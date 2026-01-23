@@ -1,14 +1,3 @@
-import { ButtonInternal } from "@/components/F0Button/internal"
-import { F0Icon } from "@/components/F0Icon"
-import {
-  EditorBubbleMenu,
-  Toolbar,
-  ToolbarLabels,
-} from "@/experimental/RichText/CoreEditor"
-import { SlashCommandGroupLabels } from "@/experimental/RichText/CoreEditor/Extensions/SlashCommand"
-import { Handle, Plus } from "@/icons/app"
-import { ScrollArea } from "@/ui/scrollarea"
-import { Skeleton } from "@/ui/skeleton"
 import DragHandle from "@tiptap/extension-drag-handle-react"
 import { Node } from "@tiptap/pm/model"
 import { Editor, EditorContent, JSONContent, useEditor } from "@tiptap/react"
@@ -22,13 +11,27 @@ import {
   useRef,
   useState,
 } from "react"
-import { AIBlockConfig, AIBlockLabels } from "../CoreEditor/Extensions/AIBlock"
-import { LiveCompanionLabels } from "../CoreEditor/Extensions/LiveCompanion"
-import { MoodTrackerLabels } from "../CoreEditor/Extensions/MoodTracker"
-import { TranscriptLabels } from "../CoreEditor/Extensions/Transcript"
+
+import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
+import { F0Button } from "@/components/F0Button"
+import { ButtonInternal } from "@/components/F0Button/internal"
+import { F0Icon } from "@/components/F0Icon"
+import { EditorBubbleMenu } from "@/experimental/RichText/CoreEditor"
+import { Toolbar } from "@/experimental/RichText/CoreEditor"
+import { Handle, Plus } from "@/icons/app"
+import { useI18n } from "@/lib/providers/i18n"
+import { ScrollArea } from "@/ui/scrollarea"
+import { Skeleton } from "@/ui/skeleton"
+
+import { AIBlockConfig } from "../CoreEditor/Extensions/AIBlock"
+import {
+  ImageUploadConfig,
+  ImageUploadErrorType,
+  insertImageFromFile,
+} from "../CoreEditor/Extensions/Image"
+import "./index.css"
 import { createNotesTextEditorExtensions } from "./extensions"
 import Header from "./Header"
-import "./index.css"
 import {
   actionType,
   MetadataItemValue,
@@ -42,16 +45,9 @@ interface NotesTextEditorProps {
   initialEditorState?: { content?: JSONContent | string; title?: string }
   readonly?: boolean
   aiBlockConfig?: AIBlockConfig
+  imageUploadConfig?: ImageUploadConfig
   onTitleChange?: (title: string) => void
-  labels: {
-    toolbarLabels: ToolbarLabels
-    slashCommandGroupLabels?: SlashCommandGroupLabels
-    aiBlockLabels?: AIBlockLabels
-    moodTrackerLabels?: MoodTrackerLabels
-    liveCompanionLabels?: LiveCompanionLabels
-    transcriptLabels?: TranscriptLabels
-    titlePlaceholder?: string
-  }
+  titlePlaceholder?: string
   actions?: actionType[]
   secondaryActions?: secondaryActionsType[]
   metadata?: MetadataItemValue[]
@@ -68,31 +64,40 @@ const NotesTextEditorComponent = forwardRef<
     placeholder,
     initialEditorState,
     readonly = false,
-    labels,
     aiBlockConfig,
+    imageUploadConfig,
     onTitleChange,
     actions,
     secondaryActions,
     metadata,
     withPadding = true,
     showBubbleMenu = false,
+    titlePlaceholder,
   },
   ref
 ) {
-  const {
-    toolbarLabels,
-    slashCommandGroupLabels,
-    aiBlockLabels,
-    moodTrackerLabels,
-    liveCompanionLabels,
-    transcriptLabels,
-  } = labels
+  const translations = useI18n()
+
   const containerRef = useRef<HTMLDivElement>(null)
   const hoveredRef = useRef<{ pos: number; nodeSize: number } | null>(null)
   const editorId = useId()
 
   const [initialContent] = useState(() => initialEditorState?.content || "")
   const [title, setTitle] = useState(initialEditorState?.title || "")
+  const [error, setError] = useState<ImageUploadErrorType | null>(null)
+
+  const getErrorMessage = (errorType: ImageUploadErrorType) => {
+    switch (errorType) {
+      case "file-too-large":
+        return translations.imageUpload.errors.fileTooLarge
+      case "invalid-type":
+        return translations.imageUpload.errors.invalidType
+      case "upload-failed":
+        return translations.imageUpload.errors.uploadFailed
+      default:
+        return translations.imageUpload.errors.uploadFailed
+    }
+  }
 
   useEffect(() => {
     if (onTitleChange) {
@@ -101,27 +106,19 @@ const NotesTextEditorComponent = forwardRef<
   }, [title, onTitleChange])
 
   const editor = useEditor({
-    extensions: createNotesTextEditorExtensions(
+    extensions: createNotesTextEditorExtensions({
       placeholder,
-      toolbarLabels,
-      slashCommandGroupLabels,
-      aiBlockConfig
+      translations,
+      aiBlockConfig,
+      imageUploadConfig: imageUploadConfig
         ? {
-            ...aiBlockConfig,
-            toolbarLabels,
-            slashCommandGroupLabels,
-            moodTrackerLabels,
-            liveCompanionLabels,
-            transcriptLabels,
-            labels: aiBlockLabels,
-            placeholder,
+            ...imageUploadConfig,
+            onError: (errorType: ImageUploadErrorType) => {
+              setError(errorType)
+            },
           }
         : undefined,
-      aiBlockLabels,
-      moodTrackerLabels,
-      liveCompanionLabels,
-      transcriptLabels
-    ),
+    }),
     content: initialContent,
     onUpdate: ({ editor }: { editor: Editor }) => {
       onChange(
@@ -139,9 +136,6 @@ const NotesTextEditorComponent = forwardRef<
     setContent: (content) => editor?.commands.setContent(content),
     insertAIBlock: () => {
       if (!editor || !aiBlockConfig) return
-      const cfg = aiBlockLabels
-        ? { ...aiBlockConfig, labels: aiBlockLabels }
-        : undefined
       editor
         .chain()
         .focus()
@@ -150,7 +144,7 @@ const NotesTextEditorComponent = forwardRef<
             type: "aiBlock",
             attrs: {
               data: { content: null, selectedAction: undefined },
-              config: cfg,
+              config: aiBlockConfig,
               isCollapsed: false,
             },
           },
@@ -160,7 +154,6 @@ const NotesTextEditorComponent = forwardRef<
     },
     insertTranscript: (title, users, messages) => {
       if (!editor) return
-      const cfg = transcriptLabels ? { labels: transcriptLabels } : undefined
       editor
         .chain()
         .focus()
@@ -169,7 +162,6 @@ const NotesTextEditorComponent = forwardRef<
             type: "transcript",
             attrs: {
               data: { title, users, messages },
-              config: cfg,
               isOpen: false,
             },
           },
@@ -184,6 +176,15 @@ const NotesTextEditorComponent = forwardRef<
         .focus()
         .insertContentAt(editor.state.doc.content.size, content)
         .run()
+    },
+    insertImage: (file: File) => {
+      if (!editor || !imageUploadConfig) return
+      insertImageFromFile(editor, file, {
+        ...imageUploadConfig,
+        onError: (errorType: ImageUploadErrorType) => {
+          setError(errorType)
+        },
+      })
     },
   }))
 
@@ -249,10 +250,34 @@ const NotesTextEditorComponent = forwardRef<
           secondaryActions={secondaryActions}
         />
       )}
+      {error && (
+        <div className="mx-auto flex w-full max-w-[824px] px-14 py-2">
+          <div className="flex w-max max-w-full items-center gap-4 rounded-md bg-f1-background-critical p-2 drop-shadow-sm">
+            <div className="flex w-full flex-row items-center gap-2">
+              <div className="flex-shrink-0">
+                <F0AvatarAlert size="sm" type="critical" />
+              </div>
+              <p
+                className="w-full max-w-xl flex-grow truncate text-ellipsis text-sm font-semibold text-f1-foreground-critical"
+                title={getErrorMessage(error)}
+              >
+                {getErrorMessage(error)}
+              </p>
+            </div>
+            <div className="flex-shrink-0">
+              <F0Button
+                variant="outline"
+                onClick={() => setError(null)}
+                label={translations.imageUpload.errors.dismiss}
+                size="sm"
+              />
+            </div>
+          </div>
+        </div>
+      )}
       {!readonly && !showBubbleMenu && (
         <div className="absolute bottom-8 left-1/2 z-50 max-w-[calc(100%-48px)] -translate-x-1/2 rounded-lg bg-f1-background p-2 shadow-md">
           <Toolbar
-            labels={toolbarLabels}
             editor={editor}
             disableButtons={false}
             showEmojiPicker={false}
@@ -269,8 +294,8 @@ const NotesTextEditorComponent = forwardRef<
               disabled={!onTitleChange || readonly}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder={labels.titlePlaceholder || ""}
-              className="notes-text-editor-title text-[39px] font-semibold tracking-[-0.78px] text-f1-foreground placeholder-f1-foreground-tertiary"
+              placeholder={titlePlaceholder || ""}
+              className="text-[39px] font-semibold text-f1-foreground placeholder-f1-foreground-tertiary"
             />
           </div>
         )}
@@ -318,7 +343,6 @@ const NotesTextEditorComponent = forwardRef<
           editorId={editorId}
           editor={editor}
           disableButtons={false}
-          toolbarLabels={toolbarLabels}
           isToolbarOpen={!showBubbleMenu}
           isFullscreen={false}
           plainHtmlMode={false}
@@ -338,7 +362,6 @@ interface NotesTextEditorSkeletonProps {
 export const NotesTextEditorSkeleton = ({
   withHeader = false,
   withTitle = true,
-  withPadding: _withPadding = false,
   withToolbar = true,
 }: NotesTextEditorSkeletonProps) => {
   return (
@@ -408,6 +431,7 @@ export const NotesTextEditorSkeleton = ({
 }
 
 export type { Message, User } from "../CoreEditor/Extensions/Transcript"
+export type { ImageUploadConfig } from "./types"
 export { NotesTextEditorComponent as NotesTextEditor }
 export type {
   NotesTextEditorHandle,

@@ -1,17 +1,35 @@
-import { useLayout } from "@/layouts/LayoutProvider"
-import { useI18n } from "@/lib/providers/i18n"
-import { cn } from "@/lib/utils"
+import { useDeepCompareEffect } from "@reactuses/core"
 import { motion } from "motion/react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
+import { Spinner } from "@/experimental/Information/Spinner"
 import { OneEmptyState } from "@/experimental/OneEmptyState"
+import {
+  GroupingDefinition,
+  OnSelectItemsCallback,
+  RecordType,
+} from "@/hooks/datasource"
 import { SortingsDefinition } from "@/hooks/datasource/types/sortings.typings"
 import { DataError } from "@/hooks/datasource/useData"
-import { OneFilterPicker } from "../../components/OneFilterPicker"
+import { useLayout } from "@/layouts/LayoutProvider"
+import { useI18n } from "@/lib/providers/i18n"
+import { useDebounceBoolean } from "@/lib/useDebounceBoolean"
+import { cn } from "@/lib/utils"
+
 import type {
   FiltersDefinition,
   FiltersState,
 } from "../../components/OneFilterPicker/types"
+import type {
+  BulkActionDefinition,
+  GroupingState,
+  OnBulkActionCallback,
+  OnLoadDataCallback,
+  SortingsState,
+} from "./types"
+import type { Visualization } from "./visualizations/collection"
+
+import { OneFilterPicker } from "../../components/OneFilterPicker"
 import {
   filterActions,
   getPrimaryActions,
@@ -20,33 +38,8 @@ import {
 } from "./actions"
 import { ActionBar, ActionBarItem } from "./components/ActionBar"
 import { CollectionActions } from "./components/CollectionActions/CollectionActions"
-import { Search } from "./components/Search"
-import { CustomEmptyStates, useEmptyState } from "./hooks/useEmptyState"
-import { ItemActionsDefinition } from "./item-actions"
-import { NavigationFiltersDefinition } from "./navigationFilters/types"
-import { Settings } from "./Settings"
-import { SummariesDefinition } from "./summary"
-import type {
-  BulkActionDefinition,
-  GroupingState,
-  OnBulkActionCallback,
-  OnLoadDataCallback,
-  SortingsState,
-} from "./types"
-
-import { Spinner } from "@/experimental/Information/Spinner"
-import { useEventEmitter } from "./useEventEmitter"
-import type { Visualization } from "./visualizations/collection"
-import { VisualizationRenderer } from "./visualizations/collection"
-
-import {
-  GroupingDefinition,
-  OnSelectItemsCallback,
-  RecordType,
-} from "@/hooks/datasource"
-import { useDebounceBoolean } from "@/lib/useDebounceBoolean"
-import { useDeepCompareEffect } from "@reactuses/core"
 import { NavigationFilters as NavigationFiltersComponent } from "./components/NavigationFilters"
+import { Search } from "./components/Search"
 import { TotalItemsSummary } from "./components/TotalItemsSummary"
 import {
   DataCollectionStatusComplete,
@@ -54,7 +47,14 @@ import {
 } from "./hooks/useDataColectionStorage/types"
 import { useDataCollectionStorage } from "./hooks/useDataColectionStorage/useDataCollectionStorage"
 import { DataCollectionSource } from "./hooks/useDataCollectionSource"
+import { CustomEmptyStates, useEmptyState } from "./hooks/useEmptyState"
+import { ItemActionsDefinition } from "./item-actions"
+import { NavigationFiltersDefinition } from "./navigationFilters/types"
+import { Settings } from "./Settings"
 import { useDataCollectionSettings } from "./Settings/SettingsProvider"
+import { SummariesDefinition } from "./summary"
+import { useEventEmitter } from "./useEventEmitter"
+import { VisualizationRenderer } from "./visualizations/collection"
 
 /**
  * A component that renders a collection of data with filtering and visualization capabilities.

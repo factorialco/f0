@@ -1,5 +1,6 @@
-import { Indicator } from "@/ui/indicator"
 import { ComponentProps, forwardRef } from "react"
+
+import { Indicator } from "@/ui/indicator"
 
 export interface IndicatorsListProps {
   items: ComponentProps<typeof Indicator>[]

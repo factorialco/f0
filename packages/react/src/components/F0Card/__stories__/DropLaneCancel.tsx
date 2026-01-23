@@ -1,6 +1,7 @@
-import { useDroppableList } from "@/lib/dnd/hooks"
 import { monitorForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter"
 import { useEffect, useRef, useState } from "react"
+
+import { useDroppableList } from "@/lib/dnd/hooks"
 
 export function DropLaneCancel({
   id,
@@ -42,8 +43,8 @@ export function DropLaneCancel({
         className={
           "flex w-full flex-col gap-0 rounded border border-solid p-2 " +
           (cancel
-            ? " cursor-not-allowed border-f1-border-secondary"
-            : " border-f1-border-secondary")
+            ? "cursor-not-allowed border-f1-border-secondary"
+            : "border-f1-border-secondary")
         }
       >
         {children}

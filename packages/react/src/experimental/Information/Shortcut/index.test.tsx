@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
+
 import { defaultTranslations, I18nProvider } from "../../../lib/providers/i18n"
 import {
   Platform,

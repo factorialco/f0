@@ -8,6 +8,7 @@ import {
   SortingsDefinition,
 } from "@/hooks/datasource"
 import { Kanban, List, Table } from "@/icons/app"
+
 import { DataCollectionSettingsContextType } from "../../Settings/SettingsProvider"
 import { SummariesDefinition } from "../../types"
 import { CardCollection, CardCollectionProps } from "./Card"

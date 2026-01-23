@@ -1,6 +1,3 @@
-import { ButtonInternal } from "@/components/F0Button/internal"
-import { ArrowDown } from "@/icons/app"
-import { cn } from "@/lib/utils"
 import {
   useCopilotChatInternal as useCopilotChat,
   useCopilotContext,
@@ -10,13 +7,18 @@ import { type Message } from "@copilotkit/shared"
 import { AnimatePresence, motion } from "motion/react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useEventListener, useResizeObserver } from "usehooks-ts"
+
+import { useI18n } from "@/ai"
+import { ButtonInternal } from "@/components/F0Button/internal"
+import { ArrowDown } from "@/icons/app"
+import { cn } from "@/lib/utils"
+
 import { isAgentStateMessage } from "../messageTypes"
 import { useAiChat } from "../providers/AiChatStateProvider"
 import { FeedbackModal } from "./FeedbackModal"
 import { FeedbackModalProvider, useFeedbackModal } from "./FeedbackProvider"
 import { Thinking } from "./Thinking"
 import { WelcomeScreen } from "./WelcomeScreen"
-import { useI18n } from "@/ai"
 
 type Turn = Array<Message | Array<Message>>
 
@@ -87,9 +89,15 @@ const Messages = ({
   const { visualizationMode } = useAiChat()
   const isFullscreen = visualizationMode === "fullscreen"
 
+  // Auto-scroll when new messages arrive
+  useEffect(() => {
+    scrollToBottom("instant")
+  }, [messages.length, scrollToBottom])
+
   return (
     <>
-      <div
+      <motion.div
+        layout
         className={cn(
           "scrollbar-macos relative isolate flex flex-col overflow-x-hidden overflow-y-scroll",
           isFullscreen ? "items-center px-4 pt-3" : "pl-4 pr-2 pt-4",
@@ -194,7 +202,7 @@ const Messages = ({
             </motion.div>
           )}
         </AnimatePresence>
-      </div>
+      </motion.div>
       {isOpen && (
         <FeedbackModal
           onSubmit={(message, feedback) => {
@@ -241,13 +249,13 @@ export function useScrollToBottom() {
   const isUserScrollUpRef = useRef(false)
   const [showScrollToBottom, setShowScrollToBottom] = useState(false)
 
-  const scrollToBottom = (behavior: ScrollBehavior = "smooth") => {
+  const scrollToBottom = useCallback((behavior: ScrollBehavior = "smooth") => {
     if (messagesContainerRef.current && messagesEndRef.current) {
       setShowScrollToBottom(false)
       isProgrammaticScrollRef.current = true
       messagesEndRef.current.scrollIntoView({ behavior })
     }
-  }
+  }, [])
 
   const checkIsScrollingUp = () => {
     if (messagesContainerRef.current) {
@@ -292,11 +300,11 @@ export function useScrollToBottom() {
     if (!container) {
       return
     }
-
     scrollToBottom("instant")
-
     const mutationObserver = new MutationObserver(() => {
       checkScrollToBottomButtonVisibility()
+      // Auto-scroll when content changes
+      scrollToBottom("instant")
     })
 
     mutationObserver.observe(container, {
@@ -308,7 +316,7 @@ export function useScrollToBottom() {
     return () => {
       mutationObserver.disconnect()
     }
-  }, [])
+  }, [scrollToBottom])
 
   return {
     messagesEndRef,

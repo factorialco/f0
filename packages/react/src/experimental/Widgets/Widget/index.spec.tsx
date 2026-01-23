@@ -1,8 +1,10 @@
-/* eslint-disable no-constant-binary-expression */
-import { zeroRender } from "@/testing/test-utils"
 import { screen } from "@testing-library/react"
 import { Fragment } from "react"
 import { expect, test } from "vitest"
+
+/* eslint-disable no-constant-binary-expression */
+import { zeroRender } from "@/testing/test-utils"
+
 import { Widget } from "./index"
 
 const renderWidget = () => {

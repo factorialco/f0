@@ -1,9 +1,10 @@
+import type { EChartsOption } from "echarts"
+
 import { F0Chart } from "@/components/Charts/F0Chart"
 import {
   getMockVisualizations,
   ExampleComponent as OneDataCollectionExampleComponent,
 } from "@/experimental/OneDataCollection/__stories__/mockData"
-import type { EChartsOption } from "echarts"
 
 type ChartOptions = Partial<Omit<EChartsOption, "grid" | "emphasis">>
 

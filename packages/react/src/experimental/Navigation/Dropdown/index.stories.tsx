@@ -1,7 +1,10 @@
+import type { Meta, StoryObj } from "@storybook/react-vite"
+
+import { expect, userEvent, within } from "storybook/test"
+
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
 import * as Icons from "@/icons/app"
-import type { Meta, StoryObj } from "@storybook/react-vite"
-import { expect, userEvent, within } from "storybook/test"
+
 import { Dropdown, MobileDropdown as MobileDropdownComponent } from "./index"
 
 const meta: Meta<typeof Dropdown> = {

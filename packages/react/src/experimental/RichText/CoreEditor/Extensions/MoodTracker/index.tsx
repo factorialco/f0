@@ -1,3 +1,12 @@
+import { Node } from "@tiptap/core"
+import {
+  NodeViewContent,
+  NodeViewProps,
+  NodeViewWrapper,
+  ReactNodeViewRenderer,
+} from "@tiptap/react"
+import React, { useState } from "react"
+
 import {
   Pulse,
   pulseIcon,
@@ -7,14 +16,7 @@ import { F0Button } from "@/components/F0Button"
 import { F0Icon } from "@/components/F0Icon"
 import { Dropdown } from "@/experimental/Navigation/Dropdown"
 import { ChevronDown, ChevronUp, Delete } from "@/icons/app"
-import { Node } from "@tiptap/core"
-import {
-  NodeViewContent,
-  NodeViewProps,
-  NodeViewWrapper,
-  ReactNodeViewRenderer,
-} from "@tiptap/react"
-import React, { useState } from "react"
+import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 
 interface MoodTrackerData {
   title: string
@@ -26,23 +28,10 @@ interface MoodTrackerData {
   }[]
 }
 
-export interface MoodTrackerLabels {
-  deleteBlock: string
-  expand: string
-  collapse: string
-}
-
-export interface MoodTrackerConfig {
-  labels?: MoodTrackerLabels
-}
-
 declare module "@tiptap/core" {
   interface Commands<ReturnType> {
     moodTracker: {
-      insertMoodTracker: (
-        data: MoodTrackerData,
-        config?: MoodTrackerConfig
-      ) => ReturnType
+      insertMoodTracker: (data: MoodTrackerData) => ReturnType
     }
   }
 }
@@ -50,17 +39,13 @@ declare module "@tiptap/core" {
 export const MoodTrackerView: React.FC<NodeViewProps> = ({
   node,
   deleteNode,
-  extension,
   updateAttributes,
 }) => {
+  const translations = useI18n()
   const [isOpen, setIsOpen] = useState<boolean>(node.attrs.isOpen ?? false)
   const data = node.attrs.data as MoodTrackerData
 
   // Use dynamic config from extension options instead of persisted config
-  const config =
-    (extension.options.currentConfig as MoodTrackerConfig) ||
-    (node.attrs.config as MoodTrackerConfig) ||
-    {}
 
   if (!data) return null
 
@@ -73,7 +58,7 @@ export const MoodTrackerView: React.FC<NodeViewProps> = ({
   // Generate dropdown items
   const getDropdownItems = [
     {
-      label: config.labels?.deleteBlock || "Delete",
+      label: translations.actions.delete,
       icon: Delete,
       critical: true,
       onClick: () => deleteNode(),
@@ -124,8 +109,8 @@ export const MoodTrackerView: React.FC<NodeViewProps> = ({
               hideLabel
               label={
                 isOpen
-                  ? config.labels?.collapse || "Collapse"
-                  : config.labels?.expand || "Expand"
+                  ? translations.actions.collapse
+                  : translations.actions.expand
               }
               icon={isOpen ? ChevronUp : ChevronDown}
               size="sm"
@@ -230,11 +215,11 @@ export const MoodTracker = Node.create({
   addCommands() {
     return {
       insertMoodTracker:
-        (data: MoodTrackerData, config?: MoodTrackerConfig) =>
+        (data: MoodTrackerData) =>
         ({ commands }) => {
           return commands.insertContent({
             type: this.name,
-            attrs: { data, config },
+            attrs: { data },
           })
         },
     }

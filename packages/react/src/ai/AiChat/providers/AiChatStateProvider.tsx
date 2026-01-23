@@ -1,6 +1,5 @@
 "use client"
 
-import { useI18n } from "@/lib/providers/i18n"
 import { type AIMessage, type Message, randomId } from "@copilotkit/shared"
 import {
   createContext,
@@ -11,6 +10,9 @@ import {
   useRef,
   useState,
 } from "react"
+
+import { useI18n } from "@/lib/providers/i18n"
+
 import { WelcomeScreenSuggestion } from "../components/WelcomeScreen"
 
 const AiChatStateContext = createContext<AiChatProviderReturnValue | null>(null)

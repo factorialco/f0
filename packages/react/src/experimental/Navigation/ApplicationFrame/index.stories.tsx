@@ -1,10 +1,13 @@
-import { Lightbulb } from "@/icons/app"
-import ExternalLink from "@/icons/app/ExternalLink"
-import { useAiChat } from "@/ai/AiChat/providers/AiChatStateProvider"
-import PalmTree from "@/icons/app/PalmTree"
 import type { Meta, StoryObj } from "@storybook/react-vite"
+
 import { ComponentProps, useEffect, useRef } from "react"
 import { expect, within } from "storybook/test"
+
+import { useAiChat } from "@/ai/AiChat/providers/AiChatStateProvider"
+import { Lightbulb } from "@/icons/app"
+import ExternalLink from "@/icons/app/ExternalLink"
+import PalmTree from "@/icons/app/PalmTree"
+
 import { Page } from "../Page"
 import * as PageStories from "../Page/index.stories"
 import * as SidebarStories from "../Sidebar/index.stories"

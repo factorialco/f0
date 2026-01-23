@@ -1,7 +1,9 @@
+import { RefObject } from "react"
+
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
 import { getAvatarColor } from "@/components/avatars/internal/BaseAvatar/utils"
 import { cn } from "@/lib/utils"
-import { RefObject } from "react"
+
 import { Picker } from "../../../Reactions/Picker"
 import { BACKGROUND_COLORS } from "../types"
 

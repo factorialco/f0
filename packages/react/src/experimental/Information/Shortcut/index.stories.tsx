@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
+
 import { ComponentProps } from "react"
+
 import { Shortcut } from "./index"
 
 const meta = {

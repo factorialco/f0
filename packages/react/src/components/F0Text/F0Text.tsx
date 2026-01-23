@@ -1,5 +1,6 @@
-import { Text, TextProps, type TextTags } from "@/ui/Text"
 import { forwardRef } from "react"
+
+import { Text, TextProps, type TextTags } from "@/ui/Text"
 
 const _allowedVariants = [
   "body",

@@ -1,4 +1,5 @@
 import { experimentalComponent } from "@/lib/experimental"
+
 import { NumberInputInternal, NumberInputInternalProps } from "./internal"
 
 const privateProps = ["buttonToggle"] as const

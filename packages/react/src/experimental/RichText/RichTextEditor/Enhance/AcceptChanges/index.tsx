@@ -1,3 +1,5 @@
+import { Editor } from "@tiptap/react"
+
 import { F0Button } from "@/components/F0Button"
 import { ToolbarDivider } from "@/experimental/RichText/CoreEditor"
 import {
@@ -6,7 +8,6 @@ import {
 } from "@/experimental/RichText/RichTextEditor/utils/types"
 import { Check, Cross, Reset } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
-import { Editor } from "@tiptap/react"
 
 interface AcceptChangesProps {
   labels?: enhanceLabelsType

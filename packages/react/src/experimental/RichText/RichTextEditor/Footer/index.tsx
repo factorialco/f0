@@ -1,13 +1,11 @@
-import { F0Button } from "@/components/F0Button"
-import {
-  Toolbar,
-  ToolbarDivider,
-  ToolbarLabels,
-} from "@/experimental/RichText/CoreEditor"
-import { Paperclip, TextSize } from "@/icons/app"
 import { Editor } from "@tiptap/react"
 import { motion } from "motion/react"
 import { useEffect, useRef, useState } from "react"
+
+import { F0Button } from "@/components/F0Button"
+import { Toolbar, ToolbarDivider } from "@/experimental/RichText/CoreEditor"
+import { Paperclip, TextSize } from "@/icons/app"
+
 import { EnhanceActivator } from "../Enhance"
 import {
   enhanceConfig,
@@ -37,7 +35,6 @@ interface FooterProps {
       customIntent?: string
     } | null
   ) => void
-  toolbarLabels: ToolbarLabels
   setIsToolbarOpen: (isToolbarOpen: boolean) => void
   isToolbarOpen: boolean
   plainHtmlMode: boolean
@@ -55,7 +52,6 @@ const Footer = ({
   enhanceConfig,
   isFullscreen,
   setLastIntent,
-  toolbarLabels,
   disableButtons,
   setIsToolbarOpen,
   isToolbarOpen,
@@ -167,7 +163,6 @@ const Footer = ({
             aria-label="Rich text editor toolbar"
           >
             <Toolbar
-              labels={toolbarLabels}
               editor={editor}
               isFullscreen={isFullscreen}
               disableButtons={disableButtons}

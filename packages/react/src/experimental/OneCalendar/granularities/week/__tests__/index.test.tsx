@@ -1,5 +1,6 @@
 import { endOfISOWeek, startOfISOWeek, startOfMonth } from "date-fns"
 import { describe, expect, it } from "vitest"
+
 import { weekGranularity } from "../index"
 
 describe("weekGranularity", () => {

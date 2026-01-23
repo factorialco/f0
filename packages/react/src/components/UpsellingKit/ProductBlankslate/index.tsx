@@ -1,3 +1,5 @@
+import { forwardRef } from "react"
+
 // packages/react/src/experimental/ProductBlankslate/index.tsx
 import { F0AvatarModule, ModuleId } from "@/components/avatars/F0AvatarModule"
 import { F0Icon, IconType } from "@/components/F0Icon"
@@ -5,7 +7,6 @@ import { F0TagRaw } from "@/components/tags/F0TagRaw"
 import { F0TagStatus, Variant } from "@/components/tags/F0TagStatus"
 import { CheckCircle } from "@/icons/app"
 import { cn } from "@/lib/utils"
-import { forwardRef } from "react"
 
 type ProductBlankslateProps = {
   title: string

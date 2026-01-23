@@ -3,6 +3,7 @@ import * as Icons from "@/icons/app"
 import { ExternalLink, Search } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { Action } from "@/ui/Action/Action"
+
 import { AiCollapsibleMessage } from "./AiCollapsibleMessage"
 
 export type Source = {

@@ -1,3 +1,5 @@
+import { useState } from "react"
+
 import { FiltersDefinition } from "@/components/OneFilterPicker/types"
 import {
   DropdownItem,
@@ -16,7 +18,7 @@ import {
   RecordType,
   SortingsDefinition,
 } from "@/hooks/datasource"
-import { useState } from "react"
+
 import { actionsToDropdownItems } from "../../visualizations/collection/utils"
 
 type UseItemActionProps<

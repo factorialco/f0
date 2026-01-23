@@ -1,8 +1,10 @@
+import { useMemo } from "react"
+
 import { F0Button } from "@/components/F0Button"
 import { useDataCollectionSettings } from "@/experimental/OneDataCollection/Settings/SettingsProvider"
 import { useI18n } from "@/lib/providers/i18n"
 import { ScrollArea } from "@/ui/scrollarea"
-import { useMemo } from "react"
+
 import { useColumns } from "../hooks/useColums"
 import { TableColumnDefinition } from "../types"
 import { SortAndHideList } from "./SortAndHideList"

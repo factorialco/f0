@@ -1,9 +1,13 @@
-import { zeroRender } from "@/testing/test-utils"
-import "@testing-library/jest-dom/vitest"
 import type { GridItemHTMLElement, GridStackWidget } from "gridstack"
+
+import "@testing-library/jest-dom/vitest"
 import React, { type ReactNode } from "react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
+
+import { zeroRender } from "@/testing/test-utils"
+
 import type { GridStackReactWidget } from "../F0GridStack"
+
 import { F0GridStack } from "../F0GridStack"
 
 // Prevent organize imports from removing React (needed for JSX in mocks)

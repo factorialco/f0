@@ -1,9 +1,11 @@
+import { AnimatePresence, motion } from "motion/react"
+import React, { useEffect, useRef, useState } from "react"
+
 import { F0Icon } from "@/components/F0Icon"
 import { Ai, ChevronRight } from "@/icons/app"
 import { cn } from "@/lib/utils"
 import { Input } from "@/ui/input"
-import { AnimatePresence, motion } from "motion/react"
-import React, { useEffect, useRef, useState } from "react"
+
 import { EnhancementOption } from "../../utils/types"
 
 interface OptionProps {

@@ -1,7 +1,9 @@
-import { useDeepCompareEffect } from "@reactuses/core"
 import type { Dispatch, SetStateAction } from "react"
+
+import { useDeepCompareEffect } from "@reactuses/core"
 import { useEffect, useMemo, useState } from "react"
 import { useDebounceValue } from "usehooks-ts"
+
 import {
   DataSource,
   DataSourceDefinition,

@@ -1,6 +1,8 @@
+import { forwardRef, useEffect, useMemo, useState } from "react"
+
 import { useI18n } from "@/lib/providers/i18n"
 import { Input } from "@/ui/input"
-import { forwardRef, useEffect, useMemo, useState } from "react"
+
 import { InputInternalProps } from "../Input/internal"
 import { Arrows } from "./components/Arrows"
 import { extractNumber } from "./internal/extractNumber"

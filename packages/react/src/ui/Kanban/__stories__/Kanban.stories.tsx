@@ -1,11 +1,15 @@
-import { createAtlaskitDriver } from "@/lib/dnd/atlaskitDriver"
-import { DndProvider } from "@/lib/dnd/context"
 import type { Meta, StoryObj } from "@storybook/react-vite"
+
 import { useState } from "react"
 import { expect, fn, waitFor, within } from "storybook/test"
+
+import { createAtlaskitDriver } from "@/lib/dnd/atlaskitDriver"
+import { DndProvider } from "@/lib/dnd/context"
+
+import type { KanbanProps } from "../types"
+
 import { KanbanCard } from "../components/KanbanCard"
 import { Kanban } from "../Kanban"
-import type { KanbanProps } from "../types"
 
 type Task = {
   id: string

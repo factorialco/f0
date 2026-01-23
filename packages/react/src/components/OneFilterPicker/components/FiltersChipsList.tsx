@@ -1,6 +1,10 @@
+import { AnimatePresence } from "motion/react"
+
 import { F0Button } from "@/components/F0Button"
 import { useI18n } from "@/lib/providers/i18n"
-import { AnimatePresence } from "motion/react"
+
+import type { FiltersDefinition, FiltersState, FilterValue } from "../types"
+
 import {
   FilterDefinitionsByType,
   FilterTypeDefinition,
@@ -8,7 +12,6 @@ import {
   getFilterType,
 } from "../filterTypes"
 import { getActiveFilterKeys } from "../internal/getActiveFilterKeys"
-import type { FiltersDefinition, FiltersState, FilterValue } from "../types"
 import { FilterChipButton } from "./FilterChipButton"
 
 interface FiltersChipsListProps<Filters extends FiltersDefinition> {

@@ -1,6 +1,7 @@
 import { F0Icon, F0IconProps, IconType } from "@/components/F0Icon"
 import { AlertCircle, InfoCircle, Warning } from "@/icons/app"
 import { cn } from "@/lib/utils"
+
 import { InputFieldStatus, InputFieldStatusType } from "../types"
 
 type InputMessagesProps = {

@@ -1,4 +1,3 @@
-import { cn, focusRing } from "@/lib/utils"
 import {
   endOfYear,
   isAfter,
@@ -8,6 +7,9 @@ import {
   startOfYear,
 } from "date-fns"
 import { AnimatePresence, motion } from "motion/react"
+
+import { cn, focusRing } from "@/lib/utils"
+
 import { CalendarMode, DateRange } from "../../types"
 
 interface YearViewProps {

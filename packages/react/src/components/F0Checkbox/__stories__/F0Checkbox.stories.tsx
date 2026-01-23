@@ -1,6 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
+
 import { useState } from "react"
 import { expect, within } from "storybook/test"
+
 import { F0Checkbox } from "../F0Checkbox"
 
 const meta = {

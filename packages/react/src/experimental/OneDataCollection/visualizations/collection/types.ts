@@ -1,12 +1,10 @@
-import { IconType } from "@/components/F0Icon"
 import type { FiltersDefinition } from "@/components/OneFilterPicker/types"
+
+import { IconType } from "@/components/F0Icon"
 import { OnSelectItemsCallback, RecordType } from "@/hooks/datasource"
 import { SortingsDefinition } from "@/hooks/datasource/types/sortings.typings"
+
 import type { DataCollectionDataAdapter } from "../../hooks/useDataCollectionSource/types"
-import { DataCollectionSource } from "../../hooks/useDataCollectionSource/types"
-import { ItemActionsDefinition } from "../../item-actions"
-import { NavigationFiltersDefinition } from "../../navigationFilters/types"
-import { SummariesDefinition } from "../../summary"
 import type {
   GroupingDefinition,
   OnLoadDataCallback,
@@ -14,8 +12,13 @@ import type {
 } from "../../types"
 import type { CardVisualizationOptions } from "./Card"
 import type { KanbanVisualizationOptions } from "./Kanban"
-import { ListVisualizationOptions } from "./List/types"
 import type { TableVisualizationOptions } from "./Table"
+
+import { DataCollectionSource } from "../../hooks/useDataCollectionSource/types"
+import { ItemActionsDefinition } from "../../item-actions"
+import { NavigationFiltersDefinition } from "../../navigationFilters/types"
+import { SummariesDefinition } from "../../summary"
+import { ListVisualizationOptions } from "./List/types"
 
 /**
  * Represents a visualization configuration for displaying collection data.

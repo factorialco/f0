@@ -5,6 +5,7 @@
 import { F0Icon, IconType } from "@/components/F0Icon"
 import { TooltipWrapper } from "@/lib/tooltip-wrapper"
 import { cn } from "@/lib/utils"
+
 import { tableDisplayClassNames } from "../../const"
 import { ValueDisplayRendererContext } from "../../renderers"
 

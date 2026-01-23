@@ -1,5 +1,7 @@
-import { Skeleton } from "@/ui/skeleton"
 import DOMPurify from "dompurify"
+
+import { Skeleton } from "@/ui/skeleton"
+
 import { withSkeleton } from "../../../../../lib/skeleton"
 import { cn } from "../../../../../lib/utils"
 import "./TextEditorTheme.css"

@@ -1,12 +1,15 @@
 "use client"
 
+import { motion } from "motion/react"
+import { ReactElement, useEffect, useState } from "react"
+
 import { Chip } from "@/experimental/OneChip"
 import { I18nContextType, useI18n } from "@/lib/providers/i18n"
 import { Skeleton } from "@/ui/skeleton"
-import { motion } from "motion/react"
-import { ReactElement, useEffect, useState } from "react"
-import { ChipLabel, getFilterType } from "../filterTypes"
+
 import type { FilterValue, FiltersDefinition } from "../types"
+
+import { ChipLabel, getFilterType } from "../filterTypes"
 
 /**
  * Animated chip component that displays an active filter with its current value.
