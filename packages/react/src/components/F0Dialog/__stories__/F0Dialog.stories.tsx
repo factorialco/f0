@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { ComponentProps, FC, useState } from "react"
 import { expect, userEvent, waitFor, within } from "storybook/test"
 
+import { modules } from "@/components/avatars/F0AvatarModule/modules"
 import { F0Button } from "@/components/F0Button"
 import {
   OnePersonListItem,
@@ -19,7 +20,8 @@ import ShareIcon from "@/icons/app/Share"
 
 import { F0Dialog } from "../index"
 import { DialogNotificationInternal } from "../internal/DialogNotification"
-import { argTypes, OTHER_ACTIONS, TABS } from "./commons"
+import { dialogSizes } from "../types"
+import { OTHER_ACTIONS, TABS } from "./commons"
 
 const meta: Meta<typeof F0Dialog> = {
   title: "Dialog",
@@ -37,7 +39,92 @@ const meta: Meta<typeof F0Dialog> = {
     },
   },
   tags: ["autodocs", "experimental"],
-  argTypes,
+  argTypes: {
+    isOpen: {
+      description: "Whether the dialog is open",
+      control: "boolean",
+      table: { defaultValue: { summary: "false" } },
+    },
+    onClose: {
+      description: "Callback when dialog is closed",
+      action: "onClose",
+    },
+    size: {
+      description: "The size of the dialog.",
+      control: "select",
+      options: dialogSizes,
+      table: {
+        type: { summary: dialogSizes.join(" | ") },
+        defaultValue: { summary: "md" },
+      },
+    },
+    primaryAction: {
+      description: "Primary action(s) to render in the footer",
+      control: "object",
+    },
+    secondaryAction: {
+      description: "Secondary action(s) to render in the footer",
+      control: "object",
+    },
+    title: {
+      description: "Title of the dialog",
+      control: "text",
+    },
+    description: {
+      description: "Description of the dialog",
+      control: "text",
+    },
+    modal: {
+      description:
+        "Whether the dialog should be modal (only closable by clicking the actions)",
+      control: "boolean",
+      table: { defaultValue: { summary: "false" } },
+    },
+    module: {
+      description: "Module configuration for the header",
+      control: {
+        type: "select",
+        options: Object.values(modules),
+      },
+    },
+    otherActions: {
+      description: "Other actions to display in the header",
+      control: "object",
+      table: {
+        type: {
+          summary: "DropdownItem[]",
+        },
+      },
+    },
+    children: {
+      description: "Custom content to render in the dialog",
+      control: "text",
+    },
+    disableContentPadding: {
+      description: "Disable the default padding from the dialog content area",
+      control: "boolean",
+      table: { defaultValue: { summary: "false" } },
+    },
+    type: {
+      description:
+        "The type of the dialog. It changes the primary action variant.",
+      control: "select",
+      options: ["default", "critical"],
+      table: { defaultValue: { summary: "default" } },
+    },
+    tabs: {
+      description: "Tabs to display in the header",
+      control: "object",
+    },
+    activeTabId: {
+      description: "The id of the active tab",
+      control: "text",
+    },
+    setActiveTabId: {
+      description: "Callback when a tab is selected",
+      action: "setActiveTabId",
+    },
+  },
   decorators: [
     (Story, { args: { isOpen, ...rest } }) => {
       const [open, setOpen] = useState(isOpen)
@@ -92,7 +179,6 @@ export const Default: Story = {
       icon: Placeholder,
       onClick: () => {},
     },
-    size: "fullscreen",
     children: <ExampleList itemsCount={20} />,
   },
 }
@@ -168,6 +254,13 @@ export const WithPromisePrimaryAction: Story = {
         expect(page.getByText("Team Status")).toBeInTheDocument()
       }
     )
+  },
+}
+
+export const Modal: Story = {
+  args: {
+    ...Default.args,
+    modal: true,
   },
 }
 

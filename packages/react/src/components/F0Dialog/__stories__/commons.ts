@@ -1,21 +1,4 @@
-import { Meta } from "@storybook/react-vite"
-import { F0Dialog } from "../F0Dialog"
-import { dialogSizes } from "../types"
 import { Pencil, Delete } from "@/icons/app"
-
-export const argTypes: Meta<typeof F0Dialog>["argTypes"] = {
-  size: {
-    description: "The size of the dialog.",
-    control: {
-      type: "select",
-      options: dialogSizes,
-    },
-    table: {
-      type: { summary: dialogSizes.join(" | ") },
-      defaultValue: { summary: "md" },
-    },
-  },
-}
 
 export const TABS = [
   {

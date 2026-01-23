@@ -43,6 +43,7 @@ export const DialogNotificationInternal = ({
       primaryAction={primaryAction}
       secondaryAction={secondaryAction}
       type={type == "critical" ? "critical" : "default"}
+      modal
     >
       <div className="flex flex-col gap-4 py-2">
         <F0AvatarAlert type={type} size="lg" />

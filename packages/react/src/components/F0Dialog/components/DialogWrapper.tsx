@@ -1,4 +1,5 @@
 import { cva } from "cva"
+import { animate } from "motion"
 import { useCallback, useMemo, useState } from "react"
 import { useMediaQuery } from "usehooks-ts"
 
@@ -65,12 +66,6 @@ export type DialogWrapperProps = {
    */
   children: React.ReactNode
   /**
-   * The breakpoint to use for the auto mode.
-   * If not provided, the default breakpoint will be used.
-   * @default breakpoints.md
-   */
-  breakpoint?: number
-  /**
    * Whether the dialog should be modal (only closable by clickiong the actions).
    * @default false
    */
@@ -136,6 +131,22 @@ export const DialogWrapper = ({
     return size
   }, [isSidePosition, size, position])
 
+  const shake = useCallback(() => {
+    if (containerElement) {
+      animate(
+        containerElement,
+        { x: [-20, 20, -15, 15, 0] },
+        { duration: 0.3, ease: "easeInOut" }
+      )
+    }
+  }, [containerElement])
+
+  const runwayEventCallback = (e: any) => {
+    if (modal) {
+      e.preventDefault()
+      shake()
+    }
+  }
   return (
     <F0DialogProvider
       isOpen={isOpen}
@@ -155,16 +166,16 @@ export const DialogWrapper = ({
           </DrawerContent>
         </Drawer>
       ) : (
-        <Dialog open={isOpen} onOpenChange={handleOpenChange} modal>
+        // We force the modal as we dont want to allow the user to click outside the dialog to close it
+        <Dialog open={isOpen} onOpenChange={handleOpenChange} modal={modal}>
           <DialogContent
             ref={setContentRef}
-            withTranslateAnimation={!isSidePosition}
             wrapperClassName={dialogWrapperClassName({ position })}
             className={dialogContentClassName({ size: localSize })}
             onOpenAutoFocus={(e) => e.preventDefault()}
-            onEscapeKeyDown={(e) => (modal ? e.preventDefault() : undefined)}
-            onPointerDownOutside={modal ? (e) => e.preventDefault() : undefined}
-            onInteractOutside={modal ? (e) => e.preventDefault() : undefined}
+            onEscapeKeyDown={runwayEventCallback}
+            onPointerDownOutside={runwayEventCallback}
+            onInteractOutside={runwayEventCallback}
           >
             {children}
           </DialogContent>
