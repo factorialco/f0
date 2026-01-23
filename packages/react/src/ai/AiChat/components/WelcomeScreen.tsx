@@ -116,11 +116,11 @@ export const WelcomeScreen = ({
                   className="border border-solid border-f1-border shadow sm:border-none sm:shadow-none"
                   label={suggestion.message}
                   icon={suggestion.icon}
-                  onClick={() => {
+                  onClick={async () => {
                     if (suggestion.onClick) {
                       suggestion.onClick()
                     } else {
-                      sendMessage({
+                      await sendMessage({
                         id: randomId(),
                         role: "user",
                         content: suggestion.prompt || suggestion.message,

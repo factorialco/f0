@@ -402,7 +402,7 @@ const FullscreenChatInput = () => {
   const { inProgress } = useContext(FullscreenChatContext)
 
   const handleSend = async (text: string) => {
-    sendMessage(text)
+    await sendMessage(text)
     return {
       id: "",
       role: "user" as const,
