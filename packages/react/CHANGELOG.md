@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.333.2](https://github.com/factorialco/f0/compare/f0-react-v1.333.1...f0-react-v1.333.2) (2026-01-23)
+
+
+### Bug Fixes
+
+* nested tables - apply observables to useLoadChildren hook ([#3281](https://github.com/factorialco/f0/issues/3281)) ([d210f78](https://github.com/factorialco/f0/commit/d210f781add32b630e9b64bb47d5616f5b72e45a))
+
 ## [1.333.1](https://github.com/factorialco/f0/compare/f0-react-v1.333.0...f0-react-v1.333.1) (2026-01-23)
 
 
