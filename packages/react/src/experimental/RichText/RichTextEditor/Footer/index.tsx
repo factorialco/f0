@@ -89,7 +89,6 @@ const Footer = ({
     }
   }
 
-
   const renderToolbarButton = () => (
     <F0Button
       onClick={(e) => {

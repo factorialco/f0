@@ -1,12 +1,3 @@
-import {
-  EditorBubbleMenu,
-  MentionedUser,
-  MentionsConfig,
-  Toolbar,
-} from "@/experimental/RichText/CoreEditor"
-import { withSkeleton } from "@/lib/skeleton"
-import { cn } from "@/lib/utils"
-import { Skeleton } from "@/ui/skeleton"
 import { FocusScope } from "@radix-ui/react-focus-scope"
 import { Editor, EditorContent, useEditor } from "@tiptap/react"
 import { AnimatePresence, motion } from "motion/react"
@@ -19,6 +10,16 @@ import {
   useState,
 } from "react"
 import ReactDOM from "react-dom"
+
+import {
+  EditorBubbleMenu,
+  MentionedUser,
+  MentionsConfig,
+  Toolbar,
+} from "@/experimental/RichText/CoreEditor"
+import { withSkeleton } from "@/lib/skeleton"
+import { cn } from "@/lib/utils"
+import { Skeleton } from "@/ui/skeleton"
 
 import "../index.css"
 import { AcceptChanges } from "./Enhance/AcceptChanges"

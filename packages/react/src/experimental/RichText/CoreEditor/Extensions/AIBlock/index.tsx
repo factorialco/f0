@@ -1,3 +1,12 @@
+import { generateHTML, JSONContent, Node } from "@tiptap/core"
+import {
+  NodeViewContent,
+  NodeViewProps,
+  NodeViewWrapper,
+  ReactNodeViewRenderer,
+} from "@tiptap/react"
+import { FC, useCallback, useEffect, useMemo, useState } from "react"
+
 import { F0Button } from "@/components/F0Button"
 import { IconType } from "@/components/F0Icon"
 import { F0AiBanner } from "@/experimental/Banners/F0AiBanner"
@@ -17,14 +26,6 @@ import {
   UnderlineExtension,
 } from "@/experimental/RichText/CoreEditor"
 import { Skeleton } from "@/ui/skeleton"
-import { generateHTML, JSONContent, Node } from "@tiptap/core"
-import {
-  NodeViewContent,
-  NodeViewProps,
-  NodeViewWrapper,
-  ReactNodeViewRenderer,
-} from "@tiptap/react"
-import { FC, useCallback, useEffect, useMemo, useState } from "react"
 
 export type AIButton = {
   type: string

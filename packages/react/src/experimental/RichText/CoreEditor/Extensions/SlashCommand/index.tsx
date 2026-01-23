@@ -1,9 +1,10 @@
-import { I18nContextType } from "@/lib/providers/i18n"
 import * as Popover from "@radix-ui/react-popover"
 import { Editor, Extension, ReactRenderer } from "@tiptap/react"
 import { Suggestion } from "@tiptap/suggestion"
 import React from "react"
 import { createRoot, Root } from "react-dom/client"
+
+import { I18nContextType } from "@/lib/providers/i18n"
 
 import { ImageUploadConfig } from "../Image"
 import {
@@ -92,7 +93,7 @@ const createSlashCommandExtension = ({
           items: ({ query }: { query: string }) => {
             // Exact search: the query with spaces must match exactly
             const normalizedQuery = query.toLowerCase().trim()
-         
+
             const results = availableCommands({
               translations,
               aiBlockConfig,
@@ -189,7 +190,6 @@ const createSlashCommandExtension = ({
               }) => {
                 if (props.items.length === 0) return
 
-              
                 const groupedCommands = getGroupedCommands({
                   aiBlockConfig,
                   translations,
@@ -252,12 +252,12 @@ const createSlashCommandExtension = ({
                 if (!component || !container || !popoverRoot) return
 
                 // Get filtered groups for update
-                const groupedCommands = getGroupedCommands({ 
+                const groupedCommands = getGroupedCommands({
                   aiBlockConfig,
                   translations,
-                  imageUploadConfig
+                  imageUploadConfig,
                 })
-                
+
                 let filteredGroups = groupedCommands
                 if (props.query && props.query.trim()) {
                   const normalizedQuery = props.query.toLowerCase().trim()

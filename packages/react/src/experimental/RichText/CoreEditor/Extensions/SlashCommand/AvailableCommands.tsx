@@ -14,8 +14,8 @@ import {
   OlList,
   Quote,
 } from "@/icons/app"
-
 import { I18nContextType } from "@/lib/providers/i18n"
+
 import { AIBlockConfig } from "../AIBlock"
 import {
   DEFAULT_ACCEPTED_TYPES,
@@ -46,7 +46,11 @@ const availableCommands = ({
   translations,
   imageUploadConfig,
 }: AvailableCommandsProps): CommandItem[] => {
-  const groups = getGroupedCommands({ aiBlockConfig, translations, imageUploadConfig })
+  const groups = getGroupedCommands({
+    aiBlockConfig,
+    translations,
+    imageUploadConfig,
+  })
   return groups.flatMap((group) => group.commands)
 }
 

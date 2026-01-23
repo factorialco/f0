@@ -1,8 +1,3 @@
-import { F0Button } from "@/components/F0Button"
-import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
-import { Dropdown } from "@/experimental/Navigation/Dropdown"
-import { ChevronDown, ChevronUp, Delete } from "@/icons/app"
-import { useI18n } from "@/lib/providers/i18n"
 import { Node } from "@tiptap/core"
 import {
   NodeViewContent,
@@ -12,6 +7,12 @@ import {
 } from "@tiptap/react"
 import { format } from "date-fns"
 import React, { useState } from "react"
+
+import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
+import { F0Button } from "@/components/F0Button"
+import { Dropdown } from "@/experimental/Navigation/Dropdown"
+import { ChevronDown, ChevronUp, Delete } from "@/icons/app"
+import { useI18n } from "@/lib/providers/i18n"
 
 export interface User {
   id: string
