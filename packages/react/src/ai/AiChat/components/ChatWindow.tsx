@@ -81,7 +81,7 @@ export const FullscreenWindow = ({ children }: WindowProps) => {
         <motion.div
           key="fullscreen-chat-window"
           aria-hidden={!open}
-          className="fixed top-0 left-0 z-50 flex h-screen w-screen flex-col overflow-hidden bg-f1-special-page"
+          className="fixed left-0 top-0 z-50 flex h-screen w-screen flex-col overflow-hidden bg-f1-special-page"
           initial={shouldPlayEntranceAnimation ? { opacity: 0 } : false}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -96,7 +96,7 @@ export const FullscreenWindow = ({ children }: WindowProps) => {
           }}
         >
           <motion.div
-            className="relative flex flex-1 h-screen w-full flex-col justify-center overflow-hidden"
+            className="relative flex h-screen w-full flex-1 flex-col justify-center overflow-hidden"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}

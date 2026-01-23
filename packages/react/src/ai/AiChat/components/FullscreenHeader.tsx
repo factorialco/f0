@@ -1,10 +1,12 @@
 "use client"
 
+import { motion } from "motion/react"
+
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { Cross } from "@/icons/app"
-import { motion } from "motion/react"
-import { useAiChat } from "../providers/AiChatStateProvider"
+
 import OneIcon from "../OneIcon"
+import { useAiChat } from "../providers/AiChatStateProvider"
 
 export const FullscreenHeader = () => {
   const { greeting, setOpen, setVisualizationMode } = useAiChat()
@@ -58,7 +60,7 @@ export const FullscreenHeader = () => {
               <span className="text-purple-600">{greeting}</span>
             )}
           </h1>
-          <p className="text-lg text-gray-600">
+          <p className="text-gray-600 text-lg">
             What would you like to create?
           </p>
         </motion.div>
