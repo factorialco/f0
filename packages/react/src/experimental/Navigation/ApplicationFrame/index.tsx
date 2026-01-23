@@ -16,8 +16,12 @@ import {
 import { useAiPromotionChat } from "@/experimental/AiPromotionChat/providers/AiPromotionChatStateProvider"
 import { experimentalComponent } from "@/lib/experimental"
 
-import { AiChat, AiChatProvider, AiChatProviderProps } from "../../../ai/AiChat"
-import { useAiChat } from "../../../ai/AiChat/providers/AiChatStateProvider"
+import {
+  F0AiChat as AiChat,
+  F0AiChatProvider as AiChatProvider,
+  F0AiChatProviderProps as AiChatProviderProps,
+} from "../../../ai/F0AiChat"
+import { useAiChat } from "../../../ai/F0AiChat/providers/AiChatStateProvider"
 import { useReducedMotion } from "../../../lib/a11y"
 import { useI18n } from "../../../lib/providers/i18n"
 import { cn, focusRing } from "../../../lib/utils"
