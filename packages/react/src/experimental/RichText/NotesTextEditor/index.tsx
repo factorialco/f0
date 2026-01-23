@@ -1,13 +1,3 @@
-import { ButtonInternal } from "@/components/F0Button/internal"
-import { F0Icon } from "@/components/F0Icon"
-import {
-  EditorBubbleMenu,
-} from "@/experimental/RichText/CoreEditor"
-import { Toolbar } from "@/experimental/RichText/CoreEditor"
-import { Handle, Plus } from "@/icons/app"
-import { useI18n } from "@/lib/providers/i18n"
-import { ScrollArea } from "@/ui/scrollarea"
-import { Skeleton } from "@/ui/skeleton"
 import DragHandle from "@tiptap/extension-drag-handle-react"
 import { Node } from "@tiptap/pm/model"
 import { Editor, EditorContent, JSONContent, useEditor } from "@tiptap/react"
@@ -22,6 +12,16 @@ import {
   useState,
 } from "react"
 
+import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
+import { F0Button } from "@/components/F0Button"
+import { ButtonInternal } from "@/components/F0Button/internal"
+import { F0Icon } from "@/components/F0Icon"
+import { EditorBubbleMenu } from "@/experimental/RichText/CoreEditor"
+import { Toolbar } from "@/experimental/RichText/CoreEditor"
+import { Handle, Plus } from "@/icons/app"
+import { useI18n } from "@/lib/providers/i18n"
+import { ScrollArea } from "@/ui/scrollarea"
+import { Skeleton } from "@/ui/skeleton"
 
 import { AIBlockConfig } from "../CoreEditor/Extensions/AIBlock"
 import {
@@ -29,16 +29,15 @@ import {
   ImageUploadErrorType,
   insertImageFromFile,
 } from "../CoreEditor/Extensions/Image"
+import "./index.css"
 import { createNotesTextEditorExtensions } from "./extensions"
 import Header from "./Header"
-import "./index.css"
 import {
   actionType,
   MetadataItemValue,
   NotesTextEditorHandle,
   secondaryActionsType,
 } from "./types"
-import { F0AvatarAlert, F0Button } from "@/f0"
 
 interface NotesTextEditorProps {
   onChange: (value: { json: JSONContent | null; html: string | null }) => void

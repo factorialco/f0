@@ -9,8 +9,11 @@ import {
   type NodeViewProps,
 } from "@tiptap/react"
 
+import { F0Button } from "@/components/F0Button"
 import { Spinner } from "@/experimental/Information/Spinner"
 import { Delete } from "@/icons/app"
+import { useI18n } from "@/lib/providers/i18n"
+import { cn } from "@/lib/utils"
 
 export type ImageUploadErrorType =
   | "file-too-large"
@@ -39,25 +42,38 @@ const ImageNodeView = ({
 }: NodeViewProps) => {
   const { src, alt, title, uploading } = node.attrs
   const isEditable = editor.isEditable
-
+  const translations = useI18n()
   return (
-    <NodeViewWrapper className="image-node-wrapper">
-      <div className={`image-container ${selected ? "is-selected" : ""}`}>
-        <img src={src} alt={alt} title={title} draggable={false} />
+    <NodeViewWrapper className="mb-2">
+      <div
+        className={cn(
+          "relative inline-block rounded-lg",
+          selected && "border-2 border-f1-border-selected-bold border-solid"
+        )}
+      >
+        <img
+          src={src}
+          alt={alt}
+          title={title}
+          draggable={false}
+          className="block h-auto w-full rounded-md transition-all duration-150 ease-out"
+        />
         {uploading && (
-          <div className="image-upload-overlay">
+          <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-f1-background-secondary backdrop-blur-[2px] transition-opacity duration-200">
             <Spinner size="medium" />
           </div>
         )}
         {isEditable && !uploading && (
-          <button
-            type="button"
-            onClick={deleteNode}
-            className="image-delete-button"
-            title="Delete"
-          >
-            <Delete className="h-4 w-4" />
-          </button>
+          <div className="dark absolute right-2 top-2">
+            <F0Button
+              onClick={deleteNode}
+              label={translations.actions.delete}
+              icon={Delete}
+              variant="outline"
+              hideLabel
+              size="sm"
+            />
+          </div>
         )}
       </div>
     </NodeViewWrapper>
