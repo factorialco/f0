@@ -7,6 +7,7 @@ import ApplicationFrameStoryMeta from "@/experimental/Navigation/ApplicationFram
 import { Placeholder } from "@/icons/app"
 import CrossIcon from "@/icons/app/Cross"
 
+import { getDialogAlikeArgTypes } from "../../common/__stories__/argsTypes"
 import { DialogNotificationInternal } from "../internal/DialogNotification"
 import { dialogNotificationTypes } from "../types"
 
@@ -27,31 +28,17 @@ const meta: Meta<typeof DialogNotificationInternal> = {
       options: dialogNotificationTypes,
       table: { defaultValue: { summary: "info" } },
     },
-    title: {
-      description: "Title of the notification.",
-      control: "text",
-    },
-    description: {
-      description: "Description of the notification.",
-      control: "text",
-    },
-    isOpen: {
-      description: "Whether the dialog is open",
-      control: "boolean",
-      table: { defaultValue: { summary: "false" } },
-    },
-    onClose: {
-      description: "Callback when dialog is closed",
-      action: "onClose",
-    },
-    primaryAction: {
-      description: "Primary action",
-      control: "object",
-    },
-    secondaryAction: {
-      description: "Secondary action",
-      control: "object",
-    },
+    ...getDialogAlikeArgTypes({
+      componentName: "dialog",
+      include: [
+        "title",
+        "description",
+        "primaryAction",
+        "secondaryAction",
+        "isOpen",
+        "onClose",
+      ],
+    }),
   },
   decorators: [
     (Story, { args: { isOpen, ...rest } }) => {

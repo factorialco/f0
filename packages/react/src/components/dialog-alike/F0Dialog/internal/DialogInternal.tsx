@@ -1,9 +1,9 @@
 import { FC, useMemo } from "react"
 
-import { DialogContent } from "../components/DialogContent"
-import { DialogFooter } from "../components/DialogFooter"
-import { DialogHeader } from "../components/DialogHeader"
-import { DialogWrapper } from "../components/DialogWrapper"
+import { Content } from "../../common/Content"
+import { Footer } from "../../common/Footer"
+import { Header } from "../../common/Header"
+import { DialogWrapper } from "../../common/Wrapper"
 import { DialogInternalProps } from "./internal-types"
 
 export const DialogInternal: FC<DialogInternalProps> = ({
@@ -30,7 +30,7 @@ export const DialogInternal: FC<DialogInternalProps> = ({
     return (
       <>
         {variant !== "notification" && (
-          <DialogHeader
+          <Header
             title={title}
             description={description}
             module={module}
@@ -41,10 +41,10 @@ export const DialogInternal: FC<DialogInternalProps> = ({
             disableClose={disableClose}
           />
         )}
-        <DialogContent disableContentPadding={disableContentPadding ?? false}>
+        <Content disableContentPadding={disableContentPadding ?? false}>
           {children}
-        </DialogContent>
-        <DialogFooter
+        </Content>
+        <Footer
           primaryAction={primaryAction ?? []}
           secondaryAction={secondaryAction ?? []}
           variant={variant}

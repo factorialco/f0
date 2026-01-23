@@ -13,7 +13,7 @@ export const DialogOverlay = forwardRef<
 >(({ className, ...props }, ref) => {
   const context = useDialogPrimitiveContext()
 
-  const modal = context.modal || context.showOverlay !== false
+  const modal = context.modal || context.showOverlay
 
   return (
     <DialogPrimitive.Root {...context} modal={modal}>

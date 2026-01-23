@@ -8,19 +8,25 @@ type PointerDownOutsideEvent = CustomEvent<{
 }>
 
 import { cn } from "../../../lib/utils"
+import { useDialogPrimitiveContext } from "../context"
 import { DialogOverlay } from "./DialogOverlay"
 import { DialogPortal } from "./DialogPortal"
+
+const defaultAnimationClassName =
+  "duration-200 data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95"
 
 export const DialogContent = forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & {
     wrapperClassName?: string
     container?: HTMLElement | null
+    animationClassName?: string
   }
 >(
   (
     {
       wrapperClassName,
+      animationClassName = defaultAnimationClassName,
       className,
       children,
       container: propContainer,
@@ -38,17 +44,20 @@ export const DialogContent = forwardRef<
       }
     }, [propContainer])
 
+    const context = useDialogPrimitiveContext()
+
     if (container === undefined) return null
 
     return (
       <DialogPortal container={container}>
-        <DialogOverlay />
+        {context.showOverlay && <DialogOverlay />}
         <DialogPrimitive.Content
           ref={ref}
           className={cn(
             "fixed inset-0 z-50 flex items-center justify-center",
-            " duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
+            "data-[state=open]:animate-in data-[state=closed]:animate-out",
             "pointer-events-none",
+            animationClassName,
             wrapperClassName
           )}
           {...props}

@@ -1,7 +1,8 @@
+import { dialogAlikePrivateProps } from "../common/types"
 import { DialogInternal } from "./internal/DialogInternal"
 import { DialogInternalProps } from "./internal/internal-types"
 
-const privateProps = ["variant", "disableClose"] as const
+const privateProps = dialogAlikePrivateProps
 
 export type F0DialogProps = Omit<
   DialogInternalProps,

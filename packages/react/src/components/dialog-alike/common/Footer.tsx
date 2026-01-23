@@ -3,15 +3,18 @@ import { F0ButtonDropdown } from "@/components/F0ButtonDropdown"
 import { toArray } from "@/lib/toArray"
 import { cn } from "@/lib/utils"
 
-import { DialogInternalProps, DialogVariant } from "../internal/internal-types"
-import { F0DialogActionsProps } from "../types"
+import {
+  DialogInternalProps,
+  DialogVariant,
+} from "../F0Dialog/internal/internal-types"
+import { F0DialogActionsProps } from "../F0Dialog/types"
 
-export type DialogFooterProps = F0DialogActionsProps & {
+export type FooterProps = F0DialogActionsProps & {
   variant?: DialogVariant
   type?: DialogInternalProps["type"]
 }
 
-export const DialogFooter = (props: DialogFooterProps) => {
+export const Footer = (props: FooterProps) => {
   const primaryActions = toArray(props.primaryAction)
   const secondaryActions = toArray(props.secondaryAction)
 

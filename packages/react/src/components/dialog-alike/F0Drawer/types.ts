@@ -1,0 +1,22 @@
+import { DialogAlikeAction, DialogAlikeActionsProps } from "../common/types"
+
+export const drawerPositions = ["left", "right"] as const
+export type DrawerPosition = (typeof drawerPositions)[number]
+
+export const drawerSizes = ["md"] as const
+export type DrawerSize = (typeof drawerSizes)[number]
+
+export type F0DrawerAction = DialogAlikeAction
+
+export type F0DrawerActionsProps = DialogAlikeActionsProps
+
+/**
+ * The levels of the alert.
+ */
+export const dialogNotificationTypes = [
+  "info",
+  "warning",
+  "critical",
+  "positive",
+] as const
+export type DialogNotificationType = (typeof dialogNotificationTypes)[number]

@@ -3,11 +3,12 @@ import { animate } from "motion"
 import { useCallback, useMemo, useState } from "react"
 import { useMediaQuery } from "usehooks-ts"
 
+import { cn } from "@/lib/utils"
 import { Dialog, DialogContent } from "@/ui/Dialog"
 import { Drawer, DrawerContent, DrawerOverlay } from "@/ui/drawer"
 
-import { DialogSize } from "../types"
-import { F0DialogProvider } from "./F0DialogProvider"
+import { DialogSize } from "../F0Dialog/types"
+import { DialogWrapperProvider } from "./DialogWrapperProvider"
 
 export const useIsSmallScreen = () =>
   useMediaQuery("(max-width: 560px)", {
@@ -76,6 +77,18 @@ export type DialogWrapperProps = {
    * @default "md"
    */
   size?: DialogSize
+
+  /**
+   * Whether the overlay should be shown.
+   * @default true
+   */
+  showOverlay?: boolean
+
+  /**
+   * Whether the dialog should have a full height.
+   * @default false
+   */
+  fullHeight?: boolean
 }
 /**
  * This is a helper component to wrap the dialog content in a drawer or dialog component.
@@ -89,7 +102,9 @@ export const DialogWrapper = ({
   position,
   children,
   modal = false,
+  showOverlay = true,
   size = "md",
+  fullHeight = false,
 }: DialogWrapperProps) => {
   // Use state to store the container element so we can trigger re-renders
   // when it's set. This ensures child components like F0Select get the
@@ -147,8 +162,18 @@ export const DialogWrapper = ({
       shake()
     }
   }
+
+  const animationClassName = useMemo(() => {
+    return cn(
+      "duration-200 data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]",
+      position == "right" &&
+        ":slide-out-to-right-full data-[state=open]:slide-in-from-right-full data-[state=closed]:slide-out-to-left-full data-[state=open]:slide-in-from-left-full",
+      position == "left" &&
+        ":slide-out-to-left-full data-[state=open]:slide-in-from-left-full data-[state=closed]:slide-out-to-right-full data-[state=open]:slide-in-from-right-full"
+    )
+  }, [fullHeight])
   return (
-    <F0DialogProvider
+    <DialogWrapperProvider
       isOpen={isOpen}
       onClose={onClose}
       position={position}
@@ -157,7 +182,9 @@ export const DialogWrapper = ({
     >
       {isSmallScreen ? (
         <Drawer open={isOpen} onOpenChange={handleOpenChange}>
-          <DrawerOverlay className="bg-f1-background-overlay" />
+          <DrawerOverlay
+            className={cn("bg-f1-background-overlay", fullHeight && "h-full")}
+          />
           <DrawerContent
             ref={setContentRef}
             className="max-h-100 bg-f1-background"
@@ -167,11 +194,20 @@ export const DialogWrapper = ({
         </Drawer>
       ) : (
         // We force the modal as we dont want to allow the user to click outside the dialog to close it
-        <Dialog open={isOpen} onOpenChange={handleOpenChange} modal={modal}>
+        <Dialog
+          open={isOpen}
+          onOpenChange={handleOpenChange}
+          modal={modal}
+          showOverlay={showOverlay}
+        >
           <DialogContent
             ref={setContentRef}
             wrapperClassName={dialogWrapperClassName({ position })}
-            className={dialogContentClassName({ size: localSize })}
+            className={cn(
+              dialogContentClassName({ size: localSize }),
+              fullHeight && "h-full"
+            )}
+            animationClassName={animationClassName}
             onOpenAutoFocus={(e) => e.preventDefault()}
             onEscapeKeyDown={runwayEventCallback}
             onPointerDownOutside={runwayEventCallback}
@@ -181,6 +217,6 @@ export const DialogWrapper = ({
           </DialogContent>
         </Dialog>
       )}
-    </F0DialogProvider>
+    </DialogWrapperProvider>
   )
 }

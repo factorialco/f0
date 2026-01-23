@@ -14,9 +14,9 @@ import { BreadcrumbList } from "@/ui/breadcrumb"
 import { DialogTitle } from "@/ui/Dialog/dialog"
 import { DrawerDescription } from "@/ui/drawer"
 
-import { useF0Dialog } from "./F0DialogProvider"
+import { useDialogWrapperContext } from "./DialogWrapperProvider"
 
-export type DialogHeaderProps = {
+export type HeaderProps = {
   /**
    * Disables the close button of the dialog.
    * @internal
@@ -32,7 +32,7 @@ export type DialogHeaderProps = {
   otherActions?: DropdownInternalProps["items"]
 } & Partial<Pick<TabsProps, "tabs" | "activeTabId" | "setActiveTabId">>
 
-export const DialogHeader = ({
+export const Header = ({
   title,
   description,
   module,
@@ -41,10 +41,10 @@ export const DialogHeader = ({
   activeTabId,
   setActiveTabId,
   disableClose,
-}: DialogHeaderProps) => {
+}: HeaderProps) => {
   const translations = useI18n()
 
-  const { onClose } = useF0Dialog()
+  const { onClose } = useDialogWrapperContext()
   const hasTabs = !!tabs
 
   const Divider = () => {

@@ -1,7 +1,10 @@
 import { ReactNode } from "react"
 
+import {
+  DialogNotificationType,
+  DialogSize,
+} from "@/components/dialog-alike/F0Dialog/types"
 import { F0ButtonProps } from "@/components/F0Button"
-import { DialogNotificationType, DialogSize } from "@/components/F0Dialog/types"
 import { Optional } from "@/lib/typescript-utils/optional"
 
 export type DialogActionValuePrimitive =

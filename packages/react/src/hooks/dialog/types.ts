@@ -1,10 +1,10 @@
-import { Optional } from "@/lib/typescript-utils/optional"
+import { DialogNotificationType } from "@/components/dialog-alike/F0Dialog/types"
 import {
   DialogActions,
   DialogActionValue,
   DialogDefinition,
 } from "@/lib/providers/dialogs/types"
-import { DialogNotificationType } from "@/components/F0Dialog/types"
+import { Optional } from "@/lib/typescript-utils/optional"
 
 export type NotificationDialogBaseOptions = Optional<
   Pick<DialogDefinition, "id" | "title">,

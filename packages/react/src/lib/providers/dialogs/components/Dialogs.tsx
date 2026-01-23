@@ -1,9 +1,9 @@
 import { nanoid } from "nanoid"
 import { Fragment, useMemo, useState } from "react"
 
-import { F0DialogAction } from "@/components/F0Dialog"
-import { DialogInternal } from "@/components/F0Dialog/internal/DialogInternal"
-import { DialogNotificationInternal } from "@/components/F0Dialog/internal/DialogNotification"
+import { F0DialogAction } from "@/components/dialog-alike/F0Dialog"
+import { DialogInternal } from "@/components/dialog-alike/F0Dialog/internal/DialogInternal"
+import { DialogNotificationInternal } from "@/components/dialog-alike/F0Dialog/internal/DialogNotification"
 import { toArray } from "@/lib/toArray"
 
 import { DialogDefinitionProviderItem } from "../internal-types"
