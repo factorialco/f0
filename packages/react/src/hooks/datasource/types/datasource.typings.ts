@@ -1,8 +1,11 @@
+import { Observable } from "zen-observable-ts"
+
 import {
   FiltersDefinition,
   FiltersState,
   PresetsDefinition,
 } from "@/components/OneFilterPicker/types"
+import { PromiseState } from "@/lib/promise-to-observable"
 
 import { DataAdapter } from "./fetch.typings"
 import { GroupingDefinition, GroupingState } from "./grouping.typings"
@@ -86,7 +89,10 @@ export type DataSourceDefinition<
     filters?: FiltersState<Filters>
     pagination?: ChildrenPaginationInfo
     sortings?: SortingsState<Sortings>
-  }) => Promise<ChildrenResponse<R>>
+  }) =>
+    | ChildrenResponse<R>
+    | Promise<ChildrenResponse<R>>
+    | Observable<PromiseState<ChildrenResponse<R>>>
   /** Function to determine if an item has children */
   itemsWithChildren?: (item: R) => boolean
   /** Function to get the number of children for an item */
