@@ -83,6 +83,7 @@ export function PrimitiveItem({
           onClick && !disabled && "cursor-pointer hover:bg-f1-background-hover",
           disabled && "cursor-not-allowed opacity-30"
         )}
+        data-active={isActive || undefined}
         onClick={disabled ? undefined : () => onClick?.(item.id)}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
