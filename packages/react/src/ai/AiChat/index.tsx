@@ -216,7 +216,7 @@ const AiChatCmp = () => {
 
   const InputComponent = useCallback(
     ({ ...props }: InputProps) => (
-      <div className="m-[16px] mt-2">
+      <div className="m-[16px] mt-0">
         <ChatTextarea {...props} />
       </div>
     ),
