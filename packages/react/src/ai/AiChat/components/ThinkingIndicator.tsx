@@ -56,9 +56,9 @@ const ANIMATION_CONFIG = {
       y: 0,
       height: "auto",
     }),
-    exit: { opacity: 0, y: 8, height: 0 },
+    exit: { opacity: 0, height: 0 },
     transition: {
-      duration: 0.25,
+      duration: 0.3,
       ease: [0.4, 0, 0.2, 1],
     },
   },
@@ -119,7 +119,7 @@ interface SubtaskRowProps {
 }
 
 /**
- * Individual subtask row with chevron icon and animated text
+ * Individual subtask row with flashing chevron icon
  */
 const SubtaskRow = memo(function SubtaskRow({
   subtask,
@@ -135,13 +135,22 @@ const SubtaskRow = memo(function SubtaskRow({
       transition={ANIMATION_CONFIG.subtask.transition}
       className="ml-7 flex min-w-0 items-center gap-1 overflow-hidden text-f1-foreground-secondary"
     >
-      <F0Icon
-        size="sm"
-        icon={ChevronRight}
-        color="secondary"
-        aria-hidden="true"
-      />
-      <span className="shine-text truncate text-sm">{subtask.text}</span>
+      <motion.div
+        animate={{ opacity: [0.4, 1, 0.4] }}
+        transition={{
+          duration: 2,
+          ease: "easeInOut",
+          repeat: Infinity,
+        }}
+      >
+        <F0Icon
+          size="sm"
+          icon={ChevronRight}
+          color="secondary"
+          aria-hidden="true"
+        />
+      </motion.div>
+      <span className="truncate text-sm">{subtask.text}</span>
     </motion.div>
   )
 })
