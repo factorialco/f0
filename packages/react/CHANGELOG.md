@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.333.1](https://github.com/factorialco/f0/compare/f0-react-v1.333.0...f0-react-v1.333.1) (2026-01-23)
+
+
+### Bug Fixes
+
+* Normalize toolbar labels ([#2971](https://github.com/factorialco/f0/issues/2971)) ([e804129](https://github.com/factorialco/f0/commit/e8041293d671e94b1a165d223c82f9528fa6a0c4))
+
 ## [1.333.0](https://github.com/factorialco/f0/compare/f0-react-v1.332.0...f0-react-v1.333.0) (2026-01-22)
 
 
