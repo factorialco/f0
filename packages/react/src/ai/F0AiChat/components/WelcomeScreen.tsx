@@ -5,11 +5,7 @@ import { useMemo } from "react"
 
 import { ButtonInternal } from "@/components/F0Button/internal"
 
-<<<<<<<< HEAD:packages/react/src/sds/ai/F0AiChat/components/WelcomeScreen.tsx
 import { F0OneIcon } from "../../F0OneIcon"
-========
-import { F0OneIcon as OneIcon } from "../../F0OneIcon"
->>>>>>>> 7ba2e4a6e (feat: introduce F0 AI components and refactor existing AI chat structure):packages/react/src/ai/F0AiChat/components/WelcomeScreen.tsx
 import { WelcomeScreenSuggestion } from "../types"
 
 export type { WelcomeScreenSuggestion }
