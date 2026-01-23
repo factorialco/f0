@@ -340,7 +340,7 @@ export const Toolbar = ({
         className={cn(
           "flex grow flex-row items-center",
           animationComplete
-            ? "scrollbar-macos overflow-x-auto"
+            ? "scrollbar-macos overflow-x-auto overflow-y-hidden"
             : "overflow-hidden"
         )}
       >

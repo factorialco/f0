@@ -333,7 +333,7 @@ const RichTextEditorComponent = forwardRef<
                 style={{ pointerEvents: "none" }}
               >
                 <div
-                  className="flex w-max items-center gap-2 rounded-lg border border-solid border-f1-border bg-f1-background p-1 drop-shadow-lg"
+                  className="absolute -bottom-4 left-1/2 z-50 max-w-[calc(100%-48px)] -translate-x-1/2 rounded-lg bg-f1-background p-2 shadow-md"
                   style={{ pointerEvents: "auto" }}
                 >
                   <Toolbar
