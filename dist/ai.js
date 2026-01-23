@@ -1,4 +1,4 @@
-import { A as i, a as r, b as t, d as o, c as n, H as e, e as A, u as l, f as u } from "./AiChatTranslationsProvider-q1M5HKKl.js";
+import { A as i, a as r, b as t, d as o, c as n, H as e, e as A, u as l, f as u } from "./AiChatTranslationsProvider-CPWPZbne.js";
 import { I as f, u as h } from "./index-ljj7NkIC.js";
 import { defaultTranslations as m } from "./i18n-provider-defaults.js";
 export {

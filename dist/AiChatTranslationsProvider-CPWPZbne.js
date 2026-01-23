@@ -21049,7 +21049,7 @@ const UC = (e) => {
   }), s(ir, {
     children: r && s(F1.div, {
       "aria-hidden": !r,
-      className: "fixed top-0 left-0 z-50 flex h-screen w-screen flex-col overflow-hidden bg-f1-special-page",
+      className: "fixed left-0 top-0 z-50 flex h-screen w-screen flex-col overflow-hidden bg-f1-special-page",
       initial: t ? {
         opacity: 0
       } : !1,
@@ -21067,7 +21067,7 @@ const UC = (e) => {
         t && n(!1);
       },
       children: s(F1.div, {
-        className: "relative flex flex-1 h-screen w-full flex-col justify-center overflow-hidden",
+        className: "relative flex h-screen w-full flex-1 flex-col justify-center overflow-hidden",
         initial: {
           opacity: 0
         },
