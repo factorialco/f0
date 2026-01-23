@@ -1,1 +1,1 @@
-{"version":3,"file":"Windows.d.ts","sourceRoot":"","sources":["../../src/icons/app/Windows.tsx"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,QAAQ,EAAE,MAAM,OAAO,CAAA;AAuBrC,QAAA,MAAM,UAAU,gIAAyB,CAAA;AACzC,eAAe,UAAU,CAAA"}
+{"version":3,"file":"Windows.d.ts","sourceRoot":"","sources":["../../src/icons/app/Windows.tsx"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,QAAQ,EAAE,MAAM,OAAO,CAAA;AAwBrC,QAAA,MAAM,UAAU,gIAAyB,CAAA;AACzC,eAAe,UAAU,CAAA"}

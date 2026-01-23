@@ -1660,8 +1660,12 @@ export declare const defaultTranslations: {
         readonly save: "Save";
         readonly send: "Send";
         readonly cancel: "Cancel";
+        readonly delete: "Delete";
         readonly copy: "Copy";
+        readonly paste: "Paste";
         readonly close: "Close";
+        readonly collapse: "Collapse";
+        readonly expand: "Expand";
         readonly showAll: "Show all";
         readonly showLess: "Show less";
         readonly skipToContent: "Skip to content";
@@ -1906,6 +1910,18 @@ export declare const defaultTranslations: {
         readonly greaterThan: "It should be greater than {{min}}";
         readonly lessThan: "It should be less than {{max}}";
     };
+    readonly imageUpload: {
+        readonly uploading: "Uploading...";
+        readonly uploadError: "Upload failed";
+        readonly insertImage: "Image";
+        readonly deleteImage: "Delete";
+        readonly errors: {
+            readonly fileTooLarge: "The file is too large";
+            readonly invalidType: "Invalid file type. Only images are allowed";
+            readonly uploadFailed: "Failed to upload image. Please try again";
+            readonly dismiss: "Dismiss";
+        };
+    };
     readonly coCreationForm: {
         readonly actions: {
             readonly actions: "Actions";
@@ -1950,6 +1966,40 @@ export declare const defaultTranslations: {
             readonly questionOptions: "Question options";
             readonly actions: "Actions";
             readonly sectionTitlePlaceholder: "Section title";
+        };
+    };
+    readonly richTextEditor: {
+        readonly bold: "Bold";
+        readonly italic: "Italic";
+        readonly underline: "Underline";
+        readonly strike: "Strike";
+        readonly highlight: "Highlight";
+        readonly heading1: "Heading 1";
+        readonly heading2: "Heading 2";
+        readonly heading3: "Heading 3";
+        readonly left: "Left";
+        readonly center: "Center";
+        readonly right: "Right";
+        readonly justify: "Justify";
+        readonly bulletList: "Bullet List";
+        readonly orderedList: "Ordered List";
+        readonly taskList: "Task List";
+        readonly codeBlock: "Code Block";
+        readonly horizontalRule: "Horizontal Rule";
+        readonly quote: "Quote";
+        readonly moreOptions: "More Options";
+        readonly code: "Code";
+        readonly divider: "Divider";
+        readonly bullet: "Bullet";
+        readonly ordered: "Ordered";
+        readonly task: "Task";
+        readonly details: "Dropdown";
+        readonly link: "Link";
+        readonly linkPlaceholder: "Enter a link";
+        readonly groups: {
+            readonly textStyles: "Text Styles";
+            readonly lists: "Lists";
+            readonly blocks: "Blocks";
         };
     };
 };
@@ -3450,6 +3500,7 @@ export declare const modules: {
     readonly calendar: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
     readonly cards: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
     readonly "clock-in": ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly communities: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
     readonly company_attendance: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
     readonly company_documents: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
     readonly company_projects: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
@@ -4630,7 +4681,7 @@ declare type TextVariant = NonNullable<TextVariants["variant"]>;
 declare type TextVariants = VariantProps<typeof textVariants>;
 
 declare const textVariants: (props?: ({
-    variant?: "info" | "small" | "body" | "code" | "label" | "description" | "heading" | "inverse" | "critical" | "warning" | "positive" | "selected" | "heading-large" | "label-input" | "warning-strong" | "critical-strong" | "positive-strong" | "info-strong" | undefined;
+    variant?: "info" | "small" | "body" | "code" | "label" | "description" | "inverse" | "critical" | "warning" | "positive" | "selected" | "heading" | "heading-large" | "label-input" | "warning-strong" | "critical-strong" | "positive-strong" | "info-strong" | undefined;
     align?: "center" | "left" | "right" | undefined;
 } & ({
     class?: ClassValue;
@@ -5124,33 +5175,6 @@ declare global {
     }
 }
 
-
-declare module "@tiptap/core" {
-    interface Commands<ReturnType> {
-        aiBlock: {
-            insertAIBlock: (data: AIBlockData, config: AIBlockConfigWithLabels) => ReturnType;
-        };
-    }
-}
-
-
-declare module "@tiptap/core" {
-    interface Commands<ReturnType> {
-        liveCompanion: {
-            insertLiveCompanion: (data: LiveCompanionData, config?: LiveCompanionConfig) => ReturnType;
-        };
-    }
-}
-
-
-declare module "@tiptap/core" {
-    interface Commands<ReturnType> {
-        transcript: {
-            insertTranscript: (data: TranscriptData, config?: TranscriptConfig) => ReturnType;
-        };
-    }
-}
-
 declare module "gridstack" {
     interface GridStackWidget {
         id?: string;
@@ -5169,15 +5193,34 @@ declare module "gridstack" {
 }
 
 
+declare namespace Calendar {
+    var displayName: string;
+}
+
+
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        moodTracker: {
-            insertMoodTracker: (data: MoodTrackerData, config?: MoodTrackerConfig) => ReturnType;
+        aiBlock: {
+            insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
+            executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
         };
     }
 }
 
 
-declare namespace Calendar {
-    var displayName: string;
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
+        moodTracker: {
+            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
+        };
+    }
+}
+
+
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
+        transcript: {
+            insertTranscript: (data: TranscriptData) => ReturnType;
+        };
+    }
 }
