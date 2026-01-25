@@ -48,11 +48,7 @@ const meta = {
   decorators: [
     (Story) => {
       return (
-<<<<<<<< HEAD:packages/react/src/sds/ai/F0AiChat/__stories__/F0AiChat.stories.tsx
         <div className="h-full w-full flex-1 [&>div>div]:h-full [&>div>div]:w-full">
-========
-        <div className="h-full w-full bg-[hsl(0,0,98)]">
->>>>>>>> 7ba2e4a6e (feat: introduce F0 AI components and refactor existing AI chat structure):packages/react/src/ai/F0AiChat/__stories__/F0AiChat.stories.tsx
           <F0AiChatProvider
             enabled
             runtimeUrl="https://mastra.local.factorial.dev/copilotkit"
