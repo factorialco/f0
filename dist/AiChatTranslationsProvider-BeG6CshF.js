@@ -1,10 +1,10 @@
-import { jsx as t, jsxs as v, Fragment as fe } from "react/jsx-runtime";
-import { g as G, A as de, h as J, m as w, i as pe, j as Te, k as je, a as me, f as Ge, l as Ve, n as We, o as qe, p as Ke, u as R, q as F, B as K, r as Ye, s as _e, t as Xe, v as Je, w as ke, x as Ze, y as Qe, b as et, z as tt, F as nt, D as rt, E as Ae, G as st, H as ge, c as ot, J as at } from "./F0MessageSources-BYW44c9n.js";
-import { useCopilotChatInternal as V, useCopilotContext as Me, useCopilotAction as he, CopilotKit as it } from "@copilotkit/react-core";
+import { jsx as t, jsxs as v, Fragment as he } from "react/jsx-runtime";
+import { g as G, A as de, h as J, m as x, i as pe, j as Te, k as je, a as me, f as Ge, l as Ve, n as We, o as qe, p as Ke, u as R, q as F, B as K, r as Ye, s as _e, t as Xe, v as Je, w as ke, x as Ze, y as Qe, b as et, z as tt, F as nt, D as rt, E as Ae, G as st, H as ge, c as ot, J as at } from "./F0MessageSources-BYW44c9n.js";
+import { useCopilotChatInternal as V, useCopilotContext as Me, useCopilotAction as fe, CopilotKit as it } from "@copilotkit/react-core";
 import { Markdown as lt, useChatContext as ct, CopilotSidebar as ut } from "@copilotkit/react-ui";
 import { forwardRef as dt, useState as B, useEffect as T, useContext as ne, createContext as ve, useRef as y, useCallback as le, useMemo as te } from "react";
 import { randomId as pt } from "@copilotkit/shared";
-const ht = {
+const ft = {
   initial: {
     scale: 0.5,
     opacity: 0
@@ -17,7 +17,7 @@ const ht = {
     scale: 0.5,
     opacity: 0
   }
-}, ft = {
+}, ht = {
   duration: 0.15,
   ease: "easeOut"
 }, Ie = dt(({ valueToCopy: e, onCopy: n, copyTooltipLabel: o, copiedTooltipLabel: s, variant: r = "neutral", size: a = "sm", ...i }, g) => {
@@ -42,12 +42,12 @@ const ht = {
     children: t(J, {
       mode: "wait",
       initial: !1,
-      children: t(w.span, {
-        variants: ht,
+      children: t(x.span, {
+        variants: ft,
         initial: "initial",
         animate: "animate",
         exit: "exit",
-        transition: ft,
+        transition: ht,
         style: {
           display: "inline-flex",
           alignItems: "center",
@@ -101,7 +101,7 @@ const Ne = ve(null), Se = ({ children: e }) => {
     children: [n && !g && t(me, {
       title: u.ai.thinking,
       status: "executing"
-    }), s && v(fe, {
+    }), s && v(he, {
       children: [t("div", {
         className: "w-fit max-w-[min(90%,330px)] [&>div]:flex [&>div]:flex-col [&>div]:gap-1",
         children: t(lt, {
@@ -123,8 +123,8 @@ const Ne = ve(null), Se = ({ children: e }) => {
           }
         }), t(de, {
           onClick: (c) => {
-            const h = p === "like" ? null : "like";
-            h && l(h, s), d(h), c.currentTarget.blur();
+            const f = p === "like" ? null : "like";
+            f && l(f, s), d(f), c.currentTarget.blur();
           },
           compact: !0,
           mode: "only",
@@ -140,8 +140,8 @@ const Ne = ve(null), Se = ({ children: e }) => {
           })
         }), t(de, {
           onClick: (c) => {
-            const h = p === "dislike" ? null : "dislike";
-            h && l(h, s), d(h), c.currentTarget.blur();
+            const f = p === "dislike" ? null : "dislike";
+            f && l(f, s), d(f), c.currentTarget.blur();
           },
           compact: !0,
           mode: "only",
@@ -165,11 +165,11 @@ const Ne = ve(null), Se = ({ children: e }) => {
 }, mt = () => null, gt = (e) => {
   const { labels: n } = ct(), { messages: o } = V(), { setOpen: s, clear: r } = R(), a = G(), i = n.title === "CopilotKit", g = o.length > 0;
   return v("header", {
-    className: F("flex justify-between border-0 border-solid border-f1-border-secondary p-[16px]"),
+    className: F("flex justify-between border-0 border-solid border-f1-border-secondary px-[16px] py-3"),
     children: [t("h2", {
       className: "text-f1-foreground",
       children: i ? "" : n.title
-    }), v(w.div, {
+    }), v(x.div, {
       layout: !0,
       className: "flex items-center",
       ...e,
@@ -193,11 +193,11 @@ const Ne = ve(null), Se = ({ children: e }) => {
 }, vt = ({ placeholders: e, defaultPlaceholder: n, inputValue: o, inProgress: s }) => {
   const [r, a] = B(""), [i, g] = B(0), [m, u] = B(!1), l = y(null), p = y(null), d = y(null), c = e[i] ?? n;
   return T(() => {
-    const h = () => {
+    const f = () => {
       p.current && (clearInterval(p.current), p.current = null), d.current && (clearInterval(d.current), d.current = null), l.current && (clearTimeout(l.current), l.current = null);
     };
     if (o.length > 0 || s) {
-      u(!1), a(""), h();
+      u(!1), a(""), f();
       return;
     }
     u(!0), a("");
@@ -213,10 +213,10 @@ const Ne = ve(null), Se = ({ children: e }) => {
         }, D);
       }, W));
     }, Y), () => {
-      h();
+      f();
     };
   }, [o, s, c, i, e.length]), o.length > 0 || s ? null : t(J, {
-    children: t(w.div, {
+    children: t(x.div, {
       initial: {
         opacity: 0
       },
@@ -229,10 +229,10 @@ const Ne = ve(null), Se = ({ children: e }) => {
       transition: {
         duration: 0.4
       },
-      className: F("col-start-1 row-start-1", "pointer-events-none", "text-f1-foreground-secondary", "text-[14px] leading-[20px] font-normal", "sm:pt-3 sm:px-3"),
+      className: F("col-start-1 row-start-1", "pointer-events-none", "text-f1-foreground-secondary", "sm:text-[14px] text-[16px] leading-[20px] font-normal", "sm:pt-3 sm:px-3"),
       children: v("div", {
         className: F("overflow-hidden text-ellipsis whitespace-nowrap", "sm:whitespace-pre-wrap sm:break-words sm:overflow-visible"),
-        children: [r, m && t(w.span, {
+        children: [r, m && t(x.span, {
           animate: {
             opacity: [1, 0]
           },
@@ -247,15 +247,15 @@ const Ne = ve(null), Se = ({ children: e }) => {
     })
   });
 }, Re = ({ submitLabel: e, inProgress: n, onSend: o, onStop: s }) => {
-  const [r, a] = B(""), i = y(null), g = y(null), m = G(), { placeholders: u } = R(), l = r.trim().length > 0, p = (h) => {
-    h.preventDefault(), n ? s?.() : l && (o(r.trim()), a("")), g.current?.focus();
-  }, d = (h) => {
-    h.key === "Enter" && !h.shiftKey && (h.preventDefault(), n || i.current?.requestSubmit());
+  const [r, a] = B(""), i = y(null), g = y(null), m = G(), { placeholders: u } = R(), l = r.trim().length > 0, p = (f) => {
+    f.preventDefault(), n ? s?.() : l && (o(r.trim()), a("")), g.current?.focus();
+  }, d = (f) => {
+    f.key === "Enter" && !f.shiftKey && (f.preventDefault(), n || i.current?.requestSubmit());
   }, c = u.length > 1;
-  return v(w.form, {
+  return v(x.form, {
     "aria-busy": n,
     ref: i,
-    className: F("relative isolate", "flex flex-row items-end gap-2 sm:flex-col sm:items-stretch sm:gap-3", "rounded-lg border border-solid border-f1-border", "transition-all hover:cursor-text", "py-1 pl-3 pr-1 sm:p-0", "before:pointer-events-none before:absolute before:inset-0 before:z-[-1]", "before:rounded-[inherit] before:bg-f1-background before:content-['']", "after:pointer-events-none after:absolute after:inset-0.5 after:z-[-2]", "after:rounded-[inherit] after:blur-[5px] after:content-['']", "after:scale-90 after:opacity-0", "after:bg-[conic-gradient(from_var(--gradient-angle),var(--tw-gradient-stops))]", "from-[#E55619] via-[#A1ADE5] to-[#E51943]", "after:transition-all after:delay-200 after:duration-300", "has-[textarea:focus]:after:scale-100 has-[textarea:focus]:after:opacity-100"),
+    className: F("relative isolate", "flex flex-row items-end gap-2 sm:flex-col sm:items-stretch sm:gap-3", "rounded-lg border border-solid border-f1-border", "transition-all hover:cursor-text", "py-px pl-3 pr-1 sm:p-0", "before:pointer-events-none before:absolute before:inset-0 before:z-[-1]", "before:rounded-[inherit] before:bg-f1-background before:content-['']", "after:pointer-events-none after:absolute after:inset-0.5 after:z-[-2]", "after:rounded-[inherit] after:blur-[5px] after:content-['']", "after:scale-90 after:opacity-0", "after:bg-[conic-gradient(from_var(--gradient-angle),var(--tw-gradient-stops))]", "from-[#E55619] via-[#A1ADE5] to-[#E51943]", "after:transition-all after:delay-200 after:duration-300", "has-[textarea:focus]:after:scale-100 has-[textarea:focus]:after:opacity-100"),
     animate: {
       "--gradient-angle": ["0deg", "360deg"]
     },
@@ -275,11 +275,11 @@ const Ne = ve(null), Se = ({ children: e }) => {
       className: F("grid flex-1 grid-cols-1 grid-rows-1", "min-h-[20px] py-2.5 sm:min-h-[40px] sm:py-0"),
       children: [t("div", {
         "aria-hidden": !0,
-        className: F("col-start-1 row-start-1", "pointer-events-none invisible", "min-h-[20px] max-h-[120px] sm:min-h-[40px] sm:max-h-[240px]", "whitespace-pre-wrap break-words", "text-[16px] text-f1-foreground sm:text-base", "sm:mt-3 sm:px-3"),
+        className: F("col-start-1 row-start-1", "pointer-events-none invisible", "min-h-[20px] max-h-[120px] sm:min-h-[40px] sm:max-h-[240px]", "whitespace-pre-wrap break-words", "sm:text-[14px] text-[16px] leading-[20px] font-normal text-f1-foreground", "sm:mt-3 sm:px-3"),
         children: r.endsWith(`
 `) ? r + "_" : r
       }), !r && !c && t("p", {
-        className: F("col-start-1 row-start-1", "pointer-events-none", "text-f1-foreground-secondary", "text-[14px] leading-[20px] font-normal", "sm:pt-3 sm:px-3", "overflow-hidden text-ellipsis whitespace-nowrap", "sm:whitespace-normal sm:overflow-visible"),
+        className: F("col-start-1 row-start-1", "pointer-events-none", "text-f1-foreground-secondary", "sm:text-[14px] text-[16px] leading-[20px] font-normal", "sm:pt-3 sm:px-3", "overflow-hidden text-ellipsis whitespace-nowrap", "sm:whitespace-normal sm:overflow-visible"),
         children: m.ai.inputPlaceholder
       }), t("textarea", {
         autoFocus: !0,
@@ -287,11 +287,11 @@ const Ne = ve(null), Se = ({ children: e }) => {
         rows: 1,
         ref: g,
         value: r,
-        onChange: (h) => {
-          a(h.target.value);
+        onChange: (f) => {
+          a(f.target.value);
         },
         onKeyDown: d,
-        className: F("col-start-1 row-start-1", "min-h-[20px] max-h-[120px] sm:min-h-[40px] sm:max-h-[240px] sm:h-auto", "resize-none", "whitespace-pre-wrap break-words", "text-[14px] leading-[20px] font-normal text-f1-foreground", "px-0 sm:mt-3 sm:px-3", "overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden", "outline-none transition-all", r || !c ? "caret-f1-foreground" : "caret-transparent")
+        className: F("col-start-1 row-start-1", "min-h-[20px] max-h-[120px] sm:min-h-[40px] sm:max-h-[240px] sm:h-auto", "resize-none", "whitespace-pre-wrap break-words", "sm:text-[14px] text-[16px] leading-[20px] font-normal text-f1-foreground", "px-0 sm:mt-3 sm:px-3", "overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden", "outline-none", r || !c ? "caret-f1-foreground" : "caret-transparent")
       }), c && t(vt, {
         placeholders: u,
         defaultPlaceholder: m.ai.inputPlaceholder,
@@ -330,14 +330,14 @@ const Ne = ve(null), Se = ({ children: e }) => {
   )), () => {
     s.current && (clearTimeout(s.current), s.current = null);
   }), [n, o, e]);
-}, wt = ({ children: e }) => {
+}, xt = ({ children: e }) => {
   const { open: n, shouldPlayEntranceAnimation: o, setShouldPlayEntranceAnimation: s, autoClearMinutes: r } = R(), { reset: a } = V();
   return bt({
     reset: a,
     isOpen: n,
     autoClearMinutes: r
   }), t(J, {
-    children: n && t(w.div, {
+    children: n && t(x.div, {
       "aria-hidden": !n,
       className: "relative flex h-full max-w-[360px] flex-col overflow-hidden border border-solid border-f1-border-secondary bg-f1-special-page shadow xs:rounded-xl",
       initial: o ? {
@@ -359,7 +359,7 @@ const Ne = ve(null), Se = ({ children: e }) => {
       onAnimationComplete: () => {
         o && s(!1);
       },
-      children: t(w.div, {
+      children: t(x.div, {
         className: "relative flex h-full w-[360px] flex-col overflow-hidden",
         initial: {
           opacity: 0
@@ -404,8 +404,8 @@ const Ne = ve(null), Se = ({ children: e }) => {
 function yt(e) {
   return e.role === "assistant" && e.agentName !== void 0;
 }
-const xt = ["buttonToggle"], kt = (e) => {
-  const n = xt.reduce((o, s) => {
+const wt = ["buttonToggle"], kt = (e) => {
+  const n = wt.reduce((o, s) => {
     const { [s]: r, ...a } = o;
     return a;
   }, e);
@@ -477,14 +477,14 @@ const Be = ({ greeting: e, initialMessages: n = [], suggestions: o = [] }) => {
   const { sendMessage: s } = V(), r = te(() => Tt(o), [o]);
   return t(J, {
     mode: "popLayout",
-    children: v(w.div, {
-      className: "flex w-full flex-1 flex-col justify-end gap-4",
+    children: v(x.div, {
+      className: "flex w-full flex-1 flex-col justify-end gap-6 sm:gap-4",
       initial: {
         opacity: 1
       },
       children: [v("div", {
         className: "pl-3",
-        children: [t(w.div, {
+        children: [t(x.div, {
           className: "flex w-fit justify-center",
           initial: {
             opacity: 0,
@@ -506,8 +506,8 @@ const Be = ({ greeting: e, initialMessages: n = [], suggestions: o = [] }) => {
             size: "lg",
             className: "my-4"
           })
-        }), e && t(w.p, {
-          className: "text-lg font-semibold text-f1-foreground-secondary",
+        }), e && t(x.p, {
+          className: "text-lg font-semibold leading-[24px] text-f1-foreground-secondary",
           initial: {
             opacity: 0,
             filter: "blur(2px)",
@@ -524,8 +524,8 @@ const Be = ({ greeting: e, initialMessages: n = [], suggestions: o = [] }) => {
             delay: 0.5
           },
           children: e
-        }), n.map((a) => t(w.p, {
-          className: "text-lg font-semibold text-f1-foreground",
+        }), n.map((a) => t(x.p, {
+          className: "text-[24px] font-semibold leading-[24px] text-f1-foreground sm:text-lg",
           initial: {
             opacity: 0,
             filter: "blur(2px)",
@@ -544,8 +544,8 @@ const Be = ({ greeting: e, initialMessages: n = [], suggestions: o = [] }) => {
           children: a.content
         }, a.id))]
       }), t("div", {
-        className: "flex flex-col items-start gap-2 px-3 pb-1 sm:px-0 sm:pb-0",
-        children: r.map((a, i) => t(w.div, {
+        className: "flex flex-col items-start gap-[6px] pb-5",
+        children: r.map((a, i) => t(x.div, {
           className: "w-full",
           initial: {
             opacity: 0,
@@ -562,17 +562,15 @@ const Be = ({ greeting: e, initialMessages: n = [], suggestions: o = [] }) => {
             ease: "easeOut",
             delay: 0.9 + i * 0.1
           },
-          children: t("div", {
-            children: t(K, {
-              variant: "ghost",
-              className: "border border-solid border-f1-border shadow sm:border-none sm:shadow-none",
-              label: a.message,
-              icon: a.icon,
-              onClick: () => s({
-                id: pt(),
-                role: "user",
-                content: a.prompt || a.message
-              })
+          children: t(K, {
+            variant: "ghost",
+            className: "border border-solid border-f1-border-secondary shadow sm:border-none sm:shadow-none",
+            label: a.message,
+            icon: a.icon,
+            onClick: () => s({
+              id: pt(),
+              role: "user",
+              content: a.prompt || a.message
             })
           })
         }, i))
@@ -584,18 +582,18 @@ const Be = ({ greeting: e, initialMessages: n = [], suggestions: o = [] }) => {
     ...e
   })
 }), Mt = ({ inProgress: e, children: n, RenderMessage: o, AssistantMessage: s, UserMessage: r, ImageRenderer: a, onRegenerate: i, onCopy: g, markdownTagRenderers: m }) => {
-  const u = y(null), { messages: l, interrupt: p } = V(), { threadId: d } = Me(), { close: c, currentReaction: h, currentMessage: b, isOpen: Y } = be(), D = G(), { greeting: W, initialMessage: $, welcomeScreenSuggestions: Z, onThumbsUp: re, onThumbsDown: _ } = R(), Q = te(() => It($ || D.ai.defaultInitialMessage), [$, D.ai.defaultInitialMessage]), ee = l.length == 0 && (W || Q.length > 0), { messagesContainerRef: se, messagesEndRef: oe, showScrollToBottom: ae, scrollToBottom: X } = Pe(), { height: A = 0 } = rt({
+  const u = y(null), { messages: l, interrupt: p } = V(), { threadId: d } = Me(), { close: c, currentReaction: f, currentMessage: b, isOpen: Y } = be(), D = G(), { greeting: W, initialMessage: $, welcomeScreenSuggestions: Z, onThumbsUp: re, onThumbsDown: _ } = R(), Q = te(() => It($ || D.ai.defaultInitialMessage), [$, D.ai.defaultInitialMessage]), ee = l.length == 0 && (W || Q.length > 0), { messagesContainerRef: se, messagesEndRef: oe, showScrollToBottom: ae, scrollToBottom: X } = Pe(), { height: A = 0 } = rt({
     ref: se,
     box: "border-box"
   }), q = te(() => Oe(l), [l]);
   return T(() => {
     X("instant");
-  }, [l.length, X]), v(fe, {
-    children: [v(w.div, {
+  }, [l.length, X]), v(he, {
+    children: [v(x.div, {
       layout: !0,
       className: F("scrollbar-macos relative isolate flex flex-1 flex-col pl-[16px] pr-[8px] pt-[16px]", "overflow-y-scroll overflow-x-hidden"),
       ref: se,
-      children: [v(w.div, {
+      children: [v(x.div, {
         layout: "position",
         ref: u,
         className: ee ? "flex flex-1 pb-3" : "flex flex-col gap-8",
@@ -638,7 +636,7 @@ const Be = ({ greeting: e, initialMessages: n = [], suggestions: o = [] }) => {
         ref: oe,
         children: n
       }), t(J, {
-        children: ae && t(w.div, {
+        children: ae && t(x.div, {
           className: "sticky bottom-2 z-10 flex justify-center",
           initial: {
             opacity: 0,
@@ -669,18 +667,18 @@ const Be = ({ greeting: e, initialMessages: n = [], suggestions: o = [] }) => {
       })]
     }), Y && t(Ee, {
       onSubmit: (H, E) => {
-        (h === "like" ? re : _)?.(H, {
+        (f === "like" ? re : _)?.(H, {
           threadId: d,
           feedback: E
         }), c();
       },
       onClose: (H) => {
-        (h === "like" ? re : _)?.(H, {
+        (f === "like" ? re : _)?.(H, {
           threadId: d,
           feedback: ""
         }), c();
       },
-      reactionType: h,
+      reactionType: f,
       message: b
     })]
   });
@@ -799,9 +797,9 @@ const De = ({ message: e, ImageRenderer: n }) => {
     ...e
   })
 }), Ft = ({ inProgress: e, RenderMessage: n, AssistantMessage: o, UserMessage: s, ImageRenderer: r, onRegenerate: a, onCopy: i, markdownTagRenderers: g }) => {
-  const m = y(null), { messages: u, interrupt: l, isLoading: p } = V(), d = e ?? p, c = o ?? Fe, h = s ?? De, b = r ?? (({ image: f, content: x }) => t("img", {
-    src: f,
-    alt: x || "Assistant image",
+  const m = y(null), { messages: u, interrupt: l, isLoading: p } = V(), d = e ?? p, c = o ?? Fe, f = s ?? De, b = r ?? (({ image: h, content: w }) => t("img", {
+    src: h,
+    alt: w || "Assistant image",
     className: "max-w-full rounded-lg"
   })), { threadId: Y } = Me(), { setInProgress: D } = ne(ce), { close: W, currentReaction: $, currentMessage: Z, isOpen: re } = be();
   T(() => {
@@ -809,8 +807,8 @@ const De = ({ message: e, ImageRenderer: n }) => {
   }, [d, D]);
   const _ = G(), { greeting: Q, initialMessage: ee, welcomeScreenSuggestions: se, onThumbsUp: oe, onThumbsDown: ae } = R(), X = te(() => Rt(ee || _.ai.defaultInitialMessage), [ee, _.ai.defaultInitialMessage]), A = u.length === 0 && (Q || X.length > 0), { messagesContainerRef: q, messagesEndRef: H, showScrollToBottom: E, scrollToBottom: L } = Pe(), P = te(() => Oe(u), [u]), O = y(u.length), U = u[u.length - 1]?.content || "", ue = y(U);
   return T(() => {
-    const f = u.length > O.current, x = u.length === O.current && U !== ue.current;
-    if (f || x) {
+    const h = u.length > O.current, w = u.length === O.current && U !== ue.current;
+    if (h || w) {
       const k = u[u.length - 1]?.role === "user", I = (N = "instant") => {
         const S = q.current;
         if (S) {
@@ -818,22 +816,22 @@ const De = ({ message: e, ImageRenderer: n }) => {
           (k || C) && L(N);
         }
       };
-      if (f) {
+      if (h) {
         I("instant");
         const N = [50, 150, 400].map((S) => setTimeout(() => I("instant"), S));
         return O.current = u.length, ue.current = U, () => N.forEach(clearTimeout);
-      } else x && I("instant");
+      } else w && I("instant");
     }
     O.current = u.length, ue.current = U;
   }, [u.length, U, L]), T(() => {
-    const f = q.current;
-    if (!f) return;
-    let x = !0;
+    const h = q.current;
+    if (!h) return;
+    let w = !0;
     const M = () => {
-      x = f.scrollHeight - f.scrollTop - f.clientHeight < 150;
+      w = h.scrollHeight - h.scrollTop - h.clientHeight < 150;
     }, k = () => {
       const j = [50, 150, 300, 600].map((ie) => setTimeout(() => {
-        x && L("instant");
+        w && L("instant");
       }, ie));
       return () => j.forEach(clearTimeout);
     }, I = (C) => {
@@ -842,19 +840,19 @@ const De = ({ message: e, ImageRenderer: n }) => {
         L("instant"), setTimeout(() => L("instant"), 300);
       }, 100);
     }, N = (C) => {
-      f._startY = C.touches[0].pageY;
+      h._startY = C.touches[0].pageY;
     }, S = (C) => {
-      const { scrollTop: j, scrollHeight: ie, clientHeight: we } = f, He = j <= 0, Ue = j + we >= ie, ye = C.touches[0].pageY, ze = f._startY || ye, xe = ye > ze ? "down" : "up";
-      (ie <= we || He && xe === "down" || Ue && xe === "up") && C.cancelable && C.preventDefault();
+      const { scrollTop: j, scrollHeight: ie, clientHeight: xe } = h, He = j <= 0, Ue = j + xe >= ie, ye = C.touches[0].pageY, ze = h._startY || ye, we = ye > ze ? "down" : "up";
+      (ie <= xe || He && we === "down" || Ue && we === "up") && C.cancelable && C.preventDefault();
     }, z = new ResizeObserver(k);
-    return z.observe(f), f.addEventListener("scroll", M), f.addEventListener("touchstart", N, {
+    return z.observe(h), h.addEventListener("scroll", M), h.addEventListener("touchstart", N, {
       passive: !0
-    }), f.addEventListener("touchmove", S, {
+    }), h.addEventListener("touchmove", S, {
       passive: !1
     }), window.addEventListener("resize", k), window.addEventListener("focusin", I), window.visualViewport && (window.visualViewport.addEventListener("resize", k), window.visualViewport.addEventListener("scroll", k)), () => {
-      z.disconnect(), f.removeEventListener("scroll", M), f.removeEventListener("touchstart", N), f.removeEventListener("touchmove", S), window.removeEventListener("resize", k), window.removeEventListener("focusin", I), window.visualViewport && (window.visualViewport.removeEventListener("resize", k), window.visualViewport.removeEventListener("scroll", k));
+      z.disconnect(), h.removeEventListener("scroll", M), h.removeEventListener("touchstart", N), h.removeEventListener("touchmove", S), window.removeEventListener("resize", k), window.removeEventListener("focusin", I), window.visualViewport && (window.visualViewport.removeEventListener("resize", k), window.visualViewport.removeEventListener("scroll", k));
     };
-  }, [L]), v(fe, {
+  }, [L]), v(he, {
     children: [v("div", {
       ref: q,
       className: F("scrollbar-macos flex flex-1 flex-col overflow-y-auto px-4", A ? "justify-end pt-0" : "justify-start pt-3"),
@@ -891,10 +889,10 @@ const De = ({ message: e, ImageRenderer: n }) => {
           greeting: Q,
           initialMessages: X,
           suggestions: se
-        }), P.map((f, x) => t("div", {
+        }), P.map((h, w) => t("div", {
           className: "flex flex-col items-start justify-start gap-2",
-          children: f.map((M, k) => {
-            const I = x === P.length - 1 && k === f.length - 1;
+          children: h.map((M, k) => {
+            const I = w === P.length - 1 && k === h.length - 1;
             if (Array.isArray(M) && !I)
               return t(Le, {
                 messages: M,
@@ -902,15 +900,15 @@ const De = ({ message: e, ImageRenderer: n }) => {
                 inProgress: d,
                 RenderMessage: n,
                 AssistantMessage: c
-              }, `${x}-${k}`);
+              }, `${w}-${k}`);
             const N = Array.isArray(M) ? M[M.length - 1] : M, S = {
-              key: `${x}-${k}`,
+              key: `${w}-${k}`,
               message: N,
               inProgress: d,
               index: k,
               isCurrentMessage: I,
               AssistantMessage: c,
-              UserMessage: h,
+              UserMessage: f,
               ImageRenderer: b,
               onRegenerate: a,
               onCopy: i,
@@ -919,7 +917,7 @@ const De = ({ message: e, ImageRenderer: n }) => {
             }, { key: z, ...C } = S;
             return n ? t(n, {
               ...C
-            }, z) : N.role === "user" ? t(h, {
+            }, z) : N.role === "user" ? t(f, {
               ...C
             }, z) : t(c, {
               ...C,
@@ -927,12 +925,12 @@ const De = ({ message: e, ImageRenderer: n }) => {
               isLoading: d && I && !N.content
             }, z);
           })
-        }, `turn-${x}`)), l, t("div", {
+        }, `turn-${w}`)), l, t("div", {
           ref: H,
           className: "h-2"
         })]
       }), t(J, {
-        children: E && t(w.div, {
+        children: E && t(x.div, {
           className: "sticky bottom-20 z-10 flex justify-center",
           initial: {
             opacity: 0,
@@ -962,14 +960,14 @@ const De = ({ message: e, ImageRenderer: n }) => {
         })
       })]
     }), re && t(Ee, {
-      onSubmit: (f, x) => {
-        ($ === "like" ? oe : ae)?.(f, {
+      onSubmit: (h, w) => {
+        ($ === "like" ? oe : ae)?.(h, {
           threadId: Y,
-          feedback: x
+          feedback: w
         }), W();
       },
-      onClose: (f) => {
-        ($ === "like" ? oe : ae)?.(f, {
+      onClose: (h) => {
+        ($ === "like" ? oe : ae)?.(h, {
           threadId: Y,
           feedback: ""
         }), W();
@@ -1023,7 +1021,7 @@ const ce = ve({
   }), [e, n]), null;
 }, Ot = () => {
   const { enabled: e, open: n, setOpen: o } = R();
-  he({
+  fe({
     name: "orchestratorThinking",
     description: "Display orchestrator thinking process (non-blocking)",
     parameters: [{
@@ -1040,7 +1038,7 @@ const ce = ve({
         inGroup: r.result?.inGroup
       })
     })
-  }), he({
+  }), fe({
     name: "messageSources",
     description: "Attach information sources to the assistant's response. Use this to show where the AI got its information from.",
     parameters: [{
@@ -1088,7 +1086,7 @@ const ce = ve({
     onSetOpen: (r) => {
       o(r);
     },
-    Window: wt,
+    Window: xt,
     Header: gt,
     Messages: At,
     Button: mt,
@@ -1138,7 +1136,7 @@ const ce = ve({
     `, document.head.appendChild(r), () => {
       document.head.removeChild(r);
     };
-  }, []), he({
+  }, []), fe({
     name: "orchestratorThinking",
     description: "Display orchestrator thinking process (non-blocking)",
     parameters: [{
