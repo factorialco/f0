@@ -1,13 +1,12 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
 import { useEffect } from "react"
 
-import { F0Button } from "@/components/F0Button"
 import { Lightbulb, ThumbsDown, ThumbsUp } from "@/icons/app"
 
 import { F0AiChat, F0AiChatProvider, useAiChat } from ".."
 
 const AiChatWrapper = ({ children }: { children: React.ReactElement }) => {
-  const { open, setOpen, setWelcomeScreenSuggestions } = useAiChat()
+  const { setOpen, setWelcomeScreenSuggestions } = useAiChat()
 
   useEffect(() => {
     setWelcomeScreenSuggestions([
@@ -35,15 +34,8 @@ const AiChatWrapper = ({ children }: { children: React.ReactElement }) => {
     setOpen(true)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
-  return (
-    <>
-      <F0Button
-        label={open ? "Close chat" : "Open chat"}
-        onClick={() => setOpen(!open)}
-      />
-      {children}
-    </>
-  )
+
+  return <div className="flex h-[700px] flex-1">{children}</div>
 }
 
 const meta = {
@@ -56,13 +48,14 @@ const meta = {
   decorators: [
     (Story) => {
       return (
-        <div className="h-full w-full bg-[hsl(0,0,98)]">
+        <div className="h-full w-full flex-1 bg-[hsl(0,0,98)] [&>div>div]:h-full [&>div>div]:w-full">
           <F0AiChatProvider
             enabled
             runtimeUrl="https://mastra.local.factorial.dev/copilotkit"
             agent="one-workflow"
             credentials="include"
             showDevConsole={false}
+            greeting="Hello, John"
           >
             <AiChatWrapper>
               <Story />

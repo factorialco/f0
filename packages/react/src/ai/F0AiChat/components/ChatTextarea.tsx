@@ -121,7 +121,7 @@ const TypewriterPlaceholder = ({
           "col-start-1 row-start-1",
           "pointer-events-none",
           "text-f1-foreground-secondary",
-          "text-[14px] leading-[20px] font-normal",
+          "sm:text-[14px] text-[16px] leading-[20px] font-normal",
           "sm:pt-3 sm:px-3"
         )}
       >
@@ -200,7 +200,7 @@ export const ChatTextarea = ({
         "flex flex-row items-end gap-2 sm:flex-col sm:items-stretch sm:gap-3",
         "rounded-lg border border-solid border-f1-border",
         "transition-all hover:cursor-text",
-        "py-1 pl-3 pr-1 sm:p-0",
+        "py-px pl-3 pr-1 sm:p-0",
         "before:pointer-events-none before:absolute before:inset-0 before:z-[-1]",
         "before:rounded-[inherit] before:bg-f1-background before:content-['']",
         "after:pointer-events-none after:absolute after:inset-0.5 after:z-[-2]",
@@ -242,7 +242,7 @@ export const ChatTextarea = ({
             "pointer-events-none invisible",
             "min-h-[20px] max-h-[120px] sm:min-h-[40px] sm:max-h-[240px]",
             "whitespace-pre-wrap break-words",
-            "text-[16px] text-f1-foreground sm:text-base",
+            "sm:text-[14px] text-[16px] leading-[20px] font-normal text-f1-foreground",
             "sm:mt-3 sm:px-3"
           )}
         >
@@ -254,7 +254,7 @@ export const ChatTextarea = ({
               "col-start-1 row-start-1",
               "pointer-events-none",
               "text-f1-foreground-secondary",
-              "text-[14px] leading-[20px] font-normal",
+              "sm:text-[14px] text-[16px] leading-[20px] font-normal",
               "sm:pt-3 sm:px-3",
               "overflow-hidden text-ellipsis whitespace-nowrap",
               "sm:whitespace-normal sm:overflow-visible"
@@ -278,10 +278,10 @@ export const ChatTextarea = ({
             "min-h-[20px] max-h-[120px] sm:min-h-[40px] sm:max-h-[240px] sm:h-auto",
             "resize-none",
             "whitespace-pre-wrap break-words",
-            "text-[14px] leading-[20px] font-normal text-f1-foreground",
+            "sm:text-[14px] text-[16px] leading-[20px] font-normal text-f1-foreground",
             "px-0 sm:mt-3 sm:px-3",
             "overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
-            "outline-none transition-all",
+            "outline-none",
             inputValue || !multiplePlaceholders
               ? "caret-f1-foreground"
               : "caret-transparent"

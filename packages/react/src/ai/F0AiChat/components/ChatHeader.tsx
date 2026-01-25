@@ -21,7 +21,7 @@ export const ChatHeader = (props: HeaderProps) => {
   return (
     <header
       className={cn(
-        "flex justify-between border-0 border-solid border-f1-border-secondary p-[16px]"
+        "flex justify-between border-0 border-solid border-f1-border-secondary px-[16px] py-3"
       )}
     >
       <h2 className="text-f1-foreground">
