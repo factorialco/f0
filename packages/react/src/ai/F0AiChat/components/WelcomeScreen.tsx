@@ -41,7 +41,7 @@ export const WelcomeScreen = ({
     <AnimatePresence mode="popLayout">
       <motion.div
         key="welcome"
-        className="flex w-full flex-1 flex-col justify-end gap-4"
+        className="flex w-full flex-1 flex-col justify-end gap-6 sm:gap-4"
         initial={{ opacity: 1 }}
       >
         <div className="pl-3">
@@ -59,7 +59,7 @@ export const WelcomeScreen = ({
           </motion.div>
           {greeting && (
             <motion.p
-              className="text-lg font-semibold text-f1-foreground-secondary"
+              className="text-lg font-semibold leading-[24px] text-f1-foreground-secondary"
               initial={{ opacity: 0, filter: "blur(2px)", y: -8 }}
               animate={{ opacity: 1, filter: "blur(0px)", y: 0 }}
               transition={{
@@ -73,7 +73,7 @@ export const WelcomeScreen = ({
           )}
           {initialMessages.map((message) => (
             <motion.p
-              className="text-lg font-semibold text-f1-foreground"
+              className="text-[24px] font-semibold leading-[24px] text-f1-foreground sm:text-lg"
               key={message.id}
               initial={{ opacity: 0, filter: "blur(2px)", y: -8 }}
               animate={{ opacity: 1, filter: "blur(0px)", y: 0 }}
@@ -87,7 +87,7 @@ export const WelcomeScreen = ({
             </motion.p>
           ))}
         </div>
-        <div className="flex flex-col items-start gap-2 pb-3">
+        <div className="flex flex-col items-start gap-[6px] pb-5">
           {pickedSuggestions.map((suggestion, index) => (
             <motion.div
               className="w-full"
@@ -100,21 +100,19 @@ export const WelcomeScreen = ({
                 delay: 0.9 + index * 0.1,
               }}
             >
-              <div>
-                <ButtonInternal
-                  variant="ghost"
-                  className="border border-solid border-f1-border shadow sm:border-none sm:shadow-none"
-                  label={suggestion.message}
-                  icon={suggestion.icon}
-                  onClick={() =>
-                    sendMessage({
-                      id: randomId(),
-                      role: "user",
-                      content: suggestion.prompt || suggestion.message,
-                    })
-                  }
-                />
-              </div>
+              <ButtonInternal
+                variant="ghost"
+                className="border border-solid border-f1-border-secondary shadow sm:border-none sm:shadow-none"
+                label={suggestion.message}
+                icon={suggestion.icon}
+                onClick={() =>
+                  sendMessage({
+                    id: randomId(),
+                    role: "user",
+                    content: suggestion.prompt || suggestion.message,
+                  })
+                }
+              />
             </motion.div>
           ))}
         </div>
