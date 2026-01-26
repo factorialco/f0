@@ -1,7 +1,7 @@
+import { cva } from "cva"
+import { TOCItem } from "../../../experimental/Navigation/F0TableOfContent"
+import { TableOfContentPopoverVariant } from "../internal-types"
 import { cn } from "@/lib/utils"
-
-import { TOCItem } from "../F0TableOfContent"
-import { CollapsibleMenuVariant } from "./index"
 
 interface CollapsedBarsProps {
   items: TOCItem[]
@@ -10,8 +10,51 @@ interface CollapsedBarsProps {
   /** Alignment of the bars */
   align?: "left" | "right"
   /** Visual variant: "dark" for light backgrounds (default), "light" for dark backgrounds */
-  variant?: CollapsibleMenuVariant
+  variant?: TableOfContentPopoverVariant
 }
+
+interface FlattenedItem {
+  id: string
+  depth: number
+  hasChildren: boolean
+}
+
+const barVariants = cva({
+  base: "h-0.5 rounded-full bg-f1-foreground cursor-pointer",
+  variants: {
+    depth: {
+      0: "w-4",
+      1: "w-3",
+      2: "w-2",
+      3: "w-1.5",
+    },
+    variant: {
+      light: "",
+      dark: "dark",
+    },
+    active: {
+      true: "",
+      false: "",
+    },
+  },
+  compoundVariants: [
+    {
+      variant: "light",
+      active: false,
+      className: "bg-f1-foreground-tertiary opacity-60",
+    },
+    {
+      variant: "dark",
+      active: false,
+      className: "opacity-50",
+    },
+  ],
+  defaultVariants: {
+    depth: 3,
+    variant: "light",
+    active: true,
+  },
+})
 
 /**
  * Flattens the menu items tree into a linear list
@@ -19,10 +62,10 @@ interface CollapsedBarsProps {
  */
 function flattenItems(
   items: TOCItem[],
-  depth: number = 0,
-  maxItems: number = 12
-): { id: string; depth: number; hasChildren: boolean }[] {
-  const result: { id: string; depth: number; hasChildren: boolean }[] = []
+  depth = 0,
+  maxItems = 12
+): FlattenedItem[] {
+  const result: FlattenedItem[] = []
 
   for (const item of items) {
     if (result.length >= maxItems) break
@@ -47,8 +90,6 @@ function flattenItems(
  * of the menu items as horizontal bars with varying widths
  * based on hierarchy depth.
  */
-const depthWidths = ["w-4", "w-3", "w-2", "w-1.5"] as const
-
 export function CollapsedBars({
   items,
   activeItem,
@@ -69,17 +110,11 @@ export function CollapsedBars({
       {flatItems.map((item) => (
         <div
           key={item.id}
-          className={cn(
-            "h-0.5 rounded-full",
-            depthWidths[item.depth] ?? depthWidths[3],
-            variant === "light"
-              ? "bg-f1-foreground-inverse"
-              : "bg-f1-foreground",
-            item.id !== activeItem &&
-              (variant === "light"
-                ? "opacity-50"
-                : "bg-f1-foreground-tertiary opacity-60")
-          )}
+          className={barVariants({
+            depth: item.depth as 0 | 1 | 2 | 3,
+            variant,
+            active: item.id === activeItem,
+          })}
         />
       ))}
     </div>
