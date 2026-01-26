@@ -7,7 +7,11 @@ export {
   DialogWrapperProvider as F0DialogProvider,
   useDialogWrapperContext as useF0Dialog,
 } from "../common/DialogWrapperProvider"
-export type { DialogSize, F0DialogActionsProps, F0DialogAction } from "./types"
+export type {
+  F0DrawerPosition,
+  F0DrawerActionsProps,
+  F0DrawerAction,
+} from "./types"
 
 /**
  * @experimental This is an experimental component use it at your own risk

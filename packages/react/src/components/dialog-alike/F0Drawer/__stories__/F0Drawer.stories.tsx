@@ -123,7 +123,7 @@ export const WithPromisePrimaryAction: Story = {
       label: "submit",
       icon: Placeholder,
       onClick: () =>
-        new Promise((resolve) => setTimeout(() => resolve(true), 5000)),
+        new Promise((resolve) => setTimeout(() => resolve(), 5000)),
     },
   },
 }

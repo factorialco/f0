@@ -2,7 +2,7 @@ import { ReactNode } from "react"
 
 import {
   DialogNotificationType,
-  DialogSize,
+  F0DialogSize,
 } from "@/components/dialog-alike/F0Dialog/types"
 import { F0ButtonProps } from "@/components/F0Button"
 import { Optional } from "@/lib/typescript-utils/optional"
@@ -44,7 +44,7 @@ export type DialogDefinition = {
   /*
    * The size of the dialog.
    */
-  size?: DialogSize
+  size?: F0DialogSize
   /*
    * The id of the dialog.
    */
