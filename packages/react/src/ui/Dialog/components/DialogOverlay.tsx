@@ -16,18 +16,22 @@ export const DialogOverlay = forwardRef<
   const modal = context.modal || context.showOverlay
 
   return (
-    <DialogPrimitive.Root {...context} modal={modal}>
-      <div
-        ref={ref}
-        className={cn(
-          "fixed inset-0 z-50 bg-f1-background-overlay data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
-          "pointer-events-auto",
-          className
-        )}
-        {...props}
-        style={{ pointerEvents: "auto", ...props.style }}
-      />
-    </DialogPrimitive.Root>
+    <>
+      <DialogPrimitive.Root {...context} modal={modal}>
+        <div
+          data-state={context.open ? "open" : "closed"}
+          ref={ref}
+          className={cn(
+            "fixed inset-0 z-50 bg-f1-background-overlay data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+            "pointer-events-auto",
+            "transition-all duration-200 backdrop-blur-[1px]",
+            className
+          )}
+          {...props}
+          style={{ pointerEvents: "auto", ...props.style }}
+        />
+      </DialogPrimitive.Root>
+    </>
   )
 })
 DialogOverlay.displayName = DialogPrimitive.Overlay.displayName

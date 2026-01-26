@@ -150,7 +150,7 @@ export const DialogWrapper = ({
     if (containerElement) {
       animate(
         containerElement,
-        { x: [-20, 20, -15, 15, 0] },
+        { x: [-15, 15, -10, 10, 0] },
         { duration: 0.3, ease: "easeInOut" }
       )
     }
@@ -163,15 +163,12 @@ export const DialogWrapper = ({
     }
   }
 
-  const animationClassName = useMemo(() => {
-    return cn(
-      "duration-200 data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]",
-      position == "right" &&
-        ":slide-out-to-right-full data-[state=open]:slide-in-from-right-full data-[state=closed]:slide-out-to-left-full data-[state=open]:slide-in-from-left-full",
-      position == "left" &&
-        ":slide-out-to-left-full data-[state=open]:slide-in-from-left-full data-[state=closed]:slide-out-to-right-full data-[state=open]:slide-in-from-right-full"
-    )
-  }, [fullHeight])
+  const animation: Record<DialogPosition, "zoom" | "slideLeft" | "slideRight"> =
+    {
+      left: "slideRight",
+      right: "slideLeft",
+      center: "zoom",
+    }
   return (
     <DialogWrapperProvider
       isOpen={isOpen}
@@ -207,7 +204,7 @@ export const DialogWrapper = ({
               dialogContentClassName({ size: localSize }),
               fullHeight && "h-full"
             )}
-            animationClassName={animationClassName}
+            animation={animation[position]}
             onOpenAutoFocus={(e) => e.preventDefault()}
             onEscapeKeyDown={runwayEventCallback}
             onPointerDownOutside={runwayEventCallback}

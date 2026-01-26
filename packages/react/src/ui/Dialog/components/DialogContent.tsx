@@ -1,7 +1,7 @@
 "use client"
 
 import * as DialogPrimitive from "@radix-ui/react-dialog"
-import { forwardRef, useEffect, useState } from "react"
+import { forwardRef, useEffect, useRef, useState } from "react"
 
 type PointerDownOutsideEvent = CustomEvent<{
   originalEvent: PointerEvent
@@ -9,24 +9,33 @@ type PointerDownOutsideEvent = CustomEvent<{
 
 import { cn } from "../../../lib/utils"
 import { useDialogPrimitiveContext } from "../context"
+import { DialogAnimation } from "../types"
 import { DialogOverlay } from "./DialogOverlay"
 import { DialogPortal } from "./DialogPortal"
 
-const defaultAnimationClassName =
-  "duration-200 data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95"
+const animationClassName = (animation: DialogAnimation) => {
+  return cn(
+    animation === "zoom" &&
+      "group-data-[state=closed]:zoom-out-95 group-data-[state=open]:zoom-in-95",
+    animation === "slideLeft" &&
+      "group-data-[state=closed]:slide-out-to-right-full group-data-[state=open]:slide-in-from-right-full",
+    animation === "slideRight" &&
+      "group-data-[state=closed]:slide-out-to-left-full group-data-[state=open]:slide-in-from-left-full"
+  )
+}
 
 export const DialogContent = forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & {
     wrapperClassName?: string
     container?: HTMLElement | null
-    animationClassName?: string
+    animation?: DialogAnimation
   }
 >(
   (
     {
       wrapperClassName,
-      animationClassName = defaultAnimationClassName,
+      animation = "zoom",
       className,
       children,
       container: propContainer,
@@ -35,6 +44,7 @@ export const DialogContent = forwardRef<
     ref
   ) => {
     const [container, setContainer] = useState<HTMLElement | null>()
+    const contentRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
       if (propContainer !== undefined) {
@@ -43,6 +53,17 @@ export const DialogContent = forwardRef<
         setContainer(document.getElementById("content"))
       }
     }, [propContainer])
+
+    useEffect(() => {
+      if (contentRef.current) {
+        // Force a reflow to ensure transition triggers
+        requestAnimationFrame(() => {
+          if (contentRef.current) {
+            contentRef.current.offsetHeight // Force reflow
+          }
+        })
+      }
+    }, [])
 
     const context = useDialogPrimitiveContext()
 
@@ -54,12 +75,16 @@ export const DialogContent = forwardRef<
         <DialogPrimitive.Content
           ref={ref}
           className={cn(
-            "fixed inset-0 z-50 flex items-center justify-center",
+            "fixed inset-0 z-50 flex items-center justify-center overflow-hidden",
             "data-[state=open]:animate-in data-[state=closed]:animate-out",
             "pointer-events-none",
-            animationClassName,
+            "group",
+            "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
             wrapperClassName
           )}
+          style={{
+            transition: "all 2s 100ms !important",
+          }}
           {...props}
           onClick={(e) => {
             if (props.onPointerDownOutside) {
@@ -73,8 +98,11 @@ export const DialogContent = forwardRef<
           }}
         >
           <div
+            ref={contentRef}
             className={cn(
               "relative flex w-[90%] flex-col rounded-xl bg-f1-background shadow-lg pointer-events-auto",
+              "group-data-[state=open]:animate-in group-data-[state=closed]:animate-out",
+              animationClassName(animation),
               className
             )}
             onClick={(e) => {
