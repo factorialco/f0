@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.334.0](https://github.com/factorialco/f0/compare/f0-react-v1.333.2...f0-react-v1.334.0) (2026-01-26)
+
+
+### Features
+
+* **TableOfContentPopover:** rename and normalize table of content popover component ([#3289](https://github.com/factorialco/f0/issues/3289)) ([f48c2e8](https://github.com/factorialco/f0/commit/f48c2e8cd684f7ee50ffef3b4b9c24047e8f2489))
+
 ## [1.333.2](https://github.com/factorialco/f0/compare/f0-react-v1.333.1...f0-react-v1.333.2) (2026-01-23)
 
 
