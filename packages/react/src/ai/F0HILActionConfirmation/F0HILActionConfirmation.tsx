@@ -1,17 +1,15 @@
 import { F0Button } from "@/components/F0Button"
 import Check from "@/icons/app/Check"
 
-import { HILActionConfirmationProps } from "../types"
+import { F0HILActionConfirmationProps } from "./types"
 
-export type { HILActionConfirmationProps }
-
-export const HILActionConfirmation = ({
+export const F0HILActionConfirmation = ({
   text,
   confirmationText,
   onConfirm,
   cancelText,
   onCancel,
-}: HILActionConfirmationProps) => {
+}: F0HILActionConfirmationProps) => {
   return (
     <div className="flex flex-col gap-2">
       {text && <p>{text}</p>}

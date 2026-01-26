@@ -17,18 +17,15 @@ import {
 import { experimentalComponent } from "@/lib/experimental"
 import { cn } from "@/lib/utils"
 
-import {
-  AssistantMessage,
-  ChatButton,
-  ChatHeader,
-  ChatTextarea,
-  ChatWindow,
-  MessageSources,
-  MessagesContainer,
-  UserMessage,
-  ActionItem,
-} from "./components"
+import { F0ActionItem as ActionItem } from "../F0ActionItem"
+import { F0MessageSources as MessageSources } from "../F0MessageSources"
+import { AssistantMessage } from "./components/AssistantMessage"
+import { ChatHeader } from "./components/ChatHeader"
+import { ChatTextarea } from "./components/ChatTextarea"
+import { SidebarWindow as ChatWindow } from "./components/ChatWindow"
+import { MessagesContainer } from "./components/MessagesContainer"
 import { MessagesContainerFullscreen } from "./components/MessagesContainerFullscreen"
+import { UserMessage } from "./components/UserMessage"
 import { WelcomeScreenSuggestion } from "./components/WelcomeScreen"
 import { FullscreenChatContextType } from "./internal-types"
 import { AiChatStateProvider, useAiChat } from "./providers/AiChatStateProvider"
@@ -211,7 +208,9 @@ const F0AiChatCmp = () => {
       Window={ChatWindow}
       Header={ChatHeader}
       Messages={MessagesContainer}
-      Button={ChatButton}
+      Button={() => {
+        return null // hide CopilotKit's default chat button
+      }}
       Input={InputComponent}
       UserMessage={UserMessage}
       AssistantMessage={AssistantMessage}

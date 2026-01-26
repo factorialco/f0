@@ -9,7 +9,7 @@ const meta = {
   parameters: {
     layout: "centered",
   },
-  tags: ["autodocs", "no-sidebar"],
+  tags: ["autodocs"],
   decorators: [
     (Story) => (
       <div className="w-96 bg-f1-background p-4">

@@ -103,7 +103,7 @@ const meta = {
   parameters: {
     layout: "centered",
   },
-  tags: ["autodocs", "no-sidebar"],
+  tags: ["autodocs"],
   decorators: [
     (Story) => (
       <F0AiChatProvider>

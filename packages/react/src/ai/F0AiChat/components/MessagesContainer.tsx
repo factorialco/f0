@@ -13,11 +13,11 @@ import { ArrowDown } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
+import { F0Thinking as Thinking } from "../../F0Thinking"
 import { isAgentStateMessage } from "../internal-types"
 import { useAiChat } from "../providers/AiChatStateProvider"
 import { FeedbackModal } from "./FeedbackModal"
 import { FeedbackModalProvider, useFeedbackModal } from "./FeedbackProvider"
-import { Thinking } from "./Thinking"
 import { WelcomeScreen } from "./WelcomeScreen"
 
 type Turn = Array<Message | Array<Message>>

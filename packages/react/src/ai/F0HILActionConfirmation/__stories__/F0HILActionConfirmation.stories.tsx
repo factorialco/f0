@@ -1,10 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { HILActionConfirmation } from "../components/HILActionConfirmation"
+import { F0HILActionConfirmation } from ".."
 
 const meta = {
-  title: "AI/F0AiChat/HILActionConfirmation",
-  component: HILActionConfirmation,
+  title: "AI/F0HILActionConfirmation",
+  component: F0HILActionConfirmation,
   parameters: {
     layout: "centered",
   },
@@ -37,7 +37,7 @@ const meta = {
       description: "Callback fired when the cancel button is clicked",
     },
   },
-} satisfies Meta<typeof HILActionConfirmation>
+} satisfies Meta<typeof F0HILActionConfirmation>
 
 export default meta
 type Story = StoryObj<typeof meta>
