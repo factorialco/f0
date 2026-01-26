@@ -61,6 +61,8 @@ import { JSX as JSX_2 } from 'react';
 import { LineChartConfig } from '../../ui/chart';
 import { LineChartPropsBase } from './utils/types';
 import { LongTextCellValue } from './types/longText';
+import { Message } from '@copilotkit/shared';
+import { MessagesProps } from '@copilotkit/react-ui';
 import { NumberCellValue } from '../../value-display/types/number';
 import { NumberCellValue as NumberCellValue_2 } from './types/number';
 import { NumberFilterOptions } from './NumberFilter/NumberFilter';
@@ -2680,6 +2682,34 @@ export declare type F0HeadingProps = Omit<TextProps, "className" | "variant" | "
     as?: HeadingTags;
 };
 
+export declare const F0HILActionConfirmation: ({ text, confirmationText, onConfirm, cancelText, onCancel, }: F0HILActionConfirmationProps) => JSX_2.Element;
+
+/**
+ * Props for the F0HILActionConfirmation component
+ */
+export declare type F0HILActionConfirmationProps = {
+    /**
+     * Optional descriptive text shown above the action buttons
+     */
+    text?: string;
+    /**
+     * Text displayed on the confirmation button
+     */
+    confirmationText: string;
+    /**
+     * Callback fired when the confirmation button is clicked
+     */
+    onConfirm: () => void;
+    /**
+     * Text displayed on the cancel button
+     */
+    cancelText: string;
+    /**
+     * Callback fired when the cancel button is clicked
+     */
+    onCancel: () => void;
+};
+
 export declare const F0Icon: ForwardRefExoticComponent<Omit<Omit<F0IconProps, "ref"> & RefAttributes<SVGSVGElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>;
 
 export declare interface F0IconProps extends SVGProps<SVGSVGElement>, VariantProps<typeof iconVariants> {
@@ -2917,6 +2947,38 @@ export declare type F0TextProps = Omit<TextProps, "className" | "variant" | "as"
     variant?: (typeof _allowedVariants_2)[number];
     as?: TextTags;
     markdown?: boolean;
+};
+
+export declare const F0Thinking: ({ messages, title }: F0ThinkingProps) => JSX_2.Element;
+
+/**
+ * Props for the F0Thinking component
+ */
+export declare type F0ThinkingProps = {
+    /**
+     * Array of thinking/reflection messages to display
+     */
+    messages: Message[];
+    /**
+     * Whether the thinking process is currently active
+     */
+    isActive?: boolean;
+    /**
+     * Custom render function for messages
+     */
+    RenderMessage?: MessagesProps["RenderMessage"];
+    /**
+     * Custom assistant message component
+     */
+    AssistantMessage?: MessagesProps["AssistantMessage"];
+    /**
+     * Whether the chat is currently in progress
+     */
+    inProgress?: boolean;
+    /**
+     * Custom title for the thinking section
+     */
+    title?: string;
 };
 
 export declare type FileAvatarVariant = Extract<AvatarVariant, {

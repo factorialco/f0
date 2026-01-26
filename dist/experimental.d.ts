@@ -49,7 +49,6 @@ import { HTMLInputTypeAttribute } from 'react';
 import { IconCellValue } from './types/icon';
 import { IconType as IconType_2 } from '../../f0';
 import { InFilterOptions } from './InFilter/types';
-import { InputProps as InputProps_2 } from '@copilotkit/react-ui';
 import { JSONContent } from '@tiptap/react';
 import { JSONContent as JSONContent_2 } from '@tiptap/core';
 import { JSX as JSX_2 } from 'react';
@@ -228,17 +227,6 @@ export declare type ActionDefinition = DropdownItemSeparator | (Pick<DropdownIte
     type?: "primary" | "secondary" | "other";
 });
 
-export declare const ActionItem: ({ title, status, inGroup }: F0ActionItemProps) => JSX_2.Element;
-
-/**
- * Props for the ActionItem component
- */
-export declare interface ActionItemProps {
-    title: string;
-    status?: "inProgress" | "executing" | "completed";
-    inGroup?: boolean;
-}
-
 declare type ActionLinkProps = ActionBaseProps & {
     href: string;
     target?: NavTarget;
@@ -406,8 +394,6 @@ declare type AIButton = {
     editable?: boolean;
 };
 
-export declare const AiChatOneIcon: ForwardRefExoticComponent<Omit<F0OneIconProps, "ref"> & RefAttributes<SVGSVGElement>>;
-
 /**
  * Return value type for the useAiChat hook
  */
@@ -477,8 +463,6 @@ declare interface AiChatState {
         feedback: string;
     }) => void;
 }
-
-export declare const AiChatTextarea: ({ submitLabel, inProgress, onSend, onStop, }: ChatTextareaProps) => JSX_2.Element;
 
 /**
  * AI Chat translations type
@@ -1451,10 +1435,6 @@ declare type ChartItem<K extends ChartConfig> = {
 };
 
 export declare const ChartWidgetEmptyState: ForwardRefExoticComponent<Props_4 & RefAttributes<HTMLDivElement>>;
-
-declare type ChatTextareaProps = InputProps_2 & {
-    submitLabel?: string;
-};
 
 export declare type ChatWidgetEmptyStateProps = Props_4;
 
@@ -2921,24 +2901,6 @@ declare interface F0ActionBarProps {
     label?: string;
 }
 
-/**
- * Props for the F0ActionItem component
- */
-declare interface F0ActionItemProps {
-    /**
-     * The title text displayed next to the status icon
-     */
-    title: string;
-    /**
-     * Current status of the action item
-     */
-    status?: "inProgress" | "executing" | "completed";
-    /**
-     * Whether the action item is part of a group
-     */
-    inGroup?: boolean;
-}
-
 export declare const F0AiBanner: ForwardRefExoticComponent<AiBannerInternalProps & RefAttributes<HTMLDivElement>> & {
     Skeleton: ({ compact }: AiBannerSkeletonProps) => JSX_2.Element;
 };
@@ -3137,38 +3099,6 @@ declare interface F0IconProps extends SVGProps<SVGSVGElement>, VariantProps<type
 }
 
 /**
- * Props for the F0MessageSources component
- */
-declare type F0MessageSourcesProps = {
-    /**
-     * Array of sources to display
-     */
-    sources: F0Source[];
-};
-
-/**
- * Props for the F0OneIcon component
- */
-declare interface F0OneIconProps extends SVGProps<SVGSVGElement> {
-    /**
-     * Whether the icon should spin
-     */
-    spin?: boolean;
-    /**
-     * Whether the icon is in hover state
-     */
-    hover?: boolean;
-    /**
-     * Background color override
-     */
-    background?: string;
-    /**
-     * Size of the icon
-     */
-    size?: "xs" | "sm" | "md" | "lg";
-}
-
-/**
  * Base props shared across all F0Select variants
  */
 declare type F0SelectBaseProps<T extends string, R = unknown> = {
@@ -3270,28 +3200,6 @@ declare type F0SelectProps<T extends string, R = unknown> = F0SelectBaseProps<T,
 }) & Pick<InputFieldProps<T>, "required" | "loading" | "hideLabel" | "labelIcon" | "size" | "label" | "icon" | "placeholder" | "disabled" | "name" | "error" | "status" | "hint">;
 export { F0SelectProps }
 export { F0SelectProps as SelectProps }
-
-/**
- * Source object for message sources
- */
-declare type F0Source = {
-    /**
-     * Title of the source
-     */
-    title: string;
-    /**
-     * Optional link URL
-     */
-    link?: string;
-    /**
-     * Optional icon name (from @/icons/app)
-     */
-    icon?: string;
-    /**
-     * Whether to open link in new tab
-     */
-    targetBlank?: boolean;
-};
 
 export declare function F0TableOfContent(props: TOCProps): JSX_2.Element;
 
@@ -3731,19 +3639,6 @@ declare type HighlightBannerProps = {
     onClick?: () => void;
 };
 
-export declare const HILActionConfirmation: ({ text, confirmationText, onConfirm, cancelText, onCancel, }: HILActionConfirmationProps) => JSX_2.Element;
-
-/**
- * Props for the HILActionConfirmation component
- */
-export declare type HILActionConfirmationProps = {
-    text?: string;
-    confirmationText: string;
-    onConfirm: () => void;
-    cancelText: string;
-    onCancel: () => void;
-};
-
 declare type HTMLString = string;
 
 declare type I18nContextType = TranslationsType & {
@@ -4156,15 +4051,6 @@ export declare interface Message {
     text: string;
     dateTime: string;
 }
-
-export declare const MessageSources: ({ sources }: F0MessageSourcesProps) => JSX_2.Element | null;
-
-/**
- * Props for the MessageSources component
- */
-export declare type MessageSourcesProps = {
-    sources: Source[];
-};
 
 declare type MetadataAction = {
     icon: IconType;
@@ -5675,16 +5561,6 @@ export declare type SortingsStateMultiple = {
 }[];
 
 export declare type SortOrder = "asc" | "desc";
-
-/**
- * Source object for message sources
- */
-export declare type Source = {
-    title: string;
-    link?: string;
-    icon?: string;
-    targetBlank?: boolean;
-};
 
 export declare function Spinner({ size, className }: SpinnerProps): JSX_2.Element;
 

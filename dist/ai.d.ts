@@ -4,6 +4,7 @@ import { CopilotKitProps } from '@copilotkit/react-core';
 import { ForwardRefExoticComponent } from 'react';
 import { JSX as JSX_2 } from 'react';
 import { Message } from '@copilotkit/shared';
+import { MessagesProps } from '@copilotkit/react-ui';
 import { ReactNode } from 'react';
 import { RefAttributes } from 'react';
 import { SVGProps } from 'react';
@@ -703,6 +704,38 @@ declare const F0AiFullscreenChat: () => JSX_2.Element | null;
 export { F0AiFullscreenChat as AiFullscreenChat }
 export { F0AiFullscreenChat }
 
+declare const F0HILActionConfirmation: ({ text, confirmationText, onConfirm, cancelText, onCancel, }: F0HILActionConfirmationProps) => JSX_2.Element;
+export { F0HILActionConfirmation }
+export { F0HILActionConfirmation as HILActionConfirmation }
+
+/**
+ * Props for the F0HILActionConfirmation component
+ */
+declare type F0HILActionConfirmationProps = {
+    /**
+     * Optional descriptive text shown above the action buttons
+     */
+    text?: string;
+    /**
+     * Text displayed on the confirmation button
+     */
+    confirmationText: string;
+    /**
+     * Callback fired when the confirmation button is clicked
+     */
+    onConfirm: () => void;
+    /**
+     * Text displayed on the cancel button
+     */
+    cancelText: string;
+    /**
+     * Callback fired when the cancel button is clicked
+     */
+    onCancel: () => void;
+};
+export { F0HILActionConfirmationProps }
+export { F0HILActionConfirmationProps as HILActionConfirmationProps }
+
 export declare const f0MarkdownRenderers: NonNullable<AssistantMessageProps["markdownTagRenderers"]>;
 
 export declare const F0MessageSources: ({ sources }: F0MessageSourcesProps) => JSX_2.Element | null;
@@ -770,17 +803,38 @@ export declare type F0Source = {
     targetBlank?: boolean;
 };
 
-export declare const HILActionConfirmation: ({ text, confirmationText, onConfirm, cancelText, onCancel, }: HILActionConfirmationProps) => JSX_2.Element;
+declare const F0Thinking: ({ messages, title }: F0ThinkingProps) => JSX_2.Element;
+export { F0Thinking }
+export { F0Thinking as Thinking }
 
 /**
- * Props for the HILActionConfirmation component
+ * Props for the F0Thinking component
  */
-export declare type HILActionConfirmationProps = {
-    text?: string;
-    confirmationText: string;
-    onConfirm: () => void;
-    cancelText: string;
-    onCancel: () => void;
+export declare type F0ThinkingProps = {
+    /**
+     * Array of thinking/reflection messages to display
+     */
+    messages: Message[];
+    /**
+     * Whether the thinking process is currently active
+     */
+    isActive?: boolean;
+    /**
+     * Custom render function for messages
+     */
+    RenderMessage?: MessagesProps["RenderMessage"];
+    /**
+     * Custom assistant message component
+     */
+    AssistantMessage?: MessagesProps["AssistantMessage"];
+    /**
+     * Whether the chat is currently in progress
+     */
+    inProgress?: boolean;
+    /**
+     * Custom title for the thinking section
+     */
+    title?: string;
 };
 
 export declare function I18nProvider({ children, translations, }: I18nProviderProps): JSX.Element;

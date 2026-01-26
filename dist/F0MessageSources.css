@@ -1,1 +1,0 @@
-.shine-text{background:linear-gradient(90deg,#888 0% 33%,#aaa 50%,#888 66% 100%);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:shine 1.5s ease-in-out infinite}@keyframes shine{0%{background-position:200% 0}to{background-position:-200% 0}}
