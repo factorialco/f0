@@ -16,7 +16,6 @@ import {
   MentionedUser,
   MentionsConfig,
   Toolbar,
-  ToolbarLabels,
 } from "@/experimental/RichText/CoreEditor"
 import { withSkeleton } from "@/lib/skeleton"
 import { cn } from "@/lib/utils"
@@ -63,7 +62,6 @@ interface RichTextEditorProps {
     content?: string
     files?: File[]
   }
-  toolbarLabels: ToolbarLabels
   title: string
   errorConfig?: errorConfig
   height?: heightType
@@ -93,7 +91,6 @@ const RichTextEditorComponent = forwardRef<
     initialEditorState,
     onChange,
     placeholder,
-    toolbarLabels,
     title,
     errorConfig,
     height = "auto",
@@ -337,11 +334,10 @@ const RichTextEditorComponent = forwardRef<
                 style={{ pointerEvents: "none" }}
               >
                 <div
-                  className="flex w-max items-center gap-2 rounded-lg border border-solid border-f1-border bg-f1-background p-1 drop-shadow-lg"
+                  className="absolute -bottom-4 left-1/2 z-50 max-w-[calc(100%-48px)] -translate-x-1/2 rounded-lg bg-f1-background p-2 shadow-md"
                   style={{ pointerEvents: "auto" }}
                 >
                   <Toolbar
-                    labels={toolbarLabels}
                     editor={editor}
                     isFullscreen={isFullscreen}
                     disableButtons={disableAllButtons}
@@ -418,7 +414,6 @@ const RichTextEditorComponent = forwardRef<
             isFullscreen={isFullscreen}
             onEnhanceWithAI={handleEnhanceWithAI}
             setLastIntent={setLastIntent}
-            toolbarLabels={toolbarLabels}
             setIsToolbarOpen={setIsToolbarOpen}
             isToolbarOpen={isToolbarOpen}
             plainHtmlMode={plainHtmlMode}
@@ -428,7 +423,6 @@ const RichTextEditorComponent = forwardRef<
             editorId={editorId}
             editor={editor}
             disableButtons={disableAllButtons}
-            toolbarLabels={toolbarLabels}
             isToolbarOpen={isToolbarOpen}
             isFullscreen={isFullscreen}
             plainHtmlMode={plainHtmlMode}

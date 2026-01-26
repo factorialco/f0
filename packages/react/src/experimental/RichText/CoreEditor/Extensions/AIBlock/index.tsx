@@ -1,25 +1,31 @@
-import { JSONContent, Node } from "@tiptap/core"
+import { generateHTML, JSONContent, Node } from "@tiptap/core"
 import {
-  Editor,
   NodeViewContent,
   NodeViewProps,
   NodeViewWrapper,
   ReactNodeViewRenderer,
-  useEditor,
 } from "@tiptap/react"
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { FC, useCallback, useEffect, useMemo, useState } from "react"
 
 import { F0Button } from "@/components/F0Button"
 import { IconType } from "@/components/F0Icon"
 import { F0AiBanner } from "@/experimental/Banners/F0AiBanner"
-import { LiveCompanionLabels } from "@/experimental/RichText/CoreEditor/Extensions/LiveCompanion"
-import { MoodTrackerLabels } from "@/experimental/RichText/CoreEditor/Extensions/MoodTracker"
-import { SlashCommandGroupLabels } from "@/experimental/RichText/CoreEditor/Extensions/SlashCommand"
-import { TranscriptLabels } from "@/experimental/RichText/CoreEditor/Extensions/Transcript"
-import { ToolbarLabels } from "@/experimental/RichText/CoreEditor/Toolbar/types"
+import {
+  ColorExtension,
+  CustomTaskExtension,
+  DetailsContentExtension,
+  DetailsExtension,
+  DetailsSummaryExtension,
+  HighlightExtension,
+  LinkExtension,
+  StarterKitExtension,
+  TaskListExtension,
+  TextAlignExtension,
+  TextStyleExtension,
+  TypographyExtension,
+  UnderlineExtension,
+} from "@/experimental/RichText/CoreEditor"
 import { Skeleton } from "@/ui/skeleton"
-
-import { createAIBlockEditorExtensions } from "./extensions"
 
 export type AIButton = {
   type: string
@@ -29,28 +35,10 @@ export type AIButton = {
   editable?: boolean
 }
 
-export interface AIBlockLabels {
-  reset: string
-  resetDescription: string
-  deleteBlock: string
-  expand: string
-  collapse: string
-}
-
 export interface AIBlockConfig {
   buttons?: AIButton[]
   onClick: (type: string) => Promise<JSONContent | null>
   title: string
-}
-
-export interface AIBlockConfigWithLabels extends AIBlockConfig {
-  labels?: AIBlockLabels
-  toolbarLabels: ToolbarLabels
-  slashCommandGroupLabels?: SlashCommandGroupLabels
-  moodTrackerLabels?: MoodTrackerLabels
-  liveCompanionLabels?: LiveCompanionLabels
-  transcriptLabels?: TranscriptLabels
-  placeholder?: string
 }
 
 interface AIBlockData {
@@ -59,152 +47,58 @@ interface AIBlockData {
   selectedTitle?: string
   selectedEmoji?: string
   isEditable?: boolean
+  shouldExecute?: boolean
 }
+
+type DisplayInfo = {
+  title: string
+  emoji?: string
+}
+
+type ActionHandlerResult = {
+  isLoading: boolean
+  handleClick: (type: string) => Promise<void>
+}
+
+type UpdateAttributesFunction = (attrs: { data: AIBlockData }) => void
 
 declare module "@tiptap/core" {
   interface Commands<ReturnType> {
     aiBlock: {
-      insertAIBlock: (
-        data: AIBlockData,
-        config: AIBlockConfigWithLabels
-      ) => ReturnType
+      insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType
+      executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType
     }
   }
 }
 
-const useContentEditor = (
-  data: AIBlockData | undefined,
-  isLoading: boolean,
-  blockId: string,
-  updateAttributes: (attrs: { data: AIBlockData }) => void,
-  config: AIBlockConfigWithLabels
-): Editor | null => {
-  const extensions = useMemo(
-    () =>
-      createAIBlockEditorExtensions(
-        config.placeholder || "",
-        config.toolbarLabels,
-        config.slashCommandGroupLabels,
-        config.moodTrackerLabels,
-        config.liveCompanionLabels,
-        config.transcriptLabels
-      ),
-    [config]
-  )
-
-  const updateTimeoutRef = useRef<NodeJS.Timeout | null>(null)
-
-  const handleUpdate = useCallback(
-    ({ editor }: { editor: Editor }) => {
-      if (updateTimeoutRef.current) {
-        clearTimeout(updateTimeoutRef.current)
-      }
-
-      updateTimeoutRef.current = setTimeout(() => {
-        const { from, to } = editor.state.selection
-        const isEmpty = editor.isEmpty
-
-        if (isEmpty && data?.selectedAction && !isLoading) {
-          updateAttributes({
-            data: {
-              content: null,
-              selectedAction: undefined,
-              selectedTitle: undefined,
-              selectedEmoji: undefined,
-            },
-          })
-        } else if (!isEmpty) {
-          updateAttributes({
-            data: {
-              content: editor.getJSON(),
-              selectedAction: data?.selectedAction,
-              selectedTitle: data?.selectedTitle,
-              selectedEmoji: data?.selectedEmoji,
-            },
-          })
-        }
-
-        // Restore selection after update
-        setTimeout(() => {
-          if (editor?.isFocused) {
-            editor.commands.setTextSelection({ from, to })
-          }
-        }, 10)
-      }, 300)
-    },
-    [data, isLoading, updateAttributes]
-  )
-
-  const editor = useEditor(
-    {
-      extensions,
-      content: data?.content || null,
-      editable: true,
-      editorProps: {
-        attributes: {
-          class: `ai-block-editor-${blockId}`,
-          "data-testid": `ai-block-content-${blockId}`,
-        },
-      },
-      onUpdate: handleUpdate,
-    },
-    [blockId]
-  )
-
-  // Handle content updates
-  useEffect(() => {
-    if (editor && data?.content) {
-      const { from, to } = editor.state.selection
-      const hadSelection = from !== to
-
-      editor.commands.setContent(data.content)
-
-      if (data?.isEditable) {
-        setTimeout(() => editor.commands.focus(), 10)
-      }
-
-      if (hadSelection && editor.isFocused) {
-        setTimeout(() => editor.commands.setTextSelection({ from, to }), 10)
-      }
-    }
-  }, [editor, data?.content, data?.isEditable])
-
-  // Cleanup
-  useEffect(
-    () => () => {
-      if (updateTimeoutRef.current) {
-        clearTimeout(updateTimeoutRef.current)
-      }
-    },
-    []
-  )
-
-  return editor
-}
-
-const useAIBlockState = (data: AIBlockData | undefined) => {
-  const [isLoading, setIsLoading] = useState(false)
-
-  useEffect(() => {
-    const hasActionWithoutContent = data?.selectedAction && !data?.content
-    const hasContentWhileLoading = data?.content && isLoading
-
-    if (hasActionWithoutContent && !isLoading) {
-      setIsLoading(true)
-    } else if (hasContentWhileLoading) {
-      setIsLoading(false)
-    }
-  }, [data?.selectedAction, data?.content, isLoading])
-
-  return { isLoading, setIsLoading }
+const useJSONToHTML = (data: AIBlockData | undefined): string => {
+  if (!data?.content) return ""
+  try {
+    return generateHTML(data.content, [
+      StarterKitExtension,
+      UnderlineExtension,
+      TextStyleExtension,
+      ColorExtension,
+      TypographyExtension,
+      TaskListExtension,
+      CustomTaskExtension,
+      HighlightExtension,
+      TextAlignExtension,
+      LinkExtension,
+      DetailsExtension,
+      DetailsSummaryExtension,
+      DetailsContentExtension,
+    ])
+  } catch {
+    return ""
+  }
 }
 
 const useDisplayInfo = (
-  data: AIBlockData | undefined,
-  config: AIBlockConfig
-) => {
+  config: AIBlockConfig,
+  data?: AIBlockData
+): DisplayInfo => {
   return useMemo(() => {
-    // Use saved data if available
     if (data?.selectedTitle || data?.selectedEmoji) {
       return {
         title: data.selectedTitle || config.title,
@@ -212,15 +106,126 @@ const useDisplayInfo = (
       }
     }
 
-    // Find button info from selected action
-    const selectedButton = data?.selectedAction
-      ? config.buttons?.find((button) => button.type === data.selectedAction)
-      : null
+    const selectedButton = config.buttons?.find(
+      (button) => button.type === data?.selectedAction
+    )
 
     return selectedButton
       ? { title: selectedButton.label, emoji: selectedButton.emoji }
       : { title: config.title }
-  }, [data?.selectedTitle, data?.selectedEmoji, data?.selectedAction, config])
+  }, [data, config])
+}
+
+const useAIActionHandler = (
+  config: AIBlockConfig,
+  updateAttributes: UpdateAttributesFunction
+): ActionHandlerResult => {
+  const [isLoading, setIsLoading] = useState(false)
+
+  const handleClick = useCallback(
+    async (type: string): Promise<void> => {
+      const selectedButton = config.buttons?.find(
+        (button) => button.type === type
+      )
+      const buttonData: AIBlockData = {
+        selectedAction: type,
+        selectedTitle: selectedButton?.label || type,
+        selectedEmoji: selectedButton?.emoji || "🤖",
+        isEditable: selectedButton?.editable ?? false,
+      }
+
+      setIsLoading(true)
+      updateAttributes({ data: { ...buttonData, content: null } })
+
+      try {
+        const content = await config.onClick(type)
+        updateAttributes({ data: { ...buttonData, content } })
+      } catch (error) {
+        console.error("AIBlock error:", error)
+        updateAttributes({ data: { ...buttonData, content: null } })
+      } finally {
+        setIsLoading(false)
+      }
+    },
+    [config, updateAttributes]
+  )
+
+  return { isLoading, handleClick }
+}
+
+const useButtonMetadataPersistence = (
+  config: AIBlockConfig,
+  updateAttributes: UpdateAttributesFunction,
+  data?: AIBlockData
+): void => {
+  useEffect(() => {
+    if (!data?.selectedAction || !config?.buttons) return
+
+    const needsUpdate =
+      !data?.selectedTitle ||
+      !data?.selectedEmoji ||
+      data?.isEditable === undefined
+
+    if (needsUpdate) {
+      const selectedButton = config.buttons.find(
+        (button) => button.type === data.selectedAction
+      )
+
+      if (selectedButton) {
+        updateAttributes({
+          data: {
+            ...data,
+            selectedTitle: selectedButton.label,
+            selectedEmoji: selectedButton.emoji,
+            isEditable: selectedButton.editable ?? false,
+          },
+        })
+      }
+    }
+  }, [data, config, updateAttributes])
+}
+
+const useAutoExecuteAction = (
+  data?: AIBlockData,
+  handleClick?: (type: string) => Promise<void>,
+  updateAttributes?: UpdateAttributesFunction
+) => {
+  useEffect(() => {
+    if (
+      data?.shouldExecute &&
+      data?.selectedAction &&
+      handleClick &&
+      updateAttributes
+    ) {
+      updateAttributes({ data: { ...data, shouldExecute: false } })
+      handleClick(data.selectedAction)
+    }
+  }, [handleClick, updateAttributes, data])
+}
+
+const useEditableContentIntegration = (
+  editor: NodeViewProps["editor"],
+  deleteNode: () => void,
+  getPos?: () => number,
+  data?: AIBlockData
+) => {
+  useEffect(() => {
+    if (!data?.content || !data?.isEditable || !editor || !getPos) return
+
+    const pos = getPos()
+
+    if (pos === undefined) return
+
+    deleteNode()
+    if (data.content) {
+      editor
+        .chain()
+        .focus()
+        .setTextSelection(pos)
+        .insertContent(data.content)
+        .run()
+    }
+  }, [data, editor, getPos, deleteNode])
 }
 
 const AIButtonsSection = ({
@@ -251,143 +256,66 @@ const AIButtonsSection = ({
   </div>
 )
 
-export const AIBlockView: React.FC<NodeViewProps> = ({
+const AIBlockLoadingSkeleton = ({ isEditable }: { isEditable?: boolean }) => {
+  if (isEditable) {
+    return (
+      <div className="flex flex-col gap-2">
+        <Skeleton className="h-4 w-1/2 rounded-md" />
+        <Skeleton className="h-4 w-full rounded-md" />
+        <Skeleton className="h-4 w-3/4 rounded-md" />
+        <Skeleton className="h-4 w-1/3 rounded-md" />
+      </div>
+    )
+  }
+
+  return <F0AiBanner.Skeleton compact />
+}
+
+export const AIBlockView: FC<NodeViewProps> = ({
   node,
   updateAttributes,
   deleteNode,
   extension,
-  editor: mainEditor,
+  editor,
   getPos,
 }) => {
   const data = node.attrs.data as AIBlockData
   const config =
-    (extension.options.currentConfig as AIBlockConfigWithLabels) ||
-    (node.attrs.config as AIBlockConfigWithLabels)
+    (extension.options.currentConfig as AIBlockConfig) ||
+    (node.attrs.config as AIBlockConfig)
 
-  const blockId = useRef(Math.random().toString(36).substr(2, 9)).current
-  const { isLoading, setIsLoading } = useAIBlockState(data)
-  const { title: displayTitle, emoji: displayEmoji } = useDisplayInfo(
-    data,
-    config
+  const { title: displayTitle } = useDisplayInfo(config, data)
+  const { isLoading: actionLoading, handleClick } = useAIActionHandler(
+    config,
+    updateAttributes
   )
-  const contentEditor = useContentEditor(
-    data,
-    isLoading,
-    blockId,
-    updateAttributes,
-    config
-  )
+  const autoDetectedLoading = Boolean(data?.selectedAction && !data?.content)
+  const isLoading = actionLoading || autoDetectedLoading
+  const htmlContent = useJSONToHTML(data)
 
-  // Handle pushing editable content to main editor
-  useEffect(() => {
-    if (data?.content && data?.isEditable && mainEditor && getPos) {
-      const pos = getPos()
-      if (pos !== undefined) {
-        deleteNode()
-        setTimeout(() => {
-          if (data.content) {
-            mainEditor
-              .chain()
-              .focus()
-              .setTextSelection(pos)
-              .insertContent(data.content)
-              .run()
-          }
-        }, 10)
-      }
-    }
-  }, [
-    data?.content,
-    data?.isEditable,
-    mainEditor,
-    getPos,
-    node.nodeSize,
-    deleteNode,
-  ])
+  // Handle side effects
+  useEditableContentIntegration(editor, deleteNode, getPos, data)
+  useButtonMetadataPersistence(config, updateAttributes, data)
+  useAutoExecuteAction(data, handleClick, updateAttributes)
 
-  // Ensure button metadata is persisted for copy/paste
-  useEffect(() => {
-    if (data?.selectedAction && config?.buttons) {
-      const needsUpdate =
-        !data?.selectedTitle ||
-        !data?.selectedEmoji ||
-        data?.isEditable === undefined
-
-      if (needsUpdate) {
-        const selectedButton = config.buttons.find(
-          (button) => button.type === data.selectedAction
-        )
-
-        if (selectedButton) {
-          updateAttributes({
-            data: {
-              ...data,
-              selectedTitle: selectedButton.label,
-              selectedEmoji: selectedButton.emoji,
-              isEditable: selectedButton.editable ?? false,
-            },
-          })
-        }
-      }
-    }
-  }, [data, config, updateAttributes])
-
-  const handleClick = useCallback(
-    async (type: string) => {
-      const selectedButton = config.buttons?.find(
-        (button) => button.type === type
-      )
-      const buttonData = {
-        selectedAction: type,
-        selectedTitle: selectedButton?.label || type,
-        selectedEmoji: selectedButton?.emoji || "🤖",
-        isEditable: selectedButton?.editable ?? false,
-      }
-
-      setIsLoading(true)
-      updateAttributes({ data: { ...buttonData, content: null } })
-
-      try {
-        const content = await config.onClick(type)
-        updateAttributes({ data: { ...buttonData, content } })
-      } catch (error) {
-        console.error("AIBlock error:", error)
-        updateAttributes({ data: { ...buttonData, content: null } })
-      } finally {
-        setIsLoading(false)
-      }
-    },
-    [config, setIsLoading, updateAttributes]
-  )
-
-  // Early returns for invalid states
+  // Early return for invalid states (after hooks)
   if (!data || !config || !config.buttons?.length) return null
 
+  // Compute display states
   const hasContent = Boolean(data?.content)
   const hasSelectedAction = Boolean(data?.selectedTitle || data?.selectedAction)
   const shouldShowBanner = hasSelectedAction && hasContent && !data?.isEditable
 
   const renderContent = () => {
     if (isLoading) {
-      return data?.isEditable ? (
-        <div className="flex flex-col gap-2">
-          <Skeleton className="h-4 w-1/2 rounded-md" />
-          <Skeleton className="h-4 w-full rounded-md" />
-          <Skeleton className="h-4 w-3/4 rounded-md" />
-          <Skeleton className="h-4 w-1/3 rounded-md" />
-        </div>
-      ) : (
-        <F0AiBanner.Skeleton compact />
-      )
+      return <AIBlockLoadingSkeleton isEditable={data?.isEditable} />
     }
 
     if (shouldShowBanner) {
       return (
         <F0AiBanner
-          title={
-            displayEmoji ? `${displayEmoji} ${displayTitle}` : displayTitle
-          }
-          content={contentEditor?.getHTML() ?? ""}
+          title={displayTitle}
+          content={htmlContent}
           onClose={() => deleteNode()}
         />
       )
@@ -491,6 +419,31 @@ export const AIBlock = Node.create({
             type: this.name,
             attrs: { data, config },
           })
+        },
+      executeAIAction:
+        (actionType: string, config: AIBlockConfig) =>
+        ({ commands }) => {
+          const button = config.buttons?.find((btn) => btn.type === actionType)
+          if (!button) return false
+          return commands.insertContent([
+            {
+              type: this.name,
+              attrs: {
+                data: {
+                  content: null,
+                  selectedAction: actionType,
+                  selectedTitle: button.label,
+                  selectedEmoji: button.emoji,
+                  isEditable: button.editable ?? false,
+                  shouldExecute: true,
+                },
+                config,
+              },
+            },
+            {
+              type: "paragraph",
+            },
+          ])
         },
     }
   },

@@ -2,101 +2,20 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import type { ComponentType, ReactNode } from "react"
 
 import { useState } from "react"
-import { fn } from "storybook/test"
 
-import { BookOpen, File, Placeholder, Question, Video } from "@/icons/app"
+import { TOCItem } from "../../../experimental/Navigation/F0TableOfContent"
+import { F0TableOfContentPopover } from "../index"
+import { courseModulesData, mockTOCData } from "./mocks"
 
-import { TOCItem, TOCItemAction } from "../../F0TableOfContent"
-import { F0CollapsibleMenu } from "../index"
-
-const mockOtherActions: TOCItemAction[] = [
-  {
-    label: "Edit",
-    onClick: fn(),
-    icon: Placeholder,
-  },
-  {
-    type: "separator",
-  },
-  {
-    label: "Delete",
-    onClick: fn(),
-    icon: Placeholder,
-  },
-]
-
-const mockTOCData = (setActiveItem: (id: string) => void): TOCItem[] => [
-  {
-    id: "simple-item",
-    label: "Simple Item",
-    onClick: setActiveItem,
-    icon: Placeholder,
-  },
-  {
-    id: "item-with-actions",
-    label: "Item with Actions",
-    onClick: setActiveItem,
-    icon: Placeholder,
-
-    otherActions: mockOtherActions,
-  },
-  {
-    id: "section-1",
-    label: "Section with Children",
-    onClick: setActiveItem,
-    icon: Placeholder,
-    otherActions: mockOtherActions,
-    children: [
-      {
-        id: "child-1",
-        label: "Child Item 1",
-        onClick: setActiveItem,
-        icon: Placeholder,
-        otherActions: mockOtherActions,
-      },
-      {
-        id: "child-2",
-        label: "Child Item 2",
-        onClick: setActiveItem,
-        otherActions: mockOtherActions,
-      },
-      {
-        id: "nested-section",
-        label: "Nested Section",
-        onClick: setActiveItem,
-        children: [
-          {
-            id: "nested-child-1",
-            label: "Nested Child 1",
-            onClick: setActiveItem,
-          },
-          {
-            id: "deep-section",
-            label: "Deep Section (Level 3)",
-            onClick: setActiveItem,
-            children: [
-              {
-                id: "deepest-item",
-                label: "Deepest Item (Level 4)",
-                onClick: setActiveItem,
-              },
-            ],
-          },
-        ],
-      },
-    ],
-  },
-]
-
-const meta: Meta<typeof F0CollapsibleMenu> = {
-  title: "Navigation/F0CollapsibleMenu",
-  component: F0CollapsibleMenu,
+const meta: Meta<typeof F0TableOfContentPopover> = {
+  title: "Navigation/TableOfContentPopover",
+  component: F0TableOfContentPopover,
   parameters: {
     layout: "centered",
     docs: {
       description: {
         component:
-          "A collapsible menu component that shows minimized bars and expands to a full menu on hover. Inspired by Notion's collapsible navigation. Uses F0TableOfContent internally for the expanded menu.",
+          "A table of content popover component that shows minimized bars and expands to a full menu on hover. Inspired by Notion's collapsible navigation. Uses F0TableOfContent internally for the expanded menu.",
       },
     },
   },
@@ -169,7 +88,7 @@ const createStoryRender = (
   return (args) => {
     const [activeItem, setActiveItem] = useState(defaultActiveItem)
     const menu = (
-      <F0CollapsibleMenu
+      <F0TableOfContentPopover
         {...args}
         items={getData(setActiveItem)}
         activeItem={activeItem}
@@ -206,7 +125,7 @@ export const Collapsible: Story = {
 
 export const WithChildrenCounter: Story = {
   render: createStoryRender("nested-child-1"),
-  args: { showChildrenCounter: true, collapsible: true, popupAlign: "start" },
+  args: { showChildrenCounter: true, collapsible: true },
   parameters: {
     docs: {
       description: {
@@ -269,86 +188,6 @@ export const WithTitle: Story = {
   },
 }
 
-const courseModulesData = (setActiveItem: (id: string) => void): TOCItem[] => [
-  {
-    id: "mod-1",
-    label: "Mod 1: Workplace Conflict",
-    onClick: setActiveItem,
-    icon: BookOpen,
-    children: [
-      {
-        id: "mod-1-page-1",
-        label: "Why Conflict Matters",
-        onClick: setActiveItem,
-        icon: File,
-      },
-      {
-        id: "mod-1-quiz-1",
-        label: "What Did You Learn So Far?",
-        onClick: setActiveItem,
-        icon: Question,
-      },
-      {
-        id: "mod-1-video-1",
-        label: "What Conflict in The Workplace Looks Like",
-        onClick: setActiveItem,
-        icon: Video,
-      },
-    ],
-  },
-  {
-    id: "mod-2",
-    label: "Module 2: Communication for Trust & Collaboration",
-    onClick: setActiveItem,
-    icon: BookOpen,
-    children: [
-      {
-        id: "mod-2-page-1",
-        label: "Why Communication Matters",
-        onClick: setActiveItem,
-        icon: File,
-      },
-      {
-        id: "mod-2-quiz-1",
-        label: "What Did You Learn So Far?",
-        disabled: true,
-        onClick: setActiveItem,
-        icon: Question,
-      },
-    ],
-  },
-  {
-    id: "mod-3",
-    label: "Module 3: Mediation, Problem-Solving & Team Resilience",
-    onClick: setActiveItem,
-    disabled: true,
-    icon: BookOpen,
-    children: [
-      {
-        id: "mod-3-video-1",
-        label: "New video",
-        disabled: true,
-        onClick: setActiveItem,
-        icon: Video,
-      },
-      {
-        id: "mod-3-page-1",
-        label: "Why Mediation Matters",
-        disabled: true,
-        onClick: setActiveItem,
-        icon: File,
-      },
-      {
-        id: "mod-3-quiz-1",
-        label: "What Did You Learn So Far?",
-        disabled: true,
-        onClick: setActiveItem,
-        icon: Question,
-      },
-    ],
-  },
-]
-
 export const CourseModules: Story = {
   render: createStoryRender("mod-1-page-1", courseModulesData),
   args: { size: "lg" },
@@ -368,12 +207,12 @@ const DarkBackgroundWrapper = ({ children }: { children: ReactNode }) => (
   </div>
 )
 
-export const LightVariant: Story = {
+export const DarkVariant: Story = {
   render: (args) => {
     const [activeItem, setActiveItem] = useState("nested-child-1")
     return (
       <DarkBackgroundWrapper>
-        <F0CollapsibleMenu
+        <F0TableOfContentPopover
           {...args}
           items={mockTOCData(setActiveItem)}
           activeItem={activeItem}
@@ -381,13 +220,13 @@ export const LightVariant: Story = {
       </DarkBackgroundWrapper>
     )
   },
-  args: { variant: "light" },
+  args: { variant: "dark" },
   decorators: [],
   parameters: {
     docs: {
       description: {
         story:
-          "Light variant with lighter colored bars, designed for dark backgrounds. The bars use inverse colors that are visible against dark surfaces.",
+          "Dark variant with lighter colored bars, designed for  backgrounds. The bars use lighter colors that are visible against dark surfaces.",
       },
     },
   },
