@@ -5,8 +5,8 @@ import { zeroRender as render, screen, within } from "@/testing/test-utils"
 
 import { defaultTranslations, I18nProvider } from "../../lib/providers/i18n"
 import { L10nProvider } from "../../lib/providers/l10n"
-import { WeekStartDay } from "./types"
 import { OneCalendar } from "./OneCalendar"
+import { WeekStartDay } from "./types"
 
 const TestWrapper = ({
   children,

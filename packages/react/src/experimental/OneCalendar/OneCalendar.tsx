@@ -3,10 +3,10 @@ import { useCallback, useEffect, useMemo, useState } from "react"
 import { F0Button } from "@/components/F0Button"
 import { ChevronLeft, ChevronRight } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
+import { useL10n } from "@/lib/providers/l10n"
 import { cn } from "@/lib/utils"
 import { Input } from "@/ui/input"
 
-import { useL10n } from "@/lib/providers/l10n"
 import {
   GranularityDefinition,
   GranularityDefinitionKey,

@@ -1,6 +1,7 @@
-import { WeekStartDay } from "@/experimental/OneCalendar/types"
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
+
+import { WeekStartDay } from "@/experimental/OneCalendar/types"
 
 import { L10nProvider, useL10n } from "./l10n-provider"
 

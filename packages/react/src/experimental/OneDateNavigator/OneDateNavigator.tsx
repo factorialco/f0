@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useState } from "react"
 
+import { useL10n } from "@/lib/providers/l10n"
 import {
   DatePickerPopup,
   DatePickerPopupProps,
 } from "@/ui/DatePickerPopup/DatePickerPopup"
 import { isSameDatePickerValue } from "@/ui/DatePickerPopup/utils"
 
-import { useL10n } from "@/lib/providers/l10n"
 import { getGranularityDefinitions } from "../OneCalendar/granularities"
 import {
   DateRange,
