@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.335.0](https://github.com/factorialco/f0/compare/f0-react-v1.334.0...f0-react-v1.335.0) (2026-01-26)
+
+
+### Features
+
+* modify TableOfContentPopover exports ([#3291](https://github.com/factorialco/f0/issues/3291)) ([8517896](https://github.com/factorialco/f0/commit/8517896f90e81a34671a845b82ff3ec326a92c19))
+
 ## [1.334.0](https://github.com/factorialco/f0/compare/f0-react-v1.333.2...f0-react-v1.334.0) (2026-01-26)
 
 
