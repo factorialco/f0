@@ -2,18 +2,20 @@ import { BaseAvatar } from "@/components/avatars/internal/BaseAvatar"
 import { F0Icon } from "@/components/F0Icon"
 import { BaseTag } from "@/components/tags/internal/BaseTag"
 import { EntitySelectSubEntity } from "@/experimental/Forms/EntitySelect/types"
-import { Cross } from "@/icons/app"
+import { Cross, PersonNegative } from "@/icons/app"
 import { cn } from "@/lib/utils"
 
 export const ListTag = ({
   entity,
   onRemove,
   disabled = false,
+  deactivated = false,
   hiddenAvatar = false,
 }: {
   entity: EntitySelectSubEntity
   onRemove: (entity: EntitySelectSubEntity) => void
   disabled?: boolean
+  deactivated?: boolean
   hiddenAvatar?: boolean
 }) => {
   return (
@@ -31,6 +33,11 @@ export const ListTag = ({
               name={entity.subName}
               size="xs"
               type="rounded"
+              icon={
+                deactivated
+                  ? { icon: PersonNegative, color: "secondary" }
+                  : undefined
+              }
             />
           )
         }
@@ -45,6 +52,7 @@ export const ListTag = ({
           )
         }
         text={entity.subName}
+        deactivated={deactivated}
       />
     </div>
   )

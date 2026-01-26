@@ -23,6 +23,7 @@ type BaseTagProps = {
    * Whether to hide the label
    */
   hideLabel?: boolean
+  deactivated?: boolean
 } & (
   | {
       left: ReactNode
@@ -48,6 +49,7 @@ export const BaseTag = forwardRef<HTMLDivElement, BaseTagProps>(
       info,
       shape = "rounded",
       hideLabel,
+      deactivated,
     },
     ref
   ) => {
@@ -68,7 +70,11 @@ export const BaseTag = forwardRef<HTMLDivElement, BaseTagProps>(
         >
           {left}
           {!!text && !hideLabel && (
-            <OneEllipsis tag="span" lines={1}>
+            <OneEllipsis
+              tag="span"
+              lines={1}
+              className={deactivated ? "text-f1-foreground/[0.61]" : undefined}
+            >
               {text}
             </OneEllipsis>
           )}

@@ -72,6 +72,7 @@ export const Trigger = ({
             subId: el.id,
             subName: el.name,
             subAvatar: el.avatar,
+            subDeactivated: el.deactivated,
           } as EntitySelectSubEntity,
         }))
       : selectedEntities.flatMap((entity) =>
@@ -121,6 +122,7 @@ export const Trigger = ({
               firstName: avatar,
               lastName: "",
               src: flattenedList[0].subItem.subAvatar,
+              deactivated: flattenedList[0].subItem.subDeactivated,
             }
       }
       append={
@@ -143,7 +145,15 @@ export const Trigger = ({
             : "pl-2"
         )}
       >
-        <OneEllipsis tag="span">
+        <OneEllipsis
+          tag="span"
+          className={
+            flattenedList.length === 1 &&
+            flattenedList[0].subItem.subDeactivated
+              ? "text-f1-foreground/[0.61]"
+              : undefined
+          }
+        >
           {flattenedList.length === 0
             ? (placeholder ?? "")
             : flattenedList.length === 1
