@@ -65,6 +65,8 @@ export const DialogInternal: FC<DialogInternalProps> = ({
     children,
     primaryAction,
     secondaryAction,
+    variant,
+    type,
   ])
 
   return (
