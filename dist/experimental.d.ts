@@ -394,14 +394,6 @@ declare interface AIBlockConfig {
     title: string;
 }
 
-declare interface AIBlockLabels {
-    reset: string;
-    resetDescription: string;
-    deleteBlock: string;
-    expand: string;
-    collapse: string;
-}
-
 declare type AIButton = {
     type: string;
     emoji: string;
@@ -1110,6 +1102,7 @@ export declare interface ButtonConfig {
     icon: IconType;
     active: (editor: Editor) => boolean;
     onClick: (editor: Editor) => void;
+    label: string;
     tooltip: {
         label: string;
         shortcut: string[];
@@ -1591,8 +1584,6 @@ export declare type CoCreationFormProps = {
 
 declare type ColId = string;
 
-export declare type CollapsibleMenuVariant = "dark" | "light";
-
 /**
  * Props for the Collection component.
  * @template Record - The type of records in the collection
@@ -2046,7 +2037,7 @@ export declare type DataSourceDefinition<R extends RecordType = RecordType, Filt
         filters?: FiltersState<Filters>;
         pagination?: ChildrenPaginationInfo;
         sortings?: SortingsState<Sortings>;
-    }) => Promise<ChildrenResponse<R>>;
+    }) => ChildrenResponse<R> | Promise<ChildrenResponse<R>> | Observable<PromiseState<ChildrenResponse<R>>>;
     /** Function to determine if an item has children */
     itemsWithChildren?: (item: R) => boolean;
     /** Function to get the number of children for an item */
@@ -2319,8 +2310,12 @@ declare const defaultTranslations: {
         readonly send: "Send";
         readonly cancel: "Cancel";
         readonly ok: "Ok";
+        readonly delete: "Delete";
         readonly copy: "Copy";
+        readonly paste: "Paste";
         readonly close: "Close";
+        readonly collapse: "Collapse";
+        readonly expand: "Expand";
         readonly showAll: "Show all";
         readonly showLess: "Show less";
         readonly skipToContent: "Skip to content";
@@ -2621,6 +2616,40 @@ declare const defaultTranslations: {
             readonly questionOptions: "Question options";
             readonly actions: "Actions";
             readonly sectionTitlePlaceholder: "Section title";
+        };
+    };
+    readonly richTextEditor: {
+        readonly bold: "Bold";
+        readonly italic: "Italic";
+        readonly underline: "Underline";
+        readonly strike: "Strike";
+        readonly highlight: "Highlight";
+        readonly heading1: "Heading 1";
+        readonly heading2: "Heading 2";
+        readonly heading3: "Heading 3";
+        readonly left: "Left";
+        readonly center: "Center";
+        readonly right: "Right";
+        readonly justify: "Justify";
+        readonly bulletList: "Bullet List";
+        readonly orderedList: "Ordered List";
+        readonly taskList: "Task List";
+        readonly codeBlock: "Code Block";
+        readonly horizontalRule: "Horizontal Rule";
+        readonly quote: "Quote";
+        readonly moreOptions: "More Options";
+        readonly code: "Code";
+        readonly divider: "Divider";
+        readonly bullet: "Bullet";
+        readonly ordered: "Ordered";
+        readonly task: "Task";
+        readonly details: "Dropdown";
+        readonly link: "Link";
+        readonly linkPlaceholder: "Enter a link";
+        readonly groups: {
+            readonly textStyles: "Text Styles";
+            readonly lists: "Lists";
+            readonly blocks: "Blocks";
         };
     };
 };
@@ -3036,25 +3065,6 @@ export declare const F0Callout: ForwardRefExoticComponent<CalloutInternalProps &
 };
 
 export declare type F0CalloutProps = CalloutInternalProps;
-
-export declare function F0CollapsibleMenu({ title, items, className, activeItem, collapsible, showChildrenCounter, barsAlign, size, popupAlign, variant, }: F0CollapsibleMenuProps): JSX_2.Element;
-
-export declare interface F0CollapsibleMenuProps extends Omit<TOCProps, "sortable" | "onReorder" | "showSearchBox" | "title" | "hideChildrenCounter"> {
-    /** Optional title displayed at the top of the menu popup */
-    title?: string;
-    /** Alignment of the collapsed bars (left or right) */
-    barsAlign?: "left" | "right";
-    /** Whether sections can be collapsed/expanded */
-    collapsible?: boolean;
-    /** Show the count of children items next to parent items */
-    showChildrenCounter?: boolean;
-    /** Maximum height of the popup: sm (max 240px), md (max 400px), lg (max 600px). Content auto-adjusts within limit. */
-    size?: PopupSize;
-    /** Alignment of the popup content */
-    popupAlign?: "center" | "start" | "end";
-    /** Visual variant: "dark" for light backgrounds (default), "light" for dark backgrounds */
-    variant?: CollapsibleMenuVariant;
-}
 
 declare interface F0IconProps extends SVGProps<SVGSVGElement>, VariantProps<typeof iconVariants> {
     icon: IconType;
@@ -3855,7 +3865,7 @@ declare const internalAvatarSizes: readonly ["xsmall", "small", "medium", "large
 
 declare const internalAvatarTypes: readonly ["base", "rounded"];
 
-export declare function Item({ item, counter, isActive, collapsible, isExpanded, onToggleExpanded, sortable, children, }: TOCItemProps): JSX_2.Element;
+export declare function Item({ item, counter, isActive, collapsible, isExpanded, onToggleExpanded, sortable, children, onDragOver, onDragLeave, onDrop, canDropInside, currentParentId, justDropped, }: TOCItemProps): JSX_2.Element;
 
 declare const Item_2: ForwardRefExoticComponent<ItemProps & RefAttributes<HTMLLIElement>>;
 
@@ -3875,7 +3885,7 @@ declare type ItemProps = {
 
 declare type Items = typeof Item_2 | typeof PersonItem | typeof CompanyItem | typeof TeamItem;
 
-export declare function ItemSectionHeader({ item, children, isActive, collapsible, isExpanded, onToggleExpanded, sortable, hideChildrenCounter, }: TOCItemSectionHeaderProps): JSX_2.Element;
+export declare function ItemSectionHeader({ item, children, isActive, collapsible, isExpanded, onToggleExpanded, sortable, hideChildrenCounter, canDropInside, onDragOver, onDragLeave, onDrop, currentParentId, draggedItemId, }: TOCItemSectionHeaderProps): JSX_2.Element;
 
 declare type Join<T extends string[], D extends string> = T extends [] ? never : T extends [infer F] ? F : T extends [infer F, ...infer R] ? F extends string ? `${F}${D}${Join<Extract<R, string[]>, D>}` : never : string;
 
@@ -3949,14 +3959,6 @@ declare type ListVisualizationOptions<R extends RecordType, _Filters extends Fil
     itemDefinition: (record: R) => ItemDefinition;
     fields: ReadonlyArray<ListPropertyDefinition<R, Sortings>>;
 };
-
-declare interface LiveCompanionLabels {
-    deleteBlock: string;
-    expand: string;
-    collapse: string;
-    oneTopicWithCommentary: string;
-    multipleTopicsWithCommentary: string;
-}
 
 declare interface LoadingStateProps {
     label: string;
@@ -4220,12 +4222,6 @@ export declare const modules: {
     readonly workflows: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
 };
 
-declare interface MoodTrackerLabels {
-    deleteBlock: string;
-    expand: string;
-    collapse: string;
-}
-
 declare type NavigateActionType = {
     type: "navigate";
     href: string;
@@ -4360,15 +4356,7 @@ export declare interface NotesTextEditorProps {
     aiBlockConfig?: AIBlockConfig;
     imageUploadConfig?: ImageUploadConfig;
     onTitleChange?: (title: string) => void;
-    labels: {
-        toolbarLabels: ToolbarLabels;
-        slashCommandGroupLabels?: SlashCommandGroupLabels;
-        aiBlockLabels?: AIBlockLabels;
-        moodTrackerLabels?: MoodTrackerLabels;
-        liveCompanionLabels?: LiveCompanionLabels;
-        transcriptLabels?: TranscriptLabels;
-        titlePlaceholder?: string;
-    };
+    titlePlaceholder?: string;
     actions?: actionType_2[];
     secondaryActions?: secondaryActionsType_2[];
     metadata?: MetadataItemValue_2[];
@@ -4376,7 +4364,7 @@ export declare interface NotesTextEditorProps {
     showBubbleMenu?: boolean;
 }
 
-export declare const NotesTextEditorSkeleton: ({ withHeader, withTitle, withPadding: _withPadding, withToolbar, }: NotesTextEditorSkeletonProps) => JSX_2.Element;
+export declare const NotesTextEditorSkeleton: ({ withHeader, withTitle, withToolbar, }: NotesTextEditorSkeletonProps) => JSX_2.Element;
 
 export declare interface NotesTextEditorSkeletonProps {
     withHeader?: boolean;
@@ -4904,8 +4892,6 @@ export declare const PieChartWidget: ForwardRefExoticComponent<Omit<WidgetProps_
 chart: PieChartProps;
 } & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>;
 
-export declare type PopupSize = "sm" | "md" | "lg";
-
 declare type PostDescriptionProps = {
     content: HTMLString;
     collapsed?: boolean;
@@ -5299,7 +5285,6 @@ export declare interface RichTextEditorProps {
         content?: string;
         files?: File[];
     };
-    toolbarLabels: ToolbarLabels;
     title: string;
     errorConfig?: errorConfig;
     height?: heightType;
@@ -5538,13 +5523,6 @@ declare const skeletonVariants: (props?: ({
     class?: never;
     className?: ClassValue;
 })) | undefined) => string;
-
-declare interface SlashCommandGroupLabels {
-    textStyles: string;
-    lists: string;
-    blocks: string;
-    [key: string]: string;
-}
 
 /**
  * Type helper to extract keys from a SortingsDefinition
@@ -5933,11 +5911,9 @@ declare const THEMES: {
     readonly dark: ".dark";
 };
 
-declare type TOCItem<Depth extends 1 | 2 | 3 | 4 = 1> = BaseTOCItem & {
+export declare type TOCItem<Depth extends 1 | 2 | 3 | 4 = 1> = BaseTOCItem & {
     children?: NextDepth<Depth> extends never ? never : TOCItem<NextDepth<Depth>>[];
 };
-export { TOCItem as CollapsibleMenuItem }
-export { TOCItem }
 
 export declare type TOCItemAction = {
     label: string;
@@ -5956,6 +5932,13 @@ declare interface TOCItemProps {
     isExpanded?: boolean;
     onToggleExpanded?: (id: string) => void;
     children?: ReactNode;
+    onDragOver?: (itemId: string, position: "before" | "after" | "inside") => void;
+    onDragLeave?: () => void;
+    onDrop?: (itemId: string, position: "before" | "after" | "inside") => void;
+    canDropInside?: boolean;
+    currentParentId?: string | null;
+    draggedItemId?: string | null;
+    justDropped?: boolean;
 }
 
 declare interface TOCItemSectionHeaderProps {
@@ -5967,6 +5950,12 @@ declare interface TOCItemSectionHeaderProps {
     onToggleExpanded?: (id: string) => void;
     sortable: boolean;
     hideChildrenCounter?: boolean;
+    canDropInside?: boolean;
+    onDragOver?: (itemId: string, position: "before" | "after" | "inside") => void;
+    onDragLeave?: () => void;
+    onDrop?: (itemId: string, position: "before" | "after" | "inside") => void;
+    currentParentId?: string | null;
+    draggedItemId?: string | null;
 }
 
 export declare interface TOCProps {
@@ -6036,45 +6025,12 @@ export declare interface ToolbarDropdownItem {
     isActive: boolean;
 }
 
-export declare interface ToolbarLabels {
-    bold: string;
-    italic: string;
-    underline: string;
-    strike: string;
-    highlight: string;
-    heading1: string;
-    heading2: string;
-    heading3: string;
-    left: string;
-    center: string;
-    right: string;
-    justify: string;
-    bulletList: string;
-    orderedList: string;
-    taskList: string;
-    codeBlock: string;
-    horizontalRule: string;
-    quote: string;
-    moreOptions: string;
-    code: string;
-    divider: string;
-    bullet: string;
-    ordered: string;
-    task: string;
-    linkPlaceholder: string;
-    linkLabel: string;
-    linkPaste: string;
-    close: string;
-    [key: string]: string;
-}
-
 export declare interface ToolbarProps {
     editor: Editor;
     isFullscreen?: boolean;
     disableButtons: boolean;
     onClose?: () => void;
     animationComplete?: boolean;
-    labels: ToolbarLabels;
     darkMode?: boolean;
     showEmojiPicker?: boolean;
     plainHtmlMode?: boolean;
@@ -6096,14 +6052,6 @@ declare type TooltipInternalProps = {
 });
 
 export declare type TooltipProps = Omit<TooltipInternalProps, (typeof privateProps_6)[number]>;
-
-declare interface TranscriptLabels {
-    deleteBlock: string;
-    expand: string;
-    collapse: string;
-    messagesCount: string;
-    messagesCountSingular: string;
-}
 
 declare type TranslationKey = Join<PathsToStringProps<typeof defaultTranslations>, ".">;
 
@@ -6541,10 +6489,16 @@ declare module "gridstack" {
 }
 
 
+declare namespace Calendar {
+    var displayName: string;
+}
+
+
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         aiBlock: {
-            insertAIBlock: (data: AIBlockData, config: AIBlockConfigWithLabels) => ReturnType;
+            insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
+            executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
         };
     }
 }
@@ -6552,8 +6506,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        liveCompanion: {
-            insertLiveCompanion: (data: LiveCompanionData, config?: LiveCompanionConfig) => ReturnType;
+        moodTracker: {
+            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
         };
     }
 }
@@ -6562,21 +6516,7 @@ declare module "@tiptap/core" {
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         transcript: {
-            insertTranscript: (data: TranscriptData, config?: TranscriptConfig) => ReturnType;
-        };
-    }
-}
-
-
-declare namespace Calendar {
-    var displayName: string;
-}
-
-
-declare module "@tiptap/core" {
-    interface Commands<ReturnType> {
-        moodTracker: {
-            insertMoodTracker: (data: MoodTrackerData, config?: MoodTrackerConfig) => ReturnType;
+            insertTranscript: (data: TranscriptData) => ReturnType;
         };
     }
 }

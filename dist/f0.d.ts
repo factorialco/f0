@@ -570,6 +570,15 @@ declare type BaseTag<T extends {
     type: string;
 }> = T & WithTooltipDescription;
 
+declare interface BaseTOCItem {
+    id: string;
+    label: string;
+    onClick?: (id: string) => void;
+    icon?: IconType;
+    disabled?: boolean;
+    otherActions?: TOCItemAction[];
+}
+
 export declare type BigNumberProps = {
     value: Numeric | NumberWithFormatter | number;
     label?: string;
@@ -1434,7 +1443,7 @@ export declare type DataSourceDefinition<R extends RecordType = RecordType, Filt
         filters?: FiltersState<Filters>;
         pagination?: ChildrenPaginationInfo;
         sortings?: SortingsState<Sortings>;
-    }) => Promise<ChildrenResponse<R>>;
+    }) => ChildrenResponse<R> | Promise<ChildrenResponse<R>> | Observable<PromiseState<ChildrenResponse<R>>>;
     /** Function to determine if an item has children */
     itemsWithChildren?: (item: R) => boolean;
     /** Function to get the number of children for an item */
@@ -1674,8 +1683,12 @@ export declare const defaultTranslations: {
         readonly send: "Send";
         readonly cancel: "Cancel";
         readonly ok: "Ok";
+        readonly delete: "Delete";
         readonly copy: "Copy";
+        readonly paste: "Paste";
         readonly close: "Close";
+        readonly collapse: "Collapse";
+        readonly expand: "Expand";
         readonly showAll: "Show all";
         readonly showLess: "Show less";
         readonly skipToContent: "Skip to content";
@@ -1978,6 +1991,40 @@ export declare const defaultTranslations: {
             readonly sectionTitlePlaceholder: "Section title";
         };
     };
+    readonly richTextEditor: {
+        readonly bold: "Bold";
+        readonly italic: "Italic";
+        readonly underline: "Underline";
+        readonly strike: "Strike";
+        readonly highlight: "Highlight";
+        readonly heading1: "Heading 1";
+        readonly heading2: "Heading 2";
+        readonly heading3: "Heading 3";
+        readonly left: "Left";
+        readonly center: "Center";
+        readonly right: "Right";
+        readonly justify: "Justify";
+        readonly bulletList: "Bullet List";
+        readonly orderedList: "Ordered List";
+        readonly taskList: "Task List";
+        readonly codeBlock: "Code Block";
+        readonly horizontalRule: "Horizontal Rule";
+        readonly quote: "Quote";
+        readonly moreOptions: "More Options";
+        readonly code: "Code";
+        readonly divider: "Divider";
+        readonly bullet: "Bullet";
+        readonly ordered: "Ordered";
+        readonly task: "Task";
+        readonly details: "Dropdown";
+        readonly link: "Link";
+        readonly linkPlaceholder: "Enter a link";
+        readonly groups: {
+            readonly textStyles: "Text Styles";
+            readonly lists: "Lists";
+            readonly blocks: "Blocks";
+        };
+    };
 };
 
 export declare type DialogAction = Optional<Pick<F0ButtonProps, "label" | "icon" | "disabled">, "icon" | "disabled"> & {
@@ -1995,8 +2042,26 @@ export declare type DialogActionValue = DialogActionValuePrimitive | (() => Prom
 
 export declare type DialogActionValuePrimitive = string | boolean | number | undefined | null;
 
+declare type DialogAlikeAction = {
+    value?: string;
+    label: string;
+    icon?: IconType;
+    onClick: () => void | Promise<void>;
+    disabled?: boolean;
+    loading?: boolean;
+};
+
+declare type DialogAlikeActionsProps = {
+    primaryAction?: DialogAlikeAction | DialogAlikeAction[];
+    secondaryAction?: DialogAlikeAction | DialogAlikeAction[];
+};
+
+declare type DialogAlikePosition = (typeof dialogAlikePositions)[number];
+
+declare const dialogAlikePositions: readonly ["center", "left", "right", "fullscreen"];
+
 export declare type DialogDefinition = {
-    size?: DialogSize;
+    size?: F0DialogSize;
     id: DialogId;
     title: string;
     description?: string;
@@ -2022,18 +2087,37 @@ declare type DialogNotificationType = (typeof dialogNotificationTypes)[number];
  */
 declare const dialogNotificationTypes: readonly ["info", "warning", "critical", "positive"];
 
-declare type DialogPosition = (typeof dialogPositions)[number];
-
-declare const dialogPositions: readonly ["center", "left", "right", "fullscreen"];
-
 declare type DialogSimpleAction = {
     label?: string;
     value?: DialogActionValue;
 };
 
-export declare type DialogSize = (typeof dialogSizes)[number];
-
 declare const dialogSizes: readonly ["sm", "md", "lg", "xl", "fullscreen"];
+
+declare type DialogWrapperContextType = {
+    open: boolean;
+    onClose: () => void;
+    shownBottomSheet: boolean;
+    position: DialogAlikePosition;
+    /**
+     * The dialog's content container element.
+     * Use this as the `portalContainer` prop for components like F0Select
+     * to ensure dropdowns render inside the dialog.
+     */
+    portalContainer: HTMLDivElement | null;
+};
+
+/**
+ * The props for the F0DialogProvider component.
+ */
+declare type DialogWrapperProviderProps = {
+    isOpen: boolean;
+    onClose: () => void;
+    shownBottomSheet?: boolean;
+    position: DialogAlikePosition;
+    children: ReactNode;
+    portalContainer: HTMLDivElement | null;
+};
 
 /**
  * Remove a property from a union of objects.
@@ -2493,48 +2577,15 @@ export declare const F0Dialog: {
     displayName: string;
 };
 
-export declare type F0DialogAction = {
-    value?: string;
-    label: string;
-    icon?: IconType;
-    onClick: () => void | Promise<void>;
-    disabled?: boolean;
-    loading?: boolean;
-};
+export declare type F0DialogAction = DialogAlikeAction;
 
-export declare type F0DialogActionsProps = {
-    primaryAction?: F0DialogAction | F0DialogAction[];
-    secondaryAction?: F0DialogAction | F0DialogAction[];
-};
+export declare type F0DialogActionsProps = DialogAlikeActionsProps;
 
-export declare const F0DialogContext: Context<F0DialogContextType>;
+export declare const F0DialogContext: Context<DialogWrapperContextType>;
 
-declare type F0DialogContextType = {
-    open: boolean;
-    onClose: () => void;
-    shownBottomSheet: boolean;
-    position: DialogPosition;
-    /**
-     * The dialog's content container element.
-     * Use this as the `portalContainer` prop for components like F0Select
-     * to ensure dropdowns render inside the dialog.
-     */
-    portalContainer: HTMLDivElement | null;
-};
+export declare const F0DialogProvider: ({ isOpen, onClose, shownBottomSheet, position, children, portalContainer, }: DialogWrapperProviderProps) => JSX_2.Element;
 
-export declare const F0DialogProvider: ({ isOpen, onClose, shownBottomSheet, position, children, portalContainer, }: F0DialogProviderProps) => JSX_2.Element;
-
-/**
- * The props for the F0DialogProvider component.
- */
-declare type F0DialogProviderProps = {
-    isOpen: boolean;
-    onClose: () => void;
-    shownBottomSheet?: boolean;
-    position: DialogPosition;
-    children: ReactNode;
-    portalContainer: HTMLDivElement | null;
-};
+export declare type F0DialogSize = (typeof dialogSizes)[number];
 
 export declare type F0DropdownButtonProps<T = string> = {
     size?: ButtonDropdownSize;
@@ -2774,6 +2825,32 @@ export declare type F0SelectProps<T extends string, R = unknown> = F0SelectBaseP
     searchFn?: (option: F0SelectItemProps<T, unknown>, search?: string) => boolean | undefined;
     options: F0SelectItemProps<T, unknown>[];
 }) & Pick<InputFieldProps<T>, "required" | "loading" | "hideLabel" | "labelIcon" | "size" | "label" | "icon" | "placeholder" | "disabled" | "name" | "error" | "status" | "hint">;
+
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export declare const F0TableOfContentPopover: typeof F0TableOfContentPopover_2;
+
+/**
+ * Internal implementation of the TableOfContentPopover component.
+ * This component includes all props including private ones.
+ */
+declare function F0TableOfContentPopover_2({ title, items, className, activeItem, collapsible, showChildrenCounter, barsAlign, size, variant, }: F0TableOfContentPopoverProps): JSX_2.Element;
+
+declare interface F0TableOfContentPopoverProps extends Omit<TOCProps, "sortable" | "onReorder" | "showSearchBox" | "title" | "hideChildrenCounter"> {
+    /** Optional title displayed at the top of the menu popup */
+    title?: string;
+    /** Alignment of the collapsed bars (left or right) */
+    barsAlign?: "left" | "right";
+    /** Whether sections can be collapsed/expanded */
+    collapsible?: boolean;
+    /** Show the count of children items next to parent items */
+    showChildrenCounter?: boolean;
+    /** Maximum height of the popup: sm (max 240px), md (max 400px), lg (max 600px). Content auto-adjusts within limit. */
+    size?: PopupSize;
+    /** Visual variant: "dark" for light backgrounds (default), "light" for dark backgrounds */
+    variant?: TableOfContentPopoverVariant;
+}
 
 export declare const F0TagAlert: ForwardRefExoticComponent<TagAlertProps & RefAttributes<HTMLDivElement>>;
 
@@ -3185,6 +3262,11 @@ declare const iconVariants: (props?: ({
     class?: never;
     className?: ClassValue;
 })) | undefined) => string;
+
+declare type IdStructure = {
+    id: string;
+    children?: IdStructure[];
+};
 
 declare type ImageContextValue = {
     src?: (props: ImageProps) => SrcProps;
@@ -3629,6 +3711,8 @@ declare type NestedVariant = "basic" | "detailed";
 
 export declare type NewColor = Extract<BaseColor, (typeof tagDotColors)[number]>;
 
+declare type NextDepth<T> = T extends 1 ? 2 : T extends 2 ? 3 : T extends 3 ? 4 : never;
+
 export declare interface NextStepsProps {
     title: string;
     items: StepItemProps[];
@@ -3937,6 +4021,8 @@ export declare type PersonAvatarVariant = Extract<AvatarVariant, {
 declare type PersonTagProps = ComponentProps<typeof F0TagPerson>;
 
 export declare const PieChart: ForwardRefExoticComponent<Omit<PieChartProps & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>;
+
+declare type PopupSize = "sm" | "md" | "lg";
 
 export declare const predefinedPresets: Record<string, DatePreset>;
 
@@ -4469,6 +4555,8 @@ declare interface TableHeadProps {
     className?: string;
 }
 
+declare type TableOfContentPopoverVariant = "dark" | "light";
+
 declare type TableVisualizationOptions<R extends RecordType, _Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition> = {
     /**
      * The columns to display
@@ -4712,6 +4800,34 @@ declare const textVariants: (props?: ({
     class?: never;
     className?: ClassValue;
 })) | undefined) => string;
+
+declare type TOCItem<Depth extends 1 | 2 | 3 | 4 = 1> = BaseTOCItem & {
+    children?: NextDepth<Depth> extends never ? never : TOCItem<NextDepth<Depth>>[];
+};
+
+declare type TOCItemAction = {
+    label: string;
+    onClick: () => void;
+    icon?: IconType;
+} | {
+    type: "separator";
+};
+
+declare interface TOCProps {
+    /** Optional title displayed at the top of the menu */
+    title?: string;
+    items: TOCItem[];
+    className?: string;
+    activeItem?: string;
+    collapsible?: boolean;
+    sortable?: boolean;
+    onReorder?: (reorderedIds: IdStructure[]) => void;
+    showSearchBox?: boolean;
+    searchPlaceholder?: string;
+    hideChildrenCounter?: boolean;
+    /** Enable vertical scrolling when content overflows (default: true) */
+    scrollable?: boolean;
+}
 
 declare type TranslationKey = Join<PathsToStringProps<typeof defaultTranslations>, ".">;
 
@@ -5016,7 +5132,7 @@ export declare const useEmojiConfetti: () => {
     fireEmojiConfetti: (emoji: string, elementRef: RefObject<HTMLElement>) => void;
 };
 
-export declare const useF0Dialog: () => F0DialogContextType;
+export declare const useF0Dialog: () => DialogWrapperContextType;
 
 export declare const useGroups: <R extends RecordType>(groups: GroupRecord<R>[], defaultOpenGroups?: boolean | GroupRecord<R>["key"][]) => {
     openGroups: Record<string, boolean>;
@@ -5225,10 +5341,16 @@ declare module "gridstack" {
 }
 
 
+declare namespace Calendar {
+    var displayName: string;
+}
+
+
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         aiBlock: {
-            insertAIBlock: (data: AIBlockData, config: AIBlockConfigWithLabels) => ReturnType;
+            insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
+            executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
         };
     }
 }
@@ -5236,8 +5358,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        liveCompanion: {
-            insertLiveCompanion: (data: LiveCompanionData, config?: LiveCompanionConfig) => ReturnType;
+        moodTracker: {
+            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
         };
     }
 }
@@ -5246,21 +5368,7 @@ declare module "@tiptap/core" {
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         transcript: {
-            insertTranscript: (data: TranscriptData, config?: TranscriptConfig) => ReturnType;
-        };
-    }
-}
-
-
-declare namespace Calendar {
-    var displayName: string;
-}
-
-
-declare module "@tiptap/core" {
-    interface Commands<ReturnType> {
-        moodTracker: {
-            insertMoodTracker: (data: MoodTrackerData, config?: MoodTrackerConfig) => ReturnType;
+            insertTranscript: (data: TranscriptData) => ReturnType;
         };
     }
 }
