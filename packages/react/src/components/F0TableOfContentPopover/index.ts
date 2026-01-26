@@ -1,6 +1,7 @@
 export * from "./F0TableOfContentPopover"
 
 import { experimentalComponent } from "@/lib/experimental"
+
 import { F0TableOfContentPopover as F0TableOfContentPopoverComponent } from "./F0TableOfContentPopover"
 
 /**

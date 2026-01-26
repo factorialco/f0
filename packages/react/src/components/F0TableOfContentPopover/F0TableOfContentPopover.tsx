@@ -1,9 +1,11 @@
 "use client"
 
+import { cva } from "cva"
 import { useCallback, useRef, useState } from "react"
+
 import { cn, focusRing } from "@/lib/utils"
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/ui/hover-card"
-import { cva } from "cva"
+
 import { F0TableOfContent } from "../../experimental/Navigation/F0TableOfContent"
 import { CollapsedBars } from "./components/CollapsedBars"
 import { F0TableOfContentPopoverProps } from "./internal-types"
