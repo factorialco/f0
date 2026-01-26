@@ -1,11 +1,13 @@
 "use client"
 
 import * as DialogPrimitive from "@radix-ui/react-dialog"
-import { forwardRef, useEffect, useRef, useState } from "react"
+import { forwardRef, useCallback, useEffect, useRef, useState } from "react"
 
 type PointerDownOutsideEvent = CustomEvent<{
   originalEvent: PointerEvent
 }>
+
+import { animate } from "motion"
 
 import { cn } from "../../../lib/utils"
 import { useDialogPrimitiveContext } from "../context"
@@ -46,6 +48,17 @@ export const DialogContent = forwardRef<
     const [container, setContainer] = useState<HTMLElement | null>()
     const contentRef = useRef<HTMLDivElement>(null)
 
+    // Shake the content when the dialog is opened and clicked outside in modal mode
+    const shake = useCallback(() => {
+      if (contentRef.current) {
+        animate(
+          contentRef.current,
+          { x: [-15, 15, -10, 10, 0] },
+          { duration: 0.3, ease: "easeInOut" }
+        )
+      }
+    }, [contentRef.current])
+
     useEffect(() => {
       if (propContainer !== undefined) {
         setContainer(propContainer)
@@ -54,16 +67,16 @@ export const DialogContent = forwardRef<
       }
     }, [propContainer])
 
-    useEffect(() => {
-      if (contentRef.current) {
-        // Force a reflow to ensure transition triggers
-        requestAnimationFrame(() => {
-          if (contentRef.current) {
-            contentRef.current.offsetHeight // Force reflow
-          }
-        })
-      }
-    }, [])
+    // useEffect(() => {
+    //   if (contentRef.current) {
+    //     // Force a reflow to ensure transition triggers
+    //     requestAnimationFrame(() => {
+    //       if (contentRef.current) {
+    //         contentRef.current.offsetHeight // Force reflow
+    //       }
+    //     })
+    //   }
+    // }, [])
 
     const context = useDialogPrimitiveContext()
 
@@ -92,6 +105,10 @@ export const DialogContent = forwardRef<
                 detail: { originalEvent: e.nativeEvent },
               }) as PointerDownOutsideEvent
               props.onPointerDownOutside(syntheticEvent)
+            }
+
+            if (context.modal) {
+              shake()
             }
             e.preventDefault()
             e.stopPropagation()

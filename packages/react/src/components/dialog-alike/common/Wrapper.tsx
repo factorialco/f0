@@ -1,5 +1,4 @@
 import { cva } from "cva"
-import { animate } from "motion"
 import { useCallback, useMemo, useState } from "react"
 import { useMediaQuery } from "usehooks-ts"
 
@@ -7,8 +6,8 @@ import { cn } from "@/lib/utils"
 import { Dialog, DialogContent } from "@/ui/Dialog"
 import { Drawer, DrawerContent, DrawerOverlay } from "@/ui/drawer"
 
-import { DialogSize } from "../F0Dialog/types"
 import { DialogWrapperProvider } from "./DialogWrapperProvider"
+import { DialogAlikeSize } from "./types"
 
 export const useIsSmallScreen = () =>
   useMediaQuery("(max-width: 560px)", {
@@ -76,7 +75,7 @@ export type DialogWrapperProps = {
    * The width of the dialog.
    * @default "md"
    */
-  size?: DialogSize
+  size?: DialogAlikeSize
 
   /**
    * Whether the overlay should be shown.
@@ -133,7 +132,7 @@ export const DialogWrapper = ({
     return position === "left" || position === "right"
   }, [position])
 
-  const localSize: DialogSize = useMemo(() => {
+  const localSize: DialogAlikeSize = useMemo(() => {
     if (isSidePosition) {
       return "sm"
     }
@@ -146,20 +145,9 @@ export const DialogWrapper = ({
     return size
   }, [isSidePosition, size, position])
 
-  const shake = useCallback(() => {
-    if (containerElement) {
-      animate(
-        containerElement,
-        { x: [-15, 15, -10, 10, 0] },
-        { duration: 0.3, ease: "easeInOut" }
-      )
-    }
-  }, [containerElement])
-
   const runwayEventCallback = (e: any) => {
     if (modal) {
       e.preventDefault()
-      shake()
     }
   }
 
