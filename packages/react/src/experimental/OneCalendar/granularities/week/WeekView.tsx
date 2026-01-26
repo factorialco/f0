@@ -1,5 +1,3 @@
-import { Calendar } from "@/ui/calendar"
-import { getEndOfWeek, getStartOfWeek } from "./index"
 import { AnimatePresence, motion } from "motion/react"
 import { useCallback, useMemo } from "react"
 import {
@@ -13,6 +11,7 @@ import { Calendar } from "@/ui/calendar"
 import { useL10n } from "../../../../lib/providers/l10n"
 import { DateRange, WeekStartDay, WeekStartsOn } from "../../types"
 import { getLocale, toCalendarPickerMatcher } from "../../utils"
+import { getEndOfWeek, getStartOfWeek } from "./index"
 
 interface WeekViewProps {
   selected?: Date | DateRange | null
