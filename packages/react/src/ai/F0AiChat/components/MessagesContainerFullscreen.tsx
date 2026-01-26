@@ -284,9 +284,7 @@ const Messages = ({
       >
         <div
           ref={turnsContainerRef}
-          className={
-            showWelcomeBlock ? "flex flex-1 pb-3" : "flex flex-col gap-8"
-          }
+          className={showWelcomeBlock ? "flex flex-1" : "flex flex-col gap-8"}
           style={{
             width: "100%",
             display: "flex",

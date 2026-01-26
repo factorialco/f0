@@ -54,7 +54,7 @@ export const AssistantMessage = ({
       )}
       {message && (
         <>
-          <div className="w-fit max-w-[min(90%,330px)] [&>div]:flex [&>div]:flex-col [&>div]:gap-1">
+          <div className="w-fit max-w-full [&>div]:flex [&>div]:flex-col [&>div]:gap-1">
             <Markdown
               content={content}
               components={{ ...f0MarkdownRenderers, ...markdownTagRenderers }}
