@@ -31,43 +31,6 @@ export type F0AiChatProviderProps = {
 >
 
 /**
- * Props for the ActionItem component
- */
-export interface ActionItemProps {
-  title: string
-  status?: "inProgress" | "executing" | "completed"
-  inGroup?: boolean
-}
-
-/**
- * Props for the HILActionConfirmation component
- */
-export type HILActionConfirmationProps = {
-  text?: string
-  confirmationText: string
-  onConfirm: () => void
-  cancelText: string
-  onCancel: () => void
-}
-
-/**
- * Source object for message sources
- */
-export type Source = {
-  title: string
-  link?: string
-  icon?: string // we need to support string because in mastra we don't have the IconType because the icons are not imported
-  targetBlank?: boolean
-}
-
-/**
- * Props for the MessageSources component
- */
-export type MessageSourcesProps = {
-  sources: Source[]
-}
-
-/**
  * Welcome screen suggestion item
  */
 export type WelcomeScreenSuggestion = {

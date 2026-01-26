@@ -16,16 +16,13 @@ import { ButtonInternal } from "@/components/F0Button/internal"
 import { ArrowDown } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
+import { ScrollShadow } from "@/sds/ai/F0AiChat/components/ScrollShadow"
 
-<<<<<<<< HEAD:packages/react/src/sds/ai/F0AiChat/components/MessagesContainer.tsx
 import { F0Thinking as Thinking } from "../../F0Thinking"
-========
->>>>>>>> 7ba2e4a6e (feat: introduce F0 AI components and refactor existing AI chat structure):packages/react/src/ai/F0AiChat/components/MessagesContainer.tsx
 import { isAgentStateMessage } from "../internal-types"
 import { useAiChat } from "../providers/AiChatStateProvider"
 import { FeedbackModal } from "./FeedbackModal"
 import { FeedbackModalProvider, useFeedbackModal } from "./FeedbackProvider"
-import { ScrollShadow } from "./ScrollShadow"
 import { WelcomeScreen } from "./WelcomeScreen"
 
 type Turn = Array<Message | Array<Message>>

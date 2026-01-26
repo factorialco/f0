@@ -94,13 +94,6 @@ export type AiChatProviderReturnValue = {
 } & Pick<AiChatState, "greeting" | "agent">
 
 /**
- * Helper function to check if a message is an AI message
- */
-export function isAiMessage(message: Message): message is AIMessage {
-  return message.role === "assistant"
-}
-
-/**
  * Helper function to check if a message is an agent state message
  */
 export function isAgentStateMessage(message: Message): boolean {

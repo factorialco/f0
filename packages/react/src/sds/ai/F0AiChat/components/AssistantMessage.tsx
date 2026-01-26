@@ -12,11 +12,7 @@ import { useI18n } from "@/lib/providers/i18n"
 import { Action } from "@/ui/Action"
 import { ButtonCopy } from "@/ui/ButtonCopy"
 
-<<<<<<<< HEAD:packages/react/src/sds/ai/F0AiChat/components/AssistantMessage.tsx
 import { F0ActionItem } from "../../F0ActionItem"
-========
-import { F0ActionItem as ActionItem } from "../../F0ActionItem"
->>>>>>>> 7ba2e4a6e (feat: introduce F0 AI components and refactor existing AI chat structure):packages/react/src/ai/F0AiChat/components/AssistantMessage.tsx
 import { f0MarkdownRenderers } from "../../F0MarkdownRenderers"
 import { useFeedbackModal, UserReaction } from "./FeedbackProvider"
 

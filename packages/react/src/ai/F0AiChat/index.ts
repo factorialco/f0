@@ -16,10 +16,6 @@ export {
 // Types
 export type {
   F0AiChatProviderProps,
-  ActionItemProps,
-  HILActionConfirmationProps,
-  MessageSourcesProps,
-  Source,
   WelcomeScreenSuggestion,
   AiChatTranslations,
   AiChatTranslationsProviderProps,
@@ -38,12 +34,3 @@ export {
   AiChatTranslationsProvider,
   useAiChatTranslations,
 } from "./providers/AiChatTranslationsProvider"
-
-// Components - re-exported from standalone
-export { F0ActionItem as ActionItem } from "../F0ActionItem"
-export { F0MessageSources as MessageSources } from "../F0MessageSources"
-export { F0OneIcon as AiChatOneIcon } from "../F0OneIcon"
-
-// Internal components
-export { HILActionConfirmation } from "./components/HILActionConfirmation"
-export { ChatTextarea as AiChatTextarea } from "./components/ChatTextarea"
