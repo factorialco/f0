@@ -197,7 +197,7 @@ export const ChatTextarea = ({
       ref={formRef}
       className={cn(
         "relative isolate",
-        "flex flex-row items-end gap-2 sm:flex-col sm:items-stretch sm:gap-3",
+        "flex flex-row items-end sm:flex-col sm:items-stretch gap-3",
         "rounded-lg border border-solid border-f1-border",
         "transition-all hover:cursor-text",
         "py-px pl-3 pr-1 sm:p-0",
@@ -232,7 +232,7 @@ export const ChatTextarea = ({
       <div
         className={cn(
           "grid flex-1 grid-cols-1 grid-rows-1",
-          "min-h-[20px] py-2.5 sm:min-h-[40px] sm:py-0"
+          "min-h-[20px] py-2.5 sm:min-h-[20px] sm:py-0"
         )}
       >
         <div
@@ -240,7 +240,7 @@ export const ChatTextarea = ({
           className={cn(
             "col-start-1 row-start-1",
             "pointer-events-none invisible",
-            "min-h-[20px] max-h-[120px] sm:min-h-[40px] sm:max-h-[240px]",
+            "min-h-[20px] max-h-[120px] sm:min-h-[20px] sm:max-h-[240px]",
             "whitespace-pre-wrap break-words",
             "sm:text-[14px] text-[16px] leading-[20px] font-normal text-f1-foreground",
             "sm:mt-3 sm:px-3"
@@ -256,8 +256,7 @@ export const ChatTextarea = ({
               "text-f1-foreground-secondary",
               "sm:text-[14px] text-[16px] leading-[20px] font-normal",
               "sm:pt-3 sm:px-3",
-              "overflow-hidden text-ellipsis whitespace-nowrap",
-              "sm:whitespace-normal sm:overflow-visible"
+              "overflow-hidden text-ellipsis whitespace-nowrap"
             )}
           >
             {translation.ai.inputPlaceholder}
@@ -275,7 +274,7 @@ export const ChatTextarea = ({
           onKeyDown={handleKeyDown}
           className={cn(
             "col-start-1 row-start-1",
-            "min-h-[20px] max-h-[120px] sm:min-h-[40px] sm:max-h-[240px] sm:h-auto",
+            "min-h-[20px] max-h-[120px] sm:min-h-[20px] sm:max-h-[240px] sm:h-auto",
             "resize-none",
             "whitespace-pre-wrap break-words",
             "sm:text-[14px] text-[16px] leading-[20px] font-normal text-f1-foreground",
@@ -297,7 +296,7 @@ export const ChatTextarea = ({
         )}
       </div>
 
-      <div className="flex shrink-0 flex-row-reverse p-1 sm:p-2 sm:pt-0">
+      <div className="flex shrink-0 flex-row-reverse p-1 sm:p-3">
         {inProgress ? (
           <ButtonInternal
             type="submit"

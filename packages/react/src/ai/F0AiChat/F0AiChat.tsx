@@ -1,7 +1,6 @@
 import {
   CopilotKit,
   CopilotKitProps,
-  useCopilotAction,
   useCopilotChatInternal,
 } from "@copilotkit/react-core"
 import { CopilotSidebar, InputProps } from "@copilotkit/react-ui"
@@ -17,8 +16,6 @@ import {
 import { experimentalComponent } from "@/lib/experimental"
 import { cn } from "@/lib/utils"
 
-import { F0ActionItem as ActionItem } from "../F0ActionItem"
-import { F0MessageSources as MessageSources } from "../F0MessageSources"
 import { AssistantMessage } from "./components/AssistantMessage"
 import { ChatHeader } from "./components/ChatHeader"
 import { ChatTextarea } from "./components/ChatTextarea"
@@ -27,6 +24,7 @@ import { MessagesContainer } from "./components/MessagesContainer"
 import { MessagesContainerFullscreen } from "./components/MessagesContainerFullscreen"
 import { UserMessage } from "./components/UserMessage"
 import { WelcomeScreenSuggestion } from "./components/WelcomeScreen"
+import { useDefaultCopilotActions } from "./copilotActions"
 import { FullscreenChatContextType } from "./internal-types"
 import { AiChatStateProvider, useAiChat } from "./providers/AiChatStateProvider"
 import { F0AiChatProviderProps } from "./types"
@@ -37,7 +35,7 @@ export const FullscreenChatContext = createContext<FullscreenChatContextType>({
   setInProgress: () => {},
 })
 
-const F0AiChatProviderCmp = ({
+const F0AiChatProviderComponent = ({
   enabled = false,
   greeting,
   initialMessage,
@@ -110,84 +108,15 @@ const SendMessageFunctionInjector = () => {
   return null
 }
 
-const F0AiChatCmp = () => {
+const F0AiChatComponent = () => {
   const { enabled, open, setOpen } = useAiChat()
 
-  useCopilotAction({
-    name: "orchestratorThinking",
-    description: "Display orchestrator thinking process (non-blocking)",
-    parameters: [
-      {
-        name: "message",
-        description: "User-friendly progress message",
-        required: true,
-      },
-    ],
-    // render only when backend wants to display the thinking
-    available: "disabled",
-    render: (props) => {
-      return (
-        <div className={props.status ? "-ml-1" : undefined}>
-          <ActionItem
-            title={props.args.message ?? "thinking"}
-            status={props.status === "complete" ? "completed" : props.status}
-            inGroup={props.result?.inGroup}
-          />
-        </div>
-      )
-    },
-  })
-
-  useCopilotAction({
-    name: "messageSources",
-    description:
-      "Attach information sources to the assistant's response. Use this to show where the AI got its information from.",
-    parameters: [
-      {
-        name: "sources",
-        type: "object[]",
-        description:
-          "Array of source objects with title and link properties. Example: [{title: 'Documentation', link: 'https://example.com'}]",
-        required: true,
-        attributes: [
-          {
-            name: "title",
-            type: "string",
-            description: "The title or name of the source",
-            required: true,
-          },
-          {
-            name: "link",
-            type: "string",
-            description: "The URL link to the source",
-            required: true,
-          },
-          {
-            name: "icon",
-            type: "string",
-            description: "The icon name to display for the source",
-            required: false,
-          },
-          {
-            name: "targetBlank",
-            type: "boolean",
-            description: "Whether to open the link in a new tab",
-            required: false,
-            default: false,
-          },
-        ],
-      },
-    ],
-    // render only when backend wants to attach sources
-    available: "disabled",
-    render: (props) => {
-      return <MessageSources sources={props.args.sources || []} />
-    },
-  })
+  // Register all default copilot actions
+  useDefaultCopilotActions()
 
   const InputComponent = useCallback(
     ({ ...props }: InputProps) => (
-      <div className="m-[16px] mt-0">
+      <div className="m-[16px] mt-2">
         <ChatTextarea {...props} />
       </div>
     ),
@@ -218,10 +147,13 @@ const F0AiChatCmp = () => {
   )
 }
 
-const F0AiFullscreenChatCmp = () => {
+const F0AiFullscreenChatComponent = () => {
   const { enabled } = useAiChat()
   const [inProgress, setInProgress] = useState(false)
   const inputContainerRef = useRef<HTMLDivElement>(null)
+
+  // Register all default copilot actions
+  useDefaultCopilotActions()
 
   // Prevent whole-page scroll when dragging from the input area (iOS bounce fix)
   useEffect(() => {
@@ -274,31 +206,6 @@ const F0AiFullscreenChatCmp = () => {
       document.head.removeChild(style)
     }
   }, [])
-
-  useCopilotAction({
-    name: "orchestratorThinking",
-    description: "Display orchestrator thinking process (non-blocking)",
-    parameters: [
-      {
-        name: "message",
-        description: "User-friendly progress message",
-        required: true,
-      },
-    ],
-    // render only when backend wants to display the thinking
-    available: "disabled",
-    render: (props) => {
-      return (
-        <div className={props.status ? "-ml-1" : undefined}>
-          <ActionItem
-            title={props.args.message ?? "thinking"}
-            status={props.status === "complete" ? "completed" : props.status}
-            inGroup={props.result?.inGroup}
-          />
-        </div>
-      )
-    },
-  })
 
   if (!enabled) {
     return null
@@ -391,14 +298,14 @@ const FullscreenChatInput = () => {
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export const F0AiChat = experimentalComponent("F0AiChat", F0AiChatCmp)
+export const F0AiChat = experimentalComponent("F0AiChat", F0AiChatComponent)
 
 /**
  * @experimental This is an experimental component use it at your own risk
  */
 export const F0AiFullscreenChat = experimentalComponent(
-  "F0AiChat",
-  F0AiFullscreenChatCmp
+  "F0AiFullscreenChat",
+  F0AiFullscreenChatComponent
 )
 
 /**
@@ -406,7 +313,7 @@ export const F0AiFullscreenChat = experimentalComponent(
  */
 export const F0AiChatProvider = experimentalComponent(
   "F0AiChatProvider",
-  F0AiChatProviderCmp
+  F0AiChatProviderComponent
 )
 
 // Re-export WelcomeScreenSuggestion type from components for backwards compatibility
