@@ -6157,6 +6157,19 @@ declare interface UseDataReturn<R extends RecordType> {
     mergedFilters: FiltersState<FiltersDefinition>;
 }
 
+/**
+ * Hook to register all default copilot actions.
+ * This provides a single entry point to enable all standard AI chat actions.
+ *
+ * @example
+ * // Enable all default actions in your component
+ * const MyComponent = () => {
+ *   useDefaultCopilotActions()
+ *   return <div>...</div>
+ * }
+ */
+export declare const useDefaultCopilotActions: () => void;
+
 export { useForm }
 
 export declare function useFormSchema<Schema extends SchemaType, FormData extends InferSchema<Schema>>(schema: Schema, options: UseFormProps<FormData>, onSubmit: OnSubmitHandler<FormData>): FormType<Schema, FormData>;
@@ -6164,6 +6177,18 @@ export declare function useFormSchema<Schema extends SchemaType, FormData extend
 export declare const useInfiniteScrollPagination: (paginationInfo: PaginationInfo | null, isLoading: boolean, isLoadingMore: boolean, loadMore: () => void) => {
     loadingIndicatorRef: RefObject<HTMLTableCellElement>;
 };
+
+/**
+ * Hook to register the message sources action.
+ * Attaches information sources to the assistant's response to show where the AI got its information from.
+ */
+export declare const useMessageSourcesAction: () => void;
+
+/**
+ * Hook to register the orchestrator thinking action.
+ * Displays the orchestrator's thinking process as a non-blocking UI element.
+ */
+export declare const useOrchestratorThinkingAction: () => void;
 
 export declare interface User {
     id: string;

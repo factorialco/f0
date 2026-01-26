@@ -1,12 +1,12 @@
-import { b8 as za, b9 as M6, ba as O6, bb as D6, bc as I6, bd as L6, be as Jc, bf as R6, bg as F6, bh as P6, m as oe, bi as dk, bj as z6, bk as $a, U as hd, bl as fk, bm as $6, bn as B6, Q as ck, bo as hg, bp as ul, bq as j6, s as A, K as zn, h as Ee, br as H6, bs as V6, bt as W6, bu as q6, bv as U6, $ as rt, bw as G6, bx as Yp, by as uk, k as qe, bz as K6, bA as hk, l as pe, bB as pk, bC as mk, B as Vt, bD as gk, bE as yk, bF as vk, i as Q, bG as uo, S as U, bH as Xn, bI as J6, bJ as Y6, bK as Bf, bL as bk, bM as kk, v as Zn, bN as xk, bO as Qp, bP as In, bQ as Xp, bR as Tr, e as wk, x as Q6, bS as vr, H as Ba, j as ho, bT as _k, bU as X6, bV as pg, bW as Ws, bX as Zp, bY as ja, bZ as pd, b_ as Z6, b$ as Ck, c0 as eC, c1 as em, c2 as ra, c3 as gn, c4 as tC, c5 as nC, c6 as tr, c7 as Yc, c8 as iC, c9 as Ro, ca as Ns, cb as rC, cc as Sk, cd as sC, ce as oC, cf as aC, cg as lC, O as Yt, N as yt, ch as Nk, ci as Ek, a9 as tm, F as dC, cj as nm, ck as Tk, cl as jf, cm as fC, R as br, cn as cC, co as Qc, cp as uC, cq as hC, n as im, cr as us, cs as Ls, ct as rm, cu as pC, cv as mC, cw as gC, cx as Ak, cy as sm, cz as yC, b5 as Ha, au as md, P as po, cA as vC, cB as Mk, T as vn, as as $i, cC as bC, cD as kC, cE as xC, cF as Ok, aq as Gn, a1 as Kn, cG as wC, cH as Dk, cI as Ik, cJ as _C, cK as mo, cL as om, t as Hf, cM as sa, az as oa, cN as CC, cO as Lk, cP as SC, cQ as NC, Z as am, _ as lm, a0 as dm, cR as EC, cS as Rk, cT as TC, cU as Fk, cV as AC, cW as MC, cX as OC, cY as mg, cZ as Pk, c_ as DC, c$ as uh, ao as gd, d0 as zk, d1 as $k, d2 as IC, d3 as LC, b4 as Va, a7 as Bk, b7 as RC, A as Wa, b6 as FC, d4 as jk, a8 as kr, ay as ar, d5 as gg, d6 as yd, d7 as PC, D as hh, ak as qa, d8 as Vf, d9 as zC, ar as $C, al as Hk, u as BC, da as Wf, db as jC, dc as HC, dd as VC, de as WC, df as qC, dg as Vk, dh as Wk, di as UC, dj as GC, dk as KC, dl as JC, dm as qk, dn as Uk, dp as Gk, dq as YC, dr as QC, ds as Kk, dt as XC, du as Jk, am as Yk, dv as fm, dw as ZC, dx as eS, dy as tS, dz as nS, dA as iS, dB as rS, aU as sS, aV as oS, b0 as qf, a_ as cm, dC as um, a$ as Qk, aW as vd, dD as aS, dE as lS, E as ph, dF as dS, dG as yg, dH as fS, dI as cS, dJ as uS, dK as hS, dL as pS, dM as Xk, dN as mS, L as Zk, aA as gS, aZ as yS, aa as vS, ab as bS, ac as kS, an as xS, dO as Ua, dP as hm, at as pm, dQ as vg, dR as mm, dS as Ga, dT as wS, dU as _S, dV as mh, dW as ex, dX as tx, dY as nx, dZ as CS, d_ as SS, d$ as NS, e0 as ES, e1 as ix, e2 as rx, e3 as sx, e4 as ox, e5 as TS, e6 as ax, e7 as lx, e8 as dx, e9 as AS, ea as fx, eb as MS, ec as OS, ed as cx, ee as DS, ef as IS, eg as LS, eh as RS, ei as FS, ej as PS, ek as zS, el as bg, em as kg, w as xg, en as $S, eo as BS, ep as jS, eq as ux, er as HS } from "./F0Thinking-kaKpUHH5.js";
-import { et as hQ, es as pQ, ey as mQ, ez as gQ, ev as yQ, eu as vQ, ex as bQ, ap as kQ, ew as xQ } from "./F0Thinking-kaKpUHH5.js";
-import { I as hx, B as VS, a as WS, F as qS } from "./AiChatTranslationsProvider-DIntmZ-8.js";
-import { A as _Q, b as CQ, b as SQ, d as NQ, c as EQ, u as TQ } from "./AiChatTranslationsProvider-DIntmZ-8.js";
+import { b9 as za, ba as M6, bb as O6, bc as D6, bd as I6, be as L6, bf as Jc, bg as R6, bh as F6, bi as P6, m as oe, bj as dk, bk as z6, bl as $a, V as hd, bm as fk, bn as $6, bo as B6, R as ck, bp as hg, bq as ul, br as j6, s as A, L as zn, h as Ee, bs as H6, bt as V6, bu as W6, bv as q6, bw as U6, a0 as rt, bx as G6, by as Yp, bz as uk, k as qe, bA as K6, bB as hk, l as pe, bC as pk, bD as mk, B as Vt, bE as gk, bF as yk, bG as vk, i as Q, bH as uo, S as U, bI as Xn, bJ as J6, bK as Y6, bL as Bf, bM as bk, bN as kk, v as Zn, bO as xk, bP as Qp, bQ as In, bR as Xp, bS as Tr, e as wk, x as Q6, bT as vr, J as Ba, j as ho, bU as _k, bV as X6, bW as pg, bX as Ws, bY as Zp, bZ as ja, b_ as pd, b$ as Z6, c0 as Ck, c1 as eC, c2 as em, c3 as ra, c4 as gn, c5 as tC, c6 as nC, c7 as tr, c8 as Yc, c9 as iC, ca as Ro, cb as Ns, cc as rC, cd as Sk, ce as sC, cf as oC, cg as aC, ch as lC, O as Yt, P as yt, ci as Nk, cj as Ek, aa as tm, F as dC, ck as nm, cl as Tk, cm as jf, cn as fC, T as br, co as cC, cp as Qc, cq as uC, cr as hC, n as im, cs as us, ct as Ls, cu as rm, cv as pC, cw as mC, cx as gC, cy as Ak, cz as sm, cA as yC, b6 as Ha, av as md, Q as po, cB as vC, cC as Mk, U as vn, at as $i, cD as bC, cE as kC, cF as xC, cG as Ok, ar as Gn, a2 as Kn, cH as wC, cI as Dk, cJ as Ik, cK as _C, cL as mo, cM as om, t as Hf, cN as sa, aA as oa, cO as CC, cP as Lk, cQ as SC, cR as NC, _ as am, $ as lm, a1 as dm, cS as EC, cT as Rk, cU as TC, cV as Fk, cW as AC, cX as MC, cY as OC, cZ as mg, c_ as Pk, c$ as DC, E as uh, ap as gd, d0 as zk, d1 as $k, d2 as IC, d3 as LC, b5 as Va, a8 as Bk, b8 as RC, A as Wa, b7 as FC, d4 as jk, a9 as kr, az as ar, d5 as gg, d6 as yd, d7 as PC, D as hh, al as qa, d8 as Vf, d9 as zC, as as $C, am as Hk, u as BC, da as Wf, db as jC, dc as HC, dd as VC, de as WC, df as qC, dg as Vk, dh as Wk, di as UC, dj as GC, dk as KC, dl as JC, dm as qk, dn as Uk, dp as Gk, dq as YC, dr as QC, ds as Kk, dt as XC, du as Jk, an as Yk, dv as fm, dw as ZC, dx as eS, dy as tS, dz as nS, dA as iS, dB as rS, aV as sS, aW as oS, b1 as qf, a$ as cm, dC as um, b0 as Qk, aX as vd, dD as aS, dE as lS, G as ph, dF as dS, dG as yg, dH as fS, dI as cS, dJ as uS, dK as hS, dL as pS, dM as Xk, dN as mS, M as Zk, aB as gS, a_ as yS, ab as vS, ac as bS, ad as kS, ao as xS, dO as Ua, dP as hm, au as pm, dQ as vg, dR as mm, dS as Ga, dT as wS, dU as _S, dV as mh, dW as ex, dX as tx, dY as nx, dZ as CS, d_ as SS, d$ as NS, e0 as ES, e1 as ix, e2 as rx, e3 as sx, e4 as ox, e5 as TS, e6 as ax, e7 as lx, e8 as dx, e9 as AS, ea as fx, eb as MS, ec as OS, ed as cx, ee as DS, ef as IS, eg as LS, eh as RS, ei as FS, ej as PS, ek as zS, el as bg, em as kg, w as xg, en as $S, eo as BS, ep as jS, eq as ux, er as HS } from "./F0Thinking-CCdAZFqx.js";
+import { et as hQ, es as pQ, ey as mQ, ez as gQ, ev as yQ, eu as vQ, ex as bQ, aq as kQ, ew as xQ } from "./F0Thinking-CCdAZFqx.js";
+import { I as hx, B as VS, a as WS, F as qS } from "./AiChatTranslationsProvider-C4AJTyV4.js";
+import { A as _Q, b as CQ, b as SQ, d as NQ, c as EQ, u as TQ, e as AQ, g as MQ, f as OQ } from "./AiChatTranslationsProvider-C4AJTyV4.js";
 import { jsx as c, jsxs as b, Fragment as _e } from "react/jsx-runtime";
 import * as Ke from "react";
 import G, { useContext as $n, useState as P, useEffect as ne, createContext as Bn, forwardRef as ye, useRef as re, PureComponent as US, useTransition as GS, useLayoutEffect as hs, useId as Uf, useCallback as Ne, useMemo as J, memo as Ka, Fragment as hi, isValidElement as px, cloneElement as gm, createElement as gh, useDebugValue as mx, createRef as KS, version as wg, useImperativeHandle as Gf, Children as gx } from "react";
-import { f as Rs, aB as aa, j as hl, aC as JS, b as Xc, aD as YS, A as QS, d as pl, i as XS, m as ZS, G as e9, g as _g, aE as t9, l as Cg, aF as n9, p as i9, aG as yx, aH as vx, aI as r9, aJ as yh, C as s9, au as o9, a2 as es, D as At, t as a9, x as l9, y as d9, F as f9, M as Sg, N as Ng, O as c9, P as u9, aj as h9, aK as vh, aL as Kf, a6 as p9, aM as bx, aN as m9, aO as g9, aP as y9, ae as bh, aQ as v9, aR as b9, ap as Jf, af as ym, aS as kx, ac as xx, ad as ps, a8 as k9, aT as x9, aU as w9, aV as _9, a4 as Yf, aW as Qf, aX as Xf, a5 as Zf, ai as vm, aY as C9, ay as S9, aZ as kh, a_ as N9, a$ as bd, b0 as E9, az as T9, b1 as A9, ax as wx, aw as M9, av as O9, b2 as D9, b3 as I9, b4 as L9, b5 as R9, aA as _x, b6 as Cx, an as Sx, b7 as F9, b8 as P9, b9 as z9, a7 as $9, R as B9, T as j9, V as H9, W as V9, Z as W9, U as q9, ba as Eg, bb as U9, bc as G9, n as K9 } from "./hooks-BuEotj8n.js";
-import { a9 as MQ, ak as OQ, al as DQ } from "./hooks-BuEotj8n.js";
+import { f as Rs, aB as aa, j as hl, aC as JS, b as Xc, aD as YS, A as QS, d as pl, i as XS, m as ZS, G as e9, g as _g, aE as t9, l as Cg, aF as n9, p as i9, aG as yx, aH as vx, aI as r9, aJ as yh, C as s9, au as o9, a2 as es, D as At, t as a9, x as l9, y as d9, F as f9, M as Sg, N as Ng, O as c9, P as u9, aj as h9, aK as vh, aL as Kf, a6 as p9, aM as bx, aN as m9, aO as g9, aP as y9, ae as bh, aQ as v9, aR as b9, ap as Jf, af as ym, aS as kx, ac as xx, ad as ps, a8 as k9, aT as x9, aU as w9, aV as _9, a4 as Yf, aW as Qf, aX as Xf, a5 as Zf, ai as vm, aY as C9, ay as S9, aZ as kh, a_ as N9, a$ as bd, b0 as E9, az as T9, b1 as A9, ax as wx, aw as M9, av as O9, b2 as D9, b3 as I9, b4 as L9, b5 as R9, aA as _x, b6 as Cx, an as Sx, b7 as F9, b8 as P9, b9 as z9, a7 as $9, R as B9, T as j9, V as H9, W as V9, Z as W9, U as q9, ba as Eg, bb as U9, bc as G9, n as K9 } from "./hooks-K9_4K5rT.js";
+import { a9 as IQ, ak as LQ, al as RQ } from "./hooks-K9_4K5rT.js";
 import bm from "react-dom";
 import './experimental.css';function Nx(t) {
   const e = za(() => M6(t)), { isStatic: n } = $n(O6);
@@ -51655,7 +51655,7 @@ export {
   Gk as Badge,
   qY as BarChartWidget,
   tA as BaseActivityItemList,
-  MQ as BaseBanner,
+  IQ as BaseBanner,
   sM as BaseCelebration,
   pM as BaseCommunityPost,
   hQ as BaseTabs,
@@ -51766,16 +51766,19 @@ export {
   bQ as getGranularitySimpleDefinition,
   fm as granularityDefinitions,
   kQ as modules,
-  OQ as predefinedPresets,
+  LQ as predefinedPresets,
   xQ as rangeSeparator,
-  DQ as selectSizes,
+  RQ as selectSizes,
   BC as useAiChat,
   TQ as useAiChatTranslations,
   ec as useAiPromotionChat,
   dc as useDataCollectionData,
   IY as useDataCollectionSource,
+  AQ as useDefaultCopilotActions,
   jT as useForm,
   fY as useFormSchema,
   Bm as useInfiniteScrollPagination,
+  MQ as useMessageSourcesAction,
+  OQ as useOrchestratorThinkingAction,
   go as useSidebar
 };
