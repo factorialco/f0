@@ -20,10 +20,17 @@ export {
   type AiChatTranslationsProviderProps,
   type WelcomeScreenSuggestion,
 } from "./ai/F0AiChat/types"
+// F0HILActionConfirmation exports
 export {
-  HILActionConfirmation,
-  type HILActionConfirmationProps,
-} from "./ai/F0AiChat/components/HILActionConfirmation"
+  F0HILActionConfirmation,
+  type F0HILActionConfirmationProps,
+} from "./ai/F0HILActionConfirmation"
+
+// Legacy alias for backwards compatibility
+export {
+  F0HILActionConfirmation as HILActionConfirmation,
+  type F0HILActionConfirmationProps as HILActionConfirmationProps,
+} from "./ai/F0HILActionConfirmation"
 
 // F0OneIcon exports
 export {
@@ -67,6 +74,12 @@ export {
 
 // F0OneSwitch exports
 export { F0OneSwitch, type F0OneSwitchProps } from "./ai/F0OneSwitch"
+
+// F0Thinking exports
+export { F0Thinking, type F0ThinkingProps } from "./ai/F0Thinking"
+
+// Legacy alias for backwards compatibility
+export { F0Thinking as Thinking } from "./ai/F0Thinking"
 
 // I18n exports
 export {

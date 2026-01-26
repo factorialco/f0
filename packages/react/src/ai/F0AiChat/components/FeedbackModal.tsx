@@ -55,7 +55,7 @@ export const FeedbackModal = ({
       position="center"
       isOpen
       onClose={handleClose}
-      width="sm"
+      width="md"
       title={title}
       primaryAction={{
         label: translation.actions.send,
