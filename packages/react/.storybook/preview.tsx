@@ -1,21 +1,20 @@
-// organize-imports-ignore
-import React, { useState } from "react"
-import { INITIAL_VIEWPORTS } from "storybook/viewport"
 import type { Preview, StoryFn, StoryContext } from "@storybook/react-vite"
 
-import { action } from "storybook/actions"
-import { MotionGlobalConfig } from "motion/react"
-
 import isChromatic from "chromatic/isChromatic"
+import { MotionGlobalConfig } from "motion/react"
+// organize-imports-ignore
+import React, { useState } from "react"
+import { action } from "storybook/actions"
+import { INITIAL_VIEWPORTS } from "storybook/viewport"
 
 import "../src/styles.css"
-
-import { ThemeProvider } from "@/lib/providers/theme"
-import { F0Provider } from "@/lib/providers/f0"
-import { DocsContainer } from "./DocsContainer.tsx"
-import { buildTranslations, defaultTranslations } from "@/lib/providers/i18n"
+import { aiTranslations } from "@/ai/F0AiChat/types"
 import { dataCollectionLocalStorageHandler } from "@/lib/providers/datacollection"
-import { aiTranslations } from "@/ai/AiChat/providers/AiChatTranslationsProvider"
+import { F0Provider } from "@/lib/providers/f0"
+import { buildTranslations, defaultTranslations } from "@/lib/providers/i18n"
+import { ThemeProvider } from "@/lib/providers/theme"
+
+import { DocsContainer } from "./DocsContainer.tsx"
 
 MotionGlobalConfig.skipAnimations = isChromatic()
 
@@ -56,7 +55,6 @@ export const F0 = (Story: StoryFn, { parameters }: StoryContext) => {
             ref={ref}
             {...props}
             onClick={(event, ...args) => {
-              console.log("Link clicked", event, ...args)
               action("Link clicked")(event, ...args)
               props?.onClick?.(event, ...args)
               event.preventDefault()

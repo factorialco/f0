@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 
-import { aiTranslations } from "@/ai/AiChat/providers/AiChatTranslationsProvider"
+import { aiTranslations } from "@/ai/F0AiChat"
 
 import { I18nProvider, TranslationsType, useI18n } from "./i18n-provider"
 import { defaultTranslations } from "./i18n-provider-defaults"

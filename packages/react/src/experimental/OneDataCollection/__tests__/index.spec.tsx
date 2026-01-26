@@ -6,7 +6,7 @@ import { Observable } from "zen-observable-ts"
 
 import type { FiltersDefinition } from "@/components/OneFilterPicker"
 
-import { aiTranslations } from "@/ai/AiChat/providers/AiChatTranslationsProvider"
+import { aiTranslations } from "@/ai/F0AiChat"
 import {
   BaseFetchOptions,
   BaseResponse,

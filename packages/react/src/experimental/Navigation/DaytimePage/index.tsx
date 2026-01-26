@@ -1,7 +1,7 @@
 import { cva, type VariantProps } from "cva"
 import { ComponentProps } from "react"
 
-import { OneSwitch } from "@/ai/AiChat/OneSwitch"
+import { F0OneSwitch as OneSwitch } from "@/ai/F0OneSwitch"
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
 import { F0AvatarPulse } from "@/components/avatars/F0AvatarPulse"
 import { F0Button } from "@/components/F0Button"
