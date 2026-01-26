@@ -240,7 +240,6 @@
     "embla-carousel-react": "^8.6.0",
     "embla-carousel-wheel-gestures": "^8.0.1",
     "gridstack": "^12.3.3",
-    "i": "^0.3.7",
     "prosemirror-state": "^1.4.3",
     "prosemirror-view": "^1.38.1",
     "react-remove-scroll": "^2.7.1",
