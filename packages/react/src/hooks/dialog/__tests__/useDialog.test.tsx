@@ -1,9 +1,12 @@
-import { zeroRenderHook } from "@/testing/test-utils"
 import { act, waitFor } from "@testing-library/react"
 import React from "react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-import { useDialog } from "../useDialog"
+
+import { zeroRenderHook } from "@/testing/test-utils"
+
 import type { DialogDefinition } from "../../../lib/providers/dialogs/types"
+
+import { useDialog } from "../useDialog"
 
 // Mock nanoid
 let nanoidCounter = 0
