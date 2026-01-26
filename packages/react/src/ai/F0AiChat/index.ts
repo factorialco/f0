@@ -34,3 +34,10 @@ export {
   AiChatTranslationsProvider,
   useAiChatTranslations,
 } from "./providers/AiChatTranslationsProvider"
+
+// Copilot Actions
+export {
+  useDefaultCopilotActions,
+  useOrchestratorThinkingAction,
+  useMessageSourcesAction,
+} from "./copilotActions"

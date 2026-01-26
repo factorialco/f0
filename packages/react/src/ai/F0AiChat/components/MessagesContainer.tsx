@@ -16,13 +16,13 @@ import { ButtonInternal } from "@/components/F0Button/internal"
 import { ArrowDown } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-import { ScrollShadow } from "@/sds/ai/F0AiChat/components/ScrollShadow"
 
 import { F0Thinking as Thinking } from "../../F0Thinking"
 import { isAgentStateMessage } from "../internal-types"
 import { useAiChat } from "../providers/AiChatStateProvider"
 import { FeedbackModal } from "./FeedbackModal"
 import { FeedbackModalProvider, useFeedbackModal } from "./FeedbackProvider"
+import { ScrollShadow } from "./ScrollShadow"
 import { WelcomeScreen } from "./WelcomeScreen"
 
 type Turn = Array<Message | Array<Message>>

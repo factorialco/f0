@@ -17,27 +17,20 @@ import { OneEllipsis } from "@/components/OneEllipsis"
 import { experimentalComponent } from "@/lib/experimental"
 import { Link } from "@/lib/linkHandler"
 import { cn } from "@/lib/utils"
+import { AssistantMessage } from "@/sds/ai/F0AiChat/components/AssistantMessage"
+import { ChatHeader } from "@/sds/ai/F0AiChat/components/ChatHeader"
+import { ChatTextarea } from "@/sds/ai/F0AiChat/components/ChatTextarea"
+import { SidebarWindow } from "@/sds/ai/F0AiChat/components/ChatWindow"
+import { FullscreenChatContextType } from "@/sds/ai/F0AiChat/internal-types"
+import {
+  AiChatStateProvider,
+  useAiChat,
+} from "@/sds/ai/F0AiChat/providers/AiChatStateProvider"
+import { AiChatProviderProps } from "@/sds/ai/F0AiChat/types"
 
-
-import { AssistantMessage } from "./components/AssistantMessage"
-import { ChatHeader } from "./components/ChatHeader"
-import { ChatTextarea } from "./components/ChatTextarea"
-import { SidebarWindow } from "./components/ChatWindow"
 import { MessagesContainer } from "./components/MessagesContainer"
-
-import { F0ActionItem as ActionItem } from "../F0ActionItem"
-import { F0MessageSources as MessageSources } from "../F0MessageSources"
-import { AssistantMessage } from "./components/AssistantMessage"
-import { ChatHeader } from "./components/ChatHeader"
-import { ChatTextarea } from "./components/ChatTextarea"
-import { SidebarWindow as ChatWindow } from "./components/ChatWindow"
-import { MessagesContainer } from "./components/MessagesContainer"
-
 import { useDefaultCopilotActions } from "./copilotActions"
-import { FullscreenChatContextType } from "./internal-types"
-import { AiChatStateProvider, useAiChat } from "./providers/AiChatStateProvider"
-import { AiChatProviderProps } from "./types"
-========
+
 // Context to share input state between Messages and Input components
 export const FullscreenChatContext = createContext<FullscreenChatContextType>({
   inProgress: false,
@@ -56,7 +49,7 @@ const F0AiChatProviderComponent = ({
   children,
   agent,
   ...copilotKitProps
-}: F0AiChatProviderProps) => {
+}: AiChatProviderProps) => {
   // todo: implement error handling
   // temporary set runtime url until error handling is done
   return (
@@ -124,20 +117,19 @@ const SendMessageFunctionInjector = () => {
 const F0AiChatComponent = () => {
   const { enabled, open, setOpen, disclaimer } = useAiChat()
 
-
   // Register all default copilot actions
   useDefaultCopilotActions()
 
   const InputComponent = useCallback(
     ({ ...props }: InputProps) => (
-      <div className="m-[16px] items-center flex flex-col gap-2">
+      <div className="m-[16px] flex flex-col items-center gap-2">
         <div className="w-full">
           <ChatTextarea {...props} />
         </div>
 
         {disclaimer?.text && (
-          <div className="flex flex-row items-center gap-1 w-full justify-center">
-            <OneEllipsis className="text-f1-foreground-tertiary text-sm font-medium">
+          <div className="flex w-full flex-row items-center justify-center gap-1">
+            <OneEllipsis className="text-sm font-medium text-f1-foreground-tertiary">
               {disclaimer.text}
             </OneEllipsis>
 
@@ -146,7 +138,7 @@ const F0AiChatComponent = () => {
                 href={disclaimer.link}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-f1-foreground-tertiary text-sm font-medium flex-shrink-0"
+                className="flex-shrink-0 text-sm font-medium text-f1-foreground-tertiary"
               >
                 {disclaimer.linkText}
               </Link>
@@ -334,7 +326,6 @@ const FullscreenChatInput = () => {
  * @experimental This is an experimental component use it at your own risk
  */
 export const F0AiChat = experimentalComponent("F0AiChat", F0AiChatComponent)
-
 
 /**
  * @experimental This is an experimental component use it at your own risk
