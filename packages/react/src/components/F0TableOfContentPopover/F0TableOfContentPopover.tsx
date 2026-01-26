@@ -45,12 +45,12 @@ export function F0TableOfContentPopover({
   const [isOpen, setIsOpen] = useState(false)
   const shouldScrollRef = useRef(false)
 
-  const handleOpenChange = (open: boolean) => {
-    if (open && !isOpen) {
-      // Transitioning from closed to open - enable scroll
+  const handleOpenChange = (nextIsOpenStatus: boolean) => {
+    const isOpening = nextIsOpenStatus && !isOpen
+    if (isOpening) {
       shouldScrollRef.current = true
     }
-    setIsOpen(open)
+    setIsOpen(nextIsOpenStatus)
   }
 
   const contentRefCallback = useCallback((container: HTMLDivElement | null) => {
