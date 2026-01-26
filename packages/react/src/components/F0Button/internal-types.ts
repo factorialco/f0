@@ -99,6 +99,12 @@ export type ButtonInternalProps = Pick<
      * The style of the button.
      */
     style?: React.CSSProperties
+
+    /**
+     * @private
+     * If true, the button will stretch to the full width of its container.
+     */
+    block?: boolean
   } & ( // Target can only be used if href is provided
     | {
         /**

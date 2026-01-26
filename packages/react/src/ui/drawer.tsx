@@ -3,6 +3,9 @@ import { Drawer as DrawerPrimitive } from "vaul"
 
 import { cn } from "../lib/utils"
 
+/**
+ * @deprecated We are using radix dialog instead
+ */
 const Drawer = ({
   shouldScaleBackground = true,
   ...props

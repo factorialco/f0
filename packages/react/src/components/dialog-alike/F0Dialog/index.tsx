@@ -3,17 +3,14 @@ import { experimentalComponent } from "@/lib/experimental"
 import { F0Dialog as F0DialogComponent } from "./F0Dialog"
 
 export {
-  F0DialogContext,
-  F0DialogProvider,
-  useF0Dialog,
-} from "./components/F0DialogProvider"
+  DialogWrapperContext as F0DialogContext,
+  DialogWrapperProvider as F0DialogProvider,
+  useDialogWrapperContext as useF0Dialog,
+} from "../common/DialogWrapperProvider"
 export type {
-  DialogPosition,
-  DialogWidth,
+  F0DialogSize,
   F0DialogActionsProps,
-  F0DialogPrimaryAction,
-  F0DialogPrimaryActionItem,
-  F0DialogSecondaryAction,
+  F0DialogAction,
 } from "./types"
 
 /**

@@ -2,7 +2,7 @@ import { type AIMessage } from "@copilotkit/shared"
 import { useCallback, useEffect, useState } from "react"
 
 import { useI18n } from "@/ai"
-import { F0Dialog } from "@/components/F0Dialog"
+import { F0Dialog } from "@/components/dialog-alike/F0Dialog"
 import { Input } from "@/experimental/Forms/Fields/Input"
 
 import { UserReaction } from "./FeedbackProvider"
@@ -52,10 +52,9 @@ export const FeedbackModal = ({
 
   return (
     <F0Dialog
-      position="center"
       isOpen
       onClose={handleClose}
-      width="sm"
+      size="sm"
       title={title}
       primaryAction={{
         label: translation.actions.send,

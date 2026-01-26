@@ -1,0 +1,24 @@
+import { Canvas, Meta } from "@storybook/addon-docs/blocks"
+import LinkTo from "@storybook/addon-links/react"
+import * as DialogNotificationStories from "./DialogNotification.stories"
+
+<Meta of={DialogNotificationStories} />
+
+# DialogNotification (Internal Component)
+
+This is an internal component used by `F0Dialog` to display notification-style dialogs.
+It is NOT intended to be used directly.
+
+To use notification dialogs, please use the <LinkTo kind="Dialogs" story="Docs">useDialog</LinkTo> hook.
+Check the <LinkTo kind="Dialogs" story="Docs">useDialog documentation</LinkTo> for more information.
+
+<div className="border-yellow-200 text-yellow-800 mt-4 rounded-md border bg-yellow-50 p-4">
+  <strong>Internal Component:</strong> This component is internal and should not
+  be used directly in your application. Please refer to{" "}
+  <LinkTo kind="Dialogs" story="Docs">
+    useDialog
+  </LinkTo>{" "}
+  hook for displaying notifications.
+</div>
+
+<Canvas of={DialogNotificationStories.Default} />

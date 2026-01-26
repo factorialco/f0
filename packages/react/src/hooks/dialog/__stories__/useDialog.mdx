@@ -1,0 +1,553 @@
+import { Canvas, Meta } from "@storybook/addon-docs/blocks"
+import * as UseDialogStories from "./useDialog.stories"
+
+<Meta of={UseDialogStories} />
+
+# useDialog Hook
+
+## Introduction
+
+### Definition
+
+The `useDialog` hook provides a simplified, promise-based API for managing dialogs in React applications. It wraps the `F0Dialog` component internally, handling all state management and providing a streamlined developer experience.
+
+### Purpose
+
+- **Simplify dialog management:** Eliminate boilerplate code for dialog state, handlers, and conditional rendering
+- **Promise-based API:** Use async/await patterns for cleaner, more readable code
+- **Automatic state handling:** No need to manage `useState` hooks or dialog open/close logic
+- **Consistent experience:** Standardized dialog patterns across the application
+- **Less code:** Reduce the amount of code needed to display dialogs significantly
+
+## Why useDialog?
+
+The `useDialog` hook was created to provide a simpler and smoother experience, avoiding the need to write a lot of code. Here's a comparison showing how much simpler it is to use the hook versus managing `F0Dialog` directly:
+
+### Before: Using F0Dialog directly
+
+When using `F0Dialog` directly, you need to manage state, handlers, and conditional rendering:
+
+```tsx
+import { useState } from "react"
+import { F0Dialog } from "@/components/F0Dialog"
+import { F0Button } from "@/components/F0Button"
+
+function DeleteItemButton() {
+  const [isOpen, setIsOpen] = useState(false)
+
+  const handleDelete = () => {
+    // Perform delete action
+    console.log("Item deleted")
+    setIsOpen(false)
+  }
+
+  const handleCancel = () => {
+    setIsOpen(false)
+  }
+
+  return (
+    <>
+      <F0Button label="Delete Item" onClick={() => setIsOpen(true)} />
+      {isOpen && (
+        <F0Dialog
+          isOpen={isOpen}
+          onClose={handleCancel}
+          title="Delete Item"
+          description="Are you sure you want to delete this item? This action cannot be undone."
+          primaryAction={{
+            label: "Delete",
+            onClick: handleDelete,
+          }}
+          secondaryAction={{
+            label: "Cancel",
+            onClick: handleCancel,
+          }}
+        >
+          <div>This action cannot be undone.</div>
+        </F0Dialog>
+      )}
+    </>
+  )
+}
+```
+
+### After: Using useDialog hook
+
+With `useDialog`, the same functionality is achieved with much less code:
+
+```tsx
+import { useDialog } from "@/hooks/dialog"
+import { F0Button } from "@/components/F0Button"
+
+function DeleteItemButton() {
+  const { confirm } = useDialog()
+
+  const handleClick = async () => {
+    const result = await confirm({
+      title: "Delete Item",
+      msg: "Are you sure you want to delete this item? This action cannot be undone.",
+    })
+
+    if (result) {
+      // Perform delete action
+      console.log("Item deleted")
+    }
+  }
+
+  return <F0Button label="Delete Item" onClick={handleClick} />
+}
+```
+
+The hook handles all the state management, dialog rendering, and cleanup automatically. The promise-based API makes it easy to handle user responses with async/await.
+
+## Notification Dialogs
+
+The `openNotificationDialog` method displays a notification dialog which should be used to display messages to the user or ask for a confirmation.
+Notification dialogs have different severity levels: `info`, `warning`, `critical` and `positive`.
+By default, the severity level is `info`.
+
+```tsx
+import { useDialog } from "@/hooks/dialog"
+
+function MyComponent() {
+  const { openNotificationDialog } = useDialog()
+
+  const showNotification = async () => {
+    await openNotificationDialog({
+      title: "Notification Title",
+      msg: "This is a notification message",
+      type: "critical",
+      actions: {
+        primary: {
+          value: true,
+          label: "Actept",
+        },
+      },
+    })
+  }
+
+  return <button onClick={showNotification}>Show Notification</button>
+}
+```
+
+<Canvas of={UseDialogStories.Notification} />
+
+### Alert Dialog
+
+The `alert` method displays a simple alert dialog with a single confirmation button. It returns a promise that resolves when the user clicks the confirm button.
+
+```tsx
+import { useDialog } from "@/hooks/dialog"
+
+function MyComponent() {
+  const { alert } = useDialog()
+
+  const showAlert = async () => {
+    await alert({ title: "Alert Title", msg: "This is an alert message" })
+    console.log("Alert dismissed")
+  }
+
+  return <button onClick={showAlert}>Show Alert</button>
+}
+```
+
+<Canvas of={UseDialogStories.Alert} />
+
+### Confirm Dialog
+
+The `confirm` method displays a confirmation dialog with both confirm and cancel buttons. It returns a promise that resolves to `true` if confirmed, or `false` if cancelled.
+
+```tsx
+import { useDialog } from "@/hooks/dialog"
+
+function MyComponent() {
+  const { confirm } = useDialog()
+
+  const handleDelete = async () => {
+    const result = await confirm({
+      title: "Delete Item",
+      msg: "Are you sure you want to delete this item?",
+    })
+
+    if (result) {
+      // User confirmed - proceed with deletion
+      console.log("Deleting item...")
+    } else {
+      // User cancelled
+      console.log("Deletion cancelled")
+    }
+  }
+
+  return <button onClick={handleDelete}>Delete</button>
+}
+```
+
+<Canvas of={UseDialogStories.Confirm} />
+
+### Custom Dialog
+
+The `openDialog` method provides full control over the dialog content and actions. It accepts a dialog definition and returns a promise that resolves with the value of the action clicked.
+
+```tsx
+import { useDialog } from "@/hooks/dialog"
+import { Delete, Pencil } from "lucide-react"
+
+function MyComponent() {
+  const { openDialog } = useDialog()
+
+  const showCustomDialog = async () => {
+    const result = await openDialog({
+      title: "Dialog Title",
+      description: "Dialog Description",
+      content: <div>Custom dialog content goes here</div>,
+      actions: {
+        primary: {
+          value: "primary",
+          label: "Primary Action",
+        },
+        secondary: [
+          {
+            value: "delete",
+            icon: Delete,
+            label: "Delete",
+          },
+          {
+            value: "edit",
+            icon: Pencil,
+            label: "Edit",
+          },
+        ],
+      },
+    })
+
+    console.log("User selected:", result)
+  }
+
+  return <button onClick={showCustomDialog}>Open Dialog</button>
+}
+```
+
+<Canvas of={UseDialogStories.Dialog} />
+
+## Advanced Usage
+
+### Promise-Based Actions
+
+The `DialogActionValue` can be a primitive value or a function that returns a Promise. When a function is provided, the dialog will remain open until the promise resolves, and all dialog actions will be disabled during the async operation (unless `nonBlocking` is set to `true`).
+
+#### Confirm with Async Operation
+
+```tsx
+import { useDialog } from "@/hooks/dialog"
+
+function MyComponent() {
+  const { confirm } = useDialog()
+
+  const handleSave = async () => {
+    const result = await confirm("Save Changes", "Do you want to save?", {
+      confirm: {
+        value: async () => {
+          // Simulate API call
+          await new Promise((resolve) => setTimeout(resolve, 2000))
+          return "saved"
+        },
+        label: "Save",
+      },
+    })
+
+    console.log("Result:", result) // "saved" after promise resolves
+  }
+
+  return <button onClick={handleSave}>Save</button>
+}
+```
+
+<Canvas of={UseDialogStories.ConfirmWithPromiseAndCustomLabel} />
+
+#### Dialog with Promise-Based Primary Actions
+
+```tsx
+import { useDialog } from "@/hooks/dialog"
+
+function MyComponent() {
+  const { openDialog } = useDialog()
+
+  const showDialog = async () => {
+    const result = await openDialog({
+      title: "Process Data",
+      description: "Choose an action",
+      content: <div>Processing options...</div>,
+      actions: {
+        primary: [
+          {
+            value: "quick",
+            label: "Quick Process",
+          },
+          {
+            value: async () => {
+              // Long-running operation
+              await new Promise((resolve) => setTimeout(resolve, 3000))
+              return "processed"
+            },
+            label: "Full Process",
+          },
+        ],
+      },
+    })
+
+    console.log("Result:", result)
+  }
+
+  return <button onClick={showDialog}>Process</button>
+}
+```
+
+<Canvas of={UseDialogStories.DialogWithDropdownAndPromises} />
+
+### keepOpen Property
+
+When `keepOpen` is set to `true` on a `DialogAction`, the dialog will not close automatically when that action is clicked. This is useful for multi-step dialogs or when you need manual control over when the dialog closes.
+
+```tsx
+import { useDialog } from "@/hooks/dialog"
+
+function MyComponent() {
+  const { openDialog } = useDialog()
+
+  const showMultiStepDialog = async () => {
+    const result = await openDialog({
+      title: "Multi-Step Process",
+      content: <div>Step 1: Initial information</div>,
+      actions: {
+        primary: {
+          value: "next",
+          label: "Next",
+          keepOpen: true, // Dialog stays open
+        },
+        secondary: {
+          value: "cancel",
+          label: "Cancel",
+        },
+      },
+    })
+
+    if (result === "next") {
+      // Show next step dialog
+      await openDialog({
+        title: "Multi-Step Process",
+        content: <div>Step 2: Final confirmation</div>,
+        actions: {
+          primary: {
+            value: "complete",
+            label: "Complete",
+          },
+        },
+      })
+    }
+  }
+
+  return <button onClick={showMultiStepDialog}>Start Process</button>
+}
+```
+
+### nonBlocking Property
+
+When `nonBlocking` is set to `true` on a `DialogAction`, the dialog actions will remain enabled during promise execution. By default, when an action's value is a promise-returning function, all dialog actions are disabled until the promise resolves. Use `nonBlocking: true` when you want users to be able to interact with other actions while one is processing.
+
+```tsx
+import { useDialog } from "@/hooks/dialog"
+
+function MyComponent() {
+  const { openDialog } = useDialog()
+
+  const showNonBlockingDialog = async () => {
+    const result = await openDialog({
+      title: "Background Operation",
+      content: <div>You can cancel while processing...</div>,
+      actions: {
+        primary: {
+          value: async () => {
+            // Long-running operation
+            await new Promise((resolve) => setTimeout(resolve, 5000))
+            return "completed"
+          },
+          label: "Start Processing",
+          nonBlocking: true, // Other actions remain enabled
+        },
+        secondary: {
+          value: "cancel",
+          label: "Cancel",
+        },
+      },
+    })
+
+    console.log("Result:", result)
+  }
+
+  return <button onClick={showNonBlockingDialog}>Start</button>
+}
+```
+
+## Type Reference
+
+### DialogDefinition
+
+The main type for defining a dialog. All properties except `id` are required when using `openDialog`.
+
+```tsx
+type DialogDefinition = {
+  /**
+   * The unique identifier for the dialog. Auto-generated if not provided.
+   */
+  id?: DialogId
+
+  /**
+   * The title displayed in the dialog header.
+   */
+  title: string
+
+  /**
+   * Optional description text displayed below the title.
+   */
+  description?: string
+
+  /**
+   * The main content of the dialog. Can be any React node.
+   */
+  content: ReactNode
+
+  /**
+   * The actions available in the dialog footer.
+   */
+  actions: DialogActions
+
+  /**
+   * The visual variant of the dialog.
+   * @default "default"
+   */
+  variant?: "default" | "critical" | "neutral"
+
+  /**
+   * The width of the dialog (only applies to center position).
+   * @default "md"
+   */
+  width?: "sm" | "md" | "lg"
+
+  /**
+   * If true, the dialog will not be closed automatically when an action is clicked.
+   * This is useful for dialogs that need to be closed manually.
+   */
+  keepOpen?: boolean
+}
+```
+
+### DialogAction
+
+Defines a single action button in the dialog.
+
+```tsx
+type DialogAction = {
+  /**
+   * The label text displayed on the button.
+   */
+  label: string
+
+  /**
+   * Optional icon component to display alongside the label.
+   */
+  icon?: IconType
+
+  /**
+   * Whether the action button is disabled.
+   */
+  disabled?: boolean
+
+  /**
+   * The value returned when this action is clicked.
+   * Can be a primitive value or a function returning a Promise.
+   */
+  value: DialogActionValue
+
+  /**
+   * If true, the dialog will not be closed automatically when this action is clicked.
+   * Useful for multi-step dialogs or when you need manual control.
+   */
+  keepOpen?: boolean
+
+  /**
+   * If true, the dialog actions will remain enabled during promise execution.
+   * By default, actions are disabled while a promise-based action is processing.
+   */
+  nonBlocking?: boolean
+}
+```
+
+### DialogActionValue
+
+The value type for dialog actions. Can be a primitive value or a function that returns a Promise.
+
+```tsx
+type DialogActionValue =
+  | string
+  | boolean
+  | number
+  | undefined
+  | null
+  | (() => Promise<DialogActionValuePrimitive>)
+```
+
+**Primitive Values:**
+
+When a primitive value is used, the dialog closes immediately and returns that value:
+
+```tsx
+{
+  value: "save", // Returns "save" immediately
+  label: "Save",
+}
+```
+
+**Promise-Returning Functions:**
+
+When a function returning a Promise is used:
+
+- The dialog remains open until the promise resolves
+- All dialog actions are disabled during execution (unless `nonBlocking: true`)
+- The resolved value is returned when the promise completes
+
+```tsx
+{
+  value: async () => {
+    await saveToServer();
+    return "saved";
+  },
+  label: "Save",
+}
+```
+
+**Behavior:**
+
+- The dialog stays open while the promise is pending
+- Dialog actions are disabled (blocked) during execution
+- The close button is disabled during execution
+- Once resolved, the dialog closes and returns the resolved value
+- Set `nonBlocking: true` to keep actions enabled during execution
+- Set `keepOpen: true` to prevent automatic closing after promise resolves
+
+### DialogActions
+
+Defines the action buttons for the dialog footer.
+
+```tsx
+type DialogActions = {
+  /**
+   * Primary action(s). Can be a single action or an array for dropdown menu.
+   */
+  primary: DialogAction | DialogAction[]
+
+  /**
+   * Optional secondary action(s). Can be a single action or an array.
+   */
+  secondary?: DialogAction | DialogAction[]
+}
+```
