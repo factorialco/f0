@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.337.0](https://github.com/factorialco/f0/compare/f0-react-v1.336.1...f0-react-v1.337.0) (2026-01-27)
+
+
+### Features
+
+* update docs for nested tables in Data Collection ([#3296](https://github.com/factorialco/f0/issues/3296)) ([b595b8b](https://github.com/factorialco/f0/commit/b595b8b72ab48b1201cc8c9ec5efe8028726c824))
+
 ## [1.336.1](https://github.com/factorialco/f0/compare/f0-react-v1.336.0...f0-react-v1.336.1) (2026-01-27)
 
 
