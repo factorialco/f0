@@ -1,6 +1,6 @@
 {
   "name": "@factorialco/f0-react",
-  "version": "1.338.0",
+  "version": "1.338.1",
   "main": "dist/f0.js",
   "typings": "dist/f0.d.ts",
   "private": false,
@@ -50,7 +50,6 @@
     "vitest:ci": "pnpm run vitest --project=unit --reporter=dot",
     "cycle-deps:delta": "tsx --tsconfig tsconfig.node.json .scripts/check-cycle-dependencies.ts"
   },
-  
   "dependencies": {
     "@atlaskit/pragmatic-drag-and-drop": "^1.7.4",
     "@atlaskit/pragmatic-drag-and-drop-flourish": "^2.0.4",
