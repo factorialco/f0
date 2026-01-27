@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.337.1](https://github.com/factorialco/f0/compare/f0-react-v1.337.0...f0-react-v1.337.1) (2026-01-27)
+
+
+### Bug Fixes
+
+* take into account overflowButtonWidth just when there is overflow ([#3294](https://github.com/factorialco/f0/issues/3294)) ([807b341](https://github.com/factorialco/f0/commit/807b3418afc99261dc103ea8dc7bc0855bf83e36))
+
 ## [1.337.0](https://github.com/factorialco/f0/compare/f0-react-v1.336.1...f0-react-v1.337.0) (2026-01-27)
 
 
