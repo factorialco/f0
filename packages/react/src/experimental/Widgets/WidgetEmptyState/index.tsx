@@ -1,3 +1,5 @@
+import { experimentalComponent } from "@/lib/experimental"
+
 import { IconType } from "../../../components/F0Icon"
 import { OneEmptyState } from "../../OneEmptyState/OneEmptyState"
 
@@ -15,7 +17,7 @@ export type WidgetEmptyStateProps = {
   actions?: Action[]
 }
 
-export function WidgetEmptyState({
+function _WidgetEmptyState({
   title,
   description,
   emoji,
@@ -36,3 +38,11 @@ export function WidgetEmptyState({
     />
   )
 }
+
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export const WidgetEmptyState = experimentalComponent(
+  "WidgetEmptyState",
+  _WidgetEmptyState
+)
