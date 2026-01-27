@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.338.1](https://github.com/factorialco/f0/compare/f0-react-v1.338.0...f0-react-v1.338.1) (2026-01-27)
+
+
+### Bug Fixes
+
+* **popover:** height and overflow ([#3271](https://github.com/factorialco/f0/issues/3271)) ([c888c94](https://github.com/factorialco/f0/commit/c888c94eb8501a0ef8544bf9f9d39fb975047121))
+
 ## [1.338.0](https://github.com/factorialco/f0/compare/f0-react-v1.337.2...f0-react-v1.338.0) (2026-01-27)
 
 
