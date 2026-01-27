@@ -82,7 +82,12 @@ export const F0Alert = ({
               )}
             >
               {link && (
-                <F0Link href={link.href} target="_blank" variant="link">
+                <F0Link
+                  href={link.href}
+                  target="_blank"
+                  variant="link"
+                  size="sm"
+                >
                   {link.label}
                 </F0Link>
               )}
@@ -91,6 +96,7 @@ export const F0Alert = ({
                   label={action.label}
                   variant="outline"
                   onClick={action.onClick}
+                  size="sm"
                 />
               )}
             </div>
