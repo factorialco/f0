@@ -94,7 +94,7 @@ const _Item = forwardRef<HTMLLIElement, ItemProps>(
 _Item.displayName = "DataList.Item"
 
 /**
- * @experimental This is an experimental component use it at your own risk
+ * @experimental This is an experimental component, use it at your own risk
  */
 const Item = experimentalComponent("DataList.Item", _Item)
 
