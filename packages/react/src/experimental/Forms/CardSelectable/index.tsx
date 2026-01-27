@@ -15,8 +15,8 @@ export function CardSelectableContainer<T extends CardSelectableValue>(
   const {
     items,
     disabled = false,
-    "aria-label": ariaLabel,
-    layout = "horizontal",
+    label,
+    layout = "vertical",
     multiple,
   } = props
 
@@ -52,7 +52,7 @@ export function CardSelectableContainer<T extends CardSelectableValue>(
   return (
     <div
       role={isMultiple ? "group" : "radiogroup"}
-      aria-label={ariaLabel}
+      aria-label={label}
       className={cn(
         "flex gap-3",
         layout === "vertical" ? "flex-col" : "flex-row"

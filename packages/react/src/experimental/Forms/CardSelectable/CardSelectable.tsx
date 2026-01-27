@@ -2,8 +2,9 @@ import { AvatarVariant, F0Avatar } from "@/components/avatars/F0Avatar"
 import { F0AvatarEmoji } from "@/components/avatars/F0AvatarEmoji"
 import { F0AvatarFile } from "@/components/avatars/F0AvatarFile"
 import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon"
+import { F0Icon } from "@/components/F0Icon"
+import { Check } from "@/icons/app"
 import { cn, focusRing } from "@/lib/utils"
-import { Checkbox } from "@/ui/checkbox"
 
 import type {
   CardSelectableAvatarVariant,
@@ -28,15 +29,30 @@ function RadioIndicator({ checked }: { checked: boolean }) {
   return (
     <div
       className={cn(
-        "flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 border-solid transition-colors",
+        "flex h-5 w-5 shrink-0 items-center justify-center rounded-full transition-colors",
         checked
-          ? "border-f1-border-selected-bold bg-f1-background-selected-bold"
-          : "border-f1-border bg-f1-background"
+          ? "bg-f1-background-selected-bold"
+          : "border-2 border-solid border-f1-border bg-f1-background"
       )}
     >
-      {checked && (
-        <div className="h-2 w-2 rounded-full bg-f1-foreground-inverse" />
+      {checked && <div className="h-2 w-2 rounded-full bg-f1-background" />}
+    </div>
+  )
+}
+
+/** Visual checkbox indicator without accessibility role (role is on parent) */
+function CheckboxIndicator({ checked }: { checked: boolean }) {
+  return (
+    <div
+      aria-hidden="true"
+      className={cn(
+        "flex h-5 w-5 shrink-0 items-center justify-center rounded-xs transition-colors",
+        checked
+          ? "bg-f1-background-selected-bold text-f1-foreground-inverse"
+          : "border border-solid border-f1-border bg-f1-background"
       )}
+    >
+      {checked && <F0Icon icon={Check} size="sm" />}
     </div>
   )
 }
@@ -98,18 +114,7 @@ export function CardSelectable<T extends CardSelectableValue>({
         )}
       </div>
       {multiple ? (
-        <Checkbox
-          checked={selected}
-          disabled={isDisabled}
-          onCheckedChange={() => {
-            if (!isDisabled) {
-              onSelect()
-            }
-          }}
-          onClick={(e) => e.stopPropagation()}
-          hideLabel
-          className="pointer-events-none"
-        />
+        <CheckboxIndicator checked={selected} />
       ) : (
         <RadioIndicator checked={selected} />
       )}

@@ -51,7 +51,7 @@ export const Default: Story = {
         items={defaultItems}
         value={value}
         onChange={setValue}
-        aria-label="Payment type selection"
+        label="Payment type selection"
       />
     )
   },
@@ -82,7 +82,7 @@ export const Unselected: Story = {
         items={defaultItems}
         value={value}
         onChange={setValue}
-        aria-label="Payment type selection"
+        label="Payment type selection"
       />
     )
   },
@@ -97,7 +97,7 @@ export const MultipleSelection: Story = {
         items={defaultItems}
         value={value}
         onChange={setValue}
-        aria-label="Payment type selection"
+        label="Payment type selection"
       />
     )
   },
@@ -157,13 +157,13 @@ export const WithNumbers: Story = {
         items={numericItems}
         value={value}
         onChange={setValue}
-        aria-label="Numeric selection"
+        label="Numeric selection"
       />
     )
   },
 }
 
-export const Vertical: Story = {
+export const Horizontal: Story = {
   render: function Render() {
     const [value, setValue] = useState<string>("new")
     return (
@@ -171,8 +171,8 @@ export const Vertical: Story = {
         items={defaultItems}
         value={value}
         onChange={setValue}
-        layout="vertical"
-        aria-label="Payment type selection"
+        layout="horizontal"
+        label="Payment type selection"
       />
     )
   },
@@ -192,7 +192,7 @@ export const TitleOnly: Story = {
         items={titleOnlyItems}
         value={value}
         onChange={setValue}
-        aria-label="Simple selection"
+        label="Simple selection"
       />
     )
   },
@@ -225,7 +225,7 @@ export const WithDisabledItem: Story = {
         items={itemsWithDisabled}
         value={value}
         onChange={setValue}
-        aria-label="Selection with disabled item"
+        label="Selection with disabled item"
       />
     )
   },
@@ -240,7 +240,7 @@ export const Disabled: Story = {
         value={value}
         onChange={setValue}
         disabled
-        aria-label="Disabled selection"
+        label="Disabled selection"
       />
     )
   },
@@ -269,7 +269,7 @@ export const WithIconAvatar: Story = {
         items={iconItems}
         value={value}
         onChange={setValue}
-        aria-label="Action selection"
+        label="Action selection"
       />
     )
   },
@@ -304,8 +304,7 @@ export const WithPersonAvatar: Story = {
         items={personItems}
         value={value}
         onChange={setValue}
-        layout="vertical"
-        aria-label="Assignee selection"
+        label="Assignee selection"
       />
     )
   },
@@ -334,7 +333,7 @@ export const WithTeamAvatar: Story = {
         items={teamItems}
         value={value}
         onChange={setValue}
-        aria-label="Team selection"
+        label="Team selection"
       />
     )
   },
@@ -363,7 +362,7 @@ export const WithEmojiAvatar: Story = {
         items={emojiItems}
         value={value}
         onChange={setValue}
-        aria-label="Category selection"
+        label="Category selection"
       />
     )
   },
@@ -398,8 +397,7 @@ export const MixedAvatars: Story = {
         items={mixedItems}
         value={value}
         onChange={setValue}
-        layout="vertical"
-        aria-label="Mixed selection"
+        label="Mixed selection"
       />
     )
   },
@@ -414,8 +412,7 @@ export const MultipleWithAvatars: Story = {
         items={personItems}
         value={value}
         onChange={setValue}
-        layout="vertical"
-        aria-label="Multiple person selection"
+        label="Multiple person selection"
       />
     )
   },

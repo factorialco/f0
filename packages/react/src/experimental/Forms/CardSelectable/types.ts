@@ -33,10 +33,10 @@ export interface CardSelectableSingleProps<T extends CardSelectableValue> {
   onChange?: (value: T) => void
   /** Whether the entire selector is disabled */
   disabled?: boolean
-  /** Accessible label for the group */
-  "aria-label"?: string
-  /** Layout direction */
-  layout?: "horizontal" | "vertical"
+  /** Label for the group (used for accessibility) */
+  label?: string
+  /** Layout direction (default: vertical) */
+  layout?: "vertical" | "horizontal"
 }
 
 export interface CardSelectableMultipleProps<T extends CardSelectableValue> {
@@ -50,10 +50,10 @@ export interface CardSelectableMultipleProps<T extends CardSelectableValue> {
   onChange?: (value: T[]) => void
   /** Whether the entire selector is disabled */
   disabled?: boolean
-  /** Accessible label for the group */
-  "aria-label"?: string
-  /** Layout direction */
-  layout?: "horizontal" | "vertical"
+  /** Label for the group (used for accessibility) */
+  label?: string
+  /** Layout direction (default: vertical) */
+  layout?: "vertical" | "horizontal"
 }
 
 export type CardSelectableContainerProps<T extends CardSelectableValue> =
