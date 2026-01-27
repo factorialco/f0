@@ -1351,6 +1351,80 @@ declare const cardPropertyRenderers: {
 
 declare type CardPropertyType = keyof typeof cardPropertyRenderers;
 
+export declare function CardSelectable<T extends CardSelectableValue>({ item, selected, disabled, multiple, onSelect, }: CardSelectableProps<T>): JSX_2.Element;
+
+declare type CardSelectableAvatarVariant = AvatarVariant | {
+    type: "emoji";
+    emoji: string;
+} | {
+    type: "file";
+    file: File;
+} | {
+    type: "icon";
+    icon: IconType;
+};
+
+export declare function CardSelectableContainer<T extends CardSelectableValue>(props: CardSelectableContainerProps<T>): React.ReactElement;
+
+export declare type CardSelectableContainerProps<T extends CardSelectableValue> = CardSelectableSingleProps<T> | CardSelectableMultipleProps<T>;
+
+export declare interface CardSelectableItem<T extends CardSelectableValue> {
+    /** Unique value for this option */
+    value: T;
+    /** Main title of the card */
+    title: string;
+    /** Description text below the title */
+    description?: string;
+    /** Avatar to display on the left */
+    avatar?: CardSelectableAvatarVariant;
+    /** Whether this item is disabled */
+    disabled?: boolean;
+}
+
+export declare interface CardSelectableMultipleProps<T extends CardSelectableValue> {
+    /** List of selectable items */
+    items: CardSelectableItem<T>[];
+    /** Multiple selection mode */
+    multiple: true;
+    /** Currently selected values */
+    value?: T[];
+    /** Callback when selection changes */
+    onChange?: (value: T[]) => void;
+    /** Whether the entire selector is disabled */
+    disabled?: boolean;
+    /** Label for the group (used for accessibility) */
+    label?: string;
+    /** Layout direction (default: vertical) */
+    layout?: "vertical" | "horizontal";
+}
+
+declare interface CardSelectableProps<T extends CardSelectableValue> {
+    item: CardSelectableItem<T>;
+    selected: boolean;
+    disabled: boolean;
+    multiple: boolean;
+    onSelect: () => void;
+}
+
+export declare interface CardSelectableSingleProps<T extends CardSelectableValue> {
+    /** List of selectable items */
+    items: CardSelectableItem<T>[];
+    /** Single selection mode (default) */
+    multiple?: false;
+    /** Currently selected value */
+    value?: T;
+    /** Callback when selection changes */
+    onChange?: (value: T) => void;
+    /** Whether the entire selector is disabled */
+    disabled?: boolean;
+    /** Label for the group (used for accessibility) */
+    label?: string;
+    /** Layout direction (default: vertical) */
+    layout?: "vertical" | "horizontal";
+}
+
+export declare type CardSelectableValue = string | number;
+
 declare type CardVisualizationOptions<T, _Filters extends FiltersDefinition, _Sortings extends SortingsDefinition> = {
     cardProperties: ReadonlyArray<CardPropertyDefinition<T>>;
     title: (record: T) => string;
@@ -6509,6 +6583,11 @@ declare module "gridstack" {
 }
 
 
+declare namespace Calendar {
+    var displayName: string;
+}
+
+
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         aiBlock: {
@@ -6534,9 +6613,4 @@ declare module "@tiptap/core" {
             insertTranscript: (data: TranscriptData) => ReturnType;
         };
     }
-}
-
-
-declare namespace Calendar {
-    var displayName: string;
 }
