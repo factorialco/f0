@@ -3434,7 +3434,7 @@ declare type KanbanVisualizationOptions<Record extends RecordType, _Filters exte
 
 declare type L10nContextValue = {
     locale: string;
-    date: {
+    date?: {
         weekStartsOn: WeekStartsOn;
     };
 };
@@ -5285,6 +5285,11 @@ declare module "gridstack" {
 }
 
 
+declare namespace Calendar {
+    var displayName: string;
+}
+
+
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         aiBlock: {
@@ -5310,9 +5315,4 @@ declare module "@tiptap/core" {
             insertTranscript: (data: TranscriptData) => ReturnType;
         };
     }
-}
-
-
-declare namespace Calendar {
-    var displayName: string;
 }

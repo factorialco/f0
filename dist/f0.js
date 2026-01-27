@@ -1,10 +1,10 @@
-import { c as $, a as xt, b as Dn, m as Si, B as Ni, O as Yr, p as qr, w as Rn, S as we, u as Sn, F as Nn, d as Jr, A as Zr, D as Qr, e as es, f as fe, C as ve, g as ts, h as is, i as An, j as ns, k as Lt, P as On, l as kn, n as Tn, o as zn, q as Pn, r as Mn, s as rs, t as ss, v as Ji, x as os, H as as, y as ls, z as cs, E as Ln, G as ds, J as us, K as hs, L as fs, M as gs, N as In, Q as qe, R as ps, U as ms, T as vs, I as ys, V as bs, X as xs, W as ws, Y as Cs } from "./index-b5h4qera.js";
-import { af as Rd, au as Sd, Z as Nd, _ as Ad, $ as Od, a0 as kd, a1 as Td, a3 as zd, a4 as Pd, a5 as Md, a6 as Ld, a7 as Id, a8 as Hd, a9 as Bd, aa as Fd, aq as Wd, ac as Gd, ad as $d, ag as jd, ae as Ud, ar as Vd, al as Kd, ao as Xd, ak as Yd, av as qd, aj as Jd, ai as Zd, a2 as Qd, ah as eu, am as tu, aw as iu, ab as nu, an as ru, at as su, ap as ou, as as au } from "./index-b5h4qera.js";
+import { c as $, a as xt, b as Dn, m as Si, B as Ni, O as Yr, p as qr, w as Rn, S as we, u as Sn, F as Nn, d as Jr, A as Zr, D as Qr, e as es, f as fe, C as ve, g as ts, h as is, i as An, j as ns, k as Lt, P as On, l as kn, n as Tn, o as zn, q as Pn, r as Mn, s as rs, t as ss, v as Ji, x as os, H as as, y as ls, z as cs, E as Ln, G as ds, J as us, K as hs, L as fs, M as gs, N as In, Q as qe, R as ps, U as ms, T as vs, I as ys, V as bs, X as xs, W as ws, Y as Cs } from "./index-DVftYrQG.js";
+import { af as Rd, au as Sd, Z as Nd, _ as Ad, $ as Od, a0 as kd, a1 as Td, a3 as zd, a4 as Pd, a5 as Md, a6 as Ld, a7 as Id, a8 as Hd, a9 as Bd, aa as Fd, aq as Wd, ac as Gd, ad as $d, ag as jd, ae as Ud, ar as Vd, al as Kd, ao as Xd, ak as Yd, av as qd, aj as Jd, ai as Zd, a2 as Qd, ah as eu, am as tu, aw as iu, ab as nu, an as ru, at as su, ap as ou, as as au } from "./index-DVftYrQG.js";
 import { jsx as f, jsxs as P, Fragment as Jt } from "react/jsx-runtime";
 import M, { forwardRef as oe, useRef as L, useImperativeHandle as _s, Children as It, createContext as Ae, useContext as _e, useState as B, useMemo as H, useEffect as I, useCallback as U, useLayoutEffect as bi, createElement as Zi, isValidElement as Hn, Fragment as Es, memo as Ds, useReducer as Rs, cloneElement as Ss, PureComponent as Ns } from "react";
 import { createPortal as Bn, unstable_batchedUpdates as Ot } from "react-dom";
-import { L as Fn, C as As, i as Wn, D as Os, S as Qi, a as ks, f as ui, b as lt, c as Ts, A as zs, d as kt, e as Gn, E as Ps, g as Pt, h as Ms, j as Ls, k as Is, l as Ke, m as $n, u as Hs, G as Bs, n as Fs, o as en, p as Ws, q as jn, r as Gs, B as Un, X as Vn, Y as xi, s as $s, t as Kn, v as js, w as Us, x as Vs, y as Ks, z as Xs, F as Ys, H as qs, I as Js, J as tn, K as Zs, M as ct, N as hi, O as Qs, P as eo, Q as to, R as io, T as no, U as ro, V as so, W as oo, Z as ao, _ as lo, $ as co, a0 as nn, a1 as uo, a2 as ho, a3 as fo, a4 as Xn, a5 as go, a6 as po, a7 as rn, a8 as mo, a9 as Yn, aa as vo, ab as yo, ac as bo, ad as xo } from "./DataCollectionStorageProvider-DtHPdndA.js";
-import { ax as cu, ae as du, af as uu, ag as hu, aj as fu, ak as gu, ao as pu, ap as mu, aq as vu, as as yu, at as bu, au as xu, av as wu, an as Cu, ar as _u, ah as Eu, ai as Du, aw as Ru, al as Su, am as Nu, ay as Au, az as Ou, aA as ku, aB as Tu } from "./DataCollectionStorageProvider-DtHPdndA.js";
+import { L as Fn, C as As, i as Wn, D as Os, S as Qi, a as ks, f as ui, b as lt, c as Ts, A as zs, d as kt, e as Gn, E as Ps, g as Pt, h as Ms, j as Ls, k as Is, l as Ke, m as $n, u as Hs, G as Bs, n as Fs, o as en, p as Ws, q as jn, r as Gs, B as Un, X as Vn, Y as xi, s as $s, t as Kn, v as js, w as Us, x as Vs, y as Ks, z as Xs, F as Ys, H as qs, I as Js, J as tn, K as Zs, M as ct, N as hi, O as Qs, P as eo, Q as to, R as io, T as no, U as ro, V as so, W as oo, Z as ao, _ as lo, $ as co, a0 as nn, a1 as uo, a2 as ho, a3 as fo, a4 as Xn, a5 as go, a6 as po, a7 as rn, a8 as mo, a9 as Yn, aa as vo, ab as yo, ac as bo, ad as xo } from "./DataCollectionStorageProvider-4dXvrEW_.js";
+import { ax as cu, ae as du, af as uu, ag as hu, aj as fu, ak as gu, ao as pu, ap as mu, aq as vu, as as yu, at as bu, au as xu, av as wu, an as Cu, ar as _u, ah as Eu, ai as Du, aw as Ru, al as Su, am as Nu, ay as Au, az as Ou, aA as ku, aB as Tu } from "./DataCollectionStorageProvider-4dXvrEW_.js";
 import { defaultTranslations as Pu } from "./i18n-provider-defaults.js";
 import './f0.css';const wo = {
   xs: 1,
@@ -8657,7 +8657,7 @@ function Dc({ filters: n, value: e, onChange: t, height: i, width: r = 600, clas
   return !n || Object.keys(n).length === 0 ? null : f("div", {
     className: $("overflow-hidden rounded-xl border border-solid border-f1-border-secondary bg-f1-background", s),
     style: {
-      width: r
+      maxWidth: r
     },
     children: f(os, {
       filters: n,
