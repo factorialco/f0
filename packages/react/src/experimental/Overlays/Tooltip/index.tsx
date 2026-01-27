@@ -1,5 +1,6 @@
 import React, { ComponentProps } from "react"
 
+import { experimentalComponent } from "@/lib/experimental"
 import {
   TooltipContent,
   Tooltip as TooltipPrimitive,
@@ -74,7 +75,7 @@ export type TooltipProps = Omit<
   (typeof privateProps)[number]
 >
 
-const Tooltip = (props: TooltipProps) => {
+const _Tooltip = (props: TooltipProps) => {
   const publicProps = privateProps.reduce((acc, key) => {
     const { [key]: _, ...rest } = acc
     return rest
@@ -83,4 +84,7 @@ const Tooltip = (props: TooltipProps) => {
   return <TooltipInternal {...publicProps} />
 }
 
-export { Tooltip }
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export const Tooltip = experimentalComponent("Tooltip", _Tooltip)
