@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.336.1](https://github.com/factorialco/f0/compare/f0-react-v1.336.0...f0-react-v1.336.1) (2026-01-27)
+
+
+### Bug Fixes
+
+* add support to edit emojis in rating questions ([#3298](https://github.com/factorialco/f0/issues/3298)) ([ccd3845](https://github.com/factorialco/f0/commit/ccd3845ae900de0d47cde1d3d0b78a963543058e))
+
 ## [1.336.0](https://github.com/factorialco/f0/compare/f0-react-v1.335.0...f0-react-v1.336.0) (2026-01-27)
 
 
