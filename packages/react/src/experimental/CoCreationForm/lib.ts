@@ -5,19 +5,15 @@ export type RatingOptionType = "1-5" | "1-10" | "emojis"
 export const getRatingOptions = (type: RatingOptionType) => {
   switch (type) {
     case "1-5":
-      return new Array(5)
-        .fill(0)
-        .map((_, index) => ({
-          value: index + 1,
-          label: (index + 1).toString(),
-        }))
+      return new Array(5).fill(0).map((_, index) => ({
+        value: index + 1,
+        label: (index + 1).toString(),
+      }))
     case "1-10":
-      return new Array(10)
-        .fill(0)
-        .map((_, index) => ({
-          value: index + 1,
-          label: (index + 1).toString(),
-        }))
+      return new Array(10).fill(0).map((_, index) => ({
+        value: index + 1,
+        label: (index + 1).toString(),
+      }))
     case "emojis":
       return [
         { value: 1, label: "😠" },
