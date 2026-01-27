@@ -1,68 +1,82 @@
-import { useCallback, useState } from "react"
-
 import { cn } from "@/lib/utils"
 
 import type {
-  CardSelectableContextValue,
-  CardSelectableProps,
+  CardSelectableContainerProps,
+  CardSelectableMultipleProps,
+  CardSelectableSingleProps,
   CardSelectableValue,
 } from "./types"
 
-import { CardSelectableItem } from "./CardSelectableItem"
-import { CardSelectableContext } from "./context"
+import { CardSelectable } from "./CardSelectable"
 
-export function CardSelectable<T extends CardSelectableValue>({
-  value: controlledValue,
-  onValueChange,
-  defaultValue,
-  disabled = false,
-  "aria-label": ariaLabel,
-  layout = "horizontal",
-  children,
-}: CardSelectableProps<T>) {
-  const [uncontrolledValue, setUncontrolledValue] = useState<T | undefined>(
-    defaultValue
-  )
-  const isControlled = controlledValue !== undefined
-  const value = isControlled ? controlledValue : uncontrolledValue
+export function CardSelectableContainer<T extends CardSelectableValue>(
+  props: CardSelectableContainerProps<T>
+): React.ReactElement {
+  const {
+    items,
+    disabled = false,
+    "aria-label": ariaLabel,
+    layout = "horizontal",
+    multiple,
+  } = props
 
-  const onSelect = useCallback(
-    (newValue: T) => {
-      if (disabled) return
-      if (!isControlled) {
-        setUncontrolledValue(newValue)
-      }
-      onValueChange?.(newValue)
-    },
-    [isControlled, onValueChange, disabled]
-  )
+  const isMultiple = multiple === true
 
-  const contextValue: CardSelectableContextValue<CardSelectableValue> = {
-    value,
-    onSelect: onSelect as (value: CardSelectableValue) => void,
-    disabled,
+  const handleSelect = (itemValue: T) => {
+    if (isMultiple) {
+      const multiProps = props as CardSelectableMultipleProps<T>
+      const currentValues = multiProps.value ?? []
+      const isSelected = currentValues.includes(itemValue)
+
+      const newValues = isSelected
+        ? currentValues.filter((v) => v !== itemValue)
+        : [...currentValues, itemValue]
+
+      multiProps.onChange?.(newValues)
+    } else {
+      const singleProps = props as CardSelectableSingleProps<T>
+      singleProps.onChange?.(itemValue)
+    }
+  }
+
+  const isSelected = (itemValue: T): boolean => {
+    if (isMultiple) {
+      const multiProps = props as CardSelectableMultipleProps<T>
+      return (multiProps.value ?? []).includes(itemValue)
+    } else {
+      const singleProps = props as CardSelectableSingleProps<T>
+      return singleProps.value === itemValue
+    }
   }
 
   return (
-    <CardSelectableContext.Provider value={contextValue}>
-      <div
-        role="radiogroup"
-        aria-label={ariaLabel}
-        className={cn(
-          "flex gap-3",
-          layout === "horizontal" ? "flex-row" : "flex-col"
-        )}
-      >
-        {children}
-      </div>
-    </CardSelectableContext.Provider>
+    <div
+      role={isMultiple ? "group" : "radiogroup"}
+      aria-label={ariaLabel}
+      className={cn(
+        "flex gap-3",
+        layout === "vertical" ? "flex-col" : "flex-row"
+      )}
+    >
+      {items.map((item) => (
+        <CardSelectable
+          key={String(item.value)}
+          item={item}
+          selected={isSelected(item.value)}
+          disabled={disabled}
+          multiple={isMultiple}
+          onSelect={() => handleSelect(item.value)}
+        />
+      ))}
+    </div>
   )
 }
 
-export { CardSelectableItem }
+export { CardSelectable } from "./CardSelectable"
 export type {
-  CardSelectableAvatarVariant,
-  CardSelectableItemProps,
-  CardSelectableProps,
+  CardSelectableContainerProps,
+  CardSelectableItem,
+  CardSelectableMultipleProps,
+  CardSelectableSingleProps,
   CardSelectableValue,
 } from "./types"
