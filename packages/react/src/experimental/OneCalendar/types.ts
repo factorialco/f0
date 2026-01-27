@@ -30,3 +30,15 @@ export type DateRangeError = {
   from: boolean
   to: boolean
 }
+
+export const WeekStartDay = {
+  Sunday: 0,
+  Monday: 1,
+  Tuesday: 2,
+  Wednesday: 3,
+  Thursday: 4,
+  Friday: 5,
+  Saturday: 6,
+} as const
+
+export type WeekStartsOn = (typeof WeekStartDay)[keyof typeof WeekStartDay]

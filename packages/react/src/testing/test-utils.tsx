@@ -21,6 +21,7 @@ export * from "@testing-library/react"
 
 import { MotionGlobalConfig } from "motion"
 
+import { WeekStartDay } from "@/experimental/OneCalendar/types"
 import { DataCollectionStorageProvider } from "@/lib/providers/datacollection/DataCollectionStorageProvider"
 import { L10nProvider } from "@/lib/providers/l10n"
 MotionGlobalConfig.skipAnimations = true
@@ -34,7 +35,12 @@ const TestProviders = ({ children }: { children: React.ReactNode }) => {
       }}
     >
       <UserPlatformProvider showExperimentalWarnings={false}>
-        <L10nProvider l10n={{ locale: "en-US" }}>
+        <L10nProvider
+          l10n={{
+            locale: "en-US",
+            date: { weekStartsOn: WeekStartDay.Monday },
+          }}
+        >
           <I18nProvider translations={defaultTranslations}>
             {children}
           </I18nProvider>
