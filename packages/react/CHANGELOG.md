@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.338.0](https://github.com/factorialco/f0/compare/f0-react-v1.337.2...f0-react-v1.338.0) (2026-01-27)
+
+
+### Features
+
+* **CardSelectable:** add new card selection component ([#3299](https://github.com/factorialco/f0/issues/3299)) ([1f3a45b](https://github.com/factorialco/f0/commit/1f3a45b762b0c031bc2d8db6428b08aea299bb3c))
+
 ## [1.337.2](https://github.com/factorialco/f0/compare/f0-react-v1.337.1...f0-react-v1.337.2) (2026-01-27)
 
 
