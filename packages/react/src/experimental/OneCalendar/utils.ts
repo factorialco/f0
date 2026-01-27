@@ -1,9 +1,9 @@
 import { format, isAfter, isBefore, isEqual } from "date-fns"
 import * as locales from "date-fns/locale"
 import { Matcher } from "react-day-picker"
-import { rangeSeparator } from "./granularities/consts"
 
 import { GranularityDefinition } from "./granularities"
+import { rangeSeparator } from "./granularities/consts"
 import { DateRange, DateRangeComplete, DateRangeString } from "./types"
 // Get the locale object from date-fns/locale
 

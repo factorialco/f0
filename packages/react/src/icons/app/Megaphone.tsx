@@ -1,4 +1,5 @@
 import type { SVGProps } from "react"
+
 import { Ref, forwardRef } from "react"
 const SvgMegaphone = (
   props: SVGProps<SVGSVGElement>,

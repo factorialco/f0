@@ -1,7 +1,4 @@
 import { cva, type VariantProps } from "cva"
-import * as React from "react"
-import { experimentalComponent } from "@/lib/experimental"
-
 import {
   BookOpen,
   CircleCheck,
@@ -9,6 +6,10 @@ import {
   OctagonX,
   TriangleAlert,
 } from "lucide-react"
+import * as React from "react"
+
+import { experimentalComponent } from "@/lib/experimental"
+
 import { Component } from "../../../lib/component/component"
 import { cn } from "../../../lib/utils"
 

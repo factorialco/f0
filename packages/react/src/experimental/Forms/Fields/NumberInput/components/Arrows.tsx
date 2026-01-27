@@ -1,6 +1,7 @@
+import { ChevronDown } from "lucide-react"
+
 import { F0Icon } from "@/components/F0Icon/F0Icon"
 import { ChevronUp } from "@/icons/app"
-import { ChevronDown } from "lucide-react"
 
 type ArrowsProps = {
   step?: number

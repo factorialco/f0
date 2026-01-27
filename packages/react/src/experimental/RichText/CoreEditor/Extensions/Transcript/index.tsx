@@ -1,7 +1,3 @@
-import { F0Button } from "@/components/F0Button"
-import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
-import { Dropdown } from "@/experimental/Navigation/Dropdown"
-import { ChevronDown, ChevronUp, Delete } from "@/icons/app"
 import { Node } from "@tiptap/core"
 import {
   NodeViewContent,
@@ -11,6 +7,12 @@ import {
 } from "@tiptap/react"
 import { format } from "date-fns"
 import React, { useState } from "react"
+
+import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
+import { F0Button } from "@/components/F0Button"
+import { Dropdown } from "@/experimental/Navigation/Dropdown"
+import { ChevronDown, ChevronUp, Delete } from "@/icons/app"
+import { useI18n } from "@/lib/providers/i18n"
 
 export interface User {
   id: string
@@ -30,25 +32,10 @@ export interface TranscriptData {
   users: User[]
 }
 
-export interface TranscriptLabels {
-  deleteBlock: string
-  expand: string
-  collapse: string
-  messagesCount: string
-  messagesCountSingular: string
-}
-
-export interface TranscriptConfig {
-  labels?: TranscriptLabels
-}
-
 declare module "@tiptap/core" {
   interface Commands<ReturnType> {
     transcript: {
-      insertTranscript: (
-        data: TranscriptData,
-        config?: TranscriptConfig
-      ) => ReturnType
+      insertTranscript: (data: TranscriptData) => ReturnType
     }
   }
 }
@@ -56,17 +43,12 @@ declare module "@tiptap/core" {
 export const TranscriptView: React.FC<NodeViewProps> = ({
   node,
   deleteNode,
-  extension,
   updateAttributes,
 }) => {
+  const translations = useI18n()
+
   const [isOpen, setIsOpen] = useState<boolean>(node.attrs.isOpen ?? false)
   const data = node.attrs.data as TranscriptData
-
-  // Use dynamic config from extension options instead of persisted config
-  const config =
-    (extension.options.currentConfig as TranscriptConfig) ||
-    (node.attrs.config as TranscriptConfig) ||
-    {}
 
   if (!data) return null
 
@@ -79,7 +61,7 @@ export const TranscriptView: React.FC<NodeViewProps> = ({
   // Generate dropdown items
   const dropdownItems = [
     {
-      label: config.labels?.deleteBlock || "Delete",
+      label: translations.actions.delete,
       icon: Delete,
       critical: true,
       onClick: () => deleteNode(),
@@ -117,10 +99,7 @@ export const TranscriptView: React.FC<NodeViewProps> = ({
                 </p>
               </div>
               <p className="text-f1-text-secondary text-sm">
-                {data.messages.length}{" "}
-                {data.messages.length === 1
-                  ? config.labels?.messagesCountSingular || ""
-                  : config.labels?.messagesCount || ""}
+                {data.messages.length}
               </p>
             </div>
           </div>
@@ -133,8 +112,8 @@ export const TranscriptView: React.FC<NodeViewProps> = ({
               hideLabel
               label={
                 isOpen
-                  ? config.labels?.collapse || "Collapse"
-                  : config.labels?.expand || "Expand"
+                  ? translations.actions.collapse
+                  : translations.actions.expand
               }
               icon={isOpen ? ChevronUp : ChevronDown}
               size="sm"
@@ -250,11 +229,11 @@ export const Transcript = Node.create({
   addCommands() {
     return {
       insertTranscript:
-        (data: TranscriptData, config?: TranscriptConfig) =>
+        (data: TranscriptData) =>
         ({ commands }) => {
           return commands.insertContent({
             type: this.name,
-            attrs: { data, config },
+            attrs: { data },
           })
         },
     }

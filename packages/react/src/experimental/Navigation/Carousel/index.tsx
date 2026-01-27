@@ -1,3 +1,8 @@
+import Autoplay from "embla-carousel-autoplay"
+import { WheelGesturesPlugin } from "embla-carousel-wheel-gestures"
+import React from "react"
+
+import { experimentalComponent } from "@/lib/experimental"
 import {
   CarouselContent,
   CarouselDots,
@@ -6,9 +11,7 @@ import {
   CarouselPrevious,
   Carousel as ShadCarousel,
 } from "@/ui/carousel"
-import Autoplay from "embla-carousel-autoplay"
-import { WheelGesturesPlugin } from "embla-carousel-wheel-gestures"
-import React from "react"
+
 import { DynamicCarousel } from "./DynamicCarousel"
 import {
   type CarouselBreakpoints,
@@ -16,7 +19,6 @@ import {
   type ColumnNumber,
   type PeekVariant,
 } from "./types"
-import { experimentalComponent } from "@/lib/experimental"
 
 interface CarouselProps {
   children: React.ReactNode

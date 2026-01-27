@@ -1,5 +1,3 @@
-import { RecordType } from "@/hooks/datasource"
-import { ChildrenResponse } from "@/hooks/datasource/types/nested.typings"
 import {
   createContext,
   ReactNode,
@@ -7,6 +5,9 @@ import {
   useContext,
   useState,
 } from "react"
+
+import { RecordType } from "@/hooks/datasource"
+import { ChildrenResponse } from "@/hooks/datasource/types/nested.typings"
 
 interface NestedDataContextValue<R extends RecordType> {
   fetchedData: Record<string, ChildrenResponse<R>>

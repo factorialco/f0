@@ -1,5 +1,3 @@
-import { Input } from "@/ui/input"
-import { InputFieldProps } from "@/ui/InputField/InputField"
 import {
   forwardRef,
   useCallback,
@@ -7,8 +5,12 @@ import {
   useImperativeHandle,
   useRef,
 } from "react"
-import { Search } from "../../../../icons/app"
+
 import { experimentalComponent } from "@/lib/experimental"
+import { Input } from "@/ui/input"
+import { InputFieldProps } from "@/ui/InputField/InputField"
+
+import { Search } from "../../../../icons/app"
 
 type F1SearchBoxProps = {
   value?: string

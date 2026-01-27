@@ -1,7 +1,8 @@
-import { F0Button } from "@/components/F0Button"
-import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
-import { errorConfig } from "@/experimental/RichText/RichTextEditor/utils/types"
 import { Editor } from "@tiptap/react"
+
+import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
+import { F0Button } from "@/components/F0Button"
+import { errorConfig } from "@/experimental/RichText/RichTextEditor/utils/types"
 
 interface ErrorProps {
   error: string

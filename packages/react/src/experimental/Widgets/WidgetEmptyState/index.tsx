@@ -1,6 +1,7 @@
+import { experimentalComponent } from "@/lib/experimental"
+
 import { IconType } from "../../../components/F0Icon"
 import { OneEmptyState } from "../../OneEmptyState/OneEmptyState"
-import { experimentalComponent } from "@/lib/experimental"
 
 type Action = {
   label: string

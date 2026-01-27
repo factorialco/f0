@@ -1,8 +1,10 @@
 import { forwardRef } from "react"
+
+import { experimentalComponent } from "@/lib/experimental"
+
 import { PieChart, PieChartProps } from "../../../../components/Charts/PieChart"
 import { withSkeleton } from "../../../../lib/skeleton"
 import { ChartContainer, ComposeChartContainerProps } from "../ChartContainer"
-import { experimentalComponent } from "@/lib/experimental"
 
 const _PieChartWidget = withSkeleton(
   forwardRef<HTMLDivElement, ComposeChartContainerProps<PieChartProps>>(

@@ -1,6 +1,8 @@
-import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
 import { useDebounceValue } from "usehooks-ts"
+
+import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
+
 import { cn } from "../../../lib/utils"
 import { Content } from "./Content"
 import { Trigger } from "./Trigger"

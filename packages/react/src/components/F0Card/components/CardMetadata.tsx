@@ -1,7 +1,9 @@
+import React from "react"
+
 import { F0Icon } from "@/components/F0Icon"
 import { valueDisplayRenderers } from "@/components/value-display"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
-import React from "react"
+
 import { CardMetadata as CardMetadataType } from "../types"
 
 export const cardPropertyRenderers = {

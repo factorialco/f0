@@ -1,5 +1,7 @@
-import { EmojiImage } from "@/lib/emojis"
 import { forwardRef } from "react"
+
+import { EmojiImage } from "@/lib/emojis"
+
 import { F0Icon, IconType } from "../components/F0Icon"
 import { cn } from "../lib/utils"
 

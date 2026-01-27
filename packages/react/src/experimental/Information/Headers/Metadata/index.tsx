@@ -1,5 +1,5 @@
-import { F0Button } from "@/components/F0Button"
-import { ButtonCopy } from "@/ui/ButtonCopy"
+import { AnimatePresence, motion } from "motion/react"
+import { memo, useState } from "react"
 
 import {
   AvatarVariant,
@@ -7,17 +7,18 @@ import {
   PersonAvatarVariant,
   TeamAvatarVariant,
 } from "@/components/avatars/F0Avatar"
+import { F0Button } from "@/components/F0Button"
 import { F0Icon, IconType } from "@/components/F0Icon"
 import { NewColor } from "@/components/tags/F0TagDot"
 import { StatusVariant } from "@/components/tags/F0TagStatus"
 import { MobileDropdown } from "@/experimental/Navigation/Dropdown"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { InfoCircleLine } from "@/icons/app"
-import { cn } from "@/lib/utils"
-import { AnimatePresence, motion } from "motion/react"
-import { memo, useState } from "react"
-import { MetadataValue } from "./MetadataValue"
 import { experimentalComponent } from "@/lib/experimental"
+import { cn } from "@/lib/utils"
+import { ButtonCopy } from "@/ui/ButtonCopy"
+
+import { MetadataValue } from "./MetadataValue"
 
 type MetadataItemValue =
   | { type: "text"; content: string }

@@ -1,8 +1,11 @@
-import { DropdownItem } from "@/experimental/Navigation/Dropdown/internal"
-import { Delete, Pencil, Upload } from "@/icons/app"
 import type { Meta, StoryObj } from "@storybook/react-vite"
+
 import { useState } from "react"
 import { fn } from "storybook/test"
+
+import { DropdownItem } from "@/experimental/Navigation/Dropdown/internal"
+import { Delete, Pencil, Upload } from "@/icons/app"
+
 import { F0Widget } from "../"
 
 const meta: Meta<typeof F0Widget> = {

@@ -1,6 +1,9 @@
-import * as Icons from "@/icons/app"
 import type { Meta, StoryObj } from "@storybook/react-vite"
+
 import { action } from "storybook/actions"
+
+import * as Icons from "@/icons/app"
+
 import { SidebarFooter } from "./index"
 
 const meta = {

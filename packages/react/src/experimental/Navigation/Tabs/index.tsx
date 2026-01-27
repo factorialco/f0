@@ -1,11 +1,13 @@
-import { DataAttributes } from "@/global.types"
-import { TabNavigation, TabNavigationLink } from "@/ui/tab-navigation"
 import { Dispatch, useEffect, useState } from "react"
+
+import { DataAttributes } from "@/global.types"
+import { experimentalComponent } from "@/lib/experimental"
+import { TabNavigation, TabNavigationLink } from "@/ui/tab-navigation"
+
 import { F0Icon } from "../../../components/F0Icon"
 import { Upsell } from "../../../icons/app"
 import { Link, useNavigation } from "../../../lib/linkHandler"
 import { withSkeleton } from "../../../lib/skeleton"
-import { experimentalComponent } from "@/lib/experimental"
 
 export type TabItem = {
   label: string

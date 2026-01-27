@@ -1,8 +1,10 @@
+import { useState } from "react"
+
+import { ModuleId } from "@/components/avatars/F0AvatarModule"
 import { ButtonVariant, F0Button } from "@/components/F0Button"
 import { IconType } from "@/components/F0Icon"
-import { ModuleId } from "@/components/avatars/F0AvatarModule"
 import { Variant } from "@/components/tags/F0TagStatus"
-import { useState } from "react"
+
 import { ProductBlankslate } from "../ProductBlankslate"
 import { UpsellRequestResponseDialog } from "../UpsellRequestResponseDialog"
 import { CustomModal } from "./components/CustomModal"

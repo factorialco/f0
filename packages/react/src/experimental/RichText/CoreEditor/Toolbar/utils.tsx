@@ -1,10 +1,11 @@
+import { Editor } from "@tiptap/react"
+
 import {
   AlignTextCenter,
   AlignTextJustify,
   AlignTextLeft,
   AlignTextRight,
 } from "@/icons/app"
-import { Editor } from "@tiptap/react"
 
 export const getTextAlignLabel = (editor: Editor) => {
   if (editor.isActive({ textAlign: "left" })) return "Left"

@@ -1,7 +1,9 @@
-import { cn } from "@/lib/utils"
 import React, { forwardRef } from "react"
-import { DetailsItem, DetailsItemType } from "../DetailsItem"
+
 import { experimentalComponent } from "@/lib/experimental"
+import { cn } from "@/lib/utils"
+
+import { DetailsItem, DetailsItemType } from "../DetailsItem"
 
 interface DetailsItemsListProps {
   title?: string

@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react"
+
 import { Platform } from "./types"
 import { detectPlatform } from "./user-platform"
 

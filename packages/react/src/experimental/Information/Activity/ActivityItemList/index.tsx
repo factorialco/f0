@@ -1,12 +1,14 @@
-import { categorizeItemsByDate } from "@/lib/date"
-import { useI18n } from "@/lib/providers/i18n"
-import { withSkeleton } from "@/lib/skeleton"
 import sortBy from "lodash/sortBy"
 import throttle from "lodash/throttle"
 import React from "react"
+
+import { categorizeItemsByDate } from "@/lib/date"
+import { experimentalComponent } from "@/lib/experimental"
+import { useI18n } from "@/lib/providers/i18n"
+import { withSkeleton } from "@/lib/skeleton"
+
 import { ActivityItem } from "../ActivityItem"
 import { Section, SectionProps } from "./Section"
-import { experimentalComponent } from "@/lib/experimental"
 
 const MORE_ITEMS_LOADING_COUNT = 3
 

@@ -1,11 +1,13 @@
 import { forwardRef } from "react"
+
+import { experimentalComponent } from "@/lib/experimental"
+
 import {
   LineChart,
   LineChartProps,
 } from "../../../../components/Charts/LineChart"
 import { withSkeleton } from "../../../../lib/skeleton"
 import { ChartContainer, ComposeChartContainerProps } from "../ChartContainer"
-import { experimentalComponent } from "@/lib/experimental"
 
 const _LineChartWidget = withSkeleton(
   forwardRef<HTMLDivElement, ComposeChartContainerProps<LineChartProps>>(

@@ -1,5 +1,3 @@
-import { F0Icon } from "@/components/F0Icon"
-import { cn } from "@/lib/utils"
 import {
   forwardRef,
   useCallback,
@@ -8,6 +6,10 @@ import {
   useRef,
   useState,
 } from "react"
+
+import { F0Icon } from "@/components/F0Icon"
+import { cn } from "@/lib/utils"
+
 import { CommandGroup, CommandItem } from "./AvailableCommands"
 
 interface CommandListHandle {

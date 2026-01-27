@@ -1,3 +1,6 @@
+import { AnimatePresence, motion } from "motion/react"
+import { useEffect, useMemo } from "react"
+
 import {
   F0Card,
   type CardImageFit,
@@ -19,9 +22,9 @@ import { cn } from "@/lib/utils"
 import { Card, CardContent, CardHeader, CardTitle } from "@/ui/Card"
 import { GroupHeader } from "@/ui/GroupHeader/GroupHeader"
 import { Skeleton } from "@/ui/skeleton"
-import { AnimatePresence, motion } from "motion/react"
-import { useEffect, useMemo } from "react"
+
 import type { FiltersDefinition } from "../../../../../components/OneFilterPicker/types"
+
 import { PagesPagination } from "../../../components/PagesPagination"
 import { ItemActionsDefinition } from "../../../item-actions"
 import { PropertyDefinition } from "../../../property-render"

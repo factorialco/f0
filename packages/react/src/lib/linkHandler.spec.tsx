@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react"
 import { describe, expect, test } from "vitest"
+
 import { Link, LinkProvider, useNavigation } from "./linkHandler"
 
 describe("LinkProvider", () => {

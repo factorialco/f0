@@ -1,3 +1,5 @@
+import { useCallback, useMemo } from "react"
+
 import { experimentalComponent } from "@/lib/experimental"
 import {
   PaginationContent,
@@ -8,7 +10,7 @@ import {
   PaginationPrevious,
   Pagination as PaginationRoot,
 } from "@/ui/pagination"
-import { useCallback, useMemo } from "react"
+
 import { cn } from "../../lib/utils"
 
 interface OnePaginationProps {

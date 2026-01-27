@@ -1,6 +1,7 @@
-import { cn } from "@/lib/utils"
 import { cva, type VariantProps } from "cva"
+
 import { experimentalComponent } from "@/lib/experimental"
+import { cn } from "@/lib/utils"
 
 const counterVariants = cva({
   base: "inline-flex items-center justify-center whitespace-nowrap rounded-xs text-sm font-medium tabular-nums transition-all",

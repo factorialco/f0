@@ -10,7 +10,9 @@ import type {
   SelectedItemsState,
   SortingsDefinition,
 } from "@/hooks/datasource"
+
 import { INPUTFIELD_SIZES, InputFieldProps } from "@/ui/InputField"
+
 import { Action } from "./components/SelectBottomActions"
 
 // Helper type to resolve the actual record type

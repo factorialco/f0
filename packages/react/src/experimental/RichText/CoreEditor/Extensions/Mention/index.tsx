@@ -1,4 +1,5 @@
 import Mention from "@tiptap/extension-mention"
+
 import { createSuggestionConfig } from "./suggestion"
 import { MentionedUser, MentionsConfig } from "./types"
 

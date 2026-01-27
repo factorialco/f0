@@ -1,5 +1,6 @@
 import { IconType } from "@/components/F0Icon"
 import { valueDisplayRenderers } from "@/components/value-display"
+
 import { CardPropertyType } from "./components/CardMetadata"
 
 /**

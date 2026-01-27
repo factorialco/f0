@@ -1,13 +1,12 @@
 import * as React from "react"
 
-import { cn } from "@/lib/utils"
-
+import { F0Icon, IconType } from "@/components/F0Icon"
 import ChevronRight from "@/icons/app/ChevronRight"
 import InfoCircleLine from "@/icons/app/InfoCircleLine"
-
-import { F0Icon, IconType } from "@/components/F0Icon"
 import { Link } from "@/lib/linkHandler"
 import { useI18n } from "@/lib/providers/i18n"
+import { cn } from "@/lib/utils"
+
 import {
   Tooltip,
   TooltipContent,

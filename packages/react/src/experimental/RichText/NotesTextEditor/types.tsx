@@ -1,7 +1,10 @@
 import { IconType } from "@/components/F0Icon"
 import { NewColor } from "@/components/tags/F0TagDot"
 import { StatusVariant } from "@/components/tags/F0TagStatus"
+
 import { Message, User } from "../CoreEditor/Extensions/Transcript"
+
+export type { ImageUploadConfig } from "../CoreEditor/Extensions/Image"
 
 type NotesTextEditorHandle = {
   clear: () => void
@@ -10,6 +13,7 @@ type NotesTextEditorHandle = {
   insertAIBlock: () => void
   insertTranscript: (title: string, users: User[], messages: Message[]) => void
   pushContent: (content: string) => void
+  insertImage: (file: File) => void
 }
 
 type actionType = {

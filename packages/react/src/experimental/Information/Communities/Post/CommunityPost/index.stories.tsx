@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
+
 import { CommunityPost } from "./index"
 
 const meta: Meta<typeof CommunityPost> = {

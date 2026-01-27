@@ -1,7 +1,9 @@
-import { Add } from "@/icons/app"
-import { zeroRender as render, screen } from "@/testing/test-utils"
 import { userEvent } from "@testing-library/user-event"
 import { describe, expect, it, vi } from "vitest"
+
+import { Add } from "@/icons/app"
+import { zeroRender as render, screen } from "@/testing/test-utils"
+
 import { F0Button } from "../index"
 
 describe("F0Button", () => {

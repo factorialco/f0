@@ -1,3 +1,5 @@
+import { FC, useMemo } from "react"
+
 import { F0AvatarList } from "@/components/avatars/F0AvatarList"
 import { F0TagStatus } from "@/components/tags/F0TagStatus"
 import { BadgeProps } from "@/experimental/Information/Badge"
@@ -7,7 +9,6 @@ import {
   Question as QuestionIcon,
 } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
-import { FC, useMemo } from "react"
 
 type Status = "waiting" | "pending" | "approved" | "rejected"
 

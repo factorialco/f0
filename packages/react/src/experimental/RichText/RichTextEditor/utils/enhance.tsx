@@ -1,4 +1,5 @@
 import { Editor } from "@tiptap/react"
+
 import { enhancedTextResponse, enhanceTextParams } from ".."
 
 function extractTextToEnhance(editor: Editor) {

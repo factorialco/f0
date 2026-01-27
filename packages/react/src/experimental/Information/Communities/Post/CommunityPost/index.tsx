@@ -1,6 +1,6 @@
-import { F0Link } from "@/components/F0Link"
 import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon"
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
+import { F0Link } from "@/components/F0Link"
 import { Reactions, ReactionsProps } from "@/experimental/Information/Reactions"
 import { Dropdown, DropdownItem } from "@/experimental/Navigation/Dropdown"
 import {
@@ -12,6 +12,7 @@ import { getDisplayDateBasedOnDuration } from "@/lib/date"
 import { withSkeleton } from "@/lib/skeleton"
 import { cn } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
+
 import { PostDescription, PostDescriptionProps } from "../PostDescription"
 import { PostEvent, PostEventProps } from "../PostEvent"
 import { isVideo } from "./video"

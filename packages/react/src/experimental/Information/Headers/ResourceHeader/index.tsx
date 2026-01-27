@@ -1,6 +1,8 @@
 import { ComponentProps } from "react"
-import { BaseHeader } from "../BaseHeader"
+
 import { experimentalComponent } from "@/lib/experimental"
+
+import { BaseHeader } from "../BaseHeader"
 
 type BaseHeaderProps = ComponentProps<typeof BaseHeader>
 

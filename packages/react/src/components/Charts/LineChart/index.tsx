@@ -1,9 +1,3 @@
-import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-  LineChartConfig,
-} from "@/ui/chart"
 import { ForwardedRef } from "react"
 import {
   CartesianGrid,
@@ -12,6 +6,14 @@ import {
   XAxis,
   YAxis,
 } from "recharts"
+
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  LineChartConfig,
+} from "@/ui/chart"
+
 import { getCategoricalColor, getColor } from "../utils/colors"
 import {
   cartesianGridProps,

@@ -2,6 +2,7 @@ import { FiltersDefinition } from "@/components/OneFilterPicker/types"
 import { SummariesDefinition } from "@/experimental/OneDataCollection/summary"
 import { RecordType } from "@/hooks/datasource"
 import { SortingsDefinition } from "@/hooks/datasource/types/sortings.typings"
+
 import { TableSettings } from "../components/TableSettings"
 import { TableVisualizationOptions } from "../types"
 

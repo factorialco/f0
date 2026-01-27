@@ -1,4 +1,5 @@
 import type { Meta } from "@storybook/react-vite"
+
 import { WidgetDecorator } from "../storybook-utils"
 import { RadialProgressWidget } from "./index"
 

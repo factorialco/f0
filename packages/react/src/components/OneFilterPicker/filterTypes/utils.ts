@@ -1,5 +1,4 @@
 import { FilterTypeKey, FilterTypes } from "."
-
 import { filterTypes } from "."
 
 /**

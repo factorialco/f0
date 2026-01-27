@@ -1,9 +1,10 @@
+import { experimentalComponent } from "@/lib/experimental"
+
 /**
  * Public implementations of the ButtonInternal component.
  * Button component.
  */
 import { InputInternal, type InputInternalProps } from "./internal"
-import { experimentalComponent } from "@/lib/experimental"
 
 const privateProps = ["buttonToggle"] as const
 
@@ -13,13 +14,10 @@ export type InputProps<T extends string> = Omit<
 >
 
 const _Input = <T extends string>(props: InputProps<T>) => {
-  const publicProps = privateProps.reduce(
-    (acc, key) => {
-      const { [key]: _, ...rest } = acc
-      return rest
-    },
-    props as InputInternalProps<string>
-  )
+  const publicProps = privateProps.reduce((acc, key) => {
+    const { [key]: _, ...rest } = acc
+    return rest
+  }, props as InputInternalProps<string>)
 
   return <InputInternal {...publicProps} />
 }

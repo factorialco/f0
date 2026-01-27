@@ -1,11 +1,13 @@
 import { forwardRef } from "react"
+
+import { experimentalComponent } from "@/lib/experimental"
+
 import {
   AreaChart,
   AreaChartProps,
 } from "../../../../components/Charts/AreaChart"
 import { withSkeleton } from "../../../../lib/skeleton"
 import { ChartContainer, ComposeChartContainerProps } from "../ChartContainer"
-import { experimentalComponent } from "@/lib/experimental"
 
 export interface AreaChartWidgetProps extends ComposeChartContainerProps<AreaChartProps> {
   canBeBlurred?: boolean

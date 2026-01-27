@@ -1,3 +1,5 @@
+import React, { ComponentProps } from "react"
+
 import { experimentalComponent } from "@/lib/experimental"
 import {
   TooltipContent,
@@ -5,7 +7,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/ui/tooltip"
-import React, { ComponentProps } from "react"
+
 import { cn } from "../../../lib/utils"
 import { Shortcut } from "../../Information/Shortcut"
 

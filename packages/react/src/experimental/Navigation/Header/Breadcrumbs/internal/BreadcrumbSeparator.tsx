@@ -1,5 +1,6 @@
-import ChevronRight from "@/icons/app/ChevronRight"
 import { ComponentPropsWithoutRef, forwardRef } from "react"
+
+import ChevronRight from "@/icons/app/ChevronRight"
 
 const BreadcrumbSeparator = forwardRef<
   HTMLSpanElement,

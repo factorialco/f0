@@ -1,3 +1,5 @@
+import { useEffect, useRef, useState } from "react"
+
 import { F0AvatarDate } from "@/components/avatars/F0AvatarDate"
 import { useReducedMotion } from "@/lib/a11y"
 import { EmojiImage } from "@/lib/emojis"
@@ -5,7 +7,7 @@ import { Link } from "@/lib/linkHandler"
 import { withSkeleton } from "@/lib/skeleton"
 import { cn, focusRing } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
-import { useEffect, useRef, useState } from "react"
+
 import { CelebrationAvatar } from "./components/avatar"
 import { useConfetti } from "./hooks/useConfetti"
 import { EMOJI_MAP } from "./types"

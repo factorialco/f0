@@ -1,12 +1,13 @@
 import { forwardRef, ReactElement } from "react"
-import { experimentalComponent } from "@/lib/experimental"
 
 import { F0AvatarCompany } from "@/components/avatars/F0AvatarCompany"
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
 import { F0AvatarTeam } from "@/components/avatars/F0AvatarTeam"
 import { IconType } from "@/components/F0Icon"
 import { F0TagDot, TagDotProps } from "@/components/tags/F0TagDot"
+import { experimentalComponent } from "@/lib/experimental"
 import { cn } from "@/lib/utils"
+
 import { InternalActionType, ItemContainer } from "./ItemContainer"
 
 export type DataListProps = {

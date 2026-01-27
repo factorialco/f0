@@ -1,8 +1,8 @@
 import { type VariantProps, cva } from "cva"
-import { experimentalComponent } from "@/lib/experimental"
 
 import { F0Icon, F0IconProps } from "@/components/F0Icon"
 import { Windows } from "@/icons/app"
+import { experimentalComponent } from "@/lib/experimental"
 import { useI18n } from "@/lib/providers/i18n"
 import { type Platform, useUserPlatform } from "@/lib/providers/user-platafform"
 import { cn } from "@/lib/utils"

@@ -1,11 +1,13 @@
 import { forwardRef } from "react"
+
+import { experimentalComponent } from "@/lib/experimental"
+
 import {
   VerticalBarChart,
   VerticalBarChartProps,
 } from "../../../../components/Charts/VerticalBarChart"
 import { withSkeleton } from "../../../../lib/skeleton"
 import { ChartContainer, ComposeChartContainerProps } from "../ChartContainer"
-import { experimentalComponent } from "@/lib/experimental"
 
 const _VerticalBarChartWidget = withSkeleton(
   forwardRef<HTMLDivElement, ComposeChartContainerProps<VerticalBarChartProps>>(

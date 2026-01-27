@@ -1,13 +1,17 @@
-import { Calendar } from "@/ui/calendar"
-import { endOfISOWeek, startOfISOWeek } from "date-fns"
 import { AnimatePresence, motion } from "motion/react"
+import { useCallback, useMemo } from "react"
 import {
   DayClickEventHandler,
+  SelectRangeEventHandler,
   DateRange as DayPickerDateRange,
 } from "react-day-picker"
+
+import { Calendar } from "@/ui/calendar"
+
 import { useL10n } from "../../../../lib/providers/l10n"
-import { DateRange } from "../../types"
+import { DateRange, WeekStartDay, WeekStartsOn } from "../../types"
 import { getLocale, toCalendarPickerMatcher } from "../../utils"
+import { getEndOfWeek, getStartOfWeek } from "./index"
 
 interface WeekViewProps {
   selected?: Date | DateRange | null
@@ -18,6 +22,7 @@ interface WeekViewProps {
   minDate?: Date
   maxDate?: Date
   compact?: boolean
+  weekStartsOn?: WeekStartsOn
 }
 
 export function WeekView({
@@ -29,8 +34,12 @@ export function WeekView({
   minDate,
   maxDate,
   compact = false,
+  weekStartsOn,
 }: WeekViewProps) {
-  const { locale } = useL10n()
+  const { locale, date } = useL10n()
+
+  const effectiveWeekStartsOn =
+    weekStartsOn ?? date?.weekStartsOn ?? WeekStartDay.Monday
 
   const motionVariants = {
     hidden: (direction: number) => ({
@@ -44,28 +53,39 @@ export function WeekView({
     }),
   }
 
+  const getWeekRangeFromDate = useCallback(
+    (date: Date) => {
+      const normalizedDay = new Date(date)
+      normalizedDay.setHours(0, 0, 0, 0)
+      return {
+        from: getStartOfWeek(normalizedDay, effectiveWeekStartsOn),
+        to: getEndOfWeek(normalizedDay, effectiveWeekStartsOn),
+      }
+    },
+    [effectiveWeekStartsOn]
+  )
+
   const handleDayClick: DayClickEventHandler = (day, modifiers) => {
     if (modifiers.selected) {
       onSelect?.(null)
       return
     }
 
-    const weekStart = startOfISOWeek(day)
-    const weekEnd = endOfISOWeek(day)
-
-    onSelect?.({
-      from: weekStart,
-      to: weekEnd,
-    })
+    onSelect?.(getWeekRangeFromDate(day))
   }
 
-  const selectedValue: DayPickerDateRange | undefined =
-    selected instanceof Date
-      ? {
-          from: startOfISOWeek(selected),
-          to: endOfISOWeek(selected),
-        }
-      : selected || undefined
+  const handleSelect: SelectRangeEventHandler = (range) => {
+    if (!range) {
+      onSelect?.(null)
+    }
+  }
+
+  const selectedValue: DayPickerDateRange | undefined = useMemo(() => {
+    if (!selected) return undefined
+
+    const dateToUse = selected instanceof Date ? selected : selected.from
+    return getWeekRangeFromDate(dateToUse)
+  }, [selected, getWeekRangeFromDate, effectiveWeekStartsOn])
 
   const disabled = toCalendarPickerMatcher({ minDate, maxDate })
 
@@ -89,10 +109,11 @@ export function WeekView({
           disabled={disabled}
           selected={selectedValue}
           onDayClick={handleDayClick}
+          onSelect={handleSelect}
           month={month}
           onMonthChange={onMonthChange}
           locale={getLocale(locale)}
-          weekStartsOn={1}
+          weekStartsOn={effectiveWeekStartsOn}
           showOutsideDays={true}
           showWeekNumber
           fixedWeeks={false}

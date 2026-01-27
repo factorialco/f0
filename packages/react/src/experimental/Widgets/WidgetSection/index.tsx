@@ -1,6 +1,8 @@
 import { forwardRef, PropsWithChildren } from "react"
-import { useTextFormatEnforcer } from "../../../lib/text"
+
 import { experimentalComponent } from "@/lib/experimental"
+
+import { useTextFormatEnforcer } from "../../../lib/text"
 
 type Props = PropsWithChildren & {
   title?: string

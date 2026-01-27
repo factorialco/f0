@@ -1,7 +1,9 @@
+import { FC } from "react"
+
 import { experimentalComponent } from "@/lib/experimental"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-import { FC } from "react"
+
 import ApprovalStep, { ApprovalStepProps } from "./ApprovalStep"
 
 type ApprovalStep = ApprovalStepProps

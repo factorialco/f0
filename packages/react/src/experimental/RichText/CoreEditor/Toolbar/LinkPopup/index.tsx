@@ -1,3 +1,8 @@
+import * as Popover from "@radix-ui/react-popover"
+import { Editor } from "@tiptap/react"
+import { AnimatePresence, motion } from "motion/react"
+import { useState } from "react"
+
 import { F0Button } from "@/components/F0Button"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0ButtonToggle } from "@/components/F0ButtonToggle"
@@ -12,20 +17,14 @@ import {
 } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
-import * as Popover from "@radix-ui/react-popover"
-import { Editor } from "@tiptap/react"
-import { AnimatePresence, motion } from "motion/react"
-import { useState } from "react"
-import { ToolbarLabels } from "../types"
 
 interface LinkPopupProps {
   editor: Editor
   disabled: boolean
-  labels: ToolbarLabels
 }
 
-export const LinkPopup = ({ editor, disabled, labels }: LinkPopupProps) => {
-  const i18n = useI18n()
+export const LinkPopup = ({ editor, disabled }: LinkPopupProps) => {
+  const translations = useI18n()
   const [openLinkPopover, setOpenLinkPopover] = useState(false)
   const [url, setUrl] = useState(editor.getAttributes("link").href || "")
 
@@ -87,7 +86,7 @@ export const LinkPopup = ({ editor, disabled, labels }: LinkPopupProps) => {
       <Popover.Trigger asChild>
         <F0ButtonToggle
           selected={editor.isActive("link") || openLinkPopover}
-          label={labels.linkLabel}
+          label={translations.richTextEditor.link}
           icon={LinkIcon}
           disabled={disabled}
           onSelectedChange={() => handleLinkButtonClick()}
@@ -163,7 +162,7 @@ export const LinkPopup = ({ editor, disabled, labels }: LinkPopupProps) => {
                     <input
                       className="w-full shrink text-f1-foreground disabled:cursor-not-allowed"
                       type="text"
-                      placeholder={labels.linkPlaceholder}
+                      placeholder={translations.richTextEditor.linkPlaceholder}
                       value={url}
                       onChange={(e) => setUrl(e.target.value)}
                       onKeyDown={(e) => {
@@ -187,7 +186,7 @@ export const LinkPopup = ({ editor, disabled, labels }: LinkPopupProps) => {
                       type="button"
                       size="sm"
                       onClick={handlePaste}
-                      label={labels.linkPaste}
+                      label={translations.actions.paste}
                     ></F0Button>
                   </div>
                   <F0Button
@@ -198,7 +197,7 @@ export const LinkPopup = ({ editor, disabled, labels }: LinkPopupProps) => {
                       e.preventDefault()
                       handleSave()
                     }}
-                    label={i18n.actions.save}
+                    label={translations.actions.save}
                   ></F0Button>
                 </div>
               </motion.div>

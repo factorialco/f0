@@ -1,9 +1,11 @@
+import { useMemo } from "react"
+
 import { Counter } from "@/experimental/Information/Counter"
 import { Preset } from "@/experimental/OnePreset"
 import { cn, focusRing } from "@/lib/utils"
 import { OverflowList } from "@/ui/OverflowList"
 import { Skeleton } from "@/ui/skeleton"
-import { useMemo } from "react"
+
 import { FiltersDefinition, FiltersState, PresetsDefinition } from "../types"
 
 interface FilterPresetsProps<Filters extends FiltersDefinition> {

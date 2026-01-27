@@ -1,6 +1,6 @@
 import { DataAttributes } from "@/global.types"
-import { Switch as SwitchRoot } from "@/ui/switch"
 import { experimentalComponent } from "@/lib/experimental"
+import { Switch as SwitchRoot } from "@/ui/switch"
 
 interface SwitchProps extends DataAttributes {
   /**

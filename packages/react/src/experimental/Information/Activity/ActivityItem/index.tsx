@@ -1,11 +1,12 @@
+import { useIntersectionObserver } from "usehooks-ts"
+
 import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon"
 import { IconType } from "@/components/F0Icon"
 import { Bell as BellIcon } from "@/icons/app"
 import { getDisplayDateBasedOnDuration } from "@/lib/date"
+import { experimentalComponent } from "@/lib/experimental"
 import { withSkeleton } from "@/lib/skeleton"
 import { Skeleton } from "@/ui/skeleton"
-import { useIntersectionObserver } from "usehooks-ts"
-import { experimentalComponent } from "@/lib/experimental"
 
 export type ActivityItemProps = {
   id: string

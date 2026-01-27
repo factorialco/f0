@@ -1,6 +1,9 @@
+import { useState } from "react"
+
+import type { FiltersDefinition } from "@/components/OneFilterPicker/types"
+
 import { F0Button } from "@/components/F0Button"
 import { F0Icon, IconType } from "@/components/F0Icon"
-import type { FiltersDefinition } from "@/components/OneFilterPicker/types"
 import {
   GroupingDefinition,
   OnSelectItemsCallback,
@@ -11,15 +14,16 @@ import { Kanban, Sliders, Table } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
-import { useState } from "react"
+
+import type { OnLoadDataCallback, OnLoadErrorCallback } from "./types"
+import type { CardVisualizationOptions } from "./visualizations/collection/Card"
+import type { TableVisualizationOptions } from "./visualizations/collection/Table"
+
 import { DataCollectionSource } from "./hooks/useDataCollectionSource/types"
 import { ItemActionsDefinition } from "./item-actions"
 import { NavigationFiltersDefinition } from "./navigationFilters/types"
 import { SummariesDefinition } from "./summary"
-import type { OnLoadDataCallback, OnLoadErrorCallback } from "./types"
-import type { CardVisualizationOptions } from "./visualizations/collection/Card"
 import { CardCollection } from "./visualizations/collection/Card"
-import type { TableVisualizationOptions } from "./visualizations/collection/Table"
 import { TableCollection } from "./visualizations/collection/Table"
 
 /**

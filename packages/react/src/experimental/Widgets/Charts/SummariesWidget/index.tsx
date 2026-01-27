@@ -1,7 +1,9 @@
 import { forwardRef } from "react"
+
+import { experimentalComponent } from "@/lib/experimental"
+
 import { withSkeleton } from "../../../../lib/skeleton"
 import { ChartContainer, ChartContainerPropsBase } from "../ChartContainer"
-import { experimentalComponent } from "@/lib/experimental"
 
 const _SummariesWidget = withSkeleton(
   forwardRef<HTMLDivElement, ChartContainerPropsBase>(

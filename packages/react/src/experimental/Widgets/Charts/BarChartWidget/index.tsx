@@ -1,8 +1,10 @@
 import { forwardRef } from "react"
+
+import { experimentalComponent } from "@/lib/experimental"
+
 import { BarChart, BarChartProps } from "../../../../components/Charts/BarChart"
 import { withSkeleton } from "../../../../lib/skeleton"
 import { ChartContainer, ComposeChartContainerProps } from "../ChartContainer"
-import { experimentalComponent } from "@/lib/experimental"
 
 const BarChartContainer = forwardRef<
   HTMLDivElement,

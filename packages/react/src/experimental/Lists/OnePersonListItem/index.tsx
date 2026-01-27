@@ -1,3 +1,5 @@
+import React from "react"
+
 import { AvatarBadge } from "@/components/avatars/F0Avatar/types"
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
 import { F0Button } from "@/components/F0Button"
@@ -6,11 +8,10 @@ import { F0TagDot, TagDotProps } from "@/components/tags/F0TagDot"
 import { F0TagRaw, TagRawProps } from "@/components/tags/F0TagRaw"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { InfoCircle } from "@/icons/app"
+import { experimentalComponent } from "@/lib/experimental"
 import { withSkeleton } from "@/lib/skeleton"
 import { cn } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
-import React from "react"
-import { experimentalComponent } from "@/lib/experimental"
 
 export type OnePersonListItemProps = {
   person: {
