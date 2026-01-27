@@ -24,10 +24,12 @@ export const OTHER_ACTIONS = [
     label: "Edit",
     icon: Pencil,
     onClick: () => {},
+    closeOnClick: true,
   },
   {
     label: "Delete",
     icon: Delete,
     onClick: () => {},
+    closeOnClick: true,
   },
 ]

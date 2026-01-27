@@ -701,6 +701,41 @@ describe("useDialog", () => {
       // Should not remove dialog-2
       expect(mockRemoveDialog).not.toHaveBeenCalledWith("dialog-2")
     })
+
+    it("should resolve the promise when closeDialog is called programmatically", async () => {
+      const { result } = zeroRenderHook(() => useDialog())
+
+      const definition: Omit<DialogDefinition, "id"> = {
+        title: "Test Dialog",
+        content: <div>Test Content</div>,
+        actions: {
+          primary: {
+            label: "OK",
+            value: true,
+          },
+        },
+      }
+
+      const promise = result.current.openDialog(definition)
+
+      await waitFor(() => {
+        expect(mockAddDialog).toHaveBeenCalled()
+      })
+
+      const addedDialog = mockAddDialog.mock.calls[0][0]
+
+      act(() => {
+        result.current.closeDialog(addedDialog.id)
+      })
+
+      // The promise should resolve with undefined when closed programmatically
+      const value = await promise
+      expect(value).toBeUndefined()
+
+      await waitFor(() => {
+        expect(mockRemoveDialog).toHaveBeenCalledWith(addedDialog.id)
+      })
+    })
   })
 
   describe("useEffect integration", () => {

@@ -34,11 +34,19 @@ export const getDialogAlikeArgTypes = ({
     },
     primaryAction: {
       description: "Primary action(s) to render in the footer",
-      control: "object",
+      table: {
+        type: {
+          summary: "DialogAlikeAction | DialogAlikeAction[]",
+        },
+      },
     },
     secondaryAction: {
       description: "Secondary action(s) to render in the footer",
-      control: "object",
+      table: {
+        type: {
+          summary: "DialogAlikeAction | DialogAlikeAction[]",
+        },
+      },
     },
     modal: {
       description: `Whether the ${componentName} should be modal (only closable by clicking the actions)`,

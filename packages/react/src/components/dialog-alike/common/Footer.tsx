@@ -7,11 +7,12 @@ import {
   DialogInternalProps,
   DialogVariant,
 } from "../F0Dialog/internal/internal-types"
-import { F0DialogActionsProps } from "../F0Dialog/types"
+import { DialogAlikeActionsProps } from "./types"
 
-export type FooterProps = F0DialogActionsProps & {
+export type FooterProps = DialogAlikeActionsProps & {
   variant?: DialogVariant
   type?: DialogInternalProps["type"]
+  onClose: () => void
 }
 
 export const Footer = (props: FooterProps) => {
@@ -46,9 +47,12 @@ export const Footer = (props: FooterProps) => {
             disabled: action.disabled,
             loading: action.loading,
           }))}
-          onClick={(value) => {
+          onClick={async (value) => {
             const action = primaryActions.find((a) => a.value === value)
-            return action ? toPromise(action?.onClick) : Promise.resolve()
+            await (action ? toPromise(action?.onClick) : Promise.resolve())
+            if (action?.closeOnClick) {
+              props.onClose()
+            }
           }}
           variant="default"
         />
@@ -59,7 +63,12 @@ export const Footer = (props: FooterProps) => {
       <ButtonInternal
         block={props.variant === "notification"}
         label={primaryActions[0].label}
-        onClick={() => toPromise(primaryActions[0].onClick)}
+        onClick={async () => {
+          await toPromise(primaryActions[0].onClick)
+          if (primaryActions[0]?.closeOnClick) {
+            props.onClose()
+          }
+        }}
         variant={_variant}
         icon={primaryActions[0].icon}
         disabled={primaryActions[0].disabled}
@@ -84,7 +93,12 @@ export const Footer = (props: FooterProps) => {
               key={action.value ?? action.label}
               block={props.variant === "notification"}
               label={action.label}
-              onClick={() => toPromise(action.onClick)}
+              onClick={async () => {
+                await toPromise(action.onClick)
+                if (action.closeOnClick) {
+                  props.onClose()
+                }
+              }}
               variant="outline"
               icon={action.icon}
               disabled={action.disabled}

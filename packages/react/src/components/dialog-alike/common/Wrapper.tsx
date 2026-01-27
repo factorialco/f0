@@ -1,5 +1,5 @@
 import { cva } from "cva"
-import { useCallback, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { useMediaQuery } from "usehooks-ts"
 
 import { cn } from "@/lib/utils"
@@ -58,6 +58,7 @@ export type DialogPosition = "left" | "right" | "center"
 
 export type DialogWrapperProps = {
   isOpen: boolean
+  onOpenChange: (open: boolean) => void
   onClose: () => void
   position: DialogPosition
 
@@ -97,6 +98,7 @@ export type DialogWrapperProps = {
  */
 export const DialogWrapper = ({
   isOpen,
+  onOpenChange,
   onClose,
   position,
   children,
@@ -121,12 +123,19 @@ export const DialogWrapper = ({
 
   const handleOpenChange = useCallback(
     (open: boolean) => {
+      onOpenChange?.(open)
       if (!open) {
         onClose()
       }
     },
     [onClose]
   )
+
+  useEffect(() => {
+    if (!isOpen) {
+      onClose()
+    }
+  }, [isOpen])
 
   const isSidePosition = useMemo(() => {
     return position === "left" || position === "right"

@@ -1,4 +1,5 @@
 import { nanoid } from "nanoid"
+import { useRef } from "react"
 
 import { useDialogsLayoutContext } from "@/lib/providers/dialogs/DialogsLayoutProvider"
 import { DialogDefinitionProviderItem } from "@/lib/providers/dialogs/internal-types"
@@ -34,6 +35,8 @@ export type UseDialogReturn = {
 export const useDialog = (): UseDialogReturn => {
   const i18n = useI18n()
   const { addDialog, removeDialog } = useDialogsLayoutContext()
+  // Store dialog callbacks so we can invoke them when closeDialog is called programmatically
+  const dialogCallbacksRef = useRef<Map<DialogId, () => void>>(new Map())
 
   const openDialog = (
     definition: Optional<DialogDefinition, "id">
@@ -45,14 +48,33 @@ export const useDialog = (): UseDialogReturn => {
     definition: Optional<DialogDefinitionInternal, "id">
   ): Promise<DialogActionValue> => {
     return new Promise((resolve) => {
+      const dialogId = definition.id || nanoid()
+
+      const handleDialogAction = async (
+        action: DialogAction | undefined,
+        value: DialogActionValuePrimitive | undefined
+      ) => {
+        resolve(value ?? undefined)
+
+        if (action?.keepOpen) {
+          return
+        }
+        // Clean up the callback reference
+        dialogCallbacksRef.current.delete(dialogId)
+        // Remove the dialog from the list after the action is resolved
+        removeDialog(dialogId)
+      }
+
       // We have to use a cast here because the type of newDialog is not correctly inferred
       // when using the spread operator with a discriminated union
+      const onCloseDialog = () => {
+        handleDialogAction(undefined, undefined)
+      }
+
       const baseDialog = {
-        id: definition.id || nanoid(),
+        id: dialogId,
         actions: definition.actions,
-        onCloseDialog: () => {
-          handleDialogAction(undefined, undefined)
-        },
+        onCloseDialog,
         onClickAction: (
           action: DialogAction,
           value: DialogActionValuePrimitive
@@ -82,18 +104,8 @@ export const useDialog = (): UseDialogReturn => {
         }
       }
 
-      const handleDialogAction = async (
-        action: DialogAction | undefined,
-        value: DialogActionValuePrimitive | undefined
-      ) => {
-        resolve(value ?? undefined)
-
-        if (action?.keepOpen) {
-          return
-        }
-        // Remove the dialog from the list after the action is resolved
-        removeDialog(newDialog.id)
-      }
+      // Store the callback so it can be invoked when closeDialog is called programmatically
+      dialogCallbacksRef.current.set(dialogId, onCloseDialog)
 
       addDialog(newDialog)
     })
@@ -155,6 +167,17 @@ export const useDialog = (): UseDialogReturn => {
   }
 
   const closeDialog = (id: DialogId) => {
+    // Get the callback for this dialog
+    const onCloseDialog = dialogCallbacksRef.current.get(id)
+
+    if (onCloseDialog) {
+      // Call the callback to resolve the promise
+      onCloseDialog()
+      // Clean up the callback reference
+      dialogCallbacksRef.current.delete(id)
+    }
+
+    // Remove the dialog from the list
     removeDialog(id)
   }
 

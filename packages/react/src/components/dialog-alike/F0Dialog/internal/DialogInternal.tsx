@@ -1,4 +1,4 @@
-import { FC, useMemo } from "react"
+import { FC, useEffect, useMemo, useState } from "react"
 
 import { Content } from "../../common/Content"
 import { Footer } from "../../common/Footer"
@@ -26,6 +26,12 @@ export const DialogInternal: FC<DialogInternalProps> = ({
   variant = "default",
   type = "default",
 }) => {
+  const [localIsOpen, setLocalIsOpen] = useState(isOpen)
+
+  useEffect(() => {
+    setLocalIsOpen(isOpen)
+  }, [isOpen])
+
   const _memoizedDialogLayout = useMemo(() => {
     return (
       <>
@@ -49,6 +55,7 @@ export const DialogInternal: FC<DialogInternalProps> = ({
           secondaryAction={secondaryAction ?? []}
           variant={variant}
           type={type}
+          onClose={() => setLocalIsOpen(false)}
         />
       </>
     )
@@ -71,11 +78,12 @@ export const DialogInternal: FC<DialogInternalProps> = ({
 
   return (
     <DialogWrapper
-      isOpen={isOpen}
+      isOpen={localIsOpen}
       onClose={onClose}
       position="center"
       size={size}
       modal={modal}
+      onOpenChange={setLocalIsOpen}
     >
       {_memoizedDialogLayout}
     </DialogWrapper>

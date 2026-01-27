@@ -26,6 +26,7 @@ export type DialogAlikeAction = {
   onClick: () => void | Promise<void>
   disabled?: boolean
   loading?: boolean
+  closeOnClick?: boolean
 }
 
 export type DialogAlikeActionsProps = {
