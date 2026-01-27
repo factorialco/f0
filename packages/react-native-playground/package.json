@@ -59,7 +59,7 @@
     "@babel/core": "^7.26.0",
     "@gorhom/bottom-sheet": "^5.1.2",
     "@react-native-async-storage/async-storage": "2.2.0",
-    "@react-native-community/datetimepicker": "8.4.4",
+    "@react-native-community/datetimepicker": "8.6.0",
     "@react-native-community/slider": "4.5.5",
     "@storybook/addon-ondevice-actions": "^10.1.11",
     "@storybook/addon-ondevice-controls": "^10.1.11",
