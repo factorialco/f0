@@ -8,7 +8,10 @@ export {
   AiFullscreenChat,
   type AiChatProviderProps,
 } from "./index"
-export { useAiChat } from "./providers/AiChatStateProvider"
+export {
+  useAiChat,
+  type VisualizationMode,
+} from "./providers/AiChatStateProvider"
 export {
   AiChatTranslationsProvider,
   useAiChatTranslations,
