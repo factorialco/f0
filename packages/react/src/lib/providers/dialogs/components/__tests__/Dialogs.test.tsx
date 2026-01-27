@@ -59,7 +59,7 @@ const MockDialogInternal = vi.hoisted(() => {
   ))
 })
 
-vi.mock("@/components/F0Dialog/internal/DialogInternal", () => ({
+vi.mock("@/components/dialog-alike/F0Dialog/internal/DialogInternal", () => ({
   DialogInternal: MockDialogInternal,
 }))
 
@@ -99,9 +99,12 @@ const MockDialogNotificationInternal = vi.hoisted(() => {
   ))
 })
 
-vi.mock("@/components/F0Dialog/internal/DialogNotification", () => ({
-  DialogNotificationInternal: MockDialogNotificationInternal,
-}))
+vi.mock(
+  "@/components/dialog-alike/F0Dialog/internal/DialogNotification",
+  () => ({
+    DialogNotificationInternal: MockDialogNotificationInternal,
+  })
+)
 
 describe("Dialogs", () => {
   beforeEach(() => {
