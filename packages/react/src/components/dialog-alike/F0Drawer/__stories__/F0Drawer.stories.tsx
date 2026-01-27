@@ -104,6 +104,7 @@ export const Default: Story = {
       label: "submit",
       icon: Placeholder,
       onClick: () => {},
+      closeOnClick: true,
     },
     children: <ExampleList itemsCount={20} />,
   },
@@ -124,6 +125,7 @@ export const WithPromisePrimaryAction: Story = {
       icon: Placeholder,
       onClick: () =>
         new Promise((resolve) => setTimeout(() => resolve(), 5000)),
+      closeOnClick: true,
     },
   },
 }
@@ -180,17 +182,20 @@ export const WithMultiplePrimaryActions: Story = {
         label: "Save",
         icon: SaveIcon,
         onClick: () => console.log("Save clicked"),
+        closeOnClick: true,
       },
       {
         value: "save-draft",
         label: "Save as draft",
         onClick: () => console.log("Save as draft clicked"),
+        closeOnClick: true,
       },
       {
         value: "save-publish",
         label: "Save and publish",
         icon: ShareIcon,
         onClick: () => console.log("Save and publish clicked"),
+        closeOnClick: true,
       },
     ],
     secondaryAction: {

@@ -1,4 +1,4 @@
-import { FC, useMemo } from "react"
+import { FC, useEffect, useMemo, useState } from "react"
 
 import { Content } from "../../common/Content"
 import { Footer } from "../../common/Footer"
@@ -25,6 +25,11 @@ export const DrawerInternal: FC<DrawerInternalProps> = ({
   setActiveTabId,
   disableContentPadding,
 }) => {
+  const [localIsOpen, setLocalIsOpen] = useState(isOpen)
+
+  useEffect(() => {
+    setLocalIsOpen(isOpen)
+  }, [isOpen])
   const _memoizedDialogLayout = useMemo(() => {
     return (
       <>
@@ -44,6 +49,7 @@ export const DrawerInternal: FC<DrawerInternalProps> = ({
         <Footer
           primaryAction={primaryAction ?? []}
           secondaryAction={secondaryAction ?? []}
+          onClose={() => setLocalIsOpen(false)}
         />
       </>
     )
@@ -64,13 +70,14 @@ export const DrawerInternal: FC<DrawerInternalProps> = ({
 
   return (
     <DialogWrapper
-      isOpen={isOpen}
+      isOpen={localIsOpen}
       onClose={onClose}
       position={position}
       size={size}
       modal={modal}
       showOverlay={modal}
       fullHeight
+      onOpenChange={setLocalIsOpen}
     >
       {_memoizedDialogLayout}
     </DialogWrapper>

@@ -84,3 +84,42 @@ primaryAction={{
   closeOnClick: true // Drawer closes only after saveData() finishes
 }}
 ```
+
+## Examples
+
+### Position: Left
+
+Drawers can be positioned on the left side of the screen. The default position is `right`.
+
+<Canvas of={F0DrawerStories.LeftPosition} />
+
+### With Module and Tabs
+
+Drawers can include module information and tabs in the header for complex content organization.
+
+<Canvas of={F0DrawerStories.WithModuleAndTabs} />
+
+### With Resource Header
+
+You can embed a `ResourceHeader` component within the drawer content for a consistent header experience.
+
+<Canvas of={F0DrawerStories.WithResourceHeader} />
+
+### Async Action (Promise)
+
+Example of an action that returns a promise, triggering the loading state.
+
+<Canvas of={F0DrawerStories.WithPromisePrimaryAction} />
+
+### Modal
+
+When `modal` is true, the drawer forces the user to interact with it and displays an overlay.
+
+<Canvas of={F0DrawerStories.Modal} />
+
+## Guidelines
+
+- **Use Cases**: Use `F0Drawer` for secondary content, details panels, or complex forms that need more space than a dialog but less context switch than a full page navigation.
+- **Position**: Use `right` (default) for most detail views. Use `left` only for navigation menus or specific layout requirements.
+- **Size**: Currently, the drawer supports `md` size. Ensure your content fits comfortably.
+- **Actions**: Similar to Dialogs, keep primary actions clear and use secondary actions for cancellations.
