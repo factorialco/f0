@@ -1,3 +1,22 @@
+/**
+ * @deprecated This file is deprecated for Tailwind CSS v4.
+ * 
+ * Tailwind CSS v4 uses CSS-first configuration instead of JavaScript config files.
+ * 
+ * For Tailwind v4, import the CSS file directly:
+ * ```css
+ * @import "@factorialco/f0-core/base.css";
+ * ```
+ * 
+ * This file is kept for backward compatibility with Tailwind v3.
+ * If you're using Tailwind v3, you can still use:
+ * ```ts
+ * import { baseConfig } from "@factorialco/f0-core/tailwind";
+ * ```
+ * 
+ * Migration guide: https://tailwindcss.com/docs/upgrade-guide
+ */
+
 import type { Config } from "tailwindcss"
 import { borderRadius } from "./src/tokens/borderRadius"
 import { baseColors, f1Colors } from "./src/tokens/colors"
@@ -7,6 +26,10 @@ import {
   relativeSpacing,
 } from "./src/tokens/spacing"
 
+/**
+ * @deprecated Use CSS-first configuration with base.css instead
+ * This config is only for Tailwind CSS v3 compatibility
+ */
 export const baseConfig: Omit<Config, "content"> = {
   darkMode: "class",
   corePlugins: {
@@ -154,7 +177,9 @@ export const baseConfig: Omit<Config, "content"> = {
   },
   plugins: [
     require("tailwindcss-animate"),
-    require("@tailwindcss/container-queries"),
+    // Note: @tailwindcss/container-queries is built into Tailwind v4
+    // For v3 compatibility, uncomment if needed:
+    // require("@tailwindcss/container-queries"),
   ],
   safelist: [
     {
