@@ -1,15 +1,23 @@
+import { useEffect, useMemo, useState } from "react"
+
 import { F0Button } from "@/components/F0Button"
 import { F0Select } from "@/components/F0Select"
 import {
   GranularityDefinitionKey,
   OneCalendar,
-  granularityDefinitions,
 } from "@/experimental/OneCalendar"
-import { DateRange, DateRangeComplete } from "@/experimental/OneCalendar/types"
+import { getGranularityDefinitions } from "@/experimental/OneCalendar/granularities"
+import {
+  DateRange,
+  DateRangeComplete,
+  WeekStartDay,
+  WeekStartsOn,
+} from "@/experimental/OneCalendar/types"
 import { ChevronLeft } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
+import { useL10n } from "@/lib/providers/l10n"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
-import { useEffect, useMemo, useState } from "react"
+
 import { getCompareToValue } from "./compareTo"
 import { GranularitySelector } from "./components/GranularitySelector"
 import { PresetList } from "./components/PresetList"
@@ -49,6 +57,7 @@ export interface DatePickerPopupProps {
   onCompareToChange?: (
     compareTo: DateRangeComplete | DateRangeComplete[] | undefined
   ) => void
+  weekStartsOn?: WeekStartsOn
 }
 
 const PRESET_CUSTOM = "__custom__"
@@ -65,12 +74,17 @@ export function DatePickerPopup({
   hideCalendarInput,
   value,
   asChild,
+  weekStartsOn,
   ...props
 }: DatePickerPopupProps) {
   const i18n = useI18n()
+  const l10n = useL10n()
   const [localValue, setLocalValue] = useState<DatePickerValue | undefined>(
     value || defaultValue
   )
+
+  const effectiveWeekStartsOn =
+    weekStartsOn ?? l10n.date?.weekStartsOn ?? WeekStartDay.Monday
 
   useEffect(() => {
     if (!isSameDatePickerValue(value, localValue)) {
@@ -85,12 +99,13 @@ export function DatePickerPopup({
   )
 
   const granularityDefinition = useMemo(() => {
-    return granularityDefinitions[localGranularity]
-  }, [localGranularity])
+    const definitions = getGranularityDefinitions(effectiveWeekStartsOn)
+    return definitions[localGranularity]
+  }, [localGranularity, effectiveWeekStartsOn])
 
   const calendarMode = useMemo(() => {
-    return granularityDefinitions[localGranularity].calendarMode || "single"
-  }, [localGranularity])
+    return granularityDefinition.calendarMode || "single"
+  }, [granularityDefinition])
 
   const handleSelectDate = (date: Date | DateRange | null) => {
     handleSelect({
@@ -114,8 +129,9 @@ export function DatePickerPopup({
     const selectedPreset = presetId ? presets[+presetId] : undefined
     if (!selectedPreset) return
 
+    const presetDefinitions = getGranularityDefinitions(effectiveWeekStartsOn)
     handleSelect({
-      value: granularityDefinitions[selectedPreset.granularity].toRange(
+      value: presetDefinitions[selectedPreset.granularity].toRange(
         typeof selectedPreset.value === "function"
           ? selectedPreset.value()
           : selectedPreset.value
@@ -262,6 +278,7 @@ export function DatePickerPopup({
                 defaultSelected={localValue?.value}
                 minDate={props.minDate}
                 maxDate={props.maxDate}
+                weekStartsOn={effectiveWeekStartsOn}
               />
               {compareToOptions.length > 0 && (
                 <div className="mt-4 flex flex-col gap-2">

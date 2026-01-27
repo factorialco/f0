@@ -1,9 +1,9 @@
+import { RecordType } from "@/hooks/datasource"
+
 import {
   DropdownItemObject,
   DropdownItemSeparator,
 } from "../Navigation/Dropdown/internal"
-
-import { RecordType } from "@/hooks/datasource"
 
 export type ActionDefinition =
   | DropdownItemSeparator

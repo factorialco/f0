@@ -1,3 +1,5 @@
+import { ComponentProps } from "react"
+
 import { TableHead } from "@/experimental/OneTable"
 import {
   FiltersDefinition,
@@ -6,7 +8,7 @@ import {
   SortingKey,
   SortingsDefinition,
 } from "@/hooks/datasource"
-import { ComponentProps } from "react"
+
 import { ItemActionsDefinition } from "../../../item-actions"
 import { NavigationFiltersDefinition } from "../../../navigationFilters/types"
 import { PropertyDefinition } from "../../../property-render"

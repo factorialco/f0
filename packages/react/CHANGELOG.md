@@ -1,5 +1,89 @@
 # Changelog
 
+## [1.337.1](https://github.com/factorialco/f0/compare/f0-react-v1.337.0...f0-react-v1.337.1) (2026-01-27)
+
+
+### Bug Fixes
+
+* take into account overflowButtonWidth just when there is overflow ([#3294](https://github.com/factorialco/f0/issues/3294)) ([807b341](https://github.com/factorialco/f0/commit/807b3418afc99261dc103ea8dc7bc0855bf83e36))
+
+## [1.337.0](https://github.com/factorialco/f0/compare/f0-react-v1.336.1...f0-react-v1.337.0) (2026-01-27)
+
+
+### Features
+
+* update docs for nested tables in Data Collection ([#3296](https://github.com/factorialco/f0/issues/3296)) ([b595b8b](https://github.com/factorialco/f0/commit/b595b8b72ab48b1201cc8c9ec5efe8028726c824))
+
+## [1.336.1](https://github.com/factorialco/f0/compare/f0-react-v1.336.0...f0-react-v1.336.1) (2026-01-27)
+
+
+### Bug Fixes
+
+* add support to edit emojis in rating questions ([#3298](https://github.com/factorialco/f0/issues/3298)) ([ccd3845](https://github.com/factorialco/f0/commit/ccd3845ae900de0d47cde1d3d0b78a963543058e))
+
+## [1.336.0](https://github.com/factorialco/f0/compare/f0-react-v1.335.0...f0-react-v1.336.0) (2026-01-27)
+
+
+### Features
+
+* Add configurable week start day support to calendar components ([#3262](https://github.com/factorialco/f0/issues/3262)) ([9f05087](https://github.com/factorialco/f0/commit/9f0508747363693ec83c244675596f704e8ff8d1))
+
+## [1.335.0](https://github.com/factorialco/f0/compare/f0-react-v1.334.0...f0-react-v1.335.0) (2026-01-26)
+
+
+### Features
+
+* modify TableOfContentPopover exports ([#3291](https://github.com/factorialco/f0/issues/3291)) ([8517896](https://github.com/factorialco/f0/commit/8517896f90e81a34671a845b82ff3ec326a92c19))
+
+## [1.334.0](https://github.com/factorialco/f0/compare/f0-react-v1.333.2...f0-react-v1.334.0) (2026-01-26)
+
+
+### Features
+
+* **TableOfContentPopover:** rename and normalize table of content popover component ([#3289](https://github.com/factorialco/f0/issues/3289)) ([f48c2e8](https://github.com/factorialco/f0/commit/f48c2e8cd684f7ee50ffef3b4b9c24047e8f2489))
+
+## [1.333.2](https://github.com/factorialco/f0/compare/f0-react-v1.333.1...f0-react-v1.333.2) (2026-01-23)
+
+
+### Bug Fixes
+
+* nested tables - apply observables to useLoadChildren hook ([#3281](https://github.com/factorialco/f0/issues/3281)) ([d210f78](https://github.com/factorialco/f0/commit/d210f781add32b630e9b64bb47d5616f5b72e45a))
+
+## [1.333.1](https://github.com/factorialco/f0/compare/f0-react-v1.333.0...f0-react-v1.333.1) (2026-01-23)
+
+
+### Bug Fixes
+
+* Normalize toolbar labels ([#2971](https://github.com/factorialco/f0/issues/2971)) ([e804129](https://github.com/factorialco/f0/commit/e8041293d671e94b1a165d223c82f9528fa6a0c4))
+
+## [1.333.0](https://github.com/factorialco/f0/compare/f0-react-v1.332.0...f0-react-v1.333.0) (2026-01-22)
+
+
+### Features
+
+* add xml to avatar file types ([#3275](https://github.com/factorialco/f0/issues/3275)) ([29eea64](https://github.com/factorialco/f0/commit/29eea6492e5f668caffab727ba33084dfa655e03))
+
+## [1.332.0](https://github.com/factorialco/f0/compare/f0-react-v1.331.0...f0-react-v1.332.0) (2026-01-22)
+
+
+### Features
+
+* add communities module icon ([#3276](https://github.com/factorialco/f0/issues/3276)) ([46deaf9](https://github.com/factorialco/f0/commit/46deaf9fa82ff06c85ddcda593c63f842cd21a47))
+
+## [1.331.0](https://github.com/factorialco/f0/compare/f0-react-v1.330.2...f0-react-v1.331.0) (2026-01-22)
+
+
+### Features
+
+* add image extension to NotesTextEditor ([#3250](https://github.com/factorialco/f0/issues/3250)) ([08207e5](https://github.com/factorialco/f0/commit/08207e5fe3bc681586ef80875b6a8c374fbd98fd))
+
+## [1.330.2](https://github.com/factorialco/f0/compare/f0-react-v1.330.1...f0-react-v1.330.2) (2026-01-22)
+
+
+### Bug Fixes
+
+* **Popover:** add container prop to fix rendering inside dialogs ([#3255](https://github.com/factorialco/f0/issues/3255)) ([9138284](https://github.com/factorialco/f0/commit/9138284e4324f0bc7981e4309fbcd8eb43eb2087))
+
 ## [1.330.1](https://github.com/factorialco/f0/compare/f0-react-v1.330.0...f0-react-v1.330.1) (2026-01-21)
 
 ### Bug Fixes

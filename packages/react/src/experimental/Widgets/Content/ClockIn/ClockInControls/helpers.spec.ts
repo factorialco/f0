@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest"
+
 import { CLOCK_IN_COLORS, ClockInStatus } from "../ClockInGraph"
 import { getInfo } from "./helpers"
 

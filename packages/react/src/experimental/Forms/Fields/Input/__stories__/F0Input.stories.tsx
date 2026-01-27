@@ -1,9 +1,10 @@
-import * as Icons from "@/icons/app"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
+import * as Icons from "@/icons/app"
 import { Placeholder } from "@/icons/app"
 import { withSkipA11y, withSnapshot } from "@/lib/storybook-utils/parameters"
 import { inputFieldStatus } from "@/ui/InputField"
+
 import { Input } from "../index"
 import { inputSizes } from "../types"
 

@@ -1,4 +1,5 @@
 import { describe, expect, test } from "vitest"
+
 import { Options, extractNumber } from "../extractNumber"
 
 describe("extractNumber", () => {

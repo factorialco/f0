@@ -1,3 +1,5 @@
+import type { Scope } from "@radix-ui/react-context"
+
 import { clamp } from "@radix-ui/number"
 import { composeEventHandlers } from "@radix-ui/primitive"
 import { createCollection } from "@radix-ui/react-collection"
@@ -22,8 +24,6 @@ import { hideOthers } from "aria-hidden"
 import * as React from "react"
 import * as ReactDOM from "react-dom"
 import { RemoveScroll } from "react-remove-scroll"
-
-import type { Scope } from "@radix-ui/react-context"
 
 type Direction = "ltr" | "rtl"
 

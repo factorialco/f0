@@ -10,6 +10,7 @@ import isChromatic from "chromatic/isChromatic"
 
 import "../src/styles.css"
 
+import { WeekStartDay } from "@/experimental/OneCalendar/types"
 import { ThemeProvider } from "@/lib/providers/theme"
 import { F0Provider } from "@/lib/providers/f0"
 import { DocsContainer } from "./DocsContainer.tsx"
@@ -47,6 +48,10 @@ export const F0 = (Story: StoryFn, { parameters }: StoryContext) => {
       l10n={{
         l10n: {
           locale: parameters.l10n?.locale ?? "en",
+          date: {
+            weekStartsOn:
+              parameters.l10n?.date?.weekStartsOn ?? WeekStartDay.Monday,
+          },
         },
       }}
       link={{
@@ -56,7 +61,6 @@ export const F0 = (Story: StoryFn, { parameters }: StoryContext) => {
             ref={ref}
             {...props}
             onClick={(event, ...args) => {
-              console.log("Link clicked", event, ...args)
               action("Link clicked")(event, ...args)
               props?.onClick?.(event, ...args)
               event.preventDefault()

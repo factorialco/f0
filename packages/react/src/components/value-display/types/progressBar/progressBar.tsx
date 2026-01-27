@@ -4,6 +4,7 @@
  */
 import { getColor } from "@/components/Charts/utils/colors"
 import { Progress } from "@/ui/progress"
+
 import { ValueDisplayRendererContext } from "../../renderers"
 import { isShowingPlaceholder, resolveValue } from "../../utils"
 import { WithPlaceholder } from "../types"

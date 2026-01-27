@@ -1,5 +1,7 @@
 "use client"
 
+import { useEffect, useMemo, useRef, useState } from "react"
+
 import { F0Button } from "@/components/F0Button"
 import { F0Checkbox } from "@/components/F0Checkbox"
 import { OneEllipsis } from "@/components/OneEllipsis"
@@ -8,7 +10,7 @@ import { Spinner } from "@/experimental/Information/Spinner"
 import { RecordType } from "@/hooks/datasource"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
-import { useEffect, useMemo, useRef, useState } from "react"
+
 import { FilterTypeComponentProps } from "../types"
 import { InFilterOptions } from "./types"
 import { cacheLabel, getCacheKey, useLoadOptions } from "./useLoadOptions"

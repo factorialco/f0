@@ -1,10 +1,13 @@
-import { F0Button } from "@/components/F0Button"
-import { ButtonInternal } from "@/components/F0Button/internal"
+import { forwardRef, useEffect, useMemo, useState } from "react"
+
 import type {
   DateRange,
   DateRangeComplete,
   GranularityDefinition,
 } from "@/experimental/OneCalendar"
+
+import { F0Button } from "@/components/F0Button"
+import { ButtonInternal } from "@/components/F0Button/internal"
 import { granularityDefinitions } from "@/experimental/OneCalendar/granularities"
 import {
   isAfterOrEqual,
@@ -13,7 +16,7 @@ import {
 import { ChevronLeft, ChevronRight } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
-import { forwardRef, useEffect, useMemo, useState } from "react"
+
 import { GranularityDefinitionKey } from "../../OneCalendar/granularities"
 import { DatePickerValue } from "../types"
 
@@ -61,7 +64,9 @@ const DateNavigatorTrigger = forwardRef<
         return [i18n.date.selectDate]
       }
 
-      const granularity = granularityDefinitions[value.granularity]
+      // Use the granularity prop if provided, otherwise fall back to static definitions
+      const granularityToUse =
+        granularity || granularityDefinitions[value.granularity]
 
       const values = [
         value.value,
@@ -70,8 +75,8 @@ const DateNavigatorTrigger = forwardRef<
         .filter((v) => v !== undefined)
         .sort((a, b) => a?.from.getTime() - b?.from.getTime())
 
-      return values.map((v) => granularity.toString(v, i18n, "long"))
-    }, [value, i18n, compareToValue])
+      return values.map((v) => granularityToUse.toString(v, i18n, "long"))
+    }, [value, i18n, compareToValue, granularity])
 
     const label = useMemo(() => {
       return Object.values(currentLabel).join(" ⸱ ")

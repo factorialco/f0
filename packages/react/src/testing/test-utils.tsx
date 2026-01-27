@@ -1,4 +1,4 @@
-import { UserPlatformProvider } from "@/lib/providers/user-platafform/UserPlatformProvider"
+import { queries } from "@testing-library/dom"
 import {
   Queries,
   render,
@@ -10,18 +10,20 @@ import {
   screen,
   within,
 } from "@testing-library/react"
-import * as ReactDOMClient from "react-dom/client"
-
-import { queries } from "@testing-library/dom"
-
 import { userEvent } from "@testing-library/user-event"
 import React, { type ReactElement } from "react"
+import * as ReactDOMClient from "react-dom/client"
+
+import { UserPlatformProvider } from "@/lib/providers/user-platafform/UserPlatformProvider"
+
 import { defaultTranslations, I18nProvider } from "../lib/providers/i18n"
 export * from "@testing-library/react"
 
+import { MotionGlobalConfig } from "motion"
+
+import { WeekStartDay } from "@/experimental/OneCalendar/types"
 import { DataCollectionStorageProvider } from "@/lib/providers/datacollection/DataCollectionStorageProvider"
 import { L10nProvider } from "@/lib/providers/l10n"
-import { MotionGlobalConfig } from "motion"
 MotionGlobalConfig.skipAnimations = true
 
 const TestProviders = ({ children }: { children: React.ReactNode }) => {
@@ -33,7 +35,12 @@ const TestProviders = ({ children }: { children: React.ReactNode }) => {
       }}
     >
       <UserPlatformProvider showExperimentalWarnings={false}>
-        <L10nProvider l10n={{ locale: "en-US" }}>
+        <L10nProvider
+          l10n={{
+            locale: "en-US",
+            date: { weekStartsOn: WeekStartDay.Monday },
+          }}
+        >
           <I18nProvider translations={defaultTranslations}>
             {children}
           </I18nProvider>

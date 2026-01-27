@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest"
 import { Observable } from "zen-observable-ts"
+
 import { PromiseState, promiseToObservable } from "./promise-to-observable"
 
 // Simple implementation of firstValueFrom since zen-observable-ts doesn't export it

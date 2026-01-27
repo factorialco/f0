@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { ComponentProps } from "react"
 import { fn } from "storybook/test"
+
 import { famousEmployees } from "../entity-select-name.factory"
 import { mapEntitySelectEntityToSubentity } from "../utils"
 import { ListTag } from "./index"

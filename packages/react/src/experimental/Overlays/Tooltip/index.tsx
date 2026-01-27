@@ -1,10 +1,12 @@
+import React, { ComponentProps } from "react"
+
 import {
   TooltipContent,
   Tooltip as TooltipPrimitive,
   TooltipProvider,
   TooltipTrigger,
 } from "@/ui/tooltip"
-import React, { ComponentProps } from "react"
+
 import { cn } from "../../../lib/utils"
 import { Shortcut } from "../../Information/Shortcut"
 

@@ -1,3 +1,6 @@
+import { AnimatePresence, motion } from "motion/react"
+import { ComponentProps, useState } from "react"
+
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Icon, F0IconProps, IconType } from "@/components/F0Icon"
 import {
@@ -11,8 +14,7 @@ import {
 import { EmojiImage } from "@/lib/emojis"
 import { useI18n } from "@/lib/providers/i18n"
 import { Action } from "@/ui/Action"
-import { AnimatePresence, motion } from "motion/react"
-import { ComponentProps, useState } from "react"
+
 import { BaseAvatar } from "../internal/BaseAvatar"
 
 export const pulses = [

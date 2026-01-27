@@ -1,13 +1,17 @@
+import type { Meta, StoryObj } from "@storybook/react-vite"
+
+import { useEffect, useState } from "react"
+
 import { F1SearchBox } from "@/experimental/Forms/Fields/F1SearchBox"
 import {
   generateMockUsers,
   MockUser,
 } from "@/experimental/OneDataCollection/__stories__/mockData"
 import { createDataSourceDefinition } from "@/hooks/datasource"
-import type { Meta, StoryObj } from "@storybook/react-vite"
-import { useEffect, useState } from "react"
-import { InFilter } from "../InFilter"
+
 import type { InFilterOptionItem, InFilterOptions } from "../types"
+
+import { InFilter } from "../InFilter"
 
 const meta = {
   title: "FilterPicker/Filters/InFilter",

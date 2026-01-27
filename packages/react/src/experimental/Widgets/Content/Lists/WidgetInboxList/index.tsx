@@ -1,5 +1,7 @@
-import { VerticalOverflowList } from "@/ui/VerticalOverflowList"
 import { ComponentProps } from "react"
+
+import { VerticalOverflowList } from "@/ui/VerticalOverflowList"
+
 import {
   WidgetInboxListItem,
   WidgetInboxListItemProps,

@@ -1,13 +1,15 @@
+import { describe, expect, it, vi } from "vitest"
+import "@testing-library/jest-dom/vitest"
 import {
   zeroRender as render,
   screen,
   userEvent,
   waitFor,
 } from "@/testing/test-utils"
-import "@testing-library/jest-dom/vitest"
-import { describe, expect, it, vi } from "vitest"
-import { F0Card } from "../F0Card"
+
 import type { CardSecondaryLink } from "../components/CardActions"
+
+import { F0Card } from "../F0Card"
 
 describe("F0Card Component", () => {
   it("renders title and description correctly", () => {

@@ -1,6 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
+
 import { Plus } from "lucide-react"
 import { fn } from "storybook/test"
+
 import { OneEmptyState } from "../OneEmptyState"
 
 const meta = {

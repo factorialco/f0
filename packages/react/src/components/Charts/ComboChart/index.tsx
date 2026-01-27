@@ -1,11 +1,3 @@
-import {
-  ChartConfig,
-  ChartContainer,
-  ChartLegend,
-  ChartLegendContent,
-  ChartTooltip,
-  ChartTooltipContent,
-} from "@/ui/chart"
 import { ForwardedRef } from "react"
 import {
   Bar,
@@ -17,6 +9,15 @@ import {
   XAxis,
   YAxis,
 } from "recharts"
+
+import {
+  ChartConfig,
+  ChartContainer,
+  ChartLegend,
+  ChartLegendContent,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/ui/chart"
 
 import { getCategoricalColor, getColor } from "../utils/colors"
 import {

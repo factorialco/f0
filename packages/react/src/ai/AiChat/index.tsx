@@ -5,9 +5,6 @@ import {
   useCopilotChatInternal,
 } from "@copilotkit/react-core"
 import { CopilotSidebar, InputProps } from "@copilotkit/react-ui"
-
-import { experimentalComponent } from "@/lib/experimental"
-
 import { type AIMessage } from "@copilotkit/shared"
 import {
   useCallback,
@@ -17,8 +14,11 @@ import {
   useState,
   useRef,
 } from "react"
-import { ActionItem } from "./ActionItem"
+
+import { experimentalComponent } from "@/lib/experimental"
 import { cn } from "@/lib/utils"
+
+import { ActionItem } from "./ActionItem"
 import {
   AssistantMessage,
   ChatButton,
@@ -29,9 +29,9 @@ import {
   MessagesContainer,
   UserMessage,
 } from "./components"
+import { MessagesContainerFullscreen } from "./components/MessagesContainerFullscreen"
 import { WelcomeScreenSuggestion } from "./components/WelcomeScreen"
 import { AiChatStateProvider, useAiChat } from "./providers/AiChatStateProvider"
-import { MessagesContainerFullscreen } from "./components/MessagesContainerFullscreen"
 
 // Context to share input state between Messages and Input components
 export const FullscreenChatContext = createContext<{
@@ -216,7 +216,7 @@ const AiChatCmp = () => {
 
   const InputComponent = useCallback(
     ({ ...props }: InputProps) => (
-      <div className="m-[16px] mt-2">
+      <div className="m-[16px] mt-0">
         <ChatTextarea {...props} />
       </div>
     ),

@@ -1,4 +1,5 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
+
 import { Cell, mockItem } from "../../../__stories__/shared"
 
 const meta = {

@@ -1,11 +1,13 @@
-import { F0Icon } from "@/components/F0Icon"
-import { Ai } from "@/icons/app"
-import { cn } from "@/lib/utils"
-import { Action } from "@/ui/Action"
 import * as Popover from "@radix-ui/react-popover"
 import { Editor } from "@tiptap/react"
 import { AnimatePresence, motion } from "motion/react"
 import { useRef, useState } from "react"
+
+import { F0Icon } from "@/components/F0Icon"
+import { Ai } from "@/icons/app"
+import { cn } from "@/lib/utils"
+import { Action } from "@/ui/Action"
+
 import { enhanceConfig } from "../utils/types"
 import { AIEnhanceMenu } from "./EnhanceMenu"
 

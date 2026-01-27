@@ -1,4 +1,5 @@
 import { TableFooter as TableFooterRoot } from "@/ui/table"
+
 import { cn } from "../../../lib/utils"
 
 interface TableFooterProps {

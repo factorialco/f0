@@ -1,6 +1,3 @@
-import type { RecordType } from "@/hooks/datasource"
-import { useDndEvents, useDroppableList } from "@/lib/dnd/hooks"
-import { cn } from "@/lib/utils"
 import { DropTargetRecord } from "@atlaskit/pragmatic-drag-and-drop/dist/types/internal-types"
 import { monitorForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter"
 import {
@@ -11,8 +8,15 @@ import {
   useRef,
   useState,
 } from "react"
-import { Lane } from "../../Lane"
+
+import type { RecordType } from "@/hooks/datasource"
+
+import { useDndEvents, useDroppableList } from "@/lib/dnd/hooks"
+import { cn } from "@/lib/utils"
+
 import type { LaneProps } from "../../Lane/types"
+
+import { Lane } from "../../Lane"
 import { KanbanOnMoveParam } from "../types"
 import {
   findTypeOfDropForLane,

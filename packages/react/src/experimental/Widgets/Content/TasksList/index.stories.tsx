@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
+
 import { fn } from "storybook/test"
+
 import { TasksList, TasksListProps } from "./index"
 
 const meta: Meta<TasksListProps> = {

@@ -1,7 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { Placeholder } from "@/icons/app"
 import { useState } from "react"
+
+import { Placeholder } from "@/icons/app"
+
 import { NumberInput } from "../index"
 
 const meta = {

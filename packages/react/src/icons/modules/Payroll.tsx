@@ -1,4 +1,5 @@
 import type { SVGProps } from "react"
+
 import { Ref, forwardRef } from "react"
 const SvgPayroll = (
   props: SVGProps<SVGSVGElement>,

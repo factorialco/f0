@@ -1,12 +1,14 @@
+import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Checkbox } from "@/components/F0Checkbox"
 import { OneEllipsis } from "@/components/OneEllipsis"
 import { Await } from "@/components/Utilities/Await"
 import { useI18n } from "@/lib/providers/i18n"
-import { Skeleton } from "@/ui/skeleton"
-import type { F0SelectItemObject } from "../types"
-import { ItemsPreviewHoverCard } from "./ItemsPreviewHoverCard"
 import { cn } from "@/lib/utils"
-import { ButtonInternal } from "@/components/F0Button/internal"
+import { Skeleton } from "@/ui/skeleton"
+
+import type { F0SelectItemObject } from "../types"
+
+import { ItemsPreviewHoverCard } from "./ItemsPreviewHoverCard"
 
 export type SelectAllProps = {
   selectedCount: number | Promise<number>
@@ -59,7 +61,7 @@ export const SelectAll = ({
           fallback={<Skeleton className="h-4 w-4" />}
         >
           {(resolvedCount: number) => (
-            <div className="flex items-center h-[24px]">
+            <div className="flex h-[24px] items-center">
               {items && items.length > 0 ? (
                 <ItemsPreviewHoverCard items={items} onDeselect={onDeselect}>
                   <OneEllipsis className="cursor-pointer text-f1-foreground-secondary transition-colors hover:text-f1-foreground">

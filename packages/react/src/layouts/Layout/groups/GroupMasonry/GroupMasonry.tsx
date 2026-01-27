@@ -1,4 +1,3 @@
-import { cn } from "@/lib/utils"
 import {
   DndContext,
   DragEndEvent,
@@ -17,6 +16,9 @@ import {
 } from "@dnd-kit/sortable"
 import { useDeepCompareEffect } from "@reactuses/core"
 import { useState } from "react"
+
+import { cn } from "@/lib/utils"
+
 import { PageLayoutGroupComponent } from "../../types"
 import { SortableBlock } from "./components/SortableBlock"
 

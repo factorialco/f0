@@ -1,7 +1,9 @@
+import { useState } from "react"
+
 import { focusRing } from "@/lib/utils"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
 import { ScrollArea, ScrollBar } from "@/ui/scrollarea"
-import { useState } from "react"
+
 import { Chip, type ChipProps } from "../../experimental/OneChip"
 
 type Props = {

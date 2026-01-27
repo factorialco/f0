@@ -1,8 +1,10 @@
+import { PopoverContentProps } from "@radix-ui/react-popover"
+import { useState } from "react"
+
 import { F0Button, F0ButtonProps } from "@/components/F0Button"
 import { IconType } from "@/components/F0Icon"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
-import { PopoverContentProps } from "@radix-ui/react-popover"
-import { useState } from "react"
+
 import { Upsell } from "../../../icons/app"
 import { Action, ProductWidget } from "../ProductWidget"
 import { UpsellRequestResponseDialog } from "../UpsellRequestResponseDialog"

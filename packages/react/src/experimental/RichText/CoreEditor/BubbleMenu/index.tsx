@@ -1,12 +1,11 @@
 import { BubbleMenu, Editor, isTextSelection } from "@tiptap/react"
 import { NodeSelection } from "prosemirror-state"
+
 import { Toolbar } from "../Toolbar"
-import { ToolbarLabels } from "../Toolbar/types"
 
 interface EditorBubbleMenuProps {
   editor: Editor
   disableButtons: boolean
-  toolbarLabels: ToolbarLabels
   isToolbarOpen: boolean
   isFullscreen: boolean
   editorId: string
@@ -17,7 +16,6 @@ export const EditorBubbleMenu = ({
   editorId,
   editor,
   disableButtons,
-  toolbarLabels,
   isToolbarOpen,
   isFullscreen,
   plainHtmlMode = false,
@@ -66,7 +64,6 @@ export const EditorBubbleMenu = ({
       {!isToolbarOpen && (
         <div className="dark z-50 flex w-max flex-row items-center rounded-lg border border-solid border-f1-border bg-f1-background p-1 drop-shadow-sm">
           <Toolbar
-            labels={toolbarLabels}
             editor={editor}
             disableButtons={disableButtons}
             darkMode

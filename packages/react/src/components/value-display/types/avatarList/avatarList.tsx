@@ -12,6 +12,7 @@ import {
   F0AvatarListProps,
 } from "@/components/avatars/F0AvatarList"
 import { cn } from "@/lib/utils"
+
 import { tableDisplayClassNames } from "../../const"
 import { ValueDisplayRendererContext } from "../../renderers"
 

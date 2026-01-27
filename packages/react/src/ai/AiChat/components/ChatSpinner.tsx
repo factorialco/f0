@@ -1,5 +1,6 @@
-import { motion } from "motion/react"
 import type { SVGProps } from "react"
+
+import { motion } from "motion/react"
 import { Ref, forwardRef, useId } from "react"
 
 const pieces = [

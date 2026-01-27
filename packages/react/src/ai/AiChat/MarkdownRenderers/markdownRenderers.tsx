@@ -1,4 +1,5 @@
 import { type AssistantMessageProps } from "@copilotkit/react-ui"
+
 import { Blockquote, Hr, Pre } from "./components/Block"
 import { Image } from "./components/Image"
 import { A } from "./components/Link"

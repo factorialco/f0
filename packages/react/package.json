@@ -1,6 +1,6 @@
 {
   "name": "@factorialco/f0-react",
-  "version": "1.330.1",
+  "version": "1.337.1",
   "private": false,
   "files": [
     "assets",
@@ -50,6 +50,7 @@
     "vitest:ci": "pnpm run vitest --project=unit --reporter=dot",
     "cycle-deps:delta": "tsx --tsconfig tsconfig.node.json .scripts/check-cycle-dependencies.ts"
   },
+  
   "dependencies": {
     "@atlaskit/pragmatic-drag-and-drop": "^1.7.4",
     "@atlaskit/pragmatic-drag-and-drop-flourish": "^2.0.4",
@@ -91,7 +92,9 @@
     "@tiptap/extension-details-summary": "^2.23.0",
     "@tiptap/extension-drag-handle": "^2.24.0",
     "@tiptap/extension-drag-handle-react": "^2.24.0",
+    "@tiptap/extension-file-handler": "^3.15.3",
     "@tiptap/extension-highlight": "^2.11.5",
+    "@tiptap/extension-image": "^2.27.2",
     "@tiptap/extension-link": "^2.11.5",
     "@tiptap/extension-mention": "^2.11.5",
     "@tiptap/extension-node-range": "^2.24.0",

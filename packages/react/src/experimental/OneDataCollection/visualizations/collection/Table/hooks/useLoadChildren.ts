@@ -1,3 +1,6 @@
+import { useCallback, useEffect, useRef, useState } from "react"
+import { Observable } from "zen-observable-ts"
+
 import { DataCollectionSource } from "@/experimental/OneDataCollection/hooks/useDataCollectionSource/types"
 import { ItemActionsDefinition } from "@/experimental/OneDataCollection/item-actions"
 import { NavigationFiltersDefinition } from "@/experimental/OneDataCollection/navigationFilters/types"
@@ -14,7 +17,8 @@ import {
   NestedResponseWithType,
   NestedVariant,
 } from "@/hooks/datasource/types/nested.typings"
-import { useCallback, useEffect, useRef, useState } from "react"
+import { promiseToObservable, PromiseState } from "@/lib/promise-to-observable"
+
 import { useNestedDataContext } from "../providers/NestedProvider"
 
 interface UseLoadChildrenProps<
@@ -132,35 +136,90 @@ export const useLoadChildren = <
     onClearFetchedData,
   ])
 
-  const loadChildren = useCallback(async () => {
+  const subscriptionRef = useRef<ZenObservable.Subscription | undefined>()
+
+  const processChildrenData = useCallback(
+    (data: ChildrenResponse<R> | undefined) => {
+      const loadedChildren = getChildren(data)
+      const updatedChildren = [...children, ...loadedChildren]
+      setChildren(updatedChildren)
+
+      const updatedData: ChildrenResponse<R> = {
+        records: updatedChildren,
+        type: data?.type,
+        paginationInfo: data?.paginationInfo,
+      }
+
+      updateFetchedData(rowId, updatedData)
+      setChildrenType(getChildrenType(data))
+      setPaginationInfo(data?.paginationInfo)
+
+      return loadedChildren
+    },
+    [children, rowId, updateFetchedData]
+  )
+
+  const loadChildren = useCallback(() => {
     if (children.length > 0 && !paginationInfo?.hasMore) return children
+
+    // Cancel any existing subscription
+    subscriptionRef.current?.unsubscribe()
 
     setIsLoading(true)
 
-    const data = await source.fetchChildren?.({
+    const result = source.fetchChildren?.({
       item,
       filters: source.currentFilters,
       pagination: paginationInfo,
       sortings: source.currentSortings,
     })
-    const loadedChildren = getChildren(data)
 
-    const updatedChildren = [...children, ...loadedChildren]
-    setChildren(updatedChildren)
-
-    const updatedData: ChildrenResponse<R> = {
-      records: updatedChildren,
-      type: data?.type,
-      paginationInfo: data?.paginationInfo,
+    // Handle undefined result
+    if (!result) {
+      setIsLoading(false)
+      return []
     }
 
-    updateFetchedData(rowId, updatedData)
-    setChildrenType(getChildrenType(data))
-    setPaginationInfo(data?.paginationInfo)
-    setIsLoading(false)
+    // Handle synchronous data (not a Promise or Observable)
+    if (!("then" in result) && !("subscribe" in result)) {
+      const loadedChildren = processChildrenData(result)
+      setIsLoading(false)
+      return loadedChildren
+    }
 
-    return loadedChildren
-  }, [children, item, source, rowId, updateFetchedData, paginationInfo])
+    // Convert Promise to Observable or use existing Observable
+    const observable: Observable<PromiseState<ChildrenResponse<R>>> =
+      "subscribe" in result ? result : promiseToObservable(result)
+
+    subscriptionRef.current = observable.subscribe({
+      next: (state) => {
+        if (state.loading) {
+          setIsLoading(true)
+        } else if (state.error) {
+          setIsLoading(false)
+        } else if (state.data) {
+          processChildrenData(state.data)
+          setIsLoading(false)
+        }
+      },
+      error: (error) => {
+        setIsLoading(false)
+        console.error("Error loading children:", error)
+      },
+      complete: () => {
+        subscriptionRef.current = undefined
+      },
+    })
+
+    return []
+  }, [children, item, source, paginationInfo, processChildrenData])
+
+  // Cleanup subscription on unmount
+  useEffect(() => {
+    return () => {
+      subscriptionRef.current?.unsubscribe()
+    }
+  }, [])
 
   return {
     children,

@@ -1,3 +1,5 @@
+import React, { forwardRef, useEffect, useMemo, useRef, useState } from "react"
+
 import { parseMarkdown, stripMarkdown } from "@/lib/markdown"
 import { cn } from "@/lib/utils"
 import {
@@ -6,7 +8,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/ui/tooltip"
-import React, { forwardRef, useEffect, useMemo, useRef, useState } from "react"
 
 export const tags = [
   "h1",
