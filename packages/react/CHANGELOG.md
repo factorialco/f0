@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.337.2](https://github.com/factorialco/f0/compare/f0-react-v1.337.1...f0-react-v1.337.2) (2026-01-27)
+
+
+### Bug Fixes
+
+* **l10n:** make date optional in L10nContextValue ([#3303](https://github.com/factorialco/f0/issues/3303)) ([17aefd3](https://github.com/factorialco/f0/commit/17aefd362890ac01a8a845569be60bc0aa3dc69c))
+
 ## [1.337.1](https://github.com/factorialco/f0/compare/f0-react-v1.337.0...f0-react-v1.337.1) (2026-01-27)
 
 

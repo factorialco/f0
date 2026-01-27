@@ -1,6 +1,8 @@
 {
   "name": "@factorialco/f0-react",
-  "version": "1.337.1",
+  "version": "1.337.2",
+  "main": "dist/f0.js",
+  "typings": "dist/f0.d.ts",
   "private": false,
   "files": [
     "assets",
@@ -15,8 +17,6 @@
   "sideEffects": [
     "**/*.css"
   ],
-  "main": "dist/f0.js",
-  "typings": "dist/f0.d.ts",
   "scripts": {
     "dev": "storybook dev -p 6006",
     "dev:docs": "DOCS_MODE=true pnpm run dev",
