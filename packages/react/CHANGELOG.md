@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.336.0](https://github.com/factorialco/f0/compare/f0-react-v1.335.0...f0-react-v1.336.0) (2026-01-27)
+
+
+### Features
+
+* Add configurable week start day support to calendar components ([#3262](https://github.com/factorialco/f0/issues/3262)) ([9f05087](https://github.com/factorialco/f0/commit/9f0508747363693ec83c244675596f704e8ff8d1))
+
 ## [1.335.0](https://github.com/factorialco/f0/compare/f0-react-v1.334.0...f0-react-v1.335.0) (2026-01-26)
 
 
