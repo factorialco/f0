@@ -423,7 +423,10 @@ const AiChat = experimentalComponent("AiChat", AiChatCmp)
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-const AiFullscreenChat = experimentalComponent("AiChat", AiFullscreenChatCmp)
+const AiFullscreenChat = experimentalComponent(
+  "AiFullscreenChat",
+  AiFullscreenChatCmp
+)
 
 const AiChatProvider = experimentalComponent(
   "AiChatProvider",

@@ -1,4 +1,4 @@
-import { forwardRef } from "react"
+import { forwardRef, memo } from "react"
 
 import { useShowExperimentalWarnings } from "./providers/user-platafform/UserPlatformProvider"
 
@@ -120,6 +120,53 @@ export const experimentalComponent = <T extends React.ComponentType<any>>(
     }
 
     return WrappedComponent as unknown as T
+  }
+
+  // Check if the component is a memo component
+  const isMemo =
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (component as any).$$typeof === Symbol.for("react.memo")
+
+  if (isMemo) {
+    // For memo components, we need to wrap the inner component and re-memoize
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const originalType = (component as any).type
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const originalCompare = (component as any).compare
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const WrappedComponent = (props: any) => {
+      const showExperimentalWarnings = useShowExperimentalWarnings()
+      if (showExperimentalWarnings) {
+        initReporting()
+
+        if (!reported[name]) {
+          reported[name] = {
+            uses: 0,
+            usesReported: -1,
+          }
+        }
+
+        reported[name] = {
+          ...reported[name],
+          uses: (reported[name]?.uses ?? 0) + 1,
+        }
+      }
+
+      return originalType(props)
+    }
+
+    WrappedComponent.displayName = `Experimental(${name})`
+
+    // Copy all static properties from the original component to preserve markers
+    copyStaticProperties(component, WrappedComponent)
+
+    const MemoizedComponent = memo(WrappedComponent, originalCompare)
+
+    // Copy all static properties to the memoized component as well
+    copyStaticProperties(component, MemoizedComponent)
+
+    return MemoizedComponent as unknown as T
   }
 
   // For regular components
