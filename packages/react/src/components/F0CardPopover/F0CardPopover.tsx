@@ -35,6 +35,7 @@ export const F0CardPopover = ({
         />
         <CardContent metadata={cardProps.metadata} />
         <CardActions
+          compact
           primaryAction={cardProps.primaryAction}
           secondaryActions={
             cardProps.secondaryActions
