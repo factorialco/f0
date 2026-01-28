@@ -26,6 +26,7 @@ export type TextareaProps = Omit<
     | "status"
     | "hint"
     | "onKeyDown"
+    | "size"
   >
 
 const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
@@ -47,6 +48,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
       hint,
       onChange,
       placeholder,
+      size,
       ...props
     },
     ref
@@ -69,6 +71,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
           onChange?.(value ?? "")
         }}
         disabled={disabled}
+        size={size}
         {...props}
       >
         <textarea
