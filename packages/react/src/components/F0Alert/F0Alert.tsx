@@ -1,17 +1,14 @@
-import { cva, type VariantProps } from "cva"
+import { cva } from "cva"
 import { useRef } from "react"
-
-import type { IconType } from "@/components/F0Icon"
 
 import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
 import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon"
 import { F0Button } from "@/components/F0Button"
 import { F0Link } from "@/components/F0Link"
 import { Placeholder } from "@/icons/app"
-import { experimentalComponent } from "@/lib/experimental"
 import { cn } from "@/lib/utils"
 
-type AlertVariant = "info" | "warning" | "critical" | "neutral" | "positive"
+import type { F0AlertProps } from "./types"
 
 const alertVariants = cva({
   base: "w-full rounded-md p-2 pr-3 text-f1-foreground",
@@ -45,29 +42,14 @@ const titleVariants = cva({
   },
 })
 
-interface AlertProps extends VariantProps<typeof alertVariants> {
-  title: string
-  description: string
-  action?: {
-    label: string
-    onClick: () => void
-  }
-  link?: {
-    label: string
-    href: string
-  }
-  icon?: IconType
-  variant: AlertVariant
-}
-
-const _OneAlert = ({
+export const F0Alert = ({
   title,
   description,
   action,
   link,
   icon,
   variant = "neutral",
-}: AlertProps) => {
+}: F0AlertProps) => {
   const containerRef = useRef<HTMLDivElement>(null)
 
   return (
@@ -100,7 +82,12 @@ const _OneAlert = ({
               )}
             >
               {link && (
-                <F0Link href={link.href} target="_blank" variant="link">
+                <F0Link
+                  href={link.href}
+                  target="_blank"
+                  variant="link"
+                  size="sm"
+                >
                   {link.label}
                 </F0Link>
               )}
@@ -109,6 +96,7 @@ const _OneAlert = ({
                   label={action.label}
                   variant="outline"
                   onClick={action.onClick}
+                  size="sm"
                 />
               )}
             </div>
@@ -118,8 +106,3 @@ const _OneAlert = ({
     </div>
   )
 }
-
-/**
- * @experimental This is an experimental component use it at your own risk
- */
-export const OneAlert = experimentalComponent("OneAlert", _OneAlert)
