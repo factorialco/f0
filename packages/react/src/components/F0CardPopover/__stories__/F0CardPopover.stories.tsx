@@ -55,9 +55,9 @@ const meta = {
 } satisfies Meta<typeof F0CardPopover>
 
 export default meta
-type Story = StoryObj<typeof meta>
+type Story = StoryObj<Meta<typeof F0CardPopover>>
 
-export const Default: Story = {
+export const Default = {
   args: {
     children: <F0Button variant="default" label="Open Card Popover"></F0Button>,
     primaryAction: {
@@ -134,4 +134,4 @@ export const Default: Story = {
       },
     ],
   },
-}
+} as Story

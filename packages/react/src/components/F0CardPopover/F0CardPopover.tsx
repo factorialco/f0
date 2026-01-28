@@ -1,10 +1,12 @@
-import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
 import { useControllable } from "use-controllable"
-import { F0CardPopoverProps } from "./types"
+
 import { Cross } from "@/icons/app"
-import { ButtonInternal } from "../F0Button/internal"
 import { useI18n } from "@/lib/providers/i18n"
-import { CardActions, CardContent } from "@/components/F0Card/internal-exports"
+import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
+
+import { ButtonInternal } from "../F0Button/internal"
+import { CardActions, CardContent } from "../F0Card/internal-exports"
+import { F0CardPopoverProps } from "./types"
 
 export const F0CardPopover = ({
   open,
@@ -23,7 +25,7 @@ export const F0CardPopover = ({
       <PopoverTrigger>{children}</PopoverTrigger>
       <PopoverContent>
         <ButtonInternal
-          className="absolute top-2 right-2 z-10"
+          className="absolute right-2 top-2 z-10"
           icon={Cross}
           variant="ghost"
           size="sm"
@@ -34,10 +36,14 @@ export const F0CardPopover = ({
         <CardContent metadata={cardProps.metadata} />
         <CardActions
           primaryAction={cardProps.primaryAction}
-          secondaryActions={{
-            actions: cardProps.secondaryActions,
-            hideLabels: true,
-          }}
+          secondaryActions={
+            cardProps.secondaryActions
+              ? {
+                  actions: cardProps.secondaryActions,
+                  hideLabels: true,
+                }
+              : undefined
+          }
         />
       </PopoverContent>
     </Popover>
