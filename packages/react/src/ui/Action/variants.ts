@@ -95,7 +95,7 @@ export const actionVariants = cva({
 export const buttonSizeVariants = cva({
   variants: {
     size: {
-      sm: "rounded-sm text-sm before:rounded-[7px] [&_.main]:h-6 [&_.main]:px-2",
+      sm: "rounded-sm text-base before:rounded-[7px] [&_.main]:h-6 [&_.main]:px-2",
       md: "rounded text-base before:rounded-[9px] [&_.main]:h-8 [&_.main]:px-3",
       lg: "rounded-md text-lg before:rounded-[11px] [&_.main]:h-10 [&_.main]:px-4",
     },

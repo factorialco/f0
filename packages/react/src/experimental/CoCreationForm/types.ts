@@ -75,6 +75,7 @@ type OnChangeQuestionParams = BaseQuestionOnChangeParams &
     | {
         type: "rating"
         value: number
+        options?: { value: number; label: string }[]
       }
     | {
         type: "select"

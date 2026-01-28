@@ -1,7 +1,5 @@
-import { cva, type VariantProps } from "cva"
+import { cva } from "cva"
 import { useRef } from "react"
-
-import type { IconType } from "@/components/F0Icon"
 
 import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
 import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon"
@@ -10,7 +8,7 @@ import { F0Link } from "@/components/F0Link"
 import { Placeholder } from "@/icons/app"
 import { cn } from "@/lib/utils"
 
-type AlertVariant = "info" | "warning" | "critical" | "neutral" | "positive"
+import type { F0AlertProps } from "./types"
 
 const alertVariants = cva({
   base: "w-full rounded-md p-2 pr-3 text-f1-foreground",
@@ -44,29 +42,14 @@ const titleVariants = cva({
   },
 })
 
-interface AlertProps extends VariantProps<typeof alertVariants> {
-  title: string
-  description: string
-  action?: {
-    label: string
-    onClick: () => void
-  }
-  link?: {
-    label: string
-    href: string
-  }
-  icon?: IconType
-  variant: AlertVariant
-}
-
-export const OneAlert = ({
+export const F0Alert = ({
   title,
   description,
   action,
   link,
   icon,
   variant = "neutral",
-}: AlertProps) => {
+}: F0AlertProps) => {
   const containerRef = useRef<HTMLDivElement>(null)
 
   return (
@@ -99,7 +82,12 @@ export const OneAlert = ({
               )}
             >
               {link && (
-                <F0Link href={link.href} target="_blank" variant="link">
+                <F0Link
+                  href={link.href}
+                  target="_blank"
+                  variant="link"
+                  size="sm"
+                >
                   {link.label}
                 </F0Link>
               )}
@@ -108,6 +96,7 @@ export const OneAlert = ({
                   label={action.label}
                   variant="outline"
                   onClick={action.onClick}
+                  size="sm"
                 />
               )}
             </div>

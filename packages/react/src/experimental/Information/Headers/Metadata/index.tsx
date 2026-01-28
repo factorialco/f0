@@ -14,6 +14,7 @@ import { StatusVariant } from "@/components/tags/F0TagStatus"
 import { MobileDropdown } from "@/experimental/Navigation/Dropdown"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { InfoCircleLine } from "@/icons/app"
+import { experimentalComponent } from "@/lib/experimental"
 import { cn } from "@/lib/utils"
 import { ButtonCopy } from "@/ui/ButtonCopy"
 
@@ -263,7 +264,7 @@ function MetadataItem({ item }: { item: MetadataItem }) {
   )
 }
 
-export const Metadata = memo(function Metadata({ items }: MetadataProps) {
+const _Metadata = memo(function Metadata({ items }: MetadataProps) {
   const cleanedItems = items.filter((item) => typeof item === "object")
   return (
     <div className="flex flex-col items-start gap-x-3 gap-y-0 md:flex-row md:flex-wrap md:items-center">
@@ -281,5 +282,10 @@ export const Metadata = memo(function Metadata({ items }: MetadataProps) {
     </div>
   )
 })
+
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export const Metadata = experimentalComponent("Metadata", _Metadata)
 
 export type { MetadataAction, MetadataItem, MetadataItemValue }

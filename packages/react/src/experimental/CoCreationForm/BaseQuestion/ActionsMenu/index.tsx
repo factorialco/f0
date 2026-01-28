@@ -29,8 +29,19 @@ import {
 
 import { useQuestionTypes } from "../../constants"
 import { useCoCreationFormContext } from "../../Context"
-import { getDefaultParamsForQuestionType } from "../../lib"
+import {
+  detectRatingOptionType,
+  getDefaultParamsForQuestionType,
+  getRatingOptions,
+  RatingOptionType,
+} from "../../lib"
 import { CoCreationFormCallbacks, QuestionType } from "../../types"
+
+const RATING_OPTIONS: { label: string; value: RatingOptionType }[] = [
+  { label: "1 - 5", value: "1-5" },
+  { label: "1 - 10", value: "1-10" },
+  { label: "Emojis", value: "emojis" },
+]
 
 const ToggleItem = ({
   label,
@@ -44,7 +55,7 @@ const ToggleItem = ({
   onChange: (checked: boolean) => void
 }) => (
   <DropdownMenuItem
-    className="pr-3"
+    className="!pb-2.5 pr-4"
     onClick={(e) => {
       e.preventDefault()
       onChange(!checked)
@@ -63,28 +74,30 @@ const ToggleItem = ({
   </DropdownMenuItem>
 )
 
-const SubMenuItem = <Value extends string>({
+const QuestionTypeMenuItem = ({
   label,
   value,
-  options,
-  icon,
-  onSelect,
+  questionTypes,
+  currentRatingType,
+  onSelectQuestionType,
+  onSelectRatingType,
 }: {
   label: string
-  value: Value
-  options: { label: string; value: Value; icon: IconType }[]
-  icon: IconType
-  onSelect: (value: Value) => void
+  value: QuestionType
+  questionTypes: { label: string; questionType: QuestionType; icon: IconType }[]
+  currentRatingType: RatingOptionType | null
+  onSelectQuestionType: (type: QuestionType) => void
+  onSelectRatingType: (type: RatingOptionType) => void
 }) => {
-  const selectedOptionLabel = options.find(
-    (option) => option.value === value
+  const selectedOptionLabel = questionTypes.find(
+    (option) => option.questionType === value
   )?.label
 
   return (
     <DropdownMenuSub>
-      <DropdownMenuSubTrigger className="px-3 py-2">
+      <DropdownMenuSubTrigger className="mx-1 px-2 data-[state=open]:rounded-sm data-[state=closed]:bg-transparent data-[state=open]:bg-f1-background-hover">
         <div className="flex w-full flex-row items-center gap-2">
-          <F0Icon icon={icon} color="default" />
+          <F0Icon icon={Hub} color="default" />
           <span className="flex-1 text-base font-medium">{label}</span>
           {!!selectedOptionLabel && (
             <span className="mr-1 text-base text-f1-foreground-secondary">
@@ -95,20 +108,62 @@ const SubMenuItem = <Value extends string>({
       </DropdownMenuSubTrigger>
       <DropdownMenuPortal>
         <DropdownMenuSubContent>
-          {options.map((option) => (
-            <DropdownMenuItem
-              key={option.value}
-              onClick={() => onSelect(option.value)}
-            >
-              <div className="flex w-full flex-row items-center gap-2">
-                <F0Icon icon={option.icon} color="default" />
-                <span className="flex-1">{option.label}</span>
-                {value === option.value && (
-                  <F0Icon icon={Check} color="default" />
-                )}
-              </div>
-            </DropdownMenuItem>
-          ))}
+          {questionTypes.map((questionType) => {
+            const isRating = questionType.questionType === "rating"
+            const isSelected = value === questionType.questionType
+
+            if (isRating) {
+              return (
+                <DropdownMenuSub key={questionType.questionType}>
+                  <DropdownMenuSubTrigger className="mx-1 mt-1 px-2 data-[state=open]:rounded-sm data-[state=closed]:bg-transparent data-[state=open]:bg-f1-background-hover">
+                    <div className="flex w-full flex-row items-center gap-2 text-base font-medium">
+                      <F0Icon icon={questionType.icon} color="default" />
+                      <span className="flex-1">{questionType.label}</span>
+                      {currentRatingType && (
+                        <span className="mr-1 text-base text-f1-foreground-secondary">
+                          {
+                            RATING_OPTIONS.find(
+                              (opt) => opt.value === currentRatingType
+                            )?.label
+                          }
+                        </span>
+                      )}
+                    </div>
+                  </DropdownMenuSubTrigger>
+                  <DropdownMenuPortal>
+                    <DropdownMenuSubContent>
+                      {RATING_OPTIONS.map((ratingOption) => (
+                        <DropdownMenuItem
+                          key={ratingOption.value}
+                          onClick={() => onSelectRatingType(ratingOption.value)}
+                        >
+                          <div className="flex w-full flex-row items-center gap-2 pl-2">
+                            <span className="flex-1">{ratingOption.label}</span>
+                            {currentRatingType === ratingOption.value && (
+                              <F0Icon icon={Check} color="default" />
+                            )}
+                          </div>
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuSubContent>
+                  </DropdownMenuPortal>
+                </DropdownMenuSub>
+              )
+            }
+
+            return (
+              <DropdownMenuItem
+                key={questionType.questionType}
+                onClick={() => onSelectQuestionType(questionType.questionType)}
+              >
+                <div className="flex w-full flex-row items-center gap-2">
+                  <F0Icon icon={questionType.icon} color="default" />
+                  <span className="flex-1">{questionType.label}</span>
+                  {isSelected && <F0Icon icon={Check} color="default" />}
+                </div>
+              </DropdownMenuItem>
+            )
+          })}
         </DropdownMenuSubContent>
       </DropdownMenuPortal>
     </DropdownMenuSub>
@@ -169,6 +224,31 @@ export function ActionsMenu({
 
   const questionTypes = useQuestionTypes()
 
+  const currentRatingType = useMemo(() => {
+    if (
+      questionType !== "rating" ||
+      !question ||
+      !("options" in question) ||
+      question.type !== "rating"
+    ) {
+      return null
+    }
+    // Type guard: rating questions have options with number values
+    const ratingOptions = question.options
+    if (
+      !Array.isArray(ratingOptions) ||
+      ratingOptions.length === 0 ||
+      typeof ratingOptions[0]?.value !== "number"
+    ) {
+      return null
+    }
+
+    // TypeScript type assertion: we've verified this is a rating question with number options
+    return detectRatingOptionType(
+      ratingOptions as { value: number; label: string }[]
+    )
+  }, [questionType, question])
+
   const handleChangeRequired = (checked: boolean) => {
     onQuestionChange?.({
       id: questionId,
@@ -195,6 +275,19 @@ export function ActionsMenu({
       ...(changingType && {
         ...getDefaultParamsForQuestionType(newQuestionType),
       }),
+    } as Parameters<
+      NonNullable<CoCreationFormCallbacks["onQuestionChange"]>
+    >[0])
+  }
+
+  const handleSelectRatingType = (ratingType: RatingOptionType) => {
+    if (questionType !== "rating") return
+
+    onQuestionChange?.({
+      id: questionId,
+      type: "rating",
+      value: 0,
+      options: getRatingOptions(ratingType),
     } as Parameters<
       NonNullable<CoCreationFormCallbacks["onQuestionChange"]>
     >[0])
@@ -235,16 +328,13 @@ export function ActionsMenu({
           </DropdownMenuGroup>
         )}
         <DropdownMenuGroup>
-          <SubMenuItem<QuestionType>
+          <QuestionTypeMenuItem
             label={t("coCreationForm.labels.questionType")}
             value={questionType}
-            options={questionTypes.map((questionType) => ({
-              label: questionType.label,
-              value: questionType.questionType,
-              icon: questionType.icon,
-            }))}
-            onSelect={handleSelectQuestionType}
-            icon={Hub}
+            questionTypes={questionTypes}
+            currentRatingType={currentRatingType}
+            onSelectQuestionType={handleSelectQuestionType}
+            onSelectRatingType={handleSelectRatingType}
           />
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
