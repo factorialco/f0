@@ -2,12 +2,12 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { fn } from "storybook/test"
 
-import { OneAlert } from "./index"
+import { F0Alert } from "../F0Alert"
 
-const meta: Meta<typeof OneAlert> = {
-  component: OneAlert,
-  title: "Home/OneAlert",
-  tags: ["autodocs", "experimental"],
+const meta: Meta<typeof F0Alert> = {
+  component: F0Alert,
+  title: "Alert",
+  tags: ["autodocs", "stable"],
   parameters: {
     layout: "centered",
   },
@@ -26,6 +26,8 @@ const meta: Meta<typeof OneAlert> = {
       description: "Link configuration",
     },
     variant: {
+      control: "select",
+      options: ["info", "warning", "critical", "neutral", "positive"],
       description: "Variant for the alert composition",
     },
   },
@@ -40,12 +42,12 @@ const meta: Meta<typeof OneAlert> = {
 
 export default meta
 
-type Story = StoryObj<typeof OneAlert>
+type Story = StoryObj<typeof F0Alert>
 
 export const Default: Story = {
   args: {
     title: "Your workspace includes up to 3 invoices.",
-    description: "Start creating invoices: it’s free with your plan!",
+    description: "Start creating invoices: it's free with your plan!",
     action: {
       label: "Request info",
       onClick: fn(),
@@ -58,7 +60,7 @@ export const Default: Story = {
   },
   render: (args) => (
     <div className="w-[640px]">
-      <OneAlert {...args} />
+      <F0Alert {...args} />
     </div>
   ),
 }
@@ -78,7 +80,7 @@ export const Narrow: Story = {
   },
   render: (args) => (
     <div className="w-[320px]">
-      <OneAlert {...args} />
+      <F0Alert {...args} />
     </div>
   ),
 }
