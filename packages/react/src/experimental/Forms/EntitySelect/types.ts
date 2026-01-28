@@ -9,6 +9,7 @@ export type EntitySelectSubEntity = {
   subName: string
   subAvatar?: string
   subSearchKeys?: string[]
+  subDeactivated?: boolean
 }
 
 export type EntitySelectEntity = {

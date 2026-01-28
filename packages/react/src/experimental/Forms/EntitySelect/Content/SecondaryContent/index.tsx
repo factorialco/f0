@@ -37,6 +37,7 @@ export const SecondaryContent = ({
             subId: el.id,
             subName: el.name,
             subAvatar: el.avatar,
+            subDeactivated: el.deactivated,
           } as EntitySelectSubEntity,
         }))
       : selectedEntities.flatMap((entity) =>
@@ -81,6 +82,7 @@ export const SecondaryContent = ({
             }
             return (
               <ListTag
+                deactivated={current.subItem.subDeactivated}
                 entity={current.subItem}
                 disabled={disabled}
                 hiddenAvatar={hiddenAvatar}

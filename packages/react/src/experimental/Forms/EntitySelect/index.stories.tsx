@@ -737,6 +737,41 @@ export const WithLabelIcon = {
   },
 }
 
+export const WithDeactivatedEntities = {
+  args: {
+    ...defaultArgs,
+    label: "Select an employee",
+    labelIcon: Placeholder,
+    hideLabel: false,
+  },
+  render: (props: ComponentProps<typeof EntitySelect>) => {
+    const [loading, setLoading] = useState<boolean>(props.loading ?? true)
+    const [selectedGroup, setSelectedGroup] = useState<string>(
+      props.selectedGroup ?? "all"
+    )
+
+    const entities = GROUP_DATA[selectedGroup as keyof typeof GROUP_DATA] || []
+    entities[0].deactivated = true
+    const [selected] = useState<EntitySelectEntity[]>([{ ...entities[0] }])
+
+    return (
+      <div className="w-64">
+        <EntitySelect
+          {...props}
+          loading={loading}
+          entities={entities}
+          selectedEntities={selected}
+          selectedGroup={selectedGroup}
+          onGroupChange={(value) => setSelectedGroup(value ?? "all")}
+          onOpenChange={(open) =>
+            open ? setTimeout(() => setLoading(false), 500) : setLoading(true)
+          }
+        />
+      </div>
+    )
+  },
+}
+
 export const Error = {
   args: {
     ...defaultArgs,

@@ -37,6 +37,14 @@ type Story = StoryObj<typeof meta>
 
 export const DefaultPersonTag: Story = {}
 
+export const DeactivatedPersonTag: Story = {
+  args: {
+    deactivated: true,
+    name: "Saul Dominguez",
+    src: "/avatars/person05.jpg",
+  },
+}
+
 export const Snapshot: Story = {
   parameters: withSnapshot({}),
   render: () => (
