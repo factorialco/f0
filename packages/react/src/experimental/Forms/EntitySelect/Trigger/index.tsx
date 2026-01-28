@@ -150,7 +150,7 @@ export const Trigger = ({
           className={
             flattenedList.length === 1 &&
             flattenedList[0].subItem.subDeactivated
-              ? "text-f1-foreground/[0.61]"
+              ? "text-f1-foreground-disabled"
               : undefined
           }
         >

@@ -73,7 +73,9 @@ export const BaseTag = forwardRef<HTMLDivElement, BaseTagProps>(
             <OneEllipsis
               tag="span"
               lines={1}
-              className={deactivated ? "text-f1-foreground/[0.61]" : undefined}
+              className={
+                deactivated ? "text-f1-foreground-disabled" : undefined
+              }
             >
               {text}
             </OneEllipsis>
