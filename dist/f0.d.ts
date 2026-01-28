@@ -265,6 +265,8 @@ declare const alertAvatarVariants: (props?: ({
 
 declare type AlertTagProps = ComponentProps<typeof F0TagAlert>;
 
+export declare type AlertVariant = "info" | "warning" | "critical" | "neutral" | "positive";
+
 declare const _allowedVariants: readonly ["heading", "heading-large"];
 
 declare const _allowedVariants_2: readonly ["body", "description", "small", "inverse", "code", "label"];
@@ -566,6 +568,15 @@ export declare type BaseResponse<R> = {
 declare type BaseTag<T extends {
     type: string;
 }> = T & WithTooltipDescription;
+
+declare interface BaseTOCItem {
+    id: string;
+    label: string;
+    onClick?: (id: string) => void;
+    icon?: IconType;
+    disabled?: boolean;
+    otherActions?: TOCItemAction[];
+}
 
 export declare type BigNumberProps = {
     value: Numeric | NumberWithFormatter | number;
@@ -1481,6 +1492,7 @@ declare interface DatePickerPopupProps {
     hideCalendarInput?: boolean;
     asChild?: boolean;
     onCompareToChange?: (compareTo: DateRangeComplete | DateRangeComplete[] | undefined) => void;
+    weekStartsOn?: WeekStartsOn;
 }
 
 export declare const datepickerSizes: readonly ["sm", "md"];
@@ -2141,6 +2153,24 @@ declare type ExtractVisualizationSettings<T> = T extends {
     };
 } ? S : never;
 
+export declare const F0Alert: ({ title, description, action, link, icon, variant, }: F0AlertProps) => JSX_2.Element;
+
+export declare interface F0AlertProps {
+    title: string;
+    description: string;
+    action?: {
+        label: string;
+        disabled?: boolean;
+        onClick: () => void;
+    };
+    link?: {
+        label: string;
+        href: string;
+    };
+    icon?: IconType;
+    variant: AlertVariant;
+}
+
 export declare const F0Avatar: ({ avatar, size }: AvatarProps) => ReactNode;
 
 export declare const F0AvatarAlert: ({ type, size, "aria-label": ariaLabel, "aria-labelledby": ariaLabelledby, }: AlertAvatarProps) => JSX_2.Element;
@@ -2762,6 +2792,32 @@ export declare type F0SelectProps<T extends string, R = unknown> = F0SelectBaseP
     options: F0SelectItemProps<T, unknown>[];
 }) & Pick<InputFieldProps<T>, "required" | "loading" | "hideLabel" | "labelIcon" | "size" | "label" | "icon" | "placeholder" | "disabled" | "name" | "error" | "status" | "hint">;
 
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export declare const F0TableOfContentPopover: typeof F0TableOfContentPopover_2;
+
+/**
+ * Internal implementation of the TableOfContentPopover component.
+ * This component includes all props including private ones.
+ */
+declare function F0TableOfContentPopover_2({ title, items, className, activeItem, collapsible, showChildrenCounter, barsAlign, size, variant, }: F0TableOfContentPopoverProps): JSX_2.Element;
+
+declare interface F0TableOfContentPopoverProps extends Omit<TOCProps, "sortable" | "onReorder" | "showSearchBox" | "title" | "hideChildrenCounter"> {
+    /** Optional title displayed at the top of the menu popup */
+    title?: string;
+    /** Alignment of the collapsed bars (left or right) */
+    barsAlign?: "left" | "right";
+    /** Whether sections can be collapsed/expanded */
+    collapsible?: boolean;
+    /** Show the count of children items next to parent items */
+    showChildrenCounter?: boolean;
+    /** Maximum height of the popup: sm (max 240px), md (max 400px), lg (max 600px). Content auto-adjusts within limit. */
+    size?: PopupSize;
+    /** Visual variant: "dark" for light backgrounds (default), "light" for dark backgrounds */
+    variant?: TableOfContentPopoverVariant;
+}
+
 export declare const F0TagAlert: ForwardRefExoticComponent<TagAlertProps & RefAttributes<HTMLDivElement>>;
 
 export declare const F0TagBalance: ForwardRefExoticComponent<TagBalanceProps & RefAttributes<HTMLDivElement>>;
@@ -2994,6 +3050,7 @@ export declare function getEmojiLabel(emoji: string): string;
 declare interface GranularityDefinition {
     calendarMode?: CalendarMode;
     calendarView: CalendarView;
+    weekStartsOn?: WeekStartsOn;
     label: (viewDate: Date, i18n: TranslationsType) => ReactNode;
     toRangeString: (date: Date | DateRange | undefined | null, i18n: TranslationsType, format?: DateStringFormat) => DateRangeString;
     toRange: <T extends Date | DateRange | undefined | null>(date: T) => T extends Date | DateRange ? DateRangeComplete : T;
@@ -3015,6 +3072,7 @@ declare interface GranularityDefinition {
         setViewDate: (date: Date) => void;
         viewDate: Date;
         compact?: boolean;
+        weekStartsOn?: WeekStartsOn;
     }) => ReactNode;
     add: (date: DateRangeComplete, delta: number) => DateRangeComplete;
     getPrevNext(date: DateRange, options: DateNavigationOptions): PrevNextDateNavigation;
@@ -3172,6 +3230,11 @@ declare const iconVariants: (props?: ({
     class?: never;
     className?: ClassValue;
 })) | undefined) => string;
+
+declare type IdStructure = {
+    id: string;
+    children?: IdStructure[];
+};
 
 declare type ImageContextValue = {
     src?: (props: ImageProps) => SrcProps;
@@ -3391,6 +3454,9 @@ declare type KanbanVisualizationOptions<Record extends RecordType, _Filters exte
 
 declare type L10nContextValue = {
     locale: string;
+    date?: {
+        weekStartsOn: WeekStartsOn;
+    };
 };
 
 declare interface L10nProviderProps {
@@ -3615,6 +3681,8 @@ declare type NestedResponseWithType<R extends RecordType> = {
 declare type NestedVariant = "basic" | "detailed";
 
 export declare type NewColor = Extract<BaseColor, (typeof tagDotColors)[number]>;
+
+declare type NextDepth<T> = T extends 1 ? 2 : T extends 2 ? 3 : T extends 3 ? 4 : never;
 
 export declare interface NextStepsProps {
     title: string;
@@ -3915,6 +3983,8 @@ export declare type PersonAvatarVariant = Extract<AvatarVariant, {
 declare type PersonTagProps = ComponentProps<typeof F0TagPerson>;
 
 export declare const PieChart: ForwardRefExoticComponent<Omit<PieChartProps & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>;
+
+declare type PopupSize = "sm" | "md" | "lg";
 
 export declare const predefinedPresets: Record<string, DatePreset>;
 
@@ -4447,6 +4517,8 @@ declare interface TableHeadProps {
     className?: string;
 }
 
+declare type TableOfContentPopoverVariant = "dark" | "light";
+
 declare type TableVisualizationOptions<R extends RecordType, _Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition> = {
     /**
      * The columns to display
@@ -4690,6 +4762,34 @@ declare const textVariants: (props?: ({
     class?: never;
     className?: ClassValue;
 })) | undefined) => string;
+
+declare type TOCItem<Depth extends 1 | 2 | 3 | 4 = 1> = BaseTOCItem & {
+    children?: NextDepth<Depth> extends never ? never : TOCItem<NextDepth<Depth>>[];
+};
+
+declare type TOCItemAction = {
+    label: string;
+    onClick: () => void;
+    icon?: IconType;
+} | {
+    type: "separator";
+};
+
+declare interface TOCProps {
+    /** Optional title displayed at the top of the menu */
+    title?: string;
+    items: TOCItem[];
+    className?: string;
+    activeItem?: string;
+    collapsible?: boolean;
+    sortable?: boolean;
+    onReorder?: (reorderedIds: IdStructure[]) => void;
+    showSearchBox?: boolean;
+    searchPlaceholder?: string;
+    hideChildrenCounter?: boolean;
+    /** Enable vertical scrolling when content overflows (default: true) */
+    scrollable?: boolean;
+}
 
 declare type TranslationKey = Join<PathsToStringProps<typeof defaultTranslations>, ".">;
 
@@ -5136,6 +5236,18 @@ declare type VisualizationSettings = {
     [K in keyof typeof collectionVisualizations]: ExtractVisualizationSettings<(typeof collectionVisualizations)[K]>;
 };
 
+declare const WeekStartDay: {
+    readonly Sunday: 0;
+    readonly Monday: 1;
+    readonly Tuesday: 2;
+    readonly Wednesday: 3;
+    readonly Thursday: 4;
+    readonly Friday: 5;
+    readonly Saturday: 6;
+};
+
+declare type WeekStartsOn = (typeof WeekStartDay)[keyof typeof WeekStartDay];
+
 export declare type WithGroupId<RecordType> = RecordType & {
     [GROUP_ID_SYMBOL]: unknown | undefined;
 };
@@ -5173,6 +5285,16 @@ declare global {
             disable: () => void;
         };
     }
+}
+
+
+declare namespace _DaytimePage {
+    var displayName: string;
+}
+
+
+declare namespace _Page {
+    var displayName: string;
 }
 
 declare module "gridstack" {
