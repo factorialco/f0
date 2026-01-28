@@ -49,6 +49,7 @@ interface AlertProps extends VariantProps<typeof alertVariants> {
   description: string
   action?: {
     label: string
+    disabled?: boolean
     onClick: () => void
   }
   link?: {
@@ -108,6 +109,7 @@ export const OneAlert = ({
                   label={action.label}
                   variant="outline"
                   onClick={action.onClick}
+                  disabled={action.disabled}
                 />
               )}
             </div>
