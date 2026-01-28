@@ -4,6 +4,7 @@ import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon"
 import { IconType } from "@/components/F0Icon"
 import { Bell as BellIcon } from "@/icons/app"
 import { getDisplayDateBasedOnDuration } from "@/lib/date"
+import { experimentalComponent } from "@/lib/experimental"
 import { withSkeleton } from "@/lib/skeleton"
 import { Skeleton } from "@/ui/skeleton"
 
@@ -94,4 +95,10 @@ export const ActivityItemSkeleton = () => (
   </div>
 )
 
-export const ActivityItem = withSkeleton(BaseActivityItem, ActivityItemSkeleton)
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export const ActivityItem = experimentalComponent(
+  "ActivityItem",
+  withSkeleton(BaseActivityItem, ActivityItemSkeleton)
+)

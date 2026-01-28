@@ -2,6 +2,7 @@ import { forwardRef } from "react"
 
 import { F0Button, type F0ButtonProps } from "@/components/F0Button"
 import { IconType } from "@/components/F0Icon"
+import { experimentalComponent } from "@/lib/experimental"
 import { cn } from "@/lib/utils"
 import { Card, CardContent, CardHeader, CardTitle } from "@/ui/Card"
 
@@ -41,7 +42,7 @@ const BUTTON_VARIANT: Record<Type, F0ButtonProps["variant"]> = {
   "bar-chart": "promote",
 }
 
-export const ChartWidgetEmptyState = forwardRef<HTMLDivElement, Props>(
+const _ChartWidgetEmptyState = forwardRef<HTMLDivElement, Props>(
   function WidgetEmptyState(
     { title, content, buttonLabel, buttonIcon, buttonAction, type },
     ref
@@ -91,4 +92,12 @@ export const ChartWidgetEmptyState = forwardRef<HTMLDivElement, Props>(
       </Card>
     )
   }
+)
+
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export const ChartWidgetEmptyState = experimentalComponent(
+  "ChartWidgetEmptyState",
+  _ChartWidgetEmptyState
 )

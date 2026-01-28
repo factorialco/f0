@@ -2,6 +2,7 @@ import Autoplay from "embla-carousel-autoplay"
 import { WheelGesturesPlugin } from "embla-carousel-wheel-gestures"
 import React from "react"
 
+import { experimentalComponent } from "@/lib/experimental"
 import {
   CarouselContent,
   CarouselDots,
@@ -46,7 +47,7 @@ function getVariantValue(
   return showPeek ? (`peek${value || 1}` as PeekVariant) : value || 1
 }
 
-export const Carousel = ({
+const _Carousel = ({
   children,
   columns,
   showArrows = true,
@@ -144,3 +145,8 @@ export const Carousel = ({
     </ShadCarousel>
   )
 }
+
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export const Carousel = experimentalComponent("Carousel", _Carousel)

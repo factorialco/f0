@@ -208,9 +208,9 @@ export function FiltersControls<Filters extends FiltersDefinition>({
               transition={{ duration: 0.1 }}
               className="absolute bottom-0 left-0 right-0 top-0 z-20 bg-f1-background"
             >
-              <div className="flex h-full flex-col transition-all">
+              <div className="flex h-full flex-col transition-all flex-1 min-h-0 max-h-full">
                 {NavHeader}
-                <div className="flex flex-1">
+                <div className="flex flex-1 min-h-0 max-h-full">
                   {selectedFilterKey ? (
                     <motion.div
                       key="filter-content"

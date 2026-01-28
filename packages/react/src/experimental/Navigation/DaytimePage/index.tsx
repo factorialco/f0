@@ -8,6 +8,7 @@ import { F0Button } from "@/components/F0Button"
 import { OneSwitch as OnePromotionSwitch } from "@/experimental/AiPromotionChat/OneSwitch"
 import { useSidebar } from "@/experimental/Navigation/ApplicationFrame/FrameProvider"
 import Menu from "@/icons/app/Menu"
+import { experimentalComponent } from "@/lib/experimental"
 import { cn } from "@/lib/utils"
 
 const daytimePageVariants = cva({
@@ -43,7 +44,7 @@ export interface DaytimePageProps extends VariantProps<
   embedded?: boolean
 }
 
-export function DaytimePage({
+function _DaytimePage({
   children,
   header,
   period,
@@ -139,4 +140,9 @@ export function DaytimePage({
   )
 }
 
-DaytimePage.displayName = "DaytimePage"
+_DaytimePage.displayName = "DaytimePage"
+
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export const DaytimePage = experimentalComponent("DaytimePage", _DaytimePage)

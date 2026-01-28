@@ -8,6 +8,7 @@ import { F0TagDot, TagDotProps } from "@/components/tags/F0TagDot"
 import { F0TagRaw, TagRawProps } from "@/components/tags/F0TagRaw"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { InfoCircle } from "@/icons/app"
+import { experimentalComponent } from "@/lib/experimental"
 import { withSkeleton } from "@/lib/skeleton"
 import { cn } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
@@ -135,7 +136,10 @@ const OnePersonListItemSkeleton = () => {
 
 BaseOnePersonListItem.displayName = "OnePersonListItem"
 
-export const OnePersonListItem = withSkeleton(
-  BaseOnePersonListItem,
-  OnePersonListItemSkeleton
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export const OnePersonListItem = experimentalComponent(
+  "OnePersonListItem",
+  withSkeleton(BaseOnePersonListItem, OnePersonListItemSkeleton)
 )

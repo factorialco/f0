@@ -3,6 +3,7 @@ import throttle from "lodash/throttle"
 import React from "react"
 
 import { categorizeItemsByDate } from "@/lib/date"
+import { experimentalComponent } from "@/lib/experimental"
 import { useI18n } from "@/lib/providers/i18n"
 import { withSkeleton } from "@/lib/skeleton"
 
@@ -112,7 +113,10 @@ export const ActivityItemListSkeleton = () => {
   )
 }
 
-export const ActivityItemList = withSkeleton(
-  BaseActivityItemList,
-  ActivityItemListSkeleton
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export const ActivityItemList = experimentalComponent(
+  "ActivityItemList",
+  withSkeleton(BaseActivityItemList, ActivityItemListSkeleton)
 )

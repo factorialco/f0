@@ -1,5 +1,6 @@
 import { cva, type VariantProps } from "cva"
 
+import { experimentalComponent } from "@/lib/experimental"
 import { cn } from "@/lib/utils"
 
 const counterVariants = cva({
@@ -26,7 +27,7 @@ type CounterProps = {
   maxValue?: number
 } & VariantProps<typeof counterVariants>
 
-export function Counter({ size, type, value, maxValue }: CounterProps) {
+function _Counter({ size, type, value, maxValue }: CounterProps) {
   const displayValue = maxValue && value > maxValue ? `+${maxValue}` : value
 
   return (
@@ -35,3 +36,8 @@ export function Counter({ size, type, value, maxValue }: CounterProps) {
     </div>
   )
 }
+
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export const Counter = experimentalComponent("Counter", _Counter)
