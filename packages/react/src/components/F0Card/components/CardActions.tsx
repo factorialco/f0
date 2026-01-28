@@ -1,3 +1,4 @@
+import { useMemo } from "react"
 import { useMediaQuery } from "usehooks-ts"
 
 import { F0Button } from "@/components/F0Button"
@@ -25,22 +26,49 @@ export interface CardSecondaryLink extends Pick<
   label: string
 }
 
+type CardSecondaryActions = {
+  /** Hide labels for secondary actions */
+  hideLabels?: boolean
+  /** The secondary actions to display */
+  actions: CardSecondaryAction[] | CardSecondaryLink
+}
+
 interface CardActionsProps {
   primaryAction?: CardPrimaryAction
-  secondaryActions?: CardSecondaryAction[] | CardSecondaryLink
+  secondaryActions?:
+    | CardSecondaryAction[]
+    | CardSecondaryLink
+    | CardSecondaryActions
   compact?: boolean
 }
 
 export function CardActions({
   primaryAction,
-  secondaryActions,
   compact = false,
+  ...props
 }: CardActionsProps) {
+  // Normalize the secondaryActions prop to always return an object with the actions and hideLabels properties
+  const secondaryActions = useMemo(
+    () =>
+      props.secondaryActions && "actions" in props.secondaryActions
+        ? props.secondaryActions
+        : {
+            actions: props.secondaryActions,
+            hideLabels: false,
+          },
+    [props.secondaryActions]
+  )
   const isDesktop = useMediaQuery("(min-width: 640px)")
   const hasActions = primaryAction || hasSecondaryActions()
 
   if (!hasActions) {
     return null
+  }
+
+  const areCecondaryActionsButtons = (
+    buttons: CardSecondaryAction[] | CardSecondaryLink
+  ): buttons is CardSecondaryAction[] => {
+    return Array.isArray(buttons)
   }
 
   return (
@@ -51,28 +79,30 @@ export function CardActions({
         compact && "pt-3"
       )}
     >
-      {secondaryActions && (
+      {secondaryActions.actions && (
         <div className="flex w-full flex-col gap-md sm:flex-row [&_a]:justify-center sm:[&_a]:justify-start [&_button]:w-full sm:[&_button]:w-fit [&_div]:w-full [&_div]:justify-center sm:[&_div]:w-fit">
-          {Array.isArray(secondaryActions) ? (
-            secondaryActions.map((action, index) => (
+          {areCecondaryActionsButtons(secondaryActions.actions) ? (
+            secondaryActions.actions.map((action, index) => (
               <F0Button
                 key={index}
                 label={action.label}
                 icon={action.icon}
                 variant="outline"
                 onClick={action.onClick}
-                hideLabel={isDesktop && index > 0}
+                hideLabel={
+                  secondaryActions.hideLabels || (isDesktop && index > 0)
+                }
                 size={isDesktop ? (compact ? "sm" : "md") : "lg"}
               />
             ))
           ) : (
             <F0Link
-              href={secondaryActions.href}
-              target={secondaryActions.target}
-              disabled={secondaryActions.disabled}
+              href={secondaryActions.actions.href}
+              target={secondaryActions.actions.target}
+              disabled={secondaryActions.actions.disabled}
               data-testid="secondary-link"
             >
-              {secondaryActions.label}
+              {secondaryActions.actions.label}
             </F0Link>
           )}
         </div>
@@ -93,10 +123,15 @@ export function CardActions({
   )
 
   function hasSecondaryActions(): boolean {
-    if (!secondaryActions) return false
-    if ("href" in secondaryActions) return true
-    if ("length" in secondaryActions) return secondaryActions.length > 0
-
+    if (!secondaryActions) {
+      return false
+    }
+    if ("href" in secondaryActions) {
+      return true
+    }
+    if (secondaryActions.actions && "length" in secondaryActions.actions) {
+      return secondaryActions.actions.length > 0
+    }
     return false
   }
 }

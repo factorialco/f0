@@ -40,7 +40,12 @@
       }
     },
     {
-      "files": ["**/*.stories.*", "**/__stories__/**", "**/*.test.*", "**/__tests__/**"],
+      "files": [
+        "**/*.stories.*",
+        "**/__stories__/**",
+        "**/*.test.*",
+        "**/__tests__/**"
+      ],
       "rules": {
         "no-console": "off"
       }
@@ -76,7 +81,14 @@
                   "**/exports.ts",
                   "@/*/exports",
                   "@/**/exports",
-                  "!@/lib/providers/f0"
+                  "!@/lib/providers/f0",
+                  "!*internal-exports",
+                  "!*internal-exports.ts",
+                  "!*/internal-exports",
+                  "!**/internal-exports",
+                  "!**/internal-exports.ts",
+                  "!@/*/internal-exports",
+                  "!@/**/internal-exports"
                 ],
                 "message": "Barrel imports are not allowed. Use specific component imports instead. [Rule: 1]"
               }
@@ -86,7 +98,12 @@
       }
     },
     {
-      "files": ["**/exports.ts", "**/exports.tsx", "**/f0.ts", "**/experimental.ts"],
+      "files": [
+        "**/exports.ts",
+        "**/exports.tsx",
+        "**/f0.ts",
+        "**/experimental.ts"
+      ],
       "rules": {
         "no-restricted-imports": [
           "error",
@@ -94,7 +111,7 @@
             "paths": [
               {
                 "name": "@/f0",
-                "message": "Barrel imports are not allowed. Use specific component imports instead.  [Rule: 2]"
+                "message": "Barrel imports are not allowed. Use specific component imports instead. [Rule: 2]"
               },
               {
                 "name": "@/experimental",
@@ -103,7 +120,14 @@
             ],
             "patterns": [
               {
-                "group": ["f0", "*f0.ts", "*/f0", "**/f0", "**/f0.ts", "!@/lib/providers/f0"],
+                "group": [
+                  "f0",
+                  "*f0.ts",
+                  "*/f0",
+                  "**/f0",
+                  "**/f0.ts",
+                  "!@/lib/providers/f0"
+                ],
                 "message": "Barrel imports are not allowed. Use specific component imports instead. [Rule: 4]"
               }
             ]
