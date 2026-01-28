@@ -48,6 +48,7 @@ import {
 import { useDataCollectionStorage } from "./hooks/useDataColectionStorage/useDataCollectionStorage"
 import { DataCollectionSource } from "./hooks/useDataCollectionSource"
 import { CustomEmptyStates, useEmptyState } from "./hooks/useEmptyState"
+import { useExportAction } from "./hooks/useExportAction"
 import { ItemActionsDefinition } from "./item-actions"
 import { NavigationFiltersDefinition } from "./navigationFilters/types"
 import { Settings } from "./Settings"
@@ -228,6 +229,13 @@ const OneDataCollectionComp = <
     [secondaryActions]
   )
 
+  // Export action - always available
+  const exportAction = useExportAction({
+    source,
+    currentVisualization: visualizations[currentVisualization],
+    filename: id ? `${id}_export` : undefined,
+  })
+
   const expandedSecondaryActions = useMemo(
     () =>
       Math.min(
@@ -249,6 +257,10 @@ const OneDataCollectionComp = <
 
   // Remaining actions are in the secondaryActionsItems group (expanded) and filters the empty groups
   const otherActionsItems = useMemo(() => {
+    const exportActionGroup = {
+      items: [exportAction],
+    }
+
     return [
       {
         ...allSecondaryActions[0],
@@ -256,8 +268,9 @@ const OneDataCollectionComp = <
           allSecondaryActions[0]?.items.slice(expandedSecondaryActions) || [],
       },
       ...allSecondaryActions.slice(1),
+      exportActionGroup,
     ].filter((group) => group.items.length > 0)
-  }, [allSecondaryActions, expandedSecondaryActions])
+  }, [allSecondaryActions, expandedSecondaryActions, exportAction])
 
   const hasCollectionsActions =
     primaryActionItems?.length > 0 || allSecondaryActions?.length > 0
