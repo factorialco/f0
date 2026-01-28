@@ -4,6 +4,7 @@ import { z, ZodTypeAny } from "zod"
 import { buildCheckboxFieldSchema } from "./fields/checkbox/validation"
 import { buildDateFieldSchema } from "./fields/date/validation"
 import { buildNumberFieldSchema } from "./fields/number/validation"
+import { buildRichTextFieldSchema } from "./fields/richtext/validation"
 import { buildSelectFieldSchema } from "./fields/select/validation"
 import { buildSwitchFieldSchema } from "./fields/switch/validation"
 import { buildTextFieldSchema } from "./fields/text/validation"
@@ -31,6 +32,8 @@ function getDefaultValidation(field: FieldDefinition): ZodTypeAny {
       return buildSelectFieldSchema(field)
     case "date":
       return buildDateFieldSchema(field)
+    case "richtext":
+      return buildRichTextFieldSchema(field)
     default:
       return z.any()
   }

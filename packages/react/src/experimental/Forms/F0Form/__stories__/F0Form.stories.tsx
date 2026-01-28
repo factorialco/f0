@@ -499,6 +499,28 @@ export const AllFieldTypes: Story = {
           helpText: "Toggle this switch",
         },
       },
+      {
+        type: "field",
+        field: {
+          id: "dateField",
+          type: "date",
+          label: "Date Field",
+          placeholder: "Select a date",
+          granularities: ["day"],
+        },
+      },
+      {
+        type: "field",
+        field: {
+          id: "richTextField",
+          type: "richtext",
+          label: "Rich Text Field",
+          placeholder: "Write something with formatting...",
+          maxCharacters: 1000,
+          height: "sm",
+          plainHtmlMode: true,
+        },
+      },
     ]
 
     return (
@@ -514,7 +536,8 @@ export const AllFieldTypes: Story = {
           multiSelectField: [],
           checkboxField: false,
           switchField: false,
-          toggleField: "medium",
+          dateField: undefined,
+          richTextField: { value: null },
         }}
         onSubmit={async (data) => {
           await sleep(1000)
