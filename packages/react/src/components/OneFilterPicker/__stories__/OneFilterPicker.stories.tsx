@@ -1,15 +1,19 @@
-import { Input } from "@/ui/input"
-import { Label } from "@/ui/label"
 import type { Meta, StoryObj } from "@storybook/react-vite"
+
 import { useEffect, useState } from "react"
 import { fn } from "storybook/test"
+
+import { Input } from "@/ui/input"
+import { Label } from "@/ui/label"
+
+import type { FiltersDefinition, FiltersState } from "../types"
+
 import { InFilterOptions } from "../filterTypes/InFilter/types"
 import * as OneFilterPicker from "../index"
 import {
   OneFilterPicker as OneFilterPickerComponent,
   OneFilterPickerRootProps,
 } from "../index"
-import type { FiltersDefinition, FiltersState } from "../types"
 import {
   deserializeFilters,
   getFiltersFromUrl,

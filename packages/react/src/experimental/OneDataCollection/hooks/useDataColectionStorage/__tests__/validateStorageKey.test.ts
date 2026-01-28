@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest"
+
 import { parseStorageKey, validateStorageKey } from "../validateStorageKey"
 
 describe("validateStorageKey", () => {

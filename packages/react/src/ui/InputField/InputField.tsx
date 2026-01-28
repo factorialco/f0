@@ -1,10 +1,3 @@
-import { F0Avatar } from "@/components/avatars/F0Avatar/F0Avatar"
-import { AvatarVariant } from "@/components/avatars/F0Avatar/types"
-import { F0ButtonToggle } from "@/components/F0ButtonToggle/F0ButtonToggle"
-import { F0Icon, IconType } from "@/components/F0Icon"
-import { Spinner } from "@/experimental/Information/Spinner"
-import { CrossedCircle } from "@/icons/app"
-import { cn, focusRing } from "@/lib/utils.ts"
 import { cva } from "cva"
 import { AnimatePresence, motion } from "motion/react"
 import {
@@ -18,6 +11,15 @@ import {
   useState,
   type AutoFill,
 } from "react"
+
+import { F0Avatar } from "@/components/avatars/F0Avatar/F0Avatar"
+import { AvatarVariant } from "@/components/avatars/F0Avatar/types"
+import { F0ButtonToggle } from "@/components/F0ButtonToggle/F0ButtonToggle"
+import { F0Icon, IconType } from "@/components/F0Icon"
+import { Spinner } from "@/experimental/Information/Spinner"
+import { CrossedCircle } from "@/icons/app"
+import { cn, focusRing } from "@/lib/utils.ts"
+
 import { AppendTag } from "./AppendTag"
 import { InputMessages } from "./components/InputMessages"
 import { Label } from "./components/Label"
@@ -501,7 +503,7 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
             {!noEdit && (
               <div
                 className={cn(
-                  "pointer-events-none absolute bottom-0 left-0 top-[1px] z-10 flex flex-1 justify-start px-3 text-f1-foreground-secondary transition-opacity",
+                  "pointer-events-none absolute bottom-0 left-0 top-[1px] z-10 flex flex-1 justify-start px-3 text-f1-foreground-secondary transition-opacity line-clamp-1",
                   (icon || avatar) && "pl-8",
                   (icon || avatar) && size === "md" && "pl-9",
                   inputElementVariants({ size }),
@@ -514,6 +516,7 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                 )}
                 onClick={handleClickPlaceholder}
                 aria-hidden="true"
+                title={placeholder}
               >
                 {placeholder}
               </div>

@@ -1,6 +1,9 @@
+import { useState } from "react"
+
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Icon } from "@/components/F0Icon"
 import { EllipsisHorizontal } from "@/icons/app"
+import { experimentalComponent } from "@/lib/experimental"
 import { Link } from "@/lib/linkHandler"
 import { cn } from "@/lib/utils.ts"
 import {
@@ -9,7 +12,7 @@ import {
   DrawerOverlay,
   DrawerTrigger,
 } from "@/ui/drawer"
-import { useState } from "react"
+
 import { DropdownItemContent } from "./DropdownItem"
 import {
   DropdownInternal,
@@ -29,7 +32,7 @@ type DropdownProps = Omit<
   onOpenChange?: (open: boolean) => void
 }
 
-export const Dropdown = (props: DropdownProps) => {
+const _Dropdown = (props: DropdownProps) => {
   const { open, onOpenChange, ...rest } = props
   const publicProps = privateProps.reduce((acc, key) => {
     const { [key]: _, ...rest } = acc
@@ -46,9 +49,14 @@ export const Dropdown = (props: DropdownProps) => {
   )
 }
 
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export const Dropdown = experimentalComponent("Dropdown", _Dropdown)
+
 export type { DropdownItem, DropdownItemLabel, DropdownItemObject }
 
-export const MobileDropdown = ({ items, children }: DropdownProps) => {
+const _MobileDropdown = ({ items, children }: DropdownProps) => {
   const [open, setOpen] = useState(false)
 
   return (
@@ -144,3 +152,11 @@ export const MobileDropdown = ({ items, children }: DropdownProps) => {
     </Drawer>
   )
 }
+
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export const MobileDropdown = experimentalComponent(
+  "MobileDropdown",
+  _MobileDropdown
+)

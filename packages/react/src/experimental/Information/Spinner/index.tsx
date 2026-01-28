@@ -1,5 +1,8 @@
 import { cva, type VariantProps } from "cva"
 import { motion } from "motion/react"
+
+import { experimentalComponent } from "@/lib/experimental"
+
 import { cn } from "../../../lib/utils"
 
 const spinnerVariants = cva({
@@ -20,7 +23,7 @@ interface SpinnerProps extends VariantProps<typeof spinnerVariants> {
   className?: string
 }
 
-function Spinner({ size, className }: SpinnerProps) {
+function _Spinner({ size, className }: SpinnerProps) {
   return (
     <div
       className={cn(spinnerVariants({ size, className }))}
@@ -66,5 +69,10 @@ function Spinner({ size, className }: SpinnerProps) {
     </div>
   )
 }
+
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+const Spinner = experimentalComponent("Spinner", _Spinner)
 
 export { Spinner }

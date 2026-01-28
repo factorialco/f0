@@ -1,11 +1,12 @@
-import { F0ButtonToggle } from "@/components/F0ButtonToggle"
-import { IconType } from "@/components/F0Icon"
-import { cn } from "@/lib/utils"
 import * as Popover from "@radix-ui/react-popover"
 import { AnimatePresence, motion } from "motion/react"
 import { useState } from "react"
-import { ToolbarButton } from "../ToolbarButton"
 
+import { F0ButtonToggle } from "@/components/F0ButtonToggle"
+import { F0Icon, IconType } from "@/components/F0Icon"
+import { cn } from "@/lib/utils"
+import { Action } from "@/ui/Action"
+import { actionVariants } from "@/ui/Action/variants"
 interface ToolbarDropdownItem {
   icon: IconType
   label: string
@@ -33,11 +34,6 @@ export const ToolbarDropdown = ({
   position = "top",
 }: ToolbarDropdownProps) => {
   const [open, setOpen] = useState(false)
-
-  const handleItemClick = (onClick: () => void) => {
-    onClick()
-    setOpen(false)
-  }
 
   const handleButtonClick = () => {
     if (disabled) return
@@ -72,20 +68,35 @@ export const ToolbarDropdown = ({
                 exit={{ opacity: 0, scale: 0.95, y: 5 }}
                 transition={{ duration: 0.15 }}
                 className={cn(
-                  "flex w-40 flex-col gap-0.5 overflow-hidden rounded-md border border-solid border-f1-border-secondary bg-f1-background p-0.5 drop-shadow-sm",
+                  "flex w-fit flex-col gap-0.5 overflow-hidden rounded-md border border-solid border-f1-border-secondary bg-f1-background p-0.5 drop-shadow-sm",
                   darkMode && "dark"
                 )}
               >
                 {items.map((item, index) => (
-                  <ToolbarButton
+                  <Action
                     key={`${item.label}-${index}`}
-                    onClick={() => handleItemClick(item.onClick)}
-                    active={item.isActive}
-                    label={item.label}
-                    disabled={disabled || !!item.disabled}
-                    icon={item.icon}
-                    showLabel
-                  />
+                    variant="ghost"
+                    size="md"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      if (!disabled) {
+                        item.onClick()
+                      }
+                    }}
+                    disabled={disabled}
+                    aria-label={item.label}
+                    className={cn(
+                      actionVariants({
+                        variant: item.isActive ? "selected" : "ghost",
+                      }),
+                      "justify-start"
+                    )}
+                  >
+                    <div className="flex items-center gap-1">
+                      <F0Icon icon={item.icon} size="md" />
+                      <span className="text-sm">{item.label}</span>
+                    </div>
+                  </Action>
                 ))}
               </motion.div>
             )}

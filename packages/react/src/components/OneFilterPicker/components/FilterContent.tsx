@@ -1,12 +1,13 @@
 "use client"
 
-import { FilterDefinitionsByType, getFilterType } from "../filterTypes"
 import type {
   FilterDefinition,
   FiltersDefinition,
   FiltersState,
   FilterValue,
 } from "../types"
+
+import { FilterDefinitionsByType, getFilterType } from "../filterTypes"
 
 /**
  * Props for the FilterContent component.
@@ -86,7 +87,7 @@ export function FilterContent<Definition extends FiltersDefinition>({
 
   return (
     <div className="relative flex h-full w-full flex-col gap-1">
-      <div className="relative flex h-full flex-col justify-between overflow-y-auto">
+      <div className="relative flex h-full flex-col justify-between overflow-y-auto ">
         {renderFilterForm({
           schema: filter,
           value: currentValue,

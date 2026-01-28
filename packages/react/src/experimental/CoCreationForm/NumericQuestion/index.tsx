@@ -1,5 +1,6 @@
 import { NumberInput } from "@/experimental/Forms/Fields/NumberInput"
 import { useI18n } from "@/lib/providers/i18n"
+
 import {
   BaseQuestion,
   BaseQuestionPropsForOtherQuestionComponents,

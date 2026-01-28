@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
+
 import { Reactions } from "./index"
 
 const meta: Meta<typeof Reactions> = {

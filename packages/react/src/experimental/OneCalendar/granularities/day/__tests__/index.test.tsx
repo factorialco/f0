@@ -1,5 +1,6 @@
 import { endOfDay, startOfDay, startOfMonth } from "date-fns"
 import { describe, expect, it } from "vitest"
+
 import { dayGranularity } from "../index"
 
 describe("dayGranularity", () => {

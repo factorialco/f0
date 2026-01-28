@@ -1,9 +1,9 @@
-import { PromiseState } from "@/lib/promise-to-observable"
 import { useEffect, useMemo, useState } from "react"
 import { Observable } from "zen-observable-ts"
 
 import { AvatarVariant } from "@/components/avatars/F0Avatar"
 import { SummariesDefinition } from "@/experimental/OneDataCollection/summary.ts"
+import { PromiseState } from "@/lib/promise-to-observable"
 import { cn } from "@/lib/utils"
 import {
   COMPANY_NAMES_MOCK,
@@ -57,6 +57,7 @@ import {
 } from "@/icons/app"
 import { DEPARTMENTS_MOCK } from "@/mocks"
 import { mockImage } from "@/testing/mocks/images"
+
 import { OneDataCollection } from ".."
 import {
   PrimaryActionsDefinitionFn,
@@ -233,6 +234,7 @@ export const getMockVisualizations = (options?: {
     allowColumnReordering?: boolean
     noSorting?: boolean
     nestedRecords?: boolean
+    applyLongText?: boolean
   }
   cache?: MockDataCache<MockUser>
 }): Record<
@@ -258,10 +260,15 @@ export const getMockVisualizations = (options?: {
         columns: [
           {
             label: "Name",
-            width: 140,
+            width: options?.table?.nestedRecords ? 300 : 140,
             render: (item) =>
               !item.children && item.detailed
-                ? ""
+                ? {
+                    type: "text",
+                    value: {
+                      placeholder: "N/A",
+                    },
+                  }
                 : {
                     type: "person",
                     value: {
@@ -347,17 +354,21 @@ export const getMockVisualizations = (options?: {
             sorting: options?.table?.noSorting ? undefined : "role",
             id: "role4",
           },
-          {
-            label: "Long",
-            render: () => ({
-              type: "longText",
-              value: {
-                text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas facilisis eu elit in pharetra. Proin id eleifend nibh, id tincidunt nisi. Donec pellentesque erat risus, a ullamcorper nulla ullamcorper quis. Nam vulputate pharetra elit eget ullamcorper. Nulla ullamcorper lacus purus, interdum tristique neque tincidunt ut. Quisque tristique condimentum ultrices. Ut eget efficitur nisl, et aliquam orci. Nulla nec efficitur erat, a maximus ex. Suspendisse ornare nibh risus, lacinia hendrerit ex consectetur sit amet. Suspendisse at urna leo. Aenean at commodo nunc, nec mattis velit. Pellentesque viverra tincidunt odio, sed efficitur sem scelerisque nec. Integer volutpat ligula non justo aliquet placerat. Nam arcu massa, finibus et hendrerit non, iaculis in libero. Quisque non vestibulum risus.",
-                lines: 4,
-              },
-            }),
-            id: "longText",
-          },
+          ...((options?.table?.applyLongText ?? true)
+            ? [
+                {
+                  label: "Long",
+                  render: () => ({
+                    type: "longText",
+                    value: {
+                      text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas facilisis eu elit in pharetra. Proin id eleifend nibh, id tincidunt nisi. Donec pellentesque erat risus, a ullamcorper nulla ullamcorper quis. Nam vulputate pharetra elit eget ullamcorper. Nulla ullamcorper lacus purus, interdum tristique neque tincidunt ut. Quisque tristique condimentum ultrices. Ut eget efficitur nisl, et aliquam orci. Nulla nec efficitur erat, a maximus ex. Suspendisse ornare nibh risus, lacinia hendrerit ex consectetur sit amet. Suspendisse at urna leo. Aenean at commodo nunc, nec mattis velit. Pellentesque viverra tincidunt odio, sed efficitur sem scelerisque nec. Integer volutpat ligula non justo aliquet placerat. Nam arcu massa, finibus et hendrerit non, iaculis in libero. Quisque non vestibulum risus.",
+                      lines: 4,
+                    },
+                  }),
+                  id: "longText",
+                },
+              ]
+            : []),
           {
             label: "Permissions",
             render: (item) =>
@@ -892,10 +903,81 @@ export const createObservableDataFetch = (delay = 0) => {
     })
 }
 
+const createdMixedNestedRecords = (filteredData: MockUser[]) => {
+  return filteredData.map((user, index) => ({
+    ...user,
+    children:
+      index % 2 === 0
+        ? [
+            {
+              ...user,
+              children: [
+                { ...user },
+                {
+                  ...user,
+                  detailed: index === 0,
+                  children: [
+                    { ...user, detailed: index === 0 },
+                    { ...user, detailed: index === 0 },
+                  ],
+                },
+                { ...user },
+              ],
+            },
+            {
+              ...user,
+              detailed: index === 0,
+              children: [
+                { ...user, detailed: index === 0 },
+                { ...user, detailed: index === 0 },
+              ],
+            },
+          ]
+        : undefined,
+  }))
+}
+
+const createdBasicNestedRecords = (filteredData: MockUser[]) => {
+  return filteredData.map((user) => ({
+    ...user,
+    children: [
+      { ...user, name: "Child_of " + user.name },
+      { ...user, name: "Child_of " + user.name },
+    ],
+  }))
+}
+
+const createdDetailedNestedRecords = (filteredData: MockUser[]) => {
+  return filteredData.map((user) => ({
+    ...user,
+    detailed: true,
+    children: [
+      { ...user, name: "Child_of " + user.name, detailed: true },
+      { ...user, name: "Child_of " + user.name, detailed: true },
+    ],
+  }))
+}
+
+const createdNestedRecords = (
+  filteredData: MockUser[],
+  nestedRecordsType?: "basic" | "detailed" | "mixed"
+) => {
+  if (nestedRecordsType === "mixed") {
+    return createdMixedNestedRecords(filteredData)
+  }
+
+  if (nestedRecordsType === "detailed") {
+    return createdDetailedNestedRecords(filteredData)
+  }
+
+  return createdBasicNestedRecords(filteredData)
+}
+
 export const createPromiseDataFetch = (
   delay = 500,
   cache?: MockDataCache<MockUser>,
-  nestedRecords = false
+  nestedRecords = false,
+  nestedRecordsType?: "basic" | "detailed" | "mixed"
 ) => {
   return (
     options: DataCollectionBaseFetchOptions<
@@ -942,37 +1024,11 @@ export const createPromiseDataFetch = (
         }
 
         resolve({
-          records: filteredData.map((user, index) => ({
-            ...user,
-            children:
-              index % 2 === 0 && nestedRecords
-                ? [
-                    {
-                      ...user,
-                      children: [
-                        { ...user },
-                        {
-                          ...user,
-                          detailed: index === 0,
-                          children: [
-                            { ...user, detailed: index === 0 },
-                            { ...user, detailed: index === 0 },
-                          ],
-                        },
-                        { ...user },
-                      ],
-                    },
-                    {
-                      ...user,
-                      detailed: index === 0,
-                      children: [
-                        { ...user, detailed: index === 0 },
-                        { ...user, detailed: index === 0 },
-                      ],
-                    },
-                  ]
-                : undefined,
-          })),
+          records: nestedRecords
+            ? createdNestedRecords(filteredData, nestedRecordsType)
+            : filteredData.map((user) => ({
+                ...user,
+              })),
           summaries: summaries as unknown as (typeof mockUsers)[number],
         })
       }, delay)
@@ -1020,6 +1076,7 @@ export const ExampleComponent = ({
   hideFilters,
   tmpFullWidth,
   nestedRecords = false,
+  nestedRecordsType = "basic",
 }: {
   useObservable?: boolean
   usePresets?: boolean
@@ -1073,6 +1130,7 @@ export const ExampleComponent = ({
   currentNavigationFilters?: NavigationFiltersState<NavigationFiltersDefinition>
   tmpFullWidth?: boolean
   nestedRecords?: boolean
+  nestedRecordsType?: "basic" | "detailed" | "mixed"
 }) => {
   // Create a cache instance to simulate Apollo cache behavior
   const cache = useMemo(() => {
@@ -1118,7 +1176,7 @@ export const ExampleComponent = ({
     return {
       fetchData: useObservable
         ? createObservableDataFetch()
-        : createPromiseDataFetch(100, cache, nestedRecords),
+        : createPromiseDataFetch(100, cache, nestedRecords, nestedRecordsType),
       // Include cacheVersion as a property so dataAdapter reference changes
       _cacheVersion: cacheVersion,
     }

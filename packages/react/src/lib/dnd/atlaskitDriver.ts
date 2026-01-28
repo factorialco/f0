@@ -5,6 +5,7 @@ import {
   dropTargetForElements,
   monitorForElements,
 } from "@atlaskit/pragmatic-drag-and-drop/element/adapter"
+
 import type { DndDriver, DragPayload, DropIntent } from "./types"
 
 type Subscriber = (e: {
@@ -42,7 +43,9 @@ export function createAtlaskitDriver(instanceId: symbol): DndDriver {
       if (disabled) return () => {}
       return draggable({
         element: el,
-        getInitialData: () => ({ ...payload, instanceId }),
+        getInitialData: () => {
+          return { ...payload, instanceId }
+        },
         dragHandle: handle ?? undefined,
       })
     },

@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { Dashboard, DashboardWidget } from "../"
+import { useEffect, useState } from "react"
 
 import { F0Button } from "@/components/F0Button"
 import { F0Checkbox } from "@/components/F0Checkbox"
@@ -8,7 +8,8 @@ import { Delete } from "@/icons/app"
 import { Layout } from "@/layouts/Layout"
 import { withSkipA11y } from "@/lib/storybook-utils/parameters"
 import { Optional } from "@/lib/typescript-utils/optional"
-import { useEffect, useState } from "react"
+
+import { Dashboard, DashboardWidget } from "../"
 import { ChartWidget, KpiWidget, TableWidget, TextWidget } from "./mockWidgets"
 
 const availableSizes = [

@@ -1,16 +1,20 @@
+import { AnimatePresence, motion } from "motion/react"
+import { useContext, useEffect, useId, useMemo, useState } from "react"
+
 import { F0Button } from "@/components/F0Button"
 import { ButtonInternal } from "@/components/F0Button/internal"
+import { F0DialogContext } from "@/components/F0Dialog"
 import { FilterPickerInternal } from "@/components/F0FilterPickerContent/internal"
 import { Filter } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
-import { AnimatePresence, motion } from "motion/react"
-import { useEffect, useId, useMemo, useState } from "react"
+
+import type { FiltersDefinition, FiltersMode, FiltersState } from "../types"
+
 import { ArrowLeft } from "../../../icons/app"
 import { getFilterType } from "../filterTypes"
 import { FilterTypeContext, FilterTypeSchema } from "../filterTypes/types"
 import { getActiveFilterKeys } from "../internal/getActiveFilterKeys"
-import type { FiltersDefinition, FiltersMode, FiltersState } from "../types"
 import { FilterContent } from "./FilterContent"
 import { FilterList } from "./FilterList"
 
@@ -40,6 +44,16 @@ export function FiltersControls<Filters extends FiltersDefinition>({
   >(null)
   const [internalIsOpen, setInternalIsOpen] = useState(false)
   const i18n = useI18n()
+
+  // Auto-detect if we're inside a dialog and use its portal container
+  const dialogContext = useContext(F0DialogContext)
+  const shouldUseDialogContainer =
+    dialogContext.portalContainer &&
+    (dialogContext.position === "center" ||
+      dialogContext.position === "fullscreen")
+  const portalContainer = shouldUseDialogContainer
+    ? dialogContext.portalContainer
+    : undefined
 
   const isOpen = controlledIsOpen ?? internalIsOpen
   const onOpenChange = controlledOnOpenChange ?? setInternalIsOpen
@@ -194,9 +208,9 @@ export function FiltersControls<Filters extends FiltersDefinition>({
               transition={{ duration: 0.1 }}
               className="absolute bottom-0 left-0 right-0 top-0 z-20 bg-f1-background"
             >
-              <div className="flex h-full flex-col transition-all">
+              <div className="flex h-full flex-col transition-all flex-1 min-h-0 max-h-full">
                 {NavHeader}
-                <div className="flex flex-1">
+                <div className="flex flex-1 min-h-0 max-h-full">
                   {selectedFilterKey ? (
                     <motion.div
                       key="filter-content"
@@ -265,6 +279,7 @@ export function FiltersControls<Filters extends FiltersDefinition>({
           align="start"
           side="bottom"
           aria-id={id}
+          container={portalContainer}
         >
           <FilterPickerInternal
             filters={filters}

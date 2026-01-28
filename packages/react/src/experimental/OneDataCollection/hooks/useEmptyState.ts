@@ -1,5 +1,7 @@
-import { useI18n } from "@/lib/providers/i18n"
 import { useState } from "react"
+
+import { useI18n } from "@/lib/providers/i18n"
+
 import { ActionProps, OneEmptyStateProps } from "../../OneEmptyState/types"
 
 export type EmptyState = {

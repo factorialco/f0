@@ -1,6 +1,8 @@
+import { forwardRef } from "react"
+
 import ExternalLink from "@/icons/app/ExternalLink"
 import { Action, ActionLinkProps, ActionLinkVariant } from "@/ui/Action"
-import { forwardRef } from "react"
+
 import { F0Icon } from "../F0Icon"
 
 export type F0LinkProps = Omit<ActionLinkProps, "variant" | "href"> & {

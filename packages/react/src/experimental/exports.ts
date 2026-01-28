@@ -1,4 +1,5 @@
 import { Component } from "@/lib/component"
+
 import {
   F0Select as Select,
   type F0SelectItemObject as SelectItemObject,
@@ -7,7 +8,7 @@ import {
 } from "../components/F0Select"
 import { ScrollArea as ScrollAreaComponent } from "./Utilities/ScrollArea"
 
-export * from "./AiChat/exports"
+export * from "../ai/AiChat/exports"
 export * from "./AiPromotionChat/exports"
 export * from "./Banners/exports"
 export * from "./Charts/exports"

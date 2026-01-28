@@ -1,3 +1,5 @@
+import { forwardRef } from "react"
+
 import { F0AvatarFile } from "@/components/avatars/F0AvatarFile"
 import { F0Icon, IconType } from "@/components/F0Icon"
 import {
@@ -7,7 +9,6 @@ import {
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { CrossedCircle, Ellipsis } from "@/icons/app"
 import { cn } from "@/lib/utils"
-import { forwardRef } from "react"
 
 type FileAction = {
   icon?: IconType

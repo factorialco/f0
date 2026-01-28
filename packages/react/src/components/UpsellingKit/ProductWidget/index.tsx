@@ -1,8 +1,10 @@
+import { useEffect, useState } from "react"
+
 import { ButtonVariant, F0Button } from "@/components/F0Button"
 import CrossIcon from "@/icons/app/Cross"
 import { Card, CardContent, CardFooter } from "@/ui/Card"
 import { Label } from "@/ui/label"
-import { useEffect, useState } from "react"
+
 import { LoadingStateProps, UpsellingButton } from "../UpsellingButton"
 import {
   ErrorMessageProps,

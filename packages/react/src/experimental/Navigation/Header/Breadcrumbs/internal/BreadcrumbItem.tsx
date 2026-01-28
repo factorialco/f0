@@ -1,3 +1,6 @@
+import { motion } from "motion/react"
+import { forwardRef, PropsWithChildren, ReactNode } from "react"
+
 import { F0AvatarModule } from "@/components/avatars/F0AvatarModule"
 import { BreadcrumbSelect } from "@/experimental/Navigation/Header"
 import { BreadcrumbSkeleton } from "@/experimental/Navigation/Header/Breadcrumbs/internal/BreadcrumbSkeleton"
@@ -9,8 +12,7 @@ import {
   BreadcrumbItem as ShadBreadcrumbItem,
   BreadcrumbLink as ShadBreadcrumbLink,
 } from "@/ui/breadcrumb"
-import { motion } from "motion/react"
-import { forwardRef, PropsWithChildren, ReactNode } from "react"
+
 import { BreadcrumbSeparator } from "./BreadcrumbSeparator"
 
 interface BreadcrumbItemProps {

@@ -1,6 +1,9 @@
+import { FC } from "react"
+
+import { experimentalComponent } from "@/lib/experimental"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-import { FC } from "react"
+
 import ApprovalStep, { ApprovalStepProps } from "./ApprovalStep"
 
 type ApprovalStep = ApprovalStepProps
@@ -9,7 +12,7 @@ type OneApprovalHistoryProps = {
   steps: ApprovalStep[]
 }
 
-export const OneApprovalHistory: FC<OneApprovalHistoryProps> = ({ steps }) => {
+const _OneApprovalHistory: FC<OneApprovalHistoryProps> = ({ steps }) => {
   const translations = useI18n()
   const title = translations.approvals.history
 
@@ -58,3 +61,11 @@ export const OneApprovalHistory: FC<OneApprovalHistoryProps> = ({ steps }) => {
     </div>
   )
 }
+
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export const OneApprovalHistory = experimentalComponent(
+  "OneApprovalHistory",
+  _OneApprovalHistory
+)

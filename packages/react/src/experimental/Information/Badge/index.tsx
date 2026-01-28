@@ -1,4 +1,7 @@
 import { cva, type VariantProps } from "cva"
+
+import { experimentalComponent } from "@/lib/experimental"
+
 import { F0Icon, IconType } from "../../../components/F0Icon"
 
 const badgeVariants = cva({
@@ -37,10 +40,15 @@ export interface BadgeProps extends VariantProps<typeof badgeVariants> {
   size?: keyof typeof iconSizes
 }
 
-export const Badge = ({ type, size = "md", icon }: BadgeProps) => {
+const _Badge = ({ type, size = "md", icon }: BadgeProps) => {
   return (
     <div className={badgeVariants({ type, size })}>
       <F0Icon icon={icon} size={iconSizes[size]} />
     </div>
   )
 }
+
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export const Badge = experimentalComponent("Badge", _Badge)

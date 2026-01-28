@@ -1,6 +1,7 @@
 import * as SwitchPrimitive from "@radix-ui/react-switch"
 import * as React from "react"
 import { useId } from "react"
+
 import { cn, focusRing } from "../lib/utils"
 
 const Switch = React.forwardRef<

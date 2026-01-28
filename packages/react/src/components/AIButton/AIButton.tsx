@@ -1,5 +1,7 @@
-import * as AIIcons from "@/icons/ai"
 import { forwardRef } from "react"
+
+import * as AIIcons from "@/icons/ai"
+
 import { ButtonInternal } from "../F0Button/internal"
 import { ButtonInternalProps } from "../F0Button/internal-types"
 

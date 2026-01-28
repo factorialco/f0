@@ -4,7 +4,9 @@ interface PageProps {
   embedded?: boolean
 }
 
-export function Page({ children, header, embedded = false }: PageProps) {
+import { experimentalComponent } from "@/lib/experimental"
+
+function _Page({ children, header, embedded = false }: PageProps) {
   return (
     <div
       className={`flex min-h-full w-full flex-col overflow-hidden ${
@@ -19,4 +21,9 @@ export function Page({ children, header, embedded = false }: PageProps) {
   )
 }
 
-Page.displayName = "Page"
+_Page.displayName = "Page"
+
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export const Page = experimentalComponent("Page", _Page)

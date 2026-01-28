@@ -8,6 +8,7 @@ import {
   startOfDay,
   startOfMonth,
 } from "date-fns"
+
 import { DateRange, DateRangeComplete } from "../../types"
 import {
   formatDate,
@@ -146,6 +147,7 @@ export const dayGranularity: GranularityDefinition = {
         minDate={minDate ? minDate.from : undefined}
         maxDate={maxDate ? maxDate.to : undefined}
         compact={renderProps.compact}
+        weekStartsOn={renderProps.weekStartsOn}
       />
     )
   },

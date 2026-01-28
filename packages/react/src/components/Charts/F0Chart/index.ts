@@ -1,4 +1,5 @@
 import { experimentalComponent } from "@/lib/experimental"
+
 import { F0Chart as _F0Chart } from "./F0Chart"
 
 /**

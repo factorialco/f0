@@ -1,6 +1,8 @@
-import { cn, focusRing } from "@/lib/utils"
 import { isAfter, isBefore, isWithinInterval } from "date-fns"
 import { AnimatePresence, motion } from "motion/react"
+
+import { cn, focusRing } from "@/lib/utils"
+
 import { CalendarMode, DateRange } from "../../types"
 
 const getQuarterFromMonth = (month: number): number => {

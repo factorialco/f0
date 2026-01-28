@@ -1,9 +1,10 @@
+import { ComponentProps } from "react"
+
 import { PersonAvatarVariant } from "@/components/avatars/F0Avatar"
 import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
 import { F0AvatarEmoji } from "@/components/avatars/F0AvatarEmoji"
 import { F0AvatarList } from "@/components/avatars/F0AvatarList"
 import { cn } from "@/lib/utils"
-import { ComponentProps } from "react"
 
 export type WidgetAvatarsListItemProps = {
   id: string | number

@@ -1,8 +1,11 @@
-import { F0Button, F0ButtonProps } from "@/components/F0Button"
+import { forwardRef, useCallback, useState } from "react"
+
 import {
   F0AvatarAlert,
   type AlertAvatarProps,
 } from "@/components/avatars/F0AvatarAlert"
+import { F0Button, F0ButtonProps } from "@/components/F0Button"
+import { experimentalComponent } from "@/lib/experimental"
 import {
   Dialog,
   DialogContent,
@@ -11,7 +14,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/ui/Dialog/dialog"
-import { forwardRef, useCallback, useState } from "react"
 
 type BaseAction = Pick<F0ButtonProps, "label" | "onClick" | "icon" | "disabled">
 
@@ -97,4 +99,9 @@ const OneDialog = forwardRef<HTMLDivElement, DialogProps>(
 
 OneDialog.displayName = "Dialog"
 
-export { OneDialog as Dialog }
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+const DialogComponent = experimentalComponent("Dialog", OneDialog)
+
+export { DialogComponent as Dialog }

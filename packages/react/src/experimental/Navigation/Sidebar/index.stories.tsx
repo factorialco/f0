@@ -1,6 +1,9 @@
-import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import type { Meta, StoryObj } from "@storybook/react-vite"
+
 import { ComponentProps, useState } from "react"
+
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
+
 import { SidebarFooter } from "./Footer"
 import * as SidebarFooterStories from "./Footer/index.stories"
 import { SidebarHeader } from "./Header"

@@ -1,4 +1,5 @@
 import { describe, expect, test } from "vitest"
+
 import { getInitials } from "../utils.ts"
 
 describe("getInitials", () => {

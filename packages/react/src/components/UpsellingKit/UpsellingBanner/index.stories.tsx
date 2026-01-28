@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
+
 import { UpsellingBanner } from "."
 
 const meta: Meta<typeof UpsellingBanner> = {

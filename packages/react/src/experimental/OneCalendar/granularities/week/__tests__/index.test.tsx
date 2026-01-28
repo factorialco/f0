@@ -1,6 +1,14 @@
-import { endOfISOWeek, startOfISOWeek, startOfMonth } from "date-fns"
+import {
+  endOfISOWeek,
+  endOfWeek,
+  startOfISOWeek,
+  startOfMonth,
+  startOfWeek,
+} from "date-fns"
 import { describe, expect, it } from "vitest"
-import { weekGranularity } from "../index"
+
+import { WeekStartDay } from "../../../types"
+import { createWeekGranularity, weekGranularity } from "../index"
 
 describe("weekGranularity", () => {
   // January 15, 2024 is a Monday (week 3 of 2024)
@@ -274,6 +282,133 @@ describe("weekGranularity", () => {
     it("returns the start of month for any date", () => {
       const result = weekGranularity.getViewDateFromDate(baseDate)
       expect(result).toEqual(startOfMonth(baseDate))
+    })
+  })
+})
+
+describe("createWeekGranularity with different weekStartsOn", () => {
+  // January 15, 2024 is a Monday
+  const testDate = new Date(2024, 0, 15) // Monday, January 15, 2024
+  const i18n = {
+    date: {
+      granularities: {
+        week: {
+          long: "Week of {{day}} {{month}} {{year}}",
+          longSingular: "Week of {{date}}",
+          longPlural: "Weeks of {{date}}",
+        },
+      },
+    },
+  }
+
+  describe("weekStartsOn = 0 (Sunday)", () => {
+    const granularity = createWeekGranularity(WeekStartDay.Sunday)
+
+    it("converts a date to the correct week range starting on Sunday", () => {
+      const result = granularity.toRange(testDate)
+      expect(result).toEqual({
+        from: startOfWeek(testDate, { weekStartsOn: WeekStartDay.Sunday }),
+        to: endOfWeek(testDate, { weekStartsOn: WeekStartDay.Sunday }),
+      })
+      // January 15, 2024 is Monday, so week starting Sunday should be Jan 14
+      expect(result.from.getDay()).toBe(0) // Sunday
+      expect(result.to.getDay()).toBe(6) // Saturday
+    })
+
+    it("formats a single date correctly with long format", () => {
+      const result = granularity.toString(testDate, i18n, "long")
+      expect(result).toContain("Jan 2024")
+    })
+
+    it("returns correct prev/next dates", () => {
+      const weekRange = granularity.toRange(testDate)
+      const result = granularity.getPrevNext(weekRange, {})
+
+      expect(result.prev).toBeTruthy()
+      expect(result.next).toBeTruthy()
+      if (result.prev && result.next) {
+        // Previous week should be 7 days before
+        expect(result.prev.from.getTime()).toBe(
+          weekRange.from.getTime() - 7 * 24 * 60 * 60 * 1000
+        )
+        // Next week should be 7 days after
+        expect(result.next.from.getTime()).toBe(
+          weekRange.from.getTime() + 7 * 24 * 60 * 60 * 1000
+        )
+      }
+    })
+  })
+
+  describe("weekStartsOn = 2 (Tuesday)", () => {
+    const granularity = createWeekGranularity(WeekStartDay.Tuesday)
+
+    it("converts a date to the correct week range starting on Tuesday", () => {
+      const result = granularity.toRange(testDate)
+      expect(result).toEqual({
+        from: startOfWeek(testDate, { weekStartsOn: WeekStartDay.Tuesday }),
+        to: endOfWeek(testDate, { weekStartsOn: WeekStartDay.Tuesday }),
+      })
+      // January 15, 2024 is Monday, so week starting Tuesday should be Jan 16
+      expect(result.from.getDay()).toBe(2) // Tuesday
+      expect(result.to.getDay()).toBe(1) // Monday (next week)
+    })
+
+    it("formats a single date correctly with long format", () => {
+      const result = granularity.toString(testDate, i18n, "long")
+      expect(result).toContain("Jan 2024")
+    })
+  })
+
+  describe("weekStartsOn = 3 (Wednesday)", () => {
+    const granularity = createWeekGranularity(WeekStartDay.Wednesday)
+
+    it("converts a date to the correct week range starting on Wednesday", () => {
+      const result = granularity.toRange(testDate)
+      expect(result).toEqual({
+        from: startOfWeek(testDate, { weekStartsOn: WeekStartDay.Wednesday }),
+        to: endOfWeek(testDate, { weekStartsOn: WeekStartDay.Wednesday }),
+      })
+      // January 15, 2024 is Monday, so week starting Wednesday should be Jan 17
+      expect(result.from.getDay()).toBe(3) // Wednesday
+      expect(result.to.getDay()).toBe(2) // Tuesday (next week)
+    })
+
+    it("formats a single date correctly with long format", () => {
+      const result = granularity.toString(testDate, i18n, "long")
+      expect(result).toContain("Jan 2024")
+    })
+  })
+
+  describe("weekStartsOn = 6 (Saturday)", () => {
+    const granularity = createWeekGranularity(WeekStartDay.Saturday)
+
+    it("converts a date to the correct week range starting on Saturday", () => {
+      const result = granularity.toRange(testDate)
+      expect(result).toEqual({
+        from: startOfWeek(testDate, { weekStartsOn: WeekStartDay.Saturday }),
+        to: endOfWeek(testDate, { weekStartsOn: WeekStartDay.Saturday }),
+      })
+      // January 15, 2024 is Monday, so week starting Saturday should be Jan 13
+      expect(result.from.getDay()).toBe(6) // Saturday
+      expect(result.to.getDay()).toBe(5) // Friday (next week)
+    })
+
+    it("formats a single date correctly with long format", () => {
+      const result = granularity.toString(testDate, i18n, "long")
+      expect(result).toContain("Jan 2024")
+    })
+  })
+
+  describe("weekStartsOn = 1 (Monday, ISO) should use ISO functions", () => {
+    const granularity = createWeekGranularity(WeekStartDay.Monday)
+
+    it("converts a date to the correct week range using ISO functions", () => {
+      const result = granularity.toRange(testDate)
+      // Should use ISO functions (same as weekGranularity)
+      expect(result).toEqual({
+        from: startOfISOWeek(testDate),
+        to: endOfISOWeek(testDate),
+      })
     })
   })
 })

@@ -1,3 +1,6 @@
+import { useCallback, useMemo } from "react"
+
+import { experimentalComponent } from "@/lib/experimental"
 import {
   PaginationContent,
   PaginationEllipsis,
@@ -7,7 +10,7 @@ import {
   PaginationPrevious,
   Pagination as PaginationRoot,
 } from "@/ui/pagination"
-import { useCallback, useMemo } from "react"
+
 import { cn } from "../../lib/utils"
 
 interface OnePaginationProps {
@@ -58,7 +61,7 @@ interface OnePaginationProps {
   disabled?: boolean
 }
 
-export function OnePagination({
+function _OnePagination({
   totalPages,
   currentPage = 1,
   onPageChange,
@@ -231,3 +234,11 @@ export function OnePagination({
     </PaginationRoot>
   )
 }
+
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export const OnePagination = experimentalComponent(
+  "OnePagination",
+  _OnePagination
+)

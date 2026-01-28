@@ -1,13 +1,15 @@
-import { F0Button } from "@/components/F0Button"
+import { cva, type VariantProps } from "cva"
+import { ComponentProps } from "react"
+
+import { OneSwitch } from "@/ai/AiChat/OneSwitch"
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
 import { F0AvatarPulse } from "@/components/avatars/F0AvatarPulse"
-import { OneSwitch } from "@/experimental/AiChat/OneSwitch"
+import { F0Button } from "@/components/F0Button"
 import { OneSwitch as OnePromotionSwitch } from "@/experimental/AiPromotionChat/OneSwitch"
 import { useSidebar } from "@/experimental/Navigation/ApplicationFrame/FrameProvider"
 import Menu from "@/icons/app/Menu"
+import { experimentalComponent } from "@/lib/experimental"
 import { cn } from "@/lib/utils"
-import { cva, type VariantProps } from "cva"
-import { ComponentProps } from "react"
 
 const daytimePageVariants = cva({
   base: "pointer-events-none absolute inset-0 h-screen max-h-[1000px] opacity-[0.08]",
@@ -42,7 +44,7 @@ export interface DaytimePageProps extends VariantProps<
   embedded?: boolean
 }
 
-export function DaytimePage({
+function _DaytimePage({
   children,
   header,
   period,
@@ -138,4 +140,9 @@ export function DaytimePage({
   )
 }
 
-DaytimePage.displayName = "DaytimePage"
+_DaytimePage.displayName = "DaytimePage"
+
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export const DaytimePage = experimentalComponent("DaytimePage", _DaytimePage)

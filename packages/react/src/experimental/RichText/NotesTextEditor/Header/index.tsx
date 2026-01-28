@@ -1,3 +1,5 @@
+import { Fragment } from "react"
+
 import { F0Avatar } from "@/components/avatars/F0Avatar"
 import { F0Button } from "@/components/F0Button"
 import { F0TagDot } from "@/components/tags/F0TagDot"
@@ -5,7 +7,7 @@ import { F0TagRaw } from "@/components/tags/F0TagRaw"
 import { F0TagStatus } from "@/components/tags/F0TagStatus"
 import { Dropdown } from "@/experimental/Navigation/Dropdown"
 import { ScrollArea } from "@/experimental/Utilities/ScrollArea"
-import { Fragment } from "react"
+
 import { actionType, MetadataItemValue, secondaryActionsType } from "../types"
 
 interface HeaderProps {

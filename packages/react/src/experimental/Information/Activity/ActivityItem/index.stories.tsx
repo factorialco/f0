@@ -1,5 +1,7 @@
-import { PalmTree as PalmTreeIcon } from "@/icons/app"
 import type { Meta, StoryObj } from "@storybook/react-vite"
+
+import { PalmTree as PalmTreeIcon } from "@/icons/app"
+
 import { ActivityItem } from "./index"
 
 const meta: Meta<typeof ActivityItem> = {
@@ -15,7 +17,7 @@ const meta: Meta<typeof ActivityItem> = {
   parameters: {
     layout: "centered",
   },
-  tags: ["autodocs", "experimental", "no-sidebar"],
+  tags: ["autodocs", "experimental"],
 }
 
 export default meta

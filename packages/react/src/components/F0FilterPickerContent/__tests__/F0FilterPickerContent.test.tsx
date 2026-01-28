@@ -1,8 +1,11 @@
-import { zeroRender as render, screen, waitFor } from "@/testing/test-utils"
-import "@testing-library/jest-dom/vitest"
 import userEvent from "@testing-library/user-event"
+import "@testing-library/jest-dom/vitest"
 import { describe, expect, it, vi } from "vitest"
+
+import { zeroRender as render, screen, waitFor } from "@/testing/test-utils"
+
 import type { FiltersDefinition } from "../../OneFilterPicker/types"
+
 import { F0FilterPickerContent } from "../F0FilterPickerContent"
 
 const definition = {
@@ -87,7 +90,7 @@ describe("F0FilterPickerContent", () => {
       )
 
       const wrapper = container.firstChild as HTMLElement
-      expect(wrapper).toHaveStyle({ width: "800px" })
+      expect(wrapper).toHaveStyle({ maxWidth: "800px" })
     })
 
     it("renders without apply button when showApplyButton is false", async () => {

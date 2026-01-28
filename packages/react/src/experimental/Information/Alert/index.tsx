@@ -1,6 +1,4 @@
 import { cva, type VariantProps } from "cva"
-import * as React from "react"
-
 import {
   BookOpen,
   CircleCheck,
@@ -8,6 +6,10 @@ import {
   OctagonX,
   TriangleAlert,
 } from "lucide-react"
+import * as React from "react"
+
+import { experimentalComponent } from "@/lib/experimental"
+
 import { Component } from "../../../lib/component/component"
 import { cn } from "../../../lib/utils"
 
@@ -35,7 +37,7 @@ const variantIcons: Record<Variants, React.FC<LucideProps>> = {
   info: BookOpen,
 }
 
-const Alert = Component(
+const _Alert = Component(
   {
     name: "Alert",
     type: "info",
@@ -67,7 +69,12 @@ const Alert = Component(
   })
 )
 
-const AlertTitle = React.forwardRef<
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+const Alert = experimentalComponent("Alert", _Alert)
+
+const _AlertTitle = React.forwardRef<
   HTMLParagraphElement,
   React.HTMLAttributes<HTMLHeadingElement>
 >(function AlertTitle({ className, ...props }, ref) {
@@ -80,7 +87,12 @@ const AlertTitle = React.forwardRef<
   )
 })
 
-const AlertDescription = React.forwardRef<
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+const AlertTitle = experimentalComponent("AlertTitle", _AlertTitle)
+
+const _AlertDescription = React.forwardRef<
   HTMLParagraphElement,
   React.HTMLAttributes<HTMLParagraphElement>
 >(function AlertDescription({ className, ...props }, ref) {
@@ -92,5 +104,13 @@ const AlertDescription = React.forwardRef<
     />
   )
 })
+
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+const AlertDescription = experimentalComponent(
+  "AlertDescription",
+  _AlertDescription
+)
 
 export { Alert, AlertDescription, AlertTitle }

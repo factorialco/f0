@@ -3,10 +3,12 @@
 import { F0Button } from "@/components/F0Button"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-import { FilterContent } from "../OneFilterPicker/components/FilterContent"
-import { FilterList } from "../OneFilterPicker/components/FilterList"
+
 import type { FiltersDefinition } from "../OneFilterPicker/types"
 import type { FilterPickerInternalProps } from "./internal-types"
+
+import { FilterContent } from "../OneFilterPicker/components/FilterContent"
+import { FilterList } from "../OneFilterPicker/components/FilterList"
 
 /**
  * Internal component that renders the filter picker content.
@@ -28,8 +30,14 @@ export function FilterPickerInternal<Filters extends FiltersDefinition>({
 
   return (
     <div
-      className={cn("flex flex-col transition-all", className)}
-      style={{ height }}
+      className={cn(
+        "flex flex-col transition-all",
+        // Defined minimum height to avoid the content from being too small to be used
+        // 15px to avoid the border of the content from being cut off
+        "max-h-[calc(var(--radix-popover-content-available-height)-15px)] min-h-[250px]",
+        className
+      )}
+      style={{ height: height }}
     >
       <div className="flex min-h-0 flex-1">
         <FilterList

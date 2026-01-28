@@ -1,17 +1,27 @@
+import { useCallback, useEffect, useMemo, useState } from "react"
+
+import { F0Button } from "@/components/F0Button"
 import { ChevronLeft, ChevronRight } from "@/icons/app"
+import { useI18n } from "@/lib/providers/i18n"
+import { useL10n } from "@/lib/providers/l10n"
 import { cn } from "@/lib/utils"
 import { Input } from "@/ui/input"
 
-import { F0Button } from "@/components/F0Button"
-import { useI18n } from "@/lib/providers/i18n"
-import { useCallback, useEffect, useMemo, useState } from "react"
 import {
   GranularityDefinition,
   GranularityDefinitionKey,
-  granularityDefinitions,
   GranularityDefinitionSimple,
+  getGranularityDefinitions,
+  granularityDefinitions,
 } from "./granularities/index"
-import { CalendarMode, CalendarView, DateRange, DateRangeString } from "./types"
+import {
+  CalendarMode,
+  CalendarView,
+  DateRange,
+  DateRangeString,
+  WeekStartDay,
+  WeekStartsOn,
+} from "./types"
 import { isActiveDate, toDateRange } from "./utils"
 
 const privateProps = ["compact"] as const
@@ -27,6 +37,7 @@ interface OneCalendarInternalProps {
   minDate?: Date
   maxDate?: Date
   compact?: boolean
+  weekStartsOn?: WeekStartsOn
 }
 
 export type OneCalendarProps = Omit<
@@ -70,8 +81,13 @@ const OneCalendarInternal = ({
   minDate,
   maxDate,
   compact = false,
+  weekStartsOn,
 }: OneCalendarInternalProps) => {
   const i18n = useI18n()
+  const l10n = useL10n()
+
+  const effectiveWeekStartsOn =
+    weekStartsOn ?? l10n.date?.weekStartsOn ?? WeekStartDay.Monday
 
   const [viewDate, setViewDate] = useState<Date>(defaultMonth)
 
@@ -81,7 +97,10 @@ const OneCalendarInternal = ({
 
   const [motionDirection, setMotionDirection] = useState(1)
 
-  const granularity = useMemo(() => granularityDefinitions[view], [view])
+  const granularity = useMemo(() => {
+    const definitions = getGranularityDefinitions(effectiveWeekStartsOn)
+    return definitions[view]
+  }, [view, effectiveWeekStartsOn])
 
   const setSelected = useCallback(
     (date: Date | DateRange | null) => {
@@ -317,6 +336,7 @@ const OneCalendarInternal = ({
           minDate,
           maxDate,
           compact,
+          weekStartsOn: effectiveWeekStartsOn,
         })}
       </div>
     </div>

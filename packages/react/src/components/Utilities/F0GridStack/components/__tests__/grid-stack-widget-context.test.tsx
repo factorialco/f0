@@ -1,5 +1,7 @@
-import { zeroRender } from "@/testing/test-utils"
 import { describe, expect, it, vi } from "vitest"
+
+import { zeroRender } from "@/testing/test-utils"
+
 import {
   GridStackWidgetContext,
   useGridStackWidgetContext,

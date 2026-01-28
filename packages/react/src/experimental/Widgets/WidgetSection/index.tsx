@@ -1,11 +1,14 @@
 import { forwardRef, PropsWithChildren } from "react"
+
+import { experimentalComponent } from "@/lib/experimental"
+
 import { useTextFormatEnforcer } from "../../../lib/text"
 
 type Props = PropsWithChildren & {
   title?: string
 }
 
-export const WidgetSection = forwardRef<HTMLDivElement, Props>(
+const _WidgetSection = forwardRef<HTMLDivElement, Props>(
   ({ title, children }, ref) => {
     useTextFormatEnforcer(
       title,
@@ -24,4 +27,12 @@ export const WidgetSection = forwardRef<HTMLDivElement, Props>(
   }
 )
 
-WidgetSection.displayName = "WidgetSection"
+_WidgetSection.displayName = "WidgetSection"
+
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export const WidgetSection = experimentalComponent(
+  "WidgetSection",
+  _WidgetSection
+)

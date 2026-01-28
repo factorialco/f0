@@ -1,17 +1,18 @@
-import { Skeleton } from "@/ui/skeleton"
-import { Table as TableRoot } from "@/ui/table"
+import { AnimatePresence, motion } from "motion/react"
 import { useEffect, useRef, useState } from "react"
-import { withSkeleton } from "../../../lib/skeleton"
-import { Spinner } from "../../Information/Spinner"
-import { TableContext } from "../utils/TableContext"
 
 import { cn } from "@/lib/utils"
-import { AnimatePresence, motion } from "motion/react"
+import { Skeleton } from "@/ui/skeleton"
+import { Table as TableRoot } from "@/ui/table"
+
+import { withSkeleton } from "../../../lib/skeleton"
+import { Spinner } from "../../Information/Spinner"
 import { TableBody } from "../TableBody"
 import { TableCell } from "../TableCell"
 import { TableHead } from "../TableHead"
 import { TableHeader } from "../TableHeader"
 import { TableRow } from "../TableRow"
+import { TableContext } from "../utils/TableContext"
 
 export interface TableProps {
   children: React.ReactNode

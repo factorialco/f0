@@ -1,4 +1,12 @@
+import { act, screen, waitFor, within } from "@testing-library/react"
+import { userEvent } from "@testing-library/user-event"
+import { LayoutGrid } from "lucide-react"
+import { describe, expect, test, vi } from "vitest"
+import { Observable } from "zen-observable-ts"
+
 import type { FiltersDefinition } from "@/components/OneFilterPicker"
+
+import { aiTranslations } from "@/ai/AiChat/providers/AiChatTranslationsProvider"
 import {
   BaseFetchOptions,
   BaseResponse,
@@ -15,24 +23,29 @@ import {
   zeroRender as render,
   zeroRenderHook as renderHook,
 } from "@/testing/test-utils"
-import { act, screen, waitFor, within } from "@testing-library/react"
-import { userEvent } from "@testing-library/user-event"
-import { LayoutGrid } from "lucide-react"
-import { describe, expect, test, vi } from "vitest"
-import { Observable } from "zen-observable-ts"
+
 import { useDataCollectionData } from "../hooks/useDataCollectionData/useDataCollectionData"
 import {
   DataCollectionSource,
   useDataCollectionSource,
 } from "../hooks/useDataCollectionSource"
-
 import { OneDataCollection } from "../index"
 import { ItemActionsDefinition } from "../item-actions"
 import { NavigationFiltersDefinition } from "../navigationFilters/types"
 import { SummariesDefinition } from "../summary"
 
 const TestWrapper = ({ children }: { children: React.ReactNode }) => (
-  <I18nProvider translations={defaultTranslations}>{children}</I18nProvider>
+  <I18nProvider
+    translations={{
+      ...defaultTranslations,
+      ai: {
+        ...defaultTranslations.ai,
+        ...aiTranslations.ai,
+      },
+    }}
+  >
+    {children}
+  </I18nProvider>
 )
 
 describe("Collections", () => {

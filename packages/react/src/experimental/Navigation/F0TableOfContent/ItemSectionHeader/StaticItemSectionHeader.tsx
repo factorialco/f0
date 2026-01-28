@@ -1,4 +1,5 @@
 import { ReactNode } from "react"
+
 import { Item } from "../Item"
 import { TOCItem } from "../types"
 
@@ -8,6 +9,14 @@ interface StaticItemSectionHeaderProps {
   isActive?: boolean
   sortable: boolean
   hideChildrenCounter?: boolean
+  isDragOver?: boolean
+  dragOverPosition?: "before" | "after" | "inside" | null
+  canDropInside?: boolean
+  onDragOver?: (itemId: string, position: "before" | "after" | "inside") => void
+  onDragLeave?: () => void
+  onDrop?: (itemId: string, position: "before" | "after" | "inside") => void
+  currentParentId?: string | null
+  draggedItemId?: string | null
 }
 
 export function StaticItemSectionHeader({
@@ -16,6 +25,12 @@ export function StaticItemSectionHeader({
   isActive,
   sortable,
   hideChildrenCounter,
+  canDropInside = false,
+  onDragOver,
+  onDragLeave,
+  onDrop,
+  currentParentId,
+  draggedItemId,
 }: StaticItemSectionHeaderProps) {
   return (
     <>
@@ -27,6 +42,12 @@ export function StaticItemSectionHeader({
         isExpanded={undefined}
         onToggleExpanded={undefined}
         sortable={sortable}
+        onDragOver={onDragOver}
+        onDragLeave={onDragLeave}
+        onDrop={onDrop}
+        canDropInside={canDropInside}
+        currentParentId={currentParentId}
+        draggedItemId={draggedItemId}
       />
       {children && (
         <div className="ml-[18px] min-w-0 border-0 border-l border-solid border-f1-border-secondary pl-4">

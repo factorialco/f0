@@ -1,5 +1,8 @@
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
+
+import { aiTranslations } from "@/ai/AiChat/providers/AiChatTranslationsProvider"
+
 import { I18nProvider, TranslationsType, useI18n } from "./i18n-provider"
 import { defaultTranslations } from "./i18n-provider-defaults"
 
@@ -13,6 +16,11 @@ describe("I18nProvider", () => {
   it("allows overriding translations", () => {
     const customTranslations: TranslationsType = {
       ...defaultTranslations,
+      ai: {
+        ...defaultTranslations.ai,
+        ...aiTranslations.ai,
+        closeChat: "CLOSE",
+      },
       actions: {
         ...defaultTranslations.actions,
         add: "Add",

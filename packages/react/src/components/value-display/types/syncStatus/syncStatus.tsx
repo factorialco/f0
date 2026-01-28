@@ -1,3 +1,5 @@
+import { motion } from "motion/react"
+
 /**
  * Sync status cell type for displaying sync status indicators with icons and tooltips.
  * Used for showing the synchronization state of items in data collections.
@@ -13,7 +15,7 @@ import {
 } from "@/icons/app"
 import { TooltipWrapper } from "@/lib/tooltip-wrapper"
 import { cn } from "@/lib/utils"
-import { motion } from "motion/react"
+
 import { tableDisplayClassNames } from "../../const"
 import { ValueDisplayRendererContext } from "../../types"
 

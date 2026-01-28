@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest"
+
 import type { FiltersDefinition, PresetsDefinition } from "../types"
+
 import { getPresetCoveredKeys } from "./getPresetCoveredKeys"
 
 describe("getPresetCoveredKeys", () => {

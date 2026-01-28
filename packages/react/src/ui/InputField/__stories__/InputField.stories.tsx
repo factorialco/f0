@@ -1,7 +1,10 @@
-import * as icons from "@/icons/app"
-import { Search } from "@/icons/app"
 import type { Meta, StoryObj } from "@storybook/react-vite"
-import { InputField } from "../"
+
+import * as icons from "@/icons/app"
+import { Placeholder, Search } from "@/icons/app"
+import { withSkipA11y, withSnapshot } from "@/lib/storybook-utils/parameters"
+
+import { InputField, INPUTFIELD_SIZES } from "../"
 
 const meta = {
   title: "Components/InputField",
@@ -289,5 +292,89 @@ export const WithAppendTag: Story = {
     ...Default.args,
     clearable: true,
     appendTag: "Label",
+  },
+}
+
+export const LongPlaceholder: Story = {
+  decorators: [
+    (Story) => (
+      <div className="w-96">
+        <Story />
+      </div>
+    ),
+  ],
+  args: {
+    ...Default.args,
+    placeholder:
+      "This is a very long placeholder that should be truncated and show an ellipsis",
+  },
+}
+
+export const Snapshot: Story = {
+  parameters: withSkipA11y(withSnapshot({})),
+  args: Default.args,
+  render: () => {
+    const base = {
+      clearable: true,
+      icon: Placeholder,
+      labelIcon: Placeholder,
+      label: "Label text here",
+      children: <input type="text" className="w-full" />,
+    }
+    const snapshotVariants = [
+      { ...base },
+      { ...base, value: "Value" },
+      { ...base, disabled: true },
+      { ...base, readonly: true },
+      { ...base, required: true },
+      { ...base, maxLength: 10, value: "Value" },
+      { ...base, hideLabel: true },
+      { ...base, error: true },
+      { ...base, icon: Placeholder },
+      {
+        ...base,
+        children: <input type="password" className="w-full" />,
+      },
+      { ...base, status: { type: "error" as const, message: "Error message" } },
+      {
+        ...base,
+        status: { type: "warning" as const, message: "Warning message" },
+      },
+      { ...base, status: { type: "info" as const, message: "Info message" } },
+      { ...base, hint: "Hint message" },
+      { ...base, loading: true },
+      {
+        ...base,
+        appendTag: "Label",
+      },
+      {
+        ...base,
+        append: (
+          <div className="rounded-sm bg-f1-background-secondary px-2 py-0.5 text-f1-foreground-secondary">
+            Tag
+          </div>
+        ),
+      },
+      { ...base },
+    ]
+    return (
+      <div className="flex flex-col gap-4">
+        {INPUTFIELD_SIZES.map((size) => (
+          <section key={size}>
+            <h4 className="mb-3 text-lg font-semibold">Size: {size}</h4>
+            <div className="flex flex-col gap-4">
+              <InputField
+                size={size}
+                label="Label text here"
+                children={<input type="text" className="w-full" />}
+              />
+              {snapshotVariants.map((variant, index) => (
+                <InputField key={`${size}-${index}`} size={size} {...variant} />
+              ))}
+            </div>
+          </section>
+        ))}
+      </div>
+    )
   },
 }

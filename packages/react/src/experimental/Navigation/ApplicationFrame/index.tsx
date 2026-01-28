@@ -1,13 +1,12 @@
+import { breakpoints } from "@factorialco/f0-core"
 import {
   AnimatePresence,
   LayoutGroup,
   motion,
   MotionConfig,
 } from "motion/react"
-import { cn, focusRing } from "../../../lib/utils"
-
-import { useReducedMotion } from "../../../lib/a11y"
-import { useI18n } from "../../../lib/providers/i18n"
+import { Fragment, useEffect, useRef } from "react"
+import { useMediaQuery } from "usehooks-ts"
 
 import {
   AiPromotionChat,
@@ -15,11 +14,13 @@ import {
   AiPromotionChatProviderProps,
 } from "@/experimental/AiPromotionChat"
 import { useAiPromotionChat } from "@/experimental/AiPromotionChat/providers/AiPromotionChatStateProvider"
-import { breakpoints } from "@factorialco/f0-core"
-import { Fragment, useEffect, useRef } from "react"
-import { useMediaQuery } from "usehooks-ts"
-import { AiChat, AiChatProvider, AiChatProviderProps } from "../../AiChat"
-import { useAiChat } from "../../AiChat/providers/AiChatStateProvider"
+import { experimentalComponent } from "@/lib/experimental"
+
+import { AiChat, AiChatProvider, AiChatProviderProps } from "../../../ai/AiChat"
+import { useAiChat } from "../../../ai/AiChat/providers/AiChatStateProvider"
+import { useReducedMotion } from "../../../lib/a11y"
+import { useI18n } from "../../../lib/providers/i18n"
+import { cn, focusRing } from "../../../lib/utils"
 import { FrameProvider, SidebarState, useSidebar } from "./FrameProvider"
 
 export interface ApplicationFrameProps {
@@ -30,7 +31,7 @@ export interface ApplicationFrameProps {
   children: React.ReactNode
 }
 
-export function ApplicationFrame({
+function _ApplicationFrame({
   children,
   sidebar,
   banner,
@@ -63,6 +64,14 @@ export function ApplicationFrame({
     </FrameProvider>
   )
 }
+
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export const ApplicationFrame = experimentalComponent(
+  "ApplicationFrame",
+  _ApplicationFrame
+)
 
 const SkipToContentButton = ({ contentId }: { contentId?: string }) => {
   const translations = useI18n()

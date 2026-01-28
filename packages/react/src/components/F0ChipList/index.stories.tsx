@@ -1,7 +1,9 @@
+import type { Meta, StoryObj } from "@storybook/react-vite"
+
 import avatar01 from "@storybook-static/avatars/person01.jpg"
 import avatar02 from "@storybook-static/avatars/person02.jpg"
 import avatar03 from "@storybook-static/avatars/person03.jpg"
-import type { Meta, StoryObj } from "@storybook/react-vite"
+
 import { F0ChipList } from "./index"
 
 const meta = {

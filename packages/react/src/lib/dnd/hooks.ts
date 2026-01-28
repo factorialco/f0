@@ -1,6 +1,8 @@
 import { useEffect } from "react"
-import { useDndContextOptional } from "./context"
+
 import type { DragPayload } from "./types"
+
+import { useDndContextOptional } from "./context"
 
 export function useDraggable<T = unknown>(args: {
   ref: React.RefObject<HTMLElement>
@@ -11,15 +13,21 @@ export function useDraggable<T = unknown>(args: {
   const ctx = useDndContextOptional()
   const { ref, payload, disabled, handleRef } = args
 
+  // Create a key that includes both id and currentParentId to detect moves
+  // This ensures we re-register when an item moves to a different parent
+  const payloadData = payload.data as { currentParentId?: string | null }
+  const payloadKey = payload.id + "|" + (payloadData?.currentParentId ?? "null")
+
   useEffect(() => {
     if (!ref.current) return
     if (!ctx || disabled) return
+
     return ctx.driver.registerDraggable(ref.current, {
       payload,
       disabled,
       handle: handleRef?.current ?? null,
     })
-  }, [ctx, ref, payload, disabled, handleRef])
+  }, [ctx, ref, payloadKey, disabled, handleRef, payload])
 }
 
 export function useDroppableList(args?: {

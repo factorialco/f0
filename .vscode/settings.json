@@ -2,8 +2,6 @@
   "yaml.schemas": {
     "https://json.schemastore.org/github-workflow.json": "vscode-vfs://github%2B7b2276223a312c22726566223a7b2274797065223a362c226964223a226d61696e227d7d/josepjaume/factorial-one/.github/workflows/deploy.yaml"
   },
-  "oxc.path.oxfmt": "./packages/react/node_modules/.bin/oxfmt",
-  "oxc.path.oxlint": "./packages/react/node_modules/.bin/oxlint",
   "editor.defaultFormatter": "oxc.oxc-vscode",  
   "editor.formatOnSave": true,
   "[mdx]": {
@@ -23,4 +21,5 @@
   "[svg]": {
     "editor.defaultFormatter": "oxc.oxc-vscode"
   },
+  "prettier.semi": false,
 }

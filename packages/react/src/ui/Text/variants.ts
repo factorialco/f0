@@ -1,4 +1,5 @@
 import { cva, type VariantProps } from "cva"
+
 import { type AsAllowedList } from "./types"
 
 export const textVariants = cva({

@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
+
 import { EnhancementOption, FILE_TYPES, resultType, RichTextEditor } from "."
 
 const meta = {
@@ -55,12 +56,6 @@ const meta = {
     maxCharacters: {
       control: "number",
       description: "Limits the number of characters that can be entered",
-    },
-    toolbarLabels: {
-      control: "object",
-      description:
-        "Object with labels for all toolbar elements. Required for tooltips and accessibility",
-      required: true,
     },
     errorConfig: {
       control: "object",
@@ -246,37 +241,6 @@ export const Default: Story = {
         variant: "outline",
       },
     ],
-    toolbarLabels: {
-      bold: "Bold",
-      italic: "Italic",
-      underline: "Underline",
-      strike: "Strike",
-      highlight: "Highlight",
-      heading1: "Heading 1",
-      heading2: "Heading 2",
-      heading3: "Heading 3",
-      left: "Left",
-      center: "Center",
-      right: "Right",
-      justify: "Justify",
-      bulletList: "Bullet List",
-      orderedList: "Ordered List",
-      taskList: "Task List",
-      codeBlock: "Code Block",
-      horizontalRule: "Horizontal Rule",
-      quote: "Quote",
-      moreOptions: "More Options",
-      code: "Code",
-      divider: "Divider",
-      bullet: "Bullet",
-      ordered: "Ordered",
-      task: "Task",
-      linkPlaceholder: "Enter link http://here...",
-      linkLabel: "Link",
-      linkPaste: "Paste",
-      close: "Close",
-    },
-
     maxCharacters: 10000,
     initialEditorState: {
       content:
