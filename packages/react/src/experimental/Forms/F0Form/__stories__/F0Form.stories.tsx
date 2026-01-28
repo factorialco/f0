@@ -582,18 +582,7 @@ export const SchemaExtraction: Story = {
       <div className="flex flex-col gap-4">
         <div className="rounded-lg bg-f1-background-secondary p-4">
           <h3 className="mb-2 font-semibold">Generated Schema Shape:</h3>
-          <pre className="text-sm">
-            {JSON.stringify(
-              Object.fromEntries(
-                Object.entries(schema.shape).map(([key, value]) => [
-                  key,
-                  value.description || value._def.typeName,
-                ])
-              ),
-              null,
-              2
-            )}
-          </pre>
+          <pre className="text-sm">{JSON.stringify(schema.shape, null, 2)}</pre>
         </div>
         <F0Form
           definition={definition}
