@@ -1,26 +1,36 @@
 import { useMemo } from "react"
 import { z, ZodTypeAny } from "zod"
 
+import { buildCheckboxFieldSchema } from "./fields/checkbox/validation"
+import { buildDateFieldSchema } from "./fields/date/validation"
+import { buildNumberFieldSchema } from "./fields/number/validation"
+import { buildSelectFieldSchema } from "./fields/select/validation"
+import { buildSwitchFieldSchema } from "./fields/switch/validation"
+import { buildTextFieldSchema } from "./fields/text/validation"
+import { buildTextareaFieldSchema } from "./fields/textarea/validation"
 import type { FieldDefinition } from "./fields/types"
 import type { FormDefinitionItem } from "./types"
 
 /**
- * Get default Zod schema based on field type when no validation is provided
+ * Get default Zod schema based on field type when no validation is provided.
+ * Builds validation schema from field definition parameters.
  */
 function getDefaultValidation(field: FieldDefinition): ZodTypeAny {
   switch (field.type) {
     case "text":
+      return buildTextFieldSchema(field)
     case "textarea":
-      return z.string()
+      return buildTextareaFieldSchema(field)
     case "number":
-      return z.number()
+      return buildNumberFieldSchema(field)
     case "checkbox":
+      return buildCheckboxFieldSchema()
     case "switch":
-      return z.boolean()
+      return buildSwitchFieldSchema()
     case "select":
-      return field.multiple ? z.array(z.string()) : z.string()
-    case "toggle":
-      return z.string()
+      return buildSelectFieldSchema(field)
+    case "date":
+      return buildDateFieldSchema(field)
     default:
       return z.any()
   }

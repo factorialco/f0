@@ -204,7 +204,7 @@ export const WithSections: Story = {
                   },
                   {
                     id: "birthdate",
-                    type: "text",
+                    type: "date",
                     label: "Birth Date",
                     placeholder: "YYYY-MM-DD",
                   },
@@ -730,13 +730,13 @@ export const VisualDesignExample: Story = {
                 fields: [
                   {
                     id: "publishOn",
-                    type: "text",
+                    type: "date",
                     label: "Publish on",
                     placeholder: "dd/mm/yyyy",
                   },
                   {
                     id: "endsAt",
-                    type: "text",
+                    type: "date",
                     label: "Ends at",
                     placeholder: "dd/mm/yyyy",
                   },

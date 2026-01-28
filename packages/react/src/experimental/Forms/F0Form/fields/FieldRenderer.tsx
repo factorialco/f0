@@ -17,6 +17,7 @@ import { evaluateRenderIf } from "./utils"
 
 // Import field renderers
 import { CheckboxFieldRenderer } from "./checkbox/CheckboxFieldRenderer"
+import { DateFieldRenderer } from "./date/DateFieldRenderer"
 import { NumberFieldRenderer } from "./number/NumberFieldRenderer"
 import { SelectFieldRenderer } from "./select/SelectFieldRenderer"
 import { SwitchFieldRenderer } from "./switch/SwitchFieldRenderer"
@@ -47,6 +48,8 @@ function renderFieldInput(
       return <CheckboxFieldRenderer field={field} formField={formField} />
     case "switch":
       return <SwitchFieldRenderer field={field} formField={formField} />
+    case "date":
+      return <DateFieldRenderer field={field} formField={formField} />
     default:
       return null
   }

@@ -43,7 +43,7 @@ export type { TextareaFieldDefinition } from "./textarea/types"
 export type { SelectFieldDefinition } from "./select/types"
 export type { CheckboxFieldDefinition } from "./checkbox/types"
 export type { SwitchFieldDefinition } from "./switch/types"
-export type { ToggleFieldDefinition, ToggleOption } from "./toggle/types"
+export type { DateFieldDefinition } from "./date/types"
 
 // Import for union type
 import type { TextFieldDefinition } from "./text/types"
@@ -52,7 +52,7 @@ import type { TextareaFieldDefinition } from "./textarea/types"
 import type { SelectFieldDefinition } from "./select/types"
 import type { CheckboxFieldDefinition } from "./checkbox/types"
 import type { SwitchFieldDefinition } from "./switch/types"
-import type { ToggleFieldDefinition } from "./toggle/types"
+import type { DateFieldDefinition } from "./date/types"
 
 /**
  * Union of all field definition types
@@ -64,7 +64,7 @@ export type FieldDefinition =
   | SelectFieldDefinition
   | CheckboxFieldDefinition
   | SwitchFieldDefinition
-  | ToggleFieldDefinition
+  | DateFieldDefinition
 
 /**
  * Field types mapping to existing components
@@ -76,4 +76,4 @@ export type FieldType =
   | "select"
   | "checkbox"
   | "switch"
-  | "toggle"
+  | "date"

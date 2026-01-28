@@ -12,8 +12,6 @@ export type {
   SelectFieldDefinition,
   CheckboxFieldDefinition,
   SwitchFieldDefinition,
-  ToggleFieldDefinition,
-  ToggleOption,
 } from "./fields/types"
 
 /**
