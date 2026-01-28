@@ -1,9 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { z } from "zod"
 
-import { F0Form } from "../F0Form"
-import { useFormDefinitionSchema } from "../useFormDefinitionSchema"
-import type { FormDefinitionItem } from "../types"
+import { F0Form, FormDefinitionItem, useFormDefinitionSchema } from "../index"
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
@@ -678,6 +676,198 @@ export const ServerValidation: Story = {
           return { success: true }
         }}
       />
+    )
+  },
+}
+
+/**
+ * Form matching the visual design with sections and switch grouping.
+ * Demonstrates how contiguous switch fields are automatically grouped
+ * in a bordered container with the switch on the right and label/description on the left.
+ */
+export const VisualDesignExample: Story = {
+  render() {
+    const definition: FormDefinitionItem[] = [
+      // Basic Information Section
+      {
+        type: "section",
+        id: "basic-info",
+        section: {
+          title: "Basic Information",
+          fields: [
+            {
+              type: "field",
+              field: {
+                id: "title",
+                type: "text",
+                label: "Title",
+                validation: z.string().min(1),
+                placeholder: "Workplace climate survey",
+              },
+            },
+            {
+              type: "field",
+              field: {
+                id: "description",
+                type: "textarea",
+                label: "Description (Optional)",
+                validation: z.string().optional(),
+                placeholder:
+                  "This short workplace climate survey contains just 12 simple questions...",
+                rows: 3,
+              },
+            },
+          ],
+        },
+      },
+      // Participants Section
+      {
+        type: "section",
+        id: "participants",
+        section: {
+          title: "Participants",
+          fields: [
+            {
+              type: "field",
+              field: {
+                id: "participants",
+                type: "select",
+                label: "Select participants",
+                options: [
+                  { value: "all", label: "All employees" },
+                  { value: "department", label: "By department" },
+                  { value: "team", label: "By team" },
+                ],
+                placeholder: "Select participants",
+              },
+            },
+          ],
+        },
+      },
+      // Schedule Section with row group
+      {
+        type: "section",
+        id: "schedule",
+        section: {
+          title: "Schedule",
+          fields: [
+            {
+              type: "group",
+              group: {
+                direction: "row",
+                fields: [
+                  {
+                    id: "publishOn",
+                    type: "text",
+                    label: "Publish on",
+                    placeholder: "dd/mm/yyyy",
+                  },
+                  {
+                    id: "endsAt",
+                    type: "text",
+                    label: "Ends at",
+                    placeholder: "dd/mm/yyyy",
+                  },
+                ],
+              },
+            },
+            {
+              type: "field",
+              field: {
+                id: "recurrence",
+                type: "select",
+                label: "Recurrence",
+                options: [
+                  { value: "none", label: "Does not repeat" },
+                  { value: "weekly", label: "Weekly" },
+                  { value: "monthly", label: "Monthly" },
+                  { value: "quarterly", label: "Quarterly" },
+                ],
+                placeholder: "Does not repeat",
+              },
+            },
+          ],
+        },
+      },
+      // Visibility & Privacy Section with switch grouping
+      {
+        type: "section",
+        id: "visibility",
+        section: {
+          title: "Visibility & Privacy",
+          fields: [
+            // These consecutive switch fields will be automatically grouped
+            {
+              type: "field",
+              field: {
+                id: "managerVisibility",
+                type: "switch",
+                label: "Add visibility permissions to managers and team leads",
+                helpText:
+                  "Grant access to managers and team leads. Even if they are not survey editors, they will be able to view the results of their own teams once responses are available",
+              },
+            },
+            {
+              type: "field",
+              field: {
+                id: "anonymousAnswers",
+                type: "switch",
+                label: "Anonymous answers",
+              },
+            },
+          ],
+        },
+      },
+      // Editors Section
+      {
+        type: "section",
+        id: "editors",
+        section: {
+          title: "Editors",
+          fields: [
+            {
+              type: "field",
+              field: {
+                id: "editors",
+                type: "select",
+                label: "Select editors",
+                options: [
+                  { value: "none", label: "None" },
+                  { value: "hr", label: "HR Team" },
+                  { value: "managers", label: "Managers" },
+                ],
+                placeholder: "None",
+              },
+            },
+          ],
+        },
+      },
+    ]
+
+    return (
+      <div className="max-w-lg">
+        <F0Form
+          definition={definition}
+          defaultValues={{
+            title: "Workplace climate survey",
+            description:
+              "This short workplace climate survey contains just 12 simple questions. It is designed to help measure employees' perceptions, experiences, and overall satisfaction within the workplace.",
+            participants: "",
+            publishOn: "",
+            endsAt: "",
+            recurrence: "none",
+            managerVisibility: false,
+            anonymousAnswers: false,
+            editors: "none",
+          }}
+          onSubmit={async (data) => {
+            await sleep(1000)
+            alert(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+            return { success: true }
+          }}
+          submitLabel="Create Survey"
+        />
+      </div>
     )
   },
 }

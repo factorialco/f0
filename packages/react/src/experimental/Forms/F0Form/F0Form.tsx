@@ -7,29 +7,58 @@ import { Form as FormProvider } from "@/ui/form"
 
 import { GroupRenderer } from "./components/GroupRenderer"
 import { SectionRenderer } from "./components/SectionRenderer"
+import { SwitchGroupRenderer } from "./components/SwitchGroupRenderer"
+import { FIELD_GAP } from "./constants"
 import { FieldRenderer } from "./fields/FieldRenderer"
-import type { F0FormProps, FormDefinitionItem } from "./types"
+import type { SwitchFieldDefinition } from "./fields/switch/types"
+import type {
+  F0FormProps,
+  FieldItem,
+  FormDefinitionItem,
+  GroupDefinition,
+  SectionDefinition,
+} from "./types"
 import { useFormDefinitionSchema } from "./useFormDefinitionSchema"
 
-interface DefinitionItemRendererProps {
-  item: FormDefinitionItem
-  index: number
-}
+type GroupedItem =
+  | { type: "field"; item: FieldItem }
+  | { type: "group"; item: GroupDefinition; index: number }
+  | { type: "section"; item: SectionDefinition }
+  | { type: "switchGroup"; fields: SwitchFieldDefinition[] }
 
 /**
- * Renders a single definition item (field, group, or section)
+ * Groups contiguous switch fields together for rendering in a bordered container
  */
-function DefinitionItemRenderer({ item, index }: DefinitionItemRendererProps) {
-  switch (item.type) {
-    case "field":
-      return <FieldRenderer key={item.field.id} field={item.field} />
-    case "group":
-      return <GroupRenderer key={`group-${index}`} group={item.group} />
-    case "section":
-      return <SectionRenderer key={item.id} section={item} />
-    default:
-      return null
+function groupContiguousSwitches(
+  definition: FormDefinitionItem[]
+): GroupedItem[] {
+  const result: GroupedItem[] = []
+  let currentSwitchGroup: SwitchFieldDefinition[] = []
+
+  const flushSwitchGroup = () => {
+    if (currentSwitchGroup.length > 0) {
+      result.push({ type: "switchGroup", fields: [...currentSwitchGroup] })
+      currentSwitchGroup = []
+    }
   }
+
+  definition.forEach((item, index) => {
+    if (item.type === "field" && item.field.type === "switch") {
+      currentSwitchGroup.push(item.field as SwitchFieldDefinition)
+    } else {
+      flushSwitchGroup()
+      if (item.type === "field") {
+        result.push({ type: "field", item })
+      } else if (item.type === "group") {
+        result.push({ type: "group", item, index })
+      } else if (item.type === "section") {
+        result.push({ type: "section", item })
+      }
+    }
+  })
+
+  flushSwitchGroup()
+  return result
 }
 
 /**
@@ -131,11 +160,14 @@ export function F0Form<TValues extends Record<string, unknown>>({
     }
   }
 
+  // Group contiguous switch fields
+  const groupedItems = groupContiguousSwitches(definition)
+
   return (
     <FormProvider {...form}>
       <form
         onSubmit={form.handleSubmit(handleSubmit)}
-        className={cn("flex flex-col gap-4", className)}
+        className={cn(`flex flex-col ${FIELD_GAP}`, className)}
       >
         {/* Root error message */}
         {rootError && (
@@ -144,10 +176,41 @@ export function F0Form<TValues extends Record<string, unknown>>({
           </p>
         )}
 
-        {/* Render definition items */}
-        {definition.map((item, index) => (
-          <DefinitionItemRenderer key={index} item={item} index={index} />
-        ))}
+        {/* Render definition items with switch grouping */}
+        {groupedItems.map((groupedItem, index) => {
+          switch (groupedItem.type) {
+            case "switchGroup":
+              return (
+                <SwitchGroupRenderer
+                  key={`switch-group-${index}`}
+                  fields={groupedItem.fields}
+                />
+              )
+            case "field":
+              return (
+                <FieldRenderer
+                  key={groupedItem.item.field.id}
+                  field={groupedItem.item.field}
+                />
+              )
+            case "group":
+              return (
+                <GroupRenderer
+                  key={`group-${groupedItem.index}`}
+                  group={groupedItem.item.group}
+                />
+              )
+            case "section":
+              return (
+                <SectionRenderer
+                  key={groupedItem.item.id}
+                  section={groupedItem.item}
+                />
+              )
+            default:
+              return null
+          }
+        })}
 
         {/* Custom children (e.g., additional actions) */}
         {children}

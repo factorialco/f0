@@ -35,6 +35,7 @@ export function SelectFieldRenderer({
         clearable={field.clearable}
         value={(formField.value as string[]) ?? []}
         onChange={(value: string[]) => formField.onChange(value)}
+        hideLabel
       />
     )
   }
@@ -46,6 +47,7 @@ export function SelectFieldRenderer({
         clearable={true}
         value={(formField.value as string) ?? undefined}
         onChange={(value: string) => formField.onChange(value)}
+        hideLabel
       />
     )
   }
@@ -55,6 +57,7 @@ export function SelectFieldRenderer({
       {...selectBaseProps}
       value={(formField.value as string) ?? undefined}
       onChange={(value: string) => formField.onChange(value)}
+      hideLabel
     />
   )
 }

@@ -23,6 +23,7 @@ export function TextFieldRenderer({
       disabled={field.disabled}
       {...formField}
       value={formField.value != null ? String(formField.value) : ""}
+      hideLabel
     />
   )
 }

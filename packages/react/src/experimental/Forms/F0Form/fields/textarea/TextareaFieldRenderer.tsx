@@ -24,6 +24,7 @@ export function TextareaFieldRenderer({
       maxLength={field.maxLength}
       {...formField}
       value={formField.value != null ? String(formField.value) : ""}
+      hideLabel
     />
   )
 }

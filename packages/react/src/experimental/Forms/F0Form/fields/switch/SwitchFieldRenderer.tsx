@@ -22,6 +22,7 @@ export function SwitchFieldRenderer({
       {...formField}
       checked={Boolean(formField.value)}
       onCheckedChange={formField.onChange}
+      hideLabel
     />
   )
 }

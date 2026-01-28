@@ -27,6 +27,7 @@ export function NumberFieldRenderer({
       {...formField}
       value={formField.value != null ? Number(formField.value) : undefined}
       onChange={(value) => formField.onChange(value)}
+      hideLabel
     />
   )
 }

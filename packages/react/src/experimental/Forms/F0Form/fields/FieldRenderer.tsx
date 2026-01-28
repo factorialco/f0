@@ -9,7 +9,6 @@ import {
   FormDescription,
   FormField as FormFieldPrimitive,
   FormItem,
-  FormLabel,
   FormMessage,
 } from "@/ui/form"
 
@@ -59,6 +58,9 @@ function renderFieldInput(
 /**
  * FieldRenderer component that renders a single form field based on its definition.
  * Handles conditional rendering via renderIf and integrates with react-hook-form.
+ *
+ * Note: Switch fields rendered individually (not in a group) use this renderer.
+ * Contiguous switch fields are grouped by parent components (F0Form, SectionRenderer).
  */
 export function FieldRenderer({ field }: FieldRendererProps) {
   const form = useFormContext()
@@ -69,8 +71,8 @@ export function FieldRenderer({ field }: FieldRendererProps) {
     return null
   }
 
-  // For checkbox and switch, we don't need a separate label since the component shows it
-  const showLabel = field.type !== "checkbox" && field.type !== "switch"
+  // For checkbox, we show label inline with the checkbox
+  const showLabel = field.type !== "checkbox"
 
   return (
     <FormFieldPrimitive
@@ -78,7 +80,14 @@ export function FieldRenderer({ field }: FieldRendererProps) {
       name={field.id}
       render={({ field: formField }) => (
         <FormItem>
-          {showLabel && <FormLabel>{field.label}</FormLabel>}
+          {showLabel && (
+            <label
+              htmlFor={field.id}
+              className="text-base font-medium leading-normal text-f1-foreground-secondary"
+            >
+              {field.label}
+            </label>
+          )}
           <FormControl>{renderFieldInput(field, formField)}</FormControl>
           {field.helpText && (
             <FormDescription>{field.helpText}</FormDescription>

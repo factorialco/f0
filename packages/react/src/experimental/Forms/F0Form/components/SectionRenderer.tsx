@@ -1,9 +1,18 @@
 import { useFormContext } from "react-hook-form"
 
+import { FIELD_GAP } from "../constants"
+import { SectionHeader } from "@/experimental/Information/Headers/SectionHeader"
 import { FieldRenderer } from "../fields/FieldRenderer"
+import type { SwitchFieldDefinition } from "../fields/switch/types"
 import { evaluateRenderIf } from "../fields/utils"
-import type { SectionDefinition, SectionRenderIf } from "../types"
+import type {
+  FieldItem,
+  GroupDefinition,
+  SectionDefinition,
+  SectionRenderIf,
+} from "../types"
 import { GroupRenderer } from "./GroupRenderer"
+import { SwitchGroupRenderer } from "./SwitchGroupRenderer"
 
 interface SectionRendererProps {
   section: SectionDefinition
@@ -23,10 +32,49 @@ function evaluateSectionRenderIf(
   return evaluateRenderIf(renderIf, values)
 }
 
+type RenderedItem =
+  | { type: "field"; item: FieldItem }
+  | { type: "group"; item: GroupDefinition; index: number }
+  | { type: "switchGroup"; fields: SwitchFieldDefinition[] }
+
+/**
+ * Groups contiguous switch fields together for rendering in a bordered container
+ */
+function groupContiguousSwitches(
+  fields: (FieldItem | GroupDefinition)[]
+): RenderedItem[] {
+  const result: RenderedItem[] = []
+  let currentSwitchGroup: SwitchFieldDefinition[] = []
+
+  const flushSwitchGroup = () => {
+    if (currentSwitchGroup.length > 0) {
+      result.push({ type: "switchGroup", fields: [...currentSwitchGroup] })
+      currentSwitchGroup = []
+    }
+  }
+
+  fields.forEach((item, index) => {
+    if (item.type === "field" && item.field.type === "switch") {
+      currentSwitchGroup.push(item.field as SwitchFieldDefinition)
+    } else {
+      flushSwitchGroup()
+      if (item.type === "field") {
+        result.push({ type: "field", item })
+      } else if (item.type === "group") {
+        result.push({ type: "group", item, index })
+      }
+    }
+  })
+
+  flushSwitchGroup()
+  return result
+}
+
 /**
  * SectionRenderer component that renders a form section with title,
  * description, and nested fields/groups.
  * Supports conditional rendering for the entire section.
+ * Automatically groups contiguous switch fields in a bordered container.
  */
 export function SectionRenderer({ section }: SectionRendererProps) {
   const form = useFormContext()
@@ -39,29 +87,39 @@ export function SectionRenderer({ section }: SectionRendererProps) {
     return null
   }
 
+  const groupedItems = groupContiguousSwitches(fields)
+
   return (
-    <fieldset className="flex flex-col gap-4 rounded-lg border border-f1-border-secondary p-4">
-      <legend className="px-2">
-        <span className="text-base font-semibold text-f1-foreground">
-          {title}
-        </span>
-      </legend>
-      {description && (
-        <p className="-mt-2 text-sm text-f1-foreground-secondary">
-          {description}
-        </p>
-      )}
-      <div className="flex flex-col gap-4">
-        {fields.map((item, index) => {
+    <section className="flex flex-col">
+      <div className="[&>div]:px-0 [&>div]:border-0 py-5">
+        <SectionHeader title={title} description={description ?? ""} />
+      </div>
+      <div className={`flex flex-col ${FIELD_GAP}`}>
+        {groupedItems.map((item, index) => {
+          if (item.type === "switchGroup") {
+            return (
+              <SwitchGroupRenderer
+                key={`switch-group-${index}`}
+                fields={item.fields}
+              />
+            )
+          }
           if (item.type === "field") {
-            return <FieldRenderer key={item.field.id} field={item.field} />
+            return (
+              <FieldRenderer key={item.item.field.id} field={item.item.field} />
+            )
           }
           if (item.type === "group") {
-            return <GroupRenderer key={`group-${index}`} group={item.group} />
+            return (
+              <GroupRenderer
+                key={`group-${item.index}`}
+                group={item.item.group}
+              />
+            )
           }
           return null
         })}
       </div>
-    </fieldset>
+    </section>
   )
 }
