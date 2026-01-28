@@ -12,6 +12,7 @@ export interface F0AlertProps {
   description: string
   action?: {
     label: string
+    disabled?: boolean
     onClick: () => void
   }
   link?: {

@@ -97,6 +97,7 @@ export const F0Alert = ({
                   variant="outline"
                   onClick={action.onClick}
                   size="sm"
+                  disabled={action.disabled}
                 />
               )}
             </div>
