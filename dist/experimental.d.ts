@@ -599,19 +599,6 @@ declare const aiTranslations: {
     };
 };
 
-/**
- * @experimental This is an experimental component use it at your own risk
- */
-export declare const Alert: React_2.ForwardRefExoticComponent<Omit<React_2.HTMLAttributes<HTMLDivElement> & VariantProps<(props?: ({
-    variant?: "info" | "warning" | "positive" | "destructive" | undefined;
-} & ({
-    class?: ClassValue;
-    className?: never;
-} | {
-    class?: never;
-    className?: ClassValue;
-})) | undefined) => string> & React_2.RefAttributes<HTMLDivElement>, "ref"> & React_2.RefAttributes<HTMLElement | SVGElement>>;
-
 declare type AlertAvatarProps = VariantProps<typeof alertAvatarVariants> & {
     type: (typeof alertAvatarTypes)[number];
     size?: (typeof alertAvatarSizes)[number];
@@ -624,43 +611,6 @@ declare const alertAvatarTypes: readonly ["critical", "warning", "info", "positi
 declare const alertAvatarVariants: (props?: ({
     type?: "info" | "critical" | "warning" | "positive" | undefined;
     size?: "lg" | "md" | "sm" | undefined;
-} & ({
-    class?: ClassValue;
-    className?: never;
-} | {
-    class?: never;
-    className?: ClassValue;
-})) | undefined) => string;
-
-/**
- * @experimental This is an experimental component use it at your own risk
- */
-export declare const AlertDescription: React_2.ForwardRefExoticComponent<React_2.HTMLAttributes<HTMLParagraphElement> & React_2.RefAttributes<HTMLParagraphElement>>;
-
-declare interface AlertProps extends VariantProps<typeof alertVariants> {
-    title: string;
-    description: string;
-    action?: {
-        label: string;
-        onClick: () => void;
-    };
-    link?: {
-        label: string;
-        href: string;
-    };
-    icon?: IconType;
-    variant: AlertVariant;
-}
-
-/**
- * @experimental This is an experimental component use it at your own risk
- */
-export declare const AlertTitle: React_2.ForwardRefExoticComponent<React_2.HTMLAttributes<HTMLHeadingElement> & React_2.RefAttributes<HTMLParagraphElement>>;
-
-declare type AlertVariant = "info" | "warning" | "critical" | "neutral" | "positive";
-
-declare const alertVariants: (props?: ({
-    variant?: "info" | "critical" | "warning" | "positive" | "neutral" | undefined;
 } & ({
     class?: ClassValue;
     className?: never;
@@ -4632,11 +4582,6 @@ export declare type OnDuplicateElementParams = {
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const OneAlert: ({ title, description, action, link, icon, variant, }: AlertProps) => JSX_2.Element;
-
-/**
- * @experimental This is an experimental component use it at your own risk
- */
 export declare const OneApprovalHistory: FC<OneApprovalHistoryProps>;
 
 declare type OneApprovalHistoryProps = {
@@ -6734,6 +6679,11 @@ declare module "gridstack" {
 }
 
 
+declare namespace Calendar {
+    var displayName: string;
+}
+
+
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         aiBlock: {
@@ -6759,9 +6709,4 @@ declare module "@tiptap/core" {
             insertTranscript: (data: TranscriptData) => ReturnType;
         };
     }
-}
-
-
-declare namespace Calendar {
-    var displayName: string;
 }
