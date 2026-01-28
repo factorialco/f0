@@ -218,8 +218,8 @@ const meta: Meta = {
       )
       const [searchValue, setSearchValue] = useState("")
       const [selectionStatus, setSelectionStatus] = useState<
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          SelectedItemsDetailedStatus<any, any> | undefined
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        SelectedItemsDetailedStatus<any, any> | undefined
       >(undefined)
 
       const handleOnChange = (value: string) => {
