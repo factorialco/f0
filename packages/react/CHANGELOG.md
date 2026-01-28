@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.338.2](https://github.com/factorialco/f0/compare/f0-react-v1.338.1...f0-react-v1.338.2) (2026-01-28)
+
+
+### Bug Fixes
+
+* get rid of Alert and rename OneAlert to F0Alert ([#3307](https://github.com/factorialco/f0/issues/3307)) ([c792592](https://github.com/factorialco/f0/commit/c792592d41cc129cc4f591edd0b44b49b94522e0))
+
 ## [1.338.1](https://github.com/factorialco/f0/compare/f0-react-v1.338.0...f0-react-v1.338.1) (2026-01-27)
 
 
