@@ -239,20 +239,6 @@ export const WithSections: Story = {
                 validation: z.boolean(),
               },
             },
-            {
-              type: "field",
-              field: {
-                id: "theme",
-                type: "toggle",
-                label: "Theme Color",
-                options: [
-                  { value: "blue", label: "Blue" },
-                  { value: "green", label: "Green" },
-                  { value: "purple", label: "Purple" },
-                ],
-                validation: z.string(),
-              },
-            },
           ],
         },
       },
@@ -511,20 +497,6 @@ export const AllFieldTypes: Story = {
           label: "Switch Field",
           validation: z.boolean(),
           helpText: "Toggle this switch",
-        },
-      },
-      {
-        type: "field",
-        field: {
-          id: "toggleField",
-          type: "toggle",
-          label: "Toggle Group Field",
-          validation: z.string(),
-          options: [
-            { value: "small", label: "S" },
-            { value: "medium", label: "M" },
-            { value: "large", label: "L" },
-          ],
         },
       },
     ]

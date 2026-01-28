@@ -8,7 +8,7 @@ import { Form as FormProvider } from "@/ui/form"
 import { GroupRenderer } from "./components/GroupRenderer"
 import { SectionRenderer } from "./components/SectionRenderer"
 import { SwitchGroupRenderer } from "./components/SwitchGroupRenderer"
-import { FIELD_GAP } from "./constants"
+import { FIELD_GAP, SECTION_MARGIN } from "./constants"
 import { FieldRenderer } from "./fields/FieldRenderer"
 import type { SwitchFieldDefinition } from "./fields/switch/types"
 import type {
@@ -202,10 +202,12 @@ export function F0Form<TValues extends Record<string, unknown>>({
               )
             case "section":
               return (
-                <SectionRenderer
-                  key={groupedItem.item.id}
-                  section={groupedItem.item}
-                />
+                <div className={index !== 0 ? SECTION_MARGIN : ""}>
+                  <SectionRenderer
+                    key={groupedItem.item.id}
+                    section={groupedItem.item}
+                  />
+                </div>
               )
             default:
               return null

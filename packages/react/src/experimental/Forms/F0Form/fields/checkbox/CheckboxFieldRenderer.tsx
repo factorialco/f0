@@ -23,7 +23,6 @@ export function CheckboxFieldRenderer({
       {...formField}
       checked={Boolean(formField.value)}
       onCheckedChange={formField.onChange}
-      hideLabel
     />
   )
 }

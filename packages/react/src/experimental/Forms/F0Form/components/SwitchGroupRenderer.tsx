@@ -34,7 +34,9 @@ function SwitchFieldItem({ field, isLast }: SwitchFieldItemProps) {
   return (
     <div
       className={`flex items-start justify-between ${SWITCH_GROUP_PADDING} ${
-        !isLast ? "border-b border-f1-border-secondary" : ""
+        !isLast
+          ? "border-0 border-b border-solid border-f1-border-secondary"
+          : ""
       }`}
     >
       <div className="flex flex-col gap-1 pr-4">
@@ -46,7 +48,7 @@ function SwitchFieldItem({ field, isLast }: SwitchFieldItemProps) {
           {field.label}
         </label>
         {field.helpText && (
-          <p className="text-sm text-f1-foreground-secondary">
+          <p className="text-base text-f1-foreground-secondary">
             {field.helpText}
           </p>
         )}
@@ -79,7 +81,7 @@ export function SwitchGroupRenderer({ fields }: SwitchGroupRendererProps) {
   }
 
   return (
-    <div className="rounded-lg border border-f1-border-secondary">
+    <div className="rounded-lg border border-solid border-f1-border-secondary">
       {fields.map((field, index) => (
         <SwitchFieldItem
           key={field.id}

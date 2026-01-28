@@ -2,6 +2,7 @@ import { ControllerRenderProps, FieldValues } from "react-hook-form"
 
 import { Input } from "../../../Fields/Input"
 import type { TextFieldDefinition } from "./types"
+import { FORM_SIZE } from "../../constants"
 
 interface TextFieldRendererProps {
   field: TextFieldDefinition
@@ -23,6 +24,7 @@ export function TextFieldRenderer({
       disabled={field.disabled}
       {...formField}
       value={formField.value != null ? String(formField.value) : ""}
+      size={FORM_SIZE}
       hideLabel
     />
   )

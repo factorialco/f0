@@ -3,6 +3,7 @@ import { ControllerRenderProps, FieldValues } from "react-hook-form"
 import { F0Select } from "@/components/F0Select"
 
 import type { SelectFieldDefinition } from "./types"
+import { FORM_SIZE } from "../../constants"
 
 interface SelectFieldRendererProps {
   field: SelectFieldDefinition
@@ -35,6 +36,7 @@ export function SelectFieldRenderer({
         clearable={field.clearable}
         value={(formField.value as string[]) ?? []}
         onChange={(value: string[]) => formField.onChange(value)}
+        size={FORM_SIZE}
         hideLabel
       />
     )
@@ -47,6 +49,7 @@ export function SelectFieldRenderer({
         clearable={true}
         value={(formField.value as string) ?? undefined}
         onChange={(value: string) => formField.onChange(value)}
+        size={FORM_SIZE}
         hideLabel
       />
     )
@@ -57,6 +60,7 @@ export function SelectFieldRenderer({
       {...selectBaseProps}
       value={(formField.value as string) ?? undefined}
       onChange={(value: string) => formField.onChange(value)}
+      size={FORM_SIZE}
       hideLabel
     />
   )

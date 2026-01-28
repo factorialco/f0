@@ -22,7 +22,6 @@ import { SelectFieldRenderer } from "./select/SelectFieldRenderer"
 import { SwitchFieldRenderer } from "./switch/SwitchFieldRenderer"
 import { TextFieldRenderer } from "./text/TextFieldRenderer"
 import { TextareaFieldRenderer } from "./textarea/TextareaFieldRenderer"
-import { ToggleFieldRenderer } from "./toggle/ToggleFieldRenderer"
 
 interface FieldRendererProps {
   field: FieldDefinition
@@ -48,8 +47,6 @@ function renderFieldInput(
       return <CheckboxFieldRenderer field={field} formField={formField} />
     case "switch":
       return <SwitchFieldRenderer field={field} formField={formField} />
-    case "toggle":
-      return <ToggleFieldRenderer field={field} formField={formField} />
     default:
       return null
   }
