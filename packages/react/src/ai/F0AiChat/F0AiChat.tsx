@@ -116,7 +116,7 @@ const F0AiChatComponent = () => {
 
   const InputComponent = useCallback(
     ({ ...props }: InputProps) => (
-      <div className="m-[16px] mt-2">
+      <div className="m-[16px]">
         <ChatTextarea {...props} />
       </div>
     ),
