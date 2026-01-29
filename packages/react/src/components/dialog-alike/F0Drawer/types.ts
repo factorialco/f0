@@ -9,14 +9,3 @@ export type DrawerSize = (typeof drawerSizes)[number]
 export type F0DrawerAction = DialogAlikeAction
 
 export type F0DrawerActionsProps = DialogAlikeActionsProps
-
-/**
- * The levels of the alert.
- */
-export const dialogNotificationTypes = [
-  "info",
-  "warning",
-  "critical",
-  "positive",
-] as const
-export type DialogNotificationType = (typeof dialogNotificationTypes)[number]

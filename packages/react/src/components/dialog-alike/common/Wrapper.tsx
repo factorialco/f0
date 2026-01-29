@@ -1,6 +1,5 @@
 import { cva } from "cva"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import { useMediaQuery } from "usehooks-ts"
 
 import { cn } from "@/lib/utils"
 import { Dialog, DialogContent } from "@/ui/Dialog"
@@ -8,11 +7,7 @@ import { Drawer, DrawerContent, DrawerOverlay } from "@/ui/drawer"
 
 import { DialogWrapperProvider } from "./DialogWrapperProvider"
 import { DialogAlikeSize } from "./types"
-
-export const useIsSmallScreen = () =>
-  useMediaQuery("(max-width: 560px)", {
-    initializeWithValue: false,
-  })
+import { useIsSmallScreen } from "./utils"
 
 const dialogWrapperClassName = cva({
   variants: {
@@ -188,7 +183,7 @@ export const DialogWrapper = ({
           />
           <DrawerContent
             ref={setContentRef}
-            className="max-h-100 bg-f1-background"
+            className="max-h-full bg-f1-background"
           >
             {children}
           </DrawerContent>

@@ -1,4 +1,10 @@
-import { createContext, useContext, useMemo, useState } from "react"
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+} from "react"
 import { createPortal } from "react-dom"
 
 import { Dialogs } from "@/lib/providers/dialogs/components/Dialogs"
@@ -27,20 +33,20 @@ export const DialogsLayoutProvider = ({
 }: DialogsLayoutProviderProps) => {
   const [dialogs, setDialogs] = useState<DialogDefinitionProviderItem[]>([])
 
-  const addDialog = (dialog: DialogDefinitionProviderItem) => {
+  const addDialog = useCallback((dialog: DialogDefinitionProviderItem) => {
     setDialogs((prev) => [...prev, dialog])
-  }
+  }, [])
 
-  const removeDialog = (id: DialogId) => {
+  const removeDialog = useCallback((id: DialogId) => {
     setDialogs((prev) => prev.filter((d) => d.id !== id))
-  }
+  }, [])
 
   const contextValue = useMemo<DialogsLayoutContextValue>(
     () => ({
       addDialog,
       removeDialog,
     }),
-    [dialogs, setDialogs]
+    [addDialog, removeDialog]
   )
 
   return (

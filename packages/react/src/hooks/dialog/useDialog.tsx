@@ -172,13 +172,13 @@ export const useDialog = (): UseDialogReturn => {
 
     if (onCloseDialog) {
       // Call the callback to resolve the promise
+      // This will also clean up the callback reference and remove the dialog
       onCloseDialog()
-      // Clean up the callback reference
-      dialogCallbacksRef.current.delete(id)
+    } else {
+      // If callback doesn't exist (shouldn't happen normally, but handle gracefully),
+      // still remove the dialog from the list
+      removeDialog(id)
     }
-
-    // Remove the dialog from the list
-    removeDialog(id)
   }
 
   return {

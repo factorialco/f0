@@ -389,7 +389,7 @@ describe("useDialog", () => {
 
       const promise = result.current.alert({
         title: "Alert Title",
-        message: "Alert Message",
+        msg: "Alert Message",
       })
 
       await waitFor(() => {
@@ -412,7 +412,7 @@ describe("useDialog", () => {
     it("should use default OK button label from i18n", async () => {
       const { result } = zeroRenderHook(() => useDialog())
 
-      result.current.alert({ title: "Title", message: "Message" })
+      result.current.alert({ title: "Title", msg: "Message" })
 
       await waitFor(() => {
         expect(mockAddDialog).toHaveBeenCalled()
@@ -427,7 +427,7 @@ describe("useDialog", () => {
 
       const promise = result.current.alert({
         title: "Title",
-        message: "Message",
+        msg: "Message",
         confirm: {
           label: "Custom OK",
           value: "custom-value",
@@ -456,7 +456,7 @@ describe("useDialog", () => {
 
       result.current.alert({
         title: "Title",
-        message: "Message",
+        msg: "Message",
         id: "custom-alert-id",
       })
 
@@ -475,7 +475,7 @@ describe("useDialog", () => {
 
       const promise = result.current.alert({
         title: "Title",
-        message: "Message",
+        msg: "Message",
         confirm: {
           value: "alert-result",
         },
@@ -502,7 +502,7 @@ describe("useDialog", () => {
 
       const promise = result.current.confirm({
         title: "Confirm Title",
-        message: "Confirm Message",
+        msg: "Confirm Message",
       })
 
       await waitFor(() => {
@@ -525,7 +525,7 @@ describe("useDialog", () => {
     it("should use default OK and Cancel labels from i18n", async () => {
       const { result } = zeroRenderHook(() => useDialog())
 
-      result.current.confirm({ title: "Title", message: "Message" })
+      result.current.confirm({ title: "Title", msg: "Message" })
 
       await waitFor(() => {
         expect(mockAddDialog).toHaveBeenCalled()
@@ -542,7 +542,7 @@ describe("useDialog", () => {
 
       const promise = result.current.confirm({
         title: "Title",
-        message: "Message",
+        msg: "Message",
         confirm: {
           label: "Yes",
           value: "yes",
@@ -577,7 +577,7 @@ describe("useDialog", () => {
 
       result.current.confirm({
         title: "Title",
-        message: "Message",
+        msg: "Message",
         id: "custom-confirm-id",
       })
 
@@ -596,7 +596,7 @@ describe("useDialog", () => {
 
       const promise = result.current.confirm({
         title: "Title",
-        message: "Message",
+        msg: "Message",
       })
 
       await waitFor(() => {
