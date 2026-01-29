@@ -1,12 +1,12 @@
-import { bk as za, bl as j6, bm as H6, bn as V6, bo as W6, bp as q6, bq as Kc, br as U6, bs as G6, bt as K6, m as ae, bu as ak, bv as J6, bw as Y6, g as cd, bx as lk, by as Q6, bz as X6, D as dk, bA as cg, bB as fl, bC as Z6, u as Ne, bD as fk, bE as ck, bF as uk, bG as hk, c as A, bH as pk, n as st, bI as mk, a as Vi, bJ as Qp, bK as gk, A as Je, F as me, bL as yk, bM as vk, B as cn, bN as ch, bO as bk, z as Q, aO as uo, S as U, bP as Qn, bQ as eC, bR as tC, bS as ra, aF as kk, bT as xk, Z as Xn, aN as Xp, bU as In, aP as Zp, aM as hs, aJ as nC, bV as br, f as Le, aL as kr, bW as wk, bX as iC, bY as ug, bZ as Vs, b_ as em, b$ as Ba, c0 as ud, c1 as rC, c2 as _k, c3 as sC, c4 as tm, c5 as sa, c6 as gn, c7 as oC, c8 as aC, c9 as nr, ca as Jc, cb as lC, cc as Ro, cd as Ns, ce as dC, cf as Ck, cg as fC, ch as cC, ci as uC, cj as hC, O as yn, w as vt, b2 as Sk, bb as Nk, V as nm, e as es, ck as pC, cl as Yc, cm as ir, cn as im, co as hg, cp as pg, cq as mg, cr as mC, P as Ff, l as Pf, o as $f, aC as ja, ag as hd, d as Ha, cs as Ek, C as $n, ae as zi, ct as Tk, cu as gC, cv as Ak, ac as Un, q as Gn, a9 as rm, aa as Mk, v as pd, a7 as ho, cw as yC, cx as Ok, cy as Dk, cz as Va, cA as sm, aQ as oa, al as aa, cB as vC, cC as Ik, cD as bC, cE as kC, cF as xC, cG as Lk, cH as wC, cI as Rk, cJ as _C, cK as CC, cL as SC, cM as gg, cN as Fk, cO as NC, cP as uh, cQ as EC, cR as TC, aB as zf, T as Pk, aE as AC, bg as Wa, aD as MC, cS as $k, U as xr, y as zr, aT as md, bi as hh, b3 as Bf, aY as OC, ad as DC, a8 as zk, cT as om, cU as Bk, bd as IC, bf as LC, b9 as jk, cV as RC, cW as Hk, cX as FC, cY as PC, cZ as $C, c_ as zC, c$ as BC, d0 as jC, ba as HC, d1 as VC, ap as WC, aq as qC, ax as jf, av as am, d2 as lm, aw as Vk, x as UC, ar as gd, d3 as GC, b5 as KC, aG as ph, d4 as JC, d5 as YC, d6 as QC, b as Wk, am as XC, au as ZC, W as eS, X as tS, Y as nS, d7 as qa, d8 as dm, af as fm, d9 as cm, da as Ua, db as iS, b6 as qk, dc as rS, dd as Uk, de as sS, df as oS, aZ as aS, a_ as lS, aR as dS, aK as fS, dg as Gk, dh as cS } from "./index-CKCXYV4b.js";
-import { dk as yQ, dj as vQ, di as bQ, dq as kQ, dr as xQ, dm as wQ, dl as _Q, dp as CQ, ab as SQ, dn as NQ } from "./index-CKCXYV4b.js";
-import { u as Kk, F as Jk, g as uS, h as Yk, i as Qk, j as Xk, k as um, l as Zk, m as Hf, n as hS, o as pS, p as hm, q as ps, r as mS, s as ex, t as pm, I as tx, v as gS, w as yS, x as vS, y as Vf, z as nx, B as ix, C as yg, D as bS, E as kS, b as xS, a as wS, G as _S, J as CS, K as SS, L as NS, M as ES, N as rx, O as sx, P as TS, Q as AS, R as vg, S as MS, T as OS, U as DS, V as IS, W as ox, X as bg, Y as LS, Z as mh, _ as ax, $ as lx, a0 as dx, a1 as RS, a2 as FS, a3 as PS, a4 as $S, a5 as fx, a6 as cx, a7 as ux, a8 as hx, a9 as zS, aa as px, ab as mx, ac as BS, ad as gx, ae as jS, af as HS, ag as VS, ah as WS, ai as kg, aj as xg, ak as wg, al as qS } from "./AiChatTranslationsProvider-CrWVPRrf.js";
-import { A as TQ, an as AQ, d as MQ, c as OQ, H as DQ, am as IQ, f as LQ } from "./AiChatTranslationsProvider-CrWVPRrf.js";
+import { bn as za, bo as j6, bp as H6, bq as V6, br as W6, bs as q6, bt as Kc, bu as U6, bv as G6, bw as K6, m as ae, bx as ak, by as J6, bz as Y6, g as cd, bA as lk, bB as Q6, bC as X6, D as dk, bD as cg, bE as fl, bF as Z6, u as Ne, bG as fk, bH as ck, bI as uk, bJ as hk, c as A, bK as pk, n as st, bL as mk, a as Vi, bM as Qp, bN as gk, A as Je, F as me, bO as yk, bP as vk, B as cn, bQ as ch, bR as bk, z as Q, aO as uo, S as U, bS as Qn, bT as eC, bU as tC, bV as ra, aF as kk, bW as xk, Z as Xn, b7 as wk, aN as Xp, bX as In, aP as Zp, aM as hs, aJ as nC, bY as br, f as Le, aL as kr, bZ as _k, b_ as iC, b$ as ug, c0 as Vs, c1 as em, c2 as Ba, c3 as ud, c4 as rC, c5 as Ck, c6 as sC, c7 as tm, c8 as sa, c9 as gn, ca as oC, cb as aC, cc as nr, cd as Jc, ce as lC, cf as Ro, cg as Ns, ch as dC, ci as Sk, cj as fC, ck as cC, cl as uC, cm as hC, O as yn, w as vt, b2 as Nk, be as Ek, V as nm, e as es, cn as pC, co as Yc, cp as ir, cq as im, cr as hg, cs as pg, ct as mg, cu as mC, P as Ff, l as Pf, o as $f, aC as ja, ag as hd, d as Ha, cv as Tk, C as $n, ae as zi, cw as Ak, cx as gC, cy as Mk, ac as Un, q as Gn, a9 as rm, aa as Ok, v as pd, a7 as ho, cz as yC, cA as Dk, cB as Ik, cC as Va, cD as sm, bb as zf, aQ as oa, al as aa, cE as vC, cF as Lk, cG as bC, cH as kC, cI as xC, cJ as Rk, cK as wC, cL as Fk, cM as _C, cN as CC, cO as SC, cP as gg, cQ as Pk, cR as NC, cS as uh, cT as EC, cU as TC, aB as Bf, T as $k, aE as AC, bj as Wa, aD as MC, cV as zk, U as xr, y as zr, aT as md, bl as hh, b3 as jf, aY as OC, ad as DC, a8 as Bk, cW as om, cX as jk, bg as IC, bi as LC, bc as Hk, cY as RC, cZ as Vk, c_ as FC, c$ as PC, d0 as $C, d1 as zC, d2 as BC, d3 as jC, bd as HC, d4 as VC, ap as WC, aq as qC, ax as Hf, av as am, d5 as lm, aw as Wk, x as UC, ar as gd, d6 as GC, b6 as KC, aG as ph, d7 as JC, d8 as YC, d9 as QC, b as qk, am as XC, au as ZC, W as eS, X as tS, Y as nS, da as qa, db as dm, af as fm, dc as cm, dd as Ua, de as iS, b8 as Uk, df as rS, dg as Gk, dh as sS, di as oS, aZ as aS, a_ as lS, aR as dS, aK as fS, dj as Kk, dk as cS } from "./index-CLq1eOyk.js";
+import { dn as yQ, dm as vQ, dl as bQ, dt as kQ, du as xQ, dq as wQ, dp as _Q, ds as CQ, ab as SQ, dr as NQ } from "./index-CLq1eOyk.js";
+import { u as Jk, F as Yk, g as uS, h as Qk, i as Xk, j as um, k as Zk, l as Vf, m as hS, n as pS, o as hm, p as ps, q as mS, r as ex, s as pm, I as tx, t as gS, v as yS, w as vS, x as nx, y as ix, z as yg, B as bS, C as kS, b as xS, a as wS, D as _S, E as CS, G as SS, J as NS, K as ES, L as rx, M as sx, N as TS, O as AS, P as vg, Q as MS, R as OS, S as DS, T as IS, U as ox, V as bg, W as LS, X as mh, Y as ax, Z as lx, _ as dx, $ as RS, a0 as FS, a1 as PS, a2 as $S, a3 as fx, a4 as cx, a5 as ux, a6 as hx, a7 as zS, a8 as px, a9 as mx, aa as BS, ab as gx, ac as jS, ad as HS, ae as VS, af as WS, ag as kg, ah as xg, ai as wg, aj as qS } from "./AiChatTranslationsProvider-DXe3ZTff.js";
+import { A as TQ, al as AQ, d as MQ, c as OQ, H as DQ, ak as IQ, f as LQ } from "./AiChatTranslationsProvider-DXe3ZTff.js";
 import { jsx as u, jsxs as b, Fragment as _e } from "react/jsx-runtime";
 import * as Xe from "react";
 import G, { useContext as zn, useState as P, useEffect as ne, createContext as Zn, forwardRef as ye, useRef as re, PureComponent as US, useTransition as GS, useLayoutEffect as ms, useId as Wf, useCallback as Te, useMemo as J, memo as Ga, Fragment as hi, isValidElement as yx, cloneElement as mm, createElement as gh, useDebugValue as vx, createRef as KS, version as _g, useImperativeHandle as qf, Children as bx } from "react";
-import { f as Ls, aE as la, j as cl, aF as JS, b as Qc, aG as YS, A as QS, d as ul, i as XS, m as ZS, G as e9, g as Cg, aH as t9, l as Sg, aI as n9, p as i9, aJ as kx, aK as xx, aL as r9, aM as yh, C as s9, ax as o9, a4 as ts, D as Ft, t as a9, x as l9, y as d9, F as f9, M as Ng, N as Eg, O as c9, P as u9, am as h9, ad as vh, aN as Uf, a8 as p9, aO as wx, aP as m9, aQ as g9, aR as y9, ah as bh, aS as v9, aT as b9, as as Gf, ai as gm, aU as _x, ag as Cx, a2 as po, aa as k9, aV as x9, aW as w9, aX as _9, a6 as Kf, aY as Jf, aZ as Yf, a7 as Qf, al as ym, a_ as C9, aB as S9, a$ as kh, b0 as N9, b1 as yd, b2 as E9, aC as T9, b3 as A9, aA as Sx, az as M9, ay as O9, b4 as D9, b5 as I9, ac as L9, b6 as R9, aD as Nx, b7 as Ex, aq as Tx, b8 as F9, b9 as P9, ba as $9, a9 as z9, R as B9, T as j9, V as H9, W as V9, Z as W9, U as q9, bb as Tg, bc as U9, bd as G9, n as K9 } from "./DataCollectionStorageProvider-C-DobgdZ.js";
-import { ab as FQ, a3 as PQ, be as $Q, bf as zQ, an as BQ, ao as jQ } from "./DataCollectionStorageProvider-C-DobgdZ.js";
+import { f as Ls, aE as la, j as cl, aF as JS, b as Qc, aG as YS, A as QS, d as ul, i as XS, m as ZS, G as e9, g as Cg, aH as t9, l as Sg, aI as n9, p as i9, aJ as kx, aK as xx, aL as r9, aM as yh, C as s9, ax as o9, a4 as ts, D as Ft, t as a9, x as l9, y as d9, F as f9, M as Ng, N as Eg, O as c9, P as u9, am as h9, ad as vh, aN as Uf, a8 as p9, aO as wx, aP as m9, aQ as g9, aR as y9, ah as bh, aS as v9, aT as b9, as as Gf, ai as gm, aU as _x, ag as Cx, a2 as po, aa as k9, aV as x9, aW as w9, aX as _9, a6 as Kf, aY as Jf, aZ as Yf, a7 as Qf, al as ym, a_ as C9, aB as S9, a$ as kh, b0 as N9, b1 as yd, b2 as E9, aC as T9, b3 as A9, aA as Sx, az as M9, ay as O9, b4 as D9, b5 as I9, ac as L9, b6 as R9, aD as Nx, b7 as Ex, aq as Tx, b8 as F9, b9 as P9, ba as $9, a9 as z9, R as B9, T as j9, V as H9, W as V9, Z as W9, U as q9, bb as Tg, bc as U9, bd as G9, n as K9 } from "./DataCollectionStorageProvider-vs3_jExz.js";
+import { ab as FQ, a3 as PQ, be as $Q, bf as zQ, an as BQ, ao as jQ } from "./DataCollectionStorageProvider-vs3_jExz.js";
 import vm from "react-dom";
 import './experimental.css';function Ax(t) {
   const e = za(() => j6(t)), { isStatic: n } = zn(H6);
@@ -823,7 +823,7 @@ function P8({ breadcrumbs: t, append: e }) {
   }, `breadcrumb-${t.at(-1)?.id ?? 0}`);
 }
 const Fx = ({ className: t, disabled: e }) => {
-  const { enabled: n, setOpen: i, open: r } = Kk(), s = Ne(), [o, a] = P(!1);
+  const { enabled: n, setOpen: i, open: r } = Jk(), s = Ne(), [o, a] = P(!1);
   return n ? u("div", {
     className: "flex items-center",
     children: u(fk, {
@@ -862,7 +862,7 @@ const Fx = ({ className: t, disabled: e }) => {
                   transitionTimingFunction: "cubic-bezier(0.175,0.885,0.32,1.5)"
                 },
                 children: u("div", {
-                  children: u(Jk, {
+                  children: u(Yk, {
                     size: "sm",
                     background: r ? "white" : void 0,
                     hover: o
@@ -1217,7 +1217,7 @@ const Bg = ae.create(me), jg = {
         whileTap: {
           scale: 0.8
         },
-        icon: Yk,
+        icon: Qk,
         className: "outline-none",
         variants: jg,
         initial: i ? "enterFromFavorite" : "initial",
@@ -1258,7 +1258,7 @@ const Bg = ae.create(me), jg = {
       asChild: !0,
       children: u(cn, {
         variant: "outline",
-        icon: Qk,
+        icon: Xk,
         hideLabel: !0,
         label: e,
         pressed: v,
@@ -1437,7 +1437,7 @@ const Bg = ae.create(me), jg = {
   title: t,
   description: i,
   icon: u(me, {
-    icon: Qk,
+    icon: Xk,
     size: "lg",
     className: "block"
   }),
@@ -1589,7 +1589,7 @@ function sY({ module: t, statusTag: e = void 0, breadcrumbs: n = [], actions: i 
               hideLabel: !0,
               onClick: () => d(),
               label: "Open main menu",
-              icon: Xk
+              icon: wk
             })
           })
         })
@@ -1936,7 +1936,7 @@ function a7(t) {
   return t.replace(/[|\\{}()[\]^$+*?.]/g, "\\$&").replace(/-/g, "\\x2d");
 }
 function l7(t, e, n) {
-  const r = wk((n || {}).ignore || []), s = d7(e);
+  const r = _k((n || {}).ignore || []), s = d7(e);
   let o = -1;
   for (; ++o < s.length; )
     iC(t, "text", a);
@@ -2536,7 +2536,7 @@ function nN(t, e) {
   return rC(t, function(i) {
     if ("value" in i && /\r?\n|\r/.test(i.value) || i.type === "break")
       return n = !0, sC;
-  }), !!((!t.depth || t.depth < 3) && _k(t) && (e.options.setext || n));
+  }), !!((!t.depth || t.depth < 3) && Ck(t) && (e.options.setext || n));
 }
 function iN(t, e, n, i) {
   const r = Math.max(Math.min(6, t.depth || 1), 1), s = n.createTracker(i);
@@ -2647,7 +2647,7 @@ function aN() {
   return "`";
 }
 function Qx(t, e) {
-  const n = _k(t);
+  const n = Ck(t);
   return !!(!e.options.resourceLink && // If there’s a url…
   t.url && // And there’s a no title…
   !t.title && // And the content of `node` is a single text node…
@@ -2823,7 +2823,7 @@ function mN(t, e, n, i) {
 }
 const gN = (
   /** @type {(node?: unknown) => node is Exclude<PhrasingContent, Html>} */
-  wk([
+  _k([
     "break",
     "delete",
     "emphasis",
@@ -3843,7 +3843,7 @@ function mE(t) {
   r.push(hE(n)), s.push(LN()), o.push(RN(n));
 }
 const gE = fC().use(cC).use(mE).use(uC).use(hC), yE = ye(function({ content: e, className: n, format: i = "html", ...r }, s) {
-  const o = J(() => Ck.sanitize(i === "markdown" ? String(gE.processSync(e)) : e, {
+  const o = J(() => Sk.sanitize(i === "markdown" ? String(gE.processSync(e)) : e, {
     ADD_ATTR: ["target"],
     ALLOWED_ATTR: ["href", "target", "rel", "class"]
   }), [i, e]), a = /<[^>]*>/.test(o);
@@ -3954,8 +3954,8 @@ const uw = vt(cw, kE), hw = Vi({
   }
 }), Jg = {
   positive: nm,
-  warning: Nk,
-  info: Sk
+  warning: Ek,
+  info: Nk
 }, Yg = {
   positive: "text-f1-foreground-positive font-medium",
   warning: "text-f1-foreground-warning font-medium",
@@ -4091,7 +4091,7 @@ const oY = vt(pw, _E), CE = ({ data: t, dataConfig: e, scaleMin: n, scaleMax: i,
       })]
     })
   });
-}, aY = a9(Le("RadarChart", CE)), SE = ae.create(Jk), NE = () => {
+}, aY = a9(Le("RadarChart", CE)), SE = ae.create(Yk), NE = () => {
   const t = Ne();
   return b("div", {
     className: "flex flex-row items-center gap-1 rounded-full border border-solid border-f1-border-secondary bg-f1-background px-2 py-1.5 pr-2.5 shadow-md",
@@ -4404,7 +4404,7 @@ const Sm = () => {
   return [
     {
       label: e("coCreationForm.questionTypes.rating"),
-      icon: Yk,
+      icon: Qk,
       questionType: "rating"
     },
     {
@@ -4424,7 +4424,7 @@ const Sm = () => {
     },
     {
       label: e("coCreationForm.questionTypes.longText"),
-      icon: Hf,
+      icon: Vf,
       questionType: "longText"
     },
     {
@@ -8085,7 +8085,7 @@ const MT = ({ option: t, selected: e, onClick: n, onChangeLabel: i, isEditMode: 
       })]
     })
   });
-}, Uw = Xe.forwardRef(({ className: t, label: e, labelIcon: n, icon: i, error: r, hideLabel: s, maxLength: o, clearable: a, disabled: l, value: d, cols: f, rows: c, status: h, hint: p, onChange: m, placeholder: g, ...y }, v) => u(Ek, {
+}, Uw = Xe.forwardRef(({ className: t, label: e, labelIcon: n, icon: i, error: r, hideLabel: s, maxLength: o, clearable: a, disabled: l, value: d, cols: f, rows: c, status: h, hint: p, onChange: m, placeholder: g, ...y }, v) => u(Tk, {
   label: e,
   labelIcon: n,
   icon: i,
@@ -8570,7 +8570,7 @@ function UT({ title: t, isActive: e = !1, onClick: n }) {
   });
 }
 function GT({ author: t, timestamp: e, onClick: n, isActive: i }) {
-  const { locale: r } = Tk(), s = gC(r), o = Ak(e, "PPPp", {
+  const { locale: r } = Ak(), s = gC(r), o = Mk(e, "PPPp", {
     locale: s
   }), a = `${t.firstName} ${t.lastName}`;
   return b("button", {
@@ -8631,7 +8631,7 @@ function JT({ avatar: t }) {
   return t.type === "emoji" ? u(rm, {
     emoji: t.emoji,
     size: "md"
-  }) : t.type === "file" ? u(Mk, {
+  }) : t.type === "file" ? u(Ok, {
     file: t.file,
     size: "md"
   }) : t.type === "icon" ? u(pd, {
@@ -8867,7 +8867,7 @@ const ZT = ({ entity: t, selected: e, onSelect: n, onRemove: i, marginLeft: r, s
       className: "flex w-full flex-row flex-wrap items-center gap-0 rounded-md border pl-2.5 pr-1",
       children: [u(Q, {
         hideLabel: !0,
-        icon: e ? Ok : Dk,
+        icon: e ? Dk : Ik,
         onClick: () => l(!e),
         label: e ? "Collapse" : "Expand",
         size: "sm",
@@ -8923,7 +8923,7 @@ const Cy = ({ label: t, onCreate: e, goToFirst: n, goToLast: i }) => u("div", {
       hideLabel: !0,
       label: t,
       onClick: () => e(),
-      icon: Vf,
+      icon: zf,
       size: "sm",
       variant: "outline"
     }), u("div", {
@@ -9267,7 +9267,7 @@ const Cy = ({ label: t, onCreate: e, goToFirst: n, goToLast: i }) => u("div", {
   className: "pr-2 pt-1.5",
   children: u(vC, {
     className: A("max-w-54 w-fit gap-1 text-ellipsis break-all border-[1px] border-solid border-f1-border-secondary py-[1px] pl-[1px]", "rounded-full", i ? "pl-2" : "pl-0"),
-    left: !i && u(Ik, {
+    left: !i && u(Lk, {
       src: t.subAvatar,
       name: t.subName,
       size: "xs",
@@ -9385,7 +9385,7 @@ const Cy = ({ label: t, onCreate: e, goToFirst: n, goToLast: i }) => u("div", {
       subAvatar: M.avatar
     }
   })), [k, n]), _ = C.length === 0 ? void 0 : C.length === 1 ? C[0].subItem.subName : C.length + " " + e, N = C.length === 1 ? C[0].subItem.subName : void 0;
-  return u(Ek, {
+  return u(Tk, {
     onClickContent: c,
     role: "combobox",
     label: s,
@@ -9740,8 +9740,8 @@ function dA(t, e) {
   }, 1 / 0)), Math.min(n, i);
 }
 var vo = "ToggleGroup", [Yw] = xC(vo, [
-  Lk
-]), Qw = Lk(), Tm = G.forwardRef((t, e) => {
+  Rk
+]), Qw = Rk(), Tm = G.forwardRef((t, e) => {
   const { type: n, ...i } = t;
   if (n === "single")
     return /* @__PURE__ */ u(fA, { ...i, ref: e });
@@ -9757,7 +9757,7 @@ var [Xw, Zw] = Yw(vo), fA = G.forwardRef((t, e) => {
     onValueChange: r = () => {
     },
     ...s
-  } = t, [o, a] = Rk({
+  } = t, [o, a] = Fk({
     prop: n,
     defaultProp: i,
     onChange: r
@@ -9780,7 +9780,7 @@ var [Xw, Zw] = Yw(vo), fA = G.forwardRef((t, e) => {
     onValueChange: r = () => {
     },
     ...s
-  } = t, [o = [], a] = Rk({
+  } = t, [o = [], a] = Fk({
     prop: n,
     defaultProp: i,
     onChange: r
@@ -9877,7 +9877,7 @@ const r2 = Vi({
     variant: "default",
     size: "default"
   }
-}), pA = Xe.forwardRef(({ className: t, variant: e, size: n, ...i }, r) => u(Fk, {
+}), pA = Xe.forwardRef(({ className: t, variant: e, size: n, ...i }, r) => u(Pk, {
   ref: r,
   className: A(r2({
     variant: e,
@@ -9886,7 +9886,7 @@ const r2 = Vi({
   })),
   ...i
 }));
-pA.displayName = Fk.displayName;
+pA.displayName = Pk.displayName;
 const s2 = Xe.createContext({
   size: "default",
   variant: "default"
@@ -11439,7 +11439,7 @@ const iM = ({ link: t, firstName: e, lastName: n, src: i, onClick: r, canReact: 
   }, [o]);
   const m = (k) => {
     h(k), a?.(k);
-  }, g = zf(), { canvasRef: y, handleMouseEnter: v, handleMouseLeave: w } = nM(g), x = ja({
+  }, g = Bf(), { canvasRef: y, handleMouseEnter: v, handleMouseLeave: w } = nM(g), x = ja({
     emoji: ZA[l],
     size: "sm"
   });
@@ -11516,7 +11516,7 @@ const iM = ({ link: t, firstName: e, lastName: n, src: i, onClick: r, canReact: 
   className: "flex w-full flex-col items-start justify-between gap-4 rounded-md bg-gradient-to-r from-[#F5A51C]/30 via-[#E51943]/30 to-[#5596F6]/30 px-3 py-3 ring-1 ring-inset ring-f1-border-secondary sm:flex-row sm:items-center sm:px-4",
   children: [b("div", {
     className: "flex flex-col items-start gap-3 sm:flex-row sm:items-center",
-    children: [u(Pk, {
+    children: [u($k, {
       module: "kudos",
       size: "lg"
     }), b("div", {
@@ -11555,7 +11555,7 @@ function sM({ emoji: t, initialCount: e, hasReacted: n = !1, users: i, onInterac
       emoji: t,
       size: "md"
     }),
-    children: u($k, {
+    children: u(zk, {
       value: a,
       spinTiming: {
         duration: 200,
@@ -11598,7 +11598,7 @@ const aM = Le("Reactions", oM), Vy = (t) => {
     i.removeEventListener("click", Vy), i.addEventListener("click", Vy);
   }), u("div", {
     dangerouslySetInnerHTML: {
-      __html: Ck.sanitize(t)
+      __html: Sk.sanitize(t)
     },
     className: A(n, e && "line-clamp-5")
   });
@@ -11988,7 +11988,7 @@ const aM = Le("Reactions", oM), Vy = (t) => {
   });
 }, gM = {
   warning: {
-    icon: Nk,
+    icon: Ek,
     iconColor: "warning",
     textColor: "text-f1-foreground-warning"
   },
@@ -12115,7 +12115,7 @@ function bM({ item: t }) {
           label: t.info.title,
           description: t.info.description,
           children: u(me, {
-            icon: Bf,
+            icon: jf,
             size: "sm"
           })
         })
@@ -12614,7 +12614,7 @@ const AM = Le("DataList.Item", z2), B2 = ye(({ action: t, avatarUrl: e, firstNam
 B2.displayName = "PersonItem";
 const MM = Le("PersonItem", B2), j2 = ye(({ avatarUrl: t, name: e, action: n }, i) => u(Qa, {
   ref: i,
-  leftIcon: () => u(zk, {
+  leftIcon: () => u(Bk, {
     name: e,
     size: "xs",
     src: t
@@ -12724,7 +12724,7 @@ const IM = Le("DotTagItem", V2), ac = (t, e) => t && t.type === "copy" ? {
         }), n.info && u(In, {
           label: n.info,
           children: u(me, {
-            icon: Sk,
+            icon: Nk,
             size: "sm",
             className: "text-f1-icon-secondary"
           })
@@ -12813,7 +12813,7 @@ function VM(t, e) {
   }, [t, e, n, i]);
 }
 function WM({ ai: t, aiPromotion: e, children: n, sidebar: i, banner: r }) {
-  const { sidebarState: s, toggleSidebar: o, isSmallScreen: a, setForceFloat: l } = go(), d = zf(), { open: f } = Kk(), { open: c } = Zf(), h = gk(`(max-width: ${yh.xl}px)`, {
+  const { sidebarState: s, toggleSidebar: o, isSmallScreen: a, setForceFloat: l } = go(), d = Bf(), { open: f } = Jk(), { open: c } = Zf(), h = gk(`(max-width: ${yh.xl}px)`, {
     initializeWithValue: !0
   });
   return ne(() => {
@@ -12995,7 +12995,7 @@ const Rh = {
             duration: 0.2
           }
         },
-        children: [u(Ik, {
+        children: [u(Lk, {
           type: "rounded",
           name: [t, e],
           src: n,
@@ -13087,7 +13087,7 @@ function U2({ children: t, header: e, period: n, embedded: i = !1 }) {
           variant: "ghost",
           onClick: () => s(),
           label: "Open main menu",
-          icon: Xk,
+          icon: wk,
           hideLabel: !0
         }), b("div", {
           className: A("flex flex-row items-center", o ? "gap-1.5" : "gap-3"),
@@ -13257,7 +13257,7 @@ const JM = ({ companies: t, selected: e, onChange: n, children: i, additionalOpt
   });
 }, Uy = ({ company: t, withNotification: e = !1 }) => b("div", {
   className: A("flex min-w-0 max-w-full flex-1 items-center gap-2 overflow-hidden rounded text-lg font-semibold text-f1-foreground transition-colors"),
-  children: [u(zk, {
+  children: [u(Bk, {
     name: t?.name?.[0],
     src: t?.logo,
     size: "sm",
@@ -13304,7 +13304,7 @@ function AY({ user: t, options: e, showActivityButton: n = !1, activityButtonSho
           hideLabel: !0
         }), o && u("div", {
           className: "absolute -right-1 -top-1 rounded-full bg-f1-background",
-          children: u(Bk, {
+          children: u(jk, {
             type: "highlight",
             size: "sm",
             icon: sx
@@ -13532,7 +13532,7 @@ const eO = ({ item: t, active: e }) => b("div", {
     children: L
   });
 }, J2 = ({ title: t, isOpen: e = !0, isRoot: n, onCollapse: i, children: r, isDragging: s, wasDragging: o }) => {
-  const [a, l] = P(e), d = zf(), f = () => {
+  const [a, l] = P(e), d = Bf(), f = () => {
     if (s || o?.current) return;
     const c = !a;
     l(c), i?.(c);
@@ -13796,7 +13796,7 @@ function DY({ onClick: t, placeholder: e, shortcut: n = ["cmd", "k"], ...i }) {
       children: [b("div", {
         className: "flex items-center gap-1",
         children: [u(me, {
-          icon: jk,
+          icon: Hk,
           size: "md"
         }), u("span", {
           children: e
@@ -13827,7 +13827,7 @@ const Gy = ({ position: t }) => u(ae.div, {
   className: A("pointer-events-none absolute inset-x-0 z-10 h-3 after:absolute after:inset-x-0 after:h-px after:bg-f1-background-inverse after:opacity-[0.04] after:content-['']", t === "top" ? ["top-0", "bg-gradient-to-b from-f1-background-secondary to-transparent", "after:top-0"] : ["bottom-0", "bg-gradient-to-t from-f1-background-secondary to-transparent", "after:bottom-0"])
 });
 function IY({ header: t, body: e, footer: n, onFooterDropdownClick: i }) {
-  const { sidebarState: r, isSmallScreen: s } = go(), o = zf(), [a, l] = uh({
+  const { sidebarState: r, isSmallScreen: s } = go(), o = Bf(), [a, l] = uh({
     threshold: 1
   }), [d, f] = uh({
     threshold: 1
@@ -14115,7 +14115,7 @@ const vO = (t) => Array.isArray(t) ? t.every((e) => yO(e)) ? t : [{
         className: "dark flex h-8 w-full items-center justify-between gap-2 px-2 sm:h-auto sm:w-fit sm:justify-start sm:pl-2 sm:pr-0",
         children: [b("span", {
           className: "font-medium tabular-nums",
-          children: [u($k, {
+          children: [u(zk, {
             value: n,
             spinTiming: {
               duration: 200,
@@ -14235,7 +14235,7 @@ const vO = (t) => Array.isArray(t) ? t.every((e) => yO(e)) ? t : [{
   const p = Ne(), m = J(() => {
     if (!t || !t.value)
       return [p.date.selectDate];
-    const N = d || Hk[t.granularity];
+    const N = d || Vk[t.granularity];
     return [t.value, Array.isArray(e) ? e[0] : e].filter((T) => T !== void 0).sort((T, S) => T?.from.getTime() - S?.from.getTime()).map((T) => N.toString(T, p, "long"));
   }, [t, p, e, d]), g = J(() => Object.values(m).join(" ⸱ "), [m]), y = (N) => {
     N && n?.(N);
@@ -14316,7 +14316,7 @@ function xO({ onSelect: t, defaultValue: e, presets: n = [], granularities: i = 
   ne(() => {
     x9(d, c) || h(d || e);
   }, [d, e]);
-  const [p, m] = P(), [g, y] = P(!1), v = Tk(), w = f.weekStartsOn ?? v.date?.weekStartsOn ?? $C.Monday, x = J(() => {
+  const [p, m] = P(), [g, y] = P(!1), v = Ak(), w = f.weekStartsOn ?? v.date?.weekStartsOn ?? $C.Monday, x = J(() => {
     const N = c?.granularity ?? "day";
     return zC(w)[N];
   }, [c?.granularity, w]), k = (N) => {
@@ -14388,7 +14388,7 @@ const _O = (t) => "date" in t, CO = {
     const i = Array.isArray(e.granularity) ? e.granularity : [e.granularity], r = e.defaultGranularity || i[0] || "day";
     if (t || (t = /* @__PURE__ */ new Date()), _O(t))
       return t;
-    const s = Hk[r];
+    const s = Vk[r];
     return {
       value: s.toRange(t),
       valueString: s.toString(t, n),
@@ -14420,7 +14420,7 @@ const _O = (t) => "date" in t, CO = {
   icon: HC,
   className: "animate-spin"
 }) : u(me, {
-  icon: jk,
+  icon: Hk,
   className: "text"
 }), SO = ({ value: t, onChange: e, loading: n = !1 }) => {
   const [i, r] = P(!1), s = Wf(), o = re(null), a = re(null), l = Ne(), d = () => {
@@ -14907,7 +14907,7 @@ const IO = Le("OnePagination", DO), Pm = ({ paginationInfo: t, setPage: e, class
         animate: "visible",
         exit: "hidden",
         custom: w,
-        variants: Vk({
+        variants: Wk({
           delay: 0.02,
           duration: 0.3
         }),
@@ -14961,7 +14961,7 @@ const IO = Le("OnePagination", DO), Pm = ({ paginationInfo: t, setPage: e, class
       data: g.records
     });
   }, [y?.total, g.records]);
-  const { selectedItems: x, groupAllSelectedStatus: k, handleSelectItemChange: C, handleSelectGroupChange: _ } = jf({
+  const { selectedItems: x, groupAllSelectedStatus: k, handleSelectItemChange: C, handleSelectGroupChange: _ } = Hf({
     data: g,
     paginationInfo: y,
     source: d,
@@ -15119,7 +15119,7 @@ const zO = (t) => {
     selectedIds: e.flatMap((n) => n.selectedIds)
   };
 }, BO = (t) => {
-  const e = jf({
+  const e = Hf({
     data: t.data || {
       type: "flat",
       records: [],
@@ -15388,7 +15388,7 @@ const $m = (t, e, n, i) => {
         variant: "ghost",
         size: "sm",
         label: "Add",
-        icon: Vf,
+        icon: zf,
         hideLabel: !0,
         onClick: i
       })
@@ -15483,7 +15483,7 @@ function nD({ title: t, items: e, renderCard: n, getKey: i, emptyState: r, fetch
         variant: "ghost",
         size: "md",
         className: "w-full justify-center",
-        icon: Vf,
+        icon: zf,
         label: "Add",
         hideLabel: !0,
         onClick: h
@@ -16373,7 +16373,7 @@ const dD = ({ lanes: t, title: e, description: n, avatar: i, metadata: r, onMove
       data: a.records
     });
   }, [l?.total, a.records]);
-  const { isLoading: p } = n, { loadingIndicatorRef: m } = $m(l, p, c, h), { selectedItems: g, groupAllSelectedStatus: y, handleSelectItemChange: v, handleSelectGroupChange: w } = jf({
+  const { isLoading: p } = n, { loadingIndicatorRef: m } = $m(l, p, c, h), { selectedItems: g, groupAllSelectedStatus: y, handleSelectItemChange: v, handleSelectGroupChange: w } = Hf({
     data: a,
     paginationInfo: l,
     source: n,
@@ -16818,10 +16818,10 @@ const cc = 32, Ld = 24, Kl = 18, ED = "1px", sr = 8, _3 = 32, C3 = 4, zh = 40, T
         onClick: (p) => {
           o && (p.stopPropagation(), i?.onExpand?.());
         },
-        children: o && (i?.expanded ? u(Ok, {
+        children: o && (i?.expanded ? u(Dk, {
           className: "pointer-events-none shrink-0",
           size: Kl
-        }) : u(Dk, {
+        }) : u(Ik, {
           className: "pointer-events-none shrink-0",
           size: Kl
         }))
@@ -16939,7 +16939,7 @@ function si({ children: t, href: e, onClick: n, width: i = "auto", firstCell: r 
     })]
   });
 }
-function Jl({ children: t, width: e = "auto", sortState: n = "none", onSortClick: i, info: r, infoIcon: s = Bf, sticky: o, hidden: a = !1, align: l = "left", className: d }) {
+function Jl({ children: t, width: e = "auto", sortState: n = "none", onSortClick: i, info: r, infoIcon: s = jf, sticky: o, hidden: a = !1, align: l = "left", className: d }) {
   const { isScrolled: f, isScrolledRight: c } = w3(), h = o?.left !== void 0, p = o?.right !== void 0, m = h || p, g = o?.left ?? 0, y = o?.right ?? 0, v = i || r, w = u(_e, {
     children: b("div", {
       className: A("flex items-center whitespace-nowrap", v && "gap-1", l === "right" && "flex-row-reverse"),
@@ -17583,7 +17583,7 @@ const A3 = (t, e, n) => {
       data: h.records
     });
   }, [p?.total, h.records]);
-  const N = J(() => n, [n]), M = (Z, W) => "id" in Z && Z.id !== void 0 && Z.id !== null ? `id:${String(Z.id)}` : `index:${String(W)}`, { selectedItems: T, allSelectedStatus: S, groupAllSelectedStatus: L, handleSelectItemChange: E, handleSelectAll: D, handleSelectGroupChange: R } = jf({
+  const N = J(() => n, [n]), M = (Z, W) => "id" in Z && Z.id !== void 0 && Z.id !== null ? `id:${String(Z.id)}` : `index:${String(W)}`, { selectedItems: T, allSelectedStatus: S, groupAllSelectedStatus: L, handleSelectItemChange: E, handleSelectAll: D, handleSelectGroupChange: R } = Hf({
     data: h,
     paginationInfo: p,
     source: e,
@@ -17685,7 +17685,7 @@ const A3 = (t, e, n) => {
               })]
             }, `group-header-${Z.key}`), u(Je, {
               children: d && (!se || oe[Z.key]) && Z.records.map((ke, de) => u(d, {
-                variants: Vk(),
+                variants: Wk(),
                 initial: se ? "hidden" : "visible",
                 animate: "visible",
                 exit: "hidden",
@@ -17796,7 +17796,7 @@ const A3 = (t, e, n) => {
   },
   list: {
     name: "List",
-    icon: Hf,
+    icon: Vf,
     settings: {
       default: {}
     },
@@ -18112,7 +18112,7 @@ const A3 = (t, e, n) => {
     value: ee && B,
     delay: 100
   });
-  Wk(() => {
+  qk(() => {
     r?.({
       filters: c,
       sortings: E,
@@ -18253,7 +18253,7 @@ const A3 = (t, e, n) => {
       ];
     })
   ) : {});
-  Wk(() => {
+  qk(() => {
     s && l(s);
   }, [s]);
   const d = J(() => r, e);
@@ -18335,7 +18335,7 @@ const uI = Le("Dialog", I3), PY = $n({
     ref: s,
     className: A("flex w-fit max-w-40 flex-row items-center gap-2 overflow-hidden rounded-md bg-f1-background-tertiary p-0.5 pr-2", i),
     ...r,
-    children: [u(Mk, {
+    children: [u(Ok, {
       file: t
     }), u(In, {
       label: t.name,
@@ -40651,7 +40651,7 @@ const LV = ({ editor: t, disabled: e }) => {
                 className: A("flex w-80 appearance-none items-center gap-2 rounded border-0 bg-f1-background py-1 pl-2 pr-1 ring-1 ring-inset ring-f1-border transition-all placeholder:text-f1-foreground-tertiary", t.isActive("link") ? "cursor-auto" : st("focus:ring-f1-border-hover") + "hover:ring-f1-border-hover"),
                 children: [u("div", {
                   className: A("flex items-center justify-center", s.length > 0 ? "w-6" : "w-4"),
-                  children: u(Bk, {
+                  children: u(jk, {
                     icon: s.length > 0 ? l(s) ? kr : LS : bg,
                     type: s ? l(s) ? "positive" : "warning" : "neutral",
                     size: s.length > 0 ? "sm" : "lg"
@@ -40873,7 +40873,7 @@ const LV = ({ editor: t, disabled: e }) => {
     }
   }], c = [{
     key: "bulletList",
-    icon: Hf,
+    icon: Vf,
     label: l.richTextEditor.bulletList,
     active: (x) => x.isActive("bulletList"),
     onClick: (x) => x.chain().focus().toggleBulletList().run(),
@@ -40974,7 +40974,7 @@ const LV = ({ editor: t, disabled: e }) => {
         onClick: () => t.chain().focus().toggleCodeBlock().run(),
         isActive: t.isActive("codeBlock")
       }, {
-        icon: qk,
+        icon: Uk,
         label: l.richTextEditor.divider,
         onClick: () => t.chain().focus().setHorizontalRule().run(),
         isActive: t.isActive("horizontalRule")
@@ -46722,7 +46722,7 @@ const Xb = ({ content: t, anchorRect: e, editor: n }) => {
     },
     children: [u("div", {
       style: i
-    }), u(Uk, {
+    }), u(Gk, {
       asChild: !0,
       children: u("div", {
         style: i
@@ -47669,7 +47669,7 @@ const OG = /(?:^|\s)(!\[(.+|:?)]\((\S+)(?:(?:\s+)["'](\S+)["'])?\))$/, DG = ot.c
         to: s
       }).toggleBulletList().run();
     },
-    icon: Hf
+    icon: Vf
   }, {
     title: e.richTextEditor.orderedList,
     command: (i) => {
@@ -47742,7 +47742,7 @@ const OG = /(?:^|\s)(!\[(.+|:?)]\((\S+)(?:(?:\s+)["'](\S+)["'])?\))$/, DG = ot.c
         to: s
       }).setHorizontalRule().run();
     },
-    icon: qk
+    icon: Uk
   }]
 }], R6 = ye(({ items: t, groups: e, command: n }, i) => {
   const [r, s] = P(0), o = re(null), a = re(null), l = e || [{
@@ -47888,7 +47888,7 @@ const VG = ({ aiBlockConfig: t, translations: e, imageUploadConfig: n }) => Ke.c
             modal: !1,
             children: [u("div", {
               style: f
-            }), u(Uk, {
+            }), u(Gk, {
               asChild: !0,
               children: u("div", {
                 style: f
@@ -48017,7 +48017,7 @@ const VG = ({ aiBlockConfig: t, translations: e, imageUploadConfig: n }) => Ke.c
   }], d = (c) => o.users.find((h) => h.id === c), f = (c) => {
     try {
       const h = new Date(c);
-      return Ak(h, "HH:mm");
+      return Mk(h, "HH:mm");
     } catch (h) {
       return console.error(h), c;
     }
@@ -48406,7 +48406,7 @@ const VG = ({ aiBlockConfig: t, translations: e, imageUploadConfig: n }) => Ke.c
               onClick: E,
               label: "Add paragraph",
               hideLabel: !0,
-              icon: Vf
+              icon: zf
             }), u("div", {
               className: "flex cursor-move items-center justify-center p-0.5 text-f1-icon-secondary",
               draggable: !0,
@@ -49777,7 +49777,7 @@ const vK = ({ mentionsConfig: t, mentionSuggestions: e, setMentionSuggestions: n
             }), e.info && u(In, {
               label: e.info,
               children: u(me, {
-                icon: Bf,
+                icon: jf,
                 size: "sm",
                 className: "text-f1-foreground-secondary"
               })
@@ -50844,7 +50844,7 @@ function ik({ id: t, title: e, subtitle: n, onClick: i, module: r }) {
       a.preventDefault(), i?.(t);
     },
     className: s,
-    children: [u(Pk, {
+    children: [u($k, {
       module: r ?? "inbox",
       size: "md"
     }), b("div", {
@@ -51023,7 +51023,7 @@ const bJ = ({ title: t, info: e }) => b("div", {
             label: i.label,
             description: i.description,
             children: u(me, {
-              icon: Bf,
+              icon: jf,
               size: "sm"
             })
           })
@@ -51199,7 +51199,7 @@ const YJ = {
       })
     })
   });
-}), QJ = ["sm", "lg", "md", "md", "lg", "sm", "lg", "lg", "sm", "sm", "md", "md"], fQ = vt(sk, () => u(Gk, {
+}), QJ = ["sm", "lg", "md", "md", "lg", "sm", "lg", "lg", "sm", "sm", "md", "md"], fQ = vt(sk, () => u(Kk, {
   children: u(sk, {
     children: QJ.map((t, e) => u(Hs.Skeleton, {
       height: t
@@ -51216,7 +51216,7 @@ const YJ = {
       children: e
     })
   });
-}), () => u(Gk, {
+}), () => u(Kk, {
   orientation: "horizontal",
   children: b(ok, {
     children: [u(Hs.Skeleton, {}), u(Hs.Skeleton, {}), u(Hs.Skeleton, {})]
@@ -51261,7 +51261,7 @@ export {
   yY as ActivityItemList,
   KA as ActivityItemListSkeleton,
   wS as AiChat,
-  Jk as AiChatOneIcon,
+  Yk as AiChatOneIcon,
   xS as AiChatProvider,
   AQ as AiChatTextarea,
   MQ as AiChatTranslationsProvider,
@@ -51271,7 +51271,7 @@ export {
   SY as ApplicationFrame,
   GY as AreaChartWidget,
   UY as AutoGrid,
-  Bk as Badge,
+  jk as Badge,
   KY as BarChartWidget,
   GA as BaseActivityItemList,
   FQ as BaseBanner,
@@ -51304,7 +51304,7 @@ export {
   uY as EntitySelect,
   dY as F0ActionBar,
   uw as F0AiBanner,
-  Pk as F0AvatarModule,
+  $k as F0AvatarModule,
   oY as F0Callout,
   PQ as F0TableOfContent,
   fY as F0VersionHistory,
@@ -51382,12 +51382,12 @@ export {
   BC as getGranularityDefinition,
   zC as getGranularityDefinitions,
   CQ as getGranularitySimpleDefinition,
-  Hk as granularityDefinitions,
+  Vk as granularityDefinitions,
   SQ as modules,
   BQ as predefinedPresets,
   NQ as rangeSeparator,
   jQ as selectSizes,
-  Kk as useAiChat,
+  Jk as useAiChat,
   LQ as useAiChatTranslations,
   Zf as useAiPromotionChat,
   lc as useDataCollectionData,
