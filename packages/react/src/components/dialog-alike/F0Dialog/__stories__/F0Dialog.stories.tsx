@@ -170,10 +170,9 @@ export const WithPromisePrimaryAction: Story = {
 
     await step("Verify dialog is open", async () => {
       // Wait for dialog to render
-      await new Promise((resolve) => setTimeout(resolve, 100))
-
-      // Verify dialog content
-      expect(page.getByText("Team Status")).toBeInTheDocument()
+      await waitFor(() => {
+        expect(page.getByText("Team Status")).toBeInTheDocument()
+      })
     })
 
     await step(
@@ -194,8 +193,9 @@ export const WithPromisePrimaryAction: Story = {
         // Wait for promise to resolve (5 seconds)
         await new Promise((resolve) => setTimeout(resolve, 5200))
 
-        // Verify dialog is still open (promise doesn't close it automatically)
-        expect(page.getByText("Team Status")).toBeInTheDocument()
+        await waitFor(() => {
+          expect(page.getByText("Team Status")).not.toBeInTheDocument()
+        })
       }
     )
   },
@@ -349,14 +349,13 @@ export const WithMultiplePrimaryActions: Story = {
       "Verify dialog is open with multiple primary actions",
       async () => {
         // Wait for dialog to render
-        await new Promise((resolve) => setTimeout(resolve, 100))
-
-        // Verify dialog content
-        expect(page.getByText("Document Editor")).toBeInTheDocument()
-        expect(
-          page.getByText("Edit your document and choose how to save it.")
-        ).toBeInTheDocument()
-        expect(page.getByText("List Item 1")).toBeInTheDocument()
+        await waitFor(() => {
+          expect(page.getByText("Document Editor")).toBeInTheDocument()
+          expect(
+            page.getByText("Edit your document and choose how to save it.")
+          ).toBeInTheDocument()
+          expect(page.getByText("List Item 1")).toBeInTheDocument()
+        })
       }
     )
 

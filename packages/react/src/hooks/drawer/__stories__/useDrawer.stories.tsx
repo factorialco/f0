@@ -127,30 +127,21 @@ export const DrawerLeft: Story = {
   },
 }
 
-export const DrawerWithDropdownAndPromises: Story = {
+export const DrawerWithDropdown: Story = {
   render: () => {
     const { openDrawer } = useDrawer()
     const [res, setRes] = useState<DialogActionValue>(undefined)
 
     const trigger = async () => {
       const res = await openDrawer({
-        title: "Drawer Title",
-        description: "Drawer Description",
-        content: <div>Drawer Content</div>,
+        title: "Drawer with Dropdown Actions",
+        description: "This drawer has multiple secondary actions",
+        content: <div>Check the actions menu</div>,
         actions: {
-          primary: [
-            {
-              value: "p1",
-              label: "Action 1",
-            },
-            {
-              label: "Primary Action 2",
-              value: () =>
-                new Promise((resolve) =>
-                  setTimeout(() => resolve("Saved"), 4000)
-                ),
-            },
-          ],
+          primary: {
+            value: "primary",
+            label: "Primary Action",
+          },
           secondary: [
             {
               value: "delete",
@@ -175,7 +166,43 @@ export const DrawerWithDropdownAndPromises: Story = {
 
     return (
       <div className="flex flex-col items-center justify-center gap-4">
-        <F0Button onClick={trigger} label="Open Drawer" />
+        <F0Button onClick={trigger} label="Open Drawer with Dropdown" />
+        <p>Last action result: {res?.toString()}</p>
+      </div>
+    )
+  },
+}
+
+export const DrawerWithPromises: Story = {
+  render: () => {
+    const { openDrawer } = useDrawer()
+    const [res, setRes] = useState<DialogActionValue>(undefined)
+
+    const trigger = async () => {
+      const res = await openDrawer({
+        title: "Drawer with Async Action",
+        description: "The primary action takes time to resolve",
+        content: <div>Click the primary action to see the loading state</div>,
+        actions: {
+          primary: {
+            label: "Save (Async)",
+            value: () =>
+              new Promise((resolve) =>
+                setTimeout(() => resolve("Saved"), 2000)
+              ),
+          },
+          secondary: {
+            value: "cancel",
+            label: "Cancel",
+          },
+        },
+      })
+      setRes(res)
+    }
+
+    return (
+      <div className="flex flex-col items-center justify-center gap-4">
+        <F0Button onClick={trigger} label="Open Drawer with Promise" />
         <p>Last action result: {res?.toString()}</p>
       </div>
     )
