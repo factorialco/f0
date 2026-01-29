@@ -199,7 +199,7 @@ const OneEllipsis = forwardRef<HTMLElement, OneEllipsisProps>(
           markdown={markdown}
           tag={tag}
           {...props}
-          data-testid={testId}
+          data-testid={testId ?? "one-ellipsis"}
           noTooltip={noTooltip}
         >
           {children}

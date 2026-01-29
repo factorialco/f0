@@ -55,7 +55,7 @@ export const CalloutInternal = forwardRef<HTMLDivElement, CalloutInternalProps>(
       <div
         ref={ref}
         className={calloutVariants({ variant })}
-        data-testid={testId}
+        data-testid={testId ?? "sdm-callout"}
       >
         <div className="flex flex-row items-center justify-between px-4 py-2">
           <div

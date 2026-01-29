@@ -21,6 +21,7 @@ export const F0Link = forwardRef<HTMLAnchorElement, F0LinkProps>(function Link(
     "aria-label": ariaLabel,
     href,
     testId,
+    "data-testid": dataTestId,
     ...props
   },
   ref
@@ -44,7 +45,7 @@ export const F0Link = forwardRef<HTMLAnchorElement, F0LinkProps>(function Link(
       rel={external ? "noopener noreferrer" : undefined}
       aria-label={ariaLabel || props.title}
       className={className}
-      data-testid={testId}
+      data-testid={testId ?? dataTestId}
     >
       <span>{children}</span>
       {external && <F0Icon icon={ExternalLink} size="sm" />}

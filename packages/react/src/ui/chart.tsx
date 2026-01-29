@@ -454,3 +454,5 @@ export {
   ChartTooltip,
   ChartTooltipContent,
 }
+
+export type { ChartContainerComponentProps }

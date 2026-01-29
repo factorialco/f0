@@ -228,7 +228,7 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
             "border-f1-border-selected bg-f1-background-selected-secondary"
         )}
         onClick={onClick}
-        data-testid={testId}
+        data-testid={testId ?? "card"}
         ref={ref}
       >
         {link && !disableOverlayLink && (

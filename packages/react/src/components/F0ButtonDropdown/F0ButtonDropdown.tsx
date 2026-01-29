@@ -140,7 +140,7 @@ const F0ButtonDropdown = ({
         size={props.size}
         disabled={props.disabled}
         loading={props.loading}
-        data-testid={testId}
+        data-testid={testId ?? "button-main"}
         aria-label={selectedItem.label}
         prepend={selectedItem.icon && <F0Icon icon={selectedItem.icon} />}
         className="rounded-r-none after:rounded-r-none"
