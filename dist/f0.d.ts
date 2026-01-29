@@ -2073,25 +2073,32 @@ export declare type DialogDefinition = {
     content: ReactNode;
     actions: DialogActions;
     keepOpen?: boolean;
-};
-
-export declare type DialogDefinitionInternal = DialogDefinition & ({
-    variant?: "default";
-    type?: "default";
     /**
-     * If true, the dialog will be modal.
+     * If true, the dialog will be modal (cannot be closed by clicking outside or pressing Escape).
+     * @default false
      */
     modal?: boolean;
     /**
      * The module of the dialog.
      */
-    module?: ModuleId;
-} | {
+    module?: DialogModule;
+};
+
+export declare type DialogDefinitionInternal = (DialogDefinition & {
+    variant?: "default";
+    type?: "default";
+}) | (Omit<DialogDefinition, "modal" | "module"> & {
     variant: "notification";
     type: DialogNotificationType;
 });
 
 export declare type DialogId = string;
+
+export declare type DialogModule = {
+    id: ModuleId;
+    label: string;
+    href: string;
+};
 
 declare type DialogNotificationType = (typeof dialogNotificationTypes)[number];
 
@@ -2176,7 +2183,38 @@ export declare type DragPayload<T = unknown> = {
     data?: T;
 };
 
+export declare type DrawerDefinition = {
+    size?: DrawerSize;
+    id: DialogId;
+    title: string;
+    description?: string;
+    content: ReactNode;
+    actions: DialogActions;
+    keepOpen?: boolean;
+    /**
+     * The position of the drawer.
+     * @default "right"
+     */
+    position?: F0DrawerPosition;
+    /**
+     * If true, the drawer will be modal.
+     */
+    modal?: boolean;
+    /**
+     * The module of the drawer.
+     */
+    module?: DialogModule;
+};
+
+export declare type DrawerDefinitionInternal = DrawerDefinition & {
+    variant: "drawer";
+};
+
 declare const drawerPositions: readonly ["left", "right"];
+
+declare type DrawerSize = (typeof drawerSizes)[number];
+
+declare const drawerSizes: readonly ["md"];
 
 declare type DropdownItem = DropdownItemObject | DropdownItemSeparator | DropdownItemLabel;
 
@@ -5173,6 +5211,13 @@ export declare function useDraggable<T = unknown>(args: {
     handleRef?: React.RefObject<HTMLElement | null>;
 }): void;
 
+export declare const useDrawer: () => UseDrawerReturn;
+
+export declare type UseDrawerReturn = {
+    openDrawer: (definition: Optional<DrawerDefinition, "id">) => Promise<DialogActionValue>;
+    closeDrawer: (id: DialogId) => void;
+};
+
 export declare function useDroppableList(args?: {
     ref: React.RefObject<HTMLElement>;
     id: string;
@@ -5414,6 +5459,11 @@ declare module "gridstack" {
 }
 
 
+declare namespace Calendar {
+    var displayName: string;
+}
+
+
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         aiBlock: {
@@ -5439,9 +5489,4 @@ declare module "@tiptap/core" {
             insertTranscript: (data: TranscriptData) => ReturnType;
         };
     }
-}
-
-
-declare namespace Calendar {
-    var displayName: string;
 }

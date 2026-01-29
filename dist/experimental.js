@@ -1,12 +1,12 @@
-import { bk as za, bl as j6, bm as H6, bn as V6, bo as W6, bp as q6, bq as Kc, br as U6, bs as G6, bt as K6, m as ae, bu as ak, bv as J6, bw as Y6, g as cd, bx as lk, by as Q6, bz as X6, D as dk, bA as cg, bB as fl, bC as Z6, u as Ne, bD as fk, bE as ck, bF as uk, bG as hk, c as A, bH as pk, n as st, bI as mk, a as Vi, bJ as Qp, bK as gk, A as Je, F as me, bL as yk, bM as vk, B as cn, bN as ch, bO as bk, z as Q, aO as uo, S as U, bP as Qn, bQ as eC, bR as tC, bS as ra, aF as kk, bT as xk, Z as Xn, aN as Xp, bU as In, aP as Zp, aM as hs, aJ as nC, bV as br, f as Le, aL as kr, bW as wk, bX as iC, bY as ug, bZ as Vs, b_ as em, b$ as Ba, c0 as ud, c1 as rC, c2 as _k, c3 as sC, c4 as tm, c5 as sa, c6 as gn, c7 as oC, c8 as aC, c9 as nr, ca as Jc, cb as lC, cc as Ro, cd as Ns, ce as dC, cf as Ck, cg as fC, ch as cC, ci as uC, cj as hC, O as yn, w as vt, b2 as Sk, bb as Nk, V as nm, e as es, ck as pC, cl as Yc, cm as ir, cn as im, co as hg, cp as pg, cq as mg, cr as mC, P as Ff, l as Pf, o as $f, aC as ja, ag as hd, d as Ha, cs as Ek, C as $n, ae as zi, ct as Tk, cu as gC, cv as Ak, ac as Un, q as Gn, a9 as rm, aa as Mk, v as pd, a7 as ho, cw as yC, cx as Ok, cy as Dk, cz as Va, cA as sm, aQ as oa, al as aa, cB as vC, cC as Ik, cD as bC, cE as kC, cF as xC, cG as Lk, cH as wC, cI as Rk, cJ as _C, cK as CC, cL as SC, cM as gg, cN as Fk, cO as NC, cP as uh, cQ as EC, cR as TC, aB as zf, T as Pk, aE as AC, bg as Wa, aD as MC, cS as $k, U as xr, y as zr, aT as md, bi as hh, b3 as Bf, aY as OC, ad as DC, a8 as zk, cT as om, cU as Bk, bd as IC, bf as LC, b9 as jk, cV as RC, cW as Hk, cX as FC, cY as PC, cZ as $C, c_ as zC, c$ as BC, d0 as jC, ba as HC, d1 as VC, ap as WC, aq as qC, ax as jf, av as am, d2 as lm, aw as Vk, x as UC, ar as gd, d3 as GC, b5 as KC, aG as ph, d4 as JC, d5 as YC, d6 as QC, b as Wk, am as XC, au as ZC, W as eS, X as tS, Y as nS, d7 as qa, d8 as dm, af as fm, d9 as cm, da as Ua, db as iS, b6 as qk, dc as rS, dd as Uk, de as sS, df as oS, aZ as aS, a_ as lS, aR as dS, aK as fS, dg as Gk, dh as cS } from "./index-CKCXYV4b.js";
-import { dk as yQ, dj as vQ, di as bQ, dq as kQ, dr as xQ, dm as wQ, dl as _Q, dp as CQ, ab as SQ, dn as NQ } from "./index-CKCXYV4b.js";
-import { u as Kk, F as Jk, g as uS, h as Yk, i as Qk, j as Xk, k as um, l as Zk, m as Hf, n as hS, o as pS, p as hm, q as ps, r as mS, s as ex, t as pm, I as tx, v as gS, w as yS, x as vS, y as Vf, z as nx, B as ix, C as yg, D as bS, E as kS, b as xS, a as wS, G as _S, J as CS, K as SS, L as NS, M as ES, N as rx, O as sx, P as TS, Q as AS, R as vg, S as MS, T as OS, U as DS, V as IS, W as ox, X as bg, Y as LS, Z as mh, _ as ax, $ as lx, a0 as dx, a1 as RS, a2 as FS, a3 as PS, a4 as $S, a5 as fx, a6 as cx, a7 as ux, a8 as hx, a9 as zS, aa as px, ab as mx, ac as BS, ad as gx, ae as jS, af as HS, ag as VS, ah as WS, ai as kg, aj as xg, ak as wg, al as qS } from "./AiChatTranslationsProvider-CrWVPRrf.js";
-import { A as TQ, an as AQ, d as MQ, c as OQ, H as DQ, am as IQ, f as LQ } from "./AiChatTranslationsProvider-CrWVPRrf.js";
+import { bl as za, bm as j6, bn as H6, bo as V6, bp as W6, bq as q6, br as Kc, bs as U6, bt as G6, bu as K6, m as ae, bv as ak, bw as J6, bx as Y6, g as cd, by as lk, bz as Q6, bA as X6, D as dk, bB as cg, bC as fl, bD as Z6, u as Ne, bE as fk, bF as ck, bG as uk, bH as hk, c as A, bI as pk, n as st, bJ as mk, a as Vi, bK as Qp, bL as gk, A as Je, F as me, bM as yk, bN as vk, B as cn, bO as ch, bP as bk, z as Q, aO as uo, S as U, bQ as Qn, bR as eC, bS as tC, bT as ra, aF as kk, bU as xk, Z as Xn, aN as Xp, bV as In, aP as Zp, aM as hs, aJ as nC, bW as br, f as Le, aL as kr, bX as wk, bY as iC, bZ as ug, b_ as Vs, b$ as em, c0 as Ba, c1 as ud, c2 as rC, c3 as _k, c4 as sC, c5 as tm, c6 as sa, c7 as gn, c8 as oC, c9 as aC, ca as nr, cb as Jc, cc as lC, cd as Ro, ce as Ns, cf as dC, cg as Ck, ch as fC, ci as cC, cj as uC, ck as hC, O as yn, w as vt, b2 as Sk, bc as Nk, V as nm, e as es, cl as pC, cm as Yc, cn as ir, co as im, cp as hg, cq as pg, cr as mg, cs as mC, P as Ff, l as Pf, o as $f, aC as ja, ag as hd, d as Ha, ct as Ek, C as $n, ae as zi, cu as Tk, cv as gC, cw as Ak, ac as Un, q as Gn, a9 as rm, aa as Mk, v as pd, a7 as ho, cx as yC, cy as Ok, cz as Dk, cA as Va, cB as sm, b9 as zf, aQ as oa, al as aa, cC as vC, cD as Ik, cE as bC, cF as kC, cG as xC, cH as Lk, cI as wC, cJ as Rk, cK as _C, cL as CC, cM as SC, cN as gg, cO as Fk, cP as NC, cQ as uh, cR as EC, cS as TC, aB as Bf, T as Pk, aE as AC, bh as Wa, aD as MC, cT as $k, U as xr, y as zr, aT as md, bj as hh, b3 as jf, aY as OC, ad as DC, a8 as zk, cU as om, cV as Bk, be as IC, bg as LC, ba as jk, cW as RC, cX as Hk, cY as FC, cZ as PC, c_ as $C, c$ as zC, d0 as BC, d1 as jC, bb as HC, d2 as VC, ap as WC, aq as qC, ax as Hf, av as am, d3 as lm, aw as Vk, x as UC, ar as gd, d4 as GC, b5 as KC, aG as ph, d5 as JC, d6 as YC, d7 as QC, b as Wk, am as XC, au as ZC, W as eS, X as tS, Y as nS, d8 as qa, d9 as dm, af as fm, da as cm, db as Ua, dc as iS, b6 as qk, dd as rS, de as Uk, df as sS, dg as oS, aZ as aS, a_ as lS, aR as dS, aK as fS, dh as Gk, di as cS } from "./index--N_tJLRg.js";
+import { dl as yQ, dk as vQ, dj as bQ, dr as kQ, ds as xQ, dn as wQ, dm as _Q, dq as CQ, ab as SQ, dp as NQ } from "./index--N_tJLRg.js";
+import { u as Kk, F as Jk, g as uS, h as Yk, i as Qk, j as Xk, k as um, l as Zk, m as Vf, n as hS, o as pS, p as hm, q as ps, r as mS, s as ex, t as pm, I as tx, v as gS, w as yS, x as vS, y as nx, z as ix, B as yg, C as bS, D as kS, b as xS, a as wS, E as _S, G as CS, J as SS, K as NS, L as ES, M as rx, N as sx, O as TS, P as AS, Q as vg, R as MS, S as OS, T as DS, U as IS, V as ox, W as bg, X as LS, Y as mh, Z as ax, _ as lx, $ as dx, a0 as RS, a1 as FS, a2 as PS, a3 as $S, a4 as fx, a5 as cx, a6 as ux, a7 as hx, a8 as zS, a9 as px, aa as mx, ab as BS, ac as gx, ad as jS, ae as HS, af as VS, ag as WS, ah as kg, ai as xg, aj as wg, ak as qS } from "./AiChatTranslationsProvider-BZGYUBmh.js";
+import { A as TQ, am as AQ, d as MQ, c as OQ, H as DQ, al as IQ, f as LQ } from "./AiChatTranslationsProvider-BZGYUBmh.js";
 import { jsx as u, jsxs as b, Fragment as _e } from "react/jsx-runtime";
 import * as Xe from "react";
 import G, { useContext as zn, useState as P, useEffect as ne, createContext as Zn, forwardRef as ye, useRef as re, PureComponent as US, useTransition as GS, useLayoutEffect as ms, useId as Wf, useCallback as Te, useMemo as J, memo as Ga, Fragment as hi, isValidElement as yx, cloneElement as mm, createElement as gh, useDebugValue as vx, createRef as KS, version as _g, useImperativeHandle as qf, Children as bx } from "react";
-import { f as Ls, aE as la, j as cl, aF as JS, b as Qc, aG as YS, A as QS, d as ul, i as XS, m as ZS, G as e9, g as Cg, aH as t9, l as Sg, aI as n9, p as i9, aJ as kx, aK as xx, aL as r9, aM as yh, C as s9, ax as o9, a4 as ts, D as Ft, t as a9, x as l9, y as d9, F as f9, M as Ng, N as Eg, O as c9, P as u9, am as h9, ad as vh, aN as Uf, a8 as p9, aO as wx, aP as m9, aQ as g9, aR as y9, ah as bh, aS as v9, aT as b9, as as Gf, ai as gm, aU as _x, ag as Cx, a2 as po, aa as k9, aV as x9, aW as w9, aX as _9, a6 as Kf, aY as Jf, aZ as Yf, a7 as Qf, al as ym, a_ as C9, aB as S9, a$ as kh, b0 as N9, b1 as yd, b2 as E9, aC as T9, b3 as A9, aA as Sx, az as M9, ay as O9, b4 as D9, b5 as I9, ac as L9, b6 as R9, aD as Nx, b7 as Ex, aq as Tx, b8 as F9, b9 as P9, ba as $9, a9 as z9, R as B9, T as j9, V as H9, W as V9, Z as W9, U as q9, bb as Tg, bc as U9, bd as G9, n as K9 } from "./DataCollectionStorageProvider-C-DobgdZ.js";
-import { ab as FQ, a3 as PQ, be as $Q, bf as zQ, an as BQ, ao as jQ } from "./DataCollectionStorageProvider-C-DobgdZ.js";
+import { f as Ls, aE as la, j as cl, aF as JS, b as Qc, aG as YS, A as QS, d as ul, i as XS, m as ZS, G as e9, g as Cg, aH as t9, l as Sg, aI as n9, p as i9, aJ as kx, aK as xx, aL as r9, aM as yh, C as s9, ax as o9, a4 as ts, D as Ft, t as a9, x as l9, y as d9, F as f9, M as Ng, N as Eg, O as c9, P as u9, am as h9, ad as vh, aN as Uf, a8 as p9, aO as wx, aP as m9, aQ as g9, aR as y9, ah as bh, aS as v9, aT as b9, as as Gf, ai as gm, aU as _x, ag as Cx, a2 as po, aa as k9, aV as x9, aW as w9, aX as _9, a6 as Kf, aY as Jf, aZ as Yf, a7 as Qf, al as ym, a_ as C9, aB as S9, a$ as kh, b0 as N9, b1 as yd, b2 as E9, aC as T9, b3 as A9, aA as Sx, az as M9, ay as O9, b4 as D9, b5 as I9, ac as L9, b6 as R9, aD as Nx, b7 as Ex, aq as Tx, b8 as F9, b9 as P9, ba as $9, a9 as z9, R as B9, T as j9, V as H9, W as V9, Z as W9, U as q9, bb as Tg, bc as U9, bd as G9, n as K9 } from "./DataCollectionStorageProvider-wYGBIcMS.js";
+import { ab as FQ, a3 as PQ, be as $Q, bf as zQ, an as BQ, ao as jQ } from "./DataCollectionStorageProvider-wYGBIcMS.js";
 import vm from "react-dom";
 import './experimental.css';function Ax(t) {
   const e = za(() => j6(t)), { isStatic: n } = zn(H6);
@@ -4424,7 +4424,7 @@ const Sm = () => {
     },
     {
       label: e("coCreationForm.questionTypes.longText"),
-      icon: Hf,
+      icon: Vf,
       questionType: "longText"
     },
     {
@@ -8923,7 +8923,7 @@ const Cy = ({ label: t, onCreate: e, goToFirst: n, goToLast: i }) => u("div", {
       hideLabel: !0,
       label: t,
       onClick: () => e(),
-      icon: Vf,
+      icon: zf,
       size: "sm",
       variant: "outline"
     }), u("div", {
@@ -11439,7 +11439,7 @@ const iM = ({ link: t, firstName: e, lastName: n, src: i, onClick: r, canReact: 
   }, [o]);
   const m = (k) => {
     h(k), a?.(k);
-  }, g = zf(), { canvasRef: y, handleMouseEnter: v, handleMouseLeave: w } = nM(g), x = ja({
+  }, g = Bf(), { canvasRef: y, handleMouseEnter: v, handleMouseLeave: w } = nM(g), x = ja({
     emoji: ZA[l],
     size: "sm"
   });
@@ -12115,7 +12115,7 @@ function bM({ item: t }) {
           label: t.info.title,
           description: t.info.description,
           children: u(me, {
-            icon: Bf,
+            icon: jf,
             size: "sm"
           })
         })
@@ -12813,7 +12813,7 @@ function VM(t, e) {
   }, [t, e, n, i]);
 }
 function WM({ ai: t, aiPromotion: e, children: n, sidebar: i, banner: r }) {
-  const { sidebarState: s, toggleSidebar: o, isSmallScreen: a, setForceFloat: l } = go(), d = zf(), { open: f } = Kk(), { open: c } = Zf(), h = gk(`(max-width: ${yh.xl}px)`, {
+  const { sidebarState: s, toggleSidebar: o, isSmallScreen: a, setForceFloat: l } = go(), d = Bf(), { open: f } = Kk(), { open: c } = Zf(), h = gk(`(max-width: ${yh.xl}px)`, {
     initializeWithValue: !0
   });
   return ne(() => {
@@ -13532,7 +13532,7 @@ const eO = ({ item: t, active: e }) => b("div", {
     children: L
   });
 }, J2 = ({ title: t, isOpen: e = !0, isRoot: n, onCollapse: i, children: r, isDragging: s, wasDragging: o }) => {
-  const [a, l] = P(e), d = zf(), f = () => {
+  const [a, l] = P(e), d = Bf(), f = () => {
     if (s || o?.current) return;
     const c = !a;
     l(c), i?.(c);
@@ -13827,7 +13827,7 @@ const Gy = ({ position: t }) => u(ae.div, {
   className: A("pointer-events-none absolute inset-x-0 z-10 h-3 after:absolute after:inset-x-0 after:h-px after:bg-f1-background-inverse after:opacity-[0.04] after:content-['']", t === "top" ? ["top-0", "bg-gradient-to-b from-f1-background-secondary to-transparent", "after:top-0"] : ["bottom-0", "bg-gradient-to-t from-f1-background-secondary to-transparent", "after:bottom-0"])
 });
 function IY({ header: t, body: e, footer: n, onFooterDropdownClick: i }) {
-  const { sidebarState: r, isSmallScreen: s } = go(), o = zf(), [a, l] = uh({
+  const { sidebarState: r, isSmallScreen: s } = go(), o = Bf(), [a, l] = uh({
     threshold: 1
   }), [d, f] = uh({
     threshold: 1
@@ -14961,7 +14961,7 @@ const IO = Le("OnePagination", DO), Pm = ({ paginationInfo: t, setPage: e, class
       data: g.records
     });
   }, [y?.total, g.records]);
-  const { selectedItems: x, groupAllSelectedStatus: k, handleSelectItemChange: C, handleSelectGroupChange: _ } = jf({
+  const { selectedItems: x, groupAllSelectedStatus: k, handleSelectItemChange: C, handleSelectGroupChange: _ } = Hf({
     data: g,
     paginationInfo: y,
     source: d,
@@ -15119,7 +15119,7 @@ const zO = (t) => {
     selectedIds: e.flatMap((n) => n.selectedIds)
   };
 }, BO = (t) => {
-  const e = jf({
+  const e = Hf({
     data: t.data || {
       type: "flat",
       records: [],
@@ -15388,7 +15388,7 @@ const $m = (t, e, n, i) => {
         variant: "ghost",
         size: "sm",
         label: "Add",
-        icon: Vf,
+        icon: zf,
         hideLabel: !0,
         onClick: i
       })
@@ -15483,7 +15483,7 @@ function nD({ title: t, items: e, renderCard: n, getKey: i, emptyState: r, fetch
         variant: "ghost",
         size: "md",
         className: "w-full justify-center",
-        icon: Vf,
+        icon: zf,
         label: "Add",
         hideLabel: !0,
         onClick: h
@@ -16373,7 +16373,7 @@ const dD = ({ lanes: t, title: e, description: n, avatar: i, metadata: r, onMove
       data: a.records
     });
   }, [l?.total, a.records]);
-  const { isLoading: p } = n, { loadingIndicatorRef: m } = $m(l, p, c, h), { selectedItems: g, groupAllSelectedStatus: y, handleSelectItemChange: v, handleSelectGroupChange: w } = jf({
+  const { isLoading: p } = n, { loadingIndicatorRef: m } = $m(l, p, c, h), { selectedItems: g, groupAllSelectedStatus: y, handleSelectItemChange: v, handleSelectGroupChange: w } = Hf({
     data: a,
     paginationInfo: l,
     source: n,
@@ -16939,7 +16939,7 @@ function si({ children: t, href: e, onClick: n, width: i = "auto", firstCell: r 
     })]
   });
 }
-function Jl({ children: t, width: e = "auto", sortState: n = "none", onSortClick: i, info: r, infoIcon: s = Bf, sticky: o, hidden: a = !1, align: l = "left", className: d }) {
+function Jl({ children: t, width: e = "auto", sortState: n = "none", onSortClick: i, info: r, infoIcon: s = jf, sticky: o, hidden: a = !1, align: l = "left", className: d }) {
   const { isScrolled: f, isScrolledRight: c } = w3(), h = o?.left !== void 0, p = o?.right !== void 0, m = h || p, g = o?.left ?? 0, y = o?.right ?? 0, v = i || r, w = u(_e, {
     children: b("div", {
       className: A("flex items-center whitespace-nowrap", v && "gap-1", l === "right" && "flex-row-reverse"),
@@ -17583,7 +17583,7 @@ const A3 = (t, e, n) => {
       data: h.records
     });
   }, [p?.total, h.records]);
-  const N = J(() => n, [n]), M = (Z, W) => "id" in Z && Z.id !== void 0 && Z.id !== null ? `id:${String(Z.id)}` : `index:${String(W)}`, { selectedItems: T, allSelectedStatus: S, groupAllSelectedStatus: L, handleSelectItemChange: E, handleSelectAll: D, handleSelectGroupChange: R } = jf({
+  const N = J(() => n, [n]), M = (Z, W) => "id" in Z && Z.id !== void 0 && Z.id !== null ? `id:${String(Z.id)}` : `index:${String(W)}`, { selectedItems: T, allSelectedStatus: S, groupAllSelectedStatus: L, handleSelectItemChange: E, handleSelectAll: D, handleSelectGroupChange: R } = Hf({
     data: h,
     paginationInfo: p,
     source: e,
@@ -17796,7 +17796,7 @@ const A3 = (t, e, n) => {
   },
   list: {
     name: "List",
-    icon: Hf,
+    icon: Vf,
     settings: {
       default: {}
     },
@@ -40873,7 +40873,7 @@ const LV = ({ editor: t, disabled: e }) => {
     }
   }], c = [{
     key: "bulletList",
-    icon: Hf,
+    icon: Vf,
     label: l.richTextEditor.bulletList,
     active: (x) => x.isActive("bulletList"),
     onClick: (x) => x.chain().focus().toggleBulletList().run(),
@@ -47669,7 +47669,7 @@ const OG = /(?:^|\s)(!\[(.+|:?)]\((\S+)(?:(?:\s+)["'](\S+)["'])?\))$/, DG = ot.c
         to: s
       }).toggleBulletList().run();
     },
-    icon: Hf
+    icon: Vf
   }, {
     title: e.richTextEditor.orderedList,
     command: (i) => {
@@ -48406,7 +48406,7 @@ const VG = ({ aiBlockConfig: t, translations: e, imageUploadConfig: n }) => Ke.c
               onClick: E,
               label: "Add paragraph",
               hideLabel: !0,
-              icon: Vf
+              icon: zf
             }), u("div", {
               className: "flex cursor-move items-center justify-center p-0.5 text-f1-icon-secondary",
               draggable: !0,
@@ -49777,7 +49777,7 @@ const vK = ({ mentionsConfig: t, mentionSuggestions: e, setMentionSuggestions: n
             }), e.info && u(In, {
               label: e.info,
               children: u(me, {
-                icon: Bf,
+                icon: jf,
                 size: "sm",
                 className: "text-f1-foreground-secondary"
               })
@@ -51023,7 +51023,7 @@ const bJ = ({ title: t, info: e }) => b("div", {
             label: i.label,
             description: i.description,
             children: u(me, {
-              icon: Bf,
+              icon: jf,
               size: "sm"
             })
           })
