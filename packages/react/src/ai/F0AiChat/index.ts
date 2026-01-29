@@ -21,6 +21,15 @@ export type {
   AiChatTranslationsProviderProps,
 } from "./types"
 
+// File upload types
+export type {
+  FileUploadResult,
+  UploadingFile,
+  FileRejectionReason,
+  RejectedFile,
+  FileValidationConfig,
+} from "./internal-types"
+
 // Legacy type alias for backwards compatibility
 export type { F0AiChatProviderProps as AiChatProviderProps } from "./types"
 

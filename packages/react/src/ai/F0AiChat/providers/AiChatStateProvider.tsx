@@ -5,6 +5,7 @@ import {
   createContext,
   FC,
   PropsWithChildren,
+  useCallback,
   useContext,
   useEffect,
   useRef,
@@ -13,7 +14,12 @@ import {
 
 import { useI18n } from "@/lib/providers/i18n"
 
-import { AiChatProviderReturnValue, AiChatState } from "../internal-types"
+import {
+  AiChatProviderReturnValue,
+  AiChatState,
+  RejectedFile,
+  UploadingFile,
+} from "../internal-types"
 import { WelcomeScreenSuggestion } from "../types"
 
 const AiChatStateContext = createContext<AiChatProviderReturnValue | null>(null)
@@ -28,6 +34,9 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   welcomeScreenSuggestions: initialWelcomeScreenSuggestions = [],
   onThumbsDown,
   onThumbsUp,
+  fileValidation,
+  onFilesRejected,
+  onUploadFile,
   ...rest
 }) => {
   const [enabledInternal, setEnabledInternal] = useState(enabled)
@@ -50,12 +59,18 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
     string | string[] | undefined
   >(initialInitialMessage)
 
+  // Attachment state
+  const [attachments, setAttachments] = useState<File[]>([])
+  const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([])
+
   // Store the reset function from CopilotKit
   const clearFunctionRef = useRef<(() => void) | null>(null)
   // Store the sendMessage function from CopilotKit
   const sendMessageFunctionRef = useRef<((message: Message) => void) | null>(
     null
   )
+  // Store the file input ref from ChatTextarea
+  const fileInputRef = useRef<HTMLInputElement | null>(null)
 
   const tmp_setAgent = (newAgent?: string) => {
     setAgent(newAgent)
@@ -77,7 +92,120 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
     }
   }
 
-  const sendMessage = (message: string | Message) => {
+  const setFileInputRef = useCallback((ref: HTMLInputElement | null) => {
+    fileInputRef.current = ref
+  }, [])
+
+  const triggerFileInput = useCallback(() => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click()
+    }
+  }, [])
+
+  // Validate a single file against the validation config
+  const validateFile = useCallback(
+    (
+      file: File
+    ): { valid: true } | { valid: false; rejection: RejectedFile } => {
+      // If no validation config, accept all files
+      if (!fileValidation) {
+        return { valid: true }
+      }
+
+      const { maxFileSize, acceptedTypes, acceptedExtensions, validate } =
+        fileValidation
+
+      // Check file size
+      if (maxFileSize && file.size > maxFileSize) {
+        return {
+          valid: false,
+          rejection: { file, reason: "size" },
+        }
+      }
+
+      // Check MIME type
+      if (acceptedTypes && acceptedTypes.length > 0) {
+        if (!acceptedTypes.includes(file.type)) {
+          return {
+            valid: false,
+            rejection: { file, reason: "type" },
+          }
+        }
+      }
+
+      // Check file extension
+      if (acceptedExtensions && acceptedExtensions.length > 0) {
+        const ext = `.${file.name.split(".").pop()?.toLowerCase()}`
+        if (!acceptedExtensions.includes(ext)) {
+          return {
+            valid: false,
+            rejection: { file, reason: "type" },
+          }
+        }
+      }
+
+      // Run custom validation
+      if (validate) {
+        const result = validate(file)
+        if (!result.valid) {
+          return {
+            valid: false,
+            rejection: { file, reason: "custom", message: result.message },
+          }
+        }
+      }
+
+      return { valid: true }
+    },
+    [fileValidation]
+  )
+
+  const addAttachment = useCallback(
+    (file: File) => {
+      const result = validateFile(file)
+      if (result.valid) {
+        setAttachments((prev) => [...prev, file])
+      } else if (onFilesRejected) {
+        onFilesRejected([result.rejection])
+      }
+    },
+    [validateFile, onFilesRejected]
+  )
+
+  const addAttachments = useCallback(
+    (files: File[]) => {
+      const accepted: File[] = []
+      const rejected: RejectedFile[] = []
+
+      for (const file of files) {
+        const result = validateFile(file)
+        if (result.valid) {
+          accepted.push(file)
+        } else {
+          rejected.push(result.rejection)
+        }
+      }
+
+      if (accepted.length > 0) {
+        setAttachments((prev) => [...prev, ...accepted])
+      }
+
+      if (rejected.length > 0 && onFilesRejected) {
+        onFilesRejected(rejected)
+      }
+    },
+    [validateFile, onFilesRejected]
+  )
+
+  const removeAttachment = useCallback((index: number) => {
+    setAttachments((prev) => prev.filter((_, i) => i !== index))
+  }, [])
+
+  const clearAttachments = useCallback(() => {
+    setAttachments([])
+  }, [])
+
+  const sendMessage = async (message: string | Message) => {
     if (!sendMessageFunctionRef.current) {
       return
     }
@@ -87,16 +215,89 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
       setOpen(true)
     }
 
+    // Get the message content for processing
+    const messageContent =
+      typeof message === "string" ? message : (message.content ?? "")
+
+    let processedContent: string = messageContent
+
+    // Upload attachments if onUploadFile is provided
+    if (attachments.length > 0 && onUploadFile) {
+      // Initialize uploading files state
+      setUploadingFiles(
+        attachments.map((f) => ({ file: f, progress: 0, status: "pending" }))
+      )
+
+      const updateUploadingFile = (
+        index: number,
+        updates: Partial<UploadingFile>
+      ) => {
+        setUploadingFiles((prev) =>
+          prev.map((item, i) => (i === index ? { ...item, ...updates } : item))
+        )
+      }
+
+      const results = await Promise.all(
+        attachments.map(async (file, index) => {
+          try {
+            updateUploadingFile(index, { status: "uploading" })
+            const result = await onUploadFile(file, (progress) => {
+              updateUploadingFile(index, { progress })
+            })
+            updateUploadingFile(index, { status: "success", result })
+            return { file, result, success: true as const }
+          } catch (error) {
+            updateUploadingFile(index, {
+              status: "error",
+              error: String(error),
+            })
+            return { file, error, success: false as const }
+          }
+        })
+      )
+
+      // Build message with file URLs
+      const successful = results.filter((r) => r.success)
+      if (successful.length > 0) {
+        const filesJson = JSON.stringify({
+          files: successful.map((u) => ({
+            name: u.file.name,
+            url: u.result.url,
+            type: u.file.type,
+            size: u.file.size,
+          })),
+        })
+        processedContent = `${messageContent}\n\n[ATTACHMENTS]\n${filesJson}\n[/ATTACHMENTS]`
+      }
+
+      setUploadingFiles([])
+    } else if (attachments.length > 0) {
+      // Fallback: add [Attachment: filename] markers if no upload callback
+      const fileMarkers = attachments
+        .map((file) => `[Attachment: ${file.name}]`)
+        .join("\n")
+      processedContent = messageContent
+        ? `${messageContent}\n\n${fileMarkers}`
+        : fileMarkers
+    }
+
+    // Construct the message
     const messageToSend: Message =
       typeof message === "string"
         ? {
             id: randomId(),
             role: "user",
-            content: message,
+            content: processedContent,
           }
-        : message
+        : {
+            ...message,
+            content: processedContent,
+          }
 
-    sendMessageFunctionRef.current?.(messageToSend)
+    sendMessageFunctionRef.current(messageToSend)
+
+    // Clear attachments after sending
+    clearAttachments()
   }
 
   useEffect(() => {
@@ -138,6 +339,16 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         setPlaceholders,
         sendMessage,
         setSendMessageFunction,
+        fileUploadsEnabled: fileValidation !== undefined,
+        attachments,
+        addAttachment,
+        addAttachments,
+        removeAttachment,
+        clearAttachments,
+        uploadingFiles,
+        isUploading: uploadingFiles.some((f) => f.status === "uploading"),
+        triggerFileInput,
+        setFileInputRef,
       }}
     >
       {children}
@@ -146,6 +357,7 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
 }
 
 const noopFn = () => {}
+const noopAsyncFn = async () => {}
 
 export function useAiChat(): AiChatProviderReturnValue {
   const context = useContext(AiChatStateContext)
@@ -172,8 +384,18 @@ export function useAiChat(): AiChatProviderReturnValue {
       setWelcomeScreenSuggestions: noopFn,
       onThumbsUp: noopFn,
       onThumbsDown: noopFn,
-      sendMessage: noopFn,
+      sendMessage: noopAsyncFn,
       setSendMessageFunction: noopFn,
+      fileUploadsEnabled: false,
+      attachments: [],
+      addAttachment: noopFn,
+      addAttachments: noopFn,
+      removeAttachment: noopFn,
+      clearAttachments: noopFn,
+      uploadingFiles: [],
+      isUploading: false,
+      triggerFileInput: noopFn,
+      setFileInputRef: noopFn,
     }
   }
 
