@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 
 import { zeroRenderHook } from "@/testing/test-utils"
 
-import type { DialogDefinition } from "../../../lib/providers/dialogs/types"
+import type { DialogDefinition } from "../../../lib/providers/dialogs-alike/types"
 
 import { useDialog } from "../useDialog"
 
@@ -18,8 +18,12 @@ vi.mock("nanoid", () => ({
 // Mock useDialogsLayoutContext
 const mockAddDialog = vi.fn()
 const mockRemoveDialog = vi.fn()
-vi.mock("@/lib/providers/dialogs/DialogsLayoutProvider", () => ({
+vi.mock("@/lib/providers/dialogs-alike/DialogsAlikeLayoutProvider", () => ({
   useDialogsLayoutContext: () => ({
+    addDialog: mockAddDialog,
+    removeDialog: mockRemoveDialog,
+  }),
+  useDialogsAlikeLayoutContext: () => ({
     addDialog: mockAddDialog,
     removeDialog: mockRemoveDialog,
   }),

@@ -1,8 +1,8 @@
 import { nanoid } from "nanoid"
 import { useRef } from "react"
 
-import { useDialogsLayoutContext } from "@/lib/providers/dialogs/DialogsLayoutProvider"
-import { DialogDefinitionProviderItem } from "@/lib/providers/dialogs/internal-types"
+import { useDialogsAlikeLayoutContext } from "@/lib/providers/dialogs-alike/DialogsAlikeLayoutProvider"
+import { DialogDefinitionProviderItem } from "@/lib/providers/dialogs-alike/internal-types"
 import {
   DialogDefinition,
   DialogActionValue,
@@ -10,7 +10,7 @@ import {
   DialogActionValuePrimitive,
   DialogId,
   DialogDefinitionInternal,
-} from "@/lib/providers/dialogs/types"
+} from "@/lib/providers/dialogs-alike/types"
 import { useI18n } from "@/lib/providers/i18n"
 import { Optional } from "@/lib/typescript-utils/optional"
 
@@ -34,7 +34,7 @@ export type UseDialogReturn = {
 
 export const useDialog = (): UseDialogReturn => {
   const i18n = useI18n()
-  const { addDialog, removeDialog } = useDialogsLayoutContext()
+  const { addDialog, removeDialog } = useDialogsAlikeLayoutContext()
   // Store dialog callbacks so we can invoke them when closeDialog is called programmatically
   const dialogCallbacksRef = useRef<Map<DialogId, () => void>>(new Map())
 

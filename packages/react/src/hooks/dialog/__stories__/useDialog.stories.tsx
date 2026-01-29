@@ -7,7 +7,7 @@ import { expect, userEvent, within } from "storybook/test"
 import { F0Button } from "@/components/F0Button"
 import { Delete } from "@/icons/app"
 
-import { DialogActionValue } from "../../../lib/providers/dialogs/types"
+import { DialogActionValue } from "../../../lib/providers/dialogs-alike/types"
 import { useDialog } from "../useDialog"
 
 const meta = {
@@ -649,6 +649,90 @@ export const DialogTriggersADialog: Story = {
     return (
       <div className="flex flex-col items-center justify-center gap-4">
         <F0Button onClick={trigger} label="Open Dialog" />
+        <p>Last action result: {res?.toString()}</p>
+      </div>
+    )
+  },
+}
+
+export const DialogWithModule: Story = {
+  render: () => {
+    const { openDialog } = useDialog()
+    const [res, setRes] = useState<DialogActionValue>(undefined)
+
+    const trigger = async () => {
+      const res = await openDialog({
+        title: "Performance Review",
+        description: "Quarterly performance review discussion",
+        module: {
+          id: "performance",
+          label: "Performance",
+          href: "/performance",
+        },
+        content: <div>Performance review content...</div>,
+        actions: {
+          primary: {
+            value: "approve",
+            label: "Approve Review",
+          },
+          secondary: {
+            value: "cancel",
+            label: "Cancel",
+          },
+        },
+      })
+      setRes(res)
+    }
+
+    return (
+      <div className="flex flex-col items-center justify-center gap-4">
+        <F0Button onClick={trigger} label="Open Module Dialog" />
+        <p>Last action result: {res?.toString()}</p>
+      </div>
+    )
+  },
+}
+
+export const Modal: Story = {
+  render: () => {
+    const { openDialog } = useDialog()
+    const [res, setRes] = useState<DialogActionValue>(undefined)
+
+    const trigger = async () => {
+      const res = await openDialog({
+        title: "Modal Dialog",
+        description:
+          "This is a modal dialog that cannot be closed by clicking outside or pressing Escape",
+        content: (
+          <div className="flex flex-col gap-2">
+            <p>
+              Modal dialogs require user interaction with the action buttons to
+              close them.
+            </p>
+            <p>
+              Clicking outside the dialog or pressing Escape will not close this
+              dialog.
+            </p>
+          </div>
+        ),
+        modal: true,
+        actions: {
+          primary: {
+            value: "confirm",
+            label: "Confirm",
+          },
+          secondary: {
+            value: "cancel",
+            label: "Cancel",
+          },
+        },
+      })
+      setRes(res)
+    }
+
+    return (
+      <div className="flex flex-col items-center justify-center gap-4">
+        <F0Button onClick={trigger} label="Open Modal Dialog" />
         <p>Last action result: {res?.toString()}</p>
       </div>
     )

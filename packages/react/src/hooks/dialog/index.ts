@@ -1,2 +1,2 @@
 export * from "./useDialog"
-export * from "@/lib/providers/dialogs/types"
+export * from "@/lib/providers/dialogs-alike/types"

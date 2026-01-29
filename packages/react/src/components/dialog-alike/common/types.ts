@@ -2,6 +2,7 @@ import { ReactNode } from "react"
 
 import { IconType } from "@/components/F0Icon/F0Icon"
 import { TabsProps } from "@/experimental/Navigation/Tabs"
+import { DialogModule } from "@/lib/providers/dialogs-alike/types"
 
 import { HeaderProps } from "./Header"
 
@@ -68,7 +69,7 @@ export type DialogAlikeInternalProps = {
   disableClose?: boolean
 
   // Module configuration for the header. Only works when dialog position is set to "right". Displays module icon and name in the header.
-  module?: HeaderProps["module"]
+  module?: DialogModule
   // Other actions to display in the header
   otherActions?: HeaderProps["otherActions"]
   // Custom content to render in the dialog

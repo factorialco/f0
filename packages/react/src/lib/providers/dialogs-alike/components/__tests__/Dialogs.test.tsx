@@ -7,7 +7,7 @@ import { zeroRender } from "@/testing/test-utils"
 
 import type { DialogDefinitionInternal } from "../../internal-types"
 
-import { Dialogs } from "../Dialogs"
+import { DialogsAlike } from "../DialogsAlike"
 
 // Mock nanoid
 let nanoidCounter = 0
@@ -106,7 +106,40 @@ vi.mock(
   })
 )
 
-describe("Dialogs", () => {
+// Mock DrawerInternal
+const MockDrawerInternal = vi.hoisted(() => {
+  return vi.fn(({ children, ...props }: any) => (
+    <div
+      data-testid="f0-drawer-internal"
+      data-title={props.title}
+      data-description={props.description}
+      data-size={props.size}
+      data-is-open={props.isOpen}
+      data-disable-close-button={props.disableClose}
+    >
+      {children}
+      <button data-testid="drawer-close-button" onClick={props.onClose}>
+        Close
+      </button>
+      {props.primaryAction?.map((action: any, index: number) => (
+        <button
+          key={`drawer-primary-${index}`}
+          data-testid={`drawer-primary-action-${index}`}
+          onClick={action.onClick}
+          disabled={action.disabled}
+        >
+          {action.label}
+        </button>
+      ))}
+    </div>
+  ))
+})
+
+vi.mock("@/components/dialog-alike/F0Drawer/internal/DrawerInternal", () => ({
+  DrawerInternal: MockDrawerInternal,
+}))
+
+describe("DialogsAlike", () => {
   beforeEach(() => {
     vi.clearAllMocks()
     nanoidCounter = 0
@@ -143,7 +176,7 @@ describe("Dialogs", () => {
         },
       ]
 
-      zeroRender(<Dialogs dialogs={dialogs} />)
+      zeroRender(<DialogsAlike items={dialogs} />)
 
       const renderedDialogs = screen.getAllByTestId("f0-dialog-internal")
       expect(renderedDialogs).toHaveLength(2)
@@ -168,7 +201,7 @@ describe("Dialogs", () => {
         },
       ]
 
-      zeroRender(<Dialogs dialogs={dialogs} />)
+      zeroRender(<DialogsAlike items={dialogs} />)
 
       expect(
         screen.getByTestId("f0-dialog-notification-internal")
@@ -177,7 +210,7 @@ describe("Dialogs", () => {
     })
 
     it("should render nothing when dialogs array is empty", () => {
-      zeroRender(<Dialogs dialogs={[]} />)
+      zeroRender(<DialogsAlike items={[]} />)
 
       expect(screen.queryByTestId("f0-dialog-internal")).not.toBeInTheDocument()
       expect(
@@ -204,7 +237,7 @@ describe("Dialogs", () => {
         },
       ]
 
-      zeroRender(<Dialogs dialogs={dialogs} />)
+      zeroRender(<DialogsAlike items={dialogs} />)
 
       const dialog = screen.getByTestId("f0-dialog-internal")
       expect(dialog).toHaveAttribute("data-title", "Test Title")
@@ -233,7 +266,7 @@ describe("Dialogs", () => {
         },
       ]
 
-      zeroRender(<Dialogs dialogs={dialogs} />)
+      zeroRender(<DialogsAlike items={dialogs} />)
 
       const dialog = screen.getByTestId("f0-dialog-notification-internal")
       expect(dialog).toHaveAttribute("data-title", "Notification Title")
@@ -262,7 +295,7 @@ describe("Dialogs", () => {
         },
       ]
 
-      zeroRender(<Dialogs dialogs={dialogs} />)
+      zeroRender(<DialogsAlike items={dialogs} />)
 
       expect(screen.getByTestId("dialog-content")).toBeInTheDocument()
       expect(screen.getByTestId("dialog-content")).toHaveTextContent(
@@ -290,7 +323,7 @@ describe("Dialogs", () => {
         },
       ]
 
-      zeroRender(<Dialogs dialogs={dialogs} />)
+      zeroRender(<DialogsAlike items={dialogs} />)
 
       const actionButton = screen.getByTestId("primary-action-0")
       expect(actionButton).toHaveTextContent("OK")
@@ -329,7 +362,7 @@ describe("Dialogs", () => {
         },
       ]
 
-      zeroRender(<Dialogs dialogs={dialogs} />)
+      zeroRender(<DialogsAlike items={dialogs} />)
 
       const actionButton = screen.getByTestId("primary-action-0")
 
@@ -366,7 +399,7 @@ describe("Dialogs", () => {
         },
       ]
 
-      zeroRender(<Dialogs dialogs={dialogs} />)
+      zeroRender(<DialogsAlike items={dialogs} />)
 
       expect(screen.getByTestId("primary-action-0")).toBeInTheDocument()
       expect(screen.queryByTestId("primary-action-1")).not.toBeInTheDocument()
@@ -401,7 +434,7 @@ describe("Dialogs", () => {
         },
       ]
 
-      zeroRender(<Dialogs dialogs={dialogs} />)
+      zeroRender(<DialogsAlike items={dialogs} />)
 
       expect(screen.getByTestId("primary-action-0")).toHaveTextContent(
         "Action 1"
@@ -437,7 +470,7 @@ describe("Dialogs", () => {
         },
       ]
 
-      zeroRender(<Dialogs dialogs={dialogs} />)
+      zeroRender(<DialogsAlike items={dialogs} />)
 
       expect(mockNanoid).toHaveBeenCalledTimes(2)
     })
@@ -461,7 +494,7 @@ describe("Dialogs", () => {
         },
       ]
 
-      zeroRender(<Dialogs dialogs={dialogs} />)
+      zeroRender(<DialogsAlike items={dialogs} />)
 
       const actionButton = screen.getByTestId("primary-action-0")
       expect(actionButton).toBeDisabled()
@@ -487,7 +520,7 @@ describe("Dialogs", () => {
         },
       ]
 
-      zeroRender(<Dialogs dialogs={dialogs} />)
+      zeroRender(<DialogsAlike items={dialogs} />)
 
       const actionButton = screen.getByTestId("notification-primary-action")
       expect(actionButton).toHaveTextContent("Confirm")
@@ -534,7 +567,7 @@ describe("Dialogs", () => {
         },
       ]
 
-      zeroRender(<Dialogs dialogs={dialogs} />)
+      zeroRender(<DialogsAlike items={dialogs} />)
 
       const actionButton = screen.getByTestId("primary-action-0")
       const closeButton = screen.getByTestId("close-button")
@@ -590,7 +623,7 @@ describe("Dialogs", () => {
         },
       ]
 
-      zeroRender(<Dialogs dialogs={dialogs} />)
+      zeroRender(<DialogsAlike items={dialogs} />)
 
       const actionButton = screen.getByTestId("primary-action-0")
       const closeButton = screen.getByTestId("close-button")
@@ -644,7 +677,7 @@ describe("Dialogs", () => {
         },
       ]
 
-      zeroRender(<Dialogs dialogs={dialogs} />)
+      zeroRender(<DialogsAlike items={dialogs} />)
 
       const primaryButton = screen.getByTestId("primary-action-0")
       const secondaryButton = screen.getByTestId("secondary-action-0")
@@ -695,7 +728,7 @@ describe("Dialogs", () => {
         },
       ]
 
-      zeroRender(<Dialogs dialogs={dialogs} />)
+      zeroRender(<DialogsAlike items={dialogs} />)
 
       const actionButton = screen.getByTestId("primary-action-0")
       const closeButton = screen.getByTestId("close-button")
@@ -763,7 +796,7 @@ describe("Dialogs", () => {
         },
       ]
 
-      zeroRender(<Dialogs dialogs={dialogs} />)
+      zeroRender(<DialogsAlike items={dialogs} />)
 
       const actionButton1 = screen.getByTestId("primary-action-0")
       const actionButton2 = screen.getByTestId("primary-action-1")
@@ -835,7 +868,7 @@ describe("Dialogs", () => {
         },
       ]
 
-      zeroRender(<Dialogs dialogs={dialogs} />)
+      zeroRender(<DialogsAlike items={dialogs} />)
 
       const closeButton = screen.getByTestId("close-button")
 
@@ -866,7 +899,7 @@ describe("Dialogs", () => {
         },
       ]
 
-      zeroRender(<Dialogs dialogs={dialogs} />)
+      zeroRender(<DialogsAlike items={dialogs} />)
 
       const closeButton = screen.getByTestId("notification-close-button")
 
@@ -896,7 +929,7 @@ describe("Dialogs", () => {
         },
       ]
 
-      zeroRender(<Dialogs dialogs={dialogs} />)
+      zeroRender(<DialogsAlike items={dialogs} />)
 
       expect(screen.getByTestId("primary-action-0")).toBeInTheDocument()
       expect(screen.queryByTestId("secondary-action-0")).not.toBeInTheDocument()
@@ -920,7 +953,7 @@ describe("Dialogs", () => {
         },
       ]
 
-      zeroRender(<Dialogs dialogs={dialogs} />)
+      zeroRender(<DialogsAlike items={dialogs} />)
 
       const actionButton = screen.getByTestId("primary-action-0")
       expect(actionButton).toBeDisabled()
@@ -954,7 +987,7 @@ describe("Dialogs", () => {
           },
         ]
 
-        zeroRender(<Dialogs dialogs={dialogs} />)
+        zeroRender(<DialogsAlike items={dialogs} />)
 
         const actionButton = screen.getByTestId("primary-action-0")
         const closeButton = screen.getByTestId("close-button")
@@ -1017,7 +1050,7 @@ describe("Dialogs", () => {
         },
       ]
 
-      zeroRender(<Dialogs dialogs={dialogs} />)
+      zeroRender(<DialogsAlike items={dialogs} />)
 
       const actionButton = screen.getByTestId("primary-action-0")
 

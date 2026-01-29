@@ -41,6 +41,12 @@ export type DialogActions = {
   secondary?: DialogAction | DialogAction[]
 }
 
+export type DialogModule = {
+  id: ModuleId
+  label: string
+  href: string
+}
+
 export type DialogDefinition = {
   /*
    * The size of the dialog.
@@ -72,24 +78,23 @@ export type DialogDefinition = {
    * This is useful for dialogs that need to be closed manually
    */
   keepOpen?: boolean
+  /**
+   * If true, the dialog will be modal (cannot be closed by clicking outside or pressing Escape).
+   * @default false
+   */
+  modal?: boolean
+  /**
+   * The module of the dialog.
+   */
+  module?: DialogModule
 }
 
-export type DialogDefinitionInternal = DialogDefinition &
-  (
-    | {
-        variant?: "default"
-        type?: "default"
-        /**
-         * If true, the dialog will be modal.
-         */
-        modal?: boolean
-        /**
-         * The module of the dialog.
-         */
-        module?: ModuleId
-      }
-    | {
-        variant: "notification"
-        type: DialogNotificationType
-      }
-  )
+export type DialogDefinitionInternal =
+  | (DialogDefinition & {
+      variant?: "default"
+      type?: "default"
+    })
+  | (Omit<DialogDefinition, "modal" | "module"> & {
+      variant: "notification"
+      type: DialogNotificationType
+    })

@@ -1,4 +1,3 @@
-import { ModuleId } from "@/components/avatars/F0AvatarModule"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import {
   DropdownInternal,
@@ -16,6 +15,8 @@ import { DrawerDescription } from "@/ui/drawer"
 
 import { useDialogWrapperContext } from "./DialogWrapperProvider"
 
+import { DialogModule } from "@/lib/providers/dialogs-alike/types"
+
 export type HeaderProps = {
   /**
    * Disables the close button of the dialog.
@@ -24,11 +25,7 @@ export type HeaderProps = {
   disableClose?: boolean
   title?: string
   description?: string
-  module?: {
-    id: ModuleId
-    label: string
-    href: string
-  }
+  module?: DialogModule
   otherActions?: DropdownInternalProps["items"]
 } & Partial<Pick<TabsProps, "tabs" | "activeTabId" | "setActiveTabId">>
 

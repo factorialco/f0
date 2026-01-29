@@ -3,7 +3,7 @@ import {
   DialogActions,
   DialogActionValue,
   DialogDefinition,
-} from "@/lib/providers/dialogs/types"
+} from "@/lib/providers/dialogs-alike/types"
 import { Optional } from "@/lib/typescript-utils/optional"
 
 export type NotificationDialogBaseOptions = Optional<

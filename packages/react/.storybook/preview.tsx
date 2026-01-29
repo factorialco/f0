@@ -28,7 +28,6 @@ export const withTheme = () => {
       </ThemeProvider>
     )
 
-    Wrapper.displayName = "WithThemeWrapper"
     return Wrapper
   }
 }
