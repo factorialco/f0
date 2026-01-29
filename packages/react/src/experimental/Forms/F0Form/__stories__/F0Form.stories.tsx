@@ -72,9 +72,9 @@ export const Default: Story = {
 }
 
 /**
- * Form with fields arranged in groups (rows)
+ * Form with fields arranged in rows
  */
-export const WithGroups: Story = {
+export const WithRows: Story = {
   render() {
     const definition: FormDefinitionItem[] = [
       {
@@ -87,54 +87,48 @@ export const WithGroups: Story = {
         },
       },
       {
-        type: "group",
-        group: {
-          direction: "row",
-          fields: [
-            {
-              id: "email",
-              type: "text",
-              inputType: "email",
-              label: "Email",
-              validation: z.string().email(),
-            },
-            {
-              id: "phone",
-              type: "text",
-              inputType: "tel",
-              label: "Phone",
-              validation: z.string().optional(),
-              placeholder: "+1 (555) 000-0000",
-            },
-          ],
-        },
+        type: "row",
+        fields: [
+          {
+            id: "email",
+            type: "text",
+            inputType: "email",
+            label: "Email",
+            validation: z.string().email(),
+          },
+          {
+            id: "phone",
+            type: "text",
+            inputType: "tel",
+            label: "Phone",
+            validation: z.string().optional(),
+            placeholder: "+1 (555) 000-0000",
+          },
+        ],
       },
       {
-        type: "group",
-        group: {
-          direction: "row",
-          fields: [
-            {
-              id: "city",
-              type: "text",
-              label: "City",
-              validation: z.string(),
-            },
-            {
-              id: "country",
-              type: "select",
-              label: "Country",
-              validation: z.string(),
-              options: [
-                { value: "us", label: "United States" },
-                { value: "uk", label: "United Kingdom" },
-                { value: "ca", label: "Canada" },
-                { value: "es", label: "Spain" },
-              ],
-              placeholder: "Select country",
-            },
-          ],
-        },
+        type: "row",
+        fields: [
+          {
+            id: "city",
+            type: "text",
+            label: "City",
+            validation: z.string(),
+          },
+          {
+            id: "country",
+            type: "select",
+            label: "Country",
+            validation: z.string(),
+            options: [
+              { value: "us", label: "United States" },
+              { value: "uk", label: "United Kingdom" },
+              { value: "ca", label: "Canada" },
+              { value: "es", label: "Spain" },
+            ],
+            placeholder: "Select country",
+          },
+        ],
       },
     ]
 
@@ -190,26 +184,23 @@ export const WithSections: Story = {
               },
             },
             {
-              type: "group",
-              group: {
-                direction: "row",
-                fields: [
-                  {
-                    id: "age",
-                    type: "number",
-                    label: "Age",
-                    validation: z.number().min(18).max(120),
-                    min: 0,
-                    max: 120,
-                  },
-                  {
-                    id: "birthdate",
-                    type: "date",
-                    label: "Birth Date",
-                    placeholder: "YYYY-MM-DD",
-                  },
-                ],
-              },
+              type: "row",
+              fields: [
+                {
+                  id: "age",
+                  type: "number",
+                  label: "Age",
+                  validation: z.number().min(18).max(120),
+                  min: 0,
+                  max: 120,
+                },
+                {
+                  id: "birthdate",
+                  type: "date",
+                  label: "Birth Date",
+                  placeholder: "YYYY-MM-DD",
+                },
+              ],
             },
           ],
         },
@@ -736,24 +727,21 @@ export const VisualDesignExample: Story = {
           title: "Schedule",
           fields: [
             {
-              type: "group",
-              group: {
-                direction: "row",
-                fields: [
-                  {
-                    id: "publishOn",
-                    type: "date",
-                    label: "Publish on",
-                    placeholder: "dd/mm/yyyy",
-                  },
-                  {
-                    id: "endsAt",
-                    type: "date",
-                    label: "Ends at",
-                    placeholder: "dd/mm/yyyy",
-                  },
-                ],
-              },
+              type: "row",
+              fields: [
+                {
+                  id: "publishOn",
+                  type: "date",
+                  label: "Publish on",
+                  placeholder: "dd/mm/yyyy",
+                },
+                {
+                  id: "endsAt",
+                  type: "date",
+                  label: "Ends at",
+                  placeholder: "dd/mm/yyyy",
+                },
+              ],
             },
             {
               type: "field",

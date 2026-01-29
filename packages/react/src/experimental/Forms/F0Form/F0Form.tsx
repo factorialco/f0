@@ -5,7 +5,7 @@ import { F0Button } from "@/components/F0Button"
 import { cn } from "@/lib/utils"
 import { Form as FormProvider } from "@/ui/form"
 
-import { GroupRenderer } from "./components/GroupRenderer"
+import { RowRenderer } from "./components/RowRenderer"
 import { SectionRenderer } from "./components/SectionRenderer"
 import { SwitchGroupRenderer } from "./components/SwitchGroupRenderer"
 import { FIELD_GAP, SECTION_MARGIN } from "./constants"
@@ -15,14 +15,14 @@ import type {
   F0FormProps,
   FieldItem,
   FormDefinitionItem,
-  GroupDefinition,
+  RowDefinition,
   SectionDefinition,
 } from "./types"
 import { useFormDefinitionSchema } from "./useFormDefinitionSchema"
 
 type GroupedItem =
   | { type: "field"; item: FieldItem }
-  | { type: "group"; item: GroupDefinition; index: number }
+  | { type: "row"; item: RowDefinition; index: number }
   | { type: "section"; item: SectionDefinition }
   | { type: "switchGroup"; fields: SwitchFieldDefinition[] }
 
@@ -49,8 +49,8 @@ function groupContiguousSwitches(
       flushSwitchGroup()
       if (item.type === "field") {
         result.push({ type: "field", item })
-      } else if (item.type === "group") {
-        result.push({ type: "group", item, index })
+      } else if (item.type === "row") {
+        result.push({ type: "row", item, index })
       } else if (item.type === "section") {
         result.push({ type: "section", item })
       }
@@ -87,14 +87,11 @@ function groupContiguousSwitches(
  *     }
  *   },
  *   {
- *     type: "group",
- *     group: {
- *       direction: "row",
- *       fields: [
- *         { id: "email", type: "text", inputType: "email", label: "Email" },
- *         { id: "phone", type: "text", inputType: "tel", label: "Phone" }
- *       ]
- *     }
+ *     type: "row",
+ *     fields: [
+ *       { id: "email", type: "text", inputType: "email", label: "Email" },
+ *       { id: "phone", type: "text", inputType: "tel", label: "Phone" }
+ *     ]
  *   },
  *   {
  *     type: "section",
@@ -185,11 +182,11 @@ export function F0Form<TValues extends Record<string, unknown>>({
                   field={groupedItem.item.field}
                 />
               )
-            case "group":
+            case "row":
               return (
-                <GroupRenderer
-                  key={`group-${groupedItem.index}`}
-                  group={groupedItem.item.group}
+                <RowRenderer
+                  key={`row-${groupedItem.index}`}
+                  row={groupedItem.item}
                 />
               )
             case "section":

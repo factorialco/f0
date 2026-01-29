@@ -82,17 +82,14 @@ describe("F0Form", () => {
     ).not.toBeInTheDocument()
   })
 
-  it("renders groups with multiple fields", () => {
+  it("renders rows with multiple fields", () => {
     const definition: FormDefinitionItem[] = [
       {
-        type: "group",
-        group: {
-          direction: "row",
-          fields: [
-            { id: "firstName", type: "text", label: "First Name" },
-            { id: "lastName", type: "text", label: "Last Name" },
-          ],
-        },
+        type: "row",
+        fields: [
+          { id: "firstName", type: "text", label: "First Name" },
+          { id: "lastName", type: "text", label: "Last Name" },
+        ],
       },
     ]
 
@@ -175,27 +172,24 @@ describe("getFormDefinitionSchema", () => {
     expect(invalidResult.success).toBe(false)
   })
 
-  it("extracts schema from groups", () => {
+  it("extracts schema from rows", () => {
     const definition: FormDefinitionItem[] = [
       {
-        type: "group",
-        group: {
-          direction: "row",
-          fields: [
-            {
-              id: "first",
-              type: "text",
-              label: "First",
-              validation: z.string(),
-            },
-            {
-              id: "second",
-              type: "number",
-              label: "Second",
-              validation: z.number(),
-            },
-          ],
-        },
+        type: "row",
+        fields: [
+          {
+            id: "first",
+            type: "text",
+            label: "First",
+            validation: z.string(),
+          },
+          {
+            id: "second",
+            type: "number",
+            label: "Second",
+            validation: z.number(),
+          },
+        ],
       },
     ]
 

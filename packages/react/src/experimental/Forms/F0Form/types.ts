@@ -30,18 +30,12 @@ export interface FieldItem {
 }
 
 /**
- * Group definition for rendering fields in a row or column
+ * Row definition for rendering fields horizontally in a row
  */
-export interface GroupDefinition {
-  type: "group"
-  group: {
-    /** Layout direction for the group */
-    direction: "row" | "column"
-    /** Fields to render in the group */
-    fields: FieldDefinition[]
-    /** Gap between fields (tailwind spacing scale) */
-    gap?: "2" | "4" | "6" | "8"
-  }
+export interface RowDefinition {
+  type: "row"
+  /** Fields to render in the row */
+  fields: FieldDefinition[]
 }
 
 /**
@@ -58,21 +52,21 @@ export interface SectionDefinition {
     description?: string
     /** Conditional rendering for the entire section */
     renderIf?: SectionRenderIf
-    /** Fields and groups within this section */
-    fields: (FieldItem | GroupDefinition)[]
+    /** Fields and rows within this section */
+    fields: (FieldItem | RowDefinition)[]
   }
 }
 
 /**
  * Union of all definition item types that can appear in the form definition array
  */
-export type FormDefinitionItem = FieldItem | GroupDefinition | SectionDefinition
+export type FormDefinitionItem = FieldItem | RowDefinition | SectionDefinition
 
 /**
  * Props for the F0Form component
  */
 export interface F0FormProps<TValues extends Record<string, unknown>> {
-  /** Array of form definition items (fields, groups, sections) */
+  /** Array of form definition items (fields, rows, sections) */
   definition: FormDefinitionItem[]
   /** Default values for the form fields */
   defaultValues?: Partial<TValues>
@@ -106,8 +100,8 @@ export type ExtractFieldIds<T extends FormDefinitionItem[]> =
   T[number] extends infer Item
     ? Item extends FieldItem
       ? Item["field"]["id"]
-      : Item extends GroupDefinition
-        ? Item["group"]["fields"][number]["id"]
+      : Item extends RowDefinition
+        ? Item["fields"][number]["id"]
         : Item extends SectionDefinition
           ? ExtractFieldIds<Item["section"]["fields"]>
           : never

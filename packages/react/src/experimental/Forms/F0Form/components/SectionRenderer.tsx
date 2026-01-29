@@ -1,17 +1,18 @@
 import { useFormContext } from "react-hook-form"
 
-import { FIELD_GAP } from "../constants"
 import { SectionHeader } from "@/experimental/Information/Headers/SectionHeader"
+
+import { FIELD_GAP } from "../constants"
 import { FieldRenderer } from "../fields/FieldRenderer"
 import type { SwitchFieldDefinition } from "../fields/switch/types"
 import { evaluateRenderIf } from "../fields/utils"
 import type {
   FieldItem,
-  GroupDefinition,
+  RowDefinition,
   SectionDefinition,
   SectionRenderIf,
 } from "../types"
-import { GroupRenderer } from "./GroupRenderer"
+import { RowRenderer } from "./RowRenderer"
 import { SwitchGroupRenderer } from "./SwitchGroupRenderer"
 
 interface SectionRendererProps {
@@ -34,14 +35,14 @@ function evaluateSectionRenderIf(
 
 type RenderedItem =
   | { type: "field"; item: FieldItem }
-  | { type: "group"; item: GroupDefinition; index: number }
+  | { type: "row"; item: RowDefinition; index: number }
   | { type: "switchGroup"; fields: SwitchFieldDefinition[] }
 
 /**
  * Groups contiguous switch fields together for rendering in a bordered container
  */
 function groupContiguousSwitches(
-  fields: (FieldItem | GroupDefinition)[]
+  fields: (FieldItem | RowDefinition)[]
 ): RenderedItem[] {
   const result: RenderedItem[] = []
   let currentSwitchGroup: SwitchFieldDefinition[] = []
@@ -60,8 +61,8 @@ function groupContiguousSwitches(
       flushSwitchGroup()
       if (item.type === "field") {
         result.push({ type: "field", item })
-      } else if (item.type === "group") {
-        result.push({ type: "group", item, index })
+      } else if (item.type === "row") {
+        result.push({ type: "row", item, index })
       }
     }
   })
@@ -109,13 +110,8 @@ export function SectionRenderer({ section }: SectionRendererProps) {
               <FieldRenderer key={item.item.field.id} field={item.item.field} />
             )
           }
-          if (item.type === "group") {
-            return (
-              <GroupRenderer
-                key={`group-${item.index}`}
-                group={item.item.group}
-              />
-            )
+          if (item.type === "row") {
+            return <RowRenderer key={`row-${item.index}`} row={item.item} />
           }
           return null
         })}

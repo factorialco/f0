@@ -49,8 +49,8 @@ function extractFieldsFromItem(
   if (item.type === "field") {
     const field = item.field
     schemaFields[field.id] = field.validation ?? getDefaultValidation(field)
-  } else if (item.type === "group") {
-    for (const field of item.group.fields) {
+  } else if (item.type === "row") {
+    for (const field of item.fields) {
       schemaFields[field.id] = field.validation ?? getDefaultValidation(field)
     }
   } else if (item.type === "section") {
@@ -130,8 +130,8 @@ export function extractAllFields(
   const extractFromItem = (item: FormDefinitionItem) => {
     if (item.type === "field") {
       fields.push(item.field)
-    } else if (item.type === "group") {
-      fields.push(...item.group.fields)
+    } else if (item.type === "row") {
+      fields.push(...item.fields)
     } else if (item.type === "section") {
       for (const sectionItem of item.section.fields) {
         extractFromItem(sectionItem)
