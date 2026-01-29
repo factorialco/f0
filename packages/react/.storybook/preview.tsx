@@ -9,6 +9,7 @@ import { INITIAL_VIEWPORTS } from "storybook/viewport"
 
 import "../src/styles.css"
 import { aiTranslations } from "@/ai/AiChat/providers/AiChatTranslationsProvider"
+import { WeekStartDay } from "@/experimental.ts"
 import { dataCollectionLocalStorageHandler } from "@/lib/providers/datacollection"
 import { F0Provider } from "@/lib/providers/f0"
 import { buildTranslations, defaultTranslations } from "@/lib/providers/i18n"
@@ -21,11 +22,14 @@ MotionGlobalConfig.skipAnimations = isChromatic()
 export const withTheme = () => {
   // eslint-disable-next-line react/display-name
   return (Story: StoryFn) => {
-    return (
+    const Wrapper = (
       <ThemeProvider theme="light">
         <Story />
       </ThemeProvider>
     )
+
+    Wrapper.displayName = "WithThemeWrapper"
+    return Wrapper
   }
 }
 
@@ -46,6 +50,10 @@ export const F0 = (Story: StoryFn, { parameters }: StoryContext) => {
       l10n={{
         l10n: {
           locale: parameters.l10n?.locale ?? "en",
+          date: {
+            weekStartsOn:
+              parameters.l10n?.date?.weekStartsOn ?? WeekStartDay.Monday,
+          },
         },
       }}
       link={{

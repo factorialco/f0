@@ -7,5 +7,5 @@ export type RatingQuestionProps =
   } & { options: { value: number; label: string }[] }
 
 export const RatingQuestion = (props: RatingQuestionProps) => {
-  return <BaseScoreQuestion {...props} />
+  return <BaseScoreQuestion {...props} type="rating" />
 }

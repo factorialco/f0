@@ -1,6 +1,8 @@
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 
+import { WeekStartDay } from "@/experimental/OneCalendar/types"
+
 import { L10nProvider, useL10n } from "./l10n-provider"
 
 // Test component that uses the l10n hook
@@ -12,7 +14,9 @@ function TestComponent() {
 describe("L10nProvider", () => {
   it("provides locale value to children", () => {
     render(
-      <L10nProvider l10n={{ locale: "es-ES" }}>
+      <L10nProvider
+        l10n={{ locale: "es-ES", date: { weekStartsOn: WeekStartDay.Monday } }}
+      >
         <TestComponent />
       </L10nProvider>
     )

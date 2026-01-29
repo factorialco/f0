@@ -1,6 +1,7 @@
 export * from "@/ui/textarea"
 import { ComponentProps } from "react"
 
+import { experimentalComponent } from "@/lib/experimental"
 import { Textarea as ShadcnTextarea } from "@/ui/textarea"
 
 import { Component } from "../../../../lib/component/component"
@@ -27,7 +28,7 @@ export type TextareaProps = Pick<
   | "error"
 >
 
-const Textarea: React.FC<TextareaProps> = Component(
+const _Textarea: React.FC<TextareaProps> = Component(
   {
     name: "Textarea",
     type: "form",
@@ -35,4 +36,7 @@ const Textarea: React.FC<TextareaProps> = Component(
   ShadcnTextarea
 )
 
-export { Textarea }
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export const Textarea = experimentalComponent("Textarea", _Textarea)

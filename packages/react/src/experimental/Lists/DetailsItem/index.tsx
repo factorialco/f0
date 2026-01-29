@@ -1,6 +1,7 @@
 import { ComponentProps, FC, forwardRef } from "react"
 
 import { Weekdays } from "@/experimental/Widgets/Content/Weekdays"
+import { experimentalComponent } from "@/lib/experimental"
 import { cn } from "@/lib/utils"
 
 import { DataList } from "../DataList"
@@ -47,7 +48,7 @@ const ItemContent: FC<{ content: Content }> = ({ content }) => (
   </>
 )
 
-export const DetailsItem = forwardRef<HTMLDivElement, DetailsItemType>(
+const _DetailsItem = forwardRef<HTMLDivElement, DetailsItemType>(
   function DetailsItem(
     { title, content, isHorizontal = false, spacingAtTheBottom },
     ref
@@ -72,3 +73,8 @@ export const DetailsItem = forwardRef<HTMLDivElement, DetailsItemType>(
     )
   }
 )
+
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export const DetailsItem = experimentalComponent("DetailsItem", _DetailsItem)

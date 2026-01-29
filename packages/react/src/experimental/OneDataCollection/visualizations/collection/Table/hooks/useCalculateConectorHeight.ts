@@ -72,7 +72,7 @@ export const useCalculateConectorHeight = (
     }
 
     const hasMoreHeight = () => {
-      return withHasMore ? BUTTON_PADDING : 0
+      return withHasMore && nestedVariant === "basic" ? BUTTON_PADDING : 0
     }
 
     const calculateHeight = () => {
