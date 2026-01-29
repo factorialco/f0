@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.339.1](https://github.com/factorialco/f0/compare/f0-react-v1.339.0...f0-react-v1.339.1) (2026-01-28)
+
+
+### Bug Fixes
+
+* resource header not rendering because Metadata component was wrapped in memo ([#3315](https://github.com/factorialco/f0/issues/3315)) ([0e7b2f4](https://github.com/factorialco/f0/commit/0e7b2f45abd95f7afd78107f2acc0c784c9e3d5a))
+
+## [1.339.0](https://github.com/factorialco/f0/compare/f0-react-v1.338.2...f0-react-v1.339.0) (2026-01-28)
+
+
+### Features
+
+* add PushPin and PushPinSolid icons ([#3313](https://github.com/factorialco/f0/issues/3313)) ([cb03a06](https://github.com/factorialco/f0/commit/cb03a066371b9db579838c237cf39b75a7491c82))
+
 ## [1.338.2](https://github.com/factorialco/f0/compare/f0-react-v1.338.1...f0-react-v1.338.2) (2026-01-28)
 
 
