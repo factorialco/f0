@@ -4,12 +4,13 @@ import { BaseAvatarProps } from "../internal/BaseAvatar"
 
 export type F0AvatarDateProps = {
   date: Date
-} & Partial<Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">>
+} & Partial<Pick<BaseAvatarProps, "aria-label" | "aria-labelledby" | "testId">>
 
 export const F0AvatarDate = ({
   date,
   "aria-label": ariaLabel,
   "aria-labelledby": ariaLabelledby,
+  testId,
 }: F0AvatarDateProps) => {
   const dateDay = getDayOfMonth(date)
   const month = getAbbreviateMonth(date)
@@ -19,6 +20,7 @@ export const F0AvatarDate = ({
       className="flex h-10 w-10 flex-col items-center justify-center rounded border border-solid border-f1-border-secondary bg-f1-background-inverse-secondary"
       aria-label={ariaLabel}
       aria-labelledby={ariaLabelledby}
+      data-testid={testId}
     >
       <div className="pt-0.5 text-xs font-semibold uppercase leading-3 text-f1-special-highlight dark:text-f1-foreground-inverse-secondary">
         {month}

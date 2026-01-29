@@ -1,5 +1,6 @@
 import React, { forwardRef, useEffect, useMemo, useRef, useState } from "react"
 
+import type { TestableProps } from "@/global.types"
 import { parseMarkdown, stripMarkdown } from "@/lib/markdown"
 import { cn } from "@/lib/utils"
 import {
@@ -135,7 +136,7 @@ const EllipsisWrapper = forwardRef<HTMLElement, EllipsisWrapperProps>(
 )
 EllipsisWrapper.displayName = "EllipsisWrapper"
 
-type OneEllipsisProps = {
+type OneEllipsisProps = TestableProps & {
   /**
    * The className to apply to the text.
    */
@@ -177,6 +178,7 @@ const OneEllipsis = forwardRef<HTMLElement, OneEllipsisProps>(
       disabled = false,
       markdown = false,
       tag = "span",
+      testId,
       ...props
     },
     forwardedRef
@@ -197,7 +199,7 @@ const OneEllipsis = forwardRef<HTMLElement, OneEllipsisProps>(
           markdown={markdown}
           tag={tag}
           {...props}
-          data-testid="one-ellipsis"
+          data-testid={testId ?? "one-ellipsis"}
           noTooltip={noTooltip}
         >
           {children}

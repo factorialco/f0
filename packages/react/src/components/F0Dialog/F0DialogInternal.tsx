@@ -82,6 +82,7 @@ export const F0DialogInternal: FC<F0DialogInternalProps> = ({
   activeTabId,
   setActiveTabId,
   disableContentPadding,
+  testId,
 }) => {
   // Use state to store the container element so we can trigger re-renders
   // when it's set. This ensures child components like F0Select get the
@@ -161,7 +162,11 @@ export const F0DialogInternal: FC<F0DialogInternalProps> = ({
       >
         <Drawer open={isOpen} onOpenChange={handleOpenChange}>
           <DrawerOverlay className="bg-f1-background-overlay" />
-          <DrawerContent ref={setContentRef} className={contentClassName}>
+          <DrawerContent
+            ref={setContentRef}
+            className={contentClassName}
+            data-testid={testId}
+          >
             <F0DialogHeader {...headerProps} />
             <F0DialogContent disableContentPadding={disableContentPadding}>
               {children}
@@ -197,6 +202,7 @@ export const F0DialogInternal: FC<F0DialogInternalProps> = ({
           })}
           className={contentClassName}
           onOpenAutoFocus={(e) => e.preventDefault()}
+          data-testid={testId}
         >
           <F0DialogHeader {...headerProps} />
           <F0DialogContent disableContentPadding={disableContentPadding}>

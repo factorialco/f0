@@ -6,4 +6,4 @@ export type F0AvatarCompanyProps = {
   src?: string
   size?: BaseAvatarProps["size"]
   badge?: AvatarBadge
-} & Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">
+} & Pick<BaseAvatarProps, "aria-label" | "aria-labelledby" | "testId">

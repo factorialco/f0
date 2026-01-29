@@ -18,6 +18,7 @@ export function F0DatePicker({
   minDate,
   maxDate,
   open = false,
+  testId,
   ...inputProps
 }: F0DatePickerProps) {
   const [localValue, setLocalValue] = useState<DatePickerValue | undefined>()
@@ -141,6 +142,7 @@ export function F0DatePicker({
       open={isOpen}
       onOpenChange={handlePickerOpenChange}
       asChild
+      data-testid={testId}
     >
       <DateInput
         ref={inputRef}

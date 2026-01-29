@@ -8,7 +8,7 @@ import type { F0TagRawProps } from "./types"
 import { BaseTag } from "../internal/BaseTag"
 
 export const F0TagRaw = forwardRef<HTMLDivElement, F0TagRawProps>(
-  ({ text, additionalAccessibleText, icon, onlyIcon }, ref) => {
+  ({ text, additionalAccessibleText, icon, onlyIcon, testId }, ref) => {
     useTextFormatEnforcer(
       text,
       { disallowEmpty: true },
@@ -32,6 +32,7 @@ export const F0TagRaw = forwardRef<HTMLDivElement, F0TagRawProps>(
         hideLabel={onlyIcon}
         text={text}
         additionalAccessibleText={additionalAccessibleText}
+        testId={testId}
       />
     )
   }

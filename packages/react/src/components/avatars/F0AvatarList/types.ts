@@ -1,3 +1,5 @@
+import type { TestableProps } from "@/global.types"
+
 import {
   CompanyAvatarVariant,
   FileAvatarVariant,
@@ -34,7 +36,7 @@ export type F0AvatarListPropsAvatars =
     }
 
 // Discriminated union that enforces type consistency
-export type F0AvatarListProps = {
+export type F0AvatarListProps = TestableProps & {
   /**
    * The size of the avatars in the list.
    * @default "md"

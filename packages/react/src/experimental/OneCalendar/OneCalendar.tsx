@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
 
 import { F0Button } from "@/components/F0Button"
+import type { TestableProps } from "@/global.types"
 import { ChevronLeft, ChevronRight } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { useL10n } from "@/lib/providers/l10n"
@@ -26,7 +27,7 @@ import { isActiveDate, toDateRange } from "./utils"
 
 const privateProps = ["compact"] as const
 
-interface OneCalendarInternalProps {
+interface OneCalendarInternalProps extends TestableProps {
   mode: CalendarMode
   view: CalendarView
   onSelect?: (date: Date | DateRange | null) => void
@@ -82,6 +83,7 @@ const OneCalendarInternal = ({
   maxDate,
   compact = false,
   weekStartsOn,
+  testId,
 }: OneCalendarInternalProps) => {
   const i18n = useI18n()
   const l10n = useL10n()
@@ -245,7 +247,7 @@ const OneCalendarInternal = ({
   }
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col" data-testid={testId}>
       {showInput && (
         <div className="mb-2 flex gap-2">
           <Input

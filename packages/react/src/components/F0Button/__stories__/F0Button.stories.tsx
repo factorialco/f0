@@ -427,3 +427,25 @@ export const AsyncLoading: Story = {
     )
   },
 }
+
+export const WithTestId: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Demonstrates using the `testId` prop to add a `data-testid` attribute for testing purposes. This allows selecting the element in tests using `getByTestId`.",
+      },
+    },
+  },
+  args: {
+    variant: "default",
+    label: "Submit Form",
+    testId: "submit-button",
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    const button = canvas.getByTestId("submit-button")
+    await expect(button).toBeInTheDocument()
+  },
+}

@@ -121,6 +121,7 @@ const F0SelectComponent = forwardRef(function Select<
     multiple,
     portalContainer,
     asList = false,
+    testId,
     ...props
   }: F0SelectProps<T, R>,
   ref: React.ForwardedRef<HTMLButtonElement>
@@ -696,6 +697,7 @@ const F0SelectComponent = forwardRef(function Select<
           "flex w-full max-h-full flex-col gap-2",
           disabled && "cursor-not-allowed opacity-50"
         )}
+        data-testid={testId}
       >
         {label && !hideLabel && (
           <Label
@@ -726,7 +728,7 @@ const F0SelectComponent = forwardRef(function Select<
   }
 
   return (
-    <>
+    <div data-testid={testId}>
       <SelectPrimitive {...selectPrimitiveProps}>
         <SelectTrigger ref={ref} asChild>
           {children ? (
@@ -827,7 +829,7 @@ const F0SelectComponent = forwardRef(function Select<
         </SelectTrigger>
         {openLocal && selectContent}
       </SelectPrimitive>
-    </>
+    </div>
   )
 })
 

@@ -73,6 +73,7 @@ const _VBarChart = <K extends ChartConfig>(
     hideGrid = false,
     showRatio = false,
     valueFormatter,
+    testId,
   }: VerticalBarChartProps<K>,
   ref: ForwardedRef<HTMLDivElement>
 ) => {
@@ -105,7 +106,12 @@ const _VBarChart = <K extends ChartConfig>(
   }
 
   return (
-    <ChartContainer config={dataConfig} ref={ref} aspect={aspect}>
+    <ChartContainer
+      config={dataConfig}
+      ref={ref}
+      aspect={aspect}
+      data-testid={testId}
+    >
       <BarChartPrimitive
         layout="vertical"
         accessibilityLayer

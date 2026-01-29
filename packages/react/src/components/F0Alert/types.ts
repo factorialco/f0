@@ -1,4 +1,5 @@
 import type { IconType } from "@/components/F0Icon"
+import type { TestableProps } from "@/global.types"
 
 export type AlertVariant =
   | "info"
@@ -7,7 +8,7 @@ export type AlertVariant =
   | "neutral"
   | "positive"
 
-export interface F0AlertProps {
+export interface F0AlertProps extends TestableProps {
   title: string
   description: string
   action?: {

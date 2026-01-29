@@ -1,5 +1,6 @@
 import { useCallback, useMemo } from "react"
 
+import type { TestableProps } from "@/global.types"
 import { experimentalComponent } from "@/lib/experimental"
 import {
   PaginationContent,
@@ -13,7 +14,7 @@ import {
 
 import { cn } from "../../lib/utils"
 
-interface OnePaginationProps {
+interface OnePaginationProps extends TestableProps {
   /**
    * The total number of pages. Pass 0 if the total is unknown.
    */
@@ -70,6 +71,7 @@ function _OnePagination({
   visibleRange = 3,
   hasNextPage = true,
   disabled = false,
+  testId,
 }: OnePaginationProps) {
   const isIndeterminate = totalPages === 0
 
@@ -143,7 +145,7 @@ function _OnePagination({
   }, [currentPage, totalPages, visibleRange, isIndeterminate])
 
   return (
-    <PaginationRoot>
+    <PaginationRoot data-testid={testId}>
       <PaginationContent role="navigation" aria-label={ariaLabel}>
         {showControls && (
           <PaginationItem>

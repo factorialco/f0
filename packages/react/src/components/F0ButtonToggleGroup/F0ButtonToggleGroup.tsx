@@ -16,6 +16,7 @@ export const F0ButtonToggleGroup = (props: F0ButtonToggleGroupProps) => {
     onChange,
     variant,
     disabled,
+    testId,
   } = props
 
   const [localValue, setLocalValue] = useState(value)
@@ -70,6 +71,7 @@ export const F0ButtonToggleGroup = (props: F0ButtonToggleGroupProps) => {
       onValueChange={handleChange}
       disabled={disabled}
       className={cn("flex flex-wrap items-center justify-center gap-1")}
+      data-testid={testId}
     >
       {localItems.map((item) => (
         <ToggleGroupItem

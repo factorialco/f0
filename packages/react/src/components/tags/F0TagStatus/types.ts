@@ -1,3 +1,5 @@
+import type { TestableProps } from "@/global.types"
+
 export const statuses = [
   "neutral",
   "info",
@@ -10,7 +12,7 @@ export type Variant = (typeof statuses)[number]
 
 export type StatusVariant = Variant
 
-export interface F0TagStatusProps {
+export interface F0TagStatusProps extends TestableProps {
   text: string
   variant: Variant
   /**

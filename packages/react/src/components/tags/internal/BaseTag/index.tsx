@@ -3,10 +3,11 @@ import { forwardRef, ReactNode } from "react"
 import { F0Icon } from "@/components/F0Icon"
 import { OneEllipsis } from "@/components/OneEllipsis"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
+import type { TestableProps } from "@/global.types"
 import { InfoCircleLine } from "@/icons/app"
 import { cn } from "@/lib/utils"
 
-type BaseTagProps = {
+type BaseTagProps = TestableProps & {
   /**
    * Sometimes you need to clarify the status for screen reader users
    * E.g., when showing a tooltip for sighted user, provide the tooltip text to this prop because tooltips aren't accessible
@@ -24,17 +25,17 @@ type BaseTagProps = {
    */
   hideLabel?: boolean
 } & (
-  | {
-      left: ReactNode
-      text?: string
-      right?: ReactNode
-    }
-  | {
-      left?: ReactNode
-      text: string
-      right?: ReactNode
-    }
-)
+    | {
+        left: ReactNode
+        text?: string
+        right?: ReactNode
+      }
+    | {
+        left?: ReactNode
+        text: string
+        right?: ReactNode
+      }
+  )
 
 export const BaseTag = forwardRef<HTMLDivElement, BaseTagProps>(
   (
@@ -48,13 +49,17 @@ export const BaseTag = forwardRef<HTMLDivElement, BaseTagProps>(
       info,
       shape = "rounded",
       hideLabel,
+      testId,
     },
     ref
   ) => {
     additionalAccessibleText =
       additionalAccessibleText || (hideLabel ? text : undefined)
     return (
-      <div className="flex w-fit max-w-full flex-row items-center justify-start gap-1">
+      <div
+        className="flex w-fit max-w-full flex-row items-center justify-start gap-1"
+        data-testid={testId}
+      >
         <div
           ref={ref}
           className={cn(

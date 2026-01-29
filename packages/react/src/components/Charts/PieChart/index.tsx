@@ -1,6 +1,7 @@
 import { ComponentProps, ForwardedRef } from "react"
 import { Cell, Label, Pie, PieChart as PieChartPrimitive } from "recharts"
 
+import type { TestableProps } from "@/global.types"
 import {
   ChartContainer,
   ChartLegend,
@@ -19,7 +20,7 @@ export type PieChartItem = {
   color?: string
 }
 
-export type PieChartProps = {
+export type PieChartProps = TestableProps & {
   dataConfig: ChartConfig
   data: PieChartItem[]
   tickFormatter?: (value: string) => string
@@ -28,7 +29,7 @@ export type PieChartProps = {
 }
 
 export const _PieChart = (
-  { data, dataConfig, overview, aspect, tickFormatter }: PieChartProps,
+  { data, dataConfig, overview, aspect, tickFormatter, testId }: PieChartProps,
   ref: ForwardedRef<HTMLDivElement>
 ) => {
   const preparedData = data.map((item, index) => ({
@@ -57,6 +58,7 @@ export const _PieChart = (
       aspect={aspect}
       data-chromatic="ignore"
       style={{ height: 380 }}
+      data-testid={testId}
     >
       <PieChartPrimitive accessibilityLayer margin={{ left: 0, right: 0 }}>
         {sum !== 0 && (

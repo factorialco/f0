@@ -18,7 +18,7 @@ export type F0AvatarTeamProps = {
    * The badge to display on the avatar. Can be a module badge or a custom badge.
    */
   badge?: AvatarBadge
-} & Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">
+} & Pick<BaseAvatarProps, "aria-label" | "aria-labelledby" | "testId">
 
 export const F0AvatarTeam = ({
   name,
@@ -27,6 +27,7 @@ export const F0AvatarTeam = ({
   "aria-label": ariaLabel,
   "aria-labelledby": ariaLabelledby,
   badge,
+  testId,
 }: F0AvatarTeamProps) => {
   return (
     <BaseAvatar
@@ -38,6 +39,7 @@ export const F0AvatarTeam = ({
       aria-label={ariaLabel}
       aria-labelledby={ariaLabelledby}
       badge={badge}
+      testId={testId}
     />
   )
 }

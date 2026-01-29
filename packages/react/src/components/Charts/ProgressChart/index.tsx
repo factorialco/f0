@@ -15,14 +15,18 @@ export type ProgressBarProps<K extends ChartConfig = ChartConfig> =
   }
 
 const _ProgressBar = <K extends ChartConfig>(
-  { value, max = 100, label, color }: ProgressBarProps<K>,
+  { value, max = 100, label, color, testId }: ProgressBarProps<K>,
   _ref: ForwardedRef<HTMLDivElement>
 ) => {
   const barColor = color ? getColor(color) : getColor("categorical-1")
   const percentage = (value / max) * 100
 
   return (
-    <div className="flex items-center space-x-2" aria-live="polite">
+    <div
+      className="flex items-center space-x-2"
+      aria-live="polite"
+      data-testid={testId}
+    >
       <div className="flex-grow">
         <Progress
           color={barColor}

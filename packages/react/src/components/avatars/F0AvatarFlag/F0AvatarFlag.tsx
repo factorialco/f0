@@ -11,6 +11,7 @@ export const F0AvatarFlag = ({
   "aria-label": ariaLabel,
   "aria-labelledby": ariaLabelledby,
   badge,
+  testId,
 }: F0AvatarFlagProps) => {
   const FlagComponent = getFlag(flag) as React.ComponentType | undefined
 
@@ -28,6 +29,7 @@ export const F0AvatarFlag = ({
       aria-label={ariaLabel}
       aria-labelledby={ariaLabelledby}
       badge={badge}
+      testId={testId}
     />
   )
 }

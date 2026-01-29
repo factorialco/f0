@@ -2,6 +2,7 @@ import { ReactNode } from "react"
 
 import { ModuleId } from "@/components/avatars/F0AvatarModule"
 import { DropdownInternalProps } from "@/experimental/Navigation/Dropdown/internal"
+import type { TestableProps } from "@/global.types"
 import { TabsProps } from "@/experimental/Navigation/Tabs"
 
 import {
@@ -45,7 +46,7 @@ export type F0DialogProviderProps = {
   portalContainer: HTMLDivElement | null
 }
 
-export type F0DialogInternalProps = {
+export type F0DialogInternalProps = TestableProps & {
   // Whether the dialog is open
   isOpen: boolean
   // Callback when dialog is closed

@@ -7,6 +7,7 @@ import {
   RadarChart as RadarChartPrimitive,
 } from "recharts"
 
+import type { TestableProps } from "@/global.types"
 import {
   ChartContainer,
   ChartLegend,
@@ -18,7 +19,7 @@ import { getCategoricalColor, getColor } from "../utils/colors"
 import { fixedForwardRef } from "../utils/forwardRef"
 import { ChartConfig, ChartItem } from "../utils/types"
 
-export type RadarChartProps<K extends ChartConfig> = {
+export type RadarChartProps<K extends ChartConfig> = TestableProps & {
   dataConfig: K
   data: ChartItem<K>[]
   scaleMin?: number
@@ -27,7 +28,7 @@ export type RadarChartProps<K extends ChartConfig> = {
 }
 
 export const _RadarChart = <K extends ChartConfig>(
-  { data, dataConfig, scaleMin, scaleMax, aspect }: RadarChartProps<K>,
+  { data, dataConfig, scaleMin, scaleMax, aspect, testId }: RadarChartProps<K>,
   ref: ForwardedRef<HTMLDivElement>
 ) => {
   const items = Object.keys(dataConfig)
@@ -42,6 +43,7 @@ export const _RadarChart = <K extends ChartConfig>(
       ref={ref}
       aspect={aspect}
       data-chromatic="ignore"
+      data-testid={testId}
     >
       <RadarChartPrimitive accessibilityLayer data={preparedData}>
         <ChartTooltip

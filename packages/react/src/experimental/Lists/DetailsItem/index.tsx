@@ -1,5 +1,6 @@
 import { ComponentProps, FC, forwardRef } from "react"
 
+import type { TestableProps } from "@/global.types"
 import { Weekdays } from "@/experimental/Widgets/Content/Weekdays"
 import { experimentalComponent } from "@/lib/experimental"
 import { cn } from "@/lib/utils"
@@ -26,7 +27,7 @@ type Content =
       type: "dot-tag"
     })
 
-export interface DetailsItemType {
+export interface DetailsItemType extends TestableProps {
   title: string
   content: Content | Content[]
   isHorizontal?: boolean
@@ -50,7 +51,7 @@ const ItemContent: FC<{ content: Content }> = ({ content }) => (
 
 const _DetailsItem = forwardRef<HTMLDivElement, DetailsItemType>(
   function DetailsItem(
-    { title, content, isHorizontal = false, spacingAtTheBottom },
+    { title, content, isHorizontal = false, spacingAtTheBottom, testId },
     ref
   ) {
     const contentArray = Array.isArray(content) ? content : [content]
@@ -63,6 +64,7 @@ const _DetailsItem = forwardRef<HTMLDivElement, DetailsItemType>(
           spacingAtTheBottom && !isHorizontal && "pb-3",
           isHorizontal && "xs:[&_ul>li]:p-0 [&_ul]:flex-1"
         )}
+        data-testid={testId}
       >
         <DataList label={title} isHorizontal={isHorizontal}>
           {contentArray.map((c, i) => (

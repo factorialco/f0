@@ -49,11 +49,12 @@ export const F0Alert = ({
   link,
   icon,
   variant = "neutral",
+  testId,
 }: F0AlertProps) => {
   const containerRef = useRef<HTMLDivElement>(null)
 
   return (
-    <div ref={containerRef} className="@container">
+    <div ref={containerRef} className="@container" data-testid={testId}>
       <div className={alertVariants({ variant })}>
         <div
           className={cn(

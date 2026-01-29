@@ -1,4 +1,5 @@
 import { IconType } from "@/components/F0Icon"
+import type { TestableProps } from "@/global.types"
 import {
   ActionButtonVariant,
   ActionProps,
@@ -20,7 +21,8 @@ export type ButtonInternalProps = Pick<
   | "tooltip"
   | "fontSize"
 > &
-  DataAttributes & {
+  DataAttributes &
+  TestableProps & {
     /**
      * The aria-label of the button if not provided title or label will be used.
      */

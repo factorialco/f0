@@ -1,5 +1,6 @@
 import { ForwardedRef } from "react"
 
+import type { TestableProps } from "@/global.types"
 import {
   Tooltip,
   TooltipContent,
@@ -10,7 +11,7 @@ import {
 import { getCategoricalColor, getColor } from "../utils/colors"
 import { fixedForwardRef } from "../utils/forwardRef"
 
-export interface CategoryBarProps {
+export interface CategoryBarProps extends TestableProps {
   data: {
     name: string
     value: number
@@ -21,14 +22,14 @@ export interface CategoryBarProps {
 }
 
 const _CategoryBarChart = (
-  { data, legend = true, hideTooltip = false }: CategoryBarProps,
+  { data, legend = true, hideTooltip = false, testId }: CategoryBarProps,
   ref: ForwardedRef<HTMLDivElement>
 ) => {
   const total = data.reduce((sum, category) => sum + category.value, 0)
 
   return (
     <TooltipProvider>
-      <div className="w-full" ref={ref}>
+      <div className="w-full" ref={ref} data-testid={testId}>
         <div className="flex h-2 gap-1 overflow-hidden">
           {data.map((category, index) => {
             const percentage = (category.value / total) * 100

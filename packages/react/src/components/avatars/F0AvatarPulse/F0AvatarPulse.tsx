@@ -65,7 +65,7 @@ export type F0AvatarPulseProps = {
    * The callback to be called when the pulse is clicked.
    */
   onPulseClick: () => void
-} & Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">
+} & Pick<BaseAvatarProps, "aria-label" | "aria-labelledby" | "testId">
 
 export const F0AvatarPulse = ({
   firstName,
@@ -75,12 +75,13 @@ export const F0AvatarPulse = ({
   "aria-labelledby": ariaLabelledby,
   pulse,
   onPulseClick,
+  testId,
 }: F0AvatarPulseProps) => {
   const translations = useI18n()
   const [showWave, setShowWave] = useState(!pulse)
 
   return (
-    <div className="relative h-10 w-10">
+    <div className="relative h-10 w-10" data-testid={testId}>
       <AnimatePresence mode="popLayout" initial={showWave ? true : false}>
         {showWave ? (
           <motion.div

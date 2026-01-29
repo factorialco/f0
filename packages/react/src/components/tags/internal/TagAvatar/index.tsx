@@ -1,18 +1,19 @@
 import { forwardRef } from "react"
 
 import { AvatarVariant, F0Avatar } from "@/components/avatars/F0Avatar"
+import type { TestableProps } from "@/global.types"
 import { useTextFormatEnforcer } from "@/lib/text"
 
 import { BaseTag } from "../BaseTag"
 
-type Props = {
+type Props = TestableProps & {
   text: string
   avatar: AvatarVariant
   onClick?: () => void
 }
 
 export const F0TagAvatar = forwardRef<HTMLDivElement, Props>(
-  ({ avatar, text }, ref) => {
+  ({ avatar, text, testId }, ref) => {
     useTextFormatEnforcer(
       text,
       { disallowEmpty: true },
@@ -26,6 +27,7 @@ export const F0TagAvatar = forwardRef<HTMLDivElement, Props>(
         left={<F0Avatar avatar={avatar} size="xs" />}
         text={text}
         shape={avatar.type === "person" ? "rounded" : "square"}
+        testId={testId}
       />
     )
   }

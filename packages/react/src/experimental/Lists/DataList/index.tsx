@@ -4,13 +4,14 @@ import { F0AvatarCompany } from "@/components/avatars/F0AvatarCompany"
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
 import { F0AvatarTeam } from "@/components/avatars/F0AvatarTeam"
 import { IconType } from "@/components/F0Icon"
+import type { TestableProps } from "@/global.types"
 import { F0TagDot, TagDotProps } from "@/components/tags/F0TagDot"
 import { experimentalComponent } from "@/lib/experimental"
 import { cn } from "@/lib/utils"
 
 import { InternalActionType, ItemContainer } from "./ItemContainer"
 
-export type DataListProps = {
+export type DataListProps = TestableProps & {
   children: ReactElement<Items>[] | ReactElement<Items>
   label?: string
   isHorizontal?: boolean
@@ -23,7 +24,7 @@ type Items =
   | typeof TeamItem
 
 const _DataList = forwardRef<HTMLUListElement, DataListProps>(
-  ({ children, label, isHorizontal = false }, ref) => {
+  ({ children, label, isHorizontal = false, testId }, ref) => {
     return (
       <div
         className={cn(
@@ -31,6 +32,7 @@ const _DataList = forwardRef<HTMLUListElement, DataListProps>(
             ? "flex min-h-12 flex-1 flex-col py-1.5 pl-3 pr-1.5 xs:flex-row"
             : "min-w-32 md:max-w-80"
         )}
+        data-testid={testId}
       >
         {label && (
           <p

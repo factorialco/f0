@@ -1,3 +1,5 @@
+import type { TestableProps } from "@/global.types"
+
 import { TagVariant } from "../F0Tag/F0Tag"
 
 // Generic type helper to create tag data types
@@ -31,7 +33,7 @@ type TagTypeMapping = {
   raw: TagDataType<"raw">
 }
 
-export type F0TagListProps<T extends TagType> = {
+export type F0TagListProps<T extends TagType> = TestableProps & {
   /**
    * The type of tags to display. Only one type can be used at a time.
    */

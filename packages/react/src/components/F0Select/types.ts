@@ -1,5 +1,6 @@
 import type { AvatarVariant } from "@/components/avatars/F0Avatar"
 import type { IconType } from "@/components/F0Icon"
+import type { TestableProps } from "@/global.types"
 import type {
   DataSourceDefinition,
   FiltersDefinition,
@@ -26,7 +27,7 @@ export type { FiltersState, OnSelectItemsCallback, SelectedItemsState }
 /**
  * Base props shared across all F0Select variants
  */
-type F0SelectBaseProps<T extends string, R = unknown> = {
+type F0SelectBaseProps<T extends string, R = unknown> = TestableProps & {
   onChangeSelectedOption?: (
     option: F0SelectItemObject<T, ResolvedRecordType<R>> | undefined,
     checked: boolean

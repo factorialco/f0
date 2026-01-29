@@ -1,3 +1,4 @@
+import type { TestableProps } from "@/global.types"
 import { Numeric, RelaxedNumericWithFormatter } from "@/lib/numeric"
 
 export const statuses = ["positive", "neutral", "negative"] as const
@@ -11,7 +12,7 @@ export interface NumericValue {
   locale?: string
 }
 
-export type F0TagBalanceProps = {
+export type F0TagBalanceProps = TestableProps & {
   /**
    * Inverts the balance status color. Is useful when a negative percent mean something positive.
    */
@@ -35,15 +36,15 @@ export type F0TagBalanceProps = {
    */
   amount: RelaxedNumericWithFormatter | Numeric
 } & (
-  | {
-      percentage:
-        | (Omit<RelaxedNumericWithFormatter, "value"> & {
-            value: Omit<Numeric, "units" | "unitsPosition">
-          })
-        | Omit<Numeric, "units" | "unitsPosition">
-    }
-  | {
-      percentage?: null
-      formatterOptions?: undefined
-    }
-)
+    | {
+        percentage:
+          | (Omit<RelaxedNumericWithFormatter, "value"> & {
+              value: Omit<Numeric, "units" | "unitsPosition">
+            })
+          | Omit<Numeric, "units" | "unitsPosition">
+      }
+    | {
+        percentage?: null
+        formatterOptions?: undefined
+      }
+  )

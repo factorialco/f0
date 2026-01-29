@@ -27,7 +27,7 @@ const statusMap: Record<"-1" | "0" | "1", BalanceStatus> = {
 }
 
 export const F0TagBalance = forwardRef<HTMLDivElement, F0TagBalanceProps>(
-  ({ percentage, amount, invertStatus, info, hint, nullText }, ref) => {
+  ({ percentage, amount, invertStatus, info, hint, nullText, testId }, ref) => {
     const normalizeNumericWithFormatter =
       useNormalizeNumericValueWithFormatter()
 
@@ -117,6 +117,7 @@ export const F0TagBalance = forwardRef<HTMLDivElement, F0TagBalanceProps>(
         left={icon}
         additionalAccessibleText={additionalAccessibleText}
         text={text}
+        testId={testId}
       />
     )
   }

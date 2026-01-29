@@ -7,7 +7,7 @@ export const avatarEmojiSizes = ["sm", "md", "lg", "xl"] as const
 export type F0AvatarEmojiProps = {
   emoji: string
   size?: (typeof avatarEmojiSizes)[number]
-} & Partial<Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">>
+} & Partial<Pick<BaseAvatarProps, "aria-label" | "aria-labelledby" | "testId">>
 
 const sizes = {
   sm: "w-6 h-6 rounded-sm",
@@ -31,6 +31,7 @@ export const F0AvatarEmoji = ({
   size = "md",
   "aria-label": ariaLabel,
   "aria-labelledby": ariaLabelledby,
+  testId,
 }: F0AvatarEmojiProps) => {
   // Check legacy size
   if (!avatarEmojiSizes.includes(size)) {
@@ -58,6 +59,7 @@ export const F0AvatarEmoji = ({
       )}
       aria-label={ariaLabel}
       aria-labelledby={ariaLabelledby}
+      data-testid={testId}
     >
       <EmojiImage emoji={emoji} size={imageSizes[size]} />
     </div>

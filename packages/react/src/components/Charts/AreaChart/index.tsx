@@ -78,6 +78,7 @@ export const BaseAreaChart = <K extends LineChartConfig>(
     canBeBlurred,
     blurArea,
     lineType = "monotoneX",
+    testId,
     aspect,
     marginTop = 0,
   }: AreaChartProps<K>,
@@ -107,7 +108,12 @@ export const BaseAreaChart = <K extends LineChartConfig>(
   const showTooltip = !canBeBlurred || !privacyModeEnabled
 
   return (
-    <ChartContainer config={dataConfig} ref={ref} aspect={aspect}>
+    <ChartContainer
+      config={dataConfig}
+      ref={ref}
+      aspect={aspect}
+      data-testid={testId}
+    >
       <AreaChartPrimitive
         accessibilityLayer
         data={preparedData}

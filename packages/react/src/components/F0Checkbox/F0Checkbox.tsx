@@ -1,8 +1,8 @@
-import { DataAttributes } from "@/global.types"
+import { DataAttributes, TestableProps } from "@/global.types"
 import { experimentalComponent } from "@/lib/experimental"
 import { Checkbox as CheckboxRoot } from "@/ui/checkbox"
 
-interface CheckboxProps extends DataAttributes {
+interface CheckboxProps extends DataAttributes, TestableProps {
   /**
    * The title of the checkbox
    */
@@ -77,6 +77,7 @@ function _F0Checkbox({
   presentational = false,
   stopPropagation = false,
   name,
+  testId,
   ...rest
 }: CheckboxProps) {
   return (
@@ -92,6 +93,7 @@ function _F0Checkbox({
       hideLabel={hideLabel}
       tabIndex={presentational ? -1 : undefined}
       onClick={(e) => stopPropagation && e.stopPropagation()}
+      data-testid={testId}
       {...rest}
     />
   )

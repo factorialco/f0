@@ -1,5 +1,6 @@
 import { AlertAvatarProps } from "@/components/avatars/F0AvatarAlert"
 import { IconType } from "@/components/F0Icon"
+import type { TestableProps } from "@/global.types"
 import { LoadingStateProps } from "@/components/UpsellingKit/UpsellingButton"
 import {
   ErrorMessageProps,
@@ -68,7 +69,7 @@ export type ActionProps = {
     }
 )
 
-export type OneEmptyStateProps = {
+export type OneEmptyStateProps = TestableProps & {
   /**
    * The title of the empty state
    */
@@ -88,25 +89,25 @@ export type OneEmptyStateProps = {
    */
   actions?: ActionProps[]
 } & (
-  | {
-      /**
-       * The variant of the empty state
-       * @optional
-       */
-      variant?: "default"
+    | {
+        /**
+         * The variant of the empty state
+         * @optional
+         */
+        variant?: "default"
 
-      /**
-       * An icon will be displayed in the empty state.
-       * emoji string
-       */
-      emoji?: string
-    }
-  | {
-      /**
-       * The variant of the empty state
-       * @optional
-       */
-      variant: Exclude<AlertAvatarProps["type"], "positive">
-      emoji?: never
-    }
-)
+        /**
+         * An icon will be displayed in the empty state.
+         * emoji string
+         */
+        emoji?: string
+      }
+    | {
+        /**
+         * The variant of the empty state
+         * @optional
+         */
+        variant: Exclude<AlertAvatarProps["type"], "positive">
+        emoji?: never
+      }
+  )
