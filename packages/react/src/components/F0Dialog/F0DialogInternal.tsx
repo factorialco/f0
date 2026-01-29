@@ -162,7 +162,11 @@ export const F0DialogInternal: FC<F0DialogInternalProps> = ({
       >
         <Drawer open={isOpen} onOpenChange={handleOpenChange}>
           <DrawerOverlay className="bg-f1-background-overlay" />
-          <DrawerContent ref={setContentRef} className={contentClassName} data-testid={testId}>
+          <DrawerContent
+            ref={setContentRef}
+            className={contentClassName}
+            data-testid={testId}
+          >
             <F0DialogHeader {...headerProps} />
             <F0DialogContent disableContentPadding={disableContentPadding}>
               {children}

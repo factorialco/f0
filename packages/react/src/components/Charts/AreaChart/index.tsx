@@ -108,7 +108,12 @@ export const BaseAreaChart = <K extends LineChartConfig>(
   const showTooltip = !canBeBlurred || !privacyModeEnabled
 
   return (
-    <ChartContainer config={dataConfig} ref={ref} aspect={aspect} data-testid={testId}>
+    <ChartContainer
+      config={dataConfig}
+      ref={ref}
+      aspect={aspect}
+      data-testid={testId}
+    >
       <AreaChartPrimitive
         accessibilityLayer
         data={preparedData}

@@ -22,7 +22,11 @@ const _ProgressBar = <K extends ChartConfig>(
   const percentage = (value / max) * 100
 
   return (
-    <div className="flex items-center space-x-2" aria-live="polite" data-testid={testId}>
+    <div
+      className="flex items-center space-x-2"
+      aria-live="polite"
+      data-testid={testId}
+    >
       <div className="flex-grow">
         <Progress
           color={barColor}

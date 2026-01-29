@@ -106,7 +106,12 @@ const _VBarChart = <K extends ChartConfig>(
   }
 
   return (
-    <ChartContainer config={dataConfig} ref={ref} aspect={aspect} data-testid={testId}>
+    <ChartContainer
+      config={dataConfig}
+      ref={ref}
+      aspect={aspect}
+      data-testid={testId}
+    >
       <BarChartPrimitive
         layout="vertical"
         accessibilityLayer

@@ -60,7 +60,12 @@ export const _LineChart = <K extends LineChartConfig>(
   )
 
   return (
-    <ChartContainer config={dataConfig} ref={ref} aspect={aspect} data-testid={testId}>
+    <ChartContainer
+      config={dataConfig}
+      ref={ref}
+      aspect={aspect}
+      data-testid={testId}
+    >
       <LineChartPrimitive
         accessibilityLayer
         data={preparedData}

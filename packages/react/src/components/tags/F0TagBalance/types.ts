@@ -36,15 +36,15 @@ export type F0TagBalanceProps = TestableProps & {
    */
   amount: RelaxedNumericWithFormatter | Numeric
 } & (
-  | {
-      percentage:
-        | (Omit<RelaxedNumericWithFormatter, "value"> & {
-            value: Omit<Numeric, "units" | "unitsPosition">
-          })
-        | Omit<Numeric, "units" | "unitsPosition">
-    }
-  | {
-      percentage?: null
-      formatterOptions?: undefined
-    }
-)
+    | {
+        percentage:
+          | (Omit<RelaxedNumericWithFormatter, "value"> & {
+              value: Omit<Numeric, "units" | "unitsPosition">
+            })
+          | Omit<Numeric, "units" | "unitsPosition">
+      }
+    | {
+        percentage?: null
+        formatterOptions?: undefined
+      }
+  )

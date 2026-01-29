@@ -11,12 +11,12 @@ export type F0TagRawProps = TestableProps & {
    */
   additionalAccessibleText?: string
 } & (
-  | {
-      icon: IconType
-      onlyIcon: true
-    }
-  | {
-      icon?: IconType
-      onlyIcon?: boolean
-    }
-)
+    | {
+        icon: IconType
+        onlyIcon: true
+      }
+    | {
+        icon?: IconType
+        onlyIcon?: boolean
+      }
+  )

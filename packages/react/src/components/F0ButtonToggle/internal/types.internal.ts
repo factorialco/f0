@@ -36,14 +36,14 @@ export type F0ButtonToggleInternalProps = TestableProps & {
    */
   withBorder?: boolean
 } & (
-  | {
-      selected: boolean
-      onSelectedChange: (selected: boolean) => void
-      defaultSelected?: undefined
-    }
-  | {
-      defaultSelected?: boolean
-      selected?: undefined
-      onSelectedChange?: undefined
-    }
-)
+    | {
+        selected: boolean
+        onSelectedChange: (selected: boolean) => void
+        defaultSelected?: undefined
+      }
+    | {
+        defaultSelected?: boolean
+        selected?: undefined
+        onSelectedChange?: undefined
+      }
+  )

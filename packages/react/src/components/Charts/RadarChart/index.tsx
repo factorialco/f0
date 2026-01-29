@@ -7,6 +7,7 @@ import {
   RadarChart as RadarChartPrimitive,
 } from "recharts"
 
+import type { TestableProps } from "@/global.types"
 import {
   ChartContainer,
   ChartLegend,
@@ -18,7 +19,7 @@ import { getCategoricalColor, getColor } from "../utils/colors"
 import { fixedForwardRef } from "../utils/forwardRef"
 import { ChartConfig, ChartItem } from "../utils/types"
 
-export type RadarChartProps<K extends ChartConfig> = {
+export type RadarChartProps<K extends ChartConfig> = TestableProps & {
   dataConfig: K
   data: ChartItem<K>[]
   scaleMin?: number

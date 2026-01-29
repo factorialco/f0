@@ -89,25 +89,25 @@ export type OneEmptyStateProps = TestableProps & {
    */
   actions?: ActionProps[]
 } & (
-  | {
-      /**
-       * The variant of the empty state
-       * @optional
-       */
-      variant?: "default"
+    | {
+        /**
+         * The variant of the empty state
+         * @optional
+         */
+        variant?: "default"
 
-      /**
-       * An icon will be displayed in the empty state.
-       * emoji string
-       */
-      emoji?: string
-    }
-  | {
-      /**
-       * The variant of the empty state
-       * @optional
-       */
-      variant: Exclude<AlertAvatarProps["type"], "positive">
-      emoji?: never
-    }
-)
+        /**
+         * An icon will be displayed in the empty state.
+         * emoji string
+         */
+        emoji?: string
+      }
+    | {
+        /**
+         * The variant of the empty state
+         * @optional
+         */
+        variant: Exclude<AlertAvatarProps["type"], "positive">
+        emoji?: never
+      }
+  )

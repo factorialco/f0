@@ -18,8 +18,7 @@ import { DatePickerTrigger } from "./components/DateNavigatorTrigger"
 import { DatePickerValue } from "./types"
 
 export interface OneDatePickerProps
-  extends Omit<DatePickerPopupProps, "children">,
-    TestableProps {
+  extends Omit<DatePickerPopupProps, "children">, TestableProps {
   hideNavigation?: boolean
   hideGoToCurrent?: boolean
 }
@@ -85,36 +84,37 @@ export function OneDateNavigator({
   }
 
   return (
-    <DatePickerPopup
-      onSelect={handleSelect}
-      value={localValue}
-      defaultValue={defaultValue}
-      presets={presets}
-      granularities={granularities}
-      minDate={props.minDate}
-      maxDate={props.maxDate}
-      open={isOpen}
-      onOpenChange={setIsOpen}
-      compareTo={compareTo}
-      defaultCompareTo={defaultCompareTo}
-      onCompareToChange={handleCompareToChange}
-      weekStartsOn={effectiveWeekStartsOn}
-      asChild
-      testId={testId}
-    >
-      <DatePickerTrigger
+    <div data-testid={testId}>
+      <DatePickerPopup
+        onSelect={handleSelect}
         value={localValue}
-        compareToValue={compareToValue}
-        highlighted={isOpen}
-        navigation={!hideNavigation}
-        onDateChange={handleNavigationChange}
-        granularity={granularityDefinition}
+        defaultValue={defaultValue}
+        presets={presets}
+        granularities={granularities}
         minDate={props.minDate}
         maxDate={props.maxDate}
-        disabled={props.disabled}
-        hideGoToCurrent={hideGoToCurrent}
-        onClick={() => setIsOpen(true)}
-      />
-    </DatePickerPopup>
+        open={isOpen}
+        onOpenChange={setIsOpen}
+        compareTo={compareTo}
+        defaultCompareTo={defaultCompareTo}
+        onCompareToChange={handleCompareToChange}
+        weekStartsOn={effectiveWeekStartsOn}
+        asChild
+      >
+        <DatePickerTrigger
+          value={localValue}
+          compareToValue={compareToValue}
+          highlighted={isOpen}
+          navigation={!hideNavigation}
+          onDateChange={handleNavigationChange}
+          granularity={granularityDefinition}
+          minDate={props.minDate}
+          maxDate={props.maxDate}
+          disabled={props.disabled}
+          hideGoToCurrent={hideGoToCurrent}
+          onClick={() => setIsOpen(true)}
+        />
+      </DatePickerPopup>
+    </div>
   )
 }

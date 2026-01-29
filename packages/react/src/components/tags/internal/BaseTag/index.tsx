@@ -25,17 +25,17 @@ type BaseTagProps = TestableProps & {
    */
   hideLabel?: boolean
 } & (
-  | {
-      left: ReactNode
-      text?: string
-      right?: ReactNode
-    }
-  | {
-      left?: ReactNode
-      text: string
-      right?: ReactNode
-    }
-)
+    | {
+        left: ReactNode
+        text?: string
+        right?: ReactNode
+      }
+    | {
+        left?: ReactNode
+        text: string
+        right?: ReactNode
+      }
+  )
 
 export const BaseTag = forwardRef<HTMLDivElement, BaseTagProps>(
   (

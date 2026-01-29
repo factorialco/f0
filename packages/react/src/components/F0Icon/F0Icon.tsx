@@ -43,7 +43,8 @@ type NestedKeyOf<T> = {
 }[keyof T & string]
 
 export interface F0IconProps
-  extends SVGProps<SVGSVGElement>,
+  extends
+    SVGProps<SVGSVGElement>,
     VariantProps<typeof iconVariants>,
     TestableProps {
   icon: IconType

@@ -177,7 +177,12 @@ const _ComboChart = <K extends ChartConfig>(
   )
 
   return (
-    <ChartContainer config={dataConfig} ref={ref} aspect={aspect} data-testid={testId}>
+    <ChartContainer
+      config={dataConfig}
+      ref={ref}
+      aspect={aspect}
+      data-testid={testId}
+    >
       <ComposedChart
         accessibilityLayer
         data={preparedData}

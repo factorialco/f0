@@ -4,7 +4,10 @@ import { useEffect, useState, type ReactNode } from "react"
 import { AIButton as AIButtonComponent } from "@/components/AIButton"
 import { F0Icon } from "@/components/F0Icon"
 import { F0Text } from "@/components/F0Text"
-import { DropdownInternal, DropdownItem } from "@/experimental/Navigation/Dropdown/internal.tsx"
+import {
+  DropdownInternal,
+  DropdownItem,
+} from "@/experimental/Navigation/Dropdown/internal.tsx"
 import type { TestableProps } from "@/global.types"
 import { One as OneIcon } from "@/icons/ai"
 import { Ellipsis, Handle } from "@/icons/app"

@@ -45,14 +45,14 @@ export type F0ButtonToggleGroupProps = TestableProps & {
    */
   disabled?: boolean
 } & (
-  | {
-      multiple: true
-      value?: string[]
-      onChange?: (value: string[]) => void
-    }
-  | {
-      multiple?: false
-      value?: string
-      onChange?: (value: string) => void
-    }
-)
+    | {
+        multiple: true
+        value?: string[]
+        onChange?: (value: string[]) => void
+      }
+    | {
+        multiple?: false
+        value?: string
+        onChange?: (value: string) => void
+      }
+  )
