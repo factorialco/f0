@@ -84,3 +84,24 @@ export const Narrow: Story = {
     </div>
   ),
 }
+
+export const DeactivatedAction: Story = {
+  args: {
+    ...Default.args,
+    title: "Company page unactive",
+    description:
+      "You are missing the company page. It is mandatory to be activated.",
+    action: {
+      label: "Request info",
+      onClick: fn(),
+      disabled: true,
+    },
+    variant: "warning",
+    link: undefined,
+  },
+  render: (args) => (
+    <div className="w-[320px]">
+      <F0Alert {...args} />
+    </div>
+  ),
+}
