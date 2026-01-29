@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.340.1](https://github.com/factorialco/f0/compare/f0-react-v1.340.0...f0-react-v1.340.1) (2026-01-29)
+
+
+### Bug Fixes
+
+* **OneFilterPicker:** prevent double toggle when closing open popover ([#3319](https://github.com/factorialco/f0/issues/3319)) ([764a086](https://github.com/factorialco/f0/commit/764a08648a498a9168785be09f117c716e33f111))
+
 ## [1.340.0](https://github.com/factorialco/f0/compare/f0-react-v1.339.1...f0-react-v1.340.0) (2026-01-29)
 
 
