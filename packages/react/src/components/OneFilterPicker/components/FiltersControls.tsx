@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "motion/react"
-import { useContext, useEffect, useId, useMemo, useState } from "react"
+import { useContext, useEffect, useId, useMemo, useRef, useState } from "react"
 
 import { F0Button } from "@/components/F0Button"
 import { ButtonInternal } from "@/components/F0Button/internal"
@@ -56,7 +56,44 @@ export function FiltersControls<Filters extends FiltersDefinition>({
     : undefined
 
   const isOpen = controlledIsOpen ?? internalIsOpen
-  const onOpenChange = controlledOnOpenChange ?? setInternalIsOpen
+
+  const isOpenRef = useRef(isOpen)
+  useEffect(() => {
+    isOpenRef.current = isOpen
+  }, [isOpen])
+
+  const isClosingRef = useRef(false)
+  const handleOpenChange = (open: boolean) => {
+    const currentIsOpen = isOpenRef.current
+
+    if (isClosingRef.current) {
+      return
+    }
+
+    if (currentIsOpen) {
+      isClosingRef.current = true
+
+      if (controlledOnOpenChange) {
+        controlledOnOpenChange(false)
+      } else {
+        setInternalIsOpen(false)
+      }
+
+      setTimeout(() => {
+        isClosingRef.current = false
+      }, 150)
+
+      return
+    }
+
+    if (controlledOnOpenChange) {
+      controlledOnOpenChange(open)
+    } else {
+      setInternalIsOpen(open)
+    }
+  }
+
+  const onOpenChange = handleOpenChange
 
   const [localFiltersValue, setLocalFiltersValue] = useState(value)
   useEffect(() => {
@@ -269,7 +306,6 @@ export function FiltersControls<Filters extends FiltersDefinition>({
             label={i18n.filters.label}
             icon={Filter}
             pressed={isOpen}
-            onClick={() => onOpenChange(!isOpen)}
             hideLabel={hideLabel}
             aria-controls={isOpen ? id : undefined}
           />
