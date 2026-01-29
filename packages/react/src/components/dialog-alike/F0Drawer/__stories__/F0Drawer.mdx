@@ -18,32 +18,32 @@ F0Drawer is a component that provides a drawer interface for the application. It
 
 ### Core Props
 
-| Prop | Type | Default | Description |
-| :--- | :--- | :--- | :--- |
-| `isOpen` | `boolean` | - | Whether the drawer is open |
-| `onClose` | `() => void` | - | Callback when drawer is closed |
-| `position` | `"left" \| "right"` | `"right"` | The position of the drawer |
-| `size` | `"md"` | `"md"` | The size of the drawer |
-| `title` | `string` | - | Title of the drawer |
-| `description` | `string` | - | Description text below title |
-| `modal` | `boolean` | `false` | Whether drawer is modal (only closable by actions) |
-| `disableContentPadding` | `boolean` | `false` | Disable default padding in content area |
+| Prop                    | Type                | Default   | Description                                        |
+| :---------------------- | :------------------ | :-------- | :------------------------------------------------- |
+| `isOpen`                | `boolean`           | -         | Whether the drawer is open                         |
+| `onClose`               | `() => void`        | -         | Callback when drawer is closed                     |
+| `position`              | `"left" \| "right"` | `"right"` | The position of the drawer                         |
+| `size`                  | `"md"`              | `"md"`    | The size of the drawer                             |
+| `title`                 | `string`            | -         | Title of the drawer                                |
+| `description`           | `string`            | -         | Description text below title                       |
+| `modal`                 | `boolean`           | `false`   | Whether drawer is modal (only closable by actions) |
+| `disableContentPadding` | `boolean`           | `false`   | Disable default padding in content area            |
 
 ### Module and Navigation Props
 
-| Prop | Type | Description |
-| :--- | :--- | :--- |
-| `module` | `{ id: ModuleId, label: string, href: string }` | Module configuration for header |
-| `otherActions` | `DropdownItem[]` | Additional actions in header |
-| `tabs` | `TabsProps["tabs"]` | Tabs to display in header |
-| `activeTabId` | `string` | Active tab ID |
-| `setActiveTabId` | `(id: string) => void` | Callback when tab is selected |
+| Prop             | Type                                            | Description                     |
+| :--------------- | :---------------------------------------------- | :------------------------------ |
+| `module`         | `{ id: ModuleId, label: string, href: string }` | Module configuration for header |
+| `otherActions`   | `DropdownItem[]`                                | Additional actions in header    |
+| `tabs`           | `TabsProps["tabs"]`                             | Tabs to display in header       |
+| `activeTabId`    | `string`                                        | Active tab ID                   |
+| `setActiveTabId` | `(id: string) => void`                          | Callback when tab is selected   |
 
 ### Actions Props
 
-| Prop | Type | Description |
-| :--- | :--- | :--- |
-| `primaryAction` | `F0DrawerAction \| F0DrawerAction[]` | Primary action(s) in footer |
+| Prop              | Type                                 | Description                   |
+| :---------------- | :----------------------------------- | :---------------------------- |
+| `primaryAction`   | `F0DrawerAction \| F0DrawerAction[]` | Primary action(s) in footer   |
 | `secondaryAction` | `F0DrawerAction \| F0DrawerAction[]` | Secondary action(s) in footer |
 
 ### F0DrawerAction Type
@@ -52,13 +52,13 @@ The `F0DrawerAction` type defines the properties for the buttons in the footer.
 
 ```typescript
 type F0DrawerAction = {
-  value?: string                    // Optional value identifier (used when primaryAction is array)
-  label: string                     // Button label text
-  icon?: IconType                   // Optional icon component
-  onClick: () => void | Promise<void>  // Click handler - can return promise
-  disabled?: boolean                // Whether button is disabled
-  loading?: boolean                 // Whether button shows loading state
-  closeOnClick?: boolean            // Close drawer after promise resolves
+  value?: string // Optional value identifier (used when primaryAction is array)
+  label: string // Button label text
+  icon?: IconType // Optional icon component
+  onClick: () => void | Promise<void> // Click handler - can return promise
+  disabled?: boolean // Whether button is disabled
+  loading?: boolean // Whether button shows loading state
+  closeOnClick?: boolean // Close drawer after promise resolves
 }
 ```
 
