@@ -1,3 +1,4 @@
+import { useControllableState } from "@radix-ui/react-use-controllable-state"
 import { AnimatePresence, motion } from "motion/react"
 import { useContext, useEffect, useId, useMemo, useRef, useState } from "react"
 
@@ -42,7 +43,6 @@ export function FiltersControls<Filters extends FiltersDefinition>({
   const [selectedFilterKey, setSelectedFilterKey] = useState<
     keyof Filters | null
   >(null)
-  const [internalIsOpen, setInternalIsOpen] = useState(false)
   const i18n = useI18n()
 
   // Auto-detect if we're inside a dialog and use its portal container
@@ -55,7 +55,11 @@ export function FiltersControls<Filters extends FiltersDefinition>({
     ? dialogContext.portalContainer
     : undefined
 
-  const isOpen = controlledIsOpen ?? internalIsOpen
+  const [isOpen, setIsOpen] = useControllableState({
+    prop: controlledIsOpen,
+    defaultProp: false,
+    onChange: controlledOnOpenChange,
+  })
 
   const isOpenRef = useRef(isOpen)
   useEffect(() => {
@@ -72,12 +76,7 @@ export function FiltersControls<Filters extends FiltersDefinition>({
 
     if (currentIsOpen) {
       isClosingRef.current = true
-
-      if (controlledOnOpenChange) {
-        controlledOnOpenChange(false)
-      } else {
-        setInternalIsOpen(false)
-      }
+      setIsOpen(false)
 
       setTimeout(() => {
         isClosingRef.current = false
@@ -86,11 +85,7 @@ export function FiltersControls<Filters extends FiltersDefinition>({
       return
     }
 
-    if (controlledOnOpenChange) {
-      controlledOnOpenChange(open)
-    } else {
-      setInternalIsOpen(open)
-    }
+    setIsOpen(open)
   }
 
   const onOpenChange = handleOpenChange
