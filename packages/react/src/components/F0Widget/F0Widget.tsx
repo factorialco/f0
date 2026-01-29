@@ -4,10 +4,8 @@ import { useEffect, useState, type ReactNode } from "react"
 import { AIButton as AIButtonComponent } from "@/components/AIButton"
 import { F0Icon } from "@/components/F0Icon"
 import { F0Text } from "@/components/F0Text"
-import {
-  DropdownInternal,
-  DropdownItem,
-} from "@/experimental/Navigation/Dropdown/internal.tsx"
+import { DropdownInternal, DropdownItem } from "@/experimental/Navigation/Dropdown/internal.tsx"
+import type { TestableProps } from "@/global.types"
 import { One as OneIcon } from "@/icons/ai"
 import { Ellipsis, Handle } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
@@ -17,7 +15,7 @@ import { Skeleton } from "@/ui/skeleton"
 
 import { ButtonInternal } from "../F0Button/internal"
 
-export interface WidgetProps {
+export interface WidgetProps extends TestableProps {
   title: string
   draggable?: boolean
   onDragStart?: () => void
@@ -39,6 +37,7 @@ const F0WidgetBase = ({
   actions,
   children,
   selected = false,
+  testId,
 }: WidgetProps) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
@@ -79,6 +78,7 @@ const F0WidgetBase = ({
       )}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      data-testid={testId}
     >
       <div className="flex h-12 w-full items-center justify-between gap-3">
         <div

@@ -5,6 +5,7 @@ import {
   type AlertAvatarProps,
 } from "@/components/avatars/F0AvatarAlert"
 import { F0Button, F0ButtonProps } from "@/components/F0Button"
+import type { TestableProps } from "@/global.types"
 import { experimentalComponent } from "@/lib/experimental"
 import {
   Dialog,
@@ -23,7 +24,7 @@ type PrimaryAction = BaseAction & {
 }
 type SecondaryAction = BaseAction
 
-type DialogProps = {
+type DialogProps = TestableProps & {
   header: {
     type: AlertAvatarProps["type"]
     title: string
@@ -38,7 +39,7 @@ type DialogProps = {
 }
 
 const OneDialog = forwardRef<HTMLDivElement, DialogProps>(
-  ({ header, actions, open, onClose }, ref) => {
+  ({ header, actions, open, onClose, testId }, ref) => {
     // We do this in order to give the illusion of a controlled state via `open`, but in reality
     // we're taking control and closing the dialog after a few milliseconds to give the closing
     // animation time to play out.
@@ -60,7 +61,11 @@ const OneDialog = forwardRef<HTMLDivElement, DialogProps>(
         open={open && !closing}
         onOpenChange={(open) => !open && handleClose?.()}
       >
-        <DialogContent ref={ref} className="bottom-3 top-auto max-w-[400px]">
+        <DialogContent
+          ref={ref}
+          className="bottom-3 top-auto max-w-[400px]"
+          data-testid={testId}
+        >
           <DialogHeader className="flex flex-col gap-4 px-4 py-5">
             <F0AvatarAlert type={header.type} size="lg" />
             <div className="flex flex-col gap-0.5">

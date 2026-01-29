@@ -40,7 +40,7 @@ const variantTitleColors: Record<string, string> = {
 
 export const CalloutInternal = forwardRef<HTMLDivElement, CalloutInternalProps>(
   function CalloutInternal(
-    { title, onClose, children, actions = [], variant },
+    { title, onClose, children, actions = [], variant, testId },
     ref
   ) {
     // Validate actions limit
@@ -55,7 +55,7 @@ export const CalloutInternal = forwardRef<HTMLDivElement, CalloutInternalProps>(
       <div
         ref={ref}
         className={calloutVariants({ variant })}
-        data-testid="sdm-callout"
+        data-testid={testId}
       >
         <div className="flex flex-row items-center justify-between px-4 py-2">
           <div

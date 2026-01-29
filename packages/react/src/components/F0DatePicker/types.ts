@@ -1,3 +1,4 @@
+import type { TestableProps } from "@/global.types"
 import {
   DatePickerPopupProps,
   DatePickerValue as DatePickerPopupValue,
@@ -13,12 +14,13 @@ export type DatePickerValue = DatePickerPopupValue
 export type F0DatePickerProps = Pick<
   DatePickerPopupProps,
   "granularities" | "minDate" | "maxDate" | "presets" | "open" | "onOpenChange"
-> & {
-  onChange?: (
-    value: DatePickerValue | undefined,
-    stringValue: string | undefined
-  ) => void
-  value?: DatePickerValue
-} & Pick<InputFieldProps<string>, InputFieldInheritedProps>
+> &
+  TestableProps & {
+    onChange?: (
+      value: DatePickerValue | undefined,
+      stringValue: string | undefined
+    ) => void
+    value?: DatePickerValue
+  } & Pick<InputFieldProps<string>, InputFieldInheritedProps>
 
 export const datepickerSizes = INPUTFIELD_SIZES

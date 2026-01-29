@@ -39,13 +39,14 @@ export const alertAvatarSizes = ["sm", "md", "lg"] as const
 export type AlertAvatarProps = VariantProps<typeof alertAvatarVariants> & {
   type: (typeof alertAvatarTypes)[number]
   size?: (typeof alertAvatarSizes)[number]
-} & Partial<Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">>
+} & Partial<Pick<BaseAvatarProps, "aria-label" | "aria-labelledby" | "testId">>
 
 export const F0AvatarAlert = ({
   type,
   size,
   "aria-label": ariaLabel,
   "aria-labelledby": ariaLabelledby,
+  testId,
 }: AlertAvatarProps) => {
   const iconMap: Record<AlertAvatarProps["type"], IconType> = {
     critical: AlertCircle,
@@ -60,6 +61,7 @@ export const F0AvatarAlert = ({
       aria-label={ariaLabel}
       aria-labelledby={ariaLabelledby}
       role="alert"
+      data-testid={testId}
     >
       <F0Icon icon={iconMap[type]} size={size} />
     </div>

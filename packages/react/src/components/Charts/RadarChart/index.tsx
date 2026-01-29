@@ -27,7 +27,7 @@ export type RadarChartProps<K extends ChartConfig> = {
 }
 
 export const _RadarChart = <K extends ChartConfig>(
-  { data, dataConfig, scaleMin, scaleMax, aspect }: RadarChartProps<K>,
+  { data, dataConfig, scaleMin, scaleMax, aspect, testId }: RadarChartProps<K>,
   ref: ForwardedRef<HTMLDivElement>
 ) => {
   const items = Object.keys(dataConfig)
@@ -42,6 +42,7 @@ export const _RadarChart = <K extends ChartConfig>(
       ref={ref}
       aspect={aspect}
       data-chromatic="ignore"
+      data-testid={testId}
     >
       <RadarChartPrimitive accessibilityLayer data={preparedData}>
         <ChartTooltip

@@ -2,6 +2,7 @@ import { cva, type VariantProps } from "cva"
 
 import { F0Avatar, type AvatarVariant } from "@/components/avatars/F0Avatar"
 import { F0Icon, type IconType } from "@/components/F0Icon"
+import type { TestableProps } from "@/global.types"
 import { CrossedCircle } from "@/icons/app"
 import { experimentalComponent } from "@/lib/experimental"
 import { cn, focusRing } from "@/lib/utils"
@@ -60,7 +61,8 @@ type ChipVariants =
     }
 
 export type ChipProps = BaseChipProps &
-  ChipVariants & {
+  ChipVariants &
+  TestableProps & {
     variant?: "default" | "selected"
   }
 
@@ -72,6 +74,7 @@ const _Chip = ({
   onClose,
   avatar,
   icon,
+  testId,
 }: ChipProps) => {
   return (
     <div
@@ -91,6 +94,7 @@ const _Chip = ({
         }
       }}
       tabIndex={onClick ? 0 : undefined}
+      data-testid={testId}
     >
       {avatar && <F0Avatar avatar={avatar} size="xs" />}
       <div className="flex items-center gap-0.5">

@@ -10,6 +10,7 @@ export const F0TagList = <T extends TagType>({
   tags,
   max = 4,
   remainingCount: initialRemainingCount,
+  testId,
 }: F0TagListProps<T>) => {
   // Convert tags to TagVariant
   const tagVariants = tags.map(
@@ -20,6 +21,7 @@ export const F0TagList = <T extends TagType>({
     <OverflowList
       items={tagVariants}
       max={max}
+      data-testid={testId}
       renderListItem={(tag) => <Tag tag={tag} />}
       renderDropdownItem={() => null}
       forceShowingOverflowIndicator={initialRemainingCount !== undefined}

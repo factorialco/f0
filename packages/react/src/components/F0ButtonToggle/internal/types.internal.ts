@@ -1,8 +1,9 @@
 import { IconType } from "@/components/F0Icon"
+import type { TestableProps } from "@/global.types"
 
 import { ButtonToggleSize, ButtonToggleVariant } from "../types"
 
-export type F0ButtonToggleInternalProps = {
+export type F0ButtonToggleInternalProps = TestableProps & {
   /**
    * The accessible label for the button.
    */

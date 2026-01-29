@@ -28,6 +28,7 @@ export const F0AvatarList = ({
   noTooltip = false,
   remainingCount: initialRemainingCount,
   max,
+  testId,
 }: F0AvatarListProps) => {
   // Check legacy size
   if (size && !avatarListSizes.includes(size)) {
@@ -65,6 +66,7 @@ export const F0AvatarList = ({
       gap={gap}
       itemsWidth={itemWidth}
       className="flex items-center"
+      data-testid={testId}
       renderListItem={(avatar, index) => {
         const displayName = getAvatarDisplayName(type, avatar)
 

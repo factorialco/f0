@@ -26,7 +26,7 @@ const normalizeTrend = (
   }
 }
 
-const F0BigNumberCmp = ({ label, ...props }: BigNumberProps) => {
+const F0BigNumberCmp = ({ label, testId, ...props }: BigNumberProps) => {
   const normalizeValueWithFormatter = useNormalizeValueWithFormatter()
 
   const value = normalizeValueWithFormatter(props.value, {
@@ -58,7 +58,7 @@ const F0BigNumberCmp = ({ label, ...props }: BigNumberProps) => {
   }, [valueValue, comparisonValue, trendConfig.show])
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2" data-testid={testId}>
       {label && <div>{label}</div>}
       <div className="flex flex-row flex-wrap items-center gap-2">
         <span className="font-bold text-2xl">{formattedValue}</span>

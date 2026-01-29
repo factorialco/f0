@@ -1,20 +1,22 @@
 import { Await } from "@/components/Utilities/Await"
+import type { TestableProps } from "@/global.types"
 import { experimentalComponent } from "@/lib/experimental"
 import { Skeleton } from "@/ui/skeleton"
 
 import { cn } from "../../lib/utils"
 import { Counter } from "../Information/Counter"
 
-interface PresetProps {
+interface PresetProps extends TestableProps {
   label: string
   number?: number | Promise<number | undefined>
   onClick?: () => void
   selected?: boolean
 }
 
-const _Preset = ({ label, number, onClick, selected }: PresetProps) => {
+const _Preset = ({ label, number, onClick, selected, testId }: PresetProps) => {
   return (
     <label
+      data-testid={testId}
       className={cn(
         "flex cursor-default appearance-none items-center gap-2 rounded px-2.5 py-1.5 font-medium text-f1-foreground outline outline-1 outline-f1-border transition-all",
         onClick &&

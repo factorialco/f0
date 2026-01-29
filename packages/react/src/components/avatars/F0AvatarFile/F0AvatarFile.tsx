@@ -18,10 +18,10 @@ export type F0AvatarFileProps = Omit<
   file: FileDef
   size?: AvatarFileSize
   badge?: AvatarBadge
-} & Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">
+} & Pick<BaseAvatarProps, "aria-label" | "aria-labelledby" | "testId">
 
 const F0AvatarFile = forwardRef<ElementRef<typeof Avatar>, F0AvatarFileProps>(
-  ({ file, badge, ...props }, ref) => {
+  ({ file, badge, testId, ...props }, ref) => {
     const { type: fileType, color: fileColor } = getFileTypeInfo(file)
 
     const reversedSizesMapping = useMemo(
@@ -70,6 +70,7 @@ const F0AvatarFile = forwardRef<ElementRef<typeof Avatar>, F0AvatarFileProps>(
         className={cn("bg-f1-background", "overflow-visible")}
         {...props}
         size={mappedSize}
+        data-testid={testId}
       >
         <AvatarFallback
           className={cn("select-none font-semibold", textSize, fileColor)}

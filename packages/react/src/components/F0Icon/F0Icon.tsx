@@ -7,6 +7,7 @@ import {
   SVGProps,
 } from "react"
 
+import type { TestableProps } from "@/global.types"
 import { cn } from "@/lib/utils"
 
 const iconVariants = cva({
@@ -42,7 +43,9 @@ type NestedKeyOf<T> = {
 }[keyof T & string]
 
 export interface F0IconProps
-  extends SVGProps<SVGSVGElement>, VariantProps<typeof iconVariants> {
+  extends SVGProps<SVGSVGElement>,
+    VariantProps<typeof iconVariants>,
+    TestableProps {
   icon: IconType
   size?: "lg" | "md" | "sm" | "xs"
   state?: "normal" | "animate"
@@ -60,7 +63,7 @@ export type IconType = ForwardRefExoticComponent<
     }
 >
 export const F0Icon = forwardRef<SVGSVGElement, F0IconProps>(function F0Icon(
-  { size, icon, state = "normal", color = "currentColor", ...props },
+  { size, icon, state = "normal", color = "currentColor", testId, ...props },
   ref
 ) {
   if (!icon) return null
@@ -88,6 +91,7 @@ export const F0Icon = forwardRef<SVGSVGElement, F0IconProps>(function F0Icon(
         className={cn(iconVariants({ size }), "select-none", colorClass)}
         style={colorStyle}
         data-has-color={color !== "currentColor" ? "true" : undefined}
+        data-testid={testId}
       />
     )
   }
@@ -99,6 +103,7 @@ export const F0Icon = forwardRef<SVGSVGElement, F0IconProps>(function F0Icon(
       className={cn("aspect-square", iconVariants({ size }), colorClass)}
       style={colorStyle}
       data-has-color={color !== "currentColor" ? "true" : undefined}
+      data-testid={testId}
     />
   )
 })

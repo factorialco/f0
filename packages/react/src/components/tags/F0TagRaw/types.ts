@@ -1,6 +1,7 @@
 import { IconType } from "@/components/F0Icon"
+import type { TestableProps } from "@/global.types"
 
-export type F0TagRawProps = {
+export type F0TagRawProps = TestableProps & {
   /**
    * The label to display in the tag or used for accessible text
    */

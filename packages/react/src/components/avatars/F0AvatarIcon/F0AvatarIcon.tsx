@@ -8,7 +8,7 @@ export const avatarIconSizes = ["sm", "md", "lg"] as const
 export type F0AvatarIconProps = {
   icon: IconType
   size?: (typeof avatarIconSizes)[number]
-} & Partial<Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">>
+} & Partial<Pick<BaseAvatarProps, "aria-label" | "aria-labelledby" | "testId">>
 
 const sizes = {
   sm: "size-6 rounded-sm",
@@ -21,6 +21,7 @@ export const F0AvatarIcon = ({
   size = "md",
   "aria-label": ariaLabel,
   "aria-labelledby": ariaLabelledby,
+  testId,
 }: F0AvatarIconProps) => {
   return (
     <div
@@ -30,6 +31,7 @@ export const F0AvatarIcon = ({
       )}
       aria-label={ariaLabel}
       aria-labelledby={ariaLabelledby}
+      data-testid={testId}
     >
       <F0Icon
         icon={icon}

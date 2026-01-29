@@ -1,6 +1,8 @@
+import type { TestableProps } from "@/global.types"
+
 import { getColor } from "../utils/colors"
 
-export interface RadialProgressProps {
+export interface RadialProgressProps extends TestableProps {
   value: number
   max?: number
   color?: string
@@ -12,6 +14,7 @@ export function RadialProgressChart({
   max = 100,
   color,
   overview,
+  testId,
 }: RadialProgressProps) {
   const strokeWidth = 12
   const size = 100
@@ -22,7 +25,10 @@ export function RadialProgressChart({
   const strokeColor = color ? getColor(color) : getColor("categorical-1")
 
   return (
-    <div className="relative inline-flex aspect-auto h-full w-full items-center justify-center overflow-hidden">
+    <div
+      className="relative inline-flex aspect-auto h-full w-full items-center justify-center overflow-hidden"
+      data-testid={testId}
+    >
       <svg
         viewBox={`0 0 ${size} ${size}`}
         className="h-full w-full -rotate-90 transform"

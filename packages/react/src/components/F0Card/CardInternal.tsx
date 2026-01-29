@@ -3,6 +3,7 @@ import { type ReactNode, forwardRef, useRef } from "react"
 import { F0Link } from "@/components/F0Link"
 import { Image } from "@/components/Utilities/Image"
 import { DropdownItem } from "@/experimental/Navigation/Dropdown"
+import type { TestableProps } from "@/global.types"
 import { cn, focusRing } from "@/lib/utils"
 import {
   Card,
@@ -47,7 +48,7 @@ const imageSizeClassMap: Record<CardImageSize, string> = {
   xl: "h-64",
 }
 
-export interface CardInternalProps {
+export interface CardInternalProps extends TestableProps {
   /**
    * Whether the card has a compact layout
    */
@@ -198,6 +199,7 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
       forceVerticalMetadata = false,
       fullHeight = false,
       disableOverlayLink = false,
+      testId,
     },
     ref
   ) {
@@ -226,7 +228,7 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
             "border-f1-border-selected bg-f1-background-selected-secondary"
         )}
         onClick={onClick}
-        data-testid="card"
+        data-testid={testId}
         ref={ref}
       >
         {link && !disableOverlayLink && (

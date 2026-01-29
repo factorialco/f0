@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react"
 
+import type { TestableProps } from "@/global.types"
 import { useL10n } from "@/lib/providers/l10n"
 import {
   DatePickerPopup,
@@ -16,10 +17,9 @@ import {
 import { DatePickerTrigger } from "./components/DateNavigatorTrigger"
 import { DatePickerValue } from "./types"
 
-export interface OneDatePickerProps extends Omit<
-  DatePickerPopupProps,
-  "children"
-> {
+export interface OneDatePickerProps
+  extends Omit<DatePickerPopupProps, "children">,
+    TestableProps {
   hideNavigation?: boolean
   hideGoToCurrent?: boolean
 }
@@ -35,6 +35,7 @@ export function OneDateNavigator({
   defaultCompareTo,
   onCompareToChange,
   value,
+  testId,
   ...props
 }: OneDatePickerProps) {
   const [localValue, setLocalValue] = useState<DatePickerValue | undefined>(
@@ -99,6 +100,7 @@ export function OneDateNavigator({
       onCompareToChange={handleCompareToChange}
       weekStartsOn={effectiveWeekStartsOn}
       asChild
+      testId={testId}
     >
       <DatePickerTrigger
         value={localValue}

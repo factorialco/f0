@@ -44,6 +44,7 @@ export const BaseAvatar = forwardRef<HTMLDivElement, BaseAvatarProps>(
       badge,
       flag,
       icon,
+      testId,
     },
     ref
   ) => {
@@ -98,7 +99,7 @@ export const BaseAvatar = forwardRef<HTMLDivElement, BaseAvatarProps>(
 
     return (
       <>
-        <div className="relative inline-flex h-fit w-fit">
+        <div className="relative inline-flex h-fit w-fit" data-testid={testId}>
           <div
             className="relative h-fit w-fit"
             style={

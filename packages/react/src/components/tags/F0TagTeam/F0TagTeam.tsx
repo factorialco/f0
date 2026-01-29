@@ -5,7 +5,7 @@ import type { F0TagTeamProps } from "./types"
 import { F0TagAvatar } from "../internal/TagAvatar"
 
 export const F0TagTeam = forwardRef<HTMLDivElement, F0TagTeamProps>(
-  ({ name, src }, ref) => {
+  ({ name, src, testId }, ref) => {
     return (
       <F0TagAvatar
         ref={ref}
@@ -15,6 +15,7 @@ export const F0TagTeam = forwardRef<HTMLDivElement, F0TagTeamProps>(
           src: src,
         }}
         text={name}
+        testId={testId}
       />
     )
   }

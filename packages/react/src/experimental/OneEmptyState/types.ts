@@ -1,5 +1,6 @@
 import { AlertAvatarProps } from "@/components/avatars/F0AvatarAlert"
 import { IconType } from "@/components/F0Icon"
+import type { TestableProps } from "@/global.types"
 import { LoadingStateProps } from "@/components/UpsellingKit/UpsellingButton"
 import {
   ErrorMessageProps,
@@ -68,7 +69,7 @@ export type ActionProps = {
     }
 )
 
-export type OneEmptyStateProps = {
+export type OneEmptyStateProps = TestableProps & {
   /**
    * The title of the empty state
    */

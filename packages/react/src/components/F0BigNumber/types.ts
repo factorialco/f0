@@ -1,3 +1,4 @@
+import type { TestableProps } from "@/global.types"
 import { Numeric, NumericWithFormatter } from "@/lib/numeric"
 
 export type NumberWithFormatter = NumericWithFormatter & {
@@ -9,7 +10,7 @@ export type TrendConfig = {
   invertStatus?: boolean
 }
 
-export type BigNumberProps = {
+export type BigNumberProps = TestableProps & {
   value: Numeric | NumberWithFormatter | number
   label?: string
   trend?: boolean | TrendConfig

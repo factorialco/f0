@@ -1,10 +1,11 @@
+import type { TestableProps } from "@/global.types"
 import { experimentalComponent } from "@/lib/experimental"
 import { OverflowList } from "@/ui/OverflowList"
 
 import { Chip, type ChipProps } from "../../experimental/OneChip"
 import { ChipCounter } from "./ChipCounter"
 
-type Props = {
+type Props = TestableProps & {
   /**
    * Array of chips to display.
    */
@@ -35,10 +36,12 @@ const _F0ChipList = ({
   max = 4,
   remainingCount: initialRemainingCount,
   layout = "compact",
+  testId,
 }: Props) => {
   if (layout === "fill") {
     return (
       <OverflowList
+        data-testid={testId}
         items={chips}
         renderListItem={(chip) => <Chip {...chip} />}
         renderDropdownItem={() => null}
@@ -65,7 +68,7 @@ const _F0ChipList = ({
   const showCounter = remainingCount > 0
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-2" data-testid={testId}>
       {visibleChips.map((chip, index) => {
         return <Chip key={index} {...chip} />
       })}

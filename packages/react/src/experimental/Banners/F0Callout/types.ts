@@ -1,4 +1,5 @@
 import { IconType } from "@/components/F0Icon"
+import type { TestableProps } from "@/global.types"
 
 export type CalloutAction = {
   label: string
@@ -15,7 +16,7 @@ export const variants = [
 ] as const
 export type CalloutVariant = (typeof variants)[number]
 
-export interface CalloutInternalProps {
+export interface CalloutInternalProps extends TestableProps {
   title: string
   onClose?: () => void
   children: React.ReactNode

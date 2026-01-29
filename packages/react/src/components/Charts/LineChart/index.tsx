@@ -41,6 +41,7 @@ export const _LineChart = <K extends LineChartConfig>(
     aspect,
     hideTooltip = false,
     hideGrid = false,
+    testId,
   }: LineChartProps<K>,
   ref: ForwardedRef<HTMLDivElement>
 ) => {
@@ -59,7 +60,7 @@ export const _LineChart = <K extends LineChartConfig>(
   )
 
   return (
-    <ChartContainer config={dataConfig} ref={ref} aspect={aspect}>
+    <ChartContainer config={dataConfig} ref={ref} aspect={aspect} data-testid={testId}>
       <LineChartPrimitive
         accessibilityLayer
         data={preparedData}

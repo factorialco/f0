@@ -130,6 +130,7 @@ const _ComboChart = <K extends ChartConfig>(
     line,
     scatter,
     onClick,
+    testId,
   }: ComboChartProps<K>,
   ref: ForwardedRef<HTMLDivElement>
 ) => {
@@ -176,7 +177,7 @@ const _ComboChart = <K extends ChartConfig>(
   )
 
   return (
-    <ChartContainer config={dataConfig} ref={ref} aspect={aspect}>
+    <ChartContainer config={dataConfig} ref={ref} aspect={aspect} data-testid={testId}>
       <ComposedChart
         accessibilityLayer
         data={preparedData}

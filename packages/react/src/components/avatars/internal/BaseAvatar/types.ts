@@ -2,6 +2,7 @@ import { ReactElement } from "react"
 
 import { AvatarBadge } from "@/components/avatars/F0Avatar/types"
 import { F0IconProps, IconType } from "@/components/F0Icon"
+import type { TestableProps } from "@/global.types"
 import { InternalAvatarProps } from "@/ui/Avatar"
 
 export const avatarSizes = ["xs", "sm", "md", "lg", "xl", "2xl"] as const
@@ -20,7 +21,7 @@ export const sizesMapping: Record<
   xsmall: "xs",
 } as const
 
-export type BaseAvatarProps = {
+export type BaseAvatarProps = TestableProps & {
   /**
    * The type of the avatar.
    */

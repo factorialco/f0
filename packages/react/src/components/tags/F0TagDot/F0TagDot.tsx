@@ -7,7 +7,7 @@ import { useTextFormatEnforcer } from "@/lib/text"
 import type { Props } from "./types"
 
 export const F0TagDot = forwardRef<HTMLDivElement, Props>(
-  ({ text, ...props }, ref) => {
+  ({ text, testId, ...props }, ref) => {
     useTextFormatEnforcer(
       text,
       { disallowEmpty: true },
@@ -35,6 +35,7 @@ export const F0TagDot = forwardRef<HTMLDivElement, Props>(
           />
         }
         text={text}
+        testId={testId}
       />
     )
   }

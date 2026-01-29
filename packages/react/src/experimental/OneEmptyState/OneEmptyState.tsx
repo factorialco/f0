@@ -11,9 +11,13 @@ export function OneEmptyState({
   variant = "default",
   emoji,
   actions,
+  testId,
 }: Types.OneEmptyStateProps) {
   return (
-    <div className="flex flex-col items-center justify-center gap-5 p-8">
+    <div
+      className="flex flex-col items-center justify-center gap-5 p-8"
+      data-testid={testId}
+    >
       {variant === "default" && <F0AvatarEmoji emoji={emoji!} size="lg" />}
       {variant !== "default" && <F0AvatarAlert type={variant} size="lg" />}
       <div className="flex flex-col items-center justify-center gap-0.5">

@@ -1,5 +1,6 @@
 import { ComponentProps } from "react"
 
+import type { TestableProps } from "@/global.types"
 import type {
   ChartContainer,
   LineChartConfig,
@@ -29,7 +30,7 @@ export type ChartConfig = Record<
 
 export type ChartPropsBase<
   K extends OriginalChartConfig = OriginalChartConfig,
-> = {
+> = TestableProps & {
   dataConfig: K
   data: ChartItem<K>[]
   xAxis?: AxisConfig
@@ -39,12 +40,13 @@ export type ChartPropsBase<
   hideTooltip?: boolean
 }
 
-export type LineChartPropsBase<K extends LineChartConfig = LineChartConfig> = {
-  dataConfig: K
-  data: ChartItem<K>[]
-  xAxis?: AxisConfig
-  yAxis?: AxisConfig
-  aspect?: ComponentProps<typeof ChartContainer>["aspect"]
-  hideGrid?: boolean
-  hideTooltip?: boolean
-}
+export type LineChartPropsBase<K extends LineChartConfig = LineChartConfig> =
+  TestableProps & {
+    dataConfig: K
+    data: ChartItem<K>[]
+    xAxis?: AxisConfig
+    yAxis?: AxisConfig
+    aspect?: ComponentProps<typeof ChartContainer>["aspect"]
+    hideGrid?: boolean
+    hideTooltip?: boolean
+  }

@@ -38,6 +38,7 @@ const ButtonInternal = forwardRef<
     noAutoTooltip,
     noTitle,
     iconRotate = false,
+    testId,
     ...props
   },
   ref
@@ -115,6 +116,7 @@ const ButtonInternal = forwardRef<
         compact={!!shouldHideLabel}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
+        data-testid={testId}
       >
         <div
           className={cn(

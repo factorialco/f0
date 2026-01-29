@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { fn } from "storybook/test"
+import { expect, fn, within } from "storybook/test"
 
 import { F0Alert } from "../F0Alert"
 
@@ -83,4 +83,23 @@ export const Narrow: Story = {
       <F0Alert {...args} />
     </div>
   ),
+}
+
+export const WithTestId: Story = {
+  args: {
+    title: "Important notification",
+    description: "This alert has a testId for testing purposes.",
+    variant: "info",
+    testId: "important-alert",
+  },
+  render: (args) => (
+    <div className="w-[640px]">
+      <F0Alert {...args} />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const alert = canvas.getByTestId("important-alert")
+    await expect(alert).toBeInTheDocument()
+  },
 }

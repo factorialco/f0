@@ -66,6 +66,7 @@ const _BarChart = <K extends ChartConfig>(
     showValueUnderLabel = false,
     highlightLastBar = false,
     onClick,
+    testId,
   }: BarChartProps<K>,
   ref: ForwardedRef<HTMLDivElement>
 ) => {
@@ -96,7 +97,7 @@ const _BarChart = <K extends ChartConfig>(
   )
 
   return (
-    <ChartContainer config={dataConfig} ref={ref} aspect={aspect}>
+    <ChartContainer config={dataConfig} ref={ref} aspect={aspect} data-testid={testId}>
       <BarChartPrimitive
         accessibilityLayer
         data={preparedData}

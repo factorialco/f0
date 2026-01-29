@@ -1,3 +1,5 @@
+import type { TestableProps } from "@/global.types"
+
 import { ButtonToggleVariant, F0ButtonToggleProps } from "../F0ButtonToggle"
 
 export type F0ButtonToggleGroupItem = Pick<
@@ -10,7 +12,7 @@ export type F0ButtonToggleGroupItem = Pick<
 export const buttonToggleGroupSizes = ["sm", "md"] as const
 export type ButtonToggleGroupSize = (typeof buttonToggleGroupSizes)[number]
 
-export type F0ButtonToggleGroupProps = {
+export type F0ButtonToggleGroupProps = TestableProps & {
   items: F0ButtonToggleGroupItem[]
   /**
    * The size of the buttons.

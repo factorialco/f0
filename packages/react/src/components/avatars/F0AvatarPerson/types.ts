@@ -26,4 +26,4 @@ export type F0AvatarPersonProps = {
    * Whether the person is deactivated. If true, the avatar will display an icon instead of the person's name or picture.
    */
   deactivated?: boolean
-} & Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">
+} & Pick<BaseAvatarProps, "aria-label" | "aria-labelledby" | "testId">

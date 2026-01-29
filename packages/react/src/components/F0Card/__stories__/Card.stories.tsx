@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import image from "@storybook-static/avatars/person04.jpg"
 import { useState } from "react"
-import { fn } from "storybook/test"
+import { expect, fn, within } from "storybook/test"
 
 import {
   Add,
@@ -615,4 +615,16 @@ export const Snapshot: Story = {
       <F0Card {...WithProgressBarCustomColor.args} />
     </div>
   ),
+}
+
+export const WithTestId: Story = {
+  args: {
+    ...Default.args,
+    testId: "user-profile-card",
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const card = canvas.getByTestId("user-profile-card")
+    await expect(card).toBeInTheDocument()
+  },
 }

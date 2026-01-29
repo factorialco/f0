@@ -65,6 +65,7 @@ function isButtonDropdownItem<T = string>(
 const F0ButtonDropdown = ({
   onClick,
   value,
+  testId,
   ...props
 }: F0ButtonDropdownProps) => {
   const t = useI18n()
@@ -139,7 +140,7 @@ const F0ButtonDropdown = ({
         size={props.size}
         disabled={props.disabled}
         loading={props.loading}
-        data-testid="button-main"
+        data-testid={testId}
         aria-label={selectedItem.label}
         prepend={selectedItem.icon && <F0Icon icon={selectedItem.icon} />}
         className="rounded-r-none after:rounded-r-none"

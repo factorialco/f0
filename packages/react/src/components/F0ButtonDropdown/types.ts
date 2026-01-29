@@ -1,4 +1,5 @@
 import { IconType } from "@/components/F0Icon"
+import type { TestableProps } from "@/global.types"
 import { actionSizes } from "@/ui/Action"
 
 export const buttonDropdownVariants = ["default", "outline", "neutral"] as const
@@ -35,7 +36,7 @@ export type ButtonDropdownGroup<T = string> = {
   items: ButtonDropdownItem<T>[]
 }
 
-export type F0ButtonDropdownProps<T = string> = {
+export type F0ButtonDropdownProps<T = string> = TestableProps & {
   /**
    * The size of the button.
    * @default "md"

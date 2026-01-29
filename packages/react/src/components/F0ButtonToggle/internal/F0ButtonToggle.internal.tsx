@@ -75,6 +75,7 @@ export const F0ButtonToggleInternal = forwardRef<
       variant = "compact",
       withBorder = false,
       defaultSelected = false,
+      testId,
       ...props
     },
     ref
@@ -129,6 +130,7 @@ export const F0ButtonToggleInternal = forwardRef<
         disabled={disabled}
         aria-label={localLabel}
         title={localLabel}
+        data-testid={testId}
         className={cn(
           "aspect-square px-0",
           "flex flex-col items-center justify-center gap-2",

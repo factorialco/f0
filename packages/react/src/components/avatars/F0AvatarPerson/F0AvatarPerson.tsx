@@ -12,6 +12,7 @@ export const F0AvatarPerson = ({
   "aria-labelledby": ariaLabelledby,
   badge,
   deactivated,
+  testId,
 }: F0AvatarPersonProps) => {
   return (
     <BaseAvatar
@@ -26,6 +27,7 @@ export const F0AvatarPerson = ({
       icon={
         deactivated ? { icon: PersonNegative, color: "secondary" } : undefined
       }
+      testId={testId}
     />
   )
 }
