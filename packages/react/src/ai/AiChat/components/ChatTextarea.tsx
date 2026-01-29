@@ -164,7 +164,8 @@ export const ChatTextarea = ({
   const formRef = useRef<HTMLFormElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const translation = useI18n()
-  const { placeholders } = useAiChat()
+  const { placeholders, visualizationMode } = useAiChat()
+  const isFullscreen = visualizationMode === "fullscreen"
 
   const hasDataToSend = inputValue.trim().length > 0
 
@@ -209,7 +210,8 @@ export const ChatTextarea = ({
         "after:bg-[conic-gradient(from_var(--gradient-angle),var(--tw-gradient-stops))]",
         "from-[#E55619] via-[#A1ADE5] to-[#E51943]",
         "after:transition-all after:delay-200 after:duration-300",
-        "has-[textarea:focus]:after:scale-100 has-[textarea:focus]:after:opacity-100"
+        "has-[textarea:focus]:after:scale-100 has-[textarea:focus]:after:opacity-100",
+        !isFullscreen && "m-3"
       )}
       animate={{
         "--gradient-angle": ["0deg", "360deg"],

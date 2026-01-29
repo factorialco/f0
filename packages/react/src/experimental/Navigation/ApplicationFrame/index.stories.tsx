@@ -1,8 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { ComponentProps } from "react"
+import { ComponentProps, useEffect, useRef } from "react"
 import { expect, within } from "storybook/test"
 
+import { useAiChat } from "@/ai/AiChat/providers/AiChatStateProvider"
 import { Lightbulb } from "@/icons/app"
 import ExternalLink from "@/icons/app/ExternalLink"
 import PalmTree from "@/icons/app/PalmTree"
@@ -116,5 +117,57 @@ export const Default: Story = {
 
     const link = canvas.getByRole("link", { name: /inbox/i })
     await expect(link.dataset.test).toBe("foo")
+  },
+}
+
+const FullscreenOpener = () => {
+  const { openFullscreen } = useAiChat()
+
+  const openedInFullscreen = useRef(false)
+
+  useEffect(() => {
+    if (openedInFullscreen.current) return
+    // Open chat in fullscreen mode on mount
+    openFullscreen()
+    openedInFullscreen.current = true
+  }, [openFullscreen])
+
+  return null
+}
+
+const FullscreenStoryComponent = (
+  args: ComponentProps<typeof ApplicationFrame>
+) => {
+  return (
+    <ApplicationFrame
+      ai={args.ai}
+      aiPromotion={args.aiPromotion}
+      sidebar={<Sidebar {...SidebarStories.default.args} />}
+    >
+      <FullscreenOpener />
+      <Page {...PageStories.Default.args} />
+    </ApplicationFrame>
+  )
+}
+
+export const Fullscreen: Story = {
+  render: (args) => <FullscreenStoryComponent {...args} />,
+  args: {
+    ai: {
+      runtimeUrl: "https://mastra.local.factorial.dev/copilotkit",
+      agent: "one-workflow",
+      credentials: "include",
+      showDevConsole: false,
+      enabled: true,
+      greeting: "Hello, Saúl,",
+      welcomeScreenSuggestions: [
+        {
+          icon: Lightbulb,
+          message: "Share feedback",
+          prompt:
+            "Share feedback and help shape One with your feedback in the next message (optional)",
+        },
+      ],
+    },
   },
 }
