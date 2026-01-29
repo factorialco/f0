@@ -1,3 +1,4 @@
+import React from "react"
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 import { z } from "zod"
@@ -21,6 +22,7 @@ describe("F0Form", () => {
 
     render(
       <F0Form
+        name="basic"
         definition={definition}
         defaultValues={{ name: "" }}
         onSubmit={async () => ({ success: true })}
@@ -46,6 +48,7 @@ describe("F0Form", () => {
 
     render(
       <F0Form
+        name="custom-submit-label"
         definition={definition}
         defaultValues={{ email: "" }}
         onSubmit={async () => ({ success: true })}
@@ -70,6 +73,7 @@ describe("F0Form", () => {
 
     render(
       <F0Form
+        name="hide-submit-button"
         definition={definition}
         defaultValues={{ name: "" }}
         onSubmit={async () => ({ success: true })}
@@ -95,6 +99,7 @@ describe("F0Form", () => {
 
     render(
       <F0Form
+        name="rows"
         definition={definition}
         defaultValues={{ firstName: "", lastName: "" }}
         onSubmit={async () => ({ success: true })}
@@ -125,6 +130,7 @@ describe("F0Form", () => {
 
     render(
       <F0Form
+        name="sections"
         definition={definition}
         defaultValues={{ name: "" }}
         onSubmit={async () => ({ success: true })}

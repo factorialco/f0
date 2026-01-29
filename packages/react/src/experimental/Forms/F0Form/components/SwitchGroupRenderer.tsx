@@ -2,26 +2,32 @@ import { useFormContext } from "react-hook-form"
 
 import { Switch } from "../../Fields/Switch"
 import { SWITCH_GROUP_PADDING } from "../constants"
+import { generateAnchorId, useF0FormContext } from "../context"
 import type { SwitchFieldDefinition } from "../fields/switch/types"
 import { evaluateRenderIf } from "../fields/utils"
 
 interface SwitchGroupRendererProps {
   fields: SwitchFieldDefinition[]
+  /** Section ID when group is inside a section (for anchor links) */
+  sectionId?: string
 }
 
 interface SwitchFieldItemProps {
   field: SwitchFieldDefinition
   isLast: boolean
+  /** Section ID when field is inside a section (for anchor links) */
+  sectionId?: string
 }
 
 /**
  * Renders a single switch field with label and description on the left,
  * switch toggle on the right
  */
-function SwitchFieldItem({ field, isLast }: SwitchFieldItemProps) {
+function SwitchFieldItem({ field, isLast, sectionId }: SwitchFieldItemProps) {
   const form = useFormContext()
   const { watch } = form
   const values = watch()
+  const { formName } = useF0FormContext()
 
   // Check if field should be rendered based on renderIf condition
   if (field.renderIf && !evaluateRenderIf(field.renderIf, values)) {
@@ -31,9 +37,13 @@ function SwitchFieldItem({ field, isLast }: SwitchFieldItemProps) {
   const fieldState = form.getFieldState(field.id)
   const fieldValue = watch(field.id)
 
+  // Generate anchor ID for the field
+  const anchorId = generateAnchorId(formName, sectionId, field.id)
+
   return (
     <div
-      className={`flex items-start justify-between ${SWITCH_GROUP_PADDING} ${
+      id={anchorId}
+      className={`flex items-start justify-between scroll-mt-4 ${SWITCH_GROUP_PADDING} ${
         !isLast
           ? "border-0 border-b border-solid border-f1-border-secondary"
           : ""
@@ -75,7 +85,10 @@ function SwitchFieldItem({ field, isLast }: SwitchFieldItemProps) {
  * SwitchGroupRenderer renders multiple switch fields in a bordered container.
  * Each switch has its label and description on the left, toggle on the right.
  */
-export function SwitchGroupRenderer({ fields }: SwitchGroupRendererProps) {
+export function SwitchGroupRenderer({
+  fields,
+  sectionId,
+}: SwitchGroupRendererProps) {
   if (fields.length === 0) {
     return null
   }
@@ -87,6 +100,7 @@ export function SwitchGroupRenderer({ fields }: SwitchGroupRendererProps) {
           key={field.id}
           field={field}
           isLast={index === fields.length - 1}
+          sectionId={sectionId}
         />
       ))}
     </div>

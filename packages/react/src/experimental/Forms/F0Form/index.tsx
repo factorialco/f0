@@ -9,6 +9,7 @@ export {
   extractAllFields,
 } from "./useFormDefinitionSchema"
 export { evaluateRenderIf } from "./fields/utils"
+export { generateAnchorId } from "./context"
 
 // Re-export field types
 export type {
@@ -22,8 +23,6 @@ export type {
   SelectFieldDefinition,
   CheckboxFieldDefinition,
   SwitchFieldDefinition,
-  ToggleFieldDefinition,
-  ToggleOption,
 } from "./fields/types"
 
 import type { F0FormProps } from "./types"

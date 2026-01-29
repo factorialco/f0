@@ -66,6 +66,8 @@ export type FormDefinitionItem = FieldItem | RowDefinition | SectionDefinition
  * Props for the F0Form component
  */
 export interface F0FormProps<TValues extends Record<string, unknown>> {
+  /** Unique name for the form, used for generating anchor links (e.g., #forms.[name].[sectionId].[fieldId]) */
+  name: string
   /** Array of form definition items (fields, rows, sections) */
   definition: FormDefinitionItem[]
   /** Default values for the form fields */

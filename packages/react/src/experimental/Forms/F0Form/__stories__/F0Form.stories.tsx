@@ -58,6 +58,7 @@ export const Default: Story = {
 
     return (
       <F0Form
+        name="basic"
         definition={definition}
         defaultValues={{ username: "", email: "", bio: "" }}
         onSubmit={async (data) => {
@@ -134,6 +135,7 @@ export const WithRows: Story = {
 
     return (
       <F0Form
+        name="with-rows"
         definition={definition}
         defaultValues={{
           fullName: "",
@@ -237,6 +239,7 @@ export const WithSections: Story = {
 
     return (
       <F0Form
+        name="with-sections"
         definition={definition}
         defaultValues={{
           firstName: "",
@@ -356,6 +359,7 @@ export const ConditionalRendering: Story = {
 
     return (
       <F0Form
+        name="conditional-rendering"
         definition={definition}
         defaultValues={{
           hasAccount: false,
@@ -516,6 +520,7 @@ export const AllFieldTypes: Story = {
 
     return (
       <F0Form
+        name="all-field-types"
         definition={definition}
         defaultValues={{
           textField: "",
@@ -576,6 +581,7 @@ export const SchemaExtraction: Story = {
           <pre className="text-sm">{JSON.stringify(schema.shape, null, 2)}</pre>
         </div>
         <F0Form
+          name="schema-extraction"
           definition={definition}
           defaultValues={{ name: "", age: 0 }}
           onSubmit={async (data) => {
@@ -624,6 +630,7 @@ export const ServerValidation: Story = {
 
     return (
       <F0Form
+        name="server-validation"
         definition={definition}
         defaultValues={{ username: "", email: "" }}
         onSubmit={async (data) => {
@@ -819,6 +826,7 @@ export const VisualDesignExample: Story = {
     return (
       <div className="max-w-lg">
         <F0Form
+          name="visual-design-example"
           definition={definition}
           defaultValues={{
             title: "Workplace climate survey",

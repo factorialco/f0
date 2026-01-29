@@ -3,6 +3,7 @@ import { useFormContext } from "react-hook-form"
 import { SectionHeader } from "@/experimental/Information/Headers/SectionHeader"
 
 import { FIELD_GAP } from "../constants"
+import { generateAnchorId, useF0FormContext } from "../context"
 import { FieldRenderer } from "../fields/FieldRenderer"
 import type { SwitchFieldDefinition } from "../fields/switch/types"
 import { evaluateRenderIf } from "../fields/utils"
@@ -80,8 +81,10 @@ function groupContiguousSwitches(
 export function SectionRenderer({ section }: SectionRendererProps) {
   const form = useFormContext()
   const values = form.watch()
+  const { formName } = useF0FormContext()
 
   const { title, description, renderIf, fields } = section.section
+  const sectionId = section.id
 
   // Check if section should be rendered based on renderIf condition
   if (renderIf && !evaluateSectionRenderIf(renderIf, values)) {
@@ -90,8 +93,11 @@ export function SectionRenderer({ section }: SectionRendererProps) {
 
   const groupedItems = groupContiguousSwitches(fields)
 
+  // Generate anchor ID for the section
+  const anchorId = generateAnchorId(formName, sectionId)
+
   return (
-    <section className="flex flex-col">
+    <section id={anchorId} className="flex flex-col scroll-mt-4">
       <div className="[&>div]:px-0 [&>div]:border-0 py-5">
         <SectionHeader title={title} description={description ?? ""} />
       </div>
@@ -102,16 +108,27 @@ export function SectionRenderer({ section }: SectionRendererProps) {
               <SwitchGroupRenderer
                 key={`switch-group-${index}`}
                 fields={item.fields}
+                sectionId={sectionId}
               />
             )
           }
           if (item.type === "field") {
             return (
-              <FieldRenderer key={item.item.field.id} field={item.item.field} />
+              <FieldRenderer
+                key={item.item.field.id}
+                field={item.item.field}
+                sectionId={sectionId}
+              />
             )
           }
           if (item.type === "row") {
-            return <RowRenderer key={`row-${item.index}`} row={item.item} />
+            return (
+              <RowRenderer
+                key={`row-${item.index}`}
+                row={item.item}
+                sectionId={sectionId}
+              />
+            )
           }
           return null
         })}

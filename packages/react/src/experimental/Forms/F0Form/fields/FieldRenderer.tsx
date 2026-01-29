@@ -13,6 +13,7 @@ import {
   FormMessage,
 } from "@/ui/form"
 
+import { generateAnchorId, useF0FormContext } from "../context"
 import type { FieldDefinition } from "./types"
 import { evaluateRenderIf } from "./utils"
 
@@ -28,6 +29,8 @@ import { TextareaFieldRenderer } from "./textarea/TextareaFieldRenderer"
 
 interface FieldRendererProps {
   field: FieldDefinition
+  /** Section ID when field is inside a section (for anchor links) */
+  sectionId?: string
 }
 
 interface FieldState {
@@ -46,14 +49,18 @@ function renderFieldInput(
   const hasError = !!fieldState.error
   const { isValidating } = fieldState
 
+  const errorAndLoadingProps = {
+    error: hasError,
+    loading: isValidating,
+  }
+
   switch (field.type) {
     case "text":
       return (
         <TextFieldRenderer
           field={field}
           formField={formField}
-          error={hasError}
-          loading={isValidating}
+          {...errorAndLoadingProps}
         />
       )
     case "number":
@@ -61,8 +68,7 @@ function renderFieldInput(
         <NumberFieldRenderer
           field={field}
           formField={formField}
-          error={hasError}
-          loading={isValidating}
+          {...errorAndLoadingProps}
         />
       )
     case "textarea":
@@ -70,8 +76,7 @@ function renderFieldInput(
         <TextareaFieldRenderer
           field={field}
           formField={formField}
-          error={hasError}
-          loading={isValidating}
+          {...errorAndLoadingProps}
         />
       )
     case "select":
@@ -79,8 +84,7 @@ function renderFieldInput(
         <SelectFieldRenderer
           field={field}
           formField={formField}
-          error={hasError}
-          loading={isValidating}
+          {...errorAndLoadingProps}
         />
       )
     case "checkbox":
@@ -92,8 +96,7 @@ function renderFieldInput(
         <DateFieldRenderer
           field={field}
           formField={formField}
-          error={hasError}
-          loading={isValidating}
+          {...errorAndLoadingProps}
         />
       )
     case "richtext":
@@ -110,9 +113,10 @@ function renderFieldInput(
  * Note: Switch fields rendered individually (not in a group) use this renderer.
  * Contiguous switch fields are grouped by parent components (F0Form, SectionRenderer).
  */
-export function FieldRenderer({ field }: FieldRendererProps) {
+export function FieldRenderer({ field, sectionId }: FieldRendererProps) {
   const form = useFormContext()
   const values = form.watch()
+  const { formName } = useF0FormContext()
 
   // Check if field should be rendered based on renderIf condition
   if (field.renderIf && !evaluateRenderIf(field.renderIf, values)) {
@@ -122,12 +126,15 @@ export function FieldRenderer({ field }: FieldRendererProps) {
   // For checkbox, we show label inline with the checkbox
   const showLabel = field.type !== "checkbox"
 
+  // Generate anchor ID for the field
+  const anchorId = generateAnchorId(formName, sectionId, field.id)
+
   return (
     <FormFieldPrimitive
       control={form.control}
       name={field.id}
       render={({ field: formField, fieldState }) => (
-        <FormItem>
+        <FormItem id={anchorId} className="scroll-mt-4">
           {showLabel && (
             <label
               htmlFor={field.id}

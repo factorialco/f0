@@ -1,4 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod"
+import { useMemo } from "react"
 import { DefaultValues, Path, useForm } from "react-hook-form"
 
 import { F0Button } from "@/components/F0Button"
@@ -9,6 +10,7 @@ import { RowRenderer } from "./components/RowRenderer"
 import { SectionRenderer } from "./components/SectionRenderer"
 import { SwitchGroupRenderer } from "./components/SwitchGroupRenderer"
 import { FIELD_GAP, SECTION_MARGIN } from "./constants"
+import { F0FormContext } from "./context"
 import { FieldRenderer } from "./fields/FieldRenderer"
 import type { SwitchFieldDefinition } from "./fields/switch/types"
 import type {
@@ -108,6 +110,7 @@ function groupContiguousSwitches(
  * ]
  *
  * <F0Form
+ *   name="user-profile"
  *   definition={definition}
  *   defaultValues={{ name: "", email: "", phone: "", newsletter: false }}
  *   onSubmit={async (data) => {
@@ -115,9 +118,15 @@ function groupContiguousSwitches(
  *     return { success: true }
  *   }}
  * />
+ *
+ * // Anchor links will be generated as:
+ * // - #forms.user-profile.name (for the name field)
+ * // - #forms.user-profile.preferences (for the preferences section)
+ * // - #forms.user-profile.preferences.newsletter (for fields inside the section)
  * ```
  */
 export function F0Form<TValues extends Record<string, unknown>>({
+  name,
   definition,
   defaultValues,
   onSubmit,
@@ -159,66 +168,71 @@ export function F0Form<TValues extends Record<string, unknown>>({
   // Group contiguous switch fields
   const groupedItems = groupContiguousSwitches(definition)
 
+  // Context value for anchor links
+  const contextValue = useMemo(() => ({ formName: name }), [name])
+
   return (
-    <FormProvider {...form}>
-      <form
-        onSubmit={form.handleSubmit(handleSubmit)}
-        className={cn(`flex flex-col ${FIELD_GAP}`, className)}
-      >
-        {/* Render definition items with switch grouping */}
-        {groupedItems.map((groupedItem, index) => {
-          switch (groupedItem.type) {
-            case "switchGroup":
-              return (
-                <SwitchGroupRenderer
-                  key={`switch-group-${index}`}
-                  fields={groupedItem.fields}
-                />
-              )
-            case "field":
-              return (
-                <FieldRenderer
-                  key={groupedItem.item.field.id}
-                  field={groupedItem.item.field}
-                />
-              )
-            case "row":
-              return (
-                <RowRenderer
-                  key={`row-${groupedItem.index}`}
-                  row={groupedItem.item}
-                />
-              )
-            case "section":
-              return (
-                <div className={index !== 0 ? SECTION_MARGIN : ""}>
-                  <SectionRenderer
-                    key={groupedItem.item.id}
-                    section={groupedItem.item}
+    <F0FormContext.Provider value={contextValue}>
+      <FormProvider {...form}>
+        <form
+          onSubmit={form.handleSubmit(handleSubmit)}
+          className={cn(`flex flex-col ${FIELD_GAP}`, className)}
+        >
+          {/* Render definition items with switch grouping */}
+          {groupedItems.map((groupedItem, index) => {
+            switch (groupedItem.type) {
+              case "switchGroup":
+                return (
+                  <SwitchGroupRenderer
+                    key={`switch-group-${index}`}
+                    fields={groupedItem.fields}
                   />
-                </div>
-              )
-            default:
-              return null
-          }
-        })}
+                )
+              case "field":
+                return (
+                  <FieldRenderer
+                    key={groupedItem.item.field.id}
+                    field={groupedItem.item.field}
+                  />
+                )
+              case "row":
+                return (
+                  <RowRenderer
+                    key={`row-${groupedItem.index}`}
+                    row={groupedItem.item}
+                  />
+                )
+              case "section":
+                return (
+                  <div
+                    key={groupedItem.item.id}
+                    className={index !== 0 ? SECTION_MARGIN : ""}
+                  >
+                    <SectionRenderer section={groupedItem.item} />
+                  </div>
+                )
+              default:
+                return null
+            }
+          })}
 
-        {/* Root error message */}
-        {rootError && (
-          <p className="text-base font-medium text-f1-foreground-critical">
-            {rootError.message}
-          </p>
-        )}
+          {/* Root error message */}
+          {rootError && (
+            <p className="text-base font-medium text-f1-foreground-critical">
+              {rootError.message}
+            </p>
+          )}
 
-        {/* Submit button */}
-        {showSubmitButton && (
-          <F0Button
-            type="submit"
-            label={submitLabel}
-            loading={form.formState.isSubmitting}
-          />
-        )}
-      </form>
-    </FormProvider>
+          {/* Submit button */}
+          {showSubmitButton && (
+            <F0Button
+              type="submit"
+              label={submitLabel}
+              loading={form.formState.isSubmitting}
+            />
+          )}
+        </form>
+      </FormProvider>
+    </F0FormContext.Provider>
   )
 }
