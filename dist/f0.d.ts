@@ -3310,7 +3310,7 @@ declare const INPUTFIELD_SIZES: readonly ["sm", "md"];
 
 declare type InputFieldInheritedProps = (typeof inputFieldInheritedProps)[number];
 
-declare const inputFieldInheritedProps: readonly ["label", "placeholder", "hideLabel", "size", "error", "disabled", "readonly", "required", "clearable", "labelIcon", "status", "hint"];
+declare const inputFieldInheritedProps: readonly ["label", "placeholder", "hideLabel", "size", "error", "disabled", "readonly", "required", "clearable", "labelIcon", "status", "hint", "loading"];
 
 declare type InputFieldProps<T> = {
     autoFocus?: boolean;
@@ -5314,11 +5314,6 @@ declare module "gridstack" {
 }
 
 
-declare namespace Calendar {
-    var displayName: string;
-}
-
-
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         aiBlock: {
@@ -5344,4 +5339,9 @@ declare module "@tiptap/core" {
             insertTranscript: (data: TranscriptData) => ReturnType;
         };
     }
+}
+
+
+declare namespace Calendar {
+    var displayName: string;
 }

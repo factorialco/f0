@@ -1852,6 +1852,41 @@ export declare interface CurrentVersion {
 
 declare type CustomEmptyStates = Partial<Record<EmptyStateType, Partial<EmptyState>>>;
 
+/**
+ * Custom field definition that allows rendering external components
+ * while maintaining react-hook-form integration
+ */
+export declare interface CustomFieldDefinition extends BaseFieldDefinition {
+    type: "custom";
+    validation: ZodTypeAny;
+    /** Render function for the custom component */
+    render: (props: CustomFieldRenderProps) => ReactNode;
+}
+
+/**
+ * Props passed to the custom field render function
+ */
+export declare interface CustomFieldRenderProps {
+    /** Field id */
+    id: string;
+    /** Field label */
+    label: string;
+    /** Placeholder text */
+    placeholder?: string;
+    /** Current field value */
+    value: unknown;
+    /** Callback to update the value */
+    onChange: (value: unknown) => void;
+    /** Callback for blur events */
+    onBlur: () => void;
+    /** Error message if validation failed */
+    error?: string;
+    /** Whether async validation is in progress */
+    isValidating: boolean;
+    /** Whether the field is disabled */
+    disabled?: boolean;
+}
+
 export declare type CustomVisualizationProps<Source extends {
     dataAdapter: DataCollectionDataAdapter<any, any, any>;
 }> = {
@@ -2127,6 +2162,23 @@ export declare type DataSourceDefinition<R extends RecordType = RecordType, Filt
         pagination?: ChildrenPaginationInfo;
     }) => number | undefined;
 };
+
+/**
+ * Date field definition (renders F0DatePicker component)
+ */
+declare interface DateFieldDefinition extends BaseFieldDefinition {
+    type: "date";
+    /** Available granularities for the date picker (default: ["day"]) */
+    granularities?: GranularityDefinitionKey[];
+    /** Minimum selectable date */
+    minDate?: Date;
+    /** Maximum selectable date */
+    maxDate?: Date;
+    /** Preset date options to display */
+    presets?: DatePreset[];
+    /** Whether the date can be cleared */
+    clearable?: boolean;
+}
 
 export declare type DateFilterDefinition = BaseFilterDefinition<"date"> & {
     options?: DateFilterOptions_2;
@@ -3012,7 +3064,7 @@ export declare function extractAllFields(definition: FormDefinitionItem[]): Fiel
 /**
  * Extract all field IDs from a form definition for type inference
  */
-export declare type ExtractFieldIds<T extends FormDefinitionItem[]> = T[number] extends infer Item ? Item extends FieldItem ? Item["field"]["id"] : Item extends GroupDefinition ? Item["group"]["fields"][number]["id"] : Item extends SectionDefinition ? ExtractFieldIds<Item["section"]["fields"]> : never : never;
+export declare type ExtractFieldIds<T extends FormDefinitionItem[]> = T[number] extends infer Item ? Item extends FieldItem ? Item["field"]["id"] : Item extends RowDefinition ? Item["fields"][number]["id"] : Item extends SectionDefinition ? ExtractFieldIds<Item["section"]["fields"]> : never : never;
 
 /**
  * Extracts the property keys from a record type.
@@ -3189,7 +3241,9 @@ export declare const F0Form: <TValues extends Record<string, unknown>>(props: F0
  * Props for the F0Form component
  */
 export declare interface F0FormProps<TValues extends Record<string, unknown>> {
-    /** Array of form definition items (fields, groups, sections) */
+    /** Unique name for the form, used for generating anchor links (e.g., #forms.[name].[sectionId].[fieldId]) */
+    name: string;
+    /** Array of form definition items (fields, rows, sections) */
     definition: FormDefinitionItem[];
     /** Default values for the form fields */
     defaultValues?: Partial<TValues>;
@@ -3201,8 +3255,6 @@ export declare interface F0FormProps<TValues extends Record<string, unknown>> {
     showSubmitButton?: boolean;
     /** Additional class name for the form */
     className?: string;
-    /** Children to render after the form fields (e.g., custom actions) */
-    children?: React.ReactNode;
 }
 
 /**
@@ -3393,7 +3445,7 @@ declare type FavoriteMenuItem = ({
 /**
  * Union of all field definition types
  */
-export declare type FieldDefinition = TextFieldDefinition | NumberFieldDefinition | TextareaFieldDefinition | SelectFieldDefinition | CheckboxFieldDefinition | SwitchFieldDefinition | ToggleFieldDefinition;
+export declare type FieldDefinition = TextFieldDefinition | NumberFieldDefinition | TextareaFieldDefinition | SelectFieldDefinition | CheckboxFieldDefinition | SwitchFieldDefinition | DateFieldDefinition | RichTextFieldDefinition | CustomFieldDefinition;
 
 /**
  * Field item wrapper for the definition array
@@ -3406,7 +3458,7 @@ export declare interface FieldItem {
 /**
  * Field types mapping to existing components
  */
-export declare type FieldType = "text" | "number" | "textarea" | "select" | "checkbox" | "switch" | "toggle";
+export declare type FieldType = "text" | "number" | "textarea" | "select" | "checkbox" | "switch" | "date" | "richtext" | "custom";
 
 export declare const FILE_TYPES: {
     readonly PDF: "pdf";
@@ -3622,7 +3674,7 @@ export declare function FormActions<Schema extends SchemaType, FormData extends 
 /**
  * Union of all definition item types that can appear in the form definition array
  */
-export declare type FormDefinitionItem = FieldItem | GroupDefinition | SectionDefinition;
+export declare type FormDefinitionItem = FieldItem | RowDefinition | SectionDefinition;
 
 declare type FormError<Fields extends FieldValues> = {
     success: false;
@@ -3653,6 +3705,12 @@ declare interface FrameContextType {
     }) => void;
     setForceFloat: (force: boolean) => void;
 }
+
+/**
+ * Generates an anchor ID for a form element
+ * Format: forms.[formName].[sectionId].[fieldId]
+ */
+export declare function generateAnchorId(formName: string, sectionId?: string, fieldId?: string): string;
 
 /**
  * Non-hook version for extracting schema outside of React components.
@@ -3724,21 +3782,6 @@ export declare type GranularityDefinitionSimple = Pick<GranularityDefinition, "t
  * Symbol used to identify the groupId in the data
  */
 declare const GROUP_ID_SYMBOL: unique symbol;
-
-/**
- * Group definition for rendering fields in a row or column
- */
-export declare interface GroupDefinition {
-    type: "group";
-    group: {
-        /** Layout direction for the group */
-        direction: "row" | "column";
-        /** Fields to render in the group */
-        fields: FieldDefinition[];
-        /** Gap between fields (tailwind spacing scale) */
-        gap?: "2" | "4" | "6" | "8";
-    };
-}
 
 /**
  * Defines the structure and configuration of a grouping options for a data source.
@@ -4069,7 +4112,7 @@ declare const inputFieldStatus: readonly ["default", "warning", "info", "error"]
 
 declare type InputFieldStatusType = (typeof inputFieldStatus)[number];
 
-declare type InputInternalProps<T extends string> = Pick<ComponentProps<typeof Input_2>, "ref"> & Pick<InputFieldProps<T>, "autoFocus" | "required" | "disabled" | "size" | "onChange" | "value" | "placeholder" | "clearable" | "maxLength" | "label" | "labelIcon" | "icon" | "hideLabel" | "name" | "error" | "status" | "hint" | "autocomplete" | "buttonToggle" | "hideMaxLength"> & {
+declare type InputInternalProps<T extends string> = Pick<ComponentProps<typeof Input_2>, "ref"> & Pick<InputFieldProps<T>, "autoFocus" | "required" | "disabled" | "size" | "onChange" | "value" | "placeholder" | "clearable" | "maxLength" | "label" | "labelIcon" | "icon" | "hideLabel" | "name" | "error" | "status" | "hint" | "autocomplete" | "buttonToggle" | "hideMaxLength" | "loading"> & {
     type?: Exclude<HTMLInputTypeAttribute, "number">;
     onPressEnter?: () => void;
 };
@@ -5593,6 +5636,30 @@ declare interface RichTextEditorSkeletonProps {
     rows?: number;
 }
 
+/**
+ * Rich text field definition (renders RichTextEditor component)
+ */
+declare interface RichTextFieldDefinition extends BaseFieldDefinition {
+    type: "richtext";
+    /** Maximum number of characters allowed */
+    maxCharacters?: number;
+    /** Configuration for user mentions */
+    mentionsConfig?: MentionsConfig;
+    /** Height configuration for the editor */
+    height?: heightType;
+    /** Whether to use plain HTML mode (no special blocks) */
+    plainHtmlMode?: boolean;
+}
+
+/**
+ * Row definition for rendering fields horizontally in a row
+ */
+export declare interface RowDefinition {
+    type: "row";
+    /** Fields to render in the row */
+    fields: FieldDefinition[];
+}
+
 declare type SchemaType = ZodType;
 
 export declare const ScrollArea: ForwardRefExoticComponent<Omit<Omit<ScrollAreaProps & RefAttributes<HTMLDivElement>, "ref"> & {
@@ -5683,8 +5750,8 @@ export declare interface SectionDefinition {
         description?: string;
         /** Conditional rendering for the entire section */
         renderIf?: SectionRenderIf;
-        /** Fields and groups within this section */
-        fields: (FieldItem | GroupDefinition)[];
+        /** Fields and rows within this section */
+        fields: (FieldItem | RowDefinition)[];
     };
 }
 
@@ -6269,7 +6336,7 @@ export declare const Textarea: FC<TextareaProps>;
 
 declare const Textarea_2: React_2.ForwardRefExoticComponent<Omit<React_2.TextareaHTMLAttributes<HTMLTextAreaElement>, "value" | "onChange" | "onFocus" | "onBlur"> & {
     value?: string;
-} & Pick<InputFieldProps<string>, "label" | "value" | "onChange" | "icon" | "onFocus" | "onBlur" | "onKeyDown" | "status" | "maxLength" | "placeholder" | "error" | "hideLabel" | "hint" | "labelIcon" | "clearable" | "onClear"> & React_2.RefAttributes<HTMLTextAreaElement>>;
+} & Pick<InputFieldProps<string>, "label" | "value" | "onChange" | "size" | "icon" | "onFocus" | "onBlur" | "onKeyDown" | "status" | "loading" | "maxLength" | "placeholder" | "error" | "hideLabel" | "hint" | "labelIcon" | "clearable" | "onClear"> & React_2.RefAttributes<HTMLTextAreaElement>>;
 
 /**
  * Textarea field definition (renders Textarea component)
@@ -6282,7 +6349,7 @@ export declare interface TextareaFieldDefinition extends BaseFieldDefinition {
     maxLength?: number;
 }
 
-export declare type TextareaProps = Pick<ComponentProps<typeof Textarea_2>, "disabled" | "onChange" | "value" | "placeholder" | "rows" | "cols" | "label" | "labelIcon" | "icon" | "hideLabel" | "maxLength" | "clearable" | "onBlur" | "onFocus" | "name" | "status" | "hint" | "error">;
+export declare type TextareaProps = Pick<ComponentProps<typeof Textarea_2>, "disabled" | "onChange" | "value" | "placeholder" | "rows" | "cols" | "label" | "labelIcon" | "icon" | "hideLabel" | "maxLength" | "clearable" | "onBlur" | "onFocus" | "name" | "status" | "hint" | "error" | "size" | "loading">;
 
 /**
  * Text field definition (renders Input component)
@@ -6374,17 +6441,6 @@ declare type toggleActionType = {
     hideLabel?: boolean;
 };
 
-/**
- * Toggle group field definition (renders ToggleGroup component)
- */
-export declare interface ToggleFieldDefinition extends BaseFieldDefinition {
-    type: "toggle";
-    /** Options for the toggle group */
-    options: ToggleOption[];
-    /** Toggle group variant */
-    variant?: "default" | "outline";
-}
-
 export declare const ToggleGroup: React_2.ForwardRefExoticComponent<((Omit<ToggleGroupPrimitive.ToggleGroupSingleProps & React_2.RefAttributes<HTMLDivElement>, "ref"> | Omit<ToggleGroupPrimitive.ToggleGroupMultipleProps & React_2.RefAttributes<HTMLDivElement>, "ref">) & VariantProps<(props?: ({
     variant?: "default" | "outline" | undefined;
     size?: "lg" | "sm" | "default" | undefined;
@@ -6406,15 +6462,6 @@ export declare const ToggleGroupItem: React_2.ForwardRefExoticComponent<Omit<Tog
     class?: never;
     className?: ClassValue;
 })) | undefined) => string> & React_2.RefAttributes<HTMLButtonElement>>;
-
-/**
- * Toggle group option
- */
-export declare interface ToggleOption {
-    value: string;
-    label: string;
-    disabled?: boolean;
-}
 
 export declare interface ToolbarButtonProps {
     onClick?: () => void;
@@ -6961,11 +7008,6 @@ declare module "gridstack" {
 }
 
 
-declare namespace Calendar {
-    var displayName: string;
-}
-
-
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         aiBlock: {
@@ -6991,4 +7033,9 @@ declare module "@tiptap/core" {
             insertTranscript: (data: TranscriptData) => ReturnType;
         };
     }
+}
+
+
+declare namespace Calendar {
+    var displayName: string;
 }
