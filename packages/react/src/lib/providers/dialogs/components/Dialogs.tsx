@@ -121,7 +121,6 @@ export const Dialogs = ({ dialogs }: DialogsProps) => {
               onClose={dialog.onCloseDialog}
               primaryAction={dialog.actions.primary[0]}
               secondaryAction={dialog.actions.secondary}
-              modal={true}
             />
           ) : (
             <DialogInternal
