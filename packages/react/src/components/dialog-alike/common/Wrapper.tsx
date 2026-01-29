@@ -1,5 +1,5 @@
 import { cva } from "cva"
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useMediaQuery } from "usehooks-ts"
 
 import { cn } from "@/lib/utils"
@@ -128,14 +128,21 @@ export const DialogWrapper = ({
         onClose()
       }
     },
-    [onClose]
+    [onClose, onOpenChange]
   )
 
+  // Track the previous value of isOpen to detect transitions
+  const prevIsOpenRef = useRef<boolean | undefined>(undefined)
+
   useEffect(() => {
-    if (!isOpen) {
+    // Only call onClose if isOpen transitions from true to false
+    // Skip on initial mount (when prevIsOpenRef.current is undefined)
+    if (prevIsOpenRef.current === true && !isOpen) {
       onClose()
     }
-  }, [isOpen])
+    // Update the ref for the next render
+    prevIsOpenRef.current = isOpen
+  }, [isOpen, onClose])
 
   const isSidePosition = useMemo(() => {
     return position === "left" || position === "right"

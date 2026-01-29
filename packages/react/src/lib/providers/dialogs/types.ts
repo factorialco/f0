@@ -1,5 +1,6 @@
 import { ReactNode } from "react"
 
+import { ModuleId } from "@/components/avatars/F0AvatarModule"
 import {
   DialogNotificationType,
   F0DialogSize,
@@ -78,6 +79,14 @@ export type DialogDefinitionInternal = DialogDefinition &
     | {
         variant?: "default"
         type?: "default"
+        /**
+         * If true, the dialog will be modal.
+         */
+        modal?: boolean
+        /**
+         * The module of the dialog.
+         */
+        module?: ModuleId
       }
     | {
         variant: "notification"
