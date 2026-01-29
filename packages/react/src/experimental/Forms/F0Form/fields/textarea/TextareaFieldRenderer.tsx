@@ -7,6 +7,7 @@ import { FORM_SIZE } from "../../constants"
 interface TextareaFieldRendererProps {
   field: TextareaFieldDefinition
   formField: ControllerRenderProps<FieldValues>
+  error?: boolean
 }
 
 /**
@@ -15,6 +16,7 @@ interface TextareaFieldRendererProps {
 export function TextareaFieldRenderer({
   field,
   formField,
+  error,
 }: TextareaFieldRendererProps) {
   return (
     <Textarea
@@ -27,6 +29,7 @@ export function TextareaFieldRenderer({
       value={formField.value != null ? String(formField.value) : ""}
       size={FORM_SIZE}
       hideLabel
+      error={error}
     />
   )
 }

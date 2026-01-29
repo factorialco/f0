@@ -8,6 +8,7 @@ import { FORM_SIZE } from "../../constants"
 interface SelectFieldRendererProps {
   field: SelectFieldDefinition
   formField: ControllerRenderProps<FieldValues>
+  error?: boolean
 }
 
 /**
@@ -16,6 +17,7 @@ interface SelectFieldRendererProps {
 export function SelectFieldRenderer({
   field,
   formField,
+  error,
 }: SelectFieldRendererProps) {
   const selectBaseProps = {
     label: field.label,
@@ -26,6 +28,7 @@ export function SelectFieldRenderer({
     searchBoxPlaceholder: field.searchBoxPlaceholder,
     name: formField.name,
     onBlur: formField.onBlur,
+    error,
   }
 
   if (field.multiple) {

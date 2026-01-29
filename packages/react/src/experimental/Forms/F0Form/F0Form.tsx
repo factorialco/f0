@@ -127,7 +127,6 @@ export function F0Form<TValues extends Record<string, unknown>>({
   submitLabel = "Submit",
   showSubmitButton = true,
   className,
-  children,
 }: F0FormProps<TValues>) {
   // Generate schema from definition
   const schema = useFormDefinitionSchema(definition)
@@ -169,13 +168,6 @@ export function F0Form<TValues extends Record<string, unknown>>({
         onSubmit={form.handleSubmit(handleSubmit)}
         className={cn(`flex flex-col ${FIELD_GAP}`, className)}
       >
-        {/* Root error message */}
-        {rootError && (
-          <p className="text-sm font-medium text-f1-foreground-critical">
-            {rootError.message}
-          </p>
-        )}
-
         {/* Render definition items with switch grouping */}
         {groupedItems.map((groupedItem, index) => {
           switch (groupedItem.type) {
@@ -214,18 +206,20 @@ export function F0Form<TValues extends Record<string, unknown>>({
           }
         })}
 
-        {/* Custom children (e.g., additional actions) */}
-        {children}
+        {/* Root error message */}
+        {rootError && (
+          <p className="text-base font-medium text-f1-foreground-critical">
+            {rootError.message}
+          </p>
+        )}
 
         {/* Submit button */}
         {showSubmitButton && (
-          <div>
-            <F0Button
-              type="submit"
-              label={submitLabel}
-              loading={form.formState.isSubmitting}
-            />
-          </div>
+          <F0Button
+            type="submit"
+            label={submitLabel}
+            loading={form.formState.isSubmitting}
+          />
         )}
       </form>
     </FormProvider>

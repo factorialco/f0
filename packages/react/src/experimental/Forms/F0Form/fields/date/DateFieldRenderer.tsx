@@ -8,6 +8,7 @@ import { FORM_SIZE } from "../../constants"
 interface DateFieldRendererProps {
   field: DateFieldDefinition
   formField: ControllerRenderProps<FieldValues>
+  error?: boolean
 }
 
 /**
@@ -16,6 +17,7 @@ interface DateFieldRendererProps {
 export function DateFieldRenderer({
   field,
   formField,
+  error,
 }: DateFieldRendererProps) {
   return (
     <F0DatePicker
@@ -31,6 +33,7 @@ export function DateFieldRenderer({
       onChange={(value) => formField.onChange(value)}
       size={FORM_SIZE}
       hideLabel
+      error={error}
     />
   )
 }

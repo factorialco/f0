@@ -84,8 +84,6 @@ export interface F0FormProps<TValues extends Record<string, unknown>> {
   showSubmitButton?: boolean
   /** Additional class name for the form */
   className?: string
-  /** Children to render after the form fields (e.g., custom actions) */
-  children?: React.ReactNode
 }
 
 /**

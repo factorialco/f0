@@ -7,6 +7,7 @@ import { FORM_SIZE } from "../../constants"
 interface NumberFieldRendererProps {
   field: NumberFieldDefinition
   formField: ControllerRenderProps<FieldValues>
+  error?: boolean
 }
 
 /**
@@ -15,6 +16,7 @@ interface NumberFieldRendererProps {
 export function NumberFieldRenderer({
   field,
   formField,
+  error,
 }: NumberFieldRendererProps) {
   return (
     <NumberInput
@@ -30,6 +32,7 @@ export function NumberFieldRenderer({
       onChange={(value) => formField.onChange(value)}
       size={FORM_SIZE}
       hideLabel
+      error={error}
     />
   )
 }

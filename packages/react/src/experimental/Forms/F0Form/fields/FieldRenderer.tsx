@@ -1,5 +1,6 @@
 import {
   ControllerRenderProps,
+  FieldError,
   FieldValues,
   useFormContext,
 } from "react-hook-form"
@@ -34,23 +35,56 @@ interface FieldRendererProps {
  */
 function renderFieldInput(
   field: FieldDefinition,
-  formField: ControllerRenderProps<FieldValues>
+  formField: ControllerRenderProps<FieldValues>,
+  error?: FieldError
 ): React.ReactNode {
+  const hasError = !!error
+
   switch (field.type) {
     case "text":
-      return <TextFieldRenderer field={field} formField={formField} />
+      return (
+        <TextFieldRenderer
+          field={field}
+          formField={formField}
+          error={hasError}
+        />
+      )
     case "number":
-      return <NumberFieldRenderer field={field} formField={formField} />
+      return (
+        <NumberFieldRenderer
+          field={field}
+          formField={formField}
+          error={hasError}
+        />
+      )
     case "textarea":
-      return <TextareaFieldRenderer field={field} formField={formField} />
+      return (
+        <TextareaFieldRenderer
+          field={field}
+          formField={formField}
+          error={hasError}
+        />
+      )
     case "select":
-      return <SelectFieldRenderer field={field} formField={formField} />
+      return (
+        <SelectFieldRenderer
+          field={field}
+          formField={formField}
+          error={hasError}
+        />
+      )
     case "checkbox":
       return <CheckboxFieldRenderer field={field} formField={formField} />
     case "switch":
       return <SwitchFieldRenderer field={field} formField={formField} />
     case "date":
-      return <DateFieldRenderer field={field} formField={formField} />
+      return (
+        <DateFieldRenderer
+          field={field}
+          formField={formField}
+          error={hasError}
+        />
+      )
     case "richtext":
       return <RichTextFieldRenderer field={field} formField={formField} />
     default:
@@ -81,7 +115,7 @@ export function FieldRenderer({ field }: FieldRendererProps) {
     <FormFieldPrimitive
       control={form.control}
       name={field.id}
-      render={({ field: formField }) => (
+      render={({ field: formField, fieldState }) => (
         <FormItem>
           {showLabel && (
             <label
@@ -91,7 +125,9 @@ export function FieldRenderer({ field }: FieldRendererProps) {
               {field.label}
             </label>
           )}
-          <FormControl>{renderFieldInput(field, formField)}</FormControl>
+          <FormControl>
+            {renderFieldInput(field, formField, fieldState.error)}
+          </FormControl>
           {field.helpText && (
             <FormDescription>{field.helpText}</FormDescription>
           )}
