@@ -2078,6 +2078,14 @@ export declare type DialogDefinition = {
 export declare type DialogDefinitionInternal = DialogDefinition & ({
     variant?: "default";
     type?: "default";
+    /**
+     * If true, the dialog will be modal.
+     */
+    modal?: boolean;
+    /**
+     * The module of the dialog.
+     */
+    module?: ModuleId;
 } | {
     variant: "notification";
     type: DialogNotificationType;
@@ -5406,11 +5414,6 @@ declare module "gridstack" {
 }
 
 
-declare namespace Calendar {
-    var displayName: string;
-}
-
-
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         aiBlock: {
@@ -5436,4 +5439,9 @@ declare module "@tiptap/core" {
             insertTranscript: (data: TranscriptData) => ReturnType;
         };
     }
+}
+
+
+declare namespace Calendar {
+    var displayName: string;
 }
