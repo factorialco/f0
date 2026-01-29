@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.340.0](https://github.com/factorialco/f0/compare/f0-react-v1.339.1...f0-react-v1.340.0) (2026-01-29)
+
+
+### Features
+
+* allowed disabled action in one alert ([#3311](https://github.com/factorialco/f0/issues/3311)) ([f289de7](https://github.com/factorialco/f0/commit/f289de7e95b05a808748a616875b3482fc836c68))
+
 ## [1.339.1](https://github.com/factorialco/f0/compare/f0-react-v1.339.0...f0-react-v1.339.1) (2026-01-28)
 
 
