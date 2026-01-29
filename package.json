@@ -1,6 +1,8 @@
 {
   "name": "@factorialco/f0-react",
-  "version": "1.335.0",
+  "version": "1.339.1",
+  "main": "dist/f0.js",
+  "typings": "dist/f0.d.ts",
   "private": false,
   "files": [
     "assets",
@@ -15,8 +17,6 @@
   "sideEffects": [
     "**/*.css"
   ],
-  "main": "dist/f0.js",
-  "typings": "dist/f0.d.ts",
   "scripts": {
     "dev": "storybook dev -p 6006",
     "dev:docs": "DOCS_MODE=true pnpm run dev",
@@ -165,7 +165,7 @@
     "@types/lodash": "^4.17.16",
     "@types/node": "^22.13.9",
     "@types/react": "^18.3.18",
-    "@types/react-dom": "^18.3.18",
+    "@types/react-dom": "^18.3.1",
     "@types/twemoji-parser": "^13.1.4",
     "@vitejs/plugin-react": "^4.3.4",
     "@vitest/browser-playwright": "^4.0.15",
@@ -189,6 +189,8 @@
     "markdown-to-jsx": "^9.3.3",
     "mockdate": "^3.0.5",
     "npm-run-all": "^4.1.5",
+    "oxfmt": "^0.26.0",
+    "oxlint": "^1.33.0",
     "playwright": "^1.57.0",
     "postcss": "^8.5.3",
     "postcss-import": "^16.1.0",
