@@ -45,7 +45,7 @@ const DateInput = forwardRef<HTMLInputElement, DateInputProps>(
     const i18n = useI18n()
 
     useEffect(() => {
-      setInputValue(granularity.toString(value?.value, i18n))
+      setInputValue(granularity.toString(value?.value, i18n, "long"))
     }, [value, granularity, i18n])
 
     const isValidDate = (date: Date | undefined | null) => {
