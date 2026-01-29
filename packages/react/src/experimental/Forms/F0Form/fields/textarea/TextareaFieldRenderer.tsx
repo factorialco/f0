@@ -8,6 +8,7 @@ interface TextareaFieldRendererProps {
   field: TextareaFieldDefinition
   formField: ControllerRenderProps<FieldValues>
   error?: boolean
+  loading?: boolean
 }
 
 /**
@@ -17,6 +18,7 @@ export function TextareaFieldRenderer({
   field,
   formField,
   error,
+  loading,
 }: TextareaFieldRendererProps) {
   return (
     <Textarea
@@ -30,6 +32,7 @@ export function TextareaFieldRenderer({
       size={FORM_SIZE}
       hideLabel
       error={error}
+      loading={loading}
     />
   )
 }

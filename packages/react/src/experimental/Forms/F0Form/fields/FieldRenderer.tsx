@@ -30,15 +30,21 @@ interface FieldRendererProps {
   field: FieldDefinition
 }
 
+interface FieldState {
+  error?: FieldError
+  isValidating: boolean
+}
+
 /**
  * Renders the appropriate input component based on field type
  */
 function renderFieldInput(
   field: FieldDefinition,
   formField: ControllerRenderProps<FieldValues>,
-  error?: FieldError
+  fieldState: FieldState
 ): React.ReactNode {
-  const hasError = !!error
+  const hasError = !!fieldState.error
+  const { isValidating } = fieldState
 
   switch (field.type) {
     case "text":
@@ -47,6 +53,7 @@ function renderFieldInput(
           field={field}
           formField={formField}
           error={hasError}
+          loading={isValidating}
         />
       )
     case "number":
@@ -55,6 +62,7 @@ function renderFieldInput(
           field={field}
           formField={formField}
           error={hasError}
+          loading={isValidating}
         />
       )
     case "textarea":
@@ -63,6 +71,7 @@ function renderFieldInput(
           field={field}
           formField={formField}
           error={hasError}
+          loading={isValidating}
         />
       )
     case "select":
@@ -71,6 +80,7 @@ function renderFieldInput(
           field={field}
           formField={formField}
           error={hasError}
+          loading={isValidating}
         />
       )
     case "checkbox":
@@ -83,6 +93,7 @@ function renderFieldInput(
           field={field}
           formField={formField}
           error={hasError}
+          loading={isValidating}
         />
       )
     case "richtext":
@@ -126,7 +137,7 @@ export function FieldRenderer({ field }: FieldRendererProps) {
             </label>
           )}
           <FormControl>
-            {renderFieldInput(field, formField, fieldState.error)}
+            {renderFieldInput(field, formField, fieldState)}
           </FormControl>
           {field.helpText && (
             <FormDescription>{field.helpText}</FormDescription>

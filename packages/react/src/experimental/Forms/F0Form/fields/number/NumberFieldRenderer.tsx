@@ -8,6 +8,7 @@ interface NumberFieldRendererProps {
   field: NumberFieldDefinition
   formField: ControllerRenderProps<FieldValues>
   error?: boolean
+  loading?: boolean
 }
 
 /**
@@ -17,6 +18,7 @@ export function NumberFieldRenderer({
   field,
   formField,
   error,
+  loading,
 }: NumberFieldRendererProps) {
   return (
     <NumberInput
@@ -33,6 +35,7 @@ export function NumberFieldRenderer({
       size={FORM_SIZE}
       hideLabel
       error={error}
+      loading={loading}
     />
   )
 }

@@ -8,6 +8,7 @@ interface TextFieldRendererProps {
   field: TextFieldDefinition
   formField: ControllerRenderProps<FieldValues>
   error?: boolean
+  loading?: boolean
 }
 
 /**
@@ -17,6 +18,7 @@ export function TextFieldRenderer({
   field,
   formField,
   error,
+  loading,
 }: TextFieldRendererProps) {
   return (
     <Input
@@ -29,6 +31,7 @@ export function TextFieldRenderer({
       size={FORM_SIZE}
       hideLabel
       error={error}
+      loading={loading}
     />
   )
 }

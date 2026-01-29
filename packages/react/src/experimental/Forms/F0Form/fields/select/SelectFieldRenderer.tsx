@@ -9,6 +9,7 @@ interface SelectFieldRendererProps {
   field: SelectFieldDefinition
   formField: ControllerRenderProps<FieldValues>
   error?: boolean
+  loading?: boolean
 }
 
 /**
@@ -18,6 +19,7 @@ export function SelectFieldRenderer({
   field,
   formField,
   error,
+  loading,
 }: SelectFieldRendererProps) {
   const selectBaseProps = {
     label: field.label,
@@ -29,6 +31,7 @@ export function SelectFieldRenderer({
     name: formField.name,
     onBlur: formField.onBlur,
     error,
+    loading,
   }
 
   if (field.multiple) {

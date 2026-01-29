@@ -9,6 +9,7 @@ interface DateFieldRendererProps {
   field: DateFieldDefinition
   formField: ControllerRenderProps<FieldValues>
   error?: boolean
+  loading?: boolean
 }
 
 /**
@@ -18,6 +19,7 @@ export function DateFieldRenderer({
   field,
   formField,
   error,
+  loading,
 }: DateFieldRendererProps) {
   return (
     <F0DatePicker
@@ -34,6 +36,7 @@ export function DateFieldRenderer({
       size={FORM_SIZE}
       hideLabel
       error={error}
+      loading={loading}
     />
   )
 }
