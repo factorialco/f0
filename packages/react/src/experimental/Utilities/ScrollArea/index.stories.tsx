@@ -3,8 +3,8 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { F0Button } from "@/components/F0Button"
 import { Placeholder } from "@/lib/storybook-utils/placeholder"
 
-import { Alert, AlertTitle } from "../../Information/Alert"
 import { ScrollArea } from "./index"
+import { F0Alert } from "@/components/F0Alert"
 
 const meta = {
   title: "ScrollArea",
@@ -57,17 +57,21 @@ export const Comparison: Story = {
   render: (props) => (
     <div className="h-96 flex-row gap-8">
       <div className="flex h-full flex-col gap-4 overflow-hidden">
-        <Alert variant="positive">
-          <AlertTitle>New ScrollArea Component</AlertTitle>
-        </Alert>
+        <F0Alert
+          variant="positive"
+          title="New ScrollArea Component"
+          description="This is a new scroll area component"
+        />
         <ScrollArea {...props}>
           <StackWithOverflow />
         </ScrollArea>
       </div>
       <div className="flex h-full flex-col gap-4 overflow-hidden">
-        <Alert variant="warning">
-          <AlertTitle>Default ScrollBar</AlertTitle>
-        </Alert>
+        <F0Alert
+          variant="warning"
+          title="Default ScrollBar"
+          description="This is a default scroll bar component"
+        />
         <div className="flex flex-col gap-4 overflow-auto">
           <StackWithOverflow />
         </div>
