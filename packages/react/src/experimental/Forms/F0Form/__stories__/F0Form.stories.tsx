@@ -546,6 +546,140 @@ export const AllFieldTypes: Story = {
 }
 
 /**
+ * Demonstrates custom field type for integrating external components
+ */
+export const CustomField: Story = {
+  render() {
+    // Simulated external component (like EmployeeSelectorV2)
+    const ExternalSelector = ({
+      label,
+      value,
+      onChange,
+      error,
+      disabled,
+      options,
+    }: {
+      label: string
+      value: string | undefined
+      onChange: (value: string | undefined) => void
+      error?: string
+      disabled?: boolean
+      options: { id: string; name: string }[]
+    }) => (
+      <div className="flex flex-col gap-1">
+        <label className="text-sm font-medium text-f1-foreground-secondary">
+          {label}
+        </label>
+        <select
+          value={value ?? ""}
+          onChange={(e) => onChange(e.target.value || undefined)}
+          disabled={disabled}
+          className={`rounded-lg border px-3 py-2 text-sm ${
+            error ? "border-f1-border-critical" : "border-f1-border-secondary"
+          } ${disabled ? "opacity-50" : ""}`}
+        >
+          <option value="">Select an option...</option>
+          {options.map((opt) => (
+            <option key={opt.id} value={opt.id}>
+              {opt.name}
+            </option>
+          ))}
+        </select>
+        {error && (
+          <span className="text-sm text-f1-foreground-critical">{error}</span>
+        )}
+      </div>
+    )
+
+    const employees = [
+      { id: "1", name: "John Doe" },
+      { id: "2", name: "Jane Smith" },
+      { id: "3", name: "Bob Johnson" },
+    ]
+
+    const definition: FormDefinitionItem[] = [
+      {
+        type: "field",
+        field: {
+          id: "title",
+          type: "text",
+          label: "Task Title",
+          validation: z.string().min(1, "Title is required"),
+          placeholder: "Enter task title",
+        },
+      },
+      {
+        type: "field",
+        field: {
+          id: "assignee",
+          type: "custom",
+          label: "Assignee",
+          validation: z.string().min(1, "Please select an assignee"),
+          render: ({ label, value, onChange, error, disabled }) => (
+            <ExternalSelector
+              label={label}
+              value={value as string | undefined}
+              onChange={onChange}
+              error={error}
+              disabled={disabled}
+              options={employees}
+            />
+          ),
+        },
+      },
+      {
+        type: "field",
+        field: {
+          id: "reviewer",
+          type: "custom",
+          label: "Reviewer (Optional)",
+          validation: z.string().optional(),
+          render: ({ label, value, onChange, error, disabled }) => (
+            <ExternalSelector
+              label={label}
+              value={value as string | undefined}
+              onChange={onChange}
+              error={error}
+              disabled={disabled}
+              options={employees}
+            />
+          ),
+        },
+      },
+      {
+        type: "field",
+        field: {
+          id: "description",
+          type: "textarea",
+          label: "Description",
+          validation: z.string().optional(),
+          rows: 3,
+        },
+      },
+    ]
+
+    return (
+      <F0Form
+        name="custom-field-example"
+        definition={definition}
+        defaultValues={{
+          title: "",
+          assignee: "",
+          reviewer: "",
+          description: "",
+        }}
+        onSubmit={async (data) => {
+          await sleep(1000)
+          alert(`Task created: ${JSON.stringify(data, null, 2)}`)
+          return { success: true }
+        }}
+        submitLabel="Create Task"
+      />
+    )
+  },
+}
+
+/**
  * Demonstrates using useFormDefinitionSchema hook to get the generated schema
  */
 export const SchemaExtraction: Story = {

@@ -34,6 +34,8 @@ function getDefaultValidation(field: FieldDefinition): ZodTypeAny {
       return buildDateFieldSchema(field)
     case "richtext":
       return buildRichTextFieldSchema(field)
+    case "custom":
+      return field.validation
     default:
       return z.any()
   }

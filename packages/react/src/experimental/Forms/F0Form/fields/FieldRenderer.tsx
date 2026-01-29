@@ -19,6 +19,7 @@ import { evaluateRenderIf } from "./utils"
 
 // Import field renderers
 import { CheckboxFieldRenderer } from "./checkbox/CheckboxFieldRenderer"
+import { CustomFieldRenderer } from "./custom/CustomFieldRenderer"
 import { DateFieldRenderer } from "./date/DateFieldRenderer"
 import { NumberFieldRenderer } from "./number/NumberFieldRenderer"
 import { RichTextFieldRenderer } from "./richtext/RichTextFieldRenderer"
@@ -101,6 +102,15 @@ function renderFieldInput(
       )
     case "richtext":
       return <RichTextFieldRenderer field={field} formField={formField} />
+    case "custom":
+      return (
+        <CustomFieldRenderer
+          field={field}
+          formField={formField}
+          error={fieldState.error?.message}
+          isValidating={isValidating}
+        />
+      )
     default:
       return null
   }
@@ -123,8 +133,8 @@ export function FieldRenderer({ field, sectionId }: FieldRendererProps) {
     return null
   }
 
-  // For checkbox, we show label inline with the checkbox
-  const showLabel = field.type !== "checkbox"
+  // For checkbox and custom fields, label is handled internally
+  const showLabel = field.type !== "checkbox" && field.type !== "custom"
 
   // Generate anchor ID for the field
   const anchorId = generateAnchorId(formName, sectionId, field.id)

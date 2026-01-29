@@ -23,6 +23,8 @@ export type {
   SelectFieldDefinition,
   CheckboxFieldDefinition,
   SwitchFieldDefinition,
+  CustomFieldDefinition,
+  CustomFieldRenderProps,
 } from "./fields/types"
 
 import type { F0FormProps } from "./types"

@@ -45,6 +45,10 @@ export type { CheckboxFieldDefinition } from "./checkbox/types"
 export type { SwitchFieldDefinition } from "./switch/types"
 export type { DateFieldDefinition } from "./date/types"
 export type { RichTextFieldDefinition, RichTextValue } from "./richtext/types"
+export type {
+  CustomFieldDefinition,
+  CustomFieldRenderProps,
+} from "./custom/types"
 
 // Import for union type
 import type { TextFieldDefinition } from "./text/types"
@@ -55,6 +59,7 @@ import type { CheckboxFieldDefinition } from "./checkbox/types"
 import type { SwitchFieldDefinition } from "./switch/types"
 import type { DateFieldDefinition } from "./date/types"
 import type { RichTextFieldDefinition } from "./richtext/types"
+import type { CustomFieldDefinition } from "./custom/types"
 
 /**
  * Union of all field definition types
@@ -68,6 +73,7 @@ export type FieldDefinition =
   | SwitchFieldDefinition
   | DateFieldDefinition
   | RichTextFieldDefinition
+  | CustomFieldDefinition
 
 /**
  * Field types mapping to existing components
@@ -81,3 +87,4 @@ export type FieldType =
   | "switch"
   | "date"
   | "richtext"
+  | "custom"
