@@ -11,7 +11,12 @@ test("calls onFullscreenChange callback when fullscreen mode changes", async () 
   render(
     <UserPlatformProvider platform="mac">
       <I18nProvider translations={defaultTranslations}>
-        <RichTextEditor onFullscreenChange={onFullscreenChange} />
+        <RichTextEditor
+          title="Title"
+          placeholder="Placeholder..."
+          onChange={vi.fn()}
+          onFullscreenChange={onFullscreenChange}
+        />
       </I18nProvider>
     </UserPlatformProvider>
   )
