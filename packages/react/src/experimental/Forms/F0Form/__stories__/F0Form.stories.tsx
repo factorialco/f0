@@ -639,3 +639,118 @@ export const VisualDesignExample: Story = {
     )
   },
 }
+
+/**
+ * Form with action bar submit type.
+ * The action bar appears at the bottom of the screen when the form has changes.
+ */
+export const WithActionBar: Story = {
+  render() {
+    const formSchema = z.object({
+      firstName: f0(z.string().min(1), {
+        label: "First Name",
+        placeholder: "Enter first name",
+      }),
+      lastName: f0(z.string().min(1), {
+        label: "Last Name",
+        placeholder: "Enter last name",
+      }),
+      email: f0(z.string().email(), {
+        label: "Email",
+        inputType: "email",
+        placeholder: "you@example.com",
+      }),
+      notifications: f0(z.boolean(), {
+        label: "Enable notifications",
+        fieldType: "switch",
+        helpText: "Receive email notifications about updates",
+      }),
+    })
+
+    return (
+      <div className="max-w-lg">
+        <F0Form
+          name="action-bar-example"
+          schema={formSchema}
+          submitType="action-bar"
+          defaultValues={{
+            firstName: "John",
+            lastName: "Doe",
+            email: "john@example.com",
+            notifications: true,
+          }}
+          onSubmit={async (data) => {
+            await sleep(1000)
+            alert(`Settings saved: ${JSON.stringify(data, null, 2)}`)
+            return { success: true }
+          }}
+          submitLabel="Save Changes"
+        />
+        <p className="mt-4 text-sm text-f1-foreground-secondary">
+          Modify any field to see the action bar appear
+        </p>
+      </div>
+    )
+  },
+}
+
+/**
+ * Form with action bar and discard button.
+ * When discardableChanges is true, a Discard button appears in the action bar.
+ * Labels default to i18n values but can be customized.
+ */
+export const WithActionBarAndDiscard: Story = {
+  render() {
+    const formSchema = z.object({
+      companyName: f0(z.string().min(1), {
+        label: "Company Name",
+        placeholder: "Enter company name",
+      }),
+      industry: f0(z.string(), {
+        label: "Industry",
+        options: [
+          { value: "tech", label: "Technology" },
+          { value: "finance", label: "Finance" },
+          { value: "healthcare", label: "Healthcare" },
+          { value: "retail", label: "Retail" },
+        ],
+        placeholder: "Select industry",
+      }),
+      employeeCount: f0(z.number().min(1).max(100000), {
+        label: "Number of Employees",
+      }),
+      publicCompany: f0(z.boolean(), {
+        label: "Publicly traded company",
+        fieldType: "checkbox",
+      }),
+    })
+
+    return (
+      <div className="max-w-lg">
+        <F0Form
+          name="action-bar-discard-example"
+          schema={formSchema}
+          submitType="action-bar"
+          discardableChanges
+          actionBarLabel="You have unsaved changes"
+          discardLabel="Discard Changes"
+          defaultValues={{
+            companyName: "Acme Corp",
+            industry: "tech",
+            employeeCount: 500,
+            publicCompany: false,
+          }}
+          onSubmit={async (data) => {
+            await sleep(1000)
+            alert(`Company updated: ${JSON.stringify(data, null, 2)}`)
+            return { success: true }
+          }}
+          submitLabel="Save"
+        />
+        <p className="mt-4 text-sm text-f1-foreground-secondary">
+          Modify any field to see the action bar with Save and Discard buttons
+        </p>
+      </div>
+    )
+  },
+}

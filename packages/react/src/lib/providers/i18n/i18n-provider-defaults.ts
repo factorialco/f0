@@ -381,6 +381,12 @@ export const defaultTranslations = {
       blocks: "Blocks",
     },
   },
+  forms: {
+    actionBar: {
+      unsavedChanges: "Unsaved changes",
+      discard: "Discard",
+    },
+  },
 } as const
 
 type TranslationShape<T> = {

@@ -13,7 +13,6 @@ describe("F0Form", () => {
     const formSchema = z.object({
       name: f0(z.string(), {
         label: "Name",
-        position: 1,
       }),
     })
 
@@ -34,7 +33,6 @@ describe("F0Form", () => {
     const formSchema = z.object({
       email: f0(z.string().email(), {
         label: "Email",
-        position: 1,
         inputType: "email",
       }),
     })
@@ -56,7 +54,6 @@ describe("F0Form", () => {
     const formSchema = z.object({
       name: f0(z.string(), {
         label: "Name",
-        position: 1,
       }),
     })
 
@@ -80,7 +77,6 @@ describe("F0Form", () => {
       name: f0(z.string(), {
         label: "Name",
         section: "personal",
-        position: 1,
       }),
     })
 
@@ -110,12 +106,10 @@ describe("F0Form", () => {
     const formSchema = z.object({
       firstName: f0(z.string(), {
         label: "First Name",
-        position: 1,
         row: "name-row",
       }),
       lastName: f0(z.string(), {
         label: "Last Name",
-        position: 2,
         row: "name-row",
       }),
     })
@@ -138,19 +132,16 @@ describe("f0 function", () => {
   it("attaches config to schema", () => {
     const schema = f0(z.string(), {
       label: "Test",
-      position: 1,
     })
 
     const config = getF0Config(schema)
     expect(config).toBeDefined()
     expect(config?.label).toBe("Test")
-    expect(config?.position).toBe(1)
   })
 
   it("preserves original schema validation", () => {
     const schema = f0(z.string().min(2), {
       label: "Test",
-      position: 1,
     })
 
     const validResult = schema.safeParse("ab")
@@ -164,7 +155,6 @@ describe("f0 function", () => {
     const schema = f0(z.string(), {
       label: "Test",
       section: "section1",
-      position: 1,
       placeholder: "Enter text",
       helpText: "Help text",
       disabled: true,
@@ -174,7 +164,6 @@ describe("f0 function", () => {
     const config = getF0Config(schema)
     expect(config?.label).toBe("Test")
     expect(config?.section).toBe("section1")
-    expect(config?.position).toBe(1)
     expect(config?.placeholder).toBe("Enter text")
     expect(config?.helpText).toBe("Help text")
     expect(config?.disabled).toBe(true)
@@ -184,7 +173,7 @@ describe("f0 function", () => {
 
 describe("hasF0Config", () => {
   it("returns true for schema with f0 config", () => {
-    const schema = f0(z.string(), { label: "Test", position: 1 })
+    const schema = f0(z.string(), { label: "Test" })
     expect(hasF0Config(schema)).toBe(true)
   })
 
@@ -197,19 +186,19 @@ describe("hasF0Config", () => {
 describe("inferFieldType", () => {
   it("infers text type from ZodString", () => {
     const schema = z.string()
-    const config = { label: "Test", position: 1 } as const
+    const config = { label: "Test" } as const
     expect(inferFieldType(schema, config)).toBe("text")
   })
 
   it("infers number type from ZodNumber", () => {
     const schema = z.number()
-    const config = { label: "Test", position: 1, fieldType: "number" } as const
+    const config = { label: "Test", fieldType: "number" } as const
     expect(inferFieldType(schema, config)).toBe("number")
   })
 
   it("infers switch type from ZodBoolean", () => {
     const schema = z.boolean()
-    const config = { label: "Test", position: 1, fieldType: "switch" } as const
+    const config = { label: "Test", fieldType: "switch" } as const
     expect(inferFieldType(schema, config)).toBe("switch")
   })
 
@@ -217,7 +206,6 @@ describe("inferFieldType", () => {
     const schema = z.string()
     const config = {
       label: "Test",
-      position: 1,
       rows: 4,
       fieldType: "textarea",
     } as const
@@ -228,7 +216,6 @@ describe("inferFieldType", () => {
     const schema = z.string()
     const config = {
       label: "Test",
-      position: 1,
       options: [{ value: "a", label: "A" }],
     } as const
     expect(inferFieldType(schema, config)).toBe("select")
@@ -238,7 +225,6 @@ describe("inferFieldType", () => {
     const schema = z.boolean()
     const config = {
       label: "Test",
-      position: 1,
       fieldType: "checkbox",
     } as const
     expect(inferFieldType(schema, config)).toBe("checkbox")
@@ -248,8 +234,8 @@ describe("inferFieldType", () => {
 describe("getSchemaDefinition", () => {
   it("converts schema to definition array", () => {
     const formSchema = z.object({
-      name: f0(z.string(), { label: "Name", position: 1 }),
-      email: f0(z.string().email(), { label: "Email", position: 2 }),
+      name: f0(z.string(), { label: "Name" }),
+      email: f0(z.string().email(), { label: "Email" }),
     })
 
     const definition = getSchemaDefinition(formSchema)
@@ -264,12 +250,10 @@ describe("getSchemaDefinition", () => {
       name: f0(z.string(), {
         label: "Name",
         section: "personal",
-        position: 1,
       }),
       email: f0(z.string(), {
         label: "Email",
         section: "contact",
-        position: 1,
       }),
     })
 
@@ -285,17 +269,17 @@ describe("getSchemaDefinition", () => {
     expect(definition[1].type).toBe("section")
   })
 
-  it("sorts fields by position", () => {
+  it("orders fields by declaration order in schema", () => {
     const formSchema = z.object({
-      third: f0(z.string(), { label: "Third", position: 3 }),
-      first: f0(z.string(), { label: "First", position: 1 }),
-      second: f0(z.string(), { label: "Second", position: 2 }),
+      first: f0(z.string(), { label: "First" }),
+      second: f0(z.string(), { label: "Second" }),
+      third: f0(z.string(), { label: "Third" }),
     })
 
     const definition = getSchemaDefinition(formSchema)
 
     expect(definition).toHaveLength(3)
-    // Fields should be sorted by position
+    // Fields should be in declaration order
     const fieldItems = definition as Array<{
       type: "field"
       field: { id: string }
@@ -309,12 +293,10 @@ describe("getSchemaDefinition", () => {
     const formSchema = z.object({
       firstName: f0(z.string(), {
         label: "First",
-        position: 1,
         row: "name-row",
       }),
       lastName: f0(z.string(), {
         label: "Last",
-        position: 2,
         row: "name-row",
       }),
     })

@@ -78,29 +78,16 @@ export type FormDefinitionItem = FieldItem | RowDefinition | SectionDefinition
 // ============================================================================
 
 /**
- * Props for the F0Form component
- *
- * @typeParam TSchema - The Zod object schema type. The form data type is inferred from this.
- *
- * @example
- * ```tsx
- * const schema = z.object({
- *   name: f0(z.string(), { label: "Name", position: 1 }),
- *   age: f0(z.number(), { label: "Age", position: 2 }),
- * })
- *
- * // Data type is inferred as { name: string; age: number }
- * <F0Form
- *   name="my-form"
- *   schema={schema}
- *   defaultValues={{ name: "" }}  // Partial allowed
- *   onSubmit={(data) => {
- *     // data is { name: string; age: number }
- *   }}
- * />
- * ```
+ * Type of submit UI to render
+ * - "default": Standard submit button at the bottom of the form
+ * - "action-bar": Floating action bar that appears when form has changes
  */
-export interface F0FormProps<TSchema extends z.ZodObject<ZodRawShape>> {
+export type F0FormSubmitType = "default" | "action-bar"
+
+/**
+ * Base props shared by all submit types
+ */
+interface F0FormBaseProps<TSchema extends z.ZodObject<ZodRawShape>> {
   /** Unique name for the form, used for generating anchor links (e.g., #forms.[name].[sectionId].[fieldId]) */
   name: string
   /** Zod object schema with F0 field configurations */
@@ -115,11 +102,72 @@ export interface F0FormProps<TSchema extends z.ZodObject<ZodRawShape>> {
   ) => Promise<F0FormSubmitResult> | F0FormSubmitResult
   /** Label for the submit button */
   submitLabel?: string
-  /** Whether to show the submit button */
-  showSubmitButton?: boolean
   /** Additional class name for the form */
   className?: string
 }
+
+/**
+ * Props when using the default submit button
+ */
+interface F0FormDefaultSubmitProps<
+  TSchema extends z.ZodObject<ZodRawShape>,
+> extends F0FormBaseProps<TSchema> {
+  /** Type of submit UI (default button) */
+  submitType?: "default"
+  /** Whether to show the submit button */
+  showSubmitButton?: boolean
+}
+
+/**
+ * Props when using the action bar submit
+ */
+interface F0FormActionBarProps<
+  TSchema extends z.ZodObject<ZodRawShape>,
+> extends F0FormBaseProps<TSchema> {
+  /** Type of submit UI (floating action bar) */
+  submitType: "action-bar"
+  /** Whether to show a Discard button to reset form changes */
+  discardableChanges?: boolean
+  /** Label for the discard button (defaults to i18n "forms.actionBar.discard") */
+  discardLabel?: string
+  /** Label shown in the action bar (defaults to i18n "forms.actionBar.unsavedChanges") */
+  actionBarLabel?: string
+}
+
+/**
+ * Props for the F0Form component
+ *
+ * @typeParam TSchema - The Zod object schema type. The form data type is inferred from this.
+ *
+ * @example
+ * ```tsx
+ * const schema = z.object({
+ *   name: f0(z.string(), { label: "Name" }),
+ *   age: f0(z.number(), { label: "Age" }),
+ * })
+ *
+ * // Default submit button
+ * <F0Form
+ *   name="my-form"
+ *   schema={schema}
+ *   defaultValues={{ name: "" }}
+ *   onSubmit={(data) => ({ success: true })}
+ * />
+ *
+ * // Action bar with discard button
+ * <F0Form
+ *   name="my-form"
+ *   schema={schema}
+ *   submitType="action-bar"
+ *   discardableChanges
+ *   defaultValues={{ name: "" }}
+ *   onSubmit={(data) => ({ success: true })}
+ * />
+ * ```
+ */
+export type F0FormProps<TSchema extends z.ZodObject<ZodRawShape>> =
+  | F0FormDefaultSubmitProps<TSchema>
+  | F0FormActionBarProps<TSchema>
 
 /**
  * Result of form submission

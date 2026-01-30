@@ -4,6 +4,8 @@ import { DefaultValues, Path, useForm } from "react-hook-form"
 import { z, ZodRawShape } from "zod"
 
 import { F0Button } from "@/components/F0Button"
+import { F0ActionBar } from "@/experimental/F0ActionBar"
+import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 import { cn } from "@/lib/utils"
 import { Form as FormProvider } from "@/ui/form"
 
@@ -83,19 +85,16 @@ function groupContiguousSwitches(
  *   firstName: f0(z.string().min(1), {
  *     label: "First Name",
  *     section: "personal",
- *     position: 1,
  *     placeholder: "Enter first name"
  *   }),
  *   lastName: f0(z.string().min(1), {
  *     label: "Last Name",
  *     section: "personal",
- *     position: 2,
  *     row: "name-row" // Group with firstName horizontally
  *   }),
  *   email: f0(z.string().email(), {
  *     label: "Email",
  *     section: "contact",
- *     position: 1,
  *     inputType: "email"
  *   })
  * })
@@ -115,16 +114,43 @@ function groupContiguousSwitches(
  * />
  * ```
  */
-export function F0Form<TSchema extends z.ZodObject<ZodRawShape>>({
-  name,
-  schema,
-  sections,
-  defaultValues,
-  onSubmit,
-  submitLabel = "Submit",
-  showSubmitButton = true,
-  className,
-}: F0FormProps<TSchema>) {
+export function F0Form<TSchema extends z.ZodObject<ZodRawShape>>(
+  props: F0FormProps<TSchema>
+) {
+  const { forms } = useI18n()
+
+  const {
+    name,
+    schema,
+    sections,
+    defaultValues,
+    onSubmit,
+    submitLabel = "Submit",
+    className,
+  } = props
+
+  // Extract submit type specific props
+  const submitType = props.submitType ?? "default"
+  const showSubmitButton =
+    submitType === "default"
+      ? ((props as { showSubmitButton?: boolean }).showSubmitButton ?? true)
+      : false
+  const discardableChanges =
+    submitType === "action-bar"
+      ? ((props as { discardableChanges?: boolean }).discardableChanges ??
+        false)
+      : false
+  const discardLabel =
+    submitType === "action-bar"
+      ? ((props as { discardLabel?: string }).discardLabel ??
+        forms.actionBar.discard)
+      : forms.actionBar.discard
+  const actionBarLabel =
+    submitType === "action-bar"
+      ? ((props as { actionBarLabel?: string }).actionBarLabel ??
+        forms.actionBar.unsavedChanges)
+      : forms.actionBar.unsavedChanges
+
   // Infer the form values type from the schema
   type TValues = z.infer<TSchema>
 
@@ -139,6 +165,7 @@ export function F0Form<TSchema extends z.ZodObject<ZodRawShape>>({
   })
 
   const rootError = form.formState.errors.root
+  const { isDirty, isSubmitting } = form.formState
 
   // Handle form submission
   const handleSubmit = async (data: TValues) => {
@@ -157,6 +184,11 @@ export function F0Form<TSchema extends z.ZodObject<ZodRawShape>>({
         form.setError("root", { message: result.rootMessage })
       }
     }
+  }
+
+  // Handle discard action
+  const handleDiscard = () => {
+    form.reset()
   }
 
   // Group contiguous switch fields
@@ -217,15 +249,34 @@ export function F0Form<TSchema extends z.ZodObject<ZodRawShape>>({
             </p>
           )}
 
-          {/* Submit button */}
-          {showSubmitButton && (
+          {/* Default submit button */}
+          {submitType === "default" && showSubmitButton && (
             <F0Button
               type="submit"
               label={submitLabel}
-              loading={form.formState.isSubmitting}
+              loading={isSubmitting}
             />
           )}
         </form>
+
+        {/* Action bar submit - rendered outside form to prevent accidental form submission */}
+        {submitType === "action-bar" && (
+          <F0ActionBar
+            isOpen={isDirty}
+            label={actionBarLabel}
+            primaryActions={[
+              {
+                label: submitLabel,
+                onClick: form.handleSubmit(handleSubmit),
+              },
+            ]}
+            secondaryActions={
+              discardableChanges
+                ? [{ label: discardLabel, onClick: handleDiscard }]
+                : []
+            }
+          />
+        )}
       </FormProvider>
     </F0FormContext.Provider>
   )

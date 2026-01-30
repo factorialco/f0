@@ -5,6 +5,7 @@ import { F0Form as F0FormComponent } from "./F0Form"
 // Export main types
 export type {
   F0FormProps,
+  F0FormSubmitType,
   F0SectionConfig,
   F0FormSubmitResult,
   SectionRenderIf,
