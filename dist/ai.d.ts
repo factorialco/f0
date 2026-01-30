@@ -359,8 +359,12 @@ export declare const defaultTranslations: {
         readonly save: "Save";
         readonly send: "Send";
         readonly cancel: "Cancel";
+        readonly delete: "Delete";
         readonly copy: "Copy";
+        readonly paste: "Paste";
         readonly close: "Close";
+        readonly collapse: "Collapse";
+        readonly expand: "Expand";
         readonly showAll: "Show all";
         readonly showLess: "Show less";
         readonly skipToContent: "Skip to content";
@@ -669,6 +673,40 @@ export declare const defaultTranslations: {
             readonly sectionTitlePlaceholder: "Section title";
         };
     };
+    readonly richTextEditor: {
+        readonly bold: "Bold";
+        readonly italic: "Italic";
+        readonly underline: "Underline";
+        readonly strike: "Strike";
+        readonly highlight: "Highlight";
+        readonly heading1: "Heading 1";
+        readonly heading2: "Heading 2";
+        readonly heading3: "Heading 3";
+        readonly left: "Left";
+        readonly center: "Center";
+        readonly right: "Right";
+        readonly justify: "Justify";
+        readonly bulletList: "Bullet List";
+        readonly orderedList: "Ordered List";
+        readonly taskList: "Task List";
+        readonly codeBlock: "Code Block";
+        readonly horizontalRule: "Horizontal Rule";
+        readonly quote: "Quote";
+        readonly moreOptions: "More Options";
+        readonly code: "Code";
+        readonly divider: "Divider";
+        readonly bullet: "Bullet";
+        readonly ordered: "Ordered";
+        readonly task: "Task";
+        readonly details: "Dropdown";
+        readonly link: "Link";
+        readonly linkPlaceholder: "Enter a link";
+        readonly groups: {
+            readonly textStyles: "Text Styles";
+            readonly lists: "Lists";
+            readonly blocks: "Blocks";
+        };
+    };
 };
 
 declare type FileRejectionReason = "size" | "type" | "custom";
@@ -774,6 +812,16 @@ declare global {
     }
 }
 
+
+declare namespace _DaytimePage {
+    var displayName: string;
+}
+
+
+declare namespace _Page {
+    var displayName: string;
+}
+
 declare module "gridstack" {
     interface GridStackWidget {
         id?: string;
@@ -792,10 +840,16 @@ declare module "gridstack" {
 }
 
 
+declare namespace Calendar {
+    var displayName: string;
+}
+
+
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         aiBlock: {
-            insertAIBlock: (data: AIBlockData, config: AIBlockConfigWithLabels) => ReturnType;
+            insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
+            executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
         };
     }
 }
@@ -803,8 +857,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        liveCompanion: {
-            insertLiveCompanion: (data: LiveCompanionData, config?: LiveCompanionConfig) => ReturnType;
+        moodTracker: {
+            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
         };
     }
 }
@@ -813,21 +867,7 @@ declare module "@tiptap/core" {
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         transcript: {
-            insertTranscript: (data: TranscriptData, config?: TranscriptConfig) => ReturnType;
-        };
-    }
-}
-
-
-declare namespace Calendar {
-    var displayName: string;
-}
-
-
-declare module "@tiptap/core" {
-    interface Commands<ReturnType> {
-        moodTracker: {
-            insertMoodTracker: (data: MoodTrackerData, config?: MoodTrackerConfig) => ReturnType;
+            insertTranscript: (data: TranscriptData) => ReturnType;
         };
     }
 }

@@ -138,8 +138,12 @@ const e = {
     save: "Save",
     send: "Send",
     cancel: "Cancel",
+    delete: "Delete",
     copy: "Copy",
+    paste: "Paste",
     close: "Close",
+    collapse: "Collapse",
+    expand: "Expand",
     showAll: "Show all",
     showLess: "Show less",
     skipToContent: "Skip to content",
@@ -446,6 +450,40 @@ const e = {
       questionOptions: "Question options",
       actions: "Actions",
       sectionTitlePlaceholder: "Section title"
+    }
+  },
+  richTextEditor: {
+    bold: "Bold",
+    italic: "Italic",
+    underline: "Underline",
+    strike: "Strike",
+    highlight: "Highlight",
+    heading1: "Heading 1",
+    heading2: "Heading 2",
+    heading3: "Heading 3",
+    left: "Left",
+    center: "Center",
+    right: "Right",
+    justify: "Justify",
+    bulletList: "Bullet List",
+    orderedList: "Ordered List",
+    taskList: "Task List",
+    codeBlock: "Code Block",
+    horizontalRule: "Horizontal Rule",
+    quote: "Quote",
+    moreOptions: "More Options",
+    code: "Code",
+    divider: "Divider",
+    bullet: "Bullet",
+    ordered: "Ordered",
+    task: "Task",
+    details: "Dropdown",
+    link: "Link",
+    linkPlaceholder: "Enter a link",
+    groups: {
+      textStyles: "Text Styles",
+      lists: "Lists",
+      blocks: "Blocks"
     }
   }
 };
