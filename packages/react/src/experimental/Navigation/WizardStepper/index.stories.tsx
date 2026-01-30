@@ -25,12 +25,6 @@ const meta: Meta<typeof WizardStepper> = {
   title: "Navigation/Wizard steps",
   component: WizardStepper,
   tags: ["autodocs", "experimental"],
-  argTypes: {
-    orientation: {
-      control: "radio",
-      options: ["vertical", "horizontal"],
-    },
-  },
 }
 
 export default meta
@@ -40,7 +34,6 @@ export const Default: Story = {
   args: {
     steps,
     currentStepId: "step-1",
-    orientation: "vertical",
   },
 }
 
@@ -48,21 +41,5 @@ export const WithCompletedSteps: Story = {
   args: {
     steps: stepsWithCompleted,
     currentStepId: "basic-info",
-    orientation: "vertical",
   },
-}
-
-export const Horizontal: Story = {
-  args: {
-    steps: stepsWithCompleted,
-    currentStepId: "basic-info",
-    orientation: "horizontal",
-  },
-  decorators: [
-    (Story) => (
-      <div className="w-[400px]">
-        <Story />
-      </div>
-    ),
-  ],
 }

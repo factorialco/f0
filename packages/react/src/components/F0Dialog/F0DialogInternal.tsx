@@ -171,13 +171,6 @@ export const F0DialogInternal: FC<F0DialogInternalProps> = ({
           <DrawerOverlay className="bg-f1-background-overlay" />
           <DrawerContent ref={setContentRef} className={contentClassName}>
             <F0DialogHeader {...headerProps} />
-            {hasSteps && (
-              <WizardStepper
-                steps={steps}
-                currentStepId={currentStepId}
-                orientation="horizontal"
-              />
-            )}
             <F0DialogContent disableContentPadding={disableContentPadding}>
               {children}
             </F0DialogContent>
@@ -214,20 +207,9 @@ export const F0DialogInternal: FC<F0DialogInternalProps> = ({
           onOpenAutoFocus={(e) => e.preventDefault()}
         >
           <F0DialogHeader {...headerProps} />
-          {hasSteps && !showVerticalStepper && (
-            <WizardStepper
-              steps={steps}
-              currentStepId={currentStepId}
-              orientation="horizontal"
-            />
-          )}
           {showVerticalStepper ? (
             <div className="flex flex-1 flex-row gap-6 overflow-hidden px-4 py-4">
-              <WizardStepper
-                steps={steps}
-                currentStepId={currentStepId}
-                orientation="vertical"
-              />
+              <WizardStepper steps={steps} currentStepId={currentStepId} />
               <F0DialogContent disableContentPadding>
                 {children}
               </F0DialogContent>

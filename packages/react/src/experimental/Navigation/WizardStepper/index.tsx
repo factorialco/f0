@@ -13,7 +13,6 @@ export type WizardStepItem = {
 export interface WizardStepperProps {
   steps: WizardStepItem[]
   currentStepId: string
-  orientation?: "vertical" | "horizontal"
 }
 
 const StepIndicator = ({
@@ -43,40 +42,9 @@ const StepIndicator = ({
   return <Counter value={index + 1} type="default" size="md" />
 }
 
-const BaseWizardStepper = ({
-  steps,
-  currentStepId,
-  orientation = "vertical",
-}: WizardStepperProps) => {
+const BaseWizardStepper = ({ steps, currentStepId }: WizardStepperProps) => {
   const currentStepIndex = steps.findIndex((step) => step.id === currentStepId)
 
-  if (orientation === "horizontal") {
-    return (
-      <div className="flex w-full flex-col gap-2">
-        <div className="flex flex-row items-center justify-center gap-2">
-          {steps.map((step, index) => {
-            const isCurrent = step.id === currentStepId
-            const isCompleted = step.completed ?? index < currentStepIndex
-
-            return (
-              <StepIndicator
-                key={step.id}
-                index={index}
-                isCurrent={isCurrent}
-                isCompleted={isCompleted}
-              />
-            )
-          })}
-        </div>
-        <p className="text-center text-sm font-medium text-f1-foreground">
-          {steps[currentStepIndex]?.label}
-        </p>
-      </div>
-    )
-  }
-
-  // Vertical layout
-  // Gap 6px between steps
   return (
     <div className="flex flex-col gap-1.5">
       {steps.map((step, index) => {
