@@ -22,7 +22,7 @@ const stepsWithCompleted: WizardStepItem[] = [
 ]
 
 const meta: Meta<typeof WizardStepper> = {
-  title: "Navigation/Wizard steps",
+  title: "sds/wizards/WizardStepper",
   component: WizardStepper,
   tags: ["autodocs", "experimental"],
 }

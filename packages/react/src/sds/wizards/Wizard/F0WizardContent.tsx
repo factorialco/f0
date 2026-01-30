@@ -1,9 +1,6 @@
 import { FC, ReactNode } from "react"
 
-import {
-  WizardStepItem,
-  WizardStepper,
-} from "@/experimental/Navigation/WizardStepper"
+import { WizardStepItem, WizardStepper } from "../WizardStepper"
 
 export interface F0WizardContentProps {
   steps: WizardStepItem[]

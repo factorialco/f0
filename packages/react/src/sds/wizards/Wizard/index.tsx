@@ -4,7 +4,7 @@ import { F0Wizard as F0WizardComponent } from "./F0Wizard"
 
 export type { F0WizardProps } from "./F0Wizard"
 // Re-export WizardStepItem for convenience
-export type { WizardStepItem } from "@/experimental/Navigation/WizardStepper"
+export type { WizardStepItem } from "../WizardStepper"
 
 /**
  * @experimental This is an experimental component use it at your own risk

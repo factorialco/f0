@@ -2,7 +2,7 @@ import CheckIcon from "@/icons/app/Check"
 import { experimentalComponent } from "@/lib/experimental"
 import { cn } from "@/lib/utils"
 
-import { Counter } from "../../Information/Counter"
+import { Counter } from "@/experimental/Information/Counter"
 
 export type WizardStepItem = {
   id: string

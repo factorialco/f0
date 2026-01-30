@@ -1,14 +1,14 @@
 import { FC, ReactNode } from "react"
 
-import { WizardStepItem } from "@/experimental/Navigation/WizardStepper"
-
-import { F0Dialog } from "../F0Dialog"
+import { F0Dialog } from "@/components/F0Dialog"
 import {
   DialogWidth,
   F0DialogPrimaryAction,
   F0DialogPrimaryActionItem,
   F0DialogSecondaryAction,
-} from "../F0Dialog/types"
+} from "@/components/F0Dialog/types"
+
+import { WizardStepItem } from "../WizardStepper"
 import { F0WizardContent } from "./F0WizardContent"
 
 export interface F0WizardProps {
