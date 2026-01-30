@@ -3,7 +3,6 @@ import { ReactNode } from "react"
 import { ModuleId } from "@/components/avatars/F0AvatarModule"
 import { DropdownInternalProps } from "@/experimental/Navigation/Dropdown/internal"
 import { TabsProps } from "@/experimental/Navigation/Tabs"
-import { WizardStepItem } from "@/experimental/Navigation/WizardStepper"
 
 import {
   DialogPosition,
@@ -72,8 +71,4 @@ export type F0DialogInternalProps = {
   children: ReactNode
   // Disable the default padding from the dialog content area
   disableContentPadding?: boolean
-  // Steps for wizard-style dialogs. Displays a lateral stepper on desktop and horizontal on mobile.
-  steps?: WizardStepItem[]
-  // ID of the current step. Required if steps is provided.
-  currentStepId?: string
 } & Partial<Pick<TabsProps, "tabs" | "activeTabId" | "setActiveTabId">>

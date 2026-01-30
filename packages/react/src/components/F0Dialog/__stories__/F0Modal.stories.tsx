@@ -372,36 +372,3 @@ export const WithFewItems: Story = {
     children: <ExamplePersonList numberOfItems={3} />,
   },
 }
-
-export const WithSteps: Story = {
-  args: {
-    isOpen: true,
-    width: "lg",
-    title: "Add Account",
-    steps: [
-      { id: "legal-entity", label: "Legal entity", completed: true },
-      { id: "purpose", label: "Select purpose", completed: true },
-      { id: "basic-info", label: "Basic information", completed: false },
-      { id: "accounting", label: "Accounting", completed: false },
-      { id: "authorized", label: "Authorized people", completed: false },
-    ],
-    currentStepId: "basic-info",
-    primaryAction: {
-      label: "Continue",
-      onClick: () => {},
-    },
-    secondaryAction: {
-      label: "Back",
-      onClick: () => {},
-    },
-    children: <ExampleList itemsCount={5} />,
-  },
-  parameters: {
-    docs: {
-      description: {
-        story:
-          "When `steps` and `currentStepId` are provided, a lateral stepper is displayed on the left side of the dialog content.",
-      },
-    },
-  },
-}
