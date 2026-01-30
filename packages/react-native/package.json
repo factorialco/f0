@@ -24,12 +24,6 @@
       "react-native": "./lib/module/index.js",
       "default": "./lib/module/index.js"
     },
-    "./global.css": {
-      "import": "./global.css",
-      "require": "./global.css",
-      "react-native": "./global.css",
-      "default": "./global.css"
-    },
     "./icons": {
       "types": "./src/icons/index.ts",
       "import": "./src/icons/index.ts",
@@ -58,8 +52,13 @@
       "react-native": "./src/icons/app/index.ts",
       "default": "./src/icons/app/index.ts"
     },
-    "./tailwind.config": "./tailwind.config.ts",
     "./package.json": "./package.json",
+    "./theme.css": {
+      "import": "./src/styles/theme.css",
+      "require": "./src/styles/theme.css",
+      "react-native": "./src/styles/theme.css",
+      "default": "./src/styles/theme.css"
+    },
     "./expo-router/entry": {
       "import": "./expo-router/entry.js",
       "require": "./expo-router/entry.js",
@@ -69,8 +68,7 @@
   },
   "files": [
     "src",
-    "lib",
-    "global.css"
+    "lib"
   ],
   "scripts": {
     "prebuild": "node -e \"const fs=require('fs');const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));pkg._originalMain=pkg.main;pkg.main='./lib/module/index.js';fs.writeFileSync('package.json',JSON.stringify(pkg,null,2))\"",
