@@ -9,7 +9,7 @@ import { INITIAL_VIEWPORTS } from "storybook/viewport"
 
 import "../src/styles.css"
 import { aiTranslations } from "@/ai/AiChat/providers/AiChatTranslationsProvider"
-import { WeekStartDay } from "@/experimental/OneCalendar/types"
+import { WeekStartDay } from "@/experimental.ts"
 import { dataCollectionLocalStorageHandler } from "@/lib/providers/datacollection"
 import { F0Provider } from "@/lib/providers/f0"
 import { buildTranslations, defaultTranslations } from "@/lib/providers/i18n"
@@ -22,11 +22,13 @@ MotionGlobalConfig.skipAnimations = isChromatic()
 export const withTheme = () => {
   // eslint-disable-next-line react/display-name
   return (Story: StoryFn) => {
-    return (
+    const Wrapper = (
       <ThemeProvider theme="light">
         <Story />
       </ThemeProvider>
     )
+
+    return Wrapper
   }
 }
 
@@ -60,6 +62,8 @@ export const F0 = (Story: StoryFn, { parameters }: StoryContext) => {
             ref={ref}
             {...props}
             onClick={(event, ...args) => {
+              // eslint-disable-next-line no-console
+              console.log("Link clicked", event, ...args)
               action("Link clicked")(event, ...args)
               props?.onClick?.(event, ...args)
               event.preventDefault()
@@ -137,6 +141,16 @@ const preview: Preview = {
       toc: {
         headingSelector: "h2, h3, h4",
       },
+      // Disable autoplay of play functions in docs mode when NOT in test mode
+      // When STORYBOOK_TEST_MODE=true (test-storybook), play functions will run automatically
+      ...(typeof process !== "undefined" &&
+      process.env.STORYBOOK_TEST_MODE === "true"
+        ? {}
+        : {
+            story: {
+              autoplay: false,
+            },
+          }),
     },
     controls: {
       expanded: true,

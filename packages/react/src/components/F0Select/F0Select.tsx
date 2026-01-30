@@ -13,7 +13,7 @@ import {
 } from "react"
 import { useDebounceCallback } from "usehooks-ts"
 
-import { F0DialogContext } from "@/components/F0Dialog"
+import { F0DialogContext } from "@/components/dialog-alike/F0Dialog"
 import {
   BaseFetchOptions,
   BaseResponse,

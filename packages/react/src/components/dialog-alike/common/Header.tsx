@@ -1,10 +1,11 @@
 import { ButtonInternal } from "@/components/F0Button/internal"
 import {
   DropdownInternal,
+  DropdownInternalProps,
   DropdownItemObject,
 } from "@/experimental/Navigation/Dropdown/internal"
 import { BreadcrumbItem } from "@/experimental/Navigation/Header/Breadcrumbs/internal/BreadcrumbItem"
-import { Tabs } from "@/experimental/Navigation/Tabs"
+import { Tabs, TabsProps } from "@/experimental/Navigation/Tabs"
 import CrossIcon from "@/icons/app/Cross"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
@@ -12,10 +13,23 @@ import { BreadcrumbList } from "@/ui/breadcrumb"
 import { DialogTitle } from "@/ui/Dialog/dialog"
 import { DrawerDescription } from "@/ui/drawer"
 
-import { F0DialogHeaderProps } from "../internal-types"
-import { useF0Dialog } from "./F0DialogProvider"
+import { useDialogWrapperContext } from "./DialogWrapperProvider"
 
-export const F0DialogHeader = ({
+import { DialogModule } from "@/lib/providers/dialogs-alike/types"
+
+export type HeaderProps = {
+  /**
+   * Disables the close button of the dialog.
+   * @internal
+   */
+  disableClose?: boolean
+  title?: string
+  description?: string
+  module?: DialogModule
+  otherActions?: DropdownInternalProps["items"]
+} & Partial<Pick<TabsProps, "tabs" | "activeTabId" | "setActiveTabId">>
+
+export const Header = ({
   title,
   description,
   module,
@@ -23,10 +37,11 @@ export const F0DialogHeader = ({
   tabs,
   activeTabId,
   setActiveTabId,
-}: F0DialogHeaderProps) => {
+  disableClose,
+}: HeaderProps) => {
   const translations = useI18n()
 
-  const { onClose } = useF0Dialog()
+  const { onClose } = useDialogWrapperContext()
   const hasTabs = !!tabs
 
   const Divider = () => {
@@ -112,13 +127,14 @@ export const F0DialogHeader = ({
           <ButtonInternal
             variant="outline"
             icon={CrossIcon}
+            disabled={disableClose}
             onClick={onClose}
             label={translations.actions.close}
             hideLabel
           />
         </div>
       </div>
-      {tabs && (
+      {tabs && tabs.length > 0 && (
         <div className="-mx-2">
           <Tabs
             tabs={tabs}

@@ -40,7 +40,7 @@
     "generate-ai-icons": "npx @svgr/cli --out-dir src/icons/ai node_modules/@factorialco/f0-core/assets/icons/ai",
     "build-storybook": "storybook build",
     "serve-storybook": "http-server storybook-static",
-    "test-storybook": "test-storybook --testTimeout=60000",
+    "test-storybook": "STORYBOOK_TEST_MODE=true test-storybook --testTimeout=60000",
     "format": "sh -c 'oxfmt \"${@:-src/}\"' --",
     "format:check": "sh -c 'oxfmt --check \"${@:-src/}\"' --",
     "tsc": "tsc --noEmit",

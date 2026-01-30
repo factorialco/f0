@@ -1,0 +1,281 @@
+import { Canvas, Meta } from "@storybook/addon-docs/blocks"
+import * as UseDrawerStories from "./useDrawer.stories"
+
+<Meta of={UseDrawerStories} />
+
+# useDrawer Hook
+
+## Introduction
+
+### Definition
+
+The `useDrawer` hook provides a simplified, promise-based API for managing drawers in React applications. It wraps the `F0Drawer` component internally, handling all state management and providing a streamlined developer experience.
+
+### Purpose
+
+- **Simplify drawer management:** Eliminate boilerplate code for drawer state, handlers, and conditional rendering
+- **Promise-based API:** Use async/await patterns for cleaner, more readable code
+- **Automatic state handling:** No need to manage `useState` hooks or drawer open/close logic
+- **Consistent experience:** Standardized drawer patterns across the application
+- **Less code:** Reduce the amount of code needed to display drawers significantly
+
+## Why useDrawer?
+
+The `useDrawer` hook was created to provide a simpler and smoother experience, avoiding the need to write a lot of code. Here's a comparison showing how much simpler it is to use the hook versus managing `F0Drawer` directly:
+
+### Before: Using F0Drawer directly
+
+When using `F0Drawer` directly, you need to manage state, handlers, and conditional rendering:
+
+```tsx
+import { useState } from "react"
+import { F0Drawer } from "@/components/dialog-alike/F0Drawer"
+import { F0Button } from "@/components/F0Button"
+
+function EditItemButton() {
+  const [isOpen, setIsOpen] = useState(false)
+
+  const handleSave = () => {
+    // Perform save action
+    console.log("Item saved")
+    setIsOpen(false)
+  }
+
+  const handleCancel = () => {
+    setIsOpen(false)
+  }
+
+  return (
+    <>
+      <F0Button label="Edit Item" onClick={() => setIsOpen(true)} />
+      {isOpen && (
+        <F0Drawer
+          isOpen={isOpen}
+          onClose={handleCancel}
+          title="Edit Item"
+          description="Edit item details below."
+          primaryAction={{
+            label: "Save",
+            onClick: handleSave,
+          }}
+          secondaryAction={{
+            label: "Cancel",
+            onClick: handleCancel,
+          }}
+        >
+          <div>Form content goes here...</div>
+        </F0Drawer>
+      )}
+    </>
+  )
+}
+```
+
+### After: Using useDrawer hook
+
+With `useDrawer`, the same functionality is achieved with much less code:
+
+```tsx
+import { useDrawer } from "@/hooks/drawer"
+import { F0Button } from "@/components/F0Button"
+
+function EditItemButton() {
+  const { openDrawer } = useDrawer()
+
+  const handleClick = async () => {
+    const result = await openDrawer({
+      title: "Edit Item",
+      description: "Edit item details below.",
+      content: <div>Form content goes here...</div>,
+      actions: {
+        primary: {
+          label: "Save",
+          value: "save",
+        },
+        secondary: {
+          label: "Cancel",
+          value: "cancel",
+        },
+      },
+    })
+
+    if (result === "save") {
+      // Perform save action
+      console.log("Item saved")
+    }
+  }
+
+  return <F0Button label="Edit Item" onClick={handleClick} />
+}
+```
+
+The hook handles all the state management, drawer rendering, and cleanup automatically. The promise-based API makes it easy to handle user responses with async/await.
+
+## Basic Usage
+
+The `openDrawer` method provides full control over the drawer content and actions. It accepts a drawer definition and returns a promise that resolves with the value of the action clicked.
+
+```tsx
+import { useDrawer } from "@/hooks/drawer"
+import { Delete, Pencil } from "lucide-react"
+
+function MyComponent() {
+  const { openDrawer } = useDrawer()
+
+  const showCustomDrawer = async () => {
+    const result = await openDrawer({
+      title: "Drawer Title",
+      description: "Drawer Description",
+      content: <div>Custom drawer content goes here</div>,
+      actions: {
+        primary: {
+          value: "primary",
+          label: "Primary Action",
+        },
+        secondary: [
+          {
+            value: "delete",
+            icon: Delete,
+            label: "Delete",
+          },
+          {
+            value: "edit",
+            icon: Pencil,
+            label: "Edit",
+          },
+        ],
+      },
+    })
+
+    console.log("User selected:", result)
+  }
+
+  return <button onClick={showCustomDrawer}>Open Drawer</button>
+}
+```
+
+<Canvas of={UseDrawerStories.Default} />
+
+## Positioning
+
+Drawers can be positioned on the `left` or `right` (default).
+
+```tsx
+import { useDrawer } from "@/hooks/drawer"
+
+function MyComponent() {
+  const { openDrawer } = useDrawer()
+
+  const showLeftDrawer = async () => {
+    await openDrawer({
+      title: "Left Drawer",
+      position: "left",
+      content: <div>Content...</div>,
+      actions: {
+        primary: { label: "OK", value: true },
+      },
+    })
+  }
+
+  return <button onClick={showLeftDrawer}>Open Left Drawer</button>
+}
+```
+
+<Canvas of={UseDrawerStories.DrawerLeft} />
+
+## Advanced Usage
+
+### Promise-Based Actions
+
+The `DialogActionValue` can be a primitive value or a function that returns a Promise. When a function is provided, the drawer will remain open until the promise resolves, and all drawer actions will be disabled during the async operation (unless `nonBlocking` is set to `true`).
+
+```tsx
+import { useDrawer } from "@/hooks/drawer"
+
+function MyComponent() {
+  const { openDrawer } = useDrawer()
+
+  const showDrawer = async () => {
+    const result = await openDrawer({
+      title: "Process Data",
+      description: "Choose an action",
+      content: <div>Processing options...</div>,
+      actions: {
+        primary: [
+          {
+            value: "quick",
+            label: "Quick Process",
+          },
+          {
+            value: async () => {
+              // Long-running operation
+              await new Promise((resolve) => setTimeout(resolve, 3000))
+              return "processed"
+            },
+            label: "Full Process",
+          },
+        ],
+      },
+    })
+
+    console.log("Result:", result)
+  }
+
+  return <button onClick={showDrawer}>Process</button>
+}
+```
+
+<Canvas of={UseDrawerStories.DrawerWithDropdownAndPromises} />
+
+### Type Reference
+
+#### DrawerDefinition
+
+The main type for defining a drawer. All properties except `id` are required when using `openDrawer`.
+
+```tsx
+type DrawerDefinition = {
+  /**
+   * The unique identifier for the drawer. Auto-generated if not provided.
+   */
+  id?: DialogId
+
+  /**
+   * The title displayed in the drawer header.
+   */
+  title: string
+
+  /**
+   * Optional description text displayed below the title.
+   */
+  description?: string
+
+  /**
+   * The main content of the drawer. Can be any React node.
+   */
+  content: ReactNode
+
+  /**
+   * The actions available in the drawer footer.
+   */
+  actions: DialogActions
+
+  /**
+   * The position of the drawer.
+   * @default "right"
+   */
+  position?: "left" | "right"
+
+  /**
+   * The size of the drawer.
+   * @default "md"
+   */
+  size?: "md"
+
+  /**
+   * If true, the drawer will not be closed automatically when an action is clicked.
+   * This is useful for drawers that need to be closed manually.
+   */
+  keepOpen?: boolean
+}
+```

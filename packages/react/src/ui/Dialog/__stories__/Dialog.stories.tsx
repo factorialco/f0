@@ -28,10 +28,7 @@ const ExampleComponent = (props: {
       <DialogTrigger asChild>
         <F0Button label="Open Dialog" />
       </DialogTrigger>
-      <DialogContent
-        withTranslateAnimation={props.withTranslateAnimation}
-        container={props.container}
-      >
+      <DialogContent container={props.container}>
         <DialogHeader>
           <DialogTitle>Dialog Title</DialogTitle>
           <DialogDescription>
@@ -162,36 +159,6 @@ export const CustomContent: Story = {
               </DialogClose>
             </div>
           </div>
-        </DialogContent>
-      </Dialog>
-    )
-  },
-}
-
-export const WithoutAnimation: Story = {
-  render: () => {
-    const [open, setOpen] = useState(false)
-
-    return (
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogTrigger asChild>
-          <F0Button label="Open Dialog (No Animation)" />
-        </DialogTrigger>
-        <DialogContent withTranslateAnimation={false}>
-          <DialogHeader>
-            <DialogTitle>Dialog Without Translate Animation</DialogTitle>
-            <DialogDescription>
-              This dialog has translate animations disabled.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="py-4">
-            <p>Only fade and zoom animations are applied.</p>
-          </div>
-          <DialogFooter>
-            <DialogClose asChild>
-              <F0Button variant="outline" label="Close" />
-            </DialogClose>
-          </DialogFooter>
         </DialogContent>
       </Dialog>
     )
