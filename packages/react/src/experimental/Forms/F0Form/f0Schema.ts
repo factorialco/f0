@@ -8,6 +8,7 @@ import type { F0SelectConfig } from "./fields/select/types"
 import type { F0CheckboxConfig } from "./fields/checkbox/types"
 import type { F0SwitchConfig } from "./fields/switch/types"
 import type { F0DateConfig } from "./fields/date/types"
+import type { F0DateRangeConfig } from "./fields/daterange/types"
 import type { F0RichTextConfig } from "./fields/richtext/types"
 import type { F0CustomConfig } from "./fields/custom/types"
 
@@ -22,6 +23,7 @@ export type F0FieldType =
   | "checkbox"
   | "switch"
   | "date"
+  | "daterange"
   | "richtext"
   | "custom"
 
@@ -55,6 +57,7 @@ export type {
   F0CheckboxConfig,
   F0SwitchConfig,
   F0DateConfig,
+  F0DateRangeConfig,
   F0RichTextConfig,
   F0CustomConfig,
 }
@@ -129,6 +132,14 @@ export type F0DateFieldConfig = F0BaseConfig &
   }
 
 /**
+ * Config for date range fields
+ */
+export type F0DateRangeFieldConfig = F0BaseConfig &
+  F0DateRangeConfig & {
+    fieldType: "daterange"
+  }
+
+/**
  * Config for array fields (multi-select)
  */
 export type F0ArrayConfig = F0BaseConfig &
@@ -153,9 +164,12 @@ export type F0RichTextFieldConfig = F0BaseConfig &
   }
 
 /**
- * Config for object fields (richtext or custom)
+ * Config for object fields (richtext, daterange, or custom)
  */
-export type F0ObjectConfig = F0RichTextFieldConfig | F0CustomFieldConfig
+export type F0ObjectConfig =
+  | F0RichTextFieldConfig
+  | F0DateRangeFieldConfig
+  | F0CustomFieldConfig
 
 /**
  * Complete F0 field configuration (union of all possible configs)
@@ -367,6 +381,21 @@ export function inferFieldType(
     // Arrays with options are multi-select
     if ("options" in config && config.options) {
       return "select"
+    }
+  }
+
+  if (innerSchema instanceof z.ZodObject) {
+    // Check if fieldType is explicitly set to daterange
+    if ("fieldType" in config && config.fieldType === "daterange") {
+      return "daterange"
+    }
+    // Check if it's a richtext value shape
+    if ("fieldType" in config && config.fieldType === "richtext") {
+      return "richtext"
+    }
+    // Check if it has render function (custom field)
+    if ("render" in config && config.render) {
+      return "custom"
     }
   }
 

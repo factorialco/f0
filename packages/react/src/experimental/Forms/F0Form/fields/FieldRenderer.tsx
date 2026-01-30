@@ -21,6 +21,7 @@ import { evaluateRenderIf } from "./utils"
 import { CheckboxFieldRenderer } from "./checkbox/CheckboxFieldRenderer"
 import { CustomFieldRenderer } from "./custom/CustomFieldRenderer"
 import { DateFieldRenderer } from "./date/DateFieldRenderer"
+import { DateRangeFieldRenderer } from "./daterange/DateRangeFieldRenderer"
 import { NumberFieldRenderer } from "./number/NumberFieldRenderer"
 import { RichTextFieldRenderer } from "./richtext/RichTextFieldRenderer"
 import { SelectFieldRenderer } from "./select/SelectFieldRenderer"
@@ -95,6 +96,14 @@ function renderFieldInput(
     case "date":
       return (
         <DateFieldRenderer
+          field={field}
+          formField={formField}
+          {...errorAndLoadingProps}
+        />
+      )
+    case "daterange":
+      return (
+        <DateRangeFieldRenderer
           field={field}
           formField={formField}
           {...errorAndLoadingProps}

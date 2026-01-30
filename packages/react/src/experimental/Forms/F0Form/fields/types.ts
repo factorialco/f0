@@ -30,6 +30,7 @@ export type RenderIfCondition =
   | BooleanRenderIfCondition
   | SelectRenderIfCondition
   | DateRenderIfCondition
+  | DateRangeRenderIfCondition
 
 // ============================================================================
 // Field-Specific RenderIf Condition Types (imported from each field)
@@ -40,6 +41,7 @@ import type { NumberRenderIfCondition } from "./number/types"
 import type { BooleanRenderIfCondition } from "./checkbox/types"
 import type { SelectRenderIfCondition } from "./select/types"
 import type { DateRenderIfCondition } from "./date/types"
+import type { DateRangeRenderIfCondition } from "./daterange/types"
 
 // Re-export for convenience
 export type {
@@ -48,6 +50,7 @@ export type {
   BooleanRenderIfCondition,
   SelectRenderIfCondition,
   DateRenderIfCondition,
+  DateRangeRenderIfCondition,
 }
 
 // ============================================================================
@@ -83,6 +86,7 @@ export type FieldType =
   | "checkbox"
   | "switch"
   | "date"
+  | "daterange"
   | "richtext"
   | "custom"
 
@@ -96,7 +100,12 @@ export type { F0TextareaConfig, F0TextareaField } from "./textarea/types"
 export type { F0SelectConfig, F0SelectField } from "./select/types"
 export type { F0CheckboxConfig, F0CheckboxField } from "./checkbox/types"
 export type { F0SwitchConfig, F0SwitchField } from "./switch/types"
-export type { F0DateConfig, F0DateField } from "./date/types"
+export type { F0DateConfig, F0DateField, DateGranularity } from "./date/types"
+export type {
+  F0DateRangeConfig,
+  F0DateRangeField,
+  DateRangeValue,
+} from "./daterange/types"
 export type {
   F0RichTextConfig,
   F0RichTextField,
@@ -116,6 +125,7 @@ import type { F0SelectField } from "./select/types"
 import type { F0CheckboxField } from "./checkbox/types"
 import type { F0SwitchField } from "./switch/types"
 import type { F0DateField } from "./date/types"
+import type { F0DateRangeField } from "./daterange/types"
 import type { F0RichTextField } from "./richtext/types"
 import type { F0CustomField } from "./custom/types"
 
@@ -130,5 +140,6 @@ export type F0Field =
   | F0CheckboxField
   | F0SwitchField
   | F0DateField
+  | F0DateRangeField
   | F0RichTextField
   | F0CustomField

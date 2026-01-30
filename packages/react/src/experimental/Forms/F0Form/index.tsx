@@ -25,6 +25,7 @@ export type {
   F0NumberFieldConfig,
   F0BooleanConfig,
   F0DateFieldConfig,
+  F0DateRangeFieldConfig,
   F0ArrayConfig,
   F0CustomFieldConfig,
   F0RichTextFieldConfig,
@@ -43,6 +44,7 @@ export type {
   BooleanRenderIfCondition,
   SelectRenderIfCondition,
   DateRenderIfCondition,
+  DateRangeRenderIfCondition,
   // Field-specific configs
   F0TextConfig,
   F0NumberConfig,
@@ -51,6 +53,8 @@ export type {
   F0CheckboxConfig,
   F0SwitchConfig,
   F0DateConfig,
+  DateGranularity,
+  F0DateRangeConfig,
   F0RichTextConfig,
   F0CustomConfig,
   // Field types
@@ -61,10 +65,12 @@ export type {
   F0CheckboxField,
   F0SwitchField,
   F0DateField,
+  F0DateRangeField,
   F0RichTextField,
   F0CustomField,
   // Other types
   RichTextValue,
+  DateRangeValue,
   CustomFieldRenderProps,
 } from "./fields/types"
 

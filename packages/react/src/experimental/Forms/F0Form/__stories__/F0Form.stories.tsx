@@ -312,8 +312,24 @@ export const AllFieldTypes: Story = {
       }),
       dateField: f0(z.date().optional(), {
         label: "Date Field",
+        placeholder: "Select a date",
         granularities: ["day"],
       }),
+      dateRangeField: f0(
+        z
+          .object({
+            from: z.date(),
+            to: z.date(),
+          })
+          .optional(),
+        {
+          label: "Date Range Field",
+          placeholder: "Select date range",
+          fieldType: "daterange",
+          fromLabel: "Start",
+          toLabel: "End",
+        }
+      ),
       richTextField: f0(
         z.object({
           value: z.string().nullable(),
@@ -345,6 +361,7 @@ export const AllFieldTypes: Story = {
           checkboxField: false,
           switchField: false,
           dateField: undefined,
+          dateRangeField: undefined,
           richTextField: { value: null },
         }}
         onSubmit={async (data) => {

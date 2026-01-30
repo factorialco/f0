@@ -1,7 +1,18 @@
-import type { GranularityDefinitionKey } from "@/experimental/OneCalendar"
 import type { DatePreset } from "@/components/F0DatePicker"
 
 import type { F0BaseField, CommonRenderIfCondition } from "../types"
+
+/**
+ * Valid granularity keys for date pickers
+ */
+export type DateGranularity =
+  | "day"
+  | "week"
+  | "month"
+  | "quarter"
+  | "halfyear"
+  | "year"
+  | "range"
 
 // ============================================================================
 // Date Field RenderIf Conditions
@@ -47,7 +58,7 @@ export type DateFieldRenderIf = DateRenderIfCondition | CommonRenderIfCondition
  */
 export interface F0DateConfig {
   /** Available granularities for the date picker */
-  granularities?: GranularityDefinitionKey[]
+  granularities?: DateGranularity[]
   /** Preset date options to display */
   presets?: DatePreset[]
 }

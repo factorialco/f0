@@ -139,6 +139,19 @@ function configToF0Field(
       } as F0Field
     }
 
+    case "daterange":
+      return {
+        ...baseProps,
+        type: "daterange",
+        fromLabel: "fromLabel" in config ? config.fromLabel : undefined,
+        toLabel: "toLabel" in config ? config.toLabel : undefined,
+        granularities:
+          "granularities" in config ? config.granularities : undefined,
+        presets: "presets" in config ? config.presets : undefined,
+        clearable,
+        renderIf: config.renderIf,
+      } as F0Field
+
     case "richtext":
       return {
         ...baseProps,
