@@ -1,4 +1,4 @@
-import { cva, type VariantProps } from "class-variance-authority";
+import { cva, type VariantProps } from "cva";
 import { cn } from "../../lib/utils";
 import { Icon, type IconType } from "../Icon";
 import { View, Text, Pressable } from "react-native";
@@ -6,7 +6,8 @@ import { AppIcons } from "../../icons";
 
 const { CrossedCircle } = AppIcons;
 
-export const chipContainerVariants = cva("flex items-center gap-1 rounded-full border border-solid border-f1-border px-2 py-0.5 grow-0", {
+export const chipContainerVariants = cva({
+  base: "flex items-center gap-1 rounded-full border border-solid border-f1-border px-2 py-0.5 grow-0",
   variants: {
     variant: {
       default: "",
@@ -18,7 +19,8 @@ export const chipContainerVariants = cva("flex items-center gap-1 rounded-full b
   },
 });
 
-export const chipTextVariants = cva("font-medium", {
+export const chipTextVariants = cva({
+  base: "font-medium",
   variants: {
     variant: {
       default: "text-f1-foreground",

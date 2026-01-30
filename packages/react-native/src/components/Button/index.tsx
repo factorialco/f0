@@ -1,4 +1,4 @@
-import { cva, type VariantProps } from "class-variance-authority";
+import { cva, type VariantProps } from "cva";
 import React, { forwardRef, useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import { cn } from "../../lib/utils";
@@ -17,7 +17,8 @@ export type ButtonVariant = (typeof variants)[number];
 export const sizes = ["sm", "md", "lg"] as const;
 export type ButtonSize = (typeof sizes)[number];
 
-const buttonVariants = cva("flex-row items-center justify-center rounded border-0", {
+const buttonVariants = cva({
+  base: "flex-row items-center justify-center rounded border-0",
   variants: {
     variant: {
       default: "bg-f1-background-accent-bold",
@@ -49,7 +50,8 @@ const buttonVariants = cva("flex-row items-center justify-center rounded border-
   },
 });
 
-const pressedVariants = cva("", {
+const pressedVariants = cva({
+  base: "",
   variants: {
     variant: {
       default: "bg-f1-background-accent-bold-hover",

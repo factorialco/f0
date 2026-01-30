@@ -1,4 +1,4 @@
-import { cva, type VariantProps } from "class-variance-authority";
+import { cva, type VariantProps } from "cva";
 import React, {
     forwardRef,
     ForwardRefExoticComponent,
@@ -8,7 +8,8 @@ import { Svg, SvgProps } from "react-native-svg";
 import { withUniwind } from "uniwind";
 import { cn } from "../../lib/utils";
 
-const iconVariants = cva("shrink-0", {
+const iconVariants = cva({
+  base: "shrink-0",
   variants: {
     size: {
       xl: "w-8 h-8 stroke-xl",

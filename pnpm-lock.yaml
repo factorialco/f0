@@ -764,9 +764,6 @@ importers:
       babel-preset-expo:
         specifier: ^54.0.10
         version: 54.0.10(@babel/core@7.28.5)(@babel/runtime@7.28.6)(expo@54.0.32)(react-refresh@0.14.2)
-      class-variance-authority:
-        specifier: ^0.7.1
-        version: 0.7.1
       eslint:
         specifier: ^9.25.0
         version: 9.39.2(jiti@2.6.1)
