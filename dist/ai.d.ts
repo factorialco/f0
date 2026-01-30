@@ -115,7 +115,11 @@ declare type AiChatProviderReturnValue = {
      * Clear all attachments
      */
     clearAttachments: () => void;
-    /* Excluded from this release type: setOnBeforeSend */
+    /**
+     * Set a callback to process messages and attachments before sending.
+     * Use this from child components to register context-specific processing.
+     */
+    setOnBeforeSend: (callback: ((message: string, attachments: File[]) => Promise<BeforeSendResult>) | null) => void;
     /**
      * Trigger the file input to open the file picker dialog.
      * Use this to programmatically open the file picker (e.g., from a suggestion button).
@@ -840,11 +844,6 @@ declare module "gridstack" {
 }
 
 
-declare namespace Calendar {
-    var displayName: string;
-}
-
-
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         aiBlock: {
@@ -870,4 +869,9 @@ declare module "@tiptap/core" {
             insertTranscript: (data: TranscriptData) => ReturnType;
         };
     }
+}
+
+
+declare namespace Calendar {
+    var displayName: string;
 }
