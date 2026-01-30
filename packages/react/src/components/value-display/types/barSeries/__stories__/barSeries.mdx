@@ -1,0 +1,35 @@
+import { Canvas, Meta } from "@storybook/addon-docs/blocks"
+import * as BarSeriesStories from "./barSeries.stories"
+
+<Meta of={BarSeriesStories} />
+
+### barSeries
+
+Generic bar-series cell: a row of vertical bars with optional secondary value for under/over/two-tone coloring. Used as the base for hourDistribution and other presets. Empty bars (value 0) show a small grey bottom border.
+
+#### Value type
+
+```
+type value = {
+  dataPoints: Array<{
+    label: string
+    value: number
+    secondaryValue?: number  // when set, under (value < secondaryValue) = orange; over/equal = teal (planned + overtime)
+  }>
+  formatLabel?: (label: string) => string   // for tooltip/accessibility
+  formatValue?: (value: number) => string
+  scaleMax?: number   // optional max for bar scale; if omitted, derived from data
+}
+```
+
+#### BarSeriesValues
+
+<Canvas of={BarSeriesStories.BarSeriesValues} />
+
+#### BarSeriesWithSecondary
+
+<Canvas of={BarSeriesStories.BarSeriesWithSecondary} />
+
+#### BarSeriesEmpty
+
+<Canvas of={BarSeriesStories.BarSeriesEmpty} />
