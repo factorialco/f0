@@ -3,9 +3,9 @@ import { experimentalComponent } from "@/lib/experimental"
 import { F0Drawer as F0DrawerComponent } from "./F0Drawer"
 
 export {
-  DialogWrapperContext as F0DialogContext,
-  DialogWrapperProvider as F0DialogProvider,
-  useDialogWrapperContext as useF0Dialog,
+  DialogWrapperContext as F0DialogAlikeContext,
+  DialogWrapperProvider as F0DialogAlikeProvider,
+  useDialogWrapperContext as useF0DialogAlikeContext,
 } from "../common/DialogWrapperProvider"
 export type {
   F0DrawerPosition,
