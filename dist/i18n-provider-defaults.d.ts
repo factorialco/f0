@@ -514,16 +514,6 @@ declare global {
     }
 }
 
-
-declare namespace _DaytimePage {
-    var displayName: string;
-}
-
-
-declare namespace _Page {
-    var displayName: string;
-}
-
 declare module "gridstack" {
     interface GridStackWidget {
         id?: string;
