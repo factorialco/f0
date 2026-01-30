@@ -5,7 +5,7 @@
   "description": "React Native components for F0 Design System",
   "main": "expo-router/entry",
   "module": "./lib/module/index.js",
-  "types": "./lib/typescript/react-native/src/index.d.ts",
+  "types": "./lib/typescript/index.d.ts",
   "source": "./src/index.ts",
   "sideEffects": [
     "**/*.css"
@@ -14,11 +14,11 @@
     ".": {
       "source": "./src/index.ts",
       "import": {
-        "types": "./lib/typescript/react-native/src/index.d.ts",
+        "types": "./lib/typescript/index.d.ts",
         "default": "./lib/module/index.js"
       },
       "require": {
-        "types": "./lib/typescript/react-native/src/index.d.ts",
+        "types": "./lib/typescript/index.d.ts",
         "default": "./lib/module/index.js"
       },
       "react-native": "./lib/module/index.js",
@@ -70,9 +70,7 @@
   "files": [
     "src",
     "lib",
-    "expo-router",
-    "global.css",
-    "tailwind.config.ts"
+    "global.css"
   ],
   "scripts": {
     "prebuild": "node -e \"const fs=require('fs');const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));pkg._originalMain=pkg.main;pkg.main='./lib/module/index.js';fs.writeFileSync('package.json',JSON.stringify(pkg,null,2))\"",
@@ -116,7 +114,6 @@
     }
   },
   "dependencies": {
-    "@factorialco/f0-core": "workspace:*",
     "clsx": "^2.1.1",
     "cva": "1.0.0-beta.3",
     "expo-clipboard": "~8.0.8",

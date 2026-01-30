@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`OneChip Snapshot 1`] = `
 <View
@@ -156,6 +156,9 @@ exports[`OneChip Snapshot with Icon 1`] = `
               "backgroundColor": "transparent",
               "borderWidth": 0,
             },
+            [
+              {},
+            ],
             {
               "flex": 0,
               "height": "100%",
@@ -323,6 +326,9 @@ exports[`OneChip Snapshot with OnClose 1`] = `
                 "backgroundColor": "transparent",
                 "borderWidth": 0,
               },
+              [
+                {},
+              ],
               {
                 "flex": 0,
                 "height": "100%",

@@ -11,11 +11,6 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "baseUrl": ".",
-    "paths": {
-      "@factorialco/f0-core": [
-        "../core/src"
-      ]
-    },
     "types": [
       "jest"
     ]

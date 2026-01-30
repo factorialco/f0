@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`DetailsItem Snapshot type company 1`] = `
 <View
@@ -113,6 +113,9 @@ exports[`DetailsItem Snapshot type company 1`] = `
                     "backgroundColor": "transparent",
                     "borderWidth": 0,
                   },
+                  [
+                    {},
+                  ],
                   {
                     "flex": 0,
                     "height": "100%",
@@ -340,6 +343,9 @@ exports[`DetailsItem Snapshot type item 1`] = `
                     "backgroundColor": "transparent",
                     "borderWidth": 0,
                   },
+                  [
+                    {},
+                  ],
                   {
                     "flex": 0,
                     "height": "100%",
@@ -513,6 +519,9 @@ exports[`DetailsItem Snapshot type person 1`] = `
                     "backgroundColor": "transparent",
                     "borderWidth": 0,
                   },
+                  [
+                    {},
+                  ],
                   {
                     "flex": 0,
                     "height": "100%",
@@ -686,6 +695,9 @@ exports[`DetailsItem Snapshot type team 1`] = `
                     "backgroundColor": "transparent",
                     "borderWidth": 0,
                   },
+                  [
+                    {},
+                  ],
                   {
                     "flex": 0,
                     "height": "100%",

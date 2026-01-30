@@ -1,8 +1,13 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`Button Snapshot - critical variant 1`] = `
 <View
-  className="flex item-start"
+  className="self-start"
+  style={
+    {
+      "position": "relative",
+    }
+  }
 >
   <View
     accessibilityLabel="Test Button"
@@ -25,7 +30,7 @@ exports[`Button Snapshot - critical variant 1`] = `
       }
     }
     accessible={true}
-    className="flex-row items-center justify-center border-none grow-0 bg-f1-background-secondary border border-f1-border h-8 rounded gap-1 px-2 sm:px-3 lg:px-4"
+    className="flex-row items-center justify-center bg-f1-background-secondary border border-f1-border h-8 rounded gap-1 px-2 sm:px-3 lg:px-4"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -40,6 +45,7 @@ exports[`Button Snapshot - critical variant 1`] = `
   >
     <Text
       className="text-base font-medium text-f1-foreground-critical"
+      numberOfLines={1}
     >
       Test Button
     </Text>
@@ -49,7 +55,12 @@ exports[`Button Snapshot - critical variant 1`] = `
 
 exports[`Button Snapshot - default button 1`] = `
 <View
-  className="flex item-start"
+  className="self-start"
+  style={
+    {
+      "position": "relative",
+    }
+  }
 >
   <View
     accessibilityLabel="Test Button"
@@ -72,7 +83,7 @@ exports[`Button Snapshot - default button 1`] = `
       }
     }
     accessible={true}
-    className="flex-row items-center justify-center border-none grow-0 bg-f1-background-accent-bold h-8 rounded gap-1 px-2 sm:px-3 lg:px-4"
+    className="flex-row items-center justify-center border-0 bg-f1-background-accent-bold h-8 rounded gap-1 px-2 sm:px-3 lg:px-4"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -87,6 +98,7 @@ exports[`Button Snapshot - default button 1`] = `
   >
     <Text
       className="text-base font-medium text-f1-foreground-inverse"
+      numberOfLines={1}
     >
       Test Button
     </Text>
@@ -96,7 +108,12 @@ exports[`Button Snapshot - default button 1`] = `
 
 exports[`Button Snapshot - different sizes 1`] = `
 <View
-  className="flex item-start"
+  className="self-start"
+  style={
+    {
+      "position": "relative",
+    }
+  }
 >
   <View
     accessibilityLabel="Test Button"
@@ -119,7 +136,7 @@ exports[`Button Snapshot - different sizes 1`] = `
       }
     }
     accessible={true}
-    className="flex-row items-center justify-center border-none grow-0 bg-f1-background-accent-bold h-6 rounded-sm gap-1 px-2 sm:px-3 lg:px-4"
+    className="flex-row items-center justify-center border-0 bg-f1-background-accent-bold h-6 rounded-sm gap-1 px-2 sm:px-3 lg:px-4"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -134,6 +151,7 @@ exports[`Button Snapshot - different sizes 1`] = `
   >
     <Text
       className="text-base font-medium text-f1-foreground-inverse"
+      numberOfLines={1}
     >
       Test Button
     </Text>
@@ -143,7 +161,12 @@ exports[`Button Snapshot - different sizes 1`] = `
 
 exports[`Button Snapshot - different sizes 2`] = `
 <View
-  className="flex item-start"
+  className="self-start"
+  style={
+    {
+      "position": "relative",
+    }
+  }
 >
   <View
     accessibilityLabel="Test Button"
@@ -166,7 +189,7 @@ exports[`Button Snapshot - different sizes 2`] = `
       }
     }
     accessible={true}
-    className="flex-row items-center justify-center border-none grow-0 bg-f1-background-accent-bold h-8 rounded gap-1 px-2 sm:px-3 lg:px-4"
+    className="flex-row items-center justify-center border-0 bg-f1-background-accent-bold h-8 rounded gap-1 px-2 sm:px-3 lg:px-4"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -181,6 +204,7 @@ exports[`Button Snapshot - different sizes 2`] = `
   >
     <Text
       className="text-base font-medium text-f1-foreground-inverse"
+      numberOfLines={1}
     >
       Test Button
     </Text>
@@ -190,7 +214,12 @@ exports[`Button Snapshot - different sizes 2`] = `
 
 exports[`Button Snapshot - different sizes 3`] = `
 <View
-  className="flex item-start"
+  className="self-start"
+  style={
+    {
+      "position": "relative",
+    }
+  }
 >
   <View
     accessibilityLabel="Test Button"
@@ -213,7 +242,7 @@ exports[`Button Snapshot - different sizes 3`] = `
       }
     }
     accessible={true}
-    className="flex-row items-center justify-center border-none grow-0 bg-f1-background-accent-bold h-10 rounded-md gap-1 px-2 sm:px-3 lg:px-4"
+    className="flex-row items-center justify-center border-0 bg-f1-background-accent-bold h-10 rounded-md gap-1 px-2 sm:px-3 lg:px-4"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -228,6 +257,7 @@ exports[`Button Snapshot - different sizes 3`] = `
   >
     <Text
       className="text-base font-medium text-f1-foreground-inverse"
+      numberOfLines={1}
     >
       Test Button
     </Text>
@@ -237,7 +267,12 @@ exports[`Button Snapshot - different sizes 3`] = `
 
 exports[`Button Snapshot - disabled state 1`] = `
 <View
-  className="flex item-start"
+  className="self-start"
+  style={
+    {
+      "position": "relative",
+    }
+  }
 >
   <View
     accessibilityLabel="Test Button, disabled"
@@ -260,7 +295,7 @@ exports[`Button Snapshot - disabled state 1`] = `
       }
     }
     accessible={true}
-    className="flex-row items-center justify-center border-none grow-0 bg-f1-background-accent-bold h-8 rounded opacity-50 gap-1 px-2 sm:px-3 lg:px-4"
+    className="flex-row items-center justify-center border-0 bg-f1-background-accent-bold h-8 rounded opacity-50 gap-1 px-2 sm:px-3 lg:px-4"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -275,6 +310,7 @@ exports[`Button Snapshot - disabled state 1`] = `
   >
     <Text
       className="text-base font-medium text-f1-foreground-inverse"
+      numberOfLines={1}
     >
       Test Button
     </Text>
@@ -284,7 +320,12 @@ exports[`Button Snapshot - disabled state 1`] = `
 
 exports[`Button Snapshot - loading state 1`] = `
 <View
-  className="flex item-start"
+  className="self-start"
+  style={
+    {
+      "position": "relative",
+    }
+  }
 >
   <View
     accessibilityLabel="Test Button, disabled, loading"
@@ -307,7 +348,7 @@ exports[`Button Snapshot - loading state 1`] = `
       }
     }
     accessible={true}
-    className="flex-row items-center justify-center border-none grow-0 bg-f1-background-accent-bold h-8 rounded opacity-50 gap-1 px-2 sm:px-3 lg:px-4"
+    className="flex-row items-center justify-center border-0 bg-f1-background-accent-bold h-8 rounded opacity-50 gap-1 px-2 sm:px-3 lg:px-4"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -322,6 +363,7 @@ exports[`Button Snapshot - loading state 1`] = `
   >
     <Text
       className="text-base font-medium text-f1-foreground-inverse"
+      numberOfLines={1}
     >
       Test Button
     </Text>
@@ -331,7 +373,12 @@ exports[`Button Snapshot - loading state 1`] = `
 
 exports[`Button Snapshot - outline variant 1`] = `
 <View
-  className="flex item-start"
+  className="self-start"
+  style={
+    {
+      "position": "relative",
+    }
+  }
 >
   <View
     accessibilityLabel="Test Button"
@@ -354,7 +401,7 @@ exports[`Button Snapshot - outline variant 1`] = `
       }
     }
     accessible={true}
-    className="flex-row items-center justify-center border-none grow-0 bg-f1-background-inverse-secondary border border-f1-border h-8 rounded gap-1 px-2 sm:px-3 lg:px-4"
+    className="flex-row items-center justify-center bg-f1-background-inverse-secondary border border-f1-border h-8 rounded gap-1 px-2 sm:px-3 lg:px-4"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -369,6 +416,7 @@ exports[`Button Snapshot - outline variant 1`] = `
   >
     <Text
       className="text-base font-medium text-f1-foreground"
+      numberOfLines={1}
     >
       Test Button
     </Text>
@@ -378,7 +426,12 @@ exports[`Button Snapshot - outline variant 1`] = `
 
 exports[`Button Snapshot - round button with hidden label 1`] = `
 <View
-  className="flex item-start"
+  className="self-start"
+  style={
+    {
+      "position": "relative",
+    }
+  }
 >
   <View
     accessibilityLabel="Test Button"
@@ -401,7 +454,7 @@ exports[`Button Snapshot - round button with hidden label 1`] = `
       }
     }
     accessible={true}
-    className="flex-row items-center justify-center border-none grow-0 bg-f1-background-accent-bold h-8 rounded aspect-square p-0"
+    className="flex-row items-center justify-center border-0 bg-f1-background-accent-bold h-8 rounded aspect-square p-0"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -419,7 +472,12 @@ exports[`Button Snapshot - round button with hidden label 1`] = `
 
 exports[`Button Snapshot - with emoji 1`] = `
 <View
-  className="flex item-start"
+  className="self-start"
+  style={
+    {
+      "position": "relative",
+    }
+  }
 >
   <View
     accessibilityLabel="Test Button"
@@ -442,7 +500,7 @@ exports[`Button Snapshot - with emoji 1`] = `
       }
     }
     accessible={true}
-    className="flex-row items-center justify-center border-none grow-0 bg-f1-background-accent-bold h-8 rounded gap-1 px-2 sm:px-3 lg:px-4"
+    className="flex-row items-center justify-center border-0 bg-f1-background-accent-bold h-8 rounded gap-1 px-2 sm:px-3 lg:px-4"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -462,6 +520,7 @@ exports[`Button Snapshot - with emoji 1`] = `
     </Text>
     <Text
       className="text-base font-medium text-f1-foreground-inverse"
+      numberOfLines={1}
     >
       Test Button
     </Text>
@@ -471,7 +530,12 @@ exports[`Button Snapshot - with emoji 1`] = `
 
 exports[`Button Snapshot - with icon 1`] = `
 <View
-  className="flex item-start"
+  className="self-start"
+  style={
+    {
+      "position": "relative",
+    }
+  }
 >
   <View
     accessibilityLabel="Test Button"
@@ -494,7 +558,7 @@ exports[`Button Snapshot - with icon 1`] = `
       }
     }
     accessible={true}
-    className="flex-row items-center justify-center border-none grow-0 bg-f1-background-accent-bold h-8 rounded gap-1 px-2 sm:px-3 lg:px-4"
+    className="flex-row items-center justify-center border-0 bg-f1-background-accent-bold h-8 rounded gap-1 px-2 sm:px-3 lg:px-4"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -509,6 +573,7 @@ exports[`Button Snapshot - with icon 1`] = `
   >
     <Text
       className="text-base font-medium text-f1-foreground-inverse"
+      numberOfLines={1}
     >
       Test Button
     </Text>
