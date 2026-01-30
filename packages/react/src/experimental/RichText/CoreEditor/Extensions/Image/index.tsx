@@ -8,6 +8,7 @@ import {
   ReactNodeViewRenderer,
   type NodeViewProps,
 } from "@tiptap/react"
+import { useCallback, useRef, useState } from "react"
 
 import { F0Button } from "@/components/F0Button"
 import { Spinner } from "@/experimental/Information/Spinner"
@@ -34,15 +35,54 @@ export const DEFAULT_ACCEPTED_TYPES = [
   "image/webp",
 ]
 
+const MIN_WIDTH = 100
+
 const ImageNodeView = ({
   node,
   deleteNode,
   selected,
   editor,
+  updateAttributes,
 }: NodeViewProps) => {
-  const { src, alt, title, uploading } = node.attrs
+  const { src, alt, title, uploading, width } = node.attrs
   const isEditable = editor.isEditable
   const translations = useI18n()
+  const imgRef = useRef<HTMLImageElement>(null)
+  const [isResizing, setIsResizing] = useState(false)
+
+  const handleResizeStart = useCallback(
+    (event: React.MouseEvent) => {
+      event.preventDefault()
+      event.stopPropagation()
+
+      const startX = event.clientX
+      const startWidth = imgRef.current?.offsetWidth ?? 0
+
+      const handleMouseMove = (e: MouseEvent) => {
+        const newWidth = Math.max(MIN_WIDTH, startWidth + (e.clientX - startX))
+        if (imgRef.current) {
+          imgRef.current.style.width = `${newWidth}px`
+        }
+      }
+
+      const handleMouseUp = () => {
+        document.removeEventListener("mousemove", handleMouseMove)
+        document.removeEventListener("mouseup", handleMouseUp)
+        setIsResizing(false)
+
+        const finalWidth = imgRef.current?.offsetWidth ?? startWidth
+        updateAttributes({ width: finalWidth })
+      }
+
+      setIsResizing(true)
+      document.addEventListener("mousemove", handleMouseMove)
+      document.addEventListener("mouseup", handleMouseUp)
+    },
+    [updateAttributes]
+  )
+
+  const showResizeHandle = isEditable && !uploading && (selected || isResizing)
+
   return (
     <NodeViewWrapper className="mb-2">
       <div
@@ -52,12 +92,26 @@ const ImageNodeView = ({
         )}
       >
         <img
+          ref={imgRef}
           src={src}
           alt={alt}
           title={title}
           draggable={false}
-          className="block h-auto w-full rounded-md transition-all duration-150 ease-out"
+          style={width ? { width: `${width}px` } : undefined}
+          className={cn(
+            "block h-auto rounded-md",
+            !width && "max-w-full",
+            !isResizing && "transition-all duration-150 ease-out"
+          )}
         />
+        {showResizeHandle && (
+          <div
+            role="separator"
+            aria-orientation="horizontal"
+            className="absolute bottom-1 right-1 h-3 w-3 cursor-se-resize rounded-sm bg-f1-border-selected-bold opacity-80 hover:opacity-100"
+            onMouseDown={handleResizeStart}
+          />
+        )}
         {uploading && (
           <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-f1-background-secondary backdrop-blur-[2px] transition-opacity duration-200">
             <Spinner size="medium" />
@@ -82,9 +136,19 @@ const ImageNodeView = ({
 
 export const ImageExtension = Image.extend({
   addAttributes() {
-    // We need it to track the uploading state and visual feedback
     return {
       ...this.parent?.(),
+      width: {
+        default: null,
+        renderHTML: (attributes) => {
+          if (!attributes.width) return {}
+          return { width: attributes.width }
+        },
+        parseHTML: (element) => {
+          const width = element.getAttribute("width")
+          return width ? Number(width) : null
+        },
+      },
       uploading: {
         default: false,
         renderHTML: () => ({}),
