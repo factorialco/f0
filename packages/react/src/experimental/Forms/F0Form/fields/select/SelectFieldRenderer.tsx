@@ -2,11 +2,11 @@ import { ControllerRenderProps, FieldValues } from "react-hook-form"
 
 import { F0Select } from "@/components/F0Select"
 
-import type { SelectFieldDefinition } from "./types"
+import type { F0SelectField } from "./types"
 import { FORM_SIZE } from "../../constants"
 
 interface SelectFieldRendererProps {
-  field: SelectFieldDefinition
+  field: F0SelectField
   formField: ControllerRenderProps<FieldValues>
   error?: boolean
   loading?: boolean

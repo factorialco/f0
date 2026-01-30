@@ -1,25 +1,63 @@
 import { ZodTypeAny } from "zod"
 
-/**
- * Conditional rendering operators for field-level conditions
- */
-export type RenderIfCondition = {
-  fieldId: string
-} & (
-  | { equalsTo: unknown }
-  | { notEqualsTo: unknown }
-  | { greaterThan: number }
-  | { greaterThanOrEqual: number }
-  | { lowerThan: number }
-  | { lowerThanOrEqual: number }
-  | { isEmpty: boolean }
-  | { matches: RegExp }
-)
+// ============================================================================
+// Base RenderIf Condition Types
+// ============================================================================
 
 /**
- * Base field definition shared across all field types
+ * Base condition that all renderIf conditions must have
  */
-export interface BaseFieldDefinition {
+interface RenderIfBase {
+  /** ID of the field to check the condition against */
+  fieldId: string
+}
+
+/**
+ * Common condition available for all field types
+ */
+export type CommonRenderIfCondition = RenderIfBase & {
+  /** Check if the field value is empty (null, undefined, empty string, empty array) */
+  isEmpty: boolean
+}
+
+/**
+ * Union of all possible RenderIf conditions (used internally for evaluation)
+ */
+export type RenderIfCondition =
+  | CommonRenderIfCondition
+  | TextRenderIfCondition
+  | NumberRenderIfCondition
+  | BooleanRenderIfCondition
+  | SelectRenderIfCondition
+  | DateRenderIfCondition
+
+// ============================================================================
+// Field-Specific RenderIf Condition Types (imported from each field)
+// ============================================================================
+
+import type { TextRenderIfCondition } from "./text/types"
+import type { NumberRenderIfCondition } from "./number/types"
+import type { BooleanRenderIfCondition } from "./checkbox/types"
+import type { SelectRenderIfCondition } from "./select/types"
+import type { DateRenderIfCondition } from "./date/types"
+
+// Re-export for convenience
+export type {
+  TextRenderIfCondition,
+  NumberRenderIfCondition,
+  BooleanRenderIfCondition,
+  SelectRenderIfCondition,
+  DateRenderIfCondition,
+}
+
+// ============================================================================
+// Base Field Type
+// ============================================================================
+
+/**
+ * Base properties shared across all F0 field types
+ */
+export interface F0BaseField {
   /** Unique identifier for the field, used as the form field name */
   id: string
   /** Label displayed above the field */
@@ -32,51 +70,10 @@ export interface BaseFieldDefinition {
   placeholder?: string
   /** Whether the field is disabled */
   disabled?: boolean
-  /** Conditional rendering based on another field's value */
-  renderIf?: RenderIfCondition
 }
 
-// Re-export field type definitions
-export type { TextFieldDefinition } from "./text/types"
-export type { NumberFieldDefinition } from "./number/types"
-export type { TextareaFieldDefinition } from "./textarea/types"
-export type { SelectFieldDefinition } from "./select/types"
-export type { CheckboxFieldDefinition } from "./checkbox/types"
-export type { SwitchFieldDefinition } from "./switch/types"
-export type { DateFieldDefinition } from "./date/types"
-export type { RichTextFieldDefinition, RichTextValue } from "./richtext/types"
-export type {
-  CustomFieldDefinition,
-  CustomFieldRenderProps,
-} from "./custom/types"
-
-// Import for union type
-import type { TextFieldDefinition } from "./text/types"
-import type { NumberFieldDefinition } from "./number/types"
-import type { TextareaFieldDefinition } from "./textarea/types"
-import type { SelectFieldDefinition } from "./select/types"
-import type { CheckboxFieldDefinition } from "./checkbox/types"
-import type { SwitchFieldDefinition } from "./switch/types"
-import type { DateFieldDefinition } from "./date/types"
-import type { RichTextFieldDefinition } from "./richtext/types"
-import type { CustomFieldDefinition } from "./custom/types"
-
 /**
- * Union of all field definition types
- */
-export type FieldDefinition =
-  | TextFieldDefinition
-  | NumberFieldDefinition
-  | TextareaFieldDefinition
-  | SelectFieldDefinition
-  | CheckboxFieldDefinition
-  | SwitchFieldDefinition
-  | DateFieldDefinition
-  | RichTextFieldDefinition
-  | CustomFieldDefinition
-
-/**
- * Field types mapping to existing components
+ * Field types for rendering
  */
 export type FieldType =
   | "text"
@@ -88,3 +85,50 @@ export type FieldType =
   | "date"
   | "richtext"
   | "custom"
+
+// ============================================================================
+// Re-export field types and configs
+// ============================================================================
+
+export type { F0TextConfig, F0TextField } from "./text/types"
+export type { F0NumberConfig, F0NumberField } from "./number/types"
+export type { F0TextareaConfig, F0TextareaField } from "./textarea/types"
+export type { F0SelectConfig, F0SelectField } from "./select/types"
+export type { F0CheckboxConfig, F0CheckboxField } from "./checkbox/types"
+export type { F0SwitchConfig, F0SwitchField } from "./switch/types"
+export type { F0DateConfig, F0DateField } from "./date/types"
+export type {
+  F0RichTextConfig,
+  F0RichTextField,
+  RichTextValue,
+} from "./richtext/types"
+export type {
+  F0CustomConfig,
+  F0CustomField,
+  CustomFieldRenderProps,
+} from "./custom/types"
+
+// Import for union type
+import type { F0TextField } from "./text/types"
+import type { F0NumberField } from "./number/types"
+import type { F0TextareaField } from "./textarea/types"
+import type { F0SelectField } from "./select/types"
+import type { F0CheckboxField } from "./checkbox/types"
+import type { F0SwitchField } from "./switch/types"
+import type { F0DateField } from "./date/types"
+import type { F0RichTextField } from "./richtext/types"
+import type { F0CustomField } from "./custom/types"
+
+/**
+ * Union of all F0 field types used for rendering
+ */
+export type F0Field =
+  | F0TextField
+  | F0NumberField
+  | F0TextareaField
+  | F0SelectField
+  | F0CheckboxField
+  | F0SwitchField
+  | F0DateField
+  | F0RichTextField
+  | F0CustomField

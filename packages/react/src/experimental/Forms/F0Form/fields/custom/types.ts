@@ -1,7 +1,20 @@
 import type { ReactNode } from "react"
 
-import type { BaseFieldDefinition } from "../types"
-import { ZodTypeAny } from "zod"
+import type { F0BaseField, CommonRenderIfCondition } from "../types"
+
+// ============================================================================
+// Custom Field RenderIf Conditions
+// Custom only supports common conditions (isEmpty)
+// ============================================================================
+
+/**
+ * All valid renderIf conditions for custom fields
+ */
+export type CustomFieldRenderIf = CommonRenderIfCondition
+
+// ============================================================================
+// Custom Field Render Props
+// ============================================================================
 
 /**
  * Props passed to the custom field render function
@@ -27,13 +40,24 @@ export interface CustomFieldRenderProps {
   disabled?: boolean
 }
 
+// ============================================================================
+// Custom Field Config and Type
+// ============================================================================
+
 /**
- * Custom field definition that allows rendering external components
- * while maintaining react-hook-form integration
+ * F0 config options specific to custom fields
  */
-export interface CustomFieldDefinition extends BaseFieldDefinition {
-  type: "custom"
-  validation: ZodTypeAny
+export interface F0CustomConfig {
   /** Render function for the custom component */
   render: (props: CustomFieldRenderProps) => ReactNode
 }
+
+/**
+ * Custom field with all properties for rendering
+ */
+export type F0CustomField = F0BaseField &
+  F0CustomConfig & {
+    type: "custom"
+    /** Conditional rendering based on another field's value */
+    renderIf?: CustomFieldRenderIf
+  }

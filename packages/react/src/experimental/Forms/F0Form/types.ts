@@ -1,18 +1,10 @@
-import type { FieldDefinition, RenderIfCondition } from "./fields/types"
+import type { z, ZodRawShape } from "zod"
 
-// Re-export field types for convenience
-export type {
-  FieldDefinition,
-  FieldType,
-  RenderIfCondition,
-  BaseFieldDefinition,
-  TextFieldDefinition,
-  NumberFieldDefinition,
-  TextareaFieldDefinition,
-  SelectFieldDefinition,
-  CheckboxFieldDefinition,
-  SwitchFieldDefinition,
-} from "./fields/types"
+import type { F0Field, RenderIfCondition } from "./fields/types"
+
+// Re-export F0 schema types
+export type { F0FieldConfig, F0FieldType, F0ZodType } from "./f0Schema"
+export { f0, getF0Config, hasF0Config, inferFieldType } from "./f0Schema"
 
 /**
  * Conditional rendering for sections - can be a condition object or a function
@@ -22,24 +14,43 @@ export type SectionRenderIf =
   | ((values: Record<string, unknown>) => boolean)
 
 /**
- * Field item wrapper for the definition array
+ * Configuration for a form section
+ */
+export interface F0SectionConfig {
+  /** Section title */
+  title: string
+  /** Section description */
+  description?: string
+  /** Conditional rendering for the entire section */
+  renderIf?: SectionRenderIf
+  /** Order in which sections appear (lower = first) */
+  order?: number
+}
+
+// ============================================================================
+// Internal types used by the form rendering system
+// These are not part of the public API but are needed for internal structure
+// ============================================================================
+
+/**
+ * @internal Field item wrapper for internal rendering
  */
 export interface FieldItem {
   type: "field"
-  field: FieldDefinition
+  field: F0Field
 }
 
 /**
- * Row definition for rendering fields horizontally in a row
+ * @internal Row definition for rendering fields horizontally
  */
 export interface RowDefinition {
   type: "row"
   /** Fields to render in the row */
-  fields: FieldDefinition[]
+  fields: F0Field[]
 }
 
 /**
- * Section definition with title, description, and nested fields
+ * @internal Section definition with title, description, and nested fields
  */
 export interface SectionDefinition {
   /** Unique identifier for the section */
@@ -58,22 +69,50 @@ export interface SectionDefinition {
 }
 
 /**
- * Union of all definition item types that can appear in the form definition array
+ * @internal Union of all definition item types used internally for rendering
  */
 export type FormDefinitionItem = FieldItem | RowDefinition | SectionDefinition
 
+// ============================================================================
+// Public API types
+// ============================================================================
+
 /**
  * Props for the F0Form component
+ *
+ * @typeParam TSchema - The Zod object schema type. The form data type is inferred from this.
+ *
+ * @example
+ * ```tsx
+ * const schema = z.object({
+ *   name: f0(z.string(), { label: "Name", position: 1 }),
+ *   age: f0(z.number(), { label: "Age", position: 2 }),
+ * })
+ *
+ * // Data type is inferred as { name: string; age: number }
+ * <F0Form
+ *   name="my-form"
+ *   schema={schema}
+ *   defaultValues={{ name: "" }}  // Partial allowed
+ *   onSubmit={(data) => {
+ *     // data is { name: string; age: number }
+ *   }}
+ * />
+ * ```
  */
-export interface F0FormProps<TValues extends Record<string, unknown>> {
+export interface F0FormProps<TSchema extends z.ZodObject<ZodRawShape>> {
   /** Unique name for the form, used for generating anchor links (e.g., #forms.[name].[sectionId].[fieldId]) */
   name: string
-  /** Array of form definition items (fields, rows, sections) */
-  definition: FormDefinitionItem[]
-  /** Default values for the form fields */
-  defaultValues?: Partial<TValues>
+  /** Zod object schema with F0 field configurations */
+  schema: TSchema
+  /** Section configurations keyed by section ID */
+  sections?: Record<string, F0SectionConfig>
+  /** Default values for the form fields (partial of the schema type) */
+  defaultValues?: Partial<z.infer<TSchema>>
   /** Callback when the form is submitted with valid data */
-  onSubmit: (data: TValues) => Promise<F0FormSubmitResult> | F0FormSubmitResult
+  onSubmit: (
+    data: z.infer<TSchema>
+  ) => Promise<F0FormSubmitResult> | F0FormSubmitResult
   /** Label for the submit button */
   submitLabel?: string
   /** Whether to show the submit button */
@@ -94,17 +133,3 @@ export type F0FormSubmitResult =
       /** Field-specific error messages */
       errors?: Record<string, string>
     }
-
-/**
- * Extract all field IDs from a form definition for type inference
- */
-export type ExtractFieldIds<T extends FormDefinitionItem[]> =
-  T[number] extends infer Item
-    ? Item extends FieldItem
-      ? Item["field"]["id"]
-      : Item extends RowDefinition
-        ? Item["fields"][number]["id"]
-        : Item extends SectionDefinition
-          ? ExtractFieldIds<Item["section"]["fields"]>
-          : never
-    : never

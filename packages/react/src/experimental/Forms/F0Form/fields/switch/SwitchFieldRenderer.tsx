@@ -1,10 +1,10 @@
 import { ControllerRenderProps, FieldValues } from "react-hook-form"
 
 import { Switch } from "../../../Fields/Switch"
-import type { SwitchFieldDefinition } from "./types"
+import type { F0SwitchField } from "./types"
 
 interface SwitchFieldRendererProps {
-  field: SwitchFieldDefinition
+  field: F0SwitchField
   formField: ControllerRenderProps<FieldValues>
 }
 

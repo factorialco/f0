@@ -1,11 +1,11 @@
 import { ControllerRenderProps, FieldValues } from "react-hook-form"
 
 import { Input } from "../../../Fields/Input"
-import type { TextFieldDefinition } from "./types"
+import type { F0TextField } from "./types"
 import { FORM_SIZE } from "../../constants"
 
 interface TextFieldRendererProps {
-  field: TextFieldDefinition
+  field: F0TextField
   formField: ControllerRenderProps<FieldValues>
   error?: boolean
   loading?: boolean

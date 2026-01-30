@@ -3,17 +3,17 @@ import { useFormContext } from "react-hook-form"
 import { Switch } from "../../Fields/Switch"
 import { SWITCH_GROUP_PADDING } from "../constants"
 import { generateAnchorId, useF0FormContext } from "../context"
-import type { SwitchFieldDefinition } from "../fields/switch/types"
+import type { F0SwitchField } from "../fields/switch/types"
 import { evaluateRenderIf } from "../fields/utils"
 
 interface SwitchGroupRendererProps {
-  fields: SwitchFieldDefinition[]
+  fields: F0SwitchField[]
   /** Section ID when group is inside a section (for anchor links) */
   sectionId?: string
 }
 
 interface SwitchFieldItemProps {
-  field: SwitchFieldDefinition
+  field: F0SwitchField
   isLast: boolean
   /** Section ID when field is inside a section (for anchor links) */
   sectionId?: string

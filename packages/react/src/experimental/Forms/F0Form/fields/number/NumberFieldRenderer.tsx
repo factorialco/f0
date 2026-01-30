@@ -1,11 +1,11 @@
 import { ControllerRenderProps, FieldValues } from "react-hook-form"
 
 import { NumberInput } from "../../../Fields/NumberInput"
-import type { NumberFieldDefinition } from "./types"
+import type { F0NumberField } from "./types"
 import { FORM_SIZE } from "../../constants"
 
 interface NumberFieldRendererProps {
-  field: NumberFieldDefinition
+  field: F0NumberField
   formField: ControllerRenderProps<FieldValues>
   error?: boolean
   loading?: boolean

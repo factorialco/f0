@@ -4,26 +4,23 @@ import { describe, expect, it } from "vitest"
 import { z } from "zod"
 
 import { F0Form } from "../F0Form"
-import type { FormDefinitionItem } from "../types"
-import { getFormDefinitionSchema } from "../useFormDefinitionSchema"
+import { f0, getF0Config, hasF0Config, inferFieldType } from "../f0Schema"
+import type { F0SectionConfig } from "../types"
+import { getSchemaDefinition } from "../useSchemaDefinition"
 
 describe("F0Form", () => {
-  it("renders a basic form with text fields", () => {
-    const definition: FormDefinitionItem[] = [
-      {
-        type: "field",
-        field: {
-          id: "name",
-          type: "text",
-          label: "Name",
-        },
-      },
-    ]
+  it("renders a basic form using schema prop", () => {
+    const formSchema = z.object({
+      name: f0(z.string(), {
+        label: "Name",
+        position: 1,
+      }),
+    })
 
     render(
       <F0Form
-        name="basic"
-        definition={definition}
+        name="schema-basic"
+        schema={formSchema}
         defaultValues={{ name: "" }}
         onSubmit={async () => ({ success: true })}
       />
@@ -34,22 +31,18 @@ describe("F0Form", () => {
   })
 
   it("renders form with custom submit label", () => {
-    const definition: FormDefinitionItem[] = [
-      {
-        type: "field",
-        field: {
-          id: "email",
-          type: "text",
-          inputType: "email",
-          label: "Email",
-        },
-      },
-    ]
+    const formSchema = z.object({
+      email: f0(z.string().email(), {
+        label: "Email",
+        position: 1,
+        inputType: "email",
+      }),
+    })
 
     render(
       <F0Form
         name="custom-submit-label"
-        definition={definition}
+        schema={formSchema}
         defaultValues={{ email: "" }}
         onSubmit={async () => ({ success: true })}
         submitLabel="Save"
@@ -60,21 +53,17 @@ describe("F0Form", () => {
   })
 
   it("can hide the submit button", () => {
-    const definition: FormDefinitionItem[] = [
-      {
-        type: "field",
-        field: {
-          id: "name",
-          type: "text",
-          label: "Name",
-        },
-      },
-    ]
+    const formSchema = z.object({
+      name: f0(z.string(), {
+        label: "Name",
+        position: 1,
+      }),
+    })
 
     render(
       <F0Form
         name="hide-submit-button"
-        definition={definition}
+        schema={formSchema}
         defaultValues={{ name: "" }}
         onSubmit={async () => ({ success: true })}
         showSubmitButton={false}
@@ -86,21 +75,55 @@ describe("F0Form", () => {
     ).not.toBeInTheDocument()
   })
 
-  it("renders rows with multiple fields", () => {
-    const definition: FormDefinitionItem[] = [
-      {
-        type: "row",
-        fields: [
-          { id: "firstName", type: "text", label: "First Name" },
-          { id: "lastName", type: "text", label: "Last Name" },
-        ],
+  it("renders form with sections", () => {
+    const formSchema = z.object({
+      name: f0(z.string(), {
+        label: "Name",
+        section: "personal",
+        position: 1,
+      }),
+    })
+
+    const sections: Record<string, F0SectionConfig> = {
+      personal: {
+        title: "Personal Information",
+        description: "Enter your details",
       },
-    ]
+    }
 
     render(
       <F0Form
-        name="rows"
-        definition={definition}
+        name="schema-sections"
+        schema={formSchema}
+        sections={sections}
+        defaultValues={{ name: "" }}
+        onSubmit={async () => ({ success: true })}
+      />
+    )
+
+    expect(screen.getByText("Personal Information")).toBeInTheDocument()
+    expect(screen.getByText("Enter your details")).toBeInTheDocument()
+    expect(screen.getByLabelText("Name")).toBeInTheDocument()
+  })
+
+  it("renders form with row grouping", () => {
+    const formSchema = z.object({
+      firstName: f0(z.string(), {
+        label: "First Name",
+        position: 1,
+        row: "name-row",
+      }),
+      lastName: f0(z.string(), {
+        label: "Last Name",
+        position: 2,
+        row: "name-row",
+      }),
+    })
+
+    render(
+      <F0Form
+        name="schema-rows"
+        schema={formSchema}
         defaultValues={{ firstName: "", lastName: "" }}
         onSubmit={async () => ({ success: true })}
       />
@@ -109,154 +132,201 @@ describe("F0Form", () => {
     expect(screen.getByLabelText("First Name")).toBeInTheDocument()
     expect(screen.getByLabelText("Last Name")).toBeInTheDocument()
   })
-
-  it("renders sections with title and description", () => {
-    const definition: FormDefinitionItem[] = [
-      {
-        type: "section",
-        id: "personal",
-        section: {
-          title: "Personal Information",
-          description: "Enter your details",
-          fields: [
-            {
-              type: "field",
-              field: { id: "name", type: "text", label: "Name" },
-            },
-          ],
-        },
-      },
-    ]
-
-    render(
-      <F0Form
-        name="sections"
-        definition={definition}
-        defaultValues={{ name: "" }}
-        onSubmit={async () => ({ success: true })}
-      />
-    )
-
-    expect(screen.getByText("Personal Information")).toBeInTheDocument()
-    expect(screen.getByText("Enter your details")).toBeInTheDocument()
-  })
 })
 
-describe("getFormDefinitionSchema", () => {
-  it("extracts schema from field definitions", () => {
-    const definition: FormDefinitionItem[] = [
-      {
-        type: "field",
-        field: {
-          id: "name",
-          type: "text",
-          label: "Name",
-          validation: z.string().min(2),
-        },
-      },
-      {
-        type: "field",
-        field: {
-          id: "age",
-          type: "number",
-          label: "Age",
-          validation: z.number().min(0),
-        },
-      },
-    ]
+describe("f0 function", () => {
+  it("attaches config to schema", () => {
+    const schema = f0(z.string(), {
+      label: "Test",
+      position: 1,
+    })
 
-    const schema = getFormDefinitionSchema(definition)
+    const config = getF0Config(schema)
+    expect(config).toBeDefined()
+    expect(config?.label).toBe("Test")
+    expect(config?.position).toBe(1)
+  })
 
-    expect(schema.shape.name).toBeDefined()
-    expect(schema.shape.age).toBeDefined()
+  it("preserves original schema validation", () => {
+    const schema = f0(z.string().min(2), {
+      label: "Test",
+      position: 1,
+    })
 
-    // Test validation
-    const validResult = schema.safeParse({ name: "John", age: 25 })
+    const validResult = schema.safeParse("ab")
     expect(validResult.success).toBe(true)
 
-    const invalidResult = schema.safeParse({ name: "J", age: -1 })
+    const invalidResult = schema.safeParse("a")
     expect(invalidResult.success).toBe(false)
   })
 
-  it("extracts schema from rows", () => {
-    const definition: FormDefinitionItem[] = [
-      {
-        type: "row",
-        fields: [
-          {
-            id: "first",
-            type: "text",
-            label: "First",
-            validation: z.string(),
-          },
-          {
-            id: "second",
-            type: "number",
-            label: "Second",
-            validation: z.number(),
-          },
-        ],
-      },
-    ]
+  it("supports all config options", () => {
+    const schema = f0(z.string(), {
+      label: "Test",
+      section: "section1",
+      position: 1,
+      placeholder: "Enter text",
+      helpText: "Help text",
+      disabled: true,
+      row: "row1",
+    })
 
-    const schema = getFormDefinitionSchema(definition)
+    const config = getF0Config(schema)
+    expect(config?.label).toBe("Test")
+    expect(config?.section).toBe("section1")
+    expect(config?.position).toBe(1)
+    expect(config?.placeholder).toBe("Enter text")
+    expect(config?.helpText).toBe("Help text")
+    expect(config?.disabled).toBe(true)
+    expect(config?.row).toBe("row1")
+  })
+})
 
-    expect(schema.shape.first).toBeDefined()
-    expect(schema.shape.second).toBeDefined()
+describe("hasF0Config", () => {
+  it("returns true for schema with f0 config", () => {
+    const schema = f0(z.string(), { label: "Test", position: 1 })
+    expect(hasF0Config(schema)).toBe(true)
   })
 
-  it("extracts schema from nested sections", () => {
-    const definition: FormDefinitionItem[] = [
-      {
-        type: "section",
-        id: "section1",
-        section: {
-          title: "Section",
-          fields: [
-            {
-              type: "field",
-              field: {
-                id: "nested",
-                type: "text",
-                label: "Nested",
-                validation: z.string(),
-              },
-            },
-          ],
-        },
-      },
-    ]
+  it("returns false for schema without f0 config", () => {
+    const schema = z.string()
+    expect(hasF0Config(schema)).toBe(false)
+  })
+})
 
-    const schema = getFormDefinitionSchema(definition)
-
-    expect(schema.shape.nested).toBeDefined()
+describe("inferFieldType", () => {
+  it("infers text type from ZodString", () => {
+    const schema = z.string()
+    const config = { label: "Test", position: 1 } as const
+    expect(inferFieldType(schema, config)).toBe("text")
   })
 
-  it("uses default validation when not provided", () => {
-    const definition: FormDefinitionItem[] = [
-      { type: "field", field: { id: "text", type: "text", label: "Text" } },
-      {
-        type: "field",
-        field: { id: "number", type: "number", label: "Number" },
-      },
-      {
-        type: "field",
-        field: { id: "checkbox", type: "checkbox", label: "Checkbox" },
-      },
-    ]
+  it("infers number type from ZodNumber", () => {
+    const schema = z.number()
+    const config = { label: "Test", position: 1, fieldType: "number" } as const
+    expect(inferFieldType(schema, config)).toBe("number")
+  })
 
-    const schema = getFormDefinitionSchema(definition)
+  it("infers switch type from ZodBoolean", () => {
+    const schema = z.boolean()
+    const config = { label: "Test", position: 1, fieldType: "switch" } as const
+    expect(inferFieldType(schema, config)).toBe("switch")
+  })
 
-    // Default string validation
-    const textResult = schema.shape.text.safeParse("test")
-    expect(textResult.success).toBe(true)
+  it("infers textarea from rows config", () => {
+    const schema = z.string()
+    const config = {
+      label: "Test",
+      position: 1,
+      rows: 4,
+      fieldType: "textarea",
+    } as const
+    expect(inferFieldType(schema, config)).toBe("textarea")
+  })
 
-    // Default number validation
-    const numberResult = schema.shape.number.safeParse(42)
-    expect(numberResult.success).toBe(true)
+  it("infers select from options config", () => {
+    const schema = z.string()
+    const config = {
+      label: "Test",
+      position: 1,
+      options: [{ value: "a", label: "A" }],
+    } as const
+    expect(inferFieldType(schema, config)).toBe("select")
+  })
 
-    // Default boolean validation
-    const checkboxResult = schema.shape.checkbox.safeParse(true)
-    expect(checkboxResult.success).toBe(true)
+  it("uses explicit fieldType when provided", () => {
+    const schema = z.boolean()
+    const config = {
+      label: "Test",
+      position: 1,
+      fieldType: "checkbox",
+    } as const
+    expect(inferFieldType(schema, config)).toBe("checkbox")
+  })
+})
+
+describe("getSchemaDefinition", () => {
+  it("converts schema to definition array", () => {
+    const formSchema = z.object({
+      name: f0(z.string(), { label: "Name", position: 1 }),
+      email: f0(z.string().email(), { label: "Email", position: 2 }),
+    })
+
+    const definition = getSchemaDefinition(formSchema)
+
+    expect(definition).toHaveLength(2)
+    expect(definition[0].type).toBe("field")
+    expect(definition[1].type).toBe("field")
+  })
+
+  it("groups fields by section", () => {
+    const formSchema = z.object({
+      name: f0(z.string(), {
+        label: "Name",
+        section: "personal",
+        position: 1,
+      }),
+      email: f0(z.string(), {
+        label: "Email",
+        section: "contact",
+        position: 1,
+      }),
+    })
+
+    const sections: Record<string, F0SectionConfig> = {
+      personal: { title: "Personal", order: 1 },
+      contact: { title: "Contact", order: 2 },
+    }
+
+    const definition = getSchemaDefinition(formSchema, sections)
+
+    expect(definition).toHaveLength(2)
+    expect(definition[0].type).toBe("section")
+    expect(definition[1].type).toBe("section")
+  })
+
+  it("sorts fields by position", () => {
+    const formSchema = z.object({
+      third: f0(z.string(), { label: "Third", position: 3 }),
+      first: f0(z.string(), { label: "First", position: 1 }),
+      second: f0(z.string(), { label: "Second", position: 2 }),
+    })
+
+    const definition = getSchemaDefinition(formSchema)
+
+    expect(definition).toHaveLength(3)
+    // Fields should be sorted by position
+    const fieldItems = definition as Array<{
+      type: "field"
+      field: { id: string }
+    }>
+    expect(fieldItems[0].field.id).toBe("first")
+    expect(fieldItems[1].field.id).toBe("second")
+    expect(fieldItems[2].field.id).toBe("third")
+  })
+
+  it("groups fields with same row into row definition", () => {
+    const formSchema = z.object({
+      firstName: f0(z.string(), {
+        label: "First",
+        position: 1,
+        row: "name-row",
+      }),
+      lastName: f0(z.string(), {
+        label: "Last",
+        position: 2,
+        row: "name-row",
+      }),
+    })
+
+    const definition = getSchemaDefinition(formSchema)
+
+    expect(definition).toHaveLength(1)
+    expect(definition[0].type).toBe("row")
+    const rowDef = definition[0] as {
+      type: "row"
+      fields: Array<{ id: string }>
+    }
+    expect(rowDef.fields).toHaveLength(2)
   })
 })

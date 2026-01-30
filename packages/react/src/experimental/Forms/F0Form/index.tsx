@@ -2,30 +2,79 @@ import { experimentalComponent } from "@/lib/experimental"
 
 import { F0Form as F0FormComponent } from "./F0Form"
 
-export * from "./types"
-export {
-  useFormDefinitionSchema,
-  getFormDefinitionSchema,
-  extractAllFields,
-} from "./useFormDefinitionSchema"
+// Export main types
+export type {
+  F0FormProps,
+  F0SectionConfig,
+  F0FormSubmitResult,
+  SectionRenderIf,
+} from "./types"
+
+// Export F0 schema extension and utilities
+export { f0, getF0Config, hasF0Config, inferFieldType } from "./f0Schema"
+export type {
+  F0BaseConfig,
+  F0FieldConfig,
+  F0FieldType,
+  F0ZodType,
+  F0FormSchema,
+  InferF0FormValues,
+  // Field-specific config types
+  F0StringConfig,
+  F0NumberFieldConfig,
+  F0BooleanConfig,
+  F0DateFieldConfig,
+  F0ArrayConfig,
+  F0CustomFieldConfig,
+  F0RichTextFieldConfig,
+} from "./f0Schema"
+
+// Export field types and configs
+export type {
+  F0Field,
+  F0BaseField,
+  FieldType,
+  // RenderIf condition types
+  RenderIfCondition,
+  CommonRenderIfCondition,
+  TextRenderIfCondition,
+  NumberRenderIfCondition,
+  BooleanRenderIfCondition,
+  SelectRenderIfCondition,
+  DateRenderIfCondition,
+  // Field-specific configs
+  F0TextConfig,
+  F0NumberConfig,
+  F0TextareaConfig,
+  F0SelectConfig,
+  F0CheckboxConfig,
+  F0SwitchConfig,
+  F0DateConfig,
+  F0RichTextConfig,
+  F0CustomConfig,
+  // Field types
+  F0TextField,
+  F0NumberField,
+  F0TextareaField,
+  F0SelectField,
+  F0CheckboxField,
+  F0SwitchField,
+  F0DateField,
+  F0RichTextField,
+  F0CustomField,
+  // Other types
+  RichTextValue,
+  CustomFieldRenderProps,
+} from "./fields/types"
+
+// Export schema definition utilities
+export { useSchemaDefinition, getSchemaDefinition } from "./useSchemaDefinition"
+
+// Export utilities
 export { evaluateRenderIf } from "./fields/utils"
 export { generateAnchorId } from "./context"
 
-// Re-export field types
-export type {
-  FieldDefinition,
-  FieldType,
-  RenderIfCondition,
-  BaseFieldDefinition,
-  TextFieldDefinition,
-  NumberFieldDefinition,
-  TextareaFieldDefinition,
-  SelectFieldDefinition,
-  CheckboxFieldDefinition,
-  SwitchFieldDefinition,
-  CustomFieldDefinition,
-  CustomFieldRenderProps,
-} from "./fields/types"
+import type { z, ZodRawShape } from "zod"
 
 import type { F0FormProps } from "./types"
 
@@ -33,7 +82,7 @@ import type { F0FormProps } from "./types"
  * @experimental This is an experimental component, use it at your own risk
  */
 export const F0Form = experimentalComponent("F0Form", F0FormComponent) as <
-  TValues extends Record<string, unknown>,
+  TSchema extends z.ZodObject<ZodRawShape>,
 >(
-  props: F0FormProps<TValues>
+  props: F0FormProps<TSchema>
 ) => React.ReactElement

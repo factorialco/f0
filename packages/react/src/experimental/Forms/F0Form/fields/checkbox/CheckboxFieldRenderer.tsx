@@ -2,10 +2,10 @@ import { ControllerRenderProps, FieldValues } from "react-hook-form"
 
 import { F0Checkbox } from "@/components/F0Checkbox"
 
-import type { CheckboxFieldDefinition } from "./types"
+import type { F0CheckboxField } from "./types"
 
 interface CheckboxFieldRendererProps {
-  field: CheckboxFieldDefinition
+  field: F0CheckboxField
   formField: ControllerRenderProps<FieldValues>
 }
 

@@ -1,9 +1,9 @@
 import { ControllerRenderProps, FieldValues } from "react-hook-form"
 
-import type { CustomFieldDefinition, CustomFieldRenderProps } from "./types"
+import type { F0CustomField, CustomFieldRenderProps } from "./types"
 
 interface CustomFieldRendererProps {
-  field: CustomFieldDefinition
+  field: F0CustomField
   formField: ControllerRenderProps<FieldValues>
   error?: string
   isValidating: boolean

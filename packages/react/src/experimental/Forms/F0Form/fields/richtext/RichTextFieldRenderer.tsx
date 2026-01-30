@@ -2,10 +2,10 @@ import { ControllerRenderProps, FieldValues } from "react-hook-form"
 
 import { RichTextEditor } from "@/experimental/RichText/RichTextEditor"
 
-import type { RichTextFieldDefinition, RichTextValue } from "./types"
+import type { F0RichTextField, RichTextValue } from "./types"
 
 interface RichTextFieldRendererProps {
-  field: RichTextFieldDefinition
+  field: F0RichTextField
   formField: ControllerRenderProps<FieldValues>
 }
 

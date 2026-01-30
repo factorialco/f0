@@ -1,6 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMemo } from "react"
 import { DefaultValues, Path, useForm } from "react-hook-form"
+import { z, ZodRawShape } from "zod"
 
 import { F0Button } from "@/components/F0Button"
 import { cn } from "@/lib/utils"
@@ -12,7 +13,7 @@ import { SwitchGroupRenderer } from "./components/SwitchGroupRenderer"
 import { FIELD_GAP, SECTION_MARGIN } from "./constants"
 import { F0FormContext } from "./context"
 import { FieldRenderer } from "./fields/FieldRenderer"
-import type { SwitchFieldDefinition } from "./fields/switch/types"
+import type { F0SwitchField } from "./fields/switch/types"
 import type {
   F0FormProps,
   FieldItem,
@@ -20,13 +21,13 @@ import type {
   RowDefinition,
   SectionDefinition,
 } from "./types"
-import { useFormDefinitionSchema } from "./useFormDefinitionSchema"
+import { useSchemaDefinition } from "./useSchemaDefinition"
 
 type GroupedItem =
   | { type: "field"; item: FieldItem }
   | { type: "row"; item: RowDefinition; index: number }
   | { type: "section"; item: SectionDefinition }
-  | { type: "switchGroup"; fields: SwitchFieldDefinition[] }
+  | { type: "switchGroup"; fields: F0SwitchField[] }
 
 /**
  * Groups contiguous switch fields together for rendering in a bordered container
@@ -35,7 +36,7 @@ function groupContiguousSwitches(
   definition: FormDefinitionItem[]
 ): GroupedItem[] {
   const result: GroupedItem[] = []
-  let currentSwitchGroup: SwitchFieldDefinition[] = []
+  let currentSwitchGroup: F0SwitchField[] = []
 
   const flushSwitchGroup = () => {
     if (currentSwitchGroup.length > 0) {
@@ -46,7 +47,7 @@ function groupContiguousSwitches(
 
   definition.forEach((item, index) => {
     if (item.type === "field" && item.field.type === "switch") {
-      currentSwitchGroup.push(item.field as SwitchFieldDefinition)
+      currentSwitchGroup.push(item.field as F0SwitchField)
     } else {
       flushSwitchGroup()
       if (item.type === "field") {
@@ -64,78 +65,71 @@ function groupContiguousSwitches(
 }
 
 /**
- * F0Form - A declarative form component that generates forms from a definition array.
+ * F0Form - A declarative form component that generates forms from a Zod schema.
  *
  * Features:
- * - Declarative form definition with fields, groups, and sections
- * - Automatic Zod schema generation from field validations
+ * - Schema-based form definition with embedded field metadata
+ * - Automatic Zod schema validation
  * - Conditional rendering support (renderIf)
  * - Integration with react-hook-form
+ * - Section and row grouping support
  *
  * @example
  * ```tsx
  * import { z } from "zod"
- * import { F0Form } from "@factorialco/factorial-one/experimental"
+ * import { f0, F0Form } from "@factorialco/factorial-one/experimental"
  *
- * const definition = [
- *   {
- *     type: "field",
- *     field: {
- *       id: "name",
- *       type: "text",
- *       label: "Name",
- *       validation: z.string().min(2),
- *       helpText: "Enter your full name"
- *     }
- *   },
- *   {
- *     type: "row",
- *     fields: [
- *       { id: "email", type: "text", inputType: "email", label: "Email" },
- *       { id: "phone", type: "text", inputType: "tel", label: "Phone" }
- *     ]
- *   },
- *   {
- *     type: "section",
- *     id: "preferences",
- *     section: {
- *       title: "Preferences",
- *       description: "Configure your preferences",
- *       renderIf: (values) => values.name !== "",
- *       fields: [
- *         { type: "field", field: { id: "newsletter", type: "checkbox", label: "Subscribe to newsletter" } }
- *       ]
- *     }
- *   }
- * ]
+ * const formSchema = z.object({
+ *   firstName: f0(z.string().min(1), {
+ *     label: "First Name",
+ *     section: "personal",
+ *     position: 1,
+ *     placeholder: "Enter first name"
+ *   }),
+ *   lastName: f0(z.string().min(1), {
+ *     label: "Last Name",
+ *     section: "personal",
+ *     position: 2,
+ *     row: "name-row" // Group with firstName horizontally
+ *   }),
+ *   email: f0(z.string().email(), {
+ *     label: "Email",
+ *     section: "contact",
+ *     position: 1,
+ *     inputType: "email"
+ *   })
+ * })
  *
  * <F0Form
  *   name="user-profile"
- *   definition={definition}
- *   defaultValues={{ name: "", email: "", phone: "", newsletter: false }}
+ *   schema={formSchema}
+ *   sections={{
+ *     personal: { title: "Personal Information", order: 1 },
+ *     contact: { title: "Contact Details", order: 2 }
+ *   }}
+ *   defaultValues={{ firstName: "", lastName: "", email: "" }}
  *   onSubmit={async (data) => {
  *     console.log(data)
  *     return { success: true }
  *   }}
  * />
- *
- * // Anchor links will be generated as:
- * // - #forms.user-profile.name (for the name field)
- * // - #forms.user-profile.preferences (for the preferences section)
- * // - #forms.user-profile.preferences.newsletter (for fields inside the section)
  * ```
  */
-export function F0Form<TValues extends Record<string, unknown>>({
+export function F0Form<TSchema extends z.ZodObject<ZodRawShape>>({
   name,
-  definition,
+  schema,
+  sections,
   defaultValues,
   onSubmit,
   submitLabel = "Submit",
   showSubmitButton = true,
   className,
-}: F0FormProps<TValues>) {
-  // Generate schema from definition
-  const schema = useFormDefinitionSchema(definition)
+}: F0FormProps<TSchema>) {
+  // Infer the form values type from the schema
+  type TValues = z.infer<TSchema>
+
+  // Convert schema to internal definition structure for rendering
+  const definition = useSchemaDefinition(schema, sections)
 
   // Initialize form with react-hook-form
   const form = useForm<TValues>({

@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { z } from "zod"
 
-import { F0Form, FormDefinitionItem, useFormDefinitionSchema } from "../index"
+import { f0, F0Form, F0SectionConfig } from "../index"
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
@@ -16,50 +16,37 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 /**
- * Basic form with simple text fields
+ * Basic form with simple text fields using the schema-based API.
+ * Field metadata (label, placeholder, position) is embedded directly in the Zod schema.
  */
 export const Default: Story = {
   render() {
-    const definition: FormDefinitionItem[] = [
-      {
-        type: "field",
-        field: {
-          id: "username",
-          type: "text",
-          label: "Username",
-          validation: z.string().min(2).max(20),
-          helpText: "Choose a unique username",
-          placeholder: "Enter username",
-        },
-      },
-      {
-        type: "field",
-        field: {
-          id: "email",
-          type: "text",
-          inputType: "email",
-          label: "Email",
-          validation: z.string().email("Please enter a valid email"),
-          placeholder: "you@example.com",
-        },
-      },
-      {
-        type: "field",
-        field: {
-          id: "bio",
-          type: "textarea",
-          label: "Biography",
-          validation: z.string().max(500).optional(),
-          helpText: "Tell us about yourself",
-          rows: 4,
-        },
-      },
-    ]
+    const formSchema = z.object({
+      username: f0(z.string().min(2).max(20), {
+        label: "Username",
+        position: 1,
+        placeholder: "Enter username",
+        helpText: "Choose a unique username",
+      }),
+      email: f0(z.string().email("Please enter a valid email"), {
+        label: "Email",
+        position: 2,
+        placeholder: "you@example.com",
+        inputType: "email",
+      }),
+      bio: f0(z.string().max(500).optional(), {
+        label: "Biography",
+        position: 3,
+        helpText: "Tell us about yourself",
+        fieldType: "textarea",
+        rows: 4,
+      }),
+    })
 
     return (
       <F0Form
         name="basic"
-        definition={definition}
+        schema={formSchema}
         defaultValues={{ username: "", email: "", bio: "" }}
         onSubmit={async (data) => {
           await sleep(1000)
@@ -73,70 +60,51 @@ export const Default: Story = {
 }
 
 /**
- * Form with fields arranged in rows
+ * Form with fields arranged in rows using the `row` property.
+ * Fields with the same `row` value are grouped horizontally.
  */
 export const WithRows: Story = {
   render() {
-    const definition: FormDefinitionItem[] = [
-      {
-        type: "field",
-        field: {
-          id: "fullName",
-          type: "text",
-          label: "Full Name",
-          validation: z.string().min(2),
-        },
-      },
-      {
-        type: "row",
-        fields: [
-          {
-            id: "email",
-            type: "text",
-            inputType: "email",
-            label: "Email",
-            validation: z.string().email(),
-          },
-          {
-            id: "phone",
-            type: "text",
-            inputType: "tel",
-            label: "Phone",
-            validation: z.string().optional(),
-            placeholder: "+1 (555) 000-0000",
-          },
+    const formSchema = z.object({
+      fullName: f0(z.string().min(2), {
+        label: "Full Name",
+        position: 1,
+      }),
+      email: f0(z.string().email(), {
+        label: "Email",
+        position: 2,
+        row: "contact-row",
+        inputType: "email",
+      }),
+      phone: f0(z.string().optional(), {
+        label: "Phone",
+        position: 3,
+        row: "contact-row",
+        placeholder: "+1 (555) 000-0000",
+      }),
+      city: f0(z.string(), {
+        label: "City",
+        position: 4,
+        row: "location-row",
+      }),
+      country: f0(z.string(), {
+        label: "Country",
+        position: 5,
+        row: "location-row",
+        options: [
+          { value: "us", label: "United States" },
+          { value: "uk", label: "United Kingdom" },
+          { value: "ca", label: "Canada" },
+          { value: "es", label: "Spain" },
         ],
-      },
-      {
-        type: "row",
-        fields: [
-          {
-            id: "city",
-            type: "text",
-            label: "City",
-            validation: z.string(),
-          },
-          {
-            id: "country",
-            type: "select",
-            label: "Country",
-            validation: z.string(),
-            options: [
-              { value: "us", label: "United States" },
-              { value: "uk", label: "United Kingdom" },
-              { value: "ca", label: "Canada" },
-              { value: "es", label: "Spain" },
-            ],
-            placeholder: "Select country",
-          },
-        ],
-      },
-    ]
+        placeholder: "Select country",
+      }),
+    })
 
     return (
       <F0Form
         name="with-rows"
-        definition={definition}
+        schema={formSchema}
         defaultValues={{
           fullName: "",
           email: "",
@@ -155,100 +123,73 @@ export const WithRows: Story = {
 }
 
 /**
- * Form with sections for organizing related fields
+ * Form with sections for organizing related fields.
+ * Fields define which section they belong to via the `section` property.
  */
 export const WithSections: Story = {
   render() {
-    const definition: FormDefinitionItem[] = [
-      {
-        type: "section",
-        id: "personal",
-        section: {
-          title: "Personal Information",
-          description: "Enter your basic personal details",
-          fields: [
-            {
-              type: "field",
-              field: {
-                id: "firstName",
-                type: "text",
-                label: "First Name",
-                validation: z.string().min(1),
-              },
-            },
-            {
-              type: "field",
-              field: {
-                id: "lastName",
-                type: "text",
-                label: "Last Name",
-                validation: z.string().min(1),
-              },
-            },
-            {
-              type: "row",
-              fields: [
-                {
-                  id: "age",
-                  type: "number",
-                  label: "Age",
-                  validation: z.number().min(18).max(120),
-                  min: 0,
-                  max: 120,
-                },
-                {
-                  id: "birthdate",
-                  type: "date",
-                  label: "Birth Date",
-                  placeholder: "YYYY-MM-DD",
-                },
-              ],
-            },
-          ],
-        },
+    const formSchema = z.object({
+      firstName: f0(z.string().min(1), {
+        label: "First Name",
+        section: "personal",
+        position: 1,
+      }),
+      lastName: f0(z.string().min(1), {
+        label: "Last Name",
+        section: "personal",
+        position: 2,
+      }),
+      age: f0(z.number().min(18).max(120), {
+        label: "Age",
+        section: "personal",
+        position: 3,
+        row: "personal-row",
+      }),
+      birthdate: f0(z.date().optional(), {
+        label: "Birth Date",
+        section: "personal",
+        position: 4,
+        row: "personal-row",
+      }),
+      newsletter: f0(z.boolean(), {
+        label: "Subscribe to newsletter",
+        section: "preferences",
+        position: 1,
+        fieldType: "checkbox",
+      }),
+      darkMode: f0(z.boolean(), {
+        label: "Enable dark mode",
+        section: "preferences",
+        position: 2,
+        fieldType: "switch",
+      }),
+    })
+
+    const sections: Record<string, F0SectionConfig> = {
+      personal: {
+        title: "Personal Information",
+        description: "Enter your basic personal details",
+        order: 1,
       },
-      {
-        type: "section",
-        id: "preferences",
-        section: {
-          title: "Preferences",
-          description: "Configure your account preferences",
-          fields: [
-            {
-              type: "field",
-              field: {
-                id: "newsletter",
-                type: "checkbox",
-                label: "Subscribe to newsletter",
-                validation: z.boolean(),
-              },
-            },
-            {
-              type: "field",
-              field: {
-                id: "darkMode",
-                type: "switch",
-                label: "Enable dark mode",
-                validation: z.boolean(),
-              },
-            },
-          ],
-        },
+      preferences: {
+        title: "Preferences",
+        description: "Configure your account preferences",
+        order: 2,
       },
-    ]
+    }
 
     return (
       <F0Form
         name="with-sections"
-        definition={definition}
+        schema={formSchema}
+        sections={sections}
         defaultValues={{
           firstName: "",
           lastName: "",
           age: undefined,
-          birthdate: "",
+          birthdate: undefined,
           newsletter: false,
           darkMode: false,
-          theme: "blue",
         }}
         onSubmit={async (data) => {
           await sleep(1000)
@@ -261,114 +202,61 @@ export const WithSections: Story = {
 }
 
 /**
- * Form with conditional field rendering based on other field values
+ * Form with conditional field rendering based on other field values.
+ * Fields can use `renderIf` to conditionally show/hide based on other field values.
  */
 export const ConditionalRendering: Story = {
   render() {
-    const definition: FormDefinitionItem[] = [
-      {
-        type: "field",
-        field: {
-          id: "hasAccount",
-          type: "checkbox",
-          label: "I already have an account",
-          validation: z.boolean(),
+    const formSchema = z.object({
+      hasAccount: f0(z.boolean(), {
+        label: "I already have an account",
+        position: 1,
+        fieldType: "checkbox",
+      }),
+      accountId: f0(z.string().min(6), {
+        label: "Account ID",
+        position: 2,
+        helpText: "Enter your existing account ID",
+        renderIf: {
+          fieldId: "hasAccount",
+          equalsTo: true,
         },
-      },
-      {
-        type: "field",
-        field: {
-          id: "accountId",
-          type: "text",
-          label: "Account ID",
-          validation: z.string().min(6),
-          helpText: "Enter your existing account ID",
-          renderIf: {
-            fieldId: "hasAccount",
-            equalsTo: true,
-          },
+      }),
+      newUsername: f0(z.string().min(3), {
+        label: "New Username",
+        position: 3,
+        helpText: "Choose a username for your new account",
+        renderIf: {
+          fieldId: "hasAccount",
+          equalsTo: false,
         },
-      },
-      {
-        type: "field",
-        field: {
-          id: "newUsername",
-          type: "text",
-          label: "New Username",
-          validation: z.string().min(3),
-          helpText: "Choose a username for your new account",
-          renderIf: {
-            fieldId: "hasAccount",
-            equalsTo: false,
-          },
+      }),
+      employeeCount: f0(z.number().min(1), {
+        label: "Number of Employees",
+        position: 4,
+      }),
+      enterprisePlan: f0(z.boolean().optional(), {
+        label: "Enable Enterprise Plan",
+        position: 5,
+        helpText: "Available for companies with 50+ employees",
+        fieldType: "checkbox",
+        renderIf: {
+          fieldId: "employeeCount",
+          greaterThanOrEqual: 50,
         },
-      },
-      {
-        type: "field",
-        field: {
-          id: "employeeCount",
-          type: "number",
-          label: "Number of Employees",
-          validation: z.number().min(1),
-          min: 1,
-        },
-      },
-      {
-        type: "field",
-        field: {
-          id: "enterprisePlan",
-          type: "checkbox",
-          label: "Enable Enterprise Plan",
-          helpText: "Available for companies with 50+ employees",
-          renderIf: {
-            fieldId: "employeeCount",
-            greaterThanOrEqual: 50,
-          },
-        },
-      },
-      {
-        type: "section",
-        id: "enterpriseSection",
-        section: {
-          title: "Enterprise Features",
-          description: "Configure enterprise-level features",
-          renderIf: (values) =>
-            values.enterprisePlan === true &&
-            (values.employeeCount as number) >= 50,
-          fields: [
-            {
-              type: "field",
-              field: {
-                id: "sso",
-                type: "switch",
-                label: "Single Sign-On (SSO)",
-              },
-            },
-            {
-              type: "field",
-              field: {
-                id: "auditLog",
-                type: "switch",
-                label: "Audit Log",
-              },
-            },
-          ],
-        },
-      },
-    ]
+      }),
+    })
 
     return (
       <F0Form
         name="conditional-rendering"
-        definition={definition}
+        schema={formSchema}
         defaultValues={{
           hasAccount: false,
           accountId: "",
           newUsername: "",
           employeeCount: 1,
           enterprisePlan: false,
-          sso: false,
-          auditLog: false,
         }}
         onSubmit={async (data) => {
           await sleep(1000)
@@ -385,143 +273,99 @@ export const ConditionalRendering: Story = {
  */
 export const AllFieldTypes: Story = {
   render() {
-    const definition: FormDefinitionItem[] = [
-      {
-        type: "field",
-        field: {
-          id: "textField",
-          type: "text",
-          label: "Text Field",
-          validation: z.string(),
-          placeholder: "Regular text input",
-        },
-      },
-      {
-        type: "field",
-        field: {
-          id: "emailField",
-          type: "text",
-          inputType: "email",
-          label: "Email Field",
-          validation: z.string().email(),
-          placeholder: "email@example.com",
-        },
-      },
-      {
-        type: "field",
-        field: {
-          id: "passwordField",
-          type: "text",
-          inputType: "password",
-          label: "Password Field",
-          validation: z.string().min(8),
-          placeholder: "Enter password",
-        },
-      },
-      {
-        type: "field",
-        field: {
-          id: "numberField",
-          type: "number",
-          label: "Number Field",
-          validation: z.number().min(0).max(100),
-          min: 0,
-          max: 100,
-          step: 1,
-        },
-      },
-      {
-        type: "field",
-        field: {
-          id: "textareaField",
-          type: "textarea",
-          label: "Textarea Field",
-          validation: z.string().max(500),
-          rows: 3,
-          maxLength: 500,
-          placeholder: "Enter long text...",
-        },
-      },
-      {
-        type: "field",
-        field: {
-          id: "selectField",
-          type: "select",
-          label: "Select Field",
-          validation: z.string(),
-          options: [
-            { value: "option1", label: "Option 1" },
-            { value: "option2", label: "Option 2" },
-            { value: "option3", label: "Option 3" },
-          ],
-          placeholder: "Select an option",
-          showSearchBox: true,
-        },
-      },
-      {
-        type: "field",
-        field: {
-          id: "multiSelectField",
-          type: "select",
-          label: "Multi-Select Field",
-          validation: z.array(z.string()),
-          multiple: true,
-          options: [
-            { value: "a", label: "Option A" },
-            { value: "b", label: "Option B" },
-            { value: "c", label: "Option C" },
-          ],
-          placeholder: "Select multiple options",
-        },
-      },
-      {
-        type: "field",
-        field: {
-          id: "checkboxField",
-          type: "checkbox",
-          label: "Checkbox Field",
-          validation: z.boolean(),
-          helpText: "Check this box to agree",
-        },
-      },
-      {
-        type: "field",
-        field: {
-          id: "switchField",
-          type: "switch",
-          label: "Switch Field",
-          validation: z.boolean(),
-          helpText: "Toggle this switch",
-        },
-      },
-      {
-        type: "field",
-        field: {
-          id: "dateField",
-          type: "date",
-          label: "Date Field",
-          placeholder: "Select a date",
-          granularities: ["day"],
-        },
-      },
-      {
-        type: "field",
-        field: {
-          id: "richTextField",
-          type: "richtext",
+    const formSchema = z.object({
+      textField: f0(z.string(), {
+        label: "Text Field",
+        position: 1,
+        placeholder: "Regular text input",
+      }),
+      emailField: f0(z.string().email(), {
+        label: "Email Field",
+        position: 2,
+        placeholder: "email@example.com",
+        inputType: "email",
+      }),
+      passwordField: f0(z.string().min(8), {
+        label: "Password Field",
+        position: 3,
+        placeholder: "Enter password",
+        inputType: "password",
+      }),
+      numberField: f0(z.number().min(0).max(100), {
+        label: "Number Field",
+        position: 4,
+        fieldType: "number",
+        step: 1,
+      }),
+      textareaField: f0(z.string().max(500), {
+        label: "Textarea Field",
+        position: 5,
+        fieldType: "textarea",
+        rows: 3,
+        placeholder: "Enter long text...",
+      }),
+      selectField: f0(z.string(), {
+        label: "Select Field",
+        position: 6,
+        options: [
+          { value: "option1", label: "Option 1" },
+          { value: "option2", label: "Option 2" },
+          { value: "option3", label: "Option 3" },
+        ],
+        placeholder: "Select an option",
+        showSearchBox: true,
+      }),
+      multiSelectField: f0(z.array(z.string()), {
+        label: "Multi-Select Field",
+        position: 7,
+        multiple: true,
+        options: [
+          { value: "a", label: "Option A" },
+          { value: "b", label: "Option B" },
+          { value: "c", label: "Option C" },
+        ],
+        placeholder: "Select multiple options",
+      }),
+      checkboxField: f0(z.boolean(), {
+        label: "Checkbox Field",
+        position: 8,
+        fieldType: "checkbox",
+        helpText: "Check this box to agree",
+      }),
+      switchField: f0(z.boolean(), {
+        label: "Switch Field",
+        position: 9,
+        fieldType: "switch",
+        helpText: "Toggle this switch",
+      }),
+      dateField: f0(z.string().optional(), {
+        label: "Date Field",
+        position: 10,
+        fieldType: "date",
+        placeholder: "Select a date",
+        granularities: ["day"],
+      }),
+      richTextField: f0(
+        z.object({
+          value: z.string().nullable(),
+          mentionIds: z.array(z.number()).optional(),
+        }),
+        {
           label: "Rich Text Field",
+          position: 11,
+          fieldType: "richtext",
           placeholder: "Write something with formatting...",
           maxCharacters: 1000,
           height: "sm",
           plainHtmlMode: true,
-        },
-      },
-    ]
+        }
+      ),
+    })
 
     return (
       <F0Form
         name="all-field-types"
-        definition={definition}
+        schema={formSchema}
         defaultValues={{
           textField: "",
           emailField: "",
@@ -597,71 +441,54 @@ export const CustomField: Story = {
       { id: "3", name: "Bob Johnson" },
     ]
 
-    const definition: FormDefinitionItem[] = [
-      {
-        type: "field",
-        field: {
-          id: "title",
-          type: "text",
-          label: "Task Title",
-          validation: z.string().min(1, "Title is required"),
-          placeholder: "Enter task title",
-        },
-      },
-      {
-        type: "field",
-        field: {
-          id: "assignee",
-          type: "custom",
-          label: "Assignee",
-          validation: z.string().min(1, "Please select an assignee"),
-          render: ({ label, value, onChange, error, disabled }) => (
-            <ExternalSelector
-              label={label}
-              value={value as string | undefined}
-              onChange={onChange}
-              error={error}
-              disabled={disabled}
-              options={employees}
-            />
-          ),
-        },
-      },
-      {
-        type: "field",
-        field: {
-          id: "reviewer",
-          type: "custom",
-          label: "Reviewer (Optional)",
-          validation: z.string().optional(),
-          render: ({ label, value, onChange, error, disabled }) => (
-            <ExternalSelector
-              label={label}
-              value={value as string | undefined}
-              onChange={onChange}
-              error={error}
-              disabled={disabled}
-              options={employees}
-            />
-          ),
-        },
-      },
-      {
-        type: "field",
-        field: {
-          id: "description",
-          type: "textarea",
-          label: "Description",
-          validation: z.string().optional(),
-          rows: 3,
-        },
-      },
-    ]
+    const formSchema = z.object({
+      title: f0(z.string().min(1, "Title is required"), {
+        label: "Task Title",
+        position: 1,
+        placeholder: "Enter task title",
+      }),
+      assignee: f0(z.string().min(1, "Please select an assignee"), {
+        label: "Assignee",
+        position: 2,
+        fieldType: "custom",
+        render: ({ label, value, onChange, error, disabled }) => (
+          <ExternalSelector
+            label={label}
+            value={value as string | undefined}
+            onChange={onChange}
+            error={error}
+            disabled={disabled}
+            options={employees}
+          />
+        ),
+      }),
+      reviewer: f0(z.string().optional(), {
+        label: "Reviewer (Optional)",
+        position: 3,
+        fieldType: "custom",
+        render: ({ label, value, onChange, error, disabled }) => (
+          <ExternalSelector
+            label={label}
+            value={value as string | undefined}
+            onChange={onChange}
+            error={error}
+            disabled={disabled}
+            options={employees}
+          />
+        ),
+      }),
+      description: f0(z.string().optional(), {
+        label: "Description",
+        position: 4,
+        fieldType: "textarea",
+        rows: 3,
+      }),
+    })
 
     return (
       <F0Form
         name="custom-field-example"
-        definition={definition}
+        schema={formSchema}
         defaultValues={{
           title: "",
           assignee: "",
@@ -680,92 +507,28 @@ export const CustomField: Story = {
 }
 
 /**
- * Demonstrates using useFormDefinitionSchema hook to get the generated schema
- */
-export const SchemaExtraction: Story = {
-  render() {
-    const definition: FormDefinitionItem[] = [
-      {
-        type: "field",
-        field: {
-          id: "name",
-          type: "text",
-          label: "Name",
-          validation: z.string().min(2).describe("User's full name"),
-        },
-      },
-      {
-        type: "field",
-        field: {
-          id: "age",
-          type: "number",
-          label: "Age",
-          validation: z.number().min(0).describe("User's age in years"),
-        },
-      },
-    ]
-
-    // Get the schema using the hook
-    const schema = useFormDefinitionSchema(definition)
-
-    return (
-      <div className="flex flex-col gap-4">
-        <div className="rounded-lg bg-f1-background-secondary p-4">
-          <h3 className="mb-2 font-semibold">Generated Schema Shape:</h3>
-          <pre className="text-sm">{JSON.stringify(schema.shape, null, 2)}</pre>
-        </div>
-        <F0Form
-          name="schema-extraction"
-          definition={definition}
-          defaultValues={{ name: "", age: 0 }}
-          onSubmit={async (data) => {
-            // Validate with the extracted schema
-            const result = schema.safeParse(data)
-            if (result.success) {
-              alert(`Valid data: ${JSON.stringify(result.data, null, 2)}`)
-              return { success: true }
-            }
-            return { success: false, rootMessage: "Validation failed" }
-          }}
-        />
-      </div>
-    )
-  },
-}
-
-/**
  * Form with server-side validation errors
  */
 export const ServerValidation: Story = {
   render() {
-    const definition: FormDefinitionItem[] = [
-      {
-        type: "field",
-        field: {
-          id: "username",
-          type: "text",
-          label: "Username",
-          validation: z.string().min(3),
-          helpText: "Try 'admin' to see server validation error",
-        },
-      },
-      {
-        type: "field",
-        field: {
-          id: "email",
-          type: "text",
-          inputType: "email",
-          label: "Email",
-          validation: z.string().email(),
-          helpText: "Try 'taken@example.com' to see server validation error",
-        },
-      },
-    ]
+    const formSchema = z.object({
+      username: f0(z.string().min(3), {
+        label: "Username",
+        position: 1,
+        helpText: "Try 'admin' to see server validation error",
+      }),
+      email: f0(z.string().email(), {
+        label: "Email",
+        position: 2,
+        inputType: "email",
+        helpText: "Try 'taken@example.com' to see server validation error",
+      }),
+    })
 
     return (
       <F0Form
         name="server-validation"
-        definition={definition}
+        schema={formSchema}
         defaultValues={{ username: "", email: "" }}
         onSubmit={async (data) => {
           await sleep(1000)
@@ -797,171 +560,112 @@ export const ServerValidation: Story = {
 }
 
 /**
- * Form matching the visual design with sections and switch grouping.
- * Demonstrates how contiguous switch fields are automatically grouped
- * in a bordered container with the switch on the right and label/description on the left.
+ * Complete form matching the visual design example.
+ * Demonstrates sections, rows, and switch grouping.
  */
 export const VisualDesignExample: Story = {
   render() {
-    const definition: FormDefinitionItem[] = [
-      // Basic Information Section
-      {
-        type: "section",
-        id: "basic-info",
-        section: {
-          title: "Basic Information",
-          fields: [
-            {
-              type: "field",
-              field: {
-                id: "title",
-                type: "text",
-                label: "Title",
-                validation: z.string().min(1),
-                placeholder: "Workplace climate survey",
-              },
-            },
-            {
-              type: "field",
-              field: {
-                id: "description",
-                type: "textarea",
-                label: "Description (Optional)",
-                validation: z.string().optional(),
-                placeholder:
-                  "This short workplace climate survey contains just 12 simple questions...",
-                rows: 3,
-              },
-            },
-          ],
-        },
-      },
-      // Participants Section
-      {
-        type: "section",
-        id: "participants",
-        section: {
-          title: "Participants",
-          fields: [
-            {
-              type: "field",
-              field: {
-                id: "participants",
-                type: "select",
-                label: "Select participants",
-                options: [
-                  { value: "all", label: "All employees" },
-                  { value: "department", label: "By department" },
-                  { value: "team", label: "By team" },
-                ],
-                placeholder: "Select participants",
-              },
-            },
-          ],
-        },
-      },
-      // Schedule Section with row group
-      {
-        type: "section",
-        id: "schedule",
-        section: {
-          title: "Schedule",
-          fields: [
-            {
-              type: "row",
-              fields: [
-                {
-                  id: "publishOn",
-                  type: "date",
-                  label: "Publish on",
-                  placeholder: "dd/mm/yyyy",
-                },
-                {
-                  id: "endsAt",
-                  type: "date",
-                  label: "Ends at",
-                  placeholder: "dd/mm/yyyy",
-                },
-              ],
-            },
-            {
-              type: "field",
-              field: {
-                id: "recurrence",
-                type: "select",
-                label: "Recurrence",
-                options: [
-                  { value: "none", label: "Does not repeat" },
-                  { value: "weekly", label: "Weekly" },
-                  { value: "monthly", label: "Monthly" },
-                  { value: "quarterly", label: "Quarterly" },
-                ],
-                placeholder: "Does not repeat",
-              },
-            },
-          ],
-        },
-      },
-      // Visibility & Privacy Section with switch grouping
-      {
-        type: "section",
-        id: "visibility",
-        section: {
-          title: "Visibility & Privacy",
-          fields: [
-            // These consecutive switch fields will be automatically grouped
-            {
-              type: "field",
-              field: {
-                id: "managerVisibility",
-                type: "switch",
-                label: "Add visibility permissions to managers and team leads",
-                helpText:
-                  "Grant access to managers and team leads. Even if they are not survey editors, they will be able to view the results of their own teams once responses are available",
-              },
-            },
-            {
-              type: "field",
-              field: {
-                id: "anonymousAnswers",
-                type: "switch",
-                label: "Anonymous answers",
-              },
-            },
-          ],
-        },
-      },
-      // Editors Section
-      {
-        type: "section",
-        id: "editors",
-        section: {
-          title: "Editors",
-          fields: [
-            {
-              type: "field",
-              field: {
-                id: "editors",
-                type: "select",
-                label: "Select editors",
-                options: [
-                  { value: "none", label: "None" },
-                  { value: "hr", label: "HR Team" },
-                  { value: "managers", label: "Managers" },
-                ],
-                placeholder: "None",
-              },
-            },
-          ],
-        },
-      },
-    ]
+    const formSchema = z.object({
+      // Basic Information section
+      title: f0(z.string().min(1), {
+        label: "Title",
+        section: "basic-info",
+        position: 1,
+        placeholder: "Workplace climate survey",
+      }),
+      description: f0(z.string().optional(), {
+        label: "Description (Optional)",
+        section: "basic-info",
+        position: 2,
+        fieldType: "textarea",
+        rows: 3,
+        placeholder:
+          "This short workplace climate survey contains just 12 simple questions...",
+      }),
+      // Participants section
+      participants: f0(z.string(), {
+        label: "Select participants",
+        section: "participants",
+        position: 1,
+        options: [
+          { value: "all", label: "All employees" },
+          { value: "department", label: "By department" },
+          { value: "team", label: "By team" },
+        ],
+        placeholder: "Select participants",
+      }),
+      // Schedule section with row grouping
+      publishOn: f0(z.string(), {
+        label: "Publish on",
+        section: "schedule",
+        position: 1,
+        row: "dates-row",
+        fieldType: "date",
+        placeholder: "dd/mm/yyyy",
+      }),
+      endsAt: f0(z.string(), {
+        label: "Ends at",
+        section: "schedule",
+        position: 2,
+        row: "dates-row",
+        fieldType: "date",
+        placeholder: "dd/mm/yyyy",
+      }),
+      recurrence: f0(z.string(), {
+        label: "Recurrence",
+        section: "schedule",
+        position: 3,
+        options: [
+          { value: "none", label: "Does not repeat" },
+          { value: "weekly", label: "Weekly" },
+          { value: "monthly", label: "Monthly" },
+          { value: "quarterly", label: "Quarterly" },
+        ],
+        placeholder: "Does not repeat",
+      }),
+      // Visibility & Privacy section with switches
+      managerVisibility: f0(z.boolean(), {
+        label: "Add visibility permissions to managers and team leads",
+        section: "visibility",
+        position: 1,
+        fieldType: "switch",
+        helpText:
+          "Grant access to managers and team leads. Even if they are not survey editors, they will be able to view the results of their own teams once responses are available",
+      }),
+      anonymousAnswers: f0(z.boolean(), {
+        label: "Anonymous answers",
+        section: "visibility",
+        position: 2,
+        fieldType: "switch",
+      }),
+      // Editors section
+      editors: f0(z.string(), {
+        label: "Select editors",
+        section: "editors",
+        position: 1,
+        options: [
+          { value: "none", label: "None" },
+          { value: "hr", label: "HR Team" },
+          { value: "managers", label: "Managers" },
+        ],
+        placeholder: "None",
+      }),
+    })
+
+    const sections: Record<string, F0SectionConfig> = {
+      "basic-info": { title: "Basic Information", order: 1 },
+      participants: { title: "Participants", order: 2 },
+      schedule: { title: "Schedule", order: 3 },
+      visibility: { title: "Visibility & Privacy", order: 4 },
+      editors: { title: "Editors", order: 5 },
+    }
 
     return (
       <div className="max-w-lg">
         <F0Form
           name="visual-design-example"
-          definition={definition}
+          schema={formSchema}
+          sections={sections}
           defaultValues={{
             title: "Workplace climate survey",
             description:

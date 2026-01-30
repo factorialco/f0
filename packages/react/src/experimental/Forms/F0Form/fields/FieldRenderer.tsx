@@ -14,7 +14,7 @@ import {
 } from "@/ui/form"
 
 import { generateAnchorId, useF0FormContext } from "../context"
-import type { FieldDefinition } from "./types"
+import type { F0Field } from "./types"
 import { evaluateRenderIf } from "./utils"
 
 // Import field renderers
@@ -29,7 +29,7 @@ import { TextFieldRenderer } from "./text/TextFieldRenderer"
 import { TextareaFieldRenderer } from "./textarea/TextareaFieldRenderer"
 
 interface FieldRendererProps {
-  field: FieldDefinition
+  field: F0Field
   /** Section ID when field is inside a section (for anchor links) */
   sectionId?: string
 }
@@ -43,7 +43,7 @@ interface FieldState {
  * Renders the appropriate input component based on field type
  */
 function renderFieldInput(
-  field: FieldDefinition,
+  field: F0Field,
   formField: ControllerRenderProps<FieldValues>,
   fieldState: FieldState
 ): React.ReactNode {

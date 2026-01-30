@@ -5,7 +5,7 @@ import { SectionHeader } from "@/experimental/Information/Headers/SectionHeader"
 import { FIELD_GAP } from "../constants"
 import { generateAnchorId, useF0FormContext } from "../context"
 import { FieldRenderer } from "../fields/FieldRenderer"
-import type { SwitchFieldDefinition } from "../fields/switch/types"
+import type { F0SwitchField } from "../fields/switch/types"
 import { evaluateRenderIf } from "../fields/utils"
 import type {
   FieldItem,
@@ -37,7 +37,7 @@ function evaluateSectionRenderIf(
 type RenderedItem =
   | { type: "field"; item: FieldItem }
   | { type: "row"; item: RowDefinition; index: number }
-  | { type: "switchGroup"; fields: SwitchFieldDefinition[] }
+  | { type: "switchGroup"; fields: F0SwitchField[] }
 
 /**
  * Groups contiguous switch fields together for rendering in a bordered container
@@ -46,7 +46,7 @@ function groupContiguousSwitches(
   fields: (FieldItem | RowDefinition)[]
 ): RenderedItem[] {
   const result: RenderedItem[] = []
-  let currentSwitchGroup: SwitchFieldDefinition[] = []
+  let currentSwitchGroup: F0SwitchField[] = []
 
   const flushSwitchGroup = () => {
     if (currentSwitchGroup.length > 0) {
@@ -57,7 +57,7 @@ function groupContiguousSwitches(
 
   fields.forEach((item, index) => {
     if (item.type === "field" && item.field.type === "switch") {
-      currentSwitchGroup.push(item.field as SwitchFieldDefinition)
+      currentSwitchGroup.push(item.field as F0SwitchField)
     } else {
       flushSwitchGroup()
       if (item.type === "field") {
