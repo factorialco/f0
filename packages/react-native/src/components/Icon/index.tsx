@@ -1,15 +1,14 @@
-import { cva, type VariantProps } from "cva";
+import { cva, type VariantProps } from "class-variance-authority";
 import React, {
-  forwardRef,
-  ForwardRefExoticComponent,
-  RefAttributes,
+    forwardRef,
+    ForwardRefExoticComponent,
+    RefAttributes,
 } from "react";
-import { SvgProps, Svg } from "react-native-svg";
+import { Svg, SvgProps } from "react-native-svg";
+import { withUniwind } from "uniwind";
 import { cn } from "../../lib/utils";
-import { cssInterop } from "nativewind";
 
-const iconVariants = cva({
-  base: "shrink-0",
+const iconVariants = cva("shrink-0", {
   variants: {
     size: {
       xl: "w-8 h-8 stroke-xl",
@@ -45,33 +44,26 @@ export type IconType = ForwardRefExoticComponent<
     }
 >;
 
-// Keep track of icons that have already had cssInterop applied
+// Keep track of icons that have already had withUniwind applied
 const interopAppliedIcons = new WeakSet();
 
-// Function to apply NativeWind interop to an icon component
+// Function to apply UniWind interop to an icon component
 export function applyIconInterop(icon: IconType) {
   if (!interopAppliedIcons.has(icon)) {
-    cssInterop(icon, {
-      className: {
-        target: "style",
-        nativeStyleToProp: {
-          color: true,
-          opacity: true,
-        },
-      },
-    });
-    interopAppliedIcons.add(icon);
+    const wrappedIcon = withUniwind(icon);
+    interopAppliedIcons.add(wrappedIcon);
+    return wrappedIcon;
   }
   return icon;
 }
 
 export const Icon = forwardRef<Svg, IconProps>(function Icon(
-  { size, icon, className, testID, ...props },
+  { size = "md", icon, className, testID, ...props },
   ref,
 ) {
   if (!icon) return null;
 
-  // Apply NativeWind interop to the icon if not already applied
+  // Apply UniWind interop to the icon if not already applied
   const Component = applyIconInterop(icon);
 
   return (

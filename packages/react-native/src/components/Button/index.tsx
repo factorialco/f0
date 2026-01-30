@@ -1,4 +1,4 @@
-import { cva, type VariantProps } from "cva";
+import { cva, type VariantProps } from "class-variance-authority";
 import React, { forwardRef, useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import { cn } from "../../lib/utils";
@@ -17,8 +17,7 @@ export type ButtonVariant = (typeof variants)[number];
 export const sizes = ["sm", "md", "lg"] as const;
 export type ButtonSize = (typeof sizes)[number];
 
-const buttonVariants = cva({
-  base: "flex-row items-center justify-center rounded border-none grow-0",
+const buttonVariants = cva("flex-row items-center justify-center rounded border-0", {
   variants: {
     variant: {
       default: "bg-f1-background-accent-bold",
@@ -50,8 +49,7 @@ const buttonVariants = cva({
   },
 });
 
-const pressedVariants = cva({
-  base: "",
+const pressedVariants = cva("", {
   variants: {
     variant: {
       default: "bg-f1-background-accent-bold-hover",
@@ -113,7 +111,7 @@ export interface ButtonProps extends VariantProps<typeof buttonVariants> {
   onPress?: () => void | Promise<unknown>;
   disabled?: boolean;
   loading?: boolean;
-  icon?: IconType;
+  icon?: IconType | null;
   emoji?: string;
   hideLabel?: boolean;
   className?: string;
@@ -164,7 +162,7 @@ export const Button = forwardRef<View, ButtonProps>(function Button(
   const shouldShowPressed = isPressed && !isDisabled;
 
   return (
-    <View className={`flex ${fullWidth ? "flex-1" : "item-start"}`}>
+    <View className={fullWidth ? "flex-1" : "self-start"} style={{ position: "relative" }}>
       <Pressable
         ref={ref}
         disabled={isDisabled}
@@ -196,8 +194,8 @@ export const Button = forwardRef<View, ButtonProps>(function Button(
             className={cn(
               hideLabel && round ? undefined : "-ml-0.5",
               hideLabel && round
-                ? getIconOnlyColor(variant, shouldShowPressed)
-                : getIconColor(variant, shouldShowPressed),
+                ? getIconOnlyColor(variant || "default", shouldShowPressed)
+                : getIconColor(variant || "default", shouldShowPressed),
             )}
           />
         )}
@@ -205,7 +203,7 @@ export const Button = forwardRef<View, ButtonProps>(function Button(
           <Text
             className={cn(
               "text-base font-medium",
-              getTextColorClass(variant, shouldShowPressed),
+              getTextColorClass(variant || "default", shouldShowPressed),
             )}
           >
             {emoji}
@@ -213,9 +211,10 @@ export const Button = forwardRef<View, ButtonProps>(function Button(
         )}
         {!hideLabel && (
           <Text
+            numberOfLines={1}
             className={cn(
               "text-base font-medium",
-              getTextColorClass(variant, shouldShowPressed),
+              getTextColorClass(variant || "default", shouldShowPressed),
             )}
           >
             {label}

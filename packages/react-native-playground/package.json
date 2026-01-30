@@ -9,8 +9,7 @@
     "build:dev:ios": "eas build --profile development --platform ios --local",
     "build:dev:android": "eas build --profile development --platform android --local",
     "prebuild": "expo prebuild --clean",
-    "postinstall": "pnpm --filter @factorialco/f0-react-native build && npx tailwindcss -i ./global.css -o ./node_modules/.cache/nativewind/global.css",
-    "storybook-generate": "sb-rn-get-stories",
+    "storybook-generate": "sb-rn-get-stories --config-path ./.storybook",
     "android": "expo run:android",
     "ios": "expo run:ios",
     "lint": "eslint -c eslint.config.mjs . --report-unused-disable-directives --max-warnings 0",
@@ -85,5 +84,10 @@
       }
     }
   },
-  "private": true
+  "private": true,
+  "pnpm": {
+    "overrides": {
+      "react-native-worklets": "npm:react-native-worklets-core@^1.6.2"
+    }
+  }
 }

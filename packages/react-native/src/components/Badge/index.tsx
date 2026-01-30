@@ -1,8 +1,7 @@
-import { cva, type VariantProps } from "cva";
-import { Icon, IconType } from "../Icon";
+import { cva, type VariantProps } from "class-variance-authority";
+import { Icon, type IconType } from "../Icon";
 
-const badgeVariants = cva({
-  base: "flex shrink-0 items-center justify-center rounded-full",
+const badgeVariants = cva("flex shrink-0 items-center justify-center rounded-full", {
   variants: {
     type: {
       neutral: "bg-transparent text-f1-icon",

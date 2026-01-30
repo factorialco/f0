@@ -1,7 +1,7 @@
 import { memo } from "react";
 import { Text, View } from "react-native";
 import { Button } from "../../Button";
-import { AppIcons } from "../../..";
+import { AppIcons } from "../../../icons";
 
 type ActionType = "notifications";
 

@@ -1,0 +1,31 @@
+{
+  "expo": {
+    "name": "f0-react-native",
+    "slug": "f0-react-native",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "f0reactnative",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#E6F4FE"
+      },
+      "edgeToEdgeEnabled": true
+    },
+    "web": {
+      "output": "static"
+    },
+    "plugins": [
+      ["expo-router", {
+        "root": "./playground/app"
+      }]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
