@@ -66,7 +66,7 @@ const BaseWizardStepper = ({ steps, currentStepId }: WizardStepperProps) => {
             />
             <span
               className={cn(
-                "text-sm font-medium leading-5 tracking-tight",
+                "text-base font-medium leading-5 tracking-tight",
                 isCurrent && "text-f1-foreground",
                 isCompleted && "text-f1-foreground-secondary",
                 !isCurrent && !isCompleted && "text-f1-foreground"
