@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.341.0](https://github.com/factorialco/f0/compare/f0-react-v1.340.2...f0-react-v1.341.0) (2026-01-30)
+
+
+### Features
+
+* enhance item actions handling in table rows ([#3321](https://github.com/factorialco/f0/issues/3321)) ([62566b6](https://github.com/factorialco/f0/commit/62566b6b8fbc9f96de89818f8b2e3840d4bb65a9))
+
 ## [1.340.2](https://github.com/factorialco/f0/compare/f0-react-v1.340.1...f0-react-v1.340.2) (2026-01-30)
 
 
