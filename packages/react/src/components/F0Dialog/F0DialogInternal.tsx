@@ -4,6 +4,8 @@ import { FC, useCallback, useMemo, useState } from "react"
 import { Dialog, DialogContent } from "@/ui/Dialog/dialog"
 import { Drawer, DrawerContent, DrawerOverlay } from "@/ui/drawer"
 
+import { WizardStepper } from "@/experimental/Navigation/WizardStepper"
+
 import { F0DialogContent } from "./components/F0DialogContent"
 import { F0DialogFooter } from "./components/F0DialogFooter"
 import { F0DialogHeader } from "./components/F0DialogHeader"
@@ -82,6 +84,8 @@ export const F0DialogInternal: FC<F0DialogInternalProps> = ({
   activeTabId,
   setActiveTabId,
   disableContentPadding,
+  steps,
+  currentStepId,
 }) => {
   // Use state to store the container element so we can trigger re-renders
   // when it's set. This ensures child components like F0Select get the
@@ -150,6 +154,10 @@ export const F0DialogInternal: FC<F0DialogInternalProps> = ({
     setActiveTabId,
   }
 
+  const hasSteps = steps && steps.length > 0 && currentStepId
+  const showVerticalStepper =
+    hasSteps && position === "center" && !isSmallScreen
+
   if (isSmallScreen && asBottomSheetInMobile) {
     return (
       <F0DialogProvider
@@ -163,6 +171,13 @@ export const F0DialogInternal: FC<F0DialogInternalProps> = ({
           <DrawerOverlay className="bg-f1-background-overlay" />
           <DrawerContent ref={setContentRef} className={contentClassName}>
             <F0DialogHeader {...headerProps} />
+            {hasSteps && (
+              <WizardStepper
+                steps={steps}
+                currentStepId={currentStepId}
+                orientation="horizontal"
+              />
+            )}
             <F0DialogContent disableContentPadding={disableContentPadding}>
               {children}
             </F0DialogContent>
@@ -199,9 +214,29 @@ export const F0DialogInternal: FC<F0DialogInternalProps> = ({
           onOpenAutoFocus={(e) => e.preventDefault()}
         >
           <F0DialogHeader {...headerProps} />
-          <F0DialogContent disableContentPadding={disableContentPadding}>
-            {children}
-          </F0DialogContent>
+          {hasSteps && !showVerticalStepper && (
+            <WizardStepper
+              steps={steps}
+              currentStepId={currentStepId}
+              orientation="horizontal"
+            />
+          )}
+          {showVerticalStepper ? (
+            <div className="flex flex-1 flex-row gap-6 overflow-hidden px-4 py-4">
+              <WizardStepper
+                steps={steps}
+                currentStepId={currentStepId}
+                orientation="vertical"
+              />
+              <F0DialogContent disableContentPadding>
+                {children}
+              </F0DialogContent>
+            </div>
+          ) : (
+            <F0DialogContent disableContentPadding={disableContentPadding}>
+              {children}
+            </F0DialogContent>
+          )}
           <F0DialogFooter
             primaryAction={primaryAction}
             secondaryAction={secondaryAction}

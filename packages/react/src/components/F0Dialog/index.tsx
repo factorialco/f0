@@ -15,6 +15,8 @@ export type {
   F0DialogPrimaryActionItem,
   F0DialogSecondaryAction,
 } from "./types"
+// Re-export WizardStepItem for convenience when using F0Dialog with steps
+export type { WizardStepItem } from "@/experimental/Navigation/WizardStepper"
 
 /**
  * @experimental This is an experimental component use it at your own risk
