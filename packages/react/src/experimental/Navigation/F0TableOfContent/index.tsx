@@ -13,6 +13,7 @@ import { F1SearchBox } from "@/experimental/Forms/Fields/F1SearchBox"
 import { createAtlaskitDriver } from "@/lib/dnd/atlaskitDriver"
 import { DndProvider } from "@/lib/dnd/context"
 import { useDndEvents } from "@/lib/dnd/hooks"
+import { experimentalComponent } from "@/lib/experimental"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { ScrollArea } from "@/ui/scrollarea"
@@ -866,7 +867,7 @@ function TOCContent({
           )}
         >
           {showSearchBox && (
-            <div className={title ? "mb-4" : ""}>
+            <div className="mb-4">
               <F1SearchBox
                 placeholder={searchPlaceholder ?? i18n.toc.search}
                 onChange={handleSearchChange}
@@ -921,7 +922,7 @@ function TOCContent({
   )
 }
 
-export function F0TableOfContent(props: TOCProps) {
+function _F0TableOfContent(props: TOCProps) {
   // Create a unique instance ID for each component instance
   const instanceIdRef = useRef(Symbol("f0-table-of-contents"))
   const driver = useMemo(() => {
@@ -934,6 +935,14 @@ export function F0TableOfContent(props: TOCProps) {
     </DndProvider>
   )
 }
+
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export const F0TableOfContent = experimentalComponent(
+  "F0TableOfContent",
+  _F0TableOfContent
+)
 
 export { Item, ItemSectionHeader }
 export type { TOCItem, TOCItemAction, TOCProps }

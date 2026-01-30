@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.43.0](https://github.com/factorialco/f0/compare/f0-core-v1.42.1...f0-core-v1.43.0) (2026-01-28)
+
+
+### Features
+
+* add PushPin and PushPinSolid icons ([#3313](https://github.com/factorialco/f0/issues/3313)) ([cb03a06](https://github.com/factorialco/f0/commit/cb03a066371b9db579838c237cf39b75a7491c82))
+
 ## [1.42.1](https://github.com/factorialco/f0/compare/f0-core-v1.42.0...f0-core-v1.42.1) (2025-12-11)
 
 

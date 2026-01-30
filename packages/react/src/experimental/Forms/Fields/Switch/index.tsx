@@ -1,4 +1,5 @@
 import { DataAttributes } from "@/global.types"
+import { experimentalComponent } from "@/lib/experimental"
 import { Switch as SwitchRoot } from "@/ui/switch"
 
 interface SwitchProps extends DataAttributes {
@@ -47,7 +48,7 @@ interface SwitchProps extends DataAttributes {
   presentational?: boolean
 }
 
-export function Switch({
+function _Switch({
   title,
   onCheckedChange,
   id,
@@ -72,3 +73,8 @@ export function Switch({
     />
   )
 }
+
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export const Switch = experimentalComponent("Switch", _Switch)

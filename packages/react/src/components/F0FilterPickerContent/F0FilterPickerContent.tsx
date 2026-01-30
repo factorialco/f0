@@ -153,7 +153,7 @@ export function F0FilterPickerContent<Filters extends FiltersDefinition>({
         "overflow-hidden rounded-xl border border-solid border-f1-border-secondary bg-f1-background",
         className
       )}
-      style={{ width }}
+      style={{ maxWidth: width }}
     >
       <FilterPickerInternal
         filters={filters}

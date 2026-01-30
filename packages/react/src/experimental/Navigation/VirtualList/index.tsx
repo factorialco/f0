@@ -1,6 +1,8 @@
 import { useVirtualizer, VirtualItem } from "@tanstack/react-virtual"
 import React, { forwardRef } from "react"
 
+import { experimentalComponent } from "@/lib/experimental"
+
 import { cn } from "../../../lib/utils"
 
 type VirtualListProps = {
@@ -11,7 +13,7 @@ type VirtualListProps = {
   className?: string
 }
 
-const VirtualList = forwardRef<HTMLDivElement, VirtualListProps>(
+const _VirtualList = forwardRef<HTMLDivElement, VirtualListProps>(
   (
     { height, itemCount, itemSize, className, renderer },
     ref: React.ForwardedRef<HTMLDivElement>
@@ -68,6 +70,9 @@ const VirtualList = forwardRef<HTMLDivElement, VirtualListProps>(
   }
 )
 
-VirtualList.displayName = "VirtualList"
+_VirtualList.displayName = "VirtualList"
 
-export { VirtualList }
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export const VirtualList = experimentalComponent("VirtualList", _VirtualList)

@@ -1,5 +1,6 @@
+import { useControllableState } from "@radix-ui/react-use-controllable-state"
 import { AnimatePresence, motion } from "motion/react"
-import { useContext, useEffect, useId, useMemo, useState } from "react"
+import { useContext, useEffect, useId, useMemo, useRef, useState } from "react"
 
 import { F0Button } from "@/components/F0Button"
 import { ButtonInternal } from "@/components/F0Button/internal"
@@ -42,7 +43,6 @@ export function FiltersControls<Filters extends FiltersDefinition>({
   const [selectedFilterKey, setSelectedFilterKey] = useState<
     keyof Filters | null
   >(null)
-  const [internalIsOpen, setInternalIsOpen] = useState(false)
   const i18n = useI18n()
 
   // Auto-detect if we're inside a dialog and use its portal container
@@ -55,8 +55,40 @@ export function FiltersControls<Filters extends FiltersDefinition>({
     ? dialogContext.portalContainer
     : undefined
 
-  const isOpen = controlledIsOpen ?? internalIsOpen
-  const onOpenChange = controlledOnOpenChange ?? setInternalIsOpen
+  const [isOpen, setIsOpen] = useControllableState({
+    prop: controlledIsOpen,
+    defaultProp: false,
+    onChange: controlledOnOpenChange,
+  })
+
+  const isOpenRef = useRef(isOpen)
+  useEffect(() => {
+    isOpenRef.current = isOpen
+  }, [isOpen])
+
+  const isClosingRef = useRef(false)
+  const handleOpenChange = (open: boolean) => {
+    const currentIsOpen = isOpenRef.current
+
+    if (isClosingRef.current) {
+      return
+    }
+
+    if (currentIsOpen) {
+      isClosingRef.current = true
+      setIsOpen(false)
+
+      setTimeout(() => {
+        isClosingRef.current = false
+      }, 150)
+
+      return
+    }
+
+    setIsOpen(open)
+  }
+
+  const onOpenChange = handleOpenChange
 
   const [localFiltersValue, setLocalFiltersValue] = useState(value)
   useEffect(() => {
@@ -208,9 +240,9 @@ export function FiltersControls<Filters extends FiltersDefinition>({
               transition={{ duration: 0.1 }}
               className="absolute bottom-0 left-0 right-0 top-0 z-20 bg-f1-background"
             >
-              <div className="flex h-full flex-col transition-all">
+              <div className="flex h-full flex-col transition-all flex-1 min-h-0 max-h-full">
                 {NavHeader}
-                <div className="flex flex-1">
+                <div className="flex flex-1 min-h-0 max-h-full">
                   {selectedFilterKey ? (
                     <motion.div
                       key="filter-content"
@@ -269,7 +301,6 @@ export function FiltersControls<Filters extends FiltersDefinition>({
             label={i18n.filters.label}
             icon={Filter}
             pressed={isOpen}
-            onClick={() => onOpenChange(!isOpen)}
             hideLabel={hideLabel}
             aria-controls={isOpen ? id : undefined}
           />

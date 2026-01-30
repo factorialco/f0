@@ -7,30 +7,34 @@ This file configures automated code review rules for the `packages/react` packag
 - New components should not be added to the `experimental` folder; instead, add them to the `components` folder and use the experimentalComponent function from `@/lib/experimental.ts`
 
 ### Imports
+
 - **NEVER** import entire React via `import * as React from "react"`
 - Import only used React components and functions
 - Use named imports: `import { useState, useEffect } from "react"`
 
 ### Exports
+
 - Use **named exports** for all components
 - Avoid default exports for components
 - Ensure a component in `components` or `experimental` is exported in `exports.ts`
 
 ### Client Components
+
 - Implement `'use client'` directive **only when necessary**
 
 ### Components folder organization
+
 Each component (in folders `components` and `experimental`) should fit this organization:
 
 - `[COMPONENTNAME]`
-    - `__tests__` the components tests
-    - `__stories__` the storybook files (split documents in multiple ones if needed)
-    - `index.tsx` the entrypoint of the components, it should only export, not having the logic
-    - `[COMPONENTNAME].tsx` the component code
-    - `types.ts` The public types (reexported by `index.tsx`)
-    - `internal-types.ts` types we dont want to expose
-    - `hooks/` if the component has hook files (`useXXXX.ts`) should be in this folder
-    - `components/` if the component have internal subcomponents should be in this folder
+  - `__tests__` the components tests
+  - `__stories__` the storybook files (split documents in multiple ones if needed)
+  - `index.tsx` the entrypoint of the components, it should only export, not having the logic
+  - `[COMPONENTNAME].tsx` the component code
+  - `types.ts` The public types (reexported by `index.tsx`)
+  - `internal-types.ts` types we dont want to expose
+  - `hooks/` if the component has hook files (`useXXXX.ts`) should be in this folder
+  - `components/` if the component have internal subcomponents should be in this folder
 
 Ensure elements in `components/`, `internal-types.ts`, and `internal` files are not exported
 
@@ -46,27 +50,25 @@ Ensure elements in `components/`, `internal-types.ts`, and `internal` files are 
 
 Some components like `src/components/F0Button` has some private properties, in this case the component has an internal implementation `src/components/F0Button/internal.tsx`
 
-
 ## Component props
+
 - Ensure props have clear and functional meanings. e.g. `only-icon` instead of having `hide-icon` and `hide-label`
 - Avoid `className` in public components (can be a private prop)
 - Avoid union types like `export type Color = 'a' | 'b'| 'c'`, use:
   ```ts
-  export const colors = ['a', 'b', 'c'] as const
+  export const colors = ["a", "b", "c"] as const
   export type Color = (typeof colors)[number]
   ```
   Ensure the const is exported as well
-  
-
 
 ### `src/ui/`
+
 Ensure those components are not re-exported
 
 ## TypeScript Standards
 
-
-
 ### Type Safety
+
 - Use **strict** TypeScript configuration
 - **NEVER** use `any` or `as any` to solve type issues
 - Prefer **interfaces** over types for public APIs
@@ -75,6 +77,7 @@ Ensure those components are not re-exported
 - Implement proper generic constraints
 
 ### Type Definitions
+
 - Define prop interfaces for all components
 - Use proper type inference where possible
 - Avoid type assertions unless absolutely necessary
@@ -82,15 +85,18 @@ Ensure those components are not re-exported
 ## Testing Requirements
 
 ### Test Files
+
 - Name test files with `.test.tsx` or `.test.ts`, **never** with `.spec.ts` or `.specs.ts`
 - Import Vitest methods explicitly: `import { describe, it, expect } from "vitest"`
 - Do **not** import `@testing-library/jest-dom`
 
 ### Test Utilities
+
 - When using `@testing-library/react`, use `zeroRender` from `@/testing/test-utils.tsx` instead of `render`
 - `zeroRender` provides mocks for context providers
 
 ### Test Coverage
+
 - Write **Vitest** unit tests for utilities, hooks, and components
 - Create **Storybook stories** for visual testing
 - Include **accessibility tests** using axe-playwright
@@ -101,17 +107,20 @@ Ensure those components are not re-exported
 ## Styling Guidelines
 
 ### Tailwind CSS
+
 - Use **Tailwind CSS** with custom configuration for primary styling
 - Follow **mobile-first** responsive design
 - Utilize container queries where appropriate
 - Leverage **shadcn/ui** components as base primitives (avoid modifications unless necessary)
 
 ### Design Tokens
+
 - Use Tailwind theme configuration
 - Follow **shadcn/ui** token conventions
 - Maintain consistent spacing and color scales
 
 ### Animation Strategy
+
 - Use CSS animations/transitions for simple interactions
 - Leverage **Framer Motion** for complex animations and gestures
 - Use **tailwindcss-animate** for common animation patterns
@@ -119,21 +128,25 @@ Ensure those components are not re-exported
 ## Code Quality
 
 ### Comments
+
 - Avoid writing comments describing "what is it"
 - Comments must be rare, highlighting complex parts of the code
 - Comments must answer the question "Why?"
 
 ### Performance
+
 - Ensure proper cleanup in `useEffect` hooks to prevent memory leaks
 - Use React.memo, useMemo, and useCallback appropriately
 - Avoid unnecessary re-renders
 
 ### Error Handling
+
 - Implement proper error boundaries where needed
 - Handle edge cases gracefully
 - Provide meaningful error messages
 
 ### Accessibility
+
 - Ensure all interactive elements are keyboard accessible
 - Use proper ARIA attributes
 - Maintain proper focus management
@@ -142,6 +155,7 @@ Ensure those components are not re-exported
 ## Common Issues to Check
 
 ### React-Specific
+
 - Memory leaks in components (ensure proper cleanup in `useEffect` hooks)
 - Missing dependency arrays in hooks
 - Improper state updates (mutating state directly)
@@ -149,6 +163,7 @@ Ensure those components are not re-exported
 - Inefficient re-renders
 
 ### TypeScript-Specific
+
 - Use of `any` type
 - Missing type definitions
 - Incorrect type assertions
@@ -156,6 +171,7 @@ Ensure those components are not re-exported
 - Avoid cycle imports
 
 ### Testing-Specific
+
 - Tests should be real unit tests
 - Coverage should be at least 80%
 - Missing test coverage for new components
@@ -164,6 +180,7 @@ Ensure those components are not re-exported
 - Incorrect test file naming
 
 ### Styling-Specific
+
 - Inconsistent use of design tokens
 - Missing responsive breakpoints
 - Hardcoded values instead of tokens
@@ -189,10 +206,11 @@ Ensure those components are not re-exported
 - Ensure the story docs covers all the properties
 - For properties with limited and well know options use the const array for the select values from the component. Avoid repeating the values in the story
   ```ts
-  export const colors = ['a', 'b', 'c'] as const
+  export const colors = ["a", "b", "c"] as const
   export type Color = (typeof colors)[number]
   ```
 - For union types use table in argtypes:
+
 ```
  table: {
         type: {
@@ -203,15 +221,15 @@ Ensure those components are not re-exported
 
 - Ensure there is a story called Snapshot which includes `parameters: withSnapshot({}),` to ensure the component has visual regression tests in chromatic
   e.g.
-    ```
-    export const Snapshot: Story = {
-        parameters: withSnapshot({}),
-        render: () => (
-            <div className="flex w-fit flex-col gap-2">
-            <div className="flex flex-row gap-2">
-                <F0AvatarDate date={exampleDate} />
-            </div>
-            </div>
-        ),
-    }
-    ```
+  ```
+  export const Snapshot: Story = {
+      parameters: withSnapshot({}),
+      render: () => (
+          <div className="flex w-fit flex-col gap-2">
+          <div className="flex flex-row gap-2">
+              <F0AvatarDate date={exampleDate} />
+          </div>
+          </div>
+      ),
+  }
+  ```

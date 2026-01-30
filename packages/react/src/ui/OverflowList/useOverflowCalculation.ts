@@ -108,13 +108,22 @@ export function useOverflowCalculation<T>(
     const itemWidths = measureItemWidths()
     const itemWidthsWithGap = itemWidths.map((width) => width + gap)
 
-    // Calculate how many items fit with an overflow button
-    const availableWidth = currentContainerWidth - overflowButtonWidth - gap
-
-    const visibleCount = calculateVisibleItemCount({
+    const availableWidthWithoutOverflow = currentContainerWidth
+    const visibleCountWithoutOverflow = calculateVisibleItemCount({
       itemWidths: itemWidthsWithGap,
-      availableWidth,
+      availableWidth: availableWidthWithoutOverflow,
     })
+
+    const fitsWithoutOverflow =
+      visibleCountWithoutOverflow >= items.length &&
+      (options?.max === undefined || items.length <= options.max)
+
+    const visibleCount = fitsWithoutOverflow
+      ? visibleCountWithoutOverflow
+      : calculateVisibleItemCount({
+          itemWidths: itemWidthsWithGap,
+          availableWidth: currentContainerWidth - overflowButtonWidth - gap,
+        })
 
     let visibleItems = visibleCount === 0 ? [] : items.slice(0, visibleCount)
     let overflowItems = visibleCount === 0 ? items : items.slice(visibleCount)
@@ -132,7 +141,7 @@ export function useOverflowCalculation<T>(
       visibleItems,
       overflowItems,
     })
-  }, [items, gap, measureItemWidths, calculateVisibleItemCount])
+  }, [items, gap, measureItemWidths, calculateVisibleItemCount, options?.max])
 
   // Initial calculation and initialization
   useEffect(() => {
