@@ -28,6 +28,7 @@ interface ParsedField {
   schema: ZodTypeAny
   config: F0FieldConfig
   fieldType: F0FieldType
+  position: number
 }
 
 // ============================================================================
@@ -196,7 +197,7 @@ function groupFieldsIntoRows(
       }
 
       // Sort row fields by position
-      rowFields.sort((a, b) => a.config.position - b.config.position)
+      rowFields.sort((a, b) => a.position - b.position)
 
       // Create row definition
       const rowDefinition: RowDefinition = {
@@ -223,13 +224,17 @@ function groupFieldsIntoRows(
 }
 
 /**
- * Parse schema and extract all F0-configured fields
+ * Parse schema and extract all F0-configured fields.
+ * Position is always derived from declaration order (Object.entries preserves insertion order in ES2015+).
  */
 function parseSchemaFields(schema: z.ZodObject<ZodRawShape>): ParsedField[] {
   const shape = schema.shape
   const fields: ParsedField[] = []
 
-  for (const [fieldId, fieldSchema] of Object.entries(shape)) {
+  const entries = Object.entries(shape)
+
+  for (let index = 0; index < entries.length; index++) {
+    const [fieldId, fieldSchema] = entries[index]
     const config = getF0Config(fieldSchema as ZodTypeAny)
     if (config) {
       const fieldType = inferFieldType(fieldSchema as ZodTypeAny, config)
@@ -238,6 +243,7 @@ function parseSchemaFields(schema: z.ZodObject<ZodRawShape>): ParsedField[] {
         schema: fieldSchema as ZodTypeAny,
         config,
         fieldType,
+        position: index,
       })
     }
   }
@@ -251,11 +257,12 @@ function parseSchemaFields(schema: z.ZodObject<ZodRawShape>): ParsedField[] {
  * This parses the schema shape, extracts F0 configs, groups fields by section,
  * sorts by position, and groups row fields together.
  *
- * Constraints are automatically derived from the Zod schema:
- * - `z.number().min(n).max(m)` → min/max for number fields
- * - `z.date().min(d).max(d)` → minDate/maxDate for date fields
- * - `z.string().max(n)` → maxLength for textarea fields
- * - `z.optional()` or `z.nullable()` → clearable for select/date fields
+ * Automatic derivations from the Zod schema:
+ * - **Position**: Derived from field declaration order (can be overridden with `position`)
+ * - **Number min/max**: `z.number().min(n).max(m)` → min/max constraints
+ * - **Date min/max**: `z.date().min(d).max(d)` → minDate/maxDate constraints
+ * - **String maxLength**: `z.string().max(n)` → maxLength for textarea
+ * - **Clearable**: `z.optional()` or `z.nullable()` → clearable for select/date fields
  *
  * @param schema - Zod object schema with F0 field configurations
  * @param sections - Optional section configurations keyed by section ID
@@ -264,16 +271,14 @@ function parseSchemaFields(schema: z.ZodObject<ZodRawShape>): ParsedField[] {
  * @example
  * ```tsx
  * const formSchema = z.object({
- *   // Date field with min/max derived from Zod, clearable because optional
- *   birthDate: f0(z.date().min(new Date("1900-01-01")).max(new Date()).optional(), {
- *     label: "Birth Date",
- *     position: 1
+ *   // Fields are ordered by declaration - no need to specify position
+ *   firstName: f0(z.string().min(1), { label: "First Name" }),
+ *   lastName: f0(z.string().min(1), { label: "Last Name" }),
+ *   // Constraints derived from Zod, clearable because optional
+ *   birthDate: f0(z.date().min(new Date("1900-01-01")).optional(), {
+ *     label: "Birth Date"
  *   }),
- *   // Number field with min/max derived from Zod
- *   age: f0(z.number().min(0).max(120), {
- *     label: "Age",
- *     position: 2
- *   })
+ *   age: f0(z.number().min(0).max(120), { label: "Age" })
  * })
  * ```
  */
@@ -301,13 +306,11 @@ export function useSchemaDefinition(
     }
 
     // Sort root fields by position
-    rootFields.sort((a, b) => a.config.position - b.config.position)
+    rootFields.sort((a, b) => a.position - b.position)
 
     // Sort fields within each section
     for (const sectionId of Object.keys(sectionFields)) {
-      sectionFields[sectionId].sort(
-        (a, b) => a.config.position - b.config.position
-      )
+      sectionFields[sectionId].sort((a, b) => a.position - b.position)
     }
 
     // Build result array
@@ -377,13 +380,11 @@ export function getSchemaDefinition(
   }
 
   // Sort root fields by position
-  rootFields.sort((a, b) => a.config.position - b.config.position)
+  rootFields.sort((a, b) => a.position - b.position)
 
   // Sort fields within each section
   for (const sectionId of Object.keys(sectionFields)) {
-    sectionFields[sectionId].sort(
-      (a, b) => a.config.position - b.config.position
-    )
+    sectionFields[sectionId].sort((a, b) => a.position - b.position)
   }
 
   // Build result array

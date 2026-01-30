@@ -26,15 +26,14 @@ export type F0FieldType =
   | "custom"
 
 /**
- * Base configuration shared across all field types
+ * Base configuration shared across all field types.
+ * Position is automatically derived from field declaration order in the schema.
  */
 export interface F0BaseConfig {
   /** Label displayed above the field */
   label: string
   /** Section ID to group field under (null = root level) */
   section?: string
-  /** Position within section for ordering (lower = first) */
-  position: number
   /** Placeholder text for the input */
   placeholder?: string
   /** Helper text displayed below the field */
