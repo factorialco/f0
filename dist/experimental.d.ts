@@ -6648,12 +6648,11 @@ export declare type WizardStepItem = {
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const WizardStepper: ({ steps, currentStepId, orientation, }: WizardStepperProps) => JSX_2.Element;
+export declare const WizardStepper: ({ steps, currentStepId }: WizardStepperProps) => JSX_2.Element;
 
 export declare interface WizardStepperProps {
     steps: WizardStepItem[];
     currentStepId: string;
-    orientation?: "vertical" | "horizontal";
 }
 
 export { }
@@ -6696,11 +6695,6 @@ declare module "gridstack" {
 }
 
 
-declare namespace Calendar {
-    var displayName: string;
-}
-
-
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         aiBlock: {
@@ -6726,4 +6720,9 @@ declare module "@tiptap/core" {
             insertTranscript: (data: TranscriptData) => ReturnType;
         };
     }
+}
+
+
+declare namespace Calendar {
+    var displayName: string;
 }
