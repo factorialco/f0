@@ -34,7 +34,6 @@ import { DotTagCellValue as DotTagCellValue_2 } from './types/dotTag';
 import { F0DialogInternalProps } from './internal-types';
 import { F0GridStackProps as F0GridStackProps_2 } from './F0GridStack';
 import { F0SelectProps as F0SelectProps_2 } from './types';
-import { F0WizardProps as F0WizardProps_2 } from './F0Wizard';
 import { f1Colors } from '@factorialco/f0-core';
 import { FC } from 'react';
 import { FileCellValue } from '../../value-display/types/file';
@@ -2852,24 +2851,6 @@ export declare type F0TextProps = Omit<TextProps, "className" | "variant" | "as"
     markdown?: boolean;
 };
 
-/**
- * @experimental This is an experimental component use it at your own risk
- */
-export declare const F0Wizard: FC<F0WizardProps_2>;
-
-export declare interface F0WizardProps {
-    isOpen: boolean;
-    onClose: () => void;
-    title?: string;
-    description?: string;
-    width?: DialogWidth;
-    primaryAction?: F0DialogPrimaryAction | F0DialogPrimaryActionItem[];
-    secondaryAction?: F0DialogSecondaryAction;
-    steps: WizardStepItem[];
-    currentStepId: string;
-    children: ReactNode;
-}
-
 export declare type FileAvatarVariant = Extract<AvatarVariant, {
     type: "file";
 }>;
@@ -5292,12 +5273,6 @@ declare interface WithTooltipDescription {
      */
     description?: string;
 }
-
-export declare type WizardStepItem = {
-    id: string;
-    label: string;
-    completed?: boolean;
-};
 
 export { }
 

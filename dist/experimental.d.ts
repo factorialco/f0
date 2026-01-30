@@ -6639,22 +6639,6 @@ declare type WithOptionalSorting_2<Record, Sortings extends SortingsDefinition> 
     sorting?: SortingKey<Sortings>;
 };
 
-export declare type WizardStepItem = {
-    id: string;
-    label: string;
-    completed?: boolean;
-};
-
-/**
- * @experimental This is an experimental component use it at your own risk
- */
-export declare const WizardStepper: ({ steps, currentStepId }: WizardStepperProps) => JSX_2.Element;
-
-export declare interface WizardStepperProps {
-    steps: WizardStepItem[];
-    currentStepId: string;
-}
-
 export { }
 
 
