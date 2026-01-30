@@ -1,5 +1,5 @@
 import React from "react";
-import { ScrollView, View, Text } from "react-native";
+import { ScrollView, Text } from "react-native";
 import { PageHeader } from "../../../src/components/Navigation/PageHeader";
 import { useCSSVariable } from "uniwind";
 

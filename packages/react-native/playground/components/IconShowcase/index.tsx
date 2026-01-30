@@ -82,13 +82,12 @@ export function IconShowcase() {
   const [appIconList, setAppIconList] = useState<Array<{ name: string; icon: IconType }>>([]);
   const [moduleIconList, setModuleIconList] = useState<Array<{ name: string; icon: IconType }>>([]);
 
-  const [f1Foreground, f1Background, f1Border, f1BackgroundSecondary, f1IconInfo, f1IconSecondary] = useCSSVariable([
+  const [f1Foreground, f1Background, f1Border, f1BackgroundSecondary, f1IconInfo] = useCSSVariable([
     '--color-f1-foreground',
     '--color-f1-background',
     '--color-f1-border',
     '--color-f1-background-secondary',
     '--color-f1-icon-info',
-    '--color-f1-icon-secondary',
   ]);
 
   const asString = (value: string | number | undefined): string => {
@@ -217,7 +216,7 @@ export function IconShowcase() {
       ) : (
         <View className="items-center justify-center p-10 mb-6">
           <Text className="text-lg" style={{ color: asString(f1Foreground) }}>
-            No icons found matching "{searchTerm}"
+            {`No icons found matching "${searchTerm}"`}
           </Text>
         </View>
       )}

@@ -1,4 +1,4 @@
-import { ThemeConfig } from "tailwindcss/types/config"
+import type { Config } from "tailwindcss"
 
 /**
  * Spacing for the tailwind config
@@ -10,7 +10,9 @@ import { ThemeConfig } from "tailwindcss/types/config"
  * Relative scale is used for size definitions, like heights and widths.
  */
 
-export const absoluteSpacing: ThemeConfig["spacing"] = {
+type ThemeSpacing = NonNullable<Config["theme"]>["spacing"]
+
+export const absoluteSpacing: ThemeSpacing = {
   px: "1px",
   0: "0px",
   0.5: "2px",
@@ -49,7 +51,7 @@ export const absoluteSpacing: ThemeConfig["spacing"] = {
   96: "384px",
 }
 
-export const relativeSpacing: ThemeConfig["spacing"] = {
+export const relativeSpacing: ThemeSpacing = {
   px: "1px",
   0: "0px",
   0.5: "0.125rem",
@@ -93,7 +95,7 @@ export const relativeSpacing: ThemeConfig["spacing"] = {
  * This special scale is used for the gap between common elements.
  * Docs: https://zeroheight.com/6cc527675/p/94c391-spacing/t/3409209197
  */
-export const betweenSpacing: ThemeConfig["spacing"] = {
+export const betweenSpacing: ThemeSpacing = {
   sm: relativeSpacing[1],
   md: relativeSpacing[2],
   lg: relativeSpacing[3],

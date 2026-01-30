@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Text, View } from "react-native";
 import { SafeAreaView as RNSafeAreaView } from "react-native-safe-area-context";
-import { useCSSVariable, useUniwind, withUniwind } from "uniwind";
+import { useCSSVariable, withUniwind } from "uniwind";
 import { ActivityShowcase } from "../../components/ActivityShowcase";
 import { AvatarShowcase } from "../../components/AvatarShowcase";
 import { BadgeShowcase } from "../../components/BadgeShowcase";
@@ -39,7 +39,6 @@ const componentOptions = [
 ];
 
 export default function ComponentsShowcase() {
-  const { theme } = useUniwind();
   const [selectedComponent, setSelectedComponent] = useState<ComponentType>("activity");
   
   const [f1Background, f1Foreground] = useCSSVariable([

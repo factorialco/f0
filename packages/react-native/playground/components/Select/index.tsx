@@ -26,12 +26,11 @@ export function Select<T extends string>({
 }: SelectProps<T>) {
   const [isOpen, setIsOpen] = useState(false);
   
-  const [f1Background, f1Foreground, f1Border, f1BackgroundSecondary, f1BackgroundHover] = useCSSVariable([
+  const [f1Background, f1Foreground, f1Border, f1BackgroundSecondary] = useCSSVariable([
     '--color-f1-background',
     '--color-f1-foreground',
     '--color-f1-border',
     '--color-f1-background-secondary',
-    '--color-f1-background-hover',
   ]);
 
   const asString = (val: string | number | undefined): string => {
