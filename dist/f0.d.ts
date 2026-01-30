@@ -2114,6 +2114,10 @@ declare type DialogSimpleAction = {
 
 declare const dialogSizes: readonly ["sm", "md", "lg", "xl", "fullscreen"];
 
+declare const DialogWrapperContext: Context<DialogWrapperContextType>;
+export { DialogWrapperContext as F0DialogAlikeContext }
+export { DialogWrapperContext as F0DialogContext }
+
 declare type DialogWrapperContextType = {
     open: boolean;
     onClose: () => void;
@@ -2126,6 +2130,10 @@ declare type DialogWrapperContextType = {
      */
     portalContainer: HTMLDivElement | null;
 };
+
+declare const DialogWrapperProvider: ({ isOpen, onClose, shownBottomSheet, position, children, portalContainer, }: DialogWrapperProviderProps) => JSX_2.Element;
+export { DialogWrapperProvider as F0DialogAlikeProvider }
+export { DialogWrapperProvider as F0DialogProvider }
 
 /**
  * The props for the F0DialogProvider component.
@@ -2650,10 +2658,6 @@ export declare const F0Dialog: {
 export declare type F0DialogAction = DialogAlikeAction;
 
 export declare type F0DialogActionsProps = DialogAlikeActionsProps;
-
-export declare const F0DialogContext: Context<DialogWrapperContextType>;
-
-export declare const F0DialogProvider: ({ isOpen, onClose, shownBottomSheet, position, children, portalContainer, }: DialogWrapperProviderProps) => JSX_2.Element;
 
 export declare type F0DialogSize = (typeof dialogSizes)[number];
 
@@ -5199,6 +5203,10 @@ export declare type UseDialogReturn = {
     closeDialog: (id: DialogId) => void;
 };
 
+declare const useDialogWrapperContext: () => DialogWrapperContextType;
+export { useDialogWrapperContext as useF0Dialog }
+export { useDialogWrapperContext as useF0DialogAlikeContext }
+
 export declare function useDndEvents(handler: (e: {
     phase: "start" | "over" | "drop" | "cancel";
     source: DragPayload;
@@ -5227,8 +5235,6 @@ export declare function useDroppableList(args?: {
 export declare const useEmojiConfetti: () => {
     fireEmojiConfetti: (emoji: string, elementRef: RefObject<HTMLElement>) => void;
 };
-
-export declare const useF0Dialog: () => DialogWrapperContextType;
 
 export declare const useGroups: <R extends RecordType>(groups: GroupRecord<R>[], defaultOpenGroups?: boolean | GroupRecord<R>["key"][]) => {
     openGroups: Record<string, boolean>;
