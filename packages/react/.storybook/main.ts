@@ -42,6 +42,10 @@ const config: StorybookConfig = {
       directory: "../src/experimental",
       titlePrefix: "Components",
     },
+    {
+      directory: "../src/sds",
+      titlePrefix: "sds",
+    },
     ...(process.env.STORYBOOK_PUBLIC_BUILD
       ? []
       : [
