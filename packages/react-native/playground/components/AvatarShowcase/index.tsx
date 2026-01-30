@@ -10,6 +10,7 @@ import {
   ModuleAvatar,
   FileAvatar,
 } from "../../../src/components/Avatars/exports";
+import { Avatar } from "../../../src/ui/avatar";
 import { AppIcons } from "../../../src/icons";
 import { useCSSVariable } from "uniwind";
 
@@ -246,6 +247,21 @@ export function AvatarShowcase() {
             Excel
           </Text>
         </View>
+      </View>
+
+      {/* Avatar Colors */}
+      <Text className="text-lg font-bold mb-4" style={{ color: asString(f1Foreground) }}>
+        Avatar Colors
+      </Text>
+      <View className="flex-row flex-wrap gap-4 mb-6 items-center">
+        {(["viridian", "malibu", "yellow", "purple", "lilac", "barbie", "smoke", "army", "flubber", "indigo", "camel"] as const).map((color) => (
+          <View key={color} className="items-center">
+            <Avatar size="medium" color={color} />
+            <Text className="text-xs mt-2 text-center capitalize" style={{ color: asString(f1Foreground) }}>
+              {color}
+            </Text>
+          </View>
+        ))}
       </View>
 
       {/* Avatars with Badges */}
