@@ -183,7 +183,6 @@ type AiChatProviderReturnValue = {
   /**
    * Set a callback to process messages and attachments before sending.
    * Use this from child components to register context-specific processing.
-   * @internal
    */
   setOnBeforeSend: (
     callback:
