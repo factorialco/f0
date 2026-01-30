@@ -160,7 +160,7 @@ export const WithPromisePrimaryAction: Story = {
       label: "submit",
       icon: Placeholder,
       onClick: () =>
-        new Promise((resolve) => setTimeout(() => resolve(), 5000)),
+        new Promise((resolve) => setTimeout(() => resolve(), 1000)),
       closeOnClick: true,
     },
   },
@@ -191,10 +191,11 @@ export const WithPromisePrimaryAction: Story = {
         // If not, we just verify the promise completes
 
         // Wait for promise to resolve (5 seconds)
-        await new Promise((resolve) => setTimeout(resolve, 5200))
+        await new Promise((resolve) => setTimeout(resolve, 1200))
 
+        // Verify dialog closes after promise resolves
         await waitFor(() => {
-          expect(page.getByText("Team Status")).not.toBeInTheDocument()
+          expect(page.queryByText("Team Status")).not.toBeInTheDocument()
         })
       }
     )
