@@ -2803,6 +2803,12 @@ declare const defaultTranslations: {
             readonly blocks: "Blocks";
         };
     };
+    readonly forms: {
+        readonly actionBar: {
+            readonly unsavedChanges: "Unsaved changes";
+            readonly discard: "Discard";
+        };
+    };
 };
 
 /**
@@ -3284,15 +3290,14 @@ declare type F0AvatarTeamProps = {
 } & Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">;
 
 /**
- * Base configuration shared across all field types
+ * Base configuration shared across all field types.
+ * Position is automatically derived from field declaration order in the schema.
  */
 export declare interface F0BaseConfig {
     /** Label displayed above the field */
     label: string;
     /** Section ID to group field under (null = root level) */
     section?: string;
-    /** Position within section for ordering (lower = first) */
-    position: number;
     /** Placeholder text for the input */
     placeholder?: string;
     /** Helper text displayed below the field */
@@ -3451,29 +3456,23 @@ export declare type F0FieldType = "text" | "number" | "textarea" | "select" | "c
 export declare const F0Form: <TSchema extends z.ZodObject<ZodRawShape>>(props: F0FormProps<TSchema>) => React.ReactElement;
 
 /**
- * Props for the F0Form component
- *
- * @typeParam TSchema - The Zod object schema type. The form data type is inferred from this.
- *
- * @example
- * ```tsx
- * const schema = z.object({
- *   name: f0(z.string(), { label: "Name", position: 1 }),
- *   age: f0(z.number(), { label: "Age", position: 2 }),
- * })
- *
- * // Data type is inferred as { name: string; age: number }
- * <F0Form
- *   name="my-form"
- *   schema={schema}
- *   defaultValues={{ name: "" }}  // Partial allowed
- *   onSubmit={(data) => {
- *     // data is { name: string; age: number }
- *   }}
- * />
- * ```
+ * Props when using the action bar submit
  */
-export declare interface F0FormProps<TSchema extends z.ZodObject<ZodRawShape>> {
+declare interface F0FormActionBarProps<TSchema extends z.ZodObject<ZodRawShape>> extends F0FormBaseProps<TSchema> {
+    /** Type of submit UI (floating action bar) */
+    submitType: "action-bar";
+    /** Whether to show a Discard button to reset form changes */
+    discardableChanges?: boolean;
+    /** Label for the discard button (defaults to i18n "forms.actionBar.discard") */
+    discardLabel?: string;
+    /** Label shown in the action bar (defaults to i18n "forms.actionBar.unsavedChanges") */
+    actionBarLabel?: string;
+}
+
+/**
+ * Base props shared by all submit types
+ */
+declare interface F0FormBaseProps<TSchema extends z.ZodObject<ZodRawShape>> {
     /** Unique name for the form, used for generating anchor links (e.g., #forms.[name].[sectionId].[fieldId]) */
     name: string;
     /** Zod object schema with F0 field configurations */
@@ -3486,11 +3485,52 @@ export declare interface F0FormProps<TSchema extends z.ZodObject<ZodRawShape>> {
     onSubmit: (data: z.infer<TSchema>) => Promise<F0FormSubmitResult> | F0FormSubmitResult;
     /** Label for the submit button */
     submitLabel?: string;
-    /** Whether to show the submit button */
-    showSubmitButton?: boolean;
     /** Additional class name for the form */
     className?: string;
 }
+
+/**
+ * Props when using the default submit button
+ */
+declare interface F0FormDefaultSubmitProps<TSchema extends z.ZodObject<ZodRawShape>> extends F0FormBaseProps<TSchema> {
+    /** Type of submit UI (default button) */
+    submitType?: "default";
+    /** Whether to show the submit button */
+    showSubmitButton?: boolean;
+}
+
+/**
+ * Props for the F0Form component
+ *
+ * @typeParam TSchema - The Zod object schema type. The form data type is inferred from this.
+ *
+ * @example
+ * ```tsx
+ * const schema = z.object({
+ *   name: f0(z.string(), { label: "Name" }),
+ *   age: f0(z.number(), { label: "Age" }),
+ * })
+ *
+ * // Default submit button
+ * <F0Form
+ *   name="my-form"
+ *   schema={schema}
+ *   defaultValues={{ name: "" }}
+ *   onSubmit={(data) => ({ success: true })}
+ * />
+ *
+ * // Action bar with discard button
+ * <F0Form
+ *   name="my-form"
+ *   schema={schema}
+ *   submitType="action-bar"
+ *   discardableChanges
+ *   defaultValues={{ name: "" }}
+ *   onSubmit={(data) => ({ success: true })}
+ * />
+ * ```
+ */
+export declare type F0FormProps<TSchema extends z.ZodObject<ZodRawShape>> = F0FormDefaultSubmitProps<TSchema> | F0FormActionBarProps<TSchema>;
 
 /**
  * Type helper for creating a form schema with F0 fields
@@ -3509,6 +3549,13 @@ export declare type F0FormSubmitResult = {
     /** Field-specific error messages */
     errors?: Record<string, string>;
 };
+
+/**
+ * Type of submit UI to render
+ * - "default": Standard submit button at the bottom of the form
+ * - "action-bar": Floating action bar that appears when form has changes
+ */
+export declare type F0FormSubmitType = "default" | "action-bar";
 
 declare interface F0IconProps extends SVGProps<SVGSVGElement>, VariantProps<typeof iconVariants> {
     icon: IconType;
@@ -7094,11 +7141,12 @@ declare interface User_2 {
  * This parses the schema shape, extracts F0 configs, groups fields by section,
  * sorts by position, and groups row fields together.
  *
- * Constraints are automatically derived from the Zod schema:
- * - `z.number().min(n).max(m)` → min/max for number fields
- * - `z.date().min(d).max(d)` → minDate/maxDate for date fields
- * - `z.string().max(n)` → maxLength for textarea fields
- * - `z.optional()` or `z.nullable()` → clearable for select/date fields
+ * Automatic derivations from the Zod schema:
+ * - **Position**: Derived from field declaration order (can be overridden with `position`)
+ * - **Number min/max**: `z.number().min(n).max(m)` → min/max constraints
+ * - **Date min/max**: `z.date().min(d).max(d)` → minDate/maxDate constraints
+ * - **String maxLength**: `z.string().max(n)` → maxLength for textarea
+ * - **Clearable**: `z.optional()` or `z.nullable()` → clearable for select/date fields
  *
  * @param schema - Zod object schema with F0 field configurations
  * @param sections - Optional section configurations keyed by section ID
@@ -7107,16 +7155,14 @@ declare interface User_2 {
  * @example
  * ```tsx
  * const formSchema = z.object({
- *   // Date field with min/max derived from Zod, clearable because optional
- *   birthDate: f0(z.date().min(new Date("1900-01-01")).max(new Date()).optional(), {
- *     label: "Birth Date",
- *     position: 1
+ *   // Fields are ordered by declaration - no need to specify position
+ *   firstName: f0(z.string().min(1), { label: "First Name" }),
+ *   lastName: f0(z.string().min(1), { label: "Last Name" }),
+ *   // Constraints derived from Zod, clearable because optional
+ *   birthDate: f0(z.date().min(new Date("1900-01-01")).optional(), {
+ *     label: "Birth Date"
  *   }),
- *   // Number field with min/max derived from Zod
- *   age: f0(z.number().min(0).max(120), {
- *     label: "Age",
- *     position: 2
- *   })
+ *   age: f0(z.number().min(0).max(120), { label: "Age" })
  * })
  * ```
  */
@@ -7468,12 +7514,8 @@ declare module "gridstack" {
 }
 
 
-declare module "@tiptap/core" {
-    interface Commands<ReturnType> {
-        moodTracker: {
-            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
-        };
-    }
+declare namespace Calendar {
+    var displayName: string;
 }
 
 
@@ -7489,13 +7531,17 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        transcript: {
-            insertTranscript: (data: TranscriptData) => ReturnType;
+        moodTracker: {
+            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
         };
     }
 }
 
 
-declare namespace Calendar {
-    var displayName: string;
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
+        transcript: {
+            insertTranscript: (data: TranscriptData) => ReturnType;
+        };
+    }
 }

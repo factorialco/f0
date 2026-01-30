@@ -479,6 +479,12 @@ const e = {
       lists: "Lists",
       blocks: "Blocks"
     }
+  },
+  forms: {
+    actionBar: {
+      unsavedChanges: "Unsaved changes",
+      discard: "Discard"
+    }
   }
 };
 export {
