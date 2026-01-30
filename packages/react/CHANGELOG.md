@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.340.2](https://github.com/factorialco/f0/compare/f0-react-v1.340.1...f0-react-v1.340.2) (2026-01-30)
+
+
+### Bug Fixes
+
+* **useSelectable:** maintain selection ([#3328](https://github.com/factorialco/f0/issues/3328)) ([2993f59](https://github.com/factorialco/f0/commit/2993f59eeb0ef733f8353f76548bf89497ba4a75))
+
 ## [1.340.1](https://github.com/factorialco/f0/compare/f0-react-v1.340.0...f0-react-v1.340.1) (2026-01-29)
 
 
