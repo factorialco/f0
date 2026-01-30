@@ -9,7 +9,7 @@ import ApplicationFrameStoryMeta from "@/experimental/Navigation/ApplicationFram
 import { F0Wizard } from "../index"
 
 const meta: Meta<typeof F0Wizard> = {
-  title: "sds/wizards/Wizard",
+  title: "wizards/Wizard",
   component: F0Wizard,
   parameters: {
     layout: "fullscreen",
