@@ -265,6 +265,8 @@ declare const alertAvatarVariants: (props?: ({
 
 declare type AlertTagProps = ComponentProps<typeof F0TagAlert>;
 
+export declare type AlertVariant = "info" | "warning" | "critical" | "neutral" | "positive";
+
 declare const _allowedVariants: readonly ["heading", "heading-large"];
 
 declare const _allowedVariants_2: readonly ["body", "description", "small", "inverse", "code", "label"];
@@ -2156,6 +2158,24 @@ declare type ExtractVisualizationSettings<T> = T extends {
         default: infer S;
     };
 } ? S : never;
+
+export declare const F0Alert: ({ title, description, action, link, icon, variant, }: F0AlertProps) => JSX_2.Element;
+
+export declare interface F0AlertProps {
+    title: string;
+    description: string;
+    action?: {
+        label: string;
+        disabled?: boolean;
+        onClick: () => void;
+    };
+    link?: {
+        label: string;
+        href: string;
+    };
+    icon?: IconType;
+    variant: AlertVariant;
+}
 
 export declare const F0Avatar: ({ avatar, size }: AvatarProps) => ReactNode;
 
@@ -5271,6 +5291,16 @@ declare global {
             disable: () => void;
         };
     }
+}
+
+
+declare namespace _DaytimePage {
+    var displayName: string;
+}
+
+
+declare namespace _Page {
+    var displayName: string;
 }
 
 declare module "gridstack" {
