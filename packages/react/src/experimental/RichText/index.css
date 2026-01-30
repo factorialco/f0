@@ -140,6 +140,10 @@
   @apply outline-none;
 }
 
+.ProseMirror-selectednode {
+  outline: none !important;
+}
+
 .rich-text-editor-container hr,
 .rich-text-display-container hr {
   @apply my-3 border-0 border-t border-f1-border;

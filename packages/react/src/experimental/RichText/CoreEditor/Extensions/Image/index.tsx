@@ -8,11 +8,11 @@ import {
   ReactNodeViewRenderer,
   type NodeViewProps,
 } from "@tiptap/react"
-import { useCallback, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 
 import { F0Button } from "@/components/F0Button"
 import { Spinner } from "@/experimental/Information/Spinner"
-import { Delete } from "@/icons/app"
+import { CornerHandle, Delete } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
@@ -49,6 +49,41 @@ const ImageNodeView = ({
   const translations = useI18n()
   const imgRef = useRef<HTMLImageElement>(null)
   const [isResizing, setIsResizing] = useState(false)
+  const [isDarkImage, setIsDarkImage] = useState(false)
+
+  useEffect(() => {
+    const img = imgRef.current
+    if (!img || !img.complete) {
+      const handleLoad = () => {
+        detectImageBrightness(img!)
+      }
+      img?.addEventListener("load", handleLoad)
+      return () => img?.removeEventListener("load", handleLoad)
+    }
+    detectImageBrightness(img)
+
+    function detectImageBrightness(imgEl: HTMLImageElement) {
+      try {
+        const canvas = document.createElement("canvas")
+        const size = 32
+        canvas.width = size
+        canvas.height = size
+        const ctx = canvas.getContext("2d", { willReadFrequently: true })
+        if (!ctx) return
+        ctx.drawImage(imgEl, 0, 0, size, size)
+        const data = ctx.getImageData(0, 0, size, size).data
+        let totalBrightness = 0
+        const pixelCount = data.length / 4
+        for (let i = 0; i < data.length; i += 4) {
+          totalBrightness +=
+            (data[i] * 299 + data[i + 1] * 587 + data[i + 2] * 114) / 1000
+        }
+        setIsDarkImage(totalBrightness / pixelCount < 128)
+      } catch {
+        // Cross-origin images will fail — default to light
+      }
+    }
+  }, [src])
 
   const handleResizeStart = useCallback(
     (event: React.MouseEvent) => {
@@ -84,11 +119,12 @@ const ImageNodeView = ({
   const showResizeHandle = isEditable && !uploading && (selected || isResizing)
 
   return (
-    <NodeViewWrapper className="mb-2">
+    <NodeViewWrapper className="mb-2" data-drag-handle>
       <div
         className={cn(
-          "relative inline-block rounded-lg",
-          selected && "border-2 border-f1-border-selected-bold border-solid"
+          "relative inline-block rounded-lg outline-none transition-shadow duration-200 ease-out",
+          selected &&
+            "ring-[1.5px] ring-black ring-offset-1 shadow-[0_0_0_1px_rgba(0,0,0,0.1),0_2px_8px_rgba(0,0,0,0.12)] dark:ring-white dark:ring-offset-0 dark:shadow-[0_0_0_1px_rgba(255,255,255,0.1),0_2px_8px_rgba(0,0,0,0.3)]"
         )}
       >
         <img
@@ -108,9 +144,11 @@ const ImageNodeView = ({
           <div
             role="separator"
             aria-orientation="horizontal"
-            className="absolute bottom-1 right-1 h-3 w-3 cursor-se-resize rounded-sm bg-f1-border-selected-bold opacity-80 hover:opacity-100"
+            className="absolute -bottom-1 -right-1 flex h-5 w-5 cursor-se-resize items-center justify-center rounded-sm bg-white text-black shadow-[0_0_0_1px_rgba(0,0,0,0.15),0_2px_6px_rgba(0,0,0,0.2)] transition-transform duration-150 ease-out hover:scale-110 active:scale-95 dark:bg-white dark:text-black dark:shadow-[0_0_0_1px_rgba(255,255,255,0.3),0_2px_6px_rgba(0,0,0,0.4)]"
             onMouseDown={handleResizeStart}
-          />
+          >
+            <CornerHandle className="h-3 w-3" />
+          </div>
         )}
         {uploading && (
           <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-f1-background-secondary backdrop-blur-[2px] transition-opacity duration-200">
@@ -118,12 +156,19 @@ const ImageNodeView = ({
           </div>
         )}
         {isEditable && !uploading && (
-          <div className="dark absolute right-2 top-2">
+          <div
+            className={cn(
+              "absolute right-2 top-2 rounded-md backdrop-blur-sm transition-colors",
+              isDarkImage
+                ? "bg-black/60 text-white shadow-[0_0_0_1px_rgba(255,255,255,0.15),0_2px_6px_rgba(0,0,0,0.3)]"
+                : "bg-white/90 text-black shadow-[0_0_0_1px_rgba(0,0,0,0.1),0_2px_6px_rgba(0,0,0,0.15)]"
+            )}
+          >
             <F0Button
               onClick={deleteNode}
               label={translations.actions.delete}
               icon={Delete}
-              variant="outline"
+              variant="ghost"
               hideLabel
               size="sm"
             />
