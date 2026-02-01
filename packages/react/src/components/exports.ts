@@ -25,6 +25,7 @@ export * from "./F0TableOfContentPopover"
 export * from "./UpsellingKit/exports"
 
 // AI Components
+export * from "../ai/F0AiChat"
 export * from "../ai/F0ActionItem"
 export * from "../ai/F0AiCollapsibleMessage"
 export * from "../ai/F0HILActionConfirmation"
@@ -33,3 +34,4 @@ export * from "../ai/F0MessageSources"
 export * from "../ai/F0OneIcon"
 export * from "../ai/F0OneSwitch"
 export * from "../ai/F0Thinking"
+export * from "../ai/F0AiChatTextArea"
