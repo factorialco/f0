@@ -100,52 +100,57 @@ const ChatTextareaWrapper = ({
 
 const meta = {
   title: "AI/F0AiChatTextArea",
-  component: F0AiChatTextArea,
+  component: ChatTextareaWrapper,
   parameters: {
     layout: "centered",
   },
   tags: ["autodocs"],
-} satisfies Meta<typeof F0AiChatTextArea>
+} satisfies Meta<typeof ChatTextareaWrapper>
 
 export default meta
 type Story = StoryObj<typeof meta>
 
-export const Default: Story = {
-  render: () => <ChatTextareaWrapper />,
-}
+export const Default: Story = {}
 
 export const WithMultiplePlaceholders: Story = {
-  render: () => <ChatTextareaWrapper placeholders={PLACEHOLDERS} />,
+  args: {
+    placeholders: PLACEHOLDERS,
+  },
 }
 
 export const WithSinglePlaceholder: Story = {
-  render: () => <ChatTextareaWrapper placeholders={[PLACEHOLDERS[0]]} />,
+  args: {
+    placeholders: [PLACEHOLDERS[0]],
+  },
 }
 
 export const WithCustomDefaultPlaceholder: Story = {
-  render: () => (
-    <ChatTextareaWrapper defaultPlaceholder="Type your question here..." />
-  ),
+  args: {
+    defaultPlaceholder: "Type your question here...",
+  },
+}
+
+// Standalone component stories for specific states
+const SubmitLabelExample = () => {
+  const [isProcessing, setIsProcessing] = useState(false)
+
+  return (
+    <div className="w-96">
+      <F0AiChatTextArea
+        inProgress={isProcessing}
+        onSend={() => {
+          setIsProcessing(true)
+          setTimeout(() => setIsProcessing(false), 2000)
+        }}
+        onStop={() => setIsProcessing(false)}
+        submitLabel="Send"
+      />
+    </div>
+  )
 }
 
 export const WithSubmitLabel: Story = {
-  render: () => {
-    const [isProcessing, setIsProcessing] = useState(false)
-
-    return (
-      <div className="w-96">
-        <F0AiChatTextArea
-          inProgress={isProcessing}
-          onSend={() => {
-            setIsProcessing(true)
-            setTimeout(() => setIsProcessing(false), 2000)
-          }}
-          onStop={() => setIsProcessing(false)}
-          submitLabel="Send"
-        />
-      </div>
-    )
-  },
+  render: () => <SubmitLabelExample />,
 }
 
 export const InProgress: Story = {
