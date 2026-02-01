@@ -5,7 +5,7 @@ import { useMemo } from "react"
 
 import { ButtonInternal } from "@/components/F0Button/internal"
 
-import { F0OneIcon as OneIcon } from "../../F0OneIcon"
+import { F0OneIcon } from "../../F0OneIcon"
 import { WelcomeScreenSuggestion } from "../types"
 
 export type { WelcomeScreenSuggestion }
@@ -55,7 +55,7 @@ export const WelcomeScreen = ({
               delay: 0.4,
             }}
           >
-            <OneIcon spin size="lg" className="my-4" />
+            <F0OneIcon spin size="lg" className="my-4" />
           </motion.div>
           {greeting && (
             <motion.p
@@ -73,7 +73,7 @@ export const WelcomeScreen = ({
           )}
           {initialMessages.map((message) => (
             <motion.p
-              className="text-[24px] font-semibold leading-[24px] text-f1-foreground"
+              className="text-xl font-semibold leading-[24px] text-f1-foreground"
               key={message.id}
               initial={{ opacity: 0, filter: "blur(2px)", y: -8 }}
               animate={{ opacity: 1, filter: "blur(0px)", y: 0 }}

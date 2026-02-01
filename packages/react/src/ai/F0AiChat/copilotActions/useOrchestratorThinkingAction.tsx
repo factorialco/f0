@@ -1,6 +1,6 @@
 import { useCopilotAction } from "@copilotkit/react-core"
 
-import { F0ActionItem as ActionItem } from "../../F0ActionItem"
+import { F0ActionItem } from "../../F0ActionItem"
 import { OrchestratorThinkingResult } from "./types"
 
 /**
@@ -25,7 +25,7 @@ export const useOrchestratorThinkingAction = () => {
       const result: OrchestratorThinkingResult | undefined = props.result
       return (
         <div className={props.status ? "-ml-1" : undefined}>
-          <ActionItem
+          <F0ActionItem
             title={title}
             status={props.status === "complete" ? "completed" : props.status}
             inGroup={result?.inGroup}

@@ -12,7 +12,7 @@ import { useI18n } from "@/lib/providers/i18n"
 import { Action } from "@/ui/Action"
 import { ButtonCopy } from "@/ui/ButtonCopy"
 
-import { F0ActionItem as ActionItem } from "../../F0ActionItem"
+import { F0ActionItem } from "../../F0ActionItem"
 import { f0MarkdownRenderers } from "../../F0MarkdownRenderers"
 import { useFeedbackModal, UserReaction } from "./FeedbackProvider"
 
@@ -50,7 +50,7 @@ export const AssistantMessage = ({
   return (
     <div className="relative isolate flex w-full flex-col items-start justify-center gap-1">
       {isLoading && !subComponent && (
-        <ActionItem title={translations.ai.thinking} status="executing" />
+        <F0ActionItem title={translations.ai.thinking} status="executing" />
       )}
       {message && (
         <>

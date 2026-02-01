@@ -19,7 +19,7 @@ import { cn } from "@/lib/utils"
 import { AssistantMessage } from "./components/AssistantMessage"
 import { ChatHeader } from "./components/ChatHeader"
 import { ChatTextarea } from "./components/ChatTextarea"
-import { SidebarWindow as ChatWindow } from "./components/ChatWindow"
+import { SidebarWindow } from "./components/ChatWindow"
 import { MessagesContainer } from "./components/MessagesContainer"
 import { MessagesContainerFullscreen } from "./components/MessagesContainerFullscreen"
 import { UserMessage } from "./components/UserMessage"
@@ -134,7 +134,7 @@ const F0AiChatComponent = () => {
       onSetOpen={(isOpen) => {
         setOpen(isOpen)
       }}
-      Window={ChatWindow}
+      Window={SidebarWindow}
       Header={ChatHeader}
       Messages={MessagesContainer}
       Button={() => {
