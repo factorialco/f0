@@ -87,7 +87,7 @@ export const WelcomeScreen = ({
             </motion.p>
           ))}
         </div>
-        <div className="flex flex-col items-start gap-[6px] pb-5">
+        <div className="flex flex-col items-start gap-[6px]">
           {pickedSuggestions.map((suggestion, index) => (
             <motion.div
               className="w-full"
