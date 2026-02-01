@@ -6,12 +6,9 @@ export {
   FullscreenChatContext,
 } from "./F0AiChat"
 
-// Legacy aliases for backwards compatibility
-export {
-  F0AiChat as AiChat,
-  F0AiChatProvider as AiChatProvider,
-  F0AiFullscreenChat as AiFullscreenChat,
-} from "./F0AiChat"
+// Standalone ChatTextArea component (can be used without F0AiChat context)
+export { F0AiChatTextArea } from "../F0AiChatTextArea"
+export type { F0AiChatTextAreaProps } from "../F0AiChatTextArea/types"
 
 // Types
 export type {
@@ -20,9 +17,6 @@ export type {
   AiChatTranslations,
   AiChatTranslationsProviderProps,
 } from "./types"
-
-// Legacy type alias for backwards compatibility
-export type { F0AiChatProviderProps as AiChatProviderProps } from "./types"
 
 export { aiTranslations } from "./types"
 

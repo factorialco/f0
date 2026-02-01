@@ -1,8 +1,7 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
-import { useEffect, useRef, useState } from "react"
+import { useRef, useState } from "react"
 
-import { F0AiChatProvider, useAiChat } from ".."
-import { ChatTextarea } from "../components/ChatTextarea"
+import { F0AiChatTextArea } from "../F0AiChatTextArea"
 
 const PLACEHOLDERS = [
   "Ask about location, directions, or travel details…",
@@ -12,24 +11,17 @@ const PLACEHOLDERS = [
   "Provide details about issues, errors, or unexpected behavior…",
 ]
 
-/**
- * Wrapper component that uses ChatTextarea with F0AiChat context.
- * This demonstrates the integration with the chat context for placeholders.
- *
- * For standalone usage without context, see F0AiChatTextArea stories.
- */
-const ChatTextareaWrapper = ({ placeholders }: { placeholders?: string[] }) => {
+// Wrapper component to manage state
+const ChatTextareaWrapper = ({
+  placeholders,
+  defaultPlaceholder,
+}: {
+  placeholders?: string[]
+  defaultPlaceholder?: string
+}) => {
   const [messages, setMessages] = useState<string[]>([])
   const [isProcessing, setIsProcessing] = useState(false)
   const abortControllerRef = useRef<AbortController | null>(null)
-
-  const { setPlaceholders } = useAiChat()
-
-  useEffect(() => {
-    if (placeholders) {
-      setPlaceholders(placeholders)
-    }
-  }, [placeholders, setPlaceholders])
 
   const handleSend = async (message: string) => {
     setMessages((prev) => [...prev, `User: ${message}`])
@@ -68,12 +60,6 @@ const ChatTextareaWrapper = ({ placeholders }: { placeholders?: string[] }) => {
       setIsProcessing(false)
       abortControllerRef.current = null
     }
-
-    return {
-      id: `message-${Date.now()}`,
-      role: "assistant" as const,
-      content: `This is a mock response after 2 seconds of thinking. I've processed your message: "${message}"`,
-    }
   }
 
   const handleStop = () => {
@@ -101,30 +87,25 @@ const ChatTextareaWrapper = ({ placeholders }: { placeholders?: string[] }) => {
         )}
       </div>
 
-      <ChatTextarea
+      <F0AiChatTextArea
         inProgress={isProcessing}
         onSend={handleSend}
         onStop={handleStop}
+        placeholders={placeholders}
+        defaultPlaceholder={defaultPlaceholder}
       />
     </div>
   )
 }
 
 const meta = {
-  title: "AI/F0AiChat/ChatTextarea (with context)",
-  component: ChatTextareaWrapper,
+  title: "AI/F0AiChatTextArea",
+  component: F0AiChatTextArea,
   parameters: {
     layout: "centered",
   },
   tags: ["autodocs"],
-  decorators: [
-    (Story) => (
-      <F0AiChatProvider>
-        <Story />
-      </F0AiChatProvider>
-    ),
-  ],
-} satisfies Meta<typeof ChatTextareaWrapper>
+} satisfies Meta<typeof F0AiChatTextArea>
 
 export default meta
 type Story = StoryObj<typeof meta>
@@ -133,10 +114,48 @@ export const Default: Story = {
   render: () => <ChatTextareaWrapper />,
 }
 
-export const WithPlaceholders: Story = {
+export const WithMultiplePlaceholders: Story = {
   render: () => <ChatTextareaWrapper placeholders={PLACEHOLDERS} />,
 }
 
-export const WithOnePlaceholder: Story = {
+export const WithSinglePlaceholder: Story = {
   render: () => <ChatTextareaWrapper placeholders={[PLACEHOLDERS[0]]} />,
+}
+
+export const WithCustomDefaultPlaceholder: Story = {
+  render: () => (
+    <ChatTextareaWrapper defaultPlaceholder="Type your question here..." />
+  ),
+}
+
+export const WithSubmitLabel: Story = {
+  render: () => {
+    const [isProcessing, setIsProcessing] = useState(false)
+
+    return (
+      <div className="w-96">
+        <F0AiChatTextArea
+          inProgress={isProcessing}
+          onSend={() => {
+            setIsProcessing(true)
+            setTimeout(() => setIsProcessing(false), 2000)
+          }}
+          onStop={() => setIsProcessing(false)}
+          submitLabel="Send"
+        />
+      </div>
+    )
+  },
+}
+
+export const InProgress: Story = {
+  render: () => (
+    <div className="w-96">
+      <F0AiChatTextArea
+        inProgress={true}
+        onSend={() => {}}
+        onStop={() => alert("Stopped!")}
+      />
+    </div>
+  ),
 }
