@@ -27,7 +27,7 @@ import { WelcomeScreenSuggestion } from "./components/WelcomeScreen"
 import { useDefaultCopilotActions } from "./copilotActions"
 import { FullscreenChatContextType } from "./internal-types"
 import { AiChatStateProvider, useAiChat } from "./providers/AiChatStateProvider"
-import { F0AiChatProviderProps } from "./types"
+import { AiChatProviderProps } from "./types"
 
 // Context to share input state between Messages and Input components
 export const FullscreenChatContext = createContext<FullscreenChatContextType>({
@@ -45,7 +45,7 @@ const F0AiChatProviderComponent = ({
   children,
   agent,
   ...copilotKitProps
-}: F0AiChatProviderProps) => {
+}: AiChatProviderProps) => {
   // todo: implement error handling
   // temporary set runtime url until error handling is done
   return (

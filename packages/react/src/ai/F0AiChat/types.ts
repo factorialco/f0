@@ -4,9 +4,9 @@ import { type AIMessage } from "@copilotkit/shared"
 import { IconType } from "@/components/F0Icon"
 
 /**
- * Props for the F0AiChatProvider component
+ * Props for the AiChatProvider component
  */
-export type F0AiChatProviderProps = {
+export type AiChatProviderProps = {
   enabled?: boolean
   greeting?: string
   initialMessage?: string | string[]

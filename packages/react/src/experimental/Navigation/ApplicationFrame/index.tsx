@@ -17,9 +17,9 @@ import { useAiPromotionChat } from "@/experimental/AiPromotionChat/providers/AiP
 import { experimentalComponent } from "@/lib/experimental"
 
 import {
-  F0AiChat as AiChat,
-  F0AiChatProvider as AiChatProvider,
-  F0AiChatProviderProps as AiChatProviderProps,
+  F0AiChat,
+  F0AiChatProvider,
+  AiChatProviderProps,
 } from "../../../ai/F0AiChat"
 import { useAiChat } from "../../../ai/F0AiChat/providers/AiChatStateProvider"
 import { useReducedMotion } from "../../../lib/a11y"
@@ -43,7 +43,7 @@ function _ApplicationFrame({
   aiPromotion,
 }: ApplicationFrameProps) {
   const AiProvider = ai?.enabled
-    ? AiChatProvider
+    ? F0AiChatProvider
     : aiPromotion?.enabled
       ? AiPromotionChatProvider
       : Fragment
@@ -233,7 +233,7 @@ function ApplicationFrameContent({
                   {children}
                 </motion.div>
               </motion.main>
-              {ai && ai.enabled && <AiChat />}
+              {ai && ai.enabled && <F0AiChat />}
               {aiPromotion && aiPromotion.enabled && <AiPromotionChat />}
             </div>
           </LayoutGroup>
