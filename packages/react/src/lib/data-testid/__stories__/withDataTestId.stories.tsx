@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import type { ComponentProps, HTMLAttributes } from "react"
 
 import { useState } from "react"
-import { expect, within } from "storybook/test"
+import { expect, userEvent, within } from "storybook/test"
 
 import { F0Button } from "../../../components/F0Button"
 import { withDataTestId } from "../index"
@@ -64,7 +64,10 @@ export const DynamicUpdate: Story = {
         <div className="flex gap-2">
           <button
             className="rounded border px-2 py-1 text-sm"
-            onClick={() => setTestId("updated-id")}
+            onClick={() => {
+              console.log("clicked")
+              setTestId("updated-id")
+            }}
           >
             Update ID
           </button>
@@ -83,7 +86,7 @@ export const DynamicUpdate: Story = {
 
     await step("Update ID", async () => {
       const updateButton = canvas.getByText("Update ID")
-      updateButton.click()
+      await userEvent.click(updateButton)
       // Wait for re-render if needed, but here it's sync
       await expect(button).toHaveAttribute("data-testid", "updated-id")
     })
