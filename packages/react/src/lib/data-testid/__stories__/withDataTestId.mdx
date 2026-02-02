@@ -57,5 +57,5 @@ The HOC adds a single prop to the wrapped component:
 
 - **ForwardRef Support**: Correctly forwards refs to the wrapped component.
 - **Static Properties**: Preserves static properties (like `displayName`) of the original component.
-- **Memoization**: Works correctly with `React.memo` components.
+- **Memoization**: For memoized components, wrap with `withDataTestId` first, then `memo`: `memo(withDataTestId(Component))`. Using `withDataTestId(memo(Component))` can let `dataTestId` reach the DOM as `datatestid` in some cases.
 - **Type Safety**: Preserves the original component's props types using TypeScript generics.

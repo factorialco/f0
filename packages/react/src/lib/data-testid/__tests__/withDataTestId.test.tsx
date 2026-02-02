@@ -39,9 +39,10 @@ describe("withDataTestId", () => {
   })
 
   it.skip("should add data-testid to a memo component", () => {
-    // Known issue: when wrapping memo(Component), the inner component receives
-    // dataTestId (camelCase) and it appears on DOM as datatestid; data-testid
-    // injection does not apply. Regular and forwardRef components work correctly.
+    // Known limitation: withDataTestId(memo(Component)) can result in dataTestId
+    // reaching the DOM as "datatestid" instead of "data-testid". React may pass
+    // the memo's props through to the inner component. Prefer wrapping the inner
+    // component with withDataTestId before memo: memo(withDataTestId(Component)).
     const TestComponent = memo(
       (props: React.HTMLAttributes<HTMLDivElement>) => (
         <div {...props}>Test Content</div>
