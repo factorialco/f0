@@ -55,6 +55,8 @@ export type F0ToastProps = {
    */
   actions?:
     | ToastActionButton
+    | [ToastActionButton]
     | ToastActionLink
+    | [ToastActionLink]
     | [ToastActionButton, ToastActionLink]
 }
