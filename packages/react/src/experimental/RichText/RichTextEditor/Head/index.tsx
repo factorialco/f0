@@ -36,7 +36,7 @@ const Head = ({
         </div>
       )}
       {isFullscreen && (
-        <div className="flex w-full items-start justify-center px-6 pt-24">
+        <div className="flex w-full items-start justify-center px-10 pt-24">
           <h1 className="font-bold w-full max-w-[824px] text-3xl">{title}</h1>
         </div>
       )}

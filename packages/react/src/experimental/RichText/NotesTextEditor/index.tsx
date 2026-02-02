@@ -276,7 +276,7 @@ const NotesTextEditorComponent = forwardRef<
         </div>
       )}
       {!readonly && !showBubbleMenu && (
-        <div className="absolute bottom-8 left-1/2 z-50 max-w-[calc(100%-48px)] -translate-x-1/2 rounded-lg bg-f1-background p-2 shadow-md">
+        <div className="absolute bottom-8 left-1/2 z-50 max-w-[calc(100%-48px)] -translate-x-1/2 rounded-lg border border-solid border-f1-border-secondary bg-f1-background p-2 shadow-md">
           <Toolbar
             editor={editor}
             disableButtons={false}
