@@ -1,6 +1,7 @@
 import { useContext, useEffect, useMemo, useRef, useState } from "react"
 
 import { useEventEmitter } from "@/experimental/OneDataCollection/useEventEmitter"
+import { withDataTestId } from "@/lib/data-testid"
 import { cn } from "@/lib/utils"
 
 import type { FiltersDefinition, FiltersMode, FiltersState } from "./types"
@@ -269,7 +270,7 @@ FiltersChipsList.displayName = "OneFilterPicker.ChipsList"
 /**
  * OneFiltersPicker component to use as a single component
  */
-const OneFilterPicker = <Definition extends FiltersDefinition>(
+const _OneFilterPicker = <Definition extends FiltersDefinition>(
   props: OneFilterPickerRootProps<Definition>
 ) => {
   return (
@@ -296,7 +297,9 @@ const OneFilterPicker = <Definition extends FiltersDefinition>(
     </FiltersRoot>
   )
 }
-OneFilterPicker.displayName = "OneFilterPicker"
+_OneFilterPicker.displayName = "OneFilterPicker"
+
+const OneFilterPicker = withDataTestId(_OneFilterPicker)
 
 /**
  * Export the components as named exports to allow to customize the layout

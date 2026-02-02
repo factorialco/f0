@@ -1,6 +1,8 @@
-import type { Meta, StoryObj } from "@storybook/react"
-import { expect, within } from "@storybook/test"
-import React from "react"
+import type { Meta, StoryObj } from "@storybook/react-vite"
+
+import type { ComponentProps, HTMLAttributes } from "react"
+import { useState } from "react"
+import { expect, within } from "storybook/test"
 
 import { F0Button } from "../../../components/F0Button"
 import { withDataTestId } from "../index"
@@ -16,14 +18,14 @@ const meta = {
     docs: {
       description: {
         component:
-          "A higher-order component that adds a `data-test-id` attribute to the wrapped component.",
+          "A higher-order component that adds a `data-testid` attribute to the wrapped component.",
       },
     },
   },
   argTypes: {
     dataTestId: {
-      control: "text",
-      description: "The data-test-id attribute value",
+      control: "text" as const,
+      description: "The data-testid attribute value",
     },
   },
 } satisfies Meta<typeof WrappedButton>
@@ -36,7 +38,7 @@ export const Default: Story = {
     label: "Button with Test ID",
     dataTestId: "my-test-button",
   },
-  play: async ({ canvasElement }) => {
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
     const canvas = within(canvasElement)
     const button = canvas.getByRole("button")
     await expect(button).toHaveAttribute("data-test-id", "my-test-button")
@@ -48,12 +50,17 @@ export const DynamicUpdate: Story = {
     label: "Dynamic ID Button",
     dataTestId: "initial-id",
   },
-  render: (args) => {
-    const [testId, setTestId] = React.useState(args.dataTestId)
+  render: (args: Record<string, unknown>) => {
+    const [testId, setTestId] = useState<string | undefined>(
+      args.dataTestId as string | undefined
+    )
 
     return (
       <div className="flex flex-col gap-4">
-        <WrappedButton {...args} dataTestId={testId} />
+        <WrappedButton
+          {...(args as unknown as ComponentProps<typeof WrappedButton>)}
+          dataTestId={testId}
+        />
         <div className="flex gap-2">
           <button
             className="rounded border px-2 py-1 text-sm"
@@ -61,7 +68,7 @@ export const DynamicUpdate: Story = {
           >
             Update ID
           </button>
-          <div className="text-sm text-gray-500">Current ID: {testId}</div>
+          <div className="text-gray-500 text-sm">Current ID: {testId}</div>
         </div>
       </div>
     )
@@ -87,8 +94,8 @@ export const DynamicUpdate: Story = {
 const SimpleComponent = ({
   children,
   ...props
-}: React.HTMLAttributes<HTMLDivElement>) => (
-  <div className="rounded bg-blue-100 p-4 text-blue-800" {...props}>
+}: HTMLAttributes<HTMLDivElement>) => (
+  <div className="bg-blue-100 text-blue-800 rounded p-4" {...props}>
     {children}
   </div>
 )
@@ -96,12 +103,17 @@ const SimpleComponent = ({
 const WrappedSimpleComponent = withDataTestId(SimpleComponent)
 
 export const CustomComponent: Story = {
+  args: { label: "" },
   render: () => (
     <WrappedSimpleComponent dataTestId="custom-component-id">
       I am a custom component with a test ID
     </WrappedSimpleComponent>
   ),
-  play: async ({ canvasElement }) => {
+  play: async ({
+    canvasElement,
+  }: {
+    canvasElement: HTMLElement
+  }): Promise<void> => {
     const canvas = within(canvasElement)
     const element = canvas.getByText("I am a custom component with a test ID")
     await expect(element).toHaveAttribute("data-test-id", "custom-component-id")

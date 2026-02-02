@@ -148,7 +148,7 @@ const preview: Preview = {
     options: {
       /*
        * Sort all the components and experimental stories in an aplhabetical order, but keep
-       * Introduction, How to contribute, Foundations, and Playground in specific order
+       * Introduction, How to contribute, Data test ID, Foundations, and Playground in specific order
        */
       storySort: (a, b) => {
         const topLevelOrder = [
@@ -156,6 +156,7 @@ const preview: Preview = {
           "how-to-contribute",
           "foundations",
           "library",
+          "data-testid",
           "hooks",
         ]
 

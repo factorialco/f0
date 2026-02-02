@@ -1,6 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
+import type { ComponentProps } from "react"
+import { expect, within } from "storybook/test"
+
 import { Check, Warning } from "@/icons/app"
+import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { internalAvatarSizes } from "@/ui/Avatar"
 
@@ -45,6 +49,7 @@ const meta: Meta<typeof F0Avatar> = {
         },
       },
     },
+    ...dataTestIdArgs,
   },
 }
 
@@ -52,6 +57,27 @@ export default meta
 type Story = StoryObj<typeof F0Avatar>
 
 const SIZES = avatarSizes
+
+export const WithDataTestId: Story = {
+  args: {
+    size: "md",
+    avatar: {
+      type: "person",
+      firstName: "John",
+      lastName: "Doe",
+      "aria-label": "John Doe",
+    },
+    dataTestId: "my-test-avatar",
+  } as ComponentProps<typeof F0Avatar>,
+  render: (args) => <F0Avatar {...args} />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const root = canvas
+      .getByRole("img", { name: "John Doe" })
+      .closest("[data-test-id]")
+    await expect(root).toHaveAttribute("data-test-id", "my-test-avatar")
+  },
+}
 
 export const PersonAvatar: Story = {
   render: () => (

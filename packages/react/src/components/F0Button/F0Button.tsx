@@ -4,7 +4,7 @@
  */
 import { forwardRef } from "react"
 
-import { withDataTestId } from "@/lib/data-test-id"
+import { withDataTestId } from "@/lib/data-testid"
 
 import { ButtonInternal } from "./internal"
 import { ButtonInternalProps } from "./internal-types"

@@ -1,6 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { useState } from "react"
+import { expect, within } from "storybook/test"
+
+import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
 
 import { OnePagination } from "./index"
 
@@ -56,6 +59,7 @@ const meta: Meta<typeof OnePagination> = {
       defaultValue: { summary: false },
       control: "boolean",
     },
+    ...dataTestIdArgs,
   },
   tags: ["autodocs", "experimental"],
 }
@@ -73,6 +77,31 @@ export const Default: Story = {
         onPageChange={setCurrentPage}
       />
     )
+  },
+}
+
+export const WithDataTestId: Story = {
+  args: {
+    totalPages: 10,
+    currentPage: 1,
+    showControls: true,
+    dataTestId: "my-test-pagination",
+  },
+  render: (args) => {
+    const [currentPage, setCurrentPage] = useState(args.currentPage)
+    return (
+      <OnePagination
+        {...args}
+        currentPage={currentPage}
+        onPageChange={setCurrentPage}
+      />
+    )
+  },
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const canvas = within(canvasElement)
+    const nav = canvas.getByRole("navigation")
+    const root = nav.closest("[data-test-id]")
+    await expect(root).toHaveAttribute("data-test-id", "my-test-pagination")
   },
 }
 

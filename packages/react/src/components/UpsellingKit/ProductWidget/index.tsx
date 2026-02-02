@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 
 import { ButtonVariant, F0Button } from "@/components/F0Button"
+import { withDataTestId } from "@/lib/data-testid"
 import CrossIcon from "@/icons/app/Cross"
 import { Card, CardContent, CardFooter } from "@/ui/Card"
 import { Label } from "@/ui/label"
@@ -47,7 +48,7 @@ type ProductWidgetProps = {
   showConfirmation?: boolean
 }
 
-export function ProductWidget({
+function _ProductWidget({
   mediaUrl,
   title,
   description,
@@ -154,3 +155,5 @@ export function ProductWidget({
     </>
   )
 }
+
+export const ProductWidget = withDataTestId(_ProductWidget)

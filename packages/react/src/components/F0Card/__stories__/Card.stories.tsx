@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import image from "@storybook-static/avatars/person04.jpg"
 import { useState } from "react"
-import { fn } from "storybook/test"
+import { expect, fn, within } from "storybook/test"
 
 import {
   Add,
@@ -19,6 +19,7 @@ import {
   Star,
 } from "@/icons/app"
 import { createAtlaskitDriver } from "@/lib/dnd/atlaskitDriver"
+import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
 import { DndProvider } from "@/lib/dnd/context"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { mockImage } from "@/testing/mocks/images"
@@ -77,6 +78,7 @@ const meta = {
         defaultValue: { summary: "sm" },
       },
     },
+    ...dataTestIdArgs,
   },
   args: {
     imageFit: "fit-width",
@@ -169,6 +171,19 @@ export const Default: Story = {
         critical: true,
       },
     ],
+  },
+}
+
+export const WithDataTestId: Story = {
+  args: {
+    ...Default.args,
+    title: "Card with Test ID",
+    dataTestId: "my-test-card",
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const card = canvas.getByText("Card with Test ID").closest("[data-test-id]")
+    await expect(card).toHaveAttribute("data-test-id", "my-test-card")
   },
 }
 

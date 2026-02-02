@@ -1,5 +1,6 @@
 import { forwardRef } from "react"
 
+import { withDataTestId } from "@/lib/data-testid"
 import { Text, TextProps, type TextTags } from "@/ui/Text"
 
 const _allowedVariants = [
@@ -17,8 +18,10 @@ export type F0TextProps = Omit<TextProps, "className" | "variant" | "as"> & {
   markdown?: boolean
 }
 
-export const F0Text = forwardRef<HTMLElement, F0TextProps>((props, ref) => {
+const _F0Text = forwardRef<HTMLElement, F0TextProps>((props, ref) => {
   return <Text ref={ref} markdown={props.markdown ?? true} {...props} />
 })
 
-F0Text.displayName = "F0Text"
+_F0Text.displayName = "F0Text"
+
+export const F0Text = withDataTestId(_F0Text)

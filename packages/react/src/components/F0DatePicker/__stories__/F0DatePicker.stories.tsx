@@ -3,9 +3,10 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { subDays } from "date-fns"
 import MockDate from "mockdate"
 import { useState } from "react"
-import { fn } from "storybook/test"
+import { expect, fn, within } from "storybook/test"
 
 import { Placeholder } from "@/icons/app"
+import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
 import { withSkipA11y, withSnapshot } from "@/lib/storybook-utils/parameters"
 import { getInputFieldArgs } from "@/ui/InputField/__stories__/InputField.args"
 
@@ -96,6 +97,7 @@ const meta = {
       },
     },
     ...getInputFieldArgs(inputFieldInheritedProps),
+    ...dataTestIdArgs,
   },
   tags: ["autodocs", "experimental"],
   decorators: [
@@ -154,6 +156,21 @@ export const Default: Story = {
   args: {
     label: "Date",
     placeholder: "Select a date",
+  },
+}
+
+export const WithDataTestId: Story = {
+  args: {
+    label: "DatePicker with Test ID",
+    placeholder: "Select a date",
+    dataTestId: "my-test-date-picker",
+  } as Story["args"] & { dataTestId: string },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const root = canvas
+      .getByLabelText("DatePicker with Test ID")
+      .closest("[data-test-id]")
+    await expect(root).toHaveAttribute("data-test-id", "my-test-date-picker")
   },
 }
 

@@ -3,6 +3,8 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useState } from "react"
 import { expect, within } from "storybook/test"
 
+import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
+
 import { F0Checkbox } from "../F0Checkbox"
 
 const meta = {
@@ -49,6 +51,7 @@ const meta = {
       control: "text",
       description: "The value of the checkbox",
     },
+    ...dataTestIdArgs,
   },
 } satisfies Meta<typeof F0Checkbox>
 
@@ -71,6 +74,26 @@ export const Default: Story = {
 
     const checkbox = canvas.getByRole("checkbox")
     await expect(checkbox.dataset.test).toBe("foo")
+  },
+}
+
+export const WithDataTestId: Story = {
+  args: {
+    title: "Checkbox with Test ID",
+    dataTestId: "my-test-checkbox",
+  },
+  render: (args) => {
+    const [checked, setChecked] = useState(false)
+    return (
+      <F0Checkbox {...args} checked={checked} onCheckedChange={setChecked} />
+    )
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const checkbox = canvas.getByRole("checkbox", {
+      name: "Checkbox with Test ID",
+    })
+    await expect(checkbox).toHaveAttribute("data-test-id", "my-test-checkbox")
   },
 }
 

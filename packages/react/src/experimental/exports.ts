@@ -1,4 +1,5 @@
 import { Component } from "@/lib/component"
+import { withDataTestId } from "@/lib/data-testid"
 
 import {
   F0Select as Select,
@@ -37,10 +38,12 @@ export * from "./Widgets/exports"
  */
 export { Select, type SelectItemObject, type SelectItemProps, type SelectProps }
 
-export const ScrollArea = Component(
-  {
-    name: "ScrollArea",
-    type: "layout",
-  },
-  ScrollAreaComponent
+export const ScrollArea = withDataTestId(
+  Component(
+    {
+      name: "ScrollArea",
+      type: "layout",
+    },
+    ScrollAreaComponent
+  )
 )

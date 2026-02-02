@@ -1,5 +1,7 @@
 import { ReactNode, useEffect, useState } from "react"
 
+import { withDataTestId } from "@/lib/data-testid"
+
 type AwaitProps<T> = {
   resolve: Promise<T> | T
   fallback: ReactNode
@@ -8,7 +10,7 @@ type AwaitProps<T> = {
   children: (value: T) => ReactNode
 }
 
-export const Await = <T,>({
+const _Await = <T,>({
   resolve,
   fallback,
   error: errorFallback,
@@ -48,3 +50,5 @@ export const Await = <T,>({
   }
   return null
 }
+
+export const Await = withDataTestId(_Await)

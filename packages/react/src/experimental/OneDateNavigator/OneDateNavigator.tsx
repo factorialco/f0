@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react"
 
+import { withDataTestId } from "@/lib/data-testid"
 import { useL10n } from "@/lib/providers/l10n"
 import {
   DatePickerPopup,
@@ -24,7 +25,7 @@ export interface OneDatePickerProps extends Omit<
   hideGoToCurrent?: boolean
 }
 
-export function OneDateNavigator({
+function _OneDateNavigator({
   onSelect,
   defaultValue,
   presets = [],
@@ -116,3 +117,5 @@ export function OneDateNavigator({
     </DatePickerPopup>
   )
 }
+
+export const OneDateNavigator = withDataTestId(_OneDateNavigator)

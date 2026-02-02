@@ -1,6 +1,7 @@
 import { forwardRef } from "react"
 
 import { F0Button } from "@/components/F0Button"
+import { withDataTestId } from "@/lib/data-testid"
 import { IconType } from "@/components/F0Icon"
 import {
   BaseBanner,
@@ -34,7 +35,7 @@ type UpsellingBannerProps = Omit<
   secondaryAction?: DefaultAction | PromoteAction
 }
 
-export const UpsellingBanner = forwardRef<HTMLDivElement, UpsellingBannerProps>(
+const _UpsellingBanner = forwardRef<HTMLDivElement, UpsellingBannerProps>(
   function UpsellingBanner(
     { primaryAction, secondaryAction, ...baseProps },
     ref
@@ -90,4 +91,6 @@ export const UpsellingBanner = forwardRef<HTMLDivElement, UpsellingBannerProps>(
   }
 )
 
-UpsellingBanner.displayName = "UpsellingBanner"
+_UpsellingBanner.displayName = "UpsellingBanner"
+
+export const UpsellingBanner = withDataTestId(_UpsellingBanner)

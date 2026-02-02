@@ -1,6 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { fn } from "storybook/test"
+import { expect, fn, within } from "storybook/test"
+
+import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
 
 import { F0Alert } from "../F0Alert"
 
@@ -30,6 +32,7 @@ const meta: Meta<typeof F0Alert> = {
       options: ["info", "warning", "critical", "neutral", "positive"],
       description: "Variant for the alert composition",
     },
+    ...dataTestIdArgs,
   },
   decorators: [
     (Story) => (
@@ -104,4 +107,24 @@ export const DeactivatedAction: Story = {
       <F0Alert {...args} />
     </div>
   ),
+}
+
+export const WithDataTestId: Story = {
+  args: {
+    ...Default.args,
+    title: "Alert with Test ID",
+    dataTestId: "my-test-alert",
+  },
+  render: (args) => (
+    <div className="w-[640px]">
+      <F0Alert {...args} />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const alert = canvas
+      .getByText("Alert with Test ID")
+      .closest("[data-test-id]")
+    await expect(alert).toHaveAttribute("data-test-id", "my-test-alert")
+  },
 }

@@ -6,7 +6,7 @@ import * as WithDataTestIdStories from "./withDataTestId.stories"
 
 # withDataTestId
 
-`withDataTestId` is a Higher-Order Component (HOC) utility that wraps React components to automatically add `data-test-id` attributes. This allows consumers to set test IDs at runtime, which is particularly useful for end-to-end testing.
+`withDataTestId` is a Higher-Order Component (HOC) utility that wraps React components to automatically add `data-testid` attributes. This allows consumers to set test IDs at runtime, which is particularly useful for end-to-end testing.
 
 ## Usage
 
@@ -15,9 +15,7 @@ Wrap your component with `withDataTestId` before exporting it.
 ```tsx
 import { withDataTestId } from "@f0/react"
 
-const MyComponent = ({ children, ...props }) => (
-  <div {...props}>{children}</div>
-)
+const MyComponent = ({ children, ...props }) => <div {...props}>{children}</div>
 
 export const MyComponentWithTestId = withDataTestId(MyComponent)
 ```
@@ -33,7 +31,7 @@ Then use it in your application:
 This will render:
 
 ```html
-<div data-test-id="my-component-123">Content</div>
+<div data-testid="my-component-123">Content</div>
 ```
 
 ## Examples
@@ -51,9 +49,9 @@ This will render:
 
 The HOC adds a single prop to the wrapped component:
 
-| Prop | Type | Description |
-| :--- | :--- | :--- |
-| `dataTestId` | `string` | The value for the `data-test-id` attribute. |
+| Prop         | Type     | Description                                |
+| :----------- | :------- | :----------------------------------------- |
+| `dataTestId` | `string` | The value for the `data-testid` attribute. |
 
 ## Features
 

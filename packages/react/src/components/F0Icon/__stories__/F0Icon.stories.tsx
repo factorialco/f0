@@ -2,12 +2,14 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { useState } from "react"
 import { ComponentProps } from "react"
+import { expect } from "storybook/test"
 
 import * as AIIcons from "@/icons/ai"
 import * as AnimatedIcons from "@/icons/animated"
 import * as Icons from "@/icons/app"
 import * as ModuleIcons from "@/icons/modules"
 import * as SpecialIcons from "@/icons/special"
+import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
 
 import { F0Icon } from "../index"
 
@@ -26,6 +28,7 @@ const meta = {
       options: ["xs", "sm", "md", "lg"],
       description: "Size of the icon",
     },
+    ...dataTestIdArgs,
   },
   parameters: {
     layout: "centered",
@@ -40,6 +43,19 @@ export const App: Story = {
   args: {
     size: "lg",
     icon: Icons.ChartLine,
+  },
+}
+
+export const WithDataTestId: Story = {
+  args: {
+    size: "lg",
+    icon: Icons.ChartLine,
+    dataTestId: "my-test-icon",
+  },
+  play: async ({ canvasElement }) => {
+    const root = canvasElement.querySelector("[data-test-id='my-test-icon']")
+    await expect(root).toBeInTheDocument()
+    await expect(root).toHaveAttribute("data-test-id", "my-test-icon")
   },
 }
 

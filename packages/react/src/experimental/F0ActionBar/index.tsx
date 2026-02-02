@@ -2,6 +2,7 @@ import { AnimatePresence, motion } from "motion/react"
 import { Fragment, useCallback, useMemo } from "react"
 
 import { F0Button } from "@/components/F0Button"
+import { withDataTestId } from "@/lib/data-testid"
 import {
   ButtonDropdownGroup,
   F0ButtonDropdown,
@@ -77,7 +78,7 @@ interface F0ActionBarProps {
   label?: string
 }
 
-export const F0ActionBar = ({
+const _F0ActionBar = ({
   isOpen,
   secondaryActions = [],
   label,
@@ -215,3 +216,5 @@ export const F0ActionBar = ({
     </AnimatePresence>
   )
 }
+
+export const F0ActionBar = withDataTestId(_F0ActionBar)

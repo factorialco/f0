@@ -4,7 +4,7 @@ import React from "react"
 import { expect, within } from "storybook/test"
 
 import { Add, Archive, Delete, Save } from "@/icons/app"
-import { dataTestIdArgs } from "@/lib/data-test-id/__stories__/args"
+import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { navTargets } from "@/ui/Action"
 
@@ -434,5 +434,10 @@ export const WithDataTestId: Story = {
   args: {
     dataTestId: "my-test-button",
     label: "Button with Test ID",
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const button = canvas.getByRole("button", { name: "Button with Test ID" })
+    await expect(button).toHaveAttribute("data-testid", "my-test-button")
   },
 }

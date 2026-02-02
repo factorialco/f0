@@ -1,0 +1,62 @@
+import { Meta } from "@storybook/addon-docs/blocks"
+
+<Meta title="Data Test ID" />
+
+# Using dataTestId
+
+All public F0 components support a `dataTestId` prop so you can attach stable selectors for end-to-end and integration tests. The value you pass is rendered as the `data-testid` attribute on the component’s root element.
+
+## Why use it?
+
+- **Stable selectors**: Avoid relying on labels, classes, or DOM structure that may change.
+- **Clear intent**: Test IDs make it obvious which elements are used in tests.
+- **Consistent API**: The same prop works across F0 components.
+
+## Usage
+
+Pass `dataTestId` to any F0 component that supports it (all public components do):
+
+```tsx
+import { F0Button } from "@factorialco/f0"
+;<F0Button label="Submit" dataTestId="submit-button" />
+```
+
+This renders:
+
+```html
+<button data-testid="submit-button" ...>Submit</button>
+```
+
+In your tests, query by that attribute:
+
+```tsx
+// With Testing Library
+const button = screen.getByTestId("submit-button")
+
+// Or by attribute
+const button = document.querySelector('[data-testid="submit-button"]')
+```
+
+## Naming
+
+- Use short, descriptive IDs: `submit-button`, `user-menu`, `table-row-1`.
+- Prefer kebab-case: `dataTestId="date-picker-trigger"`.
+- Keep IDs stable across releases so tests don’t break when copy or layout changes.
+
+## Optional prop
+
+`dataTestId` is optional. If you omit it, no `data-testid` attribute is rendered. Use it only where you need a test selector.
+
+## Advanced: wrapping your own components
+
+To add the same behavior to your own components, use the `withDataTestId` HOC from F0:
+
+```tsx
+import { withDataTestId } from "@factorialco/f0"
+
+const MyCard = ({ children, ...props }) => <div {...props}>{children}</div>
+
+export const MyCardWithTestId = withDataTestId(MyCard)
+```
+
+See **Library / withDataTestId** in the sidebar for the full API and examples.

@@ -1,5 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
+import { expect, within } from "storybook/test"
+
+import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import { F0Text } from "../index"
@@ -42,6 +45,7 @@ const meta = {
         defaultValue: { summary: "true" },
       },
     },
+    ...dataTestIdArgs,
   },
   decorators: [
     (Story) => (
@@ -61,6 +65,19 @@ export const Default: Story = {
   args: {
     variant: "body",
     content: "This is a text wrapped in the Text component.",
+  },
+}
+
+export const WithDataTestId: Story = {
+  args: {
+    variant: "body",
+    content: "Text with Test ID",
+    dataTestId: "my-test-text",
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const text = canvas.getByText("Text with Test ID")
+    await expect(text).toHaveAttribute("data-test-id", "my-test-text")
   },
 }
 

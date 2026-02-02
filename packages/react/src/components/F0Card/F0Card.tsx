@@ -1,5 +1,6 @@
 import { forwardRef } from "react"
 
+import { withDataTestId } from "@/lib/data-testid"
 import { withSkeleton } from "@/lib/skeleton"
 
 import {
@@ -34,4 +35,4 @@ const F0CardSkeleton = ({ compact = false }: { compact?: boolean }) => {
 
 F0CardBase.displayName = "F0Card"
 
-export const F0Card = withSkeleton(F0CardBase, F0CardSkeleton)
+export const F0Card = withDataTestId(withSkeleton(F0CardBase, F0CardSkeleton))

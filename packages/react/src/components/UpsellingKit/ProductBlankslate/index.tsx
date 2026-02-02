@@ -6,6 +6,7 @@ import { F0Icon, IconType } from "@/components/F0Icon"
 import { F0TagRaw } from "@/components/tags/F0TagRaw"
 import { F0TagStatus, Variant } from "@/components/tags/F0TagStatus"
 import { CheckCircle } from "@/icons/app"
+import { withDataTestId } from "@/lib/data-testid"
 import { cn } from "@/lib/utils"
 
 type ProductBlankslateProps = {
@@ -46,10 +47,7 @@ const BenefitItem = ({ text }: BenefitItemProps) => (
   </div>
 )
 
-export const ProductBlankslate = forwardRef<
-  HTMLDivElement,
-  ProductBlankslateProps
->(
+const _ProductBlankslate = forwardRef<HTMLDivElement, ProductBlankslateProps>(
   (
     {
       title,
@@ -115,4 +113,6 @@ export const ProductBlankslate = forwardRef<
   }
 )
 
-ProductBlankslate.displayName = "ProductBlankslate"
+_ProductBlankslate.displayName = "ProductBlankslate"
+
+export const ProductBlankslate = withDataTestId(_ProductBlankslate)

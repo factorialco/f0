@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { ComponentProps } from "react"
 import { expect, within } from "storybook/test"
 
+import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import { F0Link } from ".."
@@ -28,6 +29,7 @@ const meta = {
       control: "text",
       description: "The tooltip to show when the link is hovered.",
     },
+    ...dataTestIdArgs,
   },
   args: {
     children: "Link",
@@ -51,6 +53,24 @@ export const Default: Story = {
       Do not click this <F0Link {...args} /> because it goes nowhere.
     </p>
   ),
+}
+
+export const WithDataTestId: Story = {
+  args: {
+    children: "Link with Test ID",
+    href: "/foo",
+    dataTestId: "my-test-link",
+  },
+  render: (args) => (
+    <p>
+      <F0Link {...args} />
+    </p>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const link = canvas.getByRole("link", { name: "Link with Test ID" })
+    await expect(link).toHaveAttribute("data-test-id", "my-test-link")
+  },
 }
 
 export const States: Story = {
