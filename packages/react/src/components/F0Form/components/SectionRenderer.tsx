@@ -98,7 +98,7 @@ export function SectionRenderer({ section }: SectionRendererProps) {
 
   return (
     <section id={anchorId} className="flex flex-col scroll-mt-4">
-      <div className="[&>div]:px-0 [&>div]:border-0 py-5">
+      <div className="[&>div]:px-0.5 [&>div]:mx-0 [&>div]:border-0 py-5">
         <SectionHeader title={title} description={description ?? ""} />
       </div>
       <div className={`flex flex-col ${FIELD_GAP}`}>
