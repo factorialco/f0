@@ -38,6 +38,14 @@ export type RejectedFile = {
 }
 
 /**
+ * A file that failed during upload to storage
+ */
+export type FailedFileUpload = {
+  file: File
+  error: string
+}
+
+/**
  * Configuration for file validation
  */
 export type FileValidationConfig = {
@@ -94,6 +102,10 @@ export interface AiChatState {
    * Callback when files are rejected during attachment validation
    */
   onFilesRejected?: (rejectedFiles: RejectedFile[]) => void
+  /**
+   * Callback when file uploads fail while sending a message
+   */
+  onUploadFailed?: (failedUploads: FailedFileUpload[]) => void
   /**
    * Callback to upload a file to storage (e.g., S3).
    * Called for each file attachment when a message is sent.

@@ -4,6 +4,7 @@ import { type AIMessage } from "@copilotkit/shared"
 import { IconType } from "@/components/F0Icon"
 
 import {
+  FailedFileUpload,
   FileUploadResult,
   FileValidationConfig,
   RejectedFile,
@@ -33,6 +34,10 @@ export type AiChatProviderProps = {
    * Callback when files are rejected during attachment validation
    */
   onFilesRejected?: (rejectedFiles: RejectedFile[]) => void
+  /**
+   * Callback when file uploads fail while sending a message
+   */
+  onUploadFailed?: (failedUploads: FailedFileUpload[]) => void
   /**
    * Callback to upload a file to storage (e.g., S3).
    * Called for each file attachment when a message is sent.

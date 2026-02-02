@@ -17,6 +17,7 @@ import { useI18n } from "@/lib/providers/i18n"
 import {
   AiChatProviderReturnValue,
   AiChatState,
+  FailedFileUpload,
   RejectedFile,
   UploadingFile,
 } from "../internal-types"
@@ -36,6 +37,7 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   onThumbsUp,
   fileValidation,
   onFilesRejected,
+  onUploadFailed,
   onUploadFile,
   ...rest
 }) => {
@@ -69,6 +71,7 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   const sendMessageFunctionRef = useRef<((message: Message) => void) | null>(
     null
   )
+  const isSendingMessageRef = useRef(false)
   // Store the file input ref from ChatTextarea
   const fileInputRef = useRef<HTMLInputElement | null>(null)
 
@@ -206,98 +209,126 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   }, [])
 
   const sendMessage = async (message: string | Message) => {
-    if (!sendMessageFunctionRef.current) {
+    if (!sendMessageFunctionRef.current || isSendingMessageRef.current) {
       return
     }
 
-    // Ensure chat is open when sending a message
-    if (!open) {
-      setOpen(true)
-    }
+    isSendingMessageRef.current = true
 
-    // Get the message content for processing
-    const messageContent =
-      typeof message === "string" ? message : (message.content ?? "")
+    try {
+      // Ensure chat is open when sending a message
+      if (!open) {
+        setOpen(true)
+      }
 
-    let processedContent: string = messageContent
+      // Get the message content for processing
+      const messageContent =
+        typeof message === "string" ? message : (message.content ?? "")
 
-    // Upload attachments if onUploadFile is provided
-    if (attachments.length > 0 && onUploadFile) {
-      // Initialize uploading files state
-      setUploadingFiles(
-        attachments.map((f) => ({ file: f, progress: 0, status: "pending" }))
-      )
+      let processedContent: string = messageContent
 
-      const updateUploadingFile = (
-        index: number,
-        updates: Partial<UploadingFile>
-      ) => {
-        setUploadingFiles((prev) =>
-          prev.map((item, i) => (i === index ? { ...item, ...updates } : item))
+      // Upload attachments if onUploadFile is provided
+      if (attachments.length > 0 && onUploadFile) {
+        // Initialize uploading files state
+        setUploadingFiles(
+          attachments.map((f) => ({ file: f, progress: 0, status: "pending" }))
         )
+
+        const updateUploadingFile = (
+          index: number,
+          updates: Partial<UploadingFile>
+        ) => {
+          setUploadingFiles((prev) =>
+            prev.map((item, i) =>
+              i === index ? { ...item, ...updates } : item
+            )
+          )
+        }
+
+        const results = await Promise.all(
+          attachments.map(async (file, index) => {
+            try {
+              updateUploadingFile(index, { status: "uploading" })
+              const result = await onUploadFile(file, (progress) => {
+                updateUploadingFile(index, { progress })
+              })
+              updateUploadingFile(index, { status: "success", result })
+              return { file, result, success: true as const }
+            } catch (error) {
+              const errorMessage =
+                error instanceof Error ? error.message : String(error)
+              updateUploadingFile(index, {
+                status: "error",
+                error: errorMessage,
+              })
+              return { file, error: errorMessage, success: false as const }
+            }
+          })
+        )
+
+        const successful = results.filter((r) => r.success)
+        const failed = results.filter((r) => !r.success)
+
+        if (failed.length > 0 && onUploadFailed) {
+          const failedUploads: FailedFileUpload[] = failed.map((upload) => ({
+            file: upload.file,
+            error: upload.error,
+          }))
+          onUploadFailed(failedUploads)
+        }
+
+        if (successful.length > 0 || failed.length > 0) {
+          const attachmentsJson = JSON.stringify({
+            files: successful.map((upload) => ({
+              name: upload.file.name,
+              url: upload.result.url,
+              type: upload.file.type,
+              size: upload.file.size,
+            })),
+            failed_uploads: failed.map((upload) => ({
+              name: upload.file.name,
+              type: upload.file.type,
+              size: upload.file.size,
+              error: upload.error,
+            })),
+          })
+
+          const attachmentsBlock = `[ATTACHMENTS]\n${attachmentsJson}\n[/ATTACHMENTS]`
+          processedContent = messageContent
+            ? `${messageContent}\n\n${attachmentsBlock}`
+            : attachmentsBlock
+        }
+      } else if (attachments.length > 0) {
+        // Fallback: add [Attachment: filename] markers if no upload callback
+        const fileMarkers = attachments
+          .map((file) => `[Attachment: ${file.name}]`)
+          .join("\n")
+        processedContent = messageContent
+          ? `${messageContent}\n\n${fileMarkers}`
+          : fileMarkers
       }
 
-      const results = await Promise.all(
-        attachments.map(async (file, index) => {
-          try {
-            updateUploadingFile(index, { status: "uploading" })
-            const result = await onUploadFile(file, (progress) => {
-              updateUploadingFile(index, { progress })
-            })
-            updateUploadingFile(index, { status: "success", result })
-            return { file, result, success: true as const }
-          } catch (error) {
-            updateUploadingFile(index, {
-              status: "error",
-              error: String(error),
-            })
-            return { file, error, success: false as const }
-          }
-        })
-      )
+      // Construct the message
+      const messageToSend: Message =
+        typeof message === "string"
+          ? {
+              id: randomId(),
+              role: "user",
+              content: processedContent,
+            }
+          : {
+              ...message,
+              content: processedContent,
+            }
 
-      // Build message with file URLs
-      const successful = results.filter((r) => r.success)
-      if (successful.length > 0) {
-        const filesJson = JSON.stringify({
-          files: successful.map((u) => ({
-            name: u.file.name,
-            url: u.result.url,
-            type: u.file.type,
-            size: u.file.size,
-          })),
-        })
-        processedContent = `${messageContent}\n\n[ATTACHMENTS]\n${filesJson}\n[/ATTACHMENTS]`
-      }
+      sendMessageFunctionRef.current(messageToSend)
 
+      // Clear attachments after sending
+      clearAttachments()
+    } finally {
+      isSendingMessageRef.current = false
       setUploadingFiles([])
-    } else if (attachments.length > 0) {
-      // Fallback: add [Attachment: filename] markers if no upload callback
-      const fileMarkers = attachments
-        .map((file) => `[Attachment: ${file.name}]`)
-        .join("\n")
-      processedContent = messageContent
-        ? `${messageContent}\n\n${fileMarkers}`
-        : fileMarkers
     }
-
-    // Construct the message
-    const messageToSend: Message =
-      typeof message === "string"
-        ? {
-            id: randomId(),
-            role: "user",
-            content: processedContent,
-          }
-        : {
-            ...message,
-            content: processedContent,
-          }
-
-    sendMessageFunctionRef.current(messageToSend)
-
-    // Clear attachments after sending
-    clearAttachments()
   }
 
   useEffect(() => {

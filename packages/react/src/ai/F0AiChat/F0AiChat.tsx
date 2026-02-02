@@ -44,6 +44,7 @@ const F0AiChatProviderComponent = ({
   onThumbsDown,
   fileValidation,
   onFilesRejected,
+  onUploadFailed,
   onUploadFile,
   children,
   agent,
@@ -62,6 +63,7 @@ const F0AiChatProviderComponent = ({
       welcomeScreenSuggestions={welcomeScreenSuggestions}
       fileValidation={fileValidation}
       onFilesRejected={onFilesRejected}
+      onUploadFailed={onUploadFailed}
       onUploadFile={onUploadFile}
     >
       <AiChatKitWrapper {...copilotKitProps}>{children}</AiChatKitWrapper>

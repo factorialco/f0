@@ -20,6 +20,7 @@ export type {
   UploadingFile,
   FileRejectionReason,
   RejectedFile,
+  FailedFileUpload,
   FileValidationConfig,
 } from "./internal-types"
 
