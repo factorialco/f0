@@ -181,9 +181,6 @@ export type F0FieldConfig =
   | F0DateFieldConfig
   | F0ArrayConfig
   | F0ObjectConfig
-  | F0DateRangeFieldConfig
-  | F0RichTextFieldConfig
-  | F0CustomFieldConfig
 
 /**
  * Extended Zod type with F0 metadata
@@ -387,19 +384,12 @@ export function inferFieldType(
     }
   }
 
-  if (innerSchema instanceof z.ZodObject) {
-    // Check if fieldType is explicitly set to daterange
-    if ("fieldType" in config && config.fieldType === "daterange") {
-      return "daterange"
-    }
-    // Check if it's a richtext value shape
-    if ("fieldType" in config && config.fieldType === "richtext") {
-      return "richtext"
-    }
-    // Check if it has render function (custom field)
-    if ("render" in config && config.render) {
-      return "custom"
-    }
+  if (
+    innerSchema instanceof z.ZodObject &&
+    "render" in config &&
+    config.render
+  ) {
+    return "custom"
   }
 
   // Default to text
