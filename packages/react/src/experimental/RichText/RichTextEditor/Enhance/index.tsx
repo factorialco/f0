@@ -3,7 +3,7 @@ import { Editor } from "@tiptap/react"
 import { AnimatePresence, motion } from "motion/react"
 import { useRef, useState } from "react"
 
-import { AIButton } from "@/components/AIButton"
+import { ButtonInternal } from "@/components/F0Button/internal"
 import { Ai } from "@/icons/app"
 
 import { enhanceConfig } from "../utils/types"
@@ -59,7 +59,9 @@ const EnhanceActivator = ({
       }}
     >
       <Popover.Trigger asChild>
-        <AIButton
+        <ButtonInternal
+          pressed={open}
+          variant="ai"
           ref={enhanceButtonRef}
           icon={Ai}
           label={enhanceConfig?.enhanceLabels.enhanceButtonLabel ?? "Magic"}

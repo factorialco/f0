@@ -17,7 +17,10 @@ const LoadingEnhance = ({ label, isFullscreen }: LoadingEnhanceProps) => {
       )}
     >
       <motion.div
-        className="flex h-full w-full flex-row items-center justify-center gap-3 rounded-md"
+        className={cn(
+          "flex h-full w-full flex-row items-center justify-center gap-3 rounded-md",
+          isFullscreen && "max-w-[824px]"
+        )}
         style={{
           background:
             "linear-gradient(90deg, #E5561980, #A1ADE580, #E5194380, #E5561980)",

@@ -288,7 +288,7 @@ const RichTextEditorComponent = forwardRef<
             <motion.div
               className={cn(
                 "w-full overflow-hidden",
-                isFullscreen && "max-w-4xl"
+                isFullscreen && "max-w-[824px]"
               )}
               initial={false}
               animate={{
@@ -324,33 +324,37 @@ const RichTextEditorComponent = forwardRef<
           </AnimatePresence>
 
           <AnimatePresence>
-            {isFullscreen && isToolbarOpen && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 20 }}
-                transition={{ duration: 0.2, ease: "easeOut" }}
-                className="absolute bottom-10 left-0 right-0 z-[9998] flex w-full items-center justify-center"
-                style={{ pointerEvents: "none" }}
-              >
-                <div
-                  className="absolute -bottom-4 left-1/2 z-50 max-w-[calc(100%-48px)] -translate-x-1/2 rounded-lg bg-f1-background p-2 shadow-md"
-                  style={{ pointerEvents: "auto" }}
+            {isFullscreen &&
+              isToolbarOpen &&
+              !isLoadingEnhance &&
+              !isAcceptChangesOpen &&
+              !error && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 20 }}
+                  transition={{ duration: 0.2, ease: "easeOut" }}
+                  className="absolute bottom-10 left-0 right-0 z-[9998] flex w-full items-center justify-center"
+                  style={{ pointerEvents: "none" }}
                 >
-                  <Toolbar
-                    editor={editor}
-                    isFullscreen={isFullscreen}
-                    disableButtons={disableAllButtons}
-                    onClose={() => {
-                      setIsToolbarOpen(false)
-                      // Restore focus after state update to trigger BubbleMenu
-                      queueMicrotask(() => editor.commands.focus())
-                    }}
-                    plainHtmlMode={plainHtmlMode}
-                  />
-                </div>
-              </motion.div>
-            )}
+                  <div
+                    className="absolute -bottom-4 left-1/2 z-50 max-w-[calc(100%-48px)] -translate-x-1/2 rounded-lg bg-f1-background p-2 shadow-md"
+                    style={{ pointerEvents: "auto" }}
+                  >
+                    <Toolbar
+                      editor={editor}
+                      isFullscreen={isFullscreen}
+                      disableButtons={disableAllButtons}
+                      onClose={() => {
+                        setIsToolbarOpen(false)
+                        // Restore focus after state update to trigger BubbleMenu
+                        queueMicrotask(() => editor.commands.focus())
+                      }}
+                      plainHtmlMode={plainHtmlMode}
+                    />
+                  </div>
+                </motion.div>
+              )}
           </AnimatePresence>
         </div>
 
