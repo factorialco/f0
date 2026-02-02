@@ -1,5 +1,6 @@
 import { useMessageSourcesAction } from "./useMessageSourcesAction"
 import { useOrchestratorThinkingAction } from "./useOrchestratorThinkingAction"
+import { useTableExportAction } from "./useTableExportAction"
 
 /**
  * Hook to register all default copilot actions.
@@ -17,4 +18,5 @@ export const useDefaultCopilotActions = () => {
   // Each hook internally uses useCopilotAction to register the action
   useOrchestratorThinkingAction()
   useMessageSourcesAction()
+  useTableExportAction()
 }
