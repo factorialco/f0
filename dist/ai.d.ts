@@ -1,27 +1,25 @@
 import { AIMessage } from '@copilotkit/shared';
+import { AssistantMessageProps } from '@copilotkit/react-ui';
+import { Context } from 'react';
 import { CopilotKitProps } from '@copilotkit/react-core';
 import { ForwardRefExoticComponent } from 'react';
 import { JSX as JSX_2 } from 'react';
 import { Message } from '@copilotkit/shared';
+import { MessagesProps } from '@copilotkit/react-ui';
 import { ReactNode } from 'react';
 import { RefAttributes } from 'react';
 import { SVGProps } from 'react';
+import * as SwitchPrimitive from '@radix-ui/react-switch';
 
-export declare const ActionItem: ({ title, status, inGroup }: ActionItemProps) => JSX_2.Element;
+export declare function A({ children, ...props }: React.AnchorHTMLAttributes<HTMLAnchorElement>): JSX_2.Element;
 
-export declare interface ActionItemProps {
-    title: string;
-    status?: "inProgress" | "executing" | "completed";
-    inGroup?: boolean;
-}
+export declare type ActionItemStatus = (typeof actionItemStatuses)[number];
+
+export declare const actionItemStatuses: readonly ["inProgress", "executing", "completed"];
 
 /**
- * @experimental This is an experimental component use it at your own risk
+ * Props for the AiChatProvider component
  */
-export declare const AiChat: () => JSX_2.Element | null;
-
-export declare const AiChatProvider: ({ enabled, greeting, initialMessage, welcomeScreenSuggestions, onThumbsUp, onThumbsDown, children, agent, ...copilotKitProps }: AiChatProviderProps) => JSX_2.Element;
-
 export declare type AiChatProviderProps = {
     enabled?: boolean;
     greeting?: string;
@@ -37,6 +35,9 @@ export declare type AiChatProviderProps = {
     }) => void;
 } & Pick<CopilotKitProps, "agent" | "credentials" | "children" | "runtimeUrl" | "showDevConsole" | "threadId" | "headers">;
 
+/**
+ * Return value type for the useAiChat hook
+ */
 declare type AiChatProviderReturnValue = {
     enabled: boolean;
     setEnabled: React.Dispatch<React.SetStateAction<boolean>>;
@@ -83,6 +84,9 @@ declare type AiChatProviderReturnValue = {
     /* Excluded from this release type: setSendMessageFunction */
 } & Pick<AiChatState, "greeting" | "agent">;
 
+/**
+ * Internal state for the AiChat provider
+ */
 declare interface AiChatState {
     greeting?: string;
     enabled: boolean;
@@ -101,20 +105,24 @@ declare interface AiChatState {
     }) => void;
 }
 
+/**
+ * AI Chat translations type
+ */
 export declare type AiChatTranslations = TranslationShape<typeof aiTranslations>;
 
 export declare function AiChatTranslationsProvider({ children, translations, }: AiChatTranslationsProviderProps): JSX.Element;
 
+/**
+ * Props for the AiChatTranslationsProvider component
+ */
 export declare interface AiChatTranslationsProviderProps {
-    children: ReactNode;
+    children: React.ReactNode;
     translations: AiChatTranslations;
 }
 
 /**
- * @experimental This is an experimental component use it at your own risk
+ * Default AI chat translations
  */
-export declare const AiFullscreenChat: () => JSX_2.Element | null;
-
 export declare const aiTranslations: {
     ai: {
         openChat: string;
@@ -147,543 +155,321 @@ export declare const aiTranslations: {
     };
 };
 
-export declare const defaultTranslations: {
-    readonly countries: {
-        ad: string;
-        ae: string;
-        af: string;
-        ag: string;
-        ai: string;
-        al: string;
-        am: string;
-        ao: string;
-        ar: string;
-        as: string;
-        at: string;
-        au: string;
-        aw: string;
-        ax: string;
-        az: string;
-        ba: string;
-        bb: string;
-        bd: string;
-        be: string;
-        bf: string;
-        bg: string;
-        bh: string;
-        bi: string;
-        bj: string;
-        bm: string;
-        bo: string;
-        br: string;
-        bt: string;
-        bw: string;
-        by: string;
-        bz: string;
-        ca: string;
-        cd: string;
-        cf: string;
-        cg: string;
-        ch: string;
-        ci: string;
-        ck: string;
-        cl: string;
-        cm: string;
-        cn: string;
-        co: string;
-        cr: string;
-        cu: string;
-        cv: string;
-        cw: string;
-        cy: string;
-        cz: string;
-        de: string;
-        dj: string;
-        dk: string;
-        dm: string;
-        do: string;
-        dz: string;
-        ec: string;
-        ee: string;
-        eg: string;
-        er: string;
-        es: string;
-        et: string;
-        fi: string;
-        fj: string;
-        fk: string;
-        fm: string;
-        fo: string;
-        fr: string;
-        ga: string;
-        gb: string;
-        gd: string;
-        ge: string;
-        gg: string;
-        gh: string;
-        gi: string;
-        gl: string;
-        gm: string;
-        gn: string;
-        gq: string;
-        gr: string;
-        gt: string;
-        gu: string;
-        gw: string;
-        hk: string;
-        hn: string;
-        hr: string;
-        ht: string;
-        hu: string;
-        id: string;
-        ie: string;
-        il: string;
-        im: string;
-        in: string;
-        io: string;
-        iq: string;
-        ir: string;
-        is: string;
-        it: string;
-        je: string;
-        jm: string;
-        jo: string;
-        jp: string;
-        ke: string;
-    };
-    readonly approvals: {
-        readonly history: "Approval history";
-        readonly statuses: {
-            readonly waiting: "Waiting";
-            readonly pending: "Pending";
-            readonly approved: "Approved";
-            readonly rejected: "Rejected";
-        };
-        readonly requiredNumbers: {
-            readonly one: "One approval required";
-            readonly other: "{{count}} approvals required";
-        };
-    };
-    readonly navigation: {
-        readonly sidebar: {
-            readonly label: "Main navigation";
-            readonly companySelector: {
-                readonly label: "Select a company";
-                readonly placeholder: "Select a company";
-            };
-        };
-        readonly previous: "Previous";
-        readonly next: "Next";
-    };
-    readonly inputs: {
-        readonly password: {
-            readonly show: "Show password";
-            readonly hide: "Hide password";
-        };
-    };
-    readonly actions: {
-        readonly add: "Add";
-        readonly edit: "Edit";
-        readonly save: "Save";
-        readonly send: "Send";
-        readonly cancel: "Cancel";
-        readonly delete: "Delete";
-        readonly copy: "Copy";
-        readonly paste: "Paste";
-        readonly close: "Close";
-        readonly collapse: "Collapse";
-        readonly expand: "Expand";
-        readonly showAll: "Show all";
-        readonly showLess: "Show less";
-        readonly skipToContent: "Skip to content";
-        readonly view: "View";
-        readonly unselect: "Unselect";
-        readonly search: "Search";
-        readonly clear: "Clear";
-        readonly more: "More";
-        readonly moveUp: "Move up";
-        readonly moveDown: "Move down";
-        readonly thumbsUp: "Like";
-        readonly thumbsDown: "Dislike";
-        readonly other: "Other actions";
-        readonly toggle: "Toggle";
-        readonly toggleDropdownMenu: "Toggle dropdown menu";
-        readonly selectAll: "Select all";
-    };
-    readonly status: {
-        readonly selected: {
-            readonly singular: "Selected";
-            readonly plural: "Selected";
-            readonly all: "All selected";
-        };
-    };
-    readonly syncStatus: {
-        readonly synced: "Sync completed successfully.";
-        readonly syncing: "Sync in progress.";
-        readonly pending: "Not yet started.";
-        readonly partiallySynced: "All aggregated data was synced but at least 1 failed.";
-        readonly outdated: "Data might need to be synced again.";
-        readonly failed: "Sync failed.";
-    };
-    readonly filters: {
-        readonly searchPlaceholder: "Search filters...";
-        readonly inFilter: {
-            readonly searchPlaceholder: "Search options...";
-        };
-        readonly activeFilters: "Active filters: {{filters}}";
-        readonly filteringBy: "Filtering by {{label}}";
-        readonly availableFilters: "Available filters";
-        readonly label: "Filters";
-        readonly applyFilters: "Apply filters";
-        readonly applySelection: "Apply selection";
-        readonly cancel: "Cancel";
-        readonly failedToLoadOptions: "Failed to load options";
-        readonly retry: "Retry";
-        readonly number: {
-            readonly value: "Value";
-            readonly equal: "Equal to";
-            readonly equalTo: "Equal to {{value}}";
-            readonly lessOrEqual: "Less or equal to";
-            readonly lessThan: "Less than";
-            readonly greaterOrEqual: "Greater or equal to";
-            readonly greaterThan: "Greater than";
-            readonly equalShort: "= {{value}}";
-            readonly greaterThanOrEqualShort: ">= {{value}}";
-            readonly greaterThanShort: "> {{value}}";
-            readonly lessThanOrEqualShort: "<= {{value}}";
-            readonly lessThanShort: "< {{value}}";
-            readonly rangeTitle: "Use range";
-            readonly range: "{{minStrict}} {{min}} and {{maxStrict}} {{max}}";
-        };
-        readonly search: {
-            readonly relaxed: "Relaxed";
-            readonly strict: "Strict";
-        };
-        readonly selectAll: "Select all";
-        readonly clear: "Clear";
-    };
-    readonly toc: {
-        readonly search: "Search...";
-    };
-    readonly collections: {
-        readonly sorting: {
-            readonly noSorting: "No sorting";
-            readonly toggleDirection: "Toggle sorting direction";
-            readonly sortBy: "Sort by";
-        };
-        readonly grouping: {
-            readonly noGrouping: "No grouping";
-            readonly groupBy: "Group by";
-            readonly toggleDirection: "Toggle direction";
-        };
-        readonly actions: {
-            readonly actions: "Actions";
-        };
-        readonly visualizations: {
-            readonly table: "Table view";
-            readonly card: "Card view";
-            readonly list: "List view";
-            readonly kanban: "Kanban view";
-            readonly pagination: {
-                readonly of: "of";
-            };
-            readonly settings: "{{visualizationName}} settings";
-            readonly reset: "Reset to default";
-        };
-        readonly table: {
-            readonly settings: {
-                readonly showAllColumns: "Show all";
-                readonly hideAllColumns: "Hide all";
-            };
-        };
-        readonly itemsCount: "items";
-        readonly emptyStates: {
-            readonly noData: {
-                readonly title: "No data";
-                readonly description: "No data available";
-            };
-            readonly noResults: {
-                readonly title: "No results";
-                readonly description: "No results found try another search or clear the filters";
-                readonly clearFilters: "Clear filters";
-            };
-            readonly error: {
-                readonly title: "Error";
-                readonly description: "An error occurred while loading the data";
-                readonly retry: "Retry";
-            };
-        };
-        readonly summaries: {
-            readonly types: {
-                readonly sum: "sum";
-            };
-        };
-    };
-    readonly shortcut: "Shortcut";
-    readonly date: {
-        readonly from: "From";
-        readonly to: "To";
-        readonly none: "None";
-        readonly date: "Date";
-        readonly custom: "Custom period";
-        readonly selectDate: "Select Date";
-        readonly compareTo: "Compare to";
-        readonly presets: {
-            readonly last7Days: "Last 7 days";
-            readonly last30Days: "Last 30 days";
-            readonly last3Months: "Last 3 months";
-            readonly last6Months: "Last 6 months";
-            readonly lastYear: "Last year";
-            readonly last3Years: "Last 3 years";
-            readonly last100Years: "Last 100 years";
-        };
-        readonly range: "Range";
-        readonly selectedBy: "Selected by";
-        readonly groups: {
-            readonly today: "Today";
-            readonly yesterday: "Yesterday";
-            readonly lastWeek: "Last week";
-            readonly lastMonth: "Last month";
-            readonly other: "Other";
-        };
-        readonly granularities: {
-            readonly day: {
-                readonly currentDate: "Today";
-                readonly label: "Day";
-            };
-            readonly week: {
-                readonly currentDate: "This week";
-                readonly label: "Week";
-                readonly long: "Week of {{day}} {{month}} {{year}}";
-                readonly longSingular: "Week of {{date}}";
-                readonly longPlural: "Weeks of {{date}}";
-            };
-            readonly month: {
-                readonly currentDate: "This month";
-                readonly label: "Month";
-            };
-            readonly quarter: {
-                readonly currentDate: "This quarter";
-                readonly label: "Quarter";
-            };
-            readonly halfyear: {
-                readonly currentDate: "This half year";
-                readonly label: "Half year";
-            };
-            readonly year: {
-                readonly currentDate: "This year";
-                readonly label: "Year";
-            };
-            readonly range: {
-                readonly currentDate: "Today";
-                readonly label: "Range";
-            };
-        };
-        readonly month: {
-            readonly january: "January";
-            readonly february: "February";
-            readonly march: "March";
-            readonly april: "April";
-            readonly may: "May";
-            readonly june: "June";
-            readonly july: "July";
-            readonly august: "August";
-            readonly september: "September";
-            readonly october: "October";
-            readonly november: "November";
-            readonly december: "December";
-        };
-    };
-    readonly favorites: {
-        readonly favorites: "Favorites";
-        readonly remove: "Remove favorite";
-    };
-    readonly notifications: "Notifications";
-    readonly ai: {
-        readonly openChat: "Open Chat with One AI";
-        readonly closeChat: "Close Chat with One AI";
-        readonly startNewChat: "Start new chat";
-        readonly scrollToBottom: "Scroll to bottom";
-        readonly welcome: "Ask or create with One";
-        readonly defaultInitialMessage: "How can I help you today?";
-        readonly inputPlaceholder: "Ask about time, people, or company info and a lot of other things...";
-        readonly stopAnswerGeneration: "Stop generating";
-        readonly sendMessage: "Send message";
-        readonly thoughtsGroupTitle: "Reflection";
-        readonly resourcesGroupTitle: "Resources";
-        readonly thinking: "Thinking...";
-        readonly exportTable: "Download table";
-        readonly generatedTableFilename: "OneGeneratedTable";
-        readonly feedbackModal: {
-            readonly positive: {
-                readonly title: "What did you like about this response?";
-                readonly label: "Your feedback helps us make Factorial AI better";
-                readonly placeholder: "Share what worked well";
-            };
-            readonly negative: {
-                readonly title: "What could have been better?";
-                readonly label: "Your feedback helps us improve future answers";
-                readonly placeholder: "Share what didn’t work";
-            };
-        };
-        readonly ask: "Ask One";
-    };
-    readonly select: {
-        readonly noResults: "No results found";
-        readonly loadingMore: "Loading...";
-    };
-    readonly numberInput: {
-        readonly between: "It should be between {{min}} and {{max}}";
-        readonly greaterThan: "It should be greater than {{min}}";
-        readonly lessThan: "It should be less than {{max}}";
-    };
-    readonly imageUpload: {
-        readonly uploading: "Uploading...";
-        readonly uploadError: "Upload failed";
-        readonly insertImage: "Image";
-        readonly deleteImage: "Delete";
-        readonly errors: {
-            readonly fileTooLarge: "The file is too large";
-            readonly invalidType: "Invalid file type. Only images are allowed";
-            readonly uploadFailed: "Failed to upload image. Please try again";
-            readonly dismiss: "Dismiss";
-        };
-    };
-    readonly coCreationForm: {
-        readonly actions: {
-            readonly actions: "Actions";
-            readonly duplicateQuestion: "Duplicate question";
-            readonly deleteQuestion: "Delete question";
-            readonly duplicateSection: "Duplicate section";
-            readonly deleteSection: "Delete section";
-        };
-        readonly questionTypes: {
-            readonly section: "Section";
-            readonly rating: "Rating";
-            readonly multipleChoice: "Multiple choice";
-            readonly singleChoice: "Single choice";
-            readonly text: "Text";
-            readonly longText: "Long text";
-            readonly numeric: "Numeric";
-            readonly link: "Link";
-            readonly date: "Date";
-        };
-        readonly selectQuestion: {
-            readonly addOption: "Add option";
-            readonly newOption: "New option {{number}}";
-            readonly markAsCorrect: "Mark as correct";
-            readonly remove: "Remove";
-            readonly correct: "Correct";
-            readonly optionPlaceholder: "Type anything you want here...";
-        };
-        readonly answer: {
-            readonly label: "Answer";
-            readonly placeholder: "Respondent's answer";
-        };
-        readonly labels: {
-            readonly applyingChanges: "Applying changes";
-            readonly endOfSection: "End of section";
-            readonly title: "Title";
-            readonly titlePlaceholder: "Question title";
-            readonly description: "Description";
-            readonly questionDescriptionPlaceholder: "Describe the question in a few words";
-            readonly sectionDescriptionPlaceholder: "Describe the section in a few words";
-            readonly required: "Required";
-            readonly questionType: "Question type";
-            readonly questionOptions: "Question options";
-            readonly actions: "Actions";
-            readonly sectionTitlePlaceholder: "Section title";
-        };
-    };
-    readonly richTextEditor: {
-        readonly bold: "Bold";
-        readonly italic: "Italic";
-        readonly underline: "Underline";
-        readonly strike: "Strike";
-        readonly highlight: "Highlight";
-        readonly heading1: "Heading 1";
-        readonly heading2: "Heading 2";
-        readonly heading3: "Heading 3";
-        readonly left: "Left";
-        readonly center: "Center";
-        readonly right: "Right";
-        readonly justify: "Justify";
-        readonly bulletList: "Bullet List";
-        readonly orderedList: "Ordered List";
-        readonly taskList: "Task List";
-        readonly codeBlock: "Code Block";
-        readonly horizontalRule: "Horizontal Rule";
-        readonly quote: "Quote";
-        readonly moreOptions: "More Options";
-        readonly code: "Code";
-        readonly divider: "Divider";
-        readonly bullet: "Bullet";
-        readonly ordered: "Ordered";
-        readonly task: "Task";
-        readonly details: "Dropdown";
-        readonly link: "Link";
-        readonly linkPlaceholder: "Enter a link";
-        readonly groups: {
-            readonly textStyles: "Text Styles";
-            readonly lists: "Lists";
-            readonly blocks: "Blocks";
-        };
-    };
-    readonly forms: {
-        readonly actionBar: {
-            readonly unsavedChanges: "Unsaved changes";
-            readonly discard: "Discard";
-        };
-    };
-};
+export declare function Blockquote({ children, ...props }: React.HTMLAttributes<HTMLQuoteElement>): JSX_2.Element;
 
-export declare const HILActionConfirmation: ({ text, confirmationText, onConfirm, cancelText, onCancel, }: HILActionConfirmationProps) => JSX_2.Element;
+export declare const ChatSpinner: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
 
-export declare type HILActionConfirmationProps = {
+export declare function downloadTableAsExcel(table: HTMLTableElement, filename?: string): void;
+
+export declare function Em({ children, ...props }: React.HTMLAttributes<HTMLSpanElement>): JSX_2.Element;
+
+export declare const F0ActionItem: ({ title, status, inGroup }: F0ActionItemProps) => JSX_2.Element;
+
+/**
+ * Props for the F0ActionItem component
+ */
+export declare interface F0ActionItemProps {
+    /**
+     * The title text displayed next to the status icon
+     */
+    title: string;
+    /**
+     * Current status of the action item
+     */
+    status?: "inProgress" | "executing" | "completed";
+    /**
+     * Whether the action item is part of a group
+     */
+    inGroup?: boolean;
+}
+
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export declare const F0AiChat: () => JSX_2.Element | null;
+
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export declare const F0AiChatProvider: ({ enabled, greeting, initialMessage, welcomeScreenSuggestions, onThumbsUp, onThumbsDown, children, agent, ...copilotKitProps }: AiChatProviderProps) => JSX_2.Element;
+
+export declare const F0AiChatTextArea: ({ submitLabel, inProgress, onSend, onStop, placeholders, defaultPlaceholder, autoFocus, }: F0AiChatTextAreaProps) => JSX_2.Element;
+
+/**
+ * Props for the F0AiChatTextArea component
+ */
+export declare interface F0AiChatTextAreaProps {
+    /**
+     * Whether the chat is currently processing a message
+     */
+    inProgress: boolean;
+    /**
+     * Callback when the user sends a message
+     */
+    onSend: (message: string) => void;
+    /**
+     * Callback when the user stops the current generation
+     */
+    onStop?: () => void;
+    /**
+     * Custom label for the submit button
+     */
+    submitLabel?: string;
+    /**
+     * Array of placeholder strings to cycle through with typewriter effect.
+     * If multiple placeholders are provided, they will animate in a cycle.
+     * If a single placeholder is provided, it will be displayed statically.
+     */
+    placeholders?: string[];
+    /**
+     * Default placeholder text when no placeholders are provided or as fallback
+     */
+    defaultPlaceholder?: string;
+    /**
+     * Whether the textarea should autofocus on mount
+     * @default true
+     */
+    autoFocus?: boolean;
+}
+
+export declare const F0AiCollapsibleMessage: ({ icon, title, children, }: F0AiCollapsibleMessageProps) => JSX_2.Element;
+
+/**
+ * Props for the F0AiCollapsibleMessage component
+ */
+export declare interface F0AiCollapsibleMessageProps {
+    /**
+     * Icon to display in the collapsible trigger
+     */
+    icon: IconType;
+    /**
+     * Title text for the collapsible trigger
+     */
+    title: string;
+    /**
+     * Content to show when expanded
+     */
+    children: ReactNode;
+}
+
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export declare const F0AiFullscreenChat: () => JSX_2.Element | null;
+
+export declare const F0HILActionConfirmation: ({ text, confirmationText, onConfirm, cancelText, onCancel, }: F0HILActionConfirmationProps) => JSX_2.Element;
+
+/**
+ * Props for the F0HILActionConfirmation component
+ */
+export declare type F0HILActionConfirmationProps = {
+    /**
+     * Optional descriptive text shown above the action buttons
+     */
     text?: string;
+    /**
+     * Text displayed on the confirmation button
+     */
     confirmationText: string;
+    /**
+     * Callback fired when the confirmation button is clicked
+     */
     onConfirm: () => void;
+    /**
+     * Text displayed on the cancel button
+     */
     cancelText: string;
+    /**
+     * Callback fired when the cancel button is clicked
+     */
     onCancel: () => void;
 };
 
-export declare function I18nProvider({ children, translations, }: I18nProviderProps): JSX.Element;
+export declare const f0MarkdownRenderers: NonNullable<AssistantMessageProps["markdownTagRenderers"]>;
 
-export declare interface I18nProviderProps {
-    children: ReactNode;
-    translations: TranslationsType;
+export declare const F0MessageSources: ({ sources }: F0MessageSourcesProps) => JSX_2.Element | null;
+
+/**
+ * Props for the F0MessageSources component
+ */
+export declare type F0MessageSourcesProps = {
+    /**
+     * Array of sources to display
+     */
+    sources: F0Source[];
+};
+
+export declare const F0OneIcon: ForwardRefExoticComponent<Omit<F0OneIconProps, "ref"> & RefAttributes<SVGSVGElement>>;
+
+/**
+ * Props for the F0OneIcon component
+ */
+export declare interface F0OneIconProps extends SVGProps<SVGSVGElement> {
+    /**
+     * Whether the icon should spin
+     */
+    spin?: boolean;
+    /**
+     * Whether the icon is in hover state
+     */
+    hover?: boolean;
+    /**
+     * Background color override
+     */
+    background?: string;
+    /**
+     * Size of the icon
+     */
+    size?: "xs" | "sm" | "md" | "lg";
 }
+
+export declare const F0OneSwitch: ({ className, disabled }: F0OneSwitchProps) => JSX_2.Element | null;
+
+/**
+ * Props for the F0OneSwitch component
+ */
+export declare type F0OneSwitchProps = React.ComponentPropsWithoutRef<typeof SwitchPrimitive.Root>;
+
+/**
+ * Source object for message sources
+ */
+export declare type F0Source = {
+    /**
+     * Title of the source
+     */
+    title: string;
+    /**
+     * Optional link URL
+     */
+    link?: string;
+    /**
+     * Optional icon name (from @/icons/app)
+     */
+    icon?: string;
+    /**
+     * Whether to open link in new tab
+     */
+    targetBlank?: boolean;
+};
+
+export declare const F0Thinking: ({ messages, title }: F0ThinkingProps) => JSX_2.Element;
+
+/**
+ * Props for the F0Thinking component
+ */
+export declare type F0ThinkingProps = {
+    /**
+     * Array of thinking/reflection messages to display
+     */
+    messages: Message[];
+    /**
+     * Whether the thinking process is currently active
+     */
+    isActive?: boolean;
+    /**
+     * Custom render function for messages
+     */
+    RenderMessage?: MessagesProps["RenderMessage"];
+    /**
+     * Custom assistant message component
+     */
+    AssistantMessage?: MessagesProps["AssistantMessage"];
+    /**
+     * Whether the chat is currently in progress
+     */
+    inProgress?: boolean;
+    /**
+     * Custom title for the thinking section
+     */
+    title?: string;
+};
+
+export declare const FullscreenChatContext: Context<FullscreenChatContextType>;
+
+/**
+ * Context type for fullscreen chat state
+ */
+declare type FullscreenChatContextType = {
+    inProgress: boolean;
+    setInProgress: (value: boolean) => void;
+};
+
+export declare function H1({ children, ...props }: React.HTMLAttributes<HTMLHeadingElement>): JSX_2.Element;
+
+export declare function H2({ children, ...props }: React.HTMLAttributes<HTMLHeadingElement>): JSX_2.Element;
+
+export declare function H3({ children, ...props }: React.HTMLAttributes<HTMLHeadingElement>): JSX_2.Element;
+
+export declare function Hr({ ...props }: React.HTMLAttributes<HTMLHRElement>): JSX_2.Element;
 
 declare type IconType = ForwardRefExoticComponent<SVGProps<SVGSVGElement> & RefAttributes<SVGSVGElement> & {
     animate?: "normal" | "animate";
 }>;
 
-declare type Join<T extends string[], D extends string> = T extends [] ? never : T extends [infer F] ? F : T extends [infer F, ...infer R] ? F extends string ? `${F}${D}${Join<Extract<R, string[]>, D>}` : never : string;
+declare function Image_2({ src, alt, ...props }: React.ImgHTMLAttributes<HTMLImageElement>): JSX_2.Element;
+export { Image_2 as Image }
 
-declare type PathsToStringProps<T> = T extends string ? [] : {
-    [K in Extract<keyof T, string>]: [K, ...PathsToStringProps<T[K]>];
-}[Extract<keyof T, string>];
+export declare function Li({ children, ...props }: React.HTMLAttributes<HTMLLIElement>): JSX_2.Element;
 
-declare type TranslationKey = Join<PathsToStringProps<typeof defaultTranslations>, ".">;
+export declare function Ol({ children, ...props }: React.HTMLAttributes<HTMLOListElement>): JSX_2.Element;
 
+export declare type OneIconSize = (typeof oneIconSizes)[number];
+
+export declare const oneIconSizes: readonly ["xs", "sm", "md", "lg"];
+
+export declare function P({ children, ...props }: React.HTMLAttributes<HTMLParagraphElement>): JSX_2.Element;
+
+export declare function Pre({ children, ...props }: React.HTMLAttributes<HTMLPreElement>): JSX_2.Element;
+
+export declare function Strong({ children, ...props }: React.HTMLAttributes<HTMLSpanElement>): JSX_2.Element;
+
+export declare function Table({ children, ...props }: React.HTMLAttributes<HTMLTableElement>): JSX_2.Element;
+
+export declare function Td({ children, ...props }: React.HTMLAttributes<HTMLTableCellElement>): JSX_2.Element;
+
+export declare function Th({ children, ...props }: React.HTMLAttributes<HTMLTableCellElement>): JSX_2.Element;
+
+/**
+ * Translation shape helper type
+ */
 declare type TranslationShape<T> = {
     [K in keyof T]: T[K] extends string ? string : T[K] extends Record<string, string | Record<string, unknown>> ? TranslationShape<T[K]> : never;
 };
 
-declare type TranslationShape_2<T> = {
-    [K in keyof T]: T[K] extends string ? string : T[K] extends Record<string, string | Record<string, unknown>> ? TranslationShape_2<T[K]> : never;
-};
-
-export declare type TranslationsType = TranslationShape_2<typeof defaultTranslations>;
+export declare function Ul({ children, ...props }: React.HTMLAttributes<HTMLUListElement>): JSX_2.Element;
 
 export declare function useAiChat(): AiChatProviderReturnValue;
 
 export declare function useAiChatTranslations(): AiChatTranslations;
 
-export declare function useI18n(): TranslationsType & {
-    t: (key: TranslationKey, args?: Record<string, string | number>) => string;
-};
+/**
+ * Hook to register all default copilot actions.
+ * This provides a single entry point to enable all standard AI chat actions.
+ *
+ * @example
+ * // Enable all default actions in your component
+ * const MyComponent = () => {
+ *   useDefaultCopilotActions()
+ *   return <div>...</div>
+ * }
+ */
+export declare const useDefaultCopilotActions: () => void;
 
+/**
+ * Hook to register the message sources action.
+ * Attaches information sources to the assistant's response to show where the AI got its information from.
+ */
+export declare const useMessageSourcesAction: () => void;
+
+/**
+ * Hook to register the orchestrator thinking action.
+ * Displays the orchestrator's thinking process as a non-blocking UI element.
+ */
+export declare const useOrchestratorThinkingAction: () => void;
+
+/**
+ * Welcome screen suggestion item
+ */
 export declare type WelcomeScreenSuggestion = {
     icon: IconType;
     message: string;
@@ -730,11 +516,6 @@ declare module "gridstack" {
 }
 
 
-declare namespace Calendar {
-    var displayName: string;
-}
-
-
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         aiBlock: {
@@ -760,4 +541,9 @@ declare module "@tiptap/core" {
             insertTranscript: (data: TranscriptData) => ReturnType;
         };
     }
+}
+
+
+declare namespace Calendar {
+    var displayName: string;
 }

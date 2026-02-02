@@ -48,13 +48,11 @@ import { HTMLInputTypeAttribute } from 'react';
 import { IconCellValue } from './types/icon';
 import { IconType as IconType_2 } from '../../f0';
 import { InFilterOptions } from './InFilter/types';
-import { InputProps as InputProps_2 } from '@copilotkit/react-ui';
 import { JSONContent } from '@tiptap/react';
 import { JSONContent as JSONContent_2 } from '@tiptap/core';
 import { JSX as JSX_2 } from 'react';
 import { LineChartProps } from '../../../components/Charts/LineChart';
 import { LongTextCellValue } from './types/longText';
-import { Message as Message_2 } from '@copilotkit/shared';
 import { NumberCellValue } from './types/number';
 import { NumberCellValue as NumberCellValue_2 } from '../../value-display/types/number';
 import { NumberFilterOptions } from './NumberFilter/NumberFilter';
@@ -229,14 +227,6 @@ export declare type ActionDefinition = DropdownItemSeparator | (Pick<DropdownIte
     type?: "primary" | "secondary" | "other";
 });
 
-export declare const ActionItem: ({ title, status, inGroup }: ActionItemProps) => JSX_2.Element;
-
-export declare interface ActionItemProps {
-    title: string;
-    status?: "inProgress" | "executing" | "completed";
-    inGroup?: boolean;
-}
-
 declare type ActionLinkProps = ActionBaseProps & {
     href: string;
     target?: NavTarget;
@@ -408,15 +398,9 @@ declare type AIButton = {
 };
 
 /**
- * @experimental This is an experimental component use it at your own risk
+ * Props for the AiChatProvider component
  */
-export declare const AiChat: () => JSX_2.Element | null;
-
-export declare const AiChatOneIcon: ForwardRefExoticComponent<Omit<OneIconProps, "ref"> & RefAttributes<SVGSVGElement>>;
-
-export declare const AiChatProvider: ({ enabled, greeting, initialMessage, welcomeScreenSuggestions, onThumbsUp, onThumbsDown, children, agent, ...copilotKitProps }: AiChatProviderProps) => JSX_2.Element;
-
-export declare type AiChatProviderProps = {
+declare type AiChatProviderProps = {
     enabled?: boolean;
     greeting?: string;
     initialMessage?: string | string[];
@@ -430,86 +414,6 @@ export declare type AiChatProviderProps = {
         feedback: string;
     }) => void;
 } & Pick<CopilotKitProps, "agent" | "credentials" | "children" | "runtimeUrl" | "showDevConsole" | "threadId" | "headers">;
-
-declare type AiChatProviderReturnValue = {
-    enabled: boolean;
-    setEnabled: React.Dispatch<React.SetStateAction<boolean>>;
-    open: boolean;
-    setOpen: React.Dispatch<React.SetStateAction<boolean>>;
-    shouldPlayEntranceAnimation: boolean;
-    setShouldPlayEntranceAnimation: React.Dispatch<React.SetStateAction<boolean>>;
-    tmp_setAgent: (agent?: string) => void;
-    placeholders: string[];
-    setPlaceholders: React.Dispatch<React.SetStateAction<string[]>>;
-    /**
-     * Set the amount of minutes after which the chat will be cleared automatically
-     * Set `null` to disable auto-clearing
-     *
-     * @default 15
-     */
-    setAutoClearMinutes: React.Dispatch<React.SetStateAction<number | null>>;
-    autoClearMinutes: number | null;
-    /**
-     * The initial message to display in the chat
-     */
-    initialMessage?: string | string[];
-    setInitialMessage: React.Dispatch<React.SetStateAction<string | string[] | undefined>>;
-    welcomeScreenSuggestions: WelcomeScreenSuggestion[];
-    setWelcomeScreenSuggestions: React.Dispatch<React.SetStateAction<WelcomeScreenSuggestion[]>>;
-    onThumbsUp?: (message: AIMessage, { threadId, feedback }: {
-        threadId: string;
-        feedback: string;
-    }) => void;
-    onThumbsDown?: (message: AIMessage, { threadId, feedback }: {
-        threadId: string;
-        feedback: string;
-    }) => void;
-    /**
-     * Clear/reset the chat conversation
-     */
-    clear: () => void;
-    /* Excluded from this release type: setClearFunction */
-    /**
-     * Send a message to the chat
-     * @param message - The message content as a string, or a full Message object
-     */
-    sendMessage: (message: string | Message_2) => void;
-    /* Excluded from this release type: setSendMessageFunction */
-} & Pick<AiChatState, "greeting" | "agent">;
-
-declare interface AiChatState {
-    greeting?: string;
-    enabled: boolean;
-    agent?: string;
-    initialMessage?: string | string[];
-    welcomeScreenSuggestions?: WelcomeScreenSuggestion[];
-    placeholders?: string[];
-    setPlaceholders?: React.Dispatch<React.SetStateAction<string[]>>;
-    onThumbsUp?: (message: AIMessage, { threadId, feedback }: {
-        threadId: string;
-        feedback: string;
-    }) => void;
-    onThumbsDown?: (message: AIMessage, { threadId, feedback }: {
-        threadId: string;
-        feedback: string;
-    }) => void;
-}
-
-export declare const AiChatTextarea: ({ submitLabel, inProgress, onSend, onStop, }: ChatTextareaProps) => JSX_2.Element;
-
-export declare type AiChatTranslations = TranslationShape_2<typeof aiTranslations>;
-
-export declare function AiChatTranslationsProvider({ children, translations, }: AiChatTranslationsProviderProps): JSX.Element;
-
-export declare interface AiChatTranslationsProviderProps {
-    children: ReactNode;
-    translations: AiChatTranslations;
-}
-
-/**
- * @experimental This is an experimental component use it at your own risk
- */
-export declare const AiFullscreenChat: () => JSX_2.Element | null;
 
 /**
  * @experimental This is an experimental component use it at your own risk
@@ -568,38 +472,6 @@ declare interface AiPromotionChatState {
     onShow?: () => void;
     onHide?: () => void;
 }
-
-declare const aiTranslations: {
-    ai: {
-        openChat: string;
-        closeChat: string;
-        startNewChat: string;
-        scrollToBottom: string;
-        welcome: string;
-        defaultInitialMessage: string;
-        inputPlaceholder: string;
-        stopAnswerGeneration: string;
-        sendMessage: string;
-        thoughtsGroupTitle: string;
-        resourcesGroupTitle: string;
-        thinking: string;
-        exportTable: string;
-        generatedTableFilename: string;
-        feedbackModal: {
-            positive: {
-                title: string;
-                label: string;
-                placeholder: string;
-            };
-            negative: {
-                title: string;
-                label: string;
-                placeholder: string;
-            };
-        };
-        ask: string;
-    };
-};
 
 declare type AlertAvatarProps = VariantProps<typeof alertAvatarVariants> & {
     type: (typeof alertAvatarTypes)[number];
@@ -1530,10 +1402,6 @@ declare type ChartItem<K extends ChartConfig> = {
  */
 export declare const ChartWidgetEmptyState: ForwardRefExoticComponent<Props_4 & RefAttributes<HTMLDivElement>>;
 
-declare type ChatTextareaProps = InputProps_2 & {
-    submitLabel?: string;
-};
-
 export declare type ChatWidgetEmptyStateProps = Props_4;
 
 /**
@@ -2179,6 +2047,11 @@ declare type DateFilterOptions_2 = {
     view?: CalendarView;
 };
 
+/**
+ * Valid granularity keys for date pickers
+ */
+export declare type DateGranularity = "day" | "week" | "month" | "quarter" | "halfyear" | "year" | "range";
+
 export declare type DateNavigationOptions = {
     min?: Date;
     max?: Date;
@@ -2247,10 +2120,37 @@ export declare type DateRangeError = {
     to: boolean;
 };
 
+/**
+ * All valid renderIf conditions for date range fields
+ */
+declare type DateRangeFieldRenderIf = DateRangeRenderIfCondition | CommonRenderIfCondition;
+
+/**
+ * Base for date range-specific conditions
+ */
+declare interface DateRangeRenderIfBase {
+    fieldId: string;
+}
+
+/**
+ * RenderIf conditions specific to date range fields
+ */
+export declare type DateRangeRenderIfCondition = DateRangeRenderIfBase & {
+    isEmpty: boolean;
+};
+
 export declare type DateRangeString = {
     from: string;
     to?: string;
 };
+
+/**
+ * The value type for a date range field
+ */
+export declare interface DateRangeValue {
+    from: Date;
+    to: Date;
+}
 
 /**
  * Base for date-specific conditions
@@ -3407,7 +3307,7 @@ export declare type F0CustomFieldConfig = F0BaseConfig & F0CustomConfig & {
  */
 export declare interface F0DateConfig {
     /** Available granularities for the date picker */
-    granularities?: GranularityDefinitionKey[];
+    granularities?: DateGranularity[];
     /** Preset date options to display */
     presets?: DatePreset[];
 }
@@ -3436,9 +3336,48 @@ export declare type F0DateFieldConfig = F0BaseConfig & F0DateConfig & {
 };
 
 /**
+ * F0 config options specific to date range fields
+ *
+ * Note: `minDate`, `maxDate`, and `clearable` are derived from the Zod schema
+ */
+export declare interface F0DateRangeConfig {
+    /** Label for the "from" date input */
+    fromLabel?: string;
+    /** Label for the "to" date input */
+    toLabel?: string;
+    /** Available granularities for the date picker */
+    granularities?: DateGranularity[];
+    /** Preset date options to display */
+    presets?: DatePreset[];
+}
+
+/**
+ * Date range field with all properties for rendering
+ * Includes properties derived from Zod schema
+ */
+export declare type F0DateRangeField = F0BaseField & F0DateRangeConfig & {
+    type: "daterange";
+    /** Minimum selectable date (derived from z.date().min() on the from field) */
+    minDate?: Date;
+    /** Maximum selectable date (derived from z.date().max() on the to field) */
+    maxDate?: Date;
+    /** Whether the date range can be cleared (derived from optional/nullable) */
+    clearable?: boolean;
+    /** Conditional rendering based on another field's value */
+    renderIf?: DateRangeFieldRenderIf;
+};
+
+/**
+ * Config for date range fields
+ */
+export declare type F0DateRangeFieldConfig = F0BaseConfig & F0DateRangeConfig & {
+    fieldType: "daterange";
+};
+
+/**
  * Union of all F0 field types used for rendering
  */
-export declare type F0Field = F0TextField | F0NumberField | F0TextareaField | F0SelectField | F0CheckboxField | F0SwitchField | F0DateField | F0RichTextField | F0CustomField;
+export declare type F0Field = F0TextField | F0NumberField | F0TextareaField | F0SelectField | F0CheckboxField | F0SwitchField | F0DateField | F0DateRangeField | F0RichTextField | F0CustomField;
 
 /**
  * Complete F0 field configuration (union of all possible configs)
@@ -3448,7 +3387,7 @@ export declare type F0FieldConfig = F0StringConfig | F0NumberFieldConfig | F0Boo
 /**
  * Field types for rendering
  */
-export declare type F0FieldType = "text" | "number" | "textarea" | "select" | "checkbox" | "switch" | "date" | "richtext" | "custom";
+export declare type F0FieldType = "text" | "number" | "textarea" | "select" | "checkbox" | "switch" | "date" | "daterange" | "richtext" | "custom";
 
 /**
  * @experimental This is an experimental component, use it at your own risk
@@ -3600,9 +3539,9 @@ export declare type F0NumberFieldConfig = F0BaseConfig & F0NumberConfig & {
 };
 
 /**
- * Config for object fields (richtext or custom)
+ * Config for object fields (richtext, daterange, or custom)
  */
-declare type F0ObjectConfig = F0RichTextFieldConfig | F0CustomFieldConfig;
+declare type F0ObjectConfig = F0RichTextFieldConfig | F0DateRangeFieldConfig | F0CustomFieldConfig;
 
 /**
  * F0 config options specific to rich text fields
@@ -3937,7 +3876,7 @@ declare type FavoriteMenuItem = ({
 /**
  * Field types for rendering
  */
-export declare type FieldType = "text" | "number" | "textarea" | "select" | "checkbox" | "switch" | "date" | "richtext" | "custom";
+export declare type FieldType = "text" | "number" | "textarea" | "select" | "checkbox" | "switch" | "date" | "daterange" | "richtext" | "custom";
 
 export declare const FILE_TYPES: {
     readonly PDF: "pdf";
@@ -4352,16 +4291,6 @@ declare type HighlightBannerProps = {
     subtitle: string;
     buttonLabel: string;
     onClick?: () => void;
-};
-
-export declare const HILActionConfirmation: ({ text, confirmationText, onConfirm, cancelText, onCancel, }: HILActionConfirmationProps) => JSX_2.Element;
-
-export declare type HILActionConfirmationProps = {
-    text?: string;
-    confirmationText: string;
-    onConfirm: () => void;
-    cancelText: string;
-    onCancel: () => void;
 };
 
 declare type HTMLString = string;
@@ -4792,12 +4721,6 @@ export declare interface Message {
     text: string;
     dateTime: string;
 }
-
-export declare const MessageSources: ({ sources }: MessageSourcesProps) => JSX_2.Element | null;
-
-export declare type MessageSourcesProps = {
-    sources: Source[];
-};
 
 declare type MetadataAction = {
     icon: IconType;
@@ -5452,13 +5375,6 @@ declare type OneFilterPickerRootProps<Definition extends FiltersDefinition> = {
     onOpenChange?: (isOpen: boolean) => void;
 };
 
-declare interface OneIconProps extends SVGProps<SVGSVGElement> {
-    spin?: boolean;
-    hover?: boolean;
-    background?: string;
-    size?: "xs" | "sm" | "md" | "lg";
-}
-
 /**
  * @experimental This is an experimental component use it at your own risk
  */
@@ -6079,7 +5995,7 @@ declare interface RenderIfBase {
 /**
  * Union of all possible RenderIf conditions (used internally for evaluation)
  */
-export declare type RenderIfCondition = CommonRenderIfCondition | TextRenderIfCondition | NumberRenderIfCondition | BooleanRenderIfCondition | SelectRenderIfCondition | DateRenderIfCondition;
+export declare type RenderIfCondition = CommonRenderIfCondition | TextRenderIfCondition | NumberRenderIfCondition | BooleanRenderIfCondition | SelectRenderIfCondition | DateRenderIfCondition | DateRangeRenderIfCondition;
 
 export declare type ResolvedRecordType<R> = R extends RecordType ? R : RecordType;
 
@@ -6449,13 +6365,6 @@ export declare type SortingsStateMultiple = {
 }[];
 
 export declare type SortOrder = "asc" | "desc";
-
-declare type Source = {
-    title: string;
-    link?: string;
-    icon?: string;
-    targetBlank?: boolean;
-};
 
 /**
  * @experimental This is an experimental component use it at your own risk
@@ -7018,10 +6927,6 @@ declare type TranslationShape<T> = {
     [K in keyof T]: T[K] extends string ? string : T[K] extends Record<string, string | Record<string, unknown>> ? TranslationShape<T[K]> : never;
 };
 
-declare type TranslationShape_2<T> = {
-    [K in keyof T]: T[K] extends string ? string : T[K] extends Record<string, string | Record<string, unknown>> ? TranslationShape_2<T[K]> : never;
-};
-
 declare type TranslationsType = TranslationShape<typeof defaultTranslations>;
 
 declare interface TwoColumnsItemType {
@@ -7051,10 +6956,6 @@ declare namespace Types {
 }
 
 declare type URL_2 = string;
-
-export declare function useAiChat(): AiChatProviderReturnValue;
-
-export declare function useAiChatTranslations(): AiChatTranslations;
 
 export declare function useAiPromotionChat(): AiPromotionChatProviderReturnValue;
 
@@ -7326,6 +7227,9 @@ export declare const WeekStartDay: {
 
 export declare type WeekStartsOn = (typeof WeekStartDay)[keyof typeof WeekStartDay];
 
+/**
+ * Welcome screen suggestion item
+ */
 declare type WelcomeScreenSuggestion = {
     icon: IconType;
     message: string;
@@ -7514,11 +7418,6 @@ declare module "gridstack" {
 }
 
 
-declare namespace Calendar {
-    var displayName: string;
-}
-
-
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         aiBlock: {
@@ -7544,4 +7443,9 @@ declare module "@tiptap/core" {
             insertTranscript: (data: TranscriptData) => ReturnType;
         };
     }
+}
+
+
+declare namespace Calendar {
+    var displayName: string;
 }
