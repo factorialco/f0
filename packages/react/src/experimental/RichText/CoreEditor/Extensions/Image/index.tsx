@@ -117,14 +117,17 @@ const ImageNodeView = ({
   )
 
   const showResizeHandle = isEditable && !uploading && (selected || isResizing)
+  const showSelectionRing = selected || isResizing
 
   return (
     <NodeViewWrapper className="mb-2" data-drag-handle>
       <div
         className={cn(
           "relative inline-block rounded-lg outline-none transition-shadow duration-200 ease-out",
-          selected &&
-            "ring-[1.5px] ring-black ring-offset-1 shadow-[0_0_0_1px_rgba(0,0,0,0.1),0_2px_8px_rgba(0,0,0,0.12)] dark:ring-white dark:ring-offset-0 dark:shadow-[0_0_0_1px_rgba(255,255,255,0.1),0_2px_8px_rgba(0,0,0,0.3)]"
+          showSelectionRing &&
+            (isDarkImage
+              ? "shadow-[0_0_0_1.5px_rgba(255,255,255,0.95),0_0_0_1px_rgba(255,255,255,0.1),0_2px_8px_rgba(0,0,0,0.3)]"
+              : "shadow-[0_0_0_1.5px_rgba(0,0,0,0.95),0_0_0_1px_rgba(0,0,0,0.1),0_2px_8px_rgba(0,0,0,0.12)]")
         )}
       >
         <img
