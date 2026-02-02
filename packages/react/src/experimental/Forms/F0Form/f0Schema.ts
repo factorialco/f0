@@ -181,6 +181,9 @@ export type F0FieldConfig =
   | F0DateFieldConfig
   | F0ArrayConfig
   | F0ObjectConfig
+  | F0DateRangeFieldConfig
+  | F0RichTextFieldConfig
+  | F0CustomFieldConfig
 
 /**
  * Extended Zod type with F0 metadata

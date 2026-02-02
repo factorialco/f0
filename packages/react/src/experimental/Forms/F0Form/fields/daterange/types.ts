@@ -17,8 +17,9 @@ interface DateRangeRenderIfBase {
 /**
  * RenderIf conditions specific to date range fields
  */
-export type DateRangeRenderIfCondition = DateRangeRenderIfBase &
-  { isEmpty: boolean }
+export type DateRangeRenderIfCondition = DateRangeRenderIfBase & {
+  isEmpty: boolean
+}
 
 /**
  * All valid renderIf conditions for date range fields
