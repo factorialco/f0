@@ -135,16 +135,16 @@ const ImageNodeView = ({
           draggable={false}
           style={width ? { width: `${width}px` } : undefined}
           className={cn(
-            "block h-auto rounded-md",
+            "block h-auto rounded-md outline-none",
             !width && "max-w-full",
             !isResizing && "transition-all duration-150 ease-out"
           )}
         />
         {showResizeHandle && (
           <div
-            role="separator"
-            aria-orientation="horizontal"
-            className="absolute -bottom-1 -right-1 flex h-5 w-5 cursor-se-resize items-center justify-center rounded-sm bg-white text-black shadow-[0_0_0_1px_rgba(0,0,0,0.15),0_2px_6px_rgba(0,0,0,0.2)] transition-transform duration-150 ease-out hover:scale-110 active:scale-95 dark:bg-white dark:text-black dark:shadow-[0_0_0_1px_rgba(255,255,255,0.3),0_2px_6px_rgba(0,0,0,0.4)]"
+            tabIndex={-1}
+            aria-hidden="true"
+            className="absolute -bottom-1 -right-1 flex h-5 w-5 cursor-se-resize items-center justify-center rounded-sm bg-white text-black outline-none shadow-[0_0_0_1px_rgba(0,0,0,0.15),0_2px_6px_rgba(0,0,0,0.2)] transition-transform duration-150 ease-out hover:scale-110 focus:outline-none focus-visible:outline-none active:scale-95 dark:bg-white dark:text-black dark:shadow-[0_0_0_1px_rgba(255,255,255,0.3),0_2px_6px_rgba(0,0,0,0.4)]"
             onMouseDown={handleResizeStart}
           >
             <CornerHandle className="h-3 w-3" />
