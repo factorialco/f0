@@ -128,6 +128,7 @@ const RowComponentInner = <
   )
 
   const {
+    hasItemActions,
     primaryItemActions,
     dropdownItemActions,
     mobileDropdownItemActions,
@@ -214,38 +215,36 @@ const RowComponentInner = <
         </TableCell>
       ))}
 
-      {source.itemActions &&
-        !loading &&
-        !nestedRowProps?.onLoadMoreChildren && (
-          <>
-            {/** Desktop item actions adds a sticky column to the table to not overflow when the table is scrolled horizontally*/}
-            <td className="sticky right-0 top-0 z-10 hidden md:table-cell">
-              <ItemActionsRowContainer dropDownOpen={dropDownOpen}>
-                <ItemActionsRow
-                  primaryItemActions={primaryItemActions}
-                  dropdownItemActions={dropdownItemActions}
-                  handleDropDownOpenChange={handleDropDownOpenChange}
-                />
-              </ItemActionsRowContainer>
-            </td>
-            {/** Mobile item actions */}
-            <TableCell
-              key={`table-cell-${groupIndex}-${index}-actions`}
-              width={68}
-              sticky={{
-                right: 0,
-              }}
-              href={itemHref}
-              className="table-cell md:hidden"
-              loading={loading}
-            >
-              <ItemActionsMobile
-                items={mobileDropdownItemActions}
-                onOpenChange={handleDropDownOpenChange}
+      {hasItemActions && !loading && !nestedRowProps?.onLoadMoreChildren && (
+        <>
+          {/** Desktop item actions adds a sticky column to the table to not overflow when the table is scrolled horizontally*/}
+          <td className="sticky right-0 top-0 z-10 hidden md:table-cell">
+            <ItemActionsRowContainer dropDownOpen={dropDownOpen}>
+              <ItemActionsRow
+                primaryItemActions={primaryItemActions}
+                dropdownItemActions={dropdownItemActions}
+                handleDropDownOpenChange={handleDropDownOpenChange}
               />
-            </TableCell>
-          </>
-        )}
+            </ItemActionsRowContainer>
+          </td>
+          {/** Mobile item actions */}
+          <TableCell
+            key={`table-cell-${groupIndex}-${index}-actions`}
+            width={68}
+            sticky={{
+              right: 0,
+            }}
+            href={itemHref}
+            className="table-cell md:hidden"
+            loading={loading}
+          >
+            <ItemActionsMobile
+              items={mobileDropdownItemActions}
+              onOpenChange={handleDropDownOpenChange}
+            />
+          </TableCell>
+        </>
+      )}
     </TableRow>
   )
 }

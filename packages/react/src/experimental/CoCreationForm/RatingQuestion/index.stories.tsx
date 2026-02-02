@@ -44,6 +44,7 @@ export const Default: Story = {
     id: "question-1",
     title: "Rate your experience",
     description: "How satisfied are you?",
+    type: "rating",
     value: 0,
     options: [
       { value: 1, label: "1" },

@@ -83,14 +83,14 @@ export function FilterList<Definition extends FiltersDefinition>({
       </div>
       <div
         className={cn(
-          "flex h-full w-full flex-col gap-1 overflow-y-auto overflow-x-hidden p-2 pt-0",
+          "flex flex-1 h-full w-full flex-col min-h-0 max-h-full gap-1 overflow-x-hidden p-2 pt-0",
           isCompactMode && "px-1 py-0"
         )}
       >
         {isCompactMode && (
           <div className="-mx-2 mb-1 h-px border-0 border-t border-solid border-f1-border-secondary" />
         )}
-        <div className="flex flex-1 flex-col gap-1">
+        <div className="flex flex-1 flex-col gap-1 min-h-0 max-h-full overflow-y-auto">
           {Object.entries(definition).map(([key, filter]) => {
             const matchesWithSearch =
               !searchValue ||

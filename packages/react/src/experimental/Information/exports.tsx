@@ -1,6 +1,5 @@
 export * from "../../components/avatars/F0AvatarModule"
 export * from "./Activity/exports"
-export * from "./Alert"
 export * from "./Badge"
 export * from "./Communities/exports"
 export * from "./Counter"

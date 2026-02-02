@@ -1,11 +1,10 @@
-import { EmojiImage } from "@/lib/emojis"
-import { cn } from "@/lib/utils"
-
 import {
   BaseQuestion,
   BaseQuestionPropsForOtherQuestionComponents,
 } from "../BaseQuestion"
 import { useCoCreationFormContext } from "../Context"
+import { detectRatingOptionType } from "../lib"
+import { ScoreEditOption } from "./ScoreEditOption"
 
 export type BaseScoreQuestionProps =
   BaseQuestionPropsForOtherQuestionComponents & {
@@ -13,45 +12,15 @@ export type BaseScoreQuestionProps =
     options: { value: number; label: string }[]
   }
 
-const ScoreOption = ({
-  value,
-  label,
-  selected,
-  onClick,
-  disabled,
-}: {
-  value: number
-  label: string
-  selected: boolean
-  onClick: (value: number) => void
-  disabled?: boolean
-}) => {
-  const handleClick = () => {
-    if (disabled) return
-
-    onClick(value)
-  }
-
-  return (
-    <div
-      className={cn(
-        "flex h-10 min-w-20 flex-1 items-center justify-center rounded-md border border-solid border-f1-border-secondary text-center font-medium",
-        selected && "border-f1-border-selected-bold",
-        !disabled ? "cursor-pointer" : "cursor-default"
-      )}
-      onClick={handleClick}
-    >
-      <EmojiImage emoji={label} size="sm" />
-    </div>
-  )
-}
-
 export const BaseScoreQuestion = ({
   options,
   value,
   ...baseQuestionComponentProps
 }: BaseScoreQuestionProps) => {
   const { onQuestionChange, isEditMode } = useCoCreationFormContext()
+
+  const ratingType = detectRatingOptionType(options)
+  const isEmojiMode = ratingType === "emojis"
 
   const handleChangeValue = (newValue: number) => {
     onQuestionChange?.({
@@ -61,17 +30,32 @@ export const BaseScoreQuestion = ({
     })
   }
 
+  const handleChangeLabel = (optionValue: number, newLabel: string) => {
+    const updatedOptions = options.map((opt) =>
+      opt.value === optionValue ? { ...opt, label: newLabel } : opt
+    )
+
+    onQuestionChange?.({
+      id: baseQuestionComponentProps.id,
+      type: "rating",
+      value: value ?? 0,
+      options: updatedOptions,
+    } as Parameters<NonNullable<typeof onQuestionChange>>[0])
+  }
+
   return (
     <BaseQuestion {...baseQuestionComponentProps}>
       <div className="grid grid-cols-3 gap-3 md:grid-cols-5">
         {options.map((option) => (
-          <ScoreOption
+          <ScoreEditOption
             key={option.value}
-            value={option.value}
-            label={option.label}
+            option={option}
             selected={value === option.value}
             onClick={handleChangeValue}
-            disabled={isEditMode}
+            onChangeLabel={handleChangeLabel}
+            isEditMode={isEditMode}
+            disabled={false}
+            isEmojiMode={isEmojiMode}
           />
         ))}
       </div>
