@@ -96,9 +96,7 @@ import { VariantProps } from 'cva';
 import { VerticalBarChartProps } from '../../../components/Charts/VerticalBarChart';
 import { WidgetProps as WidgetProps_2 } from '../Widget';
 import { z } from 'zod';
-import { ZodRawShape } from 'zod';
 import { ZodType } from 'zod';
-import { ZodTypeAny } from 'zod';
 
 declare type Action = {
     label: string;
@@ -827,24 +825,6 @@ declare interface BaseTOCItem {
     otherActions?: TOCItemAction[];
 }
 
-/**
- * Base for boolean-specific conditions
- */
-declare interface BooleanRenderIfBase {
-    fieldId: string;
-}
-
-/**
- * RenderIf conditions specific to boolean fields
- */
-export declare type BooleanRenderIfCondition = BooleanRenderIfBase & ({
-    equalsTo: boolean;
-} | {
-    notEqualsTo: boolean;
-} | {
-    isEmpty: boolean;
-});
-
 declare type BreadcrumbBaseItemType = NavigationItem & {
     id: string;
     loading?: boolean;
@@ -1404,11 +1384,6 @@ export declare const ChartWidgetEmptyState: ForwardRefExoticComponent<Props_4 & 
 
 export declare type ChatWidgetEmptyStateProps = Props_4;
 
-/**
- * All valid renderIf conditions for checkbox fields
- */
-declare type CheckboxFieldRenderIf = BooleanRenderIfCondition | CommonRenderIfCondition;
-
 declare type ChildrenPaginationInfo = {
     total: number;
     perPage: number;
@@ -1560,14 +1535,6 @@ declare type ColumnWidth = keyof typeof columnWidths | number;
 declare const columnWidths: {
     readonly auto: undefined;
     readonly fit: 1;
-};
-
-/**
- * Common condition available for all field types
- */
-export declare type CommonRenderIfCondition = RenderIfBase & {
-    /** Check if the field value is empty (null, undefined, empty string, empty array) */
-    isEmpty: boolean;
 };
 
 export declare const CommunityPost: (({ id, author, group, createdAt, title, description, onClick, mediaUrl, event, counters, reactions, inLabel, comment, dropdownItems, noReactionsButton, }: CommunityPostProps) => JSX_2.Element) & {
@@ -1724,35 +1691,6 @@ export declare interface CurrentVersion {
 }
 
 declare type CustomEmptyStates = Partial<Record<EmptyStateType, Partial<EmptyState>>>;
-
-/**
- * All valid renderIf conditions for custom fields
- */
-declare type CustomFieldRenderIf = CommonRenderIfCondition;
-
-/**
- * Props passed to the custom field render function
- */
-export declare interface CustomFieldRenderProps {
-    /** Field id */
-    id: string;
-    /** Field label */
-    label: string;
-    /** Placeholder text */
-    placeholder?: string;
-    /** Current field value */
-    value: unknown;
-    /** Callback to update the value */
-    onChange: (value: unknown) => void;
-    /** Callback for blur events */
-    onBlur: () => void;
-    /** Error message if validation failed */
-    error?: string;
-    /** Whether async validation is in progress */
-    isValidating: boolean;
-    /** Whether the field is disabled */
-    disabled?: boolean;
-}
 
 export declare type CustomVisualizationProps<Source extends {
     dataAdapter: DataCollectionDataAdapter<any, any, any>;
@@ -2030,11 +1968,6 @@ export declare type DataSourceDefinition<R extends RecordType = RecordType, Filt
     }) => number | undefined;
 };
 
-/**
- * All valid renderIf conditions for date fields
- */
-declare type DateFieldRenderIf = DateRenderIfCondition | CommonRenderIfCondition;
-
 export declare type DateFilterDefinition = BaseFilterDefinition<"date"> & {
     options?: DateFilterOptions_2;
 };
@@ -2046,11 +1979,6 @@ declare type DateFilterOptions_2 = {
     defaultSelected?: Date | DateRange | null;
     view?: CalendarView;
 };
-
-/**
- * Valid granularity keys for date pickers
- */
-export declare type DateGranularity = "day" | "week" | "month" | "quarter" | "halfyear" | "year" | "range";
 
 export declare type DateNavigationOptions = {
     min?: Date;
@@ -2120,63 +2048,10 @@ export declare type DateRangeError = {
     to: boolean;
 };
 
-/**
- * All valid renderIf conditions for date range fields
- */
-declare type DateRangeFieldRenderIf = DateRangeRenderIfCondition | CommonRenderIfCondition;
-
-/**
- * Base for date range-specific conditions
- */
-declare interface DateRangeRenderIfBase {
-    fieldId: string;
-}
-
-/**
- * RenderIf conditions specific to date range fields
- */
-export declare type DateRangeRenderIfCondition = DateRangeRenderIfBase & {
-    isEmpty: boolean;
-};
-
 export declare type DateRangeString = {
     from: string;
     to?: string;
 };
-
-/**
- * The value type for a date range field
- */
-export declare interface DateRangeValue {
-    from: Date;
-    to: Date;
-}
-
-/**
- * Base for date-specific conditions
- */
-declare interface DateRenderIfBase {
-    fieldId: string;
-}
-
-/**
- * RenderIf conditions specific to date fields
- */
-export declare type DateRenderIfCondition = DateRenderIfBase & ({
-    equalsTo: Date;
-} | {
-    notEqualsTo: Date;
-} | {
-    greaterThan: Date;
-} | {
-    greaterThanOrEqual: Date;
-} | {
-    lowerThan: Date;
-} | {
-    lowerThanOrEqual: Date;
-} | {
-    isEmpty: boolean;
-});
 
 export declare type DateStringFormat = "default" | "long";
 
@@ -2967,11 +2842,6 @@ declare interface ErrorMessageProps {
 }
 
 /**
- * Evaluate a renderIf condition against the current form values
- */
-export declare function evaluateRenderIf(condition: RenderIfCondition, values: Record<string, unknown>): boolean;
-
-/**
  * Extracts the property keys from a record type.
  * @template RecordType - The type containing the properties to extract
  */
@@ -2982,61 +2852,6 @@ declare type ExtractVisualizationSettings<T> = T extends {
         default: infer S;
     };
 } ? S : never;
-
-/**
- * String field - text input or textarea
- */
-export declare function f0<T extends z.ZodString>(schema: T, config: F0StringConfig): T & F0ZodType<T>;
-
-/**
- * Number field
- */
-export declare function f0<T extends z.ZodNumber>(schema: T, config: F0NumberFieldConfig): T & F0ZodType<T>;
-
-/**
- * Boolean field - checkbox or switch
- */
-export declare function f0<T extends z.ZodBoolean>(schema: T, config: F0BooleanConfig): T & F0ZodType<T>;
-
-/**
- * Date field
- */
-export declare function f0<T extends z.ZodDate>(schema: T, config: F0DateFieldConfig): T & F0ZodType<T>;
-
-/**
- * Enum field - select
- */
-export declare function f0<T extends z.ZodEnum<[string, ...string[]]>>(schema: T, config: F0StringSelectConfig): T & F0ZodType<T>;
-
-/**
- * Array field - multi-select
- */
-export declare function f0<T extends z.ZodArray<ZodTypeAny>>(schema: T, config: F0ArrayConfig): T & F0ZodType<T>;
-
-/**
- * Object field - richtext or custom
- */
-export declare function f0<T extends z.ZodObject<z.ZodRawShape>>(schema: T, config: F0ObjectConfig): T & F0ZodType<T>;
-
-/**
- * Optional wrapper - inherits inner type's config
- */
-export declare function f0<T extends z.ZodOptional<ZodTypeAny>>(schema: T, config: F0FieldConfig): T & F0ZodType<T>;
-
-/**
- * Nullable wrapper - inherits inner type's config
- */
-export declare function f0<T extends z.ZodNullable<ZodTypeAny>>(schema: T, config: F0FieldConfig): T & F0ZodType<T>;
-
-/**
- * Default wrapper - inherits inner type's config
- */
-export declare function f0<T extends z.ZodDefault<ZodTypeAny>>(schema: T, config: F0FieldConfig): T & F0ZodType<T>;
-
-/**
- * Fallback for any other schema type
- */
-export declare function f0<T extends ZodTypeAny>(schema: T, config: F0FieldConfig): T & F0ZodType<T>;
 
 export declare const F0ActionBar: ({ isOpen, secondaryActions, label, ...props }: F0ActionBarProps) => JSX_2.Element;
 
@@ -3064,13 +2879,6 @@ export declare const F0AiBanner: ForwardRefExoticComponent<AiBannerInternalProps
 };
 
 export declare type F0AiBannerProps = AiBannerInternalProps;
-
-/**
- * Config for array fields (multi-select)
- */
-export declare type F0ArrayConfig = F0BaseConfig & F0SelectConfig & {
-    fieldType?: "select";
-};
 
 declare const F0AvatarAlert: ({ type, size, "aria-label": ariaLabel, "aria-labelledby": ariaLabelledby, }: AlertAvatarProps) => JSX_2.Element;
 
@@ -3189,64 +2997,6 @@ declare type F0AvatarTeamProps = {
     badge?: AvatarBadge;
 } & Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">;
 
-/**
- * Base configuration shared across all field types.
- * Position is automatically derived from field declaration order in the schema.
- */
-export declare interface F0BaseConfig {
-    /** Label displayed above the field */
-    label: string;
-    /** Section ID to group field under (null = root level) */
-    section?: string;
-    /** Placeholder text for the input */
-    placeholder?: string;
-    /** Helper text displayed below the field */
-    helpText?: string;
-    /** Whether the field is disabled */
-    disabled?: boolean;
-    /** Row ID for horizontal grouping with other fields */
-    row?: string;
-    /** Conditional rendering based on another field's value */
-    renderIf?: RenderIfCondition;
-}
-
-/**
- * Base properties shared across all F0 field types
- */
-export declare interface F0BaseField {
-    /** Unique identifier for the field, used as the form field name */
-    id: string;
-    /** Label displayed above the field */
-    label: string;
-    /** Zod validation schema for the field */
-    validation?: ZodTypeAny;
-    /** Helper text displayed below the field */
-    helpText?: string;
-    /** Placeholder text for the input */
-    placeholder?: string;
-    /** Whether the field is disabled */
-    disabled?: boolean;
-}
-
-/**
- * Config for boolean fields - checkbox
- */
-declare type F0BooleanCheckboxConfig = F0BaseConfig & F0CheckboxConfig & {
-    fieldType: "checkbox";
-};
-
-/**
- * Union of all boolean field configs
- */
-export declare type F0BooleanConfig = F0BooleanCheckboxConfig | F0BooleanSwitchConfig;
-
-/**
- * Config for boolean fields - switch (default for z.boolean())
- */
-declare type F0BooleanSwitchConfig = F0BaseConfig & F0SwitchConfig & {
-    fieldType?: "switch";
-};
-
 declare type F0ButtonProps = Omit<ButtonInternalProps, (typeof privateProps)[number] | "variant"> & {
     variant?: Exclude<ButtonInternalProps["variant"], "ai">;
 };
@@ -3257,334 +3007,11 @@ export declare const F0Callout: ForwardRefExoticComponent<CalloutInternalProps &
 
 export declare type F0CalloutProps = CalloutInternalProps;
 
-/**
- * F0 config options specific to checkbox fields
- * (checkbox has no additional options beyond base config)
- */
-export declare interface F0CheckboxConfig {
-}
-
-/**
- * Checkbox field with all properties for rendering
- */
-export declare type F0CheckboxField = F0BaseField & {
-    type: "checkbox";
-    /** Conditional rendering based on another field's value */
-    renderIf?: CheckboxFieldRenderIf;
-};
-
-/**
- * F0 config options specific to custom fields
- */
-export declare interface F0CustomConfig {
-    /** Render function for the custom component */
-    render: (props: CustomFieldRenderProps) => ReactNode;
-}
-
-/**
- * Custom field with all properties for rendering
- */
-export declare type F0CustomField = F0BaseField & F0CustomConfig & {
-    type: "custom";
-    /** Conditional rendering based on another field's value */
-    renderIf?: CustomFieldRenderIf;
-};
-
-/**
- * Config for custom fields
- */
-export declare type F0CustomFieldConfig = F0BaseConfig & F0CustomConfig & {
-    fieldType: "custom";
-};
-
-/**
- * F0 config options specific to date fields
- *
- * Note: `minDate`, `maxDate`, and `clearable` are derived from the Zod schema:
- * - `z.date().min(date)` → minDate
- * - `z.date().max(date)` → maxDate
- * - `z.date().optional()` or `z.date().nullable()` → clearable
- */
-export declare interface F0DateConfig {
-    /** Available granularities for the date picker */
-    granularities?: DateGranularity[];
-    /** Preset date options to display */
-    presets?: DatePreset[];
-}
-
-/**
- * Date field with all properties for rendering
- * Includes properties derived from Zod schema
- */
-export declare type F0DateField = F0BaseField & F0DateConfig & {
-    type: "date";
-    /** Minimum selectable date (derived from z.date().min()) */
-    minDate?: Date;
-    /** Maximum selectable date (derived from z.date().max()) */
-    maxDate?: Date;
-    /** Whether the date can be cleared (derived from optional/nullable) */
-    clearable?: boolean;
-    /** Conditional rendering based on another field's value */
-    renderIf?: DateFieldRenderIf;
-};
-
-/**
- * Config for date fields
- */
-export declare type F0DateFieldConfig = F0BaseConfig & F0DateConfig & {
-    fieldType?: "date";
-};
-
-/**
- * F0 config options specific to date range fields
- *
- * Note: `minDate`, `maxDate`, and `clearable` are derived from the Zod schema
- */
-export declare interface F0DateRangeConfig {
-    /** Label for the "from" date input */
-    fromLabel?: string;
-    /** Label for the "to" date input */
-    toLabel?: string;
-    /** Available granularities for the date picker */
-    granularities?: DateGranularity[];
-    /** Preset date options to display */
-    presets?: DatePreset[];
-}
-
-/**
- * Date range field with all properties for rendering
- * Includes properties derived from Zod schema
- */
-export declare type F0DateRangeField = F0BaseField & F0DateRangeConfig & {
-    type: "daterange";
-    /** Minimum selectable date (derived from z.date().min() on the from field) */
-    minDate?: Date;
-    /** Maximum selectable date (derived from z.date().max() on the to field) */
-    maxDate?: Date;
-    /** Whether the date range can be cleared (derived from optional/nullable) */
-    clearable?: boolean;
-    /** Conditional rendering based on another field's value */
-    renderIf?: DateRangeFieldRenderIf;
-};
-
-/**
- * Config for date range fields
- */
-export declare type F0DateRangeFieldConfig = F0BaseConfig & F0DateRangeConfig & {
-    fieldType: "daterange";
-};
-
-/**
- * Union of all F0 field types used for rendering
- */
-export declare type F0Field = F0TextField | F0NumberField | F0TextareaField | F0SelectField | F0CheckboxField | F0SwitchField | F0DateField | F0DateRangeField | F0RichTextField | F0CustomField;
-
-/**
- * Complete F0 field configuration (union of all possible configs)
- */
-export declare type F0FieldConfig = F0StringConfig | F0NumberFieldConfig | F0BooleanConfig | F0DateFieldConfig | F0ArrayConfig | F0ObjectConfig;
-
-/**
- * Field types for rendering
- */
-export declare type F0FieldType = "text" | "number" | "textarea" | "select" | "checkbox" | "switch" | "date" | "daterange" | "richtext" | "custom";
-
-/**
- * @experimental This is an experimental component, use it at your own risk
- */
-export declare const F0Form: <TSchema extends z.ZodObject<ZodRawShape>>(props: F0FormProps<TSchema>) => React.ReactElement;
-
-/**
- * Props when using the action bar submit
- */
-declare interface F0FormActionBarProps<TSchema extends z.ZodObject<ZodRawShape>> extends F0FormBaseProps<TSchema> {
-    /** Type of submit UI (floating action bar) */
-    submitType: "action-bar";
-    /** Whether to show a Discard button to reset form changes */
-    discardableChanges?: boolean;
-    /** Label for the discard button (defaults to i18n "forms.actionBar.discard") */
-    discardLabel?: string;
-    /** Label shown in the action bar (defaults to i18n "forms.actionBar.unsavedChanges") */
-    actionBarLabel?: string;
-}
-
-/**
- * Base props shared by all submit types
- */
-declare interface F0FormBaseProps<TSchema extends z.ZodObject<ZodRawShape>> {
-    /** Unique name for the form, used for generating anchor links (e.g., #forms.[name].[sectionId].[fieldId]) */
-    name: string;
-    /** Zod object schema with F0 field configurations */
-    schema: TSchema;
-    /** Section configurations keyed by section ID */
-    sections?: Record<string, F0SectionConfig>;
-    /** Default values for the form fields (partial of the schema type) */
-    defaultValues?: Partial<z.infer<TSchema>>;
-    /** Callback when the form is submitted with valid data */
-    onSubmit: (data: z.infer<TSchema>) => Promise<F0FormSubmitResult> | F0FormSubmitResult;
-    /** Label for the submit button */
-    submitLabel?: string;
-    /** Additional class name for the form */
-    className?: string;
-}
-
-/**
- * Props when using the default submit button
- */
-declare interface F0FormDefaultSubmitProps<TSchema extends z.ZodObject<ZodRawShape>> extends F0FormBaseProps<TSchema> {
-    /** Type of submit UI (default button) */
-    submitType?: "default";
-    /** Whether to show the submit button */
-    showSubmitButton?: boolean;
-}
-
-/**
- * Props for the F0Form component
- *
- * @typeParam TSchema - The Zod object schema type. The form data type is inferred from this.
- *
- * @example
- * ```tsx
- * const schema = z.object({
- *   name: f0(z.string(), { label: "Name" }),
- *   age: f0(z.number(), { label: "Age" }),
- * })
- *
- * // Default submit button
- * <F0Form
- *   name="my-form"
- *   schema={schema}
- *   defaultValues={{ name: "" }}
- *   onSubmit={(data) => ({ success: true })}
- * />
- *
- * // Action bar with discard button
- * <F0Form
- *   name="my-form"
- *   schema={schema}
- *   submitType="action-bar"
- *   discardableChanges
- *   defaultValues={{ name: "" }}
- *   onSubmit={(data) => ({ success: true })}
- * />
- * ```
- */
-export declare type F0FormProps<TSchema extends z.ZodObject<ZodRawShape>> = F0FormDefaultSubmitProps<TSchema> | F0FormActionBarProps<TSchema>;
-
-/**
- * Type helper for creating a form schema with F0 fields
- */
-export declare type F0FormSchema<T extends Record<string, ZodTypeAny>> = z.ZodObject<T>;
-
-/**
- * Result of form submission
- */
-export declare type F0FormSubmitResult = {
-    success: true;
-} | {
-    success: false;
-    /** Root error message displayed at the top of the form */
-    rootMessage?: string;
-    /** Field-specific error messages */
-    errors?: Record<string, string>;
-};
-
-/**
- * Type of submit UI to render
- * - "default": Standard submit button at the bottom of the form
- * - "action-bar": Floating action bar that appears when form has changes
- */
-export declare type F0FormSubmitType = "default" | "action-bar";
-
 declare interface F0IconProps extends SVGProps<SVGSVGElement>, VariantProps<typeof iconVariants> {
     icon: IconType;
     size?: "lg" | "md" | "sm" | "xs";
     state?: "normal" | "animate";
     color?: "default" | "currentColor" | `#${string}` | Lowercase<NestedKeyOf<typeof f1Colors.icon>>;
-}
-
-/**
- * F0 config options specific to number fields
- *
- * Note: `min` and `max` are derived from the Zod schema:
- * - `z.number().min(n)` → min
- * - `z.number().max(n)` → max
- */
-export declare interface F0NumberConfig {
-    /** Step value for the number input */
-    step?: number;
-    /** Locale for number formatting */
-    locale?: string;
-}
-
-/**
- * Number field with all properties for rendering
- * Includes properties derived from Zod schema
- */
-export declare type F0NumberField = F0BaseField & F0NumberConfig & {
-    type: "number";
-    /** Minimum value (derived from z.number().min()) */
-    min?: number;
-    /** Maximum value (derived from z.number().max()) */
-    max?: number;
-    /** Conditional rendering based on another field's value */
-    renderIf?: NumberFieldRenderIf;
-};
-
-/**
- * Config for number fields
- */
-export declare type F0NumberFieldConfig = F0BaseConfig & F0NumberConfig & {
-    fieldType?: "number";
-};
-
-/**
- * Config for object fields (richtext, daterange, or custom)
- */
-declare type F0ObjectConfig = F0RichTextFieldConfig | F0DateRangeFieldConfig | F0CustomFieldConfig;
-
-/**
- * F0 config options specific to rich text fields
- */
-export declare interface F0RichTextConfig {
-    /** Maximum number of characters allowed */
-    maxCharacters?: number;
-    /** Configuration for user mentions */
-    mentionsConfig?: MentionsConfig;
-    /** Height configuration for the editor */
-    height?: heightType;
-    /** Whether to use plain HTML mode */
-    plainHtmlMode?: boolean;
-}
-
-/**
- * Rich text field with all properties for rendering
- */
-export declare type F0RichTextField = F0BaseField & F0RichTextConfig & {
-    type: "richtext";
-    /** Conditional rendering based on another field's value */
-    renderIf?: RichTextFieldRenderIf;
-};
-
-/**
- * Config for richtext fields
- */
-export declare type F0RichTextFieldConfig = F0BaseConfig & F0RichTextConfig & {
-    fieldType: "richtext";
-};
-
-/**
- * Configuration for a form section
- */
-export declare interface F0SectionConfig {
-    /** Section title */
-    title: string;
-    /** Section description */
-    description?: string;
-    /** Conditional rendering for the entire section */
-    renderIf?: SectionRenderIf;
-    /** Order in which sections appear (lower = first) */
-    order?: number;
 }
 
 /**
@@ -3610,35 +3037,6 @@ declare type F0SelectBaseProps<T extends string, R = unknown> = {
      * Only displays the dropdown content with max height, border and scroll.
      */
     asList?: boolean;
-};
-
-/**
- * F0 config options specific to select fields
- *
- * Note: `clearable` is derived from the Zod schema:
- * - `z.string().optional()` or `z.string().nullable()` → clearable
- */
-export declare interface F0SelectConfig {
-    /** Options for the select dropdown */
-    options: F0SelectItemProps<string, unknown>[];
-    /** Whether multiple selection is allowed */
-    multiple?: boolean;
-    /** Whether to show the search box */
-    showSearchBox?: boolean;
-    /** Placeholder for the search box */
-    searchBoxPlaceholder?: string;
-}
-
-/**
- * Select field with all properties for rendering
- * Includes properties derived from Zod schema
- */
-export declare type F0SelectField = F0BaseField & F0SelectConfig & {
-    type: "select";
-    /** Whether the select can be cleared (derived from optional/nullable) */
-    clearable?: boolean;
-    /** Conditional rendering based on another field's value */
-    renderIf?: SelectFieldRenderIf;
 };
 
 declare type F0SelectItemObject<T, R = unknown> = {
@@ -3720,48 +3118,6 @@ export { F0SelectProps }
 export { F0SelectProps as SelectProps }
 
 /**
- * Union of all string field configs
- */
-export declare type F0StringConfig = F0StringTextConfig | F0StringTextareaConfig | F0StringSelectConfig;
-
-/**
- * Config for string fields with select options
- */
-declare type F0StringSelectConfig = F0BaseConfig & F0SelectConfig & {
-    fieldType?: "select";
-};
-
-/**
- * Config for string fields - textarea
- */
-declare type F0StringTextareaConfig = F0BaseConfig & F0TextareaConfig & {
-    fieldType: "textarea";
-};
-
-/**
- * Config for string fields - text input (default for z.string())
- */
-declare type F0StringTextConfig = F0BaseConfig & F0TextConfig & {
-    fieldType?: "text";
-};
-
-/**
- * F0 config options specific to switch fields
- * (switch has no additional options beyond base config)
- */
-export declare interface F0SwitchConfig {
-}
-
-/**
- * Switch field with all properties for rendering
- */
-export declare type F0SwitchField = F0BaseField & {
-    type: "switch";
-    /** Conditional rendering based on another field's value */
-    renderIf?: SwitchFieldRenderIf;
-};
-
-/**
  * @experimental This is an experimental component use it at your own risk
  */
 export declare const F0TableOfContent: typeof _F0TableOfContent;
@@ -3790,46 +3146,6 @@ declare type F0TagRawProps = {
 });
 
 /**
- * F0 config options specific to textarea fields
- *
- * Note: `maxLength` is derived from the Zod schema:
- * - `z.string().max(n)` → maxLength
- */
-export declare interface F0TextareaConfig {
-    /** Number of rows for the textarea */
-    rows?: number;
-}
-
-/**
- * Textarea field with all properties for rendering
- * Includes properties derived from Zod schema
- */
-export declare type F0TextareaField = F0BaseField & F0TextareaConfig & {
-    type: "textarea";
-    /** Maximum character length (derived from z.string().max()) */
-    maxLength?: number;
-    /** Conditional rendering based on another field's value */
-    renderIf?: TextareaFieldRenderIf;
-};
-
-/**
- * F0 config options specific to text fields
- */
-export declare interface F0TextConfig {
-    /** HTML input type (text, email, password, etc.) */
-    inputType?: "text" | "email" | "password" | "tel" | "url";
-}
-
-/**
- * Text field with all properties for rendering
- */
-export declare type F0TextField = F0BaseField & F0TextConfig & {
-    type: "text";
-    /** Conditional rendering based on another field's value */
-    renderIf?: TextFieldRenderIf;
-};
-
-/**
  * @experimental This is an experimental component use it at your own risk
  */
 export declare const F0VersionHistory: typeof _F0VersionHistory;
@@ -3841,14 +3157,6 @@ export declare interface F0VersionHistoryProps {
     versions: Version[];
     currentVersion?: CurrentVersion;
     activeVersionId?: string | "current";
-}
-
-/**
- * Extended Zod type with F0 metadata
- */
-export declare interface F0ZodType<T extends ZodTypeAny = ZodTypeAny> {
-    _f0Config?: F0FieldConfig;
-    _innerSchema: T;
 }
 
 /**
@@ -3870,13 +3178,6 @@ declare type FavoriteMenuItem = ({
 }) & {
     tooltip?: string;
 } & NavigationItem;
-
-/* Excluded from this release type: FieldItem */
-
-/**
- * Field types for rendering
- */
-export declare type FieldType = "text" | "number" | "textarea" | "select" | "checkbox" | "switch" | "date" | "daterange" | "richtext" | "custom";
 
 export declare const FILE_TYPES: {
     readonly PDF: "pdf";
@@ -4089,8 +3390,6 @@ export declare function FormActions<Schema extends SchemaType, FormData extends 
     form: FormType<Schema, FormData>;
 }): JSX_2.Element;
 
-/* Excluded from this release type: FormDefinitionItem */
-
 declare type FormError<Fields extends FieldValues> = {
     success: false;
     rootMessage?: string;
@@ -4121,17 +3420,6 @@ declare interface FrameContextType {
     setForceFloat: (force: boolean) => void;
 }
 
-/**
- * Generates an anchor ID for a form element
- * Format: forms.[formName].[sectionId].[fieldId]
- */
-export declare function generateAnchorId(formName: string, sectionId?: string, fieldId?: string): string;
-
-/**
- * Get F0 config from a schema
- */
-export declare function getF0Config(schema: ZodTypeAny): F0FieldConfig | undefined;
-
 export declare const getGranularityDefinition: (granularityKey: GranularityDefinitionKey) => GranularityDefinition;
 
 /**
@@ -4146,16 +3434,6 @@ export declare const getGranularitySimpleDefinition: (granularityKey: Granularit
  * Get the primaryActionsItems from the primaryActionsDefinition or the actions property
  */
 export declare const getPrimaryActions: (primaryActions: PrimaryActionsDefinitionFn | undefined) => PrimaryActionItemDefinition[];
-
-/**
- * Non-hook version for extracting definition outside of React components.
- * Useful for server-side rendering or testing.
- *
- * @param schema - Zod object schema with F0 field configurations
- * @param sections - Optional section configurations keyed by section ID
- * @returns Array of form definition items
- */
-export declare function getSchemaDefinition(schema: z.ZodObject<ZodRawShape>, sections?: Record<string, F0SectionConfig>): FormDefinitionItem[];
 
 /**
  * Get the secondaryActionsItems from the secondaryActionsDefinition or the actions property
@@ -4247,11 +3525,6 @@ declare type GroupRecord<RecordType> = {
     itemCount: number | undefined | Promise<number | undefined>;
     records: RecordType[];
 };
-
-/**
- * Check if a schema has F0 config
- */
-export declare function hasF0Config(schema: ZodTypeAny): boolean;
 
 declare type HeaderProps = {
     module: {
@@ -4353,16 +3626,6 @@ export declare const IndicatorsList: ForwardRefExoticComponent<IndicatorsListPro
 export declare interface IndicatorsListProps {
     items: ComponentProps<typeof Indicator>[];
 }
-
-/**
- * Extract the inferred type from an F0 form schema
- */
-export declare type InferF0FormValues<T extends z.ZodObject<z.ZodRawShape>> = z.infer<T>;
-
-/**
- * Infer field type from Zod schema when not explicitly specified
- */
-export declare function inferFieldType(schema: ZodTypeAny, config: F0FieldConfig): F0FieldType;
 
 declare type InferFilters<S> = S extends {
     dataAdapter: DataCollectionDataAdapter<any, infer F, any>;
@@ -5065,11 +4328,6 @@ export declare interface NotesTextEditorSkeletonProps {
     withToolbar?: boolean;
 }
 
-/**
- * All valid renderIf conditions for number fields
- */
-declare type NumberFieldRenderIf = NumberRenderIfCondition | CommonRenderIfCondition;
-
 export declare type NumberFilterDefinition = BaseFilterDefinition<"number"> & {
     options?: NumberFilterOptions_2;
 };
@@ -5110,32 +4368,6 @@ declare type NumberInputInternalProps = Omit<InputInternalProps<string>, "value"
 };
 
 export declare type NumberInputProps = Omit<NumberInputInternalProps, (typeof privateProps_3)[number]>;
-
-/**
- * Base for number-specific conditions
- */
-declare interface NumberRenderIfBase {
-    fieldId: string;
-}
-
-/**
- * RenderIf conditions specific to number fields
- */
-export declare type NumberRenderIfCondition = NumberRenderIfBase & ({
-    equalsTo: number;
-} | {
-    notEqualsTo: number;
-} | {
-    greaterThan: number;
-} | {
-    greaterThanOrEqual: number;
-} | {
-    lowerThan: number;
-} | {
-    lowerThanOrEqual: number;
-} | {
-    isEmpty: boolean;
-});
 
 declare type NumericQuestionProps = BaseQuestionPropsForOtherQuestionComponents & {
     value?: number | null;
@@ -5984,19 +5216,6 @@ export declare type RecordType = Record<string, unknown>;
 
 declare type RendererDefinition = ValueDisplayRendererDefinition;
 
-/**
- * Base condition that all renderIf conditions must have
- */
-declare interface RenderIfBase {
-    /** ID of the field to check the condition against */
-    fieldId: string;
-}
-
-/**
- * Union of all possible RenderIf conditions (used internally for evaluation)
- */
-export declare type RenderIfCondition = CommonRenderIfCondition | TextRenderIfCondition | NumberRenderIfCondition | BooleanRenderIfCondition | SelectRenderIfCondition | DateRenderIfCondition | DateRangeRenderIfCondition;
-
 export declare type ResolvedRecordType<R> = R extends RecordType ? R : RecordType;
 
 /**
@@ -6054,23 +5273,6 @@ export declare interface RichTextEditorProps {
 declare interface RichTextEditorSkeletonProps {
     rows?: number;
 }
-
-/**
- * All valid renderIf conditions for richtext fields
- */
-declare type RichTextFieldRenderIf = CommonRenderIfCondition;
-
-/**
- * Rich text editor result value type
- */
-export declare interface RichTextValue {
-    /** HTML content of the editor */
-    value: string | null;
-    /** IDs of mentioned users */
-    mentionIds?: number[];
-}
-
-/* Excluded from this release type: RowDefinition */
 
 declare type SchemaType = ZodType;
 
@@ -6148,8 +5350,6 @@ export declare type SectionActionParams = {
     index: number;
 };
 
-/* Excluded from this release type: SectionDefinition */
-
 export declare type SectionElement = Omit<SectionProps, "onAction" | "onChange">;
 
 /**
@@ -6171,11 +5371,6 @@ declare type SectionProps_2 = {
     onClickItem: (id: string) => void;
     onItemVisible?: (id: string) => void;
 };
-
-/**
- * Conditional rendering for sections - can be a condition object or a function
- */
-export declare type SectionRenderIf = RenderIfCondition | ((values: Record<string, unknown>) => boolean);
 
 /**
  * @experimental This is an experimental component use it at your own risk
@@ -6222,11 +5417,6 @@ export declare type SelectedState = {
     checked: boolean;
 };
 
-/**
- * All valid renderIf conditions for select fields
- */
-declare type SelectFieldRenderIf = SelectRenderIfCondition | CommonRenderIfCondition;
-
 export declare type SelectionId = number | string;
 
 export declare type SelectQuestionOption = {
@@ -6244,28 +5434,6 @@ declare type SelectQuestionProps = BaseQuestionPropsForOtherQuestionComponents &
 } | {
     type: "multi-select";
     value?: string[] | null;
-});
-
-/**
- * Base for select-specific conditions
- */
-declare interface SelectRenderIfBase {
-    fieldId: string;
-}
-
-/**
- * RenderIf conditions specific to select fields
- */
-export declare type SelectRenderIfCondition = SelectRenderIfBase & ({
-    equalsTo: string;
-} | {
-    notEqualsTo: string;
-} | {
-    includes: string;
-} | {
-    notIncludes: string;
-} | {
-    isEmpty: boolean;
 });
 
 export declare const selectSizes: readonly ["sm", "md"];
@@ -6496,11 +5664,6 @@ export declare type SummaryType = "sum";
 export declare const Switch: typeof _Switch;
 
 declare function _Switch({ title, onCheckedChange, id, disabled, checked, value, hideLabel, presentational, ...rest }: SwitchProps): JSX_2.Element;
-
-/**
- * All valid renderIf conditions for switch fields
- */
-declare type SwitchFieldRenderIf = BooleanRenderIfCondition | CommonRenderIfCondition;
 
 declare interface SwitchProps extends DataAttributes_2 {
     /**
@@ -6734,42 +5897,12 @@ declare const Textarea_2: React_2.ForwardRefExoticComponent<Omit<React_2.Textare
     value?: string;
 } & Pick<InputFieldProps<string>, "label" | "value" | "onChange" | "size" | "icon" | "onFocus" | "onBlur" | "onKeyDown" | "status" | "loading" | "maxLength" | "placeholder" | "error" | "hideLabel" | "hint" | "labelIcon" | "clearable" | "onClear"> & React_2.RefAttributes<HTMLTextAreaElement>>;
 
-/**
- * All valid renderIf conditions for textarea fields
- */
-declare type TextareaFieldRenderIf = TextRenderIfCondition | CommonRenderIfCondition;
-
 export declare type TextareaProps = Pick<ComponentProps<typeof Textarea_2>, "disabled" | "onChange" | "value" | "placeholder" | "rows" | "cols" | "label" | "labelIcon" | "icon" | "hideLabel" | "maxLength" | "clearable" | "onBlur" | "onFocus" | "name" | "status" | "hint" | "error" | "size" | "loading">;
-
-/**
- * All valid renderIf conditions for text fields
- */
-declare type TextFieldRenderIf = TextRenderIfCondition | CommonRenderIfCondition;
 
 declare type TextQuestionProps = BaseQuestionPropsForOtherQuestionComponents & {
     type: "text" | "longText";
     value?: string | null;
 };
-
-/**
- * Base for text-specific conditions
- */
-declare interface TextRenderIfBase {
-    fieldId: string;
-}
-
-/**
- * RenderIf conditions specific to text fields
- */
-export declare type TextRenderIfCondition = TextRenderIfBase & ({
-    equalsTo: string;
-} | {
-    notEqualsTo: string;
-} | {
-    matches: RegExp;
-} | {
-    isEmpty: boolean;
-});
 
 declare const THEMES: {
     readonly light: "";
@@ -7035,39 +6168,6 @@ export declare interface User {
 declare interface User_2 {
     name: string;
 }
-
-/**
- * Hook to convert a Zod schema with F0 configurations into a FormDefinitionItem array.
- *
- * This parses the schema shape, extracts F0 configs, groups fields by section,
- * sorts by position, and groups row fields together.
- *
- * Automatic derivations from the Zod schema:
- * - **Position**: Derived from field declaration order (can be overridden with `position`)
- * - **Number min/max**: `z.number().min(n).max(m)` → min/max constraints
- * - **Date min/max**: `z.date().min(d).max(d)` → minDate/maxDate constraints
- * - **String maxLength**: `z.string().max(n)` → maxLength for textarea
- * - **Clearable**: `z.optional()` or `z.nullable()` → clearable for select/date fields
- *
- * @param schema - Zod object schema with F0 field configurations
- * @param sections - Optional section configurations keyed by section ID
- * @returns Array of form definition items compatible with existing renderers
- *
- * @example
- * ```tsx
- * const formSchema = z.object({
- *   // Fields are ordered by declaration - no need to specify position
- *   firstName: f0(z.string().min(1), { label: "First Name" }),
- *   lastName: f0(z.string().min(1), { label: "Last Name" }),
- *   // Constraints derived from Zod, clearable because optional
- *   birthDate: f0(z.date().min(new Date("1900-01-01")).optional(), {
- *     label: "Birth Date"
- *   }),
- *   age: f0(z.number().min(0).max(120), { label: "Age" })
- * })
- * ```
- */
-export declare function useSchemaDefinition(schema: z.ZodObject<ZodRawShape>, sections?: Record<string, F0SectionConfig>): FormDefinitionItem[];
 
 export declare function useSidebar(): FrameContextType;
 
@@ -7418,6 +6518,11 @@ declare module "gridstack" {
 }
 
 
+declare namespace Calendar {
+    var displayName: string;
+}
+
+
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         aiBlock: {
@@ -7443,9 +6548,4 @@ declare module "@tiptap/core" {
             insertTranscript: (data: TranscriptData) => ReturnType;
         };
     }
-}
-
-
-declare namespace Calendar {
-    var displayName: string;
 }
