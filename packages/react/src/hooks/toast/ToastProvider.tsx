@@ -24,7 +24,7 @@ type ToastContextValue = {
   removeToast: (id: ToastId) => void
 }
 
-const toastContainerPositions = ["bottom-center"] as const
+const toastContainerPositions = ["bottom-center", "top-right"] as const
 type ToastContainerPosition = (typeof toastContainerPositions)[number]
 
 const ToastContext = createContext<ToastContextValue | null>(null)
@@ -35,11 +35,12 @@ type ToastProviderProps = {
 
 const toastContainerPositionClasses: Record<ToastContainerPosition, string> = {
   "bottom-center": "justify-center items-end",
+  "top-right": "justify-end items-start",
 } as const
 
 const ToastsContainer = ({
   items,
-  position = "bottom-center",
+  position = "top-right",
 }: {
   items: ToastProviderItem[]
   position?: ToastContainerPosition
