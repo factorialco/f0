@@ -78,8 +78,8 @@ export const WithDataTestId: Story = {
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    const root = canvas.getByText("Chip with Test ID").closest("[data-test-id]")
-    await expect(root).toHaveAttribute("data-test-id", "my-test-chip-list")
+    const root = canvas.getByText("Chip with Test ID").closest("[data-testid]")
+    await expect(root).toHaveAttribute("data-testid", "my-test-chip-list")
   },
 }
 

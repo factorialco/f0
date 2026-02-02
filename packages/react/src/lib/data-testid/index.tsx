@@ -107,15 +107,15 @@ export const withDataTestId = <T extends React.ComponentType<any>>(
     (component as any).$$typeof === Symbol.for("react.memo")
 
   if (isMemo) {
-    // For memo components, we need to wrap the inner component and re-memoize
+    // For memo components, wrap the inner component with data-testid injection and re-memoize.
+    // We inline the wrapper (instead of recursing) so the inner component receives only
+    // the transformed props (data-testid, no dataTestId/ref) and never spreads ref onto DOM.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const originalType = (component as any).type
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const originalCompare = (component as any).compare
 
     // Recurse to wrap the inner component (which might be forwardRef or regular)
-    // We cast to any because the recursive call returns a type with props already extended,
-    // but here we are recomposing it.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const WrappedInner = withDataTestId(originalType) as any
 

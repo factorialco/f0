@@ -169,8 +169,8 @@ export const WithDataTestId: Story = {
     const canvas = within(canvasElement)
     const root = canvas
       .getByLabelText("DatePicker with Test ID")
-      .closest("[data-test-id]")
-    await expect(root).toHaveAttribute("data-test-id", "my-test-date-picker")
+      .closest("[data-testid]")
+    await expect(root).toHaveAttribute("data-testid", "my-test-date-picker")
   },
 }
 

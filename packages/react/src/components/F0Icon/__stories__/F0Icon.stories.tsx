@@ -53,9 +53,9 @@ export const WithDataTestId: Story = {
     dataTestId: "my-test-icon",
   },
   play: async ({ canvasElement }) => {
-    const root = canvasElement.querySelector("[data-test-id='my-test-icon']")
+    const root = canvasElement.querySelector("[data-testid='my-test-icon']")
     await expect(root).toBeInTheDocument()
-    await expect(root).toHaveAttribute("data-test-id", "my-test-icon")
+    await expect(root).toHaveAttribute("data-testid", "my-test-icon")
   },
 }
 

@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import type { ComponentProps, HTMLAttributes } from "react"
+
 import { useState } from "react"
 import { expect, within } from "storybook/test"
 
@@ -41,7 +41,7 @@ export const Default: Story = {
   play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
     const canvas = within(canvasElement)
     const button = canvas.getByRole("button")
-    await expect(button).toHaveAttribute("data-test-id", "my-test-button")
+    await expect(button).toHaveAttribute("data-testid", "my-test-button")
   },
 }
 
@@ -78,14 +78,14 @@ export const DynamicUpdate: Story = {
     const button = canvas.getByRole("button", { name: "Dynamic ID Button" })
 
     await step("Check initial ID", async () => {
-      await expect(button).toHaveAttribute("data-test-id", "initial-id")
+      await expect(button).toHaveAttribute("data-testid", "initial-id")
     })
 
     await step("Update ID", async () => {
       const updateButton = canvas.getByText("Update ID")
       updateButton.click()
       // Wait for re-render if needed, but here it's sync
-      await expect(button).toHaveAttribute("data-test-id", "updated-id")
+      await expect(button).toHaveAttribute("data-testid", "updated-id")
     })
   },
 }
@@ -116,6 +116,6 @@ export const CustomComponent: Story = {
   }): Promise<void> => {
     const canvas = within(canvasElement)
     const element = canvas.getByText("I am a custom component with a test ID")
-    await expect(element).toHaveAttribute("data-test-id", "custom-component-id")
+    await expect(element).toHaveAttribute("data-testid", "custom-component-id")
   },
 }

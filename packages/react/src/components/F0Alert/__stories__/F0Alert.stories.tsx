@@ -124,7 +124,7 @@ export const WithDataTestId: Story = {
     const canvas = within(canvasElement)
     const alert = canvas
       .getByText("Alert with Test ID")
-      .closest("[data-test-id]")
-    await expect(alert).toHaveAttribute("data-test-id", "my-test-alert")
+      .closest("[data-testid]")
+    await expect(alert).toHaveAttribute("data-testid", "my-test-alert")
   },
 }

@@ -77,7 +77,7 @@ export const WithDataTestId: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     const text = canvas.getByText("Text with Test ID")
-    await expect(text).toHaveAttribute("data-test-id", "my-test-text")
+    await expect(text).toHaveAttribute("data-testid", "my-test-text")
   },
 }
 

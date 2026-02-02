@@ -102,8 +102,8 @@ export const WithDataTestId: Story = {
     const canvas = within(canvasElement)
     const root = canvas
       .getByText("BigNumber with Test ID")
-      .closest("[data-test-id]")
-    await expect(root).toHaveAttribute("data-test-id", "my-test-bignumber")
+      .closest("[data-testid]")
+    await expect(root).toHaveAttribute("data-testid", "my-test-bignumber")
   },
 }
 

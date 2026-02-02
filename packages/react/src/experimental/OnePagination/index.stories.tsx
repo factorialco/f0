@@ -100,8 +100,8 @@ export const WithDataTestId: Story = {
   play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
     const canvas = within(canvasElement)
     const nav = canvas.getByRole("navigation")
-    const root = nav.closest("[data-test-id]")
-    await expect(root).toHaveAttribute("data-test-id", "my-test-pagination")
+    const root = nav.closest("[data-testid]")
+    await expect(root).toHaveAttribute("data-testid", "my-test-pagination")
   },
 }
 

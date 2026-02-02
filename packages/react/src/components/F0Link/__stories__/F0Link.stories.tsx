@@ -69,7 +69,7 @@ export const WithDataTestId: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     const link = canvas.getByRole("link", { name: "Link with Test ID" })
-    await expect(link).toHaveAttribute("data-test-id", "my-test-link")
+    await expect(link).toHaveAttribute("data-testid", "my-test-link")
   },
 }
 

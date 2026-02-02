@@ -4,7 +4,6 @@ import { ComponentProps, FC, useState } from "react"
 import { expect, within } from "storybook/test"
 
 import { F0Button } from "@/components/F0Button"
-import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
 import { ActivityItemList } from "@/experimental/Information/Activity/ActivityItemList"
 import { Default as ActivityItemListDefault } from "@/experimental/Information/Activity/ActivityItemList/index.stories"
 import { ResourceHeader } from "@/experimental/Information/Headers/ResourceHeader"
@@ -23,6 +22,7 @@ import DeleteIcon from "@/icons/app/Delete"
 import PencilIcon from "@/icons/app/Pencil"
 import SaveIcon from "@/icons/app/Save"
 import ShareIcon from "@/icons/app/Share"
+import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
 
 import { F0Dialog } from "../index"
 import { dialogPositions, dialogWidths } from "../types"
@@ -160,7 +160,7 @@ export const WithDataTestId: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     const dialog = canvas.getByRole("dialog", { name: "Dialog with Test ID" })
-    await expect(dialog).toHaveAttribute("data-test-id", "my-test-dialog")
+    await expect(dialog).toHaveAttribute("data-testid", "my-test-dialog")
   },
 }
 

@@ -9,9 +9,9 @@ import {
   FiltersDefinition,
   RecordType,
 } from "@/hooks/datasource"
-import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
 import { SelectedItemsDetailedStatus } from "@/hooks/datasource/types/selection.typings"
 import { Appearance, Circle, Desktop, Placeholder, Plus } from "@/icons/app"
+import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
 import { withSkipA11y, withSnapshot } from "@/lib/storybook-utils/parameters"
 import { inputFieldStatus } from "@/ui/InputField"
 
@@ -344,8 +344,8 @@ export const WithDataTestId: Story = {
     const canvas = within(canvasElement)
     const select = canvas
       .getByLabelText("Select with Test ID")
-      .closest("[data-test-id]")
-    await expect(select).toHaveAttribute("data-test-id", "my-test-select")
+      .closest("[data-testid]")
+    await expect(select).toHaveAttribute("data-testid", "my-test-select")
   },
 }
 

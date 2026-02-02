@@ -93,7 +93,7 @@ export const WithDataTestId: Story = {
     const checkbox = canvas.getByRole("checkbox", {
       name: "Checkbox with Test ID",
     })
-    await expect(checkbox).toHaveAttribute("data-test-id", "my-test-checkbox")
+    await expect(checkbox).toHaveAttribute("data-testid", "my-test-checkbox")
   },
 }
 

@@ -18,8 +18,8 @@ import {
   Office,
   Star,
 } from "@/icons/app"
-import { createAtlaskitDriver } from "@/lib/dnd/atlaskitDriver"
 import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
+import { createAtlaskitDriver } from "@/lib/dnd/atlaskitDriver"
 import { DndProvider } from "@/lib/dnd/context"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { mockImage } from "@/testing/mocks/images"
@@ -182,8 +182,8 @@ export const WithDataTestId: Story = {
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    const card = canvas.getByText("Card with Test ID").closest("[data-test-id]")
-    await expect(card).toHaveAttribute("data-test-id", "my-test-card")
+    const card = canvas.getByText("Card with Test ID").closest("[data-testid]")
+    await expect(card).toHaveAttribute("data-testid", "my-test-card")
   },
 }
 

@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import type { ComponentProps } from "react"
+
 import { expect, within } from "storybook/test"
 
 import { Check, Warning } from "@/icons/app"
@@ -74,8 +74,8 @@ export const WithDataTestId: Story = {
     const canvas = within(canvasElement)
     const root = canvas
       .getByRole("img", { name: "John Doe" })
-      .closest("[data-test-id]")
-    await expect(root).toHaveAttribute("data-test-id", "my-test-avatar")
+      .closest("[data-testid]")
+    await expect(root).toHaveAttribute("data-testid", "my-test-avatar")
   },
 }
 

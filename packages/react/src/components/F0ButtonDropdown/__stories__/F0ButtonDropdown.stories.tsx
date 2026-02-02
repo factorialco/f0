@@ -128,7 +128,7 @@ export const WithDataTestId: Story = {
     const canvas = within(canvasElement)
     const button = canvas.getByRole("button")
     await expect(button).toHaveAttribute(
-      "data-test-id",
+      "data-testid",
       "my-test-button-dropdown"
     )
   },
