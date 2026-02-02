@@ -16,6 +16,7 @@ export const modules = {
   compensations: ModuleIcons.Payroll,
   discover: ModuleIcons.Discover,
   documents: ModuleIcons.Documents,
+  pages: ModuleIcons.Documents,
   employee_attendance: ModuleIcons.ClockIn,
   employees: ModuleIcons.Organization,
   engagement: ModuleIcons.Engagement,
