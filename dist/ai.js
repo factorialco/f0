@@ -1,5 +1,5 @@
-import { A as i, a as r, b as t, d as o, c as n, H as e, e as A, u as l, f as u } from "./AiChatTranslationsProvider-B-Wb3pav.js";
-import { I as f, u as h } from "./index-DsXvZIpa.js";
+import { A as i, a as r, b as t, d as o, c as n, H as e, e as A, u as l, f as u } from "./AiChatTranslationsProvider-Bl0sdxOe.js";
+import { I as f, u as h } from "./index-u3yIXJA-.js";
 import { defaultTranslations as m } from "./i18n-provider-defaults.js";
 export {
   i as ActionItem,
