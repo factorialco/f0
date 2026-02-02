@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.342.0](https://github.com/factorialco/f0/compare/f0-react-v1.341.1...f0-react-v1.342.0) (2026-02-02)
+
+
+### Features
+
+* introduce F0 AI components and refactor existing AI chat structure ([#3287](https://github.com/factorialco/f0/issues/3287)) ([3b8e8ba](https://github.com/factorialco/f0/commit/3b8e8ba3367d1f05a081ef3825f589624aed0369))
+
 ## [1.341.1](https://github.com/factorialco/f0/compare/f0-react-v1.341.0...f0-react-v1.341.1) (2026-02-02)
 
 
