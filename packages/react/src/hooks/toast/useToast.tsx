@@ -10,7 +10,7 @@ export const useToast = (): UseToastReturn => {
     const id = options.id || nanoid()
 
     addToast({
-      duration: options.persistent ? undefined : 5000,
+      duration: options.persistent ? undefined : 10000,
       ...options,
       id,
       onClose: () => removeToast(id),

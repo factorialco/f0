@@ -64,7 +64,15 @@ const titleVariants = cva({
 
 const F0Toast = forwardRef<HTMLDivElement, F0ToastProps>(
   (
-    { title, description, variant = "default", duration, onClose, actions },
+    {
+      title,
+      description,
+      variant = "default",
+      duration,
+      onClose,
+      actions,
+      forcePauseTimer,
+    },
     ref
   ) => {
     const prefersReducedMotion = useReducedMotion()
@@ -123,7 +131,13 @@ const F0Toast = forwardRef<HTMLDivElement, F0ToastProps>(
 
     // Timer logic
     useEffect(() => {
-      if (!duration || duration <= 0 || isPaused || isClosing) {
+      if (
+        !duration ||
+        duration <= 0 ||
+        isPaused ||
+        isClosing ||
+        forcePauseTimer
+      ) {
         if (animationFrameRef.current) {
           cancelAnimationFrame(animationFrameRef.current)
           animationFrameRef.current = null
@@ -149,7 +163,7 @@ const F0Toast = forwardRef<HTMLDivElement, F0ToastProps>(
       }, 16)
 
       return () => clearInterval(interval)
-    }, [duration, isPaused, isClosing, handleClose])
+    }, [duration, isPaused, isClosing, handleClose, forcePauseTimer])
 
     const handleMouseEnter = () => {
       if (duration && duration > 0) {
