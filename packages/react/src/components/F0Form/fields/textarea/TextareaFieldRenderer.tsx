@@ -1,6 +1,6 @@
 import { ControllerRenderProps, FieldValues } from "react-hook-form"
 
-import { Textarea } from "../../../Fields/TextArea"
+import { Textarea } from "@/experimental/Forms/Fields/TextArea"
 import type { F0TextareaField } from "./types"
 import { FORM_SIZE } from "../../constants"
 

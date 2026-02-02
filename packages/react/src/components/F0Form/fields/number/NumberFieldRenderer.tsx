@@ -1,6 +1,6 @@
 import { ControllerRenderProps, FieldValues } from "react-hook-form"
 
-import { NumberInput } from "../../../Fields/NumberInput"
+import { NumberInput } from "@/experimental/Forms/Fields/NumberInput"
 import type { F0NumberField } from "./types"
 import { FORM_SIZE } from "../../constants"
 

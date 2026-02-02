@@ -1,6 +1,6 @@
 import { useFormContext } from "react-hook-form"
 
-import { Switch } from "../../Fields/Switch"
+import { Switch } from "@/experimental/Forms/Fields/Switch"
 import { SWITCH_GROUP_PADDING } from "../constants"
 import { generateAnchorId, useF0FormContext } from "../context"
 import type { F0SwitchField } from "../fields/switch/types"
