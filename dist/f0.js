@@ -9180,7 +9180,7 @@ function Bu({ section: r }) {
     id: c,
     className: "flex flex-col scroll-mt-4",
     children: [h("div", {
-      className: "[&>div]:px-0 [&>div]:border-0 py-5",
+      className: "[&>div]:px-0.5 [&>div]:mx-0 [&>div]:border-0 py-5",
       children: h(Jo, {
         title: i,
         description: s ?? ""
