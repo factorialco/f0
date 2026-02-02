@@ -1,0 +1,47 @@
+---
+description: "Enforce withDataTestId wrapper for exported components"
+globs: "packages/react/src/components/**/*.tsx,packages/react/src/experimental/**/*.tsx"
+alwaysApply: false
+---
+
+# Enforce withDataTestId Wrapper
+
+To ensure all components can be easily tested with stable selectors, all public components exported from the library must be wrapped with the `withDataTestId` HOC.
+
+## Rule
+
+1.  **Public Components**: Any component that is exported for public use (i.e., not an internal subcomponent) MUST be wrapped.
+2.  **Implementation**: Use the `withDataTestId` utility from `@/lib/data-test-id`.
+3.  **Naming**: The wrapped component should be the one exported.
+
+## Example
+
+### Incorrect
+
+```tsx
+export const F0Button = forwardRef<HTMLButtonElement, F0ButtonProps>((props, ref) => {
+  // ... implementation
+})
+```
+
+### Correct
+
+```tsx
+import { withDataTestId } from "@/lib/data-test-id"
+
+const _F0Button = forwardRef<HTMLButtonElement, F0ButtonProps>((props, ref) => {
+  // ... implementation
+})
+
+export const F0Button = withDataTestId(_F0Button)
+```
+
+## Handling Existing Wrappers
+
+If a component is already wrapped (e.g., with `memo` or `experimentalComponent`), wrap it with `withDataTestId` as the outermost layer.
+
+```tsx
+export const F0Chart = withDataTestId(
+  experimentalComponent("F0Chart", _F0Chart)
+)
+```

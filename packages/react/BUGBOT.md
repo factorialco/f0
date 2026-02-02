@@ -17,6 +17,7 @@ This file configures automated code review rules for the `packages/react` packag
 - Use **named exports** for all components
 - Avoid default exports for components
 - Ensure a component in `components` or `experimental` is exported in `exports.ts`
+- **MUST** wrap all public exported components with `withDataTestId` from `@/lib/data-test-id` to support runtime test IDs.
 
 ### Client Components
 

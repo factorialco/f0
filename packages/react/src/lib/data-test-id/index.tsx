@@ -42,11 +42,16 @@ export type WithDataTestIdProps = {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const withDataTestId = <T extends React.ComponentType<any>>(
   component: T
-): T => {
+): React.ComponentType<React.ComponentProps<T> & WithDataTestIdProps> => {
   // Check if the component is a forwardRef component
   const isForwardRef =
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (component as any).$$typeof === Symbol.for("react.forward_ref")
+
+  // The type for the returned component
+  type ReturnedComponentType = React.ComponentType<
+    React.ComponentProps<T> & WithDataTestIdProps
+  >
 
   if (isForwardRef) {
     // For forwardRef components, we need to wrap the render function
@@ -79,7 +84,7 @@ export const withDataTestId = <T extends React.ComponentType<any>>(
       WrappedComponent.displayName = `withDataTestId(${name})`
     }
 
-    return WrappedComponent as unknown as T
+    return WrappedComponent as unknown as ReturnedComponentType
   }
 
   // Check if the component is a memo component
@@ -95,7 +100,10 @@ export const withDataTestId = <T extends React.ComponentType<any>>(
     const originalCompare = (component as any).compare
 
     // Recurse to wrap the inner component (which might be forwardRef or regular)
-    const WrappedInner = withDataTestId(originalType)
+    // We cast to any because the recursive call returns a type with props already extended,
+    // but here we are recomposing it.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const WrappedInner = withDataTestId(originalType) as any
 
     const MemoizedComponent = memo(WrappedInner, originalCompare)
 
@@ -113,7 +121,7 @@ export const withDataTestId = <T extends React.ComponentType<any>>(
       MemoizedComponent.displayName = `withDataTestId(${name})`
     }
 
-    return MemoizedComponent as unknown as T
+    return MemoizedComponent as unknown as ReturnedComponentType
   }
 
   // For regular components (function or class)
@@ -138,8 +146,8 @@ export const withDataTestId = <T extends React.ComponentType<any>>(
   // Set displayName
   if (!WrappedComponent.displayName) {
     const name = component.displayName || component.name || "Component"
-    WrappedComponent.displayName = `withDataTestId(${name})`
+    WrappedComponent.displayName = name
   }
 
-  return WrappedComponent as unknown as T
+  return WrappedComponent as unknown as ReturnedComponentType
 }
