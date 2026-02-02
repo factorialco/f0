@@ -4692,7 +4692,7 @@ export declare interface OneDatePickerProps extends Omit<DatePickerPopupProps, "
 
 export declare const OneEmptyState: WithDataTestIdReturnType_2<typeof _OneEmptyState>;
 
-declare function _OneEmptyState({ title, description, variant, emoji, actions, }: Types.OneEmptyStateProps): JSX_2.Element;
+declare function _OneEmptyState({ title, description, variant, emoji, actions, ...rest }: Types.OneEmptyStateProps): JSX_2.Element;
 
 declare type OneEmptyStateProps = {
     /**
@@ -6662,17 +6662,17 @@ declare global {
 }
 
 
+declare namespace _F0FilterPickerContent {
+    var displayName: string;
+}
+
+
 declare namespace _DaytimePage {
     var displayName: string;
 }
 
 
 declare namespace _Page {
-    var displayName: string;
-}
-
-
-declare namespace _F0FilterPickerContent {
     var displayName: string;
 }
 
@@ -6691,6 +6691,11 @@ declare module "gridstack" {
             h: number;
         }>;
     }
+}
+
+
+declare namespace Calendar {
+    var displayName: string;
 }
 
 
@@ -6719,9 +6724,4 @@ declare module "@tiptap/core" {
             insertTranscript: (data: TranscriptData) => ReturnType;
         };
     }
-}
-
-
-declare namespace Calendar {
-    var displayName: string;
 }
