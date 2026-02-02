@@ -1,10 +1,10 @@
 import { motion } from "motion/react"
 import { memo } from "react"
 
-import OneIcon from "@/ai/AiChat/OneIcon"
+import { F0OneIcon } from "@/ai/F0OneIcon"
 import { useI18n } from "@/lib/providers/i18n"
 
-const IconMotion = motion.create(OneIcon)
+const IconMotion = motion.create(F0OneIcon)
 
 const ApplyingChangesTag = () => {
   const i18n = useI18n()

@@ -3,7 +3,7 @@ import { ReactElement, useRef, useState } from "react"
 
 import type { StatusVariant } from "@/components/tags/F0TagStatus"
 
-import { OneSwitch } from "@/ai/AiChat/OneSwitch"
+import { F0OneSwitch } from "@/ai/F0OneSwitch"
 import { ModuleId } from "@/components/avatars/F0AvatarModule"
 import { F0Button } from "@/components/F0Button"
 import { ButtonInternal } from "@/components/F0Button/internal"
@@ -282,7 +282,7 @@ export function PageHeader({
           </div>
         )}
         <div>
-          <OneSwitch />
+          <F0OneSwitch />
           <OnePromotionSwitch />
         </div>
       </div>
