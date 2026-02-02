@@ -28,7 +28,7 @@ const mockTasks: Task[] = [
 
 const meta = {
   component: KanbanLane,
-  title: "Kanban/KanbanLane",
+  title: "Components/Kanban/KanbanLane",
   parameters: {
     docs: {
       story: { inline: false, height: "650px" },
