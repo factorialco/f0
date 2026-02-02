@@ -27,7 +27,7 @@ const FETCH_DELAY = 1500
 
 const meta = {
   component: Lane,
-  title: "Lane",
+  title: "Components/Lane",
   parameters: {
     docs: {
       story: { inline: false, height: "750px" },
