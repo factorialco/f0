@@ -28,10 +28,12 @@ Then use it in your application:
 </MyComponentWithTestId>
 ```
 
-This will render:
+This will render (the HOC uses a wrapper with `display: contents` so the test id is always in the DOM, even if the component does not spread `...rest`):
 
 ```html
-<div data-testid="my-component-123">Content</div>
+<div data-testid="my-component-123" style="display: contents">
+  <div>Content</div>
+</div>
 ```
 
 ## Examples
@@ -55,6 +57,7 @@ The HOC adds a single prop to the wrapped component:
 
 ## Features
 
+- **Wrapper fallback**: When `dataTestId` is set, the HOC renders the component inside a wrapper `<div data-testid={...} style={{ display: "contents" }}>`. The attribute is therefore always present in the DOM even if the component forgets to spread `...rest` onto its root element. `display: contents` keeps the wrapper from affecting layout.
 - **ForwardRef Support**: Correctly forwards refs to the wrapped component.
 - **Static Properties**: Preserves static properties (like `displayName`) of the original component.
 - **Memoization**: For memoized components, wrap with `withDataTestId` first, then `memo`: `memo(withDataTestId(Component))`. Using `withDataTestId(memo(Component))` can let `dataTestId` reach the DOM as `datatestid` in some cases.

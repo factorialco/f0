@@ -43,10 +43,8 @@ export const WithDataTestId: Story = {
   },
   play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
     const canvas = within(canvasElement)
-    const root = canvas
-      .getByText("EmptyState with Test ID")
-      .closest("[data-testid]")
-    await expect(root).toHaveAttribute("data-testid", "my-test-empty-state")
+    const root = canvas.getByTestId("my-test-empty-state")
+    await expect(root).toHaveTextContent("EmptyState with Test ID")
   },
 }
 

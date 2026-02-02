@@ -1,5 +1,7 @@
 import React, { forwardRef, memo } from "react"
 
+import { useRenderDataTestIdAttribute } from "../providers/user-platafform/UserPlatformProvider"
+
 const ignoredStaticProps = ["prototype", "length", "name", "$$typeof", "render"]
 /**
  * Copies all static properties from the source component to the target component.
@@ -74,14 +76,24 @@ export const withDataTestId = <T extends React.ComponentType<any>>(
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const WrappedComponent = forwardRef((props: any, ref: any) => {
+      const renderDataTestIdAttribute = useRenderDataTestIdAttribute()
       const { dataTestId, ...rest } = props
-      const newProps = { ...rest }
-
-      if (dataTestId) {
-        newProps["data-testid"] = dataTestId
+      if (!dataTestId || !renderDataTestIdAttribute) {
+        return originalRender(rest, ref)
       }
-
-      return originalRender(newProps, ref)
+      const cleanRest = (() => {
+        const { "data-testid": _d, ...r } = rest
+        return r
+      })()
+      const content = originalRender(cleanRest, ref)
+      if (content == null) {
+        return content
+      }
+      return (
+        <div data-testid={dataTestId} style={{ display: "contents" }}>
+          {content}
+        </div>
+      )
     })
 
     // Copy all static properties
@@ -143,16 +155,23 @@ export const withDataTestId = <T extends React.ComponentType<any>>(
   // We wrap them in forwardRef to ensure we pass refs correctly if the underlying component handles them
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const WrappedComponent = forwardRef((props: any, ref: any) => {
+    const renderDataTestIdAttribute = useRenderDataTestIdAttribute()
     const { dataTestId, ...rest } = props
-    const newProps = { ...rest }
-
-    if (dataTestId) {
-      newProps["data-testid"] = dataTestId
-    }
-
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const Component = component as any
-    return <Component {...newProps} ref={ref} />
+    if (!dataTestId || !renderDataTestIdAttribute) {
+      return <Component {...rest} ref={ref} />
+    }
+    const cleanRest = (() => {
+      const { "data-testid": _d, ...r } = rest
+      return r
+    })()
+    const content = <Component {...cleanRest} ref={ref} />
+    return (
+      <div data-testid={dataTestId} style={{ display: "contents" }}>
+        {content}
+      </div>
+    )
   })
 
   // Copy all static properties

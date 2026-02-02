@@ -86,6 +86,7 @@ export const F0 = (Story: StoryFn, { parameters }: StoryContext) => {
       }}
       isDev={parameters.isDev ?? false}
       dataCollectionStorageHandler={dataCollectionLocalStorageHandler}
+      renderDataTestIdAttribute={true}
     >
       <Story />
     </F0Provider>

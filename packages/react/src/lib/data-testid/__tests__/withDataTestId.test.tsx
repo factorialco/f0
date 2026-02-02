@@ -2,11 +2,25 @@ import { render, screen } from "@testing-library/react"
 import React, { forwardRef, memo } from "react"
 import { describe, expect, it } from "vitest"
 
+import { UserPlatformProvider } from "@/lib/providers/user-platafform/UserPlatformProvider"
 import { zeroRender } from "@/testing/test-utils"
 
 import { withDataTestId } from "../index"
 
 const renderWithProviders = zeroRender
+
+const renderWithoutDataTestId = (
+  ui: React.ReactElement,
+  options?: Parameters<typeof render>[1]
+) =>
+  render(ui, {
+    ...options,
+    wrapper: ({ children }) => (
+      <UserPlatformProvider renderDataTestIdAttribute={false}>
+        {children}
+      </UserPlatformProvider>
+    ),
+  })
 
 describe("withDataTestId", () => {
   it("should add data-testid to a regular component", () => {
@@ -17,8 +31,8 @@ describe("withDataTestId", () => {
 
     renderWithProviders(<WrappedComponent dataTestId="test-id" />)
 
-    const element = screen.getByText("Test Content")
-    expect(element).toHaveAttribute("data-testid", "test-id")
+    const wrapper = screen.getByTestId("test-id")
+    expect(wrapper).toHaveTextContent("Test Content")
   })
 
   it("should add data-testid to a forwardRef component", () => {
@@ -34,8 +48,8 @@ describe("withDataTestId", () => {
 
     renderWithProviders(<WrappedComponent dataTestId="test-id" />)
 
-    const element = screen.getByText("Test Content")
-    expect(element).toHaveAttribute("data-testid", "test-id")
+    const wrapper = screen.getByTestId("test-id")
+    expect(wrapper).toHaveTextContent("Test Content")
   })
 
   it.skip("should add data-testid to a memo component", () => {
@@ -66,8 +80,8 @@ describe("withDataTestId", () => {
       <WrappedComponent data-testid="original" dataTestId="new-id" />
     )
 
-    const element = screen.getByText("Test Content")
-    expect(element).toHaveAttribute("data-testid", "new-id")
+    const wrapper = screen.getByTestId("new-id")
+    expect(wrapper).toHaveTextContent("Test Content")
   })
 
   it("should preserve other props", () => {
@@ -83,9 +97,8 @@ describe("withDataTestId", () => {
       <WrappedComponent label="Custom Label" dataTestId="test-id" />
     )
 
-    const element = screen.getByText("Custom Label")
-    expect(element).toBeInTheDocument()
-    expect(element).toHaveAttribute("data-testid", "test-id")
+    const wrapper = screen.getByTestId("test-id")
+    expect(wrapper).toHaveTextContent("Custom Label")
   })
 
   it("should forward refs for regular components", () => {
@@ -147,5 +160,27 @@ describe("withDataTestId", () => {
 
     const element = screen.getByText("Test Content")
     expect(element).not.toHaveAttribute("data-testid")
+  })
+
+  it("should add data-testid via wrapper when component does not spread props", () => {
+    const TestComponent = () => <div>No spread</div>
+    const WrappedComponent = withDataTestId(TestComponent)
+
+    renderWithProviders(<WrappedComponent dataTestId="wrapper-id" />)
+
+    const wrapper = screen.getByTestId("wrapper-id")
+    expect(wrapper).toHaveTextContent("No spread")
+  })
+
+  it("should return original content when renderDataTestIdAttribute is false", () => {
+    const TestComponent = (props: React.HTMLAttributes<HTMLDivElement>) => (
+      <div {...props}>Original</div>
+    )
+    const WrappedComponent = withDataTestId(TestComponent)
+
+    renderWithoutDataTestId(<WrappedComponent dataTestId="should-not-appear" />)
+
+    expect(screen.queryByTestId("should-not-appear")).not.toBeInTheDocument()
+    expect(screen.getByText("Original")).toBeInTheDocument()
   })
 })

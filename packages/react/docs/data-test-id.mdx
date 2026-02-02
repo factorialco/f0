@@ -12,9 +12,26 @@ All public F0 components support a `dataTestId` prop so you can attach stable se
 - **Clear intent**: Test IDs make it obvious which elements are used in tests.
 - **Consistent API**: The same prop works across F0 components.
 
+## Enabling data-testid in the DOM
+
+The `data-testid` attribute is only rendered when **`renderDataTestIdAttribute`** is set to `true` on the provider. This lets you enable test IDs only in test or E2E environments and keep production DOM free of them.
+
+Pass `renderDataTestIdAttribute` to `F0Provider` (or `UserPlatformProvider` if you use it directly):
+
+```tsx
+import { F0Provider, F0Button } from "@factorialco/f0"
+
+// Enable data-testid for E2E or test runs
+<F0Provider renderDataTestIdAttribute>
+  <F0Button label="Submit" dataTestId="submit-button" />
+</F0Provider>
+```
+
+If `renderDataTestIdAttribute` is `false` or omitted (the default), components ignore the `dataTestId` prop and render without the attribute or wrapper.
+
 ## Usage
 
-Pass `dataTestId` to any F0 component that supports it (all public components do):
+Pass `dataTestId` to any F0 component that supports it (all public components do), **and** wrap your app with a provider that has `renderDataTestIdAttribute` set when you need the attribute in the DOM:
 
 ```tsx
 import { F0Button } from "@factorialco/f0"
@@ -45,7 +62,7 @@ const button = document.querySelector('[data-testid="submit-button"]')
 
 ## Optional prop
 
-`dataTestId` is optional. If you omit it, no `data-testid` attribute is rendered. Use it only where you need a test selector.
+`dataTestId` is optional. The `data-testid` attribute is rendered only when (1) you pass `dataTestId` to the component and (2) the provider has `renderDataTestIdAttribute={true}`. Otherwise no attribute is rendered. Use `dataTestId` only where you need a test selector.
 
 ## Advanced: wrapping your own components
 
