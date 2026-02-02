@@ -180,8 +180,8 @@ export function TableHead({
         "bg-f1-background",
         isSticky &&
           (isScrolled || isScrolledRight) &&
-          "relative bg-f1-background before:absolute before:inset-x-0 before:bottom-0 before:h-px before:w-full before:bg-f1-border-secondary before:content-['']",
-        isSticky && "sticky z-10",
+          "relative bg-f1-background z-10 before:absolute before:inset-x-0 before:bottom-0 before:h-px before:w-full before:bg-f1-border-secondary before:content-['']",
+        isSticky && "sticky",
         hidden && "after:hidden",
         className
       )}

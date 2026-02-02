@@ -572,7 +572,7 @@ export function useSelectable<
     updateLocalSelectedState(selectedState)
   }, [selectedState, getSelectedStateKey, updateLocalSelectedState])
 
-  // Clear selections when filters change
+  // Clear selections when filters change (only when selectAll is enabled)
   useEffect(() => {
     if (isInitialMount.current) {
       isInitialMount.current = false
@@ -585,12 +585,16 @@ export function useSelectable<
     const previousFiltersKey = JSON.stringify(previousFilters.current)
 
     if (currentFiltersKey !== previousFiltersKey) {
-      // Mark that we're clearing due to filter change to prevent data sync from restoring selections
-      justClearedByFilterChange.current = true
-      clearSelectedItems()
+      // When disableSelectAll is true, maintain the selection even when filters change
+      // because the user is manually selecting items and expects them to persist
+      if (!disableSelectAll) {
+        // Mark that we're clearing due to filter change to prevent data sync from restoring selections
+        justClearedByFilterChange.current = true
+        clearSelectedItems()
+      }
       previousFilters.current = source.currentFilters
     }
-  }, [source.currentFilters, clearSelectedItems])
+  }, [source.currentFilters, clearSelectedItems, disableSelectAll])
 
   // Store isAllSelected in ref to avoid circular dependencies
   useEffect(() => {

@@ -1,5 +1,54 @@
 # Changelog
 
+## [1.342.0](https://github.com/factorialco/f0/compare/f0-react-v1.341.1...f0-react-v1.342.0) (2026-02-02)
+
+
+### Features
+
+* introduce F0 AI components and refactor existing AI chat structure ([#3287](https://github.com/factorialco/f0/issues/3287)) ([3b8e8ba](https://github.com/factorialco/f0/commit/3b8e8ba3367d1f05a081ef3825f589624aed0369))
+
+## [1.341.1](https://github.com/factorialco/f0/compare/f0-react-v1.341.0...f0-react-v1.341.1) (2026-02-02)
+
+
+### Bug Fixes
+
+* **TableHead:** adjust z-index for sticky header styling ([#3332](https://github.com/factorialco/f0/issues/3332)) ([02ea776](https://github.com/factorialco/f0/commit/02ea7766a5c6a647912740f2ca0a54b3a3902f8e))
+
+## [1.341.0](https://github.com/factorialco/f0/compare/f0-react-v1.340.2...f0-react-v1.341.0) (2026-01-30)
+
+
+### Features
+
+* enhance item actions handling in table rows ([#3321](https://github.com/factorialco/f0/issues/3321)) ([62566b6](https://github.com/factorialco/f0/commit/62566b6b8fbc9f96de89818f8b2e3840d4bb65a9))
+
+## [1.340.2](https://github.com/factorialco/f0/compare/f0-react-v1.340.1...f0-react-v1.340.2) (2026-01-30)
+
+
+### Bug Fixes
+
+* **useSelectable:** maintain selection ([#3328](https://github.com/factorialco/f0/issues/3328)) ([2993f59](https://github.com/factorialco/f0/commit/2993f59eeb0ef733f8353f76548bf89497ba4a75))
+
+## [1.340.1](https://github.com/factorialco/f0/compare/f0-react-v1.340.0...f0-react-v1.340.1) (2026-01-29)
+
+
+### Bug Fixes
+
+* **OneFilterPicker:** prevent double toggle when closing open popover ([#3319](https://github.com/factorialco/f0/issues/3319)) ([764a086](https://github.com/factorialco/f0/commit/764a08648a498a9168785be09f117c716e33f111))
+
+## [1.340.0](https://github.com/factorialco/f0/compare/f0-react-v1.339.1...f0-react-v1.340.0) (2026-01-29)
+
+
+### Features
+
+* allowed disabled action in one alert ([#3311](https://github.com/factorialco/f0/issues/3311)) ([f289de7](https://github.com/factorialco/f0/commit/f289de7e95b05a808748a616875b3482fc836c68))
+
+## [1.339.1](https://github.com/factorialco/f0/compare/f0-react-v1.339.0...f0-react-v1.339.1) (2026-01-28)
+
+
+### Bug Fixes
+
+* resource header not rendering because Metadata component was wrapped in memo ([#3315](https://github.com/factorialco/f0/issues/3315)) ([0e7b2f4](https://github.com/factorialco/f0/commit/0e7b2f45abd95f7afd78107f2acc0c784c9e3d5a))
+
 ## [1.339.0](https://github.com/factorialco/f0/compare/f0-react-v1.338.2...f0-react-v1.339.0) (2026-01-28)
 
 
