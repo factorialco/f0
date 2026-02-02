@@ -11,138 +11,6 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-const sampleMarkdown = `## Employee Report
-
-Here's a preview of the employee data:
-
-| Name | Department | Email |
-|------|------------|-------|
-| John Doe | Engineering | john@example.com |
-| Jane Smith | Design | jane@example.com |
-| Bob Johnson | Marketing | bob@example.com |
-| Alice Brown | Engineering | alice@example.com |
-| Charlie Wilson | Sales | charlie@example.com |
-
-*Showing 5 of 150 total records*`
-
-const sampleBase64Excel = btoa("sample excel content")
-const sampleBase64Csv = btoa(
-  "Name,Department,Email\nJohn,Engineering,john@example.com"
-)
-
-export const SingleDownload: Story = {
-  args: {
-    markdown: sampleMarkdown,
-    primaryAction: {
-      label: "Download Excel",
-      type: "download",
-      fileData: sampleBase64Excel,
-      fileName: "employees.xlsx",
-      mimeType:
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    },
-  },
-}
-
-export const MultipleDownloads: Story = {
-  args: {
-    markdown: sampleMarkdown,
-    primaryAction: {
-      label: "Download Excel",
-      type: "download",
-      fileData: sampleBase64Excel,
-      fileName: "employees.xlsx",
-      mimeType:
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    },
-    secondaryActions: [
-      {
-        label: "Download CSV",
-        type: "download",
-        fileData: sampleBase64Csv,
-        fileName: "employees.csv",
-        mimeType: "text/csv",
-      },
-      {
-        label: "Download PDF",
-        type: "download",
-        fileData: sampleBase64Excel,
-        fileName: "employees.pdf",
-        mimeType: "application/pdf",
-      },
-    ],
-  },
-}
-
-export const WithCustomAction: Story = {
-  args: {
-    markdown: sampleMarkdown,
-    primaryAction: {
-      label: "Download Excel",
-      type: "download",
-      fileData: sampleBase64Excel,
-      fileName: "employees.xlsx",
-      mimeType:
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    },
-    secondaryActions: [
-      {
-        label: "Download CSV",
-        type: "download",
-        fileData: sampleBase64Csv,
-        fileName: "employees.csv",
-        mimeType: "text/csv",
-      },
-      {
-        label: "Send by Email",
-        type: "action",
-        actionId: "send-email",
-      },
-    ],
-  },
-}
-
-export const SimpleTable: Story = {
-  args: {
-    markdown: `| Product | Price |
-|---------|-------|
-| Widget A | $10.00 |
-| Widget B | $15.00 |
-| Widget C | $20.00 |`,
-    primaryAction: {
-      label: "Export",
-      type: "download",
-      fileData: sampleBase64Csv,
-      fileName: "products.csv",
-      mimeType: "text/csv",
-    },
-  },
-}
-
-export const WithDescription: Story = {
-  args: {
-    markdown: `## Sales Summary Q4 2024
-
-The following table shows the top performing regions:
-
-| Region | Revenue | Growth |
-|--------|---------|--------|
-| North America | $1.2M | +15% |
-| Europe | $800K | +12% |
-| Asia Pacific | $600K | +25% |
-
-**Note:** These figures are preliminary and subject to final audit.`,
-    primaryAction: {
-      label: "Download Full Report",
-      type: "download",
-      fileData: sampleBase64Excel,
-      fileName: "sales-q4-2024.xlsx",
-      mimeType:
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    },
-  },
-}
-
 // Generate 50 rows of CSV data for the full download
 const generateFullCsvData = () => {
   const headers = "ID,Name,Department,Email,Salary,Start Date"
@@ -163,7 +31,39 @@ const generateFullCsvData = () => {
 
 const fullCsvData = btoa(generateFullCsvData())
 
-export const PreviewWithFullDownload: Story = {
+// Generate PDF data
+const fullPdfData = btoa("PDF binary content simulation for 50 records")
+
+// Generate Excel-like content (simulated)
+const fullExcelData = btoa("Excel binary content simulation for 50 records")
+
+// Generate JSON data
+const generateFullJsonData = () => {
+  const data = Array.from({ length: 50 }, (_, i) => {
+    const id = i + 1
+    const departments = ["Engineering", "Design", "Marketing", "Sales", "HR"]
+    const names = [
+      "John Smith",
+      "Jane Doe",
+      "Bob Wilson",
+      "Alice Brown",
+      "Charlie Davis",
+    ]
+    return {
+      id,
+      name: `${names[i % 5]} ${id}`,
+      department: departments[i % 5],
+      email: `employee${id}@company.com`,
+      salary: 50000 + i * 1000,
+      startDate: `2024-0${(i % 9) + 1}-${String((i % 28) + 1).padStart(2, "0")}`,
+    }
+  })
+  return JSON.stringify(data, null, 2)
+}
+
+const fullJsonData = btoa(generateFullJsonData())
+
+export const Default: Story = {
   args: {
     markdown: `## Employee Database Export
 
@@ -179,11 +79,35 @@ Here's a preview of the employee records:
 
 *Showing 5 of 50 total records. Download to get all data.*`,
     primaryAction: {
-      label: "Download All 50 Records",
+      label: "Download CSV",
       type: "download",
       fileData: fullCsvData,
       fileName: "employees-full-export.csv",
       mimeType: "text/csv",
     },
+    secondaryActions: [
+      {
+        label: "Download Excel",
+        type: "download",
+        fileData: fullExcelData,
+        fileName: "employees-full-export.xlsx",
+        mimeType:
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      },
+      {
+        label: "Download JSON",
+        type: "download",
+        fileData: fullJsonData,
+        fileName: "employees-full-export.json",
+        mimeType: "application/json",
+      },
+      {
+        label: "Download PDF",
+        type: "download",
+        fileData: fullPdfData,
+        fileName: "employees-full-export.pdf",
+        mimeType: "application/pdf",
+      },
+    ],
   },
 }
