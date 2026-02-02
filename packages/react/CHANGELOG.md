@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.341.1](https://github.com/factorialco/f0/compare/f0-react-v1.341.0...f0-react-v1.341.1) (2026-02-02)
+
+
+### Bug Fixes
+
+* **TableHead:** adjust z-index for sticky header styling ([#3332](https://github.com/factorialco/f0/issues/3332)) ([02ea776](https://github.com/factorialco/f0/commit/02ea7766a5c6a647912740f2ca0a54b3a3902f8e))
+
 ## [1.341.0](https://github.com/factorialco/f0/compare/f0-react-v1.340.2...f0-react-v1.341.0) (2026-01-30)
 
 
