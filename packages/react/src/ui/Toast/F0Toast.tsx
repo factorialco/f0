@@ -1,6 +1,13 @@
 import { cva } from "cva"
 import { AnimatePresence, motion } from "motion/react"
-import { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from "react"
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react"
 
 import {
   AlertAvatarProps,
@@ -139,30 +146,30 @@ const F0Toast = forwardRef<HTMLDivElement, F0ToastProps>(
         // Wait, the progress bar needs to be smooth.
         // Using CSS transition for the progress bar is smoother and cleaner than state updates.
         // Let's use a simpler approach for the close timeout:
-        
+
         // We can track the *end time*.
         // But we need to pause.
-        
+
         // Alternative: Update remaining time periodically or use a ref for the actual time tracking
         // and only update state for the progress bar if we weren't using CSS.
         // BUT the requirement says: "bar will decrease from right to left depending on the remaining time"
         // and "if the user hovers the toast the time stops".
-        
+
         // If we use CSS transition, pausing is hard (we'd need to compute current width and set it).
-        // Let's stick to the plan: update remainingTime. 
+        // Let's stick to the plan: update remainingTime.
         // To avoid excessive re-renders, maybe we can update it less frequently?
-        // But for a smooth 3px bar, we might want 60fps? 
+        // But for a smooth 3px bar, we might want 60fps?
         // Actually, CSS transition is best for smoothness.
         // We can set the transition duration to `remainingTime`.
         // When pausing, we get the computed width and set it explicitly, disabling transition.
         // When resuming, we set width to 0 with transition duration = remainingTime.
-        
+
         // Let's try the requestAnimationFrame approach for precise timing logic for *closing*,
         // but for the visual bar, we can use the state.
-        
+
         // Actually, updating state every 16ms (60fps) is fine for React.
       }
-      
+
       // Let's implement the interval approach from the plan as it's robust enough.
       const interval = setInterval(() => {
         setRemainingTime((prev) => {
