@@ -3,10 +3,8 @@ import { Editor } from "@tiptap/react"
 import { AnimatePresence, motion } from "motion/react"
 import { useRef, useState } from "react"
 
-import { F0Icon } from "@/components/F0Icon"
+import { AIButton } from "@/components/AIButton"
 import { Ai } from "@/icons/app"
-import { cn } from "@/lib/utils"
-import { Action } from "@/ui/Action"
 
 import { enhanceConfig } from "../utils/types"
 import { AIEnhanceMenu } from "./EnhanceMenu"
@@ -61,27 +59,16 @@ const EnhanceActivator = ({
       }}
     >
       <Popover.Trigger asChild>
-        <Action
-          type="button"
+        <AIButton
           ref={enhanceButtonRef}
-          variant="outline"
-          size="md"
+          icon={Ai}
+          label={enhanceConfig?.enhanceLabels.enhanceButtonLabel ?? "Magic"}
           onClick={(e) => {
             handleEnhanceClick(e)
           }}
-          aria-label={
-            enhanceConfig?.enhanceLabels.enhanceButtonLabel ?? "Magic"
-          }
           disabled={disableButtons || isLoadingEnhance}
-          className={cn(
-            "bg-gradient-to-r from-[#f9f0dd80] to-[#d4ccfd80] text-[#6143a7] dark:from-[#6143a7] dark:to-[#7846ef] dark:text-f1-foreground [&>button>svg]:text-[#6143a7] dark:[&>button>svg]:text-f1-foreground",
-            hideLabel && "[&>button]:aspect-square [&>button]:px-0"
-          )}
-        >
-          <F0Icon icon={Ai} />
-          {!hideLabel &&
-            (enhanceConfig?.enhanceLabels.enhanceButtonLabel ?? "Magic")}
-        </Action>
+          hideLabel={hideLabel}
+        />
       </Popover.Trigger>
       <Popover.Portal container={document.body}>
         <Popover.Content

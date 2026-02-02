@@ -1,9 +1,8 @@
 import { AnimatePresence, motion } from "motion/react"
 import React, { useEffect, useRef, useState } from "react"
 
-import { F0Icon } from "@/components/F0Icon"
+import { ButtonInternal } from "@/components/F0Button/internal"
 import { Ai, ChevronRight } from "@/icons/app"
-import { cn } from "@/lib/utils"
 import { Input } from "@/ui/input"
 
 import { EnhancementOption } from "../../utils/types"
@@ -15,21 +14,20 @@ interface OptionProps {
 }
 
 const Option = ({ option, onClick, selectedOption = null }: OptionProps) => {
+  const isSelected = selectedOption?.id === option.id
   return (
-    <div
+    <ButtonInternal
+      variant="ghost"
+      pressed={isSelected}
+      label={option.label}
+      icon={
+        option.subOptions && option.subOptions.length > 0
+          ? ChevronRight
+          : undefined
+      }
       onClick={() => onClick(option)}
-      className={cn(
-        "flex cursor-pointer flex-row items-center gap-2 rounded-md bg-f1-background p-2 hover:bg-f1-background-secondary",
-        selectedOption?.id === option.id && "bg-f1-background-secondary"
-      )}
-    >
-      <p className="text-neutral-40 text-md grow text-ellipsis font-normal">
-        {option.label}
-      </p>
-      {option.subOptions && option.subOptions.length > 0 && (
-        <F0Icon icon={ChevronRight} size="md" className="text-f1-icon" />
-      )}
-    </div>
+      className="w-full [&>div>span>div]:justify-start"
+    />
   )
 }
 
@@ -129,9 +127,9 @@ const AIEnhanceMenu = ({
     <div className="relative">
       <div
         ref={menuRef}
-        className="flex max-h-60 w-80 flex-col overflow-hidden rounded-lg border border-solid border-f1-border bg-f1-background drop-shadow-sm"
+        className="flex max-h-60 max-w-80 flex-col overflow-hidden rounded-lg border border-solid border-f1-border bg-f1-background drop-shadow-sm"
       >
-        <div className="flex w-full flex-row items-center p-2">
+        <div className="flex w-full flex-row items-center p-2 [&>div]:w-full">
           <Input
             icon={Ai}
             label={inputPlaceholder}
@@ -166,7 +164,7 @@ const AIEnhanceMenu = ({
           selectedOption.subOptions.length > 0 && (
             <motion.div
               ref={subMenuRef}
-              className="absolute bottom-0 left-full z-50 max-h-60 w-60 overflow-y-auto rounded-lg border border-solid border-f1-border bg-f1-background p-1 drop-shadow-sm"
+              className="absolute bottom-0 left-full z-50 max-h-60 max-w-60 overflow-y-auto rounded-lg border border-solid border-f1-border bg-f1-background p-1 drop-shadow-sm"
               style={{ marginLeft: "8px" }}
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}

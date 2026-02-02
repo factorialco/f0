@@ -1,3 +1,5 @@
+import { motion } from "motion/react"
+
 import { Spinner } from "@/experimental/Information/Spinner"
 import { cn } from "@/lib/utils"
 
@@ -14,10 +16,25 @@ const LoadingEnhance = ({ label, isFullscreen }: LoadingEnhanceProps) => {
         !isFullscreen && "max-h-60"
       )}
     >
-      <div className="flex h-full w-full flex-row items-center justify-center gap-3 rounded-md bg-gradient-to-r from-[#f9f0dd80] to-[#d4ccfd80]">
+      <motion.div
+        className="flex h-full w-full flex-row items-center justify-center gap-3 rounded-md"
+        style={{
+          background:
+            "linear-gradient(90deg, #E5561980, #A1ADE580, #E5194380, #E5561980)",
+          backgroundSize: "300% 100%",
+        }}
+        animate={{
+          backgroundPosition: ["0% 50%", "100% 50%"],
+        }}
+        transition={{
+          duration: 3,
+          ease: "linear",
+          repeat: Infinity,
+        }}
+      >
         <Spinner size="small" />
         <p className="font-medium">{label || "Loading..."}</p>
-      </div>
+      </motion.div>
     </div>
   )
 }
