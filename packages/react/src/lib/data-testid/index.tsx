@@ -1,5 +1,6 @@
 import React, { forwardRef, memo } from "react"
 
+const ignoredStaticProps = ["prototype", "length", "name", "$$typeof", "render"]
 /**
  * Copies all static properties from the source component to the target component.
  * This preserves marker properties like __isPageLayoutBlock and __isPageLayoutGroup.
@@ -14,13 +15,7 @@ const copyStaticProperties = (source: any, target: any): void => {
 
   for (const key of allKeys) {
     // Skip properties that should not be copied
-    if (
-      key === "prototype" ||
-      key === "length" ||
-      key === "name" ||
-      key === "$$typeof" ||
-      key === "render" // For forwardRef, we don't want to copy the render function
-    ) {
+    if (ignoredStaticProps.includes(key as string)) {
       continue
     }
 
@@ -39,19 +34,38 @@ export type WithDataTestIdProps = {
   dataTestId?: string
 }
 
+/**
+ * Props type of a component wrapped with withDataTestId.
+ * Use when ComponentProps<typeof Component> inference fails (e.g. in Storybook stories).
+ */
+export type WithDataTestIdPropsOf<T extends React.ComponentType<unknown>> =
+  React.ComponentProps<T> & WithDataTestIdProps
+
+/**
+ * Keys on T that are not part of Function, so we preserve static members (Skeleton, displayName, etc.)
+ * without bringing in a second call signature that would confuse ComponentProps<> inference.
+ */
+type StaticMembersOf<T> = Pick<T, Exclude<keyof T, keyof Function>>
+
+/**
+ * Return type has a single call signature with props = ComponentProps<T> & WithDataTestIdProps,
+ * so ComponentProps<Wrapped> and Storybook's Meta/StoryObj infer correctly.
+ * Static properties (e.g. F0Card.Skeleton) are preserved via StaticMembersOf<T>.
+ */
+export type WithDataTestIdReturnType<T extends React.ComponentType<unknown>> =
+  React.ComponentType<WithDataTestIdPropsOf<T>> & StaticMembersOf<T>
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const withDataTestId = <T extends React.ComponentType<any>>(
   component: T
-): React.ComponentType<React.ComponentProps<T> & WithDataTestIdProps> => {
+): WithDataTestIdReturnType<T> => {
   // Check if the component is a forwardRef component
   const isForwardRef =
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (component as any).$$typeof === Symbol.for("react.forward_ref")
 
-  // The type for the returned component
-  type ReturnedComponentType = React.ComponentType<
-    React.ComponentProps<T> & WithDataTestIdProps
-  >
+  // The type for the returned component (with static properties preserved via intersection with T)
+  type ReturnedComponentType = WithDataTestIdReturnType<T>
 
   if (isForwardRef) {
     // For forwardRef components, we need to wrap the render function
@@ -64,7 +78,7 @@ export const withDataTestId = <T extends React.ComponentType<any>>(
       const newProps = { ...rest }
 
       if (dataTestId) {
-        newProps["data-test-id"] = dataTestId
+        newProps["data-testid"] = dataTestId
       }
 
       return originalRender(newProps, ref)
@@ -81,7 +95,7 @@ export const withDataTestId = <T extends React.ComponentType<any>>(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (component as any).render?.name ||
         "Component"
-      WrappedComponent.displayName = `withDataTestId(${name})`
+      WrappedComponent.displayName = name
     }
 
     return WrappedComponent as unknown as ReturnedComponentType
@@ -118,7 +132,7 @@ export const withDataTestId = <T extends React.ComponentType<any>>(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (component as any).type?.displayName ||
         "Component"
-      MemoizedComponent.displayName = `withDataTestId(${name})`
+      MemoizedComponent.displayName = name
     }
 
     return MemoizedComponent as unknown as ReturnedComponentType
@@ -132,7 +146,7 @@ export const withDataTestId = <T extends React.ComponentType<any>>(
     const newProps = { ...rest }
 
     if (dataTestId) {
-      newProps["data-test-id"] = dataTestId
+      newProps["data-testid"] = dataTestId
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

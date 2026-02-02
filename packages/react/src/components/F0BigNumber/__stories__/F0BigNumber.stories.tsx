@@ -98,7 +98,7 @@ export const WithDataTestId: Story = {
     label: "BigNumber with Test ID",
     dataTestId: "my-test-bignumber",
   },
-  play: async ({ canvasElement }) => {
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
     const canvas = within(canvasElement)
     const root = canvas
       .getByText("BigNumber with Test ID")

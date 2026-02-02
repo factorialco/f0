@@ -11,7 +11,7 @@ import type {
 } from "../../OneFilterPicker/types"
 
 import { filterDefinition } from "../../OneFilterPicker/__stories__/mockData"
-import { F0FilterPickerContent } from "../F0FilterPickerContent"
+import { F0FilterPickerContent } from "../index"
 
 const simpleFilterDefinition = {
   department: {
@@ -110,7 +110,7 @@ const WithDataTestIdComponent = () => {
 
 export const WithDataTestId: Story = {
   render: () => <WithDataTestIdComponent />,
-  play: async ({ canvasElement }) => {
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
     const canvas = within(canvasElement)
     const root = canvas.getByText("Department").closest("[data-test-id]")
     await expect(root).toHaveAttribute(
