@@ -5360,17 +5360,17 @@ declare global {
 }
 
 
-declare namespace _F0FilterPickerContent {
-    var displayName: string;
-}
-
-
 declare namespace _DaytimePage {
     var displayName: string;
 }
 
 
 declare namespace _Page {
+    var displayName: string;
+}
+
+
+declare namespace _F0FilterPickerContent {
     var displayName: string;
 }
 
@@ -5389,11 +5389,6 @@ declare module "gridstack" {
             h: number;
         }>;
     }
-}
-
-
-declare namespace Calendar {
-    var displayName: string;
 }
 
 
@@ -5422,4 +5417,9 @@ declare module "@tiptap/core" {
             insertTranscript: (data: TranscriptData) => ReturnType;
         };
     }
+}
+
+
+declare namespace Calendar {
+    var displayName: string;
 }
