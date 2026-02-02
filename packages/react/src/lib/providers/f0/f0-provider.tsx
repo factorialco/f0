@@ -16,6 +16,7 @@ import { XRayProvider } from "../../xray"
 import { DataCollectionStorageProvider } from "../datacollection/DataCollectionStorageProvider"
 import { DataCollectionStorageHandler } from "../datacollection/types"
 import { DialogsAlikeLayoutProvider } from "../dialogs-alike/DialogsAlikeLayoutProvider"
+import { ToastProvider } from "../../../hooks/toast/ToastProvider"
 import { I18nProvider, I18nProviderProps } from "../i18n"
 import { L10nProvider, L10nProviderProps } from "../l10n"
 import { UserPlatformProvider } from "../user-platafform"
@@ -112,7 +113,7 @@ export const F0Provider: React.FC<{
                         handler={dataCollectionStorageHandler}
                       >
                         <DialogsAlikeLayoutProvider>
-                          {children}
+                          <ToastProvider>{children}</ToastProvider>
                         </DialogsAlikeLayoutProvider>
                       </DataCollectionStorageProvider>
                     </ImageProvider>

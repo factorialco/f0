@@ -1,5 +1,6 @@
 // This file has been automatically migrated to valid ESM format by Storybook.
 import type { StorybookConfig } from "@storybook/react-vite"
+
 import { createRequire } from "node:module"
 import { dirname, join, resolve } from "node:path"
 import * as process from "node:process"
@@ -47,6 +48,10 @@ const config: StorybookConfig = {
       : [
           {
             directory: "../src/ui",
+            titlePrefix: "🔒 Internal",
+          },
+          {
+            directory: "../src/internal",
             titlePrefix: "🔒 Internal",
           },
         ]),

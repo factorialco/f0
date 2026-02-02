@@ -4,6 +4,7 @@ import { useState } from "react"
 import { fn } from "storybook/test"
 
 import { F0Button } from "@/components/F0Button"
+
 import { F0Toast } from "../F0Toast"
 
 const meta: Meta<typeof F0Toast> = {
@@ -12,6 +13,12 @@ const meta: Meta<typeof F0Toast> = {
   tags: ["autodocs"],
   parameters: {
     layout: "centered",
+    docs: {
+      description: {
+        component:
+          "⚠️ This is an internal component that is not exported from the package public API. Use it via `useToast` hook.",
+      },
+    },
   },
   argTypes: {
     title: {
@@ -320,8 +327,15 @@ export const AllVariants: Story = {
         onClose={fn()}
         duration={5000}
         actions={[
-          label: "Click me",
-          onClick: fn(),
+          {
+            label: "Click me",
+            onClick: fn(),
+          },
+          {
+            type: "link",
+            label: "Learn more",
+            href: "https://factorialhr.com/",
+          },
         ]}
       />
       <F0Toast
