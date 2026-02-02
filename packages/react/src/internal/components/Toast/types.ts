@@ -46,6 +46,11 @@ export type F0ToastProps = {
   duration?: number
 
   /**
+   * Whether the toast is paused. If true, the duraction timer will not tick in anycase
+   */
+  forcePauseTimer?: boolean
+
+  /**
    * The callback to be called when the toast is closed
    */
   onClose?: () => void
