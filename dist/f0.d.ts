@@ -1,3 +1,4 @@
+import { AIMessage } from '@copilotkit/shared';
 import { AlertTagCellValue } from '../../value-display/types/alertTag';
 import { AlertTagCellValue as AlertTagCellValue_2 } from './types/alertTag';
 import { AmountCellValue } from '../../value-display/types/amount';
@@ -24,6 +25,7 @@ import { CompanyCellValue as CompanyCellValue_2 } from './types/company';
 import { ComponentProps } from 'react';
 import { ComponentType } from 'react';
 import { Context } from 'react';
+import { CopilotKitProps } from '@copilotkit/react-core';
 import { CountryCellValue } from './types/country';
 import { DashboardProps as DashboardProps_2 } from './Dashboard';
 import { DateCellValue } from '../../value-display/types/date';
@@ -252,6 +254,210 @@ declare const actionSizes: readonly ["sm", "md", "lg"];
 declare type ActionVariant = (typeof actionVariants)[number];
 
 declare const actionVariants: readonly ["default", "outline", "critical", "neutral", "ghost", "promote", "outlinePromote", "ai", "link", "unstyled", "mention"];
+
+/**
+ * Props for the AiChatProvider component
+ */
+export declare type AiChatProviderProps = {
+    enabled?: boolean;
+    greeting?: string;
+    initialMessage?: string | string[];
+    welcomeScreenSuggestions?: WelcomeScreenSuggestion[];
+    onThumbsUp?: (message: AIMessage, { threadId, feedback }: {
+        threadId: string;
+        feedback: string;
+    }) => void;
+    onThumbsDown?: (message: AIMessage, { threadId, feedback }: {
+        threadId: string;
+        feedback: string;
+    }) => void;
+    /**
+     * Configuration for file validation. When provided, enables file uploads in the chat.
+     */
+    fileValidation?: FileValidationConfig;
+    /**
+     * Callback when files are rejected during attachment validation
+     */
+    onFilesRejected?: (rejectedFiles: RejectedFile[]) => void;
+    /**
+     * Callback to upload a file to storage (e.g., S3).
+     * Called for each file attachment when a message is sent.
+     */
+    onUploadFile?: (file: File, onProgress?: (progress: number) => void) => Promise<FileUploadResult>;
+} & Pick<CopilotKitProps, "agent" | "credentials" | "children" | "runtimeUrl" | "showDevConsole" | "threadId" | "headers">;
+
+/**
+ * Return value type for the useAiChat hook
+ */
+declare type AiChatProviderReturnValue = {
+    enabled: boolean;
+    setEnabled: React.Dispatch<React.SetStateAction<boolean>>;
+    open: boolean;
+    setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+    shouldPlayEntranceAnimation: boolean;
+    setShouldPlayEntranceAnimation: React.Dispatch<React.SetStateAction<boolean>>;
+    tmp_setAgent: (agent?: string) => void;
+    placeholders: string[];
+    setPlaceholders: React.Dispatch<React.SetStateAction<string[]>>;
+    /**
+     * Set the amount of minutes after which the chat will be cleared automatically
+     * Set `null` to disable auto-clearing
+     *
+     * @default 15
+     */
+    setAutoClearMinutes: React.Dispatch<React.SetStateAction<number | null>>;
+    autoClearMinutes: number | null;
+    /**
+     * The initial message to display in the chat
+     */
+    initialMessage?: string | string[];
+    setInitialMessage: React.Dispatch<React.SetStateAction<string | string[] | undefined>>;
+    welcomeScreenSuggestions: WelcomeScreenSuggestion[];
+    setWelcomeScreenSuggestions: React.Dispatch<React.SetStateAction<WelcomeScreenSuggestion[]>>;
+    onThumbsUp?: (message: AIMessage, { threadId, feedback }: {
+        threadId: string;
+        feedback: string;
+    }) => void;
+    onThumbsDown?: (message: AIMessage, { threadId, feedback }: {
+        threadId: string;
+        feedback: string;
+    }) => void;
+    /**
+     * Clear/reset the chat conversation
+     */
+    clear: () => void;
+    /* Excluded from this release type: setClearFunction */
+    /**
+     * Send a message to the chat. If onUploadFile is configured and there are
+     * attachments, they will be uploaded before the message is sent.
+     * @param message - The message content as a string, or a full Message object
+     */
+    sendMessage: (message: string | Message) => Promise<void>;
+    /* Excluded from this release type: setSendMessageFunction */
+    /**
+     * Whether file uploads are enabled. True when fileValidation is provided.
+     * Use this to conditionally show/hide file upload UI.
+     */
+    fileUploadsEnabled: boolean;
+    /**
+     * Files attached to the current message (before sending)
+     */
+    attachments: File[];
+    /**
+     * Add a single file attachment
+     */
+    addAttachment: (file: File) => void;
+    /**
+     * Add multiple file attachments
+     */
+    addAttachments: (files: File[]) => void;
+    /**
+     * Remove an attachment by index
+     */
+    removeAttachment: (index: number) => void;
+    /**
+     * Clear all attachments
+     */
+    clearAttachments: () => void;
+    /**
+     * Files currently being uploaded
+     */
+    uploadingFiles: UploadingFile[];
+    /**
+     * Whether files are currently being uploaded
+     */
+    isUploading: boolean;
+    /**
+     * Trigger the file input to open the file picker dialog.
+     * Use this to programmatically open the file picker (e.g., from a suggestion button).
+     */
+    triggerFileInput: () => void;
+    /* Excluded from this release type: setFileInputRef */
+} & Pick<AiChatState, "greeting" | "agent">;
+
+/**
+ * Internal state for the AiChat provider
+ */
+declare interface AiChatState {
+    greeting?: string;
+    enabled: boolean;
+    agent?: string;
+    initialMessage?: string | string[];
+    welcomeScreenSuggestions?: WelcomeScreenSuggestion[];
+    placeholders?: string[];
+    setPlaceholders?: React.Dispatch<React.SetStateAction<string[]>>;
+    onThumbsUp?: (message: AIMessage, { threadId, feedback }: {
+        threadId: string;
+        feedback: string;
+    }) => void;
+    onThumbsDown?: (message: AIMessage, { threadId, feedback }: {
+        threadId: string;
+        feedback: string;
+    }) => void;
+    /**
+     * Configuration for file validation. When provided, enables file uploads in the chat.
+     */
+    fileValidation?: FileValidationConfig;
+    /**
+     * Callback when files are rejected during attachment validation
+     */
+    onFilesRejected?: (rejectedFiles: RejectedFile[]) => void;
+    /**
+     * Callback to upload a file to storage (e.g., S3).
+     * Called for each file attachment when a message is sent.
+     */
+    onUploadFile?: (file: File, onProgress?: (progress: number) => void) => Promise<FileUploadResult>;
+}
+
+/**
+ * AI Chat translations type
+ */
+export declare type AiChatTranslations = TranslationShape_2<typeof aiTranslations>;
+
+export declare function AiChatTranslationsProvider({ children, translations, }: AiChatTranslationsProviderProps): JSX.Element;
+
+/**
+ * Props for the AiChatTranslationsProvider component
+ */
+export declare interface AiChatTranslationsProviderProps {
+    children: React.ReactNode;
+    translations: AiChatTranslations;
+}
+
+/**
+ * Default AI chat translations
+ */
+export declare const aiTranslations: {
+    ai: {
+        openChat: string;
+        closeChat: string;
+        startNewChat: string;
+        scrollToBottom: string;
+        welcome: string;
+        defaultInitialMessage: string;
+        inputPlaceholder: string;
+        stopAnswerGeneration: string;
+        sendMessage: string;
+        thoughtsGroupTitle: string;
+        resourcesGroupTitle: string;
+        thinking: string;
+        exportTable: string;
+        generatedTableFilename: string;
+        feedbackModal: {
+            positive: {
+                title: string;
+                label: string;
+                placeholder: string;
+            };
+            negative: {
+                title: string;
+                label: string;
+                placeholder: string;
+            };
+        };
+        ask: string;
+    };
+};
 
 export declare type AlertAvatarProps = VariantProps<typeof alertAvatarVariants> & {
     type: (typeof alertAvatarTypes)[number];
@@ -2191,6 +2397,55 @@ export declare interface F0ActionItemProps {
     inGroup?: boolean;
 }
 
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export declare const F0AiChat: () => JSX_2.Element | null;
+
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export declare const F0AiChatProvider: ({ enabled, greeting, initialMessage, welcomeScreenSuggestions, onThumbsUp, onThumbsDown, fileValidation, onFilesRejected, onUploadFile, children, agent, ...copilotKitProps }: AiChatProviderProps) => JSX_2.Element;
+
+export declare const F0AiChatTextArea: ({ submitLabel, inProgress, onSend, onStop, placeholders, defaultPlaceholder, autoFocus, }: F0AiChatTextAreaProps) => JSX_2.Element;
+
+/**
+ * Props for the F0AiChatTextArea component
+ */
+export declare interface F0AiChatTextAreaProps {
+    /**
+     * Whether the chat is currently processing a message
+     */
+    inProgress: boolean;
+    /**
+     * Callback when the user sends a message
+     */
+    onSend: (message: string) => void;
+    /**
+     * Callback when the user stops the current generation
+     */
+    onStop?: () => void;
+    /**
+     * Custom label for the submit button
+     */
+    submitLabel?: string;
+    /**
+     * Array of placeholder strings to cycle through with typewriter effect.
+     * If multiple placeholders are provided, they will animate in a cycle.
+     * If a single placeholder is provided, it will be displayed statically.
+     */
+    placeholders?: string[];
+    /**
+     * Default placeholder text when no placeholders are provided or as fallback
+     */
+    defaultPlaceholder?: string;
+    /**
+     * Whether the textarea should autofocus on mount
+     * @default true
+     */
+    autoFocus?: boolean;
+}
+
 export declare const F0AiCollapsibleMessage: ({ icon, title, children, }: F0AiCollapsibleMessageProps) => JSX_2.Element;
 
 /**
@@ -2210,6 +2465,11 @@ export declare interface F0AiCollapsibleMessageProps {
      */
     children: ReactNode;
 }
+
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export declare const F0AiFullscreenChat: () => JSX_2.Element | null;
 
 export declare const F0Alert: ({ title, description, action, link, icon, variant, }: F0AlertProps) => JSX_2.Element;
 
@@ -3047,6 +3307,48 @@ declare type FileDef = {
 };
 
 /**
+ * Reason for file rejection during validation
+ */
+export declare type FileRejectionReason = "size" | "type" | "custom";
+
+/**
+ * Result of a successful file upload
+ */
+export declare type FileUploadResult = {
+    url: string;
+    signedId?: string;
+    contentType?: string;
+    filename?: string;
+};
+
+/**
+ * Configuration for file validation
+ */
+export declare type FileValidationConfig = {
+    /**
+     * Maximum file size in bytes. Files exceeding this will be rejected with reason "size"
+     */
+    maxFileSize?: number;
+    /**
+     * Accepted MIME types (e.g., ["image/png", "application/pdf"])
+     */
+    acceptedTypes?: string[];
+    /**
+     * Accepted file extensions (e.g., [".png", ".pdf"])
+     */
+    acceptedExtensions?: string[];
+    /**
+     * Custom validation function. Return { valid: true } or { valid: false, message: "reason" }
+     */
+    validate?: (file: File) => {
+        valid: true;
+    } | {
+        valid: false;
+        message: string;
+    };
+};
+
+/**
  * Union of all available filter types.
  * Used to define possible filter configurations in a collection.
  * @template T - Type of values for the InFilterDefinition
@@ -3202,6 +3504,16 @@ export declare type FlagAvatarVariant = Extract<AvatarVariant, {
 declare type FontSize = (typeof fontSizes)[number];
 
 declare const fontSizes: readonly ["sm", "md", "lg"];
+
+export declare const FullscreenChatContext: Context<FullscreenChatContextType>;
+
+/**
+ * Context type for fullscreen chat state
+ */
+declare type FullscreenChatContextType = {
+    inProgress: boolean;
+    setInProgress: (value: boolean) => void;
+};
 
 export declare const getAnimationVariants: (options?: AnimationVariantsOptions) => {
     hidden: {
@@ -4462,6 +4774,15 @@ declare type RegularAction = BaseAction & {
 };
 
 /**
+ * A file that was rejected during validation
+ */
+export declare type RejectedFile = {
+    file: File;
+    reason: FileRejectionReason;
+    message?: string;
+};
+
+/**
  * A numeric value that can be formatted with an optional formatter and options.
  * This is a relaxed version of NumericWithFormatter that allows the numeric value to be a Numeric.
  */
@@ -5013,6 +5334,13 @@ declare type TranslationShape<T> = {
     [K in keyof T]: T[K] extends string ? string : T[K] extends Record<string, string | Record<string, unknown>> ? TranslationShape<T[K]> : never;
 };
 
+/**
+ * Translation shape helper type
+ */
+declare type TranslationShape_2<T> = {
+    [K in keyof T]: T[K] extends string ? string : T[K] extends Record<string, string | Record<string, unknown>> ? TranslationShape_2<T[K]> : never;
+};
+
 export declare type TranslationsType = TranslationShape<typeof defaultTranslations>;
 
 export declare type TrendConfig = {
@@ -5030,6 +5358,17 @@ export declare interface TwoColumnLayoutProps {
 }
 
 export declare function Ul({ children, ...props }: React.HTMLAttributes<HTMLUListElement>): JSX_2.Element;
+
+/**
+ * Tracks the state of a file being uploaded
+ */
+export declare type UploadingFile = {
+    file: File;
+    progress: number;
+    status: "pending" | "uploading" | "success" | "error";
+    result?: FileUploadResult;
+    error?: string;
+};
 
 declare type UpsellAction = BaseAction & {
     type: "upsell";
@@ -5131,6 +5470,10 @@ declare interface UpsellRequestResponseDialogProps {
     closeLabel: string;
     portalContainer?: HTMLElement | null;
 }
+
+export declare function useAiChat(): AiChatProviderReturnValue;
+
+export declare function useAiChatTranslations(): AiChatTranslations;
 
 /**
  * A core React hook that manages data fetching, state management, and pagination within the Collections ecosystem.
@@ -5280,6 +5623,19 @@ export declare interface UseDataReturn<R extends RecordType> {
  */
 export declare function useDataSource<R extends RecordType = RecordType, FiltersSchema extends FiltersDefinition = FiltersDefinition, Sortings extends SortingsDefinition = SortingsDefinition, Grouping extends GroupingDefinition<R> = GroupingDefinition<R>>({ defaultFilters, currentFilters: externalCurrentFilters, defaultGrouping: externalDefaultGrouping, currentGrouping: externalCurrentGrouping, filters, search, defaultSortings, currentSortings: externalCurrentSortings, dataAdapter, grouping, ...rest }: DataSourceDefinition<R, FiltersSchema, Sortings, Grouping>, deps?: ReadonlyArray<unknown>): DataSource<R, FiltersSchema, Sortings, Grouping>;
 
+/**
+ * Hook to register all default copilot actions.
+ * This provides a single entry point to enable all standard AI chat actions.
+ *
+ * @example
+ * // Enable all default actions in your component
+ * const MyComponent = () => {
+ *   useDefaultCopilotActions()
+ *   return <div>...</div>
+ * }
+ */
+export declare const useDefaultCopilotActions: () => void;
+
 export declare function useDndEvents(handler: (e: {
     phase: "start" | "over" | "drop" | "cancel";
     source: DragPayload;
@@ -5308,6 +5664,18 @@ export declare const useGroups: <R extends RecordType>(groups: GroupRecord<R>[],
     openGroups: Record<string, boolean>;
     setGroupOpen: (key: string, open: boolean) => void;
 };
+
+/**
+ * Hook to register the message sources action.
+ * Attaches information sources to the assistant's response to show where the AI got its information from.
+ */
+export declare const useMessageSourcesAction: () => void;
+
+/**
+ * Hook to register the orchestrator thinking action.
+ * Displays the orchestrator's thinking process as a non-blocking UI element.
+ */
+export declare const useOrchestratorThinkingAction: () => void;
 
 export declare const usePrivacyMode: () => {
     enabled: boolean;
@@ -5465,6 +5833,15 @@ declare const WeekStartDay: {
 };
 
 declare type WeekStartsOn = (typeof WeekStartDay)[keyof typeof WeekStartDay];
+
+/**
+ * Welcome screen suggestion item
+ */
+export declare type WelcomeScreenSuggestion = {
+    icon: IconType;
+    message: string;
+    prompt?: string;
+};
 
 export declare type WithGroupId<RecordType> = RecordType & {
     [GROUP_ID_SYMBOL]: unknown | undefined;

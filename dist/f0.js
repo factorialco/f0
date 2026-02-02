@@ -1,12 +1,12 @@
-import { s as G, L as Ge, M as Dn, m as Si, B as Ni, O as Yr, N as qr, P as Rn, S as we, h as Sn, l as Nn, Q as Jr, k as Zr, R as Qr, T as es, y as fe, U as ve, V as ts, W as is, X as An, Y as ns, Z as Lt, _ as On, $ as kn, a0 as Tn, a1 as zn, a2 as Pn, a3 as Mn, a4 as rs, a5 as ss, a6 as os, a7 as as, a8 as ls, i as We, a9 as Ji, aa as cs, ab as ds, ac as us, ad as hs, ae as Ln, af as fs, ag as gs, ah as ps, ai as ms, aj as vs, v as In, ak as ys, al as bs, am as xs, I as ws, an as Cs, ao as _s, ap as Es, aq as Ds } from "./F0Thinking-D3-rJmRX.js";
-import { aL as Md, aG as Ld, aH as Id, C as Hd, aS as Fd, ba as Bd, a as Wd, b as Gd, ar as $d, as as Ud, at as jd, au as Vd, aw as Kd, ax as Xd, ay as Yd, az as qd, aA as Jd, D as Zd, aB as Qd, aC as eu, b6 as tu, c as iu, F as nu, e as ru, aE as su, g as ou, aY as au, aT as lu, aU as cu, aV as du, aI as uu, aK as hu, aM as fu, aN as gu, aF as pu, aW as mu, aJ as vu, aX as yu, aP as bu, aQ as xu, aR as wu, aO as Cu, b7 as _u, b1 as Eu, d as Du, f as Ru, b4 as Su, b0 as Nu, bb as Au, a$ as Ou, a_ as ku, av as Tu, aZ as zu, b2 as Pu, bc as Mu, aD as Lu, b3 as Iu, b9 as Hu, b5 as Fu, b8 as Bu } from "./F0Thinking-D3-rJmRX.js";
+import { y as G, z as Ge, D as Dn, G as Si, J as Ni, K as Yr, M as qr, N as Rn, Q as we, R as Sn, V as Nn, W as Jr, X as Zr, Y as Qr, Z as es, _ as fe, $ as ve, a0 as ts, a1 as is, a2 as An, a3 as ns, a4 as Lt, a5 as On, a6 as kn, a7 as Tn, a8 as zn, a9 as Pn, aa as Mn, ab as rs, ac as ss, ad as os, ae as as, af as ls, w as We, ag as Ji, ah as cs, ai as ds, aj as us, ak as hs, al as Ln, am as fs, an as gs, ao as ps, ap as ms, aq as vs, ar as In, as as ys, at as bs, au as xs, av as ws, aw as Cs, ax as _s, ay as Es, az as Ds } from "./F0AiChat-D86oRWEq.js";
+import { A as zd, aQ as Pd, B as Md, C as Ld, E as Id, b3 as Hd, g as Fd, F as Bd, a as Wd, v as Gd, h as $d, b as jd, aA as Ud, aB as Vd, aC as Kd, aD as Xd, aF as Yd, aG as qd, aH as Jd, aI as Zd, aJ as Qd, aK as eu, aL as tu, aM as iu, a$ as nu, q as ru, r as su, s as ou, aO as au, t as lu, c as cu, aR as du, l as uu, m as hu, n as fu, H as gu, I as pu, L as mu, O as vu, aP as yu, o as bu, P as xu, S as wu, T as Cu, j as _u, k as Eu, U as Du, b0 as Ru, aW as Su, p as Nu, i as Au, aZ as Ou, aV as ku, b4 as Tu, aU as zu, aT as Pu, aE as Mu, u as Lu, aS as Iu, aX as Hu, d as Fu, b5 as Bu, aN as Wu, aY as Gu, f as $u, e as ju, b2 as Uu, a_ as Vu, b1 as Ku } from "./F0AiChat-D86oRWEq.js";
 import { jsx as f, jsxs as T, Fragment as Jt } from "react/jsx-runtime";
-import L, { forwardRef as oe, useRef as M, useImperativeHandle as Rs, Children as It, createContext as Ae, useContext as _e, useState as F, useMemo as H, useEffect as I, useCallback as j, useLayoutEffect as bi, createElement as Zi, isValidElement as Hn, Fragment as Ss, memo as Ns, useReducer as As, cloneElement as Os, PureComponent as ks } from "react";
+import L, { forwardRef as oe, useRef as M, useImperativeHandle as Rs, Children as It, createContext as Ae, useContext as _e, useState as F, useMemo as H, useEffect as I, useCallback as U, useLayoutEffect as bi, createElement as Zi, isValidElement as Hn, Fragment as Ss, memo as Ns, useReducer as As, cloneElement as Os, PureComponent as ks } from "react";
 import { createPortal as Fn, unstable_batchedUpdates as Ot } from "react-dom";
-import { L as Bn, C as Ts, i as Wn, D as zs, S as Qi, a as Ps, f as ui, b as ct, c as Ms, A as Ls, d as kt, e as Gn, E as Is, g as Pt, h as Hs, j as Fs, k as Bs, l as Ye, m as $n, u as Ws, G as Gs, n as $s, o as en, p as Us, q as Un, r as js, B as jn, X as Vn, Y as xi, s as Vs, t as Kn, v as Ks, w as Xs, x as Ys, y as qs, z as Js, F as Zs, H as Qs, I as eo, J as tn, K as to, M as dt, N as hi, O as io, P as no, Q as ro, R as so, T as oo, U as ao, V as lo, W as co, Z as uo, _ as ho, $ as fo, a0 as nn, a1 as go, a2 as po, a3 as mo, a4 as vo, a5 as Xn, a6 as yo, a7 as bo, a8 as rn, a9 as xo, aa as Yn, ab as wo, ac as Co, ad as _o, ae as Eo } from "./DataCollectionStorageProvider-CMBqRHX3.js";
-import { ax as Gu, af as $u, ag as Uu, aj as ju, ak as Vu, ao as Ku, ap as Xu, aq as Yu, as as qu, at as Ju, au as Zu, av as Qu, an as eh, ar as th, ah as ih, ai as nh, aw as rh, al as sh, am as oh, ay as ah, az as lh, aA as ch, aB as dh } from "./DataCollectionStorageProvider-CMBqRHX3.js";
-import { F as hh } from "./F0HILActionConfirmation-f7Bw7R2A.js";
-import { defaultTranslations as gh } from "./i18n-provider-defaults.js";
+import { L as Bn, C as Ts, i as Wn, D as zs, S as Qi, a as Ps, f as ui, b as ct, c as Ms, A as Ls, d as kt, e as Gn, E as Is, g as Pt, h as Hs, j as Fs, k as Bs, l as Ye, m as $n, u as Ws, G as Gs, n as $s, o as en, p as js, q as jn, r as Us, B as Un, X as Vn, Y as xi, s as Vs, t as Kn, v as Ks, w as Xs, x as Ys, y as qs, z as Js, F as Zs, H as Qs, I as eo, J as tn, K as to, M as dt, N as hi, O as io, P as no, Q as ro, R as so, T as oo, U as ao, V as lo, W as co, Z as uo, _ as ho, $ as fo, a0 as nn, a1 as go, a2 as po, a3 as mo, a4 as vo, a5 as Xn, a6 as yo, a7 as bo, a8 as rn, a9 as xo, aa as Yn, ab as wo, ac as Co, ad as _o, ae as Eo } from "./DataCollectionStorageProvider-Do8iyvpr.js";
+import { ax as Yu, af as qu, ag as Ju, aj as Zu, ak as Qu, ao as eh, ap as th, aq as ih, as as nh, at as rh, au as sh, av as oh, an as ah, ar as lh, ah as ch, ai as dh, aw as uh, al as hh, am as fh, ay as gh, az as ph, aA as mh, aB as vh } from "./DataCollectionStorageProvider-Do8iyvpr.js";
+import { A as bh, F as xh, b as wh, a as Ch, o as _h, u as Eh } from "./F0HILActionConfirmation-0qMyEqpG.js";
+import { defaultTranslations as Rh } from "./i18n-provider-defaults.js";
 import './f0.css';const Do = {
   xs: 1,
   sm: 2,
@@ -287,18 +287,18 @@ function zo({ children: n, options: e, onResizeStop: t, onChange: i, widgets: r 
           return;
         const O = ko.filter((B) => S[B] !== _[B]);
         if (O.length > 0) {
-          const B = {}, Q = ["w", "h", "x", "y"], ee = ["noMove", "noResize", "locked"], V = O.filter((U) => Q.includes(U)), ue = O.filter((U) => ee.includes(U));
-          if (V.length > 0 && ue.length > 0 && V.length + ue.length === O.length ? ue.forEach((U) => {
-            const he = _[U];
-            he !== void 0 && (B[U] = he);
-          }) : O.forEach((U) => {
-            const he = _[U];
-            he !== void 0 && (B[U] = he);
+          const B = {}, Q = ["w", "h", "x", "y"], ee = ["noMove", "noResize", "locked"], V = O.filter((j) => Q.includes(j)), ue = O.filter((j) => ee.includes(j));
+          if (V.length > 0 && ue.length > 0 && V.length + ue.length === O.length ? ue.forEach((j) => {
+            const he = _[j];
+            he !== void 0 && (B[j] = he);
+          }) : O.forEach((j) => {
+            const he = _[j];
+            he !== void 0 && (B[j] = he);
           }), Object.keys(B).length > 0) {
-            const U = s.el.querySelector(`[gs-id="${_.id}"]`);
-            U && A.push({
+            const j = s.el.querySelector(`[gs-id="${_.id}"]`);
+            j && A.push({
               id: _.id,
-              element: U,
+              element: j,
               updateOptions: B
             });
           }
@@ -342,7 +342,7 @@ function zo({ children: n, options: e, onResizeStop: t, onChange: i, widgets: r 
     }, 0);
     return () => clearTimeout(w);
   }, [s, d.handle, d.children]);
-  const N = j(() => {
+  const N = U(() => {
     if (!s)
       return;
     const w = s.save();
@@ -3831,12 +3831,12 @@ k.Engine = Ne;
 k.GDRev = "12.3.2";
 const Tt = /* @__PURE__ */ new WeakMap();
 function Wo({ children: n }) {
-  const { _gridStack: { value: e, set: t }, options: i } = Zn(), r = M(/* @__PURE__ */ new Map()), s = M(null), o = M(i), a = j((l, u) => {
+  const { _gridStack: { value: e, set: t }, options: i } = Zn(), r = M(/* @__PURE__ */ new Map()), s = M(null), o = M(i), a = U((l, u) => {
     if (u.id && u.grid) {
       let h = Tt.get(u.grid);
       h || (h = /* @__PURE__ */ new Map(), Tt.set(u.grid, h)), h.set(u.id, l), r.current.set(u.id, l);
     }
-  }, []), c = j(() => {
+  }, []), c = U(() => {
     if (s.current) {
       k.renderCB = a;
       const l = k.init(o.current, s.current);
@@ -3929,7 +3929,7 @@ const Go = (n, e, t) => f("div", {
   children: n
 }), Qt = ({ widgets: n = [], editMode: e = !1, onChange: t = () => {
 }, WidgetWrapper: i = Go, main: r = !1, deps: s }) => {
-  const o = j((v, y, m) => f(Si.div, {
+  const o = U((v, y, m) => f(Si.div, {
     className: "h-full w-full",
     initial: {
       opacity: 0,
@@ -4012,7 +4012,7 @@ const Go = (n, e, t) => f("div", {
         v.set(y.id, m);
       }
     }), v;
-  }, [n, s]), w = j((v) => {
+  }, [n, s]), w = U((v) => {
     u(v), C.current || t(v.map((y) => {
       const m = x.current.find((E) => E.id === y.id);
       return {
@@ -4073,8 +4073,8 @@ const Go = (n, e, t) => f("div", {
           meta: O.meta,
           _originalContent: ee,
           content: o(ee, O.meta, e)
-        }, ue = B?.x ?? O.x, U = B?.y ?? O.y;
-        return ue !== void 0 && (V.x = ue), U !== void 0 && (V.y = U), V;
+        }, ue = B?.x ?? O.x, j = B?.y ?? O.y;
+        return ue !== void 0 && (V.x = ue), j !== void 0 && (V.y = j), V;
       });
     }), h.current = e, g.current = n, D.current = s;
   }, [n, e, o, N, s]), f(ki, {
@@ -4089,10 +4089,10 @@ Qt.__isPageLayoutGroup = !0;
 const $o = (n, e) => {
   const t = e;
   return t.displayName = n, t.__isPageLayoutBlock = !0, t;
-}, Uo = (n, e) => {
+}, jo = (n, e) => {
   const t = e;
   return t.displayName = n, t.__isPageLayoutGroup = !0, t;
-}, jo = (n, e) => f("svg", {
+}, Uo = (n, e) => f("svg", {
   xmlns: "http://www.w3.org/2000/svg",
   fill: "none",
   viewBox: "0 0 24 24",
@@ -4103,7 +4103,7 @@ const $o = (n, e) => {
     d: "M11.9912 16C13.452 16.0001 14.8895 16.4311 16.1289 17.2705C16.6275 17.6086 16.6225 18.3843 16.1221 18.7188C14.8843 19.5444 13.4491 19.9999 11.9912 20C10.4905 19.9999 9.08362 19.5285 7.88184 18.7305C7.37377 18.3931 7.37263 17.6066 7.88086 17.2695C9.11404 16.4517 10.5409 16.0001 11.9912 16ZM5.27051 7.87109C5.60858 7.37248 6.38428 7.37747 6.71875 7.87793C7.54437 9.11572 7.9999 10.5509 8 12.0088C7.99994 13.5095 7.52845 14.9164 6.73047 16.1182C6.39307 16.6262 5.60663 16.6274 5.26953 16.1191C4.45167 14.886 4.00006 13.4591 4 12.0088C4.0001 10.548 4.43107 9.1105 5.27051 7.87109ZM17.2705 7.87109C17.6086 7.37248 18.3843 7.37747 18.7188 7.87793C19.5444 9.11572 19.9999 10.5509 20 12.0088C19.9999 13.5095 19.5285 14.9164 18.7305 16.1182C18.3931 16.6262 17.6066 16.6274 17.2695 16.1191C16.4517 14.886 16.0001 13.4591 16 12.0088C16.0001 10.548 16.4311 9.1105 17.2705 7.87109ZM11.9912 4C13.452 4.0001 14.8895 4.43107 16.1289 5.27051C16.6275 5.60858 16.6225 6.38428 16.1221 6.71875C14.8843 7.54437 13.4491 7.9999 11.9912 8C10.4905 7.99994 9.08362 7.52845 7.88184 6.73047C7.37377 6.39307 7.37263 5.60663 7.88086 5.26953C9.11404 4.45167 10.5409 4.00006 11.9912 4Z",
     vectorEffect: "non-scaling-stroke"
   })
-}), tr = oe(jo), Vo = ["append", "className", "pressed", "compact", "noTitle", "noAutoTooltip", "style", "variant", "loading", "emoji"], ir = oe((n, e) => {
+}), tr = oe(Uo), Vo = ["append", "className", "pressed", "compact", "noTitle", "noAutoTooltip", "style", "variant", "loading", "emoji"], ir = oe((n, e) => {
   const t = Vo.reduce((i, r) => {
     const { [r]: s, ...o } = i;
     return o;
@@ -4358,7 +4358,7 @@ const Yo = Rn(rr, Xo), qo = ({ children: n, title: e, draggable: t = !1, actions
   })
 });
 sr.displayName = "Dashboard";
-const Jo = Uo("Dashboard", sr), ed = fe("Dashboard", Jo), Zo = Ge({
+const Jo = jo("Dashboard", sr), ed = fe("Dashboard", Jo), Zo = Ge({
   base: "flex w-full flex-col p-4",
   variants: {
     variant: {
@@ -4494,16 +4494,16 @@ function ii(n) {
   const e = M(n);
   return pe(() => {
     e.current = n;
-  }), j(function() {
+  }), U(function() {
     for (var t = arguments.length, i = new Array(t), r = 0; r < t; r++)
       i[r] = arguments[r];
     return e.current == null ? void 0 : e.current(...i);
   }, []);
 }
 function oa() {
-  const n = M(null), e = j((i, r) => {
+  const n = M(null), e = U((i, r) => {
     n.current = setInterval(i, r);
-  }, []), t = j(() => {
+  }, []), t = U(() => {
     n.current !== null && (clearInterval(n.current), n.current = null);
   }, []);
   return [e, t];
@@ -4527,7 +4527,7 @@ function Ct(n, e) {
   );
 }
 function $t(n) {
-  const e = ii(n), t = M(null), i = j(
+  const e = ii(n), t = M(null), i = U(
     (r) => {
       r !== t.current && e?.(r, t.current), t.current = r;
     },
@@ -4536,7 +4536,7 @@ function $t(n) {
   );
   return [t, i];
 }
-function Ut(n) {
+function jt(n) {
   const e = M();
   return I(() => {
     e.current = n;
@@ -4587,7 +4587,7 @@ function la(n) {
   } = Z(n.target);
   return e && n instanceof e;
 }
-function jt(n) {
+function Ut(n) {
   if (la(n)) {
     if (n.touches && n.touches.length) {
       const {
@@ -4701,7 +4701,7 @@ function ha(n) {
 function fa() {
   const [n, e] = F("");
   return {
-    announce: j((i) => {
+    announce: U((i) => {
       i != null && e(i);
     }, []),
     announcement: n
@@ -4717,8 +4717,8 @@ function ga(n) {
   }, [n, e]);
 }
 function pa() {
-  const [n] = F(() => /* @__PURE__ */ new Set()), e = j((i) => (n.add(i), () => n.delete(i)), [n]);
-  return [j((i) => {
+  const [n] = F(() => /* @__PURE__ */ new Set()), e = U((i) => (n.add(i), () => n.delete(i)), [n]);
+  return [U((i) => {
     let {
       type: r,
       event: s
@@ -4869,7 +4869,7 @@ function xa(n, e) {
   return Math.sqrt(Math.pow(n.x - e.x, 2) + Math.pow(n.y - e.y, 2));
 }
 function wa(n, e) {
-  const t = jt(n);
+  const t = Ut(n);
   if (!t)
     return "0 0";
   const i = {
@@ -5513,7 +5513,7 @@ class Hi {
     } = e, {
       target: o
     } = s;
-    this.props = e, this.events = t, this.document = tt(o), this.documentListeners = new ut(this.document), this.listeners = new ut(i), this.windowListeners = new ut(Z(o)), this.initialCoordinates = (r = jt(s)) != null ? r : me, this.handleStart = this.handleStart.bind(this), this.handleMove = this.handleMove.bind(this), this.handleEnd = this.handleEnd.bind(this), this.handleCancel = this.handleCancel.bind(this), this.handleKeydown = this.handleKeydown.bind(this), this.removeTextSelection = this.removeTextSelection.bind(this), this.attach();
+    this.props = e, this.events = t, this.document = tt(o), this.documentListeners = new ut(this.document), this.listeners = new ut(i), this.windowListeners = new ut(Z(o)), this.initialCoordinates = (r = Ut(s)) != null ? r : me, this.handleStart = this.handleStart.bind(this), this.handleMove = this.handleMove.bind(this), this.handleEnd = this.handleEnd.bind(this), this.handleCancel = this.handleCancel.bind(this), this.handleKeydown = this.handleKeydown.bind(this), this.removeTextSelection = this.removeTextSelection.bind(this), this.attach();
   }
   attach() {
     const {
@@ -5579,7 +5579,7 @@ class Hi {
     } = s;
     if (!r)
       return;
-    const c = (t = jt(e)) != null ? t : me, d = bt(r, c);
+    const c = (t = Ut(e)) != null ? t : me, d = bt(r, c);
     if (!i && a) {
       if (hn(a)) {
         if (a.tolerance != null && mi(d, a.tolerance))
@@ -5616,7 +5616,7 @@ class Hi {
     (e = this.document.getSelection()) == null || e.removeAllRanges();
   }
 }
-const Ua = {
+const ja = {
   cancel: {
     name: "pointercancel"
   },
@@ -5632,7 +5632,7 @@ class Fi extends Hi {
     const {
       event: t
     } = e, i = tt(t.target);
-    super(e, Ua, i);
+    super(e, ja, i);
   }
 }
 Fi.activators = [{
@@ -5648,7 +5648,7 @@ Fi.activators = [{
     }), !0);
   }
 }];
-const ja = {
+const Ua = {
   move: {
     name: "mousemove"
   },
@@ -5662,7 +5662,7 @@ var Ci;
 })(Ci || (Ci = {}));
 class Va extends Hi {
   constructor(e) {
-    super(e, ja, tt(e.event.target));
+    super(e, Ua, tt(e.event.target));
   }
 }
 Va.activators = [{
@@ -5764,7 +5764,7 @@ function Xa(n) {
       case ht.DraggableRect:
         return r;
     }
-  }, [t, r, c]), w = M(null), R = j(() => {
+  }, [t, r, c]), w = M(null), R = U(() => {
     const y = w.current;
     if (!y)
       return;
@@ -5838,7 +5838,7 @@ function qa(n) {
     delta: e,
     disabled: t
   } = n;
-  const i = Ut(e);
+  const i = jt(e);
   return Ct((r) => {
     if (t || !i || !r)
       return Ya;
@@ -5895,7 +5895,7 @@ function Qa(n, e) {
     frequency: a,
     measure: c,
     strategy: d
-  } = r, l = M(n), u = x(), h = yt(u), g = j(function(D) {
+  } = r, l = M(n), u = x(), h = yt(u), g = U(function(D) {
     D === void 0 && (D = []), !h.current && o((N) => N === null ? D : N.concat(D.filter((w) => !N.includes(w))));
   }, [h]), C = M(null), b = Ct((D) => {
     if (u && !t)
@@ -6048,7 +6048,7 @@ function rl(n) {
   }, [n]), t;
 }
 function sl(n) {
-  const [e, t] = F(null), i = M(n), r = j((s) => {
+  const [e, t] = F(null), i = M(n), r = U((s) => {
     const o = pi(s.target);
     o && t((a) => a ? (a.set(o, wi(o)), new Map(a)) : null);
   }, []);
@@ -6155,7 +6155,7 @@ function cl(n) {
   let {
     measure: e
   } = n;
-  const [t, i] = F(null), r = j((d) => {
+  const [t, i] = F(null), r = U((d) => {
     for (const {
       target: l
     } of d)
@@ -6172,7 +6172,7 @@ function cl(n) {
       }
   }, [e]), s = si({
     callback: r
-  }), o = j((d) => {
+  }), o = U((d) => {
     const l = Cr(d);
     s?.disconnect(), l && s?.observe(l), i(l ? e(l) : null);
   }, [e, s]), [a, c] = $t(o);
@@ -6381,7 +6381,7 @@ function pl(n) {
     active: t,
     activatorEvent: i,
     draggableNodes: r
-  } = _e(Et), s = Ut(i), o = Ut(t?.id);
+  } = _e(Et), s = jt(i), o = jt(t?.id);
   return I(() => {
     if (!e && !i && s && o != null) {
       if (!ni(s) || document.activeElement === s.target)
@@ -6515,7 +6515,7 @@ const yl = /* @__PURE__ */ Ns(function(e) {
       data: (q = _?.data) != null ? q : ul,
       rect: S
     } : null;
-  }, [m, _]), B = M(null), [Q, ee] = F(null), [V, ue] = F(null), U = yt(C, Object.values(C)), he = _t("DndDescribedBy", o), Rt = H(() => A.getEnabled(), [A]), te = ml(h), {
+  }, [m, _]), B = M(null), [Q, ee] = F(null), [V, ue] = F(null), j = yt(C, Object.values(C)), he = _t("DndDescribedBy", o), Rt = H(() => A.getEnabled(), [A]), te = ml(h), {
     droppableRects: Ee,
     measureDroppableContainers: Be,
     measuringScheduled: nt
@@ -6523,7 +6523,7 @@ const yl = /* @__PURE__ */ Ns(function(e) {
     dragging: y,
     dependencies: [z.x, z.y],
     config: te.droppable
-  }), ae = Ja(E, m), St = H(() => V ? jt(V) : null, [V]), Oe = Xr(), De = el(ae, te.draggable.measure);
+  }), ae = Ja(E, m), St = H(() => V ? Ut(V) : null, [V]), Oe = Xr(), De = el(ae, te.draggable.measure);
   vl({
     activeNode: m != null ? E.get(m) : null,
     config: Oe.layoutShiftCompensation,
@@ -6546,10 +6546,10 @@ const yl = /* @__PURE__ */ Ns(function(e) {
     scrollAdjustedTranslate: null
   }), $e = A.getNodeFor((t = ye.current.over) == null ? void 0 : t.id), Re = cl({
     measure: te.dragOverlay.measure
-  }), Ue = (i = Re.nodeRef.current) != null ? i : ae, je = y ? (r = Re.rect) != null ? r : $ : null, $i = !!(Re.nodeRef.current && Re.rect), Ui = nl($i ? null : $), li = wr(Ue ? Z(Ue) : null), ke = rl(y ? $e ?? ae : null), Nt = ll(ke), At = Dr(g, {
+  }), je = (i = Re.nodeRef.current) != null ? i : ae, Ue = y ? (r = Re.rect) != null ? r : $ : null, $i = !!(Re.nodeRef.current && Re.rect), ji = nl($i ? null : $), li = wr(je ? Z(je) : null), ke = rl(y ? $e ?? ae : null), Nt = ll(ke), At = Dr(g, {
     transform: {
-      x: z.x - Ui.x,
-      y: z.y - Ui.y,
+      x: z.x - ji.x,
+      y: z.y - ji.y,
       scaleX: 1,
       scaleY: 1
     },
@@ -6557,19 +6557,19 @@ const yl = /* @__PURE__ */ Ns(function(e) {
     active: O,
     activeNodeRect: $,
     containerNodeRect: rt,
-    draggingNodeRect: je,
+    draggingNodeRect: Ue,
     over: ye.current.over,
     overlayNodeRect: Re.rect,
     scrollableAncestors: ke,
     scrollableAncestorRects: Nt,
     windowRect: li
-  }), ji = St ? Je(St, z) : null, Vi = sl(ke), Wr = vn(Vi), Gr = vn(Vi, [$]), Ve = Je(At, Wr), Ke = je ? Aa(je, At) : null, st = O && Ke ? u({
+  }), Ui = St ? Je(St, z) : null, Vi = sl(ke), Wr = vn(Vi), Gr = vn(Vi, [$]), Ve = Je(At, Wr), Ke = Ue ? Aa(Ue, At) : null, st = O && Ke ? u({
     active: O,
     collisionRect: Ke,
     droppableRects: Ee,
     droppableContainers: Rt,
-    pointerCoordinates: ji
-  }) : null, Ki = dr(st, "id"), [Te, Xi] = F(null), $r = $i ? At : Je(At, Gr), Ur = Sa($r, (s = Te?.rect) != null ? s : null, $), ci = M(null), Yi = j(
+    pointerCoordinates: Ui
+  }) : null, Ki = dr(st, "id"), [Te, Xi] = F(null), $r = $i ? At : Je(At, Gr), jr = Sa($r, (s = Te?.rect) != null ? s : null, $), ci = M(null), Yi = U(
     (q, ie) => {
       let {
         sensor: ne,
@@ -6593,7 +6593,7 @@ const yl = /* @__PURE__ */ Ns(function(e) {
             return;
           const {
             onDragAbort: xe
-          } = U.current, Se = {
+          } = j.current, Se = {
             id: Y
           };
           xe?.(Se), N({
@@ -6606,7 +6606,7 @@ const yl = /* @__PURE__ */ Ns(function(e) {
             return;
           const {
             onDragPending: at
-          } = U.current, Me = {
+          } = j.current, Me = {
             id: Y,
             constraint: Pe,
             initialCoordinates: xe,
@@ -6626,7 +6626,7 @@ const yl = /* @__PURE__ */ Ns(function(e) {
             return;
           const {
             onDragStart: Se
-          } = U.current, ot = {
+          } = j.current, ot = {
             activatorEvent: re,
             active: {
               id: Pe,
@@ -6667,7 +6667,7 @@ const yl = /* @__PURE__ */ Ns(function(e) {
           if (xe && at) {
             const {
               cancelDrop: lt
-            } = U.current;
+            } = j.current;
             Me = {
               activatorEvent: re,
               active: xe,
@@ -6682,7 +6682,7 @@ const yl = /* @__PURE__ */ Ns(function(e) {
             }), v(Ie.Uninitialized), Xi(null), ee(null), ue(null), ci.current = null;
             const lt = Y === K.DragEnd ? "onDragEnd" : "onDragCancel";
             if (Me) {
-              const di = U.current[lt];
+              const di = j.current[lt];
               di?.(Me), N({
                 type: lt,
                 event: Me
@@ -6694,7 +6694,7 @@ const yl = /* @__PURE__ */ Ns(function(e) {
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [E]
-  ), jr = j((q, ie) => (ne, ze) => {
+  ), Ur = U((q, ie) => (ne, ze) => {
     const le = ne.nativeEvent, re = E.get(ze);
     if (
       // Another sensor is already instantiating
@@ -6709,14 +6709,14 @@ const yl = /* @__PURE__ */ Ns(function(e) {
     q(ne, ie.options, be) === !0 && (le.dndKit = {
       capturedBy: ie.sensor
     }, B.current = ze, Yi(ne, ie));
-  }, [E, Yi]), qi = Za(l, jr);
+  }, [E, Yi]), qi = Za(l, Ur);
   ol(l), pe(() => {
     $ && R === Ie.Initializing && v(Ie.Initialized);
   }, [$, R]), I(
     () => {
       const {
         onDragMove: q
-      } = U.current, {
+      } = j.current, {
         active: ie,
         activatorEvent: ne,
         collisions: ze,
@@ -6756,7 +6756,7 @@ const yl = /* @__PURE__ */ Ns(function(e) {
         return;
       const {
         onDragOver: re
-      } = U.current, be = ze.get(Ki), Xe = be && be.rect.current ? {
+      } = j.current, be = ze.get(Ki), Xe = be && be.rect.current ? {
         id: be.id,
         rect: be.rect.current,
         data: be.data,
@@ -6789,21 +6789,21 @@ const yl = /* @__PURE__ */ Ns(function(e) {
       collisions: st,
       droppableRects: Ee,
       draggableNodes: E,
-      draggingNode: Ue,
-      draggingNodeRect: je,
+      draggingNode: je,
+      draggingNodeRect: Ue,
       droppableContainers: A,
       over: Te,
       scrollableAncestors: ke,
       scrollAdjustedTranslate: Ve
     }, S.current = {
-      initial: je,
+      initial: Ue,
       translated: Ke
     };
-  }, [O, ae, st, Ke, E, Ue, je, Ee, A, Te, ke, Ve]), Xa({
+  }, [O, ae, st, Ke, E, je, Ue, Ee, A, Te, ke, Ve]), Xa({
     ...Oe,
     delta: z,
     draggingRect: Ke,
-    pointerCoordinates: ji,
+    pointerCoordinates: Ui,
     scrollableAncestors: ke,
     scrollableAncestorRects: Nt
   });
@@ -6845,7 +6845,7 @@ const yl = /* @__PURE__ */ Ns(function(e) {
   }, L.createElement(Er.Provider, {
     value: Vr
   }, L.createElement(oi.Provider, {
-    value: Ur
+    value: jr
   }, d)), L.createElement(pl, {
     disabled: a?.restoreFocus === !1
   })), L.createElement(ya, {
@@ -6945,7 +6945,7 @@ function El(n) {
   } = {
     ..._l,
     ...r
-  }, D = yt(b ?? i), N = j(
+  }, D = yt(b ?? i), N = U(
     () => {
       if (!u.current) {
         u.current = !0;
@@ -6960,7 +6960,7 @@ function El(n) {
   ), w = si({
     callback: N,
     disabled: C || !o
-  }), R = j((E, z) => {
+  }), R = U((E, z) => {
     w && (z && (w.unobserve(z), u.current = !1), E && w.observe(E));
   }, [w]), [v, y] = $t(R), m = yt(e);
   return I(() => {
@@ -7004,7 +7004,7 @@ function Dl(n) {
     animation: e,
     children: t
   } = n;
-  const [i, r] = F(null), [s, o] = F(null), a = Ut(t);
+  const [i, r] = F(null), [s, o] = F(null), a = jt(t);
   return !t && !i && a && r(a), pe(() => {
     if (!s)
       return;
@@ -7402,10 +7402,10 @@ const Gl = (n) => {
     transition: d
   } = n;
   return !d || !i || a !== s && r === o ? !1 : t ? !0 : o !== r && e === c;
-}, Ul = {
+}, jl = {
   duration: 200,
   easing: "ease"
-}, Or = "transform", jl = /* @__PURE__ */ Fe.Transition.toString({
+}, Or = "transform", Ul = /* @__PURE__ */ Fe.Transition.toString({
   property: Or,
   duration: 0,
   easing: "linear"
@@ -7450,7 +7450,7 @@ function Xl(n) {
     id: o,
     strategy: a,
     resizeObserverConfig: c,
-    transition: d = Ul
+    transition: d = jl
   } = n;
   const {
     items: l,
@@ -7491,7 +7491,7 @@ function Xl(n) {
     listeners: ee,
     isDragging: V,
     over: ue,
-    setActivatorNodeRef: U,
+    setActivatorNodeRef: j,
     transform: he
   } = wl({
     id: o,
@@ -7545,10 +7545,10 @@ function Xl(n) {
       $.current.activeId = De;
       return;
     }
-    const Ue = setTimeout(() => {
+    const je = setTimeout(() => {
       $.current.activeId = De;
     }, 50);
-    return () => clearTimeout(Ue);
+    return () => clearTimeout(je);
   }, [De]), {
     active: _,
     activeIndex: h,
@@ -7566,7 +7566,7 @@ function Xl(n) {
     overIndex: x,
     over: ue,
     setNodeRef: Rt,
-    setActivatorNodeRef: U,
+    setActivatorNodeRef: j,
     setDroppableNodeRef: A,
     setDraggableNodeRef: Q,
     transform: $e ?? St,
@@ -7578,7 +7578,7 @@ function Xl(n) {
       $e || // Or to prevent items jumping to back to their "new" position when items change
       rt && $.current.newIndex === R
     )
-      return jl;
+      return Ul;
     if (!(Be && !ni(S) || !d) && (te || ye))
       return Fe.Transition.toString({
         ...d,
@@ -8275,9 +8275,9 @@ He(Dt, "getComposedData", function(n) {
     points: N
   }, c);
 });
-var bc = Us({
+var bc = js({
   chartName: "ComposedChart",
-  GraphicalChild: [Un, js, jn, Dt],
+  GraphicalChild: [jn, Us, Un, Dt],
   axisComponents: [{
     axisType: "xAxis",
     AxisComp: Vn
@@ -8396,7 +8396,7 @@ const xc = (n) => {
             })]
           });
         } : void 0
-      }), x.map((m, E) => f(jn, {
+      }), x.map((m, E) => f(Un, {
         isAnimationActive: !1,
         dataKey: String(m),
         fill: n[m].color ? dt(n[m].color) : hi(E),
@@ -8408,7 +8408,7 @@ const xc = (n) => {
           className: "fill-f1-foreground",
           fontSize: 12
         }, `label-${String(m)}`)
-      }, `bar-${String(m)}`)), D.map((m, E) => f(Un, {
+      }, `bar-${String(m)}`)), D.map((m, E) => f(jn, {
         type: u?.lineType ?? "natural",
         dataKey: String(m),
         stroke: n[m].color ? dt(n[m].color) : hi(x.length + E),
@@ -8623,7 +8623,7 @@ const Hr = ({ chips: n, max: e = 4, remainingCount: t, layout: i = "compact" }) 
   });
 };
 Hr.displayName = "F0ChipList";
-const Cd = fe("F0ChipList", Hr), _d = ["xs", "sm", "md", "lg"], Ed = ss, Nc = Ge({
+const Cd = fe("F0ChipList", Hr), _d = ss, Nc = Ge({
   base: "w-full rounded-md p-2 pr-3 text-f1-foreground",
   variants: {
     variant: {
@@ -8651,7 +8651,7 @@ const Cd = fe("F0ChipList", Hr), _d = ["xs", "sm", "md", "lg"], Ed = ss, Nc = Ge
   defaultVariants: {
     variant: "info"
   }
-}), Dd = ({ title: n, description: e, action: t, link: i, icon: r, variant: s = "neutral" }) => {
+}), Ed = ({ title: n, description: e, action: t, link: i, icon: r, variant: s = "neutral" }) => {
   const o = M(null);
   return f("div", {
     ref: o,
@@ -8761,7 +8761,7 @@ const Tc = oe((n, e) => f(Ti, {
   ...n
 }));
 Tc.displayName = "F0Heading";
-const Rd = fe(
+const Dd = fe(
   "F0GridStack",
   ki
 ), yi = 16, zc = Ge({
@@ -8847,7 +8847,7 @@ const Lc = 300, Ic = 0, Hc = Ge({
 function Fc({ title: n, items: e, className: t, activeItem: i, collapsible: r = !1, showChildrenCounter: s = !1, barsAlign: o = "left", size: a = "md", variant: c = "light" }) {
   const [d, l] = F(!1), u = M(!1), h = (C) => {
     C && !d && (u.current = !0), l(C);
-  }, g = j((C) => {
+  }, g = U((C) => {
     !C || !u.current || (u.current = !1, requestAnimationFrame(() => {
       C.querySelector("[data-active]")?.scrollIntoView({
         block: "center",
@@ -8891,7 +8891,7 @@ function Fc({ title: n, items: e, className: t, activeItem: i, collapsible: r = 
     })]
   });
 }
-const Sd = fe(
+const Rd = fe(
   "F0TableOfContentPopover",
   Fc
 ), Bc = ({ benefits: n }) => f("div", {
@@ -8993,7 +8993,7 @@ function Gc({ isOpen: n, onClose: e, title: t, children: i, module: r, portalCon
     })
   });
 }
-function Nd({ isOpen: n, onClose: e, title: t, image: i, benefits: r, errorMessage: s, successMessage: o, loadingState: a, nextSteps: c, closeLabel: d, primaryAction: l, modalTitle: u, modalModule: h, secondaryAction: g, portalContainer: C, tag: b, promoTag: x, showResponseDialog: D = !0 }) {
+function Sd({ isOpen: n, onClose: e, title: t, image: i, benefits: r, errorMessage: s, successMessage: o, loadingState: a, nextSteps: c, closeLabel: d, primaryAction: l, modalTitle: u, modalModule: h, secondaryAction: g, portalContainer: C, tag: b, promoTag: x, showResponseDialog: D = !0 }) {
   const [N, w] = F(n), [R, v] = F(null), [y, m] = F(!1), E = async () => {
     if (l?.onClick) {
       m(!0);
@@ -9128,7 +9128,7 @@ function $c({ mediaUrl: n, title: e, description: t, onClose: i, dismissible: r,
     })
   });
 }
-const Uc = oe(function({ primaryAction: e, secondaryAction: t, ...i }, r) {
+const jc = oe(function({ primaryAction: e, secondaryAction: t, ...i }, r) {
   const s = (c) => c.variant === "promote" ? f(Yn, {
     label: c.label,
     onRequest: async () => {
@@ -9157,8 +9157,8 @@ const Uc = oe(function({ primaryAction: e, secondaryAction: t, ...i }, r) {
     children: [e?.variant === "promote" && s(e), t?.variant === "promote" && s(t)]
   });
 });
-Uc.displayName = "UpsellingBanner";
-function Ad({ isOpen: n, setIsOpen: e, label: t, variant: i = "promote", size: r = "md", showIcon: s = !0, side: o = "right", align: a = "center", icon: c = ys, mediaUrl: d, title: l, description: u, width: h = "300px", trackVisibility: g, actions: C, onClick: b, hideLabel: x = !1 }) {
+jc.displayName = "UpsellingBanner";
+function Nd({ isOpen: n, setIsOpen: e, label: t, variant: i = "promote", size: r = "md", showIcon: s = !0, side: o = "right", align: a = "center", icon: c = ys, mediaUrl: d, title: l, description: u, width: h = "300px", trackVisibility: g, actions: C, onClick: b, hideLabel: x = !1 }) {
   const [D, N] = F(!1), [w, R] = F(null), [v, y] = F(null), m = (S) => {
     e(S), b && b();
   }, E = async (S) => {
@@ -9218,15 +9218,11 @@ function Ad({ isOpen: n, setIsOpen: e, label: t, variant: i = "promote", size: r
     })]
   });
 }
-const Od = [
-  "inProgress",
-  "executing",
-  "completed"
-], jc = Ae(null), Vc = ({ children: n, fullScreen: e = !0 }) => {
+const Uc = Ae(null), Vc = ({ children: n, fullScreen: e = !0 }) => {
   const t = M(null), [i, r] = F(t.current);
   return Ds(() => {
     r(t.current);
-  }, []), f(jc.Provider, {
+  }, []), f(Uc.Provider, {
     value: {
       element: i
     },
@@ -9242,7 +9238,7 @@ const Od = [
 }, Kc = ({ children: n }) => f(Eo, {
   reducedMotion: "user",
   children: n
-}), kd = ({ children: n, layout: e, link: t, privacyModeInitiallyEnabled: i, image: r, i18n: s, l10n: o, isDev: a = !1, dataCollectionStorageHandler: c, showExperimentalWarnings: d = !1 }) => f(Kc, {
+}), Ad = ({ children: n, layout: e, link: t, privacyModeInitiallyEnabled: i, image: r, i18n: s, l10n: o, isDev: a = !1, dataCollectionStorageHandler: c, showExperimentalWarnings: d = !1 }) => f(Kc, {
   children: f(bs, {
     isDev: a,
     showExperimentalWarnings: d,
@@ -9271,7 +9267,7 @@ const Od = [
       })
     })
   })
-}), En = (n) => `datacollection-${n}`, Td = {
+}), En = (n) => `datacollection-${n}`, Od = {
   get: async (n) => JSON.parse(
     localStorage.getItem(En(n)) ?? "{}"
   ),
@@ -9280,144 +9276,156 @@ const Od = [
   }
 };
 export {
-  Md as A,
+  zd as A,
+  bh as AiChatTranslationsProvider,
   sd as AreaChart,
-  Ld as Await,
+  Pd as Await,
   od as BarChart,
-  Id as Blockquote,
+  Md as Blockquote,
   ad as CategoryBarChart,
-  Hd as ChatSpinner,
+  Ld as ChatSpinner,
   hd as ComboChart,
   ed as Dashboard,
-  Gu as DndProvider,
-  Fd as Em,
-  Bd as EmojiImage,
-  Wd as F0ActionItem,
-  Gd as F0AiCollapsibleMessage,
-  Dd as F0Alert,
-  $d as F0Avatar,
+  Yu as DndProvider,
+  Id as Em,
+  Hd as EmojiImage,
+  Fd as F0ActionItem,
+  Bd as F0AiChat,
+  Wd as F0AiChatProvider,
+  Gd as F0AiChatTextArea,
+  $d as F0AiCollapsibleMessage,
+  jd as F0AiFullscreenChat,
+  Ed as F0Alert,
+  Ud as F0Avatar,
   po as F0AvatarAlert,
-  Ud as F0AvatarCompany,
-  $u as F0AvatarDate,
-  jd as F0AvatarEmoji,
-  Vd as F0AvatarFile,
+  Vd as F0AvatarCompany,
+  qu as F0AvatarDate,
+  Kd as F0AvatarEmoji,
+  Xd as F0AvatarFile,
   os as F0AvatarIcon,
-  Uu as F0AvatarList,
+  Ju as F0AvatarList,
   Ln as F0AvatarModule,
-  Kd as F0AvatarPerson,
-  Xd as F0AvatarTeam,
+  Yd as F0AvatarPerson,
+  qd as F0AvatarTeam,
   fd as F0BigNumber,
   We as F0Button,
-  Yd as F0ButtonDropdown,
-  qd as F0ButtonToggle,
-  ju as F0Card,
-  Jd as F0Checkbox,
+  Jd as F0ButtonDropdown,
+  Zd as F0ButtonToggle,
+  Zu as F0Card,
+  Qd as F0Checkbox,
   Cd as F0ChipList,
-  Vu as F0DatePicker,
-  Zd as F0Dialog,
-  Qd as F0DialogContext,
-  eu as F0DialogProvider,
-  tu as F0EventCatcherProvider,
+  Qu as F0DatePicker,
+  eu as F0Dialog,
+  tu as F0DialogContext,
+  iu as F0DialogProvider,
+  nu as F0EventCatcherProvider,
   kc as F0FilterPickerContent,
-  Rd as F0GridStack,
-  hh as F0HILActionConfirmation,
+  Dd as F0GridStack,
+  xh as F0HILActionConfirmation,
   Tc as F0Heading,
   Nn as F0Icon,
   ls as F0Link,
-  iu as F0MessageSources,
-  nu as F0OneIcon,
-  ru as F0OneSwitch,
-  kd as F0Provider,
-  su as F0Select,
-  Sd as F0TableOfContentPopover,
-  Ku as F0TagAlert,
+  ru as F0MessageSources,
+  su as F0OneIcon,
+  ou as F0OneSwitch,
+  Ad as F0Provider,
+  au as F0Select,
+  Rd as F0TableOfContentPopover,
+  eh as F0TagAlert,
   go as F0TagBalance,
-  Xu as F0TagCompany,
-  Yu as F0TagDot,
-  qu as F0TagList,
-  Ju as F0TagPerson,
+  th as F0TagCompany,
+  ih as F0TagDot,
+  nh as F0TagList,
+  rh as F0TagPerson,
   fs as F0TagRaw,
   vo as F0TagStatus,
-  Zu as F0TagTeam,
+  sh as F0TagTeam,
   nr as F0Text,
-  ou as F0Thinking,
-  au as GROUP_ID_SYMBOL,
-  lu as H1,
-  cu as H2,
-  du as H3,
+  lu as F0Thinking,
+  cu as FullscreenChatContext,
+  du as GROUP_ID_SYMBOL,
+  uu as H1,
+  hu as H2,
+  fu as H3,
   rd as HomeLayout,
-  uu as Hr,
-  hu as Image,
+  gu as Hr,
+  pu as Image,
   td as Layout,
-  fu as Li,
+  mu as Li,
   ld as LineChart,
-  gu as Ol,
-  pu as OneFilterPicker,
-  mu as P,
+  vu as Ol,
+  yu as OneFilterPicker,
+  bu as P,
   cd as PieChart,
-  vu as Pre,
+  xu as Pre,
   Co as PrivacyModeProvider,
   Br as ProductBlankslate,
-  Qu as ProductCard,
-  Nd as ProductModal,
+  oh as ProductCard,
+  Sd as ProductModal,
   $c as ProductWidget,
   ud as ProgressBarChart,
   id as StandardLayout,
-  yu as Strong,
-  bu as Table,
-  eh as Tag,
-  th as TagCounter,
-  xu as Td,
-  wu as Th,
+  wu as Strong,
+  Cu as Table,
+  ah as Tag,
+  lh as TagCounter,
+  _u as Td,
+  Eu as Th,
   nd as TwoColumnLayout,
-  Cu as Ul,
+  Du as Ul,
   Xn as UpsellRequestResponseDialog,
-  Uc as UpsellingBanner,
+  jc as UpsellingBanner,
   Yn as UpsellingButton,
-  Ad as UpsellingPopover,
+  Nd as UpsellingPopover,
   dd as VerticalBarChart,
-  Od as actionItemStatuses,
+  wh as actionItemStatuses,
+  Ch as aiTranslations,
   Qc as avatarVariants,
-  _u as buildTranslations,
+  Ru as buildTranslations,
   vd as buttonDropdownSizes,
   md as buttonDropdownVariants,
   pd as buttonSizes,
   yd as buttonToggleSizes,
   bd as buttonToggleVariants,
   gd as buttonVariants,
-  ih as cardImageFits,
-  nh as cardImageSizes,
-  rh as createAtlaskitDriver,
-  Eu as createDataSourceDefinition,
+  ch as cardImageFits,
+  dh as cardImageSizes,
+  uh as createAtlaskitDriver,
+  Su as createDataSourceDefinition,
   $o as createPageLayoutBlock,
-  Uo as createPageLayoutBlockGroup,
-  Td as dataCollectionLocalStorageHandler,
-  Ed as datepickerSizes,
-  gh as defaultTranslations,
-  Du as downloadTableAsExcel,
+  jo as createPageLayoutBlockGroup,
+  Od as dataCollectionLocalStorageHandler,
+  _d as datepickerSizes,
+  Rh as defaultTranslations,
+  Nu as downloadTableAsExcel,
   fe as experimental,
-  Ru as f0MarkdownRenderers,
-  Su as getAnimationVariants,
-  Nu as getDataSourcePaginationType,
-  Au as getEmojiLabel,
-  Ou as isInfiniteScrollPagination,
-  ku as isPageBasedPagination,
+  Au as f0MarkdownRenderers,
+  Ou as getAnimationVariants,
+  ku as getDataSourcePaginationType,
+  Tu as getEmojiLabel,
+  zu as isInfiniteScrollPagination,
+  Pu as isPageBasedPagination,
   xd as linkVariants,
-  Tu as modules,
-  _d as oneIconSizes,
-  sh as predefinedPresets,
-  oh as selectSizes,
+  Mu as modules,
+  _h as oneIconSizes,
+  hh as predefinedPresets,
+  fh as selectSizes,
   wd as tagDotColors,
-  zu as useData,
-  Pu as useDataSource,
-  ah as useDndEvents,
-  lh as useDraggable,
-  ch as useDroppableList,
-  Mu as useEmojiConfetti,
-  Lu as useF0Dialog,
-  Iu as useGroups,
-  dh as usePrivacyMode,
-  Hu as useReducedMotion,
-  Fu as useSelectable,
-  Bu as useXRay
+  Lu as useAiChat,
+  Eh as useAiChatTranslations,
+  Iu as useData,
+  Hu as useDataSource,
+  Fu as useDefaultCopilotActions,
+  gh as useDndEvents,
+  ph as useDraggable,
+  mh as useDroppableList,
+  Bu as useEmojiConfetti,
+  Wu as useF0Dialog,
+  Gu as useGroups,
+  $u as useMessageSourcesAction,
+  ju as useOrchestratorThinkingAction,
+  vh as usePrivacyMode,
+  Uu as useReducedMotion,
+  Vu as useSelectable,
+  Ku as useXRay
 };
