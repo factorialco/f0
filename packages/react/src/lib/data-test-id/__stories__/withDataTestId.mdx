@@ -1,0 +1,63 @@
+import { Canvas, Controls, Meta, Source } from "@storybook/blocks"
+
+import * as WithDataTestIdStories from "./withDataTestId.stories"
+
+<Meta of={WithDataTestIdStories} />
+
+# withDataTestId
+
+`withDataTestId` is a Higher-Order Component (HOC) utility that wraps React components to automatically add `data-test-id` attributes. This allows consumers to set test IDs at runtime, which is particularly useful for end-to-end testing.
+
+## Usage
+
+Wrap your component with `withDataTestId` before exporting it.
+
+```tsx
+import { withDataTestId } from "@f0/react"
+
+const MyComponent = ({ children, ...props }) => (
+  <div {...props}>{children}</div>
+)
+
+export const MyComponentWithTestId = withDataTestId(MyComponent)
+```
+
+Then use it in your application:
+
+```tsx
+<MyComponentWithTestId dataTestId="my-component-123">
+  Content
+</MyComponentWithTestId>
+```
+
+This will render:
+
+```html
+<div data-test-id="my-component-123">Content</div>
+```
+
+## Examples
+
+### Basic Usage
+
+<Canvas of={WithDataTestIdStories.Default} />
+<Controls of={WithDataTestIdStories.Default} />
+
+### With Custom Components
+
+<Canvas of={WithDataTestIdStories.CustomComponent} />
+
+## API
+
+The HOC adds a single prop to the wrapped component:
+
+| Prop | Type | Description |
+| :--- | :--- | :--- |
+| `dataTestId` | `string` | The value for the `data-test-id` attribute. |
+
+## Features
+
+- **ForwardRef Support**: Correctly forwards refs to the wrapped component.
+- **Static Properties**: Preserves static properties (like `displayName`) of the original component.
+- **Memoization**: Works correctly with `React.memo` components.
+- **Type Safety**: Preserves the original component's props types using TypeScript generics.
