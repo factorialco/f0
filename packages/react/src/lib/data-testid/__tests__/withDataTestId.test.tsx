@@ -188,6 +188,7 @@ describe("withDataTestId", () => {
     const TestComponent = forwardRef<HTMLDivElement, { show?: boolean }>(
       (_props, _ref) => null
     )
+    TestComponent.displayName = "TestComponent"
     const WrappedComponent = withDataTestId(TestComponent)
 
     renderWithProviders(<WrappedComponent dataTestId="should-not-appear" />)
