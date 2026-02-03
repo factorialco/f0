@@ -90,7 +90,7 @@ export function FilterList<Definition extends FiltersDefinition>({
         {isCompactMode && (
           <div className="-mx-2 mb-1 h-px border-0 border-t border-solid border-f1-border-secondary" />
         )}
-        <div className="flex flex-1 flex-col gap-1 min-h-0 max-h-full overflow-y-auto">
+        <div className="flex max-h-full min-h-0 flex-1 flex-col gap-1 overflow-y-auto">
           {Object.entries(definition).map(([key, filter]) => {
             const matchesWithSearch =
               !searchValue ||
@@ -121,7 +121,7 @@ export function FilterList<Definition extends FiltersDefinition>({
                 <div className="flex w-full items-center justify-start gap-2.5">
                   <OneEllipsis
                     tag="span"
-                    className="text-left text-f1-foreground"
+                    className="min-w-0 flex-1 text-left text-f1-foreground"
                   >
                     {filter.label}
                   </OneEllipsis>
