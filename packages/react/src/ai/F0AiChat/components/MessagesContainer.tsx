@@ -103,8 +103,8 @@ const Messages = ({
         <motion.div
           layout
           className={cn(
-            "scrollbar-macos relative isolate flex flex-1 flex-col p-[16px] pb-0",
-            "overflow-y-scroll overflow-x-hidden"
+            "relative isolate flex flex-1 flex-col p-[16px]",
+            "overflow-y-auto overflow-x-hidden scrollbar-macos"
           )}
           ref={messagesContainerRef}
         >

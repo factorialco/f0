@@ -4,7 +4,20 @@ import { useEffect, useRef, useState } from "react"
 import { F0AiChatProvider, useAiChat } from ".."
 import { ChatTextarea } from "../components/ChatTextarea"
 
-// Wrapper component to manage state
+const PLACEHOLDERS = [
+  "Ask about location, directions, or travel details…",
+  "Inquire about pricing, features, or product availability…",
+  "Request clarification on tasks, deadlines, or requirements…",
+  "Ask for opinions, recommendations, or comparisons…",
+  "Provide details about issues, errors, or unexpected behavior…",
+]
+
+/**
+ * Wrapper component that uses ChatTextarea with F0AiChat context.
+ * This demonstrates the integration with the chat context for placeholders.
+ *
+ * For standalone usage without context, see F0AiChatTextArea stories.
+ */
 const ChatTextareaWrapper = ({ placeholders }: { placeholders?: string[] }) => {
   const [messages, setMessages] = useState<string[]>([])
   const [isProcessing, setIsProcessing] = useState(false)
@@ -98,7 +111,7 @@ const ChatTextareaWrapper = ({ placeholders }: { placeholders?: string[] }) => {
 }
 
 const meta = {
-  title: "AI/F0AiChat/ChatTextarea",
+  title: "AI/F0AiChat/ChatTextarea (with context)",
   component: ChatTextareaWrapper,
   parameters: {
     layout: "centered",
@@ -119,14 +132,6 @@ type Story = StoryObj<typeof meta>
 export const Default: Story = {
   render: () => <ChatTextareaWrapper />,
 }
-
-const PLACEHOLDERS = [
-  "Ask about location, directions, or travel details…",
-  "Inquire about pricing, features, or product availability…",
-  "Request clarification on tasks, deadlines, or requirements…",
-  "Ask for opinions, recommendations, or comparisons…",
-  "Provide details about issues, errors, or unexpected behavior…",
-]
 
 export const WithPlaceholders: Story = {
   render: () => <ChatTextareaWrapper placeholders={PLACEHOLDERS} />,

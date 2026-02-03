@@ -1,13 +1,18 @@
 import { useEffect, useMemo, useState } from "react"
 
+import { useL10n } from "@/lib/providers/l10n"
 import {
   DatePickerPopup,
   DatePickerPopupProps,
 } from "@/ui/DatePickerPopup/DatePickerPopup"
 import { isSameDatePickerValue } from "@/ui/DatePickerPopup/utils"
 
-import { granularityDefinitions } from "../OneCalendar"
-import { DateRange, DateRangeComplete } from "../OneCalendar/types"
+import { getGranularityDefinitions } from "../OneCalendar/granularities"
+import {
+  DateRange,
+  DateRangeComplete,
+  WeekStartDay,
+} from "../OneCalendar/types"
 import { DatePickerTrigger } from "./components/DateNavigatorTrigger"
 import { DatePickerValue } from "./types"
 
@@ -48,10 +53,16 @@ export function OneDateNavigator({
     DateRangeComplete | DateRangeComplete[] | undefined
   >()
   const [isOpen, setIsOpen] = useState(false)
+  const l10n = useL10n()
+
+  const effectiveWeekStartsOn =
+    props.weekStartsOn ?? l10n.date?.weekStartsOn ?? WeekStartDay.Monday
 
   const granularityDefinition = useMemo(() => {
-    return granularityDefinitions[localValue?.granularity ?? "day"]
-  }, [localValue?.granularity])
+    const granularityKey = localValue?.granularity ?? "day"
+    const definitions = getGranularityDefinitions(effectiveWeekStartsOn)
+    return definitions[granularityKey]
+  }, [localValue?.granularity, effectiveWeekStartsOn])
 
   const handleSelect = (value: DatePickerValue | undefined) => {
     setLocalValue(value)
@@ -86,6 +97,7 @@ export function OneDateNavigator({
       compareTo={compareTo}
       defaultCompareTo={defaultCompareTo}
       onCompareToChange={handleCompareToChange}
+      weekStartsOn={effectiveWeekStartsOn}
       asChild
     >
       <DatePickerTrigger

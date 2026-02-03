@@ -12,7 +12,7 @@ import { ArrowDown } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
-import { F0Thinking as Thinking } from "../../F0Thinking"
+import { F0Thinking } from "../../F0Thinking"
 import { FullscreenChatContext } from "../index"
 import { useAiChat } from "../providers/AiChatStateProvider"
 import { AssistantMessage as F0AssistantMessage } from "./AssistantMessage"
@@ -316,7 +316,7 @@ const Messages = ({
 
                 if (Array.isArray(message) && !isCurrentMessage) {
                   return (
-                    <Thinking
+                    <F0Thinking
                       key={`${turnIndex}-${index}`}
                       messages={message}
                       isActive={false}

@@ -6,23 +6,13 @@ export {
   FullscreenChatContext,
 } from "./F0AiChat"
 
-// Legacy aliases for backwards compatibility
-export {
-  F0AiChat as AiChat,
-  F0AiChatProvider as AiChatProvider,
-  F0AiFullscreenChat as AiFullscreenChat,
-} from "./F0AiChat"
-
 // Types
 export type {
-  F0AiChatProviderProps,
+  AiChatProviderProps,
   WelcomeScreenSuggestion,
   AiChatTranslations,
   AiChatTranslationsProviderProps,
 } from "./types"
-
-// Legacy type alias for backwards compatibility
-export type { F0AiChatProviderProps as AiChatProviderProps } from "./types"
 
 export { aiTranslations } from "./types"
 

@@ -15,6 +15,14 @@ interface CollapsibleItemSectionHeaderProps {
   onToggleExpanded?: (id: string) => void
   sortable: boolean
   hideChildrenCounter?: boolean
+  isDragOver?: boolean
+  dragOverPosition?: "before" | "after" | "inside" | null
+  canDropInside?: boolean
+  onDragOver?: (itemId: string, position: "before" | "after" | "inside") => void
+  onDragLeave?: () => void
+  onDrop?: (itemId: string, position: "before" | "after" | "inside") => void
+  currentParentId?: string | null
+  draggedItemId?: string | null
 }
 
 export function CollapsibleItemSectionHeader({
@@ -25,6 +33,12 @@ export function CollapsibleItemSectionHeader({
   onToggleExpanded,
   sortable,
   hideChildrenCounter,
+  canDropInside = false,
+  onDragOver,
+  onDragLeave,
+  onDrop,
+  currentParentId,
+  draggedItemId,
 }: CollapsibleItemSectionHeaderProps) {
   const shouldReduceMotion = useReducedMotion()
 
@@ -45,6 +59,12 @@ export function CollapsibleItemSectionHeader({
         isExpanded={isExpanded}
         onToggleExpanded={onToggleExpanded}
         sortable={sortable}
+        onDragOver={onDragOver}
+        onDragLeave={onDragLeave}
+        onDrop={onDrop}
+        canDropInside={canDropInside}
+        currentParentId={currentParentId}
+        draggedItemId={draggedItemId}
       />
       <CollapsibleContent forceMount className="flex flex-col gap-1">
         <motion.div

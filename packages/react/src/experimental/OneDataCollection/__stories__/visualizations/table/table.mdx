@@ -528,6 +528,8 @@ fetchChildren: async ({ item }) => {
   └─ 📄 File 3
 ```
 
+<Canvas of={TableStories.TableWithNestedRecords} meta={TableStories} />
+
 #### `"detailed"`
 
 Children are displayed **aligned with the parent** without tree connectors or
@@ -557,6 +559,8 @@ fetchChildren: async ({ item }) => {
 📄 File 2.1 (child)
 📄 File 3 (child)
 ```
+
+<Canvas of={TableStories.TableWithNestedRecordsDetailed} meta={TableStories} />
 
 **Example with dynamic type:**
 
@@ -712,3 +716,5 @@ shown at the end of the expanded children. When clicked:
   ]}
 />
 ```
+
+<Canvas of={TableStories.TableWithMixedNestedRecords} meta={TableStories} />

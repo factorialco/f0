@@ -302,6 +302,7 @@ export const defaultTranslations = {
   select: {
     noResults: "No results found",
     loadingMore: "Loading...",
+    applySelection: "Apply selection",
   },
   numberInput: {
     between: "It should be between {{min}} and {{max}}",
@@ -398,6 +399,16 @@ export const defaultTranslations = {
       textStyles: "Text Styles",
       lists: "Lists",
       blocks: "Blocks",
+    },
+    ai: {
+      enhanceButtonLabel: "Enhance",
+      loadingEnhanceLabel: "Loading...",
+      defaultError: "An error occurred while loading",
+      closeErrorButtonLabel: "Continue editing",
+      acceptChangesButtonLabel: "Accept",
+      rejectChangesButtonLabel: "Reject",
+      repeatButtonLabel: "Repeat",
+      customPromptPlaceholder: "What do you want to do?",
     },
   },
 } as const

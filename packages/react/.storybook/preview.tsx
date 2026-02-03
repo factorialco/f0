@@ -9,6 +9,7 @@ import { INITIAL_VIEWPORTS } from "storybook/viewport"
 
 import "../src/styles.css"
 import { aiTranslations } from "@/ai/F0AiChat/types"
+import { WeekStartDay } from "@/experimental/OneCalendar/types"
 import { dataCollectionLocalStorageHandler } from "@/lib/providers/datacollection"
 import { F0Provider } from "@/lib/providers/f0"
 import { buildTranslations, defaultTranslations } from "@/lib/providers/i18n"
@@ -46,6 +47,10 @@ export const F0 = (Story: StoryFn, { parameters }: StoryContext) => {
       l10n={{
         l10n: {
           locale: parameters.l10n?.locale ?? "en",
+          date: {
+            weekStartsOn:
+              parameters.l10n?.date?.weekStartsOn ?? WeekStartDay.Monday,
+          },
         },
       }}
       link={{

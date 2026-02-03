@@ -19,7 +19,7 @@ import { cn } from "@/lib/utils"
 import { AssistantMessage } from "./components/AssistantMessage"
 import { ChatHeader } from "./components/ChatHeader"
 import { ChatTextarea } from "./components/ChatTextarea"
-import { SidebarWindow as ChatWindow } from "./components/ChatWindow"
+import { SidebarWindow } from "./components/ChatWindow"
 import { MessagesContainer } from "./components/MessagesContainer"
 import { MessagesContainerFullscreen } from "./components/MessagesContainerFullscreen"
 import { UserMessage } from "./components/UserMessage"
@@ -27,7 +27,7 @@ import { WelcomeScreenSuggestion } from "./components/WelcomeScreen"
 import { useDefaultCopilotActions } from "./copilotActions"
 import { FullscreenChatContextType } from "./internal-types"
 import { AiChatStateProvider, useAiChat } from "./providers/AiChatStateProvider"
-import { F0AiChatProviderProps } from "./types"
+import { AiChatProviderProps } from "./types"
 
 // Context to share input state between Messages and Input components
 export const FullscreenChatContext = createContext<FullscreenChatContextType>({
@@ -45,7 +45,7 @@ const F0AiChatProviderComponent = ({
   children,
   agent,
   ...copilotKitProps
-}: F0AiChatProviderProps) => {
+}: AiChatProviderProps) => {
   // todo: implement error handling
   // temporary set runtime url until error handling is done
   return (
@@ -134,7 +134,7 @@ const F0AiChatComponent = () => {
       onSetOpen={(isOpen) => {
         setOpen(isOpen)
       }}
-      Window={ChatWindow}
+      Window={SidebarWindow}
       Header={ChatHeader}
       Messages={MessagesContainer}
       Button={() => {
@@ -308,6 +308,9 @@ export const F0AiFullscreenChat = experimentalComponent(
   F0AiFullscreenChatComponent
 )
 
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
 export const F0AiChatProvider = experimentalComponent(
   "F0AiChatProvider",
   F0AiChatProviderComponent

@@ -3,7 +3,7 @@ import { motion } from "motion/react"
 import { useEffect, useRef, useState } from "react"
 
 import { F0Button } from "@/components/F0Button"
-import { Toolbar, ToolbarDivider } from "@/experimental/RichText/CoreEditor"
+import { Toolbar } from "@/experimental/RichText/CoreEditor"
 import { Paperclip, TextSize } from "@/icons/app"
 
 import { EnhanceActivator } from "../Enhance"
@@ -118,19 +118,16 @@ const Footer = ({
       )}
 
       {enhanceConfig && (
-        <>
-          <ToolbarDivider />
-          <EnhanceActivator
-            editor={editor}
-            onEnhanceWithAI={onEnhanceWithAI}
-            isLoadingEnhance={isLoadingEnhance}
-            enhanceConfig={enhanceConfig}
-            disableButtons={disableButtons}
-            hideLabel={useLittleMode}
-            setLastIntent={setLastIntent}
-            position="top"
-          />
-        </>
+        <EnhanceActivator
+          editor={editor}
+          onEnhanceWithAI={onEnhanceWithAI}
+          isLoadingEnhance={isLoadingEnhance}
+          enhanceConfig={enhanceConfig}
+          disableButtons={disableButtons}
+          hideLabel={useLittleMode}
+          setLastIntent={setLastIntent}
+          position="top"
+        />
       )}
 
       {maxCharacters && !useLittleMode && (

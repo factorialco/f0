@@ -14,11 +14,12 @@ import {
   AiPromotionChatProviderProps,
 } from "@/experimental/AiPromotionChat"
 import { useAiPromotionChat } from "@/experimental/AiPromotionChat/providers/AiPromotionChatStateProvider"
+import { experimentalComponent } from "@/lib/experimental"
 
 import {
-  F0AiChat as AiChat,
-  F0AiChatProvider as AiChatProvider,
-  F0AiChatProviderProps as AiChatProviderProps,
+  F0AiChat,
+  F0AiChatProvider,
+  AiChatProviderProps,
 } from "../../../ai/F0AiChat"
 import { useAiChat } from "../../../ai/F0AiChat/providers/AiChatStateProvider"
 import { useReducedMotion } from "../../../lib/a11y"
@@ -34,7 +35,7 @@ export interface ApplicationFrameProps {
   children: React.ReactNode
 }
 
-export function ApplicationFrame({
+function _ApplicationFrame({
   children,
   sidebar,
   banner,
@@ -42,7 +43,7 @@ export function ApplicationFrame({
   aiPromotion,
 }: ApplicationFrameProps) {
   const AiProvider = ai?.enabled
-    ? AiChatProvider
+    ? F0AiChatProvider
     : aiPromotion?.enabled
       ? AiPromotionChatProvider
       : Fragment
@@ -67,6 +68,14 @@ export function ApplicationFrame({
     </FrameProvider>
   )
 }
+
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export const ApplicationFrame = experimentalComponent(
+  "ApplicationFrame",
+  _ApplicationFrame
+)
 
 const SkipToContentButton = ({ contentId }: { contentId?: string }) => {
   const translations = useI18n()
@@ -224,7 +233,7 @@ function ApplicationFrameContent({
                   {children}
                 </motion.div>
               </motion.main>
-              {ai && ai.enabled && <AiChat />}
+              {ai && ai.enabled && <F0AiChat />}
               {aiPromotion && aiPromotion.enabled && <AiPromotionChat />}
             </div>
           </LayoutGroup>

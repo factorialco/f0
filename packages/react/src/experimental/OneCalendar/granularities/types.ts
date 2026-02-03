@@ -8,6 +8,7 @@ import {
   DateRange,
   DateRangeComplete,
   DateRangeString,
+  WeekStartsOn,
 } from "../types"
 
 export type DateNavigationOptions = {
@@ -27,6 +28,8 @@ export interface GranularityDefinition {
   calendarMode?: CalendarMode
   // The view of the calendar that this granularity is used in
   calendarView: CalendarView
+  // Week starts on day (only used by week granularity)
+  weekStartsOn?: WeekStartsOn
   // Label for the granularity in the calendar view
   label: (viewDate: Date, i18n: TranslationsType) => ReactNode
   // Format the date to a date range with dates as string
@@ -47,6 +50,8 @@ export interface GranularityDefinition {
   ) => string
   // Calculate the maximum width of the string representation of the date
   toStringMaxWidth: () => number
+  // Default placeholder text for the input field, derived from the format pattern
+  placeholder: () => string
   // Parse the date range string to a date range
   fromString: (
     dateStr: string | DateRangeString,
@@ -71,6 +76,7 @@ export interface GranularityDefinition {
     setViewDate: (date: Date) => void
     viewDate: Date
     compact?: boolean
+    weekStartsOn?: WeekStartsOn
   }) => ReactNode
   // Adds a delta to a date range
   add: (date: DateRangeComplete, delta: number) => DateRangeComplete
