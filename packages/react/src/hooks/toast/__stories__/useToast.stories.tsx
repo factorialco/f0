@@ -130,6 +130,8 @@ export const ToastPlayground: Story = {
       },
     ]
 
+    const [index, setIndex] = useState(0)
+
     const newToast = (options: ToastOptions) => {
       return () => {
         setLogger((prev) => [
@@ -139,7 +141,8 @@ export const ToastPlayground: Story = {
             message: `Toast ${options.title} created`,
           },
         ])
-        toast(options)
+        toast({ ...options, title: `${options.title} ${index}` })
+        setIndex((prev) => prev + 1)
       }
     }
 

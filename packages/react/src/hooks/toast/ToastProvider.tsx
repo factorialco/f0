@@ -53,18 +53,10 @@ const StackedToasts = ({ items }: { items: ToastProviderItem[] }) => {
 
   return (
     <div
-      className="relative z-[101]"
+      className="pointer-events-auto relative z-[101]"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Invisible backdrop to maintain hover area when expanded */}
-      {isHovered && (
-        <div
-          className="pointer-events-auto absolute -left-4 -right-4 -top-4 bottom-[-1000px] z-[-1]"
-          style={{ backgroundColor: "red" }}
-        />
-      )}
-
       <div className="relative">
         <AnimatePresence>
           {items.map((item, index) => {
@@ -82,11 +74,11 @@ const StackedToasts = ({ items }: { items: ToastProviderItem[] }) => {
                 exit={{ opacity: 0, scale: 0.5, transition: { duration: 0.2 } }}
                 variants={{
                   collapsed: {
-                    y: index * 10, // Compressed stack
-                    scale: 1 - index * 0.05,
+                    y: index * -10, // Items behind go up
+                    scale: 1 - index * 0.05, // Items behind are smaller
                     opacity: isVisible ? 1 : 0,
-                    zIndex: 100 - index,
-                    height: index === 0 ? "auto" : 0, // Collapse height for non-front items to avoid gaps
+                    zIndex: 100 - index, // Older (lower index) on top
+                    height: index === 0 ? "auto" : 0,
                   },
                   expanded: {
                     y: 0,
@@ -94,7 +86,7 @@ const StackedToasts = ({ items }: { items: ToastProviderItem[] }) => {
                     opacity: 1,
                     zIndex: 100 - index,
                     height: "auto",
-                    marginBottom: 16, // Gap between expanded items
+                    marginBottom: 16,
                   },
                 }}
                 transition={{
@@ -103,7 +95,9 @@ const StackedToasts = ({ items }: { items: ToastProviderItem[] }) => {
                   damping: 30,
                 }}
                 className={cn(
-                  !isHovered && index > 0 && "absolute top-0 left-0 right-0"
+                  !isHovered &&
+                    index > 0 &&
+                    "absolute top-0 left-0 right-0 mb-4"
                 )}
               >
                 <F0Toast {...item} forcePauseTimer />
@@ -124,12 +118,15 @@ const ToastsContainer = ({
   position?: ToastContainerPosition
 }) => {
   const { collapsedItems, activeItems } = useMemo(() => {
+    const reversedItems = items.slice().reverse()
     // Newer toasts at the bottom -> Active list is the end of the array
-    const activeCount = Math.min(items.length, minUncollapsedToasts)
-    const active = items.slice(items.length - activeCount)
+    const activeCount = Math.min(reversedItems.length, minUncollapsedToasts)
+    const active = reversedItems.slice(reversedItems.length - activeCount)
 
     // Stack is the rest, reversed so newest-collapsed is at index 0 (Front)
-    const collapsed = items.slice(0, items.length - activeCount).reverse()
+    // UPDATE: User requested older on top with scale 1, so we DON'T reverse anymore.
+    // Index 0 = Oldest = Front = Scale 1
+    const collapsed = reversedItems.slice(0, reversedItems.length - activeCount)
 
     return { collapsedItems: collapsed, activeItems: active }
   }, [items])
@@ -143,7 +140,7 @@ const ToastsContainer = ({
         )
       )}
     >
-      <div className="flex w-[350px] max-w-full flex-col gap-4 p-6">
+      <div className="flex w-[350px] max-w-full flex-col p-6">
         {/* Stacked Toasts at the Top */}
         <StackedToasts items={collapsedItems} />
 
