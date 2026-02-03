@@ -46,21 +46,10 @@ export const useTableExportAction = () => {
             required: true,
           },
           {
-            name: "fileData",
+            name: "downloadUrl",
             type: "string",
-            description: 'Base64 encoded file data (for type: "download")',
-            required: false,
-          },
-          {
-            name: "fileName",
-            type: "string",
-            description: 'Filename for download (for type: "download")',
-            required: false,
-          },
-          {
-            name: "mimeType",
-            type: "string",
-            description: 'MIME type of the file (for type: "download")',
+            description:
+              'URL to download the file, opens in a new tab (for type: "download")',
             required: false,
           },
           {
@@ -97,21 +86,10 @@ export const useTableExportAction = () => {
             required: true,
           },
           {
-            name: "fileData",
+            name: "downloadUrl",
             type: "string",
-            description: 'Base64 encoded file data (for type: "download")',
-            required: false,
-          },
-          {
-            name: "fileName",
-            type: "string",
-            description: 'Filename for download (for type: "download")',
-            required: false,
-          },
-          {
-            name: "mimeType",
-            type: "string",
-            description: 'MIME type of the file (for type: "download")',
+            description:
+              'URL to download the file, opens in a new tab (for type: "download")',
             required: false,
           },
           {

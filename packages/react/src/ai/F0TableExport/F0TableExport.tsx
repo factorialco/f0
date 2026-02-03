@@ -9,34 +9,15 @@ import { f0MarkdownRenderersSimple } from "../F0MarkdownRenderers"
 import { F0TableExportActionItem, F0TableExportProps } from "./types"
 
 /**
- * Converts a base64 string to a Blob
- */
-function base64ToBlob(base64: string, mimeType: string): Blob {
-  const byteCharacters = atob(base64)
-  const byteNumbers = new Array(byteCharacters.length)
-  for (let i = 0; i < byteCharacters.length; i++) {
-    byteNumbers[i] = byteCharacters.charCodeAt(i)
-  }
-  const byteArray = new Uint8Array(byteNumbers)
-  return new Blob([byteArray], { type: mimeType })
-}
-
-/**
- * Handles file download from base64 data
+ * Opens the download URL in a new tab
  */
 function handleDownload(item: F0TableExportActionItem): void {
-  if (!item.fileData || !item.mimeType || !item.fileName) {
-    console.error("Missing file data for download action")
+  if (!item.downloadUrl) {
+    console.error("Missing download URL for download action")
     return
   }
 
-  const blob = base64ToBlob(item.fileData, item.mimeType)
-  const url = URL.createObjectURL(blob)
-  const link = document.createElement("a")
-  link.href = url
-  link.download = item.fileName
-  link.click()
-  URL.revokeObjectURL(url)
+  window.open(item.downloadUrl, "_blank", "noopener,noreferrer")
 }
 
 /**
