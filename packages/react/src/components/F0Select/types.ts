@@ -49,6 +49,17 @@ type F0SelectBaseProps<T extends string, R = unknown> = {
    * Only displays the dropdown content with max height, border and scroll.
    */
   asList?: boolean
+  /**
+   * When true, shows an "Apply selection" button at the bottom of the dropdown.
+   * This button closes the dropdown when clicked, confirming the selection.
+   * Useful for multiple selection with data sources to batch selection changes.
+   */
+  showApplyButton?: boolean
+  /**
+   * Callback when the apply button is clicked.
+   * Called before the dropdown closes.
+   */
+  onApply?: () => void
 }
 
 /**

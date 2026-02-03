@@ -192,6 +192,15 @@ const meta: Meta = {
       description:
         "Whether the select is loading. If true, the select will be disabled",
     },
+    showApplyButton: {
+      control: "boolean",
+      description:
+        "When true, shows an 'Apply selection' button at the bottom of the dropdown. Useful for multiple selection with data sources to batch selection changes.",
+    },
+    onApply: {
+      description:
+        "Callback when the apply button is clicked. Called before the dropdown closes.",
+    },
   },
   args: {
     label: "Select a theme",
@@ -637,6 +646,47 @@ export const MultipleNotPaginated: Story = {
       label: item.label,
       avatar: item.avatar,
       description: `${item.jobTitle} · ${item.departmentName}`,
+    }),
+  },
+}
+
+/**
+ * Multiple selection with paginated data and an "Apply selection" button.
+ * The button appears at the bottom of the dropdown and closes it when clicked,
+ * confirming the selection. This is useful for batch selection workflows.
+ */
+export const MultiplePaginatedWithApplyButton: Story = {
+  args: {
+    label: "Select Team Members",
+    placeholder: "Search employees...",
+    multiple: true,
+    value: ["3", "42"],
+    defaultItem: (() => {
+      const emp = getEmployeeById(42)
+      return emp
+        ? [
+            {
+              value: emp.value,
+              label: emp.label,
+              avatar: emp.avatar,
+            },
+          ]
+        : []
+    })(),
+    clearable: true,
+    showSearchBox: true,
+    showApplyButton: true,
+    source: employeePaginatedSource,
+    mapOptions: (item: Employee) => ({
+      value: item.value,
+      label: item.label,
+      avatar: item.avatar,
+    }),
+    onApply: fn(() => {
+      console.log("Selection applied!")
+    }),
+    onSelectItems: fn((selectionStatus) => {
+      console.log("selectionStatus", selectionStatus)
     }),
   },
 }
