@@ -296,7 +296,7 @@ exports[`OneChip Snapshot with OnClose 1`] = `
           }
         }
         accessible={true}
-        className="-m-1 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full [&_svg]:text-f1-icon-secondary"
+        className="[&_svg]:text-f1-icon-secondary -m-1 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full"
         collapsable={false}
         focusable={true}
         onBlur={[Function]}

@@ -23,7 +23,7 @@ exports[`OnePreset Snapshot 1`] = `
       }
     }
     accessible={true}
-    className="flex grow-0 flex-row items-center gap-2 rounded border border-f1-border px-2.5 py-1.5 font-medium text-f1-foreground"
+    className="flex grow-0 flex-row items-center gap-2 rounded border px-2.5 py-1.5 font-medium border-f1-border text-f1-foreground"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -68,7 +68,7 @@ exports[`OnePreset Snapshot with number 1`] = `
       }
     }
     accessible={true}
-    className="flex grow-0 flex-row items-center gap-2 rounded border border-f1-border px-2.5 py-1.5 font-medium text-f1-foreground pr-1.5"
+    className="flex grow-0 flex-row items-center gap-2 rounded border px-2.5 py-1.5 font-medium pr-1.5 border-f1-border text-f1-foreground"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -140,7 +140,7 @@ exports[`OnePreset renders correctly with selected props 1`] = `
     onStartShouldSetResponder={[Function]}
   >
     <Text
-      className="whitespace-nowrap text-f1-foreground"
+      className="whitespace-nowrap text-f1-foreground-selected"
     >
       label
     </Text>
