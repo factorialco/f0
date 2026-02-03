@@ -1,8 +1,13 @@
 import { addDays, differenceInDays, endOfDay, startOfDay } from "date-fns"
 
 import { DateRangeComplete } from "../../types"
-import { isAfterOrEqual, isBeforeOrEqual } from "../../utils"
-import { dayGranularity, toDayGranularityDateRange } from "../day"
+import {
+  formatToPlaceholder,
+  isAfterOrEqual,
+  isBeforeOrEqual,
+} from "../../utils"
+import { rangeSeparator } from "../consts"
+import { DAY_FORMAT, dayGranularity, toDayGranularityDateRange } from "../day"
 import { GranularityDefinition } from "../types"
 /**
  * This is a special case of the day granularity.
@@ -17,10 +22,12 @@ const add = (date: DateRangeComplete, delta: number): DateRangeComplete => {
   }
 }
 
+const dayPlaceholder = formatToPlaceholder(DAY_FORMAT)
+
 export const rangeGranularity: GranularityDefinition = {
   ...dayGranularity,
   calendarMode: "range",
-  placeholder: (i18n) => i18n.date.granularities.range.placeholder,
+  placeholder: () => `${dayPlaceholder} ${rangeSeparator} ${dayPlaceholder}`,
   add,
   getPrevNext: (value, options) => {
     const dateRange = toDayGranularityDateRange(value)

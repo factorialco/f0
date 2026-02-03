@@ -4,6 +4,7 @@ import { DateRange, DateRangeComplete } from "../../types"
 import {
   formatDateRange,
   formatDateToString,
+  formatToPlaceholder,
   isAfterOrEqual,
   isBeforeOrEqual,
   toDateRangeString,
@@ -12,6 +13,8 @@ import {
 import { rangeSeparator } from "../consts"
 import { DateStringFormat, GranularityDefinition } from "../types"
 import { YearView } from "./YearView"
+
+const YEAR_FORMAT = "yyyy"
 
 export function toYearGranularityDateRange<
   T extends Date | DateRange | undefined | null,
@@ -56,16 +59,16 @@ export const yearGranularity: GranularityDefinition = {
     }
   },
   toRange: (date) => toYearGranularityDateRange(date),
-  toRangeString: (date) => formatDateRange(date, "yyyy"),
+  toRangeString: (date) => formatDateRange(date, YEAR_FORMAT),
   toString: (date, _, format = "default") => {
     const formats: Record<DateStringFormat, string> = {
-      default: formatDateToString(date, "yyyy"),
-      long: formatDateToString(date, "yyyy"), // For years, long format is the same as default
+      default: formatDateToString(date, YEAR_FORMAT),
+      long: formatDateToString(date, YEAR_FORMAT), // For years, long format is the same as default
     }
     return formats[format] ?? formats.default
   },
   toStringMaxWidth: () => 70,
-  placeholder: (i18n) => i18n.date.granularities.year.placeholder,
+  placeholder: () => formatToPlaceholder(YEAR_FORMAT),
   fromString: (dateStr) => {
     const dateRangeString = toDateRangeString(dateStr)
     if (!dateRangeString) {

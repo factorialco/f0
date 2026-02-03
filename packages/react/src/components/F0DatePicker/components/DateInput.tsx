@@ -92,7 +92,7 @@ const DateInput = forwardRef<HTMLInputElement, DateInputProps>(
     }
 
     // Use granularity placeholder as default if no placeholder provided
-    const placeholder = inputProps.placeholder ?? granularity.placeholder(i18n)
+    const placeholder = inputProps.placeholder ?? granularity.placeholder()
 
     return (
       <>

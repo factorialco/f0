@@ -14,6 +14,7 @@ import {
   formatDate,
   formatDateRange,
   formatDateToString,
+  formatToPlaceholder,
   isAfterOrEqual,
   isBeforeOrEqual,
   toDateRangeString,
@@ -22,6 +23,8 @@ import {
 import { rangeSeparator } from "../consts"
 import { DateStringFormat, GranularityDefinition } from "../types"
 import { DayView } from "./DayView"
+
+export const DAY_FORMAT = "dd/MM/yyyy"
 
 export function toDayGranularityDateRange<
   T extends Date | DateRange | undefined | null,
@@ -91,16 +94,16 @@ export const dayGranularity: GranularityDefinition = {
     }
   },
   toRange: (date) => toDayGranularityDateRange(date),
-  toRangeString: (date) => formatDateRange(date, "dd/MM/yyyy"),
+  toRangeString: (date) => formatDateRange(date, DAY_FORMAT),
   toString: (date, _, format = "default") => {
     const formats: Record<DateStringFormat, string> = {
-      default: formatDateToString(date, "dd/MM/yyyy"),
+      default: formatDateToString(date, DAY_FORMAT),
       long: formatLong(date),
     }
     return formats[format] ?? formats.default
   },
   toStringMaxWidth: () => 160,
-  placeholder: (i18n) => i18n.date.granularities.day.placeholder,
+  placeholder: () => formatToPlaceholder(DAY_FORMAT),
   fromString: (dateStr) => {
     const dateRangeString = toDateRangeString(dateStr)
     if (!dateRangeString) {

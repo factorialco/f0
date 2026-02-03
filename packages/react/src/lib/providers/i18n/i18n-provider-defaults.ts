@@ -201,7 +201,6 @@ export const defaultTranslations = {
       day: {
         currentDate: "Today",
         label: "Day",
-        placeholder: "dd/mm/yyyy",
       },
       week: {
         currentDate: "This week",
@@ -209,32 +208,26 @@ export const defaultTranslations = {
         long: "Week of {{day}} {{month}} {{year}}",
         longSingular: "Week of {{date}}",
         longPlural: "Weeks of {{date}}",
-        placeholder: "Week of dd mm yyyy",
       },
       month: {
         currentDate: "This month",
         label: "Month",
-        placeholder: "mm/yyyy",
       },
       quarter: {
         currentDate: "This quarter",
         label: "Quarter",
-        placeholder: "Qn yyyy",
       },
       halfyear: {
         currentDate: "This half year",
         label: "Half year",
-        placeholder: "Half year of yyyy",
       },
       year: {
         currentDate: "This year",
         label: "Year",
-        placeholder: "yyyy",
       },
       range: {
         currentDate: "Today",
         label: "Range",
-        placeholder: "dd/mm/yyyy - dd/mm/yyyy",
       },
     },
     month: {

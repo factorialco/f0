@@ -22,6 +22,9 @@ import { rangeSeparator } from "../consts"
 import { DateStringFormat, GranularityDefinition } from "../types"
 import { HalfYearView } from "./HalfyearView"
 
+// Halfyear uses a custom format (not a date-fns pattern): "H1 yyyy" or "H2 yyyy"
+const HALFYEAR_PLACEHOLDER = "Hn yyyy"
+
 const formatHalfYearFull = (date: Date) => {
   return `${formatHalfYear(date)} ${date.getFullYear()}`
 }
@@ -144,7 +147,7 @@ export const halfyearGranularity: GranularityDefinition = {
     return formats[format] ?? formats.default
   },
   toStringMaxWidth: () => 155,
-  placeholder: (i18n) => i18n.date.granularities.halfyear.placeholder,
+  placeholder: () => HALFYEAR_PLACEHOLDER,
   fromString: (dateStr) => {
     const dateRangeString = toDateRangeString(dateStr)
     if (!dateRangeString) {
