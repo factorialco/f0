@@ -5,6 +5,7 @@ import { useRef, useState } from "react"
 
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { Ai } from "@/icons/app"
+import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 
 import { enhanceConfig } from "../utils/types"
 import { AIEnhanceMenu } from "./EnhanceMenu"
@@ -38,6 +39,7 @@ const EnhanceActivator = ({
   position = "bottom",
   setLastIntent,
 }: EnhanceActivatorProps) => {
+  const i18n = useI18n()
   const enhanceButtonRef = useRef<HTMLButtonElement>(null)
   const [open, setOpen] = useState(false)
 
@@ -64,7 +66,7 @@ const EnhanceActivator = ({
           variant="ai"
           ref={enhanceButtonRef}
           icon={Ai}
-          label={enhanceConfig?.enhanceLabels.enhanceButtonLabel ?? "Magic"}
+          label={i18n.richTextEditor.ai.enhanceButtonLabel}
           onClick={(e) => {
             handleEnhanceClick(e)
           }}
@@ -103,7 +105,7 @@ const EnhanceActivator = ({
                   }}
                   enhancementOptions={enhanceConfig?.enhancementOptions || []}
                   inputPlaceholder={
-                    enhanceConfig?.enhanceLabels.customPromptPlaceholder || ""
+                    i18n.richTextEditor.ai.customPromptPlaceholder
                   }
                 />
               </motion.div>

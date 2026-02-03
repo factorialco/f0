@@ -380,6 +380,16 @@ export const defaultTranslations = {
       lists: "Lists",
       blocks: "Blocks",
     },
+    ai: {
+      enhanceButtonLabel: "Enhance",
+      loadingEnhanceLabel: "Loading...",
+      defaultError: "An error occurred while loading",
+      closeErrorButtonLabel: "Continue editing",
+      acceptChangesButtonLabel: "Accept",
+      rejectChangesButtonLabel: "Reject",
+      repeatButtonLabel: "Repeat",
+      customPromptPlaceholder: "What do you want to do?",
+    },
   },
 } as const
 

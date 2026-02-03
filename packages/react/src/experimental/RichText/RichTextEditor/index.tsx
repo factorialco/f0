@@ -17,11 +17,13 @@ import {
   MentionsConfig,
   Toolbar,
 } from "@/experimental/RichText/CoreEditor"
+import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 import { withSkeleton } from "@/lib/skeleton"
 import { cn } from "@/lib/utils"
-import { Skeleton } from "@/ui/skeleton"
 
 import "../index.css"
+import { Skeleton } from "@/ui/skeleton"
+
 import { AcceptChanges } from "./Enhance/AcceptChanges"
 import {
   LoadingEnhanceInline,
@@ -43,7 +45,6 @@ import {
 import {
   editorStateType,
   enhanceConfig,
-  errorConfig,
   filesConfig,
   heightType,
   lastIntentType,
@@ -66,7 +67,6 @@ interface RichTextEditorProps {
     files?: File[]
   }
   title: string
-  errorConfig?: errorConfig
   height?: heightType
   plainHtmlMode?: boolean
   fullScreenMode?: boolean
@@ -95,13 +95,13 @@ const RichTextEditorComponent = forwardRef<
     onChange,
     placeholder,
     title,
-    errorConfig,
     height = "auto",
     plainHtmlMode = false,
     fullScreenMode = true,
   },
   ref
 ) {
+  const i18n = useI18n()
   const editorId = useId()
 
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -231,7 +231,7 @@ const RichTextEditorComponent = forwardRef<
           setIsFullDocumentEnhance(false)
           setIsAcceptChangesOpen(false)
           editor.commands.clearEnhanceHighlight()
-          setError(error || enhanceConfig.enhanceLabels.defaultError)
+          setError(error || i18n.richTextEditor.ai.defaultError)
           // editor.setEditable(false) is handled by useEffect when error is set
         },
         selectedIntent,
@@ -360,12 +360,11 @@ const RichTextEditorComponent = forwardRef<
               >
                 {isLoadingEnhance && (
                   <LoadingEnhanceInline
-                    label={enhanceConfig?.enhanceLabels.loadingEnhanceLabel}
+                    label={i18n.richTextEditor.ai.loadingEnhanceLabel}
                   />
                 )}
                 {isAcceptChangesOpen && !isLoadingEnhance && (
                   <AcceptChanges
-                    labels={enhanceConfig?.enhanceLabels}
                     setLastIntent={setLastIntent}
                     setIsAcceptChangesOpen={setIsAcceptChangesOpen}
                     editor={editor}
@@ -374,13 +373,7 @@ const RichTextEditorComponent = forwardRef<
                   />
                 )}
                 {error && !isLoadingEnhance && (
-                  <Error
-                    error={error}
-                    setError={setError}
-                    editor={editor}
-                    errorConfig={errorConfig}
-                    closeErrorButtonLabel={errorConfig?.closeErrorButtonLabel}
-                  />
+                  <Error error={error} setError={setError} editor={editor} />
                 )}
               </motion.div>
             )}

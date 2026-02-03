@@ -1,15 +1,11 @@
 import { Editor } from "@tiptap/react"
 
 import { F0Button } from "@/components/F0Button"
-import {
-  enhanceLabelsType,
-  lastIntentType,
-} from "@/experimental/RichText/RichTextEditor/utils/types"
+import { lastIntentType } from "@/experimental/RichText/RichTextEditor/utils/types"
 import { Check, Cross, Reset } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 
 interface AcceptChangesProps {
-  labels?: enhanceLabelsType
   setLastIntent: (lastIntent: lastIntentType) => void
   lastIntent: lastIntentType
   setIsAcceptChangesOpen: (isAcceptChangesOpen: boolean) => void
@@ -18,7 +14,6 @@ interface AcceptChangesProps {
 }
 
 const AcceptChanges = ({
-  labels,
   setLastIntent,
   lastIntent,
   setIsAcceptChangesOpen,
@@ -30,7 +25,7 @@ const AcceptChanges = ({
   return (
     <div className="dark flex items-center gap-2 rounded-md border border-solid border-f1-border bg-f1-background p-1 drop-shadow-sm">
       <F0Button
-        label={labels?.rejectChangesButtonLabel || i18n.actions.cancel}
+        label={i18n.richTextEditor.ai.rejectChangesButtonLabel}
         onClick={(e) => {
           e.preventDefault()
           editor.commands.clearEnhanceHighlight()
@@ -45,7 +40,7 @@ const AcceptChanges = ({
       />
 
       <F0Button
-        label={labels?.repeatButtonLabel || i18n.filters.retry}
+        label={i18n.richTextEditor.ai.repeatButtonLabel}
         onClick={(e) => {
           e.preventDefault()
           editor.commands.clearEnhanceHighlight()
@@ -61,7 +56,7 @@ const AcceptChanges = ({
       />
 
       <F0Button
-        label={labels?.acceptChangesButtonLabel || i18n.actions.save}
+        label={i18n.richTextEditor.ai.acceptChangesButtonLabel}
         onClick={(e) => {
           e.preventDefault()
           editor.commands.clearEnhanceHighlight()
