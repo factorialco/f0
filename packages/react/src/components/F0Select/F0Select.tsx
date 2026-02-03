@@ -121,8 +121,6 @@ const F0SelectComponent = forwardRef(function Select<
     multiple,
     portalContainer,
     asList = false,
-    showApplyButton,
-    onApply,
     ...props
   }: F0SelectProps<T, R>,
   ref: React.ForwardedRef<HTMLButtonElement>
@@ -547,10 +545,12 @@ const F0SelectComponent = forwardRef(function Select<
     debouncedHandleChangeOpenLocal(open)
   }
 
+  // Show apply button when there's a data source, multiple selection, and not rendered as a list
+  const showApplyButton = !!source && multiple && !asList
+
   const handleApply = useCallback(() => {
-    onApply?.()
     handleChangeOpenLocal(false)
-  }, [onApply])
+  }, [])
 
   // Track when filters panel is open to hide bottom actions
   const [isFiltersOpen, setIsFiltersOpen] = useState(false)
