@@ -1,8 +1,0 @@
-@import "ress/dist/ress.min.css";
-
-/* Remove default outline for focus-visible on inputs and textareas */
-/* ress only handles :focus, but browsers now use :focus-visible in UA stylesheets */
-input:focus-visible,
-textarea:focus-visible {
-  outline: none;
-}
