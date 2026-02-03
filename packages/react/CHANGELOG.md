@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.343.1](https://github.com/factorialco/f0/compare/f0-react-v1.343.0...f0-react-v1.343.1) (2026-02-03)
+
+
+### Bug Fixes
+
+* add missing apply selection button in F0Select ([#3345](https://github.com/factorialco/f0/issues/3345)) ([f3fa4c5](https://github.com/factorialco/f0/commit/f3fa4c5359446ab793159fc496ac290ac139dce0))
+
 ## [1.343.0](https://github.com/factorialco/f0/compare/f0-react-v1.342.0...f0-react-v1.343.0) (2026-02-03)
 
 
