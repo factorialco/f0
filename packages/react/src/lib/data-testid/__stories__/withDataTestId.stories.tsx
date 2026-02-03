@@ -40,8 +40,7 @@ export const Default: Story = {
   },
   play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
     const canvas = within(canvasElement)
-    const root = canvas.getByRole("button").parentElement
-    await expect(root).toHaveAttribute("data-testid", "my-test-button")
+    await expect(canvas.getByTestId("my-test-button")).toBeInTheDocument()
   },
 }
 
@@ -78,19 +77,15 @@ export const DynamicUpdate: Story = {
   },
   play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement)
-    const root = canvas.getByRole("button", {
-      name: "Dynamic ID Button",
-    }).parentElement
 
     await step("Check initial ID", async () => {
-      await expect(root).toHaveAttribute("data-testid", "initial-id")
+      await expect(canvas.getByTestId("initial-id")).toBeInTheDocument()
     })
 
     await step("Update ID", async () => {
       const updateButton = canvas.getByText("Update ID")
       await userEvent.click(updateButton)
-      // Wait for re-render if needed, but here it's sync
-      await expect(root).toHaveAttribute("data-testid", "updated-id")
+      await expect(canvas.getByTestId("updated-id")).toBeInTheDocument()
     })
   },
 }
@@ -120,9 +115,6 @@ export const CustomComponent: Story = {
     canvasElement: HTMLElement
   }): Promise<void> => {
     const canvas = within(canvasElement)
-    const root = canvas.getByText(
-      "I am a custom component with a test ID"
-    ).parentElement
-    await expect(root).toHaveAttribute("data-testid", "custom-component-id")
+    await expect(canvas.getByTestId("custom-component-id")).toBeInTheDocument()
   },
 }

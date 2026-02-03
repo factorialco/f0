@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { useState } from "react"
 import { ComponentProps } from "react"
-import { expect } from "storybook/test"
+import { expect, within } from "storybook/test"
 
 import * as AIIcons from "@/icons/ai"
 import * as AnimatedIcons from "@/icons/animated"
@@ -53,9 +53,8 @@ export const WithDataTestId: Story = {
     dataTestId: "my-test-icon",
   },
   play: async ({ canvasElement }) => {
-    const root = canvasElement.querySelector("[data-testid='my-test-icon']")
-    await expect(root).toBeInTheDocument()
-    await expect(root).toHaveAttribute("data-testid", "my-test-icon")
+    const canvas = within(canvasElement)
+    await expect(canvas.getByTestId("my-test-icon")).toBeInTheDocument()
   },
 }
 

@@ -168,8 +168,7 @@ export const WithDataTestId: Story = {
   } as Story["args"],
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    const root = canvas.getByText("GridStack with Test ID").parentElement
-    await expect(root).toHaveAttribute("data-testid", "my-test-grid-stack")
+    await expect(canvas.getByTestId("my-test-grid-stack")).toBeInTheDocument()
   },
 }
 

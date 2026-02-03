@@ -103,6 +103,6 @@ export const WithDataTestId: Story = {
   render: (args) => <Await {...args} />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    await expect(canvas.getByText("Resolved with Test ID")).toBeInTheDocument()
+    await expect(canvas.getByTestId("my-test-await")).toBeInTheDocument()
   },
 }

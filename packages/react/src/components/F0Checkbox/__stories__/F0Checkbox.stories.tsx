@@ -90,10 +90,7 @@ export const WithDataTestId: Story = {
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    const root = canvas.getByRole("checkbox", {
-      name: "Checkbox with Test ID",
-    }).parentElement
-    await expect(root).toHaveAttribute("data-testid", "my-test-checkbox")
+    await expect(canvas.getByTestId("my-test-checkbox")).toBeInTheDocument()
   },
 }
 

@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { expect } from "storybook/test"
+import { expect, within } from "storybook/test"
 
 import { F0Alert } from "@/components/F0Alert"
 import { F0Button } from "@/components/F0Button"
@@ -44,11 +44,8 @@ export const WithDataTestId: Story = {
     </div>
   ),
   play: async ({ canvasElement }) => {
-    const root = canvasElement.querySelector(
-      "[data-testid='my-test-scroll-area']"
-    )
-    await expect(root).toBeInTheDocument()
-    await expect(root).toHaveAttribute("data-testid", "my-test-scroll-area")
+    const canvas = within(canvasElement)
+    await expect(canvas.getByTestId("my-test-scroll-area")).toBeInTheDocument()
   },
 }
 

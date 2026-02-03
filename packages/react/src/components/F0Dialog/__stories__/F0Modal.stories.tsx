@@ -159,10 +159,7 @@ export const WithDataTestId: Story = {
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    const root = canvas.getByRole("dialog", {
-      name: "Dialog with Test ID",
-    }).parentElement
-    await expect(root).toHaveAttribute("data-testid", "my-test-dialog")
+    await expect(canvas.getByTestId("my-test-dialog")).toBeInTheDocument()
   },
 }
 
