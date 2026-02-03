@@ -20,6 +20,7 @@ const add = (date: DateRangeComplete, delta: number): DateRangeComplete => {
 export const rangeGranularity: GranularityDefinition = {
   ...dayGranularity,
   calendarMode: "range",
+  placeholder: (i18n) => i18n.date.granularities.range.placeholder,
   add,
   getPrevNext: (value, options) => {
     const dateRange = toDayGranularityDateRange(value)

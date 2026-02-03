@@ -144,6 +144,7 @@ export const halfyearGranularity: GranularityDefinition = {
     return formats[format] ?? formats.default
   },
   toStringMaxWidth: () => 155,
+  placeholder: (i18n) => i18n.date.granularities.halfyear.placeholder,
   fromString: (dateStr) => {
     const dateRangeString = toDateRangeString(dateStr)
     if (!dateRangeString) {

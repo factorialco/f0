@@ -91,10 +91,14 @@ const DateInput = forwardRef<HTMLInputElement, DateInputProps>(
       setInputValue(value)
     }
 
+    // Use granularity placeholder as default if no placeholder provided
+    const placeholder = inputProps.placeholder ?? granularity.placeholder(i18n)
+
     return (
       <>
         <Input
           {...inputProps}
+          placeholder={placeholder}
           icon={Calendar}
           ref={ref}
           onFocus={() => onOpenChange?.(true)}

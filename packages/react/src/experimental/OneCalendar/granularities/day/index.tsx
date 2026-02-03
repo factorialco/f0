@@ -100,6 +100,7 @@ export const dayGranularity: GranularityDefinition = {
     return formats[format] ?? formats.default
   },
   toStringMaxWidth: () => 160,
+  placeholder: (i18n) => i18n.date.granularities.day.placeholder,
   fromString: (dateStr) => {
     const dateRangeString = toDateRangeString(dateStr)
     if (!dateRangeString) {

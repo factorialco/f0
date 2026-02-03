@@ -94,6 +94,7 @@ export const monthGranularity: GranularityDefinition = {
     return formats[format] ?? formats.default
   },
   toStringMaxWidth: () => 140,
+  placeholder: (i18n) => i18n.date.granularities.month.placeholder,
   fromString: (dateStr) => {
     const dateRangeString = toDateRangeString(dateStr)
     if (!dateRangeString) {

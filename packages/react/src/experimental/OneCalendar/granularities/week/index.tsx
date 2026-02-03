@@ -212,6 +212,7 @@ export const createWeekGranularity = (
     toStringMaxWidth: function () {
       return 240
     },
+    placeholder: (i18n) => i18n.date.granularities.week.placeholder,
     fromString: function (dateStr) {
       const dateRangeString = toDateRangeString(dateStr)
       if (!dateRangeString) {
