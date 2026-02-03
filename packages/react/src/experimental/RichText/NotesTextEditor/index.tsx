@@ -33,10 +33,13 @@ import "./index.css"
 import { createNotesTextEditorExtensions } from "./extensions"
 import Header from "./Header"
 import {
-  actionType,
-  MetadataItemValue,
+  BannerProps,
+  DropdownItem,
+  HeaderSecondaryAction,
+  MetadataItem,
   NotesTextEditorHandle,
-  secondaryActionsType,
+  PrimaryActionButton,
+  PrimaryDropdownAction,
 } from "./types"
 
 interface NotesTextEditorProps {
@@ -48,9 +51,11 @@ interface NotesTextEditorProps {
   imageUploadConfig?: ImageUploadConfig
   onTitleChange?: (title: string) => void
   titlePlaceholder?: string
-  actions?: actionType[]
-  secondaryActions?: secondaryActionsType[]
-  metadata?: MetadataItemValue[]
+  primaryAction?: PrimaryActionButton | PrimaryDropdownAction<string>
+  secondaryActions?: HeaderSecondaryAction[]
+  otherActions?: DropdownItem[]
+  metadata?: MetadataItem[]
+  banner?: BannerProps
   withPadding?: boolean
   showBubbleMenu?: boolean
 }
@@ -67,9 +72,11 @@ const NotesTextEditorComponent = forwardRef<
     aiBlockConfig,
     imageUploadConfig,
     onTitleChange,
-    actions,
+    primaryAction,
     secondaryActions,
+    otherActions,
     metadata,
+    banner,
     withPadding = true,
     showBubbleMenu = false,
     titlePlaceholder,
@@ -230,9 +237,11 @@ const NotesTextEditorComponent = forwardRef<
   }, [editor])
 
   const showHeader =
-    (actions && actions.length > 0) ||
+    primaryAction ||
+    (secondaryActions && secondaryActions.length > 0) ||
     (metadata && metadata.length > 0) ||
-    (secondaryActions && secondaryActions.length > 0)
+    (otherActions && otherActions.length > 0) ||
+    banner
   const showTitle = onTitleChange || title
 
   if (!editor) return null
@@ -245,9 +254,11 @@ const NotesTextEditorComponent = forwardRef<
     >
       {showHeader && (
         <Header
-          actions={actions}
-          metadata={metadata}
+          primaryAction={primaryAction}
           secondaryActions={secondaryActions}
+          metadata={metadata}
+          otherActions={otherActions}
+          banner={banner}
         />
       )}
       {error && (
