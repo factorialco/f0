@@ -2448,61 +2448,6 @@ declare type ExtractVisualizationSettings<T> = T extends {
     };
 } ? S : never;
 
-/**
- * String field - text input or textarea
- */
-export declare function f0<T extends z.ZodString>(schema: T, config: F0StringConfig): T & F0ZodType<T>;
-
-/**
- * Number field
- */
-export declare function f0<T extends z.ZodNumber>(schema: T, config: F0NumberFieldConfig): T & F0ZodType<T>;
-
-/**
- * Boolean field - checkbox or switch
- */
-export declare function f0<T extends z.ZodBoolean>(schema: T, config: F0BooleanConfig): T & F0ZodType<T>;
-
-/**
- * Date field
- */
-export declare function f0<T extends z.ZodDate>(schema: T, config: F0DateFieldConfig): T & F0ZodType<T>;
-
-/**
- * Enum field - select
- */
-export declare function f0<T extends z.ZodEnum<[string, ...string[]]>>(schema: T, config: F0StringSelectConfig): T & F0ZodType<T>;
-
-/**
- * Array field - multi-select
- */
-export declare function f0<T extends z.ZodArray<ZodTypeAny>>(schema: T, config: F0ArrayConfig): T & F0ZodType<T>;
-
-/**
- * Object field - richtext or custom
- */
-export declare function f0<T extends z.ZodObject<z.ZodRawShape>>(schema: T, config: F0ObjectConfig): T & F0ZodType<T>;
-
-/**
- * Optional wrapper - inherits inner type's config
- */
-export declare function f0<T extends z.ZodOptional<ZodTypeAny>>(schema: T, config: F0FieldConfig): T & F0ZodType<T>;
-
-/**
- * Nullable wrapper - inherits inner type's config
- */
-export declare function f0<T extends z.ZodNullable<ZodTypeAny>>(schema: T, config: F0FieldConfig): T & F0ZodType<T>;
-
-/**
- * Default wrapper - inherits inner type's config
- */
-export declare function f0<T extends z.ZodDefault<ZodTypeAny>>(schema: T, config: F0FieldConfig): T & F0ZodType<T>;
-
-/**
- * Fallback for any other schema type
- */
-export declare function f0<T extends ZodTypeAny>(schema: T, config: F0FieldConfig): T & F0ZodType<T>;
-
 export declare const F0ActionItem: ({ title, status, inGroup }: F0ActionItemProps) => JSX_2.Element;
 
 /**
@@ -3326,6 +3271,61 @@ declare interface F0FormDefaultSubmitProps<TSchema extends z.ZodObject<ZodRawSha
 }
 
 /**
+ * String field - text input or textarea
+ */
+export declare function f0FormField<T extends z.ZodString>(schema: T, config: F0StringConfig): T & F0ZodType<T>;
+
+/**
+ * Number field
+ */
+export declare function f0FormField<T extends z.ZodNumber>(schema: T, config: F0NumberFieldConfig): T & F0ZodType<T>;
+
+/**
+ * Boolean field - checkbox or switch
+ */
+export declare function f0FormField<T extends z.ZodBoolean>(schema: T, config: F0BooleanConfig): T & F0ZodType<T>;
+
+/**
+ * Date field
+ */
+export declare function f0FormField<T extends z.ZodDate>(schema: T, config: F0DateFieldConfig): T & F0ZodType<T>;
+
+/**
+ * Enum field - select
+ */
+export declare function f0FormField<T extends z.ZodEnum<[string, ...string[]]>>(schema: T, config: F0StringSelectConfig): T & F0ZodType<T>;
+
+/**
+ * Array field - multi-select
+ */
+export declare function f0FormField<T extends z.ZodArray<ZodTypeAny>>(schema: T, config: F0ArrayConfig): T & F0ZodType<T>;
+
+/**
+ * Object field - richtext or custom
+ */
+export declare function f0FormField<T extends z.ZodObject<z.ZodRawShape>>(schema: T, config: F0ObjectConfig): T & F0ZodType<T>;
+
+/**
+ * Optional wrapper - inherits inner type's config
+ */
+export declare function f0FormField<T extends z.ZodOptional<ZodTypeAny>>(schema: T, config: F0FieldConfig): T & F0ZodType<T>;
+
+/**
+ * Nullable wrapper - inherits inner type's config
+ */
+export declare function f0FormField<T extends z.ZodNullable<ZodTypeAny>>(schema: T, config: F0FieldConfig): T & F0ZodType<T>;
+
+/**
+ * Default wrapper - inherits inner type's config
+ */
+export declare function f0FormField<T extends z.ZodDefault<ZodTypeAny>>(schema: T, config: F0FieldConfig): T & F0ZodType<T>;
+
+/**
+ * Fallback for any other schema type
+ */
+export declare function f0FormField<T extends ZodTypeAny>(schema: T, config: F0FieldConfig): T & F0ZodType<T>;
+
+/**
  * Props for the F0Form component
  *
  * @typeParam TSchema - The Zod object schema type. The form data type is inferred from this.
@@ -3333,8 +3333,8 @@ declare interface F0FormDefaultSubmitProps<TSchema extends z.ZodObject<ZodRawSha
  * @example
  * ```tsx
  * const schema = z.object({
- *   name: f0(z.string(), { label: "Name" }),
- *   age: f0(z.number(), { label: "Age" }),
+ *   name: f0FormField(z.string(), { label: "Name" }),
+ *   age: f0FormField(z.number(), { label: "Age" }),
  * })
  *
  * // Default submit button
@@ -3580,7 +3580,8 @@ export declare type F0RichTextFieldConfig = F0BaseConfig & F0RichTextConfig & {
 };
 
 /**
- * Configuration for a form section
+ * Configuration for a form section.
+ * Section order is determined by declaration order in the sections object.
  */
 export declare interface F0SectionConfig {
     /** Section title */
@@ -3589,8 +3590,6 @@ export declare interface F0SectionConfig {
     description?: string;
     /** Conditional rendering for the entire section */
     renderIf?: SectionRenderIf;
-    /** Order in which sections appear (lower = first) */
-    order?: number;
 }
 
 /**
@@ -4559,6 +4558,12 @@ declare const internalAvatarTypes: readonly ["base", "rounded"];
 export declare function isInfiniteScrollPagination<R extends RecordType>(pagination: PaginationInfo | null): pagination is InfiniteScrollPaginatedResponse<R>;
 
 export declare function isPageBasedPagination<R extends RecordType>(pagination: PaginationInfo | null): pagination is PageBasedPaginatedResponse<R>;
+
+/**
+ * Check if a schema is of a specific Zod type using _def.typeName
+ * This is more reliable than instanceof across module boundaries
+ */
+export declare function isZodType(schema: ZodTypeAny, typeName: ZodTypeName): boolean;
 
 declare type ItemActionsDefinition<T extends RecordType> = (item: T) => ActionDefinition[] | undefined;
 
@@ -6130,6 +6135,12 @@ export declare interface TwoColumnLayoutProps {
 
 export declare function Ul({ children, ...props }: React.HTMLAttributes<HTMLUListElement>): JSX_2.Element;
 
+/**
+ * Unwrap optional, nullable, default wrappers to get the inner schema
+ * Uses _def.typeName for reliable type checking across module boundaries
+ */
+export declare function unwrapZodSchema(schema: ZodTypeAny): ZodTypeAny;
+
 declare type UpsellAction = BaseAction & {
     type: "upsell";
     variant: "promote" | "outlinePromote";
@@ -6467,13 +6478,13 @@ export declare const useReducedMotion: () => boolean;
  * ```tsx
  * const formSchema = z.object({
  *   // Fields are ordered by declaration - no need to specify position
- *   firstName: f0(z.string().min(1), { label: "First Name" }),
- *   lastName: f0(z.string().min(1), { label: "Last Name" }),
+ *   firstName: f0FormField(z.string().min(1), { label: "First Name" }),
+ *   lastName: f0FormField(z.string().min(1), { label: "Last Name" }),
  *   // Constraints derived from Zod, clearable because optional
- *   birthDate: f0(z.date().min(new Date("1900-01-01")).optional(), {
+ *   birthDate: f0FormField(z.date().min(new Date("1900-01-01")).optional(), {
  *     label: "Birth Date"
  *   }),
- *   age: f0(z.number().min(0).max(120), { label: "Age" })
+ *   age: f0FormField(z.number().min(0).max(120), { label: "Age" })
  * })
  * ```
  */
@@ -6662,6 +6673,12 @@ declare interface WithTooltipDescription {
      */
     description?: string;
 }
+
+/**
+ * Zod type names for type checking without instanceof
+ * Using _def.typeName is more reliable across module boundaries than instanceof
+ */
+declare type ZodTypeName = "ZodString" | "ZodNumber" | "ZodBoolean" | "ZodDate" | "ZodEnum" | "ZodArray" | "ZodObject" | "ZodOptional" | "ZodNullable" | "ZodDefault";
 
 export { }
 
