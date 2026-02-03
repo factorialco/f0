@@ -545,8 +545,8 @@ const F0SelectComponent = forwardRef(function Select<
     debouncedHandleChangeOpenLocal(open)
   }
 
-  // Show apply button when there's a data source, multiple selection, and not rendered as a list
-  const showApplyButton = !!source && multiple && !asList
+  // Show apply button when in multiple selection, and not rendered as a list
+  const showApplyButton = multiple && !asList
 
   const handleApply = useCallback(() => {
     handleChangeOpenLocal(false)
