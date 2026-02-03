@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
+import { expect, within } from "storybook/test"
+
 import { PageDecorator } from "@/lib/storybook-utils/pageDecorator"
 import { Placeholder } from "@/lib/storybook-utils/placeholder"
 
@@ -35,5 +37,16 @@ export const Narrow: Story = {
   },
   args: {
     variant: "narrow",
+  },
+}
+
+export const WithDataTestId: Story = {
+  args: {
+    ...Default.args,
+    dataTestId: "layout-test-id",
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await expect(canvas.getByTestId("layout-test-id")).toBeInTheDocument()
   },
 }

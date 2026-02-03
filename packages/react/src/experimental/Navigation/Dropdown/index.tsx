@@ -3,6 +3,7 @@ import { useState } from "react"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Icon } from "@/components/F0Icon"
 import { EllipsisHorizontal } from "@/icons/app"
+import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
 import { Link } from "@/lib/linkHandler"
 import { cn } from "@/lib/utils.ts"
@@ -52,7 +53,9 @@ const _Dropdown = (props: DropdownProps) => {
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export const Dropdown = experimentalComponent("Dropdown", _Dropdown)
+export const Dropdown = withDataTestId(
+  experimentalComponent("Dropdown", _Dropdown)
+)
 
 export type { DropdownItem, DropdownItemLabel, DropdownItemObject }
 
@@ -156,7 +159,6 @@ const _MobileDropdown = ({ items, children }: DropdownProps) => {
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export const MobileDropdown = experimentalComponent(
-  "MobileDropdown",
-  _MobileDropdown
+export const MobileDropdown = withDataTestId(
+  experimentalComponent("MobileDropdown", _MobileDropdown)
 )

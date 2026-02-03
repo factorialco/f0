@@ -1,6 +1,7 @@
 import { cva, type VariantProps } from "cva"
 import { motion } from "motion/react"
 
+import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
 
 import { cn } from "../../../lib/utils"
@@ -73,6 +74,6 @@ function _Spinner({ size, className }: SpinnerProps) {
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-const Spinner = experimentalComponent("Spinner", _Spinner)
+const Spinner = withDataTestId(experimentalComponent("Spinner", _Spinner))
 
 export { Spinner }

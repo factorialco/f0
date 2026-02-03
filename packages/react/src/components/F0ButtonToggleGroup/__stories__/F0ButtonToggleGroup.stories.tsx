@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { useState } from "react"
+import { expect, within } from "storybook/test"
 
 import { buttonToggleVariants } from "@/components/F0ButtonToggle"
 import { Archive, Delete, Microphone, MicrophoneNegative } from "@/icons/app"
@@ -341,5 +342,17 @@ export const Snapshot: Story = {
         </section>
       </div>
     )
+  },
+}
+
+export const WithDataTestId: Story = {
+  args: {
+    ...Default.args,
+    // @ts-expect-error - we want to test the dataTestId prop
+    dataTestId: "group-test-id",
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await expect(canvas.getByTestId("group-test-id")).toBeInTheDocument()
   },
 }

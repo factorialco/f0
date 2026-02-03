@@ -1,9 +1,12 @@
+import { ReactElement } from "react"
+
 import { AvatarVariant, F0Avatar } from "@/components/avatars/F0Avatar"
 import { F0AvatarEmoji } from "@/components/avatars/F0AvatarEmoji"
 import { F0AvatarFile } from "@/components/avatars/F0AvatarFile"
 import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon"
 import { F0Icon } from "@/components/F0Icon"
 import { Check } from "@/icons/app"
+import { withDataTestId, WithDataTestIdProps } from "@/lib/data-testid"
 import { cn, focusRing } from "@/lib/utils"
 
 import type {
@@ -65,7 +68,7 @@ interface CardSelectableProps<T extends CardSelectableValue> {
   onSelect: () => void
 }
 
-export function CardSelectable<T extends CardSelectableValue>({
+function _CardSelectable<T extends CardSelectableValue>({
   item,
   selected,
   disabled,
@@ -121,3 +124,16 @@ export function CardSelectable<T extends CardSelectableValue>({
     </div>
   )
 }
+
+/**
+ * Generic component type so consumers can use <F0Select<T, R> />.
+ * Preserves dataTestId and CardSelectable
+ */
+type CardSelectableGeneric = <T extends CardSelectableValue>(
+  props: CardSelectableProps<T> & WithDataTestIdProps
+) => ReactElement | null
+
+const CardSelectableWrapped = withDataTestId(_CardSelectable)
+
+export const CardSelectable =
+  CardSelectableWrapped as unknown as CardSelectableGeneric

@@ -1,5 +1,6 @@
 import { cva, type VariantProps } from "cva"
 
+import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
 import { cn } from "@/lib/utils"
 
@@ -40,4 +41,6 @@ function _Counter({ size, type, value, maxValue }: CounterProps) {
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export const Counter = experimentalComponent("Counter", _Counter)
+export const Counter = withDataTestId(
+  experimentalComponent("Counter", _Counter)
+)

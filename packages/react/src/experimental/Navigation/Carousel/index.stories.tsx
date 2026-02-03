@@ -1,4 +1,5 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
+import { expect, within } from "storybook/test"
 
 import { BarChartProps } from "../../../components/Charts/BarChart"
 import { Default as BarChartStory } from "../../../components/Charts/BarChart/index.stories"
@@ -246,5 +247,23 @@ export const FewItemsWithColumns: Story = {
   args: {
     ...CustomColumns.args,
     children: SLIDES.slice(0, 2),
+  },
+}
+
+export const WithDataTestId: Story = {
+  decorators: [
+    (Story) => (
+      <div className="w-full p-6">
+        <Story />
+      </div>
+    ),
+  ],
+  args: {
+    ...Default.args,
+    dataTestId: "carousel-test-id",
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await expect(canvas.getByTestId("carousel-test-id")).toBeInTheDocument()
   },
 }

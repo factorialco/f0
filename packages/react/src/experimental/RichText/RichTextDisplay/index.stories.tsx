@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
+import { expect, within } from "storybook/test"
+
 import { RichTextDisplay } from "."
 
 const meta = {
@@ -109,5 +111,18 @@ export const Markdown: Story = {
   args: {
     content: markdownContent,
     format: "markdown",
+  },
+}
+
+export const WithDataTestId: Story = {
+  args: {
+    ...Default.args,
+    dataTestId: "rich-text-display-test-id",
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await expect(
+      canvas.getByTestId("rich-text-display-test-id")
+    ).toBeInTheDocument()
   },
 }

@@ -13,6 +13,7 @@ import { F1SearchBox } from "@/experimental/Forms/Fields/F1SearchBox"
 import { createAtlaskitDriver } from "@/lib/dnd/atlaskitDriver"
 import { DndProvider } from "@/lib/dnd/context"
 import { useDndEvents } from "@/lib/dnd/hooks"
+import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
@@ -939,9 +940,8 @@ function _F0TableOfContent(props: TOCProps) {
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export const F0TableOfContent = experimentalComponent(
-  "F0TableOfContent",
-  _F0TableOfContent
+export const F0TableOfContent = withDataTestId(
+  experimentalComponent("F0TableOfContent", _F0TableOfContent)
 )
 
 export { Item, ItemSectionHeader }

@@ -17,6 +17,7 @@ import {
   MentionsConfig,
   Toolbar,
 } from "@/experimental/RichText/CoreEditor"
+import { withDataTestId } from "@/lib/data-testid"
 import { withSkeleton } from "@/lib/skeleton"
 import { cn } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
@@ -480,7 +481,6 @@ export * from "./utils/constants"
 export * from "./utils/types"
 export type { RichTextEditorHandle, RichTextEditorProps }
 
-export const RichTextEditor = withSkeleton(
-  RichTextEditorComponent,
-  RichTextEditorSkeleton
+export const RichTextEditor = withDataTestId(
+  withSkeleton(RichTextEditorComponent, RichTextEditorSkeleton)
 )

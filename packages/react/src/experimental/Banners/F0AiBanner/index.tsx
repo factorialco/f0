@@ -1,5 +1,6 @@
 import { forwardRef } from "react"
 
+import { withDataTestId } from "@/lib/data-testid"
 import { withSkeleton } from "@/lib/skeleton"
 
 import { AiBannerInternal, AiBannerSkeleton } from "./AiBannerInternal"
@@ -19,4 +20,7 @@ const F0AiBannerSkeleton = ({ compact }: AiBannerSkeletonProps) => {
 
 F0AiBannerBase.displayName = "F0AiBanner"
 
-export const F0AiBanner = withSkeleton(F0AiBannerBase, F0AiBannerSkeleton)
+export const F0AiBanner = withSkeleton(
+  withDataTestId(F0AiBannerBase),
+  F0AiBannerSkeleton
+)

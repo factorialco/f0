@@ -2,6 +2,7 @@ import Autoplay from "embla-carousel-autoplay"
 import { WheelGesturesPlugin } from "embla-carousel-wheel-gestures"
 import React from "react"
 
+import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
 import {
   CarouselContent,
@@ -149,4 +150,6 @@ const _Carousel = ({
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export const Carousel = experimentalComponent("Carousel", _Carousel)
+export const Carousel = withDataTestId(
+  experimentalComponent("Carousel", _Carousel)
+)

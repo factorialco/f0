@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { ComponentProps } from "react"
+import { expect, within } from "storybook/test"
 
 import { Shortcut } from "./index"
 
@@ -50,4 +51,15 @@ export const InverseVariant: Story = {
       </div>
     ),
   ],
+}
+
+export const WithDataTestId: Story = {
+  args: {
+    ...Default.args,
+    dataTestId: "shortcut-test-id",
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await expect(canvas.getByTestId("shortcut-test-id")).toBeInTheDocument()
+  },
 }

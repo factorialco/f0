@@ -1,5 +1,6 @@
 import { cva, type VariantProps } from "cva"
 
+import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
 
 import { F0Icon, IconType } from "../../../components/F0Icon"
@@ -51,4 +52,4 @@ const _Badge = ({ type, size = "md", icon }: BadgeProps) => {
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export const Badge = experimentalComponent("Badge", _Badge)
+export const Badge = withDataTestId(experimentalComponent("Badge", _Badge))

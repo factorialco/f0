@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
+import { expect, within } from "storybook/test"
+
 import { Add } from "../../../icons/app"
 import { ChartWidgetEmptyState } from "./index"
 
@@ -36,5 +38,18 @@ export const SalaryEmptyState: Story = {
     buttonIcon: Add,
     buttonAction: () => {},
     type: "line-chart",
+  },
+}
+
+export const WithDataTestId: Story = {
+  args: {
+    ...PerformanceEmptyState.args,
+    dataTestId: "chart-widget-empty-state-test-id",
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await expect(
+      canvas.getByTestId("chart-widget-empty-state-test-id")
+    ).toBeInTheDocument()
   },
 }

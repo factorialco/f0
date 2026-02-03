@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { ComponentProps, useState } from "react"
+import { expect, within } from "storybook/test"
 
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
@@ -118,5 +119,17 @@ export const Snapshot: Story = {
         ))}
       </div>
     )
+  },
+}
+
+export const WithDataTestId: Story = {
+  args: {
+    ...Default.args,
+    dataTestId: "sidebar-test-id",
+  },
+  decorators: Default.decorators,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await expect(canvas.getByTestId("sidebar-test-id")).toBeInTheDocument()
   },
 }

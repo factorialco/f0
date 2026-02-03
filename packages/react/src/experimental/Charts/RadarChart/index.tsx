@@ -7,6 +7,7 @@ import {
   RadarChart as RadarChartPrimitive,
 } from "recharts"
 
+import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
 import {
   ChartContainer,
@@ -96,6 +97,8 @@ export const _RadarChart = <K extends ChartConfig>(
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export const RadarChart = fixedForwardRef(
-  experimentalComponent<typeof _RadarChart>("RadarChart", _RadarChart)
+export const RadarChart = withDataTestId(
+  fixedForwardRef(
+    experimentalComponent<typeof _RadarChart>("RadarChart", _RadarChart)
+  )
 )

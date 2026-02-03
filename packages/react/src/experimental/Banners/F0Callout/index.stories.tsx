@@ -1,6 +1,8 @@
 import { StoryFn, StoryObj } from "@storybook/react-vite"
+import { expect, within } from "storybook/test"
 
 import { CheckDouble, ExternalLink } from "@/icons/app"
+import { WithDataTestIdProps } from "@/lib/data-testid"
 
 import { F0Callout, F0CalloutProps } from "."
 import { CalloutSkeleton } from "./CalloutInternal"
@@ -260,6 +262,17 @@ export const VariantsWithActions: StoryObj = {
   ),
   parameters: {
     layout: "padded",
+  },
+}
+
+export const WithDataTestId: StoryObj<F0CalloutProps & WithDataTestIdProps> = {
+  args: {
+    ...Default.args,
+    dataTestId: "callout-test-id",
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await expect(canvas.getByTestId("callout-test-id")).toBeInTheDocument()
   },
 }
 

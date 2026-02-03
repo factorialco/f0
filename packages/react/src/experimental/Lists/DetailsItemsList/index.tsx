@@ -1,5 +1,6 @@
 import React, { forwardRef } from "react"
 
+import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
 import { cn } from "@/lib/utils"
 
@@ -51,7 +52,6 @@ const _DetailsItemsList = forwardRef<HTMLDivElement, DetailsItemsListProps>(
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export const DetailsItemsList = experimentalComponent(
-  "DetailsItemsList",
-  _DetailsItemsList
+export const DetailsItemsList = withDataTestId(
+  experimentalComponent("DetailsItemsList", _DetailsItemsList)
 )

@@ -1,5 +1,6 @@
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { Check, Cross } from "@/icons/app"
+import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
 
 import { ChatTextarea, ChatWindow } from "./components"
@@ -150,14 +151,12 @@ const AiPromotionChatCmp = () => {
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-const AiPromotionChat = experimentalComponent(
-  "AiPromotionChat",
-  AiPromotionChatCmp
+const AiPromotionChat = withDataTestId(
+  experimentalComponent("AiPromotionChat", AiPromotionChatCmp)
 )
 
-const AiPromotionChatProvider = experimentalComponent(
-  "AiPromotionChatProvider",
-  AiPromotionChatProviderCmp
+const AiPromotionChatProvider = withDataTestId(
+  experimentalComponent("AiPromotionChatProvider", AiPromotionChatProviderCmp)
 )
 
 export { AiPromotionChat, AiPromotionChatProvider }

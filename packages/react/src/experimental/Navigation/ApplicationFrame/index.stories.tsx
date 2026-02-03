@@ -102,7 +102,9 @@ const DefaultStoryComponent = (
     <ApplicationFrame
       ai={args.ai}
       aiPromotion={args.aiPromotion}
+      // @ts-expect-error
       sidebar={<Sidebar {...SidebarStories.default.args} />}
+      {...args}
     >
       <Page {...PageStories.Default.args} />
     </ApplicationFrame>

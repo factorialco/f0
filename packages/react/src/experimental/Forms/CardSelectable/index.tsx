@@ -9,7 +9,7 @@ import type {
 
 import { CardSelectable } from "./CardSelectable"
 
-export function CardSelectableContainer<T extends CardSelectableValue>(
+function _CardSelectableContainer<T extends CardSelectableValue>(
   props: CardSelectableContainerProps<T>
 ): React.ReactElement {
   const {
@@ -72,7 +72,8 @@ export function CardSelectableContainer<T extends CardSelectableValue>(
   )
 }
 
-export { CardSelectable } from "./CardSelectable"
+export const CardSelectableContainer = _CardSelectableContainer
+
 export type {
   CardSelectableContainerProps,
   CardSelectableItem,
