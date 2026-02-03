@@ -279,6 +279,25 @@ export const defaultTranslations = {
       },
     },
     ask: "Ask One",
+    growth: {
+      demoCard: {
+        title: "See {{moduleName}} in action",
+        actionLabel: "Start demo",
+      },
+      bookAMeetingCard: {
+        title: "Talk with an expert",
+        schedule: "Mon-Fri · 09:00-21:00 (CEST)",
+        actionLabel: "Book a meeting",
+      },
+      questionCard: {
+        actionLabel: "Next",
+        skipLabel: "Skip",
+        sendLabel: "Send",
+      },
+      moduleCard: {
+        actionLabel: "Learn more",
+      },
+    },
   },
   select: {
     noResults: "No results found",
