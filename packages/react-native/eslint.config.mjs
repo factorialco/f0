@@ -29,6 +29,7 @@ export default [
       "**/.eslintrc.cjs",
       "**/babel.config.cjs",
       "**/*.cjs",
+      "**/scripts/**/*.mjs",
     ],
   },
 
