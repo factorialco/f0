@@ -1193,7 +1193,7 @@ declare const cardPropertyRenderers: {
 
 declare type CardPropertyType = keyof typeof cardPropertyRenderers;
 
-export declare function CardSelectable<T extends CardSelectableValue>({ item, selected, disabled, multiple, onSelect, }: CardSelectableProps<T>): JSX_2.Element;
+export declare function CardSelectable<T extends CardSelectableValue>({ item, selected, disabled, multiple, onSelect, isToggle, grouped, }: CardSelectableProps<T>): JSX_2.Element;
 
 declare type CardSelectableAvatarVariant = AvatarVariant | {
     type: "emoji";
@@ -1238,6 +1238,10 @@ export declare interface CardSelectableMultipleProps<T extends CardSelectableVal
     label?: string;
     /** Layout direction (default: vertical) */
     layout?: "vertical" | "horizontal";
+    /** When true, shows a toggle/switch indicator instead of checkbox */
+    isToggle?: boolean;
+    /** When true, items are grouped in a single bordered container with dividers */
+    grouped?: boolean;
 }
 
 declare interface CardSelectableProps<T extends CardSelectableValue> {
@@ -1246,6 +1250,10 @@ declare interface CardSelectableProps<T extends CardSelectableValue> {
     disabled: boolean;
     multiple: boolean;
     onSelect: () => void;
+    /** When true, shows a toggle/switch indicator instead of checkbox/radio */
+    isToggle?: boolean;
+    /** When true, renders without individual card borders (for grouped layout) */
+    grouped?: boolean;
 }
 
 export declare interface CardSelectableSingleProps<T extends CardSelectableValue> {
@@ -1255,14 +1263,18 @@ export declare interface CardSelectableSingleProps<T extends CardSelectableValue
     multiple?: false;
     /** Currently selected value */
     value?: T;
-    /** Callback when selection changes */
-    onChange?: (value: T) => void;
+    /** Callback when selection changes (receives undefined when isToggle and toggling off) */
+    onChange?: (value: T | undefined) => void;
     /** Whether the entire selector is disabled */
     disabled?: boolean;
     /** Label for the group (used for accessibility) */
     label?: string;
     /** Layout direction (default: vertical) */
     layout?: "vertical" | "horizontal";
+    /** When true, shows a toggle/switch indicator instead of radio and allows toggling off */
+    isToggle?: boolean;
+    /** When true, items are grouped in a single bordered container with dividers */
+    grouped?: boolean;
 }
 
 export declare type CardSelectableValue = string | number;
@@ -6518,11 +6530,6 @@ declare module "gridstack" {
 }
 
 
-declare namespace Calendar {
-    var displayName: string;
-}
-
-
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         aiBlock: {
@@ -6548,4 +6555,9 @@ declare module "@tiptap/core" {
             insertTranscript: (data: TranscriptData) => ReturnType;
         };
     }
+}
+
+
+declare namespace Calendar {
+    var displayName: string;
 }
