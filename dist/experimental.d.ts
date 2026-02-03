@@ -1221,6 +1221,8 @@ export declare interface CardSelectableItem<T extends CardSelectableValue> {
     avatar?: CardSelectableAvatarVariant;
     /** Whether this item is disabled */
     disabled?: boolean;
+    /** Whether this item is required (shows asterisk indicator) */
+    required?: boolean;
 }
 
 export declare interface CardSelectableMultipleProps<T extends CardSelectableValue> {
@@ -5675,7 +5677,7 @@ export declare type SummaryType = "sum";
  */
 export declare const Switch: typeof _Switch;
 
-declare function _Switch({ title, onCheckedChange, id, disabled, checked, value, hideLabel, presentational, ...rest }: SwitchProps): JSX_2.Element;
+declare function _Switch({ title, onCheckedChange, id, disabled, checked, value, hideLabel, presentational, required, ...rest }: SwitchProps): JSX_2.Element;
 
 declare interface SwitchProps extends DataAttributes_2 {
     /**
@@ -5714,6 +5716,11 @@ declare interface SwitchProps extends DataAttributes_2 {
      * @default false
      */
     presentational?: boolean;
+    /**
+     * Whether the switch is required (must be true)
+     * @default false
+     */
+    required?: boolean;
 }
 
 export declare type TabItem = {
@@ -6530,6 +6537,11 @@ declare module "gridstack" {
 }
 
 
+declare namespace Calendar {
+    var displayName: string;
+}
+
+
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         aiBlock: {
@@ -6555,9 +6567,4 @@ declare module "@tiptap/core" {
             insertTranscript: (data: TranscriptData) => ReturnType;
         };
     }
-}
-
-
-declare namespace Calendar {
-    var displayName: string;
 }

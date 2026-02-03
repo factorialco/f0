@@ -1195,6 +1195,11 @@ declare interface CheckboxProps extends DataAttributes_2 {
      * The name of the checkbox
      */
     name?: string;
+    /**
+     * Whether the checkbox is required
+     * @default false
+     */
+    required?: boolean;
 }
 
 declare type ChildrenPaginationInfo = {
@@ -2924,7 +2929,7 @@ export declare type F0CardProps = Omit<CardInternalProps, (typeof privateProps_3
  */
 export declare const F0Checkbox: typeof _F0Checkbox;
 
-declare function _F0Checkbox({ title, onCheckedChange, id, disabled, indeterminate, checked, value, hideLabel, presentational, stopPropagation, name, ...rest }: CheckboxProps): JSX_2.Element;
+declare function _F0Checkbox({ title, onCheckedChange, id, disabled, indeterminate, checked, value, hideLabel, presentational, stopPropagation, name, required, ...rest }: CheckboxProps): JSX_2.Element;
 
 /**
  * F0 config options specific to checkbox fields
@@ -6678,7 +6683,7 @@ declare interface WithTooltipDescription {
  * Zod type names for type checking without instanceof
  * Using _def.typeName is more reliable across module boundaries than instanceof
  */
-declare type ZodTypeName = "ZodString" | "ZodNumber" | "ZodBoolean" | "ZodDate" | "ZodEnum" | "ZodArray" | "ZodObject" | "ZodOptional" | "ZodNullable" | "ZodDefault";
+declare type ZodTypeName = "ZodString" | "ZodNumber" | "ZodBoolean" | "ZodDate" | "ZodEnum" | "ZodArray" | "ZodObject" | "ZodOptional" | "ZodNullable" | "ZodDefault" | "ZodLiteral";
 
 export { }
 
@@ -6720,6 +6725,11 @@ declare module "gridstack" {
 }
 
 
+declare namespace Calendar {
+    var displayName: string;
+}
+
+
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         aiBlock: {
@@ -6745,9 +6755,4 @@ declare module "@tiptap/core" {
             insertTranscript: (data: TranscriptData) => ReturnType;
         };
     }
-}
-
-
-declare namespace Calendar {
-    var displayName: string;
 }
