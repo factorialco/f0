@@ -545,6 +545,16 @@ const F0SelectComponent = forwardRef(function Select<
     debouncedHandleChangeOpenLocal(open)
   }
 
+  // Show apply button when in multiple selection, and not rendered as a list
+  const showApplyButton = multiple && !asList
+
+  const handleApply = useCallback(() => {
+    handleChangeOpenLocal(false)
+  }, [])
+
+  // Track when filters panel is open to hide bottom actions
+  const [isFiltersOpen, setIsFiltersOpen] = useState(false)
+
   const defaultOpenGroups = localSource.grouping?.defaultOpenGroups
   const { openGroups, setGroupOpen } = useGroups(
     data?.type === "grouped" ? data.groups : [],
@@ -645,7 +655,15 @@ const F0SelectComponent = forwardRef(function Select<
       taller={!!source?.filters}
       className={selectContentClassName}
       emptyMessage={searchEmptyMessage ?? i18n.select.noResults}
-      bottom={<SelectBottomActions actions={actions} />}
+      bottom={
+        !isFiltersOpen ? (
+          <SelectBottomActions
+            actions={actions}
+            showApplyButton={showApplyButton}
+            onApply={handleApply}
+          />
+        ) : null
+      }
       top={
         <>
           <SelectTopActions
@@ -660,8 +678,9 @@ const F0SelectComponent = forwardRef(function Select<
             currentFilters={localSource.currentFilters}
             onFiltersChange={localSource.setCurrentFilters}
             asList={asList}
+            onFiltersOpenChange={setIsFiltersOpen}
           />
-          {multiple && !currentSearch && (
+          {multiple && !currentSearch && !isFiltersOpen && (
             <SelectAll
               selectedCount={selectionMeta.selectedItemsCount}
               indeterminate={

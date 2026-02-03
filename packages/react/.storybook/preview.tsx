@@ -8,7 +8,7 @@ import { action } from "storybook/actions"
 import { INITIAL_VIEWPORTS } from "storybook/viewport"
 
 import "../src/styles.css"
-import { aiTranslations } from "@/ai/AiChat/providers/AiChatTranslationsProvider"
+import { aiTranslations } from "@/ai/F0AiChat/types"
 import { WeekStartDay } from "@/experimental/OneCalendar/types"
 import { dataCollectionLocalStorageHandler } from "@/lib/providers/datacollection"
 import { F0Provider } from "@/lib/providers/f0"
