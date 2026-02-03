@@ -17,13 +17,18 @@ import {
   MentionsConfig,
   Toolbar,
 } from "@/experimental/RichText/CoreEditor"
+import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 import { withSkeleton } from "@/lib/skeleton"
 import { cn } from "@/lib/utils"
-import { Skeleton } from "@/ui/skeleton"
 
 import "../index.css"
+import { Skeleton } from "@/ui/skeleton"
+
 import { AcceptChanges } from "./Enhance/AcceptChanges"
-import { LoadingEnhance } from "./Enhance/LoadingEnhance"
+import {
+  LoadingEnhanceInline,
+  LoadingEnhanceOverlay,
+} from "./Enhance/LoadingEnhance"
 import { Error } from "./Error"
 import { FileList } from "./FileList"
 import { Footer } from "./Footer"
@@ -40,7 +45,6 @@ import {
 import {
   editorStateType,
   enhanceConfig,
-  errorConfig,
   filesConfig,
   heightType,
   lastIntentType,
@@ -63,7 +67,6 @@ interface RichTextEditorProps {
     files?: File[]
   }
   title: string
-  errorConfig?: errorConfig
   height?: heightType
   plainHtmlMode?: boolean
   fullScreenMode?: boolean
@@ -92,13 +95,13 @@ const RichTextEditorComponent = forwardRef<
     onChange,
     placeholder,
     title,
-    errorConfig,
     height = "auto",
     plainHtmlMode = false,
     fullScreenMode = true,
   },
   ref
 ) {
+  const i18n = useI18n()
   const editorId = useId()
 
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -108,9 +111,9 @@ const RichTextEditorComponent = forwardRef<
   const [hasFullHeight, setHasFullHeight] = useState(false)
   const [isScrolledToBottom, setIsScrolledToBottom] = useState(true)
   const [isLoadingEnhance, setIsLoadingEnhance] = useState(false)
+  const [isFullDocumentEnhance, setIsFullDocumentEnhance] = useState(false)
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [isAcceptChangesOpen, setIsAcceptChangesOpen] = useState(false)
-  const [needsMinHeight, setNeedsMinHeight] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isToolbarOpen, setIsToolbarOpen] = useState(false)
   const [lastIntent, setLastIntent] = useState<lastIntentType>(null)
@@ -148,16 +151,6 @@ const RichTextEditorComponent = forwardRef<
     })
     return cleanupObservers
   }, [height, isFullscreen])
-
-  useEffect(() => {
-    if (isLoadingEnhance && editorContentContainerRef.current) {
-      const containerHeight =
-        editorContentContainerRef.current.getBoundingClientRect().height
-      setNeedsMinHeight(containerHeight < 64)
-    } else {
-      setNeedsMinHeight(false)
-    }
-  }, [isLoadingEnhance])
 
   const handleToggleFullscreen = () => {
     setIsFullscreen((prev) => !prev)
@@ -219,13 +212,27 @@ const RichTextEditorComponent = forwardRef<
         editor: editor,
         enhanceText: enhanceConfig.onEnhanceText,
         setIsLoadingEnhance,
-        onSuccess: () => {
+        onLoadingStart: ({ range, isFullDocument }) => {
           editor.setEditable(false)
+          setIsFullDocumentEnhance(isFullDocument)
+          if (!isFullDocument) {
+            editor.commands.setEnhanceHighlight(range.from, range.to)
+          }
+        },
+        onSuccess: (highlightRange) => {
+          setIsFullDocumentEnhance(false)
+          editor.commands.setEnhanceHighlight(
+            highlightRange.from,
+            highlightRange.to
+          )
           setIsAcceptChangesOpen(true)
         },
         onError: (error?: string) => {
+          setIsFullDocumentEnhance(false)
           setIsAcceptChangesOpen(false)
-          setError(error || enhanceConfig.enhanceLabels.defaultError)
+          editor.commands.clearEnhanceHighlight()
+          setError(error || i18n.richTextEditor.ai.defaultError)
+          // editor.setEditable(false) is handled by useEffect when error is set
         },
         selectedIntent,
         customIntent,
@@ -282,75 +289,56 @@ const RichTextEditorComponent = forwardRef<
               "scrollbar-macos relative flex w-full items-start justify-center overflow-y-auto pb-1 pt-3",
               isFullscreen
                 ? "h-full px-10 pb-24"
-                : cn(getHeight(height), "pl-3 pr-10")
+                : cn(getHeight(height), "pl-3 pr-10"),
+              isLoadingEnhance && isFullDocumentEnhance && "min-h-16"
             )}
           >
-            <motion.div
+            <div
               className={cn(
                 "w-full overflow-hidden",
-                isFullscreen && "max-w-4xl"
+                isFullscreen && "max-w-[824px]"
               )}
-              initial={false}
-              animate={{
-                minHeight: needsMinHeight ? "4rem" : "auto",
-                opacity: needsMinHeight ? 0.8 : 1,
-                scale: needsMinHeight ? 0.98 : 1,
-              }}
-              transition={{
-                duration: 0.4,
-                ease: [0.04, 0.62, 0.23, 0.98],
-              }}
             >
               <EditorContent editor={editor} />
-            </motion.div>
+            </div>
+
+            {isLoadingEnhance && isFullDocumentEnhance && (
+              <LoadingEnhanceOverlay isFullscreen={isFullscreen} />
+            )}
           </div>
 
           <AnimatePresence>
-            {isLoadingEnhance && (
-              <motion.div
-                key="loading-enhance"
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ duration: 0.3, ease: "easeInOut" }}
-                className="absolute inset-0"
-              >
-                <LoadingEnhance
-                  isFullscreen={isFullscreen}
-                  label={enhanceConfig?.enhanceLabels.loadingEnhanceLabel}
-                />
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          <AnimatePresence>
-            {isFullscreen && isToolbarOpen && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 20 }}
-                transition={{ duration: 0.2, ease: "easeOut" }}
-                className="absolute bottom-10 left-0 right-0 z-[9998] flex w-full items-center justify-center"
-                style={{ pointerEvents: "none" }}
-              >
-                <div
-                  className="absolute -bottom-4 left-1/2 z-50 max-w-[calc(100%-48px)] -translate-x-1/2 rounded-lg bg-f1-background p-2 shadow-md"
-                  style={{ pointerEvents: "auto" }}
+            {isFullscreen &&
+              isToolbarOpen &&
+              !isLoadingEnhance &&
+              !isAcceptChangesOpen &&
+              !error && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 20 }}
+                  transition={{ duration: 0.2, ease: "easeOut" }}
+                  className="absolute bottom-10 left-0 right-0 z-[9998] flex w-full items-center justify-center"
+                  style={{ pointerEvents: "none" }}
                 >
-                  <Toolbar
-                    editor={editor}
-                    isFullscreen={isFullscreen}
-                    disableButtons={disableAllButtons}
-                    onClose={() => {
-                      setIsToolbarOpen(false)
-                      // Restore focus after state update to trigger BubbleMenu
-                      queueMicrotask(() => editor.commands.focus())
-                    }}
-                    plainHtmlMode={plainHtmlMode}
-                  />
-                </div>
-              </motion.div>
-            )}
+                  <div
+                    className="absolute -bottom-4 left-1/2 z-50 max-w-[calc(100%-48px)] -translate-x-1/2 rounded-lg border border-solid border-f1-border-secondary bg-f1-background p-2 shadow-md"
+                    style={{ pointerEvents: "auto" }}
+                  >
+                    <Toolbar
+                      editor={editor}
+                      isFullscreen={isFullscreen}
+                      disableButtons={disableAllButtons}
+                      onClose={() => {
+                        setIsToolbarOpen(false)
+                        // Restore focus after state update to trigger BubbleMenu
+                        queueMicrotask(() => editor.commands.focus())
+                      }}
+                      plainHtmlMode={plainHtmlMode}
+                    />
+                  </div>
+                </motion.div>
+              )}
           </AnimatePresence>
         </div>
 
@@ -361,7 +349,7 @@ const RichTextEditorComponent = forwardRef<
           )}
         >
           <AnimatePresence>
-            {(isAcceptChangesOpen || error) && (
+            {(isLoadingEnhance || isAcceptChangesOpen || error) && (
               <motion.div
                 key="accordion"
                 initial={{ height: 0, opacity: 0, y: -20 }}
@@ -370,9 +358,13 @@ const RichTextEditorComponent = forwardRef<
                 transition={{ duration: 0.3 }}
                 className="flex w-full items-center justify-center pt-2"
               >
-                {isAcceptChangesOpen && (
+                {isLoadingEnhance && (
+                  <LoadingEnhanceInline
+                    label={i18n.richTextEditor.ai.loadingEnhanceLabel}
+                  />
+                )}
+                {isAcceptChangesOpen && !isLoadingEnhance && (
                   <AcceptChanges
-                    labels={enhanceConfig?.enhanceLabels}
                     setLastIntent={setLastIntent}
                     setIsAcceptChangesOpen={setIsAcceptChangesOpen}
                     editor={editor}
@@ -380,14 +372,8 @@ const RichTextEditorComponent = forwardRef<
                     lastIntent={lastIntent}
                   />
                 )}
-                {error && (
-                  <Error
-                    error={error}
-                    setError={setError}
-                    editor={editor}
-                    errorConfig={errorConfig}
-                    closeErrorButtonLabel={errorConfig?.closeErrorButtonLabel}
-                  />
+                {error && !isLoadingEnhance && (
+                  <Error error={error} setError={setError} editor={editor} />
                 )}
               </motion.div>
             )}
@@ -426,6 +412,12 @@ const RichTextEditorComponent = forwardRef<
             isToolbarOpen={isToolbarOpen}
             isFullscreen={isFullscreen}
             plainHtmlMode={plainHtmlMode}
+            enhanceConfig={enhanceConfig}
+            onEnhanceWithAI={handleEnhanceWithAI}
+            isLoadingEnhance={isLoadingEnhance}
+            setLastIntent={setLastIntent}
+            isAcceptChangesOpen={isAcceptChangesOpen}
+            hasError={!!error}
           />
         </div>
       </div>

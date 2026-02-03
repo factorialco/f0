@@ -1,10 +1,17 @@
-import { IconType } from "@/components/F0Icon"
-import { NewColor } from "@/components/tags/F0TagDot"
-import { StatusVariant } from "@/components/tags/F0TagStatus"
-
 import { Message, User } from "../CoreEditor/Extensions/Transcript"
 
 export type { ImageUploadConfig } from "../CoreEditor/Extensions/Image"
+export type {
+  MetadataItem,
+  MetadataItemValue,
+} from "@/experimental/Information/Headers/Metadata"
+export type { HeaderSecondaryAction } from "@/experimental/Information/Headers/BaseHeader"
+export type {
+  PrimaryActionButton,
+  PrimaryDropdownAction,
+} from "@/experimental/Information/utils"
+export type { DropdownItem } from "@/experimental/Navigation/Dropdown"
+export type { BannerProps, BannerVariant } from "./Header"
 
 type NotesTextEditorHandle = {
   clear: () => void
@@ -16,39 +23,4 @@ type NotesTextEditorHandle = {
   insertImage: (file: File) => void
 }
 
-type actionType = {
-  label: string
-  onClick: () => void
-  disabled?: boolean
-  icon?: IconType
-  hideLabel?: boolean
-  variant?: "default" | "outline" | "neutral"
-}
-
-type secondaryActionsType = {
-  label: string
-  onClick: () => void
-  disabled?: boolean
-  icon?: IconType
-  critical?: boolean
-}
-
-type MetadataItemValue =
-  | { type: "text"; content: string; label: string }
-  | { type: "status"; label: string; variant: StatusVariant }
-  | { type: "dot-tag"; label: string; color: NewColor }
-  | { type: "tag"; label: string; icon?: IconType }
-  | {
-      type: "person"
-      label: string
-      firstName: string
-      lastName: string
-      src?: string
-    }
-
-export type {
-  actionType,
-  MetadataItemValue,
-  NotesTextEditorHandle,
-  secondaryActionsType,
-}
+export type { NotesTextEditorHandle }

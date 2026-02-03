@@ -314,7 +314,7 @@ export const Toolbar = ({
 
   const groups = compact([
     linkGroup,
-    showEmojiPicker && emojiGroup,
+    showEmojiPicker && !disableButtons && emojiGroup,
     formattingGroup,
     textSizeGroup,
     moreOptionsGroup,
