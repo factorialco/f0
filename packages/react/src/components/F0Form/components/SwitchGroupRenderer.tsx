@@ -33,6 +33,7 @@ interface SwitchGroupRendererProps {
 export function SwitchGroupRenderer({ fields }: SwitchGroupRendererProps) {
   const form = useFormContext()
   const { watch, setValue } = form
+  const { isSubmitting } = form.formState
   const values = watch()
 
   // Filter fields based on renderIf conditions
@@ -51,10 +52,10 @@ export function SwitchGroupRenderer({ fields }: SwitchGroupRendererProps) {
         value: field.id,
         title: field.label,
         description: field.helpText,
-        disabled: field.disabled,
+        disabled: field.disabled || isSubmitting,
         required: !!(field.validation && isMustBeTrue(field.validation)),
       })),
-    [visibleFields]
+    [visibleFields, isSubmitting]
   )
 
   // Get currently selected field IDs (fields with true value)

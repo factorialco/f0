@@ -41,16 +41,27 @@ interface FieldState {
   isValidating: boolean
 }
 
+interface RenderFieldInputOptions {
+  field: F0Field
+  formField: ControllerRenderProps<FieldValues>
+  fieldState: FieldState
+  isSubmitting: boolean
+}
+
 /**
  * Renders the appropriate input component based on field type
  */
-function renderFieldInput(
-  field: F0Field,
-  formField: ControllerRenderProps<FieldValues>,
-  fieldState: FieldState
-): React.ReactNode {
+function renderFieldInput({
+  field,
+  formField,
+  fieldState,
+  isSubmitting,
+}: RenderFieldInputOptions): React.ReactNode {
   const hasError = !!fieldState.error
   const { isValidating } = fieldState
+
+  // Disable field if explicitly disabled or form is submitting
+  const isDisabled = field.disabled || isSubmitting
 
   const errorAndLoadingProps = {
     error: hasError,
@@ -61,7 +72,7 @@ function renderFieldInput(
     case "text":
       return (
         <TextFieldRenderer
-          field={field}
+          field={{ ...field, disabled: isDisabled }}
           formField={formField}
           {...errorAndLoadingProps}
         />
@@ -69,7 +80,7 @@ function renderFieldInput(
     case "number":
       return (
         <NumberFieldRenderer
-          field={field}
+          field={{ ...field, disabled: isDisabled }}
           formField={formField}
           {...errorAndLoadingProps}
         />
@@ -77,7 +88,7 @@ function renderFieldInput(
     case "textarea":
       return (
         <TextareaFieldRenderer
-          field={field}
+          field={{ ...field, disabled: isDisabled }}
           formField={formField}
           {...errorAndLoadingProps}
         />
@@ -85,19 +96,29 @@ function renderFieldInput(
     case "select":
       return (
         <SelectFieldRenderer
-          field={field}
+          field={{ ...field, disabled: isDisabled }}
           formField={formField}
           {...errorAndLoadingProps}
         />
       )
     case "checkbox":
-      return <CheckboxFieldRenderer field={field} formField={formField} />
+      return (
+        <CheckboxFieldRenderer
+          field={{ ...field, disabled: isDisabled }}
+          formField={formField}
+        />
+      )
     case "switch":
-      return <SwitchFieldRenderer field={field} formField={formField} />
+      return (
+        <SwitchFieldRenderer
+          field={{ ...field, disabled: isDisabled }}
+          formField={formField}
+        />
+      )
     case "date":
       return (
         <DateFieldRenderer
-          field={field}
+          field={{ ...field, disabled: isDisabled }}
           formField={formField}
           {...errorAndLoadingProps}
         />
@@ -105,17 +126,22 @@ function renderFieldInput(
     case "daterange":
       return (
         <DateRangeFieldRenderer
-          field={field}
+          field={{ ...field, disabled: isDisabled }}
           formField={formField}
           {...errorAndLoadingProps}
         />
       )
     case "richtext":
-      return <RichTextFieldRenderer field={field} formField={formField} />
+      return (
+        <RichTextFieldRenderer
+          field={{ ...field, disabled: isDisabled }}
+          formField={formField}
+        />
+      )
     case "custom":
       return (
         <CustomFieldRenderer
-          field={field}
+          field={{ ...field, disabled: isDisabled }}
           formField={formField}
           error={fieldState.error?.message}
           isValidating={isValidating}
@@ -136,6 +162,7 @@ function renderFieldInput(
 export function FieldRenderer({ field, sectionId }: FieldRendererProps) {
   const form = useFormContext()
   const values = form.watch()
+  const { isSubmitting } = form.formState
   const { formName } = useF0FormContext()
 
   // Check if field should be rendered based on renderIf condition
@@ -170,7 +197,7 @@ export function FieldRenderer({ field, sectionId }: FieldRendererProps) {
             </label>
           )}
           <FormControl>
-            {renderFieldInput(field, formField, fieldState)}
+            {renderFieldInput({ field, formField, fieldState, isSubmitting })}
           </FormControl>
           {field.helpText && (
             <FormDescription>{field.helpText}</FormDescription>
