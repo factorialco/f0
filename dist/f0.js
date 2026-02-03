@@ -9843,7 +9843,7 @@ const ru = {
   "on-submit": "onSubmit"
 };
 function su(i) {
-  const e = Hi(), { forms: t } = e, { name: n, schema: r, sections: s, defaultValues: o, onSubmit: a, submitConfig: l, className: d, errorTriggerMode: c = "on-blur" } = i, u = l?.label ?? "Submit", f = l?.icon === null ? void 0 : l?.icon ?? Hs, p = i.submitType ?? "default", x = p === "default" ? i.showSubmitButton ?? !0 : !1, v = p === "action-bar" ? i.discardableChanges ?? !1 : !1, w = p === "action-bar" ? i.discardConfig : void 0, S = w?.label ?? t.actionBar.discard, N = w?.icon === null ? void 0 : w?.icon ?? Fs, C = p === "action-bar" ? i.actionBarLabel ?? t.actionBar.unsavedChanges : t.actionBar.unsavedChanges, D = tu(r, s), y = M(() => iu(e), [e]), b = ru[c], m = sa({
+  const e = Hi(), { forms: t } = e, { name: n, schema: r, sections: s, defaultValues: o, onSubmit: a, submitConfig: l, className: d, errorTriggerMode: c = "on-blur" } = i, u = l?.type === "action-bar", f = l?.label ?? "Submit", p = l?.icon === null ? void 0 : l?.icon ?? Hs, x = l?.type === "default", v = l?.type === "action-bar" && l?.discardable, w = u ? l?.discardConfig : void 0, S = w?.label ?? t.actionBar.discard, N = w?.icon === null ? void 0 : w?.icon ?? Fs, C = u ? l?.actionBarLabel ?? t.actionBar.unsavedChanges : t.actionBar.unsavedChanges, D = tu(r, s), y = M(() => iu(e), [e]), b = ru[c], m = sa({
     resolver: oa(r, {
       errorMap: y
     }),
@@ -9900,14 +9900,14 @@ function su(i) {
         }), E && h("p", {
           className: "text-base font-medium text-f1-foreground-critical",
           children: E.message
-        }), p === "default" && x && h(Re, {
+        }), !u && x && h(Re, {
           type: "submit",
-          label: u,
-          icon: f,
+          label: f,
+          icon: p,
           loading: k,
           disabled: R
         })]
-      }), p === "action-bar" && h(la, {
+      }), u && h(la, {
         isOpen: z,
         variant: "light",
         label: R ? void 0 : C,
@@ -9941,8 +9941,8 @@ function su(i) {
           })]
         }) : void 0,
         primaryActions: [{
-          label: u,
-          icon: f,
+          label: f,
+          icon: p,
           onClick: m.handleSubmit(V),
           disabled: R
         }],
