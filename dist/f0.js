@@ -9065,94 +9065,129 @@ function Ud({ field: i, formField: e, error: t, loading: n }) {
     loading: n
   });
 }
-function Vd(i, e, t) {
-  const n = !!t.error, { isValidating: r } = t, s = {
-    error: n,
-    loading: r
+function Vd({ field: i, formField: e, fieldState: t, isSubmitting: n }) {
+  const r = !!t.error, { isValidating: s } = t, o = i.disabled || n, a = {
+    error: r,
+    loading: s
   };
   switch (i.type) {
     case "text":
       return h(jd, {
-        field: i,
+        field: {
+          ...i,
+          disabled: o
+        },
         formField: e,
-        ...s
+        ...a
       });
     case "number":
       return h(Hd, {
-        field: i,
+        field: {
+          ...i,
+          disabled: o
+        },
         formField: e,
-        ...s
+        ...a
       });
     case "textarea":
       return h(Ud, {
-        field: i,
+        field: {
+          ...i,
+          disabled: o
+        },
         formField: e,
-        ...s
+        ...a
       });
     case "select":
       return h(Bd, {
-        field: i,
+        field: {
+          ...i,
+          disabled: o
+        },
         formField: e,
-        ...s
+        ...a
       });
     case "checkbox":
       return h(kd, {
-        field: i,
+        field: {
+          ...i,
+          disabled: o
+        },
         formField: e
       });
     case "switch":
       return h(Wd, {
-        field: i,
+        field: {
+          ...i,
+          disabled: o
+        },
         formField: e
       });
     case "date":
       return h(Ld, {
-        field: i,
+        field: {
+          ...i,
+          disabled: o
+        },
         formField: e,
-        ...s
+        ...a
       });
     case "daterange":
       return h(Id, {
-        field: i,
+        field: {
+          ...i,
+          disabled: o
+        },
         formField: e,
-        ...s
+        ...a
       });
     case "richtext":
       return h(Fd, {
-        field: i,
+        field: {
+          ...i,
+          disabled: o
+        },
         formField: e
       });
     case "custom":
       return h(Ad, {
-        field: i,
+        field: {
+          ...i,
+          disabled: o
+        },
         formField: e,
         error: t.error?.message,
-        isValidating: r
+        isValidating: s
       });
     default:
       return null;
   }
 }
 function sn({ field: i, sectionId: e }) {
-  const t = Bi(), n = t.watch(), { formName: r } = rs();
+  const t = Bi(), n = t.watch(), { isSubmitting: r } = t.formState, { formName: s } = rs();
   if (i.renderIf && !rn(i.renderIf, n))
     return null;
-  const s = i.type !== "checkbox" && i.type !== "custom", o = i.validation && Nd(i.validation), a = ni(r, e, i.id);
+  const o = i.type !== "checkbox" && i.type !== "custom", a = i.validation && Nd(i.validation), l = ni(s, e, i.id);
   return h(Jo, {
     control: t.control,
     name: i.id,
-    render: ({ field: l, fieldState: d }) => A(Qo, {
-      id: a,
+    render: ({ field: d, fieldState: c }) => A(Qo, {
+      id: l,
       className: "scroll-mt-4",
-      children: [s && A("label", {
+      children: [o && A("label", {
         htmlFor: i.id,
         className: "text-base font-medium leading-normal text-f1-foreground-secondary",
-        children: [i.label, o && h("span", {
+        children: [i.label, a && h("span", {
           className: "ml-0.5 text-f1-foreground-critical",
           children: "*"
         })]
       }), h(ea, {
-        children: Vd(i, l, d)
+        children: Vd({
+          field: i,
+          formField: d,
+          fieldState: c,
+          isSubmitting: r
+        })
       }), i.helpText && h(ta, {
         children: i.helpText
       }), h(ia, {})]
@@ -9173,23 +9208,23 @@ function qd(i) {
   return K(e, "ZodLiteral") && e._def.value === !0;
 }
 function ls({ fields: i }) {
-  const e = Bi(), { watch: t, setValue: n } = e, r = t(), s = M(() => i.filter((d) => !d.renderIf || rn(d.renderIf, r)), [i, r]), o = M(() => s.map((d) => ({
-    value: d.id,
-    title: d.label,
-    description: d.helpText,
-    disabled: d.disabled,
-    required: !!(d.validation && qd(d.validation))
-  })), [s]), a = M(() => s.filter((d) => r[d.id]).map((d) => d.id), [s, r]);
-  return s.length === 0 ? null : h(na, {
+  const e = Bi(), { watch: t, setValue: n } = e, { isSubmitting: r } = e.formState, s = t(), o = M(() => i.filter((c) => !c.renderIf || rn(c.renderIf, s)), [i, s]), a = M(() => o.map((c) => ({
+    value: c.id,
+    title: c.label,
+    description: c.helpText,
+    disabled: c.disabled || r,
+    required: !!(c.validation && qd(c.validation))
+  })), [o, r]), l = M(() => o.filter((c) => s[c.id]).map((c) => c.id), [o, s]);
+  return o.length === 0 ? null : h(na, {
     multiple: !0,
     isToggle: !0,
     grouped: !0,
-    items: o,
-    value: a,
-    onChange: (d) => {
-      for (const c of s) {
-        const u = d.includes(c.id), f = !!r[c.id];
-        u !== f && n(c.id, u, {
+    items: a,
+    value: l,
+    onChange: (c) => {
+      for (const u of o) {
+        const f = c.includes(u.id), p = !!s[u.id];
+        f !== p && n(u.id, f, {
           shouldValidate: !0
         });
       }
