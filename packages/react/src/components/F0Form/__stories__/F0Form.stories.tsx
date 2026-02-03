@@ -51,7 +51,7 @@ export const Default: Story = {
           alert(`Form submitted: ${JSON.stringify(data, null, 2)}`)
           return { success: true }
         }}
-        submitLabel="Create Account"
+        submitConfig={{ label: "Create Account" }}
       />
     )
   },
@@ -708,7 +708,7 @@ export const WithActionBar: Story = {
             alert(`Settings saved: ${JSON.stringify(data, null, 2)}`)
             return { success: true }
           }}
-          submitConfig={{ label: "Save Changes", icon: null }}
+          submitConfig={{ label: "Save Changes" }}
         />
         <p className="mt-4 text-sm text-f1-foreground-secondary">
           Modify any field to see the action bar appear
