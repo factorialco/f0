@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.343.2](https://github.com/factorialco/f0/compare/f0-react-v1.343.1...f0-react-v1.343.2) (2026-02-03)
+
+
+### Bug Fixes
+
+* add intuitive default placeholders for date inputs ([#3348](https://github.com/factorialco/f0/issues/3348)) ([dddfe59](https://github.com/factorialco/f0/commit/dddfe59183c486519bb356de34cf141e88802d51))
+
 ## [1.343.1](https://github.com/factorialco/f0/compare/f0-react-v1.343.0...f0-react-v1.343.1) (2026-02-03)
 
 
