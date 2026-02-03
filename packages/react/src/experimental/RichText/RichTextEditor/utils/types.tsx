@@ -22,21 +22,6 @@ type enhancedTextResponse = {
   error?: string
 }
 
-type errorConfig = {
-  onClose?: () => void
-  closeErrorButtonLabel?: string
-}
-
-type enhanceLabelsType = {
-  defaultError: string
-  enhanceButtonLabel: string
-  acceptChangesButtonLabel: string
-  rejectChangesButtonLabel: string
-  repeatButtonLabel: string
-  customPromptPlaceholder: string
-  loadingEnhanceLabel: string
-}
-
 type EnhancementOption = {
   id: string
   label: string
@@ -46,7 +31,6 @@ type EnhancementOption = {
 type enhanceConfig = {
   onEnhanceText: (params: enhanceTextParams) => Promise<enhancedTextResponse>
   enhancementOptions?: EnhancementOption[]
-  enhanceLabels: enhanceLabelsType
 }
 
 type filesConfig = {
@@ -117,10 +101,8 @@ export type {
   editorStateType,
   enhanceConfig,
   enhancedTextResponse,
-  enhanceLabelsType,
   EnhancementOption,
   enhanceTextParams,
-  errorConfig,
   filesConfig,
   heightType,
   lastIntentType,

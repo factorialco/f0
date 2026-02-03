@@ -33,11 +33,15 @@ import {
 import "./index.css"
 import { createNotesTextEditorExtensions } from "./extensions"
 import Header from "./Header"
+import Title from "./Title"
 import {
-  actionType,
-  MetadataItemValue,
+  BannerProps,
+  DropdownItem,
+  HeaderSecondaryAction,
+  MetadataItem,
   NotesTextEditorHandle,
-  secondaryActionsType,
+  PrimaryActionButton,
+  PrimaryDropdownAction,
 } from "./types"
 
 interface NotesTextEditorProps {
@@ -49,10 +53,11 @@ interface NotesTextEditorProps {
   imageUploadConfig?: ImageUploadConfig
   onTitleChange?: (title: string) => void
   titlePlaceholder?: string
-  actions?: actionType[]
-  secondaryActions?: secondaryActionsType[]
-  metadata?: MetadataItemValue[]
-  withPadding?: boolean
+  primaryAction?: PrimaryActionButton | PrimaryDropdownAction<string>
+  secondaryActions?: HeaderSecondaryAction[]
+  otherActions?: DropdownItem[]
+  metadata?: MetadataItem[]
+  banner?: BannerProps
   showBubbleMenu?: boolean
 }
 
@@ -68,10 +73,11 @@ const NotesTextEditorComponent = forwardRef<
     aiBlockConfig,
     imageUploadConfig,
     onTitleChange,
-    actions,
+    primaryAction,
     secondaryActions,
+    otherActions,
     metadata,
-    withPadding = true,
+    banner,
     showBubbleMenu = false,
     titlePlaceholder,
   },
@@ -231,9 +237,11 @@ const NotesTextEditorComponent = forwardRef<
   }, [editor])
 
   const showHeader =
-    (actions && actions.length > 0) ||
+    primaryAction ||
+    (secondaryActions && secondaryActions.length > 0) ||
     (metadata && metadata.length > 0) ||
-    (secondaryActions && secondaryActions.length > 0)
+    (otherActions && otherActions.length > 0) ||
+    banner
   const showTitle = onTitleChange || title
 
   if (!editor) return null
@@ -246,9 +254,11 @@ const NotesTextEditorComponent = forwardRef<
     >
       {showHeader && (
         <Header
-          actions={actions}
-          metadata={metadata}
+          primaryAction={primaryAction}
           secondaryActions={secondaryActions}
+          metadata={metadata}
+          otherActions={otherActions}
+          banner={banner}
         />
       )}
       {error && (
@@ -277,7 +287,7 @@ const NotesTextEditorComponent = forwardRef<
         </div>
       )}
       {!readonly && !showBubbleMenu && (
-        <div className="absolute bottom-8 left-1/2 z-50 max-w-[calc(100%-48px)] -translate-x-1/2 rounded-lg bg-f1-background p-2 shadow-md">
+        <div className="absolute bottom-8 left-1/2 z-50 max-w-[calc(100%-48px)] -translate-x-1/2 rounded-lg border border-solid border-f1-border-secondary bg-f1-background p-2 shadow-md">
           <Toolbar
             editor={editor}
             disableButtons={false}
@@ -288,17 +298,12 @@ const NotesTextEditorComponent = forwardRef<
       )}
       <ScrollArea className="h-full gap-6">
         {showTitle && (
-          <div
-            className={`mx-auto flex w-full max-w-[824px] flex-col pb-4 pt-5 transition-all duration-300 ${withPadding ? "px-14" : "pl-12"}`}
-          >
-            <input
-              disabled={!onTitleChange || readonly}
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder={titlePlaceholder || ""}
-              className="text-[39px] font-semibold text-f1-foreground placeholder-f1-foreground-tertiary"
-            />
-          </div>
+          <Title
+            value={title}
+            onChange={onTitleChange ? setTitle : undefined}
+            placeholder={titlePlaceholder}
+            disabled={!onTitleChange || readonly}
+          />
         )}
         <div
           className="notes-text-editor h-full"
@@ -335,7 +340,7 @@ const NotesTextEditorComponent = forwardRef<
 
           <EditorContent
             editor={editor}
-            className={`pb-28 [&>div]:mx-auto [&>div]:w-full [&>div]:max-w-[824px] [&>div]:transition-[padding] [&>div]:duration-300 ${withPadding ? "[&>div]:px-14" : "[&>div]:pl-12"}`}
+            className="pb-28 [&>div]:mx-auto [&>div]:w-full [&>div]:max-w-[824px] [&>div]:transition-[padding] [&>div]:duration-300 sm:[&>div]:px-14 [&>div]:px-0"
           />
         </div>
       </ScrollArea>
@@ -356,7 +361,6 @@ const NotesTextEditorComponent = forwardRef<
 interface NotesTextEditorSkeletonProps {
   withHeader?: boolean
   withTitle?: boolean
-  withPadding?: boolean
   withToolbar?: boolean
 }
 

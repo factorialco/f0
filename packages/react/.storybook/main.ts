@@ -43,6 +43,10 @@ const config: StorybookConfig = {
       directory: "../src/experimental",
       titlePrefix: "Components",
     },
+    {
+      directory: "../src/ai",
+      titlePrefix: "Components",
+    },
     ...(process.env.STORYBOOK_PUBLIC_BUILD
       ? []
       : [

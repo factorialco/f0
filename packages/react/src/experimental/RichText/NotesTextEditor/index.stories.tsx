@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { expect, within } from "storybook/test"
 
 import { NewColor } from "@/components/tags/F0TagDot"
-import { AcademicCap, List, Placeholder, Settings } from "@/icons/app"
+import { AcademicCap, List, Pencil, Placeholder } from "@/icons/app"
 
 import { NotesTextEditor, NotesTextEditorSkeleton } from "./index"
 
@@ -46,11 +46,16 @@ export const Default: Story = {
       content: initialContent,
       title: "Lorem Ipsum Dolor Sit Amet",
     },
-
+    titlePlaceholder: "Untitled note",
     imageUploadConfig: {
       onUpload: mockImageUpload,
     },
-
+    banner: {
+      icon: Pencil,
+      title:
+        "You are currently in edit mode. Any modifications you make will be visible once you publish your changes",
+      variant: "info",
+    },
     aiBlockConfig: {
       title: "AI Pre-Meeting Helper",
       onClick: () => {
@@ -115,15 +120,22 @@ export const Default: Story = {
       ],
     },
 
-    actions: [
+    primaryAction: {
+      label: "Publish",
+      onClick: () => {
+        console.log("Publish clicked")
+      },
+    },
+    secondaryActions: [
       {
-        label: "Actions",
+        label: "Save draft",
         onClick: () => {
-          console.log("Actions")
+          console.log("Save draft clicked")
         },
+        variant: "outline",
       },
     ],
-    secondaryActions: [
+    otherActions: [
       {
         label: "More Actions",
         onClick: () => {
@@ -132,9 +144,9 @@ export const Default: Story = {
         icon: Placeholder,
       },
       {
-        label: "More Actions 2",
+        label: "Delete",
         onClick: () => {
-          console.log("More Actions 2")
+          console.log("Delete")
         },
         icon: Placeholder,
         critical: true,
@@ -142,32 +154,47 @@ export const Default: Story = {
     ],
     metadata: [
       {
-        type: "status",
         label: "Status",
-        variant: "warning",
+        value: {
+          type: "status",
+          label: "Pending",
+          variant: "warning",
+        },
       },
       {
-        type: "dot-tag",
-        label: "Dot tag",
-        color: "malibu" as NewColor,
+        label: "Category",
+        value: {
+          type: "dot-tag",
+          label: "Important",
+          color: "malibu" as NewColor,
+        },
       },
       {
-        type: "tag",
-        label: "Tag",
-        icon: Settings,
+        label: "Tags",
+        value: {
+          type: "tag-list",
+          tags: ["Meeting", "Q1"],
+        },
       },
       {
-        type: "text",
-
-        label: "label",
-        content: "hello",
+        label: "Description",
+        value: {
+          type: "text",
+          content: "hello",
+        },
       },
       {
-        type: "person",
-        label: "Person",
-        firstName: "Raúl",
-        lastName: "Sigüenza",
-        src: "/avatars/person01.jpg",
+        label: "Assignee",
+        value: {
+          type: "avatar",
+          variant: {
+            type: "person",
+            firstName: "Raúl",
+            lastName: "Sigüenza",
+            src: "/avatars/person01.jpg",
+          },
+          text: "Raúl Sigüenza",
+        },
       },
     ],
   },

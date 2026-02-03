@@ -59,10 +59,6 @@ const meta = {
       control: "number",
       description: "Limits the number of characters that can be entered",
     },
-    errorConfig: {
-      control: "object",
-      description: "Configures error message display and recovery options",
-    },
     height: {
       control: "select",
       options: [
@@ -196,15 +192,6 @@ export const Default: Story = {
           }, 2000)
         }),
       enhancementOptions: enhancementOptions,
-      enhanceLabels: {
-        defaultError: "Error enhancing text, try again later",
-        enhanceButtonLabel: "Magic",
-        acceptChangesButtonLabel: "Accept",
-        rejectChangesButtonLabel: "Reject",
-        repeatButtonLabel: "Repeat",
-        customPromptPlaceholder: "What do you want to do?",
-        loadingEnhanceLabel: "Loading the magic...",
-      },
     },
     filesConfig: {
       onFiles: (files) => console.log(files),
@@ -247,10 +234,6 @@ export const Default: Story = {
     initialEditorState: {
       content:
         "<p>There was a time when I wandered in the dark — lost in the chaos of tangled syntax, broken builds, and tabs that betrayed me. My code was clumsy, my patience thin. But then, like a lighthouse in a storm, <strong>you appeared</strong>. Sleek, fast, and strangely comforting, my text editor. You didn't just open files — you opened <em>possibilities</em>",
-    },
-    errorConfig: {
-      onClose: () => alert("Close"),
-      closeErrorButtonLabel: "Continue editing",
     },
     height: "auto",
   },
