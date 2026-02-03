@@ -1,6 +1,7 @@
 import { useState } from "react"
 
 import { F0Button, F0ButtonProps } from "@/components/F0Button"
+import { withDataTestId } from "@/lib/data-testid"
 import {
   ErrorMessageProps,
   NextStepsProps,
@@ -63,7 +64,7 @@ export interface UpsellingButtonProps extends Omit<F0ButtonProps, "icon"> {
 
 type ResponseStatus = "success" | "error" | null
 
-export function UpsellingButton({
+function _UpsellingButton({
   label,
   showIcon = true,
   onRequest,
@@ -133,3 +134,5 @@ export function UpsellingButton({
     </>
   )
 }
+
+export const UpsellingButton = withDataTestId(_UpsellingButton)

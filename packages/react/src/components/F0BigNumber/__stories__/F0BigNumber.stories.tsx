@@ -1,5 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
+import { expect, within } from "storybook/test"
+
+import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import type { BigNumberProps } from "../types"
@@ -60,6 +63,7 @@ const meta: Meta<typeof F0BigNumber> = {
         type: { summary: "boolean | TrendConfig" },
       },
     },
+    ...dataTestIdArgs,
   },
   decorators: [
     (Story) => (
@@ -81,6 +85,22 @@ export const Default: Story = {
       unitsPosition: "prepend" as const,
     },
     label: "Total Revenue",
+  },
+}
+
+export const WithDataTestId: Story = {
+  args: {
+    value: {
+      value: 1000000,
+      units: "$",
+      unitsPosition: "prepend" as const,
+    },
+    label: "BigNumber with Test ID",
+    dataTestId: "my-test-bignumber",
+  },
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const canvas = within(canvasElement)
+    await expect(canvas.getByTestId("my-test-bignumber")).toBeInTheDocument()
   },
 }
 

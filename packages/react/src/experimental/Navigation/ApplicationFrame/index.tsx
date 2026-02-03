@@ -14,6 +14,7 @@ import {
   AiPromotionChatProviderProps,
 } from "@/experimental/AiPromotionChat"
 import { useAiPromotionChat } from "@/experimental/AiPromotionChat/providers/AiPromotionChatStateProvider"
+import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
 
 import {
@@ -72,9 +73,8 @@ function _ApplicationFrame({
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export const ApplicationFrame = experimentalComponent(
-  "ApplicationFrame",
-  _ApplicationFrame
+export const ApplicationFrame = withDataTestId(
+  experimentalComponent("ApplicationFrame", _ApplicationFrame)
 )
 
 const SkipToContentButton = ({ contentId }: { contentId?: string }) => {

@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from "react"
  * Public implementation of the FilterPickerInternal component.
  * F0FilterPickerContent component.
  */
+import { withDataTestId } from "@/lib/data-testid"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
@@ -68,7 +69,7 @@ const DEFAULT_FORM_HEIGHT = 388
  * />
  * ```
  */
-export function F0FilterPickerContent<Filters extends FiltersDefinition>({
+function _F0FilterPickerContent<Filters extends FiltersDefinition>({
   filters,
   value,
   onChange,
@@ -170,4 +171,6 @@ export function F0FilterPickerContent<Filters extends FiltersDefinition>({
   )
 }
 
-F0FilterPickerContent.displayName = "F0FilterPickerContent"
+_F0FilterPickerContent.displayName = "F0FilterPickerContent"
+
+export const F0FilterPickerContent = withDataTestId(_F0FilterPickerContent)

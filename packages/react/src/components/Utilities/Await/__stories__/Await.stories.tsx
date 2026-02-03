@@ -1,8 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { ComponentProps, useCallback, useEffect, useState } from "react"
+import { expect, within } from "storybook/test"
 
 import { F0Button } from "@/components/F0Button"
+import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
 import { Skeleton } from "@/ui/skeleton"
 
 import { Await } from "../index"
@@ -56,6 +58,7 @@ const meta = {
       description:
         "Children to display when the promise is resolved. It's a function that gets the resolved value as an argument",
     },
+    ...dataTestIdArgs,
   },
   parameters: {
     layout: "centered",
@@ -87,5 +90,19 @@ export const WithSkeleton: Story = {
     resolve: "Hello",
     fallback: <Skeleton className="h-4 w-full" />,
     children: (value) => `${value}`,
+  },
+}
+
+export const WithDataTestId: Story = {
+  args: {
+    resolve: "Resolved with Test ID",
+    fallback: "Loading...",
+    dataTestId: "my-test-await",
+    children: (value: unknown) => String(value),
+  },
+  render: (args) => <Await {...args} />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await expect(canvas.getByTestId("my-test-await")).toBeInTheDocument()
   },
 }

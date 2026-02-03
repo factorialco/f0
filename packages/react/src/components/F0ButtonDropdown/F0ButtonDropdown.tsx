@@ -6,6 +6,7 @@ import {
   DropdownItem,
 } from "@/experimental/Navigation/Dropdown/internal.tsx"
 import { ChevronDown } from "@/icons/app/index.ts"
+import { withDataTestId } from "@/lib/data-testid/index.tsx"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils.ts"
 import { Action } from "@/ui/Action/index.tsx"
@@ -62,7 +63,7 @@ function isButtonDropdownItem<T = string>(
   return "value" in item
 }
 
-const F0ButtonDropdown = ({
+const _F0ButtonDropdown = ({
   onClick,
   value,
   ...props
@@ -186,4 +187,4 @@ const F0ButtonDropdown = ({
   )
 }
 
-export { F0ButtonDropdown }
+export const F0ButtonDropdown = withDataTestId(_F0ButtonDropdown)

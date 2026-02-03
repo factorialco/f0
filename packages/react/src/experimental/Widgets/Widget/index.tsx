@@ -9,6 +9,7 @@ import { Counter } from "@/experimental/Information/Counter"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { PrivateBox } from "@/experimental/Utilities/PrivateBox"
 import { EyeInvisible, EyeVisible, InfoCircleLine } from "@/icons/app"
+import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
 import { usePrivacyMode } from "@/lib/privacyMode"
 import { withSkeleton } from "@/lib/skeleton"
@@ -280,7 +281,6 @@ const Skeleton = forwardRef<HTMLDivElement, WidgetSkeletonProps>(
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export const Widget = experimentalComponent(
-  "Widget",
-  withSkeleton(Container, Skeleton)
+export const Widget = withDataTestId(
+  experimentalComponent("Widget", withSkeleton(Container, Skeleton))
 )

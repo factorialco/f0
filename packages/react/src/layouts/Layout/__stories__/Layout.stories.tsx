@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { ComponentProps, useCallback, useMemo, useState } from "react"
+import { expect, within } from "storybook/test"
 
 import { F0Button } from "@/components/F0Button"
 import { F0Checkbox } from "@/components/F0Checkbox"
@@ -335,5 +336,16 @@ export const WithGroupGrid: Story = {
         </>
       </Layout.Page>
     )
+  },
+}
+
+export const WithDataTestId: Story = {
+  args: {
+    ...Default.args,
+    dataTestId: "layout-page-test-id",
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await expect(canvas.getByTestId("layout-page-test-id")).toBeInTheDocument()
   },
 }

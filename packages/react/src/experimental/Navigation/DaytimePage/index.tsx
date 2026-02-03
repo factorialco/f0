@@ -8,6 +8,7 @@ import { F0Button } from "@/components/F0Button"
 import { OneSwitch as OnePromotionSwitch } from "@/experimental/AiPromotionChat/OneSwitch"
 import { useSidebar } from "@/experimental/Navigation/ApplicationFrame/FrameProvider"
 import Menu from "@/icons/app/Menu"
+import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
 import { cn } from "@/lib/utils"
 
@@ -145,4 +146,6 @@ _DaytimePage.displayName = "DaytimePage"
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export const DaytimePage = experimentalComponent("DaytimePage", _DaytimePage)
+export const DaytimePage = withDataTestId(
+  experimentalComponent("DaytimePage", _DaytimePage)
+)

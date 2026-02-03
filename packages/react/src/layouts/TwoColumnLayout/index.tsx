@@ -1,5 +1,7 @@
 import { ReactNode, forwardRef } from "react"
 
+import { Component } from "@/lib/component/component"
+import { withDataTestId } from "@/lib/data-testid"
 import { cn } from "@/lib/utils"
 
 export interface TwoColumnLayoutProps {
@@ -9,7 +11,7 @@ export interface TwoColumnLayoutProps {
   sticky?: boolean
 }
 
-export const TwoColumnLayout = forwardRef<HTMLDivElement, TwoColumnLayoutProps>(
+const _TwoColumnLayout = forwardRef<HTMLDivElement, TwoColumnLayoutProps>(
   function TwoColumnLayout(
     {
       children: mainContent,
@@ -56,6 +58,16 @@ export const TwoColumnLayout = forwardRef<HTMLDivElement, TwoColumnLayoutProps>(
       </div>
     )
   }
+)
+
+export const TwoColumnLayout = withDataTestId(
+  Component(
+    {
+      name: "TwoColumnLayout",
+      type: "layout",
+    },
+    _TwoColumnLayout
+  )
 )
 
 const Aside = ({

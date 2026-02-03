@@ -1,8 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { useState } from "react"
+import { expect, within } from "storybook/test"
 
 import { Microphone, MicrophoneNegative } from "@/icons/app"
+import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
 import { withSkipA11y, withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import { buttonToggleSizes, buttonToggleVariants } from "../"
@@ -86,6 +88,7 @@ const meta = {
         },
       },
     },
+    ...dataTestIdArgs,
   },
 } satisfies Meta<typeof F0ButtonToggle>
 
@@ -98,6 +101,20 @@ export const Default: Story = {
     icon: [MicrophoneNegative, Microphone],
     selected: undefined,
     onSelectedChange: undefined,
+  },
+}
+
+export const WithDataTestId: Story = {
+  args: {
+    label: "Toggle with Test ID",
+    icon: [MicrophoneNegative, Microphone],
+    dataTestId: "my-test-button-toggle",
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await expect(
+      canvas.getByTestId("my-test-button-toggle")
+    ).toBeInTheDocument()
   },
 }
 

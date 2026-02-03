@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
+import { expect, within } from "storybook/test"
+
 import { CrossedCircle, Download } from "@/icons/app"
 
 import { FileItem } from "."
@@ -66,5 +68,16 @@ export const Disabled: Story = {
   args: {
     ...Default.args,
     disabled: true,
+  },
+}
+
+export const WithDataTestId: Story = {
+  args: {
+    ...Default.args,
+    dataTestId: "file-item-test-id",
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await expect(canvas.getByTestId("file-item-test-id")).toBeInTheDocument()
   },
 }

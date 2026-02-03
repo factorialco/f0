@@ -1,6 +1,7 @@
 export { F0Provider } from "@/lib/providers/f0"
 export { Await } from "../components/Utilities/Await/Await"
 export * from "./a11y"
+export * from "./data-testid"
 export { createAtlaskitDriver } from "./dnd/atlaskitDriver"
 export { DndProvider } from "./dnd/context"
 export { useDndEvents, useDraggable, useDroppableList } from "./dnd/hooks"

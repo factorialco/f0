@@ -34,7 +34,10 @@ const TestProviders = ({ children }: { children: React.ReactNode }) => {
         set: () => Promise.resolve(),
       }}
     >
-      <UserPlatformProvider showExperimentalWarnings={false}>
+      <UserPlatformProvider
+        showExperimentalWarnings={false}
+        renderDataTestIdAttribute
+      >
         <L10nProvider
           l10n={{
             locale: "en-US",

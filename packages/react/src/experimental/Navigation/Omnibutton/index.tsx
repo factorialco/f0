@@ -1,3 +1,4 @@
+import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
 
 import { F0Icon } from "../../../components/F0Icon"
@@ -62,4 +63,6 @@ function _OmniButton({ label, options, hasNewUpdate }: OmniButtonProps) {
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export const OmniButton = experimentalComponent("OmniButton", _OmniButton)
+export const OmniButton = withDataTestId(
+  experimentalComponent("OmniButton", _OmniButton)
+)

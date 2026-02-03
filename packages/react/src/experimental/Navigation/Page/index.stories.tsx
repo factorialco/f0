@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { ComponentProps } from "react"
+import { expect, within } from "storybook/test"
 
 import { StandardLayout } from "@/layouts/StandardLayout"
 
@@ -242,5 +243,16 @@ export const Embedded: Story = {
           ))}
       </StandardLayout>
     ),
+  },
+}
+
+export const WithDataTestId: Story = {
+  args: {
+    ...Default.args,
+    dataTestId: "page-test-id",
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await expect(canvas.getByTestId("page-test-id")).toBeInTheDocument()
   },
 }

@@ -1,5 +1,6 @@
 import { ComponentProps, FC, forwardRef } from "react"
 
+import { withDataTestId } from "@/lib/data-testid"
 import { Weekdays } from "@/experimental/Widgets/Content/Weekdays"
 import { experimentalComponent } from "@/lib/experimental"
 import { cn } from "@/lib/utils"
@@ -77,4 +78,6 @@ const _DetailsItem = forwardRef<HTMLDivElement, DetailsItemType>(
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export const DetailsItem = experimentalComponent("DetailsItem", _DetailsItem)
+export const DetailsItem = withDataTestId(
+  experimentalComponent("DetailsItem", _DetailsItem)
+)

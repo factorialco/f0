@@ -5,6 +5,7 @@ import { F0Button } from "@/components/F0Button"
 import { F0Icon } from "@/components/F0Icon"
 import CrossIcon from "@/icons/app/Cross"
 import { One } from "@/icons/special"
+import { withDataTestId } from "@/lib/data-testid"
 
 export type ProductCardProps = {
   title: string
@@ -25,7 +26,7 @@ export type ProductCardProps = {
     }
 )
 
-export function ProductCard({
+function _ProductCard({
   title,
   description,
   onClick,
@@ -134,3 +135,5 @@ export function ProductCard({
     )
   )
 }
+
+export const ProductCard = withDataTestId(_ProductCard)

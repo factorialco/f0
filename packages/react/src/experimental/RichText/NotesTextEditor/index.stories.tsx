@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
+import { expect, within } from "storybook/test"
+
 import { NewColor } from "@/components/tags/F0TagDot"
 import { AcademicCap, List, Pencil, Placeholder } from "@/icons/app"
 
@@ -198,6 +200,21 @@ export const Default: Story = {
   },
 }
 
+export const Blank: Story = {
+  args: {
+    ...Default.args,
+    // @ts-expect-error
+    enhanceConfig: undefined,
+    filesConfig: undefined,
+    primaryAction: undefined,
+    secondaryAction: undefined,
+    initialEditorState: undefined,
+    mentionsConfig: undefined,
+    maxCharacters: undefined,
+    plainHtmlMode: true,
+  },
+}
+
 type SkeletonStory = StoryObj<typeof NotesTextEditorSkeleton>
 
 export const Skeleton: SkeletonStory = {
@@ -210,5 +227,18 @@ export const Skeleton: SkeletonStory = {
   args: {
     withHeader: true,
     withTitle: true,
+  },
+}
+
+export const WithDataTestId: Story = {
+  args: {
+    ...Default.args,
+    dataTestId: "notes-text-editor-test-id",
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await expect(
+      canvas.getByTestId("notes-text-editor-test-id")
+    ).toBeInTheDocument()
   },
 }

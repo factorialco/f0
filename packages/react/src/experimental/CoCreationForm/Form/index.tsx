@@ -3,6 +3,7 @@ import { useEffect, useMemo } from "react"
 
 import { F0Icon } from "@/components/F0Icon"
 import { Handle } from "@/icons/app"
+import { withDataTestId } from "@/lib/data-testid"
 import { cn } from "@/lib/utils"
 
 import ApplyingChangesTag from "../ApplyingChangesTag"
@@ -97,7 +98,7 @@ const Item = ({ element }: ItemProps) => {
   )
 }
 
-export const CoCreationForm = ({
+const _CoCreationForm = ({
   elements: elementsProp,
   isEditMode,
   onChange,
@@ -210,3 +211,5 @@ export const CoCreationForm = ({
     </CoCreationFormProvider>
   )
 }
+
+export const CoCreationForm = withDataTestId(_CoCreationForm)

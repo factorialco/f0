@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
+import { expect, within } from "storybook/test"
+
 import { DetailsItemsList } from "./index"
 
 const meta: Meta = {
@@ -82,5 +84,18 @@ export const TableView: Story = {
   args: {
     title: undefined,
     tableView: true,
+  },
+}
+
+export const WithDataTestId: Story = {
+  args: {
+    ...Primary.args,
+    dataTestId: "details-items-list-test-id",
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await expect(
+      canvas.getByTestId("details-items-list-test-id")
+    ).toBeInTheDocument()
   },
 }

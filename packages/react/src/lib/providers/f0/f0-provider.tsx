@@ -80,6 +80,7 @@ export const F0Provider: React.FC<{
   isDev?: boolean
   showExperimentalWarnings?: boolean
   dataCollectionStorageHandler?: DataCollectionStorageHandler
+  renderDataTestIdAttribute?: boolean
 }> = ({
   children,
   layout,
@@ -91,12 +92,14 @@ export const F0Provider: React.FC<{
   isDev = false,
   dataCollectionStorageHandler,
   showExperimentalWarnings = false,
+  renderDataTestIdAttribute = false,
 }) => {
   return (
     <MotionProvider>
       <UserPlatformProvider
         isDev={isDev}
         showExperimentalWarnings={showExperimentalWarnings}
+        renderDataTestIdAttribute={renderDataTestIdAttribute}
       >
         <L10nProvider {...l10n}>
           <I18nProvider {...i18n}>

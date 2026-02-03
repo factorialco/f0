@@ -1279,6 +1279,7 @@ export const ExampleComponent = ({
       className={cn("space-y-4", fullHeight && "max-h-full w-full bg-[#fff]")}
     >
       <OneDataCollection
+        dataTestId={`one-data-collection-${Math.random().toString(36).substring(2, 15)}`}
         tmpFullWidth={tmpFullWidth}
         id={id}
         storage={storage}

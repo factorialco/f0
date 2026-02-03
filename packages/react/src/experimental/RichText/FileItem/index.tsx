@@ -8,6 +8,7 @@ import {
 } from "@/experimental/Navigation/Dropdown/internal"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { CrossedCircle, Ellipsis } from "@/icons/app"
+import { withDataTestId } from "@/lib/data-testid"
 import { cn } from "@/lib/utils"
 
 type FileAction = {
@@ -23,7 +24,7 @@ interface FileItemProps extends React.HTMLAttributes<HTMLDivElement> {
   disabled?: boolean
 }
 
-const FileItem = forwardRef<HTMLDivElement, FileItemProps>(
+const _FileItem = forwardRef<HTMLDivElement, FileItemProps>(
   ({ file, actions = [], disabled = false, className, ...props }, ref) => {
     const hasActions = actions.length > 0
     const singleAction = actions.length === 1 ? actions[0] : null
@@ -69,7 +70,7 @@ const FileItem = forwardRef<HTMLDivElement, FileItemProps>(
     )
   }
 )
-FileItem.displayName = "FileItem"
+_FileItem.displayName = "FileItem"
 
-export { FileItem }
+export const FileItem = withDataTestId(_FileItem)
 export type { FileAction }

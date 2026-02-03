@@ -1,7 +1,7 @@
 import type { Decorator, Meta, StoryObj } from "@storybook/react-vite"
 
 import { useState } from "react"
-import { fn } from "storybook/test"
+import { expect, fn, within } from "storybook/test"
 
 import { IconType } from "@/components/F0Icon"
 import {
@@ -11,6 +11,7 @@ import {
 } from "@/hooks/datasource"
 import { SelectedItemsDetailedStatus } from "@/hooks/datasource/types/selection.typings"
 import { Appearance, Circle, Desktop, Placeholder, Plus } from "@/icons/app"
+import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
 import { withSkipA11y, withSnapshot } from "@/lib/storybook-utils/parameters"
 import { inputFieldStatus } from "@/ui/InputField"
 
@@ -192,6 +193,7 @@ const meta: Meta = {
       description:
         "Whether the select is loading. If true, the select will be disabled",
     },
+    ...dataTestIdArgs,
   },
   args: {
     label: "Select a theme",
@@ -328,6 +330,19 @@ export const Default: Story = {
     label: "Select a theme",
     value: undefined,
     placeholder: undefined,
+  },
+}
+
+export const WithDataTestId: Story = {
+  args: {
+    label: "Select with Test ID",
+    dataTestId: "my-test-select",
+    value: undefined,
+    placeholder: undefined,
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await expect(canvas.getByTestId("my-test-select")).toBeInTheDocument()
   },
 }
 

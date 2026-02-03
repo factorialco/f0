@@ -1,4 +1,5 @@
 import { Component } from "@/lib/component/component"
+import { withDataTestId } from "@/lib/data-testid"
 
 import { HomeLayout as HomeLayoutComponent } from "./HomeLayout"
 import {
@@ -12,28 +13,18 @@ import {
 
 export type { StandardLayoutProps, TwoColumnLayoutProps }
 
-export const StandardLayout = Component(
-  {
-    name: "StandardLayout",
-    type: "layout",
-  },
-  StandardLayoutComponent
-)
+export const StandardLayout = StandardLayoutComponent
 
-export const TwoColumnLayout = Component(
-  {
-    name: "TwoColumnLayout",
-    type: "layout",
-  },
-  TwoColumnLayoutComponent
-)
+export const TwoColumnLayout = TwoColumnLayoutComponent
 
-export const HomeLayout = Component(
-  {
-    name: "HomeLayout",
-    type: "layout",
-  },
-  HomeLayoutComponent
+export const HomeLayout = withDataTestId(
+  Component(
+    {
+      name: "HomeLayout",
+      type: "layout",
+    },
+    HomeLayoutComponent
+  )
 )
 
 export {

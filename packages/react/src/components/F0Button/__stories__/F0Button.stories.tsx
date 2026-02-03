@@ -4,6 +4,7 @@ import React from "react"
 import { expect, within } from "storybook/test"
 
 import { Add, Archive, Delete, Save } from "@/icons/app"
+import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { navTargets } from "@/ui/Action"
 
@@ -110,6 +111,7 @@ const meta = {
       description:
         "The target to navigate to when the button is clicked. It will render internally as a HTML link element, so allows to open the link in a new tab or window.",
     },
+    ...dataTestIdArgs,
   },
 } satisfies Meta<typeof F0Button>
 
@@ -425,5 +427,16 @@ export const AsyncLoading: Story = {
         }}
       />
     )
+  },
+}
+
+export const WithDataTestId: Story = {
+  args: {
+    dataTestId: "my-test-button",
+    label: "Button with Test ID",
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await expect(canvas.getByTestId("my-test-button")).toBeInTheDocument()
   },
 }

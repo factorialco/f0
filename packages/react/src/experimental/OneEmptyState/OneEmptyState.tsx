@@ -1,19 +1,24 @@
 import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
 import { F0AvatarEmoji } from "@/components/avatars/F0AvatarEmoji"
 import { F0Button } from "@/components/F0Button"
+import { withDataTestId } from "@/lib/data-testid"
 import { UpsellingButton } from "@/components/UpsellingKit/UpsellingButton"
 
 import * as Types from "./types"
 
-export function OneEmptyState({
+function _OneEmptyState({
   title,
   description,
   variant = "default",
   emoji,
   actions,
+  ...rest
 }: Types.OneEmptyStateProps) {
   return (
-    <div className="flex flex-col items-center justify-center gap-5 p-8">
+    <div
+      className="flex flex-col items-center justify-center gap-5 p-8"
+      {...rest}
+    >
       {variant === "default" && <F0AvatarEmoji emoji={emoji!} size="lg" />}
       {variant !== "default" && <F0AvatarAlert type={variant} size="lg" />}
       <div className="flex flex-col items-center justify-center gap-0.5">
@@ -59,3 +64,5 @@ export function OneEmptyState({
     </div>
   )
 }
+
+export const OneEmptyState = withDataTestId(_OneEmptyState)

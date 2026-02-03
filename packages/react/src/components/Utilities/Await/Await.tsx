@@ -1,6 +1,10 @@
 import { ReactNode, useEffect, useState } from "react"
 
-type AwaitProps<T> = {
+import type { WithDataTestIdProps } from "@/lib/data-testid"
+
+import { withDataTestId } from "@/lib/data-testid"
+
+export type AwaitProps<T> = {
   resolve: Promise<T> | T
   fallback: ReactNode
   error?: ReactNode
@@ -8,7 +12,7 @@ type AwaitProps<T> = {
   children: (value: T) => ReactNode
 }
 
-export const Await = <T,>({
+const _Await = <T,>({
   resolve,
   fallback,
   error: errorFallback,
@@ -48,3 +52,11 @@ export const Await = <T,>({
   }
   return null
 }
+
+/**
+ * Generic component type so <Await resolve={value}> correctly types children as (value: T) => ReactNode.
+ */
+type AwaitGeneric = <T>(props: AwaitProps<T> & WithDataTestIdProps) => ReactNode
+
+const AwaitWrapped = withDataTestId(_Await)
+export const Await = AwaitWrapped as unknown as AwaitGeneric

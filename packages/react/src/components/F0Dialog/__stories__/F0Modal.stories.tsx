@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { ComponentProps, FC, useState } from "react"
+import { expect, within } from "storybook/test"
 
 import { F0Button } from "@/components/F0Button"
 import { ActivityItemList } from "@/experimental/Information/Activity/ActivityItemList"
@@ -21,6 +22,7 @@ import DeleteIcon from "@/icons/app/Delete"
 import PencilIcon from "@/icons/app/Pencil"
 import SaveIcon from "@/icons/app/Save"
 import ShareIcon from "@/icons/app/Share"
+import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
 
 import { F0Dialog } from "../index"
 import { dialogPositions, dialogWidths } from "../types"
@@ -55,6 +57,7 @@ const meta: Meta<typeof F0Dialog> = {
         defaultValue: { summary: "md" },
       },
     },
+    ...dataTestIdArgs,
   },
   decorators: [
     (Story, { args: { isOpen, ...rest } }) => {
@@ -143,6 +146,20 @@ export const Default: Story = {
       onClick: () => {},
     },
     children: <ExampleList itemsCount={2} />,
+  },
+}
+
+export const WithDataTestId: Story = {
+  args: {
+    isOpen: true,
+    onClose: () => {},
+    title: "Dialog with Test ID",
+    dataTestId: "my-test-dialog",
+    children: <ExampleList itemsCount={2} />,
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await expect(canvas.getByTestId("my-test-dialog")).toBeInTheDocument()
   },
 }
 

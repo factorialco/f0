@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
 
 import { F0Button } from "@/components/F0Button"
+import { withDataTestId } from "@/lib/data-testid"
 import { ChevronLeft, ChevronRight } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { useL10n } from "@/lib/providers/l10n"
@@ -354,7 +355,7 @@ const OneCalendarBase = (props: OneCalendarProps) => {
 
 OneCalendarBase.displayName = "OneCalendar"
 
-export const OneCalendar = OneCalendarBase
+export const OneCalendar = withDataTestId(OneCalendarBase)
 
 // Export internal component and types for advanced usage
 export { OneCalendarInternal, type OneCalendarInternalProps }

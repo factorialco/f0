@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
+import { expect, within } from "storybook/test"
+
 import * as Icons from "../../../icons/app"
 import { Badge } from "./index"
 
@@ -34,4 +36,15 @@ export const Types: Story = {
       <Badge icon={Icons.Alert} type="warning" size="md" />
     </div>
   ),
+}
+
+export const WithDataTestId: Story = {
+  args: {
+    ...Default.args,
+    dataTestId: "badge-test-id",
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await expect(canvas.getByTestId("badge-test-id")).toBeInTheDocument()
+  },
 }

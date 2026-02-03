@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
+import { expect, within } from "storybook/test"
+
 import { Placeholder as PlaceholderIcon } from "../../../icons/app"
 import { WidgetEmptyState } from "./index"
 
@@ -49,4 +51,20 @@ export const Default: Story = {
       />
     </div>
   ),
+}
+
+export const WithDataTestId: Story = {
+  render: () => (
+    <WidgetEmptyState
+      title="Widget Empty State"
+      description="This is a widget empty state"
+      dataTestId="widget-empty-state-test-id"
+    />
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await expect(
+      canvas.getByTestId("widget-empty-state-test-id")
+    ).toBeInTheDocument()
+  },
 }

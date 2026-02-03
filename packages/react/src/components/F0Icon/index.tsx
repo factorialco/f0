@@ -1,3 +1,5 @@
+import { withDataTestId } from "@/lib/data-testid"
+
 import { Component } from "../../lib/component/component"
 import {
   F0Icon as IconComponent,
@@ -5,12 +7,14 @@ import {
   type IconType,
 } from "./F0Icon"
 
-export const F0Icon = Component(
-  {
-    name: "F0Icon",
-    type: "info",
-  },
-  IconComponent
+export const F0Icon = withDataTestId(
+  Component(
+    {
+      name: "F0Icon",
+      type: "info",
+    },
+    IconComponent
+  )
 )
 
 export type { F0IconProps, IconType }

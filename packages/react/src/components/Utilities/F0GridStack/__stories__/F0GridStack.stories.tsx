@@ -1,13 +1,15 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { cloneElement, useCallback, useState } from "react"
+import { expect, within } from "storybook/test"
 
 import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
 import { F0Button } from "@/components/F0Button"
 import { OneCalendar } from "@/experimental/OneCalendar"
+import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
 import { getMockValue } from "@/mocks"
 
-import { F0GridStack, GridStackReactWidget } from "../F0GridStack"
+import { F0GridStack, GridStackReactWidget } from "../index"
 
 const meta = {
   title: "Utilities/GridStack",
@@ -76,6 +78,7 @@ const meta = {
     onChange: {
       description: "the callback function to run when the layout changes.",
     },
+    ...dataTestIdArgs,
   },
   decorators: [
     (Story, { args }) => {
@@ -143,6 +146,30 @@ export const Default: Story = {
         </div>
       ),
     })),
+  },
+}
+
+export const WithDataTestId: Story = {
+  args: {
+    options: { column: 12 },
+    widgets: [
+      {
+        id: "widget-1",
+        w: 2,
+        h: 2,
+        content: (
+          <div className="h-full rounded-md bg-f1-background-secondary p-4">
+            GridStack with Test ID
+          </div>
+        ),
+      },
+    ],
+    dataTestId: "my-test-grid-stack",
+  } as Story["args"],
+  render: (args) => <F0GridStack {...args} />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await expect(canvas.getByTestId("my-test-grid-stack")).toBeInTheDocument()
   },
 }
 

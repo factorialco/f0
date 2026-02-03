@@ -3,7 +3,7 @@ import { Form as FormProvider } from "@/ui/form"
 
 import { FormType, InferSchema, SchemaType } from "../lib/useForm"
 
-export function Form<
+function _Form<
   Schema extends SchemaType,
   FormData extends InferSchema<Schema>,
 >({
@@ -29,7 +29,12 @@ export function Form<
   )
 }
 
-export function FormActions<
+/**
+ * @deprecated DONT USE THIS COMPONENT
+ */
+export const Form = _Form
+
+function _FormActions<
   Schema extends SchemaType,
   FormData extends InferSchema<Schema>,
 >({
@@ -49,3 +54,8 @@ export function FormActions<
     </div>
   )
 }
+
+/**
+ * @deprecated DONT USE THIS COMPONENT
+ */
+export const FormActions = _FormActions

@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import avatar from "@storybook-static/avatars/person03.jpg"
-import { fn } from "storybook/test"
+import { expect, fn, within } from "storybook/test"
 
 import { Check, Placeholder } from "../../../icons/app"
 import { OnePersonListItem } from "./index"
@@ -95,4 +95,17 @@ export const Skeleton: Story = {
   ],
   args: {},
   render: () => <OnePersonListItem.Skeleton />,
+}
+
+export const WithDataTestId: Story = {
+  args: {
+    ...Default.args,
+    dataTestId: "person-list-item-test-id",
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await expect(
+      canvas.getByTestId("person-list-item-test-id")
+    ).toBeInTheDocument()
+  },
 }

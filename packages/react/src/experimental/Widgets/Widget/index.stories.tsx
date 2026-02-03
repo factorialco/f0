@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { ComponentProps } from "react"
-import { fn } from "storybook/test"
+import { expect, fn, within } from "storybook/test"
 
 import Pencil from "@/icons/app/Pencil"
 import { Placeholder } from "@/lib/storybook-utils/placeholder"
@@ -150,5 +150,16 @@ export const FullHeight: Story = {
   args: {
     ...meta.args,
     fullHeight: true,
+  },
+}
+
+export const WithDataTestId: Story = {
+  args: {
+    ...Default.args,
+    dataTestId: "widget-test-id",
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await expect(canvas.getByTestId("widget-test-id")).toBeInTheDocument()
   },
 }

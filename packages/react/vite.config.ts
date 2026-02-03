@@ -8,6 +8,7 @@ import removeTestIdAttribute from "rollup-plugin-jsx-remove-attributes"
 import { defineConfig, Plugin } from "vite"
 import dts from "vite-plugin-dts"
 import { libInjectCss } from "vite-plugin-lib-inject-css"
+
 import { buildSyncPlugin } from "./vite/build-sync.plugin"
 
 dotenv.config({
@@ -81,29 +82,9 @@ const alias = {
   "~": path.resolve(__dirname, "./"),
 }
 
-// Check if we're building for Storybook to preserve data-testid attributes
-const isStorybookBuild = process.env.STORYBOOK_BUILD === "true"
-
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [
-    react(),
-    libInjectCss(),
-    // Only remove test IDs in production builds that are NOT for Storybook
-    ...(isStorybookBuild
-      ? []
-      : [
-          removeTestIdAttribute({
-            include: [/\.[tj]sx$/],
-            exclude: ["**/node_modules/**"],
-            attributes: ["data-testid"],
-            environments: ["production"],
-            debug: false,
-            usage: "vite",
-          }),
-        ]),
-    ...extraPlugins,
-  ],
+  plugins: [react(), libInjectCss(), ...extraPlugins],
   resolve: {
     alias: {
       ...alias,

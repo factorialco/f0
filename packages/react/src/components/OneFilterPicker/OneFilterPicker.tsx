@@ -1,6 +1,8 @@
+import type { ReactElement } from "react"
 import { useContext, useEffect, useMemo, useRef, useState } from "react"
 
 import { useEventEmitter } from "@/experimental/OneDataCollection/useEventEmitter"
+import { withDataTestId, type WithDataTestIdProps } from "@/lib/data-testid"
 import { cn } from "@/lib/utils"
 
 import type { FiltersDefinition, FiltersMode, FiltersState } from "./types"
@@ -269,7 +271,7 @@ FiltersChipsList.displayName = "OneFilterPicker.ChipsList"
 /**
  * OneFiltersPicker component to use as a single component
  */
-const OneFilterPicker = <Definition extends FiltersDefinition>(
+const _OneFilterPicker = <Definition extends FiltersDefinition>(
   props: OneFilterPickerRootProps<Definition>
 ) => {
   return (
@@ -296,7 +298,19 @@ const OneFilterPicker = <Definition extends FiltersDefinition>(
     </FiltersRoot>
   )
 }
-OneFilterPicker.displayName = "OneFilterPicker"
+_OneFilterPicker.displayName = "OneFilterPicker"
+
+/**
+ * Generic component type so consumers can use <OneFilterPicker<Definition> />.
+ * Preserves dataTestId and OneFilterPickerRootProps<Definition>.
+ */
+type OneFilterPickerGeneric = <Definition extends FiltersDefinition>(
+  props: OneFilterPickerRootProps<Definition> & WithDataTestIdProps
+) => ReactElement | null
+
+const OneFilterPicker = withDataTestId(
+  _OneFilterPicker
+) as unknown as OneFilterPickerGeneric
 
 /**
  * Export the components as named exports to allow to customize the layout

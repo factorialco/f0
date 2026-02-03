@@ -22,7 +22,7 @@ export type FormFieldProps<
   description?: string
 }
 
-export const FormField = <
+const _FormField = <
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
 >({
@@ -49,3 +49,8 @@ export const FormField = <
     />
   )
 }
+
+/**
+ * @deprecated DONT USE THIS COMPONENT
+ */
+export const FormField = _FormField

@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
+import { expect, within } from "storybook/test"
+
 import { EnhancementOption, FILE_TYPES, resultType, RichTextEditor } from "."
 
 const meta = {
@@ -256,4 +258,17 @@ type SkeletonStory = StoryObj<typeof RichTextEditor.Skeleton>
 export const Skeleton: SkeletonStory = {
   tags: ["experimental"],
   render: () => <RichTextEditor.Skeleton />,
+}
+
+export const WithDataTestId: Story = {
+  args: {
+    ...Default.args,
+    dataTestId: "rich-text-editor-test-id",
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await expect(
+      canvas.getByTestId("rich-text-editor-test-id")
+    ).toBeInTheDocument()
+  },
 }
