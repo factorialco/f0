@@ -151,8 +151,14 @@ export const withDataTestId = <T extends React.ComponentType<any>>(
     return MemoizedComponent as unknown as ReturnedComponentType
   }
 
-  // For regular components (function or class)
-  // We wrap them in forwardRef to ensure we pass refs correctly if the underlying component handles them
+  // For regular components (function or class). Plain function components can be
+  // invoked to check for null return; we only wrap when they return content so
+  // behavior matches forwardRef (no wrapper div when inner component returns null).
+  const isFunctionComponent =
+    typeof component === "function" &&
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    !(component as any).prototype?.isReactComponent
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const WrappedComponent = forwardRef((props: any, ref: any) => {
     const renderDataTestIdAttribute = useRenderDataTestIdAttribute()
@@ -166,6 +172,19 @@ export const withDataTestId = <T extends React.ComponentType<any>>(
       const { "data-testid": _d, ...r } = rest
       return r
     })()
+
+    if (isFunctionComponent) {
+      const content = Component(cleanRest)
+      if (content == null) {
+        return content
+      }
+      return (
+        <div data-testid={dataTestId} style={{ display: "contents" }}>
+          {content}
+        </div>
+      )
+    }
+
     const content = <Component {...cleanRest} ref={ref} />
     return (
       <div data-testid={dataTestId} style={{ display: "contents" }}>

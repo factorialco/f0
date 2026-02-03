@@ -183,4 +183,24 @@ describe("withDataTestId", () => {
     expect(screen.queryByTestId("should-not-appear")).not.toBeInTheDocument()
     expect(screen.getByText("Original")).toBeInTheDocument()
   })
+
+  it("should not render wrapper div when forwardRef component returns null", () => {
+    const TestComponent = forwardRef<HTMLDivElement, { show?: boolean }>(
+      (_props, _ref) => null
+    )
+    const WrappedComponent = withDataTestId(TestComponent)
+
+    renderWithProviders(<WrappedComponent dataTestId="should-not-appear" />)
+
+    expect(screen.queryByTestId("should-not-appear")).not.toBeInTheDocument()
+  })
+
+  it("should not render wrapper div when regular function component returns null", () => {
+    const TestComponent = (_props: { show?: boolean }) => null
+    const WrappedComponent = withDataTestId(TestComponent)
+
+    renderWithProviders(<WrappedComponent dataTestId="should-not-appear" />)
+
+    expect(screen.queryByTestId("should-not-appear")).not.toBeInTheDocument()
+  })
 })
