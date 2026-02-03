@@ -1,7 +1,7 @@
 import { memo } from "react";
 import { Text, View } from "react-native";
 import { Button } from "../../Button";
-import { AppIcons } from "../../../icons";
+import { AppIcons } from "../../..";
 
 type ActionType = "notifications";
 
@@ -35,7 +35,7 @@ const NotificationsAction = ({ label, onPress, showBadge }: ActionT) => {
 export const PageHeader = memo(({ title, actions }: Props) => {
   return (
     <View className="flex-row items-center justify-between px-5 py-3">
-      <Text className="text-3xl font-semibold text-f1-foreground">{title}</Text>
+      <Text className="text-f1-foreground text-3xl font-semibold">{title}</Text>
       <View className="flex-row gap-2">
         {actions?.map((action) => {
           switch (action.type) {

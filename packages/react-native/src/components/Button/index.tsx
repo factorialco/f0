@@ -18,7 +18,7 @@ export const sizes = ["sm", "md", "lg"] as const;
 export type ButtonSize = (typeof sizes)[number];
 
 const buttonVariants = tv({
-  base: "flex-row items-center justify-center rounded border-0",
+  base: "flex-row items-center justify-center rounded border-none grow-0",
   variants: {
     variant: {
       default: "bg-f1-background-accent-bold",
@@ -113,7 +113,7 @@ export interface ButtonProps extends VariantProps<typeof buttonVariants> {
   onPress?: () => void | Promise<unknown>;
   disabled?: boolean;
   loading?: boolean;
-  icon?: IconType | null;
+  icon?: IconType;
   emoji?: string;
   hideLabel?: boolean;
   className?: string;
@@ -164,7 +164,7 @@ export const Button = forwardRef<View, ButtonProps>(function Button(
   const shouldShowPressed = isPressed && !isDisabled;
 
   return (
-    <View className={fullWidth ? "flex-1" : "self-start"} style={{ position: "relative" }}>
+    <View className={`flex ${fullWidth ? "flex-1" : "item-start"}`}>
       <Pressable
         ref={ref}
         disabled={isDisabled}
@@ -196,8 +196,8 @@ export const Button = forwardRef<View, ButtonProps>(function Button(
             className={cn(
               hideLabel && round ? undefined : "-ml-0.5",
               hideLabel && round
-                ? getIconOnlyColor(variant || "default", shouldShowPressed)
-                : getIconColor(variant || "default", shouldShowPressed),
+                ? getIconOnlyColor(variant, shouldShowPressed)
+                : getIconColor(variant, shouldShowPressed),
             )}
           />
         )}
@@ -205,7 +205,7 @@ export const Button = forwardRef<View, ButtonProps>(function Button(
           <Text
             className={cn(
               "text-base font-medium",
-              getTextColorClass(variant || "default", shouldShowPressed),
+              getTextColorClass(variant, shouldShowPressed),
             )}
           >
             {emoji}
@@ -213,10 +213,9 @@ export const Button = forwardRef<View, ButtonProps>(function Button(
         )}
         {!hideLabel && (
           <Text
-            numberOfLines={1}
             className={cn(
               "text-base font-medium",
-              getTextColorClass(variant || "default", shouldShowPressed),
+              getTextColorClass(variant, shouldShowPressed),
             )}
           >
             {label}

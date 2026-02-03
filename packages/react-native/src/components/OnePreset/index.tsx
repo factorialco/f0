@@ -1,33 +1,6 @@
 import { Text, Pressable, View } from "react-native";
 import { Counter } from "../Counter";
 import { cn } from "../../lib/utils";
-import { tv } from "tailwind-variants";
-
-const presetContainerVariants = tv({
-  base: "flex grow-0 flex-row items-center gap-2 rounded border border-f1-border px-2.5 py-1.5 font-medium",
-  variants: {
-    selected: {
-      true: "border-f1-border-selected bg-f1-background-selected-secondary",
-      false: "",
-    },
-  },
-  defaultVariants: {
-    selected: false,
-  },
-});
-
-const presetTextVariants = tv({
-  base: "whitespace-nowrap",
-  variants: {
-    selected: {
-      true: "text-f1-foreground-selected",
-      false: "text-f1-foreground",
-    },
-  },
-  defaultVariants: {
-    selected: false,
-  },
-});
 
 interface PresetProps {
   label: string;
@@ -47,11 +20,19 @@ export const OnePreset = ({
       <Pressable
         onPress={onClick}
         className={cn(
-          presetContainerVariants({ selected: !!selected }),
+          "flex grow-0 flex-row items-center gap-2 rounded border px-2.5 py-1.5 font-medium",
           number !== undefined && number !== null && "pr-1.5",
+          selected
+            ? "border-f1-border-selected bg-f1-background-selected-secondary text-f1-foreground-selected"
+            : "border-f1-border text-f1-foreground",
         )}
       >
-        <Text className={presetTextVariants({ selected: !!selected })}>
+        <Text
+          className={cn(
+            "whitespace-nowrap",
+            selected ? "text-f1-foreground-selected" : "text-f1-foreground",
+          )}
+        >
           {label}
         </Text>
         {number !== undefined && number !== null && (

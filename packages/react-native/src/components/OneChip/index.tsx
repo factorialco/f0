@@ -2,9 +2,7 @@ import { tv, type VariantProps } from "tailwind-variants";
 import { cn } from "../../lib/utils";
 import { Icon, type IconType } from "../Icon";
 import { View, Text, Pressable } from "react-native";
-import { AppIcons } from "../../icons";
-
-const { CrossedCircle } = AppIcons;
+import { CrossedCircle } from "../../icons/app";
 
 export const chipContainerVariants = tv({
   base: "flex items-center gap-1 rounded-full border border-solid border-f1-border px-2 py-0.5 grow-0",
@@ -73,7 +71,7 @@ export const OneChip = ({
                 e.stopPropagation();
                 onClose();
               }}
-              className="-m-1 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full [&_svg]:text-f1-icon-secondary"
+              className="[&_svg]:text-f1-icon-secondary -m-1 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full"
               tabIndex={0}
               aria-label="Close"
             >
