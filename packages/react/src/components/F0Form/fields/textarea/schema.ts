@@ -1,6 +1,6 @@
-import { z, ZodTypeAny } from "zod"
+import { ZodTypeAny } from "zod"
 
-import { unwrapSchema } from "../schema"
+import { isZodType, unwrapZodSchema } from "../../f0Schema"
 
 /**
  * Constraints extracted from a string schema (for textarea)
@@ -22,9 +22,9 @@ export interface TextareaSchemaConstraints {
 export function extractTextareaConstraints(
   schema: ZodTypeAny
 ): TextareaSchemaConstraints {
-  const innerSchema = unwrapSchema(schema)
+  const innerSchema = unwrapZodSchema(schema)
 
-  if (!(innerSchema instanceof z.ZodString)) {
+  if (!isZodType(innerSchema, "ZodString")) {
     return {}
   }
 

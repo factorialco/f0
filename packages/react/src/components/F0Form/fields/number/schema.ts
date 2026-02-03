@@ -1,6 +1,6 @@
-import { z, ZodTypeAny } from "zod"
+import { ZodTypeAny } from "zod"
 
-import { unwrapSchema } from "../schema"
+import { isZodType, unwrapZodSchema } from "../../f0Schema"
 
 /**
  * Constraints extracted from a number schema
@@ -23,9 +23,9 @@ export interface NumberSchemaConstraints {
 export function extractNumberConstraints(
   schema: ZodTypeAny
 ): NumberSchemaConstraints {
-  const innerSchema = unwrapSchema(schema)
+  const innerSchema = unwrapZodSchema(schema)
 
-  if (!(innerSchema instanceof z.ZodNumber)) {
+  if (!isZodType(innerSchema, "ZodNumber")) {
     return {}
   }
 

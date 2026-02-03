@@ -1,6 +1,6 @@
-import { z, ZodTypeAny } from "zod"
+import { ZodTypeAny } from "zod"
 
-import { unwrapSchema } from "../schema"
+import { isZodType, unwrapZodSchema } from "../../f0Schema"
 
 /**
  * Constraints extracted from a date schema
@@ -22,9 +22,9 @@ export interface DateSchemaConstraints {
 export function extractDateConstraints(
   schema: ZodTypeAny
 ): DateSchemaConstraints {
-  const innerSchema = unwrapSchema(schema)
+  const innerSchema = unwrapZodSchema(schema)
 
-  if (!(innerSchema instanceof z.ZodDate)) {
+  if (!isZodType(innerSchema, "ZodDate")) {
     return {}
   }
 

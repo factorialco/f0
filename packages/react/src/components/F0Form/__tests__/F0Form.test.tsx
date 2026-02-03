@@ -4,14 +4,19 @@ import { describe, expect, it } from "vitest"
 import { z } from "zod"
 
 import { F0Form } from "../F0Form"
-import { f0, getF0Config, hasF0Config, inferFieldType } from "../f0Schema"
+import {
+  f0FormField,
+  getF0Config,
+  hasF0Config,
+  inferFieldType,
+} from "../f0Schema"
 import type { F0SectionConfig } from "../types"
 import { getSchemaDefinition } from "../useSchemaDefinition"
 
 describe("F0Form", () => {
   it("renders a basic form using schema prop", () => {
     const formSchema = z.object({
-      name: f0(z.string(), {
+      name: f0FormField(z.string(), {
         label: "Name",
       }),
     })
@@ -31,7 +36,7 @@ describe("F0Form", () => {
 
   it("renders form with custom submit label", () => {
     const formSchema = z.object({
-      email: f0(z.string().email(), {
+      email: f0FormField(z.string().email(), {
         label: "Email",
         inputType: "email",
       }),
@@ -52,7 +57,7 @@ describe("F0Form", () => {
 
   it("can hide the submit button", () => {
     const formSchema = z.object({
-      name: f0(z.string(), {
+      name: f0FormField(z.string(), {
         label: "Name",
       }),
     })
@@ -74,7 +79,7 @@ describe("F0Form", () => {
 
   it("renders form with sections", () => {
     const formSchema = z.object({
-      name: f0(z.string(), {
+      name: f0FormField(z.string(), {
         label: "Name",
         section: "personal",
       }),
@@ -104,11 +109,11 @@ describe("F0Form", () => {
 
   it("renders form with row grouping", () => {
     const formSchema = z.object({
-      firstName: f0(z.string(), {
+      firstName: f0FormField(z.string(), {
         label: "First Name",
         row: "name-row",
       }),
-      lastName: f0(z.string(), {
+      lastName: f0FormField(z.string(), {
         label: "Last Name",
         row: "name-row",
       }),
@@ -128,9 +133,9 @@ describe("F0Form", () => {
   })
 })
 
-describe("f0 function", () => {
+describe("f0FormField function", () => {
   it("attaches config to schema", () => {
-    const schema = f0(z.string(), {
+    const schema = f0FormField(z.string(), {
       label: "Test",
     })
 
@@ -140,7 +145,7 @@ describe("f0 function", () => {
   })
 
   it("preserves original schema validation", () => {
-    const schema = f0(z.string().min(2), {
+    const schema = f0FormField(z.string().min(2), {
       label: "Test",
     })
 
@@ -152,7 +157,7 @@ describe("f0 function", () => {
   })
 
   it("supports all config options", () => {
-    const schema = f0(z.string(), {
+    const schema = f0FormField(z.string(), {
       label: "Test",
       section: "section1",
       placeholder: "Enter text",
@@ -172,12 +177,12 @@ describe("f0 function", () => {
 })
 
 describe("hasF0Config", () => {
-  it("returns true for schema with f0 config", () => {
-    const schema = f0(z.string(), { label: "Test" })
+  it("returns true for schema with f0FormField config", () => {
+    const schema = f0FormField(z.string(), { label: "Test" })
     expect(hasF0Config(schema)).toBe(true)
   })
 
-  it("returns false for schema without f0 config", () => {
+  it("returns false for schema without f0FormField config", () => {
     const schema = z.string()
     expect(hasF0Config(schema)).toBe(false)
   })
@@ -234,8 +239,8 @@ describe("inferFieldType", () => {
 describe("getSchemaDefinition", () => {
   it("converts schema to definition array", () => {
     const formSchema = z.object({
-      name: f0(z.string(), { label: "Name" }),
-      email: f0(z.string().email(), { label: "Email" }),
+      name: f0FormField(z.string(), { label: "Name" }),
+      email: f0FormField(z.string().email(), { label: "Email" }),
     })
 
     const definition = getSchemaDefinition(formSchema)
@@ -247,19 +252,19 @@ describe("getSchemaDefinition", () => {
 
   it("groups fields by section", () => {
     const formSchema = z.object({
-      name: f0(z.string(), {
+      name: f0FormField(z.string(), {
         label: "Name",
         section: "personal",
       }),
-      email: f0(z.string(), {
+      email: f0FormField(z.string(), {
         label: "Email",
         section: "contact",
       }),
     })
 
     const sections: Record<string, F0SectionConfig> = {
-      personal: { title: "Personal", order: 1 },
-      contact: { title: "Contact", order: 2 },
+      personal: { title: "Personal" },
+      contact: { title: "Contact" },
     }
 
     const definition = getSchemaDefinition(formSchema, sections)
@@ -271,9 +276,9 @@ describe("getSchemaDefinition", () => {
 
   it("orders fields by declaration order in schema", () => {
     const formSchema = z.object({
-      first: f0(z.string(), { label: "First" }),
-      second: f0(z.string(), { label: "Second" }),
-      third: f0(z.string(), { label: "Third" }),
+      first: f0FormField(z.string(), { label: "First" }),
+      second: f0FormField(z.string(), { label: "Second" }),
+      third: f0FormField(z.string(), { label: "Third" }),
     })
 
     const definition = getSchemaDefinition(formSchema)
@@ -291,11 +296,11 @@ describe("getSchemaDefinition", () => {
 
   it("groups fields with same row into row definition", () => {
     const formSchema = z.object({
-      firstName: f0(z.string(), {
+      firstName: f0FormField(z.string(), {
         label: "First",
         row: "name-row",
       }),
-      lastName: f0(z.string(), {
+      lastName: f0FormField(z.string(), {
         label: "Last",
         row: "name-row",
       }),

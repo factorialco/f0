@@ -285,13 +285,13 @@ function parseSchemaFields(schema: z.ZodObject<ZodRawShape>): ParsedField[] {
  * ```tsx
  * const formSchema = z.object({
  *   // Fields are ordered by declaration - no need to specify position
- *   firstName: f0(z.string().min(1), { label: "First Name" }),
- *   lastName: f0(z.string().min(1), { label: "Last Name" }),
+ *   firstName: f0FormField(z.string().min(1), { label: "First Name" }),
+ *   lastName: f0FormField(z.string().min(1), { label: "Last Name" }),
  *   // Constraints derived from Zod, clearable because optional
- *   birthDate: f0(z.date().min(new Date("1900-01-01")).optional(), {
+ *   birthDate: f0FormField(z.date().min(new Date("1900-01-01")).optional(), {
  *     label: "Birth Date"
  *   }),
- *   age: f0(z.number().min(0).max(120), { label: "Age" })
+ *   age: f0FormField(z.number().min(0).max(120), { label: "Age" })
  * })
  * ```
  */
@@ -332,12 +332,11 @@ export function useSchemaDefinition(
     // Add root-level fields first (grouped into rows where applicable)
     result.push(...groupFieldsIntoRows(rootFields))
 
-    // Get section IDs sorted by order (if provided)
-    const sectionIds = Object.keys(sectionFields).sort((a, b) => {
-      const orderA = sections?.[a]?.order ?? 0
-      const orderB = sections?.[b]?.order ?? 0
-      return orderA - orderB
-    })
+    // Get section IDs in declaration order from sections object
+    // If sections config is provided, use its key order; otherwise use field discovery order
+    const sectionIds = sections
+      ? Object.keys(sections).filter((id) => sectionFields[id])
+      : Object.keys(sectionFields)
 
     // Add sections
     for (const sectionId of sectionIds) {
@@ -406,12 +405,11 @@ export function getSchemaDefinition(
   // Add root-level fields first
   result.push(...groupFieldsIntoRows(rootFields))
 
-  // Get section IDs sorted by order
-  const sectionIds = Object.keys(sectionFields).sort((a, b) => {
-    const orderA = sections?.[a]?.order ?? 0
-    const orderB = sections?.[b]?.order ?? 0
-    return orderA - orderB
-  })
+  // Get section IDs in declaration order from sections object
+  // If sections config is provided, use its key order; otherwise use field discovery order
+  const sectionIds = sections
+    ? Object.keys(sections).filter((id) => sectionFields[id])
+    : Object.keys(sectionFields)
 
   // Add sections
   for (const sectionId of sectionIds) {

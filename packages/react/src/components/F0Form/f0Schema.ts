@@ -13,6 +13,30 @@ import type { F0RichTextConfig } from "./fields/richtext/types"
 import type { F0CustomConfig } from "./fields/custom/types"
 
 /**
+ * Zod type names for type checking without instanceof
+ * Using _def.typeName is more reliable across module boundaries than instanceof
+ */
+type ZodTypeName =
+  | "ZodString"
+  | "ZodNumber"
+  | "ZodBoolean"
+  | "ZodDate"
+  | "ZodEnum"
+  | "ZodArray"
+  | "ZodObject"
+  | "ZodOptional"
+  | "ZodNullable"
+  | "ZodDefault"
+
+/**
+ * Check if a schema is of a specific Zod type using _def.typeName
+ * This is more reliable than instanceof across module boundaries
+ */
+export function isZodType(schema: ZodTypeAny, typeName: ZodTypeName): boolean {
+  return schema._def?.typeName === typeName
+}
+
+/**
  * Field types for rendering
  */
 export type F0FieldType =
@@ -195,12 +219,12 @@ export interface F0ZodType<T extends ZodTypeAny = ZodTypeAny> {
  */
 const f0ConfigMap = new WeakMap<ZodTypeAny, F0FieldConfig>()
 
-// Function overloads for type-safe f0 function
+// Function overloads for type-safe f0FormField function
 
 /**
  * String field - text input or textarea
  */
-export function f0<T extends z.ZodString>(
+export function f0FormField<T extends z.ZodString>(
   schema: T,
   config: F0StringConfig
 ): T & F0ZodType<T>
@@ -208,7 +232,7 @@ export function f0<T extends z.ZodString>(
 /**
  * Number field
  */
-export function f0<T extends z.ZodNumber>(
+export function f0FormField<T extends z.ZodNumber>(
   schema: T,
   config: F0NumberFieldConfig
 ): T & F0ZodType<T>
@@ -216,7 +240,7 @@ export function f0<T extends z.ZodNumber>(
 /**
  * Boolean field - checkbox or switch
  */
-export function f0<T extends z.ZodBoolean>(
+export function f0FormField<T extends z.ZodBoolean>(
   schema: T,
   config: F0BooleanConfig
 ): T & F0ZodType<T>
@@ -224,7 +248,7 @@ export function f0<T extends z.ZodBoolean>(
 /**
  * Date field
  */
-export function f0<T extends z.ZodDate>(
+export function f0FormField<T extends z.ZodDate>(
   schema: T,
   config: F0DateFieldConfig
 ): T & F0ZodType<T>
@@ -232,7 +256,7 @@ export function f0<T extends z.ZodDate>(
 /**
  * Enum field - select
  */
-export function f0<T extends z.ZodEnum<[string, ...string[]]>>(
+export function f0FormField<T extends z.ZodEnum<[string, ...string[]]>>(
   schema: T,
   config: F0StringSelectConfig
 ): T & F0ZodType<T>
@@ -240,7 +264,7 @@ export function f0<T extends z.ZodEnum<[string, ...string[]]>>(
 /**
  * Array field - multi-select
  */
-export function f0<T extends z.ZodArray<ZodTypeAny>>(
+export function f0FormField<T extends z.ZodArray<ZodTypeAny>>(
   schema: T,
   config: F0ArrayConfig
 ): T & F0ZodType<T>
@@ -248,7 +272,7 @@ export function f0<T extends z.ZodArray<ZodTypeAny>>(
 /**
  * Object field - richtext or custom
  */
-export function f0<T extends z.ZodObject<z.ZodRawShape>>(
+export function f0FormField<T extends z.ZodObject<z.ZodRawShape>>(
   schema: T,
   config: F0ObjectConfig
 ): T & F0ZodType<T>
@@ -256,7 +280,7 @@ export function f0<T extends z.ZodObject<z.ZodRawShape>>(
 /**
  * Optional wrapper - inherits inner type's config
  */
-export function f0<T extends z.ZodOptional<ZodTypeAny>>(
+export function f0FormField<T extends z.ZodOptional<ZodTypeAny>>(
   schema: T,
   config: F0FieldConfig
 ): T & F0ZodType<T>
@@ -264,7 +288,7 @@ export function f0<T extends z.ZodOptional<ZodTypeAny>>(
 /**
  * Nullable wrapper - inherits inner type's config
  */
-export function f0<T extends z.ZodNullable<ZodTypeAny>>(
+export function f0FormField<T extends z.ZodNullable<ZodTypeAny>>(
   schema: T,
   config: F0FieldConfig
 ): T & F0ZodType<T>
@@ -272,7 +296,7 @@ export function f0<T extends z.ZodNullable<ZodTypeAny>>(
 /**
  * Default wrapper - inherits inner type's config
  */
-export function f0<T extends z.ZodDefault<ZodTypeAny>>(
+export function f0FormField<T extends z.ZodDefault<ZodTypeAny>>(
   schema: T,
   config: F0FieldConfig
 ): T & F0ZodType<T>
@@ -280,7 +304,7 @@ export function f0<T extends z.ZodDefault<ZodTypeAny>>(
 /**
  * Fallback for any other schema type
  */
-export function f0<T extends ZodTypeAny>(
+export function f0FormField<T extends ZodTypeAny>(
   schema: T,
   config: F0FieldConfig
 ): T & F0ZodType<T>
@@ -288,7 +312,7 @@ export function f0<T extends ZodTypeAny>(
 /**
  * Implementation
  */
-export function f0<T extends ZodTypeAny>(
+export function f0FormField<T extends ZodTypeAny>(
   schema: T,
   config: F0FieldConfig
 ): T & F0ZodType<T> {
@@ -307,7 +331,7 @@ export function f0<T extends ZodTypeAny>(
  * Get F0 config from a schema
  */
 export function getF0Config(schema: ZodTypeAny): F0FieldConfig | undefined {
-  // Try direct property first (schema may have been extended with f0())
+  // Try direct property first (schema may have been extended with f0FormField())
   const schemaWithConfig = schema as unknown as { _f0Config?: F0FieldConfig }
   if (schemaWithConfig._f0Config) {
     return schemaWithConfig._f0Config
@@ -322,6 +346,22 @@ export function getF0Config(schema: ZodTypeAny): F0FieldConfig | undefined {
  */
 export function hasF0Config(schema: ZodTypeAny): boolean {
   return getF0Config(schema) !== undefined
+}
+
+/**
+ * Unwrap optional, nullable, default wrappers to get the inner schema
+ * Uses _def.typeName for reliable type checking across module boundaries
+ */
+export function unwrapZodSchema(schema: ZodTypeAny): ZodTypeAny {
+  let innerSchema = schema
+  while (
+    isZodType(innerSchema, "ZodOptional") ||
+    isZodType(innerSchema, "ZodNullable") ||
+    isZodType(innerSchema, "ZodDefault")
+  ) {
+    innerSchema = innerSchema._def.innerType
+  }
+  return innerSchema
 }
 
 /**
@@ -342,17 +382,10 @@ export function inferFieldType(
   }
 
   // Unwrap optional, nullable, default wrappers
-  let innerSchema = schema
-  while (
-    innerSchema instanceof z.ZodOptional ||
-    innerSchema instanceof z.ZodNullable ||
-    innerSchema instanceof z.ZodDefault
-  ) {
-    innerSchema = innerSchema._def.innerType
-  }
+  const innerSchema = unwrapZodSchema(schema)
 
-  // Infer from Zod type
-  if (innerSchema instanceof z.ZodString) {
+  // Infer from Zod type using _def.typeName (reliable across module boundaries)
+  if (isZodType(innerSchema, "ZodString")) {
     // Check if textarea based on rows config
     if ("rows" in config && config.rows) {
       return "textarea"
@@ -360,24 +393,24 @@ export function inferFieldType(
     return "text"
   }
 
-  if (innerSchema instanceof z.ZodNumber) {
+  if (isZodType(innerSchema, "ZodNumber")) {
     return "number"
   }
 
-  if (innerSchema instanceof z.ZodBoolean) {
+  if (isZodType(innerSchema, "ZodBoolean")) {
     // Default to switch for boolean, can be overridden with fieldType: "checkbox"
     return "switch"
   }
 
-  if (innerSchema instanceof z.ZodDate) {
+  if (isZodType(innerSchema, "ZodDate")) {
     return "date"
   }
 
-  if (innerSchema instanceof z.ZodEnum) {
+  if (isZodType(innerSchema, "ZodEnum")) {
     return "select"
   }
 
-  if (innerSchema instanceof z.ZodArray) {
+  if (isZodType(innerSchema, "ZodArray")) {
     // Arrays with options are multi-select
     if ("options" in config && config.options) {
       return "select"
@@ -385,7 +418,7 @@ export function inferFieldType(
   }
 
   if (
-    innerSchema instanceof z.ZodObject &&
+    isZodType(innerSchema, "ZodObject") &&
     "render" in config &&
     config.render
   ) {

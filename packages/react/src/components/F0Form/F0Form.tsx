@@ -79,20 +79,20 @@ function groupContiguousSwitches(
  * @example
  * ```tsx
  * import { z } from "zod"
- * import { f0, F0Form } from "@factorialco/factorial-one/experimental"
+ * import { f0FormField, F0Form } from "@factorialco/factorial-one/experimental"
  *
  * const formSchema = z.object({
- *   firstName: f0(z.string().min(1), {
+ *   firstName: f0FormField(z.string().min(1), {
  *     label: "First Name",
  *     section: "personal",
  *     placeholder: "Enter first name"
  *   }),
- *   lastName: f0(z.string().min(1), {
+ *   lastName: f0FormField(z.string().min(1), {
  *     label: "Last Name",
  *     section: "personal",
  *     row: "name-row" // Group with firstName horizontally
  *   }),
- *   email: f0(z.string().email(), {
+ *   email: f0FormField(z.string().email(), {
  *     label: "Email",
  *     section: "contact",
  *     inputType: "email"

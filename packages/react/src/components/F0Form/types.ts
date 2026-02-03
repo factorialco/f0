@@ -4,7 +4,12 @@ import type { F0Field, RenderIfCondition } from "./fields/types"
 
 // Re-export F0 schema types
 export type { F0FieldConfig, F0FieldType, F0ZodType } from "./f0Schema"
-export { f0, getF0Config, hasF0Config, inferFieldType } from "./f0Schema"
+export {
+  f0FormField,
+  getF0Config,
+  hasF0Config,
+  inferFieldType,
+} from "./f0Schema"
 
 /**
  * Conditional rendering for sections - can be a condition object or a function
@@ -14,7 +19,8 @@ export type SectionRenderIf =
   | ((values: Record<string, unknown>) => boolean)
 
 /**
- * Configuration for a form section
+ * Configuration for a form section.
+ * Section order is determined by declaration order in the sections object.
  */
 export interface F0SectionConfig {
   /** Section title */
@@ -23,8 +29,6 @@ export interface F0SectionConfig {
   description?: string
   /** Conditional rendering for the entire section */
   renderIf?: SectionRenderIf
-  /** Order in which sections appear (lower = first) */
-  order?: number
 }
 
 // ============================================================================
@@ -142,8 +146,8 @@ interface F0FormActionBarProps<
  * @example
  * ```tsx
  * const schema = z.object({
- *   name: f0(z.string(), { label: "Name" }),
- *   age: f0(z.number(), { label: "Age" }),
+ *   name: f0FormField(z.string(), { label: "Name" }),
+ *   age: f0FormField(z.number(), { label: "Age" }),
  * })
  *
  * // Default submit button

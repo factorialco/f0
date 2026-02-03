@@ -1,19 +1,12 @@
-import { z, ZodTypeAny } from "zod"
+import { ZodTypeAny } from "zod"
+
+import { isZodType, unwrapZodSchema } from "../f0Schema"
 
 /**
  * Unwrap optional, nullable, default wrappers to get the inner schema
+ * @deprecated Use unwrapZodSchema from f0Schema instead
  */
-export function unwrapSchema(schema: ZodTypeAny): ZodTypeAny {
-  let innerSchema = schema
-  while (
-    innerSchema instanceof z.ZodOptional ||
-    innerSchema instanceof z.ZodNullable ||
-    innerSchema instanceof z.ZodDefault
-  ) {
-    innerSchema = innerSchema._def.innerType
-  }
-  return innerSchema
-}
+export const unwrapSchema = unwrapZodSchema
 
 /**
  * Check if schema is optional or nullable (for clearable fields)
@@ -27,9 +20,9 @@ export function unwrapSchema(schema: ZodTypeAny): ZodTypeAny {
  */
 export function isOptionalOrNullable(schema: ZodTypeAny): boolean {
   return (
-    schema instanceof z.ZodOptional ||
-    schema instanceof z.ZodNullable ||
-    (schema instanceof z.ZodDefault &&
+    isZodType(schema, "ZodOptional") ||
+    isZodType(schema, "ZodNullable") ||
+    (isZodType(schema, "ZodDefault") &&
       isOptionalOrNullable(schema._def.innerType))
   )
 }

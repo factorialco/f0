@@ -12,7 +12,14 @@ export type {
 } from "./types"
 
 // Export F0 schema extension and utilities
-export { f0, getF0Config, hasF0Config, inferFieldType } from "./f0Schema"
+export {
+  f0FormField,
+  getF0Config,
+  hasF0Config,
+  inferFieldType,
+  isZodType,
+  unwrapZodSchema,
+} from "./f0Schema"
 export type {
   F0BaseConfig,
   F0FieldConfig,
