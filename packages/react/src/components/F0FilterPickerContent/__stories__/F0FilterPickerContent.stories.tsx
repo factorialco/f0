@@ -112,7 +112,7 @@ export const WithDataTestId: Story = {
   render: () => <WithDataTestIdComponent />,
   play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
     const canvas = within(canvasElement)
-    const root = canvas.getByText("Department").closest("[data-testid]")
+    const root = canvas.getByText("Department").parentElement
     await expect(root).toHaveAttribute(
       "data-testid",
       "my-test-filter-picker-content"

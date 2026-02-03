@@ -182,8 +182,8 @@ export const WithDataTestId: Story = {
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    const card = canvas.getByText("Card with Test ID").closest("[data-testid]")
-    await expect(card).toHaveAttribute("data-testid", "my-test-card")
+    const root = canvas.getByText("Card with Test ID").parentElement
+    await expect(root).toHaveAttribute("data-testid", "my-test-card")
   },
 }
 

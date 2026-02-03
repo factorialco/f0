@@ -122,9 +122,7 @@ export const WithDataTestId: Story = {
   ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    const alert = canvas
-      .getByText("Alert with Test ID")
-      .closest("[data-testid]")
-    await expect(alert).toHaveAttribute("data-testid", "my-test-alert")
+    const root = canvas.getByText("Alert with Test ID").parentElement
+    await expect(root).toHaveAttribute("data-testid", "my-test-alert")
   },
 }

@@ -72,9 +72,7 @@ export const WithDataTestId: Story = {
   render: (args) => <F0Avatar {...args} />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    const root = canvas
-      .getByRole("img", { name: "John Doe" })
-      .closest("[data-testid]")
+    const root = canvas.getByRole("img", { name: "John Doe" }).parentElement
     await expect(root).toHaveAttribute("data-testid", "my-test-avatar")
   },
 }

@@ -100,9 +100,7 @@ export const WithDataTestId: Story = {
   },
   play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
     const canvas = within(canvasElement)
-    const root = canvas
-      .getByText("BigNumber with Test ID")
-      .closest("[data-testid]")
+    const root = canvas.getByText("BigNumber with Test ID").parentElement
     await expect(root).toHaveAttribute("data-testid", "my-test-bignumber")
   },
 }

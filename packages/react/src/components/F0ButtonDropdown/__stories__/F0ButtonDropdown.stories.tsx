@@ -126,11 +126,8 @@ export const WithDataTestId: Story = {
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    const button = canvas.getByRole("button")
-    await expect(button).toHaveAttribute(
-      "data-testid",
-      "my-test-button-dropdown"
-    )
+    const root = canvas.getByRole("button").parentElement
+    await expect(root).toHaveAttribute("data-testid", "my-test-button-dropdown")
   },
 }
 

@@ -167,9 +167,7 @@ export const WithDataTestId: Story = {
   } as Story["args"] & { dataTestId: string },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    const root = canvas
-      .getByLabelText("DatePicker with Test ID")
-      .closest("[data-testid]")
+    const root = canvas.getByLabelText("DatePicker with Test ID").parentElement
     await expect(root).toHaveAttribute("data-testid", "my-test-date-picker")
   },
 }

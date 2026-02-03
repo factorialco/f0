@@ -159,8 +159,10 @@ export const WithDataTestId: Story = {
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    const dialog = canvas.getByRole("dialog", { name: "Dialog with Test ID" })
-    await expect(dialog).toHaveAttribute("data-testid", "my-test-dialog")
+    const root = canvas.getByRole("dialog", {
+      name: "Dialog with Test ID",
+    }).parentElement
+    await expect(root).toHaveAttribute("data-testid", "my-test-dialog")
   },
 }
 

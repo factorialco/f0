@@ -342,10 +342,8 @@ export const WithDataTestId: Story = {
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    const select = canvas
-      .getByLabelText("Select with Test ID")
-      .closest("[data-testid]")
-    await expect(select).toHaveAttribute("data-testid", "my-test-select")
+    const root = canvas.getByLabelText("Select with Test ID").parentElement
+    await expect(root).toHaveAttribute("data-testid", "my-test-select")
   },
 }
 

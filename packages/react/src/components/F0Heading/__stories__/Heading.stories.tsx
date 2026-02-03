@@ -68,8 +68,8 @@ export const WithDataTestId: Story = {
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    const heading = canvas.getByText("Heading with Test ID")
-    await expect(heading).toHaveAttribute("data-testid", "my-test-heading")
+    const root = canvas.getByText("Heading with Test ID").parentElement
+    await expect(root).toHaveAttribute("data-testid", "my-test-heading")
   },
 }
 
