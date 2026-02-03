@@ -7,6 +7,8 @@ export type {
   F0FormProps,
   F0FormSubmitType,
   F0FormErrorTriggerMode,
+  F0FormSubmitConfig,
+  F0FormDiscardConfig,
   F0SectionConfig,
   F0FormSubmitResult,
   SectionRenderIf,

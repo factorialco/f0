@@ -488,7 +488,7 @@ export const CustomField: Story = {
           alert(`Task created: ${JSON.stringify(data, null, 2)}`)
           return { success: true }
         }}
-        submitLabel="Create Task"
+        submitConfig={{ label: "Create Task", icon: null }}
       />
     )
   },
@@ -657,7 +657,7 @@ export const VisualDesignExample: Story = {
             alert(`Form submitted: ${JSON.stringify(data, null, 2)}`)
             return { success: true }
           }}
-          submitLabel="Create Survey"
+          submitConfig={{ label: "Create Survey", icon: null }}
         />
       </div>
     )
@@ -708,7 +708,7 @@ export const WithActionBar: Story = {
             alert(`Settings saved: ${JSON.stringify(data, null, 2)}`)
             return { success: true }
           }}
-          submitLabel="Save Changes"
+          submitConfig={{ label: "Save Changes", icon: null }}
         />
         <p className="mt-4 text-sm text-f1-foreground-secondary">
           Modify any field to see the action bar appear
@@ -756,8 +756,7 @@ export const WithActionBarAndDiscard: Story = {
           schema={formSchema}
           submitType="action-bar"
           discardableChanges
-          actionBarLabel="You have unsaved changes"
-          discardLabel="Discard Changes"
+          discardConfig={{ label: "Discard Changes" }}
           defaultValues={{
             companyName: "Acme Corp",
             industry: "tech",
@@ -769,7 +768,7 @@ export const WithActionBarAndDiscard: Story = {
             alert(`Company updated: ${JSON.stringify(data, null, 2)}`)
             return { success: true }
           }}
-          submitLabel="Save"
+          submitConfig={{ label: "Save" }}
         />
         <p className="mt-4 text-sm text-f1-foreground-secondary">
           Modify any field to see the action bar with Save and Discard buttons

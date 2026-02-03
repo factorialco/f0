@@ -383,8 +383,12 @@ export const defaultTranslations = {
   },
   forms: {
     actionBar: {
-      unsavedChanges: "Unsaved changes",
+      unsavedChanges: "You have changes pending to be saved",
       discard: "Discard",
+      issues: {
+        one: "{{count}} issue",
+        other: "{{count}} issues",
+      },
     },
     validation: {
       required: "This field is required",

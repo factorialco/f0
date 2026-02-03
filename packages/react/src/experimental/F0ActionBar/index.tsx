@@ -8,6 +8,7 @@ import {
 } from "@/components/F0ButtonDropdown"
 import { IconType } from "@/components/F0Icon"
 import { Dropdown, MobileDropdown } from "@/experimental/Navigation/Dropdown"
+import { cn } from "@/lib/utils"
 
 type ActionType = {
   label: string
@@ -75,12 +76,27 @@ interface F0ActionBarProps {
    * The label of the action bar
    */
   label?: string
+
+  /**
+   * Visual variant of the action bar
+   * - "dark": Dark background with light text (default)
+   * - "light": Light background with dark text
+   * @default "dark"
+   */
+  variant?: "dark" | "light"
+
+  /**
+   * Custom content to render on the left side (e.g., error navigation)
+   */
+  leftContent?: React.ReactNode
 }
 
 export const F0ActionBar = ({
   isOpen,
   secondaryActions = [],
   label,
+  variant = "dark",
+  leftContent,
   ...props
 }: F0ActionBarProps) => {
   const visibleSecondaryActions = secondaryActions.slice(0, 2)
@@ -88,6 +104,8 @@ export const F0ActionBar = ({
     ...action,
     critical: action.critical || false,
   }))
+
+  const isLight = variant === "light"
 
   /**
    * Normalize the primary actions to be a list of groups
@@ -132,6 +150,9 @@ export const F0ActionBar = ({
     [primaryActions]
   )
 
+  // Wrapper class for buttons - only apply dark theme wrapper for dark variant
+  const buttonWrapperClass = isLight ? "" : "dark"
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -140,15 +161,31 @@ export const F0ActionBar = ({
           animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
           exit={{ opacity: 0, y: 32, filter: "blur(6px)" }}
           transition={{ ease: [0.175, 0.885, 0.32, 1.275], duration: 0.3 }}
-          className="fixed bottom-2 left-2 right-2 z-50 flex h-fit w-[calc(100%-16px)] flex-col items-center gap-2 rounded-xl bg-f1-background-inverse p-2 pl-4 text-f1-foreground shadow-lg backdrop-blur-sm dark:bg-f1-background-inverse-secondary sm:bottom-5 sm:mx-auto sm:h-12 sm:w-max sm:flex-row sm:gap-8"
+          className={cn(
+            "fixed bottom-2 left-2 right-2 z-50 flex h-fit w-[calc(100%-16px)] flex-col items-center gap-2 rounded-xl p-2 shadow-lg backdrop-blur-sm sm:bottom-5 sm:mx-auto sm:h-12 sm:w-max sm:flex-row sm:gap-4",
+            isLight
+              ? "border border-solid border-f1-border-secondary bg-f1-background text-f1-foreground"
+              : "bg-f1-background-inverse text-f1-foreground dark:bg-f1-background-inverse-secondary"
+          )}
         >
+          {leftContent}
           {!!label && (
-            <span className="font-medium text-f1-foreground-inverse">
+            <span
+              className={cn(
+                "font-medium ml-2",
+                isLight ? "text-f1-foreground" : "text-f1-foreground-inverse"
+              )}
+            >
               {label}
             </span>
           )}
           <div>
-            <div className="dark flex flex-col items-center gap-2 sm:hidden [&_button]:w-full [&_div]:w-full">
+            <div
+              className={cn(
+                buttonWrapperClass,
+                "flex flex-col items-center gap-2 sm:hidden [&_button]:w-full [&_div]:w-full"
+              )}
+            >
               <Fragment key="mobile-actions">
                 <MobileDropdown items={secondaryActions} />
                 {!singlePrimaryAction ? (
@@ -171,7 +208,12 @@ export const F0ActionBar = ({
                 )}
               </Fragment>
             </div>
-            <div className="dark hidden items-center gap-2 sm:flex">
+            <div
+              className={cn(
+                buttonWrapperClass,
+                "hidden items-center gap-2 sm:flex"
+              )}
+            >
               <Fragment key="desktop-actions">
                 {dropdownActions.length > 0 && (
                   <Dropdown items={dropdownActions} />

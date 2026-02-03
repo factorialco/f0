@@ -1,5 +1,7 @@
 import type { z, ZodRawShape } from "zod"
 
+import type { IconType } from "@/components/F0Icon"
+
 import type { F0Field, RenderIfCondition } from "./fields/types"
 
 // Re-export F0 schema types
@@ -97,6 +99,36 @@ export type F0FormSubmitType = "default" | "action-bar"
 export type F0FormErrorTriggerMode = "on-blur" | "on-change" | "on-submit"
 
 /**
+ * Configuration for the submit button
+ */
+export interface F0FormSubmitConfig {
+  /** Custom label for the submit button */
+  label?: string
+  /**
+   * Custom icon for the submit button
+   * - undefined: uses default Save icon
+   * - null: no icon shown
+   * - IconType: custom icon
+   */
+  icon?: IconType | null
+}
+
+/**
+ * Configuration for the discard button (action bar only)
+ */
+export interface F0FormDiscardConfig {
+  /** Custom label for the discard button */
+  label?: string
+  /**
+   * Custom icon for the discard button
+   * - undefined: uses default Delete icon
+   * - null: no icon shown
+   * - IconType: custom icon
+   */
+  icon?: IconType | null
+}
+
+/**
  * Base props shared by all submit types
  */
 interface F0FormBaseProps<TSchema extends z.ZodObject<ZodRawShape>> {
@@ -112,8 +144,11 @@ interface F0FormBaseProps<TSchema extends z.ZodObject<ZodRawShape>> {
   onSubmit: (
     data: z.infer<TSchema>
   ) => Promise<F0FormSubmitResult> | F0FormSubmitResult
-  /** Label for the submit button */
-  submitLabel?: string
+  /**
+   * Configuration for the submit button (label and icon)
+   * @default { label: "Submit", icon: Save }
+   */
+  submitConfig?: F0FormSubmitConfig
   /** Additional class name for the form */
   className?: string
   /**
@@ -145,8 +180,11 @@ interface F0FormActionBarProps<
   submitType: "action-bar"
   /** Whether to show a Discard button to reset form changes */
   discardableChanges?: boolean
-  /** Label for the discard button (defaults to i18n "forms.actionBar.discard") */
-  discardLabel?: string
+  /**
+   * Configuration for the discard button (label and icon)
+   * @default { label: "Discard", icon: Delete }
+   */
+  discardConfig?: F0FormDiscardConfig
   /** Label shown in the action bar (defaults to i18n "forms.actionBar.unsavedChanges") */
   actionBarLabel?: string
 }

@@ -4,7 +4,9 @@ import { DefaultValues, Path, useForm } from "react-hook-form"
 import { z, ZodRawShape } from "zod"
 
 import { F0Button } from "@/components/F0Button"
+import { F0Icon } from "@/components/F0Icon"
 import { F0ActionBar } from "@/experimental/F0ActionBar"
+import { AlertCircle, ChevronDown, ChevronUp, Delete, Save } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 import { cn } from "@/lib/utils"
 import { Form as FormProvider } from "@/ui/form"
@@ -23,6 +25,7 @@ import type {
   RowDefinition,
   SectionDefinition,
 } from "./types"
+import { useErrorNavigation } from "./useErrorNavigation"
 import { useSchemaDefinition } from "./useSchemaDefinition"
 import { createZodErrorMap } from "./zodErrorMap"
 
@@ -134,10 +137,16 @@ export function F0Form<TSchema extends z.ZodObject<ZodRawShape>>(
     sections,
     defaultValues,
     onSubmit,
-    submitLabel = "Submit",
+    submitConfig,
     className,
     errorTriggerMode = "on-blur",
   } = props
+
+  // Resolve submit button configuration with defaults
+  // icon: undefined = use default, null = no icon, IconType = custom icon
+  const submitLabel = submitConfig?.label ?? "Submit"
+  const submitIcon =
+    submitConfig?.icon === null ? undefined : (submitConfig?.icon ?? Save)
 
   // Extract submit type specific props
   const submitType = props.submitType ?? "default"
@@ -150,11 +159,21 @@ export function F0Form<TSchema extends z.ZodObject<ZodRawShape>>(
       ? ((props as { discardableChanges?: boolean }).discardableChanges ??
         false)
       : false
-  const discardLabel =
+
+  // Resolve discard button configuration with defaults
+  // icon: undefined = use default, null = no icon, IconType = custom icon
+  const discardConfig =
     submitType === "action-bar"
-      ? ((props as { discardLabel?: string }).discardLabel ??
-        forms.actionBar.discard)
-      : forms.actionBar.discard
+      ? (
+          props as {
+            discardConfig?: { label?: string; icon?: typeof Delete | null }
+          }
+        ).discardConfig
+      : undefined
+  const discardLabel = discardConfig?.label ?? forms.actionBar.discard
+  const discardIcon =
+    discardConfig?.icon === null ? undefined : (discardConfig?.icon ?? Delete)
+
   const actionBarLabel =
     submitType === "action-bar"
       ? ((props as { actionBarLabel?: string }).actionBarLabel ??
@@ -183,10 +202,17 @@ export function F0Form<TSchema extends z.ZodObject<ZodRawShape>>(
   const rootError = form.formState.errors.root
   const { isDirty, isSubmitting, errors } = form.formState
 
-  // Disable submit only when there are actually triggered/visible errors
-  // We check if there are any field errors (excluding root error)
-  const fieldErrors = Object.keys(errors).filter((key) => key !== "root")
-  const hasErrors = fieldErrors.length > 0
+  // Error navigation and auto-focus
+  const {
+    hasErrors,
+    errorCount,
+    goToPreviousError,
+    goToNextError,
+    resetErrorNavigation,
+  } = useErrorNavigation({
+    formName: name,
+    errors,
+  })
 
   // Handle form submission
   const handleSubmit = async (data: TValues) => {
@@ -210,6 +236,7 @@ export function F0Form<TSchema extends z.ZodObject<ZodRawShape>>(
   // Handle discard action
   const handleDiscard = () => {
     form.reset()
+    resetErrorNavigation()
   }
 
   // Group contiguous switch fields
@@ -275,6 +302,7 @@ export function F0Form<TSchema extends z.ZodObject<ZodRawShape>>(
             <F0Button
               type="submit"
               label={submitLabel}
+              icon={submitIcon}
               loading={isSubmitting}
               disabled={hasErrors}
             />
@@ -285,17 +313,63 @@ export function F0Form<TSchema extends z.ZodObject<ZodRawShape>>(
         {submitType === "action-bar" && (
           <F0ActionBar
             isOpen={isDirty}
-            label={actionBarLabel}
+            variant="light"
+            label={!hasErrors ? actionBarLabel : undefined}
+            leftContent={
+              hasErrors ? (
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-0.5">
+                    <F0Icon icon={AlertCircle} size="md" color="critical" />
+                    <span className="font-medium text-f1-foreground-critical">
+                      {errorCount === 1
+                        ? forms.actionBar.issues.one.replace(
+                            "{{count}}",
+                            String(errorCount)
+                          )
+                        : forms.actionBar.issues.other.replace(
+                            "{{count}}",
+                            String(errorCount)
+                          )}
+                    </span>
+                  </div>
+                  {errorCount > 1 && (
+                    <div className="flex items-center gap-2">
+                      <F0Button
+                        icon={ChevronUp}
+                        onClick={goToPreviousError}
+                        variant="outline"
+                        label="Go to previous error"
+                        hideLabel
+                      />
+                      <F0Button
+                        icon={ChevronDown}
+                        onClick={goToNextError}
+                        variant="outline"
+                        label="Go to next error"
+                        hideLabel
+                      />
+                    </div>
+                  )}
+                </div>
+              ) : undefined
+            }
             primaryActions={[
               {
                 label: submitLabel,
+                icon: submitIcon,
                 onClick: form.handleSubmit(handleSubmit),
                 disabled: hasErrors,
               },
             ]}
             secondaryActions={
               discardableChanges
-                ? [{ label: discardLabel, onClick: handleDiscard }]
+                ? [
+                    {
+                      label: discardLabel,
+                      icon: discardIcon,
+                      onClick: handleDiscard,
+                    },
+                  ]
                 : []
             }
           />
