@@ -383,17 +383,10 @@ export declare type F0TableExportActionItem = {
      */
     type: "download" | "action";
     /**
-     * Base64 encoded file data (for type: "download")
+     * URL to download the file (for type: "download")
+     * Opens in a new tab when clicked
      */
-    fileData?: string;
-    /**
-     * Filename for download (for type: "download")
-     */
-    fileName?: string;
-    /**
-     * MIME type of the file (for type: "download")
-     */
-    mimeType?: string;
+    downloadUrl?: string;
     /**
      * Action identifier (for type: "action")
      */
