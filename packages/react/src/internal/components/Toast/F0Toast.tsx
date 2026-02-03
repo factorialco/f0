@@ -225,7 +225,7 @@ const F0Toast = forwardRef<HTMLDivElement, F0ToastProps>(
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
           >
-            <div className="flex flex-row gap-3">
+            <div className="pointer-events-auto flex flex-row gap-3">
               {avatarType && (
                 <div className="flex-shrink-0">
                   <F0AvatarAlert type={avatarType} size="sm" />
@@ -244,7 +244,7 @@ const F0Toast = forwardRef<HTMLDivElement, F0ToastProps>(
                   </p>
                 )}
                 {description && (
-                  <p className="text-base text-f1-foreground-inverse-secondary">
+                  <p className="line-clamp-3 text-base text-f1-foreground-inverse-secondary">
                     {description}
                   </p>
                 )}
