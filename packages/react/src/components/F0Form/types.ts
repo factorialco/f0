@@ -89,6 +89,14 @@ export type FormDefinitionItem = FieldItem | RowDefinition | SectionDefinition
 export type F0FormSubmitType = "default" | "action-bar"
 
 /**
+ * When to trigger and display validation errors
+ * - "on-blur": Errors appear when the user leaves a field (default)
+ * - "on-change": Errors appear as the user types (real-time validation)
+ * - "on-submit": Errors only appear after attempting to submit the form
+ */
+export type F0FormErrorTriggerMode = "on-blur" | "on-change" | "on-submit"
+
+/**
  * Base props shared by all submit types
  */
 interface F0FormBaseProps<TSchema extends z.ZodObject<ZodRawShape>> {
@@ -108,6 +116,11 @@ interface F0FormBaseProps<TSchema extends z.ZodObject<ZodRawShape>> {
   submitLabel?: string
   /** Additional class name for the form */
   className?: string
+  /**
+   * When to trigger and display validation errors
+   * @default "on-blur"
+   */
+  errorTriggerMode?: F0FormErrorTriggerMode
 }
 
 /**

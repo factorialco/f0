@@ -24,6 +24,7 @@ import type {
   SectionDefinition,
 } from "./types"
 import { useSchemaDefinition } from "./useSchemaDefinition"
+import { createZodErrorMap } from "./zodErrorMap"
 
 type GroupedItem =
   | { type: "field"; item: FieldItem }
@@ -114,10 +115,18 @@ function groupContiguousSwitches(
  * />
  * ```
  */
+// Map errorTriggerMode to react-hook-form mode
+const ERROR_TRIGGER_MODE_MAP = {
+  "on-blur": "onBlur",
+  "on-change": "onChange",
+  "on-submit": "onSubmit",
+} as const
+
 export function F0Form<TSchema extends z.ZodObject<ZodRawShape>>(
   props: F0FormProps<TSchema>
 ) {
-  const { forms } = useI18n()
+  const i18n = useI18n()
+  const { forms } = i18n
 
   const {
     name,
@@ -127,6 +136,7 @@ export function F0Form<TSchema extends z.ZodObject<ZodRawShape>>(
     onSubmit,
     submitLabel = "Submit",
     className,
+    errorTriggerMode = "on-blur",
   } = props
 
   // Extract submit type specific props
@@ -157,15 +167,26 @@ export function F0Form<TSchema extends z.ZodObject<ZodRawShape>>(
   // Convert schema to internal definition structure for rendering
   const definition = useSchemaDefinition(schema, sections)
 
+  // Create custom error map for localized validation messages
+  const errorMap = useMemo(() => createZodErrorMap(i18n), [i18n])
+
+  // Map our errorTriggerMode to react-hook-form's mode
+  const formMode = ERROR_TRIGGER_MODE_MAP[errorTriggerMode]
+
   // Initialize form with react-hook-form
   const form = useForm<TValues>({
-    resolver: zodResolver(schema),
-    mode: "onChange",
+    resolver: zodResolver(schema, { errorMap }),
+    mode: formMode,
     defaultValues: defaultValues as DefaultValues<TValues>,
   })
 
   const rootError = form.formState.errors.root
-  const { isDirty, isSubmitting } = form.formState
+  const { isDirty, isSubmitting, errors } = form.formState
+
+  // Disable submit only when there are actually triggered/visible errors
+  // We check if there are any field errors (excluding root error)
+  const fieldErrors = Object.keys(errors).filter((key) => key !== "root")
+  const hasErrors = fieldErrors.length > 0
 
   // Handle form submission
   const handleSubmit = async (data: TValues) => {
@@ -255,6 +276,7 @@ export function F0Form<TSchema extends z.ZodObject<ZodRawShape>>(
               type="submit"
               label={submitLabel}
               loading={isSubmitting}
+              disabled={hasErrors}
             />
           )}
         </form>
@@ -268,6 +290,7 @@ export function F0Form<TSchema extends z.ZodObject<ZodRawShape>>(
               {
                 label: submitLabel,
                 onClick: form.handleSubmit(handleSubmit),
+                disabled: hasErrors,
               },
             ]}
             secondaryActions={

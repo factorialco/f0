@@ -14,7 +14,7 @@ import {
 } from "@/ui/form"
 
 import { generateAnchorId, useF0FormContext } from "../context"
-import { isOptionalOrNullable } from "./schema"
+import { isFieldRequired } from "./schema"
 import type { F0Field } from "./types"
 import { evaluateRenderIf } from "./utils"
 
@@ -147,7 +147,7 @@ export function FieldRenderer({ field, sectionId }: FieldRendererProps) {
   const showLabel = field.type !== "checkbox" && field.type !== "custom"
 
   // Determine if field is required based on validation schema
-  const isRequired = field.validation && !isOptionalOrNullable(field.validation)
+  const isRequired = field.validation && isFieldRequired(field.validation)
 
   // Generate anchor ID for the field
   const anchorId = generateAnchorId(formName, sectionId, field.id)

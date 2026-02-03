@@ -254,13 +254,12 @@ export const ConditionalRendering: Story = {
 export const AllFieldTypes: Story = {
   render() {
     const formSchema = z.object({
-      textField: f0FormField(z.string(), {
+      textField: f0FormField(z.string().min(1), {
         label: "Text Field",
         placeholder: "Regular text input",
       }),
       emailField: f0FormField(z.string().email(), {
         label: "Email Field",
-        placeholder: "email@example.com",
         inputType: "email",
       }),
       passwordField: f0FormField(z.string().min(8), {
@@ -278,7 +277,7 @@ export const AllFieldTypes: Story = {
         rows: 3,
         placeholder: "Enter long text...",
       }),
-      selectField: f0FormField(z.string(), {
+      selectField: f0FormField(z.enum(["option1", "option2", "option3"]), {
         label: "Select Field",
         options: [
           { value: "option1", label: "Option 1" },
@@ -288,7 +287,7 @@ export const AllFieldTypes: Story = {
         placeholder: "Select an option",
         showSearchBox: true,
       }),
-      multiSelectField: f0FormField(z.array(z.string()), {
+      multiSelectField: f0FormField(z.array(z.enum(["a", "b", "c"])).min(1), {
         label: "Multi-Select Field",
         multiple: true,
         options: [
@@ -318,7 +317,7 @@ export const AllFieldTypes: Story = {
         fieldType: "switch",
         helpText: "Toggle this switch",
       }),
-      dateField: f0FormField(z.date().optional(), {
+      dateField: f0FormField(z.date(), {
         label: "Date Field",
         placeholder: "Select a date",
         granularities: ["day"],
@@ -364,7 +363,7 @@ export const AllFieldTypes: Story = {
           passwordField: "",
           numberField: 0,
           textareaField: "",
-          selectField: "",
+          selectField: "option1",
           multiSelectField: [],
           checkboxField: false,
           switchField: false,
@@ -775,6 +774,87 @@ export const WithActionBarAndDiscard: Story = {
         <p className="mt-4 text-sm text-f1-foreground-secondary">
           Modify any field to see the action bar with Save and Discard buttons
         </p>
+      </div>
+    )
+  },
+}
+
+/**
+ * Demonstrates the different error trigger modes:
+ * - **on-blur** (default): Errors appear when the user leaves a field
+ * - **on-change**: Errors appear as the user types (real-time validation)
+ * - **on-submit**: Errors only appear after attempting to submit
+ */
+export const ErrorTriggerModes: Story = {
+  render() {
+    const formSchema = z.object({
+      name: f0FormField(
+        z.string().min(2, "Name must be at least 2 characters"),
+        {
+          label: "Name",
+          placeholder: "Enter your name",
+        }
+      ),
+      email: f0FormField(z.string().email(), {
+        label: "Email",
+        inputType: "email",
+      }),
+    })
+
+    const defaultValues = { name: "", email: "" }
+
+    return (
+      <div className="grid max-w-4xl grid-cols-3 gap-8">
+        <div>
+          <h3 className="mb-4 text-lg font-semibold">On Blur (default)</h3>
+          <p className="mb-4 text-sm text-f1-foreground-secondary">
+            Errors appear when you leave a field
+          </p>
+          <F0Form
+            name="error-mode-blur"
+            schema={formSchema}
+            defaultValues={defaultValues}
+            errorTriggerMode="on-blur"
+            onSubmit={async () => {
+              await sleep(500)
+              return { success: true }
+            }}
+          />
+        </div>
+
+        <div>
+          <h3 className="mb-4 text-lg font-semibold">On Change</h3>
+          <p className="mb-4 text-sm text-f1-foreground-secondary">
+            Errors appear as you type
+          </p>
+          <F0Form
+            name="error-mode-change"
+            schema={formSchema}
+            defaultValues={defaultValues}
+            errorTriggerMode="on-change"
+            onSubmit={async () => {
+              await sleep(500)
+              return { success: true }
+            }}
+          />
+        </div>
+
+        <div>
+          <h3 className="mb-4 text-lg font-semibold">On Submit</h3>
+          <p className="mb-4 text-sm text-f1-foreground-secondary">
+            Errors only appear after clicking submit
+          </p>
+          <F0Form
+            name="error-mode-submit"
+            schema={formSchema}
+            defaultValues={defaultValues}
+            errorTriggerMode="on-submit"
+            onSubmit={async () => {
+              await sleep(500)
+              return { success: true }
+            }}
+          />
+        </div>
       </div>
     )
   },

@@ -386,6 +386,35 @@ export const defaultTranslations = {
       unsavedChanges: "Unsaved changes",
       discard: "Discard",
     },
+    validation: {
+      required: "This field is required",
+      invalidType: "Invalid value",
+      string: {
+        email: "Enter a valid email address",
+        url: "Enter a valid URL",
+        min: "Must be at least {{min}} characters",
+        max: "Must be at most {{max}} characters",
+      },
+      number: {
+        min: "Must be at least {{min}}",
+        max: "Must be at most {{max}}",
+        positive: "Must be a positive number",
+        negative: "Must be a negative number",
+        integer: "Must be a whole number",
+      },
+      date: {
+        min: "Date must be after {{min}}",
+        max: "Date must be before {{max}}",
+        invalid: "Enter a valid date",
+      },
+      array: {
+        min: "Select at least {{min}} option",
+        max: "Select at most {{max}} options",
+      },
+      checkbox: {
+        mustBeChecked: "This option must be selected",
+      },
+    },
   },
 } as const
 
