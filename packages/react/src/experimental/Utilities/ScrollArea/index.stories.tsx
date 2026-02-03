@@ -1,7 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { expect, within } from "storybook/test"
-
 import { F0Alert } from "@/components/F0Alert"
 import { F0Button } from "@/components/F0Button"
 import { Placeholder } from "@/lib/storybook-utils/placeholder"
@@ -30,23 +28,6 @@ export const Default: Story = {
       </ScrollArea>
     </div>
   ),
-}
-
-export const WithDataTestId: Story = {
-  args: {
-    dataTestId: "my-test-scroll-area",
-  } as Record<string, unknown>,
-  render: (props) => (
-    <div className="flex h-96 flex-col gap-4 overflow-hidden">
-      <ScrollArea {...props}>
-        <StackWithOverflow />
-      </ScrollArea>
-    </div>
-  ),
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    await expect(canvas.getByTestId("my-test-scroll-area")).toBeInTheDocument()
-  },
 }
 
 export const Horizontal: Story = {

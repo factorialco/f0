@@ -9,7 +9,7 @@ import { OneCalendar } from "@/experimental/OneCalendar"
 import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
 import { getMockValue } from "@/mocks"
 
-import { F0GridStack, GridStackReactWidget } from "../F0GridStack"
+import { F0GridStack, GridStackReactWidget } from "../index"
 
 const meta = {
   title: "Utilities/GridStack",
@@ -166,6 +166,7 @@ export const WithDataTestId: Story = {
     ],
     dataTestId: "my-test-grid-stack",
   } as Story["args"],
+  render: (args) => <F0GridStack {...args} />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     await expect(canvas.getByTestId("my-test-grid-stack")).toBeInTheDocument()

@@ -14,7 +14,7 @@ import {
   CalendarView,
   DateRange,
 } from "../../../experimental/OneCalendar/types"
-import { F0DatePicker } from "../F0DatePicker"
+import { F0DatePicker } from "../index"
 import { predefinedPresets } from "../presets"
 import { datepickerSizes, DatePickerValue } from "../types"
 import { inputFieldInheritedProps } from "../types.internal"
