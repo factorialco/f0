@@ -302,12 +302,9 @@ const RichTextEditorComponent = forwardRef<
               <EditorContent editor={editor} />
             </div>
 
-            {/* Full document loading overlay */}
-            <LoadingEnhanceOverlay
-              isVisible={isLoadingEnhance && isFullDocumentEnhance}
-              isFullscreen={isFullscreen}
-              label={enhanceConfig?.enhanceLabels.loadingEnhanceLabel}
-            />
+            {isLoadingEnhance && isFullDocumentEnhance && (
+              <LoadingEnhanceOverlay isFullscreen={isFullscreen} />
+            )}
           </div>
 
           <AnimatePresence>
@@ -361,7 +358,7 @@ const RichTextEditorComponent = forwardRef<
                 transition={{ duration: 0.3 }}
                 className="flex w-full items-center justify-center pt-2"
               >
-                {isLoadingEnhance && !isFullDocumentEnhance && (
+                {isLoadingEnhance && (
                   <LoadingEnhanceInline
                     label={enhanceConfig?.enhanceLabels.loadingEnhanceLabel}
                   />
