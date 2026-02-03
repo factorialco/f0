@@ -1,6 +1,5 @@
 import { AIMessage } from '@copilotkit/shared';
-import { AlertAvatarProps as AlertAvatarProps_2 } from '../../f0';
-import { AlertAvatarProps as AlertAvatarProps_3 } from './F0AvatarAlert';
+import { AlertAvatarProps as AlertAvatarProps_2 } from './F0AvatarAlert';
 import { AlertTagCellValue } from './types/alertTag';
 import { AlertTagCellValue as AlertTagCellValue_2 } from '../../value-display/types/alertTag';
 import { AmountCellValue } from './types/amount';
@@ -47,7 +46,6 @@ import { HTMLAttributeAnchorTarget } from 'react';
 import { HTMLAttributes } from 'react';
 import { HTMLInputTypeAttribute } from 'react';
 import { IconCellValue } from './types/icon';
-import { IconType as IconType_2 } from '../../f0';
 import { InFilterOptions } from './InFilter/types';
 import { InputProps as InputProps_2 } from '@copilotkit/react-ui';
 import { JSONContent } from '@tiptap/react';
@@ -517,9 +515,9 @@ export declare const AiFullscreenChat: () => JSX_2.Element | null;
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const AiPromotionChat: () => JSX_2.Element | null;
+export declare const AiPromotionChat: WithDataTestIdReturnType_2<() => JSX_2.Element | null>;
 
-export declare const AiPromotionChatProvider: ({ enabled, greeting, title, description, benefits, actions, onShow, onHide, children, }: AiPromotionChatProviderProps) => JSX_2.Element;
+export declare const AiPromotionChatProvider: WithDataTestIdReturnType_2<({ enabled, greeting, title, description, benefits, actions, onShow, onHide, children, }: AiPromotionChatProviderProps) => JSX_2.Element>;
 
 export declare type AiPromotionChatProviderProps = {
     enabled?: boolean;
@@ -627,7 +625,7 @@ declare const alertAvatarVariants: (props?: ({
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const ApplicationFrame: typeof _ApplicationFrame;
+export declare const ApplicationFrame: WithDataTestIdReturnType_3<typeof _ApplicationFrame>;
 
 declare function _ApplicationFrame({ children, sidebar, banner, ai, aiPromotion, }: ApplicationFrameProps): JSX_2.Element;
 
@@ -731,7 +729,7 @@ declare type AvatarVariant_2 = ({
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const Badge: ({ type, size, icon }: BadgeProps) => JSX_2.Element;
+export declare const Badge: WithDataTestIdReturnType_3<({ type, size, icon }: BadgeProps) => JSX_2.Element>;
 
 export declare interface BadgeProps extends VariantProps<typeof badgeVariants> {
     icon: IconType;
@@ -760,6 +758,8 @@ export declare type BannerAction = {
 export declare const BarChartWidget: ForwardRefExoticComponent<Omit<WidgetProps_2 & {
 chart: BarChartProps;
 } & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>;
+
+declare type BaseAction = Pick<F0ButtonProps, "label" | "onClick" | "icon" | "disabled">;
 
 export declare const BaseActivityItemList: ({ items, loadingMoreItems, onClickItem, onEndReached, onEndReachedItemsThreshold, }: ActivityItemListProps) => default_2.JSX.Element;
 
@@ -809,9 +809,9 @@ declare type BaseAvatarProps = {
 
 declare type BaseAvatarProps_2 = ComponentProps<typeof BaseAvatar>;
 
-export declare const BaseBanner: ForwardRefExoticComponent<BaseBannerProps & RefAttributes<HTMLDivElement>> & {
-    Skeleton: ForwardRefExoticComponent<RefAttributes<HTMLDivElement>>;
-};
+export declare const BaseBanner: WithDataTestIdReturnType_3<ForwardRefExoticComponent<BaseBannerProps & RefAttributes<HTMLDivElement>> & {
+Skeleton: ForwardRefExoticComponent<RefAttributes<HTMLDivElement>>;
+}>;
 
 export declare type BaseBannerProps = {
     title: string;
@@ -1326,8 +1326,6 @@ declare const cardPropertyRenderers: {
 
 declare type CardPropertyType = keyof typeof cardPropertyRenderers;
 
-export declare function CardSelectable<T extends CardSelectableValue>({ item, selected, disabled, multiple, onSelect, }: CardSelectableProps<T>): JSX_2.Element;
-
 declare type CardSelectableAvatarVariant = AvatarVariant | {
     type: "emoji";
     emoji: string;
@@ -1339,7 +1337,9 @@ declare type CardSelectableAvatarVariant = AvatarVariant | {
     icon: IconType;
 };
 
-export declare function CardSelectableContainer<T extends CardSelectableValue>(props: CardSelectableContainerProps<T>): React.ReactElement;
+export declare const CardSelectableContainer: typeof _CardSelectableContainer;
+
+declare function _CardSelectableContainer<T extends CardSelectableValue>(props: CardSelectableContainerProps<T>): React.ReactElement;
 
 export declare type CardSelectableContainerProps<T extends CardSelectableValue> = CardSelectableSingleProps<T> | CardSelectableMultipleProps<T>;
 
@@ -1371,14 +1371,6 @@ export declare interface CardSelectableMultipleProps<T extends CardSelectableVal
     label?: string;
     /** Layout direction (default: vertical) */
     layout?: "vertical" | "horizontal";
-}
-
-declare interface CardSelectableProps<T extends CardSelectableValue> {
-    item: CardSelectableItem<T>;
-    selected: boolean;
-    disabled: boolean;
-    multiple: boolean;
-    onSelect: () => void;
 }
 
 export declare interface CardSelectableSingleProps<T extends CardSelectableValue> {
@@ -1415,7 +1407,7 @@ declare type CardVisualizationOptions<T, _Filters extends FiltersDefinition, _So
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const Carousel: ({ children, columns, showArrows, showDots, autoplay, delay, showPeek, doubleColumns, }: CarouselProps) => default_2.JSX.Element;
+export declare const Carousel: WithDataTestIdReturnType_3<({ children, columns, showArrows, showDots, autoplay, delay, showPeek, doubleColumns, }: CarouselProps) => default_2.JSX.Element>;
 
 declare interface CarouselBreakpoints {
     default?: ColumnNumber;
@@ -1513,7 +1505,7 @@ declare type ChartItem<K extends ChartConfig> = {
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const ChartWidgetEmptyState: ForwardRefExoticComponent<Props_4 & RefAttributes<HTMLDivElement>>;
+export declare const ChartWidgetEmptyState: WithDataTestIdReturnType_3<ForwardRefExoticComponent<Props_4 & RefAttributes<HTMLDivElement>>>;
 
 declare type ChatTextareaProps = InputProps_2 & {
     submitLabel?: string;
@@ -1606,7 +1598,7 @@ declare interface ClockInGraphProps {
 
 declare type ClockInStatus = "clocked-in" | "break" | "clocked-out";
 
-export declare const CoCreationForm: ({ elements: elementsProp, isEditMode, onChange, disallowOptionalQuestions, allowedQuestionTypes, applyingChanges, }: CoCreationFormProps) => JSX_2.Element;
+export declare const CoCreationForm: WithDataTestIdReturnType_3<({ elements: elementsProp, isEditMode, onChange, disallowOptionalQuestions, allowedQuestionTypes, applyingChanges, }: CoCreationFormProps) => JSX_2.Element>;
 
 export declare type CoCreationFormCallbacks = {
     onQuestionChange?: (params: OnChangeQuestionParams) => void;
@@ -1788,7 +1780,7 @@ declare type CopyActionType = {
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const Counter: typeof _Counter;
+export declare const Counter: WithDataTestIdReturnType_3<typeof _Counter>;
 
 declare function _Counter({ size, type, value, maxValue }: CounterProps): JSX_2.Element;
 
@@ -2201,7 +2193,7 @@ declare type DateValue = {
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const DaytimePage: typeof _DaytimePage;
+export declare const DaytimePage: WithDataTestIdReturnType_3<typeof _DaytimePage>;
 
 declare function _DaytimePage({ children, header, period, embedded, }: DaytimePageProps): JSX_2.Element;
 
@@ -2720,12 +2712,12 @@ declare const defaultTranslations: {
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const DetailsItem: ForwardRefExoticComponent<DetailsItemType & RefAttributes<HTMLDivElement>>;
+export declare const DetailsItem: WithDataTestIdReturnType_3<ForwardRefExoticComponent<DetailsItemType & RefAttributes<HTMLDivElement>>>;
 
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const DetailsItemsList: default_2.ForwardRefExoticComponent<DetailsItemsListProps & default_2.RefAttributes<HTMLDivElement>>;
+export declare const DetailsItemsList: WithDataTestIdReturnType_3<default_2.ForwardRefExoticComponent<DetailsItemsListProps & default_2.RefAttributes<HTMLDivElement>>>;
 
 declare interface DetailsItemsListProps {
     title?: string;
@@ -2740,31 +2732,24 @@ export declare interface DetailsItemType {
     spacingAtTheBottom?: boolean;
 }
 
-export declare const Dialog: ForwardRefExoticComponent<Omit<{
-header: {
-type: AlertAvatarProps_2["type"];
-title: string;
-description: string;
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export declare const Dialog: WithDataTestIdReturnType_3<ForwardRefExoticComponent<DialogProps & RefAttributes<HTMLDivElement>>>;
+
+declare type DialogProps = {
+    header: {
+        type: AlertAvatarProps["type"];
+        title: string;
+        description: string;
+    };
+    actions?: {
+        primary: PrimaryAction_2;
+        secondary: SecondaryAction_2;
+    };
+    open?: boolean;
+    onClose?: () => void;
 };
-actions?: {
-primary: {
-label: string;
-icon?: IconType_2 | undefined;
-onClick?: ((event: React.MouseEvent<HTMLElement, MouseEvent>) => void | Promise<unknown>) | undefined;
-disabled?: boolean | undefined;
-} & {
-variant?: "default" | "critical" | "neutral";
-};
-secondary: {
-label: string;
-icon?: IconType_2 | undefined;
-onClick?: ((event: React.MouseEvent<HTMLElement, MouseEvent>) => void | Promise<unknown>) | undefined;
-disabled?: boolean | undefined;
-};
-};
-open?: boolean;
-onClose?: () => void;
-} & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>;
 
 /**
  * Remove a property from a union of objects.
@@ -2785,7 +2770,7 @@ declare type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Om
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const Dropdown: (props: DropdownProps) => JSX_2.Element;
+export declare const Dropdown: WithDataTestIdReturnType_3<(props: DropdownProps) => JSX_2.Element>;
 
 declare type DropdownInternalProps = {
     items: DropdownItem[];
@@ -3005,13 +2990,13 @@ declare interface F0ActionBarProps {
     label?: string;
 }
 
-export declare const F0AiBanner: ForwardRefExoticComponent<AiBannerInternalProps & RefAttributes<HTMLDivElement>> & {
+export declare const F0AiBanner: WithDataTestIdReturnType_3<ForwardRefExoticComponent<AiBannerInternalProps & RefAttributes<HTMLDivElement>>> & {
     Skeleton: ({ compact }: AiBannerSkeletonProps) => JSX_2.Element;
 };
 
 export declare type F0AiBannerProps = AiBannerInternalProps;
 
-declare const F0AvatarAlert: WithDataTestIdReturnType_3<({ type, size, "aria-label": ariaLabel, "aria-labelledby": ariaLabelledby, }: AlertAvatarProps_3) => JSX_2.Element>;
+declare const F0AvatarAlert: WithDataTestIdReturnType_3<({ type, size, "aria-label": ariaLabel, "aria-labelledby": ariaLabelledby, }: AlertAvatarProps_2) => JSX_2.Element>;
 
 declare type F0AvatarCompanyProps = {
     name: string;
@@ -3134,7 +3119,7 @@ declare type F0ButtonProps = Omit<ButtonInternalProps, (typeof privateProps)[num
     variant?: Exclude<ButtonInternalProps["variant"], "ai">;
 };
 
-export declare const F0Callout: ForwardRefExoticComponent<CalloutInternalProps & RefAttributes<HTMLDivElement>> & {
+export declare const F0Callout: WithDataTestIdReturnType_3<ForwardRefExoticComponent<CalloutInternalProps & RefAttributes<HTMLDivElement>>> & {
     Skeleton: ({ compact, variant }: CalloutSkeletonProps) => JSX_2.Element;
 };
 
@@ -3259,7 +3244,7 @@ export { F0SelectProps as SelectProps }
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const F0TableOfContent: typeof _F0TableOfContent;
+export declare const F0TableOfContent: WithDataTestIdReturnType_3<typeof _F0TableOfContent>;
 
 declare function _F0TableOfContent(props: TOCProps): JSX_2.Element;
 
@@ -3345,7 +3330,7 @@ declare type FileDef = {
     type: string;
 };
 
-export declare const FileItem: ForwardRefExoticComponent<FileItemProps & RefAttributes<HTMLDivElement>>;
+export declare const FileItem: WithDataTestIdReturnType_3<ForwardRefExoticComponent<FileItemProps & RefAttributes<HTMLDivElement>>>;
 
 declare interface FileItemProps extends React.HTMLAttributes<HTMLDivElement> {
     file: File;
@@ -3520,11 +3505,21 @@ declare type FontSize = (typeof fontSizes)[number];
 
 declare const fontSizes: readonly ["sm", "md", "lg"];
 
-export declare function Form<Schema extends SchemaType, FormData extends InferSchema<Schema>>({ onSubmit, children, ...form }: {
+/**
+ * @deprecated DONT USE THIS COMPONENT
+ */
+export declare const Form: typeof _Form;
+
+declare function _Form<Schema extends SchemaType, FormData extends InferSchema<Schema>>({ onSubmit, children, ...form }: {
     children: React.ReactNode;
 } & FormType<Schema, FormData>): JSX_2.Element;
 
-export declare function FormActions<Schema extends SchemaType, FormData extends InferSchema<Schema>>({ submitLabel, form, }: {
+/**
+ * @deprecated DONT USE THIS COMPONENT
+ */
+export declare const FormActions: typeof _FormActions;
+
+declare function _FormActions<Schema extends SchemaType, FormData extends InferSchema<Schema>>({ submitLabel, form, }: {
     submitLabel: string;
     form: FormType<Schema, FormData>;
 }): JSX_2.Element;
@@ -3535,6 +3530,9 @@ declare type FormError<Fields extends FieldValues> = {
     errors: Partial<Record<Path<Fields>, string>>;
 };
 
+/**
+ * @deprecated DONT USE THIS COMPONENT
+ */
 export declare const FormField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ label, description, children, ...props }: FormFieldProps<TFieldValues, TName> & {
     children: (field: ControllerRenderProps<TFieldValues>) => JSX.Element;
 }) => JSX_2.Element;
@@ -4247,7 +4245,7 @@ declare interface MetadataProps {
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const MobileDropdown: ({ items, children }: DropdownProps) => JSX_2.Element;
+export declare const MobileDropdown: WithDataTestIdReturnType_3<({ items, children }: DropdownProps) => JSX_2.Element>;
 
 declare const moduleAvatarVariants: (props?: ({
     size?: "lg" | "md" | "sm" | "xs" | "xxs" | undefined;
@@ -4436,7 +4434,7 @@ declare interface NextStepsProps {
     items: StepItemProps[];
 }
 
-export declare const NotesTextEditor: ForwardRefExoticComponent<NotesTextEditorProps & RefAttributes<NotesTextEditorHandle>>;
+export declare const NotesTextEditor: WithDataTestIdReturnType_3<ForwardRefExoticComponent<NotesTextEditorProps & RefAttributes<NotesTextEditorHandle>>>;
 
 export declare type NotesTextEditorHandle = {
     clear: () => void;
@@ -4527,7 +4525,7 @@ declare type NumericQuestionProps = BaseQuestionPropsForOtherQuestionComponents 
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const OmniButton: typeof _OmniButton;
+export declare const OmniButton: WithDataTestIdReturnType_3<typeof _OmniButton>;
 
 declare function _OmniButton({ label, options, hasNewUpdate }: OmniButtonProps): JSX_2.Element;
 
@@ -4623,7 +4621,13 @@ export declare type OneCalendarProps = Omit<OneCalendarInternalProps, (typeof pr
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const OneDataCollection: <R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<R>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<R>>(props: OneDataCollectionProps<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>) => JSX_2.Element;
+export declare const OneDataCollection: OneDataCollectionGeneric;
+
+/**
+ * Generic component type so consumers can use <F0Select<T, R> />.
+ * Preserves dataTestId and OneDataCollection
+ */
+declare type OneDataCollectionGeneric = <R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<R>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<R>>(props: OneDataCollectionProps<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping> & WithDataTestIdProps) => ReactElement | null;
 
 /**
  * A component that renders a collection of data with filtering and visualization capabilities.
@@ -4820,9 +4824,9 @@ declare interface OnePaginationProps {
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const OnePersonListItem: default_2.ForwardRefExoticComponent<OnePersonListItemProps & default_2.RefAttributes<HTMLDivElement>> & {
-    Skeleton: () => default_2.JSX.Element;
-};
+export declare const OnePersonListItem: WithDataTestIdReturnType_3<default_2.ForwardRefExoticComponent<OnePersonListItemProps & default_2.RefAttributes<HTMLDivElement>> & {
+Skeleton: () => default_2.JSX.Element;
+}>;
 
 export declare type OnePersonListItemProps = {
     person: {
@@ -4912,7 +4916,7 @@ declare interface OverflowListProps<T> {
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const Page: typeof _Page;
+export declare const Page: WithDataTestIdReturnType_3<typeof _Page>;
 
 declare function _Page({ children, header, embedded }: PageProps): JSX_2.Element;
 
@@ -5075,6 +5079,10 @@ declare interface PrimaryAction {
     isVisible?: boolean;
 }
 
+declare type PrimaryAction_2 = BaseAction & {
+    variant?: PrimaryActionVariant;
+};
+
 declare interface PrimaryActionButton extends PrimaryAction {
     label: string;
     icon?: IconType;
@@ -5097,6 +5105,8 @@ export declare type primaryActionType = {
     action: actionType;
     subActions?: subActionType[];
 };
+
+declare type PrimaryActionVariant = "default" | "critical" | "neutral";
 
 declare interface PrimaryDropdownAction<T> extends PrimaryAction {
     items: ButtonDropdownItem<T>[];
@@ -5308,7 +5318,7 @@ export declare type QuestionType = "rating" | "select" | "multi-select" | "text"
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const RadarChart: <K extends ChartConfig>(props: RadarChartProps<K> & RefAttributes<HTMLDivElement>) => React.ReactNode;
+export declare const RadarChart: WithDataTestIdReturnType_3<(<K extends ChartConfig>(props: RadarChartProps<K> & RefAttributes<HTMLDivElement>) => React.ReactNode)>;
 
 export declare const _RadarChart: <K extends ChartConfig>({ data, dataConfig, scaleMin, scaleMax, aspect }: RadarChartProps<K>, ref: ForwardedRef<HTMLDivElement>) => JSX_2.Element;
 
@@ -5385,7 +5395,7 @@ export declare type resultType = {
     mentionIds?: number[];
 };
 
-export declare const RichTextDisplay: ForwardRefExoticComponent<RichTextDisplayProps & RefAttributes<HTMLDivElement>>;
+export declare const RichTextDisplay: WithDataTestIdReturnType_3<ForwardRefExoticComponent<RichTextDisplayProps & RefAttributes<HTMLDivElement>>>;
 
 export declare type RichTextDisplayHandle = HTMLDivElement;
 
@@ -5395,9 +5405,9 @@ export declare interface RichTextDisplayProps extends HTMLAttributes<HTMLDivElem
     format?: "html" | "markdown";
 }
 
-export declare const RichTextEditor: ForwardRefExoticComponent<RichTextEditorProps & RefAttributes<RichTextEditorHandle>> & {
-    Skeleton: ({ rows }: RichTextEditorSkeletonProps) => JSX_2.Element;
-};
+export declare const RichTextEditor: WithDataTestIdReturnType_3<ForwardRefExoticComponent<RichTextEditorProps & RefAttributes<RichTextEditorHandle>> & {
+Skeleton: ({ rows }: RichTextEditorSkeletonProps) => JSX_2.Element;
+}>;
 
 export declare type RichTextEditorHandle = {
     clear: () => void;
@@ -5462,6 +5472,8 @@ declare type SearchOptions = {
 declare interface SecondaryAction extends PrimaryActionButton {
     variant?: "outline" | "critical" | "outlinePromote" | "promote";
 }
+
+declare type SecondaryAction_2 = BaseAction;
 
 export declare type SecondaryActionGroup = {
     label?: string;
@@ -5596,7 +5608,7 @@ export declare const selectSizes: readonly ["sm", "md"];
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const Shortcut: typeof _Shortcut;
+export declare const Shortcut: WithDataTestIdReturnType_3<typeof _Shortcut>;
 
 declare function _Shortcut({ keys, variant }: ShortcutProps): JSX_2.Element | null;
 
@@ -5614,7 +5626,9 @@ declare const shortcutVariants: (props?: ({
     className?: ClassValue;
 })) | undefined) => string;
 
-export declare function Sidebar({ header, body, footer, onFooterDropdownClick, }: SidebarProps): JSX_2.Element;
+export declare const Sidebar: WithDataTestIdReturnType_3<typeof _Sidebar>;
+
+declare function _Sidebar({ header, body, footer, onFooterDropdownClick, }: SidebarProps): JSX_2.Element;
 
 export declare function SidebarFooter({ user, options, showActivityButton, activityButtonShortcut, onActivityButtonClick, onDropdownClick, hasActivityUpdates, }: SidebarFooterProps): JSX_2.Element;
 
@@ -5699,7 +5713,7 @@ declare type Source = {
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const Spinner: typeof _Spinner;
+export declare const Spinner: WithDataTestIdReturnType_3<typeof _Spinner>;
 
 declare function _Spinner({ size, className }: SpinnerProps): JSX_2.Element;
 
@@ -5987,9 +6001,9 @@ declare type TableVisualizationSettings = {
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const Tabs: FC<TabsProps> & {
-    Skeleton: FC<Pick<TabsProps, "secondary">>;
-};
+export declare const Tabs: WithDataTestIdReturnType_3<FC<TabsProps> & {
+Skeleton: FC<Pick<TabsProps, "secondary">>;
+}>;
 
 export declare interface TabsProps {
     tabs: TabItem[];
@@ -6199,7 +6213,7 @@ export declare interface ToolbarProps {
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const Tooltip: (props: TooltipProps) => default_2.JSX.Element;
+export declare const Tooltip: WithDataTestIdReturnType_3<(props: TooltipProps) => default_2.JSX.Element>;
 
 declare type TooltipInternalProps = {
     children: default_2.ReactNode;
@@ -6506,11 +6520,11 @@ declare type WelcomeScreenSuggestion = {
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const Widget: default_2.ForwardRefExoticComponent<WidgetProps & {
-    children: ReactNode;
+export declare const Widget: WithDataTestIdReturnType_3<default_2.ForwardRefExoticComponent<WidgetProps & {
+children: ReactNode;
 } & default_2.RefAttributes<HTMLDivElement>> & {
-    Skeleton: default_2.ForwardRefExoticComponent<WidgetSkeletonProps & default_2.RefAttributes<HTMLDivElement>>;
-};
+Skeleton: default_2.ForwardRefExoticComponent<WidgetSkeletonProps & default_2.RefAttributes<HTMLDivElement>>;
+}>;
 
 export declare function WidgetAvatarsListItem({ id, title, subtitle, avatars, remainingCount, withPointerCursor, onClick, ...props }: WidgetAvatarsListItemProps): JSX_2.Element;
 
@@ -6531,7 +6545,7 @@ export declare type WidgetAvatarsListItemProps = {
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const WidgetEmptyState: typeof _WidgetEmptyState;
+export declare const WidgetEmptyState: WithDataTestIdReturnType_3<typeof _WidgetEmptyState>;
 
 declare function _WidgetEmptyState({ title, description, emoji, actions, }: WidgetEmptyStateProps): JSX_2.Element;
 
@@ -6585,11 +6599,11 @@ export declare interface WidgetProps {
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const WidgetSection: ForwardRefExoticComponent<    {
+export declare const WidgetSection: WithDataTestIdReturnType_3<ForwardRefExoticComponent<    {
 children?: ReactNode | undefined;
 } & {
 title?: string;
-} & RefAttributes<HTMLDivElement>>;
+} & RefAttributes<HTMLDivElement>>>;
 
 export declare function WidgetSimpleList({ items, gap, minSize, onClickItem, showAllItems, }: Props_9): JSX_2.Element;
 
@@ -6694,11 +6708,6 @@ declare module "gridstack" {
 }
 
 
-declare namespace Calendar {
-    var displayName: string;
-}
-
-
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         aiBlock: {
@@ -6724,4 +6733,9 @@ declare module "@tiptap/core" {
             insertTranscript: (data: TranscriptData) => ReturnType;
         };
     }
+}
+
+
+declare namespace Calendar {
+    var displayName: string;
 }

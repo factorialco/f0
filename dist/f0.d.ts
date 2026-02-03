@@ -116,10 +116,11 @@ import { TextCellValue } from '../../value-display/types/text';
 import { TextCellValue as TextCellValue_2 } from './types/text';
 import { ValueDisplayRendererContext } from '../../value-display';
 import { VariantProps } from 'cva';
-import { WithDataTestIdReturnType as WithDataTestIdReturnType_2 } from '../../../lib/data-testid';
-import { WithDataTestIdReturnType as WithDataTestIdReturnType_3 } from '../../f0';
-import { WithDataTestIdReturnType as WithDataTestIdReturnType_4 } from '../../lib/data-testid';
-import { WithDataTestIdReturnType as WithDataTestIdReturnType_5 } from '../../lib/data-testid/index.tsx';
+import { WithDataTestIdReturnType as WithDataTestIdReturnType_2 } from '../lib/data-testid';
+import { WithDataTestIdReturnType as WithDataTestIdReturnType_3 } from '../../lib/data-testid';
+import { WithDataTestIdReturnType as WithDataTestIdReturnType_4 } from '../../../lib/data-testid';
+import { WithDataTestIdReturnType as WithDataTestIdReturnType_5 } from '../../f0';
+import { WithDataTestIdReturnType as WithDataTestIdReturnType_6 } from '../../lib/data-testid/index.tsx';
 
 export declare type Action = UpsellAction | RegularAction;
 
@@ -312,7 +313,7 @@ declare type AnimationVariantsOptions = {
     maxDelay?: number;
 };
 
-export declare const AreaChart: WithDataTestIdReturnType_3<ForwardRefExoticComponent<Omit<LineChartPropsBase<LineChartConfig> & {
+export declare const AreaChart: WithDataTestIdReturnType_5<ForwardRefExoticComponent<Omit<LineChartPropsBase<LineChartConfig> & {
 lineType?: "step" | "linear" | "natural" | "monotoneX";
 marginTop?: number;
 canBeBlurred?: boolean;
@@ -430,7 +431,7 @@ declare type BannerAction = {
     icon?: IconType;
 };
 
-export declare const BarChart: WithDataTestIdReturnType_3<ForwardRefExoticComponent<Omit<ChartPropsBase<ChartConfig> & {
+export declare const BarChart: WithDataTestIdReturnType_5<ForwardRefExoticComponent<Omit<ChartPropsBase<ChartConfig> & {
 type?: "simple" | "stacked" | "stacked-by-sign";
 label?: boolean;
 legend?: boolean;
@@ -988,7 +989,7 @@ declare type CardVisualizationOptions<T, _Filters extends FiltersDefinition, _So
     compact?: boolean;
 };
 
-export declare const CategoryBarChart: WithDataTestIdReturnType_3<ForwardRefExoticComponent<Omit<CategoryBarProps & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>>;
+export declare const CategoryBarChart: WithDataTestIdReturnType_5<ForwardRefExoticComponent<Omit<CategoryBarProps & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>>;
 
 declare interface CheckboxProps extends DataAttributes_2 {
     /**
@@ -1137,7 +1138,7 @@ declare const columnWidths: {
     readonly fit: 1;
 };
 
-export declare const ComboChart: WithDataTestIdReturnType_3<ForwardRefExoticComponent<Omit<ChartPropsBase<ChartConfig> & {
+export declare const ComboChart: WithDataTestIdReturnType_5<ForwardRefExoticComponent<Omit<ChartPropsBase<ChartConfig> & {
 label?: boolean;
 legend?: boolean;
 showValueUnderLabel?: boolean;
@@ -1220,7 +1221,7 @@ export declare type CurrentFilters<F extends FilterOptions<string>> = F extends 
     [Key in K]?: FilterValue<F["fields"][Key]>;
 } : Record<string, never>;
 
-export declare const Dashboard: ComponentType<DashboardProps_2> & PageLayoutGroupComponent_2;
+export declare const Dashboard: WithDataTestIdReturnType_3<ComponentType<DashboardProps_2> & PageLayoutGroupComponent_2>;
 
 export declare type DashboardProps = GroupGridProps<DashboardWidget>;
 
@@ -2179,7 +2180,7 @@ declare type ExtractVisualizationSettings<T> = T extends {
     };
 } ? S : never;
 
-export declare const F0Alert: WithDataTestIdReturnType_4<({ title, description, action, link, icon, variant, }: F0AlertProps) => JSX_2.Element>;
+export declare const F0Alert: WithDataTestIdReturnType_3<({ title, description, action, link, icon, variant, }: F0AlertProps) => JSX_2.Element>;
 
 export declare interface F0AlertProps {
     title: string;
@@ -2197,11 +2198,11 @@ export declare interface F0AlertProps {
     variant: AlertVariant;
 }
 
-export declare const F0Avatar: WithDataTestIdReturnType_2<({ avatar, size, dataTestId, }: AvatarProps) => ReactNode>;
+export declare const F0Avatar: WithDataTestIdReturnType_4<({ avatar, size, dataTestId, }: AvatarProps) => ReactNode>;
 
-export declare const F0AvatarAlert: WithDataTestIdReturnType_2<({ type, size, "aria-label": ariaLabel, "aria-labelledby": ariaLabelledby, }: AlertAvatarProps_2) => JSX_2.Element>;
+export declare const F0AvatarAlert: WithDataTestIdReturnType_4<({ type, size, "aria-label": ariaLabel, "aria-labelledby": ariaLabelledby, }: AlertAvatarProps_2) => JSX_2.Element>;
 
-export declare const F0AvatarCompany: WithDataTestIdReturnType_2<    {
+export declare const F0AvatarCompany: WithDataTestIdReturnType_4<    {
 ({ name, src, size, "aria-label": ariaLabel, "aria-labelledby": ariaLabelledby, badge, }: F0AvatarCompanyProps_2): JSX_2.Element;
 displayName: string;
 }>;
@@ -2213,9 +2214,9 @@ export declare type F0AvatarCompanyProps = {
     badge?: AvatarBadge;
 } & Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">;
 
-export declare const F0AvatarDate: WithDataTestIdReturnType_2<({ date, "aria-label": ariaLabel, "aria-labelledby": ariaLabelledby, }: F0AvatarDateProps) => JSX_2.Element>;
+export declare const F0AvatarDate: WithDataTestIdReturnType_4<({ date, "aria-label": ariaLabel, "aria-labelledby": ariaLabelledby, }: F0AvatarDateProps) => JSX_2.Element>;
 
-export declare const F0AvatarEmoji: WithDataTestIdReturnType_2<    {
+export declare const F0AvatarEmoji: WithDataTestIdReturnType_4<    {
 ({ emoji, size, "aria-label": ariaLabel, "aria-labelledby": ariaLabelledby, }: F0AvatarEmojiProps_2): JSX_2.Element;
 displayName: string;
 }>;
@@ -2225,7 +2226,7 @@ export declare type F0AvatarEmojiProps = {
     size?: (typeof avatarEmojiSizes)[number];
 } & Partial<Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">>;
 
-export declare const F0AvatarFile: WithDataTestIdReturnType_2<ForwardRefExoticComponent<Omit<Omit<Omit<AvatarProps_2 & RefAttributes<HTMLSpanElement>, "ref"> & {
+export declare const F0AvatarFile: WithDataTestIdReturnType_4<ForwardRefExoticComponent<Omit<Omit<Omit<AvatarProps_2 & RefAttributes<HTMLSpanElement>, "ref"> & {
 size?: internalAvatarSizes_2[number];
 type?: internalAvatarTypes_2[number];
 color?: internalAvatarColors_2[number];
@@ -2247,7 +2248,7 @@ declare type F0AvatarFlagProps = {
     badge?: AvatarBadge;
 } & Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">;
 
-export declare const F0AvatarIcon: WithDataTestIdReturnType_2<    {
+export declare const F0AvatarIcon: WithDataTestIdReturnType_4<    {
 ({ icon, size, "aria-label": ariaLabel, "aria-labelledby": ariaLabelledby, }: F0AvatarIconProps_2): JSX_2.Element;
 displayName: string;
 }>;
@@ -2257,7 +2258,7 @@ export declare type F0AvatarIconProps = {
     size?: (typeof avatarIconSizes)[number];
 } & Partial<Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">>;
 
-export declare const F0AvatarList: WithDataTestIdReturnType_2<    {
+export declare const F0AvatarList: WithDataTestIdReturnType_4<    {
 ({ avatars, size, type, noTooltip, remainingCount: initialRemainingCount, max, }: F0AvatarListProps_2): JSX_2.Element;
 displayName: string;
 }>;
@@ -2308,7 +2309,7 @@ declare type F0AvatarListPropsAvatars = {
     avatars: (Omit<FileAvatarVariant, "type"> & Record<string, unknown>)[];
 };
 
-export declare const F0AvatarModule: WithDataTestIdReturnType_2<typeof F0AvatarModule_2>;
+export declare const F0AvatarModule: WithDataTestIdReturnType_4<typeof F0AvatarModule_2>;
 
 /**
  * Module avatar
@@ -2322,7 +2323,7 @@ export declare type F0AvatarModuleProps = VariantProps<typeof moduleAvatarVarian
     module: ModuleId;
 } & Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">;
 
-export declare const F0AvatarPerson: WithDataTestIdReturnType_2<    {
+export declare const F0AvatarPerson: WithDataTestIdReturnType_4<    {
 ({ firstName, lastName, src, size, "aria-label": ariaLabel, "aria-labelledby": ariaLabelledby, badge, deactivated, }: F0AvatarPersonProps_2): JSX_2.Element;
 displayName: string;
 }>;
@@ -2354,7 +2355,7 @@ export declare type F0AvatarPersonProps = {
     deactivated?: boolean;
 } & Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">;
 
-export declare const F0AvatarTeam: WithDataTestIdReturnType_2<    {
+export declare const F0AvatarTeam: WithDataTestIdReturnType_4<    {
 ({ name, src, size, "aria-label": ariaLabel, "aria-labelledby": ariaLabelledby, badge, }: F0AvatarTeamProps_2): JSX_2.Element;
 displayName: string;
 }>;
@@ -2378,18 +2379,18 @@ export declare type F0AvatarTeamProps = {
     badge?: AvatarBadge;
 } & Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">;
 
-export declare const F0BigNumber: WithDataTestIdReturnType_4<    {
+export declare const F0BigNumber: WithDataTestIdReturnType_3<    {
 ({ label, ...props }: BigNumberProps_2): JSX_2.Element;
 displayName: string;
 } & {
 Skeleton: () => JSX_2.Element;
 }>;
 
-export declare const F0Button: WithDataTestIdReturnType_4<ForwardRefExoticComponent<Omit<ButtonInternalProps, "style" | "className" | "variant" | "pressed" | "append" | "compact" | "noAutoTooltip" | "noTitle"> & {
+export declare const F0Button: WithDataTestIdReturnType_3<ForwardRefExoticComponent<Omit<ButtonInternalProps, "style" | "className" | "variant" | "pressed" | "append" | "compact" | "noAutoTooltip" | "noTitle"> & {
 variant?: Exclude<ButtonInternalProps["variant"], "ai">;
 } & RefAttributes<HTMLAnchorElement | HTMLButtonElement>>>;
 
-export declare const F0ButtonDropdown: WithDataTestIdReturnType_5<({ onClick, value, ...props }: F0ButtonDropdownProps) => JSX_2.Element | undefined>;
+export declare const F0ButtonDropdown: WithDataTestIdReturnType_6<({ onClick, value, ...props }: F0ButtonDropdownProps) => JSX_2.Element | undefined>;
 
 export declare type F0ButtonDropdownProps<T = string> = {
     /**
@@ -2437,7 +2438,7 @@ export declare type F0ButtonProps = Omit<ButtonInternalProps, (typeof privatePro
     variant?: Exclude<ButtonInternalProps["variant"], "ai">;
 };
 
-export declare const F0ButtonToggle: WithDataTestIdReturnType_4<ForwardRefExoticComponent<F0ButtonToggleProps & RefAttributes<HTMLButtonElement>>>;
+export declare const F0ButtonToggle: WithDataTestIdReturnType_3<ForwardRefExoticComponent<F0ButtonToggleProps & RefAttributes<HTMLButtonElement>>>;
 
 declare type F0ButtonToggleInternalProps = {
     /**
@@ -2481,7 +2482,7 @@ declare type F0ButtonToggleInternalProps = {
 
 export declare type F0ButtonToggleProps = Omit<F0ButtonToggleInternalProps, (typeof privateProps_2)[number]>;
 
-export declare const F0Card: WithDataTestIdReturnType_4<ForwardRefExoticComponent<F0CardProps & RefAttributes<HTMLDivElement>> & {
+export declare const F0Card: WithDataTestIdReturnType_3<ForwardRefExoticComponent<F0CardProps & RefAttributes<HTMLDivElement>> & {
 Skeleton: ({ compact }: {
 compact?: boolean;
 }) => JSX_2.Element;
@@ -2492,14 +2493,14 @@ export declare type F0CardProps = Omit<CardInternalProps, (typeof privateProps_3
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const F0Checkbox: WithDataTestIdReturnType_4<typeof _F0Checkbox>;
+export declare const F0Checkbox: WithDataTestIdReturnType_3<typeof _F0Checkbox>;
 
 declare function _F0Checkbox({ title, onCheckedChange, id, disabled, indeterminate, checked, value, hideLabel, presentational, stopPropagation, name, ...rest }: CheckboxProps): JSX_2.Element;
 
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const F0ChipList: WithDataTestIdReturnType_4<    {
+export declare const F0ChipList: WithDataTestIdReturnType_3<    {
 ({ chips, max, remainingCount: initialRemainingCount, layout, }: Props): JSX_2.Element;
 displayName: string;
 }>;
@@ -2507,7 +2508,7 @@ displayName: string;
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const F0DatePicker: WithDataTestIdReturnType_4<typeof F0DatePicker_2>;
+export declare const F0DatePicker: WithDataTestIdReturnType_3<typeof F0DatePicker_2>;
 
 declare function F0DatePicker_2({ onChange, value, presets, granularities, minDate, maxDate, open, ...inputProps }: F0DatePickerProps): JSX_2.Element;
 
@@ -2519,7 +2520,7 @@ export declare type F0DatePickerProps = Pick<DatePickerPopupProps, "granularitie
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const F0Dialog: WithDataTestIdReturnType_4<FC<F0DialogInternalProps>>;
+export declare const F0Dialog: WithDataTestIdReturnType_3<FC<F0DialogInternalProps>>;
 
 export declare type F0DialogActionsProps = {
     primaryAction?: F0DialogPrimaryAction | F0DialogPrimaryActionItem[];
@@ -2589,7 +2590,7 @@ export declare type F0DropdownButtonProps<T = string> = {
 
 export declare function F0EventCatcherProvider({ children, onEvent, enabled, catchEvents, }: EventCatcherProviderProps): JSX.Element;
 
-export declare const F0FilterPickerContent: WithDataTestIdReturnType_4<typeof _F0FilterPickerContent>;
+export declare const F0FilterPickerContent: WithDataTestIdReturnType_3<typeof _F0FilterPickerContent>;
 
 /**
  * A standalone dual-pane filter picker content component.
@@ -2668,7 +2669,7 @@ export declare interface F0FilterPickerContentProps<Filters extends FiltersDefin
  */
 export declare type F0FilterPickerContentPublicProps<Filters extends FiltersDefinition> = F0FilterPickerContentProps<Filters> & WithDataTestIdProps;
 
-export declare const F0GridStack: WithDataTestIdReturnType_2<    {
+export declare const F0GridStack: WithDataTestIdReturnType_4<    {
 ({ options, widgets, onChange, className, }: F0GridStackProps_2): JSX_2.Element;
 displayName: string;
 }>;
@@ -2680,14 +2681,14 @@ export declare interface F0GridStackProps {
     className?: string;
 }
 
-export declare const F0Heading: WithDataTestIdReturnType_4<ForwardRefExoticComponent<Omit<F0HeadingProps, "ref"> & RefAttributes<HTMLElement>>>;
+export declare const F0Heading: WithDataTestIdReturnType_3<ForwardRefExoticComponent<Omit<F0HeadingProps, "ref"> & RefAttributes<HTMLElement>>>;
 
 export declare type F0HeadingProps = Omit<TextProps, "className" | "variant" | "as"> & {
     variant?: (typeof _allowedVariants)[number];
     as?: HeadingTags;
 };
 
-export declare const F0Icon: WithDataTestIdReturnType_4<ForwardRefExoticComponent<Omit<Omit<F0IconProps, "ref"> & RefAttributes<SVGSVGElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>>;
+export declare const F0Icon: WithDataTestIdReturnType_3<ForwardRefExoticComponent<Omit<Omit<F0IconProps, "ref"> & RefAttributes<SVGSVGElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>>;
 
 export declare interface F0IconProps extends SVGProps<SVGSVGElement>, VariantProps<typeof iconVariants> {
     icon: IconType;
@@ -2696,7 +2697,7 @@ export declare interface F0IconProps extends SVGProps<SVGSVGElement>, VariantPro
     color?: "default" | "currentColor" | `#${string}` | Lowercase<NestedKeyOf<typeof f1Colors.icon>>;
 }
 
-export declare const F0Link: WithDataTestIdReturnType_4<ForwardRefExoticComponent<Omit<ActionLinkProps, "href" | "variant"> & {
+export declare const F0Link: WithDataTestIdReturnType_3<ForwardRefExoticComponent<Omit<ActionLinkProps, "href" | "variant"> & {
 variant?: ActionLinkVariant;
 stopPropagation?: boolean;
 href?: string;
@@ -2833,7 +2834,7 @@ export declare type F0SelectProps<T extends string, R = unknown> = F0SelectBaseP
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const F0TableOfContentPopover: WithDataTestIdReturnType_4<typeof F0TableOfContentPopover_2>;
+export declare const F0TableOfContentPopover: WithDataTestIdReturnType_3<typeof F0TableOfContentPopover_2>;
 
 /**
  * Internal implementation of the TableOfContentPopover component.
@@ -2856,33 +2857,33 @@ declare interface F0TableOfContentPopoverProps extends Omit<TOCProps, "sortable"
     variant?: TableOfContentPopoverVariant;
 }
 
-export declare const F0TagAlert: WithDataTestIdReturnType_2<ForwardRefExoticComponent<Props_2 & RefAttributes<HTMLDivElement>>>;
+export declare const F0TagAlert: WithDataTestIdReturnType_4<ForwardRefExoticComponent<Props_2 & RefAttributes<HTMLDivElement>>>;
 
-export declare const F0TagBalance: WithDataTestIdReturnType_2<ForwardRefExoticComponent<F0TagBalanceProps & RefAttributes<HTMLDivElement>>>;
+export declare const F0TagBalance: WithDataTestIdReturnType_4<ForwardRefExoticComponent<F0TagBalanceProps & RefAttributes<HTMLDivElement>>>;
 
-export declare const F0TagCompany: WithDataTestIdReturnType_2<ForwardRefExoticComponent<F0TagCompanyProps & RefAttributes<HTMLDivElement>>>;
+export declare const F0TagCompany: WithDataTestIdReturnType_4<ForwardRefExoticComponent<F0TagCompanyProps & RefAttributes<HTMLDivElement>>>;
 
-export declare const F0TagDot: WithDataTestIdReturnType_2<ForwardRefExoticComponent<Props_2 & RefAttributes<HTMLDivElement>>>;
+export declare const F0TagDot: WithDataTestIdReturnType_4<ForwardRefExoticComponent<Props_2 & RefAttributes<HTMLDivElement>>>;
 
-export declare const F0TagList: WithDataTestIdReturnType_2<    {
+export declare const F0TagList: WithDataTestIdReturnType_4<    {
 <T extends TagType_2>({ type, tags, max, remainingCount: initialRemainingCount, }: F0TagListProps<T>): JSX_2.Element;
 displayName: string;
 }>;
 
-export declare const F0TagPerson: WithDataTestIdReturnType_2<ForwardRefExoticComponent<F0TagPersonProps_2 & RefAttributes<HTMLDivElement>>>;
+export declare const F0TagPerson: WithDataTestIdReturnType_4<ForwardRefExoticComponent<F0TagPersonProps_2 & RefAttributes<HTMLDivElement>>>;
 
 export declare type F0TagPersonProps = {
     src?: string;
     name: string;
 };
 
-export declare const F0TagRaw: WithDataTestIdReturnType_2<ForwardRefExoticComponent<F0TagRawProps & RefAttributes<HTMLDivElement>>>;
+export declare const F0TagRaw: WithDataTestIdReturnType_4<ForwardRefExoticComponent<F0TagRawProps & RefAttributes<HTMLDivElement>>>;
 
-export declare const F0TagStatus: WithDataTestIdReturnType_2<ForwardRefExoticComponent<F0TagStatusProps & RefAttributes<HTMLDivElement>>>;
+export declare const F0TagStatus: WithDataTestIdReturnType_4<ForwardRefExoticComponent<F0TagStatusProps & RefAttributes<HTMLDivElement>>>;
 
-export declare const F0TagTeam: WithDataTestIdReturnType_2<ForwardRefExoticComponent<F0TagTeamProps & RefAttributes<HTMLDivElement>>>;
+export declare const F0TagTeam: WithDataTestIdReturnType_4<ForwardRefExoticComponent<F0TagTeamProps & RefAttributes<HTMLDivElement>>>;
 
-export declare const F0Text: WithDataTestIdReturnType_4<ForwardRefExoticComponent<Omit<F0TextProps, "ref"> & RefAttributes<HTMLElement>>>;
+export declare const F0Text: WithDataTestIdReturnType_3<ForwardRefExoticComponent<Omit<F0TextProps, "ref"> & RefAttributes<HTMLElement>>>;
 
 export declare type F0TextProps = Omit<TextProps, "className" | "variant" | "as"> & {
     variant?: (typeof _allowedVariants_2)[number];
@@ -3230,10 +3231,10 @@ declare type HeadingTags = (typeof headingTags)[number];
 
 declare const headingTags: readonly ["h1", "h2", "h3", "h4", "h5", "h6"];
 
-export declare const HomeLayout: ForwardRefExoticComponent<Omit<{
+export declare const HomeLayout: WithDataTestIdReturnType_2<ForwardRefExoticComponent<Omit<{
 widgets?: ReactNode[];
 children?: ReactNode;
-} & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>;
+} & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>>;
 
 declare type I18nContextType = TranslationsType & {
     t: (key: TranslationKey, args?: Record<string, string | number>) => string;
@@ -3512,18 +3513,18 @@ declare type Lane<Filters extends FiltersDefinition> = {
 };
 
 export declare const Layout: {
-    Page: ForwardRefExoticComponent<PageProps & RefAttributes<HTMLDivElement>>;
-    Block: ForwardRefExoticComponent<BlockProps & RefAttributes<HTMLDivElement>>;
-    BlockContent: ComponentType<BlockProps & BlockContentExtraProps> & PageLayoutBlockComponent_2;
-    Group: ForwardRefExoticComponent<GroupLinearProps & RefAttributes<HTMLDivElement>>;
-    GroupGrid: {
-        <Widget extends GroupGridWidget_2, Deps extends Record<string, unknown> = Record<string, unknown>>({ widgets, editMode, onChange, WidgetWrapper, main, deps: dependencyValues, }: GroupGridProps_2<Widget, Deps>): JSX_2.Element;
-        displayName: string;
-    };
-    GroupMasonry: {
-        ({ blocks, sortable: _sortable, onSort: _onSort, main, }: GroupMasonryProps): JSX_2.Element;
-        displayName: string;
-    };
+    Page: WithDataTestIdReturnType_3<ForwardRefExoticComponent<PageProps & RefAttributes<HTMLDivElement>>>;
+    Block: WithDataTestIdReturnType_3<ForwardRefExoticComponent<BlockProps & RefAttributes<HTMLDivElement>>>;
+    BlockContent: WithDataTestIdReturnType_3<ComponentType<BlockProps & BlockContentExtraProps> & PageLayoutBlockComponent_2>;
+    Group: WithDataTestIdReturnType_3<ForwardRefExoticComponent<GroupLinearProps & RefAttributes<HTMLDivElement>>>;
+    GroupGrid: WithDataTestIdReturnType_3<    {
+    <Widget extends GroupGridWidget_2, Deps extends Record<string, unknown> = Record<string, unknown>>({ widgets, editMode, onChange, WidgetWrapper, main, deps: dependencyValues, }: GroupGridProps_2<Widget, Deps>): JSX_2.Element;
+    displayName: string;
+    }>;
+    GroupMasonry: WithDataTestIdReturnType_3<    {
+    ({ blocks, sortable: _sortable, onSort: _onSort, main, }: GroupMasonryProps): JSX_2.Element;
+    displayName: string;
+    }>;
 };
 
 declare interface LayoutProps {
@@ -3549,7 +3550,7 @@ export declare type Level = (typeof levels)[number];
 
 declare const levels: readonly ["info", "warning", "critical", "positive"];
 
-export declare const LineChart: WithDataTestIdReturnType_3<ForwardRefExoticComponent<Omit<LineChartPropsBase<LineChartConfig> & {
+export declare const LineChart: WithDataTestIdReturnType_5<ForwardRefExoticComponent<Omit<LineChartPropsBase<LineChartConfig> & {
 lineType?: "natural" | "linear";
 } & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>>;
 
@@ -4020,7 +4021,7 @@ export declare type PersonAvatarVariant = Extract<AvatarVariant, {
 
 declare type PersonTagProps = ComponentProps<typeof F0TagPerson>;
 
-export declare const PieChart: WithDataTestIdReturnType_3<ForwardRefExoticComponent<Omit<PieChartProps & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>>;
+export declare const PieChart: WithDataTestIdReturnType_5<ForwardRefExoticComponent<Omit<PieChartProps & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>>;
 
 declare type PopupSize = "sm" | "md" | "lg";
 
@@ -4075,7 +4076,7 @@ declare const privateProps_2: readonly ["withBorder"];
 
 declare const privateProps_3: readonly ["forceVerticalMetadata", "disableOverlayLink"];
 
-export declare const ProductBlankslate: WithDataTestIdReturnType_2<ForwardRefExoticComponent<ProductBlankslateProps & RefAttributes<HTMLDivElement>>>;
+export declare const ProductBlankslate: WithDataTestIdReturnType_4<ForwardRefExoticComponent<ProductBlankslateProps & RefAttributes<HTMLDivElement>>>;
 
 declare type ProductBlankslateProps = {
     title: string;
@@ -4096,7 +4097,7 @@ declare type ProductBlankslateProps = {
     };
 };
 
-export declare const ProductCard: WithDataTestIdReturnType_2<typeof _ProductCard>;
+export declare const ProductCard: WithDataTestIdReturnType_4<typeof _ProductCard>;
 
 declare function _ProductCard({ title, description, onClick, onClose, isVisible, dismissable, trackVisibility, type, ...props }: ProductCardProps): false | JSX_2.Element;
 
@@ -4116,7 +4117,7 @@ export declare type ProductCardProps = {
     type?: never;
 });
 
-export declare const ProductModal: WithDataTestIdReturnType_2<typeof _ProductModal>;
+export declare const ProductModal: WithDataTestIdReturnType_4<typeof _ProductModal>;
 
 declare function _ProductModal({ isOpen, onClose, title, image, benefits, errorMessage, successMessage, loadingState, nextSteps, closeLabel, primaryAction, modalTitle, modalModule, secondaryAction, portalContainer, tag, promoTag, showResponseDialog, }: ProductModalProps): JSX_2.Element;
 
@@ -4163,7 +4164,7 @@ declare type ProductModalProps = {
     showResponseDialog?: boolean;
 };
 
-export declare const ProductWidget: WithDataTestIdReturnType_2<typeof _ProductWidget>;
+export declare const ProductWidget: WithDataTestIdReturnType_4<typeof _ProductWidget>;
 
 declare function _ProductWidget({ mediaUrl, title, description, onClose, dismissible, width, trackVisibility, actions, showConfirmation, }: ProductWidgetProps): JSX_2.Element;
 
@@ -4179,7 +4180,7 @@ declare type ProductWidgetProps = {
     showConfirmation?: boolean;
 };
 
-export declare const ProgressBarChart: WithDataTestIdReturnType_3<ForwardRefExoticComponent<Omit<ChartPropsBase<ChartConfig_2> & {
+export declare const ProgressBarChart: WithDataTestIdReturnType_5<ForwardRefExoticComponent<Omit<ChartPropsBase<ChartConfig_2> & {
 value: number;
 max?: number;
 label?: string;
@@ -4441,7 +4442,7 @@ export declare type SortOrder = "asc" | "desc";
 
 declare type SrcProps = Pick<ImgHTMLAttributes<HTMLImageElement>, "src" | "srcSet" | "sizes">;
 
-export declare const StandardLayout: ForwardRefExoticComponent<Omit<StandardLayoutProps & HTMLAttributes<HTMLElement> & RefAttributes<HTMLElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>;
+export declare const StandardLayout: WithDataTestIdReturnType_2<ForwardRefExoticComponent<Omit<StandardLayoutProps & HTMLAttributes<HTMLElement> & RefAttributes<HTMLElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>>;
 
 export declare interface StandardLayoutProps extends VariantProps<typeof layoutVariants> {
     children?: default_2.ReactNode;
@@ -4593,7 +4594,7 @@ declare type TableVisualizationSettings = {
     hidden?: ColId[];
 };
 
-export declare const Tag: WithDataTestIdReturnType_2<({ tag }: {
+export declare const Tag: WithDataTestIdReturnType_4<({ tag }: {
 tag: TagVariant_2;
 }) => ReactNode>;
 
@@ -4854,7 +4855,7 @@ export declare type TrendConfig = {
     invertStatus?: boolean;
 };
 
-export declare const TwoColumnLayout: ForwardRefExoticComponent<Omit<TwoColumnLayoutProps & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>;
+export declare const TwoColumnLayout: WithDataTestIdReturnType_2<ForwardRefExoticComponent<Omit<TwoColumnLayoutProps & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>>;
 
 export declare interface TwoColumnLayoutProps {
     children: ReactNode;
@@ -4874,12 +4875,12 @@ declare type UpsellAction = BaseAction & {
     showConfirmation: boolean;
 };
 
-export declare const UpsellingBanner: WithDataTestIdReturnType_2<ForwardRefExoticComponent<Omit<BaseBannerProps, "children" | "primaryAction" | "secondaryAction"> & {
+export declare const UpsellingBanner: WithDataTestIdReturnType_4<ForwardRefExoticComponent<Omit<BaseBannerProps, "children" | "primaryAction" | "secondaryAction"> & {
 primaryAction?: DefaultAction | PromoteAction;
 secondaryAction?: DefaultAction | PromoteAction;
 } & RefAttributes<HTMLDivElement>>>;
 
-export declare const UpsellingButton: WithDataTestIdReturnType_2<typeof _UpsellingButton>;
+export declare const UpsellingButton: WithDataTestIdReturnType_4<typeof _UpsellingButton>;
 
 declare function _UpsellingButton({ label, showIcon, onRequest, showConfirmation, loading: externalLoading, errorMessage, successMessage, loadingState, nextSteps, closeLabel, variant, onModalStateChange, portalContainer, ...props }: UpsellingButtonProps): JSX_2.Element;
 
@@ -4931,7 +4932,7 @@ export declare interface UpsellingButtonProps extends Omit<F0ButtonProps, "icon"
     portalContainer?: HTMLElement | null;
 }
 
-export declare const UpsellingPopover: WithDataTestIdReturnType_2<typeof _UpsellingPopover>;
+export declare const UpsellingPopover: WithDataTestIdReturnType_4<typeof _UpsellingPopover>;
 
 declare function _UpsellingPopover({ isOpen, setIsOpen, label, variant, size, showIcon, side, align, icon, mediaUrl, title, description, width, trackVisibility, actions, onClick, hideLabel, }: UpsellingPopoverProps): JSX_2.Element;
 
@@ -4955,7 +4956,7 @@ declare type UpsellingPopoverProps = {
     hideLabel?: boolean;
 };
 
-export declare const UpsellRequestResponseDialog: WithDataTestIdReturnType_2<ForwardRefExoticComponent<UpsellRequestResponseDialogProps & RefAttributes<HTMLDivElement>>>;
+export declare const UpsellRequestResponseDialog: WithDataTestIdReturnType_4<ForwardRefExoticComponent<UpsellRequestResponseDialogProps & RefAttributes<HTMLDivElement>>>;
 
 declare interface UpsellRequestResponseDialogProps {
     open: boolean;
@@ -5269,7 +5270,7 @@ declare type ValueDisplayVisualizationType = "table" | "card" | "list" | (string
 
 export declare type Variant = (typeof statuses)[number];
 
-export declare const VerticalBarChart: WithDataTestIdReturnType_3<ForwardRefExoticComponent<Omit<ChartPropsBase<ChartConfig_2> & {
+export declare const VerticalBarChart: WithDataTestIdReturnType_5<ForwardRefExoticComponent<Omit<ChartPropsBase<ChartConfig_2> & {
 label?: boolean;
 showRatio?: boolean;
 valueFormatter?: (value: string | number | undefined) => string | number;
@@ -5393,11 +5394,6 @@ declare module "gridstack" {
 }
 
 
-declare namespace Calendar {
-    var displayName: string;
-}
-
-
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         aiBlock: {
@@ -5423,4 +5419,9 @@ declare module "@tiptap/core" {
             insertTranscript: (data: TranscriptData) => ReturnType;
         };
     }
+}
+
+
+declare namespace Calendar {
+    var displayName: string;
 }
