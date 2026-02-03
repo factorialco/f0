@@ -2197,7 +2197,7 @@ export declare interface F0AlertProps {
     variant: AlertVariant;
 }
 
-export declare const F0Avatar: WithDataTestIdReturnType_2<({ avatar, size }: AvatarProps) => ReactNode>;
+export declare const F0Avatar: WithDataTestIdReturnType_2<({ avatar, size, dataTestId, }: AvatarProps) => ReactNode>;
 
 export declare const F0AvatarAlert: WithDataTestIdReturnType_2<({ type, size, "aria-label": ariaLabel, "aria-labelledby": ariaLabelledby, }: AlertAvatarProps_2) => JSX_2.Element>;
 
