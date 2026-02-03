@@ -91,7 +91,7 @@ const Header = ({
   return (
     <div className="flex flex-col">
       {((metadata && metadata.length > 0) || hasActions) && (
-        <div className="flex flex-col items-start justify-between gap-2 px-6 py-4 sm:flex-row sm:items-center">
+        <div className="flex flex-col items-start justify-between gap-2 sm:px-6 px-0 py-4 sm:flex-row sm:items-center">
           {metadata && metadata.length > 0 && <Metadata items={metadata} />}
           <div className="flex flex-shrink-0 flex-row items-center gap-2">
             {hasOtherActions && <Dropdown items={visibleOtherActions} />}

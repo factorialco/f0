@@ -44,11 +44,16 @@ export const Default: Story = {
       content: initialContent,
       title: "Lorem Ipsum Dolor Sit Amet",
     },
-
+    titlePlaceholder: "Untitled note",
     imageUploadConfig: {
       onUpload: mockImageUpload,
     },
-
+    banner: {
+      icon: Pencil,
+      title:
+        "You are currently in edit mode. Any modifications you make will be visible once you publish your changes",
+      variant: "info",
+    },
     aiBlockConfig: {
       title: "AI Pre-Meeting Helper",
       onClick: () => {
@@ -112,12 +117,7 @@ export const Default: Story = {
         },
       ],
     },
-    banner: {
-      icon: Pencil,
-      title:
-        "You are currently in edit mode. Any modifications you make will be visible once you publish your changes",
-      variant: "info",
-    },
+
     primaryAction: {
       label: "Publish",
       onClick: () => {
@@ -172,6 +172,13 @@ export const Default: Story = {
         value: {
           type: "tag-list",
           tags: ["Meeting", "Q1"],
+        },
+      },
+      {
+        label: "Description",
+        value: {
+          type: "text",
+          content: "hello",
         },
       },
       {
