@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.343.0](https://github.com/factorialco/f0/compare/f0-react-v1.342.0...f0-react-v1.343.0) (2026-02-03)
+
+
+### Features
+
+* set long label for consistency ([#3318](https://github.com/factorialco/f0/issues/3318)) ([6e98745](https://github.com/factorialco/f0/commit/6e9874599f91aeb520f6c5e5eef2f5467fa6b621))
+
 ## [1.342.0](https://github.com/factorialco/f0/compare/f0-react-v1.341.1...f0-react-v1.342.0) (2026-02-02)
 
 
