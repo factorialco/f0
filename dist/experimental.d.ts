@@ -2594,8 +2594,12 @@ declare const defaultTranslations: {
     };
     readonly forms: {
         readonly actionBar: {
-            readonly unsavedChanges: "Unsaved changes";
+            readonly unsavedChanges: "You have changes pending to be saved";
             readonly discard: "Discard";
+            readonly issues: {
+                readonly one: "{{count}} issue";
+                readonly other: "{{count}} issues";
+            };
         };
         readonly validation: {
             readonly required: "This field is required";
@@ -2896,7 +2900,7 @@ declare type ExtractVisualizationSettings<T> = T extends {
     };
 } ? S : never;
 
-export declare const F0ActionBar: ({ isOpen, secondaryActions, label, ...props }: F0ActionBarProps) => JSX_2.Element;
+export declare const F0ActionBar: ({ isOpen, secondaryActions, label, variant, leftContent, ...props }: F0ActionBarProps) => JSX_2.Element;
 
 declare interface F0ActionBarProps {
     /**
@@ -2915,6 +2919,17 @@ declare interface F0ActionBarProps {
      * The label of the action bar
      */
     label?: string;
+    /**
+     * Visual variant of the action bar
+     * - "dark": Dark background with light text (default)
+     * - "light": Light background with dark text
+     * @default "dark"
+     */
+    variant?: "dark" | "light";
+    /**
+     * Custom content to render on the left side (e.g., error navigation)
+     */
+    leftContent?: React.ReactNode;
 }
 
 export declare const F0AiBanner: ForwardRefExoticComponent<AiBannerInternalProps & RefAttributes<HTMLDivElement>> & {

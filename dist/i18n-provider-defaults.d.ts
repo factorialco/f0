@@ -482,8 +482,12 @@ export declare const defaultTranslations: {
     };
     readonly forms: {
         readonly actionBar: {
-            readonly unsavedChanges: "Unsaved changes";
+            readonly unsavedChanges: "You have changes pending to be saved";
             readonly discard: "Discard";
+            readonly issues: {
+                readonly one: "{{count}} issue";
+                readonly other: "{{count}} issues";
+            };
         };
         readonly validation: {
             readonly required: "This field is required";

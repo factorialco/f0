@@ -2301,8 +2301,12 @@ export declare const defaultTranslations: {
     };
     readonly forms: {
         readonly actionBar: {
-            readonly unsavedChanges: "Unsaved changes";
+            readonly unsavedChanges: "You have changes pending to be saved";
             readonly discard: "Discard";
+            readonly issues: {
+                readonly one: "{{count}} issue";
+                readonly other: "{{count}} issues";
+            };
         };
         readonly validation: {
             readonly required: "This field is required";
@@ -3268,8 +3272,11 @@ declare interface F0FormActionBarProps<TSchema extends z.ZodObject<ZodRawShape>>
     submitType: "action-bar";
     /** Whether to show a Discard button to reset form changes */
     discardableChanges?: boolean;
-    /** Label for the discard button (defaults to i18n "forms.actionBar.discard") */
-    discardLabel?: string;
+    /**
+     * Configuration for the discard button (label and icon)
+     * @default { label: "Discard", icon: Delete }
+     */
+    discardConfig?: F0FormDiscardConfig;
     /** Label shown in the action bar (defaults to i18n "forms.actionBar.unsavedChanges") */
     actionBarLabel?: string;
 }
@@ -3288,8 +3295,11 @@ declare interface F0FormBaseProps<TSchema extends z.ZodObject<ZodRawShape>> {
     defaultValues?: Partial<z.infer<TSchema>>;
     /** Callback when the form is submitted with valid data */
     onSubmit: (data: z.infer<TSchema>) => Promise<F0FormSubmitResult> | F0FormSubmitResult;
-    /** Label for the submit button */
-    submitLabel?: string;
+    /**
+     * Configuration for the submit button (label and icon)
+     * @default { label: "Submit", icon: Save }
+     */
+    submitConfig?: F0FormSubmitConfig;
     /** Additional class name for the form */
     className?: string;
     /**
@@ -3307,6 +3317,21 @@ declare interface F0FormDefaultSubmitProps<TSchema extends z.ZodObject<ZodRawSha
     submitType?: "default";
     /** Whether to show the submit button */
     showSubmitButton?: boolean;
+}
+
+/**
+ * Configuration for the discard button (action bar only)
+ */
+export declare interface F0FormDiscardConfig {
+    /** Custom label for the discard button */
+    label?: string;
+    /**
+     * Custom icon for the discard button
+     * - undefined: uses default Delete icon
+     * - null: no icon shown
+     * - IconType: custom icon
+     */
+    icon?: IconType | null;
 }
 
 /**
@@ -3409,6 +3434,21 @@ export declare type F0FormProps<TSchema extends z.ZodObject<ZodRawShape>> = F0Fo
  * Type helper for creating a form schema with F0 fields
  */
 export declare type F0FormSchema<T extends Record<string, ZodTypeAny>> = z.ZodObject<T>;
+
+/**
+ * Configuration for the submit button
+ */
+export declare interface F0FormSubmitConfig {
+    /** Custom label for the submit button */
+    label?: string;
+    /**
+     * Custom icon for the submit button
+     * - undefined: uses default Save icon
+     * - null: no icon shown
+     * - IconType: custom icon
+     */
+    icon?: IconType | null;
+}
 
 /**
  * Result of form submission
