@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.344.0](https://github.com/factorialco/f0/compare/f0-react-v1.343.2...f0-react-v1.344.0) (2026-02-03)
+
+
+### Features
+
+* **RichTextEditor:** replace custom button with AIButton  ([#3341](https://github.com/factorialco/f0/issues/3341)) ([918e683](https://github.com/factorialco/f0/commit/918e683c34aeb620376a16086c15e3b91c76d453))
+
 ## [1.343.2](https://github.com/factorialco/f0/compare/f0-react-v1.343.1...f0-react-v1.343.2) (2026-02-03)
 
 
