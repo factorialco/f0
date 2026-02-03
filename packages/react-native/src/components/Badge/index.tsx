@@ -1,7 +1,7 @@
-import { cva, type VariantProps } from "cva";
+import { tv, type VariantProps } from "tailwind-variants";
 import { Icon, type IconType } from "../Icon";
 
-const badgeVariants = cva({
+const badgeVariants = tv({
   base: "flex shrink-0 items-center justify-center rounded-full",
   variants: {
     type: {

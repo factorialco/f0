@@ -59,6 +59,12 @@
       "react-native": "./src/styles/theme.css",
       "default": "./src/styles/theme.css"
     },
+    "./classes.css": {
+      "import": "./src/styles/classes.css",
+      "require": "./src/styles/classes.css",
+      "react-native": "./src/styles/classes.css",
+      "default": "./src/styles/classes.css"
+    },
     "./expo-router/entry": {
       "import": "./expo-router/entry.js",
       "require": "./expo-router/entry.js",
@@ -71,10 +77,16 @@
     "lib"
   ],
   "scripts": {
-    "prebuild": "node -e \"const fs=require('fs');const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));pkg._originalMain=pkg.main;pkg.main='./lib/module/index.js';fs.writeFileSync('package.json',JSON.stringify(pkg,null,2))\"",
-    "build": "bob build",
-    "postbuild": "node -e \"const fs=require('fs');const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));if(pkg._originalMain){pkg.main=pkg._originalMain;delete pkg._originalMain;fs.writeFileSync('package.json',JSON.stringify(pkg,null,2))}\" && test -d lib/typescript/react-native/package && rm -rf lib/typescript/react-native/package || true",
-    "prepare": "bob build",
+    "prebuild": "node scripts/set-main.cjs build",
+    "prebuild:classes": "node scripts/generate-classes-css.mjs",
+    "generate:styles": "node scripts/generate-classes-css.mjs",
+    "build": "pnpm run prebuild:classes && node scripts/build-with-fix.cjs",
+    "build:dev": "SKIP_TYPE_VALIDATION=true pnpm run prebuild:classes && node scripts/build-with-fix.cjs --skip-type-validation",
+    "postbuild": "node scripts/set-main.cjs dev && test -d lib/typescript/react-native/package && rm -rf lib/typescript/react-native/package || true",
+    "dev:setup": "node scripts/set-main.cjs dev",
+    "generate-classes": "node scripts/generate-classes-css.mjs",
+    "prepublishOnly": "pnpm run generate:styles",
+    "prepare": "pnpm run generate-classes && node scripts/build-with-fix.cjs",
     "lint": "eslint -c eslint.config.mjs . --report-unused-disable-directives --max-warnings 0",
     "lint-fix": "eslint -c eslint.config.mjs . --fix --report-unused-disable-directives --max-warnings 0",
     "test": "jest",
@@ -102,6 +114,8 @@
     "react-native-safe-area-context": "^5.4.0",
     "react-native-svg": "^15.12.1",
     "react-native-worklets-core": "^1.6.2",
+    "tailwind-merge": "^3.4.0",
+    "tailwind-variants": "^3.2.2",
     "tailwindcss": "^4.1.18",
     "uniwind": "^1.2.7",
     "twemoji-parser": "^14.0.0"
@@ -112,21 +126,23 @@
     }
   },
   "dependencies": {
-    "clsx": "^2.1.1",
-    "cva": "1.0.0-beta.3",
     "expo-clipboard": "~8.0.8",
     "lodash": "^4.17.21",
-    "tailwind-merge": "^2.6.0"
+    "tailwind-merge": "^3.4.0",
+    "tailwind-variants": "^3.2.2"
   },
   "devDependencies": {
     "@babel/core": "^7.28.0",
     "@svgr/cli": "^8.1.0",
     "@types/lodash": "^4.17.16",
     "@types/twemoji-parser": "^13.1.4",
+    "glob": "^11.0.0",
     "globals": "^16.0.0",
     "npm-run-all2": "^8.0.4",
     "prettier": "^3.5.2",
     "prettier-plugin-tailwindcss": "^0.6.10",
+    "tailwind-merge": "^3.4.0",
+    "tailwind-variants": "^3.2.2",
     "tailwindcss": "^4.1.18",
     "uniwind": "^1.2.7",
     "tailwindcss-animate": "^1.0.7",
@@ -134,7 +150,6 @@
     "@react-navigation/bottom-tabs": "^7.4.0",
     "@react-navigation/elements": "^2.6.3",
     "@react-navigation/native": "^7.1.8",
-    "clsx": "^2.1.1",
     "expo": "~54.0.32",
     "expo-clipboard": "^8.0.8",
     "expo-constants": "~18.0.13",
@@ -158,7 +173,6 @@
     "react-native-svg": "^15.15.1",
     "react-native-web": "~0.21.0",
     "react-native-worklets": "0.5.1",
-    "tailwind-merge": "^3.4.0",
     "@babel/preset-typescript": "^7.28.5",
     "@testing-library/react-native": "^13.3.3",
     "@types/jest": "^30.0.0",

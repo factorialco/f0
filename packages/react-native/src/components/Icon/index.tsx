@@ -1,4 +1,4 @@
-import { cva, type VariantProps } from "cva";
+import { tv, type VariantProps } from "tailwind-variants";
 import React, {
     forwardRef,
     ForwardRefExoticComponent,
@@ -8,7 +8,7 @@ import { Svg, SvgProps } from "react-native-svg";
 import { withUniwind } from "uniwind";
 import { cn } from "../../lib/utils";
 
-const iconVariants = cva({
+const iconVariants = tv({
   base: "shrink-0",
   variants: {
     size: {

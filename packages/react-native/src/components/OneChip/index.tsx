@@ -1,4 +1,4 @@
-import { cva, type VariantProps } from "cva";
+import { tv, type VariantProps } from "tailwind-variants";
 import { cn } from "../../lib/utils";
 import { Icon, type IconType } from "../Icon";
 import { View, Text, Pressable } from "react-native";
@@ -6,7 +6,7 @@ import { AppIcons } from "../../icons";
 
 const { CrossedCircle } = AppIcons;
 
-export const chipContainerVariants = cva({
+export const chipContainerVariants = tv({
   base: "flex items-center gap-1 rounded-full border border-solid border-f1-border px-2 py-0.5 grow-0",
   variants: {
     variant: {
@@ -19,7 +19,7 @@ export const chipContainerVariants = cva({
   },
 });
 
-export const chipTextVariants = cva({
+export const chipTextVariants = tv({
   base: "font-medium",
   variants: {
     variant: {

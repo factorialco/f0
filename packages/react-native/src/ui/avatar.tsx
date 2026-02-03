@@ -1,4 +1,4 @@
-import { cva } from "cva";
+import { tv } from "tailwind-variants";
 import * as React from "react";
 import { cn } from "../lib/utils";
 import { View, Text, Image } from "react-native";
@@ -29,7 +29,7 @@ const textSizes = {
   xlarge: "text-3xl",
 };
 
-const avatarVariants = cva({
+const avatarVariants = tv({
   base: "flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold",
   variants: {
     size: {
@@ -72,7 +72,7 @@ type AvatarProps = React.ComponentPropsWithoutRef<typeof View> & {
 
 const Avatar = ({ size, type, color, className, ...props }: AvatarProps) => (
   <View
-    className={cn(avatarVariants({ size, type, color, className }))}
+    className={cn(avatarVariants({ size, type, color }), className)}
     {...props}
   />
 );

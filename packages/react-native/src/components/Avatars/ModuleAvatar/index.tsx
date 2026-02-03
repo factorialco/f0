@@ -1,10 +1,10 @@
 import { View } from "react-native";
-import { cva, type VariantProps } from "cva";
+import { tv, type VariantProps } from "tailwind-variants";
 import { IconType, applyIconInterop } from "../../Icon";
 import Svg, { Defs, LinearGradient, Stop, Path } from "react-native-svg";
 import { ModuleId, modules } from "./modules";
 
-const moduleAvatarVariants = cva({
+const moduleAvatarVariants = tv({
   base: "relative flex shrink-0 items-center justify-center",
   variants: {
     size: {
@@ -19,7 +19,7 @@ const moduleAvatarVariants = cva({
   },
 });
 
-const iconContainerVariants = cva({
+const iconContainerVariants = tv({
   base: "absolute inset-0 items-center justify-center z-10",
   variants: {
     size: {
@@ -34,7 +34,7 @@ const iconContainerVariants = cva({
   },
 });
 
-const iconSizeVariants = cva({
+const iconSizeVariants = tv({
   base: "relative text-f1-foreground-inverse drop-shadow",
   variants: {
     size: {
