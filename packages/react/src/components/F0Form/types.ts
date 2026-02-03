@@ -84,13 +84,6 @@ export type FormDefinitionItem = FieldItem | RowDefinition | SectionDefinition
 // ============================================================================
 
 /**
- * Type of submit UI to render
- * - "default": Standard submit button at the bottom of the form
- * - "action-bar": Floating action bar that appears when form has changes
- */
-export type F0FormSubmitType = "default" | "action-bar"
-
-/**
  * When to trigger and display validation errors
  * - "on-blur": Errors appear when the user leaves a field (default)
  * - "on-change": Errors appear as the user types (real-time validation)
@@ -99,9 +92,9 @@ export type F0FormSubmitType = "default" | "action-bar"
 export type F0FormErrorTriggerMode = "on-blur" | "on-change" | "on-submit"
 
 /**
- * Configuration for the submit button
+ * Base configuration shared by all submit types
  */
-export interface F0FormSubmitConfig {
+interface F0FormSubmitConfigBase {
   /** Custom label for the submit button */
   label?: string
   /**
@@ -129,57 +122,24 @@ export interface F0FormDiscardConfig {
 }
 
 /**
- * Base props shared by all submit types
+ * Submit configuration for default button type
  */
-interface F0FormBaseProps<TSchema extends z.ZodObject<ZodRawShape>> {
-  /** Unique name for the form, used for generating anchor links (e.g., #forms.[name].[sectionId].[fieldId]) */
-  name: string
-  /** Zod object schema with F0 field configurations */
-  schema: TSchema
-  /** Section configurations keyed by section ID */
-  sections?: Record<string, F0SectionConfig>
-  /** Default values for the form fields (partial of the schema type) */
-  defaultValues?: Partial<z.infer<TSchema>>
-  /** Callback when the form is submitted with valid data */
-  onSubmit: (
-    data: z.infer<TSchema>
-  ) => Promise<F0FormSubmitResult> | F0FormSubmitResult
+interface F0FormDefaultSubmitConfig extends F0FormSubmitConfigBase {
   /**
-   * Configuration for the submit button (label and icon)
-   * @default { label: "Submit", icon: Save }
+   * Type of submit UI
+   * @default "default"
    */
-  submitConfig?: F0FormSubmitConfig
-  /** Additional class name for the form */
-  className?: string
-  /**
-   * When to trigger and display validation errors
-   * @default "on-blur"
-   */
-  errorTriggerMode?: F0FormErrorTriggerMode
+  type?: "default"
 }
 
 /**
- * Props when using the default submit button
+ * Submit configuration for action bar type
  */
-interface F0FormDefaultSubmitProps<
-  TSchema extends z.ZodObject<ZodRawShape>,
-> extends F0FormBaseProps<TSchema> {
-  /** Type of submit UI (default button) */
-  submitType?: "default"
-  /** Whether to show the submit button */
-  showSubmitButton?: boolean
-}
-
-/**
- * Props when using the action bar submit
- */
-interface F0FormActionBarProps<
-  TSchema extends z.ZodObject<ZodRawShape>,
-> extends F0FormBaseProps<TSchema> {
+interface F0FormActionBarSubmitConfig extends F0FormSubmitConfigBase {
   /** Type of submit UI (floating action bar) */
-  submitType: "action-bar"
+  type: "action-bar"
   /** Whether to show a Discard button to reset form changes */
-  discardableChanges?: boolean
+  discardable?: boolean
   /**
    * Configuration for the discard button (label and icon)
    * @default { label: "Discard", icon: Delete }
@@ -188,6 +148,13 @@ interface F0FormActionBarProps<
   /** Label shown in the action bar (defaults to i18n "forms.actionBar.unsavedChanges") */
   actionBarLabel?: string
 }
+
+/**
+ * Configuration for form submission behavior and appearance
+ */
+export type F0FormSubmitConfig =
+  | F0FormDefaultSubmitConfig
+  | F0FormActionBarSubmitConfig
 
 /**
  * Props for the F0Form component
@@ -213,16 +180,41 @@ interface F0FormActionBarProps<
  * <F0Form
  *   name="my-form"
  *   schema={schema}
- *   submitType="action-bar"
- *   discardableChanges
+ *   submitConfig={{
+ *     type: "action-bar",
+ *     discardable: true,
+ *   }}
  *   defaultValues={{ name: "" }}
  *   onSubmit={(data) => ({ success: true })}
  * />
  * ```
  */
-export type F0FormProps<TSchema extends z.ZodObject<ZodRawShape>> =
-  | F0FormDefaultSubmitProps<TSchema>
-  | F0FormActionBarProps<TSchema>
+export interface F0FormProps<TSchema extends z.ZodObject<ZodRawShape>> {
+  /** Unique name for the form, used for generating anchor links (e.g., #forms.[name].[sectionId].[fieldId]) */
+  name: string
+  /** Zod object schema with F0 field configurations */
+  schema: TSchema
+  /** Section configurations keyed by section ID */
+  sections?: Record<string, F0SectionConfig>
+  /** Default values for the form fields (partial of the schema type) */
+  defaultValues?: Partial<z.infer<TSchema>>
+  /** Callback when the form is submitted with valid data */
+  onSubmit: (
+    data: z.infer<TSchema>
+  ) => Promise<F0FormSubmitResult> | F0FormSubmitResult
+  /**
+   * Configuration for form submission behavior and appearance
+   * @default { type: "default", label: "Submit", icon: Save }
+   */
+  submitConfig?: F0FormSubmitConfig
+  /** Additional class name for the form */
+  className?: string
+  /**
+   * When to trigger and display validation errors
+   * @default "on-blur"
+   */
+  errorTriggerMode?: F0FormErrorTriggerMode
+}
 
 /**
  * Result of form submission

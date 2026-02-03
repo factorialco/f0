@@ -142,43 +142,37 @@ export function F0Form<TSchema extends z.ZodObject<ZodRawShape>>(
     errorTriggerMode = "on-blur",
   } = props
 
+  // Resolve submit type from config
+  const isActionBar = submitConfig?.type === "action-bar"
+
   // Resolve submit button configuration with defaults
   // icon: undefined = use default, null = no icon, IconType = custom icon
   const submitLabel = submitConfig?.label ?? "Submit"
   const submitIcon =
     submitConfig?.icon === null ? undefined : (submitConfig?.icon ?? Save)
 
-  // Extract submit type specific props
-  const submitType = props.submitType ?? "default"
-  const showSubmitButton =
-    submitType === "default"
-      ? ((props as { showSubmitButton?: boolean }).showSubmitButton ?? true)
-      : false
+  // Extract type-specific props
+  const showSubmitButton = submitConfig?.type === "default"
   const discardableChanges =
-    submitType === "action-bar"
-      ? ((props as { discardableChanges?: boolean }).discardableChanges ??
-        false)
-      : false
+    submitConfig?.type === "action-bar" && submitConfig?.discardable
 
   // Resolve discard button configuration with defaults
   // icon: undefined = use default, null = no icon, IconType = custom icon
-  const discardConfig =
-    submitType === "action-bar"
-      ? (
-          props as {
-            discardConfig?: { label?: string; icon?: typeof Delete | null }
-          }
-        ).discardConfig
-      : undefined
+  const discardConfig = isActionBar
+    ? (
+        submitConfig as
+          | { discardConfig?: { label?: string; icon?: typeof Delete | null } }
+          | undefined
+      )?.discardConfig
+    : undefined
   const discardLabel = discardConfig?.label ?? forms.actionBar.discard
   const discardIcon =
     discardConfig?.icon === null ? undefined : (discardConfig?.icon ?? Delete)
 
-  const actionBarLabel =
-    submitType === "action-bar"
-      ? ((props as { actionBarLabel?: string }).actionBarLabel ??
-        forms.actionBar.unsavedChanges)
-      : forms.actionBar.unsavedChanges
+  const actionBarLabel = isActionBar
+    ? ((submitConfig as { actionBarLabel?: string } | undefined)
+        ?.actionBarLabel ?? forms.actionBar.unsavedChanges)
+    : forms.actionBar.unsavedChanges
 
   // Infer the form values type from the schema
   type TValues = z.infer<TSchema>
@@ -298,7 +292,7 @@ export function F0Form<TSchema extends z.ZodObject<ZodRawShape>>(
           )}
 
           {/* Default submit button */}
-          {submitType === "default" && showSubmitButton && (
+          {!isActionBar && showSubmitButton && (
             <F0Button
               type="submit"
               label={submitLabel}
@@ -310,7 +304,7 @@ export function F0Form<TSchema extends z.ZodObject<ZodRawShape>>(
         </form>
 
         {/* Action bar submit - rendered outside form to prevent accidental form submission */}
-        {submitType === "action-bar" && (
+        {isActionBar && (
           <F0ActionBar
             isOpen={isDirty}
             variant="light"

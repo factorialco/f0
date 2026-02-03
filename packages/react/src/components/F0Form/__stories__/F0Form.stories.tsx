@@ -696,7 +696,10 @@ export const WithActionBar: Story = {
         <F0Form
           name="action-bar-example"
           schema={formSchema}
-          submitType="action-bar"
+          submitConfig={{
+            type: "action-bar",
+            label: "Save Changes",
+          }}
           defaultValues={{
             firstName: "John",
             lastName: "Doe",
@@ -708,7 +711,6 @@ export const WithActionBar: Story = {
             alert(`Settings saved: ${JSON.stringify(data, null, 2)}`)
             return { success: true }
           }}
-          submitConfig={{ label: "Save Changes" }}
         />
         <p className="mt-4 text-sm text-f1-foreground-secondary">
           Modify any field to see the action bar appear
@@ -720,7 +722,7 @@ export const WithActionBar: Story = {
 
 /**
  * Form with action bar and discard button.
- * When discardableChanges is true, a Discard button appears in the action bar.
+ * When discardable is true, a Discard button appears in the action bar.
  * Labels default to i18n values but can be customized.
  */
 export const WithActionBarAndDiscard: Story = {
@@ -754,9 +756,12 @@ export const WithActionBarAndDiscard: Story = {
         <F0Form
           name="action-bar-discard-example"
           schema={formSchema}
-          submitType="action-bar"
-          discardableChanges
-          discardConfig={{ label: "Discard Changes" }}
+          submitConfig={{
+            type: "action-bar",
+            label: "Save",
+            discardable: true,
+            discardConfig: { label: "Discard Changes" },
+          }}
           defaultValues={{
             companyName: "Acme Corp",
             industry: "tech",
@@ -768,7 +773,6 @@ export const WithActionBarAndDiscard: Story = {
             alert(`Company updated: ${JSON.stringify(data, null, 2)}`)
             return { success: true }
           }}
-          submitConfig={{ label: "Save" }}
         />
         <p className="mt-4 text-sm text-f1-foreground-secondary">
           Modify any field to see the action bar with Save and Discard buttons
