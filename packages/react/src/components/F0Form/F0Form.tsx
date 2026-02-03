@@ -202,7 +202,7 @@ export function F0Form<TSchema extends z.ZodObject<ZodRawShape>>(
       <FormProvider {...form}>
         <form
           onSubmit={form.handleSubmit(handleSubmit)}
-          className={cn(`flex flex-col ${FIELD_GAP}`, className)}
+          className={cn(`flex flex-col ${FIELD_GAP} max-w-[600px]`, className)}
         >
           {/* Render definition items with switch grouping */}
           {groupedItems.map((groupedItem, index) => {

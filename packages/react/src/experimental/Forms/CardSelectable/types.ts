@@ -29,14 +29,18 @@ export interface CardSelectableSingleProps<T extends CardSelectableValue> {
   multiple?: false
   /** Currently selected value */
   value?: T
-  /** Callback when selection changes */
-  onChange?: (value: T) => void
+  /** Callback when selection changes (receives undefined when isToggle and toggling off) */
+  onChange?: (value: T | undefined) => void
   /** Whether the entire selector is disabled */
   disabled?: boolean
   /** Label for the group (used for accessibility) */
   label?: string
   /** Layout direction (default: vertical) */
   layout?: "vertical" | "horizontal"
+  /** When true, shows a toggle/switch indicator instead of radio and allows toggling off */
+  isToggle?: boolean
+  /** When true, items are grouped in a single bordered container with dividers */
+  grouped?: boolean
 }
 
 export interface CardSelectableMultipleProps<T extends CardSelectableValue> {
@@ -54,6 +58,10 @@ export interface CardSelectableMultipleProps<T extends CardSelectableValue> {
   label?: string
   /** Layout direction (default: vertical) */
   layout?: "vertical" | "horizontal"
+  /** When true, shows a toggle/switch indicator instead of checkbox */
+  isToggle?: boolean
+  /** When true, items are grouped in a single bordered container with dividers */
+  grouped?: boolean
 }
 
 export type CardSelectableContainerProps<T extends CardSelectableValue> =

@@ -14,7 +14,7 @@ interface RowRendererProps {
  */
 export function RowRenderer({ row, sectionId }: RowRendererProps) {
   return (
-    <div className={`flex flex-row ${FIELD_GAP} [&>*]:flex-1`}>
+    <div className={`flex xs:flex-row flex-col ${FIELD_GAP} [&>*]:flex-1`}>
       {row.fields.map((field) => (
         <FieldRenderer key={field.id} field={field} sectionId={sectionId} />
       ))}
