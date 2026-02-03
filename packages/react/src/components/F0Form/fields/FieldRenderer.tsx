@@ -14,6 +14,7 @@ import {
 } from "@/ui/form"
 
 import { generateAnchorId, useF0FormContext } from "../context"
+import { isOptionalOrNullable } from "./schema"
 import type { F0Field } from "./types"
 import { evaluateRenderIf } from "./utils"
 
@@ -145,6 +146,9 @@ export function FieldRenderer({ field, sectionId }: FieldRendererProps) {
   // For checkbox and custom fields, label is handled internally
   const showLabel = field.type !== "checkbox" && field.type !== "custom"
 
+  // Determine if field is required based on validation schema
+  const isRequired = field.validation && !isOptionalOrNullable(field.validation)
+
   // Generate anchor ID for the field
   const anchorId = generateAnchorId(formName, sectionId, field.id)
 
@@ -160,6 +164,9 @@ export function FieldRenderer({ field, sectionId }: FieldRendererProps) {
               className="text-base font-medium leading-normal text-f1-foreground-secondary"
             >
               {field.label}
+              {isRequired && (
+                <span className="ml-0.5 text-f1-foreground-critical">*</span>
+              )}
             </label>
           )}
           <FormControl>

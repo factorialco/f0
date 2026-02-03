@@ -20,6 +20,8 @@ export interface CardSelectableItem<T extends CardSelectableValue> {
   avatar?: CardSelectableAvatarVariant
   /** Whether this item is disabled */
   disabled?: boolean
+  /** Whether this item is required (shows asterisk indicator) */
+  required?: boolean
 }
 
 export interface CardSelectableSingleProps<T extends CardSelectableValue> {

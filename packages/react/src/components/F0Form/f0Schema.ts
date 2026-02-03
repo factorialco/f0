@@ -27,6 +27,7 @@ type ZodTypeName =
   | "ZodOptional"
   | "ZodNullable"
   | "ZodDefault"
+  | "ZodLiteral"
 
 /**
  * Check if a schema is of a specific Zod type using _def.typeName

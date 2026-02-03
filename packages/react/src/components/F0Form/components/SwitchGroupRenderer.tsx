@@ -1,12 +1,24 @@
 import { useMemo } from "react"
 import { useFormContext } from "react-hook-form"
+import { ZodTypeAny } from "zod"
 
 import {
   CardSelectableContainer,
   type CardSelectableItem,
 } from "@/experimental/Forms/CardSelectable"
+
+import { isZodType, unwrapZodSchema } from "../f0Schema"
 import type { F0SwitchField } from "../fields/switch/types"
 import { evaluateRenderIf } from "../fields/utils"
+
+/**
+ * Check if a switch schema requires the value to be `true`.
+ * This is the case for z.literal(true) schemas.
+ */
+function isMustBeTrue(schema: ZodTypeAny): boolean {
+  const inner = unwrapZodSchema(schema)
+  return isZodType(inner, "ZodLiteral") && inner._def.value === true
+}
 
 interface SwitchGroupRendererProps {
   fields: F0SwitchField[]
@@ -40,6 +52,7 @@ export function SwitchGroupRenderer({ fields }: SwitchGroupRendererProps) {
         title: field.label,
         description: field.helpText,
         disabled: field.disabled,
+        required: !!(field.validation && isMustBeTrue(field.validation)),
       })),
     [visibleFields]
   )

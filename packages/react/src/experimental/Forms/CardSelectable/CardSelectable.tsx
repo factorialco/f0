@@ -158,6 +158,9 @@ export function CardSelectable<T extends CardSelectableValue>({
           )}
         >
           {item.title}
+          {item.required && (
+            <span className="ml-0.5 text-f1-foreground-critical">*</span>
+          )}
         </span>
         {item.description && (
           <span className="text-base text-f1-foreground-secondary">

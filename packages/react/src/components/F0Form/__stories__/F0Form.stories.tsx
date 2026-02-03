@@ -303,8 +303,18 @@ export const AllFieldTypes: Story = {
         fieldType: "checkbox",
         helpText: "Check this box to agree",
       }),
+      requiredCheckboxField: f0FormField(z.literal(true), {
+        label: "Required Checkbox Field",
+        fieldType: "checkbox",
+        helpText: "Check this box to agree",
+      }),
       switchField: f0FormField(z.boolean(), {
         label: "Switch Field",
+        fieldType: "switch",
+        helpText: "Toggle this switch",
+      }),
+      requiredSwitchField: f0FormField(z.literal(true), {
+        label: "Required Switch Field",
         fieldType: "switch",
         helpText: "Toggle this switch",
       }),
