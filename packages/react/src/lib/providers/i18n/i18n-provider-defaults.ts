@@ -283,6 +283,7 @@ export const defaultTranslations = {
   select: {
     noResults: "No results found",
     loadingMore: "Loading...",
+    applySelection: "Apply selection",
   },
   numberInput: {
     between: "It should be between {{min}} and {{max}}",
