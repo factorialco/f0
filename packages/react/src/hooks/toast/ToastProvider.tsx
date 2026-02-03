@@ -46,6 +46,76 @@ const toastVariants = {
 
 const minUncollapsedToasts = 3
 
+const StackedToasts = ({ items }: { items: ToastProviderItem[] }) => {
+  const [isHovered, setIsHovered] = useState(false)
+
+  if (items.length === 0) return null
+
+  return (
+    <div
+      className="relative z-[101]"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      {/* Invisible backdrop to maintain hover area when expanded */}
+      {isHovered && (
+        <div
+          className="pointer-events-auto absolute -left-4 -right-4 -top-4 bottom-[-1000px] z-[-1]"
+          style={{ backgroundColor: "red" }}
+        />
+      )}
+
+      <div className="relative">
+        <AnimatePresence>
+          {items.map((item, index) => {
+            // Logic for visual compression
+            // We want the first item (newest collapsed) to be at the front
+            // index 0 -> front
+            const isVisible = index < 3
+
+            return (
+              <motion.div
+                key={item.id}
+                layout
+                initial={false}
+                animate={isHovered ? "expanded" : "collapsed"}
+                exit={{ opacity: 0, scale: 0.5, transition: { duration: 0.2 } }}
+                variants={{
+                  collapsed: {
+                    y: index * 10, // Compressed stack
+                    scale: 1 - index * 0.05,
+                    opacity: isVisible ? 1 : 0,
+                    zIndex: 100 - index,
+                    height: index === 0 ? "auto" : 0, // Collapse height for non-front items to avoid gaps
+                  },
+                  expanded: {
+                    y: 0,
+                    scale: 1,
+                    opacity: 1,
+                    zIndex: 100 - index,
+                    height: "auto",
+                    marginBottom: 16, // Gap between expanded items
+                  },
+                }}
+                transition={{
+                  type: "spring",
+                  stiffness: 300,
+                  damping: 30,
+                }}
+                className={cn(
+                  !isHovered && index > 0 && "absolute top-0 left-0 right-0"
+                )}
+              >
+                <F0Toast {...item} forcePauseTimer />
+              </motion.div>
+            )
+          })}
+        </AnimatePresence>
+      </div>
+    </div>
+  )
+}
+
 const ToastsContainer = ({
   items,
   position = "top-right",
@@ -53,21 +123,16 @@ const ToastsContainer = ({
   items: ToastProviderItem[]
   position?: ToastContainerPosition
 }) => {
-  const toasts = useMemo(() => {
-    return items
-      .slice()
-      .reverse()
-      .map((item, index) => {
-        return {
-          ...item,
-          isCollapsed: items.length - index - 1 >= minUncollapsedToasts,
-        }
-      })
-  }, [items])
+  const { collapsedItems, activeItems } = useMemo(() => {
+    // Newer toasts at the bottom -> Active list is the end of the array
+    const activeCount = Math.min(items.length, minUncollapsedToasts)
+    const active = items.slice(items.length - activeCount)
 
-  const collapsedCount = useMemo(() => {
-    return toasts.filter((item) => item.isCollapsed).length
-  }, [toasts])
+    // Stack is the rest, reversed so newest-collapsed is at index 0 (Front)
+    const collapsed = items.slice(0, items.length - activeCount).reverse()
+
+    return { collapsedItems: collapsed, activeItems: active }
+  }, [items])
 
   return (
     <div
@@ -78,53 +143,25 @@ const ToastsContainer = ({
         )
       )}
     >
-      <div className="flex w-[350px] max-w-full flex-col gap-2 p-6">
-        <div className="relative">
-          {toasts
-            .filter((item) => item.isCollapsed)
-            .map((item, index) => {
-              const scale = Math.max(0.7, 1 - index / 10)
-              const translateY = Math.min(
-                20,
-                (collapsedCount - index * scale - 1) * 12
-              )
-              return (
-                <div
-                  key={item.id}
-                  className={cn(
-                    index !== collapsedCount - 1 &&
-                      "absolute top-0 left-0 right-0 bottom-0"
-                  )}
-                  style={{
-                    zIndex: 100 - index,
-                    transform: `scale(${scale}) translateY(-${translateY}px)`,
-                    border: "10px solid red",
-                  }}
-                >
-                  <F0Toast {...item} forcePauseTimer />
-                </div>
-              )
-            })}
-        </div>
-        {/* Uncollapsed toasts */}
+      <div className="flex w-[350px] max-w-full flex-col gap-4 p-6">
+        {/* Stacked Toasts at the Top */}
+        <StackedToasts items={collapsedItems} />
+
+        {/* Active Toasts below */}
         <div className="relative flex flex-col gap-4">
           <AnimatePresence mode="popLayout" initial={false}>
-            {toasts
-              .filter((item) => !item.isCollapsed)
-              .map((item) => {
-                return (
-                  <motion.div
-                    key={item.id}
-                    layout
-                    variants={toastVariants}
-                    initial="initial"
-                    animate="animate"
-                    exit="exit"
-                  >
-                    <F0Toast {...item} forcePauseTimer={item.isCollapsed} />
-                  </motion.div>
-                )
-              })}
+            {activeItems.map((item) => (
+              <motion.div
+                key={item.id}
+                layout
+                variants={toastVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+              >
+                <F0Toast {...item} />
+              </motion.div>
+            ))}
           </AnimatePresence>
         </div>
       </div>
