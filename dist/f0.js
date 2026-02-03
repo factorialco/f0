@@ -1,12 +1,12 @@
 import { y as G, z as je, D as In, G as Oi, J as zi, K as gs, M as ms, N as Hn, Q as _e, R as Li, V as Fn, W as vs, X as ys, Y as bs, Z as xs, _ as he, $ as be, a0 as ws, a1 as Cs, a2 as Bn, a3 as _s, a4 as Bt, a5 as Wn, a6 as Gn, a7 as $n, a8 as jn, a9 as Un, aa as Vn, ab as Es, ac as Ds, ad as Ss, ae as Rs, af as Ns, w as We, ag as cn, ah as Ts, ai as As, aj as gi, ak as ks, al as Os, am as zs, an as Ls, ao as Ps, ap as qn, aq as Ms, ar as Is, as as Hs, at as Fs, au as Bs, av as Kn, aw as Ws, ax as Gs, ay as $s, az as js, aA as Us, aB as Vs, aC as qs, aD as Ks } from "./F0AiChat-BN99sHG6.js";
-import { A as Xu, aS as Yu, B as Zu, C as Ju, E as Qu, b5 as eh, g as th, F as ih, a as nh, v as rh, h as sh, b as oh, aE as ah, aF as lh, aG as ch, aH as dh, aJ as uh, aK as hh, aL as fh, aM as ph, aN as gh, aO as mh, aP as vh, b1 as yh, q as bh, r as xh, s as wh, t as Ch, c as _h, aT as Eh, l as Dh, m as Sh, n as Rh, H as Nh, I as Th, L as Ah, O as kh, aR as Oh, o as zh, P as Lh, S as Ph, T as Mh, j as Ih, k as Hh, U as Fh, b2 as Bh, aY as Wh, p as Gh, i as $h, a$ as jh, aX as Uh, b6 as Vh, aW as qh, aV as Kh, aI as Xh, u as Yh, aU as Zh, aZ as Jh, d as Qh, b7 as ef, aQ as tf, a_ as nf, f as rf, e as sf, b4 as of, b0 as af, b3 as lf } from "./F0AiChat-BN99sHG6.js";
+import { A as Yu, aS as Zu, B as Ju, C as Qu, E as eh, b5 as th, g as ih, F as nh, a as rh, v as sh, h as oh, b as ah, aE as lh, aF as ch, aG as dh, aH as uh, aJ as hh, aK as fh, aL as ph, aM as gh, aN as mh, aO as vh, aP as yh, b1 as bh, q as xh, r as wh, s as Ch, t as _h, c as Eh, aT as Dh, l as Sh, m as Rh, n as Nh, H as Th, I as Ah, L as kh, O as Oh, aR as zh, o as Lh, P as Ph, S as Mh, T as Ih, j as Hh, k as Fh, U as Bh, b2 as Wh, aY as Gh, p as $h, i as jh, a$ as Uh, aX as Vh, b6 as qh, aW as Kh, aV as Xh, aI as Yh, u as Zh, aU as Jh, aZ as Qh, d as ef, b7 as tf, aQ as nf, a_ as rf, f as sf, e as of, b4 as af, b0 as lf, b3 as cf } from "./F0AiChat-BN99sHG6.js";
 import { jsx as h, jsxs as O, Fragment as Et } from "react/jsx-runtime";
 import I, { forwardRef as ae, useRef as M, useImperativeHandle as Xs, Children as Wt, createContext as De, useContext as me, useState as F, useMemo as P, useEffect as H, useCallback as U, useLayoutEffect as Ei, createElement as dn, isValidElement as Xn, Fragment as Ys, memo as Zs, useReducer as Js, cloneElement as Qs, PureComponent as eo } from "react";
 import { createPortal as Yn, unstable_batchedUpdates as Lt } from "react-dom";
 import { L as Zn, C as to, i as Jn, D as io, S as un, a as no, f as mi, b as ht, c as ro, A as so, d as Pt, e as Qn, E as oo, g as Ht, h as ao, j as lo, k as co, l as Je, m as er, u as uo, G as ho, n as fo, o as hn, p as po, q as tr, r as go, B as ir, X as nr, Y as Di, s as mo, t as rr, v as vo, w as yo, x as bo, y as xo, z as wo, F as Co, H as _o, I as Eo, J as fn, K as Do, M as ft, N as vi, O as So, P as Ro, Q as No, R as To, T as Ao, U as ko, V as Oo, W as zo, Z as Lo, _ as Po, $ as Mo, a0 as pn, a1 as Io, a2 as Ho, a3 as sr, a4 as Fo, a5 as Bo, a6 as Wo, a7 as Pi, a8 as Go, a9 as $o, aa as jo, ab as Uo, ac as Vo, ad as qo, ae as Ko, af as Xo, ag as Yo, ah as Zo, ai as Jo, aj as Qo, ak as ea, al as or, am as ta, an as ia, ao as gn, ap as na, aq as ar, ar as ra, as as sa, at as oa, au as aa } from "./DataCollectionStorageProvider-TRBx6Sbn.js";
-import { aM as df, av as uf, aw as hf, az as ff, aD as pf, aE as gf, aF as mf, aH as vf, aI as yf, aJ as bf, aK as xf, aC as wf, aG as Cf, ax as _f, ay as Ef, aL as Df, aA as Sf, aB as Rf, aN as Nf, aO as Tf, aP as Af, aQ as kf } from "./DataCollectionStorageProvider-TRBx6Sbn.js";
-import { A as zf, F as Lf, b as Pf, a as Mf, o as If, u as Hf } from "./F0HILActionConfirmation-D7BLroqK.js";
-import { defaultTranslations as Bf } from "./i18n-provider-defaults.js";
+import { aM as uf, av as hf, aw as ff, az as pf, aD as gf, aE as mf, aF as vf, aH as yf, aI as bf, aJ as xf, aK as wf, aC as Cf, aG as _f, ax as Ef, ay as Df, aL as Sf, aA as Rf, aB as Nf, aN as Tf, aO as Af, aP as kf, aQ as Of } from "./DataCollectionStorageProvider-TRBx6Sbn.js";
+import { A as Lf, F as Pf, b as Mf, a as If, o as Hf, u as Ff } from "./F0HILActionConfirmation-D7BLroqK.js";
+import { defaultTranslations as Wf } from "./i18n-provider-defaults.js";
 import './f0.css';const la = {
   xs: 1,
   sm: 2,
@@ -4222,7 +4222,7 @@ const gr = ae((i, e) => h(Fi, {
   ...i
 }));
 gr.displayName = "F0Text";
-const uu = [
+const hu = [
   "person",
   "team",
   "company",
@@ -4358,7 +4358,7 @@ const Oa = Hn(mr, ka), za = ({ children: i, title: e, draggable: t = !1, actions
   })
 });
 vr.displayName = "Dashboard";
-const La = Ra("Dashboard", vr), hu = he("Dashboard", La), Pa = je({
+const La = Ra("Dashboard", vr), fu = he("Dashboard", La), Pa = je({
   base: "flex w-full flex-col p-4",
   variants: {
     variant: {
@@ -7749,20 +7749,20 @@ const Mc = ae(function({ children: e, aside: t, header: n, variant: r = "main-as
       })]
     })
   });
-}), fu = {
+}), pu = {
   Page: he("Page", Mc),
   Block: he("Block", ri),
   BlockContent: he("BlockContent", Fa),
   Group: he("Group", Bi),
   GroupGrid: he("GroupGrid", ni),
   GroupMasonry: he("GroupMasonry", Xi)
-}, pu = be({
+}, gu = be({
   name: "StandardLayout",
   type: "layout"
-}, lr), gu = be({
+}, lr), mu = be({
   name: "TwoColumnLayout",
   type: "layout"
-}, ua), mu = be({
+}, ua), vu = be({
   name: "HomeLayout",
   type: "layout"
 }, ca);
@@ -8455,49 +8455,49 @@ const nd = (i) => {
       children: t
     })]
   });
-}, ad = rr(od), vu = be(
+}, ad = rr(od), yu = be(
   {
     name: "AreaChart",
     type: "info"
   },
   To
-), yu = be(
+), bu = be(
   {
     name: "BarChart",
     type: "info"
   },
   Ao
-), bu = be(
+), xu = be(
   {
     name: "CategoryBarChart",
     type: "info"
   },
   ko
-), xu = be(
+), wu = be(
   {
     name: "LineChart",
     type: "info"
   },
   Oo
-), wu = be(
+), Cu = be(
   {
     name: "PieChart",
     type: "info"
   },
   zo
-), Cu = be(
+), _u = be(
   {
     name: "VerticalBarChart",
     type: "info"
   },
   Lo
-), _u = be(
+), Eu = be(
   {
     name: "ProgressBarChart",
     type: "info"
   },
   ad
-), Eu = be(
+), Du = be(
   {
     name: "ComboChart",
     type: "info"
@@ -8549,9 +8549,9 @@ const nd = (i) => {
   })]
 });
 Xr.displayName = "F0BigNumber";
-const dd = Hn(Xr, cd), Du = he("F0BigNumber", dd), Su = Cs.filter(
+const dd = Hn(Xr, cd), Su = he("F0BigNumber", dd), Ru = Cs.filter(
   (i) => i !== "ai"
-), Ru = Bn, Nu = ["default", "outline", "neutral"], Tu = Bn, Au = ["sm", "md", "lg"], ku = ["compact", "expanded"], Ou = _s, zu = [
+), Nu = Bn, Tu = ["default", "outline", "neutral"], Au = Bn, ku = ["sm", "md", "lg"], Ou = ["compact", "expanded"], zu = _s, Lu = [
   "viridian",
   "malibu",
   "yellow",
@@ -8623,7 +8623,7 @@ const Yr = ({ chips: i, max: e = 4, remainingCount: t, layout: n = "compact" }) 
   });
 };
 Yr.displayName = "F0ChipList";
-const Lu = he("F0ChipList", Yr), Pu = Ds, ud = je({
+const Pu = he("F0ChipList", Yr), Mu = Ds, ud = je({
   base: "w-full rounded-md p-2 pr-3 text-f1-foreground",
   variants: {
     variant: {
@@ -8651,7 +8651,7 @@ const Lu = he("F0ChipList", Yr), Pu = Ds, ud = je({
   defaultVariants: {
     variant: "info"
   }
-}), Mu = ({ title: i, description: e, action: t, link: n, icon: r, variant: s = "neutral" }) => {
+}), Iu = ({ title: i, description: e, action: t, link: n, icon: r, variant: s = "neutral" }) => {
   const o = M(null);
   return h("div", {
     ref: o,
@@ -8770,7 +8770,7 @@ function K(i, e) {
   return i._def?.typeName === e;
 }
 const es = /* @__PURE__ */ new WeakMap();
-function Iu(i, e) {
+function Hu(i, e) {
   es.set(i, e);
   const t = i;
   return t._f0Config = e, t._innerSchema = i, t;
@@ -8779,7 +8779,7 @@ function ts(i) {
   const e = i;
   return e._f0Config ? e._f0Config : es.get(i);
 }
-function Hu(i) {
+function Fu(i) {
   return ts(i) !== void 0;
 }
 function Ue(i) {
@@ -9020,11 +9020,15 @@ function Ad({ field: i, formField: e }) {
     hideLabel: !0
   });
 }
-function kd({ field: i, formField: e, error: t, loading: n }) {
+const kd = {
+  email: "name@example.com"
+};
+function Od({ field: i, formField: e, error: t, loading: n }) {
+  const r = i.inputType ?? "text", s = i.placeholder ?? kd[r] ?? void 0;
   return h(Os, {
     label: i.label,
-    type: i.inputType ?? "text",
-    placeholder: i.placeholder,
+    type: r,
+    placeholder: s,
     disabled: i.disabled,
     ...e,
     value: e.value != null ? String(e.value) : "",
@@ -9034,7 +9038,7 @@ function kd({ field: i, formField: e, error: t, loading: n }) {
     loading: n
   });
 }
-function Od({ field: i, formField: e, error: t, loading: n }) {
+function zd({ field: i, formField: e, error: t, loading: n }) {
   return h(Wo, {
     label: i.label,
     placeholder: i.placeholder,
@@ -9049,14 +9053,14 @@ function Od({ field: i, formField: e, error: t, loading: n }) {
     loading: n
   });
 }
-function zd(i, e, t) {
+function Ld(i, e, t) {
   const n = !!t.error, { isValidating: r } = t, s = {
     error: n,
     loading: r
   };
   switch (i.type) {
     case "text":
-      return h(kd, {
+      return h(Od, {
         field: i,
         formField: e,
         ...s
@@ -9068,7 +9072,7 @@ function zd(i, e, t) {
         ...s
       });
     case "textarea":
-      return h(Od, {
+      return h(zd, {
         field: i,
         formField: e,
         ...s
@@ -9136,7 +9140,7 @@ function Qi({ field: i, sectionId: e }) {
           children: "*"
         })]
       }), h(jo, {
-        children: zd(i, l, d)
+        children: Ld(i, l, d)
       }), i.helpText && h(Uo, {
         children: i.helpText
       }), h(Vo, {})]
@@ -9152,7 +9156,7 @@ function is({ row: i, sectionId: e }) {
     }, t.id))
   });
 }
-function Ld(i) {
+function Pd(i) {
   const e = Ue(i);
   return K(e, "ZodLiteral") && e._def.value === !0;
 }
@@ -9162,7 +9166,7 @@ function ns({ fields: i }) {
     title: d.label,
     description: d.helpText,
     disabled: d.disabled,
-    required: !!(d.validation && Ld(d.validation))
+    required: !!(d.validation && Pd(d.validation))
   })), [s]), a = P(() => s.filter((d) => r[d.id]).map((d) => d.id), [s, r]);
   return s.length === 0 ? null : h(qo, {
     multiple: !0,
@@ -9180,10 +9184,10 @@ function ns({ fields: i }) {
     }
   });
 }
-function Pd(i, e) {
+function Md(i, e) {
   return typeof i == "function" ? i(e) : Ji(i, e);
 }
-function Md(i) {
+function Id(i) {
   const e = [];
   let t = [];
   const n = () => {
@@ -9203,11 +9207,11 @@ function Md(i) {
     }));
   }), n(), e;
 }
-function Id({ section: i }) {
+function Hd({ section: i }) {
   const t = Pi().watch(), { formName: n } = Jr(), { title: r, description: s, renderIf: o, fields: a } = i.section, l = i.id;
-  if (o && !Pd(o, t))
+  if (o && !Md(o, t))
     return null;
-  const d = Md(a), c = Qr(n, l);
+  const d = Id(a), c = Qr(n, l);
   return O("section", {
     id: c,
     className: "flex flex-col scroll-mt-4",
@@ -9232,7 +9236,7 @@ function Id({ section: i }) {
     })]
   });
 }
-function Hd(i) {
+function Fd(i) {
   const e = Ue(i);
   if (!K(e, "ZodNumber"))
     return {};
@@ -9242,7 +9246,7 @@ function Hd(i) {
     s.kind === "min" ? n = s.value : s.kind === "max" && (r = s.value);
   return { min: n, max: r };
 }
-function Fd(i) {
+function Bd(i) {
   const e = Ue(i);
   if (!K(e, "ZodDate"))
     return {};
@@ -9252,7 +9256,7 @@ function Fd(i) {
     s.kind === "min" ? n = new Date(s.value) : s.kind === "max" && (r = new Date(s.value));
   return { minDate: n, maxDate: r };
 }
-function Bd(i) {
+function Wd(i) {
   const e = Ue(i);
   if (!K(e, "ZodString"))
     return {};
@@ -9280,7 +9284,7 @@ function Pn(i, e, t, n) {
         renderIf: t.renderIf
       };
     case "number": {
-      const { min: o, max: a } = Hd(e);
+      const { min: o, max: a } = Fd(e);
       return {
         ...r,
         type: "number",
@@ -9292,7 +9296,7 @@ function Pn(i, e, t, n) {
       };
     }
     case "textarea": {
-      const { maxLength: o } = Bd(e);
+      const { maxLength: o } = Wd(e);
       return {
         ...r,
         type: "textarea",
@@ -9325,7 +9329,7 @@ function Pn(i, e, t, n) {
         renderIf: t.renderIf
       };
     case "date": {
-      const { minDate: o, maxDate: a } = Fd(e);
+      const { minDate: o, maxDate: a } = Bd(e);
       return {
         ...r,
         type: "date",
@@ -9421,7 +9425,7 @@ function rs(i) {
   }
   return t;
 }
-function Wd(i, e) {
+function Gd(i, e) {
   return P(() => {
     const t = rs(i), n = [], r = {};
     for (const a of t) {
@@ -9450,7 +9454,7 @@ function Wd(i, e) {
     return s;
   }, [i, e]);
 }
-function Fu(i, e) {
+function Bu(i, e) {
   const t = rs(i), n = [], r = {};
   for (const a of t) {
     const l = a.config.section;
@@ -9477,7 +9481,7 @@ function Fu(i, e) {
   }
   return s;
 }
-function Gd(i) {
+function $d(i) {
   const e = [];
   let t = [];
   const n = () => {
@@ -9500,8 +9504,8 @@ function Gd(i) {
     }));
   }), n(), e;
 }
-function $d(i) {
-  const { forms: e } = Li(), { name: t, schema: n, sections: r, defaultValues: s, onSubmit: o, submitLabel: a = "Submit", className: l } = i, d = i.submitType ?? "default", c = d === "default" ? i.showSubmitButton ?? !0 : !1, u = d === "action-bar" ? i.discardableChanges ?? !1 : !1, f = d === "action-bar" ? i.discardLabel ?? e.actionBar.discard : e.actionBar.discard, p = d === "action-bar" ? i.actionBarLabel ?? e.actionBar.unsavedChanges : e.actionBar.unsavedChanges, _ = Wd(n, r), v = Xo({
+function jd(i) {
+  const { forms: e } = Li(), { name: t, schema: n, sections: r, defaultValues: s, onSubmit: o, submitLabel: a = "Submit", className: l } = i, d = i.submitType ?? "default", c = d === "default" ? i.showSubmitButton ?? !0 : !1, u = d === "action-bar" ? i.discardableChanges ?? !1 : !1, f = d === "action-bar" ? i.discardLabel ?? e.actionBar.discard : e.actionBar.discard, p = d === "action-bar" ? i.actionBarLabel ?? e.actionBar.unsavedChanges : e.actionBar.unsavedChanges, _ = Gd(n, r), v = Xo({
     resolver: Yo(n),
     mode: "onChange",
     defaultValues: s
@@ -9516,7 +9520,7 @@ function $d(i) {
     }));
   }, S = () => {
     v.reset();
-  }, y = Gd(_), b = P(() => ({
+  }, y = $d(_), b = P(() => ({
     formName: t
   }), [t]);
   return h(Zr.Provider, {
@@ -9543,7 +9547,7 @@ function $d(i) {
             case "section":
               return h("div", {
                 className: C !== 0 ? gd : "",
-                children: h(Id, {
+                children: h(Hd, {
                   section: m.item
                 })
               }, m.item.id);
@@ -9573,16 +9577,16 @@ function $d(i) {
     })
   });
 }
-const Bu = he("F0Form", $d), jd = ae((i, e) => h(Fi, {
+const Wu = he("F0Form", jd), Ud = ae((i, e) => h(Fi, {
   ref: e,
   variant: "heading",
   ...i
 }));
-jd.displayName = "F0Heading";
-const Wu = he(
+Ud.displayName = "F0Heading";
+const Gu = he(
   "F0GridStack",
   Hi
-), _i = 16, Ud = je({
+), _i = 16, Vd = je({
   base: "h-0.5 rounded-full bg-f1-foreground cursor-pointer",
   variants: {
     depth: {
@@ -9621,7 +9625,7 @@ function ss(i, e = 0) {
     depth: Math.min(e, 3)
   }, ...t.children ? ss(t.children, e + 1) : []]);
 }
-function Vd(i, e) {
+function qd(i, e) {
   const t = i.length;
   if (t <= _i) return i;
   const n = t / (_i - 1), r = new Set(Array.from({
@@ -9636,12 +9640,12 @@ function Vd(i, e) {
   }
   return [...r].sort((s, o) => s - o).map((s) => i[s]);
 }
-function qd({ items: i, activeItem: e, className: t, align: n = "left", variant: r = "dark" }) {
-  const s = P(() => Vd(ss(i), e), [i, e]);
+function Kd({ items: i, activeItem: e, className: t, align: n = "left", variant: r = "dark" }) {
+  const s = P(() => qd(ss(i), e), [i, e]);
   return h("div", {
     className: G("flex flex-col justify-center gap-2 py-3", n === "right" ? "items-end" : "items-start", t),
     children: s.map((o) => h("div", {
-      className: Ud({
+      className: Vd({
         depth: o.depth,
         variant: r,
         active: o.id === e
@@ -9649,7 +9653,7 @@ function qd({ items: i, activeItem: e, className: t, align: n = "left", variant:
     }, o.id))
   });
 }
-const Kd = 300, Xd = 0, Yd = je({
+const Xd = 300, Yd = 0, Zd = je({
   base: "w-auto overflow-y-auto rounded-lg border border-solid border-f1-border-secondary bg-f1-background p-0 shadow-lg",
   variants: {
     size: {
@@ -9662,7 +9666,7 @@ const Kd = 300, Xd = 0, Yd = je({
     size: "md"
   }
 });
-function Zd({ title: i, items: e, className: t, activeItem: n, collapsible: r = !1, showChildrenCounter: s = !1, barsAlign: o = "left", size: a = "md", variant: l = "light" }) {
+function Jd({ title: i, items: e, className: t, activeItem: n, collapsible: r = !1, showChildrenCounter: s = !1, barsAlign: o = "left", size: a = "md", variant: l = "light" }) {
   const [d, c] = F(!1), u = M(!1), f = (_) => {
     _ && !d && (u.current = !0), c(_);
   }, p = U((_) => {
@@ -9676,14 +9680,14 @@ function Zd({ title: i, items: e, className: t, activeItem: n, collapsible: r = 
   return O(zs, {
     open: d,
     onOpenChange: f,
-    openDelay: Xd,
-    closeDelay: Kd,
+    openDelay: Yd,
+    closeDelay: Xd,
     children: [h(Ls, {
       asChild: !0,
       children: h("button", {
         className: G($n(), "flex cursor-pointer items-center rounded-md px-1.5 py-1", t),
         "aria-label": i ?? "Menu",
-        children: h(qd, {
+        children: h(Kd, {
           items: e,
           activeItem: n,
           align: o,
@@ -9695,7 +9699,7 @@ function Zd({ title: i, items: e, className: t, activeItem: n, collapsible: r = 
       side: o === "left" ? "right" : "left",
       align: "center",
       sideOffset: -28,
-      className: G(Yd({
+      className: G(Zd({
         size: a
       }), !i && "pt-2", "scrollbar-macos"),
       children: h(Qo, {
@@ -9709,15 +9713,15 @@ function Zd({ title: i, items: e, className: t, activeItem: n, collapsible: r = 
     })]
   });
 }
-const Gu = he(
+const $u = he(
   "F0TableOfContentPopover",
-  Zd
-), Jd = ({ benefits: i }) => h("div", {
+  Jd
+), Qd = ({ benefits: i }) => h("div", {
   className: "flex flex-col gap-2",
-  children: i.map((e, t) => h(Qd, {
+  children: i.map((e, t) => h(eu, {
     text: e
   }, t))
-}), Qd = ({ text: i }) => O("div", {
+}), eu = ({ text: i }) => O("div", {
   className: "flex flex-row items-start gap-2",
   children: [h(Fn, {
     icon: Is,
@@ -9763,7 +9767,7 @@ const Gu = he(
           className: "font-bold text-xl text-f1-foreground",
           children: i
         })]
-      }), h(Jd, {
+      }), h(Qd, {
         benefits: t
       })]
     }), n && h("div", {
@@ -9773,7 +9777,7 @@ const Gu = he(
   })]
 }));
 os.displayName = "ProductBlankslate";
-function eu({ isOpen: i, onClose: e, title: t, children: n, module: r, portalContainer: s }) {
+function tu({ isOpen: i, onClose: e, title: t, children: n, module: r, portalContainer: s }) {
   const [o, a] = F(i);
   return H(() => {
     a(i);
@@ -9811,7 +9815,7 @@ function eu({ isOpen: i, onClose: e, title: t, children: n, module: r, portalCon
     })
   });
 }
-function $u({ isOpen: i, onClose: e, title: t, image: n, benefits: r, errorMessage: s, successMessage: o, loadingState: a, nextSteps: l, closeLabel: d, primaryAction: c, modalTitle: u, modalModule: f, secondaryAction: p, portalContainer: _, tag: v, promoTag: x, showResponseDialog: D = !0 }) {
+function ju({ isOpen: i, onClose: e, title: t, image: n, benefits: r, errorMessage: s, successMessage: o, loadingState: a, nextSteps: l, closeLabel: d, primaryAction: c, modalTitle: u, modalModule: f, secondaryAction: p, portalContainer: _, tag: v, promoTag: x, showResponseDialog: D = !0 }) {
   const [N, w] = F(i), [S, y] = F(null), [b, m] = F(!1), C = async () => {
     if (c?.onClick) {
       m(!0);
@@ -9827,7 +9831,7 @@ function $u({ isOpen: i, onClose: e, title: t, image: n, benefits: r, errorMessa
     w(!1), e?.();
   }, T = b;
   return O(Et, {
-    children: [h(eu, {
+    children: [h(tu, {
       isOpen: N,
       onClose: z,
       title: u,
@@ -9875,7 +9879,7 @@ function $u({ isOpen: i, onClose: e, title: t, image: n, benefits: r, errorMessa
     })]
   });
 }
-function tu({ mediaUrl: i, title: e, description: t, onClose: n, dismissible: r, width: s, trackVisibility: o, actions: a, showConfirmation: l = !0 }) {
+function iu({ mediaUrl: i, title: e, description: t, onClose: n, dismissible: r, width: s, trackVisibility: o, actions: a, showConfirmation: l = !0 }) {
   const [d, c] = F(!1), u = () => {
     c(!0), n && n();
   };
@@ -9946,7 +9950,7 @@ function tu({ mediaUrl: i, title: e, description: t, onClose: n, dismissible: r,
     })
   });
 }
-const iu = ae(function({ primaryAction: e, secondaryAction: t, ...n }, r) {
+const nu = ae(function({ primaryAction: e, secondaryAction: t, ...n }, r) {
   const s = (l) => l.variant === "promote" ? h(ar, {
     label: l.label,
     onRequest: async () => {
@@ -9975,8 +9979,8 @@ const iu = ae(function({ primaryAction: e, secondaryAction: t, ...n }, r) {
     children: [e?.variant === "promote" && s(e), t?.variant === "promote" && s(t)]
   });
 });
-iu.displayName = "UpsellingBanner";
-function ju({ isOpen: i, setIsOpen: e, label: t, variant: n = "promote", size: r = "md", showIcon: s = !0, side: o = "right", align: a = "center", icon: l = Ws, mediaUrl: d, title: c, description: u, width: f = "300px", trackVisibility: p, actions: _, onClick: v, hideLabel: x = !1 }) {
+nu.displayName = "UpsellingBanner";
+function Uu({ isOpen: i, setIsOpen: e, label: t, variant: n = "promote", size: r = "md", showIcon: s = !0, side: o = "right", align: a = "center", icon: l = Ws, mediaUrl: d, title: c, description: u, width: f = "300px", trackVisibility: p, actions: _, onClick: v, hideLabel: x = !1 }) {
   const [D, N] = F(!1), [w, S] = F(null), [y, b] = F(null), m = (R) => {
     e(R), v && v();
   }, C = async (R) => {
@@ -10012,7 +10016,7 @@ function ju({ isOpen: i, setIsOpen: e, label: t, variant: n = "promote", size: r
         side: o,
         align: a,
         className: "w-fit border-none bg-transparent p-2 shadow-none",
-        children: h(tu, {
+        children: h(iu, {
           mediaUrl: d,
           title: c,
           description: u,
@@ -10036,11 +10040,11 @@ function ju({ isOpen: i, setIsOpen: e, label: t, variant: n = "promote", size: r
     })]
   });
 }
-const nu = De(null), ru = ({ children: i, fullScreen: e = !0 }) => {
+const ru = De(null), su = ({ children: i, fullScreen: e = !0 }) => {
   const t = M(null), [n, r] = F(t.current);
   return Ks(() => {
     r(t.current);
-  }, []), h(nu.Provider, {
+  }, []), h(ru.Provider, {
     value: {
       element: n
     },
@@ -10053,10 +10057,10 @@ const nu = De(null), ru = ({ children: i, fullScreen: e = !0 }) => {
       children: i
     })
   });
-}, su = ({ children: i }) => h(aa, {
+}, ou = ({ children: i }) => h(aa, {
   reducedMotion: "user",
   children: i
-}), Uu = ({ children: i, layout: e, link: t, privacyModeInitiallyEnabled: n, image: r, i18n: s, l10n: o, isDev: a = !1, dataCollectionStorageHandler: l, showExperimentalWarnings: d = !1 }) => h(su, {
+}), Vu = ({ children: i, layout: e, link: t, privacyModeInitiallyEnabled: n, image: r, i18n: s, l10n: o, isDev: a = !1, dataCollectionStorageHandler: l, showExperimentalWarnings: d = !1 }) => h(ou, {
   children: h(Gs, {
     isDev: a,
     showExperimentalWarnings: d,
@@ -10066,7 +10070,7 @@ const nu = De(null), ru = ({ children: i, fullScreen: e = !0 }) => {
         ...s,
         children: h(Us, {
           ...t,
-          children: h(ru, {
+          children: h(su, {
             ...e,
             children: h(Vs, {
               children: h(sa, {
@@ -10085,7 +10089,7 @@ const nu = De(null), ru = ({ children: i, fullScreen: e = !0 }) => {
       })
     })
   })
-}), Mn = (i) => `datacollection-${i}`, Vu = {
+}), Mn = (i) => `datacollection-${i}`, qu = {
   get: async (i) => JSON.parse(
     localStorage.getItem(Mn(i)) ?? "{}"
   ),
@@ -10094,167 +10098,167 @@ const nu = De(null), ru = ({ children: i, fullScreen: e = !0 }) => {
   }
 };
 export {
-  Xu as A,
-  zf as AiChatTranslationsProvider,
-  vu as AreaChart,
-  Yu as Await,
-  yu as BarChart,
-  Zu as Blockquote,
-  bu as CategoryBarChart,
-  Ju as ChatSpinner,
-  Eu as ComboChart,
-  hu as Dashboard,
-  df as DndProvider,
-  Qu as Em,
-  eh as EmojiImage,
-  th as F0ActionItem,
-  ih as F0AiChat,
-  nh as F0AiChatProvider,
-  rh as F0AiChatTextArea,
-  sh as F0AiCollapsibleMessage,
-  oh as F0AiFullscreenChat,
-  Mu as F0Alert,
-  ah as F0Avatar,
+  Yu as A,
+  Lf as AiChatTranslationsProvider,
+  yu as AreaChart,
+  Zu as Await,
+  bu as BarChart,
+  Ju as Blockquote,
+  xu as CategoryBarChart,
+  Qu as ChatSpinner,
+  Du as ComboChart,
+  fu as Dashboard,
+  uf as DndProvider,
+  eh as Em,
+  th as EmojiImage,
+  ih as F0ActionItem,
+  nh as F0AiChat,
+  rh as F0AiChatProvider,
+  sh as F0AiChatTextArea,
+  oh as F0AiCollapsibleMessage,
+  ah as F0AiFullscreenChat,
+  Iu as F0Alert,
+  lh as F0Avatar,
   Ho as F0AvatarAlert,
-  lh as F0AvatarCompany,
-  uf as F0AvatarDate,
-  ch as F0AvatarEmoji,
-  dh as F0AvatarFile,
+  ch as F0AvatarCompany,
+  hf as F0AvatarDate,
+  dh as F0AvatarEmoji,
+  uh as F0AvatarFile,
   Ss as F0AvatarIcon,
-  hf as F0AvatarList,
+  ff as F0AvatarList,
   qn as F0AvatarModule,
-  uh as F0AvatarPerson,
-  hh as F0AvatarTeam,
-  Du as F0BigNumber,
+  hh as F0AvatarPerson,
+  fh as F0AvatarTeam,
+  Su as F0BigNumber,
   We as F0Button,
-  fh as F0ButtonDropdown,
-  ph as F0ButtonToggle,
-  ff as F0Card,
+  ph as F0ButtonDropdown,
+  gh as F0ButtonToggle,
+  pf as F0Card,
   As as F0Checkbox,
-  Lu as F0ChipList,
+  Pu as F0ChipList,
   sr as F0DatePicker,
-  gh as F0Dialog,
-  mh as F0DialogContext,
-  vh as F0DialogProvider,
-  yh as F0EventCatcherProvider,
+  mh as F0Dialog,
+  vh as F0DialogContext,
+  yh as F0DialogProvider,
+  bh as F0EventCatcherProvider,
   pd as F0FilterPickerContent,
-  Bu as F0Form,
-  Wu as F0GridStack,
-  Lf as F0HILActionConfirmation,
-  jd as F0Heading,
+  Wu as F0Form,
+  Gu as F0GridStack,
+  Pf as F0HILActionConfirmation,
+  Ud as F0Heading,
   Fn as F0Icon,
   Ns as F0Link,
-  bh as F0MessageSources,
-  xh as F0OneIcon,
-  wh as F0OneSwitch,
-  Uu as F0Provider,
+  xh as F0MessageSources,
+  wh as F0OneIcon,
+  Ch as F0OneSwitch,
+  Vu as F0Provider,
   gi as F0Select,
-  Gu as F0TableOfContentPopover,
-  pf as F0TagAlert,
+  $u as F0TableOfContentPopover,
+  gf as F0TagAlert,
   Io as F0TagBalance,
-  gf as F0TagCompany,
-  mf as F0TagDot,
-  vf as F0TagList,
-  yf as F0TagPerson,
+  mf as F0TagCompany,
+  vf as F0TagDot,
+  yf as F0TagList,
+  bf as F0TagPerson,
   Ms as F0TagRaw,
   ea as F0TagStatus,
-  bf as F0TagTeam,
+  xf as F0TagTeam,
   gr as F0Text,
-  Ch as F0Thinking,
-  _h as FullscreenChatContext,
-  Eh as GROUP_ID_SYMBOL,
-  Dh as H1,
-  Sh as H2,
-  Rh as H3,
-  mu as HomeLayout,
-  Nh as Hr,
-  Th as Image,
-  fu as Layout,
-  Ah as Li,
-  xu as LineChart,
-  kh as Ol,
-  Oh as OneFilterPicker,
-  zh as P,
-  wu as PieChart,
-  Lh as Pre,
+  _h as F0Thinking,
+  Eh as FullscreenChatContext,
+  Dh as GROUP_ID_SYMBOL,
+  Sh as H1,
+  Rh as H2,
+  Nh as H3,
+  vu as HomeLayout,
+  Th as Hr,
+  Ah as Image,
+  pu as Layout,
+  kh as Li,
+  wu as LineChart,
+  Oh as Ol,
+  zh as OneFilterPicker,
+  Lh as P,
+  Cu as PieChart,
+  Ph as Pre,
   sa as PrivacyModeProvider,
   os as ProductBlankslate,
-  xf as ProductCard,
-  $u as ProductModal,
-  tu as ProductWidget,
-  _u as ProgressBarChart,
-  pu as StandardLayout,
-  Ph as Strong,
-  Mh as Table,
-  wf as Tag,
-  Cf as TagCounter,
-  Ih as Td,
-  Hh as Th,
-  gu as TwoColumnLayout,
-  Fh as Ul,
+  wf as ProductCard,
+  ju as ProductModal,
+  iu as ProductWidget,
+  Eu as ProgressBarChart,
+  gu as StandardLayout,
+  Mh as Strong,
+  Ih as Table,
+  Cf as Tag,
+  _f as TagCounter,
+  Hh as Td,
+  Fh as Th,
+  mu as TwoColumnLayout,
+  Bh as Ul,
   or as UpsellRequestResponseDialog,
-  iu as UpsellingBanner,
+  nu as UpsellingBanner,
   ar as UpsellingButton,
-  ju as UpsellingPopover,
-  Cu as VerticalBarChart,
-  Pf as actionItemStatuses,
-  Mf as aiTranslations,
-  uu as avatarVariants,
-  Bh as buildTranslations,
-  Tu as buttonDropdownSizes,
-  Nu as buttonDropdownVariants,
-  Ru as buttonSizes,
-  Au as buttonToggleSizes,
-  ku as buttonToggleVariants,
-  Su as buttonVariants,
-  _f as cardImageFits,
-  Ef as cardImageSizes,
-  Df as createAtlaskitDriver,
-  Wh as createDataSourceDefinition,
+  Uu as UpsellingPopover,
+  _u as VerticalBarChart,
+  Mf as actionItemStatuses,
+  If as aiTranslations,
+  hu as avatarVariants,
+  Wh as buildTranslations,
+  Au as buttonDropdownSizes,
+  Tu as buttonDropdownVariants,
+  Nu as buttonSizes,
+  ku as buttonToggleSizes,
+  Ou as buttonToggleVariants,
+  Ru as buttonVariants,
+  Ef as cardImageFits,
+  Df as cardImageSizes,
+  Sf as createAtlaskitDriver,
+  Gh as createDataSourceDefinition,
   Sa as createPageLayoutBlock,
   Ra as createPageLayoutBlockGroup,
-  Vu as dataCollectionLocalStorageHandler,
-  Pu as datepickerSizes,
-  Bf as defaultTranslations,
-  Gh as downloadTableAsExcel,
+  qu as dataCollectionLocalStorageHandler,
+  Mu as datepickerSizes,
+  Wf as defaultTranslations,
+  $h as downloadTableAsExcel,
   Ji as evaluateRenderIf,
   he as experimental,
-  Iu as f0FormField,
-  $h as f0MarkdownRenderers,
+  Hu as f0FormField,
+  jh as f0MarkdownRenderers,
   Qr as generateAnchorId,
-  jh as getAnimationVariants,
-  Uh as getDataSourcePaginationType,
-  Vh as getEmojiLabel,
+  Uh as getAnimationVariants,
+  Vh as getDataSourcePaginationType,
+  qh as getEmojiLabel,
   ts as getF0Config,
-  Fu as getSchemaDefinition,
-  Hu as hasF0Config,
+  Bu as getSchemaDefinition,
+  Fu as hasF0Config,
   md as inferFieldType,
-  qh as isInfiniteScrollPagination,
-  Kh as isPageBasedPagination,
+  Kh as isInfiniteScrollPagination,
+  Xh as isPageBasedPagination,
   K as isZodType,
-  Ou as linkVariants,
-  Xh as modules,
-  If as oneIconSizes,
-  Sf as predefinedPresets,
-  Rf as selectSizes,
-  zu as tagDotColors,
+  zu as linkVariants,
+  Yh as modules,
+  Hf as oneIconSizes,
+  Rf as predefinedPresets,
+  Nf as selectSizes,
+  Lu as tagDotColors,
   Ue as unwrapZodSchema,
-  Yh as useAiChat,
-  Hf as useAiChatTranslations,
-  Zh as useData,
-  Jh as useDataSource,
-  Qh as useDefaultCopilotActions,
-  Nf as useDndEvents,
-  Tf as useDraggable,
-  Af as useDroppableList,
-  ef as useEmojiConfetti,
-  tf as useF0Dialog,
-  nf as useGroups,
-  rf as useMessageSourcesAction,
-  sf as useOrchestratorThinkingAction,
-  kf as usePrivacyMode,
-  of as useReducedMotion,
-  Wd as useSchemaDefinition,
-  af as useSelectable,
-  lf as useXRay
+  Zh as useAiChat,
+  Ff as useAiChatTranslations,
+  Jh as useData,
+  Qh as useDataSource,
+  ef as useDefaultCopilotActions,
+  Tf as useDndEvents,
+  Af as useDraggable,
+  kf as useDroppableList,
+  tf as useEmojiConfetti,
+  nf as useF0Dialog,
+  rf as useGroups,
+  sf as useMessageSourcesAction,
+  of as useOrchestratorThinkingAction,
+  Of as usePrivacyMode,
+  af as useReducedMotion,
+  Gd as useSchemaDefinition,
+  lf as useSelectable,
+  cf as useXRay
 };
