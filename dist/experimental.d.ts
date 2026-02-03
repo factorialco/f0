@@ -48,13 +48,11 @@ import { HTMLInputTypeAttribute } from 'react';
 import { IconCellValue } from './types/icon';
 import { IconType as IconType_2 } from '../../f0';
 import { InFilterOptions } from './InFilter/types';
-import { InputProps as InputProps_2 } from '@copilotkit/react-ui';
 import { JSONContent } from '@tiptap/react';
 import { JSONContent as JSONContent_2 } from '@tiptap/core';
 import { JSX as JSX_2 } from 'react';
 import { LineChartProps } from '../../../components/Charts/LineChart';
 import { LongTextCellValue } from './types/longText';
-import { Message as Message_2 } from '@copilotkit/shared';
 import { NumberCellValue } from './types/number';
 import { NumberCellValue as NumberCellValue_2 } from '../../value-display/types/number';
 import { NumberFilterOptions } from './NumberFilter/NumberFilter';
@@ -227,14 +225,6 @@ export declare type ActionDefinition = DropdownItemSeparator | (Pick<DropdownIte
     type?: "primary" | "secondary" | "other";
 });
 
-export declare const ActionItem: ({ title, status, inGroup }: ActionItemProps) => JSX_2.Element;
-
-export declare interface ActionItemProps {
-    title: string;
-    status?: "inProgress" | "executing" | "completed";
-    inGroup?: boolean;
-}
-
 declare type ActionLinkProps = ActionBaseProps & {
     href: string;
     target?: NavTarget;
@@ -406,15 +396,9 @@ declare type AIButton = {
 };
 
 /**
- * @experimental This is an experimental component use it at your own risk
+ * Props for the AiChatProvider component
  */
-export declare const AiChat: () => JSX_2.Element | null;
-
-export declare const AiChatOneIcon: ForwardRefExoticComponent<Omit<OneIconProps, "ref"> & RefAttributes<SVGSVGElement>>;
-
-export declare const AiChatProvider: ({ enabled, greeting, initialMessage, welcomeScreenSuggestions, onThumbsUp, onThumbsDown, children, agent, ...copilotKitProps }: AiChatProviderProps) => JSX_2.Element;
-
-export declare type AiChatProviderProps = {
+declare type AiChatProviderProps = {
     enabled?: boolean;
     greeting?: string;
     initialMessage?: string | string[];
@@ -428,86 +412,6 @@ export declare type AiChatProviderProps = {
         feedback: string;
     }) => void;
 } & Pick<CopilotKitProps, "agent" | "credentials" | "children" | "runtimeUrl" | "showDevConsole" | "threadId" | "headers">;
-
-declare type AiChatProviderReturnValue = {
-    enabled: boolean;
-    setEnabled: React.Dispatch<React.SetStateAction<boolean>>;
-    open: boolean;
-    setOpen: React.Dispatch<React.SetStateAction<boolean>>;
-    shouldPlayEntranceAnimation: boolean;
-    setShouldPlayEntranceAnimation: React.Dispatch<React.SetStateAction<boolean>>;
-    tmp_setAgent: (agent?: string) => void;
-    placeholders: string[];
-    setPlaceholders: React.Dispatch<React.SetStateAction<string[]>>;
-    /**
-     * Set the amount of minutes after which the chat will be cleared automatically
-     * Set `null` to disable auto-clearing
-     *
-     * @default 15
-     */
-    setAutoClearMinutes: React.Dispatch<React.SetStateAction<number | null>>;
-    autoClearMinutes: number | null;
-    /**
-     * The initial message to display in the chat
-     */
-    initialMessage?: string | string[];
-    setInitialMessage: React.Dispatch<React.SetStateAction<string | string[] | undefined>>;
-    welcomeScreenSuggestions: WelcomeScreenSuggestion[];
-    setWelcomeScreenSuggestions: React.Dispatch<React.SetStateAction<WelcomeScreenSuggestion[]>>;
-    onThumbsUp?: (message: AIMessage, { threadId, feedback }: {
-        threadId: string;
-        feedback: string;
-    }) => void;
-    onThumbsDown?: (message: AIMessage, { threadId, feedback }: {
-        threadId: string;
-        feedback: string;
-    }) => void;
-    /**
-     * Clear/reset the chat conversation
-     */
-    clear: () => void;
-    /* Excluded from this release type: setClearFunction */
-    /**
-     * Send a message to the chat
-     * @param message - The message content as a string, or a full Message object
-     */
-    sendMessage: (message: string | Message_2) => void;
-    /* Excluded from this release type: setSendMessageFunction */
-} & Pick<AiChatState, "greeting" | "agent">;
-
-declare interface AiChatState {
-    greeting?: string;
-    enabled: boolean;
-    agent?: string;
-    initialMessage?: string | string[];
-    welcomeScreenSuggestions?: WelcomeScreenSuggestion[];
-    placeholders?: string[];
-    setPlaceholders?: React.Dispatch<React.SetStateAction<string[]>>;
-    onThumbsUp?: (message: AIMessage, { threadId, feedback }: {
-        threadId: string;
-        feedback: string;
-    }) => void;
-    onThumbsDown?: (message: AIMessage, { threadId, feedback }: {
-        threadId: string;
-        feedback: string;
-    }) => void;
-}
-
-export declare const AiChatTextarea: ({ submitLabel, inProgress, onSend, onStop, }: ChatTextareaProps) => JSX_2.Element;
-
-export declare type AiChatTranslations = TranslationShape_2<typeof aiTranslations>;
-
-export declare function AiChatTranslationsProvider({ children, translations, }: AiChatTranslationsProviderProps): JSX.Element;
-
-export declare interface AiChatTranslationsProviderProps {
-    children: ReactNode;
-    translations: AiChatTranslations;
-}
-
-/**
- * @experimental This is an experimental component use it at your own risk
- */
-export declare const AiFullscreenChat: () => JSX_2.Element | null;
 
 /**
  * @experimental This is an experimental component use it at your own risk
@@ -566,38 +470,6 @@ declare interface AiPromotionChatState {
     onShow?: () => void;
     onHide?: () => void;
 }
-
-declare const aiTranslations: {
-    ai: {
-        openChat: string;
-        closeChat: string;
-        startNewChat: string;
-        scrollToBottom: string;
-        welcome: string;
-        defaultInitialMessage: string;
-        inputPlaceholder: string;
-        stopAnswerGeneration: string;
-        sendMessage: string;
-        thoughtsGroupTitle: string;
-        resourcesGroupTitle: string;
-        thinking: string;
-        exportTable: string;
-        generatedTableFilename: string;
-        feedbackModal: {
-            positive: {
-                title: string;
-                label: string;
-                placeholder: string;
-            };
-            negative: {
-                title: string;
-                label: string;
-                placeholder: string;
-            };
-        };
-        ask: string;
-    };
-};
 
 declare type AlertAvatarProps = VariantProps<typeof alertAvatarVariants> & {
     type: (typeof alertAvatarTypes)[number];
@@ -1509,10 +1381,6 @@ declare type ChartItem<K extends ChartConfig> = {
  * @experimental This is an experimental component use it at your own risk
  */
 export declare const ChartWidgetEmptyState: ForwardRefExoticComponent<Props_4 & RefAttributes<HTMLDivElement>>;
-
-declare type ChatTextareaProps = InputProps_2 & {
-    submitLabel?: string;
-};
 
 export declare type ChatWidgetEmptyStateProps = Props_4;
 
@@ -3692,16 +3560,6 @@ declare type HighlightBannerProps = {
     onClick?: () => void;
 };
 
-export declare const HILActionConfirmation: ({ text, confirmationText, onConfirm, cancelText, onCancel, }: HILActionConfirmationProps) => JSX_2.Element;
-
-export declare type HILActionConfirmationProps = {
-    text?: string;
-    confirmationText: string;
-    onConfirm: () => void;
-    cancelText: string;
-    onCancel: () => void;
-};
-
 declare type HTMLString = string;
 
 declare type I18nContextType = TranslationsType & {
@@ -4120,12 +3978,6 @@ export declare interface Message {
     text: string;
     dateTime: string;
 }
-
-export declare const MessageSources: ({ sources }: MessageSourcesProps) => JSX_2.Element | null;
-
-export declare type MessageSourcesProps = {
-    sources: Source[];
-};
 
 declare type MetadataAction = {
     icon: IconType;
@@ -4748,13 +4600,6 @@ declare type OneFilterPickerRootProps<Definition extends FiltersDefinition> = {
     /** Callback fired when filters open state is changed */
     onOpenChange?: (isOpen: boolean) => void;
 };
-
-declare interface OneIconProps extends SVGProps<SVGSVGElement> {
-    spin?: boolean;
-    hover?: boolean;
-    background?: string;
-    size?: "xs" | "sm" | "md" | "lg";
-}
 
 /**
  * @experimental This is an experimental component use it at your own risk
@@ -5683,13 +5528,6 @@ export declare type SortingsStateMultiple = {
 
 export declare type SortOrder = "asc" | "desc";
 
-declare type Source = {
-    title: string;
-    link?: string;
-    icon?: string;
-    targetBlank?: boolean;
-};
-
 /**
  * @experimental This is an experimental component use it at your own risk
  */
@@ -6216,10 +6054,6 @@ declare type TranslationShape<T> = {
     [K in keyof T]: T[K] extends string ? string : T[K] extends Record<string, string | Record<string, unknown>> ? TranslationShape<T[K]> : never;
 };
 
-declare type TranslationShape_2<T> = {
-    [K in keyof T]: T[K] extends string ? string : T[K] extends Record<string, string | Record<string, unknown>> ? TranslationShape_2<T[K]> : never;
-};
-
 declare type TranslationsType = TranslationShape<typeof defaultTranslations>;
 
 declare interface TwoColumnsItemType {
@@ -6249,10 +6083,6 @@ declare namespace Types {
 }
 
 declare type URL_2 = string;
-
-export declare function useAiChat(): AiChatProviderReturnValue;
-
-export declare function useAiChatTranslations(): AiChatTranslations;
 
 export declare function useAiPromotionChat(): AiPromotionChatProviderReturnValue;
 
@@ -6491,6 +6321,9 @@ export declare const WeekStartDay: {
 
 export declare type WeekStartsOn = (typeof WeekStartDay)[keyof typeof WeekStartDay];
 
+/**
+ * Welcome screen suggestion item
+ */
 declare type WelcomeScreenSuggestion = {
     icon: IconType;
     message: string;
