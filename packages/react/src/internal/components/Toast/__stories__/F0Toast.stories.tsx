@@ -65,7 +65,11 @@ const meta: Meta<typeof F0Toast> = {
               <F0Button label="Open Toast" onClick={() => setIsOpen(true)} />
             )}
           </div>
-          {isOpen && <Story />}
+          {isOpen && (
+            <Story
+              args={{ ...context.args, onClose: () => setIsOpen(false) }}
+            />
+          )}
         </div>
       )
     },

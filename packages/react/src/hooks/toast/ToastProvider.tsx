@@ -1,3 +1,4 @@
+import { AnimatePresence, motion } from "motion/react"
 import {
   createContext,
   useCallback,
@@ -34,8 +35,16 @@ type ToastProviderProps = {
 }
 
 const toastContainerPositionClasses: Record<ToastContainerPosition, string> = {
-  "top-right": "justify-end items-start top-4 right-4 bottom-4",
+  "top-right": "justify-end items-start top-0 right-0 bottom-0",
 } as const
+
+const toastVariants = {
+  initial: { opacity: 0, y: 20, scale: 0.9 },
+  animate: { opacity: 1, y: 0, scale: 1 },
+  exit: { opacity: 0, scale: 0.9, transition: { duration: 0.2 } },
+}
+
+const minUncollapsedToasts = 3
 
 const ToastsContainer = ({
   items,
@@ -44,17 +53,80 @@ const ToastsContainer = ({
   items: ToastProviderItem[]
   position?: ToastContainerPosition
 }) => {
+  const toasts = useMemo(() => {
+    return items
+      .slice()
+      .reverse()
+      .map((item, index) => {
+        return {
+          ...item,
+          isCollapsed: items.length - index - 1 >= minUncollapsedToasts,
+        }
+      })
+  }, [items])
+
+  const collapsedCount = useMemo(() => {
+    return toasts.filter((item) => item.isCollapsed).length
+  }, [toasts])
+
   return (
     <div
       className={cn(
-        "pointer-events-none fixed  z-[100] flex",
-        toastContainerPositionClasses[position]
+        cn(
+          "pointer-events-none fixed z-[100] flex overflow-y-auto scrollbar-hide",
+          toastContainerPositionClasses[position]
+        )
       )}
     >
-      <div className="flex w-[350px] max-w-full flex-col gap-2">
-        {items.map((item) => (
-          <F0Toast key={item.id} {...item} />
-        ))}
+      <div className="flex w-[350px] max-w-full flex-col gap-2 p-6">
+        <div className="relative">
+          {toasts
+            .filter((item) => item.isCollapsed)
+            .map((item, index) => {
+              const scale = Math.max(0.7, 1 - index / 10)
+              const translateY = Math.min(
+                20,
+                (collapsedCount - index * scale - 1) * 12
+              )
+              return (
+                <div
+                  key={item.id}
+                  className={cn(
+                    index !== collapsedCount - 1 &&
+                      "absolute top-0 left-0 right-0 bottom-0"
+                  )}
+                  style={{
+                    zIndex: 100 - index,
+                    transform: `scale(${scale}) translateY(-${translateY}px)`,
+                    border: "10px solid red",
+                  }}
+                >
+                  <F0Toast {...item} forcePauseTimer />
+                </div>
+              )
+            })}
+        </div>
+        {/* Uncollapsed toasts */}
+        <div className="relative flex flex-col gap-4">
+          <AnimatePresence mode="popLayout" initial={false}>
+            {toasts
+              .filter((item) => !item.isCollapsed)
+              .map((item) => {
+                return (
+                  <motion.div
+                    key={item.id}
+                    layout
+                    variants={toastVariants}
+                    initial="initial"
+                    animate="animate"
+                    exit="exit"
+                  >
+                    <F0Toast {...item} forcePauseTimer={item.isCollapsed} />
+                  </motion.div>
+                )
+              })}
+          </AnimatePresence>
+        </div>
       </div>
     </div>
   )

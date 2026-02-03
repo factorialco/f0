@@ -1,5 +1,4 @@
 import { cva } from "cva"
-import { AnimatePresence, motion } from "motion/react"
 import {
   forwardRef,
   useCallback,
@@ -16,7 +15,7 @@ import {
 import { F0Button } from "@/components/F0Button"
 import { F0Link } from "@/components/F0Link"
 import { Cross } from "@/icons/app"
-import { useReducedMotion } from "@/lib/a11y"
+import { useI18n } from "@/lib/providers/i18n"
 import { toArray } from "@/lib/toArray"
 import { cn } from "@/lib/utils"
 
@@ -75,8 +74,7 @@ const F0Toast = forwardRef<HTMLDivElement, F0ToastProps>(
     },
     ref
   ) => {
-    const prefersReducedMotion = useReducedMotion()
-    const [isClosing, setIsClosing] = useState(false)
+    const i18n = useI18n()
     const [remainingTime, setRemainingTime] = useState(duration || 0)
     const [isPaused, setIsPaused] = useState(false)
     const startTimeRef = useRef<number | null>(null)
@@ -121,23 +119,12 @@ const F0Toast = forwardRef<HTMLDivElement, F0ToastProps>(
     }, [variant])
 
     const handleClose = useCallback(() => {
-      setIsClosing(true)
-      // If reduced motion is preferred, we can call onClose immediately
-      // But keeping a small timeout aligns with the exit animation logic generally
-      // However, we rely on onExitComplete from AnimatePresence for the actual removal usually.
-      // But here we are likely controlled by a parent or just self-managing via onClose.
-      // If onClose is provided, we should call it after animation.
-    }, [])
+      onClose?.()
+    }, [onClose])
 
     // Timer logic
     useEffect(() => {
-      if (
-        !duration ||
-        duration <= 0 ||
-        isPaused ||
-        isClosing ||
-        forcePauseTimer
-      ) {
+      if (!duration || duration <= 0 || isPaused || forcePauseTimer) {
         if (animationFrameRef.current) {
           cancelAnimationFrame(animationFrameRef.current)
           animationFrameRef.current = null
@@ -149,7 +136,6 @@ const F0Toast = forwardRef<HTMLDivElement, F0ToastProps>(
         startTimeRef.current = Date.now()
       }
 
-      // Let's implement the interval approach from the plan as it's robust enough.
       const interval = setInterval(() => {
         setRemainingTime((prev) => {
           const next = prev - 16
@@ -163,7 +149,7 @@ const F0Toast = forwardRef<HTMLDivElement, F0ToastProps>(
       }, 16)
 
       return () => clearInterval(interval)
-    }, [duration, isPaused, isClosing, handleClose, forcePauseTimer])
+    }, [duration, isPaused, handleClose, forcePauseTimer])
 
     const handleMouseEnter = () => {
       if (duration && duration > 0) {
@@ -201,112 +187,94 @@ const F0Toast = forwardRef<HTMLDivElement, F0ToastProps>(
     const progress = duration ? (remainingTime / duration) * 100 : 0
 
     return (
-      <AnimatePresence
-        onExitComplete={() => {
-          onClose?.()
-        }}
+      <div
+        ref={ref}
+        role={role}
+        aria-live={ariaLive}
+        className={toastVariants({ variant })}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
       >
-        {!isClosing && (
-          <motion.div
-            layout
-            initial={{ opacity: 0, y: 10, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
-            transition={{
-              duration: prefersReducedMotion ? 0 : 0.3,
-              type: "spring",
-              stiffness: 500,
-              damping: 30,
-            }}
-            ref={ref}
-            role={role}
-            aria-live={ariaLive}
-            className={toastVariants({ variant })}
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
-          >
-            <div className="pointer-events-auto flex flex-row gap-3">
-              {avatarType && (
-                <div className="flex-shrink-0">
-                  <F0AvatarAlert type={avatarType} size="sm" />
-                </div>
-              )}
-
-              <div className="flex flex-1 flex-col gap-1">
-                {title && (
-                  <p
-                    className={titleVariants({
-                      variant,
-                      hasIcon: !!avatarType,
-                    })}
-                  >
-                    {title}
-                  </p>
-                )}
-                {description && (
-                  <p className="line-clamp-3 text-base text-f1-foreground-inverse-secondary">
-                    {description}
-                  </p>
-                )}
-
-                {(buttonActions.length > 0 || linkActions.length > 0) && (
-                  <div className="dark mt-1 flex flex-row flex-wrap items-center gap-3">
-                    {buttonActions.map((buttonAction) => (
-                      <F0Button
-                        key={`button-${buttonAction.label}`}
-                        {...buttonAction}
-                        variant="outline"
-                        size="sm"
-                        onClick={() =>
-                          handleActionClick(buttonAction, buttonAction.onClick)
-                        }
-                      />
-                    ))}
-                    {linkActions.map((linkAction) => (
-                      <div
-                        key={`link-${linkAction.label}`}
-                        onClick={() => handleActionClick(linkAction)}
-                      >
-                        <F0Link
-                          href={linkAction.href}
-                          children={linkAction.label}
-                        />
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Close button */}
-              {onClose && (
-                <div className="dark flex-shrink-0">
-                  <F0Button
-                    variant="ghost"
-                    icon={Cross}
-                    size="sm"
-                    hideLabel
-                    onClick={handleClose}
-                    label="Close"
-                  />
-                </div>
-              )}
+        <div className="pointer-events-auto flex flex-row gap-3">
+          {avatarType && (
+            <div className="flex-shrink-0">
+              <F0AvatarAlert type={avatarType} size="sm" />
             </div>
+          )}
 
-            {/* Progress Bar */}
-            {duration && duration > 0 && (
-              <div className="absolute bottom-0 left-0 right-0 h-[3px] w-full overflow-hidden rounded-b-lg">
-                <div
-                  className={cn("h-full w-full", progressBarColor)}
-                  style={{
-                    transform: `translateX(-${100 - progress}%)`,
-                    transition: isPaused ? "none" : "transform 16ms linear",
-                  }}
-                />
+          <div className="flex flex-1 flex-col gap-1">
+            {title && (
+              <p
+                className={titleVariants({
+                  variant,
+                  hasIcon: !!avatarType,
+                })}
+              >
+                {title}
+              </p>
+            )}
+            {description && (
+              <p className="line-clamp-3 text-base text-f1-foreground-inverse-secondary">
+                {description}
+              </p>
+            )}
+
+            {(buttonActions.length > 0 || linkActions.length > 0) && (
+              <div className="dark mt-1 flex flex-row flex-wrap items-center gap-3">
+                {buttonActions.map((buttonAction) => (
+                  <F0Button
+                    key={`button-${buttonAction.label}`}
+                    {...buttonAction}
+                    variant="outline"
+                    size="sm"
+                    onClick={() =>
+                      handleActionClick(buttonAction, buttonAction.onClick)
+                    }
+                  />
+                ))}
+                {linkActions.map((linkAction) => (
+                  <div
+                    key={`link-${linkAction.label}`}
+                    onClick={() => handleActionClick(linkAction)}
+                  >
+                    <F0Link
+                      href={linkAction.href}
+                      children={linkAction.label}
+                    />
+                  </div>
+                ))}
               </div>
             )}
-          </motion.div>
+          </div>
+
+          {/* Close button */}
+          {onClose && (
+            <div className="dark flex-shrink-0">
+              <F0Button
+                variant="ghost"
+                icon={Cross}
+                size="sm"
+                hideLabel
+                onClick={handleClose}
+                label={i18n.actions.close}
+              />
+            </div>
+          )}
+        </div>
+
+        {/* Progress Bar */}
+        {duration && duration > 0 && (
+          <div className="absolute bottom-0 left-0 right-0 h-[3px] w-full overflow-hidden rounded-b-lg">
+            <div
+              className={cn("h-full w-full", progressBarColor)}
+              style={{
+                transform: `translateX(-${100 - progress}%)`,
+                transition: isPaused ? "none" : "transform 16ms linear",
+              }}
+            />
+          </div>
         )}
-      </AnimatePresence>
+      </div>
     )
   }
 )

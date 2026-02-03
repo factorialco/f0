@@ -1,4 +1,5 @@
 import { nanoid } from "nanoid"
+import { useCallback } from "react"
 
 import { useToastContext } from "./ToastProvider"
 import { ToastId, ToastOptions, UseToastReturn } from "./types"
@@ -6,18 +7,21 @@ import { ToastId, ToastOptions, UseToastReturn } from "./types"
 export const useToast = (): UseToastReturn => {
   const { addToast, removeToast } = useToastContext()
 
-  const toast = (options: ToastOptions): ToastId => {
-    const id = options.id || nanoid()
+  const toast = useCallback(
+    (options: ToastOptions): ToastId => {
+      const id = options.id ?? nanoid()
 
-    addToast({
-      duration: options.persistent ? undefined : 10000,
-      ...options,
-      id,
-      onClose: () => removeToast(id),
-    })
+      addToast({
+        duration: options.persistent ? undefined : 10000,
+        ...options,
+        id,
+        onClose: () => removeToast(id),
+      })
 
-    return id
-  }
+      return id
+    },
+    [addToast, removeToast]
+  )
 
   return {
     toast,
