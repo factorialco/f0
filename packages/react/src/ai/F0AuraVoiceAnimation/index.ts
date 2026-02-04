@@ -1,4 +1,2 @@
-export {
-  AuraVoiceAnimation,
-  type AuraVoiceAnimationProps,
-} from "./AuraVoiceAnimation"
+export { F0AuraVoiceAnimation } from "./components/F0AuraVoiceAnimation"
+export * from "./types"
