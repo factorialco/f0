@@ -321,15 +321,6 @@ declare type ActionType_2 = {
     description?: string;
 };
 
-declare type actionType_2 = {
-    label: string;
-    onClick: () => void;
-    disabled?: boolean;
-    icon?: IconType;
-    hideLabel?: boolean;
-    variant?: "default" | "outline" | "neutral";
-};
-
 declare type ActionType_3 = CopyActionType | NavigateActionType | OpenLinkActionType;
 
 declare type ActionVariant = (typeof actionVariants)[number];
@@ -623,6 +614,14 @@ export declare type BannerAction = {
     variant?: "default" | "outline" | "ghost";
     icon?: IconType;
 };
+
+declare interface BannerProps {
+    icon: IconType;
+    title: string;
+    variant: BannerVariant;
+}
+
+declare type BannerVariant = "info" | "warning" | "critical" | "neutral" | "positive";
 
 export declare const BarChartWidget: ForwardRefExoticComponent<Omit<WidgetProps_2 & {
 chart: BarChartProps;
@@ -984,6 +983,10 @@ declare type ButtonInternalProps = Pick<ActionProps, "size" | "disabled" | "clas
      * The variant of the button.
      */
     variant?: ActionButtonVariant;
+    /**
+     * The filters'counter value to display.
+     */
+    counterValue?: number;
     /**
      * Callback fired when the button is clicked. Supports async functions for loading state.
      */
@@ -2494,6 +2497,7 @@ declare const defaultTranslations: {
     readonly select: {
         readonly noResults: "No results found";
         readonly loadingMore: "Loading...";
+        readonly applySelection: "Apply selection";
     };
     readonly numberInput: {
         readonly between: "It should be between {{min}} and {{max}}";
@@ -2590,6 +2594,16 @@ declare const defaultTranslations: {
             readonly textStyles: "Text Styles";
             readonly lists: "Lists";
             readonly blocks: "Blocks";
+        };
+        readonly ai: {
+            readonly enhanceButtonLabel: "Enhance";
+            readonly loadingEnhanceLabel: "Loading...";
+            readonly defaultError: "An error occurred while loading";
+            readonly closeErrorButtonLabel: "Continue editing";
+            readonly acceptChangesButtonLabel: "Accept";
+            readonly rejectChangesButtonLabel: "Reject";
+            readonly repeatButtonLabel: "Repeat";
+            readonly customPromptPlaceholder: "What do you want to do?";
         };
     };
     readonly forms: {
@@ -2775,23 +2789,12 @@ declare type EmptyStateType = (typeof emptyStatesTypes)[number];
 export declare type enhanceConfig = {
     onEnhanceText: (params: enhanceTextParams) => Promise<enhancedTextResponse>;
     enhancementOptions?: EnhancementOption[];
-    enhanceLabels: enhanceLabelsType;
 };
 
 export declare type enhancedTextResponse = {
     success: boolean;
     text: string;
     error?: string;
-};
-
-export declare type enhanceLabelsType = {
-    defaultError: string;
-    enhanceButtonLabel: string;
-    acceptChangesButtonLabel: string;
-    rejectChangesButtonLabel: string;
-    repeatButtonLabel: string;
-    customPromptPlaceholder: string;
-    loadingEnhanceLabel: string;
 };
 
 export declare type EnhancementOption = {
@@ -2877,11 +2880,6 @@ export declare type EntitySelectSubEntity = {
 };
 
 declare type Enumerate<N extends number, Acc extends number[] = []> = Acc["length"] extends N ? [...Acc, N][number] : Enumerate<N, [...Acc, Acc["length"]]>;
-
-export declare type errorConfig = {
-    onClose?: () => void;
-    closeErrorButtonLabel?: string;
-};
 
 declare interface ErrorMessageProps {
     title: string;
@@ -3507,6 +3505,7 @@ export declare interface GranularityDefinition {
     toRange: <T extends Date | DateRange | undefined | null>(date: T) => T extends Date | DateRange ? DateRangeComplete : T;
     toString: (date: Date | DateRange | undefined | null, i18n: TranslationsType, format?: DateStringFormat) => string;
     toStringMaxWidth: () => number;
+    placeholder: () => string;
     fromString: (dateStr: string | DateRangeString, i18n: TranslationsType) => DateRange | null;
     navigateUIView: (viewDate: Date, direction: -1 | 1) => Date;
     navigate: (date: Date, direction: -1 | 1) => Date;
@@ -4115,30 +4114,6 @@ declare type MetadataItemValue = {
     icon?: "warning" | "critical";
 };
 
-declare type MetadataItemValue_2 = {
-    type: "text";
-    content: string;
-    label: string;
-} | {
-    type: "status";
-    label: string;
-    variant: StatusVariant;
-} | {
-    type: "dot-tag";
-    label: string;
-    color: NewColor;
-} | {
-    type: "tag";
-    label: string;
-    icon?: IconType;
-} | {
-    type: "person";
-    label: string;
-    firstName: string;
-    lastName: string;
-    src?: string;
-};
-
 declare interface MetadataProps {
     /**
      * Everything is not a MetadataItem is ignored.
@@ -4370,10 +4345,11 @@ export declare interface NotesTextEditorProps {
     imageUploadConfig?: ImageUploadConfig;
     onTitleChange?: (title: string) => void;
     titlePlaceholder?: string;
-    actions?: actionType_2[];
-    secondaryActions?: secondaryActionsType_2[];
-    metadata?: MetadataItemValue_2[];
-    withPadding?: boolean;
+    primaryAction?: PrimaryActionButton | PrimaryDropdownAction<string>;
+    secondaryActions?: HeaderSecondaryAction[];
+    otherActions?: DropdownItem[];
+    metadata?: MetadataItem[];
+    banner?: BannerProps;
     showBubbleMenu?: boolean;
 }
 
@@ -4382,7 +4358,6 @@ export declare const NotesTextEditorSkeleton: ({ withHeader, withTitle, withTool
 export declare interface NotesTextEditorSkeletonProps {
     withHeader?: boolean;
     withTitle?: boolean;
-    withPadding?: boolean;
     withToolbar?: boolean;
 }
 
@@ -4663,6 +4638,8 @@ declare type OneFilterPickerRootProps<Definition extends FiltersDefinition> = {
     mode?: FiltersMode;
     /** Callback fired when filters open state is changed */
     onOpenChange?: (isOpen: boolean) => void;
+    /** Display counter for the applied filters */
+    displayCounter?: boolean;
 };
 
 /**
@@ -5322,7 +5299,6 @@ export declare interface RichTextEditorProps {
         files?: File[];
     };
     title: string;
-    errorConfig?: errorConfig;
     height?: heightType;
     plainHtmlMode?: boolean;
     fullScreenMode?: boolean;
@@ -5389,14 +5365,6 @@ export declare type SecondaryActionsDefinition = {
 export declare type SecondaryActionsItems = SecondaryActionItem[] | SecondaryActionItem[][] | SecondaryActionGroup[];
 
 export declare type secondaryActionsType = secondaryActionType | secondaryActionType[];
-
-declare type secondaryActionsType_2 = {
-    label: string;
-    onClick: () => void;
-    disabled?: boolean;
-    icon?: IconType;
-    critical?: boolean;
-};
 
 export declare type secondaryActionType = (actionType | toggleActionType) & {
     type?: "button" | "switch";
@@ -6591,6 +6559,16 @@ declare module "@tiptap/core" {
         aiBlock: {
             insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
             executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
+        };
+    }
+}
+
+
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
