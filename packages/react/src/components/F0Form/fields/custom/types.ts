@@ -17,7 +17,7 @@ export type CustomFieldRenderIf = CommonRenderIfCondition
 // ============================================================================
 
 /**
- * Base props passed to all custom field render functions
+ * Base props passed to all custom field render functions (runtime type)
  */
 export interface CustomFieldRenderPropsBase {
   /** Field id */
@@ -43,13 +43,31 @@ export interface CustomFieldRenderPropsBase {
 /**
  * Props passed to the custom field render function
  *
+ * @typeParam TValue - Type of the field value (inferred from Zod schema)
  * @typeParam TConfig - Type of the custom configuration object
  */
-export type CustomFieldRenderProps<TConfig = undefined> =
-  CustomFieldRenderPropsBase & {
-    /** Custom configuration passed via fieldConfig */
-    config: TConfig
-  }
+export interface CustomFieldRenderProps<TValue = unknown, TConfig = undefined> {
+  /** Field id */
+  id: string
+  /** Field label */
+  label: string
+  /** Placeholder text */
+  placeholder?: string
+  /** Current field value */
+  value: TValue
+  /** Callback to update the value */
+  onChange: (value: TValue) => void
+  /** Callback for blur events */
+  onBlur: () => void
+  /** Error message if validation failed */
+  error?: string
+  /** Whether async validation is in progress */
+  isValidating: boolean
+  /** Whether the field is disabled */
+  disabled?: boolean
+  /** Custom configuration passed via fieldConfig */
+  config: TConfig
+}
 
 // ============================================================================
 // Custom Field Config and Type
@@ -57,25 +75,34 @@ export type CustomFieldRenderProps<TConfig = undefined> =
 
 /**
  * Custom config without fieldConfig (render receives config: undefined)
+ *
+ * @typeParam TValue - Type of the field value
  */
-export interface F0CustomConfigBase {
+export interface F0CustomConfigBase<TValue = unknown> {
   /** Render function for the custom component */
-  render: (props: CustomFieldRenderProps<undefined>) => ReactNode
+  render: (props: CustomFieldRenderProps<TValue, undefined>) => ReactNode
 }
 
 /**
  * Custom config with fieldConfig (render receives typed config)
+ *
+ * @typeParam TValue - Type of the field value
+ * @typeParam TConfig - Type of the fieldConfig object
  */
-export interface F0CustomConfigWithFieldConfig<TConfig> {
+export interface F0CustomConfigWithFieldConfig<
+  TValue = unknown,
+  TConfig = unknown,
+> {
   /** Custom configuration to pass to the render function */
   fieldConfig: TConfig
   /** Render function for the custom component */
-  render: (props: CustomFieldRenderProps<TConfig>) => ReactNode
+  render: (props: CustomFieldRenderProps<TValue, TConfig>) => ReactNode
 }
 
 /**
  * F0 config options specific to custom fields
  *
+ * @typeParam TValue - Type of the field value (inferred from Zod schema)
  * @typeParam TConfig - Type of the custom configuration object
  *
  * @example Without fieldConfig:
@@ -84,6 +111,7 @@ export interface F0CustomConfigWithFieldConfig<TConfig> {
  *   label: "Employee",
  *   fieldType: "custom",
  *   render: ({ value, onChange }) => (
+ *     // value is typed as string
  *     <EmployeeSelector value={value} onChange={onChange} />
  *   ),
  * })
@@ -99,6 +127,7 @@ export interface F0CustomConfigWithFieldConfig<TConfig> {
  *     excludeCurrentEmployee: true,
  *   },
  *   render: ({ value, onChange, config }) => {
+ *     // value is typed as number[]
  *     // config is typed as { multiple: boolean, excludeCurrentEmployee: boolean }
  *     return (
  *       <EmployeeSelector
@@ -112,9 +141,12 @@ export interface F0CustomConfigWithFieldConfig<TConfig> {
  * })
  * ```
  */
-export type F0CustomConfig<TConfig = undefined> = TConfig extends undefined
-  ? F0CustomConfigBase
-  : F0CustomConfigWithFieldConfig<TConfig>
+export type F0CustomConfig<
+  TValue = unknown,
+  TConfig = undefined,
+> = TConfig extends undefined
+  ? F0CustomConfigBase<TValue>
+  : F0CustomConfigWithFieldConfig<TValue, TConfig>
 
 /**
  * Custom field with all properties for rendering (runtime type)

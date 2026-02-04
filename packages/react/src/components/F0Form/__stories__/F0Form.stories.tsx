@@ -1,7 +1,12 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { z } from "zod"
 
-import { f0FormField, F0Form, F0SectionConfig } from "../index"
+import {
+  f0FormField,
+  F0Form,
+  F0SectionConfig,
+  CustomFieldRenderProps,
+} from "../index"
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
@@ -459,8 +464,8 @@ export const CustomField: Story = {
         }) => (
           <ExternalSelector
             label={label}
-            value={value as string | undefined}
-            onChange={onChange}
+            value={value || undefined}
+            onChange={(v) => onChange(v ?? "")}
             error={error}
             disabled={disabled}
             options={config.options}
@@ -472,13 +477,13 @@ export const CustomField: Story = {
       reviewer: f0FormField(z.string().optional(), {
         label: "Reviewer (Optional)",
         fieldType: "custom",
-        render: ({ label, value, onChange, error, disabled }) => (
+        render: (props: CustomFieldRenderProps<string | undefined>) => (
           <ExternalSelector
-            label={label}
-            value={value as string | undefined}
-            onChange={onChange}
-            error={error}
-            disabled={disabled}
+            label={props.label}
+            value={props.value || undefined}
+            onChange={(v) => props.onChange(v)}
+            error={props.error}
+            disabled={props.disabled}
             options={employees}
             placeholder="Choose a reviewer..."
           />
