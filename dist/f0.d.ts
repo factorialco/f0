@@ -1399,15 +1399,34 @@ declare type CustomFieldRenderIf = CommonRenderIfCondition;
 /**
  * Props passed to the custom field render function
  *
+ * @typeParam TValue - Type of the field value (inferred from Zod schema)
  * @typeParam TConfig - Type of the custom configuration object
  */
-export declare type CustomFieldRenderProps<TConfig = undefined> = CustomFieldRenderPropsBase & {
+export declare interface CustomFieldRenderProps<TValue = unknown, TConfig = undefined> {
+    /** Field id */
+    id: string;
+    /** Field label */
+    label: string;
+    /** Placeholder text */
+    placeholder?: string;
+    /** Current field value */
+    value: TValue;
+    /** Callback to update the value */
+    onChange: (value: TValue) => void;
+    /** Callback for blur events */
+    onBlur: () => void;
+    /** Error message if validation failed */
+    error?: string;
+    /** Whether async validation is in progress */
+    isValidating: boolean;
+    /** Whether the field is disabled */
+    disabled?: boolean;
     /** Custom configuration passed via fieldConfig */
     config: TConfig;
-};
+}
 
 /**
- * Base props passed to all custom field render functions
+ * Base props passed to all custom field render functions (runtime type)
  */
 declare interface CustomFieldRenderPropsBase {
     /** Field id */
@@ -3016,6 +3035,7 @@ export declare const F0ChipList: {
 /**
  * F0 config options specific to custom fields
  *
+ * @typeParam TValue - Type of the field value (inferred from Zod schema)
  * @typeParam TConfig - Type of the custom configuration object
  *
  * @example Without fieldConfig:
@@ -3024,6 +3044,7 @@ export declare const F0ChipList: {
  *   label: "Employee",
  *   fieldType: "custom",
  *   render: ({ value, onChange }) => (
+ *     // value is typed as string
  *     <EmployeeSelector value={value} onChange={onChange} />
  *   ),
  * })
@@ -3039,6 +3060,7 @@ export declare const F0ChipList: {
  *     excludeCurrentEmployee: true,
  *   },
  *   render: ({ value, onChange, config }) => {
+ *     // value is typed as number[]
  *     // config is typed as { multiple: boolean, excludeCurrentEmployee: boolean }
  *     return (
  *       <EmployeeSelector
@@ -3052,24 +3074,29 @@ export declare const F0ChipList: {
  * })
  * ```
  */
-export declare type F0CustomConfig<TConfig = undefined> = TConfig extends undefined ? F0CustomConfigBase : F0CustomConfigWithFieldConfig<TConfig>;
+export declare type F0CustomConfig<TValue = unknown, TConfig = undefined> = TConfig extends undefined ? F0CustomConfigBase<TValue> : F0CustomConfigWithFieldConfig<TValue, TConfig>;
 
 /**
  * Custom config without fieldConfig (render receives config: undefined)
+ *
+ * @typeParam TValue - Type of the field value
  */
-declare interface F0CustomConfigBase {
+declare interface F0CustomConfigBase<TValue = unknown> {
     /** Render function for the custom component */
-    render: (props: CustomFieldRenderProps<undefined>) => ReactNode;
+    render: (props: CustomFieldRenderProps<TValue, undefined>) => ReactNode;
 }
 
 /**
  * Custom config with fieldConfig (render receives typed config)
+ *
+ * @typeParam TValue - Type of the field value
+ * @typeParam TConfig - Type of the fieldConfig object
  */
-declare interface F0CustomConfigWithFieldConfig<TConfig> {
+declare interface F0CustomConfigWithFieldConfig<TValue = unknown, TConfig = unknown> {
     /** Custom configuration to pass to the render function */
     fieldConfig: TConfig;
     /** Render function for the custom component */
-    render: (props: CustomFieldRenderProps<TConfig>) => ReactNode;
+    render: (props: CustomFieldRenderProps<TValue, TConfig>) => ReactNode;
 }
 
 /**
@@ -3089,22 +3116,28 @@ export declare type F0CustomField = F0BaseField & {
 
 /**
  * Union of custom field configs (with or without fieldConfig)
+ *
+ * @typeParam TValue - Type of the field value (inferred from Zod schema)
+ * @typeParam TConfig - Type of the fieldConfig object
  */
-export declare type F0CustomFieldConfig<TConfig = undefined> = TConfig extends undefined ? F0CustomFieldConfigBase : F0CustomFieldConfigWithConfig<TConfig>;
+export declare type F0CustomFieldConfig<TValue = unknown, TConfig = undefined> = TConfig extends undefined ? F0CustomFieldConfigBase<TValue> : F0CustomFieldConfigWithConfig<TValue, TConfig>;
 
 /**
  * Config for custom fields without fieldConfig
+ *
+ * @typeParam TValue - Type of the field value (inferred from Zod schema)
  */
-declare type F0CustomFieldConfigBase = F0BaseConfig & F0CustomConfig<undefined> & {
+declare type F0CustomFieldConfigBase<TValue = unknown> = F0BaseConfig & F0CustomConfig<TValue, undefined> & {
     fieldType: "custom";
 };
 
 /**
  * Config for custom fields with fieldConfig
  *
+ * @typeParam TValue - Type of the field value (inferred from Zod schema)
  * @typeParam TConfig - Type of the custom configuration object passed to render
  */
-declare type F0CustomFieldConfigWithConfig<TConfig> = F0BaseConfig & F0CustomConfig<TConfig> & {
+declare type F0CustomFieldConfigWithConfig<TValue = unknown, TConfig = unknown> = F0BaseConfig & F0CustomConfig<TValue, TConfig> & {
     fieldType: "custom";
 };
 
@@ -3414,7 +3447,7 @@ export declare type F0FormErrorTriggerMode = "on-blur" | "on-change" | "on-submi
 /**
  * String field - text input, textarea, select, or custom
  */
-export declare function f0FormField<T extends z.ZodString, TConfig = undefined>(schema: T, config: F0StringConfig<TConfig>): T & F0ZodType<T>;
+export declare function f0FormField<T extends z.ZodString, TConfig = undefined>(schema: T, config: F0StringConfig<z.infer<T>, TConfig>): T & F0ZodType<T>;
 
 /**
  * Number field
@@ -3444,7 +3477,7 @@ export declare function f0FormField<T extends z.ZodArray<ZodTypeAny>>(schema: T,
 /**
  * Object field - richtext or custom
  */
-export declare function f0FormField<T extends z.ZodObject<z.ZodRawShape>, TConfig = undefined>(schema: T, config: F0ObjectConfig<TConfig>): T & F0ZodType<T>;
+export declare function f0FormField<T extends z.ZodObject<z.ZodRawShape>, TConfig = undefined>(schema: T, config: F0ObjectConfig<z.infer<T>, TConfig>): T & F0ZodType<T>;
 
 /**
  * Optional wrapper - inherits inner type's config
@@ -3464,8 +3497,9 @@ export declare function f0FormField<T extends z.ZodDefault<ZodTypeAny>>(schema: 
 /**
  * Custom field - works with any schema type
  * Place before fallback to ensure proper type inference for fieldConfig
+ * TValue is inferred from the Zod schema to provide typed value and onChange
  */
-export declare function f0FormField<T extends ZodTypeAny, TConfig = undefined>(schema: T, config: F0CustomFieldConfig<TConfig>): T & F0ZodType<T>;
+export declare function f0FormField<T extends ZodTypeAny, TConfig = undefined>(schema: T, config: F0CustomFieldConfig<z.infer<T>, TConfig>): T & F0ZodType<T>;
 
 /**
  * Fallback for any other schema type
@@ -3688,9 +3722,10 @@ export declare type F0NumberFieldConfig = F0BaseConfig & F0NumberConfig & {
 /**
  * Config for object fields (richtext, daterange, or custom)
  *
+ * @typeParam TValue - Type of the field value (for custom fields)
  * @typeParam TConfig - Type of the custom configuration object (for custom fields)
  */
-declare type F0ObjectConfig<TConfig = undefined> = F0RichTextFieldConfig | F0DateRangeFieldConfig | F0CustomFieldConfig<TConfig>;
+declare type F0ObjectConfig<TValue = unknown, TConfig = undefined> = F0RichTextFieldConfig | F0DateRangeFieldConfig | F0CustomFieldConfig<TValue, TConfig>;
 
 export declare const F0OneIcon: ForwardRefExoticComponent<Omit<F0OneIconProps, "ref"> & RefAttributes<SVGSVGElement>>;
 
@@ -3936,8 +3971,11 @@ export declare type F0Source = {
 
 /**
  * Union of all string field configs
+ *
+ * @typeParam TValue - Type of the field value (for custom fields)
+ * @typeParam TConfig - Type of the fieldConfig object (for custom fields)
  */
-export declare type F0StringConfig<TConfig = undefined> = F0StringTextConfig | F0StringTextareaConfig | F0StringSelectConfig | F0CustomFieldConfig<TConfig>;
+export declare type F0StringConfig<TValue = string, TConfig = undefined> = F0StringTextConfig | F0StringTextareaConfig | F0StringSelectConfig | F0CustomFieldConfig<TValue, TConfig>;
 
 /**
  * Config for string fields with select options
@@ -6910,11 +6948,6 @@ declare module "gridstack" {
 }
 
 
-declare namespace Calendar {
-    var displayName: string;
-}
-
-
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         aiBlock: {
@@ -6950,4 +6983,9 @@ declare module "@tiptap/core" {
             insertTranscript: (data: TranscriptData) => ReturnType;
         };
     }
+}
+
+
+declare namespace Calendar {
+    var displayName: string;
 }
