@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.347.0](https://github.com/factorialco/f0/compare/f0-react-v1.346.0...f0-react-v1.347.0) (2026-02-04)
+
+
+### Features
+
+* export I18nProvider and related types from ai.ts  ([#3355](https://github.com/factorialco/f0/issues/3355)) ([3751faa](https://github.com/factorialco/f0/commit/3751faa4071a032f237beebe0b20baca8bbab58e))
+
 ## [1.346.0](https://github.com/factorialco/f0/compare/f0-react-v1.345.0...f0-react-v1.346.0) (2026-02-04)
 
 
