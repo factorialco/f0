@@ -205,6 +205,10 @@ export declare const aiTranslations: {
         thinking: string;
         exportTable: string;
         generatedTableFilename: string;
+        removeFile: string;
+        attachFiles: string;
+        dropZoneTitle: string;
+        dropZoneDescription: string;
         feedbackModal: {
             positive: {
                 title: string;
@@ -259,7 +263,7 @@ export declare const F0AiChat: () => JSX_2.Element | null;
  */
 export declare const F0AiChatProvider: ({ enabled, greeting, initialMessage, welcomeScreenSuggestions, onThumbsUp, onThumbsDown, fileValidation, onFilesRejected, onUploadFile, children, agent, ...copilotKitProps }: AiChatProviderProps) => JSX_2.Element;
 
-export declare const F0AiChatTextArea: ({ submitLabel, inProgress, onSend, onStop, placeholders, defaultPlaceholder, autoFocus, }: F0AiChatTextAreaProps) => JSX_2.Element;
+export declare const F0AiChatTextArea: ({ submitLabel, inProgress, onSend, onStop, placeholders, defaultPlaceholder, autoFocus, fileUploadsEnabled, attachments, onAddFiles, onRemoveAttachment, onFileInputRef, onSendWithAttachments, }: F0AiChatTextAreaProps) => JSX_2.Element;
 
 /**
  * Props for the F0AiChatTextArea component
@@ -270,7 +274,8 @@ export declare interface F0AiChatTextAreaProps {
      */
     inProgress: boolean;
     /**
-     * Callback when the user sends a message
+     * Callback when the user sends a message.
+     * When file uploads are enabled, use `onSendWithAttachments` instead.
      */
     onSend: (message: string) => void;
     /**
@@ -296,6 +301,31 @@ export declare interface F0AiChatTextAreaProps {
      * @default true
      */
     autoFocus?: boolean;
+    /**
+     * Whether file uploads are enabled. Shows paperclip button and allows file selection.
+     */
+    fileUploadsEnabled?: boolean;
+    /**
+     * Current file attachments to display
+     */
+    attachments?: File[];
+    /**
+     * Callback to add files as attachments
+     */
+    onAddFiles?: (files: File[]) => void;
+    /**
+     * Callback to remove an attachment by index
+     */
+    onRemoveAttachment?: (index: number) => void;
+    /**
+     * Callback to register the file input ref for external triggers
+     */
+    onFileInputRef?: (ref: HTMLInputElement | null) => void;
+    /**
+     * Async send handler that processes attachments before sending.
+     * When provided, this is used instead of `onSend`.
+     */
+    onSendWithAttachments?: (message: string) => Promise<void>;
 }
 
 export declare const F0AiCollapsibleMessage: ({ icon, title, children, }: F0AiCollapsibleMessageProps) => JSX_2.Element;
@@ -602,6 +632,7 @@ export declare type WelcomeScreenSuggestion = {
     icon: IconType;
     message: string;
     prompt?: string;
+    onClick?: () => void;
 };
 
 export { }
@@ -644,11 +675,6 @@ declare module "gridstack" {
 }
 
 
-declare namespace Calendar {
-    var displayName: string;
-}
-
-
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         aiBlock: {
@@ -684,4 +710,9 @@ declare module "@tiptap/core" {
             insertTranscript: (data: TranscriptData) => ReturnType;
         };
     }
+}
+
+
+declare namespace Calendar {
+    var displayName: string;
 }

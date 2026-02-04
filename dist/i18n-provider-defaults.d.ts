@@ -365,6 +365,10 @@ export declare const defaultTranslations: {
         readonly thinking: "Thinking...";
         readonly exportTable: "Download table";
         readonly generatedTableFilename: "OneGeneratedTable";
+        readonly removeFile: "Remove file";
+        readonly attachFiles: "Attach files";
+        readonly dropZoneTitle: "Add files";
+        readonly dropZoneDescription: "Drop any files here to add them to your message";
         readonly feedbackModal: {
             readonly positive: {
                 readonly title: "What did you like about this response?";
@@ -547,11 +551,6 @@ declare module "gridstack" {
 }
 
 
-declare namespace Calendar {
-    var displayName: string;
-}
-
-
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         aiBlock: {
@@ -587,4 +586,9 @@ declare module "@tiptap/core" {
             insertTranscript: (data: TranscriptData) => ReturnType;
         };
     }
+}
+
+
+declare namespace Calendar {
+    var displayName: string;
 }

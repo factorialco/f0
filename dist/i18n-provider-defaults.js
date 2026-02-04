@@ -365,6 +365,10 @@ const e = {
     thinking: "Thinking...",
     exportTable: "Download table",
     generatedTableFilename: "OneGeneratedTable",
+    removeFile: "Remove file",
+    attachFiles: "Attach files",
+    dropZoneTitle: "Add files",
+    dropZoneDescription: "Drop any files here to add them to your message",
     feedbackModal: {
       positive: {
         title: "What did you like about this response?",
