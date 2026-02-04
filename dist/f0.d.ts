@@ -1,9 +1,11 @@
+import { AIMessage } from '@copilotkit/shared';
 import { AlertTagCellValue } from '../../value-display/types/alertTag';
 import { AlertTagCellValue as AlertTagCellValue_2 } from './types/alertTag';
 import { AmountCellValue } from '../../value-display/types/amount';
 import { AmountCellValue as AmountCellValue_2 } from './types/amount';
 import { AnchorHTMLAttributes } from 'react';
 import { AriaAttributes } from 'react';
+import { AssistantMessageProps } from '@copilotkit/react-ui';
 import { AutoFill as AutoFill_2 } from 'react';
 import { AvatarListCellValue } from '../../value-display/types/avatarList';
 import { AvatarListCellValue as AvatarListCellValue_2 } from './types/avatarList';
@@ -23,6 +25,7 @@ import { CompanyCellValue as CompanyCellValue_2 } from './types/company';
 import { ComponentProps } from 'react';
 import { ComponentType } from 'react';
 import { Context } from 'react';
+import { CopilotKitProps } from '@copilotkit/react-core';
 import { CountryCellValue } from './types/country';
 import { DashboardProps as DashboardProps_2 } from './Dashboard';
 import { DateCellValue } from '../../value-display/types/date';
@@ -60,6 +63,8 @@ import { JSX as JSX_2 } from 'react';
 import { LineChartConfig } from '../../ui/chart';
 import { LineChartPropsBase } from './utils/types';
 import { LongTextCellValue } from './types/longText';
+import { Message } from '@copilotkit/shared';
+import { MessagesProps } from '@copilotkit/react-ui';
 import { NumberCellValue } from '../../value-display/types/number';
 import { NumberCellValue as NumberCellValue_2 } from './types/number';
 import { NumberFilterOptions } from './NumberFilter/NumberFilter';
@@ -83,6 +88,7 @@ import { SearchFilterOptions } from './SearchFilter/SearchFilter';
 import { StatusCellValue } from '../../value-display/types/status';
 import { StatusCellValue as StatusCellValue_2 } from './types/status';
 import { SVGProps } from 'react';
+import * as SwitchPrimitive from '@radix-ui/react-switch';
 import { SyncStatusCellValue } from './types/syncStatus';
 import { TagCellValue } from '../../value-display/types/tag';
 import { TagCellValue as TagCellValue_2 } from './types/tag';
@@ -94,6 +100,8 @@ import { TextCellValue } from '../../value-display/types/text';
 import { TextCellValue as TextCellValue_2 } from './types/text';
 import { ValueDisplayRendererContext } from '../../value-display';
 import { VariantProps } from 'cva';
+
+export declare function A({ children, ...props }: React.AnchorHTMLAttributes<HTMLAnchorElement>): JSX_2.Element;
 
 export declare type Action = UpsellAction | RegularAction;
 
@@ -219,6 +227,10 @@ declare type ActionDefinition = DropdownItemSeparator | (Pick<DropdownItemObject
     type?: "primary" | "secondary" | "other";
 });
 
+export declare type ActionItemStatus = (typeof actionItemStatuses)[number];
+
+export declare const actionItemStatuses: readonly ["inProgress", "executing", "completed"];
+
 declare type ActionLinkProps = ActionBaseProps & {
     href: string;
     target?: NavTarget;
@@ -242,6 +254,144 @@ declare const actionSizes: readonly ["sm", "md", "lg"];
 declare type ActionVariant = (typeof actionVariants)[number];
 
 declare const actionVariants: readonly ["default", "outline", "critical", "neutral", "ghost", "promote", "outlinePromote", "ai", "link", "unstyled", "mention"];
+
+/**
+ * Props for the AiChatProvider component
+ */
+export declare type AiChatProviderProps = {
+    enabled?: boolean;
+    greeting?: string;
+    initialMessage?: string | string[];
+    welcomeScreenSuggestions?: WelcomeScreenSuggestion[];
+    onThumbsUp?: (message: AIMessage, { threadId, feedback }: {
+        threadId: string;
+        feedback: string;
+    }) => void;
+    onThumbsDown?: (message: AIMessage, { threadId, feedback }: {
+        threadId: string;
+        feedback: string;
+    }) => void;
+} & Pick<CopilotKitProps, "agent" | "credentials" | "children" | "runtimeUrl" | "showDevConsole" | "threadId" | "headers">;
+
+/**
+ * Return value type for the useAiChat hook
+ */
+declare type AiChatProviderReturnValue = {
+    enabled: boolean;
+    setEnabled: React.Dispatch<React.SetStateAction<boolean>>;
+    open: boolean;
+    setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+    shouldPlayEntranceAnimation: boolean;
+    setShouldPlayEntranceAnimation: React.Dispatch<React.SetStateAction<boolean>>;
+    tmp_setAgent: (agent?: string) => void;
+    placeholders: string[];
+    setPlaceholders: React.Dispatch<React.SetStateAction<string[]>>;
+    /**
+     * Set the amount of minutes after which the chat will be cleared automatically
+     * Set `null` to disable auto-clearing
+     *
+     * @default 15
+     */
+    setAutoClearMinutes: React.Dispatch<React.SetStateAction<number | null>>;
+    autoClearMinutes: number | null;
+    /**
+     * The initial message to display in the chat
+     */
+    initialMessage?: string | string[];
+    setInitialMessage: React.Dispatch<React.SetStateAction<string | string[] | undefined>>;
+    welcomeScreenSuggestions: WelcomeScreenSuggestion[];
+    setWelcomeScreenSuggestions: React.Dispatch<React.SetStateAction<WelcomeScreenSuggestion[]>>;
+    onThumbsUp?: (message: AIMessage, { threadId, feedback }: {
+        threadId: string;
+        feedback: string;
+    }) => void;
+    onThumbsDown?: (message: AIMessage, { threadId, feedback }: {
+        threadId: string;
+        feedback: string;
+    }) => void;
+    /**
+     * Clear/reset the chat conversation
+     */
+    clear: () => void;
+    /* Excluded from this release type: setClearFunction */
+    /**
+     * Send a message to the chat
+     * @param message - The message content as a string, or a full Message object
+     */
+    sendMessage: (message: string | Message) => void;
+    /* Excluded from this release type: setSendMessageFunction */
+} & Pick<AiChatState, "greeting" | "agent">;
+
+/**
+ * Internal state for the AiChat provider
+ */
+declare interface AiChatState {
+    greeting?: string;
+    enabled: boolean;
+    agent?: string;
+    initialMessage?: string | string[];
+    welcomeScreenSuggestions?: WelcomeScreenSuggestion[];
+    placeholders?: string[];
+    setPlaceholders?: React.Dispatch<React.SetStateAction<string[]>>;
+    onThumbsUp?: (message: AIMessage, { threadId, feedback }: {
+        threadId: string;
+        feedback: string;
+    }) => void;
+    onThumbsDown?: (message: AIMessage, { threadId, feedback }: {
+        threadId: string;
+        feedback: string;
+    }) => void;
+}
+
+/**
+ * AI Chat translations type
+ */
+export declare type AiChatTranslations = TranslationShape_2<typeof aiTranslations>;
+
+export declare function AiChatTranslationsProvider({ children, translations, }: AiChatTranslationsProviderProps): JSX.Element;
+
+/**
+ * Props for the AiChatTranslationsProvider component
+ */
+export declare interface AiChatTranslationsProviderProps {
+    children: React.ReactNode;
+    translations: AiChatTranslations;
+}
+
+/**
+ * Default AI chat translations
+ */
+export declare const aiTranslations: {
+    ai: {
+        openChat: string;
+        closeChat: string;
+        startNewChat: string;
+        scrollToBottom: string;
+        welcome: string;
+        defaultInitialMessage: string;
+        inputPlaceholder: string;
+        stopAnswerGeneration: string;
+        sendMessage: string;
+        thoughtsGroupTitle: string;
+        resourcesGroupTitle: string;
+        thinking: string;
+        exportTable: string;
+        generatedTableFilename: string;
+        feedbackModal: {
+            positive: {
+                title: string;
+                label: string;
+                placeholder: string;
+            };
+            negative: {
+                title: string;
+                label: string;
+                placeholder: string;
+            };
+        };
+        ask: string;
+    };
+};
 
 export declare type AlertAvatarProps = VariantProps<typeof alertAvatarVariants> & {
     type: (typeof alertAvatarTypes)[number];
@@ -586,6 +736,8 @@ export declare type BigNumberProps = {
     comparison: Numeric | NumberWithFormatter | number;
 };
 
+export declare function Blockquote({ children, ...props }: React.HTMLAttributes<HTMLQuoteElement>): JSX_2.Element;
+
 export declare const buildTranslations: (translations: TranslationsType) => TranslationsType;
 
 /**
@@ -663,6 +815,10 @@ declare type ButtonInternalProps = Pick<ActionProps, "size" | "disabled" | "clas
      * The variant of the button.
      */
     variant?: ActionButtonVariant;
+    /**
+     * The filters'counter value to display.
+     */
+    counterValue?: number;
     /**
      * Callback fired when the button is clicked. Supports async functions for loading state.
      */
@@ -963,6 +1119,8 @@ declare type CardVisualizationOptions<T, _Filters extends FiltersDefinition, _So
 };
 
 export declare const CategoryBarChart: ForwardRefExoticComponent<Omit<CategoryBarProps & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>;
+
+export declare const ChatSpinner: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
 
 declare interface CheckboxProps extends DataAttributes_2 {
     /**
@@ -1916,6 +2074,7 @@ export declare const defaultTranslations: {
     readonly select: {
         readonly noResults: "No results found";
         readonly loadingMore: "Loading...";
+        readonly applySelection: "Apply selection";
     };
     readonly numberInput: {
         readonly between: "It should be between {{min}} and {{max}}";
@@ -2013,6 +2172,16 @@ export declare const defaultTranslations: {
             readonly lists: "Lists";
             readonly blocks: "Blocks";
         };
+        readonly ai: {
+            readonly enhanceButtonLabel: "Enhance";
+            readonly loadingEnhanceLabel: "Loading...";
+            readonly defaultError: "An error occurred while loading";
+            readonly closeErrorButtonLabel: "Continue editing";
+            readonly acceptChangesButtonLabel: "Accept";
+            readonly rejectChangesButtonLabel: "Reject";
+            readonly repeatButtonLabel: "Repeat";
+            readonly customPromptPlaceholder: "What do you want to do?";
+        };
     };
 };
 
@@ -2062,6 +2231,8 @@ export declare function DndProvider({ driver, children, }: {
     children: ReactNode;
 }): JSX_2.Element;
 
+export declare function downloadTableAsExcel(table: HTMLTableElement, filename?: string): void;
+
 export declare type DragPayload<T = unknown> = {
     kind: string;
     id: string;
@@ -2105,6 +2276,8 @@ export declare type DropIntent = {
 } | {
     type: "cancel";
 };
+
+export declare function Em({ children, ...props }: React.HTMLAttributes<HTMLSpanElement>): JSX_2.Element;
 
 export declare function EmojiImage({ emoji, size, alt }: EmojiImageProps): JSX_2.Element;
 
@@ -2152,6 +2325,100 @@ declare type ExtractVisualizationSettings<T> = T extends {
         default: infer S;
     };
 } ? S : never;
+
+export declare const F0ActionItem: ({ title, status, inGroup }: F0ActionItemProps) => JSX_2.Element;
+
+/**
+ * Props for the F0ActionItem component
+ */
+export declare interface F0ActionItemProps {
+    /**
+     * The title text displayed next to the status icon
+     */
+    title: string;
+    /**
+     * Current status of the action item
+     */
+    status?: "inProgress" | "executing" | "completed";
+    /**
+     * Whether the action item is part of a group
+     */
+    inGroup?: boolean;
+}
+
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export declare const F0AiChat: () => JSX_2.Element | null;
+
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export declare const F0AiChatProvider: ({ enabled, greeting, initialMessage, welcomeScreenSuggestions, onThumbsUp, onThumbsDown, children, agent, ...copilotKitProps }: AiChatProviderProps) => JSX_2.Element;
+
+export declare const F0AiChatTextArea: ({ submitLabel, inProgress, onSend, onStop, placeholders, defaultPlaceholder, autoFocus, }: F0AiChatTextAreaProps) => JSX_2.Element;
+
+/**
+ * Props for the F0AiChatTextArea component
+ */
+export declare interface F0AiChatTextAreaProps {
+    /**
+     * Whether the chat is currently processing a message
+     */
+    inProgress: boolean;
+    /**
+     * Callback when the user sends a message
+     */
+    onSend: (message: string) => void;
+    /**
+     * Callback when the user stops the current generation
+     */
+    onStop?: () => void;
+    /**
+     * Custom label for the submit button
+     */
+    submitLabel?: string;
+    /**
+     * Array of placeholder strings to cycle through with typewriter effect.
+     * If multiple placeholders are provided, they will animate in a cycle.
+     * If a single placeholder is provided, it will be displayed statically.
+     */
+    placeholders?: string[];
+    /**
+     * Default placeholder text when no placeholders are provided or as fallback
+     */
+    defaultPlaceholder?: string;
+    /**
+     * Whether the textarea should autofocus on mount
+     * @default true
+     */
+    autoFocus?: boolean;
+}
+
+export declare const F0AiCollapsibleMessage: ({ icon, title, children, }: F0AiCollapsibleMessageProps) => JSX_2.Element;
+
+/**
+ * Props for the F0AiCollapsibleMessage component
+ */
+export declare interface F0AiCollapsibleMessageProps {
+    /**
+     * Icon to display in the collapsible trigger
+     */
+    icon: IconType;
+    /**
+     * Title text for the collapsible trigger
+     */
+    title: string;
+    /**
+     * Content to show when expanded
+     */
+    children: ReactNode;
+}
+
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export declare const F0AiFullscreenChat: () => JSX_2.Element | null;
 
 export declare const F0Alert: ({ title, description, action, link, icon, variant, }: F0AlertProps) => JSX_2.Element;
 
@@ -2654,6 +2921,34 @@ export declare type F0HeadingProps = Omit<TextProps, "className" | "variant" | "
     as?: HeadingTags;
 };
 
+export declare const F0HILActionConfirmation: ({ text, confirmationText, onConfirm, cancelText, onCancel, }: F0HILActionConfirmationProps) => JSX_2.Element;
+
+/**
+ * Props for the F0HILActionConfirmation component
+ */
+export declare type F0HILActionConfirmationProps = {
+    /**
+     * Optional descriptive text shown above the action buttons
+     */
+    text?: string;
+    /**
+     * Text displayed on the confirmation button
+     */
+    confirmationText: string;
+    /**
+     * Callback fired when the confirmation button is clicked
+     */
+    onConfirm: () => void;
+    /**
+     * Text displayed on the cancel button
+     */
+    cancelText: string;
+    /**
+     * Callback fired when the cancel button is clicked
+     */
+    onCancel: () => void;
+};
+
 export declare const F0Icon: ForwardRefExoticComponent<Omit<Omit<F0IconProps, "ref"> & RefAttributes<SVGSVGElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>;
 
 export declare interface F0IconProps extends SVGProps<SVGSVGElement>, VariantProps<typeof iconVariants> {
@@ -2674,6 +2969,51 @@ export declare type F0LinkProps = Omit<ActionLinkProps, "variant" | "href"> & {
     stopPropagation?: boolean;
     href?: string;
 };
+
+export declare const f0MarkdownRenderers: NonNullable<AssistantMessageProps["markdownTagRenderers"]>;
+
+export declare const F0MessageSources: ({ sources }: F0MessageSourcesProps) => JSX_2.Element | null;
+
+/**
+ * Props for the F0MessageSources component
+ */
+export declare type F0MessageSourcesProps = {
+    /**
+     * Array of sources to display
+     */
+    sources: F0Source[];
+};
+
+export declare const F0OneIcon: ForwardRefExoticComponent<Omit<F0OneIconProps, "ref"> & RefAttributes<SVGSVGElement>>;
+
+/**
+ * Props for the F0OneIcon component
+ */
+export declare interface F0OneIconProps extends SVGProps<SVGSVGElement> {
+    /**
+     * Whether the icon should spin
+     */
+    spin?: boolean;
+    /**
+     * Whether the icon is in hover state
+     */
+    hover?: boolean;
+    /**
+     * Background color override
+     */
+    background?: string;
+    /**
+     * Size of the icon
+     */
+    size?: "xs" | "sm" | "md" | "lg";
+}
+
+export declare const F0OneSwitch: ({ className, disabled }: F0OneSwitchProps) => JSX_2.Element | null;
+
+/**
+ * Props for the F0OneSwitch component
+ */
+export declare type F0OneSwitchProps = React.ComponentPropsWithoutRef<typeof SwitchPrimitive.Root>;
 
 export declare const F0Provider: React.FC<{
     children: React.ReactNode;
@@ -2793,6 +3133,28 @@ export declare type F0SelectProps<T extends string, R = unknown> = F0SelectBaseP
 }) & Pick<InputFieldProps<T>, "required" | "loading" | "hideLabel" | "labelIcon" | "size" | "label" | "icon" | "placeholder" | "disabled" | "name" | "error" | "status" | "hint">;
 
 /**
+ * Source object for message sources
+ */
+export declare type F0Source = {
+    /**
+     * Title of the source
+     */
+    title: string;
+    /**
+     * Optional link URL
+     */
+    link?: string;
+    /**
+     * Optional icon name (from @/icons/app)
+     */
+    icon?: string;
+    /**
+     * Whether to open link in new tab
+     */
+    targetBlank?: boolean;
+};
+
+/**
  * @experimental This is an experimental component use it at your own risk
  */
 export declare const F0TableOfContentPopover: typeof F0TableOfContentPopover_2;
@@ -2836,6 +3198,7 @@ export declare const F0TagPerson: ForwardRefExoticComponent<F0TagPersonProps & R
 export declare type F0TagPersonProps = {
     src?: string;
     name: string;
+    deactivated?: boolean;
 };
 
 export declare const F0TagRaw: ForwardRefExoticComponent<TagRawProps & RefAttributes<HTMLDivElement>>;
@@ -2850,6 +3213,38 @@ export declare type F0TextProps = Omit<TextProps, "className" | "variant" | "as"
     variant?: (typeof _allowedVariants_2)[number];
     as?: TextTags;
     markdown?: boolean;
+};
+
+export declare const F0Thinking: ({ messages, title }: F0ThinkingProps) => JSX_2.Element;
+
+/**
+ * Props for the F0Thinking component
+ */
+export declare type F0ThinkingProps = {
+    /**
+     * Array of thinking/reflection messages to display
+     */
+    messages: Message[];
+    /**
+     * Whether the thinking process is currently active
+     */
+    isActive?: boolean;
+    /**
+     * Custom render function for messages
+     */
+    RenderMessage?: MessagesProps["RenderMessage"];
+    /**
+     * Custom assistant message component
+     */
+    AssistantMessage?: MessagesProps["AssistantMessage"];
+    /**
+     * Whether the chat is currently in progress
+     */
+    inProgress?: boolean;
+    /**
+     * Custom title for the thinking section
+     */
+    title?: string;
 };
 
 export declare type FileAvatarVariant = Extract<AvatarVariant, {
@@ -3018,6 +3413,16 @@ declare type FontSize = (typeof fontSizes)[number];
 
 declare const fontSizes: readonly ["sm", "md", "lg"];
 
+export declare const FullscreenChatContext: Context<FullscreenChatContextType>;
+
+/**
+ * Context type for fullscreen chat state
+ */
+declare type FullscreenChatContextType = {
+    inProgress: boolean;
+    setInProgress: (value: boolean) => void;
+};
+
 export declare const getAnimationVariants: (options?: AnimationVariantsOptions) => {
     hidden: {
         opacity: number;
@@ -3056,6 +3461,7 @@ declare interface GranularityDefinition {
     toRange: <T extends Date | DateRange | undefined | null>(date: T) => T extends Date | DateRange ? DateRangeComplete : T;
     toString: (date: Date | DateRange | undefined | null, i18n: TranslationsType, format?: DateStringFormat) => string;
     toStringMaxWidth: () => number;
+    placeholder: () => string;
     fromString: (dateStr: string | DateRangeString, i18n: TranslationsType) => DateRange | null;
     navigateUIView: (viewDate: Date, direction: -1 | 1) => Date;
     navigate: (date: Date, direction: -1 | 1) => Date;
@@ -3188,6 +3594,12 @@ export declare type GroupRecord<RecordType> = {
     records: RecordType[];
 };
 
+export declare function H1({ children, ...props }: React.HTMLAttributes<HTMLHeadingElement>): JSX_2.Element;
+
+export declare function H2({ children, ...props }: React.HTMLAttributes<HTMLHeadingElement>): JSX_2.Element;
+
+export declare function H3({ children, ...props }: React.HTMLAttributes<HTMLHeadingElement>): JSX_2.Element;
+
 declare type HeadingTags = (typeof headingTags)[number];
 
 declare const headingTags: readonly ["h1", "h2", "h3", "h4", "h5", "h6"];
@@ -3196,6 +3608,8 @@ export declare const HomeLayout: ForwardRefExoticComponent<Omit<{
 widgets?: ReactNode[];
 children?: ReactNode;
 } & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>;
+
+export declare function Hr({ ...props }: React.HTMLAttributes<HTMLHRElement>): JSX_2.Element;
 
 declare type I18nContextType = TranslationsType & {
     t: (key: TranslationKey, args?: Record<string, string | number>) => string;
@@ -3235,6 +3649,9 @@ declare type IdStructure = {
     id: string;
     children?: IdStructure[];
 };
+
+declare function Image_2({ src, alt, ...props }: React.ImgHTMLAttributes<HTMLImageElement>): JSX_2.Element;
+export { Image_2 as Image }
 
 declare type ImageContextValue = {
     src?: (props: ImageProps) => SrcProps;
@@ -3510,6 +3927,8 @@ declare const layoutVariants: (props?: ({
 export declare type Level = (typeof levels)[number];
 
 declare const levels: readonly ["info", "warning", "critical", "positive"];
+
+export declare function Li({ children, ...props }: React.HTMLAttributes<HTMLLIElement>): JSX_2.Element;
 
 export declare const LineChart: ForwardRefExoticComponent<Omit<LineChartPropsBase<LineChartConfig> & {
 lineType?: "natural" | "linear";
@@ -3838,6 +4257,8 @@ declare type NumericWithFormatter = {
     formatterOptions?: NumericFormatterOptions;
 };
 
+export declare function Ol({ children, ...props }: React.HTMLAttributes<HTMLOListElement>): JSX_2.Element;
+
 declare type OnBulkActionCallback<Record extends RecordType, Filters extends FiltersDefinition> = (...args: [
 action: BulkAction,
 ...Parameters<OnSelectItemsCallback<Record, Filters>>
@@ -3872,7 +4293,13 @@ declare type OneFilterPickerRootProps<Definition extends FiltersDefinition> = {
     mode?: FiltersMode;
     /** Callback fired when filters open state is changed */
     onOpenChange?: (isOpen: boolean) => void;
+    /** Display counter for the applied filters */
+    displayCounter?: boolean;
 };
+
+export declare type OneIconSize = (typeof oneIconSizes)[number];
+
+export declare const oneIconSizes: readonly ["xs", "sm", "md", "lg"];
 
 declare type OnLoadDataCallback<Record extends RecordType, Filters extends FiltersDefinition> = (data: {
     totalItems: number | undefined;
@@ -3889,6 +4316,8 @@ export declare type OnSelectItemsCallback<R extends RecordType, Filters extends 
 }, clearSelectedItems: () => void) => void;
 
 declare type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;
+
+export declare function P({ children, ...props }: React.HTMLAttributes<HTMLParagraphElement>): JSX_2.Element;
 
 /**
  * Represents a paginated response with page-based navigation.
@@ -3985,6 +4414,8 @@ declare type PersonTagProps = ComponentProps<typeof F0TagPerson>;
 export declare const PieChart: ForwardRefExoticComponent<Omit<PieChartProps & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>;
 
 declare type PopupSize = "sm" | "md" | "lg";
+
+export declare function Pre({ children, ...props }: React.HTMLAttributes<HTMLPreElement>): JSX_2.Element;
 
 export declare const predefinedPresets: Record<string, DatePreset>;
 
@@ -4416,6 +4847,8 @@ export declare interface StepItemProps {
     isCompleted?: boolean;
 }
 
+export declare function Strong({ children, ...props }: React.HTMLAttributes<HTMLSpanElement>): JSX_2.Element;
+
 export declare interface SuccessMessageProps {
     title: string;
     description: string;
@@ -4433,6 +4866,8 @@ declare type SummariesDefinition = Record<string, {
 declare type SummaryKey<Definition extends SummariesDefinition> = Definition extends readonly string[] ? Definition[number] : keyof Definition;
 
 declare type SummaryType = "sum";
+
+export declare function Table({ children, ...props }: React.HTMLAttributes<HTMLTableElement>): JSX_2.Element;
 
 declare type TableCollectionProps<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<R>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<R>> = CollectionProps<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping, TableVisualizationOptions<R, Filters, Sortings, Summaries>>;
 
@@ -4693,6 +5128,8 @@ export declare type TagVariant = BaseTag<{
     type: "raw";
 } & TagRawProps>;
 
+export declare function Td({ children, ...props }: React.HTMLAttributes<HTMLTableCellElement>): JSX_2.Element;
+
 export declare type TeamAvatarVariant = Extract<AvatarVariant, {
     type: "team";
 }>;
@@ -4763,6 +5200,8 @@ declare const textVariants: (props?: ({
     className?: ClassValue;
 })) | undefined) => string;
 
+export declare function Th({ children, ...props }: React.HTMLAttributes<HTMLTableCellElement>): JSX_2.Element;
+
 declare type TOCItem<Depth extends 1 | 2 | 3 | 4 = 1> = BaseTOCItem & {
     children?: NextDepth<Depth> extends never ? never : TOCItem<NextDepth<Depth>>[];
 };
@@ -4797,6 +5236,13 @@ declare type TranslationShape<T> = {
     [K in keyof T]: T[K] extends string ? string : T[K] extends Record<string, string | Record<string, unknown>> ? TranslationShape<T[K]> : never;
 };
 
+/**
+ * Translation shape helper type
+ */
+declare type TranslationShape_2<T> = {
+    [K in keyof T]: T[K] extends string ? string : T[K] extends Record<string, string | Record<string, unknown>> ? TranslationShape_2<T[K]> : never;
+};
+
 export declare type TranslationsType = TranslationShape<typeof defaultTranslations>;
 
 export declare type TrendConfig = {
@@ -4812,6 +5258,8 @@ export declare interface TwoColumnLayoutProps {
     mainColumnPosition?: "left" | "right";
     sticky?: boolean;
 }
+
+export declare function Ul({ children, ...props }: React.HTMLAttributes<HTMLUListElement>): JSX_2.Element;
 
 declare type UpsellAction = BaseAction & {
     type: "upsell";
@@ -4913,6 +5361,10 @@ declare interface UpsellRequestResponseDialogProps {
     closeLabel: string;
     portalContainer?: HTMLElement | null;
 }
+
+export declare function useAiChat(): AiChatProviderReturnValue;
+
+export declare function useAiChatTranslations(): AiChatTranslations;
 
 /**
  * A core React hook that manages data fetching, state management, and pagination within the Collections ecosystem.
@@ -5062,6 +5514,19 @@ export declare interface UseDataReturn<R extends RecordType> {
  */
 export declare function useDataSource<R extends RecordType = RecordType, FiltersSchema extends FiltersDefinition = FiltersDefinition, Sortings extends SortingsDefinition = SortingsDefinition, Grouping extends GroupingDefinition<R> = GroupingDefinition<R>>({ defaultFilters, currentFilters: externalCurrentFilters, defaultGrouping: externalDefaultGrouping, currentGrouping: externalCurrentGrouping, filters, search, defaultSortings, currentSortings: externalCurrentSortings, dataAdapter, grouping, ...rest }: DataSourceDefinition<R, FiltersSchema, Sortings, Grouping>, deps?: ReadonlyArray<unknown>): DataSource<R, FiltersSchema, Sortings, Grouping>;
 
+/**
+ * Hook to register all default copilot actions.
+ * This provides a single entry point to enable all standard AI chat actions.
+ *
+ * @example
+ * // Enable all default actions in your component
+ * const MyComponent = () => {
+ *   useDefaultCopilotActions()
+ *   return <div>...</div>
+ * }
+ */
+export declare const useDefaultCopilotActions: () => void;
+
 export declare function useDndEvents(handler: (e: {
     phase: "start" | "over" | "drop" | "cancel";
     source: DragPayload;
@@ -5090,6 +5555,18 @@ export declare const useGroups: <R extends RecordType>(groups: GroupRecord<R>[],
     openGroups: Record<string, boolean>;
     setGroupOpen: (key: string, open: boolean) => void;
 };
+
+/**
+ * Hook to register the message sources action.
+ * Attaches information sources to the assistant's response to show where the AI got its information from.
+ */
+export declare const useMessageSourcesAction: () => void;
+
+/**
+ * Hook to register the orchestrator thinking action.
+ * Displays the orchestrator's thinking process as a non-blocking UI element.
+ */
+export declare const useOrchestratorThinkingAction: () => void;
 
 export declare const usePrivacyMode: () => {
     enabled: boolean;
@@ -5248,6 +5725,15 @@ declare const WeekStartDay: {
 
 declare type WeekStartsOn = (typeof WeekStartDay)[keyof typeof WeekStartDay];
 
+/**
+ * Welcome screen suggestion item
+ */
+export declare type WelcomeScreenSuggestion = {
+    icon: IconType;
+    message: string;
+    prompt?: string;
+};
+
 export declare type WithGroupId<RecordType> = RecordType & {
     [GROUP_ID_SYMBOL]: unknown | undefined;
 };
@@ -5320,6 +5806,16 @@ declare module "@tiptap/core" {
         aiBlock: {
             insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
             executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
+        };
+    }
+}
+
+
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }

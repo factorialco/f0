@@ -48,13 +48,11 @@ import { HTMLInputTypeAttribute } from 'react';
 import { IconCellValue } from './types/icon';
 import { IconType as IconType_2 } from '../../f0';
 import { InFilterOptions } from './InFilter/types';
-import { InputProps as InputProps_2 } from '@copilotkit/react-ui';
 import { JSONContent } from '@tiptap/react';
 import { JSONContent as JSONContent_2 } from '@tiptap/core';
 import { JSX as JSX_2 } from 'react';
 import { LineChartProps } from '../../../components/Charts/LineChart';
 import { LongTextCellValue } from './types/longText';
-import { Message as Message_2 } from '@copilotkit/shared';
 import { NumberCellValue } from './types/number';
 import { NumberCellValue as NumberCellValue_2 } from '../../value-display/types/number';
 import { NumberFilterOptions } from './NumberFilter/NumberFilter';
@@ -227,14 +225,6 @@ export declare type ActionDefinition = DropdownItemSeparator | (Pick<DropdownIte
     type?: "primary" | "secondary" | "other";
 });
 
-export declare const ActionItem: ({ title, status, inGroup }: ActionItemProps) => JSX_2.Element;
-
-export declare interface ActionItemProps {
-    title: string;
-    status?: "inProgress" | "executing" | "completed";
-    inGroup?: boolean;
-}
-
 declare type ActionLinkProps = ActionBaseProps & {
     href: string;
     target?: NavTarget;
@@ -331,15 +321,6 @@ declare type ActionType_2 = {
     description?: string;
 };
 
-declare type actionType_2 = {
-    label: string;
-    onClick: () => void;
-    disabled?: boolean;
-    icon?: IconType;
-    hideLabel?: boolean;
-    variant?: "default" | "outline" | "neutral";
-};
-
 declare type ActionType_3 = CopyActionType | NavigateActionType | OpenLinkActionType;
 
 declare type ActionVariant = (typeof actionVariants)[number];
@@ -406,15 +387,9 @@ declare type AIButton = {
 };
 
 /**
- * @experimental This is an experimental component use it at your own risk
+ * Props for the AiChatProvider component
  */
-export declare const AiChat: () => JSX_2.Element | null;
-
-export declare const AiChatOneIcon: ForwardRefExoticComponent<Omit<OneIconProps, "ref"> & RefAttributes<SVGSVGElement>>;
-
-export declare const AiChatProvider: ({ enabled, greeting, initialMessage, welcomeScreenSuggestions, onThumbsUp, onThumbsDown, children, agent, ...copilotKitProps }: AiChatProviderProps) => JSX_2.Element;
-
-export declare type AiChatProviderProps = {
+declare type AiChatProviderProps = {
     enabled?: boolean;
     greeting?: string;
     initialMessage?: string | string[];
@@ -428,86 +403,6 @@ export declare type AiChatProviderProps = {
         feedback: string;
     }) => void;
 } & Pick<CopilotKitProps, "agent" | "credentials" | "children" | "runtimeUrl" | "showDevConsole" | "threadId" | "headers">;
-
-declare type AiChatProviderReturnValue = {
-    enabled: boolean;
-    setEnabled: React.Dispatch<React.SetStateAction<boolean>>;
-    open: boolean;
-    setOpen: React.Dispatch<React.SetStateAction<boolean>>;
-    shouldPlayEntranceAnimation: boolean;
-    setShouldPlayEntranceAnimation: React.Dispatch<React.SetStateAction<boolean>>;
-    tmp_setAgent: (agent?: string) => void;
-    placeholders: string[];
-    setPlaceholders: React.Dispatch<React.SetStateAction<string[]>>;
-    /**
-     * Set the amount of minutes after which the chat will be cleared automatically
-     * Set `null` to disable auto-clearing
-     *
-     * @default 15
-     */
-    setAutoClearMinutes: React.Dispatch<React.SetStateAction<number | null>>;
-    autoClearMinutes: number | null;
-    /**
-     * The initial message to display in the chat
-     */
-    initialMessage?: string | string[];
-    setInitialMessage: React.Dispatch<React.SetStateAction<string | string[] | undefined>>;
-    welcomeScreenSuggestions: WelcomeScreenSuggestion[];
-    setWelcomeScreenSuggestions: React.Dispatch<React.SetStateAction<WelcomeScreenSuggestion[]>>;
-    onThumbsUp?: (message: AIMessage, { threadId, feedback }: {
-        threadId: string;
-        feedback: string;
-    }) => void;
-    onThumbsDown?: (message: AIMessage, { threadId, feedback }: {
-        threadId: string;
-        feedback: string;
-    }) => void;
-    /**
-     * Clear/reset the chat conversation
-     */
-    clear: () => void;
-    /* Excluded from this release type: setClearFunction */
-    /**
-     * Send a message to the chat
-     * @param message - The message content as a string, or a full Message object
-     */
-    sendMessage: (message: string | Message_2) => void;
-    /* Excluded from this release type: setSendMessageFunction */
-} & Pick<AiChatState, "greeting" | "agent">;
-
-declare interface AiChatState {
-    greeting?: string;
-    enabled: boolean;
-    agent?: string;
-    initialMessage?: string | string[];
-    welcomeScreenSuggestions?: WelcomeScreenSuggestion[];
-    placeholders?: string[];
-    setPlaceholders?: React.Dispatch<React.SetStateAction<string[]>>;
-    onThumbsUp?: (message: AIMessage, { threadId, feedback }: {
-        threadId: string;
-        feedback: string;
-    }) => void;
-    onThumbsDown?: (message: AIMessage, { threadId, feedback }: {
-        threadId: string;
-        feedback: string;
-    }) => void;
-}
-
-export declare const AiChatTextarea: ({ submitLabel, inProgress, onSend, onStop, }: ChatTextareaProps) => JSX_2.Element;
-
-export declare type AiChatTranslations = TranslationShape_2<typeof aiTranslations>;
-
-export declare function AiChatTranslationsProvider({ children, translations, }: AiChatTranslationsProviderProps): JSX.Element;
-
-export declare interface AiChatTranslationsProviderProps {
-    children: ReactNode;
-    translations: AiChatTranslations;
-}
-
-/**
- * @experimental This is an experimental component use it at your own risk
- */
-export declare const AiFullscreenChat: () => JSX_2.Element | null;
 
 /**
  * @experimental This is an experimental component use it at your own risk
@@ -566,38 +461,6 @@ declare interface AiPromotionChatState {
     onShow?: () => void;
     onHide?: () => void;
 }
-
-declare const aiTranslations: {
-    ai: {
-        openChat: string;
-        closeChat: string;
-        startNewChat: string;
-        scrollToBottom: string;
-        welcome: string;
-        defaultInitialMessage: string;
-        inputPlaceholder: string;
-        stopAnswerGeneration: string;
-        sendMessage: string;
-        thoughtsGroupTitle: string;
-        resourcesGroupTitle: string;
-        thinking: string;
-        exportTable: string;
-        generatedTableFilename: string;
-        feedbackModal: {
-            positive: {
-                title: string;
-                label: string;
-                placeholder: string;
-            };
-            negative: {
-                title: string;
-                label: string;
-                placeholder: string;
-            };
-        };
-        ask: string;
-    };
-};
 
 declare type AlertAvatarProps = VariantProps<typeof alertAvatarVariants> & {
     type: (typeof alertAvatarTypes)[number];
@@ -751,6 +614,14 @@ export declare type BannerAction = {
     variant?: "default" | "outline" | "ghost";
     icon?: IconType;
 };
+
+declare interface BannerProps {
+    icon: IconType;
+    title: string;
+    variant: BannerVariant;
+}
+
+declare type BannerVariant = "info" | "warning" | "critical" | "neutral" | "positive";
 
 export declare const BarChartWidget: ForwardRefExoticComponent<Omit<WidgetProps_2 & {
 chart: BarChartProps;
@@ -1112,6 +983,10 @@ declare type ButtonInternalProps = Pick<ActionProps, "size" | "disabled" | "clas
      * The variant of the button.
      */
     variant?: ActionButtonVariant;
+    /**
+     * The filters'counter value to display.
+     */
+    counterValue?: number;
     /**
      * Callback fired when the button is clicked. Supports async functions for loading state.
      */
@@ -1509,10 +1384,6 @@ declare type ChartItem<K extends ChartConfig> = {
  * @experimental This is an experimental component use it at your own risk
  */
 export declare const ChartWidgetEmptyState: ForwardRefExoticComponent<Props_4 & RefAttributes<HTMLDivElement>>;
-
-declare type ChatTextareaProps = InputProps_2 & {
-    submitLabel?: string;
-};
 
 export declare type ChatWidgetEmptyStateProps = Props_4;
 
@@ -2612,6 +2483,7 @@ declare const defaultTranslations: {
     readonly select: {
         readonly noResults: "No results found";
         readonly loadingMore: "Loading...";
+        readonly applySelection: "Apply selection";
     };
     readonly numberInput: {
         readonly between: "It should be between {{min}} and {{max}}";
@@ -2708,6 +2580,16 @@ declare const defaultTranslations: {
             readonly textStyles: "Text Styles";
             readonly lists: "Lists";
             readonly blocks: "Blocks";
+        };
+        readonly ai: {
+            readonly enhanceButtonLabel: "Enhance";
+            readonly loadingEnhanceLabel: "Loading...";
+            readonly defaultError: "An error occurred while loading";
+            readonly closeErrorButtonLabel: "Continue editing";
+            readonly acceptChangesButtonLabel: "Accept";
+            readonly rejectChangesButtonLabel: "Reject";
+            readonly repeatButtonLabel: "Repeat";
+            readonly customPromptPlaceholder: "What do you want to do?";
         };
     };
 };
@@ -2854,23 +2736,12 @@ declare type EmptyStateType = (typeof emptyStatesTypes)[number];
 export declare type enhanceConfig = {
     onEnhanceText: (params: enhanceTextParams) => Promise<enhancedTextResponse>;
     enhancementOptions?: EnhancementOption[];
-    enhanceLabels: enhanceLabelsType;
 };
 
 export declare type enhancedTextResponse = {
     success: boolean;
     text: string;
     error?: string;
-};
-
-export declare type enhanceLabelsType = {
-    defaultError: string;
-    enhanceButtonLabel: string;
-    acceptChangesButtonLabel: string;
-    rejectChangesButtonLabel: string;
-    repeatButtonLabel: string;
-    customPromptPlaceholder: string;
-    loadingEnhanceLabel: string;
 };
 
 export declare type EnhancementOption = {
@@ -2953,14 +2824,10 @@ export declare type EntitySelectSubEntity = {
     subName: string;
     subAvatar?: string;
     subSearchKeys?: string[];
+    subDeactivated?: boolean;
 };
 
 declare type Enumerate<N extends number, Acc extends number[] = []> = Acc["length"] extends N ? [...Acc, N][number] : Enumerate<N, [...Acc, Acc["length"]]>;
-
-export declare type errorConfig = {
-    onClose?: () => void;
-    closeErrorButtonLabel?: string;
-};
 
 declare interface ErrorMessageProps {
     title: string;
@@ -3575,6 +3442,7 @@ export declare interface GranularityDefinition {
     toRange: <T extends Date | DateRange | undefined | null>(date: T) => T extends Date | DateRange ? DateRangeComplete : T;
     toString: (date: Date | DateRange | undefined | null, i18n: TranslationsType, format?: DateStringFormat) => string;
     toStringMaxWidth: () => number;
+    placeholder: () => string;
     fromString: (dateStr: string | DateRangeString, i18n: TranslationsType) => DateRange | null;
     navigateUIView: (viewDate: Date, direction: -1 | 1) => Date;
     navigate: (date: Date, direction: -1 | 1) => Date;
@@ -3690,16 +3558,6 @@ declare type HighlightBannerProps = {
     subtitle: string;
     buttonLabel: string;
     onClick?: () => void;
-};
-
-export declare const HILActionConfirmation: ({ text, confirmationText, onConfirm, cancelText, onCancel, }: HILActionConfirmationProps) => JSX_2.Element;
-
-export declare type HILActionConfirmationProps = {
-    text?: string;
-    confirmationText: string;
-    onConfirm: () => void;
-    cancelText: string;
-    onCancel: () => void;
 };
 
 declare type HTMLString = string;
@@ -4121,12 +3979,6 @@ export declare interface Message {
     dateTime: string;
 }
 
-export declare const MessageSources: ({ sources }: MessageSourcesProps) => JSX_2.Element | null;
-
-export declare type MessageSourcesProps = {
-    sources: Source[];
-};
-
 declare type MetadataAction = {
     icon: IconType;
     label: string;
@@ -4197,30 +4049,6 @@ declare type MetadataItemValue = {
     type: "date";
     formattedDate: string;
     icon?: "warning" | "critical";
-};
-
-declare type MetadataItemValue_2 = {
-    type: "text";
-    content: string;
-    label: string;
-} | {
-    type: "status";
-    label: string;
-    variant: StatusVariant;
-} | {
-    type: "dot-tag";
-    label: string;
-    color: NewColor;
-} | {
-    type: "tag";
-    label: string;
-    icon?: IconType;
-} | {
-    type: "person";
-    label: string;
-    firstName: string;
-    lastName: string;
-    src?: string;
 };
 
 declare interface MetadataProps {
@@ -4454,10 +4282,11 @@ export declare interface NotesTextEditorProps {
     imageUploadConfig?: ImageUploadConfig;
     onTitleChange?: (title: string) => void;
     titlePlaceholder?: string;
-    actions?: actionType_2[];
-    secondaryActions?: secondaryActionsType_2[];
-    metadata?: MetadataItemValue_2[];
-    withPadding?: boolean;
+    primaryAction?: PrimaryActionButton | PrimaryDropdownAction<string>;
+    secondaryActions?: HeaderSecondaryAction[];
+    otherActions?: DropdownItem[];
+    metadata?: MetadataItem[];
+    banner?: BannerProps;
     showBubbleMenu?: boolean;
 }
 
@@ -4466,7 +4295,6 @@ export declare const NotesTextEditorSkeleton: ({ withHeader, withTitle, withTool
 export declare interface NotesTextEditorSkeletonProps {
     withHeader?: boolean;
     withTitle?: boolean;
-    withPadding?: boolean;
     withToolbar?: boolean;
 }
 
@@ -4747,14 +4575,9 @@ declare type OneFilterPickerRootProps<Definition extends FiltersDefinition> = {
     mode?: FiltersMode;
     /** Callback fired when filters open state is changed */
     onOpenChange?: (isOpen: boolean) => void;
+    /** Display counter for the applied filters */
+    displayCounter?: boolean;
 };
-
-declare interface OneIconProps extends SVGProps<SVGSVGElement> {
-    spin?: boolean;
-    hover?: boolean;
-    background?: string;
-    size?: "xs" | "sm" | "md" | "lg";
-}
 
 /**
  * @experimental This is an experimental component use it at your own risk
@@ -5413,7 +5236,6 @@ export declare interface RichTextEditorProps {
         files?: File[];
     };
     title: string;
-    errorConfig?: errorConfig;
     height?: heightType;
     plainHtmlMode?: boolean;
     fullScreenMode?: boolean;
@@ -5480,14 +5302,6 @@ export declare type SecondaryActionsDefinition = {
 export declare type SecondaryActionsItems = SecondaryActionItem[] | SecondaryActionItem[][] | SecondaryActionGroup[];
 
 export declare type secondaryActionsType = secondaryActionType | secondaryActionType[];
-
-declare type secondaryActionsType_2 = {
-    label: string;
-    onClick: () => void;
-    disabled?: boolean;
-    icon?: IconType;
-    critical?: boolean;
-};
 
 export declare type secondaryActionType = (actionType | toggleActionType) & {
     type?: "button" | "switch";
@@ -5682,13 +5496,6 @@ export declare type SortingsStateMultiple = {
 }[];
 
 export declare type SortOrder = "asc" | "desc";
-
-declare type Source = {
-    title: string;
-    link?: string;
-    icon?: string;
-    targetBlank?: boolean;
-};
 
 /**
  * @experimental This is an experimental component use it at your own risk
@@ -6216,10 +6023,6 @@ declare type TranslationShape<T> = {
     [K in keyof T]: T[K] extends string ? string : T[K] extends Record<string, string | Record<string, unknown>> ? TranslationShape<T[K]> : never;
 };
 
-declare type TranslationShape_2<T> = {
-    [K in keyof T]: T[K] extends string ? string : T[K] extends Record<string, string | Record<string, unknown>> ? TranslationShape_2<T[K]> : never;
-};
-
 declare type TranslationsType = TranslationShape<typeof defaultTranslations>;
 
 declare interface TwoColumnsItemType {
@@ -6249,10 +6052,6 @@ declare namespace Types {
 }
 
 declare type URL_2 = string;
-
-export declare function useAiChat(): AiChatProviderReturnValue;
-
-export declare function useAiChatTranslations(): AiChatTranslations;
 
 export declare function useAiPromotionChat(): AiPromotionChatProviderReturnValue;
 
@@ -6491,6 +6290,9 @@ export declare const WeekStartDay: {
 
 export declare type WeekStartsOn = (typeof WeekStartDay)[keyof typeof WeekStartDay];
 
+/**
+ * Welcome screen suggestion item
+ */
 declare type WelcomeScreenSuggestion = {
     icon: IconType;
     message: string;
@@ -6684,6 +6486,16 @@ declare module "@tiptap/core" {
         aiBlock: {
             insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
             executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
+        };
+    }
+}
+
+
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
