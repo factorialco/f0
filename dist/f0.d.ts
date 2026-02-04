@@ -882,6 +882,10 @@ declare type ButtonInternalProps = Pick<ActionProps, "size" | "disabled" | "clas
      */
     variant?: ActionButtonVariant;
     /**
+     * The filters'counter value to display.
+     */
+    counterValue?: number;
+    /**
      * Callback fired when the button is clicked. Supports async functions for loading state.
      */
     onClick?: (event: React.MouseEvent<HTMLElement, MouseEvent>) => void | Promise<unknown>;
@@ -2136,6 +2140,7 @@ export declare const defaultTranslations: {
     readonly select: {
         readonly noResults: "No results found";
         readonly loadingMore: "Loading...";
+        readonly applySelection: "Apply selection";
     };
     readonly numberInput: {
         readonly between: "It should be between {{min}} and {{max}}";
@@ -2232,6 +2237,16 @@ export declare const defaultTranslations: {
             readonly textStyles: "Text Styles";
             readonly lists: "Lists";
             readonly blocks: "Blocks";
+        };
+        readonly ai: {
+            readonly enhanceButtonLabel: "Enhance";
+            readonly loadingEnhanceLabel: "Loading...";
+            readonly defaultError: "An error occurred while loading";
+            readonly closeErrorButtonLabel: "Continue editing";
+            readonly acceptChangesButtonLabel: "Accept";
+            readonly rejectChangesButtonLabel: "Reject";
+            readonly repeatButtonLabel: "Repeat";
+            readonly customPromptPlaceholder: "What do you want to do?";
         };
     };
 };
@@ -3249,6 +3264,7 @@ export declare const F0TagPerson: ForwardRefExoticComponent<F0TagPersonProps & R
 export declare type F0TagPersonProps = {
     src?: string;
     name: string;
+    deactivated?: boolean;
 };
 
 export declare const F0TagRaw: ForwardRefExoticComponent<TagRawProps & RefAttributes<HTMLDivElement>>;
@@ -3553,6 +3569,7 @@ declare interface GranularityDefinition {
     toRange: <T extends Date | DateRange | undefined | null>(date: T) => T extends Date | DateRange ? DateRangeComplete : T;
     toString: (date: Date | DateRange | undefined | null, i18n: TranslationsType, format?: DateStringFormat) => string;
     toStringMaxWidth: () => number;
+    placeholder: () => string;
     fromString: (dateStr: string | DateRangeString, i18n: TranslationsType) => DateRange | null;
     navigateUIView: (viewDate: Date, direction: -1 | 1) => Date;
     navigate: (date: Date, direction: -1 | 1) => Date;
@@ -4384,6 +4401,8 @@ declare type OneFilterPickerRootProps<Definition extends FiltersDefinition> = {
     mode?: FiltersMode;
     /** Callback fired when filters open state is changed */
     onOpenChange?: (isOpen: boolean) => void;
+    /** Display counter for the applied filters */
+    displayCounter?: boolean;
 };
 
 export declare type OneIconSize = (typeof oneIconSizes)[number];
@@ -5920,6 +5939,16 @@ declare module "@tiptap/core" {
         aiBlock: {
             insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
             executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
+        };
+    }
+}
+
+
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
