@@ -1398,8 +1398,18 @@ declare type CustomFieldRenderIf = CommonRenderIfCondition;
 
 /**
  * Props passed to the custom field render function
+ *
+ * @typeParam TConfig - Type of the custom configuration object
  */
-export declare interface CustomFieldRenderProps {
+export declare type CustomFieldRenderProps<TConfig = undefined> = CustomFieldRenderPropsBase & {
+    /** Custom configuration passed via fieldConfig */
+    config: TConfig;
+};
+
+/**
+ * Base props passed to all custom field render functions
+ */
+declare interface CustomFieldRenderPropsBase {
     /** Field id */
     id: string;
     /** Field label */
@@ -3005,25 +3015,96 @@ export declare const F0ChipList: {
 
 /**
  * F0 config options specific to custom fields
+ *
+ * @typeParam TConfig - Type of the custom configuration object
+ *
+ * @example Without fieldConfig:
+ * ```tsx
+ * f0FormField(z.string(), {
+ *   label: "Employee",
+ *   fieldType: "custom",
+ *   render: ({ value, onChange }) => (
+ *     <EmployeeSelector value={value} onChange={onChange} />
+ *   ),
+ * })
+ * ```
+ *
+ * @example With fieldConfig:
+ * ```tsx
+ * f0FormField(z.array(z.number()), {
+ *   label: "Select employees",
+ *   fieldType: "custom",
+ *   fieldConfig: {
+ *     multiple: true,
+ *     excludeCurrentEmployee: true,
+ *   },
+ *   render: ({ value, onChange, config }) => {
+ *     // config is typed as { multiple: boolean, excludeCurrentEmployee: boolean }
+ *     return (
+ *       <EmployeeSelector
+ *         multiple={config.multiple}
+ *         excludeCurrent={config.excludeCurrentEmployee}
+ *         value={value}
+ *         onChange={onChange}
+ *       />
+ *     )
+ *   },
+ * })
+ * ```
  */
-export declare interface F0CustomConfig {
+export declare type F0CustomConfig<TConfig = undefined> = TConfig extends undefined ? F0CustomConfigBase : F0CustomConfigWithFieldConfig<TConfig>;
+
+/**
+ * Custom config without fieldConfig (render receives config: undefined)
+ */
+declare interface F0CustomConfigBase {
     /** Render function for the custom component */
-    render: (props: CustomFieldRenderProps) => ReactNode;
+    render: (props: CustomFieldRenderProps<undefined>) => ReactNode;
 }
 
 /**
- * Custom field with all properties for rendering
+ * Custom config with fieldConfig (render receives typed config)
  */
-export declare type F0CustomField = F0BaseField & F0CustomConfig & {
+declare interface F0CustomConfigWithFieldConfig<TConfig> {
+    /** Custom configuration to pass to the render function */
+    fieldConfig: TConfig;
+    /** Render function for the custom component */
+    render: (props: CustomFieldRenderProps<TConfig>) => ReactNode;
+}
+
+/**
+ * Custom field with all properties for rendering (runtime type)
+ */
+export declare type F0CustomField = F0BaseField & {
     type: "custom";
+    /** Render function for the custom component */
+    render: (props: CustomFieldRenderPropsBase & {
+        config: unknown;
+    }) => ReactNode;
+    /** Custom configuration (if provided) */
+    fieldConfig?: unknown;
     /** Conditional rendering based on another field's value */
     renderIf?: CustomFieldRenderIf;
 };
 
 /**
- * Config for custom fields
+ * Union of custom field configs (with or without fieldConfig)
  */
-export declare type F0CustomFieldConfig = F0BaseConfig & F0CustomConfig & {
+export declare type F0CustomFieldConfig<TConfig = undefined> = TConfig extends undefined ? F0CustomFieldConfigBase : F0CustomFieldConfigWithConfig<TConfig>;
+
+/**
+ * Config for custom fields without fieldConfig
+ */
+declare type F0CustomFieldConfigBase = F0BaseConfig & F0CustomConfig<undefined> & {
+    fieldType: "custom";
+};
+
+/**
+ * Config for custom fields with fieldConfig
+ *
+ * @typeParam TConfig - Type of the custom configuration object passed to render
+ */
+declare type F0CustomFieldConfigWithConfig<TConfig> = F0BaseConfig & F0CustomConfig<TConfig> & {
     fieldType: "custom";
 };
 
@@ -3331,9 +3412,9 @@ export declare interface F0FormDiscardConfig {
 export declare type F0FormErrorTriggerMode = "on-blur" | "on-change" | "on-submit";
 
 /**
- * String field - text input or textarea
+ * String field - text input, textarea, select, or custom
  */
-export declare function f0FormField<T extends z.ZodString>(schema: T, config: F0StringConfig): T & F0ZodType<T>;
+export declare function f0FormField<T extends z.ZodString, TConfig = undefined>(schema: T, config: F0StringConfig<TConfig>): T & F0ZodType<T>;
 
 /**
  * Number field
@@ -3363,7 +3444,7 @@ export declare function f0FormField<T extends z.ZodArray<ZodTypeAny>>(schema: T,
 /**
  * Object field - richtext or custom
  */
-export declare function f0FormField<T extends z.ZodObject<z.ZodRawShape>>(schema: T, config: F0ObjectConfig): T & F0ZodType<T>;
+export declare function f0FormField<T extends z.ZodObject<z.ZodRawShape>, TConfig = undefined>(schema: T, config: F0ObjectConfig<TConfig>): T & F0ZodType<T>;
 
 /**
  * Optional wrapper - inherits inner type's config
@@ -3379,6 +3460,12 @@ export declare function f0FormField<T extends z.ZodNullable<ZodTypeAny>>(schema:
  * Default wrapper - inherits inner type's config
  */
 export declare function f0FormField<T extends z.ZodDefault<ZodTypeAny>>(schema: T, config: F0FieldConfig): T & F0ZodType<T>;
+
+/**
+ * Custom field - works with any schema type
+ * Place before fallback to ensure proper type inference for fieldConfig
+ */
+export declare function f0FormField<T extends ZodTypeAny, TConfig = undefined>(schema: T, config: F0CustomFieldConfig<TConfig>): T & F0ZodType<T>;
 
 /**
  * Fallback for any other schema type
@@ -3600,8 +3687,10 @@ export declare type F0NumberFieldConfig = F0BaseConfig & F0NumberConfig & {
 
 /**
  * Config for object fields (richtext, daterange, or custom)
+ *
+ * @typeParam TConfig - Type of the custom configuration object (for custom fields)
  */
-declare type F0ObjectConfig = F0RichTextFieldConfig | F0DateRangeFieldConfig | F0CustomFieldConfig;
+declare type F0ObjectConfig<TConfig = undefined> = F0RichTextFieldConfig | F0DateRangeFieldConfig | F0CustomFieldConfig<TConfig>;
 
 export declare const F0OneIcon: ForwardRefExoticComponent<Omit<F0OneIconProps, "ref"> & RefAttributes<SVGSVGElement>>;
 
@@ -3848,7 +3937,7 @@ export declare type F0Source = {
 /**
  * Union of all string field configs
  */
-export declare type F0StringConfig = F0StringTextConfig | F0StringTextareaConfig | F0StringSelectConfig;
+export declare type F0StringConfig<TConfig = undefined> = F0StringTextConfig | F0StringTextareaConfig | F0StringSelectConfig | F0CustomFieldConfig<TConfig>;
 
 /**
  * Config for string fields with select options

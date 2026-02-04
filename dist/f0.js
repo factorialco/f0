@@ -8864,7 +8864,8 @@ function Ld({ field: i, formField: e, error: t, isValidating: n }) {
     onBlur: e.onBlur,
     error: t,
     isValidating: n,
-    disabled: i.disabled
+    disabled: i.disabled,
+    config: i.fieldConfig
   };
   return h(Rt, {
     children: i.render(r)
@@ -9482,6 +9483,7 @@ function Wn(i, e, t, n) {
         ...r,
         type: "custom",
         render: "render" in t ? t.render : () => null,
+        fieldConfig: "fieldConfig" in t ? t.fieldConfig : void 0,
         renderIf: t.renderIf
       };
     default:
