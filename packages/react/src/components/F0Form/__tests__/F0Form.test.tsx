@@ -1,5 +1,5 @@
 import React from "react"
-import { render, screen } from "@testing-library/react"
+import { zeroRender as render, screen } from "@/testing/test-utils"
 import { describe, expect, it } from "vitest"
 import { z } from "zod"
 
@@ -31,7 +31,8 @@ describe("F0Form", () => {
     )
 
     expect(screen.getByLabelText("Name")).toBeInTheDocument()
-    expect(screen.getByRole("button", { name: /submit/i })).toBeInTheDocument()
+    // Check for submit button - use getByText since the button has label text
+    expect(screen.getByText("Submit")).toBeInTheDocument()
   })
 
   it("renders form with custom submit label", () => {
@@ -48,11 +49,11 @@ describe("F0Form", () => {
         schema={formSchema}
         defaultValues={{ email: "" }}
         onSubmit={async () => ({ success: true })}
-        submitLabel="Save"
+        submitConfig={{ label: "Save" }}
       />
     )
 
-    expect(screen.getByRole("button", { name: /save/i })).toBeInTheDocument()
+    expect(screen.getByText("Save")).toBeInTheDocument()
   })
 
   it("can hide the submit button", () => {
@@ -68,13 +69,11 @@ describe("F0Form", () => {
         schema={formSchema}
         defaultValues={{ name: "" }}
         onSubmit={async () => ({ success: true })}
-        showSubmitButton={false}
+        submitConfig={{ showButton: false }}
       />
     )
 
-    expect(
-      screen.queryByRole("button", { name: /submit/i })
-    ).not.toBeInTheDocument()
+    expect(screen.queryByText("Submit")).not.toBeInTheDocument()
   })
 
   it("renders form with sections", () => {

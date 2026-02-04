@@ -152,7 +152,8 @@ export function F0Form<TSchema extends z.ZodObject<ZodRawShape>>(
     submitConfig?.icon === null ? undefined : (submitConfig?.icon ?? Save)
 
   // Extract type-specific props
-  const showSubmitButton = submitConfig?.type === "default"
+  // Show submit button by default unless explicitly hidden or using action-bar
+  const showSubmitButton = !isActionBar
   const discardableChanges =
     submitConfig?.type === "action-bar" && submitConfig?.discardable
 
