@@ -1,9 +1,27 @@
 import { type ComponentProps, useMemo } from "react"
+import { type VariantProps, cva } from "cva"
 
+import { cn } from "@/lib/utils"
 import { ReactShaderToy } from "./ReactShaderToy"
 import { shaderSource } from "./shaderSource"
 import { useAuraVoiceAnimation } from "../hooks/useAuraVoiceAnimation"
 import type { F0AuraVoiceAnimationProps } from "../types"
+
+export const F0AuraVoiceAnimationVariants = cva({
+  base: "aspect-square",
+  variants: {
+    size: {
+      icon: "h-[24px]",
+      sm: "h-[56px]",
+      md: "h-[112px]",
+      lg: "h-[224px]",
+      xl: "h-[448px]",
+    },
+  },
+  defaultVariants: {
+    size: "lg",
+  },
+})
 
 function hexToRgb(hexColor: string) {
   const rgbColor = hexColor.match(
@@ -101,15 +119,18 @@ function AuraShader({
 AuraShader.displayName = "AuraShader"
 
 export function F0AuraVoiceAnimation({
-  className,
+  size = "lg",
   state,
   color,
   colorShift = 0.05,
   audioTrack,
   themeMode,
+  className,
   ref,
   ...props
-}: F0AuraVoiceAnimationProps & ComponentProps<"div">) {
+}: F0AuraVoiceAnimationProps &
+  ComponentProps<"div"> &
+  VariantProps<typeof F0AuraVoiceAnimationVariants>) {
   const { speed, scale, amplitude, frequency, brightness } =
     useAuraVoiceAnimation(state, audioTrack)
 
@@ -125,7 +146,11 @@ export function F0AuraVoiceAnimation({
       amplitude={amplitude}
       frequency={frequency}
       brightness={brightness}
-      className={className}
+      className={cn(
+        F0AuraVoiceAnimationVariants({ size }),
+        "overflow-hidden rounded-full",
+        className
+      )}
       {...props}
     />
   )

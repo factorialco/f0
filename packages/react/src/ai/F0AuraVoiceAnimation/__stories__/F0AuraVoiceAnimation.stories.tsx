@@ -10,6 +10,12 @@ const meta = {
   },
   tags: ["autodocs"],
   argTypes: {
+    size: {
+      control: "select",
+      options: ["icon", "sm", "md", "lg", "xl"],
+      description:
+        "Size of the aura (icon: 24px, sm: 56px, md: 112px, lg: 224px, xl: 448px)",
+    },
     state: {
       control: "select",
       options: [
@@ -41,7 +47,15 @@ const meta = {
   },
   decorators: [
     (Story) => (
-      <div style={{ width: 320, height: 320 }}>
+      <div
+        style={{
+          width: 480,
+          height: 480,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
         <Story />
       </div>
     ),
@@ -94,8 +108,11 @@ export const LightTheme: Story = {
     (Story) => (
       <div
         style={{
-          width: 320,
-          height: 320,
+          width: 480,
+          height: 480,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
           backgroundColor: "#fff",
           borderRadius: 8,
         }}
@@ -115,8 +132,11 @@ export const DarkTheme: Story = {
     (Story) => (
       <div
         style={{
-          width: 320,
-          height: 320,
+          width: 480,
+          height: 480,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
           backgroundColor: "#1a1a1a",
           borderRadius: 8,
         }}
