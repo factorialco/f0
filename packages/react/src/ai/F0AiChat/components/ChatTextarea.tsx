@@ -10,7 +10,7 @@ type ChatTextareaProps = InputProps & {
 
 /**
  * ChatTextarea component that integrates with the F0AiChat context.
- * Uses F0AiChatTextArea internally and gets placeholders from context.
+ * Uses F0AiChatTextArea internally and gets placeholders + file state from context.
  *
  * For standalone usage without the F0AiChat context, use F0AiChatTextArea directly.
  */
@@ -20,7 +20,15 @@ export const ChatTextarea = ({
   onSend,
   onStop,
 }: ChatTextareaProps) => {
-  const { placeholders } = useAiChat()
+  const {
+    placeholders,
+    fileUploadsEnabled,
+    attachments,
+    addAttachments,
+    removeAttachment,
+    setFileInputRef,
+    sendMessage,
+  } = useAiChat()
 
   return (
     <F0AiChatTextArea
@@ -29,6 +37,12 @@ export const ChatTextarea = ({
       onSend={onSend}
       onStop={onStop}
       placeholders={placeholders}
+      fileUploadsEnabled={fileUploadsEnabled}
+      attachments={attachments}
+      onAddFiles={addAttachments}
+      onRemoveAttachment={removeAttachment}
+      onFileInputRef={setFileInputRef}
+      onSendWithAttachments={sendMessage}
     />
   )
 }

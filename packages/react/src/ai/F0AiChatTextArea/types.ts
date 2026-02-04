@@ -7,7 +7,8 @@ export interface F0AiChatTextAreaProps {
    */
   inProgress: boolean
   /**
-   * Callback when the user sends a message
+   * Callback when the user sends a message.
+   * When file uploads are enabled, use `onSendWithAttachments` instead.
    */
   onSend: (message: string) => void
   /**
@@ -33,6 +34,31 @@ export interface F0AiChatTextAreaProps {
    * @default true
    */
   autoFocus?: boolean
+  /**
+   * Whether file uploads are enabled. Shows paperclip button and allows file selection.
+   */
+  fileUploadsEnabled?: boolean
+  /**
+   * Current file attachments to display
+   */
+  attachments?: File[]
+  /**
+   * Callback to add files as attachments
+   */
+  onAddFiles?: (files: File[]) => void
+  /**
+   * Callback to remove an attachment by index
+   */
+  onRemoveAttachment?: (index: number) => void
+  /**
+   * Callback to register the file input ref for external triggers
+   */
+  onFileInputRef?: (ref: HTMLInputElement | null) => void
+  /**
+   * Async send handler that processes attachments before sending.
+   * When provided, this is used instead of `onSend`.
+   */
+  onSendWithAttachments?: (message: string) => Promise<void>
 }
 
 /**

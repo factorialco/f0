@@ -1,10 +1,12 @@
 import { AnimatePresence, motion } from "motion/react"
-import { useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 
 import { ButtonInternal } from "@/components/F0Button/internal"
-import { ArrowUp, SolidStop } from "@/icons/app"
+import { FileItem } from "@/experimental/RichText/FileItem"
+import { ArrowUp, CrossedCircle, Paperclip, SolidStop } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
+import { ScrollArea } from "@/ui/scrollarea"
 
 import type { F0AiChatTextAreaProps, TypewriterPlaceholderProps } from "./types"
 
@@ -150,43 +152,89 @@ export const F0AiChatTextArea = ({
   placeholders = [],
   defaultPlaceholder,
   autoFocus = true,
+  fileUploadsEnabled = false,
+  attachments = [],
+  onAddFiles,
+  onRemoveAttachment,
+  onFileInputRef,
+  onSendWithAttachments,
 }: F0AiChatTextAreaProps) => {
   const [inputValue, setInputValue] = useState("")
+  const [isProcessing, setIsProcessing] = useState(false)
   const formRef = useRef<HTMLFormElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const translation = useI18n()
 
   const resolvedDefaultPlaceholder =
     defaultPlaceholder ?? translation.ai.inputPlaceholder
 
-  const hasDataToSend = inputValue.trim().length > 0
+  const hasDataToSend = inputValue.trim().length > 0 || attachments.length > 0
+  const multiplePlaceholders = placeholders.length > 1
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  useEffect(() => {
+    if (onFileInputRef) {
+      onFileInputRef(fileInputRef.current)
+      return () => onFileInputRef(null)
+    }
+  }, [onFileInputRef])
+
+  const handleFileSelect = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const files = Array.from(e.target.files || [])
+      if (files.length > 0 && onAddFiles) {
+        onAddFiles(files)
+      }
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ""
+      }
+    },
+    [onAddFiles]
+  )
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+
     if (inProgress) {
       onStop?.()
-    } else if (hasDataToSend) {
-      onSend(inputValue.trim())
-      setInputValue("")
+      return
     }
 
-    textareaRef.current?.focus()
+    if (!hasDataToSend || isProcessing) {
+      return
+    }
+
+    const messageContent = inputValue.trim()
+
+    if (onSendWithAttachments) {
+      setIsProcessing(true)
+      try {
+        await onSendWithAttachments(messageContent)
+        setInputValue("")
+      } finally {
+        setIsProcessing(false)
+        textareaRef.current?.focus()
+      }
+    } else {
+      onSend(messageContent)
+      setInputValue("")
+      textareaRef.current?.focus()
+    }
   }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault()
-      if (!inProgress) {
+      if (!inProgress && !isProcessing) {
         formRef.current?.requestSubmit()
       }
     }
   }
 
-  const multiplePlaceholders = placeholders.length > 1
-
   return (
     <motion.form
-      aria-busy={inProgress}
+      layout
+      aria-busy={inProgress || isProcessing}
       ref={formRef}
       className={cn(
         "relative isolate",
@@ -208,9 +256,15 @@ export const F0AiChatTextArea = ({
         "--gradient-angle": ["0deg", "360deg"],
       }}
       transition={{
-        duration: 6,
-        ease: "linear",
-        repeat: Infinity,
+        default: {
+          duration: 6,
+          ease: "linear",
+          repeat: Infinity,
+        },
+        layout: {
+          duration: 0.2,
+          ease: [0.4, 0, 0.2, 1],
+        },
       }}
       style={
         {
@@ -222,6 +276,56 @@ export const F0AiChatTextArea = ({
       }}
       onSubmit={handleSubmit}
     >
+      <AnimatePresence>
+        {attachments.length > 0 && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{
+              height: { duration: 0.2, ease: [0.4, 0, 0.2, 1] },
+              opacity: { duration: 0.15, ease: [0.4, 0, 0.2, 1] },
+            }}
+            className="overflow-hidden sm:px-3 sm:pt-3"
+          >
+            <ScrollArea>
+              <div className="flex w-full flex-row gap-2">
+                <AnimatePresence initial={false}>
+                  {attachments.map((file, index) => (
+                    <motion.div
+                      key={`${file.name}-${index}`}
+                      initial={{ scale: 0.7, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      exit={{ scale: 0.8, opacity: 0 }}
+                      transition={{
+                        duration: 0.3,
+                        ease: [0.4, 0, 0.2, 1],
+                      }}
+                      className="flex-1"
+                    >
+                      <FileItem
+                        file={file}
+                        actions={
+                          onRemoveAttachment
+                            ? [
+                                {
+                                  icon: CrossedCircle,
+                                  label: translation.ai.removeFile,
+                                  onClick: () => onRemoveAttachment(index),
+                                },
+                              ]
+                            : []
+                        }
+                      />
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              </div>
+            </ScrollArea>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div
         className={cn(
           "grid flex-1 grid-cols-1 grid-rows-1",
@@ -289,25 +393,50 @@ export const F0AiChatTextArea = ({
         )}
       </div>
 
-      <div className="flex shrink-0 flex-row-reverse p-1 sm:p-3">
-        {inProgress ? (
+      {fileUploadsEnabled && (
+        <input
+          ref={fileInputRef}
+          type="file"
+          multiple
+          onChange={handleFileSelect}
+          className="hidden"
+          aria-label={translation.ai.attachFiles}
+        />
+      )}
+
+      <div className="flex shrink-0 flex-row-reverse gap-2 p-1 sm:flex-row sm:justify-between sm:p-2 sm:pt-0">
+        {fileUploadsEnabled ? (
           <ButtonInternal
-            type="submit"
-            variant="neutral"
-            label={translation.ai.stopAnswerGeneration}
-            icon={SolidStop}
+            type="button"
+            variant="outline"
+            label={translation.ai.attachFiles}
+            icon={Paperclip}
             hideLabel
+            onClick={() => fileInputRef.current?.click()}
           />
         ) : (
-          <ButtonInternal
-            type="submit"
-            disabled={!hasDataToSend}
-            variant={hasDataToSend ? "default" : "neutral"}
-            label={submitLabel || translation.ai.sendMessage}
-            icon={submitLabel ? undefined : ArrowUp}
-            hideLabel={!submitLabel}
-          />
+          <div />
         )}
+        <div className="flex gap-2">
+          {inProgress || isProcessing ? (
+            <ButtonInternal
+              type="submit"
+              variant="neutral"
+              label={translation.ai.stopAnswerGeneration}
+              icon={SolidStop}
+              hideLabel
+            />
+          ) : (
+            <ButtonInternal
+              type="submit"
+              disabled={!hasDataToSend}
+              variant={hasDataToSend ? "default" : "neutral"}
+              label={submitLabel || translation.ai.sendMessage}
+              icon={submitLabel ? undefined : ArrowUp}
+              hideLabel={!submitLabel}
+            />
+          )}
+        </div>
       </div>
     </motion.form>
   )
