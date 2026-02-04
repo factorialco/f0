@@ -1,6 +1,6 @@
 import { type AIMessage, type Message } from "@copilotkit/shared"
 
-import { WelcomeScreenSuggestion } from "./types"
+import { AiChatDisclaimer, WelcomeScreenSuggestion } from "./types"
 
 /**
  * Context type for fullscreen chat state
@@ -19,6 +19,7 @@ export interface AiChatState {
   agent?: string
   initialMessage?: string | string[]
   welcomeScreenSuggestions?: WelcomeScreenSuggestion[]
+  disclaimer?: AiChatDisclaimer
   placeholders?: string[]
   setPlaceholders?: React.Dispatch<React.SetStateAction<string[]>>
   onThumbsUp?: (
@@ -91,7 +92,7 @@ export type AiChatProviderReturnValue = {
    * @internal
    */
   setSendMessageFunction: (sendFn: ((message: Message) => void) | null) => void
-} & Pick<AiChatState, "greeting" | "agent">
+} & Pick<AiChatState, "greeting" | "agent" | "disclaimer">
 
 /**
  * Helper function to check if a message is an agent state message

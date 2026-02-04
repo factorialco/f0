@@ -11,6 +11,7 @@ export type AiChatProviderProps = {
   greeting?: string
   initialMessage?: string | string[]
   welcomeScreenSuggestions?: WelcomeScreenSuggestion[]
+  disclaimer?: AiChatDisclaimer
   onThumbsUp?: (
     message: AIMessage,
     { threadId, feedback }: { threadId: string; feedback: string }
@@ -37,6 +38,15 @@ export type WelcomeScreenSuggestion = {
   icon: IconType
   message: string
   prompt?: string
+}
+
+/**
+ * Disclaimer configuration for the chat input
+ */
+export type AiChatDisclaimer = {
+  text: string
+  link?: string
+  linkText?: string
 }
 
 /**

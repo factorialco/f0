@@ -10,6 +10,7 @@ export {
 export type {
   AiChatProviderProps,
   WelcomeScreenSuggestion,
+  AiChatDisclaimer,
   AiChatTranslations,
   AiChatTranslationsProviderProps,
 } from "./types"

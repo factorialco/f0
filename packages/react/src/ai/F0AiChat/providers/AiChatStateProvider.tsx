@@ -26,6 +26,7 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   agent: initialAgent,
   initialMessage: initialInitialMessage,
   welcomeScreenSuggestions: initialWelcomeScreenSuggestions = [],
+  disclaimer,
   onThumbsDown,
   onThumbsUp,
   ...rest
@@ -138,6 +139,7 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         setPlaceholders,
         sendMessage,
         setSendMessageFunction,
+        disclaimer,
       }}
     >
       {children}
@@ -174,6 +176,7 @@ export function useAiChat(): AiChatProviderReturnValue {
       onThumbsDown: noopFn,
       sendMessage: noopFn,
       setSendMessageFunction: noopFn,
+      disclaimer: undefined,
     }
   }
 

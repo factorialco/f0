@@ -12,6 +12,7 @@ import {
   useState,
   useRef,
 } from "react"
+import { Link } from "@/lib/linkHandler"
 
 import { experimentalComponent } from "@/lib/experimental"
 import { cn } from "@/lib/utils"
@@ -40,6 +41,7 @@ const F0AiChatProviderComponent = ({
   greeting,
   initialMessage,
   welcomeScreenSuggestions,
+  disclaimer,
   onThumbsUp,
   onThumbsDown,
   children,
@@ -57,6 +59,7 @@ const F0AiChatProviderComponent = ({
       onThumbsDown={onThumbsDown}
       agent={agent}
       welcomeScreenSuggestions={welcomeScreenSuggestions}
+      disclaimer={disclaimer}
     >
       <AiChatKitWrapper {...copilotKitProps}>{children}</AiChatKitWrapper>
     </AiChatStateProvider>
@@ -109,18 +112,37 @@ const SendMessageFunctionInjector = () => {
 }
 
 const F0AiChatComponent = () => {
-  const { enabled, open, setOpen } = useAiChat()
+  const { enabled, open, setOpen, disclaimer } = useAiChat()
 
   // Register all default copilot actions
   useDefaultCopilotActions()
 
   const InputComponent = useCallback(
     ({ ...props }: InputProps) => (
-      <div className="m-[16px]">
+      <div className="m-[16px] items-center flex flex-col gap-2">
         <ChatTextarea {...props} />
+
+        {disclaimer?.text && (
+          <div className="flex flex-row items-center gap-1">
+            <p className="text-f1-foreground-tertiary text-sm font-medium truncate">
+              {disclaimer.text}
+            </p>
+
+            {disclaimer.link && disclaimer.linkText && (
+              <Link
+                href={disclaimer.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-f1-foreground-tertiary text-sm font-medium"
+              >
+                {disclaimer.linkText}
+              </Link>
+            )}
+          </div>
+        )}
       </div>
     ),
-    []
+    [disclaimer]
   )
 
   if (!enabled) {
@@ -260,7 +282,7 @@ const F0AiFullscreenChatComponent = () => {
 }
 
 const FullscreenChatInput = () => {
-  const { sendMessage } = useAiChat()
+  const { sendMessage, disclaimer } = useAiChat()
   const { interrupt } = useCopilotChatInternal()
   const { inProgress } = useContext(FullscreenChatContext)
 
@@ -285,12 +307,30 @@ const FullscreenChatInput = () => {
   }
 
   return (
-    <div className="w-full px-4 py-2">
+    <div className="w-full px-4 py-2 flex flex-col gap-2 items-center">
       <ChatTextarea
         inProgress={inProgress}
         onSend={handleSend}
         onStop={handleStop}
       />
+      {disclaimer?.text && (
+        <div className="flex flex-row items-center gap-1">
+          <p className="text-f1-foreground-tertiary text-sm font-medium truncate">
+            {disclaimer.text}
+          </p>
+
+          {disclaimer.link && disclaimer.linkText && (
+            <Link
+              href={disclaimer.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-f1-foreground-tertiary text-sm font-medium"
+            >
+              {disclaimer.linkText}
+            </Link>
+          )}
+        </div>
+      )}
     </div>
   )
 }

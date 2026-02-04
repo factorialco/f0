@@ -119,7 +119,13 @@ const meta = {
   tags: ["autodocs"],
   decorators: [
     (Story) => (
-      <F0AiChatProvider>
+      <F0AiChatProvider
+        disclaimer={{
+          text: "One works within your permissions.",
+          link: "/permissions",
+          linkText: "See more",
+        }}
+      >
         <Story />
       </F0AiChatProvider>
     ),
