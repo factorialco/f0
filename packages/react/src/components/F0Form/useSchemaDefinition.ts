@@ -12,6 +12,7 @@ import { isOptionalOrNullable } from "./fields/schema"
 import { extractNumberConstraints } from "./fields/number/schema"
 import { extractDateConstraints } from "./fields/date/schema"
 import { extractTextareaConstraints } from "./fields/textarea/schema"
+import { inferInputType } from "./fields/text/schema"
 import type {
   F0SectionConfig,
   FieldItem,
@@ -62,13 +63,19 @@ function configToF0Field(
   const clearable = isOptionalOrNullable(schema)
 
   switch (fieldType) {
-    case "text":
+    case "text": {
+      // Explicit inputType takes precedence, otherwise infer from schema (email/url checks)
+      const inputType =
+        "inputType" in config && config.inputType
+          ? config.inputType
+          : inferInputType(schema)
       return {
         ...baseProps,
         type: "text",
-        inputType: "inputType" in config ? config.inputType || "text" : "text",
+        inputType,
         renderIf: config.renderIf,
       } as F0Field
+    }
 
     case "number": {
       const { min, max } = extractNumberConstraints(schema)
@@ -178,7 +185,7 @@ function configToF0Field(
       return {
         ...baseProps,
         type: "text",
-        inputType: "text",
+        inputType: inferInputType(schema),
         renderIf: config.renderIf,
       } as F0Field
   }

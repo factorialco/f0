@@ -98,8 +98,7 @@ function groupContiguousSwitches(
  *   }),
  *   email: f0FormField(z.string().email(), {
  *     label: "Email",
- *     section: "contact",
- *     inputType: "email"
+ *     section: "contact"
  *   })
  * })
  *

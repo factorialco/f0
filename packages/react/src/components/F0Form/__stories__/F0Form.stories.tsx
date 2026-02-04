@@ -31,7 +31,6 @@ export const Default: Story = {
       email: f0FormField(z.string().email("Please enter a valid email"), {
         label: "Email",
         placeholder: "you@example.com",
-        inputType: "email",
       }),
       bio: f0FormField(z.string().max(500).optional(), {
         label: "Biography",
@@ -70,7 +69,6 @@ export const WithRows: Story = {
       email: f0FormField(z.string().email(), {
         label: "Email",
         row: "contact-row",
-        inputType: "email",
       }),
       phone: f0FormField(z.string().optional(), {
         label: "Phone",
@@ -260,7 +258,6 @@ export const AllFieldTypes: Story = {
       }),
       emailField: f0FormField(z.string().email(), {
         label: "Email Field",
-        inputType: "email",
       }),
       passwordField: f0FormField(z.string().min(8), {
         label: "Password Field",
@@ -296,6 +293,9 @@ export const AllFieldTypes: Story = {
           { value: "c", label: "Option C" },
         ],
         placeholder: "Select multiple options",
+      }),
+      urlField: f0FormField(z.string().url(), {
+        label: "URL Field",
       }),
       checkboxField: f0FormField(z.boolean(), {
         label: "Checkbox Field",
@@ -506,7 +506,6 @@ export const ServerValidation: Story = {
       }),
       email: f0FormField(z.string().email(), {
         label: "Email",
-        inputType: "email",
         helpText: "Try 'taken@example.com' to see server validation error",
       }),
     })
@@ -681,7 +680,6 @@ export const WithActionBar: Story = {
       }),
       email: f0FormField(z.string().email(), {
         label: "Email",
-        inputType: "email",
         placeholder: "you@example.com",
       }),
       notifications: f0FormField(z.boolean(), {
@@ -800,7 +798,6 @@ export const ErrorTriggerModes: Story = {
       ),
       email: f0FormField(z.string().email(), {
         label: "Email",
-        inputType: "email",
       }),
     })
 
