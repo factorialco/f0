@@ -262,9 +262,9 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         const filesJson = JSON.stringify({
           files: successful.map((u) => ({
             name: u.file.name,
-            url: u.result.url,
             type: u.file.type,
             size: u.file.size,
+            ...u.result,
           })),
         })
         processedContent = `${messageContent}\n\n[ATTACHMENTS]\n${filesJson}\n[/ATTACHMENTS]`
