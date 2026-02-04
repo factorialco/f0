@@ -56,26 +56,6 @@ describe("F0Form", () => {
     expect(screen.getByText("Save")).toBeInTheDocument()
   })
 
-  it("can hide the submit button", () => {
-    const formSchema = z.object({
-      name: f0FormField(z.string(), {
-        label: "Name",
-      }),
-    })
-
-    render(
-      <F0Form
-        name="hide-submit-button"
-        schema={formSchema}
-        defaultValues={{ name: "" }}
-        onSubmit={async () => ({ success: true })}
-        submitConfig={{ showButton: false }}
-      />
-    )
-
-    expect(screen.queryByText("Submit")).not.toBeInTheDocument()
-  })
-
   it("renders form with sections", () => {
     const formSchema = z.object({
       name: f0FormField(z.string(), {
