@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.346.0](https://github.com/factorialco/f0/compare/f0-react-v1.345.0...f0-react-v1.346.0) (2026-02-04)
+
+
+### Features
+
+* add deactivated view to tags ([#3293](https://github.com/factorialco/f0/issues/3293)) ([c0e2354](https://github.com/factorialco/f0/commit/c0e2354b137298d1abcb6cd2ae64ac4d07af4313))
+
 ## [1.345.0](https://github.com/factorialco/f0/compare/f0-react-v1.344.0...f0-react-v1.345.0) (2026-02-04)
 
 
