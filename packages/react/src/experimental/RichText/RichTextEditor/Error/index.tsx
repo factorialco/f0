@@ -2,23 +2,17 @@ import { Editor } from "@tiptap/react"
 
 import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
 import { F0Button } from "@/components/F0Button"
-import { errorConfig } from "@/experimental/RichText/RichTextEditor/utils/types"
+import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 
 interface ErrorProps {
   error: string
-  closeErrorButtonLabel?: string
   editor: Editor
-  errorConfig?: errorConfig
   setError: (error: string | null) => void
 }
 
-const Error = ({
-  error,
-  closeErrorButtonLabel,
-  editor,
-  errorConfig,
-  setError,
-}: ErrorProps) => {
+const Error = ({ error, editor, setError }: ErrorProps) => {
+  const i18n = useI18n()
+
   return (
     <div className="flex w-max max-w-full items-center gap-10 rounded-md bg-f1-background-critical p-1 drop-shadow-sm">
       <div className="flex w-full flex-row items-center gap-2">
@@ -27,9 +21,9 @@ const Error = ({
         </div>
         <p
           className="w-full max-w-xl flex-grow truncate text-ellipsis text-sm font-semibold text-f1-foreground-critical"
-          title={error || "Error"}
+          title={error || i18n.richTextEditor.ai.defaultError}
         >
-          {error || "Error"}
+          {error || i18n.richTextEditor.ai.defaultError}
         </p>
       </div>
       <div className="mr- flex-shrink-0">
@@ -39,11 +33,8 @@ const Error = ({
             e.preventDefault()
             setError(null)
             editor.setEditable(true)
-            if (errorConfig?.onClose) {
-              errorConfig.onClose()
-            }
           }}
-          label={closeErrorButtonLabel || "Continue editing"}
+          label={i18n.richTextEditor.ai.closeErrorButtonLabel}
           size="sm"
         />
       </div>

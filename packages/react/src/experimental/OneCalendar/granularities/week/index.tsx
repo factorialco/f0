@@ -22,6 +22,7 @@ import {
 } from "../../types"
 import {
   formatDateRange,
+  formatToPlaceholder,
   isAfterOrEqual,
   isBeforeOrEqual,
   toDateRangeString,
@@ -30,6 +31,8 @@ import {
 import { rangeSeparator } from "../consts"
 import { DateStringFormat, GranularityDefinition } from "../types"
 import { WeekView } from "./WeekView"
+
+const WEEK_FORMAT = "'W'I yyyy"
 
 // Helper functions that use ISO week functions when weekStartsOn === WeekStartDay.Monday, otherwise use configurable versions
 export const getStartOfWeek = (date: Date, weekStartsOn: WeekStartsOn) => {
@@ -91,17 +94,17 @@ const toStringSort = (
     !dateRange.to ||
     getIsSameWeek(dateRange.from, dateRange.to, weekStartsOn)
   ) {
-    return formatDate(dateRange.from, "'W'I yyyy")
+    return formatDate(dateRange.from, WEEK_FORMAT)
   }
 
   // Range
   // Same year
   if (isSameYear(dateRange.from, dateRange.to)) {
-    return `${formatDate(dateRange.from, "'W'I")} ${rangeSeparator} ${formatDate(dateRange.to, "'W'I yyyy")}`
+    return `${formatDate(dateRange.from, "'W'I")} ${rangeSeparator} ${formatDate(dateRange.to, WEEK_FORMAT)}`
   }
 
   // Different month and year
-  return `${formatDate(dateRange.from, "'W'I yyyy")} ${rangeSeparator} ${formatDate(dateRange.to, "'W'I yyyy")}`
+  return `${formatDate(dateRange.from, WEEK_FORMAT)} ${rangeSeparator} ${formatDate(dateRange.to, WEEK_FORMAT)}`
 }
 
 const toStringLong = (
@@ -212,6 +215,7 @@ export const createWeekGranularity = (
     toStringMaxWidth: function () {
       return 240
     },
+    placeholder: () => formatToPlaceholder(WEEK_FORMAT),
     fromString: function (dateStr) {
       const dateRangeString = toDateRangeString(dateStr)
       if (!dateRangeString) {

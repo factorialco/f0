@@ -1,14 +1,36 @@
 /* Main styles */
 .mention {
-  @apply rounded-xs bg-f1-background-accent px-1.5 py-0.5 font-medium;
+  @apply bg-f1-background-accent rounded-xs px-1.5 py-0.5 font-medium;
 }
 
 .mention:focus {
-  @apply outline outline-1 outline-offset-1 outline-f1-border-selected-bold;
+  @apply outline-f1-border-selected-bold outline outline-1 outline-offset-1;
 }
 
 .preserved-selection {
   @apply bg-f1-background-selected-bold/20;
+}
+
+.enhance-highlight {
+  background: linear-gradient(
+    90deg,
+    #e5561980,
+    #a1ade580,
+    #e5194380,
+    #e5561980
+  );
+  background-size: 300% 100%;
+  animation: enhance-gradient-move 3s linear infinite;
+  border-radius: 4px;
+}
+
+@keyframes enhance-gradient-move {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 100% 50%;
+  }
 }
 
 /* Make all selections transparent */
@@ -67,7 +89,7 @@
 
 .rich-text-editor-container a,
 .rich-text-display-container a {
-  @apply cursor-pointer font-medium text-f1-foreground-accent no-underline;
+  @apply text-f1-foreground-accent cursor-pointer font-medium no-underline;
 }
 
 .rich-text-editor-container strong,
@@ -121,7 +143,7 @@
 
 .rich-text-editor-container pre,
 .rich-text-display-container pre {
-  @apply relative mx-0 my-4 overflow-x-auto whitespace-pre-wrap rounded-md bg-f1-background-secondary p-2;
+  @apply bg-f1-background-secondary relative mx-0 my-4 overflow-x-auto rounded-md p-2 whitespace-pre-wrap;
 }
 
 .rich-text-editor-container code,
@@ -132,7 +154,7 @@
 
 .rich-text-editor-container blockquote,
 .rich-text-display-container blockquote {
-  @apply m-0 mb-2.5 border-0 border-l-4 border-solid border-f1-border pl-4;
+  @apply border-f1-border m-0 mb-2.5 border-0 border-l-4 border-solid pl-4;
 }
 
 .ProseMirror:focus,
@@ -142,12 +164,12 @@
 
 .rich-text-editor-container hr,
 .rich-text-display-container hr {
-  @apply my-3 border-0 border-t border-f1-border;
+  @apply border-f1-border my-3 border-0 border-t;
 }
 
 .rich-text-editor-container mark,
 .rich-text-display-container mark {
-  @apply rounded-xs bg-f1-background-promote p-0.5 text-f1-foreground;
+  @apply bg-f1-background-promote text-f1-foreground rounded-xs p-0.5;
 }
 
 .rich-text-editor-container p:empty::before,
@@ -201,7 +223,7 @@
   /* Hide native checkbox and style it custom */
   appearance: none;
   -webkit-appearance: none;
-  @apply relative h-5 w-5 flex-shrink-0 cursor-pointer rounded-xs border border-solid border-f1-border bg-f1-background transition-colors;
+  @apply border-f1-border bg-f1-background relative h-5 w-5 flex-shrink-0 cursor-pointer rounded-xs border border-solid transition-colors;
 }
 
 .f1-task-item input:hover {
@@ -217,7 +239,7 @@
 }
 
 .f1-task-item input:checked::after {
-  @apply absolute left-1/2 top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2;
+  @apply absolute top-1/2 left-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2;
   content: "";
   background-image: url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M10.75 16.75L17.75 7.25004' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M6.25 11.75L10.75 16.75' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   background-position: center;
@@ -243,7 +265,7 @@ Placeholder component
 */
 
 .tiptap p.is-empty::before {
-  @apply pointer-events-none float-left block h-0 max-w-full text-ellipsis whitespace-nowrap text-f1-foreground-tertiary;
+  @apply text-f1-foreground-tertiary pointer-events-none float-left block h-0 max-w-full text-ellipsis whitespace-nowrap;
   content: attr(data-placeholder);
 }
 
@@ -264,7 +286,7 @@ Placeholder component
 }
 
 .rich-text-details > button {
-  @apply flex h-6 w-6 items-center justify-center rounded-xs bg-f1-background;
+  @apply bg-f1-background flex h-6 w-6 items-center justify-center rounded-xs;
 }
 
 .rich-text-details > button:hover {
@@ -272,7 +294,7 @@ Placeholder component
 }
 
 .rich-text-details > button::before {
-  @apply text-xs text-f1-foreground;
+  @apply text-f1-foreground text-xs;
   content: "\25B6";
 }
 

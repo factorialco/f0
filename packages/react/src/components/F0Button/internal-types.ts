@@ -30,6 +30,10 @@ export type ButtonInternalProps = Pick<
      */
     variant?: ActionButtonVariant
     /**
+     * The filters'counter value to display.
+     */
+    counterValue?: number
+    /**
      * Callback fired when the button is clicked. Supports async functions for loading state.
      */
     onClick?: (
