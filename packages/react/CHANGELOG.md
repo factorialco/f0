@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.345.0](https://github.com/factorialco/f0/compare/f0-react-v1.344.0...f0-react-v1.345.0) (2026-02-04)
+
+
+### Features
+
+* counter inside filter component ([#3346](https://github.com/factorialco/f0/issues/3346)) ([d455d69](https://github.com/factorialco/f0/commit/d455d698953efaf4722e7478f758151035d08896))
+
 ## [1.344.0](https://github.com/factorialco/f0/compare/f0-react-v1.343.2...f0-react-v1.344.0) (2026-02-03)
 
 
