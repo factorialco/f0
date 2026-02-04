@@ -178,6 +178,7 @@ function configToF0Field(
         ...baseProps,
         type: "custom",
         render: "render" in config ? config.render : () => null,
+        fieldConfig: "fieldConfig" in config ? config.fieldConfig : undefined,
         renderIf: config.renderIf,
       } as F0Field
 

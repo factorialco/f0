@@ -114,10 +114,11 @@ export type F0StringSelectConfig = F0BaseConfig &
 /**
  * Union of all string field configs
  */
-export type F0StringConfig =
+export type F0StringConfig<TConfig = undefined> =
   | F0StringTextConfig
   | F0StringTextareaConfig
   | F0StringSelectConfig
+  | F0CustomFieldConfig<TConfig>
 
 /**
  * Config for number fields
@@ -173,12 +174,29 @@ export type F0ArrayConfig = F0BaseConfig &
   }
 
 /**
- * Config for custom fields
+ * Config for custom fields without fieldConfig
  */
-export type F0CustomFieldConfig = F0BaseConfig &
-  F0CustomConfig & {
+export type F0CustomFieldConfigBase = F0BaseConfig &
+  F0CustomConfig<undefined> & {
     fieldType: "custom"
   }
+
+/**
+ * Config for custom fields with fieldConfig
+ *
+ * @typeParam TConfig - Type of the custom configuration object passed to render
+ */
+export type F0CustomFieldConfigWithConfig<TConfig> = F0BaseConfig &
+  F0CustomConfig<TConfig> & {
+    fieldType: "custom"
+  }
+
+/**
+ * Union of custom field configs (with or without fieldConfig)
+ */
+export type F0CustomFieldConfig<TConfig = undefined> = TConfig extends undefined
+  ? F0CustomFieldConfigBase
+  : F0CustomFieldConfigWithConfig<TConfig>
 
 /**
  * Config for richtext fields
@@ -190,11 +208,13 @@ export type F0RichTextFieldConfig = F0BaseConfig &
 
 /**
  * Config for object fields (richtext, daterange, or custom)
+ *
+ * @typeParam TConfig - Type of the custom configuration object (for custom fields)
  */
-export type F0ObjectConfig =
+export type F0ObjectConfig<TConfig = undefined> =
   | F0RichTextFieldConfig
   | F0DateRangeFieldConfig
-  | F0CustomFieldConfig
+  | F0CustomFieldConfig<TConfig>
 
 /**
  * Complete F0 field configuration (union of all possible configs)
@@ -223,11 +243,11 @@ const f0ConfigMap = new WeakMap<ZodTypeAny, F0FieldConfig>()
 // Function overloads for type-safe f0FormField function
 
 /**
- * String field - text input or textarea
+ * String field - text input, textarea, select, or custom
  */
-export function f0FormField<T extends z.ZodString>(
+export function f0FormField<T extends z.ZodString, TConfig = undefined>(
   schema: T,
-  config: F0StringConfig
+  config: F0StringConfig<TConfig>
 ): T & F0ZodType<T>
 
 /**
@@ -273,10 +293,10 @@ export function f0FormField<T extends z.ZodArray<ZodTypeAny>>(
 /**
  * Object field - richtext or custom
  */
-export function f0FormField<T extends z.ZodObject<z.ZodRawShape>>(
-  schema: T,
-  config: F0ObjectConfig
-): T & F0ZodType<T>
+export function f0FormField<
+  T extends z.ZodObject<z.ZodRawShape>,
+  TConfig = undefined,
+>(schema: T, config: F0ObjectConfig<TConfig>): T & F0ZodType<T>
 
 /**
  * Optional wrapper - inherits inner type's config
@@ -300,6 +320,15 @@ export function f0FormField<T extends z.ZodNullable<ZodTypeAny>>(
 export function f0FormField<T extends z.ZodDefault<ZodTypeAny>>(
   schema: T,
   config: F0FieldConfig
+): T & F0ZodType<T>
+
+/**
+ * Custom field - works with any schema type
+ * Place before fallback to ensure proper type inference for fieldConfig
+ */
+export function f0FormField<T extends ZodTypeAny, TConfig = undefined>(
+  schema: T,
+  config: F0CustomFieldConfig<TConfig>
 ): T & F0ZodType<T>
 
 /**

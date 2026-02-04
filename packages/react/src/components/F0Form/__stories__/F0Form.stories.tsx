@@ -382,7 +382,8 @@ export const AllFieldTypes: Story = {
 }
 
 /**
- * Demonstrates custom field type for integrating external components
+ * Demonstrates custom field type for integrating external components.
+ * Uses `fieldConfig` to pass typed configuration to the render function.
  */
 export const CustomField: Story = {
   render() {
@@ -394,6 +395,7 @@ export const CustomField: Story = {
       error,
       disabled,
       options,
+      placeholder,
     }: {
       label: string
       value: string | undefined
@@ -401,6 +403,7 @@ export const CustomField: Story = {
       error?: string
       disabled?: boolean
       options: { id: string; name: string }[]
+      placeholder?: string
     }) => (
       <div className="flex flex-col gap-1">
         <label className="text-sm font-medium text-f1-foreground-secondary">
@@ -414,7 +417,7 @@ export const CustomField: Story = {
             error ? "border-f1-border-critical" : "border-f1-border-secondary"
           } ${disabled ? "opacity-50" : ""}`}
         >
-          <option value="">Select an option...</option>
+          <option value="">{placeholder ?? "Select an option..."}</option>
           {options.map((opt) => (
             <option key={opt.id} value={opt.id}>
               {opt.name}
@@ -438,20 +441,34 @@ export const CustomField: Story = {
         label: "Task Title",
         placeholder: "Enter task title",
       }),
+      // Using fieldConfig to pass typed options to the custom renderer
       assignee: f0FormField(z.string().min(1, "Please select an assignee"), {
         label: "Assignee",
         fieldType: "custom",
-        render: ({ label, value, onChange, error, disabled }) => (
+        fieldConfig: {
+          options: employees,
+        },
+        render: ({
+          label,
+          value,
+          onChange,
+          placeholder,
+          error,
+          disabled,
+          config,
+        }) => (
           <ExternalSelector
             label={label}
             value={value as string | undefined}
             onChange={onChange}
             error={error}
             disabled={disabled}
-            options={employees}
+            options={config.options}
+            placeholder={placeholder}
           />
         ),
       }),
+      // Without fieldConfig - options passed directly
       reviewer: f0FormField(z.string().optional(), {
         label: "Reviewer (Optional)",
         fieldType: "custom",
@@ -463,6 +480,7 @@ export const CustomField: Story = {
             error={error}
             disabled={disabled}
             options={employees}
+            placeholder="Choose a reviewer..."
           />
         ),
       }),

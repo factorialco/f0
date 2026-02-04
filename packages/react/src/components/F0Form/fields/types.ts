@@ -115,6 +115,7 @@ export type {
   F0CustomConfig,
   F0CustomField,
   CustomFieldRenderProps,
+  CustomFieldRenderPropsBase,
 } from "./custom/types"
 
 // Import for union type

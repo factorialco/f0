@@ -1,6 +1,6 @@
 import { ControllerRenderProps, FieldValues } from "react-hook-form"
 
-import type { F0CustomField, CustomFieldRenderProps } from "./types"
+import type { F0CustomField, CustomFieldRenderPropsBase } from "./types"
 
 interface CustomFieldRendererProps {
   field: F0CustomField
@@ -19,7 +19,7 @@ export function CustomFieldRenderer({
   error,
   isValidating,
 }: CustomFieldRendererProps) {
-  const renderProps: CustomFieldRenderProps = {
+  const renderProps: CustomFieldRenderPropsBase & { config: unknown } = {
     id: field.id,
     label: field.label,
     placeholder: field.placeholder,
@@ -29,6 +29,7 @@ export function CustomFieldRenderer({
     error,
     isValidating,
     disabled: field.disabled,
+    config: field.fieldConfig,
   }
 
   return <>{field.render(renderProps)}</>
