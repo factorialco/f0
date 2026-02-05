@@ -170,9 +170,11 @@ export function F0Form<TSchema extends z.ZodObject<ZodRawShape>>(
     discardConfig?.icon === null ? undefined : (discardConfig?.icon ?? Delete)
 
   const actionBarLabel = isActionBar
-    ? ((submitConfig as { actionBarLabel?: string } | undefined)
-        ?.actionBarLabel ?? forms.actionBar.unsavedChanges)
+    ? (submitConfig?.actionBarLabel ?? forms.actionBar.unsavedChanges)
     : forms.actionBar.unsavedChanges
+
+  const centerActionBarInFrameContent =
+    isActionBar && !!submitConfig?.centerActionBarInFrameContent
 
   // Infer the form values type from the schema
   type TValues = z.infer<TSchema>
@@ -308,6 +310,7 @@ export function F0Form<TSchema extends z.ZodObject<ZodRawShape>>(
           <F0ActionBar
             isOpen={isDirty}
             variant="light"
+            centerInFrameContent={centerActionBarInFrameContent}
             label={!hasErrors ? actionBarLabel : undefined}
             leftContent={
               hasErrors ? (

@@ -89,6 +89,13 @@ interface F0ActionBarProps {
    * Custom content to render on the left side (e.g., error navigation)
    */
   leftContent?: React.ReactNode
+
+  /**
+   * When true, centers the action bar relative to the ApplicationFrame content area
+   * (accounting for the sidebar width) instead of the full viewport.
+   * @default false
+   */
+  centerInFrameContent?: boolean
 }
 
 export const F0ActionBar = ({
@@ -97,6 +104,7 @@ export const F0ActionBar = ({
   label,
   variant = "dark",
   leftContent,
+  centerInFrameContent = false,
   ...props
 }: F0ActionBarProps) => {
   const visibleSecondaryActions = secondaryActions.slice(0, 2)
@@ -162,7 +170,10 @@ export const F0ActionBar = ({
           exit={{ opacity: 0, y: 32, filter: "blur(6px)" }}
           transition={{ ease: [0.175, 0.885, 0.32, 1.275], duration: 0.3 }}
           className={cn(
-            "fixed bottom-2 left-2 right-2 z-50 flex h-fit w-[calc(100%-16px)] flex-col items-center gap-2 rounded-xl p-2 shadow-lg backdrop-blur-sm sm:bottom-5 sm:mx-auto sm:h-12 sm:w-max sm:flex-row sm:gap-4",
+            "fixed bottom-2 left-2 right-2 z-50 flex h-fit flex-col items-center gap-2 rounded-xl p-2 shadow-lg backdrop-blur-sm sm:bottom-5 sm:h-12 sm:w-max sm:flex-row sm:gap-4",
+            centerInFrameContent
+              ? "sm:left-[240px] sm:right-2 sm:mx-auto"
+              : "sm:left-2 sm:right-2 sm:mx-auto",
             isLight
               ? "border border-solid border-f1-border-secondary bg-f1-background text-f1-foreground"
               : "bg-f1-background-inverse text-f1-foreground dark:bg-f1-background-inverse-secondary"
