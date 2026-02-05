@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.348.1](https://github.com/factorialco/f0/compare/f0-react-v1.348.0...f0-react-v1.348.1) (2026-02-05)
+
+
+### Bug Fixes
+
+* show more selected items in select input when possible ([#3362](https://github.com/factorialco/f0/issues/3362)) ([6b7afa5](https://github.com/factorialco/f0/commit/6b7afa5458f23b8305b7fe00ff035535776b6107))
+
 ## [1.348.0](https://github.com/factorialco/f0/compare/f0-react-v1.347.0...f0-react-v1.348.0) (2026-02-05)
 
 
