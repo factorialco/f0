@@ -105,13 +105,17 @@ export const WelcomeScreen = ({
                 className="border border-solid border-f1-border-secondary shadow sm:border-none sm:shadow-none"
                 label={suggestion.message}
                 icon={suggestion.icon}
-                onClick={() =>
-                  sendMessage({
-                    id: randomId(),
-                    role: "user",
-                    content: suggestion.prompt || suggestion.message,
-                  })
-                }
+                onClick={async () => {
+                  if (suggestion.onClick) {
+                    suggestion.onClick()
+                  } else {
+                    await sendMessage({
+                      id: randomId(),
+                      role: "user",
+                      content: suggestion.prompt || suggestion.message,
+                    })
+                  }
+                }}
               />
             </motion.div>
           ))}

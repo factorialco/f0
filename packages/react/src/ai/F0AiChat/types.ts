@@ -3,6 +3,12 @@ import { type AIMessage } from "@copilotkit/shared"
 
 import { IconType } from "@/components/F0Icon"
 
+import {
+  FileUploadResult,
+  FileValidationConfig,
+  RejectedFile,
+} from "./internal-types"
+
 /**
  * Props for the AiChatProvider component
  */
@@ -19,6 +25,22 @@ export type AiChatProviderProps = {
     message: AIMessage,
     { threadId, feedback }: { threadId: string; feedback: string }
   ) => void
+  /**
+   * Configuration for file validation. When provided, enables file uploads in the chat.
+   */
+  fileValidation?: FileValidationConfig
+  /**
+   * Callback when files are rejected during attachment validation
+   */
+  onFilesRejected?: (rejectedFiles: RejectedFile[]) => void
+  /**
+   * Callback to upload a file to storage (e.g., S3).
+   * Called for each file attachment when a message is sent.
+   */
+  onUploadFile?: (
+    file: File,
+    onProgress?: (progress: number) => void
+  ) => Promise<FileUploadResult>
 } & Pick<
   CopilotKitProps,
   | "agent"
@@ -37,6 +59,7 @@ export type WelcomeScreenSuggestion = {
   icon: IconType
   message: string
   prompt?: string
+  onClick?: () => void
 }
 
 /**
@@ -70,6 +93,10 @@ export const aiTranslations = {
     thinking: "Thinking...",
     exportTable: "Download table",
     generatedTableFilename: "OneGeneratedTable",
+    removeFile: "Remove file",
+    attachFiles: "Attach files",
+    dropZoneTitle: "Add files",
+    dropZoneDescription: "Drop any files here to add them to your message",
     feedbackModal: {
       positive: {
         title: "What did you like about this response?",
