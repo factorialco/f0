@@ -1,3 +1,4 @@
+import { AgentState } from '@livekit/components-react';
 import { AIMessage } from '@copilotkit/shared';
 import { AlertTagCellValue } from '../../value-display/types/alertTag';
 import { AlertTagCellValue as AlertTagCellValue_2 } from './types/alertTag';
@@ -62,6 +63,7 @@ import { internalAvatarTypes as internalAvatarTypes_2 } from '../../../ui/Avatar
 import { JSX as JSX_2 } from 'react';
 import { LineChartConfig } from '../../ui/chart';
 import { LineChartPropsBase } from './utils/types';
+import { LocalAudioTrack } from 'livekit-client';
 import { LongTextCellValue } from './types/longText';
 import { Message } from '@copilotkit/shared';
 import { MessagesProps } from '@copilotkit/react-ui';
@@ -84,6 +86,7 @@ import { ReactElement } from 'react';
 import { ReactNode } from 'react';
 import { RefAttributes } from 'react';
 import { RefObject } from 'react';
+import { RemoteAudioTrack } from 'livekit-client';
 import { SearchFilterOptions } from './SearchFilter/SearchFilter';
 import { StatusCellValue } from '../../value-display/types/status';
 import { StatusCellValue as StatusCellValue_2 } from './types/status';
@@ -98,6 +101,7 @@ import { TeamCellValue } from '../../value-display/types/team';
 import { TeamCellValue as TeamCellValue_2 } from './types/team';
 import { TextCellValue } from '../../value-display/types/text';
 import { TextCellValue as TextCellValue_2 } from './types/text';
+import { TrackReferenceOrPlaceholder } from '@livekit/components-react';
 import { ValueDisplayRendererContext } from '../../value-display';
 import { VariantProps } from 'cva';
 
@@ -254,6 +258,8 @@ declare const actionSizes: readonly ["sm", "md", "lg"];
 declare type ActionVariant = (typeof actionVariants)[number];
 
 declare const actionVariants: readonly ["default", "outline", "critical", "neutral", "ghost", "promote", "outlinePromote", "ai", "link", "unstyled", "mention"];
+
+/* Excluded from this release type: AgentState */
 
 /**
  * Props for the AiChatProvider component
@@ -2437,6 +2443,28 @@ export declare interface F0AlertProps {
     icon?: IconType;
     variant: AlertVariant;
 }
+
+export declare function F0AuraVoiceAnimation({ size, state, color, colorShift, audioTrack, themeMode, className, ref, ...props }: F0AuraVoiceAnimationProps & ComponentProps<"div"> & VariantProps<typeof F0AuraVoiceAnimationVariants>): JSX_2.Element;
+
+export declare interface F0AuraVoiceAnimationProps {
+    className?: string;
+    size?: "icon" | "sm" | "md" | "lg" | "xl";
+    state?: AgentState;
+    color?: string;
+    colorShift?: number;
+    themeMode?: "dark" | "light";
+    audioTrack?: LocalAudioTrack | RemoteAudioTrack | TrackReferenceOrPlaceholder;
+}
+
+declare const F0AuraVoiceAnimationVariants: (props?: ({
+    size?: "lg" | "md" | "sm" | "icon" | "xl" | undefined;
+} & ({
+    class?: ClassValue;
+    className?: never;
+} | {
+    class?: never;
+    className?: ClassValue;
+})) | undefined) => string;
 
 export declare const F0Avatar: ({ avatar, size }: AvatarProps) => ReactNode;
 

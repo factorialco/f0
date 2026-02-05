@@ -1,9 +1,9 @@
-import { A as e, B as o, C as t, E as n, h as i, F as r, a as l, x as c, i as A, b as u, s as h, t as F, v as C, w as T, c as d, n as m, o as I, p as f, H as g, I as S, k as p, L as x, O as H, q as P, P as b, S as k, T as O, l as v, m as w, U as M, r as E, j as L, d as q, e as B, u as U, g as j, f as z } from "./F0AiChat-Bdcyd2yl.js";
+import { A as e, B as o, C as t, E as n, h as i, F as r, a as l, x as c, i as A, b as u, s as F, t as h, v as C, w as T, c as d, n as m, o as I, p as f, H as g, I as S, k as p, L as x, O as H, q as P, P as b, S as k, T as O, l as v, m as w, U as M, r as E, j as L, d as q, e as B, u as U, g as j, f as z } from "./F0AiChat-zZ3n4mtZ.js";
 import { defaultTranslations as R } from "./i18n-provider-defaults.js";
-import { A as G, F as J, b as K, a as N, o as Q, u as V } from "./F0HILActionConfirmation-VQ_C8zDh.js";
+import { A as y, F as G, c as J, b as K, a as N, o as Q, u as W } from "./F0HILActionConfirmation-vCrEe127.js";
 export {
   e as A,
-  G as AiChatTranslationsProvider,
+  y as AiChatTranslationsProvider,
   o as Blockquote,
   t as ChatSpinner,
   n as Em,
@@ -13,9 +13,10 @@ export {
   c as F0AiChatTextArea,
   A as F0AiCollapsibleMessage,
   u as F0AiFullscreenChat,
+  G as F0AuraVoiceAnimation,
   J as F0HILActionConfirmation,
-  h as F0MessageSources,
-  F as F0OneIcon,
+  F as F0MessageSources,
+  h as F0OneIcon,
   C as F0OneSwitch,
   T as F0Thinking,
   d as FullscreenChatContext,
@@ -41,7 +42,7 @@ export {
   L as f0MarkdownRenderers,
   Q as oneIconSizes,
   q as useAiChat,
-  V as useAiChatTranslations,
+  W as useAiChatTranslations,
   B as useDefaultCopilotActions,
   U as useI18n,
   j as useMessageSourcesAction,

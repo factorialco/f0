@@ -1,21 +1,30 @@
+import { AgentState } from '@livekit/components-react';
 import { AIMessage } from '@copilotkit/shared';
 import { AssistantMessageProps } from '@copilotkit/react-ui';
+import { ClassValue } from 'cva';
+import { ComponentProps } from 'react';
 import { Context } from 'react';
 import { CopilotKitProps } from '@copilotkit/react-core';
 import { ForwardRefExoticComponent } from 'react';
 import { JSX as JSX_2 } from 'react';
+import { LocalAudioTrack } from 'livekit-client';
 import { Message } from '@copilotkit/shared';
 import { MessagesProps } from '@copilotkit/react-ui';
 import { ReactNode } from 'react';
 import { RefAttributes } from 'react';
+import { RemoteAudioTrack } from 'livekit-client';
 import { SVGProps } from 'react';
 import * as SwitchPrimitive from '@radix-ui/react-switch';
+import { TrackReferenceOrPlaceholder } from '@livekit/components-react';
+import { VariantProps } from 'cva';
 
 export declare function A({ children, ...props }: React.AnchorHTMLAttributes<HTMLAnchorElement>): JSX_2.Element;
 
 export declare type ActionItemStatus = (typeof actionItemStatuses)[number];
 
 export declare const actionItemStatuses: readonly ["inProgress", "executing", "completed"];
+
+/* Excluded from this release type: AgentState */
 
 /**
  * Props for the AiChatProvider component
@@ -751,6 +760,28 @@ export declare interface F0AiCollapsibleMessageProps {
  * @experimental This is an experimental component use it at your own risk
  */
 export declare const F0AiFullscreenChat: () => JSX_2.Element | null;
+
+export declare function F0AuraVoiceAnimation({ size, state, color, colorShift, audioTrack, themeMode, className, ref, ...props }: F0AuraVoiceAnimationProps & ComponentProps<"div"> & VariantProps<typeof F0AuraVoiceAnimationVariants>): JSX_2.Element;
+
+export declare interface F0AuraVoiceAnimationProps {
+    className?: string;
+    size?: "icon" | "sm" | "md" | "lg" | "xl";
+    state?: AgentState;
+    color?: string;
+    colorShift?: number;
+    themeMode?: "dark" | "light";
+    audioTrack?: LocalAudioTrack | RemoteAudioTrack | TrackReferenceOrPlaceholder;
+}
+
+declare const F0AuraVoiceAnimationVariants: (props?: ({
+    size?: "lg" | "md" | "sm" | "icon" | "xl" | undefined;
+} & ({
+    class?: ClassValue;
+    className?: never;
+} | {
+    class?: never;
+    className?: ClassValue;
+})) | undefined) => string;
 
 export declare const F0HILActionConfirmation: ({ text, confirmationText, onConfirm, cancelText, onCancel, }: F0HILActionConfirmationProps) => JSX_2.Element;
 
