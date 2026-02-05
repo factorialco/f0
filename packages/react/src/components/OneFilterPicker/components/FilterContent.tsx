@@ -86,8 +86,8 @@ export function FilterContent<Definition extends FiltersDefinition>({
   }
 
   return (
-    <div className="relative flex h-full w-full flex-col gap-1">
-      <div className="relative flex h-full flex-col justify-between overflow-y-auto ">
+    <div className="relative flex h-full w-full min-w-0 flex-1 flex-col gap-1">
+      <div className="relative flex h-full flex-col justify-between overflow-y-auto">
         {renderFilterForm({
           schema: filter,
           value: currentValue,

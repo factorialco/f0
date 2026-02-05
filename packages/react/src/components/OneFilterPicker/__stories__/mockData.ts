@@ -43,7 +43,7 @@ export const filterDefinition: FiltersDefinition = {
   },
   dateMonthRange: {
     type: "date",
-    label: "Date Month Range",
+    label: "Date Month Range (long title)",
     options: {
       view: "month",
       mode: "range",
@@ -171,31 +171,6 @@ export const samplePresets: PresetsDefinition<typeof filterDefinition> = [
     filter: {
       manager: ["alice"],
     },
-  },
-]
-
-// Additive presets that merge with existing filters instead of replacing them
-export const additivePresets: PresetsDefinition<typeof filterDefinition> = [
-  {
-    label: "London Office",
-    filter: {
-      location: ["london"],
-    },
-    mode: "additive",
-  },
-  {
-    label: "New York Office",
-    filter: {
-      location: ["new_york"],
-    },
-    mode: "additive",
-  },
-  {
-    label: "Remote",
-    filter: {
-      location: ["remote"],
-    },
-    mode: "additive",
   },
 ]
 

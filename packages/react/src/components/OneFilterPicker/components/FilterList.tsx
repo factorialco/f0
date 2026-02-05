@@ -3,6 +3,7 @@ import { useState } from "react"
 
 import { F0Button } from "@/components/F0Button"
 import { F0Icon } from "@/components/F0Icon"
+import { OneEllipsis } from "@/components/OneEllipsis"
 import { F1SearchBox } from "@/experimental/Forms/Fields/F1SearchBox"
 import { ChevronRight } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
@@ -63,8 +64,8 @@ export function FilterList<Definition extends FiltersDefinition>({
   return (
     <div
       className={cn(
-        "z-30 flex h-full w-full flex-col",
-        isCompactMode ? "min-w-[224px]" : "w-[224px]",
+        "z-30 flex h-full w-full shrink-0 flex-col min-w-0",
+        isCompactMode ? "min-w-[224px]" : "min-w-[224px] max-w-[245px]",
         !isCompactMode &&
           "border border-solid border-transparent border-r-f1-border-secondary"
       )}
@@ -89,7 +90,7 @@ export function FilterList<Definition extends FiltersDefinition>({
         {isCompactMode && (
           <div className="-mx-2 mb-1 h-px border-0 border-t border-solid border-f1-border-secondary" />
         )}
-        <div className="flex flex-1 flex-col gap-1 min-h-0 max-h-full overflow-y-auto">
+        <div className="flex max-h-full min-h-0 flex-1 flex-col gap-1 overflow-y-auto">
           {Object.entries(definition).map(([key, filter]) => {
             const matchesWithSearch =
               !searchValue ||
@@ -118,9 +119,12 @@ export function FilterList<Definition extends FiltersDefinition>({
                 onClick={() => onFilterSelect(key as keyof Definition)}
               >
                 <div className="flex w-full items-center justify-start gap-2.5">
-                  <span className="line-clamp-1 w-fit flex-1 text-left text-f1-foreground">
+                  <OneEllipsis
+                    tag="span"
+                    className="min-w-0 flex-1 text-left text-f1-foreground"
+                  >
                     {filter.label}
-                  </span>
+                  </OneEllipsis>
                   <AnimatePresence>
                     {!typedFilterType.isEmpty(currentValue, {
                       schema: filter as unknown as FilterTypeSchema,
