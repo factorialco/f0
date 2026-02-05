@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.349.0](https://github.com/factorialco/f0/compare/f0-react-v1.348.1...f0-react-v1.349.0) (2026-02-05)
+
+
+### Features
+
+* **AIChat:** Resize functionality, disclaimer and fixed tooltip bug ([#3361](https://github.com/factorialco/f0/issues/3361)) ([e343aaf](https://github.com/factorialco/f0/commit/e343aaf54765de3fa1da1813bf688d613ca740fd))
+
 ## [1.348.1](https://github.com/factorialco/f0/compare/f0-react-v1.348.0...f0-react-v1.348.1) (2026-02-05)
 
 
