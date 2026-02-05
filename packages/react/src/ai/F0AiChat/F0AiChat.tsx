@@ -13,7 +13,9 @@ import {
   useRef,
 } from "react"
 
+import { OneEllipsis } from "@/components/OneEllipsis"
 import { experimentalComponent } from "@/lib/experimental"
+import { Link } from "@/lib/linkHandler"
 import { cn } from "@/lib/utils"
 
 import { AssistantMessage } from "./components/AssistantMessage"
@@ -40,6 +42,8 @@ const F0AiChatProviderComponent = ({
   greeting,
   initialMessage,
   welcomeScreenSuggestions,
+  disclaimer,
+  resizable = false,
   onThumbsUp,
   onThumbsDown,
   children,
@@ -57,6 +61,8 @@ const F0AiChatProviderComponent = ({
       onThumbsDown={onThumbsDown}
       agent={agent}
       welcomeScreenSuggestions={welcomeScreenSuggestions}
+      disclaimer={disclaimer}
+      resizable={resizable}
     >
       <AiChatKitWrapper {...copilotKitProps}>{children}</AiChatKitWrapper>
     </AiChatStateProvider>
@@ -109,18 +115,39 @@ const SendMessageFunctionInjector = () => {
 }
 
 const F0AiChatComponent = () => {
-  const { enabled, open, setOpen } = useAiChat()
+  const { enabled, open, setOpen, disclaimer } = useAiChat()
 
   // Register all default copilot actions
   useDefaultCopilotActions()
 
   const InputComponent = useCallback(
     ({ ...props }: InputProps) => (
-      <div className="m-[16px]">
-        <ChatTextarea {...props} />
+      <div className="m-[16px] items-center flex flex-col gap-2">
+        <div className="w-full">
+          <ChatTextarea {...props} />
+        </div>
+
+        {disclaimer?.text && (
+          <div className="flex flex-row items-center gap-1 w-full justify-center">
+            <OneEllipsis className="text-f1-foreground-tertiary text-sm font-medium">
+              {disclaimer.text}
+            </OneEllipsis>
+
+            {disclaimer.link && disclaimer.linkText && (
+              <Link
+                href={disclaimer.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-f1-foreground-tertiary text-sm font-medium flex-shrink-0"
+              >
+                {disclaimer.linkText}
+              </Link>
+            )}
+          </div>
+        )}
       </div>
     ),
-    []
+    [disclaimer]
   )
 
   if (!enabled) {
