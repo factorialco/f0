@@ -77,6 +77,7 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:ci": "jest --ci --coverage --coverageReporters=text --coverageReporters=lcov",
+    "start:dev": "pnpm expo start -c",
     "generate-icons": "rm -fR src/icons/app/* src/icons/modules/* && run-p generate-app-icons generate-module-icons && find src/icons -name '*.tsx' -exec sed -i.bak 's/SVGSVGElement/Svg/g; s/ xmlns=\"http:\\/\\/www.w3.org\\/2000\\/svg\"//g; s/ strokeWidth={[^}]*}//g; s/ strokeWidth=\"[^\"]*\"//g' {} + && find src/icons -name '*.bak' -delete && pnpm run prettier:format",
     "generate-app-icons": "npx @svgr/cli --out-dir src/icons/app --native --svg-props className={props.className} ../../packages/core/assets/icons/app",
     "generate-module-icons": "npx @svgr/cli --out-dir src/icons/modules --native --svg-props className={props.className} ../../packages/core/assets/icons/modules",
