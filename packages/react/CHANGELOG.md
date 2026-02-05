@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.349.1](https://github.com/factorialco/f0/compare/f0-react-v1.349.0...f0-react-v1.349.1) (2026-02-05)
+
+
+### Bug Fixes
+
+* **select:** prevent layout jump when toggling filters ([#3365](https://github.com/factorialco/f0/issues/3365)) ([04043dd](https://github.com/factorialco/f0/commit/04043ddc9bb2e856e06a723110ef84a946b8eb44))
+
 ## [1.349.0](https://github.com/factorialco/f0/compare/f0-react-v1.348.1...f0-react-v1.349.0) (2026-02-05)
 
 
