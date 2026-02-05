@@ -1,5 +1,75 @@
 # Changelog
 
+## [1.348.0](https://github.com/factorialco/f0/compare/f0-react-v1.347.0...f0-react-v1.348.0) (2026-02-05)
+
+
+### Features
+
+* aura voice animation component ([#3358](https://github.com/factorialco/f0/issues/3358)) ([1c76bb8](https://github.com/factorialco/f0/commit/1c76bb8f97f65aedecb86cc726f36e911a7424f2))
+
+## [1.347.0](https://github.com/factorialco/f0/compare/f0-react-v1.346.0...f0-react-v1.347.0) (2026-02-04)
+
+
+### Features
+
+* export I18nProvider and related types from ai.ts  ([#3355](https://github.com/factorialco/f0/issues/3355)) ([3751faa](https://github.com/factorialco/f0/commit/3751faa4071a032f237beebe0b20baca8bbab58e))
+
+## [1.346.0](https://github.com/factorialco/f0/compare/f0-react-v1.345.0...f0-react-v1.346.0) (2026-02-04)
+
+
+### Features
+
+* add deactivated view to tags ([#3293](https://github.com/factorialco/f0/issues/3293)) ([c0e2354](https://github.com/factorialco/f0/commit/c0e2354b137298d1abcb6cd2ae64ac4d07af4313))
+
+## [1.345.0](https://github.com/factorialco/f0/compare/f0-react-v1.344.0...f0-react-v1.345.0) (2026-02-04)
+
+
+### Features
+
+* counter inside filter component ([#3346](https://github.com/factorialco/f0/issues/3346)) ([d455d69](https://github.com/factorialco/f0/commit/d455d698953efaf4722e7478f758151035d08896))
+
+## [1.344.0](https://github.com/factorialco/f0/compare/f0-react-v1.343.2...f0-react-v1.344.0) (2026-02-03)
+
+
+### Features
+
+* **RichTextEditor:** replace custom button with AIButton  ([#3341](https://github.com/factorialco/f0/issues/3341)) ([918e683](https://github.com/factorialco/f0/commit/918e683c34aeb620376a16086c15e3b91c76d453))
+
+## [1.343.2](https://github.com/factorialco/f0/compare/f0-react-v1.343.1...f0-react-v1.343.2) (2026-02-03)
+
+
+### Bug Fixes
+
+* add intuitive default placeholders for date inputs ([#3348](https://github.com/factorialco/f0/issues/3348)) ([dddfe59](https://github.com/factorialco/f0/commit/dddfe59183c486519bb356de34cf141e88802d51))
+
+## [1.343.1](https://github.com/factorialco/f0/compare/f0-react-v1.343.0...f0-react-v1.343.1) (2026-02-03)
+
+
+### Bug Fixes
+
+* add missing apply selection button in F0Select ([#3345](https://github.com/factorialco/f0/issues/3345)) ([f3fa4c5](https://github.com/factorialco/f0/commit/f3fa4c5359446ab793159fc496ac290ac139dce0))
+
+## [1.343.0](https://github.com/factorialco/f0/compare/f0-react-v1.342.0...f0-react-v1.343.0) (2026-02-03)
+
+
+### Features
+
+* set long label for consistency ([#3318](https://github.com/factorialco/f0/issues/3318)) ([6e98745](https://github.com/factorialco/f0/commit/6e9874599f91aeb520f6c5e5eef2f5467fa6b621))
+
+## [1.342.0](https://github.com/factorialco/f0/compare/f0-react-v1.341.1...f0-react-v1.342.0) (2026-02-02)
+
+
+### Features
+
+* introduce F0 AI components and refactor existing AI chat structure ([#3287](https://github.com/factorialco/f0/issues/3287)) ([3b8e8ba](https://github.com/factorialco/f0/commit/3b8e8ba3367d1f05a081ef3825f589624aed0369))
+
+## [1.341.1](https://github.com/factorialco/f0/compare/f0-react-v1.341.0...f0-react-v1.341.1) (2026-02-02)
+
+
+### Bug Fixes
+
+* **TableHead:** adjust z-index for sticky header styling ([#3332](https://github.com/factorialco/f0/issues/3332)) ([02ea776](https://github.com/factorialco/f0/commit/02ea7766a5c6a647912740f2ca0a54b3a3902f8e))
+
 ## [1.341.0](https://github.com/factorialco/f0/compare/f0-react-v1.340.2...f0-react-v1.341.0) (2026-01-30)
 
 

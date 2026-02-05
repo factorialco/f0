@@ -27,6 +27,7 @@ interface FiltersControlsProps<Filters extends FiltersDefinition> {
   onOpenChange?: (open: boolean) => void
   hideLabel?: boolean
   mode?: FiltersMode
+  displayCounter?: boolean
 }
 
 const DEFAULT_FORM_HEIGHT = 388
@@ -39,6 +40,7 @@ export function FiltersControls<Filters extends FiltersDefinition>({
   onOpenChange: controlledOnOpenChange,
   hideLabel,
   mode = "default",
+  displayCounter = false,
 }: FiltersControlsProps<Filters>) {
   const [selectedFilterKey, setSelectedFilterKey] = useState<
     keyof Filters | null
@@ -163,6 +165,12 @@ export function FiltersControls<Filters extends FiltersDefinition>({
     [filters, localFiltersValue, i18n]
   )
 
+  const appliedFiltersCount = useMemo(() => {
+    const count = getActiveFilterKeys(filters, value, i18n).length
+    if (count === 0) return undefined
+    return count
+  }, [filters, value, i18n])
+
   const activeFiltersTooltip = useMemo(() => {
     return activeFilters.length > 0
       ? i18n.t("filters.activeFilters", {
@@ -203,7 +211,7 @@ export function FiltersControls<Filters extends FiltersDefinition>({
     const ApplySelectionButton = (
       <>
         {selectedFilterKey && (
-          <div className="absolute bottom-0 left-0 right-0 z-30 flex items-center justify-end gap-2 border border-solid border-transparent border-t-f1-border-secondary p-2">
+          <div className="sticky bottom-0 left-0 right-0 z-30 flex items-center justify-end gap-2 border border-solid border-transparent border-t-f1-border-secondary p-2 bg-f1-background">
             <F0Button
               onClick={handleApplyFiltersSelection}
               label={i18n.filters.applySelection}
@@ -303,6 +311,7 @@ export function FiltersControls<Filters extends FiltersDefinition>({
             pressed={isOpen}
             hideLabel={hideLabel}
             aria-controls={isOpen ? id : undefined}
+            counterValue={displayCounter ? appliedFiltersCount : undefined}
           />
         </PopoverTrigger>
         <PopoverContent
