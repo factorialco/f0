@@ -23,7 +23,7 @@ exports[`OnePreset Snapshot 1`] = `
       }
     }
     accessible={true}
-    className="flex grow-0 flex-row items-center gap-2 rounded border px-2.5 py-1.5 font-medium border-f1-border text-f1-foreground"
+    className="overflow-hidden flex grow-0 flex-row items-center gap-2 rounded border px-2.5 py-1.5 font-medium border-f1-border text-f1-foreground"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -35,7 +35,33 @@ exports[`OnePreset Snapshot 1`] = `
     onResponderTerminate={[Function]}
     onResponderTerminationRequest={[Function]}
     onStartShouldSetResponder={[Function]}
+    style={
+      [
+        {
+          "transform": [
+            {
+              "scale": 1,
+            },
+          ],
+        },
+        undefined,
+      ]
+    }
   >
+    <View
+      className="absolute inset-0"
+      pointerEvents="none"
+      style={
+        [
+          {
+            "opacity": 0,
+          },
+          {
+            "backgroundColor": "rgba(0, 0, 0, 1)",
+          },
+        ]
+      }
+    />
     <Text
       className="whitespace-nowrap text-f1-foreground"
     >
@@ -68,7 +94,7 @@ exports[`OnePreset Snapshot with number 1`] = `
       }
     }
     accessible={true}
-    className="flex grow-0 flex-row items-center gap-2 rounded border px-2.5 py-1.5 font-medium pr-1.5 border-f1-border text-f1-foreground"
+    className="overflow-hidden flex grow-0 flex-row items-center gap-2 rounded border px-2.5 py-1.5 font-medium pr-1.5 border-f1-border text-f1-foreground"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -80,7 +106,33 @@ exports[`OnePreset Snapshot with number 1`] = `
     onResponderTerminate={[Function]}
     onResponderTerminationRequest={[Function]}
     onStartShouldSetResponder={[Function]}
+    style={
+      [
+        {
+          "transform": [
+            {
+              "scale": 1,
+            },
+          ],
+        },
+        undefined,
+      ]
+    }
   >
+    <View
+      className="absolute inset-0"
+      pointerEvents="none"
+      style={
+        [
+          {
+            "opacity": 0,
+          },
+          {
+            "backgroundColor": "rgba(0, 0, 0, 1)",
+          },
+        ]
+      }
+    />
     <Text
       className="whitespace-nowrap text-f1-foreground"
     >
@@ -126,7 +178,7 @@ exports[`OnePreset renders correctly with selected props 1`] = `
       }
     }
     accessible={true}
-    className="flex grow-0 flex-row items-center gap-2 rounded border px-2.5 py-1.5 font-medium border-f1-border-selected bg-f1-background-selected-secondary text-f1-foreground-selected"
+    className="overflow-hidden flex grow-0 flex-row items-center gap-2 rounded border px-2.5 py-1.5 font-medium border-f1-border-selected bg-f1-background-selected-secondary text-f1-foreground-selected"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -138,7 +190,33 @@ exports[`OnePreset renders correctly with selected props 1`] = `
     onResponderTerminate={[Function]}
     onResponderTerminationRequest={[Function]}
     onStartShouldSetResponder={[Function]}
+    style={
+      [
+        {
+          "transform": [
+            {
+              "scale": 1,
+            },
+          ],
+        },
+        undefined,
+      ]
+    }
   >
+    <View
+      className="absolute inset-0"
+      pointerEvents="none"
+      style={
+        [
+          {
+            "opacity": 0,
+          },
+          {
+            "backgroundColor": "rgba(0, 0, 0, 1)",
+          },
+        ]
+      }
+    />
     <Text
       className="whitespace-nowrap text-f1-foreground-selected"
     >

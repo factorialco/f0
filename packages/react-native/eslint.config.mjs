@@ -21,11 +21,12 @@ const reactSettings = {
 };
 
 export default [
-  // Ignore dist, lib (compiled files), and other config files
+  // Ignore dist, lib (compiled files), package (build artifacts), and other config files
   {
     ignores: [
       "**/dist",
       "**/lib",
+      "**/package",
       "**/.eslintrc.cjs",
       "**/babel.config.cjs",
       "**/*.cjs",

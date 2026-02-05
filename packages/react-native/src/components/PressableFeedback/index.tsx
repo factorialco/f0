@@ -1,4 +1,4 @@
-import { forwardRef, useCallback } from "react";
+import { forwardRef, useCallback, useMemo } from "react";
 import { Pressable, View, type PressableProps } from "react-native";
 import Animated, {
   Easing,
@@ -75,16 +75,25 @@ export const PressableFeedback = forwardRef<View, PressableFeedbackProps>(
 
     // Config values
     const scaleValue = scaleAnimation?.value ?? 0.98;
-    const scaleTimingConfig = {
-      ...DEFAULT_TIMING_CONFIG,
-      ...scaleAnimation?.timingConfig,
-    };
+    const scaleTimingConfig = useMemo(
+      () => ({
+        ...DEFAULT_TIMING_CONFIG,
+        ...scaleAnimation?.timingConfig,
+      }),
+      [scaleAnimation],
+    );
 
-    const highlightOpacityValues = highlightAnimation?.opacity ?? [0, 0.15];
-    const highlightTimingConfig = {
-      ...DEFAULT_TIMING_CONFIG,
-      ...highlightAnimation?.timingConfig,
-    };
+    const highlightOpacityValues = useMemo(
+      () => highlightAnimation?.opacity ?? [0, 0.15],
+      [highlightAnimation],
+    );
+    const highlightTimingConfig = useMemo(
+      () => ({
+        ...DEFAULT_TIMING_CONFIG,
+        ...highlightAnimation?.timingConfig,
+      }),
+      [highlightAnimation],
+    );
     const highlightColor =
       highlightAnimation?.backgroundColor ?? "rgba(0, 0, 0, 1)";
 

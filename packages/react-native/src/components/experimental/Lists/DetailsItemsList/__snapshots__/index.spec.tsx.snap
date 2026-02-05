@@ -631,7 +631,7 @@ exports[`DetailsItemsList Snapshot  1`] = `
                   {
                     "busy": undefined,
                     "checked": undefined,
-                    "disabled": undefined,
+                    "disabled": true,
                     "expanded": undefined,
                     "selected": undefined,
                   }
@@ -645,7 +645,7 @@ exports[`DetailsItemsList Snapshot  1`] = `
                   }
                 }
                 accessible={true}
-                className="flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f1-border-secondary"
+                className="overflow-hidden flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f1-border-secondary"
                 collapsable={false}
                 focusable={true}
                 onBlur={[Function]}
@@ -657,6 +657,18 @@ exports[`DetailsItemsList Snapshot  1`] = `
                 onResponderTerminate={[Function]}
                 onResponderTerminationRequest={[Function]}
                 onStartShouldSetResponder={[Function]}
+                style={
+                  [
+                    {
+                      "transform": [
+                        {
+                          "scale": 1,
+                        },
+                      ],
+                    },
+                    undefined,
+                  ]
+                }
               >
                 <View
                   aria-hidden={true}
@@ -668,7 +680,7 @@ exports[`DetailsItemsList Snapshot  1`] = `
                   }
                 />
                 <Text
-                  className="line-clamp-1 text-base font-medium text-f1-foreground"
+                  className="text-f1-foreground line-clamp-1 text-base font-medium"
                 >
                   Holidays
                 </Text>
