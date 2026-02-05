@@ -134,6 +134,32 @@ export interface ModuleCardArgs {
 }
 
 /**
+ * FAQ item for FAQ card action
+ */
+export interface FAQCardItem {
+  /** Unique identifier for the FAQ item */
+  id: string
+  /** The question text */
+  question: string
+  /** The answer text */
+  answer: string
+}
+
+/**
+ * Args for FAQ card action
+ */
+export interface FAQCardArgs {
+  /** Title shown in the card header (default: "Questions before getting started") */
+  title?: string
+  /** Array of FAQ items to display */
+  items: FAQCardItem[]
+  /** Initially expanded item ID */
+  defaultExpandedId?: string
+  /** Whether multiple items can be expanded at once (default: false) */
+  allowMultiple?: boolean
+}
+
+/**
  * Configuration for a copilot action
  */
 export interface CopilotActionConfig<TArgs = Record<string, unknown>> {

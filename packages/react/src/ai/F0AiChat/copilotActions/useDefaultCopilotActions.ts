@@ -1,5 +1,6 @@
 import { useBookAMeetingCardAction } from "./useBookAMeetingCardAction"
 import { useDemoCardAction } from "./useDemoCardAction"
+import { useFAQCardAction } from "./useFAQCardAction"
 import { useMessageSourcesAction } from "./useMessageSourcesAction"
 import { useModuleCardAction } from "./useModuleCardAction"
 import { useOrchestratorThinkingAction } from "./useOrchestratorThinkingAction"
@@ -25,4 +26,5 @@ export const useDefaultCopilotActions = () => {
   useBookAMeetingCardAction()
   useQuestionCardAction()
   useModuleCardAction()
+  useFAQCardAction()
 }

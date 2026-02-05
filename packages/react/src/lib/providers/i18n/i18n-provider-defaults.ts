@@ -297,6 +297,9 @@ export const defaultTranslations = {
       moduleCard: {
         actionLabel: "Learn more",
       },
+      faqCard: {
+        title: "Questions before getting started",
+      },
     },
   },
   select: {

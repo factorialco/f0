@@ -14,7 +14,8 @@ export const F0ModuleCard = ({
   actionHref,
 }: F0ModuleCardProps) => {
   const translations = useI18n()
-  const actionLabel = translations?.ai?.growth?.moduleCard?.actionLabel ?? ""
+  const actionLabel =
+    translations?.ai?.growth?.moduleCard?.actionLabel ?? "Learn more"
 
   return (
     <Card className="flex flex-col overflow-hidden">
