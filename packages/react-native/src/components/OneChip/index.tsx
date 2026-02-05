@@ -3,6 +3,7 @@ import { cn } from "../../lib/utils";
 import { Icon, type IconType } from "../Icon";
 import { View, Text, Pressable } from "react-native";
 import { CrossedCircle } from "../../icons/app";
+import { PressableFeedback } from "../PressableFeedback";
 
 export const chipContainerVariants = tv({
   base: "flex items-center gap-1 rounded-full border border-solid border-f1-border px-2 py-0.5 grow-0",
@@ -46,15 +47,16 @@ export const OneChip = ({
 }: ChipProps) => {
   return (
     <View className="flex items-start">
-      <Pressable
+      <PressableFeedback
         className={cn(
           chipContainerVariants({ variant }),
           onClose && "pr-1.5",
           icon && "pl-1.5",
         )}
         onPress={onClick}
-        tabIndex={onClick ? 0 : undefined}
-        aria-label="Action"
+        variant="both"
+        accessibilityRole="button"
+        accessibilityLabel="Action"
       >
         <View className="flex flex-row items-center gap-0.5">
           {icon && (
@@ -72,8 +74,8 @@ export const OneChip = ({
                 onClose();
               }}
               className="[&_svg]:text-f1-icon-secondary -m-1 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full"
-              tabIndex={0}
-              aria-label="Close"
+              accessibilityRole="button"
+              accessibilityLabel="Close"
             >
               <Icon
                 icon={CrossedCircle}
@@ -83,7 +85,7 @@ export const OneChip = ({
             </Pressable>
           )}
         </View>
-      </Pressable>
+      </PressableFeedback>
     </View>
   );
 };

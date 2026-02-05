@@ -1,5 +1,6 @@
-import { Text, Pressable, View } from "react-native";
+import { Text, View } from "react-native";
 import { Counter } from "../Counter";
+import { PressableFeedback } from "../PressableFeedback";
 import { cn } from "../../lib/utils";
 
 interface PresetProps {
@@ -17,8 +18,9 @@ export const OnePreset = ({
 }: PresetProps) => {
   return (
     <View className="flex items-start">
-      <Pressable
+      <PressableFeedback
         onPress={onClick}
+        variant="both"
         className={cn(
           "flex grow-0 flex-row items-center gap-2 rounded border px-2.5 py-1.5 font-medium",
           number !== undefined && number !== null && "pr-1.5",
@@ -38,7 +40,7 @@ export const OnePreset = ({
         {number !== undefined && number !== null && (
           <Counter value={number} type={selected ? "selected" : "default"} />
         )}
-      </Pressable>
+      </PressableFeedback>
     </View>
   );
 };
