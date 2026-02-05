@@ -222,7 +222,7 @@ const SelectContent = forwardRef<
           "relative z-50 text-f1-foreground",
           asList
             ? "flex w-full h-full flex-col"
-            : "min-w-[8rem] overflow-hidden",
+            : "flex min-w-[8rem] flex-col overflow-hidden",
           !asList &&
             "rounded-md border border-solid border-f1-border-secondary bg-f1-background shadow-md data-[state=closed]:fade-out-0 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 motion-safe:data-[state=open]:animate-in motion-safe:data-[state=closed]:animate-out motion-safe:data-[state=open]:fade-in-0 motion-safe:data-[state=closed]:zoom-out-95 motion-safe:data-[state=open]:zoom-in-95 motion-safe:data-[side=bottom]:slide-in-from-top-2",
           !asList &&
@@ -231,6 +231,15 @@ const SelectContent = forwardRef<
           !asList &&
             position === "popper" &&
             "min-w-[var(--radix-select-trigger-width)] max-w-[min(calc(var(--radix-select-trigger-width)*2.5),412px)]",
+          // Max-height for the entire select content (including filters overlay)
+          !asList &&
+            (taller
+              ? "max-h-[min(412px,calc(var(--radix-select-content-available-height,412px)))]"
+              : "max-h-[min(320px,calc(var(--radix-select-content-available-height,320px)))]"),
+          // Apply min-height when filters are present to maintain consistent size
+          !asList &&
+            forceMinHeight &&
+            "min-h-[min(412px,calc(var(--radix-select-content-available-height,412px)-110px))]",
           // Hides the content when the virtual list is not ready
           !asList && isVirtual && !virtualReady && "opacity-0",
           className
@@ -266,7 +275,7 @@ const SelectContent = forwardRef<
           {asList && <div className="flex-shrink-0">{props.top}</div>}
           <div
             className={cn(
-              "relative",
+              "relative flex flex-1 min-h-0 flex-col overflow-hidden",
               asList && "flex flex-col overflow-hidden flex-1 min-h-0"
             )}
           >
@@ -283,17 +292,7 @@ const SelectContent = forwardRef<
             <ScrollArea
               viewportRef={parentRef}
               className={cn(
-                "flex flex-col",
-                // Dynamic max-height: min of desired height and available viewport space minus top/bottom content
-                asList
-                  ? "h-full"
-                  : taller
-                    ? "max-h-[min(412px,calc(var(--radix-select-content-available-height,412px)-110px))]"
-                    : "max-h-[min(320px,calc(var(--radix-select-content-available-height,320px)))]",
-                // Apply min-height when filters are present to maintain consistent size
-                !asList &&
-                  forceMinHeight &&
-                  "min-h-[min(412px,calc(var(--radix-select-content-available-height,412px)-110px))]",
+                "flex h-full flex-col",
                 // Center content vertically when empty
                 isEmpty && "justify-center",
                 loadingNewContent && "select-none opacity-10 transition-opacity"
