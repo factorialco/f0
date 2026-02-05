@@ -53,18 +53,7 @@
       "default": "./src/icons/app/index.ts"
     },
     "./package.json": "./package.json",
-    "./theme.css": {
-      "import": "./src/styles/theme.css",
-      "require": "./src/styles/theme.css",
-      "react-native": "./src/styles/theme.css",
-      "default": "./src/styles/theme.css"
-    },
-    "./classes.css": {
-      "import": "./src/styles/classes.css",
-      "require": "./src/styles/classes.css",
-      "react-native": "./src/styles/classes.css",
-      "default": "./src/styles/classes.css"
-    },
+    "./styles": "./lib/module/styles/index.css",
     "./expo-router/entry": {
       "import": "./expo-router/entry.js",
       "require": "./expo-router/entry.js",
@@ -78,15 +67,11 @@
   ],
   "scripts": {
     "prebuild": "node scripts/set-main.cjs build",
-    "prebuild:classes": "node scripts/generate-classes-css.mjs",
-    "generate:styles": "node scripts/generate-classes-css.mjs",
-    "build": "pnpm run prebuild:classes && node scripts/build-with-fix.cjs",
-    "build:dev": "SKIP_TYPE_VALIDATION=true pnpm run prebuild:classes && node scripts/build-with-fix.cjs --skip-type-validation",
+    "build": "node scripts/build-with-fix.cjs",
+    "build:dev": "SKIP_TYPE_VALIDATION=true node scripts/build-with-fix.cjs --skip-type-validation",
     "postbuild": "node scripts/set-main.cjs dev && test -d lib/typescript/react-native/package && rm -rf lib/typescript/react-native/package || true",
     "dev:setup": "node scripts/set-main.cjs dev",
-    "generate-classes": "node scripts/generate-classes-css.mjs",
-    "prepublishOnly": "pnpm run generate:styles",
-    "prepare": "pnpm run generate-classes && node scripts/build-with-fix.cjs",
+    "prepare": "node scripts/build-with-fix.cjs",
     "lint": "eslint -c eslint.config.mjs . --report-unused-disable-directives --max-warnings 0",
     "lint-fix": "eslint -c eslint.config.mjs . --fix --report-unused-disable-directives --max-warnings 0",
     "test": "jest",
