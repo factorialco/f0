@@ -13,8 +13,10 @@ export const F0DemoCard = ({
   actionHref,
 }: F0DemoCardProps) => {
   const translations = useI18n()
-  const titleTemplate = translations?.ai?.growth?.demoCard?.title ?? ""
-  const actionLabel = translations?.ai?.growth?.demoCard?.actionLabel ?? ""
+  const titleTemplate =
+    translations?.ai?.growth?.demoCard?.title ?? "Show {{moduleName}} in action"
+  const actionLabel =
+    translations?.ai?.growth?.demoCard?.actionLabel ?? "Start demo"
   const title = titleTemplate.replace("{{moduleName}}", moduleName)
 
   return (
