@@ -56,6 +56,17 @@ const meta = {
             credentials="include"
             showDevConsole={false}
             greeting="Hello, John"
+            onUploadFile={(file) => {
+              return new Promise((resolve) => {
+                setTimeout(() => {
+                  resolve({ url: URL.createObjectURL(file) })
+                }, 1000)
+              })
+            }}
+            fileValidation={{
+              maxFileSize: 10 * 1024 * 1024, // 10MB
+              acceptedTypes: ["image/png", "image/jpeg", "application/pdf"],
+            }}
           >
             <AiChatWrapper>
               <Story />
