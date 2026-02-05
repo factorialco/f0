@@ -2644,8 +2644,9 @@ export declare interface F0AlertProps {
 
 /**
  * Config for array fields (multi-select)
+ * @typeParam R - Record type for data source (when using source instead of options)
  */
-export declare type F0ArrayConfig = F0BaseConfig & F0SelectConfig & {
+export declare type F0ArrayConfig<R extends Record<string, unknown> = Record<string, unknown>> = F0BaseConfig & F0SelectConfig<R> & {
     fieldType?: "select";
 };
 
@@ -3452,8 +3453,9 @@ export declare type F0FormErrorTriggerMode = "on-blur" | "on-change" | "on-submi
 
 /**
  * String field - text input, textarea, select, or custom
+ * @typeParam R - Record type for data source (when using source instead of options)
  */
-export declare function f0FormField<T extends z.ZodString, TConfig = undefined>(schema: T, config: F0StringConfig<z.infer<T>, TConfig>): T & F0ZodType<T>;
+export declare function f0FormField<T extends z.ZodString, TConfig = undefined, R extends Record<string, unknown> = Record<string, unknown>>(schema: T, config: F0StringConfig<z.infer<T>, TConfig, R>): T & F0ZodType<T>;
 
 /**
  * Number field
@@ -3472,13 +3474,15 @@ export declare function f0FormField<T extends z.ZodDate>(schema: T, config: F0Da
 
 /**
  * Enum field - select
+ * @typeParam R - Record type for data source (when using source instead of options)
  */
-export declare function f0FormField<T extends z.ZodEnum<[string, ...string[]]>>(schema: T, config: F0StringSelectConfig): T & F0ZodType<T>;
+export declare function f0FormField<T extends z.ZodEnum<[string, ...string[]]>, R extends Record<string, unknown> = Record<string, unknown>>(schema: T, config: F0StringSelectConfig<R>): T & F0ZodType<T>;
 
 /**
  * Array field - multi-select
+ * @typeParam R - Record type for data source (when using source instead of options)
  */
-export declare function f0FormField<T extends z.ZodArray<ZodTypeAny>>(schema: T, config: F0ArrayConfig): T & F0ZodType<T>;
+export declare function f0FormField<T extends z.ZodArray<ZodTypeAny>, R extends Record<string, unknown> = Record<string, unknown>>(schema: T, config: F0ArrayConfig<R>): T & F0ZodType<T>;
 
 /**
  * Object field - richtext or custom
@@ -3855,18 +3859,46 @@ declare type F0SelectBaseProps<T extends string, R = unknown> = {
 /**
  * F0 config options specific to select fields
  *
+ * Supports either:
+ * - Static `options` array
+ * - Dynamic `source` with `mapOptions` function
+ *
  * Note: `clearable` is derived from the Zod schema:
  * - `z.string().optional()` or `z.string().nullable()` → clearable
  */
-export declare interface F0SelectConfig {
-    /** Options for the select dropdown */
-    options: F0SelectItemProps<string, unknown>[];
+export declare type F0SelectConfig<R extends RecordType = RecordType> = F0SelectConfigWithOptions | F0SelectConfigWithSource<R>;
+
+/**
+ * Base config options shared by all select field variants
+ */
+declare interface F0SelectConfigBase {
     /** Whether multiple selection is allowed */
     multiple?: boolean;
     /** Whether to show the search box */
     showSearchBox?: boolean;
     /** Placeholder for the search box */
     searchBoxPlaceholder?: string;
+}
+
+/**
+ * Config for select fields with static options
+ */
+declare interface F0SelectConfigWithOptions extends F0SelectConfigBase {
+    /** Options for the select dropdown */
+    options: F0SelectItemProps<string, unknown>[];
+    source?: never;
+    mapOptions?: never;
+}
+
+/**
+ * Config for select fields with a data source
+ */
+declare interface F0SelectConfigWithSource<R extends RecordType = RecordType> extends F0SelectConfigBase {
+    /** Data source for fetching options dynamically */
+    source: DataSourceDefinition<R, FiltersDefinition, SortingsDefinition, GroupingDefinition<R>>;
+    /** Function to map data source items to select options */
+    mapOptions: (item: R) => F0SelectItemProps<string, R>;
+    options?: never;
 }
 
 /**
@@ -3980,13 +4012,15 @@ export declare type F0Source = {
  *
  * @typeParam TValue - Type of the field value (for custom fields)
  * @typeParam TConfig - Type of the fieldConfig object (for custom fields)
+ * @typeParam R - Record type for data source (when using source instead of options)
  */
-export declare type F0StringConfig<TValue = string, TConfig = undefined> = F0StringTextConfig | F0StringTextareaConfig | F0StringSelectConfig | F0CustomFieldConfig<TValue, TConfig>;
+export declare type F0StringConfig<TValue = string, TConfig = undefined, R extends Record<string, unknown> = Record<string, unknown>> = F0StringTextConfig | F0StringTextareaConfig | F0StringSelectConfig<R> | F0CustomFieldConfig<TValue, TConfig>;
 
 /**
  * Config for string fields with select options
+ * @typeParam R - Record type for data source (when using source instead of options)
  */
-declare type F0StringSelectConfig = F0BaseConfig & F0SelectConfig & {
+declare type F0StringSelectConfig<R extends Record<string, unknown> = Record<string, unknown>> = F0BaseConfig & F0SelectConfig<R> & {
     fieldType?: "select";
 };
 
@@ -6954,25 +6988,11 @@ declare module "gridstack" {
 }
 
 
-declare namespace Calendar {
-    var displayName: string;
-}
-
-
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         aiBlock: {
             insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
             executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
-        };
-    }
-}
-
-
-declare module "@tiptap/core" {
-    interface Commands<ReturnType> {
-        moodTracker: {
-            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
         };
     }
 }
@@ -6990,8 +7010,22 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
+        moodTracker: {
+            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
+        };
+    }
+}
+
+
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
         transcript: {
             insertTranscript: (data: TranscriptData) => ReturnType;
         };
     }
+}
+
+
+declare namespace Calendar {
+    var displayName: string;
 }
