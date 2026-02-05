@@ -215,7 +215,8 @@ function ApplicationFrameContent({
                 id="content"
                 layoutId="main"
                 className={cn(
-                  "relative flex max-w-full flex-1 overflow-auto xs:py-1 xs:pr-1",
+                  "relative flex max-w-full flex-1 overflow-auto xs:py-1",
+                  ai && ai.enabled ? "xs:pr-0.5" : "xs:pr-1",
                   sidebarState === "locked" ? "pl-0" : "xs:pl-1"
                 )}
                 layoutDependency={[sidebarState]}
@@ -234,7 +235,7 @@ function ApplicationFrameContent({
                 </motion.div>
               </motion.main>
               {ai && ai.enabled && (
-                <div className="p-1 pl-0 h-full flex">
+                <div className="py-1 pr-1 pl-0 h-full flex">
                   <F0AiChat />
                 </div>
               )}

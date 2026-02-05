@@ -57,9 +57,9 @@ const ResizeHandle = ({
   return (
     <div
       className={cn(
-        "absolute left-0 top-0 z-10 h-full w-1 cursor-ew-resize transition-colors",
-        "hover:bg-f1-background-selected-bold",
-        isResizing && "bg-f1-background-selected-bold"
+        "h-full w-1 mr-0.5 shrink-0 cursor-ew-resize transition-colors",
+        "hover:bg-f1-background-secondary-hover",
+        isResizing && "bg-f1-background-secondary-hover"
       )}
       onMouseDown={handleMouseDown}
     />
@@ -101,13 +101,8 @@ export const SidebarWindow = ({ children }: WindowProps) => {
     <AnimatePresence>
       {open && (
         <motion.div
-          key="chat-window"
-          aria-hidden={!open}
-          className={cn(
-            "relative flex h-full flex-col overflow-hidden border border-solid border-f1-border-secondary bg-f1-special-page shadow xs:rounded-xl",
-            !resizable && "max-w-[360px]"
-          )}
-          style={resizable ? { maxWidth: MAX_CHAT_WIDTH } : undefined}
+          key="chat-wrapper"
+          className="relative flex h-full"
           initial={
             shouldPlayEntranceAnimation ? { opacity: 0, width: 0 } : false
           }
@@ -133,19 +128,28 @@ export const SidebarWindow = ({ children }: WindowProps) => {
               setIsResizing={setIsResizing}
             />
           )}
-          <motion.div
-            className="relative flex h-full w-full flex-col overflow-hidden"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{
-              duration: shouldPlayEntranceAnimation ? 0.3 : 0.05,
-              ease: "easeOut",
-              delay: shouldPlayEntranceAnimation ? 0.2 : 0,
-            }}
+          <div
+            aria-hidden={!open}
+            className={cn(
+              "relative flex h-full w-full flex-col overflow-hidden border border-solid border-f1-border-secondary bg-f1-special-page shadow xs:rounded-xl",
+              !resizable && "max-w-[360px]"
+            )}
+            style={resizable ? { maxWidth: MAX_CHAT_WIDTH } : undefined}
           >
-            {children}
-          </motion.div>
+            <motion.div
+              className="relative flex h-full w-full flex-col overflow-hidden"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{
+                duration: shouldPlayEntranceAnimation ? 0.3 : 0.05,
+                ease: "easeOut",
+                delay: shouldPlayEntranceAnimation ? 0.2 : 0,
+              }}
+            >
+              {children}
+            </motion.div>
+          </div>
         </motion.div>
       )}
     </AnimatePresence>
