@@ -319,8 +319,8 @@
       --f1-icon-warning: hsl(25, 95%, 53%);
       --f1-icon-positive: hsl(160, 84%, 39%);
       --f1-icon-promote: hsl(38, 92%, 54%);
-      --f1-icon-selected: hsl(184, 92%, 28%);
-      --f1-icon-selected-hover: hsl(184, 92%, 24%);
+      --f1-icon-selected: hsl(184, 96%, 55%);
+      --f1-icon-selected-hover: hsl(184, 96%, 46%);
       --f1-icon-mood-super-negative: hsl(348, 80%, 50%);
       --f1-icon-mood-negative: hsl(25, 95%, 53%);
       --f1-icon-mood-neutral: hsl(38, 92%, 54%);
@@ -413,8 +413,8 @@
       --f1-icon-warning: hsl(24, 69%, 40%);
       --f1-icon-positive: hsl(160, 85%, 33%);
       --f1-icon-promote: hsl(38, 79%, 45%);
-      --f1-icon-selected: hsl(184, 92%, 28%);
-      --f1-icon-selected-hover: hsl(184, 92%, 35%);
+      --f1-icon-selected: hsl(184, 96%, 55%);
+      --f1-icon-selected-hover: hsl(184, 96%, 68%);
       --f1-icon-mood-super-negative: hsl(4, 61%, 49%);
       --f1-icon-mood-negative: hsl(24, 69%, 40%);
       --f1-icon-mood-neutral: hsl(38, 79%, 45%);
