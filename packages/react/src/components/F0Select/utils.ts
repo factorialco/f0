@@ -2,10 +2,12 @@ import { useCallback, useLayoutEffect, useRef, useState } from "react"
 
 /** Separator between labels */
 const LABEL_SEPARATOR = ", "
-/** Minimum width reserved for the counter (e.g., "+3") */
-const COUNTER_MIN_WIDTH = 32
+/** Minimum width reserved for the counter (e.g., "+99") */
+const COUNTER_MIN_WIDTH = 40
 /** Gap between labels text and counter */
 const GAP_WIDTH = 4
+/** Initial conservative count to avoid flash of content without counter */
+const INITIAL_VISIBLE_COUNT = 1
 
 /**
  * Measures the width of text using a hidden span element
@@ -28,7 +30,10 @@ export function useVisibleLabelCount(
   totalCount: number
 ): { visibleCount: number; containerRef: React.RefObject<HTMLDivElement> } {
   const containerRef = useRef<HTMLDivElement>(null!)
-  const [visibleCount, setVisibleCount] = useState(labels.length)
+  // Start with conservative count to avoid flash without counter
+  const [visibleCount, setVisibleCount] = useState(() =>
+    totalCount > 1 ? INITIAL_VISIBLE_COUNT : labels.length
+  )
 
   const calculateVisibleLabels = useCallback(() => {
     const container = containerRef.current
