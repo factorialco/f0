@@ -13,3 +13,9 @@
  */
 @source "./playground/**/*.{js,jsx,ts,tsx}";
 @source "./src/**/*.{js,jsx,ts,tsx}";
+
+@theme {
+ --font-normal: 'Inter-Regular';
+ --font-medium: 'Inter-Medium';
+ --font-semibold: 'Inter-SemiBold';
+}

@@ -22,7 +22,20 @@
     "plugins": [
       ["expo-router", {
         "root": "./playground/app"
-      }]
+      }],
+      [
+      "expo-font",
+        {
+          "fonts": [
+            "./assets/fonts/factorial.ttf",
+            "./assets/fonts/Inter/InterNormal.ttf",
+            "./assets/fonts/Inter/InterMedium.ttf",
+            "./assets/fonts/Inter/InterSemiBold.ttf",
+            "./assets/fonts/Inter/InterBold.ttf",
+            "./assets/fonts/OxaniumMedium.ttf"
+          ]
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
