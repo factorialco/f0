@@ -1,5 +1,7 @@
 # F0 React Native 🎨
 
+> 🚧 **Status: WIP** — We are building this design system from the ground up. Expect changes and breaking changes as we iterate. 🏗️
+
 React Native implementation of the F0 Design System.
 
 ## 🚀 Quick Setup
@@ -78,16 +80,19 @@ module.exports = withUniwindConfig(config, {
 @import 'tailwindcss';
 @import 'uniwind';
 
-/* Import F0 theme tokens */
-@import '@factorialco/f0-react-native/theme.css';
-
-/* ✅ RECOMMENDED: Import F0 component classes using @source inline() */
-/* This works reliably with Tailwind CSS v4, pnpm, and node_modules */
-@import '@factorialco/f0-react-native/classes.css';
+/* Import F0 styles (theme tokens + base styles) */
+@import '@factorialco/f0-react-native/styles';
 
 /* Add your app's source paths for Tailwind CSS v4 */
 @source "./app/**/*.{js,jsx,ts,tsx}";
 @source "./src/**/*.{js,jsx,ts,tsx}";
+
+/* Add F0 component sources so Tailwind can detect classes */
+@source "./node_modules/@factorialco/f0-react-native/lib";
+
+/* Also scan library source files */
+@source "./node_modules/@factorialco/f0-react-native/src/**/*.{js,jsx,ts,tsx}";
+
 ```
 
 **Import in your entry file (`App.tsx` or `index.js`):**
@@ -96,19 +101,56 @@ module.exports = withUniwindConfig(config, {
 import "./global.css";
 ```
 
-> **⚠️ Important:** Tailwind CSS v4 has known limitations scanning `node_modules` (GitHub #19040), especially with pnpm. 
-> 
-> **✅ Solution:** The package exports `classes.css` which uses `@source inline()` to force Tailwind to include all F0 component classes. This works reliably across all package managers and doesn't require scanning `node_modules`.
-> 
-> **Why `classes.css` instead of `@source` paths?**
-> - `@source` with file paths doesn't reliably scan `node_modules` in Tailwind v4
-> - `@source inline()` explicitly tells Tailwind which classes to include
-> - Works with pnpm, npm, and yarn
-> - No performance impact from scanning entire `node_modules`
-> 
-> The F0 theme tokens are imported from `@factorialco/f0-react-native/theme.css`.
+> **Note:** Add `@source "./node_modules/@factorialco/f0-react-native/lib";` so Tailwind can detect all component classes.
 
-### 5️⃣ TypeScript Support (Optional)
+### 5️⃣ Add Custom Fonts (Host App)
+
+To use custom fonts in your host app, load them with Expo Font and override the font CSS variables.
+
+**Install font dependencies (Expo):**
+
+```bash
+pnpm add expo-font @expo-google-fonts/your-font
+```
+
+**Load fonts in your app (Expo):**
+
+```tsx
+import { useFonts } from "expo-font";
+import {
+  YourFont_400Regular,
+  YourFont_500Medium,
+  YourFont_600SemiBold,
+} from "@expo-google-fonts/your-font";
+
+export default function App() {
+  const [fontsLoaded] = useFonts({
+    YourFont_400Regular,
+    YourFont_500Medium,
+    YourFont_600SemiBold,
+  });
+
+  if (!fontsLoaded) {
+    return null; // Or return a loading screen
+  }
+
+  return <YourApp />; // Render your app root
+}
+```
+
+**Override font variables in `global.css`:**
+
+```css
+@theme {
+  --font-normal: "YourFont-Regular";
+  --font-medium: "YourFont-Medium";
+  --font-semibold: "YourFont-SemiBold";
+}
+```
+
+> **Note:** The font names must match the PostScript names of the loaded fonts. Use the exact names from your font package or assets.
+
+### 6️⃣ TypeScript Support (Optional)
 
 **`uniwind-types.d.ts` (root):**
 
@@ -184,11 +226,11 @@ import { Button } from "@factorialco/f0-react-native";
 
 If styles from F0 components aren't being applied, ensure:
 
-1. **Import classes.css:** Your `global.css` includes the F0 classes CSS file:
+1. **Import styles and add source paths:** Your `global.css` includes the F0 styles and the F0 source path:
    ```css
-   @import '@factorialco/f0-react-native/classes.css';
+   @import '@factorialco/f0-react-native/styles';
+   @source "./node_modules/@factorialco/f0-react-native/lib";
    ```
-   This works reliably with Tailwind CSS v4, pnpm, npm, and yarn.
 
 2. **Metro Cache:** Clear Metro bundler cache:
    ```bash
@@ -200,14 +242,6 @@ If styles from F0 components aren't being applied, ensure:
 3. **Dependencies:** Verify all peer dependencies are installed:
    ```bash
    pnpm list tailwind-merge tailwind-variants tailwindcss uniwind
-   ```
-
-4. **Classes File:** Ensure the classes file exists (it's auto-generated during build):
-   ```bash
-   # Check if file exists
-   ls node_modules/@factorialco/f0-react-native/src/styles/classes.css
-   
-   # If missing, the package may need to be rebuilt
    ```
 
 ### TypeScript Errors with Variants
@@ -239,96 +273,7 @@ pnpm lint
 
 # Build package
 pnpm build
-
-# Generate classes.css file
-pnpm run generate-classes
-
-# Verify classes.css is valid
-pnpm run verify-classes
-
-# Test classes.css export (simulates external consumer)
-pnpm run test-classes
-
-# Test classes.css mode in playground (temporarily switch to classes.css)
-pnpm run test-classes-mode enable   # Switch to classes.css mode
-# ... test your app ...
-pnpm run test-classes-mode disable  # Restore normal mode
 ```
-
-## 📚 Documentation
-
-For detailed installation guide, see [docs/INSTALLATION.md](./docs/INSTALLATION.md).
-
-For styling best practices and improvements, see [improvements.md](./improvements.md).
-
-## 🎨 Classes Export
-
-The package automatically exports all Tailwind classes used in components via `./classes.css` using Tailwind's `@source inline()` directive. This ensures Uniwind/Tailwind CSS v4 can detect all component classes without scanning `node_modules`.
-
-### Usage
-
-**In your `global.css`:**
-
-```css
-@import '@factorialco/f0-react-native/classes.css';
-```
-
-**Why this works:**
-- ✅ Works reliably with Tailwind CSS v4 (fixes GitHub #19040)
-- ✅ Works with pnpm, npm, and yarn
-- ✅ Uses `@source inline()` which explicitly tells Tailwind which classes to include
-- ✅ No dependency on `node_modules` scanning (which is unreliable in Tailwind v4)
-- ✅ No performance impact from scanning entire `node_modules` directory
-
-### Internal Development / Showcase
-
-If you're developing within the same workspace (like the internal playground/showcase), you **don't need** `classes.css`. You can scan `src/` directly:
-
-```css
-@source "./src/**/*.{js,jsx,ts,tsx}";
-```
-
-**Why this works internally:**
-- Files are in local paths, not `node_modules`
-- Tailwind can scan local directories reliably
-- No need for `@source inline()` workaround
-
-**When to use `classes.css`:**
-- ✅ External consumers installing from npm
-- ✅ Projects where `node_modules` scanning fails
-- ✅ When using pnpm with symlinks
-- ❌ **NOT needed** for internal monorepo development
-
-### How It Works
-
-The `classes.css` file is auto-generated during the build process and contains all unique Tailwind classes extracted from:
-- `tv()` calls in component variants
-- `className` props in components
-- All variant combinations
-
-It uses Tailwind's `@source inline()` directive to explicitly include all classes, bypassing the unreliable `node_modules` scanning that affects Tailwind CSS v4.
-
-### Testing the Classes Export
-
-To verify that the classes export works correctly:
-
-```bash
-# 1. Generate/verify classes files
-pnpm run generate-classes
-pnpm run verify-classes
-
-# 2. Test classes.css mode in playground
-pnpm run test-classes-mode enable   # Switches to using classes.css
-# ... run your app and verify components work ...
-pnpm run test-classes-mode disable  # Restores normal src/ scanning
-```
-
-### Known Issues with Tailwind CSS v4
-
-Tailwind CSS v4 has known limitations scanning `node_modules`:
-- **GitHub Issue #19040**: `@source` doesn't reliably scan `node_modules` packages
-- **GitHub Issue #16038**: Additional issues with pnpm and symlinks
-- **Solution**: Use `@source inline()` via `classes.css` (implemented in this package)
 
 ## 📦 Peer Dependencies
 
