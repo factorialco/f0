@@ -382,6 +382,7 @@ export declare const defaultTranslations: {
     readonly select: {
         readonly noResults: "No results found";
         readonly loadingMore: "Loading...";
+        readonly applySelection: "Apply selection";
     };
     readonly numberInput: {
         readonly between: "It should be between {{min}} and {{max}}";
@@ -479,6 +480,16 @@ export declare const defaultTranslations: {
             readonly lists: "Lists";
             readonly blocks: "Blocks";
         };
+        readonly ai: {
+            readonly enhanceButtonLabel: "Enhance";
+            readonly loadingEnhanceLabel: "Loading...";
+            readonly defaultError: "An error occurred while loading";
+            readonly closeErrorButtonLabel: "Continue editing";
+            readonly acceptChangesButtonLabel: "Accept";
+            readonly rejectChangesButtonLabel: "Reject";
+            readonly repeatButtonLabel: "Repeat";
+            readonly customPromptPlaceholder: "What do you want to do?";
+        };
     };
 };
 
@@ -508,6 +519,16 @@ declare global {
     }
 }
 
+
+declare namespace _DaytimePage {
+    var displayName: string;
+}
+
+
+declare namespace _Page {
+    var displayName: string;
+}
+
 declare module "gridstack" {
     interface GridStackWidget {
         id?: string;
@@ -526,16 +547,21 @@ declare module "gridstack" {
 }
 
 
-declare namespace Calendar {
-    var displayName: string;
-}
-
-
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         aiBlock: {
             insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
             executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
+        };
+    }
+}
+
+
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
@@ -556,4 +582,9 @@ declare module "@tiptap/core" {
             insertTranscript: (data: TranscriptData) => ReturnType;
         };
     }
+}
+
+
+declare namespace Calendar {
+    var displayName: string;
 }
