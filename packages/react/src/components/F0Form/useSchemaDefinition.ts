@@ -101,11 +101,22 @@ function configToF0Field(
       } as F0Field
     }
 
-    case "select":
+    case "select": {
+      // Support both static options and data source modes
+      const hasSource = "source" in config && config.source
       return {
         ...baseProps,
         type: "select",
-        options: "options" in config ? config.options : [],
+        // Only include options if not using source
+        ...(hasSource
+          ? {
+              source: config.source,
+              mapOptions:
+                "mapOptions" in config ? config.mapOptions : undefined,
+            }
+          : {
+              options: "options" in config ? config.options : [],
+            }),
         multiple: "multiple" in config ? config.multiple : undefined,
         clearable,
         showSearchBox:
@@ -116,6 +127,7 @@ function configToF0Field(
             : undefined,
         renderIf: config.renderIf,
       } as F0Field
+    }
 
     case "checkbox":
       return {

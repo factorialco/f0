@@ -1,4 +1,11 @@
 import type { F0SelectItemProps } from "@/components/F0Select/types"
+import type {
+  DataSourceDefinition,
+  FiltersDefinition,
+  SortingsDefinition,
+  GroupingDefinition,
+  RecordType,
+} from "@/hooks/datasource"
 
 import type { F0BaseField, CommonRenderIfCondition } from "../types"
 
@@ -37,14 +44,9 @@ export type SelectFieldRenderIf =
 // ============================================================================
 
 /**
- * F0 config options specific to select fields
- *
- * Note: `clearable` is derived from the Zod schema:
- * - `z.string().optional()` or `z.string().nullable()` → clearable
+ * Base config options shared by all select field variants
  */
-export interface F0SelectConfig {
-  /** Options for the select dropdown */
-  options: F0SelectItemProps<string, unknown>[]
+interface F0SelectConfigBase {
   /** Whether multiple selection is allowed */
   multiple?: boolean
   /** Whether to show the search box */
@@ -52,6 +54,48 @@ export interface F0SelectConfig {
   /** Placeholder for the search box */
   searchBoxPlaceholder?: string
 }
+
+/**
+ * Config for select fields with static options
+ */
+interface F0SelectConfigWithOptions extends F0SelectConfigBase {
+  /** Options for the select dropdown */
+  options: F0SelectItemProps<string, unknown>[]
+  source?: never
+  mapOptions?: never
+}
+
+/**
+ * Config for select fields with a data source
+ */
+interface F0SelectConfigWithSource<
+  R extends RecordType = RecordType,
+> extends F0SelectConfigBase {
+  /** Data source for fetching options dynamically */
+  source: DataSourceDefinition<
+    R,
+    FiltersDefinition,
+    SortingsDefinition,
+    GroupingDefinition<R>
+  >
+  /** Function to map data source items to select options */
+  mapOptions: (item: R) => F0SelectItemProps<string, R>
+  options?: never
+}
+
+/**
+ * F0 config options specific to select fields
+ *
+ * Supports either:
+ * - Static `options` array
+ * - Dynamic `source` with `mapOptions` function
+ *
+ * Note: `clearable` is derived from the Zod schema:
+ * - `z.string().optional()` or `z.string().nullable()` → clearable
+ */
+export type F0SelectConfig<R extends RecordType = RecordType> =
+  | F0SelectConfigWithOptions
+  | F0SelectConfigWithSource<R>
 
 /**
  * Select field with all properties for rendering

@@ -105,9 +105,12 @@ export type F0StringTextareaConfig = F0BaseConfig &
 
 /**
  * Config for string fields with select options
+ * @typeParam R - Record type for data source (when using source instead of options)
  */
-export type F0StringSelectConfig = F0BaseConfig &
-  F0SelectConfig & {
+export type F0StringSelectConfig<
+  R extends Record<string, unknown> = Record<string, unknown>,
+> = F0BaseConfig &
+  F0SelectConfig<R> & {
     fieldType?: "select"
   }
 
@@ -116,11 +119,16 @@ export type F0StringSelectConfig = F0BaseConfig &
  *
  * @typeParam TValue - Type of the field value (for custom fields)
  * @typeParam TConfig - Type of the fieldConfig object (for custom fields)
+ * @typeParam R - Record type for data source (when using source instead of options)
  */
-export type F0StringConfig<TValue = string, TConfig = undefined> =
+export type F0StringConfig<
+  TValue = string,
+  TConfig = undefined,
+  R extends Record<string, unknown> = Record<string, unknown>,
+> =
   | F0StringTextConfig
   | F0StringTextareaConfig
-  | F0StringSelectConfig
+  | F0StringSelectConfig<R>
   | F0CustomFieldConfig<TValue, TConfig>
 
 /**
@@ -170,9 +178,12 @@ export type F0DateRangeFieldConfig = F0BaseConfig &
 
 /**
  * Config for array fields (multi-select)
+ * @typeParam R - Record type for data source (when using source instead of options)
  */
-export type F0ArrayConfig = F0BaseConfig &
-  F0SelectConfig & {
+export type F0ArrayConfig<
+  R extends Record<string, unknown> = Record<string, unknown>,
+> = F0BaseConfig &
+  F0SelectConfig<R> & {
     fieldType?: "select"
   }
 
@@ -260,11 +271,13 @@ const f0ConfigMap = new WeakMap<ZodTypeAny, F0FieldConfig>()
 
 /**
  * String field - text input, textarea, select, or custom
+ * @typeParam R - Record type for data source (when using source instead of options)
  */
-export function f0FormField<T extends z.ZodString, TConfig = undefined>(
-  schema: T,
-  config: F0StringConfig<z.infer<T>, TConfig>
-): T & F0ZodType<T>
+export function f0FormField<
+  T extends z.ZodString,
+  TConfig = undefined,
+  R extends Record<string, unknown> = Record<string, unknown>,
+>(schema: T, config: F0StringConfig<z.infer<T>, TConfig, R>): T & F0ZodType<T>
 
 /**
  * Number field
@@ -292,19 +305,21 @@ export function f0FormField<T extends z.ZodDate>(
 
 /**
  * Enum field - select
+ * @typeParam R - Record type for data source (when using source instead of options)
  */
-export function f0FormField<T extends z.ZodEnum<[string, ...string[]]>>(
-  schema: T,
-  config: F0StringSelectConfig
-): T & F0ZodType<T>
+export function f0FormField<
+  T extends z.ZodEnum<[string, ...string[]]>,
+  R extends Record<string, unknown> = Record<string, unknown>,
+>(schema: T, config: F0StringSelectConfig<R>): T & F0ZodType<T>
 
 /**
  * Array field - multi-select
+ * @typeParam R - Record type for data source (when using source instead of options)
  */
-export function f0FormField<T extends z.ZodArray<ZodTypeAny>>(
-  schema: T,
-  config: F0ArrayConfig
-): T & F0ZodType<T>
+export function f0FormField<
+  T extends z.ZodArray<ZodTypeAny>,
+  R extends Record<string, unknown> = Record<string, unknown>,
+>(schema: T, config: F0ArrayConfig<R>): T & F0ZodType<T>
 
 /**
  * Object field - richtext or custom
@@ -423,8 +438,11 @@ export function inferFieldType(
     return config.fieldType
   }
 
-  // If options are provided, it's a select
-  if ("options" in config && config.options) {
+  // If options or source are provided, it's a select
+  if (
+    ("options" in config && config.options) ||
+    ("source" in config && config.source)
+  ) {
     return "select"
   }
 
@@ -458,8 +476,11 @@ export function inferFieldType(
   }
 
   if (isZodType(innerSchema, "ZodArray")) {
-    // Arrays with options are multi-select
-    if ("options" in config && config.options) {
+    // Arrays with options or source are multi-select
+    if (
+      ("options" in config && config.options) ||
+      ("source" in config && config.source)
+    ) {
       return "select"
     }
   }

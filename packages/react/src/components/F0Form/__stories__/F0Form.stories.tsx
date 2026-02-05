@@ -1,6 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { z } from "zod"
 
+import { createDataSourceDefinition } from "@/hooks/datasource"
+
 import {
   f0FormField,
   F0Form,
@@ -878,6 +880,171 @@ export const ErrorTriggerModes: Story = {
             }}
           />
         </div>
+      </div>
+    )
+  },
+}
+
+// Mock data for data source example
+type Country = {
+  id: string
+  name: string
+  code: string
+  continent: string
+}
+
+const countriesData: Country[] = [
+  { id: "1", name: "United States", code: "US", continent: "North America" },
+  { id: "2", name: "Canada", code: "CA", continent: "North America" },
+  { id: "3", name: "Mexico", code: "MX", continent: "North America" },
+  { id: "4", name: "United Kingdom", code: "GB", continent: "Europe" },
+  { id: "5", name: "Germany", code: "DE", continent: "Europe" },
+  { id: "6", name: "France", code: "FR", continent: "Europe" },
+  { id: "7", name: "Spain", code: "ES", continent: "Europe" },
+  { id: "8", name: "Italy", code: "IT", continent: "Europe" },
+  { id: "9", name: "Japan", code: "JP", continent: "Asia" },
+  { id: "10", name: "China", code: "CN", continent: "Asia" },
+  { id: "11", name: "Australia", code: "AU", continent: "Oceania" },
+  { id: "12", name: "Brazil", code: "BR", continent: "South America" },
+  { id: "13", name: "Argentina", code: "AR", continent: "South America" },
+  { id: "14", name: "India", code: "IN", continent: "Asia" },
+  { id: "15", name: "South Korea", code: "KR", continent: "Asia" },
+  { id: "16", name: "Netherlands", code: "NL", continent: "Europe" },
+  { id: "17", name: "Belgium", code: "BE", continent: "Europe" },
+  { id: "18", name: "Sweden", code: "SE", continent: "Europe" },
+  { id: "19", name: "Norway", code: "NO", continent: "Europe" },
+  { id: "20", name: "Denmark", code: "DK", continent: "Europe" },
+  { id: "21", name: "Finland", code: "FI", continent: "Europe" },
+  { id: "22", name: "Poland", code: "PL", continent: "Europe" },
+  { id: "23", name: "Portugal", code: "PT", continent: "Europe" },
+  { id: "24", name: "Switzerland", code: "CH", continent: "Europe" },
+  { id: "25", name: "Austria", code: "AT", continent: "Europe" },
+  { id: "26", name: "Ireland", code: "IE", continent: "Europe" },
+  { id: "27", name: "New Zealand", code: "NZ", continent: "Oceania" },
+  { id: "28", name: "Singapore", code: "SG", continent: "Asia" },
+  { id: "29", name: "Thailand", code: "TH", continent: "Asia" },
+  { id: "30", name: "Vietnam", code: "VN", continent: "Asia" },
+]
+
+/** Non-paginated data source - loads all results at once */
+const countriesSource = createDataSourceDefinition<Country>({
+  dataAdapter: {
+    fetchData: async ({ search }) => {
+      // Simulate network latency
+      await sleep(200)
+
+      let results = countriesData
+      if (search) {
+        const searchLower = search.toLowerCase()
+        results = results.filter(
+          (country) =>
+            country.name.toLowerCase().includes(searchLower) ||
+            country.code.toLowerCase().includes(searchLower)
+        )
+      }
+
+      return { records: results }
+    },
+  },
+})
+
+/** Paginated data source - loads results in chunks with infinite scroll */
+const countriesPaginatedSource = createDataSourceDefinition<Country>({
+  dataAdapter: {
+    paginationType: "infinite-scroll",
+    fetchData: async ({ search, pagination }) => {
+      // Simulate network latency
+      await sleep(300)
+
+      const pageSize = pagination.perPage ?? 10
+      const cursor = "cursor" in pagination ? pagination.cursor : null
+      const offset = cursor ? Number(cursor) : 0
+
+      let results = countriesData
+      if (search) {
+        const searchLower = search.toLowerCase()
+        results = results.filter(
+          (country) =>
+            country.name.toLowerCase().includes(searchLower) ||
+            country.code.toLowerCase().includes(searchLower)
+        )
+      }
+
+      const paginatedResults = results.slice(offset, offset + pageSize)
+      const nextOffset = offset + pageSize
+
+      return {
+        type: "infinite-scroll" as const,
+        cursor: String(nextOffset),
+        perPage: pageSize,
+        hasMore: nextOffset < results.length,
+        records: paginatedResults,
+        total: results.length,
+      }
+    },
+  },
+})
+
+/**
+ * Select fields can use a data source for dynamic options.
+ * This is useful when options need to be fetched from an API
+ * or when dealing with large datasets that benefit from search filtering.
+ *
+ * - **Non-paginated**: Loads all results at once
+ * - **Paginated**: Uses infinite scroll, loading 10 items at a time
+ */
+export const SelectWithDataSource: Story = {
+  render() {
+    const mapCountryOptions = (country: Country) => ({
+      value: country.id,
+      label: country.name,
+      description: country.continent,
+    })
+
+    const formSchema = z.object({
+      // Non-paginated data source
+      country: f0FormField(z.string(), {
+        label: "Country (Non-paginated)",
+        placeholder: "Search and select a country...",
+        showSearchBox: true,
+        source: countriesSource,
+        mapOptions: mapCountryOptions,
+      }),
+      // Paginated data source with infinite scroll
+      countryPaginated: f0FormField(z.string(), {
+        label: "Country (Paginated - scroll for more)",
+        placeholder: "Search and select a country...",
+        showSearchBox: true,
+        source: countriesPaginatedSource,
+        mapOptions: mapCountryOptions,
+      }),
+      // Multi-select with paginated data source
+      countries: f0FormField(z.array(z.string()).min(1), {
+        label: "Favorite Countries (Multi-select, paginated)",
+        placeholder: "Select multiple countries...",
+        showSearchBox: true,
+        multiple: true,
+        source: countriesPaginatedSource,
+        mapOptions: mapCountryOptions,
+      }),
+    })
+
+    return (
+      <div className="max-w-lg">
+        <F0Form
+          name="select-datasource-example"
+          schema={formSchema}
+          defaultValues={{
+            country: "",
+            countryPaginated: "",
+            countries: [],
+          }}
+          onSubmit={async (data) => {
+            await sleep(1000)
+            alert(`Selected: ${JSON.stringify(data, null, 2)}`)
+            return { success: true }
+          }}
+        />
       </div>
     )
   },
