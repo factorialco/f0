@@ -19,6 +19,7 @@ import { WelcomeScreenSuggestion } from "../types"
 const AiChatStateContext = createContext<AiChatProviderReturnValue | null>(null)
 
 const DEFAULT_MINUTES_TO_RESET = 15
+const DEFAULT_CHAT_WIDTH = 360
 
 export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   children,
@@ -26,6 +27,8 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   agent: initialAgent,
   initialMessage: initialInitialMessage,
   welcomeScreenSuggestions: initialWelcomeScreenSuggestions = [],
+  disclaimer,
+  resizable = false,
   onThumbsDown,
   onThumbsUp,
   ...rest
@@ -49,6 +52,8 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   const [initialMessage, setInitialMessage] = useState<
     string | string[] | undefined
   >(initialInitialMessage)
+
+  const [chatWidth, setChatWidth] = useState(DEFAULT_CHAT_WIDTH)
 
   // Store the reset function from CopilotKit
   const clearFunctionRef = useRef<(() => void) | null>(null)
@@ -138,6 +143,10 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         setPlaceholders,
         sendMessage,
         setSendMessageFunction,
+        disclaimer,
+        resizable,
+        chatWidth,
+        setChatWidth,
       }}
     >
       {children}
@@ -174,6 +183,10 @@ export function useAiChat(): AiChatProviderReturnValue {
       onThumbsDown: noopFn,
       sendMessage: noopFn,
       setSendMessageFunction: noopFn,
+      disclaimer: undefined,
+      resizable: false,
+      chatWidth: DEFAULT_CHAT_WIDTH,
+      setChatWidth: noopFn,
     }
   }
 

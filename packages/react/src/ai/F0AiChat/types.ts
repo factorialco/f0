@@ -11,6 +11,12 @@ export type AiChatProviderProps = {
   greeting?: string
   initialMessage?: string | string[]
   welcomeScreenSuggestions?: WelcomeScreenSuggestion[]
+  disclaimer?: AiChatDisclaimer
+  /**
+   * Enable resizable chat window
+   * When enabled, the chat can be resized between 300px and 50% of the screen width
+   */
+  resizable?: boolean
   onThumbsUp?: (
     message: AIMessage,
     { threadId, feedback }: { threadId: string; feedback: string }
@@ -37,6 +43,15 @@ export type WelcomeScreenSuggestion = {
   icon: IconType
   message: string
   prompt?: string
+}
+
+/**
+ * Disclaimer configuration for the chat input
+ */
+export type AiChatDisclaimer = {
+  text: string
+  link?: string
+  linkText?: string
 }
 
 /**

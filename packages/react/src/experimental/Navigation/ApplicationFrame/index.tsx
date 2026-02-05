@@ -233,7 +233,11 @@ function ApplicationFrameContent({
                   {children}
                 </motion.div>
               </motion.main>
-              {ai && ai.enabled && <F0AiChat />}
+              {ai && ai.enabled && (
+                <div className="p-1 pl-0 h-full flex">
+                  <F0AiChat />
+                </div>
+              )}
               {aiPromotion && aiPromotion.enabled && <AiPromotionChat />}
             </div>
           </LayoutGroup>
