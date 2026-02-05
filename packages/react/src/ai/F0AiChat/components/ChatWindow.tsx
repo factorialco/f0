@@ -14,10 +14,12 @@ const DEFAULT_CHAT_WIDTH = 360
 
 const ResizeHandle = ({
   onResize,
+  onReset,
   isResizing,
   setIsResizing,
 }: {
   onResize: (deltaX: number) => void
+  onReset: () => void
   isResizing: boolean
   setIsResizing: (value: boolean) => void
 }) => {
@@ -31,6 +33,10 @@ const ResizeHandle = ({
     },
     [setIsResizing]
   )
+
+  const handleDoubleClick = useCallback(() => {
+    onReset()
+  }, [onReset])
 
   useEffect(() => {
     if (!isResizing) return
@@ -62,6 +68,7 @@ const ResizeHandle = ({
         isResizing && "bg-f1-background-secondary-hover"
       )}
       onMouseDown={handleMouseDown}
+      onDoubleClick={handleDoubleClick}
     />
   )
 }
@@ -75,6 +82,7 @@ export const SidebarWindow = ({ children }: WindowProps) => {
     resizable,
     chatWidth,
     setChatWidth,
+    resetChatWidth,
   } = useAiChat()
   const { reset } = useCopilotChatInternal()
   const [isResizing, setIsResizing] = useState(false)
@@ -124,6 +132,7 @@ export const SidebarWindow = ({ children }: WindowProps) => {
           {resizable && (
             <ResizeHandle
               onResize={handleResize}
+              onReset={resetChatWidth}
               isResizing={isResizing}
               setIsResizing={setIsResizing}
             />

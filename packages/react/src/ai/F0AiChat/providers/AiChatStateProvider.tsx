@@ -20,6 +20,23 @@ const AiChatStateContext = createContext<AiChatProviderReturnValue | null>(null)
 
 const DEFAULT_MINUTES_TO_RESET = 15
 const DEFAULT_CHAT_WIDTH = 360
+const CHAT_WIDTH_STORAGE_KEY = "ONE-ai-chat-width"
+
+const getStoredChatWidth = (): number => {
+  if (typeof window === "undefined") return DEFAULT_CHAT_WIDTH
+  try {
+    const stored = localStorage.getItem(CHAT_WIDTH_STORAGE_KEY)
+    if (stored) {
+      const parsed = parseInt(stored, 10)
+      if (!isNaN(parsed) && parsed >= 300 && parsed <= 712) {
+        return parsed
+      }
+    }
+  } catch {
+    // localStorage might not be available
+  }
+  return DEFAULT_CHAT_WIDTH
+}
 
 export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   children,
@@ -53,7 +70,17 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
     string | string[] | undefined
   >(initialInitialMessage)
 
-  const [chatWidth, setChatWidth] = useState(DEFAULT_CHAT_WIDTH)
+  const [chatWidth, setChatWidth] = useState(() => getStoredChatWidth())
+
+  // Persist chat width to localStorage
+  useEffect(() => {
+    if (typeof window === "undefined") return
+    try {
+      localStorage.setItem(CHAT_WIDTH_STORAGE_KEY, String(chatWidth))
+    } catch {
+      // localStorage might not be available
+    }
+  }, [chatWidth])
 
   // Store the reset function from CopilotKit
   const clearFunctionRef = useRef<(() => void) | null>(null)
@@ -80,6 +107,10 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
     if (clearFunctionRef.current) {
       clearFunctionRef.current()
     }
+  }
+
+  const resetChatWidth = () => {
+    setChatWidth(DEFAULT_CHAT_WIDTH)
   }
 
   const sendMessage = (message: string | Message) => {
@@ -147,6 +178,7 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         resizable,
         chatWidth,
         setChatWidth,
+        resetChatWidth,
       }}
     >
       {children}
@@ -187,6 +219,7 @@ export function useAiChat(): AiChatProviderReturnValue {
       resizable: false,
       chatWidth: DEFAULT_CHAT_WIDTH,
       setChatWidth: noopFn,
+      resetChatWidth: noopFn,
     }
   }
 

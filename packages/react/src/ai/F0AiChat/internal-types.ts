@@ -98,6 +98,10 @@ export type AiChatProviderReturnValue = {
    */
   chatWidth: number
   setChatWidth: React.Dispatch<React.SetStateAction<number>>
+  /**
+   * Reset the chat width to the default value (360px)
+   */
+  resetChatWidth: () => void
 } & Pick<AiChatState, "greeting" | "agent" | "disclaimer" | "resizable">
 
 /**
