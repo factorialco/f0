@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.348.0](https://github.com/factorialco/f0/compare/f0-react-v1.347.0...f0-react-v1.348.0) (2026-02-05)
+
+
+### Features
+
+* aura voice animation component ([#3358](https://github.com/factorialco/f0/issues/3358)) ([1c76bb8](https://github.com/factorialco/f0/commit/1c76bb8f97f65aedecb86cc726f36e911a7424f2))
+
 ## [1.347.0](https://github.com/factorialco/f0/compare/f0-react-v1.346.0...f0-react-v1.347.0) (2026-02-04)
 
 
