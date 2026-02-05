@@ -1,0 +1,80 @@
+import { jsx as t, jsxs as o } from "react/jsx-runtime";
+import { createContext as c, useContext as h } from "react";
+import { y as n, z as u } from "./F0AiChat-Bdcyd2yl.js";
+const b = ["xs", "sm", "md", "lg"], f = [
+  "inProgress",
+  "executing",
+  "completed"
+], w = {
+  ai: {
+    openChat: "Open Chat with One AI",
+    closeChat: "Close Chat with One AI",
+    startNewChat: "Start new chat",
+    scrollToBottom: "Scroll to bottom",
+    welcome: "Ask or create with One",
+    defaultInitialMessage: "How can I help you today?",
+    inputPlaceholder: "Ask about time, people, or company info and a lot of other things...",
+    stopAnswerGeneration: "Stop generating",
+    sendMessage: "Send message",
+    thoughtsGroupTitle: "Reflection",
+    resourcesGroupTitle: "Resources",
+    thinking: "Thinking...",
+    exportTable: "Download table",
+    generatedTableFilename: "OneGeneratedTable",
+    feedbackModal: {
+      positive: {
+        title: "What did you like about this response?",
+        label: "Your feedback helps us make Factorial AI better",
+        placeholder: "Share what worked well"
+      },
+      negative: {
+        title: "What could have been better?",
+        label: "Your feedback helps us improve future answers",
+        placeholder: "Share what didn't work"
+      }
+    },
+    ask: "Ask One"
+  }
+}, s = c(null);
+function g({ children: e, translations: a }) {
+  return t(s.Provider, {
+    value: a,
+    children: e
+  });
+}
+function C() {
+  const e = h(s);
+  if (e === null)
+    throw new Error("useAiChatTranslations must be used within an AiChatTranslationsProvider");
+  return e;
+}
+const k = ({ text: e, confirmationText: a, onConfirm: r, cancelText: i, onCancel: l }) => o("div", {
+  className: "flex flex-col gap-2",
+  children: [e && t("p", {
+    children: e
+  }), o("div", {
+    className: "flex gap-2",
+    children: [t(n, {
+      type: "button",
+      variant: "outline",
+      size: "sm",
+      icon: u,
+      onClick: r,
+      label: a
+    }), t(n, {
+      type: "button",
+      variant: "ghost",
+      size: "sm",
+      onClick: l,
+      label: i
+    })]
+  })]
+});
+export {
+  g as A,
+  k as F,
+  w as a,
+  f as b,
+  b as o,
+  C as u
+};

@@ -984,6 +984,10 @@ declare type ButtonInternalProps = Pick<ActionProps, "size" | "disabled" | "clas
      */
     variant?: ActionButtonVariant;
     /**
+     * The filters'counter value to display.
+     */
+    counterValue?: number;
+    /**
      * Callback fired when the button is clicked. Supports async functions for loading state.
      */
     onClick?: (event: React.MouseEvent<HTMLElement, MouseEvent>) => void | Promise<unknown>;
@@ -2820,6 +2824,7 @@ export declare type EntitySelectSubEntity = {
     subName: string;
     subAvatar?: string;
     subSearchKeys?: string[];
+    subDeactivated?: boolean;
 };
 
 declare type Enumerate<N extends number, Acc extends number[] = []> = Acc["length"] extends N ? [...Acc, N][number] : Enumerate<N, [...Acc, Acc["length"]]>;
@@ -4570,6 +4575,8 @@ declare type OneFilterPickerRootProps<Definition extends FiltersDefinition> = {
     mode?: FiltersMode;
     /** Callback fired when filters open state is changed */
     onOpenChange?: (isOpen: boolean) => void;
+    /** Display counter for the applied filters */
+    displayCounter?: boolean;
 };
 
 /**

@@ -816,6 +816,10 @@ declare type ButtonInternalProps = Pick<ActionProps, "size" | "disabled" | "clas
      */
     variant?: ActionButtonVariant;
     /**
+     * The filters'counter value to display.
+     */
+    counterValue?: number;
+    /**
      * Callback fired when the button is clicked. Supports async functions for loading state.
      */
     onClick?: (event: React.MouseEvent<HTMLElement, MouseEvent>) => void | Promise<unknown>;
@@ -3194,6 +3198,7 @@ export declare const F0TagPerson: ForwardRefExoticComponent<F0TagPersonProps & R
 export declare type F0TagPersonProps = {
     src?: string;
     name: string;
+    deactivated?: boolean;
 };
 
 export declare const F0TagRaw: ForwardRefExoticComponent<TagRawProps & RefAttributes<HTMLDivElement>>;
@@ -4288,6 +4293,8 @@ declare type OneFilterPickerRootProps<Definition extends FiltersDefinition> = {
     mode?: FiltersMode;
     /** Callback fired when filters open state is changed */
     onOpenChange?: (isOpen: boolean) => void;
+    /** Display counter for the applied filters */
+    displayCounter?: boolean;
 };
 
 export declare type OneIconSize = (typeof oneIconSizes)[number];
