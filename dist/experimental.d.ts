@@ -2898,7 +2898,7 @@ declare type ExtractVisualizationSettings<T> = T extends {
     };
 } ? S : never;
 
-export declare const F0ActionBar: ({ isOpen, secondaryActions, label, variant, leftContent, ...props }: F0ActionBarProps) => JSX_2.Element;
+export declare const F0ActionBar: ({ isOpen, secondaryActions, label, variant, leftContent, centerInFrameContent, ...props }: F0ActionBarProps) => JSX_2.Element;
 
 declare interface F0ActionBarProps {
     /**
@@ -2928,6 +2928,12 @@ declare interface F0ActionBarProps {
      * Custom content to render on the left side (e.g., error navigation)
      */
     leftContent?: React.ReactNode;
+    /**
+     * When true, centers the action bar relative to the ApplicationFrame content area
+     * (accounting for the sidebar width) instead of the full viewport.
+     * @default false
+     */
+    centerInFrameContent?: boolean;
 }
 
 export declare const F0AiBanner: ForwardRefExoticComponent<AiBannerInternalProps & RefAttributes<HTMLDivElement>> & {
@@ -6549,11 +6555,25 @@ declare module "gridstack" {
 }
 
 
+declare namespace Calendar {
+    var displayName: string;
+}
+
+
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         aiBlock: {
             insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
             executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
+        };
+    }
+}
+
+
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
+        moodTracker: {
+            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
         };
     }
 }
@@ -6571,22 +6591,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        moodTracker: {
-            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
-        };
-    }
-}
-
-
-declare module "@tiptap/core" {
-    interface Commands<ReturnType> {
         transcript: {
             insertTranscript: (data: TranscriptData) => ReturnType;
         };
     }
-}
-
-
-declare namespace Calendar {
-    var displayName: string;
 }

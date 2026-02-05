@@ -25906,21 +25906,21 @@ function eie(t) {
 }
 const tie = (t) => Array.isArray(t) ? t.every((e) => eie(e)) ? t : [{
   items: t
-}] : [t], Aye = ({ isOpen: t, secondaryActions: e = [], label: n, variant: i = "dark", leftContent: r, ...a }) => {
-  const o = e.slice(0, 2), s = e.slice(2).map((p) => ({
-    ...p,
-    critical: p.critical || !1
-  })), l = i === "light", f = xt(() => tie(a.primaryActions ?? []), [a.primaryActions]), c = xt(() => f.map((p) => ({
-    ...p,
-    items: p.items.map((m) => ({
-      value: m.label,
-      label: m.label,
-      icon: m.icon,
-      critical: m.critical,
-      description: m.description,
-      disabled: m.disabled
+}] : [t], Aye = ({ isOpen: t, secondaryActions: e = [], label: n, variant: i = "dark", leftContent: r, centerInFrameContent: a = !1, ...o }) => {
+  const s = e.slice(0, 2), l = e.slice(2).map((m) => ({
+    ...m,
+    critical: m.critical || !1
+  })), f = i === "light", c = xt(() => tie(o.primaryActions ?? []), [o.primaryActions]), u = xt(() => c.map((m) => ({
+    ...m,
+    items: m.items.map((y) => ({
+      value: y.label,
+      label: y.label,
+      icon: y.icon,
+      critical: y.critical,
+      description: y.description,
+      disabled: y.disabled
     }))
-  })), [f]), u = xt(() => f.length === 1 && f[0].items.length === 1 ? f[0].items[0] : null, [f]), d = vt((p) => f.flatMap((m) => m.items).find((m) => m.label === p), [f]), h = l ? "" : "dark";
+  })), [c]), d = xt(() => c.length === 1 && c[0].items.length === 1 ? c[0].items[0] : null, [c]), h = vt((m) => c.flatMap((y) => y.items).find((y) => y.label === m), [c]), p = f ? "" : "dark";
   return _(Sn, {
     children: t && V(wt.div, {
       initial: {
@@ -25942,51 +25942,51 @@ const tie = (t) => Array.isArray(t) ? t.every((e) => eie(e)) ? t : [{
         ease: [0.175, 0.885, 0.32, 1.275],
         duration: 0.3
       },
-      className: Z("fixed bottom-2 left-2 right-2 z-50 flex h-fit w-[calc(100%-16px)] flex-col items-center gap-2 rounded-xl p-2 shadow-lg backdrop-blur-sm sm:bottom-5 sm:mx-auto sm:h-12 sm:w-max sm:flex-row sm:gap-4", l ? "border border-solid border-f1-border-secondary bg-f1-background text-f1-foreground" : "bg-f1-background-inverse text-f1-foreground dark:bg-f1-background-inverse-secondary"),
+      className: Z("fixed bottom-2 left-2 right-2 z-50 flex h-fit flex-col items-center gap-2 rounded-xl p-2 shadow-lg backdrop-blur-sm sm:bottom-5 sm:h-12 sm:w-max sm:flex-row sm:gap-4", a ? "sm:left-[240px] sm:right-2 sm:mx-auto" : "sm:left-2 sm:right-2 sm:mx-auto", f ? "border border-solid border-f1-border-secondary bg-f1-background text-f1-foreground" : "bg-f1-background-inverse text-f1-foreground dark:bg-f1-background-inverse-secondary"),
       children: [r, !!n && _("span", {
-        className: Z("font-medium ml-2", l ? "text-f1-foreground" : "text-f1-foreground-inverse"),
+        className: Z("font-medium ml-2", f ? "text-f1-foreground" : "text-f1-foreground-inverse"),
         children: n
       }), V("div", {
         children: [_("div", {
-          className: Z(h, "flex flex-col items-center gap-2 sm:hidden [&_button]:w-full [&_div]:w-full"),
+          className: Z(p, "flex flex-col items-center gap-2 sm:hidden [&_button]:w-full [&_div]:w-full"),
           children: V(qg, {
             children: [_(nL, {
               items: e
-            }), u ? _(et, {
-              label: u.label,
-              icon: u.icon,
-              onClick: u.onClick,
-              disabled: u.disabled,
+            }), d ? _(et, {
+              label: d.label,
+              icon: d.icon,
+              onClick: d.onClick,
+              disabled: d.disabled,
               size: "lg"
             }) : _(Wg, {
-              items: c,
-              onClick: (p) => {
-                d(p)?.onClick?.();
+              items: u,
+              onClick: (m) => {
+                h(m)?.onClick?.();
               },
               size: "lg"
             })]
           }, "mobile-actions")
         }), _("div", {
-          className: Z(h, "hidden items-center gap-2 sm:flex"),
+          className: Z(p, "hidden items-center gap-2 sm:flex"),
           children: V(qg, {
-            children: [s.length > 0 && _(Xx, {
-              items: s
-            }), o.slice().reverse().map((p) => _(et, {
-              variant: p.critical ? "critical" : "outline",
-              label: p.label,
-              icon: p.icon,
-              onClick: p.onClick,
-              disabled: p.disabled
-            }, p.label)), u ? _(et, {
-              label: u.label,
-              icon: u.icon,
-              onClick: u.onClick,
-              disabled: u.disabled
+            children: [l.length > 0 && _(Xx, {
+              items: l
+            }), s.slice().reverse().map((m) => _(et, {
+              variant: m.critical ? "critical" : "outline",
+              label: m.label,
+              icon: m.icon,
+              onClick: m.onClick,
+              disabled: m.disabled
+            }, m.label)), d ? _(et, {
+              label: d.label,
+              icon: d.icon,
+              onClick: d.onClick,
+              disabled: d.disabled
             }) : _(Ot, {
               children: _(Wg, {
-                items: c,
-                onClick: (p) => {
-                  d(p)?.onClick?.();
+                items: u,
+                onClick: (m) => {
+                  h(m)?.onClick?.();
                 }
               })
             })]

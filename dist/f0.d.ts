@@ -3408,6 +3408,12 @@ declare interface F0FormActionBarSubmitConfig extends F0FormSubmitConfigBase {
     discardConfig?: F0FormDiscardConfig;
     /** Label shown in the action bar (defaults to i18n "forms.actionBar.unsavedChanges") */
     actionBarLabel?: string;
+    /**
+     * When true, centers the action bar relative to the ApplicationFrame content area
+     * (accounting for the sidebar width) instead of the full viewport.
+     * @default false
+     */
+    centerActionBarInFrameContent?: boolean;
 }
 
 /**
@@ -6948,11 +6954,25 @@ declare module "gridstack" {
 }
 
 
+declare namespace Calendar {
+    var displayName: string;
+}
+
+
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         aiBlock: {
             insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
             executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
+        };
+    }
+}
+
+
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
+        moodTracker: {
+            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
         };
     }
 }
@@ -6970,22 +6990,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        moodTracker: {
-            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
-        };
-    }
-}
-
-
-declare module "@tiptap/core" {
-    interface Commands<ReturnType> {
         transcript: {
             insertTranscript: (data: TranscriptData) => ReturnType;
         };
     }
-}
-
-
-declare namespace Calendar {
-    var displayName: string;
 }
