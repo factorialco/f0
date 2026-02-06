@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.350.0](https://github.com/factorialco/f0/compare/f0-react-v1.349.1...f0-react-v1.350.0) (2026-02-06)
+
+
+### Features
+
+* add onFullscreenChange callback to RichTextEditor ([#3325](https://github.com/factorialco/f0/issues/3325)) ([d86d5fb](https://github.com/factorialco/f0/commit/d86d5fb4f3c7f7b3baf019f11d040abd48dfae87))
+
 ## [1.349.1](https://github.com/factorialco/f0/compare/f0-react-v1.349.0...f0-react-v1.349.1) (2026-02-05)
 
 
