@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`DetailsItemsList Snapshot  1`] = `
 <View
@@ -91,6 +91,9 @@ exports[`DetailsItemsList Snapshot  1`] = `
                         "backgroundColor": "transparent",
                         "borderWidth": 0,
                       },
+                      [
+                        {},
+                      ],
                       {
                         "flex": 0,
                         "height": "100%",
@@ -197,7 +200,7 @@ exports[`DetailsItemsList Snapshot  1`] = `
                 }
               }
               accessible={true}
-              className="group justify-between rounded text-f1-foreground no-underline hover:bg-f1-background-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-f1-border-selected-bold active:bg-f1-background-secondary-hover flex flex-row items-center gap-1.5 p-1.5"
+              className="group justify-between rounded text-f1-foreground no-underline hover:bg-f1-background-hover focus-visible:outline-2 focus-visible:outline-f1-border-selected-bold active:bg-f1-background-secondary-hover flex flex-row items-center gap-1.5 p-1.5"
               collapsable={false}
               focusable={true}
               handlePress={[Function]}
@@ -271,6 +274,9 @@ exports[`DetailsItemsList Snapshot  1`] = `
                       "backgroundColor": "transparent",
                       "borderWidth": 0,
                     },
+                    [
+                      {},
+                    ],
                     {
                       "flex": 0,
                       "height": "100%",
@@ -355,7 +361,7 @@ exports[`DetailsItemsList Snapshot  1`] = `
                 }
               }
               accessible={true}
-              className="group justify-between rounded text-f1-foreground no-underline hover:bg-f1-background-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-f1-border-selected-bold active:bg-f1-background-secondary-hover flex flex-row items-center gap-1.5 p-1.5"
+              className="group justify-between rounded text-f1-foreground no-underline hover:bg-f1-background-hover focus-visible:outline-2 focus-visible:outline-f1-border-selected-bold active:bg-f1-background-secondary-hover flex flex-row items-center gap-1.5 p-1.5"
               collapsable={false}
               focusable={true}
               handlePress={[Function]}
@@ -381,7 +387,7 @@ exports[`DetailsItemsList Snapshot  1`] = `
                   >
                     <View
                       aria-hidden={true}
-                      className="flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold w-5 h-5 rounded-xs bg-[hsl(theme(colors.yellow.50))]"
+                      className="flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold w-5 h-5 rounded-xs bg-[hsl(theme(colors.yellow-50))]"
                       data-a11y-color-contrast-ignore={true}
                       role="img"
                     >
@@ -417,6 +423,9 @@ exports[`DetailsItemsList Snapshot  1`] = `
                       "backgroundColor": "transparent",
                       "borderWidth": 0,
                     },
+                    [
+                      {},
+                    ],
                     {
                       "flex": 0,
                       "height": "100%",
@@ -484,7 +493,7 @@ exports[`DetailsItemsList Snapshot  1`] = `
                 }
               }
               accessible={true}
-              className="group justify-between rounded text-f1-foreground no-underline hover:bg-f1-background-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-f1-border-selected-bold active:bg-f1-background-secondary-hover flex flex-row items-center gap-1.5 p-1.5"
+              className="group justify-between rounded text-f1-foreground no-underline hover:bg-f1-background-hover focus-visible:outline-2 focus-visible:outline-f1-border-selected-bold active:bg-f1-background-secondary-hover flex flex-row items-center gap-1.5 p-1.5"
               collapsable={false}
               focusable={true}
               handlePress={[Function]}
@@ -510,7 +519,7 @@ exports[`DetailsItemsList Snapshot  1`] = `
                   >
                     <View
                       aria-hidden={true}
-                      className="flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold w-5 h-5 rounded-xs bg-[hsl(theme(colors.malibu.50))]"
+                      className="flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold w-5 h-5 rounded-xs bg-[hsl(theme(colors.malibu-50))]"
                       data-a11y-color-contrast-ignore={true}
                       role="img"
                     >
@@ -546,6 +555,9 @@ exports[`DetailsItemsList Snapshot  1`] = `
                       "backgroundColor": "transparent",
                       "borderWidth": 0,
                     },
+                    [
+                      {},
+                    ],
                     {
                       "flex": 0,
                       "height": "100%",
@@ -619,7 +631,7 @@ exports[`DetailsItemsList Snapshot  1`] = `
                   {
                     "busy": undefined,
                     "checked": undefined,
-                    "disabled": undefined,
+                    "disabled": true,
                     "expanded": undefined,
                     "selected": undefined,
                   }
@@ -633,7 +645,7 @@ exports[`DetailsItemsList Snapshot  1`] = `
                   }
                 }
                 accessible={true}
-                className="flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f1-border-secondary"
+                className="overflow-hidden flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f1-border-secondary"
                 collapsable={false}
                 focusable={true}
                 onBlur={[Function]}
@@ -645,6 +657,18 @@ exports[`DetailsItemsList Snapshot  1`] = `
                 onResponderTerminate={[Function]}
                 onResponderTerminationRequest={[Function]}
                 onStartShouldSetResponder={[Function]}
+                style={
+                  [
+                    {
+                      "transform": [
+                        {
+                          "scale": 1,
+                        },
+                      ],
+                    },
+                    undefined,
+                  ]
+                }
               >
                 <View
                   aria-hidden={true}
@@ -656,7 +680,7 @@ exports[`DetailsItemsList Snapshot  1`] = `
                   }
                 />
                 <Text
-                  className="line-clamp-1 text-base font-medium text-f1-foreground"
+                  className="text-f1-foreground line-clamp-1 text-base font-medium"
                 >
                   Holidays
                 </Text>

@@ -1,8 +1,8 @@
-import { cva, type VariantProps } from "cva";
+import { tv, type VariantProps } from "tailwind-variants";
 import { Text, View } from "react-native";
 import { cn } from "../../lib/utils";
 
-const counterContainerVariants = cva({
+const counterContainerVariants = tv({
   base: "flex items-center justify-center rounded-xs grow-0 px-0.5",
   variants: {
     size: {
@@ -21,7 +21,7 @@ const counterContainerVariants = cva({
   },
 });
 
-const counterTextVariants = cva({
+const counterTextVariants = tv({
   base: "text-center text-sm font-medium tabular-nums whitespace-nowrap",
   variants: {
     size: {

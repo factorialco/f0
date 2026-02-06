@@ -27,7 +27,13 @@ const meta: Meta<typeof ApplicationFrame> = {
       credentials: "include",
       showDevConsole: false,
       enabled: true,
+      resizable: true,
       greeting: "Hello, John",
+      disclaimer: {
+        text: "One works within your permissions.",
+        link: "/permissions",
+        linkText: "See more",
+      },
       welcomeScreenSuggestions: [
         {
           icon: Lightbulb,

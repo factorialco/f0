@@ -1,5 +1,54 @@
 # Changelog
 
+## [1.350.0](https://github.com/factorialco/f0/compare/f0-react-v1.349.1...f0-react-v1.350.0) (2026-02-06)
+
+
+### Features
+
+* add onFullscreenChange callback to RichTextEditor ([#3325](https://github.com/factorialco/f0/issues/3325)) ([d86d5fb](https://github.com/factorialco/f0/commit/d86d5fb4f3c7f7b3baf019f11d040abd48dfae87))
+
+## [1.349.1](https://github.com/factorialco/f0/compare/f0-react-v1.349.0...f0-react-v1.349.1) (2026-02-05)
+
+
+### Bug Fixes
+
+* **select:** prevent layout jump when toggling filters ([#3365](https://github.com/factorialco/f0/issues/3365)) ([04043dd](https://github.com/factorialco/f0/commit/04043ddc9bb2e856e06a723110ef84a946b8eb44))
+
+## [1.349.0](https://github.com/factorialco/f0/compare/f0-react-v1.348.1...f0-react-v1.349.0) (2026-02-05)
+
+
+### Features
+
+* **AIChat:** Resize functionality, disclaimer and fixed tooltip bug ([#3361](https://github.com/factorialco/f0/issues/3361)) ([e343aaf](https://github.com/factorialco/f0/commit/e343aaf54765de3fa1da1813bf688d613ca740fd))
+
+## [1.348.1](https://github.com/factorialco/f0/compare/f0-react-v1.348.0...f0-react-v1.348.1) (2026-02-05)
+
+
+### Bug Fixes
+
+* show more selected items in select input when possible ([#3362](https://github.com/factorialco/f0/issues/3362)) ([6b7afa5](https://github.com/factorialco/f0/commit/6b7afa5458f23b8305b7fe00ff035535776b6107))
+
+## [1.348.0](https://github.com/factorialco/f0/compare/f0-react-v1.347.0...f0-react-v1.348.0) (2026-02-05)
+
+
+### Features
+
+* aura voice animation component ([#3358](https://github.com/factorialco/f0/issues/3358)) ([1c76bb8](https://github.com/factorialco/f0/commit/1c76bb8f97f65aedecb86cc726f36e911a7424f2))
+
+## [1.347.0](https://github.com/factorialco/f0/compare/f0-react-v1.346.0...f0-react-v1.347.0) (2026-02-04)
+
+
+### Features
+
+* export I18nProvider and related types from ai.ts  ([#3355](https://github.com/factorialco/f0/issues/3355)) ([3751faa](https://github.com/factorialco/f0/commit/3751faa4071a032f237beebe0b20baca8bbab58e))
+
+## [1.346.0](https://github.com/factorialco/f0/compare/f0-react-v1.345.0...f0-react-v1.346.0) (2026-02-04)
+
+
+### Features
+
+* add deactivated view to tags ([#3293](https://github.com/factorialco/f0/issues/3293)) ([c0e2354](https://github.com/factorialco/f0/commit/c0e2354b137298d1abcb6cd2ae64ac4d07af4313))
+
 ## [1.345.0](https://github.com/factorialco/f0/compare/f0-react-v1.344.0...f0-react-v1.345.0) (2026-02-04)
 
 
