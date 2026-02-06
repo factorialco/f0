@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`DetailsItem Snapshot type company 1`] = `
 <View
@@ -113,6 +113,9 @@ exports[`DetailsItem Snapshot type company 1`] = `
                     "backgroundColor": "transparent",
                     "borderWidth": 0,
                   },
+                  [
+                    {},
+                  ],
                   {
                     "flex": 0,
                     "height": "100%",
@@ -211,7 +214,7 @@ exports[`DetailsItem Snapshot type dot-tag 1`] = `
               {
                 "busy": undefined,
                 "checked": undefined,
-                "disabled": undefined,
+                "disabled": true,
                 "expanded": undefined,
                 "selected": undefined,
               }
@@ -225,7 +228,7 @@ exports[`DetailsItem Snapshot type dot-tag 1`] = `
               }
             }
             accessible={true}
-            className="flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f1-border-secondary"
+            className="overflow-hidden flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f1-border-secondary"
             collapsable={false}
             focusable={true}
             onBlur={[Function]}
@@ -237,6 +240,18 @@ exports[`DetailsItem Snapshot type dot-tag 1`] = `
             onResponderTerminate={[Function]}
             onResponderTerminationRequest={[Function]}
             onStartShouldSetResponder={[Function]}
+            style={
+              [
+                {
+                  "transform": [
+                    {
+                      "scale": 1,
+                    },
+                  ],
+                },
+                undefined,
+              ]
+            }
           >
             <View
               aria-hidden={true}
@@ -248,7 +263,7 @@ exports[`DetailsItem Snapshot type dot-tag 1`] = `
               }
             />
             <Text
-              className="line-clamp-1 text-base font-medium text-f1-foreground"
+              className="text-f1-foreground line-clamp-1 text-base font-medium"
             >
               Activity
             </Text>
@@ -340,6 +355,9 @@ exports[`DetailsItem Snapshot type item 1`] = `
                     "backgroundColor": "transparent",
                     "borderWidth": 0,
                   },
+                  [
+                    {},
+                  ],
                   {
                     "flex": 0,
                     "height": "100%",
@@ -474,7 +492,7 @@ exports[`DetailsItem Snapshot type person 1`] = `
               >
                 <View
                   aria-hidden={true}
-                  className="flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold w-5 h-5 rounded-full bg-[hsl(theme(colors.flubber.50))]"
+                  className="flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold w-5 h-5 rounded-full bg-[hsl(theme(colors.flubber-50))]"
                   data-a11y-color-contrast-ignore={true}
                   role="img"
                 >
@@ -513,6 +531,9 @@ exports[`DetailsItem Snapshot type person 1`] = `
                     "backgroundColor": "transparent",
                     "borderWidth": 0,
                   },
+                  [
+                    {},
+                  ],
                   {
                     "flex": 0,
                     "height": "100%",
@@ -647,7 +668,7 @@ exports[`DetailsItem Snapshot type team 1`] = `
               >
                 <View
                   aria-hidden={true}
-                  className="flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold w-5 h-5 rounded-xs bg-[hsl(theme(colors.purple.50))]"
+                  className="flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold w-5 h-5 rounded-xs bg-[hsl(theme(colors.purple-50))]"
                   data-a11y-color-contrast-ignore={true}
                   role="img"
                 >
@@ -686,6 +707,9 @@ exports[`DetailsItem Snapshot type team 1`] = `
                     "backgroundColor": "transparent",
                     "borderWidth": 0,
                   },
+                  [
+                    {},
+                  ],
                   {
                     "flex": 0,
                     "height": "100%",

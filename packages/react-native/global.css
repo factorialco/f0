@@ -1,0 +1,21 @@
+@import "tailwindcss";
+@import "uniwind";
+
+/**
+ * Development: Import local styles
+ * In consuming apps, use: @import '@factorialco/f0-react-native/styles';
+ */
+@import "./src/styles/index.css";
+
+/**
+ * Development: Scan local source files
+ * In consuming apps, use: @source './node_modules/@factorialco/f0-react-native/lib';
+ */
+@source "./playground/**/*.{js,jsx,ts,tsx}";
+@source "./src/**/*.{js,jsx,ts,tsx}";
+
+@theme {
+ --font-normal: 'Inter-Regular';
+ --font-medium: 'Inter-Medium';
+ --font-semibold: 'Inter-SemiBold';
+}

@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.23.1](https://github.com/factorialco/f0/compare/f0-react-native-v0.23.0...f0-react-native-v0.23.1) (2026-02-06)
+
+
+### Bug Fixes
+
+* theme typography tokens ([#3371](https://github.com/factorialco/f0/issues/3371)) ([8b39216](https://github.com/factorialco/f0/commit/8b39216584c31874aef95e0206a58bddc30ba6ec))
+
+## [0.23.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.22.0...f0-react-native-v0.23.0) (2026-02-06)
+
+
+### Features
+
+* React Native Design System migration to Uniwind and Tailwind 4 ([#3333](https://github.com/factorialco/f0/issues/3333)) ([ce05b98](https://github.com/factorialco/f0/commit/ce05b987d2b26298cc12e4bd7a4876405a0fb628))
+
 ## [0.22.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.21.0...f0-react-native-v0.22.0) (2025-12-17)
 
 

@@ -1,5 +1,6 @@
 export * from "../ai/F0AiChat"
 export * from "../ai/F0ActionItem"
+export * from "../ai/F0AuraVoiceAnimation"
 export * from "../ai/F0AiCollapsibleMessage"
 export * from "../ai/F0HILActionConfirmation"
 export * from "../ai/F0MarkdownRenderers"
