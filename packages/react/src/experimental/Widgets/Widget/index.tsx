@@ -1,18 +1,18 @@
-import { cva, type VariantProps } from "cva"
-import React, { forwardRef, ReactNode, useEffect } from "react"
+import { cva, type VariantProps } from "cva";
+import React, { forwardRef, ReactNode, useEffect } from "react";
 
-import { F0Button, type F0ButtonProps } from "@/components/F0Button"
-import { F0Icon, IconType } from "@/components/F0Icon"
-import { F0TagAlert } from "@/components/tags/F0TagAlert"
-import { F0TagStatus, StatusVariant } from "@/components/tags/F0TagStatus"
-import { Counter } from "@/experimental/Information/Counter"
-import { Tooltip } from "@/experimental/Overlays/Tooltip"
-import { PrivateBox } from "@/experimental/Utilities/PrivateBox"
-import { EyeInvisible, EyeVisible, InfoCircleLine } from "@/icons/app"
-import { experimentalComponent } from "@/lib/experimental"
-import { usePrivacyMode } from "@/lib/privacyMode"
-import { withSkeleton } from "@/lib/skeleton"
-import { cn } from "@/lib/utils"
+import { F0Button, type F0ButtonProps } from "@/components/F0Button";
+import { F0Icon, IconType } from "@/components/F0Icon";
+import { F0TagAlert } from "@/components/tags/F0TagAlert";
+import { F0TagStatus, StatusVariant } from "@/components/tags/F0TagStatus";
+import { Counter } from "@/ui/Counter";
+import { Tooltip } from "@/experimental/Overlays/Tooltip";
+import { PrivateBox } from "@/sds/Profile/PrivateBox";
+import { EyeInvisible, EyeVisible, InfoCircleLine } from "@/icons/app";
+import { experimentalComponent } from "@/lib/experimental";
+import { usePrivacyMode } from "@/lib/privacyMode";
+import { withSkeleton } from "@/lib/skeleton";
+import { cn } from "@/lib/utils";
 import {
   Card,
   CardComment,
@@ -22,61 +22,61 @@ import {
   CardLink,
   CardSubtitle,
   CardTitle,
-} from "@/ui/Card"
-import { Separator } from "@/ui/separator"
-import { Skeleton as SkeletonPrimitive } from "@/ui/skeleton"
+} from "@/ui/Card";
+import { Separator } from "@/ui/separator";
+import { Skeleton as SkeletonPrimitive } from "@/ui/skeleton";
 
 export interface WidgetProps {
   header?: {
-    title?: string
-    subtitle?: string
-    comment?: string
-    info?: string
-    canBeBlurred?: boolean
+    title?: string;
+    subtitle?: string;
+    comment?: string;
+    info?: string;
+    canBeBlurred?: boolean;
     link?: {
-      title: string
-      url?: string
-      onClick?: () => void
-      icon?: IconType
-    }
-    count?: number
-  }
-  action?: F0ButtonProps
+      title: string;
+      url?: string;
+      onClick?: () => void;
+      icon?: IconType;
+    };
+    count?: number;
+  };
+  action?: F0ButtonProps;
   summaries?: Array<{
-    label: string
-    value: string | number
-    prefixUnit?: string
-    postfixUnit?: string
-  }>
-  alert?: string
+    label: string;
+    value: string | number;
+    prefixUnit?: string;
+    postfixUnit?: string;
+  }>;
+  alert?: string;
   status?: {
-    text: string
-    variant: StatusVariant
-  }
-  fullHeight?: boolean
+    text: string;
+    variant: StatusVariant;
+  };
+  fullHeight?: boolean;
 }
 
 const InlineDot = () => (
   <div className="min-h-[0.15rem] min-w-[0.15rem] rounded-full bg-f1-foreground-secondary" />
-)
+);
 
 const Container = forwardRef<
   HTMLDivElement,
   WidgetProps & { children: ReactNode }
 >(function Container(
   { header, children, action, summaries, alert, status, fullHeight = false },
-  ref
+  ref,
 ) {
   const { enabled: privacyModeEnabled, toggle: togglePrivacyMode } =
-    usePrivacyMode()
+    usePrivacyMode();
 
   useEffect(() => {
     if (alert && status) {
       throw Error(
-        "You cannot pass both alert and status at the same time to this component"
-      )
+        "You cannot pass both alert and status at the same time to this component",
+      );
     }
-  }, [alert, status])
+  }, [alert, status]);
 
   const isRealNode = (node: React.ReactNode): boolean => {
     return (
@@ -86,18 +86,18 @@ const Container = forwardRef<
         node.type === React.Fragment &&
         React.Children.count(node.props.children) === 0
       )
-    )
-  }
+    );
+  };
 
   const handleLinkClick = () => {
-    header?.link?.onClick?.()
-  }
+    header?.link?.onClick?.();
+  };
 
   return (
     <Card
       className={cn(
         fullHeight ? "h-full" : "",
-        "relative flex gap-3 border-f1-border-secondary"
+        "relative flex gap-3 border-f1-border-secondary",
       )}
       ref={ref}
     >
@@ -202,7 +202,7 @@ const Container = forwardRef<
                 {index > 0 && <Separator bare />}
                 {child}
               </React.Fragment>
-            )
+            );
           })}
       </CardContent>
       {action && (
@@ -211,8 +211,8 @@ const Container = forwardRef<
         </CardFooter>
       )}
     </Card>
-  )
-})
+  );
+});
 
 const skeletonVariants = cva({
   variants: {
@@ -222,19 +222,19 @@ const skeletonVariants = cva({
       lg: "h-60",
     },
   },
-})
+});
 
 export type WidgetSkeletonProps = {
   header?: {
-    title?: string
-    subtitle?: string
-  }
+    title?: string;
+    subtitle?: string;
+  };
 } & (
   | VariantProps<typeof skeletonVariants>
   | {
-      height: "full"
+      height: "full";
     }
-)
+);
 
 const Skeleton = forwardRef<HTMLDivElement, WidgetSkeletonProps>(
   function Skeleton({ header, height }, ref) {
@@ -242,7 +242,7 @@ const Skeleton = forwardRef<HTMLDivElement, WidgetSkeletonProps>(
       <Card
         className={cn(
           "flex gap-4 border-f1-border-secondary",
-          height === "full" && "h-full"
+          height === "full" && "h-full",
         )}
         ref={ref}
         aria-live="polite"
@@ -273,14 +273,14 @@ const Skeleton = forwardRef<HTMLDivElement, WidgetSkeletonProps>(
           ))}
         </CardContent>
       </Card>
-    )
-  }
-)
+    );
+  },
+);
 
 /**
  * @experimental This is an experimental component use it at your own risk
  */
 export const Widget = experimentalComponent(
   "Widget",
-  withSkeleton(Container, Skeleton)
-)
+  withSkeleton(Container, Skeleton),
+);

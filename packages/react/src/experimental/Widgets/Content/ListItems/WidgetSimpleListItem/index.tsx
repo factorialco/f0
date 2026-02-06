@@ -1,31 +1,31 @@
-import { ComponentProps } from "react"
+import { ComponentProps } from "react";
 
-import { F0Icon, IconType } from "@/components/F0Icon"
-import { F0TagAlert } from "@/components/tags/F0TagAlert"
-import { F0TagRaw } from "@/components/tags/F0TagRaw"
-import { Counter } from "@/experimental/Information/Counter"
-import { cn } from "@/lib/utils"
+import { F0Icon, IconType } from "@/components/F0Icon";
+import { F0TagAlert } from "@/components/tags/F0TagAlert";
+import { F0TagRaw } from "@/components/tags/F0TagRaw";
+import { Counter } from "@/ui/Counter";
+import { cn } from "@/lib/utils";
 
 export type WidgetSimpleListItemProps<
   Id extends string | number = string | number,
 > = {
-  id: Id
-  title: string
-  icon?: IconType
-  iconClassName?: string
-  rightIcon?: IconType
-  rightIconClassName?: string
-  count?: number
-  alert?: ComponentProps<typeof F0TagAlert>
-  rawTag?: ComponentProps<typeof F0TagRaw>
-  onClick?: (id: Id) => void
-}
+  id: Id;
+  title: string;
+  icon?: IconType;
+  iconClassName?: string;
+  rightIcon?: IconType;
+  rightIconClassName?: string;
+  count?: number;
+  alert?: ComponentProps<typeof F0TagAlert>;
+  rawTag?: ComponentProps<typeof F0TagRaw>;
+  onClick?: (id: Id) => void;
+};
 
 type WrapperProps = {
-  onClick?: (ev: React.MouseEvent<HTMLAnchorElement>) => void
-  className: string
-  children: React.ReactNode
-}
+  onClick?: (ev: React.MouseEvent<HTMLAnchorElement>) => void;
+  className: string;
+  children: React.ReactNode;
+};
 
 const Wrapper: React.FC<WrapperProps> = ({ onClick, className, children }) => {
   return onClick ? (
@@ -36,8 +36,8 @@ const Wrapper: React.FC<WrapperProps> = ({ onClick, className, children }) => {
     <div className={className} tabIndex={-1}>
       {children}
     </div>
-  )
-}
+  );
+};
 
 export function WidgetSimpleListItem({
   id,
@@ -55,12 +55,12 @@ export function WidgetSimpleListItem({
     "flex flex-row items-start gap-1 rounded-md border border-solid border-transparent px-2 py-1.5 text-f1-foreground",
     onClick
       ? "cursor-pointer hover:bg-f1-background-tertiary focus:border-f1-background-selected-bold focus:outline-none"
-      : undefined
-  )
+      : undefined,
+  );
   const handleOnClick = (ev: React.MouseEvent<HTMLAnchorElement>) => {
-    ev.preventDefault()
-    onClick?.(id)
-  }
+    ev.preventDefault();
+    onClick?.(id);
+  };
 
   return (
     <Wrapper onClick={handleOnClick} className={className}>
@@ -87,5 +87,5 @@ export function WidgetSimpleListItem({
         {!!count && <Counter value={count} />}
       </div>
     </Wrapper>
-  )
+  );
 }

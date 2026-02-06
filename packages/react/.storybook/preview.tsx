@@ -1,23 +1,23 @@
-import type { Preview, StoryFn, StoryContext } from "@storybook/react-vite"
+import type { Preview, StoryFn, StoryContext } from "@storybook/react-vite";
 
-import isChromatic from "chromatic/isChromatic"
-import { MotionGlobalConfig } from "motion/react"
+import isChromatic from "chromatic/isChromatic";
+import { MotionGlobalConfig } from "motion/react";
 // organize-imports-ignore
-import React, { useState } from "react"
-import { action } from "storybook/actions"
-import { INITIAL_VIEWPORTS } from "storybook/viewport"
+import React, { useState } from "react";
+import { action } from "storybook/actions";
+import { INITIAL_VIEWPORTS } from "storybook/viewport";
 
-import "../src/styles.css"
-import { aiTranslations } from "@/ai/F0AiChat/types"
-import { WeekStartDay } from "@/experimental/OneCalendar/types"
-import { dataCollectionLocalStorageHandler } from "@/lib/providers/datacollection"
-import { F0Provider } from "@/lib/providers/f0"
-import { buildTranslations, defaultTranslations } from "@/lib/providers/i18n"
-import { ThemeProvider } from "@/lib/providers/theme"
+import "../src/styles.css";
+import { aiTranslations } from "@/sds/ai/F0AiChat/types";
+import { WeekStartDay } from "@/experimental/OneCalendar/types";
+import { dataCollectionLocalStorageHandler } from "@/lib/providers/datacollection";
+import { F0Provider } from "@/lib/providers/f0";
+import { buildTranslations, defaultTranslations } from "@/lib/providers/i18n";
+import { ThemeProvider } from "@/lib/providers/theme";
 
-import { DocsContainer } from "./DocsContainer.tsx"
+import { DocsContainer } from "./DocsContainer.tsx";
 
-MotionGlobalConfig.skipAnimations = isChromatic()
+MotionGlobalConfig.skipAnimations = isChromatic();
 
 export const withTheme = () => {
   // eslint-disable-next-line react/display-name
@@ -26,12 +26,12 @@ export const withTheme = () => {
       <ThemeProvider theme="light">
         <Story />
       </ThemeProvider>
-    )
-  }
-}
+    );
+  };
+};
 
 export const F0 = (Story: StoryFn, { parameters }: StoryContext) => {
-  const [currentPath, setCurrentPath] = useState(parameters.currentPath ?? "/")
+  const [currentPath, setCurrentPath] = useState(parameters.currentPath ?? "/");
 
   return (
     <F0Provider
@@ -60,11 +60,11 @@ export const F0 = (Story: StoryFn, { parameters }: StoryContext) => {
             ref={ref}
             {...props}
             onClick={(event, ...args) => {
-              action("Link clicked")(event, ...args)
-              props?.onClick?.(event, ...args)
-              event.preventDefault()
+              action("Link clicked")(event, ...args);
+              props?.onClick?.(event, ...args);
+              event.preventDefault();
               if (props.href) {
-                setCurrentPath(props.href)
+                setCurrentPath(props.href);
               }
             }}
           />
@@ -72,16 +72,16 @@ export const F0 = (Story: StoryFn, { parameters }: StoryContext) => {
       }}
       image={{
         src: ({ src, width, height }) => {
-          if (!src || src.startsWith("data:")) return { src }
-          const hasQuery = src.includes("?")
-          const separator = hasQuery ? "&" : "?"
-          const params = []
-          if (width !== undefined) params.push(`w=${width}`)
-          if (height !== undefined) params.push(`h=${height}`)
+          if (!src || src.startsWith("data:")) return { src };
+          const hasQuery = src.includes("?");
+          const separator = hasQuery ? "&" : "?";
+          const params = [];
+          if (width !== undefined) params.push(`w=${width}`);
+          if (height !== undefined) params.push(`h=${height}`);
           return {
             src:
               params.length > 0 ? `${src}${separator}${params.join("&")}` : src,
-          }
+          };
         },
       }}
       isDev={parameters.isDev ?? false}
@@ -89,8 +89,8 @@ export const F0 = (Story: StoryFn, { parameters }: StoryContext) => {
     >
       <Story />
     </F0Provider>
-  )
-}
+  );
+};
 
 const preview: Preview = {
   decorators: [F0, withTheme()],
@@ -157,20 +157,20 @@ const preview: Preview = {
           "foundations",
           "library",
           "hooks",
-        ]
+        ];
 
-        const aId = a.id.split("-")?.[0].toLowerCase()
-        const bId = b.id.split("-")?.[0].toLowerCase()
+        const aId = a.id.split("-")?.[0].toLowerCase();
+        const bId = b.id.split("-")?.[0].toLowerCase();
 
-        const aIndex = topLevelOrder.indexOf(aId)
-        const bIndex = topLevelOrder.indexOf(bId)
+        const aIndex = topLevelOrder.indexOf(aId);
+        const bIndex = topLevelOrder.indexOf(bId);
 
-        if (aIndex !== -1 && bIndex !== -1) return aIndex - bIndex
-        if (aIndex !== -1) return -1
-        if (bIndex !== -1) return 1
+        if (aIndex !== -1 && bIndex !== -1) return aIndex - bIndex;
+        if (aIndex !== -1) return -1;
+        if (bIndex !== -1) return 1;
 
-        const isAFoundation = aId.startsWith("foundations/")
-        const isBFoundation = bId.startsWith("foundations/")
+        const isAFoundation = aId.startsWith("foundations/");
+        const isBFoundation = bId.startsWith("foundations/");
 
         if (isAFoundation || isBFoundation) {
           if (isAFoundation && isBFoundation) {
@@ -181,17 +181,17 @@ const preview: Preview = {
               "borders",
               "shadows",
               "icons",
-            ]
-            const aFoundationIndex = foundationOrder.indexOf(aId.split("/")[1])
-            const bFoundationIndex = foundationOrder.indexOf(bId.split("/")[1])
+            ];
+            const aFoundationIndex = foundationOrder.indexOf(aId.split("/")[1]);
+            const bFoundationIndex = foundationOrder.indexOf(bId.split("/")[1]);
             if (aFoundationIndex !== -1 && bFoundationIndex !== -1) {
-              return aFoundationIndex - bFoundationIndex
+              return aFoundationIndex - bFoundationIndex;
             }
           }
-          return isAFoundation ? -1 : 1
+          return isAFoundation ? -1 : 1;
         }
 
-        return a.title.localeCompare(b.title)
+        return a.title.localeCompare(b.title);
       },
     },
     // darkMode: {
@@ -206,6 +206,6 @@ const preview: Preview = {
       value: "content",
     },
   },
-}
+};
 
-export default preview
+export default preview;

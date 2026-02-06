@@ -1,15 +1,15 @@
-import { render, screen } from "@testing-library/react"
-import { describe, expect, it, vi } from "vitest"
+import { render, screen } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
 
-import { aiTranslations } from "@/ai/F0AiChat"
+import { aiTranslations } from "@/sds/ai/F0AiChat";
 
-import { I18nProvider, TranslationsType, useI18n } from "./i18n-provider"
-import { defaultTranslations } from "./i18n-provider-defaults"
+import { I18nProvider, TranslationsType, useI18n } from "./i18n-provider";
+import { defaultTranslations } from "./i18n-provider-defaults";
 
 // Test component that uses the i18n hook
 function TestComponent() {
-  const i18n = useI18n()
-  return <div data-testid="translation">{i18n.actions.save}</div>
+  const i18n = useI18n();
+  return <div data-testid="translation">{i18n.actions.save}</div>;
 }
 
 describe("I18nProvider", () => {
@@ -45,28 +45,28 @@ describe("I18nProvider", () => {
         thumbsDown: "Dislike",
         toggle: "Alternar",
       },
-    }
+    };
 
     render(
       <I18nProvider translations={customTranslations}>
         <TestComponent />
-      </I18nProvider>
-    )
+      </I18nProvider>,
+    );
 
-    expect(screen.getByTestId("translation")).toHaveTextContent("Desar")
-  })
+    expect(screen.getByTestId("translation")).toHaveTextContent("Desar");
+  });
 
   it("throws error when useI18n is used outside provider", () => {
     // Suppress console.error for this test as we expect an error
-    const consoleSpy = vi.spyOn(console, "error")
-    consoleSpy.mockImplementation(() => {})
+    const consoleSpy = vi.spyOn(console, "error");
+    consoleSpy.mockImplementation(() => {});
 
     expect(() => {
-      render(<TestComponent />)
-    }).toThrow("useI18n must be used within an I18nProvider")
+      render(<TestComponent />);
+    }).toThrow("useI18n must be used within an I18nProvider");
 
-    consoleSpy.mockRestore()
-  })
+    consoleSpy.mockRestore();
+  });
 
   // Type tests - these will fail at compile time if types are wrong
   it.skip("maintains type safety for translation overrides", () => {
@@ -74,21 +74,21 @@ describe("I18nProvider", () => {
       // @ts-expect-error - Invalid translation key should be caught by TypeScript
       <I18nProvider translations={{ invalidKey: "test" }}>
         <div />
-      </I18nProvider>
-    )
+      </I18nProvider>,
+    );
 
     render(
       // @ts-expect-error - Missing required translation keys should be caught by TypeScript
       <I18nProvider translations={{}}>
         <div />
-      </I18nProvider>
-    )
+      </I18nProvider>,
+    );
 
     render(
       // @ts-expect-error - Translations are required
       <I18nProvider>
         <div />
-      </I18nProvider>
-    )
-  })
-})
+      </I18nProvider>,
+    );
+  });
+});

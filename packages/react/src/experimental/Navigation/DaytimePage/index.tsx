@@ -1,15 +1,15 @@
-import { cva, type VariantProps } from "cva"
-import { ComponentProps } from "react"
+import { cva, type VariantProps } from "cva";
+import { ComponentProps } from "react";
 
-import { F0OneSwitch } from "@/ai/F0OneSwitch"
-import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
-import { F0AvatarPulse } from "@/components/avatars/F0AvatarPulse"
-import { F0Button } from "@/components/F0Button"
-import { OneSwitch as OnePromotionSwitch } from "@/experimental/AiPromotionChat/OneSwitch"
-import { useSidebar } from "@/experimental/Navigation/ApplicationFrame/FrameProvider"
-import Menu from "@/icons/app/Menu"
-import { experimentalComponent } from "@/lib/experimental"
-import { cn } from "@/lib/utils"
+import { F0OneSwitch } from "@/sds/ai/F0OneSwitch";
+import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson";
+import { F0AvatarPulse } from "@/components/avatars/F0AvatarPulse";
+import { F0Button } from "@/components/F0Button";
+import { OneSwitch as OnePromotionSwitch } from "@/experimental/AiPromotionChat/OneSwitch";
+import { useSidebar } from "@/examples/ApplicationFrame/FrameProvider";
+import Menu from "@/icons/app/Menu";
+import { experimentalComponent } from "@/lib/experimental";
+import { cn } from "@/lib/utils";
 
 const daytimePageVariants = cva({
   base: "pointer-events-none absolute inset-0 h-screen max-h-[1000px] opacity-[0.08]",
@@ -26,22 +26,21 @@ const daytimePageVariants = cva({
   defaultVariants: {
     period: "morning",
   },
-})
+});
 
-export interface DaytimePageProps extends VariantProps<
-  typeof daytimePageVariants
-> {
-  children?: React.ReactNode
+export interface DaytimePageProps
+  extends VariantProps<typeof daytimePageVariants> {
+  children?: React.ReactNode;
   header?: {
-    title: string
-    description?: string
-    employeeFirstName: string
-    employeeLastName: string
-    employeeAvatar?: string
-    pulse?: ComponentProps<typeof F0AvatarPulse>["pulse"]
-    onPulseClick?: ComponentProps<typeof F0AvatarPulse>["onPulseClick"]
-  }
-  embedded?: boolean
+    title: string;
+    description?: string;
+    employeeFirstName: string;
+    employeeLastName: string;
+    employeeAvatar?: string;
+    pulse?: ComponentProps<typeof F0AvatarPulse>["pulse"];
+    onPulseClick?: ComponentProps<typeof F0AvatarPulse>["onPulseClick"];
+  };
+  embedded?: boolean;
 }
 
 function _DaytimePage({
@@ -50,7 +49,7 @@ function _DaytimePage({
   period,
   embedded = false,
 }: DaytimePageProps) {
-  const { sidebarState, toggleSidebar, isSmallScreen } = useSidebar()
+  const { sidebarState, toggleSidebar, isSmallScreen } = useSidebar();
 
   return (
     <div
@@ -74,7 +73,7 @@ function _DaytimePage({
             <div
               className={cn(
                 "flex flex-row items-center",
-                isSmallScreen ? "gap-1.5" : "gap-3"
+                isSmallScreen ? "gap-1.5" : "gap-3",
               )}
             >
               {header?.onPulseClick ? (
@@ -103,7 +102,7 @@ function _DaytimePage({
                 <p
                   className={cn(
                     isSmallScreen ? "text-lg" : "text-2xl",
-                    "font-semibold text-f1-foreground"
+                    "font-semibold text-f1-foreground",
                   )}
                 >
                   {header.title}
@@ -113,7 +112,7 @@ function _DaytimePage({
                   <p
                     className={cn(
                       isSmallScreen ? "text-md" : "text-lg",
-                      "text-f1-foreground-secondary"
+                      "text-f1-foreground-secondary",
                     )}
                   >
                     {header.description}
@@ -131,18 +130,18 @@ function _DaytimePage({
       <div
         className={cn(
           "isolate flex w-full flex-1 flex-col overflow-y-auto overflow-x-hidden [&>*]:flex-1",
-          isSmallScreen && "-mt-3"
+          isSmallScreen && "-mt-3",
         )}
       >
         {children}
       </div>
     </div>
-  )
+  );
 }
 
-_DaytimePage.displayName = "DaytimePage"
+_DaytimePage.displayName = "DaytimePage";
 
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export const DaytimePage = experimentalComponent("DaytimePage", _DaytimePage)
+export const DaytimePage = experimentalComponent("DaytimePage", _DaytimePage);

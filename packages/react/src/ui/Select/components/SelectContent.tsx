@@ -1,4 +1,4 @@
-import { useVirtualizer } from "@tanstack/react-virtual"
+import { useVirtualizer } from "@tanstack/react-virtual";
 import {
   ComponentPropsWithoutRef,
   ElementRef,
@@ -9,18 +9,18 @@ import {
   useMemo,
   useRef,
   useState,
-} from "react"
+} from "react";
 
-import { Spinner } from "@/experimental/Information/Spinner"
-import { useReducedMotion } from "@/lib/a11y"
-import { cn } from "@/lib/utils"
-import { ScrollArea } from "@/ui/scrollarea"
+import { Spinner } from "@/ui/Spinner";
+import { useReducedMotion } from "@/lib/a11y";
+import { cn } from "@/lib/utils";
+import { ScrollArea } from "@/ui/scrollarea";
 
-import { VirtualItem } from "../index"
-import { SelectContext } from "../SelectContext"
-import * as SelectPrimitive from "./radix-ui"
+import { VirtualItem } from "../index";
+import { SelectContext } from "../SelectContext";
+import * as SelectPrimitive from "./radix-ui";
 
-const VIEWBOX_VERTICAL_PADDING = 8
+const VIEWBOX_VERTICAL_PADDING = 8;
 
 /**
  * Select Content component
@@ -29,45 +29,45 @@ const VIEWBOX_VERTICAL_PADDING = 8
 type SelectItemProps = ComponentPropsWithoutRef<
   typeof SelectPrimitive.Content
 > & {
-  top?: ReactNode
-  bottom?: ReactNode
-  emptyMessage?: string
-  showLoadingIndicator?: boolean
+  top?: ReactNode;
+  bottom?: ReactNode;
+  emptyMessage?: string;
+  showLoadingIndicator?: boolean;
 } & (
     | {
-        value?: string[]
-        multiple: true
+        value?: string[];
+        multiple: true;
       }
     | {
-        value?: string
-        multiple?: false
+        value?: string;
+        multiple?: false;
       }
-  )
+  );
 
 type SelectContentWithItemsProps = Omit<SelectItemProps, "children"> & {
-  items: VirtualItem[]
-  children?: never
-}
+  items: VirtualItem[];
+  children?: never;
+};
 
 type SelectContentWithChildrenProps = Omit<SelectItemProps, "children"> & {
-  items?: never
-  children: ReactNode
-}
+  items?: never;
+  children: ReactNode;
+};
 
 // Union the types to create a discriminated union to avoid use children and items at the same time
 type SelectContentProps = (
   | SelectContentWithItemsProps
   | SelectContentWithChildrenProps
 ) & {
-  onScrollBottom?: () => void
-  onScrollTop?: () => void
-  isLoadingMore?: boolean
-  isLoading?: boolean
-  forceMinHeight?: boolean
-  scrollMargin?: number
-  taller?: boolean
-  portalContainer?: HTMLElement | null
-}
+  onScrollBottom?: () => void;
+  onScrollTop?: () => void;
+  isLoadingMore?: boolean;
+  isLoading?: boolean;
+  forceMinHeight?: boolean;
+  scrollMargin?: number;
+  taller?: boolean;
+  portalContainer?: HTMLElement | null;
+};
 const SelectContent = forwardRef<
   ElementRef<typeof SelectPrimitive.Content>,
   SelectContentProps
@@ -91,46 +91,46 @@ const SelectContent = forwardRef<
       portalContainer,
       ...props
     },
-    ref
+    ref,
   ) => {
     // ----------- Virtual list -----------
     // The scrollable element for your list
-    const parentRef = useRef(null)
-    const isVirtual = Array.isArray(items)
+    const parentRef = useRef(null);
+    const isVirtual = Array.isArray(items);
 
     const isEmpty = useMemo(() => {
       if (isVirtual) {
-        return items.filter((item) => item.value).length === 0
+        return items.filter((item) => item.value).length === 0;
       }
-      return !children
-    }, [isVirtual, items, children])
+      return !children;
+    }, [isVirtual, items, children]);
 
-    const prefersReducedMotion = useReducedMotion()
+    const prefersReducedMotion = useReducedMotion();
     // State to check if the virtual list is ready and the scroll in the correct position
-    const [virtualReady, setVirtualReady] = useState(prefersReducedMotion)
+    const [virtualReady, setVirtualReady] = useState(prefersReducedMotion);
     // State to check if the radixui animation has started
-    const [animationStarted, setAnimationStarted] = useState(false)
+    const [animationStarted, setAnimationStarted] = useState(false);
 
     // Get the value and the open status from the select context
-    const { value, open, as: asSelectProp } = useContext(SelectContext)
+    const { value, open, as: asSelectProp } = useContext(SelectContext);
 
-    const asList = asSelectProp === "list"
+    const asList = asSelectProp === "list";
 
     const valueArray = useMemo(() => {
       return new Set(
         (Array.isArray(value) ? value : [value]).filter(
-          (item) => item !== undefined
-        )
-      )
-    }, [value])
+          (item) => item !== undefined,
+        ),
+      );
+    }, [value]);
 
     const positionIndex = useMemo(() => {
       return (
         items?.findIndex(
-          (item) => item.value !== undefined && valueArray.has(item.value)
+          (item) => item.value !== undefined && valueArray.has(item.value),
         ) || 0
-      )
-    }, [items, valueArray])
+      );
+    }, [items, valueArray]);
 
     const virtualizer = useVirtualizer({
       count: items?.length || 0,
@@ -139,30 +139,30 @@ const SelectContent = forwardRef<
       overscan: 5,
       // If the content is a list, we need to check if the animation is enabled
       enabled: asList || prefersReducedMotion || animationStarted,
-    })
+    });
 
     useEffect(() => {
       // Reset the animation state when the select is closed
       if (!open) {
-        setAnimationStarted(false)
-        setVirtualReady(true)
+        setAnimationStarted(false);
+        setVirtualReady(true);
       }
-    }, [open])
+    }, [open]);
 
     useEffect(() => {
       // Measure the items when the animation is finished
       // Skip measurement when asList is true to prevent layout shifts from tooltips
       if (!asList) {
-        virtualizer.measure()
+        virtualizer.measure();
       }
-    }, [virtualizer, animationStarted, asList])
+    }, [virtualizer, animationStarted, asList]);
 
     useEffect(() => {
       // Scroll to selected item when position changes
-      virtualizer.scrollToIndex(positionIndex)
-    }, [virtualizer, positionIndex])
+      virtualizer.scrollToIndex(positionIndex);
+    }, [virtualizer, positionIndex]);
 
-    const virtualItems = virtualizer.getVirtualItems()
+    const virtualItems = virtualizer.getVirtualItems();
 
     const viewportContent = isEmpty ? (
       <div className="flex h-full w-full items-center justify-center p-2">
@@ -173,7 +173,7 @@ const SelectContent = forwardRef<
         className={cn(
           !asList && "transition-opacity delay-100",
           asList || virtualReady ? "" : "opacity-0",
-          !asList && forceMinHeight ? "min-h-[412px]" : ""
+          !asList && forceMinHeight ? "min-h-[412px]" : "",
         )}
         style={{
           height: virtualizer.getTotalSize() + VIEWBOX_VERTICAL_PADDING,
@@ -209,9 +209,9 @@ const SelectContent = forwardRef<
       </div>
     ) : (
       <>{children}</>
-    )
+    );
 
-    const loadingNewContent = isLoading && !isLoadingMore
+    const loadingNewContent = isLoading && !isLoadingMore;
 
     const content = (
       <SelectPrimitive.Content
@@ -233,7 +233,7 @@ const SelectContent = forwardRef<
             "min-w-[var(--radix-select-trigger-width)] max-w-[min(calc(var(--radix-select-trigger-width)*2.5),412px)]",
           // Hides the content when the virtual list is not ready
           !asList && isVirtual && !virtualReady && "opacity-0",
-          className
+          className,
         )}
         position={asList ? "item-aligned" : position}
         collisionPadding={16}
@@ -247,19 +247,19 @@ const SelectContent = forwardRef<
             props.onCloseAutoFocus &&
             typeof props.onCloseAutoFocus === "function"
           ) {
-            props.onCloseAutoFocus(event)
+            props.onCloseAutoFocus(event);
           }
           // Always prevent the default behavior - the browser will naturally
           // return focus to the last focused element before the select opened
-          event.preventDefault()
+          event.preventDefault();
         }}
         onAnimationStart={() => {
           // Set the animation state to started as the elements are visible
-          setAnimationStarted(true)
+          setAnimationStarted(true);
           setTimeout(() => {
-            virtualizer.scrollToIndex(positionIndex, { align: "center" })
-            setVirtualReady(true)
-          })
+            virtualizer.scrollToIndex(positionIndex, { align: "center" });
+            setVirtualReady(true);
+          });
         }}
       >
         <>
@@ -267,7 +267,7 @@ const SelectContent = forwardRef<
           <div
             className={cn(
               "relative",
-              asList && "flex flex-col overflow-hidden flex-1 min-h-0"
+              asList && "flex flex-col overflow-hidden flex-1 min-h-0",
             )}
           >
             {!asList && props.top}
@@ -296,7 +296,8 @@ const SelectContent = forwardRef<
                   "min-h-[min(412px,calc(var(--radix-select-content-available-height,412px)-110px))]",
                 // Center content vertically when empty
                 isEmpty && "justify-center",
-                loadingNewContent && "select-none opacity-10 transition-opacity"
+                loadingNewContent &&
+                  "select-none opacity-10 transition-opacity",
               )}
               onScrollBottom={onScrollBottom}
               onScrollTop={onScrollTop}
@@ -311,7 +312,7 @@ const SelectContent = forwardRef<
                     "p-1",
                     position === "popper" &&
                       "h-[var(--radix-select-trigger-height)] w-full",
-                    isEmpty && "flex h-full"
+                    isEmpty && "flex h-full",
                   )}
                 >
                   {viewportContent}
@@ -322,7 +323,7 @@ const SelectContent = forwardRef<
           {props.bottom}
         </>
       </SelectPrimitive.Content>
-    )
+    );
 
     return asList ? (
       content
@@ -338,18 +339,18 @@ const SelectContent = forwardRef<
             <div
               className="pointer-events-auto fixed inset-0 z-40"
               onClick={(e) => {
-                e.preventDefault()
-                e.stopPropagation()
+                e.preventDefault();
+                e.stopPropagation();
               }}
             />
           )}
           {content}
         </>
       </SelectPrimitive.Portal>
-    )
-  }
-)
+    );
+  },
+);
 
-SelectContent.displayName = SelectPrimitive.Content.displayName
+SelectContent.displayName = SelectPrimitive.Content.displayName;
 
-export { SelectContent }
+export { SelectContent };

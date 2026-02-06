@@ -1,61 +1,61 @@
-import { type ComponentProps } from "react"
+import { type ComponentProps } from "react";
 
-import { BadgeProps } from "@/experimental/Information/Badge"
+import { BadgeProps } from "@/ui/IconBadge";
 import {
   internalAvatarColors as AvatarColors,
   Avatar as AvatarComponent,
-} from "@/ui/Avatar"
+} from "@/ui/Avatar";
 
-import { F0AvatarModuleProps } from "../../F0AvatarModule"
-import { AvatarSize } from "./types"
+import { F0AvatarModuleProps } from "../../F0AvatarModule";
+import { AvatarSize } from "./types";
 
-type ShadAvatarProps = ComponentProps<typeof AvatarComponent>
+type ShadAvatarProps = ComponentProps<typeof AvatarComponent>;
 
 export function getInitials(
   name: string | string[],
-  size: AvatarSize = "md"
+  size: AvatarSize = "md",
 ): string {
-  const nameArray = Array.isArray(name) ? name : [name]
-  const isSmall = ["xs", "sm"].includes(size)
+  const nameArray = Array.isArray(name) ? name : [name];
+  const isSmall = ["xs", "sm"].includes(size);
   if (isSmall) {
-    return (nameArray[0][0] ?? "").toUpperCase()
+    return (nameArray[0][0] ?? "").toUpperCase();
   }
   if (!Array.isArray(name)) {
-    return name.slice(0, 2).toUpperCase()
+    return name.slice(0, 2).toUpperCase();
   }
 
   return nameArray
     .slice(0, 2)
     .map((name) => name[0])
     .join("")
-    .toUpperCase()
+    .toUpperCase();
 }
 
 export function getAvatarColor(text: string): ShadAvatarProps["color"] {
-  let hash = 0
+  let hash = 0;
 
   for (let i = 0; i < text.length; i++) {
-    hash = text.charCodeAt(i) + ((hash << 5) - hash)
-    hash = hash & hash
+    hash = text.charCodeAt(i) + ((hash << 5) - hash);
+    hash = hash & hash;
   }
 
   const index =
-    ((hash % AvatarColors.length) + AvatarColors.length) % AvatarColors.length
+    ((hash % AvatarColors.length) + AvatarColors.length) % AvatarColors.length;
 
-  return AvatarColors[index]
+  return AvatarColors[index];
 }
 
-type MaskVariant = "default" | "module"
-type MaskSize = AvatarSize
-type MaskType = "base" | "rounded"
+type MaskVariant = "default" | "module";
+type MaskSize = AvatarSize;
+type MaskType = "base" | "rounded";
 
 type MaskPaths = {
   [K in MaskType]: {
     [S in MaskSize]: {
-      [V in MaskVariant]: string
-    }
-  }
-}
+      [V in MaskVariant]: string;
+    };
+  };
+};
 
 export const getMask = {
   base: {
@@ -137,18 +137,18 @@ export const getMask = {
   get: (
     type: MaskType = "base",
     size: MaskSize = "md",
-    variant: MaskVariant = "default"
+    variant: MaskVariant = "default",
   ): string => {
-    return getMask[type][size][variant]
+    return getMask[type][size][variant];
   },
 } as const satisfies {
-  base: MaskPaths["base"]
-  rounded: MaskPaths["rounded"]
-  get: (type: MaskType, size: MaskSize, variant: MaskVariant) => string
-}
+  base: MaskPaths["base"];
+  rounded: MaskPaths["rounded"];
+  get: (type: MaskType, size: MaskSize, variant: MaskVariant) => string;
+};
 
 export const getBadgeSize = (
-  size: AvatarSize
+  size: AvatarSize,
 ): BadgeProps["size"] | undefined => {
   const sizeMap: Partial<
     Record<Exclude<AvatarSize, undefined>, BadgeProps["size"]>
@@ -158,13 +158,13 @@ export const getBadgeSize = (
     lg: "sm",
     sm: "sm",
     xs: "xs",
-  } as const
+  } as const;
 
-  return size && sizeMap[size] ? (sizeMap[size] ?? sizeMap.sm) : sizeMap.sm
-}
+  return size && sizeMap[size] ? (sizeMap[size] ?? sizeMap.sm) : sizeMap.sm;
+};
 
 export const getAvatarSize = (
-  size: AvatarSize
+  size: AvatarSize,
 ): F0AvatarModuleProps["size"] => {
   const sizeMap: Partial<
     Record<Exclude<AvatarSize, undefined>, F0AvatarModuleProps["size"]>
@@ -174,7 +174,7 @@ export const getAvatarSize = (
     lg: "xs",
     sm: "xs",
     xs: "xxs",
-  } as const
+  } as const;
 
-  return size && sizeMap[size] ? (sizeMap[size] ?? sizeMap.sm) : sizeMap.sm
-}
+  return size && sizeMap[size] ? (sizeMap[size] ?? sizeMap.sm) : sizeMap.sm;
+};

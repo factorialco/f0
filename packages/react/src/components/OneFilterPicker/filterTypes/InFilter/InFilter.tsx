@@ -1,19 +1,19 @@
-"use client"
+"use client";
 
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react";
 
-import { F0Button } from "@/components/F0Button"
-import { F0Checkbox } from "@/components/F0Checkbox"
-import { OneEllipsis } from "@/components/OneEllipsis"
-import { F1SearchBox } from "@/experimental/Forms/Fields/F1SearchBox"
-import { Spinner } from "@/experimental/Information/Spinner"
-import { RecordType } from "@/hooks/datasource"
-import { useI18n } from "@/lib/providers/i18n"
-import { cn, focusRing } from "@/lib/utils"
+import { F0Button } from "@/components/F0Button";
+import { F0Checkbox } from "@/components/F0Checkbox";
+import { OneEllipsis } from "@/components/OneEllipsis";
+import { F1SearchBox } from "@/experimental/Forms/Fields/F1SearchBox";
+import { Spinner } from "@/ui/Spinner";
+import { RecordType } from "@/hooks/datasource";
+import { useI18n } from "@/lib/providers/i18n";
+import { cn, focusRing } from "@/lib/utils";
 
-import { FilterTypeComponentProps } from "../types"
-import { InFilterOptions } from "./types"
-import { cacheLabel, getCacheKey, useLoadOptions } from "./useLoadOptions"
+import { FilterTypeComponentProps } from "../types";
+import { InFilterOptions } from "./types";
+import { cacheLabel, getCacheKey, useLoadOptions } from "./useLoadOptions";
 
 /**
  * Props for the InFilter component.
@@ -22,7 +22,7 @@ import { cacheLabel, getCacheKey, useLoadOptions } from "./useLoadOptions"
 type InFilterComponentProps<
   T = unknown,
   R extends RecordType = RecordType,
-> = FilterTypeComponentProps<T[], InFilterOptions<T, R>>
+> = FilterTypeComponentProps<T[], InFilterOptions<T, R>>;
 
 /**
  * A multi-select filter component that allows users to select multiple options from a predefined list.
@@ -78,11 +78,11 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
   onChange,
   isCompactMode,
 }: InFilterComponentProps<T, R>) {
-  const i18n = useI18n()
+  const i18n = useI18n();
 
-  const [searchTerm, setSearchTerm] = useState("")
+  const [searchTerm, setSearchTerm] = useState("");
 
-  const canLoadMore = useRef(true)
+  const canLoadMore = useRef(true);
 
   const { options, isLoading, error, loadOptions, loadMore } = useLoadOptions({
     schema: {
@@ -90,45 +90,45 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
       type: "in",
     },
     search: searchTerm,
-  })
+  });
 
-  const cacheKey = getCacheKey(schema)
+  const cacheKey = getCacheKey(schema);
 
   useEffect(() => {
-    let timeout: NodeJS.Timeout
+    let timeout: NodeJS.Timeout;
     if (isLoading) {
-      canLoadMore.current = false
+      canLoadMore.current = false;
     } else {
       timeout = setTimeout(() => {
-        canLoadMore.current = true
-      }, 1000)
+        canLoadMore.current = true;
+      }, 1000);
     }
 
-    return () => clearTimeout(timeout)
-  }, [isLoading])
+    return () => clearTimeout(timeout);
+  }, [isLoading]);
 
-  const hasSource = "source" in schema.options
+  const hasSource = "source" in schema.options;
 
   useEffect(() => {
-    setSearchTerm("")
-  }, [schema])
+    setSearchTerm("");
+  }, [schema]);
 
   const filteredOptions = useMemo(
     () =>
       hasSource
         ? options
         : options.filter((option) =>
-            option.label.toLowerCase().includes(searchTerm.toLowerCase())
+            option.label.toLowerCase().includes(searchTerm.toLowerCase()),
           ),
-    [hasSource, options, searchTerm]
-  )
+    [hasSource, options, searchTerm],
+  );
 
   if (isLoading && !options.length) {
     return (
       <div className="flex w-full items-center justify-center py-4">
         <Spinner size="small" />
       </div>
-    )
+    );
   }
 
   if (error) {
@@ -138,17 +138,17 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
         <button
           className={cn(
             "text-f1-foreground-primary text-xs underline",
-            focusRing()
+            focusRing(),
           )}
           onClick={() => {
             // Re-trigger the effect to retry loading
-            loadOptions(true)
+            loadOptions(true);
           }}
         >
           {i18n.filters.retry}
         </button>
       </div>
-    )
+    );
   }
 
   if (options.length === 0) {
@@ -156,55 +156,55 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
       <div className="flex w-full items-center justify-center py-4 text-sm text-f1-foreground-secondary">
         No options available
       </div>
-    )
+    );
   }
 
   // Determine if we should show the search input
   // Show search when we have loaded options (regardless of whether they came from static or async source)
-  const showSearch = options.length > 0
+  const showSearch = options.length > 0;
 
   const handleSelectAll = () => {
-    const currentValues = value ?? []
-    const newValues = [...currentValues]
+    const currentValues = value ?? [];
+    const newValues = [...currentValues];
 
     filteredOptions.forEach((option) => {
       if (!newValues.includes(option.value)) {
-        newValues.push(option.value)
+        newValues.push(option.value);
         // Cache the label when selecting all
-        cacheLabel(cacheKey, option.value, option.label)
+        cacheLabel(cacheKey, option.value, option.label);
       }
-    })
+    });
 
-    onChange(newValues)
-  }
+    onChange(newValues);
+  };
 
   const handleCheckSelectAll = (checked: boolean) => {
     if (checked) {
-      handleSelectAll()
+      handleSelectAll();
     } else {
-      onChange([])
+      onChange([]);
     }
-  }
+  };
 
   const handleClear = () => {
-    onChange([])
-  }
+    onChange([]);
+  };
 
   const handleScroll = (event: React.UIEvent<HTMLDivElement>) => {
     // Prevent multiple simultaneous calls
-    if (isLoading || !loadMore || !canLoadMore.current) return
+    if (isLoading || !loadMore || !canLoadMore.current) return;
 
-    const target = event.target as HTMLDivElement
+    const target = event.target as HTMLDivElement;
     if (target.scrollTop + target.clientHeight >= target.scrollHeight - 50) {
-      loadMore()
+      loadMore();
     }
-  }
+  };
 
   const selectedText = `${value.length} ${
     value.length === 1
       ? i18n.status.selected.singular
       : i18n.status.selected.plural
-  }`.toLowerCase()
+  }`.toLowerCase();
 
   return (
     <div
@@ -229,7 +229,7 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
         className={cn(
           "overflow-y-auto px-2",
           isCompactMode && "px-1",
-          isCompactMode ? "max-h-[360px]" : "h-full"
+          isCompactMode ? "max-h-[360px]" : "h-full",
         )}
         onScroll={handleScroll}
       >
@@ -251,8 +251,8 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
           </div>
         )}
         {filteredOptions.map((option) => {
-          const isSelected = value.includes(option.value)
-          const optionId = `option-${String(option.value)}`
+          const isSelected = value.includes(option.value);
+          const optionId = `option-${String(option.value)}`;
 
           return (
             <div
@@ -260,18 +260,18 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
               className={cn(
                 "flex w-full flex-1 cursor-pointer appearance-none items-center justify-between gap-1 rounded p-2 font-medium transition-colors hover:bg-f1-background-secondary",
                 isCompactMode && "py-1 pr-1",
-                focusRing()
+                focusRing(),
               )}
               onClick={() => {
                 if (!isSelected) {
                   // Cache the label when selecting an option
-                  cacheLabel(cacheKey, option.value, option.label)
+                  cacheLabel(cacheKey, option.value, option.label);
                 }
                 onChange(
                   isSelected
                     ? value.filter((v) => v !== option.value)
-                    : [...value, option.value]
-                )
+                    : [...value, option.value],
+                );
               }}
             >
               <span className="max-w-[250px] flex-1 whitespace-nowrap">
@@ -285,7 +285,7 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
                 hideLabel
               />
             </div>
-          )
+          );
         })}
         {isLoading && (
           <div className="flex w-full items-center justify-center py-4">
@@ -315,5 +315,5 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
         </div>
       )}
     </div>
-  )
+  );
 }

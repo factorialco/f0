@@ -1,13 +1,13 @@
-import type { Meta, StoryObj } from "@storybook/react-vite"
+import type { Meta, StoryObj } from "@storybook/react-vite";
 
-import { motion } from "motion/react"
-import { useState } from "react"
+import { motion } from "motion/react";
+import { useState } from "react";
 
-import { F0Icon } from "../../components/F0Icon"
-import { Counter } from "../../experimental/Information/Counter"
-import { Preset } from "../../experimental/OnePreset"
-import { ChevronDown } from "../../icons/app"
-import { OverflowList } from "./index"
+import { F0Icon } from "../../components/F0Icon";
+import { Counter } from "@/ui/Counter";
+import { Preset } from "@/ui/OnePreset";
+import { ChevronDown } from "../../icons/app";
+import { OverflowList } from "./index";
 
 const meta = {
   title: "Components/OverflowList",
@@ -42,7 +42,7 @@ const meta = {
   },
   decorators: [
     (Story) => {
-      const [containerWidth, setContainerWidth] = useState(640)
+      const [containerWidth, setContainerWidth] = useState(640);
       return (
         <>
           <div className="w-full gap-4">
@@ -70,20 +70,20 @@ const meta = {
             />
           </div>
         </>
-      )
+      );
     },
   ],
-} satisfies Meta<typeof OverflowList>
+} satisfies Meta<typeof OverflowList>;
 
-export default meta
-type Story = StoryObj<typeof meta>
+export default meta;
+type Story = StoryObj<typeof meta>;
 
 // Define the task type
 interface Task {
-  id: number
-  name: string
-  status: string
-  dueDate: string
+  id: number;
+  name: string;
+  status: string;
+  dueDate: string;
 }
 
 export const Default: Story = {
@@ -133,15 +133,15 @@ export const Default: Story = {
       },
     ],
     renderListItem: (item) => {
-      const task = item as Task
+      const task = item as Task;
       return (
         <div className="flex items-center gap-2 overflow-hidden whitespace-nowrap px-2 py-1">
           <span className="truncate font-medium">{task.name}</span>
         </div>
-      )
+      );
     },
     renderDropdownItem: (item) => {
-      const task = item as Task
+      const task = item as Task;
       return (
         <div className="flex flex-col p-2">
           <span className="font-medium">{task.name}</span>
@@ -150,7 +150,7 @@ export const Default: Story = {
             <span>Due: {task.dueDate}</span>
           </div>
         </div>
-      )
+      );
     },
     gap: 8,
   },
@@ -159,14 +159,14 @@ export const Default: Story = {
       <div className="w-full">
         <OverflowList {...args} />
       </div>
-    )
+    );
   },
-}
+};
 
 interface PresetItem {
-  id: number
-  name: string
-  number?: number
+  id: number;
+  name: string;
+  number?: number;
 }
 
 export const Presets: Story = {
@@ -209,17 +209,17 @@ export const Presets: Story = {
       },
     ],
     renderListItem: (item) => {
-      const preset = item as PresetItem
-      return <Preset label={preset.name} number={preset.number} />
+      const preset = item as PresetItem;
+      return <Preset label={preset.name} number={preset.number} />;
     },
     renderDropdownItem: (item) => {
-      const preset = item as PresetItem
+      const preset = item as PresetItem;
       return (
         <div className="flex justify-between rounded p-2 transition-colors hover:cursor-pointer hover:bg-f1-background-hover">
           <span className="font-medium">{preset.name}</span>
           {preset.number && <Counter value={preset.number} type="default" />}
         </div>
-      )
+      );
     },
     gap: 8,
   },
@@ -228,9 +228,9 @@ export const Presets: Story = {
       <div className="w-full">
         <OverflowList {...args} />
       </div>
-    )
+    );
   },
-}
+};
 
 export const WithCustomOverflowIndicator: Story = {
   args: {
@@ -247,4 +247,4 @@ export const WithCustomOverflowIndicator: Story = {
       </div>
     ),
   },
-}
+};

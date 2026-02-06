@@ -1,35 +1,43 @@
 // This file has been automatically migrated to valid ESM format by Storybook.
-import type { StorybookConfig } from "@storybook/react-vite"
+import type { StorybookConfig } from "@storybook/react-vite";
 
-import { createRequire } from "node:module"
-import { dirname, join, resolve } from "node:path"
-import * as process from "node:process"
-import { fileURLToPath } from "node:url"
-import remarkGfm from "remark-gfm"
-import { Preset } from "storybook/internal/types"
+import { createRequire } from "node:module";
+import { dirname, join, resolve } from "node:path";
+import * as process from "node:process";
+import { fileURLToPath } from "node:url";
+import remarkGfm from "remark-gfm";
+import { Preset } from "storybook/internal/types";
 
-const __dirname = dirname(fileURLToPath(import.meta.url))
-const require = createRequire(import.meta.url)
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const require = createRequire(import.meta.url);
 
 // We should add the STORYBOOK_ prefix to make sure that the environment variables are in browser mode (for example manager.ts file)
 if (process.env.PUBLIC_BUILD) {
-  process.env.STORYBOOK_PUBLIC_BUILD = process.env.PUBLIC_BUILD
+  process.env.STORYBOOK_PUBLIC_BUILD = process.env.PUBLIC_BUILD;
 }
 
 // Mark that we're building for Storybook to preserve data-testid attributes
-process.env.STORYBOOK_BUILD = "true"
+process.env.STORYBOOK_BUILD = "true";
 
 const config: StorybookConfig = {
   stories: [
     "../docs/Introduction.mdx",
     "../docs/**/*.mdx",
     {
-      directory: "../src/lib",
-      titlePrefix: "Library",
-    },
-    {
       directory: "../src/components",
       titlePrefix: "Components",
+    },
+    {
+      directory: "../src/experimental",
+      titlePrefix: "Components",
+    },
+    {
+      directory: "../src/ai",
+      titlePrefix: "Components",
+    },
+    {
+      directory: "../src/lib",
+      titlePrefix: "Library",
     },
     {
       directory: "../src/layouts",
@@ -40,21 +48,20 @@ const config: StorybookConfig = {
       titlePrefix: "Hooks",
     },
     {
-      directory: "../src/experimental",
-      titlePrefix: "Components",
+      directory: "../src/sds",
+      titlePrefix: "SDS",
     },
     {
-      directory: "../src/ai",
-      titlePrefix: "Components",
+      directory: "../src/examples",
+      titlePrefix: "Examples",
+    },
+    {
+      directory: "../src/ui",
+      titlePrefix: "🔒 Internal",
     },
     ...(process.env.STORYBOOK_PUBLIC_BUILD
       ? []
-      : [
-          {
-            directory: "../src/ui",
-            titlePrefix: "🔒 Internal",
-          },
-        ]),
+      : []),
   ],
   staticDirs: ["../public", "./static"],
   addons: [
@@ -96,20 +103,20 @@ const config: StorybookConfig = {
     },
   },
   viteFinal: (config) => {
-    config.resolve = config.resolve || {}
+    config.resolve = config.resolve || {};
     config.resolve.alias = {
       ...config.resolve.alias,
       "@": resolve(__dirname, "../src"),
       "~": resolve(__dirname, "../"),
-    }
+    };
     // Ensure base is set to '/' to prevent absolute path issues in CI
     // This ensures paths are relative and work correctly when served
-    config.base = config.base || "/"
-    return config
+    config.base = config.base || "/";
+    return config;
   },
-}
-export default config
+};
+export default config;
 
 function getAbsolutePath(value: string) {
-  return dirname(require.resolve(join(value, "package.json")))
+  return dirname(require.resolve(join(value, "package.json")));
 }

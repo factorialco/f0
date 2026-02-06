@@ -1,78 +1,78 @@
-import { AnimatePresence, motion } from "motion/react"
-import { ReactElement, useRef, useState } from "react"
+import { AnimatePresence, motion } from "motion/react";
+import { ReactElement, useRef, useState } from "react";
 
-import type { StatusVariant } from "@/components/tags/F0TagStatus"
+import type { StatusVariant } from "@/components/tags/F0TagStatus";
 
-import { F0OneSwitch } from "@/ai/F0OneSwitch"
-import { ModuleId } from "@/components/avatars/F0AvatarModule"
-import { F0Button } from "@/components/F0Button"
-import { ButtonInternal } from "@/components/F0Button/internal"
-import { IconType } from "@/components/F0Icon"
-import { F0TagStatus } from "@/components/tags/F0TagStatus"
-import { OneSwitch as OnePromotionSwitch } from "@/experimental/AiPromotionChat/OneSwitch"
-import { useSidebar } from "@/experimental/Navigation/ApplicationFrame/FrameProvider"
-import { Dropdown } from "@/experimental/Navigation/Dropdown"
-import { Tooltip } from "@/experimental/Overlays/Tooltip"
-import { ChevronDown, ChevronLeft, ChevronUp, Menu } from "@/icons/app"
-import { Link } from "@/lib/linkHandler"
-import { cn } from "@/lib/utils"
-import { Skeleton } from "@/ui/skeleton"
+import { F0OneSwitch } from "@/sds/ai/F0OneSwitch";
+import { ModuleId } from "@/components/avatars/F0AvatarModule";
+import { F0Button } from "@/components/F0Button";
+import { ButtonInternal } from "@/components/F0Button/internal";
+import { IconType } from "@/components/F0Icon";
+import { F0TagStatus } from "@/components/tags/F0TagStatus";
+import { OneSwitch as OnePromotionSwitch } from "@/experimental/AiPromotionChat/OneSwitch";
+import { useSidebar } from "@/examples/ApplicationFrame/FrameProvider";
+import { Dropdown } from "@/experimental/Navigation/Dropdown";
+import { Tooltip } from "@/experimental/Overlays/Tooltip";
+import { ChevronDown, ChevronLeft, ChevronUp, Menu } from "@/icons/app";
+import { Link } from "@/lib/linkHandler";
+import { cn } from "@/lib/utils";
+import { Skeleton } from "@/ui/skeleton";
 
-import { Breadcrumbs, BreadcrumbsProps } from "../Breadcrumbs"
-import { FavoriteButton } from "../Favorites"
-import { ProductUpdates, ProductUpdatesProp } from "../ProductUpdates"
+import { Breadcrumbs, BreadcrumbsProps } from "../Breadcrumbs";
+import { FavoriteButton } from "../Favorites";
+import { ProductUpdates, ProductUpdatesProp } from "../ProductUpdates";
 
 export type PageAction = {
-  label: string
-  icon: IconType
+  label: string;
+  icon: IconType;
 } & (
   | {
-      href: string
+      href: string;
     }
   | {
-      actions: Array<{ label: string; href: string }>
+      actions: Array<{ label: string; href: string }>;
     }
-)
+);
 
 type NavigationProps = {
   previous?: {
-    url: string
-    title: string
-  }
+    url: string;
+    title: string;
+  };
   next?: {
-    url: string
-    title: string
-  }
+    url: string;
+    title: string;
+  };
   counter?: {
-    current: number
-    total: number
-  }
-}
+    current: number;
+    total: number;
+  };
+};
 
 type HeaderProps = {
   module: {
-    id: ModuleId
-    name: string
-    href: string
-  }
+    id: ModuleId;
+    name: string;
+    href: string;
+  };
   statusTag?: {
-    text: string
-    variant: StatusVariant
-    tooltip?: string
-  }
-  actions?: PageAction[]
-  navigation?: NavigationProps
-  embedded?: boolean
-  breadcrumbs?: BreadcrumbsProps["breadcrumbs"]
+    text: string;
+    variant: StatusVariant;
+    tooltip?: string;
+  };
+  actions?: PageAction[];
+  navigation?: NavigationProps;
+  embedded?: boolean;
+  breadcrumbs?: BreadcrumbsProps["breadcrumbs"];
   productUpdates?: {
-    isVisible?: boolean
-  } & ProductUpdatesProp
+    isVisible?: boolean;
+  } & ProductUpdatesProp;
   favorites?: {
-    isMarked: boolean
-    onChange: (newValue: boolean) => void
-    label: string
-  }
-}
+    isMarked: boolean;
+    onChange: (newValue: boolean) => void;
+    label: string;
+  };
+};
 
 function PageNavigationLink({
   icon,
@@ -80,12 +80,12 @@ function PageNavigationLink({
   label,
   disabled,
 }: {
-  icon: IconType
-  href: string
-  label: string
-  disabled?: boolean
+  icon: IconType;
+  href: string;
+  label: string;
+  disabled?: boolean;
 }) {
-  const ref = useRef<HTMLAnchorElement>(null)
+  const ref = useRef<HTMLAnchorElement>(null);
   return (
     <F0Button
       href={href}
@@ -99,7 +99,7 @@ function PageNavigationLink({
       icon={icon}
       hideLabel
     />
-  )
+  );
 }
 
 export function PageHeader({
@@ -112,7 +112,7 @@ export function PageHeader({
   productUpdates,
   favorites,
 }: HeaderProps) {
-  const { sidebarState, toggleSidebar } = useSidebar()
+  const { sidebarState, toggleSidebar } = useSidebar();
 
   const breadcrumbsTree: typeof breadcrumbs = [
     {
@@ -122,21 +122,21 @@ export function PageHeader({
       module: module.id,
     },
     ...breadcrumbs,
-  ]
-  const hasStatus = statusTag && Object.keys(statusTag).length !== 0
-  const hasNavigation = breadcrumbs.length > 0
-  const hasActions = !embedded && actions.length > 0
-  const hasProductUpdates = !embedded && !!productUpdates?.isVisible
-  const lastBreadcrumb = breadcrumbsTree[breadcrumbsTree.length - 1]
+  ];
+  const hasStatus = statusTag && Object.keys(statusTag).length !== 0;
+  const hasNavigation = breadcrumbs.length > 0;
+  const hasActions = !embedded && actions.length > 0;
+  const hasProductUpdates = !embedded && !!productUpdates?.isVisible;
+  const lastBreadcrumb = breadcrumbsTree[breadcrumbsTree.length - 1];
   const parentBreadcrumb = hasNavigation
     ? breadcrumbsTree[breadcrumbsTree.length - 2]
-    : null
+    : null;
 
   return (
     <div
       className={cn(
         "flex items-center justify-between px-5 py-4 xs:px-6",
-        embedded ? "h-12" : "h-16"
+        embedded ? "h-12" : "h-16",
       )}
     >
       <div className="flex flex-grow items-center">
@@ -162,7 +162,7 @@ export function PageHeader({
         <div
           className={cn(
             "flex flex-grow items-center gap-2",
-            embedded && hasNavigation && "justify-center"
+            embedded && hasNavigation && "justify-center",
           )}
         >
           {embedded &&
@@ -280,12 +280,12 @@ export function PageHeader({
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 function PageAction({ action }: { action: PageAction }): ReactElement {
-  const ref = useRef<HTMLAnchorElement>(null)
-  const [isOpen, setIsOpen] = useState(false)
+  const ref = useRef<HTMLAnchorElement>(null);
+  const [isOpen, setIsOpen] = useState(false);
 
   if ("actions" in action) {
     return (
@@ -299,7 +299,7 @@ function PageAction({ action }: { action: PageAction }): ReactElement {
           pressed={isOpen}
         />
       </Dropdown>
-    )
+    );
   }
 
   return (
@@ -316,10 +316,10 @@ function PageAction({ action }: { action: PageAction }): ReactElement {
         icon={action.icon}
         hideLabel
         onClick={(e) => {
-          e.preventDefault()
-          ref.current?.click()
+          e.preventDefault();
+          ref.current?.click();
         }}
       />
     </Link>
-  )
+  );
 }

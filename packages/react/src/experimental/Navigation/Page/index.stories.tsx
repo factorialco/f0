@@ -1,18 +1,18 @@
-import type { Meta, StoryObj } from "@storybook/react-vite"
+import type { Meta, StoryObj } from "@storybook/react-vite";
 
-import { ComponentProps } from "react"
+import { ComponentProps } from "react";
 
-import { StandardLayout } from "@/layouts/StandardLayout"
+import { StandardLayout } from "@/layouts/StandardLayout";
 
-import { Placeholder } from "../../../lib/storybook-utils/placeholder"
-import { ApplicationFrame } from "../ApplicationFrame"
-import { PageHeader } from "../Header/PageHeader"
-import * as HeaderStories from "../Header/PageHeader/index.stories"
-import { Tabs } from "../Tabs"
-import * as TabsStories from "../Tabs/index.stories"
-import { Page } from "./index"
+import { Placeholder } from "../../../lib/storybook-utils/placeholder";
+import { ApplicationFrame } from "@/examples/ApplicationFrame";
+import { PageHeader } from "../Header/PageHeader";
+import * as HeaderStories from "../Header/PageHeader/index.stories";
+import { Tabs } from "../Tabs";
+import * as TabsStories from "../Tabs/index.stories";
+import { Page } from "./index";
 
-type TabsProps = ComponentProps<typeof Tabs>
+type TabsProps = ComponentProps<typeof Tabs>;
 
 const meta: Meta<typeof Page> = {
   title: "Navigation/Page",
@@ -28,16 +28,16 @@ const meta: Meta<typeof Page> = {
       </ApplicationFrame>
     ),
   ],
-}
+};
 
-export default meta
-type Story = StoryObj<ComponentProps<typeof Page>>
+export default meta;
+type Story = StoryObj<ComponentProps<typeof Page>>;
 
 const defaultModule = {
   name: "Time Tracking",
   href: "/time-tracking",
   id: "time-tracking" as const,
-}
+};
 
 // Common real-world combinations
 export const Default: Story = {
@@ -61,7 +61,7 @@ export const Default: Story = {
       </StandardLayout>
     ),
   },
-}
+};
 
 export const WithBreadcrumbs: Story = {
   args: {
@@ -92,7 +92,7 @@ export const WithBreadcrumbs: Story = {
       </StandardLayout>
     ),
   },
-}
+};
 
 export const WithBreadcrumbsAndStatus: Story = {
   args: {
@@ -128,7 +128,7 @@ export const WithBreadcrumbsAndStatus: Story = {
       </StandardLayout>
     ),
   },
-}
+};
 
 export const WithNavigation: Story = {
   args: {
@@ -165,7 +165,7 @@ export const WithNavigation: Story = {
       </StandardLayout>
     ),
   },
-}
+};
 
 export const WithNavigationAndStatus: Story = {
   args: {
@@ -207,7 +207,7 @@ export const WithNavigationAndStatus: Story = {
       </StandardLayout>
     ),
   },
-}
+};
 
 export const Embedded: Story = {
   args: {
@@ -243,4 +243,4 @@ export const Embedded: Story = {
       </StandardLayout>
     ),
   },
-}
+};

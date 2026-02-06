@@ -1,25 +1,25 @@
-import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu"
+import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
 import {
   ComponentProps,
   ReactElement,
   useCallback,
   useEffect,
   useState,
-} from "react"
+} from "react";
 
-import { ModuleId } from "@/components/avatars/F0AvatarModule"
-import { F0Button, F0ButtonProps } from "@/components/F0Button"
-import { ButtonInternal } from "@/components/F0Button/internal"
-import { F0Icon } from "@/components/F0Icon"
-import { ProductCard } from "@/components/UpsellingKit/ProductCard"
-import { Carousel } from "@/experimental/Navigation/Carousel"
-import AlertCircle from "@/icons/app/AlertCircle"
-import ChevronRight from "@/icons/app/ChevronRight"
-import CrossIcon from "@/icons/app/Cross"
-import Megaphone from "@/icons/app/Megaphone"
-import { Image } from "@/lib/imageHandler"
-import { Link } from "@/lib/linkHandler"
-import { cn } from "@/lib/utils"
+import { ModuleId } from "@/components/avatars/F0AvatarModule";
+import { F0Button, F0ButtonProps } from "@/components/F0Button";
+import { ButtonInternal } from "@/components/F0Button/internal";
+import { F0Icon } from "@/components/F0Icon";
+import { ProductCard } from "@/sds/UpsellingKit/ProductCard";
+import { Carousel } from "@/experimental/Navigation/Carousel";
+import AlertCircle from "@/icons/app/AlertCircle";
+import ChevronRight from "@/icons/app/ChevronRight";
+import CrossIcon from "@/icons/app/Cross";
+import Megaphone from "@/icons/app/Megaphone";
+import { Image } from "@/lib/imageHandler";
+import { Link } from "@/lib/linkHandler";
+import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,63 +27,63 @@ import {
   DropdownMenuPortal,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/ui/dropdown-menu"
-import { Skeleton } from "@/ui/skeleton"
+} from "@/ui/dropdown-menu";
+import { Skeleton } from "@/ui/skeleton";
 
 type ProductUpdate = {
-  title: string
-  href: string
-  mediaUrl: string
-  updated: string
-  unread?: boolean
-  onClick?: ComponentProps<typeof DropdownMenuItem>["onClick"]
-}
+  title: string;
+  href: string;
+  mediaUrl: string;
+  updated: string;
+  unread?: boolean;
+  onClick?: ComponentProps<typeof DropdownMenuItem>["onClick"];
+};
 
 type ProductUpdatesProp = {
-  label: string
-  updatesPageUrl: string
-  getUpdates: () => Promise<Array<ProductUpdate>>
-  hasUnread?: boolean
-  currentModule: string
-  onOpenChange?: ComponentProps<typeof DropdownMenu>["onOpenChange"]
-  onHeaderClick?: F0ButtonProps["onClick"]
-  onItemClick?: ComponentProps<typeof DropdownMenuItem>["onClick"]
+  label: string;
+  updatesPageUrl: string;
+  getUpdates: () => Promise<Array<ProductUpdate>>;
+  hasUnread?: boolean;
+  currentModule: string;
+  onOpenChange?: ComponentProps<typeof DropdownMenu>["onOpenChange"];
+  onHeaderClick?: F0ButtonProps["onClick"];
+  onItemClick?: ComponentProps<typeof DropdownMenuItem>["onClick"];
   emptyScreen: {
-    title: string
-    description: string
-    buttonText: string
-  }
+    title: string;
+    description: string;
+    buttonText: string;
+  };
   errorScreen: {
-    title: string
-    description: string
-    buttonText: string
-  }
+    title: string;
+    description: string;
+    buttonText: string;
+  };
   crossSelling?: {
-    isVisible: boolean
-    sectionTitle: string
+    isVisible: boolean;
+    sectionTitle: string;
 
-    onClose?: () => void
+    onClose?: () => void;
     products: Array<
       {
-        title: string
-        description: string
-        onClick: () => void
-        dismissable: boolean
-        onClose?: () => void
-        trackVisibility?: (open: boolean) => void
+        title: string;
+        description: string;
+        onClick: () => void;
+        dismissable: boolean;
+        onClose?: () => void;
+        trackVisibility?: (open: boolean) => void;
       } & (
         | {
-            module?: never
-            type: "one-campaign"
+            module?: never;
+            type: "one-campaign";
           }
         | {
-            module: ModuleId
-            type?: never
+            module: ModuleId;
+            type?: never;
           }
       )
-    >
-  }
-}
+    >;
+  };
+};
 
 const ProductUpdates = ({
   currentModule,
@@ -98,36 +98,36 @@ const ProductUpdates = ({
   hasUnread = false,
   crossSelling,
 }: ProductUpdatesProp) => {
-  const [state, setState] = useState<"idle" | "fetching" | "error">("idle")
-  const [updates, setUpdates] = useState<Array<ProductUpdate> | null>(null)
-  const [featuredUpdate, ...restUpdates] = updates ?? []
-  const [open, setOpen] = useState(false)
+  const [state, setState] = useState<"idle" | "fetching" | "error">("idle");
+  const [updates, setUpdates] = useState<Array<ProductUpdate> | null>(null);
+  const [featuredUpdate, ...restUpdates] = updates ?? [];
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    setUpdates(null)
-    setState("idle")
-  }, [currentModule])
+    setUpdates(null);
+    setState("idle");
+  }, [currentModule]);
 
   const invokeGetUpdates = useCallback(async () => {
     try {
-      setState("fetching")
-      const response = await getUpdates()
-      setState("idle")
-      setUpdates(response)
+      setState("fetching");
+      const response = await getUpdates();
+      setState("idle");
+      setUpdates(response);
     } catch {
-      setState("error")
+      setState("error");
     }
-  }, [getUpdates])
+  }, [getUpdates]);
 
   return (
     <DropdownMenu
       open={open}
       onOpenChange={async (isOpen) => {
-        setOpen(isOpen)
+        setOpen(isOpen);
         if (isOpen && updates === null) {
-          invokeGetUpdates()
+          invokeGetUpdates();
         }
-        onOpenChange(isOpen)
+        onOpenChange(isOpen);
       }}
     >
       <DropdownMenuTrigger asChild>
@@ -187,7 +187,7 @@ const ProductUpdates = ({
                 <ErrorScreen
                   {...errorScreen}
                   onClick={() => {
-                    invokeGetUpdates()
+                    invokeGetUpdates();
                   }}
                 />
               </div>
@@ -204,8 +204,8 @@ const ProductUpdates = ({
         </DropdownMenuContent>
       </DropdownMenuPortal>
     </DropdownMenu>
-  )
-}
+  );
+};
 
 const FeaturedDropdownItem = ({
   title,
@@ -215,9 +215,9 @@ const FeaturedDropdownItem = ({
   updated,
   onClick,
 }: ProductUpdate) => {
-  const itemClass = "flex flex-col items-stretch w-full"
+  const itemClass = "flex flex-col items-stretch w-full";
 
-  const isVideo = mediaUrl?.includes(".mp4")
+  const isVideo = mediaUrl?.includes(".mp4");
 
   return (
     <DropdownMenuPrimitive.Item
@@ -267,8 +267,8 @@ const FeaturedDropdownItem = ({
         </div>
       </Link>
     </DropdownMenuPrimitive.Item>
-  )
-}
+  );
+};
 
 const DropdownItem = ({
   title,
@@ -277,7 +277,7 @@ const DropdownItem = ({
   unread = false,
   onClick,
 }: ProductUpdate) => {
-  const itemClass = cn("flex flex-col items-stretch gap-3 w-full")
+  const itemClass = cn("flex flex-col items-stretch gap-3 w-full");
 
   return (
     <DropdownMenuItem asChild className={itemClass} onClick={onClick}>
@@ -288,7 +288,7 @@ const DropdownItem = ({
         rel="noopener noreferrer"
         className={cn(
           itemClass,
-          "text-f1-foreground no-underline hover:cursor-pointer"
+          "text-f1-foreground no-underline hover:cursor-pointer",
         )}
       >
         <div className="flex items-start gap-4">
@@ -302,17 +302,17 @@ const DropdownItem = ({
         </div>
       </Link>
     </DropdownMenuItem>
-  )
-}
+  );
+};
 
 const Header = ({
   title,
   url,
   onClick,
 }: {
-  title: string
-  url: string
-  onClick: F0ButtonProps["onClick"]
+  title: string;
+  url: string;
+  onClick: F0ButtonProps["onClick"];
 }) => (
   <a
     href={url}
@@ -328,7 +328,7 @@ const Header = ({
       onClick={onClick}
     />
   </a>
-)
+);
 
 const BaseScreen = ({
   icon,
@@ -337,18 +337,18 @@ const BaseScreen = ({
   description,
   iconWrapperClassName,
 }: {
-  button: ReactElement
-  icon: ReactElement
-  title: string
-  description: string
-  iconWrapperClassName?: string
+  button: ReactElement;
+  icon: ReactElement;
+  title: string;
+  description: string;
+  iconWrapperClassName?: string;
 }) => (
   <div className="w-[420px] rounded border border-solid border-f1-border-secondary bg-[hsl(var(--neutral-2))] p-12">
     <div className="flex flex-col items-center gap-4">
       <div
         className={cn(
           "grid size-14 place-items-center overflow-clip rounded border border-solid border-f1-border-secondary bg-f1-background-tertiary *:block",
-          iconWrapperClassName
+          iconWrapperClassName,
         )}
       >
         {icon}
@@ -362,7 +362,7 @@ const BaseScreen = ({
       {button}
     </div>
   </div>
-)
+);
 
 const NoUpdates = ({
   title,
@@ -370,7 +370,7 @@ const NoUpdates = ({
   buttonUrl,
   description,
 }: {
-  buttonUrl: string
+  buttonUrl: string;
 } & ProductUpdatesProp["emptyScreen"]) => (
   <BaseScreen
     title={title}
@@ -382,7 +382,7 @@ const NoUpdates = ({
       </Link>
     }
   />
-)
+);
 
 const ErrorScreen = ({
   title,
@@ -397,7 +397,7 @@ const ErrorScreen = ({
     icon={<F0Icon icon={AlertCircle} size="lg" />}
     button={<F0Button variant="outline" label={buttonText} onClick={onClick} />}
   />
-)
+);
 
 const ProductUpdatesSkeleton = () => (
   <div
@@ -422,14 +422,14 @@ const ProductUpdatesSkeleton = () => (
       </div>
     </div>
   </div>
-)
+);
 
 const UnreadDot = ({ className = "" }: { className?: string }) => (
   <div
     aria-hidden="true"
     className={cn("size-2 rounded bg-f1-background-selected-bold", className)}
   />
-)
+);
 
 const DiscoverMoreProducts = ({
   isVisible,
@@ -437,31 +437,31 @@ const DiscoverMoreProducts = ({
   crossSelling,
   onDropdownClose,
 }: {
-  isVisible: boolean
-  onClose?: () => void
-  crossSelling: ProductUpdatesProp["crossSelling"]
-  onDropdownClose: () => void
+  isVisible: boolean;
+  onClose?: () => void;
+  crossSelling: ProductUpdatesProp["crossSelling"];
+  onDropdownClose: () => void;
 }) => {
-  const [open, setOpen] = useState(isVisible)
+  const [open, setOpen] = useState(isVisible);
 
   useEffect(() => {
-    setOpen(isVisible)
-  }, [isVisible])
+    setOpen(isVisible);
+  }, [isVisible]);
 
   const handleClose = () => {
-    setOpen(false)
+    setOpen(false);
     if (onClose) {
-      onClose()
+      onClose();
     }
-  }
+  };
 
   const handleProductClick = (onClick: () => void) => {
-    setOpen(false)
-    onDropdownClose()
+    setOpen(false);
+    onDropdownClose();
     if (onClick) {
-      onClick()
+      onClick();
     }
-  }
+  };
 
   return (
     open && (
@@ -507,7 +507,7 @@ const DiscoverMoreProducts = ({
         </div>
       </>
     )
-  )
-}
+  );
+};
 
-export { ProductUpdates, type ProductUpdate, type ProductUpdatesProp }
+export { ProductUpdates, type ProductUpdate, type ProductUpdatesProp };

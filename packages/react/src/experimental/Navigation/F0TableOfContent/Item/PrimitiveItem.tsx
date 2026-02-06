@@ -1,30 +1,30 @@
-import { AnimatePresence, motion } from "motion/react"
-import { ReactNode } from "react"
+import { AnimatePresence, motion } from "motion/react";
+import { ReactNode } from "react";
 
-import { ButtonInternal } from "@/components/F0Button/internal"
-import { F0Icon } from "@/components/F0Icon"
-import { OneEllipsis } from "@/components/OneEllipsis/OneEllipsis"
-import { Counter } from "@/experimental/Information/Counter"
-import { ChevronDown, Handle } from "@/icons/app"
-import { useI18n } from "@/lib/providers/i18n"
-import { cn, focusRing } from "@/lib/utils"
+import { ButtonInternal } from "@/components/F0Button/internal";
+import { F0Icon } from "@/components/F0Icon";
+import { OneEllipsis } from "@/components/OneEllipsis/OneEllipsis";
+import { Counter } from "@/ui/Counter";
+import { ChevronDown, Handle } from "@/icons/app";
+import { useI18n } from "@/lib/providers/i18n";
+import { cn, focusRing } from "@/lib/utils";
 
-import { TOCItem } from "../types"
-import { ItemDropDown } from "./ItemDropDown"
+import { TOCItem } from "../types";
+import { ItemDropDown } from "./ItemDropDown";
 
 interface PrimitiveItemProps {
-  item: TOCItem
-  counter?: number
-  isActive?: boolean
-  sortable: boolean
-  collapsible?: boolean
-  isExpanded?: boolean
-  onToggleExpanded?: (id: string) => void
-  children?: ReactNode
-  open: boolean
-  setOpen: (open: boolean) => void
-  isHovered: boolean
-  setIsHovered: (hovered: boolean) => void
+  item: TOCItem;
+  counter?: number;
+  isActive?: boolean;
+  sortable: boolean;
+  collapsible?: boolean;
+  isExpanded?: boolean;
+  onToggleExpanded?: (id: string) => void;
+  children?: ReactNode;
+  open: boolean;
+  setOpen: (open: boolean) => void;
+  isHovered: boolean;
+  setIsHovered: (hovered: boolean) => void;
 }
 
 export function PrimitiveItem({
@@ -41,17 +41,17 @@ export function PrimitiveItem({
   isHovered,
   setIsHovered,
 }: PrimitiveItemProps) {
-  const translations = useI18n()
-  const { label, onClick, icon, disabled, otherActions } = item
+  const translations = useI18n();
+  const { label, onClick, icon, disabled, otherActions } = item;
 
   // Logic: Show counter by default (if exists), show dropdown on hover (if actions exist)
   // Keep dropdown visible while it's open to prevent flickering
-  const hasOtherActions = otherActions && otherActions.length > 0
-  const shouldShowDropdown = hasOtherActions && (isHovered || open)
-  const shouldShowCounter = counter && !shouldShowDropdown
+  const hasOtherActions = otherActions && otherActions.length > 0;
+  const shouldShowDropdown = hasOtherActions && (isHovered || open);
+  const shouldShowCounter = counter && !shouldShowDropdown;
 
   // Show handle icon on hover or when dropdown is open
-  const showHandleIcon = sortable && (isHovered || open)
+  const showHandleIcon = sortable && (isHovered || open);
 
   return (
     <div className="flex w-full min-w-0 items-center">
@@ -61,14 +61,14 @@ export function PrimitiveItem({
           size="sm"
           variant="ghost"
           onClick={(e) => {
-            e.stopPropagation()
-            onToggleExpanded?.(item.id)
+            e.stopPropagation();
+            onToggleExpanded?.(item.id);
           }}
           label={translations.actions.toggle}
           hideLabel
           className={cn(
             "text-f1-icon transition-all",
-            !isExpanded && "-rotate-90"
+            !isExpanded && "-rotate-90",
           )}
           icon={ChevronDown}
         ></ButtonInternal>
@@ -79,7 +79,7 @@ export function PrimitiveItem({
           "relative flex h-[36px] min-w-0 flex-grow items-center gap-1 rounded-[10px] border border-solid border-transparent px-1.5 text-sm transition-colors",
           isActive && "bg-f1-background-selected",
           onClick && !disabled && "cursor-pointer hover:bg-f1-background-hover",
-          disabled && "cursor-not-allowed opacity-30"
+          disabled && "cursor-not-allowed opacity-30",
         )}
         data-active={isActive || undefined}
         onClick={disabled ? undefined : () => onClick?.(item.id)}
@@ -132,7 +132,7 @@ export function PrimitiveItem({
           lines={1}
           className={cn(
             "flex-grow text-[14px] font-medium text-f1-foreground transition-all",
-            showHandleIcon || icon ? "pl-7" : "pl-0"
+            showHandleIcon || icon ? "pl-7" : "pl-0",
           )}
         >
           {label}
@@ -196,5 +196,5 @@ export function PrimitiveItem({
       </div>
       {children}
     </div>
-  )
+  );
 }

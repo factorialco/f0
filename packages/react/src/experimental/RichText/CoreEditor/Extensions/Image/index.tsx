@@ -1,38 +1,38 @@
-import type { Editor } from "@tiptap/core"
+import type { Editor } from "@tiptap/core";
 
-import { mergeAttributes } from "@tiptap/core"
-import { FileHandler } from "@tiptap/extension-file-handler"
-import { Image } from "@tiptap/extension-image"
+import { mergeAttributes } from "@tiptap/core";
+import { FileHandler } from "@tiptap/extension-file-handler";
+import { Image } from "@tiptap/extension-image";
 import {
   NodeViewWrapper,
   ReactNodeViewRenderer,
   type NodeViewProps,
-} from "@tiptap/react"
+} from "@tiptap/react";
 
-import { F0Button } from "@/components/F0Button"
-import { Spinner } from "@/experimental/Information/Spinner"
-import { Delete } from "@/icons/app"
-import { useI18n } from "@/lib/providers/i18n"
-import { cn } from "@/lib/utils"
+import { F0Button } from "@/components/F0Button";
+import { Spinner } from "@/ui/Spinner";
+import { Delete } from "@/icons/app";
+import { useI18n } from "@/lib/providers/i18n";
+import { cn } from "@/lib/utils";
 
 export type ImageUploadErrorType =
   | "file-too-large"
   | "invalid-type"
-  | "upload-failed"
+  | "upload-failed";
 
 export interface ImageUploadConfig {
-  onUpload: (file: File) => Promise<{ url: string; signedId?: string }>
-  maxFileSize?: number
-  onError?: (errorType: ImageUploadErrorType) => void
+  onUpload: (file: File) => Promise<{ url: string; signedId?: string }>;
+  maxFileSize?: number;
+  onError?: (errorType: ImageUploadErrorType) => void;
 }
 
-const DEFAULT_MAX_SIZE = 15 * 1024 * 1024 // 15MB
+const DEFAULT_MAX_SIZE = 15 * 1024 * 1024; // 15MB
 export const DEFAULT_ACCEPTED_TYPES = [
   "image/jpeg",
   "image/png",
   "image/gif",
   "image/webp",
-]
+];
 
 const ImageNodeView = ({
   node,
@@ -40,15 +40,15 @@ const ImageNodeView = ({
   selected,
   editor,
 }: NodeViewProps) => {
-  const { src, alt, title, uploading } = node.attrs
-  const isEditable = editor.isEditable
-  const translations = useI18n()
+  const { src, alt, title, uploading } = node.attrs;
+  const isEditable = editor.isEditable;
+  const translations = useI18n();
   return (
     <NodeViewWrapper className="mb-2">
       <div
         className={cn(
           "relative inline-block rounded-lg",
-          selected && "border-2 border-f1-border-selected-bold border-solid"
+          selected && "border-2 border-f1-border-selected-bold border-solid",
         )}
       >
         <img
@@ -77,8 +77,8 @@ const ImageNodeView = ({
         )}
       </div>
     </NodeViewWrapper>
-  )
-}
+  );
+};
 
 export const ImageExtension = Image.extend({
   addAttributes() {
@@ -95,45 +95,48 @@ export const ImageExtension = Image.extend({
         renderHTML: () => ({}),
         parseHTML: () => null,
       },
-    }
+    };
   },
   addNodeView() {
-    return ReactNodeViewRenderer(ImageNodeView)
+    return ReactNodeViewRenderer(ImageNodeView);
   },
   renderHTML({ HTMLAttributes }) {
-    return ["img", mergeAttributes(this.options.HTMLAttributes, HTMLAttributes)]
+    return [
+      "img",
+      mergeAttributes(this.options.HTMLAttributes, HTMLAttributes),
+    ];
   },
 }).configure({
   inline: false,
   allowBase64: true,
-})
+});
 
 const handleImageUpload = async (
   editor: Editor,
   file: File,
   uploadConfig: ImageUploadConfig,
-  pos?: number
+  pos?: number,
 ) => {
-  const maxSize = uploadConfig.maxFileSize ?? DEFAULT_MAX_SIZE
-  const { onError } = uploadConfig
+  const maxSize = uploadConfig.maxFileSize ?? DEFAULT_MAX_SIZE;
+  const { onError } = uploadConfig;
 
   // Validate file type
   if (!DEFAULT_ACCEPTED_TYPES.includes(file.type)) {
-    onError?.("invalid-type")
-    return
+    onError?.("invalid-type");
+    return;
   }
 
   // Validate file size
   if (file.size > maxSize) {
-    onError?.("file-too-large")
-    return
+    onError?.("file-too-large");
+    return;
   }
 
   // Create a local preview to make a smoother experience for the user
-  const previewUrl = URL.createObjectURL(file)
-  const uploadId = `upload-${Date.now()}-${Math.random().toString(36).slice(2)}`
+  const previewUrl = URL.createObjectURL(file);
+  const uploadId = `upload-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
-  const insertPos = pos ?? editor.state.selection.anchor
+  const insertPos = pos ?? editor.state.selection.anchor;
   editor
     .chain()
     .focus()
@@ -148,25 +151,25 @@ const handleImageUpload = async (
         },
       },
     ])
-    .run()
+    .run();
 
   try {
-    const { url } = await uploadConfig.onUpload(file)
+    const { url } = await uploadConfig.onUpload(file);
 
     // We need to udpate the URL local with the URL from the server
-    const { doc } = editor.state
-    let nodePos: number | null = null
+    const { doc } = editor.state;
+    let nodePos: number | null = null;
 
     doc.descendants((node, position) => {
       if (
         node.type.name === "image" &&
         node.attrs["data-upload-id"] === uploadId
       ) {
-        nodePos = position
-        return false
+        nodePos = position;
+        return false;
       }
-      return true
-    })
+      return true;
+    });
 
     if (nodePos !== null) {
       editor
@@ -177,48 +180,48 @@ const handleImageUpload = async (
           uploading: false,
           "data-upload-id": null,
         })
-        .run()
+        .run();
     }
   } catch {
-    onError?.("upload-failed")
+    onError?.("upload-failed");
 
     // Remove the placeholder on failure
-    const { doc } = editor.state
+    const { doc } = editor.state;
     doc.descendants((node, position) => {
       if (
         node.type.name === "image" &&
         node.attrs["data-upload-id"] === uploadId
       ) {
-        editor.chain().setNodeSelection(position).deleteSelection().run()
-        return false
+        editor.chain().setNodeSelection(position).deleteSelection().run();
+        return false;
       }
-      return true
-    })
+      return true;
+    });
   } finally {
     // Clean up the blob URL
-    URL.revokeObjectURL(previewUrl)
+    URL.revokeObjectURL(previewUrl);
   }
-}
+};
 
 export const createFileHandlerExtension = (uploadConfig: ImageUploadConfig) =>
   FileHandler.configure({
     allowedMimeTypes: DEFAULT_ACCEPTED_TYPES,
     onDrop: (currentEditor, files, pos) => {
       files.forEach((file) => {
-        handleImageUpload(currentEditor, file, uploadConfig, pos)
-      })
+        handleImageUpload(currentEditor, file, uploadConfig, pos);
+      });
     },
     onPaste: (currentEditor, files) => {
       files.forEach((file) => {
-        handleImageUpload(currentEditor, file, uploadConfig)
-      })
+        handleImageUpload(currentEditor, file, uploadConfig);
+      });
     },
-  })
+  });
 
 export const insertImageFromFile = (
   editor: Editor,
   file: File,
-  uploadConfig: ImageUploadConfig
+  uploadConfig: ImageUploadConfig,
 ) => {
-  handleImageUpload(editor, file, uploadConfig)
-}
+  handleImageUpload(editor, file, uploadConfig);
+};

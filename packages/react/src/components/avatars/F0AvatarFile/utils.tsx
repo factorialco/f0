@@ -1,12 +1,12 @@
-import { BadgeProps } from "@/experimental/Information/Badge"
+import { BadgeProps } from "@/ui/IconBadge";
 
-import { F0AvatarModuleProps } from "../F0AvatarModule"
-import { AvatarFileSize, FileDef } from "./types"
+import { F0AvatarModuleProps } from "../F0AvatarModule";
+import { AvatarFileSize, FileDef } from "./types";
 
 type FileTypeInfo = {
-  type: string
-  color: string
-}
+  type: string;
+  color: string;
+};
 
 const FILE_TYPE_MAP: Record<string, FileTypeInfo> = {
   pdf: {
@@ -65,7 +65,7 @@ const FILE_TYPE_MAP: Record<string, FileTypeInfo> = {
     type: "XML",
     color: "text-f1-foreground-positive",
   },
-}
+};
 
 const MIME_MATCH_MAP: Record<string, keyof typeof FILE_TYPE_MAP> = {
   pdf: "pdf",
@@ -86,7 +86,7 @@ const MIME_MATCH_MAP: Record<string, keyof typeof FILE_TYPE_MAP> = {
   gz: "archive",
   "7z": "archive",
   xml: "xml",
-}
+};
 
 const EXTENSION_MAP: Record<string, keyof typeof FILE_TYPE_MAP> = {
   // PDF
@@ -134,27 +134,27 @@ const EXTENSION_MAP: Record<string, keyof typeof FILE_TYPE_MAP> = {
   markdown: "markdown",
   // XML
   xml: "xml",
-}
+};
 
 const getFileTypeInfo = (file: FileDef): FileTypeInfo => {
-  const mimeType = (file.type || "").toLowerCase()
+  const mimeType = (file.type || "").toLowerCase();
 
   const matchedMimeKey = Object.keys(MIME_MATCH_MAP).find((key) =>
-    mimeType.includes(key)
-  )
+    mimeType.includes(key),
+  );
 
   if (matchedMimeKey) {
-    return FILE_TYPE_MAP[MIME_MATCH_MAP[matchedMimeKey]]
+    return FILE_TYPE_MAP[MIME_MATCH_MAP[matchedMimeKey]];
   }
 
-  const extension = (file.name || "").toLowerCase().split(".").pop()
+  const extension = (file.name || "").toLowerCase().split(".").pop();
 
   if (extension && EXTENSION_MAP[extension]) {
-    return FILE_TYPE_MAP[EXTENSION_MAP[extension]]
+    return FILE_TYPE_MAP[EXTENSION_MAP[extension]];
   }
 
-  return FILE_TYPE_MAP.default
-}
+  return FILE_TYPE_MAP.default;
+};
 
 export const getBadgeSize = (size?: AvatarFileSize): BadgeProps["size"] => {
   const sizeMap: Partial<
@@ -162,23 +162,23 @@ export const getBadgeSize = (size?: AvatarFileSize): BadgeProps["size"] => {
   > = {
     lg: "sm",
     sm: "sm",
-  } as const
+  } as const;
 
-  return size && sizeMap[size] ? sizeMap[size] : sizeMap.sm
-}
+  return size && sizeMap[size] ? sizeMap[size] : sizeMap.sm;
+};
 
 export const getAvatarSize = (
-  size?: AvatarFileSize
+  size?: AvatarFileSize,
 ): F0AvatarModuleProps["size"] | undefined => {
   const sizeMap: Partial<
     Record<Exclude<AvatarFileSize, undefined>, F0AvatarModuleProps["size"]>
   > = {
     lg: "xs",
     sm: "xs",
-  } as const
+  } as const;
 
-  return size && sizeMap[size] ? sizeMap[size] : sizeMap.sm
-}
+  return size && sizeMap[size] ? sizeMap[size] : sizeMap.sm;
+};
 
-export { getFileTypeInfo }
-export type { FileTypeInfo }
+export { getFileTypeInfo };
+export type { FileTypeInfo };

@@ -1,10 +1,10 @@
-import { AnimatePresence, motion } from "motion/react"
+import { AnimatePresence, motion } from "motion/react";
 
-import { Spinner } from "@/experimental/Information/Spinner"
-import { cn } from "@/lib/utils"
+import { Spinner } from "@/ui/Spinner";
+import { cn } from "@/lib/utils";
 
 interface LoadingEnhanceProps {
-  label?: string
+  label?: string;
 }
 
 /**
@@ -16,11 +16,11 @@ const LoadingEnhanceInline = ({ label }: LoadingEnhanceProps) => {
       <Spinner size="small" />
       <p className="font-medium text-f1-foreground">{label}</p>
     </div>
-  )
-}
+  );
+};
 
 interface LoadingEnhanceOverlayProps {
-  isFullscreen?: boolean
+  isFullscreen?: boolean;
 }
 
 /**
@@ -39,13 +39,13 @@ const LoadingEnhanceOverlay = ({
         transition={{ duration: 0.2 }}
         className={cn(
           "absolute inset-0 z-50 flex items-center justify-center rounded-lg px-3 pb-2 pt-3",
-          !isFullscreen && "max-h-60"
+          !isFullscreen && "max-h-60",
         )}
       >
         <motion.div
           className={cn(
             "flex h-full w-full flex-row items-center justify-center gap-3 rounded-md",
-            isFullscreen && "max-w-[824px]"
+            isFullscreen && "max-w-[824px]",
           )}
           style={{
             background:
@@ -63,7 +63,7 @@ const LoadingEnhanceOverlay = ({
         />
       </motion.div>
     </AnimatePresence>
-  )
-}
+  );
+};
 
-export { LoadingEnhanceInline, LoadingEnhanceOverlay }
+export { LoadingEnhanceInline, LoadingEnhanceOverlay };

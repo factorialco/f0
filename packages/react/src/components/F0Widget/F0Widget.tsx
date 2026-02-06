@@ -1,32 +1,32 @@
-import { AnimatePresence, motion } from "motion/react"
-import { useEffect, useState, type ReactNode } from "react"
+import { AnimatePresence, motion } from "motion/react";
+import { useEffect, useState, type ReactNode } from "react";
 
-import { AIButton as AIButtonComponent } from "@/components/AIButton"
-import { F0Icon } from "@/components/F0Icon"
-import { F0Text } from "@/components/F0Text"
+import { AIButton as AIButtonComponent } from "@/sds/ai/AIButton";
+import { F0Icon } from "@/components/F0Icon";
+import { F0Text } from "@/components/F0Text";
 import {
   DropdownInternal,
   DropdownItem,
-} from "@/experimental/Navigation/Dropdown/internal.tsx"
-import { One as OneIcon } from "@/icons/ai"
-import { Ellipsis, Handle } from "@/icons/app"
-import { useI18n } from "@/lib/providers/i18n"
-import { withSkeleton } from "@/lib/skeleton"
-import { cn } from "@/lib/utils"
-import { Skeleton } from "@/ui/skeleton"
+} from "@/experimental/Navigation/Dropdown/internal.tsx";
+import { One as OneIcon } from "@/icons/ai";
+import { Ellipsis, Handle } from "@/icons/app";
+import { useI18n } from "@/lib/providers/i18n";
+import { withSkeleton } from "@/lib/skeleton";
+import { cn } from "@/lib/utils";
+import { Skeleton } from "@/ui/skeleton";
 
-import { ButtonInternal } from "../F0Button/internal"
+import { ButtonInternal } from "../F0Button/internal";
 
 export interface WidgetProps {
-  title: string
-  draggable?: boolean
-  onDragStart?: () => void
-  onDragEnd?: () => void
-  isDragging?: boolean
-  AIButton?: () => void
-  actions?: DropdownItem[]
-  children: ReactNode
-  selected?: boolean
+  title: string;
+  draggable?: boolean;
+  onDragStart?: () => void;
+  onDragEnd?: () => void;
+  isDragging?: boolean;
+  AIButton?: () => void;
+  actions?: DropdownItem[];
+  children: ReactNode;
+  selected?: boolean;
 }
 
 const F0WidgetBase = ({
@@ -40,30 +40,30 @@ const F0WidgetBase = ({
   children,
   selected = false,
 }: WidgetProps) => {
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
-  const [isHovered, setIsHovered] = useState(false)
-  const t = useI18n()
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+  const t = useI18n();
 
   const handleDropdownOpenChange = (open: boolean) => {
-    setIsDropdownOpen(open)
-  }
+    setIsDropdownOpen(open);
+  };
 
-  const isActive = isHovered || isDropdownOpen
+  const isActive = isHovered || isDropdownOpen;
 
   // Handle drag end globally
   useEffect(() => {
-    if (!isDragging || !onDragEnd) return
+    if (!isDragging || !onDragEnd) return;
 
     const handleGlobalMouseUp = () => {
-      onDragEnd()
-    }
+      onDragEnd();
+    };
 
-    document.addEventListener("mouseup", handleGlobalMouseUp)
+    document.addEventListener("mouseup", handleGlobalMouseUp);
 
     return () => {
-      document.removeEventListener("mouseup", handleGlobalMouseUp)
-    }
-  }, [isDragging, onDragEnd])
+      document.removeEventListener("mouseup", handleGlobalMouseUp);
+    };
+  }, [isDragging, onDragEnd]);
 
   return (
     <div
@@ -75,7 +75,7 @@ const F0WidgetBase = ({
         selected &&
           "border-f1-border-selected-bold shadow-[0_0_0_4px_hsl(var(--selected-50)/0.1)]",
         isDragging &&
-          "cursor-grabbing border-f1-border-hover shadow-[0_6px_12px_0_hsl(var(--shadow)/0.06),0_16px_24px_-12px_hsl(var(--shadow)/0.05)]"
+          "cursor-grabbing border-f1-border-hover shadow-[0_6px_12px_0_hsl(var(--shadow)/0.06),0_16px_24px_-12px_hsl(var(--shadow)/0.05)]",
       )}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -85,7 +85,7 @@ const F0WidgetBase = ({
           className={cn(
             "flex min-w-0 flex-1 items-center",
             !draggable && "pl-4",
-            !actions && !AIButton && "pr-4"
+            !actions && !AIButton && "pr-4",
           )}
         >
           {draggable && (
@@ -100,7 +100,7 @@ const F0WidgetBase = ({
           <div
             className={cn(
               "flex min-w-0 flex-1 items-center",
-              draggable && "-translate-x-1.5"
+              draggable && "-translate-x-1.5",
             )}
           >
             <F0Text variant="label" content={title} ellipsis />
@@ -111,7 +111,7 @@ const F0WidgetBase = ({
             <motion.div
               className={cn(
                 "flex shrink-0 items-center gap-0.5 pr-2",
-                !actions && "pr-4"
+                !actions && "pr-4",
               )}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -158,8 +158,8 @@ const F0WidgetBase = ({
         {children}
       </div>
     </div>
-  )
-}
+  );
+};
 
 const F0WidgetSkeleton = () => {
   return (
@@ -176,9 +176,9 @@ const F0WidgetSkeleton = () => {
         <Skeleton className="h-3/4 w-full rounded-sm" />
       </div>
     </div>
-  )
-}
+  );
+};
 
-F0WidgetBase.displayName = "F0Widget"
+F0WidgetBase.displayName = "F0Widget";
 
-export const F0Widget = withSkeleton(F0WidgetBase, F0WidgetSkeleton)
+export const F0Widget = withSkeleton(F0WidgetBase, F0WidgetSkeleton);

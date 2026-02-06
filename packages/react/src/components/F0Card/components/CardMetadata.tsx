@@ -1,10 +1,10 @@
-import React from "react"
+import React from "react";
 
-import { F0Icon } from "@/components/F0Icon"
-import { valueDisplayRenderers } from "@/components/value-display"
-import { Tooltip } from "@/experimental/Overlays/Tooltip"
+import { F0Icon } from "@/components/F0Icon";
+import { valueDisplayRenderers } from "@/ui/value-display";
+import { Tooltip } from "@/experimental/Overlays/Tooltip";
 
-import { CardMetadata as CardMetadataType } from "../types"
+import { CardMetadata as CardMetadataType } from "../types";
 
 export const cardPropertyRenderers = {
   text: valueDisplayRenderers.text,
@@ -23,18 +23,18 @@ export const cardPropertyRenderers = {
   file: valueDisplayRenderers.file,
   folder: valueDisplayRenderers.folder,
   progressBar: valueDisplayRenderers.progressBar,
-} as const
+} as const;
 
-export type CardPropertyType = keyof typeof cardPropertyRenderers
+export type CardPropertyType = keyof typeof cardPropertyRenderers;
 
 interface CardMetadataProps {
-  metadata: CardMetadataType
+  metadata: CardMetadataType;
 }
 
 export function CardMetadata({ metadata }: CardMetadataProps) {
-  const { type, value } = metadata.property
+  const { type, value } = metadata.property;
 
-  const renderer = cardPropertyRenderers[type as CardPropertyType]
+  const renderer = cardPropertyRenderers[type as CardPropertyType];
 
   if (!renderer) {
     return (
@@ -44,13 +44,13 @@ export function CardMetadata({ metadata }: CardMetadataProps) {
         )}
         <span>Unsupported property type: {type}</span>
       </div>
-    )
+    );
   }
 
   const typedRenderer = renderer as (
     arg: Parameters<(typeof cardPropertyRenderers)[CardPropertyType]>[0],
-    meta?: { visualization: "card" }
-  ) => React.ReactNode
+    meta?: { visualization: "card" },
+  ) => React.ReactNode;
 
   return (
     <div className="flex h-8 items-center gap-1.5">
@@ -63,5 +63,5 @@ export function CardMetadata({ metadata }: CardMetadataProps) {
       )}
       {typedRenderer(value, { visualization: "card" })}
     </div>
-  )
+  );
 }
