@@ -1,6 +1,6 @@
 {
   "name": "@factorialco/f0-react-native",
-  "version": "0.22.0",
+  "version": "0.23.0",
   "type": "module",
   "description": "React Native components for F0 Design System",
   "main": "expo-router/entry",
