@@ -40,6 +40,42 @@
   --spacing-2_5: 10px;
   --spacing-3_5: 14px;
 
+  /* Typography Scale (exact from f0 core) */
+  --text-xs: 0.625rem;
+  --leading-xs: 0.75rem;
+
+  --text-sm: 0.75rem;
+  --leading-sm: 1rem;
+
+  --text-base: 0.875rem;
+  --leading-base: 1.25rem;
+  --tracking-base: -0.005em;
+
+  /* text-md alias for legacy usage */
+  --text-md: var(--text-base);
+  --leading-md: var(--leading-base);
+  --tracking-md: var(--tracking-base);
+
+  --text-lg: 1rem;
+  --leading-lg: 1.5rem;
+  --tracking-lg: -0.01em;
+
+  --text-xl: 1.125rem;
+  --leading-xl: 1.75rem;
+  --tracking-xl: -0.01em;
+
+  --text-2xl: 1.375rem;
+  --leading-2xl: 1.75rem;
+  --tracking-2xl: -0.01em;
+
+  --text-3xl: 1.625rem;
+  --leading-3xl: 2rem;
+  --tracking-3xl: -0.01em;
+
+  --text-4xl: 2.25rem;
+  --leading-4xl: 2.5rem;
+  --tracking-4xl: -0.02em;
+
   /* Base Colors - Static values that don't change between themes */
   --color-white-3: hsla(0, 0%, 100%, 0.03);
   --color-white-5: hsla(0, 0%, 100%, 0.05);
