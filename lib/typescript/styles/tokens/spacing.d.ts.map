@@ -1,0 +1,1 @@
+{"version":3,"file":"spacing.d.ts","sourceRoot":"","sources":["../../../../src/styles/tokens/spacing.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,MAAM,EAAE,MAAM,aAAa,CAAA;AAEzC;;;;;;;;GAQG;AAEH,KAAK,YAAY,GAAG,WAAW,CAAC,MAAM,CAAC,OAAO,CAAC,CAAC,CAAC,SAAS,CAAC,CAAA;AAE3D,eAAO,MAAM,eAAe,EAAE,YAqC7B,CAAA;AAED,eAAO,MAAM,eAAe,EAAE,YAqC7B,CAAA;AAOD,eAAO,MAAM,cAAc,EAAE,YAK5B,CAAA"}

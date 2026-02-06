@@ -1,0 +1,597 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`PressableFeedback Snapshots Snapshot - default variant (both) 1`] = `
+<View
+  accessibilityState={
+    {
+      "busy": undefined,
+      "checked": undefined,
+      "disabled": undefined,
+      "expanded": undefined,
+      "selected": undefined,
+    }
+  }
+  accessibilityValue={
+    {
+      "max": undefined,
+      "min": undefined,
+      "now": undefined,
+      "text": undefined,
+    }
+  }
+  accessible={true}
+  className="overflow-hidden"
+  collapsable={false}
+  focusable={true}
+  onBlur={[Function]}
+  onClick={[Function]}
+  onFocus={[Function]}
+  onResponderGrant={[Function]}
+  onResponderMove={[Function]}
+  onResponderRelease={[Function]}
+  onResponderTerminate={[Function]}
+  onResponderTerminationRequest={[Function]}
+  onStartShouldSetResponder={[Function]}
+  style={
+    [
+      {
+        "transform": [
+          {
+            "scale": 1,
+          },
+        ],
+      },
+      undefined,
+    ]
+  }
+>
+  <View
+    className="absolute inset-0"
+    pointerEvents="none"
+    style={
+      [
+        {
+          "opacity": 0,
+        },
+        {
+          "backgroundColor": "rgba(0, 0, 0, 1)",
+        },
+      ]
+    }
+  />
+  <Text>
+    Test Content
+  </Text>
+</View>
+`;
+
+exports[`PressableFeedback Snapshots Snapshot - disabled state 1`] = `
+<View
+  accessibilityState={
+    {
+      "busy": undefined,
+      "checked": undefined,
+      "disabled": true,
+      "expanded": undefined,
+      "selected": undefined,
+    }
+  }
+  accessibilityValue={
+    {
+      "max": undefined,
+      "min": undefined,
+      "now": undefined,
+      "text": undefined,
+    }
+  }
+  accessible={true}
+  className="overflow-hidden"
+  collapsable={false}
+  focusable={true}
+  onBlur={[Function]}
+  onClick={[Function]}
+  onFocus={[Function]}
+  onResponderGrant={[Function]}
+  onResponderMove={[Function]}
+  onResponderRelease={[Function]}
+  onResponderTerminate={[Function]}
+  onResponderTerminationRequest={[Function]}
+  onStartShouldSetResponder={[Function]}
+  style={
+    [
+      {
+        "transform": [
+          {
+            "scale": 1,
+          },
+        ],
+      },
+      undefined,
+    ]
+  }
+>
+  <View
+    className="absolute inset-0"
+    pointerEvents="none"
+    style={
+      [
+        {
+          "opacity": 0,
+        },
+        {
+          "backgroundColor": "rgba(0, 0, 0, 1)",
+        },
+      ]
+    }
+  />
+  <Text>
+    Test Content
+  </Text>
+</View>
+`;
+
+exports[`PressableFeedback Snapshots Snapshot - highlight variant 1`] = `
+<View
+  accessibilityState={
+    {
+      "busy": undefined,
+      "checked": undefined,
+      "disabled": undefined,
+      "expanded": undefined,
+      "selected": undefined,
+    }
+  }
+  accessibilityValue={
+    {
+      "max": undefined,
+      "min": undefined,
+      "now": undefined,
+      "text": undefined,
+    }
+  }
+  accessible={true}
+  className="overflow-hidden"
+  collapsable={false}
+  focusable={true}
+  onBlur={[Function]}
+  onClick={[Function]}
+  onFocus={[Function]}
+  onResponderGrant={[Function]}
+  onResponderMove={[Function]}
+  onResponderRelease={[Function]}
+  onResponderTerminate={[Function]}
+  onResponderTerminationRequest={[Function]}
+  onStartShouldSetResponder={[Function]}
+  style={
+    [
+      {
+        "transform": [
+          {
+            "scale": 1,
+          },
+        ],
+      },
+      undefined,
+    ]
+  }
+>
+  <View
+    className="absolute inset-0"
+    pointerEvents="none"
+    style={
+      [
+        {
+          "opacity": 0,
+        },
+        {
+          "backgroundColor": "rgba(0, 0, 0, 1)",
+        },
+      ]
+    }
+  />
+  <Text>
+    Test Content
+  </Text>
+</View>
+`;
+
+exports[`PressableFeedback Snapshots Snapshot - none variant 1`] = `
+<View
+  accessibilityState={
+    {
+      "busy": undefined,
+      "checked": undefined,
+      "disabled": undefined,
+      "expanded": undefined,
+      "selected": undefined,
+    }
+  }
+  accessibilityValue={
+    {
+      "max": undefined,
+      "min": undefined,
+      "now": undefined,
+      "text": undefined,
+    }
+  }
+  accessible={true}
+  className="overflow-hidden"
+  collapsable={false}
+  focusable={true}
+  onBlur={[Function]}
+  onClick={[Function]}
+  onFocus={[Function]}
+  onResponderGrant={[Function]}
+  onResponderMove={[Function]}
+  onResponderRelease={[Function]}
+  onResponderTerminate={[Function]}
+  onResponderTerminationRequest={[Function]}
+  onStartShouldSetResponder={[Function]}
+  style={
+    [
+      {
+        "transform": [
+          {
+            "scale": 1,
+          },
+        ],
+      },
+      undefined,
+    ]
+  }
+>
+  <Text>
+    Test Content
+  </Text>
+</View>
+`;
+
+exports[`PressableFeedback Snapshots Snapshot - scale variant 1`] = `
+<View
+  accessibilityState={
+    {
+      "busy": undefined,
+      "checked": undefined,
+      "disabled": undefined,
+      "expanded": undefined,
+      "selected": undefined,
+    }
+  }
+  accessibilityValue={
+    {
+      "max": undefined,
+      "min": undefined,
+      "now": undefined,
+      "text": undefined,
+    }
+  }
+  accessible={true}
+  className="overflow-hidden"
+  collapsable={false}
+  focusable={true}
+  onBlur={[Function]}
+  onClick={[Function]}
+  onFocus={[Function]}
+  onResponderGrant={[Function]}
+  onResponderMove={[Function]}
+  onResponderRelease={[Function]}
+  onResponderTerminate={[Function]}
+  onResponderTerminationRequest={[Function]}
+  onStartShouldSetResponder={[Function]}
+  style={
+    [
+      {
+        "transform": [
+          {
+            "scale": 1,
+          },
+        ],
+      },
+      undefined,
+    ]
+  }
+>
+  <Text>
+    Test Content
+  </Text>
+</View>
+`;
+
+exports[`PressableFeedback Snapshots Snapshot - with custom className 1`] = `
+<View
+  accessibilityState={
+    {
+      "busy": undefined,
+      "checked": undefined,
+      "disabled": undefined,
+      "expanded": undefined,
+      "selected": undefined,
+    }
+  }
+  accessibilityValue={
+    {
+      "max": undefined,
+      "min": undefined,
+      "now": undefined,
+      "text": undefined,
+    }
+  }
+  accessible={true}
+  className="overflow-hidden bg-blue-500 p-4"
+  collapsable={false}
+  focusable={true}
+  onBlur={[Function]}
+  onClick={[Function]}
+  onFocus={[Function]}
+  onResponderGrant={[Function]}
+  onResponderMove={[Function]}
+  onResponderRelease={[Function]}
+  onResponderTerminate={[Function]}
+  onResponderTerminationRequest={[Function]}
+  onStartShouldSetResponder={[Function]}
+  style={
+    [
+      {
+        "transform": [
+          {
+            "scale": 1,
+          },
+        ],
+      },
+      undefined,
+    ]
+  }
+>
+  <View
+    className="absolute inset-0"
+    pointerEvents="none"
+    style={
+      [
+        {
+          "opacity": 0,
+        },
+        {
+          "backgroundColor": "rgba(0, 0, 0, 1)",
+        },
+      ]
+    }
+  />
+  <Text>
+    Test Content
+  </Text>
+</View>
+`;
+
+exports[`PressableFeedback Snapshots Snapshot - with custom highlightAnimation config 1`] = `
+<View
+  accessibilityState={
+    {
+      "busy": undefined,
+      "checked": undefined,
+      "disabled": undefined,
+      "expanded": undefined,
+      "selected": undefined,
+    }
+  }
+  accessibilityValue={
+    {
+      "max": undefined,
+      "min": undefined,
+      "now": undefined,
+      "text": undefined,
+    }
+  }
+  accessible={true}
+  className="overflow-hidden"
+  collapsable={false}
+  focusable={true}
+  onBlur={[Function]}
+  onClick={[Function]}
+  onFocus={[Function]}
+  onResponderGrant={[Function]}
+  onResponderMove={[Function]}
+  onResponderRelease={[Function]}
+  onResponderTerminate={[Function]}
+  onResponderTerminationRequest={[Function]}
+  onStartShouldSetResponder={[Function]}
+  style={
+    [
+      {
+        "transform": [
+          {
+            "scale": 1,
+          },
+        ],
+      },
+      undefined,
+    ]
+  }
+>
+  <View
+    className="absolute inset-0"
+    pointerEvents="none"
+    style={
+      [
+        {
+          "opacity": 0,
+        },
+        {
+          "backgroundColor": "rgba(255, 0, 0, 1)",
+        },
+      ]
+    }
+  />
+  <Text>
+    Test Content
+  </Text>
+</View>
+`;
+
+exports[`PressableFeedback Snapshots Snapshot - with custom scaleAnimation config 1`] = `
+<View
+  accessibilityState={
+    {
+      "busy": undefined,
+      "checked": undefined,
+      "disabled": undefined,
+      "expanded": undefined,
+      "selected": undefined,
+    }
+  }
+  accessibilityValue={
+    {
+      "max": undefined,
+      "min": undefined,
+      "now": undefined,
+      "text": undefined,
+    }
+  }
+  accessible={true}
+  className="overflow-hidden"
+  collapsable={false}
+  focusable={true}
+  onBlur={[Function]}
+  onClick={[Function]}
+  onFocus={[Function]}
+  onResponderGrant={[Function]}
+  onResponderMove={[Function]}
+  onResponderRelease={[Function]}
+  onResponderTerminate={[Function]}
+  onResponderTerminationRequest={[Function]}
+  onStartShouldSetResponder={[Function]}
+  style={
+    [
+      {
+        "transform": [
+          {
+            "scale": 1,
+          },
+        ],
+      },
+      undefined,
+    ]
+  }
+>
+  <Text>
+    Test Content
+  </Text>
+</View>
+`;
+
+exports[`PressableFeedback Snapshots Snapshot - with custom style 1`] = `
+<View
+  accessibilityState={
+    {
+      "busy": undefined,
+      "checked": undefined,
+      "disabled": undefined,
+      "expanded": undefined,
+      "selected": undefined,
+    }
+  }
+  accessibilityValue={
+    {
+      "max": undefined,
+      "min": undefined,
+      "now": undefined,
+      "text": undefined,
+    }
+  }
+  accessible={true}
+  className="overflow-hidden"
+  collapsable={false}
+  focusable={true}
+  onBlur={[Function]}
+  onClick={[Function]}
+  onFocus={[Function]}
+  onResponderGrant={[Function]}
+  onResponderMove={[Function]}
+  onResponderRelease={[Function]}
+  onResponderTerminate={[Function]}
+  onResponderTerminationRequest={[Function]}
+  onStartShouldSetResponder={[Function]}
+  style={
+    [
+      {
+        "transform": [
+          {
+            "scale": 1,
+          },
+        ],
+      },
+      {
+        "padding": 16,
+      },
+    ]
+  }
+>
+  <View
+    className="absolute inset-0"
+    pointerEvents="none"
+    style={
+      [
+        {
+          "opacity": 0,
+        },
+        {
+          "backgroundColor": "rgba(0, 0, 0, 1)",
+        },
+      ]
+    }
+  />
+  <Text>
+    Test Content
+  </Text>
+</View>
+`;
+
+exports[`PressableFeedback Snapshots Snapshot - with disableAnimation 1`] = `
+<View
+  accessibilityState={
+    {
+      "busy": undefined,
+      "checked": undefined,
+      "disabled": undefined,
+      "expanded": undefined,
+      "selected": undefined,
+    }
+  }
+  accessibilityValue={
+    {
+      "max": undefined,
+      "min": undefined,
+      "now": undefined,
+      "text": undefined,
+    }
+  }
+  accessible={true}
+  className="overflow-hidden"
+  collapsable={false}
+  focusable={true}
+  onBlur={[Function]}
+  onClick={[Function]}
+  onFocus={[Function]}
+  onResponderGrant={[Function]}
+  onResponderMove={[Function]}
+  onResponderRelease={[Function]}
+  onResponderTerminate={[Function]}
+  onResponderTerminationRequest={[Function]}
+  onStartShouldSetResponder={[Function]}
+  style={
+    [
+      {
+        "transform": [
+          {
+            "scale": 1,
+          },
+        ],
+      },
+      undefined,
+    ]
+  }
+>
+  <Text>
+    Test Content
+  </Text>
+</View>
+`;

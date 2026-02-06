@@ -1,7 +1,7 @@
 import React from "react";
-import { DetailsItem, DetailsItemType } from "../DetailsItem";
+import { Text, View } from "react-native";
 import { cn } from "../../../../lib/utils";
-import { View, Text } from "react-native";
+import { DetailsItem, DetailsItemType } from "../DetailsItem";
 
 export interface DetailsItemsListProps {
   title?: string;

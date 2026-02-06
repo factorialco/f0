@@ -1,0 +1,1 @@
+{"version":3,"file":"index.d.ts","sourceRoot":"","sources":["../../../../../src/components/Avatars/IconAvatar/index.tsx"],"names":[],"mappings":"AAEA,OAAO,EAAQ,QAAQ,EAAE,MAAM,YAAY,CAAC;AAE5C,KAAK,KAAK,GAAG;IACX,IAAI,EAAE,QAAQ,CAAC;IACf,IAAI,CAAC,EAAE,IAAI,GAAG,IAAI,GAAG,IAAI,CAAC;IAC1B,SAAS,CAAC,EAAE,MAAM,CAAC;CACpB,CAAC;AAQF,eAAO,MAAM,UAAU;gCAAsC,KAAK;;CAYjE,CAAC"}
