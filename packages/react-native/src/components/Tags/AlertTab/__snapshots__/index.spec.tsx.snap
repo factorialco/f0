@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`AlertTag Snapshot Critical level 1`] = `
 <View
@@ -9,7 +9,7 @@ exports[`AlertTag Snapshot Critical level 1`] = `
       {
         "busy": undefined,
         "checked": undefined,
-        "disabled": undefined,
+        "disabled": true,
         "expanded": undefined,
         "selected": undefined,
       }
@@ -23,7 +23,7 @@ exports[`AlertTag Snapshot Critical level 1`] = `
       }
     }
     accessible={true}
-    className="flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-0.5 bg-f1-background-critical text-f1-foreground-critical"
+    className="overflow-hidden flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-0.5 bg-f1-background-critical text-f1-foreground-critical"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -35,6 +35,18 @@ exports[`AlertTag Snapshot Critical level 1`] = `
     onResponderTerminate={[Function]}
     onResponderTerminationRequest={[Function]}
     onStartShouldSetResponder={[Function]}
+    style={
+      [
+        {
+          "transform": [
+            {
+              "scale": 1,
+            },
+          ],
+        },
+        undefined,
+      ]
+    }
   >
     <RNSVGSvgView
       align="xMidYMid"
@@ -53,6 +65,9 @@ exports[`AlertTag Snapshot Critical level 1`] = `
             "backgroundColor": "transparent",
             "borderWidth": 0,
           },
+          [
+            {},
+          ],
           {
             "flex": 0,
             "height": "100%",
@@ -104,7 +119,7 @@ exports[`AlertTag Snapshot Ingo level 1`] = `
       {
         "busy": undefined,
         "checked": undefined,
-        "disabled": undefined,
+        "disabled": true,
         "expanded": undefined,
         "selected": undefined,
       }
@@ -118,7 +133,7 @@ exports[`AlertTag Snapshot Ingo level 1`] = `
       }
     }
     accessible={true}
-    className="flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-0.5 bg-f1-background-info text-f1-foreground-info"
+    className="overflow-hidden flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-0.5 bg-f1-background-info text-f1-foreground-info"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -130,6 +145,18 @@ exports[`AlertTag Snapshot Ingo level 1`] = `
     onResponderTerminate={[Function]}
     onResponderTerminationRequest={[Function]}
     onStartShouldSetResponder={[Function]}
+    style={
+      [
+        {
+          "transform": [
+            {
+              "scale": 1,
+            },
+          ],
+        },
+        undefined,
+      ]
+    }
   >
     <RNSVGSvgView
       align="xMidYMid"
@@ -148,6 +175,9 @@ exports[`AlertTag Snapshot Ingo level 1`] = `
             "backgroundColor": "transparent",
             "borderWidth": 0,
           },
+          [
+            {},
+          ],
           {
             "flex": 0,
             "height": "100%",
@@ -202,7 +232,7 @@ exports[`AlertTag Snapshot Warning level 1`] = `
       {
         "busy": undefined,
         "checked": undefined,
-        "disabled": undefined,
+        "disabled": true,
         "expanded": undefined,
         "selected": undefined,
       }
@@ -216,7 +246,7 @@ exports[`AlertTag Snapshot Warning level 1`] = `
       }
     }
     accessible={true}
-    className="flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-0.5 bg-f1-background-warning text-f1-foreground-warning"
+    className="overflow-hidden flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-0.5 bg-f1-background-warning text-f1-foreground-warning"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -228,6 +258,18 @@ exports[`AlertTag Snapshot Warning level 1`] = `
     onResponderTerminate={[Function]}
     onResponderTerminationRequest={[Function]}
     onStartShouldSetResponder={[Function]}
+    style={
+      [
+        {
+          "transform": [
+            {
+              "scale": 1,
+            },
+          ],
+        },
+        undefined,
+      ]
+    }
   >
     <RNSVGSvgView
       align="xMidYMid"
@@ -246,6 +288,9 @@ exports[`AlertTag Snapshot Warning level 1`] = `
             "backgroundColor": "transparent",
             "borderWidth": 0,
           },
+          [
+            {},
+          ],
           {
             "flex": 0,
             "height": "100%",

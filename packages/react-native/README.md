@@ -1,5 +1,7 @@
 # F0 React Native 🎨
 
+> 🚧 **Status: WIP** — We are building this design system from the ground up. Expect changes and breaking changes as we iterate. 🏗️
+
 React Native implementation of the F0 Design System.
 
 ## 🚀 Quick Setup
@@ -10,17 +12,27 @@ React Native implementation of the F0 Design System.
 # Install package and peer dependencies
 pnpm add @factorialco/f0-react-native \
   date-fns@^3.6.0 \
-  nativewind@^4.2.1 \
   react-native-reanimated@^3.19.4 \
   react-native-safe-area-context@^5.4.0 \
   react-native-svg@^15.12.1 \
   react-native-worklets-core@^1.6.2 \
-  tailwindcss@^3.4.19 \
+  tailwind-merge@^3.4.0 \
+  tailwind-variants@^3.2.2 \
+  tailwindcss@^4.1.18 \
+  uniwind@^1.2.7 \
   twemoji-parser@^14.0.0
-
-# Install dev dependencies
-pnpm add -D tailwindcss@^3.4.19
 ```
+
+> **Note:** The following peer dependencies are required:
+> - `uniwind` and `tailwindcss` - Required for styling (must be configured in Metro and CSS files)
+> - `tailwind-merge` and `tailwind-variants` - Required for component variant system and class merging
+> - `react-native-reanimated` - Required for animations
+> - `react-native-safe-area-context` - Required for safe area handling
+> - `react-native-svg` - Required for icon components
+> - `date-fns` - Required for date utilities
+> - `twemoji-parser` - Required for emoji support
+> 
+> `react-native-worklets-core` is optional but recommended for better performance.
 
 ### 2️⃣ Configure Babel
 
@@ -30,10 +42,7 @@ pnpm add -D tailwindcss@^3.4.19
 module.exports = function (api) {
   api.cache(true);
   return {
-    presets: [
-      ["babel-preset-expo", { jsxImportSource: "nativewind" }], // Expo only
-      "nativewind/babel",
-    ],
+    presets: ["babel-preset-expo"], // Expo only
     plugins: [
       "react-native-worklets-core/plugin",
       "react-native-reanimated/plugin", // MUST be last
@@ -42,44 +51,48 @@ module.exports = function (api) {
 };
 ```
 
+> **Note:** Uniwind doesn't require special Babel configuration. The above is a standard Expo setup.
+
 ### 3️⃣ Configure Metro
 
 **`metro.config.js`:**
 
 ```javascript
 const { getDefaultConfig } = require("expo/metro-config");
-const { withNativeWind } = require("nativewind/metro");
+const { withUniwindConfig } = require("uniwind/metro");
 
 const config = getDefaultConfig(__dirname);
-module.exports = withNativeWind(config, { input: "./global.css" });
+
+// Ensure CSS files trigger reloads
+config.resolver.sourceExts = [...(config.resolver.sourceExts || []), "css"];
+
+module.exports = withUniwindConfig(config, {
+  cssEntryFile: "./global.css",
+  dtsFile: "./uniwind-types.d.ts",
+});
 ```
 
-### 4️⃣ Configure Tailwind
-
-**`tailwind.config.js`:**
-
-```javascript
-const f0Config = require("@factorialco/f0-react-native/tailwind.config");
-
-module.exports = {
-  ...f0Config,
-  content: [
-    ...(f0Config.content || []),
-    "./app/**/*.{js,jsx,ts,tsx}",
-    "./src/**/*.{js,jsx,ts,tsx}",
-  ],
-  presets: [require("nativewind/preset"), ...(f0Config.presets || [])],
-};
-```
-
-### 5️⃣ Create Global CSS
+### 4️⃣ Create Global CSS
 
 **`global.css` (root):**
 
 ```css
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+@import 'uniwind';
+
+/* Import F0 styles (theme tokens + base styles) */
+@import '@factorialco/f0-react-native/styles';
+
+/* Add your app's source paths for Tailwind CSS v4 */
+@source "./app/**/*.{js,jsx,ts,tsx}";
+@source "./src/**/*.{js,jsx,ts,tsx}";
+
+/* Add F0 component sources so Tailwind can detect classes */
+@source "./node_modules/@factorialco/f0-react-native/lib";
+
+/* Also scan library source files */
+@source "./node_modules/@factorialco/f0-react-native/src/**/*.{js,jsx,ts,tsx}";
+
 ```
 
 **Import in your entry file (`App.tsx` or `index.js`):**
@@ -88,15 +101,68 @@ module.exports = {
 import "./global.css";
 ```
 
-### 6️⃣ TypeScript Support (Optional)
+> **Note:** Add `@source "./node_modules/@factorialco/f0-react-native/lib";` so Tailwind can detect all component classes.
 
-**`nativewind-env.d.ts` (root):**
+### 5️⃣ Add Custom Fonts (Host App)
 
-```typescript
-/// <reference types="nativewind/types" />
+To use custom fonts in your host app, load them with Expo Font and override the font CSS variables.
+
+**Install font dependencies (Expo):**
+
+```bash
+pnpm add expo-font @expo-google-fonts/your-font
 ```
 
+**Load fonts in your app (Expo):**
+
+```tsx
+import { useFonts } from "expo-font";
+import {
+  YourFont_400Regular,
+  YourFont_500Medium,
+  YourFont_600SemiBold,
+} from "@expo-google-fonts/your-font";
+
+export default function App() {
+  const [fontsLoaded] = useFonts({
+    YourFont_400Regular,
+    YourFont_500Medium,
+    YourFont_600SemiBold,
+  });
+
+  if (!fontsLoaded) {
+    return null; // Or return a loading screen
+  }
+
+  return <YourApp />; // Render your app root
+}
+```
+
+**Override font variables in `global.css`:**
+
+```css
+@theme {
+  --font-normal: "YourFont-Regular";
+  --font-medium: "YourFont-Medium";
+  --font-semibold: "YourFont-SemiBold";
+}
+```
+
+> **Note:** The font names must match the PostScript names of the loaded fonts. Use the exact names from your font package or assets.
+
+### 6️⃣ TypeScript Support (Optional)
+
+**`uniwind-types.d.ts` (root):**
+
+```typescript
+/// <reference types="uniwind/types" />
+```
+
+This file is automatically generated by Uniwind when you run Metro. You can add it to your `.gitignore` if desired.
+
 ## 📦 Usage
+
+### Basic Component Usage
 
 ```tsx
 import { Button, Icon, AppIcons } from "@factorialco/f0-react-native";
@@ -104,12 +170,94 @@ import { Button, Icon, AppIcons } from "@factorialco/f0-react-native";
 export default function App() {
   return (
     <>
-      <Button>Click me</Button>
+      <Button label="Click me" variant="default" size="md" />
       <Icon icon={AppIcons.Calendar} size="md" />
     </>
   );
 }
 ```
+
+### Using the `cn` Utility
+
+The package exports a `cn` utility function for merging Tailwind classes with automatic conflict resolution:
+
+```tsx
+import { cn } from "@factorialco/f0-react-native";
+import { View } from "react-native";
+
+function MyComponent({ className, isActive }) {
+  return (
+    <View
+      className={cn(
+        'bg-background p-4 rounded-lg',
+        'border border-divider',
+        isActive && 'bg-accent',
+        className
+      )}
+    />
+  );
+}
+```
+
+The `cn` utility:
+- ✅ Automatically merges Tailwind classes with conflict resolution
+- ✅ Uses `tailwind-merge` under the hood
+- ✅ Supports custom opacity class groups
+- ✅ Properly handles conditional classes
+
+### Component Variants
+
+All components use `tailwind-variants` for type-safe variant props:
+
+```tsx
+import { Button } from "@factorialco/f0-react-native";
+
+// Type-safe variants
+<Button 
+  label="Primary Button"
+  variant="default"  // ✅ Autocomplete: "default" | "outline" | "critical" | "neutral" | "ghost" | "promote"
+  size="md"          // ✅ Autocomplete: "sm" | "md" | "lg"
+/>
+```
+
+## 🔧 Troubleshooting
+
+### Classes Not Being Detected by Uniwind
+
+If styles from F0 components aren't being applied, ensure:
+
+1. **Import styles and add source paths:** Your `global.css` includes the F0 styles and the F0 source path:
+   ```css
+   @import '@factorialco/f0-react-native/styles';
+   @source "./node_modules/@factorialco/f0-react-native/lib";
+   ```
+
+2. **Metro Cache:** Clear Metro bundler cache:
+   ```bash
+   npx expo start --clear
+   # or
+   npm start -- --reset-cache
+   ```
+
+3. **Dependencies:** Verify all peer dependencies are installed:
+   ```bash
+   pnpm list tailwind-merge tailwind-variants tailwindcss uniwind
+   ```
+
+### TypeScript Errors with Variants
+
+If you see TypeScript errors related to variants, ensure `tailwind-variants` is installed:
+
+```bash
+pnpm add tailwind-variants@^3.2.2
+```
+
+### Build Errors
+
+If you encounter build errors, ensure:
+- All peer dependencies are installed
+- Metro config includes CSS file extensions
+- Babel plugins are properly configured
 
 ## 🔧 Development
 
@@ -118,15 +266,33 @@ export default function App() {
 pnpm test
 
 # Type check
-pnpm tsc-check
+pnpm tsc
 
 # Lint
 pnpm lint
+
+# Build package
+pnpm build
 ```
 
-## 📚 Documentation
+## 📦 Peer Dependencies
 
-For detailed installation guide, see [docs/INSTALLATION.md](./docs/INSTALLATION.md).
+This package requires the following peer dependencies to be installed in your host project:
+
+| Package | Version | Required | Purpose |
+|---------|---------|----------|---------|
+| `react` | `*` | ✅ Yes | React library |
+| `react-native` | `*` | ✅ Yes | React Native framework |
+| `tailwindcss` | `^4.1.18` | ✅ Yes | CSS framework |
+| `uniwind` | `^1.2.7` | ✅ Yes | Tailwind CSS for React Native |
+| `tailwind-merge` | `^3.4.0` | ✅ Yes | Class merging utility |
+| `tailwind-variants` | `^3.2.2` | ✅ Yes | Variant system |
+| `react-native-reanimated` | `^3.19.4` | ✅ Yes | Animations |
+| `react-native-safe-area-context` | `^5.4.0` | ✅ Yes | Safe area handling |
+| `react-native-svg` | `^15.12.1` | ✅ Yes | SVG support for icons |
+| `date-fns` | `^3.6.0` | ✅ Yes | Date utilities |
+| `twemoji-parser` | `^14.0.0` | ✅ Yes | Emoji support |
+| `react-native-worklets-core` | `^1.6.2` | ⚠️ Optional | Performance optimization |
 
 ## 📄 License
 
