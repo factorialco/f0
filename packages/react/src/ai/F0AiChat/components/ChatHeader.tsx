@@ -4,11 +4,11 @@ import { motion } from "motion/react"
 
 import { ButtonInternal } from "@/components/F0Button/internal"
 import Cross from "@/icons/app/Cross"
-import Plus from "@/icons/app/Plus"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
 import { useAiChat } from "../providers/AiChatStateProvider"
+import { New } from "@/icons/app"
 
 export const ChatHeader = (props: HeaderProps) => {
   const { labels } = useChatContext()
@@ -33,7 +33,7 @@ export const ChatHeader = (props: HeaderProps) => {
             variant="ghost"
             hideLabel
             label={translations.ai.startNewChat}
-            icon={Plus}
+            icon={New}
             onClick={() => {
               clear()
             }}
