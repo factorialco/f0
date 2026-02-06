@@ -1,10 +1,10 @@
-import { a5 as lk, bt as L6, bu as F6, bv as P6, bw as Jc, bx as z6, by as Rf, D as $6, bz as B6, ab as le, V as dk, J as j6, bA as H6, ao as dd, bB as fk, bC as V6, bD as W6, ak as ck, bE as hg, bF as ll, bG as q6, a6 as T, a7 as yi, u as Ce, bH as U6, bI as G6, bJ as K6, bK as J6, bL as Y6, av as lt, bM as Q6, bN as em, bO as uk, aj as Je, bP as X6, bQ as hk, ah as me, bR as pk, bS as mk, ac as Wt, bT as gk, bU as uh, bV as yk, a8 as Q, bW as co, ag as U, bX as Jn, bY as Z6, bZ as eC, b_ as ra, b$ as vk, c0 as bk, aP as Yn, c1 as kk, c2 as tm, c3 as In, c4 as nm, c5 as us, v as xk, c6 as tC, c7 as br, am as Re, a9 as kr, c8 as wk, c9 as nC, ca as pg, cb as Hs, cc as im, cd as Ba, ce as fd, cf as iC, cg as _k, ch as rC, ci as rm, cj as sa, ck as yn, cl as sC, cm as oC, cn as nr, co as Yc, cp as aC, cq as Lo, cr as Ss, cs as lC, ct as Ck, cu as dC, cv as fC, cw as cC, cx as uC, ad as cn, af as xt, cy as Sk, cz as Nk, aL as sm, t as hC, cA as om, cB as Ek, cC as Lf, cD as pC, al as Zr, cE as mC, cF as Qc, cG as gC, cH as am, cI as hs, cJ as ir, cK as lm, cL as mg, cM as gg, cN as yC, cO as yg, cP as Tk, cQ as dm, cR as Ak, cS as vC, at as Ff, au as Pf, aw as zf, bq as ja, b4 as cd, ai as Ha, cT as bC, cU as Mk, an as zn, b2 as ui, cV as kC, cW as Ok, cX as xC, cY as Dk, b0 as qn, ax as hi, aZ as fm, a_ as Ik, aB as ud, aX as Va, cZ as wC, c_ as Rk, c$ as Lk, d0 as _C, d1 as Wa, d2 as cm, d3 as $f, d4 as oa, b9 as aa, d5 as CC, d6 as Fk, d7 as SC, d8 as NC, d9 as EC, da as TC, db as Pk, dc as AC, dd as zk, de as MC, df as OC, dg as DC, dh as vg, di as $k, dj as IC, dk as hh, dl as Bk, dm as jk, dn as RC, dp as LC, bp as Bf, aJ as Hk, bs as FC, dq as jf, br as PC, dr as Vk, aK as es, aD as zr, ds as bg, dt as hd, du as zC, dv as ph, dw as Hf, dx as $C, dy as BC, b1 as jC, aY as Wk, a as HC, d as VC, dz as um, F as WC, dA as qC, dB as UC, dC as GC, dD as KC, dE as JC, dF as qk, dG as Uk, dH as Gk, dI as YC, dJ as QC, dK as XC, dL as ZC, dM as Kk, dN as eS, dO as Jk, dP as tS, dQ as nS, dR as iS, dS as rS, dT as sS, dU as oS, dV as aS, dW as lS, bd as dS, be as fS, bl as Vf, bj as hm, dX as pm, bk as Yk, aC as cS, bf as pd, dY as uS, dZ as hS, d_ as mh, d$ as pS, e0 as kg, e1 as mS, e2 as gS, e3 as yS, e4 as vS, e5 as bS, e6 as Qk, e7 as kS, aa as Xk, ba as xS, bi as wS, aM as _S, aN as CS, aO as SS, e8 as NS, e9 as Zk, ea as uo, eb as Wf, ec as qf, ed as ho, b3 as mm, ee as xg, ef as ES, eg as TS, eh as gh, ei as ex, ej as tx, ek as nx, el as AS, em as MS, en as OS, eo as DS, ep as ix, eq as rx, er as sx, es as ox, et as IS, eu as ax, ev as lx, ew as dx, ex as RS, ey as fx, ez as LS, eA as FS, eB as PS, eC as zS, eD as $S, eE as BS, eF as jS, eG as HS, eH as wg, eI as _g, eJ as Cg, eK as VS, eL as WS, eM as qS, eN as cx, eO as US } from "./F0AiChat-DUx0i8UY.js";
-import { eR as CQ, eQ as SQ, eP as NQ, eW as EQ, eX as TQ, eT as AQ, eS as MQ, eV as OQ, a$ as DQ, eU as IQ } from "./F0AiChat-DUx0i8UY.js";
+import { a5 as lk, bt as L6, bu as F6, bv as P6, bw as Jc, bx as z6, by as Rf, D as $6, bz as B6, ab as le, V as dk, J as j6, bA as H6, ao as dd, bB as fk, bC as V6, bD as W6, ak as ck, bE as hg, bF as ll, bG as q6, a6 as T, a7 as yi, u as Ce, bH as U6, bI as G6, bJ as K6, bK as J6, bL as Y6, av as lt, bM as Q6, bN as em, bO as uk, aj as Je, bP as X6, bQ as hk, ah as me, bR as pk, bS as mk, ac as Wt, bT as gk, bU as uh, bV as yk, a8 as Q, bW as co, ag as U, bX as Jn, bY as Z6, bZ as eC, b_ as ra, b$ as vk, c0 as bk, aP as Yn, c1 as kk, c2 as tm, c3 as In, c4 as nm, c5 as us, v as xk, c6 as tC, c7 as br, am as Re, a9 as kr, c8 as wk, c9 as nC, ca as pg, cb as Hs, cc as im, cd as Ba, ce as fd, cf as iC, cg as _k, ch as rC, ci as rm, cj as sa, ck as yn, cl as sC, cm as oC, cn as nr, co as Yc, cp as aC, cq as Lo, cr as Ss, cs as lC, ct as Ck, cu as dC, cv as fC, cw as cC, cx as uC, ad as cn, af as xt, cy as Sk, cz as Nk, aL as sm, t as hC, cA as om, cB as Ek, cC as Lf, cD as pC, al as Zr, cE as mC, cF as Qc, cG as gC, cH as am, cI as hs, cJ as ir, cK as lm, cL as mg, cM as gg, cN as yC, cO as yg, cP as Tk, cQ as dm, cR as Ak, cS as vC, at as Ff, au as Pf, aw as zf, bq as ja, b4 as cd, ai as Ha, cT as bC, cU as Mk, an as zn, b2 as ui, cV as kC, cW as Ok, cX as xC, cY as Dk, b0 as qn, ax as hi, aZ as fm, a_ as Ik, aB as ud, aX as Va, cZ as wC, c_ as Rk, c$ as Lk, d0 as _C, d1 as Wa, d2 as cm, d3 as $f, d4 as oa, b9 as aa, d5 as CC, d6 as Fk, d7 as SC, d8 as NC, d9 as EC, da as TC, db as Pk, dc as AC, dd as zk, de as MC, df as OC, dg as DC, dh as vg, di as $k, dj as IC, dk as hh, dl as Bk, dm as jk, dn as RC, dp as LC, bp as Bf, aJ as Hk, bs as FC, dq as jf, br as PC, dr as Vk, aK as es, aD as zr, ds as bg, dt as hd, du as zC, dv as ph, dw as Hf, dx as $C, dy as BC, b1 as jC, aY as Wk, a as HC, d as VC, dz as um, F as WC, dA as qC, dB as UC, dC as GC, dD as KC, dE as JC, dF as qk, dG as Uk, dH as Gk, dI as YC, dJ as QC, dK as XC, dL as ZC, dM as Kk, dN as eS, dO as Jk, dP as tS, dQ as nS, dR as iS, dS as rS, dT as sS, dU as oS, dV as aS, dW as lS, bd as dS, be as fS, bl as Vf, bj as hm, dX as pm, bk as Yk, aC as cS, bf as pd, dY as uS, dZ as hS, d_ as mh, d$ as pS, e0 as kg, e1 as mS, e2 as gS, e3 as yS, e4 as vS, e5 as bS, e6 as Qk, e7 as kS, aa as Xk, ba as xS, bi as wS, aM as _S, aN as CS, aO as SS, e8 as NS, e9 as Zk, ea as uo, eb as Wf, ec as qf, ed as ho, b3 as mm, ee as xg, ef as ES, eg as TS, eh as gh, ei as ex, ej as tx, ek as nx, el as AS, em as MS, en as OS, eo as DS, ep as ix, eq as rx, er as sx, es as ox, et as IS, eu as ax, ev as lx, ew as dx, ex as RS, ey as fx, ez as LS, eA as FS, eB as PS, eC as zS, eD as $S, eE as BS, eF as jS, eG as HS, eH as wg, eI as _g, eJ as Cg, eK as VS, eL as WS, eM as qS, eN as cx, eO as US } from "./F0AiChat-BJbUX4IN.js";
+import { eR as CQ, eQ as SQ, eP as NQ, eW as EQ, eX as TQ, eT as AQ, eS as MQ, eV as OQ, a$ as DQ, eU as IQ } from "./F0AiChat-BJbUX4IN.js";
 import { jsx as u, jsxs as b, Fragment as _e } from "react/jsx-runtime";
 import * as Xe from "react";
 import G, { createContext as Qn, forwardRef as ye, useRef as oe, useEffect as re, useContext as Xn, PureComponent as GS, useTransition as KS, useState as z, useLayoutEffect as ps, useId as Uf, useCallback as Te, useMemo as Y, memo as qa, Fragment as Bi, isValidElement as ux, cloneElement as gm, createElement as yh, useDebugValue as hx, createRef as JS, version as Sg, useImperativeHandle as Gf, Children as px } from "react";
-import { f as Is, aC as la, j as dl, aD as YS, b as Xc, aE as QS, A as XS, d as fl, i as ZS, m as e9, G as t9, g as Ng, aF as n9, l as Eg, aG as i9, p as r9, aH as mx, aI as gx, aJ as s9, aK as vh, C as o9, av as a9, a4 as Vs, D as Ft, t as l9, x as d9, y as f9, F as c9, M as Tg, N as Ag, O as u9, P as h9, ak as p9, aL as bh, aM as Kf, a8 as m9, aN as yx, aO as g9, aP as y9, aQ as v9, af as kh, aR as b9, aS as k9, aq as ym, ag as vm, aT as vx, ae as bx, a2 as po, aa as x9, aU as w9, aV as _9, aW as C9, a6 as Jf, aX as Yf, aY as Qf, a7 as Xf, aj as bm, aZ as S9, az as N9, a_ as xh, a$ as E9, b0 as md, b1 as T9, aA as A9, b2 as M9, ay as kx, ax as O9, aw as D9, b3 as I9, b4 as R9, b5 as L9, b6 as F9, aB as xx, b7 as wx, ao as _x, b8 as P9, b9 as z9, ba as $9, a9 as B9, R as j9, T as H9, V as V9, W as W9, Z as q9, U as U9, bb as Mg, bc as G9, bd as K9, n as J9 } from "./DataCollectionStorageProvider-W2R63fa1.js";
-import { ab as LQ, a3 as FQ, be as PQ, bf as zQ, al as $Q, am as BQ } from "./DataCollectionStorageProvider-W2R63fa1.js";
+import { f as Is, aC as la, j as dl, aD as YS, b as Xc, aE as QS, A as XS, d as fl, i as ZS, m as e9, G as t9, g as Ng, aF as n9, l as Eg, aG as i9, p as r9, aH as mx, aI as gx, aJ as s9, aK as vh, C as o9, av as a9, a4 as Vs, D as Ft, t as l9, x as d9, y as f9, F as c9, M as Tg, N as Ag, O as u9, P as h9, ak as p9, aL as bh, aM as Kf, a8 as m9, aN as yx, aO as g9, aP as y9, aQ as v9, af as kh, aR as b9, aS as k9, aq as ym, ag as vm, aT as vx, ae as bx, a2 as po, aa as x9, aU as w9, aV as _9, aW as C9, a6 as Jf, aX as Yf, aY as Qf, a7 as Xf, aj as bm, aZ as S9, az as N9, a_ as xh, a$ as E9, b0 as md, b1 as T9, aA as A9, b2 as M9, ay as kx, ax as O9, aw as D9, b3 as I9, b4 as R9, b5 as L9, b6 as F9, aB as xx, b7 as wx, ao as _x, b8 as P9, b9 as z9, ba as $9, a9 as B9, R as j9, T as H9, V as V9, W as W9, Z as q9, U as U9, bb as Mg, bc as G9, bd as K9, n as J9 } from "./DataCollectionStorageProvider-KSHJ568i.js";
+import { ab as LQ, a3 as FQ, be as PQ, bf as zQ, al as $Q, am as BQ } from "./DataCollectionStorageProvider-KSHJ568i.js";
 import km from "react-dom";
 import './experimental.css';function Cx(t, e) {
   const n = lk(e()), i = () => n.set(e());
@@ -1488,12 +1488,12 @@ function Wg({ icon: t, href: e, label: n, disabled: i }) {
   });
 }
 function uY({ module: t, statusTag: e = void 0, breadcrumbs: n = [], actions: i = [], embedded: r = !1, navigation: s, productUpdates: o, favorites: a }) {
-  const { sidebarState: l, toggleSidebar: d, isLastToggleInvokedByUser: f } = go(), c = [{
+  const { sidebarState: l, toggleSidebar: d } = go(), f = [{
     id: t.href,
     label: t.name,
     href: t.href,
     module: t.id
-  }, ...n], h = e && Object.keys(e).length !== 0, p = n.length > 0, m = !r && i.length > 0, g = !r && !!o?.isVisible, y = c[c.length - 1], v = p ? c[c.length - 2] : null;
+  }, ...n], c = e && Object.keys(e).length !== 0, h = n.length > 0, p = !r && i.length > 0, m = !r && !!o?.isVisible, g = f[f.length - 1], y = h ? f[f.length - 2] : null;
   return b("div", {
     className: T("flex items-center justify-between px-5 py-4 xs:px-6", r ? "h-12" : "h-16"),
     children: [b("div", {
@@ -1515,9 +1515,6 @@ function uY({ module: t, statusTag: e = void 0, breadcrumbs: n = [], actions: i 
           children: u("div", {
             className: "mr-3",
             children: u(Q, {
-              ref: (w) => {
-                f && w?.focus();
-              },
               variant: "ghost",
               hideLabel: !0,
               onClick: () => d(),
@@ -1527,36 +1524,36 @@ function uY({ module: t, statusTag: e = void 0, breadcrumbs: n = [], actions: i 
           })
         })
       }), b("div", {
-        className: T("flex flex-grow items-center gap-2", r && p && "justify-center"),
-        children: [r && p && v && !("loading" in v) && u("div", {
+        className: T("flex flex-grow items-center gap-2", r && h && "justify-center"),
+        children: [r && h && y && !("loading" in y) && u("div", {
           className: "absolute left-4",
           children: u(Jn, {
-            href: v.href,
+            href: y.href,
             children: u(Q, {
               variant: "ghost",
               hideLabel: !0,
               label: "Back",
               icon: tm,
-              onClick: (w) => w.preventDefault()
+              onClick: (v) => v.preventDefault()
             })
           })
-        }), r && p ? u("div", {
+        }), r && h ? u("div", {
           className: "text-lg font-semibold text-f1-foreground",
-          children: "loading" in y ? u(U, {
+          children: "loading" in g ? u(U, {
             className: "h-4 w-24"
-          }) : y.label
+          }) : g.label
         }) : u(z8, {
-          breadcrumbs: c,
+          breadcrumbs: f,
           append: a !== void 0 && u(W8, {
             label: a.label,
             isMarked: a.isMarked,
             onChange: a?.onChange
           })
-        }, c[0].id)]
+        }, f[0].id)]
       })]
     }), b("div", {
       className: "flex items-center gap-3",
-      children: [!r && h && u("div", {
+      children: [!r && c && u("div", {
         children: e.tooltip ? u(In, {
           label: e.tooltip,
           children: u("div", {
@@ -1570,7 +1567,7 @@ function uY({ module: t, statusTag: e = void 0, breadcrumbs: n = [], actions: i 
           text: e.text,
           variant: e.variant
         })
-      }), !r && h && (s || m || g) && u("div", {
+      }), !r && c && (s || p || m) && u("div", {
         className: "h-4 w-px bg-f1-border-secondary"
       }), s && b("div", {
         className: "flex items-center gap-3",
@@ -1591,21 +1588,21 @@ function uY({ module: t, statusTag: e = void 0, breadcrumbs: n = [], actions: i 
             disabled: !s.next
           })]
         })]
-      }), s && m && u("div", {
+      }), s && p && u("div", {
         className: "h-4 w-px bg-f1-border-secondary"
-      }), (g || m) && b("div", {
+      }), (m || p) && b("div", {
         className: "flex items-center gap-2",
-        children: [g && u("div", {
+        children: [m && u("div", {
           className: "items-right flex gap-2",
           children: u(q8, {
             ...o,
             currentModule: t.name
           })
-        }), m && u("div", {
+        }), p && u("div", {
           className: "items-right flex gap-2",
-          children: i.map((w, x) => u(Z8, {
-            action: w
-          }, x))
+          children: i.map((v, w) => u(Z8, {
+            action: v
+          }, w))
         })]
       }), b("div", {
         children: [u(xk, {}), u(Dx, {})]
@@ -12811,7 +12808,7 @@ function qM({ ai: t, aiPromotion: e, children: n, sidebar: i, banner: r }) {
             }), u(le.main, {
               id: "content",
               layoutId: "main",
-              className: T("relative flex max-w-full flex-1 overflow-auto xs:py-1 xs:pr-1", s === "locked" ? "pl-0" : "xs:pl-1"),
+              className: T("relative flex max-w-full flex-1 overflow-auto xs:py-1", t && t.enabled ? "xs:pr-0.5" : "xs:pr-1", s === "locked" ? "pl-0" : "xs:pl-1"),
               layoutDependency: [s],
               transition: {
                 duration: d ? 0 : 0.3,
@@ -12824,7 +12821,10 @@ function qM({ ai: t, aiPromotion: e, children: n, sidebar: i, banner: r }) {
                 layout: "position",
                 children: n
               })
-            }), t && t.enabled && u(WC, {}), e && e.enabled && u(oN, {})]
+            }), t && t.enabled && u("div", {
+              className: "py-1 pr-1 pl-0 h-full flex",
+              children: u(WC, {})
+            }), e && e.enabled && u(oN, {})]
           })
         })]
       })
