@@ -392,6 +392,45 @@ export const defaultTranslations = {
       customPromptPlaceholder: "What do you want to do?",
     },
   },
+  forms: {
+    actionBar: {
+      unsavedChanges: "You have changes pending to be saved",
+      discard: "Discard",
+      issues: {
+        one: "{{count}} issue",
+        other: "{{count}} issues",
+      },
+    },
+    validation: {
+      required: "This field is required",
+      invalidType: "Invalid value",
+      string: {
+        email: "Enter a valid email address",
+        url: "Enter a valid URL",
+        min: "Must be at least {{min}} characters",
+        max: "Must be at most {{max}} characters",
+      },
+      number: {
+        min: "Must be at least {{min}}",
+        max: "Must be at most {{max}}",
+        positive: "Must be a positive number",
+        negative: "Must be a negative number",
+        integer: "Must be a whole number",
+      },
+      date: {
+        min: "Date must be after {{min}}",
+        max: "Date must be before {{max}}",
+        invalid: "Enter a valid date",
+      },
+      array: {
+        min: "Select at least {{min}} option",
+        max: "Select at most {{max}} options",
+      },
+      checkbox: {
+        mustBeChecked: "This option must be selected",
+      },
+    },
+  },
 } as const
 
 type TranslationShape<T> = {

@@ -63,6 +63,12 @@ interface CheckboxProps extends DataAttributes {
    * The name of the checkbox
    */
   name?: string
+
+  /**
+   * Whether the checkbox is required
+   * @default false
+   */
+  required?: boolean
 }
 
 function _F0Checkbox({
@@ -77,6 +83,7 @@ function _F0Checkbox({
   presentational = false,
   stopPropagation = false,
   name,
+  required = false,
   ...rest
 }: CheckboxProps) {
   return (
@@ -90,6 +97,7 @@ function _F0Checkbox({
       value={value}
       name={name}
       hideLabel={hideLabel}
+      required={required}
       tabIndex={presentational ? -1 : undefined}
       onClick={(e) => stopPropagation && e.stopPropagation()}
       {...rest}

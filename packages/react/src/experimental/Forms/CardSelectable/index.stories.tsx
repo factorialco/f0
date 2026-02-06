@@ -45,7 +45,7 @@ const defaultItems: CardSelectableItem<string>[] = [
 
 export const Default: Story = {
   render: function Render() {
-    const [value, setValue] = useState<string>("new")
+    const [value, setValue] = useState<string | undefined>("new")
     return (
       <CardSelectableContainer
         items={defaultItems}
@@ -151,7 +151,7 @@ const numericItems: CardSelectableItem<number>[] = [
 
 export const WithNumbers: Story = {
   render: function Render() {
-    const [value, setValue] = useState<number>(1)
+    const [value, setValue] = useState<number | undefined>(1)
     return (
       <CardSelectableContainer
         items={numericItems}
@@ -165,7 +165,7 @@ export const WithNumbers: Story = {
 
 export const Horizontal: Story = {
   render: function Render() {
-    const [value, setValue] = useState<string>("new")
+    const [value, setValue] = useState<string | undefined>("new")
     return (
       <CardSelectableContainer
         items={defaultItems}
@@ -186,7 +186,7 @@ const titleOnlyItems: CardSelectableItem<string>[] = [
 
 export const TitleOnly: Story = {
   render: function Render() {
-    const [value, setValue] = useState<string>("yes")
+    const [value, setValue] = useState<string | undefined>("yes")
     return (
       <CardSelectableContainer
         items={titleOnlyItems}
@@ -219,7 +219,7 @@ const itemsWithDisabled: CardSelectableItem<string>[] = [
 
 export const WithDisabledItem: Story = {
   render: function Render() {
-    const [value, setValue] = useState<string>("active")
+    const [value, setValue] = useState<string | undefined>("active")
     return (
       <CardSelectableContainer
         items={itemsWithDisabled}
@@ -233,7 +233,7 @@ export const WithDisabledItem: Story = {
 
 export const Disabled: Story = {
   render: function Render() {
-    const [value, setValue] = useState<string>("new")
+    const [value, setValue] = useState<string | undefined>("new")
     return (
       <CardSelectableContainer
         items={defaultItems}
@@ -263,7 +263,7 @@ const iconItems: CardSelectableItem<string>[] = [
 
 export const WithIconAvatar: Story = {
   render: function Render() {
-    const [value, setValue] = useState<string>("create")
+    const [value, setValue] = useState<string | undefined>("create")
     return (
       <CardSelectableContainer
         items={iconItems}
@@ -298,7 +298,7 @@ const personItems: CardSelectableItem<string>[] = [
 
 export const WithPersonAvatar: Story = {
   render: function Render() {
-    const [value, setValue] = useState<string>("john")
+    const [value, setValue] = useState<string | undefined>("john")
     return (
       <CardSelectableContainer
         items={personItems}
@@ -327,7 +327,7 @@ const teamItems: CardSelectableItem<string>[] = [
 
 export const WithTeamAvatar: Story = {
   render: function Render() {
-    const [value, setValue] = useState<string>("design")
+    const [value, setValue] = useState<string | undefined>("design")
     return (
       <CardSelectableContainer
         items={teamItems}
@@ -356,7 +356,7 @@ const emojiItems: CardSelectableItem<string>[] = [
 
 export const WithEmojiAvatar: Story = {
   render: function Render() {
-    const [value, setValue] = useState<string>("rocket")
+    const [value, setValue] = useState<string | undefined>("rocket")
     return (
       <CardSelectableContainer
         items={emojiItems}
@@ -391,7 +391,7 @@ const mixedItems: CardSelectableItem<string>[] = [
 
 export const MixedAvatars: Story = {
   render: function Render() {
-    const [value, setValue] = useState<string>("personal")
+    const [value, setValue] = useState<string | undefined>("personal")
     return (
       <CardSelectableContainer
         items={mixedItems}
@@ -413,6 +413,192 @@ export const MultipleWithAvatars: Story = {
         value={value}
         onChange={setValue}
         label="Multiple person selection"
+      />
+    )
+  },
+}
+
+const toggleItems: CardSelectableItem<string>[] = [
+  {
+    value: "notifications",
+    title: "Push Notifications",
+    description: "Receive notifications on your device",
+  },
+  {
+    value: "emails",
+    title: "Email Updates",
+    description: "Get updates via email",
+  },
+  {
+    value: "sms",
+    title: "SMS Alerts",
+    description: "Receive text message alerts",
+  },
+]
+
+export const WithToggleIndicator: Story = {
+  render: function Render() {
+    const [value, setValue] = useState<string[]>(["notifications"])
+    return (
+      <CardSelectableContainer
+        multiple
+        isToggle
+        items={toggleItems}
+        value={value}
+        onChange={setValue}
+        label="Notification preferences"
+      />
+    )
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement)
+
+    await step("Initial state - first toggle is on", async () => {
+      const switches = canvas.getAllByRole("switch")
+      expect(switches[0]).toHaveAttribute("aria-checked", "true")
+      expect(switches[1]).toHaveAttribute("aria-checked", "false")
+      expect(switches[2]).toHaveAttribute("aria-checked", "false")
+    })
+
+    await step("Toggle second option on", async () => {
+      const switches = canvas.getAllByRole("switch")
+      await userEvent.click(switches[1])
+
+      expect(switches[0]).toHaveAttribute("aria-checked", "true")
+      expect(switches[1]).toHaveAttribute("aria-checked", "true")
+    })
+  },
+}
+
+export const SingleToggle: Story = {
+  render: function Render() {
+    const [value, setValue] = useState<string | undefined>(undefined)
+    const items: CardSelectableItem<string>[] = [
+      {
+        value: "enabled",
+        title: "Enable Feature",
+        description: "Turn this feature on for your account",
+      },
+    ]
+    return (
+      <CardSelectableContainer
+        isToggle
+        items={items}
+        value={value}
+        onChange={setValue}
+        label="Feature toggle"
+      />
+    )
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement)
+
+    await step("Initial state - toggle is off", async () => {
+      const toggle = canvas.getByRole("switch")
+      expect(toggle).toHaveAttribute("aria-checked", "false")
+    })
+
+    await step("Click to toggle on", async () => {
+      const toggle = canvas.getByRole("switch")
+      await userEvent.click(toggle)
+      expect(toggle).toHaveAttribute("aria-checked", "true")
+    })
+
+    await step("Click again to toggle off", async () => {
+      const toggle = canvas.getByRole("switch")
+      await userEvent.click(toggle)
+      expect(toggle).toHaveAttribute("aria-checked", "false")
+    })
+  },
+}
+
+const groupedToggleItems: CardSelectableItem<string>[] = [
+  {
+    value: "managers",
+    title: "Add visibility permissions to managers and team leads",
+    description:
+      "Grant access to managers and team leads. Even if they are not survey editors, they will be able to view the results of their own teams once responses are available",
+  },
+  {
+    value: "anonymous",
+    title: "Anonymous answers",
+  },
+]
+
+/**
+ * Grouped toggle items in a bordered container with dividers.
+ * Best for settings-style toggle lists.
+ */
+export const GroupedToggles: Story = {
+  render: function Render() {
+    const [value, setValue] = useState<string[]>([])
+    return (
+      <CardSelectableContainer
+        multiple
+        isToggle
+        grouped
+        items={groupedToggleItems}
+        value={value}
+        onChange={setValue}
+        label="Visibility settings"
+      />
+    )
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement)
+
+    await step("Initial state - all toggles off", async () => {
+      const switches = canvas.getAllByRole("switch")
+      expect(switches[0]).toHaveAttribute("aria-checked", "false")
+      expect(switches[1]).toHaveAttribute("aria-checked", "false")
+    })
+
+    await step("Toggle first option on", async () => {
+      const switches = canvas.getAllByRole("switch")
+      await userEvent.click(switches[0])
+      expect(switches[0]).toHaveAttribute("aria-checked", "true")
+    })
+
+    await step("Toggle first option off", async () => {
+      const switches = canvas.getAllByRole("switch")
+      await userEvent.click(switches[0])
+      expect(switches[0]).toHaveAttribute("aria-checked", "false")
+    })
+  },
+}
+
+/**
+ * Grouped radio selection in a bordered container.
+ */
+export const GroupedRadios: Story = {
+  render: function Render() {
+    const [value, setValue] = useState<string | undefined>("new")
+    return (
+      <CardSelectableContainer
+        grouped
+        items={defaultItems}
+        value={value}
+        onChange={setValue}
+        label="Payment type"
+      />
+    )
+  },
+}
+
+/**
+ * Grouped checkboxes in a bordered container.
+ */
+export const GroupedCheckboxes: Story = {
+  render: function Render() {
+    const [value, setValue] = useState<string[]>(["new"])
+    return (
+      <CardSelectableContainer
+        multiple
+        grouped
+        items={defaultItems}
+        value={value}
+        onChange={setValue}
+        label="Payment type"
       />
     )
   },

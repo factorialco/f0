@@ -1,0 +1,38 @@
+import { ControllerRenderProps, FieldValues } from "react-hook-form"
+
+import { Textarea } from "@/experimental/Forms/Fields/TextArea"
+import type { F0TextareaField } from "./types"
+import { FORM_SIZE } from "../../constants"
+
+interface TextareaFieldRendererProps {
+  field: F0TextareaField
+  formField: ControllerRenderProps<FieldValues>
+  error?: boolean
+  loading?: boolean
+}
+
+/**
+ * Renders a textarea field
+ */
+export function TextareaFieldRenderer({
+  field,
+  formField,
+  error,
+  loading,
+}: TextareaFieldRendererProps) {
+  return (
+    <Textarea
+      label={field.label}
+      placeholder={field.placeholder}
+      disabled={field.disabled}
+      rows={field.rows}
+      maxLength={field.maxLength}
+      {...formField}
+      value={formField.value != null ? String(formField.value) : ""}
+      size={FORM_SIZE}
+      hideLabel
+      error={error}
+      loading={loading}
+    />
+  )
+}

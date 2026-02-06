@@ -10,6 +10,8 @@ import {
   useFormContext,
 } from "react-hook-form"
 
+import { F0Icon } from "../components/F0Icon"
+import { AlertCircle } from "../icons/app"
 import { cn } from "../lib/utils"
 import { Label } from "./label"
 
@@ -135,7 +137,7 @@ const FormDescription = React.forwardRef<
     <p
       ref={ref}
       id={formDescriptionId}
-      className={cn("text-sm text-f1-foreground-secondary", className)}
+      className={cn("text-base text-f1-foreground-secondary", className)}
       {...props}
     />
   )
@@ -143,8 +145,8 @@ const FormDescription = React.forwardRef<
 FormDescription.displayName = "FormDescription"
 
 const FormMessage = React.forwardRef<
-  HTMLParagraphElement,
-  React.HTMLAttributes<HTMLParagraphElement>
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
 >(({ className, children, ...props }, ref) => {
   const { error, formMessageId } = useFormField()
   const body = error ? String(error?.message) : children
@@ -154,17 +156,17 @@ const FormMessage = React.forwardRef<
   }
 
   return (
-    <p
+    <div
       ref={ref}
       id={formMessageId}
-      className={cn(
-        "text-sm font-medium text-f1-foreground-critical",
-        className
-      )}
+      className={cn("flex gap-1", className)}
       {...props}
     >
-      {body}
-    </p>
+      <F0Icon icon={AlertCircle} color="critical" />
+      <span className="text-base font-medium text-f1-foreground-critical">
+        {body}
+      </span>
+    </div>
   )
 })
 FormMessage.displayName = "FormMessage"
