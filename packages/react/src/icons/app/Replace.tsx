@@ -1,5 +1,4 @@
 import type { SVGProps } from "react"
-
 import { Ref, forwardRef } from "react"
 const SvgReplace = (
   props: SVGProps<SVGSVGElement>,

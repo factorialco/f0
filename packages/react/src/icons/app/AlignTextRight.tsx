@@ -1,5 +1,4 @@
 import type { SVGProps } from "react"
-
 import { Ref, forwardRef } from "react"
 const SvgAlignTextRight = (
   props: SVGProps<SVGSVGElement>,
