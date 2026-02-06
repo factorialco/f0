@@ -36,10 +36,10 @@ import { ItemActionsDefinition } from "../../../item-actions"
 import { NavigationFiltersDefinition } from "../../../navigationFilters/types"
 import { SummariesDefinition } from "../../../summary"
 import { CollectionProps } from "../../../types"
-import { statusToChecked } from "../utils"
-import { Row } from "../Table/components/Row"
 import { useColumns } from "../Table/hooks/useColums"
 import { useSticky } from "../Table/useSticky"
+import { statusToChecked } from "../utils"
+import { EditableRow } from "./components/EditableRow"
 import { EditableTableVisualizationOptions } from "./types"
 
 export * from "./settings/SettingsRenderer"
@@ -61,6 +61,7 @@ export const EditableTableCollection = <
   onLoadError,
   allowColumnHiding,
   allowColumnReordering,
+  onCellChange,
 }: CollectionProps<
   R,
   Filters,
@@ -72,9 +73,9 @@ export const EditableTableCollection = <
   EditableTableVisualizationOptions<R, Filters, Sortings, Summaries>
 >) => {
   const t = useI18n()
-  const [MotionRow] = useState(() =>
+  const [MotionEditableRow] = useState(() =>
     motion.create(
-      Row<
+      EditableRow<
         R,
         Filters,
         Sortings,
@@ -138,6 +139,8 @@ export const EditableTableCollection = <
   }, [paginationInfo?.total, data.records])
 
   const frozenColumnsLeft = useMemo(() => frozenColumns, [frozenColumns])
+  /** EditableTable does not show the item actions column (e.g. edit button on hover) */
+  const showItemActions = false
   const getRowKey = (item: R, index: number) => {
     if ("id" in item && item.id !== undefined && item.id !== null) {
       return `id:${String(item.id)}`
@@ -215,7 +218,9 @@ export const EditableTableCollection = <
   )
 
   const skeletonColumns =
-    columns.length + (source.itemActions ? 1 : 0) + (source.selectable ? 1 : 0)
+    columns.length +
+    (showItemActions && source.itemActions ? 1 : 0) +
+    (source.selectable ? 1 : 0)
 
   const { getStickyPosition, checkColumnWidth } = useSticky(
     frozenColumnsLeft,
@@ -297,7 +302,7 @@ export const EditableTableCollection = <
               </TableHead>
             ))}
 
-            {source.itemActions && (
+            {showItemActions && source.itemActions && (
               <>
                 <th></th>
                 <TableHead
@@ -356,11 +361,11 @@ export const EditableTableCollection = <
                   </TableRow>
 
                   <AnimatePresence key={`group-animate-${groupIndex}`}>
-                    {MotionRow &&
+                    {MotionEditableRow &&
                       (!collapsible || openGroups[group.key]) &&
                       group.records.map((item, index) => {
                         return (
-                          <MotionRow
+                          <MotionEditableRow
                             variants={getAnimationVariants()}
                             initial={collapsible ? "hidden" : "visible"}
                             animate="visible"
@@ -379,6 +384,8 @@ export const EditableTableCollection = <
                             columns={columns}
                             frozenColumnsLeft={frozenColumnsLeft}
                             checkColumnWidth={checkColumnWidth}
+                            tableWithChildren={tableWithChildren}
+                            onCellChange={onCellChange}
                           />
                         )
                       })}
@@ -389,7 +396,7 @@ export const EditableTableCollection = <
           {data?.type === "flat" &&
             data.records.map((item, index) => {
               return (
-                <Row
+                <EditableRow
                   key={`row-${getRowKey(item, index)}`}
                   groupIndex={0}
                   source={source}
@@ -403,6 +410,7 @@ export const EditableTableCollection = <
                   frozenColumnsLeft={frozenColumnsLeft}
                   checkColumnWidth={checkColumnWidth}
                   tableWithChildren={tableWithChildren}
+                  onCellChange={onCellChange}
                 />
               )
             })}
@@ -421,7 +429,11 @@ export const EditableTableCollection = <
             paginationInfo.hasMore && (
               <tr>
                 <td
-                  colSpan={columns.length + (source.selectable ? 1 : 0) + 1}
+                  colSpan={
+                    columns.length +
+                    (source.selectable ? 1 : 0) +
+                    (showItemActions && source.itemActions ? 1 : 0)
+                  }
                   ref={loadingIndicatorRef}
                   className="h-10"
                   aria-hidden="true"
@@ -483,7 +495,7 @@ export const EditableTableCollection = <
                   )}
                 </TableCell>
               ))}
-              {source.itemActions && (
+              {showItemActions && source.itemActions && (
                 <>
                   <th className="hidden md:table-cell"></th>
                   <TableCell

@@ -18,12 +18,29 @@ import type {
 
 export type EditableTableVisualizationSettings = TableVisualizationSettings
 
+/** Column definition for Editable Table; optional `field` binds the cell input to item[field]. */
+export type EditableTableColumnDefinition<
+  R extends RecordType,
+  Sortings extends SortingsDefinition,
+  Summaries extends SummariesDefinition,
+> = TableColumnDefinition<R, Sortings, Summaries> & {
+  /** Key of the record to bind the cell input to; value comes from item[field]. */
+  field?: keyof R & string
+}
+
 export type EditableTableVisualizationOptions<
   R extends RecordType,
   _Filters extends FiltersDefinition,
   Sortings extends SortingsDefinition,
   Summaries extends SummariesDefinition,
-> = TableVisualizationOptions<R, _Filters, Sortings, Summaries>
+> = Omit<
+  TableVisualizationOptions<R, _Filters, Sortings, Summaries>,
+  "columns"
+> & {
+  columns: ReadonlyArray<EditableTableColumnDefinition<R, Sortings, Summaries>>
+  /** Called when a cell value changes; columnId is column.id ?? column.label. */
+  onCellChange?: (item: R, columnId: string, value: string) => void
+}
 
 export type EditableTableCollectionProps<
   R extends RecordType,

@@ -216,6 +216,22 @@ export class MockDataCache<T extends MockUser> {
     return item
   }
 
+  /**
+   * Update a single field on an item (e.g. for editable table cell changes).
+   */
+  updateItemField(
+    itemId: string,
+    field: keyof T & string,
+    value: string
+  ): T | null {
+    const item = this.dataMap.get(itemId)
+    if (!item) return null
+    if (!(field in item)) return null
+    ;(item as Record<string, unknown>)[field] = value
+    this.notify()
+    return item
+  }
+
   reset(newData: T[]) {
     this.dataMap = new Map(newData.map((item) => [item.id, item]))
     this.notify()
@@ -405,6 +421,7 @@ export const getMockVisualizations = (options?: {
           {
             label: "Name",
             width: options?.table?.nestedRecords ? 300 : 140,
+            field: "name",
             render: (item) =>
               !item.children && item.detailed
                 ? {
@@ -424,12 +441,14 @@ export const getMockVisualizations = (options?: {
           },
           {
             label: "Email",
+            field: "email",
             render: (item) => item.email,
             sorting: options?.table?.noSorting ? undefined : "email",
             id: "email",
           },
           {
             label: "Role",
+            field: "role",
             render: (item) => item.role,
             sorting: options?.table?.noSorting ? undefined : "role",
             id: "role",
@@ -439,6 +458,7 @@ export const getMockVisualizations = (options?: {
           {
             id: "department",
             label: "Department",
+            field: "department",
             render: (item) => item.department,
             sorting: options?.table?.noSorting ? undefined : "department",
             order: options?.table?.allowColumnReordering ? 4 : undefined,
@@ -526,6 +546,17 @@ export const getMockVisualizations = (options?: {
             order: options?.table?.allowColumnReordering ? 4 : undefined,
           },
         ],
+        onCellChange: (() => {
+          // return options?.cache
+          return (item: MockUser, columnId: string, value: string) => {
+            console.log("cell changed to ", value)
+            // const field = columnId as keyof MockUser & string
+            // if (Object.prototype.hasOwnProperty.call(item, field)) {
+            //   options.cache!.updateItemField(item.id, field, value)
+            // }
+          }
+          // : undefined
+        })(),
       },
     } as Visualization<
       MockUser,
