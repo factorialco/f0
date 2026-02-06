@@ -1,21 +1,39 @@
+import { AgentState } from '@livekit/components-react';
 import { AIMessage } from '@copilotkit/shared';
 import { AssistantMessageProps } from '@copilotkit/react-ui';
+import { ClassValue } from 'cva';
+import { ComponentProps } from 'react';
 import { Context } from 'react';
 import { CopilotKitProps } from '@copilotkit/react-core';
 import { ForwardRefExoticComponent } from 'react';
 import { JSX as JSX_2 } from 'react';
+import { LocalAudioTrack } from 'livekit-client';
 import { Message } from '@copilotkit/shared';
 import { MessagesProps } from '@copilotkit/react-ui';
 import { ReactNode } from 'react';
 import { RefAttributes } from 'react';
+import { RemoteAudioTrack } from 'livekit-client';
 import { SVGProps } from 'react';
 import * as SwitchPrimitive from '@radix-ui/react-switch';
+import { TrackReferenceOrPlaceholder } from '@livekit/components-react';
+import { VariantProps } from 'cva';
 
 export declare function A({ children, ...props }: React.AnchorHTMLAttributes<HTMLAnchorElement>): JSX_2.Element;
 
 export declare type ActionItemStatus = (typeof actionItemStatuses)[number];
 
 export declare const actionItemStatuses: readonly ["inProgress", "executing", "completed"];
+
+/* Excluded from this release type: AgentState */
+
+/**
+ * Disclaimer configuration for the chat input
+ */
+declare type AiChatDisclaimer = {
+    text: string;
+    link?: string;
+    linkText?: string;
+};
 
 /**
  * Props for the AiChatProvider component
@@ -25,6 +43,12 @@ export declare type AiChatProviderProps = {
     greeting?: string;
     initialMessage?: string | string[];
     welcomeScreenSuggestions?: WelcomeScreenSuggestion[];
+    disclaimer?: AiChatDisclaimer;
+    /**
+     * Enable resizable chat window
+     * When enabled, the chat can be resized between 300px and 50% of the screen width
+     */
+    resizable?: boolean;
     onThumbsUp?: (message: AIMessage, { threadId, feedback }: {
         threadId: string;
         feedback: string;
@@ -82,7 +106,16 @@ declare type AiChatProviderReturnValue = {
      */
     sendMessage: (message: string | Message) => void;
     /* Excluded from this release type: setSendMessageFunction */
-} & Pick<AiChatState, "greeting" | "agent">;
+    /**
+     * Current width of the chat window (for resizable mode)
+     */
+    chatWidth: number;
+    setChatWidth: React.Dispatch<React.SetStateAction<number>>;
+    /**
+     * Reset the chat width to the default value (360px)
+     */
+    resetChatWidth: () => void;
+} & Pick<AiChatState, "greeting" | "agent" | "disclaimer" | "resizable">;
 
 /**
  * Internal state for the AiChat provider
@@ -93,6 +126,8 @@ declare interface AiChatState {
     agent?: string;
     initialMessage?: string | string[];
     welcomeScreenSuggestions?: WelcomeScreenSuggestion[];
+    disclaimer?: AiChatDisclaimer;
+    resizable?: boolean;
     placeholders?: string[];
     setPlaceholders?: React.Dispatch<React.SetStateAction<string[]>>;
     onThumbsUp?: (message: AIMessage, { threadId, feedback }: {
@@ -108,7 +143,7 @@ declare interface AiChatState {
 /**
  * AI Chat translations type
  */
-export declare type AiChatTranslations = TranslationShape<typeof aiTranslations>;
+export declare type AiChatTranslations = TranslationShape_2<typeof aiTranslations>;
 
 export declare function AiChatTranslationsProvider({ children, translations, }: AiChatTranslationsProviderProps): JSX.Element;
 
@@ -159,6 +194,540 @@ export declare function Blockquote({ children, ...props }: React.HTMLAttributes<
 
 export declare const ChatSpinner: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
 
+export declare const defaultTranslations: {
+    readonly countries: {
+        ad: string;
+        ae: string;
+        af: string;
+        ag: string;
+        ai: string;
+        al: string;
+        am: string;
+        ao: string;
+        ar: string;
+        as: string;
+        at: string;
+        au: string;
+        aw: string;
+        ax: string;
+        az: string;
+        ba: string;
+        bb: string;
+        bd: string;
+        be: string;
+        bf: string;
+        bg: string;
+        bh: string;
+        bi: string;
+        bj: string;
+        bm: string;
+        bo: string;
+        br: string;
+        bt: string;
+        bw: string;
+        by: string;
+        bz: string;
+        ca: string;
+        cd: string;
+        cf: string;
+        cg: string;
+        ch: string;
+        ci: string;
+        ck: string;
+        cl: string;
+        cm: string;
+        cn: string;
+        co: string;
+        cr: string;
+        cu: string;
+        cv: string;
+        cw: string;
+        cy: string;
+        cz: string;
+        de: string;
+        dj: string;
+        dk: string;
+        dm: string;
+        do: string;
+        dz: string;
+        ec: string;
+        ee: string;
+        eg: string;
+        er: string;
+        es: string;
+        et: string;
+        fi: string;
+        fj: string;
+        fk: string;
+        fm: string;
+        fo: string;
+        fr: string;
+        ga: string;
+        gb: string;
+        gd: string;
+        ge: string;
+        gg: string;
+        gh: string;
+        gi: string;
+        gl: string;
+        gm: string;
+        gn: string;
+        gq: string;
+        gr: string;
+        gt: string;
+        gu: string;
+        gw: string;
+        hk: string;
+        hn: string;
+        hr: string;
+        ht: string;
+        hu: string;
+        id: string;
+        ie: string;
+        il: string;
+        im: string;
+        in: string;
+        io: string;
+        iq: string;
+        ir: string;
+        is: string;
+        it: string;
+        je: string;
+        jm: string;
+        jo: string;
+        jp: string;
+        ke: string;
+    };
+    readonly approvals: {
+        readonly history: "Approval history";
+        readonly statuses: {
+            readonly waiting: "Waiting";
+            readonly pending: "Pending";
+            readonly approved: "Approved";
+            readonly rejected: "Rejected";
+        };
+        readonly requiredNumbers: {
+            readonly one: "One approval required";
+            readonly other: "{{count}} approvals required";
+        };
+    };
+    readonly navigation: {
+        readonly sidebar: {
+            readonly label: "Main navigation";
+            readonly companySelector: {
+                readonly label: "Select a company";
+                readonly placeholder: "Select a company";
+            };
+        };
+        readonly previous: "Previous";
+        readonly next: "Next";
+    };
+    readonly inputs: {
+        readonly password: {
+            readonly show: "Show password";
+            readonly hide: "Hide password";
+        };
+    };
+    readonly actions: {
+        readonly add: "Add";
+        readonly edit: "Edit";
+        readonly save: "Save";
+        readonly send: "Send";
+        readonly cancel: "Cancel";
+        readonly delete: "Delete";
+        readonly copy: "Copy";
+        readonly paste: "Paste";
+        readonly close: "Close";
+        readonly collapse: "Collapse";
+        readonly expand: "Expand";
+        readonly showAll: "Show all";
+        readonly showLess: "Show less";
+        readonly skipToContent: "Skip to content";
+        readonly view: "View";
+        readonly unselect: "Unselect";
+        readonly search: "Search";
+        readonly clear: "Clear";
+        readonly more: "More";
+        readonly moveUp: "Move up";
+        readonly moveDown: "Move down";
+        readonly thumbsUp: "Like";
+        readonly thumbsDown: "Dislike";
+        readonly other: "Other actions";
+        readonly toggle: "Toggle";
+        readonly toggleDropdownMenu: "Toggle dropdown menu";
+        readonly selectAll: "Select all";
+    };
+    readonly status: {
+        readonly selected: {
+            readonly singular: "Selected";
+            readonly plural: "Selected";
+            readonly all: "All selected";
+        };
+    };
+    readonly syncStatus: {
+        readonly synced: "Sync completed successfully.";
+        readonly syncing: "Sync in progress.";
+        readonly pending: "Not yet started.";
+        readonly partiallySynced: "All aggregated data was synced but at least 1 failed.";
+        readonly outdated: "Data might need to be synced again.";
+        readonly failed: "Sync failed.";
+    };
+    readonly filters: {
+        readonly searchPlaceholder: "Search filters...";
+        readonly inFilter: {
+            readonly searchPlaceholder: "Search options...";
+        };
+        readonly activeFilters: "Active filters: {{filters}}";
+        readonly filteringBy: "Filtering by {{label}}";
+        readonly availableFilters: "Available filters";
+        readonly label: "Filters";
+        readonly applyFilters: "Apply filters";
+        readonly applySelection: "Apply selection";
+        readonly cancel: "Cancel";
+        readonly failedToLoadOptions: "Failed to load options";
+        readonly retry: "Retry";
+        readonly number: {
+            readonly value: "Value";
+            readonly equal: "Equal to";
+            readonly equalTo: "Equal to {{value}}";
+            readonly lessOrEqual: "Less or equal to";
+            readonly lessThan: "Less than";
+            readonly greaterOrEqual: "Greater or equal to";
+            readonly greaterThan: "Greater than";
+            readonly equalShort: "= {{value}}";
+            readonly greaterThanOrEqualShort: ">= {{value}}";
+            readonly greaterThanShort: "> {{value}}";
+            readonly lessThanOrEqualShort: "<= {{value}}";
+            readonly lessThanShort: "< {{value}}";
+            readonly rangeTitle: "Use range";
+            readonly range: "{{minStrict}} {{min}} and {{maxStrict}} {{max}}";
+        };
+        readonly search: {
+            readonly relaxed: "Relaxed";
+            readonly strict: "Strict";
+        };
+        readonly selectAll: "Select all";
+        readonly clear: "Clear";
+    };
+    readonly toc: {
+        readonly search: "Search...";
+    };
+    readonly collections: {
+        readonly sorting: {
+            readonly noSorting: "No sorting";
+            readonly toggleDirection: "Toggle sorting direction";
+            readonly sortBy: "Sort by";
+        };
+        readonly grouping: {
+            readonly noGrouping: "No grouping";
+            readonly groupBy: "Group by";
+            readonly toggleDirection: "Toggle direction";
+        };
+        readonly actions: {
+            readonly actions: "Actions";
+        };
+        readonly visualizations: {
+            readonly table: "Table view";
+            readonly card: "Card view";
+            readonly list: "List view";
+            readonly kanban: "Kanban view";
+            readonly pagination: {
+                readonly of: "of";
+            };
+            readonly settings: "{{visualizationName}} settings";
+            readonly reset: "Reset to default";
+        };
+        readonly table: {
+            readonly settings: {
+                readonly showAllColumns: "Show all";
+                readonly hideAllColumns: "Hide all";
+            };
+        };
+        readonly itemsCount: "items";
+        readonly emptyStates: {
+            readonly noData: {
+                readonly title: "No data";
+                readonly description: "No data available";
+            };
+            readonly noResults: {
+                readonly title: "No results";
+                readonly description: "No results found try another search or clear the filters";
+                readonly clearFilters: "Clear filters";
+            };
+            readonly error: {
+                readonly title: "Error";
+                readonly description: "An error occurred while loading the data";
+                readonly retry: "Retry";
+            };
+        };
+        readonly summaries: {
+            readonly types: {
+                readonly sum: "sum";
+            };
+        };
+    };
+    readonly shortcut: "Shortcut";
+    readonly date: {
+        readonly from: "From";
+        readonly to: "To";
+        readonly none: "None";
+        readonly date: "Date";
+        readonly custom: "Custom period";
+        readonly selectDate: "Select Date";
+        readonly compareTo: "Compare to";
+        readonly presets: {
+            readonly last7Days: "Last 7 days";
+            readonly last30Days: "Last 30 days";
+            readonly last3Months: "Last 3 months";
+            readonly last6Months: "Last 6 months";
+            readonly lastYear: "Last year";
+            readonly last3Years: "Last 3 years";
+            readonly last100Years: "Last 100 years";
+        };
+        readonly range: "Range";
+        readonly selectedBy: "Selected by";
+        readonly groups: {
+            readonly today: "Today";
+            readonly yesterday: "Yesterday";
+            readonly lastWeek: "Last week";
+            readonly lastMonth: "Last month";
+            readonly other: "Other";
+        };
+        readonly granularities: {
+            readonly day: {
+                readonly currentDate: "Today";
+                readonly label: "Day";
+            };
+            readonly week: {
+                readonly currentDate: "This week";
+                readonly label: "Week";
+                readonly long: "Week of {{day}} {{month}} {{year}}";
+                readonly longSingular: "Week of {{date}}";
+                readonly longPlural: "Weeks of {{date}}";
+            };
+            readonly month: {
+                readonly currentDate: "This month";
+                readonly label: "Month";
+            };
+            readonly quarter: {
+                readonly currentDate: "This quarter";
+                readonly label: "Quarter";
+            };
+            readonly halfyear: {
+                readonly currentDate: "This half year";
+                readonly label: "Half year";
+            };
+            readonly year: {
+                readonly currentDate: "This year";
+                readonly label: "Year";
+            };
+            readonly range: {
+                readonly currentDate: "Today";
+                readonly label: "Range";
+            };
+        };
+        readonly month: {
+            readonly january: "January";
+            readonly february: "February";
+            readonly march: "March";
+            readonly april: "April";
+            readonly may: "May";
+            readonly june: "June";
+            readonly july: "July";
+            readonly august: "August";
+            readonly september: "September";
+            readonly october: "October";
+            readonly november: "November";
+            readonly december: "December";
+        };
+    };
+    readonly favorites: {
+        readonly favorites: "Favorites";
+        readonly remove: "Remove favorite";
+    };
+    readonly notifications: "Notifications";
+    readonly ai: {
+        readonly openChat: "Open Chat with One AI";
+        readonly closeChat: "Close Chat with One AI";
+        readonly startNewChat: "Start new chat";
+        readonly scrollToBottom: "Scroll to bottom";
+        readonly welcome: "Ask or create with One";
+        readonly defaultInitialMessage: "How can I help you today?";
+        readonly inputPlaceholder: "Ask about time, people, or company info and a lot of other things...";
+        readonly stopAnswerGeneration: "Stop generating";
+        readonly sendMessage: "Send message";
+        readonly thoughtsGroupTitle: "Reflection";
+        readonly resourcesGroupTitle: "Resources";
+        readonly thinking: "Thinking...";
+        readonly exportTable: "Download table";
+        readonly generatedTableFilename: "OneGeneratedTable";
+        readonly feedbackModal: {
+            readonly positive: {
+                readonly title: "What did you like about this response?";
+                readonly label: "Your feedback helps us make Factorial AI better";
+                readonly placeholder: "Share what worked well";
+            };
+            readonly negative: {
+                readonly title: "What could have been better?";
+                readonly label: "Your feedback helps us improve future answers";
+                readonly placeholder: "Share what didn’t work";
+            };
+        };
+        readonly ask: "Ask One";
+    };
+    readonly select: {
+        readonly noResults: "No results found";
+        readonly loadingMore: "Loading...";
+        readonly applySelection: "Apply selection";
+    };
+    readonly numberInput: {
+        readonly between: "It should be between {{min}} and {{max}}";
+        readonly greaterThan: "It should be greater than {{min}}";
+        readonly lessThan: "It should be less than {{max}}";
+    };
+    readonly imageUpload: {
+        readonly uploading: "Uploading...";
+        readonly uploadError: "Upload failed";
+        readonly insertImage: "Image";
+        readonly deleteImage: "Delete";
+        readonly errors: {
+            readonly fileTooLarge: "The file is too large";
+            readonly invalidType: "Invalid file type. Only images are allowed";
+            readonly uploadFailed: "Failed to upload image. Please try again";
+            readonly dismiss: "Dismiss";
+        };
+    };
+    readonly coCreationForm: {
+        readonly actions: {
+            readonly actions: "Actions";
+            readonly duplicateQuestion: "Duplicate question";
+            readonly deleteQuestion: "Delete question";
+            readonly duplicateSection: "Duplicate section";
+            readonly deleteSection: "Delete section";
+        };
+        readonly questionTypes: {
+            readonly section: "Section";
+            readonly rating: "Rating";
+            readonly multipleChoice: "Multiple choice";
+            readonly singleChoice: "Single choice";
+            readonly text: "Text";
+            readonly longText: "Long text";
+            readonly numeric: "Numeric";
+            readonly link: "Link";
+            readonly date: "Date";
+        };
+        readonly selectQuestion: {
+            readonly addOption: "Add option";
+            readonly newOption: "New option {{number}}";
+            readonly markAsCorrect: "Mark as correct";
+            readonly remove: "Remove";
+            readonly correct: "Correct";
+            readonly optionPlaceholder: "Type anything you want here...";
+        };
+        readonly answer: {
+            readonly label: "Answer";
+            readonly placeholder: "Respondent's answer";
+        };
+        readonly labels: {
+            readonly applyingChanges: "Applying changes";
+            readonly endOfSection: "End of section";
+            readonly title: "Title";
+            readonly titlePlaceholder: "Question title";
+            readonly description: "Description";
+            readonly questionDescriptionPlaceholder: "Describe the question in a few words";
+            readonly sectionDescriptionPlaceholder: "Describe the section in a few words";
+            readonly required: "Required";
+            readonly questionType: "Question type";
+            readonly questionOptions: "Question options";
+            readonly actions: "Actions";
+            readonly sectionTitlePlaceholder: "Section title";
+        };
+    };
+    readonly richTextEditor: {
+        readonly bold: "Bold";
+        readonly italic: "Italic";
+        readonly underline: "Underline";
+        readonly strike: "Strike";
+        readonly highlight: "Highlight";
+        readonly heading1: "Heading 1";
+        readonly heading2: "Heading 2";
+        readonly heading3: "Heading 3";
+        readonly left: "Left";
+        readonly center: "Center";
+        readonly right: "Right";
+        readonly justify: "Justify";
+        readonly bulletList: "Bullet List";
+        readonly orderedList: "Ordered List";
+        readonly taskList: "Task List";
+        readonly codeBlock: "Code Block";
+        readonly horizontalRule: "Horizontal Rule";
+        readonly quote: "Quote";
+        readonly moreOptions: "More Options";
+        readonly code: "Code";
+        readonly divider: "Divider";
+        readonly bullet: "Bullet";
+        readonly ordered: "Ordered";
+        readonly task: "Task";
+        readonly details: "Dropdown";
+        readonly link: "Link";
+        readonly linkPlaceholder: "Enter a link";
+        readonly groups: {
+            readonly textStyles: "Text Styles";
+            readonly lists: "Lists";
+            readonly blocks: "Blocks";
+        };
+        readonly ai: {
+            readonly enhanceButtonLabel: "Enhance";
+            readonly loadingEnhanceLabel: "Loading...";
+            readonly defaultError: "An error occurred while loading";
+            readonly closeErrorButtonLabel: "Continue editing";
+            readonly acceptChangesButtonLabel: "Accept";
+            readonly rejectChangesButtonLabel: "Reject";
+            readonly repeatButtonLabel: "Repeat";
+            readonly customPromptPlaceholder: "What do you want to do?";
+        };
+    };
+    readonly forms: {
+        readonly actionBar: {
+            readonly unsavedChanges: "You have changes pending to be saved";
+            readonly discard: "Discard";
+            readonly issues: {
+                readonly one: "{{count}} issue";
+                readonly other: "{{count}} issues";
+            };
+        };
+        readonly validation: {
+            readonly required: "This field is required";
+            readonly invalidType: "Invalid value";
+            readonly string: {
+                readonly email: "Enter a valid email address";
+                readonly url: "Enter a valid URL";
+                readonly min: "Must be at least {{min}} characters";
+                readonly max: "Must be at most {{max}} characters";
+            };
+            readonly number: {
+                readonly min: "Must be at least {{min}}";
+                readonly max: "Must be at most {{max}}";
+                readonly positive: "Must be a positive number";
+                readonly negative: "Must be a negative number";
+                readonly integer: "Must be a whole number";
+            };
+            readonly date: {
+                readonly min: "Date must be after {{min}}";
+                readonly max: "Date must be before {{max}}";
+                readonly invalid: "Enter a valid date";
+            };
+            readonly array: {
+                readonly min: "Select at least {{min}} option";
+                readonly max: "Select at most {{max}} options";
+            };
+            readonly checkbox: {
+                readonly mustBeChecked: "This option must be selected";
+            };
+        };
+    };
+};
+
 export declare function downloadTableAsExcel(table: HTMLTableElement, filename?: string): void;
 
 export declare function Em({ children, ...props }: React.HTMLAttributes<HTMLSpanElement>): JSX_2.Element;
@@ -191,7 +760,7 @@ export declare const F0AiChat: () => JSX_2.Element | null;
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const F0AiChatProvider: ({ enabled, greeting, initialMessage, welcomeScreenSuggestions, onThumbsUp, onThumbsDown, children, agent, ...copilotKitProps }: AiChatProviderProps) => JSX_2.Element;
+export declare const F0AiChatProvider: ({ enabled, greeting, initialMessage, welcomeScreenSuggestions, disclaimer, resizable, onThumbsUp, onThumbsDown, children, agent, ...copilotKitProps }: AiChatProviderProps) => JSX_2.Element;
 
 export declare const F0AiChatTextArea: ({ submitLabel, inProgress, onSend, onStop, placeholders, defaultPlaceholder, autoFocus, }: F0AiChatTextAreaProps) => JSX_2.Element;
 
@@ -256,6 +825,28 @@ export declare interface F0AiCollapsibleMessageProps {
  * @experimental This is an experimental component use it at your own risk
  */
 export declare const F0AiFullscreenChat: () => JSX_2.Element | null;
+
+export declare function F0AuraVoiceAnimation({ size, state, color, colorShift, audioTrack, themeMode, className, ref, ...props }: F0AuraVoiceAnimationProps & ComponentProps<"div"> & VariantProps<typeof F0AuraVoiceAnimationVariants>): JSX_2.Element;
+
+export declare interface F0AuraVoiceAnimationProps {
+    className?: string;
+    size?: "icon" | "sm" | "md" | "lg" | "xl";
+    state?: AgentState;
+    color?: string;
+    colorShift?: number;
+    themeMode?: "dark" | "light";
+    audioTrack?: LocalAudioTrack | RemoteAudioTrack | TrackReferenceOrPlaceholder;
+}
+
+declare const F0AuraVoiceAnimationVariants: (props?: ({
+    size?: "lg" | "md" | "sm" | "icon" | "xl" | undefined;
+} & ({
+    class?: ClassValue;
+    className?: never;
+} | {
+    class?: never;
+    className?: ClassValue;
+})) | undefined) => string;
 
 export declare const F0HILActionConfirmation: ({ text, confirmationText, onConfirm, cancelText, onCancel, }: F0HILActionConfirmationProps) => JSX_2.Element;
 
@@ -402,12 +993,21 @@ export declare function H3({ children, ...props }: React.HTMLAttributes<HTMLHead
 
 export declare function Hr({ ...props }: React.HTMLAttributes<HTMLHRElement>): JSX_2.Element;
 
+export declare function I18nProvider({ children, translations, }: I18nProviderProps): JSX.Element;
+
+export declare interface I18nProviderProps {
+    children: ReactNode;
+    translations: TranslationsType;
+}
+
 declare type IconType = ForwardRefExoticComponent<SVGProps<SVGSVGElement> & RefAttributes<SVGSVGElement> & {
     animate?: "normal" | "animate";
 }>;
 
 declare function Image_2({ src, alt, ...props }: React.ImgHTMLAttributes<HTMLImageElement>): JSX_2.Element;
 export { Image_2 as Image }
+
+declare type Join<T extends string[], D extends string> = T extends [] ? never : T extends [infer F] ? F : T extends [infer F, ...infer R] ? F extends string ? `${F}${D}${Join<Extract<R, string[]>, D>}` : never : string;
 
 export declare function Li({ children, ...props }: React.HTMLAttributes<HTMLLIElement>): JSX_2.Element;
 
@@ -419,6 +1019,10 @@ export declare const oneIconSizes: readonly ["xs", "sm", "md", "lg"];
 
 export declare function P({ children, ...props }: React.HTMLAttributes<HTMLParagraphElement>): JSX_2.Element;
 
+declare type PathsToStringProps<T> = T extends string ? [] : {
+    [K in Extract<keyof T, string>]: [K, ...PathsToStringProps<T[K]>];
+}[Extract<keyof T, string>];
+
 export declare function Pre({ children, ...props }: React.HTMLAttributes<HTMLPreElement>): JSX_2.Element;
 
 export declare function Strong({ children, ...props }: React.HTMLAttributes<HTMLSpanElement>): JSX_2.Element;
@@ -429,12 +1033,20 @@ export declare function Td({ children, ...props }: React.HTMLAttributes<HTMLTabl
 
 export declare function Th({ children, ...props }: React.HTMLAttributes<HTMLTableCellElement>): JSX_2.Element;
 
-/**
- * Translation shape helper type
- */
+declare type TranslationKey = Join<PathsToStringProps<typeof defaultTranslations>, ".">;
+
 declare type TranslationShape<T> = {
     [K in keyof T]: T[K] extends string ? string : T[K] extends Record<string, string | Record<string, unknown>> ? TranslationShape<T[K]> : never;
 };
+
+/**
+ * Translation shape helper type
+ */
+declare type TranslationShape_2<T> = {
+    [K in keyof T]: T[K] extends string ? string : T[K] extends Record<string, string | Record<string, unknown>> ? TranslationShape_2<T[K]> : never;
+};
+
+export declare type TranslationsType = TranslationShape<typeof defaultTranslations>;
 
 export declare function Ul({ children, ...props }: React.HTMLAttributes<HTMLUListElement>): JSX_2.Element;
 
@@ -454,6 +1066,10 @@ export declare function useAiChatTranslations(): AiChatTranslations;
  * }
  */
 export declare const useDefaultCopilotActions: () => void;
+
+export declare function useI18n(): TranslationsType & {
+    t: (key: TranslationKey, args?: Record<string, string | number>) => string;
+};
 
 /**
  * Hook to register the message sources action.

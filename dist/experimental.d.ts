@@ -387,6 +387,15 @@ declare type AIButton = {
 };
 
 /**
+ * Disclaimer configuration for the chat input
+ */
+declare type AiChatDisclaimer = {
+    text: string;
+    link?: string;
+    linkText?: string;
+};
+
+/**
  * Props for the AiChatProvider component
  */
 declare type AiChatProviderProps = {
@@ -394,6 +403,12 @@ declare type AiChatProviderProps = {
     greeting?: string;
     initialMessage?: string | string[];
     welcomeScreenSuggestions?: WelcomeScreenSuggestion[];
+    disclaimer?: AiChatDisclaimer;
+    /**
+     * Enable resizable chat window
+     * When enabled, the chat can be resized between 300px and 50% of the screen width
+     */
+    resizable?: boolean;
     onThumbsUp?: (message: AIMessage, { threadId, feedback }: {
         threadId: string;
         feedback: string;
@@ -2877,6 +2892,7 @@ export declare type EntitySelectSubEntity = {
     subName: string;
     subAvatar?: string;
     subSearchKeys?: string[];
+    subDeactivated?: boolean;
 };
 
 declare type Enumerate<N extends number, Acc extends number[] = []> = Acc["length"] extends N ? [...Acc, N][number] : Enumerate<N, [...Acc, Acc["length"]]>;
@@ -5308,6 +5324,7 @@ export declare interface RichTextEditorProps {
     height?: heightType;
     plainHtmlMode?: boolean;
     fullScreenMode?: boolean;
+    onFullscreenChange?: (fullscreen: boolean) => void;
 }
 
 declare interface RichTextEditorSkeletonProps {

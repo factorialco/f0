@@ -1,3 +1,4 @@
+import { AgentState } from '@livekit/components-react';
 import { AIMessage } from '@copilotkit/shared';
 import { AlertTagCellValue } from '../../value-display/types/alertTag';
 import { AlertTagCellValue as AlertTagCellValue_2 } from './types/alertTag';
@@ -62,6 +63,7 @@ import { internalAvatarTypes as internalAvatarTypes_2 } from '../../../ui/Avatar
 import { JSX as JSX_2 } from 'react';
 import { LineChartConfig } from '../../ui/chart';
 import { LineChartPropsBase } from './utils/types';
+import { LocalAudioTrack } from 'livekit-client';
 import { LongTextCellValue } from './types/longText';
 import { Message } from '@copilotkit/shared';
 import { MessagesProps } from '@copilotkit/react-ui';
@@ -84,6 +86,7 @@ import { ReactElement } from 'react';
 import { ReactNode } from 'react';
 import { RefAttributes } from 'react';
 import { RefObject } from 'react';
+import { RemoteAudioTrack } from 'livekit-client';
 import { SearchFilterOptions } from './SearchFilter/SearchFilter';
 import { StatusCellValue } from '../../value-display/types/status';
 import { StatusCellValue as StatusCellValue_2 } from './types/status';
@@ -98,6 +101,7 @@ import { TeamCellValue } from '../../value-display/types/team';
 import { TeamCellValue as TeamCellValue_2 } from './types/team';
 import { TextCellValue } from '../../value-display/types/text';
 import { TextCellValue as TextCellValue_2 } from './types/text';
+import { TrackReferenceOrPlaceholder } from '@livekit/components-react';
 import { ValueDisplayRendererContext } from '../../value-display';
 import { VariantProps } from 'cva';
 import { z } from 'zod';
@@ -258,6 +262,17 @@ declare type ActionVariant = (typeof actionVariants)[number];
 
 declare const actionVariants: readonly ["default", "outline", "critical", "neutral", "ghost", "promote", "outlinePromote", "ai", "link", "unstyled", "mention"];
 
+/* Excluded from this release type: AgentState */
+
+/**
+ * Disclaimer configuration for the chat input
+ */
+declare type AiChatDisclaimer = {
+    text: string;
+    link?: string;
+    linkText?: string;
+};
+
 /**
  * Props for the AiChatProvider component
  */
@@ -266,6 +281,12 @@ export declare type AiChatProviderProps = {
     greeting?: string;
     initialMessage?: string | string[];
     welcomeScreenSuggestions?: WelcomeScreenSuggestion[];
+    disclaimer?: AiChatDisclaimer;
+    /**
+     * Enable resizable chat window
+     * When enabled, the chat can be resized between 300px and 50% of the screen width
+     */
+    resizable?: boolean;
     onThumbsUp?: (message: AIMessage, { threadId, feedback }: {
         threadId: string;
         feedback: string;
@@ -323,7 +344,16 @@ declare type AiChatProviderReturnValue = {
      */
     sendMessage: (message: string | Message) => void;
     /* Excluded from this release type: setSendMessageFunction */
-} & Pick<AiChatState, "greeting" | "agent">;
+    /**
+     * Current width of the chat window (for resizable mode)
+     */
+    chatWidth: number;
+    setChatWidth: React.Dispatch<React.SetStateAction<number>>;
+    /**
+     * Reset the chat width to the default value (360px)
+     */
+    resetChatWidth: () => void;
+} & Pick<AiChatState, "greeting" | "agent" | "disclaimer" | "resizable">;
 
 /**
  * Internal state for the AiChat provider
@@ -334,6 +364,8 @@ declare interface AiChatState {
     agent?: string;
     initialMessage?: string | string[];
     welcomeScreenSuggestions?: WelcomeScreenSuggestion[];
+    disclaimer?: AiChatDisclaimer;
+    resizable?: boolean;
     placeholders?: string[];
     setPlaceholders?: React.Dispatch<React.SetStateAction<string[]>>;
     onThumbsUp?: (message: AIMessage, { threadId, feedback }: {
@@ -2558,7 +2590,7 @@ export declare const F0AiChat: () => JSX_2.Element | null;
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const F0AiChatProvider: ({ enabled, greeting, initialMessage, welcomeScreenSuggestions, onThumbsUp, onThumbsDown, children, agent, ...copilotKitProps }: AiChatProviderProps) => JSX_2.Element;
+export declare const F0AiChatProvider: ({ enabled, greeting, initialMessage, welcomeScreenSuggestions, disclaimer, resizable, onThumbsUp, onThumbsDown, children, agent, ...copilotKitProps }: AiChatProviderProps) => JSX_2.Element;
 
 export declare const F0AiChatTextArea: ({ submitLabel, inProgress, onSend, onStop, placeholders, defaultPlaceholder, autoFocus, }: F0AiChatTextAreaProps) => JSX_2.Element;
 
@@ -2649,6 +2681,28 @@ export declare interface F0AlertProps {
 export declare type F0ArrayConfig<R extends Record<string, unknown> = Record<string, unknown>> = F0BaseConfig & F0SelectConfig<R> & {
     fieldType?: "select";
 };
+
+export declare function F0AuraVoiceAnimation({ size, state, color, colorShift, audioTrack, themeMode, className, ref, ...props }: F0AuraVoiceAnimationProps & ComponentProps<"div"> & VariantProps<typeof F0AuraVoiceAnimationVariants>): JSX_2.Element;
+
+export declare interface F0AuraVoiceAnimationProps {
+    className?: string;
+    size?: "icon" | "sm" | "md" | "lg" | "xl";
+    state?: AgentState;
+    color?: string;
+    colorShift?: number;
+    themeMode?: "dark" | "light";
+    audioTrack?: LocalAudioTrack | RemoteAudioTrack | TrackReferenceOrPlaceholder;
+}
+
+declare const F0AuraVoiceAnimationVariants: (props?: ({
+    size?: "lg" | "md" | "sm" | "icon" | "xl" | undefined;
+} & ({
+    class?: ClassValue;
+    className?: never;
+} | {
+    class?: never;
+    className?: ClassValue;
+})) | undefined) => string;
 
 export declare const F0Avatar: ({ avatar, size }: AvatarProps) => ReactNode;
 
@@ -4098,6 +4152,7 @@ export declare const F0TagPerson: ForwardRefExoticComponent<F0TagPersonProps & R
 export declare type F0TagPersonProps = {
     src?: string;
     name: string;
+    deactivated?: boolean;
 };
 
 export declare const F0TagRaw: ForwardRefExoticComponent<TagRawProps & RefAttributes<HTMLDivElement>>;
