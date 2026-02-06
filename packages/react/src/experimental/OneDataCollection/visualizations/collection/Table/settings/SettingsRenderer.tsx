@@ -3,7 +3,10 @@ import { SummariesDefinition } from "@/experimental/OneDataCollection/summary"
 import { RecordType } from "@/hooks/datasource"
 import { SortingsDefinition } from "@/hooks/datasource/types/sortings.typings"
 
-import { TableSettings } from "../components/TableSettings"
+import {
+  TableSettings,
+  type TableVisualizationSettingsKey,
+} from "../components/TableSettings"
 import { TableVisualizationOptions } from "../types"
 
 export const SettingsRenderer = <
@@ -12,7 +15,9 @@ export const SettingsRenderer = <
   Sortings extends SortingsDefinition,
   Summaries extends SummariesDefinition,
 >(
-  props: Readonly<TableVisualizationOptions<R, Filters, Sortings, Summaries>>
+  props: Readonly<
+    TableVisualizationOptions<R, Filters, Sortings, Summaries>
+  > & { visualizationKey?: TableVisualizationSettingsKey }
 ) => {
   if (!props.allowColumnHiding && !props.allowColumnReordering) {
     return null
@@ -24,6 +29,7 @@ export const SettingsRenderer = <
       frozenColumns={props.frozenColumns || 0}
       allowSorting={props.allowColumnReordering ?? false}
       allowHiding={props.allowColumnHiding ?? false}
+      visualizationKey={props.visualizationKey}
     />
   )
 }
