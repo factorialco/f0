@@ -70,6 +70,7 @@ interface RichTextEditorProps {
   height?: heightType
   plainHtmlMode?: boolean
   fullScreenMode?: boolean
+  onFullscreenChange?: (fullscreen: boolean) => void
 }
 
 type RichTextEditorHandle = {
@@ -98,6 +99,7 @@ const RichTextEditorComponent = forwardRef<
     height = "auto",
     plainHtmlMode = false,
     fullScreenMode = true,
+    onFullscreenChange,
   },
   ref
 ) {
@@ -153,7 +155,11 @@ const RichTextEditorComponent = forwardRef<
   }, [height, isFullscreen])
 
   const handleToggleFullscreen = () => {
-    setIsFullscreen((prev) => !prev)
+    setIsFullscreen((prev) => {
+      const next = !prev
+      if (onFullscreenChange) onFullscreenChange(next)
+      return next
+    })
   }
 
   const disableAllButtons = !!(isAcceptChangesOpen || isLoadingEnhance || error)
