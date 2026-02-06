@@ -132,6 +132,7 @@ export const defaultTranslations = {
     },
     visualizations: {
       table: "Table view",
+      editableTable: "Editable table view",
       card: "Card view",
       list: "List view",
       kanban: "Kanban view",

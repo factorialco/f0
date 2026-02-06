@@ -1,0 +1,76 @@
+import { Canvas, Meta } from "@storybook/addon-docs/blocks"
+import * as EditableTableStories from "./editable-table.stories"
+
+<Meta title="Data Collection/Visualizations/Editable Table" />
+
+# Editable Table Visualization
+
+## Introduction
+
+The Editable Table visualization is a tabular view that uses the same layout and
+features as the [Table](/?path=/docs/components-data-collection-visualizations-table--documentation)
+visualization (columns, sorting, selection, grouping, pagination, summaries).
+Its main difference is that it keeps **its own column order and visibility state**
+separately from the Table view. That way you can offer both a read-only table
+and an “editable table” (e.g. for editing or a different default layout) without
+sharing the same settings.
+
+Use it when you need a second table-like view with independent column
+configuration (e.g. “Table view” and “Editable table view” in the same data
+collection).
+
+## Examples
+
+<Canvas of={EditableTableStories.BasicEditableTable} />
+
+## Setting Up Editable Table Visualization
+
+Use `type: "editableTable"` in the `visualizations` prop. Options are the same as
+for the Table visualization:
+
+```tsx
+<OneDataCollection
+  source={dataSource}
+  visualizations={[
+    {
+      type: "editableTable",
+      options: {
+        columns: [
+          { label: "Name", render: (item) => item.name, sorting: "name", width: 140 },
+          { label: "Email", render: (item) => item.email, sorting: "email" },
+          { label: "Role", render: (item) => item.role, sorting: "role" },
+          { label: "Department", render: (item) => item.department, sorting: "department" },
+        ],
+        frozenColumns: 0,
+        allowColumnReordering: true,
+        allowColumnHiding: true,
+      },
+    },
+  ]}
+/>
+```
+
+## Options
+
+The Editable Table accepts the same options as the Table visualization:
+
+- **columns** – Column definitions (same shape as [Table column definition](/?path=/docs/components-data-collection-visualizations-table--documentation)).
+- **frozenColumns** – Number of columns to freeze on the left (`0`, `1`, or `2`).
+- **allowColumnReordering** – Let users reorder columns via settings.
+- **allowColumnHiding** – Let users show/hide columns via settings.
+
+For full details on column definitions, frozen columns, and advanced features, see
+the [Table visualization documentation](/?path=/docs/components-data-collection-visualizations-table--documentation).
+
+## Table vs Editable Table
+
+| Aspect | Table | Editable Table |
+|--------|--------|----------------|
+| Storage key | `table` | `editableTable` |
+| Column order/hidden state | Shared for “Table view” | Independent from Table |
+| Use case | Default read-only table | Second table view with its own layout |
+
+You can offer both in the same collection; users switch via the visualization
+selector and each view keeps its own column order and visibility.
+
+<Canvas of={EditableTableStories.EditableTableWithColumnSettings} />

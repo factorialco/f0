@@ -1,9 +1,7 @@
 import { Canvas, Meta, Controls, Unstyled } from "@storybook/addon-docs/blocks"
 import { DoDonts } from "@/lib/storybook-utils/do-donts"
 import { FeatureGrid } from "~/docs/components/FeatureGrid"
-import { Table } from "@/icons/app"
-import { Kanban } from "@/icons/app"
-import { List } from "@/icons/app"
+import { Kanban, List, Pencil, Table } from "@/icons/app"
 
 <Meta title="Data collection/Visualizations" />
 
@@ -26,6 +24,13 @@ etc.) and the visualization, of the data at item level (visualization) and
         description:
           "Table visualization is the default visualization for data collection. It displays the data in a table format.",
         href: "/?path=/docs/components-data-collection-visualizations-table--documentation",
+      },
+      {
+        icon: Pencil,
+        title: "Editable Table",
+        description:
+          "Same as Table but with independent column order and visibility state, so you can offer a separate editable table view.",
+        href: "/?path=/docs/components-data-collection-visualizations-editable-table--documentation",
       },
       {
         icon: Kanban,

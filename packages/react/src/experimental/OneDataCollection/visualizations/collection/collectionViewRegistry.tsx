@@ -7,11 +7,18 @@ import {
   RecordType,
   SortingsDefinition,
 } from "@/hooks/datasource"
-import { Kanban, List, Table } from "@/icons/app"
+import { Kanban, List, Pencil, Table } from "@/icons/app"
 
 import { DataCollectionSettingsContextType } from "../../Settings/SettingsProvider"
 import { SummariesDefinition } from "../../types"
 import { CardCollection, CardCollectionProps } from "./Card"
+import {
+  EditableTableCollection,
+  EditableTableCollectionProps,
+  handleEditableTableResetSettings,
+  SettingsRenderer as editableTableSettingsRenderer,
+} from "./EditableTable"
+import { EditableTableVisualizationSettings } from "./EditableTable/types"
 import { KanbanCollection, KanbanCollectionProps } from "./Kanban"
 import { ListCollection, ListCollectionProps } from "./List"
 import {
@@ -56,6 +63,18 @@ type CollectionVisualizations<
       Grouping
     >,
     TableVisualizationSettings
+  >
+  editableTable: VisualizacionTypeDefinition<
+    EditableTableCollectionProps<
+      Record,
+      Filters,
+      Sortings,
+      Summaries,
+      ItemActions,
+      NavigationFilters,
+      Grouping
+    >,
+    EditableTableVisualizationSettings
   >
   list: VisualizacionTypeDefinition<
     ListCollectionProps<
@@ -140,6 +159,48 @@ export const collectionVisualizations: CollectionVisualizations<
     settings: {
       renderer: tableSettingsRenderer,
       resetHandler: handleTableResetSettings,
+      default: {},
+    },
+  },
+  editableTable: {
+    name: "Editable table",
+    icon: Pencil,
+    render: <
+      R extends RecordType,
+      Filters extends FiltersDefinition,
+      Sortings extends SortingsDefinition,
+      Summaries extends SummariesDefinition,
+      ItemActions extends ItemActionsDefinition<R>,
+      NavigationFilters extends NavigationFiltersDefinition,
+      Grouping extends GroupingDefinition<R>,
+    >(
+      props: EditableTableCollectionProps<
+        R,
+        Filters,
+        Sortings,
+        Summaries,
+        ItemActions,
+        NavigationFilters,
+        Grouping
+      >
+    ) => {
+      return (
+        <EditableTableCollection<
+          R,
+          Filters,
+          Sortings,
+          Summaries,
+          ItemActions,
+          NavigationFilters,
+          Grouping
+        >
+          {...props}
+        />
+      )
+    },
+    settings: {
+      renderer: editableTableSettingsRenderer,
+      resetHandler: handleEditableTableResetSettings,
       default: {},
     },
   },
