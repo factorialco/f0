@@ -1,5 +1,4 @@
 import type { SVGProps } from "react"
-
 import { Ref, forwardRef } from "react"
 const SvgTextSize = (
   props: SVGProps<SVGSVGElement>,

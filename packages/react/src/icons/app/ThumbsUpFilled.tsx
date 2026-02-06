@@ -1,5 +1,4 @@
 import type { SVGProps } from "react"
-
 import { Ref, forwardRef } from "react"
 const SvgThumbsUpFilled = (
   props: SVGProps<SVGSVGElement>,
