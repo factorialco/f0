@@ -1,10 +1,10 @@
-import type { Meta, StoryObj } from "@storybook/react-vite"
+import type { Meta, StoryObj } from "@storybook/react-vite";
 
-import { HomeLayout } from "@/layouts/HomeLayout"
-import { Default as DefaultHomeLayoutStory } from "@/layouts/HomeLayout/index.stories"
+import { HomeLayout } from "@/layouts/HomeLayout";
+import { Default as DefaultHomeLayoutStory } from "@/layouts/HomeLayout/index.stories";
 
-import { ApplicationFrame } from "../ApplicationFrame"
-import { DaytimePage, DaytimePageProps } from "./index"
+import { ApplicationFrame } from "@/examples/ApplicationFrame";
+import { DaytimePage, DaytimePageProps } from "./index";
 
 const meta: Meta<typeof DaytimePage> = {
   title: "Navigation/DaytimePage",
@@ -30,10 +30,10 @@ const meta: Meta<typeof DaytimePage> = {
       </ApplicationFrame>
     ),
   ],
-}
+};
 
-export default meta
-type Story = StoryObj<DaytimePageProps>
+export default meta;
+type Story = StoryObj<DaytimePageProps>;
 
 export const DaytimeHomeLayout: Story = {
   args: {
@@ -58,7 +58,7 @@ export const DaytimeHomeLayout: Story = {
       <HomeLayout {...DefaultHomeLayoutStory.args} />
     </DaytimePage>
   ),
-}
+};
 
 export const DaytimeHomeLayoutWithDescription: Story = {
   args: {
@@ -84,7 +84,7 @@ export const DaytimeHomeLayoutWithDescription: Story = {
       <HomeLayout {...DefaultHomeLayoutStory.args} />
     </DaytimePage>
   ),
-}
+};
 
 export const DaytimeHomeLayoutWithMood: Story = {
   args: {
@@ -112,7 +112,7 @@ export const DaytimeHomeLayoutWithMood: Story = {
       <HomeLayout {...DefaultHomeLayoutStory.args} />
     </DaytimePage>
   ),
-}
+};
 
 export const DaytimeHomeLayoutWithMoodNotSet: Story = {
   args: {
@@ -139,4 +139,4 @@ export const DaytimeHomeLayoutWithMoodNotSet: Story = {
       <HomeLayout {...DefaultHomeLayoutStory.args} />
     </DaytimePage>
   ),
-}
+};

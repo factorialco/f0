@@ -1,5 +1,5 @@
-import { cva } from "cva"
-import { AnimatePresence, motion } from "motion/react"
+import { cva } from "cva";
+import { AnimatePresence, motion } from "motion/react";
 import {
   AriaAttributes,
   cloneElement,
@@ -10,32 +10,32 @@ import {
   useRef,
   useState,
   type AutoFill,
-} from "react"
+} from "react";
 
-import { F0Avatar } from "@/components/avatars/F0Avatar/F0Avatar"
-import { AvatarVariant } from "@/components/avatars/F0Avatar/types"
-import { F0ButtonToggle } from "@/components/F0ButtonToggle/F0ButtonToggle"
-import { F0Icon, IconType } from "@/components/F0Icon"
-import { Spinner } from "@/experimental/Information/Spinner"
-import { CrossedCircle } from "@/icons/app"
-import { cn, focusRing } from "@/lib/utils.ts"
+import { F0Avatar } from "@/components/avatars/F0Avatar/F0Avatar";
+import { AvatarVariant } from "@/components/avatars/F0Avatar/types";
+import { F0ButtonToggle } from "@/components/F0ButtonToggle/F0ButtonToggle";
+import { F0Icon, IconType } from "@/components/F0Icon";
+import { Spinner } from "@/ui/Spinner";
+import { CrossedCircle } from "@/icons/app";
+import { cn, focusRing } from "@/lib/utils.ts";
 
-import { AppendTag } from "./AppendTag"
-import { InputMessages } from "./components/InputMessages"
-import { Label } from "./components/Label"
-import { InputFieldStatus } from "./types"
-export const INPUTFIELD_SIZES = ["sm", "md"] as const
-export type InputFieldSize = (typeof INPUTFIELD_SIZES)[number]
+import { AppendTag } from "./AppendTag";
+import { InputMessages } from "./components/InputMessages";
+import { Label } from "./components/Label";
+import { InputFieldStatus } from "./types";
+export const INPUTFIELD_SIZES = ["sm", "md"] as const;
+export type InputFieldSize = (typeof INPUTFIELD_SIZES)[number];
 
-const defaultEmptyValue = ""
+const defaultEmptyValue = "";
 
 const defaultIsEmpty = (value: string | number | undefined | null) => {
   return value === defaultEmptyValue || value
     ? value.toString().length === 0
-    : true
-}
+    : true;
+};
 const defaultLengthProvider = (value: string | number | undefined | null) =>
-  value ? value.toString().length : 0
+  value ? value.toString().length : 0;
 
 const inputElementVariants = cva({
   base: "",
@@ -48,7 +48,7 @@ const inputElementVariants = cva({
   defaultVariants: {
     size: "md",
   },
-})
+});
 
 const inputFieldVariants = cva({
   base: "",
@@ -88,7 +88,7 @@ const inputFieldVariants = cva({
     size: "md",
     canGrow: false,
   },
-})
+});
 
 const inputFieldWrapperVariants = cva({
   base: "",
@@ -98,7 +98,7 @@ const inputFieldWrapperVariants = cva({
       md: "gap-2",
     },
   },
-})
+});
 
 const inputFieldStatusVariants = cva({
   base: "focus-within:ring-2 focus-within:ring-offset-0 focus-within:transition-none active:transition-none",
@@ -139,82 +139,82 @@ const inputFieldStatusVariants = cva({
       class: "hover:border-f1-border-critical-bold",
     },
   ],
-})
+});
 
 export type InputFieldProps<T> = {
-  autoFocus?: boolean
-  label: string
-  placeholder?: string
-  labelIcon?: IconType
-  hideLabel?: boolean
-  hidePlaceholder?: boolean
-  name?: string
-  onClickPlaceholder?: () => void
-  onClickChildren?: () => void
-  onClickContent?: () => void
-  value?: T | undefined
-  onChange?: (value: T) => void
-  size?: InputFieldSize
+  autoFocus?: boolean;
+  label: string;
+  placeholder?: string;
+  labelIcon?: IconType;
+  hideLabel?: boolean;
+  hidePlaceholder?: boolean;
+  name?: string;
+  onClickPlaceholder?: () => void;
+  onClickChildren?: () => void;
+  onClickContent?: () => void;
+  value?: T | undefined;
+  onChange?: (value: T) => void;
+  size?: InputFieldSize;
   /* @deprecated Use state (with type error)instead */
-  error?: string | boolean
-  status?: InputFieldStatus
+  error?: string | boolean;
+  status?: InputFieldStatus;
   /* shortcut for status with type default */
-  hint?: string
-  disabled?: boolean
-  className?: string
-  required?: boolean
-  readonly?: boolean
-  clearable?: boolean
-  role?: string
-  autocomplete?: AutoFill
-  inputRef?: React.Ref<unknown>
-  "aria-controls"?: AriaAttributes["aria-controls"]
-  "aria-expanded"?: AriaAttributes["aria-expanded"]
-  onClear?: () => void
-  onFocus?: () => void
-  onBlur?: () => void
-  onKeyDown?: (event: React.KeyboardEvent<HTMLInputElement>) => void
-  canGrow?: boolean
+  hint?: string;
+  disabled?: boolean;
+  className?: string;
+  required?: boolean;
+  readonly?: boolean;
+  clearable?: boolean;
+  role?: string;
+  autocomplete?: AutoFill;
+  inputRef?: React.Ref<unknown>;
+  "aria-controls"?: AriaAttributes["aria-controls"];
+  "aria-expanded"?: AriaAttributes["aria-expanded"];
+  onClear?: () => void;
+  onFocus?: () => void;
+  onBlur?: () => void;
+  onKeyDown?: (event: React.KeyboardEvent<HTMLInputElement>) => void;
+  canGrow?: boolean;
   children: React.ReactNode & {
-    onFocus?: () => void
-    onBlur?: () => void
-    onKeyDown?: (event: React.KeyboardEvent<HTMLInputElement>) => void
+    onFocus?: () => void;
+    onBlur?: () => void;
+    onKeyDown?: (event: React.KeyboardEvent<HTMLInputElement>) => void;
     onChange?: (
-      value: T | React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-    ) => void
-    value?: T
-  }
-  icon?: IconType
-  isEmpty?: (value: T | undefined) => boolean
-  emptyValue?: T
-  maxLength?: number
-  hideMaxLength?: boolean
-  append?: React.ReactNode
-  appendTag?: string
-  lengthProvider?: (value: T | undefined) => number
-  loading?: boolean
-  avatar?: AvatarVariant
+      value: T | React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+    ) => void;
+    value?: T;
+  };
+  icon?: IconType;
+  isEmpty?: (value: T | undefined) => boolean;
+  emptyValue?: T;
+  maxLength?: number;
+  hideMaxLength?: boolean;
+  append?: React.ReactNode;
+  appendTag?: string;
+  lengthProvider?: (value: T | undefined) => number;
+  loading?: boolean;
+  avatar?: AvatarVariant;
   loadingIndicator?: {
     /**
      * If true, the loading spinner will be displayed over the content without affecting the layout
      */
-    asOverlay?: boolean
+    asOverlay?: boolean;
     /**
      * The offset of the loading spinner from the content
      */
-    offset?: number
-  }
+    offset?: number;
+  };
   /**
    * Renders a button toggle inside the input field
    */
   buttonToggle?: {
-    label: string | [string, string]
-    icon: IconType | [IconType, IconType]
-    selected: boolean
-    disabled?: boolean
-    onChange: (selected: boolean) => void
-  }
-}
+    label: string | [string, string];
+    icon: IconType | [IconType, IconType];
+    selected: boolean;
+    disabled?: boolean;
+    onChange: (selected: boolean) => void;
+  };
+};
 
 const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
   (
@@ -257,20 +257,20 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
       buttonToggle,
       ...props
     }: InputFieldProps<string>,
-    ref
+    ref,
   ) => {
-    const id = useId()
+    const id = useId();
 
-    const noEdit = disabled || readonly
+    const noEdit = disabled || readonly;
 
-    const [localValue, setLocalValue] = useState(value)
+    const [localValue, setLocalValue] = useState(value);
 
     // For legacy reasons, error is a shortcut for status with type error
     if (hint) {
       status = {
         type: "default",
         message: hint,
-      }
+      };
     }
 
     // Error overrides hint
@@ -278,82 +278,82 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
       status = {
         type: "error",
         message: typeof error === "string" ? error : undefined,
-      }
+      };
     }
 
     if (!label) {
       console.error(
-        "InputField: label is required for accessibility reasons. If you don't want to show a label, set hideLabel to true."
-      )
+        "InputField: label is required for accessibility reasons. If you don't want to show a label, set hideLabel to true.",
+      );
     }
 
     useEffect(() => {
       setLocalValue(
         maxLength && value && lengthProvider(value) > maxLength
           ? value?.substring(0, maxLength)
-          : value
-      )
-    }, [value, lengthProvider, maxLength])
+          : value,
+      );
+    }, [value, lengthProvider, maxLength]);
 
     const handleChange = (
-      value: string | React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+      value: string | React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
     ) => {
       let v =
-        (typeof value === "string" ? value : value.target.value) ?? emptyValue
+        (typeof value === "string" ? value : value.target.value) ?? emptyValue;
 
       if (maxLength && lengthProvider(v) > maxLength) {
         if (typeof v === "string") {
-          v = v.substring(0, maxLength)
+          v = v.substring(0, maxLength);
         } else {
-          return
+          return;
         }
       }
 
-      setLocalValue(v)
-      props.onChange?.(v)
-    }
+      setLocalValue(v);
+      props.onChange?.(v);
+    };
 
     const handleClear = () => {
-      handleChange(emptyValue)
-      props.onClear?.()
-    }
+      handleChange(emptyValue);
+      props.onClear?.();
+    };
 
     const handleClickContent = () => {
       if (!disabled) {
-        onClickContent?.()
+        onClickContent?.();
       }
-    }
+    };
 
     const handleClickChildren = () => {
       if (!disabled) {
-        onClickChildren?.()
+        onClickChildren?.();
       }
-    }
+    };
 
     const handleClickPlaceholder = () => {
       if (!disabled) {
-        onClickPlaceholder?.()
+        onClickPlaceholder?.();
       }
-    }
+    };
 
     /**
      * Detect if the input is being autofilled
      */
-    const [isAutofilled, setIsAutofilled] = useState(false)
+    const [isAutofilled, setIsAutofilled] = useState(false);
     const handleAnimationStart = (
-      e: React.AnimationEvent<HTMLInputElement>
+      e: React.AnimationEvent<HTMLInputElement>,
     ) => {
       if (e.animationName === "autofill") {
-        setIsAutofilled(true)
+        setIsAutofilled(true);
       }
-    }
+    };
 
-    const intervalRef = useRef<NodeJS.Timeout | null>(null)
-    const localInputRef = useRef<HTMLElement>(null)
+    const intervalRef = useRef<NodeJS.Timeout | null>(null);
+    const localInputRef = useRef<HTMLElement>(null);
     const inputRef = useMemo(
       () => props.inputRef ?? localInputRef,
-      [props.inputRef, localInputRef]
-    )
+      [props.inputRef, localInputRef],
+    );
 
     useEffect(() => {
       if (isAutofilled && !intervalRef.current) {
@@ -362,33 +362,33 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
           const element =
             typeof inputRef === "object" && inputRef?.current
               ? (inputRef.current as HTMLElement)
-              : null
+              : null;
           if (element) {
             const stillAutofilled =
               element.matches(":-webkit-autofill") ||
-              element.matches(":autofill")
+              element.matches(":autofill");
             if (!stillAutofilled) {
-              setIsAutofilled(false)
+              setIsAutofilled(false);
               if (intervalRef.current) {
-                clearInterval(intervalRef.current)
-                intervalRef.current = null
+                clearInterval(intervalRef.current);
+                intervalRef.current = null;
               }
             }
           }
-        }, 100)
+        }, 100);
       }
 
       // Cleanup function to clear interval on unmount or dependency change
       return () => {
         if (intervalRef.current) {
-          clearInterval(intervalRef.current)
-          intervalRef.current = null
+          clearInterval(intervalRef.current);
+          intervalRef.current = null;
         }
-      }
-    }, [isAutofilled, inputRef])
+      };
+    }, [isAutofilled, inputRef]);
     /**********************/
 
-    const hasAppend = append || appendTag || buttonToggle
+    const hasAppend = append || appendTag || buttonToggle;
 
     return (
       <div
@@ -396,7 +396,7 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
           "flex flex-col gap-2",
           "pointer-events-none",
           disabled && "cursor-not-allowed opacity-50",
-          className
+          className,
         )}
         ref={ref}
       >
@@ -404,7 +404,7 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
           <div
             className={cn(
               "flex max-w-full items-center",
-              inputFieldWrapperVariants({ size })
+              inputFieldWrapperVariants({ size }),
             )}
           >
             <div
@@ -443,7 +443,7 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
             }),
             readonly && "border-f1-border-secondary bg-f1-background-secondary",
             disabled && "cursor-not-allowed",
-            inputFieldVariants({ size, canGrow })
+            inputFieldVariants({ size, canGrow }),
           )}
           data-testid="input-field-wrapper"
         >
@@ -455,7 +455,7 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
               <div
                 className={cn(
                   "pointer-events-none absolute left-2 top-[5px] my-auto h-5 w-5 shrink-0",
-                  size === "md" && "left-3 top-[9px]"
+                  size === "md" && "left-3 top-[9px]",
                 )}
               >
                 {icon && (
@@ -496,7 +496,7 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                   (icon || avatar) && size === "md" && "pl-9",
                   disabled && "cursor-not-allowed",
                   (children as React.ReactElement).props.className,
-                  inputElementVariants({ size })
+                  inputElementVariants({ size }),
                 ),
               })}
             </div>
@@ -512,7 +512,7 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                     isEmpty(localValue) &&
                     !isAutofilled
                     ? "opacity-100"
-                    : "opacity-0"
+                    : "opacity-0",
                 )}
                 onClick={handleClickPlaceholder}
                 aria-hidden="true"
@@ -526,7 +526,7 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                 className={cn(
                   "flex h-fit min-w-6 items-center gap-1.5 self-center pr-[3px]",
                   size === "md" && "pr-[7px]",
-                  "relative"
+                  "relative",
                 )}
               >
                 {clearable && !noEdit && (
@@ -539,15 +539,15 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                         transition={{ duration: 0.2 }}
                         className={cn(
                           "flex h-5 w-5 shrink-0 cursor-pointer items-center justify-center rounded-full p-0",
-                          focusRing()
+                          focusRing(),
                         )}
                         aria-label="Clear"
                         type="button"
                         tabIndex={0}
                         data-testid="clear-button"
                         onClick={(e) => {
-                          e.stopPropagation()
-                          handleClear()
+                          e.stopPropagation();
+                          handleClear();
                         }}
                       >
                         <F0Icon
@@ -588,9 +588,9 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                             "bg-gradient-to-l from-[#FFFFFF] from-0% dark:from-[#192231]",
                             "via-[#FFFFFF] via-60% dark:via-[#192231]",
                             "to-transparent to-100%",
-                            size === "md" && "right-3"
+                            size === "md" && "right-3",
                           ),
-                        inputElementVariants({ size })
+                        inputElementVariants({ size }),
                       )}
                       style={{
                         right:
@@ -609,10 +609,10 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
         </div>
         <InputMessages status={status} />
       </div>
-    )
-  }
-)
+    );
+  },
+);
 
-InputField.displayName = "InputField"
+InputField.displayName = "InputField";
 
-export { InputField }
+export { InputField };

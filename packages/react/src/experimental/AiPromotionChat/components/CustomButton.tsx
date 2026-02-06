@@ -1,27 +1,27 @@
-import { ButtonInternal } from "@/components/F0Button/internal"
-import { ButtonVariant } from "@/components/F0Button/types"
-import { IconType } from "@/components/F0Icon/F0Icon"
-import { Spinner } from "@/experimental/Information/Spinner"
+import { ButtonInternal } from "@/components/F0Button/internal";
+import { ButtonVariant } from "@/components/F0Button/types";
+import { IconType } from "@/components/F0Icon/F0Icon";
+import { Spinner } from "@/ui/Spinner";
 
 export type ActionProps = {
-  buttonType: "gradient" | "internal"
-  label: string
-  onClick: () => void
-  isLoading: boolean
-  buttonVariant?: ButtonVariant
-  icon?: IconType
-}
+  buttonType: "gradient" | "internal";
+  label: string;
+  onClick: () => void;
+  isLoading: boolean;
+  buttonVariant?: ButtonVariant;
+  icon?: IconType;
+};
 
 type CustomButtonProps = {
-  action: ActionProps
-  onClose: () => void
-}
+  action: ActionProps;
+  onClose: () => void;
+};
 
 export const CustomButton = ({ action, onClose }: CustomButtonProps) => {
   const handleClick = () => {
-    action.onClick()
-    onClose()
-  }
+    action.onClick();
+    onClose();
+  };
 
   switch (action.buttonType) {
     case "gradient":
@@ -44,16 +44,16 @@ export const CustomButton = ({ action, onClose }: CustomButtonProps) => {
             justifyContent: "center",
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.opacity = "0.9"
+            e.currentTarget.style.opacity = "0.9";
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.opacity = "1"
+            e.currentTarget.style.opacity = "1";
           }}
           onClick={handleClick}
         >
           {action.isLoading ? <Spinner size="small" /> : action.label}
         </button>
-      )
+      );
 
     case "internal":
       return (
@@ -63,6 +63,6 @@ export const CustomButton = ({ action, onClose }: CustomButtonProps) => {
           variant={action.buttonVariant}
           icon={action.icon}
         />
-      )
+      );
   }
-}
+};

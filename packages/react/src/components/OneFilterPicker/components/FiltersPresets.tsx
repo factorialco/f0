@@ -1,21 +1,21 @@
-import { useMemo } from "react"
+import { useMemo } from "react";
 
-import { Counter } from "@/experimental/Information/Counter"
-import { Preset } from "@/experimental/OnePreset"
-import { cn, focusRing } from "@/lib/utils"
-import { OverflowList } from "@/ui/OverflowList"
-import { Skeleton } from "@/ui/skeleton"
+import { Counter } from "@/ui/Counter";
+import { Preset } from "@/ui/OnePreset";
+import { cn, focusRing } from "@/lib/utils";
+import { OverflowList } from "@/ui/OverflowList";
+import { Skeleton } from "@/ui/skeleton";
 
-import { FiltersDefinition, FiltersState, PresetsDefinition } from "../types"
+import { FiltersDefinition, FiltersState, PresetsDefinition } from "../types";
 
 interface FilterPresetsProps<Filters extends FiltersDefinition> {
-  value: FiltersState<Filters>
-  onPresetsChange: (filter: FiltersState<Filters>) => void
-  presets: PresetsDefinition<Filters>
-  presetsLoading?: boolean
+  value: FiltersState<Filters>;
+  onPresetsChange: (filter: FiltersState<Filters>) => void;
+  presets: PresetsDefinition<Filters>;
+  presetsLoading?: boolean;
 }
 
-const NUMBER_OF_SKELETON_ITEMS = 4
+const NUMBER_OF_SKELETON_ITEMS = 4;
 
 export const FiltersPresets = <Filters extends FiltersDefinition>({
   presets,
@@ -27,8 +27,8 @@ export const FiltersPresets = <Filters extends FiltersDefinition>({
   const safeValue = useMemo(() => {
     return value != null && typeof value === "object" && !Array.isArray(value)
       ? value
-      : ({} as FiltersState<Filters>)
-  }, [value])
+      : ({} as FiltersState<Filters>);
+  }, [value]);
 
   /**
    * Computes the selection state and click handler for a preset.
@@ -41,36 +41,36 @@ export const FiltersPresets = <Filters extends FiltersDefinition>({
       typeof preset.filter === "object" &&
       !Array.isArray(preset.filter)
         ? preset.filter
-        : ({} as FiltersState<Filters>)
+        : ({} as FiltersState<Filters>);
 
     // Check if all preset filters are present in current value
     const isSelected = Object.entries(safePresetFilter).every(
-      ([key, val]) => JSON.stringify(safeValue[key]) === JSON.stringify(val)
-    )
+      ([key, val]) => JSON.stringify(safeValue[key]) === JSON.stringify(val),
+    );
 
     const handleClick = () => {
       if (isSelected) {
         // Remove only preset's keys from current filters
-        const newFilters = { ...safeValue }
+        const newFilters = { ...safeValue };
         Object.keys(safePresetFilter).forEach((key) => {
-          delete newFilters[key as keyof typeof newFilters]
-        })
-        onPresetsChange?.(newFilters)
+          delete newFilters[key as keyof typeof newFilters];
+        });
+        onPresetsChange?.(newFilters);
       } else {
         // Merge preset's filter with current filters
-        onPresetsChange?.({ ...safeValue, ...safePresetFilter })
+        onPresetsChange?.({ ...safeValue, ...safePresetFilter });
       }
-    }
+    };
 
-    return { isSelected, handleClick }
-  }
+    return { isSelected, handleClick };
+  };
 
   const renderListPresetItem = (
     preset: NonNullable<typeof presets>[number],
     index: number,
-    isVisible = true
+    isVisible = true,
   ) => {
-    const { isSelected, handleClick } = getPresetState(preset)
+    const { isSelected, handleClick } = getPresetState(preset);
 
     return (
       <Preset
@@ -81,14 +81,14 @@ export const FiltersPresets = <Filters extends FiltersDefinition>({
         data-visible={isVisible}
         number={preset.itemsCount?.(safeValue) ?? undefined}
       />
-    )
-  }
+    );
+  };
 
   const renderDropdownPresetItem = (
     preset: NonNullable<typeof presets>[number],
-    index: number
+    index: number,
   ) => {
-    const { isSelected, handleClick } = getPresetState(preset)
+    const { isSelected, handleClick } = getPresetState(preset);
 
     return (
       <button
@@ -97,7 +97,7 @@ export const FiltersPresets = <Filters extends FiltersDefinition>({
           "flex w-full cursor-pointer items-center justify-between rounded-sm p-2 text-left font-medium text-f1-foreground hover:bg-f1-background-secondary",
           isSelected &&
             "bg-f1-background-selected hover:bg-f1-background-selected",
-          focusRing()
+          focusRing(),
         )}
         onClick={handleClick}
         data-visible={true}
@@ -114,8 +114,8 @@ export const FiltersPresets = <Filters extends FiltersDefinition>({
           type={isSelected ? "selected" : "default"}
         />
       </button>
-    )
-  }
+    );
+  };
 
   const renderSkeletonItem = (_: number, index: number, isVisible = true) => (
     <Skeleton
@@ -123,7 +123,7 @@ export const FiltersPresets = <Filters extends FiltersDefinition>({
       className="h-8 w-32 rounded-md"
       data-visible={isVisible}
     />
-  )
+  );
 
   const renderDropdownSkeletonItem = (_: number, index: number) => (
     <div
@@ -134,26 +134,26 @@ export const FiltersPresets = <Filters extends FiltersDefinition>({
       <Skeleton className="h-4 w-24" />
       <Skeleton className="h-4 w-6" />
     </div>
-  )
+  );
 
   // Filter out presets with invalid filters
   const validPresets = useMemo(() => {
-    if (!presets || presets.length === 0) return []
+    if (!presets || presets.length === 0) return [];
     return presets.filter(
       (preset) =>
         preset &&
         preset.filter != null &&
         typeof preset.filter === "object" &&
-        !Array.isArray(preset.filter)
-    )
-  }, [presets])
+        !Array.isArray(preset.filter),
+    );
+  }, [presets]);
 
   // Show skeleton when loading
   if (presetsLoading) {
     const skeletonItems = Array.from(
       { length: NUMBER_OF_SKELETON_ITEMS },
-      (_, index) => index
-    )
+      (_, index) => index,
+    );
     return (
       <OverflowList
         items={skeletonItems}
@@ -161,7 +161,7 @@ export const FiltersPresets = <Filters extends FiltersDefinition>({
         renderDropdownItem={renderDropdownSkeletonItem}
         className="min-w-0 flex-1"
       />
-    )
+    );
   }
 
   return (
@@ -173,5 +173,5 @@ export const FiltersPresets = <Filters extends FiltersDefinition>({
         className="min-w-0 flex-1"
       />
     )
-  )
-}
+  );
+};

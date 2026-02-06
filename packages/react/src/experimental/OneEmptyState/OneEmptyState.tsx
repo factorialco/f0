@@ -1,9 +1,9 @@
-import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
-import { F0AvatarEmoji } from "@/components/avatars/F0AvatarEmoji"
-import { F0Button } from "@/components/F0Button"
-import { UpsellingButton } from "@/components/UpsellingKit/UpsellingButton"
+import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert";
+import { F0AvatarEmoji } from "@/components/avatars/F0AvatarEmoji";
+import { F0Button } from "@/components/F0Button";
+import { UpsellingButton } from "@/sds/UpsellingKit/UpsellingButton";
 
-import * as Types from "./types"
+import * as Types from "./types";
 
 export function OneEmptyState({
   title,
@@ -41,7 +41,7 @@ export function OneEmptyState({
                   nextSteps={action.nextSteps}
                   closeLabel={action.closeLabel}
                 />
-              )
+              );
             } else {
               return (
                 <F0Button
@@ -51,11 +51,11 @@ export function OneEmptyState({
                   onClick={action.onClick}
                   icon={action.icon}
                 />
-              )
+              );
             }
           })}
         </div>
       )}
     </div>
-  )
+  );
 }

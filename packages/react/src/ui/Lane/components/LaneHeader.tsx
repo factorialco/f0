@@ -1,14 +1,14 @@
-import { F0Button } from "@/components/F0Button"
-import { F0TagStatus, Variant } from "@/components/tags/F0TagStatus"
-import { Counter } from "@/experimental/Information/Counter"
-import { Plus } from "@/icons/app"
+import { F0Button } from "@/components/F0Button";
+import { F0TagStatus, Variant } from "@/components/tags/F0TagStatus";
+import { Counter } from "@/ui/Counter";
+import { Plus } from "@/icons/app";
 
 type LaneHeaderProps = {
-  label: string
-  variant?: Variant
-  count: number
-  onPrimaryAction?: () => void
-}
+  label: string;
+  variant?: Variant;
+  count: number;
+  onPrimaryAction?: () => void;
+};
 
 export const LaneHeader = ({
   label,
@@ -16,7 +16,7 @@ export const LaneHeader = ({
   count,
   onPrimaryAction,
 }: LaneHeaderProps) => {
-  const showPrimary = Boolean(onPrimaryAction)
+  const showPrimary = Boolean(onPrimaryAction);
 
   return (
     <div className="flex items-center gap-2 px-1 pb-0.5 pt-2">
@@ -35,5 +35,5 @@ export const LaneHeader = ({
         </div>
       )}
     </div>
-  )
-}
+  );
+};

@@ -1,23 +1,23 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState } from "react";
 
-import { F0Checkbox } from "@/components/F0Checkbox"
-import { Await } from "@/components/Utilities/Await"
-import { Counter } from "@/experimental/Information/Counter"
-import { cn } from "@/lib/utils"
-import { ChevronToggle } from "@/ui/ChevronToggle/ChevronToggle"
-import { Skeleton } from "@/ui/skeleton"
+import { F0Checkbox } from "@/components/F0Checkbox";
+import { Await } from "@/components/Utilities/Await";
+import { Counter } from "@/ui/Counter";
+import { cn } from "@/lib/utils";
+import { ChevronToggle } from "@/ui/ChevronToggle/ChevronToggle";
+import { Skeleton } from "@/ui/skeleton";
 
 type GroupHeaderProps = {
-  label: string | Promise<string>
-  itemCount: number | Promise<number | undefined> | undefined
-  open?: boolean
-  onOpenChange?: (open: boolean) => void
-  showOpenChange?: boolean
-  selectable?: boolean
-  select?: true | false | "indeterminate"
-  onSelectChange?: (selected: boolean) => void
-  className?: string
-}
+  label: string | Promise<string>;
+  itemCount: number | Promise<number | undefined> | undefined;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  showOpenChange?: boolean;
+  selectable?: boolean;
+  select?: true | false | "indeterminate";
+  onSelectChange?: (selected: boolean) => void;
+  className?: string;
+};
 
 export const GroupHeader = ({
   label,
@@ -30,24 +30,24 @@ export const GroupHeader = ({
   onSelectChange,
   className,
 }: GroupHeaderProps) => {
-  const [isOpen, setIsOpen] = useState(open)
+  const [isOpen, setIsOpen] = useState(open);
 
   useEffect(() => {
-    setIsOpen(open)
-  }, [open])
+    setIsOpen(open);
+  }, [open]);
 
   const handleOpenChange = () => {
-    setIsOpen(!isOpen)
-    onOpenChange?.(!isOpen)
-  }
+    setIsOpen(!isOpen);
+    onOpenChange?.(!isOpen);
+  };
 
   const handleGroupClick = () => {
     if (showOpenChange) {
-      handleOpenChange()
+      handleOpenChange();
     } else if (selectable) {
-      onSelectChange?.(!select)
+      onSelectChange?.(!select);
     }
-  }
+  };
 
   return (
     <div
@@ -80,5 +80,5 @@ export const GroupHeader = ({
         </span>
       )}
     </div>
-  )
-}
+  );
+};

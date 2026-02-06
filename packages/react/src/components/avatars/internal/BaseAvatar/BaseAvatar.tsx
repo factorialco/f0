@@ -1,26 +1,31 @@
-import { forwardRef, useMemo } from "react"
+import { forwardRef, useMemo } from "react";
 
-import { F0AvatarModule } from "@/components/avatars/F0AvatarModule"
-import { F0Icon, F0IconProps } from "@/components/F0Icon"
-import { Badge } from "@/experimental/Information/Badge"
-import { Tooltip } from "@/experimental/Overlays/Tooltip"
+import { F0AvatarModule } from "@/components/avatars/F0AvatarModule";
+import { F0Icon, F0IconProps } from "@/components/F0Icon";
+import { Badge } from "@/ui/IconBadge";
+import { Tooltip } from "@/experimental/Overlays/Tooltip";
 import {
   Avatar as AvatarComponent,
   AvatarFallback,
   AvatarImage,
   InternalAvatarProps,
-} from "@/ui/Avatar"
+} from "@/ui/Avatar";
 
-import { AvatarSize, avatarSizes, BaseAvatarProps, sizesMapping } from "./types"
+import {
+  AvatarSize,
+  avatarSizes,
+  BaseAvatarProps,
+  sizesMapping,
+} from "./types";
 import {
   getAvatarColor,
   getAvatarSize,
   getBadgeSize,
   getInitials,
   getMask,
-} from "./utils"
+} from "./utils";
 
-const DEFAULT_SIZE = "md"
+const DEFAULT_SIZE = "md";
 
 const iconSize: Record<AvatarSize, F0IconProps["size"]> = {
   xs: "xs",
@@ -29,7 +34,7 @@ const iconSize: Record<AvatarSize, F0IconProps["size"]> = {
   lg: "md",
   xl: "lg",
   "2xl": "lg",
-}
+};
 
 export const BaseAvatar = forwardRef<HTMLDivElement, BaseAvatarProps>(
   (
@@ -45,41 +50,41 @@ export const BaseAvatar = forwardRef<HTMLDivElement, BaseAvatarProps>(
       flag,
       icon,
     },
-    ref
+    ref,
   ) => {
     const reversedSizesMapping = useMemo(
       () =>
         Object.fromEntries(
-          Object.entries(sizesMapping).map(([key, value]) => [value, key])
+          Object.entries(sizesMapping).map(([key, value]) => [value, key]),
         ),
-      []
-    )
+      [],
+    );
 
     const isSize = (
-      size: AvatarSize | InternalAvatarProps["size"]
-    ): size is AvatarSize => avatarSizes.includes(size as AvatarSize)
+      size: AvatarSize | InternalAvatarProps["size"],
+    ): size is AvatarSize => avatarSizes.includes(size as AvatarSize);
 
     // Check if size is a valid avatar size
-    let mappedSize: AvatarSize = DEFAULT_SIZE
+    let mappedSize: AvatarSize = DEFAULT_SIZE;
     if (size && !isSize(size)) {
       console.warn(
-        `The avatar size: ${size} is deprecated. Use ${sizesMapping[size]} instead.`
-      )
-      mappedSize = sizesMapping[size] ?? DEFAULT_SIZE
+        `The avatar size: ${size} is deprecated. Use ${sizesMapping[size]} instead.`,
+      );
+      mappedSize = sizesMapping[size] ?? DEFAULT_SIZE;
     } else {
-      mappedSize = size ?? DEFAULT_SIZE
+      mappedSize = size ?? DEFAULT_SIZE;
     }
 
-    const initials = getInitials(name, mappedSize)
+    const initials = getInitials(name, mappedSize);
     const avatarColor =
       color === "random"
         ? getAvatarColor(Array.isArray(name) ? name.join("") : name)
-        : color
+        : color;
 
-    const hasAria = Boolean(ariaLabel || ariaLabelledby)
+    const hasAria = Boolean(ariaLabel || ariaLabelledby);
 
-    const badgeSize = getBadgeSize(mappedSize)
-    const moduleAvatarSize = getAvatarSize(mappedSize)
+    const badgeSize = getBadgeSize(mappedSize);
+    const moduleAvatarSize = getAvatarSize(mappedSize);
 
     const badgeContent = useMemo(
       () =>
@@ -93,8 +98,8 @@ export const BaseAvatar = forwardRef<HTMLDivElement, BaseAvatarProps>(
             )}
           </>
         ) : null,
-      [badge, badgeSize, moduleAvatarSize]
-    )
+      [badge, badgeSize, moduleAvatarSize],
+    );
 
     return (
       <>
@@ -107,7 +112,7 @@ export const BaseAvatar = forwardRef<HTMLDivElement, BaseAvatarProps>(
                     clipPath: getMask.get(
                       type === "rounded" ? "rounded" : "base",
                       mappedSize,
-                      badge.type === "module" ? "module" : "default"
+                      badge.type === "module" ? "module" : "default",
                     ),
                   }
                 : undefined
@@ -172,8 +177,8 @@ export const BaseAvatar = forwardRef<HTMLDivElement, BaseAvatarProps>(
           )}
         </div>
       </>
-    )
-  }
-)
+    );
+  },
+);
 
-BaseAvatar.displayName = "BaseAvatar"
+BaseAvatar.displayName = "BaseAvatar";

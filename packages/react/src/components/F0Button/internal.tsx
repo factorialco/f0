@@ -1,18 +1,18 @@
-import { motion } from "motion/react"
-import { forwardRef, useState } from "react"
+import { motion } from "motion/react";
+import { forwardRef, useState } from "react";
 
-import { F0Icon } from "@/components/F0Icon"
-import { EmojiImage } from "@/lib/emojis"
-import { useTextFormatEnforcer } from "@/lib/text"
-import { cn } from "@/lib/utils"
-import { Action } from "@/ui/Action"
+import { F0Icon } from "@/components/F0Icon";
+import { EmojiImage } from "@/lib/emojis";
+import { useTextFormatEnforcer } from "@/lib/text";
+import { cn } from "@/lib/utils";
+import { Action } from "@/ui/Action";
 
-import { OneEllipsis } from "../OneEllipsis"
-import { ButtonInternalProps } from "./internal-types"
-import { fontSizeVariants } from "./variants"
-import { Counter } from "@/experimental/Information/Counter"
+import { OneEllipsis } from "../OneEllipsis";
+import { ButtonInternalProps } from "./internal-types";
+import { fontSizeVariants } from "./variants";
+import { Counter } from "@/ui/Counter";
 
-const IconMotion = motion.create(F0Icon)
+const IconMotion = motion.create(F0Icon);
 
 /**
  * A button component internal that includes the private slots and props
@@ -42,38 +42,38 @@ const ButtonInternal = forwardRef<
     counterValue,
     ...props
   },
-  ref
+  ref,
 ) {
   useTextFormatEnforcer(
     label,
     { disallowEmpty: true, disallowEmojis: true },
-    { warn: true, componentName: "F0Button" }
-  )
+    { warn: true, componentName: "F0Button" },
+  );
 
-  const [loading, setLoading] = useState(false)
-  const [isHovered, setIsHovered] = useState(false)
+  const [loading, setLoading] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
 
   const handleClick = async (
-    event: React.MouseEvent<HTMLButtonElement | HTMLAnchorElement, MouseEvent>
+    event: React.MouseEvent<HTMLButtonElement | HTMLAnchorElement, MouseEvent>,
   ) => {
-    const result = onClick?.(event)
+    const result = onClick?.(event);
 
     if (result instanceof Promise) {
-      setLoading(true)
+      setLoading(true);
 
       try {
-        await result
+        await result;
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
     }
-  }
+  };
 
-  const isLoading = forceLoading || loading
-  const shouldHideLabel = hideLabel || emoji
+  const isLoading = forceLoading || loading;
+  const shouldHideLabel = hideLabel || emoji;
 
-  const buttonLabel = (label ?? "").toString()
-  const buttonFontSize = fontSize ?? size
+  const buttonLabel = (label ?? "").toString();
+  const buttonFontSize = fontSize ?? size;
 
   return (
     <>
@@ -122,7 +122,7 @@ const ButtonInternal = forwardRef<
           className={cn(
             isLoading && "invisible",
             "flex min-w-0 flex-1 items-center justify-center gap-1",
-            icon && !hideLabel && "-ml-[3px]"
+            icon && !hideLabel && "-ml-[3px]",
           )}
         >
           {icon &&
@@ -166,7 +166,7 @@ const ButtonInternal = forwardRef<
             <OneEllipsis
               className={cn(
                 shouldHideLabel && "sr-only",
-                fontSizeVariants({ fontSize: buttonFontSize })
+                fontSizeVariants({ fontSize: buttonFontSize }),
               )}
               tag="span"
             >
@@ -182,7 +182,7 @@ const ButtonInternal = forwardRef<
         </div>
       </Action>
     </>
-  )
-})
+  );
+});
 
-export { ButtonInternal }
+export { ButtonInternal };

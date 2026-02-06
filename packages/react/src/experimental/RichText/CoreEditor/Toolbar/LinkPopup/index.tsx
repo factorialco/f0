@@ -1,85 +1,85 @@
-import * as Popover from "@radix-ui/react-popover"
-import { Editor } from "@tiptap/react"
-import { AnimatePresence, motion } from "motion/react"
-import { useState } from "react"
+import * as Popover from "@radix-ui/react-popover";
+import { Editor } from "@tiptap/react";
+import { AnimatePresence, motion } from "motion/react";
+import { useState } from "react";
 
-import { F0Button } from "@/components/F0Button"
-import { ButtonInternal } from "@/components/F0Button/internal"
-import { F0ButtonToggle } from "@/components/F0ButtonToggle"
-import { F0Icon } from "@/components/F0Icon"
-import { Badge } from "@/experimental/Information/Badge"
+import { F0Button } from "@/components/F0Button";
+import { ButtonInternal } from "@/components/F0Button/internal";
+import { F0ButtonToggle } from "@/components/F0ButtonToggle";
+import { F0Icon } from "@/components/F0Icon";
+import { Badge } from "@/ui/IconBadge";
 import {
   Alert,
   Check,
   Cross,
   CrossedCircle,
   Link as LinkIcon,
-} from "@/icons/app"
-import { useI18n } from "@/lib/providers/i18n"
-import { cn, focusRing } from "@/lib/utils"
+} from "@/icons/app";
+import { useI18n } from "@/lib/providers/i18n";
+import { cn, focusRing } from "@/lib/utils";
 
 interface LinkPopupProps {
-  editor: Editor
-  disabled: boolean
+  editor: Editor;
+  disabled: boolean;
 }
 
 export const LinkPopup = ({ editor, disabled }: LinkPopupProps) => {
-  const translations = useI18n()
-  const [openLinkPopover, setOpenLinkPopover] = useState(false)
-  const [url, setUrl] = useState(editor.getAttributes("link").href || "")
+  const translations = useI18n();
+  const [openLinkPopover, setOpenLinkPopover] = useState(false);
+  const [url, setUrl] = useState(editor.getAttributes("link").href || "");
 
   const handleLinkButtonClick = (e?: React.MouseEvent) => {
-    if (e) e.preventDefault()
-    if (disabled) return
-    setOpenLinkPopover(!openLinkPopover)
-  }
+    if (e) e.preventDefault();
+    if (disabled) return;
+    setOpenLinkPopover(!openLinkPopover);
+  };
 
   const checkIfUrlIsValid = (url: string) => {
-    const trimmedUrl = url.trim()
+    const trimmedUrl = url.trim();
     const isValidUrl =
       /^(https?:\/\/)([\w-]+(\.[\w-]+)+)(:[0-9]{1,5})?(\/.*)?$/i.test(
-        trimmedUrl
-      )
-    return isValidUrl
-  }
+        trimmedUrl,
+      );
+    return isValidUrl;
+  };
 
   const handleSave = () => {
-    const trimmedUrl = url.trim()
-    if (!trimmedUrl) return
-    if (!checkIfUrlIsValid(trimmedUrl)) return
+    const trimmedUrl = url.trim();
+    if (!trimmedUrl) return;
+    if (!checkIfUrlIsValid(trimmedUrl)) return;
     editor
       .chain()
       .focus()
       .extendMarkRange("link")
       .setLink({ href: trimmedUrl })
-      .run()
+      .run();
 
-    setOpenLinkPopover(false)
-  }
+    setOpenLinkPopover(false);
+  };
 
   const handlePaste = () => {
-    setUrl("")
+    setUrl("");
     navigator.clipboard.readText().then((text) => {
-      setUrl(text)
-    })
-  }
+      setUrl(text);
+    });
+  };
 
   const handleDelete = () => {
-    editor.chain().focus().unsetLink().run()
-    setUrl("")
-  }
+    editor.chain().focus().unsetLink().run();
+    setUrl("");
+  };
 
   const handleClose = () => {
-    setOpenLinkPopover(false)
-  }
+    setOpenLinkPopover(false);
+  };
 
   return (
     <Popover.Root
       open={openLinkPopover}
       onOpenChange={(open) => {
-        setOpenLinkPopover(open)
+        setOpenLinkPopover(open);
         if (open) {
-          setUrl(editor.getAttributes("link").href || "")
+          setUrl(editor.getAttributes("link").href || "");
         }
       }}
     >
@@ -117,8 +117,8 @@ export const LinkPopup = ({ editor, disabled }: LinkPopupProps) => {
                     variant="ghost"
                     size="md"
                     onClick={(e) => {
-                      e.preventDefault()
-                      handleClose()
+                      e.preventDefault();
+                      handleClose();
                     }}
                     className="[&>button]:aspect-square [&>button]:px-0"
                     label="Close link popup"
@@ -131,13 +131,13 @@ export const LinkPopup = ({ editor, disabled }: LinkPopupProps) => {
                       !editor.isActive("link")
                         ? focusRing("focus:ring-f1-border-hover") +
                             "hover:ring-f1-border-hover"
-                        : "cursor-auto"
+                        : "cursor-auto",
                     )}
                   >
                     <div
                       className={cn(
                         "flex items-center justify-center",
-                        url.length > 0 ? "w-6" : "w-4"
+                        url.length > 0 ? "w-6" : "w-4",
                       )}
                     >
                       <Badge
@@ -167,7 +167,7 @@ export const LinkPopup = ({ editor, disabled }: LinkPopupProps) => {
                       onChange={(e) => setUrl(e.target.value)}
                       onKeyDown={(e) => {
                         if (e.key === "Enter") {
-                          handleSave()
+                          handleSave();
                         }
                       }}
                     />
@@ -194,8 +194,8 @@ export const LinkPopup = ({ editor, disabled }: LinkPopupProps) => {
                     type="button"
                     size="sm"
                     onClick={(e) => {
-                      e.preventDefault()
-                      handleSave()
+                      e.preventDefault();
+                      handleSave();
                     }}
                     label={translations.actions.save}
                   ></F0Button>
@@ -206,5 +206,5 @@ export const LinkPopup = ({ editor, disabled }: LinkPopupProps) => {
         </Popover.Content>
       </Popover.Portal>
     </Popover.Root>
-  )
-}
+  );
+};

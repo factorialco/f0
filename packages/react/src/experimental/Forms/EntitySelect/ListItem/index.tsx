@@ -1,63 +1,63 @@
-import { ChevronDown, ChevronRight } from "lucide-react"
-import { useState } from "react"
+import { ChevronDown, ChevronRight } from "lucide-react";
+import { useState } from "react";
 
-import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
-import { F0Button } from "@/components/F0Button"
-import { F0Icon } from "@/components/F0Icon"
-import { Counter } from "@/experimental/Information/Counter"
-import { CheckCircle } from "@/icons/app"
-import LogoAvatar from "@/icons/app/LogoAvatar"
-import { cn } from "@/lib/utils"
-import { Checkbox } from "@/ui/checkbox"
+import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson";
+import { F0Button } from "@/components/F0Button";
+import { F0Icon } from "@/components/F0Icon";
+import { Counter } from "@/ui/Counter";
+import { CheckCircle } from "@/icons/app";
+import LogoAvatar from "@/icons/app/LogoAvatar";
+import { cn } from "@/lib/utils";
+import { Checkbox } from "@/ui/checkbox";
 
-import { HighlightText } from "../HighLightText"
-import { EntitySelectEntity } from "../types"
+import { HighlightText } from "../HighLightText";
+import { EntitySelectEntity } from "../types";
 
 interface Props {
-  entity: EntitySelectEntity
-  selected: boolean
-  onSelect: (entity: EntitySelectEntity) => void
-  onRemove: (entity: EntitySelectEntity) => void
-  marginLeft: "ml-0" | "ml-6"
-  search: string
-  singleSelector?: boolean
-  goToFirst?: () => void
-  goToLast?: () => void
-  disabled?: boolean
-  hiddenAvatar?: boolean
+  entity: EntitySelectEntity;
+  selected: boolean;
+  onSelect: (entity: EntitySelectEntity) => void;
+  onRemove: (entity: EntitySelectEntity) => void;
+  marginLeft: "ml-0" | "ml-6";
+  search: string;
+  singleSelector?: boolean;
+  goToFirst?: () => void;
+  goToLast?: () => void;
+  disabled?: boolean;
+  hiddenAvatar?: boolean;
 }
 
 export function focusNextFocusable(
   currentElement: HTMLElement,
-  goToFirst?: () => void
+  goToFirst?: () => void,
 ) {
-  const focusableSelectors = '[data-avatarname-navigator-element="true"]'
+  const focusableSelectors = '[data-avatarname-navigator-element="true"]';
   const allFocusable = Array.from(
-    document.querySelectorAll(focusableSelectors)
-  ) as HTMLElement[]
+    document.querySelectorAll(focusableSelectors),
+  ) as HTMLElement[];
 
-  const currentIndex = allFocusable.indexOf(currentElement)
+  const currentIndex = allFocusable.indexOf(currentElement);
   if (currentIndex >= 0 && currentIndex < allFocusable.length - 1) {
-    allFocusable[currentIndex + 1].focus()
+    allFocusable[currentIndex + 1].focus();
   } else if (allFocusable.length > 0) {
-    goToFirst?.()
+    goToFirst?.();
   }
 }
 
 export function focusPreviousFocusable(
   currentElement: HTMLElement,
-  goToLast?: () => void
+  goToLast?: () => void,
 ) {
-  const focusableSelectors = '[data-avatarname-navigator-element="true"]'
+  const focusableSelectors = '[data-avatarname-navigator-element="true"]';
   const allFocusable = Array.from(
-    document.querySelectorAll(focusableSelectors)
-  ) as HTMLElement[]
+    document.querySelectorAll(focusableSelectors),
+  ) as HTMLElement[];
 
-  const currentIndex = allFocusable.indexOf(currentElement)
+  const currentIndex = allFocusable.indexOf(currentElement);
   if (currentIndex > 0) {
-    allFocusable[currentIndex - 1].focus()
+    allFocusable[currentIndex - 1].focus();
   } else if (allFocusable.length > 0) {
-    goToLast?.()
+    goToLast?.();
   }
 }
 
@@ -74,36 +74,36 @@ export const ListItemSingleContent = ({
   disabled = false,
   hiddenAvatar = false,
 }: Props) => {
-  const nameParts = entity.name.split(" ")
-  const firstName = nameParts[0] || ""
-  const lastName = nameParts.slice(1).join(" ")
+  const nameParts = entity.name.split(" ");
+  const firstName = nameParts[0] || "";
+  const lastName = nameParts.slice(1).join(" ");
 
   const handleLabelClick = (ev: React.MouseEvent<HTMLButtonElement>) => {
-    ev.preventDefault()
-    ev.stopPropagation()
-    if (disabled) return
+    ev.preventDefault();
+    ev.stopPropagation();
+    if (disabled) return;
     if (selected) {
-      onRemove(entity)
+      onRemove(entity);
     } else {
-      onSelect(entity)
+      onSelect(entity);
     }
-  }
+  };
 
   const handleKeyDown = (ev: React.KeyboardEvent<HTMLButtonElement>) => {
     if (ev.key === "Enter" || ev.key === " ") {
-      ev.preventDefault()
-      if (disabled) return
+      ev.preventDefault();
+      if (disabled) return;
       if (!selected) {
-        onSelect(entity)
+        onSelect(entity);
       } else if (selected) {
-        onRemove(entity)
+        onRemove(entity);
       }
     } else if (ev.key === "ArrowDown") {
-      focusNextFocusable(ev.currentTarget, goToFirst)
+      focusNextFocusable(ev.currentTarget, goToFirst);
     } else if (ev.key === "ArrowUp") {
-      focusPreviousFocusable(ev.currentTarget, goToLast)
+      focusPreviousFocusable(ev.currentTarget, goToLast);
     }
-  }
+  };
 
   return (
     <div className="w-full pl-1 pr-1">
@@ -115,7 +115,7 @@ export const ListItemSingleContent = ({
           "focus-within:outline focus-within:outline-1 focus-within:-outline-offset-1 focus-within:outline-f1-border-selected-bold hover:bg-f1-background-hover",
           selected && singleSelector
             ? "bg-f1-background-selected-bold/10 transition-colors dark:bg-f1-background-selected-bold/20"
-            : ""
+            : "",
         )}
       >
         {!hiddenAvatar && (
@@ -132,7 +132,7 @@ export const ListItemSingleContent = ({
           <div
             className={cn(
               "flex flex-1 flex-row items-center gap-2 break-all",
-              entity.deactivated ? "text-f1-foreground/[0.61]" : undefined
+              entity.deactivated ? "text-f1-foreground/[0.61]" : undefined,
             )}
           >
             <HighlightText
@@ -151,7 +151,7 @@ export const ListItemSingleContent = ({
           onKeyDown={handleKeyDown}
           className={cn(
             "pointer-events-none ml-auto",
-            singleSelector ? "opacity-0" : ""
+            singleSelector ? "opacity-0" : "",
           )}
         />
 
@@ -164,8 +164,8 @@ export const ListItemSingleContent = ({
         )}
       </label>
     </div>
-  )
-}
+  );
+};
 
 const EntitySelectListItem = ({
   groupView,
@@ -186,25 +186,25 @@ const EntitySelectListItem = ({
   disabled = false,
   hiddenAvatar = false,
 }: {
-  entity: EntitySelectEntity
-  groupView: boolean
-  expanded: boolean
-  selected: boolean
-  partialSelected: boolean
-  search: string
-  showGroupIcon?: boolean
-  onSelect: (entity: EntitySelectEntity) => void
-  onRemove: (entity: EntitySelectEntity) => void
-  onExpand: (expanded: boolean) => void
-  singleSelector: boolean
-  isChild?: boolean
-  hideLine?: boolean
-  goToFirst?: () => void
-  goToLast?: () => void
-  disabled?: boolean
-  hiddenAvatar?: boolean
+  entity: EntitySelectEntity;
+  groupView: boolean;
+  expanded: boolean;
+  selected: boolean;
+  partialSelected: boolean;
+  search: string;
+  showGroupIcon?: boolean;
+  onSelect: (entity: EntitySelectEntity) => void;
+  onRemove: (entity: EntitySelectEntity) => void;
+  onExpand: (expanded: boolean) => void;
+  singleSelector: boolean;
+  isChild?: boolean;
+  hideLine?: boolean;
+  goToFirst?: () => void;
+  goToLast?: () => void;
+  disabled?: boolean;
+  hiddenAvatar?: boolean;
 }) => {
-  const [pressingLabel, setPressingLabel] = useState<boolean>(false)
+  const [pressingLabel, setPressingLabel] = useState<boolean>(false);
   if (!groupView) {
     return (
       <ListItemSingleContent
@@ -220,44 +220,44 @@ const EntitySelectListItem = ({
         disabled={disabled}
         hiddenAvatar={hiddenAvatar}
       />
-    )
+    );
   }
 
   const handleKeyDown = (ev: React.KeyboardEvent<HTMLButtonElement>) => {
     if (ev.key === " ") {
-      ev.preventDefault()
-      onExpand(!expanded)
+      ev.preventDefault();
+      onExpand(!expanded);
     } else if (ev.key === "Enter" && singleSelector) {
-      onExpand(!expanded)
+      onExpand(!expanded);
     } else if (ev.key === "Enter") {
-      if (disabled) return
+      if (disabled) return;
       if (!selected || partialSelected) {
-        onSelect(entity)
+        onSelect(entity);
       } else if (selected) {
-        onRemove(entity)
+        onRemove(entity);
       }
     } else if (ev.key === "ArrowDown") {
-      focusNextFocusable(ev.currentTarget, goToFirst)
+      focusNextFocusable(ev.currentTarget, goToFirst);
     } else if (ev.key === "ArrowUp") {
-      focusPreviousFocusable(ev.currentTarget, goToLast)
+      focusPreviousFocusable(ev.currentTarget, goToLast);
     }
-  }
+  };
 
   const handleGroupClick = () => {
     if (pressingLabel) {
-      onExpand(!expanded)
-      setPressingLabel(false)
+      onExpand(!expanded);
+      setPressingLabel(false);
     } else {
-      if (disabled) return
-      if (singleSelector) return
-      if (selected) onRemove(entity)
-      else onSelect(entity)
+      if (disabled) return;
+      if (singleSelector) return;
+      if (selected) onRemove(entity);
+      else onSelect(entity);
     }
-  }
+  };
 
-  if (!entity.subItems?.length) return null
+  if (!entity.subItems?.length) return null;
 
-  const checked = selected || partialSelected
+  const checked = selected || partialSelected;
   return (
     <>
       <div className="flex w-full flex-row flex-wrap items-center gap-0 rounded-md border pl-2.5 pr-1">
@@ -273,7 +273,7 @@ const EntitySelectListItem = ({
         <label
           aria-label={entity.name}
           onPointerDown={() => {
-            setPressingLabel(true)
+            setPressingLabel(true);
           }}
           className="flex flex-1 flex-row items-center gap-2 rounded-[10px] border px-2 py-1.5 focus-within:outline focus-within:outline-1 focus-within:-outline-offset-1 focus-within:outline-f1-border-selected-bold hover:cursor-pointer hover:bg-f1-background-hover"
         >
@@ -299,8 +299,8 @@ const EntitySelectListItem = ({
             onKeyDown={handleKeyDown}
             indeterminate={partialSelected}
             onPointerDown={(ev) => {
-              ev.stopPropagation()
-              setPressingLabel(false)
+              ev.stopPropagation();
+              setPressingLabel(false);
             }}
             data-avatarname-navigator-element="true"
             className={cn("ml-auto", singleSelector ? "opacity-0" : "")}
@@ -312,9 +312,9 @@ const EntitySelectListItem = ({
         <div className="h-[1px] w-full bg-f1-border-secondary" />
       )}
     </>
-  )
-}
+  );
+};
 
-EntitySelectListItem.displayName = "EntitySelectListItem"
+EntitySelectListItem.displayName = "EntitySelectListItem";
 
-export { EntitySelectListItem }
+export { EntitySelectListItem };

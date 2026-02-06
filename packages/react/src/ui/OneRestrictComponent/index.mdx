@@ -1,0 +1,45 @@
+import { Canvas, Meta, Unstyled, Controls } from "@storybook/addon-docs/blocks";
+
+# RestrictComponent
+
+Restrict a component to be rendered only in certain routes.
+
+```tsx
+import { OneRestrictComponent } from "@factorialco/f0/dist/ui/OneRestrictComponent";
+```
+
+## Examples
+
+### Allowed routes
+
+```tsx
+<OneRestrictComponent
+  identifier="demo-component"
+  allowedRoutes={["/dashboard", "/profile"]}
+>
+  <DemoComponent />
+</OneRestrictComponent>
+```
+
+### Disallowed routes
+
+```tsx
+<OneRestrictComponent
+  identifier="demo-component"
+  disallowedRoutes={["/login", "/signup"]}
+>
+  <DemoComponent />
+</OneRestrictComponent>
+```
+
+### Allowed and disallowed routes
+
+```tsx
+<OneRestrictComponent
+  identifier="demo-component"
+  allowedRoutes={["/dashboard", "/profile"]}
+  disallowedRoutes={["/login", "/signup"]}
+>
+  <DemoComponent />
+</OneRestrictComponent>
+```

@@ -1,29 +1,29 @@
-import type { Meta, StoryObj } from "@storybook/react-vite"
+import type { Meta, StoryObj } from "@storybook/react-vite";
 
-import { ComponentProps, FC, useState } from "react"
+import { ComponentProps, FC, useState } from "react";
 
-import { F0Button } from "@/components/F0Button"
-import { ActivityItemList } from "@/experimental/Information/Activity/ActivityItemList"
-import { Default as ActivityItemListDefault } from "@/experimental/Information/Activity/ActivityItemList/index.stories"
-import { ResourceHeader } from "@/experimental/Information/Headers/ResourceHeader"
-import { Default as ResourceHeaderDefault } from "@/experimental/Information/Headers/ResourceHeader/index.stories"
+import { F0Button } from "@/components/F0Button";
+import { ActivityItemList } from "@/sds/inbox/Activity/ActivityItemList";
+import { Default as ActivityItemListDefault } from "@/sds/inbox/Activity/ActivityItemList/index.stories";
+import { ResourceHeader } from "@/experimental/Information/Headers/ResourceHeader";
+import { Default as ResourceHeaderDefault } from "@/experimental/Information/Headers/ResourceHeader/index.stories";
 import {
   OnePersonListItem,
   OnePersonListItemProps,
-} from "@/experimental/Lists/OnePersonListItem"
-import { Default as OnePersonListItemDefault } from "@/experimental/Lists/OnePersonListItem/index.stories"
-import { ApplicationFrame } from "@/experimental/Navigation/ApplicationFrame"
-import ApplicationFrameStoryMeta from "@/experimental/Navigation/ApplicationFrame/index.stories"
-import { Placeholder } from "@/icons/app"
-import CheckDoubleIcon from "@/icons/app/CheckDouble"
-import CrossIcon from "@/icons/app/Cross"
-import DeleteIcon from "@/icons/app/Delete"
-import PencilIcon from "@/icons/app/Pencil"
-import SaveIcon from "@/icons/app/Save"
-import ShareIcon from "@/icons/app/Share"
+} from "@/experimental/Lists/OnePersonListItem";
+import { Default as OnePersonListItemDefault } from "@/experimental/Lists/OnePersonListItem/index.stories";
+import { ApplicationFrame } from "@/examples/ApplicationFrame";
+import ApplicationFrameStoryMeta from "@/examples/ApplicationFrame/index.stories";
+import { Placeholder } from "@/icons/app";
+import CheckDoubleIcon from "@/icons/app/CheckDouble";
+import CrossIcon from "@/icons/app/Cross";
+import DeleteIcon from "@/icons/app/Delete";
+import PencilIcon from "@/icons/app/Pencil";
+import SaveIcon from "@/icons/app/Save";
+import ShareIcon from "@/icons/app/Share";
 
-import { F0Dialog } from "../index"
-import { dialogPositions, dialogWidths } from "../types"
+import { F0Dialog } from "../index";
+import { dialogPositions, dialogWidths } from "../types";
 
 const meta: Meta<typeof F0Dialog> = {
   title: "Dialog",
@@ -58,14 +58,14 @@ const meta: Meta<typeof F0Dialog> = {
   },
   decorators: [
     (Story, { args: { isOpen, ...rest } }) => {
-      const [open, setOpen] = useState(isOpen)
+      const [open, setOpen] = useState(isOpen);
 
       const handleClose = () => {
-        setOpen(false)
-      }
+        setOpen(false);
+      };
       const handleOpen = () => {
-        setOpen(true)
-      }
+        setOpen(true);
+      };
 
       return (
         <ApplicationFrame
@@ -78,13 +78,13 @@ const meta: Meta<typeof F0Dialog> = {
             <Story args={{ ...rest, isOpen: open, onClose: handleClose }} />
           </div>
         </ApplicationFrame>
-      )
+      );
     },
   ],
-}
+};
 
-export default meta
-type Story = StoryObj<typeof F0Dialog>
+export default meta;
+type Story = StoryObj<typeof F0Dialog>;
 
 const TABS = [
   {
@@ -103,7 +103,7 @@ const TABS = [
     id: "in-a-break",
     label: "In a break",
   },
-]
+];
 
 const OTHER_ACTIONS = [
   {
@@ -116,7 +116,7 @@ const OTHER_ACTIONS = [
     icon: DeleteIcon,
     onClick: () => {},
   },
-]
+];
 
 const ExampleList = ({ itemsCount = 20 }: { itemsCount?: number }) => (
   <div className="flex flex-col gap-4">
@@ -129,7 +129,7 @@ const ExampleList = ({ itemsCount = 20 }: { itemsCount?: number }) => (
       </div>
     ))}
   </div>
-)
+);
 
 export const Default: Story = {
   args: {
@@ -144,7 +144,7 @@ export const Default: Story = {
     },
     children: <ExampleList itemsCount={2} />,
   },
-}
+};
 
 export const WithSmWidth: Story = {
   args: {
@@ -156,28 +156,28 @@ export const WithSmWidth: Story = {
     tabs: TABS,
     children: <ExampleList />,
   },
-}
+};
 
 export const WithMdWidth: Story = {
   args: {
     ...WithSmWidth.args,
     width: "md",
   },
-}
+};
 
 export const WithLgWidth: Story = {
   args: {
     ...WithMdWidth.args,
     width: "lg",
   },
-}
+};
 
 export const WithXlWidth: Story = {
   args: {
     ...WithLgWidth.args,
     width: "xl",
   },
-}
+};
 export const WithDescription: Story = {
   args: {
     isOpen: true,
@@ -189,7 +189,7 @@ export const WithDescription: Story = {
     tabs: TABS,
     children: <ExampleList />,
   },
-}
+};
 
 const ExamplePersonList: FC<{ numberOfItems?: number }> = ({
   numberOfItems = 20,
@@ -202,7 +202,7 @@ const ExamplePersonList: FC<{ numberOfItems?: number }> = ({
       />
     ))}
   </div>
-)
+);
 
 export const WithPersonListItems: Story = {
   args: {
@@ -210,7 +210,7 @@ export const WithPersonListItems: Story = {
     tabs: TABS,
     children: <ExamplePersonList />,
   },
-}
+};
 
 export const WithLeftPosition: Story = {
   args: {
@@ -226,21 +226,21 @@ export const WithLeftPosition: Story = {
       />
     ),
   },
-}
+};
 
 export const WithRightPosition: Story = {
   args: {
     ...Default.args,
     position: "right",
   },
-}
+};
 
 export const WithFullscreenPosition: Story = {
   args: {
     ...Default.args,
     position: "fullscreen",
   },
-}
+};
 
 export const WithFullscreenPositionAndActions: Story = {
   args: {
@@ -258,7 +258,7 @@ export const WithFullscreenPositionAndActions: Story = {
     },
     children: <ExamplePersonList numberOfItems={3} />,
   },
-}
+};
 
 export const WithMultiplePrimaryActions: Story = {
   args: {
@@ -299,7 +299,7 @@ export const WithMultiplePrimaryActions: Story = {
       },
     },
   },
-}
+};
 
 export const WithModule: Story = {
   args: {
@@ -315,14 +315,14 @@ export const WithModule: Story = {
     tabs: TABS,
     children: <ExamplePersonList />,
   },
-}
+};
 
 export const WithModuleAndFullscreenPosition: Story = {
   args: {
     ...WithModule.args,
     position: "fullscreen",
   },
-}
+};
 
 export const WithResourceHeader: Story = {
   args: {
@@ -345,14 +345,14 @@ export const WithResourceHeader: Story = {
       />
     ),
   },
-}
+};
 
 export const WithResourceHeaderAndFullscreenPosition: Story = {
   args: {
     ...WithResourceHeader.args,
     position: "fullscreen",
   },
-}
+};
 
 export const WithFewItems: Story = {
   args: {
@@ -371,4 +371,4 @@ export const WithFewItems: Story = {
     },
     children: <ExamplePersonList numberOfItems={3} />,
   },
-}
+};

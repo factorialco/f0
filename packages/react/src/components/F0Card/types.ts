@@ -1,7 +1,7 @@
-import { IconType } from "@/components/F0Icon"
-import { valueDisplayRenderers } from "@/components/value-display"
+import { IconType } from "@/components/F0Icon";
+import { valueDisplayRenderers } from "@/ui/value-display";
 
-import { CardPropertyType } from "./components/CardMetadata"
+import { CardPropertyType } from "./components/CardMetadata";
 
 /**
  * Card metadata property renderers.
@@ -9,17 +9,17 @@ import { CardPropertyType } from "./components/CardMetadata"
  */
 export type CardMetadataProperty = {
   [K in CardPropertyType]: {
-    type: K
-    value: Parameters<(typeof valueDisplayRenderers)[K]>[0]
-  }
-}[CardPropertyType]
+    type: K;
+    value: Parameters<(typeof valueDisplayRenderers)[K]>[0];
+  };
+}[CardPropertyType];
 
 export type CardMetadata =
   | {
-      icon: IconType
-      tooltip?: string
-      property: Exclude<CardMetadataProperty, { type: "file" }>
+      icon: IconType;
+      tooltip?: string;
+      property: Exclude<CardMetadataProperty, { type: "file" }>;
     }
   | {
-      property: Extract<CardMetadataProperty, { type: "file" }>
-    }
+      property: Extract<CardMetadataProperty, { type: "file" }>;
+    };

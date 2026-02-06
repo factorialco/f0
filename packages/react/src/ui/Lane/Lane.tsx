@@ -1,19 +1,19 @@
-import { AnimatePresence, motion } from "motion/react"
-import React from "react"
+import { AnimatePresence, motion } from "motion/react";
+import React from "react";
 
-import type { RecordType } from "@/hooks/datasource"
+import type { RecordType } from "@/hooks/datasource";
 
-import { ButtonInternal } from "@/components/F0Button/internal"
-import { F0Card } from "@/components/F0Card"
-import { Spinner } from "@/experimental/Information/Spinner"
-import { useInfiniteScrollPagination } from "@/experimental/OneDataCollection/hooks/useInfiniteScrollPagination"
-import { ScrollArea } from "@/experimental/Utilities/ScrollArea"
-import { Plus } from "@/icons/app"
-import { cn } from "@/lib/utils"
+import { ButtonInternal } from "@/components/F0Button/internal";
+import { F0Card } from "@/components/F0Card";
+import { Spinner } from "@/ui/Spinner";
+import { useInfiniteScrollPagination } from "@/experimental/OneDataCollection/hooks/useInfiniteScrollPagination";
+import { ScrollArea } from "@/experimental/Utilities/ScrollArea";
+import { Plus } from "@/icons/app";
+import { cn } from "@/lib/utils";
 
-import { LaneHeader } from "./components/LaneHeader"
-import { LoadingSkeleton } from "./components/LoadingSkeleton"
-import { LaneProps } from "./types"
+import { LaneHeader } from "./components/LaneHeader";
+import { LoadingSkeleton } from "./components/LoadingSkeleton";
+import { LaneProps } from "./types";
 
 export function Lane<Record extends RecordType>({
   title,
@@ -38,17 +38,17 @@ export function Lane<Record extends RecordType>({
     hasMore,
     total: items.length + (hasMore ? 1 : 0),
     perPage: 3,
-  }
+  };
 
   // Use the infinite scroll hook
   const { loadingIndicatorRef } = useInfiniteScrollPagination(
     paginationInfo,
     loading,
     loadingMore,
-    fetchMore ?? (() => {})
-  )
+    fetchMore ?? (() => {}),
+  );
 
-  const showFooterAction = Boolean(onFooterAction)
+  const showFooterAction = Boolean(onFooterAction);
 
   return (
     <div className="shadow-sm group relative flex h-full w-[323.2px] flex-col">
@@ -66,14 +66,14 @@ export function Lane<Record extends RecordType>({
           !showFooterAction &&
             items.length === 0 &&
             dropPlaceholderIndex !== undefined &&
-            "pb-1"
+            "pb-1",
         )}
       >
         {loading ? (
           <ScrollArea
             className={cn(
               "relative h-full flex-1 rounded-lg",
-              loading && "select-none opacity-50 transition-opacity"
+              loading && "select-none opacity-50 transition-opacity",
             )}
           >
             <LoadingSkeleton />
@@ -96,7 +96,7 @@ export function Lane<Record extends RecordType>({
               <div
                 className={cn(
                   "relative",
-                  loadingMore && "select-none opacity-50 transition-opacity"
+                  loadingMore && "select-none opacity-50 transition-opacity",
                 )}
                 aria-live={loadingMore ? "polite" : undefined}
                 aria-busy={loadingMore ? "true" : undefined}
@@ -107,12 +107,12 @@ export function Lane<Record extends RecordType>({
                   </div>
                 ) : (
                   items.map((record, index) => {
-                    const key = getKey(record, index)
+                    const key = getKey(record, index);
                     return (
                       <React.Fragment key={key}>
                         {renderCard(record, index)}
                       </React.Fragment>
-                    )
+                    );
                   })
                 )}
                 {(loadingMore || hasMore) && (
@@ -149,5 +149,5 @@ export function Lane<Record extends RecordType>({
         </div>
       )}
     </div>
-  )
+  );
 }

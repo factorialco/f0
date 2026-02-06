@@ -1,60 +1,60 @@
-import { useDeepCompareEffect } from "@reactuses/core"
-import { motion } from "motion/react"
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { useDeepCompareEffect } from "@reactuses/core";
+import { motion } from "motion/react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { Spinner } from "@/experimental/Information/Spinner"
-import { OneEmptyState } from "@/experimental/OneEmptyState"
+import { Spinner } from "@/ui/Spinner";
+import { OneEmptyState } from "@/experimental/OneEmptyState";
 import {
   GroupingDefinition,
   OnSelectItemsCallback,
   RecordType,
-} from "@/hooks/datasource"
-import { SortingsDefinition } from "@/hooks/datasource/types/sortings.typings"
-import { DataError } from "@/hooks/datasource/useData"
-import { useLayout } from "@/layouts/LayoutProvider"
-import { useI18n } from "@/lib/providers/i18n"
-import { useDebounceBoolean } from "@/lib/useDebounceBoolean"
-import { cn } from "@/lib/utils"
+} from "@/hooks/datasource";
+import { SortingsDefinition } from "@/hooks/datasource/types/sortings.typings";
+import { DataError } from "@/hooks/datasource/useData";
+import { useLayout } from "@/layouts/LayoutProvider";
+import { useI18n } from "@/lib/providers/i18n";
+import { useDebounceBoolean } from "@/lib/useDebounceBoolean";
+import { cn } from "@/lib/utils";
 
 import type {
   FiltersDefinition,
   FiltersState,
-} from "../../components/OneFilterPicker/types"
+} from "../../components/OneFilterPicker/types";
 import type {
   BulkActionDefinition,
   GroupingState,
   OnBulkActionCallback,
   OnLoadDataCallback,
   SortingsState,
-} from "./types"
-import type { Visualization } from "./visualizations/collection"
+} from "./types";
+import type { Visualization } from "./visualizations/collection";
 
-import { OneFilterPicker } from "../../components/OneFilterPicker"
+import { OneFilterPicker } from "../../components/OneFilterPicker";
 import {
   filterActions,
   getPrimaryActions,
   getSecondaryActions,
   MAX_EXPANDED_ACTIONS,
-} from "./actions"
-import { ActionBar, ActionBarItem } from "./components/ActionBar"
-import { CollectionActions } from "./components/CollectionActions/CollectionActions"
-import { NavigationFilters as NavigationFiltersComponent } from "./components/NavigationFilters"
-import { Search } from "./components/Search"
-import { TotalItemsSummary } from "./components/TotalItemsSummary"
+} from "./actions";
+import { ActionBar, ActionBarItem } from "./components/ActionBar";
+import { CollectionActions } from "./components/CollectionActions/CollectionActions";
+import { NavigationFilters as NavigationFiltersComponent } from "./components/NavigationFilters";
+import { Search } from "./components/Search";
+import { TotalItemsSummary } from "./components/TotalItemsSummary";
 import {
   DataCollectionStatusComplete,
   DataCollectionStorageFeaturesDefinition,
-} from "./hooks/useDataColectionStorage/types"
-import { useDataCollectionStorage } from "./hooks/useDataColectionStorage/useDataCollectionStorage"
-import { DataCollectionSource } from "./hooks/useDataCollectionSource"
-import { CustomEmptyStates, useEmptyState } from "./hooks/useEmptyState"
-import { ItemActionsDefinition } from "./item-actions"
-import { NavigationFiltersDefinition } from "./navigationFilters/types"
-import { Settings } from "./Settings"
-import { useDataCollectionSettings } from "./Settings/SettingsProvider"
-import { SummariesDefinition } from "./summary"
-import { useEventEmitter } from "./useEventEmitter"
-import { VisualizationRenderer } from "./visualizations/collection"
+} from "./hooks/useDataColectionStorage/types";
+import { useDataCollectionStorage } from "./hooks/useDataColectionStorage/useDataCollectionStorage";
+import { DataCollectionSource } from "./hooks/useDataCollectionSource";
+import { CustomEmptyStates, useEmptyState } from "./hooks/useEmptyState";
+import { ItemActionsDefinition } from "./item-actions";
+import { NavigationFiltersDefinition } from "./navigationFilters/types";
+import { Settings } from "./Settings";
+import { useDataCollectionSettings } from "./Settings/SettingsProvider";
+import { SummariesDefinition } from "./summary";
+import { useEventEmitter } from "./useEventEmitter";
+import { VisualizationRenderer } from "./visualizations/collection";
 
 /**
  * A component that renders a collection of data with filtering and visualization capabilities.
@@ -95,7 +95,7 @@ export type OneDataCollectionProps<
     ItemActions,
     NavigationFilters,
     Grouping
-  >
+  >;
   visualizations: ReadonlyArray<
     Visualization<
       R,
@@ -106,21 +106,21 @@ export type OneDataCollectionProps<
       NavigationFilters,
       Grouping
     >
-  >
-  onSelectItems?: OnSelectItemsCallback<R, Filters>
-  onBulkAction?: OnBulkActionCallback<R, Filters>
-  emptyStates?: CustomEmptyStates
-  onTotalItemsChange?: (totalItems: number) => void
-  fullHeight?: boolean
+  >;
+  onSelectItems?: OnSelectItemsCallback<R, Filters>;
+  onBulkAction?: OnBulkActionCallback<R, Filters>;
+  emptyStates?: CustomEmptyStates;
+  onTotalItemsChange?: (totalItems: number) => void;
+  fullHeight?: boolean;
 
   /** Function to handle state change */
   onStateChange?: (
-    state: DataCollectionStatusComplete<FiltersState<Filters>>
-  ) => void
+    state: DataCollectionStatusComplete<FiltersState<Filters>>,
+  ) => void;
 
   /** Key for the data collection settings and state, must be unique for each data collection and contain the version e.g. "employees/v1"
    */
-  id?: string
+  id?: string;
 
   /** Storage for the data collection settings and state: use false to disable the storage */
   storage?:
@@ -137,13 +137,13 @@ export type OneDataCollectionProps<
          * - "!filters, sortings" - will not use the storage for the data collection filters and sortings state
          *
          */
-        features?: DataCollectionStorageFeaturesDefinition
-      }
+        features?: DataCollectionStorageFeaturesDefinition;
+      };
   /**
    * @deprecated removes the horizontal padding from the data collection
    */
-  tmpFullWidth?: boolean
-}
+  tmpFullWidth?: boolean;
+};
 
 const OneDataCollectionComp = <
   R extends RecordType,
@@ -201,32 +201,32 @@ const OneDataCollectionComp = <
     currentSortings,
     setCurrentSortings,
     sortings,
-  } = source
+  } = source;
 
-  const [currentVisualization, setCurrentVisualization] = useState(0)
+  const [currentVisualization, setCurrentVisualization] = useState(0);
 
-  const defaultSortings = useRef(currentSortings)
+  const defaultSortings = useRef(currentSortings);
 
   const { emitSortingChange } = useEventEmitter<Sortings>({
     defaultSorting: defaultSortings.current,
-  })
+  });
 
   useEffect(() => {
-    emitSortingChange(currentSortings)
-  }, [emitSortingChange, currentSortings])
+    emitSortingChange(currentSortings);
+  }, [emitSortingChange, currentSortings]);
 
   /**
    * Data collection actions
    */
   const primaryActionItems = useMemo(
     () => getPrimaryActions(primaryActions),
-    [primaryActions]
-  )
+    [primaryActions],
+  );
 
   const allSecondaryActions = useMemo(
     () => filterActions(getSecondaryActions(secondaryActions)),
-    [secondaryActions]
-  )
+    [secondaryActions],
+  );
 
   const expandedSecondaryActions = useMemo(
     () =>
@@ -235,17 +235,17 @@ const OneDataCollectionComp = <
           "expanded" in secondaryActions &&
           secondaryActions.expanded) ||
           0,
-        MAX_EXPANDED_ACTIONS
+        MAX_EXPANDED_ACTIONS,
       ),
-    [secondaryActions]
-  )
+    [secondaryActions],
+  );
 
   // Extracts the expandedSecondaryActions from the first group
   const secondaryActionsItems = useMemo(
     () =>
       allSecondaryActions[0]?.items.slice(0, expandedSecondaryActions) || [],
-    [allSecondaryActions, expandedSecondaryActions]
-  )
+    [allSecondaryActions, expandedSecondaryActions],
+  );
 
   // Remaining actions are in the secondaryActionsItems group (expanded) and filters the empty groups
   const otherActionsItems = useMemo(() => {
@@ -256,190 +256,190 @@ const OneDataCollectionComp = <
           allSecondaryActions[0]?.items.slice(expandedSecondaryActions) || [],
       },
       ...allSecondaryActions.slice(1),
-    ].filter((group) => group.items.length > 0)
-  }, [allSecondaryActions, expandedSecondaryActions])
+    ].filter((group) => group.items.length > 0);
+  }, [allSecondaryActions, expandedSecondaryActions]);
 
   const hasCollectionsActions =
-    primaryActionItems?.length > 0 || allSecondaryActions?.length > 0
+    primaryActionItems?.length > 0 || allSecondaryActions?.length > 0;
 
   /**
    * Clear selected items function
    */
   const [clearSelectedItemsFunc, setClearSelectedItemsFunc] = useState<
     (() => void) | undefined
-  >(undefined)
+  >(undefined);
 
   /**
    * Layout
    */
-  const layout = useLayout()
+  const layout = useLayout();
 
   /**
    * Bulk actions
    */
   type MappedBulkAction =
     | (BulkActionDefinition & { onClick: () => void })
-    | { type: "separator" }
+    | { type: "separator" };
 
   const [bulkActions, setBulkActions] = useState<
     | {
-        primary?: MappedBulkAction[]
-        secondary?: MappedBulkAction[]
+        primary?: MappedBulkAction[];
+        secondary?: MappedBulkAction[];
       }
     | { warningMessage: string }
     | undefined
-  >(undefined)
+  >(undefined);
 
   const groupItems = useCallback((items: MappedBulkAction[] | undefined) => {
     if (!items) {
-      return []
+      return [];
     }
-    const groups = []
-    let currentGroupItems: ActionBarItem[] = []
+    const groups = [];
+    let currentGroupItems: ActionBarItem[] = [];
     for (const item of items) {
       if ("type" in item && item.type === "separator") {
-        groups.push({ items: currentGroupItems })
-        currentGroupItems = []
+        groups.push({ items: currentGroupItems });
+        currentGroupItems = [];
       } else {
-        currentGroupItems.push(item as ActionBarItem)
+        currentGroupItems.push(item as ActionBarItem);
       }
     }
     if (currentGroupItems.length > 0) {
-      groups.push({ items: currentGroupItems })
+      groups.push({ items: currentGroupItems });
     }
-    return groups
-  }, [])
+    return groups;
+  }, []);
   /**
    * Creates the bulk actions groups to avoid change the datacollection interface
    */
   const bulkActionsGroups = useMemo(() => {
     if (!bulkActions) {
-      return undefined
+      return undefined;
     }
     if ("warningMessage" in bulkActions) {
       return {
         warningMessage: bulkActions.warningMessage,
-      }
+      };
     }
     return {
       primary: groupItems(bulkActions.primary ?? []),
       secondary: (bulkActions?.secondary ?? []).filter(
-        (action) => !("type" in action && action.type === "separator")
+        (action) => !("type" in action && action.type === "separator"),
       ) as ActionBarItem[],
-    }
-  }, [bulkActions, groupItems])
+    };
+  }, [bulkActions, groupItems]);
 
-  const [showActionBar, setShowActionBar] = useState(false)
+  const [showActionBar, setShowActionBar] = useState(false);
 
-  const [selectedItemsCount, setSelectedItemsCount] = useState(0)
+  const [selectedItemsCount, setSelectedItemsCount] = useState(0);
 
-  const i18n = useI18n()
+  const i18n = useI18n();
 
   const totalItemSummaryFn = useMemo(() => {
     if (totalItemSummary === true) {
       return (totalItems: number | undefined) =>
         totalItems !== undefined
           ? `${totalItems} ${i18n.collections.itemsCount}`
-          : null
+          : null;
     }
-    return totalItemSummary || undefined
-  }, [totalItemSummary, i18n])
+    return totalItemSummary || undefined;
+  }, [totalItemSummary, i18n]);
 
   const onSelectItemsLocal: OnSelectItemsCallback<R, Filters> = (
     selectedItems,
-    clearSelectedItems
+    clearSelectedItems,
   ): void => {
-    onSelectItems?.(selectedItems, clearSelectedItems)
+    onSelectItems?.(selectedItems, clearSelectedItems);
 
     /**
      * Show action bar
      */
     setShowActionBar(
       !!selectedItems.allSelected ||
-        selectedItems.itemsStatus.some((item) => item.checked)
-    )
+        selectedItems.itemsStatus.some((item) => item.checked),
+    );
 
     /**
      * Selected items count
      */
-    setSelectedItemsCount(selectedItems.selectedCount)
+    setSelectedItemsCount(selectedItems.selectedCount);
 
     /**
      * Clear selected items function
      */
-    setClearSelectedItemsFunc(() => clearSelectedItems)
+    setClearSelectedItemsFunc(() => clearSelectedItems);
 
     /**
      * Bulk actions for the action bar
      */
     const bulkActions = source.bulkActions
       ? source.bulkActions(selectedItems)
-      : undefined
+      : undefined;
 
     const mapBulkActions = (
-      action: BulkActionDefinition | { type: "separator" }
+      action: BulkActionDefinition | { type: "separator" },
     ): MappedBulkAction => {
       if ("type" in action && action.type === "separator") {
-        return { type: "separator" as const }
+        return { type: "separator" as const };
       }
-      const bulkAction = action as BulkActionDefinition
+      const bulkAction = action as BulkActionDefinition;
       return {
         ...bulkAction,
         onClick: () => {
-          onBulkAction?.(bulkAction.id, selectedItems, clearSelectedItems)
+          onBulkAction?.(bulkAction.id, selectedItems, clearSelectedItems);
           if (!bulkAction.keepSelection) {
-            clearSelectedItems()
+            clearSelectedItems();
           }
         },
-      }
-    }
+      };
+    };
 
     if (bulkActions) {
       if ("primary" in bulkActions) {
         setBulkActions({
           primary: (bulkActions?.primary || []).map(mapBulkActions),
           secondary: (bulkActions?.secondary || []).map(mapBulkActions),
-        })
+        });
       } else if ("warningMessage" in bulkActions) {
-        setBulkActions({ warningMessage: bulkActions.warningMessage })
+        setBulkActions({ warningMessage: bulkActions.warningMessage });
       }
     }
-  }
+  };
 
-  const [totalItems, setTotalItems] = useState<undefined | number>(undefined)
-  const [isInitialLoading, setIsInitialLoading] = useState(true)
+  const [totalItems, setTotalItems] = useState<undefined | number>(undefined);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
 
   const elementsRightActions = useMemo(
     () => [search?.enabled, visualizations.length > 1].some(Boolean),
-    [search, visualizations]
-  )
+    [search, visualizations],
+  );
 
   /**
    * Empty state
    */
   const { emptyState, setEmptyStateType } = useEmptyState(emptyStates, {
     retry: () => {
-      setEmptyStateType(false)
-      setCurrentFilters({ ...currentFilters })
+      setEmptyStateType(false);
+      setCurrentFilters({ ...currentFilters });
     },
     clearFilters: () => {
-      setEmptyStateType(false)
-      setCurrentFilters({})
-      setCurrentSearch(undefined)
+      setEmptyStateType(false);
+      setCurrentFilters({});
+      setCurrentSearch(undefined);
     },
-  })
+  });
 
   const getEmptyStateType = (
     totalItems: number | undefined,
     filters: FiltersState<Filters>,
-    search: string | undefined
+    search: string | undefined,
   ) => {
     return totalItems === 0
       ? Object.keys(filters).length > 0 || search
         ? "no-results"
         : "no-data"
-      : false
-  }
+      : false;
+  };
 
   const onLoadData = ({
     totalItems,
@@ -448,51 +448,51 @@ const OneDataCollectionComp = <
     search,
   }: Parameters<OnLoadDataCallback<R, Filters>>[0]) => {
     if (isInitialLoadingFromCallback) {
-      return
+      return;
     }
 
-    setIsInitialLoading(isInitialLoadingFromCallback)
-    setTotalItems(totalItems)
-    setEmptyStateType(getEmptyStateType(totalItems, filters, search))
-  }
+    setIsInitialLoading(isInitialLoadingFromCallback);
+    setTotalItems(totalItems);
+    setEmptyStateType(getEmptyStateType(totalItems, filters, search));
+  };
 
   const onLoadError = (error: DataError) => {
     setEmptyStateType(
       "error",
-      error.cause instanceof Error ? error.cause.message : error.message
-    )
-  }
+      error.cause instanceof Error ? error.cause.message : error.message,
+    );
+  };
 
   const showPresetsLoading = useDebounceBoolean({
     value: !!presetsLoading,
     delay: 100,
-  })
+  });
 
   useEffect(() => {
-    setEmptyStateType(false)
+    setEmptyStateType(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- This is intentional we should remove the empty state when the filters, search, navigation filters change
   }, [
     currentFilters,
     currentSearch,
     currentNavigationFilters,
     source.dataAdapter,
-  ])
+  ]);
 
   const showTotalItemSummary = useMemo(() => {
-    return totalItemSummaryFn !== undefined
-  }, [totalItemSummaryFn])
+    return totalItemSummaryFn !== undefined;
+  }, [totalItemSummaryFn]);
 
   const totalItemSummaryResult =
     totalItemSummaryFn === undefined
       ? null
       : totalItems !== undefined
         ? totalItemSummaryFn(totalItems)
-        : null
+        : null;
 
   /**
    * Settings
    */
-  const { settings, setSettings } = useDataCollectionSettings()
+  const { settings, setSettings } = useDataCollectionSettings();
 
   const { storageReady } = useDataCollectionStorage(
     id,
@@ -527,13 +527,13 @@ const OneDataCollectionComp = <
         setValue: setCurrentFilters,
       },
     },
-    storage === false
-  )
+    storage === false,
+  );
 
   const showTotalItemSummarySkeleton = useDebounceBoolean({
     value: isInitialLoading && storageReady,
     delay: 100,
-  })
+  });
 
   /** State */
   useDeepCompareEffect(() => {
@@ -545,7 +545,7 @@ const OneDataCollectionComp = <
       search: currentSearch,
       navigationFilters: currentNavigationFilters,
       settings: settings,
-    })
+    });
   }, [
     currentFilters,
     currentSearch,
@@ -554,32 +554,32 @@ const OneDataCollectionComp = <
     currentVisualization,
     currentGrouping,
     settings,
-  ])
+  ]);
   /************************/
 
   /** Toolbars */
   const shouldShowSettings = useMemo(() => {
     const groupByOptions = grouping
       ? Object.keys(grouping.groupBy).length + (grouping.mandatory ? 1 : 0)
-      : 0
+      : 0;
 
     const tableVisualization = Object.values(visualizations).find(
-      (visualization) => visualization.type === "table"
-    )
+      (visualization) => visualization.type === "table",
+    );
 
     // Show table settings if the table visualization is defined and the allowColumnHiding or allowColumnReordering options are true
     const showTableSettings =
       !!tableVisualization &&
       (!!tableVisualization.options?.allowColumnHiding ||
-        !!tableVisualization.options?.allowColumnReordering)
+        !!tableVisualization.options?.allowColumnReordering);
 
     return (
       (visualizations && visualizations.length > 1) ||
       (groupByOptions > 0 && !grouping?.hideSelector) ||
       (sortings && Object.keys(sortings).length > 0) ||
       showTableSettings
-    )
-  }, [visualizations, grouping, sortings])
+    );
+  }, [visualizations, grouping, sortings]);
 
   const bottomRightHasItems = useMemo(() => {
     return (
@@ -587,28 +587,28 @@ const OneDataCollectionComp = <
       hasCollectionsActions ||
       shouldShowSettings ||
       (search && search.enabled)
-    )
-  }, [elementsRightActions, hasCollectionsActions, shouldShowSettings, search])
+    );
+  }, [elementsRightActions, hasCollectionsActions, shouldShowSettings, search]);
 
   const totalItemSummaryPosition = useMemo(() => {
     if (!showTotalItemSummary) {
-      return false
+      return false;
     }
-    return filters ? "top" : "bottom"
-  }, [filters, showTotalItemSummary])
+    return filters ? "top" : "bottom";
+  }, [filters, showTotalItemSummary]);
 
   const navigationFiltersPosition = useMemo(() => {
     if (!navigationFilters) {
-      return false
+      return false;
     }
-    return bottomRightHasItems ? "top" : "bottom"
-  }, [navigationFilters, bottomRightHasItems])
+    return bottomRightHasItems ? "top" : "bottom";
+  }, [navigationFilters, bottomRightHasItems]);
 
   const showTopToolbar = useMemo(() => {
     return (
       totalItemSummaryPosition === "top" || navigationFiltersPosition === "top"
-    )
-  }, [totalItemSummaryPosition, navigationFiltersPosition])
+    );
+  }, [totalItemSummaryPosition, navigationFiltersPosition]);
 
   const showBottomToolbar = useMemo(() => {
     return (
@@ -616,20 +616,20 @@ const OneDataCollectionComp = <
       bottomRightHasItems ||
       navigationFiltersPosition === "bottom" ||
       totalItemSummaryPosition === "bottom"
-    )
+    );
   }, [
     filters,
     bottomRightHasItems,
     navigationFiltersPosition,
     totalItemSummaryPosition,
-  ])
+  ]);
 
   return (
     <div
       className={cn(
         "flex flex-col gap-4",
         layout === "standard" && "-mx-[23px]",
-        fullHeight && "h-full flex-1"
+        fullHeight && "h-full flex-1",
       )}
       style={{
         width:
@@ -660,7 +660,7 @@ const OneDataCollectionComp = <
           className={cn(
             "flex flex-row gap-4 px-4",
             fullHeight && "max-h-full",
-            tmpFullWidth && "px-0"
+            tmpFullWidth && "px-0",
           )}
         >
           {totalItemSummaryPosition === "bottom" && (
@@ -732,7 +732,7 @@ const OneDataCollectionComp = <
       <div
         className={cn(
           emptyState && "hidden",
-          fullHeight && "h-full min-h-0 flex-1"
+          fullHeight && "h-full min-h-0 flex-1",
         )}
       >
         <VisualizationRenderer
@@ -780,7 +780,7 @@ const OneDataCollectionComp = <
         </>
       )}
     </div>
-  )
-}
+  );
+};
 
-export { OneDataCollectionComp }
+export { OneDataCollectionComp };

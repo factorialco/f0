@@ -1,15 +1,15 @@
-import type { Meta, StoryObj } from "@storybook/react-vite"
+import type { Meta, StoryObj } from "@storybook/react-vite";
 
-import React, { useState } from "react"
+import React, { useState } from "react";
 
-import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
-import { F0Button } from "@/components/F0Button"
-import { F0Checkbox } from "@/components/F0Checkbox"
-import { F0TagRaw } from "@/components/tags/F0TagRaw"
-import { F0TagStatus, type StatusVariant } from "@/components/tags/F0TagStatus"
-import { Dropdown } from "@/experimental/Navigation/Dropdown"
-import { OnePagination } from "@/experimental/OnePagination"
-import { Delete, Ellipsis, Pencil } from "@/icons/app"
+import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson";
+import { F0Button } from "@/components/F0Button";
+import { F0Checkbox } from "@/components/F0Checkbox";
+import { F0TagRaw } from "@/components/tags/F0TagRaw";
+import { F0TagStatus, type StatusVariant } from "@/components/tags/F0TagStatus";
+import { Dropdown } from "@/experimental/Navigation/Dropdown";
+import { OnePagination } from "@/ui/OnePagination";
+import { Delete, Ellipsis, Pencil } from "@/icons/app";
 
 import {
   OneTable,
@@ -18,16 +18,16 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "./index"
+} from "./index";
 
 const meta: Meta<typeof OneTable> = {
   title: "Table",
   component: OneTable,
   tags: ["experimental"],
-}
+};
 
-export default meta
-type Story = StoryObj<typeof OneTable>
+export default meta;
+type Story = StoryObj<typeof OneTable>;
 
 const sampleData = [
   {
@@ -82,7 +82,7 @@ const sampleData = [
     },
     selected: false,
   },
-]
+];
 
 export const Default: Story = {
   render: () => (
@@ -127,7 +127,7 @@ export const Default: Story = {
       </TableBody>
     </OneTable>
   ),
-}
+};
 
 export const Check: Story = {
   render: () => {
@@ -135,21 +135,21 @@ export const Check: Story = {
       () => ({
         [sampleData[0].id]: true,
         [sampleData[2].id]: true,
-      })
-    )
+      }),
+    );
 
-    const selectedCount = Object.values(selectedRows).filter(Boolean).length
-    const isAllSelected = selectedCount === sampleData.length
+    const selectedCount = Object.values(selectedRows).filter(Boolean).length;
+    const isAllSelected = selectedCount === sampleData.length;
     const isPartiallySelected =
-      selectedCount > 0 && selectedCount < sampleData.length
+      selectedCount > 0 && selectedCount < sampleData.length;
 
     const handleSelectAll = (checked: boolean) => {
-      const newSelected = {} as Record<string, boolean>
+      const newSelected = {} as Record<string, boolean>;
       sampleData.forEach((row) => {
-        newSelected[row.id] = checked
-      })
-      setSelectedRows(newSelected)
-    }
+        newSelected[row.id] = checked;
+      });
+      setSelectedRows(newSelected);
+    };
 
     return (
       <OneTable>
@@ -179,7 +179,7 @@ export const Check: Story = {
                     setSelectedRows((prev) => ({
                       ...prev,
                       [row.id]: checked,
-                    }))
+                    }));
                   }}
                   title={`Select ${row.name}`}
                   hideLabel
@@ -192,9 +192,9 @@ export const Check: Story = {
           ))}
         </TableBody>
       </OneTable>
-    )
+    );
   },
-}
+};
 
 export const InfoHeader: Story = {
   render: () => (
@@ -219,20 +219,20 @@ export const InfoHeader: Story = {
       </TableBody>
     </OneTable>
   ),
-}
+};
 
-type SortState = "asc" | "desc" | undefined
-type SortColumn = "name" | "email" | "role"
+type SortState = "asc" | "desc" | undefined;
+type SortColumn = "name" | "email" | "role";
 
 export const Sortable: Story = {
   render: () => {
     const [sortConfig, setSortConfig] = React.useState<{
-      column: SortColumn | null
-      order: SortState
+      column: SortColumn | null;
+      order: SortState;
     }>({
       column: "name",
       order: "asc",
-    })
+    });
 
     const handleSort = (column: SortColumn) => {
       setSortConfig((current) => ({
@@ -243,21 +243,21 @@ export const Sortable: Story = {
               ? "desc"
               : "asc"
             : "asc",
-      }))
-    }
+      }));
+    };
 
     const sortedData = React.useMemo(() => {
-      if (!sortConfig.column) return sampleData
+      if (!sortConfig.column) return sampleData;
 
       return [...sampleData].sort((a, b) => {
-        const aValue = a[sortConfig.column!]
-        const bValue = b[sortConfig.column!]
+        const aValue = a[sortConfig.column!];
+        const bValue = b[sortConfig.column!];
 
         return sortConfig.order === "asc"
           ? aValue.localeCompare(bValue)
-          : bValue.localeCompare(aValue)
-      })
-    }, [sortConfig])
+          : bValue.localeCompare(aValue);
+      });
+    }, [sortConfig]);
 
     return (
       <OneTable>
@@ -299,9 +299,9 @@ export const Sortable: Story = {
           ))}
         </TableBody>
       </OneTable>
-    )
+    );
   },
-}
+};
 
 export const StickyColumn: Story = {
   render: () => (
@@ -363,11 +363,11 @@ export const StickyColumn: Story = {
       </TableBody>
     </OneTable>
   ),
-}
+};
 
 export const Skeleton: Story = {
   render: () => <OneTable.Skeleton columns={3} />,
-}
+};
 
 const summatoryData = [
   {
@@ -400,7 +400,7 @@ const summatoryData = [
     productB: "1.100,00 €",
     productC: "1.800,00 €",
   },
-]
+];
 
 export const Summatory: Story = {
   render: () => (
@@ -468,7 +468,7 @@ export const Summatory: Story = {
       </TableBody>
     </OneTable>
   ),
-}
+};
 
 export const Footer: Story = {
   render: () => (
@@ -523,7 +523,7 @@ export const Footer: Story = {
       </div>
     </>
   ),
-}
+};
 
 export const Actions: Story = {
   render: () => (
@@ -596,7 +596,7 @@ export const Actions: Story = {
       </TableBody>
     </OneTable>
   ),
-}
+};
 
 export const WithLinks: Story = {
   render: () => (
@@ -675,7 +675,7 @@ export const WithLinks: Story = {
       </TableBody>
     </OneTable>
   ),
-}
+};
 
 export const Loading: Story = {
   parameters: {
@@ -685,7 +685,7 @@ export const Loading: Story = {
     },
   },
   render: () => {
-    const [loading, setLoading] = useState(true)
+    const [loading, setLoading] = useState(true);
 
     return (
       <div className="flex flex-col gap-4">
@@ -736,14 +736,14 @@ export const Loading: Story = {
           </TableBody>
         </OneTable>
       </div>
-    )
+    );
   },
-}
+};
 
 export const WithOnClick: Story = {
   render: () => {
     function action() {
-      alert("action clicked")
+      alert("action clicked");
     }
 
     return (
@@ -821,6 +821,6 @@ export const WithOnClick: Story = {
           ))}
         </TableBody>
       </OneTable>
-    )
+    );
   },
-}
+};
