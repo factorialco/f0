@@ -113,7 +113,7 @@
   },
   "dependencies": {
     "expo-clipboard": "~8.0.8",
-    "lodash": "^4.17.21",
+    "lodash": "^4.17.23",
     "tailwind-merge": "^3.4.0",
     "tailwind-variants": "^3.2.2"
   },
