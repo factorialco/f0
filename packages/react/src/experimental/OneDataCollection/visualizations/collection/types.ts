@@ -13,6 +13,7 @@ import type {
 import type { CardVisualizationOptions } from "./Card"
 import type { KanbanVisualizationOptions } from "./Kanban"
 import type { TableVisualizationOptions } from "./Table"
+import type { EditableTableVisualizationOptions } from "./EditableTable"
 
 import { DataCollectionSource } from "../../hooks/useDataCollectionSource/types"
 import { ItemActionsDefinition } from "../../item-actions"
@@ -54,6 +55,17 @@ export type Visualization<
       type: "table"
       /** Configuration options for table visualization */
       options: TableVisualizationOptions<R, Filters, Sortings, Summaries>
+    }
+  | {
+      /** Editable table-based visualization type */
+      type: "editableTable"
+      /** Configuration options for editable table visualization */
+      options: EditableTableVisualizationOptions<
+        R,
+        Filters,
+        Sortings,
+        Summaries
+      >
     }
   | {
       /** List-based visualization type */
