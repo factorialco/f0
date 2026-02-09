@@ -8,10 +8,14 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "icon": {
+        "dark": "./assets/images/ios-dark.png",
+        "light": "./assets/images/ios-light.png",
+      },
     },
     "android": {
       "adaptiveIcon": {
+        "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#E6F4FE"
       },
       "edgeToEdgeEnabled": true
@@ -20,11 +24,14 @@
       "output": "static"
     },
     "plugins": [
-      ["expo-router", {
-        "root": "./playground/app"
-      }],
       [
-      "expo-font",
+        "expo-router",
+        {
+          "root": "./playground/app"
+        }
+      ],
+      [
+        "expo-font",
         {
           "fonts": [
             "./assets/fonts/factorial.ttf",
@@ -35,10 +42,29 @@
             "./assets/fonts/OxaniumMedium.ttf"
           ]
         }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#ECEDEE",
+          "image": "./assets/images/splash-icon.png",
+          "imageWidth": 200
+        }
       ]
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "354f5148-fa6f-45dd-8869-991a24b786e0"
+      }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/354f5148-fa6f-45dd-8869-991a24b786e0"
     }
   }
 }
