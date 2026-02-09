@@ -6,7 +6,7 @@ import { F0Button } from "@/components/F0Button"
 import { EmojiImage } from "@/lib/emojis"
 import { cn } from "@/lib/utils"
 
-import "../../Information/Reactions/Picker/index.css"
+import "@/experimental/Information/Reactions/Picker/index.css"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
 
 export type ScoreEditOptionProps = {
