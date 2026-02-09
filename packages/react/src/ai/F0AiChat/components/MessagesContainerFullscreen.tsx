@@ -13,7 +13,7 @@ import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { AssistantMessage as F0AssistantMessage } from "@/sds/ai/F0AiChat/components/AssistantMessage"
 
-import { F0Thinking } from "../../F0Thinking"
+import { F0Thinking } from "../../AiWidgets/F0Thinking"
 import { FullscreenChatContext } from "../index"
 import { useAiChat } from "../providers/AiChatStateProvider"
 import { FeedbackModal } from "./FeedbackModal"

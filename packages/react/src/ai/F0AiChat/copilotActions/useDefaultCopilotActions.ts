@@ -1,10 +1,10 @@
-import { useBookAMeetingCardAction } from "./useBookAMeetingCardAction"
-import { useDemoCardAction } from "./useDemoCardAction"
-import { useFAQCardAction } from "./useFAQCardAction"
-import { useMessageSourcesAction } from "./useMessageSourcesAction"
-import { useModuleCardAction } from "./useModuleCardAction"
-import { useOrchestratorThinkingAction } from "./useOrchestratorThinkingAction"
-import { useQuestionCardAction } from "./useQuestionCardAction"
+import { useBookAMeetingCardAction } from "../../AiWidgets/UpsellKit/F0BookAMeetingCard/useBookAMeetingCardAction"
+import { useDemoCardAction } from "../../AiWidgets/UpsellKit/F0DemoCard/useDemoCardAction"
+import { useFAQCardAction } from "../../AiWidgets/UpsellKit/F0FAQCard/useFAQCardAction"
+import { useMessageSourcesAction } from "../../AiWidgets/F0MessageSources/useMessageSourcesAction"
+import { useModuleCardAction } from "../../AiWidgets/UpsellKit/F0ModuleCard/useModuleCardAction"
+import { useOrchestratorThinkingAction } from "../../AiWidgets/F0Thinking/useOrchestratorThinkingAction"
+import { useQuestionCardAction } from "../../AiWidgets/UpsellKit/F0QuestionCard/useQuestionCardAction"
 
 /**
  * Hook to register all default copilot actions.

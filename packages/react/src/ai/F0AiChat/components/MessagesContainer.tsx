@@ -17,7 +17,7 @@ import { ArrowDown } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
-import { F0Thinking as Thinking } from "../../F0Thinking"
+import { F0Thinking as Thinking } from "../../AiWidgets/F0Thinking"
 import { isAgentStateMessage } from "../internal-types"
 import { useAiChat } from "../providers/AiChatStateProvider"
 import { FeedbackModal } from "./FeedbackModal"
