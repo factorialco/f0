@@ -112,8 +112,7 @@ export function PageHeader({
   productUpdates,
   favorites,
 }: HeaderProps) {
-  const { sidebarState, toggleSidebar, isLastToggleInvokedByUser } =
-    useSidebar()
+  const { sidebarState, toggleSidebar } = useSidebar()
 
   const breadcrumbsTree: typeof breadcrumbs = [
     {
@@ -150,12 +149,6 @@ export function PageHeader({
             >
               <div className="mr-3">
                 <F0Button
-                  ref={(buttonEl) => {
-                    // if action was triggered by user, focus the close button
-                    if (isLastToggleInvokedByUser) {
-                      buttonEl?.focus()
-                    }
-                  }}
                   variant="ghost"
                   hideLabel
                   onClick={() => toggleSidebar()}

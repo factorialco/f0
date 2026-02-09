@@ -1,4 +1,4 @@
-import { cva } from "cva";
+import { tv } from "tailwind-variants";
 import * as React from "react";
 import { cn } from "../lib/utils";
 import { View, Text, Image } from "react-native";
@@ -29,7 +29,7 @@ const textSizes = {
   xlarge: "text-3xl",
 };
 
-const avatarVariants = cva({
+const avatarVariants = tv({
   base: "flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold",
   variants: {
     size: {
@@ -44,17 +44,17 @@ const avatarVariants = cva({
       rounded: "rounded-full",
     } satisfies Record<(typeof type)[number], string>,
     color: {
-      viridian: "bg-[hsl(theme(colors.viridian.50))]",
-      malibu: "bg-[hsl(theme(colors.malibu.50))]",
-      yellow: "bg-[hsl(theme(colors.yellow.50))]",
-      purple: "bg-[hsl(theme(colors.purple.50))]",
-      lilac: "bg-[hsl(theme(colors.lilac.50))]",
-      barbie: "bg-[hsl(theme(colors.barbie.50))]",
-      smoke: "bg-[hsl(theme(colors.smoke.50))]",
-      army: "bg-[hsl(theme(colors.army.50))]",
-      flubber: "bg-[hsl(theme(colors.flubber.50))]",
-      indigo: "bg-[hsl(theme(colors.indigo.50))]",
-      camel: "bg-[hsl(theme(colors.camel.50))]",
+      viridian: "bg-[hsl(theme(colors.viridian-50))]",
+      malibu: "bg-[hsl(theme(colors.malibu-50))]",
+      yellow: "bg-[hsl(theme(colors.yellow-50))]",
+      purple: "bg-[hsl(theme(colors.purple-50))]",
+      lilac: "bg-[hsl(theme(colors.lilac-50))]",
+      barbie: "bg-[hsl(theme(colors.barbie-50))]",
+      smoke: "bg-[hsl(theme(colors.smoke-50))]",
+      army: "bg-[hsl(theme(colors.army-50))]",
+      flubber: "bg-[hsl(theme(colors.flubber-50))]",
+      indigo: "bg-[hsl(theme(colors.indigo-50))]",
+      camel: "bg-[hsl(theme(colors.camel-50))]",
     } satisfies Record<(typeof color)[number], string>,
   },
   defaultVariants: {
@@ -72,7 +72,7 @@ type AvatarProps = React.ComponentPropsWithoutRef<typeof View> & {
 
 const Avatar = ({ size, type, color, className, ...props }: AvatarProps) => (
   <View
-    className={cn(avatarVariants({ size, type, color, className }))}
+    className={cn(avatarVariants({ size, type, color }), className)}
     {...props}
   />
 );

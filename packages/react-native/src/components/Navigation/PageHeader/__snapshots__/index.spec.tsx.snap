@@ -1,11 +1,11 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`PageHeader Snapshot - renders correctly with multiple actions 1`] = `
 <View
   className="flex-row items-center justify-between px-5 py-3"
 >
   <Text
-    className="text-3xl font-semibold text-f1-foreground"
+    className="text-f1-foreground text-3xl font-semibold"
   >
     Test Page Title
   </Text>
@@ -110,7 +110,7 @@ exports[`PageHeader Snapshot - renders correctly with one action 1`] = `
   className="flex-row items-center justify-between px-5 py-3"
 >
   <Text
-    className="text-3xl font-semibold text-f1-foreground"
+    className="text-f1-foreground text-3xl font-semibold"
   >
     Test Page Title
   </Text>
@@ -169,7 +169,7 @@ exports[`PageHeader Snapshot - renders correctly with one action with a badge 1`
   className="flex-row items-center justify-between px-5 py-3"
 >
   <Text
-    className="text-3xl font-semibold text-f1-foreground"
+    className="text-f1-foreground text-3xl font-semibold"
   >
     Test Page Title
   </Text>
@@ -231,7 +231,7 @@ exports[`PageHeader Snapshot - renders correctly with only a title 1`] = `
   className="flex-row items-center justify-between px-5 py-3"
 >
   <Text
-    className="text-3xl font-semibold text-f1-foreground"
+    className="text-f1-foreground text-3xl font-semibold"
   >
     Test Page Title
   </Text>

@@ -14,6 +14,7 @@ import { DateRange, DateRangeComplete } from "../../types"
 import {
   formatDateRange,
   formatDateToString,
+  formatToPlaceholder,
   isAfterOrEqual,
   isBeforeOrEqual,
   toDateRangeString,
@@ -22,6 +23,8 @@ import {
 import { rangeSeparator } from "../consts"
 import { DateStringFormat, GranularityDefinition } from "../types"
 import { MonthView } from "./MonthView"
+
+const MONTH_FORMAT = "MM/yyyy"
 
 export function toMonthGranularityDateRange<
   T extends Date | DateRange | undefined | null,
@@ -37,7 +40,7 @@ const add = (date: DateRangeComplete, delta: number): DateRangeComplete => {
 }
 
 const formatMonthShort = (date: Date | DateRange | undefined | null) => {
-  return formatDateToString(date, "MM/yyyy")
+  return formatDateToString(date, MONTH_FORMAT)
 }
 
 const formatMonthLong = (date: Date | DateRange | undefined | null) => {
@@ -94,6 +97,7 @@ export const monthGranularity: GranularityDefinition = {
     return formats[format] ?? formats.default
   },
   toStringMaxWidth: () => 140,
+  placeholder: () => formatToPlaceholder(MONTH_FORMAT),
   fromString: (dateStr) => {
     const dateRangeString = toDateRangeString(dateStr)
     if (!dateRangeString) {

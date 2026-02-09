@@ -21,9 +21,17 @@ const reactSettings = {
 };
 
 export default [
-  // Ignore dist and other config files
+  // Ignore dist, lib (compiled files), package (build artifacts), and other config files
   {
-    ignores: ["**/dist", "**/.eslintrc.cjs", "**/babel.config.cjs", "**/*.cjs"],
+    ignores: [
+      "**/dist",
+      "**/lib",
+      "**/package",
+      "**/.eslintrc.cjs",
+      "**/babel.config.cjs",
+      "**/*.cjs",
+      "**/scripts/**/*.mjs",
+    ],
   },
 
   // Main React Native configuration
@@ -73,6 +81,7 @@ export default [
           varsIgnorePattern: "^_",
           args: "after-used",
           argsIgnorePattern: "^_",
+          caughtErrors: "none",
         },
       ],
     },

@@ -56,6 +56,11 @@ const meta = {
             credentials="include"
             showDevConsole={false}
             greeting="Hello, John"
+            disclaimer={{
+              text: "One works within your permissions.",
+              link: "/permissions",
+              linkText: "See more",
+            }}
           >
             <AiChatWrapper>
               <Story />

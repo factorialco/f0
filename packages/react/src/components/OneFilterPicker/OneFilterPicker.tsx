@@ -33,6 +33,8 @@ export type OneFilterPickerRootProps<Definition extends FiltersDefinition> = {
   mode?: FiltersMode
   /** Callback fired when filters open state is changed */
   onOpenChange?: (isOpen: boolean) => void
+  /** Display counter for the applied filters */
+  displayCounter?: boolean
 }
 
 /**
@@ -172,6 +174,7 @@ const FiltersControls = () => {
     presets,
     emitFilterChange,
     mode,
+    displayCounter,
   } = useContext(FiltersContext)
 
   const shownFilters = filters
@@ -197,6 +200,7 @@ const FiltersControls = () => {
         isOpen={isFiltersOpen}
         hideLabel={!!presets || mode === "simple"}
         mode={mode}
+        displayCounter={displayCounter}
       />
       {!!presets?.length && (
         <div className="flex items-center">

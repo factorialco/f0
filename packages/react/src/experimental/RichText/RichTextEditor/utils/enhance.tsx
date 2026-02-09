@@ -50,15 +50,26 @@ function prepareEnhancementContext(editor: Editor, from: number, to: number) {
   return beforeText + " " + afterText
 }
 
+interface ApplyEnhancedTextResult {
+  highlightFrom: number
+  highlightTo: number
+}
+
 function applyEnhancedText(
   editor: Editor,
   enhancedText: string,
   from: number,
   to: number,
   isFullDocumentSelected: boolean
-) {
+): ApplyEnhancedTextResult {
   if (isFullDocumentSelected) {
     editor.chain().focus().setContent(enhancedText).run()
+    // For full document, highlight everything (1 to avoid the start, content.size - 1 to avoid the end)
+    const docSize = editor.state.doc.content.size
+    return {
+      highlightFrom: 1,
+      highlightTo: Math.max(1, docSize - 1),
+    }
   } else {
     editor
       .chain()
@@ -66,11 +77,27 @@ function applyEnhancedText(
       .deleteRange({ from, to })
       .insertContent(enhancedText)
       .run()
+    // After insertion, cursor is at the end of inserted content
+    const highlightTo = editor.state.selection.to
+    return {
+      highlightFrom: from,
+      highlightTo,
+    }
   }
 }
 
 function isValidForEnhancement(text: string): boolean {
   return text.trim().length > 0
+}
+
+export interface EnhanceHighlightRange {
+  from: number
+  to: number
+}
+
+export interface EnhanceLoadingInfo {
+  range: EnhanceHighlightRange
+  isFullDocument: boolean
 }
 
 export interface EnhanceWithAIParams {
@@ -79,7 +106,8 @@ export interface EnhanceWithAIParams {
   setIsLoadingEnhance: (loading: boolean) => void
   selectedIntent?: string
   customIntent?: string
-  onSuccess: () => void
+  onLoadingStart: (info: EnhanceLoadingInfo) => void
+  onSuccess: (highlightRange: EnhanceHighlightRange) => void
   onError: (error?: string) => void
 }
 
@@ -89,6 +117,7 @@ async function handleEnhanceWithAIFunction({
   setIsLoadingEnhance,
   selectedIntent,
   customIntent,
+  onLoadingStart,
   onSuccess,
   onError,
 }: EnhanceWithAIParams): Promise<void> {
@@ -103,6 +132,16 @@ async function handleEnhanceWithAIFunction({
 
   const context = prepareEnhancementContext(editor, from, to)
 
+  // Set highlight on selected text before starting the API call
+  const initialFrom = isFullDocumentSelected ? 1 : from
+  const initialTo = isFullDocumentSelected
+    ? Math.max(1, editor.state.doc.content.size - 1)
+    : to
+  onLoadingStart({
+    range: { from: initialFrom, to: initialTo },
+    isFullDocument: isFullDocumentSelected,
+  })
+
   try {
     setIsLoadingEnhance(true)
 
@@ -114,7 +153,7 @@ async function handleEnhanceWithAIFunction({
     })
 
     if (success) {
-      applyEnhancedText(
+      const { highlightFrom, highlightTo } = applyEnhancedText(
         editor,
         text,
         from,
@@ -122,7 +161,7 @@ async function handleEnhanceWithAIFunction({
         isFullDocumentSelected ||
           textToEnhance.toString() === editor.getHTML().toString()
       )
-      onSuccess()
+      onSuccess({ from: highlightFrom, to: highlightTo })
     } else {
       onError(error)
     }

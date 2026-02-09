@@ -1,6 +1,7 @@
 import {
   ColorExtension,
   CustomTaskExtension,
+  EnhanceHighlight,
   HighlightExtension,
   LinkExtension,
   MentionedUser,
@@ -44,6 +45,7 @@ const ExtensionsConfiguration = ({
     TextAlignExtension,
     LinkExtension,
     PersistSelection,
+    EnhanceHighlight,
     ...(!plainHtmlMode
       ? [TaskListExtension, CustomTaskExtension, HighlightExtension]
       : []),

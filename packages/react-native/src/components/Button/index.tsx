@@ -1,4 +1,4 @@
-import { cva, type VariantProps } from "cva";
+import { tv, type VariantProps } from "tailwind-variants";
 import React, { forwardRef, useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import { cn } from "../../lib/utils";
@@ -17,7 +17,7 @@ export type ButtonVariant = (typeof variants)[number];
 export const sizes = ["sm", "md", "lg"] as const;
 export type ButtonSize = (typeof sizes)[number];
 
-const buttonVariants = cva({
+const buttonVariants = tv({
   base: "flex-row items-center justify-center rounded border-none grow-0",
   variants: {
     variant: {
@@ -50,7 +50,7 @@ const buttonVariants = cva({
   },
 });
 
-const pressedVariants = cva({
+const pressedVariants = tv({
   base: "",
   variants: {
     variant: {

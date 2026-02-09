@@ -22,3 +22,8 @@ jest.mock("react-native/Libraries/NativeComponent/ViewConfigIgnore", () => {
     },
   };
 });
+
+// Mock react-native-reanimated
+jest.mock("react-native-reanimated", () =>
+  require("react-native-reanimated/mock"),
+);
