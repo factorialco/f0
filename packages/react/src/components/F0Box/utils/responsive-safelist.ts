@@ -76,11 +76,17 @@ export const RESPONSIVE_SAFELIST = [
   "xl:ml-0", "xl:ml-1", "xl:ml-2", "xl:ml-3", "xl:ml-4", "xl:ml-6", "xl:ml-8", "xl:ml-auto",
   "xl:mr-0", "xl:mr-1", "xl:mr-2", "xl:mr-3", "xl:mr-4", "xl:mr-6", "xl:mr-8", "xl:mr-auto",
 
+  // ===================== POSITION =====================
+  "sm:static", "sm:relative", "sm:absolute", "sm:fixed", "sm:sticky",
+  "md:static", "md:relative", "md:absolute", "md:fixed", "md:sticky",
+  "lg:static", "lg:relative", "lg:absolute", "lg:fixed", "lg:sticky",
+  "xl:static", "xl:relative", "xl:absolute", "xl:fixed", "xl:sticky",
+
   // ===================== GAP =====================
-  "sm:gap-0", "sm:gap-sm", "sm:gap-md", "sm:gap-lg", "sm:gap-xl",
-  "md:gap-0", "md:gap-sm", "md:gap-md", "md:gap-lg", "md:gap-xl",
-  "lg:gap-0", "lg:gap-sm", "lg:gap-md", "lg:gap-lg", "lg:gap-xl",
-  "xl:gap-0", "xl:gap-sm", "xl:gap-md", "xl:gap-lg", "xl:gap-xl",
+  "sm:gap-0", "sm:gap-sm", "sm:gap-md", "sm:gap-lg", "sm:gap-xl", "sm:gap-6", "sm:gap-8",
+  "md:gap-0", "md:gap-sm", "md:gap-md", "md:gap-lg", "md:gap-xl", "md:gap-6", "md:gap-8",
+  "lg:gap-0", "lg:gap-sm", "lg:gap-md", "lg:gap-lg", "lg:gap-xl", "lg:gap-6", "lg:gap-8",
+  "xl:gap-0", "xl:gap-sm", "xl:gap-md", "xl:gap-lg", "xl:gap-xl", "xl:gap-6", "xl:gap-8",
 
   // ===================== FLEX =====================
   "sm:items-start", "sm:items-center", "sm:items-end", "sm:items-stretch", "sm:items-baseline",
@@ -169,6 +175,12 @@ export const RESPONSIVE_SAFELIST = [
   "xl:border-b", "xl:border-b-0", "xl:border-b-2",
   "xl:border-l", "xl:border-l-0", "xl:border-l-2",
   "xl:border-r", "xl:border-r-0", "xl:border-r-2",
+
+  // ===================== BORDER STYLE =====================
+  "sm:border-solid", "sm:border-dashed", "sm:border-dotted", "sm:border-double", "sm:border-none",
+  "md:border-solid", "md:border-dashed", "md:border-dotted", "md:border-double", "md:border-none",
+  "lg:border-solid", "lg:border-dashed", "lg:border-dotted", "lg:border-double", "lg:border-none",
+  "xl:border-solid", "xl:border-dashed", "xl:border-dotted", "xl:border-double", "xl:border-none",
 
   // ===================== BORDER RADIUS =====================
   "sm:rounded-none", "sm:rounded-2xs", "sm:rounded-xs", "sm:rounded-sm", "sm:rounded-md", "sm:rounded-lg", "sm:rounded-xl", "sm:rounded-2xl", "sm:rounded-full",

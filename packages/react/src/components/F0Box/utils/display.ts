@@ -1,4 +1,4 @@
-import type { DisplayToken } from "../types"
+import type { DisplayToken, PositionToken } from "../types"
 
 export const displayVariants = {
   display: {
@@ -9,4 +9,12 @@ export const displayVariants = {
     grid: "grid",
     none: "hidden",
   } satisfies Record<DisplayToken, string>,
+
+  position: {
+    static: "static",
+    relative: "relative",
+    absolute: "absolute",
+    fixed: "fixed",
+    sticky: "sticky",
+  } satisfies Record<PositionToken, string>,
 }

@@ -13,6 +13,8 @@ export const flexVariants = {
     md: "gap-md",
     lg: "gap-lg",
     xl: "gap-xl",
+    "2xl": "gap-6",
+    "3xl": "gap-8",
   } satisfies Record<GapToken, string>,
 
   alignItems: {

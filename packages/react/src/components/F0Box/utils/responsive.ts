@@ -3,6 +3,7 @@ import type {
   BackgroundToken,
   BorderColorToken,
   BorderRadiusToken,
+  BorderStyleToken,
   BorderWidthToken,
   ColSpanToken,
   ColStartToken,
@@ -15,6 +16,7 @@ import type {
   JustifyContentToken,
   MarginToken,
   OverflowToken,
+  PositionToken,
   RowSpanToken,
   RowsToken,
   SizeToken,
@@ -38,6 +40,7 @@ export type Breakpoint = "sm" | "md" | "lg" | "xl"
 /** All styling props that can be overridden per breakpoint */
 export interface ResponsiveStyleProps {
   display?: DisplayToken
+  position?: PositionToken
   // Padding
   padding?: SpacingToken
   paddingX?: SpacingToken
@@ -83,6 +86,7 @@ export interface ResponsiveStyleProps {
   borderRadiusTopRight?: BorderRadiusToken
   borderRadiusBottomLeft?: BorderRadiusToken
   borderRadiusBottomRight?: BorderRadiusToken
+  borderStyle?: BorderStyleToken
   // Overflow
   overflow?: OverflowToken
   overflowX?: OverflowToken

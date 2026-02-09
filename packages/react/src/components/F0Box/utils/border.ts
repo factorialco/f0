@@ -1,6 +1,7 @@
 import type {
   BorderColorToken,
   BorderRadiusToken,
+  BorderStyleToken,
   BorderWidthToken,
 } from "../types"
 
@@ -116,6 +117,15 @@ export const borderVariants = {
     "2xl": "rounded-br-2xl",
     full: "rounded-br-full",
   } satisfies Record<BorderRadiusToken, string>,
+
+  // -- Style --
+  borderStyle: {
+    solid: "border-solid",
+    dashed: "border-dashed",
+    dotted: "border-dotted",
+    double: "border-double",
+    none: "border-none",
+  } satisfies Record<BorderStyleToken, string>,
 }
 
 export const borderDefaults = {}

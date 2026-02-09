@@ -76,8 +76,8 @@ export type SizeToken =
   | NumericSizeToken
   | FractionToken
 
-/** Gap tokens aligned with betweenSpacing from core */
-export type GapToken = "none" | "sm" | "md" | "lg" | "xl"
+/** Gap tokens aligned with betweenSpacing from core + extended sizes */
+export type GapToken = "none" | "sm" | "md" | "lg" | "xl" | "2xl" | "3xl"
 
 /** Display modes */
 export type DisplayToken =
@@ -226,3 +226,14 @@ export type FlexDirectionToken =
 
 /** Flex wrap */
 export type FlexWrapToken = "nowrap" | "wrap" | "wrap-reverse"
+
+/** CSS position */
+export type PositionToken =
+  | "static"
+  | "relative"
+  | "absolute"
+  | "fixed"
+  | "sticky"
+
+/** Border style */
+export type BorderStyleToken = "solid" | "dashed" | "dotted" | "double" | "none"

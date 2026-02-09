@@ -73,8 +73,9 @@ const BREAKPOINTS: Breakpoint[] = ["sm", "md", "lg", "xl"]
 export const F0Box = forwardRef<HTMLDivElement, F0BoxProps>(
   (
     {
-      // Display
+      // Display & Position
       display,
+      position,
       // Padding
       padding,
       paddingX,
@@ -120,6 +121,7 @@ export const F0Box = forwardRef<HTMLDivElement, F0BoxProps>(
       borderRadiusTopRight,
       borderRadiusBottomLeft,
       borderRadiusBottomRight,
+      borderStyle,
       // Overflow
       overflow,
       overflowX,
@@ -165,6 +167,7 @@ export const F0Box = forwardRef<HTMLDivElement, F0BoxProps>(
         className={cn(
           boxVariants({
             display,
+            position,
             padding,
             paddingX,
             paddingY,
@@ -203,6 +206,7 @@ export const F0Box = forwardRef<HTMLDivElement, F0BoxProps>(
             borderRadiusTopRight,
             borderRadiusBottomLeft,
             borderRadiusBottomRight,
+            borderStyle,
             overflow,
             overflowX,
             overflowY,
