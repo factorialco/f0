@@ -2,12 +2,13 @@ import { useMemo } from "react"
 
 import {
   Calendar,
+  Completed,
   DottedCircle,
   InProgressTask,
 } from "../../../../../icons/app"
 import { WidgetSimpleListItem } from "../../ListItems/WidgetSimpleListItem"
 
-export type TaskStatus = "in-progress" | "todo"
+export type TaskStatus = "todo" | "in-progress" | "done"
 export interface Task {
   id: number | string
   text: string
@@ -22,6 +23,18 @@ export type TaskItemProps = {
   hideIcon?: boolean
 }
 
+const iconMap = {
+  todo: DottedCircle,
+  "in-progress": InProgressTask,
+  done: Completed,
+}
+
+const iconColorMap = {
+  todo: "text-f1-icon",
+  "in-progress": "text-f1-icon-info",
+  done: "text-f1-icon-success",
+}
+
 export function TaskItem({
   task,
   status,
@@ -34,13 +47,7 @@ export function TaskItem({
 
   const icon = useMemo(() => {
     if (hideIcon) return
-
-    if (status === "todo") {
-      return DottedCircle
-    }
-    if (status === "in-progress") {
-      return InProgressTask
-    }
+    return iconMap[status]
   }, [status, hideIcon])
 
   return (
@@ -48,7 +55,7 @@ export function TaskItem({
       id={task.id}
       title={task.text}
       icon={icon}
-      iconClassName={status === "todo" ? "text-f1-icon" : "text-f1-icon-info"}
+      iconClassName={iconColorMap[status]}
       alert={
         task.badge?.isPastDue
           ? {
