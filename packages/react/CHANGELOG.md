@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.352.0](https://github.com/factorialco/f0/compare/f0-react-v1.351.0...f0-react-v1.352.0) (2026-02-09)
+
+
+### Features
+
+* done state taskslist component ([#3385](https://github.com/factorialco/f0/issues/3385)) ([9a861d2](https://github.com/factorialco/f0/commit/9a861d225a5b64eaa741df3a470cf9066c889316))
+
 ## [1.351.0](https://github.com/factorialco/f0/compare/f0-react-v1.350.0...f0-react-v1.351.0) (2026-02-09)
 
 
