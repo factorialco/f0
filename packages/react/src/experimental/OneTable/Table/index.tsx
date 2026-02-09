@@ -1,50 +1,49 @@
-import { AnimatePresence, motion } from "motion/react";
-import { useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion } from "motion/react"
+import { useEffect, useRef, useState } from "react"
 
-import { cn } from "@/lib/utils";
-import { Skeleton } from "@/ui/skeleton";
-import { Table as TableRoot } from "@/ui/table";
+import { cn } from "@/lib/utils"
+import { Skeleton } from "@/ui/skeleton"
+import { Table as TableRoot } from "@/ui/table"
 
-import { withSkeleton } from "../../../lib/skeleton";
-import { Spinner } from "@/ui/Spinner";
-import { TableBody } from "../TableBody";
-import { TableCell } from "../TableCell";
-import { TableHead } from "../TableHead";
-import { TableHeader } from "../TableHeader";
-import { TableRow } from "../TableRow";
-import { TableContext } from "../utils/TableContext";
+import { withSkeleton } from "../../../lib/skeleton"
+import { Spinner } from "@/ui/Spinner"
+import { TableBody } from "../TableBody"
+import { TableCell } from "../TableCell"
+import { TableHead } from "../TableHead"
+import { TableHeader } from "../TableHeader"
+import { TableRow } from "../TableRow"
+import { TableContext } from "../utils/TableContext"
 
 export interface TableProps {
-  children: React.ReactNode;
-  loading?: boolean;
-  fixedHeader?: boolean;
+  children: React.ReactNode
+  loading?: boolean
+  fixedHeader?: boolean
 }
 
 function TableBase({ children, loading = false }: TableProps) {
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [isScrolledRight, setIsScrolledRight] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false)
+  const [isScrolledRight, setIsScrolledRight] = useState(false)
 
-  const containerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
+    const container = containerRef.current
+    if (!container) return
 
     const handleScroll = () => {
-      setIsScrolled(container.scrollLeft > 0);
+      setIsScrolled(container.scrollLeft > 0)
       setIsScrolledRight(
-        container.scrollWidth - container.scrollLeft - container.clientWidth >
-          0,
-      );
-    };
+        container.scrollWidth - container.scrollLeft - container.clientWidth > 0
+      )
+    }
 
-    handleScroll();
-    container.addEventListener("scroll", handleScroll);
+    handleScroll()
+    container.addEventListener("scroll", handleScroll)
 
     return () => {
-      container.removeEventListener("scroll", handleScroll);
-    };
-  }, []);
+      container.removeEventListener("scroll", handleScroll)
+    }
+  }, [])
 
   return (
     <TableContext.Provider
@@ -72,7 +71,7 @@ function TableBase({ children, loading = false }: TableProps) {
         </AnimatePresence>
       </div>
     </TableContext.Provider>
-  );
+  )
 }
 
 interface TableSkeletonProps {
@@ -81,7 +80,7 @@ interface TableSkeletonProps {
    * Each column will contain a loading placeholder.
    * @default 5
    */
-  columns?: number;
+  columns?: number
 }
 
 function TableSkeleton({ columns = 5 }: TableSkeletonProps) {
@@ -121,7 +120,7 @@ function TableSkeleton({ columns = 5 }: TableSkeletonProps) {
         </TableBody>
       </TableRoot>
     </TableContext.Provider>
-  );
+  )
 }
 
-export const OneTable = withSkeleton(TableBase, TableSkeleton);
+export const OneTable = withSkeleton(TableBase, TableSkeleton)

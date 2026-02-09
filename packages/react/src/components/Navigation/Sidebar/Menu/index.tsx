@@ -1,4 +1,4 @@
-import { LayoutGroup, motion, Reorder, useDragControls } from "motion/react";
+import { LayoutGroup, motion, Reorder, useDragControls } from "motion/react"
 import {
   ReactNode,
   RefObject,
@@ -7,72 +7,72 @@ import {
   useMemo,
   useRef,
   useState,
-} from "react";
+} from "react"
 
-import { AvatarVariant, F0Avatar } from "@/components/avatars/F0Avatar";
-import { F0Icon, IconType } from "@/components/F0Icon";
-import { OneEllipsis } from "@/components/OneEllipsis";
-import { Counter } from "@/ui/Counter";
-import { Dropdown, DropdownItem } from "@/experimental/Navigation/Dropdown";
-import { NavigationItem } from "@/experimental/Navigation/utils";
-import { Tooltip } from "@/experimental/Overlays/Tooltip";
+import { AvatarVariant, F0Avatar } from "@/components/avatars/F0Avatar"
+import { F0Icon, IconType } from "@/components/F0Icon"
+import { OneEllipsis } from "@/components/OneEllipsis"
+import { Counter } from "@/ui/Counter"
+import { Dropdown, DropdownItem } from "@/experimental/Navigation/Dropdown"
+import { NavigationItem } from "@/experimental/Navigation/utils"
+import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import {
   ChevronDown,
   Delete,
   EllipsisHorizontal,
   MoveDown,
   MoveUp,
-} from "@/icons/app";
-import { useReducedMotion } from "@/lib/a11y";
-import { Link, useNavigation } from "@/lib/linkHandler";
-import { useI18n } from "@/lib/providers/i18n";
-import { useTouchScreen } from "@/lib/useTouchScreen";
-import { cn, focusRing } from "@/lib/utils";
-import { Collapsible, CollapsibleContent } from "@/ui/collapsible";
+} from "@/icons/app"
+import { useReducedMotion } from "@/lib/a11y"
+import { Link, useNavigation } from "@/lib/linkHandler"
+import { useI18n } from "@/lib/providers/i18n"
+import { useTouchScreen } from "@/lib/useTouchScreen"
+import { cn, focusRing } from "@/lib/utils"
+import { Collapsible, CollapsibleContent } from "@/ui/collapsible"
 
-import { DragProvider, useDragContext } from "./DragContext";
+import { DragProvider, useDragContext } from "./DragContext"
 
 export interface MenuItem extends NavigationItem {
-  icon: IconType;
-  badge?: number;
+  icon: IconType
+  badge?: number
 }
 
 type FavoriteMenuItem = (
   | {
-      type: "icon";
-      icon: IconType;
+      type: "icon"
+      icon: IconType
     }
   | {
-      type: "avatar";
-      avatar?: AvatarVariant;
+      type: "avatar"
+      avatar?: AvatarVariant
     }
 ) & {
-  tooltip?: string;
-} & NavigationItem;
+  tooltip?: string
+} & NavigationItem
 
 export interface MenuCategory {
-  id: string;
-  title: string;
-  items: MenuItem[];
-  isRoot?: boolean;
-  isOpen?: boolean;
-  isSortable?: boolean;
+  id: string
+  title: string
+  items: MenuItem[]
+  isRoot?: boolean
+  isOpen?: boolean
+  isSortable?: boolean
 }
 
 export interface MenuProps {
-  tree: MenuCategory[];
-  favorites?: FavoriteMenuItem[];
-  onCollapse?: (category: MenuCategory, isOpen: boolean) => void;
-  onSort?: (categories: MenuCategory[]) => void;
-  onFavoritesChange?: (favorites: FavoriteMenuItem[]) => void;
+  tree: MenuCategory[]
+  favorites?: FavoriteMenuItem[]
+  onCollapse?: (category: MenuCategory, isOpen: boolean) => void
+  onSort?: (categories: MenuCategory[]) => void
+  onFavoritesChange?: (favorites: FavoriteMenuItem[]) => void
 }
 
 const MenuItemContent = ({
   item,
   active,
 }: {
-  item: MenuItem;
-  active: boolean;
+  item: MenuItem
+  active: boolean
 }) => {
   return (
     <div className="flex w-full items-center justify-between">
@@ -82,21 +82,21 @@ const MenuItemContent = ({
           size="md"
           className={cn(
             "transition-colors",
-            active ? "text-f1-icon-bold" : "text-f1-icon",
+            active ? "text-f1-icon-bold" : "text-f1-icon"
           )}
         />
         <span>{item.label}</span>
       </div>
       {item.badge && <Counter value={item.badge} size="sm" type="bold" />}
     </div>
-  );
-};
+  )
+}
 
 const MenuItem = ({ item }: { item: MenuItem }) => {
-  const { isActive } = useNavigation();
-  const { label: _label, icon: _icon, ...rest } = item;
+  const { isActive } = useNavigation()
+  const { label: _label, icon: _icon, ...rest } = item
 
-  const active = isActive(rest.href, { exact: rest.exactMatch });
+  const active = isActive(rest.href, { exact: rest.exactMatch })
 
   return (
     <Link
@@ -106,13 +106,13 @@ const MenuItem = ({ item }: { item: MenuItem }) => {
         focusRing("focus-visible:ring-inset"),
         active
           ? "bg-f1-background-secondary text-f1-foreground"
-          : "hover:bg-f1-background-secondary",
+          : "hover:bg-f1-background-secondary"
       )}
     >
       <MenuItemContent item={item} active={active} />
     </Link>
-  );
-};
+  )
+}
 
 const FavoriteItem = ({
   item,
@@ -125,75 +125,75 @@ const FavoriteItem = ({
   onReorderFinish,
   isSortable = true,
 }: {
-  item: FavoriteMenuItem;
-  tooltip?: string;
-  dragConstraints?: RefObject<HTMLElement>;
-  onRemove?: (item: FavoriteMenuItem) => void;
-  index: number;
-  total: number;
-  onMove?: (from: number, to: number) => void;
-  onReorderFinish: () => void;
-  isSortable?: boolean;
+  item: FavoriteMenuItem
+  tooltip?: string
+  dragConstraints?: RefObject<HTMLElement>
+  onRemove?: (item: FavoriteMenuItem) => void
+  index: number
+  total: number
+  onMove?: (from: number, to: number) => void
+  onReorderFinish: () => void
+  isSortable?: boolean
 }) => {
-  const t = useI18n();
+  const t = useI18n()
 
   const { isDragging, setIsDragging, draggedItemId, setDraggedItemId } =
-    useDragContext();
-  const { isActive } = useNavigation();
-  const active = isActive(item.href, { exact: item.exactMatch });
-  const wasDragging = useRef(false);
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const isFirst = index === 0;
-  const isLast = index === total - 1;
-  const isOnly = total === 1;
+    useDragContext()
+  const { isActive } = useNavigation()
+  const active = isActive(item.href, { exact: item.exactMatch })
+  const wasDragging = useRef(false)
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const isFirst = index === 0
+  const isLast = index === total - 1
+  const isOnly = total === 1
 
   const dropdownItems = useMemo(() => {
-    const items: DropdownItem[] = [];
+    const items: DropdownItem[] = []
 
     if (!isOnly && !isFirst) {
       items.push({
         label: t.actions.moveUp,
         onClick: () => onMove?.(index, index - 1),
         icon: MoveUp,
-      });
+      })
     }
     if (!isOnly && !isLast) {
       items.push({
         label: t.actions.moveDown,
         onClick: () => onMove?.(index, index + 1),
         icon: MoveDown,
-      });
+      })
     }
     if (items.length > 0) {
-      items.push({ type: "separator" });
+      items.push({ type: "separator" })
     }
     items.push({
       label: t.favorites.remove,
       onClick: () => onRemove?.(item),
       icon: Delete,
       critical: true,
-    });
+    })
 
-    return items;
-  }, [isOnly, isFirst, isLast, t, onMove, index, onRemove, item]);
+    return items
+  }, [isOnly, isFirst, isLast, t, onMove, index, onRemove, item])
 
   const handleDragStart = () => {
-    setIsDragging(true);
-    setIsDropdownOpen(false);
-    setDraggedItemId(item.href || null);
-    wasDragging.current = true;
-  };
+    setIsDragging(true)
+    setIsDropdownOpen(false)
+    setDraggedItemId(item.href || null)
+    wasDragging.current = true
+  }
 
   const handleDragEnd = () => {
-    setIsDragging(false);
-    setDraggedItemId(null);
-    onReorderFinish();
+    setIsDragging(false)
+    setDraggedItemId(null)
+    onReorderFinish()
     setTimeout(() => {
-      wasDragging.current = false;
-    }, 0);
-  };
+      wasDragging.current = false
+    }, 0)
+  }
 
-  const isItemDragging = isDragging && draggedItemId === item.href;
+  const isItemDragging = isDragging && draggedItemId === item.href
 
   const classes = useMemo(
     () =>
@@ -204,10 +204,10 @@ const FavoriteItem = ({
           ? "bg-f1-background-secondary text-f1-foreground"
           : "hover:bg-f1-background-secondary",
         isDropdownOpen && "bg-f1-background-secondary",
-        isItemDragging && "bg-f1-background-secondary",
+        isItemDragging && "bg-f1-background-secondary"
       ),
-    [active, isDropdownOpen, isItemDragging, isSortable],
-  );
+    [active, isDropdownOpen, isItemDragging, isSortable]
+  )
 
   const content = useMemo(() => {
     return (
@@ -221,7 +221,7 @@ const FavoriteItem = ({
               className={cn(
                 // w-[calc(100%-24px-2px)] - here 24px is the size of the dropdown button and 2 px is the gap
                 "flex w-[calc(100%-24px-2px)] items-center gap-1.5 no-underline",
-                isItemDragging && "pointer-events-none",
+                isItemDragging && "pointer-events-none"
               )}
               draggable={false}
             >
@@ -231,7 +231,7 @@ const FavoriteItem = ({
                   size="md"
                   className={cn(
                     "transition-colors",
-                    active ? "text-f1-icon-bold" : "text-f1-icon",
+                    active ? "text-f1-icon-bold" : "text-f1-icon"
                   )}
                 />
               ) : item.avatar ? (
@@ -253,7 +253,7 @@ const FavoriteItem = ({
           className={cn(
             "absolute inset-y-1 right-1 z-10 flex h-6 w-6 items-center justify-center rounded-sm opacity-0 transition-opacity duration-100 hover:bg-f1-background-secondary group-hover:opacity-100",
             isDropdownOpen && "bg-f1-background-secondary opacity-100",
-            isItemDragging && "opacity-100",
+            isItemDragging && "opacity-100"
           )}
         >
           <Dropdown
@@ -267,8 +267,8 @@ const FavoriteItem = ({
           </Dropdown>
         </div>
       </>
-    );
-  }, [item, active, isDropdownOpen, isItemDragging, dropdownItems, tooltip]);
+    )
+  }, [item, active, isDropdownOpen, isItemDragging, dropdownItems, tooltip])
 
   return isSortable ? (
     <Reorder.Item
@@ -287,17 +287,17 @@ const FavoriteItem = ({
     </Reorder.Item>
   ) : (
     <div className={classes}>{content}</div>
-  );
-};
+  )
+}
 
 interface BaseCategoryProps {
-  title: string;
-  isOpen?: boolean;
-  isRoot?: boolean;
-  onCollapse?: (isOpen: boolean) => void;
-  children?: ReactNode;
-  isDragging?: boolean;
-  wasDragging?: RefObject<boolean>;
+  title: string
+  isOpen?: boolean
+  isRoot?: boolean
+  onCollapse?: (isOpen: boolean) => void
+  children?: ReactNode
+  isDragging?: boolean
+  wasDragging?: RefObject<boolean>
 }
 
 const BaseCategory = ({
@@ -309,16 +309,16 @@ const BaseCategory = ({
   isDragging,
   wasDragging,
 }: BaseCategoryProps) => {
-  const [isOpen, setIsOpen] = useState(initialIsOpen);
-  const shouldReduceMotion = useReducedMotion();
+  const [isOpen, setIsOpen] = useState(initialIsOpen)
+  const shouldReduceMotion = useReducedMotion()
 
   const handleClick = () => {
-    if (isDragging || wasDragging?.current) return;
+    if (isDragging || wasDragging?.current) return
 
-    const newIsOpen = !isOpen;
-    setIsOpen(newIsOpen);
-    onCollapse?.(newIsOpen);
-  };
+    const newIsOpen = !isOpen
+    setIsOpen(newIsOpen)
+    onCollapse?.(newIsOpen)
+  }
 
   return (
     <div>
@@ -328,13 +328,13 @@ const BaseCategory = ({
             className={cn(
               "group relative flex w-full select-none items-center gap-1 rounded px-1.5 py-2 text-sm font-medium text-f1-foreground-secondary transition-colors hover:cursor-pointer hover:bg-f1-background-secondary",
               focusRing("focus-visible:ring-inset"),
-              isRoot && "hidden",
+              isRoot && "hidden"
             )}
             onClick={handleClick}
             tabIndex={0}
             onKeyDown={(e) => {
               if (e.key === "Enter" || e.key === " ") {
-                handleClick();
+                handleClick()
               }
             }}
           >
@@ -371,16 +371,16 @@ const BaseCategory = ({
         </CollapsibleContent>
       </Collapsible>
     </div>
-  );
-};
+  )
+}
 
 interface CategoryItemProps {
-  category: MenuCategory;
-  isSortable?: boolean;
-  dragConstraints?: RefObject<HTMLDivElement>;
-  onCollapse?: (category: MenuCategory, isOpen: boolean) => void;
-  onDragEnd?: (categories: MenuCategory[]) => void;
-  currentOrder?: MenuCategory[];
+  category: MenuCategory
+  isSortable?: boolean
+  dragConstraints?: RefObject<HTMLDivElement>
+  onCollapse?: (category: MenuCategory, isOpen: boolean) => void
+  onDragEnd?: (categories: MenuCategory[]) => void
+  currentOrder?: MenuCategory[]
 }
 
 const CategoryItem = ({
@@ -391,30 +391,30 @@ const CategoryItem = ({
   onDragEnd,
   currentOrder,
 }: CategoryItemProps) => {
-  const { isDragging, setIsDragging } = useDragContext();
-  const wasDragging = useRef(false);
-  const dragControls = useDragControls();
+  const { isDragging, setIsDragging } = useDragContext()
+  const wasDragging = useRef(false)
+  const dragControls = useDragControls()
 
   const handleDragStart = () => {
-    setIsDragging(true);
-    wasDragging.current = true;
-  };
+    setIsDragging(true)
+    wasDragging.current = true
+  }
 
   const handleDragEnd = () => {
-    setIsDragging(false);
+    setIsDragging(false)
     setTimeout(() => {
-      wasDragging.current = false;
+      wasDragging.current = false
       if (currentOrder) {
-        onDragEnd?.(currentOrder);
+        onDragEnd?.(currentOrder)
       }
-    }, 0);
-  };
+    }, 0)
+  }
 
   const handleCollapse = (isOpen: boolean) => {
     if (!isDragging && !wasDragging.current) {
-      onCollapse?.(category, isOpen);
+      onCollapse?.(category, isOpen)
     }
-  };
+  }
 
   const content = (
     <BaseCategory
@@ -428,7 +428,7 @@ const CategoryItem = ({
       <div
         className={cn(
           "flex flex-col gap-0.5",
-          isDragging && !wasDragging.current && "pointer-events-none",
+          isDragging && !wasDragging.current && "pointer-events-none"
         )}
       >
         {category.items.map((item, index) => (
@@ -436,9 +436,9 @@ const CategoryItem = ({
         ))}
       </div>
     </BaseCategory>
-  );
+  )
 
-  if (!isSortable) return content;
+  if (!isSortable) return content
 
   return (
     <Reorder.Item
@@ -477,8 +477,8 @@ const CategoryItem = ({
     >
       {content}
     </Reorder.Item>
-  );
-};
+  )
+}
 
 export function Menu({
   tree,
@@ -487,27 +487,27 @@ export function Menu({
   onFavoritesChange,
   favorites,
 }: MenuProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null)
   const nonSortableItems = tree.filter(
-    (category) => category.isSortable === false,
-  );
+    (category) => category.isSortable === false
+  )
   const [sortableItems, setSortableItems] = useState(
-    tree.filter((category) => category.isSortable !== false),
-  );
-  const [forceUpdateKey, setForceUpdateKey] = useState(0);
+    tree.filter((category) => category.isSortable !== false)
+  )
+  const [forceUpdateKey, setForceUpdateKey] = useState(0)
 
   const handleSort = useCallback((newOrder: MenuCategory[]) => {
-    setSortableItems(newOrder);
-  }, []);
+    setSortableItems(newOrder)
+  }, [])
 
   const handleDragEnd = useCallback(
     (newOrder: MenuCategory[]) => {
-      onSort?.(newOrder);
+      onSort?.(newOrder)
     },
-    [onSort],
-  );
+    [onSort]
+  )
 
-  const isTouchScreen = useTouchScreen();
+  const isTouchScreen = useTouchScreen()
 
   return (
     <DragProvider>
@@ -527,7 +527,7 @@ export function Menu({
         />
       </LayoutGroup>
     </DragProvider>
-  );
+  )
 }
 
 function MenuContent({
@@ -542,116 +542,116 @@ function MenuContent({
   forceUpdate,
   disableDragging = false,
 }: {
-  nonSortableItems: MenuCategory[];
-  sortableItems: MenuCategory[];
-  setSortableItems: (items: MenuCategory[]) => void;
-  containerRef: RefObject<HTMLDivElement>;
-  onCollapse?: (category: MenuCategory, isOpen: boolean) => void;
-  onDragEnd?: (categories: MenuCategory[]) => void;
-  favorites?: FavoriteMenuItem[];
-  onFavoritesChange?: (favorites: FavoriteMenuItem[]) => void;
-  forceUpdate: () => void;
-  disableDragging?: boolean;
+  nonSortableItems: MenuCategory[]
+  sortableItems: MenuCategory[]
+  setSortableItems: (items: MenuCategory[]) => void
+  containerRef: RefObject<HTMLDivElement>
+  onCollapse?: (category: MenuCategory, isOpen: boolean) => void
+  onDragEnd?: (categories: MenuCategory[]) => void
+  favorites?: FavoriteMenuItem[]
+  onFavoritesChange?: (favorites: FavoriteMenuItem[]) => void
+  forceUpdate: () => void
+  disableDragging?: boolean
 }) {
-  const t = useI18n();
+  const t = useI18n()
 
-  const { isDragging } = useDragContext();
-  const hasRoot = nonSortableItems.some((category) => category.isRoot);
+  const { isDragging } = useDragContext()
+  const hasRoot = nonSortableItems.some((category) => category.isRoot)
   const hasNonSortableItems =
-    nonSortableItems.filter((category) => !category.isRoot).length > 0;
-  const hasSortableItems = sortableItems.length > 0;
-  const favoritesRef = useRef<HTMLDivElement>(null);
+    nonSortableItems.filter((category) => !category.isRoot).length > 0
+  const hasSortableItems = sortableItems.length > 0
+  const favoritesRef = useRef<HTMLDivElement>(null)
   const [internalFavorites, setInternalFavorites] =
-    useState<FavoriteMenuItem[]>(favorites);
-  const hasFavorites = favorites.length > 0;
+    useState<FavoriteMenuItem[]>(favorites)
+  const hasFavorites = favorites.length > 0
 
   useEffect(() => {
     const hasChanged =
-      JSON.stringify(favorites) !== JSON.stringify(internalFavorites);
+      JSON.stringify(favorites) !== JSON.stringify(internalFavorites)
 
     if (hasChanged) {
-      setInternalFavorites(favorites);
+      setInternalFavorites(favorites)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- we don't want to re-run on internalFavorites change because it resets the value to favorites from props
-  }, [favorites]);
+  }, [favorites])
 
   const handleFavoritesReorder = (newOrder: FavoriteMenuItem[]) => {
-    setInternalFavorites(newOrder);
-  };
+    setInternalFavorites(newOrder)
+  }
 
   const handleRemoveFavorite = useCallback(
     (item: FavoriteMenuItem) => {
-      const updated = internalFavorites.filter((fav) => fav.href !== item.href);
-      setInternalFavorites(updated);
-      onFavoritesChange?.(updated);
+      const updated = internalFavorites.filter((fav) => fav.href !== item.href)
+      setInternalFavorites(updated)
+      onFavoritesChange?.(updated)
     },
-    [internalFavorites, onFavoritesChange],
-  );
+    [internalFavorites, onFavoritesChange]
+  )
 
   const handleMoveFavorite = useCallback(
     (from: number, to: number) => {
-      if (to < 0 || to >= internalFavorites.length) return;
-      const updated = [...internalFavorites];
-      const [moved] = updated.splice(from, 1);
-      updated.splice(to, 0, moved);
-      setInternalFavorites(updated);
-      onFavoritesChange?.(updated);
+      if (to < 0 || to >= internalFavorites.length) return
+      const updated = [...internalFavorites]
+      const [moved] = updated.splice(from, 1)
+      updated.splice(to, 0, moved)
+      setInternalFavorites(updated)
+      onFavoritesChange?.(updated)
     },
-    [internalFavorites, onFavoritesChange],
-  );
+    [internalFavorites, onFavoritesChange]
+  )
 
-  const [isInitialized, setIsInitialized] = useState(false);
-  const resizeTimeoutRef = useRef<number | null>(null);
+  const [isInitialized, setIsInitialized] = useState(false)
+  const resizeTimeoutRef = useRef<number | null>(null)
 
   // Initialize once when component mounts
   useEffect(() => {
     if (sortableItems.length > 0 && !isInitialized) {
-      setSortableItems([...sortableItems]);
-      setIsInitialized(true);
+      setSortableItems([...sortableItems])
+      setIsInitialized(true)
     }
-  }, [sortableItems, setSortableItems, isInitialized]);
+  }, [sortableItems, setSortableItems, isInitialized])
 
   // Handle resize events - using a simple debounce but reacting to all resizes
   useEffect(() => {
     const handleResize = () => {
       if (resizeTimeoutRef.current !== null) {
-        window.clearTimeout(resizeTimeoutRef.current);
+        window.clearTimeout(resizeTimeoutRef.current)
       }
 
       resizeTimeoutRef.current = window.setTimeout(() => {
         if (containerRef.current && sortableItems.length > 0) {
-          forceUpdate();
+          forceUpdate()
         }
-      }, 50);
-    };
+      }, 50)
+    }
 
-    window.addEventListener("resize", handleResize);
+    window.addEventListener("resize", handleResize)
     return () => {
-      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("resize", handleResize)
       if (resizeTimeoutRef.current !== null) {
-        window.clearTimeout(resizeTimeoutRef.current);
+        window.clearTimeout(resizeTimeoutRef.current)
       }
-    };
-  }, [containerRef, sortableItems, forceUpdate]);
+    }
+  }, [containerRef, sortableItems, forceUpdate])
 
   /**
    * Favorites content
    */
-  const favoritesContentWrapperClasses = "flex flex-col gap-0.5";
+  const favoritesContentWrapperClasses = "flex flex-col gap-0.5"
   const favoriteLabelsToIndex = useMemo(
     () =>
       internalFavorites.reduce<Record<string, Array<number>>>(
         (acc, item, idx) => {
           if (!(item.label in acc)) {
-            acc[item.label] = [];
+            acc[item.label] = []
           }
-          acc[item.label].push(idx);
-          return acc;
+          acc[item.label].push(idx)
+          return acc
         },
-        {},
+        {}
       ),
-    [internalFavorites],
-  );
+    [internalFavorites]
+  )
 
   const favoritesContent = useMemo(
     () =>
@@ -672,7 +672,7 @@ function MenuContent({
           total={internalFavorites.length}
           onMove={handleMoveFavorite}
           onReorderFinish={() => {
-            onFavoritesChange?.(internalFavorites);
+            onFavoritesChange?.(internalFavorites)
           }}
         />
       )),
@@ -684,13 +684,13 @@ function MenuContent({
       handleMoveFavorite,
       onFavoritesChange,
       disableDragging,
-    ],
-  );
+    ]
+  )
 
   /**
    * Sortable items content
    */
-  const sortableItemsContentWrapperClasses = "flex flex-col gap-3";
+  const sortableItemsContentWrapperClasses = "flex flex-col gap-3"
   const sortableItemsContent = useMemo(() => {
     return sortableItems.map((category) => (
       <CategoryItem
@@ -702,14 +702,14 @@ function MenuContent({
         onDragEnd={onDragEnd}
         currentOrder={sortableItems}
       />
-    ));
-  }, [sortableItems, disableDragging, containerRef, onCollapse, onDragEnd]);
+    ))
+  }, [sortableItems, disableDragging, containerRef, onCollapse, onDragEnd])
 
   return (
     <div
       className={cn(
         "relative",
-        isDragging && "cursor-grabbing [&_*]:cursor-grabbing",
+        isDragging && "cursor-grabbing [&_*]:cursor-grabbing"
       )}
     >
       {hasRoot && (
@@ -766,7 +766,7 @@ function MenuContent({
       {hasSortableItems && (
         <div
           className={cn(
-            "mt-3 flex w-full flex-col gap-3 bg-transparent px-3 [&_li]:list-none",
+            "mt-3 flex w-full flex-col gap-3 bg-transparent px-3 [&_li]:list-none"
           )}
           ref={containerRef}
         >
@@ -788,14 +788,13 @@ function MenuContent({
         </div>
       )}
     </div>
-  );
+  )
 }
 
 const OptionalTooltip = ({
   tooltip,
   children,
 }: {
-  tooltip?: string;
-  children: React.ReactNode;
-}) =>
-  tooltip ? <Tooltip description={tooltip}>{children}</Tooltip> : children;
+  tooltip?: string
+  children: React.ReactNode
+}) => (tooltip ? <Tooltip description={tooltip}>{children}</Tooltip> : children)

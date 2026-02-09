@@ -1,12 +1,12 @@
-import { forwardRef } from "react";
+import { forwardRef } from "react"
 
-import * as AIIcons from "@/icons/ai";
+import * as AIIcons from "@/icons/ai"
 
-import { ButtonInternal } from "@/components/F0Button/internal";
-import { ButtonInternalProps } from "@/components/F0Button/internal-types";
+import { ButtonInternal } from "@/components/F0Button/internal"
+import { ButtonInternalProps } from "@/components/F0Button/internal-types"
 
 // Create a type that only includes AI icon types
-type AIIconType = (typeof AIIcons)[keyof typeof AIIcons];
+type AIIconType = (typeof AIIcons)[keyof typeof AIIcons]
 
 const privateProps = [
   "append",
@@ -19,23 +19,23 @@ const privateProps = [
   "variant",
   "loading",
   "emoji",
-] as const;
+] as const
 
 export type AIButtonProps = Omit<
   ButtonInternalProps,
   (typeof privateProps)[number] | "icon"
 > & {
-  icon?: AIIconType;
-};
+  icon?: AIIconType
+}
 
 const AIButton = forwardRef<
   HTMLButtonElement | HTMLAnchorElement,
   AIButtonProps
 >((props, ref) => {
   const publicProps = privateProps.reduce((acc, key) => {
-    const { [key]: _, ...rest } = acc;
-    return rest;
-  }, props as ButtonInternalProps);
+    const { [key]: _, ...rest } = acc
+    return rest
+  }, props as ButtonInternalProps)
 
   return (
     <ButtonInternal
@@ -44,9 +44,9 @@ const AIButton = forwardRef<
       ref={ref}
       iconRotate={props.icon == AIIcons.One ? true : false}
     />
-  );
-});
+  )
+})
 
-AIButton.displayName = "AIButton";
+AIButton.displayName = "AIButton"
 
-export { AIButton };
+export { AIButton }

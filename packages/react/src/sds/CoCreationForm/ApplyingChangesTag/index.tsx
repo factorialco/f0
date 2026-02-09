@@ -1,13 +1,13 @@
-import { motion } from "motion/react";
-import { memo } from "react";
+import { motion } from "motion/react"
+import { memo } from "react"
 
-import { F0OneIcon } from "@/sds/ai/F0OneIcon";
-import { useI18n } from "@/lib/providers/i18n";
+import { F0OneIcon } from "@/sds/ai/F0OneIcon"
+import { useI18n } from "@/lib/providers/i18n"
 
-const IconMotion = motion.create(F0OneIcon);
+const IconMotion = motion.create(F0OneIcon)
 
 const ApplyingChangesTag = () => {
-  const i18n = useI18n();
+  const i18n = useI18n()
 
   return (
     <div className="flex flex-row items-center gap-1 rounded-full border border-solid border-f1-border-secondary bg-f1-background px-2 py-1.5 pr-2.5 shadow-md">
@@ -45,7 +45,7 @@ const ApplyingChangesTag = () => {
         {i18n.t("coCreationForm.labels.applyingChanges")}
       </span>
     </div>
-  );
-};
+  )
+}
 
-export default memo(ApplyingChangesTag);
+export default memo(ApplyingChangesTag)

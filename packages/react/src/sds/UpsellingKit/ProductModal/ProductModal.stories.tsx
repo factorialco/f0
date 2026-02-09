@@ -1,12 +1,12 @@
-import type { Meta, StoryObj } from "@storybook/react-vite";
+import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { ComponentProps } from "react";
+import { ComponentProps } from "react"
 
-import { ApplicationFrame } from "@/examples/ApplicationFrame";
-import ApplicationFrameStoryMeta from "@/examples/ApplicationFrame/index.stories";
-import UpsellIcon from "@/icons/app/Upsell";
+import { ApplicationFrame } from "@/examples/ApplicationFrame"
+import ApplicationFrameStoryMeta from "@/examples/ApplicationFrame/index.stories"
+import UpsellIcon from "@/icons/app/Upsell"
 
-import { ProductModal } from "./index";
+import { ProductModal } from "./index"
 
 const meta = {
   title: "UpsellingKit/ProductModal",
@@ -89,10 +89,10 @@ const meta = {
       description: "Tag of the modal",
     },
   },
-} satisfies Meta<typeof ProductModal>;
+} satisfies Meta<typeof ProductModal>
 
-export default meta;
-type Story = StoryObj<typeof meta>;
+export default meta
+type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
   args: {
@@ -111,7 +111,7 @@ export const Default: Story = {
     primaryAction: {
       label: "Request information",
       onClick: async () => {
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        await new Promise((resolve) => setTimeout(resolve, 1000))
       },
       icon: UpsellIcon,
       variant: "promote",
@@ -131,7 +131,7 @@ export const Default: Story = {
         "One of our experts will contact you as soon as possible with all the details.",
       buttonLabel: "Discover more products",
       buttonOnClick: () => {
-        console.log("buttonOnClick");
+        console.log("buttonOnClick")
       },
     },
     loadingState: {
@@ -163,4 +163,4 @@ export const Default: Story = {
     closeLabel: "Close",
   },
   render: (args) => <ProductModal {...args} />,
-};
+}

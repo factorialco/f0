@@ -1,8 +1,8 @@
-import type { Meta, StoryObj } from "@storybook/react-vite";
+import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { F0AiChatProvider } from "@/sds/ai/F0AiChat";
+import { F0AiChatProvider } from "@/sds/ai/F0AiChat"
 
-import { F0OneSwitch } from "../F0OneSwitch";
+import { F0OneSwitch } from "../F0OneSwitch"
 
 const meta: Meta<typeof F0OneSwitch> = {
   title: "AI/F0OneSwitch",
@@ -18,15 +18,15 @@ const meta: Meta<typeof F0OneSwitch> = {
       </F0AiChatProvider>
     ),
   ],
-};
+}
 
-export default meta;
-type Story = StoryObj<typeof meta>;
+export default meta
+type Story = StoryObj<typeof meta>
 
-export const Default: Story = {};
+export const Default: Story = {}
 
 export const Disabled: Story = {
   args: {
     disabled: true,
   },
-};
+}

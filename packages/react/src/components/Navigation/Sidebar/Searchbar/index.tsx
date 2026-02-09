@@ -1,13 +1,13 @@
-import { ButtonHTMLAttributes } from "react";
+import { ButtonHTMLAttributes } from "react"
 
-import { F0Icon } from "../../../../components/F0Icon";
-import { Search } from "../../../../icons/app";
-import { cn, focusRing } from "../../../../lib/utils";
-import { Shortcut } from "@/ui/Shortcut";
+import { F0Icon } from "../../../../components/F0Icon"
+import { Search } from "../../../../icons/app"
+import { cn, focusRing } from "../../../../lib/utils"
+import { Shortcut } from "@/ui/Shortcut"
 
 interface SearchBarProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  placeholder: string;
-  shortcut?: string[];
+  placeholder: string
+  shortcut?: string[]
 }
 
 export function SearchBar({
@@ -22,7 +22,7 @@ export function SearchBar({
         onClick={onClick}
         className={cn(
           "mb-[calc(0.75rem-1px)] flex w-full cursor-pointer items-center justify-between rounded bg-f1-background-inverse-secondary p-1.5 text-f1-foreground-secondary ring-1 ring-inset ring-f1-border-secondary transition-all hover:ring-f1-border-hover",
-          focusRing(),
+          focusRing()
         )}
         type="button"
         {...props}
@@ -36,5 +36,5 @@ export function SearchBar({
         </div>
       </button>
     </div>
-  );
+  )
 }

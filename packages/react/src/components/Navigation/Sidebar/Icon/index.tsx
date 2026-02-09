@@ -1,16 +1,16 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef } from "react"
 
-import { F0Icon } from "@/components/F0Icon";
-import { Cross } from "@/icons/app";
-import { cn } from "@/lib/utils";
-import { Action } from "@/ui/Action";
+import { F0Icon } from "@/components/F0Icon"
+import { Cross } from "@/icons/app"
+import { cn } from "@/lib/utils"
+import { Action } from "@/ui/Action"
 
-import { useSidebar } from "@/examples/ApplicationFrame/FrameProvider";
+import { useSidebar } from "@/examples/ApplicationFrame/FrameProvider"
 
 export type SidebarIconProps = {
-  isExpanded: boolean;
-  onClick?: () => void;
-};
+  isExpanded: boolean
+  onClick?: () => void
+}
 
 function SidebarIconSvg({ isExpanded }: SidebarIconProps) {
   return (
@@ -46,7 +46,7 @@ function SidebarIconSvg({ isExpanded }: SidebarIconProps) {
           "translate-x-0 stroke-current transition-all duration-200 ease-out motion-reduce:transition-none",
           isExpanded
             ? "opacity-0 group-hover:-translate-x-1 group-hover:opacity-100"
-            : "opacity-1 group-hover:translate-x-[3px]",
+            : "opacity-1 group-hover:translate-x-[3px]"
         )}
       />
       <path
@@ -58,23 +58,23 @@ function SidebarIconSvg({ isExpanded }: SidebarIconProps) {
           "stroke-current transition-all duration-200 ease-out motion-reduce:transition-none",
           isExpanded
             ? "translate-x-0 opacity-100 group-hover:-translate-x-0.5 group-hover:opacity-0"
-            : "-translate-x-0.5 opacity-0 group-hover:translate-x-0 group-hover:opacity-100",
+            : "-translate-x-0.5 opacity-0 group-hover:translate-x-0 group-hover:opacity-100"
         )}
       />
     </svg>
-  );
+  )
 }
 
 export function SidebarIcon() {
   const { prevSidebarState, sidebarState, toggleSidebar, isSmallScreen } =
-    useSidebar();
-  const buttonRef = useRef<HTMLButtonElement>(null);
+    useSidebar()
+  const buttonRef = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
     if (prevSidebarState === "hidden" && sidebarState === "locked") {
-      buttonRef.current?.focus();
+      buttonRef.current?.focus()
     }
-  }, [prevSidebarState, sidebarState]);
+  }, [prevSidebarState, sidebarState])
 
   return (
     <Action
@@ -94,5 +94,5 @@ export function SidebarIcon() {
         <F0Icon icon={Cross} size="md" />
       </div>
     </Action>
-  );
+  )
 }

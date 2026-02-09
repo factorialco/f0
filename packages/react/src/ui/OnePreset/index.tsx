@@ -1,15 +1,15 @@
-import { Await } from "@/components/Utilities/Await";
-import { experimentalComponent } from "@/lib/experimental";
-import { Skeleton } from "@/ui/skeleton";
+import { Await } from "@/components/Utilities/Await"
+import { experimentalComponent } from "@/lib/experimental"
+import { Skeleton } from "@/ui/skeleton"
 
-import { cn } from "@/lib/utils";
-import { Counter } from "@/ui/Counter";
+import { cn } from "@/lib/utils"
+import { Counter } from "@/ui/Counter"
 
 interface PresetProps {
-  label: string;
-  number?: number | Promise<number | undefined>;
-  onClick?: () => void;
-  selected?: boolean;
+  label: string
+  number?: number | Promise<number | undefined>
+  onClick?: () => void
+  selected?: boolean
 }
 
 const _Preset = ({ label, number, onClick, selected }: PresetProps) => {
@@ -22,7 +22,7 @@ const _Preset = ({ label, number, onClick, selected }: PresetProps) => {
         number && "pr-1.5",
         onClick && "cursor-pointer hover:outline-f1-border-hover",
         selected &&
-          "bg-f1-background-selected-secondary text-f1-foreground-selected outline-f1-border-selected hover:outline-f1-border-selected",
+          "bg-f1-background-selected-secondary text-f1-foreground-selected outline-f1-border-selected hover:outline-f1-border-selected"
       )}
     >
       <input
@@ -45,10 +45,10 @@ const _Preset = ({ label, number, onClick, selected }: PresetProps) => {
         </Await>
       )}
     </label>
-  );
-};
+  )
+}
 
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export const Preset = experimentalComponent("Preset", _Preset);
+export const Preset = experimentalComponent("Preset", _Preset)

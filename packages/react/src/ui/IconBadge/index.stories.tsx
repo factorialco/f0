@@ -1,7 +1,7 @@
-import type { Meta, StoryObj } from "@storybook/react-vite";
+import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import * as Icons from "@/icons/app";
-import { Badge } from "./index";
+import * as Icons from "@/icons/app"
+import { Badge } from "./index"
 
 const meta: Meta<typeof Badge> = {
   title: "Badge",
@@ -10,11 +10,11 @@ const meta: Meta<typeof Badge> = {
     layout: "centered",
   },
   tags: ["autodocs", "experimental"],
-};
+}
 
-export default meta;
+export default meta
 
-type Story = StoryObj<typeof Badge>;
+type Story = StoryObj<typeof Badge>
 
 export const Default: Story = {
   args: {
@@ -22,7 +22,7 @@ export const Default: Story = {
     icon: Icons.Placeholder,
     size: "md",
   },
-};
+}
 
 export const Types: Story = {
   render: () => (
@@ -34,4 +34,4 @@ export const Types: Story = {
       <Badge icon={Icons.Alert} type="warning" size="md" />
     </div>
   ),
-};
+}

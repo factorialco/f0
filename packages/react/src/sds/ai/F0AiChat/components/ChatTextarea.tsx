@@ -1,12 +1,12 @@
-import { type InputProps } from "@copilotkit/react-ui";
+import { type InputProps } from "@copilotkit/react-ui"
 
-import { F0AiChatTextArea } from "@/sds/ai/F0AiChatTextArea";
+import { F0AiChatTextArea } from "@/sds/ai/F0AiChatTextArea"
 
-import { useAiChat } from "../providers/AiChatStateProvider";
+import { useAiChat } from "../providers/AiChatStateProvider"
 
 type ChatTextareaProps = InputProps & {
-  submitLabel?: string;
-};
+  submitLabel?: string
+}
 
 /**
  * ChatTextarea component that integrates with the F0AiChat context.
@@ -20,7 +20,7 @@ export const ChatTextarea = ({
   onSend,
   onStop,
 }: ChatTextareaProps) => {
-  const { placeholders } = useAiChat();
+  const { placeholders } = useAiChat()
 
   return (
     <F0AiChatTextArea
@@ -30,5 +30,5 @@ export const ChatTextarea = ({
       onStop={onStop}
       placeholders={placeholders}
     />
-  );
-};
+  )
+}

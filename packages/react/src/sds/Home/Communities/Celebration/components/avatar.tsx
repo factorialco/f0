@@ -1,21 +1,21 @@
-import { RefObject } from "react";
+import { RefObject } from "react"
 
-import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson";
-import { getAvatarColor } from "@/components/avatars/internal/BaseAvatar/utils";
-import { cn } from "@/lib/utils";
+import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
+import { getAvatarColor } from "@/components/avatars/internal/BaseAvatar/utils"
+import { cn } from "@/lib/utils"
 
-import { Picker } from "@/experimental/Information/Reactions/Picker";
-import { BACKGROUND_COLORS } from "../types";
+import { Picker } from "@/experimental/Information/Reactions/Picker"
+import { BACKGROUND_COLORS } from "../types"
 
 type CelebrationAvatarProps = {
-  firstName: string;
-  lastName: string;
-  src?: string;
-  canReact: boolean;
-  lastEmojiReaction?: string;
-  onReactionSelect?: (emoji: string) => void;
-  pickerRef?: RefObject<HTMLDivElement>;
-};
+  firstName: string
+  lastName: string
+  src?: string
+  canReact: boolean
+  lastEmojiReaction?: string
+  onReactionSelect?: (emoji: string) => void
+  pickerRef?: RefObject<HTMLDivElement>
+}
 
 export function CelebrationAvatar({
   firstName,
@@ -33,10 +33,10 @@ export function CelebrationAvatar({
         !src
           ? BACKGROUND_COLORS[
               getAvatarColor(
-                [firstName, lastName].join(""),
+                [firstName, lastName].join("")
               ) as keyof typeof BACKGROUND_COLORS
             ]
-          : "",
+          : ""
       )}
     >
       {src && (
@@ -69,7 +69,7 @@ export function CelebrationAvatar({
               ref={pickerRef}
               className={cn(
                 "absolute -right-0.5",
-                src ? "bottom-0.5" : "-bottom-[3px]",
+                src ? "bottom-0.5" : "-bottom-[3px]"
               )}
             >
               <Picker
@@ -83,5 +83,5 @@ export function CelebrationAvatar({
         </div>
       </div>
     </div>
-  );
+  )
 }

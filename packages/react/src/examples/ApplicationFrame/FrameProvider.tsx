@@ -1,4 +1,4 @@
-import { breakpoints } from "@factorialco/f0-core";
+import { breakpoints } from "@factorialco/f0-core"
 import React, {
   createContext,
   PointerEvent,
@@ -7,28 +7,28 @@ import React, {
   useEffect,
   useMemo,
   useState,
-} from "react";
-import { useMediaQuery } from "usehooks-ts";
+} from "react"
+import { useMediaQuery } from "usehooks-ts"
 
-import { useNavigation } from "@/lib/linkHandler";
+import { useNavigation } from "@/lib/linkHandler"
 
-const PREFERRED_INITIAL_STATE_KEY = "one_sidebar_locked";
+const PREFERRED_INITIAL_STATE_KEY = "one_sidebar_locked"
 
-export type SidebarState = "locked" | "unlocked" | "hidden";
+export type SidebarState = "locked" | "unlocked" | "hidden"
 
 interface FrameContextType {
-  isSmallScreen: boolean;
-  isLastToggleInvokedByUser: boolean;
-  sidebarState: SidebarState;
-  prevSidebarState: SidebarState | null;
-  toggleSidebar: (callData?: { isInvokedByUser: boolean }) => void;
-  setForceFloat: (force: boolean) => void;
+  isSmallScreen: boolean
+  isLastToggleInvokedByUser: boolean
+  sidebarState: SidebarState
+  prevSidebarState: SidebarState | null
+  toggleSidebar: (callData?: { isInvokedByUser: boolean }) => void
+  setForceFloat: (force: boolean) => void
 }
 
-const FrameContext = createContext<FrameContextType | undefined>(undefined);
+const FrameContext = createContext<FrameContextType | undefined>(undefined)
 
 export function useSidebar(): FrameContextType {
-  const context = useContext(FrameContext);
+  const context = useContext(FrameContext)
   if (context === undefined) {
     return {
       isSmallScreen: false,
@@ -37,89 +37,89 @@ export function useSidebar(): FrameContextType {
       sidebarState: "locked",
       toggleSidebar: () => {},
       setForceFloat: () => {},
-    };
+    }
   }
-  return context;
+  return context
 }
 
 interface FrameProviderProps {
-  children: React.ReactNode;
+  children: React.ReactNode
 }
 
 export function FrameProvider({ children }: FrameProviderProps) {
-  const { currentPath } = useNavigation();
-  const [forceFloat, setForceFloat] = useState(false);
+  const { currentPath } = useNavigation()
+  const [forceFloat, setForceFloat] = useState(false)
   const [isLastToggleInvokedByUser, setIsLastToggleInvokedByUser] =
-    useState(false);
+    useState(false)
 
-  const breakpoint = forceFloat ? breakpoints.xl : breakpoints.md;
+  const breakpoint = forceFloat ? breakpoints.xl : breakpoints.md
   const isSmallScreen = useMediaQuery(`(max-width: ${breakpoint}px)`, {
     initializeWithValue: true,
-  });
+  })
 
   const [locked, setLocked] = useState<boolean>(() => {
-    const storedState = localStorage.getItem(PREFERRED_INITIAL_STATE_KEY);
+    const storedState = localStorage.getItem(PREFERRED_INITIAL_STATE_KEY)
 
-    return storedState !== null ? !!storedState : true;
-  });
-  const [visible, setVisible] = useState(false);
+    return storedState !== null ? !!storedState : true
+  })
+  const [visible, setVisible] = useState(false)
   const [prevSidebarState, setPrevSidebarState] = useState<SidebarState | null>(
-    null,
-  );
+    null
+  )
 
   const toggleSidebar = useCallback(
     (
       { isInvokedByUser }: { isInvokedByUser: boolean } = {
         isInvokedByUser: true,
-      },
+      }
     ) => {
-      setIsLastToggleInvokedByUser(isInvokedByUser ?? true);
-      if (isSmallScreen) setVisible(!visible);
-      setLocked(!locked);
+      setIsLastToggleInvokedByUser(isInvokedByUser ?? true)
+      if (isSmallScreen) setVisible(!visible)
+      setLocked(!locked)
     },
-    [isSmallScreen, visible, locked, setLocked, setVisible],
-  );
+    [isSmallScreen, visible, locked, setLocked, setVisible]
+  )
 
   const handlePointerMove = useCallback(
     (e: PointerEvent<HTMLDivElement>) => {
-      if (isSmallScreen) return;
+      if (isSmallScreen) return
 
       if (e.clientX < 32) {
-        setVisible(true);
+        setVisible(true)
       }
 
       if (e.clientX > 280) {
-        setVisible(false);
+        setVisible(false)
       }
     },
-    [isSmallScreen, setVisible],
-  );
+    [isSmallScreen, setVisible]
+  )
 
   const sidebarState: SidebarState = useMemo(() => {
     if (isSmallScreen) {
-      if (visible) return "unlocked";
-      return "hidden";
+      if (visible) return "unlocked"
+      return "hidden"
     }
-    if (!locked && !visible) return "hidden";
-    if (!locked && visible) return "unlocked";
-    return "locked";
-  }, [isSmallScreen, visible, locked]);
+    if (!locked && !visible) return "hidden"
+    if (!locked && visible) return "unlocked"
+    return "locked"
+  }, [isSmallScreen, visible, locked])
 
   useEffect(() => {
-    setVisible(false);
-  }, [currentPath]);
+    setVisible(false)
+  }, [currentPath])
 
   useEffect(() => {
     if (isLastToggleInvokedByUser) {
-      localStorage.setItem(PREFERRED_INITIAL_STATE_KEY, locked ? "1" : "");
+      localStorage.setItem(PREFERRED_INITIAL_STATE_KEY, locked ? "1" : "")
     }
-  }, [locked, isLastToggleInvokedByUser]);
+  }, [locked, isLastToggleInvokedByUser])
 
   useEffect(() => {
     return () => {
-      setPrevSidebarState(sidebarState);
-    };
-  }, [sidebarState]);
+      setPrevSidebarState(sidebarState)
+    }
+  }, [sidebarState])
 
   return (
     <FrameContext.Provider
@@ -136,5 +136,5 @@ export function FrameProvider({ children }: FrameProviderProps) {
         {children}
       </div>
     </FrameContext.Provider>
-  );
+  )
 }

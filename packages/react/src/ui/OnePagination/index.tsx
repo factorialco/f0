@@ -1,6 +1,6 @@
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo } from "react"
 
-import { experimentalComponent } from "@/lib/experimental";
+import { experimentalComponent } from "@/lib/experimental"
 import {
   PaginationContent,
   PaginationEllipsis,
@@ -9,56 +9,56 @@ import {
   PaginationNext,
   PaginationPrevious,
   Pagination as PaginationRoot,
-} from "@/ui/pagination";
+} from "@/ui/pagination"
 
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils"
 
 interface OnePaginationProps {
   /**
    * The total number of pages. Pass 0 if the total is unknown.
    */
-  totalPages: number;
+  totalPages: number
 
   /**
    * The current page.
    * @default 1
    */
-  currentPage?: number;
+  currentPage?: number
 
   /**
    * The callback function to handle page change.
    */
-  onPageChange?: (page: number) => void;
+  onPageChange?: (page: number) => void
 
   /**
    * Whether to show the controls.
    * @default true
    */
-  showControls?: boolean;
+  showControls?: boolean
 
   /**
    * Accessible label for the pagination navigation.
    * @default "Page navigation"
    */
-  ariaLabel?: string;
+  ariaLabel?: string
 
   /**
    * The number of pages to show on the sides of the current page.
    * @default 3
    */
-  visibleRange?: number;
+  visibleRange?: number
 
   /**
    * Used in indeterminate state (totalPages = 0) to indicate if there are more pages available.
    * @default true
    */
-  hasNextPage?: boolean;
+  hasNextPage?: boolean
 
   /**
    * Whether to disable the pagination.
    * @default false
    */
-  disabled?: boolean;
+  disabled?: boolean
 }
 
 function _OnePagination({
@@ -71,7 +71,7 @@ function _OnePagination({
   hasNextPage = true,
   disabled = false,
 }: OnePaginationProps) {
-  const isIndeterminate = totalPages === 0;
+  const isIndeterminate = totalPages === 0
 
   const handlePageChange = useCallback(
     (page: number) => {
@@ -79,68 +79,68 @@ function _OnePagination({
         onPageChange &&
         (isIndeterminate || (page >= 1 && page <= totalPages))
       ) {
-        onPageChange(page);
+        onPageChange(page)
       }
     },
-    [onPageChange, totalPages, isIndeterminate],
-  );
+    [onPageChange, totalPages, isIndeterminate]
+  )
 
   const getPageNumbers = useMemo(() => {
-    if (isIndeterminate) return [];
+    if (isIndeterminate) return []
 
-    const pages: (number | string)[] = [];
+    const pages: (number | string)[] = []
 
     if (totalPages <= 5) {
-      return Array.from({ length: totalPages }, (_, i) => i + 1);
+      return Array.from({ length: totalPages }, (_, i) => i + 1)
     }
 
-    pages.push(1);
+    pages.push(1)
 
     // Calculate the range to show around current page
-    const sidePages = Math.floor(visibleRange / 2);
-    let rangeStart = currentPage - sidePages;
-    let rangeEnd = currentPage + sidePages;
+    const sidePages = Math.floor(visibleRange / 2)
+    let rangeStart = currentPage - sidePages
+    let rangeEnd = currentPage + sidePages
 
     // Adjust range if current page is near the start
     if (currentPage <= sidePages + 2) {
-      rangeStart = 2;
-      rangeEnd = rangeStart + visibleRange - 1;
+      rangeStart = 2
+      rangeEnd = rangeStart + visibleRange - 1
       pages.push(
         ...Array.from(
           { length: rangeEnd - rangeStart + 1 },
-          (_, i) => i + rangeStart,
-        ),
-      );
-      pages.push("...");
+          (_, i) => i + rangeStart
+        )
+      )
+      pages.push("...")
     }
 
     // Adjust range if current page is near the end
     else if (currentPage >= totalPages - sidePages - 1) {
-      rangeStart = totalPages - visibleRange - 1;
-      rangeEnd = totalPages - 1;
-      pages.push("...");
+      rangeStart = totalPages - visibleRange - 1
+      rangeEnd = totalPages - 1
+      pages.push("...")
       pages.push(
         ...Array.from(
           { length: rangeEnd - rangeStart + 1 },
-          (_, i) => i + rangeStart,
-        ),
-      );
+          (_, i) => i + rangeStart
+        )
+      )
     }
 
     // Handle middle cases
     else {
-      pages.push("...");
+      pages.push("...")
       pages.push(
-        ...Array.from({ length: visibleRange }, (_, i) => i + rangeStart),
-      );
-      pages.push("...");
+        ...Array.from({ length: visibleRange }, (_, i) => i + rangeStart)
+      )
+      pages.push("...")
     }
 
     // Always add last page
-    pages.push(totalPages);
+    pages.push(totalPages)
 
-    return pages;
-  }, [currentPage, totalPages, visibleRange, isIndeterminate]);
+    return pages
+  }, [currentPage, totalPages, visibleRange, isIndeterminate])
 
   return (
     <PaginationRoot>
@@ -154,12 +154,12 @@ function _OnePagination({
                 !isIndeterminate && "mr-1",
                 currentPage === 1 || disabled
                   ? "pointer-events-none opacity-50"
-                  : "",
+                  : ""
               )}
               onClick={() => handlePageChange(currentPage - 1)}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
-                  handlePageChange(currentPage - 1);
+                  handlePageChange(currentPage - 1)
                 }
               }}
             />
@@ -173,7 +173,7 @@ function _OnePagination({
               className={cn(
                 "hidden sm:flex",
                 page === currentPage && "flex",
-                disabled && "pointer-events-none opacity-50",
+                disabled && "pointer-events-none opacity-50"
               )}
             >
               {page === "..." ? (
@@ -185,7 +185,7 @@ function _OnePagination({
                   onClick={() => handlePageChange(page as number)}
                   onKeyDown={(e) => {
                     if (e.key === "Enter") {
-                      handlePageChange(page as number);
+                      handlePageChange(page as number)
                     }
                   }}
                   tabIndex={0}
@@ -219,12 +219,12 @@ function _OnePagination({
                   (!hasNextPage && isIndeterminate) ||
                   disabled
                   ? "pointer-events-none opacity-50"
-                  : "",
+                  : ""
               )}
               onClick={() => handlePageChange(currentPage + 1)}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
-                  handlePageChange(currentPage + 1);
+                  handlePageChange(currentPage + 1)
                 }
               }}
             />
@@ -232,7 +232,7 @@ function _OnePagination({
         )}
       </PaginationContent>
     </PaginationRoot>
-  );
+  )
 }
 
 /**
@@ -240,5 +240,5 @@ function _OnePagination({
  */
 export const OnePagination = experimentalComponent(
   "OnePagination",
-  _OnePagination,
-);
+  _OnePagination
+)

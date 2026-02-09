@@ -1,6 +1,6 @@
-import type { Meta, StoryObj } from "@storybook/react-vite";
+import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { F0AuraVoiceAnimation } from "@/sds/ai/F0AuraVoiceAnimation";
+import { F0AuraVoiceAnimation } from "@/sds/ai/F0AuraVoiceAnimation"
 
 const meta = {
   title: "AI/F0AuraVoiceAnimation",
@@ -60,36 +60,36 @@ const meta = {
       </div>
     ),
   ],
-} satisfies Meta<typeof F0AuraVoiceAnimation>;
+} satisfies Meta<typeof F0AuraVoiceAnimation>
 
-export default meta;
-type Story = StoryObj<typeof meta>;
+export default meta
+type Story = StoryObj<typeof meta>
 
-export const Default: Story = {};
+export const Default: Story = {}
 
 export const Idle: Story = {
   args: {
     state: "idle",
   },
-};
+}
 
 export const Listening: Story = {
   args: {
     state: "listening",
   },
-};
+}
 
 export const Thinking: Story = {
   args: {
     state: "thinking",
   },
-};
+}
 
 export const Speaking: Story = {
   args: {
     state: "speaking",
   },
-};
+}
 
 export const CustomColor: Story = {
   args: {
@@ -97,7 +97,7 @@ export const CustomColor: Story = {
     color: "#00D9FF",
     colorShift: 0.2,
   },
-};
+}
 
 export const LightTheme: Story = {
   args: {
@@ -121,7 +121,7 @@ export const LightTheme: Story = {
       </div>
     ),
   ],
-};
+}
 
 export const DarkTheme: Story = {
   args: {
@@ -145,4 +145,4 @@ export const DarkTheme: Story = {
       </div>
     ),
   ],
-};
+}

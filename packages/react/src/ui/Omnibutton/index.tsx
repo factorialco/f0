@@ -1,23 +1,23 @@
-import { experimentalComponent } from "@/lib/experimental";
+import { experimentalComponent } from "@/lib/experimental"
 
-import { F0Icon } from "@/components/F0Icon";
-import { Question } from "@/icons/app";
-import { cn, focusRing } from "@/lib/utils";
-import { Dropdown, DropdownItem } from "@/experimental/Navigation/Dropdown";
+import { F0Icon } from "@/components/F0Icon"
+import { Question } from "@/icons/app"
+import { cn, focusRing } from "@/lib/utils"
+import { Dropdown, DropdownItem } from "@/experimental/Navigation/Dropdown"
 
 interface Option {
-  title?: string;
-  description?: string;
-  href?: string;
-  target?: string;
+  title?: string
+  description?: string
+  href?: string
+  target?: string
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Matching Dropdown component's onClick signature
-  onClick?: (event: any) => unknown;
+  onClick?: (event: any) => unknown
 }
 
 interface OmniButtonProps {
-  label: string;
-  options: Option[];
-  hasNewUpdate?: boolean;
+  label: string
+  options: Option[]
+  hasNewUpdate?: boolean
 }
 
 // Function to format the options that comes from Factorial for the dropdown
@@ -29,7 +29,7 @@ function formatDropdownItems(options: Option[]): DropdownItem[] {
       description,
       href,
       onClick: onClick ? () => onClick(undefined) : undefined,
-    }));
+    }))
 }
 
 function _OmniButton({ label, options, hasNewUpdate }: OmniButtonProps) {
@@ -45,7 +45,7 @@ function _OmniButton({ label, options, hasNewUpdate }: OmniButtonProps) {
         <button
           className={cn(
             "relative flex h-6 w-6 items-center justify-center rounded-full bg-f1-background-inverse text-f1-foreground-inverse shadow-md transition-all",
-            focusRing(),
+            focusRing()
           )}
           aria-label={label}
         >
@@ -56,10 +56,10 @@ function _OmniButton({ label, options, hasNewUpdate }: OmniButtonProps) {
         </button>
       </Dropdown>
     </div>
-  );
+  )
 }
 
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export const OmniButton = experimentalComponent("OmniButton", _OmniButton);
+export const OmniButton = experimentalComponent("OmniButton", _OmniButton)

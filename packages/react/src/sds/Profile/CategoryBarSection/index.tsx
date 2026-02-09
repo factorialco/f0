@@ -1,16 +1,16 @@
 import {
   CategoryBarChart,
   CategoryBarProps,
-} from "@/components/Charts/CategoryBarChart";
-import { cn } from "@/lib/utils";
+} from "@/components/Charts/CategoryBarChart"
+import { cn } from "@/lib/utils"
 
 interface CategoryBarSectionProps {
-  title: string;
-  subtitle: string;
-  data: CategoryBarProps["data"];
-  helpText?: string;
-  legend?: boolean;
-  hideTooltip?: boolean;
+  title: string
+  subtitle: string
+  data: CategoryBarProps["data"]
+  helpText?: string
+  legend?: boolean
+  hideTooltip?: boolean
 }
 
 export function CategoryBarSection({
@@ -39,7 +39,7 @@ export function CategoryBarSection({
           <span
             className={cn(
               "text-f1-foreground",
-              legend ? "text-sm" : "text-base",
+              legend ? "text-sm" : "text-base"
             )}
           >
             {helpText}
@@ -47,5 +47,5 @@ export function CategoryBarSection({
         </div>
       )}
     </div>
-  );
+  )
 }

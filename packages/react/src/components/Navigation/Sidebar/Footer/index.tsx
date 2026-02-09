@@ -1,26 +1,26 @@
-import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson";
-import { F0Button } from "@/components/F0Button";
-import { OneEllipsis } from "@/components/OneEllipsis";
-import { Badge } from "@/ui/IconBadge";
-import { Tooltip } from "@/experimental/Overlays/Tooltip";
-import { Bell as BellIcon, Circle as CircleIcon } from "@/icons/app";
-import { useI18n } from "@/lib/providers/i18n";
-import { cn, focusRing } from "@/lib/utils";
+import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
+import { F0Button } from "@/components/F0Button"
+import { OneEllipsis } from "@/components/OneEllipsis"
+import { Badge } from "@/ui/IconBadge"
+import { Tooltip } from "@/experimental/Overlays/Tooltip"
+import { Bell as BellIcon, Circle as CircleIcon } from "@/icons/app"
+import { useI18n } from "@/lib/providers/i18n"
+import { cn, focusRing } from "@/lib/utils"
 
-import { Dropdown, DropdownItem } from "@/experimental/Navigation/Dropdown";
+import { Dropdown, DropdownItem } from "@/experimental/Navigation/Dropdown"
 
 interface SidebarFooterProps {
   user: {
-    firstName: string;
-    lastName: string;
-    avatarUrl?: string;
-  };
-  showActivityButton?: boolean;
-  hasActivityUpdates?: boolean;
-  activityButtonShortcut?: string[];
-  onActivityButtonClick?: () => void;
-  onDropdownClick?: () => void;
-  options: DropdownItem[];
+    firstName: string
+    lastName: string
+    avatarUrl?: string
+  }
+  showActivityButton?: boolean
+  hasActivityUpdates?: boolean
+  activityButtonShortcut?: string[]
+  onActivityButtonClick?: () => void
+  onDropdownClick?: () => void
+  options: DropdownItem[]
 }
 
 export function SidebarFooter({
@@ -32,7 +32,7 @@ export function SidebarFooter({
   onDropdownClick,
   hasActivityUpdates,
 }: SidebarFooterProps) {
-  const i18n = useI18n();
+  const i18n = useI18n()
 
   return (
     <div className="flex flex-row items-center justify-between gap-1 p-3">
@@ -41,7 +41,7 @@ export function SidebarFooter({
           <button
             className={cn(
               "flex w-full max-w-full items-center gap-1.5 rounded p-1.5 font-medium transition-colors hover:bg-f1-background-secondary data-[state=open]:bg-f1-background-secondary",
-              focusRing("focus-visible:ring-inset"),
+              focusRing("focus-visible:ring-inset")
             )}
             onClick={onDropdownClick}
           >
@@ -74,5 +74,5 @@ export function SidebarFooter({
         </Tooltip>
       )}
     </div>
-  );
+  )
 }

@@ -1,67 +1,67 @@
-import { useState } from "react";
+import { useState } from "react"
 
-import { F0Button, F0ButtonProps } from "@/components/F0Button";
+import { F0Button, F0ButtonProps } from "@/components/F0Button"
 import {
   ErrorMessageProps,
   NextStepsProps,
   SuccessMessageProps,
   UpsellRequestResponseDialog,
-} from "@/sds/UpsellingKit/UpsellRequestResponseDialog";
-import UpsellIcon from "@/icons/app/Upsell";
+} from "@/sds/UpsellingKit/UpsellRequestResponseDialog"
+import UpsellIcon from "@/icons/app/Upsell"
 
 export interface LoadingStateProps {
-  label: string;
+  label: string
 }
 
 export interface UpsellingButtonProps extends Omit<F0ButtonProps, "icon"> {
-  variant?: "promote" | "outlinePromote";
+  variant?: "promote" | "outlinePromote"
   /**
    * The text to be displayed in the button
    */
-  label: string;
+  label: string
   /**
    * Whether to show the Upsell icon. Defaults to true.
    */
-  showIcon?: boolean;
+  showIcon?: boolean
   /**
    * Function to be executed when the button is clicked
    */
-  onRequest?: () => Promise<void> | void;
+  onRequest?: () => Promise<void> | void
   /**
    * Whether to show the confirmation dialog after the request
    */
-  showConfirmation?: boolean;
+  showConfirmation?: boolean
   /**
    * The error message to be displayed in the confirmation dialog
    */
-  errorMessage: ErrorMessageProps;
+  errorMessage: ErrorMessageProps
   /**
    * The success message to be displayed in the confirmation dialog
    */
-  successMessage: SuccessMessageProps;
+  successMessage: SuccessMessageProps
   /**
    * The label to be displayed in the button when the request is being processed
    */
-  loadingState: LoadingStateProps;
+  loadingState: LoadingStateProps
   /**
    * The next steps to be displayed in the confirmation dialog
    */
-  nextSteps: NextStepsProps;
+  nextSteps: NextStepsProps
   /**
    * The label to be displayed in the close button of the confirmation dialog
    */
-  closeLabel: string;
+  closeLabel: string
   /**
    * Callback to notify when the modal state changes (open/closed)
    */
-  onModalStateChange?: (isOpen: boolean) => void;
+  onModalStateChange?: (isOpen: boolean) => void
   /**
    * Portal container for the confirmation dialog
    */
-  portalContainer?: HTMLElement | null;
+  portalContainer?: HTMLElement | null
 }
 
-type ResponseStatus = "success" | "error" | null;
+type ResponseStatus = "success" | "error" | null
 
 export function UpsellingButton({
   label,
@@ -79,34 +79,34 @@ export function UpsellingButton({
   portalContainer,
   ...props
 }: UpsellingButtonProps) {
-  const [responseStatus, setResponseStatus] = useState<ResponseStatus>(null);
-  const [internalLoading, setInternalLoading] = useState(false);
+  const [responseStatus, setResponseStatus] = useState<ResponseStatus>(null)
+  const [internalLoading, setInternalLoading] = useState(false)
 
   const handleClick = async () => {
     if (onRequest) {
-      setInternalLoading(true);
+      setInternalLoading(true)
       try {
-        await onRequest();
+        await onRequest()
         if (showConfirmation) {
-          setResponseStatus("success");
-          onModalStateChange?.(true);
+          setResponseStatus("success")
+          onModalStateChange?.(true)
         }
       } catch {
-        setResponseStatus("error");
-        onModalStateChange?.(true);
+        setResponseStatus("error")
+        onModalStateChange?.(true)
       } finally {
-        setInternalLoading(false);
+        setInternalLoading(false)
       }
     }
-  };
+  }
 
   const handleModalClose = () => {
-    setResponseStatus(null);
-    onModalStateChange?.(false);
-  };
+    setResponseStatus(null)
+    onModalStateChange?.(false)
+  }
 
-  const isLoading = externalLoading || internalLoading;
-  const buttonLabel = isLoading ? loadingState.label : label;
+  const isLoading = externalLoading || internalLoading
+  const buttonLabel = isLoading ? loadingState.label : label
 
   return (
     <>
@@ -131,5 +131,5 @@ export function UpsellingButton({
         />
       )}
     </>
-  );
+  )
 }

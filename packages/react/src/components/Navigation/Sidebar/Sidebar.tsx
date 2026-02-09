@@ -1,14 +1,14 @@
-import { AnimatePresence, motion } from "motion/react";
-import { ReactElement, ReactNode, cloneElement, isValidElement } from "react";
-import { useIntersectionObserver } from "usehooks-ts";
+import { AnimatePresence, motion } from "motion/react"
+import { ReactElement, ReactNode, cloneElement, isValidElement } from "react"
+import { useIntersectionObserver } from "usehooks-ts"
 
-import { ScrollArea } from "@/ui/scrollarea";
+import { ScrollArea } from "@/ui/scrollarea"
 
-import { useReducedMotion } from "../../../lib/a11y";
-import { useI18n } from "../../../lib/providers/i18n";
-import { cn } from "../../../lib/utils";
-import { useSidebar } from "@/examples/ApplicationFrame/FrameProvider";
-import { SidebarFooter } from "./Footer";
+import { useReducedMotion } from "../../../lib/a11y"
+import { useI18n } from "../../../lib/providers/i18n"
+import { cn } from "../../../lib/utils"
+import { useSidebar } from "@/examples/ApplicationFrame/FrameProvider"
+import { SidebarFooter } from "./Footer"
 
 const ScrollShadow = ({ position }: { position: "top" | "bottom" }) => (
   <motion.div
@@ -28,16 +28,16 @@ const ScrollShadow = ({ position }: { position: "top" | "bottom" }) => (
             "bottom-0",
             "bg-gradient-to-t from-f1-background-secondary to-transparent",
             "after:bottom-0",
-          ],
+          ]
     )}
   />
-);
+)
 
 interface SidebarProps {
-  header?: ReactNode;
-  body?: ReactNode;
-  footer?: ReactNode;
-  onFooterDropdownClick?: () => void;
+  header?: ReactNode
+  body?: ReactNode
+  footer?: ReactNode
+  onFooterDropdownClick?: () => void
 }
 
 export function Sidebar({
@@ -46,12 +46,12 @@ export function Sidebar({
   footer,
   onFooterDropdownClick,
 }: SidebarProps) {
-  const { sidebarState, isSmallScreen } = useSidebar();
-  const shouldReduceMotion = useReducedMotion();
+  const { sidebarState, isSmallScreen } = useSidebar()
+  const shouldReduceMotion = useReducedMotion()
 
-  const [topRef, isAtTop] = useIntersectionObserver({ threshold: 1 });
-  const [bottomRef, isAtBottom] = useIntersectionObserver({ threshold: 1 });
-  const i18n = useI18n();
+  const [topRef, isAtTop] = useIntersectionObserver({ threshold: 1 })
+  const [bottomRef, isAtBottom] = useIntersectionObserver({ threshold: 1 })
+  const i18n = useI18n()
 
   const transition = {
     x: {
@@ -70,21 +70,21 @@ export function Sidebar({
     top: { duration: shouldReduceMotion ? 0 : 0.1 },
     left: { duration: shouldReduceMotion ? 0 : 0.1 },
     default: { duration: shouldReduceMotion ? 0 : 0.2 },
-  };
+  }
 
   const renderFooter = () => {
-    if (!footer) return null;
+    if (!footer) return null
     if (isValidElement(footer) && onFooterDropdownClick) {
       return cloneElement(
         footer as ReactElement<React.ComponentProps<typeof SidebarFooter>>,
         {
           onDropdownClick: onFooterDropdownClick,
-        },
-      );
+        }
+      )
     }
 
-    return footer;
-  };
+    return footer
+  }
 
   return (
     <motion.aside
@@ -98,8 +98,8 @@ export function Sidebar({
               "shadow-lg ring-1 ring-f1-border-secondary backdrop-blur-2xl",
               isSmallScreen
                 ? "h-full border-y-transparent border-l-transparent bg-f1-background/90"
-                : "h-[calc(100%-16px)] bg-f1-background/60",
-            ),
+                : "h-[calc(100%-16px)] bg-f1-background/60"
+            )
       )}
       animate={{
         top: sidebarState === "locked" ? 0 : isSmallScreen ? 0 : "8px",
@@ -143,5 +143,5 @@ export function Sidebar({
       )}
       <footer className="flex-shrink-0">{renderFooter()}</footer>
     </motion.aside>
-  );
+  )
 }

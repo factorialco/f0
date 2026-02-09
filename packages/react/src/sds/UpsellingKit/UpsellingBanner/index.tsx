@@ -1,43 +1,43 @@
-import { forwardRef } from "react";
+import { forwardRef } from "react"
 
-import { F0Button } from "@/components/F0Button";
-import { IconType } from "@/components/F0Icon";
+import { F0Button } from "@/components/F0Button"
+import { IconType } from "@/components/F0Icon"
 import {
   BaseBanner,
   type BannerAction,
   type BaseBannerProps,
-} from "@/sds/ai/Banners/BaseBanner";
+} from "@/sds/ai/Banners/BaseBanner"
 
-import { UpsellingButton, type UpsellingButtonProps } from "../UpsellingButton";
+import { UpsellingButton, type UpsellingButtonProps } from "../UpsellingButton"
 
-type DefaultAction = BannerAction;
+type DefaultAction = BannerAction
 
 type PromoteAction = {
-  variant: "promote";
-  label: string;
-  onClick: () => void;
-  errorMessage: UpsellingButtonProps["errorMessage"];
-  successMessage: UpsellingButtonProps["successMessage"];
-  loadingState: UpsellingButtonProps["loadingState"];
-  nextSteps: UpsellingButtonProps["nextSteps"];
-  closeLabel: UpsellingButtonProps["closeLabel"];
-  showIcon?: boolean;
-  showConfirmation?: boolean;
-  icon?: IconType;
-};
+  variant: "promote"
+  label: string
+  onClick: () => void
+  errorMessage: UpsellingButtonProps["errorMessage"]
+  successMessage: UpsellingButtonProps["successMessage"]
+  loadingState: UpsellingButtonProps["loadingState"]
+  nextSteps: UpsellingButtonProps["nextSteps"]
+  closeLabel: UpsellingButtonProps["closeLabel"]
+  showIcon?: boolean
+  showConfirmation?: boolean
+  icon?: IconType
+}
 
 type UpsellingBannerProps = Omit<
   BaseBannerProps,
   "primaryAction" | "secondaryAction" | "children"
 > & {
-  primaryAction?: DefaultAction | PromoteAction;
-  secondaryAction?: DefaultAction | PromoteAction;
-};
+  primaryAction?: DefaultAction | PromoteAction
+  secondaryAction?: DefaultAction | PromoteAction
+}
 
 export const UpsellingBanner = forwardRef<HTMLDivElement, UpsellingBannerProps>(
   function UpsellingBanner(
     { primaryAction, secondaryAction, ...baseProps },
-    ref,
+    ref
   ) {
     const renderAction = (action: DefaultAction | PromoteAction) => {
       if (action.variant === "promote") {
@@ -45,7 +45,7 @@ export const UpsellingBanner = forwardRef<HTMLDivElement, UpsellingBannerProps>(
           <UpsellingButton
             label={action.label}
             onRequest={async () => {
-              await action.onClick();
+              await action.onClick()
             }}
             errorMessage={action.errorMessage}
             successMessage={action.successMessage}
@@ -56,7 +56,7 @@ export const UpsellingBanner = forwardRef<HTMLDivElement, UpsellingBannerProps>(
             showConfirmation={action.showConfirmation}
             variant={action.variant}
           />
-        );
+        )
       }
 
       return (
@@ -67,13 +67,13 @@ export const UpsellingBanner = forwardRef<HTMLDivElement, UpsellingBannerProps>(
           size="md"
           icon={action.icon}
         />
-      );
-    };
+      )
+    }
 
     const basePrimaryAction =
-      primaryAction?.variant !== "promote" ? primaryAction : undefined;
+      primaryAction?.variant !== "promote" ? primaryAction : undefined
     const baseSecondaryAction =
-      secondaryAction?.variant !== "promote" ? secondaryAction : undefined;
+      secondaryAction?.variant !== "promote" ? secondaryAction : undefined
 
     return (
       <BaseBanner
@@ -86,8 +86,8 @@ export const UpsellingBanner = forwardRef<HTMLDivElement, UpsellingBannerProps>(
         {secondaryAction?.variant === "promote" &&
           renderAction(secondaryAction)}
       </BaseBanner>
-    );
-  },
-);
+    )
+  }
+)
 
-UpsellingBanner.displayName = "UpsellingBanner";
+UpsellingBanner.displayName = "UpsellingBanner"

@@ -1,8 +1,8 @@
-import { cva, type VariantProps } from "cva";
+import { cva, type VariantProps } from "cva"
 
-import { experimentalComponent } from "@/lib/experimental";
+import { experimentalComponent } from "@/lib/experimental"
 
-import { F0Icon, IconType } from "@/components/F0Icon";
+import { F0Icon, IconType } from "@/components/F0Icon"
 
 const badgeVariants = cva({
   base: "flex shrink-0 items-center justify-center rounded-full",
@@ -25,19 +25,19 @@ const badgeVariants = cva({
     type: "neutral",
     size: "md",
   },
-});
+})
 
 const iconSizes = {
   xs: "xs",
   sm: "xs",
   md: "sm",
   lg: "md",
-} as const;
+} as const
 
 export interface BadgeProps extends VariantProps<typeof badgeVariants> {
-  icon: IconType;
-  type?: VariantProps<typeof badgeVariants>["type"];
-  size?: keyof typeof iconSizes;
+  icon: IconType
+  type?: VariantProps<typeof badgeVariants>["type"]
+  size?: keyof typeof iconSizes
 }
 
 const _Badge = ({ type, size = "md", icon }: BadgeProps) => {
@@ -45,10 +45,10 @@ const _Badge = ({ type, size = "md", icon }: BadgeProps) => {
     <div className={badgeVariants({ type, size })}>
       <F0Icon icon={icon} size={iconSizes[size]} />
     </div>
-  );
-};
+  )
+}
 
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export const Badge = experimentalComponent("Badge", _Badge);
+export const Badge = experimentalComponent("Badge", _Badge)
