@@ -92,9 +92,13 @@ const ImageNodeView = ({
 
       const startX = event.clientX
       const startWidth = imgRef.current?.offsetWidth ?? 0
+      const maxWidth = editor.view.dom.clientWidth
 
       const handleMouseMove = (e: MouseEvent) => {
-        const newWidth = Math.max(MIN_WIDTH, startWidth + (e.clientX - startX))
+        const newWidth = Math.min(
+          maxWidth,
+          Math.max(MIN_WIDTH, startWidth + (e.clientX - startX))
+        )
         if (imgRef.current) {
           imgRef.current.style.width = `${newWidth}px`
         }
@@ -138,8 +142,7 @@ const ImageNodeView = ({
           draggable={false}
           style={width ? { width: `${width}px` } : undefined}
           className={cn(
-            "block h-auto rounded-md outline-none",
-            !width && "max-w-full",
+            "block h-auto max-w-full rounded-md outline-none",
             !isResizing && "transition-all duration-150 ease-out"
           )}
         />
