@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from "vitest"
 
 import type { GroupingDefinition, SortingsDefinition } from "@/hooks/datasource"
 
-import { TextCell } from "@/components/value-display/types/text"
+import { TextCell } from "@/ui/value-display/types/text"
 import { useDataCollectionData } from "@/experimental/OneDataCollection/hooks/useDataCollectionData/useDataCollectionData"
 import { DataCollectionSource } from "@/experimental/OneDataCollection/hooks/useDataCollectionSource/types"
 import { NavigationFiltersDefinition } from "@/experimental/OneDataCollection/navigationFilters/types"
