@@ -18,8 +18,6 @@ export function CardSelectableContainer<T extends CardSelectableValue>(
     label,
     layout = "vertical",
     multiple,
-    isToggle,
-    grouped,
   } = props
 
   const isMultiple = multiple === true
@@ -28,21 +26,16 @@ export function CardSelectableContainer<T extends CardSelectableValue>(
     if (isMultiple) {
       const multiProps = props as CardSelectableMultipleProps<T>
       const currentValues = multiProps.value ?? []
-      const currentlySelected = currentValues.includes(itemValue)
+      const isSelected = currentValues.includes(itemValue)
 
-      const newValues = currentlySelected
+      const newValues = isSelected
         ? currentValues.filter((v) => v !== itemValue)
         : [...currentValues, itemValue]
 
       multiProps.onChange?.(newValues)
     } else {
       const singleProps = props as CardSelectableSingleProps<T>
-      // When isToggle is true, clicking the selected item toggles it off
-      if (isToggle && singleProps.value === itemValue) {
-        singleProps.onChange?.(undefined)
-      } else {
-        singleProps.onChange?.(itemValue)
-      }
+      singleProps.onChange?.(itemValue)
     }
   }
 
@@ -56,44 +49,9 @@ export function CardSelectableContainer<T extends CardSelectableValue>(
     }
   }
 
-  // Determine the appropriate group role
-  const groupRole = isToggle || isMultiple ? "group" : "radiogroup"
-
-  // Grouped layout: items in a bordered container with dividers
-  if (grouped) {
-    return (
-      <div
-        role={groupRole}
-        aria-label={label}
-        className="rounded-xl border border-solid border-f1-border-secondary overflow-hidden"
-      >
-        {items.map((item, index) => (
-          <div
-            key={String(item.value)}
-            className={cn(
-              index !== items.length - 1 &&
-                "border-0 border-b border-solid border-f1-border-secondary"
-            )}
-          >
-            <CardSelectable
-              item={item}
-              selected={isSelected(item.value)}
-              disabled={disabled}
-              multiple={isMultiple}
-              onSelect={() => handleSelect(item.value)}
-              isToggle={isToggle}
-              grouped
-            />
-          </div>
-        ))}
-      </div>
-    )
-  }
-
-  // Default layout: individual cards with gap
   return (
     <div
-      role={groupRole}
+      role={isMultiple ? "group" : "radiogroup"}
       aria-label={label}
       className={cn(
         "flex gap-3",
@@ -108,7 +66,6 @@ export function CardSelectableContainer<T extends CardSelectableValue>(
           disabled={disabled}
           multiple={isMultiple}
           onSelect={() => handleSelect(item.value)}
-          isToggle={isToggle}
         />
       ))}
     </div>

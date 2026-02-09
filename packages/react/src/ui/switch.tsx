@@ -9,9 +9,8 @@ const Switch = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof SwitchPrimitive.Root> & {
     hideLabel?: boolean
     title?: string
-    required?: boolean
   }
->(({ className, disabled, hideLabel, required, ...props }, ref) => {
+>(({ className, disabled, hideLabel, ...props }, ref) => {
   // Generate a unique ID if one isn't provided
   const uniqueId = useId()
   const switchId = props.id || uniqueId
@@ -47,9 +46,6 @@ const Switch = React.forwardRef<
           )}
         >
           {props.title}
-          {required && (
-            <span className="ml-0.5 text-f1-foreground-critical">*</span>
-          )}
         </label>
       )}
     </div>
