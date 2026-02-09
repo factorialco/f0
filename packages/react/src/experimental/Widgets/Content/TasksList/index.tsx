@@ -1,9 +1,9 @@
 import { Task, TaskItem, TaskStatus } from "./TaskItem"
 
 interface TasksList {
-  todo?: (Task | string)[]
-  inProgress?: (Task | string)[]
   done?: (Task | string)[]
+  inProgress?: (Task | string)[]
+  todo?: (Task | string)[]
 }
 
 export interface TasksListProps {
@@ -22,12 +22,12 @@ export function TasksList({
   emptyMessage = "No tasks assigned",
 }: TasksListProps) {
   const taskTypes: {
-    key: "todo" | "inProgress" | "done"
+    key: "done" | "inProgress" | "todo"
     status: TaskStatus
   }[] = [
-    { key: "todo", status: "todo" },
-    { key: "inProgress", status: "in-progress" },
     { key: "done", status: "done" },
+    { key: "inProgress", status: "in-progress" },
+    { key: "todo", status: "todo" },
   ]
 
   const tasksToRender = taskTypes.flatMap(({ key, status }) =>

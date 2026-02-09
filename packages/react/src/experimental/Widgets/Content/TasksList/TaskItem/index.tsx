@@ -8,7 +8,7 @@ import {
 } from "../../../../../icons/app"
 import { WidgetSimpleListItem } from "../../ListItems/WidgetSimpleListItem"
 
-export type TaskStatus = "todo" | "in-progress" | "done"
+export type TaskStatus = "done" | "in-progress" | "todo"
 export interface Task {
   id: number | string
   text: string
@@ -24,15 +24,15 @@ export type TaskItemProps = {
 }
 
 const iconMap = {
-  todo: DottedCircle,
-  "in-progress": InProgressTask,
   done: Completed,
+  "in-progress": InProgressTask,
+  todo: DottedCircle,
 }
 
 const iconColorMap = {
-  todo: "text-f1-icon",
-  "in-progress": "text-f1-icon-info",
   done: "text-f1-icon-success",
+  "in-progress": "text-f1-icon-info",
+  todo: "text-f1-icon",
 }
 
 export function TaskItem({
