@@ -122,8 +122,8 @@ const variantMap: Record<string, Record<string, string>> = {
 
 /**
  * Prefixes every class in a space-separated class string with a breakpoint.
- * e.g. prefixClasses("sm", "border-0 border-b border-solid")
- *   → "sm:border-0 sm:border-b sm:border-solid"
+ * e.g. prefixClasses("sm", "border-b border-solid")
+ *   → "sm:border-b sm:border-solid"
  */
 function prefixClasses(breakpoint: Breakpoint, classes: string): string {
   return classes

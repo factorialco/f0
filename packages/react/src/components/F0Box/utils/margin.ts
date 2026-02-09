@@ -9,6 +9,9 @@ export const marginVariants = {
     lg: "m-4",
     xl: "m-6",
     "2xl": "m-8",
+    "3xl": "m-10",
+    "4xl": "m-12",
+    "5xl": "m-16",
     auto: "m-auto",
   } satisfies Record<MarginToken, string>,
 
@@ -20,6 +23,9 @@ export const marginVariants = {
     lg: "mx-4",
     xl: "mx-6",
     "2xl": "mx-8",
+    "3xl": "mx-10",
+    "4xl": "mx-12",
+    "5xl": "mx-16",
     auto: "mx-auto",
   } satisfies Record<MarginToken, string>,
 
@@ -31,6 +37,9 @@ export const marginVariants = {
     lg: "my-4",
     xl: "my-6",
     "2xl": "my-8",
+    "3xl": "my-10",
+    "4xl": "my-12",
+    "5xl": "my-16",
     auto: "my-auto",
   } satisfies Record<MarginToken, string>,
 
@@ -42,6 +51,9 @@ export const marginVariants = {
     lg: "mt-4",
     xl: "mt-6",
     "2xl": "mt-8",
+    "3xl": "mt-10",
+    "4xl": "mt-12",
+    "5xl": "mt-16",
     auto: "mt-auto",
   } satisfies Record<MarginToken, string>,
 
@@ -53,6 +65,9 @@ export const marginVariants = {
     lg: "mb-4",
     xl: "mb-6",
     "2xl": "mb-8",
+    "3xl": "mb-10",
+    "4xl": "mb-12",
+    "5xl": "mb-16",
     auto: "mb-auto",
   } satisfies Record<MarginToken, string>,
 
@@ -64,6 +79,9 @@ export const marginVariants = {
     lg: "ml-4",
     xl: "ml-6",
     "2xl": "ml-8",
+    "3xl": "ml-10",
+    "4xl": "ml-12",
+    "5xl": "ml-16",
     auto: "ml-auto",
   } satisfies Record<MarginToken, string>,
 
@@ -75,6 +93,9 @@ export const marginVariants = {
     lg: "mr-4",
     xl: "mr-6",
     "2xl": "mr-8",
+    "3xl": "mr-10",
+    "4xl": "mr-12",
+    "5xl": "mr-16",
     auto: "mr-auto",
   } satisfies Record<MarginToken, string>,
 }

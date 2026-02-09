@@ -9,12 +9,15 @@ import type {
 export const flexVariants = {
   gap: {
     none: "gap-0",
-    sm: "gap-sm",
-    md: "gap-md",
-    lg: "gap-lg",
-    xl: "gap-xl",
+    xs: "gap-0.5",
+    sm: "gap-1",
+    md: "gap-2",
+    lg: "gap-3",
+    xl: "gap-4",
     "2xl": "gap-6",
     "3xl": "gap-8",
+    "4xl": "gap-10",
+    "5xl": "gap-12",
   } satisfies Record<GapToken, string>,
 
   alignItems: {

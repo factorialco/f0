@@ -9,6 +9,9 @@ export const paddingVariants = {
     lg: "p-4",
     xl: "p-6",
     "2xl": "p-8",
+    "3xl": "p-10",
+    "4xl": "p-12",
+    "5xl": "p-16",
   } satisfies Record<SpacingToken, string>,
 
   paddingX: {
@@ -19,6 +22,9 @@ export const paddingVariants = {
     lg: "px-4",
     xl: "px-6",
     "2xl": "px-8",
+    "3xl": "px-10",
+    "4xl": "px-12",
+    "5xl": "px-16",
   } satisfies Record<SpacingToken, string>,
 
   paddingY: {
@@ -29,6 +35,9 @@ export const paddingVariants = {
     lg: "py-4",
     xl: "py-6",
     "2xl": "py-8",
+    "3xl": "py-10",
+    "4xl": "py-12",
+    "5xl": "py-16",
   } satisfies Record<SpacingToken, string>,
 
   paddingTop: {
@@ -39,6 +48,9 @@ export const paddingVariants = {
     lg: "pt-4",
     xl: "pt-6",
     "2xl": "pt-8",
+    "3xl": "pt-10",
+    "4xl": "pt-12",
+    "5xl": "pt-16",
   } satisfies Record<SpacingToken, string>,
 
   paddingBottom: {
@@ -49,6 +61,9 @@ export const paddingVariants = {
     lg: "pb-4",
     xl: "pb-6",
     "2xl": "pb-8",
+    "3xl": "pb-10",
+    "4xl": "pb-12",
+    "5xl": "pb-16",
   } satisfies Record<SpacingToken, string>,
 
   paddingLeft: {
@@ -59,6 +74,9 @@ export const paddingVariants = {
     lg: "pl-4",
     xl: "pl-6",
     "2xl": "pl-8",
+    "3xl": "pl-10",
+    "4xl": "pl-12",
+    "5xl": "pl-16",
   } satisfies Record<SpacingToken, string>,
 
   paddingRight: {
@@ -69,6 +87,9 @@ export const paddingVariants = {
     lg: "pr-4",
     xl: "pr-6",
     "2xl": "pr-8",
+    "3xl": "pr-10",
+    "4xl": "pr-12",
+    "5xl": "pr-16",
   } satisfies Record<SpacingToken, string>,
 }
 

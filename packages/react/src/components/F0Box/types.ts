@@ -3,8 +3,34 @@
  * These map to the design tokens defined in @factorialco/f0-core.
  */
 
-/** Semantic spacing tokens used for padding and margin */
-export type SpacingToken = "none" | "xs" | "sm" | "md" | "lg" | "xl" | "2xl"
+/**
+ * Spacing tokens for padding and margin.
+ * Maps to the project's absoluteSpacing scale (px values).
+ *
+ * | Token | Tailwind | Value |
+ * |-------|----------|-------|
+ * | none  | p-0      | 0px   |
+ * | xs    | p-1      | 4px   |
+ * | sm    | p-2      | 8px   |
+ * | md    | p-3      | 12px  |
+ * | lg    | p-4      | 16px  |
+ * | xl    | p-6      | 24px  |
+ * | 2xl   | p-8      | 32px  |
+ * | 3xl   | p-10     | 40px  |
+ * | 4xl   | p-12     | 48px  |
+ * | 5xl   | p-16     | 64px  |
+ */
+export type SpacingToken =
+  | "none"
+  | "xs"
+  | "sm"
+  | "md"
+  | "lg"
+  | "xl"
+  | "2xl"
+  | "3xl"
+  | "4xl"
+  | "5xl"
 
 /** Margin tokens (spacing + auto for centering) */
 export type MarginToken = SpacingToken | "auto"
@@ -76,8 +102,34 @@ export type SizeToken =
   | NumericSizeToken
   | FractionToken
 
-/** Gap tokens aligned with betweenSpacing from core + extended sizes */
-export type GapToken = "none" | "sm" | "md" | "lg" | "xl" | "2xl" | "3xl"
+/**
+ * Gap tokens for spacing between flex/grid children.
+ * Uses betweenSpacing (rem) for sm–xl, absoluteSpacing (px) for extended sizes.
+ *
+ * | Token | Tailwind | Value  |
+ * |-------|----------|--------|
+ * | none  | gap-0    | 0px    |
+ * | xs    | gap-0.5  | 2px    |
+ * | sm    | gap-sm   | ~4px   | (0.25rem)
+ * | md    | gap-md   | ~8px   | (0.5rem)
+ * | lg    | gap-lg   | ~12px  | (0.75rem)
+ * | xl    | gap-xl   | ~16px  | (1rem)
+ * | 2xl   | gap-6    | 24px   |
+ * | 3xl   | gap-8    | 32px   |
+ * | 4xl   | gap-10   | 40px   |
+ * | 5xl   | gap-12   | 48px   |
+ */
+export type GapToken =
+  | "none"
+  | "xs"
+  | "sm"
+  | "md"
+  | "lg"
+  | "xl"
+  | "2xl"
+  | "3xl"
+  | "4xl"
+  | "5xl"
 
 /** Display modes */
 export type DisplayToken =
@@ -98,14 +150,21 @@ export type BackgroundToken =
   | "secondary"
   | "tertiary"
   | "inverse"
+  | "inverse-secondary"
   | "bold"
   | "accent"
+  | "accent-bold"
   | "promote"
   | "critical"
+  | "critical-bold"
   | "info"
+  | "info-bold"
   | "warning"
+  | "warning-bold"
   | "positive"
+  | "positive-bold"
   | "selected"
+  | "selected-secondary"
   | "selected-bold"
   | "overlay"
 

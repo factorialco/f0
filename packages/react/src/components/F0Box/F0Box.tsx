@@ -145,12 +145,13 @@ export const F0Box = forwardRef<HTMLDivElement, F0BoxProps>(
     },
     ref
   ) => {
-    const hasBorder =
-      (border && border !== "none") ||
+    const hasPerSideBorder =
       (borderTop && borderTop !== "none") ||
       (borderBottom && borderBottom !== "none") ||
       (borderLeft && borderLeft !== "none") ||
       (borderRight && borderRight !== "none")
+
+    const hasBorder = (border && border !== "none") || hasPerSideBorder
 
     // Resolve responsive override classes for each breakpoint
     const breakpointOverrides = { sm, md, lg, xl }
@@ -165,6 +166,7 @@ export const F0Box = forwardRef<HTMLDivElement, F0BoxProps>(
       <div
         ref={ref}
         className={cn(
+          hasPerSideBorder && "border-0",
           boxVariants({
             display,
             position,
@@ -221,7 +223,8 @@ export const F0Box = forwardRef<HTMLDivElement, F0BoxProps>(
           }),
           responsiveClasses,
           hasBorder && !borderColor && "border-f1-border",
-          divider && !dividerColor && "divide-f1-border"
+          divider && !dividerColor && "divide-f1-border",
+          "scrollbar-macos"
         )}
         {...rest}
       />

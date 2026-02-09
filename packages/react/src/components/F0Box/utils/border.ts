@@ -31,29 +31,29 @@ export const borderVariants = {
     thick: "border-2 border-solid",
   } satisfies Record<BorderWidthToken, string>,
 
-  // -- Width per side (includes border-0 reset so only the specified side shows) --
+  // -- Width per side (includes reset so only the specified side shows) --
   borderTop: {
     none: "border-t-0",
-    default: "border-0 border-t border-solid",
-    thick: "border-0 border-t-2 border-solid",
+    default: "border-t border-solid",
+    thick: "border-t-2 border-solid",
   } satisfies Record<BorderWidthToken, string>,
 
   borderBottom: {
     none: "border-b-0",
-    default: "border-0 border-b border-solid",
-    thick: "border-0 border-b-2 border-solid",
+    default: "border-b border-solid",
+    thick: "border-b-2 border-solid",
   } satisfies Record<BorderWidthToken, string>,
 
   borderLeft: {
     none: "border-l-0",
-    default: "border-0 border-l border-solid",
-    thick: "border-0 border-l-2 border-solid",
+    default: "border-l border-solid",
+    thick: "border-l-2 border-solid",
   } satisfies Record<BorderWidthToken, string>,
 
   borderRight: {
     none: "border-r-0",
-    default: "border-0 border-r border-solid",
-    thick: "border-0 border-r-2 border-solid",
+    default: "border-r border-solid",
+    thick: "border-r-2 border-solid",
   } satisfies Record<BorderWidthToken, string>,
 
   // -- Radius (all corners) --
