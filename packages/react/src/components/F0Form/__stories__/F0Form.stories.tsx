@@ -996,14 +996,14 @@ const countriesPaginatedSource = createDataSourceDefinition<Country>({
 export const SelectWithDataSource: Story = {
   render() {
     const mapCountryOptions = (country: Country) => ({
-      value: country.id,
+      value: 1,
       label: country.name,
       description: country.continent,
     })
 
     const formSchema = z.object({
       // Non-paginated data source
-      country: f0FormField(z.string(), {
+      country: f0FormField(z.number(), {
         label: "Country (Non-paginated)",
         placeholder: "Search and select a country...",
         showSearchBox: true,
@@ -1011,7 +1011,7 @@ export const SelectWithDataSource: Story = {
         mapOptions: mapCountryOptions,
       }),
       // Paginated data source with infinite scroll
-      countryPaginated: f0FormField(z.string(), {
+      countryPaginated: f0FormField(z.number(), {
         label: "Country (Paginated - scroll for more)",
         placeholder: "Search and select a country...",
         showSearchBox: true,
@@ -1035,8 +1035,8 @@ export const SelectWithDataSource: Story = {
           name="select-datasource-example"
           schema={formSchema}
           defaultValues={{
-            country: "",
-            countryPaginated: "",
+            country: 1,
+            countryPaginated: 1,
             countries: [],
           }}
           onSubmit={async (data) => {

@@ -110,7 +110,7 @@ export type F0StringTextareaConfig = F0BaseConfig &
 export type F0StringSelectConfig<
   R extends Record<string, unknown> = Record<string, unknown>,
 > = F0BaseConfig &
-  F0SelectConfig<R> & {
+  F0SelectConfig<string, R> & {
     fieldType?: "select"
   }
 
@@ -132,12 +132,31 @@ export type F0StringConfig<
   | F0CustomFieldConfig<TValue, TConfig>
 
 /**
- * Config for number fields
+ * Config for number fields - number input
  */
-export type F0NumberFieldConfig = F0BaseConfig &
+export type F0NumberInputConfig = F0BaseConfig &
   F0NumberConfig & {
     fieldType?: "number"
   }
+
+/**
+ * Config for number fields - select (for selecting numeric values)
+ * @typeParam R - Record type for data source (when using source instead of options)
+ */
+export type F0NumberSelectConfig<
+  R extends Record<string, unknown> = Record<string, unknown>,
+> = F0BaseConfig &
+  F0SelectConfig<number, R> & {
+    fieldType: "select"
+  }
+
+/**
+ * Config for number fields
+ * @typeParam R - Record type for data source (when using source instead of options)
+ */
+export type F0NumberFieldConfig<
+  R extends Record<string, unknown> = Record<string, unknown>,
+> = F0NumberInputConfig | F0NumberSelectConfig<R>
 
 /**
  * Config for boolean fields - checkbox
@@ -178,12 +197,14 @@ export type F0DateRangeFieldConfig = F0BaseConfig &
 
 /**
  * Config for array fields (multi-select)
+ * @typeParam T - The value type (string or number)
  * @typeParam R - Record type for data source (when using source instead of options)
  */
 export type F0ArrayConfig<
+  T extends string | number = string,
   R extends Record<string, unknown> = Record<string, unknown>,
 > = F0BaseConfig &
-  F0SelectConfig<R> & {
+  F0SelectConfig<T, R> & {
     fieldType?: "select"
   }
 
@@ -245,13 +266,18 @@ export type F0ObjectConfig<TValue = unknown, TConfig = undefined> =
 
 /**
  * Complete F0 field configuration (union of all possible configs)
+ * @typeParam T - The value type for select fields (string or number)
+ * @typeParam R - Record type for data source (when using source instead of options)
  */
-export type F0FieldConfig =
-  | F0StringConfig
-  | F0NumberFieldConfig
+export type F0FieldConfig<
+  T extends string | number = string | number,
+  R extends Record<string, unknown> = Record<string, unknown>,
+> =
+  | F0StringConfig<string, undefined, R>
+  | F0NumberFieldConfig<R>
   | F0BooleanConfig
   | F0DateFieldConfig
-  | F0ArrayConfig
+  | F0ArrayConfig<T, R>
   | F0ObjectConfig
 
 /**
@@ -280,12 +306,13 @@ export function f0FormField<
 >(schema: T, config: F0StringConfig<z.infer<T>, TConfig, R>): T & F0ZodType<T>
 
 /**
- * Number field
+ * Number field - number input or select
+ * @typeParam R - Record type for data source (when using source instead of options)
  */
-export function f0FormField<T extends z.ZodNumber>(
-  schema: T,
-  config: F0NumberFieldConfig
-): T & F0ZodType<T>
+export function f0FormField<
+  T extends z.ZodNumber,
+  R extends Record<string, unknown> = Record<string, unknown>,
+>(schema: T, config: F0NumberFieldConfig<R>): T & F0ZodType<T>
 
 /**
  * Boolean field - checkbox or switch
@@ -314,12 +341,14 @@ export function f0FormField<
 
 /**
  * Array field - multi-select
+ * @typeParam V - The element value type (string or number)
  * @typeParam R - Record type for data source (when using source instead of options)
  */
 export function f0FormField<
   T extends z.ZodArray<ZodTypeAny>,
+  V extends string | number = string,
   R extends Record<string, unknown> = Record<string, unknown>,
->(schema: T, config: F0ArrayConfig<R>): T & F0ZodType<T>
+>(schema: T, config: F0ArrayConfig<V, R>): T & F0ZodType<T>
 
 /**
  * Object field - richtext or custom
@@ -331,27 +360,36 @@ export function f0FormField<
 
 /**
  * Optional wrapper - inherits inner type's config
+ * @typeParam V - The value type for select fields (string or number)
+ * @typeParam R - Record type for data source (when using source instead of options)
  */
-export function f0FormField<T extends z.ZodOptional<ZodTypeAny>>(
-  schema: T,
-  config: F0FieldConfig
-): T & F0ZodType<T>
+export function f0FormField<
+  T extends z.ZodOptional<ZodTypeAny>,
+  V extends string | number = string | number,
+  R extends Record<string, unknown> = Record<string, unknown>,
+>(schema: T, config: F0FieldConfig<V, R>): T & F0ZodType<T>
 
 /**
  * Nullable wrapper - inherits inner type's config
+ * @typeParam V - The value type for select fields (string or number)
+ * @typeParam R - Record type for data source (when using source instead of options)
  */
-export function f0FormField<T extends z.ZodNullable<ZodTypeAny>>(
-  schema: T,
-  config: F0FieldConfig
-): T & F0ZodType<T>
+export function f0FormField<
+  T extends z.ZodNullable<ZodTypeAny>,
+  V extends string | number = string | number,
+  R extends Record<string, unknown> = Record<string, unknown>,
+>(schema: T, config: F0FieldConfig<V, R>): T & F0ZodType<T>
 
 /**
  * Default wrapper - inherits inner type's config
+ * @typeParam V - The value type for select fields (string or number)
+ * @typeParam R - Record type for data source (when using source instead of options)
  */
-export function f0FormField<T extends z.ZodDefault<ZodTypeAny>>(
-  schema: T,
-  config: F0FieldConfig
-): T & F0ZodType<T>
+export function f0FormField<
+  T extends z.ZodDefault<ZodTypeAny>,
+  V extends string | number = string | number,
+  R extends Record<string, unknown> = Record<string, unknown>,
+>(schema: T, config: F0FieldConfig<V, R>): T & F0ZodType<T>
 
 /**
  * Custom field - works with any schema type
@@ -365,11 +403,14 @@ export function f0FormField<T extends ZodTypeAny, TConfig = undefined>(
 
 /**
  * Fallback for any other schema type
+ * @typeParam V - The value type for select fields (string or number)
+ * @typeParam R - Record type for data source (when using source instead of options)
  */
-export function f0FormField<T extends ZodTypeAny>(
-  schema: T,
-  config: F0FieldConfig
-): T & F0ZodType<T>
+export function f0FormField<
+  T extends ZodTypeAny,
+  V extends string | number = string | number,
+  R extends Record<string, unknown> = Record<string, unknown>,
+>(schema: T, config: F0FieldConfig<V, R>): T & F0ZodType<T>
 
 /**
  * Implementation

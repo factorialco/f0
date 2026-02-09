@@ -44,6 +44,11 @@ export type SelectFieldRenderIf =
 // ============================================================================
 
 /**
+ * Value types supported by select fields
+ */
+export type SelectValueType = string | number
+
+/**
  * Base config options shared by all select field variants
  */
 interface F0SelectConfigBase {
@@ -57,18 +62,24 @@ interface F0SelectConfigBase {
 
 /**
  * Config for select fields with static options
+ * @typeParam T - The value type (string or number)
  */
-interface F0SelectConfigWithOptions extends F0SelectConfigBase {
+interface F0SelectConfigWithOptions<
+  T extends SelectValueType = string,
+> extends F0SelectConfigBase {
   /** Options for the select dropdown */
-  options: F0SelectItemProps<string, unknown>[]
+  options: F0SelectItemProps<T, unknown>[]
   source?: never
   mapOptions?: never
 }
 
 /**
  * Config for select fields with a data source
+ * @typeParam T - The value type (string or number)
+ * @typeParam R - Record type from the data source
  */
 interface F0SelectConfigWithSource<
+  T extends SelectValueType = string,
   R extends RecordType = RecordType,
 > extends F0SelectConfigBase {
   /** Data source for fetching options dynamically */
@@ -79,7 +90,7 @@ interface F0SelectConfigWithSource<
     GroupingDefinition<R>
   >
   /** Function to map data source items to select options */
-  mapOptions: (item: R) => F0SelectItemProps<string, R>
+  mapOptions: (item: R) => F0SelectItemProps<T, R>
   options?: never
 }
 
@@ -90,12 +101,16 @@ interface F0SelectConfigWithSource<
  * - Static `options` array
  * - Dynamic `source` with `mapOptions` function
  *
+ * @typeParam T - The value type (string or number)
+ * @typeParam R - Record type from the data source
+ *
  * Note: `clearable` is derived from the Zod schema:
  * - `z.string().optional()` or `z.string().nullable()` → clearable
  */
-export type F0SelectConfig<R extends RecordType = RecordType> =
-  | F0SelectConfigWithOptions
-  | F0SelectConfigWithSource<R>
+export type F0SelectConfig<
+  T extends SelectValueType = string,
+  R extends RecordType = RecordType,
+> = F0SelectConfigWithOptions<T> | F0SelectConfigWithSource<T, R>
 
 /**
  * Select field with all properties for rendering
