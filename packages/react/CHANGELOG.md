@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.353.0](https://github.com/factorialco/f0/compare/f0-react-v1.352.0...f0-react-v1.353.0) (2026-02-09)
+
+
+### Features
+
+* create F0Form component ([#3384](https://github.com/factorialco/f0/issues/3384)) ([a26afe0](https://github.com/factorialco/f0/commit/a26afe03f1fc222b2a0cc769a928c875a2198390))
+
 ## [1.352.0](https://github.com/factorialco/f0/compare/f0-react-v1.351.0...f0-react-v1.352.0) (2026-02-09)
 
 
