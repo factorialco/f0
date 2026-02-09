@@ -26,6 +26,7 @@ type Story = StoryObj<TasksListProps>
 export const Default: Story = {
   args: {
     tasks: {
+      done: [{ id: 0, text: "Launch website" }],
       inProgress: [{ id: 1, text: "Migrate to new CRM" }],
       todo: [
         { id: 2, text: "Connect to Slack" },
@@ -40,6 +41,13 @@ export const Default: Story = {
 export const WithLabels: Story = {
   args: {
     tasks: {
+      done: [
+        {
+          id: 0,
+          text: "Launch website",
+          badge: { text: "Completed Sep 5" },
+        },
+      ],
       inProgress: [
         {
           id: 1,
@@ -62,6 +70,13 @@ export const WithCounters: Story = {
     onClickTask: fn(),
     hideIcons: true,
     tasks: {
+      done: [
+        {
+          id: 0,
+          text: "Launch website",
+          counter: 12,
+        },
+      ],
       inProgress: [
         {
           id: 1,
@@ -73,19 +88,19 @@ export const WithCounters: Story = {
       ],
       todo: [
         {
-          id: 1,
+          id: 3,
           text: "Write changelog",
           badge: { text: "Due Oct 2" },
           counter: 4,
         },
         {
-          id: 2,
+          id: 4,
           text: "Product review",
           badge: { text: "Due Oct 21" },
           counter: 1,
         },
         {
-          id: 3,
+          id: 5,
           text: "Final conclusions",
           badge: { text: "Due Nov 2" },
           counter: 7,
@@ -98,6 +113,12 @@ export const WithCounters: Story = {
 export const WithLongTaskTitles: Story = {
   args: {
     tasks: {
+      done: [
+        {
+          id: 0,
+          text: "Consectetur adipiscing elit. Proin ut sem accumsan ipsum malesuada maximus id vitae libero.",
+        },
+      ],
       inProgress: [
         {
           id: 1,
@@ -122,6 +143,7 @@ export const EmptyState: Story = {
   args: {
     emptyMessage: "No tasks assigned",
     tasks: {
+      done: [],
       inProgress: [],
       todo: [],
     },

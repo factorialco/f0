@@ -80,3 +80,26 @@ export const PressableTodoPastDue: Story = {
     status: "todo",
   },
 }
+
+export const Done: Story = {
+  args: {
+    task: {
+      id: 1,
+      text: "Migrate to new CRM",
+    },
+    status: "done",
+  },
+}
+
+export const DoneNoPastDue: Story = {
+  args: {
+    task: {
+      id: 1,
+      text: "Migrate to new CRM",
+      badge: {
+        text: "Completed Sep 10",
+      },
+    },
+    status: "done",
+  },
+}
