@@ -1,0 +1,56 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["react", "typescript"],
+  "categories": {
+    "correctness": "off"
+  },
+  "env": {
+    "builtin": true,
+    "node": true
+  },
+  "jsPlugins": ["eslint-plugin-react-refresh"],
+  "overrides": [
+    {
+      "files": ["**/*.{js,jsx,ts,tsx}"],
+      "rules": {
+        "no-unused-vars": [
+          "error",
+          {
+            "vars": "all",
+            "varsIgnorePattern": "^_",
+            "args": "after-used",
+            "argsIgnorePattern": "^_"
+          }
+        ],
+        "react/react-in-jsx-scope": "off",
+        "react/prop-types": "off",
+        "react/display-name": ["error", {}],
+        "react/rules-of-hooks": "error",
+        "react/exhaustive-deps": "error"
+      },
+      "plugins": ["react", "typescript"]
+    },
+    {
+      "files": ["**/*.{js,jsx,ts,tsx}"],
+      "rules": {
+        "no-console": [
+          "error",
+          {
+            "allow": ["warn", "error", "assert"]
+          }
+        ]
+      }
+    },
+    {
+      "files": [
+        "**/*.stories.*",
+        "**/__stories__/**",
+        "**/*.test.*",
+        "**/__tests__/**"
+      ],
+      "rules": {
+        "no-console": "off"
+      }
+    }
+  ]
+}
