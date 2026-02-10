@@ -1,8 +1,8 @@
 import { motion } from "motion/react"
 import { memo } from "react"
 
-import { useI18n } from "@/lib/providers/i18n"
 import { F0OneIcon } from "@/sds/ai/F0OneIcon"
+import { useI18n } from "@/lib/providers/i18n"
 
 const IconMotion = motion.create(F0OneIcon)
 

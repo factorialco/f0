@@ -111,11 +111,7 @@ const ChatTextareaWrapper = ({ placeholders }: { placeholders?: string[] }) => {
 }
 
 const meta = {
-<<<<<<<< HEAD:packages/react/src/sds/ai/F0AiChat/__stories__/ChatTextarea.stories.tsx
   title: "AI/F0AiChat/ChatTextarea (with context)",
-========
-  title: "AI/F0AiChat/ChatTextarea",
->>>>>>>> 7ba2e4a6e (feat: introduce F0 AI components and refactor existing AI chat structure):packages/react/src/ai/F0AiChat/__stories__/ChatTextarea.stories.tsx
   component: ChatTextareaWrapper,
   parameters: {
     layout: "centered",

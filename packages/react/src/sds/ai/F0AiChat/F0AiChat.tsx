@@ -18,38 +18,18 @@ import { experimentalComponent } from "@/lib/experimental"
 import { Link } from "@/lib/linkHandler"
 import { cn } from "@/lib/utils"
 
-<<<<<<<< HEAD:packages/react/src/sds/ai/F0AiChat/F0AiChat.tsx
 import { AssistantMessage } from "./components/AssistantMessage"
 import { ChatHeader } from "./components/ChatHeader"
 import { ChatTextarea } from "./components/ChatTextarea"
 import { SidebarWindow } from "./components/ChatWindow"
 import { MessagesContainer } from "./components/MessagesContainer"
-========
-import {
-  AssistantMessage,
-  ChatButton,
-  ChatHeader,
-  ChatTextarea,
-  ChatWindow,
-  MessageSources,
-  MessagesContainer,
-  UserMessage,
-  ActionItem,
-} from "./components"
->>>>>>>> 7ba2e4a6e (feat: introduce F0 AI components and refactor existing AI chat structure):packages/react/src/ai/F0AiChat/F0AiChat.tsx
 import { MessagesContainerFullscreen } from "./components/MessagesContainerFullscreen"
 import { UserMessage } from "./components/UserMessage"
 import { WelcomeScreenSuggestion } from "./components/WelcomeScreen"
-<<<<<<<< HEAD:packages/react/src/sds/ai/F0AiChat/F0AiChat.tsx
 import { useDefaultCopilotActions } from "./copilotActions"
 import { FullscreenChatContextType } from "./internal-types"
 import { AiChatStateProvider, useAiChat } from "./providers/AiChatStateProvider"
 import { AiChatProviderProps } from "./types"
-========
-import { FullscreenChatContextType } from "./internal-types"
-import { AiChatStateProvider, useAiChat } from "./providers/AiChatStateProvider"
-import { F0AiChatProviderProps } from "./types"
->>>>>>>> 7ba2e4a6e (feat: introduce F0 AI components and refactor existing AI chat structure):packages/react/src/ai/F0AiChat/F0AiChat.tsx
 
 // Context to share input state between Messages and Input components
 export const FullscreenChatContext = createContext<FullscreenChatContextType>({
@@ -57,11 +37,7 @@ export const FullscreenChatContext = createContext<FullscreenChatContextType>({
   setInProgress: () => {},
 })
 
-<<<<<<<< HEAD:packages/react/src/sds/ai/F0AiChat/F0AiChat.tsx
 const F0AiChatProviderComponent = ({
-========
-const F0AiChatProviderCmp = ({
->>>>>>>> 7ba2e4a6e (feat: introduce F0 AI components and refactor existing AI chat structure):packages/react/src/ai/F0AiChat/F0AiChat.tsx
   enabled = false,
   greeting,
   initialMessage,
@@ -73,7 +49,7 @@ const F0AiChatProviderCmp = ({
   children,
   agent,
   ...copilotKitProps
-}: F0AiChatProviderProps) => {
+}: AiChatProviderProps) => {
   // todo: implement error handling
   // temporary set runtime url until error handling is done
   return (
@@ -138,13 +114,8 @@ const SendMessageFunctionInjector = () => {
   return null
 }
 
-<<<<<<<< HEAD:packages/react/src/sds/ai/F0AiChat/F0AiChat.tsx
 const F0AiChatComponent = () => {
   const { enabled, open, setOpen, disclaimer } = useAiChat()
-========
-const F0AiChatCmp = () => {
-  const { enabled, open, setOpen } = useAiChat()
->>>>>>>> 7ba2e4a6e (feat: introduce F0 AI components and refactor existing AI chat structure):packages/react/src/ai/F0AiChat/F0AiChat.tsx
 
   // Register all default copilot actions
   useDefaultCopilotActions()
@@ -203,11 +174,7 @@ const F0AiChatCmp = () => {
   )
 }
 
-<<<<<<<< HEAD:packages/react/src/sds/ai/F0AiChat/F0AiChat.tsx
 const F0AiFullscreenChatComponent = () => {
-========
-const F0AiFullscreenChatCmp = () => {
->>>>>>>> 7ba2e4a6e (feat: introduce F0 AI components and refactor existing AI chat structure):packages/react/src/ai/F0AiChat/F0AiChat.tsx
   const { enabled } = useAiChat()
   const [inProgress, setInProgress] = useState(false)
   const inputContainerRef = useRef<HTMLDivElement>(null)
@@ -358,17 +325,12 @@ const FullscreenChatInput = () => {
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-<<<<<<<< HEAD:packages/react/src/sds/ai/F0AiChat/F0AiChat.tsx
 export const F0AiChat = experimentalComponent("F0AiChat", F0AiChatComponent)
-========
-export const F0AiChat = experimentalComponent("F0AiChat", F0AiChatCmp)
->>>>>>>> 7ba2e4a6e (feat: introduce F0 AI components and refactor existing AI chat structure):packages/react/src/ai/F0AiChat/F0AiChat.tsx
 
 /**
  * @experimental This is an experimental component use it at your own risk
  */
 export const F0AiFullscreenChat = experimentalComponent(
-<<<<<<<< HEAD:packages/react/src/sds/ai/F0AiChat/F0AiChat.tsx
   "F0AiFullscreenChat",
   F0AiFullscreenChatComponent
 )
@@ -379,15 +341,6 @@ export const F0AiFullscreenChat = experimentalComponent(
 export const F0AiChatProvider = experimentalComponent(
   "F0AiChatProvider",
   F0AiChatProviderComponent
-========
-  "F0AiChat",
-  F0AiFullscreenChatCmp
-)
-
-export const F0AiChatProvider = experimentalComponent(
-  "F0AiChatProvider",
-  F0AiChatProviderCmp
->>>>>>>> 7ba2e4a6e (feat: introduce F0 AI components and refactor existing AI chat structure):packages/react/src/ai/F0AiChat/F0AiChat.tsx
 )
 
 // Re-export WelcomeScreenSuggestion type from components for backwards compatibility

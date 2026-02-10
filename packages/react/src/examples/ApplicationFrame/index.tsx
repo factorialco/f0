@@ -14,17 +14,17 @@ import {
   AiPromotionChatProviderProps,
 } from "@/experimental/AiPromotionChat"
 import { useAiPromotionChat } from "@/experimental/AiPromotionChat/providers/AiPromotionChatStateProvider"
-import { useReducedMotion } from "@/lib/a11y"
 import { experimentalComponent } from "@/lib/experimental"
-import { useI18n } from "@/lib/providers/i18n"
-import { cn, focusRing } from "@/lib/utils"
+
 import {
   F0AiChat,
   F0AiChatProvider,
   AiChatProviderProps,
 } from "@/sds/ai/F0AiChat"
 import { useAiChat } from "@/sds/ai/F0AiChat/providers/AiChatStateProvider"
-
+import { useReducedMotion } from "@/lib/a11y"
+import { useI18n } from "@/lib/providers/i18n"
+import { cn, focusRing } from "@/lib/utils"
 import { FrameProvider, SidebarState, useSidebar } from "./FrameProvider"
 
 export interface ApplicationFrameProps {
@@ -235,7 +235,7 @@ function ApplicationFrameContent({
                 </motion.div>
               </motion.main>
               {ai && ai.enabled && (
-                <div className="flex h-full py-1 pl-0 pr-1">
+                <div className="py-1 pr-1 pl-0 h-full flex">
                   <F0AiChat />
                 </div>
               )}

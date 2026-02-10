@@ -1,18 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-<<<<<<<< HEAD:packages/react/src/sds/ai/F0HILActionConfirmation/__stories__/F0HILActionConfirmation.stories.tsx
 import { F0HILActionConfirmation } from ".."
 
 const meta = {
   title: "AI/F0HILActionConfirmation",
   component: F0HILActionConfirmation,
-========
-import { HILActionConfirmation } from "../components/HILActionConfirmation"
-
-const meta = {
-  title: "AI/F0AiChat/HILActionConfirmation",
-  component: HILActionConfirmation,
->>>>>>>> 7ba2e4a6e (feat: introduce F0 AI components and refactor existing AI chat structure):packages/react/src/ai/F0AiChat/__stories__/HILActionConfirmation.stories.tsx
   parameters: {
     layout: "centered",
   },

@@ -6,6 +6,7 @@ import { Observable } from "zen-observable-ts"
 
 import type { FiltersDefinition } from "@/components/OneFilterPicker"
 
+import { aiTranslations } from "@/sds/ai/F0AiChat"
 import {
   BaseFetchOptions,
   BaseResponse,
@@ -18,7 +19,6 @@ import {
 } from "@/hooks/datasource"
 import { PromiseState } from "@/lib/promise-to-observable"
 import { defaultTranslations, I18nProvider } from "@/lib/providers/i18n"
-import { aiTranslations } from "@/sds/ai/F0AiChat"
 import {
   zeroRender as render,
   zeroRenderHook as renderHook,
