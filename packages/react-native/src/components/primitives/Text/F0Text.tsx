@@ -1,8 +1,8 @@
 import React from "react";
 import { Text as RNText } from "react-native";
 import { cn } from "../../../lib/utils";
-import { textVariants } from "./Text.styles";
-import type { F0TextProps } from "./Text.types";
+import { textVariants } from "./F0Text.styles";
+import type { F0TextProps } from "./F0Text.types";
 
 /**
  * F0Text - Primitive Text component with semantic typography variants
@@ -66,11 +66,11 @@ export {
   TEXT_ALIGN,
   TEXT_DECORATIONS,
   TEXT_TRANSFORMS,
-} from "./Text.types";
+} from "./F0Text.types";
 export type {
   TypographyVariant,
   TextColor,
   TextAlign,
   TextDecoration,
   TextTransform,
-} from "./Text.types";
+} from "./F0Text.types";
