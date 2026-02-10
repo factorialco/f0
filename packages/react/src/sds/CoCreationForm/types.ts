@@ -1,4 +1,7 @@
+import { EntityId } from "@/experimental/Forms/EntitySelect/types"
+
 import { DateQuestionProps } from "./DateQuestion"
+import { EntitySelectQuestionProps } from "./EntitySelectQuestion/types"
 import { LinkQuestionProps } from "./LinkQuestion"
 import { NumericQuestionProps } from "./NumericQuestion"
 import { RatingQuestionProps } from "./RatingQuestion"
@@ -15,6 +18,8 @@ export type QuestionType =
   | "numeric"
   | "link"
   | "date"
+  | "entity-select"
+  | "entity-select-multi"
 
 export type ElementType = QuestionType | "section"
 
@@ -39,6 +44,7 @@ export type QuestionElement =
   | Omit<NumericQuestionProps & { type: "numeric" }, QuestionPropsToOmit>
   | Omit<LinkQuestionProps & { type: "link" }, QuestionPropsToOmit>
   | Omit<DateQuestionProps & { type: "date" }, QuestionPropsToOmit>
+  | Omit<EntitySelectQuestionProps, QuestionPropsToOmit>
 
 export type CoCreationFormElement =
   | { type: "section"; section: SectionElement }
@@ -98,6 +104,14 @@ type OnChangeQuestionParams = BaseQuestionOnChangeParams &
     | {
         type: "date"
         value?: Date | null
+      }
+    | {
+        type: "entity-select"
+        value?: EntityId | null
+      }
+    | {
+        type: "entity-select-multi"
+        value?: EntityId[] | null
       }
   )
 

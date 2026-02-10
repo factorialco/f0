@@ -87,6 +87,11 @@ export const getDefaultParamsForQuestionType = (questionType: QuestionType) => {
       return {
         value: new Date(),
       }
+    case "entity-select":
+    case "entity-select-multi":
+      return {
+        value: null,
+      }
     default:
       throw new Error(`Unsupported question type: ${questionType}`)
   }
@@ -103,6 +108,8 @@ const DEFAULT_QUESTION_TYPES: QuestionType[] = [
   "numeric",
   "link",
   "date",
+  "entity-select",
+  "entity-select-multi",
 ]
 
 export const getDefaultQuestionTypeToAdd = (

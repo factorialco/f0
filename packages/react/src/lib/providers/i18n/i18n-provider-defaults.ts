@@ -320,6 +320,11 @@ export const defaultTranslations = {
       numeric: "Numeric",
       link: "Link",
       date: "Date",
+      entitySelect: "Person selector",
+      entitySelectMulti: "Person selector (multi)",
+    },
+    entitySelectQuestion: {
+      placeholder: "Respondents will see a person selector here",
     },
     selectQuestion: {
       addOption: "Add option",

@@ -1,5 +1,7 @@
 import { BaseQuestionPropsForOtherQuestionComponents } from "../BaseQuestion"
 import { DateQuestion, DateQuestionProps } from "../DateQuestion"
+import { EntitySelectQuestion } from "../EntitySelectQuestion"
+import { EntitySelectQuestionProps } from "../EntitySelectQuestion/types"
 import { LinkQuestion, LinkQuestionProps } from "../LinkQuestion"
 import { NumericQuestion, NumericQuestionProps } from "../NumericQuestion"
 import { RatingQuestion, RatingQuestionProps } from "../RatingQuestion"
@@ -15,6 +17,7 @@ export type QuestionProps = BaseQuestionPropsForOtherQuestionComponents &
     | (NumericQuestionProps & { type: "numeric" })
     | (LinkQuestionProps & { type: "link" })
     | (DateQuestionProps & { type: "date" })
+    | EntitySelectQuestionProps
   )
 
 export const Question = ({ ...props }: QuestionProps) => {
@@ -33,6 +36,9 @@ export const Question = ({ ...props }: QuestionProps) => {
       return <LinkQuestion {...props} />
     case "date":
       return <DateQuestion {...props} />
+    case "entity-select":
+    case "entity-select-multi":
+      return <EntitySelectQuestion {...props} />
     default:
       throw new Error("Invalid question type provided")
   }
