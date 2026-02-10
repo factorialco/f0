@@ -1,6 +1,6 @@
-import Svg, { Circle } from "react-native-svg";
-import type { SvgProps } from "react-native-svg";
-import { Ref, forwardRef } from "react";
+import { Ref, forwardRef } from "react"
+import Svg, { Circle } from "react-native-svg"
+import type { SvgProps } from "react-native-svg"
 const SvgEllipsis = (props: SvgProps, ref: Ref<Svg>) => (
   <Svg
     fill="none"
@@ -31,6 +31,6 @@ const SvgEllipsis = (props: SvgProps, ref: Ref<Svg>) => (
       transform="rotate(90 12 17.5)"
     />
   </Svg>
-);
-const ForwardRef = forwardRef(SvgEllipsis);
-export default ForwardRef;
+)
+const ForwardRef = forwardRef(SvgEllipsis)
+export default ForwardRef

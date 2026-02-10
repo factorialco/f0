@@ -1,12 +1,13 @@
-import { tv, type VariantProps } from "tailwind-variants";
 import React, {
-    forwardRef,
-    ForwardRefExoticComponent,
-    RefAttributes,
-} from "react";
-import { Svg, SvgProps } from "react-native-svg";
-import { withUniwind } from "uniwind";
-import { cn } from "../../lib/utils";
+  forwardRef,
+  ForwardRefExoticComponent,
+  RefAttributes,
+} from "react"
+import { Svg, SvgProps } from "react-native-svg"
+import { tv, type VariantProps } from "tailwind-variants"
+import { withUniwind } from "uniwind"
+
+import { cn } from "../../lib/utils"
 
 const iconVariants = tv({
   base: "shrink-0",
@@ -22,50 +23,44 @@ const iconVariants = tv({
   defaultVariants: {
     size: "md",
   },
-});
+})
 
 export interface IconProps extends SvgProps, VariantProps<typeof iconVariants> {
-  icon: IconType;
-  testID?: string;
-  className?: string;
-  variant?:
-    | "default"
-    | "critical"
-    | "neutral"
-    | "ghost"
-    | "outline"
-    | "promote";
-  isPressed?: boolean;
+  icon: IconType
+  testID?: string
+  className?: string
+  variant?: "default" | "critical" | "neutral" | "ghost" | "outline" | "promote"
+  isPressed?: boolean
 }
 
 export type IconType = ForwardRefExoticComponent<
   SvgProps &
     RefAttributes<Svg> & {
-      className?: string;
+      className?: string
     }
->;
+>
 
 // Keep track of icons that have already had withUniwind applied
-const interopAppliedIcons = new WeakSet();
+const interopAppliedIcons = new WeakSet()
 
 // Function to apply UniWind interop to an icon component
 export function applyIconInterop(icon: IconType) {
   if (!interopAppliedIcons.has(icon)) {
-    const wrappedIcon = withUniwind(icon);
-    interopAppliedIcons.add(wrappedIcon);
-    return wrappedIcon;
+    const wrappedIcon = withUniwind(icon)
+    interopAppliedIcons.add(wrappedIcon)
+    return wrappedIcon
   }
-  return icon;
+  return icon
 }
 
 export const Icon = forwardRef<Svg, IconProps>(function Icon(
   { size = "md", icon, className, testID, ...props },
-  ref,
+  ref
 ) {
-  if (!icon) return null;
+  if (!icon) return null
 
   // Apply UniWind interop to the icon if not already applied
-  const Component = applyIconInterop(icon);
+  const Component = applyIconInterop(icon)
 
   return (
     <Component
@@ -74,5 +69,5 @@ export const Icon = forwardRef<Svg, IconProps>(function Icon(
       className={cn(iconVariants({ size }), className)}
       testID={testID}
     />
-  );
-});
+  )
+})

@@ -1,6 +1,6 @@
-import Svg, { Path, Circle } from "react-native-svg";
-import type { SvgProps } from "react-native-svg";
-import { Ref, forwardRef } from "react";
+import { Ref, forwardRef } from "react"
+import Svg, { Path, Circle } from "react-native-svg"
+import type { SvgProps } from "react-native-svg"
 const SvgPrinter = (props: SvgProps, ref: Ref<Svg>) => (
   <Svg
     fill="none"
@@ -21,6 +21,6 @@ const SvgPrinter = (props: SvgProps, ref: Ref<Svg>) => (
     />
     <Circle cx={17} cy={11} r={1} fill="currentColor" />
   </Svg>
-);
-const ForwardRef = forwardRef(SvgPrinter);
-export default ForwardRef;
+)
+const ForwardRef = forwardRef(SvgPrinter)
+export default ForwardRef

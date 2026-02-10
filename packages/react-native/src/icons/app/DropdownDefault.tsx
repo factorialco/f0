@@ -1,6 +1,6 @@
-import Svg, { Rect, Path } from "react-native-svg";
-import type { SvgProps } from "react-native-svg";
-import { Ref, forwardRef } from "react";
+import { Ref, forwardRef } from "react"
+import Svg, { Rect, Path } from "react-native-svg"
+import type { SvgProps } from "react-native-svg"
 const SvgDropdownDefault = (props: SvgProps, ref: Ref<Svg>) => (
   <Svg
     fill="none"
@@ -20,6 +20,6 @@ const SvgDropdownDefault = (props: SvgProps, ref: Ref<Svg>) => (
     />
     <Path stroke="currentColor" d="m8.5 10.25 3.5 3.5 3.5-3.5" />
   </Svg>
-);
-const ForwardRef = forwardRef(SvgDropdownDefault);
-export default ForwardRef;
+)
+const ForwardRef = forwardRef(SvgDropdownDefault)
+export default ForwardRef

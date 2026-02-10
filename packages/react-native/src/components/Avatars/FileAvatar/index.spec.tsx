@@ -1,6 +1,7 @@
-import { render } from "@testing-library/react-native";
-import React from "react";
-import { FileAvatar } from "./";
+import { render } from "@testing-library/react-native"
+import React from "react"
+
+import { FileAvatar } from "./"
 
 describe("FileAvatar", () => {
   it("Snapshot - different file types", () => {
@@ -27,17 +28,17 @@ describe("FileAvatar", () => {
       { name: "webpage.html", type: "html" },
       { name: "readme.md", type: "markdown" },
       { name: "unknown.xyz", type: "undefined" },
-    ];
+    ]
 
     fileTypes.map((fileType, index) => {
       const { toJSON } = render(
         <FileAvatar
           key={index}
           file={new File([""], fileType.name, { type: fileType.type })}
-        />,
-      );
+        />
+      )
 
-      expect(toJSON()).toMatchSnapshot();
-    });
-  });
-});
+      expect(toJSON()).toMatchSnapshot()
+    })
+  })
+})

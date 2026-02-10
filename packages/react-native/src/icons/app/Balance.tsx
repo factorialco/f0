@@ -1,6 +1,6 @@
-import Svg, { Path, Circle } from "react-native-svg";
-import type { SvgProps } from "react-native-svg";
-import { Ref, forwardRef } from "react";
+import { Ref, forwardRef } from "react"
+import Svg, { Path, Circle } from "react-native-svg"
+import type { SvgProps } from "react-native-svg"
 const SvgBalance = (props: SvgProps, ref: Ref<Svg>) => (
   <Svg
     fill="none"
@@ -23,6 +23,6 @@ const SvgBalance = (props: SvgProps, ref: Ref<Svg>) => (
       stroke="currentColor"
     />
   </Svg>
-);
-const ForwardRef = forwardRef(SvgBalance);
-export default ForwardRef;
+)
+const ForwardRef = forwardRef(SvgBalance)
+export default ForwardRef

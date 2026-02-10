@@ -1,7 +1,9 @@
-import { cnMerge, type CnOptions } from "tailwind-variants";
+import { cnMerge, type CnOptions } from "tailwind-variants"
 
 export function cn(...args: CnOptions): string {
-  return cnMerge(args)({
-    twMerge: true,
-  }) ?? "";
+  return (
+    cnMerge(args)({
+      twMerge: true,
+    }) ?? ""
+  )
 }

@@ -1,6 +1,6 @@
-import Svg, { Path, Circle } from "react-native-svg";
-import type { SvgProps } from "react-native-svg";
-import { Ref, forwardRef } from "react";
+import { Ref, forwardRef } from "react"
+import Svg, { Path, Circle } from "react-native-svg"
+import type { SvgProps } from "react-native-svg"
 const SvgCameraPlus = (props: SvgProps, ref: Ref<Svg>) => (
   <Svg
     fill="none"
@@ -17,6 +17,6 @@ const SvgCameraPlus = (props: SvgProps, ref: Ref<Svg>) => (
     <Circle cx={12} cy={12} r={3} stroke="currentColor" strokeLinecap="round" />
     <Path stroke="currentColor" strokeLinecap="round" d="M19 6.5h-3M17.5 8V5" />
   </Svg>
-);
-const ForwardRef = forwardRef(SvgCameraPlus);
-export default ForwardRef;
+)
+const ForwardRef = forwardRef(SvgCameraPlus)
+export default ForwardRef

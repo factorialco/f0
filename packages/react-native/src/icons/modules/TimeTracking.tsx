@@ -1,6 +1,6 @@
-import Svg, { Path } from "react-native-svg";
-import type { SvgProps } from "react-native-svg";
-import { Ref, forwardRef } from "react";
+import { Ref, forwardRef } from "react"
+import Svg, { Path } from "react-native-svg"
+import type { SvgProps } from "react-native-svg"
 const SvgTimeTracking = (props: SvgProps, ref: Ref<Svg>) => (
   <Svg
     fill="none"
@@ -20,6 +20,6 @@ const SvgTimeTracking = (props: SvgProps, ref: Ref<Svg>) => (
       d="M6.336 5.836a.9.9 0 1 0-1.272-1.272l-1.8 1.8a.9.9 0 0 0 1.272 1.272zM18.936 4.564a.9.9 0 0 0-1.272 1.272l1.8 1.8a.9.9 0 0 0 1.272-1.272z"
     />
   </Svg>
-);
-const ForwardRef = forwardRef(SvgTimeTracking);
-export default ForwardRef;
+)
+const ForwardRef = forwardRef(SvgTimeTracking)
+export default ForwardRef
