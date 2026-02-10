@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.354.0](https://github.com/factorialco/f0/compare/f0-react-v1.353.0...f0-react-v1.354.0) (2026-02-10)
+
+
+### Features
+
+* F0Box component ([#3374](https://github.com/factorialco/f0/issues/3374)) ([364b7a6](https://github.com/factorialco/f0/commit/364b7a657d1204daf3bb615d4d7b038317d2ce33))
+
 ## [1.353.0](https://github.com/factorialco/f0/compare/f0-react-v1.352.0...f0-react-v1.353.0) (2026-02-09)
 
 
