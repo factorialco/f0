@@ -1,6 +1,6 @@
-import { type VariantProps } from "tailwind-variants";
 import React from "react";
 import { View } from "react-native";
+import { type VariantProps } from "tailwind-variants";
 import { type IconType } from "../Icon";
 export declare const variants: readonly ["default", "outline", "critical", "neutral", "ghost", "promote"];
 export type ButtonVariant = (typeof variants)[number];

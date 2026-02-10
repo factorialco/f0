@@ -1,1 +1,1 @@
-{"version":3,"file":"Briefcase.d.ts","sourceRoot":"","sources":["../../../../src/icons/app/Briefcase.tsx"],"names":[],"mappings":"AAAA,OAAO,GAAmB,MAAM,kBAAkB,CAAC;AACnD,OAAO,KAAK,EAAE,QAAQ,EAAE,MAAM,kBAAkB,CAAC;AAejD,QAAA,MAAM,UAAU,0FAA2B,CAAC;AAC5C,eAAe,UAAU,CAAC"}
+{"version":3,"file":"Briefcase.d.ts","sourceRoot":"","sources":["../../../../src/icons/app/Briefcase.tsx"],"names":[],"mappings":"AACA,OAAO,GAAmB,MAAM,kBAAkB,CAAA;AAClD,OAAO,KAAK,EAAE,QAAQ,EAAE,MAAM,kBAAkB,CAAA;AAchD,QAAA,MAAM,UAAU,0FAA2B,CAAA;AAC3C,eAAe,UAAU,CAAA"}

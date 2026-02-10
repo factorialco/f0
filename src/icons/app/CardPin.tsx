@@ -1,6 +1,6 @@
-import Svg, { Path } from "react-native-svg";
-import type { SvgProps } from "react-native-svg";
-import { Ref, forwardRef } from "react";
+import { Ref, forwardRef } from "react"
+import Svg, { Path } from "react-native-svg"
+import type { SvgProps } from "react-native-svg"
 const SvgCardPin = (props: SvgProps, ref: Ref<Svg>) => (
   <Svg
     fill="none"
@@ -19,6 +19,6 @@ const SvgCardPin = (props: SvgProps, ref: Ref<Svg>) => (
       d="M8 12v.1M12 12v.1M16 12v.1"
     />
   </Svg>
-);
-const ForwardRef = forwardRef(SvgCardPin);
-export default ForwardRef;
+)
+const ForwardRef = forwardRef(SvgCardPin)
+export default ForwardRef

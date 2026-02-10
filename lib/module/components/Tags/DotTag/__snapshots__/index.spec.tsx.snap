@@ -58,7 +58,7 @@ exports[`RawTag Snapshot 1`] = `
       }
     />
     <Text
-      className="text-f1-foreground line-clamp-1 text-base font-medium"
+      className="line-clamp-1 text-base font-medium text-f1-foreground"
     >
       Label
     </Text>
@@ -124,7 +124,7 @@ exports[`RawTag Snapshot 2`] = `
       }
     />
     <Text
-      className="text-f1-foreground line-clamp-1 text-base font-medium"
+      className="line-clamp-1 text-base font-medium text-f1-foreground"
     >
       Label
     </Text>
@@ -190,7 +190,7 @@ exports[`RawTag Snapshot 3`] = `
       }
     />
     <Text
-      className="text-f1-foreground line-clamp-1 text-base font-medium"
+      className="line-clamp-1 text-base font-medium text-f1-foreground"
     >
       Label
     </Text>
@@ -256,7 +256,7 @@ exports[`RawTag Snapshot 4`] = `
       }
     />
     <Text
-      className="text-f1-foreground line-clamp-1 text-base font-medium"
+      className="line-clamp-1 text-base font-medium text-f1-foreground"
     >
       Label
     </Text>
@@ -322,7 +322,7 @@ exports[`RawTag Snapshot 5`] = `
       }
     />
     <Text
-      className="text-f1-foreground line-clamp-1 text-base font-medium"
+      className="line-clamp-1 text-base font-medium text-f1-foreground"
     >
       Label
     </Text>
@@ -388,7 +388,7 @@ exports[`RawTag Snapshot 6`] = `
       }
     />
     <Text
-      className="text-f1-foreground line-clamp-1 text-base font-medium"
+      className="line-clamp-1 text-base font-medium text-f1-foreground"
     >
       Label
     </Text>
@@ -454,7 +454,7 @@ exports[`RawTag Snapshot 7`] = `
       }
     />
     <Text
-      className="text-f1-foreground line-clamp-1 text-base font-medium"
+      className="line-clamp-1 text-base font-medium text-f1-foreground"
     >
       Label
     </Text>
@@ -520,7 +520,7 @@ exports[`RawTag Snapshot 8`] = `
       }
     />
     <Text
-      className="text-f1-foreground line-clamp-1 text-base font-medium"
+      className="line-clamp-1 text-base font-medium text-f1-foreground"
     >
       Label
     </Text>
@@ -586,7 +586,7 @@ exports[`RawTag Snapshot 9`] = `
       }
     />
     <Text
-      className="text-f1-foreground line-clamp-1 text-base font-medium"
+      className="line-clamp-1 text-base font-medium text-f1-foreground"
     >
       Label
     </Text>
@@ -652,7 +652,7 @@ exports[`RawTag Snapshot 10`] = `
       }
     />
     <Text
-      className="text-f1-foreground line-clamp-1 text-base font-medium"
+      className="line-clamp-1 text-base font-medium text-f1-foreground"
     >
       Label
     </Text>
@@ -718,7 +718,7 @@ exports[`RawTag Snapshot 11`] = `
       }
     />
     <Text
-      className="text-f1-foreground line-clamp-1 text-base font-medium"
+      className="line-clamp-1 text-base font-medium text-f1-foreground"
     >
       Label
     </Text>
@@ -784,7 +784,7 @@ exports[`RawTag Snapshot 12`] = `
       }
     />
     <Text
-      className="text-f1-foreground line-clamp-1 text-base font-medium"
+      className="line-clamp-1 text-base font-medium text-f1-foreground"
     >
       Label
     </Text>
@@ -850,7 +850,7 @@ exports[`RawTag Snapshot 13`] = `
       }
     />
     <Text
-      className="text-f1-foreground line-clamp-1 text-base font-medium"
+      className="line-clamp-1 text-base font-medium text-f1-foreground"
     >
       Label
     </Text>
@@ -916,7 +916,7 @@ exports[`RawTag Snapshot 14`] = `
       }
     />
     <Text
-      className="text-f1-foreground line-clamp-1 text-base font-medium"
+      className="line-clamp-1 text-base font-medium text-f1-foreground"
     >
       Label
     </Text>
@@ -982,7 +982,7 @@ exports[`RawTag Snapshot 15`] = `
       }
     />
     <Text
-      className="text-f1-foreground line-clamp-1 text-base font-medium"
+      className="line-clamp-1 text-base font-medium text-f1-foreground"
     >
       Label
     </Text>
@@ -1048,7 +1048,7 @@ exports[`RawTag Snapshot 16`] = `
       }
     />
     <Text
-      className="text-f1-foreground line-clamp-1 text-base font-medium"
+      className="line-clamp-1 text-base font-medium text-f1-foreground"
     >
       Label
     </Text>
@@ -1114,7 +1114,7 @@ exports[`RawTag Snapshot 17`] = `
       }
     />
     <Text
-      className="text-f1-foreground line-clamp-1 text-base font-medium"
+      className="line-clamp-1 text-base font-medium text-f1-foreground"
     >
       Label
     </Text>
@@ -1180,7 +1180,7 @@ exports[`RawTag Snapshot 18`] = `
       }
     />
     <Text
-      className="text-f1-foreground line-clamp-1 text-base font-medium"
+      className="line-clamp-1 text-base font-medium text-f1-foreground"
     >
       Label
     </Text>
@@ -1246,7 +1246,7 @@ exports[`RawTag Snapshot 19`] = `
       }
     />
     <Text
-      className="text-f1-foreground line-clamp-1 text-base font-medium"
+      className="line-clamp-1 text-base font-medium text-f1-foreground"
     >
       Label
     </Text>

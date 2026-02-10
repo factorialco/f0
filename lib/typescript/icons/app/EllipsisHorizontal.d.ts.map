@@ -1,1 +1,1 @@
-{"version":3,"file":"EllipsisHorizontal.d.ts","sourceRoot":"","sources":["../../../../src/icons/app/EllipsisHorizontal.tsx"],"names":[],"mappings":"AAAA,OAAO,GAAe,MAAM,kBAAkB,CAAC;AAC/C,OAAO,KAAK,EAAE,QAAQ,EAAE,MAAM,kBAAkB,CAAC;AAejD,QAAA,MAAM,UAAU,0FAAoC,CAAC;AACrD,eAAe,UAAU,CAAC"}
+{"version":3,"file":"EllipsisHorizontal.d.ts","sourceRoot":"","sources":["../../../../src/icons/app/EllipsisHorizontal.tsx"],"names":[],"mappings":"AACA,OAAO,GAAe,MAAM,kBAAkB,CAAA;AAC9C,OAAO,KAAK,EAAE,QAAQ,EAAE,MAAM,kBAAkB,CAAA;AAchD,QAAA,MAAM,UAAU,0FAAoC,CAAA;AACpD,eAAe,UAAU,CAAA"}

@@ -1,5 +1,6 @@
-import { tv, type VariantProps } from "tailwind-variants";
-import { Icon, type IconType } from "../Icon";
+import { tv, type VariantProps } from "tailwind-variants"
+
+import { Icon, type IconType } from "../Icon"
 
 const badgeVariants = tv({
   base: "flex shrink-0 items-center justify-center rounded-full",
@@ -22,18 +23,18 @@ const badgeVariants = tv({
     type: "neutral",
     size: "md",
   },
-});
+})
 
 const iconSizes = {
   xs: "xs",
   sm: "xs",
   md: "sm",
   lg: "md",
-} as const;
+} as const
 
 export interface BadgeProps extends VariantProps<typeof badgeVariants> {
-  icon: IconType;
-  size?: keyof typeof iconSizes;
+  icon: IconType
+  size?: keyof typeof iconSizes
 }
 
 export const Badge = ({ type, size = "md", icon }: BadgeProps) => {
@@ -43,5 +44,5 @@ export const Badge = ({ type, size = "md", icon }: BadgeProps) => {
       icon={icon}
       size={iconSizes[size]}
     />
-  );
-};
+  )
+}

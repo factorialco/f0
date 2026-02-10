@@ -1,7 +1,7 @@
 import { ComponentProps } from "react";
-import { FileLike } from "./utils";
 import { BaseAvatar } from "../BaseAvatar";
 import { AvatarBadge } from "../types";
+import { FileLike } from "./utils";
 type BaseAvatarProps = ComponentProps<typeof BaseAvatar>;
 type Props = {
     file: FileLike;

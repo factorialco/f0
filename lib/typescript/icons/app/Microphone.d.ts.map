@@ -1,1 +1,1 @@
-{"version":3,"file":"Microphone.d.ts","sourceRoot":"","sources":["../../../../src/icons/app/Microphone.tsx"],"names":[],"mappings":"AAAA,OAAO,GAAa,MAAM,kBAAkB,CAAC;AAC7C,OAAO,KAAK,EAAE,QAAQ,EAAE,MAAM,kBAAkB,CAAC;AAuBjD,QAAA,MAAM,UAAU,0FAA4B,CAAC;AAC7C,eAAe,UAAU,CAAC"}
+{"version":3,"file":"Microphone.d.ts","sourceRoot":"","sources":["../../../../src/icons/app/Microphone.tsx"],"names":[],"mappings":"AACA,OAAO,GAAa,MAAM,kBAAkB,CAAA;AAC5C,OAAO,KAAK,EAAE,QAAQ,EAAE,MAAM,kBAAkB,CAAA;AAsBhD,QAAA,MAAM,UAAU,0FAA4B,CAAA;AAC5C,eAAe,UAAU,CAAA"}

@@ -1,13 +1,14 @@
-import { Text, View } from "react-native";
-import { Counter } from "../Counter";
-import { PressableFeedback } from "../PressableFeedback";
-import { cn } from "../../lib/utils";
+import { Text, View } from "react-native"
+
+import { cn } from "../../lib/utils"
+import { Counter } from "../Counter"
+import { PressableFeedback } from "../PressableFeedback"
 
 interface PresetProps {
-  label: string;
-  number?: number;
-  onClick?: () => void;
-  selected?: boolean;
+  label: string
+  number?: number
+  onClick?: () => void
+  selected?: boolean
 }
 
 export const OnePreset = ({
@@ -26,13 +27,13 @@ export const OnePreset = ({
           number !== undefined && number !== null && "pr-1.5",
           selected
             ? "border-f1-border-selected bg-f1-background-selected-secondary text-f1-foreground-selected"
-            : "border-f1-border text-f1-foreground",
+            : "border-f1-border text-f1-foreground"
         )}
       >
         <Text
           className={cn(
             "whitespace-nowrap",
-            selected ? "text-f1-foreground-selected" : "text-f1-foreground",
+            selected ? "text-f1-foreground-selected" : "text-f1-foreground"
           )}
         >
           {label}
@@ -42,5 +43,5 @@ export const OnePreset = ({
         )}
       </PressableFeedback>
     </View>
-  );
-};
+  )
+}

@@ -1,1 +1,1 @@
-{"version":3,"file":"People.d.ts","sourceRoot":"","sources":["../../../../src/icons/app/People.tsx"],"names":[],"mappings":"AAAA,OAAO,GAAqB,MAAM,kBAAkB,CAAC;AACrD,OAAO,KAAK,EAAE,QAAQ,EAAE,MAAM,kBAAkB,CAAC;AAwBjD,QAAA,MAAM,UAAU,0FAAwB,CAAC;AACzC,eAAe,UAAU,CAAC"}
+{"version":3,"file":"People.d.ts","sourceRoot":"","sources":["../../../../src/icons/app/People.tsx"],"names":[],"mappings":"AACA,OAAO,GAAqB,MAAM,kBAAkB,CAAA;AACpD,OAAO,KAAK,EAAE,QAAQ,EAAE,MAAM,kBAAkB,CAAA;AAuBhD,QAAA,MAAM,UAAU,0FAAwB,CAAA;AACxC,eAAe,UAAU,CAAA"}

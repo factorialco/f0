@@ -1,5 +1,5 @@
-import { Avatar as AvatarComponent, type as avatarType, sizes } from "../../../ui/avatar";
 import { type ComponentProps } from "react";
+import { Avatar as AvatarComponent, type as avatarType, sizes } from "../../../ui/avatar";
 type ShadAvatarProps = ComponentProps<typeof AvatarComponent>;
 export declare function getInitials(name: string | string[], size?: ShadAvatarProps["size"], isFile?: boolean): string;
 export declare function getAvatarColor(text: string): ShadAvatarProps["color"];

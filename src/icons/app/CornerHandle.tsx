@@ -1,6 +1,6 @@
-import Svg, { Path } from "react-native-svg";
-import type { SvgProps } from "react-native-svg";
-import { Ref, forwardRef } from "react";
+import { Ref, forwardRef } from "react"
+import Svg, { Path } from "react-native-svg"
+import type { SvgProps } from "react-native-svg"
 const SvgCornerHandle = (props: SvgProps, ref: Ref<Svg>) => (
   <Svg
     fill="none"
@@ -16,6 +16,6 @@ const SvgCornerHandle = (props: SvgProps, ref: Ref<Svg>) => (
       d="M16 6 6 16m11-4.5L11.5 17"
     />
   </Svg>
-);
-const ForwardRef = forwardRef(SvgCornerHandle);
-export default ForwardRef;
+)
+const ForwardRef = forwardRef(SvgCornerHandle)
+export default ForwardRef

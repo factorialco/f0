@@ -1,5 +1,5 @@
-import { Avatar as AvatarComponent } from "../../../ui/avatar";
 import { ComponentProps } from "react";
+import { Avatar as AvatarComponent } from "../../../ui/avatar";
 import { AvatarBadge } from "../types";
 type ShadAvatarProps = ComponentProps<typeof AvatarComponent>;
 type Props = {

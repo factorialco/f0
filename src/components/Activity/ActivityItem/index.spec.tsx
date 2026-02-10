@@ -1,19 +1,17 @@
-import { render, fireEvent, screen } from "@testing-library/react-native";
-import React from "react";
-import { IconType } from "../../Icon";
-import {
-  ActivityItem,
-  ActivityItemSkeleton,
-} from "../../Activity/ActivityItem";
+import { render, fireEvent, screen } from "@testing-library/react-native"
+import React from "react"
+
+import { ActivityItem, ActivityItemSkeleton } from "../../Activity/ActivityItem"
+import { IconType } from "../../Icon"
 
 // Mock the IconAvatar component
 jest.mock("../../Avatars/IconAvatar", () => ({
   IconAvatar: () => null,
-}));
+}))
 
 // Mock dependencies
-const mockIcon: IconType = "check" as unknown as IconType;
-const mockOnPress = jest.fn();
+const mockIcon: IconType = "check" as unknown as IconType
+const mockOnPress = jest.fn()
 
 describe("ActivityItem", () => {
   const defaultProps = {
@@ -22,82 +20,82 @@ describe("ActivityItem", () => {
     title: "Activity Title",
     category: "Time off",
     onPress: mockOnPress,
-  };
+  }
 
   beforeEach(() => {
-    jest.clearAllMocks();
-  });
+    jest.clearAllMocks()
+  })
 
   it("Snapshot", () => {
-    const { toJSON } = render(<ActivityItem {...defaultProps} />);
-    expect(toJSON()).toMatchSnapshot();
-  });
+    const { toJSON } = render(<ActivityItem {...defaultProps} />)
+    expect(toJSON()).toMatchSnapshot()
+  })
 
   it("renders correctly with required props", () => {
-    render(<ActivityItem {...defaultProps} />);
+    render(<ActivityItem {...defaultProps} />)
 
-    const title = screen.getByText("Activity Title");
-    const moduleDate = screen.getByText("Time off · Today");
+    const title = screen.getByText("Activity Title")
+    const moduleDate = screen.getByText("Time off · Today")
 
-    expect(title).toBeDefined();
-    expect(moduleDate).toBeDefined();
-  });
+    expect(title).toBeDefined()
+    expect(moduleDate).toBeDefined()
+  })
 
   it("renders correctly with description", () => {
-    render(<ActivityItem {...defaultProps} description="Test description" />);
+    render(<ActivityItem {...defaultProps} description="Test description" />)
 
-    const description = screen.getByText("Test description");
+    const description = screen.getByText("Test description")
 
-    expect(description).toBeDefined();
-  });
+    expect(description).toBeDefined()
+  })
 
   it("renders icon container when icon is provided", () => {
-    render(<ActivityItem {...defaultProps} icon={mockIcon} />);
+    render(<ActivityItem {...defaultProps} icon={mockIcon} />)
 
-    const icon = screen.getByLabelText("activity-icon-container");
+    const icon = screen.getByLabelText("activity-icon-container")
 
-    expect(icon).toBeDefined();
-  });
+    expect(icon).toBeDefined()
+  })
 
   it("does not render icon container when icon is not provided", () => {
-    render(<ActivityItem {...defaultProps} />);
+    render(<ActivityItem {...defaultProps} />)
 
-    const icon = screen.queryByLabelText("activity-icon-container");
+    const icon = screen.queryByLabelText("activity-icon-container")
 
-    expect(icon).toBeNull();
-  });
+    expect(icon).toBeNull()
+  })
 
   it("shows unread indicator when isUnread is true", () => {
-    render(<ActivityItem {...defaultProps} isUnread={true} />);
+    render(<ActivityItem {...defaultProps} isUnread={true} />)
 
-    const indicator = screen.getByLabelText("unread-indicator");
+    const indicator = screen.getByLabelText("unread-indicator")
 
-    expect(indicator).toBeDefined();
-  });
+    expect(indicator).toBeDefined()
+  })
 
   it("does not show unread indicator when isUnread is false", () => {
-    render(<ActivityItem {...defaultProps} isUnread={false} />);
+    render(<ActivityItem {...defaultProps} isUnread={false} />)
 
-    const indicator = screen.queryByLabelText("unread-indicator");
+    const indicator = screen.queryByLabelText("unread-indicator")
 
-    expect(indicator).toBeNull();
-  });
+    expect(indicator).toBeNull()
+  })
 
   it("calls onPress with correct id when pressed", () => {
-    render(<ActivityItem {...defaultProps} />);
+    render(<ActivityItem {...defaultProps} />)
 
-    fireEvent.press(screen.getByLabelText("activity-item"));
+    fireEvent.press(screen.getByLabelText("activity-item"))
 
-    expect(mockOnPress).toHaveBeenCalledWith("activity-123");
-  });
-});
+    expect(mockOnPress).toHaveBeenCalledWith("activity-123")
+  })
+})
 
 describe("ActivityItemSkeleton", () => {
   it("renders skeleton correctly", () => {
-    render(<ActivityItemSkeleton />);
+    render(<ActivityItemSkeleton />)
 
-    const skeleton = screen.getByLabelText("activity-skeleton");
+    const skeleton = screen.getByLabelText("activity-skeleton")
 
-    expect(skeleton).toBeDefined();
-  });
-});
+    expect(skeleton).toBeDefined()
+  })
+})

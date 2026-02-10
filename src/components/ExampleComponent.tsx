@@ -1,11 +1,11 @@
-import React from "react";
-import { Text, View } from "react-native";
+import React from "react"
+import { Text, View } from "react-native"
 
 export interface ExampleComponentProps {
   /**
    * Optional custom text to display
    */
-  text?: string;
+  text?: string
 }
 
 /**
@@ -18,5 +18,5 @@ export const ExampleComponent: React.FC<ExampleComponentProps> = ({
     <View className="rounded-lg bg-f1-background p-4">
       <Text className="text-base font-medium text-f1-foreground">{text}</Text>
     </View>
-  );
-};
+  )
+}

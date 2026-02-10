@@ -1,6 +1,6 @@
-import Svg, { Rect } from "react-native-svg";
-import type { SvgProps } from "react-native-svg";
-import { Ref, forwardRef } from "react";
+import { Ref, forwardRef } from "react"
+import Svg, { Rect } from "react-native-svg"
+import type { SvgProps } from "react-native-svg"
 const SvgCircle = (props: SvgProps, ref: Ref<Svg>) => (
   <Svg
     fill="none"
@@ -11,6 +11,6 @@ const SvgCircle = (props: SvgProps, ref: Ref<Svg>) => (
   >
     <Rect width={16} height={16} x={4} y={4} fill="currentColor" rx={8} />
   </Svg>
-);
-const ForwardRef = forwardRef(SvgCircle);
-export default ForwardRef;
+)
+const ForwardRef = forwardRef(SvgCircle)
+export default ForwardRef

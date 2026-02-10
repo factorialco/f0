@@ -1,6 +1,6 @@
-import Svg, { Rect, Path } from "react-native-svg";
-import type { SvgProps } from "react-native-svg";
-import { Ref, forwardRef } from "react";
+import { Ref, forwardRef } from "react"
+import Svg, { Rect, Path } from "react-native-svg"
+import type { SvgProps } from "react-native-svg"
 const SvgKeyboard = (props: SvgProps, ref: Ref<Svg>) => (
   <Svg
     fill="none"
@@ -16,6 +16,6 @@ const SvgKeyboard = (props: SvgProps, ref: Ref<Svg>) => (
       d="M8 11h1M15 11h1M15 15h1M11.5 11h1M8 15h4.5M12 7V5.5a1 1 0 0 1 1-1h.5a1 1 0 0 0 1-1V3"
     />
   </Svg>
-);
-const ForwardRef = forwardRef(SvgKeyboard);
-export default ForwardRef;
+)
+const ForwardRef = forwardRef(SvgKeyboard)
+export default ForwardRef

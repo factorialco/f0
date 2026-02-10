@@ -1,6 +1,6 @@
-import Svg, { Path } from "react-native-svg";
-import type { SvgProps } from "react-native-svg";
-import { Ref, forwardRef } from "react";
+import { Ref, forwardRef } from "react"
+import Svg, { Path } from "react-native-svg"
+import type { SvgProps } from "react-native-svg"
 const SvgMobile = (props: SvgProps, ref: Ref<Svg>) => (
   <Svg
     fill="none"
@@ -16,6 +16,6 @@ const SvgMobile = (props: SvgProps, ref: Ref<Svg>) => (
     />
     <Path fill="currentColor" d="M11 16a1 1 0 1 1 2 0 1 1 0 0 1-2 0" />
   </Svg>
-);
-const ForwardRef = forwardRef(SvgMobile);
-export default ForwardRef;
+)
+const ForwardRef = forwardRef(SvgMobile)
+export default ForwardRef

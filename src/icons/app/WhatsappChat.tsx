@@ -1,6 +1,6 @@
-import Svg, { Path } from "react-native-svg";
-import type { SvgProps } from "react-native-svg";
-import { Ref, forwardRef } from "react";
+import { Ref, forwardRef } from "react"
+import Svg, { Path } from "react-native-svg"
+import type { SvgProps } from "react-native-svg"
 const SvgWhatsappChat = (props: SvgProps, ref: Ref<Svg>) => (
   <Svg
     fill="none"
@@ -18,6 +18,6 @@ const SvgWhatsappChat = (props: SvgProps, ref: Ref<Svg>) => (
       d="M8.941 8h1.544a.5.5 0 0 1 .464.314l.658 1.644a.5.5 0 0 1-.207.614l-.812.487a5.18 5.18 0 0 0 2.353 2.353l.487-.812a.5.5 0 0 1 .614-.207l1.644.658a.5.5 0 0 1 .314.464v1.544a.94.94 0 0 1-.941.941A7.53 7.53 0 0 1 8 8.941.94.94 0 0 1 8.941 8"
     />
   </Svg>
-);
-const ForwardRef = forwardRef(SvgWhatsappChat);
-export default ForwardRef;
+)
+const ForwardRef = forwardRef(SvgWhatsappChat)
+export default ForwardRef

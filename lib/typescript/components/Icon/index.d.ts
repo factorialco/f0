@@ -1,6 +1,6 @@
-import { type VariantProps } from "tailwind-variants";
 import React, { ForwardRefExoticComponent, RefAttributes } from "react";
 import { Svg, SvgProps } from "react-native-svg";
+import { type VariantProps } from "tailwind-variants";
 declare const iconVariants: import("tailwind-variants").TVReturnType<{
     size: {
         xl: string;

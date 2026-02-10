@@ -1,1 +1,1 @@
-{"version":3,"file":"Flask.d.ts","sourceRoot":"","sources":["../../../../src/icons/app/Flask.tsx"],"names":[],"mappings":"AAAA,OAAO,GAAa,MAAM,kBAAkB,CAAC;AAC7C,OAAO,KAAK,EAAE,QAAQ,EAAE,MAAM,kBAAkB,CAAC;AAiBjD,QAAA,MAAM,UAAU,0FAAuB,CAAC;AACxC,eAAe,UAAU,CAAC"}
+{"version":3,"file":"Flask.d.ts","sourceRoot":"","sources":["../../../../src/icons/app/Flask.tsx"],"names":[],"mappings":"AACA,OAAO,GAAa,MAAM,kBAAkB,CAAA;AAC5C,OAAO,KAAK,EAAE,QAAQ,EAAE,MAAM,kBAAkB,CAAA;AAgBhD,QAAA,MAAM,UAAU,0FAAuB,CAAA;AACvC,eAAe,UAAU,CAAA"}

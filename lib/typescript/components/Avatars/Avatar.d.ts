@@ -1,5 +1,5 @@
-import { sizes } from "../../ui/avatar";
 import { ComponentProps, ReactNode } from "react";
+import { sizes } from "../../ui/avatar";
 import { CompanyAvatar } from "./CompanyAvatar";
 import { PersonAvatar } from "./PersonAvatar";
 import { TeamAvatar } from "./TeamAvatar";

@@ -1,25 +1,26 @@
-import { ReactNode } from "react";
-import { Text, View } from "react-native";
-import { cn } from "../../../lib/utils";
-import { PressableFeedback } from "../../PressableFeedback";
+import { ReactNode } from "react"
+import { Text, View } from "react-native"
+
+import { cn } from "../../../lib/utils"
+import { PressableFeedback } from "../../PressableFeedback"
 
 type Props = {
-  additionalAccesibleText?: string;
-  onClick?: () => void;
-  classNameContainer?: string;
-  classNameText?: string;
+  additionalAccesibleText?: string
+  onClick?: () => void
+  classNameContainer?: string
+  classNameText?: string
 } & (
   | {
-      left: ReactNode;
-      text?: string;
-      right?: ReactNode;
+      left: ReactNode
+      text?: string
+      right?: ReactNode
     }
   | {
-      left?: ReactNode;
-      text: string;
-      right?: ReactNode;
+      left?: ReactNode
+      text: string
+      right?: ReactNode
     }
-);
+)
 
 export const BaseTag = ({
   left,
@@ -37,7 +38,7 @@ export const BaseTag = ({
         onClick && "cursor-pointer",
         !text && "aspect-square w-6 items-center justify-center p-1",
         !left ? "pl-2" : "pl-1",
-        classNameContainer,
+        classNameContainer
       )}
       onPress={onClick}
       variant={onClick ? "both" : "none"}
@@ -47,21 +48,21 @@ export const BaseTag = ({
       {!!text && (
         <Text
           className={cn(
-            "text-f1-foreground line-clamp-1 text-base font-medium",
-            classNameText,
+            "line-clamp-1 text-base font-medium text-f1-foreground",
+            classNameText
           )}
         >
           {text}
         </Text>
       )}
       {additionalAccesibleText && (
-        <Text className="text-f1-foreground sr-only text-base font-medium">
+        <Text className="sr-only text-base font-medium text-f1-foreground">
           {additionalAccesibleText}
         </Text>
       )}
       {right}
     </PressableFeedback>
   </View>
-);
+)
 
-BaseTag.displayName = "BaseTag";
+BaseTag.displayName = "BaseTag"
