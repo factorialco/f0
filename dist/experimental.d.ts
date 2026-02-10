@@ -1,34 +1,34 @@
 import { AIMessage } from '@copilotkit/shared';
 import { AlertAvatarProps as AlertAvatarProps_2 } from '../../f0';
 import { AlertTagCellValue } from './types/alertTag';
-import { AlertTagCellValue as AlertTagCellValue_2 } from '../../value-display/types/alertTag';
+import { AlertTagCellValue as AlertTagCellValue_2 } from '../../../ui/value-display/types/alertTag';
 import { AmountCellValue } from './types/amount';
-import { AmountCellValue as AmountCellValue_2 } from '../../value-display/types/amount';
+import { AmountCellValue as AmountCellValue_2 } from '../../../ui/value-display/types/amount';
 import { AnchorHTMLAttributes } from 'react';
 import { AreaChartWidgetProps } from './AreaChartWidget';
 import { AriaAttributes } from 'react';
 import { AutoFill as AutoFill_2 } from 'react';
 import { AvatarListCellValue } from './types/avatarList';
-import { AvatarListCellValue as AvatarListCellValue_2 } from '../../value-display/types/avatarList';
+import { AvatarListCellValue as AvatarListCellValue_2 } from '../../../ui/value-display/types/avatarList';
 import * as AvatarPrimitive from '@radix-ui/react-avatar';
 import { BarChartProps } from '../../../components/Charts/BarChart';
 import { baseColors } from '@factorialco/f0-core';
 import { ButtonHTMLAttributes } from 'react';
 import { ClassValue } from 'cva';
 import { CompanyCellValue } from './types/company';
-import { CompanyCellValue as CompanyCellValue_2 } from '../../value-display/types/company';
+import { CompanyCellValue as CompanyCellValue_2 } from '../../../ui/value-display/types/company';
 import { ComponentProps } from 'react';
 import { ControllerProps } from 'react-hook-form';
 import { ControllerRenderProps } from 'react-hook-form';
 import { CopilotKitProps } from '@copilotkit/react-core';
 import { CountryCellValue } from './types/country';
 import { DateCellValue } from './types/date';
-import { DateCellValue as DateCellValue_2 } from '../../value-display/types/date';
+import { DateCellValue as DateCellValue_2 } from '../../../ui/value-display/types/date';
 import { DateFilterOptions } from './DateFilter/DateFilter';
 import { default as default_2 } from 'react';
 import { Dispatch } from 'react';
 import { DotTagCellValue } from './types/dotTag';
-import { DotTagCellValue as DotTagCellValue_2 } from '../../value-display/types/dotTag';
+import { DotTagCellValue as DotTagCellValue_2 } from '../../../ui/value-display/types/dotTag';
 import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu';
 import { Editor } from '@tiptap/react';
 import { F0SelectProps as F0SelectProps_2 } from './types';
@@ -37,9 +37,9 @@ import { FC } from 'react';
 import { FieldPath } from 'react-hook-form';
 import { FieldValues } from 'react-hook-form';
 import { FileCellValue } from './types/file';
-import { FileCellValue as FileCellValue_2 } from '../../value-display/types/file';
+import { FileCellValue as FileCellValue_2 } from '../../../ui/value-display/types/file';
 import { FolderCellValue } from './types/folder';
-import { FolderCellValue as FolderCellValue_2 } from '../../value-display/types/folder';
+import { FolderCellValue as FolderCellValue_2 } from '../../../ui/value-display/types/folder';
 import { ForwardedRef } from 'react';
 import { ForwardRefExoticComponent } from 'react';
 import { HTMLAttributeAnchorTarget } from 'react';
@@ -54,17 +54,17 @@ import { JSX as JSX_2 } from 'react';
 import { LineChartProps } from '../../../components/Charts/LineChart';
 import { LongTextCellValue } from './types/longText';
 import { NumberCellValue } from './types/number';
-import { NumberCellValue as NumberCellValue_2 } from '../../value-display/types/number';
+import { NumberCellValue as NumberCellValue_2 } from '../../../ui/value-display/types/number';
 import { NumberFilterOptions } from './NumberFilter/NumberFilter';
 import { Observable } from 'zen-observable-ts';
 import { Path } from 'react-hook-form';
 import { PercentageCellValue } from './types/percentage';
 import { PersonCellValue } from './types/person';
-import { PersonCellValue as PersonCellValue_2 } from '../../value-display/types/person';
+import { PersonCellValue as PersonCellValue_2 } from '../../../ui/value-display/types/person';
 import { PieChartProps } from '../../../components/Charts/PieChart';
 import { PopoverProps } from '@radix-ui/react-popover';
 import { ProgressBarCellValue } from './types/progressBar';
-import { ProgressBarCellValue as ProgressBarCellValue_2 } from '../../value-display/types/progressBar';
+import { ProgressBarCellValue as ProgressBarCellValue_2 } from '../../../ui/value-display/types/progressBar';
 import { PropsWithChildren } from 'react';
 import * as React_2 from 'react';
 import { ReactElement } from 'react';
@@ -75,23 +75,23 @@ import { RefObject } from 'react';
 import { ScrollAreaProps } from '@radix-ui/react-scroll-area';
 import { SearchFilterOptions } from './SearchFilter/SearchFilter';
 import { StatusCellValue } from './types/status';
-import { StatusCellValue as StatusCellValue_2 } from '../../value-display/types/status';
+import { StatusCellValue as StatusCellValue_2 } from '../../../ui/value-display/types/status';
 import { SVGProps } from 'react';
 import { SyncStatusCellValue } from './types/syncStatus';
 import { TagCellValue } from './types/tag';
-import { TagCellValue as TagCellValue_2 } from '../../value-display/types/tag';
+import { TagCellValue as TagCellValue_2 } from '../../../ui/value-display/types/tag';
 import { TagListCellValue } from './types/tagList';
-import { TagListCellValue as TagListCellValue_2 } from '../../value-display/types/tagList';
+import { TagListCellValue as TagListCellValue_2 } from '../../../ui/value-display/types/tagList';
 import { TeamCellValue } from './types/team';
-import { TeamCellValue as TeamCellValue_2 } from '../../value-display/types/team';
+import { TeamCellValue as TeamCellValue_2 } from '../../../ui/value-display/types/team';
 import { TextCellValue } from './types/text';
-import { TextCellValue as TextCellValue_2 } from '../../value-display/types/text';
+import { TextCellValue as TextCellValue_2 } from '../../../ui/value-display/types/text';
 import * as ToggleGroupPrimitive from '@radix-ui/react-toggle-group';
 import { useForm } from 'react-hook-form';
 import { UseFormHandleSubmit } from 'react-hook-form';
 import { UseFormProps } from 'react-hook-form';
 import { UseFormReturn } from 'react-hook-form';
-import { ValueDisplayRendererContext as ValueDisplayRendererContext_2 } from '../../value-display';
+import { ValueDisplayRendererContext as ValueDisplayRendererContext_2 } from '../../../ui/value-display';
 import { VariantProps } from 'cva';
 import { VerticalBarChartProps } from '../../../components/Charts/VerticalBarChart';
 import { WidgetProps as WidgetProps_2 } from '../Widget';
@@ -1211,7 +1211,7 @@ declare const cardPropertyRenderers: {
 
 declare type CardPropertyType = keyof typeof cardPropertyRenderers;
 
-export declare function CardSelectable<T extends CardSelectableValue>({ item, selected, disabled, multiple, onSelect, }: CardSelectableProps<T>): JSX_2.Element;
+export declare function CardSelectable<T extends CardSelectableValue>({ item, selected, disabled, multiple, onSelect, isToggle, grouped, }: CardSelectableProps<T>): JSX_2.Element;
 
 declare type CardSelectableAvatarVariant = AvatarVariant | {
     type: "emoji";
@@ -1239,6 +1239,8 @@ export declare interface CardSelectableItem<T extends CardSelectableValue> {
     avatar?: CardSelectableAvatarVariant;
     /** Whether this item is disabled */
     disabled?: boolean;
+    /** Whether this item is required (shows asterisk indicator) */
+    required?: boolean;
 }
 
 export declare interface CardSelectableMultipleProps<T extends CardSelectableValue> {
@@ -1256,6 +1258,10 @@ export declare interface CardSelectableMultipleProps<T extends CardSelectableVal
     label?: string;
     /** Layout direction (default: vertical) */
     layout?: "vertical" | "horizontal";
+    /** When true, shows a toggle/switch indicator instead of checkbox */
+    isToggle?: boolean;
+    /** When true, items are grouped in a single bordered container with dividers */
+    grouped?: boolean;
 }
 
 declare interface CardSelectableProps<T extends CardSelectableValue> {
@@ -1264,6 +1270,10 @@ declare interface CardSelectableProps<T extends CardSelectableValue> {
     disabled: boolean;
     multiple: boolean;
     onSelect: () => void;
+    /** When true, shows a toggle/switch indicator instead of checkbox/radio */
+    isToggle?: boolean;
+    /** When true, renders without individual card borders (for grouped layout) */
+    grouped?: boolean;
 }
 
 export declare interface CardSelectableSingleProps<T extends CardSelectableValue> {
@@ -1273,14 +1283,18 @@ export declare interface CardSelectableSingleProps<T extends CardSelectableValue
     multiple?: false;
     /** Currently selected value */
     value?: T;
-    /** Callback when selection changes */
-    onChange?: (value: T) => void;
+    /** Callback when selection changes (receives undefined when isToggle and toggling off) */
+    onChange?: (value: T | undefined) => void;
     /** Whether the entire selector is disabled */
     disabled?: boolean;
     /** Label for the group (used for accessibility) */
     label?: string;
     /** Layout direction (default: vertical) */
     layout?: "vertical" | "horizontal";
+    /** When true, shows a toggle/switch indicator instead of radio and allows toggling off */
+    isToggle?: boolean;
+    /** When true, items are grouped in a single bordered container with dividers */
+    grouped?: boolean;
 }
 
 export declare type CardSelectableValue = string | number;
@@ -2607,6 +2621,45 @@ declare const defaultTranslations: {
             readonly customPromptPlaceholder: "What do you want to do?";
         };
     };
+    readonly forms: {
+        readonly actionBar: {
+            readonly unsavedChanges: "You have changes pending to be saved";
+            readonly discard: "Discard";
+            readonly issues: {
+                readonly one: "{{count}} issue";
+                readonly other: "{{count}} issues";
+            };
+        };
+        readonly validation: {
+            readonly required: "This field is required";
+            readonly invalidType: "Invalid value";
+            readonly string: {
+                readonly email: "Enter a valid email address";
+                readonly url: "Enter a valid URL";
+                readonly min: "Must be at least {{min}} characters";
+                readonly max: "Must be at most {{max}} characters";
+            };
+            readonly number: {
+                readonly min: "Must be at least {{min}}";
+                readonly max: "Must be at most {{max}}";
+                readonly positive: "Must be a positive number";
+                readonly negative: "Must be a negative number";
+                readonly integer: "Must be a whole number";
+            };
+            readonly date: {
+                readonly min: "Date must be after {{min}}";
+                readonly max: "Date must be before {{max}}";
+                readonly invalid: "Enter a valid date";
+            };
+            readonly array: {
+                readonly min: "Select at least {{min}} option";
+                readonly max: "Select at most {{max}} options";
+            };
+            readonly checkbox: {
+                readonly mustBeChecked: "This option must be selected";
+            };
+        };
+    };
 };
 
 /**
@@ -2861,7 +2914,7 @@ declare type ExtractVisualizationSettings<T> = T extends {
     };
 } ? S : never;
 
-export declare const F0ActionBar: ({ isOpen, secondaryActions, label, ...props }: F0ActionBarProps) => JSX_2.Element;
+export declare const F0ActionBar: ({ isOpen, secondaryActions, label, variant, leftContent, centerInFrameContent, ...props }: F0ActionBarProps) => JSX_2.Element;
 
 declare interface F0ActionBarProps {
     /**
@@ -2880,6 +2933,23 @@ declare interface F0ActionBarProps {
      * The label of the action bar
      */
     label?: string;
+    /**
+     * Visual variant of the action bar
+     * - "dark": Dark background with light text (default)
+     * - "light": Light background with dark text
+     * @default "dark"
+     */
+    variant?: "dark" | "light";
+    /**
+     * Custom content to render on the left side (e.g., error navigation)
+     */
+    leftContent?: React.ReactNode;
+    /**
+     * When true, centers the action bar relative to the ApplicationFrame content area
+     * (accounting for the sidebar width) instead of the full viewport.
+     * @default false
+     */
+    centerInFrameContent?: boolean;
 }
 
 export declare const F0AiBanner: ForwardRefExoticComponent<AiBannerInternalProps & RefAttributes<HTMLDivElement>> & {
@@ -3810,7 +3880,7 @@ declare const inputFieldStatus: readonly ["default", "warning", "info", "error"]
 
 declare type InputFieldStatusType = (typeof inputFieldStatus)[number];
 
-declare type InputInternalProps<T extends string> = Pick<ComponentProps<typeof Input_2>, "ref"> & Pick<InputFieldProps<T>, "autoFocus" | "required" | "disabled" | "size" | "onChange" | "value" | "placeholder" | "clearable" | "maxLength" | "label" | "labelIcon" | "icon" | "hideLabel" | "name" | "error" | "status" | "hint" | "autocomplete" | "buttonToggle" | "hideMaxLength"> & {
+declare type InputInternalProps<T extends string> = Pick<ComponentProps<typeof Input_2>, "ref"> & Pick<InputFieldProps<T>, "autoFocus" | "required" | "disabled" | "size" | "onChange" | "value" | "placeholder" | "clearable" | "maxLength" | "label" | "labelIcon" | "icon" | "hideLabel" | "name" | "error" | "status" | "hint" | "autocomplete" | "buttonToggle" | "hideMaxLength" | "loading"> & {
     type?: Exclude<HTMLInputTypeAttribute, "number">;
     onPressEnter?: () => void;
 };
@@ -4675,6 +4745,8 @@ export declare type OnePersonListItemProps = {
     withPointerCursor?: boolean;
 };
 
+export declare const OneRestrictComponent: FC<RestrictComponentProps>;
+
 export declare type OnLoadDataCallback<Record extends RecordType, Filters extends FiltersDefinition> = (data: {
     totalItems: number | undefined;
     filters: FiltersState<Filters>;
@@ -5210,6 +5282,13 @@ export declare type ResolvedRecordType<R> = R extends RecordType ? R : RecordTyp
  */
 export declare const ResourceHeader: ({ avatar, title, description, primaryAction, secondaryActions, otherActions, status, metadata, deactivated, }: Props) => JSX_2.Element;
 
+declare type RestrictComponentProps = {
+    identifier: string;
+    allowedRoutes?: string[];
+    disallowedRoutes?: string[];
+    children: React.ReactNode;
+};
+
 export declare type resultType = {
     value: string | null;
     mentionIds?: number[];
@@ -5254,6 +5333,7 @@ export declare interface RichTextEditorProps {
     height?: heightType;
     plainHtmlMode?: boolean;
     fullScreenMode?: boolean;
+    onFullscreenChange?: (fullscreen: boolean) => void;
 }
 
 declare interface RichTextEditorSkeletonProps {
@@ -5542,8 +5622,8 @@ width?: "auto" | "full" | undefined;
 paddingY?: "none" | "p-2" | "p-4" | "p-8" | "p-12" | "p-16" | undefined;
 basis?: "0" | undefined;
 inline?: boolean | undefined;
-justifyContent?: "center" | "end" | "start" | "space-between" | "stretch" | undefined;
-alignItems?: "center" | "end" | "start" | "space-between" | "stretch" | undefined;
+justifyContent?: "center" | "end" | "start" | "stretch" | "space-between" | undefined;
+alignItems?: "center" | "end" | "start" | "stretch" | "space-between" | undefined;
 grow?: boolean | undefined;
 shrink?: boolean | undefined;
 } & ({
@@ -5572,8 +5652,8 @@ width?: "auto" | "full" | undefined;
 paddingY?: "none" | "p-2" | "p-4" | "p-8" | "p-12" | "p-16" | undefined;
 basis?: "0" | undefined;
 inline?: boolean | undefined;
-justifyContent?: "center" | "end" | "start" | "space-between" | "stretch" | undefined;
-alignItems?: "center" | "end" | "start" | "space-between" | "stretch" | undefined;
+justifyContent?: "center" | "end" | "start" | "stretch" | "space-between" | undefined;
+alignItems?: "center" | "end" | "start" | "stretch" | "space-between" | undefined;
 grow?: boolean | undefined;
 shrink?: boolean | undefined;
 } & ({
@@ -5641,7 +5721,7 @@ export declare type SummaryType = "sum";
  */
 export declare const Switch: typeof _Switch;
 
-declare function _Switch({ title, onCheckedChange, id, disabled, checked, value, hideLabel, presentational, ...rest }: SwitchProps): JSX_2.Element;
+declare function _Switch({ title, onCheckedChange, id, disabled, checked, value, hideLabel, presentational, required, ...rest }: SwitchProps): JSX_2.Element;
 
 declare interface SwitchProps extends DataAttributes_2 {
     /**
@@ -5680,6 +5760,11 @@ declare interface SwitchProps extends DataAttributes_2 {
      * @default false
      */
     presentational?: boolean;
+    /**
+     * Whether the switch is required (must be true)
+     * @default false
+     */
+    required?: boolean;
 }
 
 export declare type TabItem = {
@@ -5840,6 +5925,7 @@ export declare function TasksList({ tasks, onClickTask, hideIcons, maxTasksToSho
 declare function TasksList({ tasks, onClickTask, hideIcons, maxTasksToShow, emptyMessage, }: TasksListProps): JSX_2.Element;
 
 declare interface TasksList_2 {
+    done?: (Task | string)[];
     inProgress?: (Task | string)[];
     todo?: (Task | string)[];
 }
@@ -5873,9 +5959,9 @@ export declare const Textarea: FC<TextareaProps>;
 
 declare const Textarea_2: React_2.ForwardRefExoticComponent<Omit<React_2.TextareaHTMLAttributes<HTMLTextAreaElement>, "value" | "onChange" | "onFocus" | "onBlur"> & {
     value?: string;
-} & Pick<InputFieldProps<string>, "label" | "value" | "onChange" | "icon" | "onFocus" | "onBlur" | "onKeyDown" | "status" | "maxLength" | "placeholder" | "error" | "hideLabel" | "hint" | "labelIcon" | "clearable" | "onClear"> & React_2.RefAttributes<HTMLTextAreaElement>>;
+} & Pick<InputFieldProps<string>, "label" | "value" | "onChange" | "size" | "icon" | "onFocus" | "onBlur" | "onKeyDown" | "status" | "loading" | "maxLength" | "placeholder" | "error" | "hideLabel" | "hint" | "labelIcon" | "clearable" | "onClear"> & React_2.RefAttributes<HTMLTextAreaElement>>;
 
-export declare type TextareaProps = Pick<ComponentProps<typeof Textarea_2>, "disabled" | "onChange" | "value" | "placeholder" | "rows" | "cols" | "label" | "labelIcon" | "icon" | "hideLabel" | "maxLength" | "clearable" | "onBlur" | "onFocus" | "name" | "status" | "hint" | "error">;
+export declare type TextareaProps = Pick<ComponentProps<typeof Textarea_2>, "disabled" | "onChange" | "value" | "placeholder" | "rows" | "cols" | "label" | "labelIcon" | "icon" | "hideLabel" | "maxLength" | "clearable" | "onBlur" | "onFocus" | "name" | "status" | "hint" | "error" | "size" | "loading">;
 
 declare type TextQuestionProps = BaseQuestionPropsForOtherQuestionComponents & {
     type: "text" | "longText";
