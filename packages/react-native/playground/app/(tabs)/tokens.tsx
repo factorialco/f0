@@ -169,7 +169,7 @@ export default function Index() {
     "--color-purple-70",
   ]);
 
-  // Obtener colores F1 semánticos
+  // Obtener colores F0semánticos
   const [
     f1Background,
     f1Foreground,
@@ -1149,9 +1149,9 @@ export default function Index() {
             ]}
           />
 
-          {/* F1 Foreground Colors */}
+          {/* F0Foreground Colors */}
           <ColorGroup
-            title="F1 Semantic - Foreground"
+            title="F0Semantic - Foreground"
             colors={[
               { name: "f1-foreground", color: f1Foreground },
               { name: "f1-foreground-secondary", color: f1ForegroundSecondary },
@@ -1171,9 +1171,9 @@ export default function Index() {
             ]}
           />
 
-          {/* F1 Background Colors */}
+          {/* F0Background Colors */}
           <ColorGroup
-            title="F1 Semantic - Background"
+            title="F0Semantic - Background"
             colors={[
               { name: "f1-background", color: f1Background },
               { name: "f1-background-hover", color: f1BackgroundHover },
@@ -1241,9 +1241,9 @@ export default function Index() {
             ]}
           />
 
-          {/* F1 Border Colors */}
+          {/* F0Border Colors */}
           <ColorGroup
-            title="F1 Semantic - Border"
+            title="F0Semantic - Border"
             colors={[
               { name: "f1-border", color: f1Border },
               { name: "f1-border-hover", color: f1BorderHover },
@@ -1264,9 +1264,9 @@ export default function Index() {
             ]}
           />
 
-          {/* F1 Icon Colors */}
+          {/* F0Icon Colors */}
           <ColorGroup
-            title="F1 Semantic - Icon"
+            title="F0Semantic - Icon"
             colors={[
               { name: "f1-icon", color: f1Icon },
               { name: "f1-icon-secondary", color: f1IconSecondary },
@@ -1295,9 +1295,9 @@ export default function Index() {
             ]}
           />
 
-          {/* F1 Special Colors */}
+          {/* F0Special Colors */}
           <ColorGroup
-            title="F1 Semantic - Special"
+            title="F0Semantic - Special"
             colors={[
               { name: "f1-special-ring", color: f1SpecialRing },
               { name: "f1-special-page", color: f1SpecialPage },

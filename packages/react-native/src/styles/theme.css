@@ -76,6 +76,77 @@
   --leading-4xl: 2.5rem;
   --tracking-4xl: -0.02em;
 
+  /* Semantic Typography Tokens - F0Text Variants */
+  /* Heading lg */
+  --p-text-heading-lg-font-size: 1.5rem; /* 24px */
+  --p-text-heading-lg-font-line-height: 2rem; /* 32px */
+  --p-text-heading-lg-font-letter-spacing: -0.2px;
+  --p-text-heading-lg-font-weight: 600;
+  --p-text-heading-lg-font-family: Inter;
+
+  /* Heading md */
+  --p-text-heading-md-font-size: 1.25rem; /* 20px */
+  --p-text-heading-md-font-line-height: 1.75rem; /* 28px */
+  --p-text-heading-md-font-letter-spacing: -0.2px;
+  --p-text-heading-md-font-weight: 600;
+  --p-text-heading-md-font-family: Inter;
+
+  /* Heading sm */
+  --p-text-heading-sm-font-size: 1rem; /* 16px */
+  --p-text-heading-sm-font-line-height: 1.5rem; /* 24px */
+  --p-text-heading-sm-font-letter-spacing: 0;
+  --p-text-heading-sm-font-weight: 600;
+  --p-text-heading-sm-font-family: Inter;
+
+  /* Body md default */
+  --p-text-body-md-default-font-size: 1rem; /* 16px */
+  --p-text-body-md-default-font-line-height: 1.5rem; /* 24px */
+  --p-text-body-md-default-font-letter-spacing: 0;
+  --p-text-body-md-default-font-weight: 400;
+  --p-text-body-md-default-font-family: Inter;
+
+  /* Body md medium */
+  --p-text-body-md-medium-font-size: 1rem; /* 16px */
+  --p-text-body-md-medium-font-line-height: 1.5rem; /* 24px */
+  --p-text-body-md-medium-font-letter-spacing: 0;
+  --p-text-body-md-medium-font-weight: 500;
+  --p-text-body-md-medium-font-family: Inter;
+
+  /* Body md semibold */
+  --p-text-body-md-semibold-font-size: 1rem; /* 16px */
+  --p-text-body-md-semibold-font-line-height: 1.5rem; /* 24px */
+  --p-text-body-md-semibold-font-letter-spacing: 0;
+  --p-text-body-md-semibold-font-weight: 600;
+  --p-text-body-md-semibold-font-family: Inter;
+
+  /* Body sm default */
+  --p-text-body-sm-default-font-size: 0.875rem; /* 14px */
+  --p-text-body-sm-default-font-line-height: 1.25rem; /* 20px */
+  --p-text-body-sm-default-font-letter-spacing: 0;
+  --p-text-body-sm-default-font-weight: 400;
+  --p-text-body-sm-default-font-family: Inter;
+
+  /* Body sm medium */
+  --p-text-body-sm-medium-font-size: 0.875rem; /* 14px */
+  --p-text-body-sm-medium-font-line-height: 1.5rem; /* 24px */
+  --p-text-body-sm-medium-font-letter-spacing: 0;
+  --p-text-body-sm-medium-font-weight: 500;
+  --p-text-body-sm-medium-font-family: Inter;
+
+  /* Body sm semibold */
+  --p-text-body-sm-semibold-font-size: 0.875rem; /* 14px */
+  --p-text-body-sm-semibold-font-line-height: 1.25rem; /* 20px */
+  --p-text-body-sm-semibold-font-letter-spacing: 0;
+  --p-text-body-sm-semibold-font-weight: 600;
+  --p-text-body-sm-semibold-font-family: Inter;
+
+  /* Body xs medium */
+  --p-text-body-xs-medium-font-size: 0.75rem; /* 12px */
+  --p-text-body-xs-medium-font-line-height: 1rem; /* 16px */
+  --p-text-body-xs-medium-font-letter-spacing: 0;
+  --p-text-body-xs-medium-font-weight: 500;
+  --p-text-body-xs-medium-font-family: Inter;
+
   /* Base Colors - Static values that don't change between themes */
   --color-white-3: hsla(0, 0%, 100%, 0.03);
   --color-white-5: hsla(0, 0%, 100%, 0.05);
@@ -163,7 +234,7 @@
   --radius-2xl: 1.5rem;
   --radius-full: 9999px;
 
-  /* F1 Semantic Colors - References to variant-defined values */
+  /* F0 Semantic Colors - References to variant-defined values */
   /* These use var() to reference values defined in @variant blocks */
   --color-f1-foreground: var(--f1-foreground);
   --color-f1-foreground-secondary: var(--f1-foreground-secondary);
@@ -278,7 +349,7 @@
     /* Light Mode */
     @variant light {
       /* ============================================ */
-      /* F1 Semantic Tokens - Light Mode              */
+      /* F0 Semantic Tokens - Light Mode              */
       /* All colors are pre-calculated, no hsl(var()) */
       /* ============================================ */
 
@@ -372,7 +443,7 @@
     /* Dark Mode */
     @variant dark {
       /* ============================================ */
-      /* F1 Semantic Tokens - Dark Mode               */
+      /* F0 Semantic Tokens - Dark Mode               */
       /* All colors are pre-calculated, no hsl(var()) */
       /* ============================================ */
 

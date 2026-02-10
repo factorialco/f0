@@ -10,6 +10,7 @@ import { CounterShowcase } from "../../components/CounterShowcase";
 import { DataListShowcase } from "../../components/DataListShowcase";
 import { DetailsItemShowcase } from "../../components/DetailsItemShowcase";
 import { DetailsItemsListShowcase } from "../../components/DetailsItemsListShowcase";
+import { F0TextShowcase } from "../../components/F0TextShowcase/F0TextShowcase";
 import { IconShowcase } from "../../components/IconShowcase";
 import { OneChipShowcase } from "../../components/OneChipShowcase";
 import { OnePresetShowcase } from "../../components/OnePresetShowcase";
@@ -20,7 +21,21 @@ import { ThemeSwitcher } from "../../components/ThemeSwitcher";
 
 const SafeAreaView = withUniwind(RNSafeAreaView);
 
-type ComponentType = "activity" | "avatar" | "badge" | "button" | "counter" | "datalist" | "detailsitem" | "detailsitemslist" | "icon" | "onechip" | "onepreset" | "pageheader" | "tag";
+type ComponentType =
+  | "activity"
+  | "avatar"
+  | "badge"
+  | "button"
+  | "counter"
+  | "datalist"
+  | "detailsitem"
+  | "detailsitemslist"
+  | "f0text"
+  | "icon"
+  | "onechip"
+  | "onepreset"
+  | "pageheader"
+  | "tag";
 
 const componentOptions = [
   { value: "activity" as ComponentType, label: "Activity" },
@@ -31,6 +46,7 @@ const componentOptions = [
   { value: "datalist" as ComponentType, label: "DataList" },
   { value: "detailsitem" as ComponentType, label: "DetailsItem" },
   { value: "detailsitemslist" as ComponentType, label: "DetailsItemsList" },
+  { value: "f0text" as ComponentType, label: "F0Text (Primitive)" },
   { value: "icon" as ComponentType, label: "Icon" },
   { value: "onechip" as ComponentType, label: "OneChip" },
   { value: "onepreset" as ComponentType, label: "OnePreset" },
@@ -39,17 +55,18 @@ const componentOptions = [
 ];
 
 export default function ComponentsShowcase() {
-  const [selectedComponent, setSelectedComponent] = useState<ComponentType>("activity");
-  
+  const [selectedComponent, setSelectedComponent] =
+    useState<ComponentType>("activity");
+
   const [f1Background, f1Foreground] = useCSSVariable([
-    '--color-f1-background',
-    '--color-f1-foreground',
+    "--color-f1-background",
+    "--color-f1-foreground",
   ]);
 
   const asString = (value: string | number | undefined): string => {
-    if (typeof value === 'string') return value;
-    if (typeof value === 'number') return String(value);
-    return '#000000';
+    if (typeof value === "string") return value;
+    if (typeof value === "number") return String(value);
+    return "#000000";
   };
 
   const renderComponent = () => {
@@ -70,6 +87,8 @@ export default function ComponentsShowcase() {
         return <DetailsItemShowcase />;
       case "detailsitemslist":
         return <DetailsItemsListShowcase />;
+      case "f0text":
+        return <F0TextShowcase />;
       case "icon":
         return <IconShowcase />;
       case "onechip":
@@ -86,21 +105,27 @@ export default function ComponentsShowcase() {
   };
 
   return (
-    <SafeAreaView 
-      className="flex-1 bg-f1-background" 
-      edges={['top', 'bottom']}
-    >
-      <View className="flex-1" style={{ backgroundColor: asString(f1Background) }}>
+    <SafeAreaView className="bg-f1-background flex-1" edges={["top", "bottom"]}>
+      <View
+        className="flex-1"
+        style={{ backgroundColor: asString(f1Background) }}
+      >
         <View className="px-4 pt-3 pb-2">
           <View className="mb-2">
-            <Text className="text-xl font-bold mb-1" style={{ color: asString(f1Foreground) }}>
+            <Text
+              className="mb-1 text-xl font-bold"
+              style={{ color: asString(f1Foreground) }}
+            >
               Components Showcase
             </Text>
             <ThemeSwitcher />
           </View>
-          
+
           <View className="mb-2">
-            <Text className="text-sm font-semibold mb-1" style={{ color: asString(f1Foreground) }}>
+            <Text
+              className="mb-1 text-sm font-semibold"
+              style={{ color: asString(f1Foreground) }}
+            >
               Select Component
             </Text>
             <Select
@@ -110,7 +135,7 @@ export default function ComponentsShowcase() {
             />
           </View>
         </View>
-        
+
         <View className="flex-1" style={{ minHeight: 0 }}>
           {renderComponent()}
         </View>
