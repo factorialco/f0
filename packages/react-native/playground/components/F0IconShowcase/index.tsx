@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { ScrollView, View, Text, TextInput, Pressable } from "react-native";
-import { Icon, type IconType } from "../../../src/components/Icon";
+import { ScrollView, View, TextInput, Pressable } from "react-native";
+import { F0Icon } from "../../../src/components/primitives/Icon";
+import { F0Text } from "../../../src/components/primitives/Text/F0Text";
 import { AppIcons, ModuleIcons } from "../../../src/icons";
+import type { IconType } from "../../../src/components/primitives/Icon";
 import { useCSSVariable } from "uniwind";
 
 type IconCategoryType = "app" | "module";
@@ -20,80 +22,76 @@ interface StyledIconDisplayProps extends IconDisplayProps {
 }
 
 const IconDisplay = ({ icon, name }: IconDisplayProps) => {
-  const [f1Foreground] = useCSSVariable(['--color-f0-foreground']);
-  
-  const asString = (value: string | number | undefined): string => {
-    if (typeof value === 'string') return value;
-    if (typeof value === 'number') return String(value);
-    return '#000000';
-  };
-
   return (
-    <View className="items-center w-20 mb-4 p-2">
-      <Icon icon={icon} size="md" />
-      <Text className="text-sm mt-2 text-center" style={{ color: asString(f1Foreground) }}>
-        {name}
-      </Text>
+    <View className="mb-4 w-20 items-center p-2">
+      <F0Icon icon={icon} size="md" />
+      <View className="mt-2">
+        <F0Text variant="body-xs-medium" color="secondary" align="center">
+          {name}
+        </F0Text>
+      </View>
     </View>
   );
 };
 
 const SizeVariant = ({ icon, name, size }: SizeVariantProps) => {
-  const [f1Foreground] = useCSSVariable(['--color-f0-foreground']);
-  
-  const asString = (value: string | number | undefined): string => {
-    if (typeof value === 'string') return value;
-    if (typeof value === 'number') return String(value);
-    return '#000000';
-  };
-
   return (
     <View className="items-center justify-center">
-      <Icon icon={icon} size={size} />
-      <Text className="text-xs mt-2 text-center" style={{ color: asString(f1Foreground) }}>
-        {name}
-      </Text>
+      <F0Icon icon={icon} size={size} />
+      <View className="mt-2">
+        <F0Text variant="body-xs-medium" color="secondary" align="center">
+          {name}
+        </F0Text>
+      </View>
     </View>
   );
 };
 
-const StyledIconDisplay = ({ icon, name, className }: StyledIconDisplayProps) => {
-  const [f1Foreground] = useCSSVariable(['--color-f0-foreground']);
-  
-  const asString = (value: string | number | undefined): string => {
-    if (typeof value === 'string') return value;
-    if (typeof value === 'number') return String(value);
-    return '#000000';
-  };
-
+const StyledIconDisplay = ({
+  icon,
+  name,
+  className,
+}: StyledIconDisplayProps) => {
   return (
     <View className="items-center justify-center">
-      <Icon icon={icon} size="lg" className={className} />
-      <Text className="text-xs mt-2 text-center" style={{ color: asString(f1Foreground) }}>
-        {name}
-      </Text>
+      <F0Icon icon={icon} size="lg" className={className} />
+      <View className="mt-2">
+        <F0Text variant="body-xs-medium" color="secondary" align="center">
+          {name}
+        </F0Text>
+      </View>
     </View>
   );
 };
 
-export function IconShowcase() {
+export function F0IconShowcase() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedType, setSelectedType] = useState<IconCategoryType>("app");
-  const [appIconList, setAppIconList] = useState<Array<{ name: string; icon: IconType }>>([]);
-  const [moduleIconList, setModuleIconList] = useState<Array<{ name: string; icon: IconType }>>([]);
+  const [appIconList, setAppIconList] = useState<
+    Array<{ name: string; icon: IconType }>
+  >([]);
+  const [moduleIconList, setModuleIconList] = useState<
+    Array<{ name: string; icon: IconType }>
+  >([]);
 
-  const [f1Foreground, f1Background, f1Border, f1BackgroundSecondary, f1IconInfo] = useCSSVariable([
-    '--color-f0-foreground',
-    '--color-f0-background',
-    '--color-f0-border',
-    '--color-f0-background-secondary',
-    '--color-f0-icon-info',
+  const [
+    f0Foreground,
+    f0Background,
+    f0Border,
+    f0BackgroundSecondary,
+    f0IconInfo,
+  ] = useCSSVariable([
+    "--color-f0-foreground",
+    "--color-f0-background",
+    "--color-f0-border",
+    "--color-f0-background-secondary",
+    "--color-f0-icon-info",
   ]);
 
   const asString = (value: string | number | undefined): string => {
-    if (typeof value === 'string') return value;
-    if (typeof value === 'number') return String(value);
-    return '#000000';
+    if (typeof value === "string") return value;
+    if (typeof value === "number") return String(value);
+    return "#000000";
   };
 
   // Generate icon lists on component mount
@@ -131,29 +129,32 @@ export function IconShowcase() {
     count: number;
   }) => {
     const isSelected = selectedType === type;
-    
+
     return (
       <View className="flex-1">
         <Pressable
           onPress={() => setSelectedType(type)}
-          className="py-2 px-4 rounded-lg"
+          className="rounded-lg px-4 py-2"
           style={{
-            backgroundColor: isSelected ? asString(f1IconInfo) : asString(f1BackgroundSecondary),
+            backgroundColor: isSelected
+              ? asString(f0IconInfo)
+              : asString(f0BackgroundSecondary),
           }}
         >
-          <Text
-            className="text-center font-medium text-sm"
-            style={{
-              color: isSelected ? '#ffffff' : asString(f1Foreground),
-            }}
-          >
-            {label} ({count})
-          </Text>
+          {isSelected ? (
+            <F0Text variant="body-sm-semibold" align="center" color="inverse">
+              {label} ({count})
+            </F0Text>
+          ) : (
+            <F0Text variant="body-sm-semibold" align="center">
+              {label} ({count})
+            </F0Text>
+          )}
         </Pressable>
         {isSelected && (
-          <View 
-            className="h-0.5 mt-1"
-            style={{ backgroundColor: asString(f1IconInfo) }}
+          <View
+            className="mt-1 h-0.5"
+            style={{ backgroundColor: asString(f0IconInfo) }}
           />
         )}
       </View>
@@ -161,30 +162,30 @@ export function IconShowcase() {
   };
 
   return (
-    <ScrollView 
-      className="p-4" 
+    <ScrollView
+      className="p-4"
       contentContainerStyle={{ paddingBottom: 20 }}
       style={{ width: "100%" }}
     >
       {/* Search Section */}
       <View className="mb-4">
-        <Text className="text-lg font-bold mb-2" style={{ color: asString(f1Foreground) }}>
+        <F0Text variant="heading-lg" className="mb-2">
           Search Icons
-        </Text>
+        </F0Text>
         <TextInput
-          className="border rounded-lg p-3 mb-4"
+          className="mb-4 rounded-lg border p-3"
           style={{
-            borderColor: asString(f1Border),
-            color: asString(f1Foreground),
-            backgroundColor: asString(f1Background),
+            borderColor: asString(f0Border),
+            color: asString(f0Foreground),
+            backgroundColor: asString(f0Background),
           }}
           placeholder="Search icons..."
-          placeholderTextColor={asString(f1Foreground)}
+          placeholderTextColor={asString(f0Foreground)}
           value={searchTerm}
           onChangeText={setSearchTerm}
         />
 
-        <View className="flex-row gap-2 mb-4">
+        <View className="mb-4 flex-row gap-2">
           <TabButton
             type="app"
             label="App Icons"
@@ -208,26 +209,26 @@ export function IconShowcase() {
 
       {/* Icons Grid */}
       {filteredIcons.length > 0 ? (
-        <View className="flex-row flex-wrap justify-start mb-6">
+        <View className="mb-6 flex-row flex-wrap justify-start">
           {filteredIcons.map((item) => (
             <IconDisplay key={item.name} icon={item.icon} name={item.name} />
           ))}
         </View>
       ) : (
-        <View className="items-center justify-center p-10 mb-6">
-          <Text className="text-lg" style={{ color: asString(f1Foreground) }}>
+        <View className="mb-6 items-center justify-center p-10">
+          <F0Text variant="body-md-default">
             {`No icons found matching "${searchTerm}"`}
-          </Text>
+          </F0Text>
         </View>
       )}
 
       {/* Size Variants */}
-      <Text className="text-lg font-bold mb-4 mt-6" style={{ color: asString(f1Foreground) }}>
+      <F0Text variant="heading-lg" className="mt-6 mb-4">
         Size Variants
-      </Text>
-      <View 
-        className="flex-row justify-around mb-8 p-4 rounded-lg"
-        style={{ backgroundColor: asString(f1BackgroundSecondary) }}
+      </F0Text>
+      <View
+        className="mb-8 flex-row justify-around rounded-lg p-4"
+        style={{ backgroundColor: asString(f0BackgroundSecondary) }}
       >
         <SizeVariant icon={AppIcons.ChevronDown} name="xs" size="xs" />
         <SizeVariant icon={AppIcons.ChevronDown} name="sm" size="sm" />
@@ -236,9 +237,9 @@ export function IconShowcase() {
         <SizeVariant icon={AppIcons.ChevronDown} name="xl" size="xl" />
       </View>
 
-      <View 
-        className="flex-row justify-around mb-8 p-4 rounded-lg"
-        style={{ backgroundColor: asString(f1BackgroundSecondary) }}
+      <View
+        className="mb-8 flex-row justify-around rounded-lg p-4"
+        style={{ backgroundColor: asString(f0BackgroundSecondary) }}
       >
         <SizeVariant icon={AppIcons.Archive} name="xs" size="xs" />
         <SizeVariant icon={AppIcons.Archive} name="sm" size="sm" />
@@ -247,9 +248,9 @@ export function IconShowcase() {
         <SizeVariant icon={AppIcons.Archive} name="xl" size="xl" />
       </View>
 
-      <View 
-        className="flex-row justify-around mb-8 p-4 rounded-lg"
-        style={{ backgroundColor: asString(f1BackgroundSecondary) }}
+      <View
+        className="mb-8 flex-row justify-around rounded-lg p-4"
+        style={{ backgroundColor: asString(f0BackgroundSecondary) }}
       >
         <SizeVariant icon={ModuleIcons.Home} name="xs" size="xs" />
         <SizeVariant icon={ModuleIcons.Home} name="sm" size="sm" />
@@ -258,13 +259,13 @@ export function IconShowcase() {
         <SizeVariant icon={ModuleIcons.Home} name="xl" size="xl" />
       </View>
 
-      {/* Styling */}
-      <Text className="text-lg font-bold mb-4 mt-6" style={{ color: asString(f1Foreground) }}>
-        Styling Icons
-      </Text>
-      <View 
-        className="flex-row justify-around p-4 rounded-lg"
-        style={{ backgroundColor: asString(f1BackgroundSecondary) }}
+      {/* Color Customization */}
+      <F0Text variant="heading-lg" className="mt-6 mb-4">
+        Color Customization
+      </F0Text>
+      <View
+        className="flex-row justify-around rounded-lg p-4"
+        style={{ backgroundColor: asString(f0BackgroundSecondary) }}
       >
         <StyledIconDisplay
           icon={AppIcons.Heart}
