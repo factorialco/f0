@@ -42,7 +42,7 @@ import { F0Text } from "@factorialco/f0-react-native";
 
 All React Native `TextProps` are also supported (onPress, testID, etc.).
 
-**Note**: `className` and `style` props are **not available**. Use the semantic `variant` prop for typography styling.
+**Note**: `className` and `style` props are **not available**. Use semantic props for typography. For spacing/layout, wrap F0Text in a View.
 
 ### Typography Variants
 
@@ -138,6 +138,34 @@ All variants use **Inter** font family with the weight included in the variant n
 </F0Text>
 ```
 
+### Spacing & Layout
+
+F0Text doesn't accept `className` to prevent typography override. Use a View wrapper for spacing:
+
+```tsx
+{
+  /* Spacing with View wrapper */
+}
+<View className="mb-2 mt-4">
+  <F0Text variant="body-sm-default">Text with margin</F0Text>
+</View>;
+
+{
+  /* Layout with View wrapper */
+}
+<View className="flex-1">
+  <F0Text variant="body-sm-default">Flexible text</F0Text>
+</View>;
+
+{
+  /* Icon + Text pattern */
+}
+<View className="flex-row items-center gap-2">
+  <F0Icon icon={Check} size="sm" />
+  <F0Text variant="body-sm-default">Success message</F0Text>
+</View>;
+```
+
 ### Combined Props
 
 ```tsx
@@ -168,15 +196,21 @@ All variants use **Inter** font family with the weight included in the variant n
 
 ```tsx
 <View className="bg-f0-background-secondary rounded-lg p-4">
-  <F0Text variant="heading-sm" className="mb-2">
-    Card Title
-  </F0Text>
+  <View className="mb-2">
+    <F0Text variant="heading-sm">Card Title</F0Text>
+  </View>
   <F0Text variant="body-sm-default" color="secondary" numberOfLines={2}>
     This is a description that will be truncated after two lines if it's too
     long to fit in the available space.
   </F0Text>
-  <F0Text variant="body-xs-medium" color="tertiary" className="mt-2">
-    Last updated 2 hours ago
+  <View className="mt-2">
+    <F0Text variant="body-xs-medium" color="tertiary">
+      Last updated 2 hours ago
+    </F0Text>
+  </View>
+</View>
+```
+
   </F0Text>
 </View>
 ```

@@ -119,7 +119,8 @@ interface F0TextPropsInternal extends Omit<RNTextProps, "style"> {
 /**
  * Public props for the F0Text component
  *
- * Note: `className` and `style` props are not available.
- * Use the semantic `variant` prop for typography styling.
+ * Note: `className` and `style` props are NOT available.
+ * Use semantic props (variant, color, align, etc.) for typography.
+ * For spacing/layout, wrap F0Text in a View with className.
  */
 export type F0TextProps = Omit<F0TextPropsInternal, "className">;

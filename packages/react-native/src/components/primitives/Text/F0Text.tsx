@@ -1,6 +1,5 @@
 import React from "react";
 import { Text as RNText } from "react-native";
-import { cn } from "../../../lib/utils";
 import { textVariants } from "./F0Text.styles";
 import type { F0TextProps } from "./F0Text.types";
 
@@ -28,15 +27,13 @@ const F0TextComponent = React.forwardRef<RNText, F0TextProps>(
   ) => {
     const textClassName = React.useMemo(
       () =>
-        cn(
-          textVariants({
-            variant,
-            color,
-            align,
-            decoration,
-            transform,
-          }),
-        ),
+        textVariants({
+          variant,
+          color,
+          align,
+          decoration,
+          transform,
+        }),
       [variant, color, align, decoration, transform],
     );
 
