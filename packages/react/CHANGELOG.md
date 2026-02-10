@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.355.0](https://github.com/factorialco/f0/compare/f0-react-v1.354.0...f0-react-v1.355.0) (2026-02-10)
+
+
+### Features
+
+* add device catalog module icon ([#3351](https://github.com/factorialco/f0/issues/3351)) ([0f373fd](https://github.com/factorialco/f0/commit/0f373fd5c98012ace929e5a7936dc5ba669c5269))
+
 ## [1.354.0](https://github.com/factorialco/f0/compare/f0-react-v1.353.0...f0-react-v1.354.0) (2026-02-10)
 
 
