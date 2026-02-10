@@ -313,3 +313,15 @@ Placeholder component
 .rich-text-details.rich-text-details {
   @apply mb-2;
 }
+
+/*
+Image resize handle
+*/
+
+.image-resizable-wrapper {
+  @apply max-w-full;
+}
+
+.image-resize-handle {
+  @apply z-10;
+}
