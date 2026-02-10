@@ -11,7 +11,7 @@ import { DataListShowcase } from "../../components/DataListShowcase";
 import { DetailsItemShowcase } from "../../components/DetailsItemShowcase";
 import { DetailsItemsListShowcase } from "../../components/DetailsItemsListShowcase";
 import { F0TextShowcase } from "../../components/F0TextShowcase/F0TextShowcase";
-import { IconShowcase } from "../../components/IconShowcase";
+import { F0IconShowcase } from "../../components/F0IconShowcase";
 import { OneChipShowcase } from "../../components/OneChipShowcase";
 import { OnePresetShowcase } from "../../components/OnePresetShowcase";
 import { PageHeaderShowcase } from "../../components/PageHeaderShowcase";
@@ -30,8 +30,8 @@ type ComponentType =
   | "datalist"
   | "detailsitem"
   | "detailsitemslist"
+  | "f0icon"
   | "f0text"
-  | "icon"
   | "onechip"
   | "onepreset"
   | "pageheader"
@@ -46,8 +46,8 @@ const componentOptions = [
   { value: "datalist" as ComponentType, label: "DataList" },
   { value: "detailsitem" as ComponentType, label: "DetailsItem" },
   { value: "detailsitemslist" as ComponentType, label: "DetailsItemsList" },
+  { value: "f0icon" as ComponentType, label: "F0Icon (Primitive)" },
   { value: "f0text" as ComponentType, label: "F0Text (Primitive)" },
-  { value: "icon" as ComponentType, label: "Icon" },
   { value: "onechip" as ComponentType, label: "OneChip" },
   { value: "onepreset" as ComponentType, label: "OnePreset" },
   { value: "pageheader" as ComponentType, label: "PageHeader" },
@@ -87,10 +87,10 @@ export default function ComponentsShowcase() {
         return <DetailsItemShowcase />;
       case "detailsitemslist":
         return <DetailsItemsListShowcase />;
+      case "f0icon":
+        return <F0IconShowcase />;
       case "f0text":
         return <F0TextShowcase />;
-      case "icon":
-        return <IconShowcase />;
       case "onechip":
         return <OneChipShowcase />;
       case "onepreset":
