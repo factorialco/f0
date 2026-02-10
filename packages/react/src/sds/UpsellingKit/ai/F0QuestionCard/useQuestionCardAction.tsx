@@ -1,11 +1,12 @@
 import { useCopilotAction } from "@copilotkit/react-core"
 
+import { useAiChat } from "@/sds/ai/F0AiChat/providers/AiChatStateProvider"
+
 import {
   F0QuestionCardMultiStep,
   type F0QuestionCardOption,
   type F0QuestionCardStep,
 } from "../F0QuestionCard"
-import { useAiChat } from "../../../F0AiChat/providers/AiChatStateProvider"
 import { QuestionCardArgs } from "./types"
 
 interface QuestionCardWithSendProps {
