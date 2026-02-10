@@ -21,6 +21,8 @@ import { AssistantMessage } from "@/sds/ai/F0AiChat/components/AssistantMessage"
 import { ChatHeader } from "@/sds/ai/F0AiChat/components/ChatHeader"
 import { ChatTextarea } from "@/sds/ai/F0AiChat/components/ChatTextarea"
 import { SidebarWindow } from "@/sds/ai/F0AiChat/components/ChatWindow"
+import { MessagesContainerFullscreen } from "@/sds/ai/F0AiChat/components/MessagesContainerFullscreen"
+import { UserMessage } from "@/sds/ai/F0AiChat/components/UserMessage"
 import { FullscreenChatContextType } from "@/sds/ai/F0AiChat/internal-types"
 import {
   AiChatStateProvider,
@@ -343,4 +345,4 @@ export const F0AiChatProvider = experimentalComponent(
   F0AiChatProviderComponent
 )
 // Re-export WelcomeScreenSuggestion type from components for backwards compatibility
-export type { WelcomeScreenSuggestion }
+export type { WelcomeScreenSuggestion } from "@/sds/ai/F0AiChat/types"
