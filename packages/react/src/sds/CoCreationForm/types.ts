@@ -1,4 +1,5 @@
 import { DateQuestionProps } from "./DateQuestion"
+import { DateRangeQuestionProps } from "./DateRangeQuestion/types"
 import { LinkQuestionProps } from "./LinkQuestion"
 import { NumericQuestionProps } from "./NumericQuestion"
 import { RatingQuestionProps } from "./RatingQuestion"
@@ -15,6 +16,7 @@ export type QuestionType =
   | "numeric"
   | "link"
   | "date"
+  | "daterange"
 
 export type ElementType = QuestionType | "section"
 
@@ -39,6 +41,7 @@ export type QuestionElement =
   | Omit<NumericQuestionProps & { type: "numeric" }, QuestionPropsToOmit>
   | Omit<LinkQuestionProps & { type: "link" }, QuestionPropsToOmit>
   | Omit<DateQuestionProps & { type: "date" }, QuestionPropsToOmit>
+  | Omit<DateRangeQuestionProps, QuestionPropsToOmit>
 
 export type CoCreationFormElement =
   | { type: "section"; section: SectionElement }
@@ -98,6 +101,10 @@ type OnChangeQuestionParams = BaseQuestionOnChangeParams &
     | {
         type: "date"
         value?: Date | null
+      }
+    | {
+        type: "daterange"
+        value?: { from: Date; to: Date } | null
       }
   )
 

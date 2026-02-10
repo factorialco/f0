@@ -87,6 +87,10 @@ export const getDefaultParamsForQuestionType = (questionType: QuestionType) => {
       return {
         value: new Date(),
       }
+    case "daterange":
+      return {
+        value: null,
+      }
     default:
       throw new Error(`Unsupported question type: ${questionType}`)
   }
@@ -103,6 +107,7 @@ const DEFAULT_QUESTION_TYPES: QuestionType[] = [
   "numeric",
   "link",
   "date",
+  "daterange",
 ]
 
 export const getDefaultQuestionTypeToAdd = (

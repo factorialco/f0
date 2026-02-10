@@ -320,6 +320,7 @@ export const defaultTranslations = {
       numeric: "Numeric",
       link: "Link",
       date: "Date",
+      dateRange: "Date range",
     },
     selectQuestion: {
       addOption: "Add option",
