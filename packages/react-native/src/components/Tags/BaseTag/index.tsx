@@ -47,7 +47,7 @@ export const BaseTag = ({
       {!!text && (
         <Text
           className={cn(
-            "text-f1-foreground line-clamp-1 text-base font-medium",
+            "text-f0-foreground line-clamp-1 text-base font-medium",
             classNameText,
           )}
         >
@@ -55,7 +55,7 @@ export const BaseTag = ({
         </Text>
       )}
       {additionalAccesibleText && (
-        <Text className="text-f1-foreground sr-only text-base font-medium">
+        <Text className="text-f0-foreground sr-only text-base font-medium">
           {additionalAccesibleText}
         </Text>
       )}

@@ -10,9 +10,9 @@ const counterContainerVariants = tv({
       sm: "min-w-4 h-4",
     },
     type: {
-      default: "bg-f1-background-secondary border border-f1-border",
-      selected: "bg-f1-background-selected-bold outline-f1-border-selected",
-      bold: "bg-f1-background-accent-bold",
+      default: "bg-f0-background-secondary border border-f0-border",
+      selected: "bg-f0-background-selected-bold outline-f0-border-selected",
+      bold: "bg-f0-background-accent-bold",
     },
   },
   defaultVariants: {
@@ -29,9 +29,9 @@ const counterTextVariants = tv({
       sm: "leading-none py-0.5",
     },
     type: {
-      default: "text-f1-foreground",
-      selected: "text-f1-foreground-inverse",
-      bold: "text-f1-foreground-inverse",
+      default: "text-f0-foreground",
+      selected: "text-f0-foreground-inverse",
+      bold: "text-f0-foreground-inverse",
     },
   },
   defaultVariants: {

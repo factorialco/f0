@@ -6,11 +6,11 @@ import { CrossedCircle } from "../../icons/app";
 import { PressableFeedback } from "../PressableFeedback";
 
 export const chipContainerVariants = tv({
-  base: "flex items-center gap-1 rounded-full border border-solid border-f1-border px-2 py-0.5 grow-0",
+  base: "flex items-center gap-1 rounded-full border border-solid border-f0-border px-2 py-0.5 grow-0",
   variants: {
     variant: {
       default: "",
-      selected: "border-f1-border-selected bg-f1-background-selected-secondary",
+      selected: "border-f0-border-selected bg-f0-background-selected-secondary",
     },
   },
   defaultVariants: {
@@ -22,8 +22,8 @@ export const chipTextVariants = tv({
   base: "font-medium",
   variants: {
     variant: {
-      default: "text-f1-foreground",
-      selected: "text-f1-foreground-selected",
+      default: "text-f0-foreground",
+      selected: "text-f0-foreground-selected",
     },
   },
   defaultVariants: {
@@ -73,7 +73,7 @@ export const OneChip = ({
                 e.stopPropagation();
                 onClose();
               }}
-              className="[&_svg]:text-f1-icon-secondary -m-1 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full"
+              className="[&_svg]:text-f0-icon-secondary -m-1 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full"
               accessibilityRole="button"
               accessibilityLabel="Close"
             >

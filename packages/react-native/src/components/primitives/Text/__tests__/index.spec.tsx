@@ -122,7 +122,7 @@ describe("F0Text", () => {
         <F0Text color="secondary">Secondary text</F0Text>,
       );
       const element = getByText("Secondary text");
-      expect(element.props.className).toContain("text-f1-foreground-secondary");
+      expect(element.props.className).toContain("text-f0-foreground-secondary");
     });
 
     it("applies correct alignment classes", () => {

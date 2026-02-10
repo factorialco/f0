@@ -35,7 +35,7 @@ const iconContainerVariants = tv({
 });
 
 const iconSizeVariants = tv({
-  base: "relative text-f1-foreground-inverse drop-shadow",
+  base: "relative text-f0-foreground-inverse drop-shadow",
   variants: {
     size: {
       sm: "h-[14px] w-[14px]",

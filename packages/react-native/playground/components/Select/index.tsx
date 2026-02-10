@@ -27,10 +27,10 @@ export function Select<T extends string>({
   const [isOpen, setIsOpen] = useState(false);
   
   const [f1Background, f1Foreground, f1Border, f1BackgroundSecondary] = useCSSVariable([
-    '--color-f1-background',
-    '--color-f1-foreground',
-    '--color-f1-border',
-    '--color-f1-background-secondary',
+    '--color-f0-background',
+    '--color-f0-foreground',
+    '--color-f0-border',
+    '--color-f0-background-secondary',
   ]);
 
   const asString = (val: string | number | undefined): string => {
@@ -60,7 +60,7 @@ export function Select<T extends string>({
         <Icon
           icon={isOpen ? AppIcons.ChevronUp : AppIcons.ChevronDown}
           size="sm"
-          className="text-f1-icon"
+          className="text-f0-icon"
         />
       </Pressable>
 

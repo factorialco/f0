@@ -154,7 +154,7 @@
 
 ### Features
 
-* create new f1 components AlertTag for Mobile ([#1994](https://github.com/factorialco/f0/issues/1994)) ([afe7df1](https://github.com/factorialco/f0/commit/afe7df11e763712ca5f18e228702c5d09061523f))
+* create new F0components AlertTag for Mobile ([#1994](https://github.com/factorialco/f0/issues/1994)) ([afe7df1](https://github.com/factorialco/f0/commit/afe7df11e763712ca5f18e228702c5d09061523f))
 
 ## [0.9.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.8.2...f0-react-native-v0.9.0) (2025-05-30)
 
@@ -196,7 +196,7 @@
 
 ### Features
 
-* new f1 react native buttons ([#1854](https://github.com/factorialco/f0/issues/1854)) ([3f1ad8e](https://github.com/factorialco/f0/commit/3f1ad8ea127ce1629a86a7706d99cc9cba019886))
+* new F0react native buttons ([#1854](https://github.com/factorialco/f0/issues/1854)) ([3f1ad8e](https://github.com/factorialco/f0/commit/3f1ad8ea127ce1629a86a7706d99cc9cba019886))
 
 ## [0.5.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.4.0...f0-react-native-v0.5.0) (2025-05-21)
 

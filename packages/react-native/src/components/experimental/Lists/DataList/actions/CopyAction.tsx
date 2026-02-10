@@ -38,8 +38,8 @@ export const CopyAction = ({ text, children }: CopyActionProps) => {
       aria-label={copied ? "Copied!" : `Copy ${text}`}
       className={cn(
         "group flex flex-row justify-between gap-1.5 rounded p-1.5",
-        "transition-colors duration-300 active:bg-f1-background-secondary-hover",
-        copied ? "bg-f1-background-positive" : undefined,
+        "transition-colors duration-300 active:bg-f0-background-secondary-hover",
+        copied ? "bg-f0-background-positive" : undefined,
       )}
       onPress={copyHandler}
     >
@@ -51,7 +51,7 @@ export const CopyAction = ({ text, children }: CopyActionProps) => {
             size="md"
             aria-hidden={true}
             className={cn(
-              "col-start-1 col-end-2 row-start-1 row-end-2 text-f1-icon-bold",
+              "col-start-1 col-end-2 row-start-1 row-end-2 text-f0-icon-bold",
             )}
           />
         )}
@@ -62,7 +62,7 @@ export const CopyAction = ({ text, children }: CopyActionProps) => {
             aria-hidden={true}
             className={cn(
               "col-start-1 col-end-2 row-start-1 row-end-2",
-              "text-f1-icon-positive",
+              "text-f0-icon-positive",
             )}
           />
         )}

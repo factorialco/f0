@@ -23,13 +23,13 @@ export const RawTag = ({
   return (
     <BaseTag
       classNameContainer={cn(
-        !noBorder && "border border-solid border-f1-border-secondary",
+        !noBorder && "border border-solid border-f0-border-secondary",
         className,
       )}
-      classNameText="text-f1-foreground"
+      classNameText="text-f0-foreground"
       left={
         icon ? (
-          <Icon icon={icon} size="sm" className="text-f1-icon" aria-hidden />
+          <Icon icon={icon} size="sm" className="text-f0-icon" aria-hidden />
         ) : null
       }
       text={text}

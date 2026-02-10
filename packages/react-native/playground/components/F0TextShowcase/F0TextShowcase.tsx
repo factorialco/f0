@@ -4,7 +4,7 @@ import { F0Text } from "../../../src/components/primitives/Text/F0Text";
 import { useCSSVariable } from "uniwind";
 
 export function F0TextShowcase() {
-  const [f1Foreground] = useCSSVariable(["--color-f1-foreground"]);
+  const [f0Foreground] = useCSSVariable(["--color-f0-foreground"]);
 
   const asString = (value: string | number | undefined): string => {
     if (typeof value === "string") return value;
@@ -53,7 +53,7 @@ export function F0TextShowcase() {
       {/* Text Alignment */}
       <F0Text variant="heading-lg">Text Alignment</F0Text>
 
-      <View className="bg-f1-background-secondary mb-8 gap-3 rounded p-4">
+      <View className="bg-f0-background-secondary mb-8 gap-3 rounded p-4">
         <F0Text align="left">Left aligned text</F0Text>
         <F0Text align="center">Center aligned text</F0Text>
         <F0Text align="right">Right aligned text</F0Text>
@@ -85,7 +85,7 @@ export function F0TextShowcase() {
       {/* Number of Lines Truncation */}
       <F0Text variant="heading-lg">Text Truncation</F0Text>
 
-      <View className="bg-f1-background-secondary mb-8 gap-3 rounded p-4">
+      <View className="bg-f0-background-secondary mb-8 gap-3 rounded p-4">
         <F0Text variant="body-xs-medium" color="secondary">
           Single line truncation:
         </F0Text>
@@ -139,7 +139,7 @@ export function F0TextShowcase() {
 
       <View className="mb-8 gap-6">
         {/* Card-like example */}
-        <View className="bg-f1-background-secondary rounded-lg p-4">
+        <View className="bg-f0-background-secondary rounded-lg p-4">
           <F0Text variant="heading-sm">Card Title</F0Text>
           <F0Text color="secondary">
             This is a description of the card content. It uses secondary color
@@ -151,7 +151,7 @@ export function F0TextShowcase() {
         </View>
 
         {/* Alert-like example */}
-        <View className="bg-f1-background-critical rounded-lg p-4">
+        <View className="bg-f0-background-critical rounded-lg p-4">
           <F0Text variant="heading-sm" color="critical">
             Error occurred
           </F0Text>
@@ -161,7 +161,7 @@ export function F0TextShowcase() {
         </View>
 
         {/* Success message */}
-        <View className="bg-f1-background-positive rounded-lg p-4">
+        <View className="bg-f0-background-positive rounded-lg p-4">
           <F0Text variant="heading-sm" color="positive">
             Success!
           </F0Text>

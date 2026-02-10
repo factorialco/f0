@@ -5,7 +5,7 @@ Primitive text component for React Native with semantic typography variants and 
 ## Features
 
 - Semantic typography variants (heading and body styles)
-- F1 semantic color system integration
+- F0 semantic color system integration
 - Inter font family support
 - Type-safe TypeScript API
 - Uniwind (Tailwind) styling
@@ -34,7 +34,7 @@ import { F0Text } from "@factorialco/f0-react-native";
 | Prop            | Type                | Default             | Description                                             |
 | --------------- | ------------------- | ------------------- | ------------------------------------------------------- |
 | `variant`       | `TypographyVariant` | `'body-sm-default'` | Typography variant with weight included                 |
-| `color`         | `TextColor`         | `'default'`         | Text color from F1 semantic color system                |
+| `color`         | `TextColor`         | `'default'`         | Text color from F0 semantic color system                |
 | `align`         | `TextAlign`         | `'left'`            | Text alignment (left, center, right, justify)           |
 | `decoration`    | `TextDecoration`    | `'none'`            | Text decoration (none, underline, line-through)         |
 | `transform`     | `TextTransform`     | `'none'`            | Text transform (none, uppercase, lowercase, capitalize) |
@@ -167,7 +167,7 @@ All variants use **Inter** font family with the weight included in the variant n
 ### Real-world Card Example
 
 ```tsx
-<View className="bg-f1-background-secondary rounded-lg p-4">
+<View className="bg-f0-background-secondary rounded-lg p-4">
   <F0Text variant="heading-sm" className="mb-2">
     Card Title
   </F0Text>
@@ -248,7 +248,7 @@ These mappings are defined in `global.css`:
 
 - Semantic HTML roles on web
 - Proper ellipsis with `numberOfLines`
-- F1 color system ensures proper contrast
+- F0 color system ensures proper contrast
 - Forwards all React Native Text accessibility props
 
 ## Performance

@@ -25,7 +25,7 @@ exports[`OneChip Snapshot 1`] = `
       }
     }
     accessible={true}
-    className="overflow-hidden flex items-center gap-1 rounded-full border border-solid border-f1-border px-2 py-0.5 grow-0"
+    className="overflow-hidden flex items-center gap-1 rounded-full border border-solid border-f0-border px-2 py-0.5 grow-0"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -68,7 +68,7 @@ exports[`OneChip Snapshot 1`] = `
       className="flex flex-row items-center gap-0.5"
     >
       <Text
-        className="font-medium text-f1-foreground"
+        className="font-medium text-f0-foreground"
       >
         label
       </Text>
@@ -102,7 +102,7 @@ exports[`OneChip Snapshot variant selected 1`] = `
       }
     }
     accessible={true}
-    className="overflow-hidden flex items-center gap-1 rounded-full border border-solid px-2 py-0.5 grow-0 border-f1-border-selected bg-f1-background-selected-secondary"
+    className="overflow-hidden flex items-center gap-1 rounded-full border border-solid px-2 py-0.5 grow-0 border-f0-border-selected bg-f0-background-selected-secondary"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -145,7 +145,7 @@ exports[`OneChip Snapshot variant selected 1`] = `
       className="flex flex-row items-center gap-0.5"
     >
       <Text
-        className="font-medium text-f1-foreground-selected"
+        className="font-medium text-f0-foreground-selected"
       >
         label
       </Text>
@@ -179,7 +179,7 @@ exports[`OneChip Snapshot with Icon 1`] = `
       }
     }
     accessible={true}
-    className="overflow-hidden flex items-center gap-1 rounded-full border border-solid border-f1-border px-2 py-0.5 grow-0 pl-1.5"
+    className="overflow-hidden flex items-center gap-1 rounded-full border border-solid border-f0-border px-2 py-0.5 grow-0 pl-1.5"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -225,7 +225,7 @@ exports[`OneChip Snapshot with Icon 1`] = `
         align="xMidYMid"
         bbHeight="100%"
         bbWidth="100%"
-        className="shrink-0 w-4 h-4 stroke-sm font-medium text-f1-foreground"
+        className="shrink-0 w-4 h-4 stroke-sm font-medium text-f0-foreground"
         fill="none"
         focusable={false}
         meetOrSlice={0}
@@ -303,7 +303,7 @@ exports[`OneChip Snapshot with Icon 1`] = `
         </RNSVGGroup>
       </RNSVGSvgView>
       <Text
-        className="font-medium text-f1-foreground"
+        className="font-medium text-f0-foreground"
       >
         label
       </Text>
@@ -337,7 +337,7 @@ exports[`OneChip Snapshot with OnClose 1`] = `
       }
     }
     accessible={true}
-    className="overflow-hidden flex items-center gap-1 rounded-full border border-solid border-f1-border px-2 py-0.5 grow-0 pr-1.5"
+    className="overflow-hidden flex items-center gap-1 rounded-full border border-solid border-f0-border px-2 py-0.5 grow-0 pr-1.5"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -380,7 +380,7 @@ exports[`OneChip Snapshot with OnClose 1`] = `
       className="flex flex-row items-center gap-0.5"
     >
       <Text
-        className="font-medium text-f1-foreground"
+        className="font-medium text-f0-foreground"
       >
         label
       </Text>
@@ -405,7 +405,7 @@ exports[`OneChip Snapshot with OnClose 1`] = `
           }
         }
         accessible={true}
-        className="[&_svg]:text-f1-icon-secondary -m-1 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full"
+        className="[&_svg]:text-f0-icon-secondary -m-1 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full"
         collapsable={false}
         focusable={true}
         onBlur={[Function]}
@@ -422,7 +422,7 @@ exports[`OneChip Snapshot with OnClose 1`] = `
           align="xMidYMid"
           bbHeight="100%"
           bbWidth="100%"
-          className="shrink-0 w-4 h-4 stroke-sm font-medium text-f1-foreground"
+          className="shrink-0 w-4 h-4 stroke-sm font-medium text-f0-foreground"
           fill="none"
           focusable={false}
           meetOrSlice={0}

@@ -19,7 +19,7 @@ export const TYPOGRAPHY_VARIANTS = [
 export type TypographyVariant = (typeof TYPOGRAPHY_VARIANTS)[number];
 
 /**
- * Text color variants aligned with F1 semantic color system
+ * Text color variants aligned with F0 semantic color system
  */
 export const TEXT_COLORS = [
   "default",
@@ -76,7 +76,7 @@ interface F0TextPropsInternal extends Omit<RNTextProps, "style"> {
   variant?: TypographyVariant;
 
   /**
-   * Text color from F1 semantic color system
+   * Text color from F0 semantic color system
    * @default "default"
    */
   color?: TextColor;

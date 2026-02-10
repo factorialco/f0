@@ -91,14 +91,14 @@ export const FileAvatar = ({
         <Avatar
           size={size}
           className={cn(
-            "border border-solid border-f1-border-secondary bg-f1-background",
+            "border border-solid border-f0-border-secondary bg-f0-background",
             className,
           )}
           {...props}
         >
           <Text
             className={cn(
-              "font-semibold text-f1-foreground-inverse/90",
+              "font-semibold text-f0-foreground-inverse/90",
               textSizes[size],
               fileColor,
             )}

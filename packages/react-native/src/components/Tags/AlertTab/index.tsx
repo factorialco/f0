@@ -26,17 +26,17 @@ export const AlertTag = <T extends string>({ text, level }: Props<T>) => {
     <BaseTag
       classNameText={cn(
         {
-          info: "text-f1-foreground-info",
-          warning: "text-f1-foreground-warning",
-          critical: "text-f1-foreground-critical",
+          info: "text-f0-foreground-info",
+          warning: "text-f0-foreground-warning",
+          critical: "text-f0-foreground-critical",
         }[level],
       )}
       classNameContainer={cn(
         "pl-0.5",
         {
-          info: "bg-f1-background-info text-f1-foreground-info",
-          warning: "bg-f1-background-warning text-f1-foreground-warning",
-          critical: "bg-f1-background-critical text-f1-foreground-critical",
+          info: "bg-f0-background-info text-f0-foreground-info",
+          warning: "bg-f0-background-warning text-f0-foreground-warning",
+          critical: "bg-f0-background-critical text-f0-foreground-critical",
         }[level],
       )}
       left={
@@ -44,9 +44,9 @@ export const AlertTag = <T extends string>({ text, level }: Props<T>) => {
           icon={iconMap[level]}
           className={cn(
             {
-              info: "text-f1-foreground-info",
-              warning: "text-f1-foreground-warning",
-              critical: "text-f1-foreground-critical",
+              info: "text-f0-foreground-info",
+              warning: "text-f0-foreground-warning",
+              critical: "text-f0-foreground-critical",
             }[level],
           )}
           size="md"

@@ -103,7 +103,7 @@ export const BaseAvatar = ({
           data-a11y-color-contrast-ignore
           className={
             src
-              ? "dark:bg-f1-background-inverse-secondary bg-f1-background"
+              ? "dark:bg-f0-background-inverse-secondary bg-f0-background"
               : ""
           }
         >

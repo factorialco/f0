@@ -4,7 +4,7 @@ import { useCSSVariable } from "uniwind";
 import { DetailsItem } from "../../../src/components/experimental/Lists/DetailsItem";
 
 export function DetailsItemShowcase() {
-  const [f1Foreground] = useCSSVariable(['--color-f1-foreground']);
+  const [f1Foreground] = useCSSVariable(['--color-f0-foreground']);
 
   const asString = (value: string | number | undefined): string => {
     if (typeof value === 'string') return value;
