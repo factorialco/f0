@@ -1,4 +1,5 @@
 import { DateQuestionProps } from "./DateQuestion"
+import { DropdownQuestionProps } from "./DropdownQuestion/types"
 import { LinkQuestionProps } from "./LinkQuestion"
 import { NumericQuestionProps } from "./NumericQuestion"
 import { RatingQuestionProps } from "./RatingQuestion"
@@ -15,6 +16,8 @@ export type QuestionType =
   | "numeric"
   | "link"
   | "date"
+  | "dropdown"
+  | "dropdown-multi"
 
 export type ElementType = QuestionType | "section"
 
@@ -39,6 +42,7 @@ export type QuestionElement =
   | Omit<NumericQuestionProps & { type: "numeric" }, QuestionPropsToOmit>
   | Omit<LinkQuestionProps & { type: "link" }, QuestionPropsToOmit>
   | Omit<DateQuestionProps & { type: "date" }, QuestionPropsToOmit>
+  | Omit<DropdownQuestionProps, QuestionPropsToOmit>
 
 export type CoCreationFormElement =
   | { type: "section"; section: SectionElement }
@@ -98,6 +102,16 @@ type OnChangeQuestionParams = BaseQuestionOnChangeParams &
     | {
         type: "date"
         value?: Date | null
+      }
+    | {
+        type: "dropdown"
+        value?: string | null
+        options: SelectQuestionOption[]
+      }
+    | {
+        type: "dropdown-multi"
+        value?: string[] | null
+        options: SelectQuestionOption[]
       }
   )
 

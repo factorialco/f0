@@ -315,6 +315,8 @@ export const defaultTranslations = {
       rating: "Rating",
       multipleChoice: "Multiple choice",
       singleChoice: "Single choice",
+      dropdown: "Dropdown",
+      dropdownMulti: "Dropdown (multi)",
       text: "Text",
       longText: "Long text",
       numeric: "Numeric",
