@@ -1,8 +1,10 @@
 import { tv, type VariantProps } from "tailwind-variants";
 import React, { forwardRef, useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Pressable, View } from "react-native";
 import { cn } from "../../lib/utils";
 import { Icon, type IconType } from "../Icon";
+import { F0Text } from "../primitives/Text/F0Text";
+import type { TextColor } from "../primitives/Text/F0Text.types";
 
 export const variants = [
   "default",
@@ -93,18 +95,18 @@ const getIconOnlyColor = (variant: ButtonVariant, isPressed: boolean) => {
   }
 };
 
-const getTextColorClass = (variant: ButtonVariant, isPressed: boolean) => {
+const getTextColor = (variant: ButtonVariant, isPressed: boolean): TextColor => {
   if (isPressed && variant === "critical") {
-    return "text-f0-foreground-inverse";
+    return "inverse";
   }
 
   switch (variant) {
     case "default":
-      return "text-f0-foreground-inverse";
+      return "inverse";
     case "critical":
-      return "text-f0-foreground-critical";
+      return "critical";
     default:
-      return "text-f0-foreground";
+      return "default";
   }
 };
 
@@ -192,7 +194,7 @@ export const Button = forwardRef<View, ButtonProps>(function Button(
         {icon && (
           <Icon
             icon={icon}
-            size={size === "sm" ? "sm" : "md"}
+            size="lg"
             className={cn(
               hideLabel && round ? undefined : "-ml-0.5",
               hideLabel && round
@@ -202,24 +204,20 @@ export const Button = forwardRef<View, ButtonProps>(function Button(
           />
         )}
         {emoji && (
-          <Text
-            className={cn(
-              "text-base font-medium",
-              getTextColorClass(variant, shouldShowPressed),
-            )}
+          <F0Text
+            variant="body-md-medium"
+            color={getTextColor(variant, shouldShowPressed)}
           >
             {emoji}
-          </Text>
+          </F0Text>
         )}
         {!hideLabel && (
-          <Text
-            className={cn(
-              "text-base font-medium",
-              getTextColorClass(variant, shouldShowPressed),
-            )}
+          <F0Text
+            variant="body-md-medium"
+            color={getTextColor(variant, shouldShowPressed)}
           >
             {label}
-          </Text>
+          </F0Text>
         )}
       </Pressable>
       {showBadge && variant === "outline" && (
