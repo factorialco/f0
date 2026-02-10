@@ -8,11 +8,11 @@ import {
   ReactNodeViewRenderer,
   type NodeViewProps,
 } from "@tiptap/react"
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useCallback, useState } from "react"
 
 import { F0Button } from "@/components/F0Button"
 import { Spinner } from "@/experimental/Information/Spinner"
-import { CornerHandle, Delete } from "@/icons/app"
+import { Delete } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
@@ -35,7 +35,8 @@ export const DEFAULT_ACCEPTED_TYPES = [
   "image/webp",
 ]
 
-const MIN_WIDTH = 100
+const MIN_WIDTH_PERCENT = 10
+const MAX_WIDTH_PERCENT = 100
 
 const ImageNodeView = ({
   node,
@@ -47,43 +48,7 @@ const ImageNodeView = ({
   const { src, alt, title, uploading, width } = node.attrs
   const isEditable = editor.isEditable
   const translations = useI18n()
-  const imgRef = useRef<HTMLImageElement>(null)
   const [isResizing, setIsResizing] = useState(false)
-  const [isDarkImage, setIsDarkImage] = useState(false)
-
-  useEffect(() => {
-    const img = imgRef.current
-    if (!img || !img.complete) {
-      const handleLoad = () => {
-        detectImageBrightness(img!)
-      }
-      img?.addEventListener("load", handleLoad)
-      return () => img?.removeEventListener("load", handleLoad)
-    }
-    detectImageBrightness(img)
-
-    function detectImageBrightness(imgEl: HTMLImageElement) {
-      try {
-        const canvas = document.createElement("canvas")
-        const size = 32
-        canvas.width = size
-        canvas.height = size
-        const ctx = canvas.getContext("2d", { willReadFrequently: true })
-        if (!ctx) return
-        ctx.drawImage(imgEl, 0, 0, size, size)
-        const data = ctx.getImageData(0, 0, size, size).data
-        let totalBrightness = 0
-        const pixelCount = data.length / 4
-        for (let i = 0; i < data.length; i += 4) {
-          totalBrightness +=
-            (data[i] * 299 + data[i + 1] * 587 + data[i + 2] * 114) / 1000
-        }
-        setIsDarkImage(totalBrightness / pixelCount < 128)
-      } catch {
-        // Cross-origin images will fail — default to light
-      }
-    }
-  }, [src])
 
   const handleResizeStart = useCallback(
     (event: React.MouseEvent) => {
@@ -91,94 +56,79 @@ const ImageNodeView = ({
       event.stopPropagation()
 
       const startX = event.clientX
-      const startWidth = imgRef.current?.offsetWidth ?? 0
-      const maxWidth = editor.view.dom.clientWidth
+      const startWidth = (width as number) ?? MAX_WIDTH_PERCENT
+      const editorWidth = editor.view.dom.clientWidth
 
       const handleMouseMove = (e: MouseEvent) => {
+        const deltaX = e.clientX - startX
+        const deltaPercent = (deltaX / editorWidth) * 100
         const newWidth = Math.min(
-          maxWidth,
-          Math.max(MIN_WIDTH, startWidth + (e.clientX - startX))
+          MAX_WIDTH_PERCENT,
+          Math.max(MIN_WIDTH_PERCENT, startWidth + deltaPercent)
         )
-        if (imgRef.current) {
-          imgRef.current.style.width = `${newWidth}px`
-        }
+        updateAttributes({ width: Math.round(newWidth) })
       }
 
       const handleMouseUp = () => {
+        setIsResizing(false)
         document.removeEventListener("mousemove", handleMouseMove)
         document.removeEventListener("mouseup", handleMouseUp)
-        setIsResizing(false)
-
-        const finalWidth = imgRef.current?.offsetWidth ?? startWidth
-        updateAttributes({ width: finalWidth })
       }
 
       setIsResizing(true)
       document.addEventListener("mousemove", handleMouseMove)
       document.addEventListener("mouseup", handleMouseUp)
     },
-    [updateAttributes]
+    [editor, width, updateAttributes]
   )
 
-  const showResizeHandle = isEditable && !uploading && (selected || isResizing)
-  const showSelectionRing = selected || isResizing
-
   return (
-    <NodeViewWrapper className="mb-2" data-drag-handle>
+    <NodeViewWrapper className="mb-2">
       <div
+        style={{ width: `${(width as number) ?? MAX_WIDTH_PERCENT}%` }}
         className={cn(
-          "relative inline-block rounded-lg outline-none transition-shadow duration-200 ease-out",
-          showSelectionRing &&
-            (isDarkImage
-              ? "shadow-[0_0_0_1.5px_rgba(255,255,255,0.95),0_0_0_1px_rgba(255,255,255,0.1),0_2px_8px_rgba(0,0,0,0.3)]"
-              : "shadow-[0_0_0_1.5px_rgba(0,0,0,0.95),0_0_0_1px_rgba(0,0,0,0.1),0_2px_8px_rgba(0,0,0,0.12)]")
+          "image-resizable-wrapper group/image relative rounded-lg",
+          selected && "border-2 border-f1-border-selected-bold border-solid",
+          isResizing && "select-none"
         )}
       >
         <img
-          ref={imgRef}
           src={src}
           alt={alt}
           title={title}
           draggable={false}
-          style={width ? { width: `${width}px` } : undefined}
-          className={cn(
-            "block h-auto max-w-full rounded-md outline-none",
-            !isResizing && "transition-all duration-150 ease-out"
-          )}
+          className="block h-auto w-full rounded-md transition-all duration-150 ease-out"
         />
-        {showResizeHandle && (
-          <div
-            tabIndex={-1}
-            aria-hidden="true"
-            className="absolute -bottom-1 -right-1 flex h-5 w-5 cursor-se-resize items-center justify-center rounded-sm bg-white text-black outline-none shadow-[0_0_0_1px_rgba(0,0,0,0.15),0_2px_6px_rgba(0,0,0,0.2)] transition-transform duration-150 ease-out hover:scale-110 focus:outline-none focus-visible:outline-none active:scale-95 dark:bg-white dark:text-black dark:shadow-[0_0_0_1px_rgba(255,255,255,0.3),0_2px_6px_rgba(0,0,0,0.4)]"
-            onMouseDown={handleResizeStart}
-          >
-            <CornerHandle className="h-3 w-3" />
-          </div>
-        )}
         {uploading && (
           <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-f1-background-secondary backdrop-blur-[2px] transition-opacity duration-200">
             <Spinner size="medium" />
           </div>
         )}
         {isEditable && !uploading && (
-          <div
-            className={cn(
-              "absolute right-2 top-2 rounded-md backdrop-blur-sm transition-colors",
-              isDarkImage
-                ? "bg-black/60 text-white shadow-[0_0_0_1px_rgba(255,255,255,0.15),0_2px_6px_rgba(0,0,0,0.3)]"
-                : "bg-white/90 text-black shadow-[0_0_0_1px_rgba(0,0,0,0.1),0_2px_6px_rgba(0,0,0,0.15)]"
-            )}
-          >
+          <div className="absolute right-2 top-2 opacity-0 transition-opacity group-hover/image:opacity-100">
             <F0Button
               onClick={deleteNode}
               label={translations.actions.delete}
               icon={Delete}
-              variant="ghost"
+              variant="default"
               hideLabel
-              size="sm"
             />
           </div>
+        )}
+        {isEditable && !uploading && (
+          <div
+            className={cn(
+              "absolute right-2 top-1/2 -translate-y-1/2 flex cursor-col-resize items-center justify-center",
+              "h-12 w-2 rounded-sm border border-solid border-f1-border bg-f1-foreground-inverse-secondary",
+              "opacity-0 transition-opacity group-hover/image:opacity-100",
+              isResizing && "opacity-100"
+            )}
+            onMouseDown={handleResizeStart}
+            role="separator"
+            aria-orientation="vertical"
+            aria-label="Resize image"
+            tabIndex={0}
+          />
         )}
       </div>
     </NodeViewWrapper>
@@ -190,16 +140,22 @@ export const ImageExtension = Image.extend({
     return {
       ...this.parent?.(),
       width: {
-        default: null,
-        renderHTML: (attributes) => {
-          if (!attributes.width) return {}
-          return { width: attributes.width }
+        default: MAX_WIDTH_PERCENT,
+        parseHTML: (element: HTMLElement) => {
+          const widthStyle = element.style.width
+          if (widthStyle?.endsWith("%")) {
+            return parseInt(widthStyle, 10) || MAX_WIDTH_PERCENT
+          }
+          return MAX_WIDTH_PERCENT
         },
-        parseHTML: (element) => {
-          const width = element.getAttribute("width")
-          return width ? Number(width) : null
+        renderHTML: (attributes: Record<string, unknown>) => {
+          if (!attributes.width || attributes.width === MAX_WIDTH_PERCENT) {
+            return {}
+          }
+          return { style: `width: ${attributes.width}%` }
         },
       },
+      // We need it to track the uploading state and visual feedback
       uploading: {
         default: false,
         renderHTML: () => ({}),
