@@ -5,7 +5,7 @@ exports[`DetailsItem Snapshot type company 1`] = `
   className="flex gap-0.5"
 >
   <View
-    className="min-w-32 max-w-72"
+    className="max-w-72 min-w-32"
   >
     <Text
       className="px-1.5 text-f1-foreground-secondary"
@@ -62,7 +62,7 @@ exports[`DetailsItem Snapshot type company 1`] = `
               >
                 <View
                   aria-hidden={true}
-                  className="flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold w-5 h-5 rounded-xs dark:bg-f1-background-inverse-secondary bg-f1-background"
+                  className="flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold w-5 h-5 rounded-xs bg-f1-background dark:bg-f1-background-inverse-secondary"
                   data-a11y-color-contrast-ignore={true}
                   role="img"
                 >
@@ -193,7 +193,7 @@ exports[`DetailsItem Snapshot type dot-tag 1`] = `
   className="flex gap-0.5"
 >
   <View
-    className="min-w-32 max-w-72"
+    className="max-w-72 min-w-32"
   >
     <Text
       className="px-1.5 text-f1-foreground-secondary"
@@ -263,7 +263,7 @@ exports[`DetailsItem Snapshot type dot-tag 1`] = `
               }
             />
             <Text
-              className="text-f1-foreground line-clamp-1 text-base font-medium"
+              className="line-clamp-1 text-base font-medium text-f1-foreground"
             >
               Activity
             </Text>
@@ -280,7 +280,7 @@ exports[`DetailsItem Snapshot type item 1`] = `
   className="flex gap-0.5"
 >
   <View
-    className="min-w-32 max-w-72"
+    className="max-w-72 min-w-32"
   >
     <Text
       className="px-1.5 text-f1-foreground-secondary"
@@ -435,7 +435,7 @@ exports[`DetailsItem Snapshot type person 1`] = `
   className="flex gap-0.5"
 >
   <View
-    className="min-w-32 max-w-72"
+    className="max-w-72 min-w-32"
   >
     <Text
       className="px-1.5 text-f1-foreground-secondary"
@@ -611,7 +611,7 @@ exports[`DetailsItem Snapshot type team 1`] = `
   className="flex gap-0.5"
 >
   <View
-    className="min-w-32 max-w-72"
+    className="max-w-72 min-w-32"
   >
     <Text
       className="px-1.5 text-f1-foreground-secondary"
