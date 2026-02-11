@@ -39,7 +39,7 @@ exports[`Button Snapshot - critical variant 1`] = `
     onStartShouldSetResponder={[Function]}
   >
     <Text
-      className="text-base font-medium text-f0-foreground-critical"
+      className="text-[16px] leading-[24px] font-medium text-f0-foreground-critical text-left"
     >
       Test Button
     </Text>
@@ -86,7 +86,7 @@ exports[`Button Snapshot - default button 1`] = `
     onStartShouldSetResponder={[Function]}
   >
     <Text
-      className="text-base font-medium text-f0-foreground-inverse"
+      className="text-[16px] leading-[24px] font-medium text-f0-foreground-inverse text-left"
     >
       Test Button
     </Text>
@@ -133,7 +133,7 @@ exports[`Button Snapshot - different sizes 1`] = `
     onStartShouldSetResponder={[Function]}
   >
     <Text
-      className="text-base font-medium text-f0-foreground-inverse"
+      className="text-[16px] leading-[24px] font-medium text-f0-foreground-inverse text-left"
     >
       Test Button
     </Text>
@@ -180,7 +180,7 @@ exports[`Button Snapshot - different sizes 2`] = `
     onStartShouldSetResponder={[Function]}
   >
     <Text
-      className="text-base font-medium text-f0-foreground-inverse"
+      className="text-[16px] leading-[24px] font-medium text-f0-foreground-inverse text-left"
     >
       Test Button
     </Text>
@@ -227,7 +227,7 @@ exports[`Button Snapshot - different sizes 3`] = `
     onStartShouldSetResponder={[Function]}
   >
     <Text
-      className="text-base font-medium text-f0-foreground-inverse"
+      className="text-[16px] leading-[24px] font-medium text-f0-foreground-inverse text-left"
     >
       Test Button
     </Text>
@@ -274,7 +274,7 @@ exports[`Button Snapshot - disabled state 1`] = `
     onStartShouldSetResponder={[Function]}
   >
     <Text
-      className="text-base font-medium text-f0-foreground-inverse"
+      className="text-[16px] leading-[24px] font-medium text-f0-foreground-inverse text-left"
     >
       Test Button
     </Text>
@@ -321,7 +321,7 @@ exports[`Button Snapshot - loading state 1`] = `
     onStartShouldSetResponder={[Function]}
   >
     <Text
-      className="text-base font-medium text-f0-foreground-inverse"
+      className="text-[16px] leading-[24px] font-medium text-f0-foreground-inverse text-left"
     >
       Test Button
     </Text>
@@ -368,7 +368,7 @@ exports[`Button Snapshot - outline variant 1`] = `
     onStartShouldSetResponder={[Function]}
   >
     <Text
-      className="text-base font-medium text-f0-foreground"
+      className="text-[16px] leading-[24px] font-medium text-f0-foreground text-left"
     >
       Test Button
     </Text>
@@ -456,12 +456,12 @@ exports[`Button Snapshot - with emoji 1`] = `
     onStartShouldSetResponder={[Function]}
   >
     <Text
-      className="text-base font-medium text-f0-foreground-inverse"
+      className="text-[16px] leading-[24px] font-medium text-f0-foreground-inverse text-left"
     >
       👋
     </Text>
     <Text
-      className="text-base font-medium text-f0-foreground-inverse"
+      className="text-[16px] leading-[24px] font-medium text-f0-foreground-inverse text-left"
     >
       Test Button
     </Text>
@@ -508,7 +508,7 @@ exports[`Button Snapshot - with icon 1`] = `
     onStartShouldSetResponder={[Function]}
   >
     <Text
-      className="text-base font-medium text-f0-foreground-inverse"
+      className="text-[16px] leading-[24px] font-medium text-f0-foreground-inverse text-left"
     >
       Test Button
     </Text>
