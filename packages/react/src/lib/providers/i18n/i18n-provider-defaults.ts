@@ -66,6 +66,9 @@ export const defaultTranslations = {
       singular: "Selected",
       plural: "Selected",
       all: "All selected",
+      allOnPage: "All items on this page are selected",
+      selectAllItems: "Select all {{total}} items",
+      allItemsSelected: "All {{total}} items selected",
     },
   },
   syncStatus: {

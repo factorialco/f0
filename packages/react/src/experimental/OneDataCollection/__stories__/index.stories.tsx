@@ -886,7 +886,7 @@ export const WithPageOnlySelection: Story = {
     return (
       <ExampleComponent
         selectable={(item) => item.id}
-        pageOnlySelection={true} // Default behavior - selection resets on page change
+        // Page-only selection is the default behavior - selection resets on page change
         dataAdapter={createDataAdapter({
           data: paginatedMockUsers,
           delay: 500,
@@ -914,7 +914,7 @@ export const WithCrossPageSelection: Story = {
     return (
       <ExampleComponent
         selectable={(item) => item.id}
-        pageOnlySelection={false} // Maintain selection across pages
+        allPagesSelection={true} // Maintain selection across pages
         dataAdapter={createDataAdapter({
           data: paginatedMockUsers,
           delay: 500,

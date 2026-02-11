@@ -38,7 +38,7 @@ export function useSelectable<
   onSelectItems,
   disableSelectAll = false,
   isSearchActive = false,
-  pageOnlySelection,
+  allPagesSelection,
 }: UseSelectableProps<R, Filters, Sortings, Grouping>): UseSelectableReturn<
   R,
   Filters
@@ -47,9 +47,13 @@ export function useSelectable<
   const isGrouped = data.type === "grouped"
   const isMultiSelection = selectionMode === "multi"
   const getSelectable = source.selectable
-  // Use pageOnlySelection from props, falling back to source.pageOnlySelection, default true
-  const isPageOnlySelection =
-    pageOnlySelection ?? source.pageOnlySelection ?? true
+  // Use allPagesSelection from props, falling back to source.allPagesSelection, default false
+  // When allPagesSelection is false (default), selection is scoped to the current page only
+  const isPageOnlySelection = !(
+    allPagesSelection ??
+    source.allPagesSelection ??
+    false
+  )
 
   // State & Refs
 
@@ -74,7 +78,7 @@ export function useSelectable<
   const previousSelectionState = useRef<string>("")
   const isAllSelectedRef = useRef(false)
   const justClearedByFilterChange = useRef(false)
-  // Track current page/cursor for pageOnlySelection mode - initialized as undefined
+  // Track current page/cursor for page-only selection mode - initialized as undefined
   const previousPageIdentifierRef = useRef<string | number | null | undefined>(
     undefined
   )
@@ -82,7 +86,7 @@ export function useSelectable<
   // Computed Values
 
   const totalKnownItemsCount = useMemo(() => {
-    // In pageOnlySelection mode, only count items in current page
+    // In page-only selection mode, only count items in current page
     if (isPageOnlySelection) {
       return data.records?.length || 0
     }
@@ -218,7 +222,7 @@ export function useSelectable<
   const { itemsStatus, selectedIds } = useMemo(() => {
     const items = localSelectedState.items || new Map()
 
-    // In pageOnlySelection mode, only include items from current page
+    // In page-only selection mode, only include items from current page
     const currentPageItemIds = isPageOnlySelection
       ? new Set(
           data.records
@@ -230,7 +234,7 @@ export function useSelectable<
     const itemsStatus = Array.from(items.values())
       .filter((itemState) => {
         if (itemState.item === undefined) return false
-        // Filter to only current page items in pageOnlySelection mode
+        // Filter to only current page items in page-only selection mode
         if (isPageOnlySelection && currentPageItemIds) {
           return currentPageItemIds.has(itemState.id)
         }
@@ -241,7 +245,7 @@ export function useSelectable<
     const selectedIds = Array.from(items.entries())
       .filter(([id, itemState]) => {
         if (!itemState.checked) return false
-        // Filter to only current page items in pageOnlySelection mode
+        // Filter to only current page items in page-only selection mode
         if (isPageOnlySelection && currentPageItemIds) {
           return currentPageItemIds.has(id)
         }
@@ -648,7 +652,7 @@ export function useSelectable<
     }
   }, [source.currentFilters, clearSelectedItems, disableSelectAll])
 
-  // Clear selections when page changes in pageOnlySelection mode
+  // Clear selections when page changes in page-only selection mode
   useEffect(() => {
     if (!isPageOnlySelection) return
 
@@ -794,7 +798,8 @@ export function useSelectable<
         filters: source.currentFilters || {},
         selectedCount: selectedItemsCount,
       },
-      clearSelectedItems
+      clearSelectedItems,
+      handleSelectAll
     )
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [

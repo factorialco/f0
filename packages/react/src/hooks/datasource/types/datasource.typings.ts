@@ -69,11 +69,15 @@ export type DataSourceDefinition<
   /** Default selected items */
   defaultSelectedItems?: SelectedItemsState<R>
   /**
-   * When true, selection state is scoped to the current page only.
+   * When true, selection spans across all pages (cross-page selection).
+   * - Selection state persists when navigating between pages
+   * - itemStatus includes items from all pages
+   *
+   * When false (default), selection is scoped to the current page only:
    * - Selection state resets when navigating between pages
    * - itemStatus only includes items from the current page
    */
-  pageOnlySelection?: boolean
+  allPagesSelection?: boolean
 
   /***** GROUPING ***************************************************/
   /** Grouping configuration */

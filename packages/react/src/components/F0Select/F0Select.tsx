@@ -361,7 +361,7 @@ const F0SelectComponent = forwardRef(function Select<
     selectedState: initialSelectedState,
     disableSelectAll: disableSelectAll,
     isSearchActive: !!currentSearch,
-    pageOnlySelection: false,
+    allPagesSelection: true,
   })
 
   /**

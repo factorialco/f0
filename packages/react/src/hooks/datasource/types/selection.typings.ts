@@ -46,5 +46,6 @@ export type OnSelectItemsCallback<
   selectedItems: SelectedItemsDetailedStatus<R, Filters> & {
     byLane?: Record<string, SelectedItemsDetailedStatus<R, Filters>>
   },
-  clearSelectedItems: () => void
+  clearSelectedItems: () => void,
+  handleSelectAll?: (checked: boolean) => void
 ) => void
