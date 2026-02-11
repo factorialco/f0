@@ -1,4 +1,3 @@
-import { zodResolver } from "@hookform/resolvers/zod"
 import { useMemo } from "react"
 import { DefaultValues, Path, useForm } from "react-hook-form"
 import { z, ZodRawShape } from "zod"
@@ -14,6 +13,7 @@ import { Form as FormProvider } from "@/ui/form"
 import { RowRenderer } from "./components/RowRenderer"
 import { SectionRenderer } from "./components/SectionRenderer"
 import { SwitchGroupRenderer } from "./components/SwitchGroupRenderer"
+import { createConditionalResolver } from "./conditionalResolver"
 import { FIELD_GAP, SECTION_MARGIN } from "./constants"
 import { F0FormContext } from "./context"
 import { FieldRenderer } from "./fields/FieldRenderer"
@@ -188,9 +188,15 @@ export function F0Form<TSchema extends z.ZodObject<ZodRawShape>>(
   // Map our errorTriggerMode to react-hook-form's mode
   const formMode = ERROR_TRIGGER_MODE_MAP[errorTriggerMode]
 
+  // Create conditional resolver that skips validation for hidden fields
+  const conditionalResolver = useMemo(
+    () => createConditionalResolver(schema, { errorMap }),
+    [schema, errorMap]
+  )
+
   // Initialize form with react-hook-form
   const form = useForm<TValues>({
-    resolver: zodResolver(schema, { errorMap }),
+    resolver: conditionalResolver,
     mode: formMode,
     defaultValues: defaultValues as DefaultValues<TValues>,
   })

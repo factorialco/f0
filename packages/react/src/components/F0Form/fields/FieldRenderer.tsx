@@ -158,6 +158,10 @@ function renderFieldInput({
  *
  * Note: Switch fields rendered individually (not in a group) use this renderer.
  * Contiguous switch fields are grouped by parent components (F0Form, SectionRenderer).
+ *
+ * IMPORTANT: The FormFieldPrimitive (Controller) must stay mounted even when the field
+ * is hidden to preserve the field value. We achieve this by rendering the Controller
+ * always but hiding the visual content when renderIf evaluates to false.
  */
 export function FieldRenderer({ field, sectionId }: FieldRendererProps) {
   const form = useFormContext()
@@ -165,10 +169,8 @@ export function FieldRenderer({ field, sectionId }: FieldRendererProps) {
   const { isSubmitting } = form.formState
   const { formName } = useF0FormContext()
 
-  // Check if field should be rendered based on renderIf condition
-  if (field.renderIf && !evaluateRenderIf(field.renderIf, values)) {
-    return null
-  }
+  // Check if field should be visible based on renderIf condition
+  const isVisible = !field.renderIf || evaluateRenderIf(field.renderIf, values)
 
   // For checkbox and custom fields, label is handled internally
   const showLabel = field.type !== "checkbox" && field.type !== "custom"
@@ -178,6 +180,18 @@ export function FieldRenderer({ field, sectionId }: FieldRendererProps) {
 
   // Generate anchor ID for the field
   const anchorId = generateAnchorId(formName, sectionId, field.id)
+
+  // When field is hidden based on renderIf, we still need to keep the Controller
+  // mounted to preserve the field value. We render an empty hidden span.
+  if (!isVisible) {
+    return (
+      <FormFieldPrimitive
+        control={form.control}
+        name={field.id}
+        render={() => <span className="hidden" aria-hidden="true" />}
+      />
+    )
+  }
 
   return (
     <FormFieldPrimitive
