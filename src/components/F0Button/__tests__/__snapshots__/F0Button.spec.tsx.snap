@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
-exports[`Button Snapshot - critical variant 1`] = `
+exports[`F0Button Snapshot - critical variant 1`] = `
 <View
   className="flex item-start"
 >
@@ -77,7 +77,7 @@ exports[`Button Snapshot - critical variant 1`] = `
 </View>
 `;
 
-exports[`Button Snapshot - default button 1`] = `
+exports[`F0Button Snapshot - default button 1`] = `
 <View
   className="flex item-start"
 >
@@ -154,7 +154,7 @@ exports[`Button Snapshot - default button 1`] = `
 </View>
 `;
 
-exports[`Button Snapshot - different sizes 1`] = `
+exports[`F0Button Snapshot - different sizes 1`] = `
 <View
   className="flex item-start"
 >
@@ -231,7 +231,7 @@ exports[`Button Snapshot - different sizes 1`] = `
 </View>
 `;
 
-exports[`Button Snapshot - different sizes 2`] = `
+exports[`F0Button Snapshot - different sizes 2`] = `
 <View
   className="flex item-start"
 >
@@ -308,7 +308,7 @@ exports[`Button Snapshot - different sizes 2`] = `
 </View>
 `;
 
-exports[`Button Snapshot - different sizes 3`] = `
+exports[`F0Button Snapshot - different sizes 3`] = `
 <View
   className="flex item-start"
 >
@@ -385,7 +385,7 @@ exports[`Button Snapshot - different sizes 3`] = `
 </View>
 `;
 
-exports[`Button Snapshot - disabled state 1`] = `
+exports[`F0Button Snapshot - disabled state 1`] = `
 <View
   className="flex item-start"
 >
@@ -462,7 +462,7 @@ exports[`Button Snapshot - disabled state 1`] = `
 </View>
 `;
 
-exports[`Button Snapshot - loading state 1`] = `
+exports[`F0Button Snapshot - loading state 1`] = `
 <View
   className="flex item-start"
 >
@@ -539,7 +539,7 @@ exports[`Button Snapshot - loading state 1`] = `
 </View>
 `;
 
-exports[`Button Snapshot - outline variant 1`] = `
+exports[`F0Button Snapshot - outline variant 1`] = `
 <View
   className="flex item-start"
 >
@@ -616,7 +616,7 @@ exports[`Button Snapshot - outline variant 1`] = `
 </View>
 `;
 
-exports[`Button Snapshot - round button with hidden label 1`] = `
+exports[`F0Button Snapshot - round button with hidden label 1`] = `
 <View
   className="flex item-start"
 >
@@ -687,7 +687,7 @@ exports[`Button Snapshot - round button with hidden label 1`] = `
 </View>
 `;
 
-exports[`Button Snapshot - with emoji 1`] = `
+exports[`F0Button Snapshot - with emoji 1`] = `
 <View
   className="flex item-start"
 >
@@ -769,7 +769,7 @@ exports[`Button Snapshot - with emoji 1`] = `
 </View>
 `;
 
-exports[`Button Snapshot - with icon 1`] = `
+exports[`F0Button Snapshot - with icon 1`] = `
 <View
   className="flex item-start"
 >

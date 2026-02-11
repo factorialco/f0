@@ -2,6 +2,7 @@ export * from "./Activity/ActivityItem";
 export * from "./Avatars/exports";
 export * from "./Badge";
 export * from "./Button";
+export * from "./F0Button";
 export * from "./Counter";
 export * from "./ExampleComponent";
 export * from "./Navigation/PageHeader";
