@@ -360,9 +360,10 @@ const OneDataCollectionComp = <
     )
 
     /**
-     * Selected items count
+     * Selected items count — use the actual loaded selected IDs length
+     * instead of selectedCount, which may include unloaded paginated items.
      */
-    setSelectedItemsCount(selectedItems.selectedCount)
+    setSelectedItemsCount(selectedItems.selectedIds.length)
 
     /**
      * Clear selected items function
