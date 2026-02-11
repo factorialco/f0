@@ -24,7 +24,7 @@ export const RawTag = ({
     <BaseTag
       classNameContainer={cn(
         !noBorder && "border border-solid border-f0-border-secondary",
-        className,
+        className
       )}
       classNameText="text-f0-foreground"
       left={

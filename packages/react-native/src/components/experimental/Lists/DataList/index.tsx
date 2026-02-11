@@ -42,7 +42,7 @@ const _DataList = ({
         <Text
           className={cn(
             "px-1.5 text-f0-foreground-secondary",
-            isHorizontalItem ? "mt-1.5 w-36 shrink-0" : "",
+            isHorizontalItem ? "mt-1.5 w-36 shrink-0" : ""
           )}
         >
           {label}

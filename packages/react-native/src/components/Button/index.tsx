@@ -1,10 +1,11 @@
-import { tv, type VariantProps } from "tailwind-variants";
-import React, { forwardRef, useState } from "react";
-import { Pressable, View } from "react-native";
-import { cn } from "../../lib/utils";
-import { F0Icon, type IconType } from "../primitives/Icon";
-import { F0Text } from "../primitives/Text/F0Text";
-import type { TextColor } from "../primitives/Text/F0Text.types";
+import React, { forwardRef, useState } from "react"
+import { Pressable, View } from "react-native"
+import { tv, type VariantProps } from "tailwind-variants"
+
+import { cn } from "../../lib/utils"
+import { F0Icon, type IconType } from "../primitives/Icon"
+import { F0Text } from "../primitives/Text/F0Text"
+import type { TextColor } from "../primitives/Text/F0Text.types"
 
 export const variants = [
   "default",
@@ -72,41 +73,44 @@ const pressedVariants = tv({
 const getIconColor = (variant: ButtonVariant, isPressed: boolean) => {
   switch (variant) {
     case "default":
-      return "text-f0-icon-inverse";
+      return "text-f0-icon-inverse"
     case "critical":
-      return isPressed ? "text-f0-icon-inverse" : "text-f0-icon-critical-bold";
+      return isPressed ? "text-f0-icon-inverse" : "text-f0-icon-critical-bold"
     default:
-      return "text-f0-icon";
+      return "text-f0-icon"
   }
 }
 
 const getIconOnlyColor = (variant: ButtonVariant, isPressed: boolean) => {
   switch (variant) {
     case "critical":
-      return isPressed ? "text-f0-icon-inverse" : "text-f0-icon-critical-bold";
+      return isPressed ? "text-f0-icon-inverse" : "text-f0-icon-critical-bold"
     case "default":
-      return "text-f0-icon-inverse";
+      return "text-f0-icon-inverse"
     case "outline":
     case "neutral":
     case "ghost":
     case "promote":
     default:
-      return "text-f0-icon-bold";
+      return "text-f0-icon-bold"
   }
 }
 
-const getTextColor = (variant: ButtonVariant, isPressed: boolean): TextColor => {
+const getTextColor = (
+  variant: ButtonVariant,
+  isPressed: boolean
+): TextColor => {
   if (isPressed && variant === "critical") {
-    return "inverse";
+    return "inverse"
   }
 
   switch (variant) {
     case "default":
-      return "inverse";
+      return "inverse"
     case "critical":
-      return "critical";
+      return "critical"
     default:
-      return "default";
+      return "default"
   }
 }
 
@@ -223,7 +227,7 @@ export const Button = forwardRef<View, ButtonProps>(function Button(
       {showBadge && variant === "outline" && (
         <View
           accessibilityLabel="Notification Badge"
-          className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-f0-icon-accent"
+          className="absolute top-1.5 right-1.5 h-1.5 w-1.5 rounded-full bg-f0-icon-accent"
         />
       )}
     </View>

@@ -94,7 +94,7 @@ export const FileAvatar = ({
           size={size}
           className={cn(
             "border border-solid border-f0-border-secondary bg-f0-background",
-            className,
+            className
           )}
           {...props}
         >

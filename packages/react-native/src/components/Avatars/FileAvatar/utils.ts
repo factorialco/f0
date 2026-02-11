@@ -22,7 +22,7 @@ const FILE_TYPE_MAP: Record<string, FileTypeInfo> = {
   html: { type: "HTML", color: "text-f0-foreground-accent" },
   markdown: { type: "MD", color: "text-f0-foreground-secondary" },
   default: { type: "FILE", color: "text-f0-foreground" },
-};
+}
 
 const MIME_MATCH_MAP: Record<string, keyof typeof FILE_TYPE_MAP> = {
   pdf: "pdf",

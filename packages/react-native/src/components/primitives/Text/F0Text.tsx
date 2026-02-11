@@ -1,7 +1,8 @@
-import React from "react";
-import { Text as RNText } from "react-native";
-import { textVariants } from "./F0Text.styles";
-import type { F0TextProps } from "./F0Text.types";
+import React from "react"
+import { Text as RNText } from "react-native"
+
+import { textVariants } from "./F0Text.styles"
+import type { F0TextProps } from "./F0Text.types"
 
 /**
  * F0Text - Primitive Text component with semantic typography variants
@@ -23,7 +24,7 @@ const F0TextComponent = React.forwardRef<RNText, F0TextProps>(
       numberOfLines,
       ...rest
     },
-    ref,
+    ref
   ) => {
     const textClassName = React.useMemo(
       () =>
@@ -34,8 +35,8 @@ const F0TextComponent = React.forwardRef<RNText, F0TextProps>(
           decoration,
           transform,
         }),
-      [variant, color, align, decoration, transform],
-    );
+      [variant, color, align, decoration, transform]
+    )
 
     return (
       <RNText
@@ -47,27 +48,27 @@ const F0TextComponent = React.forwardRef<RNText, F0TextProps>(
       >
         {children}
       </RNText>
-    );
-  },
-);
+    )
+  }
+)
 
-F0TextComponent.displayName = "F0Text";
+F0TextComponent.displayName = "F0Text"
 
-export const F0Text = React.memo(F0TextComponent);
+export const F0Text = React.memo(F0TextComponent)
 
 // Export types
-export type { F0TextProps };
+export type { F0TextProps }
 export {
   TYPOGRAPHY_VARIANTS,
   TEXT_COLORS,
   TEXT_ALIGN,
   TEXT_DECORATIONS,
   TEXT_TRANSFORMS,
-} from "./F0Text.types";
+} from "./F0Text.types"
 export type {
   TypographyVariant,
   TextColor,
   TextAlign,
   TextDecoration,
   TextTransform,
-} from "./F0Text.types";
+} from "./F0Text.types"

@@ -29,7 +29,7 @@ export const AlertTag = <T extends string>({ text, level }: Props<T>) => {
           info: "text-f0-foreground-info",
           warning: "text-f0-foreground-warning",
           critical: "text-f0-foreground-critical",
-        }[level],
+        }[level]
       )}
       classNameContainer={cn(
         "pl-0.5",
@@ -37,7 +37,7 @@ export const AlertTag = <T extends string>({ text, level }: Props<T>) => {
           info: "bg-f0-background-info text-f0-foreground-info",
           warning: "bg-f0-background-warning text-f0-foreground-warning",
           critical: "bg-f0-background-critical text-f0-foreground-critical",
-        }[level],
+        }[level]
       )}
       left={
         <F0Icon
@@ -47,7 +47,7 @@ export const AlertTag = <T extends string>({ text, level }: Props<T>) => {
               info: "text-f0-foreground-info",
               warning: "text-f0-foreground-warning",
               critical: "text-f0-foreground-critical",
-            }[level],
+            }[level]
           )}
           size="md"
           aria-hidden

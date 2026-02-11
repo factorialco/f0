@@ -24,7 +24,11 @@ export const IconAvatar = ({ icon, size = "md", className }: Props) => {
         className
       )}
     >
-      <F0Icon icon={icon} size={size} className="text-f0-foreground-secondary" />
+      <F0Icon
+        icon={icon}
+        size={size}
+        className="text-f0-foreground-secondary"
+      />
     </View>
   )
 }

@@ -15,7 +15,7 @@ Primitive text component for React Native with semantic typography variants and 
 ## Installation
 
 ```tsx
-import { F0Text } from "@factorialco/f0-react-native";
+import { F0Text } from "@factorialco/f0-react-native"
 ```
 
 ## Usage
@@ -146,24 +146,24 @@ F0Text doesn't accept `className` to prevent typography override. Use a View wra
 {
   /* Spacing with View wrapper */
 }
-<View className="mb-2 mt-4">
+;<View className="mt-4 mb-2">
   <F0Text variant="body-sm-default">Text with margin</F0Text>
-</View>;
+</View>
 
 {
   /* Layout with View wrapper */
 }
-<View className="flex-1">
+;<View className="flex-1">
   <F0Text variant="body-sm-default">Flexible text</F0Text>
-</View>;
+</View>
 
 {
   /* Icon + Text pattern */
 }
-<View className="flex-row items-center gap-2">
+;<View className="flex-row items-center gap-2">
   <F0Icon icon={Check} size="sm" />
   <F0Text variant="body-sm-default">Success message</F0Text>
-</View>;
+</View>
 ```
 
 ### Combined Props
@@ -195,7 +195,7 @@ F0Text doesn't accept `className` to prevent typography override. Use a View wra
 ### Real-world Card Example
 
 ```tsx
-<View className="bg-f0-background-secondary rounded-lg p-4">
+<View className="rounded-lg bg-f0-background-secondary p-4">
   <View className="mb-2">
     <F0Text variant="heading-sm">Card Title</F0Text>
   </View>

@@ -1,4 +1,4 @@
-import { tv } from "tailwind-variants";
+import { tv } from "tailwind-variants"
 
 /**
  * F0Icon tailwind-variants configuration
@@ -21,4 +21,4 @@ export const iconVariants = tv({
   defaultVariants: {
     size: "md",
   },
-});
+})

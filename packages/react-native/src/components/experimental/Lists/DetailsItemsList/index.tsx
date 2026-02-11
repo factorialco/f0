@@ -29,7 +29,7 @@ export const DetailsItemsList = function DetailsItemList({
           "flex",
           tableView
             ? "rounded-[16px] border border-solid border-f0-border-secondary"
-            : "gap-3",
+            : "gap-3"
         )}
       >
         {details?.map((item, index) => (

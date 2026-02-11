@@ -108,9 +108,9 @@ export const baseColors = {
     60: "258 56% 56%",
     70: "258 43% 46%",
   },
-} as const;
+} as const
 
-export type BaseColor = keyof typeof baseColors;
+export type BaseColor = keyof typeof baseColors
 
 export const f0Colors = {
   foreground: {
@@ -243,6 +243,6 @@ export const f0Colors = {
     page: "hsl(var(--page))",
     highlight: "hsl(var(--accent-50))",
   },
-} as const;
+} as const
 
-export type F0Color = keyof typeof f0Colors;
+export type F0Color = keyof typeof f0Colors

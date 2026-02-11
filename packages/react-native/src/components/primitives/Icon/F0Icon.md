@@ -36,8 +36,8 @@ import { Archive, Home } from '@/icons/app';
 - **Description:** SVG icon component to render (from `icons/` directory)
 
 ```tsx
-import { Archive } from "@/icons/app";
-<F0Icon icon={Archive} />;
+import { Archive } from "@/icons/app"
+;<F0Icon icon={Archive} />
 ```
 
 ### `size`
@@ -101,7 +101,7 @@ F0Icon automatically applies UniWind interop to icon components using `withUniwi
 
 ```tsx
 // Handled internally - no action needed
-const IconComponent = useMemo(() => applyIconInterop(icon), [icon]);
+const IconComponent = useMemo(() => applyIconInterop(icon), [icon])
 ```
 
 ### Performance
@@ -130,31 +130,31 @@ Style prop is blocked at compile-time to enforce className usage:
 ### Basic Icon
 
 ```tsx
-import { F0Icon } from "@/components/primitives/Icon";
-import { Archive } from "@/icons/app";
+import { F0Icon } from "@/components/primitives/Icon"
+import { Archive } from "@/icons/app"
 
-<F0Icon icon={Archive} />;
+;<F0Icon icon={Archive} />
 ```
 
 ### Icon with Color
 
 ```tsx
-import { F0Icon } from "@/components/primitives/Icon";
-import { Heart } from "@/icons/app";
+import { F0Icon } from "@/components/primitives/Icon"
+import { Heart } from "@/icons/app"
 
-<F0Icon icon={Heart} size="lg" className="text-f0-icon-critical" />;
+;<F0Icon icon={Heart} size="lg" className="text-f0-icon-critical" />
 ```
 
 ### Icon in Button
 
 ```tsx
-import { F0Icon } from "@/components/primitives/Icon";
-import { Plus } from "@/icons/app";
+import { F0Icon } from "@/components/primitives/Icon"
+import { Plus } from "@/icons/app"
 
-<Button>
+;<Button>
   <F0Icon icon={Plus} size="sm" />
   <Text>Add Item</Text>
-</Button>;
+</Button>
 ```
 
 ### Multiple Sizes
@@ -194,12 +194,12 @@ The legacy `Icon` component has been removed. Use `F0Icon` instead:
 
 ```tsx
 // Old usage (no longer available)
-import { Icon } from "@/components/Icon";
-<Icon icon={Archive} size="lg" />;
+import { Icon } from "@/components/Icon"
+;<Icon icon={Archive} size="lg" />
 
 // New usage (use F0Icon)
-import { F0Icon } from "@/components/primitives/Icon";
-<F0Icon icon={Archive} size="lg" />;
+import { F0Icon } from "@/components/primitives/Icon"
+;<F0Icon icon={Archive} size="lg" />
 ```
 
 ### Breaking Changes
