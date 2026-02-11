@@ -1,5 +1,5 @@
 import type { F0ButtonProps } from "../F0Button";
-export { BUTTON_VARIANTS as variants, BUTTON_SIZES as sizes, } from "../F0Button";
+export { BUTTON_VARIANTS as variants, BUTTON_SIZES as sizes } from "../F0Button";
 export type { ButtonVariant, ButtonSize } from "../F0Button";
 /**
  * @deprecated Use F0ButtonProps instead.

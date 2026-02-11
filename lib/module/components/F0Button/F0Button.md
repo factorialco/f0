@@ -95,8 +95,8 @@ The old `Button` component at `src/components/Button/index.tsx` re-exports from 
 
 ```tsx
 // Old (still works)
-import { Button } from "../Button";
+import { Button } from "../Button"
 
 // New (preferred)
-import { F0Button } from "../F0Button";
+import { F0Button } from "../F0Button"
 ```

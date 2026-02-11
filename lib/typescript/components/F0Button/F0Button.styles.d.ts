@@ -1,5 +1,5 @@
-import type { ButtonVariant } from "./F0Button.types";
 import type { TextColor } from "../primitives/F0Text/F0Text.types";
+import type { ButtonVariant } from "./F0Button.types";
 /**
  * Base button styles using tailwind-variants.
  * Handles variant, size, disabled, and round states.
