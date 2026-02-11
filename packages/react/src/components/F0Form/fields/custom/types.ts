@@ -38,6 +38,8 @@ export interface CustomFieldRenderPropsBase {
   isValidating: boolean
   /** Whether the field is disabled */
   disabled?: boolean
+  /** Whether the field is required (derived from Zod schema) */
+  required?: boolean
 }
 
 /**
@@ -65,6 +67,8 @@ export interface CustomFieldRenderProps<TValue = unknown, TConfig = undefined> {
   isValidating: boolean
   /** Whether the field is disabled */
   disabled?: boolean
+  /** Whether the field is required (derived from Zod schema) */
+  required?: boolean
   /** Custom configuration passed via fieldConfig */
   config: TConfig
 }

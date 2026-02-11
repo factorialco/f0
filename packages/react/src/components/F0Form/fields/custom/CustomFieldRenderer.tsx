@@ -7,6 +7,7 @@ interface CustomFieldRendererProps {
   formField: ControllerRenderProps<FieldValues>
   error?: string
   isValidating: boolean
+  required?: boolean
 }
 
 /**
@@ -18,6 +19,7 @@ export function CustomFieldRenderer({
   formField,
   error,
   isValidating,
+  required,
 }: CustomFieldRendererProps) {
   const renderProps: CustomFieldRenderPropsBase & { config: unknown } = {
     id: field.id,
@@ -29,6 +31,7 @@ export function CustomFieldRenderer({
     error,
     isValidating,
     disabled: field.disabled,
+    required,
     config: field.fieldConfig,
   }
 

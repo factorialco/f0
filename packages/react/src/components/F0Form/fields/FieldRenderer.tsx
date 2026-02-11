@@ -5,6 +5,7 @@ import {
   useFormContext,
 } from "react-hook-form"
 
+import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 import {
   FormControl,
   FormDescription,
@@ -46,6 +47,7 @@ interface RenderFieldInputOptions {
   formField: ControllerRenderProps<FieldValues>
   fieldState: FieldState
   isSubmitting: boolean
+  isRequired?: boolean
 }
 
 /**
@@ -56,6 +58,7 @@ function renderFieldInput({
   formField,
   fieldState,
   isSubmitting,
+  isRequired,
 }: RenderFieldInputOptions): React.ReactNode {
   const hasError = !!fieldState.error
   const { isValidating } = fieldState
@@ -143,8 +146,8 @@ function renderFieldInput({
         <CustomFieldRenderer
           field={{ ...field, disabled: isDisabled }}
           formField={formField}
-          error={fieldState.error?.message}
           isValidating={isValidating}
+          required={isRequired}
         />
       )
     default:
@@ -168,6 +171,7 @@ export function FieldRenderer({ field, sectionId }: FieldRendererProps) {
   const values = form.watch()
   const { isSubmitting } = form.formState
   const { formName } = useF0FormContext()
+  const { forms } = useI18n()
 
   // Check if field should be visible based on renderIf condition
   const isVisible = !field.renderIf || evaluateRenderIf(field.renderIf, values)
@@ -211,12 +215,24 @@ export function FieldRenderer({ field, sectionId }: FieldRendererProps) {
             </label>
           )}
           <FormControl>
-            {renderFieldInput({ field, formField, fieldState, isSubmitting })}
+            {renderFieldInput({
+              field,
+              formField,
+              fieldState,
+              isSubmitting,
+              isRequired,
+            })}
           </FormControl>
           {field.helpText && (
             <FormDescription>{field.helpText}</FormDescription>
           )}
-          <FormMessage />
+          <FormMessage
+            fallback={
+              isRequired
+                ? forms.validation.required
+                : forms.validation.invalidType
+            }
+          />
         </FormItem>
       )}
     />
