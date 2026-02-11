@@ -17,6 +17,10 @@ export type AiChatProviderProps = {
    * When enabled, the chat can be resized between 300px and 50% of the screen width
    */
   resizable?: boolean
+  /**
+   * Optional callback to toggle the sidebar from within the chat header (used in fullscreen mode)
+   */
+  onToggleSidebar?: () => void
   onThumbsUp?: (
     message: AIMessage,
     { threadId, feedback }: { threadId: string; feedback: string }
@@ -97,6 +101,9 @@ export const aiTranslations = {
         placeholder: "Share what didn't work",
       },
     },
+    expandChat: "Expand chat",
+    collapseChat: "Collapse chat",
+    toggleSidebar: "Toggle sidebar",
     ask: "Ask One",
   },
 }

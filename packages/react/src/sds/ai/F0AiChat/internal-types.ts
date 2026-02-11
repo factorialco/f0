@@ -23,6 +23,10 @@ export interface AiChatState {
   resizable?: boolean
   placeholders?: string[]
   setPlaceholders?: React.Dispatch<React.SetStateAction<string[]>>
+  /**
+   * Optional callback to toggle the sidebar from within the chat header (used in fullscreen mode)
+   */
+  onToggleSidebar?: () => void
   onThumbsUp?: (
     message: AIMessage,
     { threadId, feedback }: { threadId: string; feedback: string }
@@ -102,7 +106,18 @@ export type AiChatProviderReturnValue = {
    * Reset the chat width to the default value (360px)
    */
   resetChatWidth: () => void
-} & Pick<AiChatState, "greeting" | "agent" | "disclaimer" | "resizable">
+  /**
+   * Whether the chat is in fullscreen mode
+   */
+  fullscreen: boolean
+  /**
+   * Toggle fullscreen mode on or off
+   */
+  setFullscreen: React.Dispatch<React.SetStateAction<boolean>>
+} & Pick<
+  AiChatState,
+  "greeting" | "agent" | "disclaimer" | "resizable" | "onToggleSidebar"
+>
 
 /**
  * Helper function to check if a message is an agent state message

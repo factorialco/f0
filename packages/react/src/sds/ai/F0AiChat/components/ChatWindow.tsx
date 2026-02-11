@@ -1,7 +1,7 @@
 import { useCopilotChatInternal } from "@copilotkit/react-core"
 import { type WindowProps } from "@copilotkit/react-ui"
 import { AnimatePresence, motion } from "motion/react"
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
 import { cn } from "@/lib/utils"
 
@@ -76,6 +76,7 @@ const ResizeHandle = ({
 export const SidebarWindow = ({ children }: WindowProps) => {
   const {
     open,
+    fullscreen,
     shouldPlayEntranceAnimation,
     setShouldPlayEntranceAnimation,
     autoClearMinutes,
@@ -105,31 +106,56 @@ export const SidebarWindow = ({ children }: WindowProps) => {
 
   const currentWidth = resizable ? chatWidth : DEFAULT_CHAT_WIDTH
 
+  // Track fullscreen direction for different enter/exit transitions
+  const prevFullscreenRef = useRef(fullscreen)
+  const isEnteringFullscreen = fullscreen && !prevFullscreenRef.current
+  const isExitingFullscreen = !fullscreen && prevFullscreenRef.current
+  useEffect(() => {
+    prevFullscreenRef.current = fullscreen
+  }, [fullscreen])
+
+  const wrapperTransition = useMemo(() => {
+    if (isResizing) return { duration: 0 }
+    if (shouldPlayEntranceAnimation)
+      return { duration: 0.3, ease: [0, 0, 0.1, 1] as const }
+    // Entering fullscreen: fast, the white fills instantly
+    if (isEnteringFullscreen)
+      return { duration: 0.15, ease: "easeOut" as const }
+    // Exiting fullscreen: smooth and gentle shrink
+    if (isExitingFullscreen)
+      return { duration: 0.35, ease: [0.4, 0, 0.2, 1] as const }
+    // Normal open/close
+    return { duration: 0.3, ease: [0, 0, 0.1, 1] as const }
+  }, [
+    isResizing,
+    shouldPlayEntranceAnimation,
+    isEnteringFullscreen,
+    isExitingFullscreen,
+  ])
+
   return (
     <AnimatePresence>
       {open && (
         <motion.div
           key="chat-wrapper"
-          className="relative flex h-full"
+          className="relative ml-auto flex h-full xs:rounded-xl dark:bg-f1-background bg-f1-transparent"
           initial={
             shouldPlayEntranceAnimation ? { opacity: 0, width: 0 } : false
           }
           animate={{
             opacity: 1,
-            width: currentWidth,
+            width: fullscreen ? "100%" : currentWidth,
           }}
           exit={{ opacity: 0, width: 0 }}
-          transition={{
-            duration: isResizing ? 0 : 0.3,
-            ease: [0, 0, 0.1, 1],
-          }}
+          transition={wrapperTransition}
+          style={{ transformOrigin: "right center" }}
           onAnimationComplete={() => {
             if (shouldPlayEntranceAnimation) {
               setShouldPlayEntranceAnimation(false)
             }
           }}
         >
-          {resizable && (
+          {resizable && !fullscreen && (
             <ResizeHandle
               onResize={handleResize}
               onReset={resetChatWidth}
@@ -141,9 +167,13 @@ export const SidebarWindow = ({ children }: WindowProps) => {
             aria-hidden={!open}
             className={cn(
               "relative flex h-full w-full flex-col overflow-hidden border border-solid border-f1-border-secondary bg-f1-special-page shadow xs:rounded-xl",
-              !resizable && "max-w-[360px]"
+              !fullscreen && !resizable && "max-w-[360px]"
             )}
-            style={resizable ? { maxWidth: MAX_CHAT_WIDTH } : undefined}
+            style={
+              resizable && !fullscreen
+                ? { maxWidth: MAX_CHAT_WIDTH }
+                : undefined
+            }
           >
             <motion.div
               className="relative flex h-full w-full flex-col overflow-hidden"

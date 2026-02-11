@@ -44,6 +44,7 @@ const F0AiChatProviderComponent = ({
   welcomeScreenSuggestions,
   disclaimer,
   resizable = false,
+  onToggleSidebar,
   onThumbsUp,
   onThumbsDown,
   children,
@@ -63,6 +64,7 @@ const F0AiChatProviderComponent = ({
       welcomeScreenSuggestions={welcomeScreenSuggestions}
       disclaimer={disclaimer}
       resizable={resizable}
+      onToggleSidebar={onToggleSidebar}
     >
       <AiChatKitWrapper {...copilotKitProps}>{children}</AiChatKitWrapper>
     </AiChatStateProvider>
@@ -115,14 +117,19 @@ const SendMessageFunctionInjector = () => {
 }
 
 const F0AiChatComponent = () => {
-  const { enabled, open, setOpen, disclaimer } = useAiChat()
+  const { enabled, open, setOpen, disclaimer, fullscreen } = useAiChat()
 
   // Register all default copilot actions
   useDefaultCopilotActions()
 
   const InputComponent = useCallback(
     ({ ...props }: InputProps) => (
-      <div className="m-[16px] items-center flex flex-col gap-2">
+      <div
+        className={cn(
+          "m-[16px] items-center flex flex-col gap-2",
+          fullscreen && "mx-auto w-full max-w-[712px]"
+        )}
+      >
         <div className="w-full">
           <ChatTextarea {...props} />
         </div>
@@ -147,7 +154,7 @@ const F0AiChatComponent = () => {
         )}
       </div>
     ),
-    [disclaimer]
+    [disclaimer, fullscreen]
   )
 
   if (!enabled) {
@@ -156,7 +163,7 @@ const F0AiChatComponent = () => {
 
   return (
     <CopilotSidebar
-      className="h-full"
+      className={cn("h-full", fullscreen && "w-full")}
       defaultOpen={open}
       onSetOpen={(isOpen) => {
         setOpen(isOpen)

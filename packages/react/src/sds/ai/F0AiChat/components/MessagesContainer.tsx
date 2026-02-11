@@ -63,6 +63,7 @@ const Messages = ({
     welcomeScreenSuggestions,
     onThumbsUp,
     onThumbsDown,
+    fullscreen,
   } = useAiChat()
   const initialMessages = useMemo(
     () =>
@@ -104,7 +105,8 @@ const Messages = ({
           layout
           className={cn(
             "relative isolate flex flex-1 flex-col p-[16px]",
-            "overflow-y-auto overflow-x-hidden scrollbar-macos"
+            "overflow-y-auto overflow-x-hidden scrollbar-macos",
+            fullscreen && "items-center"
           )}
           ref={messagesContainerRef}
         >
@@ -117,7 +119,10 @@ const Messages = ({
           <motion.div
             layout="position"
             ref={turnsContainerRef}
-            className={showWelcomeBlock ? "flex flex-1" : "flex flex-col gap-8"}
+            className={cn(
+              showWelcomeBlock ? "flex flex-1" : "flex flex-col gap-8",
+              fullscreen && "w-full max-w-[712px]"
+            )}
           >
             {showWelcomeBlock && (
               <WelcomeScreen

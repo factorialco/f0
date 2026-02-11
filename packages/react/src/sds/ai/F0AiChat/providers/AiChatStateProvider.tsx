@@ -46,12 +46,14 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   welcomeScreenSuggestions: initialWelcomeScreenSuggestions = [],
   disclaimer,
   resizable = false,
+  onToggleSidebar,
   onThumbsDown,
   onThumbsUp,
   ...rest
 }) => {
   const [enabledInternal, setEnabledInternal] = useState(enabled)
   const [open, setOpen] = useState(false)
+  const [fullscreen, setFullscreen] = useState(false)
   const [shouldPlayEntranceAnimation, setShouldPlayEntranceAnimation] =
     useState(true)
   const [agent, setAgent] = useState<string | undefined>(initialAgent)
@@ -139,14 +141,23 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
     setEnabledInternal(enabled)
   }, [enabled])
 
+  // Reset fullscreen when chat closes
   useEffect(() => {
     if (!open) {
+      setFullscreen(false)
       const prefersReducedMotion = window.matchMedia(
         "(prefers-reduced-motion: reduce)"
       ).matches
       setShouldPlayEntranceAnimation(!prefersReducedMotion)
     }
   }, [open])
+
+  // Ensure chat is open when entering fullscreen
+  useEffect(() => {
+    if (fullscreen && !open) {
+      setOpen(true)
+    }
+  }, [fullscreen, open])
 
   return (
     <AiChatStateContext.Provider
@@ -156,6 +167,8 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         setEnabled: setEnabledInternal,
         open,
         setOpen,
+        fullscreen,
+        setFullscreen,
         shouldPlayEntranceAnimation,
         setShouldPlayEntranceAnimation,
         agent,
@@ -176,6 +189,7 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         setSendMessageFunction,
         disclaimer,
         resizable,
+        onToggleSidebar,
         chatWidth,
         setChatWidth,
         resetChatWidth,
@@ -197,6 +211,8 @@ export function useAiChat(): AiChatProviderReturnValue {
       setEnabled: noopFn,
       open: false,
       setOpen: noopFn,
+      fullscreen: false,
+      setFullscreen: noopFn,
       shouldPlayEntranceAnimation: true,
       setShouldPlayEntranceAnimation: noopFn,
       agent: undefined,
@@ -217,6 +233,7 @@ export function useAiChat(): AiChatProviderReturnValue {
       setSendMessageFunction: noopFn,
       disclaimer: undefined,
       resizable: false,
+      onToggleSidebar: undefined,
       chatWidth: DEFAULT_CHAT_WIDTH,
       setChatWidth: noopFn,
       resetChatWidth: noopFn,

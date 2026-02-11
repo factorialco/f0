@@ -91,7 +91,7 @@ export function Sidebar({
       initial={false}
       aria-label={i18n.navigation.sidebar.label}
       className={cn(
-        "absolute bottom-0 left-0 top-0 z-10 flex w-[var(--ds-sidebar-width)] flex-col transition-[background-color]",
+        "absolute bottom-0 left-0 top-0 z-50 flex w-[var(--ds-sidebar-width)] flex-col transition-[background-color]",
         sidebarState === "locked"
           ? "h-full"
           : cn(

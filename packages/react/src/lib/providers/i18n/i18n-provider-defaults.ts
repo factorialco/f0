@@ -281,6 +281,9 @@ export const defaultTranslations = {
         placeholder: "Share what didn’t work",
       },
     },
+    expandChat: "Expand chat",
+    collapseChat: "Collapse chat",
+    toggleSidebar: "Toggle sidebar",
     ask: "Ask One",
     growth: {
       demoCard: {
