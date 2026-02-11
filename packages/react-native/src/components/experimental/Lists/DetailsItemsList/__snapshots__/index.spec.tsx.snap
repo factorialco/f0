@@ -200,7 +200,7 @@ exports[`DetailsItemsList Snapshot  1`] = `
                 }
               }
               accessible={true}
-              className="group justify-between rounded text-f0-foreground no-underline hover:bg-f0-background-hover focus-visible:outline-2 focus-visible:outline-f0-border-selected-bold active:bg-f0-background-secondary-hover flex flex-row items-center gap-1.5 p-1.5"
+              className="group justify-between rounded text-inherit no-underline hover:bg-f0-background-hover focus-visible:outline-2 focus-visible:outline-f0-border-selected-bold active:bg-f0-background-secondary-hover flex flex-row items-center gap-1.5 p-1.5"
               collapsable={false}
               focusable={true}
               handlePress={[Function]}
@@ -226,7 +226,7 @@ exports[`DetailsItemsList Snapshot  1`] = `
                   >
                     <View
                       aria-hidden={true}
-                      className="flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold w-5 h-5 rounded-full dark:bg-f0-background-inverse-secondary bg-f0-background"
+                      className="flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold w-5 h-5 rounded-full bg-f0-background dark:bg-f0-background-inverse-secondary"
                       data-a11y-color-contrast-ignore={true}
                       role="img"
                     >
@@ -361,7 +361,7 @@ exports[`DetailsItemsList Snapshot  1`] = `
                 }
               }
               accessible={true}
-              className="group justify-between rounded text-f0-foreground no-underline hover:bg-f0-background-hover focus-visible:outline-2 focus-visible:outline-f0-border-selected-bold active:bg-f0-background-secondary-hover flex flex-row items-center gap-1.5 p-1.5"
+              className="group justify-between rounded text-inherit no-underline hover:bg-f0-background-hover focus-visible:outline-2 focus-visible:outline-f0-border-selected-bold active:bg-f0-background-secondary-hover flex flex-row items-center gap-1.5 p-1.5"
               collapsable={false}
               focusable={true}
               handlePress={[Function]}
@@ -493,7 +493,7 @@ exports[`DetailsItemsList Snapshot  1`] = `
                 }
               }
               accessible={true}
-              className="group justify-between rounded text-f0-foreground no-underline hover:bg-f0-background-hover focus-visible:outline-2 focus-visible:outline-f0-border-selected-bold active:bg-f0-background-secondary-hover flex flex-row items-center gap-1.5 p-1.5"
+              className="group justify-between rounded text-inherit no-underline hover:bg-f0-background-hover focus-visible:outline-2 focus-visible:outline-f0-border-selected-bold active:bg-f0-background-secondary-hover flex flex-row items-center gap-1.5 p-1.5"
               collapsable={false}
               focusable={true}
               handlePress={[Function]}
@@ -680,7 +680,7 @@ exports[`DetailsItemsList Snapshot  1`] = `
                   }
                 />
                 <Text
-                  className="text-f0-foreground line-clamp-1 text-base font-medium"
+                  className="line-clamp-1 text-base font-medium text-f0-foreground"
                 >
                   Holidays
                 </Text>

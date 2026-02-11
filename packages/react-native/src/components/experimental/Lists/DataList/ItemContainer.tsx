@@ -2,7 +2,7 @@ import { ReactElement, ReactNode } from "react"
 import { View, Text } from "react-native"
 
 import { cn } from "../../../../lib/utils"
-import { F0Icon, type IconType } from "../../../primitives/Icon"
+import { F0Icon, type IconType } from "../../../primitives/F0Icon"
 
 import { CopyAction } from "./actions/CopyAction"
 import { GenericAction } from "./actions/GenericAction"

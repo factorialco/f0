@@ -5,7 +5,7 @@ import { cn } from "../../../../lib/utils"
 import { CompanyAvatar } from "../../../Avatars/CompanyAvatar"
 import { PersonAvatar } from "../../../Avatars/PersonAvatar"
 import { TeamAvatar } from "../../../Avatars/TeamAvatar"
-import { type IconType } from "../../../primitives/Icon"
+import { type IconType } from "../../../primitives/F0Icon"
 import { DotTag, DotTagProps } from "../../../Tags/DotTag"
 
 import { ItemContainer } from "./ItemContainer"

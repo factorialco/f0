@@ -15,5 +15,5 @@ export * from "./experimental/Lists/DetailsItem"
 export * from "./experimental/Lists/DetailsItemsList"
 
 // Export primitives
-export * from "./primitives/Text"
-export * from "./primitives/Icon"
+export * from "./primitives/F0Text"
+export * from "./primitives/F0Icon"

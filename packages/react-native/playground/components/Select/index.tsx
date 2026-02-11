@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Modal, Pressable, ScrollView, Text } from "react-native";
 import { useCSSVariable } from "uniwind";
 import { AppIcons } from "../../../src/icons";
-import { F0Icon } from "../../../src/components/primitives/Icon";
+import { F0Icon } from "../../../src/components/primitives/F0Icon";
 
 export interface SelectOption<T extends string> {
   value: T;
