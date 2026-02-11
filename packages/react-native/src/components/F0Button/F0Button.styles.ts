@@ -1,7 +1,8 @@
-import { tv } from "tailwind-variants";
+import { tv } from "tailwind-variants"
 
-import type { ButtonVariant } from "./F0Button.types";
-import type { TextColor } from "../primitives/F0Text/F0Text.types";
+import type { TextColor } from "../primitives/F0Text/F0Text.types"
+
+import type { ButtonVariant } from "./F0Button.types"
 
 /**
  * Base button styles using tailwind-variants.
@@ -38,7 +39,7 @@ export const buttonVariants = tv({
     disabled: false,
     round: false,
   },
-});
+})
 
 /**
  * Pressed-state overrides per variant.
@@ -59,63 +60,63 @@ export const pressedVariants = tv({
   defaultVariants: {
     variant: "default",
   },
-});
+})
 
 /**
  * Returns the icon className when a label is also visible.
  */
 export const getIconColor = (
   variant: ButtonVariant,
-  isPressed: boolean,
+  isPressed: boolean
 ): string => {
   switch (variant) {
     case "default":
-      return "text-f0-icon-inverse";
+      return "text-f0-icon-inverse"
     case "critical":
-      return isPressed ? "text-f0-icon-inverse" : "text-f0-icon-critical-bold";
+      return isPressed ? "text-f0-icon-inverse" : "text-f0-icon-critical-bold"
     default:
-      return "text-f0-icon";
+      return "text-f0-icon"
   }
-};
+}
 
 /**
  * Returns the icon className in icon-only / round mode.
  */
 export const getIconOnlyColor = (
   variant: ButtonVariant,
-  isPressed: boolean,
+  isPressed: boolean
 ): string => {
   switch (variant) {
     case "critical":
-      return isPressed ? "text-f0-icon-inverse" : "text-f0-icon-critical-bold";
+      return isPressed ? "text-f0-icon-inverse" : "text-f0-icon-critical-bold"
     case "default":
-      return "text-f0-icon-inverse";
+      return "text-f0-icon-inverse"
     case "outline":
     case "neutral":
     case "ghost":
     case "promote":
     default:
-      return "text-f0-icon-bold";
+      return "text-f0-icon-bold"
   }
-};
+}
 
 /**
  * Returns the semantic TextColor for label / emoji text.
  */
 export const getTextColor = (
   variant: ButtonVariant,
-  isPressed: boolean,
+  isPressed: boolean
 ): TextColor => {
   if (isPressed && variant === "critical") {
-    return "inverse";
+    return "inverse"
   }
 
   switch (variant) {
     case "default":
-      return "inverse";
+      return "inverse"
     case "critical":
-      return "critical";
+      return "critical"
     default:
-      return "default";
+      return "default"
   }
-};
+}

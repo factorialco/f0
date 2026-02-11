@@ -1,19 +1,19 @@
-import React, { forwardRef, useCallback, useMemo, useState } from "react";
-import { View } from "react-native";
+import React, { forwardRef, useCallback, useMemo, useState } from "react"
+import { View } from "react-native"
 
-import { cn } from "../../lib/utils";
-import { PressableFeedback } from "../PressableFeedback";
-import { F0Icon } from "../primitives/F0Icon";
-import { F0Text } from "../primitives/F0Text";
+import { cn } from "../../lib/utils"
+import { PressableFeedback } from "../PressableFeedback"
+import { F0Icon } from "../primitives/F0Icon"
+import { F0Text } from "../primitives/F0Text"
 
-import type { F0ButtonProps } from "./F0Button.types";
 import {
   buttonVariants,
   pressedVariants,
   getIconColor,
   getIconOnlyColor,
   getTextColor,
-} from "./F0Button.styles";
+} from "./F0Button.styles"
+import type { F0ButtonProps } from "./F0Button.types"
 
 /**
  * F0Button - Primary button component for the F0 Design System.
@@ -60,40 +60,40 @@ const F0Button = React.memo(
       feedback = "both",
       ...rest
     },
-    ref,
+    ref
   ) {
     // State for async onPress auto-loading
-    const [isLoading, setIsLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(false)
     // State for tracking pressed state (for color changes)
-    const [isPressed, setIsPressed] = useState(false);
+    const [isPressed, setIsPressed] = useState(false)
 
-    const isDisabled = disabled || loading || isLoading;
-    const isRound = hideLabel && round;
+    const isDisabled = disabled || loading || isLoading
+    const isRound = hideLabel && round
 
     const handlePress = useCallback(async () => {
-      if (!onPress || isDisabled) return;
+      if (!onPress || isDisabled) return
 
-      const result = onPress();
+      const result = onPress()
 
       if (result instanceof Promise) {
-        setIsLoading(true);
+        setIsLoading(true)
         try {
-          await result;
+          await result
         } finally {
-          setIsLoading(false);
+          setIsLoading(false)
         }
       }
-    }, [onPress, isDisabled]);
+    }, [onPress, isDisabled])
 
     const handlePressIn = useCallback(() => {
       if (!isDisabled) {
-        setIsPressed(true);
+        setIsPressed(true)
       }
-    }, [isDisabled]);
+    }, [isDisabled])
 
     const handlePressOut = useCallback(() => {
-      setIsPressed(false);
-    }, []);
+      setIsPressed(false)
+    }, [])
 
     // Memoize the base className (everything except pressed state)
     const baseClassName = useMemo(
@@ -104,29 +104,29 @@ const F0Button = React.memo(
           disabled: isDisabled,
           round: isRound,
         }),
-      [variant, size, isDisabled, isRound],
-    );
+      [variant, size, isDisabled, isRound]
+    )
 
     const accessibilityLabel = useMemo(() => {
-      const parts = [label];
-      if (isDisabled) parts.push("disabled");
-      if (loading || isLoading) parts.push("loading");
-      return parts.join(", ");
-    }, [label, isDisabled, loading, isLoading]);
+      const parts = [label]
+      if (isDisabled) parts.push("disabled")
+      if (loading || isLoading) parts.push("loading")
+      return parts.join(", ")
+    }, [label, isDisabled, loading, isLoading])
 
-    const shouldShowPressed = isPressed && !isDisabled;
+    const shouldShowPressed = isPressed && !isDisabled
 
     const className = shouldShowPressed
       ? cn(baseClassName, pressedVariants({ variant }))
-      : baseClassName;
+      : baseClassName
 
-    const iconIsOnly = isRound || (hideLabel && !emoji);
+    const iconIsOnly = isRound || (hideLabel && !emoji)
     const iconColor = icon
       ? iconIsOnly
         ? getIconOnlyColor(variant, shouldShowPressed)
         : getIconColor(variant, shouldShowPressed)
-      : undefined;
-    const textColor = getTextColor(variant, shouldShowPressed);
+      : undefined
+    const textColor = getTextColor(variant, shouldShowPressed)
 
     return (
       <View className={`flex ${fullWidth ? "flex-1" : "item-start"}`}>
@@ -174,10 +174,10 @@ const F0Button = React.memo(
           />
         )}
       </View>
-    );
-  }),
-);
+    )
+  })
+)
 
-F0Button.displayName = "F0Button";
+F0Button.displayName = "F0Button"
 
-export { F0Button };
+export { F0Button }
