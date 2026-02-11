@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.357.0](https://github.com/factorialco/f0/compare/f0-react-v1.356.2...f0-react-v1.357.0) (2026-02-11)
+
+
+### Features
+
+* useSelectable add pageOnlySelection feature  ([#3174](https://github.com/factorialco/f0/issues/3174)) ([a58c2f3](https://github.com/factorialco/f0/commit/a58c2f3a7375bcc2636a3a661a32d2bc4ec957e2))
+
 ## [1.356.2](https://github.com/factorialco/f0/compare/f0-react-v1.356.1...f0-react-v1.356.2) (2026-02-11)
 
 
