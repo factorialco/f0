@@ -2,7 +2,7 @@ import { ReactElement, ReactNode } from "react"
 import { View, Text } from "react-native"
 
 import { cn } from "../../../../lib/utils"
-import { Icon, IconType } from "../../../Icon"
+import { F0Icon, type IconType } from "../../../primitives/Icon"
 
 import { CopyAction } from "./actions/CopyAction"
 import { GenericAction } from "./actions/GenericAction"
@@ -34,7 +34,7 @@ export const ItemContainer = (props: ItemContainerProps) => {
           (typeof LeftIcon === "function" ? (
             LeftIcon({})
           ) : (
-            <Icon icon={LeftIcon} size="md" />
+            <F0Icon icon={LeftIcon} size="md" />
           ))}
         <Text className="line-clamp-5 text-left text-f0-foreground">
           {text}

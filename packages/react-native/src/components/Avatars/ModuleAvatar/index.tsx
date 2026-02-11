@@ -2,7 +2,7 @@ import { View } from "react-native"
 import Svg, { Defs, LinearGradient, Stop, Path } from "react-native-svg"
 import { tv, type VariantProps } from "tailwind-variants"
 
-import { IconType, applyIconInterop } from "../../Icon"
+import { type IconType, applyIconInterop } from "../../primitives/Icon"
 
 import { ModuleId, modules } from "./modules"
 

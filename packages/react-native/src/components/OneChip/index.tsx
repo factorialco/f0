@@ -3,7 +3,7 @@ import { tv, type VariantProps } from "tailwind-variants"
 
 import { CrossedCircle } from "../../icons/app"
 import { cn } from "../../lib/utils"
-import { Icon, type IconType } from "../Icon"
+import { F0Icon, type IconType } from "../primitives/Icon"
 import { PressableFeedback } from "../PressableFeedback"
 
 export const chipContainerVariants = tv({
@@ -61,7 +61,7 @@ export const OneChip = ({
       >
         <View className="flex flex-row items-center gap-0.5">
           {icon && (
-            <Icon
+            <F0Icon
               icon={icon}
               size="sm"
               className={chipTextVariants({ variant })}
@@ -78,7 +78,7 @@ export const OneChip = ({
               accessibilityRole="button"
               accessibilityLabel="Close"
             >
-              <Icon
+              <F0Icon
                 icon={CrossedCircle}
                 className={chipTextVariants({ variant })}
                 size="sm"

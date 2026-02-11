@@ -190,14 +190,14 @@ src/components/Icon/        # Backward compatibility layer
 
 ## Migration from Legacy Icon
 
-The new F0Icon component maintains backward compatibility through the `components/Icon/index.tsx` re-export:
+The legacy `Icon` component has been removed. Use `F0Icon` instead:
 
 ```tsx
-// Old usage (still works via re-export from components/Icon)
+// Old usage (no longer available)
 import { Icon } from "@/components/Icon";
 <Icon icon={Archive} size="lg" />;
 
-// New usage (recommended - direct import from primitives)
+// New usage (use F0Icon)
 import { F0Icon } from "@/components/primitives/Icon";
 <F0Icon icon={Archive} size="lg" />;
 ```

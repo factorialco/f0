@@ -187,13 +187,13 @@ Use this section after each manual update so people can install the latest build
 ### Basic Component Usage
 
 ```tsx
-import { Button, Icon, AppIcons } from "@factorialco/f0-react-native";
+import { Button, F0Icon, AppIcons } from "@factorialco/f0-react-native";
 
 export default function App() {
   return (
     <>
       <Button label="Click me" variant="default" size="md" />
-      <Icon icon={AppIcons.Calendar} size="md" />
+      <F0Icon icon={AppIcons.Calendar} size="md" />
     </>
   );
 }

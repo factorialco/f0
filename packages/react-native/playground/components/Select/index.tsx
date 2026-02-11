@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Modal, Pressable, ScrollView, Text } from "react-native";
 import { useCSSVariable } from "uniwind";
 import { AppIcons } from "../../../src/icons";
-import { Icon } from "../../../src/components/Icon";
+import { F0Icon } from "../../../src/components/primitives/Icon";
 
 export interface SelectOption<T extends string> {
   value: T;
@@ -57,7 +57,7 @@ export function Select<T extends string>({
         >
           {selectedOption?.label || placeholder}
         </Text>
-        <Icon
+        <F0Icon
           icon={isOpen ? AppIcons.ChevronUp : AppIcons.ChevronDown}
           size="sm"
           className="text-f0-icon"

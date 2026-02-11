@@ -2,7 +2,7 @@ import { tv, type VariantProps } from "tailwind-variants";
 import React, { forwardRef, useState } from "react";
 import { Pressable, View } from "react-native";
 import { cn } from "../../lib/utils";
-import { Icon, type IconType } from "../Icon";
+import { F0Icon, type IconType } from "../primitives/Icon";
 import { F0Text } from "../primitives/Text/F0Text";
 import type { TextColor } from "../primitives/Text/F0Text.types";
 
@@ -192,7 +192,7 @@ export const Button = forwardRef<View, ButtonProps>(function Button(
         accessibilityHint={accessibilityHint}
       >
         {icon && (
-          <Icon
+          <F0Icon
             icon={icon}
             size="lg"
             className={cn(
