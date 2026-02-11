@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.356.2](https://github.com/factorialco/f0/compare/f0-react-v1.356.1...f0-react-v1.356.2) (2026-02-11)
+
+
+### Bug Fixes
+
+* add support for required custom field in F0Form ([#3413](https://github.com/factorialco/f0/issues/3413)) ([8827bff](https://github.com/factorialco/f0/commit/8827bff2aab7d72783b9d0155efc9ec997b3439f))
+
 ## [1.356.1](https://github.com/factorialco/f0/compare/f0-react-v1.356.0...f0-react-v1.356.1) (2026-02-11)
 
 
