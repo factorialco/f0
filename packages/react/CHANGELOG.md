@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.355.1](https://github.com/factorialco/f0/compare/f0-react-v1.355.0...f0-react-v1.355.1) (2026-02-11)
+
+
+### Bug Fixes
+
+* take care of large filter names in OneFilterPicker component ([#3402](https://github.com/factorialco/f0/issues/3402)) ([5e23940](https://github.com/factorialco/f0/commit/5e2394087949158f6bd3a22a92f5d17d530d173e))
+
 ## [1.355.0](https://github.com/factorialco/f0/compare/f0-react-v1.354.0...f0-react-v1.355.0) (2026-02-10)
 
 
