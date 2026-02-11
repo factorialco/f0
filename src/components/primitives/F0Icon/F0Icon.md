@@ -132,7 +132,6 @@ Style prop is blocked at compile-time to enforce className usage:
 ```tsx
 import { F0Icon } from "@/components/primitives/Icon"
 import { Archive } from "@/icons/app"
-
 ;<F0Icon icon={Archive} />
 ```
 
@@ -141,7 +140,6 @@ import { Archive } from "@/icons/app"
 ```tsx
 import { F0Icon } from "@/components/primitives/Icon"
 import { Heart } from "@/icons/app"
-
 ;<F0Icon icon={Heart} size="lg" className="text-f0-icon-critical" />
 ```
 
@@ -150,7 +148,6 @@ import { Heart } from "@/icons/app"
 ```tsx
 import { F0Icon } from "@/components/primitives/Icon"
 import { Plus } from "@/icons/app"
-
 ;<Button>
   <F0Icon icon={Plus} size="sm" />
   <Text>Add Item</Text>

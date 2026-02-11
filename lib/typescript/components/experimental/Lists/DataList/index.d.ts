@@ -1,5 +1,5 @@
 import { ReactElement } from "react";
-import { type IconType } from "../../../primitives/Icon";
+import { type IconType } from "../../../primitives/F0Icon";
 import { DotTagProps } from "../../../Tags/DotTag";
 export type DataListProps = {
     children: ReactElement<Items>[] | ReactElement<Items>;

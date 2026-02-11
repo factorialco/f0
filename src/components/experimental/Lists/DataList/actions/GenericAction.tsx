@@ -4,7 +4,7 @@ import { Pressable, View } from "react-native"
 import { GenericActionType } from ".."
 import { ChevronRight } from "../../../../../icons/app"
 import { cn } from "../../../../../lib/utils"
-import { F0Icon } from "../../../../primitives/Icon"
+import { F0Icon } from "../../../../primitives/F0Icon"
 
 export type GenericActionProps = {
   children: ReactNode

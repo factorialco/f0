@@ -1,5 +1,5 @@
 import { type VariantProps } from "tailwind-variants";
-import { type IconType } from "../primitives/Icon";
+import { type IconType } from "../primitives/F0Icon";
 declare const badgeVariants: import("tailwind-variants").TVReturnType<{
     type: {
         neutral: string;

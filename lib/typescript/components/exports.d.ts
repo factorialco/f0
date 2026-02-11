@@ -12,6 +12,6 @@ export * from "./Tags/exports";
 export * from "./experimental/Lists/DataList";
 export * from "./experimental/Lists/DetailsItem";
 export * from "./experimental/Lists/DetailsItemsList";
-export * from "./primitives/Text";
-export * from "./primitives/Icon";
+export * from "./primitives/F0Text";
+export * from "./primitives/F0Icon";
 //# sourceMappingURL=exports.d.ts.map

@@ -1,5 +1,5 @@
 import { ReactElement } from "react";
-import { type IconType } from "../../../primitives/Icon";
+import { type IconType } from "../../../primitives/F0Icon";
 import { ActionType } from ".";
 type ItemContainerProps = {
     leftIcon?: IconType | (() => ReactElement);

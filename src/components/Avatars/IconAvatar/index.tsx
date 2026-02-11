@@ -1,7 +1,7 @@
 import { View } from "react-native"
 
 import { cn } from "../../../lib/utils"
-import { F0Icon, type IconType } from "../../primitives/Icon"
+import { F0Icon, type IconType } from "../../primitives/F0Icon"
 
 type Props = {
   icon: IconType

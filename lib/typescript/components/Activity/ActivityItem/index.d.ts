@@ -1,4 +1,4 @@
-import { type IconType } from "../../primitives/Icon";
+import { type IconType } from "../../primitives/F0Icon";
 export type ActivityItemProps = {
     id: string;
     date: string;

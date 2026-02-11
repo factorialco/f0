@@ -1,6 +1,6 @@
 import { tv, type VariantProps } from "tailwind-variants"
 
-import { F0Icon, type IconType } from "../primitives/Icon"
+import { F0Icon, type IconType } from "../primitives/F0Icon"
 
 const badgeVariants = tv({
   base: "flex shrink-0 items-center justify-center rounded-full",

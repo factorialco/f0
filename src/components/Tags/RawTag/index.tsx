@@ -1,6 +1,6 @@
 import { useTextFormatEnforcer } from "../../../lib/text"
 import { cn } from "../../../lib/utils"
-import { F0Icon, type IconType } from "../../primitives/Icon"
+import { F0Icon, type IconType } from "../../primitives/F0Icon"
 import { BaseTag } from "../BaseTag"
 
 export type RawTagProps = {

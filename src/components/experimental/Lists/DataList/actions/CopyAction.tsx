@@ -5,7 +5,7 @@ import { Pressable, View } from "react-native"
 import { CopyActionType } from ".."
 import { CheckCircle, LayersFront } from "../../../../../icons/app"
 import { cn } from "../../../../../lib/utils"
-import { F0Icon } from "../../../../primitives/Icon"
+import { F0Icon } from "../../../../primitives/F0Icon"
 
 const COPIED_SHOWN_MS = 750
 

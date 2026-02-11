@@ -3,9 +3,9 @@ import { Pressable, View } from "react-native"
 import { tv, type VariantProps } from "tailwind-variants"
 
 import { cn } from "../../lib/utils"
-import { F0Icon, type IconType } from "../primitives/Icon"
-import { F0Text } from "../primitives/Text/F0Text"
-import type { TextColor } from "../primitives/Text/F0Text.types"
+import { F0Icon, type IconType } from "../primitives/F0Icon"
+import { F0Text } from "../primitives/F0Text/F0Text"
+import type { TextColor } from "../primitives/F0Text/F0Text.types"
 
 export const variants = [
   "default",

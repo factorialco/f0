@@ -1,7 +1,7 @@
 import { AlertCircle, InfoCircle, Warning } from "../../../icons/app"
 import { useTextFormatEnforcer } from "../../../lib/text"
 import { cn } from "../../../lib/utils"
-import { F0Icon, type IconType } from "../../primitives/Icon"
+import { F0Icon, type IconType } from "../../primitives/F0Icon"
 import { BaseTag } from "../BaseTag"
 
 type Level = "info" | "warning" | "critical"
