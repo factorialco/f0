@@ -9,7 +9,7 @@ import { FC, useCallback, useEffect, useMemo, useState } from "react"
 
 import { F0Button } from "@/components/F0Button"
 import { IconType } from "@/components/F0Icon"
-import { F0AiBanner } from "@/experimental/Banners/F0AiBanner"
+import { F0AiBanner } from "@/sds/ai/Banners/F0AiBanner"
 import {
   ColorExtension,
   CustomTaskExtension,

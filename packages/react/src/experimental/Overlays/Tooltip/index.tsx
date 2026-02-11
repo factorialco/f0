@@ -16,7 +16,7 @@ import {
 } from "@/ui/tooltip"
 
 import { cn } from "../../../lib/utils"
-import { Shortcut } from "../../Information/Shortcut"
+import { Shortcut } from "@/ui/Shortcut"
 
 type TooltipInternalProps = {
   children: React.ReactNode

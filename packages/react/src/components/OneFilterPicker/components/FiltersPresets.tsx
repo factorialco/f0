@@ -1,7 +1,7 @@
 import { useMemo } from "react"
 
-import { Counter } from "@/experimental/Information/Counter"
-import { Preset } from "@/experimental/OnePreset"
+import { Counter } from "@/ui/Counter"
+import { Preset } from "@/ui/OnePreset"
 import { cn, focusRing } from "@/lib/utils"
 import { OverflowList } from "@/ui/OverflowList"
 import { Skeleton } from "@/ui/skeleton"

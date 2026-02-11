@@ -1,6 +1,6 @@
-import Svg, { Path } from "react-native-svg";
-import type { SvgProps } from "react-native-svg";
-import { Ref, forwardRef } from "react";
+import { Ref, forwardRef } from "react"
+import Svg, { Path } from "react-native-svg"
+import type { SvgProps } from "react-native-svg"
 const SvgMaximize = (props: SvgProps, ref: Ref<Svg>) => (
   <Svg
     fill="none"
@@ -16,6 +16,6 @@ const SvgMaximize = (props: SvgProps, ref: Ref<Svg>) => (
       d="M13.5 10.5 19 5m0 0h-4m4 0v4M10.5 13.5 5 19m0 0h4m-4 0v-4"
     />
   </Svg>
-);
-const ForwardRef = forwardRef(SvgMaximize);
-export default ForwardRef;
+)
+const ForwardRef = forwardRef(SvgMaximize)
+export default ForwardRef

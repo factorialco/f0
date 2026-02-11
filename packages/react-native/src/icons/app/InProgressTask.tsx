@@ -1,6 +1,6 @@
-import Svg, { Circle, Path } from "react-native-svg";
-import type { SvgProps } from "react-native-svg";
-import { Ref, forwardRef } from "react";
+import { Ref, forwardRef } from "react"
+import Svg, { Circle, Path } from "react-native-svg"
+import type { SvgProps } from "react-native-svg"
 const SvgInProgressTask = (props: SvgProps, ref: Ref<Svg>) => (
   <Svg
     fill="none"
@@ -12,6 +12,6 @@ const SvgInProgressTask = (props: SvgProps, ref: Ref<Svg>) => (
     <Circle cx={12} cy={12} r={8} stroke="currentColor" />
     <Path fill="currentColor" d="M12 18a6 6 0 0 0 0-12z" />
   </Svg>
-);
-const ForwardRef = forwardRef(SvgInProgressTask);
-export default ForwardRef;
+)
+const ForwardRef = forwardRef(SvgInProgressTask)
+export default ForwardRef

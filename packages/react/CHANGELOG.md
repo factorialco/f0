@@ -1,5 +1,33 @@
 # Changelog
 
+## [1.355.0](https://github.com/factorialco/f0/compare/f0-react-v1.354.0...f0-react-v1.355.0) (2026-02-10)
+
+
+### Features
+
+* add device catalog module icon ([#3351](https://github.com/factorialco/f0/issues/3351)) ([0f373fd](https://github.com/factorialco/f0/commit/0f373fd5c98012ace929e5a7936dc5ba669c5269))
+
+## [1.354.0](https://github.com/factorialco/f0/compare/f0-react-v1.353.0...f0-react-v1.354.0) (2026-02-10)
+
+
+### Features
+
+* F0Box component ([#3374](https://github.com/factorialco/f0/issues/3374)) ([364b7a6](https://github.com/factorialco/f0/commit/364b7a657d1204daf3bb615d4d7b038317d2ce33))
+
+## [1.353.0](https://github.com/factorialco/f0/compare/f0-react-v1.352.0...f0-react-v1.353.0) (2026-02-09)
+
+
+### Features
+
+* create F0Form component ([#3384](https://github.com/factorialco/f0/issues/3384)) ([a26afe0](https://github.com/factorialco/f0/commit/a26afe03f1fc222b2a0cc769a928c875a2198390))
+
+## [1.352.0](https://github.com/factorialco/f0/compare/f0-react-v1.351.0...f0-react-v1.352.0) (2026-02-09)
+
+
+### Features
+
+* done state taskslist component ([#3385](https://github.com/factorialco/f0/issues/3385)) ([9a861d2](https://github.com/factorialco/f0/commit/9a861d225a5b64eaa741df3a470cf9066c889316))
+
 ## [1.351.0](https://github.com/factorialco/f0/compare/f0-react-v1.350.0...f0-react-v1.351.0) (2026-02-09)
 
 

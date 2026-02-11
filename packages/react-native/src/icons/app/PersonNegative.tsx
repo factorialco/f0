@@ -1,6 +1,6 @@
-import Svg, { Path } from "react-native-svg";
-import type { SvgProps } from "react-native-svg";
-import { Ref, forwardRef } from "react";
+import { Ref, forwardRef } from "react"
+import Svg, { Path } from "react-native-svg"
+import type { SvgProps } from "react-native-svg"
 const SvgPersonNegative = (props: SvgProps, ref: Ref<Svg>) => (
   <Svg
     fill="none"
@@ -22,6 +22,6 @@ const SvgPersonNegative = (props: SvgProps, ref: Ref<Svg>) => (
     />
     <Path stroke="currentColor" strokeLinecap="round" d="m5 5 14 14" />
   </Svg>
-);
-const ForwardRef = forwardRef(SvgPersonNegative);
-export default ForwardRef;
+)
+const ForwardRef = forwardRef(SvgPersonNegative)
+export default ForwardRef

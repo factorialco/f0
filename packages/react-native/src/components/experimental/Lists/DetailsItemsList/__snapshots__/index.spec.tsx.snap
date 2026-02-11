@@ -16,7 +16,7 @@ exports[`DetailsItemsList Snapshot  1`] = `
       className="flex gap-0.5"
     >
       <View
-        className="min-w-32 max-w-72"
+        className="max-w-72 min-w-32"
       >
         <Text
           className="px-1.5 text-f0-foreground-secondary"
@@ -168,7 +168,7 @@ exports[`DetailsItemsList Snapshot  1`] = `
       className="flex gap-0.5"
     >
       <View
-        className="min-w-32 max-w-72"
+        className="max-w-72 min-w-32"
       >
         <Text
           className="px-1.5 text-f0-foreground-secondary"
@@ -329,7 +329,7 @@ exports[`DetailsItemsList Snapshot  1`] = `
       className="flex gap-0.5"
     >
       <View
-        className="min-w-32 max-w-72"
+        className="max-w-72 min-w-32"
       >
         <Text
           className="px-1.5 text-f0-foreground-secondary"
@@ -610,7 +610,7 @@ exports[`DetailsItemsList Snapshot  1`] = `
       className="flex gap-0.5"
     >
       <View
-        className="min-w-32 max-w-72"
+        className="max-w-72 min-w-32"
       >
         <Text
           className="px-1.5 text-f0-foreground-secondary"

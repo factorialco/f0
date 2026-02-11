@@ -13,11 +13,11 @@ export const variants = [
   "neutral",
   "ghost",
   "promote",
-] as const;
-export type ButtonVariant = (typeof variants)[number];
+] as const
+export type ButtonVariant = (typeof variants)[number]
 
-export const sizes = ["sm", "md", "lg"] as const;
-export type ButtonSize = (typeof sizes)[number];
+export const sizes = ["sm", "md", "lg"] as const
+export type ButtonSize = (typeof sizes)[number]
 
 const buttonVariants = tv({
   base: "flex-row items-center justify-center rounded border-none grow-0",
@@ -50,7 +50,7 @@ const buttonVariants = tv({
     disabled: false,
     round: false,
   },
-});
+})
 
 const pressedVariants = tv({
   base: "",
@@ -67,7 +67,7 @@ const pressedVariants = tv({
   defaultVariants: {
     variant: "default",
   },
-});
+})
 
 const getIconColor = (variant: ButtonVariant, isPressed: boolean) => {
   switch (variant) {
@@ -78,7 +78,7 @@ const getIconColor = (variant: ButtonVariant, isPressed: boolean) => {
     default:
       return "text-f0-icon";
   }
-};
+}
 
 const getIconOnlyColor = (variant: ButtonVariant, isPressed: boolean) => {
   switch (variant) {
@@ -93,7 +93,7 @@ const getIconOnlyColor = (variant: ButtonVariant, isPressed: boolean) => {
     default:
       return "text-f0-icon-bold";
   }
-};
+}
 
 const getTextColor = (variant: ButtonVariant, isPressed: boolean): TextColor => {
   if (isPressed && variant === "critical") {
@@ -108,20 +108,20 @@ const getTextColor = (variant: ButtonVariant, isPressed: boolean): TextColor => 
     default:
       return "default";
   }
-};
+}
 
 export interface ButtonProps extends VariantProps<typeof buttonVariants> {
-  label: string;
-  onPress?: () => void | Promise<unknown>;
-  disabled?: boolean;
-  loading?: boolean;
-  icon?: IconType;
-  emoji?: string;
-  hideLabel?: boolean;
-  className?: string;
-  accessibilityHint?: string;
-  showBadge?: boolean;
-  fullWidth?: boolean;
+  label: string
+  onPress?: () => void | Promise<unknown>
+  disabled?: boolean
+  loading?: boolean
+  icon?: IconType
+  emoji?: string
+  hideLabel?: boolean
+  className?: string
+  accessibilityHint?: string
+  showBadge?: boolean
+  fullWidth?: boolean
 }
 
 export const Button = forwardRef<View, ButtonProps>(function Button(
@@ -141,29 +141,29 @@ export const Button = forwardRef<View, ButtonProps>(function Button(
     showBadge = false,
     fullWidth = false,
   },
-  ref,
+  ref
 ) {
-  const [isLoading, setIsLoading] = useState(false);
-  const [isPressed, setIsPressed] = useState(false);
+  const [isLoading, setIsLoading] = useState(false)
+  const [isPressed, setIsPressed] = useState(false)
 
   const handlePress = async () => {
-    if (!onPress || disabled || loading || isLoading) return;
+    if (!onPress || disabled || loading || isLoading) return
 
-    const result = onPress();
+    const result = onPress()
 
     if (result instanceof Promise) {
-      setIsLoading(true);
+      setIsLoading(true)
       try {
-        await result;
+        await result
       } finally {
-        setIsLoading(false);
+        setIsLoading(false)
       }
     }
-  };
+  }
 
-  const isDisabled = disabled || loading || isLoading;
-  const accessibilityLabel = `${label}${isDisabled ? ", disabled" : ""}${loading || isLoading ? ", loading" : ""}`;
-  const shouldShowPressed = isPressed && !isDisabled;
+  const isDisabled = disabled || loading || isLoading
+  const accessibilityLabel = `${label}${isDisabled ? ", disabled" : ""}${loading || isLoading ? ", loading" : ""}`
+  const shouldShowPressed = isPressed && !isDisabled
 
   return (
     <View className={`flex ${fullWidth ? "flex-1" : "item-start"}`}>
@@ -181,7 +181,7 @@ export const Button = forwardRef<View, ButtonProps>(function Button(
             round: hideLabel && round,
           }),
           shouldShowPressed && pressedVariants({ variant }),
-          className,
+          className
         )}
         accessibilityLabel={accessibilityLabel}
         accessibilityRole="button"
@@ -199,7 +199,7 @@ export const Button = forwardRef<View, ButtonProps>(function Button(
               hideLabel && round ? undefined : "-ml-0.5",
               hideLabel && round
                 ? getIconOnlyColor(variant, shouldShowPressed)
-                : getIconColor(variant, shouldShowPressed),
+                : getIconColor(variant, shouldShowPressed)
             )}
           />
         )}
@@ -227,5 +227,5 @@ export const Button = forwardRef<View, ButtonProps>(function Button(
         />
       )}
     </View>
-  );
-});
+  )
+})

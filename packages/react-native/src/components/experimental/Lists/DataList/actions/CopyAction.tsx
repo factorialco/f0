@@ -1,38 +1,39 @@
-import { ReactNode, useEffect, useState } from "react";
-import { cn } from "../../../../../lib/utils";
-import { Icon } from "../../../../Icon";
-import { CheckCircle, LayersFront } from "../../../../../icons/app";
-import { Pressable, View } from "react-native";
-import * as Clipboard from "expo-clipboard";
-import { CopyActionType } from "..";
+import * as Clipboard from "expo-clipboard"
+import { ReactNode, useEffect, useState } from "react"
+import { Pressable, View } from "react-native"
 
-const COPIED_SHOWN_MS = 750;
+import { CopyActionType } from ".."
+import { CheckCircle, LayersFront } from "../../../../../icons/app"
+import { cn } from "../../../../../lib/utils"
+import { Icon } from "../../../../Icon"
+
+const COPIED_SHOWN_MS = 750
 
 export type CopyActionProps = {
-  children: ReactNode;
-} & CopyActionType;
+  children: ReactNode
+} & CopyActionType
 
 export const CopyAction = ({ text, children }: CopyActionProps) => {
-  const [copied, setCopied] = useState(false);
+  const [copied, setCopied] = useState(false)
 
   useEffect(() => {
     if (copied) {
-      const timer = setTimeout(() => setCopied(false), COPIED_SHOWN_MS);
+      const timer = setTimeout(() => setCopied(false), COPIED_SHOWN_MS)
 
-      return () => clearTimeout(timer);
+      return () => clearTimeout(timer)
     }
-  }, [copied]);
+  }, [copied])
 
   const copyHandler = async () => {
     try {
       if (text) {
-        await Clipboard.setStringAsync(text);
-        setCopied(true);
+        await Clipboard.setStringAsync(text)
+        setCopied(true)
       }
     } catch (error) {
-      void error;
+      void error
     }
-  };
+  }
   return (
     <Pressable
       aria-label={copied ? "Copied!" : `Copy ${text}`}
@@ -68,5 +69,5 @@ export const CopyAction = ({ text, children }: CopyActionProps) => {
         )}
       </View>
     </Pressable>
-  );
-};
+  )
+}

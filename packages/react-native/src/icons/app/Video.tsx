@@ -1,6 +1,6 @@
-import Svg, { Path } from "react-native-svg";
-import type { SvgProps } from "react-native-svg";
-import { Ref, forwardRef } from "react";
+import { Ref, forwardRef } from "react"
+import Svg, { Path } from "react-native-svg"
+import type { SvgProps } from "react-native-svg"
 const SvgVideo = (props: SvgProps, ref: Ref<Svg>) => (
   <Svg
     fill="none"
@@ -18,6 +18,6 @@ const SvgVideo = (props: SvgProps, ref: Ref<Svg>) => (
       d="M10 14.117V9.883a.5.5 0 0 1 .757-.429l3.528 2.117a.5.5 0 0 1 0 .858l-3.528 2.117a.5.5 0 0 1-.757-.43Z"
     />
   </Svg>
-);
-const ForwardRef = forwardRef(SvgVideo);
-export default ForwardRef;
+)
+const ForwardRef = forwardRef(SvgVideo)
+export default ForwardRef

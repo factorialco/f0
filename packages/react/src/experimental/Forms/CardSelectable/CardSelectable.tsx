@@ -57,12 +57,36 @@ function CheckboxIndicator({ checked }: { checked: boolean }) {
   )
 }
 
+/** Visual toggle/switch indicator without accessibility role (role is on parent) */
+function ToggleIndicator({ checked }: { checked: boolean }) {
+  return (
+    <div
+      aria-hidden="true"
+      className={cn(
+        "flex h-6 w-10 shrink-0 items-center rounded-full p-0.5 transition-colors",
+        checked ? "bg-f1-background-selected-bold" : "bg-f1-border"
+      )}
+    >
+      <div
+        className={cn(
+          "h-5 w-5 rounded-full bg-f1-background shadow-sm transition-transform",
+          checked ? "translate-x-4" : "translate-x-0"
+        )}
+      />
+    </div>
+  )
+}
+
 interface CardSelectableProps<T extends CardSelectableValue> {
   item: CardSelectableItem<T>
   selected: boolean
   disabled: boolean
   multiple: boolean
   onSelect: () => void
+  /** When true, shows a toggle/switch indicator instead of checkbox/radio */
+  isToggle?: boolean
+  /** When true, renders without individual card borders (for grouped layout) */
+  grouped?: boolean
 }
 
 export function CardSelectable<T extends CardSelectableValue>({
@@ -71,6 +95,8 @@ export function CardSelectable<T extends CardSelectableValue>({
   disabled,
   multiple,
   onSelect,
+  isToggle,
+  grouped,
 }: CardSelectableProps<T>) {
   const isDisabled = disabled || item.disabled
 
@@ -80,9 +106,22 @@ export function CardSelectable<T extends CardSelectableValue>({
     }
   }
 
+  // Determine the appropriate ARIA role
+  const role = isToggle ? "switch" : multiple ? "checkbox" : "radio"
+
+  const renderIndicator = () => {
+    if (isToggle) {
+      return <ToggleIndicator checked={selected} />
+    }
+    if (multiple) {
+      return <CheckboxIndicator checked={selected} />
+    }
+    return <RadioIndicator checked={selected} />
+  }
+
   return (
     <div
-      role={multiple ? "checkbox" : "radio"}
+      role={role}
       aria-checked={selected}
       aria-disabled={isDisabled}
       tabIndex={isDisabled ? -1 : 0}
@@ -94,30 +133,42 @@ export function CardSelectable<T extends CardSelectableValue>({
         }
       }}
       className={cn(
-        "relative flex flex-1 cursor-pointer items-center gap-3 rounded-lg border border-solid p-4 transition-colors",
+        "relative flex flex-1 cursor-pointer items-center gap-3 transition-colors",
         focusRing(),
-        selected
-          ? "border-f1-border-selected-bold bg-f1-background-selected-secondary"
-          : "border-f1-border-secondary bg-f1-background hover:border-f1-border",
+        grouped
+          ? // Grouped style: no border, just padding
+            cn("px-4 py-3")
+          : // Card style: border and rounded corners
+            cn(
+              "rounded-xl border border-solid p-4",
+              // Toggle cards don't show selected state via border (the toggle indicator shows it)
+              selected && !isToggle
+                ? "border-f1-border-selected-bold bg-f1-background-selected-secondary"
+                : "border-f1-border-secondary bg-f1-background hover:border-f1-border"
+            ),
         isDisabled && "cursor-not-allowed opacity-50"
       )}
     >
       {item.avatar && <AvatarRender avatar={item.avatar} />}
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-        <span className="text-base font-semibold text-f1-foreground">
+        <span
+          className={cn(
+            "text-base text-f1-foreground",
+            grouped ? "font-medium" : "font-semibold"
+          )}
+        >
           {item.title}
+          {item.required && (
+            <span className="ml-0.5 text-f1-foreground-critical">*</span>
+          )}
         </span>
         {item.description && (
-          <span className="text-sm text-f1-foreground-secondary">
+          <span className="text-base text-f1-foreground-secondary">
             {item.description}
           </span>
         )}
       </div>
-      {multiple ? (
-        <CheckboxIndicator checked={selected} />
-      ) : (
-        <RadioIndicator checked={selected} />
-      )}
+      {renderIndicator()}
     </div>
   )
 }

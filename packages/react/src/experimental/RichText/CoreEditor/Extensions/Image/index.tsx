@@ -10,7 +10,7 @@ import {
 } from "@tiptap/react"
 
 import { F0Button } from "@/components/F0Button"
-import { Spinner } from "@/experimental/Information/Spinner"
+import { Spinner } from "@/ui/Spinner"
 import { Delete } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"

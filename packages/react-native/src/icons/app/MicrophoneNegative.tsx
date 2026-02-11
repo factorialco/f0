@@ -1,6 +1,6 @@
-import Svg, { Path } from "react-native-svg";
-import type { SvgProps } from "react-native-svg";
-import { Ref, forwardRef } from "react";
+import { Ref, forwardRef } from "react"
+import Svg, { Path } from "react-native-svg"
+import type { SvgProps } from "react-native-svg"
 const SvgMicrophoneNegative = (props: SvgProps, ref: Ref<Svg>) => (
   <Svg
     fill="none"
@@ -21,6 +21,6 @@ const SvgMicrophoneNegative = (props: SvgProps, ref: Ref<Svg>) => (
       d="M6 11a6 6 0 0 0 7.114 5.897M18 11c0 .923-.209 1.798-.581 2.58M12 17v3m0 0h-2m2 0h2M5 5l13 13"
     />
   </Svg>
-);
-const ForwardRef = forwardRef(SvgMicrophoneNegative);
-export default ForwardRef;
+)
+const ForwardRef = forwardRef(SvgMicrophoneNegative)
+export default ForwardRef

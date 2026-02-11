@@ -17,6 +17,7 @@ export const modules = {
   company_trainings: ModuleIcons.Trainings,
   compensations: ModuleIcons.Payroll,
   complaints: ModuleIcons.Complaints,
+  device_catalog: ModuleIcons.Marketplace,
   discover: ModuleIcons.Discover,
   documents: ModuleIcons.Documents,
   employee_attendance: ModuleIcons.ClockIn,

@@ -1,6 +1,6 @@
-import Svg, { Circle, Path } from "react-native-svg";
-import type { SvgProps } from "react-native-svg";
-import { Ref, forwardRef } from "react";
+import { Ref, forwardRef } from "react"
+import Svg, { Circle, Path } from "react-native-svg"
+import type { SvgProps } from "react-native-svg"
 const SvgClock = (props: SvgProps, ref: Ref<Svg>) => (
   <Svg
     fill="none"
@@ -17,6 +17,6 @@ const SvgClock = (props: SvgProps, ref: Ref<Svg>) => (
       d="M12 9v3l3.5 2"
     />
   </Svg>
-);
-const ForwardRef = forwardRef(SvgClock);
-export default ForwardRef;
+)
+const ForwardRef = forwardRef(SvgClock)
+export default ForwardRef

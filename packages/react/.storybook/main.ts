@@ -24,12 +24,20 @@ const config: StorybookConfig = {
     "../docs/Introduction.mdx",
     "../docs/**/*.mdx",
     {
-      directory: "../src/lib",
-      titlePrefix: "Library",
-    },
-    {
       directory: "../src/components",
       titlePrefix: "Components",
+    },
+    {
+      directory: "../src/experimental",
+      titlePrefix: "Components",
+    },
+    {
+      directory: "../src/ai",
+      titlePrefix: "Components",
+    },
+    {
+      directory: "../src/lib",
+      titlePrefix: "Library",
     },
     {
       directory: "../src/layouts",
@@ -40,21 +48,18 @@ const config: StorybookConfig = {
       titlePrefix: "Hooks",
     },
     {
-      directory: "../src/experimental",
-      titlePrefix: "Components",
+      directory: "../src/sds",
+      titlePrefix: "SDS",
     },
     {
-      directory: "../src/ai",
-      titlePrefix: "Components",
+      directory: "../src/examples",
+      titlePrefix: "Examples",
     },
-    ...(process.env.STORYBOOK_PUBLIC_BUILD
-      ? []
-      : [
-          {
-            directory: "../src/ui",
-            titlePrefix: "🔒 Internal",
-          },
-        ]),
+    {
+      directory: "../src/ui",
+      titlePrefix: "🔒 Internal",
+    },
+    ...(process.env.STORYBOOK_PUBLIC_BUILD ? [] : []),
   ],
   staticDirs: ["../public", "./static"],
   addons: [

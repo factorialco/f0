@@ -1,15 +1,15 @@
-import { BaseTag } from "../BaseTag";
-import { useTextFormatEnforcer } from "../../../lib/text";
-import { Icon, IconType } from "../../Icon";
-import { cn } from "../../../lib/utils";
+import { useTextFormatEnforcer } from "../../../lib/text"
+import { cn } from "../../../lib/utils"
+import { Icon, IconType } from "../../Icon"
+import { BaseTag } from "../BaseTag"
 
 export type RawTagProps = {
-  text?: string;
-  additionalAccesibleText?: string;
-  icon?: IconType;
-  noBorder?: boolean;
-  className?: string;
-};
+  text?: string
+  additionalAccesibleText?: string
+  icon?: IconType
+  noBorder?: boolean
+  className?: string
+}
 
 export const RawTag = ({
   text,
@@ -18,7 +18,7 @@ export const RawTag = ({
   noBorder,
   className,
 }: RawTagProps) => {
-  useTextFormatEnforcer(text, { disallowEmpty: true });
+  useTextFormatEnforcer(text, { disallowEmpty: true })
 
   return (
     <BaseTag
@@ -35,7 +35,7 @@ export const RawTag = ({
       text={text}
       additionalAccesibleText={additionalAccesibleText}
     />
-  );
-};
+  )
+}
 
-RawTag.displayName = "RawTag";
+RawTag.displayName = "RawTag"

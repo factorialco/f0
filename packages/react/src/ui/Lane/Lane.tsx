@@ -5,7 +5,7 @@ import type { RecordType } from "@/hooks/datasource"
 
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Card } from "@/components/F0Card"
-import { Spinner } from "@/experimental/Information/Spinner"
+import { Spinner } from "@/ui/Spinner"
 import { useInfiniteScrollPagination } from "@/experimental/OneDataCollection/hooks/useInfiniteScrollPagination"
 import { ScrollArea } from "@/experimental/Utilities/ScrollArea"
 import { Plus } from "@/icons/app"

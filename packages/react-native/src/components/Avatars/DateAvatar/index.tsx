@@ -1,13 +1,14 @@
-import { View, Text } from "react-native";
-import { getAbbreviateMonth, getDayOfMonth } from "../../../lib/date";
+import { View, Text } from "react-native"
+
+import { getAbbreviateMonth, getDayOfMonth } from "../../../lib/date"
 
 type Props = {
-  date: Date;
-};
+  date: Date
+}
 
 export const DateAvatar = ({ date }: Props) => {
-  const dateDay = getDayOfMonth(date);
-  const month = getAbbreviateMonth(date);
+  const dateDay = getDayOfMonth(date)
+  const month = getAbbreviateMonth(date)
 
   return (
     <View className="flex h-10 w-10 flex-col items-center justify-center rounded border border-solid border-f0-border-secondary bg-f0-background-inverse-secondary">
@@ -18,5 +19,5 @@ export const DateAvatar = ({ date }: Props) => {
         {dateDay}
       </Text>
     </View>
-  );
-};
+  )
+}

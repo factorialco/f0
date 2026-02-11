@@ -2,7 +2,7 @@ import { useDeepCompareEffect } from "@reactuses/core"
 import { motion } from "motion/react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
-import { Spinner } from "@/experimental/Information/Spinner"
+import { Spinner } from "@/ui/Spinner"
 import { OneEmptyState } from "@/experimental/OneEmptyState"
 import {
   GroupingDefinition,

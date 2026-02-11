@@ -11,7 +11,7 @@ import {
   useState,
 } from "react"
 
-import { Spinner } from "@/experimental/Information/Spinner"
+import { Spinner } from "@/ui/Spinner"
 import { useReducedMotion } from "@/lib/a11y"
 import { cn } from "@/lib/utils"
 import { ScrollArea } from "@/ui/scrollarea"

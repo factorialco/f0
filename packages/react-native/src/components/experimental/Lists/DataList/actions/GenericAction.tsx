@@ -1,14 +1,15 @@
-import { memo, ReactNode } from "react";
-import { cn } from "../../../../../lib/utils";
-import { Icon } from "../../../../Icon";
-import { ChevronRight } from "../../../../../icons/app";
-import { Pressable, View } from "react-native";
-import { GenericActionType } from "..";
+import { memo, ReactNode } from "react"
+import { Pressable, View } from "react-native"
+
+import { GenericActionType } from ".."
+import { ChevronRight } from "../../../../../icons/app"
+import { cn } from "../../../../../lib/utils"
+import { Icon } from "../../../../Icon"
 
 export type GenericActionProps = {
-  children: ReactNode;
-  className?: string;
-} & GenericActionType;
+  children: ReactNode
+  className?: string
+} & GenericActionType
 
 export const GenericAction = memo(
   ({ children, className, ...props }: GenericActionProps) => {
@@ -30,8 +31,8 @@ export const GenericAction = memo(
           className="text-f0-foreground"
         />
       </Pressable>
-    );
-  },
-);
+    )
+  }
+)
 
-GenericAction.displayName = "GenericAction";
+GenericAction.displayName = "GenericAction"

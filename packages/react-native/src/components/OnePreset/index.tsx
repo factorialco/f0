@@ -1,13 +1,14 @@
-import { Text, View } from "react-native";
-import { Counter } from "../Counter";
-import { PressableFeedback } from "../PressableFeedback";
-import { cn } from "../../lib/utils";
+import { Text, View } from "react-native"
+
+import { cn } from "../../lib/utils"
+import { Counter } from "../Counter"
+import { PressableFeedback } from "../PressableFeedback"
 
 interface PresetProps {
-  label: string;
-  number?: number;
-  onClick?: () => void;
-  selected?: boolean;
+  label: string
+  number?: number
+  onClick?: () => void
+  selected?: boolean
 }
 
 export const OnePreset = ({
@@ -42,5 +43,5 @@ export const OnePreset = ({
         )}
       </PressableFeedback>
     </View>
-  );
-};
+  )
+}
