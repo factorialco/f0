@@ -1,57 +1,60 @@
 import React from "react";
 import { ScrollView, View, Text } from "react-native";
-import { Button } from "../../../src/components/Button";
+import { F0Button } from "../../../src/components/F0Button";
 import { AppIcons } from "../../../src/icons";
 import { useCSSVariable } from "uniwind";
 
 const { Add, Archive, Delete, Save } = AppIcons;
 
-export function ButtonShowcase() {
-  const [f1Foreground] = useCSSVariable(['--color-f0-foreground']);
+export function F0ButtonShowcase() {
+  const [f1Foreground] = useCSSVariable(["--color-f0-foreground"]);
 
   const asString = (value: string | number | undefined): string => {
-    if (typeof value === 'string') return value;
-    if (typeof value === 'number') return String(value);
-    return '#000000';
+    if (typeof value === "string") return value;
+    if (typeof value === "number") return String(value);
+    return "#000000";
   };
 
   return (
-    <ScrollView 
-      className="p-4" 
+    <ScrollView
+      className="p-4"
       contentContainerStyle={{ paddingBottom: 20 }}
       style={{ width: "100%" }}
     >
       {/* Basic Variants */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f1Foreground) }}>
+      <Text
+        className="text-lg font-bold mb-4"
+        style={{ color: asString(f1Foreground) }}
+      >
         Default Variants
       </Text>
       <View className="flex-row flex-wrap gap-2 mb-6" style={{ width: "100%" }}>
-        <Button
+        <F0Button
           variant="default"
           label="Default"
           accessibilityHint="Primary action button"
         />
-        <Button
+        <F0Button
           variant="critical"
           label="Critical"
           accessibilityHint="Destructive action button"
         />
-        <Button
+        <F0Button
           variant="neutral"
           label="Neutral"
           accessibilityHint="Secondary action button"
         />
-        <Button
+        <F0Button
           variant="ghost"
           label="Ghost"
           accessibilityHint="Subtle action button"
         />
-        <Button
+        <F0Button
           variant="outline"
           label="Outline"
           accessibilityHint="Alternative action button"
         />
-        <Button
+        <F0Button
           variant="promote"
           label="Promote"
           accessibilityHint="Promotional action button"
@@ -59,41 +62,44 @@ export function ButtonShowcase() {
       </View>
 
       {/* With Icons */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f1Foreground) }}>
+      <Text
+        className="text-lg font-bold mb-4"
+        style={{ color: asString(f1Foreground) }}
+      >
         With Icons
       </Text>
       <View className="flex-row flex-wrap gap-2 mb-6" style={{ width: "100%" }}>
-        <Button
+        <F0Button
           variant="default"
           label="Add item"
           icon={Add}
           accessibilityHint="Add a new item"
         />
-        <Button
+        <F0Button
           variant="critical"
           label="Delete"
           icon={Delete}
           accessibilityHint="Delete selected item"
         />
-        <Button
+        <F0Button
           variant="neutral"
           label="Archive"
           icon={Archive}
           accessibilityHint="Archive selected item"
         />
-        <Button
+        <F0Button
           variant="ghost"
           label="Save"
           icon={Save}
           accessibilityHint="Save current changes"
         />
-        <Button
+        <F0Button
           variant="outline"
           label="Add more"
           icon={Add}
           accessibilityHint="Add additional items"
         />
-        <Button
+        <F0Button
           variant="promote"
           label="New"
           icon={Add}
@@ -102,11 +108,14 @@ export function ButtonShowcase() {
       </View>
 
       {/* Icon Only */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f1Foreground) }}>
+      <Text
+        className="text-lg font-bold mb-4"
+        style={{ color: asString(f1Foreground) }}
+      >
         Icon Only
       </Text>
       <View className="flex-row flex-wrap gap-2 mb-6">
-        <Button
+        <F0Button
           variant="default"
           label="Add"
           icon={Add}
@@ -114,7 +123,7 @@ export function ButtonShowcase() {
           round
           accessibilityHint="Add new item"
         />
-        <Button
+        <F0Button
           variant="critical"
           label="Delete"
           icon={Delete}
@@ -122,7 +131,7 @@ export function ButtonShowcase() {
           round
           accessibilityHint="Delete selected item"
         />
-        <Button
+        <F0Button
           variant="neutral"
           label="Archive"
           icon={Archive}
@@ -130,7 +139,7 @@ export function ButtonShowcase() {
           round
           accessibilityHint="Archive selected item"
         />
-        <Button
+        <F0Button
           variant="ghost"
           label="Save"
           icon={Save}
@@ -138,7 +147,7 @@ export function ButtonShowcase() {
           round
           accessibilityHint="Save current changes"
         />
-        <Button
+        <F0Button
           variant="outline"
           label="Add"
           icon={Add}
@@ -146,7 +155,7 @@ export function ButtonShowcase() {
           round
           accessibilityHint="Add new item"
         />
-        <Button
+        <F0Button
           variant="outline"
           label="Add"
           icon={AppIcons.Bell}
@@ -155,7 +164,7 @@ export function ButtonShowcase() {
           showBadge
           accessibilityHint="Add new item with notification"
         />
-        <Button
+        <F0Button
           variant="promote"
           label="Add"
           icon={Add}
@@ -166,39 +175,60 @@ export function ButtonShowcase() {
       </View>
 
       {/* Sizes */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f1Foreground) }}>Sizes</Text>
+      <Text
+        className="text-lg font-bold mb-4"
+        style={{ color: asString(f1Foreground) }}
+      >
+        Sizes
+      </Text>
       <View className="flex-row items-center gap-2 mb-6">
-        <Button size="sm" label="Small" accessibilityHint="Small size button" />
-        <Button
+        <F0Button
+          size="sm"
+          label="Small"
+          accessibilityHint="Small size button"
+        />
+        <F0Button
           size="md"
           label="Medium"
           accessibilityHint="Medium size button"
         />
-        <Button size="lg" label="Large" accessibilityHint="Large size button" />
+        <F0Button
+          size="lg"
+          label="Large"
+          accessibilityHint="Large size button"
+        />
       </View>
 
       {/* States */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f1Foreground) }}>States</Text>
+      <Text
+        className="text-lg font-bold mb-4"
+        style={{ color: asString(f1Foreground) }}
+      >
+        States
+      </Text>
       <View className="flex-row flex-wrap gap-2 mb-6">
-        <Button label="Default" accessibilityHint="Interactive button" />
-        <Button
+        <F0Button label="Default" accessibilityHint="Interactive button" />
+        <F0Button
           disabled
           label="Disabled"
           accessibilityHint="Non-interactive button"
         />
-        <Button
+        <F0Button
           loading
           label="Loading"
-          accessibilityHint="Button in loading state"
+          accessibilityHint="F0Button in loading state"
         />
       </View>
 
-      {/* Icon Button Groups */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f1Foreground) }}>
-        Icon Button Groups
+      {/* Icon F0Button Groups */}
+      <Text
+        className="text-lg font-bold mb-4"
+        style={{ color: asString(f1Foreground) }}
+      >
+        Icon F0Button Groups
       </Text>
       <View className="flex-row items-center gap-2 mb-6">
-        <Button
+        <F0Button
           variant="ghost"
           icon={Add}
           hideLabel
@@ -206,7 +236,7 @@ export function ButtonShowcase() {
           label="Add"
           accessibilityHint="Add new item to group"
         />
-        <Button
+        <F0Button
           variant="ghost"
           icon={Archive}
           hideLabel
@@ -214,7 +244,7 @@ export function ButtonShowcase() {
           label="Archive"
           accessibilityHint="Archive selected items"
         />
-        <Button
+        <F0Button
           variant="ghost"
           icon={Delete}
           hideLabel
@@ -225,11 +255,14 @@ export function ButtonShowcase() {
       </View>
 
       {/* Icon Only Sizes */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f1Foreground) }}>
+      <Text
+        className="text-lg font-bold mb-4"
+        style={{ color: asString(f1Foreground) }}
+      >
         Icon Only Sizes
       </Text>
       <View className="flex-row items-center gap-2 mb-6">
-        <Button
+        <F0Button
           variant="default"
           icon={Add}
           hideLabel
@@ -238,7 +271,7 @@ export function ButtonShowcase() {
           label="Add"
           accessibilityHint="Small icon-only button"
         />
-        <Button
+        <F0Button
           variant="default"
           icon={Add}
           hideLabel
@@ -247,7 +280,7 @@ export function ButtonShowcase() {
           label="Add"
           accessibilityHint="Medium icon-only button"
         />
-        <Button
+        <F0Button
           variant="default"
           icon={Add}
           hideLabel
@@ -258,7 +291,7 @@ export function ButtonShowcase() {
         />
       </View>
       <View className="flex-row items-center gap-2 mb-6">
-        <Button
+        <F0Button
           variant="critical"
           icon={Delete}
           hideLabel
@@ -267,7 +300,7 @@ export function ButtonShowcase() {
           label="Delete"
           accessibilityHint="Small icon-only button"
         />
-        <Button
+        <F0Button
           variant="critical"
           icon={Delete}
           hideLabel
@@ -276,7 +309,7 @@ export function ButtonShowcase() {
           label="Delete"
           accessibilityHint="Medium icon-only button"
         />
-        <Button
+        <F0Button
           variant="critical"
           icon={Delete}
           hideLabel
@@ -287,30 +320,33 @@ export function ButtonShowcase() {
         />
       </View>
 
-      {/* Emoji Buttons */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f1Foreground) }}>
-        Emoji Buttons
+      {/* Emoji F0Buttons */}
+      <Text
+        className="text-lg font-bold mb-4"
+        style={{ color: asString(f1Foreground) }}
+      >
+        Emoji F0Buttons
       </Text>
       <View className="flex-row items-center gap-2 mb-6">
-        <Button
+        <F0Button
           emoji="🥰"
           label="Love"
           variant="neutral"
           accessibilityHint="Express love reaction"
         />
-        <Button
+        <F0Button
           emoji="👍"
           label="Like"
           variant="neutral"
           accessibilityHint="Express like reaction"
         />
-        <Button
+        <F0Button
           emoji="🎉"
           label="Celebrate"
           variant="neutral"
           accessibilityHint="Express celebration reaction"
         />
-        <Button
+        <F0Button
           emoji="🥰"
           label="Love"
           variant="neutral"
@@ -320,24 +356,27 @@ export function ButtonShowcase() {
       </View>
 
       {/* Notification Badge */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f1Foreground) }}>
+      <Text
+        className="text-lg font-bold mb-4"
+        style={{ color: asString(f1Foreground) }}
+      >
         With Notification Badge
       </Text>
       <View className="flex-row flex-wrap gap-2 mb-6">
-        <Button
+        <F0Button
           variant="outline"
           label="Messages"
           showBadge
           accessibilityHint="Messages button with notification"
         />
-        <Button
+        <F0Button
           variant="outline"
           label="Archive"
           icon={Archive}
           showBadge
           accessibilityHint="Archive with notifications"
         />
-        <Button
+        <F0Button
           variant="outline"
           label="Notifications"
           icon={Add}
@@ -349,11 +388,14 @@ export function ButtonShowcase() {
       </View>
 
       {/* Async Example */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f1Foreground) }}>
+      <Text
+        className="text-lg font-bold mb-4"
+        style={{ color: asString(f1Foreground) }}
+      >
         Async Action
       </Text>
       <View className="mb-6 items-start">
-        <Button
+        <F0Button
           label="Save Changes"
           icon={Save}
           accessibilityHint="Save changes with loading state"
