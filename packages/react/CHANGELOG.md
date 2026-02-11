@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.356.1](https://github.com/factorialco/f0/compare/f0-react-v1.356.0...f0-react-v1.356.1) (2026-02-11)
+
+
+### Bug Fixes
+
+* make multi-selection in F0Select work with numerical ids ([#3410](https://github.com/factorialco/f0/issues/3410)) ([aaa8a81](https://github.com/factorialco/f0/commit/aaa8a812fe7a76eee8c7fe0b682c81b176fc095f))
+
 ## [1.356.0](https://github.com/factorialco/f0/compare/f0-react-v1.355.2...f0-react-v1.356.0) (2026-02-11)
 
 
