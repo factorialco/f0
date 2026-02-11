@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.356.0](https://github.com/factorialco/f0/compare/f0-react-v1.355.2...f0-react-v1.356.0) (2026-02-11)
+
+
+### Features
+
+* Ai One upsell kit ([#3352](https://github.com/factorialco/f0/issues/3352)) ([b5ff629](https://github.com/factorialco/f0/commit/b5ff629a25133c4492dfb2410ccfd6c8db591b57))
+
 ## [1.355.2](https://github.com/factorialco/f0/compare/f0-react-v1.355.1...f0-react-v1.355.2) (2026-02-11)
 
 
