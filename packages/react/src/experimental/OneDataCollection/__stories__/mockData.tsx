@@ -84,7 +84,8 @@ export const filters = {
   },
   searchStrict: {
     type: "search",
-    label: "Search with strict toggle example",
+    label:
+      "Search with strict toggle example to clear the search value to clear the search value example to clear the search value to clear the search value",
     options: {
       strictToggle: true,
     },
