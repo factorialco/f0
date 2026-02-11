@@ -1,0 +1,1 @@
+{"version":3,"names":["F0Text","TYPOGRAPHY_VARIANTS","TEXT_COLORS","TEXT_ALIGN","TEXT_DECORATIONS","TEXT_TRANSFORMS"],"sourceRoot":"../../../../../src","sources":["components/primitives/Text/index.ts"],"mappings":"AAMA,OAASA,MAAM,KAAQ,UAAU,CASjC,OACEC,mBAAmB,CACnBC,WAAW,CACXC,UAAU,CACVC,gBAAgB,CAChBC,eAAe,KACV,UAAU","ignoreList":[]}
