@@ -1,4 +1,4 @@
-import type { TextProps as RNTextProps } from "react-native";
+import type { TextProps as RNTextProps } from "react-native"
 
 /**
  * Typography variant types based on semantic design tokens
@@ -14,9 +14,9 @@ export const TYPOGRAPHY_VARIANTS = [
   "body-sm-medium",
   "body-sm-semibold",
   "body-xs-medium",
-] as const;
+] as const
 
-export type TypographyVariant = (typeof TYPOGRAPHY_VARIANTS)[number];
+export type TypographyVariant = (typeof TYPOGRAPHY_VARIANTS)[number]
 
 /**
  * Text color variants aligned with F0 semantic color system
@@ -34,23 +34,23 @@ export const TEXT_COLORS = [
   "warning",
   "positive",
   "selected",
-] as const;
+] as const
 
-export type TextColor = (typeof TEXT_COLORS)[number];
+export type TextColor = (typeof TEXT_COLORS)[number]
 
 /**
  * Text alignment options
  */
-export const TEXT_ALIGN = ["left", "center", "right", "justify"] as const;
+export const TEXT_ALIGN = ["left", "center", "right", "justify"] as const
 
-export type TextAlign = (typeof TEXT_ALIGN)[number];
+export type TextAlign = (typeof TEXT_ALIGN)[number]
 
 /**
  * Text decoration options
  */
-export const TEXT_DECORATIONS = ["none", "underline", "line-through"] as const;
+export const TEXT_DECORATIONS = ["none", "underline", "line-through"] as const
 
-export type TextDecoration = (typeof TEXT_DECORATIONS)[number];
+export type TextDecoration = (typeof TEXT_DECORATIONS)[number]
 
 /**
  * Text transform options
@@ -60,9 +60,9 @@ export const TEXT_TRANSFORMS = [
   "uppercase",
   "lowercase",
   "capitalize",
-] as const;
+] as const
 
-export type TextTransform = (typeof TEXT_TRANSFORMS)[number];
+export type TextTransform = (typeof TEXT_TRANSFORMS)[number]
 
 /**
  * Internal props for the F0Text component (includes className for internal use)
@@ -73,47 +73,47 @@ interface F0TextPropsInternal extends Omit<RNTextProps, "style"> {
    * Semantic typography variant
    * @default "body-sm-default"
    */
-  variant?: TypographyVariant;
+  variant?: TypographyVariant
 
   /**
    * Text color from F0 semantic color system
    * @default "default"
    */
-  color?: TextColor;
+  color?: TextColor
 
   /**
    * Text alignment
    * @default "left"
    */
-  align?: TextAlign;
+  align?: TextAlign
 
   /**
    * Text decoration
    * @default "none"
    */
-  decoration?: TextDecoration;
+  decoration?: TextDecoration
 
   /**
    * Text transform
    * @default "none"
    */
-  transform?: TextTransform;
+  transform?: TextTransform
 
   /**
    * Maximum number of lines before truncating with ellipsis
    */
-  numberOfLines?: number;
+  numberOfLines?: number
 
   /**
    * Children content
    */
-  children?: React.ReactNode;
+  children?: React.ReactNode
 
   /**
    * Internal use only - not exposed in public API
    * @private
    */
-  className?: string;
+  className?: string
 }
 
 /**
@@ -123,4 +123,4 @@ interface F0TextPropsInternal extends Omit<RNTextProps, "style"> {
  * Use semantic props (variant, color, align, etc.) for typography.
  * For spacing/layout, wrap F0Text in a View with className.
  */
-export type F0TextProps = Omit<F0TextPropsInternal, "className">;
+export type F0TextProps = Omit<F0TextPropsInternal, "className">

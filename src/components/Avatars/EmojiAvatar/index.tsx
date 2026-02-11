@@ -27,7 +27,7 @@ export const EmojiAvatar = ({ emoji, size = "md", className }: Props) => {
       className={cn(
         className,
         sizes[size],
-        "dark:bg-f0-background-inverse-secondary flex aspect-square items-center justify-center border border-solid border-f0-border-secondary bg-f0-background",
+        "flex aspect-square items-center justify-center border border-solid border-f0-border-secondary bg-f0-background dark:bg-f0-background-inverse-secondary"
       )}
     >
       <EmojiImage emoji={emoji} size={emojiSize[size]} />

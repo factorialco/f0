@@ -1,11 +1,12 @@
-import React, { useMemo } from "react";
-import type { Svg } from "react-native-svg";
-import { withUniwind } from "uniwind";
-import type { F0IconProps, IconType } from "./F0Icon.types";
-import { iconVariants } from "./F0Icon.styles";
+import React, { useMemo } from "react"
+import type { Svg } from "react-native-svg"
+import { withUniwind } from "uniwind"
+
+import { iconVariants } from "./F0Icon.styles"
+import type { F0IconProps, IconType } from "./F0Icon.types"
 
 // Keep track of icons that have already had withUniwind applied
-const interopAppliedIcons = new WeakSet<IconType>();
+const interopAppliedIcons = new WeakSet<IconType>()
 
 /**
  * Applies UniWind interop to an icon component
@@ -14,11 +15,11 @@ const interopAppliedIcons = new WeakSet<IconType>();
  */
 export function applyIconInterop(icon: IconType): IconType {
   if (!interopAppliedIcons.has(icon)) {
-    const wrappedIcon = withUniwind(icon) as IconType;
-    interopAppliedIcons.add(wrappedIcon);
-    return wrappedIcon;
+    const wrappedIcon = withUniwind(icon) as IconType
+    interopAppliedIcons.add(wrappedIcon)
+    return wrappedIcon
   }
-  return icon;
+  return icon
 }
 
 /**
@@ -36,25 +37,25 @@ const F0Icon = React.memo(
   React.forwardRef<Svg, F0IconProps>(
     (
       { size = "md", icon, testID, className: customClassName, ...rest },
-      ref,
+      ref
     ) => {
       // Apply UniWind interop to the icon if not already applied
       // Must be called before any conditional returns (React Hooks rules)
       const IconComponent = useMemo(
         () => (icon ? applyIconInterop(icon) : null),
-        [icon],
-      );
+        [icon]
+      )
 
       // Memoize className generation - merge size variants with custom className
       const className = useMemo(() => {
-        const sizeClasses = iconVariants({ size });
+        const sizeClasses = iconVariants({ size })
         return customClassName
           ? `${sizeClasses} ${customClassName}`
-          : sizeClasses;
-      }, [size, customClassName]);
+          : sizeClasses
+      }, [size, customClassName])
 
       // Early return if no icon provided (after all hooks)
-      if (!icon || !IconComponent) return null;
+      if (!icon || !IconComponent) return null
 
       return (
         <IconComponent
@@ -63,11 +64,11 @@ const F0Icon = React.memo(
           testID={testID}
           {...rest}
         />
-      );
-    },
-  ),
-);
+      )
+    }
+  )
+)
 
-F0Icon.displayName = "F0Icon";
+F0Icon.displayName = "F0Icon"
 
-export default F0Icon;
+export default F0Icon

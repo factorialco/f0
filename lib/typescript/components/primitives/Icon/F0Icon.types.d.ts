@@ -1,8 +1,8 @@
+import type { ForwardRefExoticComponent, RefAttributes } from "react";
 import type { SvgProps } from "react-native-svg";
+import type { Svg } from "react-native-svg";
 import type { VariantProps } from "tailwind-variants";
 import type { iconVariants } from "./F0Icon.styles";
-import type { ForwardRefExoticComponent, RefAttributes } from "react";
-import type { Svg } from "react-native-svg";
 /**
  * Icon component type - forward ref to SVG component with className support
  */

@@ -1,7 +1,7 @@
 import { AlertCircle, InfoCircle, Warning } from "../../../icons/app"
 import { useTextFormatEnforcer } from "../../../lib/text"
 import { cn } from "../../../lib/utils"
-import { Icon, IconType } from "../../Icon"
+import { F0Icon, type IconType } from "../../primitives/Icon"
 import { BaseTag } from "../BaseTag"
 
 type Level = "info" | "warning" | "critical"
@@ -29,7 +29,7 @@ export const AlertTag = <T extends string>({ text, level }: Props<T>) => {
           info: "text-f0-foreground-info",
           warning: "text-f0-foreground-warning",
           critical: "text-f0-foreground-critical",
-        }[level],
+        }[level]
       )}
       classNameContainer={cn(
         "pl-0.5",
@@ -37,17 +37,17 @@ export const AlertTag = <T extends string>({ text, level }: Props<T>) => {
           info: "bg-f0-background-info text-f0-foreground-info",
           warning: "bg-f0-background-warning text-f0-foreground-warning",
           critical: "bg-f0-background-critical text-f0-foreground-critical",
-        }[level],
+        }[level]
       )}
       left={
-        <Icon
+        <F0Icon
           icon={iconMap[level]}
           className={cn(
             {
               info: "text-f0-foreground-info",
               warning: "text-f0-foreground-warning",
               critical: "text-f0-foreground-critical",
-            }[level],
+            }[level]
           )}
           size="md"
           aria-hidden

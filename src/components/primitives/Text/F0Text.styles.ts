@@ -1,4 +1,4 @@
-import { tv, type VariantProps } from "tailwind-variants";
+import { tv, type VariantProps } from "tailwind-variants"
 
 /**
  * Text component variants using tailwind-variants
@@ -64,6 +64,6 @@ export const textVariants = tv({
     decoration: "none",
     transform: "none",
   },
-});
+})
 
-export type TextVariants = VariantProps<typeof textVariants>;
+export type TextVariants = VariantProps<typeof textVariants>

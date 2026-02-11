@@ -1,4 +1,4 @@
-import { IconType } from "../../Icon";
+import { type IconType } from "../../primitives/Icon";
 type Props = {
     icon: IconType;
     size?: "sm" | "md" | "lg";

@@ -1,8 +1,9 @@
-import type { SvgProps } from "react-native-svg";
-import type { VariantProps } from "tailwind-variants";
-import type { iconVariants } from "./F0Icon.styles";
-import type { ForwardRefExoticComponent, RefAttributes } from "react";
-import type { Svg } from "react-native-svg";
+import type { ForwardRefExoticComponent, RefAttributes } from "react"
+import type { SvgProps } from "react-native-svg"
+import type { Svg } from "react-native-svg"
+import type { VariantProps } from "tailwind-variants"
+
+import type { iconVariants } from "./F0Icon.styles"
 
 /**
  * Icon component type - forward ref to SVG component with className support
@@ -10,9 +11,9 @@ import type { Svg } from "react-native-svg";
 export type IconType = ForwardRefExoticComponent<
   SvgProps &
     RefAttributes<Svg> & {
-      className?: string;
+      className?: string
     }
->;
+>
 
 /**
  * Public F0Icon props - includes className for color customization
@@ -23,37 +24,31 @@ export interface F0IconProps extends Omit<SvgProps, "style"> {
    * Tailwind className for color customization
    * Use semantic tokens like text-f0-icon-critical, text-f0-icon-success, etc.
    */
-  className?: string;
+  className?: string
 
   /**
    * Icon component to render (from icons directory)
    */
-  icon: IconType;
+  icon: IconType
 
   /**
    * Icon size variant
    * @default 'md'
    */
-  size?: VariantProps<typeof iconVariants>["size"];
+  size?: VariantProps<typeof iconVariants>["size"]
 
   /**
    * Test ID for testing
    */
-  testID?: string;
+  testID?: string
 
   /**
    * @deprecated variant prop is not used in F0Icon, size handles all styling
    */
-  variant?:
-    | "default"
-    | "critical"
-    | "neutral"
-    | "ghost"
-    | "outline"
-    | "promote";
+  variant?: "default" | "critical" | "neutral" | "ghost" | "outline" | "promote"
 
   /**
    * @deprecated isPressed is not used in F0Icon
    */
-  isPressed?: boolean;
+  isPressed?: boolean
 }

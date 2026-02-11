@@ -1,5 +1,5 @@
 import { type VariantProps } from "tailwind-variants";
-import { type IconType } from "../Icon";
+import { type IconType } from "../primitives/Icon";
 export declare const chipContainerVariants: import("tailwind-variants").TVReturnType<{
     variant: {
         default: string;

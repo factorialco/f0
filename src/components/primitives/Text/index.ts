@@ -4,7 +4,7 @@
  * @see F0Text.md for documentation
  */
 
-export { F0Text } from "./F0Text";
+export { F0Text } from "./F0Text"
 export type {
   F0TextProps,
   TypographyVariant,
@@ -12,11 +12,11 @@ export type {
   TextAlign,
   TextDecoration,
   TextTransform,
-} from "./F0Text";
+} from "./F0Text"
 export {
   TYPOGRAPHY_VARIANTS,
   TEXT_COLORS,
   TEXT_ALIGN,
   TEXT_DECORATIONS,
   TEXT_TRANSFORMS,
-} from "./F0Text";
+} from "./F0Text"

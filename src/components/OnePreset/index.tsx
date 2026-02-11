@@ -27,13 +27,13 @@ export const OnePreset = ({
           number !== undefined && number !== null && "pr-1.5",
           selected
             ? "border-f0-border-selected bg-f0-background-selected-secondary text-f0-foreground-selected"
-            : "border-f0-border text-f0-foreground",
+            : "border-f0-border text-f0-foreground"
         )}
       >
         <Text
           className={cn(
             "whitespace-nowrap",
-            selected ? "text-f0-foreground-selected" : "text-f0-foreground",
+            selected ? "text-f0-foreground-selected" : "text-f0-foreground"
           )}
         >
           {label}

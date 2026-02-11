@@ -5,7 +5,7 @@ import { Pressable, View } from "react-native"
 import { CopyActionType } from ".."
 import { CheckCircle, LayersFront } from "../../../../../icons/app"
 import { cn } from "../../../../../lib/utils"
-import { Icon } from "../../../../Icon"
+import { F0Icon } from "../../../../primitives/Icon"
 
 const COPIED_SHOWN_MS = 750
 
@@ -40,30 +40,30 @@ export const CopyAction = ({ text, children }: CopyActionProps) => {
       className={cn(
         "group flex flex-row justify-between gap-1.5 rounded p-1.5",
         "transition-colors duration-300 active:bg-f0-background-secondary-hover",
-        copied ? "bg-f0-background-positive" : undefined,
+        copied ? "bg-f0-background-positive" : undefined
       )}
       onPress={copyHandler}
     >
       <View className="flex flex-row items-center gap-1.5">{children}</View>
       <View className="flex">
         {!copied && (
-          <Icon
+          <F0Icon
             icon={LayersFront}
             size="md"
             aria-hidden={true}
             className={cn(
-              "col-start-1 col-end-2 row-start-1 row-end-2 text-f0-icon-bold",
+              "col-start-1 col-end-2 row-start-1 row-end-2 text-f0-icon-bold"
             )}
           />
         )}
         {copied && (
-          <Icon
+          <F0Icon
             icon={CheckCircle}
             size="md"
             aria-hidden={true}
             className={cn(
               "col-start-1 col-end-2 row-start-1 row-end-2",
-              "text-f0-icon-positive",
+              "text-f0-icon-positive"
             )}
           />
         )}

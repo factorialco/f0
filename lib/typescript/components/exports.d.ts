@@ -4,7 +4,6 @@ export * from "./Badge";
 export * from "./Button";
 export * from "./Counter";
 export * from "./ExampleComponent";
-export * from "./Icon";
 export * from "./Navigation/PageHeader";
 export * from "./OneChip";
 export * from "./OnePreset";
@@ -13,5 +12,6 @@ export * from "./Tags/exports";
 export * from "./experimental/Lists/DataList";
 export * from "./experimental/Lists/DetailsItem";
 export * from "./experimental/Lists/DetailsItemsList";
-export * from "./primitives/Text/F0Text";
+export * from "./primitives/Text";
+export * from "./primitives/Icon";
 //# sourceMappingURL=exports.d.ts.map

@@ -36,7 +36,7 @@ const NotificationsAction = ({ label, onPress, showBadge }: ActionT) => {
 export const PageHeader = memo(({ title, actions }: Props) => {
   return (
     <View className="flex-row items-center justify-between px-5 py-3">
-      <Text className="text-f0-foreground text-3xl font-semibold">{title}</Text>
+      <Text className="text-3xl font-semibold text-f0-foreground">{title}</Text>
       <View className="flex-row gap-2">
         {actions?.map((action) => {
           switch (action.type) {

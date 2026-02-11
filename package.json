@@ -72,7 +72,7 @@
     "postbuild": "node scripts/set-main.cjs dev && test -d lib/typescript/react-native/package && rm -rf lib/typescript/react-native/package || true",
     "dev:setup": "node scripts/set-main.cjs dev",
     "lint": "sh -c 'oxlint \"${@:-src/**/*}\" --max-warnings 0' --",
-    "lint-fix": "sh -c 'oxlint \"${@:-src/**/*}\" --fix --max-warnings 0' --",
+    "lint:fix": "sh -c 'oxlint \"${@:-src/**/*}\" --fix --max-warnings 0' --",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:ci": "jest --ci --coverage --coverageReporters=text --coverageReporters=lcov",

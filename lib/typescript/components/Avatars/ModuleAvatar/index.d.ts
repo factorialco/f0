@@ -1,5 +1,5 @@
 import { type VariantProps } from "tailwind-variants";
-import { IconType } from "../../Icon";
+import { type IconType } from "../../primitives/Icon";
 import { ModuleId } from "./modules";
 declare const moduleAvatarVariants: import("tailwind-variants").TVReturnType<{
     size: {

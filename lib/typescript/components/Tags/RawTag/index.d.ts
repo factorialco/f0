@@ -1,4 +1,4 @@
-import { IconType } from "../../Icon";
+import { type IconType } from "../../primitives/Icon";
 export type RawTagProps = {
     text?: string;
     additionalAccesibleText?: string;
