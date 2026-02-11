@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.355.2](https://github.com/factorialco/f0/compare/f0-react-v1.355.1...f0-react-v1.355.2) (2026-02-11)
+
+
+### Bug Fixes
+
+* do not trigger validation for hidden fields in F0Form ([#3406](https://github.com/factorialco/f0/issues/3406)) ([3bf0e59](https://github.com/factorialco/f0/commit/3bf0e5966d589873fa48d723405dcb54ec33caaf))
+
 ## [1.355.1](https://github.com/factorialco/f0/compare/f0-react-v1.355.0...f0-react-v1.355.1) (2026-02-11)
 
 
