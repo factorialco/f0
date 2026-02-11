@@ -1,4 +1,5 @@
 import { DateQuestionProps } from "./DateQuestion"
+import { DataSelectQuestionProps } from "./DataSelectQuestion/types"
 import { LinkQuestionProps } from "./LinkQuestion"
 import { NumericQuestionProps } from "./NumericQuestion"
 import { RatingQuestionProps } from "./RatingQuestion"
@@ -10,6 +11,7 @@ export type QuestionType =
   | "rating"
   | "select"
   | "multi-select"
+  | "data-select"
   | "text"
   | "longText"
   | "numeric"
@@ -36,6 +38,7 @@ export type QuestionElement =
       SelectQuestionProps & { type: "select" | "multi-select" },
       QuestionPropsToOmit
     >
+  | Omit<DataSelectQuestionProps & { type: "data-select" }, QuestionPropsToOmit>
   | Omit<NumericQuestionProps & { type: "numeric" }, QuestionPropsToOmit>
   | Omit<LinkQuestionProps & { type: "link" }, QuestionPropsToOmit>
   | Omit<DateQuestionProps & { type: "date" }, QuestionPropsToOmit>
@@ -85,6 +88,11 @@ type OnChangeQuestionParams = BaseQuestionOnChangeParams &
     | {
         type: "multi-select"
         value?: string[] | null
+        options: SelectQuestionOption[]
+      }
+    | {
+        type: "data-select"
+        value?: string | null
         options: SelectQuestionOption[]
       }
     | {

@@ -1,5 +1,13 @@
 import { IconType } from "@/components/F0Icon/F0Icon"
-import { Check, CheckDouble, List, Numbers, Star, TextSize } from "@/icons/app"
+import {
+  Check,
+  ChevronDown,
+  CheckDouble,
+  List,
+  Numbers,
+  Star,
+  TextSize,
+} from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 
 import { useCoCreationFormContext } from "./Context"
@@ -29,6 +37,11 @@ export const useQuestionTypes = () => {
       label: t("coCreationForm.questionTypes.singleChoice"),
       icon: Check,
       questionType: "select",
+    },
+    {
+      label: t("coCreationForm.questionTypes.dataSelect"),
+      icon: ChevronDown,
+      questionType: "data-select",
     },
     {
       label: t("coCreationForm.questionTypes.text"),

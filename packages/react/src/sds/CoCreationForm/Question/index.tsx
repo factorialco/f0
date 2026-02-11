@@ -1,5 +1,7 @@
 import { BaseQuestionPropsForOtherQuestionComponents } from "../BaseQuestion"
 import { DateQuestion, DateQuestionProps } from "../DateQuestion"
+import { DataSelectQuestion } from "../DataSelectQuestion"
+import { DataSelectQuestionProps } from "../DataSelectQuestion/types"
 import { LinkQuestion, LinkQuestionProps } from "../LinkQuestion"
 import { NumericQuestion, NumericQuestionProps } from "../NumericQuestion"
 import { RatingQuestion, RatingQuestionProps } from "../RatingQuestion"
@@ -12,6 +14,7 @@ export type QuestionProps = BaseQuestionPropsForOtherQuestionComponents &
     | TextQuestionProps
     | (RatingQuestionProps & { type: "rating" })
     | (SelectQuestionProps & { type: "select" | "multi-select" })
+    | (DataSelectQuestionProps & { type: "data-select" })
     | (NumericQuestionProps & { type: "numeric" })
     | (LinkQuestionProps & { type: "link" })
     | (DateQuestionProps & { type: "date" })
@@ -27,6 +30,8 @@ export const Question = ({ ...props }: QuestionProps) => {
     case "select":
     case "multi-select":
       return <SelectQuestion {...props} />
+    case "data-select":
+      return <DataSelectQuestion {...props} />
     case "numeric":
       return <NumericQuestion {...props} />
     case "link":
