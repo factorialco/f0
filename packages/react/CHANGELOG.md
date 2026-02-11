@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.358.0](https://github.com/factorialco/f0/compare/f0-react-v1.357.0...f0-react-v1.358.0) (2026-02-11)
+
+
+### Features
+
+* **icons:** new ai icons ([#3375](https://github.com/factorialco/f0/issues/3375)) ([e60a5c0](https://github.com/factorialco/f0/commit/e60a5c0525414a0ef2dfad79a031faa7b95f5c61))
+
 ## [1.357.0](https://github.com/factorialco/f0/compare/f0-react-v1.356.2...f0-react-v1.357.0) (2026-02-11)
 
 
