@@ -154,20 +154,25 @@ const PresetsOverflowCounterConsistencyComponent = ({
   )
 }
 
-export const WithPresetsOverflowCounterConsistency: StoryObj = {
-  args: {
-    width: 300,
-  },
-  argTypes: {
-    width: {
-      control: { type: "range", min: 220, max: 900, step: 10 },
-      description: "Container width in pixels to test overflow behavior",
+type OverflowCounterConsistencyStory = StoryObj<{ width: number }>
+
+export const WithPresetsOverflowCounterConsistency: OverflowCounterConsistencyStory =
+  {
+    args: {
+      width: 300,
     },
-  },
-  render: (args) => (
-    <PresetsOverflowCounterConsistencyComponent width={args.width as number} />
-  ),
-}
+    argTypes: {
+      width: {
+        control: { type: "range", min: 220, max: 900, step: 10 },
+        description: "Container width in pixels to test overflow behavior",
+      },
+    },
+    render: (args) => (
+      <PresetsOverflowCounterConsistencyComponent
+        width={args.width as number}
+      />
+    ),
+  }
 
 export const WithPresetsAndInitialFilters: StoryObj = {
   args: {
