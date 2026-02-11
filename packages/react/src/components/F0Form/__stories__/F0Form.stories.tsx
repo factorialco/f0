@@ -887,7 +887,7 @@ export const ErrorTriggerModes: Story = {
 
 // Mock data for data source example
 type Country = {
-  id: string
+  id: number
   name: string
   code: string
   continent: string
@@ -924,7 +924,7 @@ const countriesData: Country[] = [
   { id: "28", name: "Singapore", code: "SG", continent: "Asia" },
   { id: "29", name: "Thailand", code: "TH", continent: "Asia" },
   { id: "30", name: "Vietnam", code: "VN", continent: "Asia" },
-]
+].map((country, index) => ({ ...country, id: index + 1, value: index + 1 }))
 
 /** Non-paginated data source - loads all results at once */
 const countriesSource = createDataSourceDefinition<Country>({
@@ -985,6 +985,18 @@ const countriesPaginatedSource = createDataSourceDefinition<Country>({
   },
 })
 
+const defaultValues = {
+  country: 1,
+  countryPaginated: 1,
+  countries: [],
+}
+
+const mapCountryOptions = (country: Country) => ({
+  value: country.id,
+  label: country.name,
+  description: country.continent,
+})
+
 /**
  * Select fields can use a data source for dynamic options.
  * This is useful when options need to be fetched from an API
@@ -995,12 +1007,6 @@ const countriesPaginatedSource = createDataSourceDefinition<Country>({
  */
 export const SelectWithDataSource: Story = {
   render() {
-    const mapCountryOptions = (country: Country) => ({
-      value: 1,
-      label: country.name,
-      description: country.continent,
-    })
-
     const formSchema = z.object({
       // Non-paginated data source
       country: f0FormField(z.number(), {
@@ -1019,7 +1025,7 @@ export const SelectWithDataSource: Story = {
         mapOptions: mapCountryOptions,
       }),
       // Multi-select with paginated data source
-      countries: f0FormField(z.array(z.string()).min(1), {
+      countries: f0FormField(z.array(z.number()).min(1), {
         label: "Favorite Countries (Multi-select, paginated)",
         placeholder: "Select multiple countries...",
         showSearchBox: true,
@@ -1034,11 +1040,7 @@ export const SelectWithDataSource: Story = {
         <F0Form
           name="select-datasource-example"
           schema={formSchema}
-          defaultValues={{
-            country: 1,
-            countryPaginated: 1,
-            countries: [],
-          }}
+          defaultValues={defaultValues}
           onSubmit={async (data) => {
             await sleep(1000)
             alert(`Selected: ${JSON.stringify(data, null, 2)}`)
