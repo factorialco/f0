@@ -20,8 +20,6 @@ import { SwitchGroupRenderer } from "./SwitchGroupRenderer"
 
 interface SectionRendererProps {
   section: SectionDefinition
-  /** Whether to wrap the section in a bordered box */
-  wrappedInBox?: boolean
 }
 
 /**
@@ -82,10 +80,7 @@ function groupContiguousSwitches(
  * Supports conditional rendering for the entire section.
  * Automatically groups contiguous switch fields in a bordered container.
  */
-export function SectionRenderer({
-  section,
-  wrappedInBox = false,
-}: SectionRendererProps) {
+export function SectionRenderer({ section }: SectionRendererProps) {
   const form = useFormContext()
   const values = form.watch()
   const { formName } = useF0FormContext()
@@ -103,13 +98,12 @@ export function SectionRenderer({
   // Generate anchor ID for the section
   const anchorId = generateAnchorId(formName, sectionId)
 
-  const sectionContent = (
-    <>
+  return (
+    <section id={anchorId} className="flex flex-col scroll-mt-4">
       <div
         className={cn(
-          "flex items-start justify-between",
-          "[&>div]:px-0.5 [&>div]:mx-0 [&>div]:border-0",
-          wrappedInBox ? "py-4" : "py-5"
+          "flex items-start justify-between py-5",
+          "[&>div]:px-0.5 [&>div]:mx-0 [&>div]:border-0"
         )}
       >
         <SectionHeader title={title} description={description ?? ""} />
@@ -156,19 +150,6 @@ export function SectionRenderer({
           return null
         })}
       </div>
-    </>
-  )
-
-  return (
-    <section
-      id={anchorId}
-      className={cn(
-        "flex flex-col scroll-mt-4",
-        wrappedInBox &&
-          "rounded-xl border border-solid border-f1-border-secondary p-5 pt-1"
-      )}
-    >
-      {sectionContent}
     </section>
   )
 }

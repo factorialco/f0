@@ -198,10 +198,9 @@ export const WithSections: Story = {
 }
 
 /**
- * Form with a sections sidebar and sections wrapped in boxes.
+ * Form with a sections sidebar.
  * Use the `styling` prop to configure the layout:
  * - `showSectionsSidepanel`: Shows a sidebar with section navigation
- * - `sectionsWrappedInBox`: Wraps each section in a bordered box
  */
 export const WithSectionsSidepanel: Story = {
   render() {
@@ -314,7 +313,6 @@ export const WithSectionsSidepanel: Story = {
         sections={sections}
         styling={{
           showSectionsSidepanel: true,
-          sectionsWrappedInBox: true,
         }}
         defaultValues={{
           title: "Workplace climate survey",

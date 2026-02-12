@@ -11,7 +11,7 @@ export const SWITCH_GROUP_PADDING = "p-4"
 /** Margin between sections (24px) */
 export const SECTION_MARGIN = "mt-6"
 
-/** Margin between sections when wrapped in a box (28px) */
-export const SECTION_MARGIN_WITH_BOX = "mt-7"
+/** Maximum width for form content (720px) */
+export const FORM_MAX_WIDTH = "max-w-[720px]"
 
 export const FORM_SIZE = "md" as const

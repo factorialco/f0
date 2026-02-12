@@ -190,11 +190,6 @@ export interface F0FormStylingConfig {
    * @default false
    */
   showSectionsSidepanel?: boolean
-  /**
-   * Wraps each section in a bordered box/card
-   * @default false
-   */
-  sectionsWrappedInBox?: boolean
 }
 
 /**

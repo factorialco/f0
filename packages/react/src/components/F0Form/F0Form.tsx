@@ -16,7 +16,7 @@ import { RowRenderer } from "./components/RowRenderer"
 import { SectionRenderer } from "./components/SectionRenderer"
 import { SwitchGroupRenderer } from "./components/SwitchGroupRenderer"
 import { createConditionalResolver } from "./conditionalResolver"
-import { SECTION_MARGIN, SECTION_MARGIN_WITH_BOX } from "./constants"
+import { FORM_MAX_WIDTH, SECTION_MARGIN } from "./constants"
 import { F0FormContext, generateAnchorId } from "./context"
 import { FieldRenderer } from "./fields/FieldRenderer"
 import type { F0SwitchField } from "./fields/switch/types"
@@ -146,7 +146,6 @@ export function F0Form<TSchema extends z.ZodObject<ZodRawShape>>(
 
   // Resolve styling configuration
   const showSectionsSidepanel = styling?.showSectionsSidepanel ?? false
-  const sectionsWrappedInBox = styling?.sectionsWrappedInBox ?? false
 
   // Resolve submit type from config
   const isActionBar = submitConfig?.type === "action-bar"
@@ -294,11 +293,7 @@ export function F0Form<TSchema extends z.ZodObject<ZodRawShape>>(
   const formContent = (
     <form
       onSubmit={form.handleSubmit(handleSubmit)}
-      className={cn(
-        "flex flex-col",
-        sectionsWrappedInBox ? "max-w-[720px]" : "max-w-[600px]",
-        className
-      )}
+      className={cn("flex flex-col", FORM_MAX_WIDTH, className)}
     >
       {/* Render definition items with switch grouping */}
       {groupedItems.map((groupedItem, index) => {
@@ -329,18 +324,9 @@ export function F0Form<TSchema extends z.ZodObject<ZodRawShape>>(
             return (
               <div
                 key={groupedItem.item.id}
-                className={
-                  index !== 0
-                    ? sectionsWrappedInBox
-                      ? SECTION_MARGIN_WITH_BOX
-                      : SECTION_MARGIN
-                    : ""
-                }
+                className={index !== 0 ? SECTION_MARGIN : ""}
               >
-                <SectionRenderer
-                  section={groupedItem.item}
-                  wrappedInBox={sectionsWrappedInBox}
-                />
+                <SectionRenderer section={groupedItem.item} />
               </div>
             )
           default:
