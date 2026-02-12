@@ -399,6 +399,9 @@ export const defaultTranslations = {
     ordered: "Ordered",
     task: "Task",
     details: "Dropdown",
+    video: "Video",
+    videoUrlPrompt: "Enter a YouTube or Vimeo URL",
+    videoUrlInvalid: "Please enter a valid YouTube or Vimeo URL",
     link: "Link",
     linkPlaceholder: "Enter a link",
     groups: {

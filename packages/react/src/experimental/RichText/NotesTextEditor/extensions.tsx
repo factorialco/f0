@@ -23,6 +23,7 @@ import {
   TypographyExtension,
   UnderlineExtension,
   ImageUploadConfig,
+  VideoEmbedExtension,
   createFileHandlerExtension,
 } from "@/experimental/RichText/CoreEditor"
 import { I18nContextType } from "@/lib/providers/i18n"
@@ -60,6 +61,7 @@ export const createNotesTextEditorExtensions = ({
       currentConfig: aiBlockConfig,
     }),
     ImageExtension,
+    VideoEmbedExtension,
     ...(imageUploadConfig
       ? [createFileHandlerExtension(imageUploadConfig)]
       : []),
