@@ -163,6 +163,22 @@ export type F0FormSubmitConfig =
   | F0FormActionBarSubmitConfig
 
 /**
+ * Styling configuration for the form layout and appearance
+ */
+export interface F0FormStylingConfig {
+  /**
+   * Shows a sidebar with section navigation (Table of Contents)
+   * @default false
+   */
+  showSectionsSidepanel?: boolean
+  /**
+   * Wraps each section in a bordered box/card
+   * @default false
+   */
+  sectionsWrappedInBox?: boolean
+}
+
+/**
  * Props for the F0Form component
  *
  * @typeParam TSchema - The Zod object schema type. The form data type is inferred from this.
@@ -220,6 +236,11 @@ export interface F0FormProps<TSchema extends z.ZodObject<ZodRawShape>> {
    * @default "on-blur"
    */
   errorTriggerMode?: F0FormErrorTriggerMode
+  /**
+   * Styling configuration for form layout and appearance.
+   * Controls section sidebar visibility and box wrapping.
+   */
+  styling?: F0FormStylingConfig
 }
 
 /**

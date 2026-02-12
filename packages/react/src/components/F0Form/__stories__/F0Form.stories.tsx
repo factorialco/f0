@@ -192,6 +192,135 @@ export const WithSections: Story = {
 }
 
 /**
+ * Form with a sections sidebar and sections wrapped in boxes.
+ * Use the `styling` prop to configure the layout:
+ * - `showSectionsSidepanel`: Shows a sidebar with section navigation
+ * - `sectionsWrappedInBox`: Wraps each section in a bordered box
+ */
+export const WithSectionsSidepanel: Story = {
+  render() {
+    const formSchema = z.object({
+      // Basic Information
+      title: f0FormField(z.string().min(1), {
+        label: "Title",
+        section: "basic",
+        placeholder: "Enter survey title",
+      }),
+      description: f0FormField(z.string().max(500).optional(), {
+        label: "Description (Optional)",
+        section: "basic",
+        fieldType: "textarea",
+        rows: 3,
+      }),
+      // Participants
+      participants: f0FormField(z.string(), {
+        label: "Select participants",
+        section: "participants",
+        options: [
+          { value: "all", label: "All employees" },
+          { value: "department", label: "By department" },
+          { value: "custom", label: "Custom selection" },
+        ],
+        placeholder: "Select participants",
+      }),
+      // Schedule
+      publishOn: f0FormField(z.date().optional(), {
+        label: "Publish on",
+        section: "schedule",
+        row: "schedule-dates",
+      }),
+      endsAt: f0FormField(z.date().optional(), {
+        label: "Ends at",
+        section: "schedule",
+        row: "schedule-dates",
+      }),
+      recurrence: f0FormField(z.string(), {
+        label: "Recurrence",
+        section: "schedule",
+        options: [
+          { value: "none", label: "Does not repeat" },
+          { value: "weekly", label: "Weekly" },
+          { value: "monthly", label: "Monthly" },
+          { value: "quarterly", label: "Quarterly" },
+        ],
+      }),
+      // Visibility & Privacy
+      managerVisibility: f0FormField(z.boolean(), {
+        label: "Add visibility permissions to managers and team leads",
+        helpText:
+          "Grant access to managers and team leads. Even if they are not survey editors, they will be able to view the results of their own teams once responses are available",
+        section: "visibility",
+        fieldType: "switch",
+      }),
+      anonymousAnswers: f0FormField(z.boolean(), {
+        label: "Anonymous answers",
+        section: "visibility",
+        fieldType: "switch",
+      }),
+      // Editors
+      editors: f0FormField(z.string(), {
+        label: "Select editors",
+        section: "editors",
+        options: [
+          { value: "none", label: "None" },
+          { value: "admins", label: "Administrators only" },
+          { value: "custom", label: "Custom selection" },
+        ],
+        placeholder: "Select editors",
+      }),
+    })
+
+    const sections: Record<string, F0SectionConfig> = {
+      basic: {
+        title: "Basic Information",
+      },
+      participants: {
+        title: "Participants",
+      },
+      schedule: {
+        title: "Schedule",
+      },
+      visibility: {
+        title: "Visibility & Privacy",
+      },
+      editors: {
+        title: "Editors",
+      },
+    }
+
+    return (
+      <F0Form
+        name="survey-settings"
+        schema={formSchema}
+        sections={sections}
+        styling={{
+          showSectionsSidepanel: true,
+          sectionsWrappedInBox: true,
+        }}
+        defaultValues={{
+          title: "Workplace climate survey",
+          description:
+            "This short workplace climate survey contains just 12 simple questions. It is designed to help measure employees' perceptions, experiences, and overall satisfaction within the workplace.",
+          participants: "",
+          publishOn: undefined,
+          endsAt: undefined,
+          recurrence: "none",
+          managerVisibility: false,
+          anonymousAnswers: false,
+          editors: "none",
+        }}
+        onSubmit={async (data) => {
+          await sleep(1000)
+          alert(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+          return { success: true }
+        }}
+        submitConfig={{ label: "Save Survey" }}
+      />
+    )
+  },
+}
+
+/**
  * Form with conditional field rendering based on other field values.
  * Fields can use `renderIf` to conditionally show/hide based on other field values.
  */

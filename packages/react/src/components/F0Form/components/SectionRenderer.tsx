@@ -1,6 +1,7 @@
 import { useFormContext } from "react-hook-form"
 
 import { SectionHeader } from "@/experimental/Information/Headers/SectionHeader"
+import { cn } from "@/lib/utils"
 
 import { FIELD_GAP } from "../constants"
 import { generateAnchorId, useF0FormContext } from "../context"
@@ -18,6 +19,8 @@ import { SwitchGroupRenderer } from "./SwitchGroupRenderer"
 
 interface SectionRendererProps {
   section: SectionDefinition
+  /** Whether to wrap the section in a bordered box */
+  wrappedInBox?: boolean
 }
 
 /**
@@ -78,7 +81,10 @@ function groupContiguousSwitches(
  * Supports conditional rendering for the entire section.
  * Automatically groups contiguous switch fields in a bordered container.
  */
-export function SectionRenderer({ section }: SectionRendererProps) {
+export function SectionRenderer({
+  section,
+  wrappedInBox = false,
+}: SectionRendererProps) {
   const form = useFormContext()
   const values = form.watch()
   const { formName } = useF0FormContext()
@@ -96,9 +102,14 @@ export function SectionRenderer({ section }: SectionRendererProps) {
   // Generate anchor ID for the section
   const anchorId = generateAnchorId(formName, sectionId)
 
-  return (
-    <section id={anchorId} className="flex flex-col scroll-mt-4">
-      <div className="[&>div]:px-0.5 [&>div]:mx-0 [&>div]:border-0 py-5">
+  const sectionContent = (
+    <>
+      <div
+        className={cn(
+          "[&>div]:px-0.5 [&>div]:mx-0 [&>div]:border-0",
+          wrappedInBox ? "py-4" : "py-5"
+        )}
+      >
         <SectionHeader title={title} description={description ?? ""} />
       </div>
       <div className={`flex flex-col ${FIELD_GAP}`}>
@@ -133,6 +144,19 @@ export function SectionRenderer({ section }: SectionRendererProps) {
           return null
         })}
       </div>
+    </>
+  )
+
+  return (
+    <section
+      id={anchorId}
+      className={cn(
+        "flex flex-col scroll-mt-4",
+        wrappedInBox &&
+          "rounded-xl border border-solid border-f1-border-secondary p-5 pt-1"
+      )}
+    >
+      {sectionContent}
     </section>
   )
 }
