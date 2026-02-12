@@ -280,7 +280,7 @@ export const WithChildren: Story = {
   },
 }
 
-export const WithChildrenAndLinkInside: Story = {
+export const WithInteractiveChildren: Story = {
   args: {
     title: "Card with interactive children",
     link: "https://factorial.co",
