@@ -12,6 +12,7 @@ import {
 } from "../f0Schema"
 import type { F0SectionConfig } from "../types"
 import { getSchemaDefinition } from "../useSchemaDefinition"
+import { isFieldRequired, isOptionalOrNullable } from "../fields/schema"
 
 describe("F0Form", () => {
   it("renders a basic form using schema prop", () => {
@@ -294,5 +295,227 @@ describe("getSchemaDefinition", () => {
       fields: Array<{ id: string }>
     }
     expect(rowDef.fields).toHaveLength(2)
+  })
+})
+
+describe("inferFieldType - date/time fields", () => {
+  it("infers date type from ZodDate", () => {
+    const schema = z.date()
+    const config = { label: "Test" } as const
+    expect(inferFieldType(schema, config)).toBe("date")
+  })
+
+  it("infers time type from explicit fieldType", () => {
+    const schema = z.date()
+    const config = { label: "Test", fieldType: "time" } as const
+    expect(inferFieldType(schema, config)).toBe("time")
+  })
+
+  it("infers datetime type from explicit fieldType", () => {
+    const schema = z.date()
+    const config = { label: "Test", fieldType: "datetime" } as const
+    expect(inferFieldType(schema, config)).toBe("datetime")
+  })
+
+  it("infers daterange type from explicit fieldType with object schema", () => {
+    const schema = z.object({ from: z.date(), to: z.date() })
+    const config = { label: "Test", fieldType: "daterange" } as const
+    expect(inferFieldType(schema, config)).toBe("daterange")
+  })
+})
+
+describe("isOptionalOrNullable", () => {
+  it("returns true for optional schema", () => {
+    expect(isOptionalOrNullable(z.string().optional())).toBe(true)
+  })
+
+  it("returns true for nullable schema", () => {
+    expect(isOptionalOrNullable(z.string().nullable())).toBe(true)
+  })
+
+  it("returns true for optional date schema", () => {
+    expect(isOptionalOrNullable(z.date().optional())).toBe(true)
+  })
+
+  it("returns false for required schema", () => {
+    expect(isOptionalOrNullable(z.string())).toBe(false)
+  })
+
+  it("returns false for required date schema", () => {
+    expect(isOptionalOrNullable(z.date())).toBe(false)
+  })
+
+  it("returns true for schema with default that wraps optional", () => {
+    expect(isOptionalOrNullable(z.string().optional().default(""))).toBe(true)
+  })
+})
+
+describe("isFieldRequired", () => {
+  describe("string fields", () => {
+    it("returns false for plain z.string() (empty string is valid)", () => {
+      expect(isFieldRequired(z.string())).toBe(false)
+    })
+
+    it("returns true for z.string().min(1)", () => {
+      expect(isFieldRequired(z.string().min(1))).toBe(true)
+    })
+
+    it("returns true for z.string().email()", () => {
+      expect(isFieldRequired(z.string().email())).toBe(true)
+    })
+
+    it("returns true for z.string().url()", () => {
+      expect(isFieldRequired(z.string().url())).toBe(true)
+    })
+
+    it("returns true for z.string().uuid()", () => {
+      expect(isFieldRequired(z.string().uuid())).toBe(true)
+    })
+
+    it("returns false for z.string().optional()", () => {
+      expect(isFieldRequired(z.string().optional())).toBe(false)
+    })
+
+    it("returns false for z.string().min(1).optional()", () => {
+      expect(isFieldRequired(z.string().min(1).optional())).toBe(false)
+    })
+  })
+
+  describe("number fields", () => {
+    it("returns true for z.number()", () => {
+      expect(isFieldRequired(z.number())).toBe(true)
+    })
+
+    it("returns false for z.number().optional()", () => {
+      expect(isFieldRequired(z.number().optional())).toBe(false)
+    })
+  })
+
+  describe("date fields", () => {
+    it("returns true for z.date()", () => {
+      expect(isFieldRequired(z.date())).toBe(true)
+    })
+
+    it("returns false for z.date().optional()", () => {
+      expect(isFieldRequired(z.date().optional())).toBe(false)
+    })
+  })
+
+  describe("boolean fields", () => {
+    it("returns true for z.boolean()", () => {
+      expect(isFieldRequired(z.boolean())).toBe(true)
+    })
+
+    it("returns false for z.boolean().optional()", () => {
+      expect(isFieldRequired(z.boolean().optional())).toBe(false)
+    })
+  })
+})
+
+describe("getSchemaDefinition - field types", () => {
+  it("creates date field from z.date()", () => {
+    const formSchema = z.object({
+      birthDate: f0FormField(z.date(), { label: "Birth Date" }),
+    })
+
+    const definition = getSchemaDefinition(formSchema)
+    const fieldItem = definition[0] as {
+      type: "field"
+      field: { type: string }
+    }
+
+    expect(fieldItem.field.type).toBe("date")
+  })
+
+  it("creates time field from z.date() with fieldType time", () => {
+    const formSchema = z.object({
+      startTime: f0FormField(z.date(), {
+        label: "Start Time",
+        fieldType: "time",
+      }),
+    })
+
+    const definition = getSchemaDefinition(formSchema)
+    const fieldItem = definition[0] as {
+      type: "field"
+      field: { type: string }
+    }
+
+    expect(fieldItem.field.type).toBe("time")
+  })
+
+  it("creates datetime field from z.date() with fieldType datetime", () => {
+    const formSchema = z.object({
+      eventTime: f0FormField(z.date(), {
+        label: "Event Time",
+        fieldType: "datetime",
+      }),
+    })
+
+    const definition = getSchemaDefinition(formSchema)
+    const fieldItem = definition[0] as {
+      type: "field"
+      field: { type: string }
+    }
+
+    expect(fieldItem.field.type).toBe("datetime")
+  })
+
+  it("sets clearable true for optional fields", () => {
+    const formSchema = z.object({
+      optionalDate: f0FormField(z.date().optional(), {
+        label: "Optional Date",
+      }),
+    })
+
+    const definition = getSchemaDefinition(formSchema)
+    const fieldItem = definition[0] as {
+      type: "field"
+      field: { clearable?: boolean }
+    }
+
+    expect(fieldItem.field.clearable).toBe(true)
+  })
+
+  it("sets clearable false for required fields", () => {
+    const formSchema = z.object({
+      requiredDate: f0FormField(z.date(), { label: "Required Date" }),
+    })
+
+    const definition = getSchemaDefinition(formSchema)
+    const fieldItem = definition[0] as {
+      type: "field"
+      field: { clearable?: boolean }
+    }
+
+    expect(fieldItem.field.clearable).toBe(false)
+  })
+
+  it("sets clearable true for z.string() without constraints", () => {
+    const formSchema = z.object({
+      notes: f0FormField(z.string(), { label: "Notes" }),
+    })
+
+    const definition = getSchemaDefinition(formSchema)
+    const fieldItem = definition[0] as {
+      type: "field"
+      field: { clearable?: boolean }
+    }
+
+    expect(fieldItem.field.clearable).toBe(true)
+  })
+
+  it("sets clearable false for z.string().url()", () => {
+    const formSchema = z.object({
+      website: f0FormField(z.string().url(), { label: "Website" }),
+    })
+
+    const definition = getSchemaDefinition(formSchema)
+    const fieldItem = definition[0] as {
+      type: "field"
+      field: { clearable?: boolean }
+    }
+
+    expect(fieldItem.field.clearable).toBe(false)
   })
 })
