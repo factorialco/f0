@@ -57,7 +57,7 @@ export function DateTimeFieldRenderer({
 }: DateTimeFieldRendererProps) {
   const currentDate = formField.value as Date | undefined
 
-  // Extract the time portion from the current Date value
+  // Extract the time portion from the current Date value (for combining with date changes)
   const timeValue = useMemo(() => dateToTimeString(currentDate), [currentDate])
 
   // Handle date changes - preserve the time portion
@@ -74,16 +74,28 @@ export function DateTimeFieldRenderer({
   )
 
   // Handle time changes - preserve the date portion
+  // TimeFieldRenderer now passes a Date object
   const handleTimeChange = useCallback(
-    (newTime: string | undefined) => {
+    (newTimeDate: Date | undefined) => {
+      if (!newTimeDate) {
+        // Keep the date but clear the time
+        if (currentDate) {
+          const result = new Date(currentDate)
+          result.setHours(0, 0, 0, 0)
+          formField.onChange(result)
+        }
+        return
+      }
+      // Extract time from the new Date and combine with current date
+      const timeString = dateToTimeString(newTimeDate)
       if (!currentDate) {
         // If no date is set, use today's date
         const today = new Date()
         today.setHours(0, 0, 0, 0)
-        formField.onChange(combineDateAndTime(today, newTime))
+        formField.onChange(combineDateAndTime(today, timeString))
         return
       }
-      formField.onChange(combineDateAndTime(currentDate, newTime))
+      formField.onChange(combineDateAndTime(currentDate, timeString))
     },
     [formField, currentDate]
   )
@@ -129,10 +141,10 @@ export function DateTimeFieldRenderer({
   const timeFormField: ControllerRenderProps<FieldValues> = useMemo(
     () => ({
       ...formField,
-      value: timeValue,
+      value: currentDate,
       onChange: handleTimeChange,
     }),
-    [formField, timeValue, handleTimeChange]
+    [formField, currentDate, handleTimeChange]
   )
 
   return (
