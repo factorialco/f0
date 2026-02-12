@@ -93,7 +93,7 @@ type OnChangeQuestionParams = BaseQuestionOnChangeParams &
     | {
         type: "data-select"
         value?: string | null
-        options: SelectQuestionOption[]
+        options?: SelectQuestionOption[]
       }
     | {
         type: "numeric"

@@ -3,7 +3,7 @@ import { BaseQuestionOnChangeParams, SelectQuestionOption } from "../types"
 
 export type DataSelectQuestionOnChangeParams = BaseQuestionOnChangeParams & {
   type: "data-select"
-  options: SelectQuestionOption[]
+  options?: SelectQuestionOption[]
   value?: string | null
 }
 
