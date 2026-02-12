@@ -284,7 +284,6 @@ export const WithInteractiveChildren: Story = {
   args: {
     title: "Card with interactive children",
     link: "https://factorial.co",
-    interactiveChildren: true,
     onClick: () => alert("Card clicked!"),
     children: <InteractiveChildrenContent />,
   },

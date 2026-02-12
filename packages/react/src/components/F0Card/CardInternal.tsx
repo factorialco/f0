@@ -157,12 +157,6 @@ export interface CardInternalProps {
    * can manage drag-and-drop while still allowing click navigation via onClick
    */
   disableOverlayLink?: boolean
-
-  /**
-   * When true, enables pointer events on children elements, making them interactive/clickable
-   * @default false
-   */
-  interactiveChildren?: boolean
 }
 
 const imageFitClassMap: Record<CardImageFit, string> = {
@@ -204,7 +198,6 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
       forceVerticalMetadata = false,
       fullHeight = false,
       disableOverlayLink = false,
-      interactiveChildren = false,
     },
     ref
   ) {
@@ -358,13 +351,7 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
             )}
           </div>
           {(metadata || children) && (
-            <CardContent
-              className={cn(
-                "pointer-events-none",
-                interactiveChildren &&
-                  "relative z-10 [&_a]:pointer-events-auto [&_button]:pointer-events-auto [&_input]:pointer-events-auto [&_select]:pointer-events-auto [&_textarea]:pointer-events-auto [&_[role='button']]:pointer-events-auto [&_[tabindex]]:pointer-events-auto"
-              )}
-            >
+            <CardContent className="pointer-events-none relative z-10 [&_a]:pointer-events-auto [&_button]:pointer-events-auto [&_input]:pointer-events-auto [&_select]:pointer-events-auto [&_textarea]:pointer-events-auto [&_[role='button']]:pointer-events-auto [&_[tabindex]]:pointer-events-auto">
               {metadata && (
                 <div
                   className={cn(
