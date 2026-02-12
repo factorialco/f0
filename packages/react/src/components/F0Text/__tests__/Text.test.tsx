@@ -6,6 +6,11 @@ import { F0Text } from "../F0Text"
 
 describe("F0Text Component", () => {
   describe("Allowed Variants", () => {
+    it("renders heading variant", () => {
+      render(<F0Text variant="heading" content="Heading" />)
+      expect(screen.getByText("Heading")).toBeInTheDocument()
+    })
+
     it("renders body variant", () => {
       render(<F0Text variant="body" content="Body" />)
       expect(screen.getByText("Body")).toBeInTheDocument()
@@ -34,6 +39,28 @@ describe("F0Text Component", () => {
     it("renders label variant", () => {
       render(<F0Text variant="label" content="Label" />)
       expect(screen.getByText("Label")).toBeInTheDocument()
+    })
+  })
+
+  describe("Sizes", () => {
+    it("renders sm size", () => {
+      render(<F0Text size="sm" content="Small" />)
+      expect(screen.getByText("Small")).toBeInTheDocument()
+    })
+
+    it("renders md size (default)", () => {
+      render(<F0Text size="md" content="Medium" />)
+      expect(screen.getByText("Medium")).toBeInTheDocument()
+    })
+
+    it("renders lg size", () => {
+      render(<F0Text size="lg" content="Large" />)
+      expect(screen.getByText("Large")).toBeInTheDocument()
+    })
+
+    it("renders xl size", () => {
+      render(<F0Text size="xl" content="Extra Large" />)
+      expect(screen.getByText("Extra Large")).toBeInTheDocument()
     })
   })
 

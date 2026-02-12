@@ -10,12 +10,29 @@ const meta = {
   tags: ["autodocs", "experimental"],
   argTypes: {
     variant: {
-      options: ["body", "description", "small", "inverse", "code", "label"],
+      options: [
+        "heading",
+        "body",
+        "description",
+        "small",
+        "inverse",
+        "code",
+        "label",
+      ],
       control: "select",
       description: "The variant of the text",
       table: {
         type: { summary: "string" },
         defaultValue: { summary: "body" },
+      },
+    },
+    size: {
+      options: ["sm", "md", "lg", "xl"],
+      control: "select",
+      description: "The size of the text",
+      table: {
+        type: { summary: "string" },
+        defaultValue: { summary: "md" },
       },
     },
     as: {
@@ -82,6 +99,20 @@ export const Variants: Story = {
   ),
 }
 
+export const Sizes: Story = {
+  args: {
+    content: "",
+  },
+  render: () => (
+    <div className="flex flex-col gap-2">
+      <F0Text size="sm" content="Small size text (sm)" />
+      <F0Text size="md" content="Medium size text (md) - default" />
+      <F0Text size="lg" content="Large size text (lg)" />
+      <F0Text size="xl" content="Extra large size text (xl)" />
+    </div>
+  ),
+}
+
 export const TextAlignment: Story = {
   parameters: {
     chromatic: { disableSnapshot: true },
@@ -144,12 +175,23 @@ export const Snapshot: Story = {
       <section>
         <h4 className="text-lg font-semibold">All Variants</h4>
         <div className="flex flex-col gap-2">
+          <F0Text variant="heading" content="Heading variant text" />
           <F0Text variant="description" content="Description variant text" />
           <F0Text variant="body" content="Body variant text (default)" />
           <F0Text variant="small" content="Small variant text" />
           <F0Text variant="code" content="const code = 'Code variant text';" />
           <F0Text variant="label" content="Label variant text" />
           <F0Text variant="inverse" content="Inverse variant text" />
+        </div>
+      </section>
+
+      <section>
+        <h4 className="text-lg font-semibold">All Sizes</h4>
+        <div className="flex flex-col gap-2">
+          <F0Text size="sm" content="Small size text (sm)" />
+          <F0Text size="md" content="Medium size text (md)" />
+          <F0Text size="lg" content="Large size text (lg)" />
+          <F0Text size="xl" content="Extra large size text (xl)" />
         </div>
       </section>
 
