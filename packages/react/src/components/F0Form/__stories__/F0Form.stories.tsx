@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { z } from "zod"
 
 import { createDataSourceDefinition } from "@/hooks/datasource"
+import { ExternalLink, Settings } from "@/icons/app"
 
 import {
   f0FormField,
@@ -165,6 +166,11 @@ export const WithSections: Story = {
       preferences: {
         title: "Preferences",
         description: "Configure your account preferences",
+        action: {
+          label: "Go to settings",
+          icon: Settings,
+          href: "#settings",
+        },
       },
     }
 
@@ -276,12 +282,25 @@ export const WithSectionsSidepanel: Story = {
       },
       participants: {
         title: "Participants",
+        description: "Choose who will receive this survey",
+        action: {
+          label: "Manage groups",
+          icon: ExternalLink,
+          href: "#groups",
+        },
       },
       schedule: {
         title: "Schedule",
       },
       visibility: {
         title: "Visibility & Privacy",
+        description:
+          "Configure the visibility and privacy settings for this survey",
+        action: {
+          label: "Privacy settings",
+          icon: Settings,
+          onClick: () => alert("Opening privacy settings..."),
+        },
       },
       editors: {
         title: "Editors",

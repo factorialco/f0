@@ -370,6 +370,7 @@ export function useSchemaDefinition(
           title: sectionConfig?.title ?? sectionId,
           description: sectionConfig?.description,
           renderIf: sectionConfig?.renderIf,
+          action: sectionConfig?.action,
           fields: groupFieldsIntoRows(fields),
         },
       }
@@ -443,6 +444,7 @@ export function getSchemaDefinition(
         title: sectionConfig?.title ?? sectionId,
         description: sectionConfig?.description,
         renderIf: sectionConfig?.renderIf,
+        action: sectionConfig?.action,
         fields: groupFieldsIntoRows(fields),
       },
     }
