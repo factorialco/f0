@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { DefaultValues, Path, useForm } from "react-hook-form"
 import { z, ZodRawShape } from "zod"
 
@@ -22,11 +22,13 @@ import { FieldRenderer } from "./fields/FieldRenderer"
 import type { F0SwitchField } from "./fields/switch/types"
 import type {
   F0FormProps,
+  F0FormRef,
   FieldItem,
   FormDefinitionItem,
   RowDefinition,
   SectionDefinition,
 } from "./types"
+import type { F0FormStateCallback } from "./useF0Form"
 import { useErrorNavigation } from "./useErrorNavigation"
 import { useSchemaDefinition } from "./useSchemaDefinition"
 import { createZodErrorMap } from "./zodErrorMap"
@@ -142,6 +144,7 @@ export function F0Form<TSchema extends z.ZodObject<ZodRawShape>>(
     className,
     errorTriggerMode = "on-blur",
     styling,
+    formRef,
   } = props
 
   // Resolve styling configuration
@@ -158,7 +161,9 @@ export function F0Form<TSchema extends z.ZodObject<ZodRawShape>>(
 
   // Extract type-specific props
   // Show submit button by default unless explicitly hidden or using action-bar
-  const showSubmitButton = !isActionBar
+  const hideSubmitButton =
+    submitConfig?.type !== "action-bar" && submitConfig?.hideSubmitButton
+  const showSubmitButton = !isActionBar && !hideSubmitButton
   const discardableChanges =
     submitConfig?.type === "action-bar" && submitConfig?.discardable
 
@@ -282,6 +287,56 @@ export function F0Form<TSchema extends z.ZodObject<ZodRawShape>>(
     form.reset()
     resetErrorNavigation()
   }
+
+  // Store state callback from useF0Form hook
+  const stateCallbackRef = useRef<F0FormStateCallback | null>(null)
+
+  // Expose form methods via ref for external control
+  useEffect(() => {
+    if (formRef) {
+      const refMethods: F0FormRef = {
+        submit: () => {
+          return new Promise<void>((resolve, reject) => {
+            form.handleSubmit(
+              async (data) => {
+                await handleSubmit(data)
+                resolve()
+              },
+              () => {
+                // Validation failed - reject to signal the caller
+                reject(new Error("Form validation failed"))
+              }
+            )()
+          })
+        },
+        reset: () => {
+          form.reset()
+          resetErrorNavigation()
+        },
+        isDirty: () => form.formState.isDirty,
+        _setStateCallback: (callback: F0FormStateCallback) => {
+          stateCallbackRef.current = callback
+        },
+      }
+      formRef.current = refMethods
+    }
+
+    return () => {
+      if (formRef) {
+        formRef.current = null
+      }
+    }
+  }, [formRef, form, resetErrorNavigation])
+
+  // Notify useF0Form hook of state changes
+  useEffect(() => {
+    if (stateCallbackRef.current) {
+      stateCallbackRef.current({
+        isSubmitting,
+        hasErrors,
+      })
+    }
+  }, [isSubmitting, hasErrors])
 
   // Group contiguous switch fields
   const groupedItems = groupContiguousSwitches(definition)

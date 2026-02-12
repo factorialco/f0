@@ -97,6 +97,10 @@ export { useSchemaDefinition, getSchemaDefinition } from "./useSchemaDefinition"
 export { evaluateRenderIf } from "./fields/utils"
 export { generateAnchorId } from "./context"
 
+// Export form control hook
+export { useF0Form } from "./useF0Form"
+export type { F0FormRef, UseF0FormReturn } from "./useF0Form"
+
 import type { z, ZodRawShape } from "zod"
 
 import type { F0FormProps } from "./types"

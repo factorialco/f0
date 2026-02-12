@@ -1,14 +1,18 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
+import { useState } from "react"
 import { z } from "zod"
 
+import { F0Button } from "@/components/F0Button"
+import { F0Dialog } from "@/components/F0Dialog"
 import { createDataSourceDefinition } from "@/hooks/datasource"
-import { ExternalLink, Settings } from "@/icons/app"
+import { ExternalLink, Plus, Settings } from "@/icons/app"
 
 import {
   f0FormField,
   F0Form,
   F0SectionConfig,
   CustomFieldRenderProps,
+  useF0Form,
 } from "../index"
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
@@ -1479,6 +1483,95 @@ export const SelectWithDataSource: Story = {
           }}
         />
       </div>
+    )
+  },
+}
+
+/**
+ * Form inside a Dialog using `useF0Form` hook.
+ *
+ * The `useF0Form` hook provides:
+ * - `formRef`: Pass to F0Form to enable external control
+ * - `submit()`: Programmatically submit the form (validates first)
+ * - `reset()`: Reset the form to default values
+ * - `isDirty()`: Check if the form has unsaved changes
+ * - `isSubmitting`: Whether the form is currently submitting
+ * - `hasErrors`: Whether the form has validation errors
+ *
+ * This is useful when the submit button needs to be outside the form,
+ * such as in a dialog's footer with F0Dialog.
+ */
+export const FormInDialog: Story = {
+  render() {
+    const [open, setOpen] = useState(false)
+    const { formRef, submit, isSubmitting, hasErrors } = useF0Form()
+
+    const formSchema = z.object({
+      name: f0FormField(
+        z.string().min(2, "Name must be at least 2 characters"),
+        {
+          label: "Name",
+          placeholder: "Enter name",
+        }
+      ),
+      email: f0FormField(z.string().email("Please enter a valid email"), {
+        label: "Email",
+        placeholder: "Enter email address",
+      }),
+      role: f0FormField(z.enum(["admin", "editor", "viewer"]), {
+        label: "Role",
+        options: [
+          { value: "admin", label: "Administrator" },
+          { value: "editor", label: "Editor" },
+          { value: "viewer", label: "Viewer" },
+        ],
+        placeholder: "Select a role",
+      }),
+    })
+
+    return (
+      <>
+        <F0Button
+          label="Add Team Member"
+          icon={Plus}
+          onClick={() => setOpen(true)}
+        />
+        <F0Dialog
+          isOpen={open}
+          onClose={() => setOpen(false)}
+          title="Add Team Member"
+          description="Add a new member to your team. They will receive an invitation email."
+          primaryAction={{
+            label: "Add Member",
+            icon: Plus,
+            onClick: submit,
+            loading: isSubmitting,
+            disabled: hasErrors,
+          }}
+          secondaryAction={{
+            label: "Cancel",
+            onClick: () => setOpen(false),
+          }}
+        >
+          <F0Form
+            formRef={formRef}
+            name="dialog-form"
+            schema={formSchema}
+            defaultValues={{
+              name: "",
+              email: "",
+              role: undefined,
+            }}
+            submitConfig={{ type: "default", hideSubmitButton: true }}
+            onSubmit={async (data) => {
+              await sleep(1000)
+              alert(`Team member added: ${JSON.stringify(data, null, 2)}`)
+              setOpen(false)
+              return { success: true }
+            }}
+          />
+        </F0Dialog>
+      </>
     )
   },
 }
