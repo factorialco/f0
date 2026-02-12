@@ -125,7 +125,13 @@ export const NumberInputInternal = forwardRef<
         {...props}
         hint={localHint}
         appendTag={units}
-        append={<Arrows step={step} onClickArrow={handleStep} />}
+        append={
+          <Arrows
+            step={step}
+            disabled={props.disabled}
+            onClickArrow={handleStep}
+          />
+        }
       />
     </div>
   )

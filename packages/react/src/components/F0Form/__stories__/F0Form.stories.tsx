@@ -518,6 +518,166 @@ export const AllFieldTypes: Story = {
 }
 
 /**
+ * Form demonstrating all available field types in disabled state.
+ * Each field has `disabled: true` and is pre-filled with sample values.
+ */
+export const AllFieldTypesDisabled: Story = {
+  render() {
+    const formSchema = z.object({
+      textField: f0FormField(z.string().min(1), {
+        label: "Text Field",
+        placeholder: "Regular text input",
+        disabled: true,
+      }),
+      emailField: f0FormField(z.string().email(), {
+        label: "Email Field",
+        disabled: true,
+      }),
+      passwordField: f0FormField(z.string().min(8), {
+        label: "Password Field",
+        placeholder: "Enter password",
+        inputType: "password",
+        disabled: true,
+      }),
+      numberField: f0FormField(z.number().min(0).max(100), {
+        label: "Number Field",
+        step: 1,
+        disabled: true,
+      }),
+      textareaField: f0FormField(z.string().max(500), {
+        label: "Textarea Field",
+        fieldType: "textarea",
+        rows: 3,
+        placeholder: "Enter long text...",
+        disabled: true,
+      }),
+      selectField: f0FormField(z.enum(["option1", "option2", "option3"]), {
+        label: "Select Field",
+        options: [
+          { value: "option1", label: "Option 1" },
+          { value: "option2", label: "Option 2" },
+          { value: "option3", label: "Option 3" },
+        ],
+        placeholder: "Select an option",
+        showSearchBox: true,
+        disabled: true,
+      }),
+      multiSelectField: f0FormField(z.array(z.enum(["a", "b", "c"])).min(1), {
+        label: "Multi-Select Field",
+        multiple: true,
+        options: [
+          { value: "a", label: "Option A" },
+          { value: "b", label: "Option B" },
+          { value: "c", label: "Option C" },
+        ],
+        placeholder: "Select multiple options",
+        disabled: true,
+      }),
+      urlField: f0FormField(z.string().url(), {
+        label: "URL Field",
+        disabled: true,
+      }),
+      checkboxField: f0FormField(z.boolean(), {
+        label: "Checkbox Field",
+        fieldType: "checkbox",
+        helpText: "Check this box to agree",
+        disabled: true,
+      }),
+      requiredCheckboxField: f0FormField(z.literal(true), {
+        label: "Required Checkbox Field",
+        fieldType: "checkbox",
+        helpText: "Check this box to agree",
+        disabled: true,
+      }),
+      switchField: f0FormField(z.boolean(), {
+        label: "Switch Field",
+        fieldType: "switch",
+        helpText: "Toggle this switch",
+        disabled: true,
+      }),
+      requiredSwitchField: f0FormField(z.literal(true), {
+        label: "Required Switch Field",
+        fieldType: "switch",
+        helpText: "Toggle this switch",
+        disabled: true,
+      }),
+      dateField: f0FormField(z.date(), {
+        label: "Date Field",
+        placeholder: "Select a date",
+        granularities: ["day"],
+        disabled: true,
+      }),
+      dateRangeField: f0FormField(
+        z
+          .object({
+            from: z.date(),
+            to: z.date(),
+          })
+          .optional(),
+        {
+          label: "Date Range Field",
+          placeholder: "Select date range",
+          fieldType: "daterange",
+          fromLabel: "Start",
+          toLabel: "End",
+          disabled: true,
+        }
+      ),
+      richTextField: f0FormField(
+        z.object({
+          value: z.string().nullable(),
+          mentionIds: z.array(z.number()).optional(),
+        }),
+        {
+          label: "Rich Text Field",
+          fieldType: "richtext",
+          placeholder: "Write something with formatting...",
+          maxCharacters: 1000,
+          height: "sm",
+          plainHtmlMode: true,
+          disabled: true,
+        }
+      ),
+    })
+
+    return (
+      <F0Form
+        name="all-field-types-disabled"
+        schema={formSchema}
+        defaultValues={{
+          textField: "Sample text value",
+          emailField: "user@example.com",
+          passwordField: "secretpassword",
+          numberField: 42,
+          textareaField:
+            "This is a longer piece of text that demonstrates the textarea field in its disabled state.",
+          selectField: "option2",
+          multiSelectField: ["a", "b"],
+          urlField: "https://example.com",
+          checkboxField: true,
+          requiredCheckboxField: true,
+          switchField: true,
+          requiredSwitchField: true,
+          dateField: new Date("2024-06-15"),
+          dateRangeField: {
+            from: new Date("2024-01-01"),
+            to: new Date("2024-12-31"),
+          },
+          richTextField: {
+            value: "<p>This is <strong>rich text</strong> content.</p>",
+          },
+        }}
+        onSubmit={async (data) => {
+          await sleep(1000)
+          alert(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+          return { success: true }
+        }}
+      />
+    )
+  },
+}
+
+/**
  * Demonstrates custom field type for integrating external components.
  * Uses `fieldConfig` to pass typed configuration to the render function.
  */

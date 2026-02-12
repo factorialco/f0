@@ -32,10 +32,10 @@ export function SwitchFieldRenderer({
 
   return (
     <Switch
+      {...formField}
       title={field.label}
       disabled={field.disabled}
       required={isRequired}
-      {...formField}
       checked={Boolean(formField.value)}
       onCheckedChange={formField.onChange}
       hideLabel

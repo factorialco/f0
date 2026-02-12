@@ -22,12 +22,12 @@ export function TextareaFieldRenderer({
 }: TextareaFieldRendererProps) {
   return (
     <Textarea
+      {...formField}
       label={field.label}
       placeholder={field.placeholder}
       disabled={field.disabled}
       rows={field.rows}
       maxLength={field.maxLength}
-      {...formField}
       value={formField.value != null ? String(formField.value) : ""}
       size={FORM_SIZE}
       hideLabel

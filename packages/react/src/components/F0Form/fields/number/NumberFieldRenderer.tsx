@@ -22,6 +22,7 @@ export function NumberFieldRenderer({
 }: NumberFieldRendererProps) {
   return (
     <NumberInput
+      {...formField}
       label={field.label}
       placeholder={field.placeholder}
       disabled={field.disabled}
@@ -29,7 +30,6 @@ export function NumberFieldRenderer({
       min={field.min}
       max={field.max}
       locale={field.locale ?? "en-US"}
-      {...formField}
       value={formField.value != null ? Number(formField.value) : undefined}
       onChange={(value) => formField.onChange(value)}
       size={FORM_SIZE}

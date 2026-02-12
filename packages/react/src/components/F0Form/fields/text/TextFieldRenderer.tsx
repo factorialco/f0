@@ -42,11 +42,11 @@ export function TextFieldRenderer({
 
   return (
     <Input
+      {...formField}
       label={field.label}
       type={inputType}
       placeholder={placeholder}
       disabled={field.disabled}
-      {...formField}
       value={formField.value != null ? String(formField.value) : ""}
       size={FORM_SIZE}
       hideLabel

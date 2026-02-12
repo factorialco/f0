@@ -32,10 +32,10 @@ export function CheckboxFieldRenderer({
 
   return (
     <F0Checkbox
+      {...formField}
       title={field.label}
       disabled={field.disabled}
       required={isRequired}
-      {...formField}
       checked={Boolean(formField.value)}
       onCheckedChange={formField.onChange}
     />

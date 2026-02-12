@@ -395,7 +395,7 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
         className={cn(
           "flex flex-col gap-2",
           "pointer-events-none",
-          disabled && "cursor-not-allowed opacity-50",
+          disabled && "cursor-not-allowed",
           className
         )}
         ref={ref}
@@ -442,7 +442,7 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
               disabled: disabled || readonly,
             }),
             readonly && "border-f1-border-secondary bg-f1-background-secondary",
-            disabled && "cursor-not-allowed",
+            disabled && "cursor-not-allowed bg-f1-background-tertiary",
             inputFieldVariants({ size, canGrow })
           )}
           data-testid="input-field-wrapper"

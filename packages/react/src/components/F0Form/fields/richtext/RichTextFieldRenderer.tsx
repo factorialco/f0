@@ -26,6 +26,7 @@ export function RichTextFieldRenderer({
       mentionsConfig={field.mentionsConfig}
       height={field.height}
       plainHtmlMode={field.plainHtmlMode}
+      disabled={field.disabled}
       initialEditorState={{
         content: currentValue?.value ?? "",
       }}
