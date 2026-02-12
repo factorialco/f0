@@ -66,6 +66,8 @@ export type {
   F0SwitchConfig,
   F0DateConfig,
   DateGranularity,
+  F0TimeConfig,
+  F0TimeField,
   F0DateTimeConfig,
   F0DateTimeField,
   F0DateRangeConfig,

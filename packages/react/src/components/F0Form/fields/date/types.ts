@@ -96,15 +96,15 @@ export interface F0TimeConfig {
 
 /**
  * Time field with all properties for rendering
- * Stores time as a string in HH:mm format
+ * Stores time as a Date object, displays as HH:mm format
  */
 export type F0TimeField = F0BaseField &
   F0TimeConfig & {
     type: "time"
-    /** Minimum selectable time (e.g., "09:00") */
-    minTime?: string
-    /** Maximum selectable time (e.g., "17:00") */
-    maxTime?: string
+    /** Minimum selectable date/time (derived from z.date().min()) */
+    minDate?: Date
+    /** Maximum selectable date/time (derived from z.date().max()) */
+    maxDate?: Date
     /** Whether the time can be cleared (derived from optional/nullable) */
     clearable?: boolean
     /** Conditional rendering based on another field's value */

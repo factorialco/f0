@@ -400,7 +400,7 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
         )}
         ref={ref}
       >
-        {((!hideLabel && label) || maxLength) && (
+        {((!hideLabel && label) || (maxLength && !hideMaxLength)) && (
           <div
             className={cn(
               "flex max-w-full items-center",

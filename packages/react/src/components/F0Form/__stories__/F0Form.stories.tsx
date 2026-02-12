@@ -475,6 +475,16 @@ export const AllFieldTypes: Story = {
         placeholder: "Select a date",
         granularities: ["day"],
       }),
+      timeField: f0FormField(z.date(), {
+        label: "Time Field",
+        fieldType: "time",
+        helpText: "Select a time (HH:mm)",
+      }),
+      datetimeField: f0FormField(z.date(), {
+        label: "DateTime Field",
+        fieldType: "datetime",
+        helpText: "Select date and time",
+      }),
       dateRangeField: f0FormField(
         z
           .object({
@@ -521,6 +531,8 @@ export const AllFieldTypes: Story = {
           checkboxField: false,
           switchField: false,
           dateField: undefined,
+          timeField: undefined,
+          datetimeField: undefined,
           dateRangeField: undefined,
           richTextField: { value: null },
         }}
@@ -624,6 +636,18 @@ export const AllFieldTypesDisabled: Story = {
         granularities: ["day"],
         disabled: true,
       }),
+      timeField: f0FormField(z.date(), {
+        label: "Time Field",
+        fieldType: "time",
+        helpText: "Select a time (HH:mm)",
+        disabled: true,
+      }),
+      datetimeField: f0FormField(z.date(), {
+        label: "DateTime Field",
+        fieldType: "datetime",
+        helpText: "Select date and time",
+        disabled: true,
+      }),
       dateRangeField: f0FormField(
         z
           .object({
@@ -676,6 +700,8 @@ export const AllFieldTypesDisabled: Story = {
           switchField: true,
           requiredSwitchField: true,
           dateField: new Date("2024-06-15"),
+          timeField: new Date("2024-06-15T14:30:00"),
+          datetimeField: new Date("2024-06-15T14:30:00"),
           dateRangeField: {
             from: new Date("2024-01-01"),
             to: new Date("2024-12-31"),
@@ -1350,71 +1376,6 @@ export const SelectWithDataSource: Story = {
           onSubmit={async (data) => {
             await sleep(1000)
             alert(`Selected: ${JSON.stringify(data, null, 2)}`)
-            return { success: true }
-          }}
-        />
-      </div>
-    )
-  },
-}
-
-/**
- * DateTime field example demonstrating `fieldType: "datetime"` with `z.date()`.
- * Shows different configurations: basic datetime, optional datetime,
- * and datetime with min/max constraints.
- */
-export const DateTimeField: Story = {
-  render() {
-    const now = new Date()
-    const oneWeekLater = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
-
-    const formSchema = z.object({
-      // Basic datetime field
-      appointmentTime: f0FormField(z.date(), {
-        label: "Appointment Time",
-        fieldType: "datetime",
-        helpText: "Select a date and time for your appointment",
-      }),
-      // Optional datetime
-      reminderAt: f0FormField(z.date().optional(), {
-        label: "Reminder (optional)",
-        fieldType: "datetime",
-        helpText: "Set an optional reminder",
-      }),
-      // DateTime with min/max constraints
-      meetingTime: f0FormField(z.date().min(now).max(oneWeekLater), {
-        label: "Meeting Time",
-        fieldType: "datetime",
-        helpText: "Must be within the next week",
-      }),
-      // Regular date field for comparison
-      birthDate: f0FormField(z.date().optional(), {
-        label: "Birth Date (date only)",
-        helpText: "Regular date picker for comparison",
-        granularities: ["day"],
-      }),
-    })
-
-    return (
-      <div className="max-w-lg">
-        <F0Form
-          name="datetime-example"
-          schema={formSchema}
-          defaultValues={{
-            appointmentTime: now,
-            reminderAt: undefined,
-            meetingTime: now,
-            birthDate: undefined,
-          }}
-          onSubmit={async (data) => {
-            await sleep(1000)
-            alert(
-              `Submitted:\n${JSON.stringify(
-                data,
-                (_, v) => (v instanceof Date ? v.toISOString() : v),
-                2
-              )}`
-            )
             return { success: true }
           }}
         />

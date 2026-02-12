@@ -7,7 +7,11 @@ import type { F0TextareaConfig } from "./fields/textarea/types"
 import type { F0SelectConfig } from "./fields/select/types"
 import type { F0CheckboxConfig } from "./fields/checkbox/types"
 import type { F0SwitchConfig } from "./fields/switch/types"
-import type { F0DateConfig, F0DateTimeConfig } from "./fields/date/types"
+import type {
+  F0DateConfig,
+  F0DateTimeConfig,
+  F0TimeConfig,
+} from "./fields/date/types"
 import type { F0DateRangeConfig } from "./fields/daterange/types"
 import type { F0RichTextConfig } from "./fields/richtext/types"
 import type { F0CustomConfig } from "./fields/custom/types"
@@ -48,6 +52,7 @@ export type F0FieldType =
   | "checkbox"
   | "switch"
   | "date"
+  | "time"
   | "datetime"
   | "daterange"
   | "richtext"
@@ -83,6 +88,7 @@ export type {
   F0CheckboxConfig,
   F0SwitchConfig,
   F0DateConfig,
+  F0TimeConfig,
   F0DateRangeConfig,
   F0RichTextConfig,
   F0CustomConfig,
@@ -189,6 +195,14 @@ export type F0DateFieldConfig = F0BaseConfig &
   }
 
 /**
+ * Config for time fields (stores as Date, displays as HH:mm)
+ */
+export type F0TimeFieldConfig = F0BaseConfig &
+  F0TimeConfig & {
+    fieldType: "time"
+  }
+
+/**
  * Config for datetime fields
  */
 export type F0DateTimeFieldConfig = F0BaseConfig &
@@ -197,10 +211,11 @@ export type F0DateTimeFieldConfig = F0BaseConfig &
   }
 
 /**
- * Union of all date/datetime field configs for z.date()
+ * Union of all date/time/datetime field configs for z.date()
  */
 export type F0DateOrDateTimeFieldConfig =
   | F0DateFieldConfig
+  | F0TimeFieldConfig
   | F0DateTimeFieldConfig
 
 /**
@@ -293,6 +308,7 @@ export type F0FieldConfig<
   | F0NumberFieldConfig<R>
   | F0BooleanConfig
   | F0DateFieldConfig
+  | F0TimeFieldConfig
   | F0DateTimeFieldConfig
   | F0ArrayConfig<T, R>
   | F0ObjectConfig
