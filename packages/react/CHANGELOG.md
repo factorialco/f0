@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.359.0](https://github.com/factorialco/f0/compare/f0-react-v1.358.1...f0-react-v1.359.0) (2026-02-12)
+
+
+### Features
+
+* add date-time field inputs on F0Form ([#3424](https://github.com/factorialco/f0/issues/3424)) ([efc4951](https://github.com/factorialco/f0/commit/efc4951695719e3d56cfecfe63a149cf1becf28b))
+
 ## [1.358.1](https://github.com/factorialco/f0/compare/f0-react-v1.358.0...f0-react-v1.358.1) (2026-02-12)
 
 
