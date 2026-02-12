@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.358.1](https://github.com/factorialco/f0/compare/f0-react-v1.358.0...f0-react-v1.358.1) (2026-02-12)
+
+
+### Bug Fixes
+
+* visual upgrade for the F0Form ([#3418](https://github.com/factorialco/f0/issues/3418)) ([b17d41b](https://github.com/factorialco/f0/commit/b17d41b5a0fc625b10f0ce18310cdd34e24c8471))
+
 ## [1.358.0](https://github.com/factorialco/f0/compare/f0-react-v1.357.0...f0-react-v1.358.0) (2026-02-11)
 
 
