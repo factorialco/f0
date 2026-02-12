@@ -16,7 +16,7 @@ import { RowRenderer } from "./components/RowRenderer"
 import { SectionRenderer } from "./components/SectionRenderer"
 import { SwitchGroupRenderer } from "./components/SwitchGroupRenderer"
 import { createConditionalResolver } from "./conditionalResolver"
-import { FIELD_GAP, SECTION_MARGIN } from "./constants"
+import { SECTION_MARGIN, SECTION_MARGIN_WITH_BOX } from "./constants"
 import { F0FormContext, generateAnchorId } from "./context"
 import { FieldRenderer } from "./fields/FieldRenderer"
 import type { F0SwitchField } from "./fields/switch/types"
@@ -294,37 +294,48 @@ export function F0Form<TSchema extends z.ZodObject<ZodRawShape>>(
   const formContent = (
     <form
       onSubmit={form.handleSubmit(handleSubmit)}
-      className={cn(`flex flex-col ${FIELD_GAP} max-w-[600px]`, className)}
+      className={cn(
+        "flex flex-col",
+        sectionsWrappedInBox ? "max-w-[720px]" : "max-w-[600px]",
+        className
+      )}
     >
       {/* Render definition items with switch grouping */}
       {groupedItems.map((groupedItem, index) => {
+        // Apply field gap margin to non-section items (sections have their own margin)
+        const fieldGapClass =
+          index !== 0 && groupedItem.type !== "section" ? "mt-4" : ""
+
         switch (groupedItem.type) {
           case "switchGroup":
             return (
-              <SwitchGroupRenderer
-                key={`switch-group-${index}`}
-                fields={groupedItem.fields}
-              />
+              <div key={`switch-group-${index}`} className={fieldGapClass}>
+                <SwitchGroupRenderer fields={groupedItem.fields} />
+              </div>
             )
           case "field":
             return (
-              <FieldRenderer
-                key={groupedItem.item.field.id}
-                field={groupedItem.item.field}
-              />
+              <div key={groupedItem.item.field.id} className={fieldGapClass}>
+                <FieldRenderer field={groupedItem.item.field} />
+              </div>
             )
           case "row":
             return (
-              <RowRenderer
-                key={`row-${groupedItem.index}`}
-                row={groupedItem.item}
-              />
+              <div key={`row-${groupedItem.index}`} className={fieldGapClass}>
+                <RowRenderer row={groupedItem.item} />
+              </div>
             )
           case "section":
             return (
               <div
                 key={groupedItem.item.id}
-                className={index !== 0 ? SECTION_MARGIN : ""}
+                className={
+                  index !== 0
+                    ? sectionsWrappedInBox
+                      ? SECTION_MARGIN_WITH_BOX
+                      : SECTION_MARGIN
+                    : ""
+                }
               >
                 <SectionRenderer
                   section={groupedItem.item}
@@ -339,20 +350,22 @@ export function F0Form<TSchema extends z.ZodObject<ZodRawShape>>(
 
       {/* Root error message */}
       {rootError && (
-        <p className="text-base font-medium text-f1-foreground-critical">
+        <p className="mt-4 text-base font-medium text-f1-foreground-critical">
           {rootError.message}
         </p>
       )}
 
       {/* Default submit button */}
       {!isActionBar && showSubmitButton && (
-        <F0Button
-          type="submit"
-          label={submitLabel}
-          icon={submitIcon}
-          loading={isSubmitting}
-          disabled={hasErrors}
-        />
+        <div className="mt-4">
+          <F0Button
+            type="submit"
+            label={submitLabel}
+            icon={submitIcon}
+            loading={isSubmitting}
+            disabled={hasErrors}
+          />
+        </div>
       )}
     </form>
   )
@@ -361,7 +374,7 @@ export function F0Form<TSchema extends z.ZodObject<ZodRawShape>>(
     <F0FormContext.Provider value={contextValue}>
       <FormProvider {...form}>
         {showSectionsSidepanel && tocItems.length > 0 ? (
-          <div className="flex w-full">
+          <div className="flex w-full gap-4">
             {/* Sections sidebar */}
             <div className="shrink-0 sticky top-4 h-fit self-start">
               <F0TableOfContent
