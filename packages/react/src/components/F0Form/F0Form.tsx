@@ -376,7 +376,7 @@ export function F0Form<TSchema extends z.ZodObject<ZodRawShape>>(
         {showSectionsSidepanel && tocItems.length > 0 ? (
           <div className="flex w-full gap-4">
             {/* Sections sidebar */}
-            <div className="shrink-0 sticky top-4 h-fit self-start">
+            <div className="shrink-0 sticky top-4 h-fit self-start pt-3">
               <F0TableOfContent
                 items={tocItems}
                 activeItem={activeSection}
