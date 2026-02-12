@@ -5,6 +5,7 @@ import { Input } from "@/experimental/Forms/Fields/Input"
 import { Clock } from "@/icons/app"
 
 import type { F0TimeField } from "./types"
+import { dateToTimeString, timeStringToDate } from "./utils"
 import { FORM_SIZE } from "../../constants"
 
 export interface TimeFieldRendererProps {
@@ -12,33 +13,6 @@ export interface TimeFieldRendererProps {
   formField: ControllerRenderProps<FieldValues>
   error?: boolean
   loading?: boolean
-}
-
-/**
- * Extracts time string (HH:mm) from a Date
- */
-function dateToTimeString(date: Date | undefined): string {
-  if (!date || !(date instanceof Date) || isNaN(date.getTime())) return ""
-
-  const hours = String(date.getHours()).padStart(2, "0")
-  const minutes = String(date.getMinutes()).padStart(2, "0")
-
-  return `${hours}:${minutes}`
-}
-
-/**
- * Converts a time string (HH:mm) to a Date object.
- * Uses today's date as the base.
- */
-function timeStringToDate(timeString: string): Date | undefined {
-  if (!timeString) return undefined
-
-  const [hours, minutes] = timeString.split(":").map(Number)
-  if (isNaN(hours) || isNaN(minutes)) return undefined
-
-  const date = new Date()
-  date.setHours(hours, minutes, 0, 0)
-  return date
 }
 
 /**

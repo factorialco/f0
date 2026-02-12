@@ -4,45 +4,13 @@ import { ControllerRenderProps, FieldValues } from "react-hook-form"
 import type { F0DateTimeField, F0DateField, F0TimeField } from "./types"
 import { DateFieldRenderer } from "./DateFieldRenderer"
 import { TimeFieldRenderer } from "./TimeFieldRenderer"
+import { dateToTimeString, combineDateAndTime } from "./utils"
 
 interface DateTimeFieldRendererProps {
   field: F0DateTimeField
   formField: ControllerRenderProps<FieldValues>
   error?: boolean
   loading?: boolean
-}
-
-/**
- * Extracts time string (HH:mm) from a Date
- */
-function dateToTimeString(date: Date | undefined): string {
-  if (!date) return ""
-
-  const hours = String(date.getHours()).padStart(2, "0")
-  const minutes = String(date.getMinutes()).padStart(2, "0")
-
-  return `${hours}:${minutes}`
-}
-
-/**
- * Combines a date and time string into a single Date object
- */
-function combineDateAndTime(
-  date: Date | undefined,
-  timeString: string | undefined
-): Date | undefined {
-  if (!date) return undefined
-
-  const result = new Date(date)
-
-  if (timeString) {
-    const [hours, minutes, seconds] = timeString.split(":").map(Number)
-    result.setHours(hours ?? 0, minutes ?? 0, seconds ?? 0, 0)
-  } else {
-    result.setHours(0, 0, 0, 0)
-  }
-
-  return result
 }
 
 /**
