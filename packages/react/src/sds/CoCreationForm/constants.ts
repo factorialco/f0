@@ -41,7 +41,7 @@ export const useQuestionTypes = () => {
     {
       label: t("coCreationForm.questionTypes.dataSelect"),
       icon: ChevronDown,
-      questionType: "data-select",
+      questionType: "dropdown-single",
     },
     {
       label: t("coCreationForm.questionTypes.text"),

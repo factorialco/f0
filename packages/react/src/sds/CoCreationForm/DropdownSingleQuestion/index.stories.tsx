@@ -4,13 +4,13 @@ import { useState } from "react"
 
 import { withSkipA11y } from "@/lib/storybook-utils/parameters"
 
-import { DataSelectQuestion } from "."
+import { DropdownSingleQuestion } from "."
 import { CoCreationFormProvider } from "../Context"
 import { CoCreationFormElement } from "../types"
 
-const meta: Meta<typeof DataSelectQuestion> = {
-  title: "CoCreationForm/DataSelectQuestion",
-  component: DataSelectQuestion,
+const meta: Meta<typeof DropdownSingleQuestion> = {
+  title: "CoCreationForm/DropdownSingleQuestion",
+  component: DropdownSingleQuestion,
   tags: ["autodocs", "experimental"],
   render: (args) => {
     const [elements, setElements] = useState<CoCreationFormElement[]>([
@@ -27,7 +27,7 @@ const meta: Meta<typeof DataSelectQuestion> = {
           onChange={setElements}
           isEditMode
         >
-          <DataSelectQuestion {...args} {...question} />
+          <DropdownSingleQuestion {...args} {...question} />
         </CoCreationFormProvider>
       </div>
     )
@@ -35,7 +35,7 @@ const meta: Meta<typeof DataSelectQuestion> = {
 }
 
 export default meta
-type Story = StoryObj<typeof DataSelectQuestion>
+type Story = StoryObj<typeof DropdownSingleQuestion>
 
 export const Default: Story = {
   parameters: withSkipA11y({}),
@@ -43,7 +43,7 @@ export const Default: Story = {
     id: "question-1",
     title: "Select your department",
     description: "Choose one option from the list",
-    type: "data-select",
+    type: "dropdown-single",
     value: null,
     options: [
       { value: "engineering", label: "Engineering" },

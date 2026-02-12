@@ -1,15 +1,16 @@
 import { BaseQuestionPropsForOtherQuestionComponents } from "../BaseQuestion"
 import { BaseQuestionOnChangeParams, SelectQuestionOption } from "../types"
 
-export type DataSelectQuestionOnChangeParams = BaseQuestionOnChangeParams & {
-  type: "data-select"
-  options?: SelectQuestionOption[]
-  value?: string | null
-}
+export type DropdownSingleQuestionOnChangeParams =
+  BaseQuestionOnChangeParams & {
+    type: "dropdown-single"
+    options?: SelectQuestionOption[]
+    value?: string | null
+  }
 
-export type DataSelectQuestionProps =
+export type DropdownSingleQuestionProps =
   BaseQuestionPropsForOtherQuestionComponents & {
-    type: "data-select"
+    type: "dropdown-single"
     options: SelectQuestionOption[]
     value?: string | null
   }

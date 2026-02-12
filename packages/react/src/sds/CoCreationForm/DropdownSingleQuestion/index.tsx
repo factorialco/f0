@@ -5,12 +5,12 @@ import { useI18n } from "@/lib/providers/i18n"
 
 import { BaseQuestion } from "../BaseQuestion"
 import { useCoCreationFormContext } from "../Context"
-import { DataSelectQuestionProps } from "./types"
+import { DropdownSingleQuestionProps } from "./types"
 
-export const DataSelectQuestion = ({
+export const DropdownSingleQuestion = ({
   options,
   ...props
-}: DataSelectQuestionProps) => {
+}: DropdownSingleQuestionProps) => {
   const { onQuestionChange, getSectionContainingQuestion } =
     useCoCreationFormContext()
 
@@ -39,7 +39,7 @@ export const DataSelectQuestion = ({
           onChange={(value) =>
             onQuestionChange?.({
               id: props.id,
-              type: "data-select",
+              type: "dropdown-single",
               value,
             })
           }

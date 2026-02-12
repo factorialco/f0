@@ -265,7 +265,7 @@ export function ActionsMenu({
       !(
         (newQuestionType === "select" ||
           newQuestionType === "multi-select" ||
-          newQuestionType === "data-select") &&
+          newQuestionType === "dropdown-single") &&
         question &&
         "options" in question &&
         !!question.options.length
