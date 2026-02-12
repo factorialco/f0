@@ -36,6 +36,7 @@ export function NumberFieldRenderer({
       hideLabel
       error={error}
       loading={loading}
+      clearable={field.clearable}
     />
   )
 }

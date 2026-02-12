@@ -8,7 +8,7 @@ import {
   inferFieldType,
 } from "./f0Schema"
 import type { F0Field } from "./fields/types"
-import { isOptionalOrNullable } from "./fields/schema"
+import { isFieldRequired } from "./fields/schema"
 import { extractNumberConstraints } from "./fields/number/schema"
 import { extractDateConstraints } from "./fields/date/schema"
 import { extractTextareaConstraints } from "./fields/textarea/schema"
@@ -59,8 +59,8 @@ function configToF0Field(
     validation: schema,
   }
 
-  // Check if field is optional/nullable for clearable
-  const clearable = isOptionalOrNullable(schema)
+  // Non-required fields should be clearable
+  const clearable = !isFieldRequired(schema)
 
   switch (fieldType) {
     case "text": {
@@ -73,6 +73,7 @@ function configToF0Field(
         ...baseProps,
         type: "text",
         inputType,
+        clearable,
         renderIf: config.renderIf,
       } as F0Field
     }
@@ -86,6 +87,7 @@ function configToF0Field(
         min,
         max,
         locale: "locale" in config ? config.locale : undefined,
+        clearable,
         renderIf: config.renderIf,
       } as F0Field
     }
@@ -97,6 +99,7 @@ function configToF0Field(
         type: "textarea",
         rows: "rows" in config ? config.rows : undefined,
         maxLength,
+        clearable,
         renderIf: config.renderIf,
       } as F0Field
     }

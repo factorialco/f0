@@ -45,6 +45,8 @@ export interface F0TextConfig {
 export type F0TextField = F0BaseField &
   F0TextConfig & {
     type: "text"
+    /** Whether the field can be cleared (derived from optional/nullable) */
+    clearable?: boolean
     /** Conditional rendering based on another field's value */
     renderIf?: TextFieldRenderIf
   }

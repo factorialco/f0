@@ -73,14 +73,16 @@ const DateInput = forwardRef<HTMLInputElement, DateInputProps>(
         granularity.fromString(inputValue, i18n)
       )
 
-      if (range && isValidDate(range?.from) && isValidDate(range?.to)) {
-        onDateChange?.({
-          value: range,
-          granularity: granularity.key,
-        })
-        setError(false)
-      } else {
-        setError(true)
+      if (range) {
+        if (isValidDate(range?.from) && isValidDate(range?.to)) {
+          onDateChange?.({
+            value: range,
+            granularity: granularity.key,
+          })
+          setError(false)
+        } else {
+          setError(true)
+        }
       }
     }
 

@@ -53,6 +53,7 @@ export function TextFieldRenderer({
       error={error}
       loading={loading}
       icon={icon}
+      clearable={field.clearable}
     />
   )
 }

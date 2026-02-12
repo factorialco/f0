@@ -470,17 +470,17 @@ export const AllFieldTypes: Story = {
         fieldType: "switch",
         helpText: "Toggle this switch",
       }),
-      dateField: f0FormField(z.date(), {
+      dateField: f0FormField(z.date().optional(), {
         label: "Date Field",
         placeholder: "Select a date",
         granularities: ["day"],
       }),
-      timeField: f0FormField(z.date(), {
+      timeField: f0FormField(z.date().optional(), {
         label: "Time Field",
         fieldType: "time",
         helpText: "Select a time (HH:mm)",
       }),
-      datetimeField: f0FormField(z.date(), {
+      datetimeField: f0FormField(z.date().optional(), {
         label: "DateTime Field",
         fieldType: "datetime",
         helpText: "Select date and time",
@@ -630,7 +630,7 @@ export const AllFieldTypesDisabled: Story = {
         helpText: "Toggle this switch",
         disabled: true,
       }),
-      dateField: f0FormField(z.date(), {
+      dateField: f0FormField(z.date().optional(), {
         label: "Date Field",
         placeholder: "Select a date",
         granularities: ["day"],

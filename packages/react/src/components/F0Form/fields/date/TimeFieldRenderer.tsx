@@ -2,6 +2,7 @@ import { useCallback, useMemo } from "react"
 import { ControllerRenderProps, FieldValues } from "react-hook-form"
 
 import { Input } from "@/experimental/Forms/Fields/Input"
+import { Clock } from "@/icons/app"
 
 import type { F0TimeField } from "./types"
 import { FORM_SIZE } from "../../constants"
@@ -85,6 +86,7 @@ export function TimeFieldRenderer({
       clearable={field.clearable}
       name={formField.name}
       ref={formField.ref}
+      icon={Clock}
     />
   )
 }

@@ -61,6 +61,8 @@ export type F0NumberField = F0BaseField &
     min?: number
     /** Maximum value (derived from z.number().max()) */
     max?: number
+    /** Whether the field can be cleared (derived from optional/nullable) */
+    clearable?: boolean
     /** Conditional rendering based on another field's value */
     renderIf?: NumberFieldRenderIf
   }
