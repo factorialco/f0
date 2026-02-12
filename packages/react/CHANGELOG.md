@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.360.0](https://github.com/factorialco/f0/compare/f0-react-v1.359.0...f0-react-v1.360.0) (2026-02-12)
+
+
+### Features
+
+* add custom actions to the community card ([#3427](https://github.com/factorialco/f0/issues/3427)) ([675aa78](https://github.com/factorialco/f0/commit/675aa7889179808d16a799339a5b8f4481f1f7e1))
+
 ## [1.359.0](https://github.com/factorialco/f0/compare/f0-react-v1.358.1...f0-react-v1.359.0) (2026-02-12)
 
 

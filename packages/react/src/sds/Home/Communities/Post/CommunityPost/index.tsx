@@ -1,5 +1,7 @@
 import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon"
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
+import { F0Button } from "@/components/F0Button"
+import { IconType } from "@/components/F0Icon"
 import { F0Link } from "@/components/F0Link"
 import { Reactions, ReactionsProps } from "@/experimental/Information/Reactions"
 import { Dropdown, DropdownItem } from "@/experimental/Navigation/Dropdown"
@@ -16,6 +18,12 @@ import { Skeleton } from "@/ui/skeleton"
 import { PostDescription, PostDescriptionProps } from "../PostDescription"
 import { PostEvent, PostEventProps } from "../PostEvent"
 import { isVideo } from "./video"
+
+export type CommunityPostAction = {
+  label: string
+  icon?: IconType
+  onClick: () => void
+}
 
 export type CommunityPostProps = {
   id: string
@@ -50,6 +58,8 @@ export type CommunityPostProps = {
     onClick: () => void
   }
 
+  actions?: CommunityPostAction[]
+
   noVideoPreload?: boolean
 
   onClick: (id: string) => void
@@ -73,6 +83,7 @@ export const BaseCommunityPost = ({
   reactions,
   inLabel,
   comment,
+  actions,
   dropdownItems,
   noReactionsButton = false,
 }: CommunityPostProps) => {
@@ -176,6 +187,16 @@ export const BaseCommunityPost = ({
 
             <div className="flex flex-row gap-2">
               <div className="hidden flex-row gap-2 md:flex">
+                {actions?.map((act) => (
+                  <F0Button
+                    key={act.label}
+                    {...(act.icon && { icon: act.icon })}
+                    variant="outline"
+                    size="md"
+                    onClick={act.onClick}
+                    label={act.label}
+                  />
+                ))}
                 {dropdownItems?.length && (
                   <Dropdown
                     items={dropdownItems}

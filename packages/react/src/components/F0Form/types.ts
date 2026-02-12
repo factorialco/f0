@@ -7,7 +7,6 @@ import type {
   F0BaseFieldRenderIfFunction,
   RenderIfCondition,
 } from "./fields/types"
-import type { F0FormRef } from "./useF0Form"
 
 // Re-export F0 schema types
 export type { F0FieldConfig, F0FieldType, F0ZodType } from "./f0Schema"
