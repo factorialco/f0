@@ -1,6 +1,7 @@
 import { F0Avatar } from "@/components/avatars/F0Avatar"
 import { F0Icon } from "@/components/F0Icon"
 import { OneEllipsis } from "@/components/OneEllipsis"
+import { F0TagDot } from "@/components/tags/F0TagDot"
 import { F0TagRaw } from "@/components/tags/F0TagRaw"
 import { SelectItem as SelectItemPrimitive } from "@/ui/Select"
 
@@ -32,7 +33,11 @@ export const SelectItem = <T extends string, R>({
         </div>
         {item.tag && (
           <div className="self-center">
-            <F0TagRaw text={item.tag} />
+            {typeof item.tag === "string" ? (
+              <F0TagRaw text={item.tag} />
+            ) : (
+              <F0TagDot {...item.tag} />
+            )}
           </div>
         )}
       </div>
