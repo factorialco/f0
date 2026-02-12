@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.361.0](https://github.com/factorialco/f0/compare/f0-react-v1.360.0...f0-react-v1.361.0) (2026-02-12)
+
+
+### Features
+
+* improved renderIf and disable fields logic ([#3429](https://github.com/factorialco/f0/issues/3429)) ([d3df4e4](https://github.com/factorialco/f0/commit/d3df4e40c2c4c0fee0c89fb52b75ab0c5d69adf1))
+
 ## [1.360.0](https://github.com/factorialco/f0/compare/f0-react-v1.359.0...f0-react-v1.360.0) (2026-02-12)
 
 
