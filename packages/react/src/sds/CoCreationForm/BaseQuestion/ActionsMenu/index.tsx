@@ -263,9 +263,7 @@ export function ActionsMenu({
     const changingType =
       newQuestionType !== questionType &&
       !(
-        (newQuestionType === "select" ||
-          newQuestionType === "multi-select" ||
-          newQuestionType === "dropdown-single") &&
+        (newQuestionType === "select" || newQuestionType === "multi-select") &&
         question &&
         "options" in question &&
         !!question.options.length

@@ -62,7 +62,6 @@ export const getDefaultParamsForQuestionType = (questionType: QuestionType) => {
       }
     case "select":
     case "multi-select":
-    case "dropdown-single":
       return {
         options: [
           {
@@ -70,6 +69,10 @@ export const getDefaultParamsForQuestionType = (questionType: QuestionType) => {
             label: "New option 1",
           },
         ],
+      }
+    case "dropdown-single":
+      return {
+        options: [],
       }
     case "text":
     case "longText":
