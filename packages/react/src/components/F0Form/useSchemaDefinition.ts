@@ -158,6 +158,18 @@ function configToF0Field(
       } as F0Field
     }
 
+    case "datetime": {
+      const { minDate, maxDate } = extractDateConstraints(schema)
+      return {
+        ...baseProps,
+        type: "datetime",
+        minDate,
+        maxDate,
+        clearable,
+        renderIf: config.renderIf,
+      } as F0Field
+    }
+
     case "daterange":
       return {
         ...baseProps,

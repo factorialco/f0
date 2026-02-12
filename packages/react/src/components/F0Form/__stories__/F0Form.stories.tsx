@@ -1357,3 +1357,68 @@ export const SelectWithDataSource: Story = {
     )
   },
 }
+
+/**
+ * DateTime field example demonstrating `fieldType: "datetime"` with `z.date()`.
+ * Shows different configurations: basic datetime, optional datetime,
+ * and datetime with min/max constraints.
+ */
+export const DateTimeField: Story = {
+  render() {
+    const now = new Date()
+    const oneWeekLater = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
+
+    const formSchema = z.object({
+      // Basic datetime field
+      appointmentTime: f0FormField(z.date(), {
+        label: "Appointment Time",
+        fieldType: "datetime",
+        helpText: "Select a date and time for your appointment",
+      }),
+      // Optional datetime
+      reminderAt: f0FormField(z.date().optional(), {
+        label: "Reminder (optional)",
+        fieldType: "datetime",
+        helpText: "Set an optional reminder",
+      }),
+      // DateTime with min/max constraints
+      meetingTime: f0FormField(z.date().min(now).max(oneWeekLater), {
+        label: "Meeting Time",
+        fieldType: "datetime",
+        helpText: "Must be within the next week",
+      }),
+      // Regular date field for comparison
+      birthDate: f0FormField(z.date().optional(), {
+        label: "Birth Date (date only)",
+        helpText: "Regular date picker for comparison",
+        granularities: ["day"],
+      }),
+    })
+
+    return (
+      <div className="max-w-lg">
+        <F0Form
+          name="datetime-example"
+          schema={formSchema}
+          defaultValues={{
+            appointmentTime: now,
+            reminderAt: undefined,
+            meetingTime: now,
+            birthDate: undefined,
+          }}
+          onSubmit={async (data) => {
+            await sleep(1000)
+            alert(
+              `Submitted:\n${JSON.stringify(
+                data,
+                (_, v) => (v instanceof Date ? v.toISOString() : v),
+                2
+              )}`
+            )
+            return { success: true }
+          }}
+        />
+      </div>
+    )
+  },
+}

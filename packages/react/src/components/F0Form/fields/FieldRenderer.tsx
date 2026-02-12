@@ -23,6 +23,8 @@ import { evaluateRenderIf } from "./utils"
 import { CheckboxFieldRenderer } from "./checkbox/CheckboxFieldRenderer"
 import { CustomFieldRenderer } from "./custom/CustomFieldRenderer"
 import { DateFieldRenderer } from "./date/DateFieldRenderer"
+import { TimeFieldRenderer } from "./date/TimeFieldRenderer"
+import { DateTimeFieldRenderer } from "./date/DateTimeFieldRenderer"
 import { DateRangeFieldRenderer } from "./daterange/DateRangeFieldRenderer"
 import { NumberFieldRenderer } from "./number/NumberFieldRenderer"
 import { RichTextFieldRenderer } from "./richtext/RichTextFieldRenderer"
@@ -121,6 +123,22 @@ function renderFieldInput({
     case "date":
       return (
         <DateFieldRenderer
+          field={{ ...field, disabled: isDisabled }}
+          formField={formField}
+          {...errorAndLoadingProps}
+        />
+      )
+    case "time":
+      return (
+        <TimeFieldRenderer
+          field={{ ...field, disabled: isDisabled }}
+          formField={formField}
+          {...errorAndLoadingProps}
+        />
+      )
+    case "datetime":
+      return (
+        <DateTimeFieldRenderer
           field={{ ...field, disabled: isDisabled }}
           formField={formField}
           {...errorAndLoadingProps}

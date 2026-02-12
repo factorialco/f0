@@ -86,6 +86,8 @@ export type FieldType =
   | "checkbox"
   | "switch"
   | "date"
+  | "time"
+  | "datetime"
   | "daterange"
   | "richtext"
   | "custom"
@@ -100,7 +102,15 @@ export type { F0TextareaConfig, F0TextareaField } from "./textarea/types"
 export type { F0SelectConfig, F0SelectField } from "./select/types"
 export type { F0CheckboxConfig, F0CheckboxField } from "./checkbox/types"
 export type { F0SwitchConfig, F0SwitchField } from "./switch/types"
-export type { F0DateConfig, F0DateField, DateGranularity } from "./date/types"
+export type {
+  F0DateConfig,
+  F0DateField,
+  DateGranularity,
+  F0TimeConfig,
+  F0TimeField,
+  F0DateTimeConfig,
+  F0DateTimeField,
+} from "./date/types"
 export type {
   F0DateRangeConfig,
   F0DateRangeField,
@@ -125,7 +135,7 @@ import type { F0TextareaField } from "./textarea/types"
 import type { F0SelectField } from "./select/types"
 import type { F0CheckboxField } from "./checkbox/types"
 import type { F0SwitchField } from "./switch/types"
-import type { F0DateField } from "./date/types"
+import type { F0DateField, F0TimeField, F0DateTimeField } from "./date/types"
 import type { F0DateRangeField } from "./daterange/types"
 import type { F0RichTextField } from "./richtext/types"
 import type { F0CustomField } from "./custom/types"
@@ -141,6 +151,8 @@ export type F0Field =
   | F0CheckboxField
   | F0SwitchField
   | F0DateField
+  | F0TimeField
+  | F0DateTimeField
   | F0DateRangeField
   | F0RichTextField
   | F0CustomField

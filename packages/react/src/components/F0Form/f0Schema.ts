@@ -7,7 +7,7 @@ import type { F0TextareaConfig } from "./fields/textarea/types"
 import type { F0SelectConfig } from "./fields/select/types"
 import type { F0CheckboxConfig } from "./fields/checkbox/types"
 import type { F0SwitchConfig } from "./fields/switch/types"
-import type { F0DateConfig } from "./fields/date/types"
+import type { F0DateConfig, F0DateTimeConfig } from "./fields/date/types"
 import type { F0DateRangeConfig } from "./fields/daterange/types"
 import type { F0RichTextConfig } from "./fields/richtext/types"
 import type { F0CustomConfig } from "./fields/custom/types"
@@ -48,6 +48,7 @@ export type F0FieldType =
   | "checkbox"
   | "switch"
   | "date"
+  | "datetime"
   | "daterange"
   | "richtext"
   | "custom"
@@ -188,6 +189,21 @@ export type F0DateFieldConfig = F0BaseConfig &
   }
 
 /**
+ * Config for datetime fields
+ */
+export type F0DateTimeFieldConfig = F0BaseConfig &
+  F0DateTimeConfig & {
+    fieldType: "datetime"
+  }
+
+/**
+ * Union of all date/datetime field configs for z.date()
+ */
+export type F0DateOrDateTimeFieldConfig =
+  | F0DateFieldConfig
+  | F0DateTimeFieldConfig
+
+/**
  * Config for date range fields
  */
 export type F0DateRangeFieldConfig = F0BaseConfig &
@@ -277,6 +293,7 @@ export type F0FieldConfig<
   | F0NumberFieldConfig<R>
   | F0BooleanConfig
   | F0DateFieldConfig
+  | F0DateTimeFieldConfig
   | F0ArrayConfig<T, R>
   | F0ObjectConfig
 
@@ -323,11 +340,11 @@ export function f0FormField<T extends z.ZodBoolean>(
 ): T & F0ZodType<T>
 
 /**
- * Date field
+ * Date or DateTime field
  */
 export function f0FormField<T extends z.ZodDate>(
   schema: T,
-  config: F0DateFieldConfig
+  config: F0DateOrDateTimeFieldConfig
 ): T & F0ZodType<T>
 
 /**
