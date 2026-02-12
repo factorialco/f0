@@ -1,6 +1,10 @@
 import type { DatePreset } from "@/components/F0DatePicker"
 
-import type { F0BaseField, CommonRenderIfCondition } from "../types"
+import type {
+  F0BaseField,
+  F0BaseFieldRenderIfFunction,
+  CommonRenderIfCondition,
+} from "../types"
 
 /**
  * Valid granularity keys for date pickers
@@ -42,7 +46,10 @@ export type DateRenderIfCondition = DateRenderIfBase &
 /**
  * All valid renderIf conditions for date fields
  */
-export type DateFieldRenderIf = DateRenderIfCondition | CommonRenderIfCondition
+export type DateFieldRenderIf =
+  | DateRenderIfCondition
+  | CommonRenderIfCondition
+  | F0BaseFieldRenderIfFunction
 
 // ============================================================================
 // Date Field Config and Type

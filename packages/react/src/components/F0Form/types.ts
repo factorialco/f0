@@ -2,7 +2,11 @@ import type { z, ZodRawShape } from "zod"
 
 import type { IconType } from "@/components/F0Icon"
 
-import type { F0Field, RenderIfCondition } from "./fields/types"
+import type {
+  F0Field,
+  F0BaseFieldRenderIfFunction,
+  RenderIfCondition,
+} from "./fields/types"
 
 // Re-export F0 schema types
 export type { F0FieldConfig, F0FieldType, F0ZodType } from "./f0Schema"
@@ -16,9 +20,7 @@ export {
 /**
  * Conditional rendering for sections - can be a condition object or a function
  */
-export type SectionRenderIf =
-  | RenderIfCondition
-  | ((values: Record<string, unknown>) => boolean)
+export type SectionRenderIf = RenderIfCondition | F0BaseFieldRenderIfFunction
 
 /**
  * Action button configuration for a section.

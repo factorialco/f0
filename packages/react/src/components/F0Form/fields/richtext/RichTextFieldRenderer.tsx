@@ -3,9 +3,10 @@ import { ControllerRenderProps, FieldValues } from "react-hook-form"
 import { RichTextEditor } from "@/experimental/RichText/RichTextEditor"
 
 import type { F0RichTextField, RichTextValue } from "./types"
+import type { ResolvedField } from "../types"
 
 interface RichTextFieldRendererProps {
-  field: F0RichTextField
+  field: ResolvedField<F0RichTextField>
   formField: ControllerRenderProps<FieldValues>
 }
 

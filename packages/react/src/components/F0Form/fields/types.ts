@@ -32,6 +32,20 @@ export type RenderIfCondition =
   | DateRenderIfCondition
   | DateRangeRenderIfCondition
 
+/**
+ * Function type for dynamic renderIf evaluation based on form values
+ */
+export type F0BaseFieldRenderIfFunction = (context: {
+  values: Record<string, unknown>
+}) => boolean
+
+/**
+ * RenderIf property can be a condition object or a function that receives form values
+ */
+export type F0BaseFieldRenderIfProp =
+  | RenderIfCondition
+  | F0BaseFieldRenderIfFunction
+
 // ============================================================================
 // Field-Specific RenderIf Condition Types (imported from each field)
 // ============================================================================
@@ -58,6 +72,18 @@ export type {
 // ============================================================================
 
 /**
+ * Function type for dynamic disabled evaluation based on form values
+ */
+export type F0BaseFieldDisabledFunction = (context: {
+  values: Record<string, unknown>
+}) => boolean
+
+/**
+ * Disabled property can be a boolean or a function that receives form values
+ */
+export type F0BaseFieldDisabledProp = boolean | F0BaseFieldDisabledFunction
+
+/**
  * Base properties shared across all F0 field types
  */
 export interface F0BaseField {
@@ -71,7 +97,30 @@ export interface F0BaseField {
   helpText?: string
   /** Placeholder text for the input */
   placeholder?: string
-  /** Whether the field is disabled */
+  /**
+   * Whether the field is disabled.
+   * Can be a boolean or a function that receives form values.
+   * @example
+   * // Static disabled
+   * disabled: true
+   *
+   * // Dynamic disabled based on other field values
+   * disabled: ({ values }) => values.status === 'readonly'
+   */
+  disabled?: F0BaseFieldDisabledProp
+  /**
+   * When true, resets the field to its default value when it becomes disabled.
+   * Useful for clearing dependent fields when their controlling field changes.
+   * @default false
+   */
+  resetOnDisable?: boolean
+}
+
+/**
+ * Utility type that converts F0BaseFieldDisabledProp to boolean in a field type.
+ * Used internally by field renderers after the disabled prop has been evaluated.
+ */
+export type ResolvedField<T extends F0BaseField> = Omit<T, "disabled"> & {
   disabled?: boolean
 }
 

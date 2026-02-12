@@ -1,6 +1,9 @@
 import { z, ZodTypeAny } from "zod"
 
-import type { RenderIfCondition } from "./fields/types"
+import type {
+  F0BaseFieldDisabledProp,
+  F0BaseFieldRenderIfProp,
+} from "./fields/types"
 import type { F0TextConfig } from "./fields/text/types"
 import type { F0NumberConfig } from "./fields/number/types"
 import type { F0TextareaConfig } from "./fields/textarea/types"
@@ -71,12 +74,36 @@ export interface F0BaseConfig {
   placeholder?: string
   /** Helper text displayed below the field */
   helpText?: string
-  /** Whether the field is disabled */
-  disabled?: boolean
+  /**
+   * Whether the field is disabled.
+   * Can be a boolean or a function that receives form values.
+   * @example
+   * // Static disabled
+   * disabled: true
+   *
+   * // Dynamic disabled based on other field values
+   * disabled: ({ values }) => values.status === 'readonly'
+   */
+  disabled?: F0BaseFieldDisabledProp
+  /**
+   * When true, resets the field to its default value when it becomes disabled.
+   * Useful for clearing dependent fields when their controlling field changes.
+   * @default false
+   */
+  resetOnDisable?: boolean
   /** Row ID for horizontal grouping with other fields */
   row?: string
-  /** Conditional rendering based on another field's value */
-  renderIf?: RenderIfCondition
+  /**
+   * Conditional rendering based on another field's value.
+   * Can be a condition object or a function that receives form values.
+   * @example
+   * // Condition object
+   * renderIf: { fieldId: 'status', equalsTo: 'active' }
+   *
+   * // Dynamic renderIf based on form values
+   * renderIf: ({ values }) => values.status === 'active'
+   */
+  renderIf?: F0BaseFieldRenderIfProp
 }
 
 // Re-export field-specific config types

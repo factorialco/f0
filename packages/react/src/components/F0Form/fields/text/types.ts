@@ -1,4 +1,8 @@
-import type { F0BaseField, CommonRenderIfCondition } from "../types"
+import type {
+  F0BaseField,
+  F0BaseFieldRenderIfFunction,
+  CommonRenderIfCondition,
+} from "../types"
 
 // ============================================================================
 // Text Field RenderIf Conditions
@@ -25,7 +29,10 @@ export type TextRenderIfCondition = TextRenderIfBase &
 /**
  * All valid renderIf conditions for text fields
  */
-export type TextFieldRenderIf = TextRenderIfCondition | CommonRenderIfCondition
+export type TextFieldRenderIf =
+  | TextRenderIfCondition
+  | CommonRenderIfCondition
+  | F0BaseFieldRenderIfFunction
 
 // ============================================================================
 // Text Field Config and Type

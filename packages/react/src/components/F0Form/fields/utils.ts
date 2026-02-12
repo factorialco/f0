@@ -1,9 +1,13 @@
-import type { RenderIfCondition } from "./types"
+import type {
+  F0BaseFieldDisabledProp,
+  F0BaseFieldRenderIfProp,
+  RenderIfCondition,
+} from "./types"
 
 /**
- * Evaluate a renderIf condition against the current form values
+ * Evaluate a renderIf condition object against the current form values
  */
-export function evaluateRenderIf(
+function evaluateRenderIfCondition(
   condition: RenderIfCondition,
   values: Record<string, unknown>
 ): boolean {
@@ -102,4 +106,33 @@ export function evaluateRenderIf(
   }
 
   return true
+}
+
+/**
+ * Evaluate a renderIf property which can be a condition object or a function
+ */
+export function evaluateRenderIf(
+  renderIf: F0BaseFieldRenderIfProp,
+  values: Record<string, unknown>
+): boolean {
+  if (typeof renderIf === "function") {
+    return renderIf({ values })
+  }
+  return evaluateRenderIfCondition(renderIf, values)
+}
+
+/**
+ * Evaluate a disabled property which can be a boolean or a function
+ */
+export function evaluateDisabled(
+  disabled: F0BaseFieldDisabledProp | undefined,
+  values: Record<string, unknown>
+): boolean {
+  if (disabled === undefined) {
+    return false
+  }
+  if (typeof disabled === "function") {
+    return disabled({ values })
+  }
+  return disabled
 }

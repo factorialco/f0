@@ -1,4 +1,8 @@
-import type { F0BaseField, CommonRenderIfCondition } from "../types"
+import type {
+  F0BaseField,
+  F0BaseFieldRenderIfFunction,
+  CommonRenderIfCondition,
+} from "../types"
 import type { TextRenderIfCondition } from "../text/types"
 
 // ============================================================================
@@ -12,6 +16,7 @@ import type { TextRenderIfCondition } from "../text/types"
 export type TextareaFieldRenderIf =
   | TextRenderIfCondition
   | CommonRenderIfCondition
+  | F0BaseFieldRenderIfFunction
 
 // ============================================================================
 // Textarea Field Config and Type

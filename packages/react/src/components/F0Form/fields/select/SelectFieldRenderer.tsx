@@ -3,10 +3,11 @@ import { ControllerRenderProps, FieldValues } from "react-hook-form"
 import { F0Select } from "@/components/F0Select"
 
 import type { F0SelectField } from "./types"
+import type { ResolvedField } from "../types"
 import { FORM_SIZE } from "../../constants"
 
 interface SelectFieldRendererProps {
-  field: F0SelectField
+  field: ResolvedField<F0SelectField>
   formField: ControllerRenderProps<FieldValues>
   error?: boolean
   loading?: boolean
@@ -21,7 +22,9 @@ function SelectWithOptions({
   error,
   loading,
 }: SelectFieldRendererProps & {
-  field: F0SelectField & { options: NonNullable<F0SelectField["options"]> }
+  field: ResolvedField<F0SelectField> & {
+    options: NonNullable<F0SelectField["options"]>
+  }
 }) {
   const baseProps = {
     label: field.label,
@@ -79,7 +82,7 @@ function SelectWithSource({
   error,
   loading,
 }: SelectFieldRendererProps & {
-  field: F0SelectField & {
+  field: ResolvedField<F0SelectField> & {
     source: NonNullable<F0SelectField["source"]>
     mapOptions: NonNullable<F0SelectField["mapOptions"]>
   }

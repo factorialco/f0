@@ -4,10 +4,11 @@ import { ControllerRenderProps, FieldValues } from "react-hook-form"
 import { F0DatePicker, DatePickerValue } from "@/components/F0DatePicker"
 
 import type { F0DateField } from "./types"
+import type { ResolvedField } from "../types"
 import { FORM_SIZE } from "../../constants"
 
 interface DateFieldRendererProps {
-  field: F0DateField
+  field: ResolvedField<F0DateField>
   formField: ControllerRenderProps<FieldValues>
   error?: boolean
   loading?: boolean

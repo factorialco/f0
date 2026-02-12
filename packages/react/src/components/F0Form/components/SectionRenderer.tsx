@@ -9,31 +9,12 @@ import { generateAnchorId, useF0FormContext } from "../context"
 import { FieldRenderer } from "../fields/FieldRenderer"
 import type { F0SwitchField } from "../fields/switch/types"
 import { evaluateRenderIf } from "../fields/utils"
-import type {
-  FieldItem,
-  RowDefinition,
-  SectionDefinition,
-  SectionRenderIf,
-} from "../types"
+import type { FieldItem, RowDefinition, SectionDefinition } from "../types"
 import { RowRenderer } from "./RowRenderer"
 import { SwitchGroupRenderer } from "./SwitchGroupRenderer"
 
 interface SectionRendererProps {
   section: SectionDefinition
-}
-
-/**
- * Evaluate a section's renderIf condition which can be either
- * a RenderIfCondition object or a function
- */
-function evaluateSectionRenderIf(
-  renderIf: SectionRenderIf,
-  values: Record<string, unknown>
-): boolean {
-  if (typeof renderIf === "function") {
-    return renderIf(values)
-  }
-  return evaluateRenderIf(renderIf, values)
 }
 
 type RenderedItem =
@@ -89,7 +70,7 @@ export function SectionRenderer({ section }: SectionRendererProps) {
   const sectionId = section.id
 
   // Check if section should be rendered based on renderIf condition
-  if (renderIf && !evaluateSectionRenderIf(renderIf, values)) {
+  if (renderIf && !evaluateRenderIf(renderIf, values)) {
     return null
   }
 

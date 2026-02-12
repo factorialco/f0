@@ -5,9 +5,10 @@ import { Switch } from "@/experimental/Forms/Fields/Switch"
 
 import { isZodType, unwrapZodSchema } from "../../f0Schema"
 import type { F0SwitchField } from "./types"
+import type { ResolvedField } from "../types"
 
 interface SwitchFieldRendererProps {
-  field: F0SwitchField
+  field: ResolvedField<F0SwitchField>
   formField: ControllerRenderProps<FieldValues>
 }
 

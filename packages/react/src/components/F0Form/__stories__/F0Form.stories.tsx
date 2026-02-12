@@ -340,6 +340,7 @@ export const WithSectionsSidepanel: Story = {
 /**
  * Form with conditional field rendering based on other field values.
  * Fields can use `renderIf` to conditionally show/hide based on other field values.
+ * Supports both condition objects and functions.
  */
 export const ConditionalRendering: Story = {
   render() {
@@ -351,6 +352,7 @@ export const ConditionalRendering: Story = {
       accountId: f0FormField(z.string().min(6), {
         label: "Account ID",
         helpText: "Enter your existing account ID",
+        // Condition object syntax
         renderIf: {
           fieldId: "hasAccount",
           equalsTo: true,
@@ -359,10 +361,8 @@ export const ConditionalRendering: Story = {
       newUsername: f0FormField(z.string().min(3), {
         label: "New Username",
         helpText: "Choose a username for your new account",
-        renderIf: {
-          fieldId: "hasAccount",
-          equalsTo: false,
-        },
+        // Function syntax - equivalent to the condition object above
+        renderIf: ({ values }) => values.hasAccount === false,
       }),
       employeeCount: f0FormField(z.number().min(1), {
         label: "Number of Employees",
@@ -371,10 +371,10 @@ export const ConditionalRendering: Story = {
         label: "Enable Enterprise Plan",
         helpText: "Available for companies with 50+ employees",
         fieldType: "checkbox",
-        renderIf: {
-          fieldId: "employeeCount",
-          greaterThanOrEqual: 50,
-        },
+        // Function syntax for complex conditions
+        renderIf: ({ values }) =>
+          typeof values.employeeCount === "number" &&
+          values.employeeCount >= 50,
       }),
     })
 
@@ -388,6 +388,105 @@ export const ConditionalRendering: Story = {
           newUsername: "",
           employeeCount: 1,
           enterprisePlan: false,
+        }}
+        onSubmit={async (data) => {
+          await sleep(1000)
+          alert(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+          return { success: true }
+        }}
+      />
+    )
+  },
+}
+
+/**
+ * Form with dynamic disabled fields based on other field values.
+ * Fields can use `disabled` as a function that receives form values
+ * to conditionally enable/disable based on other field values.
+ *
+ * Also demonstrates `resetOnDisable` which resets a field to its
+ * default value when it becomes disabled.
+ */
+export const DynamicDisabled: Story = {
+  render() {
+    const formSchema = z.object({
+      status: f0FormField(z.enum(["draft", "published", "archived"]), {
+        label: "Document Status",
+        options: [
+          { value: "draft", label: "Draft" },
+          { value: "published", label: "Published" },
+          { value: "archived", label: "Archived" },
+        ],
+        helpText: "Select 'Archived' to disable editing",
+      }),
+      title: f0FormField(z.string().min(1), {
+        label: "Title",
+        placeholder: "Enter document title",
+        // Disabled when status is 'archived'
+        disabled: ({ values }) => values.status === "archived",
+        resetOnDisable: true,
+      }),
+      content: f0FormField(z.string().optional(), {
+        label: "Content",
+        fieldType: "textarea",
+        rows: 4,
+        placeholder: "Enter document content",
+        // Disabled when status is 'archived'
+        disabled: ({ values }) => values.status === "archived",
+      }),
+      enableNotifications: f0FormField(z.boolean(), {
+        label: "Enable Notifications",
+        fieldType: "switch",
+        helpText: "Receive notifications about this document",
+      }),
+      notifyOnComments: f0FormField(z.boolean(), {
+        label: "Notify on Comments",
+        fieldType: "switch",
+        helpText: "Get notified when someone comments",
+        // Disabled when notifications are disabled, resets to false
+        disabled: ({ values }) => !values.enableNotifications,
+        resetOnDisable: true,
+      }),
+      notifyOnEdits: f0FormField(z.boolean(), {
+        label: "Notify on Edits",
+        fieldType: "switch",
+        helpText: "Get notified when document is edited",
+        // Disabled when notifications are disabled, resets to false
+        disabled: ({ values }) => !values.enableNotifications,
+        resetOnDisable: true,
+      }),
+      employeeCount: f0FormField(z.number().min(1), {
+        label: "Number of Team Members",
+        helpText: "Enter at least 10 to enable bulk actions",
+      }),
+      bulkAction: f0FormField(z.string().optional(), {
+        label: "Bulk Action",
+        options: [
+          { value: "notify", label: "Notify All" },
+          { value: "export", label: "Export Data" },
+          { value: "archive", label: "Archive All" },
+        ],
+        placeholder: "Select bulk action",
+        // Disabled when employee count is less than 10, resets to undefined
+        disabled: ({ values }) =>
+          typeof values.employeeCount !== "number" || values.employeeCount < 10,
+        resetOnDisable: true,
+      }),
+    })
+
+    return (
+      <F0Form
+        name="dynamic-disabled"
+        schema={formSchema}
+        defaultValues={{
+          status: "draft",
+          title: "",
+          content: "",
+          enableNotifications: true,
+          notifyOnComments: false,
+          notifyOnEdits: false,
+          employeeCount: 1,
+          bulkAction: undefined,
         }}
         onSubmit={async (data) => {
           await sleep(1000)

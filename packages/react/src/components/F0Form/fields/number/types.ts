@@ -1,4 +1,8 @@
-import type { F0BaseField, CommonRenderIfCondition } from "../types"
+import type {
+  F0BaseField,
+  F0BaseFieldRenderIfFunction,
+  CommonRenderIfCondition,
+} from "../types"
 
 // ============================================================================
 // Number Field RenderIf Conditions
@@ -31,6 +35,7 @@ export type NumberRenderIfCondition = NumberRenderIfBase &
 export type NumberFieldRenderIf =
   | NumberRenderIfCondition
   | CommonRenderIfCondition
+  | F0BaseFieldRenderIfFunction
 
 // ============================================================================
 // Number Field Config and Type

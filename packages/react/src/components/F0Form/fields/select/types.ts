@@ -7,7 +7,11 @@ import type {
   RecordType,
 } from "@/hooks/datasource"
 
-import type { F0BaseField, CommonRenderIfCondition } from "../types"
+import type {
+  F0BaseField,
+  F0BaseFieldRenderIfFunction,
+  CommonRenderIfCondition,
+} from "../types"
 
 // ============================================================================
 // Select Field RenderIf Conditions
@@ -38,6 +42,7 @@ export type SelectRenderIfCondition = SelectRenderIfBase &
 export type SelectFieldRenderIf =
   | SelectRenderIfCondition
   | CommonRenderIfCondition
+  | F0BaseFieldRenderIfFunction
 
 // ============================================================================
 // Select Field Config and Type

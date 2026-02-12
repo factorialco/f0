@@ -5,11 +5,12 @@ import { Input } from "@/experimental/Forms/Fields/Input"
 import { Clock } from "@/icons/app"
 
 import type { F0TimeField } from "./types"
+import type { ResolvedField } from "../types"
 import { dateToTimeString, timeStringToDate } from "./utils"
 import { FORM_SIZE } from "../../constants"
 
 export interface TimeFieldRendererProps {
-  field: F0TimeField
+  field: ResolvedField<F0TimeField>
   formField: ControllerRenderProps<FieldValues>
   error?: boolean
   loading?: boolean

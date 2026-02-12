@@ -56,6 +56,7 @@ function configToF0Field(
     placeholder: config.placeholder,
     helpText: config.helpText,
     disabled: config.disabled,
+    resetOnDisable: config.resetOnDisable,
     validation: schema,
   }
 
