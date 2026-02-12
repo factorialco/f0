@@ -25,6 +25,7 @@ import { mockImage } from "@/testing/mocks/images"
 
 import { F0Link } from "@/components/F0Link"
 import { Switch } from "@/ui/switch"
+import { Text } from "@/ui/Text"
 
 import {
   cardImageFits,
@@ -54,19 +55,15 @@ const InteractiveChildrenContent = () => {
         This card has a link, but the children are interactive.
       </p>
       <div className="flex items-center justify-between">
-        <F0Link
-          href="https://google.com"
-          target="_blank"
-          onClick={(e) => e.stopPropagation()}
-        >
+        <F0Link href="https://google.com" target="_blank">
           Click me (goes to Google)
         </F0Link>
         <Switch
           title="Toggle"
           checked={checked}
           onCheckedChange={(value) => setChecked(value)}
-          onClick={(e) => e.stopPropagation()}
         />
+        <Text variant="body" content="Toggle" />
       </div>
     </div>
   )
