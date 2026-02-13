@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.362.1](https://github.com/factorialco/f0/compare/f0-react-v1.362.0...f0-react-v1.362.1) (2026-02-13)
+
+
+### Bug Fixes
+
+* **AiChat:** Fix autofocus for Activities ([#3432](https://github.com/factorialco/f0/issues/3432)) ([d0cc2d6](https://github.com/factorialco/f0/commit/d0cc2d6d1debc6348d9c99cce05476baf01f2354))
+
 ## [1.362.0](https://github.com/factorialco/f0/compare/f0-react-v1.361.0...f0-react-v1.362.0) (2026-02-13)
 
 
