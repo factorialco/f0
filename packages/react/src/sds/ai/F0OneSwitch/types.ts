@@ -5,4 +5,6 @@ import * as SwitchPrimitive from "@radix-ui/react-switch"
  */
 export type F0OneSwitchProps = React.ComponentPropsWithoutRef<
   typeof SwitchPrimitive.Root
->
+> & {
+  customTooltip?: string
+}

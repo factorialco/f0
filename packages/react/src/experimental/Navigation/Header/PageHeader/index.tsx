@@ -3,19 +3,19 @@ import { ReactElement, useRef, useState } from "react"
 
 import type { StatusVariant } from "@/components/tags/F0TagStatus"
 
-import { F0OneSwitch } from "@/sds/ai/F0OneSwitch"
 import { ModuleId } from "@/components/avatars/F0AvatarModule"
 import { F0Button } from "@/components/F0Button"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { IconType } from "@/components/F0Icon"
 import { F0TagStatus } from "@/components/tags/F0TagStatus"
-import { OneSwitch as OnePromotionSwitch } from "@/experimental/AiPromotionChat/OneSwitch"
 import { useSidebar } from "@/examples/ApplicationFrame/FrameProvider"
+import { OneSwitch as OnePromotionSwitch } from "@/experimental/AiPromotionChat/OneSwitch"
 import { Dropdown } from "@/experimental/Navigation/Dropdown"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { ChevronDown, ChevronLeft, ChevronUp, Menu } from "@/icons/app"
 import { Link } from "@/lib/linkHandler"
 import { cn } from "@/lib/utils"
+import { F0OneSwitch } from "@/sds/ai/F0OneSwitch"
 import { Skeleton } from "@/ui/skeleton"
 
 import { Breadcrumbs, BreadcrumbsProps } from "../Breadcrumbs"
@@ -72,6 +72,7 @@ type HeaderProps = {
     onChange: (newValue: boolean) => void
     label: string
   }
+  oneSwitchCustomTooltip?: string
 }
 
 function PageNavigationLink({
@@ -111,6 +112,7 @@ export function PageHeader({
   navigation,
   productUpdates,
   favorites,
+  oneSwitchCustomTooltip,
 }: HeaderProps) {
   const { sidebarState, toggleSidebar } = useSidebar()
 
@@ -275,7 +277,7 @@ export function PageHeader({
           </div>
         )}
         <div>
-          <F0OneSwitch />
+          <F0OneSwitch tooltipContent={oneSwitchCustomTooltip} />
           <OnePromotionSwitch />
         </div>
       </div>

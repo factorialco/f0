@@ -15,7 +15,11 @@ import { useAiChat } from "../F0AiChat/providers/AiChatStateProvider"
 import { F0OneIcon } from "../F0OneIcon"
 import { F0OneSwitchProps } from "./types"
 
-export const F0OneSwitch = ({ className, disabled }: F0OneSwitchProps) => {
+export const F0OneSwitch = ({
+  className,
+  disabled,
+  customTooltip,
+}: F0OneSwitchProps) => {
   const { enabled, setOpen, open } = useAiChat()
   const translations = useI18n()
   const [isHover, setIsHover] = useState(false)
@@ -89,7 +93,7 @@ export const F0OneSwitch = ({ className, disabled }: F0OneSwitchProps) => {
           </TooltipTrigger>
           {!open && (
             <TooltipContent side="left" className="font-medium">
-              {translations.ai.welcome}
+              {customTooltip ?? translations.ai.welcome}
             </TooltipContent>
           )}
         </Tooltip>

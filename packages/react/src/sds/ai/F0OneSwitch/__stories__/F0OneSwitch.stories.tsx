@@ -30,3 +30,9 @@ export const Disabled: Story = {
     disabled: true,
   },
 }
+
+export const WithCustomTooltip: Story = {
+  args: {
+    customTooltip: "This is a custom tooltip",
+  },
+}

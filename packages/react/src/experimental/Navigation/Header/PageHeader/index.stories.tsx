@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { useState } from "react"
 
+import { F0AiChatProvider } from "@/sds/ai/F0AiChat"
 import { EllipsisHorizontal, Settings } from "../../../../icons/app"
 import { PageHeader } from "./index"
 
@@ -14,9 +15,11 @@ const meta = {
   },
   decorators: [
     (Story) => (
-      <div className="bg-f1-background">
-        <Story />
-      </div>
+      <F0AiChatProvider enabled runtimeUrl="https://example.com">
+        <div className="bg-f1-background">
+          <Story />
+        </div>
+      </F0AiChatProvider>
     ),
   ],
 } satisfies Meta<typeof PageHeader>
@@ -374,5 +377,12 @@ export const EmbeddedWithLoading: Story = {
       { id: "employees", label: "Employees", href: "/employees" },
       { id: "loading", loading: true },
     ],
+  },
+}
+
+export const WithOneSwitchCustomTooltip: Story = {
+  args: {
+    module: defaultModule,
+    oneSwitchCustomTooltip: "This is a custom tooltip",
   },
 }
