@@ -367,6 +367,7 @@ export const WithDotTags: Story = {
       {
         value: "active",
         label: "Active",
+        description: "Active description",
         tag: {
           type: "dot",
           text: "Active",
@@ -385,6 +386,15 @@ export const WithDotTags: Story = {
       {
         value: "inactive",
         label: "Inactive",
+        icon: Appearance,
+        tag: "Disabled",
+      },
+
+      {
+        value: "inactive",
+        label: "Inactive",
+        description: "Inactive description",
+        icon: Desktop,
         tag: "Disabled",
       },
     ],
