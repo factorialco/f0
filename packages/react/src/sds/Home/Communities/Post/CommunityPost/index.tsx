@@ -179,10 +179,6 @@ export const BaseCommunityPost = ({
               >
                 {group.title}
               </F0Link>
-              <span className="hidden text-f1-foreground-secondary md:inline">
-                ·
-              </span>
-              <span className="text-f1-foreground-secondary">{date}</span>
             </div>
 
             <div className="flex flex-row gap-2">
@@ -195,6 +191,7 @@ export const BaseCommunityPost = ({
                     size="md"
                     onClick={act.onClick}
                     label={act.label}
+                    title={act.label}
                   />
                 ))}
                 {dropdownItems?.length && (
@@ -220,6 +217,9 @@ export const BaseCommunityPost = ({
               </div>
             </div>
           </div>
+          <span className="-mt-3 text-sm text-f1-foreground-secondary">
+            {date}
+          </span>
           <div className="flex flex-col gap-1 text-f1-foreground">
             <p className="text-xl font-semibold">{title}</p>
             {description && <PostDescription content={description} collapsed />}
