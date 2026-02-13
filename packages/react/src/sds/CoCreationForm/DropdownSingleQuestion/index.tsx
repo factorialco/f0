@@ -30,8 +30,9 @@ export const DropdownSingleQuestion = ({
     <BaseQuestion {...props}>
       <div className="-mx-0.5 flex flex-col items-start [&>div]:w-full">
         <F0Select
-          label=""
+          label={t("coCreationForm.answer.label")}
           hideLabel
+          size="md"
           clearable={false}
           multiple={false}
           options={selectOptions}
@@ -45,6 +46,7 @@ export const DropdownSingleQuestion = ({
           }
           placeholder={t("coCreationForm.answer.placeholder")}
           disabled={questionLocked}
+          required={props.required}
         />
       </div>
     </BaseQuestion>
