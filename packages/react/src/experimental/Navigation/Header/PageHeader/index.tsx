@@ -277,7 +277,7 @@ export function PageHeader({
           </div>
         )}
         <div>
-          <F0OneSwitch tooltipContent={oneSwitchCustomTooltip} />
+          <F0OneSwitch customTooltip={oneSwitchCustomTooltip} />
           <OnePromotionSwitch />
         </div>
       </div>
