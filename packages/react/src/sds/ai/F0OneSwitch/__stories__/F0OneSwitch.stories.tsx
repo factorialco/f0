@@ -36,3 +36,10 @@ export const WithCustomTooltip: Story = {
     customTooltip: "This is a custom tooltip",
   },
 }
+
+export const TooltipAlwaysVisible: Story = {
+  args: {
+    customTooltip: "ONE assistant is available",
+    tooltipAlwaysVisible: true,
+  },
+}

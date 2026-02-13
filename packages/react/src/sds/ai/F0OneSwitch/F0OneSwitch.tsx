@@ -19,10 +19,15 @@ export const F0OneSwitch = ({
   className,
   disabled,
   customTooltip,
+  tooltipAlwaysVisible = false,
 }: F0OneSwitchProps) => {
   const { enabled, setOpen, open } = useAiChat()
   const translations = useI18n()
   const [isHover, setIsHover] = useState(false)
+  const [tooltipOpen, setTooltipOpen] = useState(false)
+
+  const tooltipText = customTooltip ?? translations.ai.welcome
+  const showTooltip = tooltipAlwaysVisible ? true : tooltipOpen
 
   if (!enabled) {
     return null
@@ -31,7 +36,12 @@ export const F0OneSwitch = ({
   return (
     <div className="flex items-center">
       <TooltipProvider>
-        <Tooltip delayDuration={850} disableHoverableContent>
+        <Tooltip
+          delayDuration={tooltipAlwaysVisible ? 0 : 850}
+          disableHoverableContent
+          open={!open && showTooltip}
+          onOpenChange={tooltipAlwaysVisible ? () => {} : setTooltipOpen}
+        >
           <TooltipTrigger asChild>
             <motion.div
               animate={{
@@ -92,8 +102,11 @@ export const F0OneSwitch = ({
             </motion.div>
           </TooltipTrigger>
           {!open && (
-            <TooltipContent side="left" className="font-medium">
-              {customTooltip ?? translations.ai.welcome}
+            <TooltipContent
+              side="left"
+              className={cn("font-medium", tooltipAlwaysVisible && "z-[100]")}
+            >
+              {tooltipText}
             </TooltipContent>
           )}
         </Tooltip>

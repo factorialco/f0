@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useState } from "react"
 
 import { F0AiChatProvider } from "@/sds/ai/F0AiChat"
+
 import { EllipsisHorizontal, Settings } from "../../../../icons/app"
 import { PageHeader } from "./index"
 
@@ -384,5 +385,13 @@ export const WithOneSwitchCustomTooltip: Story = {
   args: {
     module: defaultModule,
     oneSwitchCustomTooltip: "This is a custom tooltip",
+  },
+}
+
+export const WithOneSwitchTooltipAlwaysVisible: Story = {
+  args: {
+    module: defaultModule,
+    oneSwitchCustomTooltip: "Ask me anything",
+    oneSwitchTooltipAlwaysVisible: true,
   },
 }
