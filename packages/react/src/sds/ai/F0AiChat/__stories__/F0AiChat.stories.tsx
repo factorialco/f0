@@ -5,30 +5,28 @@ import { Lightbulb, ThumbsDown, ThumbsUp } from "@/icons/app"
 
 import { F0AiChat, F0AiChatProvider, useAiChat } from ".."
 
-const AiChatWrapper = ({ children }: { children: React.ReactElement }) => {
-  const { setOpen, setWelcomeScreenSuggestions } = useAiChat()
+const defaultSuggestions = [
+  {
+    icon: Lightbulb,
+    message: "Hello, how can I help you today?",
+    prompt: "Hello, how can I help you today?",
+  },
+  {
+    icon: ThumbsUp,
+    message: "Share feedback",
+    prompt:
+      "Share feedback and help shape One with your feedback in the next message (optional)",
+  },
+  {
+    icon: ThumbsDown,
+    message: "Very long message to test the layout of the suggestions list",
+    prompt:
+      "Very long message to test the layout of the suggestions list and help shape One with your feedback in the next message (optional)",
+  },
+]
 
-  useEffect(() => {
-    setWelcomeScreenSuggestions([
-      {
-        icon: Lightbulb,
-        message: "Hello, how can I help you today?",
-        prompt: "Hello, how can I help you today?",
-      },
-      {
-        icon: ThumbsUp,
-        message: "Share feedback",
-        prompt:
-          "Share feedback and help shape One with your feedback in the next message (optional)",
-      },
-      {
-        icon: ThumbsDown,
-        message: "Very long message to test the layout of the suggestions list",
-        prompt:
-          "Very long message to test the layout of the suggestions list and help shape One with your feedback in the next message (optional)",
-      },
-    ])
-  }, [setWelcomeScreenSuggestions])
+const AiChatWrapper = ({ children }: { children: React.ReactElement }) => {
+  const { setOpen } = useAiChat()
 
   useEffect(() => {
     setOpen(true)
@@ -56,6 +54,7 @@ const meta = {
             credentials="include"
             showDevConsole={false}
             greeting="Hello, John"
+            welcomeScreenSuggestions={defaultSuggestions}
             disclaimer={{
               text: "One works within your permissions.",
               link: "/permissions",

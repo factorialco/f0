@@ -63,9 +63,6 @@ export type AiChatProviderReturnValue = {
     React.SetStateAction<string | string[] | undefined>
   >
   welcomeScreenSuggestions: WelcomeScreenSuggestion[]
-  setWelcomeScreenSuggestions: React.Dispatch<
-    React.SetStateAction<WelcomeScreenSuggestion[]>
-  >
   onThumbsUp?: (
     message: AIMessage,
     { threadId, feedback }: { threadId: string; feedback: string }
