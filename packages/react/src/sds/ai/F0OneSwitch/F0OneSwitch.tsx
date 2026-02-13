@@ -37,7 +37,7 @@ export const F0OneSwitch = ({
     <div className="flex items-center">
       <TooltipProvider>
         <Tooltip
-          delayDuration={tooltipAlwaysVisible ? 0 : 850}
+          delayDuration={850}
           disableHoverableContent
           open={!open && showTooltip}
           onOpenChange={tooltipAlwaysVisible ? () => {} : setTooltipOpen}
