@@ -57,13 +57,19 @@ const config: TestRunnerConfig = {
       // Add a longer delay to ensure previous axe run is complete
       await page.waitForTimeout(500)
 
-      // Ensure any previous axe runs are complete
-      await page.evaluate(() => {
+      // Ensure any previous axe runs are complete with a timeout to prevent hanging
+      const axeWaitTimeout = 5000 // 5 second max wait
+      await page.evaluate((timeout) => {
         if (window.axe?.isRunning) {
-          return new Promise((resolve) => {
+          return new Promise<boolean>((resolve) => {
+            const startTime = Date.now()
+
             const checkRunning = () => {
               if (!window.axe?.isRunning) {
                 resolve(true)
+              } else if (Date.now() - startTime > timeout) {
+                // Timeout reached, proceed anyway
+                resolve(false)
               } else {
                 setTimeout(checkRunning, 100)
               }
@@ -71,7 +77,8 @@ const config: TestRunnerConfig = {
             checkRunning()
           })
         }
-      })
+        return Promise.resolve(true)
+      }, axeWaitTimeout)
 
       // Get violations without throwing an error
       const violations = await getViolations(page, "#storybook-root", {
