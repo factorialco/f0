@@ -14,7 +14,6 @@ import {
 import { useI18n } from "@/lib/providers/i18n"
 
 import { AiChatProviderReturnValue, AiChatState } from "../internal-types"
-import { WelcomeScreenSuggestion } from "../types"
 
 const AiChatStateContext = createContext<AiChatProviderReturnValue | null>(null)
 
@@ -55,9 +54,6 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   const [shouldPlayEntranceAnimation, setShouldPlayEntranceAnimation] =
     useState(true)
   const [agent, setAgent] = useState<string | undefined>(initialAgent)
-  const [welcomeScreenSuggestions, setWelcomeScreenSuggestions] = useState<
-    WelcomeScreenSuggestion[]
-  >(initialWelcomeScreenSuggestions)
   const i18n = useI18n()
   const [placeholders, setPlaceholders] = useState<string[]>([
     i18n.t("ai.inputPlaceholder"),
@@ -164,8 +160,7 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         autoClearMinutes: enabledInternal ? autoClearMinutes : null,
         initialMessage,
         setInitialMessage,
-        welcomeScreenSuggestions,
-        setWelcomeScreenSuggestions,
+        welcomeScreenSuggestions: initialWelcomeScreenSuggestions,
         onThumbsUp,
         onThumbsDown,
         clear,
@@ -210,7 +205,6 @@ export function useAiChat(): AiChatProviderReturnValue {
       placeholders: [],
       setPlaceholders: noopFn,
       welcomeScreenSuggestions: [],
-      setWelcomeScreenSuggestions: noopFn,
       onThumbsUp: noopFn,
       onThumbsDown: noopFn,
       sendMessage: noopFn,
