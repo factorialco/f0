@@ -340,7 +340,7 @@ export const defaultTranslations = {
       rating: "Rating",
       multipleChoice: "Multiple choice",
       singleChoice: "Single choice",
-      dataSelect: "Data select",
+      dropdownSingle: "Dropdown (single)",
       text: "Text",
       longText: "Long text",
       numeric: "Numeric",
