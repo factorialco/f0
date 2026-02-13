@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.362.0](https://github.com/factorialco/f0/compare/f0-react-v1.361.0...f0-react-v1.362.0) (2026-02-13)
+
+
+### Features
+
+* add useF0Form hook for better integration with dialogs ([#3430](https://github.com/factorialco/f0/issues/3430)) ([eb46fdf](https://github.com/factorialco/f0/commit/eb46fdf12c823e4ea53621501d5cdb608872e353))
+
 ## [1.361.0](https://github.com/factorialco/f0/compare/f0-react-v1.360.0...f0-react-v1.361.0) (2026-02-12)
 
 
