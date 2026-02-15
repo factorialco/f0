@@ -225,7 +225,7 @@ function ApplicationFrameContent({
           duration: shouldReduceMotion ? 0 : 0.2,
         }}
       >
-        <div className="grid h-screen grid-cols-1 grid-rows-[auto_minmax(0,1fr)] items-stretch">
+        <div className="grid h-screen grid-cols-1 grid-rows-[auto_minmax(0,1fr)] items-stretch scrollbar-macos">
           <div className="col-[1/-1]">{banner}</div>
           <LayoutGroup id="ai-chat-group">
             <div className="relative isolate flex h-full">
