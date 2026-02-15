@@ -124,18 +124,18 @@ const F0AiChatComponent = () => {
 
   const InputComponent = useCallback(
     ({ ...props }: InputProps) => (
-      <div
-        className={cn(
-          "m-[16px] items-center flex flex-col gap-2",
-          fullscreen && "mx-auto w-full max-w-[712px]"
-        )}
-      >
-        <div className="w-full">
+      <div className="items-center flex flex-col gap-2 p-4">
+        <div className={cn("w-full", fullscreen && "max-w-[712px]")}>
           <ChatTextarea {...props} />
         </div>
 
         {disclaimer?.text && (
-          <div className="flex flex-row items-center gap-1 w-full justify-center">
+          <div
+            className={cn(
+              "flex flex-row items-center gap-1 w-full justify-center",
+              fullscreen && " max-w-[712px]"
+            )}
+          >
             <OneEllipsis className="text-f1-foreground-tertiary text-sm font-medium">
               {disclaimer.text}
             </OneEllipsis>

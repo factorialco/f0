@@ -140,8 +140,8 @@ const Messages = ({
                   style={{
                     minHeight: isCurrentTurn
                       ? // "scroll" the current turn up in the view to make space for the assistant response,
-                        // but leave 20% of the container height on the top to show part of the previous dialog
-                        containerHeight * 0.8
+                        // but leave 50% of the container height on the top to show part of the previous dialog
+                        containerHeight * 0.5
                       : undefined,
                   }}
                   key={`turn-${turnIndex}`}
