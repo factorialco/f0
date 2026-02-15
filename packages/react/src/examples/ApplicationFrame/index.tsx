@@ -267,14 +267,18 @@ function ApplicationFrameContent({
                   id="content"
                   layoutId="main"
                   className={cn(
-                    "relative flex max-w-full flex-1 overflow-auto xs:py-1",
+                    "relative flex max-w-full flex-1 xs:py-1",
+                    isAiChatFullscreen ? "overflow-hidden" : "overflow-auto",
                     ai && ai.enabled ? "xs:pr-0.5" : "xs:pr-1",
                     sidebarState === "locked" ? "pl-0" : "xs:pl-1"
                   )}
                   layoutDependency={sidebarState}
                 >
                   <motion.div
-                    className="flex max-w-full flex-1 overflow-auto"
+                    className={cn(
+                      "flex max-w-full flex-1",
+                      isAiChatFullscreen ? "overflow-hidden" : "overflow-auto"
+                    )}
                     layout="position"
                   >
                     {children}
@@ -294,7 +298,10 @@ function ApplicationFrameContent({
                         "h-full flex",
                         isOverlayMode
                           ? "absolute inset-0 z-40 justify-end py-1 pr-1 pl-0 [&_.copilotKitSidebarContentWrapper]:h-full [&_.copilotKitSidebarContentWrapper]:w-full"
-                          : "py-1 pr-1 pl-0"
+                          : "py-1 pr-1",
+                        sidebarState === "hidden" && isAiChatFullscreen
+                          ? "pl-1"
+                          : "pl-0"
                       )}
                     >
                       <F0AiChat />
