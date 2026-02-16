@@ -46,6 +46,7 @@ const F0AiChatProviderComponent = ({
   welcomeScreenSuggestions,
   disclaimer,
   resizable = false,
+  fullscreenFooter,
   onThumbsUp,
   onThumbsDown,
   children,
@@ -65,6 +66,7 @@ const F0AiChatProviderComponent = ({
       welcomeScreenSuggestions={welcomeScreenSuggestions}
       disclaimer={disclaimer}
       resizable={resizable}
+      fullscreenFooter={fullscreenFooter}
     >
       <AiChatKitWrapper {...copilotKitProps}>{children}</AiChatKitWrapper>
     </AiChatStateProvider>
@@ -124,6 +126,7 @@ const F0AiChatComponent = () => {
     disclaimer,
     visualizationMode,
     setVisualizationMode,
+    fullscreenFooter,
   } = useAiChat()
   const { messages } = useCopilotChatInternal()
 
@@ -174,10 +177,12 @@ const F0AiChatComponent = () => {
               )}
             </div>
           )}
+
+          {isFullscreen && fullscreenFooter}
         </div>
       </div>
     ),
-    [disclaimer, isFullscreen]
+    [disclaimer, isFullscreen, fullscreenFooter]
   )
 
   if (!enabled) {

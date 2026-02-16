@@ -17,6 +17,10 @@ export type AiChatProviderProps = {
    * When enabled, the chat can be resized between 300px and 50% of the screen width
    */
   resizable?: boolean
+  /**
+   * Custom component to render below the input in fullscreen mode
+   */
+  fullscreenFooter?: React.ReactNode
   onThumbsUp?: (
     message: AIMessage,
     { threadId, feedback }: { threadId: string; feedback: string }

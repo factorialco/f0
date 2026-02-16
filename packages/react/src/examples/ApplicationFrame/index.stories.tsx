@@ -14,6 +14,7 @@ import * as PageStories from "@/experimental/Navigation/Page/index.stories"
 import * as SidebarStories from "@/components/Navigation/Sidebar/index.stories"
 import { Sidebar } from "@/components/Navigation/Sidebar/Sidebar"
 import { ApplicationFrame } from "./index"
+import { Placeholder } from "@/lib/storybook-utils/placeholder"
 
 const meta: Meta<typeof ApplicationFrame> = {
   title: "ApplicationFrame",
@@ -175,6 +176,13 @@ export const Fullscreen: Story = {
             "Share feedback and help shape One with your feedback in the next message (optional)",
         },
       ],
+      fullscreenFooter: (
+        <Placeholder className="w-full h-[120px] !rounded-md mt-12">
+          <p className="text-f1-foreground-secondary">
+            This is a custom footer component
+          </p>
+        </Placeholder>
+      ),
     },
   },
 }

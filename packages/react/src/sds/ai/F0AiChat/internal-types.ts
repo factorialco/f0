@@ -26,6 +26,10 @@ export interface AiChatState {
   welcomeScreenSuggestions?: WelcomeScreenSuggestion[]
   disclaimer?: AiChatDisclaimer
   resizable?: boolean
+  /**
+   * Custom component to render below the input in fullscreen mode
+   */
+  fullscreenFooter?: React.ReactNode
   placeholders?: string[]
   setPlaceholders?: React.Dispatch<React.SetStateAction<string[]>>
   onThumbsUp?: (
@@ -119,7 +123,10 @@ export type AiChatProviderReturnValue = {
    * Open the chat in fullscreen mode
    */
   openFullscreen: () => void
-} & Pick<AiChatState, "greeting" | "agent" | "disclaimer" | "resizable">
+} & Pick<
+  AiChatState,
+  "greeting" | "agent" | "disclaimer" | "resizable" | "fullscreenFooter"
+>
 
 /**
  * Helper function to check if a message is an agent state message

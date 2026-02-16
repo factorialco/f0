@@ -237,6 +237,7 @@ export function useAiChat(): AiChatProviderReturnValue {
       visualizationMode: "sidepanel",
       setVisualizationMode: noopFn,
       openFullscreen: noopFn,
+      fullscreenFooter: undefined,
     }
   }
 
