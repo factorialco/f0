@@ -150,14 +150,18 @@ function configToF0Field(
       } as F0Field
 
     case "date": {
-      const { minDate, maxDate } = extractDateConstraints(schema)
+      // Config minDate/maxDate take priority over schema-derived constraints
+      // Config values can be static Date or dynamic function
+      const schemaConstraints = extractDateConstraints(schema)
+      const configMinDate = "minDate" in config ? config.minDate : undefined
+      const configMaxDate = "maxDate" in config ? config.maxDate : undefined
       return {
         ...baseProps,
         type: "date",
         granularities:
           "granularities" in config ? config.granularities : undefined,
-        minDate,
-        maxDate,
+        minDate: configMinDate ?? schemaConstraints.minDate,
+        maxDate: configMaxDate ?? schemaConstraints.maxDate,
         presets: "presets" in config ? config.presets : undefined,
         clearable,
         renderIf: config.renderIf,
@@ -165,24 +169,30 @@ function configToF0Field(
     }
 
     case "time": {
-      const { minDate, maxDate } = extractDateConstraints(schema)
+      // Config minDate/maxDate take priority over schema-derived constraints
+      const schemaConstraints = extractDateConstraints(schema)
+      const configMinDate = "minDate" in config ? config.minDate : undefined
+      const configMaxDate = "maxDate" in config ? config.maxDate : undefined
       return {
         ...baseProps,
         type: "time",
-        minDate,
-        maxDate,
+        minDate: configMinDate ?? schemaConstraints.minDate,
+        maxDate: configMaxDate ?? schemaConstraints.maxDate,
         clearable,
         renderIf: config.renderIf,
       } as F0Field
     }
 
     case "datetime": {
-      const { minDate, maxDate } = extractDateConstraints(schema)
+      // Config minDate/maxDate take priority over schema-derived constraints
+      const schemaConstraints = extractDateConstraints(schema)
+      const configMinDate = "minDate" in config ? config.minDate : undefined
+      const configMaxDate = "maxDate" in config ? config.maxDate : undefined
       return {
         ...baseProps,
         type: "datetime",
-        minDate,
-        maxDate,
+        minDate: configMinDate ?? schemaConstraints.minDate,
+        maxDate: configMaxDate ?? schemaConstraints.maxDate,
         clearable,
         renderIf: config.renderIf,
       } as F0Field

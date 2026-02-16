@@ -18,7 +18,11 @@ import {
 import { generateAnchorId, useF0FormContext } from "../context"
 import { isFieldRequired } from "./schema"
 import type { F0Field } from "./types"
-import { evaluateDisabled, evaluateRenderIf } from "./utils"
+import {
+  evaluateDateConstraint,
+  evaluateDisabled,
+  evaluateRenderIf,
+} from "./utils"
 
 // Import field renderers
 import { CheckboxFieldRenderer } from "./checkbox/CheckboxFieldRenderer"
@@ -126,7 +130,13 @@ function renderFieldInput({
     case "date":
       return (
         <DateFieldRenderer
-          field={{ ...field, disabled: isDisabled }}
+          field={{
+            ...field,
+            disabled: isDisabled,
+            // Evaluate dynamic date constraints
+            minDate: evaluateDateConstraint(field.minDate, values),
+            maxDate: evaluateDateConstraint(field.maxDate, values),
+          }}
           formField={formField}
           {...errorAndLoadingProps}
         />
@@ -134,7 +144,13 @@ function renderFieldInput({
     case "time":
       return (
         <TimeFieldRenderer
-          field={{ ...field, disabled: isDisabled }}
+          field={{
+            ...field,
+            disabled: isDisabled,
+            // Evaluate dynamic date constraints
+            minDate: evaluateDateConstraint(field.minDate, values),
+            maxDate: evaluateDateConstraint(field.maxDate, values),
+          }}
           formField={formField}
           {...errorAndLoadingProps}
         />
@@ -142,7 +158,13 @@ function renderFieldInput({
     case "datetime":
       return (
         <DateTimeFieldRenderer
-          field={{ ...field, disabled: isDisabled }}
+          field={{
+            ...field,
+            disabled: isDisabled,
+            // Evaluate dynamic date constraints
+            minDate: evaluateDateConstraint(field.minDate, values),
+            maxDate: evaluateDateConstraint(field.maxDate, values),
+          }}
           formField={formField}
           {...errorAndLoadingProps}
         />

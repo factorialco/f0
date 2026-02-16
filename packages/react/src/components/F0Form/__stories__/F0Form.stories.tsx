@@ -1577,46 +1577,81 @@ export const FormInDialog: Story = {
 }
 
 /**
- * Form with cross-field date validation.
+ * Form with dynamic date constraints.
  *
- * Uses Zod's `.refine()` to validate that the end date is after the start date.
- * The error is associated with the `endDate` field using the `path` option.
+ * The end date picker dynamically updates its minimum selectable date
+ * based on the start date value. This prevents users from selecting
+ * an end date before the start date directly in the UI.
+ *
+ * Uses the `minDate` config option with a function that receives form values.
  */
-export const DateRangeValidation: Story = {
+export const DynamicDateConstraints: Story = {
   render() {
     const formSchema = z
       .object({
-        eventName: f0FormField(z.string().min(1, "Event name is required"), {
-          label: "Event Name",
-          placeholder: "Enter event name",
-        }),
-        startDate: f0FormField(z.date(), {
-          label: "Start Date",
-          placeholder: "Select start date",
-        }),
+        projectName: f0FormField(
+          z.string().min(1, "Project name is required"),
+          {
+            label: "Project Name",
+            placeholder: "Enter project name",
+          }
+        ),
+        startDate: f0FormField(
+          z.date().min(new Date(), "Start date must be in the future"),
+          {
+            label: "Start Date",
+            placeholder: "Select start date",
+            helpText: "When does the project begin?",
+          }
+        ),
         endDate: f0FormField(z.date(), {
           label: "End Date",
           placeholder: "Select end date",
-          helpText: "Must be after the start date",
+          helpText:
+            "Dates before the start date are disabled in the date picker",
+          // Dynamic minDate: end date must be >= start date
+          minDate: ({ values }) => new Date(`${values.startDate}`),
+        }),
+        deadline: f0FormField(z.date().optional(), {
+          label: "Final Deadline (Optional)",
+          placeholder: "Select deadline",
+          helpText: "Must be after the end date",
+          // Dynamic minDate based on end date
+          minDate: ({ values }) => new Date(`${values.endDate}`),
         }),
       })
-      .refine((data) => data.endDate > data.startDate, {
-        message: "End date must be after start date",
-        path: ["endDate"],
+      .superRefine((data, ctx) => {
+        // Validate end date is on or after start date
+        if (data.startDate && data.endDate && data.endDate < data.startDate) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "End date must be on or after start date",
+            path: ["endDate"],
+          })
+        }
+        // Validate deadline is on or after end date
+        if (data.endDate && data.deadline && data.deadline < data.endDate) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "Deadline must be on or after end date",
+            path: ["deadline"],
+          })
+        }
       })
 
     return (
       <F0Form
-        name="date-range-validation"
+        name="dynamic-date-constraints"
         schema={formSchema}
         defaultValues={{
-          eventName: "",
+          projectName: "",
           startDate: undefined,
           endDate: undefined,
+          deadline: undefined,
         }}
         onSubmit={async (data) => {
           await sleep(1000)
-          alert(`Event created: ${JSON.stringify(data, null, 2)}`)
+          alert(`Project created: ${JSON.stringify(data, null, 2)}`)
           return { success: true }
         }}
       />

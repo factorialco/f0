@@ -1,14 +1,17 @@
 import { useCallback, useMemo } from "react"
 import { ControllerRenderProps, FieldValues } from "react-hook-form"
 
-import type { F0DateTimeField, F0DateField, F0TimeField } from "./types"
-import type { ResolvedField } from "../types"
+import type {
+  ResolvedDateTimeField,
+  ResolvedDateField,
+  ResolvedTimeField,
+} from "./types"
 import { DateFieldRenderer } from "./DateFieldRenderer"
 import { TimeFieldRenderer } from "./TimeFieldRenderer"
 import { dateToTimeString, combineDateAndTime } from "./utils"
 
 interface DateTimeFieldRendererProps {
-  field: ResolvedField<F0DateTimeField>
+  field: ResolvedDateTimeField
   formField: ControllerRenderProps<FieldValues>
   error?: boolean
   loading?: boolean
@@ -70,7 +73,7 @@ export function DateTimeFieldRenderer({
   )
 
   // Create synthetic field and formField props for DateFieldRenderer
-  const dateField: ResolvedField<F0DateField> = useMemo(
+  const dateField: ResolvedDateField = useMemo(
     () => ({
       id: `${field.id}-date`,
       type: "date",
@@ -96,7 +99,7 @@ export function DateTimeFieldRenderer({
   )
 
   // Create synthetic field and formField props for TimeFieldRenderer
-  const timeField: ResolvedField<F0TimeField> = useMemo(
+  const timeField: ResolvedTimeField = useMemo(
     () => ({
       id: `${field.id}-time`,
       type: "time",
