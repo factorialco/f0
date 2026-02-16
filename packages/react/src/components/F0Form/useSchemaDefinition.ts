@@ -6,7 +6,9 @@ import {
   F0FieldType,
   getF0Config,
   inferFieldType,
+  unwrapToZodObject,
 } from "./f0Schema"
+import type { F0FormSchema } from "./types"
 import type { F0Field } from "./fields/types"
 import { isFieldRequired } from "./fields/schema"
 import { extractNumberConstraints } from "./fields/number/schema"
@@ -344,11 +346,13 @@ function parseSchemaFields(schema: z.ZodObject<ZodRawShape>): ParsedField[] {
  * ```
  */
 export function useSchemaDefinition(
-  schema: z.ZodObject<ZodRawShape>,
+  schema: F0FormSchema,
   sections?: Record<string, F0SectionConfig>
 ): FormDefinitionItem[] {
   return useMemo(() => {
-    const allFields = parseSchemaFields(schema)
+    // Unwrap ZodEffects if present (from .refine(), .transform(), etc.)
+    const objectSchema = unwrapToZodObject(schema)
+    const allFields = parseSchemaFields(objectSchema)
 
     // Group fields by section
     const rootFields: ParsedField[] = []
@@ -419,10 +423,12 @@ export function useSchemaDefinition(
  * @returns Array of form definition items
  */
 export function getSchemaDefinition(
-  schema: z.ZodObject<ZodRawShape>,
+  schema: F0FormSchema,
   sections?: Record<string, F0SectionConfig>
 ): FormDefinitionItem[] {
-  const allFields = parseSchemaFields(schema)
+  // Unwrap ZodEffects if present (from .refine(), .transform(), etc.)
+  const objectSchema = unwrapToZodObject(schema)
+  const allFields = parseSchemaFields(objectSchema)
 
   // Group fields by section
   const rootFields: ParsedField[] = []

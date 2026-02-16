@@ -1575,3 +1575,51 @@ export const FormInDialog: Story = {
     )
   },
 }
+
+/**
+ * Form with cross-field date validation.
+ *
+ * Uses Zod's `.refine()` to validate that the end date is after the start date.
+ * The error is associated with the `endDate` field using the `path` option.
+ */
+export const DateRangeValidation: Story = {
+  render() {
+    const formSchema = z
+      .object({
+        eventName: f0FormField(z.string().min(1, "Event name is required"), {
+          label: "Event Name",
+          placeholder: "Enter event name",
+        }),
+        startDate: f0FormField(z.date(), {
+          label: "Start Date",
+          placeholder: "Select start date",
+        }),
+        endDate: f0FormField(z.date(), {
+          label: "End Date",
+          placeholder: "Select end date",
+          helpText: "Must be after the start date",
+        }),
+      })
+      .refine((data) => data.endDate > data.startDate, {
+        message: "End date must be after start date",
+        path: ["endDate"],
+      })
+
+    return (
+      <F0Form
+        name="date-range-validation"
+        schema={formSchema}
+        defaultValues={{
+          eventName: "",
+          startDate: undefined,
+          endDate: undefined,
+        }}
+        onSubmit={async (data) => {
+          await sleep(1000)
+          alert(`Event created: ${JSON.stringify(data, null, 2)}`)
+          return { success: true }
+        }}
+      />
+    )
+  },
+}

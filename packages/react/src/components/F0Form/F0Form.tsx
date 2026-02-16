@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { DefaultValues, Path, useForm } from "react-hook-form"
-import { z, ZodRawShape } from "zod"
+import { z } from "zod"
 
 import { F0Button } from "@/components/F0Button"
 import { F0Icon } from "@/components/F0Icon"
@@ -23,6 +23,7 @@ import type { F0SwitchField } from "./fields/switch/types"
 import type {
   F0FormProps,
   F0FormRef,
+  F0FormSchema,
   FieldItem,
   FormDefinitionItem,
   RowDefinition,
@@ -128,7 +129,7 @@ const ERROR_TRIGGER_MODE_MAP = {
   "on-submit": "onSubmit",
 } as const
 
-export function F0Form<TSchema extends z.ZodObject<ZodRawShape>>(
+export function F0Form<TSchema extends F0FormSchema>(
   props: F0FormProps<TSchema>
 ) {
   const i18n = useI18n()
