@@ -125,21 +125,11 @@ const F0AiChatComponent = () => {
     setOpen,
     disclaimer,
     visualizationMode,
-    setVisualizationMode,
     fullscreenFooter,
   } = useAiChat()
   const { messages } = useCopilotChatInternal()
 
-  // Switch to sidebar mode after first message is sent in fullscreen mode
-  useEffect(() => {
-    if (
-      visualizationMode === "fullscreen" &&
-      messages.length > 0 &&
-      messages.some((msg) => msg.role === "user")
-    ) {
-      setVisualizationMode("sidepanel")
-    }
-  }, [messages, visualizationMode, setVisualizationMode])
+  const hasMessages = messages.length > 0
 
   // Register all default copilot actions
   useDefaultCopilotActions()
@@ -178,11 +168,11 @@ const F0AiChatComponent = () => {
             </div>
           )}
 
-          {isFullscreen && fullscreenFooter}
+          {isFullscreen && !hasMessages && fullscreenFooter}
         </div>
       </div>
     ),
-    [disclaimer, isFullscreen, fullscreenFooter]
+    [disclaimer, isFullscreen, fullscreenFooter, hasMessages]
   )
 
   if (!enabled) {

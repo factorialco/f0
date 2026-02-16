@@ -141,11 +141,6 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
     sendMessageFunctionRef.current?.(messageToSend)
   }
 
-  const openFullscreen = () => {
-    setVisualizationMode("fullscreen")
-    setOpen(true)
-  }
-
   useEffect(() => {
     setEnabledInternal(enabled)
   }, [enabled])
@@ -192,7 +187,6 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         resetChatWidth,
         visualizationMode,
         setVisualizationMode,
-        openFullscreen,
       }}
     >
       {children}
@@ -236,7 +230,6 @@ export function useAiChat(): AiChatProviderReturnValue {
       resetChatWidth: noopFn,
       visualizationMode: "sidepanel",
       setVisualizationMode: noopFn,
-      openFullscreen: noopFn,
       fullscreenFooter: undefined,
     }
   }
