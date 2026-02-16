@@ -1,4 +1,4 @@
-import type { z, ZodRawShape } from "zod"
+import type { z, ZodRawShape, ZodEffects } from "zod"
 
 import type { IconType } from "@/components/F0Icon"
 
@@ -206,9 +206,17 @@ export interface F0FormStylingConfig {
 }
 
 /**
+ * Type for F0Form schemas - can be a plain ZodObject or a refined ZodObject (ZodEffects)
+ */
+export type F0FormSchema<T extends ZodRawShape = ZodRawShape> =
+  | z.ZodObject<T>
+  | ZodEffects<z.ZodObject<T>>
+
+/**
  * Props for the F0Form component
  *
  * @typeParam TSchema - The Zod object schema type. The form data type is inferred from this.
+ *                      Can be a plain ZodObject or a refined ZodObject (using .refine()).
  *
  * @example
  * ```tsx
@@ -225,20 +233,17 @@ export interface F0FormStylingConfig {
  *   onSubmit={(data) => ({ success: true })}
  * />
  *
- * // Action bar with discard button
- * <F0Form
- *   name="my-form"
- *   schema={schema}
- *   submitConfig={{
- *     type: "action-bar",
- *     discardable: true,
- *   }}
- *   defaultValues={{ name: "" }}
- *   onSubmit={(data) => ({ success: true })}
- * />
+ * // With cross-field validation using .refine()
+ * const schemaWithRefine = z.object({
+ *   startDate: f0FormField(z.date(), { label: "Start" }),
+ *   endDate: f0FormField(z.date(), { label: "End" }),
+ * }).refine((data) => data.endDate > data.startDate, {
+ *   message: "End date must be after start date",
+ *   path: ["endDate"],
+ * })
  * ```
  */
-export interface F0FormProps<TSchema extends z.ZodObject<ZodRawShape>> {
+export interface F0FormProps<TSchema extends F0FormSchema> {
   /** Unique name for the form, used for generating anchor links (e.g., #forms.[name].[sectionId].[fieldId]) */
   name: string
   /** Zod object schema with F0 field configurations */
