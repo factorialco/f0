@@ -24,7 +24,8 @@ export const ChatHeader = (props: HeaderProps) => {
         "flex justify-between border-0 border-solid border-f1-border-secondary px-[16px] py-3",
         visualizationMode === "fullscreen" &&
           !hasMessages &&
-          "absolute left-0 right-0 top-0"
+          "absolute left-0 right-0 top-0",
+        visualizationMode === "fullscreen" && "pb-0"
       )}
     >
       <h2 className="text-f1-foreground">
