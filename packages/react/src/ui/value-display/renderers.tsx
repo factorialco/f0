@@ -17,7 +17,6 @@ import { PercentageCell } from "./types/percentage"
 import { PersonCell } from "./types/person"
 import { ProgressBarCell } from "./types/progressBar"
 import { StatusCell } from "./types/status"
-import { SyncStatusCell } from "./types/syncStatus"
 import { TagCell } from "./types/tag"
 import { TagListCell } from "./types/tagList"
 import { TeamCell } from "./types/team"
@@ -57,7 +56,6 @@ export const valueDisplayRenderers = {
   file: FileCell,
   folder: FolderCell,
   country: CountryCell,
-  syncStatus: SyncStatusCell,
 } as const satisfies Record<string, ValueDisplayRenderer>
 
 /**

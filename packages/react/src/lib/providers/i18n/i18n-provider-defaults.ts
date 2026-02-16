@@ -71,14 +71,6 @@ export const defaultTranslations = {
       allItemsSelected: "All {{total}} items selected",
     },
   },
-  syncStatus: {
-    synced: "Sync completed successfully.",
-    syncing: "Sync in progress.",
-    pending: "Not yet started.",
-    partiallySynced: "All aggregated data was synced but at least 1 failed.",
-    outdated: "Data might need to be synced again.",
-    failed: "Sync failed.",
-  },
   filters: {
     searchPlaceholder: "Search filters...",
     inFilter: {
