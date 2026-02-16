@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.362.3](https://github.com/factorialco/f0/compare/f0-react-v1.362.2...f0-react-v1.362.3) (2026-02-16)
+
+
+### Bug Fixes
+
+* accept F0Form schema refine for more advanced validation ([#3439](https://github.com/factorialco/f0/issues/3439)) ([0314598](https://github.com/factorialco/f0/commit/0314598fa93e076fadd44281a676dbb19dca01b5))
+
 ## [1.362.2](https://github.com/factorialco/f0/compare/f0-react-v1.362.1...f0-react-v1.362.2) (2026-02-16)
 
 
