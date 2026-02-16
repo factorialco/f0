@@ -128,6 +128,11 @@ export const Default: Story = {
   },
 }
 
+/**
+ * Storybook helper to open the chat in fullscreen visualization mode.
+ * NOTE: This is NOT related to F0AiFullscreenChat component used for ONE CHAT on mobile.
+ * This simply switches the CopilotSidebar to fullscreen mode for desktop testing.
+ */
 const FullscreenOpener = () => {
   const { setVisualizationMode, setOpen } = useAiChat()
 
