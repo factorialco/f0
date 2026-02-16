@@ -104,6 +104,7 @@ const DEFAULT_QUESTION_TYPES: QuestionType[] = [
   "longText",
   "select",
   "multi-select",
+  "dropdown-single",
   "numeric",
   "link",
   "date",
