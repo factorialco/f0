@@ -6,9 +6,11 @@ import {
   F0FieldType,
   getF0Config,
   inferFieldType,
+  unwrapToZodObject,
 } from "./f0Schema"
+import type { F0FormSchema } from "./types"
 import type { F0Field } from "./fields/types"
-import { isOptionalOrNullable } from "./fields/schema"
+import { isFieldRequired } from "./fields/schema"
 import { extractNumberConstraints } from "./fields/number/schema"
 import { extractDateConstraints } from "./fields/date/schema"
 import { extractTextareaConstraints } from "./fields/textarea/schema"
@@ -56,11 +58,12 @@ function configToF0Field(
     placeholder: config.placeholder,
     helpText: config.helpText,
     disabled: config.disabled,
+    resetOnDisable: config.resetOnDisable,
     validation: schema,
   }
 
-  // Check if field is optional/nullable for clearable
-  const clearable = isOptionalOrNullable(schema)
+  // Non-required fields should be clearable
+  const clearable = !isFieldRequired(schema)
 
   switch (fieldType) {
     case "text": {
@@ -73,6 +76,7 @@ function configToF0Field(
         ...baseProps,
         type: "text",
         inputType,
+        clearable,
         renderIf: config.renderIf,
       } as F0Field
     }
@@ -86,6 +90,7 @@ function configToF0Field(
         min,
         max,
         locale: "locale" in config ? config.locale : undefined,
+        clearable,
         renderIf: config.renderIf,
       } as F0Field
     }
@@ -97,6 +102,7 @@ function configToF0Field(
         type: "textarea",
         rows: "rows" in config ? config.rows : undefined,
         maxLength,
+        clearable,
         renderIf: config.renderIf,
       } as F0Field
     }
@@ -144,15 +150,49 @@ function configToF0Field(
       } as F0Field
 
     case "date": {
-      const { minDate, maxDate } = extractDateConstraints(schema)
+      // Config minDate/maxDate take priority over schema-derived constraints
+      // Config values can be static Date or dynamic function
+      const schemaConstraints = extractDateConstraints(schema)
+      const configMinDate = "minDate" in config ? config.minDate : undefined
+      const configMaxDate = "maxDate" in config ? config.maxDate : undefined
       return {
         ...baseProps,
         type: "date",
         granularities:
           "granularities" in config ? config.granularities : undefined,
-        minDate,
-        maxDate,
+        minDate: configMinDate ?? schemaConstraints.minDate,
+        maxDate: configMaxDate ?? schemaConstraints.maxDate,
         presets: "presets" in config ? config.presets : undefined,
+        clearable,
+        renderIf: config.renderIf,
+      } as F0Field
+    }
+
+    case "time": {
+      // Config minDate/maxDate take priority over schema-derived constraints
+      const schemaConstraints = extractDateConstraints(schema)
+      const configMinDate = "minDate" in config ? config.minDate : undefined
+      const configMaxDate = "maxDate" in config ? config.maxDate : undefined
+      return {
+        ...baseProps,
+        type: "time",
+        minDate: configMinDate ?? schemaConstraints.minDate,
+        maxDate: configMaxDate ?? schemaConstraints.maxDate,
+        clearable,
+        renderIf: config.renderIf,
+      } as F0Field
+    }
+
+    case "datetime": {
+      // Config minDate/maxDate take priority over schema-derived constraints
+      const schemaConstraints = extractDateConstraints(schema)
+      const configMinDate = "minDate" in config ? config.minDate : undefined
+      const configMaxDate = "maxDate" in config ? config.maxDate : undefined
+      return {
+        ...baseProps,
+        type: "datetime",
+        minDate: configMinDate ?? schemaConstraints.minDate,
+        maxDate: configMaxDate ?? schemaConstraints.maxDate,
         clearable,
         renderIf: config.renderIf,
       } as F0Field
@@ -316,11 +356,13 @@ function parseSchemaFields(schema: z.ZodObject<ZodRawShape>): ParsedField[] {
  * ```
  */
 export function useSchemaDefinition(
-  schema: z.ZodObject<ZodRawShape>,
+  schema: F0FormSchema,
   sections?: Record<string, F0SectionConfig>
 ): FormDefinitionItem[] {
   return useMemo(() => {
-    const allFields = parseSchemaFields(schema)
+    // Unwrap ZodEffects if present (from .refine(), .transform(), etc.)
+    const objectSchema = unwrapToZodObject(schema)
+    const allFields = parseSchemaFields(objectSchema)
 
     // Group fields by section
     const rootFields: ParsedField[] = []
@@ -370,6 +412,7 @@ export function useSchemaDefinition(
           title: sectionConfig?.title ?? sectionId,
           description: sectionConfig?.description,
           renderIf: sectionConfig?.renderIf,
+          action: sectionConfig?.action,
           fields: groupFieldsIntoRows(fields),
         },
       }
@@ -390,10 +433,12 @@ export function useSchemaDefinition(
  * @returns Array of form definition items
  */
 export function getSchemaDefinition(
-  schema: z.ZodObject<ZodRawShape>,
+  schema: F0FormSchema,
   sections?: Record<string, F0SectionConfig>
 ): FormDefinitionItem[] {
-  const allFields = parseSchemaFields(schema)
+  // Unwrap ZodEffects if present (from .refine(), .transform(), etc.)
+  const objectSchema = unwrapToZodObject(schema)
+  const allFields = parseSchemaFields(objectSchema)
 
   // Group fields by section
   const rootFields: ParsedField[] = []
@@ -443,6 +488,7 @@ export function getSchemaDefinition(
         title: sectionConfig?.title ?? sectionId,
         description: sectionConfig?.description,
         renderIf: sectionConfig?.renderIf,
+        action: sectionConfig?.action,
         fields: groupFieldsIntoRows(fields),
       },
     }

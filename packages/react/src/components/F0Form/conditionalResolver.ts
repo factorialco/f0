@@ -1,9 +1,10 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import type { Resolver, FieldValues, ResolverOptions } from "react-hook-form"
-import { z, ZodTypeAny, ZodRawShape, ZodObject } from "zod"
+import { z, ZodTypeAny, ZodRawShape, ZodObject, ZodEffects } from "zod"
 
-import { getF0Config } from "./f0Schema"
+import { getF0Config, isZodType, unwrapToZodObject } from "./f0Schema"
 import { evaluateRenderIf } from "./fields/utils"
+import type { F0FormSchema } from "./types"
 
 /**
  * Creates a conditional Zod resolver that only validates visible fields.
@@ -11,13 +12,13 @@ import { evaluateRenderIf } from "./fields/utils"
  * Fields with `renderIf` conditions that evaluate to `false` are automatically
  * skipped during validation, preventing validation errors for hidden fields.
  *
- * @param schema - The original Zod object schema
+ * Supports both plain ZodObject schemas and refined schemas (ZodEffects).
+ *
+ * @param schema - The original Zod object schema (plain or refined)
  * @param schemaOptions - Options passed to zodResolver (e.g., errorMap)
  * @returns A resolver function compatible with react-hook-form
  */
-export function createConditionalResolver<
-  TSchema extends ZodObject<ZodRawShape>,
->(
+export function createConditionalResolver<TSchema extends F0FormSchema>(
   schema: TSchema,
   schemaOptions?: Parameters<typeof zodResolver>[1]
 ): Resolver<z.infer<TSchema>> {
@@ -42,12 +43,16 @@ export function createConditionalResolver<
  * - If it has no renderIf, keep the original schema
  * - If renderIf evaluates to true (field is visible), keep the original schema
  * - If renderIf evaluates to false (field is hidden), use z.any() to skip all validation
+ *
+ * If the original schema has refinements (ZodEffects), they are preserved.
  */
-function buildDynamicSchema<TSchema extends ZodObject<ZodRawShape>>(
+function buildDynamicSchema<TSchema extends F0FormSchema>(
   schema: TSchema,
   values: Record<string, unknown>
-): ZodObject<ZodRawShape> {
-  const shape = schema.shape
+): ZodObject<ZodRawShape> | ZodEffects<ZodObject<ZodRawShape>> {
+  // Get the underlying ZodObject (unwrap if it's a ZodEffects)
+  const objectSchema = unwrapToZodObject(schema)
+  const shape = objectSchema.shape
   const newShape: ZodRawShape = {}
 
   for (const [fieldId, fieldSchema] of Object.entries(shape)) {
@@ -73,5 +78,22 @@ function buildDynamicSchema<TSchema extends ZodObject<ZodRawShape>>(
     }
   }
 
-  return z.object(newShape)
+  const dynamicObjectSchema = z.object(newShape)
+
+  // If the original schema was a ZodEffects (has refinements), re-apply them
+  if (isZodType(schema, "ZodEffects")) {
+    const effects = schema as unknown as ZodEffects<ZodObject<ZodRawShape>>
+    // Get the refinement function and re-apply it to the dynamic schema
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const effect = effects._def.effect as any
+    if (effect.type === "refinement") {
+      // Use superRefine instead of refine because Zod's refinement function
+      // already has the message and path baked in (they're not stored on the effect object)
+      return dynamicObjectSchema.superRefine(effect.refinement) as ZodEffects<
+        ZodObject<ZodRawShape>
+      >
+    }
+  }
+
+  return dynamicObjectSchema
 }

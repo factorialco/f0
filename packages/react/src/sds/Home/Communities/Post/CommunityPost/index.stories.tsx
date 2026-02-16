@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
+import PushPin from "@/icons/app/PushPin"
+
 import { CommunityPost } from "./index"
 
 const meta: Meta<typeof CommunityPost> = {
@@ -97,6 +99,13 @@ export const Default: Story = {
         critical: true,
       },
     ],
+    actions: [
+      {
+        label: "Pin",
+        icon: PushPin,
+        onClick: () => {},
+      },
+    ],
   },
 }
 
@@ -148,6 +157,38 @@ export const WithEventAndVideo: Story = {
       date: eventDate,
     },
     noVideoPreload: true,
+  },
+}
+
+export const WithSingleCustomButton: Story = {
+  decorators: Default.decorators,
+  args: {
+    ...Default.args,
+    actions: [
+      {
+        label: "Pin",
+        icon: PushPin,
+        onClick: () => {},
+      },
+    ],
+  },
+}
+
+export const WithMultipleCustomButtons: Story = {
+  decorators: Default.decorators,
+  args: {
+    ...Default.args,
+    actions: [
+      {
+        label: "Pin",
+        icon: PushPin,
+        onClick: () => {},
+      },
+      {
+        label: "Another Action",
+        onClick: () => {},
+      },
+    ],
   },
 }
 

@@ -32,6 +32,20 @@ export type RenderIfCondition =
   | DateRenderIfCondition
   | DateRangeRenderIfCondition
 
+/**
+ * Function type for dynamic renderIf evaluation based on form values
+ */
+export type F0BaseFieldRenderIfFunction = (context: {
+  values: Record<string, unknown>
+}) => boolean
+
+/**
+ * RenderIf property can be a condition object or a function that receives form values
+ */
+export type F0BaseFieldRenderIfProp =
+  | RenderIfCondition
+  | F0BaseFieldRenderIfFunction
+
 // ============================================================================
 // Field-Specific RenderIf Condition Types (imported from each field)
 // ============================================================================
@@ -58,6 +72,18 @@ export type {
 // ============================================================================
 
 /**
+ * Function type for dynamic disabled evaluation based on form values
+ */
+export type F0BaseFieldDisabledFunction = (context: {
+  values: Record<string, unknown>
+}) => boolean
+
+/**
+ * Disabled property can be a boolean or a function that receives form values
+ */
+export type F0BaseFieldDisabledProp = boolean | F0BaseFieldDisabledFunction
+
+/**
  * Base properties shared across all F0 field types
  */
 export interface F0BaseField {
@@ -71,7 +97,30 @@ export interface F0BaseField {
   helpText?: string
   /** Placeholder text for the input */
   placeholder?: string
-  /** Whether the field is disabled */
+  /**
+   * Whether the field is disabled.
+   * Can be a boolean or a function that receives form values.
+   * @example
+   * // Static disabled
+   * disabled: true
+   *
+   * // Dynamic disabled based on other field values
+   * disabled: ({ values }) => values.status === 'readonly'
+   */
+  disabled?: F0BaseFieldDisabledProp
+  /**
+   * When true, resets the field to its default value when it becomes disabled.
+   * Useful for clearing dependent fields when their controlling field changes.
+   * @default false
+   */
+  resetOnDisable?: boolean
+}
+
+/**
+ * Utility type that converts F0BaseFieldDisabledProp to boolean in a field type.
+ * Used internally by field renderers after the disabled prop has been evaluated.
+ */
+export type ResolvedField<T extends F0BaseField> = Omit<T, "disabled"> & {
   disabled?: boolean
 }
 
@@ -86,6 +135,8 @@ export type FieldType =
   | "checkbox"
   | "switch"
   | "date"
+  | "time"
+  | "datetime"
   | "daterange"
   | "richtext"
   | "custom"
@@ -100,7 +151,17 @@ export type { F0TextareaConfig, F0TextareaField } from "./textarea/types"
 export type { F0SelectConfig, F0SelectField } from "./select/types"
 export type { F0CheckboxConfig, F0CheckboxField } from "./checkbox/types"
 export type { F0SwitchConfig, F0SwitchField } from "./switch/types"
-export type { F0DateConfig, F0DateField, DateGranularity } from "./date/types"
+export type {
+  F0DateConfig,
+  F0DateField,
+  DateGranularity,
+  F0TimeConfig,
+  F0TimeField,
+  F0DateTimeConfig,
+  F0DateTimeField,
+  F0DateConstraintProp,
+  F0DateConstraintFunction,
+} from "./date/types"
 export type {
   F0DateRangeConfig,
   F0DateRangeField,
@@ -125,7 +186,7 @@ import type { F0TextareaField } from "./textarea/types"
 import type { F0SelectField } from "./select/types"
 import type { F0CheckboxField } from "./checkbox/types"
 import type { F0SwitchField } from "./switch/types"
-import type { F0DateField } from "./date/types"
+import type { F0DateField, F0TimeField, F0DateTimeField } from "./date/types"
 import type { F0DateRangeField } from "./daterange/types"
 import type { F0RichTextField } from "./richtext/types"
 import type { F0CustomField } from "./custom/types"
@@ -141,6 +202,8 @@ export type F0Field =
   | F0CheckboxField
   | F0SwitchField
   | F0DateField
+  | F0TimeField
+  | F0DateTimeField
   | F0DateRangeField
   | F0RichTextField
   | F0CustomField

@@ -1,7 +1,11 @@
 import type { MentionsConfig } from "@/experimental/RichText/CoreEditor"
 import type { heightType } from "@/experimental/RichText/RichTextEditor"
 
-import type { F0BaseField, CommonRenderIfCondition } from "../types"
+import type {
+  F0BaseField,
+  F0BaseFieldRenderIfFunction,
+  CommonRenderIfCondition,
+} from "../types"
 
 // ============================================================================
 // RichText Field RenderIf Conditions
@@ -11,7 +15,9 @@ import type { F0BaseField, CommonRenderIfCondition } from "../types"
 /**
  * All valid renderIf conditions for richtext fields
  */
-export type RichTextFieldRenderIf = CommonRenderIfCondition
+export type RichTextFieldRenderIf =
+  | CommonRenderIfCondition
+  | F0BaseFieldRenderIfFunction
 
 // ============================================================================
 // RichText Value Type

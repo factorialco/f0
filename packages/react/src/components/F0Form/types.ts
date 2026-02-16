@@ -1,8 +1,12 @@
-import type { z, ZodRawShape } from "zod"
+import type { z, ZodRawShape, ZodEffects } from "zod"
 
 import type { IconType } from "@/components/F0Icon"
 
-import type { F0Field, RenderIfCondition } from "./fields/types"
+import type {
+  F0Field,
+  F0BaseFieldRenderIfFunction,
+  RenderIfCondition,
+} from "./fields/types"
 
 // Re-export F0 schema types
 export type { F0FieldConfig, F0FieldType, F0ZodType } from "./f0Schema"
@@ -13,12 +17,30 @@ export {
   inferFieldType,
 } from "./f0Schema"
 
+// Re-export useF0Form hook and types
+export { useF0Form } from "./useF0Form"
+import type { F0FormRef } from "./useF0Form"
+export type { F0FormRef, UseF0FormReturn } from "./useF0Form"
+
 /**
  * Conditional rendering for sections - can be a condition object or a function
  */
-export type SectionRenderIf =
-  | RenderIfCondition
-  | ((values: Record<string, unknown>) => boolean)
+export type SectionRenderIf = RenderIfCondition | F0BaseFieldRenderIfFunction
+
+/**
+ * Action button configuration for a section.
+ * Provide either onClick for a button action or href for a link.
+ */
+export interface F0SectionAction {
+  /** Button label */
+  label: string
+  /** Button icon */
+  icon?: IconType
+  /** Click handler (use this or href) */
+  onClick?: () => void
+  /** Link URL (use this or onClick) */
+  href?: string
+}
 
 /**
  * Configuration for a form section.
@@ -31,6 +53,8 @@ export interface F0SectionConfig {
   description?: string
   /** Conditional rendering for the entire section */
   renderIf?: SectionRenderIf
+  /** Optional action button for the section */
+  action?: F0SectionAction
 }
 
 // ============================================================================
@@ -69,6 +93,8 @@ export interface SectionDefinition {
     description?: string
     /** Conditional rendering for the entire section */
     renderIf?: SectionRenderIf
+    /** Optional action button for the section */
+    action?: F0SectionAction
     /** Fields and rows within this section */
     fields: (FieldItem | RowDefinition)[]
   }
@@ -130,6 +156,12 @@ interface F0FormDefaultSubmitConfig extends F0FormSubmitConfigBase {
    * @default "default"
    */
   type?: "default"
+  /**
+   * When true, hides the submit button.
+   * Useful when using `useF0Form` hook to submit from outside the form.
+   * @default false
+   */
+  hideSubmitButton?: boolean
 }
 
 /**
@@ -163,9 +195,28 @@ export type F0FormSubmitConfig =
   | F0FormActionBarSubmitConfig
 
 /**
+ * Styling configuration for the form layout and appearance
+ */
+export interface F0FormStylingConfig {
+  /**
+   * Shows a sidebar with section navigation (Table of Contents)
+   * @default false
+   */
+  showSectionsSidepanel?: boolean
+}
+
+/**
+ * Type for F0Form schemas - can be a plain ZodObject or a refined ZodObject (ZodEffects)
+ */
+export type F0FormSchema<T extends ZodRawShape = ZodRawShape> =
+  | z.ZodObject<T>
+  | ZodEffects<z.ZodObject<T>>
+
+/**
  * Props for the F0Form component
  *
  * @typeParam TSchema - The Zod object schema type. The form data type is inferred from this.
+ *                      Can be a plain ZodObject or a refined ZodObject (using .refine()).
  *
  * @example
  * ```tsx
@@ -182,20 +233,17 @@ export type F0FormSubmitConfig =
  *   onSubmit={(data) => ({ success: true })}
  * />
  *
- * // Action bar with discard button
- * <F0Form
- *   name="my-form"
- *   schema={schema}
- *   submitConfig={{
- *     type: "action-bar",
- *     discardable: true,
- *   }}
- *   defaultValues={{ name: "" }}
- *   onSubmit={(data) => ({ success: true })}
- * />
+ * // With cross-field validation using .refine()
+ * const schemaWithRefine = z.object({
+ *   startDate: f0FormField(z.date(), { label: "Start" }),
+ *   endDate: f0FormField(z.date(), { label: "End" }),
+ * }).refine((data) => data.endDate > data.startDate, {
+ *   message: "End date must be after start date",
+ *   path: ["endDate"],
+ * })
  * ```
  */
-export interface F0FormProps<TSchema extends z.ZodObject<ZodRawShape>> {
+export interface F0FormProps<TSchema extends F0FormSchema> {
   /** Unique name for the form, used for generating anchor links (e.g., #forms.[name].[sectionId].[fieldId]) */
   name: string
   /** Zod object schema with F0 field configurations */
@@ -220,6 +268,24 @@ export interface F0FormProps<TSchema extends z.ZodObject<ZodRawShape>> {
    * @default "on-blur"
    */
   errorTriggerMode?: F0FormErrorTriggerMode
+  /**
+   * Styling configuration for form layout and appearance.
+   * Controls section sidebar visibility and box wrapping.
+   */
+  styling?: F0FormStylingConfig
+  /**
+   * Ref to control the form programmatically from outside.
+   * Use with the `useF0Form` hook to get a ref and submit/reset functions.
+   *
+   * @example
+   * ```tsx
+   * const { formRef, submit } = useF0Form()
+   *
+   * <F0Form formRef={formRef} ... />
+   * <Button onClick={submit}>Submit</Button>
+   * ```
+   */
+  formRef?: React.MutableRefObject<F0FormRef | null>
 }
 
 /**

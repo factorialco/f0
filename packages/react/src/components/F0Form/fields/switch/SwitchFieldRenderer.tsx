@@ -5,9 +5,10 @@ import { Switch } from "@/experimental/Forms/Fields/Switch"
 
 import { isZodType, unwrapZodSchema } from "../../f0Schema"
 import type { F0SwitchField } from "./types"
+import type { ResolvedField } from "../types"
 
 interface SwitchFieldRendererProps {
-  field: F0SwitchField
+  field: ResolvedField<F0SwitchField>
   formField: ControllerRenderProps<FieldValues>
 }
 
@@ -32,10 +33,10 @@ export function SwitchFieldRenderer({
 
   return (
     <Switch
+      {...formField}
       title={field.label}
       disabled={field.disabled}
       required={isRequired}
-      {...formField}
       checked={Boolean(formField.value)}
       onCheckedChange={formField.onChange}
       hideLabel

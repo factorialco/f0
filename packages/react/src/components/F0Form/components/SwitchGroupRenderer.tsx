@@ -1,4 +1,4 @@
-import { useMemo } from "react"
+import { useEffect, useMemo, useRef } from "react"
 import { useFormContext } from "react-hook-form"
 import { ZodTypeAny } from "zod"
 
@@ -9,7 +9,7 @@ import {
 
 import { isZodType, unwrapZodSchema } from "../f0Schema"
 import type { F0SwitchField } from "../fields/switch/types"
-import { evaluateRenderIf } from "../fields/utils"
+import { evaluateDisabled, evaluateRenderIf } from "../fields/utils"
 
 /**
  * Check if a switch schema requires the value to be `true`.
@@ -45,6 +45,48 @@ export function SwitchGroupRenderer({ fields }: SwitchGroupRendererProps) {
     [fields, values]
   )
 
+  // Calculate disabled state for each field
+  const disabledStates = useMemo(
+    () =>
+      Object.fromEntries(
+        visibleFields.map((field) => [
+          field.id,
+          evaluateDisabled(field.disabled, values) || isSubmitting,
+        ])
+      ),
+    [visibleFields, isSubmitting, values]
+  )
+
+  // Track previous disabled states to detect transitions
+  // Initialize with empty object so first render doesn't trigger resets
+  const prevDisabledStatesRef = useRef<Record<string, boolean>>({})
+
+  // Reset fields to default value when they become disabled (if resetOnDisable is true)
+  useEffect(() => {
+    const prevStates = prevDisabledStatesRef.current
+    const defaultValues = form.formState.defaultValues ?? {}
+
+    for (const field of visibleFields) {
+      // Skip if we don't have a previous state (first render)
+      if (!(field.id in prevStates)) {
+        continue
+      }
+
+      const wasDisabled = prevStates[field.id]
+      const isDisabled = disabledStates[field.id] ?? false
+
+      // Only reset when transitioning from enabled to disabled
+      if (!wasDisabled && isDisabled && field.resetOnDisable) {
+        // Use setValue with the default value for immediate update
+        const defaultValue = defaultValues[field.id] ?? false
+        setValue(field.id, defaultValue, { shouldValidate: false })
+      }
+    }
+
+    // Update ref after processing
+    prevDisabledStatesRef.current = { ...disabledStates }
+  }, [disabledStates, visibleFields, form, setValue])
+
   // Convert fields to CardSelectableItem format
   const items: CardSelectableItem<string>[] = useMemo(
     () =>
@@ -52,10 +94,10 @@ export function SwitchGroupRenderer({ fields }: SwitchGroupRendererProps) {
         value: field.id,
         title: field.label,
         description: field.helpText,
-        disabled: field.disabled || isSubmitting,
+        disabled: disabledStates[field.id] ?? false,
         required: !!(field.validation && isMustBeTrue(field.validation)),
       })),
-    [visibleFields, isSubmitting]
+    [visibleFields, disabledStates]
   )
 
   // Get currently selected field IDs (fields with true value)

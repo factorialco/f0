@@ -1,9 +1,14 @@
-import type { RenderIfCondition } from "./types"
+import type {
+  F0BaseFieldDisabledProp,
+  F0BaseFieldRenderIfProp,
+  RenderIfCondition,
+} from "./types"
+import type { F0DateConstraintProp } from "./date/types"
 
 /**
- * Evaluate a renderIf condition against the current form values
+ * Evaluate a renderIf condition object against the current form values
  */
-export function evaluateRenderIf(
+function evaluateRenderIfCondition(
   condition: RenderIfCondition,
   values: Record<string, unknown>
 ): boolean {
@@ -102,4 +107,59 @@ export function evaluateRenderIf(
   }
 
   return true
+}
+
+/**
+ * Evaluate a renderIf property which can be a condition object or a function
+ */
+export function evaluateRenderIf(
+  renderIf: F0BaseFieldRenderIfProp,
+  values: Record<string, unknown>
+): boolean {
+  if (typeof renderIf === "function") {
+    return renderIf({ values })
+  }
+  return evaluateRenderIfCondition(renderIf, values)
+}
+
+/**
+ * Evaluate a disabled property which can be a boolean or a function
+ */
+export function evaluateDisabled(
+  disabled: F0BaseFieldDisabledProp | undefined,
+  values: Record<string, unknown>
+): boolean {
+  if (disabled === undefined) {
+    return false
+  }
+  if (typeof disabled === "function") {
+    return disabled({ values })
+  }
+  return disabled
+}
+
+/**
+ * Evaluate a date constraint property which can be a static Date or a function.
+ * Used for dynamic minDate/maxDate that depend on other field values.
+ *
+ * @example
+ * ```ts
+ * // Static constraint
+ * evaluateDateConstraint(new Date("2024-01-01"), values) // returns Date
+ *
+ * // Dynamic constraint
+ * evaluateDateConstraint(({ values }) => values.startDate, values) // returns Date or undefined
+ * ```
+ */
+export function evaluateDateConstraint(
+  constraint: F0DateConstraintProp | undefined,
+  values: Record<string, unknown>
+): Date | undefined {
+  if (constraint === undefined) {
+    return undefined
+  }
+  if (typeof constraint === "function") {
+    return constraint({ values })
+  }
+  return constraint
 }

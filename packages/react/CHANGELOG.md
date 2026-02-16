@@ -1,5 +1,61 @@
 # Changelog
 
+## [1.362.3](https://github.com/factorialco/f0/compare/f0-react-v1.362.2...f0-react-v1.362.3) (2026-02-16)
+
+
+### Bug Fixes
+
+* accept F0Form schema refine for more advanced validation ([#3439](https://github.com/factorialco/f0/issues/3439)) ([0314598](https://github.com/factorialco/f0/commit/0314598fa93e076fadd44281a676dbb19dca01b5))
+
+## [1.362.2](https://github.com/factorialco/f0/compare/f0-react-v1.362.1...f0-react-v1.362.2) (2026-02-16)
+
+
+### Bug Fixes
+
+* keep preset counters consistent in overflow filter picker ([#3409](https://github.com/factorialco/f0/issues/3409)) ([309f8ca](https://github.com/factorialco/f0/commit/309f8ca8da4ff641deb805a242b432b7848edbd4))
+
+## [1.362.1](https://github.com/factorialco/f0/compare/f0-react-v1.362.0...f0-react-v1.362.1) (2026-02-13)
+
+
+### Bug Fixes
+
+* **AiChat:** Fix autofocus for Activities ([#3432](https://github.com/factorialco/f0/issues/3432)) ([d0cc2d6](https://github.com/factorialco/f0/commit/d0cc2d6d1debc6348d9c99cce05476baf01f2354))
+
+## [1.362.0](https://github.com/factorialco/f0/compare/f0-react-v1.361.0...f0-react-v1.362.0) (2026-02-13)
+
+
+### Features
+
+* add useF0Form hook for better integration with dialogs ([#3430](https://github.com/factorialco/f0/issues/3430)) ([eb46fdf](https://github.com/factorialco/f0/commit/eb46fdf12c823e4ea53621501d5cdb608872e353))
+
+## [1.361.0](https://github.com/factorialco/f0/compare/f0-react-v1.360.0...f0-react-v1.361.0) (2026-02-12)
+
+
+### Features
+
+* improved renderIf and disable fields logic ([#3429](https://github.com/factorialco/f0/issues/3429)) ([d3df4e4](https://github.com/factorialco/f0/commit/d3df4e40c2c4c0fee0c89fb52b75ab0c5d69adf1))
+
+## [1.360.0](https://github.com/factorialco/f0/compare/f0-react-v1.359.0...f0-react-v1.360.0) (2026-02-12)
+
+
+### Features
+
+* add custom actions to the community card ([#3427](https://github.com/factorialco/f0/issues/3427)) ([675aa78](https://github.com/factorialco/f0/commit/675aa7889179808d16a799339a5b8f4481f1f7e1))
+
+## [1.359.0](https://github.com/factorialco/f0/compare/f0-react-v1.358.1...f0-react-v1.359.0) (2026-02-12)
+
+
+### Features
+
+* add date-time field inputs on F0Form ([#3424](https://github.com/factorialco/f0/issues/3424)) ([efc4951](https://github.com/factorialco/f0/commit/efc4951695719e3d56cfecfe63a149cf1becf28b))
+
+## [1.358.1](https://github.com/factorialco/f0/compare/f0-react-v1.358.0...f0-react-v1.358.1) (2026-02-12)
+
+
+### Bug Fixes
+
+* visual upgrade for the F0Form ([#3418](https://github.com/factorialco/f0/issues/3418)) ([b17d41b](https://github.com/factorialco/f0/commit/b17d41b5a0fc625b10f0ce18310cdd34e24c8471))
+
 ## [1.358.0](https://github.com/factorialco/f0/compare/f0-react-v1.357.0...f0-react-v1.358.0) (2026-02-11)
 
 

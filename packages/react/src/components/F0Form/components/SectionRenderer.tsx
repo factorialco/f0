@@ -1,37 +1,20 @@
 import { useFormContext } from "react-hook-form"
 
+import { F0Button } from "@/components/F0Button"
 import { SectionHeader } from "@/experimental/Information/Headers/SectionHeader"
+import { cn } from "@/lib/utils"
 
 import { FIELD_GAP } from "../constants"
 import { generateAnchorId, useF0FormContext } from "../context"
 import { FieldRenderer } from "../fields/FieldRenderer"
 import type { F0SwitchField } from "../fields/switch/types"
 import { evaluateRenderIf } from "../fields/utils"
-import type {
-  FieldItem,
-  RowDefinition,
-  SectionDefinition,
-  SectionRenderIf,
-} from "../types"
+import type { FieldItem, RowDefinition, SectionDefinition } from "../types"
 import { RowRenderer } from "./RowRenderer"
 import { SwitchGroupRenderer } from "./SwitchGroupRenderer"
 
 interface SectionRendererProps {
   section: SectionDefinition
-}
-
-/**
- * Evaluate a section's renderIf condition which can be either
- * a RenderIfCondition object or a function
- */
-function evaluateSectionRenderIf(
-  renderIf: SectionRenderIf,
-  values: Record<string, unknown>
-): boolean {
-  if (typeof renderIf === "function") {
-    return renderIf(values)
-  }
-  return evaluateRenderIf(renderIf, values)
 }
 
 type RenderedItem =
@@ -83,11 +66,11 @@ export function SectionRenderer({ section }: SectionRendererProps) {
   const values = form.watch()
   const { formName } = useF0FormContext()
 
-  const { title, description, renderIf, fields } = section.section
+  const { title, description, renderIf, action, fields } = section.section
   const sectionId = section.id
 
   // Check if section should be rendered based on renderIf condition
-  if (renderIf && !evaluateSectionRenderIf(renderIf, values)) {
+  if (renderIf && !evaluateRenderIf(renderIf, values)) {
     return null
   }
 
@@ -98,8 +81,23 @@ export function SectionRenderer({ section }: SectionRendererProps) {
 
   return (
     <section id={anchorId} className="flex flex-col scroll-mt-4">
-      <div className="[&>div]:px-0.5 [&>div]:mx-0 [&>div]:border-0 py-5">
+      <div
+        className={cn(
+          "flex items-start justify-between py-5",
+          "[&>div]:px-0.5 [&>div]:mx-0 [&>div]:border-0"
+        )}
+      >
         <SectionHeader title={title} description={description ?? ""} />
+        {action && (
+          <F0Button
+            label={action.label}
+            icon={action.icon}
+            onClick={action.onClick}
+            href={action.href}
+            variant="outline"
+            size="md"
+          />
+        )}
       </div>
       <div className={`flex flex-col ${FIELD_GAP}`}>
         {groupedItems.map((item, index) => {

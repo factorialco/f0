@@ -1,4 +1,8 @@
-import type { F0BaseField, CommonRenderIfCondition } from "../types"
+import type {
+  F0BaseField,
+  F0BaseFieldRenderIfFunction,
+  CommonRenderIfCondition,
+} from "../types"
 
 // ============================================================================
 // Number Field RenderIf Conditions
@@ -31,6 +35,7 @@ export type NumberRenderIfCondition = NumberRenderIfBase &
 export type NumberFieldRenderIf =
   | NumberRenderIfCondition
   | CommonRenderIfCondition
+  | F0BaseFieldRenderIfFunction
 
 // ============================================================================
 // Number Field Config and Type
@@ -61,6 +66,8 @@ export type F0NumberField = F0BaseField &
     min?: number
     /** Maximum value (derived from z.number().max()) */
     max?: number
+    /** Whether the field can be cleared (derived from optional/nullable) */
+    clearable?: boolean
     /** Conditional rendering based on another field's value */
     renderIf?: NumberFieldRenderIf
   }
