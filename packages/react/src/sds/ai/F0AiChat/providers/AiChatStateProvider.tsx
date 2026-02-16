@@ -13,7 +13,11 @@ import {
 
 import { useI18n } from "@/lib/providers/i18n"
 
-import { AiChatProviderReturnValue, AiChatState } from "../internal-types"
+import {
+  AiChatProviderReturnValue,
+  AiChatState,
+  VisualizationMode,
+} from "../internal-types"
 import { WelcomeScreenSuggestion } from "../types"
 
 const AiChatStateContext = createContext<AiChatProviderReturnValue | null>(null)
@@ -69,6 +73,8 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   const [initialMessage, setInitialMessage] = useState<
     string | string[] | undefined
   >(initialInitialMessage)
+  const [visualizationMode, setVisualizationMode] =
+    useState<VisualizationMode>("sidepanel")
 
   const [chatWidth, setChatWidth] = useState(() => getStoredChatWidth())
 
@@ -135,6 +141,11 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
     sendMessageFunctionRef.current?.(messageToSend)
   }
 
+  const openFullscreen = () => {
+    setVisualizationMode("fullscreen")
+    setOpen(true)
+  }
+
   useEffect(() => {
     setEnabledInternal(enabled)
   }, [enabled])
@@ -179,6 +190,9 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         chatWidth,
         setChatWidth,
         resetChatWidth,
+        visualizationMode,
+        setVisualizationMode,
+        openFullscreen,
       }}
     >
       {children}
@@ -220,6 +234,9 @@ export function useAiChat(): AiChatProviderReturnValue {
       chatWidth: DEFAULT_CHAT_WIDTH,
       setChatWidth: noopFn,
       resetChatWidth: noopFn,
+      visualizationMode: "sidepanel",
+      setVisualizationMode: noopFn,
+      openFullscreen: noopFn,
     }
   }
 

@@ -48,6 +48,9 @@ const Messages = ({
 }: MessagesProps) => {
   const turnsContainerRef = useRef<HTMLDivElement>(null)
   const { messages, interrupt } = useCopilotChat()
+
+  const noMessages = messages.length === 0
+
   const { threadId } = useCopilotContext()
   const {
     close: closeFeedbackModal,
@@ -88,6 +91,9 @@ const Messages = ({
     return convertMessagesToTurns(messages)
   }, [messages])
 
+  const { visualizationMode } = useAiChat()
+  const isFullscreen = visualizationMode === "fullscreen"
+
   // Scroll shadow detection
   const [topRef, isAtTop] = useIntersectionObserver({ threshold: 1 })
   const [bottomRef, isAtBottom] = useIntersectionObserver({ threshold: 1 })
@@ -99,12 +105,18 @@ const Messages = ({
 
   return (
     <>
-      <div className="relative flex flex-1 flex-col overflow-hidden">
+      <div
+        className={cn(
+          "relative flex flex-col overflow-hidden",
+          !isFullscreen && "flex-1"
+        )}
+      >
         <motion.div
           layout
           className={cn(
-            "relative isolate flex flex-1 flex-col p-[16px]",
-            "overflow-y-auto overflow-x-hidden scrollbar-macos"
+            "scrollbar-macos relative isolate flex flex-col overflow-x-hidden overflow-y-auto",
+            isFullscreen ? "items-center px-4 pt-3" : "p-4",
+            (!isFullscreen || !noMessages) && "flex-1"
           )}
           ref={messagesContainerRef}
         >
@@ -117,7 +129,10 @@ const Messages = ({
           <motion.div
             layout="position"
             ref={turnsContainerRef}
-            className={showWelcomeBlock ? "flex flex-1" : "flex flex-col gap-8"}
+            className={cn(
+              showWelcomeBlock ? "flex flex-1" : "flex flex-col gap-8",
+              isFullscreen && "w-full max-w-[540px]"
+            )}
           >
             {showWelcomeBlock && (
               <WelcomeScreen

@@ -13,7 +13,7 @@ import { New } from "@/icons/app"
 export const ChatHeader = (props: HeaderProps) => {
   const { labels } = useChatContext()
   const { messages } = useCopilotChatInternal()
-  const { setOpen, clear } = useAiChat()
+  const { setOpen, clear, visualizationMode } = useAiChat()
   const translations = useI18n()
   const hasDefaultTitle = labels.title === "CopilotKit"
   const hasMessages = messages.length > 0
@@ -21,7 +21,10 @@ export const ChatHeader = (props: HeaderProps) => {
   return (
     <header
       className={cn(
-        "flex justify-between border-0 border-solid border-f1-border-secondary px-[16px] py-3"
+        "flex justify-between border-0 border-solid border-f1-border-secondary px-[16px] py-3",
+        visualizationMode === "fullscreen" &&
+          !hasMessages &&
+          "absolute left-0 right-0 top-0"
       )}
     >
       <h2 className="text-f1-foreground">

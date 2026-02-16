@@ -21,7 +21,7 @@ import { cn } from "@/lib/utils"
 import { AssistantMessage } from "./components/AssistantMessage"
 import { ChatHeader } from "./components/ChatHeader"
 import { ChatTextarea } from "./components/ChatTextarea"
-import { SidebarWindow } from "./components/ChatWindow"
+import { FullscreenWindow, SidebarWindow } from "./components/ChatWindow"
 import { MessagesContainer } from "./components/MessagesContainer"
 import { MessagesContainerFullscreen } from "./components/MessagesContainerFullscreen"
 import { UserMessage } from "./components/UserMessage"
@@ -30,6 +30,8 @@ import { useDefaultCopilotActions } from "./copilotActions"
 import { FullscreenChatContextType } from "./internal-types"
 import { AiChatStateProvider, useAiChat } from "./providers/AiChatStateProvider"
 import { AiChatProviderProps } from "./types"
+
+import "./styles.css"
 
 // Context to share input state between Messages and Input components
 export const FullscreenChatContext = createContext<FullscreenChatContextType>({
@@ -115,53 +117,82 @@ const SendMessageFunctionInjector = () => {
 }
 
 const F0AiChatComponent = () => {
-  const { enabled, open, setOpen, disclaimer } = useAiChat()
+  const {
+    enabled,
+    open,
+    setOpen,
+    disclaimer,
+    visualizationMode,
+    setVisualizationMode,
+  } = useAiChat()
+  const { messages } = useCopilotChatInternal()
+
+  // Switch to sidebar mode after first message is sent in fullscreen mode
+  useEffect(() => {
+    if (
+      visualizationMode === "fullscreen" &&
+      messages.length > 0 &&
+      messages.some((msg) => msg.role === "user")
+    ) {
+      setVisualizationMode("sidepanel")
+    }
+  }, [messages, visualizationMode, setVisualizationMode])
 
   // Register all default copilot actions
   useDefaultCopilotActions()
 
+  const isFullscreen = visualizationMode === "fullscreen"
+
   const InputComponent = useCallback(
     ({ ...props }: InputProps) => (
-      <div className="m-[16px] items-center flex flex-col gap-2">
-        <div className="w-full">
-          <ChatTextarea {...props} />
-        </div>
-
-        {disclaimer?.text && (
-          <div className="flex flex-row items-center gap-1 w-full justify-center">
-            <OneEllipsis className="text-f1-foreground-tertiary text-sm font-medium">
-              {disclaimer.text}
-            </OneEllipsis>
-
-            {disclaimer.link && disclaimer.linkText && (
-              <Link
-                href={disclaimer.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-f1-foreground-tertiary text-sm font-medium flex-shrink-0"
-              >
-                {disclaimer.linkText}
-              </Link>
-            )}
+      <div className={cn(isFullscreen && "flex w-full justify-center px-3")}>
+        <div
+          className={cn(
+            "flex flex-col items-center gap-2",
+            isFullscreen ? "w-full max-w-[540px]" : "m-4"
+          )}
+        >
+          <div className="w-full">
+            <ChatTextarea {...props} />
           </div>
-        )}
+
+          {disclaimer?.text && (
+            <div className="flex w-full flex-row items-center justify-center gap-1">
+              <OneEllipsis className="text-sm font-medium text-f1-foreground-tertiary">
+                {disclaimer.text}
+              </OneEllipsis>
+
+              {disclaimer.link && disclaimer.linkText && (
+                <Link
+                  href={disclaimer.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-shrink-0 text-sm font-medium text-f1-foreground-tertiary"
+                >
+                  {disclaimer.linkText}
+                </Link>
+              )}
+            </div>
+          )}
+        </div>
       </div>
     ),
-    [disclaimer]
+    [disclaimer, isFullscreen]
   )
 
   if (!enabled) {
     return null
   }
 
+  // Use CopilotSidebar for both modes, with different Window components
   return (
     <CopilotSidebar
-      className="h-full"
+      className={cn("h-full", isFullscreen ? "w-0" : open && "py-1 xs:pr-1")}
       defaultOpen={open}
       onSetOpen={(isOpen) => {
         setOpen(isOpen)
       }}
-      Window={SidebarWindow}
+      Window={isFullscreen ? FullscreenWindow : SidebarWindow}
       Header={ChatHeader}
       Messages={MessagesContainer}
       Button={() => {

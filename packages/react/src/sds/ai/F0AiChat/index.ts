@@ -14,6 +14,8 @@ export type {
   AiChatTranslationsProviderProps,
 } from "./types"
 
+export type { VisualizationMode } from "./internal-types"
+
 export { aiTranslations } from "./types"
 
 // Hooks

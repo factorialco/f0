@@ -3,6 +3,11 @@ import { type AIMessage, type Message } from "@copilotkit/shared"
 import { type AiChatDisclaimer, WelcomeScreenSuggestion } from "./types"
 
 /**
+ * Visualization mode for the AI chat
+ */
+export type VisualizationMode = "sidepanel" | "fullscreen"
+
+/**
  * Context type for fullscreen chat state
  */
 export type FullscreenChatContextType = {
@@ -102,6 +107,18 @@ export type AiChatProviderReturnValue = {
    * Reset the chat width to the default value (360px)
    */
   resetChatWidth: () => void
+  /**
+   * The current visualization mode of the chat
+   */
+  visualizationMode: VisualizationMode
+  /**
+   * Set the visualization mode of the chat
+   */
+  setVisualizationMode: React.Dispatch<React.SetStateAction<VisualizationMode>>
+  /**
+   * Open the chat in fullscreen mode
+   */
+  openFullscreen: () => void
 } & Pick<AiChatState, "greeting" | "agent" | "disclaimer" | "resizable">
 
 /**
