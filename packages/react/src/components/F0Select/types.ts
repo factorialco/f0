@@ -164,10 +164,7 @@ export type F0SelectProps<T extends string, R = unknown> = F0SelectBaseProps<
 
 export type F0SelectTagProp =
   | string
-  | ({ type: "dot"; text: string } & (
-      | { color: NewColor }
-      | { customColor: string }
-    ))
+  | { type: "dot"; text: string; color: NewColor }
 
 export type F0SelectItemObject<T, R = unknown> = {
   type?: "item"
