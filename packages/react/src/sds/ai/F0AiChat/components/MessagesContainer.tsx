@@ -74,8 +74,6 @@ const Messages = ({
       ),
     [initialMessage, translations.ai.defaultInitialMessage]
   )
-  const showWelcomeBlock =
-    messages.length == 0 && (greeting || initialMessages.length > 0)
 
   const {
     messagesContainerRef,
@@ -94,6 +92,10 @@ const Messages = ({
   const { visualizationMode } = useAiChat()
   const isFullscreen = visualizationMode === "fullscreen"
 
+  const showWelcomeBlock =
+    (messages.length === 0 || isFullscreen) &&
+    (greeting || initialMessages.length > 0)
+
   // Scroll shadow detection
   const [topRef, isAtTop] = useIntersectionObserver({ threshold: 1 })
   const [bottomRef, isAtBottom] = useIntersectionObserver({ threshold: 1 })
@@ -108,15 +110,15 @@ const Messages = ({
       <div
         className={cn(
           "relative flex flex-col overflow-hidden",
-          !isFullscreen && "flex-1"
+          (!isFullscreen || !noMessages) && "flex-1"
         )}
       >
         <motion.div
           layout
           className={cn(
-            "scrollbar-macos relative isolate flex flex-col overflow-x-hidden overflow-y-auto",
+            "scrollbar-macos relative isolate flex flex-col justify-end overflow-x-hidden overflow-y-auto",
             isFullscreen ? "items-center px-4 pt-3" : "p-4",
-            (!isFullscreen || !noMessages) && "flex-1"
+            noMessages && "flex-1"
           )}
           ref={messagesContainerRef}
         >
@@ -130,7 +132,8 @@ const Messages = ({
             layout="position"
             ref={turnsContainerRef}
             className={cn(
-              showWelcomeBlock ? "flex flex-1" : "flex flex-col gap-8",
+              "flex flex-col gap-8",
+              showWelcomeBlock && "flex-1",
               isFullscreen && "w-full max-w-[720px]"
             )}
           >
@@ -139,6 +142,7 @@ const Messages = ({
                 greeting={greeting}
                 initialMessages={initialMessages}
                 suggestions={welcomeScreenSuggestions}
+                showSuggestions={!!showWelcomeBlock && noMessages}
               />
             )}
             {turns.map((turnMessages, turnIndex) => {
@@ -147,13 +151,17 @@ const Messages = ({
               return (
                 <div
                   className="flex flex-col items-start justify-start gap-2"
-                  style={{
-                    minHeight: isCurrentTurn
-                      ? // "scroll" the current turn up in the view to make space for the assistant response,
-                        // but leave 20% of the container height on the top to show part of the previous dialog
-                        containerHeight * 0.8
-                      : undefined,
-                  }}
+                  style={
+                    isFullscreen
+                      ? undefined
+                      : {
+                          minHeight: isCurrentTurn
+                            ? // "scroll" the current turn up in the view to make space for the assistant response,
+                              // but leave 20% of the container height on the top to show part of the previous dialog
+                              containerHeight * 0.8
+                            : undefined,
+                        }
+                  }
                   key={`turn-${turnIndex}`}
                 >
                   {turnMessages.map((message, index) => {

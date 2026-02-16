@@ -129,16 +129,17 @@ export const Default: Story = {
 }
 
 const FullscreenOpener = () => {
-  const { openFullscreen } = useAiChat()
+  const { setVisualizationMode, setOpen } = useAiChat()
 
   const openedInFullscreen = useRef(false)
 
   useEffect(() => {
     if (openedInFullscreen.current) return
     // Open chat in fullscreen mode on mount
-    openFullscreen()
+    setVisualizationMode("fullscreen")
+    setOpen(true)
     openedInFullscreen.current = true
-  }, [openFullscreen])
+  }, [setVisualizationMode, setOpen])
 
   return null
 }
@@ -158,7 +159,7 @@ const FullscreenStoryComponent = (
   )
 }
 
-export const Fullscreen: Story = {
+export const OneFullscreen: Story = {
   render: (args) => <FullscreenStoryComponent {...args} />,
   args: {
     ai: {

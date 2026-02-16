@@ -206,8 +206,8 @@ export const FullscreenWindow = ({ children }: WindowProps) => {
         >
           <motion.div
             className={cn(
-              "relative flex h-screen w-full flex-1 flex-col justify-center overflow-hidden",
-              isFullscreen && "gap-4"
+              "relative flex h-screen w-full flex-1 flex-col overflow-hidden pb-4",
+              isFullscreen && "gap-4 justify-center"
             )}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}

@@ -26,11 +26,13 @@ export const WelcomeScreen = ({
   greeting,
   initialMessages = [],
   suggestions = [],
+  showSuggestions,
 }: {
   greeting?: string
   // todo make it string
   initialMessages?: Message[]
   suggestions?: WelcomeScreenSuggestion[]
+  showSuggestions?: boolean
 }) => {
   const { sendMessage } = useCopilotChatInternal()
   const { visualizationMode } = useAiChat()
@@ -42,7 +44,7 @@ export const WelcomeScreen = ({
   )
 
   return (
-    <AnimatePresence mode="popLayout">
+    <AnimatePresence>
       <motion.div
         key="welcome"
         className={cn(
@@ -102,42 +104,44 @@ export const WelcomeScreen = ({
             </motion.p>
           ))}
         </div>
-        <div
-          className={cn(
-            "flex flex-col gap-[6px]",
-            isFullscreen
-              ? "w-full max-w-[720px] items-center -mx-3"
-              : "items-start"
-          )}
-        >
-          {pickedSuggestions.map((suggestion, index) => (
-            <motion.div
-              className="w-full"
-              key={index}
-              initial={{ opacity: 0, filter: "blur(2px)", y: -8 }}
-              animate={{ opacity: 1, filter: "blur(0px)", y: 0 }}
-              transition={{
-                duration: 0.1,
-                ease: "easeOut",
-                delay: 0.9 + index * 0.1,
-              }}
-            >
-              <ButtonInternal
-                variant="ghost"
-                className="border border-solid border-f1-border-secondary shadow sm:border-none sm:shadow-none"
-                label={suggestion.message}
-                icon={suggestion.icon}
-                onClick={() =>
-                  sendMessage({
-                    id: randomId(),
-                    role: "user",
-                    content: suggestion.prompt || suggestion.message,
-                  })
-                }
-              />
-            </motion.div>
-          ))}
-        </div>
+        {showSuggestions && (
+          <div
+            className={cn(
+              "flex flex-col gap-[6px]",
+              isFullscreen
+                ? "w-full max-w-[720px] items-center -mx-3"
+                : "items-start"
+            )}
+          >
+            {pickedSuggestions.map((suggestion, index) => (
+              <motion.div
+                className="w-full"
+                key={index}
+                initial={{ opacity: 0, filter: "blur(2px)", y: -8 }}
+                animate={{ opacity: 1, filter: "blur(0px)", y: 0 }}
+                transition={{
+                  duration: 0.1,
+                  ease: "easeOut",
+                  delay: 0.9 + index * 0.1,
+                }}
+              >
+                <ButtonInternal
+                  variant="ghost"
+                  className="border border-solid border-f1-border-secondary shadow sm:border-none sm:shadow-none"
+                  label={suggestion.message}
+                  icon={suggestion.icon}
+                  onClick={() =>
+                    sendMessage({
+                      id: randomId(),
+                      role: "user",
+                      content: suggestion.prompt || suggestion.message,
+                    })
+                  }
+                />
+              </motion.div>
+            ))}
+          </div>
+        )}
       </motion.div>
     </AnimatePresence>
   )
