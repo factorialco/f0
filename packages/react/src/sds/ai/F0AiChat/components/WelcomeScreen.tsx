@@ -44,12 +44,12 @@ export const WelcomeScreen = ({
   )
 
   return (
-    <AnimatePresence>
+    <AnimatePresence mode="popLayout">
       <motion.div
         key="welcome"
         className={cn(
-          "flex w-full flex-1 flex-col gap-6 sm:gap-4",
-          isFullscreen ? "items-start justify-center" : "justify-end"
+          "flex w-full flex-col gap-6 sm:gap-4",
+          isFullscreen ? "items-start justify-center" : "justify-end flex-1"
         )}
         initial={{ opacity: 1 }}
       >

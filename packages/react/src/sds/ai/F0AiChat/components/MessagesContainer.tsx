@@ -116,9 +116,9 @@ const Messages = ({
         <motion.div
           layout
           className={cn(
-            "scrollbar-macos relative isolate flex flex-col justify-end overflow-x-hidden overflow-y-auto",
-            isFullscreen ? "items-center px-4 pt-3" : "p-4",
-            noMessages && "flex-1"
+            "scrollbar-macos relative isolate flex flex-col overflow-x-hidden overflow-y-auto",
+            isFullscreen ? "items-center px-4 pb-4 pt-3" : "p-4",
+            "flex-1"
           )}
           ref={messagesContainerRef}
         >
