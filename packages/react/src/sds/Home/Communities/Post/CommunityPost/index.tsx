@@ -20,7 +20,7 @@ import { PostEvent, PostEventProps } from "../PostEvent"
 import { isVideo } from "./video"
 
 export type CommunityPostAction = {
-  label: string
+  label?: string
   icon?: IconType
   onClick: () => void
 }
@@ -185,13 +185,14 @@ export const BaseCommunityPost = ({
               <div className="hidden flex-row gap-2 md:flex">
                 {actions?.map((act) => (
                   <F0Button
+                    hideLabel={!act.label}
                     key={act.label}
                     {...(act.icon && { icon: act.icon })}
                     variant="outline"
                     size="md"
                     onClick={act.onClick}
-                    label={act.label}
-                    title={act.label}
+                    label={act.label ?? ""}
+                    title={act.label ?? ""}
                   />
                 ))}
                 {dropdownItems?.length && (

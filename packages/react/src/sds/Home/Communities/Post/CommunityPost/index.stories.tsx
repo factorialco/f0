@@ -192,6 +192,19 @@ export const WithMultipleCustomButtons: Story = {
   },
 }
 
+export const WithCustomButtonWithoutLabel: Story = {
+  decorators: Default.decorators,
+  args: {
+    ...Default.args,
+    actions: [
+      {
+        icon: PushPin,
+        onClick: () => {},
+      },
+    ],
+  },
+}
+
 type SkeletonStory = StoryObj<typeof CommunityPost.Skeleton>
 
 export const Skeleton: SkeletonStory = {
