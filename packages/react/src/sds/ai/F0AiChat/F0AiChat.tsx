@@ -149,7 +149,7 @@ const F0AiChatComponent = () => {
         <div
           className={cn(
             "flex flex-col items-center gap-2",
-            isFullscreen ? "w-full max-w-[540px]" : "m-4"
+            isFullscreen ? "w-full max-w-[720px]" : "m-4"
           )}
         >
           <div className="w-full">
@@ -187,7 +187,7 @@ const F0AiChatComponent = () => {
   // Use CopilotSidebar for both modes, with different Window components
   return (
     <CopilotSidebar
-      className={cn("h-full", isFullscreen ? "w-0" : open && "py-1 xs:pr-1")}
+      className={cn("h-full", isFullscreen && "w-0")}
       defaultOpen={open}
       onSetOpen={(isOpen) => {
         setOpen(isOpen)

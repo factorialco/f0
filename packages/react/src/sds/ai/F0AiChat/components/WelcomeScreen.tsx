@@ -106,7 +106,7 @@ export const WelcomeScreen = ({
           className={cn(
             "flex flex-col gap-[6px]",
             isFullscreen
-              ? "w-full max-w-[540px] items-center -mx-3"
+              ? "w-full max-w-[720px] items-center -mx-3"
               : "items-start"
           )}
         >

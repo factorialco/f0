@@ -131,7 +131,7 @@ const Messages = ({
             ref={turnsContainerRef}
             className={cn(
               showWelcomeBlock ? "flex flex-1" : "flex flex-col gap-8",
-              isFullscreen && "w-full max-w-[540px]"
+              isFullscreen && "w-full max-w-[720px]"
             )}
           >
             {showWelcomeBlock && (
