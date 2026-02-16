@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.363.0](https://github.com/factorialco/f0/compare/f0-react-v1.362.3...f0-react-v1.363.0) (2026-02-16)
+
+
+### Features
+
+* Add card interactiveChildren prop to make children components clickable ([#3419](https://github.com/factorialco/f0/issues/3419)) ([13e0b71](https://github.com/factorialco/f0/commit/13e0b718ea50c5f14f6e0e89386636958afd5257))
+
 ## [1.362.3](https://github.com/factorialco/f0/compare/f0-react-v1.362.2...f0-react-v1.362.3) (2026-02-16)
 
 
