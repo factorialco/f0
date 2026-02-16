@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.362.2](https://github.com/factorialco/f0/compare/f0-react-v1.362.1...f0-react-v1.362.2) (2026-02-16)
+
+
+### Bug Fixes
+
+* keep preset counters consistent in overflow filter picker ([#3409](https://github.com/factorialco/f0/issues/3409)) ([309f8ca](https://github.com/factorialco/f0/commit/309f8ca8da4ff641deb805a242b432b7848edbd4))
+
 ## [1.362.1](https://github.com/factorialco/f0/compare/f0-react-v1.362.0...f0-react-v1.362.1) (2026-02-13)
 
 
