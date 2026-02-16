@@ -11,7 +11,7 @@ export const DropdownSingleQuestion = ({
   options,
   ...props
 }: DropdownSingleQuestionProps) => {
-  const { onQuestionChange, getSectionContainingQuestion } =
+  const { onQuestionChange, getSectionContainingQuestion, isEditMode } =
     useCoCreationFormContext()
 
   const containingSection = getSectionContainingQuestion(props.id)
@@ -37,15 +37,16 @@ export const DropdownSingleQuestion = ({
           multiple={false}
           options={selectOptions}
           value={props.value ?? ""}
-          onChange={(value) =>
+          onChange={(value) => {
+            if (isEditMode) return
             onQuestionChange?.({
               id: props.id,
               type: "dropdown-single",
               value,
             })
-          }
+          }}
           placeholder={t("coCreationForm.answer.placeholder")}
-          disabled={questionLocked}
+          disabled={questionLocked || isEditMode}
           required={props.required}
         />
       </div>
