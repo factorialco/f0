@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.365.0](https://github.com/factorialco/f0/compare/f0-react-v1.364.0...f0-react-v1.365.0) (2026-02-17)
+
+
+### Features
+
+* make community post action label optional ([#3446](https://github.com/factorialco/f0/issues/3446)) ([e3638be](https://github.com/factorialco/f0/commit/e3638beabfe1232a41c42eb7d7623842b7c54311))
+
 ## [1.364.0](https://github.com/factorialco/f0/compare/f0-react-v1.363.0...f0-react-v1.364.0) (2026-02-17)
 
 
