@@ -162,7 +162,7 @@ function useAutoCloseSidebar(
 
 /**
  * Z-index layers (within the isolate stacking context):
- *   z-30  Sidebar
+ *   z-5  Sidebar ()
  *   z-20  Sidebar backdrop / Chat (fullscreen)
  *   z-10  Main content
  *   z-0   Chat (normal)
@@ -263,7 +263,7 @@ function ApplicationFrameContent({
             {/* Sidebar */}
             <div
               className={cn(
-                "z-30",
+                sidebarState !== "locked" ? "z-30" : "z-0",
                 !shouldReduceMotion && "transition-all",
                 sidebarState === "locked" ? "w-[240px] shrink-0 pl-3" : "w-0"
               )}
