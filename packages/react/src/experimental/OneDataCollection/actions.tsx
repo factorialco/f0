@@ -2,11 +2,20 @@ import { DropdownItemObject } from "@/experimental/Navigation/Dropdown/internal.
 
 export type PrimaryActionItemDefinition = Pick<
   DropdownItemObject,
-  "label" | "icon"
+  "label" | "icon" | "description"
 > & {
   loading?: boolean
   onClick?: () => void | Promise<void>
   disabled?: boolean
+}
+
+/**
+ * Defines the trigger button appearance for primary actions when rendered as a dropdown.
+ * Used to customize the label and icon of the dropdown trigger button independently from the dropdown items.
+ */
+export type PrimaryActionsTriggerDefinition = {
+  label: string
+  icon?: DropdownItemObject["icon"]
 }
 
 /**

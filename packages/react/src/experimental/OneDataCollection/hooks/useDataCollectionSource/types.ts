@@ -16,6 +16,7 @@ import {
 
 import {
   PrimaryActionsDefinitionFn,
+  PrimaryActionsTriggerDefinition,
   SecondaryActionsDefinition,
 } from "../../actions"
 import { ItemActionsDefinition } from "../../item-actions"
@@ -127,6 +128,8 @@ export type DataCollectionSourceDefinition<
   itemActions?: ItemActions
   /** Available primary actions that can be performed on the collection */
   primaryActions?: PrimaryActionsDefinitionFn
+  /** Trigger button configuration for primary actions dropdown mode */
+  primaryActionsTrigger?: PrimaryActionsTriggerDefinition
   /** Available secondary actions that can be performed on the collection */
   secondaryActions?: SecondaryActionsDefinition
   /** Available summaries fields. If not provided, summaries is not allowed. */

@@ -8,18 +8,21 @@ import { Ellipsis } from "@/icons/app"
 
 import {
   PrimaryActionItemDefinition,
+  PrimaryActionsTriggerDefinition,
   SecondaryActionGroup,
   SecondaryActionItem,
 } from "../../actions"
 
 type CollectionActionProps = {
   primaryActions?: PrimaryActionItemDefinition[]
+  primaryActionsTrigger?: PrimaryActionsTriggerDefinition
   secondaryActions?: SecondaryActionItem[]
   otherActions?: SecondaryActionGroup[]
 }
 
 export const CollectionActions = ({
   primaryActions,
+  primaryActionsTrigger,
   secondaryActions,
   otherActions,
 }: CollectionActionProps) => {
@@ -44,6 +47,12 @@ export const CollectionActions = ({
   )
 
   const [open, onOpenChange] = useState(false)
+  const [primaryDropdownOpen, onPrimaryDropdownOpenChange] = useState(false)
+
+  // Determine if we should use dropdown mode: when any primary action has a description
+  const useDropdownMode = primaryActionsButtons.some(
+    (action) => action.description !== undefined
+  )
 
   if (
     primaryActionsButtons.length === 0 &&
@@ -52,9 +61,42 @@ export const CollectionActions = ({
   )
     return null
 
+  // Build primary actions dropdown items (for dropdown mode)
+  const primaryDropdownItems: DropdownItem[] = primaryActionsButtons.map(
+    (action) => ({
+      label: action.label,
+      icon: action.icon,
+      description: action.description,
+      onClick: () => {
+        action.onClick?.()
+        onPrimaryDropdownOpenChange(false)
+      },
+    })
+  )
+
+  // Determine trigger label and icon for dropdown mode
+  const triggerLabel =
+    primaryActionsTrigger?.label || primaryActionsButtons[0]?.label
+  const triggerIcon =
+    primaryActionsTrigger?.icon || primaryActionsButtons[0]?.icon
+
   return (
     <div className="flex flex-row-reverse items-center gap-2">
-      {primaryActionsButtons.length === 1 ? (
+      {useDropdownMode ? (
+        <Dropdown
+          items={primaryDropdownItems}
+          align="end"
+          open={primaryDropdownOpen}
+          onOpenChange={onPrimaryDropdownOpenChange}
+        >
+          <ButtonInternal
+            variant="default"
+            icon={triggerIcon}
+            label={triggerLabel}
+            pressed={primaryDropdownOpen}
+          />
+        </Dropdown>
+      ) : primaryActionsButtons.length === 1 ? (
         <F0Button
           size="md"
           onClick={primaryActionsButtons[0].onClick}

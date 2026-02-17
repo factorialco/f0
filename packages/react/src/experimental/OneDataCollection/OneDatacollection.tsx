@@ -192,6 +192,7 @@ const OneDataCollectionComp = <
     isLoading,
     // Actions
     primaryActions,
+    primaryActionsTrigger,
     secondaryActions,
     // Summary
     totalItemSummary,
@@ -739,6 +740,7 @@ const OneDataCollectionComp = <
                   )}
                   <CollectionActions
                     primaryActions={primaryActionItems}
+                    primaryActionsTrigger={primaryActionsTrigger}
                     secondaryActions={secondaryActionsItems}
                     otherActions={otherActionsItems}
                   />
