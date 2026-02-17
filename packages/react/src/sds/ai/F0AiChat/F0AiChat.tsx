@@ -122,30 +122,22 @@ const SendMessageFunctionInjector = () => {
 }
 
 const ChatInput = (props: InputProps) => {
-  const { disclaimer, footer } = useAiChat()
+  const { disclaimer, footer, visualizationMode } = useAiChat()
   const { messages } = useCopilotChatInternal()
   const isWelcomeScreen = messages.length === 0
+  const fullscreen = visualizationMode === "fullscreen"
+  const fullscreenWelcome = fullscreen && isWelcomeScreen
 
   return (
-    <div className="flex flex-col items-center gap-2 px-4 pb-4 pt-2">
+    <div
+      className={cn(
+        "flex flex-col items-center gap-2 px-4 pb-4 pt-2",
+        fullscreenWelcome && "flex-1"
+      )}
+    >
       <div className="w-full max-w-[712px]">
         <ChatTextarea {...props} />
       </div>
-
-      <AnimatePresence>
-        {footer && isWelcomeScreen && (
-          <motion.div
-            key="chat-footer"
-            initial={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0, overflow: "hidden" }}
-            transition={{ duration: 0.25, ease: "easeInOut" }}
-            className="w-full py-4 mx-auto max-w-[712px]"
-          >
-            {footer}
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       {disclaimer?.text && (
         <div className="flex flex-row items-center gap-1 w-full justify-center max-w-[712px]">
           <OneEllipsis className="text-sm font-medium text-f1-foreground-tertiary">
@@ -164,6 +156,23 @@ const ChatInput = (props: InputProps) => {
           )}
         </div>
       )}
+      <AnimatePresence>
+        {footer && isWelcomeScreen && (
+          <motion.div
+            key="chat-footer"
+            className={cn(
+              "w-full py-4 mx-auto max-w-[712px]",
+              fullscreenWelcome && "mt-auto"
+            )}
+            initial={{ opacity: 0, height: 0, overflow: "hidden" }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0, overflow: "hidden" }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+          >
+            {footer}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

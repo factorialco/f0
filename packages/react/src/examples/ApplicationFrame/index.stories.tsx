@@ -263,33 +263,13 @@ export const FullscreenWithActions: Story = {
       resizable: true,
       greeting: "Hello, John",
       defaultVisualizationMode: "fullscreen",
-      lockVisualizationMode: true,
+      lockVisualizationMode: false,
       footer: <QuickActions />,
       disclaimer: {
         text: "One works within your permissions.",
         link: "/permissions",
         linkText: "See more",
       },
-      welcomeScreenSuggestions: [
-        {
-          icon: Lightbulb,
-          message: "Share feedback",
-          prompt:
-            "Share feedback and help shape One with your feedback in the next message (optional)",
-        },
-        {
-          icon: PalmTree,
-          message: "Create a new task",
-          prompt:
-            "Create a new task and help shape One with your feedback in the next message (optional)",
-        },
-        {
-          icon: Lightbulb,
-          message: "Create a new project",
-          prompt:
-            "Create a new project and help shape One with your feedback in the next message (optional)",
-        },
-      ],
     },
   },
 }
