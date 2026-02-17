@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.364.0](https://github.com/factorialco/f0/compare/f0-react-v1.363.0...f0-react-v1.364.0) (2026-02-17)
+
+
+### Features
+
+* add dropdown element as question type ([#3412](https://github.com/factorialco/f0/issues/3412)) ([481c0c6](https://github.com/factorialco/f0/commit/481c0c643371ec204319ce51c09cfba7975c0fa4))
+
 ## [1.363.0](https://github.com/factorialco/f0/compare/f0-react-v1.362.3...f0-react-v1.363.0) (2026-02-16)
 
 
