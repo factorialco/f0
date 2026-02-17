@@ -5,12 +5,13 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
 import { cn } from "@/lib/utils"
 
+import {
+  DEFAULT_CHAT_WIDTH,
+  MAX_CHAT_WIDTH,
+  MIN_CHAT_WIDTH,
+} from "../constants"
 import { useAutoClear } from "../hooks/useAutoClear"
 import { useAiChat } from "../providers/AiChatStateProvider"
-
-const MIN_CHAT_WIDTH = 300
-const MAX_CHAT_WIDTH = 712
-export const DEFAULT_CHAT_WIDTH = 360
 
 const ResizeHandle = ({
   onResize,

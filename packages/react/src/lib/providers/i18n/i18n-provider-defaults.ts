@@ -284,7 +284,6 @@ export const defaultTranslations = {
     },
     expandChat: "Expand chat",
     collapseChat: "Collapse chat",
-    toggleSidebar: "Toggle sidebar",
     ask: "Ask One",
     growth: {
       demoCard: {

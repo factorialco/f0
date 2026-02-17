@@ -100,7 +100,6 @@ export const aiTranslations = {
     },
     expandChat: "Expand chat",
     collapseChat: "Collapse chat",
-    toggleSidebar: "Toggle sidebar",
     ask: "Ask One",
   },
 }

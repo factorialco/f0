@@ -23,11 +23,11 @@ import {
   F0AiChatProvider,
   AiChatProviderProps,
 } from "@/sds/ai/F0AiChat"
+import { DEFAULT_CHAT_WIDTH } from "@/sds/ai/F0AiChat/constants"
 import { useAiChat } from "@/sds/ai/F0AiChat/providers/AiChatStateProvider"
 
 import { FrameProvider, SidebarState, useSidebar } from "./FrameProvider"
 
-const DEFAULT_CHAT_WIDTH = 360
 const CONTENT_TRANSITION = { duration: 0.3, ease: [0, 0, 0.1, 1] }
 
 export interface ApplicationFrameProps {

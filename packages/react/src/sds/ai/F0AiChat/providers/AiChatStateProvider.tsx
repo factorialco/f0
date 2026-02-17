@@ -13,13 +13,13 @@ import {
 
 import { useI18n } from "@/lib/providers/i18n"
 
+import { DEFAULT_CHAT_WIDTH } from "../constants"
 import { AiChatProviderReturnValue, AiChatState } from "../internal-types"
 import { WelcomeScreenSuggestion } from "../types"
 
 const AiChatStateContext = createContext<AiChatProviderReturnValue | null>(null)
 
 const DEFAULT_MINUTES_TO_RESET = 15
-const DEFAULT_CHAT_WIDTH = 360
 const CHAT_WIDTH_STORAGE_KEY = "ONE-ai-chat-width"
 
 const getStoredChatWidth = (): number => {
