@@ -5,7 +5,7 @@ import {
   motion,
   MotionConfig,
 } from "motion/react"
-import { Fragment, useEffect, useRef } from "react"
+import { Fragment, useEffect, useMemo, useRef, useState } from "react"
 import { useMediaQuery } from "usehooks-ts"
 
 import {
@@ -187,6 +187,35 @@ function ApplicationFrameContent({
   const { open: isAiPromotionChatOpen } = useAiPromotionChat()
   const reservedChatWidth = resizable ? chatWidth : DEFAULT_CHAT_WIDTH
 
+  // Track fullscreen transitions for smooth exit animation
+  const prevFullscreenRef = useRef(isAiChatFullscreen)
+  const isEnteringFullscreen = isAiChatFullscreen && !prevFullscreenRef.current
+  const isExitingFullscreen = !isAiChatFullscreen && prevFullscreenRef.current
+  const [
+    isFullscreenExitTransitionActive,
+    setIsFullscreenExitTransitionActive,
+  ] = useState(false)
+
+  useEffect(() => {
+    if (!isAiChatFullscreen && prevFullscreenRef.current) {
+      setIsFullscreenExitTransitionActive(true)
+    }
+    prevFullscreenRef.current = isAiChatFullscreen
+  }, [isAiChatFullscreen])
+
+  const isInFullscreenTransition =
+    isAiChatFullscreen ||
+    isFullscreenExitTransitionActive ||
+    isExitingFullscreen
+
+  const chatContainerTransition = useMemo(() => {
+    if (isEnteringFullscreen)
+      return { duration: 0.15, ease: "easeOut" as const }
+    if (isExitingFullscreen)
+      return { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] as const }
+    return { duration: 0 }
+  }, [isEnteringFullscreen, isExitingFullscreen])
+
   const shouldAutoCloseSidebar = useMediaQuery(
     `(max-width: ${breakpoints.xl}px)`,
     { initializeWithValue: true }
@@ -264,7 +293,9 @@ function ApplicationFrameContent({
                 layoutId="main"
                 className={cn(
                   "relative z-10 flex h-full max-w-full flex-1 xs:py-1",
-                  isAiChatFullscreen ? "overflow-hidden" : "overflow-auto",
+                  isInFullscreenTransition
+                    ? "overflow-hidden"
+                    : "overflow-auto",
                   !isAiChatOpen && !isAiPromotionChatOpen && "xs:pr-1",
                   sidebarState === "locked" ? "pl-0" : "xs:pl-1"
                 )}
@@ -273,7 +304,9 @@ function ApplicationFrameContent({
                 <motion.div
                   className={cn(
                     "flex max-w-full flex-1",
-                    isAiChatFullscreen ? "overflow-hidden" : "overflow-auto"
+                    isInFullscreenTransition
+                      ? "overflow-hidden"
+                      : "overflow-auto"
                   )}
                   layout="position"
                 >
@@ -283,21 +316,27 @@ function ApplicationFrameContent({
 
               {/* Chat */}
               {ai?.enabled && (
-                <div
+                <motion.div
                   className={cn(
                     "pointer-events-none absolute right-0 top-0 bottom-0",
                     "[&_.copilotKitSidebarContentWrapper]:relative [&_.copilotKitSidebarContentWrapper]:h-full [&_.copilotKitSidebarContentWrapper]:w-full",
-                    isAiChatFullscreen ? "z-20" : "z-0",
-                    sidebarState === "hidden" && isAiChatFullscreen
+                    isInFullscreenTransition ? "z-20" : "z-0",
+                    sidebarState === "hidden" && isInFullscreenTransition
                       ? "pl-1"
                       : "pl-0"
                   )}
-                  style={{
+                  animate={{
                     width: isAiChatFullscreen ? "100%" : reservedChatWidth,
+                  }}
+                  transition={chatContainerTransition}
+                  onAnimationComplete={() => {
+                    if (isFullscreenExitTransitionActive) {
+                      setIsFullscreenExitTransitionActive(false)
+                    }
                   }}
                 >
                   <F0AiChat />
-                </div>
+                </motion.div>
               )}
             </motion.div>
 

@@ -5,11 +5,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
 import { cn } from "@/lib/utils"
 
-import {
-  DEFAULT_CHAT_WIDTH,
-  MAX_CHAT_WIDTH,
-  MIN_CHAT_WIDTH,
-} from "../constants"
+import { MAX_CHAT_WIDTH, MIN_CHAT_WIDTH } from "../constants"
 import { useAutoClear } from "../hooks/useAutoClear"
 import { useAiChat } from "../providers/AiChatStateProvider"
 
@@ -86,7 +82,6 @@ export const SidebarWindow = ({ children }: WindowProps) => {
     setShouldPlayEntranceAnimation,
     autoClearMinutes,
     resizable,
-    chatWidth,
     setChatWidth,
     resetChatWidth,
   } = useAiChat()
@@ -110,34 +105,12 @@ export const SidebarWindow = ({ children }: WindowProps) => {
     [setChatWidth]
   )
 
-  const currentWidth = resizable ? chatWidth : DEFAULT_CHAT_WIDTH
-
-  // Track fullscreen direction for different enter/exit transitions
-  const prevFullscreenRef = useRef(fullscreen)
-  const isEnteringFullscreen = fullscreen && !prevFullscreenRef.current
-  const isExitingFullscreen = !fullscreen && prevFullscreenRef.current
-  useEffect(() => {
-    prevFullscreenRef.current = fullscreen
-  }, [fullscreen])
-
   const wrapperTransition = useMemo(() => {
     if (isResizing) return { duration: 0 }
     if (shouldPlayEntranceAnimation)
       return { duration: 0.3, ease: [0, 0, 0.1, 1] as const }
-    // Entering fullscreen: fast, the white fills instantly
-    if (isEnteringFullscreen)
-      return { duration: 0.15, ease: "easeOut" as const }
-    // Exiting fullscreen: smooth shrink towards the right
-    if (isExitingFullscreen)
-      return { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] as const }
-    // Normal open/close
     return { duration: 0.3, ease: [0, 0, 0.1, 1] as const }
-  }, [
-    isResizing,
-    shouldPlayEntranceAnimation,
-    isEnteringFullscreen,
-    isExitingFullscreen,
-  ])
+  }, [isResizing, shouldPlayEntranceAnimation])
 
   return (
     <AnimatePresence>
@@ -150,7 +123,7 @@ export const SidebarWindow = ({ children }: WindowProps) => {
           }
           animate={{
             opacity: 1,
-            width: fullscreen ? "100%" : currentWidth,
+            width: "100%",
           }}
           exit={{ opacity: 0, width: 0 }}
           transition={wrapperTransition}
@@ -171,15 +144,7 @@ export const SidebarWindow = ({ children }: WindowProps) => {
           )}
           <div
             aria-hidden={!open}
-            className={cn(
-              "relative flex h-full w-full flex-col overflow-hidden border border-solid border-f1-border-secondary bg-f1-special-page shadow xs:rounded-xl",
-              !fullscreen && !resizable && "max-w-[360px]"
-            )}
-            style={
-              resizable && !fullscreen
-                ? { maxWidth: MAX_CHAT_WIDTH }
-                : undefined
-            }
+            className="relative flex h-full w-full flex-col overflow-hidden border border-solid border-f1-border-secondary bg-f1-special-page shadow xs:rounded-xl"
           >
             <motion.div
               className="relative flex h-full w-full flex-col overflow-hidden"

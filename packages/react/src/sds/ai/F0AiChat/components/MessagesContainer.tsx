@@ -56,9 +56,7 @@ const Messages = ({
     welcomeScreenSuggestions,
     onThumbsUp,
     onThumbsDown,
-    visualizationMode,
   } = useAiChat()
-  const fullscreen = visualizationMode === "fullscreen"
 
   const initialMessages = useMemo(
     () =>
@@ -157,15 +155,12 @@ const Messages = ({
         >
           <div
             ref={contentRef}
-            className={cn(
-              "flex flex-col p-4 h-full",
-              fullscreen && "items-center"
-            )}
+            className="flex flex-col p-4 h-full items-center"
           >
             <div
               className={cn(
                 showWelcomeBlock ? "flex flex-1" : "flex flex-col gap-8",
-                fullscreen && "w-full max-w-[712px]"
+                "w-full max-w-[712px]"
               )}
             >
               {showWelcomeBlock && (

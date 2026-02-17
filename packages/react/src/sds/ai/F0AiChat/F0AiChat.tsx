@@ -115,14 +115,13 @@ const SendMessageFunctionInjector = () => {
 }
 
 const ChatInput = (props: InputProps) => {
-  const { disclaimer, visualizationMode, footer } = useAiChat()
+  const { disclaimer, footer } = useAiChat()
   const { messages } = useCopilotChatInternal()
-  const fullscreen = visualizationMode === "fullscreen"
   const isWelcomeScreen = messages.length === 0
 
   return (
     <div className="flex flex-col items-center gap-2 px-4 pb-4 pt-2">
-      <div className={cn("w-full", fullscreen && "max-w-[712px]")}>
+      <div className="w-full max-w-[712px]">
         <ChatTextarea {...props} />
       </div>
 
@@ -141,12 +140,7 @@ const ChatInput = (props: InputProps) => {
       </AnimatePresence>
 
       {disclaimer?.text && (
-        <div
-          className={cn(
-            "flex flex-row items-center gap-1 w-full justify-center",
-            fullscreen && " max-w-[712px]"
-          )}
-        >
+        <div className="flex flex-row items-center gap-1 w-full justify-center max-w-[712px]">
           <OneEllipsis className="text-sm font-medium text-f1-foreground-tertiary">
             {disclaimer.text}
           </OneEllipsis>
