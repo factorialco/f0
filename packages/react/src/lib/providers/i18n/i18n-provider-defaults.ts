@@ -263,6 +263,7 @@ export const defaultTranslations = {
     inputPlaceholder:
       "Ask about time, people, or company info and a lot of other things...",
     stopAnswerGeneration: "Stop generating",
+    responseStopped: "You stopped this response",
     sendMessage: "Send message",
     thoughtsGroupTitle: "Reflection",
     resourcesGroupTitle: "Resources",

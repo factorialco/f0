@@ -46,7 +46,6 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   welcomeScreenSuggestions: initialWelcomeScreenSuggestions = [],
   disclaimer,
   resizable = false,
-  onToggleSidebar,
   onThumbsDown,
   onThumbsUp,
   ...rest
@@ -189,7 +188,6 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         setSendMessageFunction,
         disclaimer,
         resizable,
-        onToggleSidebar,
         chatWidth,
         setChatWidth,
         resetChatWidth,
@@ -233,7 +231,6 @@ export function useAiChat(): AiChatProviderReturnValue {
       setSendMessageFunction: noopFn,
       disclaimer: undefined,
       resizable: false,
-      onToggleSidebar: undefined,
       chatWidth: DEFAULT_CHAT_WIDTH,
       setChatWidth: noopFn,
       resetChatWidth: noopFn,

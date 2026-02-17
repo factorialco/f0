@@ -44,7 +44,6 @@ const F0AiChatProviderComponent = ({
   welcomeScreenSuggestions,
   disclaimer,
   resizable = false,
-  onToggleSidebar,
   onThumbsUp,
   onThumbsDown,
   children,
@@ -64,7 +63,6 @@ const F0AiChatProviderComponent = ({
       welcomeScreenSuggestions={welcomeScreenSuggestions}
       disclaimer={disclaimer}
       resizable={resizable}
-      onToggleSidebar={onToggleSidebar}
     >
       <AiChatKitWrapper {...copilotKitProps}>{children}</AiChatKitWrapper>
     </AiChatStateProvider>
@@ -124,7 +122,7 @@ const F0AiChatComponent = () => {
 
   const InputComponent = useCallback(
     ({ ...props }: InputProps) => (
-      <div className="items-center flex flex-col gap-2 p-4">
+      <div className="flex flex-col items-center gap-2 p-4">
         <div className={cn("w-full", fullscreen && "max-w-[712px]")}>
           <ChatTextarea {...props} />
         </div>
@@ -136,7 +134,7 @@ const F0AiChatComponent = () => {
               fullscreen && " max-w-[712px]"
             )}
           >
-            <OneEllipsis className="text-f1-foreground-tertiary text-sm font-medium">
+            <OneEllipsis className="text-sm font-medium text-f1-foreground-tertiary">
               {disclaimer.text}
             </OneEllipsis>
 
@@ -145,7 +143,7 @@ const F0AiChatComponent = () => {
                 href={disclaimer.link}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-f1-foreground-tertiary text-sm font-medium flex-shrink-0"
+                className="flex-shrink-0 text-sm font-medium text-f1-foreground-tertiary"
               >
                 {disclaimer.linkText}
               </Link>
@@ -163,7 +161,7 @@ const F0AiChatComponent = () => {
 
   return (
     <CopilotSidebar
-      className={cn("h-full", fullscreen && "w-full")}
+      className="h-full w-full"
       defaultOpen={open}
       onSetOpen={(isOpen) => {
         setOpen(isOpen)

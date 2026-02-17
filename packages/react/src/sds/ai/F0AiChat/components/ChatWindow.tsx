@@ -10,7 +10,7 @@ import { useAiChat } from "../providers/AiChatStateProvider"
 
 const MIN_CHAT_WIDTH = 300
 const MAX_CHAT_WIDTH = 712
-const DEFAULT_CHAT_WIDTH = 360
+export const DEFAULT_CHAT_WIDTH = 360
 
 const ResizeHandle = ({
   onResize,
@@ -34,9 +34,11 @@ const ResizeHandle = ({
     [setIsResizing]
   )
 
-  const handleDoubleClick = useCallback(() => {
-    onReset()
-  }, [onReset])
+  const handleDoubleClick = useCallback(async () => {
+    setIsResizing(true)
+    await onReset()
+    setIsResizing(false)
+  }, [onReset, setIsResizing])
 
   useEffect(() => {
     if (!isResizing) return
@@ -63,13 +65,15 @@ const ResizeHandle = ({
   return (
     <div
       className={cn(
-        "h-full w-1 mr-0.5 shrink-0 cursor-ew-resize transition-colors",
-        "hover:bg-f1-background-secondary-hover",
-        isResizing && "bg-f1-background-secondary-hover"
+        "flex h-full w-2 flex-shrink-0 cursor-ew-resize items-stretch justify-center transition-colors",
+        "[&>div]:hover:bg-f1-background-secondary-hover",
+        isResizing && "[&>div]:bg-f1-background-secondary-hover"
       )}
       onMouseDown={handleMouseDown}
       onDoubleClick={handleDoubleClick}
-    />
+    >
+      <div className="w-1 rounded-full" />
+    </div>
   )
 }
 
@@ -121,9 +125,9 @@ export const SidebarWindow = ({ children }: WindowProps) => {
     // Entering fullscreen: fast, the white fills instantly
     if (isEnteringFullscreen)
       return { duration: 0.15, ease: "easeOut" as const }
-    // Exiting fullscreen: smooth and gentle shrink
+    // Exiting fullscreen: smooth shrink towards the right
     if (isExitingFullscreen)
-      return { duration: 0.35, ease: [0.4, 0, 0.2, 1] as const }
+      return { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] as const }
     // Normal open/close
     return { duration: 0.3, ease: [0, 0, 0.1, 1] as const }
   }, [
@@ -138,7 +142,7 @@ export const SidebarWindow = ({ children }: WindowProps) => {
       {open && (
         <motion.div
           key="chat-wrapper"
-          className="relative ml-auto flex h-full xs:rounded-xl dark:bg-f1-background bg-f1-transparent"
+          className="pointer-events-auto bg-f1-transparent relative ml-auto flex h-full dark:bg-f1-background xs:rounded-xl py-1 pr-1"
           initial={
             shouldPlayEntranceAnimation ? { opacity: 0, width: 0 } : false
           }

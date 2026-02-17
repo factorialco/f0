@@ -6,7 +6,6 @@ import { ButtonInternal } from "@/components/F0Button/internal"
 import Cross from "@/icons/app/Cross"
 import Maximize from "@/icons/app/Maximize"
 import Minimize from "@/icons/app/Minimize"
-import Menu from "@/icons/app/Menu"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
@@ -16,8 +15,7 @@ import { New } from "@/icons/app"
 export const ChatHeader = (props: HeaderProps) => {
   const { labels } = useChatContext()
   const { messages } = useCopilotChatInternal()
-  const { setOpen, clear, fullscreen, setFullscreen, onToggleSidebar } =
-    useAiChat()
+  const { setOpen, clear, fullscreen, setFullscreen } = useAiChat()
   const translations = useI18n()
   const hasDefaultTitle = labels.title === "CopilotKit"
   const hasMessages = messages.length > 0
@@ -29,20 +27,11 @@ export const ChatHeader = (props: HeaderProps) => {
       )}
     >
       <div className="flex items-center">
-        {fullscreen && onToggleSidebar && (
-          <ButtonInternal
-            variant="ghost"
-            hideLabel
-            label={translations.ai.toggleSidebar}
-            icon={Menu}
-            onClick={onToggleSidebar}
-          />
-        )}
         <h2 className="text-f1-foreground">
           {hasDefaultTitle ? "" : labels.title}
         </h2>
       </div>
-      <motion.div layout className="flex items-center" {...props}>
+      <motion.div className="flex items-center" {...props}>
         {hasMessages && (
           <ButtonInternal
             variant="ghost"

@@ -124,3 +124,47 @@ export const Default: Story = {
     await expect(link.dataset.test).toBe("foo")
   },
 }
+
+export const WithAiPromotion: Story = {
+  render: (args) => <DefaultStoryComponent {...args} />,
+  args: {
+    ai: undefined,
+    aiPromotion: {
+      enabled: true,
+      greeting: "Hey Hellen,",
+      title: "Meet One, your AI agent",
+      description:
+        "One simplifies your daily tasks so you can focus on what really matters. Join the waitlist (open until November 30, 2025) to:",
+      benefits: [
+        {
+          noBoldText: "Get access at",
+          boldText: "no additional cost",
+        },
+        {
+          noBoldText: "Explore key features",
+          boldText: "early",
+        },
+        {
+          noBoldText: "Share feedback and",
+          boldText: "help shape One",
+        },
+      ],
+      actions: [
+        {
+          label: "Join the waitlist",
+          onClick: () => {},
+          buttonType: "gradient",
+          isLoading: false,
+        },
+        {
+          label: "Learn more",
+          onClick: () => {},
+          buttonType: "internal",
+          buttonVariant: "ghost",
+          isLoading: false,
+          icon: ExternalLink,
+        },
+      ],
+    },
+  },
+}
