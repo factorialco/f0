@@ -17,8 +17,8 @@ export const ScrollShadow = ({ position }: { position: "top" | "bottom" }) => (
           ]
         : [
             "bottom-0",
-            "h-5",
-            "bg-gradient-to-t from-f1-special-page dark:from-f1-background-secondary to-transparent",
+            "h-6",
+            "bg-gradient-to-t from-f1-background dark:from-f1-background-secondary to-transparent",
             "after:bottom-0",
           ]
     )}

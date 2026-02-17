@@ -122,7 +122,7 @@ const F0AiChatComponent = () => {
 
   const InputComponent = useCallback(
     ({ ...props }: InputProps) => (
-      <div className="flex flex-col items-center gap-2 p-4">
+      <div className="flex flex-col items-center gap-2 px-4 pb-4 pt-2">
         <div className={cn("w-full", fullscreen && "max-w-[712px]")}>
           <ChatTextarea {...props} />
         </div>
