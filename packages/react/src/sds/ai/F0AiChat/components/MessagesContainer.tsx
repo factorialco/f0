@@ -56,8 +56,9 @@ const Messages = ({
     welcomeScreenSuggestions,
     onThumbsUp,
     onThumbsDown,
-    fullscreen,
+    visualizationMode,
   } = useAiChat()
+  const fullscreen = visualizationMode === "fullscreen"
 
   const initialMessages = useMemo(
     () =>

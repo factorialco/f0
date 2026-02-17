@@ -15,7 +15,14 @@ import { New } from "@/icons/app"
 export const ChatHeader = (props: HeaderProps) => {
   const { labels } = useChatContext()
   const { messages } = useCopilotChatInternal()
-  const { setOpen, clear, fullscreen, setFullscreen } = useAiChat()
+  const {
+    setOpen,
+    clear,
+    visualizationMode,
+    setVisualizationMode,
+    lockVisualizationMode,
+  } = useAiChat()
+  const fullscreen = visualizationMode === "fullscreen"
   const translations = useI18n()
   const hasDefaultTitle = labels.title === "CopilotKit"
   const hasMessages = messages.length > 0
@@ -43,17 +50,23 @@ export const ChatHeader = (props: HeaderProps) => {
             }}
           />
         )}
-        <ButtonInternal
-          variant="ghost"
-          hideLabel
-          label={
-            fullscreen
-              ? translations.ai.collapseChat
-              : translations.ai.expandChat
-          }
-          icon={fullscreen ? Minimize : Maximize}
-          onClick={() => setFullscreen((prev) => !prev)}
-        />
+        {!lockVisualizationMode && (
+          <ButtonInternal
+            variant="ghost"
+            hideLabel
+            label={
+              fullscreen
+                ? translations.ai.collapseChat
+                : translations.ai.expandChat
+            }
+            icon={fullscreen ? Minimize : Maximize}
+            onClick={() =>
+              setVisualizationMode((prev) =>
+                prev === "fullscreen" ? "sidepanel" : "fullscreen"
+              )
+            }
+          />
+        )}
         {!fullscreen && (
           <ButtonInternal
             variant="ghost"

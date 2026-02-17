@@ -15,7 +15,7 @@ import { useI18n } from "@/lib/providers/i18n"
 
 import { DEFAULT_CHAT_WIDTH } from "../constants"
 import { AiChatProviderReturnValue, AiChatState } from "../internal-types"
-import { WelcomeScreenSuggestion } from "../types"
+import { type VisualizationMode, WelcomeScreenSuggestion } from "../types"
 
 const AiChatStateContext = createContext<AiChatProviderReturnValue | null>(null)
 
@@ -46,15 +46,20 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   welcomeScreenSuggestions: initialWelcomeScreenSuggestions = [],
   disclaimer,
   resizable = false,
+  defaultVisualizationMode = "sidepanel",
+  lockVisualizationMode = false,
+  footer,
   onThumbsDown,
   onThumbsUp,
   ...rest
 }) => {
   const [enabledInternal, setEnabledInternal] = useState(enabled)
-  const [open, setOpen] = useState(false)
-  const [fullscreen, setFullscreen] = useState(false)
+  const [open, setOpen] = useState(defaultVisualizationMode === "fullscreen")
+  const [visualizationMode, setVisualizationMode] = useState<VisualizationMode>(
+    defaultVisualizationMode
+  )
   const [shouldPlayEntranceAnimation, setShouldPlayEntranceAnimation] =
-    useState(true)
+    useState(defaultVisualizationMode !== "fullscreen")
   const [agent, setAgent] = useState<string | undefined>(initialAgent)
   const [welcomeScreenSuggestions, setWelcomeScreenSuggestions] = useState<
     WelcomeScreenSuggestion[]
@@ -140,10 +145,10 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
     setEnabledInternal(enabled)
   }, [enabled])
 
-  // Reset fullscreen when chat closes
+  // Reset visualization mode when chat closes
   useEffect(() => {
     if (!open) {
-      setFullscreen(false)
+      setVisualizationMode("sidepanel")
       const prefersReducedMotion = window.matchMedia(
         "(prefers-reduced-motion: reduce)"
       ).matches
@@ -153,10 +158,10 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
 
   // Ensure chat is open when entering fullscreen
   useEffect(() => {
-    if (fullscreen && !open) {
+    if (visualizationMode === "fullscreen" && !open) {
       setOpen(true)
     }
-  }, [fullscreen, open])
+  }, [visualizationMode, open])
 
   return (
     <AiChatStateContext.Provider
@@ -166,8 +171,10 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         setEnabled: setEnabledInternal,
         open,
         setOpen,
-        fullscreen,
-        setFullscreen,
+        visualizationMode,
+        setVisualizationMode,
+        lockVisualizationMode,
+        footer,
         shouldPlayEntranceAnimation,
         setShouldPlayEntranceAnimation,
         agent,
@@ -209,8 +216,9 @@ export function useAiChat(): AiChatProviderReturnValue {
       setEnabled: noopFn,
       open: false,
       setOpen: noopFn,
-      fullscreen: false,
-      setFullscreen: noopFn,
+      visualizationMode: "sidepanel",
+      setVisualizationMode: noopFn,
+      lockVisualizationMode: false,
       shouldPlayEntranceAnimation: true,
       setShouldPlayEntranceAnimation: noopFn,
       agent: undefined,

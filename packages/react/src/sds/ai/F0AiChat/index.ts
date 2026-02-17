@@ -9,6 +9,7 @@ export {
 // Types
 export type {
   AiChatProviderProps,
+  VisualizationMode,
   WelcomeScreenSuggestion,
   AiChatTranslations,
   AiChatTranslationsProviderProps,

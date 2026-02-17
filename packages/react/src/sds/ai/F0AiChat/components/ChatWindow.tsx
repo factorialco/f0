@@ -81,7 +81,7 @@ const ResizeHandle = ({
 export const SidebarWindow = ({ children }: WindowProps) => {
   const {
     open,
-    fullscreen,
+    visualizationMode,
     shouldPlayEntranceAnimation,
     setShouldPlayEntranceAnimation,
     autoClearMinutes,
@@ -90,6 +90,7 @@ export const SidebarWindow = ({ children }: WindowProps) => {
     setChatWidth,
     resetChatWidth,
   } = useAiChat()
+  const fullscreen = visualizationMode === "fullscreen"
   const { reset } = useCopilotChatInternal()
   const [isResizing, setIsResizing] = useState(false)
 

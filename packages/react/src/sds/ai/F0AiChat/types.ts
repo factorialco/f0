@@ -4,6 +4,11 @@ import { type AIMessage } from "@copilotkit/shared"
 import { IconType } from "@/components/F0Icon"
 
 /**
+ * Visualization mode for the AI chat
+ */
+export type VisualizationMode = "sidepanel" | "fullscreen"
+
+/**
  * Props for the AiChatProvider component
  */
 export type AiChatProviderProps = {
@@ -17,6 +22,21 @@ export type AiChatProviderProps = {
    * When enabled, the chat can be resized between 300px and 50% of the screen width
    */
   resizable?: boolean
+  /**
+   * The default visualization mode for the chat
+   * When set to "fullscreen", the chat starts in fullscreen mode and auto-opens
+   * @default "sidepanel"
+   */
+  defaultVisualizationMode?: VisualizationMode
+  /**
+   * When true, prevents switching between visualization modes (hides the expand/collapse button)
+   * @default false
+   */
+  lockVisualizationMode?: boolean
+  /**
+   * Optional footer content rendered below the textarea
+   */
+  footer?: React.ReactNode
   onThumbsUp?: (
     message: AIMessage,
     { threadId, feedback }: { threadId: string; feedback: string }

@@ -1,6 +1,10 @@
 import { type AIMessage, type Message } from "@copilotkit/shared"
 
-import { type AiChatDisclaimer, WelcomeScreenSuggestion } from "./types"
+import {
+  type AiChatDisclaimer,
+  type VisualizationMode,
+  WelcomeScreenSuggestion,
+} from "./types"
 
 /**
  * Context type for fullscreen chat state
@@ -21,6 +25,9 @@ export interface AiChatState {
   welcomeScreenSuggestions?: WelcomeScreenSuggestion[]
   disclaimer?: AiChatDisclaimer
   resizable?: boolean
+  defaultVisualizationMode?: VisualizationMode
+  lockVisualizationMode?: boolean
+  footer?: React.ReactNode
   placeholders?: string[]
   setPlaceholders?: React.Dispatch<React.SetStateAction<string[]>>
   onThumbsUp?: (
@@ -103,13 +110,21 @@ export type AiChatProviderReturnValue = {
    */
   resetChatWidth: () => void
   /**
-   * Whether the chat is in fullscreen mode
+   * The current visualization mode of the chat
    */
-  fullscreen: boolean
+  visualizationMode: VisualizationMode
   /**
-   * Toggle fullscreen mode on or off
+   * Set the visualization mode
    */
-  setFullscreen: React.Dispatch<React.SetStateAction<boolean>>
+  setVisualizationMode: React.Dispatch<React.SetStateAction<VisualizationMode>>
+  /**
+   * When true, prevents switching between visualization modes
+   */
+  lockVisualizationMode: boolean
+  /**
+   * Optional footer content rendered below the textarea
+   */
+  footer?: React.ReactNode
 } & Pick<AiChatState, "greeting" | "agent" | "disclaimer" | "resizable">
 
 /**

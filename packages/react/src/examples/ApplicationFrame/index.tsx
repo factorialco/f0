@@ -179,10 +179,11 @@ function ApplicationFrameContent({
   const shouldReduceMotion = useReducedMotion()
   const {
     open: isAiChatOpen,
-    fullscreen: isAiChatFullscreen,
+    visualizationMode,
     chatWidth,
     resizable,
   } = useAiChat()
+  const isAiChatFullscreen = visualizationMode === "fullscreen"
   const { open: isAiPromotionChatOpen } = useAiPromotionChat()
   const reservedChatWidth = resizable ? chatWidth : DEFAULT_CHAT_WIDTH
 

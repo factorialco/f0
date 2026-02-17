@@ -4,14 +4,8 @@ import {
   useCopilotChatInternal,
 } from "@copilotkit/react-core"
 import { CopilotSidebar, InputProps } from "@copilotkit/react-ui"
-import {
-  useCallback,
-  useEffect,
-  createContext,
-  useContext,
-  useState,
-  useRef,
-} from "react"
+import { AnimatePresence, motion } from "motion/react"
+import { useEffect, createContext, useContext, useState, useRef } from "react"
 
 import { OneEllipsis } from "@/components/OneEllipsis"
 import { experimentalComponent } from "@/lib/experimental"
@@ -44,6 +38,9 @@ const F0AiChatProviderComponent = ({
   welcomeScreenSuggestions,
   disclaimer,
   resizable = false,
+  defaultVisualizationMode,
+  lockVisualizationMode,
+  footer,
   onThumbsUp,
   onThumbsDown,
   children,
@@ -63,6 +60,9 @@ const F0AiChatProviderComponent = ({
       welcomeScreenSuggestions={welcomeScreenSuggestions}
       disclaimer={disclaimer}
       resizable={resizable}
+      defaultVisualizationMode={defaultVisualizationMode}
+      lockVisualizationMode={lockVisualizationMode}
+      footer={footer}
     >
       <AiChatKitWrapper {...copilotKitProps}>{children}</AiChatKitWrapper>
     </AiChatStateProvider>
@@ -114,46 +114,64 @@ const SendMessageFunctionInjector = () => {
   return null
 }
 
+const ChatInput = (props: InputProps) => {
+  const { disclaimer, visualizationMode, footer } = useAiChat()
+  const { messages } = useCopilotChatInternal()
+  const fullscreen = visualizationMode === "fullscreen"
+  const isWelcomeScreen = messages.length === 0
+
+  return (
+    <div className="flex flex-col items-center gap-2 px-4 pb-4 pt-2">
+      <div className={cn("w-full", fullscreen && "max-w-[712px]")}>
+        <ChatTextarea {...props} />
+      </div>
+
+      <AnimatePresence>
+        {footer && isWelcomeScreen && (
+          <motion.div
+            key="chat-footer"
+            initial={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0, overflow: "hidden" }}
+            transition={{ duration: 0.25, ease: "easeInOut" }}
+            className="w-full py-4 mx-auto max-w-[712px]"
+          >
+            {footer}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {disclaimer?.text && (
+        <div
+          className={cn(
+            "flex flex-row items-center gap-1 w-full justify-center",
+            fullscreen && " max-w-[712px]"
+          )}
+        >
+          <OneEllipsis className="text-sm font-medium text-f1-foreground-tertiary">
+            {disclaimer.text}
+          </OneEllipsis>
+
+          {disclaimer.link && disclaimer.linkText && (
+            <Link
+              href={disclaimer.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-shrink-0 text-sm font-medium text-f1-foreground-tertiary"
+            >
+              {disclaimer.linkText}
+            </Link>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
 const F0AiChatComponent = () => {
-  const { enabled, open, setOpen, disclaimer, fullscreen } = useAiChat()
+  const { enabled, open, setOpen } = useAiChat()
 
   // Register all default copilot actions
   useDefaultCopilotActions()
-
-  const InputComponent = useCallback(
-    ({ ...props }: InputProps) => (
-      <div className="flex flex-col items-center gap-2 px-4 pb-4 pt-2">
-        <div className={cn("w-full", fullscreen && "max-w-[712px]")}>
-          <ChatTextarea {...props} />
-        </div>
-
-        {disclaimer?.text && (
-          <div
-            className={cn(
-              "flex flex-row items-center gap-1 w-full justify-center",
-              fullscreen && " max-w-[712px]"
-            )}
-          >
-            <OneEllipsis className="text-sm font-medium text-f1-foreground-tertiary">
-              {disclaimer.text}
-            </OneEllipsis>
-
-            {disclaimer.link && disclaimer.linkText && (
-              <Link
-                href={disclaimer.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex-shrink-0 text-sm font-medium text-f1-foreground-tertiary"
-              >
-                {disclaimer.linkText}
-              </Link>
-            )}
-          </div>
-        )}
-      </div>
-    ),
-    [disclaimer, fullscreen]
-  )
 
   if (!enabled) {
     return null
@@ -172,7 +190,7 @@ const F0AiChatComponent = () => {
       Button={() => {
         return null // hide CopilotKit's default chat button
       }}
-      Input={InputComponent}
+      Input={ChatInput}
       UserMessage={UserMessage}
       AssistantMessage={AssistantMessage}
     />

@@ -4,8 +4,13 @@ import { ComponentProps } from "react"
 import { expect, within } from "storybook/test"
 
 import { Lightbulb } from "@/icons/app"
+import Add from "@/icons/app/Add"
+import ArrowRight from "@/icons/app/ArrowRight"
 import ExternalLink from "@/icons/app/ExternalLink"
+import Marketplace from "@/icons/app/Marketplace"
 import PalmTree from "@/icons/app/PalmTree"
+import { Action } from "@/ui/Action"
+import { F0Icon } from "@/components/F0Icon"
 
 import { Page } from "@/experimental/Navigation/Page"
 import * as PageStories from "@/experimental/Navigation/Page/index.stories"
@@ -163,6 +168,97 @@ export const WithAiPromotion: Story = {
           buttonVariant: "ghost",
           isLoading: false,
           icon: ExternalLink,
+        },
+      ],
+    },
+  },
+}
+
+const QuickActions = () => (
+  <div className="flex flex-col gap-4 w-full border-f1-border border-2 border-dotted rounded-md p-4">
+    <div className="flex items-center justify-between gap-4">
+      <p className="text-sm text-f1-foreground-secondary whitespace-nowrap">
+        Or start from
+      </p>
+      <div className="flex items-center gap-2">
+        <Action
+          variant="ghost"
+          prepend={<F0Icon icon={Marketplace} size="sm" />}
+          append={<ArrowRight className="h-3.5 w-3.5" />}
+          onClick={() => {}}
+        >
+          All templates
+        </Action>
+      </div>
+    </div>
+    <div className="flex flex-wrap gap-2">
+      <Action
+        variant="outline"
+        prepend={<F0Icon icon={Add} size="sm" />}
+        onClick={() => {}}
+      >
+        Empty survey
+      </Action>
+      <Action variant="outline" prepend={<span>😀</span>} onClick={() => {}}>
+        Q4 Employee Satisfaction
+      </Action>
+      <Action
+        variant="outline"
+        prepend={<span>🤝</span>}
+        append={<ArrowRight className="h-3.5 w-3.5" />}
+        onClick={() => {}}
+      >
+        Team Effectiveness
+      </Action>
+    </div>
+  </div>
+)
+
+export const FullscreenWithActions: Story = {
+  render: (args) => (
+    <ApplicationFrame
+      ai={args.ai}
+      aiPromotion={args.aiPromotion}
+      sidebar={<Sidebar {...SidebarStories.default.args} />}
+    >
+      <Page {...PageStories.Default.args} />
+    </ApplicationFrame>
+  ),
+  args: {
+    ai: {
+      runtimeUrl: "https://mastra.local.factorial.dev/copilotkit",
+      agent: "one-workflow",
+      credentials: "include",
+      showDevConsole: false,
+      enabled: true,
+      resizable: true,
+      greeting: "Hello, John",
+      defaultVisualizationMode: "fullscreen",
+      lockVisualizationMode: true,
+      footer: <QuickActions />,
+      disclaimer: {
+        text: "One works within your permissions.",
+        link: "/permissions",
+        linkText: "See more",
+      },
+      welcomeScreenSuggestions: [
+        {
+          icon: Lightbulb,
+          message: "Share feedback",
+          prompt:
+            "Share feedback and help shape One with your feedback in the next message (optional)",
+        },
+        {
+          icon: PalmTree,
+          message: "Create a new task",
+          prompt:
+            "Create a new task and help shape One with your feedback in the next message (optional)",
+        },
+        {
+          icon: Lightbulb,
+          message: "Create a new project",
+          prompt:
+            "Create a new project and help shape One with your feedback in the next message (optional)",
         },
       ],
     },
