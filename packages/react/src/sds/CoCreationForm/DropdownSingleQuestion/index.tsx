@@ -33,7 +33,7 @@ export const DropdownSingleQuestion = ({
           label={t("coCreationForm.answer.label")}
           hideLabel
           size="md"
-          clearable={false}
+          clearable={!props.required}
           multiple={false}
           options={selectOptions}
           value={props.value ?? ""}
