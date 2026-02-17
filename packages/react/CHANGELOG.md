@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.367.0](https://github.com/factorialco/f0/compare/f0-react-v1.366.0...f0-react-v1.367.0) (2026-02-17)
+
+
+### Features
+
+* add id to the community post wrapper div ([#3452](https://github.com/factorialco/f0/issues/3452)) ([17da663](https://github.com/factorialco/f0/commit/17da6634f6484375e1e962f819a4a98632279154))
+
 ## [1.366.0](https://github.com/factorialco/f0/compare/f0-react-v1.365.0...f0-react-v1.366.0) (2026-02-17)
 
 
