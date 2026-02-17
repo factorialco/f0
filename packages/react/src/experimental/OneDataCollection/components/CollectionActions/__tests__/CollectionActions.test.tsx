@@ -135,13 +135,9 @@ describe("CollectionActions", () => {
         "Costs proven by receipts or invoices"
       )
       expect(passedItems[1].label).toBe("Mileage")
-      expect(passedItems[1].description).toBe(
-        "Travel with a personal vehicle"
-      )
+      expect(passedItems[1].description).toBe("Travel with a personal vehicle")
       expect(passedItems[2].label).toBe("Per diem")
-      expect(passedItems[2].description).toBe(
-        "Fixed daily travel allowance"
-      )
+      expect(passedItems[2].description).toBe("Fixed daily travel allowance")
     })
 
     it("renders Dropdown even with a single action that has a description", () => {
