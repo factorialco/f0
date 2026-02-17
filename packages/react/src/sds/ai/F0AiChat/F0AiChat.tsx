@@ -2,8 +2,10 @@ import {
   CopilotKit,
   CopilotKitProps,
   useCopilotChatInternal,
+  useCopilotContext,
 } from "@copilotkit/react-core"
 import { CopilotSidebar, InputProps } from "@copilotkit/react-ui"
+import { randomId } from "@copilotkit/shared"
 import { AnimatePresence, motion } from "motion/react"
 import { useEffect, createContext, useContext, useState, useRef } from "react"
 
@@ -87,13 +89,18 @@ const AiChatKitWrapper = ({
 const ResetFunctionInjector = () => {
   const { setClearFunction } = useAiChat()
   const { reset } = useCopilotChatInternal()
+  const { setThreadId } = useCopilotContext()
 
   useEffect(() => {
-    setClearFunction(reset)
+    const resetWithNewThread = () => {
+      reset()
+      setThreadId(randomId())
+    }
+    setClearFunction(resetWithNewThread)
     return () => {
       setClearFunction(null)
     }
-  }, [setClearFunction, reset])
+  }, [setClearFunction, reset, setThreadId])
 
   return null
 }

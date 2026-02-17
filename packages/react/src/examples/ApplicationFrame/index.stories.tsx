@@ -4,19 +4,21 @@ import { ComponentProps } from "react"
 import { expect, within } from "storybook/test"
 
 import { Lightbulb } from "@/icons/app"
-import Add from "@/icons/app/Add"
 import ArrowRight from "@/icons/app/ArrowRight"
 import ExternalLink from "@/icons/app/ExternalLink"
 import Marketplace from "@/icons/app/Marketplace"
 import PalmTree from "@/icons/app/PalmTree"
 import { Action } from "@/ui/Action"
-import { F0Icon } from "@/components/F0Icon"
+import { F0Icon, IconType } from "@/components/F0Icon"
+import { useAiChat } from "@/sds/ai/F0AiChat"
 
 import { Page } from "@/experimental/Navigation/Page"
 import * as PageStories from "@/experimental/Navigation/Page/index.stories"
 import * as SidebarStories from "@/components/Navigation/Sidebar/index.stories"
 import { Sidebar } from "@/components/Navigation/Sidebar/Sidebar"
 import { ApplicationFrame } from "./index"
+import { F0Box } from "@/components/F0Box"
+import { F0Button } from "@/components/F0Button"
 
 const meta: Meta<typeof ApplicationFrame> = {
   title: "ApplicationFrame",
@@ -174,45 +176,72 @@ export const WithAiPromotion: Story = {
   },
 }
 
-const QuickActions = () => (
-  <div className="flex flex-col gap-4 w-full border-f1-border border-2 border-dotted rounded-md p-4">
-    <div className="flex items-center justify-between gap-4">
-      <p className="text-sm text-f1-foreground-secondary whitespace-nowrap">
-        Or start from
-      </p>
-      <div className="flex items-center gap-2">
-        <Action
-          variant="ghost"
-          prepend={<F0Icon icon={Marketplace} size="sm" />}
-          append={<ArrowRight className="h-3.5 w-3.5" />}
-          onClick={() => {}}
-        >
-          All templates
-        </Action>
+const QuickActions = () => {
+  const { sendMessage } = useAiChat()
+
+  const buttonWithMessage = (action: {
+    label: string
+    message: string
+    icon: IconType
+  }) => {
+    return (
+      <F0Button
+        variant="outline"
+        label={action.label}
+        onClick={() => {
+          sendMessage(action.message)
+        }}
+        icon={action.icon}
+      />
+    )
+  }
+
+  const actions = [
+    {
+      label: "All templates",
+      message: "Give me a summary of my pending time-off requests",
+      icon: Lightbulb,
+    },
+    {
+      label: "Empty survey",
+      message: "Give me a summary of my pending time-off requests",
+      icon: Lightbulb,
+    },
+    {
+      label: "Q4 Employee Satisfaction",
+      message: "Give me a summary of my pending time-off requests",
+      icon: Lightbulb,
+    },
+    {
+      label: "Team Effectiveness",
+      message: "Give me a summary of my pending time-off requests",
+      icon: Lightbulb,
+    },
+  ]
+
+  return (
+    <div className="flex flex-col gap-4 w-full border-f1-border border-2 border-dotted rounded-md p-4">
+      <div className="flex items-center justify-between gap-4">
+        <p className="text-sm text-f1-foreground-secondary whitespace-nowrap">
+          Or start from
+        </p>
+        <div className="flex items-center gap-2">
+          <Action
+            variant="ghost"
+            prepend={<F0Icon icon={Marketplace} size="sm" />}
+            append={<ArrowRight className="h-3.5 w-3.5" />}
+            onClick={() => {}}
+          >
+            All templates
+          </Action>
+        </div>
       </div>
+      <F0Box display="grid" columns="4" gap="sm">
+        {actions.map((action) => buttonWithMessage(action))}
+      </F0Box>
     </div>
-    <div className="flex flex-wrap gap-2">
-      <Action
-        variant="outline"
-        prepend={<F0Icon icon={Add} size="sm" />}
-        onClick={() => {}}
-      >
-        Empty survey
-      </Action>
-      <Action variant="outline" prepend={<span>😀</span>} onClick={() => {}}>
-        Q4 Employee Satisfaction
-      </Action>
-      <Action
-        variant="outline"
-        prepend={<span>🤝</span>}
-        append={<ArrowRight className="h-3.5 w-3.5" />}
-        onClick={() => {}}
-      >
-        Team Effectiveness
-      </Action>
-    </div>
-  </div>
-)
+  )
+}
 
 export const FullscreenWithActions: Story = {
   render: (args) => (
