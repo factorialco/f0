@@ -26,6 +26,7 @@ export const Default: Story = {
     ),
   ],
   args: {
+    id: "123",
     author: {
       firstName: "Saúl",
       lastName: "Domínguez",

@@ -109,6 +109,7 @@ export const BaseCommunityPost = ({
     <div
       className="flex w-full cursor-pointer flex-row gap-3 rounded-xl border border-solid border-transparent p-3 pt-2 hover:bg-f1-background-hover focus:border-f1-border-secondary focus:outline focus:outline-1 focus:outline-offset-1 focus:outline-f1-border-selected-bold md:pb-4 md:pt-3"
       onClick={handleClick}
+      id={`community-post-${id}`}
     >
       <div className="hidden md:block">
         {author ? (
