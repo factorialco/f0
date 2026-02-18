@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.369.2](https://github.com/factorialco/f0/compare/f0-react-v1.369.1...f0-react-v1.369.2) (2026-02-18)
+
+
+### Bug Fixes
+
+* ensure search box doesnt disappear in data collection InFilter ([#3464](https://github.com/factorialco/f0/issues/3464)) ([dc4f519](https://github.com/factorialco/f0/commit/dc4f5191071227bfcf56419a77eb136374910476))
+
 ## [1.369.1](https://github.com/factorialco/f0/compare/f0-react-v1.369.0...f0-react-v1.369.1) (2026-02-18)
 
 
