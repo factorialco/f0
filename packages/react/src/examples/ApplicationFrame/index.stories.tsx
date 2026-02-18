@@ -263,7 +263,7 @@ export const FullscreenWithActions: Story = {
       resizable: true,
       greeting: "Hello, John",
       defaultVisualizationMode: "fullscreen",
-      lockVisualizationMode: false,
+      lockVisualizationMode: true,
       footer: <QuickActions />,
       disclaimer: {
         text: "One works within your permissions.",
