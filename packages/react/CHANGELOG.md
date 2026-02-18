@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.369.3](https://github.com/factorialco/f0/compare/f0-react-v1.369.2...f0-react-v1.369.3) (2026-02-18)
+
+
+### Bug Fixes
+
+* **F0DatePicker:** reset range selection when clicking after complete range ([#3447](https://github.com/factorialco/f0/issues/3447)) ([aa1bd6f](https://github.com/factorialco/f0/commit/aa1bd6ff5d9fbb0e74056ea0a708668ed88b8264))
+
 ## [1.369.2](https://github.com/factorialco/f0/compare/f0-react-v1.369.1...f0-react-v1.369.2) (2026-02-18)
 
 
