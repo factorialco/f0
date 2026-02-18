@@ -277,7 +277,10 @@ export function F0Form<TSchema extends F0FormSchema>(
     }
     const result = await onSubmit(cleanedData)
 
-    if (!result.success) {
+    if (result.success) {
+      form.reset(data)
+      resetErrorNavigation()
+    } else {
       // Set field-specific errors
       if (result.errors) {
         Object.entries(result.errors).forEach(([field, message]) => {

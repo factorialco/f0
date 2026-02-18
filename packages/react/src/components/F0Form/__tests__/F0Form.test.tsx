@@ -1393,3 +1393,94 @@ describe("F0Form clearing optional fields with default values", () => {
     expect(submittedData.dateRange).toBeUndefined()
   })
 })
+
+describe("F0Form dirty state resets after successful submission", () => {
+  it("hides the action bar after a successful submit", async () => {
+    const user = userEvent.setup()
+    const onSubmit = vi.fn().mockResolvedValue({ success: true })
+
+    const formSchema = z.object({
+      name: f0FormField(z.string().min(1), {
+        label: "Name",
+      }),
+    })
+
+    render(
+      <F0Form
+        name="dirty-reset-test"
+        schema={formSchema}
+        defaultValues={{ name: "initial" }}
+        onSubmit={onSubmit}
+        submitConfig={{ type: "action-bar" }}
+      />
+    )
+
+    const input = screen.getByLabelText("Name")
+    await user.clear(input)
+    await user.type(input, "updated")
+
+    await waitFor(() => {
+      expect(
+        screen.getByText("You have changes pending to be saved")
+      ).toBeInTheDocument()
+    })
+
+    const submitButtons = screen.getAllByText("Submit")
+    await user.click(submitButtons[0])
+
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalledWith({ name: "updated" })
+    })
+
+    await waitFor(() => {
+      expect(
+        screen.queryByText("You have changes pending to be saved")
+      ).not.toBeInTheDocument()
+    })
+  })
+
+  it("keeps the action bar visible after a failed submit", async () => {
+    const user = userEvent.setup()
+    const onSubmit = vi.fn().mockResolvedValue({
+      success: false,
+      errors: { name: "Name already taken" },
+    })
+
+    const formSchema = z.object({
+      name: f0FormField(z.string().min(1), {
+        label: "Name",
+      }),
+    })
+
+    render(
+      <F0Form
+        name="dirty-persist-test"
+        schema={formSchema}
+        defaultValues={{ name: "initial" }}
+        onSubmit={onSubmit}
+        submitConfig={{ type: "action-bar" }}
+      />
+    )
+
+    const input = screen.getByLabelText("Name")
+    await user.clear(input)
+    await user.type(input, "updated")
+
+    await waitFor(() => {
+      expect(
+        screen.getByText("You have changes pending to be saved")
+      ).toBeInTheDocument()
+    })
+
+    const submitButtons = screen.getAllByText("Submit")
+    await user.click(submitButtons[0])
+
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalled()
+    })
+
+    await waitFor(() => {
+      expect(screen.getByText("1 issue")).toBeInTheDocument()
+    })
+  })
+})
