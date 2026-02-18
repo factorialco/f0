@@ -266,7 +266,16 @@ export function F0Form<TSchema extends F0FormSchema>(
 
   // Handle form submission
   const handleSubmit = async (data: TValues) => {
-    const result = await onSubmit(data)
+    // Convert null values back to undefined before passing to onSubmit.
+    // Clearable date fields store null internally to prevent react-hook-form
+    // from falling back to defaultValues, but consumers expect undefined.
+    const cleanedData = { ...data }
+    for (const key of Object.keys(cleanedData)) {
+      if ((cleanedData as Record<string, unknown>)[key] === null) {
+        ;(cleanedData as Record<string, unknown>)[key] = undefined
+      }
+    }
+    const result = await onSubmit(cleanedData)
 
     if (!result.success) {
       // Set field-specific errors

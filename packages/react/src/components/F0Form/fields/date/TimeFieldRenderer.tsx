@@ -25,17 +25,20 @@ export function TimeFieldRenderer({
   error,
   loading,
 }: TimeFieldRendererProps) {
-  // Convert Date value to HH:mm string for the native time input
+  // Convert Date value to HH:mm string for the native time input.
+  // Form value may be null (used to represent cleared state).
   const timeValue = useMemo(
-    () => dateToTimeString(formField.value as Date | undefined),
+    () => dateToTimeString((formField.value ?? undefined) as Date | undefined),
     [formField.value]
   )
 
-  // Handle native time input change
+  // Handle native time input change.
+  // Uses null instead of undefined for cleared values because
+  // react-hook-form treats undefined as "use defaultValue".
   const handleChange = useCallback(
     (value: string | undefined) => {
       if (!value) {
-        formField.onChange(undefined)
+        formField.onChange(null)
         return
       }
 

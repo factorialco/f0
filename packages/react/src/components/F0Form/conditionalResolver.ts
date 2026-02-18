@@ -30,9 +30,20 @@ export function createConditionalResolver<TSchema extends F0FormSchema>(
     // Build a dynamic schema that skips validation for hidden fields
     const dynamicSchema = buildDynamicSchema(schema, values)
 
+    // Convert null values to undefined before Zod validation.
+    // Clearable date fields use null instead of undefined to prevent
+    // react-hook-form from falling back to defaultValues on clear.
+    // Zod .optional() expects undefined, not null.
+    const processedValues = { ...values }
+    for (const key of Object.keys(processedValues)) {
+      if (processedValues[key] === null) {
+        processedValues[key] = undefined
+      }
+    }
+
     // Use the standard zodResolver with the dynamic schema
     const resolver = zodResolver(dynamicSchema, schemaOptions)
-    return resolver(values, context, options)
+    return resolver(processedValues, context, options)
   }
 }
 
