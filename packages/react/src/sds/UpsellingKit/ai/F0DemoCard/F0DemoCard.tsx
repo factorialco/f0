@@ -21,11 +21,11 @@ export const F0DemoCard = ({
 
   return (
     <Card className="flex flex-col overflow-hidden">
-      <CardContent className="flex flex-col gap-4 p-0">
+      <CardContent className="flex flex-col p-0">
         <div
           className={cn(
-            "overflow-hidden rounded-lg border border-f1-border",
-            "ring-1 ring-f1-border/50 bg-f1-background-inverse-secondary"
+            "relative -mx-3 -mt-3 mb-4 flex items-center justify-center overflow-hidden rounded-md",
+            "bg-f1-background-inverse-secondary"
           )}
         >
           {preview}
@@ -37,7 +37,7 @@ export const F0DemoCard = ({
           </p>
         </div>
       </CardContent>
-      <CardFooter className="-mx-4 -mb-4 mt-4 flex justify-end rounded-b-xl border-0 border-t border-t-f1-border bg-f1-background-secondary px-4 py-3">
+      <CardFooter className="relative -mx-4 mt-4 flex justify-end border-0 border-t border-solid border-t-f1-border-secondary px-4 pt-4">
         {actionHref ? (
           <F0Button
             variant="default"

@@ -1,7 +1,7 @@
 import { useCallback, useState } from "react"
 
 import { F0Icon } from "@/components/F0Icon"
-import { ChevronDown, ChevronRight, Question } from "@/icons/app"
+import { ChevronDown, ChevronRight } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { Card, CardContent, CardHeader } from "@/ui/Card"
 import { cn } from "@/lib/utils"
@@ -18,14 +18,18 @@ const FAQItemRow = ({ item, isExpanded, onToggle }: FAQItemRowProps) => {
   return (
     <div
       className={cn(
-        "flex flex-col rounded-lg px-3 -mx-3 transition-colors duration-200",
+        "flex flex-col rounded-lg transition-colors",
         isExpanded && "bg-f1-background-secondary"
       )}
     >
       <button
         type="button"
         onClick={() => onToggle(item.id)}
-        className="flex w-full items-start justify-between gap-3 py-3 text-left transition-colors hover:opacity-80"
+        className={cn(
+          "flex w-full items-start justify-between gap-3 rounded-lg px-4 py-3 text-left transition-all",
+          !isExpanded &&
+            "hover:bg-f1-background-hover hover:shadow-[0_2px_6px_-1px_rgba(13,22,37,.04),inset_0_-2px_4px_rgba(13,22,37,.04)]"
+        )}
         aria-expanded={isExpanded}
         aria-controls={`faq-answer-${item.id}`}
       >
@@ -48,7 +52,7 @@ const FAQItemRow = ({ item, isExpanded, onToggle }: FAQItemRowProps) => {
         role="region"
         aria-labelledby={`faq-question-${item.id}`}
         className={cn(
-          "overflow-hidden transition-all duration-200",
+          "overflow-hidden px-4 transition-all duration-200",
           isExpanded ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
         )}
       >
@@ -61,7 +65,6 @@ const FAQItemRow = ({ item, isExpanded, onToggle }: FAQItemRowProps) => {
 }
 
 export const F0FAQCard = ({
-  headerIcon,
   items,
   defaultExpandedId,
   expandedId: controlledExpandedId,
@@ -73,7 +76,6 @@ export const F0FAQCard = ({
 
   const displayTitle =
     faqTranslations?.title ?? "Questions before getting started"
-  const displayIcon = headerIcon ?? Question
 
   // State for uncontrolled mode (single or multiple)
   const [internalExpandedIds, setInternalExpandedIds] = useState<Set<string>>(
@@ -124,15 +126,8 @@ export const F0FAQCard = ({
 
   return (
     <Card className="flex flex-col overflow-hidden">
-      <CardHeader className="-mx-4 -mt-4 mb-2 flex flex-row items-center gap-2 rounded-t-xl bg-f1-background-secondary px-4 py-3">
-        <div className="flex h-6 w-6 items-center justify-center rounded-full border border-f1-border-secondary">
-          <F0Icon
-            icon={displayIcon}
-            size="sm"
-            className="text-f1-foreground-secondary"
-          />
-        </div>
-        <h3 className="text-base font-semibold text-f1-foreground">
+      <CardHeader className="relative -mx-4 -mt-4 mb-4 border-0 border-b border-solid border-b-f1-border-secondary p-4">
+        <h3 className="text-lg font-semibold leading-6 text-f1-foreground">
           {displayTitle}
         </h3>
       </CardHeader>

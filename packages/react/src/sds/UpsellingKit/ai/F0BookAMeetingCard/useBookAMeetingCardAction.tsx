@@ -19,27 +19,6 @@ export const useBookAMeetingCardAction = () => {
         description: "Optional URL for the action button (e.g. booking page)",
         required: false,
       },
-      {
-        name: "avatars",
-        type: "object[]",
-        description:
-          "Optional list of expert avatars. Each object: { firstName, lastName, src? }",
-        required: false,
-        attributes: [
-          {
-            name: "lastName",
-            type: "string",
-            description: "Last name of the expert",
-            required: true,
-          },
-          {
-            name: "src",
-            type: "string",
-            description: "Optional avatar image URL",
-            required: false,
-          },
-        ],
-      },
     ],
     available: "disabled",
     render: (props) => {

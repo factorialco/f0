@@ -5,7 +5,7 @@ import { F0Checkbox } from "@/components/F0Checkbox"
 import { F0Icon } from "@/components/F0Icon"
 import { ChevronLeft, ChevronRight } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
-import { Card, CardContent, CardFooter } from "@/ui/Card"
+import { Card, CardContent, CardFooter, CardHeader } from "@/ui/Card"
 
 import { F0QuestionCardMultiStepProps, F0QuestionCardOption } from "./types"
 
@@ -85,46 +85,46 @@ export const F0QuestionCardMultiStep = ({
 
   return (
     <Card className="flex flex-col overflow-hidden">
-      <CardContent className="flex flex-col gap-4">
-        <h3 className="text-base font-semibold text-f1-foreground">
+      <CardHeader className="relative -mx-4 -mt-4 mb-4 border-0 border-b border-solid border-b-f1-border-secondary p-4">
+        <h3 className="text-lg font-semibold leading-6 text-f1-foreground">
           {currentStepData.question}
         </h3>
-        <div className="flex flex-col gap-3">
-          {currentStepData.options.map((option: F0QuestionCardOption) => (
-            <div key={option.id} className="flex items-center gap-2.5">
-              <F0Checkbox
-                id={option.id}
-                title={option.label}
-                checked={selectedIds.includes(option.id)}
-                onCheckedChange={(checked) =>
-                  handleToggle(option.id, checked === true)
-                }
-              />
-            </div>
-          ))}
-        </div>
+      </CardHeader>
+      <CardContent className="flex flex-col gap-3 p-0 pb-4">
+        {currentStepData.options.map((option: F0QuestionCardOption) => (
+          <div key={option.id} className="flex items-center gap-2.5">
+            <F0Checkbox
+              id={option.id}
+              title={option.label}
+              checked={selectedIds.includes(option.id)}
+              onCheckedChange={(checked) =>
+                handleToggle(option.id, checked === true)
+              }
+            />
+          </div>
+        ))}
       </CardContent>
-      <CardFooter className="-mx-4 -mb-4 mt-4 flex items-center justify-between rounded-b-xl border-0 border-t border-t-f1-border bg-f1-background-secondary px-4 py-3">
-        <div className="flex min-w-[7.5rem] items-center justify-start gap-1">
+      <CardFooter className="relative -mx-4 mt-0 flex items-center justify-between border-0 border-t border-solid border-t-f1-border-secondary px-4 pt-4">
+        <div className="flex items-center gap-1">
           {showPagination && (
             <>
               <button
                 type="button"
                 onClick={handlePrev}
                 disabled={currentStep <= 0}
-                className="flex h-8 w-8 shrink-0 items-center justify-center rounded text-f1-foreground-secondary transition-colors hover:bg-f1-background-tertiary hover:text-f1-foreground disabled:pointer-events-none disabled:opacity-50"
+                className="flex h-6 w-6 shrink-0 items-center justify-center rounded text-f1-foreground-secondary transition-colors hover:bg-f1-background-tertiary hover:text-f1-foreground disabled:pointer-events-none disabled:opacity-50"
                 aria-label="Previous"
               >
                 <F0Icon icon={ChevronLeft} size="sm" />
               </button>
-              <span className="min-w-[2.5rem] text-center text-sm text-f1-foreground-secondary">
+              <span className="text-center text-sm text-f1-foreground-secondary">
                 {currentStep + 1}/{totalSteps}
               </span>
               <button
                 type="button"
                 onClick={handleNext}
                 disabled={currentStep >= totalSteps - 1}
-                className="flex h-8 w-8 shrink-0 items-center justify-center rounded text-f1-foreground-secondary transition-colors hover:bg-f1-background-tertiary hover:text-f1-foreground disabled:pointer-events-none disabled:opacity-50"
+                className="flex h-6 w-6 shrink-0 items-center justify-center rounded text-f1-foreground-secondary transition-colors hover:bg-f1-background-tertiary hover:text-f1-foreground disabled:pointer-events-none disabled:opacity-50"
                 aria-label="Next"
               >
                 <F0Icon icon={ChevronRight} size="sm" />
@@ -146,7 +146,7 @@ export const F0QuestionCardMultiStep = ({
           )}
           <F0Button
             type="button"
-            variant="outline"
+            variant={isLastStep ? "default" : "outline"}
             size="md"
             label={
               isLastStep
