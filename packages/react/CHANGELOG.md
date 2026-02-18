@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.370.0](https://github.com/factorialco/f0/compare/f0-react-v1.369.4...f0-react-v1.370.0) (2026-02-18)
+
+
+### Features
+
+* add YouTube and Vimeo video embed extension ([#3425](https://github.com/factorialco/f0/issues/3425)) ([971ff5b](https://github.com/factorialco/f0/commit/971ff5b740c455a39f4ce9ae9dbc02ebf7bb7224))
+* include avatar list as a variant in DetailsItemsList component ([#3470](https://github.com/factorialco/f0/issues/3470)) ([011793a](https://github.com/factorialco/f0/commit/011793a320ccce2bcb0f0d7cbdb15f5891715bce))
+
 ## [1.369.4](https://github.com/factorialco/f0/compare/f0-react-v1.369.3...f0-react-v1.369.4) (2026-02-18)
 
 
