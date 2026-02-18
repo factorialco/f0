@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.369.0](https://github.com/factorialco/f0/compare/f0-react-v1.368.0...f0-react-v1.369.0) (2026-02-18)
+
+
+### Features
+
+* enhance F0AiChat with sidebar toggle and fullscreen support ([#3417](https://github.com/factorialco/f0/issues/3417)) ([1985ae7](https://github.com/factorialco/f0/commit/1985ae726cc612f2f70212883a37799d3d6a7888))
+
 ## [1.368.0](https://github.com/factorialco/f0/compare/f0-react-v1.367.0...f0-react-v1.368.0) (2026-02-18)
 
 
