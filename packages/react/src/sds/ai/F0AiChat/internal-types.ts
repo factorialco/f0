@@ -54,15 +54,6 @@ export type AiChatProviderReturnValue = {
   placeholders: string[]
   setPlaceholders: React.Dispatch<React.SetStateAction<string[]>>
   /**
-   * Set the amount of minutes after which the chat will be cleared automatically
-   * Set `null` to disable auto-clearing
-   *
-   * @default 15
-   */
-  setAutoClearMinutes: React.Dispatch<React.SetStateAction<number | null>>
-  autoClearMinutes: number | null
-
-  /**
    * The initial message to display in the chat
    */
   initialMessage?: string | string[]

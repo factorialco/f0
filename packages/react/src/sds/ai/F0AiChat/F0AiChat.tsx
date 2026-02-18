@@ -7,7 +7,7 @@ import {
 import { CopilotSidebar, InputProps } from "@copilotkit/react-ui"
 import { randomId } from "@copilotkit/shared"
 import { AnimatePresence, motion } from "motion/react"
-import { useEffect, createContext, useContext, useState, useRef } from "react"
+import { useEffect, useRef } from "react"
 
 import { OneEllipsis } from "@/components/OneEllipsis"
 import { experimentalComponent } from "@/lib/experimental"
@@ -19,19 +19,12 @@ import { ChatHeader } from "./components/ChatHeader"
 import { ChatTextarea } from "./components/ChatTextarea"
 import { SidebarWindow } from "./components/ChatWindow"
 import { MessagesContainer } from "./components/MessagesContainer"
-import { MessagesContainerFullscreen } from "./components/MessagesContainerFullscreen"
 import { UserMessage } from "./components/UserMessage"
 import { WelcomeScreenSuggestion } from "./components/WelcomeScreen"
 import { useDefaultCopilotActions } from "./copilotActions"
-import { FullscreenChatContextType } from "./internal-types"
+import { F0AiFullscreenChatComponent } from "./F0AiFullscreenChat"
 import { AiChatStateProvider, useAiChat } from "./providers/AiChatStateProvider"
 import { AiChatProviderProps } from "./types"
-
-// Context to share input state between Messages and Input components
-export const FullscreenChatContext = createContext<FullscreenChatContextType>({
-  inProgress: false,
-  setInProgress: () => {},
-})
 
 const F0AiChatProviderComponent = ({
   enabled = false,
@@ -49,8 +42,6 @@ const F0AiChatProviderComponent = ({
   agent,
   ...copilotKitProps
 }: AiChatProviderProps) => {
-  // todo: implement error handling
-  // temporary set runtime url until error handling is done
   return (
     <AiChatStateProvider
       enabled={enabled}
@@ -124,12 +115,19 @@ const SendMessageFunctionInjector = () => {
 const ChatInput = (props: InputProps) => {
   const { disclaimer, footer, visualizationMode } = useAiChat()
   const { messages } = useCopilotChatInternal()
+  const containerRef = useRef<HTMLDivElement>(null)
   const isWelcomeScreen = messages.length === 0
   const fullscreen = visualizationMode === "fullscreen"
   const fullscreenWelcome = fullscreen && isWelcomeScreen
 
+  useEffect(() => {
+    const textarea = containerRef.current?.querySelector("textarea")
+    textarea?.focus()
+  }, [visualizationMode])
+
   return (
     <div
+      ref={containerRef}
       className={cn(
         "flex flex-col items-center gap-2 px-4 pb-4 pt-2",
         fullscreenWelcome && "flex-1"
@@ -207,154 +205,6 @@ const F0AiChatComponent = () => {
   )
 }
 
-const F0AiFullscreenChatComponent = () => {
-  const { enabled } = useAiChat()
-  const [inProgress, setInProgress] = useState(false)
-  const inputContainerRef = useRef<HTMLDivElement>(null)
-
-  // Register all default copilot actions
-  useDefaultCopilotActions()
-
-  // Prevent whole-page scroll when dragging from the input area (iOS bounce fix)
-  useEffect(() => {
-    const el = inputContainerRef.current
-    if (!el) return
-
-    const handleTouchMove = (e: TouchEvent) => {
-      // If the touch starts in the input container, we don't want it to scroll the page
-      if (e.cancelable) {
-        e.preventDefault()
-      }
-    }
-
-    el.addEventListener("touchmove", handleTouchMove, { passive: false })
-    return () => {
-      el.removeEventListener("touchmove", handleTouchMove)
-    }
-  }, [])
-
-  // Inject global styles to prevent body scroll
-  useEffect(() => {
-    const style = document.createElement("style")
-    style.innerHTML = `
-      html, body {
-        overflow: hidden !important;
-        height: 100% !important;
-        width: 100% !important;
-        margin: 0;
-        padding: 0;
-      }
-      #root {
-        height: 100% !important;
-        width: 100% !important;
-        overflow: hidden !important;
-        display: flex;
-        flex-direction: column;
-      }
-      /* Hide scrollbars */
-      ::-webkit-scrollbar {
-        display: none !important;
-      }
-      * {
-        -ms-overflow-style: none !important;
-        scrollbar-width: none !important;
-        -webkit-tap-highlight-color: transparent;
-      }
-    `
-    document.head.appendChild(style)
-    return () => {
-      document.head.removeChild(style)
-    }
-  }, [])
-
-  if (!enabled) {
-    return null
-  }
-
-  return (
-    <FullscreenChatContext.Provider value={{ inProgress, setInProgress }}>
-      <div
-        className="bg-white"
-        style={{
-          height: "100%",
-          width: "100%",
-          display: "flex",
-          flexDirection: "column",
-          overflow: "hidden",
-          overscrollBehavior: "none",
-        }}
-      >
-        <div
-          style={{
-            flex: 1,
-            minHeight: 0,
-            display: "flex",
-            flexDirection: "column",
-            overflow: "hidden",
-          }}
-        >
-          <MessagesContainerFullscreen />
-        </div>
-
-        {/* Input section rendered outside the messages container to stay at the bottom */}
-        <div
-          ref={inputContainerRef}
-          className={cn(
-            "flex-shrink-0 w-full bg-white border-t border-f1-border transition-all",
-            "pb-[env(safe-area-inset-bottom,12px)] focus-within:pb-0"
-          )}
-          style={{
-            flexShrink: 0,
-            width: "100%",
-            display: "flex",
-            flexDirection: "column",
-            zIndex: 10,
-            touchAction: "none",
-          }}
-        >
-          <FullscreenChatInput />
-        </div>
-      </div>
-    </FullscreenChatContext.Provider>
-  )
-}
-
-const FullscreenChatInput = () => {
-  const { sendMessage } = useAiChat()
-  const { interrupt } = useCopilotChatInternal()
-  const { inProgress } = useContext(FullscreenChatContext)
-
-  const handleSend = async (text: string) => {
-    sendMessage(text)
-    return {
-      id: "",
-      role: "user" as const,
-      content: text,
-    }
-  }
-
-  const handleStop = () => {
-    if (interrupt && typeof interrupt !== "string") {
-      const stopButton = document.querySelector(
-        '[aria-label*="Stop"]'
-      ) as HTMLButtonElement
-      if (stopButton) {
-        stopButton.click()
-      }
-    }
-  }
-
-  return (
-    <div className="w-full px-4 py-2">
-      <ChatTextarea
-        inProgress={inProgress}
-        onSend={handleSend}
-        onStop={handleStop}
-      />
-    </div>
-  )
-}
-
 /**
  * @experimental This is an experimental component use it at your own risk
  */
@@ -376,5 +226,4 @@ export const F0AiChatProvider = experimentalComponent(
   F0AiChatProviderComponent
 )
 
-// Re-export WelcomeScreenSuggestion type from components for backwards compatibility
 export type { WelcomeScreenSuggestion }

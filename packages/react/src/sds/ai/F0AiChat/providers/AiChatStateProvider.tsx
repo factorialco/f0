@@ -19,7 +19,6 @@ import { type VisualizationMode, WelcomeScreenSuggestion } from "../types"
 
 const AiChatStateContext = createContext<AiChatProviderReturnValue | null>(null)
 
-const DEFAULT_MINUTES_TO_RESET = 15
 const CHAT_WIDTH_STORAGE_KEY = "ONE-ai-chat-width"
 
 const getStoredChatWidth = (): number => {
@@ -69,9 +68,6 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
     i18n.t("ai.inputPlaceholder"),
   ])
 
-  const [autoClearMinutes, setAutoClearMinutes] = useState<number | null>(
-    DEFAULT_MINUTES_TO_RESET
-  )
   const [initialMessage, setInitialMessage] = useState<
     string | string[] | undefined
   >(initialInitialMessage)
@@ -179,8 +175,6 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         setShouldPlayEntranceAnimation,
         agent,
         tmp_setAgent,
-        setAutoClearMinutes,
-        autoClearMinutes: enabledInternal ? autoClearMinutes : null,
         initialMessage,
         setInitialMessage,
         welcomeScreenSuggestions,
@@ -223,10 +217,8 @@ export function useAiChat(): AiChatProviderReturnValue {
       setShouldPlayEntranceAnimation: noopFn,
       agent: undefined,
       tmp_setAgent: noopFn,
-      setAutoClearMinutes: noopFn,
       clear: noopFn,
       setClearFunction: noopFn,
-      autoClearMinutes: null,
       initialMessage: undefined,
       setInitialMessage: noopFn,
       placeholders: [],

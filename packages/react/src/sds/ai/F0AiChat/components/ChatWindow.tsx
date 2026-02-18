@@ -1,4 +1,3 @@
-import { useCopilotChatInternal } from "@copilotkit/react-core"
 import { type WindowProps } from "@copilotkit/react-ui"
 import { AnimatePresence, motion } from "motion/react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
@@ -6,7 +5,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { cn } from "@/lib/utils"
 
 import { MAX_CHAT_WIDTH, MIN_CHAT_WIDTH } from "../constants"
-import { useAutoClear } from "../hooks/useAutoClear"
 import { useAiChat } from "../providers/AiChatStateProvider"
 
 const ResizeHandle = ({
@@ -80,20 +78,12 @@ export const SidebarWindow = ({ children }: WindowProps) => {
     visualizationMode,
     shouldPlayEntranceAnimation,
     setShouldPlayEntranceAnimation,
-    autoClearMinutes,
     resizable,
     setChatWidth,
     resetChatWidth,
   } = useAiChat()
   const fullscreen = visualizationMode === "fullscreen"
-  const { reset } = useCopilotChatInternal()
   const [isResizing, setIsResizing] = useState(false)
-
-  useAutoClear({
-    reset,
-    isOpen: open,
-    autoClearMinutes,
-  })
 
   const handleResize = useCallback(
     (deltaX: number) => {
