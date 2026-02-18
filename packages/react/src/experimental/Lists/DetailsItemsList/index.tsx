@@ -24,7 +24,7 @@ const _DetailsItemsList = forwardRef<HTMLDivElement, DetailsItemsListProps>(
           className={cn(
             "flex flex-col",
             tableView
-              ? "max-w-[580px] rounded-md border border-solid border-f1-border-secondary"
+              ? "rounded-md border border-solid border-f1-border-secondary"
               : "gap-3"
           )}
         >
