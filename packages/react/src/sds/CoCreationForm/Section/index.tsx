@@ -123,18 +123,22 @@ export const Section = ({
             </div>
           )}
         </div>
-        <textarea
-          value={description}
-          aria-label={t("coCreationForm.labels.description")}
-          placeholder={t("coCreationForm.labels.sectionDescriptionPlaceholder")}
-          onChange={handleChangeDescription}
-          disabled={inputDisabled}
-          style={TEXT_AREA_STYLE}
-          className={cn(
-            "w-full resize-none text-f1-foreground-secondary placeholder:text-f1-foreground-tertiary disabled:text-f1-foreground-secondary [&::-webkit-search-cancel-button]:hidden",
-            inputDisabled && "cursor-not-allowed"
-          )}
-        />
+        {((isEditMode && !locked) || description) && (
+          <textarea
+            value={description}
+            aria-label={t("coCreationForm.labels.description")}
+            placeholder={t(
+              "coCreationForm.labels.sectionDescriptionPlaceholder"
+            )}
+            onChange={handleChangeDescription}
+            disabled={inputDisabled}
+            style={TEXT_AREA_STYLE}
+            className={cn(
+              "w-full resize-none text-f1-foreground-secondary placeholder:text-f1-foreground-tertiary disabled:text-f1-foreground-secondary [&::-webkit-search-cancel-button]:hidden",
+              inputDisabled && "cursor-not-allowed"
+            )}
+          />
+        )}
       </div>
       <DragProvider>
         <Reorder.Group
