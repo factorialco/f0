@@ -3,7 +3,7 @@ import { ReactNode } from "react"
 import {
   metadataRenderer,
   ValueDisplayRendererDefinition,
-} from "@/ui/value-display"
+} from "@/components/value-display"
 import { RecordType } from "@/hooks/datasource"
 import { TranslationsType } from "@/lib/providers/i18n/i18n-provider-defaults"
 

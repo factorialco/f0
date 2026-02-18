@@ -84,8 +84,7 @@ export const filters = {
   },
   searchStrict: {
     type: "search",
-    label:
-      "Search with strict toggle example to clear the search value to clear the search value example to clear the search value to clear the search value",
+    label: "Search with strict toggle example",
     options: {
       strictToggle: true,
     },
@@ -1047,7 +1046,6 @@ export const ExampleComponent = ({
   frozenColumns = 0,
   selectable,
   defaultSelectedItems,
-  allPagesSelection,
   bulkActions,
   currentGrouping,
   currentSortings,
@@ -1108,7 +1106,6 @@ export const ExampleComponent = ({
   >
   defaultSelectedItems?: SelectedItemsState<MockUser>
   selectable?: (item: MockUser) => string | number | undefined
-  allPagesSelection?: boolean
   bulkActions?: BulkActionsDefinition<MockUser, FiltersType>
   onSelectItems?: OnSelectItemsCallback<MockUser, FiltersType>
   onBulkAction?: OnBulkActionCallback<MockUser, FiltersType>
@@ -1234,7 +1231,6 @@ export const ExampleComponent = ({
       ],
       selectable,
       defaultSelectedItems,
-      allPagesSelection,
       bulkActions,
       totalItemSummary,
       search:

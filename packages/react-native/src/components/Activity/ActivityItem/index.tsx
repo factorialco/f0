@@ -1,19 +1,18 @@
-import { useState } from "react"
-import { View, Text, Pressable } from "react-native"
-
-import { IconAvatar } from "../../Avatars/exports"
-import { IconType } from "../../Icon"
+import { View, Text, Pressable } from "react-native";
+import { useState } from "react";
+import { IconType } from "../../Icon";
+import { IconAvatar } from "../../Avatars/exports";
 
 export type ActivityItemProps = {
-  id: string
-  date: string
-  title: string
-  description?: string
-  icon?: IconType
-  category: string
-  isUnread?: boolean
-  onPress: (id: string) => void
-}
+  id: string;
+  date: string;
+  title: string;
+  description?: string;
+  icon?: IconType;
+  category: string;
+  isUnread?: boolean;
+  onPress: (id: string) => void;
+};
 
 export const ActivityItem = ({
   id,
@@ -25,7 +24,7 @@ export const ActivityItem = ({
   isUnread = false,
   onPress,
 }: ActivityItemProps) => {
-  const [isPressed, setIsPressed] = useState(false)
+  const [isPressed, setIsPressed] = useState(false);
 
   return (
     <Pressable
@@ -60,8 +59,8 @@ export const ActivityItem = ({
         )}
       </View>
     </Pressable>
-  )
-}
+  );
+};
 
 export const ActivityItemSkeleton = () => {
   return (
@@ -87,5 +86,5 @@ export const ActivityItemSkeleton = () => {
       {/* Space for the unread indicator */}
       <View className="ml-1 w-2" />
     </View>
-  )
-}
+  );
+};

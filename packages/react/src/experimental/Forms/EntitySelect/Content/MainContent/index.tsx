@@ -5,7 +5,7 @@ import { F0Select } from "@/components/F0Select"
 
 import { Action } from "../../../../../components/F0Select/components/SelectBottomActions"
 import { cn } from "../../../../../lib/utils"
-import { Spinner } from "@/ui/Spinner"
+import { Spinner } from "../../../../Information/Spinner"
 import { VirtualList } from "../../../../Navigation/VirtualList"
 import { CreateItem } from "../../CreateItem"
 import { EntitySelectListItem } from "../../ListItem"

@@ -46,12 +46,6 @@ interface SwitchProps extends DataAttributes {
    * @default false
    */
   presentational?: boolean
-
-  /**
-   * Whether the switch is required (must be true)
-   * @default false
-   */
-  required?: boolean
 }
 
 function _Switch({
@@ -63,7 +57,6 @@ function _Switch({
   value,
   hideLabel = false,
   presentational = false,
-  required = false,
   ...rest
 }: SwitchProps) {
   return (
@@ -75,7 +68,6 @@ function _Switch({
       checked={checked}
       value={value}
       hideLabel={hideLabel}
-      required={required}
       tabIndex={presentational ? -1 : undefined}
       {...rest}
     />

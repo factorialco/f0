@@ -1,9 +1,6 @@
-import { cnMerge, type CnOptions } from "tailwind-variants"
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
 
-export function cn(...args: CnOptions): string {
-  return (
-    cnMerge(args)({
-      twMerge: true,
-    }) ?? ""
-  )
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
 }

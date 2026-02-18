@@ -1,12 +1,11 @@
-import { render } from "@testing-library/react-native"
-import React from "react"
-
-import { DetailsItemsList, DetailsItemsListProps } from "."
+import { render } from "@testing-library/react-native";
+import React from "react";
+import { DetailsItemsList, DetailsItemsListProps } from ".";
 
 jest.mock("expo-clipboard", () => ({
   setString: jest.fn(),
   getString: jest.fn(),
-}))
+}));
 
 describe("DetailsItemsList", () => {
   it("Snapshot ", () => {
@@ -66,9 +65,9 @@ describe("DetailsItemsList", () => {
           },
         },
       ],
-    }
+    };
 
-    const { toJSON } = render(<DetailsItemsList {...content} />)
-    expect(toJSON()).toMatchSnapshot()
-  })
-})
+    const { toJSON } = render(<DetailsItemsList {...content} />);
+    expect(toJSON()).toMatchSnapshot();
+  });
+});

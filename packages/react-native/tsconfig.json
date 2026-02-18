@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "ESNext",
     "module": "ESNext",
-    "moduleResolution": "bundler",
+    "moduleResolution": "node",
     "jsx": "react-native",
     "esModuleInterop": true,
     "strict": true,
@@ -10,23 +10,11 @@
     "outDir": "dist",
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "baseUrl": ".",
-    "types": [
-      "jest"
-    ]
+    "paths": {
+      "@factorialco/f0-core": ["../core/src"]
+    },
+    "types": ["nativewind/types", "jest"]
   },
-  "include": [
-    "src",
-    "playground",
-    "**/*.ts",
-    "**/*.tsx",
-    ".expo/types/**/*.ts",
-    "expo-env.d.ts",
-    "uniwind-types.d.ts"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist"
-  ],
-  "extends": "expo/tsconfig.base"
+  "include": ["src", "nativewind-env.d.ts"],
+  "exclude": ["node_modules", "dist"]
 }

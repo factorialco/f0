@@ -2,7 +2,7 @@ import { useDeepCompareEffect } from "@reactuses/core"
 import { motion } from "motion/react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
-import { Spinner } from "@/ui/Spinner"
+import { Spinner } from "@/experimental/Information/Spinner"
 import { OneEmptyState } from "@/experimental/OneEmptyState"
 import {
   GroupingDefinition,
@@ -333,16 +333,6 @@ const OneDataCollectionComp = <
 
   const [selectedItemsCount, setSelectedItemsCount] = useState(0)
 
-  /**
-   * All-pages selection state tracking
-   */
-  const [isAllCurrentPageSelected, setIsAllCurrentPageSelected] =
-    useState(false)
-  const [isAllItemsSelected, setIsAllItemsSelected] = useState(false)
-  const [selectAllFunc, setSelectAllFunc] = useState<
-    ((checked: boolean) => void) | undefined
-  >(undefined)
-
   const i18n = useI18n()
 
   const totalItemSummaryFn = useMemo(() => {
@@ -357,10 +347,9 @@ const OneDataCollectionComp = <
 
   const onSelectItemsLocal: OnSelectItemsCallback<R, Filters> = (
     selectedItems,
-    clearSelectedItems,
-    handleSelectAll
+    clearSelectedItems
   ): void => {
-    onSelectItems?.(selectedItems, clearSelectedItems, handleSelectAll)
+    onSelectItems?.(selectedItems, clearSelectedItems)
 
     /**
      * Show action bar
@@ -379,22 +368,6 @@ const OneDataCollectionComp = <
      * Clear selected items function
      */
     setClearSelectedItemsFunc(() => clearSelectedItems)
-
-    /**
-     * Track all-pages selection state
-     */
-    if (handleSelectAll) {
-      setSelectAllFunc(() => handleSelectAll)
-    }
-
-    // Track whether all items on the current page are selected
-    const allOnPage =
-      selectedItems.itemsStatus.length > 0 &&
-      selectedItems.itemsStatus.every((item) => item.checked)
-    setIsAllCurrentPageSelected(allOnPage)
-
-    // Track whether all items across all pages are selected
-    setIsAllItemsSelected(selectedItems.allSelected === true)
 
     /**
      * Bulk actions for the action bar
@@ -802,11 +775,6 @@ const OneDataCollectionComp = <
                   : undefined
               }
               onUnselect={() => clearSelectedItemsFunc?.()}
-              allPagesSelection={!!source.allPagesSelection}
-              isAllCurrentPageSelected={isAllCurrentPageSelected}
-              isAllItemsSelected={isAllItemsSelected}
-              totalItems={totalItems}
-              onSelectAllItems={() => selectAllFunc?.(true)}
             />
           )}
         </>

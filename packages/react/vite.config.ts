@@ -129,14 +129,7 @@ export default defineConfig({
     outDir: "dist",
     copyPublicDir: false,
     rollupOptions: {
-      external: [
-        "react/jsx-runtime",
-        "react",
-        "react-dom",
-        /@copilotkit\/.*/,
-        /@livekit\/.*/,
-        "livekit-client",
-      ],
+      external: ["react/jsx-runtime", "react", "react-dom", /@copilotkit\/.*/],
       maxParallelFileOps: 100,
       // Workaround to fix rebuild https://github.com/vitejs/vite/issues/19410#issuecomment-2661835482
       output: {

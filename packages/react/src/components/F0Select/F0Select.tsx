@@ -162,23 +162,24 @@ const F0SelectComponent = forwardRef(function Select<
   )
 
   const defaultValues = useMemo(
-    // Convert to strings for consistent handling
-    () => defaultItems.map((item) => String(item.value)),
+    () => defaultItems.map((item) => item.value),
     [defaultItems]
   )
 
-  // Always store localValue as strings for consistent comparison
-  const [localValue, setLocalValue] = useState(() => {
-    const initial = toArray(value) ?? defaultValues ?? []
-    return initial.map(String)
-  })
+  const [localValue, setLocalValue] = useState(
+    toArray(value) ?? defaultValues ?? []
+  )
 
   useEffect(() => {
-    const incomingValues = (toArray(value) ?? []).map(String)
-    if (!isEqual(incomingValues, localValue ?? [])) {
+    if (
+      !isEqual(
+        toArray(value) ?? [],
+        localValue?.map((item) => String(item)) ?? []
+      )
+    ) {
       const newValue = toArray(value) ?? defaultValues ?? []
-      // Ensure unique values and convert to strings
-      setLocalValue(Array.from(new Set(newValue.map(String))))
+      // Ensure unique values to prevent duplicates
+      setLocalValue(Array.from(new Set(newValue)))
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value])
@@ -228,15 +229,13 @@ const F0SelectComponent = forwardRef(function Select<
   const localSource = useDataSource(
     {
       ...dataSource,
-      // Return string IDs for consistent comparison across the selection system
-      // This ensures numeric values like 1 match with string IDs like "1"
       selectable: (item) => {
         if (!item) {
           return undefined
         }
         const mappedOption = optionMapper(item)
         return mappedOption.type !== "separator"
-          ? String(mappedOption.value)
+          ? mappedOption.value
           : undefined
       },
       search: showSearchBox
@@ -283,10 +282,8 @@ const F0SelectComponent = forwardRef(function Select<
   >(new Map())
 
   /**
-   * Map of items from paginated data by their value (as string).
+   * Map of items from paginated data by their value.
    * Used for dropdown list and selection state.
-   * Keys are always strings to ensure consistent lookups regardless of
-   * whether the original value is a string or number.
    */
   const itemsByValue = useMemo(() => {
     const entries: [
@@ -301,9 +298,8 @@ const F0SelectComponent = forwardRef(function Select<
     for (const record of data.records) {
       const mappedOption = optionMapper(record)
       if (mappedOption.type !== "separator") {
-        // Always use string keys for consistent lookups
         entries.push([
-          String(mappedOption.value),
+          mappedOption.value,
           { item: record, option: mappedOption },
         ])
       }
@@ -330,10 +326,9 @@ const F0SelectComponent = forwardRef(function Select<
     const uniqueValues = Array.from(new Set(values))
 
     for (const val of uniqueValues) {
-      // Use string key for consistent lookup
-      const itemData = itemsByValue[String(val)]
-      items.set(String(val), {
-        id: String(val),
+      const itemData = itemsByValue[val]
+      items.set(val, {
+        id: val,
         checked: true,
         item: itemData?.item as WithGroupId<ActualRecordType> | undefined,
       })
@@ -361,7 +356,6 @@ const F0SelectComponent = forwardRef(function Select<
     selectedState: initialSelectedState,
     disableSelectAll: disableSelectAll,
     isSearchActive: !!currentSearch,
-    allPagesSelection: true,
   })
 
   /**
@@ -373,31 +367,27 @@ const F0SelectComponent = forwardRef(function Select<
     const result: F0SelectItemObject<T, ResolvedRecordType<R>>[] = []
 
     for (const valueId of localValue) {
-      const stringValueId = String(valueId)
       // Try to get from paginated data first
-      const fromData = itemsByValue[stringValueId]
+      const fromData = itemsByValue[valueId]
       if (fromData) {
         // Update cache with latest data
-        selectedItemsCache.current.set(stringValueId, fromData.option)
+        selectedItemsCache.current.set(valueId, fromData.option)
         result.push(fromData.option)
         continue
       }
 
       // Try from cache (items selected but not in current data)
-      const fromCache = selectedItemsCache.current.get(stringValueId)
+      const fromCache = selectedItemsCache.current.get(valueId)
       if (fromCache) {
         result.push(fromCache)
         continue
       }
 
       // Try defaultItems (pre-selected values provided by parent)
-      // Compare as strings to handle both string and number values
-      const fromDefault = defaultItems.find(
-        (item) => String(item.value) === stringValueId
-      )
+      const fromDefault = defaultItems.find((item) => item.value === valueId)
       if (fromDefault) {
         // Add to cache for future use
-        selectedItemsCache.current.set(stringValueId, fromDefault)
+        selectedItemsCache.current.set(valueId, fromDefault)
         result.push(fromDefault)
       }
     }
@@ -425,14 +415,13 @@ const F0SelectComponent = forwardRef(function Select<
       handleSelectItemChange(value, checked)
 
       // Only call onChangeSelectedOption if we have the item data
-      // Use string key for consistent lookup
-      const item = itemsByValue[String(value)]
+      const item = itemsByValue[value]
       if (item) {
         // Cache the item for future display
         if (checked) {
-          selectedItemsCache.current.set(String(value), item.option)
+          selectedItemsCache.current.set(value, item.option)
         } else {
-          selectedItemsCache.current.delete(String(value))
+          selectedItemsCache.current.delete(value)
         }
         onChangeSelectedOption?.(item.option, checked)
       }
@@ -503,6 +492,13 @@ const F0SelectComponent = forwardRef(function Select<
     // TypeScript cannot infer the type of the onChange callback when it has generics,
     // so we need to cast it to the correct type
     if (multiple) {
+      const values = checkedItems.map((item) => String(item.id) as T)
+
+      // Sync localValue with actual selection state
+      // This ensures the preview shows correct items after deselection
+      // Use Set to ensure unique values and prevent duplicates
+      setLocalValue(Array.from(new Set(values)))
+
       const records = checkedItems
         .map((item) => item.item)
         .filter(
@@ -519,41 +515,19 @@ const F0SelectComponent = forwardRef(function Select<
         >
       })
 
-      // Use original option values to preserve the type (number vs string)
-      // Only use stringified id as fallback if option is not available
-      const values = checkedItems.map((item) => {
-        if (item.item) {
-          const option = optionMapper(item.item as ActualRecordType)
-          return option.type !== "separator"
-            ? (option.value as T)
-            : (String(item.id) as T)
-        }
-        return String(item.id) as T
-      })
-
-      // Sync localValue with actual selection state (as strings for internal comparison)
-      // This ensures the preview shows correct items after deselection
-      // Use Set to ensure unique values and prevent duplicates
-      setLocalValue(Array.from(new Set(values.map(String))))
-
       onChange?.(values, originalItems, options)
     } else {
       const selectedItem = checkedItems[0]
+      const value = selectedItem ? (String(selectedItem.id) as T) : undefined
+
+      // Sync localValue with actual selection state
+      setLocalValue(value ? [value] : [])
+
       const record = selectedItem?.item as ActualRecordType | undefined
       const originalItem = extractOriginalItem(record)
       const option = record
         ? (optionMapper(record) as F0SelectItemObject<T, ResolvedRecordType<R>>)
         : undefined
-
-      // Use original option value to preserve the type (number vs string)
-      const value = option
-        ? (option.value as T)
-        : selectedItem
-          ? (String(selectedItem.id) as T)
-          : undefined
-
-      // Sync localValue with actual selection state (as string for internal comparison)
-      setLocalValue(value !== undefined ? [String(value)] : [])
 
       onChange?.(value as T, originalItem, option)
     }
@@ -606,9 +580,7 @@ const F0SelectComponent = forwardRef(function Select<
                   item={mappedOption}
                 />
               ),
-              // Convert to string to ensure consistent comparison with selectedItemsValues
-              // which also converts to strings (line 623)
-              value: String(mappedOption.value),
+              value: mappedOption.value,
             }
       })
     },

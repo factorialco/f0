@@ -1,22 +1,21 @@
-import { memo } from "react"
-import { Text, View } from "react-native"
+import { memo } from "react";
+import { Text, View } from "react-native";
+import { Button } from "../../Button";
+import { AppIcons } from "../../..";
 
-import { AppIcons } from "../../.."
-import { Button } from "../../Button"
-
-type ActionType = "notifications"
+type ActionType = "notifications";
 
 export type ActionT = {
-  type: ActionType
-  label: string
-  onPress: () => void
-  showBadge?: boolean
-}
+  type: ActionType;
+  label: string;
+  onPress: () => void;
+  showBadge?: boolean;
+};
 
 type Props = {
-  title: string
-  actions?: ActionT[]
-}
+  title: string;
+  actions?: ActionT[];
+};
 
 const NotificationsAction = ({ label, onPress, showBadge }: ActionT) => {
   return (
@@ -30,8 +29,8 @@ const NotificationsAction = ({ label, onPress, showBadge }: ActionT) => {
       size="md"
       round
     />
-  )
-}
+  );
+};
 
 export const PageHeader = memo(({ title, actions }: Props) => {
   return (
@@ -41,14 +40,14 @@ export const PageHeader = memo(({ title, actions }: Props) => {
         {actions?.map((action) => {
           switch (action.type) {
             case "notifications":
-              return <NotificationsAction {...action} key={action.label} />
+              return <NotificationsAction {...action} key={action.label} />;
             default:
-              return null
+              return null;
           }
         })}
       </View>
     </View>
-  )
-})
+  );
+});
 
-PageHeader.displayName = "PageHeader"
+PageHeader.displayName = "PageHeader";

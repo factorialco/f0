@@ -23,20 +23,6 @@ jobs:
       - uses: ./.github/actions/setup-node-pnpm
       - name: Check formatting
         run: pnpm --filter @factorialco/f0-react run format:check
-  format-react-native:
-    needs: detect-changes
-    # Prevents running on the release-please branch
-    if: |
-      needs.detect-changes.outputs.package_react_native == 'true' &&
-      github.head_ref != 'release-please--branches--master' &&
-      !contains(github.event.pull_request.labels.*.name, 'autorelease')
-    name: "[📱 REACT NATIVE] Format"
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/setup-node-pnpm
-      - name: Check formatting
-        run: pnpm --filter @factorialco/f0-react-native run format:check
   lint:
     needs: detect-changes
     # Prevents running on the release-please branch
@@ -60,14 +46,12 @@ jobs:
         run: pnpm --filter @factorialco/f0-core build
       - name: Check linting with oxlint
         run: pnpm --filter @factorialco/f0-react run lint
-  lint-react-native:
+  eslint-react-native:
     needs: detect-changes
     # Prevents running on the release-please branch
     if: |
-      needs.detect-changes.outputs.package_react_native == 'true' &&
-      github.head_ref != 'release-please--branches--master' &&
-      !contains(github.event.pull_request.labels.*.name, 'autorelease')
-    name: "[📱 REACT NATIVE] Linting"
+      needs.detect-changes.outputs.package_react_native == 'true'
+    name: "[📱 REACT NATIVE] Eslint"
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
@@ -81,7 +65,7 @@ jobs:
         run: pnpm install
       - name: Build core package
         run: pnpm --filter @factorialco/f0-core build
-      - name: Check linting with oxlint
+      - name: Check linting with eslint
         run: pnpm --filter @factorialco/f0-react-native run lint
       - name: Check typescript
         run: pnpm --filter @factorialco/f0-react-native exec tsc --noEmit

@@ -25,7 +25,7 @@ export default defineConfig({
       ...alias,
     },
     typecheck: {
-      tsconfig: "./tsconfig.tests.json",
+      tsconfig: "./tsconfig.test.json",
     },
     coverage: {
       // Include covered and uncovered files matching this pattern

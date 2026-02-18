@@ -48,14 +48,12 @@ export function FilterPickerInternal<Filters extends FiltersDefinition>({
           onClickApplyFilters={onApply}
         />
         {selectedFilterKey && (
-          <div className="min-w-[340px] flex-1">
-            <FilterContent
-              selectedFilterKey={selectedFilterKey}
-              definition={filters}
-              tempFilters={tempFilters}
-              onFilterChange={onFilterChange}
-            />
-          </div>
+          <FilterContent
+            selectedFilterKey={selectedFilterKey}
+            definition={filters}
+            tempFilters={tempFilters}
+            onFilterChange={onFilterChange}
+          />
         )}
       </div>
       {showApplyButton && (

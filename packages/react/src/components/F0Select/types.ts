@@ -1,6 +1,5 @@
 import type { AvatarVariant } from "@/components/avatars/F0Avatar"
 import type { IconType } from "@/components/F0Icon"
-import type { NewColor } from "@/components/tags/F0TagDot/types"
 import type {
   DataSourceDefinition,
   FiltersDefinition,
@@ -162,17 +161,13 @@ export type F0SelectProps<T extends string, R = unknown> = F0SelectBaseProps<
     | "hint"
   >
 
-export type F0SelectTagProp =
-  | string
-  | { type: "dot"; text: string; color: NewColor }
-
 export type F0SelectItemObject<T, R = unknown> = {
   type?: "item"
   value: T
   label: string
   description?: string
   avatar?: AvatarVariant
-  tag?: F0SelectTagProp
+  tag?: string
   icon?: IconType
   item?: R
   disabled?: boolean

@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+// Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`OneChip Snapshot 1`] = `
 <View
@@ -6,7 +6,6 @@ exports[`OneChip Snapshot 1`] = `
 >
   <View
     accessibilityLabel="Action"
-    accessibilityRole="button"
     accessibilityState={
       {
         "busy": undefined,
@@ -25,7 +24,7 @@ exports[`OneChip Snapshot 1`] = `
       }
     }
     accessible={true}
-    className="overflow-hidden flex items-center gap-1 rounded-full border border-solid border-f1-border px-2 py-0.5 grow-0"
+    className="flex items-center gap-1 rounded-full border border-solid border-f1-border px-2 py-0.5 grow-0"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -37,33 +36,7 @@ exports[`OneChip Snapshot 1`] = `
     onResponderTerminate={[Function]}
     onResponderTerminationRequest={[Function]}
     onStartShouldSetResponder={[Function]}
-    style={
-      [
-        {
-          "transform": [
-            {
-              "scale": 1,
-            },
-          ],
-        },
-        undefined,
-      ]
-    }
   >
-    <View
-      className="absolute inset-0"
-      pointerEvents="none"
-      style={
-        [
-          {
-            "opacity": 0,
-          },
-          {
-            "backgroundColor": "rgba(0, 0, 0, 1)",
-          },
-        ]
-      }
-    />
     <View
       className="flex flex-row items-center gap-0.5"
     >
@@ -83,7 +56,6 @@ exports[`OneChip Snapshot variant selected 1`] = `
 >
   <View
     accessibilityLabel="Action"
-    accessibilityRole="button"
     accessibilityState={
       {
         "busy": undefined,
@@ -102,7 +74,7 @@ exports[`OneChip Snapshot variant selected 1`] = `
       }
     }
     accessible={true}
-    className="overflow-hidden flex items-center gap-1 rounded-full border border-solid px-2 py-0.5 grow-0 border-f1-border-selected bg-f1-background-selected-secondary"
+    className="flex items-center gap-1 rounded-full border border-solid px-2 py-0.5 grow-0 border-f1-border-selected bg-f1-background-selected-secondary"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -114,33 +86,7 @@ exports[`OneChip Snapshot variant selected 1`] = `
     onResponderTerminate={[Function]}
     onResponderTerminationRequest={[Function]}
     onStartShouldSetResponder={[Function]}
-    style={
-      [
-        {
-          "transform": [
-            {
-              "scale": 1,
-            },
-          ],
-        },
-        undefined,
-      ]
-    }
   >
-    <View
-      className="absolute inset-0"
-      pointerEvents="none"
-      style={
-        [
-          {
-            "opacity": 0,
-          },
-          {
-            "backgroundColor": "rgba(0, 0, 0, 1)",
-          },
-        ]
-      }
-    />
     <View
       className="flex flex-row items-center gap-0.5"
     >
@@ -160,7 +106,6 @@ exports[`OneChip Snapshot with Icon 1`] = `
 >
   <View
     accessibilityLabel="Action"
-    accessibilityRole="button"
     accessibilityState={
       {
         "busy": undefined,
@@ -179,7 +124,7 @@ exports[`OneChip Snapshot with Icon 1`] = `
       }
     }
     accessible={true}
-    className="overflow-hidden flex items-center gap-1 rounded-full border border-solid border-f1-border px-2 py-0.5 grow-0 pl-1.5"
+    className="flex items-center gap-1 rounded-full border border-solid border-f1-border px-2 py-0.5 grow-0 pl-1.5"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -191,33 +136,7 @@ exports[`OneChip Snapshot with Icon 1`] = `
     onResponderTerminate={[Function]}
     onResponderTerminationRequest={[Function]}
     onStartShouldSetResponder={[Function]}
-    style={
-      [
-        {
-          "transform": [
-            {
-              "scale": 1,
-            },
-          ],
-        },
-        undefined,
-      ]
-    }
   >
-    <View
-      className="absolute inset-0"
-      pointerEvents="none"
-      style={
-        [
-          {
-            "opacity": 0,
-          },
-          {
-            "backgroundColor": "rgba(0, 0, 0, 1)",
-          },
-        ]
-      }
-    />
     <View
       className="flex flex-row items-center gap-0.5"
     >
@@ -237,9 +156,6 @@ exports[`OneChip Snapshot with Icon 1`] = `
               "backgroundColor": "transparent",
               "borderWidth": 0,
             },
-            [
-              {},
-            ],
             {
               "flex": 0,
               "height": "100%",
@@ -318,7 +234,6 @@ exports[`OneChip Snapshot with OnClose 1`] = `
 >
   <View
     accessibilityLabel="Action"
-    accessibilityRole="button"
     accessibilityState={
       {
         "busy": undefined,
@@ -337,7 +252,7 @@ exports[`OneChip Snapshot with OnClose 1`] = `
       }
     }
     accessible={true}
-    className="overflow-hidden flex items-center gap-1 rounded-full border border-solid border-f1-border px-2 py-0.5 grow-0 pr-1.5"
+    className="flex items-center gap-1 rounded-full border border-solid border-f1-border px-2 py-0.5 grow-0 pr-1.5"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -349,33 +264,7 @@ exports[`OneChip Snapshot with OnClose 1`] = `
     onResponderTerminate={[Function]}
     onResponderTerminationRequest={[Function]}
     onStartShouldSetResponder={[Function]}
-    style={
-      [
-        {
-          "transform": [
-            {
-              "scale": 1,
-            },
-          ],
-        },
-        undefined,
-      ]
-    }
   >
-    <View
-      className="absolute inset-0"
-      pointerEvents="none"
-      style={
-        [
-          {
-            "opacity": 0,
-          },
-          {
-            "backgroundColor": "rgba(0, 0, 0, 1)",
-          },
-        ]
-      }
-    />
     <View
       className="flex flex-row items-center gap-0.5"
     >
@@ -386,7 +275,6 @@ exports[`OneChip Snapshot with OnClose 1`] = `
       </Text>
       <View
         accessibilityLabel="Close"
-        accessibilityRole="button"
         accessibilityState={
           {
             "busy": undefined,
@@ -417,6 +305,7 @@ exports[`OneChip Snapshot with OnClose 1`] = `
         onResponderTerminate={[Function]}
         onResponderTerminationRequest={[Function]}
         onStartShouldSetResponder={[Function]}
+        tabIndex={0}
       >
         <RNSVGSvgView
           align="xMidYMid"
@@ -434,9 +323,6 @@ exports[`OneChip Snapshot with OnClose 1`] = `
                 "backgroundColor": "transparent",
                 "borderWidth": 0,
               },
-              [
-                {},
-              ],
               {
                 "flex": 0,
                 "height": "100%",

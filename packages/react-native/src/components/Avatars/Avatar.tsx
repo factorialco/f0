@@ -1,26 +1,24 @@
-import { ComponentProps, ReactNode } from "react"
+import { sizes } from "../../ui/avatar";
+import { ComponentProps, ReactNode } from "react";
+import { CompanyAvatar } from "./CompanyAvatar";
+import { PersonAvatar } from "./PersonAvatar";
+import { TeamAvatar } from "./TeamAvatar";
 
-import { sizes } from "../../ui/avatar"
-
-import { CompanyAvatar } from "./CompanyAvatar"
-import { PersonAvatar } from "./PersonAvatar"
-import { TeamAvatar } from "./TeamAvatar"
-
-type PersonAvatarProps = ComponentProps<typeof PersonAvatar>
-type TeamAvatarProps = ComponentProps<typeof TeamAvatar>
-type CompanyAvatarProps = ComponentProps<typeof CompanyAvatar>
+type PersonAvatarProps = ComponentProps<typeof PersonAvatar>;
+type TeamAvatarProps = ComponentProps<typeof TeamAvatar>;
+type CompanyAvatarProps = ComponentProps<typeof CompanyAvatar>;
 
 export type AvatarVariant =
   | ({ type: "person" } & Omit<PersonAvatarProps, "size">)
   | ({ type: "team" } & Omit<TeamAvatarProps, "size">)
-  | ({ type: "company" } & Omit<CompanyAvatarProps, "size">)
+  | ({ type: "company" } & Omit<CompanyAvatarProps, "size">);
 
 export const Avatar = ({
   avatar,
   size = "xsmall",
 }: {
-  avatar: AvatarVariant
-  size?: (typeof sizes)[number]
+  avatar: AvatarVariant;
+  size?: (typeof sizes)[number];
 }): ReactNode => {
   switch (avatar.type) {
     case "person":
@@ -33,7 +31,7 @@ export const Avatar = ({
           aria-label={avatar["aria-label"]}
           aria-labelledby={avatar["aria-labelledby"]}
         />
-      )
+      );
     case "team":
       return (
         <TeamAvatar
@@ -43,7 +41,7 @@ export const Avatar = ({
           aria-label={avatar["aria-label"]}
           aria-labelledby={avatar["aria-labelledby"]}
         />
-      )
+      );
     case "company":
       return (
         <CompanyAvatar
@@ -53,6 +51,6 @@ export const Avatar = ({
           aria-label={avatar["aria-label"]}
           aria-labelledby={avatar["aria-labelledby"]}
         />
-      )
+      );
   }
-}
+};

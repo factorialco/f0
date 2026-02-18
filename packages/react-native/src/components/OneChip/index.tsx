@@ -1,12 +1,10 @@
-import { View, Text, Pressable } from "react-native"
-import { tv, type VariantProps } from "tailwind-variants"
+import { cva, type VariantProps } from "cva";
+import { cn } from "../../lib/utils";
+import { Icon, IconType } from "../Icon";
+import { View, Text, Pressable } from "react-native";
+import { CrossedCircle } from "../../icons/app";
 
-import { CrossedCircle } from "../../icons/app"
-import { cn } from "../../lib/utils"
-import { Icon, type IconType } from "../Icon"
-import { PressableFeedback } from "../PressableFeedback"
-
-export const chipContainerVariants = tv({
+export const chipContainerVariants = cva({
   base: "flex items-center gap-1 rounded-full border border-solid border-f1-border px-2 py-0.5 grow-0",
   variants: {
     variant: {
@@ -17,9 +15,9 @@ export const chipContainerVariants = tv({
   defaultVariants: {
     variant: "default",
   },
-})
+});
 
-export const chipTextVariants = tv({
+export const chipTextVariants = cva({
   base: "font-medium",
   variants: {
     variant: {
@@ -30,13 +28,13 @@ export const chipTextVariants = tv({
   defaultVariants: {
     variant: "default",
   },
-})
+});
 
 interface ChipProps extends VariantProps<typeof chipContainerVariants> {
-  label: string
-  icon?: IconType
-  onClick?: () => void
-  onClose?: () => void
+  label: string;
+  icon?: IconType;
+  onClick?: () => void;
+  onClose?: () => void;
 }
 
 export const OneChip = ({
@@ -48,16 +46,15 @@ export const OneChip = ({
 }: ChipProps) => {
   return (
     <View className="flex items-start">
-      <PressableFeedback
+      <Pressable
         className={cn(
           chipContainerVariants({ variant }),
           onClose && "pr-1.5",
-          icon && "pl-1.5"
+          icon && "pl-1.5",
         )}
         onPress={onClick}
-        variant="both"
-        accessibilityRole="button"
-        accessibilityLabel="Action"
+        tabIndex={onClick ? 0 : undefined}
+        aria-label="Action"
       >
         <View className="flex flex-row items-center gap-0.5">
           {icon && (
@@ -71,12 +68,12 @@ export const OneChip = ({
           {onClose && (
             <Pressable
               onPress={(e) => {
-                e.stopPropagation()
-                onClose()
+                e.stopPropagation();
+                onClose();
               }}
               className="-m-1 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full [&_svg]:text-f1-icon-secondary"
-              accessibilityRole="button"
-              accessibilityLabel="Close"
+              tabIndex={0}
+              aria-label="Close"
             >
               <Icon
                 icon={CrossedCircle}
@@ -86,7 +83,7 @@ export const OneChip = ({
             </Pressable>
           )}
         </View>
-      </PressableFeedback>
+      </Pressable>
     </View>
-  )
-}
+  );
+};

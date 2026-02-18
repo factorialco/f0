@@ -10,9 +10,6 @@ import {
   useFormContext,
 } from "react-hook-form"
 
-import { F0Icon } from "../components/F0Icon"
-import { AlertCircle } from "../icons/app"
-import { useI18n } from "../lib/providers/i18n/i18n-provider"
 import { cn } from "../lib/utils"
 import { Label } from "./label"
 
@@ -138,46 +135,38 @@ const FormDescription = React.forwardRef<
     <p
       ref={ref}
       id={formDescriptionId}
-      className={cn("text-base text-f1-foreground-secondary", className)}
+      className={cn("text-sm text-f1-foreground-secondary", className)}
       {...props}
     />
   )
 })
 FormDescription.displayName = "FormDescription"
 
-interface FormMessageProps extends React.HTMLAttributes<HTMLDivElement> {
-  /** Fallback message when error exists but has no message */
-  fallback?: string
-}
+const FormMessage = React.forwardRef<
+  HTMLParagraphElement,
+  React.HTMLAttributes<HTMLParagraphElement>
+>(({ className, children, ...props }, ref) => {
+  const { error, formMessageId } = useFormField()
+  const body = error ? String(error?.message) : children
 
-const FormMessage = React.forwardRef<HTMLDivElement, FormMessageProps>(
-  ({ className, children, fallback, ...props }, ref) => {
-    const { error, formMessageId } = useFormField()
-    const { forms } = useI18n()
-    // Use fallback message when error exists but message is undefined
-    const body = error
-      ? (error.message ?? fallback ?? forms.validation.invalidType)
-      : children
-
-    if (!body) {
-      return null
-    }
-
-    return (
-      <div
-        ref={ref}
-        id={formMessageId}
-        className={cn("flex gap-1", className)}
-        {...props}
-      >
-        <F0Icon icon={AlertCircle} color="critical" />
-        <span className="text-base font-medium text-f1-foreground-critical">
-          {body}
-        </span>
-      </div>
-    )
+  if (!body) {
+    return null
   }
-)
+
+  return (
+    <p
+      ref={ref}
+      id={formMessageId}
+      className={cn(
+        "text-sm font-medium text-f1-foreground-critical",
+        className
+      )}
+      {...props}
+    >
+      {body}
+    </p>
+  )
+})
 FormMessage.displayName = "FormMessage"
 
 export {

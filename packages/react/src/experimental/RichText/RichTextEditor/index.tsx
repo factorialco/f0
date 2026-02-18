@@ -70,9 +70,6 @@ interface RichTextEditorProps {
   height?: heightType
   plainHtmlMode?: boolean
   fullScreenMode?: boolean
-  onFullscreenChange?: (fullscreen: boolean) => void
-  /** Whether the editor is disabled */
-  disabled?: boolean
 }
 
 type RichTextEditorHandle = {
@@ -101,8 +98,6 @@ const RichTextEditorComponent = forwardRef<
     height = "auto",
     plainHtmlMode = false,
     fullScreenMode = true,
-    onFullscreenChange,
-    disabled = false,
   },
   ref
 ) {
@@ -158,19 +153,10 @@ const RichTextEditorComponent = forwardRef<
   }, [height, isFullscreen])
 
   const handleToggleFullscreen = () => {
-    setIsFullscreen((prev) => {
-      const next = !prev
-      if (onFullscreenChange) onFullscreenChange(next)
-      return next
-    })
+    setIsFullscreen((prev) => !prev)
   }
 
-  const disableAllButtons = !!(
-    isAcceptChangesOpen ||
-    isLoadingEnhance ||
-    error ||
-    disabled
-  )
+  const disableAllButtons = !!(isAcceptChangesOpen || isLoadingEnhance || error)
 
   const editor = useEditor({
     extensions: ExtensionsConfiguration({
@@ -182,19 +168,16 @@ const RichTextEditorComponent = forwardRef<
       plainHtmlMode,
     }),
     content: editorState.html,
-    editable: !disabled,
     onUpdate: ({ editor }: { editor: Editor }) => {
       handleEditorUpdate({ editor, onChange, setEditorState })
     },
   })
 
   useEffect(() => {
-    if ((error || disabled) && editor) {
+    if (error && editor) {
       editor.setEditable(false)
-    } else if (editor && !error && !disabled) {
-      editor.setEditable(true)
     }
-  }, [error, disabled, editor])
+  }, [error, editor])
 
   useImperativeHandle(ref, () => ({
     clear: () => editor?.commands.clearContent(),
@@ -265,8 +248,7 @@ const RichTextEditorComponent = forwardRef<
         ref={containerRef}
         id={editorId}
         className={cn(
-          "rich-text-editor-container pointer-events-auto flex flex-col",
-          disabled ? "bg-f1-background-tertiary" : "bg-f1-background",
+          "rich-text-editor-container pointer-events-auto flex flex-col bg-f1-background",
           isFullscreen
             ? "fixed inset-0 z-50"
             : "relative w-full rounded-xl border border-solid border-f1-border"
@@ -362,8 +344,7 @@ const RichTextEditorComponent = forwardRef<
 
         <div
           className={cn(
-            "relative z-40 rounded-b-lg px-3",
-            !disabled && "bg-f1-background",
+            "relative z-40 rounded-b-lg bg-f1-background px-3",
             hasFullHeight && !isScrolledToBottom && "shadow-editor-tools"
           )}
         >
@@ -415,7 +396,6 @@ const RichTextEditorComponent = forwardRef<
             canUseFiles={filesConfig ? true : false}
             isLoadingEnhance={isLoadingEnhance}
             disableButtons={disableAllButtons}
-            disabled={disabled}
             enhanceConfig={enhanceConfig}
             isFullscreen={isFullscreen}
             onEnhanceWithAI={handleEnhanceWithAI}

@@ -1,6 +1,6 @@
-import { Ref, forwardRef } from "react"
-import Svg, { Path } from "react-native-svg"
-import type { SvgProps } from "react-native-svg"
+import Svg, { Path } from "react-native-svg";
+import type { SvgProps } from "react-native-svg";
+import { Ref, forwardRef } from "react";
 const SvgPauseCircle = (props: SvgProps, ref: Ref<Svg>) => (
   <Svg
     fill="none"
@@ -16,6 +16,6 @@ const SvgPauseCircle = (props: SvgProps, ref: Ref<Svg>) => (
       clipRule="evenodd"
     />
   </Svg>
-)
-const ForwardRef = forwardRef(SvgPauseCircle)
-export default ForwardRef
+);
+const ForwardRef = forwardRef(SvgPauseCircle);
+export default ForwardRef;

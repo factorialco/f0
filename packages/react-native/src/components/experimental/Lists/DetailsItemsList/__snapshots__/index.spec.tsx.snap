@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+// Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`DetailsItemsList Snapshot  1`] = `
 <View
@@ -16,7 +16,7 @@ exports[`DetailsItemsList Snapshot  1`] = `
       className="flex gap-0.5"
     >
       <View
-        className="max-w-72 min-w-32"
+        className="min-w-32 max-w-72"
       >
         <Text
           className="px-1.5 text-f1-foreground-secondary"
@@ -91,9 +91,6 @@ exports[`DetailsItemsList Snapshot  1`] = `
                         "backgroundColor": "transparent",
                         "borderWidth": 0,
                       },
-                      [
-                        {},
-                      ],
                       {
                         "flex": 0,
                         "height": "100%",
@@ -168,7 +165,7 @@ exports[`DetailsItemsList Snapshot  1`] = `
       className="flex gap-0.5"
     >
       <View
-        className="max-w-72 min-w-32"
+        className="min-w-32 max-w-72"
       >
         <Text
           className="px-1.5 text-f1-foreground-secondary"
@@ -200,7 +197,7 @@ exports[`DetailsItemsList Snapshot  1`] = `
                 }
               }
               accessible={true}
-              className="group justify-between rounded text-inherit no-underline hover:bg-f1-background-hover focus-visible:outline-2 focus-visible:outline-f1-border-selected-bold active:bg-f1-background-secondary-hover flex flex-row items-center gap-1.5 p-1.5"
+              className="group justify-between rounded text-f1-foreground no-underline hover:bg-f1-background-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-f1-border-selected-bold active:bg-f1-background-secondary-hover flex flex-row items-center gap-1.5 p-1.5"
               collapsable={false}
               focusable={true}
               handlePress={[Function]}
@@ -226,7 +223,7 @@ exports[`DetailsItemsList Snapshot  1`] = `
                   >
                     <View
                       aria-hidden={true}
-                      className="flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold w-5 h-5 rounded-full bg-f1-background dark:bg-f1-background-inverse-secondary"
+                      className="flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold w-5 h-5 rounded-full dark:bg-f1-background-inverse-secondary bg-f1-background"
                       data-a11y-color-contrast-ignore={true}
                       role="img"
                     >
@@ -274,9 +271,6 @@ exports[`DetailsItemsList Snapshot  1`] = `
                       "backgroundColor": "transparent",
                       "borderWidth": 0,
                     },
-                    [
-                      {},
-                    ],
                     {
                       "flex": 0,
                       "height": "100%",
@@ -329,7 +323,7 @@ exports[`DetailsItemsList Snapshot  1`] = `
       className="flex gap-0.5"
     >
       <View
-        className="max-w-72 min-w-32"
+        className="min-w-32 max-w-72"
       >
         <Text
           className="px-1.5 text-f1-foreground-secondary"
@@ -361,7 +355,7 @@ exports[`DetailsItemsList Snapshot  1`] = `
                 }
               }
               accessible={true}
-              className="group justify-between rounded text-inherit no-underline hover:bg-f1-background-hover focus-visible:outline-2 focus-visible:outline-f1-border-selected-bold active:bg-f1-background-secondary-hover flex flex-row items-center gap-1.5 p-1.5"
+              className="group justify-between rounded text-f1-foreground no-underline hover:bg-f1-background-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-f1-border-selected-bold active:bg-f1-background-secondary-hover flex flex-row items-center gap-1.5 p-1.5"
               collapsable={false}
               focusable={true}
               handlePress={[Function]}
@@ -387,7 +381,7 @@ exports[`DetailsItemsList Snapshot  1`] = `
                   >
                     <View
                       aria-hidden={true}
-                      className="flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold w-5 h-5 rounded-xs bg-[hsl(theme(colors.yellow-50))]"
+                      className="flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold w-5 h-5 rounded-xs bg-[hsl(theme(colors.yellow.50))]"
                       data-a11y-color-contrast-ignore={true}
                       role="img"
                     >
@@ -423,9 +417,6 @@ exports[`DetailsItemsList Snapshot  1`] = `
                       "backgroundColor": "transparent",
                       "borderWidth": 0,
                     },
-                    [
-                      {},
-                    ],
                     {
                       "flex": 0,
                       "height": "100%",
@@ -493,7 +484,7 @@ exports[`DetailsItemsList Snapshot  1`] = `
                 }
               }
               accessible={true}
-              className="group justify-between rounded text-inherit no-underline hover:bg-f1-background-hover focus-visible:outline-2 focus-visible:outline-f1-border-selected-bold active:bg-f1-background-secondary-hover flex flex-row items-center gap-1.5 p-1.5"
+              className="group justify-between rounded text-f1-foreground no-underline hover:bg-f1-background-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-f1-border-selected-bold active:bg-f1-background-secondary-hover flex flex-row items-center gap-1.5 p-1.5"
               collapsable={false}
               focusable={true}
               handlePress={[Function]}
@@ -519,7 +510,7 @@ exports[`DetailsItemsList Snapshot  1`] = `
                   >
                     <View
                       aria-hidden={true}
-                      className="flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold w-5 h-5 rounded-xs bg-[hsl(theme(colors.malibu-50))]"
+                      className="flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold w-5 h-5 rounded-xs bg-[hsl(theme(colors.malibu.50))]"
                       data-a11y-color-contrast-ignore={true}
                       role="img"
                     >
@@ -555,9 +546,6 @@ exports[`DetailsItemsList Snapshot  1`] = `
                       "backgroundColor": "transparent",
                       "borderWidth": 0,
                     },
-                    [
-                      {},
-                    ],
                     {
                       "flex": 0,
                       "height": "100%",
@@ -610,7 +598,7 @@ exports[`DetailsItemsList Snapshot  1`] = `
       className="flex gap-0.5"
     >
       <View
-        className="max-w-72 min-w-32"
+        className="min-w-32 max-w-72"
       >
         <Text
           className="px-1.5 text-f1-foreground-secondary"
@@ -631,7 +619,7 @@ exports[`DetailsItemsList Snapshot  1`] = `
                   {
                     "busy": undefined,
                     "checked": undefined,
-                    "disabled": true,
+                    "disabled": undefined,
                     "expanded": undefined,
                     "selected": undefined,
                   }
@@ -645,7 +633,7 @@ exports[`DetailsItemsList Snapshot  1`] = `
                   }
                 }
                 accessible={true}
-                className="overflow-hidden flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f1-border-secondary"
+                className="flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f1-border-secondary"
                 collapsable={false}
                 focusable={true}
                 onBlur={[Function]}
@@ -657,18 +645,6 @@ exports[`DetailsItemsList Snapshot  1`] = `
                 onResponderTerminate={[Function]}
                 onResponderTerminationRequest={[Function]}
                 onStartShouldSetResponder={[Function]}
-                style={
-                  [
-                    {
-                      "transform": [
-                        {
-                          "scale": 1,
-                        },
-                      ],
-                    },
-                    undefined,
-                  ]
-                }
               >
                 <View
                   aria-hidden={true}

@@ -1,15 +1,14 @@
-import { memo, ReactNode } from "react"
-import { Pressable, View } from "react-native"
-
-import { GenericActionType } from ".."
-import { ChevronRight } from "../../../../../icons/app"
-import { cn } from "../../../../../lib/utils"
-import { Icon } from "../../../../Icon"
+import { memo, ReactNode } from "react";
+import { cn } from "../../../../../lib/utils";
+import { Icon } from "../../../../Icon";
+import { ChevronRight } from "../../../../../icons/app";
+import { Pressable, View } from "react-native";
+import { GenericActionType } from "..";
 
 export type GenericActionProps = {
-  children: ReactNode
-  className?: string
-} & GenericActionType
+  children: ReactNode;
+  className?: string;
+} & GenericActionType;
 
 export const GenericAction = memo(
   ({ children, className, ...props }: GenericActionProps) => {
@@ -18,9 +17,9 @@ export const GenericAction = memo(
         onPress={props.handlePress}
         {...props}
         className={cn(
-          "group flex items-center justify-between gap-1.5 rounded p-1.5 text-f1-foreground text-inherit",
+          "text-inherit group flex items-center justify-between gap-1.5 rounded p-1.5 text-f1-foreground",
           "no-underline hover:bg-f1-background-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-f1-border-selected-bold active:bg-f1-background-secondary-hover",
-          className
+          className,
         )}
       >
         <View className="flex flex-row items-center gap-1.5">{children}</View>
@@ -31,8 +30,8 @@ export const GenericAction = memo(
           className="text-f1-foreground"
         />
       </Pressable>
-    )
-  }
-)
+    );
+  },
+);
 
-GenericAction.displayName = "GenericAction"
+GenericAction.displayName = "GenericAction";

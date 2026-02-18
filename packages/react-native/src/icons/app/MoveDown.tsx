@@ -1,6 +1,6 @@
-import { Ref, forwardRef } from "react"
-import Svg, { Path, Rect } from "react-native-svg"
-import type { SvgProps } from "react-native-svg"
+import Svg, { Path, Rect } from "react-native-svg";
+import type { SvgProps } from "react-native-svg";
+import { Ref, forwardRef } from "react";
 const SvgMoveDown = (props: SvgProps, ref: Ref<Svg>) => (
   <Svg
     fill="none"
@@ -39,6 +39,6 @@ const SvgMoveDown = (props: SvgProps, ref: Ref<Svg>) => (
       transform="matrix(1 0 0 -1 12 9.7)"
     />
   </Svg>
-)
-const ForwardRef = forwardRef(SvgMoveDown)
-export default ForwardRef
+);
+const ForwardRef = forwardRef(SvgMoveDown);
+export default ForwardRef;

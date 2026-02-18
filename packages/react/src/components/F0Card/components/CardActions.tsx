@@ -60,10 +60,7 @@ export function CardActions({
                 label={action.label}
                 icon={action.icon}
                 variant="outline"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  action.onClick()
-                }}
+                onClick={action.onClick}
                 hideLabel={isDesktop && index > 0}
                 size={isDesktop ? (compact ? "sm" : "md") : "lg"}
               />
@@ -73,7 +70,6 @@ export function CardActions({
               href={secondaryActions.href}
               target={secondaryActions.target}
               disabled={secondaryActions.disabled}
-              onClick={(e) => e.stopPropagation()}
               data-testid="secondary-link"
             >
               {secondaryActions.label}
@@ -87,10 +83,7 @@ export function CardActions({
           <F0Button
             label={primaryAction.label}
             icon={primaryAction.icon}
-            onClick={(e) => {
-              e.stopPropagation()
-              primaryAction.onClick()
-            }}
+            onClick={primaryAction.onClick}
             size={isDesktop ? (compact ? "sm" : "md") : "lg"}
             data-testid="primary-button"
           />

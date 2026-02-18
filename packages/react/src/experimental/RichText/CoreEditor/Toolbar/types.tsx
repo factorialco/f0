@@ -2,7 +2,7 @@ import { Editor } from "@tiptap/react"
 import { ComponentProps } from "react"
 
 import { IconType } from "@/components/F0Icon"
-import { Shortcut } from "@/ui/Shortcut"
+import { Shortcut } from "@/experimental/Information/Shortcut"
 
 export interface ButtonConfig {
   key: string

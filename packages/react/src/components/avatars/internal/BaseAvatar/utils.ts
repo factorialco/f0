@@ -1,6 +1,6 @@
 import { type ComponentProps } from "react"
 
-import { BadgeProps } from "@/ui/IconBadge"
+import { BadgeProps } from "@/experimental/Information/Badge"
 import {
   internalAvatarColors as AvatarColors,
   Avatar as AvatarComponent,

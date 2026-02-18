@@ -1,32 +1,31 @@
-import { ComponentProps, FC } from "react"
-import { View } from "react-native"
-
-import { cn } from "../../../../lib/utils"
-import { DataList } from "../DataList"
+import { ComponentProps, FC } from "react";
+import { DataList } from "../DataList";
+import { cn } from "../../../../lib/utils";
+import { View } from "react-native";
 
 export type Content =
   | (ComponentProps<typeof DataList.Item> & {
-      type: "item"
+      type: "item";
     })
   | (ComponentProps<typeof DataList.PersonItem> & {
-      type: "person"
+      type: "person";
     })
   | (ComponentProps<typeof DataList.CompanyItem> & {
-      type: "company"
+      type: "company";
     })
   | (ComponentProps<typeof DataList.TeamItem> & {
-      type: "team"
+      type: "team";
     })
   | (ComponentProps<typeof DataList.DotTagItem> & {
-      type: "dot-tag"
-    })
+      type: "dot-tag";
+    });
 
 export interface DetailsItemType {
-  title: string
-  content: Content | Content[]
-  spacingAtTheBottom?: boolean
-  isHorizontalItem?: boolean
-  tableView?: boolean
+  title: string;
+  content: Content | Content[];
+  spacingAtTheBottom?: boolean;
+  isHorizontalItem?: boolean;
+  tableView?: boolean;
 }
 
 const ItemContent: FC<{ content: Content }> = ({ content }) => (
@@ -37,7 +36,7 @@ const ItemContent: FC<{ content: Content }> = ({ content }) => (
     {content.type === "company" && <DataList.CompanyItem {...content} />}
     {content.type === "dot-tag" && <DataList.DotTagItem {...content} />}
   </>
-)
+);
 
 export const DetailsItem = ({
   title,
@@ -46,13 +45,13 @@ export const DetailsItem = ({
   tableView = false,
   spacingAtTheBottom,
 }: DetailsItemType) => {
-  const contentArray = Array.isArray(content) ? content : [content]
+  const contentArray = Array.isArray(content) ? content : [content];
 
   return (
     <View
       className={cn(
         "flex gap-0.5",
-        spacingAtTheBottom && !isHorizontalItem && "pb-3"
+        spacingAtTheBottom && !isHorizontalItem && "pb-3",
       )}
     >
       <DataList
@@ -65,5 +64,5 @@ export const DetailsItem = ({
         ))}
       </DataList>
     </View>
-  )
-}
+  );
+};

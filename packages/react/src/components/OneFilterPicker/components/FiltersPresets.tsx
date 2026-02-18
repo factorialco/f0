@@ -1,8 +1,7 @@
 import { useMemo } from "react"
 
-import { Await } from "@/components/Utilities/Await"
-import { Counter } from "@/ui/Counter"
-import { Preset } from "@/ui/OnePreset"
+import { Counter } from "@/experimental/Information/Counter"
+import { Preset } from "@/experimental/OnePreset"
 import { cn, focusRing } from "@/lib/utils"
 import { OverflowList } from "@/ui/OverflowList"
 import { Skeleton } from "@/ui/skeleton"
@@ -72,16 +71,15 @@ export const FiltersPresets = <Filters extends FiltersDefinition>({
     isVisible = true
   ) => {
     const { isSelected, handleClick } = getPresetState(preset)
-    const presetNumber = preset.itemsCount?.(safeValue)
 
     return (
       <Preset
-        key={`${preset.label}-${index}`}
+        key={index}
         label={preset.label}
         selected={isSelected}
         onClick={handleClick}
         data-visible={isVisible}
-        number={presetNumber}
+        number={preset.itemsCount?.(safeValue) ?? undefined}
       />
     )
   }
@@ -91,11 +89,10 @@ export const FiltersPresets = <Filters extends FiltersDefinition>({
     index: number
   ) => {
     const { isSelected, handleClick } = getPresetState(preset)
-    const presetNumber = preset.itemsCount?.(safeValue)
 
     return (
       <button
-        key={`${preset.label}-${index}`}
+        key={index}
         className={cn(
           "flex w-full cursor-pointer items-center justify-between rounded-sm p-2 text-left font-medium text-f1-foreground hover:bg-f1-background-secondary",
           isSelected &&
@@ -106,21 +103,16 @@ export const FiltersPresets = <Filters extends FiltersDefinition>({
         data-visible={true}
       >
         {preset.label}
-        {presetNumber !== undefined && (
-          <Await
-            resolve={presetNumber}
-            fallback={<Skeleton className="h-4 w-6" />}
-          >
-            {(number) =>
-              number !== undefined && (
-                <Counter
-                  value={number}
-                  type={isSelected ? "selected" : "default"}
-                />
-              )
-            }
-          </Await>
-        )}
+        <Counter
+          value={
+            preset.filter != null &&
+            typeof preset.filter === "object" &&
+            !Array.isArray(preset.filter)
+              ? Object.keys(preset.filter).length
+              : 0
+          }
+          type={isSelected ? "selected" : "default"}
+        />
       </button>
     )
   }

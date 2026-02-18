@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+// Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`RawTag Snapshot 1`] = `
 <View
@@ -9,7 +9,7 @@ exports[`RawTag Snapshot 1`] = `
       {
         "busy": undefined,
         "checked": undefined,
-        "disabled": true,
+        "disabled": undefined,
         "expanded": undefined,
         "selected": undefined,
       }
@@ -23,7 +23,7 @@ exports[`RawTag Snapshot 1`] = `
       }
     }
     accessible={true}
-    className="overflow-hidden flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f1-border-secondary"
+    className="flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f1-border-secondary"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -35,18 +35,6 @@ exports[`RawTag Snapshot 1`] = `
     onResponderTerminate={[Function]}
     onResponderTerminationRequest={[Function]}
     onStartShouldSetResponder={[Function]}
-    style={
-      [
-        {
-          "transform": [
-            {
-              "scale": 1,
-            },
-          ],
-        },
-        undefined,
-      ]
-    }
   >
     <View
       aria-hidden={true}
@@ -75,7 +63,7 @@ exports[`RawTag Snapshot 2`] = `
       {
         "busy": undefined,
         "checked": undefined,
-        "disabled": true,
+        "disabled": undefined,
         "expanded": undefined,
         "selected": undefined,
       }
@@ -89,7 +77,7 @@ exports[`RawTag Snapshot 2`] = `
       }
     }
     accessible={true}
-    className="overflow-hidden flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f1-border-secondary"
+    className="flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f1-border-secondary"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -101,18 +89,6 @@ exports[`RawTag Snapshot 2`] = `
     onResponderTerminate={[Function]}
     onResponderTerminationRequest={[Function]}
     onStartShouldSetResponder={[Function]}
-    style={
-      [
-        {
-          "transform": [
-            {
-              "scale": 1,
-            },
-          ],
-        },
-        undefined,
-      ]
-    }
   >
     <View
       aria-hidden={true}
@@ -141,7 +117,7 @@ exports[`RawTag Snapshot 3`] = `
       {
         "busy": undefined,
         "checked": undefined,
-        "disabled": true,
+        "disabled": undefined,
         "expanded": undefined,
         "selected": undefined,
       }
@@ -155,7 +131,7 @@ exports[`RawTag Snapshot 3`] = `
       }
     }
     accessible={true}
-    className="overflow-hidden flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f1-border-secondary"
+    className="flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f1-border-secondary"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -167,18 +143,6 @@ exports[`RawTag Snapshot 3`] = `
     onResponderTerminate={[Function]}
     onResponderTerminationRequest={[Function]}
     onStartShouldSetResponder={[Function]}
-    style={
-      [
-        {
-          "transform": [
-            {
-              "scale": 1,
-            },
-          ],
-        },
-        undefined,
-      ]
-    }
   >
     <View
       aria-hidden={true}
@@ -207,7 +171,7 @@ exports[`RawTag Snapshot 4`] = `
       {
         "busy": undefined,
         "checked": undefined,
-        "disabled": true,
+        "disabled": undefined,
         "expanded": undefined,
         "selected": undefined,
       }
@@ -221,7 +185,7 @@ exports[`RawTag Snapshot 4`] = `
       }
     }
     accessible={true}
-    className="overflow-hidden flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f1-border-secondary"
+    className="flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f1-border-secondary"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -233,18 +197,6 @@ exports[`RawTag Snapshot 4`] = `
     onResponderTerminate={[Function]}
     onResponderTerminationRequest={[Function]}
     onStartShouldSetResponder={[Function]}
-    style={
-      [
-        {
-          "transform": [
-            {
-              "scale": 1,
-            },
-          ],
-        },
-        undefined,
-      ]
-    }
   >
     <View
       aria-hidden={true}
@@ -273,7 +225,7 @@ exports[`RawTag Snapshot 5`] = `
       {
         "busy": undefined,
         "checked": undefined,
-        "disabled": true,
+        "disabled": undefined,
         "expanded": undefined,
         "selected": undefined,
       }
@@ -287,7 +239,7 @@ exports[`RawTag Snapshot 5`] = `
       }
     }
     accessible={true}
-    className="overflow-hidden flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f1-border-secondary"
+    className="flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f1-border-secondary"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -299,18 +251,6 @@ exports[`RawTag Snapshot 5`] = `
     onResponderTerminate={[Function]}
     onResponderTerminationRequest={[Function]}
     onStartShouldSetResponder={[Function]}
-    style={
-      [
-        {
-          "transform": [
-            {
-              "scale": 1,
-            },
-          ],
-        },
-        undefined,
-      ]
-    }
   >
     <View
       aria-hidden={true}
@@ -339,7 +279,7 @@ exports[`RawTag Snapshot 6`] = `
       {
         "busy": undefined,
         "checked": undefined,
-        "disabled": true,
+        "disabled": undefined,
         "expanded": undefined,
         "selected": undefined,
       }
@@ -353,7 +293,7 @@ exports[`RawTag Snapshot 6`] = `
       }
     }
     accessible={true}
-    className="overflow-hidden flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f1-border-secondary"
+    className="flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f1-border-secondary"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -365,18 +305,6 @@ exports[`RawTag Snapshot 6`] = `
     onResponderTerminate={[Function]}
     onResponderTerminationRequest={[Function]}
     onStartShouldSetResponder={[Function]}
-    style={
-      [
-        {
-          "transform": [
-            {
-              "scale": 1,
-            },
-          ],
-        },
-        undefined,
-      ]
-    }
   >
     <View
       aria-hidden={true}
@@ -405,7 +333,7 @@ exports[`RawTag Snapshot 7`] = `
       {
         "busy": undefined,
         "checked": undefined,
-        "disabled": true,
+        "disabled": undefined,
         "expanded": undefined,
         "selected": undefined,
       }
@@ -419,7 +347,7 @@ exports[`RawTag Snapshot 7`] = `
       }
     }
     accessible={true}
-    className="overflow-hidden flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f1-border-secondary"
+    className="flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f1-border-secondary"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -431,18 +359,6 @@ exports[`RawTag Snapshot 7`] = `
     onResponderTerminate={[Function]}
     onResponderTerminationRequest={[Function]}
     onStartShouldSetResponder={[Function]}
-    style={
-      [
-        {
-          "transform": [
-            {
-              "scale": 1,
-            },
-          ],
-        },
-        undefined,
-      ]
-    }
   >
     <View
       aria-hidden={true}
@@ -471,7 +387,7 @@ exports[`RawTag Snapshot 8`] = `
       {
         "busy": undefined,
         "checked": undefined,
-        "disabled": true,
+        "disabled": undefined,
         "expanded": undefined,
         "selected": undefined,
       }
@@ -485,7 +401,7 @@ exports[`RawTag Snapshot 8`] = `
       }
     }
     accessible={true}
-    className="overflow-hidden flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f1-border-secondary"
+    className="flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f1-border-secondary"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -497,18 +413,6 @@ exports[`RawTag Snapshot 8`] = `
     onResponderTerminate={[Function]}
     onResponderTerminationRequest={[Function]}
     onStartShouldSetResponder={[Function]}
-    style={
-      [
-        {
-          "transform": [
-            {
-              "scale": 1,
-            },
-          ],
-        },
-        undefined,
-      ]
-    }
   >
     <View
       aria-hidden={true}
@@ -537,7 +441,7 @@ exports[`RawTag Snapshot 9`] = `
       {
         "busy": undefined,
         "checked": undefined,
-        "disabled": true,
+        "disabled": undefined,
         "expanded": undefined,
         "selected": undefined,
       }
@@ -551,7 +455,7 @@ exports[`RawTag Snapshot 9`] = `
       }
     }
     accessible={true}
-    className="overflow-hidden flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f1-border-secondary"
+    className="flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f1-border-secondary"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -563,18 +467,6 @@ exports[`RawTag Snapshot 9`] = `
     onResponderTerminate={[Function]}
     onResponderTerminationRequest={[Function]}
     onStartShouldSetResponder={[Function]}
-    style={
-      [
-        {
-          "transform": [
-            {
-              "scale": 1,
-            },
-          ],
-        },
-        undefined,
-      ]
-    }
   >
     <View
       aria-hidden={true}
@@ -603,7 +495,7 @@ exports[`RawTag Snapshot 10`] = `
       {
         "busy": undefined,
         "checked": undefined,
-        "disabled": true,
+        "disabled": undefined,
         "expanded": undefined,
         "selected": undefined,
       }
@@ -617,7 +509,7 @@ exports[`RawTag Snapshot 10`] = `
       }
     }
     accessible={true}
-    className="overflow-hidden flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f1-border-secondary"
+    className="flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f1-border-secondary"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -629,18 +521,6 @@ exports[`RawTag Snapshot 10`] = `
     onResponderTerminate={[Function]}
     onResponderTerminationRequest={[Function]}
     onStartShouldSetResponder={[Function]}
-    style={
-      [
-        {
-          "transform": [
-            {
-              "scale": 1,
-            },
-          ],
-        },
-        undefined,
-      ]
-    }
   >
     <View
       aria-hidden={true}
@@ -669,7 +549,7 @@ exports[`RawTag Snapshot 11`] = `
       {
         "busy": undefined,
         "checked": undefined,
-        "disabled": true,
+        "disabled": undefined,
         "expanded": undefined,
         "selected": undefined,
       }
@@ -683,7 +563,7 @@ exports[`RawTag Snapshot 11`] = `
       }
     }
     accessible={true}
-    className="overflow-hidden flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f1-border-secondary"
+    className="flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f1-border-secondary"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -695,18 +575,6 @@ exports[`RawTag Snapshot 11`] = `
     onResponderTerminate={[Function]}
     onResponderTerminationRequest={[Function]}
     onStartShouldSetResponder={[Function]}
-    style={
-      [
-        {
-          "transform": [
-            {
-              "scale": 1,
-            },
-          ],
-        },
-        undefined,
-      ]
-    }
   >
     <View
       aria-hidden={true}
@@ -735,7 +603,7 @@ exports[`RawTag Snapshot 12`] = `
       {
         "busy": undefined,
         "checked": undefined,
-        "disabled": true,
+        "disabled": undefined,
         "expanded": undefined,
         "selected": undefined,
       }
@@ -749,7 +617,7 @@ exports[`RawTag Snapshot 12`] = `
       }
     }
     accessible={true}
-    className="overflow-hidden flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f1-border-secondary"
+    className="flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f1-border-secondary"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -761,18 +629,6 @@ exports[`RawTag Snapshot 12`] = `
     onResponderTerminate={[Function]}
     onResponderTerminationRequest={[Function]}
     onStartShouldSetResponder={[Function]}
-    style={
-      [
-        {
-          "transform": [
-            {
-              "scale": 1,
-            },
-          ],
-        },
-        undefined,
-      ]
-    }
   >
     <View
       aria-hidden={true}
@@ -801,7 +657,7 @@ exports[`RawTag Snapshot 13`] = `
       {
         "busy": undefined,
         "checked": undefined,
-        "disabled": true,
+        "disabled": undefined,
         "expanded": undefined,
         "selected": undefined,
       }
@@ -815,7 +671,7 @@ exports[`RawTag Snapshot 13`] = `
       }
     }
     accessible={true}
-    className="overflow-hidden flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f1-border-secondary"
+    className="flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f1-border-secondary"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -827,18 +683,6 @@ exports[`RawTag Snapshot 13`] = `
     onResponderTerminate={[Function]}
     onResponderTerminationRequest={[Function]}
     onStartShouldSetResponder={[Function]}
-    style={
-      [
-        {
-          "transform": [
-            {
-              "scale": 1,
-            },
-          ],
-        },
-        undefined,
-      ]
-    }
   >
     <View
       aria-hidden={true}
@@ -867,7 +711,7 @@ exports[`RawTag Snapshot 14`] = `
       {
         "busy": undefined,
         "checked": undefined,
-        "disabled": true,
+        "disabled": undefined,
         "expanded": undefined,
         "selected": undefined,
       }
@@ -881,7 +725,7 @@ exports[`RawTag Snapshot 14`] = `
       }
     }
     accessible={true}
-    className="overflow-hidden flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f1-border-secondary"
+    className="flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f1-border-secondary"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -893,18 +737,6 @@ exports[`RawTag Snapshot 14`] = `
     onResponderTerminate={[Function]}
     onResponderTerminationRequest={[Function]}
     onStartShouldSetResponder={[Function]}
-    style={
-      [
-        {
-          "transform": [
-            {
-              "scale": 1,
-            },
-          ],
-        },
-        undefined,
-      ]
-    }
   >
     <View
       aria-hidden={true}
@@ -933,7 +765,7 @@ exports[`RawTag Snapshot 15`] = `
       {
         "busy": undefined,
         "checked": undefined,
-        "disabled": true,
+        "disabled": undefined,
         "expanded": undefined,
         "selected": undefined,
       }
@@ -947,7 +779,7 @@ exports[`RawTag Snapshot 15`] = `
       }
     }
     accessible={true}
-    className="overflow-hidden flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f1-border-secondary"
+    className="flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f1-border-secondary"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -959,18 +791,6 @@ exports[`RawTag Snapshot 15`] = `
     onResponderTerminate={[Function]}
     onResponderTerminationRequest={[Function]}
     onStartShouldSetResponder={[Function]}
-    style={
-      [
-        {
-          "transform": [
-            {
-              "scale": 1,
-            },
-          ],
-        },
-        undefined,
-      ]
-    }
   >
     <View
       aria-hidden={true}
@@ -999,7 +819,7 @@ exports[`RawTag Snapshot 16`] = `
       {
         "busy": undefined,
         "checked": undefined,
-        "disabled": true,
+        "disabled": undefined,
         "expanded": undefined,
         "selected": undefined,
       }
@@ -1013,7 +833,7 @@ exports[`RawTag Snapshot 16`] = `
       }
     }
     accessible={true}
-    className="overflow-hidden flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f1-border-secondary"
+    className="flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f1-border-secondary"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -1025,18 +845,6 @@ exports[`RawTag Snapshot 16`] = `
     onResponderTerminate={[Function]}
     onResponderTerminationRequest={[Function]}
     onStartShouldSetResponder={[Function]}
-    style={
-      [
-        {
-          "transform": [
-            {
-              "scale": 1,
-            },
-          ],
-        },
-        undefined,
-      ]
-    }
   >
     <View
       aria-hidden={true}
@@ -1065,7 +873,7 @@ exports[`RawTag Snapshot 17`] = `
       {
         "busy": undefined,
         "checked": undefined,
-        "disabled": true,
+        "disabled": undefined,
         "expanded": undefined,
         "selected": undefined,
       }
@@ -1079,7 +887,7 @@ exports[`RawTag Snapshot 17`] = `
       }
     }
     accessible={true}
-    className="overflow-hidden flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f1-border-secondary"
+    className="flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f1-border-secondary"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -1091,18 +899,6 @@ exports[`RawTag Snapshot 17`] = `
     onResponderTerminate={[Function]}
     onResponderTerminationRequest={[Function]}
     onStartShouldSetResponder={[Function]}
-    style={
-      [
-        {
-          "transform": [
-            {
-              "scale": 1,
-            },
-          ],
-        },
-        undefined,
-      ]
-    }
   >
     <View
       aria-hidden={true}
@@ -1131,7 +927,7 @@ exports[`RawTag Snapshot 18`] = `
       {
         "busy": undefined,
         "checked": undefined,
-        "disabled": true,
+        "disabled": undefined,
         "expanded": undefined,
         "selected": undefined,
       }
@@ -1145,7 +941,7 @@ exports[`RawTag Snapshot 18`] = `
       }
     }
     accessible={true}
-    className="overflow-hidden flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f1-border-secondary"
+    className="flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f1-border-secondary"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -1157,18 +953,6 @@ exports[`RawTag Snapshot 18`] = `
     onResponderTerminate={[Function]}
     onResponderTerminationRequest={[Function]}
     onStartShouldSetResponder={[Function]}
-    style={
-      [
-        {
-          "transform": [
-            {
-              "scale": 1,
-            },
-          ],
-        },
-        undefined,
-      ]
-    }
   >
     <View
       aria-hidden={true}
@@ -1197,7 +981,7 @@ exports[`RawTag Snapshot 19`] = `
       {
         "busy": undefined,
         "checked": undefined,
-        "disabled": true,
+        "disabled": undefined,
         "expanded": undefined,
         "selected": undefined,
       }
@@ -1211,7 +995,7 @@ exports[`RawTag Snapshot 19`] = `
       }
     }
     accessible={true}
-    className="overflow-hidden flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f1-border-secondary"
+    className="flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f1-border-secondary"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -1223,18 +1007,6 @@ exports[`RawTag Snapshot 19`] = `
     onResponderTerminate={[Function]}
     onResponderTerminationRequest={[Function]}
     onStartShouldSetResponder={[Function]}
-    style={
-      [
-        {
-          "transform": [
-            {
-              "scale": 1,
-            },
-          ],
-        },
-        undefined,
-      ]
-    }
   >
     <View
       aria-hidden={true}

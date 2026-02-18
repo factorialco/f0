@@ -10,7 +10,7 @@ import { Action } from "@/ui/Action"
 import { OneEllipsis } from "../OneEllipsis"
 import { ButtonInternalProps } from "./internal-types"
 import { fontSizeVariants } from "./variants"
-import { Counter } from "@/ui/Counter"
+import { Counter } from "@/experimental/Information/Counter"
 
 const IconMotion = motion.create(F0Icon)
 
