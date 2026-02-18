@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.369.4](https://github.com/factorialco/f0/compare/f0-react-v1.369.3...f0-react-v1.369.4) (2026-02-18)
+
+
+### Bug Fixes
+
+* get rid of max width in DetailsItemsList component ([#3462](https://github.com/factorialco/f0/issues/3462)) ([9807a8c](https://github.com/factorialco/f0/commit/9807a8c86f1ddbb09e99479c8be18a61547122d1))
+
 ## [1.369.3](https://github.com/factorialco/f0/compare/f0-react-v1.369.2...f0-react-v1.369.3) (2026-02-18)
 
 
