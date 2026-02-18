@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.368.0](https://github.com/factorialco/f0/compare/f0-react-v1.367.0...f0-react-v1.368.0) (2026-02-18)
+
+
+### Features
+
+* **Select:** support DotTag in select options ([#3422](https://github.com/factorialco/f0/issues/3422)) ([eef8882](https://github.com/factorialco/f0/commit/eef88829de45fceee7f37bcc4259648add4e9a70))
+
 ## [1.367.0](https://github.com/factorialco/f0/compare/f0-react-v1.366.0...f0-react-v1.367.0) (2026-02-17)
 
 
