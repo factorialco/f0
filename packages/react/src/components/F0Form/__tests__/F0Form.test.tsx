@@ -1,6 +1,6 @@
 import React from "react"
 import { zeroRender as render, screen, waitFor } from "@/testing/test-utils"
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, vi } from "vitest"
 import { z } from "zod"
 import userEvent from "@testing-library/user-event"
 
@@ -15,6 +15,7 @@ import type { F0SectionConfig } from "../types"
 import { getSchemaDefinition } from "../useSchemaDefinition"
 import { isFieldRequired, isOptionalOrNullable } from "../fields/schema"
 import { evaluateDisabled, evaluateRenderIf } from "../fields/utils"
+import { createConditionalResolver } from "../conditionalResolver"
 
 describe("F0Form", () => {
   it("renders a basic form using schema prop", () => {
@@ -1119,5 +1120,276 @@ describe("F0Form switch groups with resetOnDisable", () => {
         "false"
       )
     })
+  })
+})
+
+describe("createConditionalResolver - null to undefined conversion", () => {
+  it("converts null values to undefined before validation", async () => {
+    const schema = z.object({
+      name: f0FormField(z.string(), { label: "Name" }),
+      birthDate: f0FormField(z.date().optional(), { label: "Birth Date" }),
+    })
+
+    const resolver = createConditionalResolver(schema)
+    const result = await resolver(
+      { name: "John", birthDate: null as unknown as Date },
+      undefined,
+      {
+        fields: {},
+        shouldUseNativeValidation: false,
+      }
+    )
+
+    expect(result.errors).toEqual({})
+  })
+
+  it("rejects null for required date without conversion issue", async () => {
+    const schema = z.object({
+      requiredDate: f0FormField(z.date(), { label: "Required Date" }),
+    })
+
+    const resolver = createConditionalResolver(schema)
+    const result = await resolver(
+      { requiredDate: null as unknown as Date },
+      undefined,
+      {
+        fields: {},
+        shouldUseNativeValidation: false,
+      }
+    )
+
+    const requiredDateError =
+      "requiredDate" in result.errors ? result.errors.requiredDate : undefined
+
+    expect(requiredDateError).toBeDefined()
+    expect(requiredDateError?.message).toBe("Required")
+  })
+
+  it("passes through valid date values unchanged", async () => {
+    const schema = z.object({
+      eventDate: f0FormField(z.date().optional(), { label: "Event Date" }),
+    })
+
+    const testDate = new Date("2026-06-15")
+    const resolver = createConditionalResolver(schema)
+    const result = await resolver({ eventDate: testDate }, undefined, {
+      fields: {},
+      shouldUseNativeValidation: false,
+    })
+
+    expect(result.errors).toEqual({})
+    expect(result.values).toEqual({ eventDate: testDate })
+  })
+
+  it("converts multiple null values to undefined", async () => {
+    const schema = z.object({
+      startDate: f0FormField(z.date().optional(), { label: "Start" }),
+      endDate: f0FormField(z.date().optional(), { label: "End" }),
+      notes: f0FormField(z.string().optional(), { label: "Notes" }),
+    })
+
+    const resolver = createConditionalResolver(schema)
+    const result = await resolver(
+      {
+        startDate: null as unknown as Date,
+        endDate: null as unknown as Date,
+        notes: "test",
+      },
+      undefined,
+      {
+        fields: {},
+        shouldUseNativeValidation: false,
+      }
+    )
+
+    expect(result.errors).toEqual({})
+  })
+})
+
+describe("F0Form clearing optional fields with default values", () => {
+  it("clears optional text field to empty instead of default value", async () => {
+    const user = userEvent.setup()
+
+    const formSchema = z.object({
+      name: f0FormField(z.string().optional(), {
+        label: "Name",
+        placeholder: "Enter name",
+      }),
+    })
+
+    render(
+      <F0Form
+        name="clear-text-test"
+        schema={formSchema}
+        defaultValues={{ name: "John Doe" }}
+        onSubmit={async () => ({ success: true })}
+      />
+    )
+
+    const input = screen.getByLabelText("Name")
+    expect(input).toHaveValue("John Doe")
+
+    await user.clear(input)
+    expect(input).toHaveValue("")
+  })
+
+  it("clears optional number field to empty instead of default value", async () => {
+    const user = userEvent.setup()
+
+    const formSchema = z.object({
+      count: f0FormField(z.number().optional(), {
+        label: "Count",
+      }),
+    })
+
+    render(
+      <F0Form
+        name="clear-number-test"
+        schema={formSchema}
+        defaultValues={{ count: 42 }}
+        onSubmit={async () => ({ success: true })}
+      />
+    )
+
+    const input = screen.getByLabelText("Count")
+    expect(input).toHaveValue("42")
+
+    await user.clear(input)
+    expect(input).toHaveValue("")
+  })
+
+  it("clears optional date field to empty instead of default value", async () => {
+    const user = userEvent.setup()
+
+    const formSchema = z.object({
+      eventDate: f0FormField(z.date().optional(), {
+        label: "Event Date",
+        placeholder: "Select a date",
+        granularities: ["day"],
+      }),
+    })
+
+    render(
+      <F0Form
+        name="clear-date-test"
+        schema={formSchema}
+        defaultValues={{
+          eventDate: new Date("2026-06-15"),
+        }}
+        onSubmit={async () => ({ success: true })}
+      />
+    )
+
+    // The date input should display the default date value
+    const dateInput = screen.getByLabelText("Event Date")
+    expect((dateInput as HTMLInputElement).value).not.toBe("")
+
+    // Click the clear button
+    const clearButton = screen.getByTestId("clear-button")
+    await user.click(clearButton)
+
+    // The input should now be empty, not reverted to the default
+    await waitFor(() => {
+      expect(dateInput).toHaveValue("")
+    })
+  })
+
+  it("submits undefined for cleared optional date field, not the default", async () => {
+    const user = userEvent.setup()
+    const onSubmit = vi.fn().mockResolvedValue({ success: true })
+
+    const formSchema = z.object({
+      title: f0FormField(z.string().min(1), {
+        label: "Title",
+      }),
+      eventDate: f0FormField(z.date().optional(), {
+        label: "Event Date",
+        placeholder: "Select a date",
+        granularities: ["day"],
+      }),
+    })
+
+    render(
+      <F0Form
+        name="clear-date-submit-test"
+        schema={formSchema}
+        defaultValues={{
+          title: "My Event",
+          eventDate: new Date("2026-06-15"),
+        }}
+        onSubmit={onSubmit}
+      />
+    )
+
+    // The date field should be rendered with a value
+    const clearButtons = screen.getAllByTestId("clear-button")
+    expect(clearButtons.length).toBeGreaterThan(0)
+
+    // Click the clear button on the date field
+    await user.click(clearButtons[clearButtons.length - 1])
+
+    // Submit the form
+    const submitButton = screen.getByText("Submit")
+    await user.click(submitButton)
+
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalled()
+    })
+
+    const submittedData = onSubmit.mock.calls[0][0]
+    expect(submittedData.eventDate).toBeUndefined()
+  })
+
+  it("submits undefined for cleared optional date range field", async () => {
+    const user = userEvent.setup()
+    const onSubmit = vi.fn().mockResolvedValue({ success: true })
+
+    const formSchema = z.object({
+      title: f0FormField(z.string().min(1), {
+        label: "Title",
+      }),
+      dateRange: f0FormField(
+        z.object({ from: z.date(), to: z.date() }).optional(),
+        {
+          label: "Date Range",
+          placeholder: "Select range",
+          fieldType: "daterange",
+          fromLabel: "Start",
+          toLabel: "End",
+        }
+      ),
+    })
+
+    render(
+      <F0Form
+        name="clear-daterange-submit-test"
+        schema={formSchema}
+        defaultValues={{
+          title: "My Project",
+          dateRange: {
+            from: new Date("2026-01-01"),
+            to: new Date("2026-12-31"),
+          },
+        }}
+        onSubmit={onSubmit}
+      />
+    )
+
+    const clearButtons = screen.getAllByTestId("clear-button")
+    expect(clearButtons.length).toBeGreaterThan(0)
+
+    // Click the clear button on the date range field
+    await user.click(clearButtons[clearButtons.length - 1])
+
+    // Submit the form
+    const submitButton = screen.getByText("Submit")
+    await user.click(submitButton)
+
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalled()
+    })
+
+    const submittedData = onSubmit.mock.calls[0][0]
+    expect(submittedData.dateRange).toBeUndefined()
   })
 })
