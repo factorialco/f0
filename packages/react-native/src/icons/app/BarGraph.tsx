@@ -1,6 +1,6 @@
-import Svg, { Rect, Path } from "react-native-svg";
-import type { SvgProps } from "react-native-svg";
-import { Ref, forwardRef } from "react";
+import { Ref, forwardRef } from "react"
+import Svg, { Rect, Path } from "react-native-svg"
+import type { SvgProps } from "react-native-svg"
 const SvgBarGraph = (props: SvgProps, ref: Ref<Svg>) => (
   <Svg
     fill="none"
@@ -16,6 +16,6 @@ const SvgBarGraph = (props: SvgProps, ref: Ref<Svg>) => (
       d="M8 13v2M12 9v6M16 11v4"
     />
   </Svg>
-);
-const ForwardRef = forwardRef(SvgBarGraph);
-export default ForwardRef;
+)
+const ForwardRef = forwardRef(SvgBarGraph)
+export default ForwardRef

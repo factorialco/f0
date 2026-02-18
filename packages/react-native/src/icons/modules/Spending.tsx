@@ -1,6 +1,6 @@
-import Svg, { Path } from "react-native-svg";
-import type { SvgProps } from "react-native-svg";
-import { Ref, forwardRef } from "react";
+import { Ref, forwardRef } from "react"
+import Svg, { Path } from "react-native-svg"
+import type { SvgProps } from "react-native-svg"
 const SvgSpending = (props: SvgProps, ref: Ref<Svg>) => (
   <Svg
     fill="none"
@@ -16,6 +16,6 @@ const SvgSpending = (props: SvgProps, ref: Ref<Svg>) => (
       clipRule="evenodd"
     />
   </Svg>
-);
-const ForwardRef = forwardRef(SvgSpending);
-export default ForwardRef;
+)
+const ForwardRef = forwardRef(SvgSpending)
+export default ForwardRef

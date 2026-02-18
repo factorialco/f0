@@ -1,6 +1,6 @@
-import Svg, { Path } from "react-native-svg";
-import type { SvgProps } from "react-native-svg";
-import { Ref, forwardRef } from "react";
+import { Ref, forwardRef } from "react"
+import Svg, { Path } from "react-native-svg"
+import type { SvgProps } from "react-native-svg"
 const SvgGreater = (props: SvgProps, ref: Ref<Svg>) => (
   <Svg
     fill="none"
@@ -16,6 +16,6 @@ const SvgGreater = (props: SvgProps, ref: Ref<Svg>) => (
       d="m6 19 13-7L6 5"
     />
   </Svg>
-);
-const ForwardRef = forwardRef(SvgGreater);
-export default ForwardRef;
+)
+const ForwardRef = forwardRef(SvgGreater)
+export default ForwardRef

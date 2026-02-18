@@ -1,24 +1,26 @@
-import { ReactNode } from "react";
-import { Pressable, Text, View } from "react-native";
-import { cn } from "../../../lib/utils";
+import { ReactNode } from "react"
+import { Text, View } from "react-native"
+
+import { cn } from "../../../lib/utils"
+import { PressableFeedback } from "../../PressableFeedback"
 
 type Props = {
-  additionalAccesibleText?: string;
-  onClick?: () => void;
-  classNameContainer?: string;
-  classNameText?: string;
+  additionalAccesibleText?: string
+  onClick?: () => void
+  classNameContainer?: string
+  classNameText?: string
 } & (
   | {
-      left: ReactNode;
-      text?: string;
-      right?: ReactNode;
+      left: ReactNode
+      text?: string
+      right?: ReactNode
     }
   | {
-      left?: ReactNode;
-      text: string;
-      right?: ReactNode;
+      left?: ReactNode
+      text: string
+      right?: ReactNode
     }
-);
+)
 
 export const BaseTag = ({
   left,
@@ -30,22 +32,24 @@ export const BaseTag = ({
   classNameText,
 }: Props) => (
   <View className="flex items-start">
-    <Pressable
+    <PressableFeedback
       className={cn(
         "flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2",
-        onClick && "cursor-pointer hover:bg-f1-background-hover",
+        onClick && "cursor-pointer",
         !text && "aspect-square w-6 items-center justify-center p-1",
         !left ? "pl-2" : "pl-1",
-        classNameContainer,
+        classNameContainer
       )}
       onPress={onClick}
+      variant={onClick ? "both" : "none"}
+      disabled={!onClick}
     >
       {left}
       {!!text && (
         <Text
           className={cn(
             "line-clamp-1 text-base font-medium text-f1-foreground",
-            classNameText,
+            classNameText
           )}
         >
           {text}
@@ -57,8 +61,8 @@ export const BaseTag = ({
         </Text>
       )}
       {right}
-    </Pressable>
+    </PressableFeedback>
   </View>
-);
+)
 
-BaseTag.displayName = "BaseTag";
+BaseTag.displayName = "BaseTag"

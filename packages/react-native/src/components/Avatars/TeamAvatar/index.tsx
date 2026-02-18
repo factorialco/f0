@@ -1,15 +1,16 @@
-import { ComponentProps } from "react";
-import { BaseAvatar } from "../BaseAvatar";
-import { AvatarBadge } from "../types";
+import { ComponentProps } from "react"
 
-type BaseAvatarProps = ComponentProps<typeof BaseAvatar>;
+import { BaseAvatar } from "../BaseAvatar"
+import { AvatarBadge } from "../types"
+
+type BaseAvatarProps = ComponentProps<typeof BaseAvatar>
 
 type Props = {
-  name: string;
-  src?: string;
-  size?: BaseAvatarProps["size"];
-  badge?: AvatarBadge;
-} & Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">;
+  name: string
+  src?: string
+  size?: BaseAvatarProps["size"]
+  badge?: AvatarBadge
+} & Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">
 
 export const TeamAvatar = ({
   name,
@@ -30,7 +31,7 @@ export const TeamAvatar = ({
       aria-labelledby={ariaLabelledby}
       badge={badge}
     />
-  );
-};
+  )
+}
 
-TeamAvatar.displayName = "TeamAvatar";
+TeamAvatar.displayName = "TeamAvatar"

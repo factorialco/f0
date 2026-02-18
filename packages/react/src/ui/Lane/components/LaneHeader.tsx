@@ -1,6 +1,6 @@
 import { F0Button } from "@/components/F0Button"
 import { F0TagStatus, Variant } from "@/components/tags/F0TagStatus"
-import { Counter } from "@/experimental/Information/Counter"
+import { Counter } from "@/ui/Counter"
 import { Plus } from "@/icons/app"
 
 type LaneHeaderProps = {

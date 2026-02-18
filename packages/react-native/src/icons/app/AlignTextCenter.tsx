@@ -1,6 +1,6 @@
-import Svg, { Path } from "react-native-svg";
-import type { SvgProps } from "react-native-svg";
-import { Ref, forwardRef } from "react";
+import { Ref, forwardRef } from "react"
+import Svg, { Path } from "react-native-svg"
+import type { SvgProps } from "react-native-svg"
 const SvgAlignTextCenter = (props: SvgProps, ref: Ref<Svg>) => (
   <Svg
     fill="none"
@@ -16,6 +16,6 @@ const SvgAlignTextCenter = (props: SvgProps, ref: Ref<Svg>) => (
       d="M5 8h14M5 12h14M9 16h6"
     />
   </Svg>
-);
-const ForwardRef = forwardRef(SvgAlignTextCenter);
-export default ForwardRef;
+)
+const ForwardRef = forwardRef(SvgAlignTextCenter)
+export default ForwardRef

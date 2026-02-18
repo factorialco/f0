@@ -1,6 +1,6 @@
-import Svg, { Path } from "react-native-svg";
-import type { SvgProps } from "react-native-svg";
-import { Ref, forwardRef } from "react";
+import { Ref, forwardRef } from "react"
+import Svg, { Path } from "react-native-svg"
+import type { SvgProps } from "react-native-svg"
 const SvgCloud = (props: SvgProps, ref: Ref<Svg>) => (
   <Svg
     fill="none"
@@ -15,6 +15,6 @@ const SvgCloud = (props: SvgProps, ref: Ref<Svg>) => (
       d="M12 6a4 4 0 0 1 4 4 4 4 0 0 1 0 8H8a4 4 0 0 1 0-8 4 4 0 0 1 4-4Z"
     />
   </Svg>
-);
-const ForwardRef = forwardRef(SvgCloud);
-export default ForwardRef;
+)
+const ForwardRef = forwardRef(SvgCloud)
+export default ForwardRef

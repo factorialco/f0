@@ -1,6 +1,6 @@
-import Svg, { Path } from "react-native-svg";
-import type { SvgProps } from "react-native-svg";
-import { Ref, forwardRef } from "react";
+import { Ref, forwardRef } from "react"
+import Svg, { Path } from "react-native-svg"
+import type { SvgProps } from "react-native-svg"
 const SvgVideoRecorderNegative = (props: SvgProps, ref: Ref<Svg>) => (
   <Svg
     fill="none"
@@ -17,6 +17,6 @@ const SvgVideoRecorderNegative = (props: SvgProps, ref: Ref<Svg>) => (
     />
     <Path stroke="currentColor" strokeLinecap="round" d="m5 5 13 13" />
   </Svg>
-);
-const ForwardRef = forwardRef(SvgVideoRecorderNegative);
-export default ForwardRef;
+)
+const ForwardRef = forwardRef(SvgVideoRecorderNegative)
+export default ForwardRef

@@ -1,6 +1,6 @@
-import Svg, { Path, Circle } from "react-native-svg";
-import type { SvgProps } from "react-native-svg";
-import { Ref, forwardRef } from "react";
+import { Ref, forwardRef } from "react"
+import Svg, { Path, Circle } from "react-native-svg"
+import type { SvgProps } from "react-native-svg"
 const SvgInfoCircleLine = (props: SvgProps, ref: Ref<Svg>) => (
   <Svg
     fill="none"
@@ -23,6 +23,6 @@ const SvgInfoCircleLine = (props: SvgProps, ref: Ref<Svg>) => (
       d="M12 9v.1"
     />
   </Svg>
-);
-const ForwardRef = forwardRef(SvgInfoCircleLine);
-export default ForwardRef;
+)
+const ForwardRef = forwardRef(SvgInfoCircleLine)
+export default ForwardRef

@@ -3,14 +3,16 @@ import {
   fireEvent,
   screen,
   within,
-} from "@testing-library/react-native";
-import React from "react";
-import { PageHeader } from "./"; // Assuming index.tsx is in the same folder
-import { ButtonProps } from "../../Button"; // Adjust path as necessary
+} from "@testing-library/react-native"
+import React from "react"
+
+import { ButtonProps } from "../../Button" // Adjust path as necessary
+
+import { PageHeader } from "./" // Assuming index.tsx is in the same folder
 // import { AppIcons } from "../../../index"; // Adjust path as necessary - Not directly used in mock after change
 
 // Define a simple type for the mocked icon
-type MockIconType = { name: string };
+type MockIconType = { name: string }
 
 // Mock the Button component
 jest.mock("../../Button", () => ({
@@ -22,32 +24,32 @@ jest.mock("../../Button", () => ({
       showBadge,
       ...rest
     }: ButtonProps & { icon?: MockIconType }) => {
-      const MockButton = require("react-native").TouchableOpacity;
-      const MockText = require("react-native").Text;
+      const MockButton = require("react-native").TouchableOpacity
+      const MockText = require("react-native").Text
       return (
         <MockButton onPress={onPress} accessibilityLabel={label} {...rest}>
           <MockText>{label}</MockText>
           {icon && <MockText>Icon:{icon.name}</MockText>}
           {showBadge && <MockText>Badge</MockText>}
         </MockButton>
-      );
-    },
+      )
+    }
   ),
-}));
+}))
 
 // Mock AppIcons - specifically the Bell icon used by PageHeader's NotificationAction
 jest.mock("../../../index", () => ({
   AppIcons: {
     Bell: { name: "Bell" } as MockIconType, // Ensure the mock matches MockIconType
   },
-}));
+}))
 
 describe("PageHeader", () => {
-  const mockOnPressNotification = jest.fn();
+  const mockOnPressNotification = jest.fn()
 
   const defaultProps = {
     title: "Test Page Title",
-  };
+  }
 
   const propsWithActions = {
     ...defaultProps,
@@ -59,7 +61,7 @@ describe("PageHeader", () => {
         showBadge: false,
       },
     ],
-  };
+  }
 
   const propsWithMultipleActions = {
     ...defaultProps,
@@ -76,27 +78,27 @@ describe("PageHeader", () => {
         onPress: jest.fn(),
       },
     ],
-  };
+  }
 
   beforeEach(() => {
-    jest.clearAllMocks();
-  });
+    jest.clearAllMocks()
+  })
 
   // Snapshot tests
   it("Snapshot - renders correctly with only a title", () => {
-    const { toJSON } = render(<PageHeader {...defaultProps} />);
-    expect(toJSON()).toMatchSnapshot();
-  });
+    const { toJSON } = render(<PageHeader {...defaultProps} />)
+    expect(toJSON()).toMatchSnapshot()
+  })
 
   it("Snapshot - renders correctly with one action", () => {
-    const { toJSON } = render(<PageHeader {...propsWithActions} />);
-    expect(toJSON()).toMatchSnapshot();
-  });
+    const { toJSON } = render(<PageHeader {...propsWithActions} />)
+    expect(toJSON()).toMatchSnapshot()
+  })
 
   it("Snapshot - renders correctly with multiple actions", () => {
-    const { toJSON } = render(<PageHeader {...propsWithMultipleActions} />);
-    expect(toJSON()).toMatchSnapshot();
-  });
+    const { toJSON } = render(<PageHeader {...propsWithMultipleActions} />)
+    expect(toJSON()).toMatchSnapshot()
+  })
 
   it("Snapshot - renders correctly with one action with a badge", () => {
     const propsWithBadge = {
@@ -109,36 +111,36 @@ describe("PageHeader", () => {
           showBadge: true,
         },
       ],
-    };
-    const { toJSON } = render(<PageHeader {...propsWithBadge} />);
-    expect(toJSON()).toMatchSnapshot();
-  });
+    }
+    const { toJSON } = render(<PageHeader {...propsWithBadge} />)
+    expect(toJSON()).toMatchSnapshot()
+  })
 
   // Functional tests
   it("renders the title correctly", () => {
-    render(<PageHeader {...defaultProps} />);
-    const title = screen.getByText("Test Page Title");
-    expect(title).toBeDefined();
-  });
+    render(<PageHeader {...defaultProps} />)
+    const title = screen.getByText("Test Page Title")
+    expect(title).toBeDefined()
+  })
 
   it("does not render actions if actions prop is not provided", () => {
-    render(<PageHeader {...defaultProps} />);
-    const notificationButton = screen.queryByText("Notifications");
-    expect(notificationButton).toBeNull();
-  });
+    render(<PageHeader {...defaultProps} />)
+    const notificationButton = screen.queryByText("Notifications")
+    expect(notificationButton).toBeNull()
+  })
 
   it("renders action buttons when actions prop is provided", () => {
-    render(<PageHeader {...propsWithActions} />);
-    const notificationButton = screen.getByText("Notifications");
-    expect(notificationButton).toBeDefined();
-  });
+    render(<PageHeader {...propsWithActions} />)
+    const notificationButton = screen.getByText("Notifications")
+    expect(notificationButton).toBeDefined()
+  })
 
   it("calls the onPress handler of an action button when pressed", () => {
-    render(<PageHeader {...propsWithActions} />);
-    const notificationButton = screen.getByText("Notifications");
-    fireEvent.press(notificationButton);
-    expect(mockOnPressNotification).toHaveBeenCalledTimes(1);
-  });
+    render(<PageHeader {...propsWithActions} />)
+    const notificationButton = screen.getByText("Notifications")
+    fireEvent.press(notificationButton)
+    expect(mockOnPressNotification).toHaveBeenCalledTimes(1)
+  })
 
   it("displays a badge on an action button if showBadge is true", () => {
     render(
@@ -152,11 +154,11 @@ describe("PageHeader", () => {
             showBadge: true,
           },
         ]}
-      />,
-    );
-    const badge = screen.getByText("Badge");
-    expect(badge).toBeDefined();
-  });
+      />
+    )
+    const badge = screen.getByText("Badge")
+    expect(badge).toBeDefined()
+  })
 
   it("does not display a badge if showBadge is false or undefined", () => {
     render(
@@ -176,23 +178,23 @@ describe("PageHeader", () => {
             showBadge: false,
           },
         ]}
-      />,
-    );
-    const badge = screen.queryByText("Badge");
-    expect(badge).toBeNull();
-  });
+      />
+    )
+    const badge = screen.queryByText("Badge")
+    expect(badge).toBeNull()
+  })
 
   it("renders multiple action buttons correctly", () => {
-    render(<PageHeader {...propsWithMultipleActions} />);
-    const notificationsButton = screen.getByText("Notifications");
-    const alertsButton = screen.getByText("Alerts");
+    render(<PageHeader {...propsWithMultipleActions} />)
+    const notificationsButton = screen.getByText("Notifications")
+    const alertsButton = screen.getByText("Alerts")
 
-    expect(notificationsButton).toBeDefined();
-    expect(alertsButton).toBeDefined();
+    expect(notificationsButton).toBeDefined()
+    expect(alertsButton).toBeDefined()
 
-    const notificationButtonContainer = screen.getByLabelText("Notifications");
+    const notificationButtonContainer = screen.getByLabelText("Notifications")
 
-    const badge = within(notificationButtonContainer).getByText("Badge");
-    expect(badge).toBeDefined();
-  });
-});
+    const badge = within(notificationButtonContainer).getByText("Badge")
+    expect(badge).toBeDefined()
+  })
+})

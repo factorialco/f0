@@ -1,6 +1,6 @@
-import Svg, { Mask, Path } from "react-native-svg";
-import type { SvgProps } from "react-native-svg";
-import { Ref, forwardRef } from "react";
+import { Ref, forwardRef } from "react"
+import Svg, { Mask, Path } from "react-native-svg"
+import type { SvgProps } from "react-native-svg"
 const SvgAppearance = (props: SvgProps, ref: Ref<Svg>) => (
   <Svg
     fill="none"
@@ -28,6 +28,6 @@ const SvgAppearance = (props: SvgProps, ref: Ref<Svg>) => (
       mask="url(#appearance_svg__a)"
     />
   </Svg>
-);
-const ForwardRef = forwardRef(SvgAppearance);
-export default ForwardRef;
+)
+const ForwardRef = forwardRef(SvgAppearance)
+export default ForwardRef

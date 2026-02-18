@@ -1,13 +1,14 @@
-import React from "react";
-import { DetailsItem, DetailsItemType } from "../DetailsItem";
-import { cn } from "../../../../lib/utils";
-import { View, Text } from "react-native";
+import React from "react"
+import { Text, View } from "react-native"
+
+import { cn } from "../../../../lib/utils"
+import { DetailsItem, DetailsItemType } from "../DetailsItem"
 
 export interface DetailsItemsListProps {
-  title?: string;
-  tableView?: boolean;
-  isHorizontalItem?: boolean;
-  details: DetailsItemType[];
+  title?: string
+  tableView?: boolean
+  isHorizontalItem?: boolean
+  details: DetailsItemType[]
 }
 
 export const DetailsItemsList = function DetailsItemList({
@@ -28,7 +29,7 @@ export const DetailsItemsList = function DetailsItemList({
           "flex",
           tableView
             ? "rounded-[16px] border border-solid border-f1-border-secondary"
-            : "gap-3",
+            : "gap-3"
         )}
       >
         {details?.map((item, index) => (
@@ -48,5 +49,5 @@ export const DetailsItemsList = function DetailsItemList({
         ))}
       </View>
     </View>
-  );
-};
+  )
+}

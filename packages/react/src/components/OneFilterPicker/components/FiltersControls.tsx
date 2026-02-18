@@ -315,7 +315,7 @@ export function FiltersControls<Filters extends FiltersDefinition>({
           />
         </PopoverTrigger>
         <PopoverContent
-          className="w-[600px] rounded-xl border border-solid border-f1-border-secondary p-0 shadow-md"
+          className="w-fit min-w-[600px] rounded-xl border border-solid border-f1-border-secondary p-0 shadow-md"
           align="start"
           side="bottom"
           aria-id={id}

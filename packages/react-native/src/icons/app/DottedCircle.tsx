@@ -1,6 +1,6 @@
-import Svg, { Circle } from "react-native-svg";
-import type { SvgProps } from "react-native-svg";
-import { Ref, forwardRef } from "react";
+import { Ref, forwardRef } from "react"
+import Svg, { Circle } from "react-native-svg"
+import type { SvgProps } from "react-native-svg"
 const SvgDottedCircle = (props: SvgProps, ref: Ref<Svg>) => (
   <Svg
     fill="none"
@@ -11,6 +11,6 @@ const SvgDottedCircle = (props: SvgProps, ref: Ref<Svg>) => (
   >
     <Circle cx={12} cy={12} r={8} stroke="currentColor" strokeDasharray="2 2" />
   </Svg>
-);
-const ForwardRef = forwardRef(SvgDottedCircle);
-export default ForwardRef;
+)
+const ForwardRef = forwardRef(SvgDottedCircle)
+export default ForwardRef

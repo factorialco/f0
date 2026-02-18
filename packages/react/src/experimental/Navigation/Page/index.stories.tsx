@@ -5,7 +5,7 @@ import { ComponentProps } from "react"
 import { StandardLayout } from "@/layouts/StandardLayout"
 
 import { Placeholder } from "../../../lib/storybook-utils/placeholder"
-import { ApplicationFrame } from "../ApplicationFrame"
+import { ApplicationFrame } from "@/examples/ApplicationFrame"
 import { PageHeader } from "../Header/PageHeader"
 import * as HeaderStories from "../Header/PageHeader/index.stories"
 import { Tabs } from "../Tabs"

@@ -6,3 +6,8 @@ input:focus-visible,
 textarea:focus-visible {
   outline: none;
 }
+
+/* Hide the native time picker icon */
+input[type="time"]::-webkit-calendar-picker-indicator {
+  background: none;
+}

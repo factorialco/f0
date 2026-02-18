@@ -8,7 +8,7 @@ import { F0Checkbox } from "@/components/F0Checkbox"
 import { F0TagRaw } from "@/components/tags/F0TagRaw"
 import { F0TagStatus, type StatusVariant } from "@/components/tags/F0TagStatus"
 import { Dropdown } from "@/experimental/Navigation/Dropdown"
-import { OnePagination } from "@/experimental/OnePagination"
+import { OnePagination } from "@/ui/OnePagination"
 import { Delete, Ellipsis, Pencil } from "@/icons/app"
 
 import {

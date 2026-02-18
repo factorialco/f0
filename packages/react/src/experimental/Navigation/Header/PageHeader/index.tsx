@@ -3,14 +3,14 @@ import { ReactElement, useRef, useState } from "react"
 
 import type { StatusVariant } from "@/components/tags/F0TagStatus"
 
-import { F0OneSwitch } from "@/ai/F0OneSwitch"
+import { F0OneSwitch } from "@/sds/ai/F0OneSwitch"
 import { ModuleId } from "@/components/avatars/F0AvatarModule"
 import { F0Button } from "@/components/F0Button"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { IconType } from "@/components/F0Icon"
 import { F0TagStatus } from "@/components/tags/F0TagStatus"
 import { OneSwitch as OnePromotionSwitch } from "@/experimental/AiPromotionChat/OneSwitch"
-import { useSidebar } from "@/experimental/Navigation/ApplicationFrame/FrameProvider"
+import { useSidebar } from "@/examples/ApplicationFrame/FrameProvider"
 import { Dropdown } from "@/experimental/Navigation/Dropdown"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { ChevronDown, ChevronLeft, ChevronUp, Menu } from "@/icons/app"
@@ -112,8 +112,7 @@ export function PageHeader({
   productUpdates,
   favorites,
 }: HeaderProps) {
-  const { sidebarState, toggleSidebar, isLastToggleInvokedByUser } =
-    useSidebar()
+  const { sidebarState, toggleSidebar } = useSidebar()
 
   const breadcrumbsTree: typeof breadcrumbs = [
     {
@@ -150,12 +149,6 @@ export function PageHeader({
             >
               <div className="mr-3">
                 <F0Button
-                  ref={(buttonEl) => {
-                    // if action was triggered by user, focus the close button
-                    if (isLastToggleInvokedByUser) {
-                      buttonEl?.focus()
-                    }
-                  }}
                   variant="ghost"
                   hideLabel
                   onClick={() => toggleSidebar()}

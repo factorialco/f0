@@ -75,4 +75,4 @@ jobs:
       - name: Build core package
         run: pnpm --filter @factorialco/f0-core build
       - name: Run tests
-        run: pnpm --filter @factorialco/f0-react-native run test
+        run: pnpm --filter @factorialco/f0-react-native run test:ci
