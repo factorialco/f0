@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.370.1](https://github.com/factorialco/f0/compare/f0-react-v1.370.0...f0-react-v1.370.1) (2026-02-18)
+
+
+### Bug Fixes
+
+* ensure we don't keep the pending changes bar opened after form submission ([#3473](https://github.com/factorialco/f0/issues/3473)) ([44ba9ab](https://github.com/factorialco/f0/commit/44ba9abb2a399f1d498388d922dc63b464687a63))
+
 ## [1.370.0](https://github.com/factorialco/f0/compare/f0-react-v1.369.4...f0-react-v1.370.0) (2026-02-18)
 
 
