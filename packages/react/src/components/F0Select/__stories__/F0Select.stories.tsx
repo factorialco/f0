@@ -167,6 +167,7 @@ const meta: Meta = {
         "  label: string\n" +
         "  description?: string\n" +
         "  avatar?: AvatarVariant\n" +
+        "  tag?: string | { type: 'dot'; text: string; color: NewColor }\n" +
         "  icon?: IconType\n" +
         "  item?: unknown\n" +
         "  disabled?: boolean\n" +
@@ -354,6 +355,49 @@ export const WithDisabledOptions: Story = {
         disabled: index === 1,
       }
     }),
+  },
+}
+
+export const WithDotTags: Story = {
+  args: {
+    label: "Select a status",
+    placeholder: "Select a status",
+    onChange: fn(),
+    options: [
+      {
+        value: "active",
+        label: "Active",
+        description: "Active description",
+        tag: {
+          type: "dot",
+          text: "Active",
+          color: "viridian",
+        },
+      },
+      {
+        value: "pending",
+        label: "Pending",
+        tag: {
+          type: "dot",
+          text: "Pending",
+          color: "yellow",
+        },
+      },
+      {
+        value: "inactive",
+        label: "Inactive",
+        icon: Appearance,
+        tag: "Disabled",
+      },
+
+      {
+        value: "inactive",
+        label: "Inactive",
+        description: "Inactive description",
+        icon: Desktop,
+        tag: "Disabled",
+      },
+    ],
   },
 }
 

@@ -1,6 +1,10 @@
 import { type AIMessage, type Message } from "@copilotkit/shared"
 
-import { type AiChatDisclaimer, WelcomeScreenSuggestion } from "./types"
+import {
+  type AiChatDisclaimer,
+  type VisualizationMode,
+  WelcomeScreenSuggestion,
+} from "./types"
 
 /**
  * Context type for fullscreen chat state
@@ -21,6 +25,9 @@ export interface AiChatState {
   welcomeScreenSuggestions?: WelcomeScreenSuggestion[]
   disclaimer?: AiChatDisclaimer
   resizable?: boolean
+  defaultVisualizationMode?: VisualizationMode
+  lockVisualizationMode?: boolean
+  footer?: React.ReactNode
   placeholders?: string[]
   setPlaceholders?: React.Dispatch<React.SetStateAction<string[]>>
   onThumbsUp?: (
@@ -46,15 +53,6 @@ export type AiChatProviderReturnValue = {
   tmp_setAgent: (agent?: string) => void
   placeholders: string[]
   setPlaceholders: React.Dispatch<React.SetStateAction<string[]>>
-  /**
-   * Set the amount of minutes after which the chat will be cleared automatically
-   * Set `null` to disable auto-clearing
-   *
-   * @default 15
-   */
-  setAutoClearMinutes: React.Dispatch<React.SetStateAction<number | null>>
-  autoClearMinutes: number | null
-
   /**
    * The initial message to display in the chat
    */
@@ -102,6 +100,22 @@ export type AiChatProviderReturnValue = {
    * Reset the chat width to the default value (360px)
    */
   resetChatWidth: () => void
+  /**
+   * The current visualization mode of the chat
+   */
+  visualizationMode: VisualizationMode
+  /**
+   * Set the visualization mode
+   */
+  setVisualizationMode: React.Dispatch<React.SetStateAction<VisualizationMode>>
+  /**
+   * When true, prevents switching between visualization modes
+   */
+  lockVisualizationMode: boolean
+  /**
+   * Optional footer content rendered below the textarea
+   */
+  footer?: React.ReactNode
 } & Pick<AiChatState, "greeting" | "agent" | "disclaimer" | "resizable">
 
 /**

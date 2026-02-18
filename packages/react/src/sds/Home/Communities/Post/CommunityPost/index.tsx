@@ -20,7 +20,7 @@ import { PostEvent, PostEventProps } from "../PostEvent"
 import { isVideo } from "./video"
 
 export type CommunityPostAction = {
-  label: string
+  label?: string
   icon?: IconType
   onClick: () => void
 }
@@ -109,6 +109,7 @@ export const BaseCommunityPost = ({
     <div
       className="flex w-full cursor-pointer flex-row gap-3 rounded-xl border border-solid border-transparent p-3 pt-2 hover:bg-f1-background-hover focus:border-f1-border-secondary focus:outline focus:outline-1 focus:outline-offset-1 focus:outline-f1-border-selected-bold md:pb-4 md:pt-3"
       onClick={handleClick}
+      id={`community-post-${id}`}
     >
       <div className="hidden md:block">
         {author ? (
@@ -185,13 +186,14 @@ export const BaseCommunityPost = ({
               <div className="hidden flex-row gap-2 md:flex">
                 {actions?.map((act) => (
                   <F0Button
+                    hideLabel={!act.label}
                     key={act.label}
                     {...(act.icon && { icon: act.icon })}
                     variant="outline"
                     size="md"
                     onClick={act.onClick}
-                    label={act.label}
-                    title={act.label}
+                    label={act.label ?? ""}
+                    title={act.label ?? ""}
                   />
                 ))}
                 {dropdownItems?.length && (

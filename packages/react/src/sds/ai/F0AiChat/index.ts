@@ -1,14 +1,11 @@
 // Main components
-export {
-  F0AiChat,
-  F0AiChatProvider,
-  F0AiFullscreenChat,
-  FullscreenChatContext,
-} from "./F0AiChat"
+export { F0AiChat, F0AiChatProvider, F0AiFullscreenChat } from "./F0AiChat"
+export { FullscreenChatContext } from "./F0AiFullscreenChat"
 
 // Types
 export type {
   AiChatProviderProps,
+  VisualizationMode,
   WelcomeScreenSuggestion,
   AiChatTranslations,
   AiChatTranslationsProviderProps,

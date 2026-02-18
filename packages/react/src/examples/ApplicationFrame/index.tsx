@@ -5,7 +5,7 @@ import {
   motion,
   MotionConfig,
 } from "motion/react"
-import { Fragment, useEffect, useRef } from "react"
+import { Fragment, useEffect, useMemo, useRef, useState } from "react"
 import { useMediaQuery } from "usehooks-ts"
 
 import {
@@ -14,18 +14,21 @@ import {
   AiPromotionChatProviderProps,
 } from "@/experimental/AiPromotionChat"
 import { useAiPromotionChat } from "@/experimental/AiPromotionChat/providers/AiPromotionChatStateProvider"
+import { useReducedMotion } from "@/lib/a11y"
 import { experimentalComponent } from "@/lib/experimental"
-
+import { useI18n } from "@/lib/providers/i18n"
+import { cn, focusRing } from "@/lib/utils"
 import {
   F0AiChat,
   F0AiChatProvider,
   AiChatProviderProps,
 } from "@/sds/ai/F0AiChat"
+import { DEFAULT_CHAT_WIDTH } from "@/sds/ai/F0AiChat/constants"
 import { useAiChat } from "@/sds/ai/F0AiChat/providers/AiChatStateProvider"
-import { useReducedMotion } from "@/lib/a11y"
-import { useI18n } from "@/lib/providers/i18n"
-import { cn, focusRing } from "@/lib/utils"
+
 import { FrameProvider, SidebarState, useSidebar } from "./FrameProvider"
+
+const CONTENT_TRANSITION = { duration: 0.3, ease: [0, 0, 0.1, 1] }
 
 export interface ApplicationFrameProps {
   ai?: Omit<AiChatProviderProps, "children">
@@ -36,6 +39,30 @@ export interface ApplicationFrameProps {
 }
 
 function _ApplicationFrame({
+  children,
+  sidebar,
+  banner,
+  ai,
+  aiPromotion,
+}: ApplicationFrameProps) {
+  return (
+    <FrameProvider>
+      <ApplicationFrameWithProvider
+        ai={ai}
+        aiPromotion={aiPromotion}
+        sidebar={sidebar}
+        banner={banner}
+      >
+        {children}
+      </ApplicationFrameWithProvider>
+    </FrameProvider>
+  )
+}
+
+/**
+ * Intermediate component that wraps children with the appropriate AI provider.
+ */
+function ApplicationFrameWithProvider({
   children,
   sidebar,
   banner,
@@ -54,18 +81,16 @@ function _ApplicationFrame({
       : undefined
 
   return (
-    <FrameProvider>
-      <AiProvider {...aiProps}>
-        <ApplicationFrameContent
-          ai={ai}
-          aiPromotion={aiPromotion}
-          sidebar={sidebar}
-          banner={banner}
-        >
-          {children}
-        </ApplicationFrameContent>
-      </AiProvider>
-    </FrameProvider>
+    <AiProvider {...aiProps}>
+      <ApplicationFrameContent
+        ai={ai}
+        aiPromotion={aiPromotion}
+        sidebar={sidebar}
+        banner={banner}
+      >
+        {children}
+      </ApplicationFrameContent>
+    </AiProvider>
   )
 }
 
@@ -135,6 +160,13 @@ function useAutoCloseSidebar(
   }, [isAiChatOpen, shouldAutoCloseSidebar, sidebarState, toggleSidebar])
 }
 
+/**
+ * Z-index layers (within the isolate stacking context):
+ *   z-5  Sidebar ()
+ *   z-20  Sidebar backdrop / Chat (fullscreen)
+ *   z-10  Main content
+ *   z-0   Chat (normal)
+ */
 function ApplicationFrameContent({
   ai,
   aiPromotion,
@@ -145,13 +177,48 @@ function ApplicationFrameContent({
   const { sidebarState, toggleSidebar, isSmallScreen, setForceFloat } =
     useSidebar()
   const shouldReduceMotion = useReducedMotion()
-  const { open: isAiChatOpen } = useAiChat()
+  const {
+    open: isAiChatOpen,
+    visualizationMode,
+    chatWidth,
+    resizable,
+  } = useAiChat()
+  const isAiChatFullscreen = visualizationMode === "fullscreen"
   const { open: isAiPromotionChatOpen } = useAiPromotionChat()
+  const reservedChatWidth = resizable ? chatWidth : DEFAULT_CHAT_WIDTH
+
+  // Track fullscreen transitions for smooth exit animation
+  const prevFullscreenRef = useRef(isAiChatFullscreen)
+  const isEnteringFullscreen = isAiChatFullscreen && !prevFullscreenRef.current
+  const isExitingFullscreen = !isAiChatFullscreen && prevFullscreenRef.current
+  const [
+    isFullscreenExitTransitionActive,
+    setIsFullscreenExitTransitionActive,
+  ] = useState(false)
+
+  useEffect(() => {
+    if (!isAiChatFullscreen && prevFullscreenRef.current) {
+      setIsFullscreenExitTransitionActive(true)
+    }
+    prevFullscreenRef.current = isAiChatFullscreen
+  }, [isAiChatFullscreen])
+
+  const isInFullscreenTransition =
+    isAiChatFullscreen ||
+    isFullscreenExitTransitionActive ||
+    isExitingFullscreen
+
+  const chatContainerTransition = useMemo(() => {
+    if (isEnteringFullscreen)
+      return { duration: 0.15, ease: "easeOut" as const }
+    if (isExitingFullscreen)
+      return { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] as const }
+    return { duration: 0 }
+  }, [isEnteringFullscreen, isExitingFullscreen])
+
   const shouldAutoCloseSidebar = useMediaQuery(
     `(max-width: ${breakpoints.xl}px)`,
-    {
-      initializeWithValue: true,
-    }
+    { initializeWithValue: true }
   )
 
   useEffect(() => {
@@ -165,85 +232,118 @@ function ApplicationFrameContent({
   useAutoCloseSidebar(isAiChatOpen, shouldAutoCloseSidebar)
 
   return (
-    <>
-      <MotionConfig
-        reducedMotion={shouldReduceMotion ? "always" : "never"}
-        transition={{
-          ease: [0.25, 0.1, 0.25, 1],
-          duration: shouldReduceMotion ? 0 : 0.2,
-        }}
-      >
-        <div className="grid h-screen grid-cols-1 grid-rows-[auto_minmax(0,1fr)] items-stretch">
-          <div className="col-[1/-1]">{banner}</div>
-          <LayoutGroup id="ai-chat-group">
-            <div className="relative isolate flex h-full">
-              <AnimatePresence>
-                {sidebarState === "unlocked" && (
-                  <motion.nav
-                    className={cn(
-                      "fixed inset-0 z-[5] bg-f1-background-inverse",
-                      {
-                        hidden: !isSmallScreen,
-                      }
-                    )}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 0.1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: shouldReduceMotion ? 0 : 0.2 }}
-                    onClick={() => toggleSidebar()}
-                  />
-                )}
-              </AnimatePresence>
-              <div
-                className={cn(
-                  { "transition-all": !shouldReduceMotion },
-                  sidebarState === "locked" ? "w-[240px] shrink-0 pl-3" : "w-0"
-                )}
-                ref={(node) => {
-                  // React types does not yet support ["inert" attribute](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/inert) at the moment
-                  if (sidebarState === "hidden") {
-                    node?.setAttribute("inert", "")
-                  } else {
-                    node?.removeAttribute("inert")
-                  }
-                }}
-              >
-                <SkipToContentButton contentId="content" />
-                {sidebar}
-              </div>
+    <MotionConfig
+      reducedMotion={shouldReduceMotion ? "always" : "never"}
+      transition={{
+        ease: [0.25, 0.1, 0.25, 1],
+        duration: shouldReduceMotion ? 0 : 0.2,
+      }}
+    >
+      <div className="scrollbar-macos grid h-screen grid-cols-1 grid-rows-[auto_minmax(0,1fr)]">
+        <div className="col-[1/-1]">{banner}</div>
+        <LayoutGroup id="ai-chat-group">
+          <div className="relative isolate flex h-full">
+            {/* Sidebar backdrop */}
+            <AnimatePresence>
+              {sidebarState === "unlocked" && (
+                <motion.nav
+                  className={cn(
+                    "fixed inset-0 z-20 bg-f1-background-inverse",
+                    !isSmallScreen && "hidden"
+                  )}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 0.1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: shouldReduceMotion ? 0 : 0.2 }}
+                  onClick={() => toggleSidebar()}
+                />
+              )}
+            </AnimatePresence>
+
+            {/* Sidebar */}
+            <div
+              className={cn(
+                sidebarState !== "locked" ? "z-30" : "z-0",
+                !shouldReduceMotion && "transition-all",
+                sidebarState === "locked" ? "w-[240px] shrink-0 pl-3" : "w-0"
+              )}
+              ref={(node) => {
+                if (sidebarState === "hidden") {
+                  node?.setAttribute("inert", "")
+                } else {
+                  node?.removeAttribute("inert")
+                }
+              }}
+            >
+              <SkipToContentButton contentId="content" />
+              {sidebar}
+            </div>
+
+            {/* Main area */}
+            <motion.div
+              className="relative min-w-0 flex-1"
+              animate={{
+                paddingRight: isAiChatOpen ? reservedChatWidth : 0,
+              }}
+              transition={{ paddingRight: CONTENT_TRANSITION }}
+            >
+              {/* Main content */}
               <motion.main
                 id="content"
                 layoutId="main"
                 className={cn(
-                  "relative flex max-w-full flex-1 overflow-auto xs:py-1",
-                  ai && ai.enabled ? "xs:pr-0.5" : "xs:pr-1",
+                  "relative z-10 flex h-full max-w-full flex-1 xs:py-1",
+                  isInFullscreenTransition
+                    ? "overflow-hidden"
+                    : "overflow-auto",
+                  !isAiChatOpen && !isAiPromotionChatOpen && "xs:pr-1",
                   sidebarState === "locked" ? "pl-0" : "xs:pl-1"
                 )}
-                layoutDependency={[sidebarState]}
-                transition={{
-                  duration: shouldReduceMotion ? 0 : 0.3,
-                  type: "spring",
-                  stiffness: 300,
-                  damping: 30,
-                }}
+                layoutDependency={sidebarState}
               >
                 <motion.div
-                  className="flex max-w-full flex-1 overflow-auto"
+                  className={cn(
+                    "flex max-w-full flex-1",
+                    isInFullscreenTransition
+                      ? "overflow-hidden"
+                      : "overflow-auto"
+                  )}
                   layout="position"
                 >
                   {children}
                 </motion.div>
               </motion.main>
-              {ai && ai.enabled && (
-                <div className="py-1 pr-1 pl-0 h-full flex">
+
+              {/* Chat */}
+              {ai?.enabled && (
+                <motion.div
+                  className={cn(
+                    "pointer-events-none absolute right-0 top-0 bottom-0",
+                    "[&_.copilotKitSidebarContentWrapper]:relative [&_.copilotKitSidebarContentWrapper]:h-full [&_.copilotKitSidebarContentWrapper]:w-full",
+                    isInFullscreenTransition ? "z-20" : "z-0",
+                    sidebarState === "hidden" && isInFullscreenTransition
+                      ? "pl-1"
+                      : "pl-0"
+                  )}
+                  animate={{
+                    width: isAiChatFullscreen ? "100%" : reservedChatWidth,
+                  }}
+                  transition={chatContainerTransition}
+                  onAnimationComplete={() => {
+                    if (isFullscreenExitTransitionActive) {
+                      setIsFullscreenExitTransitionActive(false)
+                    }
+                  }}
+                >
                   <F0AiChat />
-                </div>
+                </motion.div>
               )}
-              {aiPromotion && aiPromotion.enabled && <AiPromotionChat />}
-            </div>
-          </LayoutGroup>
-        </div>
-      </MotionConfig>
-    </>
+            </motion.div>
+
+            {aiPromotion?.enabled && <AiPromotionChat />}
+          </div>
+        </LayoutGroup>
+      </div>
+    </MotionConfig>
   )
 }
