@@ -26,7 +26,7 @@ export interface ImageUploadConfig {
   onError?: (errorType: ImageUploadErrorType) => void
 }
 
-const DEFAULT_MAX_SIZE = 15 * 1024 * 1024 // 15MB
+const DEFAULT_MAX_SIZE = 50 * 1024 * 1024 // 50MB
 export const DEFAULT_ACCEPTED_TYPES = [
   "image/jpeg",
   "image/png",
