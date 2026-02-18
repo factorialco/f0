@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.369.1](https://github.com/factorialco/f0/compare/f0-react-v1.369.0...f0-react-v1.369.1) (2026-02-18)
+
+
+### Bug Fixes
+
+* One tools ([#3457](https://github.com/factorialco/f0/issues/3457)) ([dc9ab24](https://github.com/factorialco/f0/commit/dc9ab24eaca1052799992b88ed6abbc4341db81e))
+
 ## [1.369.0](https://github.com/factorialco/f0/compare/f0-react-v1.368.0...f0-react-v1.369.0) (2026-02-18)
 
 
