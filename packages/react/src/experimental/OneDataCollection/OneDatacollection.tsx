@@ -333,15 +333,7 @@ const OneDataCollectionComp = <
 
   const [selectedItemsCount, setSelectedItemsCount] = useState(0)
 
-  /**
-   * All-pages selection state tracking
-   */
-  const [isAllCurrentPageSelected, setIsAllCurrentPageSelected] =
-    useState(false)
   const [isAllItemsSelected, setIsAllItemsSelected] = useState(false)
-  const [selectAllFunc, setSelectAllFunc] = useState<
-    ((checked: boolean) => void) | undefined
-  >(undefined)
 
   const i18n = useI18n()
 
@@ -380,20 +372,6 @@ const OneDataCollectionComp = <
      */
     setClearSelectedItemsFunc(() => clearSelectedItems)
 
-    /**
-     * Track all-pages selection state
-     */
-    if (handleSelectAll) {
-      setSelectAllFunc(() => handleSelectAll)
-    }
-
-    // Track whether all items on the current page are selected
-    const allOnPage =
-      selectedItems.itemsStatus.length > 0 &&
-      selectedItems.itemsStatus.every((item) => item.checked)
-    setIsAllCurrentPageSelected(allOnPage)
-
-    // Track whether all items across all pages are selected
     setIsAllItemsSelected(selectedItems.allSelected === true)
 
     /**
@@ -803,10 +781,8 @@ const OneDataCollectionComp = <
               }
               onUnselect={() => clearSelectedItemsFunc?.()}
               allPagesSelection={!!source.allPagesSelection}
-              isAllCurrentPageSelected={isAllCurrentPageSelected}
               isAllItemsSelected={isAllItemsSelected}
               totalItems={totalItems}
-              onSelectAllItems={() => selectAllFunc?.(true)}
             />
           )}
         </>

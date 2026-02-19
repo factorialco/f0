@@ -79,6 +79,7 @@ export function FiltersChipsList<Filters extends FiltersDefinition>({
               <FilterChipButton
                 key={`filter-${String(key)}`}
                 filter={filterSchema}
+                filterKey={String(key)}
                 value={currentValue}
                 onSelect={() => onFilterSelect(key)}
                 onRemove={() => onFilterRemove(key)}

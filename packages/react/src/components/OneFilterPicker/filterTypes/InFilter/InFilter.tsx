@@ -2,16 +2,19 @@
 
 import { useEffect, useMemo, useRef, useState } from "react"
 
-import { F0Button } from "@/components/F0Button"
 import { F0Checkbox } from "@/components/F0Checkbox"
 import { OneEllipsis } from "@/components/OneEllipsis"
 import { F1SearchBox } from "@/experimental/Forms/Fields/F1SearchBox"
+import { ScrollArea } from "@/ui/scrollarea"
 import { Spinner } from "@/ui/Spinner"
 import { RecordType } from "@/hooks/datasource"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 
 import { FilterTypeComponentProps } from "../types"
+import { InFilterFlatOption } from "./components/InFilterFlatOption"
+import { InFilterOptionRow } from "./components/InFilterOptionRow"
+import { optionMatchesSearch } from "./components/option-utils"
 import { InFilterOptions } from "./types"
 import { cacheLabel, getCacheKey, useLoadOptions } from "./useLoadOptions"
 
@@ -34,6 +37,7 @@ type InFilterComponentProps<
  * - Maintains order of selection
  * - Supports both static and async options
  * - Shows loading state for async options
+ * - Hierarchical nested options with independent selection per filter key
  *
  * @template T - The type of values that can be selected
  *
@@ -77,6 +81,8 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
   value,
   onChange,
   isCompactMode,
+  onFilterChange,
+  allFiltersValue,
 }: InFilterComponentProps<T, R>) {
   const i18n = useI18n()
 
@@ -113,14 +119,16 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
     setSearchTerm("")
   }, [schema])
 
+  const searchTermLower = searchTerm.toLowerCase()
+
   const filteredOptions = useMemo(
     () =>
       hasSource
         ? options
         : options.filter((option) =>
-            option.label.toLowerCase().includes(searchTerm.toLowerCase())
+            optionMatchesSearch(option, searchTermLower)
           ),
-    [hasSource, options, searchTerm]
+    [hasSource, options, searchTermLower]
   )
 
   if (isLoading && !options.length) {
@@ -141,7 +149,6 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
             focusRing()
           )}
           onClick={() => {
-            // Re-trigger the effect to retry loading
             loadOptions(true)
           }}
         >
@@ -159,7 +166,7 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
     )
   }
 
-  const showSearch = options.length > 0 || hasSource
+  const showSearch = options.length > 0
 
   const handleSelectAll = () => {
     const currentValues = value ?? []
@@ -168,7 +175,6 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
     filteredOptions.forEach((option) => {
       if (!newValues.includes(option.value)) {
         newValues.push(option.value)
-        // Cache the label when selecting all
         cacheLabel(cacheKey, option.value, option.label)
       }
     })
@@ -184,18 +190,21 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
     }
   }
 
-  const handleClear = () => {
-    onChange([])
+  const handleScrollBottom = () => {
+    if (isLoading || !loadMore || !canLoadMore.current) return
+    loadMore()
   }
 
-  const handleScroll = (event: React.UIEvent<HTMLDivElement>) => {
-    // Prevent multiple simultaneous calls
-    if (isLoading || !loadMore || !canLoadMore.current) return
-
-    const target = event.target as HTMLDivElement
-    if (target.scrollTop + target.clientHeight >= target.scrollHeight - 50) {
-      loadMore()
+  const handleToggleOption = (optionValue: T, optionLabel: string) => {
+    const isSelected = value.includes(optionValue)
+    if (!isSelected) {
+      cacheLabel(cacheKey, optionValue, optionLabel)
     }
+    onChange(
+      isSelected
+        ? value.filter((v) => v !== optionValue)
+        : [...value, optionValue]
+    )
   }
 
   const selectedText = `${value.length} ${
@@ -203,6 +212,11 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
       ? i18n.status.selected.singular
       : i18n.status.selected.plural
   }`.toLowerCase()
+
+  const hasAnyChildren = filteredOptions.some(
+    (opt) => !!opt.children?.options.length
+  )
+  const autoExpand = !!searchTermLower && hasAnyChildren
 
   return (
     <div
@@ -223,17 +237,18 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
       {isCompactMode && (
         <div className="mb-1 h-px border-0 border-t border-solid border-f1-border-secondary" />
       )}
-      <div
+      <ScrollArea
         className={cn(
-          "overflow-y-auto px-2",
+          "[&>div]:pb-2",
           isCompactMode && "px-1",
-          isCompactMode ? "max-h-[360px]" : "h-full"
+          isCompactMode ? "max-h-[360px]" : "flex-1 min-h-0"
         )}
-        onScroll={handleScroll}
+        onScrollBottom={handleScrollBottom}
+        scrollMargin={50}
       >
         {isCompactMode && (
           <div className="sticky left-0 right-0 top-0 z-10 flex w-full flex-1 items-center justify-between gap-1 rounded bg-f1-background/80 p-2 py-1 pr-1 backdrop-blur-[8px]">
-            <span className="max-w-[250px] flex-1 whitespace-nowrap">
+            <span className="min-w-0 flex-1">
               <OneEllipsis className="text-f1-foreground-secondary">
                 {selectedText}
               </OneEllipsis>
@@ -248,75 +263,37 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
             />
           </div>
         )}
-        {filteredOptions.length === 0 && !isLoading && (
-          <div className="flex w-full items-center justify-center py-4 text-sm text-f1-foreground-secondary">
-            {i18n.select.noResults}
-          </div>
-        )}
-        {filteredOptions.map((option) => {
-          const isSelected = value.includes(option.value)
-          const optionId = `option-${String(option.value)}`
-
-          return (
-            <div
-              key={String(option.value)}
-              className={cn(
-                "flex w-full flex-1 cursor-pointer appearance-none items-center justify-between gap-1 rounded p-2 font-medium transition-colors hover:bg-f1-background-secondary",
-                isCompactMode && "py-1 pr-1",
-                focusRing()
-              )}
-              onClick={() => {
-                if (!isSelected) {
-                  // Cache the label when selecting an option
-                  cacheLabel(cacheKey, option.value, option.label)
-                }
-                onChange(
-                  isSelected
-                    ? value.filter((v) => v !== option.value)
-                    : [...value, option.value]
-                )
-              }}
-            >
-              <span className="max-w-[250px] flex-1 whitespace-nowrap">
-                <OneEllipsis>{option.label}</OneEllipsis>
-              </span>
-              <F0Checkbox
-                id={optionId}
-                title={option.label}
-                checked={isSelected}
-                presentational
-                hideLabel
+        {hasAnyChildren
+          ? filteredOptions.map((option) => (
+              <InFilterOptionRow
+                key={String(option.value)}
+                option={option}
+                isSelected={value.includes(option.value)}
+                onToggle={() => handleToggleOption(option.value, option.label)}
+                isCompactMode={isCompactMode}
+                depth={0}
+                onFilterChange={onFilterChange}
+                allFiltersValue={allFiltersValue}
+                cacheKey={cacheKey}
+                searchTerm={searchTermLower}
+                autoExpand={autoExpand}
               />
-            </div>
-          )
-        })}
+            ))
+          : filteredOptions.map((option) => (
+              <InFilterFlatOption
+                key={String(option.value)}
+                option={option}
+                isSelected={value.includes(option.value)}
+                onToggle={() => handleToggleOption(option.value, option.label)}
+                isCompactMode={isCompactMode}
+              />
+            ))}
         {isLoading && (
           <div className="flex w-full items-center justify-center py-4">
             <Spinner size="small" />
           </div>
         )}
-      </div>
-      {!isCompactMode && (
-        <div className="sticky bottom-0 left-0 right-0 flex items-center justify-between gap-2 border border-solid border-transparent border-t-f1-border-secondary bg-f1-background/80 p-2 backdrop-blur-[8px]">
-          <F0Button
-            variant="outline"
-            label={i18n.filters.selectAll}
-            onClick={handleSelectAll}
-            disabled={
-              filteredOptions.length === 0 ||
-              (Array.isArray(value) && value.length === filteredOptions.length)
-            }
-            size="sm"
-          />
-          <F0Button
-            variant="ghost"
-            label={i18n.filters.clear}
-            onClick={handleClear}
-            disabled={!Array.isArray(value) || value.length === 0}
-            size="sm"
-          />
-        </div>
-      )}
+      </ScrollArea>
     </div>
   )
 }

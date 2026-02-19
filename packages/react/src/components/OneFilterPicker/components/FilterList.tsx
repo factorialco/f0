@@ -1,12 +1,13 @@
 import { AnimatePresence, motion } from "motion/react"
-import { useState } from "react"
+import { useMemo } from "react"
 
 import { F0Button } from "@/components/F0Button"
 import { F0Icon } from "@/components/F0Icon"
-import { F1SearchBox } from "@/experimental/Forms/Fields/F1SearchBox"
+import { OneEllipsis } from "@/components/OneEllipsis"
 import { ChevronRight } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
+import { ScrollArea } from "@/ui/scrollarea"
 
 import type {
   FilterTypeDefinition,
@@ -15,6 +16,7 @@ import type {
 import type { FiltersDefinition, FiltersState, FilterValue } from "../types"
 
 import { FilterDefinitionsByType, getFilterType } from "../filterTypes"
+import { collectNestedFilterKeys } from "../filterTypes/InFilter/components/option-utils"
 
 /**
  * Props for the FilterList component.
@@ -58,91 +60,94 @@ export function FilterList<Definition extends FiltersDefinition>({
 }: FilterListProps<Definition>) {
   const i18n = useI18n()
 
-  const [searchValue, setSearchValue] = useState("")
+  const nestedKeysMap = useMemo(() => {
+    const map = new Map<string, string[]>()
+    for (const [key, filter] of Object.entries(definition)) {
+      if (filter.type === "in" && "options" in filter) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- accessing nested options generically
+        const nested = collectNestedFilterKeys((filter as any).options)
+        if (nested.length > 0) map.set(key, nested)
+      }
+    }
+    return map
+  }, [definition])
 
   return (
     <div
       className={cn(
         "z-30 flex h-full flex-col",
-        isCompactMode ? "min-w-[224px] w-full" : "w-fit max-w-[520px]",
+        isCompactMode ? "min-w-[224px] w-full" : "w-60",
         !isCompactMode &&
           "border border-solid border-transparent border-r-f1-border-secondary"
       )}
     >
-      <div className="flex flex-col p-2">
-        <F1SearchBox
-          key="filter-list-search"
-          name="filter-list-search"
-          placeholder={i18n.filters.searchPlaceholder}
-          value={searchValue}
-          onChange={setSearchValue}
-          autoFocus={!selectedFilterKey}
-          clearable
-        />
-      </div>
       <div
         className={cn(
-          "flex flex-1 h-full w-full flex-col min-h-0 max-h-full gap-1 overflow-x-hidden p-2 pt-0",
-          isCompactMode && "px-1 py-0"
+          "flex flex-1 h-full w-full flex-col min-h-0 max-h-full gap-1 overflow-x-hidden p-2"
         )}
       >
         {isCompactMode && (
           <div className="-mx-2 mb-1 h-px border-0 border-t border-solid border-f1-border-secondary" />
         )}
-        <div className="flex flex-1 flex-col gap-1 min-h-0 max-h-full overflow-y-auto">
-          {Object.entries(definition).map(([key, filter]) => {
-            const matchesWithSearch =
-              !searchValue ||
-              filter.label.toLowerCase().includes(searchValue.toLowerCase())
+        <ScrollArea className="flex-1 min-h-0 max-h-full">
+          <div className="flex flex-col gap-1">
+            {Object.entries(definition).map(([key, filter]) => {
+              const filterType = getFilterType(filter.type)
 
-            if (!matchesWithSearch) return null
+              type FilterType = FilterDefinitionsByType[typeof filter.type]
+              const currentValue = tempFilters[key] as FilterValue<FilterType>
+              const typedFilterType =
+                filterType as unknown as FilterTypeDefinition<
+                  FilterValue<FilterType>
+                >
 
-            const filterType = getFilterType(filter.type)
+              const ownValueActive = !typedFilterType.isEmpty(currentValue, {
+                schema: filter as unknown as FilterTypeSchema,
+                i18n,
+              })
 
-            type FilterType = FilterDefinitionsByType[typeof filter.type]
-            const currentValue = tempFilters[key] as FilterValue<FilterType>
-            const typedFilterType =
-              filterType as unknown as FilterTypeDefinition<
-                FilterValue<FilterType>
-              >
+              const nestedKeys = nestedKeysMap.get(key)
+              const nestedValueActive =
+                !ownValueActive &&
+                !!nestedKeys?.some((nk) => {
+                  const nv = tempFilters[nk as keyof Definition]
+                  return Array.isArray(nv) && nv.length > 0
+                })
 
-            return (
-              <button
-                key={key}
-                className={cn(
-                  "group relative flex w-full appearance-none items-center justify-between rounded px-2 py-1.5 font-medium transition-colors",
-                  "hover:bg-f1-background-secondary",
-                  selectedFilterKey === key && "bg-f1-background-secondary",
-                  focusRing()
-                )}
-                onClick={() => onFilterSelect(key as keyof Definition)}
-              >
-                <div className="flex w-full items-center justify-start gap-2.5">
-                  <span
-                    className="flex-1 whitespace-nowrap text-left text-f1-foreground line-clamp-1 text-ellipsis"
-                    title={filter.label}
-                  >
-                    {filter.label}
-                  </span>
-                  <AnimatePresence>
-                    {!typedFilterType.isEmpty(currentValue, {
-                      schema: filter as unknown as FilterTypeSchema,
-                      i18n,
-                    }) && (
-                      <motion.div
-                        className="h-2 w-2 shrink-0 rounded-full bg-f1-background-selected-bold"
-                        initial={{ opacity: 0, scale: 0.7 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.7 }}
-                      />
-                    )}
-                  </AnimatePresence>
-                  {isCompactMode && <F0Icon icon={ChevronRight} />}
-                </div>
-              </button>
-            )
-          })}
-        </div>
+              const isActive = ownValueActive || nestedValueActive
+
+              return (
+                <button
+                  key={key}
+                  className={cn(
+                    "group relative flex w-full appearance-none items-center justify-between rounded px-2 py-1.5 font-medium transition-colors",
+                    "hover:bg-f1-background-secondary",
+                    selectedFilterKey === key && "bg-f1-background-secondary",
+                    focusRing()
+                  )}
+                  onClick={() => onFilterSelect(key as keyof Definition)}
+                >
+                  <div className="flex w-full items-center justify-start gap-2.5 overflow-hidden">
+                    <OneEllipsis className="flex-1 text-left text-f1-foreground">
+                      {filter.label}
+                    </OneEllipsis>
+                    <AnimatePresence>
+                      {isActive && (
+                        <motion.div
+                          className="h-2 w-2 shrink-0 rounded-full bg-f1-background-selected-bold"
+                          initial={{ opacity: 0, scale: 0.7 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.7 }}
+                        />
+                      )}
+                    </AnimatePresence>
+                    {isCompactMode && <F0Icon icon={ChevronRight} />}
+                  </div>
+                </button>
+              )
+            })}
+          </div>
+        </ScrollArea>
         {isCompactMode && (
           <div className="-mx-2 flex items-center justify-end gap-2 border border-solid border-transparent border-t-f1-border-secondary p-2">
             <F0Button

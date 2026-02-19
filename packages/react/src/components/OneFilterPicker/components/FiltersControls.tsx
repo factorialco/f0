@@ -42,9 +42,10 @@ export function FiltersControls<Filters extends FiltersDefinition>({
   mode = "default",
   displayCounter = false,
 }: FiltersControlsProps<Filters>) {
+  const firstFilterKey = (Object.keys(filters)[0] as keyof Filters) ?? null
   const [selectedFilterKey, setSelectedFilterKey] = useState<
     keyof Filters | null
-  >(null)
+  >(mode === "compact" ? null : firstFilterKey)
   const i18n = useI18n()
 
   // Auto-detect if we're inside a dialog and use its portal container
@@ -118,6 +119,11 @@ export function FiltersControls<Filters extends FiltersDefinition>({
     }
   }
 
+  const handleCancelFilters = () => {
+    setLocalFiltersValue(value)
+    onOpenChange(false)
+  }
+
   const handleApplyFiltersSelection = () => {
     handleGoBack()
   }
@@ -184,6 +190,86 @@ export function FiltersControls<Filters extends FiltersDefinition>({
     // eslint-disable-next-line react-hooks/exhaustive-deps -- We only want to run this when the active filters change
   }, [activeFilters, filters])
 
+  // Inline mode: dual-pane layout (filter list + content) as an overlay
+  if (mode === "inline") {
+    const hasFiltersApplied = !!Object.values(localFiltersValue).length
+
+    return (
+      <div className="flex items-center gap-2">
+        <div className="relative">
+          <ButtonInternal
+            variant="outline"
+            label={i18n.filters.label}
+            icon={Filter}
+            pressed={isOpen}
+            onClick={() => onOpenChange(!isOpen)}
+            aria-controls={isOpen ? id : undefined}
+            hideLabel
+            tooltip={activeFiltersTooltip}
+          />
+
+          {hasFiltersApplied && (
+            <div className="absolute right-0 top-0 aspect-square w-2 rounded-full border border-solid border-f1-background bg-f1-background-selected-bold" />
+          )}
+        </div>
+        <AnimatePresence mode="popLayout" propagate={false}>
+          {isOpen && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.1 }}
+              className="absolute bottom-0 left-0 right-0 top-0 z-20 bg-f1-background"
+            >
+              <div className="flex h-full flex-col flex-1 min-h-0 max-h-full">
+                <div className="flex shrink-0 items-center gap-2 border-0 border-b border-solid border-f1-border-secondary px-2 py-1.5">
+                  <ButtonInternal
+                    variant="ghost"
+                    icon={ArrowLeft}
+                    label={i18n.filters.label}
+                    hideLabel
+                    size="sm"
+                    onClick={handleCancelFilters}
+                  />
+                  <span className="text-base font-medium text-f1-foreground">
+                    {i18n.filters.label}
+                  </span>
+                </div>
+                <div className="flex flex-1 min-h-0 max-h-full">
+                  <FilterList
+                    definition={filters}
+                    tempFilters={localFiltersValue}
+                    selectedFilterKey={selectedFilterKey}
+                    onFilterSelect={(key: keyof Filters) =>
+                      setSelectedFilterKey(key)
+                    }
+                    onClickApplyFilters={handleApplyFilters}
+                  />
+                  {selectedFilterKey && (
+                    <div className="flex-1 min-w-0 overflow-hidden">
+                      <FilterContent
+                        selectedFilterKey={selectedFilterKey}
+                        definition={filters}
+                        tempFilters={localFiltersValue}
+                        onFilterChange={updateFilterValue}
+                      />
+                    </div>
+                  )}
+                </div>
+                <div className="flex items-center justify-end gap-2 border border-solid border-transparent border-t-f1-border-secondary p-2 bg-f1-background">
+                  <F0Button
+                    onClick={handleApplyFilters}
+                    label={i18n.filters.applyFilters}
+                  />
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    )
+  }
+
   // Compact mode has its own UI with animations
   if (mode === "compact") {
     const hasFiltersApplied = !!Object.values(localFiltersValue).length
@@ -195,7 +281,7 @@ export function FiltersControls<Filters extends FiltersDefinition>({
       : i18n.t("filters.availableFilters")
 
     const NavHeader = (
-      <div className="flex items-center gap-2 pl-1.5 pt-1.5">
+      <div className="flex items-center gap-2 pl-1.5 py-1.5">
         <F0Button
           label="Back"
           icon={ArrowLeft}

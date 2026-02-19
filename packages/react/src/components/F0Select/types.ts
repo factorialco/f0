@@ -50,6 +50,12 @@ type F0SelectBaseProps<T extends string, R = unknown> = {
    * Only displays the dropdown content with max height, border and scroll.
    */
   asList?: boolean
+  /**
+   * When true, shows a selection preview panel on the right side of the dropdown
+   * for multi-select mode. When false and filters are present, filters use compact mode.
+   * @default false
+   */
+  showPreview?: boolean
 }
 
 /**

@@ -70,6 +70,7 @@ export const defaultTranslations = {
       selectAllItems: "Select all {{total}} items",
       allItemsSelected: "All {{total}} items selected",
     },
+    noItemsSelected: "No items selected",
   },
   filters: {
     searchPlaceholder: "Search filters...",

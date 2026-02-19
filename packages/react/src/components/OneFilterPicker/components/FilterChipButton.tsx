@@ -16,11 +16,13 @@ import { ChipLabel, getFilterType } from "../filterTypes"
  */
 export function FilterChipButton<Definition extends FiltersDefinition>({
   filter,
+  filterKey,
   value,
   onSelect,
   onRemove,
 }: {
   filter: Definition[keyof Definition]
+  filterKey?: string
   value: FilterValue<Definition[keyof Definition]> | undefined
   onSelect: () => void
   onRemove: () => void
@@ -46,7 +48,11 @@ export function FilterChipButton<Definition extends FiltersDefinition>({
         context: { schema: Definition[keyof Definition]; i18n: I18nContextType }
       ) => Promise<string>
 
-      const valueLabel = await labelRenderer(value, { schema: filter, i18n })
+      const valueLabel = await labelRenderer(value, {
+        schema: filter,
+        i18n,
+        filterKey,
+      })
       const label =
         typeof valueLabel === "object"
           ? valueLabel
