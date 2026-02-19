@@ -62,9 +62,6 @@ const StackedToasts = ({ items }: { items: ToastProviderItem[] }) => {
 
   if (items.length === 0) return null
 
-  // Newest stacked toast at index 0 = front of stack (closest to active area)
-  const displayItems = items.slice().reverse()
-
   return (
     <div
       className="pointer-events-auto relative z-[101] mb-4"
@@ -72,8 +69,8 @@ const StackedToasts = ({ items }: { items: ToastProviderItem[] }) => {
       onMouseLeave={() => setIsHovered(false)}
     >
       <AnimatePresence>
-        {displayItems.map((item, index) => {
-          // index 0 = newest stacked = front of stack
+        {items.map((item, index) => {
+          // index 0 = oldest stacked = front of stack (closest to active area, on top)
           // Clamp visual position for hidden items to the last visible slot
           const visualIndex = Math.min(index, maxVisibleStackedToasts - 1)
           const isVisible = index < maxVisibleStackedToasts
@@ -97,7 +94,8 @@ const StackedToasts = ({ items }: { items: ToastProviderItem[] }) => {
                 stacked: {
                   x: 0,
                   y: visualIndex * -10,
-                  scale: 1 - visualIndex * 0.05,
+                  // Hidden items start smaller so they zoom in when becoming visible
+                  scale: isVisible ? 1 - visualIndex * 0.05 : 0.9,
                   opacity: isVisible ? 1 : 0,
                   zIndex: items.length - index,
                   height: index === 0 ? "auto" : 0,
@@ -182,7 +180,7 @@ const ToastsContainer = ({
                     animate="animate"
                     exit="exit"
                   >
-                    <F0Toast {...item} forcePauseTimer />
+                    <F0Toast {...item} />
                   </motion.div>
                 ))}
               </AnimatePresence>
