@@ -9596,7 +9596,7 @@ const jm = Re("F0ChipList", Ra), $m = fo, Ch = vt({
         variant: s
       }),
       children: M("div", {
-        className: J("flex flex-col items-start gap-3 @sm:flex-row @sm:items-center @sm:justify-between"),
+        className: J("flex flex-col items-start gap-3 @xs:flex-row @xs:items-center @xs:justify-between"),
         children: [M("div", {
           className: "flex flex-row gap-2",
           children: [f("div", {
@@ -9621,7 +9621,7 @@ const jm = Re("F0ChipList", Ra), $m = fo, Ch = vt({
             })]
           })]
         }), (t || r) && M("div", {
-          className: J("flex flex-shrink-0 flex-row items-center gap-3 pl-8 @sm:pl-0"),
+          className: J("flex flex-shrink-0 flex-row items-center gap-3 pl-8 @xs:pl-0"),
           children: [r && f(go, {
             href: r.href,
             target: "_blank",
