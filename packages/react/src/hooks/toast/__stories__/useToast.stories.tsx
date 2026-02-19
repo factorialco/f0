@@ -32,7 +32,7 @@ type Story = StoryObj<typeof meta>
 
 export const ToastPlayground: Story = {
   render: () => {
-    const { toast, removeToast } = useToast()
+    const { toast, removeToast, clearAll } = useToast()
     const [lastId, setLastId] = useState<ToastId[]>([])
 
     const [logger, setLogger] = useState<{ date: string; message: string }[]>(
@@ -260,6 +260,13 @@ export const ToastPlayground: Story = {
                     removeToast(idToRemove)
                     setLastId((prev) => prev.slice(0, -1))
                   }
+                }}
+              />
+              <F0Button
+                label="Clear All"
+                onClick={() => {
+                  clearAll()
+                  setLastId([])
                 }}
               />
             </div>

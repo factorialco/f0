@@ -23,6 +23,7 @@ export type ToastProviderItem = F0ToastProps & {
 type ToastContextValue = {
   addToast: (toast: ToastProviderItem) => void
   removeToast: (id: ToastId) => void
+  clearAll: () => void
 }
 
 const toastContainerPositions = ["top-right"] as const
@@ -49,11 +50,18 @@ const minUncollapsedToasts = 3
 const StackedToasts = ({ items }: { items: ToastProviderItem[] }) => {
   const [isHovered, setIsHovered] = useState(false)
 
+  // Dynamic animation speed based on number of items
+  // More items = slower animation for smoother experience
+  const baseStiffness = 200
+  const baseDamping = 25
+  const stiffnessReduction = Math.min(items.length * 15, 100) // Cap reduction at 100
+  const dampingIncrease = Math.min(items.length * 2, 15) // Cap increase at 15
+
   if (items.length === 0) return null
 
   return (
     <div
-      className="pointer-events-auto relative z-[101]"
+      className="pointer-events-auto relative z-[101] mb-4"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -69,7 +77,11 @@ const StackedToasts = ({ items }: { items: ToastProviderItem[] }) => {
             <motion.div
               key={item.id}
               layout
-              initial={false}
+              initial={{
+                opacity: 0,
+                y: -50,
+                scale: 0.9,
+              }}
               animate={isHovered ? "expanded" : "collapsed"}
               exit={{
                 opacity: 0,
@@ -88,18 +100,18 @@ const StackedToasts = ({ items }: { items: ToastProviderItem[] }) => {
                   y: 0,
                   scale: 1,
                   opacity: 1,
-                  // zIndex: 100 - index,
+                  zIndex: 100 - reversedIndex,
                   height: "auto",
                   marginBottom: 16,
                 },
               }}
               transition={{
                 type: "spring",
-                stiffness: 300,
-                damping: 30,
+                stiffness: baseStiffness - stiffnessReduction,
+                damping: baseDamping + dampingIncrease,
               }}
               className={cn(
-                !isHovered && index > 0 && "absolute top-0 left-0 right-0 mb-4"
+                !isHovered && index > 0 && "absolute top-0 left-0 right-0"
               )}
             >
               <F0Toast {...item} forcePauseTimer />
@@ -183,12 +195,17 @@ export const ToastProvider = ({ children }: ToastProviderProps) => {
     setItems((prev) => prev.filter((item) => item.id !== id))
   }, [])
 
+  const clearAll = useCallback(() => {
+    setItems([])
+  }, [])
+
   const contextValue = useMemo(
     () => ({
       addToast,
       removeToast,
+      clearAll,
     }),
-    [addToast, removeToast]
+    [addToast, removeToast, clearAll]
   )
 
   return (

@@ -55,4 +55,8 @@ export type UseToastReturn = {
    * @param id The id of the toast to remove
    */
   removeToast: (id: ToastId) => void
+  /**
+   * Clear all toasts
+   */
+  clearAll: () => void
 }

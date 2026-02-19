@@ -5,7 +5,7 @@ import { useToastContext } from "./ToastProvider"
 import { ToastId, ToastOptions, UseToastReturn } from "./types"
 
 export const useToast = (): UseToastReturn => {
-  const { addToast, removeToast } = useToastContext()
+  const { addToast, removeToast, clearAll } = useToastContext()
 
   const toast = useCallback(
     (options: ToastOptions): ToastId => {
@@ -26,5 +26,6 @@ export const useToast = (): UseToastReturn => {
   return {
     toast,
     removeToast,
+    clearAll,
   }
 }
