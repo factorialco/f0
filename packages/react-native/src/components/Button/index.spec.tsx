@@ -1,13 +1,13 @@
 import { render, fireEvent, screen } from "@testing-library/react-native"
 import React from "react"
 
-import { IconType } from "../Icon"
+import { type IconType } from "../primitives/F0Icon"
 
 import { Button } from "./"
 
-// Mock the Icon component
-jest.mock("../Icon", () => ({
-  Icon: () => null,
+// Mock the F0Icon component
+jest.mock("../primitives/F0Icon", () => ({
+  F0Icon: () => null,
 }))
 
 // Mock dependencies

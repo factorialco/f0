@@ -106,7 +106,7 @@ const AvatarFallback = ({
   size?: (typeof sizes)[number]
 }) => (
   <Text
-    className={cn("text-f1-foreground-inverse/90", textSizes[size], className)}
+    className={cn("text-f0-foreground-inverse/90", textSizes[size], className)}
     {...props}
   />
 )

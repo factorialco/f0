@@ -1,16 +1,16 @@
 import { tv, type VariantProps } from "tailwind-variants"
 
-import { Icon, type IconType } from "../Icon"
+import { F0Icon, type IconType } from "../primitives/F0Icon"
 
 const badgeVariants = tv({
   base: "flex shrink-0 items-center justify-center rounded-full",
   variants: {
     type: {
-      neutral: "bg-transparent text-f1-icon",
-      highlight: "text-f1-special-highlight",
-      positive: "bg-f1-background-positive-bold text-f1-foreground-inverse",
-      critical: "bg-f1-icon-critical text-f1-foreground-inverse",
-      warning: "bg-f1-background-warning-bold text-f1-foreground-inverse",
+      neutral: "bg-transparent text-f0-icon",
+      highlight: "text-f0-special-highlight",
+      positive: "bg-f0-background-positive-bold text-f0-foreground-inverse",
+      critical: "bg-f0-icon-critical text-f0-foreground-inverse",
+      warning: "bg-f0-background-warning-bold text-f0-foreground-inverse",
     },
     size: {
       xs: "h-2.5 w-2.5",
@@ -39,7 +39,7 @@ export interface BadgeProps extends VariantProps<typeof badgeVariants> {
 
 export const Badge = ({ type, size = "md", icon }: BadgeProps) => {
   return (
-    <Icon
+    <F0Icon
       className={badgeVariants({ type, size })}
       icon={icon}
       size={iconSizes[size]}

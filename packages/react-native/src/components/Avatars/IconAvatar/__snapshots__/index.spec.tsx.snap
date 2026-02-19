@@ -2,13 +2,13 @@
 
 exports[`IconAvatar Snapshot - different sizes 1`] = `
 <View
-  className="flex aspect-square items-center justify-center border border-solid border-f1-border-secondary h-6 w-6 rounded-sm"
+  className="flex aspect-square items-center justify-center border border-solid border-f0-border-secondary h-6 w-6 rounded-sm"
 >
   <RNSVGSvgView
     align="xMidYMid"
     bbHeight="100%"
     bbWidth="100%"
-    className="shrink-0 w-4 h-4 stroke-sm text-f1-foreground-secondary"
+    className="shrink-0 w-4 h-4 stroke-sm text-f0-foreground-secondary"
     fill="none"
     focusable={false}
     meetOrSlice={0}
@@ -90,13 +90,13 @@ exports[`IconAvatar Snapshot - different sizes 1`] = `
 
 exports[`IconAvatar Snapshot - different sizes 2`] = `
 <View
-  className="flex aspect-square items-center justify-center border border-solid border-f1-border-secondary h-9 w-9 rounded-md"
+  className="flex aspect-square items-center justify-center border border-solid border-f0-border-secondary h-9 w-9 rounded-md"
 >
   <RNSVGSvgView
     align="xMidYMid"
     bbHeight="100%"
     bbWidth="100%"
-    className="shrink-0 w-5 h-5 stroke-md text-f1-foreground-secondary"
+    className="shrink-0 w-5 h-5 stroke-md text-f0-foreground-secondary"
     fill="none"
     focusable={false}
     meetOrSlice={0}
@@ -178,13 +178,13 @@ exports[`IconAvatar Snapshot - different sizes 2`] = `
 
 exports[`IconAvatar Snapshot - different sizes 3`] = `
 <View
-  className="flex aspect-square items-center justify-center border border-solid border-f1-border-secondary h-10 w-10 rounded-lg"
+  className="flex aspect-square items-center justify-center border border-solid border-f0-border-secondary h-10 w-10 rounded-lg"
 >
   <RNSVGSvgView
     align="xMidYMid"
     bbHeight="100%"
     bbWidth="100%"
-    className="shrink-0 w-6 h-6 stroke-lg text-f1-foreground-secondary"
+    className="shrink-0 w-6 h-6 stroke-lg text-f0-foreground-secondary"
     fill="none"
     focusable={false}
     meetOrSlice={0}

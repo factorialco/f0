@@ -7,7 +7,7 @@ import { useCSSVariable } from "uniwind";
 const { Add, Check, Alert, Archive, Home, Settings } = AppIcons;
 
 export function OneChipShowcase() {
-  const [f1Foreground] = useCSSVariable(['--color-f1-foreground']);
+  const [f1Foreground] = useCSSVariable(['--color-f0-foreground']);
   const [selectedChips, setSelectedChips] = useState<Set<string>>(new Set());
 
   const asString = (value: string | number | undefined): string => {

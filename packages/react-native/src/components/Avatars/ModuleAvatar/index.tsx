@@ -2,7 +2,7 @@ import { View } from "react-native"
 import Svg, { Defs, LinearGradient, Stop, Path } from "react-native-svg"
 import { tv, type VariantProps } from "tailwind-variants"
 
-import { IconType, applyIconInterop } from "../../Icon"
+import { type IconType, applyIconInterop } from "../../primitives/F0Icon"
 
 import { ModuleId, modules } from "./modules"
 
@@ -37,7 +37,7 @@ const iconContainerVariants = tv({
 })
 
 const iconSizeVariants = tv({
-  base: "relative text-f1-foreground-inverse drop-shadow",
+  base: "relative text-f0-foreground-inverse drop-shadow",
   variants: {
     size: {
       sm: "h-[14px] w-[14px]",

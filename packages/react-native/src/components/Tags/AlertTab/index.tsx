@@ -1,7 +1,7 @@
 import { AlertCircle, InfoCircle, Warning } from "../../../icons/app"
 import { useTextFormatEnforcer } from "../../../lib/text"
 import { cn } from "../../../lib/utils"
-import { Icon, IconType } from "../../Icon"
+import { F0Icon, type IconType } from "../../primitives/F0Icon"
 import { BaseTag } from "../BaseTag"
 
 type Level = "info" | "warning" | "critical"
@@ -26,27 +26,27 @@ export const AlertTag = <T extends string>({ text, level }: Props<T>) => {
     <BaseTag
       classNameText={cn(
         {
-          info: "text-f1-foreground-info",
-          warning: "text-f1-foreground-warning",
-          critical: "text-f1-foreground-critical",
+          info: "text-f0-foreground-info",
+          warning: "text-f0-foreground-warning",
+          critical: "text-f0-foreground-critical",
         }[level]
       )}
       classNameContainer={cn(
         "pl-0.5",
         {
-          info: "bg-f1-background-info text-f1-foreground-info",
-          warning: "bg-f1-background-warning text-f1-foreground-warning",
-          critical: "bg-f1-background-critical text-f1-foreground-critical",
+          info: "bg-f0-background-info text-f0-foreground-info",
+          warning: "bg-f0-background-warning text-f0-foreground-warning",
+          critical: "bg-f0-background-critical text-f0-foreground-critical",
         }[level]
       )}
       left={
-        <Icon
+        <F0Icon
           icon={iconMap[level]}
           className={cn(
             {
-              info: "text-f1-foreground-info",
-              warning: "text-f1-foreground-warning",
-              critical: "text-f1-foreground-critical",
+              info: "text-f0-foreground-info",
+              warning: "text-f0-foreground-warning",
+              critical: "text-f0-foreground-critical",
             }[level]
           )}
           size="md"

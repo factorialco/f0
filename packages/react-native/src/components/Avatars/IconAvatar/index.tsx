@@ -1,7 +1,7 @@
 import { View } from "react-native"
 
 import { cn } from "../../../lib/utils"
-import { Icon, IconType } from "../../Icon"
+import { F0Icon, type IconType } from "../../primitives/F0Icon"
 
 type Props = {
   icon: IconType
@@ -19,12 +19,16 @@ export const IconAvatar = ({ icon, size = "md", className }: Props) => {
   return (
     <View
       className={cn(
-        "flex aspect-square items-center justify-center border border-solid border-f1-border-secondary",
+        "flex aspect-square items-center justify-center border border-solid border-f0-border-secondary",
         sizes[size],
         className
       )}
     >
-      <Icon icon={icon} size={size} className="text-f1-foreground-secondary" />
+      <F0Icon
+        icon={icon}
+        size={size}
+        className="text-f0-foreground-secondary"
+      />
     </View>
   )
 }

@@ -14,7 +14,7 @@ exports[`PersonAvatar Snapshot 1`] = `
       role="img"
     >
       <Text
-        className="text-f1-foreground-inverse/90 text-md"
+        className="text-f0-foreground-inverse/90 text-md"
         data-a11y-color-contrast-ignore={true}
       >
         DM

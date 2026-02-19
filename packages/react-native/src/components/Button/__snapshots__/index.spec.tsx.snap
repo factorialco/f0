@@ -25,7 +25,7 @@ exports[`Button Snapshot - critical variant 1`] = `
       }
     }
     accessible={true}
-    className="flex-row items-center justify-center border-none grow-0 bg-f1-background-secondary border border-f1-border h-8 rounded gap-1 px-2 sm:px-3 lg:px-4"
+    className="overflow-hidden"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -37,12 +37,42 @@ exports[`Button Snapshot - critical variant 1`] = `
     onResponderTerminate={[Function]}
     onResponderTerminationRequest={[Function]}
     onStartShouldSetResponder={[Function]}
+    style={
+      [
+        {
+          "transform": [
+            {
+              "scale": 1,
+            },
+          ],
+        },
+        undefined,
+      ]
+    }
   >
-    <Text
-      className="text-base font-medium text-f1-foreground-critical"
+    <View
+      className="absolute inset-0"
+      pointerEvents="none"
+      style={
+        [
+          {
+            "opacity": 0,
+          },
+          {
+            "backgroundColor": "rgba(0, 0, 0, 1)",
+          },
+        ]
+      }
+    />
+    <View
+      className="flex-row items-center justify-center border-none grow-0 bg-f0-background-secondary border border-f0-border h-8 rounded gap-1 px-2 sm:px-3 lg:px-4"
     >
-      Test Button
-    </Text>
+      <Text
+        className="text-[16px] leading-[24px] font-medium text-f0-foreground-critical text-left"
+      >
+        Test Button
+      </Text>
+    </View>
   </View>
 </View>
 `;
@@ -72,7 +102,7 @@ exports[`Button Snapshot - default button 1`] = `
       }
     }
     accessible={true}
-    className="flex-row items-center justify-center border-none grow-0 bg-f1-background-accent-bold h-8 rounded gap-1 px-2 sm:px-3 lg:px-4"
+    className="overflow-hidden"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -84,12 +114,42 @@ exports[`Button Snapshot - default button 1`] = `
     onResponderTerminate={[Function]}
     onResponderTerminationRequest={[Function]}
     onStartShouldSetResponder={[Function]}
+    style={
+      [
+        {
+          "transform": [
+            {
+              "scale": 1,
+            },
+          ],
+        },
+        undefined,
+      ]
+    }
   >
-    <Text
-      className="text-base font-medium text-f1-foreground-inverse"
+    <View
+      className="absolute inset-0"
+      pointerEvents="none"
+      style={
+        [
+          {
+            "opacity": 0,
+          },
+          {
+            "backgroundColor": "rgba(0, 0, 0, 1)",
+          },
+        ]
+      }
+    />
+    <View
+      className="flex-row items-center justify-center border-none grow-0 bg-f0-background-accent-bold h-8 rounded gap-1 px-2 sm:px-3 lg:px-4"
     >
-      Test Button
-    </Text>
+      <Text
+        className="text-[16px] leading-[24px] font-medium text-f0-foreground-inverse text-left"
+      >
+        Test Button
+      </Text>
+    </View>
   </View>
 </View>
 `;
@@ -119,7 +179,7 @@ exports[`Button Snapshot - different sizes 1`] = `
       }
     }
     accessible={true}
-    className="flex-row items-center justify-center border-none grow-0 bg-f1-background-accent-bold h-6 rounded-sm gap-1 px-2 sm:px-3 lg:px-4"
+    className="overflow-hidden"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -131,12 +191,42 @@ exports[`Button Snapshot - different sizes 1`] = `
     onResponderTerminate={[Function]}
     onResponderTerminationRequest={[Function]}
     onStartShouldSetResponder={[Function]}
+    style={
+      [
+        {
+          "transform": [
+            {
+              "scale": 1,
+            },
+          ],
+        },
+        undefined,
+      ]
+    }
   >
-    <Text
-      className="text-base font-medium text-f1-foreground-inverse"
+    <View
+      className="absolute inset-0"
+      pointerEvents="none"
+      style={
+        [
+          {
+            "opacity": 0,
+          },
+          {
+            "backgroundColor": "rgba(0, 0, 0, 1)",
+          },
+        ]
+      }
+    />
+    <View
+      className="flex-row items-center justify-center border-none grow-0 bg-f0-background-accent-bold h-6 rounded-sm gap-1 px-2 sm:px-3 lg:px-4"
     >
-      Test Button
-    </Text>
+      <Text
+        className="text-[16px] leading-[24px] font-medium text-f0-foreground-inverse text-left"
+      >
+        Test Button
+      </Text>
+    </View>
   </View>
 </View>
 `;
@@ -166,7 +256,7 @@ exports[`Button Snapshot - different sizes 2`] = `
       }
     }
     accessible={true}
-    className="flex-row items-center justify-center border-none grow-0 bg-f1-background-accent-bold h-8 rounded gap-1 px-2 sm:px-3 lg:px-4"
+    className="overflow-hidden"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -178,12 +268,42 @@ exports[`Button Snapshot - different sizes 2`] = `
     onResponderTerminate={[Function]}
     onResponderTerminationRequest={[Function]}
     onStartShouldSetResponder={[Function]}
+    style={
+      [
+        {
+          "transform": [
+            {
+              "scale": 1,
+            },
+          ],
+        },
+        undefined,
+      ]
+    }
   >
-    <Text
-      className="text-base font-medium text-f1-foreground-inverse"
+    <View
+      className="absolute inset-0"
+      pointerEvents="none"
+      style={
+        [
+          {
+            "opacity": 0,
+          },
+          {
+            "backgroundColor": "rgba(0, 0, 0, 1)",
+          },
+        ]
+      }
+    />
+    <View
+      className="flex-row items-center justify-center border-none grow-0 bg-f0-background-accent-bold h-8 rounded gap-1 px-2 sm:px-3 lg:px-4"
     >
-      Test Button
-    </Text>
+      <Text
+        className="text-[16px] leading-[24px] font-medium text-f0-foreground-inverse text-left"
+      >
+        Test Button
+      </Text>
+    </View>
   </View>
 </View>
 `;
@@ -213,7 +333,7 @@ exports[`Button Snapshot - different sizes 3`] = `
       }
     }
     accessible={true}
-    className="flex-row items-center justify-center border-none grow-0 bg-f1-background-accent-bold h-10 rounded-md gap-1 px-2 sm:px-3 lg:px-4"
+    className="overflow-hidden"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -225,12 +345,42 @@ exports[`Button Snapshot - different sizes 3`] = `
     onResponderTerminate={[Function]}
     onResponderTerminationRequest={[Function]}
     onStartShouldSetResponder={[Function]}
+    style={
+      [
+        {
+          "transform": [
+            {
+              "scale": 1,
+            },
+          ],
+        },
+        undefined,
+      ]
+    }
   >
-    <Text
-      className="text-base font-medium text-f1-foreground-inverse"
+    <View
+      className="absolute inset-0"
+      pointerEvents="none"
+      style={
+        [
+          {
+            "opacity": 0,
+          },
+          {
+            "backgroundColor": "rgba(0, 0, 0, 1)",
+          },
+        ]
+      }
+    />
+    <View
+      className="flex-row items-center justify-center border-none grow-0 bg-f0-background-accent-bold h-10 rounded-md gap-1 px-2 sm:px-3 lg:px-4"
     >
-      Test Button
-    </Text>
+      <Text
+        className="text-[16px] leading-[24px] font-medium text-f0-foreground-inverse text-left"
+      >
+        Test Button
+      </Text>
+    </View>
   </View>
 </View>
 `;
@@ -260,7 +410,7 @@ exports[`Button Snapshot - disabled state 1`] = `
       }
     }
     accessible={true}
-    className="flex-row items-center justify-center border-none grow-0 bg-f1-background-accent-bold h-8 rounded opacity-50 gap-1 px-2 sm:px-3 lg:px-4"
+    className="overflow-hidden"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -272,12 +422,42 @@ exports[`Button Snapshot - disabled state 1`] = `
     onResponderTerminate={[Function]}
     onResponderTerminationRequest={[Function]}
     onStartShouldSetResponder={[Function]}
+    style={
+      [
+        {
+          "transform": [
+            {
+              "scale": 1,
+            },
+          ],
+        },
+        undefined,
+      ]
+    }
   >
-    <Text
-      className="text-base font-medium text-f1-foreground-inverse"
+    <View
+      className="absolute inset-0"
+      pointerEvents="none"
+      style={
+        [
+          {
+            "opacity": 0,
+          },
+          {
+            "backgroundColor": "rgba(0, 0, 0, 1)",
+          },
+        ]
+      }
+    />
+    <View
+      className="flex-row items-center justify-center border-none grow-0 bg-f0-background-accent-bold h-8 rounded opacity-50 gap-1 px-2 sm:px-3 lg:px-4"
     >
-      Test Button
-    </Text>
+      <Text
+        className="text-[16px] leading-[24px] font-medium text-f0-foreground-inverse text-left"
+      >
+        Test Button
+      </Text>
+    </View>
   </View>
 </View>
 `;
@@ -307,7 +487,7 @@ exports[`Button Snapshot - loading state 1`] = `
       }
     }
     accessible={true}
-    className="flex-row items-center justify-center border-none grow-0 bg-f1-background-accent-bold h-8 rounded opacity-50 gap-1 px-2 sm:px-3 lg:px-4"
+    className="overflow-hidden"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -319,12 +499,42 @@ exports[`Button Snapshot - loading state 1`] = `
     onResponderTerminate={[Function]}
     onResponderTerminationRequest={[Function]}
     onStartShouldSetResponder={[Function]}
+    style={
+      [
+        {
+          "transform": [
+            {
+              "scale": 1,
+            },
+          ],
+        },
+        undefined,
+      ]
+    }
   >
-    <Text
-      className="text-base font-medium text-f1-foreground-inverse"
+    <View
+      className="absolute inset-0"
+      pointerEvents="none"
+      style={
+        [
+          {
+            "opacity": 0,
+          },
+          {
+            "backgroundColor": "rgba(0, 0, 0, 1)",
+          },
+        ]
+      }
+    />
+    <View
+      className="flex-row items-center justify-center border-none grow-0 bg-f0-background-accent-bold h-8 rounded opacity-50 gap-1 px-2 sm:px-3 lg:px-4"
     >
-      Test Button
-    </Text>
+      <Text
+        className="text-[16px] leading-[24px] font-medium text-f0-foreground-inverse text-left"
+      >
+        Test Button
+      </Text>
+    </View>
   </View>
 </View>
 `;
@@ -354,7 +564,7 @@ exports[`Button Snapshot - outline variant 1`] = `
       }
     }
     accessible={true}
-    className="flex-row items-center justify-center border-none grow-0 bg-f1-background-inverse-secondary border border-f1-border h-8 rounded gap-1 px-2 sm:px-3 lg:px-4"
+    className="overflow-hidden"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -366,12 +576,42 @@ exports[`Button Snapshot - outline variant 1`] = `
     onResponderTerminate={[Function]}
     onResponderTerminationRequest={[Function]}
     onStartShouldSetResponder={[Function]}
+    style={
+      [
+        {
+          "transform": [
+            {
+              "scale": 1,
+            },
+          ],
+        },
+        undefined,
+      ]
+    }
   >
-    <Text
-      className="text-base font-medium text-f1-foreground"
+    <View
+      className="absolute inset-0"
+      pointerEvents="none"
+      style={
+        [
+          {
+            "opacity": 0,
+          },
+          {
+            "backgroundColor": "rgba(0, 0, 0, 1)",
+          },
+        ]
+      }
+    />
+    <View
+      className="flex-row items-center justify-center border-none grow-0 bg-f0-background-inverse-secondary border border-f0-border h-8 rounded gap-1 px-2 sm:px-3 lg:px-4"
     >
-      Test Button
-    </Text>
+      <Text
+        className="text-[16px] leading-[24px] font-medium text-f0-foreground text-left"
+      >
+        Test Button
+      </Text>
+    </View>
   </View>
 </View>
 `;
@@ -401,7 +641,7 @@ exports[`Button Snapshot - round button with hidden label 1`] = `
       }
     }
     accessible={true}
-    className="flex-row items-center justify-center border-none grow-0 bg-f1-background-accent-bold h-8 rounded aspect-square p-0"
+    className="overflow-hidden"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -413,7 +653,37 @@ exports[`Button Snapshot - round button with hidden label 1`] = `
     onResponderTerminate={[Function]}
     onResponderTerminationRequest={[Function]}
     onStartShouldSetResponder={[Function]}
-  />
+    style={
+      [
+        {
+          "transform": [
+            {
+              "scale": 1,
+            },
+          ],
+        },
+        undefined,
+      ]
+    }
+  >
+    <View
+      className="absolute inset-0"
+      pointerEvents="none"
+      style={
+        [
+          {
+            "opacity": 0,
+          },
+          {
+            "backgroundColor": "rgba(0, 0, 0, 1)",
+          },
+        ]
+      }
+    />
+    <View
+      className="flex-row items-center justify-center border-none grow-0 bg-f0-background-accent-bold h-8 rounded aspect-square p-0"
+    />
+  </View>
 </View>
 `;
 
@@ -442,7 +712,7 @@ exports[`Button Snapshot - with emoji 1`] = `
       }
     }
     accessible={true}
-    className="flex-row items-center justify-center border-none grow-0 bg-f1-background-accent-bold h-8 rounded gap-1 px-2 sm:px-3 lg:px-4"
+    className="overflow-hidden"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -454,17 +724,47 @@ exports[`Button Snapshot - with emoji 1`] = `
     onResponderTerminate={[Function]}
     onResponderTerminationRequest={[Function]}
     onStartShouldSetResponder={[Function]}
+    style={
+      [
+        {
+          "transform": [
+            {
+              "scale": 1,
+            },
+          ],
+        },
+        undefined,
+      ]
+    }
   >
-    <Text
-      className="text-base font-medium text-f1-foreground-inverse"
+    <View
+      className="absolute inset-0"
+      pointerEvents="none"
+      style={
+        [
+          {
+            "opacity": 0,
+          },
+          {
+            "backgroundColor": "rgba(0, 0, 0, 1)",
+          },
+        ]
+      }
+    />
+    <View
+      className="flex-row items-center justify-center border-none grow-0 bg-f0-background-accent-bold h-8 rounded gap-1 px-2 sm:px-3 lg:px-4"
     >
-      👋
-    </Text>
-    <Text
-      className="text-base font-medium text-f1-foreground-inverse"
-    >
-      Test Button
-    </Text>
+      <Text
+        className="text-[16px] leading-[24px] font-medium text-f0-foreground-inverse text-left"
+      >
+        👋
+      </Text>
+      <Text
+        className="text-[16px] leading-[24px] font-medium text-f0-foreground-inverse text-left"
+      >
+        Test Button
+      </Text>
+    </View>
   </View>
 </View>
 `;
@@ -494,7 +794,7 @@ exports[`Button Snapshot - with icon 1`] = `
       }
     }
     accessible={true}
-    className="flex-row items-center justify-center border-none grow-0 bg-f1-background-accent-bold h-8 rounded gap-1 px-2 sm:px-3 lg:px-4"
+    className="overflow-hidden"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -506,12 +806,42 @@ exports[`Button Snapshot - with icon 1`] = `
     onResponderTerminate={[Function]}
     onResponderTerminationRequest={[Function]}
     onStartShouldSetResponder={[Function]}
+    style={
+      [
+        {
+          "transform": [
+            {
+              "scale": 1,
+            },
+          ],
+        },
+        undefined,
+      ]
+    }
   >
-    <Text
-      className="text-base font-medium text-f1-foreground-inverse"
+    <View
+      className="absolute inset-0"
+      pointerEvents="none"
+      style={
+        [
+          {
+            "opacity": 0,
+          },
+          {
+            "backgroundColor": "rgba(0, 0, 0, 1)",
+          },
+        ]
+      }
+    />
+    <View
+      className="flex-row items-center justify-center border-none grow-0 bg-f0-background-accent-bold h-8 rounded gap-1 px-2 sm:px-3 lg:px-4"
     >
-      Test Button
-    </Text>
+      <Text
+        className="text-[16px] leading-[24px] font-medium text-f0-foreground-inverse text-left"
+      >
+        Test Button
+      </Text>
+    </View>
   </View>
 </View>
 `;

@@ -6,10 +6,10 @@ export const ThemeSwitcher = () => {
   
   // Obtener colores del tema actual
   const [f1Background, f1Foreground, f1Border, f1BackgroundSecondary] = useCSSVariable([
-    '--color-f1-background',
-    '--color-f1-foreground',
-    '--color-f1-border',
-    '--color-f1-background-secondary',
+    '--color-f0-background',
+    '--color-f0-foreground',
+    '--color-f0-border',
+    '--color-f0-background-secondary',
   ]);
 
   const asString = (value: string | number | undefined): string => {

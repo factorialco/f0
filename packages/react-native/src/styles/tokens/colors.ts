@@ -112,7 +112,7 @@ export const baseColors = {
 
 export type BaseColor = keyof typeof baseColors
 
-export const f1Colors = {
+export const f0Colors = {
   foreground: {
     DEFAULT: "hsl(var(--neutral-100))",
     secondary: "hsl(var(--neutral-50))",
@@ -245,4 +245,4 @@ export const f1Colors = {
   },
 } as const
 
-export type F1Color = keyof typeof f1Colors
+export type F0Color = keyof typeof f0Colors
