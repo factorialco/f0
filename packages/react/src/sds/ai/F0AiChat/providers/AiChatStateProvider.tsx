@@ -3,13 +3,14 @@
 import { type Message, randomId } from "@copilotkit/shared"
 import {
   createContext,
-  FC,
-  PropsWithChildren,
+  type FC,
+  type PropsWithChildren,
   useContext,
   useEffect,
   useRef,
   useState,
 } from "react"
+import type { ReactNode } from "react"
 
 import { useI18n } from "@/lib/providers/i18n"
 
@@ -47,11 +48,12 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   resizable = false,
   defaultVisualizationMode = "sidepanel",
   lockVisualizationMode = false,
-  footer,
+  footer: initialFooter,
   onThumbsDown,
   onThumbsUp,
   ...rest
 }) => {
+  const [footer, setFooter] = useState<ReactNode | undefined>(initialFooter)
   const [enabledInternal, setEnabledInternal] = useState(enabled)
   const [open, setOpen] = useState(defaultVisualizationMode === "fullscreen")
   const [visualizationMode, setVisualizationMode] = useState<VisualizationMode>(
@@ -171,6 +173,7 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         setVisualizationMode,
         lockVisualizationMode,
         footer,
+        setFooter,
         shouldPlayEntranceAnimation,
         setShouldPlayEntranceAnimation,
         agent,
@@ -231,6 +234,8 @@ export function useAiChat(): AiChatProviderReturnValue {
       setSendMessageFunction: noopFn,
       disclaimer: undefined,
       resizable: false,
+      footer: undefined,
+      setFooter: noopFn,
       chatWidth: DEFAULT_CHAT_WIDTH,
       setChatWidth: noopFn,
       resetChatWidth: noopFn,

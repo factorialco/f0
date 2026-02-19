@@ -160,7 +160,8 @@ const ChatInput = (props: InputProps) => {
             key="chat-footer"
             className={cn(
               "w-full py-4 mx-auto max-w-[712px]",
-              fullscreenWelcome && "mt-auto"
+              fullscreenWelcome && "mt-auto",
+              fullscreen && "flex justify-center"
             )}
             initial={{ opacity: 0, height: 0, overflow: "hidden" }}
             animate={{ opacity: 1, height: "auto" }}

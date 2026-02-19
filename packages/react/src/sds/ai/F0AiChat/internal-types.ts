@@ -116,6 +116,10 @@ export type AiChatProviderReturnValue = {
    * Optional footer content rendered below the textarea
    */
   footer?: React.ReactNode
+  /**
+   * Set the footer content. Use this to update the footer from outside the provider (e.g. per page/route).
+   */
+  setFooter: React.Dispatch<React.SetStateAction<React.ReactNode | undefined>>
 } & Pick<AiChatState, "greeting" | "agent" | "disclaimer" | "resizable">
 
 /**
