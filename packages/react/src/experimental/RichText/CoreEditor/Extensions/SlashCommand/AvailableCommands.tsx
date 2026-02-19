@@ -13,6 +13,7 @@ import {
   Minus,
   OlList,
   Quote,
+  Video,
 } from "@/icons/app"
 import { I18nContextType } from "@/lib/providers/i18n"
 
@@ -22,6 +23,7 @@ import {
   ImageUploadConfig,
   insertImageFromFile,
 } from "../Image"
+import { parseVideoUrl } from "../VideoEmbed"
 
 interface CommandItem {
   title: string
@@ -199,6 +201,23 @@ const getGroupedCommands = ({
               },
             ]
           : []),
+        {
+          title: translations.richTextEditor.video,
+          command: (editor: Editor) => {
+            const url = window.prompt(
+              translations.richTextEditor.videoUrlPrompt
+            )
+            if (url) {
+              const info = parseVideoUrl(url)
+              if (info) {
+                editor.commands.setVideoEmbed({ src: url })
+              } else {
+                window.alert(translations.richTextEditor.videoUrlInvalid)
+              }
+            }
+          },
+          icon: Video,
+        },
         {
           title: translations.richTextEditor.details,
           command: (editor) => {

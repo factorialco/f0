@@ -19,7 +19,7 @@ export const useOrchestratorThinkingAction = () => {
       },
     ],
     // render only when backend wants to display the thinking
-    available: "disabled",
+    available: "frontend",
     render: (props) => {
       const title: string = props.args.message ?? "thinking"
       const result: OrchestratorThinkingResult | undefined = props.result

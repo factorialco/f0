@@ -156,6 +156,19 @@ export const F0AiChatTextArea = ({
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const translation = useI18n()
 
+  // Skip autofocus when URL has a hash (e.g. #section) so we don't steal focus
+  // from the element the hash points to when the URL updates. We use an effect
+  // so we only read window on the client and avoid hydration mismatch.
+  useEffect(() => {
+    if (
+      autoFocus &&
+      typeof window !== "undefined" &&
+      window.location.hash.length === 0
+    ) {
+      textareaRef.current?.focus()
+    }
+  }, [autoFocus])
+
   const resolvedDefaultPlaceholder =
     defaultPlaceholder ?? translation.ai.inputPlaceholder
 
@@ -256,7 +269,7 @@ export const F0AiChatTextArea = ({
           </p>
         )}
         <textarea
-          autoFocus={autoFocus}
+          autoFocus={false}
           name="one-ai-input"
           rows={1}
           ref={textareaRef}

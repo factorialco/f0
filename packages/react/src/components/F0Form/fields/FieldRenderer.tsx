@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react"
 import {
   ControllerRenderProps,
   FieldError,
@@ -17,12 +18,18 @@ import {
 import { generateAnchorId, useF0FormContext } from "../context"
 import { isFieldRequired } from "./schema"
 import type { F0Field } from "./types"
-import { evaluateRenderIf } from "./utils"
+import {
+  evaluateDateConstraint,
+  evaluateDisabled,
+  evaluateRenderIf,
+} from "./utils"
 
 // Import field renderers
 import { CheckboxFieldRenderer } from "./checkbox/CheckboxFieldRenderer"
 import { CustomFieldRenderer } from "./custom/CustomFieldRenderer"
 import { DateFieldRenderer } from "./date/DateFieldRenderer"
+import { TimeFieldRenderer } from "./date/TimeFieldRenderer"
+import { DateTimeFieldRenderer } from "./date/DateTimeFieldRenderer"
 import { DateRangeFieldRenderer } from "./daterange/DateRangeFieldRenderer"
 import { NumberFieldRenderer } from "./number/NumberFieldRenderer"
 import { RichTextFieldRenderer } from "./richtext/RichTextFieldRenderer"
@@ -48,6 +55,7 @@ interface RenderFieldInputOptions {
   fieldState: FieldState
   isSubmitting: boolean
   isRequired?: boolean
+  values: Record<string, unknown>
 }
 
 /**
@@ -59,12 +67,13 @@ function renderFieldInput({
   fieldState,
   isSubmitting,
   isRequired,
+  values,
 }: RenderFieldInputOptions): React.ReactNode {
   const hasError = !!fieldState.error
   const { isValidating } = fieldState
 
-  // Disable field if explicitly disabled or form is submitting
-  const isDisabled = field.disabled || isSubmitting
+  // Evaluate disabled (can be boolean or function) and combine with submitting state
+  const isDisabled = evaluateDisabled(field.disabled, values) || isSubmitting
 
   const errorAndLoadingProps = {
     error: hasError,
@@ -121,7 +130,41 @@ function renderFieldInput({
     case "date":
       return (
         <DateFieldRenderer
-          field={{ ...field, disabled: isDisabled }}
+          field={{
+            ...field,
+            disabled: isDisabled,
+            // Evaluate dynamic date constraints
+            minDate: evaluateDateConstraint(field.minDate, values),
+            maxDate: evaluateDateConstraint(field.maxDate, values),
+          }}
+          formField={formField}
+          {...errorAndLoadingProps}
+        />
+      )
+    case "time":
+      return (
+        <TimeFieldRenderer
+          field={{
+            ...field,
+            disabled: isDisabled,
+            // Evaluate dynamic date constraints
+            minDate: evaluateDateConstraint(field.minDate, values),
+            maxDate: evaluateDateConstraint(field.maxDate, values),
+          }}
+          formField={formField}
+          {...errorAndLoadingProps}
+        />
+      )
+    case "datetime":
+      return (
+        <DateTimeFieldRenderer
+          field={{
+            ...field,
+            disabled: isDisabled,
+            // Evaluate dynamic date constraints
+            minDate: evaluateDateConstraint(field.minDate, values),
+            maxDate: evaluateDateConstraint(field.maxDate, values),
+          }}
           formField={formField}
           {...errorAndLoadingProps}
         />
@@ -173,6 +216,25 @@ export function FieldRenderer({ field, sectionId }: FieldRendererProps) {
   const { formName } = useF0FormContext()
   const { forms } = useI18n()
 
+  // Evaluate if field is currently disabled
+  const isDisabled = evaluateDisabled(field.disabled, values)
+
+  // Track previous disabled state to detect transitions
+  const wasDisabledRef = useRef(isDisabled)
+
+  // Reset field to default value when it becomes disabled (if resetOnDisable is true)
+  useEffect(() => {
+    const wasDisabled = wasDisabledRef.current
+    wasDisabledRef.current = isDisabled
+
+    // Only reset when transitioning from enabled to disabled
+    if (!wasDisabled && isDisabled && field.resetOnDisable) {
+      // Use setValue with the default value for immediate update
+      const defaultValue = form.formState.defaultValues?.[field.id]
+      form.setValue(field.id, defaultValue, { shouldValidate: false })
+    }
+  }, [isDisabled, field.resetOnDisable, field.id, form])
+
   // Check if field should be visible based on renderIf condition
   const isVisible = !field.renderIf || evaluateRenderIf(field.renderIf, values)
 
@@ -221,6 +283,7 @@ export function FieldRenderer({ field, sectionId }: FieldRendererProps) {
               fieldState,
               isSubmitting,
               isRequired,
+              values,
             })}
           </FormControl>
           {field.helpText && (

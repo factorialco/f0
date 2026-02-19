@@ -1,6 +1,10 @@
 import type { ReactNode } from "react"
 
-import type { F0BaseField, CommonRenderIfCondition } from "../types"
+import type {
+  F0BaseField,
+  F0BaseFieldRenderIfFunction,
+  CommonRenderIfCondition,
+} from "../types"
 
 // ============================================================================
 // Custom Field RenderIf Conditions
@@ -10,7 +14,9 @@ import type { F0BaseField, CommonRenderIfCondition } from "../types"
 /**
  * All valid renderIf conditions for custom fields
  */
-export type CustomFieldRenderIf = CommonRenderIfCondition
+export type CustomFieldRenderIf =
+  | CommonRenderIfCondition
+  | F0BaseFieldRenderIfFunction
 
 // ============================================================================
 // Custom Field Render Props

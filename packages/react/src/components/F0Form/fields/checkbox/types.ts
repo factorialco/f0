@@ -1,4 +1,8 @@
-import type { F0BaseField, CommonRenderIfCondition } from "../types"
+import type {
+  F0BaseField,
+  F0BaseFieldRenderIfFunction,
+  CommonRenderIfCondition,
+} from "../types"
 
 // ============================================================================
 // Boolean Field RenderIf Conditions (shared by checkbox and switch)
@@ -23,6 +27,7 @@ export type BooleanRenderIfCondition = BooleanRenderIfBase &
 export type CheckboxFieldRenderIf =
   | BooleanRenderIfCondition
   | CommonRenderIfCondition
+  | F0BaseFieldRenderIfFunction
 
 // ============================================================================
 // Checkbox Field Config and Type

@@ -1,4 +1,8 @@
-import type { F0BaseField, CommonRenderIfCondition } from "../types"
+import type {
+  F0BaseField,
+  F0BaseFieldRenderIfFunction,
+  CommonRenderIfCondition,
+} from "../types"
 import type { TextRenderIfCondition } from "../text/types"
 
 // ============================================================================
@@ -12,6 +16,7 @@ import type { TextRenderIfCondition } from "../text/types"
 export type TextareaFieldRenderIf =
   | TextRenderIfCondition
   | CommonRenderIfCondition
+  | F0BaseFieldRenderIfFunction
 
 // ============================================================================
 // Textarea Field Config and Type
@@ -37,6 +42,8 @@ export type F0TextareaField = F0BaseField &
     type: "textarea"
     /** Maximum character length (derived from z.string().max()) */
     maxLength?: number
+    /** Whether the field can be cleared (derived from optional/nullable) */
+    clearable?: boolean
     /** Conditional rendering based on another field's value */
     renderIf?: TextareaFieldRenderIf
   }

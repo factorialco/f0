@@ -1,13 +1,20 @@
 import { z, ZodTypeAny } from "zod"
 
-import type { RenderIfCondition } from "./fields/types"
+import type {
+  F0BaseFieldDisabledProp,
+  F0BaseFieldRenderIfProp,
+} from "./fields/types"
 import type { F0TextConfig } from "./fields/text/types"
 import type { F0NumberConfig } from "./fields/number/types"
 import type { F0TextareaConfig } from "./fields/textarea/types"
 import type { F0SelectConfig } from "./fields/select/types"
 import type { F0CheckboxConfig } from "./fields/checkbox/types"
 import type { F0SwitchConfig } from "./fields/switch/types"
-import type { F0DateConfig } from "./fields/date/types"
+import type {
+  F0DateConfig,
+  F0DateTimeConfig,
+  F0TimeConfig,
+} from "./fields/date/types"
 import type { F0DateRangeConfig } from "./fields/daterange/types"
 import type { F0RichTextConfig } from "./fields/richtext/types"
 import type { F0CustomConfig } from "./fields/custom/types"
@@ -28,6 +35,7 @@ type ZodTypeName =
   | "ZodNullable"
   | "ZodDefault"
   | "ZodLiteral"
+  | "ZodEffects"
 
 /**
  * Check if a schema is of a specific Zod type using _def.typeName
@@ -35,6 +43,21 @@ type ZodTypeName =
  */
 export function isZodType(schema: ZodTypeAny, typeName: ZodTypeName): boolean {
   return schema._def?.typeName === typeName
+}
+
+/**
+ * Unwrap a ZodEffects (created by .refine(), .transform(), etc.) to get the underlying ZodObject.
+ * If the schema is already a ZodObject, returns it as-is.
+ * This allows F0Form to work with refined schemas.
+ */
+export function unwrapToZodObject<T extends z.ZodRawShape>(
+  schema: z.ZodObject<T> | z.ZodEffects<z.ZodObject<T>>
+): z.ZodObject<T> {
+  if (isZodType(schema, "ZodEffects")) {
+    // ZodEffects has the inner schema in _def.schema
+    return (schema as z.ZodEffects<z.ZodObject<T>>)._def.schema
+  }
+  return schema as z.ZodObject<T>
 }
 
 /**
@@ -48,6 +71,8 @@ export type F0FieldType =
   | "checkbox"
   | "switch"
   | "date"
+  | "time"
+  | "datetime"
   | "daterange"
   | "richtext"
   | "custom"
@@ -65,12 +90,36 @@ export interface F0BaseConfig {
   placeholder?: string
   /** Helper text displayed below the field */
   helpText?: string
-  /** Whether the field is disabled */
-  disabled?: boolean
+  /**
+   * Whether the field is disabled.
+   * Can be a boolean or a function that receives form values.
+   * @example
+   * // Static disabled
+   * disabled: true
+   *
+   * // Dynamic disabled based on other field values
+   * disabled: ({ values }) => values.status === 'readonly'
+   */
+  disabled?: F0BaseFieldDisabledProp
+  /**
+   * When true, resets the field to its default value when it becomes disabled.
+   * Useful for clearing dependent fields when their controlling field changes.
+   * @default false
+   */
+  resetOnDisable?: boolean
   /** Row ID for horizontal grouping with other fields */
   row?: string
-  /** Conditional rendering based on another field's value */
-  renderIf?: RenderIfCondition
+  /**
+   * Conditional rendering based on another field's value.
+   * Can be a condition object or a function that receives form values.
+   * @example
+   * // Condition object
+   * renderIf: { fieldId: 'status', equalsTo: 'active' }
+   *
+   * // Dynamic renderIf based on form values
+   * renderIf: ({ values }) => values.status === 'active'
+   */
+  renderIf?: F0BaseFieldRenderIfProp
 }
 
 // Re-export field-specific config types
@@ -82,6 +131,7 @@ export type {
   F0CheckboxConfig,
   F0SwitchConfig,
   F0DateConfig,
+  F0TimeConfig,
   F0DateRangeConfig,
   F0RichTextConfig,
   F0CustomConfig,
@@ -188,6 +238,30 @@ export type F0DateFieldConfig = F0BaseConfig &
   }
 
 /**
+ * Config for time fields (stores as Date, displays as HH:mm)
+ */
+export type F0TimeFieldConfig = F0BaseConfig &
+  F0TimeConfig & {
+    fieldType: "time"
+  }
+
+/**
+ * Config for datetime fields
+ */
+export type F0DateTimeFieldConfig = F0BaseConfig &
+  F0DateTimeConfig & {
+    fieldType: "datetime"
+  }
+
+/**
+ * Union of all date/time/datetime field configs for z.date()
+ */
+export type F0DateOrDateTimeFieldConfig =
+  | F0DateFieldConfig
+  | F0TimeFieldConfig
+  | F0DateTimeFieldConfig
+
+/**
  * Config for date range fields
  */
 export type F0DateRangeFieldConfig = F0BaseConfig &
@@ -277,6 +351,8 @@ export type F0FieldConfig<
   | F0NumberFieldConfig<R>
   | F0BooleanConfig
   | F0DateFieldConfig
+  | F0TimeFieldConfig
+  | F0DateTimeFieldConfig
   | F0ArrayConfig<T, R>
   | F0ObjectConfig
 
@@ -323,11 +399,11 @@ export function f0FormField<T extends z.ZodBoolean>(
 ): T & F0ZodType<T>
 
 /**
- * Date field
+ * Date or DateTime field
  */
 export function f0FormField<T extends z.ZodDate>(
   schema: T,
-  config: F0DateFieldConfig
+  config: F0DateOrDateTimeFieldConfig
 ): T & F0ZodType<T>
 
 /**
@@ -537,11 +613,6 @@ export function inferFieldType(
   // Default to text
   return "text"
 }
-
-/**
- * Type helper for creating a form schema with F0 fields
- */
-export type F0FormSchema<T extends Record<string, ZodTypeAny>> = z.ZodObject<T>
 
 /**
  * Extract the inferred type from an F0 form schema

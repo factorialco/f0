@@ -74,76 +74,74 @@ const AiPromotionChatCmp = () => {
   }
 
   return (
-    <div className="p-1 pl-0">
-      <ChatWindow clickOutsideToClose hitEscapeToClose shortcut="">
-        {/* Close button header */}
-        <div className="flex items-center justify-end p-3 pb-0">
-          <ButtonInternal
-            variant="ghost"
-            hideLabel
-            label=""
-            icon={Cross}
-            onClick={handleClose}
-          />
-        </div>
+    <ChatWindow clickOutsideToClose hitEscapeToClose shortcut="">
+      {/* Close button header */}
+      <div className="flex items-center justify-end p-3 pb-0">
+        <ButtonInternal
+          variant="ghost"
+          hideLabel
+          label=""
+          icon={Cross}
+          onClick={handleClose}
+        />
+      </div>
 
-        <div className="flex-1 content-center overflow-y-auto">
-          <div className="flex flex-col gap-4 p-6 pt-3">
-            {/* Header with icon and greeting */}
-            <div className="flex flex-col gap-4">
-              <OneIcon spin size="lg" />
-              <div>
-                <p className="text-lg font-medium text-f1-foreground-secondary">
-                  {greeting}
-                </p>
-                <h1 className="text-2xl font-semibold text-f1-foreground">
-                  {title}
-                </h1>
-              </div>
-            </div>
-
-            {/* Description */}
-            {description && (
-              <p className="text-md text-f1-foreground-secondary">
-                {description}
+      <div className="flex-1 content-center overflow-y-auto">
+        <div className="flex flex-col gap-4 p-6 pt-3">
+          {/* Header with icon and greeting */}
+          <div className="flex flex-col gap-4">
+            <OneIcon spin size="lg" />
+            <div>
+              <p className="text-lg font-medium text-f1-foreground-secondary">
+                {greeting}
               </p>
-            )}
-
-            {/* Benefits list */}
-            {benefits?.length && (
-              <ul className="flex flex-col gap-2">
-                {benefits.map((benefit, index) => (
-                  <li key={index} className="flex items-center gap-1">
-                    <Check className="h-5 w-5 flex-shrink-0" />
-                    <span className="text-md text-f1-foreground">
-                      {benefit.noBoldText} <strong>{benefit.boldText}</strong>
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            )}
-
-            {/* Actions */}
-            {actions?.length && (
-              <div className="flex flex-col gap-3 pt-2">
-                {actions.map((action, index) => (
-                  <CustomButton
-                    key={index}
-                    action={action}
-                    onClose={() => setOpen(false)}
-                  />
-                ))}
-              </div>
-            )}
+              <h1 className="text-2xl font-semibold text-f1-foreground">
+                {title}
+              </h1>
+            </div>
           </div>
-        </div>
 
-        {/* Disabled chat input fixed at the bottom */}
-        <div className="m-3 mt-2 flex-shrink-0">
-          <ChatTextarea />
+          {/* Description */}
+          {description && (
+            <p className="text-md text-f1-foreground-secondary">
+              {description}
+            </p>
+          )}
+
+          {/* Benefits list */}
+          {benefits?.length && (
+            <ul className="flex flex-col gap-2">
+              {benefits.map((benefit, index) => (
+                <li key={index} className="flex items-center gap-1">
+                  <Check className="h-5 w-5 flex-shrink-0" />
+                  <span className="text-md text-f1-foreground">
+                    {benefit.noBoldText} <strong>{benefit.boldText}</strong>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          {/* Actions */}
+          {actions?.length && (
+            <div className="flex flex-col gap-3 pt-2">
+              {actions.map((action, index) => (
+                <CustomButton
+                  key={index}
+                  action={action}
+                  onClose={() => setOpen(false)}
+                />
+              ))}
+            </div>
+          )}
         </div>
-      </ChatWindow>
-    </div>
+      </div>
+
+      {/* Disabled chat input fixed at the bottom */}
+      <div className="m-3 mt-2 flex-shrink-0">
+        <ChatTextarea />
+      </div>
+    </ChatWindow>
   )
 }
 

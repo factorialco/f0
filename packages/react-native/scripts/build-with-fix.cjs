@@ -244,6 +244,32 @@ try {
     stdio: "inherit",
   });
 
+  // Step 6.5: Clean up snapshot directories from build output (they shouldn't be in lib/)
+  console.log("\n🧹 Cleaning up snapshot directories from build output...");
+  const libModuleDir = path.join(rootDir, "lib", "module");
+  if (fs.existsSync(libModuleDir)) {
+    function removeSnapshots(dir) {
+      const entries = fs.readdirSync(dir, { withFileTypes: true });
+      for (const entry of entries) {
+        const fullPath = path.join(dir, entry.name);
+        if (entry.isDirectory()) {
+          if (entry.name === "__snapshots__") {
+            fs.rmSync(fullPath, { recursive: true, force: true });
+            console.log(`   Removed: ${path.relative(rootDir, fullPath)}`);
+          } else {
+            removeSnapshots(fullPath);
+          }
+        }
+      }
+    }
+    try {
+      removeSnapshots(libModuleDir);
+      console.log("✅ Snapshot directories cleaned from build output");
+    } catch (error) {
+      console.log("ℹ️  Error cleaning snapshots (non-critical):", error.message);
+    }
+  }
+
   // Step 7: Final verification
   if (fs.existsSync(EXPECTED_INDEX)) {
     console.log("\n✅ Build completed successfully!");

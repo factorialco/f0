@@ -43,6 +43,8 @@ export const AssistantMessage = ({
   const { open: openFeedbackModal } = useFeedbackModal()
   const [reactionValue, setReactionValue] = useState<UserReaction | null>(null)
 
+  const isStoppedMessage = content.includes("<!--response-stopped-->")
+
   if (!isLoading && !isGenerating && isEmptyMessage) {
     return null
   }
@@ -61,7 +63,7 @@ export const AssistantMessage = ({
             />
           </div>
 
-          {!isGenerating && !isLoading && !!content && (
+          {!isGenerating && !isLoading && !!content && !isStoppedMessage && (
             <div className="flex">
               <ButtonCopy
                 size="md"

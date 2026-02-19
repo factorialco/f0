@@ -23,6 +23,10 @@ import { DndProvider } from "@/lib/dnd/context"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { mockImage } from "@/testing/mocks/images"
 
+import { F0Link } from "@/components/F0Link"
+import { Switch } from "@/ui/switch"
+import { Text } from "@/ui/Text"
+
 import {
   cardImageFits,
   cardImageSizes,
@@ -39,6 +43,28 @@ const SlotComponent = () => {
   return (
     <div className="w-full rounded border-2 border-dashed border-f1-border-info bg-f1-background-info p-5 text-center font-medium text-f1-foreground-info">
       This is a slot (children)
+    </div>
+  )
+}
+
+const InteractiveChildrenContent = () => {
+  const [checked, setChecked] = useState(false)
+  return (
+    <div className="flex flex-col gap-3">
+      <p className="text-f1-foreground-secondary">
+        This card has a link, but the children are interactive.
+      </p>
+      <div className="flex items-center justify-between">
+        <F0Link href="https://google.com" target="_blank">
+          Click me (goes to Google)
+        </F0Link>
+        <Switch
+          title="Toggle"
+          checked={checked}
+          onCheckedChange={(value) => setChecked(value)}
+        />
+        <Text variant="body" content="Toggle" />
+      </div>
     </div>
   )
 }
@@ -248,6 +274,15 @@ export const WithChildren: Story = {
   args: {
     title: "Card with children",
     children: <SlotComponent />,
+  },
+}
+
+export const WithInteractiveChildren: Story = {
+  args: {
+    title: "Card with interactive children",
+    link: "https://factorial.co",
+    onClick: () => alert("Card clicked!"),
+    children: <InteractiveChildrenContent />,
   },
 }
 

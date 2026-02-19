@@ -5,10 +5,13 @@ import { F0Form as F0FormComponent } from "./F0Form"
 // Export main types
 export type {
   F0FormProps,
+  F0FormSchema,
   F0FormErrorTriggerMode,
   F0FormSubmitConfig,
   F0FormDiscardConfig,
+  F0FormStylingConfig,
   F0SectionConfig,
+  F0SectionAction,
   F0FormSubmitResult,
   SectionRenderIf,
 } from "./types"
@@ -27,13 +30,13 @@ export type {
   F0FieldConfig,
   F0FieldType,
   F0ZodType,
-  F0FormSchema,
   InferF0FormValues,
   // Field-specific config types
   F0StringConfig,
   F0NumberFieldConfig,
   F0BooleanConfig,
   F0DateFieldConfig,
+  F0DateTimeFieldConfig,
   F0DateRangeFieldConfig,
   F0ArrayConfig,
   F0CustomFieldConfig,
@@ -63,6 +66,10 @@ export type {
   F0SwitchConfig,
   F0DateConfig,
   DateGranularity,
+  F0TimeConfig,
+  F0TimeField,
+  F0DateTimeConfig,
+  F0DateTimeField,
   F0DateRangeConfig,
   F0RichTextConfig,
   F0CustomConfig,
@@ -90,15 +97,17 @@ export { useSchemaDefinition, getSchemaDefinition } from "./useSchemaDefinition"
 export { evaluateRenderIf } from "./fields/utils"
 export { generateAnchorId } from "./context"
 
-import type { z, ZodRawShape } from "zod"
+// Export form control hook
+export { useF0Form } from "./useF0Form"
+export type { F0FormRef, UseF0FormReturn } from "./useF0Form"
 
-import type { F0FormProps } from "./types"
+import type { F0FormProps, F0FormSchema } from "./types"
 
 /**
  * @experimental This is an experimental component, use it at your own risk
  */
 export const F0Form = experimentalComponent("F0Form", F0FormComponent) as <
-  TSchema extends z.ZodObject<ZodRawShape>,
+  TSchema extends F0FormSchema,
 >(
   props: F0FormProps<TSchema>
 ) => React.ReactElement
