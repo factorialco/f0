@@ -37,7 +37,7 @@ const ScrollShadow = ({ position }: { position: "top" | "bottom" }) => (
   />
 )
 
-export const F0DialogContent = ({
+export const Content = ({
   children,
   disableContentPadding = false,
 }: ContentProps) => {

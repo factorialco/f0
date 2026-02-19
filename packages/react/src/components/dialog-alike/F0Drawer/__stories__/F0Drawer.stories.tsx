@@ -3,8 +3,6 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { ComponentProps, FC, useState } from "react"
 
 import { F0Button } from "@/components/F0Button"
-import { ApplicationFrame } from "@/examples/ApplicationFrame"
-import ApplicationFrameStoryMeta from "@/examples/ApplicationFrame/index.stories"
 import { ResourceHeader } from "@/experimental/Information/Headers/ResourceHeader"
 import { Default as ResourceHeaderDefault } from "@/experimental/Information/Headers/ResourceHeader/index.stories"
 import {
@@ -63,16 +61,10 @@ const meta: Meta<typeof F0Drawer> = {
       }
 
       return (
-        <ApplicationFrame
-          {...(ApplicationFrameStoryMeta.args as ComponentProps<
-            typeof ApplicationFrame
-          >)}
-        >
-          <div className="flex flex-1 items-center justify-center rounded-md border border-solid border-f1-border-secondary bg-f1-background">
-            <F0Button label="Open dialog" onClick={handleOpen} />
-            <Story args={{ ...rest, isOpen: open, onClose: handleClose }} />
-          </div>
-        </ApplicationFrame>
+        <div className="flex flex-1 items-center justify-center rounded-md border border-solid border-f1-border-secondary bg-f1-background">
+          <F0Button label="Open dialog" onClick={handleOpen} />
+          <Story args={{ ...rest, isOpen: open, onClose: handleClose }} />
+        </div>
       )
     },
   ],

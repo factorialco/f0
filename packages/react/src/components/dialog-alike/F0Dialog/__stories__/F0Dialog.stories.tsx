@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { ComponentProps, FC, useState } from "react"
+import { FC, useState } from "react"
 import { expect, userEvent, waitFor, within } from "storybook/test"
 
 import { F0Button } from "@/components/F0Button"
@@ -9,8 +9,6 @@ import {
   OnePersonListItemProps,
 } from "@/experimental/Lists/OnePersonListItem"
 import { Default as OnePersonListItemDefault } from "@/experimental/Lists/OnePersonListItem/index.stories"
-import { ApplicationFrame } from "@/experimental/Navigation/ApplicationFrame"
-import ApplicationFrameStoryMeta from "@/experimental/Navigation/ApplicationFrame/index.stories"
 import { Placeholder } from "@/icons/app"
 import CheckDoubleIcon from "@/icons/app/CheckDouble"
 import CrossIcon from "@/icons/app/Cross"
@@ -77,16 +75,10 @@ const meta: Meta<typeof F0Dialog> = {
       }
 
       return (
-        <ApplicationFrame
-          {...(ApplicationFrameStoryMeta.args as ComponentProps<
-            typeof ApplicationFrame
-          >)}
-        >
-          <div className="flex flex-1 items-center justify-center rounded-md border border-solid border-f1-border-secondary bg-f1-background">
-            <F0Button label="Open dialog" onClick={handleOpen} />
-            <Story args={{ ...rest, isOpen: open, onClose: handleClose }} />
-          </div>
-        </ApplicationFrame>
+        <div className="flex flex-1 items-center justify-center rounded-md border border-solid border-f1-border-secondary bg-f1-background">
+          <F0Button label="Open dialog" onClick={handleOpen} />
+          <Story args={{ ...rest, isOpen: open, onClose: handleClose }} />
+        </div>
       )
     },
   ],
