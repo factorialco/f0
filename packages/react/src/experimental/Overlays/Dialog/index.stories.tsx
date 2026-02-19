@@ -60,7 +60,7 @@ const meta = {
                 primary: {
                   ...args.actions?.primary,
                   label: args.actions?.primary?.label || "",
-                  onClick: (e) => {
+                  onClick: (e: React.MouseEvent<HTMLElement>) => {
                     args.actions?.primary?.onClick?.(e)
                     setIsOpen(false)
                   },
@@ -68,7 +68,7 @@ const meta = {
                 secondary: {
                   ...args.actions?.secondary,
                   label: args.actions?.secondary?.label || "",
-                  onClick: (e) => {
+                  onClick: (e: React.MouseEvent<HTMLElement>) => {
                     args.actions?.secondary?.onClick?.(e)
                     setIsOpen(false)
                   },
@@ -177,7 +177,7 @@ export const WithDataTestId: Story = {
     dataTestId: "dialog-test-id",
     open: true,
   },
-  play: async ({ canvasElement }) => {
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
     // Dialog uses Portal, so we need to look in the body
     const body = canvasElement.ownerDocument.body
     const canvas = within(body)
