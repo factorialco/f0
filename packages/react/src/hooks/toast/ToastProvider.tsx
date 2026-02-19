@@ -64,7 +64,7 @@ const StackedToasts = ({ items }: { items: ToastProviderItem[] }) => {
 
   return (
     <div
-      className="pointer-events-auto relative z-[101] mb-4"
+      className="pointer-events-auto relative z-[101] mb-4 flex flex-col"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -99,13 +99,16 @@ const StackedToasts = ({ items }: { items: ToastProviderItem[] }) => {
                   opacity: isVisible ? 1 : 0,
                   zIndex: items.length - index,
                   height: index === 0 ? "auto" : 0,
+                  order: 0,
                 },
                 expanded: {
                   x: 0,
                   y: 0,
                   scale: 1,
                   opacity: 1,
-                  zIndex: items.length - index,
+                  // Reverse visual order: newest (highest index) at top
+                  zIndex: index + 1,
+                  order: items.length - 1 - index,
                   height: "auto",
                   marginBottom: 16,
                 },
@@ -180,7 +183,7 @@ const ToastsContainer = ({
                     animate="animate"
                     exit="exit"
                   >
-                    <F0Toast {...item} />
+                    <F0Toast {...item} forcePauseTimer />
                   </motion.div>
                 ))}
               </AnimatePresence>
