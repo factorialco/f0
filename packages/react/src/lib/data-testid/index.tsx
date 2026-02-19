@@ -200,14 +200,17 @@ export const withDataTestId = <T extends React.ComponentType<any>>(
     const { dataTestId, ...rest } = props
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const Component = component as any
+
+    if (!dataTestId || !renderDataTestIdAttribute) {
+      return <Component {...rest} ref={ref} />
+    }
+
+    // Strip data-testid from props passed to the inner component to avoid it
+    // leaking to the DOM alongside the wrapper div's data-testid attribute.
     const cleanRest = (() => {
       const { "data-testid": _d, ...r } = rest
       return r
     })()
-
-    if (!dataTestId || !renderDataTestIdAttribute) {
-      return <Component {...cleanRest} ref={ref} />
-    }
 
     return (
       <InnerWithTestId
