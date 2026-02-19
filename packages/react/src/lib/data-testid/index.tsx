@@ -151,44 +151,27 @@ export const withDataTestId = <T extends React.ComponentType<any>>(
     return MemoizedComponent as unknown as ReturnedComponentType
   }
 
-  // For regular components (function or class). Plain function components can be
-  // invoked to check for null return; we only wrap when they return content so
-  // behavior matches forwardRef (no wrapper div when inner component returns null).
-  const isFunctionComponent =
-    typeof component === "function" &&
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    !(component as any).prototype?.isReactComponent
-
+  // For regular components (function or class). Always render via JSX to ensure
+  // hooks always run in the same fiber regardless of whether dataTestId is set,
+  // avoiding "Rendered more/fewer hooks than during the previous render" crashes.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const WrappedComponent = forwardRef((props: any, ref: any) => {
     const renderDataTestIdAttribute = useRenderDataTestIdAttribute()
     const { dataTestId, ...rest } = props
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const Component = component as any
-    if (!dataTestId || !renderDataTestIdAttribute) {
-      return <Component {...rest} ref={ref} />
-    }
     const cleanRest = (() => {
       const { "data-testid": _d, ...r } = rest
       return r
     })()
 
-    if (isFunctionComponent) {
-      const content = Component(cleanRest)
-      if (content == null) {
-        return content
-      }
-      return (
-        <div data-testid={dataTestId} style={{ display: "contents" }}>
-          {content}
-        </div>
-      )
+    if (!dataTestId || !renderDataTestIdAttribute) {
+      return <Component {...cleanRest} ref={ref} />
     }
 
-    const content = <Component {...cleanRest} ref={ref} />
     return (
       <div data-testid={dataTestId} style={{ display: "contents" }}>
-        {content}
+        <Component {...cleanRest} ref={ref} />
       </div>
     )
   })
