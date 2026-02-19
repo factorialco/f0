@@ -1,9 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { ComponentProps, useState } from "react"
+import { useState } from "react"
 
-import { ApplicationFrame } from "@/experimental/Navigation/ApplicationFrame"
-import ApplicationFrameStoryMeta from "@/experimental/Navigation/ApplicationFrame/index.stories"
 import { Placeholder } from "@/icons/app"
 import CrossIcon from "@/icons/app/Cross"
 
@@ -52,21 +50,15 @@ const meta: Meta<typeof DialogNotificationInternal> = {
       }
 
       return (
-        <ApplicationFrame
-          {...(ApplicationFrameStoryMeta.args as ComponentProps<
-            typeof ApplicationFrame
-          >)}
-        >
-          <div className="flex flex-1 items-center justify-center rounded-md border border-solid border-f1-border-secondary bg-f1-background">
-            <button
-              className="rounded-md border border-solid border-f1-border-secondary bg-f1-background-secondary p-2"
-              onClick={handleOpen}
-            >
-              Open Notification
-            </button>
-            <Story args={{ ...rest, isOpen: open, onClose: handleClose }} />
-          </div>
-        </ApplicationFrame>
+        <div className="flex flex-1 items-center justify-center rounded-md border border-solid border-f1-border-secondary bg-f1-background">
+          <button
+            className="rounded-md border border-solid border-f1-border-secondary bg-f1-background-secondary p-2"
+            onClick={handleOpen}
+          >
+            Open Notification
+          </button>
+          <Story args={{ ...rest, isOpen: open, onClose: handleClose }} />
+        </div>
       )
     },
   ],
