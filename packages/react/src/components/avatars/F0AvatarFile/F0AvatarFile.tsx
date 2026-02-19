@@ -1,6 +1,6 @@
 import { ElementRef, forwardRef, useMemo } from "react"
 
-import { Badge } from "@/experimental/Information/Badge"
+import { Badge } from "@/ui/IconBadge"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { cn } from "@/lib/utils"
 import { Avatar, AvatarFallback, InternalAvatarProps } from "@/ui/Avatar"

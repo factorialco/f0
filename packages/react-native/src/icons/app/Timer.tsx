@@ -1,6 +1,6 @@
-import Svg, { Circle, Path } from "react-native-svg";
-import type { SvgProps } from "react-native-svg";
-import { Ref, forwardRef } from "react";
+import { Ref, forwardRef } from "react"
+import Svg, { Circle, Path } from "react-native-svg"
+import type { SvgProps } from "react-native-svg"
 const SvgTimer = (props: SvgProps, ref: Ref<Svg>) => (
   <Svg
     fill="none"
@@ -22,6 +22,6 @@ const SvgTimer = (props: SvgProps, ref: Ref<Svg>) => (
       d="M12 5.5V3M10 3h4M19.09 6l1.414 1.414M4.91 6 3.496 7.414"
     />
   </Svg>
-);
-const ForwardRef = forwardRef(SvgTimer);
-export default ForwardRef;
+)
+const ForwardRef = forwardRef(SvgTimer)
+export default ForwardRef

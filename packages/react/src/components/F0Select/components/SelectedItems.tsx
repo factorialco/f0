@@ -5,6 +5,7 @@ import { OneEllipsis } from "@/components/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 
 import type { F0SelectItemObject } from "../types"
+import { LABEL_SEPARATOR, useVisibleLabelCount } from "../utils"
 
 import { ItemsCounter } from "./ItemsCounter"
 
@@ -19,8 +20,45 @@ type SelectValueProps = {
   onDeselect?: (value: string) => void
 }
 
-/** Maximum number of labels to show before displaying count */
-const MAX_VISIBLE_LABELS = 2
+/**
+ * Component for displaying selected items with dynamic truncation
+ */
+function MultiSelectDisplay({
+  selection,
+  totalSelectedCount,
+  onDeselect,
+}: {
+  selection: F0SelectItemObject<string>[]
+  totalSelectedCount: number
+  onDeselect?: (value: string) => void
+}) {
+  const labels = selection.map((item) => item.label)
+  const { visibleCount, containerRef } = useVisibleLabelCount(
+    labels,
+    totalSelectedCount
+  )
+
+  const visibleItems = selection.slice(0, visibleCount)
+  const remainingCount = totalSelectedCount - visibleCount
+
+  return (
+    <div
+      ref={containerRef}
+      className="flex w-full items-center gap-1 text-left"
+    >
+      <span className="min-w-0 flex-1 truncate">
+        {visibleItems.map((item) => item.label).join(LABEL_SEPARATOR)}
+      </span>
+      {remainingCount > 0 && (
+        <ItemsCounter
+          count={remainingCount}
+          items={selection.slice(visibleCount)}
+          onDeselect={onDeselect}
+        />
+      )}
+    </div>
+  )
+}
 
 /**
  * Component for displaying the selected item or items in the inputField
@@ -67,12 +105,8 @@ export const SelectedItems = forwardRef<HTMLDivElement, SelectValueProps>(
           )
         }
 
-        // For small selections, show visible labels with counter for remaining
-        const visibleItems = selection.slice(0, MAX_VISIBLE_LABELS)
-        const remainingCount = selectedCount - visibleItems.length
-
         // If no items are loaded yet but we have a count, show just the count
-        if (visibleItems.length === 0 && selectedCount > 0) {
+        if (selection.length === 0 && selectedCount > 0) {
           return (
             <div className="flex w-full items-center gap-1 text-left">
               <OneEllipsis className="min-w-0 flex-1">
@@ -83,27 +117,16 @@ export const SelectedItems = forwardRef<HTMLDivElement, SelectValueProps>(
         }
 
         return (
-          <div className="flex w-full items-center gap-1 text-left">
-            <OneEllipsis className="min-w-0 flex-1">
-              {visibleItems.map((item) => item.label).join(", ")}
-            </OneEllipsis>
-            {remainingCount > 0 && (
-              <ItemsCounter
-                count={remainingCount}
-                items={selection}
-                onDeselect={onDeselect}
-              />
-            )}
-          </div>
+          <MultiSelectDisplay
+            selection={selection}
+            totalSelectedCount={selectedCount}
+            onDeselect={onDeselect}
+          />
         )
       }
 
-      // Show labels for small selections, count with popover for large ones
-      const visibleItems = selection.slice(0, MAX_VISIBLE_LABELS)
-      const remainingCount = selectedCount - visibleItems.length
-
       // If no items are loaded yet but we have a count, show just the count
-      if (visibleItems.length === 0 && selectedCount > 0) {
+      if (selection.length === 0 && selectedCount > 0) {
         return (
           <div className="flex w-full items-center gap-1 text-left">
             <OneEllipsis className="min-w-0 flex-1">
@@ -114,18 +137,11 @@ export const SelectedItems = forwardRef<HTMLDivElement, SelectValueProps>(
       }
 
       return (
-        <div className="flex w-full items-center gap-1 text-left">
-          <OneEllipsis className="min-w-0 flex-1">
-            {visibleItems.map((item) => item.label).join(", ")}
-          </OneEllipsis>
-          {remainingCount > 0 && (
-            <ItemsCounter
-              count={remainingCount}
-              items={selection}
-              onDeselect={onDeselect}
-            />
-          )}
-        </div>
+        <MultiSelectDisplay
+          selection={selection}
+          totalSelectedCount={selectedCount}
+          onDeselect={onDeselect}
+        />
       )
     }
 

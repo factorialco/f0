@@ -1,23 +1,25 @@
-import { ComponentProps, useMemo } from "react";
-import { Text } from "react-native";
-import { FileLike, getFileTypeInfo } from "./utils";
-import { Avatar } from "../../../ui/avatar";
-import { cn } from "../../../lib/utils";
-import { BaseAvatar } from "../BaseAvatar";
-import { AvatarBadge } from "../types";
-import { ModuleAvatar, ModuleAvatarProps } from "../ModuleAvatar";
-import { Badge, BadgeProps } from "../../Badge";
-import { View } from "react-native";
-import { getInitials } from "../BaseAvatar/utils";
+import { ComponentProps, useMemo } from "react"
+import { Text } from "react-native"
+import { View } from "react-native"
 
-type BaseAvatarProps = ComponentProps<typeof BaseAvatar>;
+import { cn } from "../../../lib/utils"
+import { Avatar } from "../../../ui/avatar"
+import { Badge, BadgeProps } from "../../Badge"
+import { BaseAvatar } from "../BaseAvatar"
+import { getInitials } from "../BaseAvatar/utils"
+import { ModuleAvatar, ModuleAvatarProps } from "../ModuleAvatar"
+import { AvatarBadge } from "../types"
+
+import { FileLike, getFileTypeInfo } from "./utils"
+
+type BaseAvatarProps = ComponentProps<typeof BaseAvatar>
 
 type Props = {
-  file: FileLike;
-  className?: string;
-  size?: BaseAvatarProps["size"];
-  badge?: AvatarBadge;
-};
+  file: FileLike
+  className?: string
+  size?: BaseAvatarProps["size"]
+  badge?: AvatarBadge
+}
 
 const textSizes = {
   xsmall: "text-xs",
@@ -25,10 +27,10 @@ const textSizes = {
   medium: "text-sm",
   large: "text-md",
   xlarge: "text-2xl",
-};
+}
 
 const getAvatarSize = (
-  size: BaseAvatarProps["size"],
+  size: BaseAvatarProps["size"]
 ): ModuleAvatarProps["size"] | undefined => {
   const sizeMap: Partial<
     Record<
@@ -39,13 +41,13 @@ const getAvatarSize = (
     xlarge: "lg",
     large: "md",
     small: "sm",
-  } as const;
+  } as const
 
-  return size && sizeMap[size] ? sizeMap[size] : sizeMap.small;
-};
+  return size && sizeMap[size] ? sizeMap[size] : sizeMap.small
+}
 
 const getBadgeSize = (
-  size: BaseAvatarProps["size"],
+  size: BaseAvatarProps["size"]
 ): BadgeProps["size"] | undefined => {
   const sizeMap: Partial<
     Record<Exclude<BaseAvatarProps["size"], undefined>, BadgeProps["size"]>
@@ -53,10 +55,10 @@ const getBadgeSize = (
     xlarge: "lg",
     large: "md",
     small: "sm",
-  } as const;
+  } as const
 
-  return size && sizeMap[size] ? sizeMap[size] : sizeMap.small;
-};
+  return size && sizeMap[size] ? sizeMap[size] : sizeMap.small
+}
 export const FileAvatar = ({
   file,
   className,
@@ -64,10 +66,10 @@ export const FileAvatar = ({
   badge,
   ...props
 }: Props) => {
-  const { type: fileType, color: fileColor } = getFileTypeInfo(file);
-  const initials = getInitials(fileType, size, true);
-  const badgeSize = getBadgeSize(size);
-  const moduleAvatarSize = getAvatarSize(size);
+  const { type: fileType, color: fileColor } = getFileTypeInfo(file)
+  const initials = getInitials(fileType, size, true)
+  const badgeSize = getBadgeSize(size)
+  const moduleAvatarSize = getAvatarSize(size)
   const badgeContent = useMemo(
     () =>
       badge ? (
@@ -80,8 +82,8 @@ export const FileAvatar = ({
           )}
         </>
       ) : null,
-    [badge, badgeSize, moduleAvatarSize],
-  );
+    [badge, badgeSize, moduleAvatarSize]
+  )
 
   return (
     <View
@@ -92,7 +94,7 @@ export const FileAvatar = ({
           size={size}
           className={cn(
             "border border-solid border-f1-border-secondary bg-f1-background",
-            className,
+            className
           )}
           {...props}
         >
@@ -100,7 +102,7 @@ export const FileAvatar = ({
             className={cn(
               "font-semibold text-f1-foreground-inverse/90",
               textSizes[size],
-              fileColor,
+              fileColor
             )}
           >
             {initials}
@@ -108,10 +110,10 @@ export const FileAvatar = ({
         </Avatar>
       </View>
       {badge && (
-        <View className="absolute -bottom-0.5 -right-0.5">{badgeContent}</View>
+        <View className="absolute -right-0.5 -bottom-0.5">{badgeContent}</View>
       )}
     </View>
-  );
-};
+  )
+}
 
-FileAvatar.displayName = "FileAvatar";
+FileAvatar.displayName = "FileAvatar"

@@ -43,6 +43,7 @@ type UseItemActionProps<
 }
 
 export type UseItemActions = {
+  hasItemActions: boolean
   primaryItemActions: Exclude<ActionDefinition, DropdownItemSeparator>[]
   dropdownItemActions: DropdownItem[]
   mobileDropdownItemActions: DropdownItem[]
@@ -77,6 +78,7 @@ export const useItemActions = <
 
   if (!source.itemActions) {
     return {
+      hasItemActions: false,
       primaryItemActions: [],
       dropdownItemActions: [],
       mobileDropdownItemActions: [],
@@ -132,6 +134,7 @@ export const useItemActions = <
   }
 
   return {
+    hasItemActions: itemActions.length > 0,
     primaryItemActions,
     dropdownItemActions,
     mobileDropdownItemActions,

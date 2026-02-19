@@ -1,6 +1,6 @@
-import Svg, { Path, Circle } from "react-native-svg";
-import type { SvgProps } from "react-native-svg";
-import { Ref, forwardRef } from "react";
+import { Ref, forwardRef } from "react"
+import Svg, { Path, Circle } from "react-native-svg"
+import type { SvgProps } from "react-native-svg"
 const SvgWallet = (props: SvgProps, ref: Ref<Svg>) => (
   <Svg
     fill="none"
@@ -21,6 +21,6 @@ const SvgWallet = (props: SvgProps, ref: Ref<Svg>) => (
     />
     <Circle cx={16.25} cy={13.75} r={1.25} fill="currentColor" />
   </Svg>
-);
-const ForwardRef = forwardRef(SvgWallet);
-export default ForwardRef;
+)
+const ForwardRef = forwardRef(SvgWallet)
+export default ForwardRef

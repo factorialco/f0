@@ -1,6 +1,6 @@
-import Svg, { Path } from "react-native-svg";
-import type { SvgProps } from "react-native-svg";
-import { Ref, forwardRef } from "react";
+import { Ref, forwardRef } from "react"
+import Svg, { Path } from "react-native-svg"
+import type { SvgProps } from "react-native-svg"
 const SvgUnderline = (props: SvgProps, ref: Ref<Svg>) => (
   <Svg
     fill="none"
@@ -21,6 +21,6 @@ const SvgUnderline = (props: SvgProps, ref: Ref<Svg>) => (
       d="M7 18h10"
     />
   </Svg>
-);
-const ForwardRef = forwardRef(SvgUnderline);
-export default ForwardRef;
+)
+const ForwardRef = forwardRef(SvgUnderline)
+export default ForwardRef

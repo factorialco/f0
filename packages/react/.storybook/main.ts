@@ -1,5 +1,6 @@
 // This file has been automatically migrated to valid ESM format by Storybook.
 import type { StorybookConfig } from "@storybook/react-vite"
+
 import { createRequire } from "node:module"
 import { dirname, join, resolve } from "node:path"
 import * as process from "node:process"
@@ -23,12 +24,20 @@ const config: StorybookConfig = {
     "../docs/Introduction.mdx",
     "../docs/**/*.mdx",
     {
-      directory: "../src/lib",
-      titlePrefix: "Library",
-    },
-    {
       directory: "../src/components",
       titlePrefix: "Components",
+    },
+    {
+      directory: "../src/experimental",
+      titlePrefix: "Components",
+    },
+    {
+      directory: "../src/ai",
+      titlePrefix: "Components",
+    },
+    {
+      directory: "../src/lib",
+      titlePrefix: "Library",
     },
     {
       directory: "../src/layouts",
@@ -39,17 +48,18 @@ const config: StorybookConfig = {
       titlePrefix: "Hooks",
     },
     {
-      directory: "../src/experimental",
-      titlePrefix: "Components",
+      directory: "../src/sds",
+      titlePrefix: "SDS",
     },
-    ...(process.env.STORYBOOK_PUBLIC_BUILD
-      ? []
-      : [
-          {
-            directory: "../src/ui",
-            titlePrefix: "🔒 Internal",
-          },
-        ]),
+    {
+      directory: "../src/examples",
+      titlePrefix: "Examples",
+    },
+    {
+      directory: "../src/ui",
+      titlePrefix: "🔒 Internal",
+    },
+    ...(process.env.STORYBOOK_PUBLIC_BUILD ? [] : []),
   ],
   staticDirs: ["../public", "./static"],
   addons: [

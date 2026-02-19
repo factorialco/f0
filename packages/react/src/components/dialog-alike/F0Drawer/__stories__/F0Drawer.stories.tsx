@@ -3,6 +3,8 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { ComponentProps, FC, useState } from "react"
 
 import { F0Button } from "@/components/F0Button"
+import { ApplicationFrame } from "@/examples/ApplicationFrame"
+import ApplicationFrameStoryMeta from "@/examples/ApplicationFrame/index.stories"
 import { ResourceHeader } from "@/experimental/Information/Headers/ResourceHeader"
 import { Default as ResourceHeaderDefault } from "@/experimental/Information/Headers/ResourceHeader/index.stories"
 import {
@@ -10,8 +12,6 @@ import {
   OnePersonListItemProps,
 } from "@/experimental/Lists/OnePersonListItem"
 import { Default as OnePersonListItemDefault } from "@/experimental/Lists/OnePersonListItem/index.stories"
-import { ApplicationFrame } from "@/experimental/Navigation/ApplicationFrame"
-import ApplicationFrameStoryMeta from "@/experimental/Navigation/ApplicationFrame/index.stories"
 import { Placeholder } from "@/icons/app"
 import SaveIcon from "@/icons/app/Save"
 import ShareIcon from "@/icons/app/Share"

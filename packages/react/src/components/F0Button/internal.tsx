@@ -10,6 +10,7 @@ import { Action } from "@/ui/Action"
 import { OneEllipsis } from "../OneEllipsis"
 import { ButtonInternalProps } from "./internal-types"
 import { fontSizeVariants } from "./variants"
+import { Counter } from "@/ui/Counter"
 
 const IconMotion = motion.create(F0Icon)
 
@@ -39,6 +40,7 @@ const ButtonInternal = forwardRef<
     noTitle,
     iconRotate = false,
     block = false,
+    counterValue,
     ...props
   },
   ref
@@ -174,7 +176,10 @@ const ButtonInternal = forwardRef<
           ) : (
             <span className="sr-only">{buttonLabel}</span>
           )}
-          {append}
+          {append}{" "}
+          {counterValue && (
+            <Counter value={counterValue} size="sm" type="selected" />
+          )}
         </div>
       </Action>
     </>

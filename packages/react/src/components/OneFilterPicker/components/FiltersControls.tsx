@@ -1,5 +1,6 @@
+import { useControllableState } from "@radix-ui/react-use-controllable-state"
 import { AnimatePresence, motion } from "motion/react"
-import { useContext, useEffect, useId, useMemo, useState } from "react"
+import { useContext, useEffect, useId, useMemo, useRef, useState } from "react"
 
 import { F0DialogContext } from "@/components/dialog-alike/F0Dialog"
 import { F0Button } from "@/components/F0Button"
@@ -26,6 +27,7 @@ interface FiltersControlsProps<Filters extends FiltersDefinition> {
   onOpenChange?: (open: boolean) => void
   hideLabel?: boolean
   mode?: FiltersMode
+  displayCounter?: boolean
 }
 
 const DEFAULT_FORM_HEIGHT = 388
@@ -38,11 +40,11 @@ export function FiltersControls<Filters extends FiltersDefinition>({
   onOpenChange: controlledOnOpenChange,
   hideLabel,
   mode = "default",
+  displayCounter = false,
 }: FiltersControlsProps<Filters>) {
   const [selectedFilterKey, setSelectedFilterKey] = useState<
     keyof Filters | null
   >(null)
-  const [internalIsOpen, setInternalIsOpen] = useState(false)
   const i18n = useI18n()
 
   // Auto-detect if we're inside a dialog and use its portal container
@@ -55,8 +57,40 @@ export function FiltersControls<Filters extends FiltersDefinition>({
     ? dialogContext.portalContainer
     : undefined
 
-  const isOpen = controlledIsOpen ?? internalIsOpen
-  const onOpenChange = controlledOnOpenChange ?? setInternalIsOpen
+  const [isOpen, setIsOpen] = useControllableState({
+    prop: controlledIsOpen,
+    defaultProp: false,
+    onChange: controlledOnOpenChange,
+  })
+
+  const isOpenRef = useRef(isOpen)
+  useEffect(() => {
+    isOpenRef.current = isOpen
+  }, [isOpen])
+
+  const isClosingRef = useRef(false)
+  const handleOpenChange = (open: boolean) => {
+    const currentIsOpen = isOpenRef.current
+
+    if (isClosingRef.current) {
+      return
+    }
+
+    if (currentIsOpen) {
+      isClosingRef.current = true
+      setIsOpen(false)
+
+      setTimeout(() => {
+        isClosingRef.current = false
+      }, 150)
+
+      return
+    }
+
+    setIsOpen(open)
+  }
+
+  const onOpenChange = handleOpenChange
 
   const [localFiltersValue, setLocalFiltersValue] = useState(value)
   useEffect(() => {
@@ -131,6 +165,12 @@ export function FiltersControls<Filters extends FiltersDefinition>({
     [filters, localFiltersValue, i18n]
   )
 
+  const appliedFiltersCount = useMemo(() => {
+    const count = getActiveFilterKeys(filters, value, i18n).length
+    if (count === 0) return undefined
+    return count
+  }, [filters, value, i18n])
+
   const activeFiltersTooltip = useMemo(() => {
     return activeFilters.length > 0
       ? i18n.t("filters.activeFilters", {
@@ -171,7 +211,7 @@ export function FiltersControls<Filters extends FiltersDefinition>({
     const ApplySelectionButton = (
       <>
         {selectedFilterKey && (
-          <div className="absolute bottom-0 left-0 right-0 z-30 flex items-center justify-end gap-2 border border-solid border-transparent border-t-f1-border-secondary p-2">
+          <div className="sticky bottom-0 left-0 right-0 z-30 flex items-center justify-end gap-2 border border-solid border-transparent border-t-f1-border-secondary p-2 bg-f1-background">
             <F0Button
               onClick={handleApplyFiltersSelection}
               label={i18n.filters.applySelection}
@@ -269,13 +309,13 @@ export function FiltersControls<Filters extends FiltersDefinition>({
             label={i18n.filters.label}
             icon={Filter}
             pressed={isOpen}
-            onClick={() => onOpenChange(!isOpen)}
             hideLabel={hideLabel}
             aria-controls={isOpen ? id : undefined}
+            counterValue={displayCounter ? appliedFiltersCount : undefined}
           />
         </PopoverTrigger>
         <PopoverContent
-          className="w-[600px] rounded-xl border border-solid border-f1-border-secondary p-0 shadow-md"
+          className="w-fit min-w-[600px] rounded-xl border border-solid border-f1-border-secondary p-0 shadow-md"
           align="start"
           side="bottom"
           aria-id={id}

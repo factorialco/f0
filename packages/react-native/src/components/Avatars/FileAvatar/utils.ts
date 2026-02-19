@@ -1,12 +1,12 @@
 type FileTypeInfo = {
-  type: string;
-  color: string;
-};
+  type: string
+  color: string
+}
 
 type FileLike = {
-  name: string;
-  type?: string;
-};
+  name: string
+  type?: string
+}
 
 const FILE_TYPE_MAP: Record<string, FileTypeInfo> = {
   pdf: { type: "PDF", color: "text-f1-foreground-accent" },
@@ -22,7 +22,7 @@ const FILE_TYPE_MAP: Record<string, FileTypeInfo> = {
   html: { type: "HTML", color: "text-f1-foreground-accent" },
   markdown: { type: "MD", color: "text-f1-foreground-secondary" },
   default: { type: "FILE", color: "text-f1-foreground" },
-};
+}
 
 const MIME_MATCH_MAP: Record<string, keyof typeof FILE_TYPE_MAP> = {
   pdf: "pdf",
@@ -42,7 +42,7 @@ const MIME_MATCH_MAP: Record<string, keyof typeof FILE_TYPE_MAP> = {
   tar: "archive",
   gz: "archive",
   "7z": "archive",
-};
+}
 
 const EXTENSION_MAP: Record<string, keyof typeof FILE_TYPE_MAP> = {
   pdf: "pdf",
@@ -77,27 +77,27 @@ const EXTENSION_MAP: Record<string, keyof typeof FILE_TYPE_MAP> = {
   htm: "html",
   md: "markdown",
   markdown: "markdown",
-};
+}
 
 const getFileTypeInfo = (file: FileLike): FileTypeInfo => {
-  const mimeType = file.type?.toLowerCase() ?? "";
+  const mimeType = file.type?.toLowerCase() ?? ""
 
   const matchedMimeKey = Object.keys(MIME_MATCH_MAP).find((key) =>
-    mimeType.includes(key),
-  );
+    mimeType.includes(key)
+  )
 
   if (matchedMimeKey) {
-    return FILE_TYPE_MAP[MIME_MATCH_MAP[matchedMimeKey]];
+    return FILE_TYPE_MAP[MIME_MATCH_MAP[matchedMimeKey]]
   }
 
-  const extension = file.name.toLowerCase().split(".").pop();
+  const extension = file.name.toLowerCase().split(".").pop()
 
   if (extension && EXTENSION_MAP[extension]) {
-    return FILE_TYPE_MAP[EXTENSION_MAP[extension]];
+    return FILE_TYPE_MAP[EXTENSION_MAP[extension]]
   }
 
-  return FILE_TYPE_MAP.default;
-};
+  return FILE_TYPE_MAP.default
+}
 
-export { getFileTypeInfo };
-export type { FileTypeInfo, FileLike };
+export { getFileTypeInfo }
+export type { FileTypeInfo, FileLike }

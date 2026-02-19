@@ -94,6 +94,13 @@
   @apply outline-none;
 }
 
+.notes-text-editor .ProseMirror-selectednode,
+.ProseMirror .ProseMirror-selectednode,
+.ProseMirror-selectednode,
+.node-image.ProseMirror-selectednode {
+  outline: none !important;
+}
+
 .notes-text-editor hr {
   @apply my-3 border-0 border-t border-f1-border;
 }

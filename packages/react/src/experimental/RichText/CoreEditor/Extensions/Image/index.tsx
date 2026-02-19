@@ -8,9 +8,10 @@ import {
   ReactNodeViewRenderer,
   type NodeViewProps,
 } from "@tiptap/react"
+import { useCallback, useState } from "react"
 
 import { F0Button } from "@/components/F0Button"
-import { Spinner } from "@/experimental/Information/Spinner"
+import { Spinner } from "@/ui/Spinner"
 import { Delete } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
@@ -26,7 +27,7 @@ export interface ImageUploadConfig {
   onError?: (errorType: ImageUploadErrorType) => void
 }
 
-const DEFAULT_MAX_SIZE = 15 * 1024 * 1024 // 15MB
+const DEFAULT_MAX_SIZE = 50 * 1024 * 1024 // 50MB
 export const DEFAULT_ACCEPTED_TYPES = [
   "image/jpeg",
   "image/png",
@@ -34,21 +35,61 @@ export const DEFAULT_ACCEPTED_TYPES = [
   "image/webp",
 ]
 
+const MIN_WIDTH_PERCENT = 10
+const MAX_WIDTH_PERCENT = 100
+
 const ImageNodeView = ({
   node,
   deleteNode,
   selected,
   editor,
+  updateAttributes,
 }: NodeViewProps) => {
-  const { src, alt, title, uploading } = node.attrs
+  const { src, alt, title, uploading, width } = node.attrs
   const isEditable = editor.isEditable
   const translations = useI18n()
+  const [isResizing, setIsResizing] = useState(false)
+
+  const handleResizeStart = useCallback(
+    (event: React.MouseEvent) => {
+      event.preventDefault()
+      event.stopPropagation()
+
+      const startX = event.clientX
+      const startWidth = (width as number) ?? MAX_WIDTH_PERCENT
+      const editorWidth = editor.view.dom.clientWidth
+
+      const handleMouseMove = (e: MouseEvent) => {
+        const deltaX = e.clientX - startX
+        const deltaPercent = (deltaX / editorWidth) * 100
+        const newWidth = Math.min(
+          MAX_WIDTH_PERCENT,
+          Math.max(MIN_WIDTH_PERCENT, startWidth + deltaPercent)
+        )
+        updateAttributes({ width: Math.round(newWidth) })
+      }
+
+      const handleMouseUp = () => {
+        setIsResizing(false)
+        document.removeEventListener("mousemove", handleMouseMove)
+        document.removeEventListener("mouseup", handleMouseUp)
+      }
+
+      setIsResizing(true)
+      document.addEventListener("mousemove", handleMouseMove)
+      document.addEventListener("mouseup", handleMouseUp)
+    },
+    [editor, width, updateAttributes]
+  )
+
   return (
     <NodeViewWrapper className="mb-2">
       <div
+        style={{ width: `${(width as number) ?? MAX_WIDTH_PERCENT}%` }}
         className={cn(
-          "relative inline-block rounded-lg",
-          selected && "border-2 border-f1-border-selected-bold border-solid"
+          "image-resizable-wrapper group/image relative rounded-lg",
+          selected && "border-2 border-f1-border-selected-bold border-solid",
+          isResizing && "select-none"
         )}
       >
         <img
@@ -64,16 +105,30 @@ const ImageNodeView = ({
           </div>
         )}
         {isEditable && !uploading && (
-          <div className="dark absolute right-2 top-2">
+          <div className="absolute right-2 top-2 opacity-0 transition-opacity group-hover/image:opacity-100">
             <F0Button
               onClick={deleteNode}
               label={translations.actions.delete}
               icon={Delete}
-              variant="outline"
+              variant="default"
               hideLabel
-              size="sm"
             />
           </div>
+        )}
+        {isEditable && !uploading && (
+          <div
+            className={cn(
+              "absolute right-2 top-1/2 -translate-y-1/2 flex cursor-col-resize items-center justify-center",
+              "h-12 w-2 rounded-sm border border-solid border-f1-border bg-f1-foreground-inverse-secondary",
+              "opacity-0 transition-opacity group-hover/image:opacity-100",
+              isResizing && "opacity-100"
+            )}
+            onMouseDown={handleResizeStart}
+            role="separator"
+            aria-orientation="vertical"
+            aria-label="Resize image"
+            tabIndex={0}
+          />
         )}
       </div>
     </NodeViewWrapper>
@@ -82,9 +137,25 @@ const ImageNodeView = ({
 
 export const ImageExtension = Image.extend({
   addAttributes() {
-    // We need it to track the uploading state and visual feedback
     return {
       ...this.parent?.(),
+      width: {
+        default: MAX_WIDTH_PERCENT,
+        parseHTML: (element: HTMLElement) => {
+          const widthStyle = element.style.width
+          if (widthStyle?.endsWith("%")) {
+            return parseInt(widthStyle, 10) || MAX_WIDTH_PERCENT
+          }
+          return MAX_WIDTH_PERCENT
+        },
+        renderHTML: (attributes: Record<string, unknown>) => {
+          if (!attributes.width || attributes.width === MAX_WIDTH_PERCENT) {
+            return {}
+          }
+          return { style: `width: ${attributes.width}%` }
+        },
+      },
+      // We need it to track the uploading state and visual feedback
       uploading: {
         default: false,
         renderHTML: () => ({}),

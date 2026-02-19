@@ -1,6 +1,6 @@
-import Svg, { Path } from "react-native-svg";
-import type { SvgProps } from "react-native-svg";
-import { Ref, forwardRef } from "react";
+import { Ref, forwardRef } from "react"
+import Svg, { Path } from "react-native-svg"
+import type { SvgProps } from "react-native-svg"
 const SvgLightbulb = (props: SvgProps, ref: Ref<Svg>) => (
   <Svg
     fill="none"
@@ -21,6 +21,6 @@ const SvgLightbulb = (props: SvgProps, ref: Ref<Svg>) => (
       d="M8 16v-2.08a1.1 1.1 0 0 0-.322-.758 6 6 0 1 1 8.644 0 1.1 1.1 0 0 0-.322.757V16"
     />
   </Svg>
-);
-const ForwardRef = forwardRef(SvgLightbulb);
-export default ForwardRef;
+)
+const ForwardRef = forwardRef(SvgLightbulb)
+export default ForwardRef

@@ -1,7 +1,7 @@
 import { AnimatePresence, motion } from "motion/react"
 import { useEffect, useState, type ReactNode } from "react"
 
-import { AIButton as AIButtonComponent } from "@/components/AIButton"
+import { AIButton as AIButtonComponent } from "@/sds/ai/AIButton"
 import { F0Icon } from "@/components/F0Icon"
 import { F0Text } from "@/components/F0Text"
 import {

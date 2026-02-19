@@ -4,8 +4,8 @@ import { motion } from "motion/react"
 import { useState } from "react"
 
 import { F0Icon } from "../../components/F0Icon"
-import { Counter } from "../../experimental/Information/Counter"
-import { Preset } from "../../experimental/OnePreset"
+import { Counter } from "@/ui/Counter"
+import { Preset } from "@/ui/OnePreset"
 import { ChevronDown } from "../../icons/app"
 import { OverflowList } from "./index"
 

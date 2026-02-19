@@ -1,6 +1,6 @@
-import Svg, { Path } from "react-native-svg";
-import type { SvgProps } from "react-native-svg";
-import { Ref, forwardRef } from "react";
+import { Ref, forwardRef } from "react"
+import Svg, { Path } from "react-native-svg"
+import type { SvgProps } from "react-native-svg"
 const SvgEyeInvisible = (props: SvgProps, ref: Ref<Svg>) => (
   <Svg
     fill="none"
@@ -21,6 +21,6 @@ const SvgEyeInvisible = (props: SvgProps, ref: Ref<Svg>) => (
       d="m10.008 13.016-1.11 3.32M14.058 13.016l1.11 3.32M17.523 10.543 20 13.016M6.477 10.543 4 13.016"
     />
   </Svg>
-);
-const ForwardRef = forwardRef(SvgEyeInvisible);
-export default ForwardRef;
+)
+const ForwardRef = forwardRef(SvgEyeInvisible)
+export default ForwardRef
