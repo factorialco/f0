@@ -45,7 +45,11 @@ export function FilterChipButton<Definition extends FiltersDefinition>({
       setIsLoading(true)
       const labelRenderer = filterType.chipLabel as unknown as (
         value: FilterValue<Definition[keyof Definition]>,
-        context: { schema: Definition[keyof Definition]; i18n: I18nContextType }
+        context: {
+          schema: Definition[keyof Definition]
+          i18n: I18nContextType
+          filterKey?: string
+        }
       ) => Promise<string>
 
       const valueLabel = await labelRenderer(value, {
