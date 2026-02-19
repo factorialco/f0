@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.45.0](https://github.com/factorialco/f0/compare/f0-core-v1.44.0...f0-core-v1.45.0) (2026-02-19)
+
+
+### Features
+
+* **core:** add xs container query breakpoint ([#3468](https://github.com/factorialco/f0/issues/3468)) ([9b2d76d](https://github.com/factorialco/f0/commit/9b2d76d4ded04749d3c1de68a8ee98609c6a17f4))
+
 ## [1.44.0](https://github.com/factorialco/f0/compare/f0-core-v1.43.0...f0-core-v1.44.0) (2026-02-11)
 
 

@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.371.0](https://github.com/factorialco/f0/compare/f0-react-v1.370.1...f0-react-v1.371.0) (2026-02-19)
+
+
+### Features
+
+* **core:** add xs container query breakpoint ([#3468](https://github.com/factorialco/f0/issues/3468)) ([9b2d76d](https://github.com/factorialco/f0/commit/9b2d76d4ded04749d3c1de68a8ee98609c6a17f4))
+
 ## [1.370.1](https://github.com/factorialco/f0/compare/f0-react-v1.370.0...f0-react-v1.370.1) (2026-02-18)
 
 
