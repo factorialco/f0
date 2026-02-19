@@ -151,9 +151,49 @@ export const withDataTestId = <T extends React.ComponentType<any>>(
     return MemoizedComponent as unknown as ReturnedComponentType
   }
 
+  const isFunctionComponent =
+    typeof component === "function" &&
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    !(component as any).prototype?.isReactComponent
+
   // For regular components (function or class). Always render via JSX to ensure
   // hooks always run in the same fiber regardless of whether dataTestId is set,
   // avoiding "Rendered more/fewer hooks than during the previous render" crashes.
+  //
+  // When dataTestId is set we delegate to a stable inner component (InnerWithTestId)
+  // that lives in its own fiber. For function components it calls Component() directly
+  // (safe since it's always called the same way within that fiber) to detect null and
+  // suppress the wrapper div. For class components it falls back to JSX.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const InnerWithTestId = ({
+    dataTestId,
+    innerRef,
+    componentProps,
+  }: {
+    dataTestId: string
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    innerRef: any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    componentProps: any
+  }) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const Component = component as any
+    if (isFunctionComponent) {
+      const content = Component({ ...componentProps, ref: innerRef })
+      if (content == null) return null
+      return (
+        <div data-testid={dataTestId} style={{ display: "contents" }}>
+          {content}
+        </div>
+      )
+    }
+    return (
+      <div data-testid={dataTestId} style={{ display: "contents" }}>
+        <Component {...componentProps} ref={innerRef} />
+      </div>
+    )
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const WrappedComponent = forwardRef((props: any, ref: any) => {
     const renderDataTestIdAttribute = useRenderDataTestIdAttribute()
@@ -170,9 +210,11 @@ export const withDataTestId = <T extends React.ComponentType<any>>(
     }
 
     return (
-      <div data-testid={dataTestId} style={{ display: "contents" }}>
-        <Component {...cleanRest} ref={ref} />
-      </div>
+      <InnerWithTestId
+        dataTestId={dataTestId}
+        innerRef={ref}
+        componentProps={cleanRest}
+      />
     )
   })
 
