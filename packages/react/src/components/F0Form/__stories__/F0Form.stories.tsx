@@ -1,9 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
+
 import { useState } from "react"
 import { z } from "zod"
 
+import { F0Dialog } from "@/components/dialog-alike/F0Dialog"
 import { F0Button } from "@/components/F0Button"
-import { F0Dialog } from "@/components/F0Dialog"
 import { createDataSourceDefinition } from "@/hooks/datasource"
 import { ExternalLink, Plus, Settings } from "@/icons/app"
 
