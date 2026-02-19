@@ -16,7 +16,7 @@
  *
  */
 
-import { forwardRef, useCallback, useRef, useState } from "react"
+import { forwardRef, useCallback, useRef } from "react"
 
 import { FiltersDefinition } from "@/components/OneFilterPicker/types"
 import { DataCollectionSource } from "@/experimental/OneDataCollection/hooks/useDataCollectionSource/types"
@@ -31,7 +31,7 @@ import {
 
 import { useCalculateConectorHeight } from "../hooks/useCalculateConectorHeight"
 import { useLoadChildren } from "../hooks/useLoadChildren"
-import { NestedDataProvider } from "../providers/NestedProvider"
+import { useNestedDataContext } from "../providers/NestedProvider"
 import { TableColumnDefinition } from "../types"
 import { LoadMoreRow } from "./LoadMore"
 import { NestedRowProps, Row } from "./Row"
@@ -90,11 +90,12 @@ const NestedRowContent = <
     | React.RefObject<HTMLTableRowElement>
     | null
 ) => {
-  const [open, setOpen] = useState(false)
-
   const internalRowRef = useRef<HTMLTableRowElement | null>(null)
 
-  const rowId = `${props.nestedRowProps?.depth ?? 0}-${"id" in props.item ? props.item.id : props.index}`
+  const rowId = `${props.nestedRowProps?.depth ?? 0}-${"id" in props.item ? props.item.id + "-" + props.index : props.index}`
+
+  const { expandedRowIds, setRowExpanded } = useNestedDataContext()
+  const open = expandedRowIds[rowId] ?? false
 
   /**
    * useLoadChildren hook manages:
@@ -108,7 +109,7 @@ const NestedRowContent = <
       rowId: rowId,
       item: props.item,
       source: props.source,
-      onClearFetchedData: () => setOpen(false),
+      onClearFetchedData: () => setRowExpanded(rowId, false),
     })
 
   const shouldShowLoading = open && isLoading
@@ -145,7 +146,7 @@ const NestedRowContent = <
 
   const handleExpand = () => {
     const isExpanding = !open
-    setOpen(isExpanding)
+    setRowExpanded(rowId, isExpanding)
 
     if (isExpanding && !children.length) {
       loadChildren()
@@ -335,17 +336,9 @@ const NestedRowComponentInner = <
     | React.RefObject<HTMLTableRowElement>
     | null
 ) => {
-  // Only wrap with Provider at the root level (depth === 0 or undefined)
-  // This ensures we have a single shared context for the entire tree
-  if ((props.nestedRowProps?.depth ?? 0) === 0) {
-    return (
-      <NestedDataProvider>
-        <NestedRowContentWithRef {...props} ref={ref} />
-      </NestedDataProvider>
-    )
-  }
-
-  // Nested children render without additional provider wrapping
+  // Provider is mounted at Table level when tableWithChildren is true, so we
+  // never wrap here. This keeps expansion state and fetched data in a single
+  // context that survives parent re-renders (e.g. GraphQL refetch).
   return <NestedRowContentWithRef {...props} ref={ref} />
 }
 
