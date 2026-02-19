@@ -57,55 +57,56 @@ const StackedToasts = ({ items }: { items: ToastProviderItem[] }) => {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <div className="relative">
-        <AnimatePresence>
-          {items.map((item, index) => {
-            // Logic for visual compression
-            // We want the first item (newest collapsed) to be at the front
-            // index 0 -> front
-            const isVisible = index < 3
+      <AnimatePresence>
+        {items.map((item, index) => {
+          // Logic for visual compression
+          // We want the first item (newest collapsed) to be at the front
+          // index 0 -> front
+          const reversedIndex = items.length - index - 1
+          const isVisible = reversedIndex < 3
 
-            return (
-              <motion.div
-                key={item.id}
-                layout
-                initial={false}
-                animate={isHovered ? "expanded" : "collapsed"}
-                exit={{ opacity: 0, scale: 0.5, transition: { duration: 0.2 } }}
-                variants={{
-                  collapsed: {
-                    y: index * -10, // Items behind go up
-                    scale: 1 - index * 0.05, // Items behind are smaller
-                    opacity: isVisible ? 1 : 0,
-                    zIndex: 100 - index, // Older (lower index) on top
-                    height: index === 0 ? "auto" : 0,
-                  },
-                  expanded: {
-                    y: 0,
-                    scale: 1,
-                    opacity: 1,
-                    zIndex: 100 - index,
-                    height: "auto",
-                    marginBottom: 16,
-                  },
-                }}
-                transition={{
-                  type: "spring",
-                  stiffness: 300,
-                  damping: 30,
-                }}
-                className={cn(
-                  !isHovered &&
-                    index > 0 &&
-                    "absolute top-0 left-0 right-0 mb-4"
-                )}
-              >
-                <F0Toast {...item} forcePauseTimer />
-              </motion.div>
-            )
-          })}
-        </AnimatePresence>
-      </div>
+          return (
+            <motion.div
+              key={item.id}
+              layout
+              initial={false}
+              animate={isHovered ? "expanded" : "collapsed"}
+              exit={{
+                opacity: 0,
+                scale: 0.5,
+                transition: { duration: 0.2 },
+              }}
+              variants={{
+                collapsed: {
+                  y: reversedIndex * -10, // Items behind go up
+                  scale: 1 - reversedIndex * 0.05, // Items behind are smaller
+                  opacity: isVisible ? 1 : 0,
+                  zIndex: 100 - reversedIndex, // Older (lower index) on top
+                  height: reversedIndex === 0 ? "auto" : 0,
+                },
+                expanded: {
+                  y: 0,
+                  scale: 1,
+                  opacity: 1,
+                  // zIndex: 100 - index,
+                  height: "auto",
+                  marginBottom: 16,
+                },
+              }}
+              transition={{
+                type: "spring",
+                stiffness: 300,
+                damping: 30,
+              }}
+              className={cn(
+                !isHovered && index > 0 && "absolute top-0 left-0 right-0 mb-4"
+              )}
+            >
+              <F0Toast {...item} forcePauseTimer />
+            </motion.div>
+          )
+        })}
+      </AnimatePresence>
     </div>
   )
 }
@@ -156,7 +157,7 @@ const ToastsContainer = ({
                 animate="animate"
                 exit="exit"
               >
-                <F0Toast {...item} />
+                <F0Toast {...item} forcePauseTimer />
               </motion.div>
             ))}
           </AnimatePresence>
