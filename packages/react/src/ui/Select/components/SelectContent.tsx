@@ -232,7 +232,7 @@ const SelectContent = forwardRef<
           !asList &&
             position === "popper" &&
             !forceMinHeight &&
-            "min-w-[var(--radix-select-trigger-width)] max-w-[min(calc(var(--radix-select-trigger-width)*2.5),412px)]",
+            "min-w-[8rem] w-[var(--radix-select-trigger-width)]",
           !asList &&
             position === "popper" &&
             forceMinHeight &&
@@ -275,19 +275,19 @@ const SelectContent = forwardRef<
           })
         }}
       >
-        <>
+        <div
+          className="flex flex-1 min-h-0 flex-col"
+          style={
+            !asList
+              ? {
+                  maxHeight:
+                    "var(--radix-select-content-available-height, 100%)",
+                }
+              : undefined
+          }
+        >
           {asList && <div className="flex-shrink-0">{props.top}</div>}
-          <div
-            className="flex flex-1 min-h-0 flex-row overflow-hidden"
-            style={
-              !asList
-                ? {
-                    maxHeight:
-                      "var(--radix-select-content-available-height, 100%)",
-                  }
-                : undefined
-            }
-          >
+          <div className="flex flex-1 min-h-0 flex-row overflow-hidden">
             <div
               className={cn(
                 "relative flex flex-1 min-h-0 min-w-0 flex-col overflow-hidden",
@@ -335,8 +335,8 @@ const SelectContent = forwardRef<
             </div>
             {props.right}
           </div>
-          {props.bottom}
-        </>
+          {props.bottom && <div className="shrink-0">{props.bottom}</div>}
+        </div>
       </SelectPrimitive.Content>
     )
 
