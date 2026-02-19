@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.371.1](https://github.com/factorialco/f0/compare/f0-react-v1.371.0...f0-react-v1.371.1) (2026-02-19)
+
+
+### Bug Fixes
+
+* add setFooter to AiChat ([#3481](https://github.com/factorialco/f0/issues/3481)) ([61895d0](https://github.com/factorialco/f0/commit/61895d0bff5d551658a658e96977e901a418d0d7))
+
 ## [1.371.0](https://github.com/factorialco/f0/compare/f0-react-v1.370.1...f0-react-v1.371.0) (2026-02-19)
 
 
