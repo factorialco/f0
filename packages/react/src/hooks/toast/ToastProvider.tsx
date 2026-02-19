@@ -99,7 +99,7 @@ const StackedToasts = ({ items }: { items: ToastProviderItem[] }) => {
                   y: visualIndex * -10,
                   scale: 1 - visualIndex * 0.05,
                   opacity: isVisible ? 1 : 0,
-                  zIndex: 100 - index,
+                  zIndex: items.length - index,
                   height: index === 0 ? "auto" : 0,
                 },
                 expanded: {
@@ -107,7 +107,7 @@ const StackedToasts = ({ items }: { items: ToastProviderItem[] }) => {
                   y: 0,
                   scale: 1,
                   opacity: 1,
-                  zIndex: 100 - index,
+                  zIndex: items.length - index,
                   height: "auto",
                   marginBottom: 16,
                 },
@@ -156,7 +156,7 @@ const ToastsContainer = ({
   return (
     <div
       className={cn(
-        "pointer-events-none fixed z-[100] flex overflow-hidden",
+        "pointer-events-none fixed z-[100] flex overflow-y-auto",
         toastContainerPositionClasses[position]
       )}
     >
@@ -171,7 +171,7 @@ const ToastsContainer = ({
 
             {/* Active Toasts — flex-col-reverse so oldest (index 0) is at the bottom */}
             <div className="relative flex flex-col-reverse gap-4">
-              <AnimatePresence mode="popLayout" initial={false}>
+              <AnimatePresence mode="popLayout">
                 {activeItems.map((item) => (
                   <motion.div
                     key={item.id}
