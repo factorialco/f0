@@ -9,8 +9,8 @@ import PalmTree from "@/icons/app/PalmTree"
 
 import { Page } from "../Page"
 import * as PageStories from "../Page/index.stories"
-import * as SidebarStories from "../Sidebar/index.stories"
-import { Sidebar } from "../Sidebar/Sidebar"
+import * as SidebarStories from "@/components/Navigation/Sidebar/index.stories"
+import { Sidebar } from "@/components/Navigation/Sidebar/Sidebar"
 import { ApplicationFrame } from "./index"
 
 const meta: Meta<typeof ApplicationFrame> = {
