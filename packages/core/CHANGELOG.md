@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.45.0](https://github.com/factorialco/f0/compare/f0-core-v1.44.0...f0-core-v1.45.0) (2026-02-19)
+
+
+### Features
+
+* **core:** add xs container query breakpoint ([#3468](https://github.com/factorialco/f0/issues/3468)) ([9b2d76d](https://github.com/factorialco/f0/commit/9b2d76d4ded04749d3c1de68a8ee98609c6a17f4))
+
+## [1.44.0](https://github.com/factorialco/f0/compare/f0-core-v1.43.0...f0-core-v1.44.0) (2026-02-11)
+
+
+### Features
+
+* **icons:** new ai icons ([#3375](https://github.com/factorialco/f0/issues/3375)) ([e60a5c0](https://github.com/factorialco/f0/commit/e60a5c0525414a0ef2dfad79a031faa7b95f5c61))
+
 ## [1.43.0](https://github.com/factorialco/f0/compare/f0-core-v1.42.1...f0-core-v1.43.0) (2026-01-28)
 
 

@@ -1,124 +1,126 @@
-import { render, fireEvent, screen } from "@testing-library/react-native";
-import React from "react";
-import { Button } from "./";
-import { IconType } from "../Icon";
+import { render, fireEvent, screen } from "@testing-library/react-native"
+import React from "react"
+
+import { IconType } from "../Icon"
+
+import { Button } from "./"
 
 // Mock the Icon component
 jest.mock("../Icon", () => ({
   Icon: () => null,
-}));
+}))
 
 // Mock dependencies
-const mockIcon: IconType = "check" as unknown as IconType;
-const mockOnPress = jest.fn();
+const mockIcon: IconType = "check" as unknown as IconType
+const mockOnPress = jest.fn()
 
 describe("Button", () => {
   const defaultProps = {
     label: "Test Button",
     onPress: mockOnPress,
-  };
+  }
 
   beforeEach(() => {
-    jest.clearAllMocks();
-  });
+    jest.clearAllMocks()
+  })
 
   it("Snapshot - default button", () => {
-    const { toJSON } = render(<Button {...defaultProps} />);
+    const { toJSON } = render(<Button {...defaultProps} />)
 
-    expect(toJSON()).toMatchSnapshot();
-  });
+    expect(toJSON()).toMatchSnapshot()
+  })
 
   it("Snapshot - outline variant", () => {
-    const { toJSON } = render(<Button {...defaultProps} variant="outline" />);
+    const { toJSON } = render(<Button {...defaultProps} variant="outline" />)
 
-    expect(toJSON()).toMatchSnapshot();
-  });
+    expect(toJSON()).toMatchSnapshot()
+  })
 
   it("Snapshot - critical variant", () => {
-    const { toJSON } = render(<Button {...defaultProps} variant="critical" />);
+    const { toJSON } = render(<Button {...defaultProps} variant="critical" />)
 
-    expect(toJSON()).toMatchSnapshot();
-  });
+    expect(toJSON()).toMatchSnapshot()
+  })
 
   it("Snapshot - with icon", () => {
-    const { toJSON } = render(<Button {...defaultProps} icon={mockIcon} />);
+    const { toJSON } = render(<Button {...defaultProps} icon={mockIcon} />)
 
-    expect(toJSON()).toMatchSnapshot();
-  });
+    expect(toJSON()).toMatchSnapshot()
+  })
 
   it("Snapshot - with emoji", () => {
-    const { toJSON } = render(<Button {...defaultProps} emoji="👋" />);
+    const { toJSON } = render(<Button {...defaultProps} emoji="👋" />)
 
-    expect(toJSON()).toMatchSnapshot();
-  });
+    expect(toJSON()).toMatchSnapshot()
+  })
 
   it("Snapshot - disabled state", () => {
-    const { toJSON } = render(<Button {...defaultProps} disabled />);
+    const { toJSON } = render(<Button {...defaultProps} disabled />)
 
-    expect(toJSON()).toMatchSnapshot();
-  });
+    expect(toJSON()).toMatchSnapshot()
+  })
 
   it("Snapshot - loading state", () => {
-    const { toJSON } = render(<Button {...defaultProps} loading />);
+    const { toJSON } = render(<Button {...defaultProps} loading />)
 
-    expect(toJSON()).toMatchSnapshot();
-  });
+    expect(toJSON()).toMatchSnapshot()
+  })
 
   it("Snapshot - different sizes", () => {
-    const sizes = ["sm", "md", "lg"] as const;
+    const sizes = ["sm", "md", "lg"] as const
 
     sizes.forEach((size) => {
-      const { toJSON } = render(<Button {...defaultProps} size={size} />);
-      expect(toJSON()).toMatchSnapshot();
-    });
-  });
+      const { toJSON } = render(<Button {...defaultProps} size={size} />)
+      expect(toJSON()).toMatchSnapshot()
+    })
+  })
 
   it("Snapshot - round button with hidden label", () => {
-    const { toJSON } = render(<Button {...defaultProps} round hideLabel />);
+    const { toJSON } = render(<Button {...defaultProps} round hideLabel />)
 
-    expect(toJSON()).toMatchSnapshot();
-  });
+    expect(toJSON()).toMatchSnapshot()
+  })
 
   // Regular component tests
   it("renders correctly with required props", () => {
-    render(<Button {...defaultProps} />);
+    render(<Button {...defaultProps} />)
 
-    const button = screen.getByText("Test Button");
+    const button = screen.getByText("Test Button")
 
-    expect(button).toBeDefined();
-  });
+    expect(button).toBeDefined()
+  })
 
   it("handles press events", () => {
-    render(<Button {...defaultProps} />);
+    render(<Button {...defaultProps} />)
 
-    fireEvent.press(screen.getByRole("button"));
+    fireEvent.press(screen.getByRole("button"))
 
-    expect(mockOnPress).toHaveBeenCalled();
-  });
+    expect(mockOnPress).toHaveBeenCalled()
+  })
 
   it("does not call onPress when disabled", () => {
-    render(<Button {...defaultProps} disabled />);
+    render(<Button {...defaultProps} disabled />)
 
-    fireEvent.press(screen.getByRole("button"));
+    fireEvent.press(screen.getByRole("button"))
 
-    expect(mockOnPress).not.toHaveBeenCalled();
-  });
+    expect(mockOnPress).not.toHaveBeenCalled()
+  })
 
   it("shows correct accessibility label when disabled", () => {
-    render(<Button {...defaultProps} disabled />);
+    render(<Button {...defaultProps} disabled />)
 
-    const button = screen.getByRole("button");
+    const button = screen.getByRole("button")
 
-    expect(button.props.accessibilityLabel).toBe("Test Button, disabled");
-  });
+    expect(button.props.accessibilityLabel).toBe("Test Button, disabled")
+  })
 
   it("shows correct accessibility label when loading", () => {
-    render(<Button {...defaultProps} loading />);
+    render(<Button {...defaultProps} loading />)
 
-    const button = screen.getByRole("button");
+    const button = screen.getByRole("button")
 
     expect(button.props.accessibilityLabel).toBe(
-      "Test Button, disabled, loading",
-    );
-  });
-});
+      "Test Button, disabled, loading"
+    )
+  })
+})

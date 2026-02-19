@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from "motion/react"
 
-import { Spinner } from "@/experimental/Information/Spinner"
+import { Spinner } from "@/ui/Spinner"
 import { cn } from "@/lib/utils"
 
 interface LoadingEnhanceProps {

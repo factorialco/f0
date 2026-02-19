@@ -1,6 +1,6 @@
-import Svg, { Path, Circle } from "react-native-svg";
-import type { SvgProps } from "react-native-svg";
-import { Ref, forwardRef } from "react";
+import { Ref, forwardRef } from "react"
+import Svg, { Path, Circle } from "react-native-svg"
+import type { SvgProps } from "react-native-svg"
 const SvgSearchPerson = (props: SvgProps, ref: Ref<Svg>) => (
   <Svg
     fill="none"
@@ -19,6 +19,6 @@ const SvgSearchPerson = (props: SvgProps, ref: Ref<Svg>) => (
     <Circle cx={11} cy={10.5} r={2.5} stroke="currentColor" />
     <Circle cx={11} cy={11} r={7} stroke="currentColor" />
   </Svg>
-);
-const ForwardRef = forwardRef(SvgSearchPerson);
-export default ForwardRef;
+)
+const ForwardRef = forwardRef(SvgSearchPerson)
+export default ForwardRef

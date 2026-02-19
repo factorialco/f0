@@ -5,6 +5,7 @@ import {
   isSameDay,
   isSameMonth,
   isSameYear,
+  parse,
   startOfDay,
   startOfMonth,
 } from "date-fns"
@@ -113,6 +114,21 @@ export const dayGranularity: GranularityDefinition = {
 
     const parseDate = (dateStr: string) => {
       const trimmed = dateStr.trim()
+      const referenceDate = new Date()
+
+      // Try long format first: "20 Feb 2026" (day month year)
+      const longFormatDate = parse(trimmed, "d MMM yyyy", referenceDate)
+      if (!isNaN(longFormatDate.getTime())) {
+        return longFormatDate
+      }
+
+      // Try numeric format: "20/02/2026"
+      const numericDate = parse(trimmed, DAY_FORMAT, referenceDate)
+      if (!isNaN(numericDate.getTime())) {
+        return numericDate
+      }
+
+      // Fallback: manual parsing for other separators (dot, dash)
       const [day, month, year] = trimmed.split(/[/.-]/)
       return new Date(Number(year), Number(month) - 1, Number(day))
     }

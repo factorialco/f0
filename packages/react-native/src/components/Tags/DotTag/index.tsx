@@ -1,7 +1,8 @@
-import { baseColors } from "@factorialco/f0-core";
-import { BaseTag } from "../BaseTag";
-import { useTextFormatEnforcer } from "../../../lib/text";
-import { View } from "react-native";
+import { View } from "react-native"
+
+import { useTextFormatEnforcer } from "../../../lib/text"
+import { baseColors } from "../../../styles"
+import { BaseTag } from "../BaseTag"
 
 export type NewColor = Extract<
   keyof typeof baseColors,
@@ -16,23 +17,23 @@ export type NewColor = Extract<
   | "flubber"
   | "indigo"
   | "camel"
->;
+>
 
-export const dotTagColors = Object.keys(baseColors) as NewColor[];
+export const dotTagColors = Object.keys(baseColors) as NewColor[]
 
 export type DotTagProps = {
-  text: string;
-} & ({ color: NewColor } | { customColor: string });
+  text: string
+} & ({ color: NewColor } | { customColor: string })
 
 export const DotTag = ({ text, ...props }: DotTagProps) => {
-  useTextFormatEnforcer(text, { disallowEmpty: true });
+  useTextFormatEnforcer(text, { disallowEmpty: true })
 
   const backgroundColor =
     "color" in props && props.color
       ? `hsl(${baseColors[props.color][50]})`
-      : "customColor" in props && props.customColor;
+      : "customColor" in props && props.customColor
 
-  if (!backgroundColor) return null;
+  if (!backgroundColor) return null
 
   return (
     <BaseTag
@@ -48,7 +49,7 @@ export const DotTag = ({ text, ...props }: DotTagProps) => {
       }
       text={text}
     />
-  );
-};
+  )
+}
 
-DotTag.displayName = "DotTag";
+DotTag.displayName = "DotTag"

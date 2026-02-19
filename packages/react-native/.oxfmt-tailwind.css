@@ -1,0 +1,10 @@
+/**
+ * Oxfmt Tailwind CSS Configuration
+ * 
+ * This file is used by oxfmt to read Tailwind CSS 4 configuration
+ * for class sorting. It includes all the styles that the library exports.
+ */
+
+@import "tailwindcss";
+@import "uniwind";
+@import "./src/styles/index.css";

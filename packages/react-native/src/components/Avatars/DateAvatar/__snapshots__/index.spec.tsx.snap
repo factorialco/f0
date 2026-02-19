@@ -1,16 +1,16 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`DateAvatar Snapshot 1`] = `
 <View
   className="flex h-10 w-10 flex-col items-center justify-center rounded border border-solid border-f1-border-secondary bg-f1-background-inverse-secondary"
 >
   <Text
-    className="dark:text-f1-foreground-inverse-secondary pt-0.5 text-xs font-semibold uppercase leading-3 text-f1-special-highlight"
+    className="pt-0.5 text-xs leading-3 font-semibold text-f1-special-highlight uppercase dark:text-f1-foreground-inverse-secondary"
   >
     Jan
   </Text>
   <Text
-    className="flex items-center justify-center text-lg font-medium leading-tight text-f1-foreground"
+    className="flex items-center justify-center text-lg leading-tight font-medium text-f1-foreground"
   >
     1
   </Text>

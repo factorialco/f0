@@ -2,7 +2,7 @@ import { forwardRef, useMemo } from "react"
 
 import { F0AvatarModule } from "@/components/avatars/F0AvatarModule"
 import { F0Icon, F0IconProps } from "@/components/F0Icon"
-import { Badge } from "@/experimental/Information/Badge"
+import { Badge } from "@/ui/IconBadge"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import {
   Avatar as AvatarComponent,

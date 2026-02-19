@@ -1,26 +1,26 @@
-import { BaseTag } from "../BaseTag";
-import { cn } from "../../../lib/utils";
-import { useTextFormatEnforcer } from "../../../lib/text";
-import { Icon, IconType } from "../../Icon";
-import { AlertCircle, InfoCircle, Warning } from "../../../icons/app";
+import { AlertCircle, InfoCircle, Warning } from "../../../icons/app"
+import { useTextFormatEnforcer } from "../../../lib/text"
+import { cn } from "../../../lib/utils"
+import { Icon, IconType } from "../../Icon"
+import { BaseTag } from "../BaseTag"
 
-type Level = "info" | "warning" | "critical";
+type Level = "info" | "warning" | "critical"
 
-type NonEmpty<T extends string> = T extends "" ? never : T;
+type NonEmpty<T extends string> = T extends "" ? never : T
 
 type Props<T extends string = string> = {
-  text: NonEmpty<T>;
-  level: Level;
-};
+  text: NonEmpty<T>
+  level: Level
+}
 
 const iconMap: Record<Level, IconType> = {
   info: InfoCircle,
   warning: Warning,
   critical: AlertCircle,
-};
+}
 
 export const AlertTag = <T extends string>({ text, level }: Props<T>) => {
-  useTextFormatEnforcer(text, { disallowEmpty: true });
+  useTextFormatEnforcer(text, { disallowEmpty: true })
 
   return (
     <BaseTag
@@ -29,7 +29,7 @@ export const AlertTag = <T extends string>({ text, level }: Props<T>) => {
           info: "text-f1-foreground-info",
           warning: "text-f1-foreground-warning",
           critical: "text-f1-foreground-critical",
-        }[level],
+        }[level]
       )}
       classNameContainer={cn(
         "pl-0.5",
@@ -37,7 +37,7 @@ export const AlertTag = <T extends string>({ text, level }: Props<T>) => {
           info: "bg-f1-background-info text-f1-foreground-info",
           warning: "bg-f1-background-warning text-f1-foreground-warning",
           critical: "bg-f1-background-critical text-f1-foreground-critical",
-        }[level],
+        }[level]
       )}
       left={
         <Icon
@@ -47,7 +47,7 @@ export const AlertTag = <T extends string>({ text, level }: Props<T>) => {
               info: "text-f1-foreground-info",
               warning: "text-f1-foreground-warning",
               critical: "text-f1-foreground-critical",
-            }[level],
+            }[level]
           )}
           size="md"
           aria-hidden
@@ -55,7 +55,7 @@ export const AlertTag = <T extends string>({ text, level }: Props<T>) => {
       }
       text={text}
     />
-  );
-};
+  )
+}
 
-AlertTag.displayName = "AlertTag";
+AlertTag.displayName = "AlertTag"

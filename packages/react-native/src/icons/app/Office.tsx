@@ -1,6 +1,6 @@
-import Svg, { Path } from "react-native-svg";
-import type { SvgProps } from "react-native-svg";
-import { Ref, forwardRef } from "react";
+import { Ref, forwardRef } from "react"
+import Svg, { Path } from "react-native-svg"
+import type { SvgProps } from "react-native-svg"
 const SvgOffice = (props: SvgProps, ref: Ref<Svg>) => (
   <Svg
     fill="none"
@@ -26,6 +26,6 @@ const SvgOffice = (props: SvgProps, ref: Ref<Svg>) => (
       d="M19 20H5"
     />
   </Svg>
-);
-const ForwardRef = forwardRef(SvgOffice);
-export default ForwardRef;
+)
+const ForwardRef = forwardRef(SvgOffice)
+export default ForwardRef

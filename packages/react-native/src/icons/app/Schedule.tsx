@@ -1,6 +1,6 @@
-import Svg, { Path, Circle } from "react-native-svg";
-import type { SvgProps } from "react-native-svg";
-import { Ref, forwardRef } from "react";
+import { Ref, forwardRef } from "react"
+import Svg, { Path, Circle } from "react-native-svg"
+import type { SvgProps } from "react-native-svg"
 const SvgSchedule = (props: SvgProps, ref: Ref<Svg>) => (
   <Svg
     fill="none"
@@ -27,6 +27,6 @@ const SvgSchedule = (props: SvgProps, ref: Ref<Svg>) => (
       d="M7 10h4M7 14h2"
     />
   </Svg>
-);
-const ForwardRef = forwardRef(SvgSchedule);
-export default ForwardRef;
+)
+const ForwardRef = forwardRef(SvgSchedule)
+export default ForwardRef

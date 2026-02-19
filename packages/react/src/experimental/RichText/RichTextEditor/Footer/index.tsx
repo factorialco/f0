@@ -3,6 +3,7 @@ import { motion } from "motion/react"
 import { useEffect, useRef, useState } from "react"
 
 import { F0Button } from "@/components/F0Button"
+import { cn } from "@/lib/utils"
 import { Toolbar } from "@/experimental/RichText/CoreEditor"
 import { Paperclip, TextSize } from "@/icons/app"
 
@@ -27,6 +28,7 @@ interface FooterProps {
   ) => Promise<void>
   isLoadingEnhance: boolean
   disableButtons: boolean
+  disabled?: boolean
   enhanceConfig: enhanceConfig | undefined
   isFullscreen: boolean
   setLastIntent: (
@@ -53,6 +55,7 @@ const Footer = ({
   isFullscreen,
   setLastIntent,
   disableButtons,
+  disabled = false,
   setIsToolbarOpen,
   isToolbarOpen,
   plainHtmlMode,
@@ -156,7 +159,10 @@ const Footer = ({
             onAnimationComplete={() =>
               setToolbarAnimationComplete(isToolbarOpen)
             }
-            className="absolute left-0 top-0 z-10 h-full overflow-hidden bg-f1-background"
+            className={cn(
+              "absolute left-0 top-0 z-10 h-full overflow-hidden",
+              disabled ? "bg-f1-background-tertiary" : "bg-f1-background"
+            )}
             aria-label="Rich text editor toolbar"
           >
             <Toolbar

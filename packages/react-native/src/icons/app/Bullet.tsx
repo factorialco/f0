@@ -1,6 +1,6 @@
-import Svg, { Path } from "react-native-svg";
-import type { SvgProps } from "react-native-svg";
-import { Ref, forwardRef } from "react";
+import { Ref, forwardRef } from "react"
+import Svg, { Path } from "react-native-svg"
+import type { SvgProps } from "react-native-svg"
 const SvgBullet = (props: SvgProps, ref: Ref<Svg>) => (
   <Svg
     fill="none"
@@ -14,6 +14,6 @@ const SvgBullet = (props: SvgProps, ref: Ref<Svg>) => (
       d="M10 7c-2.25 0-3 .75-3 3s.75 3 3 3 3-.75 3-3-.75-3-3-3"
     />
   </Svg>
-);
-const ForwardRef = forwardRef(SvgBullet);
-export default ForwardRef;
+)
+const ForwardRef = forwardRef(SvgBullet)
+export default ForwardRef

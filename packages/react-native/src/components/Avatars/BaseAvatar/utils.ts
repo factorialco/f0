@@ -1,44 +1,45 @@
+import { type ComponentProps } from "react"
+
 import {
   color as AvatarColors,
   Avatar as AvatarComponent,
   type as avatarType,
   sizes,
-} from "../../../ui/avatar";
-import { type ComponentProps } from "react";
+} from "../../../ui/avatar"
 
-type ShadAvatarProps = ComponentProps<typeof AvatarComponent>;
+type ShadAvatarProps = ComponentProps<typeof AvatarComponent>
 
 export function getInitials(
   name: string | string[],
   size?: ShadAvatarProps["size"],
-  isFile?: boolean,
+  isFile?: boolean
 ): string {
-  const nameArray = Array.isArray(name) ? name : [name];
-  const isSmall = size === "xsmall" || size === "small";
-  const minChar = isFile ? 3 : 2;
+  const nameArray = Array.isArray(name) ? name : [name]
+  const isSmall = size === "xsmall" || size === "small"
+  const minChar = isFile ? 3 : 2
 
-  if (isSmall) return (nameArray[0][0] ?? "").toUpperCase();
-  if (!Array.isArray(name)) return name.slice(0, minChar).toUpperCase();
+  if (isSmall) return (nameArray[0][0] ?? "").toUpperCase()
+  if (!Array.isArray(name)) return name.slice(0, minChar).toUpperCase()
 
   return nameArray
     .slice(0, minChar)
     .map((name) => name[0])
     .join("")
-    .toUpperCase();
+    .toUpperCase()
 }
 
 export function getAvatarColor(text: string): ShadAvatarProps["color"] {
-  let hash = 0;
+  let hash = 0
 
   for (let i = 0; i < text.length; i++) {
-    hash = text.charCodeAt(i) + ((hash << 5) - hash);
-    hash = hash & hash;
+    hash = text.charCodeAt(i) + ((hash << 5) - hash)
+    hash = hash & hash
   }
 
   const index =
-    ((hash % AvatarColors.length) + AvatarColors.length) % AvatarColors.length;
+    ((hash % AvatarColors.length) + AvatarColors.length) % AvatarColors.length
 
-  return AvatarColors[index];
+  return AvatarColors[index]
 }
 
 export const getMask = {
@@ -68,6 +69,6 @@ export const getMask = {
   },
   get: (
     type: (typeof avatarType)[number] = "base",
-    size: (typeof sizes)[number] = "medium",
+    size: (typeof sizes)[number] = "medium"
   ) => getMask[type][size],
-} as const;
+} as const

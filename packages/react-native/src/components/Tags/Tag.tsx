@@ -1,32 +1,33 @@
-import { ComponentProps, ReactNode } from "react";
-import { AlertTag } from "./AlertTab";
+import { ComponentProps, ReactNode } from "react"
 
-type AlertTagProps = ComponentProps<typeof AlertTag>;
+import { AlertTag } from "./AlertTab"
+
+type AlertTagProps = ComponentProps<typeof AlertTag>
 
 // Base interface for optional tooltip description
 interface WithTooltipDescription {
   /**
    * Optional description to show in the tooltip
    */
-  description?: string;
+  description?: string
 }
 
 // Base type for all tag variants
-type BaseTag<T extends { type: string }> = T & WithTooltipDescription;
+type BaseTag<T extends { type: string }> = T & WithTooltipDescription
 
-export type TagVariant = BaseTag<{ type: "alert" } & AlertTagProps>;
+export type TagVariant = BaseTag<{ type: "alert" } & AlertTagProps>
 
 const tagComponent = (tag: TagVariant): ReactNode | undefined => {
-  const { type } = tag;
-  if (type === "alert") return <AlertTag {...tag} />;
+  const { type } = tag
+  if (type === "alert") return <AlertTag {...tag} />
 
-  return undefined;
-};
+  return undefined
+}
 
 export const Tag = ({ tag }: { tag: TagVariant }): ReactNode => {
-  const renderTag = tagComponent(tag);
+  const renderTag = tagComponent(tag)
 
-  if (!renderTag) return "Invalid tag type";
+  if (!renderTag) return "Invalid tag type"
 
-  return renderTag;
-};
+  return renderTag
+}

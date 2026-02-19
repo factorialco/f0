@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`IconAvatar Snapshot - different sizes 1`] = `
 <View
@@ -20,6 +20,9 @@ exports[`IconAvatar Snapshot - different sizes 1`] = `
           "backgroundColor": "transparent",
           "borderWidth": 0,
         },
+        [
+          {},
+        ],
         {
           "flex": 0,
           "height": "100%",
@@ -105,6 +108,9 @@ exports[`IconAvatar Snapshot - different sizes 2`] = `
           "backgroundColor": "transparent",
           "borderWidth": 0,
         },
+        [
+          {},
+        ],
         {
           "flex": 0,
           "height": "100%",
@@ -190,6 +196,9 @@ exports[`IconAvatar Snapshot - different sizes 3`] = `
           "backgroundColor": "transparent",
           "borderWidth": 0,
         },
+        [
+          {},
+        ],
         {
           "flex": 0,
           "height": "100%",

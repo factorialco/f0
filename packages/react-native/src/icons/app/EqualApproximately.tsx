@@ -1,6 +1,6 @@
-import Svg, { Path } from "react-native-svg";
-import type { SvgProps } from "react-native-svg";
-import { Ref, forwardRef } from "react";
+import { Ref, forwardRef } from "react"
+import Svg, { Path } from "react-native-svg"
+import type { SvgProps } from "react-native-svg"
 const SvgEqualApproximately = (props: SvgProps, ref: Ref<Svg>) => (
   <Svg
     fill="none"
@@ -16,6 +16,6 @@ const SvgEqualApproximately = (props: SvgProps, ref: Ref<Svg>) => (
       d="M4.667 9.266C7.11 6.517 9.556 7.322 12 9.333s4.889 2.816 7.333.067M4.667 14.6c2.444-2.75 4.889-1.945 7.333.067s4.889 2.816 7.333.067"
     />
   </Svg>
-);
-const ForwardRef = forwardRef(SvgEqualApproximately);
-export default ForwardRef;
+)
+const ForwardRef = forwardRef(SvgEqualApproximately)
+export default ForwardRef

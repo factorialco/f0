@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`PersonAvatar Snapshot 1`] = `
 <View
@@ -9,7 +9,7 @@ exports[`PersonAvatar Snapshot 1`] = `
   >
     <View
       aria-hidden={true}
-      className="flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold w-8 h-8 rounded-full bg-[hsl(theme(colors.flubber.50))]"
+      className="flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold w-8 h-8 rounded-full bg-[hsl(theme(colors.flubber-50))]"
       data-a11y-color-contrast-ignore={true}
       role="img"
     >
