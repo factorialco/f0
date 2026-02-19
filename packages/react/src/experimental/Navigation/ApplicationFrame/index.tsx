@@ -21,12 +21,16 @@ import {
   F0AiChat,
   F0AiChatProvider,
   AiChatProviderProps,
-} from "../../../ai/F0AiChat"
-import { useAiChat } from "../../../ai/F0AiChat/providers/AiChatStateProvider"
+} from "@/sds/ai/F0AiChat"
+import { useAiChat } from "@/sds/ai/F0AiChat/providers/AiChatStateProvider"
 import { useReducedMotion } from "../../../lib/a11y"
 import { useI18n } from "../../../lib/providers/i18n"
 import { cn, focusRing } from "../../../lib/utils"
-import { FrameProvider, SidebarState, useSidebar } from "./FrameProvider"
+import {
+  FrameProvider,
+  SidebarState,
+  useSidebar,
+} from "@/examples/ApplicationFrame/FrameProvider"
 
 export interface ApplicationFrameProps {
   ai?: Omit<AiChatProviderProps, "children">
