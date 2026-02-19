@@ -1,4 +1,4 @@
-import { ComponentProps, ForwardedRef } from "react"
+import { ComponentProps, ForwardedRef, ReactElement } from "react"
 import {
   PolarAngleAxis,
   PolarGrid,
@@ -7,7 +7,7 @@ import {
   RadarChart as RadarChartPrimitive,
 } from "recharts"
 
-import { withDataTestId } from "@/lib/data-testid"
+import { withDataTestId, WithDataTestIdProps } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
 import {
   ChartContainer,
@@ -94,11 +94,17 @@ export const _RadarChart = <K extends ChartConfig>(
   )
 }
 
+type RadarChartGeneric = <K extends ChartConfig>(
+  props: RadarChartProps<K> & WithDataTestIdProps
+) => ReactElement | null
+
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export const RadarChart = withDataTestId(
+const RadarChartWrapped = withDataTestId(
   fixedForwardRef(
     experimentalComponent<typeof _RadarChart>("RadarChart", _RadarChart)
   )
 )
+
+export const RadarChart = RadarChartWrapped as unknown as RadarChartGeneric

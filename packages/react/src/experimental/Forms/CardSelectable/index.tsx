@@ -1,3 +1,6 @@
+import { ReactElement } from "react"
+
+import { withDataTestId, WithDataTestIdProps } from "@/lib/data-testid"
 import { cn } from "@/lib/utils"
 
 import type {
@@ -115,7 +118,13 @@ function _CardSelectableContainer<T extends CardSelectableValue>(
   )
 }
 
-export const CardSelectableContainer = _CardSelectableContainer
+type CardSelectableContainerGeneric = <T extends CardSelectableValue>(
+  props: CardSelectableContainerProps<T> & WithDataTestIdProps
+) => ReactElement | null
+
+export const CardSelectableContainer = withDataTestId(
+  _CardSelectableContainer
+) as unknown as CardSelectableContainerGeneric
 
 export type {
   CardSelectableContainerProps,
