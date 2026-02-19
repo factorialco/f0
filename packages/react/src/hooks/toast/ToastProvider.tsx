@@ -45,7 +45,7 @@ const toastVariants = {
   exit: { opacity: 0, scale: 0.9, transition: { duration: 0.2 } },
 }
 
-const minUncollapsedToasts = 3
+const minActiveToasts = 3
 
 const StackedToasts = ({ items }: { items: ToastProviderItem[] }) => {
   const [isHovered, setIsHovered] = useState(false)
@@ -68,7 +68,7 @@ const StackedToasts = ({ items }: { items: ToastProviderItem[] }) => {
       <AnimatePresence>
         {items.map((item, index) => {
           // Logic for visual compression
-          // We want the first item (newest collapsed) to be at the front
+          // We want the first item (newest stacked) to be at the front
           // index 0 -> front
           const reversedIndex = items.length - index - 1
           const isVisible = reversedIndex < 3
@@ -82,14 +82,14 @@ const StackedToasts = ({ items }: { items: ToastProviderItem[] }) => {
                 y: -50,
                 scale: 0.9,
               }}
-              animate={isHovered ? "expanded" : "collapsed"}
+              animate={isHovered ? "expanded" : "stacked"}
               exit={{
                 opacity: 0,
                 scale: 0.5,
                 transition: { duration: 0.2 },
               }}
               variants={{
-                collapsed: {
+                stacked: {
                   y: reversedIndex * -10, // Items behind go up
                   scale: 1 - reversedIndex * 0.05, // Items behind are smaller
                   opacity: isVisible ? 1 : 0,
@@ -130,18 +130,18 @@ const ToastsContainer = ({
   items: ToastProviderItem[]
   position?: ToastContainerPosition
 }) => {
-  const { collapsedItems, activeItems } = useMemo(() => {
+  const { stackedItems, activeItems } = useMemo(() => {
     const reversedItems = items.slice().reverse()
     // Newer toasts at the bottom -> Active list is the end of the array
-    const activeCount = Math.min(reversedItems.length, minUncollapsedToasts)
+    const activeCount = Math.min(reversedItems.length, minActiveToasts)
     const active = reversedItems.slice(reversedItems.length - activeCount)
 
-    // Stack is the rest, reversed so newest-collapsed is at index 0 (Front)
+    // Stack is the rest, reversed so newest-stacked is at index 0 (Front)
     // UPDATE: User requested older on top with scale 1, so we DON'T reverse anymore.
     // Index 0 = Oldest = Front = Scale 1
-    const collapsed = reversedItems.slice(0, reversedItems.length - activeCount)
+    const stacked = reversedItems.slice(0, reversedItems.length - activeCount)
 
-    return { collapsedItems: collapsed, activeItems: active }
+    return { stackedItems: stacked, activeItems: active }
   }, [items])
 
   return (
@@ -155,7 +155,7 @@ const ToastsContainer = ({
     >
       <div className="flex w-[350px] max-w-full flex-col p-6">
         {/* Stacked Toasts at the Top */}
-        <StackedToasts items={collapsedItems} />
+        <StackedToasts items={stackedItems} />
 
         {/* Active Toasts below */}
         <div className="relative flex flex-col gap-4">
