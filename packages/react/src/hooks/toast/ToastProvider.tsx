@@ -39,23 +39,26 @@ const toastContainerPositionClasses: Record<ToastContainerPosition, string> = {
   "top-right": "justify-end items-start top-0 right-0 bottom-0",
 } as const
 
-const toastVariants = {
-  initial: { opacity: 0, y: 20, scale: 0.9 },
+// Active toast entry/exit animation — comes from top, exits upward
+const activeToastVariants = {
+  initial: { opacity: 0, y: -20, scale: 0.95 },
   animate: { opacity: 1, y: 0, scale: 1 },
   exit: { opacity: 0, scale: 0.9, transition: { duration: 0.2 } },
 }
 
+// How many toasts are shown fully expanded (not stacked)
 const minActiveToasts = 3
+// How many stacked toasts are visible (the rest are hidden at same position as last visible)
+const maxVisibleStackedToasts = 3
 
 const StackedToasts = ({ items }: { items: ToastProviderItem[] }) => {
   const [isHovered, setIsHovered] = useState(false)
 
-  // Dynamic animation speed based on number of items
-  // More items = slower animation for smoother experience
+  // Dynamic animation speed: more items = slower spring
   const baseStiffness = 200
   const baseDamping = 25
-  const stiffnessReduction = Math.min(items.length * 15, 100) // Cap reduction at 100
-  const dampingIncrease = Math.min(items.length * 2, 15) // Cap increase at 15
+  const stiffnessReduction = Math.min(items.length * 15, 100)
+  const dampingIncrease = Math.min(items.length * 2, 15)
 
   if (items.length === 0) return null
 
@@ -67,20 +70,20 @@ const StackedToasts = ({ items }: { items: ToastProviderItem[] }) => {
     >
       <AnimatePresence>
         {items.map((item, index) => {
-          // Logic for visual compression
-          // We want the first item (newest stacked) to be at the front
-          // index 0 -> front
-          const reversedIndex = items.length - index - 1
-          const isVisible = reversedIndex < 3
+          // index 0 = oldest stacked = front of stack
+          // index 1 = next behind, etc.
+          // Clamp visual position for hidden items to the last visible slot
+          const visualIndex = Math.min(index, maxVisibleStackedToasts - 1)
+          const isVisible = index < maxVisibleStackedToasts
 
           return (
             <motion.div
               key={item.id}
-              layout
+              layoutId={item.id}
               initial={{
                 opacity: 0,
-                y: -50,
-                scale: 0.9,
+                y: -(visualIndex * 10) - 30, // start above final position
+                scale: 1 - visualIndex * 0.05,
               }}
               animate={isHovered ? "expanded" : "stacked"}
               exit={{
@@ -90,17 +93,17 @@ const StackedToasts = ({ items }: { items: ToastProviderItem[] }) => {
               }}
               variants={{
                 stacked: {
-                  y: reversedIndex * -10, // Items behind go up
-                  scale: 1 - reversedIndex * 0.05, // Items behind are smaller
+                  y: visualIndex * -10,
+                  scale: 1 - visualIndex * 0.05,
                   opacity: isVisible ? 1 : 0,
-                  zIndex: 100 - reversedIndex, // Older (lower index) on top
-                  height: reversedIndex === 0 ? "auto" : 0,
+                  zIndex: 100 - index,
+                  height: index === 0 ? "auto" : 0,
                 },
                 expanded: {
                   y: 0,
                   scale: 1,
                   opacity: 1,
-                  zIndex: 100 - reversedIndex,
+                  zIndex: 100 - index,
                   height: "auto",
                   marginBottom: 16,
                 },
@@ -131,50 +134,62 @@ const ToastsContainer = ({
   position?: ToastContainerPosition
 }) => {
   const { stackedItems, activeItems } = useMemo(() => {
-    const reversedItems = items.slice().reverse()
-    // Newer toasts at the bottom -> Active list is the end of the array
-    const activeCount = Math.min(reversedItems.length, minActiveToasts)
-    const active = reversedItems.slice(reversedItems.length - activeCount)
+    const totalCount = items.length
+    const activeCount = Math.min(totalCount, minActiveToasts)
 
-    // Stack is the rest, reversed so newest-stacked is at index 0 (Front)
-    // UPDATE: User requested older on top with scale 1, so we DON'T reverse anymore.
-    // Index 0 = Oldest = Front = Scale 1
-    const stacked = reversedItems.slice(0, reversedItems.length - activeCount)
+    // Active = oldest N toasts (first added), rendered bottom-to-top via flex-col-reverse
+    // So items[0] (oldest) appears at the bottom, items[activeCount-1] at top
+    const active = items.slice(0, activeCount)
+
+    // Stacked = newer overflow toasts, oldest-first so index 0 = front of stack
+    const stacked = items.slice(activeCount)
 
     return { stackedItems: stacked, activeItems: active }
   }, [items])
 
+  const hasItems = items.length > 0
+
   return (
     <div
       className={cn(
-        cn(
-          "pointer-events-none fixed z-[100] flex overflow-y-auto scrollbar-hide",
-          toastContainerPositionClasses[position]
-        )
+        "pointer-events-none fixed z-[100] flex overflow-hidden",
+        toastContainerPositionClasses[position]
       )}
     >
-      <div className="flex w-[350px] max-w-full flex-col p-6">
-        {/* Stacked Toasts at the Top */}
-        <StackedToasts items={stackedItems} />
+      <AnimatePresence>
+        {hasItems && (
+          <motion.div
+            key="toast-panel"
+            className="flex w-[350px] max-w-full flex-col p-6"
+            initial={{ opacity: 0, x: 60 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
+            transition={{ type: "spring", stiffness: 280, damping: 28 }}
+          >
+            {/* Stacked Toasts at the Top */}
+            <StackedToasts items={stackedItems} />
 
-        {/* Active Toasts below */}
-        <div className="relative flex flex-col gap-4">
-          <AnimatePresence mode="popLayout" initial={false}>
-            {activeItems.map((item) => (
-              <motion.div
-                key={item.id}
-                layout
-                variants={toastVariants}
-                initial="initial"
-                animate="animate"
-                exit="exit"
-              >
-                <F0Toast {...item} forcePauseTimer />
-              </motion.div>
-            ))}
-          </AnimatePresence>
-        </div>
-      </div>
+            {/* Active Toasts — flex-col-reverse so oldest (index 0) is at the bottom */}
+            <div className="relative flex flex-col-reverse gap-4">
+              <AnimatePresence mode="popLayout" initial={false}>
+                {activeItems.map((item) => (
+                  <motion.div
+                    key={item.id}
+                    layoutId={item.id}
+                    layout
+                    variants={activeToastVariants}
+                    initial="initial"
+                    animate="animate"
+                    exit="exit"
+                  >
+                    <F0Toast {...item} forcePauseTimer />
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
