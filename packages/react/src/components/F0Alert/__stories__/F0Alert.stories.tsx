@@ -105,3 +105,22 @@ export const DeactivatedAction: Story = {
     </div>
   ),
 }
+
+export const InDialog: Story = {
+  args: {
+    title: "Create a new job",
+    description:
+      "Craft a job description that aligns with this vacancy's requirements.",
+    action: {
+      label: "New job",
+      onClick: fn(),
+    },
+    variant: "info",
+    link: undefined,
+  },
+  render: (args) => (
+    <div className="w-[450px]">
+      <F0Alert {...args} />
+    </div>
+  ),
+}
