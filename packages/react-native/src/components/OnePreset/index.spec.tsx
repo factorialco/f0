@@ -1,46 +1,47 @@
-import { render, screen, userEvent } from "@testing-library/react-native";
-import React from "react";
-import { OnePreset } from ".";
+import { render, screen, userEvent } from "@testing-library/react-native"
+import React from "react"
+
+import { OnePreset } from "."
 
 describe("OnePreset", () => {
   const defaultProps = {
     label: "label",
-  };
+  }
 
   it("Snapshot", () => {
-    const { toJSON } = render(<OnePreset {...defaultProps} />);
-    expect(toJSON()).toMatchSnapshot();
-  });
+    const { toJSON } = render(<OnePreset {...defaultProps} />)
+    expect(toJSON()).toMatchSnapshot()
+  })
 
   it("Snapshot with number", () => {
-    const { toJSON } = render(<OnePreset {...defaultProps} number={42} />);
-    expect(toJSON()).toMatchSnapshot();
-  });
+    const { toJSON } = render(<OnePreset {...defaultProps} number={42} />)
+    expect(toJSON()).toMatchSnapshot()
+  })
 
   it("renders correctly with selected props", () => {
-    const { toJSON } = render(<OnePreset {...defaultProps} selected={true} />);
+    const { toJSON } = render(<OnePreset {...defaultProps} selected={true} />)
 
-    expect(toJSON()).toMatchSnapshot();
-  });
+    expect(toJSON()).toMatchSnapshot()
+  })
 
   it("renders correctly with required props", () => {
-    render(<OnePreset {...defaultProps} />);
+    render(<OnePreset {...defaultProps} />)
 
-    const number = screen.getByText("label");
+    const number = screen.getByText("label")
 
-    expect(number).toBeDefined();
-  });
+    expect(number).toBeDefined()
+  })
 
   it("renders correctly with onClick event", async () => {
-    const testFn = jest.fn();
-    const user = userEvent.setup();
+    const testFn = jest.fn()
+    const user = userEvent.setup()
 
-    render(<OnePreset {...defaultProps} onClick={testFn} />);
+    render(<OnePreset {...defaultProps} onClick={testFn} />)
 
-    const number = screen.getByText("label");
-    await user.press(number);
+    const number = screen.getByText("label")
+    await user.press(number)
 
-    expect(testFn).toHaveBeenCalledTimes(1);
-    expect(number).toBeDefined();
-  });
-});
+    expect(testFn).toHaveBeenCalledTimes(1)
+    expect(number).toBeDefined()
+  })
+})

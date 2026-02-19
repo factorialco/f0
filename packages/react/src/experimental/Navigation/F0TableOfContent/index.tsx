@@ -851,21 +851,12 @@ function TOCContent({
 
   return (
     <nav
-      className={cn(
-        "w-[248px]",
-        scrollable ? "overflow-y-auto" : "overflow-hidden",
-        className
-      )}
+      className={cn("flex w-[248px] flex-col overflow-hidden", className)}
       aria-label={title}
       ref={containerRef}
     >
       {(title || showSearchBox) && (
-        <div
-          className={cn(
-            "bg-f1-background pb-2 pl-5 pr-4 pt-5",
-            scrollable && "sticky top-0 z-10"
-          )}
-        >
+        <div className="shrink-0 bg-f1-background pb-2 pl-5 pr-4 pt-5">
           {showSearchBox && (
             <div className="mb-4">
               <F1SearchBox
@@ -888,10 +879,39 @@ function TOCContent({
           )}
         </div>
       )}
-      <ScrollArea className="h-full min-h-0">
-        <div className="px-3 pb-2">
+      {scrollable ? (
+        <ScrollArea className="min-h-0 flex-1">
+          <div className="px-3 pb-2">
+            <div className="flex flex-col gap-0.5">
+              {(sortable ? filteredSortableItems : filteredItems).map((item) =>
+                renderTOCItem(
+                  item,
+                  sortable,
+                  0,
+                  activeItem,
+                  collapsible,
+                  hideChildrenCounter,
+                  expandedItems,
+                  handleToggleExpanded,
+                  handleMoveItem,
+                  sortableItems,
+                  draggedItemId,
+                  dragOverItemId,
+                  dragOverPosition,
+                  sortable ? handleChildrenReorder : undefined,
+                  null,
+                  handleDragOver,
+                  handleDragLeave,
+                  handleDrop,
+                  justDroppedItemId
+                )
+              )}
+            </div>
+          </div>
+        </ScrollArea>
+      ) : (
+        <div className="min-h-0 flex-1 overflow-hidden px-3 pb-2">
           <div className="flex flex-col gap-0.5">
-            {/* Removed duplicate placeholder - renderTOCItem handles it */}
             {(sortable ? filteredSortableItems : filteredItems).map((item) =>
               renderTOCItem(
                 item,
@@ -917,7 +937,7 @@ function TOCContent({
             )}
           </div>
         </div>
-      </ScrollArea>
+      )}
     </nav>
   )
 }

@@ -1,5 +1,4 @@
 import type { SVGProps } from "react"
-
 import { Ref, forwardRef } from "react"
 const SvgCheckCircle = (
   props: SVGProps<SVGSVGElement>,

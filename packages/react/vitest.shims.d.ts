@@ -1,6 +1,8 @@
 /// <reference types="vitest/browser" />
 /// <reference types="react" />
 
+import "@testing-library/jest-dom/vitest"
+
 // Global React namespace declaration for test files
 // This allows using React types (React.ReactNode, React.ReactElement, etc.) without importing React
 // Using global augmentation to ensure it works in module contexts

@@ -1,6 +1,6 @@
-import Svg, { Path } from "react-native-svg";
-import type { SvgProps } from "react-native-svg";
-import { Ref, forwardRef } from "react";
+import { Ref, forwardRef } from "react"
+import Svg, { Path } from "react-native-svg"
+import type { SvgProps } from "react-native-svg"
 const SvgAlertCircle = (props: SvgProps, ref: Ref<Svg>) => (
   <Svg
     fill="none"
@@ -14,6 +14,6 @@ const SvgAlertCircle = (props: SvgProps, ref: Ref<Svg>) => (
       d="M12 20a8 8 0 1 0 0-16 8 8 0 0 0 0 16m-.967-11.94a.97.97 0 1 1 1.935 0l-.303 3.9a.667.667 0 0 1-1.33 0zM13 15a1 1 0 1 1-2 0 1 1 0 0 1 2 0"
     />
   </Svg>
-);
-const ForwardRef = forwardRef(SvgAlertCircle);
-export default ForwardRef;
+)
+const ForwardRef = forwardRef(SvgAlertCircle)
+export default ForwardRef

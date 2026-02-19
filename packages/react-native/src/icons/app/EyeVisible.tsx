@@ -1,6 +1,6 @@
-import Svg, { Path, Circle } from "react-native-svg";
-import type { SvgProps } from "react-native-svg";
-import { Ref, forwardRef } from "react";
+import { Ref, forwardRef } from "react"
+import Svg, { Path, Circle } from "react-native-svg"
+import type { SvgProps } from "react-native-svg"
 const SvgEyeVisible = (props: SvgProps, ref: Ref<Svg>) => (
   <Svg
     fill="none"
@@ -16,6 +16,6 @@ const SvgEyeVisible = (props: SvgProps, ref: Ref<Svg>) => (
     />
     <Circle cx={12} cy={12} r={2.35} stroke="currentColor" />
   </Svg>
-);
-const ForwardRef = forwardRef(SvgEyeVisible);
-export default ForwardRef;
+)
+const ForwardRef = forwardRef(SvgEyeVisible)
+export default ForwardRef

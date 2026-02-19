@@ -50,6 +50,8 @@ export interface GranularityDefinition {
   ) => string
   // Calculate the maximum width of the string representation of the date
   toStringMaxWidth: () => number
+  // Default placeholder text for the input field, derived from the format pattern
+  placeholder: () => string
   // Parse the date range string to a date range
   fromString: (
     dateStr: string | DateRangeString,

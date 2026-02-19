@@ -1,6 +1,6 @@
-import Svg, { Circle, Path } from "react-native-svg";
-import type { SvgProps } from "react-native-svg";
-import { Ref, forwardRef } from "react";
+import { Ref, forwardRef } from "react"
+import Svg, { Circle, Path } from "react-native-svg"
+import type { SvgProps } from "react-native-svg"
 const SvgOrganization = (props: SvgProps, ref: Ref<Svg>) => (
   <Svg
     fill="none"
@@ -20,6 +20,6 @@ const SvgOrganization = (props: SvgProps, ref: Ref<Svg>) => (
       d="M4 16v-.5a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v.5M12 8v8"
     />
   </Svg>
-);
-const ForwardRef = forwardRef(SvgOrganization);
-export default ForwardRef;
+)
+const ForwardRef = forwardRef(SvgOrganization)
+export default ForwardRef

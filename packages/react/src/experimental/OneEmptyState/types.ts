@@ -1,11 +1,11 @@
 import { AlertAvatarProps } from "@/components/avatars/F0AvatarAlert"
 import { IconType } from "@/components/F0Icon"
-import { LoadingStateProps } from "@/components/UpsellingKit/UpsellingButton"
+import { LoadingStateProps } from "@/sds/UpsellingKit/UpsellingButton"
 import {
   ErrorMessageProps,
   NextStepsProps,
   SuccessMessageProps,
-} from "@/components/UpsellingKit/UpsellRequestResponseDialog"
+} from "@/sds/UpsellingKit/UpsellRequestResponseDialog"
 
 export type ActionProps = {
   /**

@@ -1,6 +1,6 @@
-import Svg, { Path } from "react-native-svg";
-import type { SvgProps } from "react-native-svg";
-import { Ref, forwardRef } from "react";
+import { Ref, forwardRef } from "react"
+import Svg, { Path } from "react-native-svg"
+import type { SvgProps } from "react-native-svg"
 const SvgChartLine = (props: SvgProps, ref: Ref<Svg>) => (
   <Svg
     fill="none"
@@ -21,6 +21,6 @@ const SvgChartLine = (props: SvgProps, ref: Ref<Svg>) => (
       d="m4 13 4.5-4 3.5 1 4.5-4L20 9M5.5 17 9 13.5l3.5 2 4-3.5 3.5 2.5"
     />
   </Svg>
-);
-const ForwardRef = forwardRef(SvgChartLine);
-export default ForwardRef;
+)
+const ForwardRef = forwardRef(SvgChartLine)
+export default ForwardRef

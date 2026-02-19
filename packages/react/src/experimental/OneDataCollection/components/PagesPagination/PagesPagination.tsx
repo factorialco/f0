@@ -1,4 +1,4 @@
-import { OnePagination } from "@/experimental/OnePagination"
+import { OnePagination } from "@/ui/OnePagination"
 import { isPageBasedPagination, PaginationInfo } from "@/hooks/datasource"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"

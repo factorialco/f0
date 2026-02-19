@@ -1,6 +1,6 @@
-import Svg, { Path } from "react-native-svg";
-import type { SvgProps } from "react-native-svg";
-import { Ref, forwardRef } from "react";
+import { Ref, forwardRef } from "react"
+import Svg, { Path } from "react-native-svg"
+import type { SvgProps } from "react-native-svg"
 const SvgDiscover = (props: SvgProps, ref: Ref<Svg>) => (
   <Svg
     fill="none"
@@ -20,6 +20,6 @@ const SvgDiscover = (props: SvgProps, ref: Ref<Svg>) => (
       d="M18.638 6.509a.64.64 0 0 0-.57 0 .66.66 0 0 0-.27.263c-.03.05-.06.112-.08.157l-.005.01-.413.878-.914.14-.011.002a2 2 0 0 0-.172.031.65.65 0 0 0-.33.192.65.65 0 0 0-.162.517.66.66 0 0 0 .15.336c.038.046.085.094.12.129l.008.008.675.69-.16.98-.002.012c-.008.05-.02.116-.024.175a.642.642 0 0 0 .514.696.65.65 0 0 0 .385-.05c.054-.024.114-.056.156-.08l.01-.005.81-.447.81.447.01.005c.042.024.102.056.156.08.05.022.2.085.385.05a.64.64 0 0 0 .514-.697 2 2 0 0 0-.024-.174l-.002-.012-.16-.98.675-.69.008-.008c.034-.035.082-.083.119-.129a.66.66 0 0 0 .15-.336.65.65 0 0 0-.161-.517.65.65 0 0 0-.33-.192 2 2 0 0 0-.172-.031l-.011-.002-.914-.14-.413-.878-.005-.01a2 2 0 0 0-.08-.157.66.66 0 0 0-.27-.263"
     />
   </Svg>
-);
-const ForwardRef = forwardRef(SvgDiscover);
-export default ForwardRef;
+)
+const ForwardRef = forwardRef(SvgDiscover)
+export default ForwardRef

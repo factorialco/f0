@@ -26,6 +26,8 @@ export type TextareaProps = Pick<
   | "status"
   | "hint"
   | "error"
+  | "size"
+  | "loading"
 >
 
 const _Textarea: React.FC<TextareaProps> = Component(

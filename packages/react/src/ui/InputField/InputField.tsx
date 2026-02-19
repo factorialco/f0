@@ -16,7 +16,7 @@ import { F0Avatar } from "@/components/avatars/F0Avatar/F0Avatar"
 import { AvatarVariant } from "@/components/avatars/F0Avatar/types"
 import { F0ButtonToggle } from "@/components/F0ButtonToggle/F0ButtonToggle"
 import { F0Icon, IconType } from "@/components/F0Icon"
-import { Spinner } from "@/experimental/Information/Spinner"
+import { Spinner } from "@/ui/Spinner"
 import { CrossedCircle } from "@/icons/app"
 import { cn, focusRing } from "@/lib/utils.ts"
 
@@ -110,7 +110,7 @@ const inputFieldStatusVariants = cva({
         "border-f1-border-warning-bold focus-within:border-f1-border-warning-bold focus-within:ring-f1-border-warning",
       info: "border-f1-border-info-bold focus-within:border-f1-border-info-bold focus-within:ring-f1-border-info",
       error:
-        "border-f1-border-critical-bold focus-within:border-f1-border-critical-bold focus-within:ring-f1-border-critical",
+        "border-f1-border-critical-bold focus-within:border-f1-border-critical-bold focus-within:ring-f1-border-critical bg-f1-background-critical bg-opacity-10",
     },
     disabled: {
       true: "",
@@ -395,12 +395,12 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
         className={cn(
           "flex flex-col gap-2",
           "pointer-events-none",
-          disabled && "cursor-not-allowed opacity-50",
+          disabled && "cursor-not-allowed",
           className
         )}
         ref={ref}
       >
-        {((!hideLabel && label) || maxLength) && (
+        {((!hideLabel && label) || (maxLength && !hideMaxLength)) && (
           <div
             className={cn(
               "flex max-w-full items-center",
@@ -442,7 +442,7 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
               disabled: disabled || readonly,
             }),
             readonly && "border-f1-border-secondary bg-f1-background-secondary",
-            disabled && "cursor-not-allowed",
+            disabled && "cursor-not-allowed bg-f1-background-tertiary",
             inputFieldVariants({ size, canGrow })
           )}
           data-testid="input-field-wrapper"

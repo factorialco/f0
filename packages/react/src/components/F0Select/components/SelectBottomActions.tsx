@@ -1,5 +1,6 @@
 import { F0Button, F0ButtonProps } from "@/components/F0Button"
 import { IconType } from "@/components/F0Icon"
+import { useI18n } from "@/lib/providers/i18n"
 
 export type Action = {
   label: string
@@ -11,13 +12,22 @@ export type Action = {
 
 interface SelectBottomActionsProps {
   actions?: Action[]
+  showApplyButton?: boolean
+  onApply?: () => void
 }
 
-export const SelectBottomActions = ({ actions }: SelectBottomActionsProps) => {
-  if (!actions) return null
+export const SelectBottomActions = ({
+  actions,
+  showApplyButton,
+  onApply,
+}: SelectBottomActionsProps) => {
+  const i18n = useI18n()
+
+  if (!actions && !showApplyButton) return null
+
   return (
-    <div className="flex w-full flex-row gap-2 border-0 border-t border-solid border-f1-border-secondary p-2">
-      {actions.map((action) => (
+    <div className="flex w-full flex-row items-center gap-2 border-0 border-t border-solid border-f1-border-secondary p-2">
+      {actions?.map((action) => (
         <F0Button
           key={action.label}
           variant={action.variant}
@@ -26,6 +36,11 @@ export const SelectBottomActions = ({ actions }: SelectBottomActionsProps) => {
           label={action.label}
         />
       ))}
+      {showApplyButton && (
+        <div className="ml-auto">
+          <F0Button onClick={onApply} label={i18n.select.applySelection} />
+        </div>
+      )}
     </div>
   )
 }

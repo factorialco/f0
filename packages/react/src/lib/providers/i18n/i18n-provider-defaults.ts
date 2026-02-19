@@ -66,15 +66,10 @@ export const defaultTranslations = {
       singular: "Selected",
       plural: "Selected",
       all: "All selected",
+      allOnPage: "All items on this page are selected",
+      selectAllItems: "Select all {{total}} items",
+      allItemsSelected: "All {{total}} items selected",
     },
-  },
-  syncStatus: {
-    synced: "Sync completed successfully.",
-    syncing: "Sync in progress.",
-    pending: "Not yet started.",
-    partiallySynced: "All aggregated data was synced but at least 1 failed.",
-    outdated: "Data might need to be synced again.",
-    failed: "Sync failed.",
   },
   filters: {
     searchPlaceholder: "Search filters...",
@@ -260,6 +255,7 @@ export const defaultTranslations = {
     inputPlaceholder:
       "Ask about time, people, or company info and a lot of other things...",
     stopAnswerGeneration: "Stop generating",
+    responseStopped: "You stopped this response",
     sendMessage: "Send message",
     thoughtsGroupTitle: "Reflection",
     resourcesGroupTitle: "Resources",
@@ -278,11 +274,36 @@ export const defaultTranslations = {
         placeholder: "Share what didn’t work",
       },
     },
+    expandChat: "Expand chat",
+    collapseChat: "Collapse chat",
     ask: "Ask One",
+    growth: {
+      demoCard: {
+        title: "See {{moduleName}} in action",
+        actionLabel: "Start demo",
+      },
+      bookAMeetingCard: {
+        title: "Talk with an expert",
+        schedule: "Mon-Fri · 09:00-21:00 (CEST)",
+        actionLabel: "Book a meeting",
+      },
+      questionCard: {
+        actionLabel: "Next",
+        skipLabel: "Skip",
+        sendLabel: "Send",
+      },
+      moduleCard: {
+        actionLabel: "Learn more",
+      },
+      faqCard: {
+        title: "Questions before getting started",
+      },
+    },
   },
   select: {
     noResults: "No results found",
     loadingMore: "Loading...",
+    applySelection: "Apply selection",
   },
   numberInput: {
     between: "It should be between {{min}} and {{max}}",
@@ -373,12 +394,64 @@ export const defaultTranslations = {
     ordered: "Ordered",
     task: "Task",
     details: "Dropdown",
+    video: "Video",
+    videoUrlPrompt: "Enter a YouTube or Vimeo URL",
+    videoUrlInvalid: "Please enter a valid YouTube or Vimeo URL",
     link: "Link",
     linkPlaceholder: "Enter a link",
     groups: {
       textStyles: "Text Styles",
       lists: "Lists",
       blocks: "Blocks",
+    },
+    ai: {
+      enhanceButtonLabel: "Enhance",
+      loadingEnhanceLabel: "Loading...",
+      defaultError: "An error occurred while loading",
+      closeErrorButtonLabel: "Continue editing",
+      acceptChangesButtonLabel: "Accept",
+      rejectChangesButtonLabel: "Reject",
+      repeatButtonLabel: "Repeat",
+      customPromptPlaceholder: "What do you want to do?",
+    },
+  },
+  forms: {
+    actionBar: {
+      unsavedChanges: "You have changes pending to be saved",
+      discard: "Discard",
+      issues: {
+        one: "{{count}} issue",
+        other: "{{count}} issues",
+      },
+    },
+    validation: {
+      required: "This field is required",
+      invalidType: "Invalid value",
+      string: {
+        email: "Enter a valid email address",
+        url: "Enter a valid URL",
+        min: "Must be at least {{min}} characters",
+        max: "Must be at most {{max}} characters",
+      },
+      number: {
+        min: "Must be at least {{min}}",
+        max: "Must be at most {{max}}",
+        positive: "Must be a positive number",
+        negative: "Must be a negative number",
+        integer: "Must be a whole number",
+      },
+      date: {
+        min: "Date must be after {{min}}",
+        max: "Date must be before {{max}}",
+        invalid: "Enter a valid date",
+      },
+      array: {
+        min: "Select at least {{min}} option",
+        max: "Select at most {{max}} options",
+      },
+      checkbox: {
+        mustBeChecked: "This option must be selected",
+      },
     },
   },
 } as const

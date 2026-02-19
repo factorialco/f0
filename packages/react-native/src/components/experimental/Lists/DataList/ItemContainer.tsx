@@ -1,17 +1,20 @@
-import { ReactElement, ReactNode } from "react";
-import { CopyAction } from "./actions/CopyAction";
-import { cn } from "../../../../lib/utils";
-import { Icon, IconType } from "../../../Icon";
-import { View, Text } from "react-native";
-import { GenericAction } from "./actions/GenericAction";
-import { ActionType } from ".";
+import { ReactElement, ReactNode } from "react"
+import { View, Text } from "react-native"
+
+import { cn } from "../../../../lib/utils"
+import { Icon, IconType } from "../../../Icon"
+
+import { CopyAction } from "./actions/CopyAction"
+import { GenericAction } from "./actions/GenericAction"
+
+import { ActionType } from "."
 
 type ItemContainerProps = {
-  leftIcon?: IconType | (() => ReactElement);
-  action?: ActionType;
-  text: string;
-  className?: string;
-};
+  leftIcon?: IconType | (() => ReactElement)
+  action?: ActionType
+  text: string
+  className?: string
+}
 
 export const ItemContainer = (props: ItemContainerProps) => {
   const {
@@ -19,7 +22,7 @@ export const ItemContainer = (props: ItemContainerProps) => {
     leftIcon: LeftIcon,
     className,
     action = { type: "noop" },
-  } = props;
+  } = props
 
   return (
     <View className="flex rounded font-medium text-f1-foreground *:flex-1">
@@ -38,37 +41,37 @@ export const ItemContainer = (props: ItemContainerProps) => {
         </Text>
       </Action>
     </View>
-  );
-};
+  )
+}
 
 const Action = ({
   children,
   action,
   ...props
 }: {
-  className: string;
-  action: ActionType;
-  children: ReactNode;
+  className: string
+  action: ActionType
+  children: ReactNode
 }) => {
-  const type = action.type;
+  const type = action.type
   switch (type) {
     case "copy":
       return (
         <CopyAction {...action} {...props}>
           {children}
         </CopyAction>
-      );
+      )
     case "generic":
       return (
         <GenericAction {...action} {...props}>
           {children}
         </GenericAction>
-      );
+      )
     case "noop":
-      return <View {...props}>{children}</View>;
+      return <View {...props}>{children}</View>
     default: {
-      const _exhaustiveCheck: never = type;
-      return _exhaustiveCheck;
+      const _exhaustiveCheck: never = type
+      return _exhaustiveCheck
     }
   }
-};
+}

@@ -1,17 +1,19 @@
+import { ComponentProps, useMemo } from "react"
+import { View } from "react-native"
+
 import {
   Avatar as AvatarComponent,
   AvatarFallback,
   AvatarImage,
-} from "../../../ui/avatar";
-import { ComponentProps, useMemo } from "react";
-import { Badge, BadgeProps } from "../../Badge";
-import { getAvatarColor, getInitials } from "./utils";
-import { View } from "react-native";
-import { ModuleAvatar, ModuleAvatarProps } from "../ModuleAvatar";
-import { AvatarBadge } from "../types";
+} from "../../../ui/avatar"
+import { Badge, BadgeProps } from "../../Badge"
+import { ModuleAvatar, ModuleAvatarProps } from "../ModuleAvatar"
+import { AvatarBadge } from "../types"
+
+import { getAvatarColor, getInitials } from "./utils"
 
 const getAvatarSize = (
-  size: ShadAvatarProps["size"],
+  size: ShadAvatarProps["size"]
 ): ModuleAvatarProps["size"] | undefined => {
   const sizeMap: Partial<
     Record<
@@ -22,13 +24,13 @@ const getAvatarSize = (
     xlarge: "lg",
     large: "md",
     small: "sm",
-  } as const;
+  } as const
 
-  return size && sizeMap[size] ? sizeMap[size] : sizeMap.small;
-};
+  return size && sizeMap[size] ? sizeMap[size] : sizeMap.small
+}
 
 const getBadgeSize = (
-  size: ShadAvatarProps["size"],
+  size: ShadAvatarProps["size"]
 ): BadgeProps["size"] | undefined => {
   const sizeMap: Partial<
     Record<Exclude<ShadAvatarProps["size"], undefined>, BadgeProps["size"]>
@@ -36,21 +38,21 @@ const getBadgeSize = (
     xlarge: "lg",
     large: "md",
     small: "sm",
-  } as const;
+  } as const
 
-  return size && sizeMap[size] ? sizeMap[size] : sizeMap.small;
-};
+  return size && sizeMap[size] ? sizeMap[size] : sizeMap.small
+}
 
-type ShadAvatarProps = ComponentProps<typeof AvatarComponent>;
+type ShadAvatarProps = ComponentProps<typeof AvatarComponent>
 
 type Props = {
-  type: ShadAvatarProps["type"];
-  name: string | string[];
-  src?: string;
-  size?: ShadAvatarProps["size"];
-  color?: ShadAvatarProps["color"] | "random";
-  badge?: AvatarBadge;
-} & Pick<ShadAvatarProps, "aria-label" | "aria-labelledby">;
+  type: ShadAvatarProps["type"]
+  name: string | string[]
+  src?: string
+  size?: ShadAvatarProps["size"]
+  color?: ShadAvatarProps["color"] | "random"
+  badge?: AvatarBadge
+} & Pick<ShadAvatarProps, "aria-label" | "aria-labelledby">
 
 export const BaseAvatar = ({
   src,
@@ -62,15 +64,15 @@ export const BaseAvatar = ({
   "aria-labelledby": ariaLabelledby,
   badge,
 }: Props) => {
-  const initials = getInitials(name, size);
+  const initials = getInitials(name, size)
   const avatarColor =
     color === "random"
       ? getAvatarColor(Array.isArray(name) ? name.join("") : name)
-      : color;
+      : color
 
-  const hasAria = Boolean(ariaLabel || ariaLabelledby);
-  const badgeSize = getBadgeSize(size);
-  const moduleAvatarSize = getAvatarSize(size);
+  const hasAria = Boolean(ariaLabel || ariaLabelledby)
+  const badgeSize = getBadgeSize(size)
+  const moduleAvatarSize = getAvatarSize(size)
 
   const badgeContent = useMemo(
     () =>
@@ -84,8 +86,8 @@ export const BaseAvatar = ({
           )}
         </>
       ) : null,
-    [badge, badgeSize, moduleAvatarSize],
-  );
+    [badge, badgeSize, moduleAvatarSize]
+  )
 
   return (
     <View
@@ -103,7 +105,7 @@ export const BaseAvatar = ({
           data-a11y-color-contrast-ignore
           className={
             src
-              ? "dark:bg-f1-background-inverse-secondary bg-f1-background"
+              ? "bg-f1-background dark:bg-f1-background-inverse-secondary"
               : ""
           }
         >
@@ -117,10 +119,10 @@ export const BaseAvatar = ({
         </AvatarComponent>
       </View>
       {badge && (
-        <View className="absolute -bottom-0.5 -right-0.5">{badgeContent}</View>
+        <View className="absolute -right-0.5 -bottom-0.5">{badgeContent}</View>
       )}
     </View>
-  );
-};
+  )
+}
 
-BaseAvatar.displayName = "BaseAvatar";
+BaseAvatar.displayName = "BaseAvatar"

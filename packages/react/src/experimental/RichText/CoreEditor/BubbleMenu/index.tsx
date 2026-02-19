@@ -1,7 +1,9 @@
 import { BubbleMenu, Editor, isTextSelection } from "@tiptap/react"
 import { NodeSelection } from "prosemirror-state"
 
-import { Toolbar } from "../Toolbar"
+import { EnhanceActivator } from "../../RichTextEditor/Enhance"
+import { enhanceConfig, lastIntentType } from "../../RichTextEditor/utils/types"
+import { Toolbar, ToolbarDivider } from "../Toolbar"
 
 interface EditorBubbleMenuProps {
   editor: Editor
@@ -10,6 +12,17 @@ interface EditorBubbleMenuProps {
   isFullscreen: boolean
   editorId: string
   plainHtmlMode?: boolean
+  // Optional enhance props
+  enhanceConfig?: enhanceConfig
+  onEnhanceWithAI?: (
+    selectedOption?: string,
+    customIntent?: string
+  ) => Promise<void>
+  isLoadingEnhance?: boolean
+  setLastIntent?: (lastIntent: lastIntentType) => void
+  // Hide bubble menu when enhance is active
+  isAcceptChangesOpen?: boolean
+  hasError?: boolean
 }
 
 export const EditorBubbleMenu = ({
@@ -19,7 +32,19 @@ export const EditorBubbleMenu = ({
   isToolbarOpen,
   isFullscreen,
   plainHtmlMode = false,
+  enhanceConfig,
+  onEnhanceWithAI,
+  isLoadingEnhance = false,
+  setLastIntent,
+  isAcceptChangesOpen = false,
+  hasError = false,
 }: EditorBubbleMenuProps) => {
+  const showEnhance = enhanceConfig && onEnhanceWithAI && setLastIntent
+
+  // Hide bubble menu during enhance flow
+  const shouldHideForEnhance =
+    isLoadingEnhance || isAcceptChangesOpen || hasError
+
   return (
     <BubbleMenu
       tippyOptions={{
@@ -61,8 +86,24 @@ export const EditorBubbleMenu = ({
         return true
       }}
     >
-      {!isToolbarOpen && (
-        <div className="dark z-50 flex w-max flex-row items-center rounded-lg border border-solid border-f1-border bg-f1-background p-1 drop-shadow-sm">
+      {!isToolbarOpen && !shouldHideForEnhance && (
+        <div className="dark z-50 flex w-max flex-row items-center gap-1 rounded-lg border border-solid border-f1-border bg-f1-background p-1 drop-shadow-sm">
+          {showEnhance && (
+            <>
+              <EnhanceActivator
+                editor={editor}
+                onEnhanceWithAI={onEnhanceWithAI}
+                isLoadingEnhance={isLoadingEnhance}
+                enhanceConfig={enhanceConfig}
+                disableButtons={disableButtons}
+                hideLabel
+                position="top"
+                setLastIntent={setLastIntent}
+              />
+
+              <ToolbarDivider />
+            </>
+          )}
           <Toolbar
             editor={editor}
             disableButtons={disableButtons}

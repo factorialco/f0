@@ -1,9 +1,9 @@
+import * as Popover from "@radix-ui/react-popover"
 import { AnimatePresence, motion } from "motion/react"
 import React, { useEffect, useRef, useState } from "react"
 
-import { F0Icon } from "@/components/F0Icon"
+import { ButtonInternal } from "@/components/F0Button/internal"
 import { Ai, ChevronRight } from "@/icons/app"
-import { cn } from "@/lib/utils"
 import { Input } from "@/ui/input"
 
 import { EnhancementOption } from "../../utils/types"
@@ -11,25 +11,86 @@ import { EnhancementOption } from "../../utils/types"
 interface OptionProps {
   option: EnhancementOption
   onClick: (option: EnhancementOption) => void
-  selectedOption?: EnhancementOption | null
+  isSelected?: boolean
 }
 
-const Option = ({ option, onClick, selectedOption = null }: OptionProps) => {
+const Option = ({ option, onClick, isSelected = false }: OptionProps) => {
   return (
-    <div
+    <ButtonInternal
+      variant="ghost"
+      pressed={isSelected}
+      label={option.label}
+      icon={
+        option.subOptions && option.subOptions.length > 0
+          ? ChevronRight
+          : undefined
+      }
       onClick={() => onClick(option)}
-      className={cn(
-        "flex cursor-pointer flex-row items-center gap-2 rounded-md bg-f1-background p-2 hover:bg-f1-background-secondary",
-        selectedOption?.id === option.id && "bg-f1-background-secondary"
-      )}
-    >
-      <p className="text-neutral-40 text-md grow text-ellipsis font-normal">
-        {option.label}
-      </p>
-      {option.subOptions && option.subOptions.length > 0 && (
-        <F0Icon icon={ChevronRight} size="md" className="text-f1-icon" />
-      )}
-    </div>
+      className="w-full [&>div>span>div]:justify-start"
+    />
+  )
+}
+
+interface OptionWithSubMenuProps {
+  option: EnhancementOption
+  onSelect: (option: EnhancementOption) => void
+  onSubSelect: (option: EnhancementOption) => void
+  isOpen: boolean
+  onOpenChange: (open: boolean) => void
+}
+
+const OptionWithSubMenu = ({
+  option,
+  onSelect,
+  onSubSelect,
+  isOpen,
+  onOpenChange,
+}: OptionWithSubMenuProps) => {
+  return (
+    <Popover.Root open={isOpen} onOpenChange={onOpenChange}>
+      <Popover.Trigger asChild>
+        <div>
+          <Option
+            option={option}
+            onClick={() => onSelect(option)}
+            isSelected={isOpen}
+          />
+        </div>
+      </Popover.Trigger>
+      <Popover.Portal>
+        <Popover.Content
+          side="right"
+          sideOffset={8}
+          align="start"
+          alignOffset={-4}
+          collisionPadding={10}
+          avoidCollisions
+          style={{ zIndex: 10000 }}
+        >
+          <AnimatePresence>
+            {isOpen && (
+              <motion.div
+                className="scrollbar-macos max-h-60 max-w-60 overflow-y-auto rounded-lg border border-solid border-f1-border-secondary bg-f1-background p-1 drop-shadow-sm"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.15 }}
+              >
+                <div className="flex flex-col">
+                  {option.subOptions?.map((subOption) => (
+                    <Option
+                      key={subOption.id}
+                      onClick={onSubSelect}
+                      option={subOption}
+                    />
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </Popover.Content>
+      </Popover.Portal>
+    </Popover.Root>
   )
 }
 
@@ -52,12 +113,9 @@ const AIEnhanceMenu = ({
   enhancementOptions,
   inputPlaceholder,
 }: AIEnhanceMenuProps) => {
-  const [selectedOption, setSelectedOption] =
-    useState<EnhancementOption | null>(null)
+  const [openSubMenuId, setOpenSubMenuId] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState("")
   const customInputRef = useRef<HTMLInputElement>(null)
-  const menuRef = useRef<HTMLDivElement>(null)
-  const subMenuRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (customInputRef.current) {
@@ -65,38 +123,9 @@ const AIEnhanceMenu = ({
     }
   }, [])
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (!selectedOption) return
-      if (!(event.target instanceof Element)) return
-
-      const clickedOnMainMenu = menuRef.current?.contains(event.target)
-      const clickedOnSubMenu = subMenuRef.current?.contains(event.target)
-      const optionItem = event.target.closest(".option-item")
-
-      if (
-        !clickedOnSubMenu &&
-        (!clickedOnMainMenu ||
-          (clickedOnMainMenu && optionItem?.id !== selectedOption.id))
-      ) {
-        setSelectedOption(null)
-      }
-    }
-
-    if (selectedOption) {
-      document.addEventListener("mousedown", handleClickOutside)
-    }
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside)
-    }
-  }, [selectedOption])
-
   const handleOptionSelect = (option: EnhancementOption) => {
     if (option.subOptions && option.subOptions.length > 0) {
-      setSelectedOption((prevSelected) =>
-        prevSelected?.id === option.id ? null : option
-      )
+      setOpenSubMenuId((prev) => (prev === option.id ? null : option.id))
     } else {
       onSelect({ selectedIntent: option.id, customIntent: undefined })
       onClose()
@@ -126,65 +155,52 @@ const AIEnhanceMenu = ({
   )
 
   return (
-    <div className="relative">
-      <div
-        ref={menuRef}
-        className="flex max-h-60 w-80 flex-col overflow-hidden rounded-lg border border-solid border-f1-border bg-f1-background drop-shadow-sm"
-      >
-        <div className="flex w-full flex-row items-center p-2">
-          <Input
-            icon={Ai}
-            label={inputPlaceholder}
-            hideLabel
-            type="text"
-            placeholder={inputPlaceholder}
-            autoFocus
-            value={searchQuery}
-            onChange={setSearchQuery}
-            onKeyDown={handleKeyDown}
-            ref={customInputRef}
-          />
-        </div>
-        {enhancementOptions.length > 0 && (
-          <div className="scrollbar-macos flex flex-col overflow-y-auto px-1 pb-1">
-            {filteredOptions.map((option) => (
-              <div id={option.id} className="option-item" key={option.id}>
-                <Option
-                  onClick={handleOptionSelect}
-                  option={option}
-                  selectedOption={selectedOption}
-                />
-              </div>
-            ))}
-          </div>
-        )}
+    <div className="flex max-w-80 flex-col overflow-hidden rounded-lg border border-solid border-f1-border-secondary bg-f1-background drop-shadow-sm">
+      <div className="flex w-full flex-row items-center p-2 [&>div]:w-full">
+        <Input
+          icon={Ai}
+          label={inputPlaceholder}
+          hideLabel
+          type="text"
+          placeholder={inputPlaceholder}
+          autoFocus
+          value={searchQuery}
+          onChange={setSearchQuery}
+          onKeyDown={handleKeyDown}
+          ref={customInputRef}
+        />
       </div>
+      {enhancementOptions.length > 0 && (
+        <div className="scrollbar-macos flex flex-col overflow-y-auto px-1 pb-1">
+          {filteredOptions.map((option) => {
+            const hasSubOptions =
+              option.subOptions && option.subOptions.length > 0
 
-      <AnimatePresence>
-        {selectedOption &&
-          selectedOption.subOptions &&
-          selectedOption.subOptions.length > 0 && (
-            <motion.div
-              ref={subMenuRef}
-              className="absolute bottom-0 left-full z-50 max-h-60 w-60 overflow-y-auto rounded-lg border border-solid border-f1-border bg-f1-background p-1 drop-shadow-sm"
-              style={{ marginLeft: "8px" }}
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -10 }}
-              transition={{ duration: 0.2 }}
-            >
-              <div className="scrollbar-macos flex flex-col overflow-y-auto">
-                {selectedOption.subOptions.map((subOption) => (
-                  <Option
-                    key={subOption.id}
-                    onClick={handleSubOptionSelect}
-                    option={subOption}
-                  />
-                ))}
-              </div>
-            </motion.div>
-          )}
-      </AnimatePresence>
+            if (hasSubOptions) {
+              return (
+                <OptionWithSubMenu
+                  key={option.id}
+                  option={option}
+                  onSelect={handleOptionSelect}
+                  onSubSelect={handleSubOptionSelect}
+                  isOpen={openSubMenuId === option.id}
+                  onOpenChange={(open) =>
+                    setOpenSubMenuId(open ? option.id : null)
+                  }
+                />
+              )
+            }
+
+            return (
+              <Option
+                key={option.id}
+                onClick={handleOptionSelect}
+                option={option}
+              />
+            )
+          })}
+        </div>
+      )}
     </div>
   )
 }

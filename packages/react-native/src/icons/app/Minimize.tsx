@@ -1,6 +1,6 @@
-import Svg, { Path } from "react-native-svg";
-import type { SvgProps } from "react-native-svg";
-import { Ref, forwardRef } from "react";
+import { Ref, forwardRef } from "react"
+import Svg, { Path } from "react-native-svg"
+import type { SvgProps } from "react-native-svg"
 const SvgMinimize = (props: SvgProps, ref: Ref<Svg>) => (
   <Svg
     fill="none"
@@ -16,6 +16,6 @@ const SvgMinimize = (props: SvgProps, ref: Ref<Svg>) => (
       d="m19 5-5.5 5.5m0 0h4m-4 0v-4M5 19l5.5-5.5m0 0h-4m4 0v4"
     />
   </Svg>
-);
-const ForwardRef = forwardRef(SvgMinimize);
-export default ForwardRef;
+)
+const ForwardRef = forwardRef(SvgMinimize)
+export default ForwardRef

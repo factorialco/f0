@@ -1,3 +1,3 @@
-export * from "./AlertTab";
-export * from "./DotTag";
-export * from "./RawTag";
+export * from "./AlertTab"
+export * from "./DotTag"
+export * from "./RawTag"

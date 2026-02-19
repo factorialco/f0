@@ -26,9 +26,9 @@ import { AppIcons, ModuleIcons } from "@factorialco/f0-react-native";
 | testID    | string                       |         | Test ID for testing                     |
 | ...props  | SvgProps                     |         | Additional props for the SVG component  |
 
-## Styling with NativeWind
+## Styling with UniWind
 
-The Icon component is designed to work with NativeWind, allowing you to style icons using Tailwind CSS classes:
+The Icon component is designed to work with UniWind, allowing you to style icons using Tailwind CSS classes:
 
 ```tsx
 // Style using Tailwind CSS classes

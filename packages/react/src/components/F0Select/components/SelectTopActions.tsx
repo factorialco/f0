@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "motion/react"
-import { useState } from "react"
+import { useCallback, useState } from "react"
 
 import { OneFilterPicker } from "@/components/OneFilterPicker"
 import { GroupingSelector } from "@/experimental/OneDataCollection/Settings/components/GroupingSelector"
@@ -31,6 +31,8 @@ interface SelectTopActionsProps<
   currentGrouping?: GroupingState<R, Grouping>
   onGroupingChange?: (grouping: GroupingState<R, Grouping>) => void
   asList?: boolean
+  isFiltersOpen?: boolean
+  onFiltersOpenChange?: (open: boolean) => void
 }
 
 export const SelectTopActions = <R extends RecordType = RecordType>({
@@ -45,10 +47,20 @@ export const SelectTopActions = <R extends RecordType = RecordType>({
   currentFilters,
   onFiltersChange,
   asList = false,
+  onFiltersOpenChange,
 }: SelectTopActionsProps<R>) => {
   const i18n = useI18n()
 
-  const [isFiltersOpen, setIsFiltersOpen] = useState(false)
+  const [isFiltersOpenLocal, setIsFiltersOpenLocal] = useState(false)
+
+  // Stable callback that updates both local and parent state
+  const handleFiltersOpenChange = useCallback(
+    (open: boolean) => {
+      setIsFiltersOpenLocal(open)
+      onFiltersOpenChange?.(open)
+    },
+    [onFiltersOpenChange]
+  )
 
   if (
     !showSearchBox &&
@@ -70,7 +82,7 @@ export const SelectTopActions = <R extends RecordType = RecordType>({
                 onChange={onSearchChange}
                 value={searchValue}
                 debounceTime={400}
-                autoFocus={!asList && !isFiltersOpen}
+                autoFocus={!asList && !isFiltersOpenLocal}
                 clearable
               />
             </div>
@@ -81,7 +93,7 @@ export const SelectTopActions = <R extends RecordType = RecordType>({
               value={currentFilters}
               onChange={onFiltersChange}
               mode={asList ? "simple" : "compact"}
-              onOpenChange={setIsFiltersOpen}
+              onOpenChange={handleFiltersOpenChange}
             />
           )}
         </div>

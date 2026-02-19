@@ -351,7 +351,10 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
             )}
           </div>
           {(metadata || children) && (
-            <CardContent className="pointer-events-none">
+            <CardContent
+              className="pointer-events-none relative z-10 [&_a]:pointer-events-auto [&_button]:pointer-events-auto [&_input]:pointer-events-auto [&_select]:pointer-events-auto [&_textarea]:pointer-events-auto [&_[role='button']]:pointer-events-auto [&_[tabindex]]:pointer-events-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
               {metadata && (
                 <div
                   className={cn(

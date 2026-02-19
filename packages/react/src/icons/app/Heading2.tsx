@@ -1,5 +1,4 @@
 import type { SVGProps } from "react"
-
 import { Ref, forwardRef } from "react"
 const SvgHeading2 = (
   props: SVGProps<SVGSVGElement>,

@@ -1,26 +1,27 @@
-import { ReactElement } from "react";
+import { ReactElement } from "react"
+import { View, Text } from "react-native"
 
-import { ItemContainer } from "./ItemContainer";
-import { cn } from "../../../../lib/utils";
-import { IconType } from "../../../Icon";
-import { PersonAvatar } from "../../../Avatars/PersonAvatar";
-import { CompanyAvatar } from "../../../Avatars/CompanyAvatar";
-import { TeamAvatar } from "../../../Avatars/TeamAvatar";
-import { DotTag, DotTagProps } from "../../../Tags/DotTag";
-import { View, Text } from "react-native";
+import { cn } from "../../../../lib/utils"
+import { CompanyAvatar } from "../../../Avatars/CompanyAvatar"
+import { PersonAvatar } from "../../../Avatars/PersonAvatar"
+import { TeamAvatar } from "../../../Avatars/TeamAvatar"
+import { IconType } from "../../../Icon"
+import { DotTag, DotTagProps } from "../../../Tags/DotTag"
+
+import { ItemContainer } from "./ItemContainer"
 
 export type DataListProps = {
-  children: ReactElement<Items>[] | ReactElement<Items>;
-  label?: string;
-  isHorizontalItem?: boolean;
-  tableView?: boolean;
-};
+  children: ReactElement<Items>[] | ReactElement<Items>
+  label?: string
+  isHorizontalItem?: boolean
+  tableView?: boolean
+}
 
 type Items =
   | typeof Item
   | typeof PersonItem
   | typeof CompanyItem
-  | typeof TeamItem;
+  | typeof TeamItem
 
 const _DataList = ({
   children,
@@ -33,15 +34,15 @@ const _DataList = ({
       className={cn(
         isHorizontalItem
           ? "flex min-h-12 flex-shrink flex-row"
-          : "min-w-32 max-w-72",
-        tableView ? "px-[8px] pb-[10px] pt-[14px]" : "",
+          : "max-w-72 min-w-32",
+        tableView ? "px-[8px] pt-[14px] pb-[10px]" : ""
       )}
     >
       {!!label && (
         <Text
           className={cn(
             "px-1.5 text-f1-foreground-secondary",
-            isHorizontalItem ? "mt-1.5 w-36 shrink-0" : "",
+            isHorizontalItem ? "mt-1.5 w-36 shrink-0" : ""
           )}
         >
           {label}
@@ -51,30 +52,30 @@ const _DataList = ({
         {children}
       </View>
     </View>
-  );
-};
+  )
+}
 
 export type ItemProps = {
-  text: string;
-  icon?: IconType;
-  action?: ActionType;
-};
+  text: string
+  icon?: IconType
+  action?: ActionType
+}
 
-export type ActionType = CopyActionType | GenericActionType | NoopActionType;
+export type ActionType = CopyActionType | GenericActionType | NoopActionType
 
 export type CopyActionType = {
-  type: "copy";
-  text?: string;
-};
+  type: "copy"
+  text?: string
+}
 
 export type GenericActionType = {
-  type: "generic";
-  handlePress?: () => void;
-};
+  type: "generic"
+  handlePress?: () => void
+}
 
 export type NoopActionType = {
-  type: "noop";
-};
+  type: "noop"
+}
 
 const Item = ({ text, icon, action }: ItemProps) => {
   return (
@@ -83,17 +84,17 @@ const Item = ({ text, icon, action }: ItemProps) => {
       leftIcon={icon}
       action={getInternalAction(action, text)}
     />
-  );
-};
+  )
+}
 
-type URL = string;
+type URL = string
 
 type EmployeeItemProps = {
-  firstName: string;
-  lastName: string;
-  avatarUrl?: URL;
-  action?: ActionType;
-};
+  firstName: string
+  lastName: string
+  avatarUrl?: URL
+  action?: ActionType
+}
 
 const PersonItem = ({
   action,
@@ -101,7 +102,7 @@ const PersonItem = ({
   firstName,
   lastName,
 }: EmployeeItemProps) => {
-  const fullName = `${firstName} ${lastName}`;
+  const fullName = `${firstName} ${lastName}`
   return (
     <ItemContainer
       leftIcon={() => (
@@ -115,14 +116,14 @@ const PersonItem = ({
       text={fullName}
       action={getInternalAction(action, fullName)}
     />
-  );
-};
+  )
+}
 
 type CompanyItemProps = {
-  name: string;
-  avatarUrl?: URL;
-  action?: ActionType;
-};
+  name: string
+  avatarUrl?: URL
+  action?: ActionType
+}
 
 const CompanyItem = ({ avatarUrl, name, action }: CompanyItemProps) => {
   return (
@@ -133,13 +134,13 @@ const CompanyItem = ({ avatarUrl, name, action }: CompanyItemProps) => {
       text={name}
       action={getInternalAction(action, name)}
     />
-  );
-};
+  )
+}
 
 type TeamItemProps = {
-  name: string;
-  action?: ActionType;
-};
+  name: string
+  action?: ActionType
+}
 
 const TeamItem = ({ action, name }: TeamItemProps) => {
   return (
@@ -148,18 +149,18 @@ const TeamItem = ({ action, name }: TeamItemProps) => {
       text={name}
       action={getInternalAction(action, name)}
     />
-  );
-};
+  )
+}
 
-type DotTagItemProps = DotTagProps;
+type DotTagItemProps = DotTagProps
 
 const DotTagItem = ({ ...props }: DotTagItemProps) => {
   return (
     <View className="flex items-start pt-1">
       <DotTag {...props} />
     </View>
-  );
-};
+  )
+}
 
 /**
  * convert simplified action type received from user to internal action format
@@ -168,14 +169,14 @@ const DotTagItem = ({ ...props }: DotTagItemProps) => {
  */
 const getInternalAction = (
   action: ActionType | undefined,
-  defaultCopyText: string,
+  defaultCopyText: string
 ): ActionType | undefined => {
   if (action && action.type === "copy") {
-    return { type: "copy", text: action.text ?? defaultCopyText };
+    return { type: "copy", text: action.text ?? defaultCopyText }
   }
 
-  return action;
-};
+  return action
+}
 
 export const DataList = Object.assign(_DataList, {
   Item,
@@ -183,4 +184,4 @@ export const DataList = Object.assign(_DataList, {
   PersonItem,
   TeamItem,
   DotTagItem,
-});
+})

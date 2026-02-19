@@ -1,4 +1,4 @@
-import { ModuleIcons } from "../../../icons";
+import { ModuleIcons } from "../../../icons"
 
 export const modules = {
   "ai-reports": ModuleIcons.Reports,
@@ -59,6 +59,6 @@ export const modules = {
   "time-tracking": ModuleIcons.TimeTracking,
   timeoff: ModuleIcons.TimeOff,
   workflows: ModuleIcons.Workflows,
-} as const;
+} as const
 
-export type ModuleId = keyof typeof modules;
+export type ModuleId = keyof typeof modules

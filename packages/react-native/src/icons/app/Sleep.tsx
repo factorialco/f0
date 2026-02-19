@@ -1,6 +1,6 @@
-import Svg, { Path } from "react-native-svg";
-import type { SvgProps } from "react-native-svg";
-import { Ref, forwardRef } from "react";
+import { Ref, forwardRef } from "react"
+import Svg, { Path } from "react-native-svg"
+import type { SvgProps } from "react-native-svg"
 const SvgSleep = (props: SvgProps, ref: Ref<Svg>) => (
   <Svg
     fill="none"
@@ -16,6 +16,6 @@ const SvgSleep = (props: SvgProps, ref: Ref<Svg>) => (
       d="M10.5 20.5h-7l7-7h-7M20.5 10.5h-7l7-7h-7"
     />
   </Svg>
-);
-const ForwardRef = forwardRef(SvgSleep);
-export default ForwardRef;
+)
+const ForwardRef = forwardRef(SvgSleep)
+export default ForwardRef
