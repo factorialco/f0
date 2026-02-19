@@ -22,6 +22,7 @@
   @apply m-0 mb-2.5 ml-5 border-b-4 pl-4;
   color: rgb(101, 103, 107);
   border-left-color: rgb(206, 208, 212);
+  border-bottom: none;
 }
 
 .FactorialOneTextEditor .TextEditorTheme__h1 {

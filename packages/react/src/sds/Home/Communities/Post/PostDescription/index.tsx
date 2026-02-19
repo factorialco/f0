@@ -1,9 +1,9 @@
-import DOMPurify from "dompurify"
-
 import { Skeleton } from "@/ui/skeleton"
 
 import { withSkeleton } from "../../../../../lib/skeleton"
 import { cn } from "../../../../../lib/utils"
+import { RichTextDisplay } from "@/experimental/RichText/RichTextDisplay"
+
 import "./TextEditorTheme.css"
 
 type HTMLString = string
@@ -12,25 +12,15 @@ export type PostDescriptionProps = {
   content: HTMLString
   collapsed?: boolean
 }
-
-const linkClickHandler = (e: Event) => {
-  e.stopPropagation()
-}
-
 export const BasePostDescription = ({
   content,
   collapsed,
 }: PostDescriptionProps) => {
   const className = "FactorialOneTextEditor"
 
-  document.querySelectorAll(`.${className} a`).forEach((a) => {
-    a.removeEventListener("click", linkClickHandler)
-    a.addEventListener("click", linkClickHandler)
-  })
-
   return (
-    <div
-      dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(content) }}
+    <RichTextDisplay
+      content={content}
       className={cn(className, collapsed && "line-clamp-5")}
     />
   )
