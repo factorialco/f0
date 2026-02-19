@@ -1,32 +1,69 @@
+import { AgentState } from '@livekit/components-react';
 import { AIMessage } from '@copilotkit/shared';
+import { AssistantMessageProps } from '@copilotkit/react-ui';
+import { ClassValue } from 'cva';
+import { ComponentProps } from 'react';
+import { Context } from 'react';
 import { CopilotKitProps } from '@copilotkit/react-core';
 import { ForwardRefExoticComponent } from 'react';
 import { JSX as JSX_2 } from 'react';
+import { LocalAudioTrack } from 'livekit-client';
 import { Message } from '@copilotkit/shared';
+import { MessagesProps } from '@copilotkit/react-ui';
 import { ReactNode } from 'react';
 import { RefAttributes } from 'react';
+import { RemoteAudioTrack } from 'livekit-client';
 import { SVGProps } from 'react';
+import * as SwitchPrimitive from '@radix-ui/react-switch';
+import { TrackReferenceOrPlaceholder } from '@livekit/components-react';
+import { VariantProps } from 'cva';
 
-export declare const ActionItem: ({ title, status, inGroup }: ActionItemProps) => JSX_2.Element;
+export declare function A({ children, ...props }: React.AnchorHTMLAttributes<HTMLAnchorElement>): JSX_2.Element;
 
-export declare interface ActionItemProps {
-    title: string;
-    status?: "inProgress" | "executing" | "completed";
-    inGroup?: boolean;
-}
+export declare type ActionItemStatus = (typeof actionItemStatuses)[number];
+
+export declare const actionItemStatuses: readonly ["inProgress", "executing", "completed"];
+
+/* Excluded from this release type: AgentState */
 
 /**
- * @experimental This is an experimental component use it at your own risk
+ * Disclaimer configuration for the chat input
  */
-export declare const AiChat: () => JSX_2.Element | null;
+declare type AiChatDisclaimer = {
+    text: string;
+    link?: string;
+    linkText?: string;
+};
 
-export declare const AiChatProvider: ({ enabled, greeting, initialMessage, welcomeScreenSuggestions, onThumbsUp, onThumbsDown, children, agent, ...copilotKitProps }: AiChatProviderProps) => JSX_2.Element;
-
+/**
+ * Props for the AiChatProvider component
+ */
 export declare type AiChatProviderProps = {
     enabled?: boolean;
     greeting?: string;
     initialMessage?: string | string[];
     welcomeScreenSuggestions?: WelcomeScreenSuggestion[];
+    disclaimer?: AiChatDisclaimer;
+    /**
+     * Enable resizable chat window
+     * When enabled, the chat can be resized between 300px and 50% of the screen width
+     */
+    resizable?: boolean;
+    /**
+     * The default visualization mode for the chat
+     * When set to "fullscreen", the chat starts in fullscreen mode and auto-opens
+     * @default "sidepanel"
+     */
+    defaultVisualizationMode?: VisualizationMode;
+    /**
+     * When true, prevents switching between visualization modes (hides the expand/collapse button)
+     * @default false
+     */
+    lockVisualizationMode?: boolean;
+    /**
+     * Optional footer content rendered below the textarea
+     */
+    footer?: React.ReactNode;
     onThumbsUp?: (message: AIMessage, { threadId, feedback }: {
         threadId: string;
         feedback: string;
@@ -37,6 +74,9 @@ export declare type AiChatProviderProps = {
     }) => void;
 } & Pick<CopilotKitProps, "agent" | "credentials" | "children" | "runtimeUrl" | "showDevConsole" | "threadId" | "headers">;
 
+/**
+ * Return value type for the useAiChat hook
+ */
 declare type AiChatProviderReturnValue = {
     enabled: boolean;
     setEnabled: React.Dispatch<React.SetStateAction<boolean>>;
@@ -47,14 +87,6 @@ declare type AiChatProviderReturnValue = {
     tmp_setAgent: (agent?: string) => void;
     placeholders: string[];
     setPlaceholders: React.Dispatch<React.SetStateAction<string[]>>;
-    /**
-     * Set the amount of minutes after which the chat will be cleared automatically
-     * Set `null` to disable auto-clearing
-     *
-     * @default 15
-     */
-    setAutoClearMinutes: React.Dispatch<React.SetStateAction<number | null>>;
-    autoClearMinutes: number | null;
     /**
      * The initial message to display in the chat
      */
@@ -81,14 +113,47 @@ declare type AiChatProviderReturnValue = {
      */
     sendMessage: (message: string | Message) => void;
     /* Excluded from this release type: setSendMessageFunction */
-} & Pick<AiChatState, "greeting" | "agent">;
+    /**
+     * Current width of the chat window (for resizable mode)
+     */
+    chatWidth: number;
+    setChatWidth: React.Dispatch<React.SetStateAction<number>>;
+    /**
+     * Reset the chat width to the default value (360px)
+     */
+    resetChatWidth: () => void;
+    /**
+     * The current visualization mode of the chat
+     */
+    visualizationMode: VisualizationMode;
+    /**
+     * Set the visualization mode
+     */
+    setVisualizationMode: React.Dispatch<React.SetStateAction<VisualizationMode>>;
+    /**
+     * When true, prevents switching between visualization modes
+     */
+    lockVisualizationMode: boolean;
+    /**
+     * Optional footer content rendered below the textarea
+     */
+    footer?: React.ReactNode;
+} & Pick<AiChatState, "greeting" | "agent" | "disclaimer" | "resizable">;
 
+/**
+ * Internal state for the AiChat provider
+ */
 declare interface AiChatState {
     greeting?: string;
     enabled: boolean;
     agent?: string;
     initialMessage?: string | string[];
     welcomeScreenSuggestions?: WelcomeScreenSuggestion[];
+    disclaimer?: AiChatDisclaimer;
+    resizable?: boolean;
+    defaultVisualizationMode?: VisualizationMode;
+    lockVisualizationMode?: boolean;
+    footer?: React.ReactNode;
     placeholders?: string[];
     setPlaceholders?: React.Dispatch<React.SetStateAction<string[]>>;
     onThumbsUp?: (message: AIMessage, { threadId, feedback }: {
@@ -101,20 +166,24 @@ declare interface AiChatState {
     }) => void;
 }
 
-export declare type AiChatTranslations = TranslationShape<typeof aiTranslations>;
+/**
+ * AI Chat translations type
+ */
+export declare type AiChatTranslations = TranslationShape_2<typeof aiTranslations>;
 
 export declare function AiChatTranslationsProvider({ children, translations, }: AiChatTranslationsProviderProps): JSX.Element;
 
+/**
+ * Props for the AiChatTranslationsProvider component
+ */
 export declare interface AiChatTranslationsProviderProps {
-    children: ReactNode;
+    children: React.ReactNode;
     translations: AiChatTranslations;
 }
 
 /**
- * @experimental This is an experimental component use it at your own risk
+ * Default AI chat translations
  */
-export declare const AiFullscreenChat: () => JSX_2.Element | null;
-
 export declare const aiTranslations: {
     ai: {
         openChat: string;
@@ -125,6 +194,7 @@ export declare const aiTranslations: {
         defaultInitialMessage: string;
         inputPlaceholder: string;
         stopAnswerGeneration: string;
+        responseStopped: string;
         sendMessage: string;
         thoughtsGroupTitle: string;
         resourcesGroupTitle: string;
@@ -143,9 +213,15 @@ export declare const aiTranslations: {
                 placeholder: string;
             };
         };
+        expandChat: string;
+        collapseChat: string;
         ask: string;
     };
 };
+
+export declare function Blockquote({ children, ...props }: React.HTMLAttributes<HTMLQuoteElement>): JSX_2.Element;
+
+export declare const ChatSpinner: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
 
 export declare const defaultTranslations: {
     readonly countries: {
@@ -316,15 +392,10 @@ export declare const defaultTranslations: {
             readonly singular: "Selected";
             readonly plural: "Selected";
             readonly all: "All selected";
+            readonly allOnPage: "All items on this page are selected";
+            readonly selectAllItems: "Select all {{total}} items";
+            readonly allItemsSelected: "All {{total}} items selected";
         };
-    };
-    readonly syncStatus: {
-        readonly synced: "Sync completed successfully.";
-        readonly syncing: "Sync in progress.";
-        readonly pending: "Not yet started.";
-        readonly partiallySynced: "All aggregated data was synced but at least 1 failed.";
-        readonly outdated: "Data might need to be synced again.";
-        readonly failed: "Sync failed.";
     };
     readonly filters: {
         readonly searchPlaceholder: "Search filters...";
@@ -509,6 +580,7 @@ export declare const defaultTranslations: {
         readonly defaultInitialMessage: "How can I help you today?";
         readonly inputPlaceholder: "Ask about time, people, or company info and a lot of other things...";
         readonly stopAnswerGeneration: "Stop generating";
+        readonly responseStopped: "You stopped this response";
         readonly sendMessage: "Send message";
         readonly thoughtsGroupTitle: "Reflection";
         readonly resourcesGroupTitle: "Resources";
@@ -527,11 +599,36 @@ export declare const defaultTranslations: {
                 readonly placeholder: "Share what didn’t work";
             };
         };
+        readonly expandChat: "Expand chat";
+        readonly collapseChat: "Collapse chat";
         readonly ask: "Ask One";
+        readonly growth: {
+            readonly demoCard: {
+                readonly title: "See {{moduleName}} in action";
+                readonly actionLabel: "Start demo";
+            };
+            readonly bookAMeetingCard: {
+                readonly title: "Talk with an expert";
+                readonly schedule: "Mon-Fri · 09:00-21:00 (CEST)";
+                readonly actionLabel: "Book a meeting";
+            };
+            readonly questionCard: {
+                readonly actionLabel: "Next";
+                readonly skipLabel: "Skip";
+                readonly sendLabel: "Send";
+            };
+            readonly moduleCard: {
+                readonly actionLabel: "Learn more";
+            };
+            readonly faqCard: {
+                readonly title: "Questions before getting started";
+            };
+        };
     };
     readonly select: {
         readonly noResults: "No results found";
         readonly loadingMore: "Loading...";
+        readonly applySelection: "Apply selection";
     };
     readonly numberInput: {
         readonly between: "It should be between {{min}} and {{max}}";
@@ -622,6 +719,9 @@ export declare const defaultTranslations: {
         readonly ordered: "Ordered";
         readonly task: "Task";
         readonly details: "Dropdown";
+        readonly video: "Video";
+        readonly videoUrlPrompt: "Enter a YouTube or Vimeo URL";
+        readonly videoUrlInvalid: "Please enter a valid YouTube or Vimeo URL";
         readonly link: "Link";
         readonly linkPlaceholder: "Enter a link";
         readonly groups: {
@@ -629,18 +729,322 @@ export declare const defaultTranslations: {
             readonly lists: "Lists";
             readonly blocks: "Blocks";
         };
+        readonly ai: {
+            readonly enhanceButtonLabel: "Enhance";
+            readonly loadingEnhanceLabel: "Loading...";
+            readonly defaultError: "An error occurred while loading";
+            readonly closeErrorButtonLabel: "Continue editing";
+            readonly acceptChangesButtonLabel: "Accept";
+            readonly rejectChangesButtonLabel: "Reject";
+            readonly repeatButtonLabel: "Repeat";
+            readonly customPromptPlaceholder: "What do you want to do?";
+        };
+    };
+    readonly forms: {
+        readonly actionBar: {
+            readonly unsavedChanges: "You have changes pending to be saved";
+            readonly discard: "Discard";
+            readonly issues: {
+                readonly one: "{{count}} issue";
+                readonly other: "{{count}} issues";
+            };
+        };
+        readonly validation: {
+            readonly required: "This field is required";
+            readonly invalidType: "Invalid value";
+            readonly string: {
+                readonly email: "Enter a valid email address";
+                readonly url: "Enter a valid URL";
+                readonly min: "Must be at least {{min}} characters";
+                readonly max: "Must be at most {{max}} characters";
+            };
+            readonly number: {
+                readonly min: "Must be at least {{min}}";
+                readonly max: "Must be at most {{max}}";
+                readonly positive: "Must be a positive number";
+                readonly negative: "Must be a negative number";
+                readonly integer: "Must be a whole number";
+            };
+            readonly date: {
+                readonly min: "Date must be after {{min}}";
+                readonly max: "Date must be before {{max}}";
+                readonly invalid: "Enter a valid date";
+            };
+            readonly array: {
+                readonly min: "Select at least {{min}} option";
+                readonly max: "Select at most {{max}} options";
+            };
+            readonly checkbox: {
+                readonly mustBeChecked: "This option must be selected";
+            };
+        };
     };
 };
 
-export declare const HILActionConfirmation: ({ text, confirmationText, onConfirm, cancelText, onCancel, }: HILActionConfirmationProps) => JSX_2.Element;
+export declare function downloadTableAsExcel(table: HTMLTableElement, filename?: string): void;
 
-export declare type HILActionConfirmationProps = {
+export declare function Em({ children, ...props }: React.HTMLAttributes<HTMLSpanElement>): JSX_2.Element;
+
+export declare const F0ActionItem: ({ title, status, inGroup }: F0ActionItemProps) => JSX_2.Element;
+
+/**
+ * Props for the F0ActionItem component
+ */
+export declare interface F0ActionItemProps {
+    /**
+     * The title text displayed next to the status icon
+     */
+    title: string;
+    /**
+     * Current status of the action item
+     */
+    status?: "inProgress" | "executing" | "completed";
+    /**
+     * Whether the action item is part of a group
+     */
+    inGroup?: boolean;
+}
+
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export declare const F0AiChat: () => JSX_2.Element | null;
+
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export declare const F0AiChatProvider: ({ enabled, greeting, initialMessage, welcomeScreenSuggestions, disclaimer, resizable, defaultVisualizationMode, lockVisualizationMode, footer, onThumbsUp, onThumbsDown, children, agent, ...copilotKitProps }: AiChatProviderProps) => JSX_2.Element;
+
+export declare const F0AiChatTextArea: ({ submitLabel, inProgress, onSend, onStop, placeholders, defaultPlaceholder, autoFocus, }: F0AiChatTextAreaProps) => JSX_2.Element;
+
+/**
+ * Props for the F0AiChatTextArea component
+ */
+export declare interface F0AiChatTextAreaProps {
+    /**
+     * Whether the chat is currently processing a message
+     */
+    inProgress: boolean;
+    /**
+     * Callback when the user sends a message
+     */
+    onSend: (message: string) => void;
+    /**
+     * Callback when the user stops the current generation
+     */
+    onStop?: () => void;
+    /**
+     * Custom label for the submit button
+     */
+    submitLabel?: string;
+    /**
+     * Array of placeholder strings to cycle through with typewriter effect.
+     * If multiple placeholders are provided, they will animate in a cycle.
+     * If a single placeholder is provided, it will be displayed statically.
+     */
+    placeholders?: string[];
+    /**
+     * Default placeholder text when no placeholders are provided or as fallback
+     */
+    defaultPlaceholder?: string;
+    /**
+     * Whether the textarea should autofocus on mount
+     * @default true
+     */
+    autoFocus?: boolean;
+}
+
+export declare const F0AiCollapsibleMessage: ({ icon, title, children, }: F0AiCollapsibleMessageProps) => JSX_2.Element;
+
+/**
+ * Props for the F0AiCollapsibleMessage component
+ */
+export declare interface F0AiCollapsibleMessageProps {
+    /**
+     * Icon to display in the collapsible trigger
+     */
+    icon: IconType;
+    /**
+     * Title text for the collapsible trigger
+     */
+    title: string;
+    /**
+     * Content to show when expanded
+     */
+    children: ReactNode;
+}
+
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export declare const F0AiFullscreenChat: () => JSX_2.Element | null;
+
+export declare function F0AuraVoiceAnimation({ size, state, color, colorShift, audioTrack, themeMode, className, ref, ...props }: F0AuraVoiceAnimationProps & ComponentProps<"div"> & VariantProps<typeof F0AuraVoiceAnimationVariants>): JSX_2.Element;
+
+export declare interface F0AuraVoiceAnimationProps {
+    className?: string;
+    size?: "icon" | "sm" | "md" | "lg" | "xl";
+    state?: AgentState;
+    color?: string;
+    colorShift?: number;
+    themeMode?: "dark" | "light";
+    audioTrack?: LocalAudioTrack | RemoteAudioTrack | TrackReferenceOrPlaceholder;
+}
+
+declare const F0AuraVoiceAnimationVariants: (props?: ({
+    size?: "lg" | "md" | "sm" | "icon" | "xl" | undefined;
+} & ({
+    class?: ClassValue;
+    className?: never;
+} | {
+    class?: never;
+    className?: ClassValue;
+})) | undefined) => string;
+
+export declare const F0HILActionConfirmation: ({ text, confirmationText, onConfirm, cancelText, onCancel, }: F0HILActionConfirmationProps) => JSX_2.Element;
+
+/**
+ * Props for the F0HILActionConfirmation component
+ */
+export declare type F0HILActionConfirmationProps = {
+    /**
+     * Optional descriptive text shown above the action buttons
+     */
     text?: string;
+    /**
+     * Text displayed on the confirmation button
+     */
     confirmationText: string;
+    /**
+     * Callback fired when the confirmation button is clicked
+     */
     onConfirm: () => void;
+    /**
+     * Text displayed on the cancel button
+     */
     cancelText: string;
+    /**
+     * Callback fired when the cancel button is clicked
+     */
     onCancel: () => void;
 };
+
+export declare const f0MarkdownRenderers: NonNullable<AssistantMessageProps["markdownTagRenderers"]>;
+
+export declare const F0MessageSources: ({ sources }: F0MessageSourcesProps) => JSX_2.Element | null;
+
+/**
+ * Props for the F0MessageSources component
+ */
+export declare type F0MessageSourcesProps = {
+    /**
+     * Array of sources to display
+     */
+    sources: F0Source[];
+};
+
+export declare const F0OneIcon: ForwardRefExoticComponent<Omit<F0OneIconProps, "ref"> & RefAttributes<SVGSVGElement>>;
+
+/**
+ * Props for the F0OneIcon component
+ */
+export declare interface F0OneIconProps extends SVGProps<SVGSVGElement> {
+    /**
+     * Whether the icon should spin
+     */
+    spin?: boolean;
+    /**
+     * Whether the icon is in hover state
+     */
+    hover?: boolean;
+    /**
+     * Background color override
+     */
+    background?: string;
+    /**
+     * Size of the icon
+     */
+    size?: "xs" | "sm" | "md" | "lg";
+}
+
+export declare const F0OneSwitch: ({ className, disabled }: F0OneSwitchProps) => JSX_2.Element | null;
+
+/**
+ * Props for the F0OneSwitch component
+ */
+export declare type F0OneSwitchProps = React.ComponentPropsWithoutRef<typeof SwitchPrimitive.Root>;
+
+/**
+ * Source object for message sources
+ */
+export declare type F0Source = {
+    /**
+     * Title of the source
+     */
+    title: string;
+    /**
+     * Optional link URL
+     */
+    link?: string;
+    /**
+     * Optional icon name (from @/icons/app)
+     */
+    icon?: string;
+    /**
+     * Whether to open link in new tab
+     */
+    targetBlank?: boolean;
+};
+
+export declare const F0Thinking: ({ messages, title }: F0ThinkingProps) => JSX_2.Element;
+
+/**
+ * Props for the F0Thinking component
+ */
+export declare type F0ThinkingProps = {
+    /**
+     * Array of thinking/reflection messages to display
+     */
+    messages: Message[];
+    /**
+     * Whether the thinking process is currently active
+     */
+    isActive?: boolean;
+    /**
+     * Custom render function for messages
+     */
+    RenderMessage?: MessagesProps["RenderMessage"];
+    /**
+     * Custom assistant message component
+     */
+    AssistantMessage?: MessagesProps["AssistantMessage"];
+    /**
+     * Whether the chat is currently in progress
+     */
+    inProgress?: boolean;
+    /**
+     * Custom title for the thinking section
+     */
+    title?: string;
+};
+
+export declare const FullscreenChatContext: Context<FullscreenChatContextType>;
+
+/**
+ * Context type for fullscreen chat state
+ */
+declare type FullscreenChatContextType = {
+    inProgress: boolean;
+    setInProgress: (value: boolean) => void;
+};
+
+export declare function H1({ children, ...props }: React.HTMLAttributes<HTMLHeadingElement>): JSX_2.Element;
+
+export declare function H2({ children, ...props }: React.HTMLAttributes<HTMLHeadingElement>): JSX_2.Element;
+
+export declare function H3({ children, ...props }: React.HTMLAttributes<HTMLHeadingElement>): JSX_2.Element;
+
+export declare function Hr({ ...props }: React.HTMLAttributes<HTMLHRElement>): JSX_2.Element;
 
 export declare function I18nProvider({ children, translations, }: I18nProviderProps): JSX.Element;
 
@@ -653,11 +1057,34 @@ declare type IconType = ForwardRefExoticComponent<SVGProps<SVGSVGElement> & RefA
     animate?: "normal" | "animate";
 }>;
 
+declare function Image_2({ src, alt, ...props }: React.ImgHTMLAttributes<HTMLImageElement>): JSX_2.Element;
+export { Image_2 as Image }
+
 declare type Join<T extends string[], D extends string> = T extends [] ? never : T extends [infer F] ? F : T extends [infer F, ...infer R] ? F extends string ? `${F}${D}${Join<Extract<R, string[]>, D>}` : never : string;
+
+export declare function Li({ children, ...props }: React.HTMLAttributes<HTMLLIElement>): JSX_2.Element;
+
+export declare function Ol({ children, ...props }: React.HTMLAttributes<HTMLOListElement>): JSX_2.Element;
+
+export declare type OneIconSize = (typeof oneIconSizes)[number];
+
+export declare const oneIconSizes: readonly ["xs", "sm", "md", "lg"];
+
+export declare function P({ children, ...props }: React.HTMLAttributes<HTMLParagraphElement>): JSX_2.Element;
 
 declare type PathsToStringProps<T> = T extends string ? [] : {
     [K in Extract<keyof T, string>]: [K, ...PathsToStringProps<T[K]>];
 }[Extract<keyof T, string>];
+
+export declare function Pre({ children, ...props }: React.HTMLAttributes<HTMLPreElement>): JSX_2.Element;
+
+export declare function Strong({ children, ...props }: React.HTMLAttributes<HTMLSpanElement>): JSX_2.Element;
+
+export declare function Table({ children, ...props }: React.HTMLAttributes<HTMLTableElement>): JSX_2.Element;
+
+export declare function Td({ children, ...props }: React.HTMLAttributes<HTMLTableCellElement>): JSX_2.Element;
+
+export declare function Th({ children, ...props }: React.HTMLAttributes<HTMLTableCellElement>): JSX_2.Element;
 
 declare type TranslationKey = Join<PathsToStringProps<typeof defaultTranslations>, ".">;
 
@@ -665,20 +1092,58 @@ declare type TranslationShape<T> = {
     [K in keyof T]: T[K] extends string ? string : T[K] extends Record<string, string | Record<string, unknown>> ? TranslationShape<T[K]> : never;
 };
 
+/**
+ * Translation shape helper type
+ */
 declare type TranslationShape_2<T> = {
     [K in keyof T]: T[K] extends string ? string : T[K] extends Record<string, string | Record<string, unknown>> ? TranslationShape_2<T[K]> : never;
 };
 
-export declare type TranslationsType = TranslationShape_2<typeof defaultTranslations>;
+export declare type TranslationsType = TranslationShape<typeof defaultTranslations>;
+
+export declare function Ul({ children, ...props }: React.HTMLAttributes<HTMLUListElement>): JSX_2.Element;
 
 export declare function useAiChat(): AiChatProviderReturnValue;
 
 export declare function useAiChatTranslations(): AiChatTranslations;
 
+/**
+ * Hook to register all default copilot actions.
+ * This provides a single entry point to enable all standard AI chat actions.
+ *
+ * @example
+ * // Enable all default actions in your component
+ * const MyComponent = () => {
+ *   useDefaultCopilotActions()
+ *   return <div>...</div>
+ * }
+ */
+export declare const useDefaultCopilotActions: () => void;
+
 export declare function useI18n(): TranslationsType & {
     t: (key: TranslationKey, args?: Record<string, string | number>) => string;
 };
 
+/**
+ * Hook to register the message sources action.
+ * Attaches information sources to the assistant's response to show where the AI got its information from.
+ */
+export declare const useMessageSourcesAction: () => void;
+
+/**
+ * Hook to register the orchestrator thinking action.
+ * Displays the orchestrator's thinking process as a non-blocking UI element.
+ */
+export declare const useOrchestratorThinkingAction: () => void;
+
+/**
+ * Visualization mode for the AI chat
+ */
+export declare type VisualizationMode = "sidepanel" | "fullscreen";
+
+/**
+ * Welcome screen suggestion item
+ */
 export declare type WelcomeScreenSuggestion = {
     icon: IconType;
     message: string;
@@ -742,6 +1207,16 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
+        };
+    }
+}
+
+
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
         moodTracker: {
             insertMoodTracker: (data: MoodTrackerData) => ReturnType;
         };
@@ -753,6 +1228,17 @@ declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         transcript: {
             insertTranscript: (data: TranscriptData) => ReturnType;
+        };
+    }
+}
+
+
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
+        videoEmbed: {
+            setVideoEmbed: (options: {
+                src: string;
+            }) => ReturnType;
         };
     }
 }
