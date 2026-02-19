@@ -119,11 +119,11 @@ export const DialogWrapper = ({
   const handleOpenChange = useCallback(
     (open: boolean) => {
       onOpenChange?.(open)
-      if (!open) {
-        onClose()
-      }
+      // Do not call onClose here: the useEffect below runs when isOpen becomes
+      // false and invokes onClose once. Calling onClose here would duplicate
+      // the callback when the user closes via outside click or Escape.
     },
-    [onClose, onOpenChange]
+    [onOpenChange]
   )
 
   // Track the previous value of isOpen to detect transitions
