@@ -39,10 +39,10 @@ const toastContainerPositionClasses: Record<ToastContainerPosition, string> = {
   "top-right": "justify-end items-start top-0 right-0 bottom-0",
 } as const
 
-// Active toast entry/exit animation — comes from top, exits upward
+// Active toast entry/exit animation — slides in from right, exits with fade+zoom
 const activeToastVariants = {
-  initial: { opacity: 0, y: -20, scale: 0.95 },
-  animate: { opacity: 1, y: 0, scale: 1 },
+  initial: { opacity: 0, x: 60, scale: 0.95 },
+  animate: { opacity: 1, x: 0, scale: 1 },
   exit: { opacity: 0, scale: 0.9, transition: { duration: 0.2 } },
 }
 
@@ -82,7 +82,7 @@ const StackedToasts = ({ items }: { items: ToastProviderItem[] }) => {
               layoutId={item.id}
               initial={{
                 opacity: 0,
-                y: -(visualIndex * 10) - 30, // start above final position
+                x: 60,
                 scale: 1 - visualIndex * 0.05,
               }}
               animate={isHovered ? "expanded" : "stacked"}
@@ -158,13 +158,9 @@ const ToastsContainer = ({
     >
       <AnimatePresence>
         {hasItems && (
-          <motion.div
+          <div
             key="toast-panel"
             className="flex w-[350px] max-w-full flex-col p-6"
-            initial={{ opacity: 0, x: 60 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
-            transition={{ type: "spring", stiffness: 280, damping: 28 }}
           >
             {/* Stacked Toasts at the Top */}
             <StackedToasts items={stackedItems} />
@@ -187,7 +183,7 @@ const ToastsContainer = ({
                 ))}
               </AnimatePresence>
             </div>
-          </motion.div>
+          </div>
         )}
       </AnimatePresence>
     </div>
