@@ -54,13 +54,16 @@ const maxVisibleStackedToasts = 3
 const StackedToasts = ({ items }: { items: ToastProviderItem[] }) => {
   const [isHovered, setIsHovered] = useState(false)
 
-  // Dynamic animation speed: more items = slower spring
-  const baseStiffness = 200
-  const baseDamping = 25
-  const stiffnessReduction = Math.min(items.length * 15, 100)
-  const dampingIncrease = Math.min(items.length * 2, 15)
+  // Dynamic animation speed: more items = slower spring, but keep it snappy
+  const baseStiffness = 500
+  const baseDamping = 40
+  const stiffnessReduction = Math.min(items.length * 15, 150)
+  const dampingIncrease = Math.min(items.length * 2, 10)
 
   if (items.length === 0) return null
+
+  // Newest stacked toast at index 0 = front of stack (closest to active area)
+  const displayItems = items.slice().reverse()
 
   return (
     <div
@@ -69,9 +72,8 @@ const StackedToasts = ({ items }: { items: ToastProviderItem[] }) => {
       onMouseLeave={() => setIsHovered(false)}
     >
       <AnimatePresence>
-        {items.map((item, index) => {
-          // index 0 = oldest stacked = front of stack
-          // index 1 = next behind, etc.
+        {displayItems.map((item, index) => {
+          // index 0 = newest stacked = front of stack
           // Clamp visual position for hidden items to the last visible slot
           const visualIndex = Math.min(index, maxVisibleStackedToasts - 1)
           const isVisible = index < maxVisibleStackedToasts
