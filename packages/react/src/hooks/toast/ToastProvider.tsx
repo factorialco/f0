@@ -93,6 +93,7 @@ const StackedToasts = ({ items }: { items: ToastProviderItem[] }) => {
               }}
               variants={{
                 stacked: {
+                  x: 0,
                   y: visualIndex * -10,
                   scale: 1 - visualIndex * 0.05,
                   opacity: isVisible ? 1 : 0,
@@ -100,6 +101,7 @@ const StackedToasts = ({ items }: { items: ToastProviderItem[] }) => {
                   height: index === 0 ? "auto" : 0,
                 },
                 expanded: {
+                  x: 0,
                   y: 0,
                   scale: 1,
                   opacity: 1,
