@@ -1,12 +1,12 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { type ReactElement, useEffect, useMemo, useState } from "react"
 
 /**
  * Public implementation of the FilterPickerInternal component.
  * F0FilterPickerContent component.
  */
-import { withDataTestId } from "@/lib/data-testid"
+import { withDataTestId, type WithDataTestIdProps } from "@/lib/data-testid"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
@@ -173,4 +173,10 @@ function _F0FilterPickerContent<Filters extends FiltersDefinition>({
 
 _F0FilterPickerContent.displayName = "F0FilterPickerContent"
 
-export const F0FilterPickerContent = withDataTestId(_F0FilterPickerContent)
+type F0FilterPickerContentGeneric = <Filters extends FiltersDefinition>(
+  props: F0FilterPickerContentProps<Filters> & WithDataTestIdProps
+) => ReactElement | null
+
+export const F0FilterPickerContent = withDataTestId(
+  _F0FilterPickerContent
+) as unknown as F0FilterPickerContentGeneric
