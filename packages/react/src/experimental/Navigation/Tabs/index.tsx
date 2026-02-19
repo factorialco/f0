@@ -28,21 +28,16 @@ export interface TabsProps {
 
 export const BaseTabs: React.FC<TabsProps> = ({
   tabs,
-  activeTabId: controlledActiveTabId,
+  activeTabId: initialActiveTabId,
   setActiveTabId: onChangeActiveTabId,
   secondary = false,
   embedded = false,
 }) => {
   const firstTab = tabs[0]
 
-  const isControlled =
-    controlledActiveTabId !== undefined && onChangeActiveTabId !== undefined
-
-  const [internalActiveTabId, setInternalActiveTabId] = useState(
-    controlledActiveTabId ?? ("id" in firstTab ? firstTab.id : undefined)
+  const [activeTabId, setActiveTabId] = useState(
+    initialActiveTabId ?? ("id" in firstTab ? firstTab.id : undefined)
   )
-
-  const activeTabId = isControlled ? controlledActiveTabId : internalActiveTabId
 
   useEffect(() => {
     if (activeTabId) onChangeActiveTabId?.(activeTabId)
@@ -84,10 +79,7 @@ export const BaseTabs: React.FC<TabsProps> = ({
               href={"href" in props ? props.href : undefined}
               onClick={() => {
                 if ("id" in props) {
-                  setInternalActiveTabId(props.id)
-                  if (isControlled) {
-                    onChangeActiveTabId?.(props.id)
-                  }
+                  setActiveTabId?.(props.id)
                 }
               }}
               secondary={secondary}
