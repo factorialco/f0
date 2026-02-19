@@ -81,4 +81,64 @@ describe("useLink", () => {
       "false"
     )
   })
+
+  test("isActive returns true when href contains search params matching pathname", async () => {
+    render(
+      <LinkProvider currentPath="/foo">
+        <Component href="/foo?tab=form" />
+      </LinkProvider>
+    )
+
+    expect(screen.getByRole("link").getAttribute("data-is-active")).toEqual(
+      "true"
+    )
+  })
+
+  test("isActive returns true when href contains hash matching pathname", async () => {
+    render(
+      <LinkProvider currentPath="/foo">
+        <Component href="/foo#section" />
+      </LinkProvider>
+    )
+
+    expect(screen.getByRole("link").getAttribute("data-is-active")).toEqual(
+      "true"
+    )
+  })
+
+  test("isActive returns true when href contains both search params and hash matching pathname", async () => {
+    render(
+      <LinkProvider currentPath="/foo">
+        <Component href="/foo?tab=form#section" />
+      </LinkProvider>
+    )
+
+    expect(screen.getByRole("link").getAttribute("data-is-active")).toEqual(
+      "true"
+    )
+  })
+
+  test("isActive returns false when href contains search params but pathname does not match", async () => {
+    render(
+      <LinkProvider currentPath="/bar">
+        <Component href="/foo?tab=form" />
+      </LinkProvider>
+    )
+
+    expect(screen.getByRole("link").getAttribute("data-is-active")).toEqual(
+      "false"
+    )
+  })
+
+  test("isActive returns true when currentPath contains search params matching href pathname", async () => {
+    render(
+      <LinkProvider currentPath="/foo?tab=form">
+        <Component href="/foo" />
+      </LinkProvider>
+    )
+
+    expect(screen.getByRole("link").getAttribute("data-is-active")).toEqual(
+      "true"
+    )
+  })
 })

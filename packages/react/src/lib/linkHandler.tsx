@@ -49,6 +49,16 @@ function stripTrailingSlash(path: string) {
   return path.endsWith("/") ? path.slice(0, -1) : path
 }
 
+function stripSearchAndHash(path: string) {
+  const searchIndex = path.indexOf("?")
+  const hashIndex = path.indexOf("#")
+  const endIndex = Math.min(
+    searchIndex === -1 ? path.length : searchIndex,
+    hashIndex === -1 ? path.length : hashIndex
+  )
+  return path.substring(0, endIndex)
+}
+
 export const useNavigation = () => {
   const { currentPath } = useLinkContext()
 
@@ -59,11 +69,17 @@ export const useNavigation = () => {
     ) => {
       if (currentPath === undefined || path === undefined) return false
 
-      if (exact)
-        return stripTrailingSlash(currentPath) === stripTrailingSlash(path)
+      const normalizedCurrentPath = stripSearchAndHash(currentPath)
+      const normalizedPath = stripSearchAndHash(path)
 
-      return `${stripTrailingSlash(currentPath)}/`.startsWith(
-        `${stripTrailingSlash(path)}/`
+      if (exact)
+        return (
+          stripTrailingSlash(normalizedCurrentPath) ===
+          stripTrailingSlash(normalizedPath)
+        )
+
+      return `${stripTrailingSlash(normalizedCurrentPath)}/`.startsWith(
+        `${stripTrailingSlash(normalizedPath)}/`
       )
     },
     [currentPath]
