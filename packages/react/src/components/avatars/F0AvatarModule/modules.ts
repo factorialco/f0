@@ -53,6 +53,7 @@ export const modules = {
   processes: ModuleIcons.Workflows,
   profile: ModuleIcons.Profile,
   project_management: ModuleIcons.Projects,
+  "push-pin-solid": ModuleIcons.PushPinSolid,
   reports: ModuleIcons.Reports,
   salary_advance: ModuleIcons.SalaryAdvance,
   settings: ModuleIcons.Settings,
