@@ -187,6 +187,9 @@ const ToastsContainer = ({
       }
     }
 
+    // Always update the ref before any early returns
+    prevStackedIdsRef.current = currentStackedIds
+
     if (newlyPromoted.size > 0) {
       setPromotingIds(newlyPromoted)
       const timer = setTimeout(
@@ -195,8 +198,6 @@ const ToastsContainer = ({
       )
       return () => clearTimeout(timer)
     }
-
-    prevStackedIdsRef.current = currentStackedIds
   }, [stackedItems, activeItems])
 
   const hasItems = items.length > 0
