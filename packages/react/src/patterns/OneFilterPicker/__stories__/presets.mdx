@@ -20,8 +20,10 @@ frequently used filtered data views. This simplifies navigation, as there is no
 need to manually adjust the filters every time you want to change the table
 view.
 
-Presets merge their filter with the current filters when selected, preserving
-existing selections. When deselected, only the preset's filter keys are removed.
+Presets use **replace behavior**: clicking a preset replaces all current filters
+with the preset's filter configuration. A preset shows as selected only when the
+current filters exactly match the preset's filter value. If the user manually
+adds or changes any filter, the preset becomes deselected.
 
 To ensure an optimal user experience, it is recommended to carefully select the
 presets, prioritizing those that display the most relevant and frequently
@@ -83,40 +85,39 @@ The label of the preset to display in the UI.
 
 `FiltersState<Filters>`
 
-The filter of the preset value associated with the preset.
+The filter configuration to apply when this preset is selected. Clicking a
+preset replaces all current filters with this value.
 
 ### itemsCount
 
 `(value: FiltersState<Filters>) => number`
 
 The items count of the preset. This is a function that returns a promise or a
-value It gets the current filters value as an argument.
+value. It gets the current filters value as an argument.
 
 > itemCount function is called on render, so it should be a pure function and
 > you should cache the result.
 
-### mode
+## Preset Behavior
 
-`'replace' | 'additive'` (optional, default: `'replace'`)
+### Replace mode
 
-Controls how the preset is applied when clicked:
+Presets always use replace behavior:
 
-- **`'replace'`** (default): Replaces all current filters with the preset's
-  filter. This is the traditional behavior where clicking a preset clears any
-  existing selections.
-- **`'additive'`**: Merges the preset's filter with current filters, preserving
-  existing selections. This is useful for status filters or other filters that
-  should combine with the user's current selection.
-
-## Additive Presets
-
-Additive presets are particularly useful when you want users to quickly apply a
-filter (like status) while preserving their other filter selections.
+1. **Selecting**: Clicking an unselected preset replaces all current filters with
+   the preset's filter configuration
+2. **Deselecting**: Clicking an already-selected preset clears all filters
+3. **Selection indicator**: A preset shows as "selected" only when the current
+   filter state exactly matches the preset's filter (same keys and values, no
+   extra keys)
+4. **Manual filter changes**: If the user manually adds, removes, or changes any
+   filter, all presets become deselected because the filter state no longer
+   exactly matches any preset
 
 ### Example
 
 <Canvas
-  of={OneFiltersPickerStories.WithAdditivePresets}
+  of={OneFiltersPickerStories.WithPresetsAndInitialFilters}
   meta={OneFiltersPickerStories}
 />
 
@@ -127,38 +128,23 @@ const presets = [
   {
     label: "Status: Pending",
     filter: { status: ["pending"] },
-    mode: "additive", // Merges with existing filters
   },
   {
     label: "Status: Approved",
     filter: { status: ["approved"] },
-    mode: "additive",
   },
   {
     label: "Status: Paid",
     filter: { status: ["paid"] },
-    mode: "additive",
   },
 ]
 ```
 
-### Behavior
+## Result Count
 
-When using additive presets:
+When the `resultCount` prop is provided to `OneFilterPicker`, the chips row
+displays a "N results for:" prefix before the filter chips, showing how many
+items match the current filter selection.
 
-1. **Selecting**: Clicking an unselected additive preset merges its filter with
-   your current selections
-2. **Deselecting**: Clicking an already-selected additive preset removes only
-   the preset's filter keys, preserving other filters
-3. **Selection indicator**: An additive preset shows as "selected" when all its
-   filter keys match the current filter state, even if there are additional
-   filters active
-
-### When to use additive presets
-
-- **Status filters**: Users often want to filter by status while keeping their
-  other selections (e.g., department, date range)
-- **Quick toggles**: Any filter that acts as a toggle on top of existing
-  selections
-- **Category filters**: When users want to narrow down results within their
-  current view
+In the `OneDataCollection` component, this is automatically wired to the total
+items count from the data source.
