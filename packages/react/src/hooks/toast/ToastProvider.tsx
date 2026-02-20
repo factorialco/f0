@@ -49,10 +49,10 @@ const promotionLockDuration = 400
 
 const StackedToasts = ({
   items,
-  promotingIds,
+  isTransitioning,
 }: {
   items: ToastProviderItem[]
-  promotingIds: Set<ToastId>
+  isTransitioning: boolean
 }) => {
   const [isHovered, setIsHovered] = useState(false)
   const lockRef = useRef(false)
@@ -65,7 +65,7 @@ const StackedToasts = ({
 
   // Lock hover interactions during stacked→active promotions
   useEffect(() => {
-    if (promotingIds.size > 0) {
+    if (isTransitioning) {
       lockRef.current = true
       setIsHovered(false)
       const timer = setTimeout(() => {
@@ -73,7 +73,7 @@ const StackedToasts = ({
       }, promotionLockDuration)
       return () => clearTimeout(timer)
     }
-  }, [promotingIds])
+  }, [isTransitioning])
 
   const handleMouseEnter = () => {
     if (!lockRef.current) setIsHovered(true)
@@ -157,7 +157,8 @@ const ToastsContainer = ({
   position?: ToastContainerPosition
 }) => {
   const prevStackedIdsRef = useRef<Set<ToastId>>(new Set())
-  const [promotingIds, setPromotingIds] = useState<Set<ToastId>>(new Set())
+  const promotingIdsRef = useRef<Set<ToastId>>(new Set())
+  const [isTransitioning, setIsTransitioning] = useState(false)
 
   const { stackedItems, activeItems } = useMemo(() => {
     const totalCount = items.length
@@ -173,31 +174,28 @@ const ToastsContainer = ({
     return { stackedItems: stacked, activeItems: active }
   }, [items])
 
-  // Detect which ids just moved from stacked → active
-  useEffect(() => {
-    const currentStackedIds = new Set(stackedItems.map((i) => i.id))
-    const newlyPromoted = new Set<ToastId>()
-
-    for (const id of prevStackedIdsRef.current) {
-      if (!currentStackedIds.has(id)) {
-        // Was stacked, no longer stacked — check if it's now active
-        if (activeItems.some((i) => i.id === id)) {
-          newlyPromoted.add(id)
-        }
-      }
+  // Compute promoted ids synchronously during render so initial prop is correct on first paint
+  const currentStackedIds = new Set(stackedItems.map((i) => i.id))
+  const newlyPromoted = new Set<ToastId>()
+  for (const id of prevStackedIdsRef.current) {
+    if (!currentStackedIds.has(id) && activeItems.some((i) => i.id === id)) {
+      newlyPromoted.add(id)
     }
+  }
+  prevStackedIdsRef.current = currentStackedIds
+  promotingIdsRef.current = newlyPromoted
 
-    // Always update the ref before any early returns
-    prevStackedIdsRef.current = currentStackedIds
-
+  // Trigger hover lock in StackedToasts when a promotion occurs
+  useEffect(() => {
     if (newlyPromoted.size > 0) {
-      setPromotingIds(newlyPromoted)
+      setIsTransitioning(true)
       const timer = setTimeout(
-        () => setPromotingIds(new Set()),
+        () => setIsTransitioning(false),
         promotionLockDuration
       )
       return () => clearTimeout(timer)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stackedItems, activeItems])
 
   const hasItems = items.length > 0
@@ -216,7 +214,10 @@ const ToastsContainer = ({
             className="flex w-[350px] max-w-full flex-col p-6"
           >
             {/* Stacked Toasts at the Top */}
-            <StackedToasts items={stackedItems} promotingIds={promotingIds} />
+            <StackedToasts
+              items={stackedItems}
+              isTransitioning={isTransitioning}
+            />
 
             {/* Active Toasts — flex-col-reverse so oldest (index 0) is at the bottom */}
             <div className="relative flex flex-col-reverse gap-4">
@@ -228,7 +229,7 @@ const ToastsContainer = ({
                     layout
                     // Skip entry animation for items promoted from stacked (layoutId handles it)
                     initial={
-                      promotingIds.has(item.id)
+                      promotingIdsRef.current.has(item.id)
                         ? false
                         : { opacity: 0, x: 60, scale: 0.95 }
                     }
