@@ -138,6 +138,10 @@ declare type AiChatProviderReturnValue = {
      * Optional footer content rendered below the textarea
      */
     footer?: React.ReactNode;
+    /**
+     * Set the footer content. Use this to update the footer from outside the provider (e.g. per page/route).
+     */
+    setFooter: React.Dispatch<React.SetStateAction<React.ReactNode | undefined>>;
 } & Pick<AiChatState, "greeting" | "agent" | "disclaimer" | "resizable">;
 
 /**
@@ -1190,6 +1194,11 @@ declare module "gridstack" {
 }
 
 
+declare namespace Calendar {
+    var displayName: string;
+}
+
+
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         aiBlock: {
@@ -1236,9 +1245,4 @@ declare module "@tiptap/core" {
             }) => ReturnType;
         };
     }
-}
-
-
-declare namespace Calendar {
-    var displayName: string;
 }

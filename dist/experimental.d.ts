@@ -17,8 +17,6 @@ import { ClassValue } from 'cva';
 import { CompanyCellValue } from './types/company';
 import { CompanyCellValue as CompanyCellValue_2 } from '../../../ui/value-display/types/company';
 import { ComponentProps } from 'react';
-import { ControllerProps } from 'react-hook-form';
-import { ControllerRenderProps } from 'react-hook-form';
 import { CopilotKitProps } from '@copilotkit/react-core';
 import { CountryCellValue } from './types/country';
 import { DateCellValue } from './types/date';
@@ -33,8 +31,6 @@ import { Editor } from '@tiptap/react';
 import { F0SelectProps as F0SelectProps_2 } from './types';
 import { f1Colors } from '@factorialco/f0-core';
 import { FC } from 'react';
-import { FieldPath } from 'react-hook-form';
-import { FieldValues } from 'react-hook-form';
 import { FileCellValue } from './types/file';
 import { FileCellValue as FileCellValue_2 } from '../../../ui/value-display/types/file';
 import { FolderCellValue } from './types/folder';
@@ -55,7 +51,6 @@ import { NumberCellValue } from './types/number';
 import { NumberCellValue as NumberCellValue_2 } from '../../../ui/value-display/types/number';
 import { NumberFilterOptions } from './NumberFilter/NumberFilter';
 import { Observable } from 'zen-observable-ts';
-import { Path } from 'react-hook-form';
 import { PercentageCellValue } from './types/percentage';
 import { PersonCellValue } from './types/person';
 import { PersonCellValue as PersonCellValue_2 } from '../../../ui/value-display/types/person';
@@ -84,16 +79,10 @@ import { TeamCellValue as TeamCellValue_2 } from '../../../ui/value-display/type
 import { TextCellValue } from './types/text';
 import { TextCellValue as TextCellValue_2 } from '../../../ui/value-display/types/text';
 import * as ToggleGroupPrimitive from '@radix-ui/react-toggle-group';
-import { useForm } from 'react-hook-form';
-import { UseFormHandleSubmit } from 'react-hook-form';
-import { UseFormProps } from 'react-hook-form';
-import { UseFormReturn } from 'react-hook-form';
 import { ValueDisplayRendererContext as ValueDisplayRendererContext_2 } from '../../../ui/value-display';
 import { VariantProps } from 'cva';
 import { VerticalBarChartProps } from '../../../components/Charts/VerticalBarChart';
 import { WidgetProps as WidgetProps_2 } from '../Widget';
-import { z } from 'zod';
-import { ZodType } from 'zod';
 
 declare type Action = {
     label: string;
@@ -3564,34 +3553,6 @@ declare type FontSize = (typeof fontSizes)[number];
 
 declare const fontSizes: readonly ["sm", "md", "lg"];
 
-export declare function Form<Schema extends SchemaType, FormData extends InferSchema<Schema>>({ onSubmit, children, ...form }: {
-    children: React.ReactNode;
-} & FormType<Schema, FormData>): JSX_2.Element;
-
-export declare function FormActions<Schema extends SchemaType, FormData extends InferSchema<Schema>>({ submitLabel, form, }: {
-    submitLabel: string;
-    form: FormType<Schema, FormData>;
-}): JSX_2.Element;
-
-declare type FormError<Fields extends FieldValues> = {
-    success: false;
-    rootMessage?: string;
-    errors: Partial<Record<Path<Fields>, string>>;
-};
-
-export declare const FormField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ label, description, children, ...props }: FormFieldProps<TFieldValues, TName> & {
-    children: (field: ControllerRenderProps<TFieldValues>) => JSX.Element;
-}) => JSX_2.Element;
-
-export declare type FormFieldProps<TFieldValues extends FieldValues, TName extends FieldPath<TFieldValues>> = Pick<ControllerProps<TFieldValues, TName>, "name" | "control"> & {
-    label: string;
-    description?: string;
-};
-
-declare type FormType<T extends SchemaType, FormType extends InferSchema<T>> = UseFormReturn<FormType, unknown, undefined> & {
-    onSubmit: ReturnType<UseFormHandleSubmit<FormType>>;
-};
-
 declare interface FrameContextType {
     isSmallScreen: boolean;
     isLastToggleInvokedByUser: boolean;
@@ -3823,8 +3784,6 @@ declare type InferFilters<S> = S extends {
 declare type InferRecord<S> = S extends {
     dataAdapter: DataCollectionDataAdapter<infer R, any, any>;
 } ? R : never;
-
-declare type InferSchema<T extends SchemaType> = z.infer<T>;
 
 export declare type InFilterDefinition<T = string | number, R extends RecordType = RecordType> = BaseFilterDefinition<"in"> & {
     options: InFilterOptions_2<T, R>;
@@ -4871,8 +4830,6 @@ export declare type OnSelectItemsCallback<R extends RecordType, Filters extends 
     byLane?: Record<string, SelectedItemsDetailedStatus<R, Filters>>;
 }, clearSelectedItems: () => void, handleSelectAll?: (checked: boolean) => void) => void;
 
-declare type OnSubmitHandler<TFieldValues extends FieldValues, TTransformedValues extends FieldValues | undefined = undefined> = (data: ReturnType<UseFormHandleSubmit<TFieldValues, TTransformedValues>>) => Promise<Success | FormError<TFieldValues>> | Success | FormError<TFieldValues>;
-
 declare type OpenLinkActionType = {
     type: "open-link";
     href: string;
@@ -5454,8 +5411,6 @@ declare interface RichTextEditorSkeletonProps {
     rows?: number;
 }
 
-declare type SchemaType = ZodType;
-
 export declare const ScrollArea: ForwardRefExoticComponent<Omit<Omit<ScrollAreaProps & RefAttributes<HTMLDivElement>, "ref"> & {
 showBar?: boolean;
 viewportRef?: React.RefObject<HTMLDivElement>;
@@ -5802,12 +5757,6 @@ export declare type subActionType = {
     onClick: () => void;
     disabled?: boolean;
     icon?: IconType;
-};
-
-declare type Success = {
-    success: true;
-    rootMessage?: never;
-    errors?: never;
 };
 
 declare interface SuccessMessageProps {
@@ -6329,10 +6278,6 @@ declare interface UseDataReturn<R extends RecordType> {
     mergedFilters: FiltersState<FiltersDefinition>;
 }
 
-export { useForm }
-
-export declare function useFormSchema<Schema extends SchemaType, FormData extends InferSchema<Schema>>(schema: Schema, options: UseFormProps<FormData>, onSubmit: OnSubmitHandler<FormData>): FormType<Schema, FormData>;
-
 export declare const useInfiniteScrollPagination: (paginationInfo: PaginationInfo | null, isLoading: boolean, isLoadingMore: boolean, loadMore: () => void) => {
     loadingIndicatorRef: RefObject<HTMLTableCellElement>;
 };
@@ -6700,6 +6645,11 @@ declare module "gridstack" {
 }
 
 
+declare namespace Calendar {
+    var displayName: string;
+}
+
+
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         aiBlock: {
@@ -6746,9 +6696,4 @@ declare module "@tiptap/core" {
             }) => ReturnType;
         };
     }
-}
-
-
-declare namespace Calendar {
-    var displayName: string;
 }
