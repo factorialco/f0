@@ -166,7 +166,7 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
     )
   }
 
-  const showSearch = options.length > 0
+  const showSearch = options.length > 0 || hasSource
 
   const handleSelectAll = () => {
     const currentValues = value ?? []
@@ -261,6 +261,11 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
               presentational
               hideLabel
             />
+          </div>
+        )}
+        {filteredOptions.length === 0 && !isLoading && (
+          <div className="flex w-full items-center justify-center py-4 text-sm text-f1-foreground-secondary">
+            {i18n.select.noResults}
           </div>
         )}
         {hasAnyChildren

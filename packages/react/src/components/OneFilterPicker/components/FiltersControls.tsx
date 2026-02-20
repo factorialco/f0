@@ -215,10 +215,10 @@ export function FiltersControls<Filters extends FiltersDefinition>({
         <AnimatePresence mode="popLayout" propagate={false}>
           {isOpen && (
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.1 }}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 8 }}
+              transition={{ type: "spring", duration: 0.3, bounce: 0 }}
               className="absolute bottom-0 left-0 right-0 top-0 z-20 bg-f1-background"
             >
               <div className="flex h-full flex-col flex-1 min-h-0 max-h-full">
@@ -328,10 +328,10 @@ export function FiltersControls<Filters extends FiltersDefinition>({
         <AnimatePresence mode="popLayout" propagate={false}>
           {isOpen && (
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.1 }}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 8 }}
+              transition={{ type: "spring", duration: 0.3, bounce: 0 }}
               className="absolute bottom-0 left-0 right-0 top-0 z-20 bg-f1-background"
             >
               <div className="flex h-full flex-col transition-all flex-1 min-h-0 max-h-full">

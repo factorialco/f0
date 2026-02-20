@@ -239,8 +239,6 @@ const SelectContent = forwardRef<
             "w-[calc(var(--radix-select-trigger-width)+12rem)]",
           // Max-height: fixed cap so Radix can detect overflow and flip sides
           !asList && (taller ? "max-h-[412px]" : "max-h-[320px]"),
-          // Apply min-height when filters are present
-          !asList && forceMinHeight && "min-h-[412px]",
           // Hides the content when the virtual list is not ready
           !asList && isVirtual && !virtualReady && "opacity-0",
           className
@@ -282,6 +280,12 @@ const SelectContent = forwardRef<
               ? {
                   maxHeight:
                     "var(--radix-select-content-available-height, 100%)",
+                  ...(forceMinHeight
+                    ? {
+                        minHeight:
+                          "min(412px, var(--radix-select-content-available-height, 412px))",
+                      }
+                    : {}),
                 }
               : undefined
           }

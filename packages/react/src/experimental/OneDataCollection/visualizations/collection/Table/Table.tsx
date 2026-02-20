@@ -277,7 +277,7 @@ export const TableCollection = <
                 sticky={{ left: 0 }}
                 align="left"
               >
-                <div className="flex w-full items-center justify-start">
+                <div className="flex w-full items-center justify-start ml-1.5">
                   <F0Checkbox
                     checked={
                       allSelectedStatus.selectedCount > 0 ||

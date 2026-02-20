@@ -76,7 +76,7 @@ export function FilterList<Definition extends FiltersDefinition>({
     <div
       className={cn(
         "z-30 flex h-full flex-col",
-        isCompactMode ? "min-w-[224px] w-full" : "w-60",
+        isCompactMode ? "min-w-[224px] w-full" : "w-56",
         !isCompactMode &&
           "border border-solid border-transparent border-r-f1-border-secondary"
       )}

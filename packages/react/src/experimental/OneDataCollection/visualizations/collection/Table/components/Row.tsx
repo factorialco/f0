@@ -178,7 +178,7 @@ const RowComponentInner = <
           loading={loading}
         >
           {id !== undefined && (
-            <div className="pointer-events-auto flex items-center justify-start">
+            <div className="pointer-events-auto flex items-center justify-start ml-1.5">
               <Checkbox
                 checked={selectedItems.has(id)}
                 onCheckedChange={onCheckedChange}
