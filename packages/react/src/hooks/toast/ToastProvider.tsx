@@ -99,10 +99,6 @@ const StackedToasts = ({
           return (
             <motion.div
               key={item.id}
-              layoutId={item.id}
-              // Prevent layout animation within stacked area — only use layoutId
-              // for cross-component shared layout with active area
-              layout={false}
               initial={{
                 opacity: 0,
                 x: 60,
