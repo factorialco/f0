@@ -72,8 +72,8 @@ type HeaderProps = {
     onChange: (newValue: boolean) => void
     label: string
   }
-  oneSwitchCustomTooltip?: string
-  oneSwitchTooltipAlwaysVisible?: boolean
+  oneSwitchTooltip?: string
+  oneSwitchAutoOpen?: boolean
 }
 
 function PageNavigationLink({
@@ -113,8 +113,8 @@ export function PageHeader({
   navigation,
   productUpdates,
   favorites,
-  oneSwitchCustomTooltip,
-  oneSwitchTooltipAlwaysVisible,
+  oneSwitchTooltip,
+  oneSwitchAutoOpen,
 }: HeaderProps) {
   const { sidebarState, toggleSidebar } = useSidebar()
 
@@ -280,8 +280,8 @@ export function PageHeader({
         )}
         <div className="flex items-center gap-3">
           <F0OneSwitch
-            customTooltip={oneSwitchCustomTooltip}
-            tooltipAlwaysVisible={oneSwitchTooltipAlwaysVisible}
+            tooltip={oneSwitchTooltip}
+            autoOpen={oneSwitchAutoOpen}
           />
           <OnePromotionSwitch />
         </div>
