@@ -117,10 +117,7 @@ const StackedToasts = ({
                   scale: isVisible ? 1 - visualIndex * 0.05 : 0.9,
                   opacity: isVisible ? 1 : 0,
                   zIndex: items.length - index,
-                  position: index === 0 ? "relative" : "absolute",
-                  top: 0,
-                  left: 0,
-                  right: 0,
+                  height: index === 0 ? "auto" : 0,
                   order: 0,
                 },
                 expanded: {
@@ -131,10 +128,7 @@ const StackedToasts = ({
                   // Reverse visual order: newest (highest index) at top
                   zIndex: index + 1,
                   order: items.length - 1 - index,
-                  position: "relative",
-                  top: 0,
-                  left: 0,
-                  right: 0,
+                  height: "auto",
                 },
               }}
               transition={{
@@ -142,7 +136,9 @@ const StackedToasts = ({
                 stiffness: baseStiffness - stiffnessReduction,
                 damping: baseDamping + dampingIncrease,
               }}
-              style={{ width: "100%" }}
+              className={cn(
+                !isHovered && index > 0 && "absolute top-0 left-0 right-0"
+              )}
             >
               <F0Toast {...item} forcePauseTimer />
             </motion.div>
