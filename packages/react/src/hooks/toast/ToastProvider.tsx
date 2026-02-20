@@ -4,6 +4,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -68,9 +69,11 @@ const StackedToasts = ({
   const dampingIncrease = Math.min(items.length * 2, 10)
 
   // Measure the front stacked item height for the spacer
-  useEffect(() => {
+  useLayoutEffect(() => {
     const el = frontItemRef.current
     if (!el) return
+    // Set initial height synchronously before paint
+    setFrontItemHeight(el.getBoundingClientRect().height)
     const observer = new ResizeObserver((entries) => {
       for (const entry of entries) {
         setFrontItemHeight(entry.contentRect.height)
