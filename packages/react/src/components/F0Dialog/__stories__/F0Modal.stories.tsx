@@ -47,13 +47,13 @@ const meta: Meta<typeof F0Dialog> = {
     },
     width: {
       description:
-        "The width of the dialog. ⚠️ Only applies to center position",
+        "The width of the dialog. ⚠️ Applies to center and side panel positions (left/right)",
       control: {
         type: "select",
         options: dialogWidths,
       },
       table: {
-        type: { summary: "sm | md | lg" },
+        type: { summary: "sm | md | lg | xl" },
         defaultValue: { summary: "md" },
       },
     },
@@ -249,6 +249,62 @@ export const WithRightPosition: Story = {
   args: {
     ...Default.args,
     position: "right",
+  },
+}
+
+export const WithLeftPositionSmWidth: Story = {
+  args: {
+    ...WithLeftPosition.args,
+    width: "sm",
+  },
+}
+
+export const WithLeftPositionMdWidth: Story = {
+  args: {
+    ...WithLeftPosition.args,
+    width: "md",
+  },
+}
+
+export const WithLeftPositionLgWidth: Story = {
+  args: {
+    ...WithLeftPosition.args,
+    width: "lg",
+  },
+}
+
+export const WithLeftPositionXlWidth: Story = {
+  args: {
+    ...WithLeftPosition.args,
+    width: "xl",
+  },
+}
+
+export const WithRightPositionSmWidth: Story = {
+  args: {
+    ...WithRightPosition.args,
+    width: "sm",
+  },
+}
+
+export const WithRightPositionMdWidth: Story = {
+  args: {
+    ...WithRightPosition.args,
+    width: "md",
+  },
+}
+
+export const WithRightPositionLgWidth: Story = {
+  args: {
+    ...WithRightPosition.args,
+    width: "lg",
+  },
+}
+
+export const WithRightPositionXlWidth: Story = {
+  args: {
+    ...WithRightPosition.args,
+    width: "xl",
   },
 }
 

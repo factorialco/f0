@@ -118,14 +118,11 @@ export const F0DialogInternal: FC<F0DialogInternalProps> = ({
     return "center"
   }, [isSmallScreen, asBottomSheetInMobile, isSidePosition, position])
 
-  // Forces the width to be "sm" for sidePosition variants
+  // Side panel positions (left/right) accept width variants
   const localWidth = useMemo(() => {
-    if (variant === "sidePosition") {
-      return "sm"
-    }
-    if (width && position !== "center") {
+    if (width && !["center", "left", "right"].includes(position)) {
       console.warn(
-        "F0Dialog: `width` prop is only applicable to center position"
+        "F0Dialog: `width` prop is only applicable to center and side panel positions"
       )
     }
 
