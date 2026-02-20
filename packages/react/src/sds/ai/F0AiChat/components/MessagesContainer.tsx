@@ -163,13 +163,15 @@ const Messages = ({
                 "w-full max-w-[712px]"
               )}
             >
-              {showWelcomeBlock && (
-                <WelcomeScreen
-                  greeting={greeting}
-                  initialMessages={initialMessages}
-                  suggestions={welcomeScreenSuggestions}
-                />
-              )}
+              <AnimatePresence mode="popLayout">
+                {showWelcomeBlock && (
+                  <WelcomeScreen
+                    greeting={greeting}
+                    initialMessages={initialMessages}
+                    suggestions={welcomeScreenSuggestions}
+                  />
+                )}
+              </AnimatePresence>
               {turns.map((turnMessages, turnIndex) => (
                 <div
                   ref={turnIndex === turns.length - 1 ? lastTurnRef : undefined}
