@@ -50,9 +50,11 @@ const promotionLockDuration = 400
 const StackedToasts = ({
   items,
   isTransitioning,
+  promotingIds,
 }: {
   items: ToastProviderItem[]
   isTransitioning: boolean
+  promotingIds: Set<ToastId>
 }) => {
   const [isHovered, setIsHovered] = useState(false)
   const lockRef = useRef(false)
@@ -104,11 +106,11 @@ const StackedToasts = ({
                 scale: 1 - visualIndex * 0.05,
               }}
               animate={isHovered ? "expanded" : "stacked"}
-              exit={{
-                opacity: 0,
-                scale: 0.5,
-                transition: { duration: 0.2 },
-              }}
+              exit={
+                promotingIds.has(item.id)
+                  ? { opacity: 1, scale: 1, transition: { duration: 0 } }
+                  : { opacity: 0, scale: 0.5, transition: { duration: 0.2 } }
+              }
               variants={{
                 stacked: {
                   x: 0,
@@ -217,6 +219,7 @@ const ToastsContainer = ({
             <StackedToasts
               items={stackedItems}
               isTransitioning={isTransitioning}
+              promotingIds={promotingIdsRef.current}
             />
 
             {/* Active Toasts — flex-col-reverse so oldest (index 0) is at the bottom */}
