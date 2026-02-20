@@ -5,6 +5,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react"
 import { createPortal } from "react-dom"
@@ -39,20 +40,22 @@ const toastContainerPositionClasses: Record<ToastContainerPosition, string> = {
   "top-right": "justify-end items-start top-0 right-0 bottom-0",
 } as const
 
-// Active toast entry/exit animation — slides in from right, exits with fade+zoom
-const activeToastVariants = {
-  initial: { opacity: 0, x: 60, scale: 0.95 },
-  animate: { opacity: 1, x: 0, scale: 1 },
-  exit: { opacity: 0, scale: 0.9, transition: { duration: 0.2 } },
-}
-
 // How many toasts are shown fully expanded (not stacked)
 const minActiveToasts = 3
 // How many stacked toasts are visible (the rest are hidden at same position as last visible)
 const maxVisibleStackedToasts = 3
+// How long to disable hover after a stacked→active promotion (ms)
+const promotionLockDuration = 400
 
-const StackedToasts = ({ items }: { items: ToastProviderItem[] }) => {
+const StackedToasts = ({
+  items,
+  promotingIds,
+}: {
+  items: ToastProviderItem[]
+  promotingIds: Set<ToastId>
+}) => {
   const [isHovered, setIsHovered] = useState(false)
+  const lockRef = useRef(false)
 
   // Dynamic animation speed: more items = slower spring, but keep it snappy
   const baseStiffness = 500
@@ -60,12 +63,28 @@ const StackedToasts = ({ items }: { items: ToastProviderItem[] }) => {
   const stiffnessReduction = Math.min(items.length * 15, 150)
   const dampingIncrease = Math.min(items.length * 2, 10)
 
+  // Lock hover interactions during stacked→active promotions
+  useEffect(() => {
+    if (promotingIds.size > 0) {
+      lockRef.current = true
+      setIsHovered(false)
+      const timer = setTimeout(() => {
+        lockRef.current = false
+      }, promotionLockDuration)
+      return () => clearTimeout(timer)
+    }
+  }, [promotingIds])
+
+  const handleMouseEnter = () => {
+    if (!lockRef.current) setIsHovered(true)
+  }
+
   if (items.length === 0) return null
 
   return (
     <div
-      className="pointer-events-auto relative z-[101] mb-4 flex flex-col"
-      onMouseEnter={() => setIsHovered(true)}
+      className="pointer-events-auto relative z-[101] mb-4 flex flex-col gap-4"
+      onMouseEnter={handleMouseEnter}
       onMouseLeave={() => setIsHovered(false)}
     >
       <AnimatePresence>
@@ -110,7 +129,6 @@ const StackedToasts = ({ items }: { items: ToastProviderItem[] }) => {
                   zIndex: index + 1,
                   order: items.length - 1 - index,
                   height: "auto",
-                  marginBottom: 16,
                 },
               }}
               transition={{
@@ -138,6 +156,9 @@ const ToastsContainer = ({
   items: ToastProviderItem[]
   position?: ToastContainerPosition
 }) => {
+  const prevStackedIdsRef = useRef<Set<ToastId>>(new Set())
+  const [promotingIds, setPromotingIds] = useState<Set<ToastId>>(new Set())
+
   const { stackedItems, activeItems } = useMemo(() => {
     const totalCount = items.length
     const activeCount = Math.min(totalCount, minActiveToasts)
@@ -152,12 +173,38 @@ const ToastsContainer = ({
     return { stackedItems: stacked, activeItems: active }
   }, [items])
 
+  // Detect which ids just moved from stacked → active
+  useEffect(() => {
+    const currentStackedIds = new Set(stackedItems.map((i) => i.id))
+    const newlyPromoted = new Set<ToastId>()
+
+    for (const id of prevStackedIdsRef.current) {
+      if (!currentStackedIds.has(id)) {
+        // Was stacked, no longer stacked — check if it's now active
+        if (activeItems.some((i) => i.id === id)) {
+          newlyPromoted.add(id)
+        }
+      }
+    }
+
+    if (newlyPromoted.size > 0) {
+      setPromotingIds(newlyPromoted)
+      const timer = setTimeout(
+        () => setPromotingIds(new Set()),
+        promotionLockDuration
+      )
+      return () => clearTimeout(timer)
+    }
+
+    prevStackedIdsRef.current = currentStackedIds
+  }, [stackedItems, activeItems])
+
   const hasItems = items.length > 0
 
   return (
     <div
       className={cn(
-        "pointer-events-none fixed z-[100] flex overflow-y-auto",
+        "pointer-events-none fixed z-[100] flex overflow-x-hidden overflow-y-auto",
         toastContainerPositionClasses[position]
       )}
     >
@@ -168,7 +215,7 @@ const ToastsContainer = ({
             className="flex w-[350px] max-w-full flex-col p-6"
           >
             {/* Stacked Toasts at the Top */}
-            <StackedToasts items={stackedItems} />
+            <StackedToasts items={stackedItems} promotingIds={promotingIds} />
 
             {/* Active Toasts — flex-col-reverse so oldest (index 0) is at the bottom */}
             <div className="relative flex flex-col-reverse gap-4">
@@ -178,10 +225,18 @@ const ToastsContainer = ({
                     key={item.id}
                     layoutId={item.id}
                     layout
-                    variants={activeToastVariants}
-                    initial="initial"
-                    animate="animate"
-                    exit="exit"
+                    // Skip entry animation for items promoted from stacked (layoutId handles it)
+                    initial={
+                      promotingIds.has(item.id)
+                        ? false
+                        : { opacity: 0, x: 60, scale: 0.95 }
+                    }
+                    animate={{ opacity: 1, x: 0, scale: 1 }}
+                    exit={{
+                      opacity: 0,
+                      scale: 0.9,
+                      transition: { duration: 0.2 },
+                    }}
                   >
                     <F0Toast {...item} forcePauseTimer />
                   </motion.div>
