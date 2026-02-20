@@ -58,12 +58,27 @@ const StackedToasts = ({
 }) => {
   const [isHovered, setIsHovered] = useState(false)
   const lockRef = useRef(false)
+  const frontItemRef = useRef<HTMLDivElement>(null)
+  const [frontItemHeight, setFrontItemHeight] = useState<number>(0)
 
   // Dynamic animation speed: more items = slower spring, but keep it snappy
   const baseStiffness = 500
   const baseDamping = 40
   const stiffnessReduction = Math.min(items.length * 15, 150)
   const dampingIncrease = Math.min(items.length * 2, 10)
+
+  // Measure the front stacked item height for the spacer
+  useEffect(() => {
+    const el = frontItemRef.current
+    if (!el) return
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        setFrontItemHeight(entry.contentRect.height)
+      }
+    })
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [items[0]?.id])
 
   // Lock hover interactions during stacked→active promotions
   useEffect(() => {
@@ -85,68 +100,73 @@ const StackedToasts = ({
 
   return (
     <div
-      className="pointer-events-auto relative z-[101] mb-4 flex flex-col gap-4"
+      className="pointer-events-auto relative z-[101] mb-4"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <AnimatePresence>
-        {items.map((item, index) => {
-          // index 0 = oldest stacked = front of stack (closest to active area, on top)
-          // Clamp visual position for hidden items to the last visible slot
-          const visualIndex = Math.min(index, maxVisibleStackedToasts - 1)
-          const isVisible = index < maxVisibleStackedToasts
+      {/* Spacer: maintains container height matching the front stacked item when not hovered */}
+      {!isHovered && <div style={{ height: frontItemHeight }} />}
 
-          return (
-            <motion.div
-              key={item.id}
-              layoutId={item.id}
-              initial={{
-                opacity: 0,
-                x: 60,
-                scale: 1 - visualIndex * 0.05,
-              }}
-              animate={isHovered ? "expanded" : "stacked"}
-              exit={
-                promotingIds.has(item.id)
-                  ? { opacity: 1, scale: 1, transition: { duration: 0 } }
-                  : { opacity: 0, scale: 0.5, transition: { duration: 0.2 } }
-              }
-              variants={{
-                stacked: {
-                  x: 0,
-                  y: visualIndex * -10,
-                  // Hidden items start smaller so they zoom in when becoming visible
-                  scale: isVisible ? 1 - visualIndex * 0.05 : 0.9,
-                  opacity: isVisible ? 1 : 0,
-                  zIndex: items.length - index,
-                  height: index === 0 ? "auto" : 0,
-                  order: 0,
-                },
-                expanded: {
-                  x: 0,
-                  y: 0,
-                  scale: 1,
-                  opacity: 1,
-                  // Reverse visual order: newest (highest index) at top
-                  zIndex: index + 1,
-                  order: items.length - 1 - index,
-                  height: "auto",
-                },
-              }}
-              transition={{
-                type: "spring",
-                stiffness: baseStiffness - stiffnessReduction,
-                damping: baseDamping + dampingIncrease,
-              }}
-              className={cn(
-                !isHovered && index > 0 && "absolute top-0 left-0 right-0"
-              )}
-            >
-              <F0Toast {...item} forcePauseTimer />
-            </motion.div>
-          )
-        })}
-      </AnimatePresence>
+      {/* When expanded, use flex layout with gap */}
+      <div
+        className={cn(isHovered && "flex flex-col gap-4")}
+        style={!isHovered ? { position: "relative" } : undefined}
+      >
+        <AnimatePresence>
+          {items.map((item, index) => {
+            // index 0 = oldest stacked = front of stack (closest to active area, on top)
+            // Clamp visual position for hidden items to the last visible slot
+            const visualIndex = Math.min(index, maxVisibleStackedToasts - 1)
+            const isVisible = index < maxVisibleStackedToasts
+
+            return (
+              <motion.div
+                key={item.id}
+                ref={index === 0 ? frontItemRef : undefined}
+                layoutId={item.id}
+                initial={{
+                  opacity: 0,
+                  x: 60,
+                  scale: 1 - visualIndex * 0.05,
+                }}
+                animate={isHovered ? "expanded" : "stacked"}
+                exit={
+                  promotingIds.has(item.id)
+                    ? { opacity: 1, scale: 1, transition: { duration: 0 } }
+                    : { opacity: 0, scale: 0.5, transition: { duration: 0.2 } }
+                }
+                variants={{
+                  stacked: {
+                    x: 0,
+                    y: visualIndex * -10,
+                    // Hidden items start smaller so they zoom in when becoming visible
+                    scale: isVisible ? 1 - visualIndex * 0.05 : 0.9,
+                    opacity: isVisible ? 1 : 0,
+                    zIndex: items.length - index,
+                  },
+                  expanded: {
+                    x: 0,
+                    y: 0,
+                    scale: 1,
+                    opacity: 1,
+                    // Reverse visual order: newest (highest index) at top
+                    zIndex: index + 1,
+                    order: items.length - 1 - index,
+                  },
+                }}
+                transition={{
+                  type: "spring",
+                  stiffness: baseStiffness - stiffnessReduction,
+                  damping: baseDamping + dampingIncrease,
+                }}
+                className={cn(!isHovered && "absolute top-0 left-0 right-0")}
+              >
+                <F0Toast {...item} forcePauseTimer />
+              </motion.div>
+            )
+          })}
+        </AnimatePresence>
+      </div>
     </div>
   )
 }
