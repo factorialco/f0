@@ -227,6 +227,26 @@ export type InferPerSectionValues<T extends F0PerSectionSchema> = {
 }
 
 /**
+ * Creates a union of `[sectionId, data]` pairs for each key in T.
+ * Used to build a callback where TypeScript narrows `data` based on `sectionId`.
+ *
+ * @example
+ * For T = { profile: ZodObject<{name: ZodString}>, settings: ZodObject<{theme: ZodEnum}> }
+ * Produces: ["profile", { name: string }] | ["settings", { theme: "light" | "dark" }]
+ */
+type PerSectionSubmitArgs<T extends F0PerSectionSchema> = {
+  [K in keyof T & string]: [sectionId: K, data: z.infer<T[K]>]
+}[keyof T & string]
+
+/**
+ * Callback type for per-section submit. Uses a discriminated union of argument
+ * tuples so that narrowing `sectionId` also narrows `data` to the correct type.
+ */
+type PerSectionSubmitHandler<T extends F0PerSectionSchema> = (
+  ...args: PerSectionSubmitArgs<T>
+) => Promise<F0FormSubmitResult> | F0FormSubmitResult
+
+/**
  * Props for the F0Form component (single schema mode)
  */
 export interface F0FormPropsWithSingleSchema<TSchema extends F0FormSchema> {
@@ -312,11 +332,8 @@ export interface F0FormPropsWithPerSectionSchema<T extends F0PerSectionSchema> {
   defaultValues?: {
     [K in keyof T]?: Partial<z.infer<T[K]>>
   }
-  /** Callback when a section is submitted. Receives the section ID and its validated data. */
-  onSubmit: (
-    sectionId: string,
-    data: z.infer<T[keyof T]>
-  ) => Promise<F0FormSubmitResult> | F0FormSubmitResult
+  /** Callback when a section is submitted. Receives the section ID and its validated data, both correctly typed. */
+  onSubmit: PerSectionSubmitHandler<T>
   /** Global submit config applied to all sections (can be overridden per section) */
   submitConfig?: F0PerSectionSubmitConfig
   /** Additional class name for the form container */
