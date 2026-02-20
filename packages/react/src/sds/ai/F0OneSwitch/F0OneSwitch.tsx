@@ -1,6 +1,6 @@
 import * as SwitchPrimitive from "@radix-ui/react-switch"
 import { motion } from "motion/react"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
@@ -18,16 +18,27 @@ import { F0OneSwitchProps } from "./types"
 export const F0OneSwitch = ({
   className,
   disabled,
-  customTooltip,
-  tooltipAlwaysVisible = false,
+  tooltip,
+  autoOpen = false,
 }: F0OneSwitchProps) => {
   const { enabled, setOpen, open } = useAiChat()
   const translations = useI18n()
   const [isHover, setIsHover] = useState(false)
   const [tooltipOpen, setTooltipOpen] = useState(false)
+  const [autoTooltipVisible, setAutoTooltipVisible] = useState(autoOpen)
 
-  const tooltipText = customTooltip ?? translations.ai.welcome
-  const showTooltip = tooltipAlwaysVisible ? true : tooltipOpen
+  const tooltipText = tooltip ?? translations.ai.welcome
+  const showTooltip = autoOpen ? autoTooltipVisible : tooltipOpen
+
+  useEffect(() => {
+    if (autoOpen) setAutoTooltipVisible(true)
+  }, [autoOpen])
+
+  useEffect(() => {
+    if (!autoOpen) return
+    const timer = setTimeout(() => setAutoTooltipVisible(false), 3000)
+    return () => clearTimeout(timer)
+  }, [autoOpen])
 
   if (!enabled) {
     return null
@@ -40,7 +51,7 @@ export const F0OneSwitch = ({
           delayDuration={850}
           disableHoverableContent
           open={!open && showTooltip}
-          onOpenChange={tooltipAlwaysVisible ? () => {} : setTooltipOpen}
+          onOpenChange={autoOpen ? () => {} : setTooltipOpen}
         >
           <TooltipTrigger asChild>
             <motion.div
@@ -54,11 +65,6 @@ export const F0OneSwitch = ({
                   repeat: Infinity,
                 },
               }}
-              style={
-                {
-                  "--gradient-angle": "180deg",
-                } as React.CSSProperties
-              }
             >
               <SwitchPrimitive.Root
                 onCheckedChange={(val) => {
@@ -104,7 +110,7 @@ export const F0OneSwitch = ({
           {!open && (
             <TooltipContent
               side="left"
-              className={cn("font-medium", tooltipAlwaysVisible && "z-[100]")}
+              className={cn("font-medium", autoOpen && "z-[100]")}
             >
               {tooltipText}
             </TooltipContent>
