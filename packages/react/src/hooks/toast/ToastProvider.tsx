@@ -58,6 +58,20 @@ const StackedToasts = ({
 }) => {
   const [isHovered, setIsHovered] = useState(false)
   const lockRef = useRef(false)
+  // Track items that have been promoted and should never trigger an exit animation.
+  // We accumulate promoted IDs across renders so that even after `promotingIds` clears,
+  // we still know to exclude them from AnimatePresence.
+  const promotedEverRef = useRef<Set<ToastId>>(new Set())
+  for (const id of promotingIds) {
+    promotedEverRef.current.add(id)
+  }
+  // Clean up IDs that are no longer in items at all (already fully removed)
+  const currentItemIds = new Set(items.map((i) => i.id))
+  for (const id of promotedEverRef.current) {
+    if (!currentItemIds.has(id)) {
+      promotedEverRef.current.delete(id)
+    }
+  }
 
   // Dynamic animation speed: more items = slower spring, but keep it snappy
   const baseStiffness = 500
@@ -83,6 +97,13 @@ const StackedToasts = ({
 
   if (items.length === 0) return null
 
+  // Count of actual visible (non-promoted) items for z-index and order calculations
+  const visibleCount = items.filter(
+    (item) => !promotedEverRef.current.has(item.id)
+  ).length
+
+  if (visibleCount === 0) return null
+
   return (
     <div
       className="pointer-events-auto relative z-[101] mb-4 flex flex-col gap-4"
@@ -90,61 +111,93 @@ const StackedToasts = ({
       onMouseLeave={() => setIsHovered(false)}
     >
       <AnimatePresence>
-        {items.map((item, index) => {
-          // index 0 = oldest stacked = front of stack (closest to active area, on top)
-          // Clamp visual position for hidden items to the last visible slot
-          const visualIndex = Math.min(index, maxVisibleStackedToasts - 1)
-          const isVisible = index < maxVisibleStackedToasts
+        {(() => {
+          let visibleIndex = 0
+          return items.map((item) => {
+            const isPromoted = promotedEverRef.current.has(item.id)
 
-          return (
-            <motion.div
-              key={item.id}
-              initial={{
-                opacity: 0,
-                x: 60,
-                scale: 1 - visualIndex * 0.05,
-              }}
-              animate={isHovered ? "expanded" : "stacked"}
-              exit={
-                promotingIds.has(item.id)
-                  ? { opacity: 1, scale: 1, transition: { duration: 0 } }
-                  : { opacity: 0, scale: 0.5, transition: { duration: 0.2 } }
-              }
-              variants={{
-                stacked: {
-                  x: 0,
-                  y: visualIndex * -10,
-                  // Hidden items start smaller so they zoom in when becoming visible
-                  scale: isVisible ? 1 - visualIndex * 0.05 : 0.9,
-                  opacity: isVisible ? 1 : 0,
-                  zIndex: items.length - index,
-                  height: index === 0 ? "auto" : 0,
-                  order: 0,
-                },
-                expanded: {
-                  x: 0,
-                  y: 0,
-                  scale: 1,
-                  opacity: 1,
-                  // Reverse visual order: newest (highest index) at top
-                  zIndex: index + 1,
-                  order: items.length - 1 - index,
-                  height: "auto",
-                },
-              }}
-              transition={{
-                type: "spring",
-                stiffness: baseStiffness - stiffnessReduction,
-                damping: baseDamping + dampingIncrease,
-              }}
-              className={cn(
-                !isHovered && index > 0 && "absolute top-0 left-0 right-0"
-              )}
-            >
-              <F0Toast {...item} forcePauseTimer />
-            </motion.div>
-          )
-        })}
+            // Promoted items stay in AnimatePresence's children list (preventing exit
+            // animation) but render as invisible zero-height elements
+            if (isPromoted) {
+              return (
+                <motion.div
+                  key={item.id}
+                  style={{
+                    position: "absolute",
+                    width: 0,
+                    height: 0,
+                    overflow: "hidden",
+                    opacity: 0,
+                    pointerEvents: "none",
+                  }}
+                  exit={{ transition: { duration: 0 } }}
+                />
+              )
+            }
+
+            const currentVisibleIndex = visibleIndex
+            visibleIndex++
+
+            // currentVisibleIndex 0 = oldest stacked = front of stack (closest to active area, on top)
+            // Clamp visual position for hidden items to the last visible slot
+            const visualIndex = Math.min(
+              currentVisibleIndex,
+              maxVisibleStackedToasts - 1
+            )
+            const isVisible = currentVisibleIndex < maxVisibleStackedToasts
+
+            return (
+              <motion.div
+                key={item.id}
+                initial={{
+                  opacity: 0,
+                  x: 60,
+                  scale: 1 - visualIndex * 0.05,
+                }}
+                animate={isHovered ? "expanded" : "stacked"}
+                exit={{
+                  opacity: 0,
+                  scale: 0.5,
+                  transition: { duration: 0.2 },
+                }}
+                variants={{
+                  stacked: {
+                    x: 0,
+                    y: visualIndex * -10,
+                    // Hidden items start smaller so they zoom in when becoming visible
+                    scale: isVisible ? 1 - visualIndex * 0.05 : 0.9,
+                    opacity: isVisible ? 1 : 0,
+                    zIndex: visibleCount - currentVisibleIndex,
+                    height: currentVisibleIndex === 0 ? "auto" : 0,
+                    order: 0,
+                  },
+                  expanded: {
+                    x: 0,
+                    y: 0,
+                    scale: 1,
+                    opacity: 1,
+                    // Reverse visual order: newest (highest index) at top
+                    zIndex: currentVisibleIndex + 1,
+                    order: visibleCount - 1 - currentVisibleIndex,
+                    height: "auto",
+                  },
+                }}
+                transition={{
+                  type: "spring",
+                  stiffness: baseStiffness - stiffnessReduction,
+                  damping: baseDamping + dampingIncrease,
+                }}
+                className={cn(
+                  !isHovered &&
+                    currentVisibleIndex > 0 &&
+                    "absolute top-0 left-0 right-0"
+                )}
+              >
+                <F0Toast {...item} forcePauseTimer />
+              </motion.div>
+            )
+          })
+        })()}
       </AnimatePresence>
     </div>
   )
@@ -159,7 +212,12 @@ const ToastsContainer = ({
 }) => {
   const prevStackedIdsRef = useRef<Set<ToastId>>(new Set())
   const promotingIdsRef = useRef<Set<ToastId>>(new Set())
+  const promotedAccumulatorRef = useRef<Set<ToastId>>(new Set())
   const [isTransitioning, setIsTransitioning] = useState(false)
+  const stackedContainerRef = useRef<HTMLDivElement>(null)
+  const activeContainerRef = useRef<HTMLDivElement>(null)
+  // Store the measured Y offset for promoted items to animate from
+  const promotionOffsetRef = useRef<number>(0)
 
   const { stackedItems, activeItems } = useMemo(() => {
     const totalCount = items.length
@@ -185,6 +243,45 @@ const ToastsContainer = ({
   }
   prevStackedIdsRef.current = currentStackedIds
   promotingIdsRef.current = newlyPromoted
+
+  // Accumulate promoted IDs so we can keep them in the stacked list across re-renders.
+  // This prevents AnimatePresence from triggering exit animations for promoted items.
+  for (const id of newlyPromoted) {
+    promotedAccumulatorRef.current.add(id)
+  }
+  // Clean up IDs that are no longer in activeItems (fully removed from the system)
+  for (const id of promotedAccumulatorRef.current) {
+    if (!activeItems.some((i) => i.id === id)) {
+      promotedAccumulatorRef.current.delete(id)
+    }
+  }
+
+  // Include promoted items in stacked list so StackedToasts can filter them out
+  // before AnimatePresence processes them (avoiding exit animation).
+  // We use promotedAccumulatorRef (persists across renders) instead of newlyPromoted
+  // (only non-empty for one render) to survive re-renders caused by setIsTransitioning.
+  const stackedItemsWithPromoted =
+    promotedAccumulatorRef.current.size === 0
+      ? stackedItems
+      : [
+          ...activeItems.filter((i) =>
+            promotedAccumulatorRef.current.has(i.id)
+          ),
+          ...stackedItems,
+        ]
+
+  // Measure the Y offset between stacked and active containers for promotion animation.
+  // The promoted item should start where the stacked area is (above active) and slide down.
+  if (
+    newlyPromoted.size > 0 &&
+    stackedContainerRef.current &&
+    activeContainerRef.current
+  ) {
+    const stackedRect = stackedContainerRef.current.getBoundingClientRect()
+    const activeRect = activeContainerRef.current.getBoundingClientRect()
+    // Negative because the stacked area is above the active area
+    promotionOffsetRef.current = stackedRect.top - activeRect.top
+  }
 
   // Trigger hover lock in StackedToasts when a promotion occurs
   useEffect(() => {
@@ -215,36 +312,50 @@ const ToastsContainer = ({
             className="flex w-[350px] max-w-full flex-col p-6"
           >
             {/* Stacked Toasts at the Top */}
-            <StackedToasts
-              items={stackedItems}
-              isTransitioning={isTransitioning}
-              promotingIds={promotingIdsRef.current}
-            />
+            <div ref={stackedContainerRef}>
+              <StackedToasts
+                items={stackedItemsWithPromoted}
+                isTransitioning={isTransitioning}
+                promotingIds={promotingIdsRef.current}
+              />
+            </div>
 
             {/* Active Toasts — flex-col-reverse so oldest (index 0) is at the bottom */}
-            <div className="relative flex flex-col-reverse gap-4">
+            <div
+              ref={activeContainerRef}
+              className="relative flex flex-col-reverse gap-4"
+            >
               <AnimatePresence mode="popLayout">
-                {activeItems.map((item) => (
-                  <motion.div
-                    key={item.id}
-                    layoutId={item.id}
-                    layout
-                    // Skip entry animation for items promoted from stacked (layoutId handles it)
-                    initial={
-                      promotingIdsRef.current.has(item.id)
-                        ? false
-                        : { opacity: 0, x: 60, scale: 0.95 }
-                    }
-                    animate={{ opacity: 1, x: 0, scale: 1 }}
-                    exit={{
-                      opacity: 0,
-                      scale: 0.9,
-                      transition: { duration: 0.2 },
-                    }}
-                  >
-                    <F0Toast {...item} forcePauseTimer />
-                  </motion.div>
-                ))}
+                {activeItems.map((item) => {
+                  const isPromoted = promotingIdsRef.current.has(item.id)
+
+                  return (
+                    <motion.div
+                      key={item.id}
+                      layout
+                      // Promoted: start from stacked position (negative Y) and slide down
+                      // New: slide in from right
+                      initial={
+                        isPromoted
+                          ? {
+                              opacity: 1,
+                              x: 0,
+                              y: promotionOffsetRef.current,
+                              scale: 1,
+                            }
+                          : { opacity: 0, x: 60, scale: 0.95 }
+                      }
+                      animate={{ opacity: 1, x: 0, y: 0, scale: 1 }}
+                      exit={{
+                        opacity: 0,
+                        scale: 0.9,
+                        transition: { duration: 0.2 },
+                      }}
+                    >
+                      <F0Toast {...item} forcePauseTimer />
+                    </motion.div>
+                  )
+                })}
               </AnimatePresence>
             </div>
           </div>
