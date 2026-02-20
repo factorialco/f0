@@ -1,3 +1,5 @@
+import isEqual from "lodash/isEqual"
+
 import { FiltersDefinition, FiltersState, PresetDefinition } from "../types"
 
 /**
@@ -18,17 +20,17 @@ export const isPresetSelected = <Filters extends FiltersDefinition>(
     return false
   }
 
-  const presetKeys = Object.keys(presetFilter)
+  const presetKeys = Object.keys(presetFilter).filter(
+    (k) => presetFilter[k as keyof Filters] !== undefined
+  )
   const currentKeys = Object.keys(currentFilters).filter(
     (k) => currentFilters[k as keyof Filters] !== undefined
   )
 
   return (
     presetKeys.length === currentKeys.length &&
-    Object.entries(presetFilter).every(
-      ([key, val]) =>
-        JSON.stringify(currentFilters[key as keyof Filters]) ===
-        JSON.stringify(val)
-    )
+    Object.entries(presetFilter)
+      .filter(([, val]) => val !== undefined)
+      .every(([key, val]) => isEqual(currentFilters[key as keyof Filters], val))
   )
 }
