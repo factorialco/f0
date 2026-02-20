@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.372.0](https://github.com/factorialco/f0/compare/f0-react-v1.371.1...f0-react-v1.372.0) (2026-02-20)
+
+
+### Features
+
+* **ai-chat:** improve fullscreen UX and close animation ([#3486](https://github.com/factorialco/f0/issues/3486)) ([8acd80b](https://github.com/factorialco/f0/commit/8acd80b2f855e153c629c254dcbc090f5383ab14))
+
 ## [1.371.1](https://github.com/factorialco/f0/compare/f0-react-v1.371.0...f0-react-v1.371.1) (2026-02-19)
 
 
