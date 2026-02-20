@@ -12,6 +12,7 @@ import { createPortal } from "react-dom"
 
 import { F0Toast } from "@/internal/components/Toast/F0Toast"
 import { F0ToastProps } from "@/internal/components/Toast/types"
+import { useIsMobile } from "@/lib/useIsDesktop"
 import { cn } from "@/lib/utils"
 
 import { ToastId } from "./types"
@@ -37,11 +38,14 @@ type ToastProviderProps = {
 }
 
 const toastContainerPositionClasses: Record<ToastContainerPosition, string> = {
-  "top-right": "justify-end items-start top-0 right-0 bottom-0",
+  "top-right":
+    "justify-end items-start top-0 right-0 bottom-0 left-0 sm:left-auto",
 } as const
 
 // How many toasts are shown fully expanded (not stacked)
-const minActiveToasts = 3
+const maxActiveToasts = 3
+// How many active toasts are shown on mobile
+const maxActiveToastsMobile = 2
 // How many stacked toasts are visible (the rest are hidden at same position as last visible)
 const maxVisibleStackedToasts = 3
 // How long to disable hover after a stacked→active promotion (ms)
@@ -51,10 +55,12 @@ const StackedToasts = ({
   items,
   isTransitioning,
   promotingIds,
+  onHoverChange,
 }: {
   items: ToastProviderItem[]
   isTransitioning: boolean
   promotingIds: Set<ToastId>
+  onHoverChange?: (isHovered: boolean) => void
 }) => {
   const [isHovered, setIsHovered] = useState(false)
   const lockRef = useRef(false)
@@ -94,6 +100,10 @@ const StackedToasts = ({
   const handleMouseEnter = () => {
     if (!lockRef.current) setIsHovered(true)
   }
+
+  useEffect(() => {
+    onHoverChange?.(isHovered)
+  }, [isHovered])
 
   if (items.length === 0) return null
 
@@ -210,6 +220,7 @@ const ToastsContainer = ({
   items: ToastProviderItem[]
   position?: ToastContainerPosition
 }) => {
+  const isMobile = useIsMobile()
   const prevStackedIdsRef = useRef<Set<ToastId>>(new Set())
   const promotingIdsRef = useRef<Set<ToastId>>(new Set())
   const promotedAccumulatorRef = useRef<Set<ToastId>>(new Set())
@@ -221,7 +232,11 @@ const ToastsContainer = ({
 
   const { stackedItems, activeItems } = useMemo(() => {
     const totalCount = items.length
-    const activeCount = Math.min(totalCount, minActiveToasts)
+
+    const activeCount = Math.min(
+      totalCount,
+      isMobile ? maxActiveToastsMobile : maxActiveToasts
+    )
 
     // Active = oldest N toasts (first added), rendered bottom-to-top via flex-col-reverse
     // So items[0] (oldest) appears at the bottom, items[activeCount-1] at top
@@ -231,7 +246,7 @@ const ToastsContainer = ({
     const stacked = items.slice(activeCount)
 
     return { stackedItems: stacked, activeItems: active }
-  }, [items])
+  }, [items, isMobile])
 
   // Compute promoted ids synchronously during render so initial prop is correct on first paint
   const currentStackedIds = new Set(stackedItems.map((i) => i.id))
@@ -298,6 +313,11 @@ const ToastsContainer = ({
 
   const hasItems = items.length > 0
 
+  const [forcePause, setForcePause] = useState(false)
+  const onHoverChange = useCallback((isHovered: boolean) => {
+    setForcePause(isHovered)
+  }, [])
+
   return (
     <div
       className={cn(
@@ -309,7 +329,7 @@ const ToastsContainer = ({
         {hasItems && (
           <div
             key="toast-panel"
-            className="flex w-[350px] max-w-full flex-col p-6"
+            className="flex w-full flex-col p-6 sm:w-[350px]"
           >
             {/* Stacked Toasts at the Top */}
             <div ref={stackedContainerRef}>
@@ -317,10 +337,11 @@ const ToastsContainer = ({
                 items={stackedItemsWithPromoted}
                 isTransitioning={isTransitioning}
                 promotingIds={promotingIdsRef.current}
+                onHoverChange={onHoverChange}
               />
             </div>
 
-            {/* Active Toasts — flex-col-reverse so oldest (index 0) is at the bottom */}
+            {/* Active Toasts — desktop only, flex-col-reverse so oldest (index 0) is at the bottom */}
             <div
               ref={activeContainerRef}
               className="relative flex flex-col-reverse gap-4"
@@ -352,7 +373,7 @@ const ToastsContainer = ({
                         transition: { duration: 0.2 },
                       }}
                     >
-                      <F0Toast {...item} forcePauseTimer />
+                      <F0Toast {...item} forcePauseTimer={forcePause} />
                     </motion.div>
                   )
                 })}
