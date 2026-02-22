@@ -80,14 +80,15 @@ describe("convertMessagesToTurn", () => {
       },
     ]
     const turns = convertMessagesToTurns(messages)
-    // user message + assistant message + group of thoughts
+    // user message + group of thoughts + assistant message
     expect(turns[0]).toHaveLength(3)
     expect(turns[1]).toHaveLength(1)
 
+    // Thinking group is hoisted above text messages
     expect(
       turns[0].map((m) => (Array.isArray(m) ? "array" : m.role))
-    ).toStrictEqual(["user", "assistant", "array"])
-    expect(turns[0][2]).toHaveLength(3)
+    ).toStrictEqual(["user", "array", "assistant"])
+    expect(turns[0][1]).toHaveLength(3)
 
     expect(
       turns[1].map((m) => (Array.isArray(m) ? "array" : m.role))
@@ -117,14 +118,15 @@ describe("convertMessagesToTurn", () => {
     ]
     const turns = convertMessagesToTurns(messages)
 
-    // All thinking messages merged into one group
+    // All thinking messages merged into one group, hoisted above text
     expect(turns[0]).toHaveLength(4)
     expect(turns[1]).toHaveLength(1)
 
+    // Thinking group hoisted to position 1 (right after user message)
     expect(
       turns[0].map((m) => (Array.isArray(m) ? "array" : m.role))
-    ).toStrictEqual(["user", "assistant", "array", "assistant"])
-    expect(turns[0][2]).toHaveLength(2)
+    ).toStrictEqual(["user", "array", "assistant", "assistant"])
+    expect(turns[0][1]).toHaveLength(2)
 
     expect(
       turns[1].map((m) => (Array.isArray(m) ? "array" : m.role))
@@ -191,6 +193,71 @@ describe("convertMessagesToTurn", () => {
     expect(thinkingGroup).toHaveLength(2)
     expect(thinkingGroup[0].content).toBe("same thought")
     expect(thinkingGroup[1].content).toBe("different thought")
+  })
+
+  it("groups thinking messages with empty content but different arguments (real CopilotKit shape)", () => {
+    const messages: Message[] = [
+      {
+        id: "1",
+        role: "user",
+        content: "Hello!",
+      },
+      createActionThinkingMessage("Pulling leave types…"),
+      createActionThinkingMessage("Fetching approved absences…"),
+      createActionThinkingMessage("Calculating absenteeism rate…"),
+    ]
+    const turns = convertMessagesToTurns(messages)
+    expect(turns[0]).toHaveLength(2)
+
+    const thinkingGroup = turns[0][1] as Message[]
+    expect(thinkingGroup).toHaveLength(3)
+  })
+
+  it("deduplicates action thinking messages with identical arguments", () => {
+    const messages: Message[] = [
+      {
+        id: "1",
+        role: "user",
+        content: "Hello!",
+      },
+      createActionThinkingMessage("same step"),
+      createActionThinkingMessage("same step"),
+      createActionThinkingMessage("different step"),
+    ]
+    const turns = convertMessagesToTurns(messages)
+
+    const thinkingGroup = turns[0][1] as Message[]
+    expect(thinkingGroup).toHaveLength(2)
+  })
+
+  it("hoists thinking group above text when thinking arrives after text in multi-run turns", () => {
+    // Simulates: Run1 produces text, Run2 produces thinking + text (same turn, no new user message)
+    const messages: Message[] = [
+      {
+        id: "1",
+        role: "user",
+        content: "Take a day off tomorrow",
+      },
+      {
+        id: "2",
+        role: "assistant",
+        content: "I've prepared a time-off request.",
+      },
+      createActionThinkingMessage("Processing cancellation…"),
+      {
+        id: "3",
+        role: "assistant",
+        content: "Your request was cancelled.",
+      },
+    ]
+    const turns = convertMessagesToTurns(messages)
+    expect(turns).toHaveLength(1)
+    expect(turns[0]).toHaveLength(4)
+
+    // Thinking group hoisted above text messages
+    expect(
+      turns[0].map((m) => (Array.isArray(m) ? "array" : m.role))
+    ).toStrictEqual(["user", "array", "assistant", "assistant"])
   })
 
   it("hoists agentState message above thinking tool calls if agentState comes between thinking calls", () => {
@@ -265,6 +332,26 @@ const createThinkingMessage = (content: string = randomUUID()): Message => ({
       function: {
         name: "orchestratorThinking",
         arguments: "",
+      },
+    },
+  ],
+})
+
+/**
+ * Realistic CopilotKit action-execution message shape:
+ * content is undefined, preamble text lives in toolCalls arguments.
+ */
+const createActionThinkingMessage = (preamble: string): Message => ({
+  id: randomUUID(),
+  role: "assistant",
+  content: undefined as unknown as string,
+  toolCalls: [
+    {
+      id: randomUUID(),
+      type: "function",
+      function: {
+        name: "orchestratorThinking",
+        arguments: JSON.stringify({ message: preamble }),
       },
     },
   ],
