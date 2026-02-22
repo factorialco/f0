@@ -22,7 +22,7 @@ export function InFilterFlatOption<T extends string>({
   const optionId = `option-${String(option.value)}`
 
   return (
-    <div className="w-full px-2">
+    <div className={cn("w-full", !isCompactMode && "px-2")}>
       <div
         className={cn(
           "flex w-full min-w-0 flex-1 cursor-pointer appearance-none items-center justify-between gap-1 rounded p-1.5 font-medium transition-colors hover:bg-f1-background-secondary",

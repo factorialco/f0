@@ -20,7 +20,7 @@ function SelectedCount({ count }: { count: number }) {
   const i18n = useI18n()
   return (
     <div className="flex w-full items-center gap-1 text-left">
-      <OneEllipsis className="min-w-0 flex-1">
+      <OneEllipsis className="min-w-0 flex-1 text-f1-foreground">
         {`${count} ${count === 1 ? i18n.status.selected.singular : i18n.status.selected.plural}`.toLowerCase()}
       </OneEllipsis>
     </div>
@@ -50,7 +50,7 @@ function MultiSelectDisplay({
       ref={containerRef}
       className="flex w-full items-center gap-1 text-left"
     >
-      <span className="min-w-0 flex-1 truncate">
+      <span className="min-w-0 flex-1 truncate text-f1-foreground">
         {labels.join(LABEL_SEPARATOR)}
       </span>
     </div>
@@ -77,7 +77,7 @@ export const SelectedItems = forwardRef<HTMLDivElement, SelectValueProps>(
       if (allSelected === true) {
         return (
           <div className="flex w-full items-center gap-1 text-left">
-            <OneEllipsis className="min-w-0 flex-1">
+            <OneEllipsis className="min-w-0 flex-1 text-f1-foreground">
               {`${i18n.status.selected.all} (${selectedCount})`}
             </OneEllipsis>
           </div>
@@ -122,7 +122,7 @@ export const SelectedItems = forwardRef<HTMLDivElement, SelectValueProps>(
             <F0Icon icon={selectedItem.icon} />
           </div>
         )}
-        <OneEllipsis tag="span" className="text-left">
+        <OneEllipsis tag="span" className="text-left text-f1-foreground">
           {selectedItem.label}
         </OneEllipsis>
       </div>
