@@ -42,6 +42,7 @@ const F0AiChatProviderComponent = ({
   agent,
   onVisibility,
   onClose,
+  onWelcomeSuggestionClick,
   ...copilotKitProps
 }: AiChatProviderProps) => {
   return (
@@ -60,6 +61,7 @@ const F0AiChatProviderComponent = ({
       footer={footer}
       onVisibility={onVisibility}
       onClose={onClose}
+      onWelcomeSuggestionClick={onWelcomeSuggestionClick}
     >
       <AiChatKitWrapper {...copilotKitProps}>{children}</AiChatKitWrapper>
     </AiChatStateProvider>

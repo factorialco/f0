@@ -34,7 +34,7 @@ export const WelcomeScreen = ({
 }) => {
   const { sendMessage } = useCopilotChatInternal()
 
-  const { visualizationMode } = useAiChat()
+  const { visualizationMode, onWelcomeSuggestionClick } = useAiChat()
 
   const isFullscreen = visualizationMode === "fullscreen"
 
@@ -115,13 +115,14 @@ export const WelcomeScreen = ({
                   className="border border-solid border-f1-border-secondary shadow sm:border-none sm:shadow-none"
                   label={suggestion.message}
                   icon={suggestion.icon}
-                  onClick={() =>
+                  onClick={() => {
+                    onWelcomeSuggestionClick?.(suggestion)
                     sendMessage({
                       id: randomId(),
                       role: "user",
                       content: suggestion.prompt || suggestion.message,
                     })
-                  }
+                  }}
                 />
               </motion.div>
             ))}

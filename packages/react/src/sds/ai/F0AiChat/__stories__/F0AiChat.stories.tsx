@@ -67,6 +67,9 @@ const meta = {
             onClose={() => {
               console.log("ai chat close")
             }}
+            onWelcomeSuggestionClick={(suggestion) => {
+              console.log("ai chat welcome suggestion click", suggestion)
+            }}
           >
             <AiChatWrapper>
               <Story />

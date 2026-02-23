@@ -53,6 +53,10 @@ export type AiChatProviderProps = {
    * A callback that gets called when the chat window is closed.
    */
   onClose?: () => void
+  /**
+   * A callback that gets called when a welcome screen suggestion is clicked.
+   */
+  onWelcomeSuggestionClick?: (suggestion: WelcomeScreenSuggestion) => void
 } & Pick<
   CopilotKitProps,
   | "agent"
