@@ -87,6 +87,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
           cols={cols}
           rows={rows}
           disabled={disabled}
+          required={required}
         />
       </InputField>
     )
