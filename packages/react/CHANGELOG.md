@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.374.2](https://github.com/factorialco/f0/compare/f0-react-v1.374.1...f0-react-v1.374.2) (2026-02-23)
+
+
+### Bug Fixes
+
+* do not show pagination footer in data collection when it's only one page ([#3505](https://github.com/factorialco/f0/issues/3505)) ([df07496](https://github.com/factorialco/f0/commit/df07496367e8dff0a370c05091b365f7e535314c))
+
 ## [1.374.1](https://github.com/factorialco/f0/compare/f0-react-v1.374.0...f0-react-v1.374.1) (2026-02-23)
 
 
