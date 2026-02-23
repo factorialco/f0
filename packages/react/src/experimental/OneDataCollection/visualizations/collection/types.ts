@@ -35,8 +35,8 @@ export type VisualizationFilterOverrides<Filters extends FiltersDefinition> = {
    *  If not provided, the global source filters are used.
    *  Can be a subset of the source filters definition. */
   filters?: Partial<Filters>
-  /** Additional presets shown only when this visualization is active.
-   *  These are displayed alongside the global source presets. */
+  /** Preset configuration used only when this visualization is active.
+   *  These replace the global source presets for this visualization. */
   presets?: PresetsDefinition<Filters>
 }
 
