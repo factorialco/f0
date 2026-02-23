@@ -64,6 +64,10 @@ export function FilterContent<Definition extends FiltersDefinition>({
   const currentValue = (tempFilters[selectedFilterKey] ||
     filterType.emptyValue) as FilterValue<FilterType>
 
+  const handleSiblingFilterChange = (key: string, value: unknown) => {
+    onFilterChange(key as keyof Definition, value)
+  }
+
   function renderFilterForm<T extends FilterDefinition>({
     schema,
     value,
@@ -81,13 +85,22 @@ export function FilterContent<Definition extends FiltersDefinition>({
         value: FilterValue<T>
         onChange: (v: FilterValue<T>) => void
         isCompactMode?: boolean
+        onFilterChange?: (key: string, value: unknown) => void
+        allFiltersValue?: Record<string, unknown>
       }) => React.ReactNode
-    )({ schema, value, onChange, isCompactMode })
+    )({
+      schema,
+      value,
+      onChange,
+      isCompactMode,
+      onFilterChange: handleSiblingFilterChange,
+      allFiltersValue: tempFilters as Record<string, unknown>,
+    })
   }
 
   return (
     <div className="relative flex h-full w-full flex-col gap-1">
-      <div className="relative flex h-full flex-col justify-between overflow-y-auto ">
+      <div className="relative flex h-full flex-col justify-between overflow-y-auto overflow-x-hidden">
         {renderFilterForm({
           schema: filter,
           value: currentValue,

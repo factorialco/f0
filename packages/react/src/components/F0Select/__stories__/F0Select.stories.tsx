@@ -17,8 +17,8 @@ import { inputFieldStatus } from "@/ui/InputField"
 import { F0Select, selectSizes } from "../index"
 import {
   Employee,
+  employeeNestedPaginatedSource,
   employeeNonPaginatedSource,
-  employeePaginatedSource,
   getEmployeeById,
   MockItem,
   mockItems,
@@ -575,7 +575,7 @@ export const WithDataSourcePaginated: Story = {
           }
         : undefined
     })(),
-    source: employeePaginatedSource,
+    source: employeeNestedPaginatedSource,
     mapOptions: (item: Employee) => ({
       value: item.value,
       label: item.label,
@@ -715,7 +715,48 @@ export const MultiplePaginated: Story = {
     })(),
     clearable: true,
     showSearchBox: true,
-    source: employeePaginatedSource,
+    source: employeeNestedPaginatedSource,
+    mapOptions: (item: Employee) => ({
+      value: item.value,
+      label: item.label,
+      avatar: item.avatar,
+    }),
+    onSelectItems: fn((selectionStatus) => {
+      console.log("selectionStatus", selectionStatus)
+    }),
+  },
+}
+
+/**
+ * Multiple selection with paginated data and a selection preview panel on the right.
+ * The preview shows selected items with avatars and allows inline deselection.
+ * Filters use inline (dual-pane) mode when preview is enabled.
+ */
+export const MultiplePaginatedWithPreview: Story = {
+  args: {
+    label: "Select Team Members",
+    placeholder: "Search employees...",
+    multiple: true,
+    showPreview: true,
+    value: ["3", "42", "500", "1200"],
+    defaultItem: (() => {
+      const ids = [42, 500, 1200]
+      return ids
+        .map((id) => {
+          const emp = getEmployeeById(id)
+          return emp
+            ? {
+                value: emp.value,
+                label: emp.label,
+                avatar: emp.avatar,
+              }
+            : null
+        })
+        .filter(Boolean)
+    })(),
+    clearable: true,
+    showSearchBox: true,
+    source: employeeNestedPaginatedSource,
     mapOptions: (item: Employee) => ({
       value: item.value,
       label: item.label,
@@ -758,7 +799,7 @@ export const MultiplePaginatedAsList: Story = {
         .filter(Boolean)
     })(),
     clearable: true,
-    source: employeePaginatedSource,
+    source: employeeNestedPaginatedSource,
     mapOptions: (item: Employee) => ({
       value: item.value,
       label: item.label,
@@ -846,7 +887,7 @@ export const SingleSelectWithFilters: Story = {
           }
         : undefined
     })(),
-    source: employeePaginatedSource,
+    source: employeeNestedPaginatedSource,
     mapOptions: (item: Employee) => ({
       value: item.value,
       label: item.label,

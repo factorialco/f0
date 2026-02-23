@@ -18,6 +18,16 @@ export type InFilterOptionItem<T = unknown> = {
   value: T
   /** Human-readable label for the option */
   label: string
+  /**
+   * Nested children that belong to a different filter key.
+   * Enables hierarchical filtering (e.g., office -> space -> desk).
+   */
+  children?: {
+    /** The filter key where child selections are stored in FiltersState */
+    filterKey: string
+    /** Child options, which can themselves have children for infinite nesting */
+    options: Array<InFilterOptionItem<T>>
+  }
 }
 
 /**

@@ -31,6 +31,7 @@ type SelectItemProps = ComponentPropsWithoutRef<
 > & {
   top?: ReactNode
   bottom?: ReactNode
+  right?: ReactNode
   emptyMessage?: string
   showLoadingIndicator?: boolean
 } & (
@@ -230,22 +231,23 @@ const SelectContent = forwardRef<
             "data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1",
           !asList &&
             position === "popper" &&
-            "min-w-[var(--radix-select-trigger-width)] max-w-[min(calc(var(--radix-select-trigger-width)*2.5),412px)]",
-          // Max-height for the entire select content (including filters overlay)
+            !forceMinHeight &&
+            "min-w-[8rem] w-[var(--radix-select-trigger-width)]",
           !asList &&
-            (taller
-              ? "max-h-[min(412px,calc(var(--radix-select-content-available-height,412px)))]"
-              : "max-h-[min(320px,calc(var(--radix-select-content-available-height,320px)))]"),
-          // Apply min-height when filters are present to maintain consistent size
-          !asList &&
+            position === "popper" &&
             forceMinHeight &&
-            "min-h-[min(412px,calc(var(--radix-select-content-available-height,412px)-110px))]",
+            "w-[calc(var(--radix-select-trigger-width)+12rem)]",
+          // Max-height: fixed cap so Radix can detect overflow and flip sides
+          !asList && (taller ? "max-h-[412px]" : "max-h-[320px]"),
           // Hides the content when the virtual list is not ready
           !asList && isVirtual && !virtualReady && "opacity-0",
           className
         )}
         position={asList ? "item-aligned" : position}
+        side={asList ? undefined : "bottom"}
+        sideOffset={asList ? undefined : 4}
         collisionPadding={16}
+        avoidCollisions
         {...props}
         // Prevent the default focus restoration when the select closes.
         // This avoids infinite focus loops when the select is inside a modal
@@ -271,55 +273,74 @@ const SelectContent = forwardRef<
           })
         }}
       >
-        <>
+        <div
+          className="flex flex-1 min-h-0 flex-col"
+          style={
+            !asList
+              ? {
+                  maxHeight:
+                    "var(--radix-select-content-available-height, 100%)",
+                  ...(forceMinHeight
+                    ? {
+                        minHeight:
+                          "min(412px, var(--radix-select-content-available-height, 412px))",
+                      }
+                    : {}),
+                }
+              : undefined
+          }
+        >
           {asList && <div className="flex-shrink-0">{props.top}</div>}
-          <div
-            className={cn(
-              "relative flex flex-1 min-h-0 flex-col overflow-hidden",
-              asList && "flex flex-col overflow-hidden flex-1 min-h-0"
-            )}
-          >
-            {!asList && props.top}
-            {showLoadingIndicator && loadingNewContent && (
-              <div
-                className="absolute inset-0 flex cursor-progress items-center justify-center"
-                aria-live="polite"
-                aria-busy="true"
-              >
-                <Spinner />
-              </div>
-            )}
-            <ScrollArea
-              viewportRef={parentRef}
+          <div className="flex flex-1 min-h-0 flex-row overflow-hidden">
+            <div
               className={cn(
-                "flex h-full flex-col",
-                // Center content vertically when empty
-                isEmpty && "justify-center",
-                loadingNewContent && "select-none opacity-10 transition-opacity"
+                "relative flex flex-1 min-h-0 min-w-0 flex-col overflow-hidden",
+                asList && "flex flex-col overflow-hidden flex-1 min-h-0"
               )}
-              onScrollBottom={onScrollBottom}
-              onScrollTop={onScrollTop}
-              scrollMargin={scrollMargin}
             >
-              {asList ? (
-                <div className="min-h-0 p-1">{viewportContent}</div>
-              ) : (
-                <SelectPrimitive.Viewport
-                  asChild
-                  className={cn(
-                    "p-1",
-                    position === "popper" &&
-                      "h-[var(--radix-select-trigger-height)] w-full",
-                    isEmpty && "flex h-full"
-                  )}
+              {!asList && props.top}
+              {showLoadingIndicator && loadingNewContent && (
+                <div
+                  className="absolute inset-0 flex cursor-progress items-center justify-center"
+                  aria-live="polite"
+                  aria-busy="true"
                 >
-                  {viewportContent}
-                </SelectPrimitive.Viewport>
+                  <Spinner />
+                </div>
               )}
-            </ScrollArea>
+              <ScrollArea
+                viewportRef={parentRef}
+                className={cn(
+                  "flex h-full flex-col",
+                  isEmpty && "justify-center",
+                  loadingNewContent &&
+                    "select-none opacity-10 transition-opacity"
+                )}
+                onScrollBottom={onScrollBottom}
+                onScrollTop={onScrollTop}
+                scrollMargin={scrollMargin}
+              >
+                {asList ? (
+                  <div className="min-h-0 p-1">{viewportContent}</div>
+                ) : (
+                  <SelectPrimitive.Viewport
+                    asChild
+                    className={cn(
+                      "p-1",
+                      position === "popper" &&
+                        "h-[var(--radix-select-trigger-height)] w-full",
+                      isEmpty && "flex h-full"
+                    )}
+                  >
+                    {viewportContent}
+                  </SelectPrimitive.Viewport>
+                )}
+              </ScrollArea>
+            </div>
+            {props.right}
           </div>
-          {props.bottom}
-        </>
+          {props.bottom && <div className="shrink-0">{props.bottom}</div>}
+        </div>
       </SelectPrimitive.Content>
     )
 

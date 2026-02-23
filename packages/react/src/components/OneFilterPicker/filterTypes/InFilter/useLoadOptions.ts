@@ -12,6 +12,10 @@ const optionsCache = new Map<string, InFilterOptionItem<unknown>[]>()
 // Key format: `${cacheKey}:${value}`
 const labelCache = new Map<string, string>()
 
+// Nested label cache: stores contextual labels for child filter values
+// Key format: `${filterKey}:${value}`, value includes parent context (e.g. "Barcelona HQ > Floor 1")
+const nestedLabelCache = new Map<string, string>()
+
 export function getCacheKey<T, R extends RecordType = RecordType>(
   schema: FilterTypeSchema<InFilterOptions<T, R>>
 ): string {
@@ -35,6 +39,28 @@ export function getCachedLabel<T>(
 ): string | undefined {
   const labelKey = `${cacheKey}:${String(value)}`
   return labelCache.get(labelKey)
+}
+
+/**
+ * Cache a contextual label for a nested child filter value.
+ * Stores "ParentLabel > ChildLabel" so chips can display parent context.
+ */
+export function cacheNestedLabel(
+  filterKey: string,
+  value: unknown,
+  label: string
+): void {
+  nestedLabelCache.set(`${filterKey}:${String(value)}`, label)
+}
+
+/**
+ * Get a cached contextual label for a nested child filter value.
+ */
+export function getNestedCachedLabel(
+  filterKey: string,
+  value: unknown
+): string | undefined {
+  return nestedLabelCache.get(`${filterKey}:${String(value)}`)
 }
 
 /**
