@@ -163,3 +163,13 @@ export const WithDataTestId: Story = {
     await expect(canvas.getByTestId("widget-test-id")).toBeInTheDocument()
   },
 }
+
+export const WithOnClickOnlyLink: Story = {
+  args: {
+    ...meta.args,
+    header: {
+      title: "Balance",
+      link: { title: "Balance", onClick: fn() },
+    },
+  },
+}

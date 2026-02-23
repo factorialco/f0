@@ -1,5 +1,33 @@
 # Changelog
 
+## [1.374.1](https://github.com/factorialco/f0/compare/f0-react-v1.374.0...f0-react-v1.374.1) (2026-02-23)
+
+
+### Bug Fixes
+
+* render CardLink as native button when no href is provided ([#3476](https://github.com/factorialco/f0/issues/3476)) ([69e634b](https://github.com/factorialco/f0/commit/69e634b735368eaede87fd441233727ea30c6708))
+
+## [1.374.0](https://github.com/factorialco/f0/compare/f0-react-v1.373.2...f0-react-v1.374.0) (2026-02-23)
+
+
+### Features
+
+* **F0TextArea/F0Text:** add required prop support and corresponding story ([#3498](https://github.com/factorialco/f0/issues/3498)) ([352a125](https://github.com/factorialco/f0/commit/352a125f0f17cb4fd1a085714237d14f8969e9f5))
+
+## [1.373.2](https://github.com/factorialco/f0/compare/f0-react-v1.373.1...f0-react-v1.373.2) (2026-02-23)
+
+
+### Bug Fixes
+
+* **ai-chat:** fix preamble dedup and thinking group ordering ([#3494](https://github.com/factorialco/f0/issues/3494)) ([b81f80d](https://github.com/factorialco/f0/commit/b81f80da4bdcdc88b8b49705af7f99b1d7663a7f))
+
+## [1.373.1](https://github.com/factorialco/f0/compare/f0-react-v1.373.0...f0-react-v1.373.1) (2026-02-23)
+
+
+### Bug Fixes
+
+* some ui changes in ai chat in fullscreen mode ([#3491](https://github.com/factorialco/f0/issues/3491)) ([7fb5893](https://github.com/factorialco/f0/commit/7fb58939b5113735fa1cb18823e23430083c719f))
+
 ## [1.373.0](https://github.com/factorialco/f0/compare/f0-react-v1.372.1...f0-react-v1.373.0) (2026-02-23)
 
 
