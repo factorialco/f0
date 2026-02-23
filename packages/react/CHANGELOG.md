@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.374.1](https://github.com/factorialco/f0/compare/f0-react-v1.374.0...f0-react-v1.374.1) (2026-02-23)
+
+
+### Bug Fixes
+
+* render CardLink as native button when no href is provided ([#3476](https://github.com/factorialco/f0/issues/3476)) ([69e634b](https://github.com/factorialco/f0/commit/69e634b735368eaede87fd441233727ea30c6708))
+
 ## [1.374.0](https://github.com/factorialco/f0/compare/f0-react-v1.373.2...f0-react-v1.374.0) (2026-02-23)
 
 
