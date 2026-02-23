@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.374.0](https://github.com/factorialco/f0/compare/f0-react-v1.373.2...f0-react-v1.374.0) (2026-02-23)
+
+
+### Features
+
+* **F0TextArea/F0Text:** add required prop support and corresponding story ([#3498](https://github.com/factorialco/f0/issues/3498)) ([352a125](https://github.com/factorialco/f0/commit/352a125f0f17cb4fd1a085714237d14f8969e9f5))
+
 ## [1.373.2](https://github.com/factorialco/f0/compare/f0-react-v1.373.1...f0-react-v1.373.2) (2026-02-23)
 
 
