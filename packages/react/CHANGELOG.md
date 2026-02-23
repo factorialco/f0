@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.373.1](https://github.com/factorialco/f0/compare/f0-react-v1.373.0...f0-react-v1.373.1) (2026-02-23)
+
+
+### Bug Fixes
+
+* some ui changes in ai chat in fullscreen mode ([#3491](https://github.com/factorialco/f0/issues/3491)) ([7fb5893](https://github.com/factorialco/f0/commit/7fb58939b5113735fa1cb18823e23430083c719f))
+
 ## [1.373.0](https://github.com/factorialco/f0/compare/f0-react-v1.372.1...f0-react-v1.373.0) (2026-02-23)
 
 
