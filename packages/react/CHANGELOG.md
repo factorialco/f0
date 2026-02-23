@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.373.0](https://github.com/factorialco/f0/compare/f0-react-v1.372.1...f0-react-v1.373.0) (2026-02-23)
+
+
+### Features
+
+* **F0Select:** selection preview panel, nested filters and improved filter UX ([#3485](https://github.com/factorialco/f0/issues/3485)) ([c25e85f](https://github.com/factorialco/f0/commit/c25e85f20bc687075b9ed9aa789e8c03c8513663))
+
 ## [1.372.1](https://github.com/factorialco/f0/compare/f0-react-v1.372.0...f0-react-v1.372.1) (2026-02-23)
 
 
