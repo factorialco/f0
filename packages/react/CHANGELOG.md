@@ -1,5 +1,26 @@
 # Changelog
 
+## [1.373.0](https://github.com/factorialco/f0/compare/f0-react-v1.372.1...f0-react-v1.373.0) (2026-02-23)
+
+
+### Features
+
+* **F0Select:** selection preview panel, nested filters and improved filter UX ([#3485](https://github.com/factorialco/f0/issues/3485)) ([c25e85f](https://github.com/factorialco/f0/commit/c25e85f20bc687075b9ed9aa789e8c03c8513663))
+
+## [1.372.1](https://github.com/factorialco/f0/compare/f0-react-v1.372.0...f0-react-v1.372.1) (2026-02-23)
+
+
+### Bug Fixes
+
+* improve feedback when submitting forms ([#3495](https://github.com/factorialco/f0/issues/3495)) ([1278002](https://github.com/factorialco/f0/commit/127800256a90d278249e79a8b935bfb9669a7ab5))
+
+## [1.372.0](https://github.com/factorialco/f0/compare/f0-react-v1.371.1...f0-react-v1.372.0) (2026-02-20)
+
+
+### Features
+
+* **ai-chat:** improve fullscreen UX and close animation ([#3486](https://github.com/factorialco/f0/issues/3486)) ([8acd80b](https://github.com/factorialco/f0/commit/8acd80b2f855e153c629c254dcbc090f5383ab14))
+
 ## [1.371.1](https://github.com/factorialco/f0/compare/f0-react-v1.371.0...f0-react-v1.371.1) (2026-02-19)
 
 

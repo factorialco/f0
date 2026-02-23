@@ -7,9 +7,12 @@ import {
   ButtonDropdownGroup,
   F0ButtonDropdown,
 } from "@/components/F0ButtonDropdown"
-import { IconType } from "@/components/F0Icon"
+import { F0Icon, IconType } from "@/components/F0Icon"
 import { Dropdown, MobileDropdown } from "@/experimental/Navigation/Dropdown"
+import CheckCircleAnimated from "@/icons/animated/CheckCircle"
+import { AlertCircleLine } from "@/icons/app"
 import { cn } from "@/lib/utils"
+import { Spinner } from "@/ui/Spinner"
 
 type ActionType = {
   label: string
@@ -57,6 +60,8 @@ const normalizeItems = (
   }
 }
 
+export type ActionBarStatus = "idle" | "loading" | "success"
+
 interface F0ActionBarProps {
   /**
    * Whether the action bar is open
@@ -97,6 +102,49 @@ interface F0ActionBarProps {
    * @default false
    */
   centerInFrameContent?: boolean
+
+  /**
+   * The current status of the action bar.
+   * - "idle": Default state, shows an alert icon (pending changes)
+   * - "loading": Shows a spinner and disables all actions
+   * - "success": Shows a checkmark icon and disables all actions
+   * @default "idle"
+   */
+  status?: ActionBarStatus
+}
+
+const StatusIcon = ({
+  status,
+  isLight,
+}: {
+  status: ActionBarStatus
+  isLight: boolean
+}) => {
+  if (status === "loading") {
+    return (
+      <Spinner
+        size="small"
+        className={cn(!isLight && "text-f1-foreground-inverse")}
+      />
+    )
+  }
+
+  if (status === "success") {
+    return (
+      <CheckCircleAnimated
+        animate="animate"
+        className="h-5 w-5 text-f1-icon-positive"
+      />
+    )
+  }
+
+  return (
+    <F0Icon
+      icon={AlertCircleLine}
+      size="md"
+      color={isLight ? "currentColor" : "inverse"}
+    />
+  )
 }
 
 const _F0ActionBar = ({
@@ -106,6 +154,7 @@ const _F0ActionBar = ({
   variant = "dark",
   leftContent,
   centerInFrameContent = false,
+  status = "idle",
   ...props
 }: F0ActionBarProps) => {
   const visibleSecondaryActions = secondaryActions.slice(0, 2)
@@ -115,6 +164,7 @@ const _F0ActionBar = ({
   }))
 
   const isLight = variant === "light"
+  const isInteractionDisabled = status === "loading" || status === "success"
 
   /**
    * Normalize the primary actions to be a list of groups
@@ -171,7 +221,7 @@ const _F0ActionBar = ({
           exit={{ opacity: 0, y: 32, filter: "blur(6px)" }}
           transition={{ ease: [0.175, 0.885, 0.32, 1.275], duration: 0.3 }}
           className={cn(
-            "fixed bottom-2 left-2 right-2 z-50 flex h-fit flex-col items-center gap-2 rounded-xl p-2 shadow-lg backdrop-blur-sm sm:bottom-5 sm:h-12 sm:w-max sm:flex-row sm:gap-4",
+            "fixed bottom-2 left-2 right-2 z-50 flex h-fit flex-col items-center gap-2 rounded-xl p-2 shadow-lg backdrop-blur-sm sm:bottom-5 sm:h-12 sm:w-max sm:flex-row sm:gap-4 sm:min-w-[475px] sm:justify-between",
             centerInFrameContent
               ? "sm:left-[240px] sm:right-2 sm:mx-auto"
               : "sm:left-2 sm:right-2 sm:mx-auto",
@@ -181,15 +231,24 @@ const _F0ActionBar = ({
           )}
         >
           {leftContent}
-          {!!label && (
-            <span
-              className={cn(
-                "font-medium ml-2",
-                isLight ? "text-f1-foreground" : "text-f1-foreground-inverse"
+          {(!!label || (status && status !== "idle")) && (
+            <div className="ml-2 flex items-center gap-2">
+              {status && status !== "idle" && (
+                <StatusIcon status={status} isLight={isLight} />
               )}
-            >
-              {label}
-            </span>
+              {!!label && (
+                <span
+                  className={cn(
+                    "font-medium",
+                    isLight
+                      ? "text-f1-foreground"
+                      : "text-f1-foreground-inverse"
+                  )}
+                >
+                  {label}
+                </span>
+              )}
+            </div>
           )}
           <div>
             <div
@@ -208,13 +267,17 @@ const _F0ActionBar = ({
                       ;(action as ActionType)?.onClick?.()
                     }}
                     size="lg"
+                    disabled={isInteractionDisabled}
                   />
                 ) : (
                   <F0Button
                     label={singlePrimaryAction.label}
                     icon={singlePrimaryAction.icon}
                     onClick={singlePrimaryAction.onClick}
-                    disabled={singlePrimaryAction.disabled}
+                    disabled={
+                      isInteractionDisabled || singlePrimaryAction.disabled
+                    }
+                    loading={status === "loading"}
                     size="lg"
                   />
                 )}
@@ -240,7 +303,7 @@ const _F0ActionBar = ({
                       label={action.label}
                       icon={action.icon}
                       onClick={action.onClick}
-                      disabled={action.disabled}
+                      disabled={isInteractionDisabled || action.disabled}
                     />
                   ))}
                 {!singlePrimaryAction ? (
@@ -251,6 +314,7 @@ const _F0ActionBar = ({
                         const action = getActionByValue(value)
                         ;(action as ActionType)?.onClick?.()
                       }}
+                      disabled={isInteractionDisabled}
                     />
                   </>
                 ) : (
@@ -258,7 +322,10 @@ const _F0ActionBar = ({
                     label={singlePrimaryAction.label}
                     icon={singlePrimaryAction.icon}
                     onClick={singlePrimaryAction.onClick}
-                    disabled={singlePrimaryAction.disabled}
+                    disabled={
+                      isInteractionDisabled || singlePrimaryAction.disabled
+                    }
+                    loading={status === "loading"}
                   />
                 )}
               </Fragment>

@@ -130,6 +130,8 @@ interface F0FormSubmitConfigBase {
    * - IconType: custom icon
    */
   icon?: IconType | null
+  /** Label shown in the action bar while submitting (defaults to i18n "forms.actionBar.saving") */
+  savingMessage?: string
 }
 
 /**
@@ -292,7 +294,11 @@ export interface F0FormProps<TSchema extends F0FormSchema> {
  * Result of form submission
  */
 export type F0FormSubmitResult =
-  | { success: true }
+  | {
+      success: true
+      /** Optional message shown in the action bar after successful submission */
+      message?: string
+    }
   | {
       success: false
       /** Root error message displayed at the top of the form */
