@@ -45,6 +45,14 @@ export type AiChatProviderProps = {
     message: AIMessage,
     { threadId, feedback }: { threadId: string; feedback: string }
   ) => void
+  /**
+   * A callback that gets called when the chat window opens or closes.
+   */
+  onVisibility?: () => void
+  /**
+   * A callback that gets called when the chat window is closed.
+   */
+  onClose?: () => void
 } & Pick<
   CopilotKitProps,
   | "agent"

@@ -1,5 +1,7 @@
 "use client"
 
+import type { ReactNode } from "react"
+
 import { type Message, randomId } from "@copilotkit/shared"
 import {
   createContext,
@@ -10,7 +12,6 @@ import {
   useRef,
   useState,
 } from "react"
-import type { ReactNode } from "react"
 
 import { useI18n } from "@/lib/providers/i18n"
 
@@ -51,6 +52,8 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   footer: initialFooter,
   onThumbsDown,
   onThumbsUp,
+  onVisibility,
+  onClose,
   ...rest
 }) => {
   const [footer, setFooter] = useState<ReactNode | undefined>(initialFooter)
@@ -75,6 +78,21 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   >(initialInitialMessage)
 
   const [chatWidth, setChatWidth] = useState(() => getStoredChatWidth())
+  const prevOpenRef = useRef<boolean | undefined>(undefined)
+
+  // Track visibility and close for activity (onVisibility when opened, onClose when closed)
+  useEffect(() => {
+    if (prevOpenRef.current === undefined) {
+      prevOpenRef.current = open
+      return
+    }
+    if (open && !prevOpenRef.current) {
+      onVisibility?.()
+    } else if (!open && prevOpenRef.current) {
+      onClose?.()
+    }
+    prevOpenRef.current = open
+  }, [open, onVisibility, onClose])
 
   // Persist chat width to localStorage
   useEffect(() => {
@@ -195,6 +213,8 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         chatWidth,
         setChatWidth,
         resetChatWidth,
+        onVisibility,
+        onClose,
       }}
     >
       {children}
@@ -239,6 +259,8 @@ export function useAiChat(): AiChatProviderReturnValue {
       chatWidth: DEFAULT_CHAT_WIDTH,
       setChatWidth: noopFn,
       resetChatWidth: noopFn,
+      onVisibility: noopFn,
+      onClose: noopFn,
     }
   }
 

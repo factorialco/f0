@@ -61,6 +61,12 @@ const meta = {
               link: "/permissions",
               linkText: "See more",
             }}
+            onVisibility={() => {
+              console.log("ai chat visibility")
+            }}
+            onClose={() => {
+              console.log("ai chat close")
+            }}
           >
             <AiChatWrapper>
               <Story />

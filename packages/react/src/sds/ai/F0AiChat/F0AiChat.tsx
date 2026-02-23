@@ -40,6 +40,8 @@ const F0AiChatProviderComponent = ({
   onThumbsDown,
   children,
   agent,
+  onVisibility,
+  onClose,
   ...copilotKitProps
 }: AiChatProviderProps) => {
   return (
@@ -56,6 +58,8 @@ const F0AiChatProviderComponent = ({
       defaultVisualizationMode={defaultVisualizationMode}
       lockVisualizationMode={lockVisualizationMode}
       footer={footer}
+      onVisibility={onVisibility}
+      onClose={onClose}
     >
       <AiChatKitWrapper {...copilotKitProps}>{children}</AiChatKitWrapper>
     </AiChatStateProvider>

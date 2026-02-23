@@ -38,6 +38,8 @@ export interface AiChatState {
     message: AIMessage,
     { threadId, feedback }: { threadId: string; feedback: string }
   ) => void
+  onVisibility?: () => void
+  onClose?: () => void
 }
 
 /**
@@ -72,6 +74,8 @@ export type AiChatProviderReturnValue = {
     message: AIMessage,
     { threadId, feedback }: { threadId: string; feedback: string }
   ) => void
+  onVisibility?: () => void
+  onClose?: () => void
   /**
    * Clear/reset the chat conversation
    */
