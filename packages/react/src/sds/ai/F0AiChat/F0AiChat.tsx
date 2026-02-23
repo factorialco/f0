@@ -4,7 +4,6 @@ import {
   useCopilotChatInternal,
   useCopilotContext,
 } from "@copilotkit/react-core"
-import { type Message } from "@copilotkit/shared"
 import { CopilotSidebar, InputProps } from "@copilotkit/react-ui"
 import { randomId } from "@copilotkit/shared"
 import { AnimatePresence, motion } from "motion/react"
@@ -41,13 +40,7 @@ const F0AiChatProviderComponent = ({
   onThumbsDown,
   children,
   agent,
-  onVisibility,
-  onClose,
-  onWelcomeSuggestionClick,
-  onNewChat,
-  onMessageSent,
-  onMessageReceived,
-  onFeedbackClick,
+  tracking,
   ...copilotKitProps
 }: AiChatProviderProps) => {
   return (
@@ -64,13 +57,7 @@ const F0AiChatProviderComponent = ({
       defaultVisualizationMode={defaultVisualizationMode}
       lockVisualizationMode={lockVisualizationMode}
       footer={footer}
-      onVisibility={onVisibility}
-      onClose={onClose}
-      onWelcomeSuggestionClick={onWelcomeSuggestionClick}
-      onNewChat={onNewChat}
-      onMessageSent={onMessageSent}
-      onMessageReceived={onMessageReceived}
-      onFeedbackClick={onFeedbackClick}
+      tracking={tracking}
     >
       <AiChatKitWrapper {...copilotKitProps}>{children}</AiChatKitWrapper>
     </AiChatStateProvider>
@@ -87,7 +74,6 @@ const AiChatKitWrapper = ({
     <CopilotKit runtimeUrl="/copilotkit" agent={agent} {...copilotKitProps}>
       <ResetFunctionInjector />
       <SendMessageFunctionInjector />
-      <MessageActivityInjector />
       {children}
     </CopilotKit>
   )
@@ -128,56 +114,6 @@ const SendMessageFunctionInjector = () => {
   return null
 }
 
-const MessageActivityInjector = () => {
-  const { onMessageSent, onMessageReceived } = useAiChat()
-  const { messages, isLoading } = useCopilotChatInternal()
-  const reportedSentIdsRef = useRef<Set<string>>(new Set())
-  const reportedReceivedIdsRef = useRef<Set<string>>(new Set())
-  const prevLoadingRef = useRef<boolean>(false)
-
-  // Report each new user message
-  useEffect(() => {
-    if (messages.length === 0) {
-      reportedSentIdsRef.current.clear()
-      reportedReceivedIdsRef.current.clear()
-      return
-    }
-
-    for (const msg of messages) {
-      if (!msg || !("role" in msg) || !msg.id) continue
-      if (msg.role === "user" && !reportedSentIdsRef.current.has(msg.id)) {
-        reportedSentIdsRef.current.add(msg.id)
-        onMessageSent?.(msg as Message)
-      }
-    }
-  }, [messages, onMessageSent])
-
-  // Report assistant response only once when it finishes (isLoading: true -> false)
-  useEffect(() => {
-    const wasLoading = prevLoadingRef.current
-    prevLoadingRef.current = isLoading
-
-    if (wasLoading && !isLoading && messages.length > 0) {
-      const lastAssistantMessage = [...messages]
-        .reverse()
-        .find((m) => m && "role" in m && m.role === "assistant")
-      if (
-        lastAssistantMessage &&
-        lastAssistantMessage.id &&
-        !reportedReceivedIdsRef.current.has(lastAssistantMessage.id)
-      ) {
-        reportedReceivedIdsRef.current.add(lastAssistantMessage.id)
-        onMessageReceived?.(lastAssistantMessage as Message)
-      }
-    }
-    if (messages.length === 0) {
-      reportedReceivedIdsRef.current.clear()
-    }
-  }, [isLoading, messages, onMessageReceived])
-
-  return null
-}
-
 const ChatInput = (props: InputProps) => {
   const { disclaimer, footer, visualizationMode } = useAiChat()
   const { messages } = useCopilotChatInternal()
@@ -211,7 +147,7 @@ const ChatInput = (props: InputProps) => {
       {disclaimer?.text && (
         <motion.div
           layout="position"
-          className="flex flex-row items-center gap-1 w-full justify-center max-w-[712px]"
+          className="flex w-full max-w-[712px] flex-row items-center justify-center gap-1"
           transition={{
             layout: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] },
           }}

@@ -34,7 +34,7 @@ export const WelcomeScreen = ({
 }) => {
   const { sendMessage } = useCopilotChatInternal()
 
-  const { visualizationMode, onWelcomeSuggestionClick } = useAiChat()
+  const { visualizationMode, tracking } = useAiChat()
 
   const isFullscreen = visualizationMode === "fullscreen"
 
@@ -116,7 +116,7 @@ export const WelcomeScreen = ({
                   label={suggestion.message}
                   icon={suggestion.icon}
                   onClick={() => {
-                    onWelcomeSuggestionClick?.(suggestion)
+                    tracking?.onWelcomeSuggestionClick?.(suggestion)
                     sendMessage({
                       id: randomId(),
                       role: "user",

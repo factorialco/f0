@@ -4,6 +4,7 @@ import { motion } from "motion/react"
 import { useCallback } from "react"
 
 import { ButtonInternal } from "@/components/F0Button/internal"
+import { New } from "@/icons/app"
 import Cross from "@/icons/app/Cross"
 import Maximize from "@/icons/app/Maximize"
 import Minimize from "@/icons/app/Minimize"
@@ -11,7 +12,6 @@ import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
 import { useAiChat } from "../providers/AiChatStateProvider"
-import { New } from "@/icons/app"
 
 export const ChatHeader = (props: HeaderProps) => {
   const { labels } = useChatContext()
@@ -22,7 +22,7 @@ export const ChatHeader = (props: HeaderProps) => {
     visualizationMode,
     setVisualizationMode,
     lockVisualizationMode,
-    onNewChat,
+    tracking,
   } = useAiChat()
   const fullscreen = visualizationMode === "fullscreen"
   const translations = useI18n()
@@ -36,6 +36,7 @@ export const ChatHeader = (props: HeaderProps) => {
     } else {
       setOpen(false)
     }
+    tracking?.onClose?.()
   }, [fullscreen, setVisualizationMode, setOpen])
 
   return (
@@ -53,7 +54,7 @@ export const ChatHeader = (props: HeaderProps) => {
             label={translations.ai.startNewChat}
             icon={New}
             onClick={() => {
-              onNewChat?.()
+              tracking?.onNewChat?.()
               clear()
             }}
           />

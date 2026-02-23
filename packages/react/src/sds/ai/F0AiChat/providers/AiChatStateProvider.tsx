@@ -52,13 +52,7 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   footer: initialFooter,
   onThumbsDown,
   onThumbsUp,
-  onVisibility,
-  onClose,
-  onWelcomeSuggestionClick,
-  onNewChat,
-  onMessageSent,
-  onMessageReceived,
-  onFeedbackClick,
+  tracking,
   ...rest
 }) => {
   const [footer, setFooter] = useState<ReactNode | undefined>(initialFooter)
@@ -83,21 +77,12 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   >(initialInitialMessage)
 
   const [chatWidth, setChatWidth] = useState(() => getStoredChatWidth())
-  const prevOpenRef = useRef<boolean | undefined>(undefined)
 
-  // Track visibility and close for activity (onVisibility when opened, onClose when closed)
   useEffect(() => {
-    if (prevOpenRef.current === undefined) {
-      prevOpenRef.current = open
-      return
+    if (open) {
+      tracking?.onVisibility?.()
     }
-    if (open && !prevOpenRef.current) {
-      onVisibility?.()
-    } else if (!open && prevOpenRef.current) {
-      onClose?.()
-    }
-    prevOpenRef.current = open
-  }, [open, onVisibility, onClose])
+  }, [open])
 
   // Persist chat width to localStorage
   useEffect(() => {
@@ -218,13 +203,7 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         chatWidth,
         setChatWidth,
         resetChatWidth,
-        onVisibility,
-        onClose,
-        onWelcomeSuggestionClick,
-        onNewChat,
-        onMessageSent,
-        onMessageReceived,
-        onFeedbackClick,
+        tracking,
       }}
     >
       {children}
@@ -269,13 +248,7 @@ export function useAiChat(): AiChatProviderReturnValue {
       chatWidth: DEFAULT_CHAT_WIDTH,
       setChatWidth: noopFn,
       resetChatWidth: noopFn,
-      onVisibility: noopFn,
-      onClose: noopFn,
-      onWelcomeSuggestionClick: noopFn,
-      onNewChat: noopFn,
-      onMessageSent: noopFn,
-      onMessageReceived: noopFn,
-      onFeedbackClick: noopFn,
+      tracking: undefined,
     }
   }
 

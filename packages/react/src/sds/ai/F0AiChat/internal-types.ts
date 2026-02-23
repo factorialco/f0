@@ -2,6 +2,7 @@ import { type AIMessage, type Message } from "@copilotkit/shared"
 
 import {
   type AiChatDisclaimer,
+  type AiChatTrackingOptions,
   type VisualizationMode,
   WelcomeScreenSuggestion,
 } from "./types"
@@ -38,18 +39,7 @@ export interface AiChatState {
     message: AIMessage,
     { threadId, feedback }: { threadId: string; feedback: string }
   ) => void
-  onVisibility?: () => void
-  onClose?: () => void
-  onWelcomeSuggestionClick?: (suggestion: WelcomeScreenSuggestion) => void
-  onNewChat?: () => void
-  onMessageSent?: (message: Message) => void
-  onMessageReceived?: (message: Message) => void
-  onFeedbackClick?: (params: {
-    message: AIMessage
-    reaction: "like" | "dislike"
-    feedback: string
-    threadId: string
-  }) => void
+  tracking?: AiChatTrackingOptions
 }
 
 /**
@@ -84,18 +74,7 @@ export type AiChatProviderReturnValue = {
     message: AIMessage,
     { threadId, feedback }: { threadId: string; feedback: string }
   ) => void
-  onVisibility?: () => void
-  onClose?: () => void
-  onWelcomeSuggestionClick?: (suggestion: WelcomeScreenSuggestion) => void
-  onNewChat?: () => void
-  onMessageSent?: (message: Message) => void
-  onMessageReceived?: (message: Message) => void
-  onFeedbackClick?: (params: {
-    message: AIMessage
-    reaction: "like" | "dislike"
-    feedback: string
-    threadId: string
-  }) => void
+  tracking?: AiChatTrackingOptions
   /**
    * Clear/reset the chat conversation
    */

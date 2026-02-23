@@ -9,6 +9,17 @@ import { IconType } from "@/components/F0Icon"
 export type VisualizationMode = "sidepanel" | "fullscreen"
 
 /**
+ * Tracking options for the AI chat
+ */
+export type AiChatTrackingOptions = {
+  onVisibility?: () => void
+  onClose?: () => void
+  onWelcomeSuggestionClick?: (suggestion: WelcomeScreenSuggestion) => void
+  onNewChat?: () => void
+  onMessage?: (message: Message) => void
+}
+
+/**
  * Props for the AiChatProvider component
  */
 export type AiChatProviderProps = {
@@ -45,39 +56,7 @@ export type AiChatProviderProps = {
     message: AIMessage,
     { threadId, feedback }: { threadId: string; feedback: string }
   ) => void
-  /**
-   * A callback that gets called when the chat window opens or closes.
-   */
-  onVisibility?: () => void
-  /**
-   * A callback that gets called when the chat window is closed.
-   */
-  onClose?: () => void
-  /**
-   * A callback that gets called when a welcome screen suggestion is clicked.
-   */
-  onWelcomeSuggestionClick?: (suggestion: WelcomeScreenSuggestion) => void
-  /**
-   * A callback that gets called when the user clicks the "Start new chat" button.
-   */
-  onNewChat?: () => void
-  /**
-   * A callback that gets called when the user sends a message.
-   */
-  onMessageSent?: (message: Message) => void
-  /**
-   * A callback that gets called when an assistant message is received.
-   */
-  onMessageReceived?: (message: Message) => void
-  /**
-   * A callback that gets called when the user submits feedback (thumbs up or down) on an assistant message.
-   */
-  onFeedbackClick?: (params: {
-    message: AIMessage
-    reaction: "like" | "dislike"
-    feedback: string
-    threadId: string
-  }) => void
+  tracking?: AiChatTrackingOptions
 } & Pick<
   CopilotKitProps,
   | "agent"
