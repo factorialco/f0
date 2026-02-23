@@ -1,6 +1,6 @@
 import * as SwitchPrimitive from "@radix-ui/react-switch"
 import { motion } from "motion/react"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
@@ -15,7 +15,12 @@ import { useAiChat } from "../F0AiChat/providers/AiChatStateProvider"
 import { F0OneIcon } from "../F0OneIcon"
 import { F0OneSwitchProps } from "./types"
 
-export const F0OneSwitch = ({ className, disabled }: F0OneSwitchProps) => {
+export const F0OneSwitch = ({
+  className,
+  disabled,
+  onVisible,
+  onClick,
+}: F0OneSwitchProps) => {
   const { enabled, setOpen, open } = useAiChat()
   const translations = useI18n()
   const [isHover, setIsHover] = useState(false)
@@ -23,6 +28,10 @@ export const F0OneSwitch = ({ className, disabled }: F0OneSwitchProps) => {
   if (!enabled) {
     return null
   }
+
+  useEffect(() => {
+    onVisible?.()
+  }, [onVisible])
 
   return (
     <div className="flex items-center">
@@ -49,6 +58,7 @@ export const F0OneSwitch = ({ className, disabled }: F0OneSwitchProps) => {
               <SwitchPrimitive.Root
                 onCheckedChange={(val) => {
                   setOpen(val)
+                  onClick?.()
                 }}
                 checked={open}
                 aria-label={
