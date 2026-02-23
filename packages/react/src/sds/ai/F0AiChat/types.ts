@@ -1,5 +1,5 @@
 import { CopilotKitProps } from "@copilotkit/react-core"
-import { type AIMessage } from "@copilotkit/shared"
+import { type AIMessage, type Message } from "@copilotkit/shared"
 
 import { IconType } from "@/components/F0Icon"
 
@@ -61,6 +61,23 @@ export type AiChatProviderProps = {
    * A callback that gets called when the user clicks the "Start new chat" button.
    */
   onNewChat?: () => void
+  /**
+   * A callback that gets called when the user sends a message.
+   */
+  onMessageSent?: (message: Message) => void
+  /**
+   * A callback that gets called when an assistant message is received.
+   */
+  onMessageReceived?: (message: Message) => void
+  /**
+   * A callback that gets called when the user submits feedback (thumbs up or down) on an assistant message.
+   */
+  onFeedbackClick?: (params: {
+    message: AIMessage
+    reaction: "like" | "dislike"
+    feedback: string
+    threadId: string
+  }) => void
 } & Pick<
   CopilotKitProps,
   | "agent"

@@ -42,6 +42,14 @@ export interface AiChatState {
   onClose?: () => void
   onWelcomeSuggestionClick?: (suggestion: WelcomeScreenSuggestion) => void
   onNewChat?: () => void
+  onMessageSent?: (message: Message) => void
+  onMessageReceived?: (message: Message) => void
+  onFeedbackClick?: (params: {
+    message: AIMessage
+    reaction: "like" | "dislike"
+    feedback: string
+    threadId: string
+  }) => void
 }
 
 /**
@@ -80,6 +88,14 @@ export type AiChatProviderReturnValue = {
   onClose?: () => void
   onWelcomeSuggestionClick?: (suggestion: WelcomeScreenSuggestion) => void
   onNewChat?: () => void
+  onMessageSent?: (message: Message) => void
+  onMessageReceived?: (message: Message) => void
+  onFeedbackClick?: (params: {
+    message: AIMessage
+    reaction: "like" | "dislike"
+    feedback: string
+    threadId: string
+  }) => void
   /**
    * Clear/reset the chat conversation
    */

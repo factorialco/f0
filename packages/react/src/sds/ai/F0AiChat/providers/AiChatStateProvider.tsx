@@ -56,6 +56,9 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   onClose,
   onWelcomeSuggestionClick,
   onNewChat,
+  onMessageSent,
+  onMessageReceived,
+  onFeedbackClick,
   ...rest
 }) => {
   const [footer, setFooter] = useState<ReactNode | undefined>(initialFooter)
@@ -219,6 +222,9 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         onClose,
         onWelcomeSuggestionClick,
         onNewChat,
+        onMessageSent,
+        onMessageReceived,
+        onFeedbackClick,
       }}
     >
       {children}
@@ -267,6 +273,9 @@ export function useAiChat(): AiChatProviderReturnValue {
       onClose: noopFn,
       onWelcomeSuggestionClick: noopFn,
       onNewChat: noopFn,
+      onMessageSent: noopFn,
+      onMessageReceived: noopFn,
+      onFeedbackClick: noopFn,
     }
   }
 

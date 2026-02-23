@@ -4,6 +4,7 @@ import {
   useCopilotChatInternal,
   useCopilotContext,
 } from "@copilotkit/react-core"
+import { type Message } from "@copilotkit/shared"
 import { CopilotSidebar, InputProps } from "@copilotkit/react-ui"
 import { randomId } from "@copilotkit/shared"
 import { AnimatePresence, motion } from "motion/react"
@@ -44,6 +45,9 @@ const F0AiChatProviderComponent = ({
   onClose,
   onWelcomeSuggestionClick,
   onNewChat,
+  onMessageSent,
+  onMessageReceived,
+  onFeedbackClick,
   ...copilotKitProps
 }: AiChatProviderProps) => {
   return (
@@ -64,6 +68,9 @@ const F0AiChatProviderComponent = ({
       onClose={onClose}
       onWelcomeSuggestionClick={onWelcomeSuggestionClick}
       onNewChat={onNewChat}
+      onMessageSent={onMessageSent}
+      onMessageReceived={onMessageReceived}
+      onFeedbackClick={onFeedbackClick}
     >
       <AiChatKitWrapper {...copilotKitProps}>{children}</AiChatKitWrapper>
     </AiChatStateProvider>
@@ -80,6 +87,7 @@ const AiChatKitWrapper = ({
     <CopilotKit runtimeUrl="/copilotkit" agent={agent} {...copilotKitProps}>
       <ResetFunctionInjector />
       <SendMessageFunctionInjector />
+      <MessageActivityInjector />
       {children}
     </CopilotKit>
   )
@@ -116,6 +124,56 @@ const SendMessageFunctionInjector = () => {
       setSendMessageFunction(null)
     }
   }, [setSendMessageFunction, sendMessage])
+
+  return null
+}
+
+const MessageActivityInjector = () => {
+  const { onMessageSent, onMessageReceived } = useAiChat()
+  const { messages, isLoading } = useCopilotChatInternal()
+  const reportedSentIdsRef = useRef<Set<string>>(new Set())
+  const reportedReceivedIdsRef = useRef<Set<string>>(new Set())
+  const prevLoadingRef = useRef<boolean>(false)
+
+  // Report each new user message
+  useEffect(() => {
+    if (messages.length === 0) {
+      reportedSentIdsRef.current.clear()
+      reportedReceivedIdsRef.current.clear()
+      return
+    }
+
+    for (const msg of messages) {
+      if (!msg || !("role" in msg) || !msg.id) continue
+      if (msg.role === "user" && !reportedSentIdsRef.current.has(msg.id)) {
+        reportedSentIdsRef.current.add(msg.id)
+        onMessageSent?.(msg as Message)
+      }
+    }
+  }, [messages, onMessageSent])
+
+  // Report assistant response only once when it finishes (isLoading: true -> false)
+  useEffect(() => {
+    const wasLoading = prevLoadingRef.current
+    prevLoadingRef.current = isLoading
+
+    if (wasLoading && !isLoading && messages.length > 0) {
+      const lastAssistantMessage = [...messages]
+        .reverse()
+        .find((m) => m && "role" in m && m.role === "assistant")
+      if (
+        lastAssistantMessage &&
+        lastAssistantMessage.id &&
+        !reportedReceivedIdsRef.current.has(lastAssistantMessage.id)
+      ) {
+        reportedReceivedIdsRef.current.add(lastAssistantMessage.id)
+        onMessageReceived?.(lastAssistantMessage as Message)
+      }
+    }
+    if (messages.length === 0) {
+      reportedReceivedIdsRef.current.clear()
+    }
+  }, [isLoading, messages, onMessageReceived])
 
   return null
 }

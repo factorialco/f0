@@ -73,6 +73,15 @@ const meta = {
             onNewChat={() => {
               console.log("ai chat new chat")
             }}
+            onMessageSent={(message) => {
+              console.log("ai chat message sent", message)
+            }}
+            onMessageReceived={(message) => {
+              console.log("ai chat message received", message)
+            }}
+            onFeedbackClick={(params) => {
+              console.log("ai chat feedback click", params)
+            }}
           >
             <AiChatWrapper>
               <Story />

@@ -82,6 +82,7 @@ const Messages = ({
     welcomeScreenSuggestions,
     onThumbsUp,
     onThumbsDown,
+    onFeedbackClick,
   } = useAiChat()
   const initialMessages = useMemo(
     () =>
@@ -410,12 +411,24 @@ const Messages = ({
             const callback =
               currentReaction === "like" ? onThumbsUp : onThumbsDown
             callback?.(message, { threadId, feedback })
+            onFeedbackClick?.({
+              message,
+              reaction: currentReaction,
+              feedback,
+              threadId,
+            })
             closeFeedbackModal()
           }}
           onClose={(message) => {
             const callback =
               currentReaction === "like" ? onThumbsUp : onThumbsDown
             callback?.(message, { threadId, feedback: "" })
+            onFeedbackClick?.({
+              message,
+              reaction: currentReaction,
+              feedback: "",
+              threadId,
+            })
             closeFeedbackModal()
           }}
           reactionType={currentReaction}
