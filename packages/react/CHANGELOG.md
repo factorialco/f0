@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.373.2](https://github.com/factorialco/f0/compare/f0-react-v1.373.1...f0-react-v1.373.2) (2026-02-23)
+
+
+### Bug Fixes
+
+* **ai-chat:** fix preamble dedup and thinking group ordering ([#3494](https://github.com/factorialco/f0/issues/3494)) ([b81f80d](https://github.com/factorialco/f0/commit/b81f80da4bdcdc88b8b49705af7f99b1d7663a7f))
+
 ## [1.373.1](https://github.com/factorialco/f0/compare/f0-react-v1.373.0...f0-react-v1.373.1) (2026-02-23)
 
 
