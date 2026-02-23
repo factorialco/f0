@@ -58,7 +58,7 @@ export type AiChatProviderProps = {
    */
   onWelcomeSuggestionClick?: (suggestion: WelcomeScreenSuggestion) => void
   /**
-   * A callback that gets called when the user starts a new chat (e.g. via "Start new chat").
+   * A callback that gets called when the user clicks the "Start new chat" button.
    */
   onNewChat?: () => void
 } & Pick<

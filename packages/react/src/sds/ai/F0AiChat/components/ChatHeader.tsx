@@ -22,6 +22,7 @@ export const ChatHeader = (props: HeaderProps) => {
     visualizationMode,
     setVisualizationMode,
     lockVisualizationMode,
+    onNewChat,
   } = useAiChat()
   const fullscreen = visualizationMode === "fullscreen"
   const translations = useI18n()
@@ -52,6 +53,7 @@ export const ChatHeader = (props: HeaderProps) => {
             label={translations.ai.startNewChat}
             icon={New}
             onClick={() => {
+              onNewChat?.()
               clear()
             }}
           />

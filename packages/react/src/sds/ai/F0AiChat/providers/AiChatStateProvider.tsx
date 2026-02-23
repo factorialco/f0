@@ -129,7 +129,6 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
 
   const clear = () => {
     if (clearFunctionRef.current) {
-      onNewChat?.()
       clearFunctionRef.current()
     }
   }
