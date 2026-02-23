@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.375.0](https://github.com/factorialco/f0/compare/f0-react-v1.374.2...f0-react-v1.375.0) (2026-02-23)
+
+
+### Features
+
+* submit and validation per section in F0Form ([#3487](https://github.com/factorialco/f0/issues/3487)) ([b217695](https://github.com/factorialco/f0/commit/b217695a1666fd1d41d3bb316fc012c66f28cefe))
+
 ## [1.374.2](https://github.com/factorialco/f0/compare/f0-react-v1.374.1...f0-react-v1.374.2) (2026-02-23)
 
 
