@@ -15,8 +15,7 @@ export type ToastOptions = {
    * The variant of the toast
    */
   variant?: F0ToastVariant
-  /**
-  
+
   /**
    * The actions to display in the toast
    */

@@ -1,12 +1,5 @@
 import { cva } from "cva"
-import {
-  forwardRef,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react"
+import { forwardRef, useCallback, useEffect, useMemo, useState } from "react"
 
 import {
   AlertAvatarProps,
@@ -77,8 +70,6 @@ const F0Toast = forwardRef<HTMLDivElement, F0ToastProps>(
     const i18n = useI18n()
     const [remainingTime, setRemainingTime] = useState(duration || 0)
     const [isPaused, setIsPaused] = useState(false)
-    const startTimeRef = useRef<number | null>(null)
-    const animationFrameRef = useRef<number | null>(null)
 
     const { role, ariaLive, avatarType, progressBarColor } = useMemo(() => {
       const getRoleAndAriaLive = () => {
@@ -125,15 +116,7 @@ const F0Toast = forwardRef<HTMLDivElement, F0ToastProps>(
     // Timer logic
     useEffect(() => {
       if (!duration || duration <= 0 || isPaused || forcePauseTimer) {
-        if (animationFrameRef.current) {
-          cancelAnimationFrame(animationFrameRef.current)
-          animationFrameRef.current = null
-        }
         return
-      }
-
-      if (!startTimeRef.current) {
-        startTimeRef.current = Date.now()
       }
 
       const interval = setInterval(() => {

@@ -332,11 +332,12 @@ export const AllVariants: Story = {
         duration={5000}
         actions={[
           {
+            type: "button" as const,
             label: "Click me",
             onClick: fn(),
           },
           {
-            type: "link",
+            type: "link" as const,
             label: "Learn more",
             href: "https://factorialhr.com/",
           },

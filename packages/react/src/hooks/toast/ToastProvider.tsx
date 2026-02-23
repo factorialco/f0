@@ -179,7 +179,6 @@ const StackedToasts = ({
                     opacity: isVisible ? 1 : 0,
                     zIndex: visibleCount - currentVisibleIndex,
                     height: currentVisibleIndex === 0 ? "auto" : 0,
-                    order: 0,
                   },
                   expanded: {
                     x: 0,
@@ -188,9 +187,13 @@ const StackedToasts = ({
                     opacity: 1,
                     // Reverse visual order: newest (highest index) at top
                     zIndex: currentVisibleIndex + 1,
-                    order: visibleCount - 1 - currentVisibleIndex,
                     height: "auto",
                   },
+                }}
+                // Apply order immediately (outside animation) so the reorder
+                // happens before the expand animation starts, not during it.
+                style={{
+                  order: isHovered ? visibleCount - 1 - currentVisibleIndex : 0,
                 }}
                 transition={{
                   type: "spring",
@@ -395,7 +398,15 @@ export const ToastProvider = ({ children }: ToastProviderProps) => {
   }, [])
 
   const addToast = useCallback((toast: ToastProviderItem) => {
-    setItems((prev) => [...prev, toast])
+    setItems((prev) => {
+      const existingIndex = prev.findIndex((item) => item.id === toast.id)
+      if (existingIndex !== -1) {
+        const next = [...prev]
+        next[existingIndex] = toast
+        return next
+      }
+      return [...prev, toast]
+    })
   }, [])
 
   const removeToast = useCallback((id: ToastId) => {
