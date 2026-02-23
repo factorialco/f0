@@ -1,4 +1,7 @@
-import type { FiltersDefinition } from "@/components/OneFilterPicker/types"
+import type {
+  FiltersDefinition,
+  PresetsDefinition,
+} from "@/components/OneFilterPicker/types"
 
 import { IconType } from "@/components/F0Icon"
 import { OnSelectItemsCallback, RecordType } from "@/hooks/datasource"
@@ -21,6 +24,23 @@ import { SummariesDefinition } from "../../summary"
 import { ListVisualizationOptions } from "./List/types"
 
 /**
+ * Optional per-visualization filter and preset overrides.
+ * When provided on a visualization, these override the global source filters/presets
+ * for that specific view, and the view maintains its own independent filter state.
+ *
+ * @template Filters - The filters type extending FiltersDefinition
+ */
+export type VisualizationFilterOverrides<Filters extends FiltersDefinition> = {
+  /** Override which filters are available when this visualization is active.
+   *  If not provided, the global source filters are used.
+   *  Can be a subset of the source filters definition. */
+  filters?: Partial<Filters>
+  /** Additional presets shown only when this visualization is active.
+   *  These are displayed alongside the global source presets. */
+  presets?: PresetsDefinition<Filters>
+}
+
+/**
  * Represents a visualization configuration for displaying collection data.
  * Supports different visualization types (card, table, or custom) with their respective options.
  *
@@ -37,31 +57,31 @@ export type Visualization<
   NavigationFilters extends NavigationFiltersDefinition,
   Grouping extends GroupingDefinition<R>,
 > =
-  | {
+  | ({
       /** Card-based visualization type */
       type: "card"
       /** Configuration options for card visualization */
       options: CardVisualizationOptions<R, Filters, Sortings>
-    }
-  | {
+    } & VisualizationFilterOverrides<Filters>)
+  | ({
       /** Kanban-based visualization type */
       type: "kanban"
       /** Configuration options for kanban visualization */
       options: KanbanVisualizationOptions<R, Filters, Sortings>
-    }
-  | {
+    } & VisualizationFilterOverrides<Filters>)
+  | ({
       /** Table-based visualization type */
       type: "table"
       /** Configuration options for table visualization */
       options: TableVisualizationOptions<R, Filters, Sortings, Summaries>
-    }
-  | {
+    } & VisualizationFilterOverrides<Filters>)
+  | ({
       /** List-based visualization type */
       type: "list"
       /** Configuration options for list visualization */
       options: ListVisualizationOptions<R, Filters, Sortings>
-    }
-  | {
+    } & VisualizationFilterOverrides<Filters>)
+  | ({
       /** Human-readable label for the visualization */
       label: string
       /** Icon to represent the visualization in UI */
@@ -83,7 +103,7 @@ export type Visualization<
           Grouping
         >
       }) => JSX.Element
-    }
+    } & VisualizationFilterOverrides<Filters>)
 
 /**
  * Represents the type of visualization.
