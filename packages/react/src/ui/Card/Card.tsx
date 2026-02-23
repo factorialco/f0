@@ -136,26 +136,52 @@ CardInfo.displayName = "CardInfo"
 
 /**
  * Card Link
+ *
+ * When an `href` is provided, renders as a `Link` for navigation.
+ * When only `onClick` is provided (no `href`), renders as a native `<button>`
+ * for correct accessibility semantics and keyboard support.
  */
 const CardLink = React.forwardRef<
-  HTMLAnchorElement,
+  HTMLElement,
   React.ComponentPropsWithoutRef<"a"> & { icon?: IconType }
->(({ className, title, icon = ChevronRight, ...props }, ref) => {
+>(({ className, title, icon = ChevronRight, href, ...rest }, ref) => {
+  const sharedClassName = cn(
+    "group inline-flex aspect-square h-6 items-center justify-center gap-1", //layout
+    "rounded-sm border border-solid border-f1-border bg-f1-background-inverse-secondary", //appearance
+    "whitespace-nowrap px-0 text-base font-medium text-f1-foreground", //typography
+    "cursor-pointer transition-colors hover:border-f1-border-hover focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-f1-special-ring focus-visible:ring-offset-1", //interaction
+    className
+  )
+  const iconElement = (
+    <F0Icon size="sm" icon={icon} className="text-f1-icon-bold" />
+  )
+
+  if (!href) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { target, rel, download, type: _type, ...buttonProps } = rest
+    return (
+      <button
+        ref={ref as React.Ref<HTMLButtonElement>}
+        className={sharedClassName}
+        aria-label={title}
+        type="button"
+        {...(buttonProps as React.ComponentPropsWithoutRef<"button">)}
+      >
+        {iconElement}
+      </button>
+    )
+  }
+
   return (
     <Link
-      ref={ref}
-      className={cn(
-        "group inline-flex aspect-square h-6 items-center justify-center gap-1", //layout
-        "rounded-sm border border-solid border-f1-border bg-f1-background-inverse-secondary", //appearance
-        "whitespace-nowrap px-0 text-base font-medium text-f1-foreground", //typography
-        "cursor-pointer transition-colors hover:border-f1-border-hover focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-f1-special-ring focus-visible:ring-offset-1", //interaction
-        className
-      )}
+      ref={ref as React.Ref<HTMLAnchorElement>}
+      className={sharedClassName}
       role="button"
       aria-label={title}
-      {...props}
+      href={href}
+      {...rest}
     >
-      <F0Icon size="sm" icon={icon} className="text-f1-icon-bold" />
+      {iconElement}
     </Link>
   )
 })
