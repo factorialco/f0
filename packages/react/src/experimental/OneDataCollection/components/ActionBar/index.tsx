@@ -93,15 +93,8 @@ interface ActionBarProps {
 
   /**
    * Whether all-pages selection mode is active.
-   * When true, shows a banner to select all items across pages.
    */
   allPagesSelection?: boolean
-
-  /**
-   * Whether all items on the current page are selected.
-   * Used together with allPagesSelection to show the "select all items" banner.
-   */
-  isAllCurrentPageSelected?: boolean
 
   /**
    * Whether the user has opted to select ALL items across all pages.
@@ -112,11 +105,6 @@ interface ActionBarProps {
    * Total number of items across all pages.
    */
   totalItems?: number
-
-  /**
-   * Callback to select all items across all pages.
-   */
-  onSelectAllItems?: () => void
 }
 
 const Alert = ({ message }: { message: string }) => {
@@ -135,10 +123,8 @@ export const ActionBar = ({
   onUnselect,
   warningMessage,
   allPagesSelection = false,
-  isAllCurrentPageSelected = false,
   isAllItemsSelected = false,
   totalItems,
-  onSelectAllItems,
   ...props
 }: ActionBarProps) => {
   const { t, ...i18n } = useI18n()
@@ -148,18 +134,6 @@ export const ActionBar = ({
       ? i18n.status.selected.singular
       : i18n.status.selected.plural
 
-  // Show the "select all across pages" banner when:
-  // - all-pages selection mode is active
-  // - all items on the current page are selected
-  // - but NOT all items across all pages are selected yet
-  const showSelectAllBanner =
-    allPagesSelection &&
-    isAllCurrentPageSelected &&
-    !isAllItemsSelected &&
-    totalItems !== undefined &&
-    totalItems > 0
-
-  // Show "all items selected" confirmation when all items across pages are selected
   const showAllItemsSelected =
     allPagesSelection && isAllItemsSelected && totalItems !== undefined
 
@@ -244,16 +218,6 @@ export const ActionBar = ({
                   />
                   <span> {selectedText}</span>
                 </span>
-              )}
-              {showSelectAllBanner && (
-                <F0Button
-                  variant="outline"
-                  size="sm"
-                  label={t("status.selected.selectAllItems", {
-                    total: totalItems ?? 0,
-                  })}
-                  onClick={onSelectAllItems}
-                />
               )}
               <F0Button
                 variant="outline"

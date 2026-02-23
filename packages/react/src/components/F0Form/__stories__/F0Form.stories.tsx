@@ -60,8 +60,8 @@ export const Default: Story = {
         defaultValues={{ username: "", email: "", bio: "" }}
         onSubmit={async (data) => {
           await sleep(1000)
-          alert(`Form submitted: ${JSON.stringify(data, null, 2)}`)
-          return { success: true }
+          console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+          return { success: true, message: "Account created successfully" }
         }}
         submitConfig={{ label: "Create Account" }}
       />
@@ -118,7 +118,7 @@ export const WithRows: Story = {
         }}
         onSubmit={async (data) => {
           await sleep(1000)
-          alert(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+          console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
           return { success: true }
         }}
       />
@@ -194,8 +194,8 @@ export const WithSections: Story = {
         }}
         onSubmit={async (data) => {
           await sleep(1000)
-          alert(`Form submitted: ${JSON.stringify(data, null, 2)}`)
-          return { success: true }
+          console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+          return { success: true, message: "Profile saved" }
         }}
       />
     )
@@ -303,7 +303,9 @@ export const WithSectionsSidepanel: Story = {
         action: {
           label: "Privacy settings",
           icon: Settings,
-          onClick: () => alert("Opening privacy settings..."),
+          onClick: () => {
+            console.info("Opening privacy settings...")
+          },
         },
       },
       editors: {
@@ -333,7 +335,7 @@ export const WithSectionsSidepanel: Story = {
         }}
         onSubmit={async (data) => {
           await sleep(1000)
-          alert(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+          console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
           return { success: true }
         }}
         submitConfig={{ label: "Save Survey" }}
@@ -396,7 +398,7 @@ export const ConditionalRendering: Story = {
         }}
         onSubmit={async (data) => {
           await sleep(1000)
-          alert(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+          console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
           return { success: true }
         }}
       />
@@ -495,7 +497,7 @@ export const DynamicDisabled: Story = {
         }}
         onSubmit={async (data) => {
           await sleep(1000)
-          alert(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+          console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
           return { success: true }
         }}
       />
@@ -642,7 +644,7 @@ export const AllFieldTypes: Story = {
         }}
         onSubmit={async (data) => {
           await sleep(1000)
-          alert(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+          console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
           return { success: true }
         }}
       />
@@ -816,7 +818,7 @@ export const AllFieldTypesDisabled: Story = {
         }}
         onSubmit={async (data) => {
           await sleep(1000)
-          alert(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+          console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
           return { success: true }
         }}
       />
@@ -946,7 +948,7 @@ export const CustomField: Story = {
         }}
         onSubmit={async (data) => {
           await sleep(1000)
-          alert(`Task created: ${JSON.stringify(data, null, 2)}`)
+          console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
           return { success: true }
         }}
         submitConfig={{ label: "Create Task", icon: null }}
@@ -997,7 +999,7 @@ export const ServerValidation: Story = {
             }
           }
 
-          alert(`Account created successfully!`)
+          console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
           return { success: true }
         }}
       />
@@ -1114,7 +1116,7 @@ export const VisualDesignExample: Story = {
           }}
           onSubmit={async (data) => {
             await sleep(1000)
-            alert(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+            console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
             return { success: true }
           }}
           submitConfig={{ label: "Create Survey", icon: null }}
@@ -1167,8 +1169,8 @@ export const WithActionBar: Story = {
           }}
           onSubmit={async (data) => {
             await sleep(1000)
-            alert(`Settings saved: ${JSON.stringify(data, null, 2)}`)
-            return { success: true }
+            console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+            return { success: true, message: "Settings saved successfully" }
           }}
         />
         <p className="mt-4 text-sm text-f1-foreground-secondary">
@@ -1229,8 +1231,8 @@ export const WithActionBarAndDiscard: Story = {
           }}
           onSubmit={async (data) => {
             await sleep(1000)
-            alert(`Company updated: ${JSON.stringify(data, null, 2)}`)
-            return { success: true }
+            console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+            return { success: true, message: "Company details updated" }
           }}
         />
         <p className="mt-4 text-sm text-f1-foreground-secondary">
@@ -1479,7 +1481,7 @@ export const SelectWithDataSource: Story = {
           defaultValues={defaultValues}
           onSubmit={async (data) => {
             await sleep(1000)
-            alert(`Selected: ${JSON.stringify(data, null, 2)}`)
+            console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
             return { success: true }
           }}
         />
@@ -1566,7 +1568,7 @@ export const FormInDialog: Story = {
             submitConfig={{ type: "default", hideSubmitButton: true }}
             onSubmit={async (data) => {
               await sleep(1000)
-              alert(`Team member added: ${JSON.stringify(data, null, 2)}`)
+              console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
               setOpen(false)
               return { success: true }
             }}
@@ -1652,7 +1654,7 @@ export const DynamicDateConstraints: Story = {
         }}
         onSubmit={async (data) => {
           await sleep(1000)
-          alert(`Project created: ${JSON.stringify(data, null, 2)}`)
+          console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
           return { success: true }
         }}
       />

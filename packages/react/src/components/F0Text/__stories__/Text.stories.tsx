@@ -132,6 +132,15 @@ export const MarkdownWithEllipsis: Story = {
   },
 }
 
+export const Required: Story = {
+  args: {
+    variant: "label",
+    content: "Label text",
+    required: true,
+    markdown: false,
+  },
+}
+
 export const Snapshot: Story = {
   parameters: withSnapshot({}),
   args: {

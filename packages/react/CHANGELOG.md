@@ -1,5 +1,61 @@
 # Changelog
 
+## [1.374.2](https://github.com/factorialco/f0/compare/f0-react-v1.374.1...f0-react-v1.374.2) (2026-02-23)
+
+
+### Bug Fixes
+
+* do not show pagination footer in data collection when it's only one page ([#3505](https://github.com/factorialco/f0/issues/3505)) ([df07496](https://github.com/factorialco/f0/commit/df07496367e8dff0a370c05091b365f7e535314c))
+
+## [1.374.1](https://github.com/factorialco/f0/compare/f0-react-v1.374.0...f0-react-v1.374.1) (2026-02-23)
+
+
+### Bug Fixes
+
+* render CardLink as native button when no href is provided ([#3476](https://github.com/factorialco/f0/issues/3476)) ([69e634b](https://github.com/factorialco/f0/commit/69e634b735368eaede87fd441233727ea30c6708))
+
+## [1.374.0](https://github.com/factorialco/f0/compare/f0-react-v1.373.2...f0-react-v1.374.0) (2026-02-23)
+
+
+### Features
+
+* **F0TextArea/F0Text:** add required prop support and corresponding story ([#3498](https://github.com/factorialco/f0/issues/3498)) ([352a125](https://github.com/factorialco/f0/commit/352a125f0f17cb4fd1a085714237d14f8969e9f5))
+
+## [1.373.2](https://github.com/factorialco/f0/compare/f0-react-v1.373.1...f0-react-v1.373.2) (2026-02-23)
+
+
+### Bug Fixes
+
+* **ai-chat:** fix preamble dedup and thinking group ordering ([#3494](https://github.com/factorialco/f0/issues/3494)) ([b81f80d](https://github.com/factorialco/f0/commit/b81f80da4bdcdc88b8b49705af7f99b1d7663a7f))
+
+## [1.373.1](https://github.com/factorialco/f0/compare/f0-react-v1.373.0...f0-react-v1.373.1) (2026-02-23)
+
+
+### Bug Fixes
+
+* some ui changes in ai chat in fullscreen mode ([#3491](https://github.com/factorialco/f0/issues/3491)) ([7fb5893](https://github.com/factorialco/f0/commit/7fb58939b5113735fa1cb18823e23430083c719f))
+
+## [1.373.0](https://github.com/factorialco/f0/compare/f0-react-v1.372.1...f0-react-v1.373.0) (2026-02-23)
+
+
+### Features
+
+* **F0Select:** selection preview panel, nested filters and improved filter UX ([#3485](https://github.com/factorialco/f0/issues/3485)) ([c25e85f](https://github.com/factorialco/f0/commit/c25e85f20bc687075b9ed9aa789e8c03c8513663))
+
+## [1.372.1](https://github.com/factorialco/f0/compare/f0-react-v1.372.0...f0-react-v1.372.1) (2026-02-23)
+
+
+### Bug Fixes
+
+* improve feedback when submitting forms ([#3495](https://github.com/factorialco/f0/issues/3495)) ([1278002](https://github.com/factorialco/f0/commit/127800256a90d278249e79a8b935bfb9669a7ab5))
+
+## [1.372.0](https://github.com/factorialco/f0/compare/f0-react-v1.371.1...f0-react-v1.372.0) (2026-02-20)
+
+
+### Features
+
+* **ai-chat:** improve fullscreen UX and close animation ([#3486](https://github.com/factorialco/f0/issues/3486)) ([8acd80b](https://github.com/factorialco/f0/commit/8acd80b2f855e153c629c254dcbc090f5383ab14))
+
 ## [1.371.1](https://github.com/factorialco/f0/compare/f0-react-v1.371.0...f0-react-v1.371.1) (2026-02-19)
 
 

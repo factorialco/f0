@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { flushSync } from "react-dom"
 import { DefaultValues, Path, useForm } from "react-hook-form"
 import { z } from "zod"
 
 import { F0Button } from "@/components/F0Button"
-import { F0Icon } from "@/components/F0Icon"
-import { F0ActionBar } from "@/experimental/F0ActionBar"
+import { ActionBarStatus } from "@/experimental/F0ActionBar"
 import { F0TableOfContent } from "@/experimental/Navigation/F0TableOfContent"
 import { TOCItem } from "@/experimental/Navigation/F0TableOfContent/types"
-import { AlertCircle, ChevronDown, ChevronUp, Delete, Save } from "@/icons/app"
+import { Delete, Save } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 import { cn } from "@/lib/utils"
 import { Form as FormProvider } from "@/ui/form"
@@ -26,6 +26,7 @@ import type {
 } from "./types"
 import type { F0FormStateCallback } from "./useF0Form"
 
+import { FormActionBar } from "./components/ActionBar"
 import { F0FormSection } from "./components/F0FormSection"
 import { RowRenderer } from "./components/RowRenderer"
 import { SectionRenderer } from "./components/SectionRenderer"
@@ -313,9 +314,12 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
   const discardIcon =
     discardConfig?.icon === null ? undefined : (discardConfig?.icon ?? Delete)
 
-  const actionBarLabel = isActionBar
+  const actionBarIdleLabel = isActionBar
     ? (submitConfig?.actionBarLabel ?? forms.actionBar.unsavedChanges)
     : forms.actionBar.unsavedChanges
+
+  const actionBarSavingLabel =
+    submitConfig?.savingMessage ?? forms.actionBar.saving
 
   const centerActionBarInFrameContent =
     isActionBar && !!submitConfig?.centerActionBarInFrameContent
@@ -384,6 +388,11 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
   const rootError = form.formState.errors.root
   const { isDirty, isSubmitting, errors } = form.formState
 
+  const [actionBarStatus, setActionBarStatus] =
+    useState<ActionBarStatus>("idle")
+  const [successMessage, setSuccessMessage] = useState<string | undefined>()
+  const successTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
   // Error navigation and auto-focus
   const {
     hasErrors,
@@ -396,11 +405,25 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
     errors,
   })
 
-  // Handle form submission
+  const resolvedActionBarLabel = (() => {
+    if (hasErrors) return undefined
+    if (actionBarStatus === "loading") return actionBarSavingLabel
+    if (actionBarStatus === "success")
+      return successMessage ?? forms.actionBar.saved
+    return actionBarIdleLabel
+  })()
+
+  // Handle form submission with status flow: idle -> loading -> success -> idle
   const handleSubmit = async (data: TValues) => {
-    // Convert null values back to undefined before passing to onSubmit.
-    // Clearable date fields store null internally to prevent react-hook-form
-    // from falling back to defaultValues, but consumers expect undefined.
+    if (successTimerRef.current) {
+      clearTimeout(successTimerRef.current)
+      successTimerRef.current = null
+    }
+
+    flushSync(() => {
+      setActionBarStatus("loading")
+    })
+
     const cleanedData = { ...data }
     for (const key of Object.keys(cleanedData)) {
       if ((cleanedData as Record<string, unknown>)[key] === null) {
@@ -412,25 +435,59 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
     if (result.success) {
       form.reset(data)
       resetErrorNavigation()
+      setSuccessMessage(result.message)
+      setActionBarStatus("success")
+
+      successTimerRef.current = setTimeout(() => {
+        setActionBarStatus("idle")
+        setSuccessMessage(undefined)
+        successTimerRef.current = null
+      }, 3000)
     } else {
-      // Set field-specific errors
+      setActionBarStatus("idle")
+
       if (result.errors) {
         Object.entries(result.errors).forEach(([field, message]) => {
           form.setError(field as Path<TValues>, { message })
         })
       }
 
-      // Set root error if provided
       if (result.rootMessage) {
         form.setError("root", { message: result.rootMessage })
       }
     }
   }
 
+  useEffect(() => {
+    return () => {
+      if (successTimerRef.current) {
+        clearTimeout(successTimerRef.current)
+      }
+    }
+  }, [])
+
+  // Reset action bar status when the form becomes dirty again after a successful save
+  useEffect(() => {
+    if (isDirty && actionBarStatus === "success") {
+      if (successTimerRef.current) {
+        clearTimeout(successTimerRef.current)
+        successTimerRef.current = null
+      }
+      setActionBarStatus("idle")
+      setSuccessMessage(undefined)
+    }
+  }, [isDirty, actionBarStatus])
+
   // Handle discard action
   const handleDiscard = () => {
     form.reset()
     resetErrorNavigation()
+    setActionBarStatus("idle")
+    setSuccessMessage(undefined)
+    if (successTimerRef.current) {
+      clearTimeout(successTimerRef.current)
+      successTimerRef.current = null
+    }
   }
 
   // Store state callback from useF0Form hook
@@ -580,72 +637,26 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
           formContent
         )}
 
-        {/* Action bar submit - rendered outside form to prevent accidental form submission */}
-        {isActionBar && (
-          <F0ActionBar
-            isOpen={isDirty}
-            variant="light"
-            centerInFrameContent={centerActionBarInFrameContent}
-            label={!hasErrors ? actionBarLabel : undefined}
-            leftContent={
-              hasErrors ? (
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-0.5">
-                    <F0Icon icon={AlertCircle} size="md" color="critical" />
-                    <span className="font-medium text-f1-foreground-critical">
-                      {errorCount === 1
-                        ? forms.actionBar.issues.one.replace(
-                            "{{count}}",
-                            String(errorCount)
-                          )
-                        : forms.actionBar.issues.other.replace(
-                            "{{count}}",
-                            String(errorCount)
-                          )}
-                    </span>
-                  </div>
-                  {errorCount > 1 && (
-                    <div className="flex items-center gap-2">
-                      <F0Button
-                        icon={ChevronUp}
-                        onClick={goToPreviousError}
-                        variant="outline"
-                        label="Go to previous error"
-                        hideLabel
-                      />
-                      <F0Button
-                        icon={ChevronDown}
-                        onClick={goToNextError}
-                        variant="outline"
-                        label="Go to next error"
-                        hideLabel
-                      />
-                    </div>
-                  )}
-                </div>
-              ) : undefined
-            }
-            primaryActions={[
-              {
-                label: submitLabel,
-                icon: submitIcon,
-                onClick: form.handleSubmit(handleSubmit),
-                disabled: hasErrors,
-              },
-            ]}
-            secondaryActions={
-              discardableChanges
-                ? [
-                    {
-                      label: discardLabel,
-                      icon: discardIcon,
-                      onClick: handleDiscard,
-                    },
-                  ]
-                : []
-            }
-          />
-        )}
+        <FormActionBar
+          isActionBar={isActionBar}
+          isDirty={isDirty}
+          actionBarStatus={actionBarStatus}
+          hasErrors={hasErrors}
+          errorCount={errorCount}
+          resolvedActionBarLabel={resolvedActionBarLabel}
+          centerActionBarInFrameContent={centerActionBarInFrameContent}
+          submitLabel={submitLabel}
+          submitIcon={submitIcon}
+          discardableChanges={discardableChanges}
+          discardLabel={discardLabel}
+          discardIcon={discardIcon}
+          issuesOneLabel={forms.actionBar.issues.one}
+          issuesOtherLabel={forms.actionBar.issues.other}
+          onSubmit={form.handleSubmit(handleSubmit)}
+          onDiscard={handleDiscard}
+          goToPreviousError={goToPreviousError}
+          goToNextError={goToNextError}
+        />
       </FormProvider>
     </F0FormContext.Provider>
   )
