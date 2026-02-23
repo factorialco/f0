@@ -102,9 +102,8 @@ export const useDataCollectionStorage = <
           }
         }
       )
+      setStorageReady(true)
     })
-
-    setStorageReady(true)
     // eslint-disable-next-line react-hooks/exhaustive-deps -- Only run when key changes
   }, [key, active])
 
