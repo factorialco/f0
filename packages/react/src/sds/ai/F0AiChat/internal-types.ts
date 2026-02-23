@@ -41,6 +41,7 @@ export interface AiChatState {
   onVisibility?: () => void
   onClose?: () => void
   onWelcomeSuggestionClick?: (suggestion: WelcomeScreenSuggestion) => void
+  onNewChat?: () => void
 }
 
 /**
@@ -78,6 +79,7 @@ export type AiChatProviderReturnValue = {
   onVisibility?: () => void
   onClose?: () => void
   onWelcomeSuggestionClick?: (suggestion: WelcomeScreenSuggestion) => void
+  onNewChat?: () => void
   /**
    * Clear/reset the chat conversation
    */

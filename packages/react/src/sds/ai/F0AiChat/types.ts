@@ -57,6 +57,10 @@ export type AiChatProviderProps = {
    * A callback that gets called when a welcome screen suggestion is clicked.
    */
   onWelcomeSuggestionClick?: (suggestion: WelcomeScreenSuggestion) => void
+  /**
+   * A callback that gets called when the user starts a new chat (e.g. via "Start new chat").
+   */
+  onNewChat?: () => void
 } & Pick<
   CopilotKitProps,
   | "agent"

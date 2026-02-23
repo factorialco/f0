@@ -70,6 +70,9 @@ const meta = {
             onWelcomeSuggestionClick={(suggestion) => {
               console.log("ai chat welcome suggestion click", suggestion)
             }}
+            onNewChat={() => {
+              console.log("ai chat new chat")
+            }}
           >
             <AiChatWrapper>
               <Story />

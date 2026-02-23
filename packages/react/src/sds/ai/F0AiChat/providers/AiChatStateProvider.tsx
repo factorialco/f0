@@ -55,6 +55,7 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   onVisibility,
   onClose,
   onWelcomeSuggestionClick,
+  onNewChat,
   ...rest
 }) => {
   const [footer, setFooter] = useState<ReactNode | undefined>(initialFooter)
@@ -128,6 +129,7 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
 
   const clear = () => {
     if (clearFunctionRef.current) {
+      onNewChat?.()
       clearFunctionRef.current()
     }
   }
@@ -217,6 +219,7 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         onVisibility,
         onClose,
         onWelcomeSuggestionClick,
+        onNewChat,
       }}
     >
       {children}
@@ -264,6 +267,7 @@ export function useAiChat(): AiChatProviderReturnValue {
       onVisibility: noopFn,
       onClose: noopFn,
       onWelcomeSuggestionClick: noopFn,
+      onNewChat: noopFn,
     }
   }
 
