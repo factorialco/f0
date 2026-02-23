@@ -56,7 +56,6 @@ const Messages = ({
     welcomeScreenSuggestions,
     onThumbsUp,
     onThumbsDown,
-    onFeedbackClick,
   } = useAiChat()
 
   const initialMessages = useMemo(
@@ -151,12 +150,12 @@ const Messages = ({
     <>
       <div className="relative flex flex-1 flex-col overflow-hidden">
         <ScrollArea
-          className="flex-1 [&>div]:h-full [&>div>div]:h-full"
+          className="flex-1 [&>div>div]:h-full [&>div]:h-full"
           viewportRef={viewportRef}
         >
           <div
             ref={contentRef}
-            className="flex flex-col p-4 h-full items-center"
+            className="flex h-full flex-col items-center p-4"
           >
             <div
               className={cn(
@@ -271,24 +270,13 @@ const Messages = ({
             const callback =
               currentReaction === "like" ? onThumbsUp : onThumbsDown
             callback?.(message, { threadId, feedback })
-            onFeedbackClick?.({
-              message,
-              reaction: currentReaction,
-              feedback,
-              threadId,
-            })
+
             closeFeedbackModal()
           }}
           onClose={(message) => {
             const callback =
               currentReaction === "like" ? onThumbsUp : onThumbsDown
             callback?.(message, { threadId, feedback: "" })
-            onFeedbackClick?.({
-              message,
-              reaction: currentReaction,
-              feedback: "",
-              threadId,
-            })
             closeFeedbackModal()
           }}
           reactionType={currentReaction}
