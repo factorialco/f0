@@ -1,190 +1,76 @@
-# Skill: f0-code-review
+---
+name: f0-code-review
+description: Code review checklist for the F0 React component library. Use when reviewing PRs, auditing component code quality, or checking compliance with F0 conventions before merging. Covers component structure, TypeScript strictness, testing standards, styling, accessibility, and Storybook requirements.
+---
 
-Code review checklist for the F0 React component library. Load this skill when reviewing PRs, code changes, or performing code quality audits.
+# F0 Code Review
 
-## When to Use
+Review F0 React components against the conventions in `packages/react/AGENTS.md`. This skill adds review-specific guidance on top of those standards.
 
-- Reviewing pull requests
-- Auditing component code quality
-- Checking compliance with F0 conventions before merging
+## Review Workflow
 
-## Component Structure Checklist
+1. Read `packages/react/AGENTS.md` for full component conventions
+2. Check each item below — flag violations with severity
+3. Classify issues as **blocking** (must fix) or **suggestion** (nice to have)
 
-### Folder Organization
+## Blocking Issues
 
-Each component (in `components/` and `experimental/`) must follow:
+Flag these as blocking — they must be fixed before merge:
 
+- `any` or `as any` usage anywhere
+- `import * as React` instead of named imports
+- Default exports on components
+- Missing test file for new/changed components
+- Test files named `.spec.ts` instead of `.test.tsx`
+- Using `render` instead of `zeroRender` from `@/testing/test-utils.tsx`
+- New component not exported in `exports.ts`
+- Internal components or `internal-types.ts` exported publicly
+- Missing `Snapshot` story with `withSnapshot({})` for Chromatic
+- `dangerouslySetInnerHTML` without explicit justification
+- Circular imports
+- New component placed in `experimental/` instead of `components/` (use `experimentalComponent` from `@/lib/experimental.ts`)
+- New component name missing `F0` prefix
+
+## Suggestions (Non-blocking)
+
+Flag these as suggestions:
+
+- Comments describing "what" instead of "why"
+- Missing `React.memo`/`useMemo`/`useCallback` where beneficial
+- Missing cleanup in `useEffect`
+- `className` exposed on public component API
+- Union type props not using const array pattern
+- Missing accessibility tests
+- Coverage appears below 80%
+
+## Storybook Review
+
+Verify stories follow these F0-specific patterns:
+
+- Meta uses `satisfies Meta<typeof Component>` (not `as Meta`)
+- Tags include `["autodocs", "stable"]` or `["autodocs", "experimental"]`
+- ArgTypes for union props reference the component's const array directly
+- Union types without const arrays use `table.type.summary`
+- Snapshot story renders all meaningful variants in a flex layout
+
+```tsx
+// Required Snapshot pattern
+export const Snapshot: Story = {
+  parameters: withSnapshot({}),
+  render: () => (
+    <div className="flex w-fit flex-col gap-2">
+      {/* All meaningful variants */}
+    </div>
+  ),
+}
 ```
-[ComponentName]/
-  __tests__/              — Component tests
-  __stories__/            — Storybook files (split into multiple if needed)
-  index.tsx               — Entry point (exports only, no logic)
-  [ComponentName].tsx     — Component implementation
-  types.ts                — Public types (re-exported by index.tsx)
-  internal-types.ts       — Private types (not exported)
-  hooks/                  — Hook files (useXXXX.ts)
-  components/             — Internal subcomponents
-```
 
-- Elements in `components/`, `internal-types.ts`, and `internal` files must NOT be exported
-- One component per file, unless subcomponents are very simple
+## Props Review Checklist
 
-### Naming
-
-- New component names must start with `F0` (e.g., `F0Button`)
-- Recommend renaming old components starting with `F1`, `One`, or without prefix when touched
-- Does not apply to subcomponents or private components
-
-### Imports and Exports
-
-- **NEVER** `import * as React from "react"` — import only what you use
-- Use **named exports** for all components — no default exports
-- Implement `'use client'` only when necessary
-- Ensure components in `components/` or `experimental/` are exported in `exports.ts`
-- Components in `src/ui/` must **not** be re-exported
-
-### Private Components
-
-Some components (e.g., `F0Button`) have private properties — these use an internal implementation file (e.g., `internal.tsx`)
-
-### New Components Location
-
-- New components go in `components/`, NOT `experimental/` — use `experimentalComponent` from `@/lib/experimental.ts` instead
-
-## Props Review
-
-- Props must have clear, functional names (e.g., `only-icon` not `hide-icon` + `hide-label`)
-- Avoid `className` on public components (can be a private prop)
-- For union types, verify const arrays are used:
+- Names are functional and clear (`only-icon` not `hide-icon` + `hide-label`)
+- Union types use exported const arrays:
   ```ts
   export const colors = ["a", "b", "c"] as const
   export type Color = (typeof colors)[number]
   ```
-  Ensure the const array is exported alongside the type.
-
-## TypeScript Review
-
-- **strict** TypeScript configuration must be respected
-- **NEVER** use `any` or `as any` — find the proper type
-- Prefer **interfaces** over types for public APIs
-- Use discriminated unions for complex state
-- Export component prop interfaces
-- Implement proper generic constraints
-- Avoid type assertions unless absolutely necessary
-- No cycle imports
-- No unused imports or variables
-
-## Testing Review
-
-### File Naming
-
-- Test files must use `.test.tsx` or `.test.ts` — **never** `.spec.ts` or `.specs.ts`
-- Import Vitest methods explicitly: `import { describe, it, expect } from "vitest"`
-- Do **not** import `@testing-library/jest-dom`
-
-### Test Utilities
-
-- Must use `zeroRender` from `@/testing/test-utils.tsx` instead of `render` from `@testing-library/react`
-
-### Coverage
-
-- Coverage target: at least 80%
-- Tests should be real unit tests — avoid excessive mocking
-- Test behavior, not internals
-- Missing test coverage for new components is a blocking issue
-- Missing accessibility tests should be flagged
-
-## Styling Review
-
-### Tailwind CSS
-
-- Use Tailwind CSS with custom configuration — no inline styles
-- Follow mobile-first responsive design
-- Use shadcn/ui components as base primitives (avoid modifications unless necessary)
-- No hardcoded values — use design tokens
-
-### Design Tokens
-
-- Follow shadcn/ui token conventions
-- Maintain consistent spacing and color scales
-
-### Animations
-
-- CSS animations/transitions for simple interactions
-- Framer Motion for complex animations and gestures
-- `tailwindcss-animate` for common patterns
-
-## Code Quality Review
-
-### Comments
-
-- Reject comments that describe "what" — comments must answer "Why?"
-- Comments should be rare
-
-### Performance
-
-- Check for proper cleanup in `useEffect` hooks (memory leaks)
-- Verify `React.memo`, `useMemo`, and `useCallback` are used appropriately
-- Flag unnecessary re-renders
-- Check for missing dependency arrays in hooks
-
-### Error Handling
-
-- Error boundaries where needed
-- Edge cases handled gracefully
-- Meaningful error messages
-
-### Accessibility
-
-- All interactive elements must be keyboard accessible
-- Proper ARIA attributes
-- Proper focus management
-
-### Security
-
-- Validate user inputs in components
-- Sanitize data before rendering
-- Flag any use of `dangerouslySetInnerHTML`
-
-## React-Specific Issues
-
-- Memory leaks in components (missing cleanup in `useEffect`)
-- Missing dependency arrays in hooks
-- Improper state updates (mutating state directly)
-- Missing key props in lists
-- Inefficient re-renders
-
-## Architecture Patterns
-
-- Functional components only
-- Atomic design principles
-- Modular and reusable components
-- Separation of concerns (presentation vs. logic)
-- Custom hooks for shared logic
-
-## Storybook Review
-
-- Every component must have at least one story file
-- Story docs must cover all properties
-- For properties with limited options, use the const array from the component — avoid repeating values in the story
-- For union types, use `table` in `argTypes`:
-  ```ts
-  table: {
-    type: {
-      summary: "[The TYPE, e.g Color = 'a' | 'b' | 'c']",
-    },
-  }
-  ```
-- Must include a `Snapshot` story with `parameters: withSnapshot({})` for Chromatic visual regression:
-  ```tsx
-  export const Snapshot: Story = {
-    parameters: withSnapshot({}),
-    render: () => (
-      <div className="flex w-fit flex-col gap-2">
-        <div className="flex flex-row gap-2">
-          <F0AvatarDate date={exampleDate} />
-        </div>
-      </div>
-    ),
-  }
-  ```
+- Public interfaces are exported, internal types stay in `internal-types.ts`
