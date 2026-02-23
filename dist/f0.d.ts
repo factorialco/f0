@@ -7250,8 +7250,6 @@ export declare type ToastOptions = {
      */
     variant?: F0ToastVariant;
     /**
-
-     /**
      * The actions to display in the toast
      */
     actions?: F0ToastProps["actions"];
