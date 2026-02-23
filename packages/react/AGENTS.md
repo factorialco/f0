@@ -7,7 +7,8 @@ This is the F0 React component library (`@factorialco/f0-react`). See the root [
 This package includes on-demand skills in `.skills/`:
 
 - **f0-code-review** — Code review checklist (component structure, TypeScript, testing, styling, a11y). Load when reviewing PRs or code.
-- **f0-component-docs** — Storybook story and MDX documentation generation templates. Load when creating or updating component documentation.
+
+For component documentation (Storybook stories and MDX), use the global `factorial-f0-component-documentation` skill instead.
 
 ## Component Guidelines
 
