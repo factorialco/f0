@@ -418,6 +418,8 @@ export const defaultTranslations = {
   forms: {
     actionBar: {
       unsavedChanges: "You have changes pending to be saved",
+      saving: "Saving...",
+      saved: "Your changes have been saved",
       discard: "Discard",
       issues: {
         one: "{{count}} issue",
