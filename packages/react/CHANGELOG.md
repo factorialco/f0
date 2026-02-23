@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.372.1](https://github.com/factorialco/f0/compare/f0-react-v1.372.0...f0-react-v1.372.1) (2026-02-23)
+
+
+### Bug Fixes
+
+* improve feedback when submitting forms ([#3495](https://github.com/factorialco/f0/issues/3495)) ([1278002](https://github.com/factorialco/f0/commit/127800256a90d278249e79a8b935bfb9669a7ab5))
+
 ## [1.372.0](https://github.com/factorialco/f0/compare/f0-react-v1.371.1...f0-react-v1.372.0) (2026-02-20)
 
 
