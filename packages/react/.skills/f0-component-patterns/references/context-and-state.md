@@ -99,54 +99,31 @@ export function useDraggable<T = unknown>(args: { ... }) {
 
 ## Controlled vs. Uncontrolled Components
 
-### Pattern 1: isControlled Flag
+### Use useControllable hook
+
+Use https://www.npmjs.com/package/use-controllable (check the readme for futher details)
 
 ```tsx
-// src/components/F0ButtonToggle/internal/F0ButtonToggle.internal.tsx
-const [localSelected, setLocalSelected] = useState(defaultSelected)
+/// ❌ Anti-pattern: Always using internal state
+function BadComponent({ value, onChange }) {
+  const [internalValue, setInternalValue] = useState(value)
 
-const isControlled = selected !== undefined
-const state = {
-  selected: isControlled ? selected : localSelected,
-  onSelectedChange: isControlled ? onSelectedChange : setLocalSelected,
+  // Need to sync internal state with prop changes
+  useEffect(() => {
+    setInternalValue(value) // Extra re-render!
+  }, [value])
+
+  // ... causes multiple onChange calls and state conflicts
 }
 ```
 
-### Pattern 2: localValue with useEffect Sync
-
-When the controlled value may change externally:
-
 ```tsx
-// src/ui/Select/components/Select.tsx
-const [localValue, setLocalValue] = useState(toArray(props.value))
-
-useEffect(() => {
-  setLocalValue(toArray(props.value))
-}, [JSON.stringify(props.value)])
-
-// Context resolves controlled vs. uncontrolled
-const contextValue = useMemo(
-  () => ({
-    value: props.value !== undefined ? toArray(props.value) : localValue,
-    // ...
-  }),
-  [JSON.stringify(props.value), localValue /* ... */]
-)
-```
-
-### Pattern 3: localValue with maxLength
-
-```tsx
-// src/ui/InputField/InputField.tsx
-const [localValue, setLocalValue] = useState(value)
-
-useEffect(() => {
-  setLocalValue(
-    maxLength && value && lengthProvider(value) > maxLength
-      ? value?.substring(0, maxLength)
-      : value
-  )
-}, [value, lengthProvider, maxLength])
+// ✅ Optimal: Direct value usage when controlled
+function GoodComponent({ value, onChange }) {
+  const [currentValue, setValue] = useControllable({ value, onChange })
+  // When controlled: currentValue === value (no internal state)
+  // When uncontrolled: currentValue is managed internally
+}
 ```
 
 ## Async onClick with Auto-Loading

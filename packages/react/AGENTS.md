@@ -9,38 +9,28 @@ This package includes on-demand skills in `.skills/`:
 - **f0-code-review** — Code review checklist (component structure, TypeScript, testing, styling, a11y). Load when reviewing PRs or code.
 - **f0-component-patterns** — Detailed reference for component architecture, context, styling, testing, i18n, and animation patterns with code examples. Load when building or modifying components.
 
-For component documentation (Storybook stories and MDX), use the global `factorial-f0-component-documentation` skill instead.
+For **Storybook story files** (`.stories.tsx`), use the in-repo `f0-storybook-stories` skill (`.skills/f0-storybook-stories/`).
+For **MDX documentation** (the Docs tab), use the global `factorial-f0-component-documentation` skill — these are separate files with separate conventions.
 
-## Component Architecture
+## Folder Organization
 
-### Folder Organization
+Describes the `react` package organization
 
-Each component should follow this structure:
-
-```
-[ComponentName]/
-  __tests__/              — Component tests
-  __stories__/            — Storybook files (split into multiple if needed)
-  index.tsx               — Entry point (exports only, no logic)
-  [ComponentName].tsx     — Component implementation
-  types.ts                — Public types (re-exported by index.tsx)
-  internal-types.ts       — Private types (not exported)
-  hooks/                  — Hook files (useXXXX.ts)
-  components/             — Internal subcomponents
-```
-
-- Elements in `components/`, `internal-types.ts`, and `internal` files must not be exported
-- One component per file, unless subcomponents are very simple
-- New components go in `components/`, not `experimental/` — use `experimentalComponent` from `@/lib/experimental.ts` instead
-
-### File Structure Order
-
-Structure component files in this order:
-
-1. Type definitions and interfaces
-2. Component implementation
-3. Helper functions
-4. Exports
+- /assets -> static global assets
+- /docs -> global package documentation
+- /src
+  - ai/ -> don't use, keep it for compatibility
+  - components/ -> all the f0 public components
+  - experimental/ -> legacy experimental components. DON'T add anything new, all the public components must be in components/. Add the experimental Experimental Wrapper for the experimental ones. Suggest to apply the .skills/f0-experimental-component-migration
+  - flags/ -> contries flags
+  - hooks/ -> public exported hooks
+  - icons/ -> generated icon components (icon CAN NOT be added here manually, check docs/AddNewICon.mdx)
+  - layout/ -> Page layout components
+  - lib/ -> library related tools
+  - mocks/ -> mock data
+  - sds/ -> Satellite design systems. Are components, hooks, etc of non core elements
+  - testing/ -> testing tools
+  - ui/ -> primitive components used in the components. Mainly wraps Radix components
 
 ### Index Exports
 
