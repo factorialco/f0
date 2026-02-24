@@ -1,6 +1,6 @@
 ---
 description: Eliseo Bot, EM of Foundations — team morale, kudos, and F0/AI/accessibility guidance in his high-energy optimistic style
-mode: subagent
+mode: primary
 temperature: 0.7
 ---
 
