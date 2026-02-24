@@ -1,3 +1,5 @@
+import { ReactNode } from "react"
+
 export const levels = ["info", "warning", "critical", "positive"] as const
 
 export type Level = (typeof levels)[number]
@@ -5,4 +7,6 @@ export type Level = (typeof levels)[number]
 export type Props<Text extends string = string> = {
   text: Text extends "" ? never : Text
   level: Level
+  /** Content to render on the right side of the tag (e.g. icon or action) */
+  right?: ReactNode
 }

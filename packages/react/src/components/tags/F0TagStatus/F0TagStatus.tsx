@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils"
 import type { F0TagStatusProps } from "./types"
 
 export const F0TagStatus = forwardRef<HTMLDivElement, F0TagStatusProps>(
-  ({ text, additionalAccessibleText, variant }, ref) => {
+  ({ text, additionalAccessibleText, variant, right }, ref) => {
     useTextFormatEnforcer(
       text,
       { disallowEmpty: true },
@@ -43,6 +43,7 @@ export const F0TagStatus = forwardRef<HTMLDivElement, F0TagStatusProps>(
         }
         additionalAccessibleText={additionalAccessibleText}
         text={text}
+        right={right}
       />
     )
   }

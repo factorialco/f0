@@ -1,3 +1,5 @@
+import { ReactNode } from "react"
+
 import { Numeric, RelaxedNumericWithFormatter } from "@/lib/numeric"
 
 export const statuses = ["positive", "neutral", "negative"] as const
@@ -29,6 +31,11 @@ export type F0TagBalanceProps = {
    * Text to display when the balance is null or undefined
    */
   nullText?: string
+
+  /**
+   * Content to render on the right side of the tag (e.g. icon or action)
+   */
+  right?: ReactNode
 
   /**
    * Value to display next to the tag can be a number, a Numeric or a NumericWithFormatter

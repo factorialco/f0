@@ -1,3 +1,5 @@
+import { ReactNode } from "react"
+
 export const statuses = [
   "neutral",
   "info",
@@ -18,4 +20,5 @@ export interface F0TagStatusProps {
    * E.g., when showing a tooltip for sighted user, provide the tootip text to this prop because tooltips aren't accessible
    */
   additionalAccessibleText?: string
+  right?: ReactNode
 }

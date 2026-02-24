@@ -1,3 +1,5 @@
+import { ReactNode } from "react"
+
 import { IconType } from "@/components/F0Icon"
 
 export type F0TagRawProps = {
@@ -9,6 +11,7 @@ export type F0TagRawProps = {
    * Additional accessible text to display in the tag
    */
   additionalAccessibleText?: string
+  right?: ReactNode
 } & (
   | {
       icon: IconType
