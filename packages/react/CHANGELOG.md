@@ -1,5 +1,40 @@
 # Changelog
 
+## [1.376.1](https://github.com/factorialco/f0/compare/f0-react-v1.376.0...f0-react-v1.376.1) (2026-02-24)
+
+
+### Bug Fixes
+
+* properly consider available space for responsive in data collection with card visualization ([#3512](https://github.com/factorialco/f0/issues/3512)) ([d5bfeaa](https://github.com/factorialco/f0/commit/d5bfeaa6eff1b752de4bedf6d26b903d11687ee9))
+
+## [1.376.0](https://github.com/factorialco/f0/compare/f0-react-v1.375.1...f0-react-v1.376.0) (2026-02-24)
+
+
+### Features
+
+* improve post description rendering for updated editor ([#3478](https://github.com/factorialco/f0/issues/3478)) ([4dd04fe](https://github.com/factorialco/f0/commit/4dd04fed1ee456934b94acfad9a863f823fd6f8b))
+
+## [1.375.1](https://github.com/factorialco/f0/compare/f0-react-v1.375.0...f0-react-v1.375.1) (2026-02-24)
+
+
+### Bug Fixes
+
+* add cursor-pointer to dropdown ([#3421](https://github.com/factorialco/f0/issues/3421)) ([91c6695](https://github.com/factorialco/f0/commit/91c6695b965d7ec7204e294f7347e6d260880bbb))
+
+## [1.375.0](https://github.com/factorialco/f0/compare/f0-react-v1.374.2...f0-react-v1.375.0) (2026-02-23)
+
+
+### Features
+
+* submit and validation per section in F0Form ([#3487](https://github.com/factorialco/f0/issues/3487)) ([b217695](https://github.com/factorialco/f0/commit/b217695a1666fd1d41d3bb316fc012c66f28cefe))
+
+## [1.374.2](https://github.com/factorialco/f0/compare/f0-react-v1.374.1...f0-react-v1.374.2) (2026-02-23)
+
+
+### Bug Fixes
+
+* do not show pagination footer in data collection when it's only one page ([#3505](https://github.com/factorialco/f0/issues/3505)) ([df07496](https://github.com/factorialco/f0/commit/df07496367e8dff0a370c05091b365f7e535314c))
+
 ## [1.374.1](https://github.com/factorialco/f0/compare/f0-react-v1.374.0...f0-react-v1.374.1) (2026-02-23)
 
 
