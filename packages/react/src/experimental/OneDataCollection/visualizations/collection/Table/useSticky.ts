@@ -16,7 +16,7 @@ export const useSticky = <
   hasCheckColumn: boolean,
   allPagesSelection: boolean
 ) => {
-  const checkColumnWidth = hasCheckColumn ? (allPagesSelection ? 70 : 46) : 0
+  const checkColumnWidth = hasCheckColumn ? (allPagesSelection ? 72 : 46) : 0
   const getStickyPosition = useCallback(
     (cellIndex: number) => {
       return cellIndex < frozenColumnsLeft && columns.length > 1

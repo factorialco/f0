@@ -269,6 +269,10 @@ const OneDataCollectionComp = <
     (() => void) | undefined
   >(undefined)
 
+  const [handleSelectAllFunc, setHandleSelectAllFunc] = useState<
+    ((checked: boolean) => void) | undefined
+  >(undefined)
+
   /**
    * Layout
    */
@@ -371,6 +375,8 @@ const OneDataCollectionComp = <
      * Clear selected items function
      */
     setClearSelectedItemsFunc(() => clearSelectedItems)
+
+    setHandleSelectAllFunc(() => handleSelectAll)
 
     setIsAllItemsSelected(selectedItems.allSelected === true)
 
@@ -780,6 +786,11 @@ const OneDataCollectionComp = <
                   : undefined
               }
               onUnselect={() => clearSelectedItemsFunc?.()}
+              onSelectAll={
+                !isAllItemsSelected
+                  ? () => handleSelectAllFunc?.(true)
+                  : undefined
+              }
               allPagesSelection={!!source.allPagesSelection}
               isAllItemsSelected={isAllItemsSelected}
               totalItems={totalItems}

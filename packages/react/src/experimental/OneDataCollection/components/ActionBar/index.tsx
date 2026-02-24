@@ -9,6 +9,7 @@ import {
   F0ButtonDropdown,
 } from "@/components/F0ButtonDropdown"
 import { IconType } from "@/components/F0Icon"
+import { OneEllipsis } from "@/components/OneEllipsis"
 import { Dropdown, MobileDropdown } from "@/experimental/Navigation/Dropdown"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
@@ -87,6 +88,11 @@ interface ActionBarProps {
   onUnselect?: () => void
 
   /**
+   * The function to select all items. When defined, a "Select all" button is shown.
+   */
+  onSelectAll?: () => void
+
+  /**
    * The warning message to show in the action bar
    */
   warningMessage?: string
@@ -121,6 +127,7 @@ export const ActionBar = ({
   secondaryActions = [],
   selectedNumber = undefined,
   onUnselect,
+  onSelectAll,
   warningMessage,
   allPagesSelection = false,
   isAllItemsSelected = false,
@@ -208,7 +215,7 @@ export const ActionBar = ({
                   })}
                 </span>
               ) : (
-                <span className="font-medium tabular-nums">
+                <span className="flex items-center gap-1 font-medium tabular-nums">
                   <NumberFlow
                     value={selectedNumber}
                     spinTiming={{
@@ -216,15 +223,29 @@ export const ActionBar = ({
                       easing: "cubic-bezier(0.175, 0.885, 0.32, 1.275)",
                     }}
                   />
-                  <span> {selectedText}</span>
+                  <OneEllipsis className="text-f1-foreground">
+                    {selectedText}
+                  </OneEllipsis>
                 </span>
               )}
-              <F0Button
-                variant="outline"
-                label={i18n.actions.unselect}
-                onClick={onUnselect}
-                size="sm"
-              />
+              <div className="flex items-center gap-1">
+                {onSelectAll && !showAllItemsSelected && (
+                  <F0Button
+                    variant="outline"
+                    label={t("status.selected.selectAllItems", {
+                      total: totalItems ?? 0,
+                    })}
+                    onClick={onSelectAll}
+                    size="sm"
+                  />
+                )}
+                <F0Button
+                  variant="outline"
+                  label={i18n.actions.unselect}
+                  onClick={onUnselect}
+                  size="sm"
+                />
+              </div>
             </div>
           )}
           <div className="dark">

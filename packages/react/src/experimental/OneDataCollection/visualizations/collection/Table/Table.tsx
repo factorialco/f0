@@ -1,9 +1,9 @@
 import { AnimatePresence, motion } from "motion/react"
 import { Fragment, useEffect, useMemo, useState } from "react"
 
+import { F0Button } from "@/components/F0Button"
 import { F0Checkbox } from "@/components/F0Checkbox"
 import { Dropdown } from "@/experimental/Navigation/Dropdown"
-import { ChevronDown } from "@/icons/app"
 import { PagesPagination } from "@/experimental/OneDataCollection/components/PagesPagination"
 import { useDataCollectionSettings } from "@/experimental/OneDataCollection/Settings/SettingsProvider"
 import {
@@ -27,6 +27,7 @@ import {
   useGroups,
   useSelectable,
 } from "@/hooks/datasource"
+import { ChevronDown } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { GroupHeader } from "@/ui/GroupHeader/index"
@@ -43,7 +44,6 @@ import { Row } from "./components/Row"
 import { useColumns } from "./hooks/useColums"
 import { TableVisualizationOptions } from "./types"
 import { useSticky } from "./useSticky"
-import { F0Button } from "@/components/F0Button"
 export * from "./settings/SettingsRenderer"
 
 export const TableCollection = <
@@ -277,43 +277,57 @@ export const TableCollection = <
                 sticky={{ left: 0 }}
                 align="left"
               >
-                <div className="flex w-full items-center justify-start ml-1.5">
-                  <F0Checkbox
-                    checked={
-                      allSelectedStatus.selectedCount > 0 ||
-                      allSelectedStatus.checked
-                    }
-                    indeterminate={
-                      allSelectedStatus.indeterminate ||
-                      (allSelectedStatus.selectedCount > 0 &&
-                        !allSelectedStatus.checked)
-                    }
-                    onCheckedChange={handleSelectAll}
-                    title={i18n.actions.selectAll}
-                    hideLabel
-                    disabled={data?.records.length === 0}
-                  />
-                  {source.allPagesSelection && (
-                    <Dropdown
-                      size="sm"
-                      items={[
-                        {
-                          label: t("status.selected.selectAllItems", {
-                            total: paginationInfo?.total ?? data.records.length,
-                          }),
-                          onClick: () => handleSelectAllItems(true),
-                        },
-                      ]}
-                    >
-                      <F0Button
-                        label={i18n.actions.more}
-                        hideLabel
+                <div className="ml-1.5 flex w-full items-center justify-start">
+                  <div
+                    className={cn(
+                      "flex",
+                      source.allPagesSelection &&
+                        cn(
+                          "rounded-sm hover:bg-f1-background-hover",
+                          (allSelectedStatus.selectedCount > 0 ||
+                            allSelectedStatus.checked) &&
+                            "bg-f1-background-secondary"
+                        )
+                    )}
+                  >
+                    <F0Checkbox
+                      checked={
+                        allSelectedStatus.selectedCount > 0 ||
+                        allSelectedStatus.checked
+                      }
+                      indeterminate={
+                        allSelectedStatus.indeterminate ||
+                        (allSelectedStatus.selectedCount > 0 &&
+                          !allSelectedStatus.checked)
+                      }
+                      onCheckedChange={handleSelectAll}
+                      title={i18n.actions.selectAll}
+                      hideLabel
+                      disabled={data?.records.length === 0}
+                    />
+                    {source.allPagesSelection && (
+                      <Dropdown
                         size="sm"
-                        icon={ChevronDown}
-                        variant="ghost"
-                      />
-                    </Dropdown>
-                  )}
+                        items={[
+                          {
+                            label: t("status.selected.selectAllItems", {
+                              total:
+                                paginationInfo?.total ?? data.records.length,
+                            }),
+                            onClick: () => handleSelectAllItems(true),
+                          },
+                        ]}
+                      >
+                        <F0Button
+                          label={i18n.actions.more}
+                          hideLabel
+                          size="sm"
+                          icon={ChevronDown}
+                          variant="ghost"
+                        />
+                      </Dropdown>
+                    )}
+                  </div>
                 </div>
               </TableHead>
             )}
