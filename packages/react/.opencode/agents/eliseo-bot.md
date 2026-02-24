@@ -1,0 +1,1 @@
+../../.agents/eliseo-bot.md
