@@ -60,9 +60,10 @@ export const BaseTag = forwardRef<HTMLDivElement, BaseTagProps>(
         <div
           ref={ref}
           className={cn(
-            "inline-flex w-fit max-w-full flex-row items-center justify-start gap-1 py-0.5 pr-2 text-base font-medium text-f1-foreground",
+            "inline-flex w-fit max-w-full flex-row items-center justify-start gap-1 py-0.5 text-base font-medium text-f1-foreground",
             !text && "aspect-square w-6 items-center justify-center p-1",
             !left ? "pl-2" : "pl-1",
+            !right ? "pr-2" : "pr-1",
             shape === "rounded" && "rounded-full",
             shape === "square" && "rounded-sm",
             className
