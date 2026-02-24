@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.376.1](https://github.com/factorialco/f0/compare/f0-react-v1.376.0...f0-react-v1.376.1) (2026-02-24)
+
+
+### Bug Fixes
+
+* properly consider available space for responsive in data collection with card visualization ([#3512](https://github.com/factorialco/f0/issues/3512)) ([d5bfeaa](https://github.com/factorialco/f0/commit/d5bfeaa6eff1b752de4bedf6d26b903d11687ee9))
+
 ## [1.376.0](https://github.com/factorialco/f0/compare/f0-react-v1.375.1...f0-react-v1.376.0) (2026-02-24)
 
 
