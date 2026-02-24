@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.378.0](https://github.com/factorialco/f0/compare/f0-react-v1.377.0...f0-react-v1.378.0) (2026-02-24)
+
+
+### Features
+
+* dataTestId ([#3339](https://github.com/factorialco/f0/issues/3339)) ([3813ba9](https://github.com/factorialco/f0/commit/3813ba9fd43435043e76dc13fa1d1ee3fc7ab462))
+
 ## [1.377.0](https://github.com/factorialco/f0/compare/f0-react-v1.376.1...f0-react-v1.377.0) (2026-02-24)
 
 
