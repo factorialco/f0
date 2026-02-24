@@ -27,7 +27,10 @@ export const F0OneSwitch = ({
   const [tooltipOpen, setTooltipOpen] = useState(false)
   const [autoTooltipVisible, setAutoTooltipVisible] = useState(autoOpen)
 
-  const tooltipText = tooltip ?? translations.ai.welcome
+  const tooltipText =
+    disabled && tooltip?.whenDisabled
+      ? tooltip?.whenDisabled
+      : (tooltip?.whenEnabled ?? translations.ai.welcome)
   const showTooltip = autoOpen ? autoTooltipVisible : tooltipOpen
 
   useEffect(() => {
