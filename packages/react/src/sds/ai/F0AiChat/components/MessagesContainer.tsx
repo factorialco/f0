@@ -369,12 +369,18 @@ export function convertMessagesToTurns(messages: Message[]): Turn[] {
     if (isThinkingMessage(message)) {
       if (thinkingGroup) {
         const prev = thinkingGroup[thinkingGroup.length - 1]
-        if (prev.content !== message.content) {
+        if (getThinkingKey(prev) !== getThinkingKey(message)) {
           thinkingGroup.push(message)
         }
       } else {
         thinkingGroup = [message]
-        currentTurn.push(thinkingGroup)
+        // Always insert thinking group right after the user message (index 1)
+        // so it appears above any text messages from earlier runs in the same turn
+        if (currentTurn.length > 1) {
+          currentTurn.splice(1, 0, thinkingGroup)
+        } else {
+          currentTurn.push(thinkingGroup)
+        }
       }
       continue
     }
@@ -392,4 +398,21 @@ function isThinkingMessage(message: Message): boolean {
       (call) => call.function.name === "orchestratorThinking"
     ) === true
   )
+}
+
+/**
+ * Dedup key for thinking messages.
+ *
+ * CopilotKit action-execution messages have empty/undefined `content` — the
+ * actual preamble text lives in `toolCalls[0].function.arguments`.
+ * Fall back to `content` for backwards compatibility with any call-site that
+ * sets it directly, then to `id` as a last resort.
+ */
+function getThinkingKey(message: Message): string {
+  const tc = (
+    message as {
+      toolCalls?: { function: { name: string; arguments: string } }[]
+    }
+  ).toolCalls?.find((c) => c.function.name === "orchestratorThinking")
+  return tc?.function.arguments || message.content || message.id
 }

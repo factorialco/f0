@@ -3,7 +3,9 @@ import { Message, randomId } from "@copilotkit/shared"
 import { AnimatePresence, motion } from "motion/react"
 import { useMemo } from "react"
 
+import { useAiChat } from "@/ai"
 import { ButtonInternal } from "@/components/F0Button/internal"
+import { cn } from "@/lib/utils"
 
 import { F0OneIcon } from "../../F0OneIcon"
 import { WelcomeScreenSuggestion } from "../types"
@@ -32,6 +34,10 @@ export const WelcomeScreen = ({
 }) => {
   const { sendMessage } = useCopilotChatInternal()
 
+  const { visualizationMode } = useAiChat()
+
+  const isFullscreen = visualizationMode === "fullscreen"
+
   const pickedSuggestions = useMemo(
     () => pickRandomSuggestions(suggestions),
     [suggestions]
@@ -44,7 +50,7 @@ export const WelcomeScreen = ({
         className="flex w-full flex-1 flex-col justify-end gap-6 sm:gap-4"
         initial={{ opacity: 1 }}
       >
-        <div className="pl-3">
+        <div className={!isFullscreen ? "pl-3" : ""}>
           <motion.div
             className="flex w-fit justify-center"
             initial={{ opacity: 0, scale: 0.8, filter: "blur(6px)" }}
@@ -57,7 +63,7 @@ export const WelcomeScreen = ({
           >
             <F0OneIcon spin size="lg" className="my-4" />
           </motion.div>
-          {greeting && (
+          {greeting && !isFullscreen && (
             <motion.p
               className="text-lg font-semibold leading-[24px] text-f1-foreground-secondary"
               initial={{ opacity: 0, filter: "blur(2px)", y: -8 }}
@@ -73,7 +79,10 @@ export const WelcomeScreen = ({
           )}
           {initialMessages.map((message) => (
             <motion.p
-              className="text-xl font-semibold leading-[24px] text-f1-foreground"
+              className={cn(
+                "text-xl font-semibold leading-[24px] text-f1-foreground",
+                isFullscreen ? "text-3xl" : ""
+              )}
               key={message.id}
               initial={{ opacity: 0, filter: "blur(2px)", y: -8 }}
               animate={{ opacity: 1, filter: "blur(0px)", y: 0 }}
@@ -87,35 +96,37 @@ export const WelcomeScreen = ({
             </motion.p>
           ))}
         </div>
-        <div className="flex flex-col items-start gap-[6px]">
-          {pickedSuggestions.map((suggestion, index) => (
-            <motion.div
-              className="w-full"
-              key={index}
-              initial={{ opacity: 0, filter: "blur(2px)", y: -8 }}
-              animate={{ opacity: 1, filter: "blur(0px)", y: 0 }}
-              transition={{
-                duration: 0.1,
-                ease: "easeOut",
-                delay: 0.9 + index * 0.1,
-              }}
-            >
-              <ButtonInternal
-                variant="ghost"
-                className="border border-solid border-f1-border-secondary shadow sm:border-none sm:shadow-none"
-                label={suggestion.message}
-                icon={suggestion.icon}
-                onClick={() =>
-                  sendMessage({
-                    id: randomId(),
-                    role: "user",
-                    content: suggestion.prompt || suggestion.message,
-                  })
-                }
-              />
-            </motion.div>
-          ))}
-        </div>
+        {!!pickedSuggestions.length && (
+          <div className="flex flex-col items-start gap-[6px]">
+            {pickedSuggestions.map((suggestion, index) => (
+              <motion.div
+                className="w-full"
+                key={index}
+                initial={{ opacity: 0, filter: "blur(2px)", y: -8 }}
+                animate={{ opacity: 1, filter: "blur(0px)", y: 0 }}
+                transition={{
+                  duration: 0.1,
+                  ease: "easeOut",
+                  delay: 0.9 + index * 0.1,
+                }}
+              >
+                <ButtonInternal
+                  variant="ghost"
+                  className="border border-solid border-f1-border-secondary shadow sm:border-none sm:shadow-none"
+                  label={suggestion.message}
+                  icon={suggestion.icon}
+                  onClick={() =>
+                    sendMessage({
+                      id: randomId(),
+                      role: "user",
+                      content: suggestion.prompt || suggestion.message,
+                    })
+                  }
+                />
+              </motion.div>
+            ))}
+          </div>
+        )}
       </motion.div>
     </AnimatePresence>
   )

@@ -100,6 +100,14 @@ export const WithMaxLength: Story = {
   },
 }
 
+export const Required: Story = {
+  args: {
+    label: "Label text here",
+    required: true,
+    placeholder: "Placeholder text here",
+  },
+}
+
 export const Clearable: Story = {
   args: {
     label: "Label text here",

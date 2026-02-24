@@ -2,6 +2,8 @@ import { AnimatePresence, motion } from "motion/react"
 import { Fragment, useEffect, useMemo, useState } from "react"
 
 import { F0Checkbox } from "@/components/F0Checkbox"
+import { Dropdown } from "@/experimental/Navigation/Dropdown"
+import { ChevronDown } from "@/icons/app"
 import { PagesPagination } from "@/experimental/OneDataCollection/components/PagesPagination"
 import { useDataCollectionSettings } from "@/experimental/OneDataCollection/Settings/SettingsProvider"
 import {
@@ -41,6 +43,7 @@ import { Row } from "./components/Row"
 import { useColumns } from "./hooks/useColums"
 import { TableVisualizationOptions } from "./types"
 import { useSticky } from "./useSticky"
+import { F0Button } from "@/components/F0Button"
 export * from "./settings/SettingsRenderer"
 
 export const TableCollection = <
@@ -70,7 +73,7 @@ export const TableCollection = <
   Grouping,
   TableVisualizationOptions<R, Filters, Sortings, Summaries>
 >) => {
-  const t = useI18n()
+  const { t, ...i18n } = useI18n()
   // Created a motion component for the row
   const [MotionRow] = useState(() =>
     motion.create(
@@ -156,6 +159,7 @@ export const TableCollection = <
     groupAllSelectedStatus,
     handleSelectItemChange,
     handleSelectAll,
+    handleSelectAllItems,
     handleSelectGroupChange,
   } = useSelectable({
     data,
@@ -236,7 +240,8 @@ export const TableCollection = <
   const { getStickyPosition, checkColumnWidth } = useSticky(
     frozenColumnsLeft,
     columns,
-    !!source.selectable
+    !!source.selectable,
+    !!source.allPagesSelection
   )
 
   const tableWithChildren = data?.records.some((item) =>
@@ -270,9 +275,9 @@ export const TableCollection = <
               <TableHead
                 width={checkColumnWidth}
                 sticky={{ left: 0 }}
-                align="right"
+                align="left"
               >
-                <div className="flex w-full items-center justify-end">
+                <div className="flex w-full items-center justify-start ml-1.5">
                   <F0Checkbox
                     checked={
                       allSelectedStatus.selectedCount > 0 ||
@@ -284,10 +289,31 @@ export const TableCollection = <
                         !allSelectedStatus.checked)
                     }
                     onCheckedChange={handleSelectAll}
-                    title={t.actions.selectAll}
+                    title={i18n.actions.selectAll}
                     hideLabel
                     disabled={data?.records.length === 0}
                   />
+                  {source.allPagesSelection && (
+                    <Dropdown
+                      size="sm"
+                      items={[
+                        {
+                          label: t("status.selected.selectAllItems", {
+                            total: paginationInfo?.total ?? data.records.length,
+                          }),
+                          onClick: () => handleSelectAllItems(true),
+                        },
+                      ]}
+                    >
+                      <F0Button
+                        label={i18n.actions.more}
+                        hideLabel
+                        size="sm"
+                        icon={ChevronDown}
+                        variant="ghost"
+                      />
+                    </Dropdown>
+                  )}
                 </div>
               </TableHead>
             )}
@@ -330,7 +356,7 @@ export const TableCollection = <
                   }}
                   className="table-cell md:hidden"
                 >
-                  {t.collections.actions.actions}
+                  {i18n.collections.actions.actions}
                 </TableHead>
               </>
             )}
@@ -494,7 +520,7 @@ export const TableCollection = <
                       source.summaries[column.summary]?.type === "sum" ? (
                         <div className="flex gap-1">
                           <span className="text-f1-foreground-secondary">
-                            {t.collections.summaries.types.sum}
+                            {i18n.collections.summaries.types.sum}
                           </span>
                           {`${summaryData.data[column.summary]}`}
                         </div>

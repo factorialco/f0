@@ -1,17 +1,33 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { flushSync } from "react-dom"
 import { DefaultValues, Path, useForm } from "react-hook-form"
 import { z } from "zod"
 
 import { F0Button } from "@/components/F0Button"
-import { F0Icon } from "@/components/F0Icon"
-import { F0ActionBar } from "@/experimental/F0ActionBar"
+import { ActionBarStatus } from "@/experimental/F0ActionBar"
 import { F0TableOfContent } from "@/experimental/Navigation/F0TableOfContent"
 import { TOCItem } from "@/experimental/Navigation/F0TableOfContent/types"
-import { AlertCircle, ChevronDown, ChevronUp, Delete, Save } from "@/icons/app"
+import { Delete, Save } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 import { cn } from "@/lib/utils"
 import { Form as FormProvider } from "@/ui/form"
 
+import type { F0SwitchField } from "./fields/switch/types"
+import type {
+  F0FormPropsWithPerSectionSchema,
+  F0FormPropsWithSingleSchema,
+  F0FormRef,
+  F0FormSchema,
+  F0PerSectionSchema,
+  FieldItem,
+  FormDefinitionItem,
+  RowDefinition,
+  SectionDefinition,
+} from "./types"
+import type { F0FormStateCallback } from "./useF0Form"
+
+import { FormActionBar } from "./components/ActionBar"
+import { F0FormSection } from "./components/F0FormSection"
 import { RowRenderer } from "./components/RowRenderer"
 import { SectionRenderer } from "./components/SectionRenderer"
 import { SwitchGroupRenderer } from "./components/SwitchGroupRenderer"
@@ -19,17 +35,6 @@ import { createConditionalResolver } from "./conditionalResolver"
 import { FORM_MAX_WIDTH, SECTION_MARGIN } from "./constants"
 import { F0FormContext, generateAnchorId } from "./context"
 import { FieldRenderer } from "./fields/FieldRenderer"
-import type { F0SwitchField } from "./fields/switch/types"
-import type {
-  F0FormProps,
-  F0FormRef,
-  F0FormSchema,
-  FieldItem,
-  FormDefinitionItem,
-  RowDefinition,
-  SectionDefinition,
-} from "./types"
-import type { F0FormStateCallback } from "./useF0Form"
 import { useErrorNavigation } from "./useErrorNavigation"
 import { useSchemaDefinition } from "./useSchemaDefinition"
 import { createZodErrorMap } from "./zodErrorMap"
@@ -76,52 +81,17 @@ function groupContiguousSwitches(
 }
 
 /**
- * F0Form - A declarative form component that generates forms from a Zod schema.
- *
- * Features:
- * - Schema-based form definition with embedded field metadata
- * - Automatic Zod schema validation
- * - Conditional rendering support (renderIf)
- * - Integration with react-hook-form
- * - Section and row grouping support
- *
- * @example
- * ```tsx
- * import { z } from "zod"
- * import { f0FormField, F0Form } from "@factorialco/factorial-one/experimental"
- *
- * const formSchema = z.object({
- *   firstName: f0FormField(z.string().min(1), {
- *     label: "First Name",
- *     section: "personal",
- *     placeholder: "Enter first name"
- *   }),
- *   lastName: f0FormField(z.string().min(1), {
- *     label: "Last Name",
- *     section: "personal",
- *     row: "name-row" // Group with firstName horizontally
- *   }),
- *   email: f0FormField(z.string().email(), {
- *     label: "Email",
- *     section: "contact"
- *   })
- * })
- *
- * <F0Form
- *   name="user-profile"
- *   schema={formSchema}
- *   sections={{
- *     personal: { title: "Personal Information", order: 1 },
- *     contact: { title: "Contact Details", order: 2 }
- *   }}
- *   defaultValues={{ firstName: "", lastName: "", email: "" }}
- *   onSubmit={async (data) => {
- *     console.log(data)
- *     return { success: true }
- *   }}
- * />
- * ```
+ * Detects whether a value is a Zod schema (ZodObject or ZodEffects)
+ * vs. a plain record of schemas (per-section mode).
  */
+function isZodSchema(value: unknown): value is F0FormSchema {
+  if (typeof value !== "object" || value === null) return false
+  const obj = value as Record<string, unknown>
+  // Zod schemas have a _def.typeName property that plain objects don't
+  const def = obj._def as Record<string, unknown> | undefined
+  return def?.typeName === "ZodObject" || def?.typeName === "ZodEffects"
+}
+
 // Map errorTriggerMode to react-hook-form mode
 const ERROR_TRIGGER_MODE_MAP = {
   "on-blur": "onBlur",
@@ -129,8 +99,171 @@ const ERROR_TRIGGER_MODE_MAP = {
   "on-submit": "onSubmit",
 } as const
 
-export function F0Form<TSchema extends F0FormSchema>(
-  props: F0FormProps<TSchema>
+/**
+ * Per-section schema mode renderer.
+ * Renders each section as an independent form with its own validation and submit.
+ */
+function F0FormPerSection<T extends F0PerSectionSchema>(
+  props: F0FormPropsWithPerSectionSchema<T>
+) {
+  const {
+    name,
+    schema,
+    sections,
+    defaultValues,
+    onSubmit,
+    submitConfig,
+    className,
+    errorTriggerMode = "on-blur",
+    styling,
+  } = props
+
+  const showSectionsSidepanel = styling?.showSectionsSidepanel ?? false
+
+  const sectionIds = useMemo(() => Object.keys(schema), [schema])
+
+  const handleSectionClick = useCallback(
+    (sectionId: string) => {
+      const anchorId = generateAnchorId(name, sectionId)
+      const element = document.getElementById(anchorId)
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth", block: "start" })
+      }
+    },
+    [name]
+  )
+
+  const [activeSection, setActiveSection] = useState<string | undefined>(
+    sectionIds[0]
+  )
+
+  const tocItems: TOCItem[] = useMemo(() => {
+    if (!sections || !showSectionsSidepanel) return []
+
+    return sectionIds.map((sectionId) => ({
+      id: sectionId,
+      label: sections[sectionId]?.title ?? sectionId,
+      onClick: () => {
+        setActiveSection(sectionId)
+        handleSectionClick(sectionId)
+      },
+    }))
+  }, [sections, sectionIds, showSectionsSidepanel, handleSectionClick])
+
+  const content = (
+    <div className={cn("flex w-full flex-col", FORM_MAX_WIDTH, className)}>
+      {sectionIds.map((sectionId, index) => {
+        const sectionSchema = schema[sectionId]
+        const sectionConfig = sections?.[sectionId]
+        const sectionDefaults =
+          defaultValues?.[sectionId as keyof typeof defaultValues]
+        const perSectionSubmitConfig =
+          sectionConfig?.submitConfig ?? submitConfig
+
+        return (
+          <div
+            key={sectionId}
+            id={generateAnchorId(name, sectionId)}
+            className={cn("scroll-mt-4", index !== 0 && SECTION_MARGIN)}
+          >
+            <F0FormSection
+              formName={name}
+              sectionId={sectionId}
+              schema={sectionSchema}
+              sectionConfig={sectionConfig}
+              defaultValues={
+                sectionDefaults as Partial<z.infer<typeof sectionSchema>>
+              }
+              onSubmit={(data) => onSubmit(sectionId, data)}
+              submitConfig={perSectionSubmitConfig}
+              errorTriggerMode={errorTriggerMode}
+            />
+          </div>
+        )
+      })}
+    </div>
+  )
+
+  if (showSectionsSidepanel && tocItems.length > 0) {
+    return (
+      <div className="flex w-full gap-4">
+        <div className="sticky top-4 h-fit shrink-0 self-start pt-3">
+          <F0TableOfContent
+            items={tocItems}
+            activeItem={activeSection}
+            scrollable={false}
+          />
+        </div>
+        <div className="w-px bg-f1-border-secondary" />
+        <div className="flex flex-1 justify-center">{content}</div>
+      </div>
+    )
+  }
+
+  return content
+}
+
+/**
+ * F0Form - A declarative form component that generates forms from a Zod schema.
+ *
+ * Supports two modes:
+ * 1. **Single schema**: One form with one submit button (existing behavior)
+ * 2. **Per-section schema**: A record of schemas keyed by section ID, where each
+ *    section has independent validation and its own submit button.
+ *
+ * @example Single schema
+ * ```tsx
+ * const schema = z.object({
+ *   firstName: f0FormField(z.string().min(1), { label: "First Name", section: "personal" }),
+ *   email: f0FormField(z.string().email(), { label: "Email", section: "contact" }),
+ * })
+ *
+ * <F0Form name="user" schema={schema} onSubmit={async (data) => ({ success: true })} />
+ * ```
+ *
+ * @example Per-section schema
+ * ```tsx
+ * const schema = {
+ *   personal: z.object({
+ *     firstName: f0FormField(z.string().min(1), { label: "First Name" }),
+ *   }),
+ *   contact: z.object({
+ *     email: f0FormField(z.string().email(), { label: "Email" }),
+ *   }),
+ * }
+ *
+ * <F0Form
+ *   name="user"
+ *   schema={schema}
+ *   sections={{ personal: { title: "Personal" }, contact: { title: "Contact" } }}
+ *   onSubmit={async (sectionId, data) => ({ success: true })}
+ * />
+ * ```
+ */
+export function F0Form<TSchema extends F0FormSchema | F0PerSectionSchema>(
+  props: TSchema extends F0FormSchema
+    ? F0FormPropsWithSingleSchema<TSchema>
+    : TSchema extends F0PerSectionSchema
+      ? F0FormPropsWithPerSectionSchema<TSchema>
+      : never
+) {
+  if (!isZodSchema(props.schema)) {
+    return (
+      <F0FormPerSection
+        {...(props as unknown as F0FormPropsWithPerSectionSchema<F0PerSectionSchema>)}
+      />
+    )
+  }
+
+  return (
+    <F0FormSingleSchema
+      {...(props as unknown as F0FormPropsWithSingleSchema<F0FormSchema>)}
+    />
+  )
+}
+
+function F0FormSingleSchema<TSchema extends F0FormSchema>(
+  props: F0FormPropsWithSingleSchema<TSchema>
 ) {
   const i18n = useI18n()
   const { forms } = i18n
@@ -181,9 +314,12 @@ export function F0Form<TSchema extends F0FormSchema>(
   const discardIcon =
     discardConfig?.icon === null ? undefined : (discardConfig?.icon ?? Delete)
 
-  const actionBarLabel = isActionBar
+  const actionBarIdleLabel = isActionBar
     ? (submitConfig?.actionBarLabel ?? forms.actionBar.unsavedChanges)
     : forms.actionBar.unsavedChanges
+
+  const actionBarSavingLabel =
+    submitConfig?.savingMessage ?? forms.actionBar.saving
 
   const centerActionBarInFrameContent =
     isActionBar && !!submitConfig?.centerActionBarInFrameContent
@@ -252,6 +388,11 @@ export function F0Form<TSchema extends F0FormSchema>(
   const rootError = form.formState.errors.root
   const { isDirty, isSubmitting, errors } = form.formState
 
+  const [actionBarStatus, setActionBarStatus] =
+    useState<ActionBarStatus>("idle")
+  const [successMessage, setSuccessMessage] = useState<string | undefined>()
+  const successTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
   // Error navigation and auto-focus
   const {
     hasErrors,
@@ -264,11 +405,25 @@ export function F0Form<TSchema extends F0FormSchema>(
     errors,
   })
 
-  // Handle form submission
+  const resolvedActionBarLabel = (() => {
+    if (hasErrors) return undefined
+    if (actionBarStatus === "loading") return actionBarSavingLabel
+    if (actionBarStatus === "success")
+      return successMessage ?? forms.actionBar.saved
+    return actionBarIdleLabel
+  })()
+
+  // Handle form submission with status flow: idle -> loading -> success -> idle
   const handleSubmit = async (data: TValues) => {
-    // Convert null values back to undefined before passing to onSubmit.
-    // Clearable date fields store null internally to prevent react-hook-form
-    // from falling back to defaultValues, but consumers expect undefined.
+    if (successTimerRef.current) {
+      clearTimeout(successTimerRef.current)
+      successTimerRef.current = null
+    }
+
+    flushSync(() => {
+      setActionBarStatus("loading")
+    })
+
     const cleanedData = { ...data }
     for (const key of Object.keys(cleanedData)) {
       if ((cleanedData as Record<string, unknown>)[key] === null) {
@@ -280,25 +435,59 @@ export function F0Form<TSchema extends F0FormSchema>(
     if (result.success) {
       form.reset(data)
       resetErrorNavigation()
+      setSuccessMessage(result.message)
+      setActionBarStatus("success")
+
+      successTimerRef.current = setTimeout(() => {
+        setActionBarStatus("idle")
+        setSuccessMessage(undefined)
+        successTimerRef.current = null
+      }, 3000)
     } else {
-      // Set field-specific errors
+      setActionBarStatus("idle")
+
       if (result.errors) {
         Object.entries(result.errors).forEach(([field, message]) => {
           form.setError(field as Path<TValues>, { message })
         })
       }
 
-      // Set root error if provided
       if (result.rootMessage) {
         form.setError("root", { message: result.rootMessage })
       }
     }
   }
 
+  useEffect(() => {
+    return () => {
+      if (successTimerRef.current) {
+        clearTimeout(successTimerRef.current)
+      }
+    }
+  }, [])
+
+  // Reset action bar status when the form becomes dirty again after a successful save
+  useEffect(() => {
+    if (isDirty && actionBarStatus === "success") {
+      if (successTimerRef.current) {
+        clearTimeout(successTimerRef.current)
+        successTimerRef.current = null
+      }
+      setActionBarStatus("idle")
+      setSuccessMessage(undefined)
+    }
+  }, [isDirty, actionBarStatus])
+
   // Handle discard action
   const handleDiscard = () => {
     form.reset()
     resetErrorNavigation()
+    setActionBarStatus("idle")
+    setSuccessMessage(undefined)
+    if (successTimerRef.current) {
+      clearTimeout(successTimerRef.current)
+      successTimerRef.current = null
+    }
   }
 
   // Store state callback from useF0Form hook
@@ -430,7 +619,7 @@ export function F0Form<TSchema extends F0FormSchema>(
         {showSectionsSidepanel && tocItems.length > 0 ? (
           <div className="flex w-full gap-4">
             {/* Sections sidebar */}
-            <div className="shrink-0 sticky top-4 h-fit self-start pt-3">
+            <div className="sticky top-4 h-fit shrink-0 self-start pt-3">
               <F0TableOfContent
                 items={tocItems}
                 activeItem={activeSection}
@@ -448,72 +637,26 @@ export function F0Form<TSchema extends F0FormSchema>(
           formContent
         )}
 
-        {/* Action bar submit - rendered outside form to prevent accidental form submission */}
-        {isActionBar && (
-          <F0ActionBar
-            isOpen={isDirty}
-            variant="light"
-            centerInFrameContent={centerActionBarInFrameContent}
-            label={!hasErrors ? actionBarLabel : undefined}
-            leftContent={
-              hasErrors ? (
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-0.5">
-                    <F0Icon icon={AlertCircle} size="md" color="critical" />
-                    <span className="font-medium text-f1-foreground-critical">
-                      {errorCount === 1
-                        ? forms.actionBar.issues.one.replace(
-                            "{{count}}",
-                            String(errorCount)
-                          )
-                        : forms.actionBar.issues.other.replace(
-                            "{{count}}",
-                            String(errorCount)
-                          )}
-                    </span>
-                  </div>
-                  {errorCount > 1 && (
-                    <div className="flex items-center gap-2">
-                      <F0Button
-                        icon={ChevronUp}
-                        onClick={goToPreviousError}
-                        variant="outline"
-                        label="Go to previous error"
-                        hideLabel
-                      />
-                      <F0Button
-                        icon={ChevronDown}
-                        onClick={goToNextError}
-                        variant="outline"
-                        label="Go to next error"
-                        hideLabel
-                      />
-                    </div>
-                  )}
-                </div>
-              ) : undefined
-            }
-            primaryActions={[
-              {
-                label: submitLabel,
-                icon: submitIcon,
-                onClick: form.handleSubmit(handleSubmit),
-                disabled: hasErrors,
-              },
-            ]}
-            secondaryActions={
-              discardableChanges
-                ? [
-                    {
-                      label: discardLabel,
-                      icon: discardIcon,
-                      onClick: handleDiscard,
-                    },
-                  ]
-                : []
-            }
-          />
-        )}
+        <FormActionBar
+          isActionBar={isActionBar}
+          isDirty={isDirty}
+          actionBarStatus={actionBarStatus}
+          hasErrors={hasErrors}
+          errorCount={errorCount}
+          resolvedActionBarLabel={resolvedActionBarLabel}
+          centerActionBarInFrameContent={centerActionBarInFrameContent}
+          submitLabel={submitLabel}
+          submitIcon={submitIcon}
+          discardableChanges={discardableChanges}
+          discardLabel={discardLabel}
+          discardIcon={discardIcon}
+          issuesOneLabel={forms.actionBar.issues.one}
+          issuesOtherLabel={forms.actionBar.issues.other}
+          onSubmit={form.handleSubmit(handleSubmit)}
+          onDiscard={handleDiscard}
+          goToPreviousError={goToPreviousError}
+          goToNextError={goToNextError}
+        />
       </FormProvider>
     </F0FormContext.Provider>
   )

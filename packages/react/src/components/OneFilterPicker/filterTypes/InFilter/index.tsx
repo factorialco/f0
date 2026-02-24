@@ -9,6 +9,7 @@ import {
   cacheLabel,
   getCacheKey,
   getCachedLabel,
+  getNestedCachedLabel,
   loadOptions,
 } from "./useLoadOptions"
 
@@ -19,14 +20,24 @@ export const inFilter: FilterTypeDefinition<
   emptyValue: [],
   isEmpty: (value) => (value || []).length === 0,
   render: (props) => <InFilter {...props} />,
-  chipLabel: async (value, { schema }) => {
+  chipLabel: async (value, { schema, filterKey }) => {
     const cacheKey = getCacheKey(schema)
+
+    // For nested child filters, check the contextual label cache first
+    if (filterKey) {
+      const nestedLabels = value.map((v) => getNestedCachedLabel(filterKey, v))
+      if (nestedLabels[0]) {
+        const remainingCount = nestedLabels.length - 1
+        return remainingCount > 0
+          ? `${nestedLabels[0]} +${remainingCount}`
+          : nestedLabels[0]
+      }
+    }
 
     // Check cache first for all values
     const cachedLabels = value.map((v) => getCachedLabel(cacheKey, v))
 
     if (cachedLabels[0]) {
-      // All labels are cached, use them
       const firstSelectedLabel = cachedLabels[0]!
       const remainingCount = cachedLabels.length - 1
       const hasMultipleSelections = remainingCount > 0

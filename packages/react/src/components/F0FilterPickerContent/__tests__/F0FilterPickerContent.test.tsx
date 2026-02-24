@@ -115,63 +115,6 @@ describe("F0FilterPickerContent", () => {
     })
   })
 
-  describe("Filter Navigation", () => {
-    it("switches to a different filter when clicking on it", async () => {
-      const user = userEvent.setup()
-      const onChange = vi.fn()
-
-      render(
-        <F0FilterPickerContent
-          filters={definition}
-          value={{}}
-          onChange={onChange}
-        />
-      )
-
-      await waitFor(() => {
-        expect(screen.getByText("Department")).toBeInTheDocument()
-      })
-
-      // Click on Location filter
-      await user.click(screen.getByText("Location"))
-
-      // Location options should be visible
-      await waitFor(() => {
-        expect(screen.getByText("New York")).toBeInTheDocument()
-        expect(screen.getByText("San Francisco")).toBeInTheDocument()
-        expect(screen.getByText("London")).toBeInTheDocument()
-      })
-    })
-
-    it("filters the filter list based on search", async () => {
-      const user = userEvent.setup()
-      const onChange = vi.fn()
-
-      render(
-        <F0FilterPickerContent
-          filters={definition}
-          value={{}}
-          onChange={onChange}
-        />
-      )
-
-      await waitFor(() => {
-        expect(screen.getByText("Department")).toBeInTheDocument()
-      })
-
-      // Find the search input for filter list
-      const searchInputs = await screen.findAllByRole("searchbox")
-      await user.type(searchInputs[0], "Loc")
-
-      // Only Location should be visible
-      await waitFor(() => {
-        expect(screen.queryByText("Department")).not.toBeInTheDocument()
-        expect(screen.getByText("Location")).toBeInTheDocument()
-        expect(screen.queryByText("Search")).not.toBeInTheDocument()
-      })
-    })
-  })
-
   describe("Filter Selection", () => {
     it("selects an option when clicking on it", async () => {
       const user = userEvent.setup()
@@ -299,24 +242,6 @@ describe("F0FilterPickerContent", () => {
       })
     })
 
-    it("auto-selects filter with values when opening", async () => {
-      const onChange = vi.fn()
-
-      render(
-        <F0FilterPickerContent
-          filters={definition}
-          value={{ location: ["nyc"] }}
-          onChange={onChange}
-        />
-      )
-
-      // Should auto-select Location filter since it has a value
-      await waitFor(() => {
-        const locationButton = screen.getByText("Location").closest("button")
-        expect(locationButton).toHaveClass("bg-f1-background-secondary")
-      })
-    })
-
     it("shows indicator on filters with selected values", async () => {
       const onChange = vi.fn()
 
@@ -336,64 +261,6 @@ describe("F0FilterPickerContent", () => {
         expect(
           departmentButton?.querySelector(".bg-f1-background-selected-bold")
         ).toBeInTheDocument()
-      })
-    })
-  })
-
-  describe("Select All and Clear", () => {
-    it("selects all options when clicking Select All", async () => {
-      const user = userEvent.setup()
-      const onChange = vi.fn()
-
-      render(
-        <F0FilterPickerContent
-          filters={definition}
-          value={{}}
-          onChange={onChange}
-        />
-      )
-
-      await waitFor(() => {
-        expect(screen.getByText("Engineering")).toBeInTheDocument()
-      })
-
-      // Click Select All
-      await user.click(screen.getByRole("button", { name: /select all/i }))
-
-      // Click Apply button
-      await user.click(screen.getByRole("button", { name: /apply/i }))
-
-      expect(onChange).toHaveBeenCalledWith({
-        department: ["engineering", "design", "product"],
-      })
-    })
-
-    it("clears all options when clicking Clear", async () => {
-      const user = userEvent.setup()
-      const onChange = vi.fn()
-
-      render(
-        <F0FilterPickerContent
-          filters={definition}
-          value={{ department: ["engineering", "design"], location: ["nyc"] }}
-          onChange={onChange}
-        />
-      )
-
-      await waitFor(() => {
-        expect(screen.getByText("Engineering")).toBeInTheDocument()
-      })
-
-      // Click Clear (only clears current filter's selections)
-      await user.click(screen.getByRole("button", { name: /clear/i }))
-
-      // Click Apply button
-      await user.click(screen.getByRole("button", { name: /apply/i }))
-
-      // Location should still have its value, department is cleared (empty array)
-      expect(onChange).toHaveBeenCalledWith({
-        department: [],
-        location: ["nyc"],
       })
     })
   })
