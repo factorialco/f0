@@ -124,8 +124,7 @@ const RowComponentInner = <
   const { getStickyPosition } = useSticky(
     frozenColumnsLeft,
     columns,
-    !!source.selectable,
-    !!source.allPagesSelection
+    !!source.selectable
   )
 
   const {
@@ -160,6 +159,8 @@ const RowComponentInner = <
     )
   }
 
+  const isSelected = id !== undefined && selectedItems.has(id)
+
   return (
     <TableRow
       ref={ref}
@@ -168,7 +169,8 @@ const RowComponentInner = <
         "group transition-colors hover:bg-f1-background-hover",
         "after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-px after:w-full after:bg-f1-border-secondary after:content-['']",
         noBorder && "after:bg-white-100",
-        disableHover && "hover:bg-transparent"
+        disableHover && "hover:bg-transparent",
+        isSelected && "bg-f1-background-selected-secondary"
       )}
     >
       {source.selectable && (
@@ -178,7 +180,7 @@ const RowComponentInner = <
           loading={loading}
         >
           {id !== undefined && (
-            <div className="pointer-events-auto flex items-center justify-start ml-1.5">
+            <div className="pointer-events-auto ml-1.5 flex items-center justify-start">
               <Checkbox
                 checked={selectedItems.has(id)}
                 onCheckedChange={onCheckedChange}

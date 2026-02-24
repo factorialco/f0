@@ -88,11 +88,6 @@ interface ActionBarProps {
   onUnselect?: () => void
 
   /**
-   * The function to select all items. When defined, a "Select all" button is shown.
-   */
-  onSelectAll?: () => void
-
-  /**
    * The warning message to show in the action bar
    */
   warningMessage?: string
@@ -127,7 +122,6 @@ export const ActionBar = ({
   secondaryActions = [],
   selectedNumber = undefined,
   onUnselect,
-  onSelectAll,
   warningMessage,
   allPagesSelection = false,
   isAllItemsSelected = false,
@@ -228,24 +222,12 @@ export const ActionBar = ({
                   </OneEllipsis>
                 </span>
               )}
-              <div className="flex items-center gap-1">
-                {onSelectAll && !showAllItemsSelected && (
-                  <F0Button
-                    variant="outline"
-                    label={t("status.selected.selectAllItems", {
-                      total: totalItems ?? 0,
-                    })}
-                    onClick={onSelectAll}
-                    size="sm"
-                  />
-                )}
-                <F0Button
-                  variant="outline"
-                  label={i18n.actions.unselect}
-                  onClick={onUnselect}
-                  size="sm"
-                />
-              </div>
+              <F0Button
+                variant="outline"
+                label={i18n.actions.unselect}
+                onClick={onUnselect}
+                size="sm"
+              />
             </div>
           )}
           <div className="dark">
