@@ -4,329 +4,166 @@ This is the F0 React component library (`@factorialco/f0-react`). See the root [
 
 ## Skills
 
-This package includes on-demand skills in `.skills/`:
+Load the relevant skill before starting work:
 
-- **f0-code-review** — Code review checklist (component structure, TypeScript, testing, styling, a11y). Load when reviewing PRs or code.
-- **f0-component-patterns** — Detailed reference for component architecture, context, styling, testing, i18n, and animation patterns with code examples. Load when building or modifying components.
+- **f0-code-review** — Code review checklist. Load when reviewing PRs or auditing code.
+- **f0-component-patterns** — Architecture, context, styling, i18n patterns with code examples. Load when building or modifying components.
+- **f0-unit-testing** — Vitest unit test patterns. Load when writing or fixing unit tests.
+- **f0-storybook-stories** — `.stories.tsx` file patterns. Load when adding or updating stories.
+- **f0-storybook-testing** — play function and axe-playwright a11y test patterns. Load when writing interaction or a11y tests.
+- **f0-experimental-component-migration** — Promoting components from `experimental/` to stable. Load when migrating.
 
-For **Storybook story files** (`.stories.tsx`), use the in-repo `f0-storybook-stories` skill (`.skills/f0-storybook-stories/`).
-For **MDX documentation** (the Docs tab), use the global `factorial-f0-component-documentation` skill — these are separate files with separate conventions.
+For **MDX documentation** (the Docs tab), use the global `factorial-f0-component-documentation` skill — separate conventions from story files.
 
 ## Folder Organization
 
-Describes the `react` package organization
-
-- /assets -> static global assets
-- /docs -> global package documentation
-- /src
-  - ai/ -> don't use, keep it for compatibility
-  - components/ -> all the f0 public components
-  - experimental/ -> legacy experimental components. DON'T add anything new, all the public components must be in components/. Add the experimental Experimental Wrapper for the experimental ones. Suggest to apply the .skills/f0-experimental-component-migration
-  - flags/ -> contries flags
-  - hooks/ -> public exported hooks
-  - icons/ -> generated icon components (icon CAN NOT be added here manually, check docs/AddNewICon.mdx)
-  - layout/ -> Page layout components
-  - lib/ -> library related tools
-  - mocks/ -> mock data
-  - sds/ -> Satellite design systems. Are components, hooks, etc of non core elements
-  - testing/ -> testing tools
-  - ui/ -> primitive components used in the components. Mainly wraps Radix components
-
-### Index Exports
-
-Three patterns exist for `index.tsx` — use the appropriate one:
-
-- **Simple re-export**: `export * from "./F0ComponentName"` — for stable, non-experimental components
-- **Experimental wrapper**: `experimentalComponent("F0Name", Component)` — for components still being stabilized
-- **Component() metadata**: `Component({ name, type }, Cmp)` — for components needing XRay tooling integration (types: `"layout"`, `"info"`, `"action"`, `"form"`)
-
-### forwardRef Convention
-
-All components accepting refs must use `forwardRef` with explicit generic types and set `displayName`:
-
-```tsx
-export const F0Example = forwardRef<HTMLDivElement, F0ExampleProps>(
-  function F0Example(props, ref) { ... }
-)
-F0Example.displayName = "F0Example"
+```
+src/
+  components/    — all public F0 components
+  experimental/  — legacy only, do NOT add new components here
+  hooks/         — public exported hooks
+  icons/         — generated icons (do not edit manually)
+  layout/        — page layout components
+  lib/           — internal utilities and providers
+  sds/           — satellite design systems (non-core components)
+  ui/            — primitive wrappers (Radix, shadcn/ui); not re-exported publicly
 ```
 
-For generic components (e.g., F0Select), re-cast the export to preserve generic type parameters.
+Each component follows this structure:
 
-### Private Props (Public/Internal Split)
-
-Components with private properties use a two-layer pattern:
-
-1. Define `privateProps` const array listing private prop names
-2. Internal component receives all props (including private ones marked `@private` in JSDoc)
-3. Public component strips private props via reduce before forwarding
-
-```tsx
-const privateProps = ["className", "compact", "pressed"] as const;
-export type F0ExampleProps = Omit<InternalProps, (typeof privateProps)[number]>;
+```
+F0Example/
+  __tests__/       — test files (.test.tsx)
+  __stories__/     — Storybook files
+  index.tsx        — exports only, no logic
+  F0Example.tsx    — implementation
+  types.ts         — public types
+  internal-types.ts — private types (not exported)
+  hooks/           — component-specific hooks
+  components/      — internal subcomponents (not exported)
 ```
 
-### withSkeleton HOC
-
-Attach `.Skeleton` sub-component to components using `withSkeleton()`:
-
-```tsx
-export const F0Card = withSkeleton(F0CardBase, F0CardSkeleton);
-// Usage: <F0Card.Skeleton compact />
-```
-
-### UI Abstraction Layer
-
-Components must compose via `@/ui/` wrappers, never import Radix or third-party primitives directly. The `@/ui/` layer wraps Radix UI, shadcn/ui, and other primitives. Examples: `@/ui/Action`, `@/ui/Select`, `@/ui/Dialog/dialog`, `@/ui/Text`.
+## Component Architecture
 
 ### Naming
 
-- New component names must start with `F0` (e.g., `F0Button`)
-- Old components starting with `F1`, `One`, or without prefix should be renamed when touched
-- This does not apply to subcomponents or private components
+- Public components must start with `F0` (e.g., `F0Button`)
+- Old `F1`, `One`, or unprefixed names: rename when touched
+- Rule does not apply to subcomponents or private internals
+
+### Index Exports
+
+Three patterns for `index.tsx`:
+
+- **Simple re-export** — `export * from "./F0ComponentName"` — stable components
+- **Experimental wrapper** — `experimentalComponent("F0Name", Cmp)` from `@/lib/experimental` — components being stabilized
+- **Component() metadata** — `Component({ name, type }, Cmp)` — XRay tooling integration (`type`: `"layout"` | `"info"` | `"action"` | `"form"`)
+
+### forwardRef
+
+All ref-accepting components: use `forwardRef<El, Props>` with explicit generics, set `displayName`. For generic components (e.g., F0Select), re-cast export to preserve type parameters. See `f0-component-patterns` skill for examples.
+
+### Private Props (Public/Internal Split)
+
+Components with internal-only props use a two-layer pattern: define `privateProps` const array, derive public type with `Omit`, strip private props via reduce in the public wrapper. See `f0-component-patterns` skill for full example.
+
+### withSkeleton HOC
+
+Attach `.Skeleton` via `withSkeleton(F0CardBase, F0CardSkeleton)` — enables `<F0Card.Skeleton />` usage.
+
+### UI Abstraction Layer
+
+Never import Radix or third-party primitives directly. Always use `@/ui/` wrappers (e.g., `@/ui/Action`, `@/ui/Select`, `@/ui/Dialog/dialog`).
 
 ### Imports and Exports
 
-- **Never** import entire React via `import * as React from "react"` — import only what you use
-- Use **named exports** for all components — no default exports
-- Implement `'use client'` directive only when necessary
-- Ensure components in `components/` or `experimental/` are exported in `exports.ts`
-- Components in `src/ui/` must **not** be re-exported
+- Never `import * as React from "react"` — import only what you use
+- Named exports only — no default exports
+- `'use client'` directive only when necessary
+- Components in `components/` must be exported in `exports.ts`
+- `src/ui/` components must **not** be re-exported publicly
 
 ## Component Props
 
-- Props must have clear, functional names (e.g., `only-icon` not `hide-icon` + `hide-label`)
-- Avoid `className` on public components (can be a private prop)
-- For union types, use const arrays and export both array and type:
+- Clear, functional names (e.g., `onlyIcon` not `hideIcon` + `hideLabel`)
+- No `className` on public components (use as a private prop if needed)
+- Union type props: use exported const arrays — `export const sizes = [...] as const; export type Size = (typeof sizes)[number]`
+- `DataAttributes` from `@/global.types` for `data-*` prop support
+- Default values set inline in destructuring (not `defaultProps`)
+- Discriminated unions for mutually exclusive prop combinations
 
-```ts
-export const colors = ["a", "b", "c"] as const;
-export type Color = (typeof colors)[number];
-```
+## Context and State
 
-- Use `DataAttributes` intersection type from `@/global.types` for `data-*` prop support
-- Set default prop values inline during destructuring (not `defaultProps`)
-- Use discriminated unions for mutually exclusive prop combinations
-- Use `Omit` + intersection to derive public props from internal types
+- **Required context**: `createContext<T | null>(null)` + hook throws if null
+- **Optional with fallback**: hook returns default via `??`
+- **Dual hooks**: `useX()` (throws) + `useXOptional()` (returns null) when both cases exist
+- **Controlled/uncontrolled**: use the `useControllable` hook — do not manually sync state via `useEffect`
+- **Event naming**: props use `on` prefix (`onClick`), internal handlers use `handle` prefix (`handleClick`), always invoke callbacks with optional chaining (`props.onClick?.(event)`)
 
-## Context and State Patterns
+See `f0-component-patterns` skill for code examples.
 
-### Context Initialization
+## TypeScript
 
-Use the appropriate pattern based on whether the context is required or optional:
-
-- **Required context** (most common): `createContext<T | null>(null)` + hook that throws if null
-- **Optional with defaults**: `createContext<T>(defaultValue)` — no guard needed in hook
-- **Optional with fallback**: `createContext<T | null>(null)` + hook returns fallback value via `??`
-- **Dual hooks**: provide both `useX()` (throws) and `useXOptional()` (returns null) when both use cases exist
-
-### Controlled vs. Uncontrolled Components
-
-Support both modes with `localValue` state synced from the prop via `useEffect`:
-
-```tsx
-const [localValue, setLocalValue] = useState(value);
-useEffect(() => {
-  setLocalValue(value);
-}, [value]);
-```
-
-Check `isControlled = value !== undefined` to determine behavior.
-
-### Event Naming
-
-- **Props (public API)**: always `on` prefix — `onClick`, `onChange`, `onClose`, `onOpenChange`
-- **Internal handlers**: always `handle` prefix — `handleClick`, `handleClose`
-- **Callback invocation**: always use optional chaining — `props.onClick?.(event)`
-
-## TypeScript Standards
-
-- Use **strict** TypeScript configuration
-- **Never** use `any` or `as any` — find the proper type
-- Prefer **interfaces** over types for public APIs
-- Use discriminated unions for complex state
+- Strict mode — `any` and `as any` are never acceptable
+- Prefer interfaces over types for public APIs
 - Export component prop interfaces
-- Implement proper generic constraints
-- Avoid type assertions unless absolutely necessary
-- Avoid cycle imports
+- No circular imports
 
-## Testing Standards
+## Testing
 
-### File Naming
-
-- Name test files `.test.tsx` or `.test.ts` — **never** `.spec.ts` or `.specs.ts`
-
-### Imports
-
-- Import Vitest methods explicitly: `import { describe, it, expect } from "vitest"`
-- Do **not** import `@testing-library/jest-dom`
-- Alias `zeroRender` as `render`: `import { zeroRender as render } from "@/testing/test-utils"`
-
-### Test Utilities
-
-- Use `zeroRender` from `@/testing/test-utils.tsx` instead of `render` from `@testing-library/react` — it provides mocks for context providers (I18n, L10n, DataCollectionStorage, UserPlatform) and disables Framer Motion animations
-- Use `zeroRenderHook` for testing hooks in isolation
-
-### Writing Tests
-
-- Use `vi.fn()` exclusively — never `jest.fn()`
-- Use `vi.hoisted()` when mock values need to be available before `vi.mock()` factory runs
-- Set up `userEvent` via `userEvent.setup()`, integrate with fake timers via `advanceTimers: vi.advanceTimersByTime`
-- Prefer query priority: `getByRole` > `getByText` > `getByLabelText` > `getByTestId`
-- No snapshot testing — use explicit assertions only
-- a11y automated testing via Storybook (axe-playwright), not in unit tests
-- Create helper functions for multi-step interactions (e.g., `openSelect()`, `openDropdown()`)
-- For deferred promise testing, store the resolver externally: `let resolve; const p = new Promise(r => { resolve = r })`
-
-### Test Coverage
-
-- Write Vitest unit tests for utilities, hooks, and components
-- Create Storybook stories for visual testing
-- Include accessibility tests using axe-playwright
-- Test component variants and edge cases
-- Avoid excessive mocking — test behavior, not internals
-- Always run tests to confirm changes
-- Coverage target: at least 80%
+- Test files: `.test.tsx` / `.test.ts` — never `.spec.ts`
+- Unit tests: use `f0-unit-testing` skill
+- Storybook interaction and a11y tests: use `f0-storybook-testing` skill
+- No snapshot tests — explicit assertions only
+- Coverage target: 80%
 
 ## Styling
 
-### Tailwind CSS
+- Tailwind CSS only — no CSS modules or CSS-in-JS
+- `cn()` from `@/lib/utils` for all className composition
+- CVA from `"cva"` (not `"class-variance-authority"`) for multi-variant components
+- Design tokens use `f1-` prefix: `text-f1-foreground`, `bg-f1-background`, `border-f1-border`, etc.
+- `focusRing()` from `@/lib/utils` on all focusable elements
+- Inline `style` only for truly dynamic values (hex colors, percentages)
 
-- Use Tailwind CSS with custom configuration — no CSS modules or CSS-in-JS
-- Inline `style` attributes only for truly dynamic values (hex colors, background images)
-- Follow mobile-first responsive design
-- Utilize container queries (`@container` + `@xs:`, `@md:` breakpoints) where appropriate
-- Use shadcn/ui components as base primitives (avoid modifications unless necessary)
-
-### cn() Utility
-
-Use `cn()` from `@/lib/utils` for all className composition (wraps `clsx` + `twMerge`):
-
-- Boolean conditions: `cn("base", isActive && "active-class")`
-- Ternary: `cn(size === "sm" ? "p-2" : "p-4")`
-- Combined with CVA: `cn(variants({ size }), "extra-class")`
-- Combined with `focusRing()`: `cn("base-class", focusRing())`
-
-### CVA (Class Variance Authority)
-
-Import from `"cva"` (not `"class-variance-authority"`). Use for multi-variant components:
-
-- Define with `cva({ base, variants, defaultVariants })` — use `compoundVariants` for variant interactions
-- Extract prop types: `type Props = VariantProps<typeof myVariants>`
-- Compose variant maps via spread: `variants: { ...sizeVariants, ...colorVariants }`
-
-### Design Tokens
-
-All design tokens use the `f1-` prefix in Tailwind classes:
-
-- **Foreground**: `text-f1-foreground`, `text-f1-foreground-secondary`, `-info`, `-warning`, `-critical`, `-positive`, `-disabled`
-- **Background**: `bg-f1-background`, `bg-f1-background-secondary`, `-tertiary`, `-info`, `-warning`, `-critical`, `-positive`, `-selected`
-- **Border**: `border-f1-border`, `border-f1-border-secondary`, `-hover`, `-selected`, `-critical`
-- **Icons**: `text-f1-icon`, `text-f1-icon-secondary`, `-bold`, `-critical`, `-info`
-- **Focus ring**: `ring-f1-special-ring`
-
-### focusRing() Utility
-
-Use `focusRing()` from `@/lib/utils` for standardized focus indicators on all focusable elements. It applies `focus-visible:ring-1 focus-visible:ring-f1-special-ring`. Accepts optional extra classes: `focusRing("focus-visible:ring-inset")`.
-
-### Animation Strategy
-
-- CSS transitions (`transition-colors`, `transition-all`) for simple interactions
-- Framer Motion for complex animations: `AnimatePresence` + `motion.div` for enter/exit, `motion.create(Component)` for wrapping existing components
-- `tailwindcss-animate` for common animation patterns
-- Always check `useReducedMotion()` from `@/lib/a11y` — set Framer Motion `duration: 0` when true
-- Tests disable animations globally via `MotionGlobalConfig.skipAnimations = true`
+See `f0-component-patterns` skill for CVA, container query, and animation code examples.
 
 ## i18n
 
-- Built-in via `useI18n` hook from `@/lib/providers/i18n`
-- Hook returns both direct property access and a `t()` function for dot-notation keys with `{{placeholder}}` interpolation
-- Variable naming: `const i18n = useI18n()` or `const { t, ...i18n } = useI18n()` when both access patterns are needed
-- `defaultTranslations` is the full English translation object (`as const`) — used as fallback in tests
-- `TranslationsType` provides type-safe translation overrides via `TranslationShape<>`
-- Translation keys: camelCase, domain-namespaced (e.g., `actions.save`, `filters.clearAll`), use `one`/`other` sub-keys for plurals
-- Fallback: missing keys log `console.warn` and return the key string
+- `useI18n()` from `@/lib/providers/i18n` — returns direct property access and `t()` for dot-notation keys with `{{placeholder}}` interpolation
+- Translation keys: camelCase, domain-namespaced (`actions.save`), `one`/`other` sub-keys for plurals
+- Missing keys: log `console.warn` and return the key string
+
+See `f0-component-patterns` skill for `TranslationsType`, `defaultTranslations`, and pluralization examples.
 
 ## Accessibility
 
-- Use `focusRing()` from `@/lib/utils` on all focusable elements
-- Use `useReducedMotion()` from `@/lib/a11y` for all animated components — set `duration: 0` when true
-- Use `sr-only` class for visually hidden text (e.g., icon-only buttons must have `<span className="sr-only">{label}</span>`)
-- Use `aria-busy="true"` + `aria-live="polite"` on loading/skeleton states
-- For div-based interactive elements, handle `Enter` and `Space` keys in `onKeyDown` and set `tabIndex={0}` + `role`
-- Delegate complex widget a11y (dialogs, selects, toggles) to Radix UI primitives via `@/ui/`
-- All interactive elements must be keyboard accessible
-- Maintain proper focus management
-- Test with screen readers
+- `focusRing()` on all focusable elements
+- `useReducedMotion()` from `@/lib/a11y` for animated components — set Framer Motion `duration: 0` when true
+- `sr-only` class for visually hidden text (icon-only buttons require `<span className="sr-only">{label}</span>`)
+- `aria-busy="true"` + `aria-live="polite"` on loading/skeleton states
+- Keyboard handling on custom interactive elements: `onKeyDown` for Enter/Space, `tabIndex={0}`, `role`
+- Delegate complex widgets (dialogs, selects, toggles) to Radix via `@/ui/`
+- Load the `a11y` skill for detailed WCAG patterns and decision trees
 
 ## Code Quality
 
-### Comments
-
-- Avoid comments that describe "what" — comments must answer "Why?"
-- Comments should be rare, highlighting only complex parts
-
-### Performance
-
-- Ensure proper cleanup in `useEffect` hooks (prevent memory leaks)
-- Use `React.memo`, `useMemo`, and `useCallback` appropriately
-- Avoid unnecessary re-renders
-- Implement code splitting where beneficial
-- Optimize bundle size with tree shaking
-
-### Error Handling
-
-- Use `console.warn()` for recoverable issues with fallback behavior (wrong prop combinations, unsupported values)
-- Use `throw new Error()` for unrecoverable programming errors (missing required props, context used outside provider)
-- Use `useTextFormatEnforcer()` from `@/lib/text` for validating text props
-- No error boundaries exist currently — implement where needed
-
-### Security
-
-- Validate user inputs in components
-- Sanitize data before rendering
-- Avoid `dangerouslySetInnerHTML` unless absolutely necessary
-
-## Dependencies
-
-### Core
-
-- React 18+ (functional components), TypeScript 5+ (strict), Vite
-
-### UI and Styling
-
-- Radix UI, shadcn/ui, Tailwind CSS, Framer Motion, Embla Carousel, Lucide React, SVGR
-
-### Forms and Validation
-
-- React Hook Form, Zod, @hookform/resolvers
-
-### Utilities
-
-- CVA (`cva` package), clsx, tailwind-merge, date-fns, usehooks-ts
-
-### Development Tools
-
-- Storybook, Vitest, Chromatic (visual regression)
+- Comments answer "Why?", not "What?" — keep them rare
+- `console.warn()` for recoverable issues (wrong prop combinations, unsupported values)
+- `throw new Error()` for unrecoverable errors (context used outside provider, missing required props)
+- `useTextFormatEnforcer()` from `@/lib/text` for validating text props
+- Clean up `useEffect` hooks to prevent memory leaks
 
 ## Available Commands
 
-All commands use `pnpm` and run from the `packages/react` directory:
+Run from `packages/react/`:
 
-### Development
-
-- `pnpm build` — Build the library and generate types
-
-### Testing
-
-- `pnpm vitest` — Run Vitest in watch mode
-- `pnpm vitest:ci` — Run Vitest once (CI mode)
-- `pnpm test-storybook` — Run all Storybook tests
-- `pnpm test-storybook -- filename` — Run a single Storybook test
-
-### Linting and Formatting
-
-- `pnpm lint` — Run lint checks
-- `pnpm lint-fix` — Auto-fix lint issues
-- `pnpm prettier:format` — Format code
-- `pnpm tsc` — Type-check TypeScript files
+```bash
+pnpm build          # build library and generate types
+pnpm vitest         # unit tests (watch)
+pnpm vitest:ci      # unit tests (CI, run once)
+pnpm test-storybook # Storybook interaction + a11y tests
+pnpm lint           # lint check
+pnpm lint-fix       # auto-fix lint issues
+pnpm tsc            # type-check
+```

@@ -15,7 +15,6 @@ Load this skill when you need to:
 - Modify an existing component's architecture
 - Implement context/state management patterns
 - Add styling with CVA, Tailwind, or Framer Motion
-- Write or fix tests
 - Add i18n support to a component
 
 ## Quick Reference
@@ -25,7 +24,7 @@ Load this skill when you need to:
 | Component architecture (privateProps, forwardRef, withSkeleton, index exports, `@/ui/` layer) | `references/component-architecture.md` |
 | Context initialization, controlled/uncontrolled, async onClick, event naming                  | `references/context-and-state.md`      |
 | CVA, cn(), focusRing(), container queries, Framer Motion, design tokens                       | `references/styling-and-animation.md`  |
-| zeroRender, userEvent, vi.hoisted(), helper functions, deferred promises                      | `references/testing-patterns.md`       |
+| Unit tests (zeroRender, vi.hoisted(), fake timers, deferred promises)                         | Load the `f0-unit-testing` skill       |
 | useI18n, defaultTranslations, TranslationsType, plurals, interpolation                        | `references/i18n-patterns.md`          |
 
 ## Key Rules

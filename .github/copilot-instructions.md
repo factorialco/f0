@@ -5,10 +5,11 @@ This is F0, Factorial's design system monorepo. It provides modular, reusable UI
 ## Monorepo Structure
 
 - `packages/core/` — Shared types, utilities, base Tailwind config
+- `packages/one/` — Factorial AI (One) components
 - `packages/react/` — React component library (primary package)
-- `packages/one/` — Factorial's AI (One) related components
-- `packages/react-native/` — Mobile component library (deprecated)
-- `packages/playground/` — Development testing ground (deprecated)
+- `packages/react-native/` — Mobile component library
+- `packages/playground/` — (deprecated)
+- `packages/react-native-playground/` — (deprecated)
 
 ## Key Conventions
 

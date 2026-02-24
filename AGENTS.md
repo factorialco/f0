@@ -10,40 +10,22 @@ F0 is Factorial's design system. It provides modular, reusable UI components for
 
 ### Key Principles
 
-- Write modular, reusable components following atomic design principles
-- Use TypeScript with strict type safety — `any` is never acceptable
-- Follow functional and declarative programming patterns
-- Implement comprehensive tests and ensure accessibility (a11y) compliance
-- Support both web and mobile platforms with consistent design patterns
-- All code and comments must be in English
-- Use `pnpm` as the package manager for all commands
+- TypeScript strict — `any` is never acceptable
+- All code and comments in English
+- Use `pnpm` as the package manager
 
 ### Monorepo Structure
 
 ```
 f0/
   packages/
-    core/           — Shared types, utilities, and base Tailwind configuration
-    react/          — Web component library (see packages/react/AGENTS.md)
-    react-native/   — Mobile component library (native implementations)
-    playground/     — Development testing ground
-    examples/       — Real-world usage examples and integration patterns
-  icons/            — Shared SVG icon assets
+    core/                    — Shared types, utilities, base Tailwind config
+    one/                     — Factorial AI (One) components
+    react/                   — Web component library (see packages/react/AGENTS.md)
+    react-native/            — Mobile component library
+    playground/              — (deprecated)
+    react-native-playground/ — (deprecated)
+  icons/                     — Shared SVG icon assets
 ```
 
-### Documentation Structure
-
-Each component should include:
-
-- `index.tsx` — Component entry point
-- `*.stories.tsx` — Storybook documentation and visual tests
-- `*.test.tsx` — Unit/integration tests (never `.spec.ts`)
-- `*.mdx` — Extended documentation (for complex components)
-
-### Build and Release
-
-- **Vite** for development and production builds
-- **Semantic versioning** for all releases
-- TypeScript declarations generated alongside builds
-- CSS bundled with components
-- Tree-shaking optimized output
+For `packages/react/` conventions, see `packages/react/AGENTS.md`.

@@ -9,9 +9,10 @@ Creates `.stories.tsx` files for F0 components. For MDX docs (the Docs tab), use
 
 ## Quick Reference
 
-| Need                                                                  | See                            |
-| --------------------------------------------------------------------- | ------------------------------ |
-| Meta definition, tags, argTypes, Snapshot, decorators, play functions | `references/story-patterns.md` |
+| Need                                                                  | See                                   |
+| --------------------------------------------------------------------- | ------------------------------------- |
+| Meta definition, tags, argTypes, Snapshot, decorators, play functions | `references/story-patterns.md`        |
+| Play functions, portal queries, step(), a11y configuration            | Load the `f0-storybook-testing` skill |
 
 ## Key Rules
 
