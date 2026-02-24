@@ -384,14 +384,16 @@ export const EmbeddedWithLoading: Story = {
 export const WithOneSwitchCustomTooltip: Story = {
   args: {
     module: defaultModule,
-    oneSwitchTooltip: "This is a custom tooltip",
+    oneSwitchTooltip: {
+      whenEnabled: "This is a custom tooltip",
+    },
   },
 }
 
 export const WithOneSwitchTooltipAlwaysVisible: Story = {
   args: {
     module: defaultModule,
-    oneSwitchTooltip: "Ask me anything",
+    oneSwitchTooltip: { whenEnabled: "Ask me anything" },
     oneSwitchAutoOpen: true,
   },
 }
