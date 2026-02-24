@@ -1,5 +1,6 @@
 import { AgentState } from '@livekit/components-react';
 import { AIMessage } from '@copilotkit/shared';
+import { AlertAvatarProps as AlertAvatarProps_2 } from './F0AvatarAlert';
 import { AlertTagCellValue } from '../../../ui/value-display/types/alertTag';
 import { AlertTagCellValue as AlertTagCellValue_2 } from './types/alertTag';
 import { AmountCellValue } from '../../../ui/value-display/types/amount';
@@ -8,10 +9,15 @@ import { AnchorHTMLAttributes } from 'react';
 import { AriaAttributes } from 'react';
 import { AssistantMessageProps } from '@copilotkit/react-ui';
 import { AutoFill as AutoFill_2 } from 'react';
+import { AvatarBadge as AvatarBadge_2 } from '../F0Avatar';
+import { AvatarFileSize as AvatarFileSize_2 } from './types';
 import { AvatarListCellValue } from '../../../ui/value-display/types/avatarList';
 import { AvatarListCellValue as AvatarListCellValue_2 } from './types/avatarList';
 import * as AvatarPrimitive from '@radix-ui/react-avatar';
+import { AvatarProps } from './F0Avatar';
 import { AvatarProps as AvatarProps_2 } from '@radix-ui/react-avatar';
+import { BarSeriesCellValue } from './types/barSeries';
+import { BaseAvatarProps as BaseAvatarProps_2 } from '../internal/BaseAvatar';
 import { baseColors } from '@factorialco/f0-core';
 import { BigNumberProps as BigNumberProps_2 } from './types';
 import { BlockContentExtraProps } from './blocks/BlockContent';
@@ -35,13 +41,27 @@ import { DateFilterOptions } from './DateFilter/DateFilter';
 import { default as default_2 } from 'react';
 import { DotTagCellValue } from '../../../ui/value-display/types/dotTag';
 import { DotTagCellValue as DotTagCellValue_2 } from './types/dotTag';
+import { F0AvatarCompanyProps as F0AvatarCompanyProps_2 } from './types';
+import { F0AvatarDateProps } from './F0AvatarDate';
+import { F0AvatarEmojiProps as F0AvatarEmojiProps_2 } from './F0AvatarEmoji';
+import { F0AvatarIconProps as F0AvatarIconProps_2 } from './F0AvatarIcon';
+import { F0AvatarListProps as F0AvatarListProps_2 } from './types';
+import { F0AvatarPersonProps as F0AvatarPersonProps_2 } from './types';
+import { F0AvatarTeamProps as F0AvatarTeamProps_2 } from './F0AvatarTeam';
 import { F0DialogProps } from './F0Dialog';
 import { F0DrawerProps } from './F0Drawer';
 import { F0GridStackProps as F0GridStackProps_2 } from './F0GridStack';
-import { F0SelectProps as F0SelectProps_2 } from './types';
+import { F0TagBalanceProps } from './types';
+import { F0TagCompanyProps } from './types';
+import { F0TagListProps } from './types';
+import { F0TagPersonProps as F0TagPersonProps_2 } from './types';
+import { F0TagRawProps } from './types';
+import { F0TagStatusProps } from './types';
+import { F0TagTeamProps } from './types';
 import { f1Colors } from '@factorialco/f0-core';
 import { FileCellValue } from '../../../ui/value-display/types/file';
 import { FileCellValue as FileCellValue_2 } from './types/file';
+import { FileDef as FileDef_2 } from './types';
 import { FolderCellValue } from '../../../ui/value-display/types/folder';
 import { FolderCellValue as FolderCellValue_2 } from './types/folder';
 import { ForwardedRef } from 'react';
@@ -52,6 +72,7 @@ import { GroupGridProps as GroupGridProps_2 } from './groups/GroupGrid';
 import { GroupGridWidget as GroupGridWidget_2 } from './groups/GroupGrid';
 import { GroupLinearProps } from './groups/GroupLinear';
 import { GroupMasonryProps } from './groups/GroupMasonry';
+import { HourDistributionCellValue } from './types/hourDistribution';
 import { HTMLAttributeAnchorTarget } from 'react';
 import { HTMLAttributes } from 'react';
 import { IconCellValue } from './types/icon';
@@ -81,6 +102,7 @@ import { PieChartProps } from './PieChart';
 import { PopoverContentProps } from '@radix-ui/react-popover';
 import { ProgressBarCellValue } from '../../../ui/value-display/types/progressBar';
 import { ProgressBarCellValue as ProgressBarCellValue_2 } from './types/progressBar';
+import { Props as Props_2 } from './types';
 import * as React_2 from 'react';
 import { ReactElement } from 'react';
 import { ReactNode } from 'react';
@@ -97,6 +119,8 @@ import { TagCellValue } from '../../../ui/value-display/types/tag';
 import { TagCellValue as TagCellValue_2 } from './types/tag';
 import { TagListCellValue } from '../../../ui/value-display/types/tagList';
 import { TagListCellValue as TagListCellValue_2 } from './types/tagList';
+import { TagType as TagType_2 } from './types';
+import { TagVariant as TagVariant_2 } from './F0Tag';
 import { TeamCellValue } from '../../../ui/value-display/types/team';
 import { TeamCellValue as TeamCellValue_2 } from './types/team';
 import { TextCellValue } from '../../../ui/value-display/types/text';
@@ -104,6 +128,11 @@ import { TextCellValue as TextCellValue_2 } from './types/text';
 import { TrackReferenceOrPlaceholder } from '@livekit/components-react';
 import { ValueDisplayRendererContext } from '../../../ui/value-display';
 import { VariantProps } from 'cva';
+import { WithDataTestIdReturnType as WithDataTestIdReturnType_2 } from '../lib/data-testid';
+import { WithDataTestIdReturnType as WithDataTestIdReturnType_3 } from '../../lib/data-testid';
+import { WithDataTestIdReturnType as WithDataTestIdReturnType_4 } from '../../../lib/data-testid';
+import { WithDataTestIdReturnType as WithDataTestIdReturnType_5 } from '../../f0';
+import { WithDataTestIdReturnType as WithDataTestIdReturnType_6 } from '../../lib/data-testid/index.tsx';
 import { z } from 'zod';
 import { ZodEffects } from 'zod';
 import { ZodRawShape } from 'zod';
@@ -512,12 +541,12 @@ declare type AnimationVariantsOptions = {
     maxDelay?: number;
 };
 
-export declare const AreaChart: ForwardRefExoticComponent<Omit<LineChartPropsBase<LineChartConfig> & {
+export declare const AreaChart: WithDataTestIdReturnType_5<ForwardRefExoticComponent<Omit<LineChartPropsBase<LineChartConfig> & {
 lineType?: "step" | "linear" | "natural" | "monotoneX";
 marginTop?: number;
 canBeBlurred?: boolean;
 blurArea?: "l" | "r" | "lr";
-} & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>;
+} & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>>;
 
 declare type AsAllowedList = (typeof allTags)[number];
 
@@ -548,11 +577,6 @@ declare const avatarIconSizes: readonly ["sm", "md", "lg"];
 export declare type AvatarListSize = (typeof avatarListSizes)[number];
 
 declare const avatarListSizes: readonly ["xs", "sm", "md"];
-
-declare type AvatarProps = {
-    avatar: AvatarVariant_2;
-    size?: AvatarSize;
-};
 
 declare type AvatarSize = (typeof avatarSizes)[number];
 
@@ -594,9 +618,14 @@ export declare type AvatarVariants = (typeof avatarVariants)[number];
 
 export declare const avatarVariants: readonly ["person", "team", "company", "file", "flag"];
 
-export declare const Await: <T>({ resolve, fallback, error: errorFallback, children, }: AwaitProps<T>) => ReactNode;
+export declare const Await: AwaitGeneric;
 
-declare type AwaitProps<T> = {
+/**
+ * Generic component type so <Await resolve={value}> correctly types children as (value: T) => ReactNode.
+ */
+declare type AwaitGeneric = <T>(props: AwaitProps<T> & WithDataTestIdProps) => ReactNode;
+
+export declare type AwaitProps<T> = {
     resolve: Promise<T> | T;
     fallback: ReactNode;
     error?: ReactNode;
@@ -633,7 +662,7 @@ declare type BannerAction = {
     icon?: IconType;
 };
 
-export declare const BarChart: ForwardRefExoticComponent<Omit<ChartPropsBase<ChartConfig> & {
+export declare const BarChart: WithDataTestIdReturnType_5<ForwardRefExoticComponent<Omit<ChartPropsBase<ChartConfig> & {
 type?: "simple" | "stacked" | "stacked-by-sign";
 label?: boolean;
 legend?: boolean;
@@ -645,7 +674,7 @@ values: {
 [x: string]: number;
 };
 }) => void) | undefined;
-} & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>;
+} & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>>;
 
 declare type BaseAction = {
     label: string;
@@ -856,16 +885,16 @@ declare const boxVariants: (props?: ({
     overflowX?: "hidden" | "auto" | "scroll" | "visible" | undefined;
     overflowY?: "hidden" | "auto" | "scroll" | "visible" | undefined;
     borderColor?: "info" | "bold" | "default" | "secondary" | "critical" | "warning" | "positive" | "promote" | "selected" | "critical-bold" | "info-bold" | "warning-bold" | "positive-bold" | "selected-bold" | undefined;
-    border?: "default" | "none" | "thick" | undefined;
-    borderTop?: "default" | "none" | "thick" | undefined;
-    borderBottom?: "default" | "none" | "thick" | undefined;
-    borderLeft?: "default" | "none" | "thick" | undefined;
-    borderRight?: "default" | "none" | "thick" | undefined;
-    borderRadius?: "lg" | "md" | "sm" | "xs" | "none" | "xl" | "2xl" | "full" | "2xs" | undefined;
-    borderRadiusTopLeft?: "lg" | "md" | "sm" | "xs" | "none" | "xl" | "2xl" | "full" | "2xs" | undefined;
-    borderRadiusTopRight?: "lg" | "md" | "sm" | "xs" | "none" | "xl" | "2xl" | "full" | "2xs" | undefined;
-    borderRadiusBottomLeft?: "lg" | "md" | "sm" | "xs" | "none" | "xl" | "2xl" | "full" | "2xs" | undefined;
-    borderRadiusBottomRight?: "lg" | "md" | "sm" | "xs" | "none" | "xl" | "2xl" | "full" | "2xs" | undefined;
+    border?: "none" | "default" | "thick" | undefined;
+    borderTop?: "none" | "default" | "thick" | undefined;
+    borderBottom?: "none" | "default" | "thick" | undefined;
+    borderLeft?: "none" | "default" | "thick" | undefined;
+    borderRight?: "none" | "default" | "thick" | undefined;
+    borderRadius?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xl" | "full" | "2xs" | undefined;
+    borderRadiusTopLeft?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xl" | "full" | "2xs" | undefined;
+    borderRadiusTopRight?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xl" | "full" | "2xs" | undefined;
+    borderRadiusBottomLeft?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xl" | "full" | "2xs" | undefined;
+    borderRadiusBottomRight?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xl" | "full" | "2xs" | undefined;
     borderStyle?: "none" | "dashed" | "dotted" | "double" | "solid" | undefined;
     background?: "info" | "bold" | "secondary" | "inverse" | "critical" | "accent" | "warning" | "positive" | "promote" | "selected" | "critical-bold" | "transparent" | "overlay" | "primary" | "tertiary" | "inverse-secondary" | "accent-bold" | "info-bold" | "warning-bold" | "positive-bold" | "selected-secondary" | "selected-bold" | undefined;
     width?: SizeToken_2 | undefined;
@@ -879,28 +908,28 @@ declare const boxVariants: (props?: ({
     colSpan?: "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "10" | "11" | "12" | "full" | undefined;
     colStart?: "1" | "2" | "3" | "4" | "auto" | "5" | "6" | "7" | "8" | "9" | "10" | "11" | "12" | "13" | undefined;
     rowSpan?: "1" | "2" | "3" | "4" | "5" | "6" | "full" | undefined;
-    gap?: "lg" | "md" | "sm" | "xs" | "none" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
+    gap?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
     alignItems?: "center" | "end" | "baseline" | "start" | "stretch" | undefined;
     justifyContent?: "center" | "end" | "start" | "between" | "stretch" | "around" | "evenly" | undefined;
     flexDirection?: "row" | "column" | "column-reverse" | "row-reverse" | undefined;
     flexWrap?: "wrap" | "nowrap" | "wrap-reverse" | undefined;
     grow?: boolean | undefined;
     shrink?: boolean | undefined;
-    margin?: "lg" | "md" | "sm" | "xs" | "none" | "auto" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
-    marginX?: "lg" | "md" | "sm" | "xs" | "none" | "auto" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
-    marginY?: "lg" | "md" | "sm" | "xs" | "none" | "auto" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
-    marginTop?: "lg" | "md" | "sm" | "xs" | "none" | "auto" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
-    marginBottom?: "lg" | "md" | "sm" | "xs" | "none" | "auto" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
-    marginLeft?: "lg" | "md" | "sm" | "xs" | "none" | "auto" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
-    marginRight?: "lg" | "md" | "sm" | "xs" | "none" | "auto" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
-    padding?: "lg" | "md" | "sm" | "xs" | "none" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
-    paddingX?: "lg" | "md" | "sm" | "xs" | "none" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
-    paddingY?: "lg" | "md" | "sm" | "xs" | "none" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
-    paddingTop?: "lg" | "md" | "sm" | "xs" | "none" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
-    paddingBottom?: "lg" | "md" | "sm" | "xs" | "none" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
-    paddingLeft?: "lg" | "md" | "sm" | "xs" | "none" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
-    paddingRight?: "lg" | "md" | "sm" | "xs" | "none" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
-    display?: "block" | "grid" | "none" | "inline" | "flex" | "inline-flex" | undefined;
+    margin?: "none" | "lg" | "md" | "sm" | "xs" | "auto" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
+    marginX?: "none" | "lg" | "md" | "sm" | "xs" | "auto" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
+    marginY?: "none" | "lg" | "md" | "sm" | "xs" | "auto" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
+    marginTop?: "none" | "lg" | "md" | "sm" | "xs" | "auto" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
+    marginBottom?: "none" | "lg" | "md" | "sm" | "xs" | "auto" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
+    marginLeft?: "none" | "lg" | "md" | "sm" | "xs" | "auto" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
+    marginRight?: "none" | "lg" | "md" | "sm" | "xs" | "auto" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
+    padding?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
+    paddingX?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
+    paddingY?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
+    paddingTop?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
+    paddingBottom?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
+    paddingLeft?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
+    paddingRight?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
+    display?: "block" | "inline" | "flex" | "grid" | "inline-flex" | "none" | undefined;
     position?: "fixed" | "sticky" | "absolute" | "relative" | "static" | undefined;
 } & ({
     class?: ClassValue;
@@ -1298,7 +1327,7 @@ declare type CardVisualizationOptions<T, _Filters extends FiltersDefinition, _So
     compact?: boolean;
 };
 
-export declare const CategoryBarChart: ForwardRefExoticComponent<Omit<CategoryBarProps & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>;
+export declare const CategoryBarChart: WithDataTestIdReturnType_5<ForwardRefExoticComponent<Omit<CategoryBarProps & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>>;
 
 export declare const ChatSpinner: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
 
@@ -1468,7 +1497,7 @@ declare const columnWidths: {
     readonly fit: 1;
 };
 
-export declare const ComboChart: ForwardRefExoticComponent<Omit<ChartPropsBase<ChartConfig> & {
+export declare const ComboChart: WithDataTestIdReturnType_5<ForwardRefExoticComponent<Omit<ChartPropsBase<ChartConfig> & {
 label?: boolean;
 legend?: boolean;
 showValueUnderLabel?: boolean;
@@ -1499,7 +1528,7 @@ values: {
 [x: string]: number;
 };
 }) => void) | undefined;
-} & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>;
+} & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>>;
 
 /**
  * Common condition available for all field types
@@ -1626,7 +1655,7 @@ declare interface CustomFieldRenderPropsBase {
     required?: boolean;
 }
 
-export declare const Dashboard: ComponentType<DashboardProps_2> & PageLayoutGroupComponent_2;
+export declare const Dashboard: WithDataTestIdReturnType_3<ComponentType<DashboardProps_2> & PageLayoutGroupComponent_2>;
 
 export declare type DashboardProps = GroupGridProps<DashboardWidget>;
 
@@ -2985,7 +3014,7 @@ export declare interface F0AiCollapsibleMessageProps {
  */
 export declare const F0AiFullscreenChat: () => JSX_2.Element | null;
 
-export declare const F0Alert: ({ title, description, action, link, icon, variant, }: F0AlertProps) => JSX_2.Element;
+export declare const F0Alert: WithDataTestIdReturnType_3<({ title, description, action, link, icon, variant, }: F0AlertProps) => JSX_2.Element>;
 
 export declare interface F0AlertProps {
     title: string;
@@ -3034,14 +3063,14 @@ declare const F0AuraVoiceAnimationVariants: (props?: ({
     className?: ClassValue;
 })) | undefined) => string;
 
-export declare const F0Avatar: ({ avatar, size }: AvatarProps) => ReactNode;
+export declare const F0Avatar: WithDataTestIdReturnType_4<({ avatar, size, dataTestId, }: AvatarProps) => ReactNode>;
 
-export declare const F0AvatarAlert: ({ type, size, "aria-label": ariaLabel, "aria-labelledby": ariaLabelledby, }: AlertAvatarProps) => JSX_2.Element;
+export declare const F0AvatarAlert: WithDataTestIdReturnType_4<({ type, size, "aria-label": ariaLabel, "aria-labelledby": ariaLabelledby, }: AlertAvatarProps_2) => JSX_2.Element>;
 
-export declare const F0AvatarCompany: {
-    ({ name, src, size, "aria-label": ariaLabel, "aria-labelledby": ariaLabelledby, badge, }: F0AvatarCompanyProps): JSX_2.Element;
-    displayName: string;
-};
+export declare const F0AvatarCompany: WithDataTestIdReturnType_4<    {
+({ name, src, size, "aria-label": ariaLabel, "aria-labelledby": ariaLabelledby, badge, }: F0AvatarCompanyProps_2): JSX_2.Element;
+displayName: string;
+}>;
 
 export declare type F0AvatarCompanyProps = {
     name: string;
@@ -3050,31 +3079,27 @@ export declare type F0AvatarCompanyProps = {
     badge?: AvatarBadge;
 } & Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">;
 
-export declare const F0AvatarDate: ({ date, "aria-label": ariaLabel, "aria-labelledby": ariaLabelledby, }: F0AvatarDateProps) => JSX_2.Element;
+export declare const F0AvatarDate: WithDataTestIdReturnType_4<({ date, "aria-label": ariaLabel, "aria-labelledby": ariaLabelledby, }: F0AvatarDateProps) => JSX_2.Element>;
 
-declare type F0AvatarDateProps = {
-    date: Date;
-} & Partial<Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">>;
-
-export declare const F0AvatarEmoji: {
-    ({ emoji, size, "aria-label": ariaLabel, "aria-labelledby": ariaLabelledby, }: F0AvatarEmojiProps): JSX_2.Element;
-    displayName: string;
-};
+export declare const F0AvatarEmoji: WithDataTestIdReturnType_4<    {
+({ emoji, size, "aria-label": ariaLabel, "aria-labelledby": ariaLabelledby, }: F0AvatarEmojiProps_2): JSX_2.Element;
+displayName: string;
+}>;
 
 export declare type F0AvatarEmojiProps = {
     emoji: string;
     size?: (typeof avatarEmojiSizes)[number];
 } & Partial<Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">>;
 
-export declare const F0AvatarFile: ForwardRefExoticComponent<Omit<Omit<Omit<AvatarProps_2 & RefAttributes<HTMLSpanElement>, "ref"> & {
+export declare const F0AvatarFile: WithDataTestIdReturnType_4<ForwardRefExoticComponent<Omit<Omit<Omit<AvatarProps_2 & RefAttributes<HTMLSpanElement>, "ref"> & {
 size?: internalAvatarSizes_2[number];
 type?: internalAvatarTypes_2[number];
 color?: internalAvatarColors_2[number];
 } & RefAttributes<HTMLSpanElement>, "ref">, "type" | "size"> & {
-file: FileDef;
-size?: AvatarFileSize;
-badge?: AvatarBadge;
-} & Pick<BaseAvatarProps, "aria-label" | "aria-labelledby"> & RefAttributes<HTMLSpanElement>>;
+file: FileDef_2;
+size?: AvatarFileSize_2;
+badge?: AvatarBadge_2;
+} & Pick<BaseAvatarProps_2, "aria-label" | "aria-labelledby"> & RefAttributes<HTMLSpanElement>>>;
 
 export declare type F0AvatarFileProps = Omit<React.ComponentPropsWithoutRef<typeof Avatar>, "type" | "size"> & {
     file: FileDef;
@@ -3088,20 +3113,20 @@ declare type F0AvatarFlagProps = {
     badge?: AvatarBadge;
 } & Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">;
 
-export declare const F0AvatarIcon: {
-    ({ icon, size, "aria-label": ariaLabel, "aria-labelledby": ariaLabelledby, }: F0AvatarIconProps): JSX_2.Element;
-    displayName: string;
-};
+export declare const F0AvatarIcon: WithDataTestIdReturnType_4<    {
+({ icon, size, "aria-label": ariaLabel, "aria-labelledby": ariaLabelledby, }: F0AvatarIconProps_2): JSX_2.Element;
+displayName: string;
+}>;
 
 export declare type F0AvatarIconProps = {
     icon: IconType;
     size?: (typeof avatarIconSizes)[number];
 } & Partial<Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">>;
 
-export declare const F0AvatarList: {
-    ({ avatars, size, type, noTooltip, remainingCount: initialRemainingCount, max, }: F0AvatarListProps): JSX_2.Element;
-    displayName: string;
-};
+export declare const F0AvatarList: WithDataTestIdReturnType_4<    {
+({ avatars, size, type, noTooltip, remainingCount: initialRemainingCount, max, }: F0AvatarListProps_2): JSX_2.Element;
+displayName: string;
+}>;
 
 export declare type F0AvatarListProps = {
     /**
@@ -3149,22 +3174,24 @@ declare type F0AvatarListPropsAvatars = {
     avatars: (Omit<FileAvatarVariant, "type"> & Record<string, unknown>)[];
 };
 
+export declare const F0AvatarModule: WithDataTestIdReturnType_4<typeof F0AvatarModule_2>;
+
 /**
  * Module avatar
  * @description A component that displays a module avatar
  * @experimental
  * @returns
  */
-export declare function F0AvatarModule({ size, module, ...props }: F0AvatarModuleProps): JSX_2.Element;
+declare function F0AvatarModule_2({ size, module, ...props }: F0AvatarModuleProps): JSX_2.Element;
 
 export declare type F0AvatarModuleProps = VariantProps<typeof moduleAvatarVariants> & {
     module: ModuleId;
 } & Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">;
 
-export declare const F0AvatarPerson: {
-    ({ firstName, lastName, src, size, "aria-label": ariaLabel, "aria-labelledby": ariaLabelledby, badge, deactivated, }: F0AvatarPersonProps): JSX_2.Element;
-    displayName: string;
-};
+export declare const F0AvatarPerson: WithDataTestIdReturnType_4<    {
+({ firstName, lastName, src, size, "aria-label": ariaLabel, "aria-labelledby": ariaLabelledby, badge, deactivated, }: F0AvatarPersonProps_2): JSX_2.Element;
+displayName: string;
+}>;
 
 export declare type F0AvatarPersonProps = {
     /**
@@ -3193,10 +3220,10 @@ export declare type F0AvatarPersonProps = {
     deactivated?: boolean;
 } & Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">;
 
-export declare const F0AvatarTeam: {
-    ({ name, src, size, "aria-label": ariaLabel, "aria-labelledby": ariaLabelledby, badge, }: F0AvatarTeamProps): JSX_2.Element;
-    displayName: string;
-};
+export declare const F0AvatarTeam: WithDataTestIdReturnType_4<    {
+({ name, src, size, "aria-label": ariaLabel, "aria-labelledby": ariaLabelledby, badge, }: F0AvatarTeamProps_2): JSX_2.Element;
+displayName: string;
+}>;
 
 export declare type F0AvatarTeamProps = {
     /**
@@ -3319,12 +3346,12 @@ declare type F0BaseFieldRenderIfFunction = (context: {
  */
 declare type F0BaseFieldRenderIfProp = RenderIfCondition | F0BaseFieldRenderIfFunction;
 
-export declare const F0BigNumber: {
-    ({ label, ...props }: BigNumberProps_2): JSX_2.Element;
-    displayName: string;
+export declare const F0BigNumber: WithDataTestIdReturnType_3<    {
+({ label, ...props }: BigNumberProps_2): JSX_2.Element;
+displayName: string;
 } & {
-    Skeleton: () => JSX_2.Element;
-};
+Skeleton: () => JSX_2.Element;
+}>;
 
 /**
  * Config for boolean fields - checkbox
@@ -3358,11 +3385,11 @@ export declare interface F0BoxProps extends Omit<React.ComponentPropsWithoutRef<
     xl?: ResponsiveStyleProps;
 }
 
-export declare const F0Button: ForwardRefExoticComponent<Omit<ButtonInternalProps, "style" | "className" | "block" | "variant" | "pressed" | "append" | "compact" | "noAutoTooltip" | "noTitle"> & {
+export declare const F0Button: WithDataTestIdReturnType_3<ForwardRefExoticComponent<Omit<ButtonInternalProps, "style" | "className" | "block" | "variant" | "pressed" | "append" | "compact" | "noAutoTooltip" | "noTitle"> & {
 variant?: Exclude<ButtonInternalProps["variant"], "ai">;
-} & RefAttributes<HTMLAnchorElement | HTMLButtonElement>>;
+} & RefAttributes<HTMLAnchorElement | HTMLButtonElement>>>;
 
-export declare const F0ButtonDropdown: ({ onClick, value, ...props }: F0ButtonDropdownProps) => JSX_2.Element | undefined;
+export declare const F0ButtonDropdown: WithDataTestIdReturnType_6<({ onClick, value, ...props }: F0ButtonDropdownProps) => JSX_2.Element | undefined>;
 
 export declare type F0ButtonDropdownProps<T = string> = {
     /**
@@ -3410,7 +3437,7 @@ export declare type F0ButtonProps = Omit<ButtonInternalProps, (typeof privatePro
     variant?: Exclude<ButtonInternalProps["variant"], "ai">;
 };
 
-export declare const F0ButtonToggle: ForwardRefExoticComponent<F0ButtonToggleProps & RefAttributes<HTMLButtonElement>>;
+export declare const F0ButtonToggle: WithDataTestIdReturnType_3<ForwardRefExoticComponent<F0ButtonToggleProps & RefAttributes<HTMLButtonElement>>>;
 
 declare type F0ButtonToggleInternalProps = {
     /**
@@ -3454,18 +3481,18 @@ declare type F0ButtonToggleInternalProps = {
 
 export declare type F0ButtonToggleProps = Omit<F0ButtonToggleInternalProps, (typeof privateProps_2)[number]>;
 
-export declare const F0Card: ForwardRefExoticComponent<F0CardProps & RefAttributes<HTMLDivElement>> & {
-    Skeleton: ({ compact }: {
-        compact?: boolean;
-    }) => JSX_2.Element;
-};
+export declare const F0Card: WithDataTestIdReturnType_3<ForwardRefExoticComponent<F0CardProps & RefAttributes<HTMLDivElement>> & {
+Skeleton: ({ compact }: {
+compact?: boolean;
+}) => JSX_2.Element;
+}>;
 
 export declare type F0CardProps = Omit<CardInternalProps, (typeof privateProps_3)[number]>;
 
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const F0Checkbox: typeof _F0Checkbox;
+export declare const F0Checkbox: WithDataTestIdReturnType_3<typeof _F0Checkbox>;
 
 declare function _F0Checkbox({ title, onCheckedChange, id, disabled, indeterminate, checked, value, hideLabel, presentational, stopPropagation, name, required, ...rest }: CheckboxProps): JSX_2.Element;
 
@@ -3488,10 +3515,10 @@ export declare type F0CheckboxField = F0BaseField & {
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const F0ChipList: {
-    ({ chips, max, remainingCount: initialRemainingCount, layout, }: Props): JSX_2.Element;
-    displayName: string;
-};
+export declare const F0ChipList: WithDataTestIdReturnType_3<    {
+({ chips, max, remainingCount: initialRemainingCount, layout, }: Props): JSX_2.Element;
+displayName: string;
+}>;
 
 /**
  * F0 config options specific to custom fields
@@ -3698,7 +3725,7 @@ declare type F0DateOrDateTimeFieldConfig = F0DateFieldConfig | F0TimeFieldConfig
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const F0DatePicker: typeof F0DatePicker_2;
+export declare const F0DatePicker: WithDataTestIdReturnType_3<typeof F0DatePicker_2>;
 
 declare function F0DatePicker_2({ onChange, value, presets, granularities, minDate, maxDate, open, ...inputProps }: F0DatePickerProps): JSX_2.Element;
 
@@ -3793,10 +3820,10 @@ export declare type F0DateTimeFieldConfig = F0BaseConfig & F0DateTimeConfig & {
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const F0Dialog: {
-    (props: F0DialogProps): JSX_2.Element;
-    displayName: string;
-};
+export declare const F0Dialog: WithDataTestIdReturnType_4<    {
+(props: F0DialogProps): JSX_2.Element;
+displayName: string;
+}>;
 
 export declare type F0DialogAction = DialogAlikeAction;
 
@@ -3847,58 +3874,9 @@ export declare type F0FieldConfig<T extends string | number = string | number, R
  */
 export declare type F0FieldType = "text" | "number" | "textarea" | "select" | "checkbox" | "switch" | "date" | "time" | "datetime" | "daterange" | "richtext" | "custom";
 
-/**
- * A standalone dual-pane filter picker content component.
- *
- * This component renders the filter picker interface (left panel with filter list,
- * right panel with filter content) without any popover wrapper, allowing it to be
- * embedded directly in modals, sidebars, or other containers.
- *
- * Features:
- * - Left panel showing filter categories with search
- * - Right panel showing filter options for the selected filter
- * - Multi-select with checkboxes for "in" type filters
- * - Support for search, date, number, and custom filter types
- * - Select All and Clear actions
- *
- * @template Filters - The type defining the structure of available filters
- *
- * @example
- * ```tsx
- * // Embed directly in a modal or page
- * <F0FilterPickerContent
- *   filters={{
- *     department: {
- *       type: "in",
- *       label: "Department",
- *       options: {
- *         options: [
- *           { value: "engineering", label: "Engineering" },
- *           { value: "marketing", label: "Marketing" },
- *         ]
- *       }
- *     },
- *     location: {
- *       type: "in",
- *       label: "Location",
- *       options: {
- *         options: [
- *           { value: "nyc", label: "New York" },
- *           { value: "sf", label: "San Francisco" },
- *         ]
- *       }
- *     }
- *   }}
- *   value={selectedFilters}
- *   onChange={setSelectedFilters}
- * />
- * ```
- */
-export declare function F0FilterPickerContent<Filters extends FiltersDefinition>({ filters, value, onChange, height, width, className, showApplyButton, applyButtonLabel, }: F0FilterPickerContentProps<Filters>): JSX_2.Element | null;
+export declare const F0FilterPickerContent: F0FilterPickerContentGeneric;
 
-export declare namespace F0FilterPickerContent {
-    var displayName: string;
-}
+declare type F0FilterPickerContentGeneric = <Filters extends FiltersDefinition>(props: F0FilterPickerContentProps<Filters> & WithDataTestIdProps) => ReactElement | null;
 
 /**
  * Props for the F0FilterPickerContent component.
@@ -3916,6 +3894,13 @@ export declare interface F0FilterPickerContentProps<Filters extends FiltersDefin
     /** Width of the content panel */
     width?: number;
 }
+
+/**
+ * Public props for F0FilterPickerContent (includes dataTestId from withDataTestId).
+ * Use this when typing props that include the optional dataTestId attribute.
+ * @template Filters - The type defining the structure of available filters
+ */
+export declare type F0FilterPickerContentPublicProps<Filters extends FiltersDefinition> = F0FilterPickerContentProps<Filters> & WithDataTestIdProps;
 
 /**
  * @experimental This is an experimental component, use it at your own risk
@@ -4227,10 +4212,10 @@ export declare type F0FormSubmitResult = {
     errors?: Record<string, string>;
 };
 
-export declare const F0GridStack: {
-    ({ options, widgets, onChange, className, }: F0GridStackProps_2): JSX_2.Element;
-    displayName: string;
-};
+export declare const F0GridStack: WithDataTestIdReturnType_4<    {
+({ options, widgets, onChange, className, }: F0GridStackProps_2): JSX_2.Element;
+displayName: string;
+}>;
 
 export declare interface F0GridStackProps {
     options: GridStackReactOptions;
@@ -4239,7 +4224,7 @@ export declare interface F0GridStackProps {
     className?: string;
 }
 
-export declare const F0Heading: ForwardRefExoticComponent<Omit<F0HeadingProps, "ref"> & RefAttributes<HTMLElement>>;
+export declare const F0Heading: WithDataTestIdReturnType_3<ForwardRefExoticComponent<Omit<F0HeadingProps, "ref"> & RefAttributes<HTMLElement>>>;
 
 export declare type F0HeadingProps = Omit<TextProps, "className" | "variant" | "as"> & {
     variant?: (typeof _allowedVariants)[number];
@@ -4274,7 +4259,7 @@ export declare type F0HILActionConfirmationProps = {
     onCancel: () => void;
 };
 
-export declare const F0Icon: ForwardRefExoticComponent<Omit<Omit<F0IconProps, "ref"> & RefAttributes<SVGSVGElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>;
+export declare const F0Icon: WithDataTestIdReturnType_3<ForwardRefExoticComponent<Omit<Omit<F0IconProps, "ref"> & RefAttributes<SVGSVGElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>>;
 
 export declare interface F0IconProps extends SVGProps<SVGSVGElement>, VariantProps<typeof iconVariants> {
     icon: IconType;
@@ -4283,11 +4268,11 @@ export declare interface F0IconProps extends SVGProps<SVGSVGElement>, VariantPro
     color?: "default" | "currentColor" | `#${string}` | Lowercase<NestedKeyOf<typeof f1Colors.icon>>;
 }
 
-export declare const F0Link: ForwardRefExoticComponent<Omit<ActionLinkProps, "href" | "variant"> & {
+export declare const F0Link: WithDataTestIdReturnType_3<ForwardRefExoticComponent<Omit<ActionLinkProps, "href" | "variant"> & {
 variant?: ActionLinkVariant;
 stopPropagation?: boolean;
 href?: string;
-} & RefAttributes<HTMLAnchorElement>>;
+} & RefAttributes<HTMLAnchorElement>>>;
 
 export declare type F0LinkProps = Omit<ActionLinkProps, "variant" | "href"> & {
     variant?: ActionLinkVariant;
@@ -4392,12 +4377,20 @@ export declare interface F0OneIconProps extends SVGProps<SVGSVGElement> {
     size?: "xs" | "sm" | "md" | "lg";
 }
 
-export declare const F0OneSwitch: ({ className, disabled }: F0OneSwitchProps) => JSX_2.Element | null;
+export declare const F0OneSwitch: ({ className, disabled, tooltip, autoOpen, }: F0OneSwitchProps) => JSX_2.Element | null;
 
 /**
  * Props for the F0OneSwitch component
  */
-export declare type F0OneSwitchProps = React.ComponentPropsWithoutRef<typeof SwitchPrimitive.Root>;
+export declare type F0OneSwitchProps = React.ComponentPropsWithoutRef<typeof SwitchPrimitive.Root> & {
+    /** Custom text shown in the tooltip when the chat is closed */
+    tooltip?: {
+        whenDisabled?: string;
+        whenEnabled?: string;
+    };
+    /** When true, the tooltip is opened automatically for 3 seconds*/
+    autoOpen?: boolean;
+};
 
 /**
  * A record mapping section IDs to their individual schemas.
@@ -4446,6 +4439,7 @@ export declare const F0Provider: React.FC<{
     isDev?: boolean;
     showExperimentalWarnings?: boolean;
     dataCollectionStorageHandler?: DataCollectionStorageHandler;
+    renderDataTestIdAttribute?: boolean;
 }>;
 
 /**
@@ -4511,9 +4505,7 @@ export declare interface F0SectionConfig {
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const F0Select: <T extends string = string, R = unknown>(props: F0SelectProps_2<T, R> & {
-    ref?: React.Ref<HTMLButtonElement>;
-}) => React.ReactElement;
+export declare const F0Select: F0SelectGeneric;
 
 /**
  * Base props shared across all F0Select variants
@@ -4608,6 +4600,12 @@ export declare type F0SelectField = F0BaseField & F0SelectConfig & {
     /** Conditional rendering based on another field's value */
     renderIf?: SelectFieldRenderIf;
 };
+
+/**
+ * Generic component type so consumers can use <F0Select<T, R> />.
+ * Preserves dataTestId and F0SelectProps<T, R>.
+ */
+declare type F0SelectGeneric = <T extends string, R = unknown>(props: F0SelectProps<T, R> & WithDataTestIdProps) => ReactElement | null;
 
 export declare type F0SelectItemObject<T, R = unknown> = {
     type?: "item";
@@ -4759,7 +4757,7 @@ export declare type F0SwitchField = F0BaseField & {
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const F0TableOfContentPopover: typeof F0TableOfContentPopover_2;
+export declare const F0TableOfContentPopover: WithDataTestIdReturnType_3<typeof F0TableOfContentPopover_2>;
 
 /**
  * Internal implementation of the TableOfContentPopover component.
@@ -4782,20 +4780,20 @@ declare interface F0TableOfContentPopoverProps extends Omit<TOCProps, "sortable"
     variant?: TableOfContentPopoverVariant;
 }
 
-export declare const F0TagAlert: ForwardRefExoticComponent<TagAlertProps & RefAttributes<HTMLDivElement>>;
+export declare const F0TagAlert: WithDataTestIdReturnType_4<ForwardRefExoticComponent<Props_2 & RefAttributes<HTMLDivElement>>>;
 
-export declare const F0TagBalance: ForwardRefExoticComponent<TagBalanceProps & RefAttributes<HTMLDivElement>>;
+export declare const F0TagBalance: WithDataTestIdReturnType_4<ForwardRefExoticComponent<F0TagBalanceProps & RefAttributes<HTMLDivElement>>>;
 
-export declare const F0TagCompany: ForwardRefExoticComponent<TagCompanyProps & RefAttributes<HTMLDivElement>>;
+export declare const F0TagCompany: WithDataTestIdReturnType_4<ForwardRefExoticComponent<F0TagCompanyProps & RefAttributes<HTMLDivElement>>>;
 
-export declare const F0TagDot: ForwardRefExoticComponent<TagDotProps & RefAttributes<HTMLDivElement>>;
+export declare const F0TagDot: WithDataTestIdReturnType_4<ForwardRefExoticComponent<Props_2 & RefAttributes<HTMLDivElement>>>;
 
-export declare const F0TagList: {
-    <T extends TagType>({ type, tags, max, remainingCount: initialRemainingCount, }: TagListProps<T>): JSX_2.Element;
-    displayName: string;
-};
+export declare const F0TagList: WithDataTestIdReturnType_4<    {
+<T extends TagType_2>({ type, tags, max, remainingCount: initialRemainingCount, }: F0TagListProps<T>): JSX_2.Element;
+displayName: string;
+}>;
 
-export declare const F0TagPerson: ForwardRefExoticComponent<F0TagPersonProps & RefAttributes<HTMLDivElement>>;
+export declare const F0TagPerson: WithDataTestIdReturnType_4<ForwardRefExoticComponent<F0TagPersonProps_2 & RefAttributes<HTMLDivElement>>>;
 
 export declare type F0TagPersonProps = {
     src?: string;
@@ -4803,13 +4801,13 @@ export declare type F0TagPersonProps = {
     deactivated?: boolean;
 };
 
-export declare const F0TagRaw: ForwardRefExoticComponent<TagRawProps & RefAttributes<HTMLDivElement>>;
+export declare const F0TagRaw: WithDataTestIdReturnType_4<ForwardRefExoticComponent<F0TagRawProps & RefAttributes<HTMLDivElement>>>;
 
-export declare const F0TagStatus: ForwardRefExoticComponent<TagStatusProps & RefAttributes<HTMLDivElement>>;
+export declare const F0TagStatus: WithDataTestIdReturnType_4<ForwardRefExoticComponent<F0TagStatusProps & RefAttributes<HTMLDivElement>>>;
 
-export declare const F0TagTeam: ForwardRefExoticComponent<TagTeamProps & RefAttributes<HTMLDivElement>>;
+export declare const F0TagTeam: WithDataTestIdReturnType_4<ForwardRefExoticComponent<F0TagTeamProps & RefAttributes<HTMLDivElement>>>;
 
-export declare const F0Text: ForwardRefExoticComponent<Omit<F0TextProps, "ref"> & RefAttributes<HTMLElement>>;
+export declare const F0Text: WithDataTestIdReturnType_3<ForwardRefExoticComponent<Omit<F0TextProps, "ref"> & RefAttributes<HTMLElement>>>;
 
 /**
  * F0 config options specific to textarea fields
@@ -5365,10 +5363,10 @@ declare const headingTags: readonly ["h1", "h2", "h3", "h4", "h5", "h6"];
 
 declare type heightType = "xxs" | "xs" | "sm" | "md" | "lg" | "xl" | "2xl" | "3xl" | "full" | "auto";
 
-export declare const HomeLayout: ForwardRefExoticComponent<Omit<{
+export declare const HomeLayout: WithDataTestIdReturnType_2<ForwardRefExoticComponent<Omit<{
 widgets?: ReactNode[];
 children?: ReactNode;
-} & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>;
+} & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>>;
 
 export declare function Hr({ ...props }: React.HTMLAttributes<HTMLHRElement>): JSX_2.Element;
 
@@ -5689,18 +5687,18 @@ declare type Lane<Filters extends FiltersDefinition> = {
 };
 
 export declare const Layout: {
-    Page: ForwardRefExoticComponent<PageProps & RefAttributes<HTMLDivElement>>;
-    Block: ForwardRefExoticComponent<BlockProps & RefAttributes<HTMLDivElement>>;
-    BlockContent: ComponentType<BlockProps & BlockContentExtraProps> & PageLayoutBlockComponent_2;
-    Group: ForwardRefExoticComponent<GroupLinearProps & RefAttributes<HTMLDivElement>>;
-    GroupGrid: {
-        <Widget extends GroupGridWidget_2, Deps extends Record<string, unknown> = Record<string, unknown>>({ widgets, editMode, onChange, WidgetWrapper, main, deps: dependencyValues, }: GroupGridProps_2<Widget, Deps>): JSX_2.Element;
-        displayName: string;
-    };
-    GroupMasonry: {
-        ({ blocks, sortable: _sortable, onSort: _onSort, main, }: GroupMasonryProps): JSX_2.Element;
-        displayName: string;
-    };
+    Page: WithDataTestIdReturnType_3<ForwardRefExoticComponent<PageProps & RefAttributes<HTMLDivElement>>>;
+    Block: WithDataTestIdReturnType_3<ForwardRefExoticComponent<BlockProps & RefAttributes<HTMLDivElement>>>;
+    BlockContent: WithDataTestIdReturnType_3<ComponentType<BlockProps & BlockContentExtraProps> & PageLayoutBlockComponent_2>;
+    Group: WithDataTestIdReturnType_3<ForwardRefExoticComponent<GroupLinearProps & RefAttributes<HTMLDivElement>>>;
+    GroupGrid: WithDataTestIdReturnType_3<    {
+    <Widget extends GroupGridWidget_2, Deps extends Record<string, unknown> = Record<string, unknown>>({ widgets, editMode, onChange, WidgetWrapper, main, deps: dependencyValues, }: GroupGridProps_2<Widget, Deps>): JSX_2.Element;
+    displayName: string;
+    }>;
+    GroupMasonry: WithDataTestIdReturnType_3<    {
+    ({ blocks, sortable: _sortable, onSort: _onSort, main, }: GroupMasonryProps): JSX_2.Element;
+    displayName: string;
+    }>;
 };
 
 declare interface LayoutProps {
@@ -5728,9 +5726,9 @@ declare const levels: readonly ["info", "warning", "critical", "positive"];
 
 export declare function Li({ children, ...props }: React.HTMLAttributes<HTMLLIElement>): JSX_2.Element;
 
-export declare const LineChart: ForwardRefExoticComponent<Omit<LineChartPropsBase<LineChartConfig> & {
+export declare const LineChart: WithDataTestIdReturnType_5<ForwardRefExoticComponent<Omit<LineChartPropsBase<LineChartConfig> & {
 lineType?: "natural" | "linear";
-} & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>;
+} & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>>;
 
 declare type LinkContextValue = {
     currentPath?: string;
@@ -6124,13 +6122,13 @@ action: BulkAction,
 ...Parameters<OnSelectItemsCallback<Record, Filters>>
 ]) => void;
 
+export declare const OneFilterPicker: OneFilterPickerGeneric;
+
 /**
- * OneFiltersPicker component to use as a single component
+ * Generic component type so consumers can use <OneFilterPicker<Definition> />.
+ * Preserves dataTestId and OneFilterPickerRootProps<Definition>.
  */
-export declare const OneFilterPicker: {
-    <Definition extends FiltersDefinition>(props: OneFilterPickerRootProps<Definition>): JSX_2.Element;
-    displayName: string;
-};
+declare type OneFilterPickerGeneric = <Definition extends FiltersDefinition>(props: OneFilterPickerRootProps<Definition> & WithDataTestIdProps) => ReactElement | null;
 
 /**
  * Props for the Filters component.
@@ -6292,7 +6290,7 @@ export declare type PersonAvatarVariant = Extract<AvatarVariant, {
 
 declare type PersonTagProps = ComponentProps<typeof F0TagPerson>;
 
-export declare const PieChart: ForwardRefExoticComponent<Omit<PieChartProps & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>;
+export declare const PieChart: WithDataTestIdReturnType_5<ForwardRefExoticComponent<Omit<PieChartProps & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>>;
 
 declare type PopupSize = "sm" | "md" | "lg";
 
@@ -6352,7 +6350,7 @@ declare const privateProps_2: readonly ["withBorder"];
 
 declare const privateProps_3: readonly ["forceVerticalMetadata", "disableOverlayLink"];
 
-export declare const ProductBlankslate: ForwardRefExoticComponent<ProductBlankslateProps & RefAttributes<HTMLDivElement>>;
+export declare const ProductBlankslate: WithDataTestIdReturnType_4<ForwardRefExoticComponent<ProductBlankslateProps & RefAttributes<HTMLDivElement>>>;
 
 declare type ProductBlankslateProps = {
     title: string;
@@ -6373,7 +6371,9 @@ declare type ProductBlankslateProps = {
     };
 };
 
-export declare function ProductCard({ title, description, onClick, onClose, isVisible, dismissable, trackVisibility, type, ...props }: ProductCardProps): false | JSX_2.Element;
+export declare const ProductCard: WithDataTestIdReturnType_4<typeof _ProductCard>;
+
+declare function _ProductCard({ title, description, onClick, onClose, isVisible, dismissable, trackVisibility, type, ...props }: ProductCardProps): false | JSX_2.Element;
 
 export declare type ProductCardProps = {
     title: string;
@@ -6391,7 +6391,9 @@ export declare type ProductCardProps = {
     type?: never;
 });
 
-export declare function ProductModal({ isOpen, onClose, title, image, benefits, errorMessage, successMessage, loadingState, nextSteps, closeLabel, primaryAction, modalTitle, modalModule, secondaryAction, portalContainer, tag, promoTag, showResponseDialog, }: ProductModalProps): JSX_2.Element;
+export declare const ProductModal: WithDataTestIdReturnType_4<typeof _ProductModal>;
+
+declare function _ProductModal({ isOpen, onClose, title, image, benefits, errorMessage, successMessage, loadingState, nextSteps, closeLabel, primaryAction, modalTitle, modalModule, secondaryAction, portalContainer, tag, promoTag, showResponseDialog, }: ProductModalProps): JSX_2.Element;
 
 declare type ProductModalProps = {
     isOpen: boolean;
@@ -6436,7 +6438,9 @@ declare type ProductModalProps = {
     showResponseDialog?: boolean;
 };
 
-export declare function ProductWidget({ mediaUrl, title, description, onClose, dismissible, width, trackVisibility, actions, showConfirmation, }: ProductWidgetProps): JSX_2.Element;
+export declare const ProductWidget: WithDataTestIdReturnType_4<typeof _ProductWidget>;
+
+declare function _ProductWidget({ mediaUrl, title, description, onClose, dismissible, width, trackVisibility, actions, showConfirmation, }: ProductWidgetProps): JSX_2.Element;
 
 declare type ProductWidgetProps = {
     mediaUrl?: string;
@@ -6450,12 +6454,12 @@ declare type ProductWidgetProps = {
     showConfirmation?: boolean;
 };
 
-export declare const ProgressBarChart: ForwardRefExoticComponent<Omit<ChartPropsBase<ChartConfig_2> & {
+export declare const ProgressBarChart: WithDataTestIdReturnType_5<ForwardRefExoticComponent<Omit<ChartPropsBase<ChartConfig_2> & {
 value: number;
 max?: number;
 label?: string;
 color?: string;
-} & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>;
+} & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>>;
 
 /**
  * Utility type for handling both Promise and Observable return types.
@@ -6537,7 +6541,7 @@ declare type Props = {
     layout?: "fill" | "compact";
 };
 
-declare type Props_2 = {
+declare type Props_3 = {
     count: number;
     list?: TagCounterItem[];
 };
@@ -6869,11 +6873,17 @@ export declare type SpacingToken = "none" | "xs" | "sm" | "md" | "lg" | "xl" | "
 
 declare type SrcProps = Pick<ImgHTMLAttributes<HTMLImageElement>, "src" | "srcSet" | "sizes">;
 
-export declare const StandardLayout: ForwardRefExoticComponent<Omit<StandardLayoutProps & HTMLAttributes<HTMLElement> & RefAttributes<HTMLElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>;
+export declare const StandardLayout: WithDataTestIdReturnType_2<ForwardRefExoticComponent<Omit<StandardLayoutProps & HTMLAttributes<HTMLElement> & RefAttributes<HTMLElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>>;
 
 export declare interface StandardLayoutProps extends VariantProps<typeof layoutVariants> {
     children?: default_2.ReactNode;
 }
+
+/**
+ * Keys on T that are not part of Function, so we preserve static members (Skeleton, displayName, etc.)
+ * without bringing in a second call signature that would confuse ComponentProps<> inference.
+ */
+declare type StaticMembersOf<T> = Pick<T, Exclude<keyof T, keyof Function>>;
 
 export declare type Status = (typeof statuses_2)[number];
 
@@ -7024,9 +7034,9 @@ declare type TableVisualizationSettings = {
     hidden?: ColId[];
 };
 
-export declare const Tag: ({ tag }: {
-    tag: TagVariant;
-}) => ReactNode;
+export declare const Tag: WithDataTestIdReturnType_4<({ tag }: {
+tag: TagVariant_2;
+}) => ReactNode>;
 
 export declare type TagAlertProps<Text extends string = string> = {
     text: Text extends "" ? never : Text;
@@ -7069,7 +7079,7 @@ export declare interface TagCompanyProps {
 }
 
 export declare const TagCounter: {
-    ({ count, list }: Props_2): JSX_2.Element;
+    ({ count, list }: Props_3): JSX_2.Element;
     displayName: string;
 };
 
@@ -7332,7 +7342,7 @@ export declare type TrendConfig = {
     invertStatus?: boolean;
 };
 
-export declare const TwoColumnLayout: ForwardRefExoticComponent<Omit<TwoColumnLayoutProps & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>;
+export declare const TwoColumnLayout: WithDataTestIdReturnType_2<ForwardRefExoticComponent<Omit<TwoColumnLayoutProps & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>>;
 
 export declare interface TwoColumnLayoutProps {
     children: ReactNode;
@@ -7360,12 +7370,14 @@ declare type UpsellAction = BaseAction & {
     showConfirmation: boolean;
 };
 
-export declare const UpsellingBanner: ForwardRefExoticComponent<Omit<BaseBannerProps, "children" | "primaryAction" | "secondaryAction"> & {
+export declare const UpsellingBanner: WithDataTestIdReturnType_4<ForwardRefExoticComponent<Omit<BaseBannerProps, "children" | "primaryAction" | "secondaryAction"> & {
 primaryAction?: DefaultAction | PromoteAction;
 secondaryAction?: DefaultAction | PromoteAction;
-} & RefAttributes<HTMLDivElement>>;
+} & RefAttributes<HTMLDivElement>>>;
 
-export declare function UpsellingButton({ label, showIcon, onRequest, showConfirmation, loading: externalLoading, errorMessage, successMessage, loadingState, nextSteps, closeLabel, variant, onModalStateChange, portalContainer, ...props }: UpsellingButtonProps): JSX_2.Element;
+export declare const UpsellingButton: WithDataTestIdReturnType_4<typeof _UpsellingButton>;
+
+declare function _UpsellingButton({ label, showIcon, onRequest, showConfirmation, loading: externalLoading, errorMessage, successMessage, loadingState, nextSteps, closeLabel, variant, onModalStateChange, portalContainer, ...props }: UpsellingButtonProps): JSX_2.Element;
 
 export declare interface UpsellingButtonProps extends Omit<F0ButtonProps, "icon"> {
     variant?: "promote" | "outlinePromote";
@@ -7415,7 +7427,9 @@ export declare interface UpsellingButtonProps extends Omit<F0ButtonProps, "icon"
     portalContainer?: HTMLElement | null;
 }
 
-export declare function UpsellingPopover({ isOpen, setIsOpen, label, variant, size, showIcon, side, align, icon, mediaUrl, title, description, width, trackVisibility, actions, onClick, hideLabel, }: UpsellingPopoverProps): JSX_2.Element;
+export declare const UpsellingPopover: WithDataTestIdReturnType_4<typeof _UpsellingPopover>;
+
+declare function _UpsellingPopover({ isOpen, setIsOpen, label, variant, size, showIcon, side, align, icon, mediaUrl, title, description, width, trackVisibility, actions, onClick, hideLabel, }: UpsellingPopoverProps): JSX_2.Element;
 
 declare type UpsellingPopoverProps = {
     isOpen: boolean;
@@ -7437,7 +7451,7 @@ declare type UpsellingPopoverProps = {
     hideLabel?: boolean;
 };
 
-export declare const UpsellRequestResponseDialog: ForwardRefExoticComponent<UpsellRequestResponseDialogProps & RefAttributes<HTMLDivElement>>;
+export declare const UpsellRequestResponseDialog: WithDataTestIdReturnType_4<ForwardRefExoticComponent<UpsellRequestResponseDialogProps & RefAttributes<HTMLDivElement>>>;
 
 declare interface UpsellRequestResponseDialogProps {
     open: boolean;
@@ -7910,6 +7924,8 @@ declare const valueDisplayRenderers: {
     readonly person: (args: PersonCellValue_2, meta: ValueDisplayRendererContext_2) => JSX_2.Element;
     readonly percentage: (args: PercentageCellValue, meta: ValueDisplayRendererContext_2) => JSX_2.Element | null;
     readonly progressBar: (args: ProgressBarCellValue_2, _meta: ValueDisplayRendererContext_2) => JSX_2.Element | null;
+    readonly barSeries: (args: BarSeriesCellValue, meta: ValueDisplayRendererContext_2) => JSX_2.Element;
+    readonly hourDistribution: (args: HourDistributionCellValue, meta: ValueDisplayRendererContext_2) => JSX_2.Element;
     readonly company: (args: CompanyCellValue_2, meta: ValueDisplayRendererContext_2) => JSX_2.Element;
     readonly team: (args: TeamCellValue_2, meta: ValueDisplayRendererContext_2) => JSX_2.Element;
     readonly tag: (args: TagCellValue_2) => JSX_2.Element;
@@ -7925,11 +7941,11 @@ declare type ValueDisplayVisualizationType = "table" | "card" | "list" | (string
 
 export declare type Variant = (typeof statuses)[number];
 
-export declare const VerticalBarChart: ForwardRefExoticComponent<Omit<ChartPropsBase<ChartConfig_2> & {
+export declare const VerticalBarChart: WithDataTestIdReturnType_5<ForwardRefExoticComponent<Omit<ChartPropsBase<ChartConfig_2> & {
 label?: boolean;
 showRatio?: boolean;
 valueFormatter?: (value: string | number | undefined) => string | number;
-} & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>;
+} & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>>;
 
 declare type VisualizacionTypeDefinition<Props, Settings = Record<string, never>> = {
     render: (props: Props) => JSX.Element;
@@ -7971,6 +7987,25 @@ export declare type WelcomeScreenSuggestion = {
     message: string;
     prompt?: string;
 };
+
+export declare const withDataTestId: <T extends default_2.ComponentType<any>>(component: T) => WithDataTestIdReturnType<T>;
+
+export declare type WithDataTestIdProps = {
+    dataTestId?: string;
+};
+
+/**
+ * Props type of a component wrapped with withDataTestId.
+ * Use when ComponentProps<typeof Component> inference fails (e.g. in Storybook stories).
+ */
+export declare type WithDataTestIdPropsOf<T extends default_2.ComponentType<unknown>> = default_2.ComponentProps<T> & WithDataTestIdProps;
+
+/**
+ * Return type has a single call signature with props = ComponentProps<T> & WithDataTestIdProps,
+ * so ComponentProps<Wrapped> and Storybook's Meta/StoryObj infer correctly.
+ * Static properties (e.g. F0Card.Skeleton) are preserved via StaticMembersOf<T>.
+ */
+export declare type WithDataTestIdReturnType<T extends default_2.ComponentType<unknown>> = default_2.ComponentType<WithDataTestIdPropsOf<T>> & StaticMembersOf<T>;
 
 export declare type WithGroupId<RecordType> = RecordType & {
     [GROUP_ID_SYMBOL]: unknown | undefined;

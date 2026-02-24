@@ -974,12 +974,20 @@ export declare interface F0OneIconProps extends SVGProps<SVGSVGElement> {
     size?: "xs" | "sm" | "md" | "lg";
 }
 
-export declare const F0OneSwitch: ({ className, disabled }: F0OneSwitchProps) => JSX_2.Element | null;
+export declare const F0OneSwitch: ({ className, disabled, tooltip, autoOpen, }: F0OneSwitchProps) => JSX_2.Element | null;
 
 /**
  * Props for the F0OneSwitch component
  */
-export declare type F0OneSwitchProps = React.ComponentPropsWithoutRef<typeof SwitchPrimitive.Root>;
+export declare type F0OneSwitchProps = React.ComponentPropsWithoutRef<typeof SwitchPrimitive.Root> & {
+    /** Custom text shown in the tooltip when the chat is closed */
+    tooltip?: {
+        whenDisabled?: string;
+        whenEnabled?: string;
+    };
+    /** When true, the tooltip is opened automatically for 3 seconds*/
+    autoOpen?: boolean;
+};
 
 /**
  * Source object for message sources
