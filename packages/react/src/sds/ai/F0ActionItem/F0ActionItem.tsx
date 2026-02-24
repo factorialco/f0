@@ -1,10 +1,11 @@
 import { F0Icon } from "@/components/F0Icon"
+import { OneEllipsis } from "@/components/OneEllipsis"
 import OutlineCircle from "@/icons/animated/CheckCircleLine"
 import DottedCircle from "@/icons/app/DottedCircle"
 import { cn } from "@/lib/utils"
 
-import { ChatSpinner } from "./components/ChatSpinner"
 import "./styles.css"
+import { ChatSpinner } from "./components/ChatSpinner"
 import { F0ActionItemProps } from "./types"
 
 export const F0ActionItem = ({ title, status, inGroup }: F0ActionItemProps) => {
@@ -34,9 +35,11 @@ export const F0ActionItem = ({ title, status, inGroup }: F0ActionItemProps) => {
           />
         </div>
       )}
-      <p className={cn("text-pretty", status === "executing" && "shine-text")}>
+      <OneEllipsis
+        className={cn("text-pretty", status === "executing" && "shine-text")}
+      >
         {title}
-      </p>
+      </OneEllipsis>
     </div>
   )
 }

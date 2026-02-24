@@ -13,6 +13,7 @@ import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { ScrollArea } from "@/ui/scrollarea"
 
+import { F0ActionItem } from "../../F0ActionItem"
 import { F0Thinking as Thinking } from "../../F0Thinking"
 import { isAgentStateMessage } from "../internal-types"
 import { useAiChat } from "../providers/AiChatStateProvider"
@@ -68,7 +69,24 @@ const Messages = ({
   const showWelcomeBlock =
     messages.length === 0 && (greeting || initialMessages.length > 0)
 
-  const turns = useMemo(() => convertMessagesToTurns(messages), [messages])
+  // Filter out coagent state render placeholders injected by CopilotKit.
+  // These are empty assistant messages used for useCoAgentStateRender, which
+  // f0 does not use.  Keeping them would prevent the loading indicator from
+  // showing (the placeholder becomes the last message, masking the "last
+  // message is user" check).
+  const filteredMessages = useMemo(
+    () =>
+      messages.filter(
+        (m) =>
+          (m as Message & { name?: string }).name !== "coagent-state-render"
+      ),
+    [messages]
+  )
+
+  const turns = useMemo(
+    () => convertMessagesToTurns(filteredMessages),
+    [filteredMessages]
+  )
 
   // Scroll state
   const viewportRef = useRef<HTMLDivElement>(null)
@@ -150,12 +168,12 @@ const Messages = ({
     <>
       <div className="relative flex flex-1 flex-col overflow-hidden">
         <ScrollArea
-          className="flex-1 [&>div]:h-full [&>div>div]:h-full"
+          className="flex-1 [&>div>div]:h-full [&>div]:h-full"
           viewportRef={viewportRef}
         >
           <div
             ref={contentRef}
-            className="flex flex-col p-4 h-full items-center"
+            className="flex h-full flex-col items-center p-4"
           >
             <div
               className={cn(
@@ -208,6 +226,7 @@ const Messages = ({
                             ? message[message.length - 1]
                             : message
                         }
+                        messages={messages}
                         inProgress={inProgress}
                         index={index}
                         isCurrentMessage={isCurrentMessage}
@@ -220,6 +239,21 @@ const Messages = ({
                       />
                     )
                   })}
+                  {/* Loading indicator while waiting for the first assistant
+                      response.  Mirrors the official CopilotKit Messages
+                      component behaviour (show activity icon when the last
+                      message is from the user and the agent is running). */}
+                  {inProgress &&
+                    turnIndex === turns.length - 1 &&
+                    turnMessages.length > 0 &&
+                    !Array.isArray(turnMessages[turnMessages.length - 1]) &&
+                    (turnMessages[turnMessages.length - 1] as Message).role ===
+                      "user" && (
+                      <F0ActionItem
+                        title={translations.ai.thinking}
+                        status="executing"
+                      />
+                    )}
                 </div>
               ))}
               {interrupt}
@@ -336,11 +370,6 @@ export function convertMessagesToTurns(messages: Message[]): Turn[] {
     return []
   }
 
-  console.assert(
-    messages[0].role === "user",
-    "Invariant violation! Assistant message received before user message"
-  )
-
   const turns: Turn[] = []
   let thinkingGroup: Message[] | null = null
 
@@ -349,6 +378,14 @@ export function convertMessagesToTurns(messages: Message[]): Turn[] {
       turns.push([message])
       thinkingGroup = null
       continue
+    }
+
+    // Guard: if no user message has been seen yet, create an implicit turn.
+    // This can happen in v1.51+ when reset() does not abort the running agent
+    // and a stale assistant placeholder is the first message in the array.
+    if (turns.length === 0) {
+      turns.push([])
+      thinkingGroup = null
     }
 
     const currentTurn = turns[turns.length - 1]
@@ -365,11 +402,11 @@ export function convertMessagesToTurns(messages: Message[]): Turn[] {
       continue
     }
 
-    // Always merge thinking messages into a single group per turn, deduplicating consecutive identical content
+    // Always merge thinking messages into a single group per turn, deduplicating consecutive identical tool call args
     if (isThinkingMessage(message)) {
       if (thinkingGroup) {
         const prev = thinkingGroup[thinkingGroup.length - 1]
-        if (prev.content !== message.content) {
+        if (getThinkingKey(prev) !== getThinkingKey(message)) {
           thinkingGroup.push(message)
         }
       } else {
@@ -385,9 +422,27 @@ export function convertMessagesToTurns(messages: Message[]): Turn[] {
   return turns
 }
 
+/**
+ * Return a stable key for deduplicating consecutive thinking messages.
+ * In v1.51+ (AG-UI) the distinguishing text lives in the tool call arguments,
+ * not in message.content (which is empty for thinking-only messages).
+ */
+function getThinkingKey(message: Message): string {
+  if (message.role !== "assistant") return message.id
+  const call = message.toolCalls?.find(
+    (tc: { function: { name: string } }) =>
+      tc.function.name === "orchestratorThinking"
+  )
+  return call?.function.arguments ?? message.id
+}
+
 function isThinkingMessage(message: Message): boolean {
+  // A thinking message is an assistant message with orchestratorThinking
+  // tool calls and no text content. The backend uses a separate messageId
+  // for tool calls vs text, so thinking messages stay content-free.
   return (
     message.role === "assistant" &&
+    !message.content &&
     message.toolCalls?.some(
       (call) => call.function.name === "orchestratorThinking"
     ) === true

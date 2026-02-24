@@ -12,7 +12,6 @@ import { useI18n } from "@/lib/providers/i18n"
 import { Action } from "@/ui/Action"
 import { ButtonCopy } from "@/ui/ButtonCopy"
 
-import { F0ActionItem } from "../../F0ActionItem"
 import { f0MarkdownRenderers } from "../../F0MarkdownRenderers"
 import { useFeedbackModal, UserReaction } from "./FeedbackProvider"
 
@@ -24,19 +23,10 @@ export const AssistantMessage = ({
   onCopy,
 }: AssistantMessageProps) => {
   const content = message?.content || ""
-  const isThinkingTool =
-    message?.role === "assistant" &&
-    message.toolCalls?.find(
-      (tool) => tool.function.name === "orchestratorThinking"
-    )
 
-  const subComponent = message?.generativeUI?.(
-    isThinkingTool
-      ? {
-          status: isLoading ? "executing" : "completed",
-        }
-      : undefined
-  )
+  // In CopilotKit v1.51+ generativeUI is a no-arg closure that renders
+  // the action registered via useCopilotAction (e.g. orchestratorThinking).
+  const subComponent = message?.generativeUI?.() ?? null
   const isEmptyMessage = !content && !subComponent
 
   const translations = useI18n()
@@ -51,9 +41,6 @@ export const AssistantMessage = ({
 
   return (
     <div className="relative isolate flex w-full flex-col items-start justify-center gap-1">
-      {isLoading && !subComponent && (
-        <F0ActionItem title={translations.ai.thinking} status="executing" />
-      )}
       {message && (
         <>
           <div className="w-fit max-w-full [&>div]:flex [&>div]:flex-col [&>div]:gap-1">

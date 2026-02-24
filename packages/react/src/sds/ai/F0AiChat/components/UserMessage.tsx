@@ -3,6 +3,19 @@ import { useContext, useEffect, useRef } from "react"
 
 import { FullscreenChatContext } from "../index"
 
+function getTextContent(
+  content: string | Array<{ type: string; text?: string }> | undefined
+): string | undefined {
+  if (typeof content === "string") return content
+  if (Array.isArray(content)) {
+    return content
+      .filter((part) => part.type === "text" && part.text)
+      .map((part) => part.text)
+      .join("")
+  }
+  return undefined
+}
+
 export const UserMessage = ({ message, ImageRenderer }: UserMessageProps) => {
   const isImageMessage = message && "image" in message && message.image
   const ref = useRef<HTMLDivElement>(null)
@@ -27,7 +40,7 @@ export const UserMessage = ({ message, ImageRenderer }: UserMessageProps) => {
       <div className="copilotKitMessage copilotKitUserMessage">
         <ImageRenderer
           image={imageMessage.image!}
-          content={imageMessage.content}
+          content={getTextContent(imageMessage.content)}
         />
       </div>
     )
@@ -38,7 +51,7 @@ export const UserMessage = ({ message, ImageRenderer }: UserMessageProps) => {
       ref={ref}
       className="my-4 w-fit max-w-[min(90%,330px)] self-end whitespace-pre-wrap rounded-2xl border border-solid border-f1-border-secondary bg-f1-background-tertiary px-4 py-3 first:mt-0 last:mb-0"
     >
-      {message?.content}
+      {getTextContent(message?.content)}
     </div>
   )
 }

@@ -3,17 +3,23 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { type Message } from "@copilotkit/shared"
 
 import { F0Thinking } from ".."
-import { F0ActionItem } from "../../F0ActionItem"
 
-// Helper to create mock messages with generativeUI
-const createThinkingMessage = (
-  content: string,
-  status: "inProgress" | "executing" | "completed" = "completed"
-): Message => ({
+// Helper to create mock thinking messages with orchestratorThinking tool calls.
+// F0Thinking extracts the title from the tool call arguments directly.
+const createThinkingMessage = (content: string): Message => ({
   id: `msg-${Math.random().toString(36).substr(2, 9)}`,
   role: "assistant",
   content: "",
-  generativeUI: () => <F0ActionItem title={content} status={status} inGroup />,
+  toolCalls: [
+    {
+      id: `tc-${Math.random().toString(36).substr(2, 9)}`,
+      type: "function",
+      function: {
+        name: "orchestratorThinking",
+        arguments: JSON.stringify({ message: content }),
+      },
+    },
+  ],
 })
 
 const meta = {
@@ -80,9 +86,9 @@ export const SingleThought: Story = {
 export const InProgress: Story = {
   args: {
     messages: [
-      createThinkingMessage("Analyzing the request...", "completed"),
-      createThinkingMessage("Gathering relevant information...", "completed"),
-      createThinkingMessage("Formulating response...", "executing"),
+      createThinkingMessage("Analyzing the request..."),
+      createThinkingMessage("Gathering relevant information..."),
+      createThinkingMessage("Formulating response..."),
     ],
     isActive: true,
     inProgress: true,

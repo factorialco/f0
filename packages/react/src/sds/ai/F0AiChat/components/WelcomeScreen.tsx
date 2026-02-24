@@ -83,7 +83,7 @@ export const WelcomeScreen = ({
                 delay: 0.7,
               }}
             >
-              {message.content}
+              {typeof message.content === "string" ? message.content : ""}
             </motion.p>
           ))}
         </div>

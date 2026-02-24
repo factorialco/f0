@@ -171,7 +171,7 @@ describe("convertMessagesToTurn", () => {
     ).toStrictEqual(["user"])
   })
 
-  it("deduplicates consecutive thinking messages with identical content", () => {
+  it("deduplicates consecutive thinking messages with identical tool call args", () => {
     const messages: Message[] = [
       {
         id: "1",
@@ -189,8 +189,6 @@ describe("convertMessagesToTurn", () => {
 
     const thinkingGroup = turns[0][1] as Message[]
     expect(thinkingGroup).toHaveLength(2)
-    expect(thinkingGroup[0].content).toBe("same thought")
-    expect(thinkingGroup[1].content).toBe("different thought")
   })
 
   it("hoists agentState message above thinking tool calls if agentState comes between thinking calls", () => {
@@ -232,6 +230,51 @@ describe("convertMessagesToTurn", () => {
       turns[1].map((m) => (Array.isArray(m) ? "array" : m.role))
     ).toStrictEqual(["user"])
   })
+
+  it("does not crash when first message is not a user message", () => {
+    const messages: Message[] = [
+      {
+        id: "1",
+        role: "assistant",
+        content: "Stale placeholder",
+      },
+    ]
+    const turns = convertMessagesToTurns(messages)
+    expect(turns).toHaveLength(1)
+    expect(turns[0]).toHaveLength(1)
+  })
+
+  it("treats message with both text content and thinking tool calls as a regular message", () => {
+    const messages: Message[] = [
+      {
+        id: "1",
+        role: "user",
+        content: "Tell me my salary",
+      },
+      createThinkingMessage("Looking up salary..."),
+      {
+        id: "3",
+        role: "assistant",
+        content: "Your salary is $100,000",
+        toolCalls: [
+          {
+            id: randomUUID(),
+            type: "function",
+            function: {
+              name: "orchestratorThinking",
+              arguments: JSON.stringify({ message: "Looking up salary..." }),
+            },
+          },
+        ],
+      },
+    ]
+    const turns = convertMessagesToTurns(messages)
+    expect(turns).toHaveLength(1)
+
+    // The message with both content and thinking toolCalls should NOT be in the thinking group
+    const turnItems = turns[0].map((m) => (Array.isArray(m) ? "array" : m.role))
+    expect(turnItems).toStrictEqual(["user", "array", "assistant"])
+  })
 })
 
 const createToolCallMessage = (
@@ -254,17 +297,23 @@ const createToolCallMessage = (
   }
 }
 
-const createThinkingMessage = (content: string = randomUUID()): Message => ({
+/**
+ * Create a thinking message matching the v1.51+ AG-UI model:
+ * content is empty (no text), tool call arguments carry the thinking text.
+ */
+const createThinkingMessage = (thinkingText?: string): Message => ({
   id: randomUUID(),
   role: "assistant",
-  content,
+  content: "",
   toolCalls: [
     {
       id: randomUUID(),
       type: "function",
       function: {
         name: "orchestratorThinking",
-        arguments: "",
+        arguments: JSON.stringify({
+          message: thinkingText ?? randomUUID(),
+        }),
       },
     },
   ],
