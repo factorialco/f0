@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.379.0](https://github.com/factorialco/f0/compare/f0-react-v1.378.0...f0-react-v1.379.0) (2026-02-24)
+
+
+### Features
+
+* add barSeries and hourDistribution value-display types ([#3327](https://github.com/factorialco/f0/issues/3327)) ([49be7a1](https://github.com/factorialco/f0/commit/49be7a1fba0318ccd01f6d3ed38069927429743a))
+
 ## [1.378.0](https://github.com/factorialco/f0/compare/f0-react-v1.377.0...f0-react-v1.378.0) (2026-02-24)
 
 
