@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.377.0](https://github.com/factorialco/f0/compare/f0-react-v1.376.1...f0-react-v1.377.0) (2026-02-24)
+
+
+### Features
+
+* adding custom tooltip to F0OneSwitch ([#3436](https://github.com/factorialco/f0/issues/3436)) ([acec605](https://github.com/factorialco/f0/commit/acec60548b9243d47d017a25028e63fc45657105))
+
 ## [1.376.1](https://github.com/factorialco/f0/compare/f0-react-v1.376.0...f0-react-v1.376.1) (2026-02-24)
 
 
