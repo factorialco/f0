@@ -258,3 +258,26 @@ export const MobileDropdown: Story = {
   },
   render: (args) => <MobileDropdownComponent {...args} />,
 }
+
+export const WithDataTestId: Story = {
+  args: {
+    ...Default.args,
+    dataTestId: "dropdown-test-id",
+  },
+  render: (args) => (
+    <Dropdown {...args}>
+      <button aria-label="Open user menu">
+        <F0AvatarPerson
+          src="/avatars/person04.jpg"
+          firstName="Dani"
+          lastName="Moreno"
+          size="lg"
+        />
+      </button>
+    </Dropdown>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await expect(canvas.getByTestId("dropdown-test-id")).toBeInTheDocument()
+  },
+}

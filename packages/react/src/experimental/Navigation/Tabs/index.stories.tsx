@@ -141,3 +141,14 @@ export const WithIdsAndVariants: Story = {
     secondary: true,
   },
 }
+
+export const WithDataTestId: Story = {
+  args: {
+    ...Primary.args,
+    dataTestId: "tabs-test-id",
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await expect(canvas.getByTestId("tabs-test-id")).toBeInTheDocument()
+  },
+}

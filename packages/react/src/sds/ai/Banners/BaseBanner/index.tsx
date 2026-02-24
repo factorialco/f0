@@ -3,6 +3,7 @@ import { forwardRef, useState } from "react"
 import { F0Button } from "@/components/F0Button"
 import { IconType } from "@/components/F0Icon"
 import CrossIcon from "@/icons/app/Cross"
+import { withDataTestId } from "@/lib/data-testid"
 import { withSkeleton } from "@/lib/skeleton"
 import { cn } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
@@ -171,6 +172,8 @@ const BaseBannerSkeleton = forwardRef<HTMLDivElement>(
   }
 )
 
-export const BaseBanner = withSkeleton(BaseBannerComponent, BaseBannerSkeleton)
+export const BaseBanner = withDataTestId(
+  withSkeleton(BaseBannerComponent, BaseBannerSkeleton)
+)
 
 BaseBanner.displayName = "BaseBanner"

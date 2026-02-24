@@ -2,6 +2,7 @@ import { AnimatePresence, motion } from "motion/react"
 import { ReactElement, ReactNode, cloneElement, isValidElement } from "react"
 import { useIntersectionObserver } from "usehooks-ts"
 
+import { withDataTestId } from "@/lib/data-testid"
 import { ScrollArea } from "@/ui/scrollarea"
 
 import { useReducedMotion } from "../../../lib/a11y"
@@ -40,7 +41,7 @@ interface SidebarProps {
   onFooterDropdownClick?: () => void
 }
 
-export function Sidebar({
+function _Sidebar({
   header,
   body,
   footer,
@@ -145,3 +146,5 @@ export function Sidebar({
     </motion.aside>
   )
 }
+
+export const Sidebar = withDataTestId(_Sidebar)

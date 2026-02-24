@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
+import { expect, within } from "storybook/test"
+
 import { Spinner } from "./index"
 
 const meta = {
@@ -22,4 +24,12 @@ export const Default: Story = {
       <Spinner size="large" />
     </div>
   ),
+}
+
+export const WithDataTestId: Story = {
+  render: () => <Spinner size="medium" dataTestId="spinner-test-id" />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await expect(canvas.getByTestId("spinner-test-id")).toBeInTheDocument()
+  },
 }

@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { ComponentProps } from "react"
+import { expect, within } from "storybook/test"
 
 import { DetailsItemsList } from "@/experimental/Lists/DetailsItemsList"
 import * as DetailsItemsListStories from "@/experimental/Lists/DetailsItemsList/index.stories"
@@ -95,5 +96,16 @@ export const MainColumnRight: Story = {
   args: {
     ...Default.args,
     mainColumnPosition: "right",
+  },
+}
+
+export const WithDataTestId: Story = {
+  args: {
+    ...Default.args,
+    dataTestId: "layout-test-id",
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await expect(canvas.getByTestId("layout-test-id")).toBeInTheDocument()
   },
 }

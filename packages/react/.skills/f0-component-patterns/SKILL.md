@@ -19,13 +19,13 @@ Load this skill when you need to:
 
 ## Quick Reference
 
-| Pattern                                                                                       | Reference File                         |
-| --------------------------------------------------------------------------------------------- | -------------------------------------- |
-| Component architecture (privateProps, forwardRef, withSkeleton, index exports, `@/ui/` layer) | `references/component-architecture.md` |
-| Context initialization, controlled/uncontrolled, async onClick, event naming                  | `references/context-and-state.md`      |
-| CVA, cn(), focusRing(), container queries, Framer Motion, design tokens                       | `references/styling-and-animation.md`  |
-| Unit tests (zeroRender, vi.hoisted(), fake timers, deferred promises)                         | Load the `f0-unit-testing` skill       |
-| useI18n, defaultTranslations, TranslationsType, plurals, interpolation                        | `references/i18n-patterns.md`          |
+| Pattern                                                                                                       | Reference File                         |
+| ------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
+| Component architecture (privateProps, forwardRef, withSkeleton, withDataTestId, index exports, `@/ui/` layer) | `references/component-architecture.md` |
+| Context initialization, controlled/uncontrolled, async onClick, event naming                                  | `references/context-and-state.md`      |
+| CVA, cn(), focusRing(), container queries, Framer Motion, design tokens                                       | `references/styling-and-animation.md`  |
+| Unit tests (zeroRender, vi.hoisted(), fake timers, deferred promises)                                         | Load the `f0-unit-testing` skill       |
+| useI18n, defaultTranslations, TranslationsType, plurals, interpolation                                        | `references/i18n-patterns.md`          |
 
 ## Key Rules
 
@@ -34,3 +34,4 @@ Load this skill when you need to:
 3. **Never use `any`** — find the proper type.
 4. **New components must start with `F0`** prefix.
 5. **Tests use `zeroRender`** aliased as `render`, never `@testing-library/react`'s `render`.
+6. **All public exported components must be wrapped with `withDataTestId`** from `@/lib/data-testid` — see `references/component-architecture.md` for patterns and composition order.
