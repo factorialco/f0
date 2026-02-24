@@ -122,7 +122,7 @@ const _MobileDropdown = ({ items, children }: DropdownProps) => {
                   item.onClick?.()
                   setOpen(false)
                 }}
-                className="flex w-full items-center gap-2 p-3"
+                className="flex w-full cursor-pointer items-center gap-2 p-3"
               >
                 {item.icon && (
                   <span
