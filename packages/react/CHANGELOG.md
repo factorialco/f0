@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.376.0](https://github.com/factorialco/f0/compare/f0-react-v1.375.1...f0-react-v1.376.0) (2026-02-24)
+
+
+### Features
+
+* improve post description rendering for updated editor ([#3478](https://github.com/factorialco/f0/issues/3478)) ([4dd04fe](https://github.com/factorialco/f0/commit/4dd04fed1ee456934b94acfad9a863f823fd6f8b))
+
 ## [1.375.1](https://github.com/factorialco/f0/compare/f0-react-v1.375.0...f0-react-v1.375.1) (2026-02-24)
 
 
