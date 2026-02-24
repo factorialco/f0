@@ -72,7 +72,10 @@ type HeaderProps = {
     onChange: (newValue: boolean) => void
     label: string
   }
-  oneSwitchTooltip?: string
+  oneSwitchTooltip?: {
+    whenDisabled?: string
+    whenEnabled?: string
+  }
   oneSwitchAutoOpen?: boolean
 }
 
