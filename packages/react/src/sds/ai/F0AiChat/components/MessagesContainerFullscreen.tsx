@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils"
 
 import { F0Thinking } from "../../F0Thinking"
 import { FullscreenChatContext } from "../index"
+import { filterCoagentPlaceholders } from "../internal-types"
 import { useAiChat } from "../providers/AiChatStateProvider"
 import { AssistantMessage as F0AssistantMessage } from "./AssistantMessage"
 import { FeedbackModal } from "./FeedbackModal"
@@ -47,7 +48,12 @@ const Messages = ({
   markdownTagRenderers,
 }: Partial<MessagesProps>) => {
   const turnsContainerRef = useRef<HTMLDivElement>(null)
-  const { messages, interrupt, isLoading } = useCopilotChat()
+  const { messages: rawMessages, interrupt, isLoading } = useCopilotChat()
+
+  const messages = useMemo(
+    () => filterCoagentPlaceholders(rawMessages),
+    [rawMessages]
+  )
 
   const inProgress = inProgressProp ?? isLoading
 

@@ -128,3 +128,22 @@ export type AiChatProviderReturnValue = {
 export function isAgentStateMessage(message: Message): boolean {
   return message.role === "assistant" && message.agentName !== undefined
 }
+
+/**
+ * Check whether a message is a coagent-state-render placeholder injected by
+ * CopilotKit v1.51+.  These empty assistant messages are meant for
+ * `useCoAgentStateRender` which f0 does not use; they must be filtered out
+ * before any message-count or welcome-screen logic.
+ */
+export function isCoagentPlaceholder(message: Message): boolean {
+  return (
+    (message as Message & { name?: string }).name === "coagent-state-render"
+  )
+}
+
+/**
+ * Filter coagent-state-render placeholder messages from an array.
+ */
+export function filterCoagentPlaceholders(messages: Message[]): Message[] {
+  return messages.filter((m) => !isCoagentPlaceholder(m))
+}

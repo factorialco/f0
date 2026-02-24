@@ -1,7 +1,7 @@
 import { useCopilotChatInternal } from "@copilotkit/react-core"
 import { useChatContext, type HeaderProps } from "@copilotkit/react-ui"
 import { motion } from "motion/react"
-import { useCallback } from "react"
+import { useCallback, useMemo } from "react"
 
 import { ButtonInternal } from "@/components/F0Button/internal"
 import Cross from "@/icons/app/Cross"
@@ -11,6 +11,7 @@ import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
 import { useAiChat } from "../providers/AiChatStateProvider"
+import { filterCoagentPlaceholders } from "../internal-types"
 import { New } from "@/icons/app"
 
 export const ChatHeader = (props: HeaderProps) => {
@@ -26,7 +27,11 @@ export const ChatHeader = (props: HeaderProps) => {
   const fullscreen = visualizationMode === "fullscreen"
   const translations = useI18n()
   const hasDefaultTitle = labels.title === "CopilotKit"
-  const hasMessages = messages.length > 0
+  const filteredMessages = useMemo(
+    () => filterCoagentPlaceholders(messages),
+    [messages]
+  )
+  const hasMessages = filteredMessages.length > 0
 
   const handleClose = useCallback(() => {
     if (fullscreen) {

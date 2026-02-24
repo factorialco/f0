@@ -15,7 +15,10 @@ import { ScrollArea } from "@/ui/scrollarea"
 
 import { F0ActionItem } from "../../F0ActionItem"
 import { F0Thinking as Thinking } from "../../F0Thinking"
-import { isAgentStateMessage } from "../internal-types"
+import {
+  filterCoagentPlaceholders,
+  isAgentStateMessage,
+} from "../internal-types"
 import { useAiChat } from "../providers/AiChatStateProvider"
 import { FeedbackModal } from "./FeedbackModal"
 import { FeedbackModalProvider, useFeedbackModal } from "./FeedbackProvider"
@@ -66,22 +69,20 @@ const Messages = ({
       ),
     [initialMessage, translations.ai.defaultInitialMessage]
   )
-  const showWelcomeBlock =
-    messages.length === 0 && (greeting || initialMessages.length > 0)
 
   // Filter out coagent state render placeholders injected by CopilotKit.
   // These are empty assistant messages used for useCoAgentStateRender, which
-  // f0 does not use.  Keeping them would prevent the loading indicator from
+  // f0 does not use.  Keeping them would break the welcome screen check
+  // (placeholder counts as a message) and prevent the loading indicator from
   // showing (the placeholder becomes the last message, masking the "last
   // message is user" check).
   const filteredMessages = useMemo(
-    () =>
-      messages.filter(
-        (m) =>
-          (m as Message & { name?: string }).name !== "coagent-state-render"
-      ),
+    () => filterCoagentPlaceholders(messages),
     [messages]
   )
+
+  const showWelcomeBlock =
+    filteredMessages.length === 0 && (greeting || initialMessages.length > 0)
 
   const turns = useMemo(
     () => convertMessagesToTurns(filteredMessages),

@@ -7,7 +7,7 @@ import {
 import { CopilotSidebar, InputProps } from "@copilotkit/react-ui"
 import { randomId } from "@copilotkit/shared"
 import { AnimatePresence, motion } from "motion/react"
-import { useEffect, useRef } from "react"
+import { useEffect, useMemo, useRef } from "react"
 
 import { OneEllipsis } from "@/components/OneEllipsis"
 import { experimentalComponent } from "@/lib/experimental"
@@ -23,6 +23,7 @@ import { UserMessage } from "./components/UserMessage"
 import { WelcomeScreenSuggestion } from "./components/WelcomeScreen"
 import { useDefaultCopilotActions } from "./copilotActions"
 import { F0AiFullscreenChatComponent } from "./F0AiFullscreenChat"
+import { filterCoagentPlaceholders } from "./internal-types"
 import { AiChatStateProvider, useAiChat } from "./providers/AiChatStateProvider"
 import { AiChatProviderProps } from "./types"
 
@@ -116,7 +117,11 @@ const ChatInput = (props: InputProps) => {
   const { disclaimer, footer, visualizationMode } = useAiChat()
   const { messages } = useCopilotChatInternal()
   const containerRef = useRef<HTMLDivElement>(null)
-  const isWelcomeScreen = messages.length === 0
+  const filteredMessages = useMemo(
+    () => filterCoagentPlaceholders(messages),
+    [messages]
+  )
+  const isWelcomeScreen = filteredMessages.length === 0
   const fullscreen = visualizationMode === "fullscreen"
   const fullscreenWelcome = fullscreen && isWelcomeScreen
 
