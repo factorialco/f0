@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.375.1](https://github.com/factorialco/f0/compare/f0-react-v1.375.0...f0-react-v1.375.1) (2026-02-24)
+
+
+### Bug Fixes
+
+* add cursor-pointer to dropdown ([#3421](https://github.com/factorialco/f0/issues/3421)) ([91c6695](https://github.com/factorialco/f0/commit/91c6695b965d7ec7204e294f7347e6d260880bbb))
+
 ## [1.375.0](https://github.com/factorialco/f0/compare/f0-react-v1.374.2...f0-react-v1.375.0) (2026-02-23)
 
 
