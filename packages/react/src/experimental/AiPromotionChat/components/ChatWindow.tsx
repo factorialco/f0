@@ -23,7 +23,7 @@ export const SidebarWindow = ({ children }: WindowProps) => {
         <motion.div
           key="chat-window"
           aria-hidden={!open}
-          className="relative flex h-full max-w-[360px] flex-col overflow-hidden border border-solid border-f1-border-secondary bg-f1-special-page shadow xs:rounded-xl"
+          className="relative p-1 pl-1.5 w-[360px] flex h-full flex-col overflow-hidden "
           initial={
             shouldPlayEntranceAnimation ? { opacity: 0, width: 0 } : false
           }
@@ -39,19 +39,21 @@ export const SidebarWindow = ({ children }: WindowProps) => {
             }
           }}
         >
-          <motion.div
-            className="relative flex h-full w-[360px] flex-col overflow-x-hidden"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{
-              duration: shouldPlayEntranceAnimation ? 0.3 : 0.05,
-              ease: "easeOut",
-              delay: shouldPlayEntranceAnimation ? 0.2 : 0,
-            }}
-          >
-            {children}
-          </motion.div>
+          <div className="border border-solid border-f1-border-secondary bg-f1-special-page shadow xs:rounded-xl h-full w-full">
+            <motion.div
+              className="relative flex h-full w-full flex-col overflow-x-hidden "
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{
+                duration: shouldPlayEntranceAnimation ? 0.3 : 0.05,
+                ease: "easeOut",
+                delay: shouldPlayEntranceAnimation ? 0.2 : 0,
+              }}
+            >
+              {children}
+            </motion.div>
+          </div>
         </motion.div>
       )}
     </AnimatePresence>

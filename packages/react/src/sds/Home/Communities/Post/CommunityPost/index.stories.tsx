@@ -26,6 +26,7 @@ export const Default: Story = {
     ),
   ],
   args: {
+    id: "123",
     author: {
       firstName: "Saúl",
       lastName: "Domínguez",
@@ -186,6 +187,19 @@ export const WithMultipleCustomButtons: Story = {
       },
       {
         label: "Another Action",
+        onClick: () => {},
+      },
+    ],
+  },
+}
+
+export const WithCustomButtonWithoutLabel: Story = {
+  decorators: Default.decorators,
+  args: {
+    ...Default.args,
+    actions: [
+      {
+        icon: PushPin,
         onClick: () => {},
       },
     ],

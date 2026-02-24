@@ -1,5 +1,6 @@
 import type { AvatarVariant } from "@/components/avatars/F0Avatar"
 import type { IconType } from "@/components/F0Icon"
+import type { NewColor } from "@/components/tags/F0TagDot/types"
 import type {
   DataSourceDefinition,
   FiltersDefinition,
@@ -49,6 +50,12 @@ type F0SelectBaseProps<T extends string, R = unknown> = {
    * Only displays the dropdown content with max height, border and scroll.
    */
   asList?: boolean
+  /**
+   * When true, shows a selection preview panel on the right side of the dropdown
+   * for multi-select mode. When false and filters are present, filters use compact mode.
+   * @default false
+   */
+  showPreview?: boolean
 }
 
 /**
@@ -161,13 +168,17 @@ export type F0SelectProps<T extends string, R = unknown> = F0SelectBaseProps<
     | "hint"
   >
 
+export type F0SelectTagProp =
+  | string
+  | { type: "dot"; text: string; color: NewColor }
+
 export type F0SelectItemObject<T, R = unknown> = {
   type?: "item"
   value: T
   label: string
   description?: string
   avatar?: AvatarVariant
-  tag?: string
+  tag?: F0SelectTagProp
   icon?: IconType
   item?: R
   disabled?: boolean

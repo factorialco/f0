@@ -35,6 +35,7 @@ type ZodTypeName =
   | "ZodNullable"
   | "ZodDefault"
   | "ZodLiteral"
+  | "ZodEffects"
 
 /**
  * Check if a schema is of a specific Zod type using _def.typeName
@@ -42,6 +43,21 @@ type ZodTypeName =
  */
 export function isZodType(schema: ZodTypeAny, typeName: ZodTypeName): boolean {
   return schema._def?.typeName === typeName
+}
+
+/**
+ * Unwrap a ZodEffects (created by .refine(), .transform(), etc.) to get the underlying ZodObject.
+ * If the schema is already a ZodObject, returns it as-is.
+ * This allows F0Form to work with refined schemas.
+ */
+export function unwrapToZodObject<T extends z.ZodRawShape>(
+  schema: z.ZodObject<T> | z.ZodEffects<z.ZodObject<T>>
+): z.ZodObject<T> {
+  if (isZodType(schema, "ZodEffects")) {
+    // ZodEffects has the inner schema in _def.schema
+    return (schema as z.ZodEffects<z.ZodObject<T>>)._def.schema
+  }
+  return schema as z.ZodObject<T>
 }
 
 /**
@@ -597,11 +613,6 @@ export function inferFieldType(
   // Default to text
   return "text"
 }
-
-/**
- * Type helper for creating a form schema with F0 fields
- */
-export type F0FormSchema<T extends Record<string, ZodTypeAny>> = z.ZodObject<T>
 
 /**
  * Extract the inferred type from an F0 form schema

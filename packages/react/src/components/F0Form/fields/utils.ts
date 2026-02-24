@@ -3,6 +3,7 @@ import type {
   F0BaseFieldRenderIfProp,
   RenderIfCondition,
 } from "./types"
+import type { F0DateConstraintProp } from "./date/types"
 
 /**
  * Evaluate a renderIf condition object against the current form values
@@ -135,4 +136,30 @@ export function evaluateDisabled(
     return disabled({ values })
   }
   return disabled
+}
+
+/**
+ * Evaluate a date constraint property which can be a static Date or a function.
+ * Used for dynamic minDate/maxDate that depend on other field values.
+ *
+ * @example
+ * ```ts
+ * // Static constraint
+ * evaluateDateConstraint(new Date("2024-01-01"), values) // returns Date
+ *
+ * // Dynamic constraint
+ * evaluateDateConstraint(({ values }) => values.startDate, values) // returns Date or undefined
+ * ```
+ */
+export function evaluateDateConstraint(
+  constraint: F0DateConstraintProp | undefined,
+  values: Record<string, unknown>
+): Date | undefined {
+  if (constraint === undefined) {
+    return undefined
+  }
+  if (typeof constraint === "function") {
+    return constraint({ values })
+  }
+  return constraint
 }

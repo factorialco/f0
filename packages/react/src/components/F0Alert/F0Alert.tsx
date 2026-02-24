@@ -57,7 +57,7 @@ export const F0Alert = ({
       <div className={alertVariants({ variant })}>
         <div
           className={cn(
-            "flex flex-col items-start gap-3 @sm:flex-row @sm:items-center @sm:justify-between"
+            "flex flex-col items-start gap-3 @xs:flex-row @xs:items-center @xs:justify-between"
           )}
         >
           <div className="flex flex-row gap-2">
@@ -78,7 +78,7 @@ export const F0Alert = ({
           {(action || link) && (
             <div
               className={cn(
-                "flex flex-shrink-0 flex-row items-center gap-3 pl-8 @sm:pl-0"
+                "flex flex-shrink-0 flex-row items-center gap-3 pl-8 @xs:pl-0"
               )}
             >
               {link && (

@@ -84,3 +84,205 @@ export const TableView: Story = {
     tableView: true,
   },
 }
+
+export const TableViewWithPersonList: Story = {
+  args: {
+    title: "Team Members",
+    tableView: true,
+    details: [
+      {
+        title: "Manager",
+        content: {
+          type: "person",
+          firstName: "Saul",
+          lastName: "Dominguez",
+          avatarUrl: "/avatars/person01.jpg",
+        },
+      },
+      {
+        title: "Tech Lead",
+        content: {
+          type: "person",
+          firstName: "Dani",
+          lastName: "Moreno",
+          avatarUrl: "/avatars/person05.jpg",
+        },
+      },
+      {
+        title: "Designer",
+        content: {
+          type: "person",
+          firstName: "Josep Jaume",
+          lastName: "Rey Peroy",
+          avatarUrl: "/avatars/person07.jpg",
+        },
+      },
+      {
+        title: "Engineers",
+        content: [
+          {
+            type: "person",
+            firstName: "Alex",
+            lastName: "Garcia",
+            avatarUrl: "/avatars/person06.jpg",
+          },
+          {
+            type: "person",
+            firstName: "Maria",
+            lastName: "Lopez",
+            avatarUrl: "/avatars/person02.jpg",
+          },
+        ],
+      },
+    ],
+  },
+}
+
+export const WithAvatarList: Story = {
+  args: {
+    title: "Details",
+    details: [
+      {
+        title: "Participants",
+        content: {
+          type: "avatar-list",
+          avatarList: {
+            type: "person",
+            size: "sm",
+            remainingCount: 9,
+            avatars: [
+              {
+                firstName: "Saul",
+                lastName: "Dominguez",
+                src: "/avatars/person01.jpg",
+              },
+              {
+                firstName: "Dani",
+                lastName: "Moreno",
+                src: "/avatars/person05.jpg",
+              },
+              {
+                firstName: "Josep Jaume",
+                lastName: "Rey Peroy",
+                src: "/avatars/person07.jpg",
+              },
+            ],
+          },
+        },
+      },
+      {
+        title: "Publish on",
+        content: {
+          type: "item",
+          text: "Now",
+        },
+      },
+      {
+        title: "Anonymous answers",
+        content: {
+          type: "item",
+          text: "No",
+        },
+      },
+    ],
+  },
+}
+
+export const TableViewWithAvatarList: Story = {
+  args: {
+    tableView: true,
+    details: [
+      {
+        title: "Participants",
+        content: {
+          type: "avatar-list",
+          avatarList: {
+            type: "person",
+            size: "sm",
+            remainingCount: 9,
+            avatars: [
+              {
+                firstName: "Saul",
+                lastName: "Dominguez",
+                src: "/avatars/person01.jpg",
+              },
+              {
+                firstName: "Dani",
+                lastName: "Moreno",
+                src: "/avatars/person05.jpg",
+              },
+              {
+                firstName: "Josep Jaume",
+                lastName: "Rey Peroy",
+                src: "/avatars/person07.jpg",
+              },
+            ],
+          },
+        },
+      },
+      {
+        title: "Publish on",
+        content: {
+          type: "item",
+          text: "Now",
+        },
+      },
+      {
+        title: "Anonymous answers",
+        content: {
+          type: "item",
+          text: "No",
+        },
+      },
+    ],
+  },
+}
+
+export const WithTeamAvatarList: Story = {
+  args: {
+    title: "Project Info",
+    tableView: true,
+    details: [
+      {
+        title: "Teams",
+        content: {
+          type: "avatar-list",
+          avatarList: {
+            type: "team",
+            size: "sm",
+            remainingCount: 9,
+            avatars: [
+              { name: "Engineering" },
+              { name: "Design" },
+              { name: "Management" },
+              { name: "Marketing" },
+            ],
+          },
+        },
+      },
+      {
+        title: "Companies",
+        content: {
+          type: "avatar-list",
+          avatarList: {
+            type: "company",
+            size: "sm",
+            remainingCount: 9,
+            avatars: [
+              { name: "Factorial", src: "/avatars/company01.jpg" },
+              { name: "Acme Corp", src: "/avatars/company02.jpg" },
+            ],
+          },
+        },
+      },
+      {
+        title: "Status",
+        content: {
+          type: "dot-tag",
+          text: "Active",
+          customColor: "#07A2AD",
+        },
+      },
+    ],
+  },
+}

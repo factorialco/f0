@@ -159,6 +159,8 @@ export type {
   F0TimeField,
   F0DateTimeConfig,
   F0DateTimeField,
+  F0DateConstraintProp,
+  F0DateConstraintFunction,
 } from "./date/types"
 export type {
   F0DateRangeConfig,

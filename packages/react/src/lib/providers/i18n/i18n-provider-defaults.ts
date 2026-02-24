@@ -70,14 +70,7 @@ export const defaultTranslations = {
       selectAllItems: "Select all {{total}} items",
       allItemsSelected: "All {{total}} items selected",
     },
-  },
-  syncStatus: {
-    synced: "Sync completed successfully.",
-    syncing: "Sync in progress.",
-    pending: "Not yet started.",
-    partiallySynced: "All aggregated data was synced but at least 1 failed.",
-    outdated: "Data might need to be synced again.",
-    failed: "Sync failed.",
+    noItemsSelected: "No items selected",
   },
   filters: {
     searchPlaceholder: "Search filters...",
@@ -263,6 +256,7 @@ export const defaultTranslations = {
     inputPlaceholder:
       "Ask about time, people, or company info and a lot of other things...",
     stopAnswerGeneration: "Stop generating",
+    responseStopped: "You stopped this response",
     sendMessage: "Send message",
     thoughtsGroupTitle: "Reflection",
     resourcesGroupTitle: "Resources",
@@ -281,6 +275,8 @@ export const defaultTranslations = {
         placeholder: "Share what didn’t work",
       },
     },
+    expandChat: "Expand chat",
+    collapseChat: "Collapse chat",
     ask: "Ask One",
     growth: {
       demoCard: {
@@ -399,6 +395,9 @@ export const defaultTranslations = {
     ordered: "Ordered",
     task: "Task",
     details: "Dropdown",
+    video: "Video",
+    videoUrlPrompt: "Enter a YouTube or Vimeo URL",
+    videoUrlInvalid: "Please enter a valid YouTube or Vimeo URL",
     link: "Link",
     linkPlaceholder: "Enter a link",
     groups: {
@@ -420,6 +419,8 @@ export const defaultTranslations = {
   forms: {
     actionBar: {
       unsavedChanges: "You have changes pending to be saved",
+      saving: "Saving...",
+      saved: "Your changes have been saved",
       discard: "Discard",
       issues: {
         one: "{{count}} issue",

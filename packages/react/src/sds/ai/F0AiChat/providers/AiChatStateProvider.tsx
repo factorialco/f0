@@ -3,23 +3,23 @@
 import { type Message, randomId } from "@copilotkit/shared"
 import {
   createContext,
-  FC,
-  PropsWithChildren,
+  type FC,
+  type PropsWithChildren,
   useContext,
   useEffect,
   useRef,
   useState,
 } from "react"
+import type { ReactNode } from "react"
 
 import { useI18n } from "@/lib/providers/i18n"
 
+import { DEFAULT_CHAT_WIDTH } from "../constants"
 import { AiChatProviderReturnValue, AiChatState } from "../internal-types"
-import { WelcomeScreenSuggestion } from "../types"
+import { type VisualizationMode, WelcomeScreenSuggestion } from "../types"
 
 const AiChatStateContext = createContext<AiChatProviderReturnValue | null>(null)
 
-const DEFAULT_MINUTES_TO_RESET = 15
-const DEFAULT_CHAT_WIDTH = 360
 const CHAT_WIDTH_STORAGE_KEY = "ONE-ai-chat-width"
 
 const getStoredChatWidth = (): number => {
@@ -46,14 +46,21 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   welcomeScreenSuggestions: initialWelcomeScreenSuggestions = [],
   disclaimer,
   resizable = false,
+  defaultVisualizationMode = "sidepanel",
+  lockVisualizationMode = false,
+  footer: initialFooter,
   onThumbsDown,
   onThumbsUp,
   ...rest
 }) => {
+  const [footer, setFooter] = useState<ReactNode | undefined>(initialFooter)
   const [enabledInternal, setEnabledInternal] = useState(enabled)
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(defaultVisualizationMode === "fullscreen")
+  const [visualizationMode, setVisualizationMode] = useState<VisualizationMode>(
+    defaultVisualizationMode
+  )
   const [shouldPlayEntranceAnimation, setShouldPlayEntranceAnimation] =
-    useState(true)
+    useState(defaultVisualizationMode !== "fullscreen")
   const [agent, setAgent] = useState<string | undefined>(initialAgent)
   const [welcomeScreenSuggestions, setWelcomeScreenSuggestions] = useState<
     WelcomeScreenSuggestion[]
@@ -63,9 +70,6 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
     i18n.t("ai.inputPlaceholder"),
   ])
 
-  const [autoClearMinutes, setAutoClearMinutes] = useState<number | null>(
-    DEFAULT_MINUTES_TO_RESET
-  )
   const [initialMessage, setInitialMessage] = useState<
     string | string[] | undefined
   >(initialInitialMessage)
@@ -139,14 +143,23 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
     setEnabledInternal(enabled)
   }, [enabled])
 
+  // Reset visualization mode when chat closes
   useEffect(() => {
     if (!open) {
+      setVisualizationMode("sidepanel")
       const prefersReducedMotion = window.matchMedia(
         "(prefers-reduced-motion: reduce)"
       ).matches
       setShouldPlayEntranceAnimation(!prefersReducedMotion)
     }
   }, [open])
+
+  // Ensure chat is open when entering fullscreen
+  useEffect(() => {
+    if (visualizationMode === "fullscreen" && !open) {
+      setOpen(true)
+    }
+  }, [visualizationMode, open])
 
   return (
     <AiChatStateContext.Provider
@@ -156,12 +169,15 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         setEnabled: setEnabledInternal,
         open,
         setOpen,
+        visualizationMode,
+        setVisualizationMode,
+        lockVisualizationMode,
+        footer,
+        setFooter,
         shouldPlayEntranceAnimation,
         setShouldPlayEntranceAnimation,
         agent,
         tmp_setAgent,
-        setAutoClearMinutes,
-        autoClearMinutes: enabledInternal ? autoClearMinutes : null,
         initialMessage,
         setInitialMessage,
         welcomeScreenSuggestions,
@@ -197,14 +213,15 @@ export function useAiChat(): AiChatProviderReturnValue {
       setEnabled: noopFn,
       open: false,
       setOpen: noopFn,
+      visualizationMode: "sidepanel",
+      setVisualizationMode: noopFn,
+      lockVisualizationMode: false,
       shouldPlayEntranceAnimation: true,
       setShouldPlayEntranceAnimation: noopFn,
       agent: undefined,
       tmp_setAgent: noopFn,
-      setAutoClearMinutes: noopFn,
       clear: noopFn,
       setClearFunction: noopFn,
-      autoClearMinutes: null,
       initialMessage: undefined,
       setInitialMessage: noopFn,
       placeholders: [],
@@ -217,6 +234,8 @@ export function useAiChat(): AiChatProviderReturnValue {
       setSendMessageFunction: noopFn,
       disclaimer: undefined,
       resizable: false,
+      footer: undefined,
+      setFooter: noopFn,
       chatWidth: DEFAULT_CHAT_WIDTH,
       setChatWidth: noopFn,
       resetChatWidth: noopFn,

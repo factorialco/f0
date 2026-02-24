@@ -152,3 +152,13 @@ export const FullHeight: Story = {
     fullHeight: true,
   },
 }
+
+export const WithOnClickOnlyLink: Story = {
+  args: {
+    ...meta.args,
+    header: {
+      title: "Balance",
+      link: { title: "Balance", onClick: fn() },
+    },
+  },
+}

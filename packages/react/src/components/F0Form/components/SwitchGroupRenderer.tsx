@@ -116,7 +116,10 @@ export function SwitchGroupRenderer({ fields }: SwitchGroupRendererProps) {
       const isSelected = newSelectedIds.includes(field.id)
       const currentValue = Boolean(values[field.id])
       if (isSelected !== currentValue) {
-        setValue(field.id, isSelected, { shouldValidate: true })
+        setValue(field.id, isSelected, {
+          shouldValidate: true,
+          shouldDirty: true,
+        })
       }
     }
   }

@@ -38,7 +38,7 @@ jobs:
 
       - name: Run Chromatic
         id: chromatic
-        uses: chromaui/action@latest
+        uses: chromaui/action@v13
         with:
           workingDir: /packages/react
           projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}

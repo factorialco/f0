@@ -65,7 +65,7 @@ const DropdownItem = ({ item }: { item: DropdownItemObject }) => {
   )
 
   return (
-    <DropdownMenuItem asChild className={itemClass}>
+    <DropdownMenuItem asChild className={cn(itemClass, "cursor-pointer")}>
       {href ? (
         <Link
           href={href}

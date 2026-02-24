@@ -80,9 +80,10 @@ export function F0FilterPickerContent<Filters extends FiltersDefinition>({
 }: F0FilterPickerContentProps<Filters>) {
   const i18n = useI18n()
 
+  const firstFilterKey = (Object.keys(filters)[0] as keyof Filters) ?? null
   const [selectedFilterKey, setSelectedFilterKey] = useState<
     keyof Filters | null
-  >(null)
+  >(firstFilterKey)
   const [localFiltersValue, setLocalFiltersValue] =
     useState<FiltersState<Filters>>(value)
 
