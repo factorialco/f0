@@ -1,6 +1,6 @@
 /**
  * Hour distribution cell type for displaying worked hours per day as a compact bar chart.
- * Thin preset over barSeries: maps date + minutes (+ optional plannedMinutes) to bar-series
+ * Thin preset over barSeries: maps date + value (+ optional plannedValue) to bar-series
  * with date/hours formatters and current colors (underworked = orange, planned/overtime = teal).
  */
 import { tableDisplayClassNames } from "../../const"
@@ -14,9 +14,9 @@ import { cn } from "@/lib/utils"
 
 export interface HourDistributionDataPoint {
   date: string
-  minutes: number
-  /** When set, used for two-tone coloring and underworked (minutes < plannedMinutes) = orange. */
-  plannedMinutes?: number
+  value: number
+  /** When set, used for two-tone coloring and underworked (value < plannedValue) = orange. */
+  plannedValue?: number
 }
 
 export interface HourDistributionCellValue {
@@ -50,9 +50,9 @@ function toBarSeriesDataPoint(
 ): BarSeriesDataPoint {
   return {
     label: point.date,
-    value: point.minutes,
-    ...(point.plannedMinutes != null
-      ? { secondaryValue: point.plannedMinutes }
+    value: point.value,
+    ...(point.plannedValue != null
+      ? { secondaryValue: point.plannedValue }
       : {}),
   }
 }
@@ -60,7 +60,7 @@ function toBarSeriesDataPoint(
 function toBarSeriesValue(args: HourDistributionCellValue): BarSeriesCellValue {
   const dataPoints = args.dataPoints.map(toBarSeriesDataPoint)
   const maxMinutes = Math.max(
-    ...args.dataPoints.map((p) => Math.max(p.minutes, p.plannedMinutes ?? 0)),
+    ...args.dataPoints.map((p) => Math.max(p.value, p.plannedValue ?? 0)),
     MAX_MINUTES_FOR_SCALE * 0.1
   )
   const scaleMax = Math.min(maxMinutes, MAX_MINUTES_FOR_SCALE)

@@ -26,7 +26,7 @@ describe("HourDistributionCell", () => {
 
   it("renders bar series for one day with minutes only", () => {
     const args: HourDistributionCellValue = {
-      dataPoints: [{ date: "2025-12-19", minutes: 480 }],
+      dataPoints: [{ date: "2025-12-19", value: 480 }],
     }
 
     const { container } = render(HourDistributionCell(args, defaultMeta))
@@ -42,8 +42,8 @@ describe("HourDistributionCell", () => {
   it("renders bar series with plannedMinutes (under/over)", () => {
     const args: HourDistributionCellValue = {
       dataPoints: [
-        { date: "2025-12-16", minutes: 360, plannedMinutes: 480 },
-        { date: "2025-12-17", minutes: 540, plannedMinutes: 480 },
+        { date: "2025-12-16", value: 360, plannedValue: 480 },
+        { date: "2025-12-17", value: 540, plannedValue: 480 },
       ],
     }
 
@@ -62,7 +62,7 @@ describe("HourDistributionCell", () => {
 
   it("renders empty day (0 minutes) with bar series empty bar", () => {
     const args: HourDistributionCellValue = {
-      dataPoints: [{ date: "2025-12-18", minutes: 0 }],
+      dataPoints: [{ date: "2025-12-18", value: 0 }],
     }
 
     const { container } = render(HourDistributionCell(args, defaultMeta))

@@ -13,8 +13,8 @@ Renders a compact bar chart of worked hours per day. Hover over each bar to see 
 type value = {
   dataPoints: Array<{
     date: string   // ISO or YYYY-MM-DD
-    minutes: number
-    plannedMinutes?: number  // when set, underworked days (minutes < plannedMinutes) use orange/yellow; else teal
+    value: number
+    plannedValue?: number  // when set, underworked days (value < plannedValue) use orange/yellow; else teal
   }>
 }
 ```

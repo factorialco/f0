@@ -3,16 +3,16 @@ import { Meta, StoryObj } from "@storybook/react-vite"
 import { Cell, mockItem } from "../../../__stories__/shared"
 
 const sampleDataPoints = [
-  { date: "2025-12-01", minutes: 480 },
-  { date: "2025-12-02", minutes: 540 },
-  { date: "2025-12-03", minutes: 480 },
-  { date: "2025-12-04", minutes: 420 },
-  { date: "2025-12-05", minutes: 480 },
-  { date: "2025-12-08", minutes: 360 },
-  { date: "2025-12-09", minutes: 480 },
-  { date: "2025-12-10", minutes: 510 },
-  { date: "2025-12-11", minutes: 480 },
-  { date: "2025-12-12", minutes: 240 },
+  { date: "2025-12-01", value: 480 },
+  { date: "2025-12-02", value: 540 },
+  { date: "2025-12-03", value: 480 },
+  { date: "2025-12-04", value: 420 },
+  { date: "2025-12-05", value: 480 },
+  { date: "2025-12-08", value: 360 },
+  { date: "2025-12-09", value: 480 },
+  { date: "2025-12-10", value: 510 },
+  { date: "2025-12-11", value: 480 },
+  { date: "2025-12-12", value: 240 },
 ]
 
 const meta = {
@@ -59,9 +59,9 @@ export const HourDistributionShortPeriod: Story = {
         type: "hourDistribution",
         value: {
           dataPoints: [
-            { date: "2025-12-16", minutes: 480 },
-            { date: "2025-12-17", minutes: 510 },
-            { date: "2025-12-18", minutes: 0 },
+            { date: "2025-12-16", value: 480 },
+            { date: "2025-12-17", value: 510 },
+            { date: "2025-12-18", value: 0 },
           ],
         },
       }),
@@ -79,10 +79,10 @@ export const HourDistributionWithPlanned: Story = {
         type: "hourDistribution",
         value: {
           dataPoints: [
-            { date: "2025-12-16", minutes: 480, plannedMinutes: 480 },
-            { date: "2025-12-17", minutes: 360, plannedMinutes: 480 },
-            { date: "2025-12-18", minutes: 540, plannedMinutes: 480 },
-            { date: "2025-12-19", minutes: 480, plannedMinutes: 480 },
+            { date: "2025-12-16", value: 480, plannedValue: 480 },
+            { date: "2025-12-17", value: 360, plannedValue: 480 },
+            { date: "2025-12-18", value: 540, plannedValue: 480 },
+            { date: "2025-12-19", value: 480, plannedValue: 480 },
           ],
         },
       }),
