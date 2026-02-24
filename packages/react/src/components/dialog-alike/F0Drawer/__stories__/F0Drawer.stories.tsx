@@ -1,7 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { ComponentProps, FC, useState } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import { ResourceHeader } from "@/experimental/Information/Headers/ResourceHeader"
 import { Default as ResourceHeaderDefault } from "@/experimental/Information/Headers/ResourceHeader/index.stories"
@@ -13,6 +12,7 @@ import { Default as OnePersonListItemDefault } from "@/experimental/Lists/OnePer
 import { Placeholder } from "@/icons/app"
 import SaveIcon from "@/icons/app/Save"
 import ShareIcon from "@/icons/app/Share"
+import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
 
 import { getDialogAlikeArgTypes } from "../../common/__stories__/argsTypes"
 import { OTHER_ACTIONS, TABS } from "../../common/__stories__/mocks"
@@ -48,6 +48,7 @@ const meta: Meta<typeof F0Drawer> = {
         defaultValue: { summary: "md" },
       },
     },
+    ...dataTestIdArgs,
   },
   decorators: [
     (Story, { args: { isOpen, ...rest } }) => {

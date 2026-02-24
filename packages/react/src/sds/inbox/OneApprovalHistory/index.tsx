@@ -1,5 +1,6 @@
 import { FC } from "react"
 
+import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
@@ -65,7 +66,6 @@ const _OneApprovalHistory: FC<OneApprovalHistoryProps> = ({ steps }) => {
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export const OneApprovalHistory = experimentalComponent(
-  "OneApprovalHistory",
-  _OneApprovalHistory
+export const OneApprovalHistory = withDataTestId(
+  experimentalComponent("OneApprovalHistory", _OneApprovalHistory)
 )

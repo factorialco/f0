@@ -1,5 +1,33 @@
 # Changelog
 
+## [1.379.0](https://github.com/factorialco/f0/compare/f0-react-v1.378.0...f0-react-v1.379.0) (2026-02-24)
+
+
+### Features
+
+* add barSeries and hourDistribution value-display types ([#3327](https://github.com/factorialco/f0/issues/3327)) ([49be7a1](https://github.com/factorialco/f0/commit/49be7a1fba0318ccd01f6d3ed38069927429743a))
+
+## [1.378.0](https://github.com/factorialco/f0/compare/f0-react-v1.377.0...f0-react-v1.378.0) (2026-02-24)
+
+
+### Features
+
+* dataTestId ([#3339](https://github.com/factorialco/f0/issues/3339)) ([3813ba9](https://github.com/factorialco/f0/commit/3813ba9fd43435043e76dc13fa1d1ee3fc7ab462))
+
+## [1.377.0](https://github.com/factorialco/f0/compare/f0-react-v1.376.1...f0-react-v1.377.0) (2026-02-24)
+
+
+### Features
+
+* adding custom tooltip to F0OneSwitch ([#3436](https://github.com/factorialco/f0/issues/3436)) ([acec605](https://github.com/factorialco/f0/commit/acec60548b9243d47d017a25028e63fc45657105))
+
+## [1.376.1](https://github.com/factorialco/f0/compare/f0-react-v1.376.0...f0-react-v1.376.1) (2026-02-24)
+
+
+### Bug Fixes
+
+* properly consider available space for responsive in data collection with card visualization ([#3512](https://github.com/factorialco/f0/issues/3512)) ([d5bfeaa](https://github.com/factorialco/f0/commit/d5bfeaa6eff1b752de4bedf6d26b903d11687ee9))
+
 ## [1.376.0](https://github.com/factorialco/f0/compare/f0-react-v1.375.1...f0-react-v1.376.0) (2026-02-24)
 
 

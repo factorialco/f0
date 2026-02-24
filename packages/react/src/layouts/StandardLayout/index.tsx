@@ -1,6 +1,8 @@
 import { cva, type VariantProps } from "cva"
 import React from "react"
 
+import { Component } from "@/lib/component/component"
+import { withDataTestId } from "@/lib/data-testid"
 import { cn } from "@/lib/utils"
 
 import { LayoutProvider } from "../LayoutProvider"
@@ -20,7 +22,7 @@ const layoutVariants = cva({
   },
 })
 
-export const StandardLayout = React.forwardRef<
+const _StandardLayout = React.forwardRef<
   HTMLElement,
   StandardLayoutProps & React.HTMLAttributes<HTMLElement>
 >(({ children, variant, className, ...props }, ref) => {
@@ -37,4 +39,14 @@ export const StandardLayout = React.forwardRef<
   )
 })
 
-StandardLayout.displayName = "StandardLayout"
+_StandardLayout.displayName = "StandardLayout"
+
+export const StandardLayout = withDataTestId(
+  Component(
+    {
+      name: "StandardLayout",
+      type: "layout",
+    },
+    _StandardLayout
+  )
+)

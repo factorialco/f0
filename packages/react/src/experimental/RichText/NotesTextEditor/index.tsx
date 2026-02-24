@@ -19,6 +19,7 @@ import { F0Icon } from "@/components/F0Icon"
 import { EditorBubbleMenu } from "@/experimental/RichText/CoreEditor"
 import { Toolbar } from "@/experimental/RichText/CoreEditor"
 import { Handle, Plus } from "@/icons/app"
+import { withDataTestId } from "@/lib/data-testid"
 import { useI18n } from "@/lib/providers/i18n"
 import { ScrollArea } from "@/ui/scrollarea"
 import { Skeleton } from "@/ui/skeleton"
@@ -436,7 +437,7 @@ export const NotesTextEditorSkeleton = ({
 
 export type { Message, User } from "../CoreEditor/Extensions/Transcript"
 export type { ImageUploadConfig } from "./types"
-export { NotesTextEditorComponent as NotesTextEditor }
+export const NotesTextEditor = withDataTestId(NotesTextEditorComponent)
 export type {
   NotesTextEditorHandle,
   NotesTextEditorProps,

@@ -1,5 +1,7 @@
 import { forwardRef } from "react"
 
+import { withDataTestId } from "@/lib/data-testid"
+
 import { F0ButtonToggleInternal } from "./internal/F0ButtonToggle.internal"
 import { F0ButtonToggleInternalProps } from "./internal/types.internal"
 
@@ -10,7 +12,7 @@ export type F0ButtonToggleProps = Omit<
   (typeof privateProps)[number]
 >
 
-const F0ButtonToggle = forwardRef<HTMLButtonElement, F0ButtonToggleProps>(
+const _F0ButtonToggle = forwardRef<HTMLButtonElement, F0ButtonToggleProps>(
   (props, ref) => {
     const publicProps = privateProps.reduce((acc, key) => {
       const { [key]: _, ...rest } = acc
@@ -21,6 +23,6 @@ const F0ButtonToggle = forwardRef<HTMLButtonElement, F0ButtonToggleProps>(
   }
 )
 
-F0ButtonToggle.displayName = "F0ButtonToggle"
+_F0ButtonToggle.displayName = "F0ButtonToggle"
 
-export { F0ButtonToggle }
+export const F0ButtonToggle = withDataTestId(_F0ButtonToggle)
