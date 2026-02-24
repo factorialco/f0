@@ -12,6 +12,7 @@ Load the relevant skill before starting work:
 - **f0-storybook-stories** — `.stories.tsx` file patterns. Load when adding or updating stories.
 - **f0-storybook-testing** — play function and axe-playwright a11y test patterns. Load when writing interaction or a11y tests.
 - **f0-experimental-component-migration** — Promoting components from `experimental/` to stable. Load when migrating.
+- **f0-pr** — Create PRs with correct title format, PR template body, and gh CLI workflow. Load when opening a pull request.
 
 For **MDX documentation** (the Docs tab), use the global `factorial-f0-component-documentation` skill — separate conventions from story files.
 
