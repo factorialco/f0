@@ -17,31 +17,74 @@ Review F0 React components against the conventions in `packages/react/AGENTS.md`
 
 Flag these as blocking — they must be fixed before merge:
 
+### TypeScript
+
 - `any` or `as any` usage anywhere
 - `import * as React` instead of named imports
 - Default exports on components
+- Circular imports
+
+### Component Structure
+
+- Missing `displayName` on `forwardRef` components
+- Direct Radix/third-party primitive import (must use `@/ui/` wrappers)
+- New component name missing `F0` prefix
+- New component placed in `experimental/` instead of `components/` (use `experimentalComponent` from `@/lib/experimental.ts`)
+- Internal components or `internal-types.ts` exported publicly
+- New component not exported in `exports.ts`
+
+### Testing
+
 - Missing test file for new/changed components
 - Test files named `.spec.ts` instead of `.test.tsx`
-- Using `render` instead of `zeroRender` from `@/testing/test-utils.tsx`
-- New component not exported in `exports.ts`
-- Internal components or `internal-types.ts` exported publicly
+- Using `render` from `@testing-library/react` instead of `zeroRender` from `@/testing/test-utils.tsx`
+- Using `jest.fn()` instead of `vi.fn()`
+- Snapshot testing (use explicit assertions only)
+
+### Storybook
+
 - Missing `Snapshot` story with `withSnapshot({})` for Chromatic
+
+### Security
+
 - `dangerouslySetInnerHTML` without explicit justification
-- Circular imports
-- New component placed in `experimental/` instead of `components/` (use `experimentalComponent` from `@/lib/experimental.ts`)
-- New component name missing `F0` prefix
 
 ## Suggestions (Non-blocking)
 
 Flag these as suggestions:
 
+### Code Quality
+
 - Comments describing "what" instead of "why"
 - Missing `React.memo`/`useMemo`/`useCallback` where beneficial
 - Missing cleanup in `useEffect`
-- `className` exposed on public component API
+- `className` exposed on public component API (should be a private prop)
 - Union type props not using const array pattern
-- Missing accessibility tests
+
+### Testing
+
+- Using `fireEvent` where `userEvent` would be more appropriate
 - Coverage appears below 80%
+- Missing helper functions for repeated multi-step interactions
+
+### Accessibility
+
+- Missing `useReducedMotion()` check in animated components
+- Missing `aria-live="polite"` on loading/skeleton states
+- Missing `sr-only` label on icon-only buttons
+- Focusable element missing `focusRing()`
+- Interactive div missing keyboard handler (`onKeyDown` for Enter/Space) or `tabIndex={0}` + `role`
+
+### i18n
+
+- Hardcoded user-facing strings (should use `useI18n()`)
+- Missing fallback for translation keys
+
+### Styling
+
+- CSS modules or CSS-in-JS usage (should use Tailwind)
+- CVA imported from `"class-variance-authority"` instead of `"cva"`
+- Inline `style` for values expressible as Tailwind classes
 
 ## Storybook Review
 
@@ -74,3 +117,5 @@ export const Snapshot: Story = {
   export type Color = (typeof colors)[number]
   ```
 - Public interfaces are exported, internal types stay in `internal-types.ts`
+- Default prop values set inline during destructuring (not `defaultProps`)
+- `DataAttributes` from `@/global.types` used for `data-*` prop support where needed
