@@ -10,7 +10,7 @@ Review F0 React components against the conventions in `packages/react/AGENTS.md`
 ## Review Workflow
 
 1. Read `packages/react/AGENTS.md` for full component conventions
-2. For components with interactive or animated elements, also load the `a11y` skill (`packages/react/.agents/skills/a11y/`) for detailed WCAG patterns
+2. For components with interactive or animated elements, also load the `a11y` skill (`.agents/skills/a11y/`) for detailed WCAG patterns
 3. Check each item below — flag violations with severity
 4. Classify issues as **blocking** (must fix) or **suggestion** (nice to have)
 
