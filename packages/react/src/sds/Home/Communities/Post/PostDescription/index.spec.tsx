@@ -60,17 +60,18 @@ describe("PostDescription XSS Protection", () => {
     expect(screen.getByText("Content")).toBeInTheDocument()
   })
 
-  it("should NOT sanitize style attributes with expressions (SECURITY CONCERN)", () => {
+  it("should sanitize style attributes with expressions", () => {
     const maliciousContent = `<div style="background-image: url('javascript:alert(1)')">Content</div>`
 
     render(<BasePostDescription content={maliciousContent} />)
 
     const div = screen.getByText("Content")
     expect(div).toBeInTheDocument()
-    // SECURITY CONCERN: DOMPurify is NOT removing javascript: URLs from style attributes
-    // This could potentially be exploited in older browsers
+    // Style attributes with javascript: URLs should be removed or neutralized
     const style = div.getAttribute("style")
-    expect(style).toContain("javascript:")
+    if (style !== null) {
+      expect(style).not.toContain("javascript:")
+    }
   })
 
   it("should NOT sanitize data attributes with javascript (POTENTIAL CONCERN)", () => {
@@ -162,11 +163,14 @@ describe("PostDescription XSS Protection", () => {
       expect(img.getAttribute("onerror")).toBeNull()
     }
 
-    // NOTE: Style attributes with javascript: URLs are NOT sanitized by DOMPurify
-    const divWithStyle = document.querySelector("div[style]")
-    if (divWithStyle) {
-      expect(divWithStyle.getAttribute("style")).toContain("javascript:")
-    }
+    // Style attributes with javascript: URLs should be removed or neutralized
+    const elementsWithStyle = document.querySelectorAll("[style]")
+    elementsWithStyle.forEach((element) => {
+      const style = element.getAttribute("style")
+      if (style !== null) {
+        expect(style).not.toContain("javascript:")
+      }
+    })
   })
 
   it("should sanitize SVG with embedded scripts", () => {
