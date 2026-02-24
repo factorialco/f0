@@ -170,7 +170,8 @@ const e = {
       allOnPage: "All items on this page are selected",
       selectAllItems: "Select all {{total}} items",
       allItemsSelected: "All {{total}} items selected"
-    }
+    },
+    noItemsSelected: "No items selected"
   },
   filters: {
     searchPlaceholder: "Search filters...",
@@ -518,6 +519,8 @@ const e = {
   forms: {
     actionBar: {
       unsavedChanges: "You have changes pending to be saved",
+      saving: "Saving...",
+      saved: "Your changes have been saved",
       discard: "Discard",
       issues: {
         one: "{{count}} issue",

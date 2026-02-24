@@ -2210,6 +2210,7 @@ export declare const defaultTranslations: {
             readonly selectAllItems: "Select all {{total}} items";
             readonly allItemsSelected: "All {{total}} items selected";
         };
+        readonly noItemsSelected: "No items selected";
     };
     readonly filters: {
         readonly searchPlaceholder: "Search filters...";
@@ -2557,6 +2558,8 @@ export declare const defaultTranslations: {
     readonly forms: {
         readonly actionBar: {
             readonly unsavedChanges: "You have changes pending to be saved";
+            readonly saving: "Saving...";
+            readonly saved: "Your changes have been saved";
             readonly discard: "Discard";
             readonly issues: {
                 readonly one: "{{count}} issue";
@@ -3917,7 +3920,10 @@ export declare interface F0FilterPickerContentProps<Filters extends FiltersDefin
 /**
  * @experimental This is an experimental component, use it at your own risk
  */
-export declare const F0Form: <TSchema extends F0FormSchema>(props: F0FormProps<TSchema>) => React.ReactElement;
+export declare const F0Form: {
+    <TSchema extends F0FormSchema>(props: F0FormPropsWithSingleSchema<TSchema>): React.ReactElement;
+    <T extends F0PerSectionSchema>(props: F0FormPropsWithPerSectionSchema<T>): React.ReactElement;
+};
 
 /**
  * Submit configuration for action bar type
@@ -4058,44 +4064,60 @@ export declare function f0FormField<T extends ZodTypeAny, TConfig = undefined>(s
 export declare function f0FormField<T extends ZodTypeAny, V extends string | number = string | number, R extends Record<string, unknown> = Record<string, unknown>>(schema: T, config: F0FieldConfig<V, R>): T & F0ZodType<T>;
 
 /**
- * Props for the F0Form component
- *
- * @typeParam TSchema - The Zod object schema type. The form data type is inferred from this.
- *                      Can be a plain ZodObject or a refined ZodObject (using .refine()).
- *
- * @example
- * ```tsx
- * const schema = z.object({
- *   name: f0FormField(z.string(), { label: "Name" }),
- *   age: f0FormField(z.number(), { label: "Age" }),
- * })
- *
- * // Default submit button
- * <F0Form
- *   name="my-form"
- *   schema={schema}
- *   defaultValues={{ name: "" }}
- *   onSubmit={(data) => ({ success: true })}
- * />
- *
- * // With cross-field validation using .refine()
- * const schemaWithRefine = z.object({
- *   startDate: f0FormField(z.date(), { label: "Start" }),
- *   endDate: f0FormField(z.date(), { label: "End" }),
- * }).refine((data) => data.endDate > data.startDate, {
- *   message: "End date must be after start date",
- *   path: ["endDate"],
- * })
- * ```
+ * Union of both F0Form prop variants.
+ * The component detects the mode based on whether `schema` is a single Zod schema
+ * or a record of schemas keyed by section ID.
  */
-export declare interface F0FormProps<TSchema extends F0FormSchema> {
-    /** Unique name for the form, used for generating anchor links (e.g., #forms.[name].[sectionId].[fieldId]) */
+export declare type F0FormProps<TSchema extends F0FormSchema | F0PerSectionSchema = F0FormSchema | F0PerSectionSchema> = TSchema extends F0FormSchema ? F0FormPropsWithSingleSchema<TSchema> : TSchema extends F0PerSectionSchema ? F0FormPropsWithPerSectionSchema<TSchema> : never;
+
+/**
+ * Props for the F0Form component (per-section schema mode).
+ * Each section key in the schema maps to an independent form with its own
+ * validation and submit button.
+ */
+export declare interface F0FormPropsWithPerSectionSchema<T extends F0PerSectionSchema> {
+    /** Unique name for the form, used for generating anchor links */
+    name: string;
+    /** Record mapping section IDs to their Zod schemas. Each section is independently validated and submitted. */
+    schema: T;
+    /** Section configurations keyed by section ID */
+    sections?: Record<string, F0PerSectionSectionConfig>;
+    /** Default values for each section, keyed by section ID */
+    defaultValues?: {
+        [K in keyof T]?: Partial<z.infer<T[K]>>;
+    };
+    /** Callback when a section is submitted. Receives the section ID and its validated data, both correctly typed. */
+    onSubmit: PerSectionSubmitHandler<T>;
+    /** Global submit config applied to all sections (can be overridden per section) */
+    submitConfig?: F0PerSectionSubmitConfig;
+    /** Additional class name for the form container */
+    className?: string;
+    /**
+     * When to trigger and display validation errors
+     * @default "on-blur"
+     */
+    errorTriggerMode?: F0FormErrorTriggerMode;
+    /**
+     * Styling configuration for form layout and appearance.
+     */
+    styling?: F0FormStylingConfig;
+    /**
+     * Ref to control the form programmatically from outside.
+     */
+    formRef?: React.MutableRefObject<F0FormRef | null>;
+}
+
+/**
+ * Props for the F0Form component (single schema mode)
+ */
+export declare interface F0FormPropsWithSingleSchema<TSchema extends F0FormSchema> {
+    /** Unique name for the form, used for generating anchor links */
     name: string;
     /** Zod object schema with F0 field configurations */
     schema: TSchema;
     /** Section configurations keyed by section ID */
     sections?: Record<string, F0SectionConfig>;
-    /** Default values for the form fields (partial of the schema type) */
+    /** Default values for the form fields */
     defaultValues?: Partial<z.infer<TSchema>>;
     /** Callback when the form is submitted with valid data */
     onSubmit: (data: z.infer<TSchema>) => Promise<F0FormSubmitResult> | F0FormSubmitResult;
@@ -4119,14 +4141,6 @@ export declare interface F0FormProps<TSchema extends F0FormSchema> {
     /**
      * Ref to control the form programmatically from outside.
      * Use with the `useF0Form` hook to get a ref and submit/reset functions.
-     *
-     * @example
-     * ```tsx
-     * const { formRef, submit } = useF0Form()
-     *
-     * <F0Form formRef={formRef} ... />
-     * <Button onClick={submit}>Submit</Button>
-     * ```
      */
     formRef?: React.MutableRefObject<F0FormRef | null>;
 }
@@ -4194,6 +4208,8 @@ declare interface F0FormSubmitConfigBase {
      * - IconType: custom icon
      */
     icon?: IconType | null;
+    /** Label shown in the action bar while submitting (defaults to i18n "forms.actionBar.saving") */
+    savingMessage?: string;
 }
 
 /**
@@ -4201,6 +4217,8 @@ declare interface F0FormSubmitConfigBase {
  */
 export declare type F0FormSubmitResult = {
     success: true;
+    /** Optional message shown in the action bar after successful submission */
+    message?: string;
 } | {
     success: false;
     /** Root error message displayed at the top of the form */
@@ -4381,6 +4399,42 @@ export declare const F0OneSwitch: ({ className, disabled }: F0OneSwitchProps) =>
  */
 export declare type F0OneSwitchProps = React.ComponentPropsWithoutRef<typeof SwitchPrimitive.Root>;
 
+/**
+ * A record mapping section IDs to their individual schemas.
+ * When used, each section gets independent validation and its own submit button.
+ */
+export declare type F0PerSectionSchema = Record<string, F0FormSchema>;
+
+/**
+ * Section configuration for per-section schema mode.
+ * Extends F0SectionConfig with per-section submit and default values.
+ */
+export declare interface F0PerSectionSectionConfig extends F0SectionConfig {
+    /** Override submit config for this specific section */
+    submitConfig?: F0PerSectionSubmitConfig;
+}
+
+/**
+ * Per-section submit configuration, extending the base submit config
+ * with an optional per-section label override.
+ */
+export declare interface F0PerSectionSubmitConfig {
+    /** Custom label for the submit button (per section) */
+    label?: string;
+    /**
+     * Custom icon for the submit button
+     * - undefined: uses default Save icon
+     * - null: no icon shown
+     * - IconType: custom icon
+     */
+    icon?: IconType | null;
+    /**
+     * When true, the submit button is only visible once the section has unsaved changes.
+     * @default false
+     */
+    showSubmitWhenDirty?: boolean;
+}
+
 export declare const F0Provider: React.FC<{
     children: React.ReactNode;
     link?: LinkContextValue;
@@ -4484,6 +4538,12 @@ declare type F0SelectBaseProps<T extends string, R = unknown> = {
      * Only displays the dropdown content with max height, border and scroll.
      */
     asList?: boolean;
+    /**
+     * When true, shows a selection preview panel on the right side of the dropdown
+     * for multi-select mode. When false and filters are present, filters use compact mode.
+     * @default false
+     */
+    showPreview?: boolean;
 };
 
 /**
@@ -4945,7 +5005,7 @@ declare interface FilterPickerBaseProps<Filters extends FiltersDefinition> {
  */
 export declare type FiltersDefinition<Keys extends string = string> = Record<Keys, FilterDefinition>;
 
-export declare type FiltersMode = "default" | "compact" | "simple";
+export declare type FiltersMode = "default" | "compact" | "simple" | "inline";
 
 /**
  * Current state of all filters in a collection.
@@ -4960,6 +5020,8 @@ export declare type FiltersState<Definition extends Record<string, FilterDefinit
 declare type FilterTypeContext<Options extends object = never> = {
     schema: FilterTypeSchema<Options>;
     i18n: I18nContextType;
+    /** The key of this filter in the FiltersDefinition (passed to chipLabel for nested label lookups) */
+    filterKey?: string;
 };
 
 declare type FilterTypeDefinition<Value = unknown, Options extends object = never, EmptyValue = Value, OptionalOptions extends boolean = false> = {
@@ -4972,6 +5034,8 @@ declare type FilterTypeDefinition<Value = unknown, Options extends object = neve
         value: Value;
         onChange: (value: Value) => void;
         isCompactMode?: boolean;
+        onFilterChange?: (key: string, value: unknown) => void;
+        allFiltersValue?: Record<string, unknown>;
     }) => React.ReactNode;
     /**
      * The value label to display in the filter chips
@@ -5366,6 +5430,14 @@ export declare type InferF0FormValues<T extends z.ZodObject<z.ZodRawShape>> = z.
  */
 export declare function inferFieldType(schema: ZodTypeAny, config: F0FieldConfig): F0FieldType;
 
+/**
+ * Helper type to infer the combined values from a per-section schema record.
+ * Merges all section schemas into a single type.
+ */
+export declare type InferPerSectionValues<T extends F0PerSectionSchema> = {
+    [K in keyof T]: z.infer<T[K]>;
+};
+
 export declare type InFilterDefinition<T = string | number, R extends RecordType = RecordType> = BaseFilterDefinition<"in"> & {
     options: InFilterOptions_2<T, R>;
 };
@@ -5380,6 +5452,16 @@ declare type InFilterOptionItem<T = unknown> = {
     value: T;
     /** Human-readable label for the option */
     label: string;
+    /**
+     * Nested children that belong to a different filter key.
+     * Enables hierarchical filtering (e.g., office -> space -> desk).
+     */
+    children?: {
+        /** The filter key where child selections are stored in FiltersState */
+        filterKey: string;
+        /** Child options, which can themselves have children for infinite nesting */
+        options: Array<InFilterOptionItem<T>>;
+    };
 };
 
 /**
@@ -6185,6 +6267,24 @@ export declare type PaginationType = "pages" | "infinite-scroll" | "no-paginatio
 declare type PathsToStringProps<T> = T extends string ? [] : {
     [K in Extract<keyof T, string>]: [K, ...PathsToStringProps<T[K]>];
 }[Extract<keyof T, string>];
+
+/**
+ * Creates a union of `[sectionId, data]` pairs for each key in T.
+ * Used to build a callback where TypeScript narrows `data` based on `sectionId`.
+ *
+ * @example
+ * For T = { profile: ZodObject<{name: ZodString}>, settings: ZodObject<{theme: ZodEnum}> }
+ * Produces: ["profile", { name: string }] | ["settings", { theme: "light" | "dark" }]
+ */
+declare type PerSectionSubmitArgs<T extends F0PerSectionSchema> = {
+    [K in keyof T & string]: [sectionId: K, data: z.infer<T[K]>];
+}[keyof T & string];
+
+/**
+ * Callback type for per-section submit. Uses a discriminated union of argument
+ * tuples so that narrowing `sectionId` also narrows `data` to the correct type.
+ */
+declare type PerSectionSubmitHandler<T extends F0PerSectionSchema> = (...args: PerSectionSubmitArgs<T>) => Promise<F0FormSubmitResult> | F0FormSubmitResult;
 
 export declare type PersonAvatarVariant = Extract<AvatarVariant, {
     type: "person";
@@ -7135,6 +7235,12 @@ declare interface TextProps extends Omit<default_2.HTMLAttributes<HTMLElement>, 
      * @default false
      */
     markdown?: boolean;
+    /**
+     * Show a required indicator (red asterisk) after the content.
+     * Useful when the Text is used as a form label.
+     * @default false
+     */
+    required?: boolean;
 }
 
 /**
@@ -7688,7 +7794,7 @@ export declare function useSchemaDefinition(schema: F0FormSchema, sections?: Rec
  * Custom hook to manage selection state for items and groups in a data table
  * Supports single/multi selection, grouped data, pagination, and filtering
  */
-export declare function useSelectable<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Grouping extends GroupingDefinition<R>>({ data, paginationInfo, source, selectionMode, selectedState, onSelectItems, disableSelectAll, isSearchActive, allPagesSelection, }: UseSelectableProps<R, Filters, Sortings, Grouping>): UseSelectableReturn<R, Filters>;
+export declare function useSelectable<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Grouping extends GroupingDefinition<R>>({ data, paginationInfo, source, selectionMode, selectedState, onSelectItems, disableSelectAll, isSearchActive, allPagesSelection, resetOnPageChange, }: UseSelectableProps<R, Filters, Sortings, Grouping>): UseSelectableReturn<R, Filters>;
 
 export declare type UseSelectableProps<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Grouping extends GroupingDefinition<R>> = {
     data: Data<R>;
@@ -7718,6 +7824,12 @@ export declare type UseSelectableProps<R extends RecordType, Filters extends Fil
      * - itemStatus only includes items from the current page
      */
     allPagesSelection?: boolean;
+    /**
+     * When true (default), clears selection when the page changes
+     * (unless all items are selected). Set to false to persist
+     * selections across page changes unconditionally.
+     */
+    resetOnPageChange?: boolean;
 };
 
 export declare type UseSelectableReturn<R extends RecordType, Filters extends FiltersDefinition> = {
@@ -7747,9 +7859,14 @@ export declare type UseSelectableReturn<R extends RecordType, Filters extends Fi
      */
     handleSelectItemChange: (itemOrId: R | SelectionId | readonly SelectionId[], checked: boolean) => void;
     /**
-     * Handles the change of the selected all items
+     * Handles "select all" for the current page only
      */
     handleSelectAll: (checked: boolean) => void;
+    /**
+     * Handles "select all items" across all pages (full dataset).
+     * Only meaningful when allPagesSelection is enabled.
+     */
+    handleSelectAllItems: (checked: boolean) => void;
     /**
      * Handles the change of the selected group.
      * Accepts either SelectionId(s) or a GroupRecord.
@@ -7928,11 +8045,6 @@ declare module "gridstack" {
 }
 
 
-declare namespace Calendar {
-    var displayName: string;
-}
-
-
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         aiBlock: {
@@ -7979,4 +8091,9 @@ declare module "@tiptap/core" {
             }) => ReturnType;
         };
     }
+}
+
+
+declare namespace Calendar {
+    var displayName: string;
 }

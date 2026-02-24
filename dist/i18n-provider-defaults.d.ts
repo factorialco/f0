@@ -171,6 +171,7 @@ export declare const defaultTranslations: {
             readonly selectAllItems: "Select all {{total}} items";
             readonly allItemsSelected: "All {{total}} items selected";
         };
+        readonly noItemsSelected: "No items selected";
     };
     readonly filters: {
         readonly searchPlaceholder: "Search filters...";
@@ -518,6 +519,8 @@ export declare const defaultTranslations: {
     readonly forms: {
         readonly actionBar: {
             readonly unsavedChanges: "You have changes pending to be saved";
+            readonly saving: "Saving...";
+            readonly saved: "Your changes have been saved";
             readonly discard: "Discard";
             readonly issues: {
                 readonly one: "{{count}} issue";
@@ -610,11 +613,6 @@ declare module "gridstack" {
 }
 
 
-declare namespace Calendar {
-    var displayName: string;
-}
-
-
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         aiBlock: {
@@ -661,4 +659,9 @@ declare module "@tiptap/core" {
             }) => ReturnType;
         };
     }
+}
+
+
+declare namespace Calendar {
+    var displayName: string;
 }

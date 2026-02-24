@@ -106,6 +106,8 @@ export declare type ActionBarGroup = {
 
 export declare type ActionBarItem = ActionType_2;
 
+export declare type ActionBarStatus = "idle" | "loading" | "success";
+
 declare type ActionBaseProps = ActionCommonProps & DataAttributes;
 
 declare type ActionButtonProps = ActionBaseProps & {
@@ -2331,6 +2333,7 @@ declare const defaultTranslations: {
             readonly selectAllItems: "Select all {{total}} items";
             readonly allItemsSelected: "All {{total}} items selected";
         };
+        readonly noItemsSelected: "No items selected";
     };
     readonly filters: {
         readonly searchPlaceholder: "Search filters...";
@@ -2678,6 +2681,8 @@ declare const defaultTranslations: {
     readonly forms: {
         readonly actionBar: {
             readonly unsavedChanges: "You have changes pending to be saved";
+            readonly saving: "Saving...";
+            readonly saved: "Your changes have been saved";
             readonly discard: "Discard";
             readonly issues: {
                 readonly one: "{{count}} issue";
@@ -2948,7 +2953,7 @@ declare type ExtractVisualizationSettings<T> = T extends {
     };
 } ? S : never;
 
-export declare const F0ActionBar: ({ isOpen, secondaryActions, label, variant, leftContent, centerInFrameContent, ...props }: F0ActionBarProps) => JSX_2.Element;
+export declare const F0ActionBar: ({ isOpen, secondaryActions, label, variant, leftContent, centerInFrameContent, status, ...props }: F0ActionBarProps) => JSX_2.Element;
 
 declare interface F0ActionBarProps {
     /**
@@ -2984,6 +2989,14 @@ declare interface F0ActionBarProps {
      * @default false
      */
     centerInFrameContent?: boolean;
+    /**
+     * The current status of the action bar.
+     * - "idle": Default state, shows an alert icon (pending changes)
+     * - "loading": Shows a spinner and disables all actions
+     * - "success": Shows a checkmark icon and disables all actions
+     * @default "idle"
+     */
+    status?: ActionBarStatus;
 }
 
 export declare const F0AiBanner: ForwardRefExoticComponent<AiBannerInternalProps & RefAttributes<HTMLDivElement>> & {
@@ -3195,6 +3208,12 @@ declare type F0SelectBaseProps<T extends string, R = unknown> = {
      * Only displays the dropdown content with max height, border and scroll.
      */
     asList?: boolean;
+    /**
+     * When true, shows a selection preview panel on the right side of the dropdown
+     * for multi-select mode. When false and filters are present, filters use compact mode.
+     * @default false
+     */
+    showPreview?: boolean;
 };
 
 declare type F0SelectItemObject<T, R = unknown> = {
@@ -3438,7 +3457,7 @@ export declare type FilterOptions<FilterKeys extends string> = Record<FilterKeys
  */
 export declare type FiltersDefinition<Keys extends string = string> = Record<Keys, FilterDefinition>;
 
-export declare type FiltersMode = "default" | "compact" | "simple";
+export declare type FiltersMode = "default" | "compact" | "simple" | "inline";
 
 /**
  * Current state of all filters in a collection.
@@ -3453,6 +3472,8 @@ export declare type FiltersState<Definition extends Record<string, FilterDefinit
 declare type FilterTypeContext<Options extends object = never> = {
     schema: FilterTypeSchema<Options>;
     i18n: I18nContextType;
+    /** The key of this filter in the FiltersDefinition (passed to chipLabel for nested label lookups) */
+    filterKey?: string;
 };
 
 declare type FilterTypeDefinition<Value = unknown, Options extends object = never, EmptyValue = Value, OptionalOptions extends boolean = false> = {
@@ -3465,6 +3486,8 @@ declare type FilterTypeDefinition<Value = unknown, Options extends object = neve
         value: Value;
         onChange: (value: Value) => void;
         isCompactMode?: boolean;
+        onFilterChange?: (key: string, value: unknown) => void;
+        allFiltersValue?: Record<string, unknown>;
     }) => React.ReactNode;
     /**
      * The value label to display in the filter chips
@@ -3799,6 +3822,16 @@ declare type InFilterOptionItem<T = unknown> = {
     value: T;
     /** Human-readable label for the option */
     label: string;
+    /**
+     * Nested children that belong to a different filter key.
+     * Enables hierarchical filtering (e.g., office -> space -> desk).
+     */
+    children?: {
+        /** The filter key where child selections are stored in FiltersState */
+        filterKey: string;
+        /** Child options, which can themselves have children for infinite nesting */
+        options: Array<InFilterOptionItem<T>>;
+    };
 };
 
 /**
@@ -6022,9 +6055,9 @@ export declare const Textarea: FC<TextareaProps>;
 
 declare const Textarea_2: React_2.ForwardRefExoticComponent<Omit<React_2.TextareaHTMLAttributes<HTMLTextAreaElement>, "value" | "onChange" | "onFocus" | "onBlur"> & {
     value?: string;
-} & Pick<InputFieldProps<string>, "label" | "value" | "onChange" | "size" | "icon" | "onFocus" | "onBlur" | "onKeyDown" | "status" | "loading" | "maxLength" | "placeholder" | "error" | "hideLabel" | "hint" | "labelIcon" | "clearable" | "onClear"> & React_2.RefAttributes<HTMLTextAreaElement>>;
+} & Pick<InputFieldProps<string>, "label" | "value" | "onChange" | "size" | "icon" | "onFocus" | "onBlur" | "onKeyDown" | "status" | "loading" | "maxLength" | "placeholder" | "required" | "error" | "hideLabel" | "hint" | "labelIcon" | "clearable" | "onClear"> & React_2.RefAttributes<HTMLTextAreaElement>>;
 
-export declare type TextareaProps = Pick<ComponentProps<typeof Textarea_2>, "disabled" | "onChange" | "value" | "placeholder" | "rows" | "cols" | "label" | "labelIcon" | "icon" | "hideLabel" | "maxLength" | "clearable" | "onBlur" | "onFocus" | "name" | "status" | "hint" | "error" | "size" | "loading">;
+export declare type TextareaProps = Pick<ComponentProps<typeof Textarea_2>, "disabled" | "onChange" | "value" | "placeholder" | "rows" | "cols" | "label" | "labelIcon" | "icon" | "hideLabel" | "maxLength" | "clearable" | "onBlur" | "onFocus" | "name" | "status" | "hint" | "error" | "size" | "loading" | "required">;
 
 declare type TextQuestionProps = BaseQuestionPropsForOtherQuestionComponents & {
     type: "text" | "longText";
@@ -6645,11 +6678,6 @@ declare module "gridstack" {
 }
 
 
-declare namespace Calendar {
-    var displayName: string;
-}
-
-
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         aiBlock: {
@@ -6696,4 +6724,9 @@ declare module "@tiptap/core" {
             }) => ReturnType;
         };
     }
+}
+
+
+declare namespace Calendar {
+    var displayName: string;
 }
