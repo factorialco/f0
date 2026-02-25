@@ -60,13 +60,14 @@ export const defaultTranslations = {
     toggle: "Toggle",
     toggleDropdownMenu: "Toggle dropdown menu",
     selectAll: "Select all",
+    selectAllItems: "Select all {{total}} items",
   },
   status: {
     selected: {
       singular: "Selected",
       plural: "Selected",
       all: "All selected",
-      allOnPage: "All items on this page are selected",
+      allOnPage: "All {{count}} items on this page are selected",
       selectAllItems: "Select all {{total}} items",
       allItemsSelected: "All {{total}} items selected",
     },
