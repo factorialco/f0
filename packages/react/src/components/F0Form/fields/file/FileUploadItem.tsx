@@ -112,15 +112,6 @@ export function FileUploadItem({
                 ? formatFileSize(fileSize)
                 : null}
         </span>
-
-        {isUploading && (
-          <div className="mt-1 h-1 w-full overflow-hidden rounded-full bg-f1-background-tertiary">
-            <div
-              className="h-full rounded-full bg-f1-background-accent transition-all duration-200"
-              style={{ width: `${progressPercent}%` }}
-            />
-          </div>
-        )}
       </div>
 
       {!disabled && (
