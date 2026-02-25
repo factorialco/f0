@@ -11,7 +11,6 @@ import { ButtonInternal } from "@/components/F0Button/internal"
 import { ArrowDown } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-import { ScrollArea } from "@/ui/scrollarea"
 
 import { F0Thinking as Thinking } from "../../F0Thinking"
 import { isAgentStateMessage } from "../internal-types"
@@ -79,8 +78,6 @@ const Messages = ({
   const prevTurnsCountRef = useRef(turns.length)
   const [turnMinHeight, setTurnMinHeight] = useState(0)
   const [showScrollBtn, setShowScrollBtn] = useState(false)
-  const [isAtTop, setIsAtTop] = useState(true)
-  const [hasContentBelow, setHasContentBelow] = useState(false)
 
   const scrollToBottom = useCallback((behavior: ScrollBehavior = "smooth") => {
     endRef.current?.scrollIntoView({ behavior })
@@ -99,6 +96,7 @@ const Messages = ({
       setTurnMinHeight(viewport.clientHeight - py)
     })
     observer.observe(viewport)
+    observer.observe(content)
     return () => observer.disconnect()
   }, [])
 
@@ -109,15 +107,6 @@ const Messages = ({
     const { scrollTop, scrollHeight, clientHeight } = el
     const distanceFromBottom = scrollHeight - scrollTop - clientHeight
     setShowScrollBtn(distanceFromBottom > clientHeight)
-    setIsAtTop(scrollTop <= 0)
-
-    // Bottom shadow: only when actual message content is below the viewport
-    const sentinel = contentEndRef.current
-    if (sentinel) {
-      const containerRect = el.getBoundingClientRect()
-      const sentinelRect = sentinel.getBoundingClientRect()
-      setHasContentBelow(sentinelRect.top > containerRect.bottom)
-    }
   }, [])
 
   useEffect(() => {
@@ -140,8 +129,6 @@ const Messages = ({
     // Reset scroll state when conversation is cleared
     if (turns.length === 0) {
       setShowScrollBtn(false)
-      setIsAtTop(true)
-      setHasContentBelow(false)
     }
     prevTurnsCountRef.current = turns.length
   }, [turns.length])
@@ -149,13 +136,20 @@ const Messages = ({
   return (
     <>
       <div className="relative flex flex-1 flex-col overflow-hidden">
-        <ScrollArea
-          className="flex-1 [&>div]:h-full [&>div>div]:h-full"
-          viewportRef={viewportRef}
+        <div
+          ref={viewportRef}
+          className={cn(
+            "flex-1 overflow-y-scroll pr-0",
+            "[scrollbar-width:thin] [scrollbar-color:transparent_transparent]",
+            "hover:[scrollbar-color:var(--scrollbar-thumb)_transparent]",
+            "[&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:bg-transparent",
+            "[&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-transparent",
+            "hover:[&::-webkit-scrollbar-thumb]:bg-f1-background-inverse/30"
+          )}
         >
           <div
             ref={contentRef}
-            className="flex flex-col p-4 h-full items-center"
+            className="flex h-full flex-col items-center py-4 pl-4 pr-3"
           >
             <div
               className={cn(
@@ -254,14 +248,10 @@ const Messages = ({
               )}
             </AnimatePresence>
           </div>
-        </ScrollArea>
+        </div>
 
-        <AnimatePresence>
-          {!isAtTop && <ScrollShadow position="top" key="shadow-top" />}
-          {hasContentBelow && (
-            <ScrollShadow position="bottom" key="shadow-bottom" />
-          )}
-        </AnimatePresence>
+        <ScrollShadow position="top" key="shadow-top" />
+        <ScrollShadow position="bottom" key="shadow-bottom" />
       </div>
 
       {isOpen && (
