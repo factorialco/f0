@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.381.0](https://github.com/factorialco/f0/compare/f0-react-v1.380.0...f0-react-v1.381.0) (2026-02-25)
+
+
+### Features
+
+* **dataCollection:** selectable header ([#3518](https://github.com/factorialco/f0/issues/3518)) ([db9fd03](https://github.com/factorialco/f0/commit/db9fd034f6a528af634e08078f8deb37d4e55104))
+
 ## [1.380.0](https://github.com/factorialco/f0/compare/f0-react-v1.379.0...f0-react-v1.380.0) (2026-02-25)
 
 
