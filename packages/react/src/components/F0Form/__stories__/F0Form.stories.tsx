@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { useState } from "react"
+import { useState, useCallback, useRef } from "react"
 import { z } from "zod"
 
 import { F0Button } from "@/components/F0Button"
@@ -15,6 +15,11 @@ import {
   CustomFieldRenderProps,
   useF0Form,
 } from "../index"
+import type {
+  FileUploadHookReturn,
+  FileUploadResult,
+  FileUploadStatus,
+} from "../fields/types"
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
@@ -821,6 +826,96 @@ export const AllFieldTypesDisabled: Story = {
           console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
           return { success: true }
         }}
+      />
+    )
+  },
+}
+
+function useMockUpload(): FileUploadHookReturn {
+  const [progress, setProgress] = useState(0)
+  const [status, setStatus] = useState<FileUploadStatus>("idle")
+  const abortRef = useRef(false)
+
+  const upload = useCallback(async (file: File): Promise<FileUploadResult> => {
+    abortRef.current = false
+    setStatus("processing")
+    setProgress(0)
+    await sleep(500)
+    if (abortRef.current) return { type: "aborted" }
+    setStatus("uploading")
+    for (let i = 1; i <= 10; i++) {
+      await sleep(200)
+      if (abortRef.current) return { type: "aborted" }
+      setProgress(i / 10)
+    }
+    setStatus("success")
+    return { type: "success", signedId: `signed_${file.name}_${Date.now()}` }
+  }, [])
+
+  const cancelUpload = useCallback(() => {
+    abortRef.current = true
+    setStatus("idle")
+    setProgress(0)
+  }, [])
+
+  return { upload, cancelUpload, progress, status }
+}
+
+/**
+ * File upload fields integrated within a form alongside other field types.
+ * Demonstrates single file, multiple files, and file fields with validation
+ * constraints — all using the declarative `f0FormField` API.
+ */
+export const FileFields: Story = {
+  render() {
+    const formSchema = z.object({
+      title: f0FormField(z.string().min(1), {
+        label: "Document Title",
+        placeholder: "Enter title",
+      }),
+      singleFile: f0FormField(z.string().min(1, "Please upload a file"), {
+        label: "Cover Image",
+        fieldType: "file",
+        accept: ["image/jpeg", "image/png", "image/webp"],
+        maxSizeMB: 5,
+        description: "Upload a JPEG, PNG, or WebP image (max 5 MB)",
+        useUpload: useMockUpload,
+      }),
+      attachments: f0FormField(
+        z.array(z.string()).min(1, "Upload at least one file"),
+        {
+          label: "Attachments",
+          fieldType: "file",
+          multiple: true,
+          accept: ["application/pdf", "image"],
+          maxSizeMB: 50,
+          useUpload: useMockUpload,
+        }
+      ),
+      notes: f0FormField(z.string().optional(), {
+        label: "Notes",
+        fieldType: "textarea",
+        rows: 3,
+        placeholder: "Any additional notes...",
+      }),
+    })
+
+    return (
+      <F0Form
+        name="file-fields"
+        schema={formSchema}
+        defaultValues={{
+          title: "",
+          singleFile: "",
+          attachments: [],
+          notes: "",
+        }}
+        onSubmit={async (data) => {
+          await sleep(1000)
+          console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+          return { success: true, message: "Document saved" }
+        }}
+        submitConfig={{ label: "Save Document" }}
       />
     )
   },

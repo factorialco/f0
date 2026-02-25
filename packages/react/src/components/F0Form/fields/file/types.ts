@@ -1,0 +1,209 @@
+import type {
+  F0BaseField,
+  F0BaseFieldRenderIfFunction,
+  CommonRenderIfCondition,
+} from "../types"
+
+// ============================================================================
+// File Upload Types (consumer-provided)
+// ============================================================================
+
+/**
+ * Result of a file upload operation
+ */
+export type FileUploadResult =
+  | { type: "success"; signedId: string }
+  | { type: "aborted" }
+
+/**
+ * Upload status states
+ */
+export type FileUploadStatus = "idle" | "processing" | "uploading" | "success"
+
+/**
+ * Return type of the consumer-provided upload hook
+ */
+export interface FileUploadHookReturn {
+  /** Uploads a file and returns the result */
+  upload: (file: File) => Promise<FileUploadResult>
+  /** Cancels the in-flight upload */
+  cancelUpload?: () => void
+  /** Upload progress from 0 to 1 */
+  progress: number
+  /** Current upload status */
+  status: FileUploadStatus
+}
+
+/**
+ * A hook that returns upload capabilities for a single file.
+ * Each call creates an independent upload instance with its own state.
+ *
+ * @example
+ * ```tsx
+ * const useMyUpload: UseFileUpload = () => {
+ *   const { upload, progress, status, cancelUpload } = useDirectUpload({
+ *     resourceType: "MyModule::Document",
+ *   })
+ *   return { upload, progress, status, cancelUpload }
+ * }
+ * ```
+ */
+export type UseFileUpload = () => FileUploadHookReturn
+
+// ============================================================================
+// File Field RenderIf Conditions
+// ============================================================================
+
+/**
+ * All valid renderIf conditions for file fields
+ */
+export type FileFieldRenderIf =
+  | CommonRenderIfCondition
+  | F0BaseFieldRenderIfFunction
+
+// ============================================================================
+// MIME Type
+// ============================================================================
+
+/**
+ * Known MIME types for the file field `accept` prop.
+ *
+ * Supports three formats:
+ * - Specific types: `"image/png"`, `"application/pdf"`
+ * - Wildcard categories: `"image/*"`, `"video/*"`
+ * - Bare categories (shorthand for wildcard): `"image"`, `"video"`
+ *
+ * The `string & {}` escape hatch allows unlisted MIME types while
+ * still providing autocomplete for known ones.
+ */
+export type MimeType =
+  // Bare category shorthands (normalized to wildcard at runtime)
+  | "image"
+  | "video"
+  | "audio"
+  | "text"
+  | "application"
+  // Wildcard categories
+  | "image/*"
+  | "video/*"
+  | "audio/*"
+  | "text/*"
+  | "application/*"
+  // Images
+  | "image/jpeg"
+  | "image/png"
+  | "image/gif"
+  | "image/webp"
+  | "image/svg+xml"
+  | "image/heic"
+  | "image/bmp"
+  | "image/tiff"
+  | "image/avif"
+  // Videos
+  | "video/mp4"
+  | "video/webm"
+  | "video/quicktime"
+  // Audio
+  | "audio/mpeg"
+  | "audio/ogg"
+  | "audio/wav"
+  // Documents
+  | "application/pdf"
+  | "application/msword"
+  | "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+  | "application/vnd.ms-excel"
+  | "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+  | "application/vnd.ms-powerpoint"
+  | "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+  | "application/zip"
+  | "application/json"
+  // Text
+  | "text/plain"
+  | "text/csv"
+  | "text/html"
+  | "text/markdown"
+
+// ============================================================================
+// File Field Config and Type
+// ============================================================================
+
+/**
+ * F0 config options specific to file fields
+ */
+export interface F0FileConfig {
+  /**
+   * Accepted MIME types.
+   *
+   * @example
+   * accept: ["image"]                       // all image types
+   * accept: ["image/png", "image/jpeg"]     // specific types
+   * accept: ["image", "application/pdf"]    // mix of category and specific
+   */
+  accept?: MimeType[]
+  /** Maximum file size in megabytes (per file) */
+  maxSizeMB?: number
+  /** Allow multiple file uploads (form value becomes `string[]`) */
+  multiple?: boolean
+  /** Helper text shown in the dropzone area */
+  description?: string
+  /** Consumer-provided hook that returns upload capabilities */
+  useUpload: UseFileUpload
+}
+
+/**
+ * File field with all properties for rendering (runtime type)
+ */
+export type F0FileField = F0BaseField & {
+  type: "file"
+  /** Accepted MIME types */
+  accept?: MimeType[]
+  /** Maximum file size in megabytes */
+  maxSizeMB?: number
+  /** Allow multiple files */
+  multiple?: boolean
+  /** Dropzone description text */
+  description?: string
+  /** Consumer-provided upload hook */
+  useUpload: UseFileUpload
+  /** Conditional rendering */
+  renderIf?: FileFieldRenderIf
+}
+
+/**
+ * Metadata for a file that has been selected or uploaded
+ */
+export interface FileEntry {
+  /** Unique key for React list rendering */
+  key: string
+  /** The File object (available during/after upload) */
+  file: File
+  /** The signedId returned after successful upload */
+  signedId?: string
+  /** Error message if upload failed */
+  error?: string
+}
+
+/**
+ * Props for the FileUploadItem component
+ */
+export interface FileUploadItemProps {
+  /** The file to upload */
+  file: File
+  /** Consumer-provided upload hook */
+  useUpload: UseFileUpload
+  /** Called when upload completes successfully */
+  onUploadComplete: (signedId: string) => void
+  /** Called when the file is removed (cancels upload if in progress) */
+  onRemove: () => void
+  /** Called when upload fails */
+  onError: (error: string) => void
+  /** Whether the field is disabled */
+  disabled?: boolean
+  /** i18n strings */
+  translations: {
+    remove: string
+    uploading: string
+    processing: string
+    uploadFailed: string
+  }
+}

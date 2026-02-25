@@ -36,6 +36,7 @@ import { RichTextFieldRenderer } from "./richtext/RichTextFieldRenderer"
 import { SelectFieldRenderer } from "./select/SelectFieldRenderer"
 import { SwitchFieldRenderer } from "./switch/SwitchFieldRenderer"
 import { TextFieldRenderer } from "./text/TextFieldRenderer"
+import { FileFieldRenderer } from "./file/FileFieldRenderer"
 import { TextareaFieldRenderer } from "./textarea/TextareaFieldRenderer"
 
 interface FieldRendererProps {
@@ -182,6 +183,14 @@ function renderFieldInput({
         <RichTextFieldRenderer
           field={{ ...field, disabled: isDisabled }}
           formField={formField}
+        />
+      )
+    case "file":
+      return (
+        <FileFieldRenderer
+          field={{ ...field, disabled: isDisabled }}
+          formField={formField}
+          error={hasError}
         />
       )
     case "custom":

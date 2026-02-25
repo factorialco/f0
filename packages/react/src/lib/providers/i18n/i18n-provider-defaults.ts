@@ -427,6 +427,18 @@ export const defaultTranslations = {
         other: "{{count}} issues",
       },
     },
+    file: {
+      dropzone: "Drag and drop a file, or click to select",
+      dropzoneActive: "Drop the file here",
+      dropzoneMultiple: "Drag and drop files, or click to select",
+      acceptedTypes: "Accepted formats: {{types}}",
+      remove: "Remove",
+      uploading: "Uploading…",
+      processing: "Processing…",
+      uploadFailed: "Upload failed",
+      fileTooLarge: "File exceeds {{maxSize}} MB limit",
+      invalidFileType: "File type not accepted. Accepted formats: {{types}}",
+    },
     validation: {
       required: "This field is required",
       invalidType: "Invalid value",

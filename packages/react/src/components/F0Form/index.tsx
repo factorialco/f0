@@ -47,6 +47,7 @@ export type {
   F0ArrayConfig,
   F0CustomFieldConfig,
   F0RichTextFieldConfig,
+  F0FileFieldConfig,
 } from "./f0Schema"
 
 // Export field types and configs
@@ -79,6 +80,7 @@ export type {
   F0DateRangeConfig,
   F0RichTextConfig,
   F0CustomConfig,
+  F0FileConfig,
   // Field types
   F0TextField,
   F0NumberField,
@@ -89,7 +91,14 @@ export type {
   F0DateField,
   F0DateRangeField,
   F0RichTextField,
+  F0FileField,
   F0CustomField,
+  // Upload types
+  MimeType,
+  FileUploadResult,
+  FileUploadStatus,
+  FileUploadHookReturn,
+  UseFileUpload,
   // Other types
   RichTextValue,
   DateRangeValue,
