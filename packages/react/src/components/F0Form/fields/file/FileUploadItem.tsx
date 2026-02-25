@@ -14,11 +14,12 @@ function formatFileSize(bytes: number): string {
 }
 
 /**
- * Manages a single file's upload lifecycle.
- * Each instance calls the consumer's useUpload hook to get independent state.
+ * Renders a single file row. Handles two modes:
+ * - New upload (entry.file): triggers useUpload, shows progress
+ * - Pre-existing (entry.initialFile): displays immediately, no upload
  */
 export function FileUploadItem({
-  file,
+  entry,
   useUpload,
   onUploadComplete,
   onRemove,
@@ -26,18 +27,25 @@ export function FileUploadItem({
   disabled,
   translations,
 }: FileUploadItemProps) {
-  const { upload, cancelUpload, progress, status } = useUpload()
+  const isNewUpload = !!entry.file
+  const uploadHook = useUpload?.()
+  const upload = uploadHook?.upload
+  const cancelUpload = uploadHook?.cancelUpload
+  const progress = uploadHook?.progress ?? 0
+  const status = uploadHook?.status ?? "idle"
+
   const [error, setError] = useState<string | null>(null)
   const uploadStartedRef = useRef(false)
 
   const handleUpload = useCallback(async () => {
+    if (!isNewUpload || !entry.file || !upload) return
     if (uploadStartedRef.current) return
     uploadStartedRef.current = true
 
     try {
-      const result = await upload(file)
+      const result = await upload(entry.file)
       if (result.type === "success") {
-        onUploadComplete(result.signedId)
+        onUploadComplete(result.value)
       } else {
         onRemove()
       }
@@ -46,34 +54,52 @@ export function FileUploadItem({
       setError(msg)
       onError(msg)
     }
-  }, [upload, file, onUploadComplete, onRemove, onError, translations])
+  }, [
+    isNewUpload,
+    entry.file,
+    upload,
+    onUploadComplete,
+    onRemove,
+    onError,
+    translations,
+  ])
 
   useEffect(() => {
-    handleUpload()
-  }, [handleUpload])
+    if (isNewUpload) {
+      handleUpload()
+    }
+  }, [isNewUpload, handleUpload])
 
   const handleRemove = useCallback(() => {
-    if (status === "uploading" || status === "processing") {
+    if (isNewUpload && (status === "uploading" || status === "processing")) {
       cancelUpload?.()
     }
     onRemove()
-  }, [status, cancelUpload, onRemove])
+  }, [isNewUpload, status, cancelUpload, onRemove])
 
-  const isUploading = status === "uploading" || status === "processing"
+  const isUploading =
+    isNewUpload && (status === "uploading" || status === "processing")
   const progressPercent = Math.round(progress * 100)
+
+  const fileDef = entry.file ?? {
+    name: entry.initialFile?.name ?? "",
+    type: entry.initialFile?.type ?? "",
+  }
+  const fileName = entry.file?.name ?? entry.initialFile?.name ?? ""
+  const fileSize = entry.file?.size ?? entry.initialFile?.size
 
   return (
     <div
       className={cn(
-        "flex items-center gap-3 rounded-lg border border-solid border-f1-border-secondary px-3 py-2",
+        "flex items-center gap-3 rounded-lg border border-solid border-f1-border-secondary px-2.5 py-2",
         error && "border-f1-border-critical"
       )}
     >
-      <F0AvatarFile file={file} size="md" />
+      <F0AvatarFile file={fileDef} size="md" />
 
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
         <span className="truncate text-base font-medium text-f1-foreground">
-          {file.name}
+          {fileName}
         </span>
         <span className="text-sm text-f1-foreground-secondary">
           {error
@@ -82,7 +108,9 @@ export function FileUploadItem({
               ? status === "processing"
                 ? translations.processing
                 : `${translations.uploading} ${progressPercent}%`
-              : formatFileSize(file.size)}
+              : fileSize != null
+                ? formatFileSize(fileSize)
+                : null}
         </span>
 
         {isUploading && (

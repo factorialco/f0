@@ -849,7 +849,7 @@ function useMockUpload(): FileUploadHookReturn {
       setProgress(i / 10)
     }
     setStatus("success")
-    return { type: "success", signedId: `signed_${file.name}_${Date.now()}` }
+    return { type: "success", value: `signed_${file.name}_${Date.now()}` }
   }, [])
 
   const cancelUpload = useCallback(() => {
@@ -916,6 +916,72 @@ export const FileFields: Story = {
           return { success: true, message: "Document saved" }
         }}
         submitConfig={{ label: "Save Document" }}
+      />
+    )
+  },
+}
+
+/**
+ * File field with pre-existing files loaded via `initialFiles` on F0Form.
+ * The shared pool is automatically matched to each file field by comparing
+ * `InitialFile.value` against the field's `defaultValues`.
+ */
+export const FileFieldsWithInitialFiles: Story = {
+  render() {
+    const formSchema = z.object({
+      document: f0FormField(z.string().min(1, "Please upload a file"), {
+        label: "Contract Document",
+        fieldType: "file",
+        accept: ["application/pdf"],
+        useUpload: useMockUpload,
+      }),
+      attachments: f0FormField(
+        z.array(z.string()).min(1, "Upload at least one file"),
+        {
+          label: "Supporting Documents",
+          fieldType: "file",
+          multiple: true,
+          accept: ["application/pdf", "image"],
+          maxSizeMB: 50,
+          useUpload: useMockUpload,
+        }
+      ),
+    })
+
+    return (
+      <F0Form
+        name="file-initial"
+        schema={formSchema}
+        defaultValues={{
+          document: "signed_contract_2024.pdf",
+          attachments: ["signed_invoice.pdf", "signed_receipt.png"],
+        }}
+        initialFiles={[
+          {
+            value: "signed_contract_2024.pdf",
+            name: "contract_2024.pdf",
+            type: "application/pdf",
+            size: 2_500_000,
+          },
+          {
+            value: "signed_invoice.pdf",
+            name: "invoice_march.pdf",
+            type: "application/pdf",
+            size: 1_200_000,
+          },
+          {
+            value: "signed_receipt.png",
+            name: "receipt_photo.png",
+            type: "image/png",
+            size: 850_000,
+          },
+        ]}
+        onSubmit={async (data) => {
+          await sleep(1000)
+          console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+          return { success: true, message: "Document updated" }
+        }}
+        submitConfig={{ label: "Update Document" }}
       />
     )
   },

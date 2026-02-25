@@ -52,7 +52,7 @@ function createMockUploadHook(
 
         setProgress(1)
         setStatus("success")
-        return { type: "success", signedId: `signed_${file.name}` }
+        return { type: "success", value: `signed_${file.name}` }
       },
       [delay, shouldFail]
     )
@@ -386,6 +386,228 @@ describe("FileFieldRenderer", () => {
       name: /drag and drop/i,
     })
     expect(dropzone).toHaveAttribute("aria-disabled", "true")
+  })
+
+  it("renders a single initial file without uploading", () => {
+    const schema = z.object({
+      file: f0FormField(z.string().min(1), {
+        label: "Contract",
+        fieldType: "file",
+        useUpload: createMockUploadHook(),
+      }),
+    })
+
+    render(
+      <F0Form
+        name="test-initial-single"
+        schema={schema}
+        defaultValues={{ file: "existing_contract.pdf" }}
+        initialFiles={[
+          {
+            value: "existing_contract.pdf",
+            name: "contract_2024.pdf",
+            type: "application/pdf",
+            size: 2_500_000,
+          },
+        ]}
+        onSubmit={async () => ({ success: true })}
+      />
+    )
+
+    expect(screen.getByText("contract_2024.pdf")).toBeInTheDocument()
+    expect(screen.getByText("2.4 MB")).toBeInTheDocument()
+
+    expect(
+      screen.queryByText("Drag and drop a file, or click to select")
+    ).not.toBeInTheDocument()
+  })
+
+  it("removes a single initial file and restores the dropzone", async () => {
+    const onSubmit = vi.fn(async () => ({ success: true }))
+
+    const schema = z.object({
+      file: f0FormField(z.string().optional(), {
+        label: "Contract",
+        fieldType: "file",
+        useUpload: createMockUploadHook(),
+      }),
+    })
+
+    render(
+      <F0Form
+        name="test-initial-remove"
+        schema={schema}
+        defaultValues={{ file: "existing_contract.pdf" }}
+        initialFiles={[
+          {
+            value: "existing_contract.pdf",
+            name: "contract_2024.pdf",
+            type: "application/pdf",
+            size: 2_500_000,
+          },
+        ]}
+        onSubmit={onSubmit}
+        submitConfig={{ label: "Save" }}
+      />
+    )
+
+    expect(screen.getByText("contract_2024.pdf")).toBeInTheDocument()
+
+    const removeButton = screen.getByLabelText("Remove")
+    await userEvent.click(removeButton)
+
+    await waitFor(() => {
+      expect(screen.queryByText("contract_2024.pdf")).not.toBeInTheDocument()
+    })
+
+    await waitFor(() => {
+      expect(
+        screen.getByText("Drag and drop a file, or click to select")
+      ).toBeInTheDocument()
+    })
+  })
+
+  it("renders multiple initial files with dropzone still visible", () => {
+    const schema = z.object({
+      files: f0FormField(z.array(z.string()), {
+        label: "Attachments",
+        fieldType: "file",
+        multiple: true,
+        useUpload: createMockUploadHook(),
+      }),
+    })
+
+    render(
+      <F0Form
+        name="test-initial-multi"
+        schema={schema}
+        defaultValues={{ files: ["invoice_id", "receipt_id"] }}
+        initialFiles={[
+          {
+            value: "invoice_id",
+            name: "invoice.pdf",
+            type: "application/pdf",
+            size: 1_200_000,
+          },
+          {
+            value: "receipt_id",
+            name: "receipt.png",
+            type: "image/png",
+            size: 850_000,
+          },
+        ]}
+        onSubmit={async () => ({ success: true })}
+      />
+    )
+
+    expect(screen.getByText("invoice.pdf")).toBeInTheDocument()
+    expect(screen.getByText("receipt.png")).toBeInTheDocument()
+
+    expect(
+      screen.getByText("Drag and drop files, or click to select")
+    ).toBeInTheDocument()
+  })
+
+  it("removes one initial file from a multi-file field and submits the rest", async () => {
+    const onSubmit = vi.fn(async () => ({ success: true }))
+
+    const schema = z.object({
+      files: f0FormField(z.array(z.string()), {
+        label: "Attachments",
+        fieldType: "file",
+        multiple: true,
+        useUpload: createMockUploadHook(),
+      }),
+    })
+
+    render(
+      <F0Form
+        name="test-initial-multi-remove"
+        schema={schema}
+        defaultValues={{ files: ["invoice_id", "receipt_id"] }}
+        initialFiles={[
+          {
+            value: "invoice_id",
+            name: "invoice.pdf",
+            type: "application/pdf",
+            size: 1_200_000,
+          },
+          {
+            value: "receipt_id",
+            name: "receipt.png",
+            type: "image/png",
+            size: 850_000,
+          },
+        ]}
+        onSubmit={onSubmit}
+        submitConfig={{ label: "Save" }}
+      />
+    )
+
+    expect(screen.getByText("invoice.pdf")).toBeInTheDocument()
+    expect(screen.getByText("receipt.png")).toBeInTheDocument()
+
+    const removeButtons = screen.getAllByLabelText("Remove")
+    await userEvent.click(removeButtons[0])
+
+    await waitFor(() => {
+      expect(screen.queryByText("invoice.pdf")).not.toBeInTheDocument()
+    })
+
+    expect(screen.getByText("receipt.png")).toBeInTheDocument()
+
+    const submitButton = screen.getByText("Save")
+    await userEvent.click(submitButton)
+
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalledWith(
+        expect.objectContaining({
+          files: ["receipt_id"],
+        })
+      )
+    })
+  })
+
+  it("submits initial file values without re-uploading", async () => {
+    const onSubmit = vi.fn(async () => ({ success: true }))
+
+    const schema = z.object({
+      file: f0FormField(z.string().min(1), {
+        label: "Document",
+        fieldType: "file",
+        useUpload: createMockUploadHook(),
+      }),
+    })
+
+    render(
+      <F0Form
+        name="test-initial-submit"
+        schema={schema}
+        defaultValues={{ file: "https://cdn.example.com/contract.pdf" }}
+        initialFiles={[
+          {
+            value: "https://cdn.example.com/contract.pdf",
+            name: "contract.pdf",
+            type: "application/pdf",
+          },
+        ]}
+        onSubmit={onSubmit}
+        submitConfig={{ label: "Save" }}
+      />
+    )
+
+    expect(screen.getByText("contract.pdf")).toBeInTheDocument()
+
+    const submitButton = screen.getByText("Save")
+    await userEvent.click(submitButton)
+
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalledWith(
+        expect.objectContaining({
+          file: "https://cdn.example.com/contract.pdf",
+        })
+      )
+    })
   })
 
   it("handles multiple file uploads", async () => {

@@ -82,6 +82,7 @@ interface F0FormSectionProps<TSchema extends F0FormSchema> {
   submitConfig?: F0PerSectionSubmitConfig
   errorTriggerMode: F0FormErrorTriggerMode
   className?: string
+  initialFiles?: import("../fields/file/types").InitialFile[]
 }
 
 /**
@@ -98,6 +99,7 @@ export function F0FormSection<TSchema extends F0FormSchema>({
   submitConfig,
   errorTriggerMode,
   className,
+  initialFiles,
 }: F0FormSectionProps<TSchema>) {
   const i18n = useI18n()
 
@@ -159,7 +161,10 @@ export function F0FormSection<TSchema extends F0FormSchema>({
 
   const groupedItems = groupContiguousSwitches(definition)
 
-  const contextValue = useMemo(() => ({ formName }), [formName])
+  const contextValue = useMemo(
+    () => ({ formName, initialFiles }),
+    [formName, initialFiles]
+  )
 
   const title = sectionConfig?.title ?? sectionId
   const description = sectionConfig?.description

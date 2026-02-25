@@ -9,10 +9,11 @@ import type {
 // ============================================================================
 
 /**
- * Result of a file upload operation
+ * Result of a file upload operation.
+ * `value` is the identifier stored as the form value (e.g. a signedId, URL, or any string).
  */
 export type FileUploadResult =
-  | { type: "success"; signedId: string }
+  | { type: "success"; value: string }
   | { type: "aborted" }
 
 /**
@@ -124,6 +125,25 @@ export type MimeType =
   | "text/markdown"
 
 // ============================================================================
+// Initial File (pre-existing)
+// ============================================================================
+
+/**
+ * Metadata for a file that already exists (e.g. from a previous upload).
+ * Passed via `initialFiles` so the field can display it without re-uploading.
+ */
+export interface InitialFile {
+  /** The identifier that matches the form's default value (signedId, URL, etc.) */
+  value: string
+  /** Display name (e.g. "report.pdf") */
+  name: string
+  /** MIME type for icon display (e.g. "application/pdf") */
+  type?: string
+  /** File size in bytes */
+  size?: number
+}
+
+// ============================================================================
 // File Field Config and Type
 // ============================================================================
 
@@ -170,15 +190,17 @@ export type F0FileField = F0BaseField & {
 }
 
 /**
- * Metadata for a file that has been selected or uploaded
+ * Metadata for a file that has been selected, uploaded, or pre-existing
  */
 export interface FileEntry {
   /** Unique key for React list rendering */
   key: string
-  /** The File object (available during/after upload) */
-  file: File
-  /** The signedId returned after successful upload */
-  signedId?: string
+  /** The File object — present for new uploads, absent for pre-existing files */
+  file?: File
+  /** Pre-existing file metadata — present when seeded from `initialFiles` */
+  initialFile?: InitialFile
+  /** The form value returned after successful upload, or from initialFile */
+  value?: string
   /** Error message if upload failed */
   error?: string
 }
@@ -187,12 +209,12 @@ export interface FileEntry {
  * Props for the FileUploadItem component
  */
 export interface FileUploadItemProps {
-  /** The file to upload */
-  file: File
-  /** Consumer-provided upload hook */
-  useUpload: UseFileUpload
-  /** Called when upload completes successfully */
-  onUploadComplete: (signedId: string) => void
+  /** The file entry (new upload or pre-existing) */
+  entry: FileEntry
+  /** Consumer-provided upload hook — only needed for new uploads */
+  useUpload?: UseFileUpload
+  /** Called when upload completes successfully with the form value */
+  onUploadComplete: (value: string) => void
   /** Called when the file is removed (cancels upload if in progress) */
   onRemove: () => void
   /** Called when upload fails */

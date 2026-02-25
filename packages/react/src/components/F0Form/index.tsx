@@ -95,6 +95,7 @@ export type {
   F0CustomField,
   // Upload types
   MimeType,
+  InitialFile,
   FileUploadResult,
   FileUploadStatus,
   FileUploadHookReturn,

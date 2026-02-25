@@ -6,8 +6,9 @@ import { Upload } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 import { cn, focusRing } from "@/lib/utils"
 
+import { useF0FormContext } from "../../context"
 import type { ResolvedField } from "../types"
-import type { F0FileField, FileEntry } from "./types"
+import type { F0FileField, FileEntry, InitialFile } from "./types"
 
 import { FileUploadItem } from "./FileUploadItem"
 
@@ -100,28 +101,57 @@ interface FileFieldRendererProps {
  * Renders a file upload field with native drag-and-drop dropzone.
  * Supports single and multiple file modes.
  */
+function resolveInitialEntries(
+  pool: InitialFile[] | undefined,
+  formValue: unknown,
+  isMultiple: boolean
+): FileEntry[] {
+  if (!pool?.length) return []
+
+  const values: string[] = isMultiple
+    ? Array.isArray(formValue)
+      ? formValue
+      : []
+    : typeof formValue === "string" && formValue
+      ? [formValue]
+      : []
+
+  if (values.length === 0) return []
+
+  const lookup = new Map(pool.map((f) => [f.value, f]))
+
+  return values
+    .map((v) => lookup.get(v))
+    .filter((f): f is InitialFile => f != null)
+    .map((f) => ({
+      key: `initial-${f.value}`,
+      initialFile: f,
+      value: f.value,
+    }))
+}
+
 export function FileFieldRenderer({
   field,
   formField,
   error,
 }: FileFieldRendererProps) {
   const { forms } = useI18n()
+  const { initialFiles: initialFilesPool } = useF0FormContext()
   const inputId = useId()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [isDragOver, setIsDragOver] = useState(false)
-  const [entries, setEntries] = useState<FileEntry[]>([])
+  const isMultiple = field.multiple ?? false
+  const [entries, setEntries] = useState<FileEntry[]>(() =>
+    resolveInitialEntries(initialFilesPool, formField.value, isMultiple)
+  )
   const [validationError, setValidationError] = useState<string | null>(null)
 
   const translations = forms.file
 
-  const isMultiple = field.multiple ?? false
   const hasFiles = entries.length > 0
-  const hasValue = isMultiple
-    ? Array.isArray(formField.value) && formField.value.length > 0
-    : !!formField.value
 
-  // In single mode, hide dropzone once a file is selected
-  const showDropzone = isMultiple || (!hasFiles && !hasValue)
+  // In single mode, hide dropzone once a file entry exists
+  const showDropzone = isMultiple || !hasFiles
 
   const acceptString = field.accept
     ? field.accept.map(normalizeMime).join(",")
@@ -247,20 +277,18 @@ export function FileFieldRenderer({
   )
 
   const handleUploadComplete = useCallback(
-    (key: string, signedId: string) => {
+    (key: string, value: string) => {
       setEntries((prev) =>
-        prev.map((entry) =>
-          entry.key === key ? { ...entry, signedId } : entry
-        )
+        prev.map((entry) => (entry.key === key ? { ...entry, value } : entry))
       )
 
       if (isMultiple) {
         const currentValue: string[] = Array.isArray(formField.value)
           ? formField.value
           : []
-        formField.onChange([...currentValue, signedId])
+        formField.onChange([...currentValue, value])
       } else {
-        formField.onChange(signedId)
+        formField.onChange(value)
       }
     },
     [isMultiple, formField]
@@ -271,12 +299,12 @@ export function FileFieldRenderer({
       const entry = entries.find((e) => e.key === key)
       setEntries((prev) => prev.filter((e) => e.key !== key))
 
-      if (entry?.signedId) {
+      if (entry?.value) {
         if (isMultiple) {
           const currentValue: string[] = Array.isArray(formField.value)
             ? formField.value
             : []
-          formField.onChange(currentValue.filter((id) => id !== entry.signedId))
+          formField.onChange(currentValue.filter((id) => id !== entry.value))
         } else {
           formField.onChange(undefined)
         }
@@ -368,10 +396,10 @@ export function FileFieldRenderer({
           {entries.map((entry) => (
             <FileUploadItem
               key={entry.key}
-              file={entry.file}
-              useUpload={field.useUpload}
-              onUploadComplete={(signedId) =>
-                handleUploadComplete(entry.key, signedId)
+              entry={entry}
+              useUpload={entry.file ? field.useUpload : undefined}
+              onUploadComplete={(value) =>
+                handleUploadComplete(entry.key, value)
               }
               onRemove={() => handleRemove(entry.key)}
               onError={(msg) => handleUploadError(entry.key, msg)}

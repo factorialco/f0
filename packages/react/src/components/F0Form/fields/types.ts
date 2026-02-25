@@ -181,6 +181,7 @@ export type {
 } from "./custom/types"
 export type {
   MimeType,
+  InitialFile,
   F0FileConfig,
   F0FileField,
   FileUploadResult,

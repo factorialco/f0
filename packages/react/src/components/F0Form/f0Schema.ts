@@ -342,7 +342,7 @@ export type F0RichTextFieldConfig = F0BaseConfig &
   }
 
 /**
- * Config for file fields (single file upload, form value is signedId string)
+ * Config for file fields (single file upload, form value is a string identifier)
  */
 export type F0StringFileConfig = F0BaseConfig &
   F0FileConfig & {
