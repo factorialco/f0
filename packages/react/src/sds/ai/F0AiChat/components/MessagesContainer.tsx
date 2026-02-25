@@ -149,11 +149,11 @@ const Messages = ({
         >
           <div
             ref={contentRef}
-            className="flex h-full flex-col items-center py-4 pl-4 pr-3"
+            className="flex h-full flex-col items-center py-4 pl-4 pr-1.5"
           >
             <div
               className={cn(
-                showWelcomeBlock ? "flex flex-1" : "flex flex-col gap-8",
+                showWelcomeBlock ? "flex flex-1" : "flex flex-col gap-6",
                 "w-full max-w-[712px]"
               )}
             >
