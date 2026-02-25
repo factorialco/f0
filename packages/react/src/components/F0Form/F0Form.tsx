@@ -116,6 +116,7 @@ function F0FormPerSection<T extends F0PerSectionSchema>(
     className,
     errorTriggerMode = "on-blur",
     styling,
+    initialFiles,
   } = props
 
   const showSectionsSidepanel = styling?.showSectionsSidepanel ?? false
@@ -177,6 +178,7 @@ function F0FormPerSection<T extends F0PerSectionSchema>(
               onSubmit={(data) => onSubmit(sectionId, data)}
               submitConfig={perSectionSubmitConfig}
               errorTriggerMode={errorTriggerMode}
+              initialFiles={initialFiles}
             />
           </div>
         )
@@ -544,7 +546,10 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
   const groupedItems = groupContiguousSwitches(definition)
 
   // Context value for anchor links
-  const contextValue = useMemo(() => ({ formName: name }), [name])
+  const contextValue = useMemo(
+    () => ({ formName: name, initialFiles: props.initialFiles }),
+    [name, props.initialFiles]
+  )
 
   // Form content component to avoid repetition
   const formContent = (

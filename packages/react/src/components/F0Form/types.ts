@@ -6,6 +6,7 @@ import type {
   F0Field,
   F0BaseFieldRenderIfFunction,
   RenderIfCondition,
+  InitialFile,
 } from "./fields/types"
 
 // Re-export F0 schema types
@@ -286,6 +287,12 @@ export interface F0FormPropsWithSingleSchema<TSchema extends F0FormSchema> {
    * Use with the `useF0Form` hook to get a ref and submit/reset functions.
    */
   formRef?: React.MutableRefObject<F0FormRef | null>
+  /**
+   * Pre-existing file metadata shared across all file fields.
+   * Each file field automatically resolves its entries by matching
+   * `defaultValues` against `InitialFile.value`.
+   */
+  initialFiles?: InitialFile[]
 }
 
 /**
@@ -353,6 +360,12 @@ export interface F0FormPropsWithPerSectionSchema<T extends F0PerSectionSchema> {
    * Ref to control the form programmatically from outside.
    */
   formRef?: React.MutableRefObject<F0FormRef | null>
+  /**
+   * Pre-existing file metadata shared across all file fields.
+   * Each file field automatically resolves its entries by matching
+   * `defaultValues` against `InitialFile.value`.
+   */
+  initialFiles?: InitialFile[]
 }
 
 /**
