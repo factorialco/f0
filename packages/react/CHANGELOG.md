@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.382.0](https://github.com/factorialco/f0/compare/f0-react-v1.381.0...f0-react-v1.382.0) (2026-02-25)
+
+
+### Features
+
+* add support for file field type in F0Form ([#3520](https://github.com/factorialco/f0/issues/3520)) ([082bb29](https://github.com/factorialco/f0/commit/082bb29491c25577f6f661543e37730b0bca177b))
+
 ## [1.381.0](https://github.com/factorialco/f0/compare/f0-react-v1.380.0...f0-react-v1.381.0) (2026-02-25)
 
 
