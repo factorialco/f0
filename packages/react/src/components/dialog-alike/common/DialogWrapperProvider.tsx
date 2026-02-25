@@ -20,6 +20,7 @@ export type DialogWrapperContextType = {
  */
 export type DialogWrapperProviderProps = {
   isOpen: boolean
+  dataTestId?: string
   onClose: () => void
   shownBottomSheet?: boolean
   position: Position
@@ -51,6 +52,7 @@ export const DialogWrapperProvider = ({
         position,
         shownBottomSheet,
         portalContainer,
+        dataTestId,
       }}
     >
       {children}

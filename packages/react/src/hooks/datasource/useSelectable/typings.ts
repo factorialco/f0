@@ -69,6 +69,12 @@ export type UseSelectableProps<
    * - itemStatus only includes items from the current page
    */
   allPagesSelection?: boolean
+  /**
+   * When true (default), clears selection when the page changes
+   * (unless all items are selected). Set to false to persist
+   * selections across page changes unconditionally.
+   */
+  resetOnPageChange?: boolean
 }
 
 export type SelectionMeta<R extends RecordType> = {
@@ -113,9 +119,14 @@ export type UseSelectableReturn<
     checked: boolean
   ) => void
   /**
-   * Handles the change of the selected all items
+   * Handles "select all" for the current page only
    */
   handleSelectAll: (checked: boolean) => void
+  /**
+   * Handles "select all items" across all pages (full dataset).
+   * Only meaningful when allPagesSelection is enabled.
+   */
+  handleSelectAllItems: (checked: boolean) => void
   /**
    * Handles the change of the selected group.
    * Accepts either SelectionId(s) or a GroupRecord.

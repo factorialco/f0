@@ -1,6 +1,8 @@
 import { StoryFn, StoryObj } from "@storybook/react-vite"
+import { expect, within } from "storybook/test"
 
 import { CheckDouble, ExternalLink } from "@/icons/app"
+import { WithDataTestIdProps } from "@/lib/data-testid"
 
 import { F0AiBanner, F0AiBannerProps } from "."
 import { AiBannerSkeleton } from "./AiBannerInternal"
@@ -81,6 +83,17 @@ export const Skeleton: StoryObj = {
 
 export const SkeletonCompact: StoryObj = {
   render: () => <AiBannerSkeleton compact />,
+}
+
+export const WithDataTestId: StoryObj<F0AiBannerProps & WithDataTestIdProps> = {
+  args: {
+    ...Default.args,
+    dataTestId: "ai-banner-test-id",
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await expect(canvas.getByTestId("ai-banner-test-id")).toBeInTheDocument()
+  },
 }
 
 export default meta

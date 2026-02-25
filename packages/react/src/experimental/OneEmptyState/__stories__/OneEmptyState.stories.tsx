@@ -1,7 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { Plus } from "lucide-react"
-import { fn } from "storybook/test"
+import { expect, fn, within } from "storybook/test"
+
+import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
 
 import { OneEmptyState } from "../OneEmptyState"
 
@@ -9,6 +11,9 @@ const meta = {
   component: OneEmptyState,
   title: "EmptyState",
   tags: ["autodocs", "experimental"],
+  argTypes: {
+    ...dataTestIdArgs,
+  },
 } satisfies Meta<typeof OneEmptyState>
 
 export default meta
@@ -27,6 +32,18 @@ export const Basic: Story = {
         icon: Plus,
       },
     ],
+  },
+}
+
+export const WithDataTestId: Story = {
+  args: {
+    title: "EmptyState with Test ID",
+    description: "Start by adding your first item.",
+    dataTestId: "my-test-empty-state",
+  },
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const canvas = within(canvasElement)
+    await expect(canvas.getByTestId("my-test-empty-state")).toBeInTheDocument()
   },
 }
 

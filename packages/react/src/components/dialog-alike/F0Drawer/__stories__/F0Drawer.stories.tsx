@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { ComponentProps, FC, useState } from "react"
+import { expect, within } from "storybook/test"
 
 import { F0Button } from "@/components/F0Button"
 import { ResourceHeader } from "@/experimental/Information/Headers/ResourceHeader"
@@ -13,6 +14,7 @@ import { Default as OnePersonListItemDefault } from "@/experimental/Lists/OnePer
 import { Placeholder } from "@/icons/app"
 import SaveIcon from "@/icons/app/Save"
 import ShareIcon from "@/icons/app/Share"
+import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
 
 import { getDialogAlikeArgTypes } from "../../common/__stories__/argsTypes"
 import { OTHER_ACTIONS, TABS } from "../../common/__stories__/mocks"
@@ -48,6 +50,7 @@ const meta: Meta<typeof F0Drawer> = {
         defaultValue: { summary: "md" },
       },
     },
+    ...dataTestIdArgs,
   },
   decorators: [
     (Story, { args: { isOpen, ...rest } }) => {
@@ -102,7 +105,21 @@ export const Default: Story = {
   },
 }
 
-export const LeftPosition: Story = {
+export const WithDataTestId: Story = {
+  args: {
+    isOpen: true,
+    onClose: () => {},
+    title: "Dialog with Test ID",
+    dataTestId: "my-test-dialog",
+    children: <ExampleList itemsCount={2} />,
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await expect(canvas.getByTestId("my-test-dialog")).toBeInTheDocument()
+  },
+}
+
+export const WithSmWidth: Story = {
   args: {
     ...Default.args,
     position: "left",

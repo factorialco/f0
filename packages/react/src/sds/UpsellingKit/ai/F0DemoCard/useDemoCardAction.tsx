@@ -56,7 +56,7 @@ export const useDemoCardAction = () => {
         required: false,
       },
     ],
-    available: "disabled",
+    available: "frontend",
     render: (props) => {
       const args = props.args as DemoCardArgs
       const url = args.previewMediaUrl

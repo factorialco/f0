@@ -1283,6 +1283,7 @@ export const ExampleComponent = ({
       className={cn("space-y-4", fullHeight && "max-h-full w-full bg-[#fff]")}
     >
       <OneDataCollection
+        dataTestId={`one-data-collection-${id ?? "example"}`}
         tmpFullWidth={tmpFullWidth}
         id={id}
         storage={storage}

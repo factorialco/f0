@@ -1,3 +1,5 @@
+import { WithDataTestIdProps } from "@/lib/data-testid"
+
 import { dialogAlikePrivateProps } from "../common/types"
 import { DialogInternal } from "./internal/DialogInternal"
 import { DialogInternalProps } from "./internal/internal-types"
@@ -7,13 +9,19 @@ const privateProps = dialogAlikePrivateProps
 export type F0DialogProps = Omit<
   DialogInternalProps,
   (typeof privateProps)[number]
->
+> &
+  WithDataTestIdProps
 
 const F0Dialog = (props: F0DialogProps) => {
-  const publicProps = privateProps.reduce<DialogInternalProps>((acc, key) => {
-    const { [key as keyof DialogInternalProps]: _, ...rest } = acc
-    return rest as DialogInternalProps
-  }, props as DialogInternalProps)
+  const publicProps = privateProps.reduce<
+    DialogInternalProps & WithDataTestIdProps
+  >(
+    (acc, key) => {
+      const { [key as keyof DialogInternalProps]: _, ...rest } = acc
+      return rest as DialogInternalProps & WithDataTestIdProps
+    },
+    props as DialogInternalProps & WithDataTestIdProps
+  )
 
   return <DialogInternal {...publicProps} />
 }

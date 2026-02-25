@@ -1,12 +1,14 @@
 import { FC, useEffect, useMemo, useState } from "react"
 
+import { withDataTestId } from "@/lib/data-testid"
+
 import { Content } from "../../common/Content"
 import { Footer } from "../../common/Footer"
 import { Header } from "../../common/Header"
 import { DialogWrapper } from "../../common/Wrapper"
 import { DrawerInternalProps } from "./internal-types"
 
-export const DrawerInternal: FC<DrawerInternalProps> = ({
+const DrawerInternalBase: FC<DrawerInternalProps> = ({
   disableClose = false,
   onClose,
   isOpen,
@@ -83,3 +85,5 @@ export const DrawerInternal: FC<DrawerInternalProps> = ({
     </DialogWrapper>
   )
 }
+
+export const DrawerInternal = withDataTestId(DrawerInternalBase)

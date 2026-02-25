@@ -1,6 +1,11 @@
 import type { Meta } from "@storybook/react-vite"
+import { ComponentType } from "react"
 
-import { RadarChart } from "./index"
+import { expect, within } from "storybook/test"
+
+import { WithDataTestIdProps } from "@/lib/data-testid"
+
+import { RadarChart, RadarChartProps } from "./index"
 
 const dataConfig = {
   113: {
@@ -11,9 +16,11 @@ const dataConfig = {
   },
 }
 
-const meta: Meta<typeof RadarChart<typeof dataConfig>> = {
+const meta: Meta<RadarChartProps<typeof dataConfig> & WithDataTestIdProps> = {
   title: "Charts/RadarChart",
-  component: RadarChart,
+  component: RadarChart as unknown as ComponentType<
+    RadarChartProps<typeof dataConfig> & WithDataTestIdProps
+  >,
   tags: ["autodocs", "experimental"],
   args: {
     dataConfig,
@@ -54,5 +61,16 @@ export const WithCustomScale = {
     dataConfig,
     scaleMin: 1,
     scaleMax: 10,
+  },
+}
+
+export const WithDataTestId = {
+  args: {
+    ...meta.args,
+    dataTestId: "radar-chart-test-id",
+  },
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const canvas = within(canvasElement)
+    await expect(canvas.getByTestId("radar-chart-test-id")).toBeInTheDocument()
   },
 }

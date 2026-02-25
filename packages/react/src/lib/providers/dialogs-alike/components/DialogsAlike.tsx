@@ -137,6 +137,7 @@ export const DialogsAlike = ({ items }: DialogsAlikeProps) => {
               modal={item.modal}
               position={item.position}
               module={item.module}
+              dataTestId={item.dataTestId}
             >
               {item.content}
             </DrawerInternal>
@@ -153,6 +154,7 @@ export const DialogsAlike = ({ items }: DialogsAlikeProps) => {
               secondaryAction={item.actions.secondary}
               modal={item.modal}
               module={item.module}
+              dataTestId={item.dataTestId}
             >
               {item.content}
             </DialogInternal>

@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { useState } from "react"
-import { fn } from "storybook/test"
+import { expect, fn, within } from "storybook/test"
 
 import { Placeholder } from "@/icons/app"
 
@@ -240,5 +240,28 @@ export const HideChildrenCounter: Story = {
         story: "Shows how to hide the children counter.",
       },
     },
+  },
+}
+
+export const WithDataTestId: Story = {
+  render: (args) => {
+    const [activeItem, setActiveItem] = useState("nested-child-1")
+
+    return (
+      <F0TableOfContent
+        {...args}
+        dataTestId="toc-test-id"
+        items={mockTOCData(setActiveItem)}
+        activeItem={activeItem}
+        className="h-full"
+        onReorder={(order) => {
+          console.log("Items reordered:", order)
+        }}
+      />
+    )
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await expect(canvas.getByTestId("toc-test-id")).toBeInTheDocument()
   },
 }

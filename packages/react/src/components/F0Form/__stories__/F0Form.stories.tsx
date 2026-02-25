@@ -60,8 +60,8 @@ export const Default: Story = {
         defaultValues={{ username: "", email: "", bio: "" }}
         onSubmit={async (data) => {
           await sleep(1000)
-          alert(`Form submitted: ${JSON.stringify(data, null, 2)}`)
-          return { success: true }
+          console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+          return { success: true, message: "Account created successfully" }
         }}
         submitConfig={{ label: "Create Account" }}
       />
@@ -118,7 +118,7 @@ export const WithRows: Story = {
         }}
         onSubmit={async (data) => {
           await sleep(1000)
-          alert(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+          console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
           return { success: true }
         }}
       />
@@ -194,8 +194,8 @@ export const WithSections: Story = {
         }}
         onSubmit={async (data) => {
           await sleep(1000)
-          alert(`Form submitted: ${JSON.stringify(data, null, 2)}`)
-          return { success: true }
+          console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+          return { success: true, message: "Profile saved" }
         }}
       />
     )
@@ -303,7 +303,9 @@ export const WithSectionsSidepanel: Story = {
         action: {
           label: "Privacy settings",
           icon: Settings,
-          onClick: () => alert("Opening privacy settings..."),
+          onClick: () => {
+            console.info("Opening privacy settings...")
+          },
         },
       },
       editors: {
@@ -333,7 +335,7 @@ export const WithSectionsSidepanel: Story = {
         }}
         onSubmit={async (data) => {
           await sleep(1000)
-          alert(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+          console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
           return { success: true }
         }}
         submitConfig={{ label: "Save Survey" }}
@@ -396,7 +398,7 @@ export const ConditionalRendering: Story = {
         }}
         onSubmit={async (data) => {
           await sleep(1000)
-          alert(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+          console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
           return { success: true }
         }}
       />
@@ -495,7 +497,7 @@ export const DynamicDisabled: Story = {
         }}
         onSubmit={async (data) => {
           await sleep(1000)
-          alert(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+          console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
           return { success: true }
         }}
       />
@@ -642,7 +644,7 @@ export const AllFieldTypes: Story = {
         }}
         onSubmit={async (data) => {
           await sleep(1000)
-          alert(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+          console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
           return { success: true }
         }}
       />
@@ -816,7 +818,7 @@ export const AllFieldTypesDisabled: Story = {
         }}
         onSubmit={async (data) => {
           await sleep(1000)
-          alert(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+          console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
           return { success: true }
         }}
       />
@@ -946,7 +948,7 @@ export const CustomField: Story = {
         }}
         onSubmit={async (data) => {
           await sleep(1000)
-          alert(`Task created: ${JSON.stringify(data, null, 2)}`)
+          console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
           return { success: true }
         }}
         submitConfig={{ label: "Create Task", icon: null }}
@@ -997,7 +999,7 @@ export const ServerValidation: Story = {
             }
           }
 
-          alert(`Account created successfully!`)
+          console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
           return { success: true }
         }}
       />
@@ -1114,7 +1116,7 @@ export const VisualDesignExample: Story = {
           }}
           onSubmit={async (data) => {
             await sleep(1000)
-            alert(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+            console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
             return { success: true }
           }}
           submitConfig={{ label: "Create Survey", icon: null }}
@@ -1167,8 +1169,8 @@ export const WithActionBar: Story = {
           }}
           onSubmit={async (data) => {
             await sleep(1000)
-            alert(`Settings saved: ${JSON.stringify(data, null, 2)}`)
-            return { success: true }
+            console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+            return { success: true, message: "Settings saved successfully" }
           }}
         />
         <p className="mt-4 text-sm text-f1-foreground-secondary">
@@ -1229,8 +1231,8 @@ export const WithActionBarAndDiscard: Story = {
           }}
           onSubmit={async (data) => {
             await sleep(1000)
-            alert(`Company updated: ${JSON.stringify(data, null, 2)}`)
-            return { success: true }
+            console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+            return { success: true, message: "Company details updated" }
           }}
         />
         <p className="mt-4 text-sm text-f1-foreground-secondary">
@@ -1479,7 +1481,7 @@ export const SelectWithDataSource: Story = {
           defaultValues={defaultValues}
           onSubmit={async (data) => {
             await sleep(1000)
-            alert(`Selected: ${JSON.stringify(data, null, 2)}`)
+            console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
             return { success: true }
           }}
         />
@@ -1566,7 +1568,7 @@ export const FormInDialog: Story = {
             submitConfig={{ type: "default", hideSubmitButton: true }}
             onSubmit={async (data) => {
               await sleep(1000)
-              alert(`Team member added: ${JSON.stringify(data, null, 2)}`)
+              console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
               setOpen(false)
               return { success: true }
             }}
@@ -1652,9 +1654,255 @@ export const DynamicDateConstraints: Story = {
         }}
         onSubmit={async (data) => {
           await sleep(1000)
-          alert(`Project created: ${JSON.stringify(data, null, 2)}`)
+          console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
           return { success: true }
         }}
+      />
+    )
+  },
+}
+
+/**
+ * Form with per-section schema: each section has its own independent schema,
+ * validation, and submit button. Submitting one section does not affect others.
+ *
+ * The `schema` prop receives a record where keys are section IDs and values
+ * are Zod schemas. The `onSubmit` callback receives the section ID and its data.
+ */
+export const PerSectionSubmit: Story = {
+  render() {
+    const schema = {
+      personal: z.object({
+        firstName: f0FormField(z.string().min(1), {
+          label: "First Name",
+          placeholder: "Enter first name",
+        }),
+        lastName: f0FormField(z.string().min(1), {
+          label: "Last Name",
+          placeholder: "Enter last name",
+        }),
+        bio: f0FormField(z.string().max(300).optional(), {
+          label: "Bio",
+          fieldType: "textarea",
+          rows: 3,
+        }),
+      }),
+      contact: z.object({
+        email: f0FormField(z.string().email(), {
+          label: "Email",
+          placeholder: "you@example.com",
+        }),
+        phone: f0FormField(z.string().optional(), {
+          label: "Phone",
+          placeholder: "+1 (555) 000-0000",
+        }),
+      }),
+      preferences: z.object({
+        theme: f0FormField(z.enum(["light", "dark", "system"]), {
+          label: "Theme",
+          options: [
+            { value: "light", label: "Light" },
+            { value: "dark", label: "Dark" },
+            { value: "system", label: "System" },
+          ],
+        }),
+        notifications: f0FormField(z.boolean(), {
+          label: "Enable notifications",
+        }),
+      }),
+    }
+
+    return (
+      <F0Form
+        name="per-section"
+        schema={schema}
+        sections={{
+          personal: {
+            title: "Personal Information",
+            description: "Your basic profile details",
+          },
+          contact: {
+            title: "Contact Details",
+            description: "How we can reach you",
+          },
+          preferences: {
+            title: "Preferences",
+            description: "Customize your experience",
+            submitConfig: { label: "Save Preferences" },
+          },
+        }}
+        defaultValues={{
+          personal: { firstName: "", lastName: "", bio: "" },
+          contact: { email: "", phone: "" },
+          preferences: { theme: "system", notifications: true },
+        }}
+        onSubmit={async (sectionId, data) => {
+          await sleep(1000)
+          alert(
+            `Section "${sectionId}" submitted: ${JSON.stringify(data, null, 2)}`
+          )
+          return { success: true }
+        }}
+        submitConfig={{ label: "Save" }}
+      />
+    )
+  },
+}
+
+/**
+ * Per-section schema with sections sidebar navigation.
+ * Each section is independently submittable while the sidebar provides quick navigation.
+ */
+export const PerSectionWithSidebar: Story = {
+  render() {
+    const schema = {
+      general: z.object({
+        title: f0FormField(z.string().min(1), {
+          label: "Survey Title",
+          placeholder: "Enter survey title",
+        }),
+        description: f0FormField(z.string().max(500).optional(), {
+          label: "Description",
+          fieldType: "textarea",
+          rows: 3,
+        }),
+      }),
+      settings: z.object({
+        anonymousAnswers: f0FormField(z.boolean(), {
+          label: "Anonymous answers",
+          helpText: "Respondents' identities will not be recorded",
+        }),
+        managerVisibility: f0FormField(z.boolean(), {
+          label: "Manager visibility",
+          helpText: "Allow managers to see individual responses",
+        }),
+      }),
+      schedule: z.object({
+        publishOn: f0FormField(z.date().optional(), {
+          label: "Publish date",
+        }),
+        endsAt: f0FormField(z.date().optional(), {
+          label: "End date",
+        }),
+      }),
+    }
+
+    return (
+      <F0Form
+        name="per-section-sidebar"
+        schema={schema}
+        sections={{
+          general: {
+            title: "General",
+            description: "Basic survey information",
+          },
+          settings: {
+            title: "Settings",
+            description: "Privacy and visibility",
+          },
+          schedule: { title: "Schedule", description: "When the survey runs" },
+        }}
+        defaultValues={{
+          general: { title: "", description: "" },
+          settings: { anonymousAnswers: false, managerVisibility: false },
+          schedule: { publishOn: undefined, endsAt: undefined },
+        }}
+        onSubmit={async (sectionId, data) => {
+          await sleep(1000)
+          alert(
+            `Section "${sectionId}" saved: ${JSON.stringify(data, null, 2)}`
+          )
+          return { success: true }
+        }}
+        styling={{ showSectionsSidepanel: true }}
+        submitConfig={{ label: "Save" }}
+      />
+    )
+  },
+}
+
+/**
+ * Per-section schema with `showSubmitWhenDirty` enabled.
+ * The submit button for each section is hidden until the user modifies a field,
+ * keeping the UI clean and only surfacing the save action when there are actual changes.
+ *
+ * This can be set globally via `submitConfig` (applies to all sections) or
+ * overridden per section via `sections[id].submitConfig`.
+ */
+export const PerSectionShowSubmitWhenDirty: Story = {
+  render() {
+    const schema = {
+      profile: z.object({
+        displayName: f0FormField(z.string().min(1), {
+          label: "Display Name",
+          placeholder: "Enter your display name",
+        }),
+        bio: f0FormField(z.string().max(200).optional(), {
+          label: "Bio",
+          fieldType: "textarea",
+          rows: 3,
+          placeholder: "Tell us about yourself",
+        }),
+      }),
+      notifications: z.object({
+        emailNotifications: f0FormField(z.boolean(), {
+          label: "Email notifications",
+          helpText: "Receive updates via email",
+        }),
+        pushNotifications: f0FormField(z.boolean(), {
+          label: "Push notifications",
+          helpText: "Receive push notifications on your device",
+        }),
+      }),
+      security: z.object({
+        currentPassword: f0FormField(z.string().min(8), {
+          label: "Current Password",
+          placeholder: "Enter current password",
+        }),
+        newPassword: f0FormField(z.string().min(8), {
+          label: "New Password",
+          placeholder: "Enter new password",
+        }),
+      }),
+    }
+
+    return (
+      <F0Form
+        name="per-section-dirty"
+        schema={schema}
+        sections={{
+          profile: {
+            title: "Profile",
+            description: "Your public profile information",
+            submitConfig: { showSubmitWhenDirty: true },
+          },
+          notifications: {
+            title: "Notifications",
+            description: "Choose how you want to be notified",
+            submitConfig: { showSubmitWhenDirty: true },
+          },
+          security: {
+            title: "Security",
+            description: "Update your password",
+            submitConfig: { label: "Change Password" },
+          },
+        }}
+        defaultValues={{
+          profile: { displayName: "Jane Doe", bio: "" },
+          notifications: {
+            emailNotifications: true,
+            pushNotifications: false,
+          },
+          security: { currentPassword: "", newPassword: "" },
+        }}
+        onSubmit={async (sectionId, data) => {
+          await sleep(1000)
+          alert(
+            `Section "${sectionId}" saved: ${JSON.stringify(data, null, 2)}`
+          )
+          return { success: true }
+        }}
+        submitConfig={{ label: "Save" }}
       />
     )
   },

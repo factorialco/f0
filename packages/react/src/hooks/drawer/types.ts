@@ -57,6 +57,11 @@ export type DrawerDefinition = {
    * The module of the drawer.
    */
   module?: DialogModule
+
+  /**
+   * The data test id of the drawer.
+   */
+  dataTestId?: string
 }
 
 export type DrawerDefinitionInternal = DrawerDefinition & {

@@ -87,6 +87,11 @@ export type DialogDefinition = {
    * The module of the dialog.
    */
   module?: DialogModule
+
+  /**
+   * The data test id of the dialog.
+   */
+  dataTestId?: string
 }
 
 export type DialogDefinitionInternal =

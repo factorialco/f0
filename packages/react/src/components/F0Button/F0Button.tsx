@@ -4,6 +4,8 @@
  */
 import { forwardRef } from "react"
 
+import { withDataTestId } from "@/lib/data-testid"
+
 import { ButtonInternal } from "./internal"
 import { ButtonInternalProps } from "./internal-types"
 
@@ -25,7 +27,7 @@ export type F0ButtonProps = Omit<
   variant?: Exclude<ButtonInternalProps["variant"], "ai">
 }
 
-const F0Button = forwardRef<
+const _F0Button = forwardRef<
   HTMLButtonElement | HTMLAnchorElement,
   F0ButtonProps
 >((props, ref) => {
@@ -37,6 +39,6 @@ const F0Button = forwardRef<
   return <ButtonInternal {...publicProps} ref={ref} />
 })
 
-F0Button.displayName = "F0Button"
+_F0Button.displayName = "F0Button"
 
-export { F0Button }
+export const F0Button = withDataTestId(_F0Button)

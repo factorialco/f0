@@ -1,12 +1,14 @@
 import { FC, useEffect, useMemo, useState } from "react"
 
+import { withDataTestId } from "@/lib/data-testid"
+
 import { Content } from "../../common/Content"
 import { Footer } from "../../common/Footer"
 import { Header } from "../../common/Header"
 import { DialogWrapper } from "../../common/Wrapper"
 import { DialogInternalProps } from "./internal-types"
 
-export const DialogInternal: FC<DialogInternalProps> = ({
+const DialogInternalBase: FC<DialogInternalProps> = ({
   disableClose = false,
   onClose,
   isOpen,
@@ -89,3 +91,5 @@ export const DialogInternal: FC<DialogInternalProps> = ({
     </DialogWrapper>
   )
 }
+
+export const DialogInternal = withDataTestId(DialogInternalBase)

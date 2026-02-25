@@ -1,12 +1,14 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
+import { expect, within } from "storybook/test"
+
 import { F0Button } from "@/components/F0Button"
 
-import { TooltipInternal } from "./index"
+import { Tooltip } from "./index"
 
-const meta: Meta<typeof TooltipInternal> = {
+const meta: Meta<typeof Tooltip> = {
   title: "Tooltip",
-  component: TooltipInternal,
+  component: Tooltip,
   tags: ["autodocs", "experimental"],
   decorators: [
     (Story) => (
@@ -17,7 +19,7 @@ const meta: Meta<typeof TooltipInternal> = {
 
 export default meta
 
-type Story = StoryObj<typeof TooltipInternal>
+type Story = StoryObj<typeof Tooltip>
 
 export const Basic: Story = {
   args: {
@@ -32,5 +34,17 @@ export const WithShortcut: Story = {
     label: "Collapse sidebar",
     children: <F0Button variant="outline" label="Hover me" />,
     shortcut: ["cmd", "."],
+  },
+}
+
+export const WithDataTestId: Story = {
+  args: {
+    ...Basic.args,
+    dataTestId: "tooltip-test-id",
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    // Tooltip trigger should have the test id
+    await expect(canvas.getByTestId("tooltip-test-id")).toBeInTheDocument()
   },
 }

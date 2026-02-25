@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
+import { expect, within } from "storybook/test"
+
 import { DetailsItem } from "./index"
 
 const meta: Meta = {
@@ -57,5 +59,16 @@ export const Horizontal: Story = {
       text: "Paseo Mara, 62, Bajos\nPáez del Vallès\nCeuta",
     },
     isHorizontal: true,
+  },
+}
+
+export const WithDataTestId: Story = {
+  args: {
+    ...Default.args,
+    dataTestId: "details-item-test-id",
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await expect(canvas.getByTestId("details-item-test-id")).toBeInTheDocument()
   },
 }

@@ -176,11 +176,11 @@ const JOB_TITLES: Record<string, string[]> = {
 
 // Office locations with numeric IDs
 const OFFICES = [
-  { id: 101, name: "Barcelona HQ" },
-  { id: 102, name: "Madrid" },
+  { id: 101, name: "Barcelona HQ - Diagonal Avenue Campus" },
+  { id: 102, name: "Madrid Centro de Innovación y Desarrollo Tecnológico" },
   { id: 103, name: "London" },
   { id: 104, name: "New York" },
-  { id: 105, name: "San Francisco" },
+  { id: 105, name: "San Francisco Bay Area Innovation Hub" },
   { id: 106, name: "Berlin" },
   { id: 107, name: "Remote" },
 ] as const
@@ -191,6 +191,38 @@ const LEGAL_ENTITIES = [
   { id: 202, name: "Factorial Inc" },
   { id: 203, name: "Factorial UK Ltd" },
   { id: 204, name: "Factorial GmbH" },
+] as const
+
+// Spaces per office — not every office has spaces (Berlin, Remote have none)
+const SPACES = [
+  { id: 1, name: "Floor 1 - Collaborative Workspace Area", officeId: 101 },
+  { id: 2, name: "Floor 2", officeId: 101 },
+  { id: 3, name: "Rooftop Terrace & Executive Meeting Rooms", officeId: 101 },
+  { id: 4, name: "Floor 1", officeId: 102 },
+  {
+    id: 5,
+    name: "Floor 2 - Departamento de Investigación y Desarrollo",
+    officeId: 102,
+  },
+  { id: 6, name: "Ground Floor", officeId: 103 },
+  { id: 7, name: "Floor 1", officeId: 103 },
+  {
+    id: 8,
+    name: "Main Floor - Customer Success & Support Center",
+    officeId: 104,
+  },
+  { id: 9, name: "Open Space", officeId: 105 },
+] as const
+
+// Desks per space — only some spaces have desks
+const DESKS = [
+  { id: 100, name: "Desk A1 - Standing Desk Near Window", spaceId: 1 },
+  { id: 101, name: "Desk A2", spaceId: 1 },
+  { id: 102, name: "Desk A3", spaceId: 1 },
+  { id: 103, name: "Desk B1", spaceId: 2 },
+  { id: 104, name: "Desk B2 - Ergonomic Adjustable Workspace", spaceId: 2 },
+  { id: 105, name: "Hot Desk 1", spaceId: 8 },
+  { id: 106, name: "Hot Desk 2", spaceId: 8 },
 ] as const
 
 // Extended name lists for variety
@@ -441,9 +473,135 @@ export const employeeFiltersDefinition = {
   },
 }
 
+/**
+ * Nested filter definitions: office -> space -> desk.
+ * space and desk filters have hideSelector so they don't appear in the sidebar.
+ */
+export const employeeNestedFiltersDefinition = {
+  department: {
+    type: "in" as const,
+    label: "Department & Business Unit",
+    options: {
+      options: DEPARTMENTS.map((dept) => ({
+        value: String(dept.id),
+        label: dept.name,
+      })),
+    },
+  },
+  office: {
+    type: "in" as const,
+    label: "Office Location & Workspace",
+    options: {
+      options: OFFICES.map((office) => {
+        const officeSpaces = SPACES.filter((s) => s.officeId === office.id)
+        return {
+          value: String(office.id),
+          label: office.name,
+          ...(officeSpaces.length > 0 && {
+            children: {
+              filterKey: "space",
+              options: officeSpaces.map((space) => {
+                const spaceDesks = DESKS.filter((d) => d.spaceId === space.id)
+                return {
+                  value: String(space.id),
+                  label: space.name,
+                  ...(spaceDesks.length > 0 && {
+                    children: {
+                      filterKey: "desk",
+                      options: spaceDesks.map((desk) => ({
+                        value: String(desk.id),
+                        label: desk.name,
+                      })),
+                    },
+                  }),
+                }
+              }),
+            },
+          }),
+        }
+      }),
+    },
+  },
+  space: {
+    type: "in" as const,
+    label: "Space",
+    hideSelector: true,
+    options: {
+      options: SPACES.map((space) => ({
+        value: String(space.id),
+        label: space.name,
+      })),
+    },
+  },
+  desk: {
+    type: "in" as const,
+    label: "Desk",
+    hideSelector: true,
+    options: {
+      options: DESKS.map((desk) => ({
+        value: String(desk.id),
+        label: desk.name,
+      })),
+    },
+  },
+  legalEntity: {
+    type: "in" as const,
+    label: "Legal Entity & Corporate Structure",
+    options: {
+      options: LEGAL_ENTITIES.map((entity) => ({
+        value: String(entity.id),
+        label: entity.name,
+      })),
+    },
+  },
+}
+
+type EmployeeNestedFilters = typeof employeeNestedFiltersDefinition
+
 type EmployeeFilters = typeof employeeFiltersDefinition
 
 export type Employee = ReturnType<typeof generateEmployee>
+
+const applyNestedFilters = (
+  employees: Employee[],
+  filters?: FiltersState<EmployeeNestedFilters>
+): Employee[] => {
+  if (!filters) return employees
+
+  return employees.filter((employee) => {
+    if (
+      filters.department &&
+      Array.isArray(filters.department) &&
+      filters.department.length > 0
+    ) {
+      if (!filters.department.includes(String(employee.departmentId))) {
+        return false
+      }
+    }
+
+    if (
+      filters.office &&
+      Array.isArray(filters.office) &&
+      filters.office.length > 0
+    ) {
+      if (!filters.office.includes(String(employee.officeId))) {
+        return false
+      }
+    }
+
+    if (
+      filters.legalEntity &&
+      Array.isArray(filters.legalEntity) &&
+      filters.legalEntity.length > 0
+    ) {
+      if (!filters.legalEntity.includes(String(employee.legalEntityId))) {
+        return false
+      }
+    }
+
+    return true
+  })
+}
 
 /**
  * Apply filters to employee list
@@ -577,6 +735,44 @@ export const employeeNonPaginatedSource = createDataSourceDefinition<
 
       return {
         records: results,
+      }
+    },
+  },
+})
+
+/**
+ * Paginated data source with nested filters (office -> space -> desk)
+ */
+export const employeeNestedPaginatedSource = createDataSourceDefinition<
+  Employee,
+  EmployeeNestedFilters
+>({
+  filters: employeeNestedFiltersDefinition,
+  dataAdapter: {
+    paginationType: "infinite-scroll",
+    fetchData: async (options) => {
+      const { search, pagination, filters } = options
+
+      await simulateLatency()
+
+      const pageSize = pagination.perPage ?? 25
+      const cursor = "cursor" in pagination ? pagination.cursor : null
+      const offset = cursor ? Number(cursor) : 0
+
+      let results = getAllEmployees()
+      results = applyNestedFilters(results, filters)
+      results = applySearch(results, search)
+
+      const paginatedResults = results.slice(offset, offset + pageSize)
+      const nextOffset = offset + pageSize
+
+      return {
+        type: "infinite-scroll" as const,
+        cursor: String(nextOffset),
+        perPage: pageSize,
+        hasMore: nextOffset < results.length,
+        records: paginatedResults,
+        total: results.length,
       }
     },
   },

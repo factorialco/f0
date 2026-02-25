@@ -5,7 +5,13 @@ import { F0Form as F0FormComponent } from "./F0Form"
 // Export main types
 export type {
   F0FormProps,
+  F0FormPropsWithSingleSchema,
+  F0FormPropsWithPerSectionSchema,
   F0FormSchema,
+  F0PerSectionSchema,
+  F0PerSectionSectionConfig,
+  F0PerSectionSubmitConfig,
+  InferPerSectionValues,
   F0FormErrorTriggerMode,
   F0FormSubmitConfig,
   F0FormDiscardConfig,
@@ -101,13 +107,21 @@ export { generateAnchorId } from "./context"
 export { useF0Form } from "./useF0Form"
 export type { F0FormRef, UseF0FormReturn } from "./useF0Form"
 
-import type { F0FormProps, F0FormSchema } from "./types"
+import type {
+  F0FormPropsWithSingleSchema,
+  F0FormPropsWithPerSectionSchema,
+  F0FormSchema,
+  F0PerSectionSchema,
+} from "./types"
 
 /**
  * @experimental This is an experimental component, use it at your own risk
  */
-export const F0Form = experimentalComponent("F0Form", F0FormComponent) as <
-  TSchema extends F0FormSchema,
->(
-  props: F0FormProps<TSchema>
-) => React.ReactElement
+export const F0Form = experimentalComponent("F0Form", F0FormComponent) as {
+  <TSchema extends F0FormSchema>(
+    props: F0FormPropsWithSingleSchema<TSchema>
+  ): React.ReactElement
+  <T extends F0PerSectionSchema>(
+    props: F0FormPropsWithPerSectionSchema<T>
+  ): React.ReactElement
+}

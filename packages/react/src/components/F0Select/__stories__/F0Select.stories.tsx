@@ -1,7 +1,7 @@
 import type { Decorator, Meta, StoryObj } from "@storybook/react-vite"
 
 import { useState } from "react"
-import { fn } from "storybook/test"
+import { expect, fn, within } from "storybook/test"
 
 import { IconType } from "@/components/F0Icon"
 import {
@@ -11,14 +11,15 @@ import {
 } from "@/hooks/datasource"
 import { SelectedItemsDetailedStatus } from "@/hooks/datasource/types/selection.typings"
 import { Appearance, Circle, Desktop, Placeholder, Plus } from "@/icons/app"
+import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
 import { withSkipA11y, withSnapshot } from "@/lib/storybook-utils/parameters"
 import { inputFieldStatus } from "@/ui/InputField"
 
 import { F0Select, selectSizes } from "../index"
 import {
   Employee,
+  employeeNestedPaginatedSource,
   employeeNonPaginatedSource,
-  employeePaginatedSource,
   getEmployeeById,
   MockItem,
   mockItems,
@@ -193,6 +194,7 @@ const meta: Meta = {
       description:
         "Whether the select is loading. If true, the select will be disabled",
     },
+    ...dataTestIdArgs,
   },
   args: {
     label: "Select a theme",
@@ -329,6 +331,19 @@ export const Default: Story = {
     label: "Select a theme",
     value: undefined,
     placeholder: undefined,
+  },
+}
+
+export const WithDataTestId: Story = {
+  args: {
+    label: "Select with Test ID",
+    dataTestId: "my-test-select",
+    value: undefined,
+    placeholder: undefined,
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await expect(canvas.getByTestId("my-test-select")).toBeInTheDocument()
   },
 }
 
@@ -575,7 +590,7 @@ export const WithDataSourcePaginated: Story = {
           }
         : undefined
     })(),
-    source: employeePaginatedSource,
+    source: employeeNestedPaginatedSource,
     mapOptions: (item: Employee) => ({
       value: item.value,
       label: item.label,
@@ -715,7 +730,48 @@ export const MultiplePaginated: Story = {
     })(),
     clearable: true,
     showSearchBox: true,
-    source: employeePaginatedSource,
+    source: employeeNestedPaginatedSource,
+    mapOptions: (item: Employee) => ({
+      value: item.value,
+      label: item.label,
+      avatar: item.avatar,
+    }),
+    onSelectItems: fn((selectionStatus) => {
+      console.log("selectionStatus", selectionStatus)
+    }),
+  },
+}
+
+/**
+ * Multiple selection with paginated data and a selection preview panel on the right.
+ * The preview shows selected items with avatars and allows inline deselection.
+ * Filters use inline (dual-pane) mode when preview is enabled.
+ */
+export const MultiplePaginatedWithPreview: Story = {
+  args: {
+    label: "Select Team Members",
+    placeholder: "Search employees...",
+    multiple: true,
+    showPreview: true,
+    value: ["3", "42", "500", "1200"],
+    defaultItem: (() => {
+      const ids = [42, 500, 1200]
+      return ids
+        .map((id) => {
+          const emp = getEmployeeById(id)
+          return emp
+            ? {
+                value: emp.value,
+                label: emp.label,
+                avatar: emp.avatar,
+              }
+            : null
+        })
+        .filter(Boolean)
+    })(),
+    clearable: true,
+    showSearchBox: true,
+    source: employeeNestedPaginatedSource,
     mapOptions: (item: Employee) => ({
       value: item.value,
       label: item.label,
@@ -758,7 +814,7 @@ export const MultiplePaginatedAsList: Story = {
         .filter(Boolean)
     })(),
     clearable: true,
-    source: employeePaginatedSource,
+    source: employeeNestedPaginatedSource,
     mapOptions: (item: Employee) => ({
       value: item.value,
       label: item.label,
@@ -846,7 +902,7 @@ export const SingleSelectWithFilters: Story = {
           }
         : undefined
     })(),
-    source: employeePaginatedSource,
+    source: employeeNestedPaginatedSource,
     mapOptions: (item: Employee) => ({
       value: item.value,
       label: item.label,
