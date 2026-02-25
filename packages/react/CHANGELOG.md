@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.380.0](https://github.com/factorialco/f0/compare/f0-react-v1.379.0...f0-react-v1.380.0) (2026-02-25)
+
+
+### Features
+
+* filters per visualization ([#3455](https://github.com/factorialco/f0/issues/3455)) ([95405f9](https://github.com/factorialco/f0/commit/95405f955b76b0a24b64f05231821f065cfd23c7))
+
 ## [1.379.0](https://github.com/factorialco/f0/compare/f0-react-v1.378.0...f0-react-v1.379.0) (2026-02-24)
 
 
