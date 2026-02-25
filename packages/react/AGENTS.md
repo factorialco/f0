@@ -2,10 +2,22 @@
 
 This is the F0 React component library (`@factorialco/f0-react`). See the root [AGENTS.md](../../AGENTS.md) for monorepo-level guidelines.
 
+## Post-Implementation Quality Gate
+
+After completing **any code modification task** (new component, feature, bug fix, refactoring),
+load the `f0-quality-gate` skill and execute its full workflow before presenting results to the user.
+
+**Skip only when:**
+
+- The user explicitly asks to skip checks
+- The change is documentation-only (`.md`, `.mdx`, comments)
+- The change is auto-generated files (icons, type snapshots)
+
 ## Skills
 
 Load the relevant skill before starting work:
 
+- **f0-quality-gate** — Post-implementation quality gate. Runs automatically after any code change — typecheck, lint, tests, plus parallel subagent reviews for code quality, a11y, and Storybook.
 - **f0-code-review** — Code review checklist. Load when reviewing PRs or auditing code.
 - **f0-component-patterns** — Architecture, context, styling, i18n patterns with code examples. Load when building or modifying components.
 - **f0-unit-testing** — Vitest unit test patterns. Load when writing or fixing unit tests.
