@@ -1,6 +1,6 @@
 ---
 name: f0-quality-gate
-description: Automated post-implementation quality gate for F0 React components. Runs inline commands (typecheck, lint, tests) then spawns parallel subagents for code review, a11y, and Storybook checks. Auto-fixes non-blocking issues and reports blockers to the user.
+description: Automated post-implementation quality gate for F0 React components. Runs inline commands (typecheck, lint, tests) then spawns parallel subagents for code review, a11y, Storybook documentation coverage, and test coverage. Auto-fixes non-blocking issues and reports blockers to the user.
 ---
 
 # F0 Quality Gate
@@ -90,11 +90,13 @@ pnpm vitest:ci -- --reporter=verbose --testPathPattern "<component-name>"
 - On failure: record failing test names as **blocking**, do not attempt auto-fix (test failures require human judgment)
 - On pass: record count for the summary
 
+> **Note:** Phase 2 Subagent D performs a deeper behavioral coverage review — the Phase 1 test run only confirms existing tests pass, not that new behavior is covered.
+
 ---
 
 ## Phase 2 — Parallel Subagent Reviews
 
-After Phase 1 completes (regardless of failures — subagent reviews are independent), spawn **three subagents in parallel** using the Task tool.
+After Phase 1 completes (regardless of failures — subagent reviews are independent), spawn **four subagents in parallel** using the Task tool.
 
 Pass each subagent:
 
@@ -195,19 +197,28 @@ You are a Storybook reviewer for the F0 React component library.
 Load the `f0-storybook-stories` skill from `.skills/f0-storybook-stories/SKILL.md`.
 Load the `f0-storybook-testing` skill from `.skills/f0-storybook-testing/SKILL.md`.
 
-Review the following changed files. For each changed component, check its
-corresponding `__stories__/` directory and verify:
+Review the following changed files. For each changed component, read the component
+source and its corresponding `__stories__/` directory and verify:
 
+### Structural checks (conventions)
 1. A `.stories.tsx` file exists for every changed component
 2. Meta uses `satisfies Meta<typeof Component>` (not `as Meta`)
 3. Tags include `["autodocs", "stable"]` or `["autodocs", "experimental"]`
 4. A `Snapshot` story exists with `parameters: withSnapshot({})`
 5. ArgTypes for union props reference the component's const arrays
-6. Interactive components have at least one `play` function story
+
+### Documentation coverage checks (new behavior)
+6. Every new prop added in this diff has a corresponding story or argType that demonstrates it
+7. Every new variant or state (e.g., new size, color, loading state, error state) is represented
+   in at least one story — and ideally in the Snapshot story so it is visually captured
+8. If a prop was removed or renamed, any story referencing the old prop name is updated
+9. Interactive components with new interactions have at least one `play` function story
+   covering the new interaction
 
 For each issue found, classify it as:
-- BLOCKING: required by F0 conventions (missing story file, missing Snapshot story)
-- SUGGESTION: improvement (missing play function, incomplete argTypes)
+- BLOCKING: required by F0 conventions (missing story file, missing Snapshot story,
+  new prop/variant with zero story coverage)
+- SUGGESTION: improvement (incomplete argTypes, new interaction without play function)
 
 Changed files:
 {changed file list}
@@ -232,11 +243,66 @@ List only suggestions that are safe to auto-fix without changing behavior:
 If no issues found in a category, write "None".
 ```
 
+### Subagent D: Test Coverage
+
+**Prompt to pass:**
+
+```
+You are a test coverage reviewer for the F0 React component library.
+
+Load the `f0-unit-testing` skill from `.skills/f0-unit-testing/SKILL.md`.
+
+Your goal is NOT to check if tests pass — the CI already ran them.
+Your goal is to check if the tests cover the new or changed behavior introduced in this diff.
+
+For each changed component or hook, read both the source file and its `__tests__/` file(s).
+Then answer these questions:
+
+### Existence checks
+1. Does a `.test.tsx` file exist for every changed component? (never `.spec.ts`)
+2. Is `zeroRender` used instead of `render` from `@testing-library/react`?
+
+### Behavioral coverage checks
+3. For every new prop added: is there at least one test that exercises it?
+4. For every new conditional branch (if/else, ternary, switch case): is there a test
+   that covers the truthy and falsy paths?
+5. For every new callback prop (e.g., `onSelect`, `onChange`): is there a test that
+   verifies it is called with the correct arguments?
+6. For every new error/warning thrown or logged: is there a test that verifies it?
+7. For every new state transition (e.g., loading → loaded, collapsed → expanded):
+   is there a test that verifies the before and after states?
+8. If a prop or behavior was removed: are the tests that relied on it cleaned up
+   (no dead tests asserting removed behavior)?
+
+For each issue found, classify it as:
+- BLOCKING: new behavior with zero test coverage, or missing test file entirely
+- SUGGESTION: partial coverage (e.g., happy path tested but error path missing)
+
+Changed files:
+{changed file list}
+
+Diff:
+{full diff}
+
+Return a structured report with this exact format:
+
+## Test Coverage Report
+
+### Blocking Issues
+- {file}:{line} — {description}
+
+### Suggestions
+- {file}:{line} — {description}
+
+If no issues found in a category, write "None".
+Note: do not include Auto-fixable Suggestions — test writing requires human judgment.
+```
+
 ---
 
 ## Step 3 — Collect Results and Auto-fix
 
-Once all three subagents return their reports:
+Once all four subagents return their reports:
 
 1. **Apply auto-fixes**: For every item listed under `Auto-fixable Suggestions` across all three reports, apply the fix directly. Keep a count.
 
@@ -266,6 +332,7 @@ Phase 2 (Reviews)
   Code Review: PASS | {n} blocking, {n} suggestions ({n} auto-fixed)
   A11y:        PASS | {n} blocking, {n} suggestions ({n} auto-fixed)
   Storybook:   PASS | {n} blocking, {n} suggestions ({n} auto-fixed)
+  Tests:       PASS | {n} blocking, {n} suggestions
 
 ────────────────────────────────────────────
 ```
@@ -285,7 +352,11 @@ Blocking issues requiring your attention:
 
 [Storybook]
   src/components/F0Example/__stories__/F0Example.stories.tsx
-  → Missing Snapshot story with withSnapshot({})
+  → New `variant` prop added but no story demonstrates it
+
+[Tests]
+  src/components/F0Example/__tests__/F0Example.test.tsx
+  → New `onSelect` callback prop has no test verifying it is called
 ```
 
 If everything passes (or only auto-fixed suggestions remain), say:
@@ -298,11 +369,12 @@ Quality gate passed. All checks green.
 
 ## Quick Reference
 
-| Phase       | Tool           | Command / Agent                                       |
-| ----------- | -------------- | ----------------------------------------------------- |
-| TypeScript  | Bash           | `pnpm tsc --noEmit`                                   |
-| Lint        | Bash           | `pnpm lint-fix && pnpm lint`                          |
-| Tests       | Bash           | `pnpm vitest:ci`                                      |
-| Code Review | Task (general) | Loads `f0-code-review`                                |
-| A11y        | Task (general) | Loads `a11y`                                          |
-| Storybook   | Task (general) | Loads `f0-storybook-stories` + `f0-storybook-testing` |
+| Phase         | Tool           | Command / Agent                                       |
+| ------------- | -------------- | ----------------------------------------------------- |
+| TypeScript    | Bash           | `pnpm tsc --noEmit`                                   |
+| Lint          | Bash           | `pnpm lint-fix && pnpm lint`                          |
+| Tests         | Bash           | `pnpm vitest:ci`                                      |
+| Code Review   | Task (general) | Loads `f0-code-review`                                |
+| A11y          | Task (general) | Loads `a11y`                                          |
+| Storybook     | Task (general) | Loads `f0-storybook-stories` + `f0-storybook-testing` |
+| Test Coverage | Task (general) | Loads `f0-unit-testing`                               |
