@@ -204,4 +204,74 @@ describe("withDataTestId", () => {
 
     expect(screen.queryByTestId("should-not-appear")).not.toBeInTheDocument()
   })
+
+  describe("type-level: discriminated union preservation", () => {
+    // These are compile-time assertions — if the types regress, tsc will fail.
+    // They verify that withDataTestId does not collapse discriminated union props.
+
+    type SingleProps = {
+      multiple?: false
+      value?: string
+      onChange?: (v: string) => void
+    }
+    type MultiProps = {
+      multiple: true
+      value?: string[]
+      onChange?: (v: string[]) => void
+    }
+    type UnionProps = SingleProps | MultiProps
+
+    const UnionComponent: React.FC<UnionProps> = () => null
+    const Wrapped = withDataTestId(UnionComponent)
+
+    type WrappedProps = React.ComponentProps<typeof Wrapped>
+
+    it("should preserve single-select branch of discriminated union", () => {
+      // Single-select branch: value is string, onChange receives string
+      const goodSingle: WrappedProps = {
+        value: "a",
+        onChange: (_v: string) => {},
+        dataTestId: "test",
+      }
+
+      // Multiple is not required — it should be optional in the single branch
+      const goodSingleNoMultiple: WrappedProps = {
+        value: "a",
+        dataTestId: "test",
+      }
+
+      expect(goodSingle).toBeDefined()
+      expect(goodSingleNoMultiple).toBeDefined()
+    })
+
+    it("should preserve multi-select branch of discriminated union", () => {
+      // Multi-select branch: value is string[], onChange receives string[]
+      const goodMulti: WrappedProps = {
+        multiple: true,
+        value: ["a", "b"],
+        onChange: (_v: string[]) => {},
+        dataTestId: "test",
+      }
+
+      expect(goodMulti).toBeDefined()
+    })
+
+    it("should reject cross-branch prop combinations", () => {
+      // @ts-expect-error — value should be string[] when multiple is true, not string
+      const _badMultiWithStringValue: WrappedProps = {
+        multiple: true,
+        value: "a",
+        dataTestId: "test",
+      }
+
+      // @ts-expect-error — value should be string when multiple is false, not string[]
+      const _badSingleWithArrayValue: WrappedProps = {
+        multiple: false,
+        value: ["a", "b"],
+        dataTestId: "test",
+      }
+
+      expect(true).toBe(true)
+    })
+  })
 })

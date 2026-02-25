@@ -38,10 +38,16 @@ export type WithDataTestIdProps = {
 
 /**
  * Props type of a component wrapped with withDataTestId.
+ *
+ * Uses a distributive conditional type so that when the wrapped component has
+ * discriminated-union props (e.g. F0Select with `multiple: true | false`
+ * branches), each branch of the union is individually intersected with
+ * `WithDataTestIdProps` instead of being flattened into a single merged type.
+ *
  * Use when ComponentProps<typeof Component> inference fails (e.g. in Storybook stories).
  */
 export type WithDataTestIdPropsOf<T extends React.ComponentType<unknown>> =
-  React.ComponentProps<T> & WithDataTestIdProps
+  T extends React.ComponentType<infer P> ? P & WithDataTestIdProps : never
 
 /**
  * Keys on T that are not part of Function, so we preserve static members (Skeleton, displayName, etc.)
