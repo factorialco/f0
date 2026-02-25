@@ -91,6 +91,7 @@ export const BaseCommunityPost = ({
     .filter(Boolean)
     .join(" · ")
 
+  const collapsed = true
   const date = getDisplayDateBasedOnDuration(createdAt)
 
   const handleClick = () => {
@@ -128,10 +129,10 @@ export const BaseCommunityPost = ({
           <F0AvatarIcon icon={PersonIcon} />
         )}
       </div>
-      <div className="flex flex-1 flex-col gap-3">
-        <div className="flex flex-col gap-2">
+      <div className="flex min-w-0 flex-1 flex-col gap-3">
+        <div className="flex min-w-0 flex-col gap-2">
           <div className="flex flex-row justify-between">
-            <div className="flex flex-1 flex-row flex-wrap items-center gap-1">
+            <div className="flex min-w-0 flex-1 flex-row flex-wrap items-center gap-1">
               {author ? (
                 <>
                   <F0Link
@@ -222,8 +223,15 @@ export const BaseCommunityPost = ({
           <span className="-mt-3 text-sm text-f1-foreground-secondary">
             {date}
           </span>
-          <div className="flex flex-col gap-1 text-f1-foreground">
-            <p className="text-xl font-semibold">{title}</p>
+          <div className="flex min-w-0 flex-col gap-1 text-f1-foreground">
+            <p
+              className={cn(
+                "text-xl font-semibold",
+                collapsed && "line-clamp-2 break-words"
+              )}
+            >
+              {title}
+            </p>
             {description && <PostDescription content={description} collapsed />}
           </div>
         </div>

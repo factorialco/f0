@@ -1,7 +1,8 @@
+import { RichTextDisplay } from "@/experimental/RichText/RichTextDisplay"
 import { Skeleton } from "@/ui/skeleton"
+
 import { withSkeleton } from "../../../../../lib/skeleton"
 import { cn } from "../../../../../lib/utils"
-import { RichTextDisplay } from "@/experimental/RichText/RichTextDisplay"
 
 type HTMLString = string
 
@@ -16,7 +17,10 @@ export const BasePostDescription = ({
   return (
     <RichTextDisplay
       content={content}
-      className={cn("FactorialOneTextEditor", collapsed && "line-clamp-5")}
+      className={cn(
+        "FactorialOneTextEditor",
+        collapsed && "line-clamp-5 break-words"
+      )}
     />
   )
 }
