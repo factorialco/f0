@@ -24,9 +24,6 @@ export type {
   F0WizardFormPerSectionSubmitArg,
 } from "./types"
 
-/**
- * @experimental This is an experimental component use it at your own risk
- */
 const F0WizardForm = withDataTestId(F0WizardFormComponent) as {
   <TSchema extends F0FormSchema>(
     props: F0WizardFormSingleSchemaProps<TSchema>

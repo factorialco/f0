@@ -10,9 +10,6 @@ export type {
   F0WizardChildrenProps,
 } from "./types"
 
-/**
- * @experimental This is an experimental component use it at your own risk
- */
 const F0Wizard = withDataTestId(F0WizardComponent)
 
 export { F0Wizard }

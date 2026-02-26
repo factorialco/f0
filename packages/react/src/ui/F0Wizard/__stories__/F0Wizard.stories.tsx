@@ -6,11 +6,12 @@ import { F0Button } from "@/components/F0Button"
 import { ApplicationFrame } from "@/examples/ApplicationFrame"
 import ApplicationFrameStoryMeta from "@/examples/ApplicationFrame/index.stories"
 
-import { F0Wizard } from "../index"
 import type { F0WizardStep } from "../types"
 
+import { F0Wizard } from "../index"
+
 const meta: Meta<typeof F0Wizard> = {
-  title: "Experimental/F0Wizard",
+  title: "F0Wizard",
   component: F0Wizard,
   parameters: {
     layout: "fullscreen",

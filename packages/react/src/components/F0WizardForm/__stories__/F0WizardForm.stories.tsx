@@ -11,7 +11,7 @@ import ApplicationFrameStoryMeta from "@/examples/ApplicationFrame/index.stories
 import { F0WizardForm, useF0FormDefinition } from "../index"
 
 const meta: Meta<typeof F0WizardForm> = {
-  title: "Experimental/F0WizardForm",
+  title: "F0WizardForm",
   component: F0WizardForm,
   parameters: {
     layout: "fullscreen",

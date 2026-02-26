@@ -18,6 +18,12 @@ const noop = () => {}
 import { WizardSteps } from "./components/WizardSteps"
 import { useWizardNavigation } from "./hooks/useWizardNavigation"
 
+/**
+ * @internal This component is not exported from the package.
+ * For form-based wizards (the most common use case), use `F0WizardForm` instead,
+ * which wraps `F0Wizard` and `F0Form` together with built-in step validation,
+ * submission handling, and value persistence across steps.
+ */
 export const F0Wizard: FC<F0WizardProps> = ({
   steps,
   children,

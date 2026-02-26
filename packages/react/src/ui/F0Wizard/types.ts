@@ -16,6 +16,10 @@ export interface F0WizardChildrenProps {
   goToStep: (index: number) => Promise<void>
 }
 
+/**
+ * @internal Not exported from the package.
+ * Use `F0WizardForm` for form-based wizards (the most common use case).
+ */
 export interface F0WizardProps {
   steps: F0WizardStep[]
   children: (props: F0WizardChildrenProps) => ReactNode
