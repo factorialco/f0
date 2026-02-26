@@ -259,8 +259,10 @@ export interface F0FormPropsWithSingleSchema<TSchema extends F0FormSchema> {
   schema: TSchema
   /** Section configurations keyed by section ID */
   sections?: Record<string, F0SectionConfig>
-  /** Default values for the form fields */
+  /** Default values for the form fields. When provided, used as reactive `values` so the form updates when this prop changes. */
   defaultValues?: Partial<z.infer<TSchema>>
+  /** Called whenever any form value changes. Use this to sync form state with your app (e.g. parent state). */
+  onValuesChange?: (values: Partial<z.infer<TSchema>>) => void
   /** Callback when the form is submitted with valid data */
   onSubmit: (
     data: z.infer<TSchema>
@@ -337,10 +339,12 @@ export interface F0FormPropsWithPerSectionSchema<T extends F0PerSectionSchema> {
   schema: T
   /** Section configurations keyed by section ID */
   sections?: Record<string, F0PerSectionSectionConfig>
-  /** Default values for each section, keyed by section ID */
+  /** Default values for each section, keyed by section ID. When provided, used as reactive `values` so each section updates when its defaults change. */
   defaultValues?: {
     [K in keyof T]?: Partial<z.infer<T[K]>>
   }
+  /** Called whenever any value changes in any section. Use this to sync form state with your app. Receives section ID and that section's current values. */
+  onValuesChange?: (sectionId: string, values: Record<string, unknown>) => void
   /** Callback when a section is submitted. Receives the section ID and its validated data, both correctly typed. */
   onSubmit: PerSectionSubmitHandler<T>
   /** Global submit config applied to all sections (can be overridden per section) */

@@ -111,6 +111,7 @@ function F0FormPerSection<T extends F0PerSectionSchema>(
     schema,
     sections,
     defaultValues,
+    onValuesChange,
     onSubmit,
     submitConfig,
     className,
@@ -174,6 +175,12 @@ function F0FormPerSection<T extends F0PerSectionSchema>(
               sectionConfig={sectionConfig}
               defaultValues={
                 sectionDefaults as Partial<z.infer<typeof sectionSchema>>
+              }
+              onValuesChange={
+                onValuesChange
+                  ? (values: Record<string, unknown>) =>
+                      onValuesChange(sectionId, values)
+                  : undefined
               }
               onSubmit={(data) => onSubmit(sectionId, data)}
               submitConfig={perSectionSubmitConfig}
@@ -275,6 +282,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
     schema,
     sections,
     defaultValues,
+    onValuesChange,
     onSubmit,
     submitConfig,
     className,
@@ -380,15 +388,24 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
     [schema, errorMap]
   )
 
-  // Initialize form with react-hook-form
+  // Initialize form with react-hook-form. Pass `values` when defaultValues is
+  // provided so the form stays in sync when the prop changes (e.g. after async load).
   const form = useForm<TValues>({
     resolver: conditionalResolver,
     mode: formMode,
     defaultValues: defaultValues as DefaultValues<TValues>,
+    ...(defaultValues !== undefined && {
+      values: defaultValues as DefaultValues<TValues>,
+    }),
   })
 
   const rootError = form.formState.errors.root
   const { isDirty, isSubmitting, errors } = form.formState
+
+  const watchedValues = form.watch()
+  useEffect(() => {
+    onValuesChange?.(watchedValues as Partial<TValues>)
+  }, [watchedValues, onValuesChange])
 
   const [actionBarStatus, setActionBarStatus] =
     useState<ActionBarStatus>("idle")
