@@ -66,7 +66,7 @@ export type EditableTableVisualizationOptions<
    * Resolve with nothing for success, or `{ columnId: "message" }` to set errors.
    * Rejection sets an error on the edited column.
    */
-  onCellChange?: (updatedItem: R) => Promise<void | Record<string, string>>
+  onCellChange: (updatedItem: R) => Promise<void | Record<string, string>>
 }
 
 export type EditableTableCollectionProps<

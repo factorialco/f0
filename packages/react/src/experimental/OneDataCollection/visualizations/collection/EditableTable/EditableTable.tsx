@@ -1,4 +1,4 @@
-import { useMemo } from "react"
+import { useMemo, useRef } from "react"
 
 import {
   FiltersDefinition,
@@ -42,10 +42,16 @@ export const EditableTableCollection = <
 >) => {
   const { settings } = useDataCollectionSettings()
 
+  const onCellChangeRef = useRef(onCellChange)
+  onCellChangeRef.current = onCellChange
+
   const RowWrapper = useMemo(() => {
     return function EditableRowWrapper({ item, children }: RowWrapperProps<R>) {
       return (
-        <EditableRowProvider item={item} onCellChange={onCellChange}>
+        <EditableRowProvider
+          item={item}
+          onCellChange={(...args) => onCellChangeRef.current?.(...args)}
+        >
           {children}
         </EditableRowProvider>
       )

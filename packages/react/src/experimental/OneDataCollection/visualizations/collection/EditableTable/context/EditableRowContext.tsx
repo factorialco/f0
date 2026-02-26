@@ -28,7 +28,7 @@ const EditableRowContext = createContext<EditableRowContextValue<any> | null>(
 
 export type EditableRowProviderProps<R extends RecordType> = {
   item: R
-  onCellChange?: (updatedItem: R) => Promise<void | Record<string, string>>
+  onCellChange: (updatedItem: R) => Promise<void | Record<string, string>>
   children: React.ReactNode
 }
 
@@ -66,8 +66,6 @@ export function EditableRowProvider<R extends RecordType>({
         }
         return prev
       })
-
-      if (!onCellChange) return
 
       setCellLoading((prev) => ({ ...prev, [columnId]: true }))
 
