@@ -1,0 +1,9 @@
+{
+  "generatedAt": "2026-02-19T19:33:48.631Z",
+  "toolVersion": "0.1.0",
+  "provider": "google",
+  "model": "gemini-3-flash-preview",
+  "fileHashes": {
+    "/works/factorial/f0/packages/react/src/components/F0Box/index.tsx": "19ed8cd9193bac9e54e579dd730cbca2956df616c60d10c7a2d9481dd441b5ee"
+  }
+}

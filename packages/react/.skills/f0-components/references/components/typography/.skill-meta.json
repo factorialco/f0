@@ -1,0 +1,9 @@
+{
+  "generatedAt": "2026-02-19T18:50:50.624Z",
+  "toolVersion": "0.1.0",
+  "provider": "google",
+  "model": "gemini-3-flash-preview",
+  "fileHashes": {
+    "https://ds.factorial.dev/?path=/docs/foundations-typography--documentation": "cd8943f00b5568a3f4748334f696728b1de2340dc74f362df36ee713e129f849"
+  }
+}

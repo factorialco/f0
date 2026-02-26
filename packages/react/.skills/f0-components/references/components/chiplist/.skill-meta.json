@@ -1,0 +1,11 @@
+{
+  "generatedAt": "2026-02-19T18:50:48.051Z",
+  "toolVersion": "0.1.0",
+  "provider": "google",
+  "model": "gemini-3-flash-preview",
+  "fileHashes": {
+    "__props__": "90708024b82d547b388331456b053554832eda0593eab6d2ff41ff7d4adef661",
+    "__stories__": "5569821b793b4a8d2e55a664a944357ca445e86379462595f79bea00abb8cec8",
+    "https://ds.factorial.dev/?path=/docs/components-chiplist--documentation": "ed388b9eab2f4054b96940dd6b2962e72f83ca4d219a909b6da6003913da34e0"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "generatedAt": "2026-02-19T18:51:55.461Z",
+  "toolVersion": "0.1.0",
+  "provider": "google",
+  "model": "gemini-3-flash-preview",
+  "fileHashes": {
+    "__props__": "d3e4200f1f2533243eea7d08f2b819f43514b31f802167df1daac7f1a224209c",
+    "__stories__": "fac537e6339a2beb0cb4c93caf7f95f5389016a6e950bfa218e2f70403f20d39",
+    "__subPages__": "b2f14a5e29deccae1b9fa29d18e8046881e2332d90e3109887c5d82ac4f26f76",
+    "https://ds.factorial.dev/?path=/docs/components-entityselect-employeeselector--documentation": "882f584dad8b2317e87f82e510d3fd05a02354863a16312e78afeb639013f802",
+    "https://ds.factorial.dev/?path=/docs/components-entityselect-entityselect--documentation": "4fad9bc6328a7a17e3ea8654ab36d022738d7dd19b5abc1e46b9d03976283bef",
+    "https://ds.factorial.dev/?path=/docs/components-entityselect-listitem--documentation": "12aad058a619531dddaf87b7ac5399f8d449ce0d197b26d42948aad8ac0d825e",
+    "https://ds.factorial.dev/?path=/docs/components-entityselect-listtag--documentation": "e952a02e334fea330d11b8579989bc14fe03ea0a77a2e30ba1b787a60fb4d5db",
+    "https://ds.factorial.dev/?path=/docs/components-entityselect-trigger--documentation": "57fc6ceb1ffdff9bb8cc8b112aaf3950fcce6de046164e22bb66582cc4c90b1f"
+  }
+}

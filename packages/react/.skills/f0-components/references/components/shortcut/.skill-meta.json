@@ -1,0 +1,11 @@
+{
+  "generatedAt": "2026-02-19T18:47:40.201Z",
+  "toolVersion": "0.1.0",
+  "provider": "google",
+  "model": "gemini-3-flash-preview",
+  "fileHashes": {
+    "__props__": "643ab4198930733772111fe354bd44d0e1960ea97940a533b719bf1ce545859d",
+    "__stories__": "a10b0a8ba40c6e38048288c6fd8575ff2fe123feddeda9ba30f984f6c6ed82c6",
+    "https://ds.factorial.dev/?path=/docs/🔒-internal-shortcut--documentation": "24a7bc537f4ed563a2841876c2f552a8504e12e7124e22bf5b522a0e07056d97"
+  }
+}

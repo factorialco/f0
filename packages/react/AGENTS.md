@@ -20,14 +20,14 @@ Load the relevant skill before starting work:
 - **f0-quality-gate** — Post-implementation quality gate. Runs automatically after any code change — typecheck, lint, tests, plus parallel subagent reviews for code quality, a11y, and Storybook.
 - **f0-code-review** — Code review checklist. Load when reviewing PRs or auditing code.
 - **f0-component-patterns** — Architecture, context, styling, i18n patterns with code examples. Load when building or modifying components.
+- **f0-components** — Reference documentation for all 92 f0 components. Load when you need to understand component APIs, props, and usage patterns.
+- **f0-component-docs** — Generate MDX documentation for Storybook. Load when creating docs for a component.
 - **f0-unit-testing** — Vitest unit test patterns. Load when writing or fixing unit tests.
 - **f0-storybook-stories** — `.stories.tsx` file patterns. Load when adding or updating stories.
 - **f0-storybook-testing** — play function and axe-playwright a11y test patterns. Load when writing interaction or a11y tests.
 - **f0-experimental-component-migration** — Promoting components from `experimental/` to stable. Load when migrating.
 - **f0-pr** — Create PRs with correct title format, PR template body, and gh CLI workflow. Load when opening a pull request.
 - **f0-ai-config-hygiene** — Audits AI config files for instruction duplication. Load when modifying `AGENTS.md`, `copilot-instructions.md`, or any skill file.
-
-For **MDX documentation** (the Docs tab), use the global `factorial-f0-component-documentation` skill — separate conventions from story files.
 
 ## Folder Organization
 

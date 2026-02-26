@@ -1,0 +1,11 @@
+{
+  "generatedAt": "2026-02-19T18:55:05.851Z",
+  "toolVersion": "0.1.0",
+  "provider": "google",
+  "model": "gemini-3-flash-preview",
+  "fileHashes": {
+    "__props__": "9621fac269ff2eddfebe49219aec47d976bccca51ebf2622ceb1b81affd62d8c",
+    "__stories__": "0d8b262f98c7fd8379390cd81592f5b61c4972a1ae30a7b44009e8b15ca551e0",
+    "https://ds.factorial.dev/?path=/docs/layouts-layout--documentation": "949dbe6a0ac8450f660d99990ad6d6581957ffc0a384c72058fe7d47c0b05349"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "generatedAt": "2026-02-19T18:55:39.771Z",
+  "toolVersion": "0.1.0",
+  "provider": "google",
+  "model": "gemini-3-flash-preview",
+  "fileHashes": {
+    "__props__": "a37707a0d73e394bb1268a21a1aa501745e9f858fb7c0142e5bb0bf388a23b2e",
+    "__stories__": "60727325eb32d8014b2f69c62f710f50697c1e977a1adba739703f1f8b219afa",
+    "__subPages__": "0b3488e90a718e312f07bd2e1fc85ae07a3ade89a6f0e10dfdf9ca055ac83045",
+    "https://ds.factorial.dev/?path=/docs/sds-banners-aibanner--documentation": "97bd670f5396a2284d561ba1d5dde3191717a338950e8dd041273f5494184e49",
+    "https://ds.factorial.dev/?path=/docs/sds-banners-callout--documentation": "3b0d9c6ebc74bdb63316f8b5d86f365faa47b9525342fab3c613da44c2c0389b"
+  }
+}

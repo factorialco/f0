@@ -1,0 +1,10 @@
+{
+  "generatedAt": "2026-02-19T18:47:20.161Z",
+  "toolVersion": "0.1.0",
+  "provider": "google",
+  "model": "gemini-3-flash-preview",
+  "fileHashes": {
+    "__stories__": "da9a7b67e29c0e370847d1ba8cb751a2b7939a58088aaaa1b9c268af663f8f36",
+    "https://ds.factorial.dev/?path=/docs/🔒-internal-onerestrictcomponent--documentation": "1b2d673127ccd3a3024a2228b9c152da50d8bf9232d22ccf4273e1f890776b30"
+  }
+}

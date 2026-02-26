@@ -1,0 +1,9 @@
+{
+  "generatedAt": "2026-02-19T18:48:04.189Z",
+  "toolVersion": "0.1.0",
+  "provider": "google",
+  "model": "gemini-3-flash-preview",
+  "fileHashes": {
+    "https://ds.factorial.dev/?path=/docs/components-maturity--documentation": "b0c63b0ae6b00d3031d6892e018dce2630da3fe5f0c28a303fb37b294a82f986"
+  }
+}
