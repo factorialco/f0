@@ -95,6 +95,7 @@ export const TableCollection = <
   showItemActions: showItemActionsProp,
   visualizationSettings,
   fromVisualization = "table",
+  summaryPlaceholder = "-",
 }: CollectionProps<
   R,
   Filters,
@@ -249,6 +250,12 @@ export const TableCollection = <
       ? currentSortings.order
       : "none"
   }
+
+  const isEmptySummaryValue = (value: unknown) =>
+    value === null || value === undefined || value === ""
+
+  const getSummaryPlaceholder = (columnPlaceholder?: string) =>
+    columnPlaceholder ?? summaryPlaceholder
 
   /**
    * Handle column sort click
@@ -460,7 +467,7 @@ export const TableCollection = <
                       hidden
                       sticky={{
                         right: 0,
-                      }}
+                    }}
                       className="table-cell md:hidden"
                     >
                       {i18n.collections.actions.actions}
@@ -660,18 +667,43 @@ export const TableCollection = <
                             "flex"
                           )}
                         >
-                          {column.summary &&
-                          source.summaries &&
-                          source.summaries[column.summary]?.type === "sum" ? (
-                            <div className="flex gap-1">
+                          {(() => {
+                            const placeholder = getSummaryPlaceholder(
+                              column.summaryPlaceholder
+                            )
+
+                            if (
+                              column.summary &&
+                              source.summaries &&
+                              source.summaries[column.summary]?.type === "sum"
+                            ) {
+                              const summaryValue =
+                                summaryData.data[column.summary]
+
+                              if (isEmptySummaryValue(summaryValue)) {
+                                return (
+                                  <span className="text-f1-foreground-secondary">
+                                    {placeholder}
+                                  </span>
+                                )
+                              }
+
+                              return (
+                                <div className="flex gap-1">
+                                  <span className="text-f1-foreground-secondary">
+                                    {i18n.collections.summaries.types.sum}
+                                  </span>
+                                  {`${summaryValue}`}
+                                </div>
+                              )
+                            }
+
+                            return (
                               <span className="text-f1-foreground-secondary">
-                                {i18n.collections.summaries.types.sum}
+                                {placeholder}
                               </span>
-                              {`${summaryData.data[column.summary]}`}
-                            </div>
-                          ) : (
-                            "-"
-                          )}
+                            )
+                          })()}
                         </div>
                       )}
                     </TableCell>
