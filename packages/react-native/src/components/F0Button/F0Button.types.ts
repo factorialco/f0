@@ -1,7 +1,7 @@
 import type {
   PressableFeedbackProps,
   PressableFeedbackVariant,
-} from "../PressableFeedback"
+} from "../primitives/PressableFeedback"
 import type { IconType } from "../primitives/F0Icon/F0Icon.types"
 
 /**

@@ -2,7 +2,7 @@ import { render, fireEvent, screen } from "@testing-library/react-native"
 import React from "react"
 import { View, Text } from "react-native"
 
-import { PressableFeedback } from "./"
+import { PressableFeedback } from "../"
 
 describe("PressableFeedback", () => {
   const mockOnPressIn = jest.fn()
@@ -265,7 +265,6 @@ describe("PressableFeedback", () => {
 
       const tree = toJSON()
       expect(tree).toBeDefined()
-      // Highlight overlay should be present
       expect(tree?.children?.length).toBeGreaterThan(1)
     })
 
@@ -289,7 +288,6 @@ describe("PressableFeedback", () => {
 
       const tree = toJSON()
       expect(tree).toBeDefined()
-      // Both highlight overlay and scale should be present
       expect(tree?.children?.length).toBeGreaterThan(1)
     })
 
@@ -302,7 +300,6 @@ describe("PressableFeedback", () => {
 
       const tree = toJSON()
       expect(tree).toBeDefined()
-      // No highlight overlay should be present
       expect(tree?.children?.length).toBe(1)
     })
   })
@@ -356,7 +353,6 @@ describe("PressableFeedback", () => {
 
       const tree = toJSON()
       expect(tree).toBeDefined()
-      // No highlight overlay should be present when animations are disabled
       expect(tree?.children?.length).toBe(1)
     })
   })

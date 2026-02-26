@@ -2,7 +2,7 @@ import React, { forwardRef, useCallback, useMemo, useState } from "react"
 import { View } from "react-native"
 
 import { cn } from "../../lib/utils"
-import { PressableFeedback } from "../PressableFeedback"
+import { PressableFeedback } from "../primitives/PressableFeedback"
 import { F0Icon } from "../primitives/F0Icon"
 import { F0Text } from "../primitives/F0Text"
 
