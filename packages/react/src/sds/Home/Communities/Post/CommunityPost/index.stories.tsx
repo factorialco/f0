@@ -228,6 +228,8 @@ export const LongUnspacedText: Story = {
   },
 }
 
+type SkeletonStory = StoryObj<typeof CommunityPost.Skeleton>
+
 export const Skeleton: SkeletonStory = {
   decorators: [
     (Story) => (
