@@ -1,15 +1,15 @@
 import React from "react"
 
 import { withDataTestId } from "@/lib/data-testid"
-import { experimentalComponent } from "@/lib/experimental"
 
-import { F0WizardForm as F0WizardFormComponent } from "./F0WizardForm"
 import type {
   F0FormSchema,
   F0PerSectionSchema,
   F0WizardFormPerSectionProps,
   F0WizardFormSingleSchemaProps,
 } from "./types"
+
+import { F0WizardForm as F0WizardFormComponent } from "./F0WizardForm"
 
 export { useF0FormDefinition } from "./useF0FormDefinition"
 
@@ -27,9 +27,7 @@ export type {
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-const F0WizardForm = withDataTestId(
-  experimentalComponent("F0WizardForm", F0WizardFormComponent)
-) as {
+const F0WizardForm = withDataTestId(F0WizardFormComponent) as {
   <TSchema extends F0FormSchema>(
     props: F0WizardFormSingleSchemaProps<TSchema>
   ): React.ReactElement

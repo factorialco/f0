@@ -193,7 +193,7 @@ const groupedSchema = z.object({
     label: "Nationality",
     section: "personal",
   }),
-  legalEntity: f0FormField(z.string().optional(), {
+  legalEntity: f0FormField(z.string().min(1), {
     label: "Legal entity",
     section: "work",
   }),

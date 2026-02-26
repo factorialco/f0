@@ -5,6 +5,7 @@ import { z } from "zod"
 
 import { F0Button } from "@/components/F0Button"
 import { F0Dialog } from "@/components/F0Dialog"
+import { useF0FormDefinition } from "@/components/F0WizardForm"
 import { createDataSourceDefinition } from "@/hooks/datasource"
 import { ExternalLink, Plus, Settings } from "@/icons/app"
 
@@ -2066,5 +2067,132 @@ export const PerSectionShowSubmitWhenDirty: Story = {
         submitConfig={{ label: "Save" }}
       />
     )
+  },
+}
+
+/**
+ * Single-schema form using `formDefinition` prop.
+ * Instead of passing individual form props, all form-related configuration
+ * is bundled into a single `formDefinition` object via `useF0FormDefinition`.
+ * Rendering props (`className`, `styling`, `formRef`, `initialFiles`) remain
+ * as direct props on `F0Form`.
+ */
+export const WithFormDefinitionSingleSchema: Story = {
+  render() {
+    const formSchema = z.object({
+      firstName: f0FormField(z.string().min(1), {
+        label: "First Name",
+        section: "personal",
+      }),
+      lastName: f0FormField(z.string().min(1), {
+        label: "Last Name",
+        section: "personal",
+      }),
+      email: f0FormField(z.string().email(), {
+        label: "Email",
+        section: "contact",
+        placeholder: "you@example.com",
+      }),
+      phone: f0FormField(z.string().optional(), {
+        label: "Phone",
+        section: "contact",
+        placeholder: "+1 (555) 000-0000",
+      }),
+    })
+
+    const formDefinition = useF0FormDefinition({
+      name: "form-definition-single",
+      schema: formSchema,
+      sections: {
+        personal: { title: "Personal Information" },
+        contact: { title: "Contact Details" },
+      },
+      defaultValues: {
+        firstName: "Alicia",
+        lastName: "Keys",
+        email: "alicia.keys@factorial.co",
+        phone: "",
+      },
+      onSubmit: async ({ data }) => {
+        await sleep(1000)
+        console.info(
+          `Form submitted via formDefinition: ${JSON.stringify(data, null, 2)}`
+        )
+        return { success: true, message: "Saved successfully" }
+      },
+      submitConfig: { label: "Save Profile" },
+    })
+
+    return <F0Form formDefinition={formDefinition} />
+  },
+}
+
+/**
+ * Per-section form using `formDefinition` prop.
+ * Each section is independently validated and submitted. The `onSubmit`
+ * callback receives `{ sectionId, data, fullData }` — where `sectionId`
+ * narrows `data` to the correct section type, and `fullData` always
+ * contains all sections' latest values.
+ */
+export const WithFormDefinitionPerSection: Story = {
+  render() {
+    const schema = {
+      profile: z.object({
+        displayName: f0FormField(z.string().min(1), {
+          label: "Display Name",
+          placeholder: "Enter your display name",
+        }),
+        bio: f0FormField(z.string().max(200).optional(), {
+          label: "Bio",
+          fieldType: "textarea",
+          rows: 3,
+        }),
+      }),
+      settings: z.object({
+        theme: f0FormField(z.enum(["light", "dark", "system"]), {
+          label: "Theme",
+          options: [
+            { value: "light", label: "Light" },
+            { value: "dark", label: "Dark" },
+            { value: "system", label: "System" },
+          ],
+        }),
+        notifications: f0FormField(z.boolean(), {
+          label: "Enable notifications",
+          fieldType: "switch",
+        }),
+      }),
+    }
+
+    const formDefinition = useF0FormDefinition({
+      name: "form-definition-per-section",
+      schema,
+      sections: {
+        profile: {
+          title: "Profile",
+          description: "Your public profile information",
+        },
+        settings: {
+          title: "Settings",
+          description: "Customize your experience",
+        },
+      },
+      defaultValues: {
+        profile: { displayName: "Jane Doe", bio: "" },
+        settings: { theme: "system", notifications: true },
+      },
+      onSubmit: async ({ sectionId, data, fullData }) => {
+        await sleep(1000)
+        console.info(
+          `Section "${sectionId}" submitted via formDefinition:`,
+          data
+        )
+        console.info("Full data:", fullData)
+        return { success: true }
+      },
+      submitConfig: { label: "Save" },
+    })
+
+    return <F0Form formDefinition={formDefinition} />
   },
 }
