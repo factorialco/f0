@@ -253,6 +253,30 @@ export const TableViewWithAvatarList: Story = {
   },
 }
 
+export const TableViewWithNumericAndTeams: Story = {
+  args: {
+    title: "Salaries",
+    tableView: true,
+    details: [
+      {
+        title: "Default",
+        content: { type: "item", text: "24.000 € - 78.000 € / year" },
+      },
+      {
+        title: "Madrid HQ",
+        content: { type: "item", text: "32.000 € - 89.000 € / year" },
+      },
+      {
+        title: "Teams",
+        content: [
+          { type: "team", name: "Engineering" },
+          { type: "team", name: "Design" },
+        ],
+      },
+    ],
+  },
+}
+
 export const WithTeamAvatarList: Story = {
   args: {
     title: "Project Info",

@@ -38,12 +38,69 @@ export interface DetailsItemType {
   content: Content | Content[]
   isHorizontal?: boolean
   spacingAtTheBottom?: boolean
-  contentAlign?: "start" | "end"
 }
 
-const ItemContent: FC<{ content: Content; contentAlign?: "start" | "end" }> = ({
+const numericUnits = new Set([
+  "year",
+  "years",
+  "yr",
+  "month",
+  "months",
+  "mo",
+  "week",
+  "weeks",
+  "day",
+  "days",
+  "hour",
+  "hours",
+  "hr",
+  "hrs",
+])
+
+const isNumericValueText = (text: string): boolean => {
+  const sanitized = text.replace(/[^0-9A-Za-z./\s-]/g, "")
+  const tokens = sanitized
+    .toLowerCase()
+    .split(/[\s/]+/)
+    .map((token) => token.replace(/^-+|-+$/g, ""))
+    .filter(Boolean)
+
+  if (tokens.length === 0) {
+    return false
+  }
+
+  let hasNumber = false
+
+  for (const token of tokens) {
+    if (!Number.isNaN(Number(token))) {
+      hasNumber = true
+      continue
+    }
+
+    if (numericUnits.has(token)) {
+      continue
+    }
+
+    return false
+  }
+
+  return hasNumber
+}
+
+const getContentAlign = (
+  content: Content,
+  isHorizontal: boolean
+): "start" | "end" => {
+  if (!isHorizontal || content.type !== "item") {
+    return "start"
+  }
+
+  return isNumericValueText(content.text) ? "end" : "start"
+}
+
+const ItemContent: FC<{ content: Content; isHorizontal: boolean }> = ({
   content,
-  contentAlign,
+  isHorizontal,
 }) => (
   <>
     {content.type === "weekdays" && (
@@ -51,18 +108,15 @@ const ItemContent: FC<{ content: Content; contentAlign?: "start" | "end" }> = ({
         <Weekdays {...content} />
       </li>
     )}
-    {content.type === "person" && (
-      <DataList.PersonItem {...content} contentAlign={contentAlign} />
-    )}
+    {content.type === "person" && <DataList.PersonItem {...content} />}
     {content.type === "item" && (
-      <DataList.Item {...content} contentAlign={contentAlign} />
+      <DataList.Item
+        {...content}
+        contentAlign={getContentAlign(content, isHorizontal)}
+      />
     )}
-    {content.type === "team" && (
-      <DataList.TeamItem {...content} contentAlign={contentAlign} />
-    )}
-    {content.type === "company" && (
-      <DataList.CompanyItem {...content} contentAlign={contentAlign} />
-    )}
+    {content.type === "team" && <DataList.TeamItem {...content} />}
+    {content.type === "company" && <DataList.CompanyItem {...content} />}
     {content.type === "dot-tag" && <DataList.DotTagItem {...content} />}
     {content.type === "avatar-list" && (
       <li className="w-fit list-none px-1.5 py-1">
@@ -74,7 +128,7 @@ const ItemContent: FC<{ content: Content; contentAlign?: "start" | "end" }> = ({
 
 const _DetailsItem = forwardRef<HTMLDivElement, DetailsItemType>(
   function DetailsItem(
-    { title, content, isHorizontal = false, spacingAtTheBottom, contentAlign },
+    { title, content, isHorizontal = false, spacingAtTheBottom },
     ref
   ) {
     const contentArray = Array.isArray(content) ? content : [content]
@@ -90,7 +144,7 @@ const _DetailsItem = forwardRef<HTMLDivElement, DetailsItemType>(
       >
         <DataList label={title} isHorizontal={isHorizontal}>
           {contentArray.map((c, i) => (
-            <ItemContent key={i} content={c} contentAlign={contentAlign} />
+            <ItemContent key={i} content={c} isHorizontal={isHorizontal} />
           ))}
         </DataList>
       </div>
