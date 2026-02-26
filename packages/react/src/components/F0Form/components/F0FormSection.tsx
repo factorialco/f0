@@ -114,6 +114,7 @@ export function F0FormSection<TSchema extends F0FormSchema>({
   const submitIcon =
     submitConfig?.icon === null ? undefined : (submitConfig?.icon ?? Save)
   const showSubmitWhenDirty = submitConfig?.showSubmitWhenDirty ?? false
+  const hideSubmitButton = submitConfig?.hideSubmitButton ?? false
 
   const errorMap = useMemo(() => createZodErrorMap(i18n), [i18n])
   const formMode = ERROR_TRIGGER_MODE_MAP[errorTriggerMode]
@@ -275,7 +276,7 @@ export function F0FormSection<TSchema extends F0FormSchema>({
             </p>
           )}
 
-          {(!showSubmitWhenDirty || isDirty) && (
+          {!hideSubmitButton && (!showSubmitWhenDirty || isDirty) && (
             <div className="mt-4">
               <F0Button
                 type="submit"

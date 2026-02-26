@@ -424,4 +424,165 @@ describe("F0Wizard", () => {
 
     expect(screen.getByTestId("step-content")).toHaveTextContent("Current: 0")
   })
+
+  it("sidebar next step click triggers onNext validation", async () => {
+    const user = userEvent.setup()
+    const onNext = vi.fn().mockResolvedValue(undefined)
+
+    const steps: F0WizardStep[] = [
+      { title: "Step 1", onNext },
+      { title: "Step 2" },
+    ]
+
+    render(
+      <F0Wizard isOpen={true} onClose={() => {}} steps={steps}>
+        {({ currentStep }) => (
+          <div data-testid="step-content">Step {currentStep}</div>
+        )}
+      </F0Wizard>
+    )
+
+    const nav = screen.getByRole("navigation", { name: "Wizard steps" })
+    const stepButtons = nav.querySelectorAll("button")
+    await user.click(stepButtons[1])
+
+    await waitFor(() => {
+      expect(onNext).toHaveBeenCalledOnce()
+      expect(screen.getByTestId("step-content")).toHaveTextContent("Step 1")
+    })
+  })
+
+  it("sidebar next step click stays put when onNext rejects", async () => {
+    const user = userEvent.setup()
+    const onNext = vi.fn().mockRejectedValue(new Error("Validation failed"))
+
+    const steps: F0WizardStep[] = [
+      { title: "Step 1", onNext },
+      { title: "Step 2" },
+    ]
+
+    render(
+      <F0Wizard isOpen={true} onClose={() => {}} steps={steps}>
+        {({ currentStep }) => (
+          <div data-testid="step-content">Step {currentStep}</div>
+        )}
+      </F0Wizard>
+    )
+
+    const nav = screen.getByRole("navigation", { name: "Wizard steps" })
+    const stepButtons = nav.querySelectorAll("button")
+    await user.click(stepButtons[1])
+
+    await waitFor(() => {
+      expect(onNext).toHaveBeenCalledOnce()
+    })
+
+    expect(screen.getByTestId("step-content")).toHaveTextContent("Step 0")
+  })
+
+  it("with allowStepSkipping, clicking a far step validates intermediate steps", async () => {
+    const user = userEvent.setup()
+    const onNext0 = vi.fn().mockResolvedValue(undefined)
+    const onNext1 = vi.fn().mockResolvedValue(undefined)
+
+    const steps: F0WizardStep[] = [
+      { title: "Step 1", onNext: onNext0 },
+      { title: "Step 2", onNext: onNext1 },
+      { title: "Step 3" },
+    ]
+
+    render(
+      <F0Wizard
+        isOpen={true}
+        onClose={() => {}}
+        steps={steps}
+        allowStepSkipping
+      >
+        {({ currentStep }) => (
+          <div data-testid="step-content">Step {currentStep}</div>
+        )}
+      </F0Wizard>
+    )
+
+    const nav = screen.getByRole("navigation", { name: "Wizard steps" })
+    const stepButtons = nav.querySelectorAll("button")
+    await user.click(stepButtons[2])
+
+    await waitFor(() => {
+      expect(onNext0).toHaveBeenCalledOnce()
+      expect(onNext1).toHaveBeenCalledOnce()
+      expect(screen.getByTestId("step-content")).toHaveTextContent("Step 2")
+    })
+  })
+
+  it("with allowStepSkipping, clicking a far step stays put if intermediate validation fails", async () => {
+    const user = userEvent.setup()
+    const onNext0 = vi.fn().mockResolvedValue(undefined)
+    const onNext1 = vi.fn().mockRejectedValue(new Error("Validation failed"))
+
+    const steps: F0WizardStep[] = [
+      { title: "Step 1", onNext: onNext0 },
+      { title: "Step 2", onNext: onNext1 },
+      { title: "Step 3" },
+    ]
+
+    render(
+      <F0Wizard
+        isOpen={true}
+        onClose={() => {}}
+        steps={steps}
+        allowStepSkipping
+      >
+        {({ currentStep }) => (
+          <div data-testid="step-content">Step {currentStep}</div>
+        )}
+      </F0Wizard>
+    )
+
+    const nav = screen.getByRole("navigation", { name: "Wizard steps" })
+    const stepButtons = nav.querySelectorAll("button")
+    await user.click(stepButtons[2])
+
+    await waitFor(() => {
+      expect(onNext0).toHaveBeenCalledOnce()
+      expect(onNext1).toHaveBeenCalledOnce()
+    })
+
+    expect(screen.getByTestId("step-content")).toHaveTextContent("Step 0")
+  })
+
+  it("disables sidebar steps >1 ahead by default", () => {
+    render(
+      <F0Wizard isOpen={true} onClose={() => {}} steps={makeSteps(4)}>
+        {() => <div>Content</div>}
+      </F0Wizard>
+    )
+
+    const nav = screen.getByRole("navigation", { name: "Wizard steps" })
+    const buttons = nav.querySelectorAll("button")
+
+    expect(buttons[1]).not.toBeDisabled()
+    expect(buttons[2]).toBeDisabled()
+    expect(buttons[3]).toBeDisabled()
+  })
+
+  it("enables sidebar steps >1 ahead with allowStepSkipping", () => {
+    render(
+      <F0Wizard
+        isOpen={true}
+        onClose={() => {}}
+        steps={makeSteps(4)}
+        allowStepSkipping
+      >
+        {() => <div>Content</div>}
+      </F0Wizard>
+    )
+
+    const nav = screen.getByRole("navigation", { name: "Wizard steps" })
+    const buttons = nav.querySelectorAll("button")
+
+    expect(buttons[1]).not.toBeDisabled()
+    expect(buttons[2]).not.toBeDisabled()
+    expect(buttons[3]).not.toBeDisabled()
+  })
 })

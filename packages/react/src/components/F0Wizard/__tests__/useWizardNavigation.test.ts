@@ -409,6 +409,38 @@ describe("useWizardNavigation", () => {
     expect(result.current.currentStep).toBe(1)
   })
 
+  it("goToStep forward sets loading during onNext even without allowStepSkipping", async () => {
+    let resolveOnNext: () => void
+    const onNext = () =>
+      new Promise<void>((resolve) => {
+        resolveOnNext = resolve
+      })
+
+    const steps: F0WizardStep[] = [
+      { title: "Step 1", onNext },
+      { title: "Step 2" },
+    ]
+
+    const { result } = zeroRenderHook(() =>
+      useWizardNavigation({ steps, allowStepSkipping: false })
+    )
+
+    let goToStepPromise: Promise<void>
+    act(() => {
+      goToStepPromise = result.current.goToStep(1)
+    })
+
+    expect(result.current.loading).toBe(true)
+
+    await act(async () => {
+      resolveOnNext!()
+      await goToStepPromise!
+    })
+
+    expect(result.current.loading).toBe(false)
+    expect(result.current.currentStep).toBe(1)
+  })
+
   it("goToStep forward stays on current step when onNext rejects", async () => {
     const onNext0 = vi.fn().mockRejectedValue(new Error("Validation failed"))
     const steps: F0WizardStep[] = [

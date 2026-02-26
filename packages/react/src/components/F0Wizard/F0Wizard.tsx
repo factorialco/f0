@@ -55,14 +55,14 @@ export const F0Wizard: FC<F0WizardProps> = ({
   const primaryAction = useMemo<F0DialogPrimaryAction>(
     () => ({
       label: resolvedNextLabel,
-      icon: ArrowRight,
+      icon: isLastStep ? undefined : ArrowRight,
       onClick: () => void navigation.goNext(),
       disabled:
         currentStepDef?.isCompleted?.() === false ||
         currentStepDef?.hasErrors?.() === true,
       loading: navigation.loading,
     }),
-    [resolvedNextLabel, navigation, currentStepDef]
+    [resolvedNextLabel, isLastStep, navigation, currentStepDef]
   )
 
   const secondaryAction = useMemo<F0DialogSecondaryAction | undefined>(

@@ -314,6 +314,12 @@ export interface F0PerSectionSubmitConfig {
    * @default false
    */
   showSubmitWhenDirty?: boolean
+  /**
+   * When true, hides the submit button.
+   * Useful when submission is controlled externally (e.g. inside F0WizardForm).
+   * @default false
+   */
+  hideSubmitButton?: boolean
 }
 
 /**

@@ -155,6 +155,36 @@ function F0WizardFormPerSection<T extends F0PerSectionSchema>({
 
   const sectionIds = useMemo(() => Object.keys(schema), [schema])
 
+  const effectiveSteps = useMemo(() => {
+    if (!customSteps) return undefined
+
+    const hasMultiSectionStep = customSteps.some(
+      (step) => step.sectionIds.length > 1
+    )
+
+    if (hasMultiSectionStep) {
+      if (process.env.NODE_ENV !== "production") {
+        console.error(
+          "[F0WizardForm] Per-section schema mode does not support grouping " +
+            "multiple sections into a single step. Each section requires its " +
+            "own independent form and submit. Steps with multiple sectionIds " +
+            "will be automatically split into separate steps."
+        )
+      }
+
+      return customSteps.flatMap((step) =>
+        step.sectionIds.map((id) => ({
+          title: sections?.[id]?.title ?? step.title,
+          sectionIds: [id],
+          nextLabel: step.nextLabel,
+          previousLabel: step.previousLabel,
+        }))
+      )
+    }
+
+    return customSteps
+  }, [customSteps, sections])
+
   const fullDataRef = useRef<Record<string, unknown>>({})
 
   const sectionForms = useMemo(
@@ -184,7 +214,7 @@ function F0WizardFormPerSection<T extends F0PerSectionSchema>({
 
   const onNextForStep = useCallback(
     (stepIndex: number) => async () => {
-      const ids = getSectionIdsForStep(stepIndex, sectionIds, customSteps)
+      const ids = getSectionIdsForStep(stepIndex, sectionIds, effectiveSteps)
       for (const sectionId of ids) {
         const sectionForm = sectionForms[sectionId]
         if (sectionForm) {
@@ -192,15 +222,15 @@ function F0WizardFormPerSection<T extends F0PerSectionSchema>({
         }
       }
     },
-    [sectionIds, customSteps, sectionForms]
+    [sectionIds, effectiveSteps, sectionForms]
   )
 
   const hasErrorsForStep = useCallback(
     (stepIndex: number): boolean => {
-      const ids = getSectionIdsForStep(stepIndex, sectionIds, customSteps)
+      const ids = getSectionIdsForStep(stepIndex, sectionIds, effectiveSteps)
       return ids.some((id) => sectionErrorStateRef.current[id] === true)
     },
-    [sectionIds, customSteps]
+    [sectionIds, effectiveSteps]
   )
 
   const wizardSteps = useMemo(
@@ -208,7 +238,7 @@ function F0WizardFormPerSection<T extends F0PerSectionSchema>({
       deriveWizardSteps(
         sectionIds,
         sections,
-        customSteps,
+        effectiveSteps,
         isStepAllDisabled,
         onNextForStep,
         hasErrorsForStep
@@ -217,7 +247,7 @@ function F0WizardFormPerSection<T extends F0PerSectionSchema>({
     [
       sectionIds,
       sections,
-      customSteps,
+      effectiveSteps,
       isStepAllDisabled,
       onNextForStep,
       hasErrorsForStep,
@@ -257,7 +287,7 @@ function F0WizardFormPerSection<T extends F0PerSectionSchema>({
         const currentSectionIds = getSectionIdsForStep(
           currentStep,
           sectionIds,
-          customSteps
+          effectiveSteps
         )
 
         return (
@@ -344,12 +374,10 @@ function PerSectionFormWrapper<TSchema extends F0FormSchema>({
       sectionConfig={sectionConfig}
       defaultValues={defaultValues}
       onSubmit={onSubmit}
-      submitConfig={
-        {
-          ...submitConfig,
-          hideSubmitButton: true,
-        } as F0PerSectionSubmitConfig & { hideSubmitButton: boolean }
-      }
+      submitConfig={{
+        ...submitConfig,
+        hideSubmitButton: true,
+      }}
       errorTriggerMode={errorTriggerMode}
       formRef={form.formRef}
     />

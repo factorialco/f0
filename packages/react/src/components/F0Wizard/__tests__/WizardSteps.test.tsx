@@ -169,4 +169,104 @@ describe("WizardSteps", () => {
 
     expect(goToStep).toHaveBeenCalledWith(1)
   })
+
+  it("disables steps more than one ahead when allowStepSkipping is false", async () => {
+    const user = userEvent.setup()
+    const goToStep = vi.fn()
+
+    const steps: F0WizardStep[] = [
+      { title: "Step A" },
+      { title: "Step B" },
+      { title: "Step C" },
+    ]
+
+    renderWithContext(steps, 0, { goToStep, allowStepSkipping: false })
+
+    const nav = screen.getByRole("navigation", { name: "Wizard steps" })
+    const buttons = nav.querySelectorAll("button")
+
+    expect(buttons[2]).toBeDisabled()
+
+    await user.click(buttons[2])
+    expect(goToStep).not.toHaveBeenCalled()
+  })
+
+  it("enables steps more than one ahead when allowStepSkipping is true", async () => {
+    const user = userEvent.setup()
+    const goToStep = vi.fn()
+
+    const steps: F0WizardStep[] = [
+      { title: "Step A" },
+      { title: "Step B" },
+      { title: "Step C" },
+    ]
+
+    renderWithContext(steps, 0, { goToStep, allowStepSkipping: true })
+
+    const nav = screen.getByRole("navigation", { name: "Wizard steps" })
+    const buttons = nav.querySelectorAll("button")
+
+    expect(buttons[2]).not.toBeDisabled()
+
+    await user.click(buttons[2])
+    expect(goToStep).toHaveBeenCalledWith(2)
+  })
+
+  it("disables forward steps when an intermediate step has errors", async () => {
+    const user = userEvent.setup()
+    const goToStep = vi.fn()
+
+    const steps: F0WizardStep[] = [
+      { title: "Step A", hasErrors: () => false },
+      { title: "Step B", hasErrors: () => true },
+      { title: "Step C" },
+    ]
+
+    renderWithContext(steps, 0, { goToStep, allowStepSkipping: true })
+
+    const nav = screen.getByRole("navigation", { name: "Wizard steps" })
+    const buttons = nav.querySelectorAll("button")
+
+    expect(buttons[2]).toBeDisabled()
+
+    await user.click(buttons[2])
+    expect(goToStep).not.toHaveBeenCalled()
+  })
+
+  it("allows clicking the immediately next step when allowStepSkipping is false", async () => {
+    const user = userEvent.setup()
+    const goToStep = vi.fn()
+
+    const steps: F0WizardStep[] = [
+      { title: "Step A" },
+      { title: "Step B" },
+      { title: "Step C" },
+    ]
+
+    renderWithContext(steps, 0, { goToStep, allowStepSkipping: false })
+
+    const nav = screen.getByRole("navigation", { name: "Wizard steps" })
+    const buttons = nav.querySelectorAll("button")
+
+    expect(buttons[1]).not.toBeDisabled()
+
+    await user.click(buttons[1])
+    expect(goToStep).toHaveBeenCalledWith(1)
+  })
+
+  it("allows clicking backwards when allowStepSkipping is false", async () => {
+    const user = userEvent.setup()
+    const goToStep = vi.fn()
+
+    const steps: F0WizardStep[] = [
+      { title: "Step A" },
+      { title: "Step B" },
+      { title: "Step C" },
+    ]
+
+    renderWithContext(steps, 2, { goToStep, allowStepSkipping: false })
+
+    await user.click(screen.getByText("Step A"))
+    expect(goToStep).toHaveBeenCalledWith(0)
+  })
 })
