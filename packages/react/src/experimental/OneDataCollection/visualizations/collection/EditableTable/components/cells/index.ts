@@ -1,15 +1,20 @@
 import type { ComponentType } from "react"
 
+import type { RecordType, SortingsDefinition } from "@/hooks/datasource"
+
+import type { SummariesDefinition } from "../../../../../summary"
+import type { TableColumnDefinition } from "../../../Table/types"
 import type { EditableTableCellEditType } from "../../types"
 import { TextCell } from "./TextCell"
 
 /**
  * Shared props contract that every editable cell component must implement.
  */
-export type EditableCellProps = {
-  label: string
+export type EditableCellProps = Pick<
+  TableColumnDefinition<RecordType, SortingsDefinition, SummariesDefinition>,
+  "label" | "align"
+> & {
   value: string
-  align?: "left" | "right"
   error?: string
   loading?: boolean
   onChange: (value: string) => void
