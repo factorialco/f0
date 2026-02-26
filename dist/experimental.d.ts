@@ -2744,7 +2744,6 @@ declare interface DetailsItemsListProps {
     title?: string;
     tableView?: boolean;
     details: DetailsItemType[];
-    contentAlign?: "start" | "end";
 }
 
 export declare interface DetailsItemType {
@@ -2752,7 +2751,6 @@ export declare interface DetailsItemType {
     content: Content | Content[];
     isHorizontal?: boolean;
     spacingAtTheBottom?: boolean;
-    contentAlign?: "start" | "end";
 }
 
 export declare const Dialog: WithDataTestIdReturnType_4<ForwardRefExoticComponent<Omit<DialogProps & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>>;
