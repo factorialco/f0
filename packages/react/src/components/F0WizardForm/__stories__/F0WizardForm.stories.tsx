@@ -7,6 +7,7 @@ import { F0Button } from "@/components/F0Button"
 import { f0FormField } from "@/components/F0Form/f0Schema"
 import { ApplicationFrame } from "@/examples/ApplicationFrame"
 import ApplicationFrameStoryMeta from "@/examples/ApplicationFrame/index.stories"
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import { F0WizardForm, useF0FormDefinition } from "../index"
 
@@ -466,4 +467,13 @@ function LinkAfterSubmitStory() {
 
 export const LinkAfterSubmit: Story = {
   render: () => <LinkAfterSubmitStory />,
+}
+
+// =============================================================================
+// Snapshot for Chromatic
+// =============================================================================
+
+export const Snapshot: Story = {
+  parameters: withSnapshot({}),
+  render: () => <SingleSchemaStory />,
 }

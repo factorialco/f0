@@ -5,6 +5,7 @@ import { ComponentProps, FC, useState } from "react"
 import { F0Button } from "@/components/F0Button"
 import { ApplicationFrame } from "@/examples/ApplicationFrame"
 import ApplicationFrameStoryMeta from "@/examples/ApplicationFrame/index.stories"
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import type { F0WizardStep } from "../types"
 
@@ -238,5 +239,12 @@ export const AutoSkipCompletedSteps: Story = {
       { title: "Step 2 (completed)", isCompleted: () => true },
       { title: "Step 3" },
     ],
+  },
+}
+
+export const Snapshot: Story = {
+  parameters: withSnapshot({}),
+  args: {
+    ...Default.args,
   },
 }
