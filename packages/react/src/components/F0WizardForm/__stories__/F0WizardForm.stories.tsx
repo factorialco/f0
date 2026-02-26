@@ -95,7 +95,6 @@ function SingleSchemaStory() {
           isOpen={open}
           onClose={() => setOpen(false)}
           title="Add employee"
-          width="lg"
         />
       </div>
     </ApplicationFrame>
@@ -161,7 +160,6 @@ function PerSectionSchemaStory() {
           isOpen={open}
           onClose={() => setOpen(false)}
           title="Add employee"
-          width="lg"
         />
       </div>
     </ApplicationFrame>
@@ -239,7 +237,6 @@ function CustomStepGroupingStory() {
           isOpen={open}
           onClose={() => setOpen(false)}
           title="Add employee"
-          width="lg"
           steps={[
             {
               title: "Basic info",
@@ -318,7 +315,6 @@ function DisabledStepAutoCompletedStory() {
           isOpen={open}
           onClose={() => setOpen(false)}
           title="Edit employee"
-          width="lg"
         />
       </div>
     </ApplicationFrame>
@@ -363,7 +359,6 @@ function WithDefaultStepIndexStory() {
           isOpen={open}
           onClose={() => setOpen(false)}
           title="Add employee"
-          width="lg"
           defaultStepIndex={1}
         />
       </div>
