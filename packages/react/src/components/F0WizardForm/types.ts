@@ -109,7 +109,9 @@ interface F0WizardFormBaseProps {
   onStepChanged?: (stepIndex: number) => void
   steps?: F0WizardFormStep[]
   /**
-   * When true, users can click on any completed step to jump to it.
+   * When true, users can click on any step that is not explicitly marked
+   * as incomplete (i.e. its `isCompleted` callback does not return `false`)
+   * to jump to it.
    * When false (default), users must navigate sequentially using Next/Previous.
    * @default false
    */

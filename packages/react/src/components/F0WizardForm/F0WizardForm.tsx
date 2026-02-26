@@ -528,13 +528,19 @@ function PerSectionFormWrapper<TSchema extends F0FormSchema>({
 }) {
   const form = useF0Form()
 
-  sectionForms[sectionId] = form
+  useEffect(() => {
+    sectionForms[sectionId] = form
+    return () => {
+      sectionForms[sectionId] = null
+    }
+  }, [sectionForms, sectionId, form])
 
-  const prevHasErrors = useRef(form.hasErrors)
-  if (prevHasErrors.current !== form.hasErrors) {
-    prevHasErrors.current = form.hasErrors
-    onErrorStateChange(form.hasErrors)
-  }
+  const onErrorStateChangeRef = useRef(onErrorStateChange)
+  onErrorStateChangeRef.current = onErrorStateChange
+
+  useEffect(() => {
+    onErrorStateChangeRef.current(form.hasErrors)
+  }, [form.hasErrors])
 
   return (
     <F0FormSection
@@ -686,10 +692,9 @@ function F0WizardFormSingleSchema<TSchema extends F0FormSchema>({
   const handleFormSubmit = useCallback(
     async (data: z.infer<TSchema>): Promise<F0FormSubmitResult> => {
       Object.assign(enteredValuesRef.current, data)
-      lastSubmitDataRef.current = {
-        ...enteredValuesRef.current,
-      } as z.infer<TSchema>
-      const result = await onSubmit({ data })
+      const fullData = { ...enteredValuesRef.current } as z.infer<TSchema>
+      lastSubmitDataRef.current = fullData
+      const result = await onSubmit({ data: fullData })
       lastSubmitResultRef.current = result
       return result
     },

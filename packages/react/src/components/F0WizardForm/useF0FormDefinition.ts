@@ -77,10 +77,38 @@ export function useF0FormDefinition(
 ):
   | F0FormDefinitionSingleSchema<F0FormSchema>
   | F0FormDefinitionPerSection<F0PerSectionSchema> {
+  const {
+    name,
+    schema,
+    sections,
+    defaultValues,
+    onSubmit,
+    submitConfig,
+    errorTriggerMode,
+  } = input
+
   return useMemo(() => {
-    const brand = isZodSchema(input.schema) ? "single" : "per-section"
-    return { ...input, _brand: brand } as
+    const brand = isZodSchema(schema) ? "single" : "per-section"
+    return {
+      name,
+      schema,
+      sections,
+      defaultValues,
+      onSubmit,
+      submitConfig,
+      errorTriggerMode,
+      _brand: brand,
+    } as
       | F0FormDefinitionSingleSchema<F0FormSchema>
       | F0FormDefinitionPerSection<F0PerSectionSchema>
-  }, [input])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    name,
+    schema,
+    sections,
+    defaultValues,
+    onSubmit,
+    submitConfig,
+    errorTriggerMode,
+  ])
 }

@@ -13,10 +13,10 @@ import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 import type { F0WizardProps } from "./types"
 
 import { WizardProvider } from "./components/WizardProvider"
-
-const noop = () => {}
 import { WizardSteps } from "./components/WizardSteps"
 import { useWizardNavigation } from "./hooks/useWizardNavigation"
+
+const noop = () => {}
 
 /**
  * @internal This component is not exported from the package.
