@@ -140,8 +140,6 @@ function configToF0Field(
       return {
         ...baseProps,
         type: "checkbox",
-        moreInfoLink:
-          "moreInfoLink" in config ? config.moreInfoLink : undefined,
         renderIf: config.renderIf,
       } as F0Field
 

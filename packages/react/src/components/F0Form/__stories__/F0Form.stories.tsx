@@ -597,10 +597,6 @@ export const AllFieldTypes: Story = {
         label: "Checkbox Field",
         fieldType: "checkbox",
         helpText: "Check this box to agree",
-        moreInfoLink: {
-          href: "https://help.factorial.co/terms",
-          label: "Read the terms",
-        },
       }),
       requiredCheckboxField: f0FormField(z.literal(true), {
         label: "Required Checkbox Field",
