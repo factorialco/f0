@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { useState } from "react"
+import { useState, useCallback, useRef } from "react"
 import { z } from "zod"
 
 import { F0Dialog } from "@/components/dialog-alike/F0Dialog"
@@ -15,6 +15,11 @@ import {
   CustomFieldRenderProps,
   useF0Form,
 } from "../index"
+import type {
+  FileUploadHookReturn,
+  FileUploadResult,
+  FileUploadStatus,
+} from "../fields/types"
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
@@ -821,6 +826,162 @@ export const AllFieldTypesDisabled: Story = {
           console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
           return { success: true }
         }}
+      />
+    )
+  },
+}
+
+function useMockUpload(): FileUploadHookReturn {
+  const [progress, setProgress] = useState(0)
+  const [status, setStatus] = useState<FileUploadStatus>("idle")
+  const abortRef = useRef(false)
+
+  const upload = useCallback(async (file: File): Promise<FileUploadResult> => {
+    abortRef.current = false
+    setStatus("processing")
+    setProgress(0)
+    await sleep(500)
+    if (abortRef.current) return { type: "aborted" }
+    setStatus("uploading")
+    for (let i = 1; i <= 10; i++) {
+      await sleep(200)
+      if (abortRef.current) return { type: "aborted" }
+      setProgress(i / 10)
+    }
+    setStatus("success")
+    return { type: "success", value: `signed_${file.name}_${Date.now()}` }
+  }, [])
+
+  const cancelUpload = useCallback(() => {
+    abortRef.current = true
+    setStatus("idle")
+    setProgress(0)
+  }, [])
+
+  return { upload, cancelUpload, progress, status }
+}
+
+/**
+ * File upload fields integrated within a form alongside other field types.
+ * Demonstrates single file, multiple files, and file fields with validation
+ * constraints — all using the declarative `f0FormField` API.
+ */
+export const FileFields: Story = {
+  render() {
+    const formSchema = z.object({
+      title: f0FormField(z.string().min(1), {
+        label: "Document Title",
+        placeholder: "Enter title",
+      }),
+      singleFile: f0FormField(z.string().min(1, "Please upload a file"), {
+        label: "Cover Image",
+        fieldType: "file",
+        accept: ["image/jpeg", "image/png", "image/webp"],
+        maxSizeMB: 5,
+        description: "Upload a JPEG, PNG, or WebP image (max 5 MB)",
+        useUpload: useMockUpload,
+      }),
+      attachments: f0FormField(
+        z.array(z.string()).min(1, "Upload at least one file"),
+        {
+          label: "Attachments",
+          fieldType: "file",
+          multiple: true,
+          accept: ["application/pdf", "image"],
+          maxSizeMB: 50,
+          useUpload: useMockUpload,
+        }
+      ),
+      notes: f0FormField(z.string().optional(), {
+        label: "Notes",
+        fieldType: "textarea",
+        rows: 3,
+        placeholder: "Any additional notes...",
+      }),
+    })
+
+    return (
+      <F0Form
+        name="file-fields"
+        schema={formSchema}
+        defaultValues={{
+          title: "",
+          singleFile: "",
+          attachments: [],
+          notes: "",
+        }}
+        onSubmit={async (data) => {
+          await sleep(1000)
+          console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+          return { success: true, message: "Document saved" }
+        }}
+        submitConfig={{ label: "Save Document" }}
+      />
+    )
+  },
+}
+
+/**
+ * File field with pre-existing files loaded via `initialFiles` on F0Form.
+ * The shared pool is automatically matched to each file field by comparing
+ * `InitialFile.value` against the field's `defaultValues`.
+ */
+export const FileFieldsWithInitialFiles: Story = {
+  render() {
+    const formSchema = z.object({
+      document: f0FormField(z.string().min(1, "Please upload a file"), {
+        label: "Contract Document",
+        fieldType: "file",
+        accept: ["application/pdf"],
+        useUpload: useMockUpload,
+      }),
+      attachments: f0FormField(
+        z.array(z.string()).min(1, "Upload at least one file"),
+        {
+          label: "Supporting Documents",
+          fieldType: "file",
+          multiple: true,
+          accept: ["application/pdf", "image"],
+          maxSizeMB: 50,
+          useUpload: useMockUpload,
+        }
+      ),
+    })
+
+    return (
+      <F0Form
+        name="file-initial"
+        schema={formSchema}
+        defaultValues={{
+          document: "signed_contract_2024.pdf",
+          attachments: ["signed_invoice.pdf", "signed_receipt.png"],
+        }}
+        initialFiles={[
+          {
+            value: "signed_contract_2024.pdf",
+            name: "contract_2024.pdf",
+            type: "application/pdf",
+            size: 2_500_000,
+          },
+          {
+            value: "signed_invoice.pdf",
+            name: "invoice_march.pdf",
+            type: "application/pdf",
+            size: 1_200_000,
+          },
+          {
+            value: "signed_receipt.png",
+            name: "receipt_photo.png",
+            type: "image/png",
+            size: 850_000,
+          },
+        ]}
+        onSubmit={async (data) => {
+          await sleep(1000)
+          console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+          return { success: true, message: "Document updated" }
+        }}
+        submitConfig={{ label: "Update Document" }}
       />
     )
   },

@@ -1,9 +1,8 @@
 import { AnimatePresence, motion } from "motion/react"
 import { Fragment, useEffect, useMemo, useState } from "react"
 
+import { F0Button } from "@/components/F0Button"
 import { F0Checkbox } from "@/components/F0Checkbox"
-import { Dropdown } from "@/experimental/Navigation/Dropdown"
-import { ChevronDown } from "@/icons/app"
 import { PagesPagination } from "@/experimental/OneDataCollection/components/PagesPagination"
 import { useDataCollectionSettings } from "@/experimental/OneDataCollection/Settings/SettingsProvider"
 import {
@@ -43,8 +42,28 @@ import { Row } from "./components/Row"
 import { useColumns } from "./hooks/useColums"
 import { TableVisualizationOptions } from "./types"
 import { useSticky } from "./useSticky"
-import { F0Button } from "@/components/F0Button"
 export * from "./settings/SettingsRenderer"
+
+const HighlightedCount = ({ text, count }: { text: string; count: number }) => {
+  const countStr = String(count)
+  const idx = text.indexOf(countStr)
+  if (idx === -1) {
+    return (
+      <span className="font-me text-base font-medium text-f1-foreground-secondary">
+        {text}
+      </span>
+    )
+  }
+  const before = text.slice(0, idx)
+  const after = text.slice(idx + countStr.length)
+  return (
+    <span className="text-base font-medium text-f1-foreground-secondary">
+      {before}
+      <span className="font-semibold text-f1-foreground">{countStr}</span>
+      {after}
+    </span>
+  )
+}
 
 export const TableCollection = <
   R extends RecordType,
@@ -240,8 +259,7 @@ export const TableCollection = <
   const { getStickyPosition, checkColumnWidth } = useSticky(
     frozenColumnsLeft,
     columns,
-    !!source.selectable,
-    !!source.allPagesSelection
+    !!source.selectable
   )
 
   const tableWithChildren = data?.records.some((item) =>
@@ -266,23 +284,41 @@ export const TableCollection = <
     })
   }
 
+  const hasSelection =
+    allSelectedStatus.selectedCount > 0 || allSelectedStatus.checked
+
+  const allOnPageSelected =
+    !allSelectedStatus.checked &&
+    allSelectedStatus.unselectedCount === 0 &&
+    allSelectedStatus.selectedCount > 0
+
+  const showSelectAllOption =
+    !!source.allPagesSelection &&
+    !allSelectedStatus.checked &&
+    paginationInfo?.total !== undefined &&
+    paginationInfo.total > allSelectedStatus.selectedCount
+
+  const selectionHeaderColSpan = columns.length + (source.itemActions ? 2 : 0)
+
+  const selectedText =
+    allSelectedStatus.selectedCount === 1
+      ? i18n.status.selected.singular
+      : i18n.status.selected.plural
+
   return (
     <div className="flex h-full min-h-0 flex-col gap-4">
       <OneTable loading={isLoading}>
         <TableHeader sticky={true}>
-          <TableRow>
-            {source.selectable && (
+          {hasSelection && source.selectable ? (
+            <TableRow>
               <TableHead
                 width={checkColumnWidth}
                 sticky={{ left: 0 }}
                 align="left"
               >
-                <div className="flex w-full items-center justify-start ml-1.5">
+                <div className="ml-1.5 flex w-full items-center justify-start">
                   <F0Checkbox
-                    checked={
-                      allSelectedStatus.selectedCount > 0 ||
-                      allSelectedStatus.checked
-                    }
+                    checked={true}
                     indeterminate={
                       allSelectedStatus.indeterminate ||
                       (allSelectedStatus.selectedCount > 0 &&
@@ -291,76 +327,110 @@ export const TableCollection = <
                     onCheckedChange={handleSelectAll}
                     title={i18n.actions.selectAll}
                     hideLabel
-                    disabled={data?.records.length === 0}
                   />
-                  {source.allPagesSelection && (
-                    <Dropdown
-                      size="sm"
-                      items={[
-                        {
-                          label: t("status.selected.selectAllItems", {
-                            total: paginationInfo?.total ?? data.records.length,
-                          }),
-                          onClick: () => handleSelectAllItems(true),
-                        },
-                      ]}
-                    >
-                      <F0Button
-                        label={i18n.actions.more}
-                        hideLabel
-                        size="sm"
-                        icon={ChevronDown}
-                        variant="ghost"
-                      />
-                    </Dropdown>
-                  )}
                 </div>
               </TableHead>
-            )}
-            {columns.map(({ sorting, label, ...column }, index) => (
-              <TableHead
-                key={`table-head-${index}`}
-                sortState={getColumnSortState(
-                  sorting,
-                  source.sortings,
-                  currentSortings
-                )}
-                width={column.width}
-                align={column.align}
-                sticky={getStickyPosition(index)}
-                {...column}
-                // Needs to force hidden column includes hidden prop, that is the definition not the final state
-                hidden={false}
-                onSortClick={
-                  sorting
-                    ? () => {
-                        if (!sorting) return
-                        handleSortClick(sorting)
-                      }
-                    : undefined
-                }
+              <th
+                colSpan={selectionHeaderColSpan}
+                className="h-11 border-0 border-t border-solid border-f1-border-secondary bg-f1-background px-3"
               >
-                {label}
-              </TableHead>
-            ))}
-
-            {source.itemActions && (
-              <>
-                <th></th>
+                <div className="flex items-center gap-3">
+                  <HighlightedCount
+                    text={
+                      allSelectedStatus.checked
+                        ? t("status.selected.allItemsSelected", {
+                            total:
+                              paginationInfo?.total ??
+                              allSelectedStatus.selectedCount,
+                          })
+                        : allOnPageSelected
+                          ? t("status.selected.allOnPage", {
+                              count: allSelectedStatus.selectedCount,
+                            })
+                          : `${allSelectedStatus.selectedCount} ${selectedText}`
+                    }
+                    count={
+                      allSelectedStatus.checked
+                        ? (paginationInfo?.total ??
+                          allSelectedStatus.selectedCount)
+                        : allSelectedStatus.selectedCount
+                    }
+                  />
+                  {showSelectAllOption && (
+                    <F0Button
+                      variant="outline"
+                      label={t("status.selected.selectAllItems", {
+                        total: paginationInfo?.total ?? 0,
+                      })}
+                      onClick={() => handleSelectAllItems(true)}
+                      size="sm"
+                    />
+                  )}
+                </div>
+              </th>
+            </TableRow>
+          ) : (
+            <TableRow>
+              {source.selectable && (
                 <TableHead
-                  key="actions"
-                  width={68}
-                  hidden
-                  sticky={{
-                    right: 0,
-                  }}
-                  className="table-cell md:hidden"
+                  width={checkColumnWidth}
+                  sticky={{ left: 0 }}
+                  align="left"
                 >
-                  {i18n.collections.actions.actions}
+                  <div className="ml-1.5 flex w-full items-center justify-start">
+                    <F0Checkbox
+                      checked={false}
+                      onCheckedChange={handleSelectAll}
+                      title={i18n.actions.selectAll}
+                      hideLabel
+                      disabled={data?.records.length === 0}
+                    />
+                  </div>
                 </TableHead>
-              </>
-            )}
-          </TableRow>
+              )}
+              {columns.map(({ sorting, label, ...column }, index) => (
+                <TableHead
+                  key={`table-head-${index}`}
+                  sortState={getColumnSortState(
+                    sorting,
+                    source.sortings,
+                    currentSortings
+                  )}
+                  width={column.width}
+                  align={column.align}
+                  sticky={getStickyPosition(index)}
+                  {...column}
+                  hidden={false}
+                  onSortClick={
+                    sorting
+                      ? () => {
+                          if (!sorting) return
+                          handleSortClick(sorting)
+                        }
+                      : undefined
+                  }
+                >
+                  {label}
+                </TableHead>
+              ))}
+              {source.itemActions && (
+                <>
+                  <th></th>
+                  <TableHead
+                    key="actions"
+                    width={68}
+                    hidden
+                    sticky={{
+                      right: 0,
+                    }}
+                    className="table-cell md:hidden"
+                  >
+                    {i18n.collections.actions.actions}
+                  </TableHead>
+                </>
+              )}
+            </TableRow>
+          )}
         </TableHeader>
         <TableBody>
           {data?.type === "grouped" &&

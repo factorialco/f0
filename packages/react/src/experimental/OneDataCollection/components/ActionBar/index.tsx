@@ -9,6 +9,7 @@ import {
   F0ButtonDropdown,
 } from "@/components/F0ButtonDropdown"
 import { IconType } from "@/components/F0Icon"
+import { OneEllipsis } from "@/components/OneEllipsis"
 import { Dropdown, MobileDropdown } from "@/experimental/Navigation/Dropdown"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
@@ -208,7 +209,7 @@ export const ActionBar = ({
                   })}
                 </span>
               ) : (
-                <span className="font-medium tabular-nums">
+                <span className="flex items-center gap-1 font-medium tabular-nums">
                   <NumberFlow
                     value={selectedNumber}
                     spinTiming={{
@@ -216,7 +217,9 @@ export const ActionBar = ({
                       easing: "cubic-bezier(0.175, 0.885, 0.32, 1.275)",
                     }}
                   />
-                  <span> {selectedText}</span>
+                  <OneEllipsis className="text-f1-foreground">
+                    {selectedText}
+                  </OneEllipsis>
                 </span>
               )}
               <F0Button

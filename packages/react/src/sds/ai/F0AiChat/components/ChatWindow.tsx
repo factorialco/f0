@@ -60,7 +60,7 @@ const ResizeHandle = ({
   return (
     <div
       className={cn(
-        "flex h-full w-2 flex-shrink-0 cursor-ew-resize items-stretch justify-center transition-colors",
+        "flex h-full w-1 flex-shrink-0 cursor-ew-resize items-stretch justify-center transition-colors",
         "[&>div]:hover:bg-f1-background-secondary-hover",
         isResizing && "[&>div]:bg-f1-background-secondary-hover"
       )}
@@ -107,7 +107,7 @@ export const SidebarWindow = ({ children }: WindowProps) => {
       {open && (
         <motion.div
           key="chat-wrapper"
-          className="pointer-events-auto bg-f1-transparent relative ml-auto flex h-full dark:bg-f1-background xs:rounded-xl py-1 pr-1"
+          className="bg-f1-transparent pointer-events-auto relative ml-auto flex h-full py-1 pr-1 dark:bg-f1-background xs:rounded-xl"
           initial={
             shouldPlayEntranceAnimation ? { opacity: 0, width: 0 } : false
           }
