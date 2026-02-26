@@ -1,14 +1,8 @@
-import React, { forwardRef, memo, type ReactNode } from "react";
+import React, { forwardRef, memo, type ReactNode } from "react"
 
-import { useRenderDataTestIdAttribute } from "../providers/user-platafform/UserPlatformProvider";
+import { useRenderDataTestIdAttribute } from "../providers/user-platafform/UserPlatformProvider"
 
-const ignoredStaticProps = [
-  "prototype",
-  "length",
-  "name",
-  "$$typeof",
-  "render",
-];
+const ignoredStaticProps = ["prototype", "length", "name", "$$typeof", "render"]
 /**
  * Copies all static properties from the source component to the target component.
  * This preserves marker properties like __isPageLayoutBlock and __isPageLayoutGroup.
@@ -19,28 +13,28 @@ const copyStaticProperties = (source: any, target: any): void => {
   const allKeys = [
     ...Object.getOwnPropertyNames(source),
     ...Object.getOwnPropertySymbols(source),
-  ];
+  ]
 
   for (const key of allKeys) {
     // Skip properties that should not be copied
     if (ignoredStaticProps.includes(key as string)) {
-      continue;
+      continue
     }
 
     try {
-      const descriptor = Object.getOwnPropertyDescriptor(source, key);
+      const descriptor = Object.getOwnPropertyDescriptor(source, key)
       if (descriptor) {
-        Object.defineProperty(target, key, descriptor);
+        Object.defineProperty(target, key, descriptor)
       }
     } catch {
       // If we can't copy a property, skip it
     }
   }
-};
+}
 
 export type WithDataTestIdProps = {
-  dataTestId?: string;
-};
+  dataTestId?: string
+}
 
 /**
  * Wrapper component that conditionally renders a `data-testid` attribute.
@@ -65,31 +59,31 @@ export const DataTestIdWrapper = ({
   dataTestId,
   children,
 }: WithDataTestIdProps & { children: ReactNode }): ReactNode => {
-  const renderDataTestIdAttribute = useRenderDataTestIdAttribute();
+  const renderDataTestIdAttribute = useRenderDataTestIdAttribute()
 
   if (!dataTestId || !renderDataTestIdAttribute) {
-    return children;
+    return children
   }
 
   return (
     <div data-testid={dataTestId} style={{ display: "contents" }}>
       {children}
     </div>
-  );
-};
+  )
+}
 
 /**
  * Props type of a component wrapped with withDataTestId.
  * Use when ComponentProps<typeof Component> inference fails (e.g. in Storybook stories).
  */
 export type WithDataTestIdPropsOf<T extends React.ComponentType<unknown>> =
-  React.ComponentProps<T> & WithDataTestIdProps;
+  React.ComponentProps<T> & WithDataTestIdProps
 
 /**
  * Keys on T that are not part of Function, so we preserve static members (Skeleton, displayName, etc.)
  * without bringing in a second call signature that would confuse ComponentProps<> inference.
  */
-type StaticMembersOf<T> = Pick<T, Exclude<keyof T, keyof Function>>;
+type StaticMembersOf<T> = Pick<T, Exclude<keyof T, keyof Function>>
 
 /**
  * Return type has a single call signature with props = ComponentProps<T> & WithDataTestIdProps,
@@ -97,36 +91,36 @@ type StaticMembersOf<T> = Pick<T, Exclude<keyof T, keyof Function>>;
  * Static properties (e.g. F0Card.Skeleton) are preserved via StaticMembersOf<T>.
  */
 export type WithDataTestIdReturnType<T extends React.ComponentType<unknown>> =
-  React.ComponentType<WithDataTestIdPropsOf<T>> & StaticMembersOf<T>;
+  React.ComponentType<WithDataTestIdPropsOf<T>> & StaticMembersOf<T>
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const withDataTestId = <T extends React.ComponentType<any>>(
-  component: T,
+  component: T
 ): WithDataTestIdReturnType<T> => {
   // Check if the component is a forwardRef component
   const isForwardRef =
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (component as any).$$typeof === Symbol.for("react.forward_ref");
+    (component as any).$$typeof === Symbol.for("react.forward_ref")
 
   // The type for the returned component (with static properties preserved via intersection with T)
-  type ReturnedComponentType = WithDataTestIdReturnType<T>;
+  type ReturnedComponentType = WithDataTestIdReturnType<T>
 
   if (isForwardRef) {
     // For forwardRef components, we need to wrap the render function
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const originalRender = (component as any).render;
+    const originalRender = (component as any).render
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const WrappedComponent = forwardRef((props: any, ref: any) => {
-      const { dataTestId, ...rest } = props;
-      const content = originalRender(rest, ref);
+      const { dataTestId, ...rest } = props
+      const content = originalRender(rest, ref)
       return (
         <DataTestIdWrapper dataTestId={dataTestId}>{content}</DataTestIdWrapper>
-      );
-    });
+      )
+    })
 
     // Copy all static properties
-    copyStaticProperties(component, WrappedComponent);
+    copyStaticProperties(component, WrappedComponent)
 
     // Set displayName
     if (!WrappedComponent.displayName) {
@@ -135,17 +129,17 @@ export const withDataTestId = <T extends React.ComponentType<any>>(
         component.name ||
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (component as any).render?.name ||
-        "Component";
-      WrappedComponent.displayName = name;
+        "Component"
+      WrappedComponent.displayName = name
     }
 
-    return WrappedComponent as unknown as ReturnedComponentType;
+    return WrappedComponent as unknown as ReturnedComponentType
   }
 
   // Check if the component is a memo component
   const isMemo =
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (component as any).$$typeof === Symbol.for("react.memo");
+    (component as any).$$typeof === Symbol.for("react.memo")
 
   if (isMemo) {
     // For memo components we recurse so the inner component gets withDataTestId.
@@ -154,17 +148,17 @@ export const withDataTestId = <T extends React.ComponentType<any>>(
     // memoized components, prefer memo(withDataTestId(Component)) so the HOC
     // wraps the inner component and data-testid is applied correctly.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const originalType = (component as any).type;
+    const originalType = (component as any).type
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const originalCompare = (component as any).compare;
+    const originalCompare = (component as any).compare
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const WrappedInner = withDataTestId(originalType) as any;
+    const WrappedInner = withDataTestId(originalType) as any
 
-    const MemoizedComponent = memo(WrappedInner, originalCompare);
+    const MemoizedComponent = memo(WrappedInner, originalCompare)
 
     // Copy all static properties
-    copyStaticProperties(component, MemoizedComponent);
+    copyStaticProperties(component, MemoizedComponent)
 
     // Set displayName
     if (!MemoizedComponent.displayName) {
@@ -173,11 +167,11 @@ export const withDataTestId = <T extends React.ComponentType<any>>(
         component.name ||
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (component as any).type?.displayName ||
-        "Component";
-      MemoizedComponent.displayName = name;
+        "Component"
+      MemoizedComponent.displayName = name
     }
 
-    return MemoizedComponent as unknown as ReturnedComponentType;
+    return MemoizedComponent as unknown as ReturnedComponentType
   }
 
   // For regular components (function or class). Always render via JSX to ensure
@@ -185,25 +179,25 @@ export const withDataTestId = <T extends React.ComponentType<any>>(
   // avoiding "Rendered more/fewer hooks than during the previous render" crashes.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const WrappedComponent = forwardRef((props: any, ref: any) => {
-    const { dataTestId, ...rest } = props;
+    const { dataTestId, ...rest } = props
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const Component = component as any;
+    const Component = component as any
 
     return (
       <DataTestIdWrapper dataTestId={dataTestId}>
         <Component {...rest} ref={ref} />
       </DataTestIdWrapper>
-    );
-  });
+    )
+  })
 
   // Copy all static properties
-  copyStaticProperties(component, WrappedComponent);
+  copyStaticProperties(component, WrappedComponent)
 
   // Set displayName
   if (!WrappedComponent.displayName) {
-    const name = component.displayName || component.name || "Component";
-    WrappedComponent.displayName = name;
+    const name = component.displayName || component.name || "Component"
+    WrappedComponent.displayName = name
   }
 
-  return WrappedComponent as unknown as ReturnedComponentType;
-};
+  return WrappedComponent as unknown as ReturnedComponentType
+}
