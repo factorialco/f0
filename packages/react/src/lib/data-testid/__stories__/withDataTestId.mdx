@@ -4,61 +4,165 @@ import * as WithDataTestIdStories from "./withDataTestId.stories"
 
 <Meta of={WithDataTestIdStories} />
 
-# withDataTestId
+# dataTestId
 
-`withDataTestId` is a Higher-Order Component (HOC) utility that wraps React components to automatically add `data-testid` attributes. This allows consumers to set test IDs at runtime, which is particularly useful for end-to-end testing.
+`dataTestId` is a mechanism for attaching stable `data-testid` attributes to F0 components for end-to-end testing. There are two ways to add this support to a component: the **`withDataTestId` HOC** and the **inline `DataTestIdWrapper`** pattern. Both result in the same runtime behaviour — a `<div data-testid={...} style="display: contents">` wrapper rendered only when the `renderDataTestIdAttribute` flag is enabled via `F0Provider`.
 
-## Usage
+## How It Works
 
-Wrap your component with `withDataTestId` before exporting it.
+- Adds a `dataTestId?: string` prop to the component
+- When `dataTestId` is provided **and** `renderDataTestIdAttribute` is enabled (via `F0Provider`), wraps the component output in `<div data-testid={dataTestId} style={{ display: "contents" }}>` — this avoids layout interference
+- Rendering is gated by the `renderDataTestIdAttribute` flag in `UserPlatformProvider` (defaults to `false`)
+- If the component returns `null`, no wrapper div is rendered
+
+---
+
+## Pattern A — `withDataTestId` HOC
+
+Wrap your component at the export site. This is the default for most components.
 
 ```tsx
-import { withDataTestId } from "@f0/react"
+import { withDataTestId } from "@/lib/data-testid"
 
-const MyComponent = ({ children, ...props }) => <div {...props}>{children}</div>
+const _Tag = (props: TagProps) => <span>{props.label}</span>
 
-export const MyComponentWithTestId = withDataTestId(MyComponent)
+export const Tag = withDataTestId(_Tag)
+// Tag now accepts a dataTestId prop
 ```
 
-Then use it in your application:
+The HOC:
+
+- Forwards refs to the wrapped component
+- Copies all static properties (e.g. `.Skeleton`, `displayName`)
+- Handles `forwardRef` and `memo` components correctly
+
+### Composition order
+
+When combining with other HOCs, always apply `withDataTestId` **outermost**:
 
 ```tsx
-<MyComponentWithTestId dataTestId="my-component-123">
-  Content
-</MyComponentWithTestId>
+// With experimentalComponent:
+export const F0DatePicker = withDataTestId(
+  experimentalComponent("F0DatePicker", _F0DatePicker)
+)
+
+// With withSkeleton:
+export const F0Card = withDataTestId(withSkeleton(F0CardBase, F0CardSkeleton))
+
+// With both:
+export const F0Widget = withDataTestId(
+  experimentalComponent("F0Widget", withSkeleton(WidgetBase, WidgetSkeleton))
+)
 ```
 
-This will render (the HOC uses a wrapper with `display: contents` so the test id is always in the DOM, even if the component does not spread `...rest`):
+### Type limitation — when not to use this pattern
 
-```html
-<div data-testid="my-component-123" style="display: contents">
-  <div>Content</div>
-</div>
+The `withDataTestId` HOC produces `WithDataTestIdReturnType<T>`, which uses `React.ComponentProps<T>` internally. This causes type inference problems in two situations:
+
+1. **Generic components** — type parameters like `<T extends string, R = unknown>` are erased to their constraints. A consumer can no longer pass typed values.
+
+   ```tsx
+   // F0Select is generic: <T extends string, R = unknown>(props: F0SelectProps<T, R>) => ...
+   // After withDataTestId, the type parameter T is lost and value/onChange become unknown.
+   ```
+
+2. **Discriminated union props** — the HOC flattens all union branches into a single merged type, so TypeScript can no longer discriminate between them.
+
+   ```tsx
+   // Before HOC:  value: string   (single) | value: string[]  (multi)
+   // After HOC:   value: string | string[]  (branches merged — discriminant lost)
+   ```
+
+Use **Pattern B** below for these cases.
+
+---
+
+## Pattern B — Inline `DataTestIdWrapper`
+
+Import `DataTestIdWrapper` and `WithDataTestIdProps` directly, extend your props interface, and wrap the render output. The component is exported as-is — no HOC at the export site.
+
+```tsx
+import { DataTestIdWrapper, WithDataTestIdProps } from "@/lib/data-testid"
+
+interface MyComponentProps extends WithDataTestIdProps {
+  label: string
+}
+
+const MyComponent = ({ label, dataTestId }: MyComponentProps) => (
+  <DataTestIdWrapper dataTestId={dataTestId}>
+    <span>{label}</span>
+  </DataTestIdWrapper>
+)
+
+// index.tsx — no HOC needed
+export { MyComponent }
+export type { MyComponentProps }
 ```
+
+This pattern preserves generic type parameters, discriminated unions, and portal output intact, because `dataTestId` is just a regular prop handled inside the component body.
+
+Components using this pattern: `F0Select`, `RichTextEditor`, `RadarChart`, `Await`, `OneFilterPicker`, `F0FilterPickerContent`, `F0AvatarFile`, `NotesTextEditor`, `OneDateNavigator`, `Dropdown`, `MobileDropdown`.
+
+### When to use each pattern
+
+| Situation                                   | Pattern                                |
+| :------------------------------------------ | :------------------------------------- |
+| Simple component, fixed props               | `withDataTestId` HOC (Pattern A)       |
+| Generic component (`<T extends ...>`)       | Inline `DataTestIdWrapper` (Pattern B) |
+| `forwardRef` with discriminated union props | Inline `DataTestIdWrapper` (Pattern B) |
+| `ReactDOM.createPortal` output              | Inline `DataTestIdWrapper` (Pattern B) |
+
+---
 
 ## Examples
 
-### Basic Usage
+### HOC — Basic usage
 
 <Canvas of={WithDataTestIdStories.Default} />
 <Controls of={WithDataTestIdStories.Default} />
 
-### With Custom Components
+### HOC — Dynamic ID update
+
+<Canvas of={WithDataTestIdStories.DynamicUpdate} />
+
+### HOC — Custom component
 
 <Canvas of={WithDataTestIdStories.CustomComponent} />
 
+### Inline DataTestIdWrapper
+
+<Canvas of={WithDataTestIdStories.InlineWrapper} />
+
+---
+
 ## API
 
-The HOC adds a single prop to the wrapped component:
+### `withDataTestId(Component)`
 
-| Prop         | Type     | Description                                |
-| :----------- | :------- | :----------------------------------------- |
-| `dataTestId` | `string` | The value for the `data-testid` attribute. |
+Returns a new component with an additional `dataTestId?: string` prop. Preserves refs, static properties, and `displayName`.
 
-## Features
+### `DataTestIdWrapper`
 
-- **Wrapper fallback**: When `dataTestId` is set, the HOC renders the component inside a wrapper `<div data-testid={...} style={{ display: "contents" }}>`. The attribute is therefore always present in the DOM even if the component forgets to spread `...rest` onto its root element. `display: contents` keeps the wrapper from affecting layout.
-- **ForwardRef Support**: Correctly forwards refs to the wrapped component.
-- **Static Properties**: Preserves static properties (like `displayName`) of the original component.
-- **Memoization**: For memoized components, wrap with `withDataTestId` first, then `memo`: `memo(withDataTestId(Component))`. Using `withDataTestId(memo(Component))` can let `dataTestId` reach the DOM as `datatestid` in some cases.
-- **Type Safety**: Preserves the original component's props types using TypeScript generics.
+| Prop         | Type                  | Description                                                                 |
+| :----------- | :-------------------- | :-------------------------------------------------------------------------- |
+| `dataTestId` | `string \| undefined` | Value for the `data-testid` attribute. No wrapper is rendered when omitted. |
+| `children`   | `ReactNode`           | Content to wrap.                                                            |
+
+### `WithDataTestIdProps`
+
+```tsx
+type WithDataTestIdProps = {
+  dataTestId?: string
+}
+```
+
+Extend your props interface with this when using Pattern B.
+
+### Enabling in tests
+
+```tsx
+<F0Provider renderDataTestIdAttribute>
+  <MyComponent dataTestId="my-id" label="Hello" />
+</F0Provider>
+// Renders: <div data-testid="my-id" style="display: contents"><span>Hello</span></div>
+```
