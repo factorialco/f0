@@ -1,6 +1,6 @@
 import { ReactNode, useEffect, useState } from "react"
 
-import { DataTestIdWrapper, type WithDataTestIdProps } from "@/lib/data-testid"
+import { DataTestIdWrapper } from "@/lib/data-testid"
 
 export type AwaitProps<T> = {
   resolve: Promise<T> | T
@@ -16,7 +16,7 @@ const _Await = <T,>({
   error: errorFallback,
   children,
   dataTestId,
-}: AwaitProps<T> & WithDataTestIdProps): ReactNode => {
+}: AwaitProps<T> & { dataTestId?: string }): ReactNode => {
   const [resolvedValue, setResolvedValue] = useState<T | null>(null)
   const [error, setError] = useState<Error | null>(null)
   const [isPending, setIsPending] = useState(false)
@@ -63,5 +63,5 @@ const _Await = <T,>({
 }
 
 export const Await = _Await as <T>(
-  props: AwaitProps<T> & WithDataTestIdProps
+  props: AwaitProps<T> & { dataTestId?: string }
 ) => ReactNode

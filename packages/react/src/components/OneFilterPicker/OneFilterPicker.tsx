@@ -2,7 +2,7 @@ import type { ReactElement } from "react"
 import { useContext, useEffect, useMemo, useRef, useState } from "react"
 
 import { useEventEmitter } from "@/experimental/OneDataCollection/useEventEmitter"
-import { DataTestIdWrapper, type WithDataTestIdProps } from "@/lib/data-testid"
+import { DataTestIdWrapper } from "@/lib/data-testid"
 import { cn } from "@/lib/utils"
 
 import type { FiltersDefinition, FiltersMode, FiltersState } from "./types"
@@ -276,7 +276,7 @@ FiltersChipsList.displayName = "OneFilterPicker.ChipsList"
  * OneFiltersPicker component to use as a single component
  */
 const _OneFilterPicker = <Definition extends FiltersDefinition>(
-  props: OneFilterPickerRootProps<Definition> & WithDataTestIdProps
+  props: OneFilterPickerRootProps<Definition> & { dataTestId?: string }
 ) => {
   const { dataTestId, ...rootProps } = props
   return (
@@ -312,7 +312,7 @@ _OneFilterPicker.displayName = "OneFilterPicker"
 const OneFilterPicker = _OneFilterPicker as <
   Definition extends FiltersDefinition,
 >(
-  props: OneFilterPickerRootProps<Definition> & WithDataTestIdProps
+  props: OneFilterPickerRootProps<Definition> & { dataTestId?: string }
 ) => ReactElement | null
 
 /**

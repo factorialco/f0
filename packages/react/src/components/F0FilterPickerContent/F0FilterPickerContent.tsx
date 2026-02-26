@@ -6,7 +6,7 @@ import { type ReactElement, useEffect, useMemo, useState } from "react"
  * Public implementation of the FilterPickerInternal component.
  * F0FilterPickerContent component.
  */
-import { DataTestIdWrapper, type WithDataTestIdProps } from "@/lib/data-testid"
+import { DataTestIdWrapper } from "@/lib/data-testid"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
@@ -79,7 +79,7 @@ function _F0FilterPickerContent<Filters extends FiltersDefinition>({
   showApplyButton = true,
   applyButtonLabel,
   dataTestId,
-}: F0FilterPickerContentProps<Filters> & WithDataTestIdProps) {
+}: F0FilterPickerContentProps<Filters> & { dataTestId?: string }) {
   const i18n = useI18n()
 
   const firstFilterKey = (Object.keys(filters)[0] as keyof Filters) ?? null
@@ -180,5 +180,5 @@ _F0FilterPickerContent.displayName = "F0FilterPickerContent"
 export const F0FilterPickerContent = _F0FilterPickerContent as <
   Filters extends FiltersDefinition,
 >(
-  props: F0FilterPickerContentProps<Filters> & WithDataTestIdProps
+  props: F0FilterPickerContentProps<Filters> & { dataTestId?: string }
 ) => ReactElement | null

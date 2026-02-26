@@ -7,7 +7,7 @@ import {
   RadarChart as RadarChartPrimitive,
 } from "recharts"
 
-import { DataTestIdWrapper, WithDataTestIdProps } from "@/lib/data-testid"
+import { DataTestIdWrapper } from "@/lib/data-testid"
 
 import {
   ChartContainer,
@@ -36,7 +36,7 @@ export const _RadarChart = <K extends ChartConfig>(
     scaleMax,
     aspect,
     dataTestId,
-  }: RadarChartProps<K> & WithDataTestIdProps,
+  }: RadarChartProps<K> & { dataTestId?: string },
   ref: ForwardedRef<HTMLDivElement>
 ) => {
   const items = Object.keys(dataConfig)
@@ -100,6 +100,7 @@ export const _RadarChart = <K extends ChartConfig>(
 export const RadarChart = fixedForwardRef(_RadarChart) as <
   K extends ChartConfig,
 >(
-  props: RadarChartProps<K> &
-    WithDataTestIdProps & { ref?: ForwardedRef<HTMLDivElement> }
+  props: RadarChartProps<K> & { dataTestId?: string } & {
+    ref?: ForwardedRef<HTMLDivElement>
+  }
 ) => ReactElement | null

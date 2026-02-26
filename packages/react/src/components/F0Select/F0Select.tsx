@@ -28,7 +28,7 @@ import {
   useSelectable,
   WithGroupId,
 } from "@/hooks/datasource"
-import { DataTestIdWrapper, type WithDataTestIdProps } from "@/lib/data-testid"
+import { DataTestIdWrapper } from "@/lib/data-testid"
 import { useI18n } from "@/lib/providers/i18n"
 import { toArray } from "@/lib/toArray"
 import { cn } from "@/lib/utils"
@@ -126,7 +126,7 @@ const F0SelectComponent = forwardRef(function Select<
     showPreview = false,
     dataTestId,
     ...props
-  }: F0SelectProps<T, R> & WithDataTestIdProps,
+  }: F0SelectProps<T, R>,
   ref: React.ForwardedRef<HTMLButtonElement>
 ) {
   const id = useId()
@@ -914,6 +914,7 @@ export const F0Select = F0SelectComponent as <
   T extends string = string,
   R = unknown,
 >(
-  props: F0SelectProps<T, R> &
-    WithDataTestIdProps & { ref?: React.Ref<HTMLButtonElement> }
+  props: F0SelectProps<T, R> & { dataTestId?: string } & {
+    ref?: React.Ref<HTMLButtonElement>
+  }
 ) => React.ReactElement

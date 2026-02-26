@@ -1,4 +1,3 @@
-import type { WithDataTestIdProps } from "@/lib/data-testid"
 import type { FiltersDefinition, FiltersState } from "../OneFilterPicker/types"
 import type { FilterPickerBaseProps } from "./internal-types"
 
@@ -22,10 +21,10 @@ export interface F0FilterPickerContentProps<
 }
 
 /**
- * Public props for F0FilterPickerContent (includes dataTestId from withDataTestId).
+ * Public props for F0FilterPickerContent (includes dataTestId).
  * Use this when typing props that include the optional dataTestId attribute.
  * @template Filters - The type defining the structure of available filters
  */
 export type F0FilterPickerContentPublicProps<
   Filters extends FiltersDefinition,
-> = F0FilterPickerContentProps<Filters> & WithDataTestIdProps
+> = F0FilterPickerContentProps<Filters> & { dataTestId?: string }
