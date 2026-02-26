@@ -40,51 +40,31 @@ export interface DetailsItemType {
   spacingAtTheBottom?: boolean
 }
 
-const numericUnits = new Set([
-  "year",
-  "years",
-  "yr",
-  "month",
-  "months",
-  "mo",
-  "week",
-  "weeks",
-  "day",
-  "days",
-  "hour",
-  "hours",
-  "hr",
-  "hrs",
-])
-
 const isNumericValueText = (text: string): boolean => {
-  const sanitized = text.replace(/[^0-9A-Za-z./\s-]/g, "")
-  const tokens = sanitized
-    .toLowerCase()
-    .split(/[\s/]+/)
-    .map((token) => token.replace(/^-+|-+$/g, ""))
-    .filter(Boolean)
-
-  if (tokens.length === 0) {
+  const firstDigitIndex = text.search(/\d/)
+  if (firstDigitIndex === -1) {
     return false
   }
 
-  let hasNumber = false
+  const lastDigitMatch = text.match(/\d(?!.*\d)/)
+  const lastDigitIndex = lastDigitMatch
+    ? text.lastIndexOf(lastDigitMatch[0])
+    : -1
+  if (lastDigitIndex === -1) {
+    return false
+  }
+  const before = text.slice(0, firstDigitIndex)
+  const between = text.slice(firstDigitIndex, lastDigitIndex + 1)
 
-  for (const token of tokens) {
-    if (!Number.isNaN(Number(token))) {
-      hasNumber = true
-      continue
-    }
-
-    if (numericUnits.has(token)) {
-      continue
-    }
-
+  if (/\p{L}/u.test(before)) {
     return false
   }
 
-  return hasNumber
+  if (/\p{L}/u.test(between)) {
+    return false
+  }
+
+  return true
 }
 
 const getContentAlign = (
