@@ -1,11 +1,13 @@
-import { renderProperty } from "@/experimental/OneDataCollection/property-render"
 import type { RecordType, SortingsDefinition } from "@/hooks/datasource"
+
+import { renderProperty } from "@/experimental/OneDataCollection/property-render"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
-import type { CellRendererProps } from "../../Table/types"
 import type { SummariesDefinition } from "../../../../summary"
+import type { CellRendererProps } from "../../Table/types"
 import type { EditableTableColumnDefinition } from "../types"
+
 import { useEditableRow } from "../context/EditableRowContext"
 import { editableCellMap } from "./cells"
 
@@ -27,6 +29,12 @@ function getCellValue<R extends RecordType>(
   const rendered = column.render(item)
   if (typeof rendered === "string") return rendered
   if (typeof rendered === "number") return String(rendered)
+
+  if (process.env.NODE_ENV === "development") {
+    console.warn(
+      `EditableTable: getCellValue for column "${column.id}" returned a non-primitive render value.`
+    )
+  }
   return ""
 }
 
