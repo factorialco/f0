@@ -13210,14 +13210,11 @@ const JN = se("DotTagItem", zh), yo = (t, e) => t && t.type === "copy" ? { type:
   TeamItem: KN,
   DotTagItem: JN
 }), QN = (t) => {
-  const e = t.search(/\d/);
-  if (e === -1)
+  const e = t.trim();
+  if (!e)
     return !1;
-  const n = t.match(/\d(?!.*\d)/), r = n ? t.lastIndexOf(n[0]) : -1;
-  if (r === -1)
-    return !1;
-  const i = t.slice(0, e), o = t.slice(e, r + 1);
-  return !(new RegExp("\\p{L}", "u").test(i) || new RegExp("\\p{L}", "u").test(o));
+  const n = e.split(/[\s/]+/)[0] ?? "";
+  return /\d/.test(n) ? !new RegExp("\\p{L}", "u").test(n) : !1;
 }, XN = (t, e) => !e || t.type !== "item" ? "start" : QN(t.text) ? "end" : "start", ZN = ({
   content: t,
   isHorizontal: e
