@@ -78,7 +78,8 @@ function SingleSchemaStory() {
     },
     onSubmit: async ({ data }) => {
       console.log("Form submitted:", data)
-      return { success: true }
+      await new Promise((r) => setTimeout(r, 1500))
+      return { success: true, message: "Employee saved successfully" }
     },
   })
 
@@ -143,7 +144,8 @@ function PerSectionSchemaStory() {
     onSubmit: async ({ sectionId, data, fullData }) => {
       console.log(`Section "${sectionId}" submitted:`, data)
       console.log("Full data so far:", fullData)
-      return { success: true }
+      await new Promise((r) => setTimeout(r, 1500))
+      return { success: true, message: `Section "${sectionId}" saved` }
     },
   })
 
@@ -220,7 +222,8 @@ function CustomStepGroupingStory() {
     },
     onSubmit: async ({ data }) => {
       console.log("Form submitted:", data)
-      return { success: true }
+      await new Promise((r) => setTimeout(r, 1500))
+      return { success: true, message: "Step saved successfully" }
     },
   })
 
@@ -298,7 +301,8 @@ function DisabledStepAutoCompletedStory() {
     },
     onSubmit: async ({ data }) => {
       console.log("Form submitted:", data)
-      return { success: true }
+      await new Promise((r) => setTimeout(r, 1500))
+      return { success: true, message: "Employee updated" }
     },
   })
 
@@ -342,7 +346,8 @@ function WithDefaultStepIndexStory() {
     },
     onSubmit: async ({ data }) => {
       console.log("Form submitted:", data)
-      return { success: true }
+      await new Promise((r) => setTimeout(r, 1500))
+      return { success: true, message: "Employee saved successfully" }
     },
   })
 
@@ -368,4 +373,97 @@ function WithDefaultStepIndexStory() {
 
 export const WithDefaultStepIndex: Story = {
   render: () => <WithDefaultStepIndexStory />,
+}
+
+// =============================================================================
+// Auto-close on last step submit
+// =============================================================================
+
+function AutoClosePerSectionStory() {
+  const [open, setOpen] = useState(true)
+
+  const definition = useF0FormDefinition({
+    name: "auto-close-per-section",
+    schema: perSectionSchema,
+    sections: {
+      general: { title: "General information" },
+      work: { title: "Work details" },
+    },
+    onSubmit: async ({ sectionId, data }) => {
+      console.log(`Section "${sectionId}" submitted:`, data)
+      await new Promise((r) => setTimeout(r, 1500))
+      return { success: true, message: `Section "${sectionId}" saved` }
+    },
+  })
+
+  return (
+    <ApplicationFrame
+      {...(ApplicationFrameStoryMeta.args as ComponentProps<
+        typeof ApplicationFrame
+      >)}
+    >
+      <div className="flex flex-1 items-center justify-center">
+        <F0Button label="Open wizard" onClick={() => setOpen(true)} />
+        <F0WizardForm
+          formDefinition={definition}
+          isOpen={open}
+          onClose={() => setOpen(false)}
+          title="Add employee (auto-close)"
+          autoCloseOnLastStepSubmit
+        />
+      </div>
+    </ApplicationFrame>
+  )
+}
+
+export const AutoClosePerSection: Story = {
+  render: () => <AutoClosePerSectionStory />,
+}
+
+// =============================================================================
+// Link after last step submit
+// =============================================================================
+
+function LinkAfterSubmitStory() {
+  const [open, setOpen] = useState(true)
+
+  const definition = useF0FormDefinition({
+    name: "link-after-submit",
+    schema: perSectionSchema,
+    sections: {
+      general: { title: "General information" },
+      work: { title: "Work details" },
+    },
+    onSubmit: async ({ sectionId, data }) => {
+      console.log(`Section "${sectionId}" submitted:`, data)
+      await new Promise((r) => setTimeout(r, 1500))
+      return { success: true, message: `Section "${sectionId}" saved` }
+    },
+  })
+
+  return (
+    <ApplicationFrame
+      {...(ApplicationFrameStoryMeta.args as ComponentProps<
+        typeof ApplicationFrame
+      >)}
+    >
+      <div className="flex flex-1 items-center justify-center">
+        <F0Button label="Open wizard" onClick={() => setOpen(true)} />
+        <F0WizardForm
+          formDefinition={definition}
+          isOpen={open}
+          onClose={() => setOpen(false)}
+          title="Add employee (link redirect)"
+          linkAfterLastStepSubmit={({ fullData }) => {
+            console.log("Redirecting with data:", fullData)
+            return "https://factorialhr.com"
+          }}
+        />
+      </div>
+    </ApplicationFrame>
+  )
+}
+
+export const LinkAfterSubmit: Story = {
+  render: () => <LinkAfterSubmitStory />,
 }

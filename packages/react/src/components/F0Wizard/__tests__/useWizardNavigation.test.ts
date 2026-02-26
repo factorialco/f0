@@ -502,4 +502,71 @@ describe("useWizardNavigation", () => {
     expect(onSubmit).not.toHaveBeenCalled()
     expect(result.current.loading).toBe(false)
   })
+
+  // ---------------------------------------------------------------------------
+  // autoCloseOnLastStepSubmit
+  // ---------------------------------------------------------------------------
+
+  it("calls onClose after last step when autoCloseOnLastStepSubmit is true", async () => {
+    const onClose = vi.fn()
+    const onSubmit = vi.fn()
+
+    const { result } = zeroRenderHook(() =>
+      useWizardNavigation({
+        steps: makeSteps(1),
+        onSubmit,
+        autoCloseOnLastStepSubmit: true,
+        onClose,
+      })
+    )
+
+    await act(async () => {
+      await result.current.goNext()
+    })
+
+    expect(onSubmit).toHaveBeenCalledOnce()
+    expect(onClose).toHaveBeenCalledOnce()
+  })
+
+  it("does not call onClose when autoCloseOnLastStepSubmit is false", async () => {
+    const onClose = vi.fn()
+    const onSubmit = vi.fn()
+
+    const { result } = zeroRenderHook(() =>
+      useWizardNavigation({
+        steps: makeSteps(1),
+        onSubmit,
+        autoCloseOnLastStepSubmit: false,
+        onClose,
+      })
+    )
+
+    await act(async () => {
+      await result.current.goNext()
+    })
+
+    expect(onSubmit).toHaveBeenCalledOnce()
+    expect(onClose).not.toHaveBeenCalled()
+  })
+
+  it("does not call onClose when onSubmit throws", async () => {
+    const onClose = vi.fn()
+    const onSubmit = vi.fn().mockRejectedValue(new Error("fail"))
+
+    const { result } = zeroRenderHook(() =>
+      useWizardNavigation({
+        steps: makeSteps(1),
+        onSubmit,
+        autoCloseOnLastStepSubmit: true,
+        onClose,
+      })
+    )
+
+    await act(async () => {
+      await result.current.goNext()
+    })
+
+    expect(onSubmit).toHaveBeenCalledOnce()
+    expect(onClose).not.toHaveBeenCalled()
+  })
 })

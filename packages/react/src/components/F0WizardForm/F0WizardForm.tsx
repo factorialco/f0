@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { z, ZodRawShape, ZodTypeAny } from "zod"
 
 import type {
@@ -14,6 +14,8 @@ import { F0Form } from "@/components/F0Form/F0Form"
 import { getF0Config, unwrapToZodObject } from "@/components/F0Form/f0Schema"
 import { useF0Form } from "@/components/F0Form/useF0Form"
 import { F0Wizard } from "@/components/F0Wizard/F0Wizard"
+import { F0ActionBar, type ActionBarStatus } from "@/experimental/F0ActionBar"
+import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 
 import type {
   F0FormDefinitionPerSection,
@@ -80,6 +82,55 @@ function buildSectionSubSchema<T extends ZodRawShape>(
   return z.object(subShape)
 }
 
+const SUCCESS_TIMER_MS = 3000
+
+function useWizardActionBar() {
+  const { forms } = useI18n()
+  const [actionBarStatus, setActionBarStatus] =
+    useState<ActionBarStatus>("idle")
+  const [successMessage, setSuccessMessage] = useState<string | undefined>()
+  const successTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (successTimerRef.current) clearTimeout(successTimerRef.current)
+    }
+  }, [])
+
+  const showSuccess = useCallback((message?: string) => {
+    if (successTimerRef.current) {
+      clearTimeout(successTimerRef.current)
+      successTimerRef.current = null
+    }
+    setSuccessMessage(message)
+    setActionBarStatus("success")
+    successTimerRef.current = setTimeout(() => {
+      setActionBarStatus("idle")
+      setSuccessMessage(undefined)
+      successTimerRef.current = null
+    }, SUCCESS_TIMER_MS)
+  }, [])
+
+  const label =
+    actionBarStatus === "success"
+      ? (successMessage ?? forms.actionBar.saved)
+      : undefined
+
+  const ActionBar = useMemo(
+    () => (
+      <F0ActionBar
+        isOpen={actionBarStatus === "success"}
+        variant="light"
+        status={actionBarStatus}
+        label={label}
+      />
+    ),
+    [actionBarStatus, label]
+  )
+
+  return { showSuccess, ActionBar }
+}
+
 // =============================================================================
 // Step derivation
 // =============================================================================
@@ -142,6 +193,8 @@ function F0WizardFormPerSection<T extends F0PerSectionSchema>({
   submitLabel,
   onStepChanged,
   allowStepSkipping,
+  autoCloseOnLastStepSubmit,
+  linkAfterLastStepSubmit,
 }: F0WizardFormPerSectionProps<T>) {
   const {
     name,
@@ -255,6 +308,9 @@ function F0WizardFormPerSection<T extends F0PerSectionSchema>({
     ]
   )
 
+  const lastSubmitResultRef = useRef<F0FormSubmitResult | null>(null)
+  const { showSuccess, ActionBar } = useWizardActionBar()
+
   const handleSectionSubmit = useCallback(
     (sectionId: string) =>
       async (data: Record<string, unknown>): Promise<F0FormSubmitResult> => {
@@ -264,10 +320,31 @@ function F0WizardFormPerSection<T extends F0PerSectionSchema>({
           data,
           fullData: { ...fullDataRef.current } as InferPerSectionValues<T>,
         } as Parameters<typeof onSubmit>[0])
+        lastSubmitResultRef.current = result
+        if (result.success) {
+          showSuccess(result.message)
+        }
         return result
       },
-    [onSubmit]
+    [onSubmit, showSuccess]
   )
+
+  const handleLastStepCompleted = useCallback(() => {
+    const result = lastSubmitResultRef.current
+    if (!result?.success) return
+
+    if (linkAfterLastStepSubmit) {
+      const url = linkAfterLastStepSubmit({
+        fullData: { ...fullDataRef.current } as InferPerSectionValues<T>,
+      })
+      window.location.href = url
+      return
+    }
+
+    if (autoCloseOnLastStepSubmit) {
+      onClose?.()
+    }
+  }, [autoCloseOnLastStepSubmit, linkAfterLastStepSubmit, onClose])
 
   return (
     <F0Wizard
@@ -280,6 +357,7 @@ function F0WizardFormPerSection<T extends F0PerSectionSchema>({
       nextLabel={nextLabel}
       previousLabel={previousLabel}
       submitLabel={submitLabel}
+      onSubmit={handleLastStepCompleted}
       onStepChanged={onStepChanged}
       allowStepSkipping={allowStepSkipping}
     >
@@ -291,38 +369,41 @@ function F0WizardFormPerSection<T extends F0PerSectionSchema>({
         )
 
         return (
-          <div className="flex flex-col gap-6">
-            {currentSectionIds.map((sectionId) => {
-              const sectionSchema = schema[sectionId]
-              if (!sectionSchema) return null
+          <>
+            <div className="flex flex-col gap-6">
+              {currentSectionIds.map((sectionId) => {
+                const sectionSchema = schema[sectionId]
+                if (!sectionSchema) return null
 
-              const sectionConfig = sections?.[sectionId]
-              const sectionDefaults = defaultValues?.[
-                sectionId as keyof typeof defaultValues
-              ] as Partial<z.infer<typeof sectionSchema>> | undefined
+                const sectionConfig = sections?.[sectionId]
+                const sectionDefaults = defaultValues?.[
+                  sectionId as keyof typeof defaultValues
+                ] as Partial<z.infer<typeof sectionSchema>> | undefined
 
-              return (
-                <PerSectionFormWrapper
-                  key={sectionId}
-                  sectionId={sectionId}
-                  formName={name}
-                  schema={sectionSchema}
-                  sectionConfig={sectionConfig}
-                  defaultValues={sectionDefaults}
-                  onSubmit={handleSectionSubmit(sectionId)}
-                  submitConfig={submitConfig}
-                  errorTriggerMode={errorTriggerMode}
-                  sectionForms={sectionForms}
-                  onErrorStateChange={(hasErrors) => {
-                    setSectionErrorState((prev) => {
-                      if (prev[sectionId] === hasErrors) return prev
-                      return { ...prev, [sectionId]: hasErrors }
-                    })
-                  }}
-                />
-              )
-            })}
-          </div>
+                return (
+                  <PerSectionFormWrapper
+                    key={sectionId}
+                    sectionId={sectionId}
+                    formName={name}
+                    schema={sectionSchema}
+                    sectionConfig={sectionConfig}
+                    defaultValues={sectionDefaults}
+                    onSubmit={handleSectionSubmit(sectionId)}
+                    submitConfig={submitConfig}
+                    errorTriggerMode={errorTriggerMode}
+                    sectionForms={sectionForms}
+                    onErrorStateChange={(hasErrors) => {
+                      setSectionErrorState((prev) => {
+                        if (prev[sectionId] === hasErrors) return prev
+                        return { ...prev, [sectionId]: hasErrors }
+                      })
+                    }}
+                  />
+                )
+              })}
+            </div>
+            {ActionBar}
+          </>
         )
       }}
     </F0Wizard>
@@ -401,6 +482,8 @@ function F0WizardFormSingleSchema<TSchema extends F0FormSchema>({
   submitLabel,
   onStepChanged,
   allowStepSkipping,
+  autoCloseOnLastStepSubmit,
+  linkAfterLastStepSubmit,
 }: F0WizardFormSingleSchemaProps<TSchema>) {
   const {
     name,
@@ -462,16 +545,38 @@ function F0WizardFormSingleSchema<TSchema extends F0FormSchema>({
     ]
   )
 
-  const handleFinalSubmit = useCallback(async () => {
-    await form.submit()
-  }, [form])
+  const lastSubmitResultRef = useRef<F0FormSubmitResult | null>(null)
+  const lastSubmitDataRef = useRef<z.infer<TSchema> | null>(null)
+  const { showSuccess, ActionBar } = useWizardActionBar()
 
   const handleFormSubmit = useCallback(
     async (data: z.infer<TSchema>): Promise<F0FormSubmitResult> => {
-      return await onSubmit({ data })
+      lastSubmitDataRef.current = data
+      const result = await onSubmit({ data })
+      lastSubmitResultRef.current = result
+      return result
     },
     [onSubmit]
   )
+
+  const handleLastStepCompleted = useCallback(() => {
+    const result = lastSubmitResultRef.current
+    if (!result?.success) return
+
+    showSuccess(result.message)
+
+    if (linkAfterLastStepSubmit) {
+      const url = linkAfterLastStepSubmit({
+        fullData: lastSubmitDataRef.current as z.infer<TSchema>,
+      })
+      window.location.href = url
+      return
+    }
+
+    if (autoCloseOnLastStepSubmit) {
+      onClose?.()
+    }
+  }, [autoCloseOnLastStepSubmit, linkAfterLastStepSubmit, onClose, showSuccess])
 
   return (
     <F0Wizard
@@ -484,7 +589,7 @@ function F0WizardFormSingleSchema<TSchema extends F0FormSchema>({
       nextLabel={nextLabel}
       previousLabel={previousLabel}
       submitLabel={submitLabel}
-      onSubmit={handleFinalSubmit}
+      onSubmit={handleLastStepCompleted}
       onStepChanged={onStepChanged}
       allowStepSkipping={allowStepSkipping}
     >
@@ -507,24 +612,29 @@ function F0WizardFormSingleSchema<TSchema extends F0FormSchema>({
         }, {})
 
         return (
-          <div className="pb-5">
-            <F0Form
-              name={`${name}-step-${currentStep}`}
-              schema={stepSchema}
-              sections={stepSections}
-              defaultValues={
-                defaultValues as Partial<z.infer<typeof stepSchema>> | undefined
-              }
-              onSubmit={
-                handleFormSubmit as (
-                  data: z.infer<typeof stepSchema>
-                ) => Promise<F0FormSubmitResult>
-              }
-              submitConfig={{ hideSubmitButton: true }}
-              errorTriggerMode={errorTriggerMode}
-              formRef={form.formRef}
-            />
-          </div>
+          <>
+            <div className="pb-5">
+              <F0Form
+                name={`${name}-step-${currentStep}`}
+                schema={stepSchema}
+                sections={stepSections}
+                defaultValues={
+                  defaultValues as
+                    | Partial<z.infer<typeof stepSchema>>
+                    | undefined
+                }
+                onSubmit={
+                  handleFormSubmit as (
+                    data: z.infer<typeof stepSchema>
+                  ) => Promise<F0FormSubmitResult>
+                }
+                submitConfig={{ hideSubmitButton: true, hideActionBar: true }}
+                errorTriggerMode={errorTriggerMode}
+                formRef={form.formRef}
+              />
+            </div>
+            {ActionBar}
+          </>
         )
       }}
     </F0Wizard>

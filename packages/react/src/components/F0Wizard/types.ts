@@ -20,7 +20,7 @@ export interface F0WizardProps {
   steps: F0WizardStep[]
   children: (props: F0WizardChildrenProps) => ReactNode
   isOpen: boolean
-  onClose: () => void
+  onClose?: () => void
   title?: string
   width?: DialogWidth
   defaultStepIndex?: number
@@ -35,4 +35,10 @@ export interface F0WizardProps {
    * @default false
    */
   allowStepSkipping?: boolean
+  /**
+   * When true, the wizard automatically closes after the last step's
+   * onSubmit completes successfully (without throwing).
+   * @default false
+   */
+  autoCloseOnLastStepSubmit?: boolean
 }

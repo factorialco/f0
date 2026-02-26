@@ -462,6 +462,8 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
   // Show submit button by default unless explicitly hidden or using action-bar
   const hideSubmitButton =
     submitConfig?.type !== "action-bar" && submitConfig?.hideSubmitButton
+  const hideActionBar =
+    submitConfig?.type !== "action-bar" && !!submitConfig?.hideActionBar
   const showSubmitButton = !isActionBar && !hideSubmitButton
   const discardableChanges =
     submitConfig?.type === "action-bar" && submitConfig?.discardable
@@ -805,26 +807,28 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
           formContent
         )}
 
-        <FormActionBar
-          isActionBar={isActionBar}
-          isDirty={isDirty}
-          actionBarStatus={actionBarStatus}
-          hasErrors={hasErrors}
-          errorCount={errorCount}
-          resolvedActionBarLabel={resolvedActionBarLabel}
-          centerActionBarInFrameContent={centerActionBarInFrameContent}
-          submitLabel={submitLabel}
-          submitIcon={submitIcon}
-          discardableChanges={discardableChanges}
-          discardLabel={discardLabel}
-          discardIcon={discardIcon}
-          issuesOneLabel={forms.actionBar.issues.one}
-          issuesOtherLabel={forms.actionBar.issues.other}
-          onSubmit={form.handleSubmit(handleSubmit)}
-          onDiscard={handleDiscard}
-          goToPreviousError={goToPreviousError}
-          goToNextError={goToNextError}
-        />
+        {!hideActionBar && (
+          <FormActionBar
+            isActionBar={isActionBar}
+            isDirty={isDirty}
+            actionBarStatus={actionBarStatus}
+            hasErrors={hasErrors}
+            errorCount={errorCount}
+            resolvedActionBarLabel={resolvedActionBarLabel}
+            centerActionBarInFrameContent={centerActionBarInFrameContent}
+            submitLabel={submitLabel}
+            submitIcon={submitIcon}
+            discardableChanges={discardableChanges}
+            discardLabel={discardLabel}
+            discardIcon={discardIcon}
+            issuesOneLabel={forms.actionBar.issues.one}
+            issuesOtherLabel={forms.actionBar.issues.other}
+            onSubmit={form.handleSubmit(handleSubmit)}
+            onDiscard={handleDiscard}
+            goToPreviousError={goToPreviousError}
+            goToNextError={goToNextError}
+          />
+        )}
       </FormProvider>
     </F0FormContext.Provider>
   )

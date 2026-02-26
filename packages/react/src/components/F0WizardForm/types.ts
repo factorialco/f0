@@ -94,7 +94,7 @@ export type F0FormDefinition<
 
 interface F0WizardFormBaseProps {
   isOpen: boolean
-  onClose: () => void
+  onClose?: () => void
   title?: string
   width?: DialogWidth
   defaultStepIndex?: number
@@ -109,16 +109,37 @@ interface F0WizardFormBaseProps {
    * @default false
    */
   allowStepSkipping?: boolean
+  /**
+   * When true, the wizard automatically closes after the last step's
+   * onSubmit returns `{ success: true }`.
+   * Also implied when `linkAfterLastStepSubmit` is provided.
+   * @default false
+   */
+  autoCloseOnLastStepSubmit?: boolean
 }
 
 export interface F0WizardFormSingleSchemaProps<
   TSchema extends F0FormSchema,
 > extends F0WizardFormBaseProps {
   formDefinition: F0FormDefinitionSingleSchema<TSchema>
+  /**
+   * Function that receives the submitted data and returns a URL to navigate to
+   * after the last step's onSubmit returns `{ success: true }`.
+   * When provided, the wizard auto-closes and navigates to the returned URL.
+   */
+  linkAfterLastStepSubmit?: (arg: { fullData: z.infer<TSchema> }) => string
 }
 
 export interface F0WizardFormPerSectionProps<
   T extends F0PerSectionSchema,
 > extends F0WizardFormBaseProps {
   formDefinition: F0FormDefinitionPerSection<T>
+  /**
+   * Function that receives the submitted data and returns a URL to navigate to
+   * after the last step's onSubmit returns `{ success: true }`.
+   * When provided, the wizard auto-closes and navigates to the returned URL.
+   */
+  linkAfterLastStepSubmit?: (arg: {
+    fullData: InferPerSectionValues<T>
+  }) => string
 }

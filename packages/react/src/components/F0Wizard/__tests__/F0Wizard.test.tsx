@@ -585,4 +585,60 @@ describe("F0Wizard", () => {
     expect(buttons[2]).not.toBeDisabled()
     expect(buttons[3]).not.toBeDisabled()
   })
+
+  // ---------------------------------------------------------------------------
+  // autoCloseOnLastStepSubmit
+  // ---------------------------------------------------------------------------
+
+  it("calls onClose after last step submit with autoCloseOnLastStepSubmit", async () => {
+    const user = userEvent.setup()
+    const onClose = vi.fn()
+    const onSubmit = vi.fn().mockResolvedValue(undefined)
+
+    render(
+      <F0Wizard
+        isOpen={true}
+        onClose={onClose}
+        steps={[{ title: "Only step" }]}
+        onSubmit={onSubmit}
+        autoCloseOnLastStepSubmit
+      >
+        {() => <div>Content</div>}
+      </F0Wizard>
+    )
+
+    await user.click(screen.getByText("Submit"))
+
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalled()
+    })
+    await waitFor(() => {
+      expect(onClose).toHaveBeenCalledTimes(1)
+    })
+  })
+
+  it("does not call onClose without autoCloseOnLastStepSubmit", async () => {
+    const user = userEvent.setup()
+    const onClose = vi.fn()
+    const onSubmit = vi.fn().mockResolvedValue(undefined)
+
+    render(
+      <F0Wizard
+        isOpen={true}
+        onClose={onClose}
+        steps={[{ title: "Only step" }]}
+        onSubmit={onSubmit}
+      >
+        {() => <div>Content</div>}
+      </F0Wizard>
+    )
+
+    await user.click(screen.getByText("Submit"))
+
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalled()
+    })
+
+    expect(onClose).not.toHaveBeenCalled()
+  })
 })

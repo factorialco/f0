@@ -165,6 +165,12 @@ interface F0FormDefaultSubmitConfig extends F0FormSubmitConfigBase {
    * @default false
    */
   hideSubmitButton?: boolean
+  /**
+   * When true, hides the internal action bar (loading/success feedback).
+   * Useful when the parent component provides its own action bar.
+   * @default false
+   */
+  hideActionBar?: boolean
 }
 
 /**

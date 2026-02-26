@@ -13,6 +13,8 @@ import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 import type { F0WizardProps } from "./types"
 
 import { WizardProvider } from "./components/WizardProvider"
+
+const noop = () => {}
 import { WizardSteps } from "./components/WizardSteps"
 import { useWizardNavigation } from "./hooks/useWizardNavigation"
 
@@ -20,7 +22,7 @@ export const F0Wizard: FC<F0WizardProps> = ({
   steps,
   children,
   isOpen,
-  onClose,
+  onClose = noop,
   title,
   width = "xl",
   defaultStepIndex,
@@ -30,6 +32,7 @@ export const F0Wizard: FC<F0WizardProps> = ({
   onSubmit,
   onStepChanged,
   allowStepSkipping = false,
+  autoCloseOnLastStepSubmit = false,
 }) => {
   const navigation = useWizardNavigation({
     steps,
@@ -37,6 +40,8 @@ export const F0Wizard: FC<F0WizardProps> = ({
     onSubmit,
     onStepChanged,
     allowStepSkipping,
+    autoCloseOnLastStepSubmit,
+    onClose,
   })
 
   const i18n = useI18n()

@@ -8,6 +8,8 @@ interface UseWizardNavigationOptions {
   onSubmit?: () => void | Promise<unknown>
   onStepChanged?: (stepIndex: number) => void
   allowStepSkipping?: boolean
+  autoCloseOnLastStepSubmit?: boolean
+  onClose?: () => void
 }
 
 interface UseWizardNavigationReturn {
@@ -24,6 +26,8 @@ export function useWizardNavigation({
   onSubmit,
   onStepChanged,
   allowStepSkipping = false,
+  autoCloseOnLastStepSubmit = false,
+  onClose,
 }: UseWizardNavigationOptions): UseWizardNavigationReturn {
   const [currentStep, setCurrentStep] = useState(defaultStepIndex)
   const [loading, setLoading] = useState(false)
@@ -97,6 +101,9 @@ export function useWizardNavigation({
         if (onSubmit) {
           await onSubmit()
         }
+        if (autoCloseOnLastStepSubmit) {
+          onClose?.()
+        }
       } else {
         changeStep(currentStep + 1)
       }
@@ -105,7 +112,7 @@ export function useWizardNavigation({
     } finally {
       setLoading(false)
     }
-  }, [currentStep, onSubmit, changeStep])
+  }, [currentStep, onSubmit, changeStep, autoCloseOnLastStepSubmit, onClose])
 
   const goPrevious = useCallback(() => {
     if (currentStep > 0) {

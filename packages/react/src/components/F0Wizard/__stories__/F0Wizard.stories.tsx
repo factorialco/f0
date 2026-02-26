@@ -163,7 +163,10 @@ export const WithIsCompletedGate: Story = {
             { title: "Configure" },
             { title: "Finish" },
           ]}
-          onSubmit={() => setOpen(false)}
+          onSubmit={async () => {
+            await new Promise((r) => setTimeout(r, 1500))
+            setOpen(false)
+          }}
         >
           {({ currentStep }) => {
             if (currentStep === 0) {
@@ -203,6 +206,16 @@ export const AllowStepSkipping: Story = {
       { title: "Settings" },
     ],
     defaultStepIndex: 2,
+  },
+}
+
+export const AutoCloseOnSubmit: Story = {
+  args: {
+    ...Default.args,
+    autoCloseOnLastStepSubmit: true,
+    onSubmit: async () => {
+      await new Promise((resolve) => setTimeout(resolve, 1500))
+    },
   },
 }
 

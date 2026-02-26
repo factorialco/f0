@@ -52,19 +52,29 @@ function PerSectionWrapper({
   definition,
   steps,
   allowStepSkipping,
+  autoCloseOnLastStepSubmit,
+  linkAfterLastStepSubmit,
+  onClose,
 }: {
   definition: F0FormDefinitionPerSection<typeof perSectionSchema>
   steps?: F0WizardFormStep[]
   allowStepSkipping?: boolean
+  autoCloseOnLastStepSubmit?: boolean
+  linkAfterLastStepSubmit?: (arg: {
+    fullData: Record<string, unknown>
+  }) => string
+  onClose?: () => void
 }) {
   return (
     <F0WizardForm
       formDefinition={definition}
       isOpen={true}
-      onClose={() => {}}
+      onClose={onClose ?? (() => {})}
       title="Test wizard"
       steps={steps}
       allowStepSkipping={allowStepSkipping}
+      autoCloseOnLastStepSubmit={autoCloseOnLastStepSubmit}
+      linkAfterLastStepSubmit={linkAfterLastStepSubmit}
     />
   )
 }
@@ -326,6 +336,90 @@ describe("F0WizardForm — Per-section mode", () => {
   })
 
   // ---------------------------------------------------------------------------
+  // Loading state during onSubmit
+  // ---------------------------------------------------------------------------
+
+  it("shows loading on Continue button while onSubmit is processing (intermediate step)", async () => {
+    const user = userEvent.setup()
+    let resolveSubmit!: (value: { success: boolean }) => void
+    const onSubmit = vi.fn(
+      () =>
+        new Promise<{ success: boolean }>((resolve) => {
+          resolveSubmit = resolve
+        })
+    )
+    const definition = makePerSectionDefinition({
+      onSubmit,
+      defaultValues: { general: { email: "test@test.com" } },
+    })
+
+    render(<PerSectionWrapper definition={definition} />)
+
+    const continueButton = screen.getByText("Continue").closest("button")!
+    await user.click(continueButton)
+
+    await waitFor(() => {
+      expect(continueButton).toHaveAttribute("aria-busy", "true")
+    })
+    expect(continueButton).toBeDisabled()
+
+    resolveSubmit({ success: true })
+
+    await waitFor(() => {
+      expect(screen.getByLabelText("Legal entity")).toBeInTheDocument()
+    })
+  })
+
+  it("shows loading on Submit button while onSubmit is processing (last step)", async () => {
+    const user = userEvent.setup()
+    let resolveSubmit!: (value: { success: boolean }) => void
+    const onSubmit = vi.fn(
+      () =>
+        new Promise<{ success: boolean }>((resolve) => {
+          resolveSubmit = resolve
+        })
+    )
+    const definition = makePerSectionDefinition({
+      onSubmit,
+      defaultValues: {
+        general: { email: "test@test.com" },
+        work: { legalEntity: "Factorial" },
+      },
+    })
+
+    render(<PerSectionWrapper definition={definition} />)
+
+    await user.click(screen.getByText("Continue"))
+    resolveSubmit({ success: true })
+
+    await waitFor(() => {
+      expect(screen.getByLabelText("Legal entity")).toBeInTheDocument()
+    })
+
+    let resolveLastSubmit!: (value: { success: boolean }) => void
+    onSubmit.mockImplementation(
+      () =>
+        new Promise<{ success: boolean }>((resolve) => {
+          resolveLastSubmit = resolve
+        })
+    )
+
+    const submitButton = screen.getByText("Submit").closest("button")!
+    await user.click(submitButton)
+
+    await waitFor(() => {
+      expect(submitButton).toHaveAttribute("aria-busy", "true")
+    })
+    expect(submitButton).toBeDisabled()
+
+    resolveLastSubmit({ success: true })
+
+    await waitFor(() => {
+      expect(submitButton).not.toHaveAttribute("aria-busy", "true")
+    })
+  })
+
+  // ---------------------------------------------------------------------------
   // allowStepSkipping
   // ---------------------------------------------------------------------------
 
@@ -362,6 +456,229 @@ describe("F0WizardForm — Per-section mode", () => {
     const buttons = nav.querySelectorAll("button")
 
     expect(buttons[2]).toBeDisabled()
+  })
+
+  // ---------------------------------------------------------------------------
+  // Action bar on success
+  // ---------------------------------------------------------------------------
+
+  it("shows a success action bar after a step is submitted successfully", async () => {
+    const user = userEvent.setup()
+    const definition = makePerSectionDefinition({
+      onSubmit: vi.fn().mockResolvedValue({ success: true, message: "Saved!" }),
+      defaultValues: {
+        general: { email: "test@test.com" },
+        work: { legalEntity: "Factorial" },
+      },
+    })
+
+    render(<PerSectionWrapper definition={definition} />)
+
+    await user.click(screen.getByText("Continue"))
+
+    await waitFor(() => {
+      expect(screen.getByText("Saved!")).toBeInTheDocument()
+    })
+  })
+
+  it("shows default success message when onSubmit returns success without message", async () => {
+    const user = userEvent.setup()
+    const definition = makePerSectionDefinition({
+      onSubmit: vi.fn().mockResolvedValue({ success: true }),
+      defaultValues: {
+        general: { email: "test@test.com" },
+        work: { legalEntity: "Factorial" },
+      },
+    })
+
+    render(<PerSectionWrapper definition={definition} />)
+
+    await user.click(screen.getByText("Continue"))
+
+    await waitFor(() => {
+      expect(
+        screen.getByText("Your changes have been saved")
+      ).toBeInTheDocument()
+    })
+  })
+
+  it("does not show success action bar when onSubmit returns success: false", async () => {
+    const user = userEvent.setup()
+    const definition = makePerSectionDefinition({
+      onSubmit: vi.fn().mockResolvedValue({
+        success: false,
+        rootMessage: "Server error",
+      }),
+      defaultValues: {
+        general: { email: "test@test.com" },
+        work: { legalEntity: "Factorial" },
+      },
+    })
+
+    render(<PerSectionWrapper definition={definition} />)
+
+    await user.click(screen.getByText("Continue"))
+
+    await waitFor(() => {
+      expect(definition.onSubmit).toHaveBeenCalledTimes(1)
+    })
+
+    expect(
+      screen.queryByText("Your changes have been saved")
+    ).not.toBeInTheDocument()
+  })
+
+  // ---------------------------------------------------------------------------
+  // autoCloseOnLastStepSubmit
+  // ---------------------------------------------------------------------------
+
+  it("calls onClose after last step submits successfully with autoCloseOnLastStepSubmit", async () => {
+    const user = userEvent.setup()
+    const onClose = vi.fn()
+    const definition = makePerSectionDefinition({
+      defaultValues: {
+        general: { email: "test@test.com" },
+        work: { legalEntity: "Factorial" },
+      },
+    })
+
+    render(
+      <PerSectionWrapper
+        definition={definition}
+        onClose={onClose}
+        autoCloseOnLastStepSubmit
+      />
+    )
+
+    await user.click(screen.getByText("Continue"))
+    await waitFor(() => {
+      expect(screen.getByLabelText("Legal entity")).toBeInTheDocument()
+    })
+
+    await user.click(screen.getByText("Submit"))
+    await waitFor(() => {
+      expect(onClose).toHaveBeenCalledTimes(1)
+    })
+  })
+
+  it("does not call onClose when last step submit returns success: false", async () => {
+    const user = userEvent.setup()
+    const onClose = vi.fn()
+    const onSubmit = vi
+      .fn()
+      .mockResolvedValueOnce({ success: true })
+      .mockResolvedValueOnce({
+        success: false,
+        rootMessage: "Server error",
+      })
+
+    const definition = makePerSectionDefinition({
+      onSubmit,
+      defaultValues: {
+        general: { email: "test@test.com" },
+        work: { legalEntity: "Factorial" },
+      },
+    })
+
+    render(
+      <PerSectionWrapper
+        definition={definition}
+        onClose={onClose}
+        autoCloseOnLastStepSubmit
+      />
+    )
+
+    await user.click(screen.getByText("Continue"))
+    await waitFor(() => {
+      expect(screen.getByLabelText("Legal entity")).toBeInTheDocument()
+    })
+
+    await user.click(screen.getByText("Submit"))
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalledTimes(2)
+    })
+
+    expect(onClose).not.toHaveBeenCalled()
+  })
+
+  // ---------------------------------------------------------------------------
+  // linkAfterLastStepSubmit
+  // ---------------------------------------------------------------------------
+
+  it("navigates to URL from linkAfterLastStepSubmit after successful last step", async () => {
+    const user = userEvent.setup()
+    const originalLocation = window.location.href
+    const linkFn = vi.fn().mockReturnValue("https://factorialhr.com/employees")
+
+    const definition = makePerSectionDefinition({
+      defaultValues: {
+        general: { email: "test@test.com" },
+        work: { legalEntity: "Factorial" },
+      },
+    })
+
+    render(
+      <PerSectionWrapper
+        definition={definition}
+        linkAfterLastStepSubmit={linkFn}
+      />
+    )
+
+    await user.click(screen.getByText("Continue"))
+    await waitFor(() => {
+      expect(screen.getByLabelText("Legal entity")).toBeInTheDocument()
+    })
+
+    await user.click(screen.getByText("Submit"))
+    await waitFor(() => {
+      expect(linkFn).toHaveBeenCalledWith(
+        expect.objectContaining({
+          fullData: expect.objectContaining({
+            general: expect.objectContaining({ email: "test@test.com" }),
+            work: expect.objectContaining({ legalEntity: "Factorial" }),
+          }),
+        })
+      )
+    })
+
+    window.location.href = originalLocation
+  })
+
+  it("linkAfterLastStepSubmit takes precedence over autoCloseOnLastStepSubmit", async () => {
+    const user = userEvent.setup()
+    const originalLocation = window.location.href
+    const onClose = vi.fn()
+    const linkFn = vi.fn().mockReturnValue("https://factorialhr.com")
+
+    const definition = makePerSectionDefinition({
+      defaultValues: {
+        general: { email: "test@test.com" },
+        work: { legalEntity: "Factorial" },
+      },
+    })
+
+    render(
+      <PerSectionWrapper
+        definition={definition}
+        onClose={onClose}
+        autoCloseOnLastStepSubmit
+        linkAfterLastStepSubmit={linkFn}
+      />
+    )
+
+    await user.click(screen.getByText("Continue"))
+    await waitFor(() => {
+      expect(screen.getByLabelText("Legal entity")).toBeInTheDocument()
+    })
+
+    await user.click(screen.getByText("Submit"))
+    await waitFor(() => {
+      expect(linkFn).toHaveBeenCalled()
+    })
+
+    expect(onClose).not.toHaveBeenCalled()
+
+    window.location.href = originalLocation
   })
 })
 
@@ -400,6 +717,37 @@ describe("F0WizardForm — Single-schema mode", () => {
     expect(screen.getByLabelText("Email")).toBeInTheDocument()
 
     await user.click(screen.getByText("Continue"))
+
+    await waitFor(() => {
+      expect(screen.getByLabelText("Legal entity")).toBeInTheDocument()
+    })
+  })
+
+  it("shows loading on Continue button while onSubmit is processing", async () => {
+    const user = userEvent.setup()
+    let resolveSubmit!: (value: { success: boolean }) => void
+    const onSubmit = vi.fn(
+      () =>
+        new Promise<{ success: boolean }>((resolve) => {
+          resolveSubmit = resolve
+        })
+    )
+    const definition = makeSingleSchemaDefinition({
+      onSubmit,
+      defaultValues: { email: "test@test.com" },
+    })
+
+    render(<SingleSchemaWrapper definition={definition} />)
+
+    const continueButton = screen.getByText("Continue").closest("button")!
+    await user.click(continueButton)
+
+    await waitFor(() => {
+      expect(continueButton).toHaveAttribute("aria-busy", "true")
+    })
+    expect(continueButton).toBeDisabled()
+
+    resolveSubmit({ success: true })
 
     await waitFor(() => {
       expect(screen.getByLabelText("Legal entity")).toBeInTheDocument()
