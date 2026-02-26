@@ -13062,7 +13062,7 @@ const jr = J(
       leftIcon: r,
       className: i,
       action: o = { type: "noop" },
-      textAlign: s = "start"
+      contentAlign: s = "start"
     } = t;
     return /* @__PURE__ */ l(
       "li",
@@ -13137,20 +13137,20 @@ const WN = ({
 );
 Oh.displayName = "DataList";
 const Rh = J(
-  ({ text: t, icon: e, action: n, textAlign: r }, i) => /* @__PURE__ */ l(
+  ({ text: t, icon: e, action: n, contentAlign: r }, i) => /* @__PURE__ */ l(
     jr,
     {
       ref: i,
       text: t,
       leftIcon: e,
       action: yo(n, t),
-      textAlign: r
+      contentAlign: r
     }
   )
 );
 Rh.displayName = "DataList.Item";
 const UN = se("DataList.Item", Rh), Fh = J(
-  ({ action: t, avatarUrl: e, firstName: n, lastName: r, textAlign: i }, o) => {
+  ({ action: t, avatarUrl: e, firstName: n, lastName: r, contentAlign: i }, o) => {
     const s = `${n} ${r}`;
     return /* @__PURE__ */ l(
       jr,
@@ -13167,34 +13167,34 @@ const UN = se("DataList.Item", Rh), Fh = J(
         ),
         text: s,
         action: yo(t, s),
-        textAlign: i
+        contentAlign: i
       }
     );
   }
 );
 Fh.displayName = "PersonItem";
 const GN = se("PersonItem", Fh), Mh = J(
-  ({ avatarUrl: t, name: e, action: n, textAlign: r }, i) => /* @__PURE__ */ l(
+  ({ avatarUrl: t, name: e, action: n, contentAlign: r }, i) => /* @__PURE__ */ l(
     jr,
     {
       ref: i,
       leftIcon: () => /* @__PURE__ */ l(Iu, { name: e, size: "xs", src: t }),
       text: e,
       action: yo(n, e),
-      textAlign: r
+      contentAlign: r
     }
   )
 );
 Mh.displayName = "CompanyItem";
 const qN = se("CompanyItem", Mh), Ph = J(
-  ({ action: t, name: e, textAlign: n }, r) => /* @__PURE__ */ l(
+  ({ action: t, name: e, contentAlign: n }, r) => /* @__PURE__ */ l(
     jr,
     {
       ref: r,
       leftIcon: () => /* @__PURE__ */ l(Sb, { name: e, size: "xs" }),
       text: e,
       action: yo(t, e),
-      textAlign: n
+      contentAlign: n
     }
   )
 );
@@ -13214,10 +13214,10 @@ const JN = se("DotTagItem", zh), yo = (t, e) => t && t.type === "copy" ? { type:
   contentAlign: e
 }) => /* @__PURE__ */ g(Z, { children: [
   t.type === "weekdays" && /* @__PURE__ */ l("li", { className: "list-none px-1.5 py-1", children: /* @__PURE__ */ l(BN, { ...t }) }),
-  t.type === "person" && /* @__PURE__ */ l(Dn.PersonItem, { ...t, textAlign: e }),
-  t.type === "item" && /* @__PURE__ */ l(Dn.Item, { ...t, textAlign: e }),
-  t.type === "team" && /* @__PURE__ */ l(Dn.TeamItem, { ...t, textAlign: e }),
-  t.type === "company" && /* @__PURE__ */ l(Dn.CompanyItem, { ...t, textAlign: e }),
+  t.type === "person" && /* @__PURE__ */ l(Dn.PersonItem, { ...t, contentAlign: e }),
+  t.type === "item" && /* @__PURE__ */ l(Dn.Item, { ...t, contentAlign: e }),
+  t.type === "team" && /* @__PURE__ */ l(Dn.TeamItem, { ...t, contentAlign: e }),
+  t.type === "company" && /* @__PURE__ */ l(Dn.CompanyItem, { ...t, contentAlign: e }),
   t.type === "dot-tag" && /* @__PURE__ */ l(Dn.DotTagItem, { ...t }),
   t.type === "avatar-list" && /* @__PURE__ */ l("li", { className: "w-fit list-none px-1.5 py-1", children: /* @__PURE__ */ l(fo, { ...t.avatarList }) })
 ] }), XN = J(

@@ -1644,7 +1644,7 @@ declare type CompanyItemProps = {
     name: string;
     avatarUrl?: URL_2;
     action?: ActionType_3;
-    textAlign?: "start" | "end";
+    contentAlign?: "start" | "end";
 };
 
 export declare function CompanySelector({ companies, selected, onChange, isLoading, withNotification, additionalOptions, }: CompanySelectorProps): JSX_2.Element;
@@ -2854,7 +2854,7 @@ declare type EmployeeItemProps = {
     lastName: string;
     avatarUrl?: URL_2;
     action?: ActionType_3;
-    textAlign?: "start" | "end";
+    contentAlign?: "start" | "end";
 };
 
 declare type EmptyState = {
@@ -4056,7 +4056,7 @@ declare type ItemProps = {
     text: string;
     icon?: IconType;
     action?: ActionType_3;
-    textAlign?: "start" | "end";
+    contentAlign?: "start" | "end";
 };
 
 declare type Items = typeof Item_2 | typeof PersonItem | typeof CompanyItem | typeof TeamItem;
@@ -6096,7 +6096,7 @@ declare const TeamItem: ForwardRefExoticComponent<TeamItemProps & RefAttributes<
 declare type TeamItemProps = {
     name: string;
     action?: ActionType_3;
-    textAlign?: "start" | "end";
+    contentAlign?: "start" | "end";
 };
 
 /**
