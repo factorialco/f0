@@ -683,6 +683,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
           resetErrorNavigation()
         },
         isDirty: () => form.formState.isDirty,
+        getValues: () => form.getValues() as Record<string, unknown>,
         _setStateCallback: (callback: F0FormStateCallback) => {
           stateCallbackRef.current = callback
         },

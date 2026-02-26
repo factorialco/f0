@@ -181,6 +181,7 @@ export function F0FormSection<TSchema extends F0FormSchema>({
         },
         reset: () => form.reset(),
         isDirty: () => form.formState.isDirty,
+        getValues: () => form.getValues() as Record<string, unknown>,
         _setStateCallback: (callback: F0FormStateCallback) => {
           stateCallbackRef.current = callback
         },

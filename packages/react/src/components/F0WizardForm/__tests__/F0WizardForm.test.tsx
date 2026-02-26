@@ -233,6 +233,34 @@ describe("F0WizardForm — Per-section mode", () => {
   })
 
   // ---------------------------------------------------------------------------
+  // Value preservation across step navigation
+  // ---------------------------------------------------------------------------
+
+  it("preserves field values when navigating back to a previous step (per-section)", async () => {
+    const user = userEvent.setup()
+    const definition = makePerSectionDefinition()
+
+    render(<PerSectionWrapper definition={definition} />)
+
+    const emailInput = screen.getByLabelText("Email")
+    await user.type(emailInput, "preserved@test.com")
+
+    await user.click(screen.getByText("Continue"))
+
+    await waitFor(() => {
+      expect(screen.getByLabelText("Legal entity")).toBeInTheDocument()
+    })
+
+    await user.click(screen.getByText("Previous"))
+
+    await waitFor(() => {
+      expect(screen.getByLabelText("Email")).toBeInTheDocument()
+    })
+
+    expect(screen.getByLabelText("Email")).toHaveValue("preserved@test.com")
+  })
+
+  // ---------------------------------------------------------------------------
   // Auto-split multi-section steps
   // ---------------------------------------------------------------------------
 
@@ -766,5 +794,29 @@ describe("F0WizardForm — Single-schema mode", () => {
       (btn) => btn.getAttribute("type") === "submit"
     )
     expect(submitButtons).toHaveLength(0)
+  })
+
+  it("preserves field values when navigating back to a previous step (single-schema)", async () => {
+    const user = userEvent.setup()
+    const definition = makeSingleSchemaDefinition()
+
+    render(<SingleSchemaWrapper definition={definition} />)
+
+    const emailInput = screen.getByLabelText("Email")
+    await user.type(emailInput, "preserved@test.com")
+
+    await user.click(screen.getByText("Continue"))
+
+    await waitFor(() => {
+      expect(screen.getByLabelText("Legal entity")).toBeInTheDocument()
+    })
+
+    await user.click(screen.getByText("Previous"))
+
+    await waitFor(() => {
+      expect(screen.getByLabelText("Email")).toBeInTheDocument()
+    })
+
+    expect(screen.getByLabelText("Email")).toHaveValue("preserved@test.com")
   })
 })

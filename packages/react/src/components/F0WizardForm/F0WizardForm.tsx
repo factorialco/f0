@@ -239,6 +239,7 @@ function F0WizardFormPerSection<T extends F0PerSectionSchema>({
   }, [customSteps, sections])
 
   const fullDataRef = useRef<Record<string, unknown>>({})
+  const currentStepRef = useRef(defaultStepIndex ?? 0)
 
   const sectionForms = useMemo(
     () =>
@@ -346,6 +347,29 @@ function F0WizardFormPerSection<T extends F0PerSectionSchema>({
     }
   }, [autoCloseOnLastStepSubmit, linkAfterLastStepSubmit, onClose])
 
+  const snapshotCurrentStepValues = useCallback(() => {
+    const prevSectionIds = getSectionIdsForStep(
+      currentStepRef.current,
+      sectionIds,
+      effectiveSteps
+    )
+    for (const id of prevSectionIds) {
+      const form = sectionForms[id]
+      if (form) {
+        fullDataRef.current[id] = form.getValues()
+      }
+    }
+  }, [sectionIds, effectiveSteps, sectionForms])
+
+  const handleStepChanged = useCallback(
+    (stepIndex: number) => {
+      snapshotCurrentStepValues()
+      currentStepRef.current = stepIndex
+      onStepChanged?.(stepIndex)
+    },
+    [snapshotCurrentStepValues, onStepChanged]
+  )
+
   return (
     <F0Wizard
       steps={wizardSteps}
@@ -358,7 +382,7 @@ function F0WizardFormPerSection<T extends F0PerSectionSchema>({
       previousLabel={previousLabel}
       submitLabel={submitLabel}
       onSubmit={handleLastStepCompleted}
-      onStepChanged={onStepChanged}
+      onStepChanged={handleStepChanged}
       allowStepSkipping={allowStepSkipping}
     >
       {({ currentStep }) => {
@@ -376,9 +400,13 @@ function F0WizardFormPerSection<T extends F0PerSectionSchema>({
                 if (!sectionSchema) return null
 
                 const sectionConfig = sections?.[sectionId]
-                const sectionDefaults = defaultValues?.[
+                const submittedData = fullDataRef.current[sectionId] as
+                  | Partial<z.infer<typeof sectionSchema>>
+                  | undefined
+                const originalDefaults = defaultValues?.[
                   sectionId as keyof typeof defaultValues
                 ] as Partial<z.infer<typeof sectionSchema>> | undefined
+                const sectionDefaults = submittedData ?? originalDefaults
 
                 return (
                   <PerSectionFormWrapper
@@ -510,6 +538,10 @@ function F0WizardFormSingleSchema<TSchema extends F0FormSchema>({
   )
 
   const form = useF0Form()
+  const enteredValuesRef = useRef<Record<string, unknown>>(
+    defaultValues ? { ...defaultValues } : {}
+  )
+  const currentStepRef = useRef(defaultStepIndex ?? 0)
 
   const onNextForStep = useCallback(
     (_stepIndex: number) => async () => {
@@ -551,7 +583,10 @@ function F0WizardFormSingleSchema<TSchema extends F0FormSchema>({
 
   const handleFormSubmit = useCallback(
     async (data: z.infer<TSchema>): Promise<F0FormSubmitResult> => {
-      lastSubmitDataRef.current = data
+      Object.assign(enteredValuesRef.current, data)
+      lastSubmitDataRef.current = {
+        ...enteredValuesRef.current,
+      } as z.infer<TSchema>
       const result = await onSubmit({ data })
       lastSubmitResultRef.current = result
       return result
@@ -578,6 +613,16 @@ function F0WizardFormSingleSchema<TSchema extends F0FormSchema>({
     }
   }, [autoCloseOnLastStepSubmit, linkAfterLastStepSubmit, onClose, showSuccess])
 
+  const handleStepChanged = useCallback(
+    (stepIndex: number) => {
+      const currentValues = form.getValues()
+      Object.assign(enteredValuesRef.current, currentValues)
+      currentStepRef.current = stepIndex
+      onStepChanged?.(stepIndex)
+    },
+    [form, onStepChanged]
+  )
+
   return (
     <F0Wizard
       steps={wizardSteps}
@@ -590,7 +635,7 @@ function F0WizardFormSingleSchema<TSchema extends F0FormSchema>({
       previousLabel={previousLabel}
       submitLabel={submitLabel}
       onSubmit={handleLastStepCompleted}
-      onStepChanged={onStepChanged}
+      onStepChanged={handleStepChanged}
       allowStepSkipping={allowStepSkipping}
     >
       {({ currentStep }) => {
@@ -619,7 +664,7 @@ function F0WizardFormSingleSchema<TSchema extends F0FormSchema>({
                 schema={stepSchema}
                 sections={stepSections}
                 defaultValues={
-                  defaultValues as
+                  enteredValuesRef.current as
                     | Partial<z.infer<typeof stepSchema>>
                     | undefined
                 }
