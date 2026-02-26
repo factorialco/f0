@@ -914,7 +914,7 @@ export const F0Select = F0SelectComponent as <
   T extends string = string,
   R = unknown,
 >(
-  props: F0SelectProps<T, R> & { dataTestId?: string } & {
+  props: F0SelectProps<T, R> & {
     ref?: React.Ref<HTMLButtonElement>
   }
 ) => React.ReactElement

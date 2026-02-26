@@ -277,5 +277,36 @@ describe("withDataTestId", () => {
       expect(_goodMulti).toBeDefined()
       expect(_badMulti).toBeDefined()
     })
+
+    it("should infer callback argument as boolean, not any (regression test)", () => {
+      // This test ensures that callback argument types are not widened to `any`
+      // when wrapped with withDataTestId. If they become `any`, the @ts-expect-error
+      // below would be satisfied (wrong), causing a compile error.
+      type Props = {
+        onCheckedChange?: (checked: boolean) => void
+      }
+
+      const Checkbox: React.FC<Props> = () => null
+      const Wrapped = withDataTestId(Checkbox)
+
+      type WrappedProps = React.ComponentProps<typeof Wrapped>
+
+      // Extract the callback parameter type
+      type OnChange = NonNullable<WrappedProps["onCheckedChange"]>
+      type CheckedParam = Parameters<OnChange>[0]
+
+      // IsAny<T> is `true` if T is `any`, `false` otherwise
+      type IsAny<T> = 0 extends 1 & T ? true : false
+      type CheckedIsAny = IsAny<CheckedParam>
+
+      // If CheckedParam is `any`, this @ts-expect-error is satisfied (bad!)
+      // If CheckedParam is `boolean`, this @ts-expect-error is unused → compile error (good!)
+      // We want this line to cause an "unused @ts-expect-error" error if types are correct.
+      //
+      // NOTE: The assertion below verifies CheckedIsAny is false (checked is NOT any).
+      // If this test fails with "unused @ts-expect-error", the fix is working!
+      const _checkedIsNotAny: CheckedIsAny = false
+      expect(_checkedIsNotAny).toBe(false)
+    })
   })
 })
