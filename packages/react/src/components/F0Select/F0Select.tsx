@@ -28,6 +28,7 @@ import {
   useSelectable,
   WithGroupId,
 } from "@/hooks/datasource"
+import { DataTestIdWrapper, type WithDataTestIdProps } from "@/lib/data-testid"
 import { useI18n } from "@/lib/providers/i18n"
 import { toArray } from "@/lib/toArray"
 import { cn } from "@/lib/utils"
@@ -123,8 +124,9 @@ const F0SelectComponent = forwardRef(function Select<
     portalContainer,
     asList = false,
     showPreview = false,
+    dataTestId,
     ...props
-  }: F0SelectProps<T, R>,
+  }: F0SelectProps<T, R> & WithDataTestIdProps,
   ref: React.ForwardedRef<HTMLButtonElement>
 ) {
   const id = useId()
@@ -767,42 +769,48 @@ const F0SelectComponent = forwardRef(function Select<
 
   if (asList) {
     return (
-      <div
-        className={cn(
-          "flex w-full max-h-full flex-col gap-2",
-          disabled && "cursor-not-allowed opacity-50"
-        )}
-      >
-        {label && !hideLabel && (
-          <Label
-            label={label}
-            required={required}
-            htmlFor={id}
-            icon={labelIcon}
-            disabled={disabled}
-          />
-        )}
-        {/* Select Container */}
+      <DataTestIdWrapper dataTestId={dataTestId}>
         <div
           className={cn(
-            "flex-1 min-h-0",
-            asListContainerVariants({
-              status: error ? "error" : status?.type ? status?.type : "default",
-            })
+            "flex w-full max-h-full flex-col gap-2",
+            disabled && "cursor-not-allowed opacity-50"
           )}
         >
-          <SelectPrimitive {...selectPrimitiveProps}>
-            {selectContent}
-          </SelectPrimitive>
+          {label && !hideLabel && (
+            <Label
+              label={label}
+              required={required}
+              htmlFor={id}
+              icon={labelIcon}
+              disabled={disabled}
+            />
+          )}
+          {/* Select Container */}
+          <div
+            className={cn(
+              "flex-1 min-h-0",
+              asListContainerVariants({
+                status: error
+                  ? "error"
+                  : status?.type
+                    ? status?.type
+                    : "default",
+              })
+            )}
+          >
+            <SelectPrimitive {...selectPrimitiveProps}>
+              {selectContent}
+            </SelectPrimitive>
+          </div>
+          {/* Hint or Status Message */}
+          <InputMessages status={status} />
         </div>
-        {/* Hint or Status Message */}
-        <InputMessages status={status} />
-      </div>
+      </DataTestIdWrapper>
     )
   }
 
   return (
-    <>
+    <DataTestIdWrapper dataTestId={dataTestId}>
       <SelectPrimitive {...selectPrimitiveProps}>
         <SelectTrigger ref={ref} asChild>
           {children ? (
@@ -898,7 +906,7 @@ const F0SelectComponent = forwardRef(function Select<
         </SelectTrigger>
         {openLocal && selectContent}
       </SelectPrimitive>
-    </>
+    </DataTestIdWrapper>
   )
 })
 
@@ -906,5 +914,6 @@ export const F0Select = F0SelectComponent as <
   T extends string = string,
   R = unknown,
 >(
-  props: F0SelectProps<T, R> & { ref?: React.Ref<HTMLButtonElement> }
+  props: F0SelectProps<T, R> &
+    WithDataTestIdProps & { ref?: React.Ref<HTMLButtonElement> }
 ) => React.ReactElement

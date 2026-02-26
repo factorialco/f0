@@ -2,7 +2,7 @@ import type { ReactElement } from "react"
 import { useContext, useEffect, useMemo, useRef, useState } from "react"
 
 import { useEventEmitter } from "@/experimental/OneDataCollection/useEventEmitter"
-import { withDataTestId, type WithDataTestIdProps } from "@/lib/data-testid"
+import { DataTestIdWrapper, type WithDataTestIdProps } from "@/lib/data-testid"
 import { cn } from "@/lib/utils"
 
 import type { FiltersDefinition, FiltersMode, FiltersState } from "./types"
@@ -276,48 +276,44 @@ FiltersChipsList.displayName = "OneFilterPicker.ChipsList"
  * OneFiltersPicker component to use as a single component
  */
 const _OneFilterPicker = <Definition extends FiltersDefinition>(
-  props: OneFilterPickerRootProps<Definition>
+  props: OneFilterPickerRootProps<Definition> & WithDataTestIdProps
 ) => {
+  const { dataTestId, ...rootProps } = props
   return (
-    <FiltersRoot {...props}>
-      <div
-        className={cn(
-          "flex items-center justify-between gap-4",
-          !props.filters && "justify-end"
+    <DataTestIdWrapper dataTestId={dataTestId}>
+      <FiltersRoot {...rootProps}>
+        <div
+          className={cn(
+            "flex items-center justify-between gap-4",
+            !rootProps.filters && "justify-end"
+          )}
+        >
+          {rootProps.filters && (
+            <div className="flex min-w-0 flex-1 gap-1">
+              <FiltersControls />
+              <FiltersPresets />
+            </div>
+          )}
+          {rootProps.children && (
+            <div className="flex shrink-0 items-center gap-2">
+              {rootProps.children}
+            </div>
+          )}
+        </div>
+        {(!rootProps.mode || rootProps.mode === "default") && (
+          <FiltersChipsList />
         )}
-      >
-        {props.filters && (
-          <div className="flex min-w-0 flex-1 gap-1">
-            <FiltersControls />
-            <FiltersPresets />
-          </div>
-        )}
-        {props.children && (
-          <div className="flex shrink-0 items-center gap-2">
-            {props.children}
-          </div>
-        )}
-      </div>
-      {(!props.mode || props.mode === "default") && <FiltersChipsList />}
-    </FiltersRoot>
+      </FiltersRoot>
+    </DataTestIdWrapper>
   )
 }
 _OneFilterPicker.displayName = "OneFilterPicker"
 
-/**
- * Generic component type so consumers can use <OneFilterPicker<Definition> />.
- * Preserves dataTestId and OneFilterPickerRootProps<Definition>.
- */
-type OneFilterPickerGeneric = <Definition extends FiltersDefinition>(
+const OneFilterPicker = _OneFilterPicker as <
+  Definition extends FiltersDefinition,
+>(
   props: OneFilterPickerRootProps<Definition> & WithDataTestIdProps
 ) => ReactElement | null
-
-// `as unknown as OneFilterPickerGeneric`: withDataTestId() returns WithDataTestIdReturnType<T>,
-// which cannot express generic call signatures. The double cast re-adds the <Definition>
-// type parameter that TypeScript erases during HOC wrapping. See WithDataTestIdPropsOf.
-const OneFilterPicker = withDataTestId(
-  _OneFilterPicker
-) as unknown as OneFilterPickerGeneric
 
 /**
  * Export the components as named exports to allow to customize the layout

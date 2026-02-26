@@ -7,7 +7,7 @@ import {
   RadarChart as RadarChartPrimitive,
 } from "recharts"
 
-import { withDataTestId, WithDataTestIdProps } from "@/lib/data-testid"
+import { DataTestIdWrapper, WithDataTestIdProps } from "@/lib/data-testid"
 
 import {
   ChartContainer,
@@ -29,7 +29,14 @@ export type RadarChartProps<K extends ChartConfig> = {
 }
 
 export const _RadarChart = <K extends ChartConfig>(
-  { data, dataConfig, scaleMin, scaleMax, aspect }: RadarChartProps<K>,
+  {
+    data,
+    dataConfig,
+    scaleMin,
+    scaleMax,
+    aspect,
+    dataTestId,
+  }: RadarChartProps<K> & WithDataTestIdProps,
   ref: ForwardedRef<HTMLDivElement>
 ) => {
   const items = Object.keys(dataConfig)
@@ -39,62 +46,60 @@ export const _RadarChart = <K extends ChartConfig>(
   }))
 
   return (
-    <ChartContainer
-      config={dataConfig}
-      ref={ref}
-      aspect={aspect}
-      data-chromatic="ignore"
-    >
-      <RadarChartPrimitive accessibilityLayer data={preparedData}>
-        <ChartTooltip
-          cursor
-          content={<ChartTooltipContent indicator="dot" />}
-        />
-
-        <PolarGrid gridType="circle" />
-        <PolarAngleAxis dataKey="subject" />
-        <PolarRadiusAxis
-          angle={90}
-          type="number"
-          domain={[scaleMin ?? "dataMin", scaleMax ?? "dataMax"]}
-        />
-
-        {items.map((key, index) => (
-          <Radar
-            key={key}
-            dataKey={key}
-            fill={
-              dataConfig[key].color
-                ? getColor(dataConfig[key].color)
-                : getCategoricalColor(index)
-            }
-            stroke={
-              dataConfig[key].color
-                ? getColor(dataConfig[key].color)
-                : getCategoricalColor(index)
-            }
-            strokeWidth={1.5}
-            fillOpacity={0.3}
-            label={dataConfig[key].label}
-            isAnimationActive={false}
+    <DataTestIdWrapper dataTestId={dataTestId}>
+      <ChartContainer
+        config={dataConfig}
+        ref={ref}
+        aspect={aspect}
+        data-chromatic="ignore"
+      >
+        <RadarChartPrimitive accessibilityLayer data={preparedData}>
+          <ChartTooltip
+            cursor
+            content={<ChartTooltipContent indicator="dot" />}
           />
-        ))}
 
-        {Object.keys(dataConfig).length > 1 && (
-          <ChartLegend iconType="star" content={<ChartLegendContent />} />
-        )}
-      </RadarChartPrimitive>
-    </ChartContainer>
+          <PolarGrid gridType="circle" />
+          <PolarAngleAxis dataKey="subject" />
+          <PolarRadiusAxis
+            angle={90}
+            type="number"
+            domain={[scaleMin ?? "dataMin", scaleMax ?? "dataMax"]}
+          />
+
+          {items.map((key, index) => (
+            <Radar
+              key={key}
+              dataKey={key}
+              fill={
+                dataConfig[key].color
+                  ? getColor(dataConfig[key].color)
+                  : getCategoricalColor(index)
+              }
+              stroke={
+                dataConfig[key].color
+                  ? getColor(dataConfig[key].color)
+                  : getCategoricalColor(index)
+              }
+              strokeWidth={1.5}
+              fillOpacity={0.3}
+              label={dataConfig[key].label}
+              isAnimationActive={false}
+            />
+          ))}
+
+          {Object.keys(dataConfig).length > 1 && (
+            <ChartLegend iconType="star" content={<ChartLegendContent />} />
+          )}
+        </RadarChartPrimitive>
+      </ChartContainer>
+    </DataTestIdWrapper>
   )
 }
 
-type RadarChartGeneric = <K extends ChartConfig>(
-  props: RadarChartProps<K> & WithDataTestIdProps
+export const RadarChart = fixedForwardRef(_RadarChart) as <
+  K extends ChartConfig,
+>(
+  props: RadarChartProps<K> &
+    WithDataTestIdProps & { ref?: ForwardedRef<HTMLDivElement> }
 ) => ReactElement | null
-
-const RadarChartWrapped = withDataTestId(fixedForwardRef(_RadarChart))
-
-// `as unknown as RadarChartGeneric`: withDataTestId() returns WithDataTestIdReturnType<T>,
-// which cannot express generic call signatures. The double cast re-adds the <K>
-// type parameter that TypeScript erases during HOC wrapping. See WithDataTestIdPropsOf.
-export const RadarChart = RadarChartWrapped as unknown as RadarChartGeneric

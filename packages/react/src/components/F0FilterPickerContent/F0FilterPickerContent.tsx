@@ -6,7 +6,7 @@ import { type ReactElement, useEffect, useMemo, useState } from "react"
  * Public implementation of the FilterPickerInternal component.
  * F0FilterPickerContent component.
  */
-import { withDataTestId, type WithDataTestIdProps } from "@/lib/data-testid"
+import { DataTestIdWrapper, type WithDataTestIdProps } from "@/lib/data-testid"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
@@ -78,7 +78,8 @@ function _F0FilterPickerContent<Filters extends FiltersDefinition>({
   className,
   showApplyButton = true,
   applyButtonLabel,
-}: F0FilterPickerContentProps<Filters>) {
+  dataTestId,
+}: F0FilterPickerContentProps<Filters> & WithDataTestIdProps) {
   const i18n = useI18n()
 
   const firstFilterKey = (Object.keys(filters)[0] as keyof Filters) ?? null
@@ -150,37 +151,34 @@ function _F0FilterPickerContent<Filters extends FiltersDefinition>({
   }
 
   return (
-    <div
-      className={cn(
-        "overflow-hidden rounded-xl border border-solid border-f1-border-secondary bg-f1-background",
-        className
-      )}
-      style={{ maxWidth: width }}
-    >
-      <FilterPickerInternal
-        filters={filters}
-        tempFilters={localFiltersValue}
-        selectedFilterKey={selectedFilterKey}
-        onFilterSelect={setSelectedFilterKey}
-        onFilterChange={updateFilterValue}
-        onApply={handleApplyFilters}
-        height={formHeight}
-        showApplyButton={showApplyButton}
-        applyButtonLabel={applyButtonLabel}
-      />
-    </div>
+    <DataTestIdWrapper dataTestId={dataTestId}>
+      <div
+        className={cn(
+          "overflow-hidden rounded-xl border border-solid border-f1-border-secondary bg-f1-background",
+          className
+        )}
+        style={{ maxWidth: width }}
+      >
+        <FilterPickerInternal
+          filters={filters}
+          tempFilters={localFiltersValue}
+          selectedFilterKey={selectedFilterKey}
+          onFilterSelect={setSelectedFilterKey}
+          onFilterChange={updateFilterValue}
+          onApply={handleApplyFilters}
+          height={formHeight}
+          showApplyButton={showApplyButton}
+          applyButtonLabel={applyButtonLabel}
+        />
+      </div>
+    </DataTestIdWrapper>
   )
 }
 
 _F0FilterPickerContent.displayName = "F0FilterPickerContent"
 
-type F0FilterPickerContentGeneric = <Filters extends FiltersDefinition>(
+export const F0FilterPickerContent = _F0FilterPickerContent as <
+  Filters extends FiltersDefinition,
+>(
   props: F0FilterPickerContentProps<Filters> & WithDataTestIdProps
 ) => ReactElement | null
-
-// `as unknown as F0FilterPickerContentGeneric`: withDataTestId() returns WithDataTestIdReturnType<T>,
-// which cannot express generic call signatures. The double cast re-adds the <Filters>
-// type parameter that TypeScript erases during HOC wrapping. See WithDataTestIdPropsOf.
-export const F0FilterPickerContent = withDataTestId(
-  _F0FilterPickerContent
-) as unknown as F0FilterPickerContentGeneric
