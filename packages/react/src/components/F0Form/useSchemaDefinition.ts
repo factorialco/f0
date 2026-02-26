@@ -59,6 +59,7 @@ function configToF0Field(
     helpText: config.helpText,
     disabled: config.disabled,
     resetOnDisable: config.resetOnDisable,
+    alert: config.alert,
     validation: schema,
   }
 
@@ -139,6 +140,8 @@ function configToF0Field(
       return {
         ...baseProps,
         type: "checkbox",
+        moreInfoLink:
+          "moreInfoLink" in config ? config.moreInfoLink : undefined,
         renderIf: config.renderIf,
       } as F0Field
 
@@ -146,6 +149,8 @@ function configToF0Field(
       return {
         ...baseProps,
         type: "switch",
+        moreInfoLink:
+          "moreInfoLink" in config ? config.moreInfoLink : undefined,
         renderIf: config.renderIf,
       } as F0Field
 

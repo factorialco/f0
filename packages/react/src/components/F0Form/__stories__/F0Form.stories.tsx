@@ -267,6 +267,24 @@ export const WithSectionsSidepanel: Story = {
         section: "visibility",
         fieldType: "switch",
       }),
+      linkWorkflows: f0FormField(z.boolean(), {
+        label: "Link this course with Workflows",
+        helpText:
+          "Use our Workflows solution to automate actions such as generating course certificates or sending questionnaires.",
+        section: "visibility",
+        fieldType: "switch",
+        moreInfoLink: {
+          href: "https://help.factorial.co/workflows",
+        },
+        alert: ({ fieldValue }) =>
+          fieldValue
+            ? {
+                title: "Workflows integration active",
+                description:
+                  "Certificates and questionnaires will be generated automatically when this course is completed.",
+              }
+            : null,
+      }),
       anonymousAnswers: f0FormField(z.boolean(), {
         label: "Anonymous answers",
         section: "visibility",
@@ -335,6 +353,7 @@ export const WithSectionsSidepanel: Story = {
           endsAt: undefined,
           recurrence: "none",
           managerVisibility: false,
+          linkWorkflows: false,
           anonymousAnswers: false,
           editors: "none",
         }}
@@ -531,6 +550,19 @@ export const AllFieldTypes: Story = {
       numberField: f0FormField(z.number().min(0).max(100), {
         label: "Number Field",
         step: 1,
+        alert: ({ fieldValue }) =>
+          fieldValue === 0
+            ? {
+                title: "No competencies assigned",
+                description:
+                  "Competencies help assess employee growth. Consider adding at least one.",
+                variant: "warning" as const,
+                link: {
+                  label: "Learn about competencies",
+                  href: "https://help.factorial.co/competencies",
+                },
+              }
+            : null,
       }),
       textareaField: f0FormField(z.string().max(500), {
         label: "Textarea Field",
@@ -565,6 +597,10 @@ export const AllFieldTypes: Story = {
         label: "Checkbox Field",
         fieldType: "checkbox",
         helpText: "Check this box to agree",
+        moreInfoLink: {
+          href: "https://help.factorial.co/terms",
+          label: "Read the terms",
+        },
       }),
       requiredCheckboxField: f0FormField(z.literal(true), {
         label: "Required Checkbox Field",
@@ -575,6 +611,19 @@ export const AllFieldTypes: Story = {
         label: "Switch Field",
         fieldType: "switch",
         helpText: "Toggle this switch",
+        moreInfoLink: {
+          href: "https://help.factorial.co/example",
+          label: "Learn more",
+        },
+        alert: ({ fieldValue }) =>
+          fieldValue
+            ? {
+                title: "Feature enabled",
+                description:
+                  "Enabling this feature will send notifications to all team members.",
+                variant: "info" as const,
+              }
+            : null,
       }),
       requiredSwitchField: f0FormField(z.literal(true), {
         label: "Required Switch Field",

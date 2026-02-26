@@ -10,7 +10,15 @@ import type {
 } from "./fields/types"
 
 // Re-export F0 schema types
-export type { F0FieldConfig, F0FieldType, F0ZodType } from "./f0Schema"
+export type {
+  F0FieldConfig,
+  F0FieldType,
+  F0MoreInfoLink,
+  F0FieldAlertProps,
+  F0FieldAlertFunction,
+  F0FieldAlert,
+  F0ZodType,
+} from "./f0Schema"
 export {
   f0FormField,
   getF0Config,

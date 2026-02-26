@@ -1,5 +1,7 @@
 import { ZodTypeAny } from "zod"
 
+import type { F0FieldAlert } from "../f0Schema"
+
 // ============================================================================
 // Base RenderIf Condition Types
 // ============================================================================
@@ -114,6 +116,8 @@ export interface F0BaseField {
    * @default false
    */
   resetOnDisable?: boolean
+  /** Alert displayed below the field (static props or conditional callback) */
+  alert?: F0FieldAlert
 }
 
 /**

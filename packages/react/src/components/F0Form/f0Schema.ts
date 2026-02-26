@@ -1,5 +1,8 @@
 import { z, ZodTypeAny } from "zod"
 
+import type { AlertVariant } from "@/components/F0Alert/types"
+import type { IconType } from "@/components/F0Icon"
+
 import type {
   F0BaseFieldDisabledProp,
   F0BaseFieldRenderIfProp,
@@ -83,6 +86,52 @@ export type F0FieldType =
  * Base configuration shared across all field types.
  * Position is automatically derived from field declaration order in the schema.
  */
+/**
+ * Alert props returned by the field alert callback.
+ * Same as F0AlertProps but with `variant` defaulting to "info".
+ */
+export interface F0FieldAlertProps {
+  title: string
+  description: string
+  action?: {
+    label: string
+    disabled?: boolean
+    onClick: () => void
+  }
+  link?: {
+    label: string
+    href: string
+  }
+  icon?: IconType
+  variant?: AlertVariant
+}
+
+/**
+ * Callback that evaluates whether to show an alert below the field.
+ * Receives the field's current value and all form values.
+ * Return alert props to show, or null/undefined to hide.
+ */
+export type F0FieldAlertFunction = (context: {
+  fieldValue: unknown
+  values: Record<string, unknown>
+}) => F0FieldAlertProps | null | undefined
+
+/**
+ * Alert configuration for a field.
+ * Can be static props (always shown) or a callback for conditional display.
+ */
+export type F0FieldAlert = F0FieldAlertProps | F0FieldAlertFunction
+
+/**
+ * Configuration for a "more info" link displayed below the help text.
+ */
+export interface F0MoreInfoLink {
+  /** URL the link points to */
+  href: string
+  /** Link label (defaults to "More information") */
+  label?: string
+}
+
 export interface F0BaseConfig {
   /** Label displayed above the field */
   label: string
@@ -122,6 +171,20 @@ export interface F0BaseConfig {
    * renderIf: ({ values }) => values.status === 'active'
    */
   renderIf?: F0BaseFieldRenderIfProp
+  /**
+   * Alert displayed below the field.
+   * Can be static props (always shown) or a callback for conditional display.
+   * @example
+   * // Static alert (always visible)
+   * alert: { title: "Note", description: "This field is important" }
+   *
+   * // Conditional alert based on field value
+   * alert: ({ fieldValue }) =>
+   *   fieldValue === 0
+   *     ? { title: "Heads up", description: "Value is zero", variant: "warning" }
+   *     : null
+   */
+  alert?: F0FieldAlert
 }
 
 // Re-export field-specific config types

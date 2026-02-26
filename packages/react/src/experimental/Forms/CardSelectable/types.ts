@@ -22,6 +22,8 @@ export interface CardSelectableItem<T extends CardSelectableValue> {
   disabled?: boolean
   /** Whether this item is required (shows asterisk indicator) */
   required?: boolean
+  /** Link displayed below the description, typically pointing to external documentation */
+  moreInfoLink?: { href: string; label?: string }
 }
 
 export interface CardSelectableSingleProps<T extends CardSelectableValue> {

@@ -2,12 +2,14 @@ import { useEffect, useMemo, useRef } from "react"
 import { useFormContext } from "react-hook-form"
 import { ZodTypeAny } from "zod"
 
+import { F0Alert } from "@/components/F0Alert"
 import {
   CardSelectableContainer,
   type CardSelectableItem,
 } from "@/experimental/Forms/CardSelectable"
 
 import { isZodType, unwrapZodSchema } from "../f0Schema"
+import type { F0FieldAlertProps } from "../f0Schema"
 import type { F0SwitchField } from "../fields/switch/types"
 import { evaluateDisabled, evaluateRenderIf } from "../fields/utils"
 
@@ -96,6 +98,7 @@ export function SwitchGroupRenderer({ fields }: SwitchGroupRendererProps) {
         description: field.helpText,
         disabled: disabledStates[field.id] ?? false,
         required: !!(field.validation && isMustBeTrue(field.validation)),
+        moreInfoLink: field.moreInfoLink,
       })),
     [visibleFields, disabledStates]
   )
@@ -124,14 +127,34 @@ export function SwitchGroupRenderer({ fields }: SwitchGroupRendererProps) {
     }
   }
 
+  const alerts = useMemo(() => {
+    const result: { fieldId: string; props: F0FieldAlertProps }[] = []
+    for (const field of visibleFields) {
+      if (!field.alert) continue
+      const alertProps =
+        typeof field.alert === "function"
+          ? field.alert({ fieldValue: values[field.id], values })
+          : field.alert
+      if (alertProps) {
+        result.push({ fieldId: field.id, props: alertProps })
+      }
+    }
+    return result
+  }, [visibleFields, values])
+
   return (
-    <CardSelectableContainer
-      multiple
-      isToggle
-      grouped
-      items={items}
-      value={selectedIds}
-      onChange={handleChange}
-    />
+    <div className="flex flex-col gap-2">
+      <CardSelectableContainer
+        multiple
+        isToggle
+        grouped
+        items={items}
+        value={selectedIds}
+        onChange={handleChange}
+      />
+      {alerts.map(({ fieldId, props }) => (
+        <F0Alert key={fieldId} {...props} variant={props.variant ?? "info"} />
+      ))}
+    </div>
   )
 }

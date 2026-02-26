@@ -6,6 +6,8 @@ import {
   useFormContext,
 } from "react-hook-form"
 
+import { F0Alert } from "@/components/F0Alert"
+import { F0Link } from "@/components/F0Link"
 import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 import {
   FormControl,
@@ -298,6 +300,26 @@ export function FieldRenderer({ field, sectionId }: FieldRendererProps) {
           {field.helpText && (
             <FormDescription>{field.helpText}</FormDescription>
           )}
+          {"moreInfoLink" in field && field.moreInfoLink && (
+            <F0Link
+              href={field.moreInfoLink.href}
+              target="_blank"
+              variant="link"
+            >
+              {field.moreInfoLink.label ?? forms.moreInformation}
+            </F0Link>
+          )}
+          {(() => {
+            if (!field.alert) return null
+            const alertProps =
+              typeof field.alert === "function"
+                ? field.alert({ fieldValue: formField.value, values })
+                : field.alert
+            if (!alertProps) return null
+            return (
+              <F0Alert {...alertProps} variant={alertProps.variant ?? "info"} />
+            )
+          })()}
           <FormMessage
             fallback={
               isRequired
