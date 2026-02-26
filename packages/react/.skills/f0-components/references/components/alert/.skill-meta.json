@@ -1,9 +1,0 @@
-{
-  "generatedAt": "2026-02-19T19:33:26.764Z",
-  "toolVersion": "0.1.0",
-  "provider": "google",
-  "model": "gemini-3-flash-preview",
-  "fileHashes": {
-    "/works/factorial/f0/packages/react/src/components/F0Alert/F0Alert.tsx": "8e9f1ecf58aadf5f78b0cfdb03577cac40dac4f92dbe8e62fbf9a5b5a8a0cdad"
-  }
-}

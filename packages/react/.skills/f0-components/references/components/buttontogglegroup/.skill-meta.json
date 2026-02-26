@@ -1,9 +1,0 @@
-{
-  "generatedAt": "2026-02-19T19:34:22.160Z",
-  "toolVersion": "0.1.0",
-  "provider": "google",
-  "model": "gemini-3-flash-preview",
-  "fileHashes": {
-    "/works/factorial/f0/packages/react/src/components/F0ButtonToggleGroup/index.ts": "79c29f35b3c9d315ab551081f8c605b4ffe4680d655420cf8abc2354075bced7"
-  }
-}

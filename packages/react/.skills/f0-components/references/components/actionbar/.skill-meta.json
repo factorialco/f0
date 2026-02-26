@@ -1,9 +1,0 @@
-{
-  "generatedAt": "2026-02-19T19:33:11.322Z",
-  "toolVersion": "0.1.0",
-  "provider": "google",
-  "model": "gemini-3-flash-preview",
-  "fileHashes": {
-    "/works/factorial/f0/packages/react/src/experimental/OneDataCollection/components/ActionBar/index.tsx": "f3e43ac3f8b935e9acd71606e57ac4e8ff31cb71a6dc292d549c7e6c1a577889"
-  }
-}

@@ -1,9 +1,0 @@
-{
-  "generatedAt": "2026-02-19T18:46:08.301Z",
-  "toolVersion": "0.1.0",
-  "provider": "google",
-  "model": "gemini-3-flash-preview",
-  "fileHashes": {
-    "https://ds.factorial.dev/?path=/docs/foundations-spacing--documentation": "e9b7908d782d8bbca6a6f4e35fa1398053df306f844a075428ad961ae2787434"
-  }
-}
