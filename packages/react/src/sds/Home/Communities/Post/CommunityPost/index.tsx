@@ -232,7 +232,9 @@ export const BaseCommunityPost = ({
             >
               {title}
             </p>
-            {description && <PostDescription content={description} collapsed />}
+            {description && (
+              <PostDescription content={description} collapsed={collapsed} />
+            )}
           </div>
         </div>
         {mediaUrl && !event && (
