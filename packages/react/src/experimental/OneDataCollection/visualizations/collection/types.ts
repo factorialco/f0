@@ -76,7 +76,7 @@ export type Visualization<
       /** Configuration options for table visualization */
       options: TableVisualizationOptions<R, Filters, Sortings, Summaries>
     } & VisualizationFilterOverrides<Filters>)
-  | {
+  | ({
       /** Editable table-based visualization type */
       type: "editableTable"
       /** Configuration options for editable table visualization */
@@ -86,7 +86,7 @@ export type Visualization<
         Sortings,
         Summaries
       >
-    }
+    } & VisualizationFilterOverrides<Filters>)
   | ({
       /** List-based visualization type */
       type: "list"
