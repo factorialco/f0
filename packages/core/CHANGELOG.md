@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.46.0](https://github.com/factorialco/f0/compare/f0-core-v1.45.0...f0-core-v1.46.0) (2026-02-26)
+
+
+### Features
+
+* add QuestionCircle icon SVG ([8027e9d](https://github.com/factorialco/f0/commit/8027e9d7a00b0006fb12090699e86332ab6f2b70))
+
 ## [1.45.0](https://github.com/factorialco/f0/compare/f0-core-v1.44.0...f0-core-v1.45.0) (2026-02-19)
 
 
