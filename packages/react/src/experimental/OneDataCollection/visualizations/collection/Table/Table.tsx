@@ -442,7 +442,7 @@ export const TableCollection = <
                 ))}
                 {showItemActions && (
                   <>
-                    <th></th>
+                    <th className="hidden md:table-cell"></th>
                     <TableHead
                       key="actions"
                       width={68}
