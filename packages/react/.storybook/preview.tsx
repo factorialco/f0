@@ -155,6 +155,7 @@ const preview: Preview = {
         const topLevelOrder = [
           "introduction",
           "how-to-contribute",
+          "ai-configuration",
           "foundations",
           "library",
           "data-testid",
