@@ -25,6 +25,12 @@ export interface F0WizardFormStep {
   sectionIds: string[]
   nextLabel?: string
   previousLabel?: string
+  /**
+   * Custom function to determine if this step is considered completed.
+   * Receives the step's current data. When provided, takes precedence
+   * over the default "all required fields filled" check.
+   */
+  isCompleted?: (arg: { data: Record<string, unknown> }) => boolean
 }
 
 /**
@@ -100,7 +106,6 @@ interface F0WizardFormBaseProps {
   defaultStepIndex?: number
   nextLabel?: string
   previousLabel?: string
-  submitLabel?: string
   onStepChanged?: (stepIndex: number) => void
   steps?: F0WizardFormStep[]
   /**
@@ -116,6 +121,14 @@ interface F0WizardFormBaseProps {
    * @default false
    */
   autoCloseOnLastStepSubmit?: boolean
+  /**
+   * When true, the wizard automatically skips to the first non-completed step
+   * on open. A step is completed when all required fields have values, or when
+   * the step's custom `isCompleted` function returns true.
+   * Only applies on initial render; users can still navigate back freely.
+   * @default false
+   */
+  autoSkipCompletedSteps?: boolean
 }
 
 export interface F0WizardFormSingleSchemaProps<

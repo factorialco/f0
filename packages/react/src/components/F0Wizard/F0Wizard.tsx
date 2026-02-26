@@ -33,10 +33,20 @@ export const F0Wizard: FC<F0WizardProps> = ({
   onStepChanged,
   allowStepSkipping = false,
   autoCloseOnLastStepSubmit = false,
+  autoSkipCompletedSteps = false,
 }) => {
+  const effectiveDefaultStepIndex = useMemo(() => {
+    if (defaultStepIndex !== undefined) return defaultStepIndex
+    if (!autoSkipCompletedSteps) return 0
+    const firstIncomplete = steps.findIndex(
+      (step) => step.isCompleted?.() !== true
+    )
+    return firstIncomplete === -1 ? steps.length - 1 : firstIncomplete
+  }, [defaultStepIndex, autoSkipCompletedSteps, steps])
+
   const navigation = useWizardNavigation({
     steps,
-    defaultStepIndex,
+    defaultStepIndex: effectiveDefaultStepIndex,
     onSubmit,
     onStepChanged,
     allowStepSkipping,

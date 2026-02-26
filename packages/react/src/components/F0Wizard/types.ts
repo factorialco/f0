@@ -41,4 +41,11 @@ export interface F0WizardProps {
    * @default false
    */
   autoCloseOnLastStepSubmit?: boolean
+  /**
+   * When true, the wizard automatically skips to the first non-completed step
+   * on open, based on each step's `isCompleted` function.
+   * Only applies on initial render; users can still navigate back freely.
+   * @default false
+   */
+  autoSkipCompletedSteps?: boolean
 }

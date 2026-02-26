@@ -641,4 +641,59 @@ describe("F0Wizard", () => {
 
     expect(onClose).not.toHaveBeenCalled()
   })
+
+  // ---------------------------------------------------------------------------
+  // autoSkipCompletedSteps
+  // ---------------------------------------------------------------------------
+
+  it("skips to the first non-completed step on open when autoSkipCompletedSteps is enabled", () => {
+    render(
+      <F0Wizard
+        isOpen={true}
+        steps={[
+          { title: "Step 1", isCompleted: () => true },
+          { title: "Step 2", isCompleted: () => true },
+          { title: "Step 3" },
+        ]}
+        autoSkipCompletedSteps
+      >
+        {({ currentStep }) => <div>Step {currentStep + 1} content</div>}
+      </F0Wizard>
+    )
+
+    expect(screen.getByText("Step 3 content")).toBeInTheDocument()
+  })
+
+  it("stays on last step when all steps are completed with autoSkipCompletedSteps", () => {
+    render(
+      <F0Wizard
+        isOpen={true}
+        steps={[
+          { title: "Step 1", isCompleted: () => true },
+          { title: "Step 2", isCompleted: () => true },
+        ]}
+        autoSkipCompletedSteps
+      >
+        {({ currentStep }) => <div>Step {currentStep + 1} content</div>}
+      </F0Wizard>
+    )
+
+    expect(screen.getByText("Step 2 content")).toBeInTheDocument()
+  })
+
+  it("does not skip steps when autoSkipCompletedSteps is disabled", () => {
+    render(
+      <F0Wizard
+        isOpen={true}
+        steps={[
+          { title: "Step 1", isCompleted: () => true },
+          { title: "Step 2" },
+        ]}
+      >
+        {({ currentStep }) => <div>Step {currentStep + 1} content</div>}
+      </F0Wizard>
+    )
+
+    expect(screen.getByText("Step 1 content")).toBeInTheDocument()
+  })
 })

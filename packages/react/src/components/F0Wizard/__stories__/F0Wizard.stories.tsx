@@ -227,3 +227,15 @@ export const ManySteps: Story = {
     })),
   },
 }
+
+export const AutoSkipCompletedSteps: Story = {
+  args: {
+    ...Default.args,
+    autoSkipCompletedSteps: true,
+    steps: [
+      { title: "Step 1 (completed)", isCompleted: () => true },
+      { title: "Step 2 (completed)", isCompleted: () => true },
+      { title: "Step 3" },
+    ],
+  },
+}

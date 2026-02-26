@@ -54,6 +54,7 @@ function PerSectionWrapper({
   allowStepSkipping,
   autoCloseOnLastStepSubmit,
   linkAfterLastStepSubmit,
+  autoSkipCompletedSteps,
   onClose,
 }: {
   definition: F0FormDefinitionPerSection<typeof perSectionSchema>
@@ -63,6 +64,7 @@ function PerSectionWrapper({
   linkAfterLastStepSubmit?: (arg: {
     fullData: Record<string, unknown>
   }) => string
+  autoSkipCompletedSteps?: boolean
   onClose?: () => void
 }) {
   return (
@@ -75,6 +77,7 @@ function PerSectionWrapper({
       allowStepSkipping={allowStepSkipping}
       autoCloseOnLastStepSubmit={autoCloseOnLastStepSubmit}
       linkAfterLastStepSubmit={linkAfterLastStepSubmit}
+      autoSkipCompletedSteps={autoSkipCompletedSteps}
     />
   )
 }
@@ -113,10 +116,14 @@ function makeSingleSchemaDefinition(
 
 function SingleSchemaWrapper({
   definition,
+  steps,
   allowStepSkipping,
+  autoSkipCompletedSteps,
 }: {
   definition: F0FormDefinitionSingleSchema<typeof singleSchema>
+  steps?: F0WizardFormStep[]
   allowStepSkipping?: boolean
+  autoSkipCompletedSteps?: boolean
 }) {
   return (
     <F0WizardForm
@@ -124,7 +131,9 @@ function SingleSchemaWrapper({
       isOpen={true}
       onClose={() => {}}
       title="Test wizard"
+      steps={steps}
       allowStepSkipping={allowStepSkipping}
+      autoSkipCompletedSteps={autoSkipCompletedSteps}
     />
   )
 }
@@ -708,6 +717,78 @@ describe("F0WizardForm — Per-section mode", () => {
 
     window.location.href = originalLocation
   })
+
+  // ---------------------------------------------------------------------------
+  // autoSkipCompletedSteps
+  // ---------------------------------------------------------------------------
+
+  it("skips to the first incomplete step on open when autoSkipCompletedSteps is enabled", () => {
+    const definition = makePerSectionDefinition({
+      defaultValues: {
+        general: { email: "test@test.com" },
+        work: {},
+      },
+    })
+
+    render(<PerSectionWrapper definition={definition} autoSkipCompletedSteps />)
+
+    expect(screen.getByLabelText("Legal entity")).toBeInTheDocument()
+    expect(screen.queryByLabelText("Email")).not.toBeInTheDocument()
+  })
+
+  it("does not skip steps when autoSkipCompletedSteps is disabled", () => {
+    const definition = makePerSectionDefinition({
+      defaultValues: {
+        general: { email: "test@test.com" },
+        work: {},
+      },
+    })
+
+    render(<PerSectionWrapper definition={definition} />)
+
+    expect(screen.getByLabelText("Email")).toBeInTheDocument()
+    expect(screen.queryByLabelText("Legal entity")).not.toBeInTheDocument()
+  })
+
+  it("stays on last step when all steps are completed", () => {
+    const definition = makePerSectionDefinition({
+      defaultValues: {
+        general: { email: "test@test.com" },
+        work: { legalEntity: "Factorial" },
+      },
+    })
+
+    render(<PerSectionWrapper definition={definition} autoSkipCompletedSteps />)
+
+    expect(screen.getByLabelText("Legal entity")).toBeInTheDocument()
+  })
+
+  it("respects custom isCompleted function on steps", () => {
+    const definition = makePerSectionDefinition({
+      defaultValues: {
+        general: { email: "test@test.com" },
+        work: {},
+      },
+    })
+
+    render(
+      <PerSectionWrapper
+        definition={definition}
+        autoSkipCompletedSteps
+        steps={[
+          {
+            title: "General",
+            sectionIds: ["general"],
+            isCompleted: () => false,
+          },
+          { title: "Work", sectionIds: ["work"] },
+        ]}
+      />
+    )
+
+    expect(screen.getByLabelText("Email")).toBeInTheDocument()
+    expect(screen.queryByLabelText("Legal entity")).not.toBeInTheDocument()
+  })
 })
 
 // =============================================================================
@@ -818,5 +899,56 @@ describe("F0WizardForm — Single-schema mode", () => {
     })
 
     expect(screen.getByLabelText("Email")).toHaveValue("preserved@test.com")
+  })
+
+  // ---------------------------------------------------------------------------
+  // autoSkipCompletedSteps
+  // ---------------------------------------------------------------------------
+
+  it("skips to the first incomplete step on open when autoSkipCompletedSteps is enabled", () => {
+    const definition = makeSingleSchemaDefinition({
+      defaultValues: { email: "test@test.com" },
+    })
+
+    render(
+      <SingleSchemaWrapper definition={definition} autoSkipCompletedSteps />
+    )
+
+    expect(screen.getByLabelText("Legal entity")).toBeInTheDocument()
+    expect(screen.queryByLabelText("Email")).not.toBeInTheDocument()
+  })
+
+  it("does not skip steps when autoSkipCompletedSteps is disabled", () => {
+    const definition = makeSingleSchemaDefinition({
+      defaultValues: { email: "test@test.com" },
+    })
+
+    render(<SingleSchemaWrapper definition={definition} />)
+
+    expect(screen.getByLabelText("Email")).toBeInTheDocument()
+  })
+
+  it("respects custom isCompleted on steps in single-schema mode", () => {
+    const definition = makeSingleSchemaDefinition({
+      defaultValues: { email: "test@test.com" },
+    })
+
+    render(
+      <SingleSchemaWrapper
+        definition={definition}
+        autoSkipCompletedSteps
+        steps={[
+          {
+            title: "General",
+            sectionIds: ["general"],
+            isCompleted: () => false,
+          },
+          { title: "Work", sectionIds: ["work"] },
+        ]}
+      />
+    )
+
+    expect(screen.getByLabelText("Email")).toBeInTheDocument()
+    expect(screen.queryByLabelText("Legal entity")).not.toBeInTheDocument()
   })
 })

@@ -82,6 +82,22 @@ function buildSectionSubSchema<T extends ZodRawShape>(
   return z.object(subShape)
 }
 
+function isStepFilled(
+  schema: F0FormSchema,
+  data: Record<string, unknown> | undefined,
+  customIsCompleted?: (arg: { data: Record<string, unknown> }) => boolean
+): boolean {
+  const values = data ?? {}
+  if (customIsCompleted) return customIsCompleted({ data: values })
+  const objectSchema = unwrapToZodObject(schema)
+  const shape = objectSchema.shape as Record<string, ZodTypeAny>
+  return Object.entries(shape).every(([key, fieldSchema]) => {
+    if (fieldSchema.isOptional()) return true
+    const value = values[key]
+    return value !== undefined && value !== null && value !== ""
+  })
+}
+
 const SUCCESS_TIMER_MS = 3000
 
 function useWizardActionBar() {
@@ -143,7 +159,8 @@ function deriveWizardSteps(
   customSteps: F0WizardFormStep[] | undefined,
   isStepAllDisabled: (sectionIds: string[]) => boolean,
   onNextForStep: (stepIndex: number) => () => Promise<void>,
-  hasErrorsForStep?: (stepIndex: number) => boolean
+  hasErrorsForStep?: (stepIndex: number) => boolean,
+  isStepDataFilled?: (stepIndex: number) => boolean
 ): F0WizardStep[] {
   const stepsConfig: F0WizardFormStep[] =
     customSteps ??
@@ -152,16 +169,19 @@ function deriveWizardSteps(
       sectionIds: [id],
     }))
 
-  return stepsConfig.map((stepConfig, index) => ({
-    title: stepConfig.title,
-    nextLabel: stepConfig.nextLabel,
-    previousLabel: stepConfig.previousLabel,
-    isCompleted: isStepAllDisabled(stepConfig.sectionIds)
-      ? () => true
-      : undefined,
-    hasErrors: hasErrorsForStep ? () => hasErrorsForStep(index) : undefined,
-    onNext: onNextForStep(index),
-  }))
+  return stepsConfig.map((stepConfig, index) => {
+    const allDisabled = isStepAllDisabled(stepConfig.sectionIds)
+    const dataFilled = isStepDataFilled?.(index) ?? false
+
+    return {
+      title: stepConfig.title,
+      nextLabel: stepConfig.nextLabel,
+      previousLabel: stepConfig.previousLabel,
+      isCompleted: allDisabled || dataFilled ? () => true : undefined,
+      hasErrors: hasErrorsForStep ? () => hasErrorsForStep(index) : undefined,
+      onNext: onNextForStep(index),
+    }
+  })
 }
 
 function getSectionIdsForStep(
@@ -190,11 +210,11 @@ function F0WizardFormPerSection<T extends F0PerSectionSchema>({
   defaultStepIndex,
   nextLabel,
   previousLabel,
-  submitLabel,
   onStepChanged,
   allowStepSkipping,
   autoCloseOnLastStepSubmit,
   linkAfterLastStepSubmit,
+  autoSkipCompletedSteps = false,
 }: F0WizardFormPerSectionProps<T>) {
   const {
     name,
@@ -205,6 +225,8 @@ function F0WizardFormPerSection<T extends F0PerSectionSchema>({
     submitConfig,
     errorTriggerMode = "on-blur",
   } = formDefinition as F0FormDefinitionPerSection<T>
+
+  const submitLabel = submitConfig?.label
 
   const sectionIds = useMemo(() => Object.keys(schema), [schema])
 
@@ -287,6 +309,42 @@ function F0WizardFormPerSection<T extends F0PerSectionSchema>({
     [sectionIds, effectiveSteps]
   )
 
+  const stepsConfig: F0WizardFormStep[] = useMemo(
+    () =>
+      effectiveSteps ??
+      sectionIds.map((id) => ({
+        title: sections?.[id]?.title ?? id,
+        sectionIds: [id],
+      })),
+    [effectiveSteps, sectionIds, sections]
+  )
+
+  const isStepDataFilled = useCallback(
+    (stepIndex: number): boolean => {
+      if (!autoSkipCompletedSteps) return false
+      const stepConfig = stepsConfig[stepIndex]
+      if (!stepConfig) return false
+      return stepConfig.sectionIds.every((id) => {
+        const sectionSchema = schema[id]
+        if (!sectionSchema) return false
+        const data = (defaultValues?.[id as keyof typeof defaultValues] ??
+          fullDataRef.current[id]) as Record<string, unknown> | undefined
+        return isStepFilled(sectionSchema, data, stepConfig.isCompleted)
+      })
+    },
+    [autoSkipCompletedSteps, stepsConfig, schema, defaultValues]
+  )
+
+  const computedDefaultStepIndex = useMemo(() => {
+    if (defaultStepIndex !== undefined) return defaultStepIndex
+    if (!autoSkipCompletedSteps) return undefined
+    const firstIncomplete = stepsConfig.findIndex(
+      (_, i) => !isStepDataFilled(i)
+    )
+    if (firstIncomplete === -1) return stepsConfig.length - 1
+    return firstIncomplete
+  }, [defaultStepIndex, autoSkipCompletedSteps, stepsConfig, isStepDataFilled])
+
   const wizardSteps = useMemo(
     () =>
       deriveWizardSteps(
@@ -295,7 +353,8 @@ function F0WizardFormPerSection<T extends F0PerSectionSchema>({
         effectiveSteps,
         isStepAllDisabled,
         onNextForStep,
-        hasErrorsForStep
+        hasErrorsForStep,
+        autoSkipCompletedSteps ? isStepDataFilled : undefined
       ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
@@ -306,6 +365,8 @@ function F0WizardFormPerSection<T extends F0PerSectionSchema>({
       onNextForStep,
       hasErrorsForStep,
       sectionErrorState,
+      autoSkipCompletedSteps,
+      isStepDataFilled,
     ]
   )
 
@@ -377,7 +438,7 @@ function F0WizardFormPerSection<T extends F0PerSectionSchema>({
       onClose={onClose}
       title={title}
       width={width}
-      defaultStepIndex={defaultStepIndex}
+      defaultStepIndex={computedDefaultStepIndex}
       nextLabel={nextLabel}
       previousLabel={previousLabel}
       submitLabel={submitLabel}
@@ -507,11 +568,11 @@ function F0WizardFormSingleSchema<TSchema extends F0FormSchema>({
   defaultStepIndex,
   nextLabel,
   previousLabel,
-  submitLabel,
   onStepChanged,
   allowStepSkipping,
   autoCloseOnLastStepSubmit,
   linkAfterLastStepSubmit,
+  autoSkipCompletedSteps = false,
 }: F0WizardFormSingleSchemaProps<TSchema>) {
   const {
     name,
@@ -519,8 +580,11 @@ function F0WizardFormSingleSchema<TSchema extends F0FormSchema>({
     sections,
     defaultValues,
     onSubmit,
+    submitConfig,
     errorTriggerMode = "on-blur",
   } = formDefinition as F0FormDefinitionSingleSchema<TSchema>
+
+  const submitLabel = submitConfig?.label
 
   const objectSchema = useMemo(() => unwrapToZodObject(schema), [schema])
 
@@ -557,6 +621,41 @@ function F0WizardFormSingleSchema<TSchema extends F0FormSchema>({
     [form.hasErrors]
   )
 
+  const stepsConfig: F0WizardFormStep[] = useMemo(
+    () =>
+      customSteps ??
+      sectionIds.map((id) => ({
+        title: sections?.[id]?.title ?? id,
+        sectionIds: [id],
+      })),
+    [customSteps, sectionIds, sections]
+  )
+
+  const isStepDataFilled = useCallback(
+    (stepIndex: number): boolean => {
+      if (!autoSkipCompletedSteps) return false
+      const stepConfig = stepsConfig[stepIndex]
+      if (!stepConfig) return false
+      const subSchema = buildSectionSubSchema(
+        objectSchema,
+        stepConfig.sectionIds
+      )
+      const data = defaultValues as Record<string, unknown> | undefined
+      return isStepFilled(subSchema, data, stepConfig.isCompleted)
+    },
+    [autoSkipCompletedSteps, stepsConfig, objectSchema, defaultValues]
+  )
+
+  const computedDefaultStepIndex = useMemo(() => {
+    if (defaultStepIndex !== undefined) return defaultStepIndex
+    if (!autoSkipCompletedSteps) return undefined
+    const firstIncomplete = stepsConfig.findIndex(
+      (_, i) => !isStepDataFilled(i)
+    )
+    if (firstIncomplete === -1) return stepsConfig.length - 1
+    return firstIncomplete
+  }, [defaultStepIndex, autoSkipCompletedSteps, stepsConfig, isStepDataFilled])
+
   const wizardSteps = useMemo(
     () =>
       deriveWizardSteps(
@@ -565,7 +664,8 @@ function F0WizardFormSingleSchema<TSchema extends F0FormSchema>({
         customSteps,
         isStepAllDisabled,
         onNextForStep,
-        hasErrorsForStep
+        hasErrorsForStep,
+        autoSkipCompletedSteps ? isStepDataFilled : undefined
       ),
     [
       sectionIds,
@@ -574,6 +674,8 @@ function F0WizardFormSingleSchema<TSchema extends F0FormSchema>({
       isStepAllDisabled,
       onNextForStep,
       hasErrorsForStep,
+      autoSkipCompletedSteps,
+      isStepDataFilled,
     ]
   )
 
@@ -630,7 +732,7 @@ function F0WizardFormSingleSchema<TSchema extends F0FormSchema>({
       onClose={onClose}
       title={title}
       width={width}
-      defaultStepIndex={defaultStepIndex}
+      defaultStepIndex={computedDefaultStepIndex}
       nextLabel={nextLabel}
       previousLabel={previousLabel}
       submitLabel={submitLabel}
