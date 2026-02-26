@@ -48,7 +48,7 @@ export function EditableCellRenderer<
   R extends RecordType,
   Sortings extends SortingsDefinition,
   Summaries extends SummariesDefinition,
->({ item, column, children }: CellRendererProps<R, Sortings, Summaries>) {
+>({ column, children }: CellRendererProps<R, Sortings, Summaries>) {
   const editableCtx = useEditableRow<R>()
   const i18n = useI18n()
 
@@ -104,7 +104,7 @@ export function EditableCellRenderer<
         "flex"
       )}
     >
-      {renderProperty(item, editableColumn, "editableTable", i18n)}
+      {renderProperty(localItem, editableColumn, "editableTable", i18n)}
     </div>
   )
 }
