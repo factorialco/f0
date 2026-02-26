@@ -1872,6 +1872,9 @@ declare type DataCollectionStatus<CurrentFiltersState extends FiltersState<Filte
     search?: string | undefined;
     navigationFilters?: NavigationFiltersState<NavigationFiltersDefinition>;
     visualization?: number;
+    /** Per-visualization filter states, keyed by visualization index.
+     *  Only present when visualizations declare per-view filter overrides. */
+    visualizationFilters?: Record<string, CurrentFiltersState>;
 };
 
 declare type DataCollectionStatusComplete<CurrentFiltersState extends FiltersState<FiltersDefinition>> = DataCollectionStatus<CurrentFiltersState> & {
@@ -1883,7 +1886,7 @@ declare type DataCollectionStorageFeature = (typeof dataCollectionStorageFeature
 /**
  * The available features of the data collection status storage
  */
-declare const dataCollectionStorageFeatures: readonly ["filters", "navigationFilters", "sortings", "grouping", "visualization", "search"];
+declare const dataCollectionStorageFeatures: readonly ["filters", "navigationFilters", "sortings", "grouping", "visualization", "search", "visualizationFilters"];
 
 declare type DataCollectionStorageFeaturesDefinition = ("*" | `all` | `!${DataCollectionStorageFeature}` | `${DataCollectionStorageFeature}`)[];
 
@@ -2319,13 +2322,14 @@ declare const defaultTranslations: {
         readonly toggle: "Toggle";
         readonly toggleDropdownMenu: "Toggle dropdown menu";
         readonly selectAll: "Select all";
+        readonly selectAllItems: "Select all {{total}} items";
     };
     readonly status: {
         readonly selected: {
             readonly singular: "Selected";
             readonly plural: "Selected";
             readonly all: "All selected";
-            readonly allOnPage: "All items on this page are selected";
+            readonly allOnPage: "All {{count}} items on this page are selected";
             readonly selectAllItems: "Select all {{total}} items";
             readonly allItemsSelected: "All {{total}} items selected";
         };
@@ -2684,6 +2688,18 @@ declare const defaultTranslations: {
                 readonly one: "{{count}} issue";
                 readonly other: "{{count}} issues";
             };
+        };
+        readonly file: {
+            readonly dropzone: "Drag and drop a file, or click to select";
+            readonly dropzoneActive: "Drop the file here";
+            readonly dropzoneMultiple: "Drag and drop files, or click to select";
+            readonly acceptedTypes: "Accepted formats: {{types}}";
+            readonly remove: "Remove";
+            readonly uploading: "Uploading…";
+            readonly processing: "Processing…";
+            readonly uploadFailed: "Upload failed";
+            readonly fileTooLarge: "File exceeds {{maxSize}} MB limit";
+            readonly invalidFileType: "File type not accepted. Accepted formats: {{types}}";
         };
         readonly validation: {
             readonly required: "This field is required";
@@ -6434,27 +6450,27 @@ declare type VisualizacionTypeDefinition<Props, Settings = Record<string, never>
  * @template Filters - The filters type extending FiltersDefinition
  * @template ItemActions - The actions type extending Item ActionsDefinition
  */
-declare type Visualization<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<R>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<R>> = {
+declare type Visualization<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<R>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<R>> = ({
     /** Card-based visualization type */
     type: "card";
     /** Configuration options for card visualization */
     options: CardVisualizationOptions<R, Filters, Sortings>;
-} | {
+} & VisualizationFilterOverrides<Filters>) | ({
     /** Kanban-based visualization type */
     type: "kanban";
     /** Configuration options for kanban visualization */
     options: KanbanVisualizationOptions<R, Filters, Sortings>;
-} | {
+} & VisualizationFilterOverrides<Filters>) | ({
     /** Table-based visualization type */
     type: "table";
     /** Configuration options for table visualization */
     options: TableVisualizationOptions<R, Filters, Sortings, Summaries>;
-} | {
+} & VisualizationFilterOverrides<Filters>) | ({
     /** List-based visualization type */
     type: "list";
     /** Configuration options for list visualization */
     options: ListVisualizationOptions<R, Filters, Sortings>;
-} | {
+} & VisualizationFilterOverrides<Filters>) | ({
     /** Human-readable label for the visualization */
     label: string;
     /** Icon to represent the visualization in UI */
@@ -6468,6 +6484,23 @@ declare type Visualization<R extends RecordType, Filters extends FiltersDefiniti
         onLoadError: OnLoadErrorCallback;
         source: DataCollectionSource<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>;
     }) => JSX.Element;
+} & VisualizationFilterOverrides<Filters>);
+
+/**
+ * Optional per-visualization filter and preset overrides.
+ * When provided on a visualization, these override the global source filters/presets
+ * for that specific view, and the view maintains its own independent filter state.
+ *
+ * @template Filters - The filters type extending FiltersDefinition
+ */
+export declare type VisualizationFilterOverrides<Filters extends FiltersDefinition> = {
+    /** Override which filters are available when this visualization is active.
+     *  If not provided, the global source filters are used.
+     *  Can be a subset of the source filters definition. */
+    filters?: Partial<Filters>;
+    /** Preset configuration used only when this visualization is active.
+     *  These replace the global source presets for this visualization. */
+    presets?: PresetsDefinition<Filters>;
 };
 
 /**
@@ -6693,6 +6726,11 @@ declare module "gridstack" {
 }
 
 
+declare namespace Calendar {
+    var displayName: string;
+}
+
+
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         aiBlock: {
@@ -6739,9 +6777,4 @@ declare module "@tiptap/core" {
             }) => ReturnType;
         };
     }
-}
-
-
-declare namespace Calendar {
-    var displayName: string;
 }

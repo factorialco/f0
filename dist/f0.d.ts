@@ -1775,6 +1775,9 @@ declare type DataCollectionStatus<CurrentFiltersState extends FiltersState<Filte
     search?: string | undefined;
     navigationFilters?: NavigationFiltersState<NavigationFiltersDefinition>;
     visualization?: number;
+    /** Per-visualization filter states, keyed by visualization index.
+     *  Only present when visualizations declare per-view filter overrides. */
+    visualizationFilters?: Record<string, CurrentFiltersState>;
 };
 
 export declare type DataCollectionStorage<CurrentFiltersState extends FiltersState<FiltersDefinition> = FiltersState<FiltersDefinition>> = {
@@ -2229,13 +2232,14 @@ export declare const defaultTranslations: {
         readonly toggle: "Toggle";
         readonly toggleDropdownMenu: "Toggle dropdown menu";
         readonly selectAll: "Select all";
+        readonly selectAllItems: "Select all {{total}} items";
     };
     readonly status: {
         readonly selected: {
             readonly singular: "Selected";
             readonly plural: "Selected";
             readonly all: "All selected";
-            readonly allOnPage: "All items on this page are selected";
+            readonly allOnPage: "All {{count}} items on this page are selected";
             readonly selectAllItems: "Select all {{total}} items";
             readonly allItemsSelected: "All {{total}} items selected";
         };
@@ -2594,6 +2598,18 @@ export declare const defaultTranslations: {
                 readonly one: "{{count}} issue";
                 readonly other: "{{count}} issues";
             };
+        };
+        readonly file: {
+            readonly dropzone: "Drag and drop a file, or click to select";
+            readonly dropzoneActive: "Drop the file here";
+            readonly dropzoneMultiple: "Drag and drop files, or click to select";
+            readonly acceptedTypes: "Accepted formats: {{types}}";
+            readonly remove: "Remove";
+            readonly uploading: "Uploading…";
+            readonly processing: "Processing…";
+            readonly uploadFailed: "Upload failed";
+            readonly fileTooLarge: "File exceeds {{maxSize}} MB limit";
+            readonly invalidFileType: "File type not accepted. Accepted formats: {{types}}";
         };
         readonly validation: {
             readonly required: "This field is required";
@@ -3033,11 +3049,26 @@ export declare interface F0AlertProps {
 }
 
 /**
- * Config for array fields (multi-select)
+ * Config for array fields (multi-select or multi-file)
  * @typeParam T - The value type (string or number)
  * @typeParam R - Record type for data source (when using source instead of options)
  */
-export declare type F0ArrayConfig<T extends string | number = string, R extends Record<string, unknown> = Record<string, unknown>> = F0BaseConfig & F0SelectConfig<T, R> & {
+export declare type F0ArrayConfig<T extends string | number = string, R extends Record<string, unknown> = Record<string, unknown>> = F0ArraySelectConfig<T, R> | F0ArrayFileConfig;
+
+/**
+ * Config for file fields (multiple file upload, form value is string[])
+ */
+declare type F0ArrayFileConfig = F0BaseConfig & F0FileConfig & {
+    fieldType: "file";
+    multiple: true;
+};
+
+/**
+ * Config for array fields with select (multi-select)
+ * @typeParam T - The value type (string or number)
+ * @typeParam R - Record type for data source (when using source instead of options)
+ */
+declare type F0ArraySelectConfig<T extends string | number = string, R extends Record<string, unknown> = Record<string, unknown>> = F0BaseConfig & F0SelectConfig<T, R> & {
     fieldType?: "select";
 };
 
@@ -3860,19 +3891,66 @@ export declare function F0EventCatcherProvider({ children, onEvent, enabled, cat
 /**
  * Union of all F0 field types used for rendering
  */
-export declare type F0Field = F0TextField | F0NumberField | F0TextareaField | F0SelectField | F0CheckboxField | F0SwitchField | F0DateField | F0TimeField | F0DateTimeField | F0DateRangeField | F0RichTextField | F0CustomField;
+export declare type F0Field = F0TextField | F0NumberField | F0TextareaField | F0SelectField | F0CheckboxField | F0SwitchField | F0DateField | F0TimeField | F0DateTimeField | F0DateRangeField | F0RichTextField | F0FileField | F0CustomField;
 
 /**
  * Complete F0 field configuration (union of all possible configs)
  * @typeParam T - The value type for select fields (string or number)
  * @typeParam R - Record type for data source (when using source instead of options)
  */
-export declare type F0FieldConfig<T extends string | number = string | number, R extends Record<string, unknown> = Record<string, unknown>> = F0StringConfig<string, undefined, R> | F0NumberFieldConfig<R> | F0BooleanConfig | F0DateFieldConfig | F0TimeFieldConfig | F0DateTimeFieldConfig | F0ArrayConfig<T, R> | F0ObjectConfig;
+export declare type F0FieldConfig<T extends string | number = string | number, R extends Record<string, unknown> = Record<string, unknown>> = F0StringConfig<string, undefined, R> | F0NumberFieldConfig<R> | F0BooleanConfig | F0DateFieldConfig | F0TimeFieldConfig | F0DateTimeFieldConfig | F0ArrayConfig<T, R> | F0FileFieldConfig | F0ObjectConfig;
 
 /**
  * Field types for rendering
  */
-export declare type F0FieldType = "text" | "number" | "textarea" | "select" | "checkbox" | "switch" | "date" | "time" | "datetime" | "daterange" | "richtext" | "custom";
+export declare type F0FieldType = "text" | "number" | "textarea" | "select" | "checkbox" | "switch" | "date" | "time" | "datetime" | "daterange" | "richtext" | "file" | "custom";
+
+/**
+ * F0 config options specific to file fields
+ */
+export declare interface F0FileConfig {
+    /**
+     * Accepted MIME types.
+     *
+     * @example
+     * accept: ["image"]                       // all image types
+     * accept: ["image/png", "image/jpeg"]     // specific types
+     * accept: ["image", "application/pdf"]    // mix of category and specific
+     */
+    accept?: MimeType_2[];
+    /** Maximum file size in megabytes (per file) */
+    maxSizeMB?: number;
+    /** Allow multiple file uploads (form value becomes `string[]`) */
+    multiple?: boolean;
+    /** Helper text shown in the dropzone area */
+    description?: string;
+    /** Consumer-provided hook that returns upload capabilities */
+    useUpload: UseFileUpload;
+}
+
+/**
+ * File field with all properties for rendering (runtime type)
+ */
+export declare type F0FileField = F0BaseField & {
+    type: "file";
+    /** Accepted MIME types */
+    accept?: MimeType_2[];
+    /** Maximum file size in megabytes */
+    maxSizeMB?: number;
+    /** Allow multiple files */
+    multiple?: boolean;
+    /** Dropzone description text */
+    description?: string;
+    /** Consumer-provided upload hook */
+    useUpload: UseFileUpload;
+    /** Conditional rendering */
+    renderIf?: FileFieldRenderIf;
+};
+
+/**
+ * Union of all file field configs
+ */
+export declare type F0FileFieldConfig = F0StringFileConfig | F0ArrayFileConfig;
 
 export declare const F0FilterPickerContent: F0FilterPickerContentGeneric;
 
@@ -4090,6 +4168,12 @@ export declare interface F0FormPropsWithPerSectionSchema<T extends F0PerSectionS
      * Ref to control the form programmatically from outside.
      */
     formRef?: React.MutableRefObject<F0FormRef | null>;
+    /**
+     * Pre-existing file metadata shared across all file fields.
+     * Each file field automatically resolves its entries by matching
+     * `defaultValues` against `InitialFile.value`.
+     */
+    initialFiles?: InitialFile[];
 }
 
 /**
@@ -4128,6 +4212,12 @@ export declare interface F0FormPropsWithSingleSchema<TSchema extends F0FormSchem
      * Use with the `useF0Form` hook to get a ref and submit/reset functions.
      */
     formRef?: React.MutableRefObject<F0FormRef | null>;
+    /**
+     * Pre-existing file metadata shared across all file fields.
+     * Each file field automatically resolves its entries by matching
+     * `defaultValues` against `InitialFile.value`.
+     */
+    initialFiles?: InitialFile[];
 }
 
 /**
@@ -4714,7 +4804,15 @@ export declare type F0Source = {
  * @typeParam TConfig - Type of the fieldConfig object (for custom fields)
  * @typeParam R - Record type for data source (when using source instead of options)
  */
-export declare type F0StringConfig<TValue = string, TConfig = undefined, R extends Record<string, unknown> = Record<string, unknown>> = F0StringTextConfig | F0StringTextareaConfig | F0StringSelectConfig<R> | F0CustomFieldConfig<TValue, TConfig>;
+export declare type F0StringConfig<TValue = string, TConfig = undefined, R extends Record<string, unknown> = Record<string, unknown>> = F0StringTextConfig | F0StringTextareaConfig | F0StringSelectConfig<R> | F0StringFileConfig | F0CustomFieldConfig<TValue, TConfig>;
+
+/**
+ * Config for file fields (single file upload, form value is a string identifier)
+ */
+declare type F0StringFileConfig = F0BaseConfig & F0FileConfig & {
+    fieldType: "file";
+    multiple?: false;
+};
 
 /**
  * Config for string fields with select options
@@ -4942,7 +5040,7 @@ export declare interface F0ZodType<T extends ZodTypeAny = ZodTypeAny> {
 /**
  * Field types for rendering
  */
-export declare type FieldType = "text" | "number" | "textarea" | "select" | "checkbox" | "switch" | "date" | "time" | "datetime" | "daterange" | "richtext" | "custom";
+export declare type FieldType = "text" | "number" | "textarea" | "select" | "checkbox" | "switch" | "date" | "time" | "datetime" | "daterange" | "richtext" | "file" | "custom";
 
 export declare type FileAvatarVariant = Extract<AvatarVariant, {
     type: "file";
@@ -4952,6 +5050,41 @@ declare type FileDef = {
     name: string;
     type: string;
 };
+
+/**
+ * All valid renderIf conditions for file fields
+ */
+declare type FileFieldRenderIf = CommonRenderIfCondition | F0BaseFieldRenderIfFunction;
+
+/**
+ * Return type of the consumer-provided upload hook
+ */
+export declare interface FileUploadHookReturn {
+    /** Uploads a file and returns the result */
+    upload: (file: File) => Promise<FileUploadResult>;
+    /** Cancels the in-flight upload */
+    cancelUpload?: () => void;
+    /** Upload progress from 0 to 1 */
+    progress: number;
+    /** Current upload status */
+    status: FileUploadStatus;
+}
+
+/**
+ * Result of a file upload operation.
+ * `value` is the identifier stored as the form value (e.g. a signedId, URL, or any string).
+ */
+export declare type FileUploadResult = {
+    type: "success";
+    value: string;
+} | {
+    type: "aborted";
+};
+
+/**
+ * Upload status states
+ */
+export declare type FileUploadStatus = "idle" | "processing" | "uploading" | "success";
 
 /**
  * Union of all available filter types.
@@ -5511,6 +5644,21 @@ export declare type InfiniteScrollPaginatedResponse<TRecord> = BasePaginatedResp
     hasMore: boolean;
 };
 
+/**
+ * Metadata for a file that already exists (e.g. from a previous upload).
+ * Passed via `initialFiles` so the field can display it without re-uploading.
+ */
+export declare interface InitialFile {
+    /** The identifier that matches the form's default value (signedId, URL, etc.) */
+    value: string;
+    /** Display name (e.g. "report.pdf") */
+    name: string;
+    /** MIME type for icon display (e.g. "application/pdf") */
+    type?: string;
+    /** File size in bytes */
+    size?: number;
+}
+
 declare const INPUTFIELD_SIZES: readonly ["sm", "md"];
 
 declare type InputFieldInheritedProps = (typeof inputFieldInheritedProps)[number];
@@ -5774,6 +5922,20 @@ declare type MentionsConfig = {
     onMentionQueryStringChanged?: (queryString: string) => Promise<MentionedUser[]> | undefined;
     users: MentionedUser[];
 };
+
+/**
+ * Known MIME types for the file field `accept` prop.
+ *
+ * Supports three formats:
+ * - Specific types: `"image/png"`, `"application/pdf"`
+ * - Wildcard categories: `"image/*"`, `"video/*"`
+ * - Bare categories (shorthand for wildcard): `"image"`, `"video"`
+ *
+ * The `string & {}` escape hatch allows unlisted MIME types while
+ * still providing autocomplete for known ones.
+ */
+declare type MimeType_2 = "image" | "video" | "audio" | "text" | "application" | "image/*" | "video/*" | "audio/*" | "text/*" | "application/*" | "image/jpeg" | "image/png" | "image/gif" | "image/webp" | "image/svg+xml" | "image/heic" | "image/bmp" | "image/tiff" | "image/avif" | "video/mp4" | "video/webm" | "video/quicktime" | "audio/mpeg" | "audio/ogg" | "audio/wav" | "application/pdf" | "application/msword" | "application/vnd.openxmlformats-officedocument.wordprocessingml.document" | "application/vnd.ms-excel" | "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" | "application/vnd.ms-powerpoint" | "application/vnd.openxmlformats-officedocument.presentationml.presentation" | "application/zip" | "application/json" | "text/plain" | "text/csv" | "text/html" | "text/markdown";
+export { MimeType_2 as MimeType }
 
 declare const moduleAvatarVariants: (props?: ({
     size?: "lg" | "md" | "sm" | "xs" | "xxs" | undefined;
@@ -7745,6 +7907,22 @@ export declare interface UseF0FormReturn {
     hasErrors: boolean;
 }
 
+/**
+ * A hook that returns upload capabilities for a single file.
+ * Each call creates an independent upload instance with its own state.
+ *
+ * @example
+ * ```tsx
+ * const useMyUpload: UseFileUpload = () => {
+ *   const { upload, progress, status, cancelUpload } = useDirectUpload({
+ *     resourceType: "MyModule::Document",
+ *   })
+ *   return { upload, progress, status, cancelUpload }
+ * }
+ * ```
+ */
+export declare type UseFileUpload = () => FileUploadHookReturn;
+
 export declare const useGroups: <R extends RecordType>(groups: GroupRecord<R>[], defaultOpenGroups?: boolean | GroupRecord<R>["key"][]) => {
     openGroups: Record<string, boolean>;
     setGroupOpen: (key: string, open: boolean) => void;
@@ -8080,6 +8258,11 @@ declare module "gridstack" {
 }
 
 
+declare namespace Calendar {
+    var displayName: string;
+}
+
+
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         aiBlock: {
@@ -8126,9 +8309,4 @@ declare module "@tiptap/core" {
             }) => ReturnType;
         };
     }
-}
-
-
-declare namespace Calendar {
-    var displayName: string;
 }

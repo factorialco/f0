@@ -390,13 +390,14 @@ export declare const defaultTranslations: {
         readonly toggle: "Toggle";
         readonly toggleDropdownMenu: "Toggle dropdown menu";
         readonly selectAll: "Select all";
+        readonly selectAllItems: "Select all {{total}} items";
     };
     readonly status: {
         readonly selected: {
             readonly singular: "Selected";
             readonly plural: "Selected";
             readonly all: "All selected";
-            readonly allOnPage: "All items on this page are selected";
+            readonly allOnPage: "All {{count}} items on this page are selected";
             readonly selectAllItems: "Select all {{total}} items";
             readonly allItemsSelected: "All {{total}} items selected";
         };
@@ -755,6 +756,18 @@ export declare const defaultTranslations: {
                 readonly one: "{{count}} issue";
                 readonly other: "{{count}} issues";
             };
+        };
+        readonly file: {
+            readonly dropzone: "Drag and drop a file, or click to select";
+            readonly dropzoneActive: "Drop the file here";
+            readonly dropzoneMultiple: "Drag and drop files, or click to select";
+            readonly acceptedTypes: "Accepted formats: {{types}}";
+            readonly remove: "Remove";
+            readonly uploading: "Uploading…";
+            readonly processing: "Processing…";
+            readonly uploadFailed: "Upload failed";
+            readonly fileTooLarge: "File exceeds {{maxSize}} MB limit";
+            readonly invalidFileType: "File type not accepted. Accepted formats: {{types}}";
         };
         readonly validation: {
             readonly required: "This field is required";
@@ -1205,6 +1218,11 @@ declare module "gridstack" {
 }
 
 
+declare namespace Calendar {
+    var displayName: string;
+}
+
+
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         aiBlock: {
@@ -1251,9 +1269,4 @@ declare module "@tiptap/core" {
             }) => ReturnType;
         };
     }
-}
-
-
-declare namespace Calendar {
-    var displayName: string;
 }
