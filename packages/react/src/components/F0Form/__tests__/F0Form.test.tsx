@@ -1863,6 +1863,233 @@ describe("F0Form per-section showSubmitWhenDirty", () => {
   })
 })
 
+describe("F0Form with formDefinition (single schema)", () => {
+  const singleSchema = z.object({
+    firstName: f0FormField(z.string().min(1), {
+      label: "First Name",
+      section: "personal",
+    }),
+    email: f0FormField(z.string().email(), {
+      label: "Email",
+      section: "contact",
+    }),
+  })
+
+  it("renders fields from a single-schema formDefinition", () => {
+    const definition = {
+      _brand: "single" as const,
+      name: "def-single-render",
+      schema: singleSchema,
+      sections: {
+        personal: { title: "Personal" },
+        contact: { title: "Contact" },
+      },
+      defaultValues: { firstName: "", email: "" },
+      onSubmit: async () => ({ success: true as const }),
+    }
+
+    render(<F0Form formDefinition={definition} />)
+
+    expect(screen.getByText("Personal")).toBeInTheDocument()
+    expect(screen.getByText("Contact")).toBeInTheDocument()
+    expect(screen.getByLabelText("First Name")).toBeInTheDocument()
+    expect(screen.getByLabelText("Email")).toBeInTheDocument()
+  })
+
+  it("invokes onSubmit with { data } shape", async () => {
+    const user = userEvent.setup()
+    const onSubmit = vi.fn().mockResolvedValue({ success: true })
+
+    const definition = {
+      _brand: "single" as const,
+      name: "def-single-submit",
+      schema: singleSchema,
+      sections: {
+        personal: { title: "Personal" },
+        contact: { title: "Contact" },
+      },
+      defaultValues: { firstName: "", email: "" },
+      onSubmit,
+    }
+
+    render(<F0Form formDefinition={definition} />)
+
+    await user.type(screen.getByLabelText("First Name"), "Alice")
+    await user.type(screen.getByLabelText("Email"), "alice@example.com")
+
+    await user.click(screen.getByText("Submit"))
+
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalledTimes(1)
+      expect(onSubmit).toHaveBeenCalledWith({
+        data: { firstName: "Alice", email: "alice@example.com" },
+      })
+    })
+  })
+
+  it("renders default values from formDefinition", () => {
+    const definition = {
+      _brand: "single" as const,
+      name: "def-single-defaults",
+      schema: singleSchema,
+      sections: {
+        personal: { title: "Personal" },
+        contact: { title: "Contact" },
+      },
+      defaultValues: { firstName: "Bob", email: "bob@example.com" },
+      onSubmit: async () => ({ success: true as const }),
+    }
+
+    render(<F0Form formDefinition={definition} />)
+
+    expect(screen.getByLabelText("First Name")).toHaveValue("Bob")
+    expect(screen.getByLabelText("Email")).toHaveValue("bob@example.com")
+  })
+})
+
+describe("F0Form with formDefinition (per-section)", () => {
+  const perSectionSchema = {
+    personal: z.object({
+      firstName: f0FormField(z.string().min(1), { label: "First Name" }),
+    }),
+    contact: z.object({
+      email: f0FormField(z.string().email(), { label: "Email" }),
+    }),
+  }
+
+  it("renders fields from a per-section formDefinition", () => {
+    const definition = {
+      _brand: "per-section" as const,
+      name: "def-per-section-render",
+      schema: perSectionSchema,
+      sections: {
+        personal: { title: "Personal" },
+        contact: { title: "Contact" },
+      },
+      defaultValues: {
+        personal: { firstName: "" },
+        contact: { email: "" },
+      },
+      onSubmit: async () => ({ success: true as const }),
+    }
+
+    render(<F0Form formDefinition={definition} />)
+
+    expect(screen.getByText("Personal")).toBeInTheDocument()
+    expect(screen.getByText("Contact")).toBeInTheDocument()
+    expect(screen.getByLabelText("First Name")).toBeInTheDocument()
+    expect(screen.getByLabelText("Email")).toBeInTheDocument()
+  })
+
+  it("invokes onSubmit with { sectionId, data, fullData } shape", async () => {
+    const user = userEvent.setup()
+    const onSubmit = vi.fn().mockResolvedValue({ success: true })
+
+    const definition = {
+      _brand: "per-section" as const,
+      name: "def-per-section-submit",
+      schema: perSectionSchema,
+      sections: {
+        personal: { title: "Personal" },
+        contact: { title: "Contact" },
+      },
+      defaultValues: {
+        personal: { firstName: "" },
+        contact: { email: "" },
+      },
+      onSubmit,
+      submitConfig: { label: "Save" },
+    }
+
+    render(<F0Form formDefinition={definition} />)
+
+    await user.type(screen.getByLabelText("Email"), "test@example.com")
+
+    const saveButtons = screen.getAllByText("Save")
+    await user.click(saveButtons[1])
+
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalledTimes(1)
+      expect(onSubmit).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sectionId: "contact",
+          data: { email: "test@example.com" },
+        })
+      )
+      const arg = onSubmit.mock.calls[0][0]
+      expect(arg).toHaveProperty("fullData")
+      expect(arg.fullData).toHaveProperty("contact")
+    })
+  })
+
+  it("accumulates fullData across section submits", async () => {
+    const user = userEvent.setup()
+    const onSubmit = vi.fn().mockResolvedValue({ success: true })
+
+    const definition = {
+      _brand: "per-section" as const,
+      name: "def-per-section-fulldata",
+      schema: perSectionSchema,
+      sections: {
+        personal: { title: "Personal" },
+        contact: { title: "Contact" },
+      },
+      defaultValues: {
+        personal: { firstName: "" },
+        contact: { email: "" },
+      },
+      onSubmit,
+      submitConfig: { label: "Save" },
+    }
+
+    render(<F0Form formDefinition={definition} />)
+
+    await user.type(screen.getByLabelText("First Name"), "Alice")
+    const saveButtons = screen.getAllByText("Save")
+    await user.click(saveButtons[0])
+
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalledTimes(1)
+    })
+
+    await user.type(screen.getByLabelText("Email"), "alice@example.com")
+    const saveButtonsAfter = screen.getAllByText("Save")
+    await user.click(saveButtonsAfter[1])
+
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalledTimes(2)
+      const secondCall = onSubmit.mock.calls[1][0]
+      expect(secondCall.sectionId).toBe("contact")
+      expect(secondCall.fullData.personal).toEqual({ firstName: "Alice" })
+      expect(secondCall.fullData.contact).toEqual({
+        email: "alice@example.com",
+      })
+    })
+  })
+
+  it("renders default values from per-section formDefinition", () => {
+    const definition = {
+      _brand: "per-section" as const,
+      name: "def-per-section-defaults",
+      schema: perSectionSchema,
+      sections: {
+        personal: { title: "Personal" },
+        contact: { title: "Contact" },
+      },
+      defaultValues: {
+        personal: { firstName: "Carol" },
+        contact: { email: "carol@example.com" },
+      },
+      onSubmit: async () => ({ success: true as const }),
+    }
+
+    render(<F0Form formDefinition={definition} />)
+
+    expect(screen.getByLabelText("First Name")).toHaveValue("Carol")
+    expect(screen.getByLabelText("Email")).toHaveValue("carol@example.com")
+  })
+})
+
 describe("F0Form per-section server errors", () => {
   it("displays field errors returned from onSubmit", async () => {
     const user = userEvent.setup()

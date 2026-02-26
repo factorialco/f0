@@ -20,7 +20,7 @@ const meta: Meta<typeof F0WizardForm> = {
       story: { inline: false, height: "720px" },
     },
   },
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs"],
 }
 
 export default meta

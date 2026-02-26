@@ -20,7 +20,7 @@ const meta: Meta<typeof F0Wizard> = {
       story: { inline: false, height: "720px" },
     },
   },
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs"],
   decorators: [
     (Story, { args: { isOpen, ...rest } }) => {
       const [open, setOpen] = useState(isOpen)
