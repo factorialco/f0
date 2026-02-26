@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest"
 import { UserPlatformProvider } from "@/lib/providers/user-platafform/UserPlatformProvider"
 import { zeroRender } from "@/testing/test-utils"
 
-import { withDataTestId } from "../index"
+import { WithDataTestIdPropsOf, withDataTestId } from "../index"
 
 const renderWithProviders = zeroRender
 
@@ -203,5 +203,79 @@ describe("withDataTestId", () => {
     renderWithProviders(<WrappedComponent dataTestId="null-regular" />)
 
     expect(screen.getByTestId("null-regular")).toBeInTheDocument()
+  })
+
+  describe("type-level: onChange callback argument inference", () => {
+    // These are compile-time assertions — the it() bodies never actually run.
+    // If types regress, tsc --noEmit will fail on this file.
+
+    it("should infer onChange argument types from a simple two-argument callback", () => {
+      // A component with a typed two-argument onChange (mirrors F0DatePicker)
+      type DateValue = { year: number; month: number }
+      type Props = {
+        onChange?: (
+          value: DateValue | undefined,
+          label: string | undefined
+        ) => void
+        value?: DateValue
+      }
+      const DatePicker: React.FC<Props> = () => null
+      const Wrapped = withDataTestId(DatePicker)
+
+      // WithDataTestIdPropsOf must preserve both onChange parameter types.
+      type WrappedProps = WithDataTestIdPropsOf<typeof Wrapped>
+
+      const _goodProps: WrappedProps = {
+        onChange: (value: DateValue | undefined, label: string | undefined) => {
+          void value
+          void label
+        },
+        dataTestId: "test",
+      }
+      expect(_goodProps).toBeDefined()
+    })
+
+    it("should preserve each branch of a discriminated-union component's onChange", () => {
+      // Mirrors F0Select: multiple:false → onChange(string), multiple:true → onChange(string[])
+      type SingleProps = {
+        multiple?: false
+        value?: string
+        onChange?: (v: string) => void
+      }
+      type MultiProps = {
+        multiple: true
+        value?: string[]
+        onChange?: (v: string[]) => void
+      }
+      type UnionProps = SingleProps | MultiProps
+
+      const SelectComponent: React.FC<UnionProps> = () => null
+      const Wrapped = withDataTestId(SelectComponent)
+
+      type WrappedProps = WithDataTestIdPropsOf<typeof Wrapped>
+
+      // Single branch: multiple omitted, onChange receives string
+      const _goodSingle: WrappedProps = {
+        onChange: (_v: string) => {},
+        dataTestId: "test",
+      }
+
+      // Multi branch: multiple: true, onChange receives string[]
+      const _goodMulti: WrappedProps = {
+        multiple: true,
+        onChange: (_v: string[]) => {},
+        dataTestId: "test",
+      }
+
+      // @ts-expect-error — multiple:true requires onChange(string[]), not onChange(string)
+      const _badMulti: WrappedProps = {
+        multiple: true,
+        onChange: (_v: string) => {},
+      }
+
+      expect(_goodSingle).toBeDefined()
+      expect(_goodMulti).toBeDefined()
+      expect(_badMulti).toBeDefined()
+    })
   })
 })
