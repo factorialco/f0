@@ -470,6 +470,12 @@ export const defaultTranslations = {
       },
     },
   },
+  wizard: {
+    previous: "Previous",
+    next: "Continue",
+    submit: "Submit",
+    stepOf: "Step {{current}} of {{total}}",
+  },
 } as const
 
 type TranslationShape<T> = {
