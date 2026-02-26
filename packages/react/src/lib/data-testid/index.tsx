@@ -44,18 +44,16 @@ export type WithDataTestIdPropsOf<T extends React.ComponentType<unknown>> =
   React.ComponentProps<T> & WithDataTestIdProps
 
 /**
- * Keys on T that are not part of Function, so we preserve static members (Skeleton, displayName, etc.)
- * without bringing in a second call signature that would confuse ComponentProps<> inference.
+ * Return type preserves the original component type T so that discriminated unions,
+ * generics, and overloaded call signatures are not collapsed.
+ * dataTestId is added via a parallel call signature so it appears in autocomplete
+ * without interfering with the original props structure.
  */
-type StaticMembersOf<T> = Pick<T, Exclude<keyof T, keyof Function>>
-
-/**
- * Return type has a single call signature with props = ComponentProps<T> & WithDataTestIdProps,
- * so ComponentProps<Wrapped> and Storybook's Meta/StoryObj infer correctly.
- * Static properties (e.g. F0Card.Skeleton) are preserved via StaticMembersOf<T>.
- */
-export type WithDataTestIdReturnType<T extends React.ComponentType<unknown>> =
-  React.ComponentType<WithDataTestIdPropsOf<T>> & StaticMembersOf<T>
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type WithDataTestIdReturnType<T extends React.ComponentType<any>> = T & {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (props: React.ComponentProps<T> & WithDataTestIdProps): any
+}
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const withDataTestId = <T extends React.ComponentType<any>>(
@@ -65,9 +63,6 @@ export const withDataTestId = <T extends React.ComponentType<any>>(
   const isForwardRef =
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (component as any).$$typeof === Symbol.for("react.forward_ref")
-
-  // The type for the returned component (with static properties preserved via intersection with T)
-  type ReturnedComponentType = WithDataTestIdReturnType<T>
 
   if (isForwardRef) {
     // For forwardRef components, we need to wrap the render function
@@ -110,7 +105,7 @@ export const withDataTestId = <T extends React.ComponentType<any>>(
       WrappedComponent.displayName = name
     }
 
-    return WrappedComponent as unknown as ReturnedComponentType
+    return WrappedComponent as unknown as WithDataTestIdReturnType<T>
   }
 
   // Check if the component is a memo component
@@ -148,7 +143,7 @@ export const withDataTestId = <T extends React.ComponentType<any>>(
       MemoizedComponent.displayName = name
     }
 
-    return MemoizedComponent as unknown as ReturnedComponentType
+    return MemoizedComponent as unknown as WithDataTestIdReturnType<T>
   }
 
   const isFunctionComponent =
@@ -230,5 +225,5 @@ export const withDataTestId = <T extends React.ComponentType<any>>(
     WrappedComponent.displayName = name
   }
 
-  return WrappedComponent as unknown as ReturnedComponentType
+  return WrappedComponent as unknown as WithDataTestIdReturnType<T>
 }
