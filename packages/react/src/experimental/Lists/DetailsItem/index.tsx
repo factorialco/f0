@@ -58,7 +58,10 @@ const ItemContent: FC<{ content: Content; contentAlign?: "start" | "end" }> = ({
       <DataList.Item {...content} textAlign={contentAlign} />
     )}
     {content.type === "team" && (
-      <DataList.TeamItem {...content} textAlign={contentAlign} />
+      <DataList.TeamItem
+        {...content}
+        textAlign={content.textAlign ?? contentAlign}
+      />
     )}
     {content.type === "company" && (
       <DataList.CompanyItem {...content} textAlign={contentAlign} />
