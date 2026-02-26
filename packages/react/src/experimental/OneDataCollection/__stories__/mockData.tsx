@@ -495,12 +495,16 @@ export const getMockVisualizations = (options?: {
           },
         ],
         onCellChange: (() => {
-          return options?.cache
-            ? async (updatedItem: MockUser) => {
-                console.log("cache enabled: cell changed", updatedItem)
-                options.cache!.updateItem(updatedItem)
-              }
-            : undefined
+          if (options?.cache) {
+            return async (updatedItem: MockUser) => {
+              console.log("cache enabled: cell changed", updatedItem)
+              options.cache!.updateItem(updatedItem)
+            }
+          }
+          return async (_updatedItem: MockUser) => {
+            console.log("cache disabled: cell changed", _updatedItem)
+            // No-op handler when cache is not available
+          }
         })(),
       },
     } as Visualization<
