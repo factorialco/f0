@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.25.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.24.1...f0-react-native-v0.25.0) (2026-02-26)
+
+
+### Features
+
+* **react-native:** add QuestionCircle icon ([7aa0cb8](https://github.com/factorialco/f0/commit/7aa0cb8f6ae3921c7abbd3d21c133770557880bc))
+
 ## [0.24.1](https://github.com/factorialco/f0/compare/f0-react-native-v0.24.0...f0-react-native-v0.24.1) (2026-02-10)
 
 
