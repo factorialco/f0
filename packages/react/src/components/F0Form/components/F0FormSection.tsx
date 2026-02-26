@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react"
+import { useCallback, useEffect, useMemo } from "react"
 import { DefaultValues, Path, useForm } from "react-hook-form"
 import { z } from "zod"
 
@@ -76,6 +76,8 @@ interface F0FormSectionProps<TSchema extends F0FormSchema> {
   schema: TSchema
   sectionConfig?: F0PerSectionSectionConfig
   defaultValues?: Partial<z.infer<TSchema>>
+  /** Called whenever any value in this section changes. Used by F0Form per-section mode to notify parent. */
+  onValuesChange?: (values: Partial<z.infer<TSchema>>) => void
   onSubmit: (
     data: z.infer<TSchema>
   ) => Promise<F0FormSubmitResult> | F0FormSubmitResult
@@ -95,6 +97,7 @@ export function F0FormSection<TSchema extends F0FormSchema>({
   schema,
   sectionConfig,
   defaultValues,
+  onValuesChange,
   onSubmit,
   submitConfig,
   errorTriggerMode,
@@ -126,7 +129,15 @@ export function F0FormSection<TSchema extends F0FormSchema>({
     resolver: conditionalResolver,
     mode: formMode,
     defaultValues: defaultValues as DefaultValues<TValues>,
+    ...(defaultValues !== undefined && {
+      values: defaultValues as DefaultValues<TValues>,
+    }),
   })
+
+  const watchedValues = form.watch()
+  useEffect(() => {
+    onValuesChange?.(watchedValues as Partial<z.infer<TSchema>>)
+  }, [watchedValues, onValuesChange])
 
   const rootError = form.formState.errors.root
   const { isSubmitting, isDirty } = form.formState
