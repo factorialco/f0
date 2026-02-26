@@ -1,5 +1,6 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
 import { useMemo, useRef, useState } from "react"
+import { action } from "storybook/actions"
 
 import {
   createDataAdapter,
@@ -33,21 +34,19 @@ function useEditableTableData(
   itemsRef.current = items
 
   const onCellChange = async (updatedItem: MockUser) => {
-    console.log("onCellChange", updatedItem)
+    action("onCellChange")(updatedItem)
     setItems((prev) =>
       prev.map((i) => (i.id === updatedItem.id ? updatedItem : i))
     )
   }
 
   const dataAdapter = useMemo(() => {
-    console.log("useEditableTableData: creating data adapter")
     const adapter = createDataAdapter({
       data: items,
       paginationType: "pages",
       perPage: 10,
     })
     adapter.fetchData = (options: unknown) => {
-      console.log("fetchData: useEditableTableData")
       const currentAdapter = createDataAdapter({
         data: itemsRef.current,
         paginationType: "pages",
@@ -69,7 +68,6 @@ export const BasicEditableTable: Story = {
       },
     })
     const { dataAdapter, onCellChange } = useEditableTableData()
-    console.log("BasicEditableTable: rendering")
     return (
       <ExampleComponent
         visualizations={[
@@ -102,7 +100,6 @@ export const EditableTableWithColumnSettings: Story = {
       },
     })
     const { dataAdapter, onCellChange } = useEditableTableData()
-    console.log("EditableTableWithColumnSettings: rendering")
     return (
       <ExampleComponent
         tableAllowColumnReordering
@@ -141,7 +138,8 @@ export const EditableTableWithErrors: Story = {
     const mockVisualizations = getMockVisualizations()
     const { dataAdapter } = useEditableTableData()
 
-    const onCellChange = async (_updatedItem: MockUser) => {
+    const onCellChange = async (updatedItem: MockUser) => {
+      action("onCellChange")(updatedItem)
       // Simulate an API call that always fails
       await new Promise((resolve) => setTimeout(resolve, 300))
       throw new Error("Invalid value")
@@ -358,7 +356,7 @@ export const EditableTableWithNestedRecords: Story = {
     })
 
     const onCellChange = async (updatedItem: MockUser) => {
-      console.log("onCellChange (nested)", updatedItem)
+      action("onCellChange")(updatedItem)
     }
 
     return (
@@ -405,7 +403,7 @@ export const EditableTableWithNestedRecordsDetailed: Story = {
     })
 
     const onCellChange = async (updatedItem: MockUser) => {
-      console.log("onCellChange (nested detailed)", updatedItem)
+      action("onCellChange")(updatedItem)
     }
 
     return (
