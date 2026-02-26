@@ -41,30 +41,17 @@ export interface DetailsItemType {
 }
 
 const isNumericValueText = (text: string): boolean => {
-  const firstDigitIndex = text.search(/\d/)
-  if (firstDigitIndex === -1) {
+  const trimmed = text.trim()
+  if (!trimmed) {
     return false
   }
 
-  const lastDigitMatch = text.match(/\d(?!.*\d)/)
-  const lastDigitIndex = lastDigitMatch
-    ? text.lastIndexOf(lastDigitMatch[0])
-    : -1
-  if (lastDigitIndex === -1) {
-    return false
-  }
-  const before = text.slice(0, firstDigitIndex)
-  const between = text.slice(firstDigitIndex, lastDigitIndex + 1)
-
-  if (/\p{L}/u.test(before)) {
+  const firstToken = trimmed.split(/[\s/]+/)[0] ?? ""
+  if (!/\d/.test(firstToken)) {
     return false
   }
 
-  if (/\p{L}/u.test(between)) {
-    return false
-  }
-
-  return true
+  return !/\p{L}/u.test(firstToken)
 }
 
 const getContentAlign = (
