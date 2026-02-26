@@ -45,6 +45,23 @@ export type WithDataTestIdProps = {
  * `WithDataTestIdProps` instead of being flattened into a single merged type.
  *
  * Use when ComponentProps<typeof Component> inference fails (e.g. in Storybook stories).
+ *
+ * NOTE: For components with generic type parameters (e.g. `F0Select<T, R>`,
+ * `RadarChart<K>`, `Await<T>`), `WithDataTestIdReturnType<T>` cannot preserve
+ * the generic signature — TypeScript erases the type parameter when inferring
+ * `ComponentType<infer P>`, collapsing `<T>` to its constraint. In those cases,
+ * do NOT rely on this type; instead cast the wrapped component to a hand-written
+ * generic function type that re-adds `dataTestId` manually:
+ *
+ * @example
+ * ```ts
+ * type MyGeneric = <T>(props: MyProps<T> & WithDataTestIdProps) => ReactElement | null
+ *
+ * // `as unknown as MyGeneric`: withDataTestId() returns WithDataTestIdReturnType<T>
+ * // which cannot express generic call signatures. The double cast re-adds the
+ * // type parameter that TypeScript erased during HOC wrapping.
+ * export const MyComponent = withDataTestId(_MyComponent) as unknown as MyGeneric
+ * ```
  */
 export type WithDataTestIdPropsOf<T extends React.ComponentType<unknown>> =
   T extends React.ComponentType<infer P> ? P & WithDataTestIdProps : never

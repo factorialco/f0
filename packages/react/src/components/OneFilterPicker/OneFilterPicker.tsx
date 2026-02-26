@@ -312,6 +312,9 @@ type OneFilterPickerGeneric = <Definition extends FiltersDefinition>(
   props: OneFilterPickerRootProps<Definition> & WithDataTestIdProps
 ) => ReactElement | null
 
+// `as unknown as OneFilterPickerGeneric`: withDataTestId() returns WithDataTestIdReturnType<T>,
+// which cannot express generic call signatures. The double cast re-adds the <Definition>
+// type parameter that TypeScript erases during HOC wrapping. See WithDataTestIdPropsOf.
 const OneFilterPicker = withDataTestId(
   _OneFilterPicker
 ) as unknown as OneFilterPickerGeneric

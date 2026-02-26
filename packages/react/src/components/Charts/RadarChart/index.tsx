@@ -94,4 +94,7 @@ type RadarChartGeneric = <K extends ChartConfig>(
 
 const RadarChartWrapped = withDataTestId(fixedForwardRef(_RadarChart))
 
+// `as unknown as RadarChartGeneric`: withDataTestId() returns WithDataTestIdReturnType<T>,
+// which cannot express generic call signatures. The double cast re-adds the <K>
+// type parameter that TypeScript erases during HOC wrapping. See WithDataTestIdPropsOf.
 export const RadarChart = RadarChartWrapped as unknown as RadarChartGeneric

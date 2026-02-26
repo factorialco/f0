@@ -59,4 +59,7 @@ const _Await = <T,>({
 type AwaitGeneric = <T>(props: AwaitProps<T> & WithDataTestIdProps) => ReactNode
 
 const AwaitWrapped = withDataTestId(_Await)
+// `as unknown as AwaitGeneric`: withDataTestId() returns WithDataTestIdReturnType<T>,
+// which cannot express generic call signatures. The double cast re-adds the <T>
+// type parameter that TypeScript erases during HOC wrapping. See WithDataTestIdPropsOf.
 export const Await = AwaitWrapped as unknown as AwaitGeneric

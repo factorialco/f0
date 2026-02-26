@@ -26,4 +26,7 @@ const F0SelectWrapped = withDataTestId(
 /**
  * @experimental This is an experimental component use it at your own risk
  */
+// `as unknown as F0SelectGeneric`: withDataTestId() returns WithDataTestIdReturnType<T>,
+// which cannot express generic call signatures. The double cast re-adds the <T, R>
+// type parameters that TypeScript erases during HOC wrapping. See WithDataTestIdPropsOf.
 export const F0Select = F0SelectWrapped as unknown as F0SelectGeneric
