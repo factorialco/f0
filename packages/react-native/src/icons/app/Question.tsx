@@ -1,7 +1,6 @@
 import { Ref, forwardRef } from "react"
 import Svg, { Path } from "react-native-svg"
 import type { SvgProps } from "react-native-svg"
-
 const SvgQuestion = (props: SvgProps, ref: Ref<Svg>) => (
   <Svg
     fill="none"
