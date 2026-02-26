@@ -55,11 +55,12 @@ export type WithDataTestIdProps = {
  *
  * @example
  * ```ts
- * type MyGeneric = <T>(props: MyProps<T> & WithDataTestIdProps) => ReactElement | null
+ * type MyGeneric = <U>(props: MyProps<U> & WithDataTestIdProps) => ReactElement | null
  *
- * // `as unknown as MyGeneric`: withDataTestId() returns WithDataTestIdReturnType<T>
- * // which cannot express generic call signatures. The double cast re-adds the
- * // type parameter that TypeScript erased during HOC wrapping.
+ * // `as unknown as MyGeneric`: withDataTestId(_MyComponent) returns
+ * // WithDataTestIdReturnType<typeof _MyComponent>, which cannot express generic
+ * // call signatures. The double cast re-adds the type parameter that TypeScript
+ * // erased during HOC wrapping.
  * export const MyComponent = withDataTestId(_MyComponent) as unknown as MyGeneric
  * ```
  */
