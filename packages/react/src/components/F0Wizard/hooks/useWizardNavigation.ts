@@ -7,12 +7,13 @@ interface UseWizardNavigationOptions {
   defaultStepIndex?: number
   onSubmit?: () => void | Promise<unknown>
   onStepChanged?: (stepIndex: number) => void
+  allowStepSkipping?: boolean
 }
 
 interface UseWizardNavigationReturn {
   currentStep: number
   loading: boolean
-  goToStep: (index: number) => void
+  goToStep: (index: number) => Promise<void>
   goNext: () => Promise<void>
   goPrevious: () => void
 }
@@ -22,6 +23,7 @@ export function useWizardNavigation({
   defaultStepIndex = 0,
   onSubmit,
   onStepChanged,
+  allowStepSkipping = false,
 }: UseWizardNavigationOptions): UseWizardNavigationReturn {
   const [currentStep, setCurrentStep] = useState(defaultStepIndex)
   const [loading, setLoading] = useState(false)
@@ -37,20 +39,47 @@ export function useWizardNavigation({
   )
 
   const goToStep = useCallback(
-    (index: number) => {
+    async (index: number) => {
       if (index < 0 || index >= stepsRef.current.length) return
 
       if (stepsRef.current[currentStep]?.hasErrors?.() === true) return
+
+      if (!allowStepSkipping && index > currentStep + 1) return
+
+      if (index > currentStep) {
+        const intermediateHasErrors = stepsRef.current
+          .slice(currentStep, index)
+          .some((step) => step.hasErrors?.() === true)
+        if (intermediateHasErrors) return
+      }
 
       const canJump = stepsRef.current
         .slice(0, index)
         .every((step) => step.isCompleted?.() !== false)
 
-      if (canJump) {
-        changeStep(index)
+      if (!canJump) return
+
+      if (index > currentStep) {
+        setLoading(true)
+        try {
+          for (let i = currentStep; i < index; i++) {
+            const step = stepsRef.current[i]
+            if (step?.onNext) {
+              await step.onNext()
+            }
+          }
+          changeStep(index)
+        } catch {
+          // An intermediate step's onNext rejected (validation failed) — stay put
+        } finally {
+          setLoading(false)
+        }
+        return
       }
+
+      changeStep(index)
     },
-    [changeStep, currentStep]
+    [changeStep, currentStep, allowStepSkipping]
   )
 
   const goNext = useCallback(async () => {

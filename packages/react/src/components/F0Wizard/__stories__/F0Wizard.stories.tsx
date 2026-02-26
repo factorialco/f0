@@ -191,6 +191,21 @@ export const WithIsCompletedGate: Story = {
   },
 }
 
+export const AllowStepSkipping: Story = {
+  args: {
+    ...Default.args,
+    allowStepSkipping: true,
+    steps: [
+      { title: "General information", isCompleted: () => true },
+      { title: "Personal details", isCompleted: () => true },
+      { title: "Work details" },
+      { title: "Agreement" },
+      { title: "Settings" },
+    ],
+    defaultStepIndex: 2,
+  },
+}
+
 export const ManySteps: Story = {
   args: {
     ...Default.args,

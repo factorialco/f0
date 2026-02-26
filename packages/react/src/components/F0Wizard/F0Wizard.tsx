@@ -29,12 +29,14 @@ export const F0Wizard: FC<F0WizardProps> = ({
   submitLabel,
   onSubmit,
   onStepChanged,
+  allowStepSkipping = false,
 }) => {
   const navigation = useWizardNavigation({
     steps,
     defaultStepIndex,
     onSubmit,
     onStepChanged,
+    allowStepSkipping,
   })
 
   const i18n = useI18n()
@@ -94,6 +96,7 @@ export const F0Wizard: FC<F0WizardProps> = ({
         goNext={navigation.goNext}
         goPrevious={navigation.goPrevious}
         steps={steps}
+        allowStepSkipping={allowStepSkipping}
       >
         <div className="flex min-h-0 flex-1 flex-row">
           <div className="w-1/3 shrink-0 overflow-y-auto border-x-0 border-b-0 border-r border-t-0 border-solid border-f1-border-secondary p-2">

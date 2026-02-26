@@ -48,7 +48,7 @@ function StepIndicator({ state, index }: { state: StepState; index: number }) {
 }
 
 export function WizardSteps() {
-  const { steps, currentStep, goToStep } = useF0Wizard()
+  const { steps, currentStep, goToStep, allowStepSkipping } = useF0Wizard()
 
   return (
     <nav aria-label="Wizard steps" className="flex flex-col gap-1.5 p-1">
@@ -58,21 +58,30 @@ export function WizardSteps() {
 
         const currentStepHasErrors = steps[currentStep]?.hasErrors?.() === true
 
-        const canNavigate =
+        const intermediateHasErrors =
+          index > currentStep &&
+          steps.slice(currentStep, index).some((s) => s.hasErrors?.() === true)
+
+        let canNavigate =
           index !== currentStep &&
           !currentStepHasErrors &&
+          !intermediateHasErrors &&
           steps.slice(0, index).every((s) => s.isCompleted?.() !== false)
+
+        if (canNavigate && !allowStepSkipping && index > currentStep + 1) {
+          canNavigate = false
+        }
 
         const handleClick = () => {
           if (canNavigate) {
-            goToStep(index)
+            void goToStep(index)
           }
         }
 
         const handleKeyDown = (e: React.KeyboardEvent) => {
           if ((e.key === "Enter" || e.key === " ") && canNavigate) {
             e.preventDefault()
-            goToStep(index)
+            void goToStep(index)
           }
         }
 

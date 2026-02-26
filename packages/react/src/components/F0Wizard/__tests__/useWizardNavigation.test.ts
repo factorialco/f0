@@ -60,9 +60,9 @@ describe("useWizardNavigation", () => {
     expect(result.current.currentStep).toBe(0)
   })
 
-  it("goToStep jumps to a valid step", () => {
+  it("goToStep jumps to a valid step when allowStepSkipping is true", () => {
     const { result } = zeroRenderHook(() =>
-      useWizardNavigation({ steps: makeSteps(3) })
+      useWizardNavigation({ steps: makeSteps(3), allowStepSkipping: true })
     )
 
     act(() => {
@@ -70,6 +70,46 @@ describe("useWizardNavigation", () => {
     })
 
     expect(result.current.currentStep).toBe(2)
+  })
+
+  it("goToStep blocks jumping more than one step ahead when allowStepSkipping is false", () => {
+    const { result } = zeroRenderHook(() =>
+      useWizardNavigation({ steps: makeSteps(3), allowStepSkipping: false })
+    )
+
+    act(() => {
+      result.current.goToStep(2)
+    })
+
+    expect(result.current.currentStep).toBe(0)
+  })
+
+  it("goToStep allows going to the next step when allowStepSkipping is false", () => {
+    const { result } = zeroRenderHook(() =>
+      useWizardNavigation({ steps: makeSteps(3), allowStepSkipping: false })
+    )
+
+    act(() => {
+      result.current.goToStep(1)
+    })
+
+    expect(result.current.currentStep).toBe(1)
+  })
+
+  it("goToStep allows going backwards when allowStepSkipping is false", () => {
+    const { result } = zeroRenderHook(() =>
+      useWizardNavigation({
+        steps: makeSteps(3),
+        defaultStepIndex: 2,
+        allowStepSkipping: false,
+      })
+    )
+
+    act(() => {
+      result.current.goToStep(0)
+    })
+
+    expect(result.current.currentStep).toBe(0)
   })
 
   it("goToStep ignores out-of-bounds indices", () => {
@@ -177,6 +217,7 @@ describe("useWizardNavigation", () => {
       useWizardNavigation({
         steps: makeSteps(3),
         onStepChanged,
+        allowStepSkipping: true,
       })
     )
 
@@ -216,20 +257,40 @@ describe("useWizardNavigation", () => {
     expect(result.current.currentStep).toBe(0)
   })
 
-  it("goToStep is allowed when current step has no errors", () => {
+  it("goToStep is allowed when current step has no errors and allowStepSkipping is true", () => {
     const steps: F0WizardStep[] = [
       { title: "Step 1", hasErrors: () => false },
       { title: "Step 2" },
       { title: "Step 3" },
     ]
 
-    const { result } = zeroRenderHook(() => useWizardNavigation({ steps }))
+    const { result } = zeroRenderHook(() =>
+      useWizardNavigation({ steps, allowStepSkipping: true })
+    )
 
     act(() => {
       result.current.goToStep(2)
     })
 
     expect(result.current.currentStep).toBe(2)
+  })
+
+  it("goToStep blocks jumping when an intermediate step has errors", () => {
+    const steps: F0WizardStep[] = [
+      { title: "Step 1", hasErrors: () => false },
+      { title: "Step 2", hasErrors: () => true },
+      { title: "Step 3" },
+    ]
+
+    const { result } = zeroRenderHook(() =>
+      useWizardNavigation({ steps, allowStepSkipping: true })
+    )
+
+    act(() => {
+      result.current.goToStep(2)
+    })
+
+    expect(result.current.currentStep).toBe(0)
   })
 
   it("goNext stays on current step when onNext rejects", async () => {
@@ -248,6 +309,148 @@ describe("useWizardNavigation", () => {
     expect(onNext).toHaveBeenCalledOnce()
     expect(result.current.currentStep).toBe(0)
     expect(result.current.loading).toBe(false)
+  })
+
+  it("goToStep with allowStepSkipping runs onNext for each intermediate step", async () => {
+    const onNext0 = vi.fn().mockResolvedValue(undefined)
+    const onNext1 = vi.fn().mockResolvedValue(undefined)
+    const steps: F0WizardStep[] = [
+      { title: "Step 1", onNext: onNext0 },
+      { title: "Step 2", onNext: onNext1 },
+      { title: "Step 3" },
+    ]
+
+    const { result } = zeroRenderHook(() =>
+      useWizardNavigation({ steps, allowStepSkipping: true })
+    )
+
+    await act(async () => {
+      await result.current.goToStep(2)
+    })
+
+    expect(onNext0).toHaveBeenCalledOnce()
+    expect(onNext1).toHaveBeenCalledOnce()
+    expect(result.current.currentStep).toBe(2)
+  })
+
+  it("goToStep with allowStepSkipping stops at failing intermediate step", async () => {
+    const onNext0 = vi.fn().mockResolvedValue(undefined)
+    const onNext1 = vi.fn().mockRejectedValue(new Error("Validation failed"))
+    const steps: F0WizardStep[] = [
+      { title: "Step 1", onNext: onNext0 },
+      { title: "Step 2", onNext: onNext1 },
+      { title: "Step 3" },
+    ]
+
+    const { result } = zeroRenderHook(() =>
+      useWizardNavigation({ steps, allowStepSkipping: true })
+    )
+
+    await act(async () => {
+      await result.current.goToStep(2)
+    })
+
+    expect(onNext0).toHaveBeenCalledOnce()
+    expect(onNext1).toHaveBeenCalledOnce()
+    expect(result.current.currentStep).toBe(0)
+    expect(result.current.loading).toBe(false)
+  })
+
+  it("goToStep with allowStepSkipping sets loading during validation", async () => {
+    let resolveOnNext: () => void
+    const onNext = () =>
+      new Promise<void>((resolve) => {
+        resolveOnNext = resolve
+      })
+
+    const steps: F0WizardStep[] = [
+      { title: "Step 1", onNext },
+      { title: "Step 2" },
+      { title: "Step 3" },
+    ]
+
+    const { result } = zeroRenderHook(() =>
+      useWizardNavigation({ steps, allowStepSkipping: true })
+    )
+
+    let goToStepPromise: Promise<void>
+    act(() => {
+      goToStepPromise = result.current.goToStep(2)
+    })
+
+    expect(result.current.loading).toBe(true)
+
+    await act(async () => {
+      resolveOnNext!()
+      await goToStepPromise!
+    })
+
+    expect(result.current.loading).toBe(false)
+    expect(result.current.currentStep).toBe(2)
+  })
+
+  it("goToStep forward always runs onNext for the current step even without allowStepSkipping", async () => {
+    const onNext0 = vi.fn().mockResolvedValue(undefined)
+    const steps: F0WizardStep[] = [
+      { title: "Step 1", onNext: onNext0 },
+      { title: "Step 2" },
+      { title: "Step 3" },
+    ]
+
+    const { result } = zeroRenderHook(() =>
+      useWizardNavigation({ steps, allowStepSkipping: false })
+    )
+
+    await act(async () => {
+      await result.current.goToStep(1)
+    })
+
+    expect(onNext0).toHaveBeenCalledOnce()
+    expect(result.current.currentStep).toBe(1)
+  })
+
+  it("goToStep forward stays on current step when onNext rejects", async () => {
+    const onNext0 = vi.fn().mockRejectedValue(new Error("Validation failed"))
+    const steps: F0WizardStep[] = [
+      { title: "Step 1", onNext: onNext0 },
+      { title: "Step 2" },
+    ]
+
+    const { result } = zeroRenderHook(() =>
+      useWizardNavigation({ steps, allowStepSkipping: false })
+    )
+
+    await act(async () => {
+      await result.current.goToStep(1)
+    })
+
+    expect(onNext0).toHaveBeenCalledOnce()
+    expect(result.current.currentStep).toBe(0)
+    expect(result.current.loading).toBe(false)
+  })
+
+  it("goToStep backwards does not run intermediate onNext even with allowStepSkipping", async () => {
+    const onNext0 = vi.fn().mockResolvedValue(undefined)
+    const steps: F0WizardStep[] = [
+      { title: "Step 1", onNext: onNext0 },
+      { title: "Step 2" },
+      { title: "Step 3" },
+    ]
+
+    const { result } = zeroRenderHook(() =>
+      useWizardNavigation({
+        steps,
+        defaultStepIndex: 2,
+        allowStepSkipping: true,
+      })
+    )
+
+    await act(async () => {
+      await result.current.goToStep(0)
+    })
+
+    expect(onNext0).not.toHaveBeenCalled()
+    expect(result.current.currentStep).toBe(0)
   })
 
   it("goNext does not call onSubmit when onNext rejects on last step", async () => {

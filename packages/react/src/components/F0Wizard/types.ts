@@ -13,7 +13,7 @@ export interface F0WizardStep {
 
 export interface F0WizardChildrenProps {
   currentStep: number
-  goToStep: (index: number) => void
+  goToStep: (index: number) => Promise<void>
 }
 
 export interface F0WizardProps {
@@ -29,4 +29,10 @@ export interface F0WizardProps {
   submitLabel?: string
   onSubmit?: () => void | Promise<unknown>
   onStepChanged?: (stepIndex: number) => void
+  /**
+   * When true, users can click on any completed step to jump to it.
+   * When false (default), users must navigate sequentially using Next/Previous.
+   * @default false
+   */
+  allowStepSkipping?: boolean
 }

@@ -103,6 +103,12 @@ interface F0WizardFormBaseProps {
   submitLabel?: string
   onStepChanged?: (stepIndex: number) => void
   steps?: F0WizardFormStep[]
+  /**
+   * When true, users can click on any completed step to jump to it.
+   * When false (default), users must navigate sequentially using Next/Previous.
+   * @default false
+   */
+  allowStepSkipping?: boolean
 }
 
 export interface F0WizardFormSingleSchemaProps<

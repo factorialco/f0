@@ -297,7 +297,33 @@ describe("F0Wizard", () => {
     expect(continueButton).toBeDisabled()
   })
 
-  it("provides goToStep to children render prop", async () => {
+  it("provides goToStep to children render prop (with allowStepSkipping)", async () => {
+    const user = userEvent.setup()
+
+    render(
+      <F0Wizard
+        isOpen={true}
+        onClose={() => {}}
+        steps={makeSteps(3)}
+        allowStepSkipping
+      >
+        {({ currentStep, goToStep }) => (
+          <div>
+            <div data-testid="step-content">Step {currentStep}</div>
+            <button onClick={() => goToStep(2)}>Jump to step 3</button>
+          </div>
+        )}
+      </F0Wizard>
+    )
+
+    await user.click(screen.getByText("Jump to step 3"))
+
+    await waitFor(() => {
+      expect(screen.getByTestId("step-content")).toHaveTextContent("Step 2")
+    })
+  })
+
+  it("blocks goToStep from skipping steps by default", async () => {
     const user = userEvent.setup()
 
     render(
@@ -314,7 +340,7 @@ describe("F0Wizard", () => {
     await user.click(screen.getByText("Jump to step 3"))
 
     await waitFor(() => {
-      expect(screen.getByTestId("step-content")).toHaveTextContent("Step 2")
+      expect(screen.getByTestId("step-content")).toHaveTextContent("Step 0")
     })
   })
 

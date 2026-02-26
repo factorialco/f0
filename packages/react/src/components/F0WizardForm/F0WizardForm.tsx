@@ -141,6 +141,7 @@ function F0WizardFormPerSection<T extends F0PerSectionSchema>({
   previousLabel,
   submitLabel,
   onStepChanged,
+  allowStepSkipping,
 }: F0WizardFormPerSectionProps<T>) {
   const {
     name,
@@ -250,6 +251,7 @@ function F0WizardFormPerSection<T extends F0PerSectionSchema>({
       previousLabel={previousLabel}
       submitLabel={submitLabel}
       onStepChanged={onStepChanged}
+      allowStepSkipping={allowStepSkipping}
     >
       {({ currentStep }) => {
         const currentSectionIds = getSectionIdsForStep(
@@ -370,6 +372,7 @@ function F0WizardFormSingleSchema<TSchema extends F0FormSchema>({
   previousLabel,
   submitLabel,
   onStepChanged,
+  allowStepSkipping,
 }: F0WizardFormSingleSchemaProps<TSchema>) {
   const {
     name,
@@ -455,6 +458,7 @@ function F0WizardFormSingleSchema<TSchema extends F0FormSchema>({
       submitLabel={submitLabel}
       onSubmit={handleFinalSubmit}
       onStepChanged={onStepChanged}
+      allowStepSkipping={allowStepSkipping}
     >
       {({ currentStep }) => {
         const currentSectionIds = getSectionIdsForStep(

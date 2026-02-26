@@ -25,6 +25,7 @@ function renderWithContext(
       goNext={goNext}
       goPrevious={goPrevious}
       steps={steps}
+      allowStepSkipping={overrides.allowStepSkipping ?? false}
       {...overrides}
     >
       <WizardSteps />
