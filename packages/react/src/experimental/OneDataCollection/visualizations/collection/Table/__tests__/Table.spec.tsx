@@ -20,6 +20,7 @@ import { ItemActionsDefinition } from "../../../../item-actions"
 import { SummariesDefinition } from "../../../../summary"
 import { AddRowProvider } from "../../EditableTable/context/AddRowContext"
 import { TableCollection } from "../index"
+import type { TableColumnDefinition } from "../types"
 
 vi.mock("../../property", () => ({
   propertyRenderers: {
@@ -921,19 +922,30 @@ describe("TableCollection", () => {
   })
 
   describe("summary placeholders", () => {
-    type SummaryPerson = Person & {
-      salary?: number | null | string
-      bonus?: number | null | string
+    type SummaryTestDefinitions = {
+      salary: {
+        type: "sum"
+      }
     }
 
-    const summaryColumns = [
+    type SummaryPerson = Person & {
+      salary?: number | null | string
+    }
+
+    const summaryColumns: ReadonlyArray<
+      TableColumnDefinition<
+        SummaryPerson,
+        SortingsDefinition,
+        SummaryTestDefinitions
+      >
+    > = [
       { label: "name", render: (item: SummaryPerson) => item.name },
       { label: "email", render: (item: SummaryPerson) => item.email },
       {
         label: "salary",
         summary: "salary" as const,
         align: "right" as const,
-        render: (item: SummaryPerson) => item.salary,
+        render: (item: SummaryPerson) => item.salary ?? undefined,
       },
     ]
 
@@ -945,7 +957,7 @@ describe("TableCollection", () => {
       SummaryPerson,
       TestFilters,
       SortingsDefinition,
-      SummariesDefinition,
+      SummaryTestDefinitions,
       ItemActionsDefinition<SummaryPerson>,
       TestNavigationFilters,
       GroupingDefinition<SummaryPerson>
@@ -977,7 +989,6 @@ describe("TableCollection", () => {
       setCurrentGrouping: vi.fn(),
       summaries: {
         salary: { type: "sum" },
-        label: "Total",
       },
     })
 
@@ -997,7 +1008,7 @@ describe("TableCollection", () => {
           SummaryPerson,
           TestFilters,
           SortingsDefinition,
-          SummariesDefinition,
+          SummaryTestDefinitions,
           ItemActionsDefinition<SummaryPerson>,
           TestNavigationFilters,
           GroupingDefinition<SummaryPerson>
@@ -1025,7 +1036,7 @@ describe("TableCollection", () => {
           SummaryPerson,
           TestFilters,
           SortingsDefinition,
-          SummariesDefinition,
+          SummaryTestDefinitions,
           ItemActionsDefinition<SummaryPerson>,
           TestNavigationFilters,
           GroupingDefinition<SummaryPerson>
@@ -1058,18 +1069,26 @@ describe("TableCollection", () => {
           SummaryPerson,
           TestFilters,
           SortingsDefinition,
-          SummariesDefinition,
+          SummaryTestDefinitions,
           ItemActionsDefinition<SummaryPerson>,
           TestNavigationFilters,
           GroupingDefinition<SummaryPerson>
         >
-          columns={[
-            ...summaryColumns.slice(0, 2),
-            {
-              ...summaryColumns[2],
-              summaryPlaceholder: "COLUMN",
-            },
-          ]}
+          columns={
+            [
+              ...summaryColumns.slice(0, 2),
+              {
+                ...summaryColumns[2],
+                summaryPlaceholder: "COLUMN",
+              },
+            ] as ReadonlyArray<
+              TableColumnDefinition<
+                SummaryPerson,
+                SortingsDefinition,
+                SummaryTestDefinitions
+              >
+            >
+          }
           source={createSummarySource({ salarySummary: null })}
           onSelectItems={vi.fn()}
           onLoadData={vi.fn()}
@@ -1092,7 +1111,7 @@ describe("TableCollection", () => {
           SummaryPerson,
           TestFilters,
           SortingsDefinition,
-          SummariesDefinition,
+          SummaryTestDefinitions,
           ItemActionsDefinition<SummaryPerson>,
           TestNavigationFilters,
           GroupingDefinition<SummaryPerson>
