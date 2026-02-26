@@ -80,14 +80,14 @@ export type OpenLinkActionType = {
 }
 
 const _Item = forwardRef<HTMLLIElement, ItemProps>(
-  ({ text, icon, action, textAlign }, ref) => {
+  ({ text, icon, action, contentAlign }, ref) => {
     return (
       <ItemContainer
         ref={ref}
         text={text}
         leftIcon={icon}
         action={getInternalAction(action, text)}
-        textAlign={textAlign}
+        contentAlign={contentAlign}
       />
     )
   }
@@ -107,11 +107,11 @@ type EmployeeItemProps = {
   lastName: string
   avatarUrl?: URL
   action?: ActionType
-  textAlign?: "start" | "end"
+  contentAlign?: "start" | "end"
 }
 
 const _PersonItem = forwardRef<HTMLLIElement, EmployeeItemProps>(
-  ({ action, avatarUrl, firstName, lastName, textAlign }, ref) => {
+  ({ action, avatarUrl, firstName, lastName, contentAlign }, ref) => {
     const fullName = `${firstName} ${lastName}`
     return (
       <ItemContainer
@@ -126,7 +126,7 @@ const _PersonItem = forwardRef<HTMLLIElement, EmployeeItemProps>(
         )}
         text={fullName}
         action={getInternalAction(action, fullName)}
-        textAlign={textAlign}
+        contentAlign={contentAlign}
       />
     )
   }
@@ -142,11 +142,11 @@ type CompanyItemProps = {
   name: string
   avatarUrl?: URL
   action?: ActionType
-  textAlign?: "start" | "end"
+  contentAlign?: "start" | "end"
 }
 
 const _CompanyItem = forwardRef<HTMLLIElement, CompanyItemProps>(
-  ({ avatarUrl, name, action, textAlign }, ref) => {
+  ({ avatarUrl, name, action, contentAlign }, ref) => {
     return (
       <ItemContainer
         ref={ref}
@@ -155,7 +155,7 @@ const _CompanyItem = forwardRef<HTMLLIElement, CompanyItemProps>(
         )}
         text={name}
         action={getInternalAction(action, name)}
-        textAlign={textAlign}
+        contentAlign={contentAlign}
       />
     )
   }
@@ -171,18 +171,18 @@ const CompanyItem = experimentalComponent("CompanyItem", _CompanyItem)
 type TeamItemProps = {
   name: string
   action?: ActionType
-  textAlign?: "start" | "end"
+  contentAlign?: "start" | "end"
 }
 
 const _TeamItem = forwardRef<HTMLLIElement, TeamItemProps>(
-  ({ action, name, textAlign }, ref) => {
+  ({ action, name, contentAlign }, ref) => {
     return (
       <ItemContainer
         ref={ref}
         leftIcon={() => <F0AvatarTeam name={name} size="xs" />}
         text={name}
         action={getInternalAction(action, name)}
-        textAlign={textAlign}
+        contentAlign={contentAlign}
       />
     )
   }

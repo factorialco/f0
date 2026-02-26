@@ -52,19 +52,16 @@ const ItemContent: FC<{ content: Content; contentAlign?: "start" | "end" }> = ({
       </li>
     )}
     {content.type === "person" && (
-      <DataList.PersonItem {...content} textAlign={contentAlign} />
+      <DataList.PersonItem {...content} contentAlign={contentAlign} />
     )}
     {content.type === "item" && (
-      <DataList.Item {...content} textAlign={contentAlign} />
+      <DataList.Item {...content} contentAlign={contentAlign} />
     )}
     {content.type === "team" && (
-      <DataList.TeamItem
-        {...content}
-        textAlign={content.textAlign ?? contentAlign}
-      />
+      <DataList.TeamItem {...content} contentAlign={contentAlign} />
     )}
     {content.type === "company" && (
-      <DataList.CompanyItem {...content} textAlign={contentAlign} />
+      <DataList.CompanyItem {...content} contentAlign={contentAlign} />
     )}
     {content.type === "dot-tag" && <DataList.DotTagItem {...content} />}
     {content.type === "avatar-list" && (
