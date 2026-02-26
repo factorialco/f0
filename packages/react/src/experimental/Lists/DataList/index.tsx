@@ -56,7 +56,7 @@ export type ItemProps = {
   text: string
   icon?: IconType
   action?: ActionType
-  textAlign?: "start" | "end"
+  contentAlign?: "start" | "end"
 }
 
 export type ActionType =
