@@ -1,16 +1,16 @@
 import { Input } from "@/experimental/Forms/Fields/Input"
 import { cn } from "@/lib/utils"
 
-import type { EditableCellProps } from "."
+import type { ValueDisplayEditorProps } from "../../types"
 
-export function TextCell({
+export function TextEditor({
   label,
   value,
   align,
   error,
   loading,
   onChange,
-}: EditableCellProps) {
+}: ValueDisplayEditorProps<string>) {
   return (
     <div
       className={cn(

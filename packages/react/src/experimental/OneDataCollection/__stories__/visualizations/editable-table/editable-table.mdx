@@ -283,14 +283,15 @@ composition:
   and tracks per-cell error state via React context.
 - **`cellRenderer`** — An `EditableCellRenderer` resolves each column's
   `editType(item)` function to determine which editable component to render.
-  The mapping from cell type to component is defined in an extensible
-  `editableCellMap` registry (`components/cells/index.ts`).
+  The mapping from cell type to component is defined in the
+  `valueDisplayEditors` registry (`ui/value-display/editors.ts`), keeping
+  editors co-located with their read-only renderers in the value-display system.
 
 To add a new cell type (e.g. `"date"`, `"select"`):
 
-1. Add the type literal to `EditableTableCellEditType` in `types.ts`.
-2. Create the component in `components/cells/`.
-3. Register it in `editableCellMap`.
+1. Create the editor component in `ui/value-display/types/<type>/<type>-editor.tsx`.
+2. Export it from `ui/value-display/types/<type>/index.tsx`.
+3. Register it in `valueDisplayEditors` (`ui/value-display/editors.ts`).
 
 ## Table vs Editable Table
 

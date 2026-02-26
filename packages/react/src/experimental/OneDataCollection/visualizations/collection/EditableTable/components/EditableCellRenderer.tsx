@@ -3,13 +3,12 @@ import type { RecordType, SortingsDefinition } from "@/hooks/datasource"
 import { renderProperty } from "@/experimental/OneDataCollection/property-render"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
+import { valueDisplayEditors } from "@/ui/value-display/editors"
 
 import type { SummariesDefinition } from "../../../../summary"
 import type { CellRendererProps } from "../../Table/types"
 import type { EditableTableColumnDefinition } from "../types"
-
 import { useEditableRow } from "../context/EditableRowContext"
-import { editableCellMap } from "./cells"
 
 /**
  * Get the display value for an editable cell from the local item.
@@ -69,7 +68,7 @@ export function EditableCellRenderer<
     cellEditType !== undefined && editableColumn.editable(localItem)
 
   if (isEditable && cellEditType) {
-    const CellComponent = editableCellMap[cellEditType]
+    const CellComponent = valueDisplayEditors[cellEditType]
 
     if (CellComponent) {
       const value = getCellValue(localItem, editableColumn)

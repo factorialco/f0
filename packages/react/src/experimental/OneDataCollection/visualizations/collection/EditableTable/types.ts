@@ -10,6 +10,8 @@ import { NavigationFiltersDefinition } from "../../../navigationFilters/types"
 import { SummariesDefinition } from "../../../summary"
 import { CollectionProps } from "../../../types"
 
+import type { EditableValueDisplayType } from "@/ui/value-display/editors"
+
 import type {
   TableColumnDefinition,
   TableVisualizationOptions,
@@ -18,8 +20,8 @@ import type {
 
 export type EditableTableVisualizationSettings = TableVisualizationSettings
 
-/** The edit mode for a column cell in the editable table. */
-export type EditableTableCellEditType = "text"
+/** The edit mode for a column cell in the editable table. Derived from value-display editors. */
+export type EditableTableCellEditType = EditableValueDisplayType
 
 /**
  * Column definition for Editable Table.
