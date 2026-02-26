@@ -56,6 +56,7 @@ export type ItemProps = {
   text: string
   icon?: IconType
   action?: ActionType
+  textAlign?: "start" | "end"
 }
 
 export type ActionType =
@@ -79,13 +80,14 @@ export type OpenLinkActionType = {
 }
 
 const _Item = forwardRef<HTMLLIElement, ItemProps>(
-  ({ text, icon, action }, ref) => {
+  ({ text, icon, action, textAlign }, ref) => {
     return (
       <ItemContainer
         ref={ref}
         text={text}
         leftIcon={icon}
         action={getInternalAction(action, text)}
+        textAlign={textAlign}
       />
     )
   }
@@ -105,10 +107,11 @@ type EmployeeItemProps = {
   lastName: string
   avatarUrl?: URL
   action?: ActionType
+  textAlign?: "start" | "end"
 }
 
 const _PersonItem = forwardRef<HTMLLIElement, EmployeeItemProps>(
-  ({ action, avatarUrl, firstName, lastName }, ref) => {
+  ({ action, avatarUrl, firstName, lastName, textAlign }, ref) => {
     const fullName = `${firstName} ${lastName}`
     return (
       <ItemContainer
@@ -123,6 +126,7 @@ const _PersonItem = forwardRef<HTMLLIElement, EmployeeItemProps>(
         )}
         text={fullName}
         action={getInternalAction(action, fullName)}
+        textAlign={textAlign}
       />
     )
   }
@@ -138,10 +142,11 @@ type CompanyItemProps = {
   name: string
   avatarUrl?: URL
   action?: ActionType
+  textAlign?: "start" | "end"
 }
 
 const _CompanyItem = forwardRef<HTMLLIElement, CompanyItemProps>(
-  ({ avatarUrl, name, action }, ref) => {
+  ({ avatarUrl, name, action, textAlign }, ref) => {
     return (
       <ItemContainer
         ref={ref}
@@ -150,6 +155,7 @@ const _CompanyItem = forwardRef<HTMLLIElement, CompanyItemProps>(
         )}
         text={name}
         action={getInternalAction(action, name)}
+        textAlign={textAlign}
       />
     )
   }
@@ -165,16 +171,18 @@ const CompanyItem = experimentalComponent("CompanyItem", _CompanyItem)
 type TeamItemProps = {
   name: string
   action?: ActionType
+  textAlign?: "start" | "end"
 }
 
 const _TeamItem = forwardRef<HTMLLIElement, TeamItemProps>(
-  ({ action, name }, ref) => {
+  ({ action, name, textAlign }, ref) => {
     return (
       <ItemContainer
         ref={ref}
         leftIcon={() => <F0AvatarTeam name={name} size="xs" />}
         text={name}
         action={getInternalAction(action, name)}
+        textAlign={textAlign}
       />
     )
   }

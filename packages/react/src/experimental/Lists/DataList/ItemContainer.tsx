@@ -11,6 +11,7 @@ type ItemContainerProps = {
   action?: InternalActionType
   text: string
   className?: string
+  textAlign?: "start" | "end"
 }
 
 // internally all action fields are mandatory
@@ -46,6 +47,7 @@ export const ItemContainer = forwardRef<HTMLLIElement, ItemContainerProps>(
       leftIcon: LeftIcon,
       className,
       action = { type: "noop" },
+      textAlign = "start",
     } = props
 
     return (
@@ -63,7 +65,12 @@ export const ItemContainer = forwardRef<HTMLLIElement, ItemContainerProps>(
             ) : (
               <F0Icon icon={LeftIcon} size="md" aria-hidden="true" />
             ))}
-          <div className="line-clamp-5 flex-1 whitespace-pre-line text-left">
+          <div
+            className={cn(
+              "line-clamp-5 flex-1 whitespace-pre-line",
+              textAlign === "end" ? "text-right" : "text-left"
+            )}
+          >
             {text}
           </div>
         </Action>

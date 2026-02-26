@@ -1,9 +1,9 @@
 import { ComponentProps, FC, forwardRef } from "react"
 
-import { withDataTestId } from "@/lib/data-testid"
 import { F0AvatarList } from "@/components/avatars/F0AvatarList"
 import { F0AvatarListProps } from "@/components/avatars/F0AvatarList/types"
 import { Weekdays } from "@/experimental/Widgets/Content/Weekdays"
+import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
 import { cn } from "@/lib/utils"
 
@@ -38,19 +38,31 @@ export interface DetailsItemType {
   content: Content | Content[]
   isHorizontal?: boolean
   spacingAtTheBottom?: boolean
+  contentAlign?: "start" | "end"
 }
 
-const ItemContent: FC<{ content: Content }> = ({ content }) => (
+const ItemContent: FC<{ content: Content; contentAlign?: "start" | "end" }> = ({
+  content,
+  contentAlign,
+}) => (
   <>
     {content.type === "weekdays" && (
       <li className="list-none px-1.5 py-1">
         <Weekdays {...content} />
       </li>
     )}
-    {content.type === "person" && <DataList.PersonItem {...content} />}
-    {content.type === "item" && <DataList.Item {...content} />}
-    {content.type === "team" && <DataList.TeamItem {...content} />}
-    {content.type === "company" && <DataList.CompanyItem {...content} />}
+    {content.type === "person" && (
+      <DataList.PersonItem {...content} textAlign={contentAlign} />
+    )}
+    {content.type === "item" && (
+      <DataList.Item {...content} textAlign={contentAlign} />
+    )}
+    {content.type === "team" && (
+      <DataList.TeamItem {...content} textAlign={contentAlign} />
+    )}
+    {content.type === "company" && (
+      <DataList.CompanyItem {...content} textAlign={contentAlign} />
+    )}
     {content.type === "dot-tag" && <DataList.DotTagItem {...content} />}
     {content.type === "avatar-list" && (
       <li className="w-fit list-none px-1.5 py-1">
@@ -62,7 +74,7 @@ const ItemContent: FC<{ content: Content }> = ({ content }) => (
 
 const _DetailsItem = forwardRef<HTMLDivElement, DetailsItemType>(
   function DetailsItem(
-    { title, content, isHorizontal = false, spacingAtTheBottom },
+    { title, content, isHorizontal = false, spacingAtTheBottom, contentAlign },
     ref
   ) {
     const contentArray = Array.isArray(content) ? content : [content]
@@ -78,7 +90,7 @@ const _DetailsItem = forwardRef<HTMLDivElement, DetailsItemType>(
       >
         <DataList label={title} isHorizontal={isHorizontal}>
           {contentArray.map((c, i) => (
-            <ItemContent key={i} content={c} />
+            <ItemContent key={i} content={c} contentAlign={contentAlign} />
           ))}
         </DataList>
       </div>

@@ -10,10 +10,14 @@ interface DetailsItemsListProps {
   title?: string
   tableView?: boolean
   details: DetailsItemType[]
+  contentAlign?: "start" | "end"
 }
 
 const _DetailsItemsList = forwardRef<HTMLDivElement, DetailsItemsListProps>(
-  function DetailsItemList({ title, tableView = false, details }, ref) {
+  function DetailsItemList(
+    { title, tableView = false, details, contentAlign },
+    ref
+  ) {
     return (
       <div ref={ref} className="flex flex-col gap-4">
         {!!title && (
@@ -37,6 +41,7 @@ const _DetailsItemsList = forwardRef<HTMLDivElement, DetailsItemsListProps>(
                 content={item.content}
                 spacingAtTheBottom={item.spacingAtTheBottom}
                 isHorizontal={tableView}
+                contentAlign={item.contentAlign ?? contentAlign}
               />
               {tableView && index !== details.length - 1 && (
                 <div className="h-[1px] w-full bg-f1-border-secondary" />
