@@ -22,6 +22,8 @@ type EditableRowContextValue<R extends RecordType> = {
   handleCellChange: (columnId: string, value: string) => void
 }
 
+// React's createContext does not support per-usage generics.
+// The generic useEditableRow<R>() hook below provides type safety at consumption time.
 const EditableRowContext = createContext<EditableRowContextValue<any> | null>(
   null
 )
