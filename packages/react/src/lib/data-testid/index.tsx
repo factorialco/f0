@@ -114,6 +114,11 @@ export const withDataTestId = <T extends React.ComponentType<any>>(
     const WrappedComponent = forwardRef((props: any, ref: any) => {
       const { dataTestId, ...rest } = props
       const content = originalRender(rest, ref)
+
+      if (content == null) {
+        // Preserve original behavior: do not render a wrapper when the component renders nothing
+        return content
+      }
       return (
         <DataTestIdWrapper dataTestId={dataTestId}>{content}</DataTestIdWrapper>
       )
