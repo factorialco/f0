@@ -8,6 +8,7 @@ import { valueDisplayEditors } from "@/ui/value-display/editors"
 import type { SummariesDefinition } from "../../../../summary"
 import type { CellRendererProps } from "../../Table/types"
 import type { EditableTableColumnDefinition } from "../types"
+
 import { useEditableRow } from "../context/EditableRowContext"
 
 /**
@@ -63,9 +64,18 @@ export function EditableCellRenderer<
   >
 
   const cellEditType = editableColumn.editType?.(localItem)
-
   const isEditable =
     cellEditType !== undefined && editableColumn.editable(localItem)
+
+  const hasId = editableColumn.id !== undefined
+
+  if (process.env.NODE_ENV === "development" && isEditable && !hasId) {
+    // Columns with an editType must define an id to support updates
+    // and error/loading state. Without an id the cell will be read-only.
+    console.warn(
+      `EditableTable: column "${editableColumn.label}" is editable but has no "id" defined. It will render as read-only.`
+    )
+  }
 
   if (isEditable && cellEditType) {
     const CellComponent = valueDisplayEditors[cellEditType]
