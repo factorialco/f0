@@ -1,33 +1,30 @@
 import { AgentState } from '@livekit/components-react';
 import { AIMessage } from '@copilotkit/shared';
 import { AlertAvatarProps as AlertAvatarProps_2 } from './F0AvatarAlert';
-import { AlertTagCellValue } from '../../../ui/value-display/types/alertTag';
+import { AlertTagCellValue } from './f0';
 import { AlertTagCellValue as AlertTagCellValue_2 } from './types/alertTag';
-import { AmountCellValue } from '../../../ui/value-display/types/amount';
+import { AmountCellValue } from './f0';
 import { AmountCellValue as AmountCellValue_2 } from './types/amount';
 import { AnchorHTMLAttributes } from 'react';
 import { AriaAttributes } from 'react';
 import { AssistantMessageProps } from '@copilotkit/react-ui';
 import { AutoFill as AutoFill_2 } from 'react';
-import { AvatarBadge as AvatarBadge_2 } from '../F0Avatar';
-import { AvatarFileSize as AvatarFileSize_2 } from './types';
-import { AvatarListCellValue } from '../../../ui/value-display/types/avatarList';
+import { AvatarListCellValue } from './f0';
 import { AvatarListCellValue as AvatarListCellValue_2 } from './types/avatarList';
 import * as AvatarPrimitive from '@radix-ui/react-avatar';
 import { AvatarProps } from './F0Avatar';
 import { AvatarProps as AvatarProps_2 } from '@radix-ui/react-avatar';
 import { BarSeriesCellValue } from './types/barSeries';
-import { BaseAvatarProps as BaseAvatarProps_2 } from '../internal/BaseAvatar';
 import { baseColors } from '@factorialco/f0-core';
 import { BigNumberProps as BigNumberProps_2 } from './types';
 import { BlockContentExtraProps } from './blocks/BlockContent';
 import { BlockProps } from './blocks/Block';
 import { CategoryBarProps } from './CategoryBarChart';
-import { ChartConfig } from '../../ui/chart';
+import { ChartConfig } from './f0';
 import { ChartConfig as ChartConfig_2 } from './utils/types';
 import { ChartPropsBase } from './utils/types';
 import { ClassValue } from 'cva';
-import { CompanyCellValue } from '../../../ui/value-display/types/company';
+import { CompanyCellValue } from './f0';
 import { CompanyCellValue as CompanyCellValue_2 } from './types/company';
 import { ComponentProps } from 'react';
 import { ComponentType } from 'react';
@@ -35,11 +32,11 @@ import { Context } from 'react';
 import { CopilotKitProps } from '@copilotkit/react-core';
 import { CountryCellValue } from './types/country';
 import { DashboardProps as DashboardProps_2 } from './Dashboard';
-import { DateCellValue } from '../../../ui/value-display/types/date';
+import { DateCellValue } from './f0';
 import { DateCellValue as DateCellValue_2 } from './types/date';
 import { DateFilterOptions } from './DateFilter/DateFilter';
 import { default as default_2 } from 'react';
-import { DotTagCellValue } from '../../../ui/value-display/types/dotTag';
+import { DotTagCellValue } from './f0';
 import { DotTagCellValue as DotTagCellValue_2 } from './types/dotTag';
 import { F0AvatarCompanyProps as F0AvatarCompanyProps_2 } from './types';
 import { F0AvatarDateProps } from './F0AvatarDate';
@@ -50,7 +47,10 @@ import { F0AvatarPersonProps as F0AvatarPersonProps_2 } from './types';
 import { F0AvatarTeamProps as F0AvatarTeamProps_2 } from './F0AvatarTeam';
 import { F0DialogProps } from './F0Dialog';
 import { F0DrawerProps } from './F0Drawer';
+import { F0FormDefinitionPerSection as F0FormDefinitionPerSection_2 } from './f0';
+import { F0FormDefinitionSingleSchema as F0FormDefinitionSingleSchema_2 } from './f0';
 import { F0GridStackProps as F0GridStackProps_2 } from './F0GridStack';
+import { F0SelectProps as F0SelectProps_2 } from './types';
 import { F0TagBalanceProps } from './types';
 import { F0TagCompanyProps } from './types';
 import { F0TagListProps } from './types';
@@ -59,10 +59,9 @@ import { F0TagRawProps } from './types';
 import { F0TagStatusProps } from './types';
 import { F0TagTeamProps } from './types';
 import { f1Colors } from '@factorialco/f0-core';
-import { FileCellValue } from '../../../ui/value-display/types/file';
+import { FileCellValue } from './f0';
 import { FileCellValue as FileCellValue_2 } from './types/file';
-import { FileDef as FileDef_2 } from './types';
-import { FolderCellValue } from '../../../ui/value-display/types/folder';
+import { FolderCellValue } from './f0';
 import { FolderCellValue as FolderCellValue_2 } from './types/folder';
 import { ForwardedRef } from 'react';
 import { ForwardRefExoticComponent } from 'react';
@@ -78,29 +77,29 @@ import { HTMLAttributes } from 'react';
 import { IconCellValue } from './types/icon';
 import { ImgHTMLAttributes } from 'react';
 import { InFilterOptions } from './InFilter/types';
-import { internalAvatarColors as internalAvatarColors_2 } from '../../../ui/Avatar';
-import { internalAvatarSizes as internalAvatarSizes_2 } from '../../../ui/Avatar';
-import { internalAvatarTypes as internalAvatarTypes_2 } from '../../../ui/Avatar';
+import { internalAvatarColors as internalAvatarColors_2 } from './f0';
+import { internalAvatarSizes as internalAvatarSizes_2 } from './f0';
+import { internalAvatarTypes as internalAvatarTypes_2 } from './f0';
 import { JSX as JSX_2 } from 'react';
-import { LineChartConfig } from '../../ui/chart';
+import { LineChartConfig } from './f0';
 import { LineChartPropsBase } from './utils/types';
 import { LocalAudioTrack } from 'livekit-client';
 import { LongTextCellValue } from './types/longText';
 import { Message } from '@copilotkit/shared';
 import { MessagesProps } from '@copilotkit/react-ui';
-import { NumberCellValue } from '../../../ui/value-display/types/number';
+import { NumberCellValue } from './f0';
 import { NumberCellValue as NumberCellValue_2 } from './types/number';
 import { NumberFilterOptions } from './NumberFilter/NumberFilter';
 import { Observable } from 'zen-observable-ts';
 import { PageLayoutBlockComponent as PageLayoutBlockComponent_2 } from './types';
-import { PageLayoutGroupComponent as PageLayoutGroupComponent_2 } from '../Layout';
+import { PageLayoutGroupComponent as PageLayoutGroupComponent_2 } from './f0';
 import { PageProps } from './pages/Page';
 import { PercentageCellValue } from './types/percentage';
-import { PersonCellValue } from '../../../ui/value-display/types/person';
+import { PersonCellValue } from './f0';
 import { PersonCellValue as PersonCellValue_2 } from './types/person';
 import { PieChartProps } from './PieChart';
 import { PopoverContentProps } from '@radix-ui/react-popover';
-import { ProgressBarCellValue } from '../../../ui/value-display/types/progressBar';
+import { ProgressBarCellValue } from './f0';
 import { ProgressBarCellValue as ProgressBarCellValue_2 } from './types/progressBar';
 import { Props as Props_2 } from './types';
 import * as React_2 from 'react';
@@ -111,28 +110,28 @@ import { RefObject } from 'react';
 import { RemoteAudioTrack } from 'livekit-client';
 import { SearchFilterOptions } from './SearchFilter/SearchFilter';
 import { SizeToken as SizeToken_2 } from './types';
-import { StatusCellValue } from '../../../ui/value-display/types/status';
+import { StatusCellValue } from './f0';
 import { StatusCellValue as StatusCellValue_2 } from './types/status';
 import { SVGProps } from 'react';
 import * as SwitchPrimitive from '@radix-ui/react-switch';
-import { TagCellValue } from '../../../ui/value-display/types/tag';
+import { TagCellValue } from './f0';
 import { TagCellValue as TagCellValue_2 } from './types/tag';
-import { TagListCellValue } from '../../../ui/value-display/types/tagList';
+import { TagListCellValue } from './f0';
 import { TagListCellValue as TagListCellValue_2 } from './types/tagList';
 import { TagType as TagType_2 } from './types';
 import { TagVariant as TagVariant_2 } from './F0Tag';
-import { TeamCellValue } from '../../../ui/value-display/types/team';
+import { TeamCellValue } from './f0';
 import { TeamCellValue as TeamCellValue_2 } from './types/team';
-import { TextCellValue } from '../../../ui/value-display/types/text';
+import { TextCellValue } from './f0';
 import { TextCellValue as TextCellValue_2 } from './types/text';
 import { TrackReferenceOrPlaceholder } from '@livekit/components-react';
-import { ValueDisplayRendererContext } from '../../../ui/value-display';
+import { ValueDisplayRendererContext } from './f0';
 import { VariantProps } from 'cva';
-import { WithDataTestIdReturnType as WithDataTestIdReturnType_2 } from '../lib/data-testid';
-import { WithDataTestIdReturnType as WithDataTestIdReturnType_3 } from '../../lib/data-testid';
-import { WithDataTestIdReturnType as WithDataTestIdReturnType_4 } from '../../../lib/data-testid';
-import { WithDataTestIdReturnType as WithDataTestIdReturnType_5 } from '../../f0';
-import { WithDataTestIdReturnType as WithDataTestIdReturnType_6 } from '../../lib/data-testid/index.tsx';
+import { WithDataTestIdReturnType as WithDataTestIdReturnType_2 } from './f0';
+import { WithDataTestIdReturnType as WithDataTestIdReturnType_3 } from './f0';
+import { WithDataTestIdReturnType as WithDataTestIdReturnType_4 } from './f0';
+import { WithDataTestIdReturnType as WithDataTestIdReturnType_5 } from './f0';
+import { WithDataTestIdReturnType as WithDataTestIdReturnType_6 } from './f0';
 import { z } from 'zod';
 import { ZodEffects } from 'zod';
 import { ZodRawShape } from 'zod';
@@ -618,12 +617,9 @@ export declare type AvatarVariants = (typeof avatarVariants)[number];
 
 export declare const avatarVariants: readonly ["person", "team", "company", "file", "flag"];
 
-export declare const Await: AwaitGeneric;
-
-/**
- * Generic component type so <Await resolve={value}> correctly types children as (value: T) => ReactNode.
- */
-declare type AwaitGeneric = <T>(props: AwaitProps<T> & WithDataTestIdProps) => ReactNode;
+export declare const Await: <T>(props: AwaitProps<T> & {
+    dataTestId?: string;
+}) => ReactNode;
 
 export declare type AwaitProps<T> = {
     resolve: Promise<T> | T;
@@ -1917,6 +1913,29 @@ export declare type DataSourceDefinition<R extends RecordType = RecordType, Filt
 };
 
 /**
+ * Wrapper component that conditionally renders a `data-testid` attribute.
+ *
+ * When `dataTestId` is provided and the platform context enables test id rendering,
+ * wraps children in a `<div data-testid={dataTestId} style={{ display: "contents" }}>`.
+ * Otherwise renders children as-is with no wrapper element.
+ *
+ * Use this directly inside components with complex generic types (e.g. F0Select,
+ * OneFilterPicker) where the `withDataTestId` HOC would erase type parameters.
+ *
+ * @example
+ * ```tsx
+ * const MyComponent = <T,>({ dataTestId, ...props }: MyProps<T> & WithDataTestIdProps) => (
+ *   <DataTestIdWrapper dataTestId={dataTestId}>
+ *     <div>...</div>
+ *   </DataTestIdWrapper>
+ * )
+ * ```
+ */
+export declare const DataTestIdWrapper: ({ dataTestId, children, }: WithDataTestIdProps & {
+    children: ReactNode;
+}) => ReactNode;
+
+/**
  * All valid renderIf conditions for date fields
  */
 declare type DateFieldRenderIf = DateRenderIfCondition | CommonRenderIfCondition | F0BaseFieldRenderIfFunction;
@@ -2641,6 +2660,12 @@ export declare const defaultTranslations: {
             };
         };
     };
+    readonly wizard: {
+        readonly previous: "Previous";
+        readonly next: "Continue";
+        readonly submit: "Submit";
+        readonly stepOf: "Step {{current}} of {{total}}";
+    };
 };
 
 export declare type DialogAction = Optional<Pick<F0ButtonProps, "label" | "icon" | "disabled">, "icon" | "disabled"> & {
@@ -3122,21 +3147,21 @@ export declare type F0AvatarEmojiProps = {
     size?: (typeof avatarEmojiSizes)[number];
 } & Partial<Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">>;
 
-export declare const F0AvatarFile: WithDataTestIdReturnType_4<ForwardRefExoticComponent<Omit<Omit<Omit<AvatarProps_2 & RefAttributes<HTMLSpanElement>, "ref"> & {
+export declare const F0AvatarFile: ForwardRefExoticComponent<Omit<Omit<Omit<AvatarProps_2 & RefAttributes<HTMLSpanElement>, "ref"> & {
 size?: internalAvatarSizes_2[number];
 type?: internalAvatarTypes_2[number];
 color?: internalAvatarColors_2[number];
 } & RefAttributes<HTMLSpanElement>, "ref">, "type" | "size"> & {
-file: FileDef_2;
-size?: AvatarFileSize_2;
-badge?: AvatarBadge_2;
-} & Pick<BaseAvatarProps_2, "aria-label" | "aria-labelledby"> & RefAttributes<HTMLSpanElement>>>;
+file: FileDef;
+size?: AvatarFileSize;
+badge?: AvatarBadge;
+} & Pick<BaseAvatarProps, "aria-label" | "aria-labelledby"> & WithDataTestIdProps & RefAttributes<HTMLSpanElement>>;
 
 export declare type F0AvatarFileProps = Omit<React.ComponentPropsWithoutRef<typeof Avatar>, "type" | "size"> & {
     file: FileDef;
     size?: AvatarFileSize;
     badge?: AvatarBadge;
-} & Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">;
+} & Pick<BaseAvatarProps, "aria-label" | "aria-labelledby"> & WithDataTestIdProps;
 
 declare type F0AvatarFlagProps = {
     flag: CountryCode | (string & {});
@@ -3952,9 +3977,9 @@ export declare type F0FileField = F0BaseField & {
  */
 export declare type F0FileFieldConfig = F0StringFileConfig | F0ArrayFileConfig;
 
-export declare const F0FilterPickerContent: F0FilterPickerContentGeneric;
-
-declare type F0FilterPickerContentGeneric = <Filters extends FiltersDefinition>(props: F0FilterPickerContentProps<Filters> & WithDataTestIdProps) => ReactElement | null;
+export declare const F0FilterPickerContent: <Filters extends FiltersDefinition>(props: F0FilterPickerContentProps<Filters> & {
+    dataTestId?: string;
+}) => ReactElement | null;
 
 /**
  * Props for the F0FilterPickerContent component.
@@ -3974,11 +3999,13 @@ export declare interface F0FilterPickerContentProps<Filters extends FiltersDefin
 }
 
 /**
- * Public props for F0FilterPickerContent (includes dataTestId from withDataTestId).
+ * Public props for F0FilterPickerContent (includes dataTestId).
  * Use this when typing props that include the optional dataTestId attribute.
  * @template Filters - The type defining the structure of available filters
  */
-export declare type F0FilterPickerContentPublicProps<Filters extends FiltersDefinition> = F0FilterPickerContentProps<Filters> & WithDataTestIdProps;
+export declare type F0FilterPickerContentPublicProps<Filters extends FiltersDefinition> = F0FilterPickerContentProps<Filters> & {
+    dataTestId?: string;
+};
 
 /**
  * @experimental This is an experimental component, use it at your own risk
@@ -3986,6 +4013,8 @@ export declare type F0FilterPickerContentPublicProps<Filters extends FiltersDefi
 export declare const F0Form: {
     <TSchema extends F0FormSchema>(props: F0FormPropsWithSingleSchema<TSchema>): React.ReactElement;
     <T extends F0PerSectionSchema>(props: F0FormPropsWithPerSectionSchema<T>): React.ReactElement;
+    <TSchema extends F0FormSchema>(props: F0FormPropsWithSingleSchemaDefinition<TSchema>): React.ReactElement;
+    <T extends F0PerSectionSchema>(props: F0FormPropsWithPerSectionDefinition<T>): React.ReactElement;
 };
 
 /**
@@ -4026,6 +4055,38 @@ declare interface F0FormDefaultSubmitConfig extends F0FormSubmitConfigBase {
      * @default false
      */
     hideSubmitButton?: boolean;
+    /**
+     * When true, hides the internal action bar (loading/success feedback).
+     * Useful when the parent component provides its own action bar.
+     * @default false
+     */
+    hideActionBar?: boolean;
+}
+
+export declare type F0FormDefinition<T extends F0FormSchema_2 | F0PerSectionSchema_2 = F0FormSchema_2 | F0PerSectionSchema_2> = T extends F0FormSchema_2 ? F0FormDefinitionSingleSchema<T> : T extends F0PerSectionSchema_2 ? F0FormDefinitionPerSection<T> : never;
+
+export declare interface F0FormDefinitionPerSection<T extends F0PerSectionSchema_2> {
+    /* Excluded from this release type: _brand */
+    name: string;
+    schema: T;
+    sections?: Record<string, F0PerSectionSectionConfig>;
+    defaultValues?: {
+        [K in keyof T]?: Partial<z.infer<T[K]>>;
+    };
+    onSubmit: (arg: F0WizardFormPerSectionSubmitArg<T>) => Promise<F0FormSubmitResult> | F0FormSubmitResult;
+    submitConfig?: F0PerSectionSubmitConfig;
+    errorTriggerMode?: F0FormErrorTriggerMode;
+}
+
+export declare interface F0FormDefinitionSingleSchema<TSchema extends F0FormSchema_2> {
+    /* Excluded from this release type: _brand */
+    name: string;
+    schema: TSchema;
+    sections?: Record<string, F0SectionConfig>;
+    defaultValues?: Partial<z.infer<TSchema>>;
+    onSubmit: (arg: F0WizardFormSingleSubmitArg<TSchema>) => Promise<F0FormSubmitResult> | F0FormSubmitResult;
+    submitConfig?: F0FormSubmitConfig;
+    errorTriggerMode?: F0FormErrorTriggerMode;
 }
 
 /**
@@ -4127,11 +4188,24 @@ export declare function f0FormField<T extends ZodTypeAny, TConfig = undefined>(s
 export declare function f0FormField<T extends ZodTypeAny, V extends string | number = string | number, R extends Record<string, unknown> = Record<string, unknown>>(schema: T, config: F0FieldConfig<V, R>): T & F0ZodType<T>;
 
 /**
- * Union of both F0Form prop variants.
+ * Union of all F0Form prop variants.
  * The component detects the mode based on whether `schema` is a single Zod schema
- * or a record of schemas keyed by section ID.
+ * or a record of schemas keyed by section ID, or whether a `formDefinition` is provided.
  */
-export declare type F0FormProps<TSchema extends F0FormSchema | F0PerSectionSchema = F0FormSchema | F0PerSectionSchema> = TSchema extends F0FormSchema ? F0FormPropsWithSingleSchema<TSchema> : TSchema extends F0PerSectionSchema ? F0FormPropsWithPerSectionSchema<TSchema> : never;
+export declare type F0FormProps<TSchema extends F0FormSchema | F0PerSectionSchema = F0FormSchema | F0PerSectionSchema> = TSchema extends F0FormSchema ? F0FormPropsWithSingleSchema<TSchema> | F0FormPropsWithSingleSchemaDefinition<TSchema> : TSchema extends F0PerSectionSchema ? F0FormPropsWithPerSectionSchema<TSchema> | F0FormPropsWithPerSectionDefinition<TSchema> : never;
+
+/**
+ * Props for F0Form using a formDefinition (per-section schema mode).
+ * Form-related props are extracted from the definition; only rendering/integration
+ * props are passed directly.
+ */
+export declare interface F0FormPropsWithPerSectionDefinition<T extends F0PerSectionSchema> {
+    formDefinition: F0FormDefinitionPerSection_2<T>;
+    className?: string;
+    styling?: F0FormStylingConfig;
+    formRef?: React.MutableRefObject<F0FormRef | null>;
+    initialFiles?: InitialFile[];
+}
 
 /**
  * Props for the F0Form component (per-section schema mode).
@@ -4221,6 +4295,19 @@ export declare interface F0FormPropsWithSingleSchema<TSchema extends F0FormSchem
 }
 
 /**
+ * Props for F0Form using a formDefinition (single schema mode).
+ * Form-related props are extracted from the definition; only rendering/integration
+ * props are passed directly.
+ */
+export declare interface F0FormPropsWithSingleSchemaDefinition<TSchema extends F0FormSchema> {
+    formDefinition: F0FormDefinitionSingleSchema_2<TSchema>;
+    className?: string;
+    styling?: F0FormStylingConfig;
+    formRef?: React.MutableRefObject<F0FormRef | null>;
+    initialFiles?: InitialFile[];
+}
+
+/**
  * Interface for the F0Form ref methods
  */
 export declare interface F0FormRef {
@@ -4238,6 +4325,10 @@ export declare interface F0FormRef {
      * Check if the form has unsaved changes
      */
     isDirty: () => boolean;
+    /**
+     * Get the current form values (including unsaved changes)
+     */
+    getValues: () => Record<string, unknown>;
     /* Excluded from this release type: _setStateCallback */
 }
 
@@ -4245,6 +4336,8 @@ export declare interface F0FormRef {
  * Type for F0Form schemas - can be a plain ZodObject or a refined ZodObject (ZodEffects)
  */
 export declare type F0FormSchema<T extends ZodRawShape = ZodRawShape> = z.ZodObject<T> | ZodEffects<z.ZodObject<T>>;
+
+declare type F0FormSchema_2<T extends ZodRawShape = ZodRawShape> = z.ZodObject<T> | ZodEffects<z.ZodObject<T>>;
 
 /**
  * Callback to update form state in the hook
@@ -4488,6 +4581,8 @@ export declare type F0OneSwitchProps = React.ComponentPropsWithoutRef<typeof Swi
  */
 export declare type F0PerSectionSchema = Record<string, F0FormSchema>;
 
+declare type F0PerSectionSchema_2 = Record<string, F0FormSchema_2>;
+
 /**
  * Section configuration for per-section schema mode.
  * Extends F0SectionConfig with per-section submit and default values.
@@ -4516,6 +4611,12 @@ export declare interface F0PerSectionSubmitConfig {
      * @default false
      */
     showSubmitWhenDirty?: boolean;
+    /**
+     * When true, hides the submit button.
+     * Useful when submission is controlled externally (e.g. inside F0WizardForm).
+     * @default false
+     */
+    hideSubmitButton?: boolean;
 }
 
 export declare const F0Provider: React.FC<{
@@ -4595,7 +4696,9 @@ export declare interface F0SectionConfig {
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const F0Select: F0SelectGeneric;
+export declare const F0Select: <T extends string = string, R = unknown>(props: F0SelectProps_2<T, R> & {
+    ref?: React.Ref<HTMLButtonElement>;
+}) => React.ReactElement;
 
 /**
  * Base props shared across all F0Select variants
@@ -4626,7 +4729,7 @@ declare type F0SelectBaseProps<T extends string, R = unknown> = {
      * @default false
      */
     showPreview?: boolean;
-};
+} & WithDataTestIdProps;
 
 /**
  * F0 config options specific to select fields
@@ -4690,12 +4793,6 @@ export declare type F0SelectField = F0BaseField & F0SelectConfig & {
     /** Conditional rendering based on another field's value */
     renderIf?: SelectFieldRenderIf;
 };
-
-/**
- * Generic component type so consumers can use <F0Select<T, R> />.
- * Preserves dataTestId and F0SelectProps<T, R>.
- */
-declare type F0SelectGeneric = <T extends string, R = unknown>(props: F0SelectProps<T, R> & WithDataTestIdProps) => ReactElement | null;
 
 export declare type F0SelectItemObject<T, R = unknown> = {
     type?: "item";
@@ -5026,6 +5123,104 @@ export declare type F0TimeField = F0BaseField & F0TimeConfig & {
 declare type F0TimeFieldConfig = F0BaseConfig & F0TimeConfig & {
     fieldType: "time";
 };
+
+export declare const F0WizardForm: {
+    <TSchema extends F0FormSchema_2>(props: F0WizardFormSingleSchemaProps<TSchema>): default_2.ReactElement;
+    <T extends F0PerSectionSchema_2>(props: F0WizardFormPerSectionProps<T>): default_2.ReactElement;
+};
+
+declare interface F0WizardFormBaseProps {
+    isOpen: boolean;
+    onClose?: () => void;
+    title?: string;
+    size?: F0DialogSize;
+    defaultStepIndex?: number;
+    nextLabel?: string;
+    previousLabel?: string;
+    onStepChanged?: (stepIndex: number) => void;
+    steps?: F0WizardFormStep[];
+    /**
+     * When true, users can click on any step that is not explicitly marked
+     * as incomplete (i.e. its `isCompleted` callback does not return `false`)
+     * to jump to it.
+     * When false (default), users must navigate sequentially using Next/Previous.
+     * @default false
+     */
+    allowStepSkipping?: boolean;
+    /**
+     * When true, the wizard automatically closes after the last step's
+     * onSubmit returns `{ success: true }`.
+     * Also implied when `linkAfterLastStepSubmit` is provided.
+     * @default false
+     */
+    autoCloseOnLastStepSubmit?: boolean;
+    /**
+     * When true, the wizard automatically skips to the first non-completed step
+     * on open. A step is completed when all required fields have values, or when
+     * the step's custom `isCompleted` function returns true.
+     * Only applies on initial render; users can still navigate back freely.
+     * @default false
+     */
+    autoSkipCompletedSteps?: boolean;
+}
+
+export declare interface F0WizardFormPerSectionProps<T extends F0PerSectionSchema_2> extends F0WizardFormBaseProps {
+    formDefinition: F0FormDefinitionPerSection<T>;
+    /**
+     * Function that receives the submitted data and returns a URL to navigate to
+     * after the last step's onSubmit returns `{ success: true }`.
+     * When provided, the wizard auto-closes and navigates to the returned URL.
+     */
+    linkAfterLastStepSubmit?: (arg: {
+        fullData: InferPerSectionValues_2<T>;
+    }) => string;
+}
+
+/**
+ * Per-section submit argument: discriminated union where sectionId narrows data.
+ * fullData always contains all sections' latest values.
+ */
+export declare type F0WizardFormPerSectionSubmitArg<T extends F0PerSectionSchema_2> = {
+    [K in keyof T & string]: {
+        sectionId: K;
+        data: z.infer<T[K]>;
+        fullData: InferPerSectionValues_2<T>;
+    };
+}[keyof T & string];
+
+export declare interface F0WizardFormSingleSchemaProps<TSchema extends F0FormSchema_2> extends F0WizardFormBaseProps {
+    formDefinition: F0FormDefinitionSingleSchema<TSchema>;
+    /**
+     * Function that receives the submitted data and returns a URL to navigate to
+     * after the last step's onSubmit returns `{ success: true }`.
+     * When provided, the wizard auto-closes and navigates to the returned URL.
+     */
+    linkAfterLastStepSubmit?: (arg: {
+        fullData: z.infer<TSchema>;
+    }) => string;
+}
+
+/**
+ * Single-schema submit argument: data is the full form.
+ */
+export declare interface F0WizardFormSingleSubmitArg<TSchema extends F0FormSchema_2> {
+    data: z.infer<TSchema>;
+}
+
+export declare interface F0WizardFormStep {
+    title: string;
+    sectionIds: string[];
+    nextLabel?: string;
+    previousLabel?: string;
+    /**
+     * Custom function to determine if this step is considered completed.
+     * Receives the step's current data. When provided, takes precedence
+     * over the default "all required fields filled" check.
+     */
+    isCompleted?: (arg: {
+        data: Record<string, unknown>;
+    }) => boolean;
+}
 
 /**
  * Extended Zod type with F0 metadata
@@ -5566,6 +5761,10 @@ export declare function inferFieldType(schema: ZodTypeAny, config: F0FieldConfig
  * Merges all section schemas into a single type.
  */
 export declare type InferPerSectionValues<T extends F0PerSectionSchema> = {
+    [K in keyof T]: z.infer<T[K]>;
+};
+
+declare type InferPerSectionValues_2<T extends F0PerSectionSchema_2> = {
     [K in keyof T]: z.infer<T[K]>;
 };
 
@@ -6284,13 +6483,9 @@ action: BulkAction,
 ...Parameters<OnSelectItemsCallback<Record, Filters>>
 ]) => void;
 
-export declare const OneFilterPicker: OneFilterPickerGeneric;
-
-/**
- * Generic component type so consumers can use <OneFilterPicker<Definition> />.
- * Preserves dataTestId and OneFilterPickerRootProps<Definition>.
- */
-declare type OneFilterPickerGeneric = <Definition extends FiltersDefinition>(props: OneFilterPickerRootProps<Definition> & WithDataTestIdProps) => ReactElement | null;
+export declare const OneFilterPicker: <Definition extends FiltersDefinition>(props: OneFilterPickerRootProps<Definition> & {
+    dataTestId?: string;
+}) => ReactElement | null;
 
 /**
  * Props for the Filters component.
@@ -7040,12 +7235,6 @@ export declare const StandardLayout: WithDataTestIdReturnType_2<ForwardRefExotic
 export declare interface StandardLayoutProps extends VariantProps<typeof layoutVariants> {
     children?: default_2.ReactNode;
 }
-
-/**
- * Keys on T that are not part of Function, so we preserve static members (Skeleton, displayName, etc.)
- * without bringing in a second call signature that would confuse ComponentProps<> inference.
- */
-declare type StaticMembersOf<T> = Pick<T, Exclude<keyof T, keyof Function>>;
 
 export declare type Status = (typeof statuses_2)[number];
 
@@ -7875,6 +8064,32 @@ export declare const useEmojiConfetti: () => {
  */
 export declare function useF0Form(): UseF0FormReturn;
 
+export declare function useF0FormDefinition<TSchema extends F0FormSchema_2>(input: UseF0FormDefinitionSingleSchemaInput<TSchema>): F0FormDefinitionSingleSchema<TSchema>;
+
+export declare function useF0FormDefinition<T extends F0PerSectionSchema_2>(input: UseF0FormDefinitionPerSectionInput<T>): F0FormDefinitionPerSection<T>;
+
+declare interface UseF0FormDefinitionPerSectionInput<T extends F0PerSectionSchema_2> {
+    name: string;
+    schema: T;
+    sections?: Record<string, F0PerSectionSectionConfig>;
+    defaultValues?: {
+        [K in keyof T]?: Partial<z.infer<T[K]>>;
+    };
+    onSubmit: (arg: F0WizardFormPerSectionSubmitArg<T>) => Promise<F0FormSubmitResult> | F0FormSubmitResult;
+    submitConfig?: F0PerSectionSubmitConfig;
+    errorTriggerMode?: F0FormErrorTriggerMode;
+}
+
+declare interface UseF0FormDefinitionSingleSchemaInput<TSchema extends F0FormSchema_2> {
+    name: string;
+    schema: TSchema;
+    sections?: Record<string, F0SectionConfig>;
+    defaultValues?: Partial<z.infer<TSchema>>;
+    onSubmit: (arg: F0WizardFormSingleSubmitArg<TSchema>) => Promise<F0FormSubmitResult> | F0FormSubmitResult;
+    submitConfig?: F0FormSubmitConfig;
+    errorTriggerMode?: F0FormErrorTriggerMode;
+}
+
 /**
  * Return type for the useF0Form hook
  */
@@ -7897,6 +8112,10 @@ export declare interface UseF0FormReturn {
      * Check if the form has unsaved changes
      */
     isDirty: () => boolean;
+    /**
+     * Get the current form values (including unsaved changes)
+     */
+    getValues: () => Record<string, unknown>;
     /**
      * Whether the form is currently submitting
      */
@@ -8179,11 +8398,15 @@ export declare type WithDataTestIdProps = {
 export declare type WithDataTestIdPropsOf<T extends default_2.ComponentType<unknown>> = default_2.ComponentProps<T> & WithDataTestIdProps;
 
 /**
- * Return type has a single call signature with props = ComponentProps<T> & WithDataTestIdProps,
- * so ComponentProps<Wrapped> and Storybook's Meta/StoryObj infer correctly.
- * Static properties (e.g. F0Card.Skeleton) are preserved via StaticMembersOf<T>.
+ * Given a component type T, produce a new component type that:
+ * 1. Accepts all of T's props plus dataTestId
+ * 2. Preserves callback argument types (e.g., onCheckedChange: (checked: boolean) => void)
+ * 3. Preserves static members (e.g., F0Card.Skeleton)
+ *
+ * We use a mapped type approach to avoid the pitfalls of React.ComponentType
+ * which collapses callback inference.
  */
-export declare type WithDataTestIdReturnType<T extends default_2.ComponentType<unknown>> = default_2.ComponentType<WithDataTestIdPropsOf<T>> & StaticMembersOf<T>;
+export declare type WithDataTestIdReturnType<T extends default_2.ComponentType<any>> = default_2.ForwardRefExoticComponent<default_2.PropsWithoutRef<default_2.ComponentProps<T> & WithDataTestIdProps> & default_2.RefAttributes<T extends default_2.ForwardRefExoticComponent<infer P> ? P extends default_2.RefAttributes<infer R> ? R : unknown : unknown>> & Pick<T, Exclude<keyof T, keyof default_2.ForwardRefExoticComponent<unknown>>>;
 
 export declare type WithGroupId<RecordType> = RecordType & {
     [GROUP_ID_SYMBOL]: unknown | undefined;

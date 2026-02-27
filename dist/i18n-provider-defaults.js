@@ -569,6 +569,12 @@ const e = {
         mustBeChecked: "This option must be selected"
       }
     }
+  },
+  wizard: {
+    previous: "Previous",
+    next: "Continue",
+    submit: "Submit",
+    stepOf: "Step {{current}} of {{total}}"
   }
 };
 export {

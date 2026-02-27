@@ -1,42 +1,43 @@
 import { AIMessage } from '@copilotkit/shared';
 import { AlertAvatarProps as AlertAvatarProps_2 } from './F0AvatarAlert';
 import { AlertTagCellValue } from './types/alertTag';
-import { AlertTagCellValue as AlertTagCellValue_2 } from '../../../ui/value-display/types/alertTag';
+import { AlertTagCellValue as AlertTagCellValue_2 } from './experimental';
 import { AmountCellValue } from './types/amount';
-import { AmountCellValue as AmountCellValue_2 } from '../../../ui/value-display/types/amount';
+import { AmountCellValue as AmountCellValue_2 } from './experimental';
 import { AnchorHTMLAttributes } from 'react';
 import { AreaChartWidgetProps } from './AreaChartWidget';
 import { AriaAttributes } from 'react';
 import { AutoFill as AutoFill_2 } from 'react';
 import { AvatarListCellValue } from './types/avatarList';
-import { AvatarListCellValue as AvatarListCellValue_2 } from '../../../ui/value-display/types/avatarList';
+import { AvatarListCellValue as AvatarListCellValue_2 } from './experimental';
 import * as AvatarPrimitive from '@radix-ui/react-avatar';
-import { BarChartProps } from '../../../components/Charts/BarChart';
+import { BarChartProps } from './experimental';
 import { BarSeriesCellValue } from './types/barSeries';
 import { baseColors } from '@factorialco/f0-core';
 import { ButtonHTMLAttributes } from 'react';
 import { ClassValue } from 'cva';
 import { CompanyCellValue } from './types/company';
-import { CompanyCellValue as CompanyCellValue_2 } from '../../../ui/value-display/types/company';
+import { CompanyCellValue as CompanyCellValue_2 } from './experimental';
 import { ComponentProps } from 'react';
 import { CopilotKitProps } from '@copilotkit/react-core';
 import { CountryCellValue } from './types/country';
 import { DateCellValue } from './types/date';
-import { DateCellValue as DateCellValue_2 } from '../../../ui/value-display/types/date';
+import { DateCellValue as DateCellValue_2 } from './experimental';
 import { DateFilterOptions } from './DateFilter/DateFilter';
 import { default as default_2 } from 'react';
 import { Dispatch } from 'react';
 import { DotTagCellValue } from './types/dotTag';
-import { DotTagCellValue as DotTagCellValue_2 } from '../../../ui/value-display/types/dotTag';
+import { DotTagCellValue as DotTagCellValue_2 } from './experimental';
 import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu';
 import { Editor } from '@tiptap/react';
+import { F0SelectProps as F0SelectProps_2 } from './types';
 import { F0TagRawProps as F0TagRawProps_2 } from './types';
 import { f1Colors } from '@factorialco/f0-core';
 import { FC } from 'react';
 import { FileCellValue } from './types/file';
-import { FileCellValue as FileCellValue_2 } from '../../../ui/value-display/types/file';
+import { FileCellValue as FileCellValue_2 } from './experimental';
 import { FolderCellValue } from './types/folder';
-import { FolderCellValue as FolderCellValue_2 } from '../../../ui/value-display/types/folder';
+import { FolderCellValue as FolderCellValue_2 } from './experimental';
 import { ForwardedRef } from 'react';
 import { ForwardRefExoticComponent } from 'react';
 import { HourDistributionCellValue } from './types/hourDistribution';
@@ -48,19 +49,19 @@ import { InFilterOptions } from './InFilter/types';
 import { JSONContent } from '@tiptap/react';
 import { JSONContent as JSONContent_2 } from '@tiptap/core';
 import { JSX as JSX_2 } from 'react';
-import { LineChartProps } from '../../../components/Charts/LineChart';
+import { LineChartProps } from './experimental';
 import { LongTextCellValue } from './types/longText';
 import { NumberCellValue } from './types/number';
-import { NumberCellValue as NumberCellValue_2 } from '../../../ui/value-display/types/number';
+import { NumberCellValue as NumberCellValue_2 } from './experimental';
 import { NumberFilterOptions } from './NumberFilter/NumberFilter';
 import { Observable } from 'zen-observable-ts';
 import { PercentageCellValue } from './types/percentage';
 import { PersonCellValue } from './types/person';
-import { PersonCellValue as PersonCellValue_2 } from '../../../ui/value-display/types/person';
-import { PieChartProps } from '../../../components/Charts/PieChart';
+import { PersonCellValue as PersonCellValue_2 } from './experimental';
+import { PieChartProps } from './experimental';
 import { PopoverProps } from '@radix-ui/react-popover';
 import { ProgressBarCellValue } from './types/progressBar';
-import { ProgressBarCellValue as ProgressBarCellValue_2 } from '../../../ui/value-display/types/progressBar';
+import { ProgressBarCellValue as ProgressBarCellValue_2 } from './experimental';
 import { Props as Props_7 } from './types';
 import { PropsWithChildren } from 'react';
 import * as React_2 from 'react';
@@ -72,25 +73,26 @@ import { RefObject } from 'react';
 import { ScrollAreaProps } from '@radix-ui/react-scroll-area';
 import { SearchFilterOptions } from './SearchFilter/SearchFilter';
 import { StatusCellValue } from './types/status';
-import { StatusCellValue as StatusCellValue_2 } from '../../../ui/value-display/types/status';
+import { StatusCellValue as StatusCellValue_2 } from './experimental';
 import { SVGProps } from 'react';
 import { TagCellValue } from './types/tag';
-import { TagCellValue as TagCellValue_2 } from '../../../ui/value-display/types/tag';
+import { TagCellValue as TagCellValue_2 } from './experimental';
 import { TagListCellValue } from './types/tagList';
-import { TagListCellValue as TagListCellValue_2 } from '../../../ui/value-display/types/tagList';
+import { TagListCellValue as TagListCellValue_2 } from './experimental';
 import { TeamCellValue } from './types/team';
-import { TeamCellValue as TeamCellValue_2 } from '../../../ui/value-display/types/team';
+import { TeamCellValue as TeamCellValue_2 } from './experimental';
 import { TextCellValue } from './types/text';
-import { TextCellValue as TextCellValue_2 } from '../../../ui/value-display/types/text';
+import { TextCellValue as TextCellValue_2 } from './experimental';
 import * as ToggleGroupPrimitive from '@radix-ui/react-toggle-group';
-import { ValueDisplayRendererContext as ValueDisplayRendererContext_2 } from '../../../ui/value-display';
+import { ValueDisplayRendererContext as ValueDisplayRendererContext_2 } from './experimental';
 import { VariantProps } from 'cva';
-import { VerticalBarChartProps } from '../../../components/Charts/VerticalBarChart';
-import { WidgetProps as WidgetProps_2 } from '../Widget';
-import { WithDataTestIdReturnType } from '../lib/data-testid';
-import { WithDataTestIdReturnType as WithDataTestIdReturnType_2 } from '../../lib/data-testid';
-import { WithDataTestIdReturnType as WithDataTestIdReturnType_3 } from '../../../../lib/data-testid';
-import { WithDataTestIdReturnType as WithDataTestIdReturnType_4 } from '../../../lib/data-testid';
+import { VerticalBarChartProps } from './experimental';
+import { WidgetProps as WidgetProps_2 } from './experimental';
+import { WithDataTestIdProps as WithDataTestIdProps_2 } from './experimental';
+import { WithDataTestIdReturnType } from './experimental';
+import { WithDataTestIdReturnType as WithDataTestIdReturnType_2 } from './experimental';
+import { WithDataTestIdReturnType as WithDataTestIdReturnType_3 } from './experimental';
+import { WithDataTestIdReturnType as WithDataTestIdReturnType_4 } from './experimental';
 
 declare type Action = {
     label: string;
@@ -2731,6 +2733,12 @@ declare const defaultTranslations: {
             };
         };
     };
+    readonly wizard: {
+        readonly previous: "Previous";
+        readonly next: "Continue";
+        readonly submit: "Submit";
+        readonly stepOf: "Step {{current}} of {{total}}";
+    };
 };
 
 /**
@@ -2741,9 +2749,9 @@ export declare const DetailsItem: WithDataTestIdReturnType_4<ForwardRefExoticCom
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const DetailsItemsList: WithDataTestIdReturnType_4<default_2.ForwardRefExoticComponent<DetailsItemsListProps & default_2.RefAttributes<HTMLDivElement>>>;
+export declare const DetailsItemsList: default_2.ForwardRefExoticComponent<DetailsItemsListProps & default_2.RefAttributes<HTMLDivElement>>;
 
-declare interface DetailsItemsListProps {
+declare interface DetailsItemsListProps extends WithDataTestIdProps {
     title?: string;
     tableView?: boolean;
     details: DetailsItemType[];
@@ -2775,7 +2783,7 @@ declare type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Om
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const Dropdown: WithDataTestIdReturnType_4<(props: DropdownProps) => JSX_2.Element>;
+export declare const Dropdown: (props: DropdownProps) => JSX_2.Element;
 
 declare type DropdownInternalProps = {
     items: DropdownItem[];
@@ -2819,7 +2827,7 @@ declare const DropdownMenuItem: React_2.ForwardRefExoticComponent<Omit<DropdownM
 declare type DropdownProps = Omit<DropdownInternalProps, (typeof privateProps_4)[number]> & {
     open?: boolean;
     onOpenChange?: (open: boolean) => void;
-};
+} & WithDataTestIdProps;
 
 declare type DropdownSingleQuestionProps = BaseQuestionPropsForOtherQuestionComponents & {
     type: "dropdown-single";
@@ -3011,7 +3019,7 @@ declare interface F0ActionBarProps {
     status?: ActionBarStatus;
 }
 
-export declare const F0AiBanner: WithDataTestIdReturnType_3<ForwardRefExoticComponent<AiBannerInternalProps & RefAttributes<HTMLDivElement>>> & {
+export declare const F0AiBanner: ForwardRefExoticComponent<Omit<AiBannerInternalProps & RefAttributes<HTMLDivElement> & WithDataTestIdProps_2, "ref"> & RefAttributes<HTMLDivElement>> & Pick<ForwardRefExoticComponent<AiBannerInternalProps & RefAttributes<HTMLDivElement>>, never> & {
     Skeleton: ({ compact }: AiBannerSkeletonProps) => JSX_2.Element;
 };
 
@@ -3035,7 +3043,7 @@ declare type F0AvatarFileProps = Omit<React.ComponentPropsWithoutRef<typeof Avat
     file: FileDef;
     size?: AvatarFileSize;
     badge?: AvatarBadge;
-} & Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">;
+} & Pick<BaseAvatarProps, "aria-label" | "aria-labelledby"> & WithDataTestIdProps;
 
 declare type F0AvatarFlagProps = {
     flag: CountryCode | (string & {});
@@ -3186,7 +3194,7 @@ declare type F0ButtonProps = Omit<ButtonInternalProps, (typeof privateProps)[num
     variant?: Exclude<ButtonInternalProps["variant"], "ai">;
 };
 
-export declare const F0Callout: WithDataTestIdReturnType_3<ForwardRefExoticComponent<CalloutInternalProps & RefAttributes<HTMLDivElement>>> & {
+export declare const F0Callout: ForwardRefExoticComponent<Omit<CalloutInternalProps & RefAttributes<HTMLDivElement> & WithDataTestIdProps_2, "ref"> & RefAttributes<HTMLDivElement>> & Pick<ForwardRefExoticComponent<CalloutInternalProps & RefAttributes<HTMLDivElement>>, never> & {
     Skeleton: ({ compact, variant }: CalloutSkeletonProps) => JSX_2.Element;
 };
 
@@ -3228,13 +3236,7 @@ declare type F0SelectBaseProps<T extends string, R = unknown> = {
      * @default false
      */
     showPreview?: boolean;
-};
-
-/**
- * Generic component type so consumers can use <F0Select<T, R> />.
- * Preserves dataTestId and F0SelectProps<T, R>.
- */
-declare type F0SelectGeneric = <T extends string, R = unknown>(props: F0SelectProps<T, R> & WithDataTestIdProps) => ReactElement | null;
+} & WithDataTestIdProps;
 
 declare type F0SelectItemObject<T, R = unknown> = {
     type?: "item";
@@ -4269,7 +4271,7 @@ declare interface MetadataProps {
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const MobileDropdown: WithDataTestIdReturnType_4<({ items, children }: DropdownProps) => JSX_2.Element>;
+export declare const MobileDropdown: ({ items, children, dataTestId }: DropdownProps) => JSX_2.Element;
 
 declare const moduleAvatarVariants: (props?: ({
     size?: "lg" | "md" | "sm" | "xs" | "xxs" | undefined;
@@ -4459,7 +4461,7 @@ declare interface NextStepsProps {
     items: StepItemProps[];
 }
 
-export declare const NotesTextEditor: WithDataTestIdReturnType_4<ForwardRefExoticComponent<NotesTextEditorProps & RefAttributes<NotesTextEditorHandle>>>;
+export declare const NotesTextEditor: ForwardRefExoticComponent<NotesTextEditorProps & RefAttributes<NotesTextEditorHandle>>;
 
 export declare type NotesTextEditorHandle = {
     clear: () => void;
@@ -4471,7 +4473,7 @@ export declare type NotesTextEditorHandle = {
     insertImage: (file: File) => void;
 };
 
-export declare interface NotesTextEditorProps {
+export declare interface NotesTextEditorProps extends WithDataTestIdProps {
     onChange: (value: {
         json: JSONContent | null;
         html: string | null;
@@ -4714,11 +4716,11 @@ declare type OneDataCollectionProps<R extends RecordType, Filters extends Filter
     tmpFullWidth?: boolean;
 };
 
-export declare const OneDateNavigator: WithDataTestIdReturnType_2<typeof _OneDateNavigator>;
+export declare const OneDateNavigator: typeof _OneDateNavigator;
 
-declare function _OneDateNavigator({ onSelect, defaultValue, presets, granularities, hideNavigation, hideGoToCurrent, compareTo, defaultCompareTo, onCompareToChange, value, ...props }: OneDatePickerProps): JSX_2.Element;
+declare function _OneDateNavigator({ onSelect, defaultValue, presets, granularities, hideNavigation, hideGoToCurrent, compareTo, defaultCompareTo, onCompareToChange, value, dataTestId, ...props }: OneDatePickerProps): JSX_2.Element;
 
-export declare interface OneDatePickerProps extends Omit<DatePickerPopupProps, "children"> {
+export declare interface OneDatePickerProps extends Omit<DatePickerPopupProps, "children">, WithDataTestIdProps {
     hideNavigation?: boolean;
     hideGoToCurrent?: boolean;
 }
@@ -4764,13 +4766,9 @@ declare type OneEmptyStateProps = {
     emoji?: never;
 });
 
-export declare const OneFilterPicker: OneFilterPickerGeneric;
-
-/**
- * Generic component type so consumers can use <OneFilterPicker<Definition> />.
- * Preserves dataTestId and OneFilterPickerRootProps<Definition>.
- */
-declare type OneFilterPickerGeneric = <Definition extends FiltersDefinition>(props: OneFilterPickerRootProps<Definition> & WithDataTestIdProps) => ReactElement | null;
+export declare const OneFilterPicker: <Definition extends FiltersDefinition>(props: OneFilterPickerRootProps<Definition> & {
+    dataTestId?: string;
+}) => ReactElement | null;
 
 /**
  * Props for the Filters component.
@@ -5431,9 +5429,9 @@ export declare interface RichTextDisplayProps extends HTMLAttributes<HTMLDivElem
     format?: "html" | "markdown";
 }
 
-export declare const RichTextEditor: WithDataTestIdReturnType_4<ForwardRefExoticComponent<RichTextEditorProps & RefAttributes<RichTextEditorHandle>> & {
-Skeleton: ({ rows }: RichTextEditorSkeletonProps) => JSX_2.Element;
-}>;
+export declare const RichTextEditor: ForwardRefExoticComponent<RichTextEditorProps & RefAttributes<RichTextEditorHandle>> & {
+    Skeleton: ({ rows }: RichTextEditorSkeletonProps) => JSX_2.Element;
+};
 
 export declare type RichTextEditorHandle = {
     clear: () => void;
@@ -5463,6 +5461,7 @@ export declare interface RichTextEditorProps {
     onFullscreenChange?: (fullscreen: boolean) => void;
     /** Whether the editor is disabled */
     disabled?: boolean;
+    dataTestId?: string;
 }
 
 declare interface RichTextEditorSkeletonProps {
@@ -5560,7 +5559,9 @@ declare type SectionProps_2 = {
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const Select: F0SelectGeneric;
+export declare const Select: <T extends string = string, R = unknown>(props: F0SelectProps_2<T, R> & {
+    ref?: React.Ref<HTMLButtonElement>;
+}) => React.ReactElement;
 
 /**
  * Represents a collection of selected items.

@@ -799,6 +799,12 @@ export declare const defaultTranslations: {
             };
         };
     };
+    readonly wizard: {
+        readonly previous: "Previous";
+        readonly next: "Continue";
+        readonly submit: "Submit";
+        readonly stepOf: "Step {{current}} of {{total}}";
+    };
 };
 
 export declare function downloadTableAsExcel(table: HTMLTableElement, filename?: string): void;
