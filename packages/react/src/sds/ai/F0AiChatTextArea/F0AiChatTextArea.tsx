@@ -1,146 +1,17 @@
-import { AnimatePresence, motion } from "motion/react"
-import { useEffect, useRef, useState } from "react"
+import { motion } from "motion/react"
+import { useEffect, useMemo, useRef, useState } from "react"
 
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { ArrowUp, SolidStop } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
-import type { F0AiChatTextAreaProps, TypewriterPlaceholderProps } from "./types"
-
-const TypewriterPlaceholder = ({
-  placeholders,
-  defaultPlaceholder,
-  inputValue,
-  inProgress,
-}: TypewriterPlaceholderProps) => {
-  const [displayedPlaceholder, setDisplayedPlaceholder] = useState("")
-  const [currentPlaceholderIndex, setCurrentPlaceholderIndex] = useState(0)
-  const [isTyping, setIsTyping] = useState(false)
-  const placeholderTimeoutRef = useRef<NodeJS.Timeout | null>(null)
-  const typeIntervalRef = useRef<NodeJS.Timeout | null>(null)
-  const deleteIntervalRef = useRef<NodeJS.Timeout | null>(null)
-
-  const placeholderText =
-    placeholders[currentPlaceholderIndex] ?? defaultPlaceholder
-
-  useEffect(() => {
-    const clearAllIntervals = () => {
-      if (typeIntervalRef.current) {
-        clearInterval(typeIntervalRef.current)
-        typeIntervalRef.current = null
-      }
-      if (deleteIntervalRef.current) {
-        clearInterval(deleteIntervalRef.current)
-        deleteIntervalRef.current = null
-      }
-      if (placeholderTimeoutRef.current) {
-        clearTimeout(placeholderTimeoutRef.current)
-        placeholderTimeoutRef.current = null
-      }
-    }
-
-    if (inputValue.length > 0 || inProgress) {
-      setIsTyping(false)
-      setDisplayedPlaceholder("")
-      clearAllIntervals()
-      return
-    }
-
-    setIsTyping(true)
-    setDisplayedPlaceholder("")
-
-    let currentIndex = 0
-    const typeSpeed = 50
-    const deleteSpeed = 30
-    const pauseBeforeDelete = 2000
-    const pauseBeforeNext = 1000
-
-    typeIntervalRef.current = setInterval(() => {
-      if (currentIndex < placeholderText.length) {
-        setDisplayedPlaceholder(placeholderText.slice(0, currentIndex + 1))
-        currentIndex++
-      } else {
-        if (typeIntervalRef.current) {
-          clearInterval(typeIntervalRef.current)
-          typeIntervalRef.current = null
-        }
-        placeholderTimeoutRef.current = setTimeout(() => {
-          deleteIntervalRef.current = setInterval(() => {
-            if (currentIndex > 0) {
-              currentIndex--
-              setDisplayedPlaceholder(placeholderText.slice(0, currentIndex))
-            } else {
-              if (deleteIntervalRef.current) {
-                clearInterval(deleteIntervalRef.current)
-                deleteIntervalRef.current = null
-              }
-              placeholderTimeoutRef.current = setTimeout(() => {
-                const nextIndex =
-                  (currentPlaceholderIndex + 1) %
-                  Math.max(placeholders.length, 1)
-                setCurrentPlaceholderIndex(nextIndex)
-              }, pauseBeforeNext)
-            }
-          }, deleteSpeed)
-        }, pauseBeforeDelete)
-      }
-    }, typeSpeed)
-
-    return () => {
-      clearAllIntervals()
-    }
-  }, [
-    inputValue,
-    inProgress,
-    placeholderText,
-    currentPlaceholderIndex,
-    placeholders.length,
-  ])
-
-  if (inputValue.length > 0 || inProgress) {
-    return null
-  }
-
-  return (
-    <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.4 }}
-        className={cn(
-          "col-start-1 row-start-1",
-          "pointer-events-none",
-          "text-f1-foreground-secondary",
-          "sm:text-[14px] text-[16px] leading-[20px] font-normal",
-          "sm:pt-3 sm:px-3"
-        )}
-      >
-        <div
-          className={cn(
-            "overflow-hidden text-ellipsis whitespace-nowrap",
-            "sm:whitespace-pre-wrap sm:break-words sm:overflow-visible"
-          )}
-        >
-          {displayedPlaceholder}
-          {isTyping && (
-            <motion.span
-              animate={{ opacity: [1, 0] }}
-              transition={{
-                duration: 0.8,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
-            >
-              |
-            </motion.span>
-          )}
-        </div>
-      </motion.div>
-    </AnimatePresence>
-  )
-}
+import { MentionPopover } from "./MentionPopover"
+import { ToolHintSelector } from "./ToolHintSelector"
+import { TypewriterPlaceholder } from "./TypewriterPlaceholder"
+import type { F0AiChatTextAreaProps } from "./types"
+import { useMentions } from "./useMentions"
+import { buildHighlightSegments } from "./utils"
 
 export const F0AiChatTextArea = ({
   submitLabel,
@@ -150,11 +21,25 @@ export const F0AiChatTextArea = ({
   placeholders = [],
   defaultPlaceholder,
   autoFocus = true,
+  entityResolvers,
+  toolHints,
+  activeToolHint,
+  onActiveToolHintChange,
 }: F0AiChatTextAreaProps) => {
   const [inputValue, setInputValue] = useState("")
+  const [cursorPosition, setCursorPosition] = useState(0)
   const formRef = useRef<HTMLFormElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const highlightRef = useRef<HTMLDivElement>(null)
   const translation = useI18n()
+
+  const mentions = useMentions({
+    inputValue,
+    setInputValue,
+    cursorPosition,
+    entityResolvers,
+    textareaRef,
+  })
 
   // Skip autofocus when URL has a hash (e.g. #section) so we don't steal focus
   // from the element the hash points to when the URL updates. We use an effect
@@ -176,10 +61,15 @@ export const F0AiChatTextArea = ({
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+    mentions.close()
     if (inProgress) {
       onStop?.()
     } else if (hasDataToSend) {
-      onSend(inputValue.trim())
+      const transformed = mentions.transformMentions(inputValue.trim())
+      const withToolHint = activeToolHint
+        ? `<tool-context tool="${activeToolHint.id}">${activeToolHint.prompt}</tool-context>\n\n${transformed}`
+        : transformed
+      onSend(withToolHint)
       setInputValue("")
     }
 
@@ -187,6 +77,9 @@ export const F0AiChatTextArea = ({
   }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    // Let mention popover handle keyboard events first
+    if (mentions.handleKeyDown(e)) return
+
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault()
       if (!inProgress) {
@@ -195,7 +88,35 @@ export const F0AiChatTextArea = ({
     }
   }
 
+  const updateCursorPosition = () => {
+    setCursorPosition(textareaRef.current?.selectionStart ?? 0)
+  }
+
+  const syncHighlightScroll = () => {
+    if (highlightRef.current && textareaRef.current) {
+      highlightRef.current.scrollTop = textareaRef.current.scrollTop
+    }
+  }
+
   const multiplePlaceholders = placeholders.length > 1
+
+  /**
+   * Split inputValue into segments: plain text, mention spans, and ghost
+   * (inline-completion) text. The highlight overlay uses these to render
+   * @Name mentions with distinct styling and show the autocomplete ghost
+   * text at the cursor position.
+   */
+  const highlightSegments = useMemo(() => {
+    return buildHighlightSegments(inputValue, mentions.mentions, {
+      cursorPosition,
+      inlineCompletion: mentions.inlineCompletion,
+    })
+  }, [inputValue, mentions.mentions, cursorPosition, mentions.inlineCompletion])
+
+  // The overlay must be active when there are either mentions to highlight
+  // or ghost (inline-completion) text to render at the cursor.
+  const hasOverlay =
+    mentions.mentions.length > 0 || mentions.inlineCompletion !== null
 
   return (
     <motion.form
@@ -235,6 +156,15 @@ export const F0AiChatTextArea = ({
       }}
       onSubmit={handleSubmit}
     >
+      <MentionPopover
+        isOpen={mentions.isOpen}
+        results={mentions.results}
+        isLoading={mentions.isLoading}
+        selectedIndex={mentions.selectedIndex}
+        position={mentions.popoverPosition}
+        onSelect={mentions.selectPerson}
+      />
+
       <div
         className={cn(
           "grid flex-1 grid-cols-1 grid-rows-1",
@@ -254,6 +184,42 @@ export const F0AiChatTextArea = ({
         >
           {inputValue.endsWith("\n") ? inputValue + "_" : inputValue}
         </div>
+        {/* Highlight overlay: renders text with styled @mentions and ghost completions */}
+        {hasOverlay && (
+          <div
+            ref={highlightRef}
+            aria-hidden={true}
+            className={cn(
+              "col-start-1 row-start-1",
+              "pointer-events-none",
+              "min-h-[20px] max-h-[120px] sm:min-h-[20px] sm:max-h-[240px]",
+              "whitespace-pre-wrap break-words",
+              "sm:text-[14px] text-[16px] leading-[20px] font-normal text-f1-foreground",
+              "px-0 sm:mt-3 sm:px-3",
+              "overflow-hidden"
+            )}
+          >
+            {highlightSegments.map((seg, i) =>
+              seg.type === "mention" ? (
+                <span
+                  key={i}
+                  className="font-medium text-f1-foreground-secondary"
+                >
+                  {seg.text}
+                </span>
+              ) : seg.type === "ghost" ? (
+                <span
+                  key={i}
+                  className="text-f1-foreground-secondary opacity-50"
+                >
+                  {seg.text}
+                </span>
+              ) : (
+                <span key={i}>{seg.text}</span>
+              )
+            )}
+          </div>
+        )}
         {!inputValue && !multiplePlaceholders && (
           <p
             className={cn(
@@ -276,20 +242,29 @@ export const F0AiChatTextArea = ({
           value={inputValue}
           onChange={(e) => {
             setInputValue(e.target.value)
+            setCursorPosition(e.target.selectionStart ?? 0)
           }}
           onKeyDown={handleKeyDown}
+          onKeyUp={updateCursorPosition}
+          onClick={updateCursorPosition}
+          onSelect={updateCursorPosition}
+          onScroll={syncHighlightScroll}
           className={cn(
             "col-start-1 row-start-1",
             "min-h-[20px] max-h-[120px] sm:min-h-[20px] sm:max-h-[240px] sm:h-auto",
             "resize-none",
             "whitespace-pre-wrap break-words",
-            "sm:text-[14px] text-[16px] leading-[20px] font-normal text-f1-foreground",
+            "sm:text-[14px] text-[16px] leading-[20px] font-normal",
             "px-0 sm:mt-3 sm:px-3",
             "overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
             "outline-none",
-            inputValue || !multiplePlaceholders
-              ? "caret-f1-foreground"
-              : "caret-transparent"
+            hasOverlay
+              ? "text-transparent caret-f1-foreground"
+              : "text-f1-foreground",
+            !hasOverlay &&
+              (inputValue || !multiplePlaceholders
+                ? "caret-f1-foreground"
+                : "caret-transparent")
           )}
         />
         {multiplePlaceholders && (
@@ -302,25 +277,36 @@ export const F0AiChatTextArea = ({
         )}
       </div>
 
-      <div className="flex shrink-0 flex-row-reverse p-1 sm:p-3">
-        {inProgress ? (
-          <ButtonInternal
-            type="submit"
-            variant="neutral"
-            label={translation.ai.stopAnswerGeneration}
-            icon={SolidStop}
-            hideLabel
-          />
-        ) : (
-          <ButtonInternal
-            type="submit"
-            disabled={!hasDataToSend}
-            variant={hasDataToSend ? "default" : "neutral"}
-            label={submitLabel || translation.ai.sendMessage}
-            icon={submitLabel ? undefined : ArrowUp}
-            hideLabel={!submitLabel}
-          />
-        )}
+      <div className="flex shrink-0 items-center justify-between p-1 sm:p-3">
+        <div className="flex items-center">
+          {toolHints && toolHints.length > 0 && onActiveToolHintChange && (
+            <ToolHintSelector
+              toolHints={toolHints}
+              activeToolHint={activeToolHint ?? null}
+              onChange={onActiveToolHintChange}
+            />
+          )}
+        </div>
+        <div className="flex items-center">
+          {inProgress ? (
+            <ButtonInternal
+              type="submit"
+              variant="neutral"
+              label={translation.ai.stopAnswerGeneration}
+              icon={SolidStop}
+              hideLabel
+            />
+          ) : (
+            <ButtonInternal
+              type="submit"
+              disabled={!hasDataToSend}
+              variant={hasDataToSend ? "default" : "neutral"}
+              label={submitLabel || translation.ai.sendMessage}
+              icon={submitLabel ? undefined : ArrowUp}
+              hideLabel={!submitLabel}
+            />
+          )}
+        </div>
       </div>
     </motion.form>
   )

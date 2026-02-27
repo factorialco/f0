@@ -3,6 +3,8 @@ import { type AIMessage, type Message } from "@copilotkit/shared"
 import {
   type AiChatDisclaimer,
   type AiChatTrackingOptions,
+  type AiChatToolHint,
+  type EntityResolvers,
   type VisualizationMode,
   WelcomeScreenSuggestion,
 } from "./types"
@@ -29,6 +31,8 @@ export interface AiChatState {
   defaultVisualizationMode?: VisualizationMode
   lockVisualizationMode?: boolean
   footer?: React.ReactNode
+  entityResolvers?: EntityResolvers
+  toolHints?: AiChatToolHint[]
   placeholders?: string[]
   setPlaceholders?: React.Dispatch<React.SetStateAction<string[]>>
   onThumbsUp?: (
@@ -123,7 +127,22 @@ export type AiChatProviderReturnValue = {
    * Set the footer content. Use this to update the footer from outside the provider (e.g. per page/route).
    */
   setFooter: React.Dispatch<React.SetStateAction<React.ReactNode | undefined>>
-} & Pick<AiChatState, "greeting" | "agent" | "disclaimer" | "resizable">
+} & Pick<
+  AiChatState,
+  | "greeting"
+  | "agent"
+  | "disclaimer"
+  | "resizable"
+  | "entityResolvers"
+  | "toolHints"
+> & {
+    /** The currently active tool hint, or null if none is selected */
+    activeToolHint: AiChatToolHint | null
+    /** Set the active tool hint (pass null to clear) */
+    setActiveToolHint: React.Dispatch<
+      React.SetStateAction<AiChatToolHint | null>
+    >
+  }
 
 /**
  * Helper function to check if a message is an agent state message

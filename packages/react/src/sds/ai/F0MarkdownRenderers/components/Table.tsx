@@ -44,6 +44,31 @@ export function Table({
   )
 }
 
+/**
+ * Table variant without the built-in download button.
+ * Used inside components that already provide their own download controls.
+ */
+export function TableSimple({
+  children,
+  ...props
+}: React.HTMLAttributes<HTMLTableElement>) {
+  return (
+    <div className="mb-2 flex flex-col gap-2">
+      <div className="max-h-[600px] overflow-auto rounded-md border border-solid border-f1-border-secondary">
+        <table
+          {...props}
+          className={cn(
+            "w-full border-separate border-spacing-0",
+            props.className
+          )}
+        >
+          {children}
+        </table>
+      </div>
+    </div>
+  )
+}
+
 export function Th({
   children,
   ...props

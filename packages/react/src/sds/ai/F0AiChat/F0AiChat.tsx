@@ -36,6 +36,8 @@ const F0AiChatProviderComponent = ({
   defaultVisualizationMode,
   lockVisualizationMode,
   footer,
+  entityResolvers,
+  toolHints,
   onThumbsUp,
   onThumbsDown,
   children,
@@ -58,6 +60,8 @@ const F0AiChatProviderComponent = ({
       lockVisualizationMode={lockVisualizationMode}
       footer={footer}
       tracking={tracking}
+      entityResolvers={entityResolvers}
+      toolHints={toolHints}
     >
       <AiChatKitWrapper {...copilotKitProps}>{children}</AiChatKitWrapper>
     </AiChatStateProvider>

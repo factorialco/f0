@@ -3,22 +3,133 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { ComponentProps } from "react"
 import { expect, within } from "storybook/test"
 
+import { F0Box } from "@/components/F0Box"
+import { F0Button } from "@/components/F0Button"
+import { F0Icon, IconType } from "@/components/F0Icon"
+import * as SidebarStories from "@/components/Navigation/Sidebar/index.stories"
+import { Sidebar } from "@/components/Navigation/Sidebar/Sidebar"
+import { Page } from "@/experimental/Navigation/Page"
+import * as PageStories from "@/experimental/Navigation/Page/index.stories"
 import { Lightbulb } from "@/icons/app"
 import ArrowRight from "@/icons/app/ArrowRight"
+import ChartLine from "@/icons/app/ChartLine"
 import ExternalLink from "@/icons/app/ExternalLink"
 import Marketplace from "@/icons/app/Marketplace"
 import PalmTree from "@/icons/app/PalmTree"
-import { Action } from "@/ui/Action"
-import { F0Icon, IconType } from "@/components/F0Icon"
+import People from "@/icons/app/People"
+import Table from "@/icons/app/Table"
 import { useAiChat } from "@/sds/ai/F0AiChat"
+import { type AiChatToolHint, PersonProfile } from "@/sds/ai/F0AiChat/types"
+import { Action } from "@/ui/Action"
 
-import { Page } from "@/experimental/Navigation/Page"
-import * as PageStories from "@/experimental/Navigation/Page/index.stories"
-import * as SidebarStories from "@/components/Navigation/Sidebar/index.stories"
-import { Sidebar } from "@/components/Navigation/Sidebar/Sidebar"
 import { ApplicationFrame } from "./index"
-import { F0Box } from "@/components/F0Box"
-import { F0Button } from "@/components/F0Button"
+
+/**
+ * Mock people database for @mention search and entity resolution in Storybook.
+ * Based on Factorial's development seed employees.
+ */
+const mockPeople: PersonProfile[] = [
+  {
+    id: "5",
+    firstName: "Hellen",
+    lastName: "the HR",
+    jobTitle: "People Director, CPO",
+  },
+  { id: "6", firstName: "Phebe", lastName: "Jacobson", jobTitle: "CEO, I" },
+  { id: "7", firstName: "Arnulfo", lastName: "Maggio", jobTitle: "CTO, I" },
+  { id: "8", firstName: "Bernarda", lastName: "Wilkinson", jobTitle: "CFO, I" },
+  { id: "10", firstName: "Anitra", lastName: "Schaden", jobTitle: "CMO, I" },
+  {
+    id: "11",
+    firstName: "Fidel",
+    lastName: "Johnson",
+    jobTitle: "People Director, CPO",
+  },
+  {
+    id: "12",
+    firstName: "Jeanetta",
+    lastName: "McCullough",
+    jobTitle: "Store Manager, I",
+  },
+  {
+    id: "13",
+    firstName: "Florencio",
+    lastName: "Little",
+    jobTitle: "Sales Manager, I",
+  },
+  {
+    id: "14",
+    firstName: "Fae",
+    lastName: "Fritsch",
+    jobTitle: "Design Director, I",
+  },
+  {
+    id: "15",
+    firstName: "Jordan",
+    lastName: "Kunze",
+    jobTitle: "Sales Manager, I",
+  },
+]
+
+/**
+ * Mock person resolver — looks up from mockPeople, falls back to generic profile.
+ */
+const mockPersonResolver = (id: string): Promise<PersonProfile> =>
+  new Promise((resolve) => {
+    setTimeout(() => {
+      const person = mockPeople.find((p) => p.id === id)
+      resolve(
+        person ?? {
+          id,
+          firstName: "Employee",
+          lastName: `#${id}`,
+          jobTitle: "Unknown",
+        }
+      )
+    }, 600)
+  })
+
+const mockSearchPersons = (query: string): Promise<PersonProfile[]> =>
+  new Promise((resolve) => {
+    setTimeout(() => {
+      const q = query.toLowerCase()
+      const results = mockPeople.filter(
+        (p) =>
+          p.firstName.toLowerCase().includes(q) ||
+          p.lastName.toLowerCase().includes(q) ||
+          (p.jobTitle && p.jobTitle.toLowerCase().includes(q))
+      )
+      resolve(results.slice(0, 5))
+    }, 300)
+  })
+
+/**
+ * Example tool hints for Storybook — these tell the AI the user's intent
+ * without the user seeing the prompt in the chat.
+ */
+const mockToolHints: AiChatToolHint[] = [
+  {
+    id: "tables",
+    label: "Generate tables",
+    icon: Table,
+    prompt:
+      "The user wants you to generate data tables. Format your response using markdown tables whenever possible. Structure data clearly with headers and rows.",
+  },
+  {
+    id: "data-analysis",
+    label: "Data analysis",
+    icon: ChartLine,
+    prompt:
+      "The user wants you to perform data analysis. Focus on analyzing data, identifying trends, and providing actionable insights. Use charts and tables when appropriate.",
+  },
+  {
+    id: "reportees",
+    label: "Reportees information",
+    icon: People,
+    prompt:
+      "The user wants information about their reportees and direct reports. Focus on team member details, roles, performance, and organizational structure.",
+  },
+]
 
 const meta: Meta<typeof ApplicationFrame> = {
   title: "ApplicationFrame",
@@ -36,6 +147,11 @@ const meta: Meta<typeof ApplicationFrame> = {
       enabled: true,
       resizable: true,
       greeting: "Hello, John",
+      entityResolvers: {
+        person: mockPersonResolver,
+        searchPersons: mockSearchPersons,
+      },
+      toolHints: mockToolHints,
       disclaimer: {
         text: "One works within your permissions.",
         link: "/permissions",
@@ -220,9 +336,9 @@ const QuickActions = () => {
   ]
 
   return (
-    <div className="flex flex-col gap-4 w-full border-f1-border border-2 border-dotted rounded-md p-4">
+    <div className="flex w-full flex-col gap-4 rounded-md border-2 border-dotted border-f1-border p-4">
       <div className="flex items-center justify-between gap-4">
-        <p className="text-sm text-f1-foreground-secondary whitespace-nowrap">
+        <p className="whitespace-nowrap text-sm text-f1-foreground-secondary">
           Or start from
         </p>
         <div className="flex items-center gap-2">
@@ -265,6 +381,11 @@ export const FullscreenWithActions: Story = {
       defaultVisualizationMode: "fullscreen",
       lockVisualizationMode: true,
       footer: <QuickActions />,
+      entityResolvers: {
+        person: mockPersonResolver,
+        searchPersons: mockSearchPersons,
+      },
+      toolHints: mockToolHints,
       disclaimer: {
         text: "One works within your permissions.",
         link: "/permissions",
