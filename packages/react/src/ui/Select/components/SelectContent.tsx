@@ -11,10 +11,10 @@ import {
   useState,
 } from "react"
 
-import { Spinner } from "@/ui/Spinner"
 import { useReducedMotion } from "@/lib/a11y"
 import { cn } from "@/lib/utils"
 import { ScrollArea } from "@/ui/scrollarea"
+import { Spinner } from "@/ui/Spinner"
 
 import { VirtualItem } from "../index"
 import { SelectContext } from "../SelectContext"
@@ -232,11 +232,11 @@ const SelectContent = forwardRef<
           !asList &&
             position === "popper" &&
             !forceMinHeight &&
-            "min-w-[8rem] w-[var(--radix-select-trigger-width)]",
+            "min-w-80 w-[var(--radix-select-trigger-width)]",
           !asList &&
             position === "popper" &&
             forceMinHeight &&
-            "w-[calc(var(--radix-select-trigger-width)+12rem)]",
+            "min-w-[32rem] w-[calc(var(--radix-select-trigger-width)+12rem)]",
           // Max-height: fixed cap so Radix can detect overflow and flip sides
           !asList && (taller ? "max-h-[412px]" : "max-h-[320px]"),
           // Hides the content when the virtual list is not ready
@@ -274,7 +274,7 @@ const SelectContent = forwardRef<
         }}
       >
         <div
-          className="flex flex-1 min-h-0 flex-col"
+          className="flex min-h-0 flex-1 flex-col"
           style={
             !asList
               ? {
@@ -291,7 +291,7 @@ const SelectContent = forwardRef<
           }
         >
           {asList && <div className="flex-shrink-0">{props.top}</div>}
-          <div className="flex flex-1 min-h-0 flex-row overflow-hidden">
+          <div className="flex min-h-0 flex-1 flex-row overflow-hidden">
             <div
               className={cn(
                 "relative flex flex-1 min-h-0 min-w-0 flex-col overflow-hidden",
