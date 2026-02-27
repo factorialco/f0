@@ -4,7 +4,7 @@ import { OnePreset } from "../../../src/components/OnePreset";
 import { useCSSVariable } from "uniwind";
 
 export function OnePresetShowcase() {
-  const [f1Foreground] = useCSSVariable(['--color-f0-foreground']);
+  const [f0Foreground] = useCSSVariable(['--color-f0-foreground']);
   const [selectedPresets, setSelectedPresets] = useState<Set<string>>(new Set());
 
   const asString = (value: string | number | undefined): string => {
@@ -30,7 +30,7 @@ export function OnePresetShowcase() {
       style={{ width: "100%" }}
     >
       {/* Basic Variants */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f1Foreground) }}>
+      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
         Basic Variants
       </Text>
       <View className="flex-row flex-wrap gap-2 mb-6">
@@ -39,7 +39,7 @@ export function OnePresetShowcase() {
       </View>
 
       {/* With Numbers */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f1Foreground) }}>
+      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
         With Numbers
       </Text>
       <View className="flex-row flex-wrap gap-2 mb-6">
@@ -50,7 +50,7 @@ export function OnePresetShowcase() {
       </View>
 
       {/* Selected with Numbers */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f1Foreground) }}>
+      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
         Selected with Numbers
       </Text>
       <View className="flex-row flex-wrap gap-2 mb-6">
@@ -61,7 +61,7 @@ export function OnePresetShowcase() {
       </View>
 
       {/* Different Number Values */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f1Foreground) }}>
+      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
         Different Number Values
       </Text>
       <View className="flex-row flex-wrap gap-2 mb-6">
@@ -73,7 +73,7 @@ export function OnePresetShowcase() {
       </View>
 
       {/* Interactive (Clickable) */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f1Foreground) }}>
+      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
         Interactive (Click to Toggle Selection)
       </Text>
       <View className="flex-row flex-wrap gap-2 mb-6">
@@ -97,7 +97,7 @@ export function OnePresetShowcase() {
       </View>
 
       {/* Different Labels */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f1Foreground) }}>
+      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
         Different Labels
       </Text>
       <View className="flex-row flex-wrap gap-2 mb-6">
@@ -108,7 +108,7 @@ export function OnePresetShowcase() {
       </View>
 
       {/* All Variants Summary */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f1Foreground) }}>
+      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
         All Variants Summary
       </Text>
       <View className="flex-row flex-wrap gap-2 mb-6">
@@ -121,7 +121,7 @@ export function OnePresetShowcase() {
       </View>
 
       {/* Use Cases */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f1Foreground) }}>
+      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
         Common Use Cases
       </Text>
       <View className="flex-row flex-wrap gap-2 mb-6">

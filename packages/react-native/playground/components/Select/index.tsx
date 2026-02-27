@@ -26,7 +26,7 @@ export function Select<T extends string>({
 }: SelectProps<T>) {
   const [isOpen, setIsOpen] = useState(false);
   
-  const [f1Background, f1Foreground, f1Border, f1BackgroundSecondary] = useCSSVariable([
+  const [f0Background, f0Foreground, f0Border, f0BackgroundSecondary] = useCSSVariable([
     '--color-f0-background',
     '--color-f0-foreground',
     '--color-f0-border',
@@ -47,13 +47,13 @@ export function Select<T extends string>({
         onPress={() => setIsOpen(true)}
         className={`flex-row items-center justify-between px-3 py-2 rounded-lg border ${className || ''}`}
         style={{
-          backgroundColor: asString(f1Background),
-          borderColor: asString(f1Border),
+          backgroundColor: asString(f0Background),
+          borderColor: asString(f0Border),
         }}
       >
         <Text
           className="text-sm flex-1"
-          style={{ color: asString(f1Foreground) }}
+          style={{ color: asString(f0Foreground) }}
         >
           {selectedOption?.label || placeholder}
         </Text>
@@ -78,8 +78,8 @@ export function Select<T extends string>({
           <Pressable
             className="rounded-lg border w-4/5 max-w-md"
             style={{
-              backgroundColor: asString(f1Background),
-              borderColor: asString(f1Border),
+              backgroundColor: asString(f0Background),
+              borderColor: asString(f0Border),
               maxHeight: '80%',
             }}
             onPress={(e) => e.stopPropagation()}
@@ -101,13 +101,13 @@ export function Select<T extends string>({
                     className={`px-4 py-3 rounded-lg mb-1 ${isSelected ? '' : ''}`}
                     style={{
                       backgroundColor: isSelected 
-                        ? asString(f1BackgroundSecondary)
+                        ? asString(f0BackgroundSecondary)
                         : 'transparent',
                     }}
                   >
                     <Text
                       className="text-base"
-                      style={{ color: asString(f1Foreground) }}
+                      style={{ color: asString(f0Foreground) }}
                     >
                       {option.label}
                     </Text>
