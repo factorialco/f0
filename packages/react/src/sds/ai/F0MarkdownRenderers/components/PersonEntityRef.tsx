@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 
 import { F0Card } from "@/components/F0Card"
 import { Link } from "@/lib/linkHandler"
@@ -28,6 +28,14 @@ export function PersonEntityRef({ id, label }: { id: string; label: string }) {
   const [isLoading, setIsLoading] = useState(false)
   const [hasError, setHasError] = useState(false)
 
+  // Guard against state updates after unmount
+  const mountedRef = useRef(true)
+  useEffect(() => {
+    return () => {
+      mountedRef.current = false
+    }
+  }, [])
+
   const fetchProfile = useCallback(() => {
     if (!resolver || profile || isLoading) return
 
@@ -42,13 +50,13 @@ export function PersonEntityRef({ id, label }: { id: string; label: string }) {
     resolver(id)
       .then((data) => {
         cacheRef.current.set(id, data)
-        setProfile(data)
+        if (mountedRef.current) setProfile(data)
       })
       .catch(() => {
-        setHasError(true)
+        if (mountedRef.current) setHasError(true)
       })
       .finally(() => {
-        setIsLoading(false)
+        if (mountedRef.current) setIsLoading(false)
       })
   }, [resolver, id, profile, isLoading])
 

@@ -197,7 +197,7 @@ export const F0AiChatTextArea = ({
               "whitespace-pre-wrap break-words",
               "sm:text-[14px] text-[16px] leading-[20px] font-normal text-f1-foreground",
               "px-0 sm:mt-3 sm:px-3",
-              "overflow-hidden"
+              "overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
             )}
           >
             {highlightSegments.map((seg, i) =>

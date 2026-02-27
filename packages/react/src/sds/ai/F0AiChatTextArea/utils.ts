@@ -1,5 +1,17 @@
 import type { MentionEntry } from "./useMentions"
 
+/**
+ * Escape a string for safe embedding inside XML/HTML attributes and text
+ * content. Prevents tag injection when building `<entity-ref>` markup.
+ */
+export function escapeXml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+}
+
 export type HighlightSegment = {
   type: "text" | "mention" | "ghost"
   text: string

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
 import type { EntityResolvers, PersonProfile } from "../F0AiChat/types"
+import { escapeXml } from "./utils"
 
 /**
  * A tracked mention in the textarea text.
@@ -410,7 +411,7 @@ export function useMentions({
       for (const mention of sorted) {
         // Replace all occurrences of @Name with entity-ref
         const pattern = `@${mention.name}`
-        const replacement = `<entity-ref type="person" id="${mention.id}">${mention.name}</entity-ref>`
+        const replacement = `<entity-ref type="person" id="${escapeXml(mention.id)}">${escapeXml(mention.name)}</entity-ref>`
 
         // Replace all occurrences
         while (result.includes(pattern)) {
