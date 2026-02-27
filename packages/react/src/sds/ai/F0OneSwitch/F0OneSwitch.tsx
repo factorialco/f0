@@ -19,9 +19,9 @@ export const F0OneSwitch = ({
   className,
   disabled,
   onVisible,
-  onClick,
   tooltip,
   autoOpen = false,
+  onToggle,
 }: F0OneSwitchProps) => {
   const { enabled, setOpen, open } = useAiChat()
   const translations = useI18n()
@@ -78,7 +78,7 @@ export const F0OneSwitch = ({
               <SwitchPrimitive.Root
                 onCheckedChange={(val) => {
                   setOpen(val)
-                  onClick?.()
+                  onToggle?.()
                 }}
                 checked={open}
                 aria-label={
