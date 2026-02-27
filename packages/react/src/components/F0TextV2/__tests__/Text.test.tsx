@@ -502,6 +502,37 @@ describe("F0TextV2 Component", () => {
     })
   })
 
+  describe("Required indicator", () => {
+    it("renders a red asterisk when required is true", () => {
+      render(<F0TextV2 variant="label" content="Email" required />)
+      const asterisk = screen.getByText("*", { exact: false })
+      expect(asterisk.tagName).toBe("SPAN")
+      expect(asterisk).toHaveClass("text-f1-foreground-critical")
+      expect(asterisk).toHaveAttribute("aria-hidden", "true")
+    })
+
+    it("does not render asterisk when required is false", () => {
+      render(<F0TextV2 variant="label" content="Email" />)
+      const el = screen.getByText("Email")
+      expect(el.innerHTML).not.toContain("*")
+    })
+
+    it("renders asterisk with ellipsis enabled", () => {
+      const { container } = render(
+        <F0TextV2 variant="label" content="Email" required ellipsis />
+      )
+      const asterisk = container.querySelector(".text-f1-foreground-critical")
+      expect(asterisk).toBeInTheDocument()
+      expect(asterisk).toHaveAttribute("aria-hidden", "true")
+    })
+
+    it("renders asterisk with any variant", () => {
+      render(<F0TextV2 variant="body" content="Name" required />)
+      const asterisk = screen.getByText("*", { exact: false })
+      expect(asterisk).toHaveClass("text-f1-foreground-critical")
+    })
+  })
+
   describe("Combined props", () => {
     it("combines variant, size, color, decoration, and transform", () => {
       render(

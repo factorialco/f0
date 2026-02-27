@@ -96,6 +96,14 @@ const meta = {
         defaultValue: { summary: "none" },
       },
     },
+    required: {
+      control: "boolean",
+      description: "Show a required indicator (red asterisk) after the content",
+      table: {
+        type: { summary: "boolean" },
+        defaultValue: { summary: "false" },
+      },
+    },
   },
   decorators: [
     (Story) => (
@@ -440,6 +448,25 @@ export const TextEllipsis: Story = {
   ],
 }
 
+export const Required: Story = {
+  args: {
+    content: "",
+  },
+  render: () => (
+    <div className="flex flex-col gap-2">
+      <F0TextV2 variant="label" content="Email address" required />
+      <F0TextV2 variant="label" content="Optional field" />
+      <F0TextV2 variant="body" content="Required body text" required />
+      <F0TextV2
+        variant="label"
+        content="Required with ellipsis"
+        required
+        ellipsis
+      />
+    </div>
+  ),
+}
+
 export const CombinedProps: Story = {
   args: {
     content: "",
@@ -713,6 +740,15 @@ export const Snapshot: Story = {
             content="This is a very long text that will be truncated with ellipsis when it exceeds the container width"
             ellipsis
           />
+        </div>
+      </section>
+
+      <section>
+        <h4 className="text-lg font-semibold">Required Indicator</h4>
+        <div className="flex flex-col gap-2">
+          <F0TextV2 variant="label" content="Email address" required />
+          <F0TextV2 variant="body" content="Required body text" required />
+          <F0TextV2 variant="label" content="Optional field" />
         </div>
       </section>
 
