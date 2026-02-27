@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.383.2](https://github.com/factorialco/f0/compare/f0-react-v1.383.1...f0-react-v1.383.2) (2026-02-27)
+
+
+### Bug Fixes
+
+* update single-select questions in CoCreationForm radio appearance ([#3546](https://github.com/factorialco/f0/issues/3546)) ([79762f0](https://github.com/factorialco/f0/commit/79762f0970b3beaafc16cb395ec94c640d09c9b0))
+
 ## [1.383.1](https://github.com/factorialco/f0/compare/f0-react-v1.383.0...f0-react-v1.383.1) (2026-02-27)
 
 
