@@ -15,7 +15,6 @@ import ArrowRight from "@/icons/app/ArrowRight"
 import ChartLine from "@/icons/app/ChartLine"
 import ExternalLink from "@/icons/app/ExternalLink"
 import Marketplace from "@/icons/app/Marketplace"
-import PalmTree from "@/icons/app/PalmTree"
 import People from "@/icons/app/People"
 import Table from "@/icons/app/Table"
 import { useAiChat } from "@/sds/ai/F0AiChat"
@@ -157,26 +156,6 @@ const meta: Meta<typeof ApplicationFrame> = {
         link: "/permissions",
         linkText: "See more",
       },
-      welcomeScreenSuggestions: [
-        {
-          icon: Lightbulb,
-          message: "Share feedback",
-          prompt:
-            "Share feedback and help shape One with your feedback in the next message (optional)",
-        },
-        {
-          icon: PalmTree,
-          message: "Create a new task",
-          prompt:
-            "Create a new task and help shape One with your feedback in the next message (optional)",
-        },
-        {
-          icon: Lightbulb,
-          message: "Create a new project",
-          prompt:
-            "Create a new project and help shape One with your feedback in the next message (optional)",
-        },
-      ],
     },
     aiPromotion: {
       enabled: false,

@@ -6,10 +6,11 @@ import { ArrowUp, SolidStop } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
+import type { F0AiChatTextAreaProps } from "./types"
+
 import { MentionPopover } from "./MentionPopover"
 import { ToolHintSelector } from "./ToolHintSelector"
 import { TypewriterPlaceholder } from "./TypewriterPlaceholder"
-import type { F0AiChatTextAreaProps } from "./types"
 import { useMentions } from "./useMentions"
 import { buildHighlightSegments } from "./utils"
 
@@ -123,7 +124,7 @@ export const F0AiChatTextArea = ({
       aria-busy={inProgress}
       ref={formRef}
       className={cn(
-        "relative isolate",
+        "relative isolate z-20",
         "flex flex-row items-end sm:flex-col sm:items-stretch gap-3",
         "rounded-lg border border-solid border-f1-border",
         "transition-all hover:cursor-text",

@@ -73,7 +73,7 @@ export function ToolHintSelector({
           side="top"
           align="start"
           sideOffset={8}
-          className="w-56 p-0.5"
+          className="w-56 rounded-lg p-1"
         >
           <AnimatePresence>
             {open && (
