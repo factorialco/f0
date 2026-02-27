@@ -167,8 +167,8 @@ const RowComponentInner = <
   )
 
   const localDisabledHover = useMemo(
-    () => disableHover || (!hasItemActions && !itemHref && !itemOnClick),
-    [disableHover, hasItemActions, itemHref, itemOnClick]
+    () => disableHover || (!showItemActions && !itemHref && !itemOnClick),
+    [disableHover, showItemActions, itemHref, itemOnClick]
   )
 
   return (
