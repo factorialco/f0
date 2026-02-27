@@ -25,7 +25,7 @@ jobs:
     needs: detect-changes
     name: "[⚛️ REACT] Generate SKILL.md files"
     if: |
-      needs.detect-changes.outputs.package_react == 'true' &&
+      (needs.detect-changes.outputs.package_react == 'true' || github.event_name == 'workflow_dispatch') &&
       github.head_ref != 'release-please--branches--master' &&
       !contains(github.event.pull_request.labels.*.name, 'autorelease')
     runs-on: ubuntu-latest
@@ -48,7 +48,7 @@ jobs:
         run: pnpm --filter @factorialco/f0-react run build-storybook
 
       - name: Generate SKILL.md files
-        uses: sergiocarracedo/storybook-to-skill-md-action@v1
+        uses: sergiocarracedo/storybook-to-skill-md-action@8a23e2214de82494ec0e57de46e32c7e4ae53335
         with:
           index-file: "packages/react/storybook-static/index.json"
           source-dir: "packages/react/src"
