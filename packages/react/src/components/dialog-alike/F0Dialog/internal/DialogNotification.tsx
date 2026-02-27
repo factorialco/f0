@@ -42,7 +42,7 @@ export const DialogNotificationInternal = ({
       size="sm"
       primaryAction={primaryAction}
       secondaryAction={secondaryAction}
-      type={type == "critical" ? "critical" : "default"}
+      type={type === "critical" ? "critical" : "default"}
       modal
     >
       <div className="flex flex-col gap-4 py-2">
