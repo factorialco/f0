@@ -160,17 +160,19 @@ const e = {
     other: "Other actions",
     toggle: "Toggle",
     toggleDropdownMenu: "Toggle dropdown menu",
-    selectAll: "Select all"
+    selectAll: "Select all",
+    selectAllItems: "Select all {{total}} items"
   },
   status: {
     selected: {
       singular: "Selected",
       plural: "Selected",
       all: "All selected",
-      allOnPage: "All items on this page are selected",
+      allOnPage: "All {{count}} items on this page are selected",
       selectAllItems: "Select all {{total}} items",
       allItemsSelected: "All {{total}} items selected"
-    }
+    },
+    noItemsSelected: "No items selected"
   },
   filters: {
     searchPlaceholder: "Search filters...",
@@ -518,11 +520,25 @@ const e = {
   forms: {
     actionBar: {
       unsavedChanges: "You have changes pending to be saved",
+      saving: "Saving...",
+      saved: "Your changes have been saved",
       discard: "Discard",
       issues: {
         one: "{{count}} issue",
         other: "{{count}} issues"
       }
+    },
+    file: {
+      dropzone: "Drag and drop a file, or click to select",
+      dropzoneActive: "Drop the file here",
+      dropzoneMultiple: "Drag and drop files, or click to select",
+      acceptedTypes: "Accepted formats: {{types}}",
+      remove: "Remove",
+      uploading: "Uploading…",
+      processing: "Processing…",
+      uploadFailed: "Upload failed",
+      fileTooLarge: "File exceeds {{maxSize}} MB limit",
+      invalidFileType: "File type not accepted. Accepted formats: {{types}}"
     },
     validation: {
       required: "This field is required",
@@ -553,6 +569,12 @@ const e = {
         mustBeChecked: "This option must be selected"
       }
     }
+  },
+  wizard: {
+    previous: "Previous",
+    next: "Continue",
+    submit: "Submit",
+    stepOf: "Step {{current}} of {{total}}"
   }
 };
 export {
