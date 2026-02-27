@@ -19,6 +19,9 @@ export * from "./F0Heading"
 export * from "./F0Icon"
 export * from "./F0Link"
 export * from "./F0Select"
+/**
+ * @deprecated Use F0TextV2 instead. F0Text will be removed after migration is complete.
+ */
 export * from "./F0Text"
 export * from "./F0TextV2"
 export * from "./OneFilterPicker/exports"

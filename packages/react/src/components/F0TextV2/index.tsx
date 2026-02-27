@@ -4,7 +4,6 @@ import { createElement, forwardRef } from "react"
 import { OneEllipsis } from "@/components/OneEllipsis"
 import { cn } from "@/lib/utils"
 
-import { Component } from "../../lib/component/component"
 import type {
   ColorToken,
   DecorationToken,
@@ -12,6 +11,8 @@ import type {
   TransformToken,
   VariantToken,
 } from "./types"
+
+import { Component } from "../../lib/component/component"
 import {
   alignDefaults,
   alignVariants,
@@ -146,7 +147,6 @@ const F0TextV2Inner = forwardRef<HTMLElement, F0TextV2Props>(
 
     const asTag = defaultTagMap[variant]
 
-    // Ellipsis path
     if (ellipsis !== undefined) {
       const lines = typeof ellipsis === "number" ? ellipsis : 1
 
@@ -164,7 +164,6 @@ const F0TextV2Inner = forwardRef<HTMLElement, F0TextV2Props>(
       )
     }
 
-    // Plain text path
     return createElement(asTag, { ...htmlProps, className, ref }, content)
   }
 )
