@@ -215,7 +215,6 @@ export function ClockInControls({
                           onChange={handleChangeBreakType}
                           open={breakTypePickerOpen}
                           onOpenChange={setBreakTypePickerOpen}
-                          selectContentClassName="min-w-80"
                         >
                           <div aria-label="Select break type">
                             <F0Button

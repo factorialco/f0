@@ -107,7 +107,6 @@ const F0SelectComponent = forwardRef(function Select<
     searchBoxPlaceholder,
     searchEmptyMessage,
     size = "sm",
-    selectContentClassName,
     actions,
     source,
     label,
@@ -701,7 +700,6 @@ const F0SelectComponent = forwardRef(function Select<
     <SelectContent
       items={items}
       taller={!!source?.filters}
-      className={selectContentClassName}
       emptyMessage={searchEmptyMessage ?? i18n.select.noResults}
       bottom={
         !isFiltersOpen ? (
