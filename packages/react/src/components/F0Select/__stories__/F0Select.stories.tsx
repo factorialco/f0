@@ -423,8 +423,8 @@ export const WithPersonTags: Story = {
     onChange: fn(),
     options: [
       {
-        value: "marta",
-        label: "Marta Serrano",
+        value: "isabella",
+        label: "Isabella Tangari",
         description: "Product Designer",
         tag: {
           type: "person",
@@ -436,7 +436,7 @@ export const WithPersonTags: Story = {
         label: "Saul Dominguez",
         tag: {
           type: "person",
-          name: "Saul Dominguez",
+          name: "Eliseo Quintanilla",
         },
       },
       {
