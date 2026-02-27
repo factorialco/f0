@@ -19,12 +19,12 @@ export const IconAvatar = ({ icon, size = "md", className }: Props) => {
   return (
     <View
       className={cn(
-        "flex aspect-square items-center justify-center border border-solid border-f1-border-secondary",
+        "flex aspect-square items-center justify-center border border-solid border-f0-border-secondary",
         sizes[size],
         className
       )}
     >
-      <Icon icon={icon} size={size} className="text-f1-foreground-secondary" />
+      <Icon icon={icon} size={size} className="text-f0-foreground-secondary" />
     </View>
   )
 }

@@ -32,7 +32,7 @@ The Icon component is designed to work with UniWind, allowing you to style icons
 
 ```tsx
 // Style using Tailwind CSS classes
-<Icon icon={AppIcons.Archive} className="text-f1-icon-secondary" />
+<Icon icon={AppIcons.Archive} className="text-f0-icon-secondary" />
 ```
 
 ## Available Icons

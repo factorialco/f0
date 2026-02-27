@@ -18,8 +18,8 @@ export const GenericAction = memo(
         onPress={props.handlePress}
         {...props}
         className={cn(
-          "group flex items-center justify-between gap-1.5 rounded p-1.5 text-f1-foreground text-inherit",
-          "no-underline hover:bg-f1-background-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-f1-border-selected-bold active:bg-f1-background-secondary-hover",
+          "group flex items-center justify-between gap-1.5 rounded p-1.5 text-f0-foreground text-inherit",
+          "no-underline hover:bg-f0-background-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-f0-border-selected-bold active:bg-f0-background-secondary-hover",
           className
         )}
       >
@@ -28,7 +28,7 @@ export const GenericAction = memo(
           aria-hidden={true}
           icon={ChevronRight}
           size="md"
-          className="text-f1-foreground"
+          className="text-f0-foreground"
         />
       </Pressable>
     )

@@ -41,7 +41,7 @@ const _DataList = ({
       {!!label && (
         <Text
           className={cn(
-            "px-1.5 text-f1-foreground-secondary",
+            "px-1.5 text-f0-foreground-secondary",
             isHorizontalItem ? "mt-1.5 w-36 shrink-0" : ""
           )}
         >

@@ -37,7 +37,7 @@ export const DotTag = ({ text, ...props }: DotTagProps) => {
 
   return (
     <BaseTag
-      classNameContainer="border border-solid border-f1-border-secondary"
+      classNameContainer="border border-solid border-f0-border-secondary"
       left={
         <View
           className="m-1 aspect-square w-2 rounded-full"
