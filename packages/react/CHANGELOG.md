@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.385.0](https://github.com/factorialco/f0/compare/f0-react-v1.384.0...f0-react-v1.385.0) (2026-02-27)
+
+
+### Features
+
+* **F0AiChat:** New events in ai chat ([#3501](https://github.com/factorialco/f0/issues/3501)) ([a3e7e01](https://github.com/factorialco/f0/commit/a3e7e010c054d186551cb1ea98d442ef336eee8d))
+
 ## [1.384.0](https://github.com/factorialco/f0/compare/f0-react-v1.383.2...f0-react-v1.384.0) (2026-02-27)
 
 
