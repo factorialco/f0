@@ -7,6 +7,8 @@ export type {
   F0FormProps,
   F0FormPropsWithSingleSchema,
   F0FormPropsWithPerSectionSchema,
+  F0FormPropsWithSingleSchemaDefinition,
+  F0FormPropsWithPerSectionDefinition,
   F0FormSchema,
   F0PerSectionSchema,
   F0PerSectionSectionConfig,
@@ -120,6 +122,8 @@ export type { F0FormRef, UseF0FormReturn } from "./useF0Form"
 import type {
   F0FormPropsWithSingleSchema,
   F0FormPropsWithPerSectionSchema,
+  F0FormPropsWithSingleSchemaDefinition,
+  F0FormPropsWithPerSectionDefinition,
   F0FormSchema,
   F0PerSectionSchema,
 } from "./types"
@@ -133,5 +137,11 @@ export const F0Form = experimentalComponent("F0Form", F0FormComponent) as {
   ): React.ReactElement
   <T extends F0PerSectionSchema>(
     props: F0FormPropsWithPerSectionSchema<T>
+  ): React.ReactElement
+  <TSchema extends F0FormSchema>(
+    props: F0FormPropsWithSingleSchemaDefinition<TSchema>
+  ): React.ReactElement
+  <T extends F0PerSectionSchema>(
+    props: F0FormPropsWithPerSectionDefinition<T>
   ): React.ReactElement
 }
