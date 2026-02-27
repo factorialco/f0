@@ -54,7 +54,7 @@ jobs:
           source-dir: "packages/react/src"
           output-dir: "packages/react/f0-skills"
           provider: "groq"
-          model: "moonshotai/kimi-k2-instruct-0905"
+          model: "qwen/qwen3-32b"
           api-key: ${{ secrets.GROQ_APIKEY }}
           verbose: "true"
           exclude: |
