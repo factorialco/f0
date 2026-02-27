@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.383.1](https://github.com/factorialco/f0/compare/f0-react-v1.383.0...f0-react-v1.383.1) (2026-02-27)
+
+
+### Bug Fixes
+
+* **data-testid:** preserve discriminated union props in WithDataTestIdPropsOf ([#3525](https://github.com/factorialco/f0/issues/3525)) ([5656938](https://github.com/factorialco/f0/commit/5656938da02d1867065b423f875f217f24ad7a28))
+
 ## [1.383.0](https://github.com/factorialco/f0/compare/f0-react-v1.382.0...f0-react-v1.383.0) (2026-02-27)
 
 
