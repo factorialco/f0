@@ -1,11 +1,8 @@
 import { FC, useMemo } from "react"
 
-import type {
-  F0DialogPrimaryAction,
-  F0DialogSecondaryAction,
-} from "@/components/F0Dialog/types"
+import type { DialogAlikeAction } from "@/components/dialog-alike/common/types"
 
-import { F0DialogInternal as F0Dialog } from "@/components/F0Dialog/F0DialogInternal"
+import { F0Dialog } from "@/components/dialog-alike/F0Dialog"
 import ArrowLeft from "@/icons/app/ArrowLeft"
 import ArrowRight from "@/icons/app/ArrowRight"
 import { useI18n } from "@/lib/providers/i18n/i18n-provider"
@@ -30,7 +27,7 @@ export const F0Wizard: FC<F0WizardProps> = ({
   isOpen,
   onClose = noop,
   title,
-  width = "xl",
+  size = "xl",
   defaultStepIndex,
   nextLabel,
   previousLabel,
@@ -73,7 +70,7 @@ export const F0Wizard: FC<F0WizardProps> = ({
   const resolvedPreviousLabel =
     currentStepDef?.previousLabel ?? previousLabel ?? i18n.wizard.previous
 
-  const primaryAction = useMemo<F0DialogPrimaryAction>(
+  const primaryAction = useMemo<DialogAlikeAction>(
     () => ({
       label: resolvedNextLabel,
       icon: isLastStep ? undefined : ArrowRight,
@@ -86,7 +83,7 @@ export const F0Wizard: FC<F0WizardProps> = ({
     [resolvedNextLabel, isLastStep, navigation, currentStepDef]
   )
 
-  const secondaryAction = useMemo<F0DialogSecondaryAction | undefined>(
+  const secondaryAction = useMemo<DialogAlikeAction | undefined>(
     () =>
       isFirstStep
         ? undefined
@@ -103,7 +100,7 @@ export const F0Wizard: FC<F0WizardProps> = ({
     <F0Dialog
       isOpen={isOpen}
       onClose={onClose}
-      width={width}
+      size={size}
       title={title}
       primaryAction={primaryAction}
       secondaryAction={secondaryAction}
