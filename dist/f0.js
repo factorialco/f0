@@ -17784,7 +17784,7 @@ const ey = ye(ev), tv = ({
     size: "sm",
     primaryAction: s,
     secondaryAction: o,
-    type: t == "critical" ? "critical" : "default",
+    type: t === "critical" ? "critical" : "default",
     modal: !0,
     children: /* @__PURE__ */ H("div", { className: "flex flex-col gap-4 py-2", children: [
       /* @__PURE__ */ f(Bo, { type: t, size: "lg" }),
