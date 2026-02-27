@@ -1,5 +1,7 @@
 "use client"
 
+import type { ReactNode } from "react"
+
 import { type Message, randomId } from "@copilotkit/shared"
 import {
   createContext,
@@ -10,7 +12,6 @@ import {
   useRef,
   useState,
 } from "react"
-import type { ReactNode } from "react"
 
 import { useI18n } from "@/lib/providers/i18n"
 
@@ -51,6 +52,7 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   footer: initialFooter,
   onThumbsDown,
   onThumbsUp,
+  tracking,
   ...rest
 }) => {
   const [footer, setFooter] = useState<ReactNode | undefined>(initialFooter)
@@ -75,6 +77,12 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   >(initialInitialMessage)
 
   const [chatWidth, setChatWidth] = useState(() => getStoredChatWidth())
+
+  useEffect(() => {
+    if (open) {
+      tracking?.onVisibility?.()
+    }
+  }, [open])
 
   // Persist chat width to localStorage
   useEffect(() => {
@@ -195,6 +203,7 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         chatWidth,
         setChatWidth,
         resetChatWidth,
+        tracking,
       }}
     >
       {children}
@@ -239,6 +248,7 @@ export function useAiChat(): AiChatProviderReturnValue {
       chatWidth: DEFAULT_CHAT_WIDTH,
       setChatWidth: noopFn,
       resetChatWidth: noopFn,
+      tracking: undefined,
     }
   }
 

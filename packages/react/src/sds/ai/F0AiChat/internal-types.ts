@@ -2,6 +2,7 @@ import { type AIMessage, type Message } from "@copilotkit/shared"
 
 import {
   type AiChatDisclaimer,
+  type AiChatTrackingOptions,
   type VisualizationMode,
   WelcomeScreenSuggestion,
 } from "./types"
@@ -38,6 +39,7 @@ export interface AiChatState {
     message: AIMessage,
     { threadId, feedback }: { threadId: string; feedback: string }
   ) => void
+  tracking?: AiChatTrackingOptions
 }
 
 /**
@@ -72,6 +74,7 @@ export type AiChatProviderReturnValue = {
     message: AIMessage,
     { threadId, feedback }: { threadId: string; feedback: string }
   ) => void
+  tracking?: AiChatTrackingOptions
   /**
    * Clear/reset the chat conversation
    */

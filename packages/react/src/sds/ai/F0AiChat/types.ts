@@ -1,5 +1,5 @@
 import { CopilotKitProps } from "@copilotkit/react-core"
-import { type AIMessage } from "@copilotkit/shared"
+import { type AIMessage, type Message } from "@copilotkit/shared"
 
 import { IconType } from "@/components/F0Icon"
 
@@ -7,6 +7,17 @@ import { IconType } from "@/components/F0Icon"
  * Visualization mode for the AI chat
  */
 export type VisualizationMode = "sidepanel" | "fullscreen"
+
+/**
+ * Tracking options for the AI chat
+ */
+export type AiChatTrackingOptions = {
+  onVisibility?: () => void
+  onClose?: () => void
+  onWelcomeSuggestionClick?: (suggestion: WelcomeScreenSuggestion) => void
+  onNewChat?: () => void
+  onMessage?: (message: Message) => void
+}
 
 /**
  * Props for the AiChatProvider component
@@ -45,6 +56,7 @@ export type AiChatProviderProps = {
     message: AIMessage,
     { threadId, feedback }: { threadId: string; feedback: string }
   ) => void
+  tracking?: AiChatTrackingOptions
 } & Pick<
   CopilotKitProps,
   | "agent"

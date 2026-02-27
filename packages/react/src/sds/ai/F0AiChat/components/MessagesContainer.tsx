@@ -260,6 +260,7 @@ const Messages = ({
             const callback =
               currentReaction === "like" ? onThumbsUp : onThumbsDown
             callback?.(message, { threadId, feedback })
+
             closeFeedbackModal()
           }}
           onClose={(message) => {

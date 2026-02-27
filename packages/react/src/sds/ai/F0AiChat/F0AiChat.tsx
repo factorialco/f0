@@ -40,6 +40,7 @@ const F0AiChatProviderComponent = ({
   onThumbsDown,
   children,
   agent,
+  tracking,
   ...copilotKitProps
 }: AiChatProviderProps) => {
   return (
@@ -56,6 +57,7 @@ const F0AiChatProviderComponent = ({
       defaultVisualizationMode={defaultVisualizationMode}
       lockVisualizationMode={lockVisualizationMode}
       footer={footer}
+      tracking={tracking}
     >
       <AiChatKitWrapper {...copilotKitProps}>{children}</AiChatKitWrapper>
     </AiChatStateProvider>
@@ -145,7 +147,7 @@ const ChatInput = (props: InputProps) => {
       {disclaimer?.text && (
         <motion.div
           layout="position"
-          className="flex flex-row items-center gap-1 w-full justify-center max-w-[712px]"
+          className="flex w-full max-w-[712px] flex-row items-center justify-center gap-1"
           transition={{
             layout: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] },
           }}
