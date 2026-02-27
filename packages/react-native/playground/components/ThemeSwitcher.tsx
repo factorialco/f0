@@ -4,7 +4,7 @@ import { Uniwind, useCSSVariable, useUniwind } from 'uniwind';
 export const ThemeSwitcher = () => {
   const { theme, hasAdaptiveThemes } = useUniwind();
   
-  // Obtener colores del tema actual
+  // Get current theme colors
   const [f0Background, f0Foreground, f0Border, f0BackgroundSecondary] = useCSSVariable([
     '--color-f0-background',
     '--color-f0-foreground',
