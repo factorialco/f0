@@ -22,4 +22,5 @@ export type SelectOptionProps = {
   isEditMode?: boolean
   correct?: boolean
   locked?: boolean
+  type: "select" | "multi-select"
 }
