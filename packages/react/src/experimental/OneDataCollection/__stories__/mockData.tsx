@@ -236,6 +236,7 @@ export const getMockVisualizations = (options?: {
     noSorting?: boolean
     nestedRecords?: boolean
     applyLongText?: boolean
+    longColumnLabels?: boolean
   }
   cache?: MockDataCache<MockUser>
 }): Record<
@@ -333,7 +334,9 @@ export const getMockVisualizations = (options?: {
           },
           {
             id: "role3",
-            label: "Role 3",
+            label: options?.table?.longColumnLabels
+              ? "Role (Field with a very long label to test the ellipsis)"
+              : "Role 3",
             render: (item) => item.role,
             sorting: options?.table?.noSorting ? undefined : "role",
           },
