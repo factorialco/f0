@@ -5,6 +5,8 @@ import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Icon } from "@/components/F0Icon"
 import { OneEllipsis } from "@/components/OneEllipsis"
 import { Cross, Sliders } from "@/icons/app"
+import { useReducedMotion } from "@/lib/a11y"
+import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { Action } from "@/ui/Action"
 import { actionVariants } from "@/ui/Action/variants"
@@ -34,6 +36,8 @@ export function ToolHintSelector({
   onChange,
 }: ToolHintSelectorProps) {
   const [open, setOpen] = useState(false)
+  const i18n = useI18n()
+  const shouldReduceMotion = useReducedMotion()
 
   const handleSelect = useCallback(
     (hint: AiChatToolHint) => {
@@ -62,7 +66,7 @@ export function ToolHintSelector({
         <PopoverTrigger asChild>
           <ButtonInternal
             pressed={open}
-            label="Tools"
+            label={i18n.t("ai.tools")}
             hideLabel={!!activeToolHint}
             icon={Sliders}
             variant="outline"
@@ -81,7 +85,7 @@ export function ToolHintSelector({
                 initial={{ opacity: 0, scale: 0.95, y: 5 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: 5 }}
-                transition={{ duration: 0.15 }}
+                transition={{ duration: shouldReduceMotion ? 0 : 0.15 }}
                 className="flex flex-col gap-0.5"
               >
                 {toolHints.map((hint) => {
@@ -126,7 +130,7 @@ export function ToolHintSelector({
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
-            transition={{ duration: 0.15 }}
+            transition={{ duration: shouldReduceMotion ? 0 : 0.15 }}
             onClick={handleClear}
             className={cn(
               "flex items-center gap-1 rounded-sm px-2 py-1.5",

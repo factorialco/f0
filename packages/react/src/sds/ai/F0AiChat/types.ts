@@ -196,6 +196,8 @@ export const aiTranslations = {
     expandChat: "Expand chat",
     collapseChat: "Collapse chat",
     ask: "Ask One",
+    viewProfile: "View profile",
+    tools: "Tools",
   },
 }
 

@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from "motion/react"
 import { useEffect, useRef, useState } from "react"
 
+import { useReducedMotion } from "@/lib/a11y"
 import { cn } from "@/lib/utils"
 
 export interface TypewriterPlaceholderProps {
@@ -16,6 +17,7 @@ export const TypewriterPlaceholder = ({
   inputValue,
   inProgress,
 }: TypewriterPlaceholderProps) => {
+  const shouldReduceMotion = useReducedMotion()
   const [displayedPlaceholder, setDisplayedPlaceholder] = useState("")
   const [currentPlaceholderIndex, setCurrentPlaceholderIndex] = useState(0)
   const [isTyping, setIsTyping] = useState(false)
@@ -47,6 +49,24 @@ export const TypewriterPlaceholder = ({
       setDisplayedPlaceholder("")
       clearAllIntervals()
       return
+    }
+
+    // When reduced motion is preferred, show the full placeholder without animation
+    if (shouldReduceMotion) {
+      setIsTyping(false)
+      setDisplayedPlaceholder(placeholderText)
+      clearAllIntervals()
+
+      // Rotate to next placeholder after a delay
+      placeholderTimeoutRef.current = setTimeout(() => {
+        const nextIndex =
+          (currentPlaceholderIndex + 1) % Math.max(placeholders.length, 1)
+        setCurrentPlaceholderIndex(nextIndex)
+      }, 4000)
+
+      return () => {
+        clearAllIntervals()
+      }
     }
 
     setIsTyping(true)
@@ -98,6 +118,7 @@ export const TypewriterPlaceholder = ({
     placeholderText,
     currentPlaceholderIndex,
     placeholders.length,
+    shouldReduceMotion,
   ])
 
   if (inputValue.length > 0 || inProgress) {
@@ -110,7 +131,7 @@ export const TypewriterPlaceholder = ({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        transition={{ duration: 0.4 }}
+        transition={{ duration: shouldReduceMotion ? 0 : 0.4 }}
         className={cn(
           "col-start-1 row-start-1",
           "pointer-events-none",
@@ -126,7 +147,7 @@ export const TypewriterPlaceholder = ({
           )}
         >
           {displayedPlaceholder}
-          {isTyping && (
+          {isTyping && !shouldReduceMotion && (
             <motion.span
               animate={{ opacity: [1, 0] }}
               transition={{

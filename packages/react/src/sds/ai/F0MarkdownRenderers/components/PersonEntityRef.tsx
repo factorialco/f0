@@ -2,6 +2,8 @@ import { useCallback, useEffect, useRef, useState } from "react"
 
 import { F0Card } from "@/components/F0Card"
 import { Link } from "@/lib/linkHandler"
+import { useI18n } from "@/lib/providers/i18n"
+import { cn, focusRing } from "@/lib/utils"
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/ui/hover-card"
 
 import { useAiChat } from "../../F0AiChat/providers/AiChatStateProvider"
@@ -74,9 +76,15 @@ export function PersonEntityRef({ id, label }: { id: string; label: string }) {
       }}
     >
       <HoverCardTrigger asChild>
-        <span className="cursor-pointer font-medium text-f1-foreground-secondary hover:text-f1-foreground">
+        <button
+          type="button"
+          className={cn(
+            "cursor-pointer font-medium text-f1-foreground-secondary hover:text-f1-foreground",
+            focusRing()
+          )}
+        >
           @{label}
-        </span>
+        </button>
       </HoverCardTrigger>
       <HoverCardContent
         side="top"
@@ -110,6 +118,7 @@ function PersonEntityRefContent({
 }) {
   const employeeUrl = `/employees/${id}`
   const linkRef = useRef<HTMLAnchorElement>(null)
+  const i18n = useI18n()
 
   const navigateToProfile = () => {
     linkRef.current?.click()
@@ -126,7 +135,7 @@ function PersonEntityRefContent({
         <F0Card
           title={fallbackName}
           primaryAction={{
-            label: "View profile",
+            label: i18n.t("ai.viewProfile"),
             onClick: navigateToProfile,
           }}
         />
@@ -148,7 +157,7 @@ function PersonEntityRefContent({
         description={profile.jobTitle}
         secondaryActions={[
           {
-            label: "View profile",
+            label: i18n.t("ai.viewProfile"),
             onClick: navigateToProfile,
           },
         ]}

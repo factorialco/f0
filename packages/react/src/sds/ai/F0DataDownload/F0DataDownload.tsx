@@ -91,8 +91,10 @@ export const F0DataDownload = ({
     (format: string, _item: unknown) => {
       if (format === "excel") {
         downloadAsExcel(dataset, filename)
-      } else {
+      } else if (format === "csv") {
         downloadAsCsv(dataset, filename)
+      } else {
+        console.warn(`[F0DataDownload] Unknown download format: "${format}"`)
       }
     },
     [dataset, filename]
