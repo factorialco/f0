@@ -57,6 +57,7 @@ import { F0TagPersonProps as F0TagPersonProps_2 } from './types';
 import { F0TagRawProps } from './types';
 import { F0TagStatusProps } from './types';
 import { F0TagTeamProps } from './types';
+import { F0TextV2Props as F0TextV2Props_2 } from './F0TextV2';
 import { f1Colors } from '@factorialco/f0-core';
 import { FC } from 'react';
 import { FileCellValue } from './f0';
@@ -4932,7 +4933,7 @@ export declare type F0TextProps = Omit<TextProps, "className" | "variant" | "as"
     markdown?: boolean;
 };
 
-export declare const F0TextV2: ForwardRefExoticComponent<Omit<F0TextV2Props & RefAttributes<HTMLElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>;
+export declare const F0TextV2: ForwardRefExoticComponent<Omit<F0TextV2Props_2 & RefAttributes<HTMLElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>;
 
 /** Text alignment */
 export declare type F0TextV2Align = "left" | "center" | "right";
@@ -4961,7 +4962,7 @@ export declare interface F0TextV2Props extends Omit<React.ComponentPropsWithoutR
     size?: F0TextV2Size;
     /**
      * Semantic text color.
-     * `description`, `subtitle`, and `caption` default to `"secondary"`.
+     * `description`, `subtitle`, `caption`, and `label` default to `"secondary"`.
      */
     color?: F0TextV2Color;
     /**
@@ -4984,6 +4985,12 @@ export declare interface F0TextV2Props extends Omit<React.ComponentPropsWithoutR
     decoration?: F0TextV2Decoration;
     /** Text transform. */
     transform?: F0TextV2Transform;
+    /**
+     * Show a required indicator (red asterisk) after the content.
+     * Useful when the Text is used as a form label.
+     * @default false
+     */
+    required?: boolean;
 }
 
 /**
@@ -8435,11 +8442,6 @@ declare module "gridstack" {
 }
 
 
-declare namespace Calendar {
-    var displayName: string;
-}
-
-
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         aiBlock: {
@@ -8471,8 +8473,10 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        transcript: {
-            insertTranscript: (data: TranscriptData) => ReturnType;
+        videoEmbed: {
+            setVideoEmbed: (options: {
+                src: string;
+            }) => ReturnType;
         };
     }
 }
@@ -8480,10 +8484,13 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        videoEmbed: {
-            setVideoEmbed: (options: {
-                src: string;
-            }) => ReturnType;
+        transcript: {
+            insertTranscript: (data: TranscriptData) => ReturnType;
         };
     }
+}
+
+
+declare namespace Calendar {
+    var displayName: string;
 }
