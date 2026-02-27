@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react"
+import { useCallback, useEffect, useMemo, useRef } from "react"
 import { DefaultValues, Path, useForm } from "react-hook-form"
 import { z } from "zod"
 
@@ -26,6 +26,7 @@ import type {
   FormDefinitionItem,
   RowDefinition,
 } from "../types"
+import type { F0FormRef, F0FormStateCallback } from "../useF0Form"
 import { useSchemaDefinition } from "../useSchemaDefinition"
 import { createZodErrorMap } from "../zodErrorMap"
 
@@ -83,6 +84,7 @@ interface F0FormSectionProps<TSchema extends F0FormSchema> {
   errorTriggerMode: F0FormErrorTriggerMode
   className?: string
   initialFiles?: import("../fields/file/types").InitialFile[]
+  formRef?: React.MutableRefObject<F0FormRef | null>
 }
 
 /**
@@ -100,19 +102,19 @@ export function F0FormSection<TSchema extends F0FormSchema>({
   errorTriggerMode,
   className,
   initialFiles,
+  formRef,
 }: F0FormSectionProps<TSchema>) {
   const i18n = useI18n()
 
   type TValues = z.infer<TSchema>
 
-  // Fields in per-section mode don't have a `section` property, so they
-  // are all root-level fields. We don't pass section config to useSchemaDefinition.
   const definition = useSchemaDefinition(schema)
 
   const submitLabel = submitConfig?.label ?? "Submit"
   const submitIcon =
     submitConfig?.icon === null ? undefined : (submitConfig?.icon ?? Save)
   const showSubmitWhenDirty = submitConfig?.showSubmitWhenDirty ?? false
+  const hideSubmitButton = submitConfig?.hideSubmitButton ?? false
 
   const errorMap = useMemo(() => createZodErrorMap(i18n), [i18n])
   const formMode = ERROR_TRIGGER_MODE_MAP[errorTriggerMode]
@@ -132,6 +134,8 @@ export function F0FormSection<TSchema extends F0FormSchema>({
   const { isSubmitting, isDirty } = form.formState
   const hasErrors =
     Object.keys(form.formState.errors).filter((k) => k !== "root").length > 0
+
+  const stateCallbackRef = useRef<F0FormStateCallback | null>(null)
 
   const handleSubmit = useCallback(
     async (data: TValues) => {
@@ -158,6 +162,45 @@ export function F0FormSection<TSchema extends F0FormSchema>({
     },
     [onSubmit, form]
   )
+
+  useEffect(() => {
+    if (formRef) {
+      const refMethods: F0FormRef = {
+        submit: () => {
+          return new Promise<void>((resolve, reject) => {
+            form.handleSubmit(
+              async (data) => {
+                await handleSubmit(data)
+                resolve()
+              },
+              () => {
+                reject(new Error("Form validation failed"))
+              }
+            )()
+          })
+        },
+        reset: () => form.reset(),
+        isDirty: () => form.formState.isDirty,
+        getValues: () => form.getValues() as Record<string, unknown>,
+        _setStateCallback: (callback: F0FormStateCallback) => {
+          stateCallbackRef.current = callback
+        },
+      }
+      formRef.current = refMethods
+    }
+
+    return () => {
+      if (formRef) {
+        formRef.current = null
+      }
+    }
+  }, [formRef, form, handleSubmit])
+
+  useEffect(() => {
+    if (stateCallbackRef.current) {
+      stateCallbackRef.current({ isSubmitting, hasErrors })
+    }
+  }, [isSubmitting, hasErrors])
 
   const groupedItems = groupContiguousSwitches(definition)
 
@@ -234,7 +277,7 @@ export function F0FormSection<TSchema extends F0FormSchema>({
             </p>
           )}
 
-          {(!showSubmitWhenDirty || isDirty) && (
+          {!hideSubmitButton && (!showSubmitWhenDirty || isDirty) && (
             <div className="mt-4">
               <F0Button
                 type="submit"

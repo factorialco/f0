@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react"
 
-import { withDataTestId } from "@/lib/data-testid"
+import { DataTestIdWrapper, WithDataTestIdProps } from "@/lib/data-testid"
 import { useL10n } from "@/lib/providers/l10n"
 import {
   DatePickerPopup,
@@ -17,10 +17,8 @@ import {
 import { DatePickerTrigger } from "./components/DateNavigatorTrigger"
 import { DatePickerValue } from "./types"
 
-export interface OneDatePickerProps extends Omit<
-  DatePickerPopupProps,
-  "children"
-> {
+export interface OneDatePickerProps
+  extends Omit<DatePickerPopupProps, "children">, WithDataTestIdProps {
   hideNavigation?: boolean
   hideGoToCurrent?: boolean
 }
@@ -36,6 +34,7 @@ function _OneDateNavigator({
   defaultCompareTo,
   onCompareToChange,
   value,
+  dataTestId,
   ...props
 }: OneDatePickerProps) {
   const [localValue, setLocalValue] = useState<DatePickerValue | undefined>(
@@ -85,37 +84,39 @@ function _OneDateNavigator({
   }
 
   return (
-    <DatePickerPopup
-      onSelect={handleSelect}
-      value={localValue}
-      defaultValue={defaultValue}
-      presets={presets}
-      granularities={granularities}
-      minDate={props.minDate}
-      maxDate={props.maxDate}
-      open={isOpen}
-      onOpenChange={setIsOpen}
-      compareTo={compareTo}
-      defaultCompareTo={defaultCompareTo}
-      onCompareToChange={handleCompareToChange}
-      weekStartsOn={effectiveWeekStartsOn}
-      asChild
-    >
-      <DatePickerTrigger
+    <DataTestIdWrapper dataTestId={dataTestId}>
+      <DatePickerPopup
+        onSelect={handleSelect}
         value={localValue}
-        compareToValue={compareToValue}
-        highlighted={isOpen}
-        navigation={!hideNavigation}
-        onDateChange={handleNavigationChange}
-        granularity={granularityDefinition}
+        defaultValue={defaultValue}
+        presets={presets}
+        granularities={granularities}
         minDate={props.minDate}
         maxDate={props.maxDate}
-        disabled={props.disabled}
-        hideGoToCurrent={hideGoToCurrent}
-        onClick={() => setIsOpen(true)}
-      />
-    </DatePickerPopup>
+        open={isOpen}
+        onOpenChange={setIsOpen}
+        compareTo={compareTo}
+        defaultCompareTo={defaultCompareTo}
+        onCompareToChange={handleCompareToChange}
+        weekStartsOn={effectiveWeekStartsOn}
+        asChild
+      >
+        <DatePickerTrigger
+          value={localValue}
+          compareToValue={compareToValue}
+          highlighted={isOpen}
+          navigation={!hideNavigation}
+          onDateChange={handleNavigationChange}
+          granularity={granularityDefinition}
+          minDate={props.minDate}
+          maxDate={props.maxDate}
+          disabled={props.disabled}
+          hideGoToCurrent={hideGoToCurrent}
+          onClick={() => setIsOpen(true)}
+        />
+      </DatePickerPopup>
+    </DataTestIdWrapper>
   )
 }
 
-export const OneDateNavigator = withDataTestId(_OneDateNavigator)
+export const OneDateNavigator = _OneDateNavigator

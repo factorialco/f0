@@ -19,7 +19,7 @@ import { F0Icon } from "@/components/F0Icon"
 import { EditorBubbleMenu } from "@/experimental/RichText/CoreEditor"
 import { Toolbar } from "@/experimental/RichText/CoreEditor"
 import { Handle, Plus } from "@/icons/app"
-import { withDataTestId } from "@/lib/data-testid"
+import { DataTestIdWrapper, WithDataTestIdProps } from "@/lib/data-testid"
 import { useI18n } from "@/lib/providers/i18n"
 import { ScrollArea } from "@/ui/scrollarea"
 import { Skeleton } from "@/ui/skeleton"
@@ -44,7 +44,7 @@ import {
   PrimaryDropdownAction,
 } from "./types"
 
-interface NotesTextEditorProps {
+interface NotesTextEditorProps extends WithDataTestIdProps {
   onChange: (value: { json: JSONContent | null; html: string | null }) => void
   placeholder: string
   initialEditorState?: { content?: JSONContent | string; title?: string }
@@ -80,6 +80,7 @@ const NotesTextEditorComponent = forwardRef<
     banner,
     showBubbleMenu = false,
     titlePlaceholder,
+    dataTestId,
   },
   ref
 ) {
@@ -247,114 +248,116 @@ const NotesTextEditorComponent = forwardRef<
   if (!editor) return null
 
   return (
-    <div
-      className="relative flex h-full w-full flex-col"
-      ref={containerRef}
-      id={editorId}
-    >
-      {showHeader && (
-        <Header
-          primaryAction={primaryAction}
-          secondaryActions={secondaryActions}
-          metadata={metadata}
-          otherActions={otherActions}
-          banner={banner}
-        />
-      )}
-      {error && (
-        <div className="mx-auto flex w-full max-w-[824px] px-14 py-2">
-          <div className="flex w-max max-w-full items-center gap-4 rounded-md bg-f1-background-critical p-2 drop-shadow-sm">
-            <div className="flex w-full flex-row items-center gap-2">
-              <div className="flex-shrink-0">
-                <F0AvatarAlert size="sm" type="critical" />
-              </div>
-              <p
-                className="w-full max-w-xl flex-grow truncate text-ellipsis text-sm font-semibold text-f1-foreground-critical"
-                title={getErrorMessage(error)}
-              >
-                {getErrorMessage(error)}
-              </p>
-            </div>
-            <div className="flex-shrink-0">
-              <F0Button
-                variant="outline"
-                onClick={() => setError(null)}
-                label={translations.imageUpload.errors.dismiss}
-                size="sm"
-              />
-            </div>
-          </div>
-        </div>
-      )}
-      {!readonly && !showBubbleMenu && (
-        <div className="absolute bottom-8 left-1/2 z-50 max-w-[calc(100%-48px)] -translate-x-1/2 rounded-lg border border-solid border-f1-border-secondary bg-f1-background p-2 shadow-md">
-          <Toolbar
-            editor={editor}
-            disableButtons={false}
-            showEmojiPicker={false}
-            plainHtmlMode={false}
-          />
-        </div>
-      )}
-      <ScrollArea className="h-full gap-6">
-        {showTitle && (
-          <Title
-            value={title}
-            onChange={onTitleChange ? setTitle : undefined}
-            placeholder={titlePlaceholder}
-            disabled={!onTitleChange || readonly}
+    <DataTestIdWrapper dataTestId={dataTestId}>
+      <div
+        className="relative flex h-full w-full flex-col"
+        ref={containerRef}
+        id={editorId}
+      >
+        {showHeader && (
+          <Header
+            primaryAction={primaryAction}
+            secondaryActions={secondaryActions}
+            metadata={metadata}
+            otherActions={otherActions}
+            banner={banner}
           />
         )}
-        <div
-          className="notes-text-editor h-full"
-          onClick={() => editor.commands.focus()}
-        >
-          {!readonly && (
-            <DragHandle
-              editor={editor}
-              tippyOptions={tippyOptions}
-              onNodeChange={handleNodeChange}
-            >
-              <div className="flex flex-row">
-                <ButtonInternal
-                  compact
-                  variant="ghost"
-                  size="sm"
-                  className="text-f1-foreground-tertiary"
-                  onClick={handlePlusClick}
-                  label="Add paragraph"
-                  hideLabel
-                  icon={Plus}
-                ></ButtonInternal>
-
-                <div
-                  className="flex cursor-move items-center justify-center p-0.5 text-f1-icon-secondary"
-                  draggable
-                  data-drag-handle
-                >
-                  <F0Icon icon={Handle} size="xs" />
+        {error && (
+          <div className="mx-auto flex w-full max-w-[824px] px-14 py-2">
+            <div className="flex w-max max-w-full items-center gap-4 rounded-md bg-f1-background-critical p-2 drop-shadow-sm">
+              <div className="flex w-full flex-row items-center gap-2">
+                <div className="flex-shrink-0">
+                  <F0AvatarAlert size="sm" type="critical" />
                 </div>
+                <p
+                  className="w-full max-w-xl flex-grow truncate text-ellipsis text-sm font-semibold text-f1-foreground-critical"
+                  title={getErrorMessage(error)}
+                >
+                  {getErrorMessage(error)}
+                </p>
               </div>
-            </DragHandle>
+              <div className="flex-shrink-0">
+                <F0Button
+                  variant="outline"
+                  onClick={() => setError(null)}
+                  label={translations.imageUpload.errors.dismiss}
+                  size="sm"
+                />
+              </div>
+            </div>
+          </div>
+        )}
+        {!readonly && !showBubbleMenu && (
+          <div className="absolute bottom-8 left-1/2 z-50 max-w-[calc(100%-48px)] -translate-x-1/2 rounded-lg border border-solid border-f1-border-secondary bg-f1-background p-2 shadow-md">
+            <Toolbar
+              editor={editor}
+              disableButtons={false}
+              showEmojiPicker={false}
+              plainHtmlMode={false}
+            />
+          </div>
+        )}
+        <ScrollArea className="h-full gap-6">
+          {showTitle && (
+            <Title
+              value={title}
+              onChange={onTitleChange ? setTitle : undefined}
+              placeholder={titlePlaceholder}
+              disabled={!onTitleChange || readonly}
+            />
           )}
+          <div
+            className="notes-text-editor h-full"
+            onClick={() => editor.commands.focus()}
+          >
+            {!readonly && (
+              <DragHandle
+                editor={editor}
+                tippyOptions={tippyOptions}
+                onNodeChange={handleNodeChange}
+              >
+                <div className="flex flex-row">
+                  <ButtonInternal
+                    compact
+                    variant="ghost"
+                    size="sm"
+                    className="text-f1-foreground-tertiary"
+                    onClick={handlePlusClick}
+                    label="Add paragraph"
+                    hideLabel
+                    icon={Plus}
+                  ></ButtonInternal>
 
-          <EditorContent
+                  <div
+                    className="flex cursor-move items-center justify-center p-0.5 text-f1-icon-secondary"
+                    draggable
+                    data-drag-handle
+                  >
+                    <F0Icon icon={Handle} size="xs" />
+                  </div>
+                </div>
+              </DragHandle>
+            )}
+
+            <EditorContent
+              editor={editor}
+              className="pb-28 [&>div]:mx-auto [&>div]:w-full [&>div]:max-w-[824px] [&>div]:transition-[padding] [&>div]:duration-300 sm:[&>div]:px-14 [&>div]:px-0"
+            />
+          </div>
+        </ScrollArea>
+        {!readonly && (
+          <EditorBubbleMenu
+            editorId={editorId}
             editor={editor}
-            className="pb-28 [&>div]:mx-auto [&>div]:w-full [&>div]:max-w-[824px] [&>div]:transition-[padding] [&>div]:duration-300 sm:[&>div]:px-14 [&>div]:px-0"
+            disableButtons={false}
+            isToolbarOpen={!showBubbleMenu}
+            isFullscreen={false}
+            plainHtmlMode={false}
           />
-        </div>
-      </ScrollArea>
-      {!readonly && (
-        <EditorBubbleMenu
-          editorId={editorId}
-          editor={editor}
-          disableButtons={false}
-          isToolbarOpen={!showBubbleMenu}
-          isFullscreen={false}
-          plainHtmlMode={false}
-        />
-      )}
-    </div>
+        )}
+      </div>
+    </DataTestIdWrapper>
   )
 })
 
@@ -437,7 +440,7 @@ export const NotesTextEditorSkeleton = ({
 
 export type { Message, User } from "../CoreEditor/Extensions/Transcript"
 export type { ImageUploadConfig } from "./types"
-export const NotesTextEditor = withDataTestId(NotesTextEditorComponent)
+export const NotesTextEditor = NotesTextEditorComponent
 export type {
   NotesTextEditorHandle,
   NotesTextEditorProps,
