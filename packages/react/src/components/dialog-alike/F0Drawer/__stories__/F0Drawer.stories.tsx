@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { within } from "@testing-library/react"
+import { expect, within } from "storybook/test"
+
 import { ComponentProps, FC, useState } from "react"
 
 import { F0Button } from "@/components/F0Button"
