@@ -236,6 +236,7 @@ export const getMockVisualizations = (options?: {
     noSorting?: boolean
     nestedRecords?: boolean
     applyLongText?: boolean
+    longColumnLabels?: boolean
   }
   cache?: MockDataCache<MockUser>
 }): Record<
