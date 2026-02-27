@@ -333,7 +333,9 @@ export const getMockVisualizations = (options?: {
           },
           {
             id: "role3",
-            label: "Role (Field with a very long label to test the ellipsis)",
+            label: options?.table?.longColumnLabels
+              ? "Role (Field with a very long label to test the ellipsis)"
+              : "Role 3",
             render: (item) => item.role,
             sorting: options?.table?.noSorting ? undefined : "role",
           },
