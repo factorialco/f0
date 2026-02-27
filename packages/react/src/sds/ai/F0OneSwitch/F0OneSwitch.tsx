@@ -25,13 +25,13 @@ export const F0OneSwitch = ({
   const translations = useI18n()
   const [isHover, setIsHover] = useState(false)
 
-  if (!enabled) {
-    return null
-  }
-
   useEffect(() => {
     onVisible?.()
   }, [onVisible])
+
+  if (!enabled) {
+    return null
+  }
 
   return (
     <div className="flex items-center">
