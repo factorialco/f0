@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.383.0](https://github.com/factorialco/f0/compare/f0-react-v1.382.0...f0-react-v1.383.0) (2026-02-27)
+
+
+### Features
+
+* create F0Wizard and F0WizardForm components ([#3531](https://github.com/factorialco/f0/issues/3531)) ([7c81ef4](https://github.com/factorialco/f0/commit/7c81ef498f43e29de3eba4e4345895134301922c))
+
+
+### Bug Fixes
+
+* **datacollection:** fix sort column list ellipsis not working ([#3537](https://github.com/factorialco/f0/issues/3537)) ([6dec00d](https://github.com/factorialco/f0/commit/6dec00da8deeb4401de3c1c70e93e3ac03a4c2a7))
+
 ## [1.382.0](https://github.com/factorialco/f0/compare/f0-react-v1.381.0...f0-react-v1.382.0) (2026-02-25)
 
 
