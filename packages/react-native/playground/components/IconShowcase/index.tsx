@@ -20,7 +20,7 @@ interface StyledIconDisplayProps extends IconDisplayProps {
 }
 
 const IconDisplay = ({ icon, name }: IconDisplayProps) => {
-  const [f1Foreground] = useCSSVariable(['--color-f1-foreground']);
+  const [f1Foreground] = useCSSVariable(['--color-f0-foreground']);
   
   const asString = (value: string | number | undefined): string => {
     if (typeof value === 'string') return value;
@@ -39,7 +39,7 @@ const IconDisplay = ({ icon, name }: IconDisplayProps) => {
 };
 
 const SizeVariant = ({ icon, name, size }: SizeVariantProps) => {
-  const [f1Foreground] = useCSSVariable(['--color-f1-foreground']);
+  const [f1Foreground] = useCSSVariable(['--color-f0-foreground']);
   
   const asString = (value: string | number | undefined): string => {
     if (typeof value === 'string') return value;
@@ -58,7 +58,7 @@ const SizeVariant = ({ icon, name, size }: SizeVariantProps) => {
 };
 
 const StyledIconDisplay = ({ icon, name, className }: StyledIconDisplayProps) => {
-  const [f1Foreground] = useCSSVariable(['--color-f1-foreground']);
+  const [f1Foreground] = useCSSVariable(['--color-f0-foreground']);
   
   const asString = (value: string | number | undefined): string => {
     if (typeof value === 'string') return value;
@@ -83,11 +83,11 @@ export function IconShowcase() {
   const [moduleIconList, setModuleIconList] = useState<Array<{ name: string; icon: IconType }>>([]);
 
   const [f1Foreground, f1Background, f1Border, f1BackgroundSecondary, f1IconInfo] = useCSSVariable([
-    '--color-f1-foreground',
-    '--color-f1-background',
-    '--color-f1-border',
-    '--color-f1-background-secondary',
-    '--color-f1-icon-info',
+    '--color-f0-foreground',
+    '--color-f0-background',
+    '--color-f0-border',
+    '--color-f0-background-secondary',
+    '--color-f0-icon-info',
   ]);
 
   const asString = (value: string | number | undefined): string => {
@@ -269,22 +269,22 @@ export function IconShowcase() {
         <StyledIconDisplay
           icon={AppIcons.Heart}
           name="critical"
-          className="text-f1-icon-critical"
+          className="text-f0-icon-critical"
         />
         <StyledIconDisplay
           icon={AppIcons.InfoCircle}
           name="info"
-          className="text-f1-icon-info"
+          className="text-f0-icon-info"
         />
         <StyledIconDisplay
           icon={AppIcons.Check}
           name="positive"
-          className="text-f1-icon-positive"
+          className="text-f0-icon-positive"
         />
         <StyledIconDisplay
           icon={AppIcons.Warning}
           name="warning"
-          className="text-f1-icon-warning"
+          className="text-f0-icon-warning"
         />
       </View>
     </ScrollView>

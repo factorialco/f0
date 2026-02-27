@@ -4,7 +4,7 @@ import { Counter } from "../../../src/components/Counter";
 import { useCSSVariable } from "uniwind";
 
 export function CounterShowcase() {
-  const [f1Foreground] = useCSSVariable(['--color-f1-foreground']);
+  const [f1Foreground] = useCSSVariable(['--color-f0-foreground']);
 
   const asString = (value: string | number | undefined): string => {
     if (typeof value === 'string') return value;

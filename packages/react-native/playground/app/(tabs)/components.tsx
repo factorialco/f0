@@ -42,8 +42,8 @@ export default function ComponentsShowcase() {
   const [selectedComponent, setSelectedComponent] = useState<ComponentType>("activity");
   
   const [f1Background, f1Foreground] = useCSSVariable([
-    '--color-f1-background',
-    '--color-f1-foreground',
+    '--color-f0-background',
+    '--color-f0-foreground',
   ]);
 
   const asString = (value: string | number | undefined): string => {
@@ -87,7 +87,7 @@ export default function ComponentsShowcase() {
 
   return (
     <SafeAreaView 
-      className="flex-1 bg-f1-background" 
+      className="flex-1 bg-f0-background" 
       edges={['top', 'bottom']}
     >
       <View className="flex-1" style={{ backgroundColor: asString(f1Background) }}>

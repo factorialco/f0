@@ -4,7 +4,7 @@ import { OnePreset } from "../../../src/components/OnePreset";
 import { useCSSVariable } from "uniwind";
 
 export function OnePresetShowcase() {
-  const [f1Foreground] = useCSSVariable(['--color-f1-foreground']);
+  const [f1Foreground] = useCSSVariable(['--color-f0-foreground']);
   const [selectedPresets, setSelectedPresets] = useState<Set<string>>(new Set());
 
   const asString = (value: string | number | undefined): string => {

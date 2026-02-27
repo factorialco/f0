@@ -17,7 +17,7 @@ import { useCSSVariable } from "uniwind";
 const { Check, Alert, Home } = AppIcons;
 
 export function AvatarShowcase() {
-  const [f1Foreground] = useCSSVariable(['--color-f1-foreground']);
+  const [f1Foreground] = useCSSVariable(['--color-f0-foreground']);
 
   const asString = (value: string | number | undefined): string => {
     if (typeof value === 'string') return value;
