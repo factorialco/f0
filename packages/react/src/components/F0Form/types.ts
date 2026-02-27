@@ -165,6 +165,12 @@ interface F0FormDefaultSubmitConfig extends F0FormSubmitConfigBase {
    * @default false
    */
   hideSubmitButton?: boolean
+  /**
+   * When true, hides the internal action bar (loading/success feedback).
+   * Useful when the parent component provides its own action bar.
+   * @default false
+   */
+  hideActionBar?: boolean
 }
 
 /**
@@ -314,6 +320,12 @@ export interface F0PerSectionSubmitConfig {
    * @default false
    */
   showSubmitWhenDirty?: boolean
+  /**
+   * When true, hides the submit button.
+   * Useful when submission is controlled externally (e.g. inside F0WizardForm).
+   * @default false
+   */
+  hideSubmitButton?: boolean
 }
 
 /**
@@ -369,18 +381,52 @@ export interface F0FormPropsWithPerSectionSchema<T extends F0PerSectionSchema> {
 }
 
 /**
- * Union of both F0Form prop variants.
+ * Props for F0Form using a formDefinition (single schema mode).
+ * Form-related props are extracted from the definition; only rendering/integration
+ * props are passed directly.
+ */
+export interface F0FormPropsWithSingleSchemaDefinition<
+  TSchema extends F0FormSchema,
+> {
+  formDefinition: import("@/components/F0WizardForm/types").F0FormDefinitionSingleSchema<TSchema>
+  className?: string
+  styling?: F0FormStylingConfig
+  formRef?: React.MutableRefObject<F0FormRef | null>
+  initialFiles?: InitialFile[]
+}
+
+/**
+ * Props for F0Form using a formDefinition (per-section schema mode).
+ * Form-related props are extracted from the definition; only rendering/integration
+ * props are passed directly.
+ */
+export interface F0FormPropsWithPerSectionDefinition<
+  T extends F0PerSectionSchema,
+> {
+  formDefinition: import("@/components/F0WizardForm/types").F0FormDefinitionPerSection<T>
+  className?: string
+  styling?: F0FormStylingConfig
+  formRef?: React.MutableRefObject<F0FormRef | null>
+  initialFiles?: InitialFile[]
+}
+
+/**
+ * Union of all F0Form prop variants.
  * The component detects the mode based on whether `schema` is a single Zod schema
- * or a record of schemas keyed by section ID.
+ * or a record of schemas keyed by section ID, or whether a `formDefinition` is provided.
  */
 export type F0FormProps<
   TSchema extends F0FormSchema | F0PerSectionSchema =
     | F0FormSchema
     | F0PerSectionSchema,
 > = TSchema extends F0FormSchema
-  ? F0FormPropsWithSingleSchema<TSchema>
+  ?
+      | F0FormPropsWithSingleSchema<TSchema>
+      | F0FormPropsWithSingleSchemaDefinition<TSchema>
   : TSchema extends F0PerSectionSchema
-    ? F0FormPropsWithPerSectionSchema<TSchema>
+    ?
+        | F0FormPropsWithPerSectionSchema<TSchema>
+        | F0FormPropsWithPerSectionDefinition<TSchema>
     : never
 
 /**

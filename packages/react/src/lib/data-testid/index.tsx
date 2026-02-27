@@ -1,4 +1,4 @@
-import React, { forwardRef, memo } from "react"
+import React, { forwardRef, memo, type ReactNode } from "react"
 
 import { useRenderDataTestIdAttribute } from "../providers/user-platafform/UserPlatformProvider"
 
@@ -37,6 +37,42 @@ export type WithDataTestIdProps = {
 }
 
 /**
+ * Wrapper component that conditionally renders a `data-testid` attribute.
+ *
+ * When `dataTestId` is provided and the platform context enables test id rendering,
+ * wraps children in a `<div data-testid={dataTestId} style={{ display: "contents" }}>`.
+ * Otherwise renders children as-is with no wrapper element.
+ *
+ * Use this directly inside components with complex generic types (e.g. F0Select,
+ * OneFilterPicker) where the `withDataTestId` HOC would erase type parameters.
+ *
+ * @example
+ * ```tsx
+ * const MyComponent = <T,>({ dataTestId, ...props }: MyProps<T> & WithDataTestIdProps) => (
+ *   <DataTestIdWrapper dataTestId={dataTestId}>
+ *     <div>...</div>
+ *   </DataTestIdWrapper>
+ * )
+ * ```
+ */
+export const DataTestIdWrapper = ({
+  dataTestId,
+  children,
+}: WithDataTestIdProps & { children: ReactNode }): ReactNode => {
+  const renderDataTestIdAttribute = useRenderDataTestIdAttribute()
+
+  if (!dataTestId || !renderDataTestIdAttribute) {
+    return children
+  }
+
+  return (
+    <div data-testid={dataTestId} style={{ display: "contents" }}>
+      {children}
+    </div>
+  )
+}
+
+/**
  * Props type of a component wrapped with withDataTestId.
  * Use when ComponentProps<typeof Component> inference fails (e.g. in Storybook stories).
  */
@@ -44,18 +80,28 @@ export type WithDataTestIdPropsOf<T extends React.ComponentType<unknown>> =
   React.ComponentProps<T> & WithDataTestIdProps
 
 /**
- * Keys on T that are not part of Function, so we preserve static members (Skeleton, displayName, etc.)
- * without bringing in a second call signature that would confuse ComponentProps<> inference.
+ * Given a component type T, produce a new component type that:
+ * 1. Accepts all of T's props plus dataTestId
+ * 2. Preserves callback argument types (e.g., onCheckedChange: (checked: boolean) => void)
+ * 3. Preserves static members (e.g., F0Card.Skeleton)
+ *
+ * We use a mapped type approach to avoid the pitfalls of React.ComponentType
+ * which collapses callback inference.
  */
-type StaticMembersOf<T> = Pick<T, Exclude<keyof T, keyof Function>>
-
-/**
- * Return type has a single call signature with props = ComponentProps<T> & WithDataTestIdProps,
- * so ComponentProps<Wrapped> and Storybook's Meta/StoryObj infer correctly.
- * Static properties (e.g. F0Card.Skeleton) are preserved via StaticMembersOf<T>.
- */
-export type WithDataTestIdReturnType<T extends React.ComponentType<unknown>> =
-  React.ComponentType<WithDataTestIdPropsOf<T>> & StaticMembersOf<T>
+export type WithDataTestIdReturnType<
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  T extends React.ComponentType<any>,
+> = React.ForwardRefExoticComponent<
+  React.PropsWithoutRef<React.ComponentProps<T> & WithDataTestIdProps> &
+    React.RefAttributes<
+      T extends React.ForwardRefExoticComponent<infer P>
+        ? P extends React.RefAttributes<infer R>
+          ? R
+          : unknown
+        : unknown
+    >
+> &
+  Pick<T, Exclude<keyof T, keyof React.ForwardRefExoticComponent<unknown>>>
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const withDataTestId = <T extends React.ComponentType<any>>(
@@ -70,29 +116,19 @@ export const withDataTestId = <T extends React.ComponentType<any>>(
   type ReturnedComponentType = WithDataTestIdReturnType<T>
 
   if (isForwardRef) {
-    // For forwardRef components, we need to wrap the render function
+    // For forwardRef components, render via JSX (not by calling the render
+    // function directly) so React's reconciler properly handles null returns
+    // and hook ordering stays consistent across CI environments.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const originalRender = (component as any).render
+    const OriginalComponent = component as any
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const WrappedComponent = forwardRef((props: any, ref: any) => {
-      const renderDataTestIdAttribute = useRenderDataTestIdAttribute()
       const { dataTestId, ...rest } = props
-      if (!dataTestId || !renderDataTestIdAttribute) {
-        return originalRender(rest, ref)
-      }
-      const cleanRest = (() => {
-        const { "data-testid": _d, ...r } = rest
-        return r
-      })()
-      const content = originalRender(cleanRest, ref)
-      if (content == null) {
-        return content
-      }
       return (
-        <div data-testid={dataTestId} style={{ display: "contents" }}>
-          {content}
-        </div>
+        <DataTestIdWrapper dataTestId={dataTestId}>
+          <OriginalComponent {...rest} ref={ref} />
+        </DataTestIdWrapper>
       )
     })
 
@@ -151,73 +187,19 @@ export const withDataTestId = <T extends React.ComponentType<any>>(
     return MemoizedComponent as unknown as ReturnedComponentType
   }
 
-  const isFunctionComponent =
-    typeof component === "function" &&
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    !(component as any).prototype?.isReactComponent
-
   // For regular components (function or class). Always render via JSX to ensure
   // hooks always run in the same fiber regardless of whether dataTestId is set,
   // avoiding "Rendered more/fewer hooks than during the previous render" crashes.
-  //
-  // When dataTestId is set we delegate to a stable inner component (InnerWithTestId)
-  // that lives in its own fiber. For function components it calls Component() directly
-  // (safe since it's always called the same way within that fiber) to detect null and
-  // suppress the wrapper div. For class components it falls back to JSX.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const InnerWithTestId = ({
-    dataTestId,
-    innerRef,
-    componentProps,
-  }: {
-    dataTestId: string
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    innerRef: any
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    componentProps: any
-  }) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const Component = component as any
-    if (isFunctionComponent) {
-      const content = Component({ ...componentProps, ref: innerRef })
-      if (content == null) return null
-      return (
-        <div data-testid={dataTestId} style={{ display: "contents" }}>
-          {content}
-        </div>
-      )
-    }
-    return (
-      <div data-testid={dataTestId} style={{ display: "contents" }}>
-        <Component {...componentProps} ref={innerRef} />
-      </div>
-    )
-  }
-
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const WrappedComponent = forwardRef((props: any, ref: any) => {
-    const renderDataTestIdAttribute = useRenderDataTestIdAttribute()
     const { dataTestId, ...rest } = props
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const Component = component as any
 
-    if (!dataTestId || !renderDataTestIdAttribute) {
-      return <Component {...rest} ref={ref} />
-    }
-
-    // Strip data-testid from props passed to the inner component to avoid it
-    // leaking to the DOM alongside the wrapper div's data-testid attribute.
-    const cleanRest = (() => {
-      const { "data-testid": _d, ...r } = rest
-      return r
-    })()
-
     return (
-      <InnerWithTestId
-        dataTestId={dataTestId}
-        innerRef={ref}
-        componentProps={cleanRest}
-      />
+      <DataTestIdWrapper dataTestId={dataTestId}>
+        <Component {...rest} ref={ref} />
+      </DataTestIdWrapper>
     )
   })
 

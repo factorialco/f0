@@ -48,7 +48,7 @@ const Item = ({
       )}
       <span
         className={cn(
-          "flex-1",
+          "flex-1 min-w-0",
           item.sortable ? "text-f1-foreground" : "text-f1-foreground-secondary"
         )}
       >

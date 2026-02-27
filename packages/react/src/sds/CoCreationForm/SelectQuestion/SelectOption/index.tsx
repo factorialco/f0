@@ -10,6 +10,29 @@ import { cn } from "@/lib/utils"
 import { useDragContext } from "../../DragContext"
 import { OnClickOptionActionParams, SelectOptionProps } from "./types"
 
+function RadioIndicator({
+  checked,
+  disabled,
+}: {
+  checked: boolean
+  disabled?: boolean
+}) {
+  return (
+    <div
+      aria-hidden="true"
+      className={cn(
+        "flex h-5 w-5 shrink-0 items-center justify-center rounded-full transition-colors",
+        checked
+          ? "bg-f1-background-selected-bold"
+          : "border border-solid border-f1-border bg-f1-background",
+        disabled && "opacity-50"
+      )}
+    >
+      {checked && <div className="h-2 w-2 rounded-full bg-f1-background" />}
+    </div>
+  )
+}
+
 const TEXT_AREA_STYLE: object = {
   fieldSizing: "content",
 }
@@ -24,6 +47,7 @@ export const SelectOption = ({
   isEditMode,
   correct,
   locked,
+  type,
 }: SelectOptionProps) => {
   const { value, label } = option
 
@@ -93,14 +117,21 @@ export const SelectOption = ({
             isDragging && "cursor-grabbing [&_button]:cursor-grabbing"
           )}
         >
-          <F0Checkbox
-            title={label}
-            checked={!!(selected && !isEditMode)}
-            onCheckedChange={handleClick}
-            disabled={isEditMode}
-            presentational={isEditMode}
-            hideLabel
-          />
+          {type === "multi-select" ? (
+            <F0Checkbox
+              title={label}
+              checked={!!(selected && !isEditMode)}
+              onCheckedChange={handleClick}
+              disabled={isEditMode}
+              presentational={isEditMode}
+              hideLabel
+            />
+          ) : (
+            <RadioIndicator
+              checked={!!(selected && !isEditMode)}
+              disabled={isEditMode}
+            />
+          )}
         </div>
         <div
           className={cn(

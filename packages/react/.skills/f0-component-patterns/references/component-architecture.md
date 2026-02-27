@@ -237,7 +237,7 @@ export type ButtonInternalProps = Pick<ActionProps, "size" | "disabled"> &
 
 ## withDataTestId HOC
 
-All public exported components **must** be wrapped with `withDataTestId` from `@/lib/data-testid`. This HOC adds a `dataTestId` prop that renders a `data-testid` HTML attribute for stable test selectors.
+All public exported components **must** expose a `dataTestId` prop — either via the `withDataTestId` HOC or via the inline `DataTestIdWrapper` pattern described below. The key invariant to verify is: **does the exported component accept `dataTestId` in its props?**
 
 ### How It Works
 
@@ -300,6 +300,58 @@ export const F0Widget = withDataTestId(
   experimentalComponent("F0Widget", withSkeleton(WidgetBase, WidgetSkeleton))
 )
 ```
+
+### Pattern 4: Inline DataTestIdWrapper (preferred for complex components)
+
+Some components cannot use the `withDataTestId` HOC without breaking type inference — for example:
+
+- **Generic components** (e.g. `F0Select<T, R>`) — the HOC erases generic type parameters
+- **`forwardRef` components with discriminated union props** — the HOC can collapse union branches
+- **Components that use `ReactDOM.createPortal`** — the HOC cannot wrap portal output
+
+For these, import `DataTestIdWrapper` and `WithDataTestIdProps` directly and handle `dataTestId` inside the component:
+
+```tsx
+// src/components/F0MyComponent/F0MyComponent.tsx
+import { DataTestIdWrapper, WithDataTestIdProps } from "@/lib/data-testid"
+
+export interface F0MyComponentProps extends WithDataTestIdProps {
+  // ... other props
+}
+
+export const F0MyComponent = ({ dataTestId, ...props }: F0MyComponentProps) => {
+  return (
+    <DataTestIdWrapper dataTestId={dataTestId}>
+      {/* component content */}
+    </DataTestIdWrapper>
+  )
+}
+```
+
+```tsx
+// src/components/F0MyComponent/index.tsx — no HOC needed, dataTestId is already in props
+export { F0MyComponent } from "./F0MyComponent"
+export type { F0MyComponentProps } from "./F0MyComponent"
+```
+
+This pattern is used by: `F0Select`, `RichTextEditor`, `RadarChart`, `Await`, `OneFilterPicker`, `F0FilterPickerContent`, `F0AvatarFile`, `NotesTextEditor`, `OneDateNavigator`, `Dropdown`, `MobileDropdown`.
+
+### When to Use Each Pattern
+
+| Situation                                   | Use                                    |
+| ------------------------------------------- | -------------------------------------- |
+| Simple component, fixed props               | `withDataTestId` HOC (Patterns 1–3)    |
+| Generic component (`<T extends ...>`)       | Inline `DataTestIdWrapper` (Pattern 4) |
+| `forwardRef` with discriminated union props | Inline `DataTestIdWrapper` (Pattern 4) |
+| `ReactDOM.createPortal` output              | Inline `DataTestIdWrapper` (Pattern 4) |
+
+### Verification Checklist
+
+When reviewing or writing a component, confirm:
+
+- [ ] The exported component accepts `dataTestId?: string` in its props
+- [ ] Either the HOC is applied at the export site, **or** `WithDataTestIdProps` is in the props interface and `DataTestIdWrapper` wraps the render output
+- [ ] `withDataTestId` is **not** applied on top of a component that already uses the inline pattern (would double-wrap)
 
 ### Types
 

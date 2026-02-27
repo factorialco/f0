@@ -4,6 +4,13 @@ import { DefaultValues, Path, useForm } from "react-hook-form"
 import { z } from "zod"
 
 import { F0Button } from "@/components/F0Button"
+import type {
+  F0FormDefinitionPerSection,
+  F0FormDefinitionSingleSchema,
+  F0PerSectionSchema as WizardPerSectionSchema,
+  F0FormSchema as WizardFormSchema,
+  InferPerSectionValues,
+} from "@/components/F0WizardForm/types"
 import { ActionBarStatus } from "@/experimental/F0ActionBar"
 import { F0TableOfContent } from "@/experimental/Navigation/F0TableOfContent"
 import { TOCItem } from "@/experimental/Navigation/F0TableOfContent/types"
@@ -15,9 +22,12 @@ import { Form as FormProvider } from "@/ui/form"
 import type { F0SwitchField } from "./fields/switch/types"
 import type {
   F0FormPropsWithPerSectionSchema,
+  F0FormPropsWithPerSectionDefinition,
   F0FormPropsWithSingleSchema,
+  F0FormPropsWithSingleSchemaDefinition,
   F0FormRef,
   F0FormSchema,
+  F0FormSubmitResult,
   F0PerSectionSchema,
   FieldItem,
   FormDefinitionItem,
@@ -242,24 +252,177 @@ function F0FormPerSection<T extends F0PerSectionSchema>(
  * />
  * ```
  */
+type AnyF0FormProps =
+  | F0FormPropsWithSingleSchema<F0FormSchema>
+  | F0FormPropsWithPerSectionSchema<F0PerSectionSchema>
+  | F0FormPropsWithSingleSchemaDefinition<F0FormSchema>
+  | F0FormPropsWithPerSectionDefinition<F0PerSectionSchema>
+
+function hasFormDefinition(
+  props: AnyF0FormProps
+): props is
+  | F0FormPropsWithSingleSchemaDefinition<F0FormSchema>
+  | F0FormPropsWithPerSectionDefinition<F0PerSectionSchema> {
+  return "formDefinition" in props && props.formDefinition != null
+}
+
 export function F0Form<TSchema extends F0FormSchema | F0PerSectionSchema>(
   props: TSchema extends F0FormSchema
-    ? F0FormPropsWithSingleSchema<TSchema>
+    ?
+        | F0FormPropsWithSingleSchema<TSchema>
+        | F0FormPropsWithSingleSchemaDefinition<TSchema>
     : TSchema extends F0PerSectionSchema
-      ? F0FormPropsWithPerSectionSchema<TSchema>
+      ?
+          | F0FormPropsWithPerSectionSchema<TSchema>
+          | F0FormPropsWithPerSectionDefinition<TSchema>
       : never
 ) {
-  if (!isZodSchema(props.schema)) {
+  const castProps = props as unknown as AnyF0FormProps
+
+  if (hasFormDefinition(castProps)) {
+    return <F0FormFromDefinition {...castProps} />
+  }
+
+  const legacyProps = castProps as
+    | F0FormPropsWithSingleSchema<F0FormSchema>
+    | F0FormPropsWithPerSectionSchema<F0PerSectionSchema>
+
+  if (!isZodSchema(legacyProps.schema)) {
     return (
       <F0FormPerSection
-        {...(props as unknown as F0FormPropsWithPerSectionSchema<F0PerSectionSchema>)}
+        {...(legacyProps as F0FormPropsWithPerSectionSchema<F0PerSectionSchema>)}
       />
     )
   }
 
   return (
     <F0FormSingleSchema
-      {...(props as unknown as F0FormPropsWithSingleSchema<F0FormSchema>)}
+      {...(legacyProps as F0FormPropsWithSingleSchema<F0FormSchema>)}
+    />
+  )
+}
+
+/**
+ * Adapts a formDefinition into the legacy props format and delegates
+ * to F0FormSingleSchema or F0FormPerSection.
+ */
+function F0FormFromDefinition(
+  props:
+    | F0FormPropsWithSingleSchemaDefinition<F0FormSchema>
+    | F0FormPropsWithPerSectionDefinition<F0PerSectionSchema>
+) {
+  const { formDefinition, className, styling, formRef, initialFiles } = props
+
+  if (formDefinition._brand === "single") {
+    return (
+      <F0FormFromSingleDefinition
+        formDefinition={
+          formDefinition as F0FormDefinitionSingleSchema<WizardFormSchema>
+        }
+        className={className}
+        styling={styling}
+        formRef={formRef}
+        initialFiles={initialFiles}
+      />
+    )
+  }
+
+  return (
+    <F0FormFromPerSectionDefinition
+      formDefinition={
+        formDefinition as F0FormDefinitionPerSection<WizardPerSectionSchema>
+      }
+      className={className}
+      styling={styling}
+      formRef={formRef}
+      initialFiles={initialFiles}
+    />
+  )
+}
+
+function F0FormFromSingleDefinition<TSchema extends F0FormSchema>({
+  formDefinition,
+  className,
+  styling,
+  formRef,
+  initialFiles,
+}: F0FormPropsWithSingleSchemaDefinition<TSchema>) {
+  const def = formDefinition as F0FormDefinitionSingleSchema<TSchema>
+
+  const adaptedOnSubmit = useCallback(
+    (
+      data: z.infer<TSchema>
+    ): Promise<F0FormSubmitResult> | F0FormSubmitResult =>
+      def.onSubmit({ data }),
+    [def]
+  )
+
+  return (
+    <F0FormSingleSchema
+      name={def.name}
+      schema={def.schema}
+      sections={def.sections}
+      defaultValues={def.defaultValues}
+      onSubmit={adaptedOnSubmit}
+      submitConfig={def.submitConfig}
+      errorTriggerMode={def.errorTriggerMode}
+      className={className}
+      styling={styling}
+      formRef={formRef}
+      initialFiles={initialFiles}
+    />
+  )
+}
+
+function F0FormFromPerSectionDefinition<T extends F0PerSectionSchema>({
+  formDefinition,
+  className,
+  styling,
+  formRef,
+  initialFiles,
+}: F0FormPropsWithPerSectionDefinition<T>) {
+  const def = formDefinition as F0FormDefinitionPerSection<T>
+
+  const fullDataRef = useRef<Record<string, unknown>>(
+    def.defaultValues ? { ...def.defaultValues } : {}
+  )
+
+  const adaptedOnSubmit = useCallback(
+    (
+      sectionId: string,
+      data: Record<string, unknown>
+    ): Promise<F0FormSubmitResult> | F0FormSubmitResult => {
+      fullDataRef.current[sectionId] = data
+      return (
+        def.onSubmit as (arg: {
+          sectionId: string
+          data: Record<string, unknown>
+          fullData: InferPerSectionValues<T>
+        }) => Promise<F0FormSubmitResult> | F0FormSubmitResult
+      )({
+        sectionId,
+        data,
+        fullData: { ...fullDataRef.current } as InferPerSectionValues<T>,
+      })
+    },
+    [def]
+  )
+
+  return (
+    <F0FormPerSection
+      name={def.name}
+      schema={def.schema}
+      sections={def.sections}
+      defaultValues={def.defaultValues}
+      onSubmit={
+        adaptedOnSubmit as F0FormPropsWithPerSectionSchema<T>["onSubmit"]
+      }
+      submitConfig={def.submitConfig}
+      errorTriggerMode={def.errorTriggerMode}
+      className={className}
+      styling={styling}
+      formRef={formRef}
+      initialFiles={initialFiles}
     />
   )
 }
@@ -299,6 +462,8 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
   // Show submit button by default unless explicitly hidden or using action-bar
   const hideSubmitButton =
     submitConfig?.type !== "action-bar" && submitConfig?.hideSubmitButton
+  const hideActionBar =
+    submitConfig?.type !== "action-bar" && !!submitConfig?.hideActionBar
   const showSubmitButton = !isActionBar && !hideSubmitButton
   const discardableChanges =
     submitConfig?.type === "action-bar" && submitConfig?.discardable
@@ -518,6 +683,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
           resetErrorNavigation()
         },
         isDirty: () => form.formState.isDirty,
+        getValues: () => form.getValues() as Record<string, unknown>,
         _setStateCallback: (callback: F0FormStateCallback) => {
           stateCallbackRef.current = callback
         },
@@ -642,26 +808,28 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
           formContent
         )}
 
-        <FormActionBar
-          isActionBar={isActionBar}
-          isDirty={isDirty}
-          actionBarStatus={actionBarStatus}
-          hasErrors={hasErrors}
-          errorCount={errorCount}
-          resolvedActionBarLabel={resolvedActionBarLabel}
-          centerActionBarInFrameContent={centerActionBarInFrameContent}
-          submitLabel={submitLabel}
-          submitIcon={submitIcon}
-          discardableChanges={discardableChanges}
-          discardLabel={discardLabel}
-          discardIcon={discardIcon}
-          issuesOneLabel={forms.actionBar.issues.one}
-          issuesOtherLabel={forms.actionBar.issues.other}
-          onSubmit={form.handleSubmit(handleSubmit)}
-          onDiscard={handleDiscard}
-          goToPreviousError={goToPreviousError}
-          goToNextError={goToNextError}
-        />
+        {!hideActionBar && (
+          <FormActionBar
+            isActionBar={isActionBar}
+            isDirty={isDirty}
+            actionBarStatus={actionBarStatus}
+            hasErrors={hasErrors}
+            errorCount={errorCount}
+            resolvedActionBarLabel={resolvedActionBarLabel}
+            centerActionBarInFrameContent={centerActionBarInFrameContent}
+            submitLabel={submitLabel}
+            submitIcon={submitIcon}
+            discardableChanges={discardableChanges}
+            discardLabel={discardLabel}
+            discardIcon={discardIcon}
+            issuesOneLabel={forms.actionBar.issues.one}
+            issuesOtherLabel={forms.actionBar.issues.other}
+            onSubmit={form.handleSubmit(handleSubmit)}
+            onDiscard={handleDiscard}
+            goToPreviousError={goToPreviousError}
+            goToNextError={goToNextError}
+          />
+        )}
       </FormProvider>
     </F0FormContext.Provider>
   )

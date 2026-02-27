@@ -27,6 +27,10 @@ export interface F0FormRef {
    */
   isDirty: () => boolean
   /**
+   * Get the current form values (including unsaved changes)
+   */
+  getValues: () => Record<string, unknown>
+  /**
    * Internal: Set the state callback for reactive updates
    * @internal
    */
@@ -55,6 +59,10 @@ export interface UseF0FormReturn {
    * Check if the form has unsaved changes
    */
   isDirty: () => boolean
+  /**
+   * Get the current form values (including unsaved changes)
+   */
+  getValues: () => Record<string, unknown>
   /**
    * Whether the form is currently submitting
    */
@@ -148,9 +156,18 @@ export function useF0Form(): UseF0FormReturn {
 
   const isDirty = useCallback(() => {
     if (!customFormRef.current) {
+      console.warn("useF0Form: formRef is not attached to an F0Form component")
       return false
     }
     return customFormRef.current.isDirty()
+  }, [])
+
+  const getValues = useCallback(() => {
+    if (!customFormRef.current) {
+      console.warn("useF0Form: formRef is not attached to an F0Form component")
+      return {}
+    }
+    return customFormRef.current.getValues()
   }, [])
 
   return {
@@ -158,6 +175,7 @@ export function useF0Form(): UseF0FormReturn {
     submit,
     reset,
     isDirty,
+    getValues,
     isSubmitting,
     hasErrors,
   }
