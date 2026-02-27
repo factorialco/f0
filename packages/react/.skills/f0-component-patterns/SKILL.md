@@ -34,4 +34,4 @@ Load this skill when you need to:
 3. **Never use `any`** — find the proper type.
 4. **New components must start with `F0`** prefix.
 5. **Tests use `zeroRender`** aliased as `render`, never `@testing-library/react`'s `render`.
-6. **All public exported components must be wrapped with `withDataTestId`** from `@/lib/data-testid` — see `references/component-architecture.md` for patterns and composition order.
+6. **All public exported components must expose a `dataTestId` prop** — either via the `withDataTestId` HOC (most components) or via the inline `DataTestIdWrapper` + `WithDataTestIdProps` pattern (generic components, discriminated union components, portal components). The key check: does the exported component accept `dataTestId` in its props? See `references/component-architecture.md` for patterns, composition order, and the decision table.
