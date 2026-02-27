@@ -4714,7 +4714,6 @@ declare type F0SelectBaseProps<T extends string, R = unknown> = {
     onOpenChange?: (open: boolean) => void;
     searchEmptyMessage?: string;
     className?: string;
-    selectContentClassName?: string;
     actions?: Action_2[];
     /** Container element to render the portal content into */
     portalContainer?: HTMLElement | null;
