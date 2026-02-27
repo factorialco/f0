@@ -52,6 +52,13 @@ const sampleDataset = {
   ],
   totalCount: 50,
   previewCount: 5,
+  columnLabels: {
+    ID: "Employee ID",
+    Name: "Full Name",
+    Department: "Department",
+    Email: "Email Address",
+    Salary: "Annual Salary",
+  },
 }
 
 /**

@@ -65,6 +65,13 @@ export const useDataDownloadAction = () => {
             description: "Number of rows shown in the markdown preview table",
             required: false,
           },
+          {
+            name: "columnLabels",
+            type: "object",
+            description:
+              "Map of raw column names to human-readable labels in the user's language. Used for Excel/CSV headers.",
+            required: false,
+          },
         ],
       },
     ],

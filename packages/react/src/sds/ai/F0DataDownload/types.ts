@@ -21,6 +21,11 @@ export type F0DataDownloadDataset = {
    * Used together with totalCount to render the preview note.
    */
   previewCount?: number
+  /**
+   * Map of raw column names to human-readable labels in the user's language.
+   * Used for Excel/CSV headers. Falls back to the raw column name when absent.
+   */
+  columnLabels?: Record<string, string>
 }
 
 /**

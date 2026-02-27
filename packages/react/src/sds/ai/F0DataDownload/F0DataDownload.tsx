@@ -16,9 +16,10 @@ function downloadAsExcel(
   dataset: F0DataDownloadDataset,
   filename: string
 ): void {
-  const { columns, rows } = dataset
+  const { columns, rows, columnLabels } = dataset
+  const headers = columns.map((col) => columnLabels?.[col] ?? col)
   const wsData = [
-    columns,
+    headers,
     ...rows.map((row) => columns.map((col) => row[col] ?? "")),
   ]
   const workbook = XLSX.utils.book_new()
@@ -41,7 +42,8 @@ function downloadAsExcel(
  * Generate a CSV string from a dataset and trigger a browser download.
  */
 function downloadAsCsv(dataset: F0DataDownloadDataset, filename: string): void {
-  const { columns, rows } = dataset
+  const { columns, rows, columnLabels } = dataset
+  const headers = columns.map((col) => columnLabels?.[col] ?? col)
 
   const escapeCsv = (value: unknown): string => {
     const str = value == null ? "" : String(value)
@@ -52,7 +54,7 @@ function downloadAsCsv(dataset: F0DataDownloadDataset, filename: string): void {
   }
 
   const lines = [
-    columns.map(escapeCsv).join(","),
+    headers.map(escapeCsv).join(","),
     ...rows.map((row) => columns.map((col) => escapeCsv(row[col])).join(",")),
   ]
 
