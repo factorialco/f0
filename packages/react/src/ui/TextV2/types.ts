@@ -1,5 +1,5 @@
 /**
- * Token types for F0TextV2 props.
+ * Token types for TextV2 props.
  * These map to the design tokens defined in @factorialco/f0-core.
  */
 
