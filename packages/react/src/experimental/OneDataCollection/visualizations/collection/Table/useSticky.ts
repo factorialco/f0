@@ -13,10 +13,9 @@ export const useSticky = <
 >(
   frozenColumnsLeft: number,
   columns: ReadonlyArray<TableColumnDefinition<R, Sortings, Summaries>>,
-  hasCheckColumn: boolean,
-  allPagesSelection: boolean
+  hasCheckColumn: boolean
 ) => {
-  const checkColumnWidth = hasCheckColumn ? (allPagesSelection ? 70 : 46) : 0
+  const checkColumnWidth = hasCheckColumn ? 46 : 0
   const getStickyPosition = useCallback(
     (cellIndex: number) => {
       return cellIndex < frozenColumnsLeft && columns.length > 1

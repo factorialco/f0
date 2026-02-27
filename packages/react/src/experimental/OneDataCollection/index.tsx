@@ -1,8 +1,11 @@
+import { ReactElement } from "react"
+
 import {
   FiltersDefinition,
   RecordType,
   SortingsDefinition,
 } from "@/hooks/datasource"
+import { withDataTestId, WithDataTestIdProps } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
 
 import { ItemActionsDefinition } from "./item-actions"
@@ -43,11 +46,36 @@ const DataCollection = <
 )
 
 /**
- * @experimental This is an experimental component use it at your own risk
+ * Generic component type so consumers can use <F0Select<T, R> />.
+ * Preserves dataTestId and OneDataCollection
  */
-const OneDataCollection = experimentalComponent(
-  "OneDataCollection",
-  DataCollection
+type OneDataCollectionGeneric = <
+  R extends RecordType,
+  Filters extends FiltersDefinition,
+  Sortings extends SortingsDefinition,
+  Summaries extends SummariesDefinition,
+  ItemActions extends ItemActionsDefinition<R>,
+  NavigationFilters extends NavigationFiltersDefinition,
+  Grouping extends GroupingDefinition<R>,
+>(
+  props: OneDataCollectionProps<
+    R,
+    Filters,
+    Sortings,
+    Summaries,
+    ItemActions,
+    NavigationFilters,
+    Grouping
+  > &
+    WithDataTestIdProps
+) => ReactElement | null
+
+const OneDataCollectionWrapped = withDataTestId(
+  experimentalComponent("OneDataCollection", DataCollection)
 )
 
-export { OneDataCollection }
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export const OneDataCollection =
+  OneDataCollectionWrapped as unknown as OneDataCollectionGeneric

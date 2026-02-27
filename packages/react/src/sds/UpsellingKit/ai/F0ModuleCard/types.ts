@@ -3,10 +3,6 @@
  */
 export interface F0ModuleCardProps {
   /**
-   * Module id for the icon (e.g. "projects", "company_projects"). Renders F0AvatarModule.
-   */
-  module: string
-  /**
    * Card title (e.g. "Projects")
    */
   moduleName: string
@@ -22,6 +18,10 @@ export interface F0ModuleCardProps {
    * When set, the action button renders as a link to this URL.
    */
   actionHref?: string
+  /**
+   * Optional image source for the avatar
+   */
+  imageSrc?: string
 }
 
 /**
@@ -36,4 +36,6 @@ export interface ModuleCardArgs {
   description: string
   /** Optional URL for the action button (redirect) */
   actionHref?: string
+  /** Optional image source for the avatar */
+  imageSrc?: string
 }

@@ -1,6 +1,7 @@
 import { forwardRef, useCallback, useState } from "react"
 
 import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
+import { withDataTestId } from "@/lib/data-testid"
 import { F0Button } from "@/components/F0Button"
 import { F0Icon } from "@/components/F0Icon"
 import { CheckCircle, DottedCircle } from "@/icons/app"
@@ -133,7 +134,7 @@ const DialogActions = ({
   )
 }
 
-const UpsellRequestResponseDialog = forwardRef<
+const _UpsellRequestResponseDialog = forwardRef<
   HTMLDivElement,
   UpsellRequestResponseDialogProps
 >(
@@ -204,6 +205,8 @@ const UpsellRequestResponseDialog = forwardRef<
   }
 )
 
-UpsellRequestResponseDialog.displayName = "UpsellRequestResponseDialog"
+_UpsellRequestResponseDialog.displayName = "UpsellRequestResponseDialog"
 
-export { UpsellRequestResponseDialog }
+export const UpsellRequestResponseDialog = withDataTestId(
+  _UpsellRequestResponseDialog
+)

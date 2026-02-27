@@ -1484,3 +1484,678 @@ describe("F0Form dirty state resets after successful submission", () => {
     })
   })
 })
+
+describe("F0Form per-section schema", () => {
+  const perSectionSchema = {
+    personal: z.object({
+      firstName: f0FormField(z.string().min(1), {
+        label: "First Name",
+      }),
+      lastName: f0FormField(z.string().min(1), {
+        label: "Last Name",
+      }),
+    }),
+    contact: z.object({
+      email: f0FormField(z.string().email(), {
+        label: "Email",
+      }),
+    }),
+  }
+
+  const defaultSections = {
+    personal: { title: "Personal Information" },
+    contact: { title: "Contact Details" },
+  }
+
+  const defaultValues = {
+    personal: { firstName: "", lastName: "" },
+    contact: { email: "" },
+  }
+
+  it("renders all sections with their titles", () => {
+    render(
+      <F0Form
+        name="per-section-test"
+        schema={perSectionSchema}
+        sections={defaultSections}
+        defaultValues={defaultValues}
+        onSubmit={async () => ({ success: true })}
+      />
+    )
+
+    expect(screen.getByText("Personal Information")).toBeInTheDocument()
+    expect(screen.getByText("Contact Details")).toBeInTheDocument()
+  })
+
+  it("renders fields from each section", () => {
+    render(
+      <F0Form
+        name="per-section-fields"
+        schema={perSectionSchema}
+        sections={defaultSections}
+        defaultValues={defaultValues}
+        onSubmit={async () => ({ success: true })}
+      />
+    )
+
+    expect(screen.getByLabelText("First Name")).toBeInTheDocument()
+    expect(screen.getByLabelText("Last Name")).toBeInTheDocument()
+    expect(screen.getByLabelText("Email")).toBeInTheDocument()
+  })
+
+  it("renders a submit button per section", () => {
+    render(
+      <F0Form
+        name="per-section-submits"
+        schema={perSectionSchema}
+        sections={defaultSections}
+        defaultValues={defaultValues}
+        onSubmit={async () => ({ success: true })}
+        submitConfig={{ label: "Save" }}
+      />
+    )
+
+    const saveButtons = screen.getAllByText("Save")
+    expect(saveButtons).toHaveLength(2)
+  })
+
+  it("renders section descriptions when provided", () => {
+    render(
+      <F0Form
+        name="per-section-desc"
+        schema={perSectionSchema}
+        sections={{
+          personal: {
+            title: "Personal",
+            description: "Your personal details",
+          },
+          contact: {
+            title: "Contact",
+            description: "How to reach you",
+          },
+        }}
+        defaultValues={defaultValues}
+        onSubmit={async () => ({ success: true })}
+      />
+    )
+
+    expect(screen.getByText("Your personal details")).toBeInTheDocument()
+    expect(screen.getByText("How to reach you")).toBeInTheDocument()
+  })
+
+  it("supports per-section submit label override", () => {
+    render(
+      <F0Form
+        name="per-section-labels"
+        schema={perSectionSchema}
+        sections={{
+          personal: {
+            title: "Personal",
+            submitConfig: { label: "Save Profile" },
+          },
+          contact: {
+            title: "Contact",
+            submitConfig: { label: "Save Contact" },
+          },
+        }}
+        defaultValues={defaultValues}
+        onSubmit={async () => ({ success: true })}
+      />
+    )
+
+    expect(screen.getByText("Save Profile")).toBeInTheDocument()
+    expect(screen.getByText("Save Contact")).toBeInTheDocument()
+  })
+
+  it("submits only the section data with the correct sectionId", async () => {
+    const user = userEvent.setup()
+    const onSubmit = vi.fn().mockResolvedValue({ success: true })
+
+    render(
+      <F0Form
+        name="per-section-submit-data"
+        schema={perSectionSchema}
+        sections={defaultSections}
+        defaultValues={defaultValues}
+        onSubmit={onSubmit}
+        submitConfig={{ label: "Save" }}
+      />
+    )
+
+    const emailInput = screen.getByLabelText("Email")
+    await user.type(emailInput, "test@example.com")
+
+    const saveButtons = screen.getAllByText("Save")
+    // Second save button belongs to the contact section
+    await user.click(saveButtons[1])
+
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalledWith("contact", {
+        email: "test@example.com",
+      })
+    })
+  })
+
+  it("validates each section independently", async () => {
+    const user = userEvent.setup()
+    const onSubmit = vi.fn().mockResolvedValue({ success: true })
+
+    render(
+      <F0Form
+        name="per-section-validation"
+        schema={perSectionSchema}
+        sections={defaultSections}
+        defaultValues={defaultValues}
+        onSubmit={onSubmit}
+        submitConfig={{ label: "Save" }}
+      />
+    )
+
+    // Fill in the contact section with a valid email
+    const emailInput = screen.getByLabelText("Email")
+    await user.type(emailInput, "valid@example.com")
+
+    // Submit the contact section (second Save button)
+    const saveButtons = screen.getAllByText("Save")
+    await user.click(saveButtons[1])
+
+    // Contact section should submit successfully even though personal is empty
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalledWith("contact", {
+        email: "valid@example.com",
+      })
+    })
+  })
+
+  it("does not submit other sections when one is submitted", async () => {
+    const user = userEvent.setup()
+    const onSubmit = vi.fn().mockResolvedValue({ success: true })
+
+    render(
+      <F0Form
+        name="per-section-isolation"
+        schema={perSectionSchema}
+        sections={defaultSections}
+        defaultValues={{
+          personal: { firstName: "Jane", lastName: "Doe" },
+          contact: { email: "jane@example.com" },
+        }}
+        onSubmit={onSubmit}
+        submitConfig={{ label: "Save" }}
+      />
+    )
+
+    // Submit only the personal section (first Save button)
+    const saveButtons = screen.getAllByText("Save")
+    await user.click(saveButtons[0])
+
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalledTimes(1)
+      expect(onSubmit).toHaveBeenCalledWith("personal", {
+        firstName: "Jane",
+        lastName: "Doe",
+      })
+    })
+  })
+
+  it("resets section dirty state after successful submit", async () => {
+    const user = userEvent.setup()
+    const onSubmit = vi.fn().mockResolvedValue({ success: true })
+
+    render(
+      <F0Form
+        name="per-section-reset"
+        schema={perSectionSchema}
+        sections={defaultSections}
+        defaultValues={{
+          personal: { firstName: "Jane", lastName: "Doe" },
+          contact: { email: "" },
+        }}
+        onSubmit={onSubmit}
+        submitConfig={{ label: "Save", showSubmitWhenDirty: true }}
+      />
+    )
+
+    // No save buttons visible initially
+    expect(screen.queryByText("Save")).not.toBeInTheDocument()
+
+    // Edit a field in the contact section
+    const emailInput = screen.getByLabelText("Email")
+    await user.type(emailInput, "test@example.com")
+
+    // Save button should appear for the contact section
+    await waitFor(() => {
+      expect(screen.getByText("Save")).toBeInTheDocument()
+    })
+
+    // Submit
+    await user.click(screen.getByText("Save"))
+
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalled()
+    })
+
+    // After successful submit, save button should disappear
+    await waitFor(() => {
+      expect(screen.queryByText("Save")).not.toBeInTheDocument()
+    })
+  })
+})
+
+describe("F0Form per-section showSubmitWhenDirty", () => {
+  it("hides submit buttons when showSubmitWhenDirty is true and form is pristine", () => {
+    const schema = {
+      profile: z.object({
+        name: f0FormField(z.string().min(1), { label: "Name" }),
+      }),
+    }
+
+    render(
+      <F0Form
+        name="dirty-submit-hidden"
+        schema={schema}
+        sections={{ profile: { title: "Profile" } }}
+        defaultValues={{ profile: { name: "Jane" } }}
+        onSubmit={async () => ({ success: true })}
+        submitConfig={{ label: "Save", showSubmitWhenDirty: true }}
+      />
+    )
+
+    expect(screen.queryByText("Save")).not.toBeInTheDocument()
+  })
+
+  it("shows submit button after editing a field", async () => {
+    const user = userEvent.setup()
+
+    const schema = {
+      profile: z.object({
+        name: f0FormField(z.string().min(1), { label: "Name" }),
+      }),
+    }
+
+    render(
+      <F0Form
+        name="dirty-submit-shown"
+        schema={schema}
+        sections={{ profile: { title: "Profile" } }}
+        defaultValues={{ profile: { name: "Jane" } }}
+        onSubmit={async () => ({ success: true })}
+        submitConfig={{ label: "Save", showSubmitWhenDirty: true }}
+      />
+    )
+
+    expect(screen.queryByText("Save")).not.toBeInTheDocument()
+
+    const input = screen.getByLabelText("Name")
+    await user.clear(input)
+    await user.type(input, "John")
+
+    await waitFor(() => {
+      expect(screen.getByText("Save")).toBeInTheDocument()
+    })
+  })
+
+  it("always shows submit button when showSubmitWhenDirty is false", () => {
+    const schema = {
+      profile: z.object({
+        name: f0FormField(z.string().min(1), { label: "Name" }),
+      }),
+    }
+
+    render(
+      <F0Form
+        name="dirty-submit-always"
+        schema={schema}
+        sections={{ profile: { title: "Profile" } }}
+        defaultValues={{ profile: { name: "Jane" } }}
+        onSubmit={async () => ({ success: true })}
+        submitConfig={{ label: "Save" }}
+      />
+    )
+
+    expect(screen.getByText("Save")).toBeInTheDocument()
+  })
+
+  it("per-section submitConfig overrides global showSubmitWhenDirty", async () => {
+    const user = userEvent.setup()
+
+    const schema = {
+      profile: z.object({
+        name: f0FormField(z.string().min(1), { label: "Name" }),
+      }),
+      settings: z.object({
+        theme: f0FormField(z.string(), { label: "Theme" }),
+      }),
+    }
+
+    render(
+      <F0Form
+        name="dirty-submit-override"
+        schema={schema}
+        sections={{
+          profile: {
+            title: "Profile",
+            submitConfig: { label: "Save Profile", showSubmitWhenDirty: false },
+          },
+          settings: { title: "Settings" },
+        }}
+        defaultValues={{
+          profile: { name: "Jane" },
+          settings: { theme: "light" },
+        }}
+        onSubmit={async () => ({ success: true })}
+        submitConfig={{ label: "Save", showSubmitWhenDirty: true }}
+      />
+    )
+
+    // Profile section overrides to always show
+    expect(screen.getByText("Save Profile")).toBeInTheDocument()
+    // Settings section inherits global showSubmitWhenDirty: true, so hidden
+    expect(screen.queryByText("Save")).not.toBeInTheDocument()
+
+    // Edit settings to make it dirty
+    const themeInput = screen.getByLabelText("Theme")
+    await user.type(themeInput, "dark")
+
+    await waitFor(() => {
+      expect(screen.getByText("Save")).toBeInTheDocument()
+    })
+  })
+})
+
+describe("F0Form with formDefinition (single schema)", () => {
+  const singleSchema = z.object({
+    firstName: f0FormField(z.string().min(1), {
+      label: "First Name",
+      section: "personal",
+    }),
+    email: f0FormField(z.string().email(), {
+      label: "Email",
+      section: "contact",
+    }),
+  })
+
+  it("renders fields from a single-schema formDefinition", () => {
+    const definition = {
+      _brand: "single" as const,
+      name: "def-single-render",
+      schema: singleSchema,
+      sections: {
+        personal: { title: "Personal" },
+        contact: { title: "Contact" },
+      },
+      defaultValues: { firstName: "", email: "" },
+      onSubmit: async () => ({ success: true as const }),
+    }
+
+    render(<F0Form formDefinition={definition} />)
+
+    expect(screen.getByText("Personal")).toBeInTheDocument()
+    expect(screen.getByText("Contact")).toBeInTheDocument()
+    expect(screen.getByLabelText("First Name")).toBeInTheDocument()
+    expect(screen.getByLabelText("Email")).toBeInTheDocument()
+  })
+
+  it("invokes onSubmit with { data } shape", async () => {
+    const user = userEvent.setup()
+    const onSubmit = vi.fn().mockResolvedValue({ success: true })
+
+    const definition = {
+      _brand: "single" as const,
+      name: "def-single-submit",
+      schema: singleSchema,
+      sections: {
+        personal: { title: "Personal" },
+        contact: { title: "Contact" },
+      },
+      defaultValues: { firstName: "", email: "" },
+      onSubmit,
+    }
+
+    render(<F0Form formDefinition={definition} />)
+
+    await user.type(screen.getByLabelText("First Name"), "Alice")
+    await user.type(screen.getByLabelText("Email"), "alice@example.com")
+
+    await user.click(screen.getByText("Submit"))
+
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalledTimes(1)
+      expect(onSubmit).toHaveBeenCalledWith({
+        data: { firstName: "Alice", email: "alice@example.com" },
+      })
+    })
+  })
+
+  it("renders default values from formDefinition", () => {
+    const definition = {
+      _brand: "single" as const,
+      name: "def-single-defaults",
+      schema: singleSchema,
+      sections: {
+        personal: { title: "Personal" },
+        contact: { title: "Contact" },
+      },
+      defaultValues: { firstName: "Bob", email: "bob@example.com" },
+      onSubmit: async () => ({ success: true as const }),
+    }
+
+    render(<F0Form formDefinition={definition} />)
+
+    expect(screen.getByLabelText("First Name")).toHaveValue("Bob")
+    expect(screen.getByLabelText("Email")).toHaveValue("bob@example.com")
+  })
+})
+
+describe("F0Form with formDefinition (per-section)", () => {
+  const perSectionSchema = {
+    personal: z.object({
+      firstName: f0FormField(z.string().min(1), { label: "First Name" }),
+    }),
+    contact: z.object({
+      email: f0FormField(z.string().email(), { label: "Email" }),
+    }),
+  }
+
+  it("renders fields from a per-section formDefinition", () => {
+    const definition = {
+      _brand: "per-section" as const,
+      name: "def-per-section-render",
+      schema: perSectionSchema,
+      sections: {
+        personal: { title: "Personal" },
+        contact: { title: "Contact" },
+      },
+      defaultValues: {
+        personal: { firstName: "" },
+        contact: { email: "" },
+      },
+      onSubmit: async () => ({ success: true as const }),
+    }
+
+    render(<F0Form formDefinition={definition} />)
+
+    expect(screen.getByText("Personal")).toBeInTheDocument()
+    expect(screen.getByText("Contact")).toBeInTheDocument()
+    expect(screen.getByLabelText("First Name")).toBeInTheDocument()
+    expect(screen.getByLabelText("Email")).toBeInTheDocument()
+  })
+
+  it("invokes onSubmit with { sectionId, data, fullData } shape", async () => {
+    const user = userEvent.setup()
+    const onSubmit = vi.fn().mockResolvedValue({ success: true })
+
+    const definition = {
+      _brand: "per-section" as const,
+      name: "def-per-section-submit",
+      schema: perSectionSchema,
+      sections: {
+        personal: { title: "Personal" },
+        contact: { title: "Contact" },
+      },
+      defaultValues: {
+        personal: { firstName: "" },
+        contact: { email: "" },
+      },
+      onSubmit,
+      submitConfig: { label: "Save" },
+    }
+
+    render(<F0Form formDefinition={definition} />)
+
+    await user.type(screen.getByLabelText("Email"), "test@example.com")
+
+    const saveButtons = screen.getAllByText("Save")
+    await user.click(saveButtons[1])
+
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalledTimes(1)
+      expect(onSubmit).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sectionId: "contact",
+          data: { email: "test@example.com" },
+        })
+      )
+      const arg = onSubmit.mock.calls[0][0]
+      expect(arg).toHaveProperty("fullData")
+      expect(arg.fullData).toHaveProperty("contact")
+    })
+  })
+
+  it("accumulates fullData across section submits", async () => {
+    const user = userEvent.setup()
+    const onSubmit = vi.fn().mockResolvedValue({ success: true })
+
+    const definition = {
+      _brand: "per-section" as const,
+      name: "def-per-section-fulldata",
+      schema: perSectionSchema,
+      sections: {
+        personal: { title: "Personal" },
+        contact: { title: "Contact" },
+      },
+      defaultValues: {
+        personal: { firstName: "" },
+        contact: { email: "" },
+      },
+      onSubmit,
+      submitConfig: { label: "Save" },
+    }
+
+    render(<F0Form formDefinition={definition} />)
+
+    await user.type(screen.getByLabelText("First Name"), "Alice")
+    const saveButtons = screen.getAllByText("Save")
+    await user.click(saveButtons[0])
+
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalledTimes(1)
+    })
+
+    await user.type(screen.getByLabelText("Email"), "alice@example.com")
+    const saveButtonsAfter = screen.getAllByText("Save")
+    await user.click(saveButtonsAfter[1])
+
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalledTimes(2)
+      const secondCall = onSubmit.mock.calls[1][0]
+      expect(secondCall.sectionId).toBe("contact")
+      expect(secondCall.fullData.personal).toEqual({ firstName: "Alice" })
+      expect(secondCall.fullData.contact).toEqual({
+        email: "alice@example.com",
+      })
+    })
+  })
+
+  it("renders default values from per-section formDefinition", () => {
+    const definition = {
+      _brand: "per-section" as const,
+      name: "def-per-section-defaults",
+      schema: perSectionSchema,
+      sections: {
+        personal: { title: "Personal" },
+        contact: { title: "Contact" },
+      },
+      defaultValues: {
+        personal: { firstName: "Carol" },
+        contact: { email: "carol@example.com" },
+      },
+      onSubmit: async () => ({ success: true as const }),
+    }
+
+    render(<F0Form formDefinition={definition} />)
+
+    expect(screen.getByLabelText("First Name")).toHaveValue("Carol")
+    expect(screen.getByLabelText("Email")).toHaveValue("carol@example.com")
+  })
+})
+
+describe("F0Form per-section server errors", () => {
+  it("displays field errors returned from onSubmit", async () => {
+    const user = userEvent.setup()
+    const onSubmit = vi.fn().mockResolvedValue({
+      success: false,
+      errors: { email: "Email already taken" },
+    })
+
+    const schema = {
+      contact: z.object({
+        email: f0FormField(z.string().email(), { label: "Email" }),
+      }),
+    }
+
+    render(
+      <F0Form
+        name="per-section-errors"
+        schema={schema}
+        sections={{ contact: { title: "Contact" } }}
+        defaultValues={{ contact: { email: "" } }}
+        onSubmit={onSubmit}
+        submitConfig={{ label: "Save" }}
+      />
+    )
+
+    const emailInput = screen.getByLabelText("Email")
+    await user.type(emailInput, "test@example.com")
+
+    await user.click(screen.getByText("Save"))
+
+    await waitFor(() => {
+      expect(screen.getByText("Email already taken")).toBeInTheDocument()
+    })
+  })
+
+  it("displays root error message returned from onSubmit", async () => {
+    const user = userEvent.setup()
+    const onSubmit = vi.fn().mockResolvedValue({
+      success: false,
+      rootMessage: "Server error occurred",
+    })
+
+    const schema = {
+      contact: z.object({
+        email: f0FormField(z.string().email(), { label: "Email" }),
+      }),
+    }
+
+    render(
+      <F0Form
+        name="per-section-root-error"
+        schema={schema}
+        sections={{ contact: { title: "Contact" } }}
+        defaultValues={{ contact: { email: "" } }}
+        onSubmit={onSubmit}
+        submitConfig={{ label: "Save" }}
+      />
+    )
+
+    const emailInput = screen.getByLabelText("Email")
+    await user.type(emailInput, "test@example.com")
+
+    await user.click(screen.getByText("Save"))
+
+    await waitFor(() => {
+      expect(screen.getByText("Server error occurred")).toBeInTheDocument()
+    })
+  })
+})

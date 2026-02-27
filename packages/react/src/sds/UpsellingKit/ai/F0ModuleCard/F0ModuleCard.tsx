@@ -1,5 +1,4 @@
-import { F0AvatarModule } from "@/components/avatars/F0AvatarModule"
-import { ModuleId } from "@/components/avatars/F0AvatarModule/modules"
+import { F0Avatar } from "@/components/avatars/F0Avatar"
 import { F0Button } from "@/components/F0Button"
 import { useI18n } from "@/lib/providers/i18n"
 import { Card, CardContent, CardFooter } from "@/ui/Card"
@@ -7,11 +6,11 @@ import { Card, CardContent, CardFooter } from "@/ui/Card"
 import { F0ModuleCardProps } from "./types"
 
 export const F0ModuleCard = ({
-  module,
   moduleName,
   description,
   onAction,
   actionHref,
+  imageSrc,
 }: F0ModuleCardProps) => {
   const translations = useI18n()
   const actionLabel =
@@ -21,7 +20,14 @@ export const F0ModuleCard = ({
     <Card className="flex flex-col overflow-hidden">
       <CardContent className="flex flex-col gap-3 p-0">
         <div className="flex items-start gap-3">
-          <F0AvatarModule module={module as ModuleId} size="lg" />
+          <F0Avatar
+            avatar={{
+              type: "company",
+              name: moduleName || "",
+              src: imageSrc || "",
+            }}
+            size="lg"
+          />
           <div className="flex min-w-0 flex-col gap-1">
             <h3 className="text-lg font-semibold text-f1-foreground">
               {moduleName}

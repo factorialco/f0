@@ -10,4 +10,8 @@ export type F0OneSwitchProps = React.ComponentPropsWithoutRef<
   onVisible?: () => void
   /** Callback when the switch is clicked */
   onClick?: () => void
+  /** Custom text shown in the tooltip when the chat is closed */
+  tooltip?: { whenDisabled?: string; whenEnabled?: string }
+  /** When true, the tooltip is opened automatically for 3 seconds*/
+  autoOpen?: boolean
 }

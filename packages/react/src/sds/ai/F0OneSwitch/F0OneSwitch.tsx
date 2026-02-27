@@ -20,10 +20,30 @@ export const F0OneSwitch = ({
   disabled,
   onVisible,
   onClick,
+  tooltip,
+  autoOpen = false,
 }: F0OneSwitchProps) => {
   const { enabled, setOpen, open } = useAiChat()
   const translations = useI18n()
   const [isHover, setIsHover] = useState(false)
+  const [tooltipOpen, setTooltipOpen] = useState(false)
+  const [autoTooltipVisible, setAutoTooltipVisible] = useState(autoOpen)
+
+  const tooltipText =
+    disabled && tooltip?.whenDisabled
+      ? tooltip?.whenDisabled
+      : (tooltip?.whenEnabled ?? translations.ai.welcome)
+  const showTooltip = autoOpen ? autoTooltipVisible : tooltipOpen
+
+  useEffect(() => {
+    if (autoOpen) setAutoTooltipVisible(true)
+  }, [autoOpen])
+
+  useEffect(() => {
+    if (!autoOpen) return
+    const timer = setTimeout(() => setAutoTooltipVisible(false), 3000)
+    return () => clearTimeout(timer)
+  }, [autoOpen])
 
   useEffect(() => {
     onVisible?.()
@@ -36,7 +56,12 @@ export const F0OneSwitch = ({
   return (
     <div className="flex items-center">
       <TooltipProvider>
-        <Tooltip delayDuration={850} disableHoverableContent>
+        <Tooltip
+          delayDuration={850}
+          disableHoverableContent
+          open={!open && showTooltip}
+          onOpenChange={autoOpen ? () => {} : setTooltipOpen}
+        >
           <TooltipTrigger asChild>
             <motion.div
               animate={{
@@ -49,11 +74,6 @@ export const F0OneSwitch = ({
                   repeat: Infinity,
                 },
               }}
-              style={
-                {
-                  "--gradient-angle": "180deg",
-                } as React.CSSProperties
-              }
             >
               <SwitchPrimitive.Root
                 onCheckedChange={(val) => {
@@ -98,8 +118,11 @@ export const F0OneSwitch = ({
             </motion.div>
           </TooltipTrigger>
           {!open && (
-            <TooltipContent side="left" className="font-medium">
-              {translations.ai.welcome}
+            <TooltipContent
+              side="left"
+              className={cn("font-medium", autoOpen && "z-[100]")}
+            >
+              {tooltipText}
             </TooltipContent>
           )}
         </Tooltip>

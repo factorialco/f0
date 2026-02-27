@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { useState } from "react"
+import { expect, within } from "storybook/test"
 
 import { F0Button } from "@/components/F0Button"
 import { Delete } from "@/icons/app"
@@ -59,7 +60,7 @@ const meta = {
                 primary: {
                   ...args.actions?.primary,
                   label: args.actions?.primary?.label || "",
-                  onClick: (e) => {
+                  onClick: (e: React.MouseEvent<HTMLElement>) => {
                     args.actions?.primary?.onClick?.(e)
                     setIsOpen(false)
                   },
@@ -67,7 +68,7 @@ const meta = {
                 secondary: {
                   ...args.actions?.secondary,
                   label: args.actions?.secondary?.label || "",
-                  onClick: (e) => {
+                  onClick: (e: React.MouseEvent<HTMLElement>) => {
                     args.actions?.secondary?.onClick?.(e)
                     setIsOpen(false)
                   },
@@ -167,5 +168,19 @@ export const WithTrigger = {
         />
       </div>
     )
+  },
+}
+
+export const WithDataTestId: Story = {
+  args: {
+    ...Critical.args,
+    dataTestId: "dialog-test-id",
+    open: true,
+  },
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    // Dialog uses Portal, so we need to look in the body
+    const body = canvasElement.ownerDocument.body
+    const canvas = within(body)
+    await expect(canvas.getByTestId("dialog-test-id")).toBeInTheDocument()
   },
 }

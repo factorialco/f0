@@ -1,6 +1,7 @@
 import { Dispatch, useEffect, useState } from "react"
 
 import { DataAttributes } from "@/global.types"
+import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
 import { TabNavigation, TabNavigationLink } from "@/ui/tab-navigation"
 
@@ -124,7 +125,6 @@ export const TabsSkeleton: React.FC<Pick<TabsProps, "secondary">> = ({
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export const Tabs = experimentalComponent(
-  "Tabs",
-  withSkeleton(BaseTabs, TabsSkeleton)
+export const Tabs = withDataTestId(
+  experimentalComponent("Tabs", withSkeleton(BaseTabs, TabsSkeleton))
 )

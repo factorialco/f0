@@ -1,3 +1,4 @@
+import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
 
 import { Block as BlockComponent } from "./blocks/Block"
@@ -9,12 +10,18 @@ import { Page as PageComponent } from "./pages/Page"
 export * from "./types"
 
 export const Layout = {
-  Page: experimentalComponent("Page", PageComponent),
-  Block: experimentalComponent("Block", BlockComponent),
-  BlockContent: experimentalComponent("BlockContent", BlockContentComponent),
-  Group: experimentalComponent("Group", GroupLinearComponent),
-  GroupGrid: experimentalComponent("GroupGrid", GroupGridComponent),
-  GroupMasonry: experimentalComponent("GroupMasonry", GroupMasonryComponent),
+  Page: withDataTestId(experimentalComponent("Page", PageComponent)),
+  Block: withDataTestId(experimentalComponent("Block", BlockComponent)),
+  BlockContent: withDataTestId(
+    experimentalComponent("BlockContent", BlockContentComponent)
+  ),
+  Group: withDataTestId(experimentalComponent("Group", GroupLinearComponent)),
+  GroupGrid: withDataTestId(
+    experimentalComponent("GroupGrid", GroupGridComponent)
+  ),
+  GroupMasonry: withDataTestId(
+    experimentalComponent("GroupMasonry", GroupMasonryComponent)
+  ),
 }
 
 export * from "./utils"

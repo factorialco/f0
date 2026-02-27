@@ -1,5 +1,136 @@
 # Changelog
 
+## [1.384.0](https://github.com/factorialco/f0/compare/f0-react-v1.383.2...f0-react-v1.384.0) (2026-02-27)
+
+
+### Features
+
+* add min width of 320px (w-80) to select content ([#3542](https://github.com/factorialco/f0/issues/3542)) ([8bc550f](https://github.com/factorialco/f0/commit/8bc550f1b9ad7ba237ed2aeeb24fa98adc1c084e))
+
+## [1.383.2](https://github.com/factorialco/f0/compare/f0-react-v1.383.1...f0-react-v1.383.2) (2026-02-27)
+
+
+### Bug Fixes
+
+* update single-select questions in CoCreationForm radio appearance ([#3546](https://github.com/factorialco/f0/issues/3546)) ([79762f0](https://github.com/factorialco/f0/commit/79762f0970b3beaafc16cb395ec94c640d09c9b0))
+
+## [1.383.1](https://github.com/factorialco/f0/compare/f0-react-v1.383.0...f0-react-v1.383.1) (2026-02-27)
+
+
+### Bug Fixes
+
+* **data-testid:** preserve discriminated union props in WithDataTestIdPropsOf ([#3525](https://github.com/factorialco/f0/issues/3525)) ([5656938](https://github.com/factorialco/f0/commit/5656938da02d1867065b423f875f217f24ad7a28))
+
+## [1.383.0](https://github.com/factorialco/f0/compare/f0-react-v1.382.0...f0-react-v1.383.0) (2026-02-27)
+
+
+### Features
+
+* create F0Wizard and F0WizardForm components ([#3531](https://github.com/factorialco/f0/issues/3531)) ([7c81ef4](https://github.com/factorialco/f0/commit/7c81ef498f43e29de3eba4e4345895134301922c))
+
+
+### Bug Fixes
+
+* **datacollection:** fix sort column list ellipsis not working ([#3537](https://github.com/factorialco/f0/issues/3537)) ([6dec00d](https://github.com/factorialco/f0/commit/6dec00da8deeb4401de3c1c70e93e3ac03a4c2a7))
+
+## [1.382.0](https://github.com/factorialco/f0/compare/f0-react-v1.381.0...f0-react-v1.382.0) (2026-02-25)
+
+
+### Features
+
+* add support for file field type in F0Form ([#3520](https://github.com/factorialco/f0/issues/3520)) ([082bb29](https://github.com/factorialco/f0/commit/082bb29491c25577f6f661543e37730b0bca177b))
+
+## [1.381.0](https://github.com/factorialco/f0/compare/f0-react-v1.380.0...f0-react-v1.381.0) (2026-02-25)
+
+
+### Features
+
+* **dataCollection:** selectable header ([#3518](https://github.com/factorialco/f0/issues/3518)) ([db9fd03](https://github.com/factorialco/f0/commit/db9fd034f6a528af634e08078f8deb37d4e55104))
+
+## [1.380.0](https://github.com/factorialco/f0/compare/f0-react-v1.379.0...f0-react-v1.380.0) (2026-02-25)
+
+
+### Features
+
+* filters per visualization ([#3455](https://github.com/factorialco/f0/issues/3455)) ([95405f9](https://github.com/factorialco/f0/commit/95405f955b76b0a24b64f05231821f065cfd23c7))
+
+## [1.379.0](https://github.com/factorialco/f0/compare/f0-react-v1.378.0...f0-react-v1.379.0) (2026-02-24)
+
+
+### Features
+
+* add barSeries and hourDistribution value-display types ([#3327](https://github.com/factorialco/f0/issues/3327)) ([49be7a1](https://github.com/factorialco/f0/commit/49be7a1fba0318ccd01f6d3ed38069927429743a))
+
+## [1.378.0](https://github.com/factorialco/f0/compare/f0-react-v1.377.0...f0-react-v1.378.0) (2026-02-24)
+
+
+### Features
+
+* dataTestId ([#3339](https://github.com/factorialco/f0/issues/3339)) ([3813ba9](https://github.com/factorialco/f0/commit/3813ba9fd43435043e76dc13fa1d1ee3fc7ab462))
+
+## [1.377.0](https://github.com/factorialco/f0/compare/f0-react-v1.376.1...f0-react-v1.377.0) (2026-02-24)
+
+
+### Features
+
+* adding custom tooltip to F0OneSwitch ([#3436](https://github.com/factorialco/f0/issues/3436)) ([acec605](https://github.com/factorialco/f0/commit/acec60548b9243d47d017a25028e63fc45657105))
+
+## [1.376.1](https://github.com/factorialco/f0/compare/f0-react-v1.376.0...f0-react-v1.376.1) (2026-02-24)
+
+
+### Bug Fixes
+
+* properly consider available space for responsive in data collection with card visualization ([#3512](https://github.com/factorialco/f0/issues/3512)) ([d5bfeaa](https://github.com/factorialco/f0/commit/d5bfeaa6eff1b752de4bedf6d26b903d11687ee9))
+
+## [1.376.0](https://github.com/factorialco/f0/compare/f0-react-v1.375.1...f0-react-v1.376.0) (2026-02-24)
+
+
+### Features
+
+* improve post description rendering for updated editor ([#3478](https://github.com/factorialco/f0/issues/3478)) ([4dd04fe](https://github.com/factorialco/f0/commit/4dd04fed1ee456934b94acfad9a863f823fd6f8b))
+
+## [1.375.1](https://github.com/factorialco/f0/compare/f0-react-v1.375.0...f0-react-v1.375.1) (2026-02-24)
+
+
+### Bug Fixes
+
+* add cursor-pointer to dropdown ([#3421](https://github.com/factorialco/f0/issues/3421)) ([91c6695](https://github.com/factorialco/f0/commit/91c6695b965d7ec7204e294f7347e6d260880bbb))
+
+## [1.375.0](https://github.com/factorialco/f0/compare/f0-react-v1.374.2...f0-react-v1.375.0) (2026-02-23)
+
+
+### Features
+
+* submit and validation per section in F0Form ([#3487](https://github.com/factorialco/f0/issues/3487)) ([b217695](https://github.com/factorialco/f0/commit/b217695a1666fd1d41d3bb316fc012c66f28cefe))
+
+## [1.374.2](https://github.com/factorialco/f0/compare/f0-react-v1.374.1...f0-react-v1.374.2) (2026-02-23)
+
+
+### Bug Fixes
+
+* do not show pagination footer in data collection when it's only one page ([#3505](https://github.com/factorialco/f0/issues/3505)) ([df07496](https://github.com/factorialco/f0/commit/df07496367e8dff0a370c05091b365f7e535314c))
+
+## [1.374.1](https://github.com/factorialco/f0/compare/f0-react-v1.374.0...f0-react-v1.374.1) (2026-02-23)
+
+
+### Bug Fixes
+
+* render CardLink as native button when no href is provided ([#3476](https://github.com/factorialco/f0/issues/3476)) ([69e634b](https://github.com/factorialco/f0/commit/69e634b735368eaede87fd441233727ea30c6708))
+
+## [1.374.0](https://github.com/factorialco/f0/compare/f0-react-v1.373.2...f0-react-v1.374.0) (2026-02-23)
+
+
+### Features
+
+* **F0TextArea/F0Text:** add required prop support and corresponding story ([#3498](https://github.com/factorialco/f0/issues/3498)) ([352a125](https://github.com/factorialco/f0/commit/352a125f0f17cb4fd1a085714237d14f8969e9f5))
+
+## [1.373.2](https://github.com/factorialco/f0/compare/f0-react-v1.373.1...f0-react-v1.373.2) (2026-02-23)
+
+
+### Bug Fixes
+
+* **ai-chat:** fix preamble dedup and thinking group ordering ([#3494](https://github.com/factorialco/f0/issues/3494)) ([b81f80d](https://github.com/factorialco/f0/commit/b81f80da4bdcdc88b8b49705af7f99b1d7663a7f))
+
 ## [1.373.1](https://github.com/factorialco/f0/compare/f0-react-v1.373.0...f0-react-v1.373.1) (2026-02-23)
 
 

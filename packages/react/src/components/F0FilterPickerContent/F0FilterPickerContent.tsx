@@ -1,11 +1,12 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { type ReactElement, useEffect, useMemo, useState } from "react"
 
 /**
  * Public implementation of the FilterPickerInternal component.
  * F0FilterPickerContent component.
  */
+import { DataTestIdWrapper } from "@/lib/data-testid"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
@@ -68,7 +69,7 @@ const DEFAULT_FORM_HEIGHT = 388
  * />
  * ```
  */
-export function F0FilterPickerContent<Filters extends FiltersDefinition>({
+function _F0FilterPickerContent<Filters extends FiltersDefinition>({
   filters,
   value,
   onChange,
@@ -77,7 +78,8 @@ export function F0FilterPickerContent<Filters extends FiltersDefinition>({
   className,
   showApplyButton = true,
   applyButtonLabel,
-}: F0FilterPickerContentProps<Filters>) {
+  dataTestId,
+}: F0FilterPickerContentProps<Filters> & { dataTestId?: string }) {
   const i18n = useI18n()
 
   const firstFilterKey = (Object.keys(filters)[0] as keyof Filters) ?? null
@@ -149,26 +151,34 @@ export function F0FilterPickerContent<Filters extends FiltersDefinition>({
   }
 
   return (
-    <div
-      className={cn(
-        "overflow-hidden rounded-xl border border-solid border-f1-border-secondary bg-f1-background",
-        className
-      )}
-      style={{ maxWidth: width }}
-    >
-      <FilterPickerInternal
-        filters={filters}
-        tempFilters={localFiltersValue}
-        selectedFilterKey={selectedFilterKey}
-        onFilterSelect={setSelectedFilterKey}
-        onFilterChange={updateFilterValue}
-        onApply={handleApplyFilters}
-        height={formHeight}
-        showApplyButton={showApplyButton}
-        applyButtonLabel={applyButtonLabel}
-      />
-    </div>
+    <DataTestIdWrapper dataTestId={dataTestId}>
+      <div
+        className={cn(
+          "overflow-hidden rounded-xl border border-solid border-f1-border-secondary bg-f1-background",
+          className
+        )}
+        style={{ maxWidth: width }}
+      >
+        <FilterPickerInternal
+          filters={filters}
+          tempFilters={localFiltersValue}
+          selectedFilterKey={selectedFilterKey}
+          onFilterSelect={setSelectedFilterKey}
+          onFilterChange={updateFilterValue}
+          onApply={handleApplyFilters}
+          height={formHeight}
+          showApplyButton={showApplyButton}
+          applyButtonLabel={applyButtonLabel}
+        />
+      </div>
+    </DataTestIdWrapper>
   )
 }
 
-F0FilterPickerContent.displayName = "F0FilterPickerContent"
+_F0FilterPickerContent.displayName = "F0FilterPickerContent"
+
+export const F0FilterPickerContent = _F0FilterPickerContent as <
+  Filters extends FiltersDefinition,
+>(
+  props: F0FilterPickerContentProps<Filters> & { dataTestId?: string }
+) => ReactElement | null

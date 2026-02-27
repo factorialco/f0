@@ -1,6 +1,7 @@
 import { useState } from "react"
 
 import { ModuleId } from "@/components/avatars/F0AvatarModule"
+import { withDataTestId } from "@/lib/data-testid"
 import { ButtonVariant, F0Button } from "@/components/F0Button"
 import { IconType } from "@/components/F0Icon"
 import { Variant } from "@/components/tags/F0TagStatus"
@@ -62,7 +63,7 @@ type Action = {
 }
 type ResponseStatus = "success" | "error" | null
 
-export function ProductModal({
+function _ProductModal({
   isOpen,
   onClose,
   title,
@@ -174,3 +175,5 @@ export function ProductModal({
     </>
   )
 }
+
+export const ProductModal = withDataTestId(_ProductModal)
