@@ -17,18 +17,46 @@ const meta = {
   title: "Toast",
   decorators: [
     (Story) => (
-      <ToastProvider>
-        <Story />
-      </ToastProvider>
+      <div style={{ height: "100%", width: "100%" }}>
+        <ToastProvider>
+          <Story />
+        </ToastProvider>
+      </div>
     ),
   ],
   parameters: {
-    layout: "centered",
+    layout: "fullscreen",
   },
 } satisfies Meta<typeof F0Button>
 
 export default meta
 type Story = StoryObj<typeof meta>
+
+const _FakeAppContainer = ({
+  children,
+  sidebar,
+  chat,
+}: {
+  children: React.ReactNode
+  sidebar?: React.ReactNode
+  chat?: React.ReactNode
+}) => {
+  return (
+    <div className="flex h-full w-full flex-row gap-0">
+      <div className="order-1 flex h-full w-[240px] flex-col items-center justify-center gap-8 overflow-y-auto rounded-xl bg-f1-background-secondary p-4">
+        {sidebar || "Sidebar"}
+      </div>
+      <div id="content" className="relative order-2 flex-1 flex-col gap-4">
+        <div className="h-full w-full overflow-auto overflow-y-auto p-4">
+          {children}
+        </div>
+      </div>
+      <div className="order-3 flex h-full w-[300px] flex-col items-center justify-center gap-4 overflow-y-auto rounded-xl bg-f1-background-secondary p-4">
+        {chat || "One chat"}
+      </div>
+    </div>
+  )
+}
 
 export const ToastPlayground: Story = {
   render: () => {
@@ -147,10 +175,9 @@ export const ToastPlayground: Story = {
     }
 
     return (
-      <div className="flex flex-row gap-10">
-        <div className="order-2 flex w-[300px] flex-col gap-4 p-4">
-          <h3 className="font-bold text-lg">Logger</h3>
-          <div className="flex max-h-[500px] flex-col gap-2 overflow-y-auto">
+      <_FakeAppContainer
+        chat={
+          <>
             {logger
               .slice()
               .reverse()
@@ -161,7 +188,12 @@ export const ToastPlayground: Story = {
                   </p>
                 </div>
               ))}
-          </div>
+          </>
+        }
+      >
+        <div className="order-2 flex w-[300px] flex-col gap-4 p-4">
+          <h3 className="font-bold text-lg">Logger</h3>
+          <div className="flex max-h-[500px] flex-col gap-2 overflow-y-auto"></div>
         </div>
         <div className="order-1 flex flex-col gap-8 p-4">
           <div className="flex flex-col gap-4">
@@ -272,7 +304,7 @@ export const ToastPlayground: Story = {
             </div>
           </div>
         </div>
-      </div>
+      </_FakeAppContainer>
     )
   },
 }

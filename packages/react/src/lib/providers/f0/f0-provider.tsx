@@ -116,7 +116,14 @@ export const F0Provider: React.FC<{
                         handler={dataCollectionStorageHandler}
                       >
                         <DialogsAlikeLayoutProvider>
-                          <ToastProvider>{children}</ToastProvider>
+                          <ToastProvider
+                            portalTargets={{
+                              mobile: "body",
+                              desktop: "#content",
+                            }}
+                          >
+                            {children}
+                          </ToastProvider>
                         </DialogsAlikeLayoutProvider>
                       </DataCollectionStorageProvider>
                     </ImageProvider>

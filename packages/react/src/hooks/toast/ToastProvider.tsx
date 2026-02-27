@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from "motion/react"
 import {
   createContext,
+  Fragment,
   useCallback,
   useContext,
   useEffect,
@@ -35,6 +36,7 @@ const ToastContext = createContext<ToastContextValue | null>(null)
 
 type ToastProviderProps = {
   children: React.ReactNode
+  portalTargets?: Record<"mobile" | "desktop", string>
 }
 
 const toastContainerPositionClasses: Record<ToastContainerPosition, string> = {
@@ -324,7 +326,7 @@ const ToastsContainer = ({
   return (
     <div
       className={cn(
-        "pointer-events-none fixed z-[100] flex overflow-x-hidden overflow-y-auto",
+        "pointer-events-none absolute top-0 left-0 right-0 z-[100] flex overflow-x-hidden overflow-y-auto w-full h-full",
         toastContainerPositionClasses[position]
       )}
     >
@@ -389,7 +391,13 @@ const ToastsContainer = ({
   )
 }
 
-export const ToastProvider = ({ children }: ToastProviderProps) => {
+export const ToastProvider = ({
+  children,
+  portalTargets = {
+    mobile: "body",
+    desktop: "#content",
+  },
+}: ToastProviderProps) => {
   const [items, setItems] = useState<ToastProviderItem[]>([])
   const [isMounted, setIsMounted] = useState(false)
 
@@ -426,11 +434,36 @@ export const ToastProvider = ({ children }: ToastProviderProps) => {
     [addToast, removeToast, clearAll]
   )
 
+  const isMobile = useIsMobile()
+  const [portalTarget, setPortalTarget] = useState<HTMLElement | null>(null)
+  const [portalKey, setPortalKey] = useState(0)
+  const prevPortalTargetRef = useRef<HTMLElement | null>(null)
+
+  useEffect(() => {
+    if (typeof document === "undefined") return
+    const selector = isMobile
+      ? portalTargets?.mobile || "body"
+      : portalTargets?.desktop || "body"
+    const target =
+      document.querySelector<HTMLElement>(selector) ?? document.body
+    if (prevPortalTargetRef.current !== target) {
+      prevPortalTargetRef.current = target
+      setPortalKey((k) => k + 1)
+    }
+    setPortalTarget(target)
+  }, [isMobile, portalTargets?.mobile, portalTargets?.desktop])
+
   return (
     <ToastContext.Provider value={contextValue}>
       {isMounted &&
         typeof document !== "undefined" &&
-        createPortal(<ToastsContainer items={items} />, document.body)}
+        portalTarget != null &&
+        createPortal(
+          <Fragment key={portalKey}>
+            <ToastsContainer items={items} />
+          </Fragment>,
+          portalTarget
+        )}
       {children}
     </ToastContext.Provider>
   )
