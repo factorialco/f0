@@ -6,9 +6,10 @@ import { F0DataDownloadProps } from "../../F0DataDownload/types"
 /**
  * Hook to register the data download copilot action.
  *
- * The agent triggers this frontend tool when it has prepared downloadable
- * files (CSV, Excel, PDF, etc.) for the user. It renders an optional
- * markdown preview followed by download buttons.
+ * The agent triggers this frontend tool when it has query results
+ * available for download. It sends the raw dataset (columns + rows)
+ * along with an optional markdown preview. The component generates
+ * Excel and CSV files client-side.
  *
  * Uses `available: "frontend"` so the backend agent can invoke it.
  */
@@ -16,7 +17,7 @@ export const useDataDownloadAction = () => {
   useCopilotAction({
     name: "downloadData",
     description:
-      "Display download buttons for prepared data exports. Use this to offer the user downloadable files in one or more formats, optionally with a markdown preview.",
+      "Display download buttons for query results. Sends the raw dataset to the frontend for client-side Excel and CSV generation, optionally with a markdown preview table.",
     parameters: [
       {
         name: "markdown",
@@ -26,58 +27,43 @@ export const useDataDownloadAction = () => {
         required: false,
       },
       {
-        name: "primaryAction",
+        name: "filename",
+        type: "string",
+        description:
+          "Descriptive filename (without extension) for the downloaded files, in the user's language. E.g. 'ventas_por_mes', 'team_salaries'.",
+        required: false,
+      },
+      {
+        name: "dataset",
         type: "object",
-        description: "Primary download button configuration",
+        description:
+          "Raw dataset for client-side file generation. Contains column headers and row data.",
         required: true,
         attributes: [
           {
-            name: "label",
-            type: "string",
+            name: "columns",
+            type: "string[]",
+            description: "Column headers in display order",
+            required: true,
+          },
+          {
+            name: "rows",
+            type: "object[]",
+            description: "Array of row objects keyed by column name",
+            required: true,
+          },
+          {
+            name: "totalCount",
+            type: "number",
             description:
-              'Label displayed on the button (e.g. "Download CSV", "Download Report")',
-            required: true,
+              "Total number of rows returned by the query (before truncation)",
+            required: false,
           },
           {
-            name: "type",
-            type: "string",
-            description:
-              'Type of action — currently only "download" is supported',
-            required: true,
-          },
-          {
-            name: "downloadUrl",
-            type: "string",
-            description: "URL to download the file (opens in a new tab)",
-            required: true,
-          },
-        ],
-      },
-      {
-        name: "secondaryActions",
-        type: "object[]",
-        description:
-          "Additional download format options shown in a dropdown menu",
-        required: false,
-        attributes: [
-          {
-            name: "label",
-            type: "string",
-            description: "Label displayed in the dropdown",
-            required: true,
-          },
-          {
-            name: "type",
-            type: "string",
-            description:
-              'Type of action — currently only "download" is supported',
-            required: true,
-          },
-          {
-            name: "downloadUrl",
-            type: "string",
-            description: "URL to download the file (opens in a new tab)",
-            required: true,
+            name: "previewCount",
+            type: "number",
+            description: "Number of rows shown in the markdown preview table",
+            required: false,
           },
         ],
       },
@@ -87,12 +73,8 @@ export const useDataDownloadAction = () => {
       const rawArgs = props.args as Partial<F0DataDownloadProps>
       const downloadProps: F0DataDownloadProps = {
         markdown: rawArgs.markdown,
-        primaryAction: rawArgs.primaryAction ?? {
-          label: "Download",
-          type: "download",
-          downloadUrl: "",
-        },
-        secondaryActions: rawArgs.secondaryActions,
+        filename: rawArgs.filename,
+        dataset: rawArgs.dataset ?? { columns: [], rows: [] },
       }
 
       return <F0DataDownload {...downloadProps} />

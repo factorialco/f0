@@ -1,22 +1,16 @@
 import { useRef } from "react"
 
-import { F0Button } from "@/components/F0Button"
-import DownloadIcon from "@/icons/app/Download"
-import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-
-import { downloadTableAsExcel } from "../utils/tableExport"
 
 export function Table({
   children,
   ...props
 }: React.HTMLAttributes<HTMLTableElement>) {
-  const { ai } = useI18n()
   const ref = useRef<HTMLTableElement>(null)
 
   return (
     <div className="mb-2 flex flex-col gap-2">
-      <div className="max-h-[600px] overflow-auto rounded-md border border-solid border-f1-border-secondary">
+      <div className="group/table max-h-[600px] overflow-auto rounded-md border border-solid border-f1-border-secondary [scrollbar-color:transparent_transparent] hover:[scrollbar-color:auto]">
         <table
           ref={ref}
           {...props}
@@ -27,18 +21,6 @@ export function Table({
         >
           {children}
         </table>
-      </div>
-      <div className="flex justify-start">
-        <F0Button
-          variant="outline"
-          size="sm"
-          label={ai.exportTable}
-          icon={DownloadIcon}
-          onClick={() => {
-            if (ref.current)
-              downloadTableAsExcel(ref.current, ai.generatedTableFilename)
-          }}
-        />
       </div>
     </div>
   )
@@ -54,7 +36,7 @@ export function TableSimple({
 }: React.HTMLAttributes<HTMLTableElement>) {
   return (
     <div className="mb-2 flex flex-col gap-2">
-      <div className="max-h-[600px] overflow-auto rounded-md border border-solid border-f1-border-secondary">
+      <div className="max-h-[600px] overflow-auto rounded-md border border-solid border-f1-border-secondary [scrollbar-color:transparent_transparent] hover:[scrollbar-color:auto]">
         <table
           {...props}
           className={cn(

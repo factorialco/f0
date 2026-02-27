@@ -179,8 +179,6 @@ export const aiTranslations = {
     thoughtsGroupTitle: "Reflection",
     resourcesGroupTitle: "Resources",
     thinking: "Thinking...",
-    exportTable: "Download table",
-    generatedTableFilename: "OneGeneratedTable",
     feedbackModal: {
       positive: {
         title: "What did you like about this response?",
@@ -193,6 +191,8 @@ export const aiTranslations = {
         placeholder: "Share what didn't work",
       },
     },
+    dataDownloadPreview:
+      "Preview {{shown}} of {{total}} rows — download the Excel to see all data.",
     expandChat: "Expand chat",
     collapseChat: "Collapse chat",
     ask: "Ask One",

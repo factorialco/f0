@@ -1,91 +1,128 @@
 import { Markdown } from "@copilotkit/react-ui"
+import { useCallback } from "react"
+import * as XLSX from "xlsx"
 
-import { F0Button } from "@/components/F0Button"
 import { F0ButtonDropdown } from "@/components/F0ButtonDropdown"
-import { ButtonDropdownItem } from "@/components/F0ButtonDropdown/types"
 import Download from "@/icons/app/Download"
+import { useI18n } from "@/lib/providers/i18n"
 
 import { f0MarkdownRenderersSimple } from "../F0MarkdownRenderers"
-import { F0DataDownloadActionItem, F0DataDownloadProps } from "./types"
+import { F0DataDownloadDataset, F0DataDownloadProps } from "./types"
 
 /**
- * Opens the download URL in a new tab.
+ * Generate an .xlsx file from a dataset and trigger a browser download.
  */
-function handleDownload(item: F0DataDownloadActionItem): void {
-  if (!item.downloadUrl) {
-    console.error("Missing download URL for download action")
-    return
-  }
+function downloadAsExcel(
+  dataset: F0DataDownloadDataset,
+  filename: string
+): void {
+  const { columns, rows } = dataset
+  const wsData = [
+    columns,
+    ...rows.map((row) => columns.map((col) => row[col] ?? "")),
+  ]
+  const workbook = XLSX.utils.book_new()
+  const worksheet = XLSX.utils.aoa_to_sheet(wsData)
+  XLSX.utils.book_append_sheet(workbook, worksheet, "Data")
 
-  window.open(item.downloadUrl, "_blank", "noopener,noreferrer")
+  const buffer = XLSX.write(workbook, { type: "array", bookType: "xlsx" })
+  const blob = new Blob([buffer], {
+    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  })
+
+  const link = document.createElement("a")
+  link.href = URL.createObjectURL(blob)
+  link.download = `${filename}.xlsx`
+  link.click()
+  URL.revokeObjectURL(link.href)
 }
 
 /**
+ * Generate a CSV string from a dataset and trigger a browser download.
+ */
+function downloadAsCsv(dataset: F0DataDownloadDataset, filename: string): void {
+  const { columns, rows } = dataset
+
+  const escapeCsv = (value: unknown): string => {
+    const str = value == null ? "" : String(value)
+    if (str.includes(",") || str.includes('"') || str.includes("\n")) {
+      return `"${str.replace(/"/g, '""')}"`
+    }
+    return str
+  }
+
+  const lines = [
+    columns.map(escapeCsv).join(","),
+    ...rows.map((row) => columns.map((col) => escapeCsv(row[col])).join(",")),
+  ]
+
+  const blob = new Blob([lines.join("\n")], {
+    type: "text/csv;charset=utf-8;",
+  })
+
+  const link = document.createElement("a")
+  link.href = URL.createObjectURL(blob)
+  link.download = `${filename}.csv`
+  link.click()
+  URL.revokeObjectURL(link.href)
+}
+
+const downloadItems = [
+  { value: "excel", label: "Download Excel", icon: Download },
+  { value: "csv", label: "Download CSV", icon: Download },
+]
+
+/**
  * Component that renders an optional markdown preview followed by
- * download buttons. When a single action is provided, a plain button
- * is rendered; when secondary actions exist, a split-button dropdown
- * is shown instead.
+ * a dropdown button with "Download Excel" as the primary action and
+ * "Download CSV" as a secondary option. Files are generated client-side
+ * from the raw dataset provided by the agent.
  */
 export const F0DataDownload = ({
   markdown,
-  primaryAction,
-  secondaryActions,
+  filename = "dataset",
+  dataset,
 }: F0DataDownloadProps) => {
-  const hasSecondaryActions = secondaryActions && secondaryActions.length > 0
+  const i18n = useI18n()
 
-  // Build dropdown items when there are secondary actions
-  const dropdownItems: ButtonDropdownItem<string>[] = hasSecondaryActions
-    ? [
-        {
-          value: "primary",
-          label: primaryAction.label,
-          icon: Download,
-        },
-        ...secondaryActions.map((action, index) => ({
-          value: `secondary-${index}`,
-          label: action.label,
-          icon: Download,
-        })),
-      ]
-    : []
-
-  const handleDropdownClick = (value: string) => {
-    if (value === "primary") {
-      handleDownload(primaryAction)
-    } else {
-      const index = parseInt(value.replace("secondary-", ""), 10)
-      const action = secondaryActions?.[index]
-      if (action) {
-        handleDownload(action)
+  const handleDownload = useCallback(
+    (format: string, _item: unknown) => {
+      if (format === "excel") {
+        downloadAsExcel(dataset, filename)
+      } else {
+        downloadAsCsv(dataset, filename)
       }
-    }
-  }
+    },
+    [dataset, filename]
+  )
+
+  const { totalCount, previewCount } = dataset
+  const showPreviewNote =
+    totalCount != null && previewCount != null && totalCount > previewCount
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-1 pb-3">
       {markdown && (
         <div className="w-fit max-w-full [&>div]:flex [&>div]:flex-col [&>div]:gap-1">
           <Markdown content={markdown} components={f0MarkdownRenderersSimple} />
         </div>
       )}
-      <div className="flex justify-start">
-        {hasSecondaryActions ? (
-          <F0ButtonDropdown
-            variant="outline"
-            size="sm"
-            items={dropdownItems}
-            value="primary"
-            onClick={handleDropdownClick}
-          />
-        ) : (
-          <F0Button
-            variant="outline"
-            size="sm"
-            label={primaryAction.label}
-            icon={Download}
-            onClick={() => handleDownload(primaryAction)}
-          />
-        )}
+      {showPreviewNote && (
+        <p className="text-sm italic text-f1-foreground-secondary">
+          {i18n.t("ai.dataDownloadPreview", {
+            shown: previewCount,
+            total: totalCount,
+          })}
+        </p>
+      )}
+      <div className="mt-3 flex justify-start">
+        <F0ButtonDropdown
+          variant="outline"
+          size="sm"
+          items={downloadItems}
+          value="excel"
+          onClick={handleDownload}
+        />
       </div>
     </div>
   )
