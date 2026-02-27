@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
+import { within } from "@testing-library/react"
 import { ComponentProps, FC, useState } from "react"
-import { expect, within } from "storybook/test"
 
 import { F0Button } from "@/components/F0Button"
 import { ResourceHeader } from "@/experimental/Information/Headers/ResourceHeader"
@@ -119,7 +119,7 @@ export const WithDataTestId: Story = {
   },
 }
 
-export const WithSmWidth: Story = {
+export const LeftPosition: Story = {
   args: {
     ...Default.args,
     position: "left",

@@ -81,10 +81,54 @@ const LaneProvider = <
     onError,
   })
 
+  const {
+    data,
+    search,
+    setSearch,
+    isInitialLoading,
+    isLoading,
+    isLoadingMore,
+    error,
+    paginationInfo,
+    setPage,
+    loadMore,
+    totalItems,
+    mergedFilters: hookMergedFilters,
+    summaries,
+  } = hook
+
   useEffect(() => {
-    onHookUpdate?.(hook)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hook])
+    onHookUpdate?.({
+      data,
+      search,
+      setSearch,
+      isInitialLoading,
+      isLoading,
+      isLoadingMore,
+      error,
+      paginationInfo,
+      setPage,
+      loadMore,
+      totalItems,
+      mergedFilters: hookMergedFilters,
+      summaries,
+    })
+  }, [
+    data,
+    search,
+    setSearch,
+    isInitialLoading,
+    isLoading,
+    isLoadingMore,
+    error,
+    paginationInfo,
+    setPage,
+    loadMore,
+    totalItems,
+    hookMergedFilters,
+    summaries,
+    onHookUpdate,
+  ])
 
   return null
 }

@@ -18,6 +18,7 @@ import type {
 import type { F0DateRangeConfig } from "./fields/daterange/types"
 import type { F0RichTextConfig } from "./fields/richtext/types"
 import type { F0CustomConfig } from "./fields/custom/types"
+import type { F0FileConfig } from "./fields/file/types"
 
 /**
  * Zod type names for type checking without instanceof
@@ -75,6 +76,7 @@ export type F0FieldType =
   | "datetime"
   | "daterange"
   | "richtext"
+  | "file"
   | "custom"
 
 /**
@@ -135,6 +137,7 @@ export type {
   F0DateRangeConfig,
   F0RichTextConfig,
   F0CustomConfig,
+  F0FileConfig,
 }
 
 /**
@@ -179,6 +182,7 @@ export type F0StringConfig<
   | F0StringTextConfig
   | F0StringTextareaConfig
   | F0StringSelectConfig<R>
+  | F0StringFileConfig
   | F0CustomFieldConfig<TValue, TConfig>
 
 /**
@@ -270,17 +274,27 @@ export type F0DateRangeFieldConfig = F0BaseConfig &
   }
 
 /**
- * Config for array fields (multi-select)
+ * Config for array fields with select (multi-select)
  * @typeParam T - The value type (string or number)
  * @typeParam R - Record type for data source (when using source instead of options)
  */
-export type F0ArrayConfig<
+export type F0ArraySelectConfig<
   T extends string | number = string,
   R extends Record<string, unknown> = Record<string, unknown>,
 > = F0BaseConfig &
   F0SelectConfig<T, R> & {
     fieldType?: "select"
   }
+
+/**
+ * Config for array fields (multi-select or multi-file)
+ * @typeParam T - The value type (string or number)
+ * @typeParam R - Record type for data source (when using source instead of options)
+ */
+export type F0ArrayConfig<
+  T extends string | number = string,
+  R extends Record<string, unknown> = Record<string, unknown>,
+> = F0ArraySelectConfig<T, R> | F0ArrayFileConfig
 
 /**
  * Config for custom fields without fieldConfig
@@ -328,6 +342,29 @@ export type F0RichTextFieldConfig = F0BaseConfig &
   }
 
 /**
+ * Config for file fields (single file upload, form value is a string identifier)
+ */
+export type F0StringFileConfig = F0BaseConfig &
+  F0FileConfig & {
+    fieldType: "file"
+    multiple?: false
+  }
+
+/**
+ * Config for file fields (multiple file upload, form value is string[])
+ */
+export type F0ArrayFileConfig = F0BaseConfig &
+  F0FileConfig & {
+    fieldType: "file"
+    multiple: true
+  }
+
+/**
+ * Union of all file field configs
+ */
+export type F0FileFieldConfig = F0StringFileConfig | F0ArrayFileConfig
+
+/**
  * Config for object fields (richtext, daterange, or custom)
  *
  * @typeParam TValue - Type of the field value (for custom fields)
@@ -354,6 +391,7 @@ export type F0FieldConfig<
   | F0TimeFieldConfig
   | F0DateTimeFieldConfig
   | F0ArrayConfig<T, R>
+  | F0FileFieldConfig
   | F0ObjectConfig
 
 /**
@@ -553,6 +591,11 @@ export function inferFieldType(
   // If explicitly specified, use that
   if ("fieldType" in config && config.fieldType) {
     return config.fieldType
+  }
+
+  // If useUpload is provided, it's a file field
+  if ("useUpload" in config && config.useUpload) {
+    return "file"
   }
 
   // If options or source are provided, it's a select

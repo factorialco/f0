@@ -1,8 +1,12 @@
 import { createContext, useContext } from "react"
 
+import type { InitialFile } from "./fields/file/types"
+
 interface F0FormContextValue {
   /** Form name used for anchor links */
   formName: string
+  /** Shared pool of pre-existing file metadata for file fields */
+  initialFiles?: InitialFile[]
 }
 
 export const F0FormContext = createContext<F0FormContextValue | null>(null)

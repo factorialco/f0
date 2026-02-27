@@ -1,5 +1,26 @@
 # Changelog
 
+## [1.382.0](https://github.com/factorialco/f0/compare/f0-react-v1.381.0...f0-react-v1.382.0) (2026-02-25)
+
+
+### Features
+
+* add support for file field type in F0Form ([#3520](https://github.com/factorialco/f0/issues/3520)) ([082bb29](https://github.com/factorialco/f0/commit/082bb29491c25577f6f661543e37730b0bca177b))
+
+## [1.381.0](https://github.com/factorialco/f0/compare/f0-react-v1.380.0...f0-react-v1.381.0) (2026-02-25)
+
+
+### Features
+
+* **dataCollection:** selectable header ([#3518](https://github.com/factorialco/f0/issues/3518)) ([db9fd03](https://github.com/factorialco/f0/commit/db9fd034f6a528af634e08078f8deb37d4e55104))
+
+## [1.380.0](https://github.com/factorialco/f0/compare/f0-react-v1.379.0...f0-react-v1.380.0) (2026-02-25)
+
+
+### Features
+
+* filters per visualization ([#3455](https://github.com/factorialco/f0/issues/3455)) ([95405f9](https://github.com/factorialco/f0/commit/95405f955b76b0a24b64f05231821f065cfd23c7))
+
 ## [1.379.0](https://github.com/factorialco/f0/compare/f0-react-v1.378.0...f0-react-v1.379.0) (2026-02-24)
 
 
