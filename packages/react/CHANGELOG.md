@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.384.0](https://github.com/factorialco/f0/compare/f0-react-v1.383.2...f0-react-v1.384.0) (2026-02-27)
+
+
+### Features
+
+* add min width of 320px (w-80) to select content ([#3542](https://github.com/factorialco/f0/issues/3542)) ([8bc550f](https://github.com/factorialco/f0/commit/8bc550f1b9ad7ba237ed2aeeb24fa98adc1c084e))
+
 ## [1.383.2](https://github.com/factorialco/f0/compare/f0-react-v1.383.1...f0-react-v1.383.2) (2026-02-27)
 
 
