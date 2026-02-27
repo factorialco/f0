@@ -1,6 +1,6 @@
 import { z, ZodRawShape, ZodEffects } from "zod"
 
-import { DialogWidth } from "@/components/F0Dialog"
+import { F0DialogSize } from "@/components/dialog-alike/F0Dialog"
 import type {
   F0FormErrorTriggerMode,
   F0FormSubmitConfig,
@@ -102,7 +102,7 @@ interface F0WizardFormBaseProps {
   isOpen: boolean
   onClose?: () => void
   title?: string
-  width?: DialogWidth
+  size?: F0DialogSize
   defaultStepIndex?: number
   nextLabel?: string
   previousLabel?: string

@@ -52,7 +52,6 @@ export const DialogWrapperProvider = ({
         position,
         shownBottomSheet,
         portalContainer,
-        dataTestId,
       }}
     >
       {children}

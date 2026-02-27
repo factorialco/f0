@@ -83,7 +83,7 @@ export const Default: Story = {
     isOpen: true,
     onClose: () => {},
     title: "Add employee",
-    width: "lg",
+    size: "lg",
     steps: BASIC_STEPS,
     onSubmit: async () => {
       await new Promise((resolve) => setTimeout(resolve, 1000))
@@ -159,7 +159,7 @@ export const WithIsCompletedGate: Story = {
           isOpen={open}
           onClose={() => setOpen(false)}
           title="Gated wizard"
-          width="lg"
+          size="lg"
           steps={[
             { title: "Accept terms", isCompleted: () => accepted },
             { title: "Configure" },
