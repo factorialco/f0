@@ -5,7 +5,7 @@ export type DialogVariant = (typeof dialogVariants)[number]
 
 export type DialogInternalProps = DialogAlikeInternalProps & {
   /**
-   * The type of the dialog. It chenges the primary action variant.
+   * The type of the dialog. It changes the primary action variant.
    * @default "default"
    */
   type?: "default" | "critical"
