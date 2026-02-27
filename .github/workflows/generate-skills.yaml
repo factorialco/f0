@@ -57,6 +57,40 @@ jobs:
           model: "moonshotai/kimi-k2-instruct-0905"
           api-key: ${{ secrets.GROQ_APIKEY }}
           verbose: "true"
+          exclude: |
+            🔒 Internal/**
+            **/Internal/**
+            Library/**
+
+      - name: Remove stale skill directories
+        run: |
+          OUTPUT_DIR="packages/react/f0-skills"
+          INDEX_FILE="$OUTPUT_DIR/_index/SKILL.md"
+
+          if [ ! -f "$INDEX_FILE" ]; then
+            echo "No index file found, skipping cleanup"
+            exit 0
+          fi
+
+          # Extract referenced skill slugs from the index SKILL.md.
+          # The index lists skills as markdown links: [Name](../slug/SKILL.md)
+          # Capture everything between "../" and "/SKILL.md"
+          REFERENCED=$(grep -oP '\.\./\K[^/]+(?=/SKILL\.md)' "$INDEX_FILE" | sort -u)
+
+          echo "Referenced skill slugs:"
+          echo "$REFERENCED"
+
+          for dir in "$OUTPUT_DIR"/*/; do
+            slug=$(basename "$dir")
+            # Always keep the _index directory
+            if [ "$slug" = "_index" ]; then
+              continue
+            fi
+            if ! echo "$REFERENCED" | grep -qx "$slug"; then
+              echo "Removing stale skill directory: $dir"
+              rm -rf "$dir"
+            fi
+          done
 
       - name: Push generated skills
         if: github.event_name == 'push'
