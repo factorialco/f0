@@ -48,7 +48,7 @@ jobs:
         run: pnpm --filter @factorialco/f0-react run build-storybook
 
       - name: Generate SKILL.md files
-        uses: sergiocarracedo/storybook-to-skill-md-action@v1
+        uses: sergiocarracedo/storybook-to-skill-md-action@v1.2.0
         with:
           index-file: "packages/react/storybook-static/index.json"
           source-dir: "packages/react/src"
