@@ -1,5 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
+import { expect, within } from "storybook/test"
+
+import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import { F0Heading } from "../index"
@@ -34,6 +37,7 @@ const meta = {
         defaultValue: { summary: "false" },
       },
     },
+    ...dataTestIdArgs,
   },
   decorators: [
     (Story) => (
@@ -53,6 +57,18 @@ export const Default: Story = {
   args: {
     variant: "heading",
     content: "This is a heading",
+  },
+}
+
+export const WithDataTestId: Story = {
+  args: {
+    variant: "heading",
+    content: "Heading with Test ID",
+    dataTestId: "my-test-heading",
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await expect(canvas.getByTestId("my-test-heading")).toBeInTheDocument()
   },
 }
 

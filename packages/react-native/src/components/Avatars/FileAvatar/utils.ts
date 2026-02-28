@@ -9,19 +9,19 @@ type FileLike = {
 }
 
 const FILE_TYPE_MAP: Record<string, FileTypeInfo> = {
-  pdf: { type: "PDF", color: "text-f1-foreground-accent" },
-  image: { type: "IMG", color: "text-f1-foreground-info" },
-  doc: { type: "DOC", color: "text-f1-foreground-info" },
-  excel: { type: "XLS", color: "text-f1-foreground-positive" },
-  ppt: { type: "PPT", color: "text-f1-foreground-warning" },
-  txt: { type: "TXT", color: "text-f1-foreground-secondary" },
-  video: { type: "VID", color: "text-f1-foreground-info" },
-  audio: { type: "AUD", color: "text-f1-foreground-accent" },
-  archive: { type: "ZIP", color: "text-f1-foreground-warning" },
-  csv: { type: "CSV", color: "text-f1-foreground-positive" },
-  html: { type: "HTML", color: "text-f1-foreground-accent" },
-  markdown: { type: "MD", color: "text-f1-foreground-secondary" },
-  default: { type: "FILE", color: "text-f1-foreground" },
+  pdf: { type: "PDF", color: "text-f0-foreground-accent" },
+  image: { type: "IMG", color: "text-f0-foreground-info" },
+  doc: { type: "DOC", color: "text-f0-foreground-info" },
+  excel: { type: "XLS", color: "text-f0-foreground-positive" },
+  ppt: { type: "PPT", color: "text-f0-foreground-warning" },
+  txt: { type: "TXT", color: "text-f0-foreground-secondary" },
+  video: { type: "VID", color: "text-f0-foreground-info" },
+  audio: { type: "AUD", color: "text-f0-foreground-accent" },
+  archive: { type: "ZIP", color: "text-f0-foreground-warning" },
+  csv: { type: "CSV", color: "text-f0-foreground-positive" },
+  html: { type: "HTML", color: "text-f0-foreground-accent" },
+  markdown: { type: "MD", color: "text-f0-foreground-secondary" },
+  default: { type: "FILE", color: "text-f0-foreground" },
 }
 
 const MIME_MATCH_MAP: Record<string, keyof typeof FILE_TYPE_MAP> = {

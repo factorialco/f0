@@ -5,15 +5,17 @@ import {
   type AlertAvatarProps,
 } from "@/components/avatars/F0AvatarAlert"
 import { F0Button, F0ButtonProps } from "@/components/F0Button"
+import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
 import {
-  Dialog,
+  Dialog as DialogPrimitive,
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/ui/Dialog/dialog"
+import { Component } from "@/lib/component/component"
 
 type BaseAction = Pick<F0ButtonProps, "label" | "onClick" | "icon" | "disabled">
 
@@ -56,9 +58,9 @@ const OneDialog = forwardRef<HTMLDivElement, DialogProps>(
     }, [onClose])
 
     return (
-      <Dialog
+      <DialogPrimitive
         open={open && !closing}
-        onOpenChange={(open) => !open && handleClose?.()}
+        onOpenChange={(open: boolean) => !open && handleClose?.()}
       >
         <DialogContent ref={ref} className="bottom-3 top-auto max-w-[400px]">
           <DialogHeader className="flex flex-col gap-4 px-4 py-5">
@@ -92,16 +94,18 @@ const OneDialog = forwardRef<HTMLDivElement, DialogProps>(
             </DialogFooter>
           )}
         </DialogContent>
-      </Dialog>
+      </DialogPrimitive>
     )
   }
 )
 
 OneDialog.displayName = "Dialog"
 
-/**
- * @experimental This is an experimental component use it at your own risk
- */
-const DialogComponent = experimentalComponent("Dialog", OneDialog)
+export const Dialog = withDataTestId(
+  Component(
+    { name: "Dialog", type: "info" },
+    experimentalComponent("Dialog", OneDialog)
+  )
+)
 
-export { DialogComponent as Dialog }
+export { OneDialog as DialogInner }

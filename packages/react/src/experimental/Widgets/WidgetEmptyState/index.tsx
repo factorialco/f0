@@ -1,3 +1,4 @@
+import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
 
 import { IconType } from "../../../components/F0Icon"
@@ -42,7 +43,6 @@ function _WidgetEmptyState({
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export const WidgetEmptyState = experimentalComponent(
-  "WidgetEmptyState",
-  _WidgetEmptyState
+export const WidgetEmptyState = withDataTestId(
+  experimentalComponent("WidgetEmptyState", _WidgetEmptyState)
 )

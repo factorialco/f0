@@ -1,5 +1,6 @@
 import { forwardRef } from "react"
 
+import { withDataTestId } from "@/lib/data-testid"
 import { withSkeleton } from "@/lib/skeleton"
 
 import { CalloutInternal, CalloutSkeleton } from "./CalloutInternal"
@@ -19,4 +20,7 @@ const F0CalloutSkeleton = ({ compact, variant }: CalloutSkeletonProps) => {
 
 F0CalloutBase.displayName = "F0Callout"
 
-export const F0Callout = withSkeleton(F0CalloutBase, F0CalloutSkeleton)
+export const F0Callout = withSkeleton(
+  withDataTestId(F0CalloutBase),
+  F0CalloutSkeleton
+)

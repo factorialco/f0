@@ -6,6 +6,7 @@ import type {
   F0Field,
   F0BaseFieldRenderIfFunction,
   RenderIfCondition,
+  InitialFile,
 } from "./fields/types"
 
 // Re-export F0 schema types
@@ -130,6 +131,8 @@ interface F0FormSubmitConfigBase {
    * - IconType: custom icon
    */
   icon?: IconType | null
+  /** Label shown in the action bar while submitting (defaults to i18n "forms.actionBar.saving") */
+  savingMessage?: string
 }
 
 /**
@@ -162,6 +165,12 @@ interface F0FormDefaultSubmitConfig extends F0FormSubmitConfigBase {
    * @default false
    */
   hideSubmitButton?: boolean
+  /**
+   * When true, hides the internal action bar (loading/success feedback).
+   * Useful when the parent component provides its own action bar.
+   * @default false
+   */
+  hideActionBar?: boolean
 }
 
 /**
@@ -213,44 +222,50 @@ export type F0FormSchema<T extends ZodRawShape = ZodRawShape> =
   | ZodEffects<z.ZodObject<T>>
 
 /**
- * Props for the F0Form component
- *
- * @typeParam TSchema - The Zod object schema type. The form data type is inferred from this.
- *                      Can be a plain ZodObject or a refined ZodObject (using .refine()).
+ * A record mapping section IDs to their individual schemas.
+ * When used, each section gets independent validation and its own submit button.
+ */
+export type F0PerSectionSchema = Record<string, F0FormSchema>
+
+/**
+ * Helper type to infer the combined values from a per-section schema record.
+ * Merges all section schemas into a single type.
+ */
+export type InferPerSectionValues<T extends F0PerSectionSchema> = {
+  [K in keyof T]: z.infer<T[K]>
+}
+
+/**
+ * Creates a union of `[sectionId, data]` pairs for each key in T.
+ * Used to build a callback where TypeScript narrows `data` based on `sectionId`.
  *
  * @example
- * ```tsx
- * const schema = z.object({
- *   name: f0FormField(z.string(), { label: "Name" }),
- *   age: f0FormField(z.number(), { label: "Age" }),
- * })
- *
- * // Default submit button
- * <F0Form
- *   name="my-form"
- *   schema={schema}
- *   defaultValues={{ name: "" }}
- *   onSubmit={(data) => ({ success: true })}
- * />
- *
- * // With cross-field validation using .refine()
- * const schemaWithRefine = z.object({
- *   startDate: f0FormField(z.date(), { label: "Start" }),
- *   endDate: f0FormField(z.date(), { label: "End" }),
- * }).refine((data) => data.endDate > data.startDate, {
- *   message: "End date must be after start date",
- *   path: ["endDate"],
- * })
- * ```
+ * For T = { profile: ZodObject<{name: ZodString}>, settings: ZodObject<{theme: ZodEnum}> }
+ * Produces: ["profile", { name: string }] | ["settings", { theme: "light" | "dark" }]
  */
-export interface F0FormProps<TSchema extends F0FormSchema> {
-  /** Unique name for the form, used for generating anchor links (e.g., #forms.[name].[sectionId].[fieldId]) */
+type PerSectionSubmitArgs<T extends F0PerSectionSchema> = {
+  [K in keyof T & string]: [sectionId: K, data: z.infer<T[K]>]
+}[keyof T & string]
+
+/**
+ * Callback type for per-section submit. Uses a discriminated union of argument
+ * tuples so that narrowing `sectionId` also narrows `data` to the correct type.
+ */
+type PerSectionSubmitHandler<T extends F0PerSectionSchema> = (
+  ...args: PerSectionSubmitArgs<T>
+) => Promise<F0FormSubmitResult> | F0FormSubmitResult
+
+/**
+ * Props for the F0Form component (single schema mode)
+ */
+export interface F0FormPropsWithSingleSchema<TSchema extends F0FormSchema> {
+  /** Unique name for the form, used for generating anchor links */
   name: string
   /** Zod object schema with F0 field configurations */
   schema: TSchema
   /** Section configurations keyed by section ID */
   sections?: Record<string, F0SectionConfig>
-  /** Default values for the form fields (partial of the schema type) */
+  /** Default values for the form fields */
   defaultValues?: Partial<z.infer<TSchema>>
   /** Callback when the form is submitted with valid data */
   onSubmit: (
@@ -276,23 +291,153 @@ export interface F0FormProps<TSchema extends F0FormSchema> {
   /**
    * Ref to control the form programmatically from outside.
    * Use with the `useF0Form` hook to get a ref and submit/reset functions.
-   *
-   * @example
-   * ```tsx
-   * const { formRef, submit } = useF0Form()
-   *
-   * <F0Form formRef={formRef} ... />
-   * <Button onClick={submit}>Submit</Button>
-   * ```
    */
   formRef?: React.MutableRefObject<F0FormRef | null>
+  /**
+   * Pre-existing file metadata shared across all file fields.
+   * Each file field automatically resolves its entries by matching
+   * `defaultValues` against `InitialFile.value`.
+   */
+  initialFiles?: InitialFile[]
 }
+
+/**
+ * Per-section submit configuration, extending the base submit config
+ * with an optional per-section label override.
+ */
+export interface F0PerSectionSubmitConfig {
+  /** Custom label for the submit button (per section) */
+  label?: string
+  /**
+   * Custom icon for the submit button
+   * - undefined: uses default Save icon
+   * - null: no icon shown
+   * - IconType: custom icon
+   */
+  icon?: IconType | null
+  /**
+   * When true, the submit button is only visible once the section has unsaved changes.
+   * @default false
+   */
+  showSubmitWhenDirty?: boolean
+  /**
+   * When true, hides the submit button.
+   * Useful when submission is controlled externally (e.g. inside F0WizardForm).
+   * @default false
+   */
+  hideSubmitButton?: boolean
+}
+
+/**
+ * Section configuration for per-section schema mode.
+ * Extends F0SectionConfig with per-section submit and default values.
+ */
+export interface F0PerSectionSectionConfig extends F0SectionConfig {
+  /** Override submit config for this specific section */
+  submitConfig?: F0PerSectionSubmitConfig
+}
+
+/**
+ * Props for the F0Form component (per-section schema mode).
+ * Each section key in the schema maps to an independent form with its own
+ * validation and submit button.
+ */
+export interface F0FormPropsWithPerSectionSchema<T extends F0PerSectionSchema> {
+  /** Unique name for the form, used for generating anchor links */
+  name: string
+  /** Record mapping section IDs to their Zod schemas. Each section is independently validated and submitted. */
+  schema: T
+  /** Section configurations keyed by section ID */
+  sections?: Record<string, F0PerSectionSectionConfig>
+  /** Default values for each section, keyed by section ID */
+  defaultValues?: {
+    [K in keyof T]?: Partial<z.infer<T[K]>>
+  }
+  /** Callback when a section is submitted. Receives the section ID and its validated data, both correctly typed. */
+  onSubmit: PerSectionSubmitHandler<T>
+  /** Global submit config applied to all sections (can be overridden per section) */
+  submitConfig?: F0PerSectionSubmitConfig
+  /** Additional class name for the form container */
+  className?: string
+  /**
+   * When to trigger and display validation errors
+   * @default "on-blur"
+   */
+  errorTriggerMode?: F0FormErrorTriggerMode
+  /**
+   * Styling configuration for form layout and appearance.
+   */
+  styling?: F0FormStylingConfig
+  /**
+   * Ref to control the form programmatically from outside.
+   */
+  formRef?: React.MutableRefObject<F0FormRef | null>
+  /**
+   * Pre-existing file metadata shared across all file fields.
+   * Each file field automatically resolves its entries by matching
+   * `defaultValues` against `InitialFile.value`.
+   */
+  initialFiles?: InitialFile[]
+}
+
+/**
+ * Props for F0Form using a formDefinition (single schema mode).
+ * Form-related props are extracted from the definition; only rendering/integration
+ * props are passed directly.
+ */
+export interface F0FormPropsWithSingleSchemaDefinition<
+  TSchema extends F0FormSchema,
+> {
+  formDefinition: import("@/components/F0WizardForm/types").F0FormDefinitionSingleSchema<TSchema>
+  className?: string
+  styling?: F0FormStylingConfig
+  formRef?: React.MutableRefObject<F0FormRef | null>
+  initialFiles?: InitialFile[]
+}
+
+/**
+ * Props for F0Form using a formDefinition (per-section schema mode).
+ * Form-related props are extracted from the definition; only rendering/integration
+ * props are passed directly.
+ */
+export interface F0FormPropsWithPerSectionDefinition<
+  T extends F0PerSectionSchema,
+> {
+  formDefinition: import("@/components/F0WizardForm/types").F0FormDefinitionPerSection<T>
+  className?: string
+  styling?: F0FormStylingConfig
+  formRef?: React.MutableRefObject<F0FormRef | null>
+  initialFiles?: InitialFile[]
+}
+
+/**
+ * Union of all F0Form prop variants.
+ * The component detects the mode based on whether `schema` is a single Zod schema
+ * or a record of schemas keyed by section ID, or whether a `formDefinition` is provided.
+ */
+export type F0FormProps<
+  TSchema extends F0FormSchema | F0PerSectionSchema =
+    | F0FormSchema
+    | F0PerSectionSchema,
+> = TSchema extends F0FormSchema
+  ?
+      | F0FormPropsWithSingleSchema<TSchema>
+      | F0FormPropsWithSingleSchemaDefinition<TSchema>
+  : TSchema extends F0PerSectionSchema
+    ?
+        | F0FormPropsWithPerSectionSchema<TSchema>
+        | F0FormPropsWithPerSectionDefinition<TSchema>
+    : never
 
 /**
  * Result of form submission
  */
 export type F0FormSubmitResult =
-  | { success: true }
+  | {
+      success: true
+      /** Optional message shown in the action bar after successful submission */
+      message?: string
+    }
   | {
       success: false
       /** Root error message displayed at the top of the form */

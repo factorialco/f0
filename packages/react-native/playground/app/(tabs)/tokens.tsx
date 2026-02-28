@@ -169,161 +169,161 @@ export default function Index() {
     "--color-purple-70",
   ]);
 
-  // Obtener colores F1 semánticos
+  // Obtener colores F0 semánticos
   const [
-    f1Background,
-    f1Foreground,
-    f1ForegroundSecondary,
-    f1ForegroundTertiary,
-    f1ForegroundDisabled,
-    f1ForegroundInverse,
-    f1ForegroundInverseSecondary,
-    f1ForegroundAccent,
-    f1ForegroundCritical,
-    f1ForegroundInfo,
-    f1ForegroundWarning,
-    f1ForegroundPositive,
-    f1ForegroundSelected,
-    f1BackgroundHover,
-    f1BackgroundSecondary,
-    f1BackgroundSecondaryHover,
-    f1BackgroundTertiary,
-    f1BackgroundInverse,
-    f1BackgroundInverseSecondary,
-    f1BackgroundBold,
-    f1BackgroundAccent,
-    f1BackgroundAccentBold,
-    f1BackgroundAccentBoldHover,
-    f1BackgroundPromote,
-    f1BackgroundPromoteHover,
-    f1BackgroundCritical,
-    f1BackgroundCriticalBold,
-    f1BackgroundInfo,
-    f1BackgroundInfoBold,
-    f1BackgroundWarning,
-    f1BackgroundWarningBold,
-    f1BackgroundPositive,
-    f1BackgroundPositiveBold,
-    f1BackgroundSelected,
-    f1BackgroundSelectedSecondary,
-    f1BackgroundSelectedHover,
-    f1BackgroundSelectedBold,
-    f1BackgroundSelectedBoldHover,
-    f1BackgroundOverlay,
-    f1Border,
-    f1BorderHover,
-    f1BorderSecondary,
-    f1BorderInverse,
-    f1BorderBold,
-    f1BorderPromote,
-    f1BorderSelected,
-    f1BorderSelectedBold,
-    f1BorderCritical,
-    f1BorderCriticalBold,
-    f1BorderWarning,
-    f1BorderWarningBold,
-    f1BorderInfo,
-    f1BorderInfoBold,
-    f1BorderPositive,
-    f1BorderPositiveBold,
-    f1Icon,
-    f1IconSecondary,
-    f1IconInverse,
-    f1IconBold,
-    f1IconCritical,
-    f1IconCriticalBold,
-    f1IconAccent,
-    f1IconInfo,
-    f1IconWarning,
-    f1IconPositive,
-    f1IconPromote,
-    f1IconSelected,
-    f1IconSelectedHover,
-    f1IconMoodSuperNegative,
-    f1IconMoodNegative,
-    f1IconMoodNeutral,
-    f1IconMoodPositive,
-    f1IconMoodSuperPositive,
-    f1SpecialRing,
-    f1SpecialPage,
-    f1SpecialHighlight,
+    f0Background,
+    f0Foreground,
+    f0ForegroundSecondary,
+    f0ForegroundTertiary,
+    f0ForegroundDisabled,
+    f0ForegroundInverse,
+    f0ForegroundInverseSecondary,
+    f0ForegroundAccent,
+    f0ForegroundCritical,
+    f0ForegroundInfo,
+    f0ForegroundWarning,
+    f0ForegroundPositive,
+    f0ForegroundSelected,
+    f0BackgroundHover,
+    f0BackgroundSecondary,
+    f0BackgroundSecondaryHover,
+    f0BackgroundTertiary,
+    f0BackgroundInverse,
+    f0BackgroundInverseSecondary,
+    f0BackgroundBold,
+    f0BackgroundAccent,
+    f0BackgroundAccentBold,
+    f0BackgroundAccentBoldHover,
+    f0BackgroundPromote,
+    f0BackgroundPromoteHover,
+    f0BackgroundCritical,
+    f0BackgroundCriticalBold,
+    f0BackgroundInfo,
+    f0BackgroundInfoBold,
+    f0BackgroundWarning,
+    f0BackgroundWarningBold,
+    f0BackgroundPositive,
+    f0BackgroundPositiveBold,
+    f0BackgroundSelected,
+    f0BackgroundSelectedSecondary,
+    f0BackgroundSelectedHover,
+    f0BackgroundSelectedBold,
+    f0BackgroundSelectedBoldHover,
+    f0BackgroundOverlay,
+    f0Border,
+    f0BorderHover,
+    f0BorderSecondary,
+    f0BorderInverse,
+    f0BorderBold,
+    f0BorderPromote,
+    f0BorderSelected,
+    f0BorderSelectedBold,
+    f0BorderCritical,
+    f0BorderCriticalBold,
+    f0BorderWarning,
+    f0BorderWarningBold,
+    f0BorderInfo,
+    f0BorderInfoBold,
+    f0BorderPositive,
+    f0BorderPositiveBold,
+    f0Icon,
+    f0IconSecondary,
+    f0IconInverse,
+    f0IconBold,
+    f0IconCritical,
+    f0IconCriticalBold,
+    f0IconAccent,
+    f0IconInfo,
+    f0IconWarning,
+    f0IconPositive,
+    f0IconPromote,
+    f0IconSelected,
+    f0IconSelectedHover,
+    f0IconMoodSuperNegative,
+    f0IconMoodNegative,
+    f0IconMoodNeutral,
+    f0IconMoodPositive,
+    f0IconMoodSuperPositive,
+    f0SpecialRing,
+    f0SpecialPage,
+    f0SpecialHighlight,
   ] = useCSSVariable([
-    "--color-f1-background",
-    "--color-f1-foreground",
-    "--color-f1-foreground-secondary",
-    "--color-f1-foreground-tertiary",
-    "--color-f1-foreground-disabled",
-    "--color-f1-foreground-inverse",
-    "--color-f1-foreground-inverse-secondary",
-    "--color-f1-foreground-accent",
-    "--color-f1-foreground-critical",
-    "--color-f1-foreground-info",
-    "--color-f1-foreground-warning",
-    "--color-f1-foreground-positive",
-    "--color-f1-foreground-selected",
-    "--color-f1-background-hover",
-    "--color-f1-background-secondary",
-    "--color-f1-background-secondary-hover",
-    "--color-f1-background-tertiary",
-    "--color-f1-background-inverse",
-    "--color-f1-background-inverse-secondary",
-    "--color-f1-background-bold",
-    "--color-f1-background-accent",
-    "--color-f1-background-accent-bold",
-    "--color-f1-background-accent-bold-hover",
-    "--color-f1-background-promote",
-    "--color-f1-background-promote-hover",
-    "--color-f1-background-critical",
-    "--color-f1-background-critical-bold",
-    "--color-f1-background-info",
-    "--color-f1-background-info-bold",
-    "--color-f1-background-warning",
-    "--color-f1-background-warning-bold",
-    "--color-f1-background-positive",
-    "--color-f1-background-positive-bold",
-    "--color-f1-background-selected",
-    "--color-f1-background-selected-secondary",
-    "--color-f1-background-selected-hover",
-    "--color-f1-background-selected-bold",
-    "--color-f1-background-selected-bold-hover",
-    "--color-f1-background-overlay",
-    "--color-f1-border",
-    "--color-f1-border-hover",
-    "--color-f1-border-secondary",
-    "--color-f1-border-inverse",
-    "--color-f1-border-bold",
-    "--color-f1-border-promote",
-    "--color-f1-border-selected",
-    "--color-f1-border-selected-bold",
-    "--color-f1-border-critical",
-    "--color-f1-border-critical-bold",
-    "--color-f1-border-warning",
-    "--color-f1-border-warning-bold",
-    "--color-f1-border-info",
-    "--color-f1-border-info-bold",
-    "--color-f1-border-positive",
-    "--color-f1-border-positive-bold",
-    "--color-f1-icon",
-    "--color-f1-icon-secondary",
-    "--color-f1-icon-inverse",
-    "--color-f1-icon-bold",
-    "--color-f1-icon-critical",
-    "--color-f1-icon-critical-bold",
-    "--color-f1-icon-accent",
-    "--color-f1-icon-info",
-    "--color-f1-icon-warning",
-    "--color-f1-icon-positive",
-    "--color-f1-icon-promote",
-    "--color-f1-icon-selected",
-    "--color-f1-icon-selected-hover",
-    "--color-f1-icon-mood-super-negative",
-    "--color-f1-icon-mood-negative",
-    "--color-f1-icon-mood-neutral",
-    "--color-f1-icon-mood-positive",
-    "--color-f1-icon-mood-super-positive",
-    "--color-f1-special-ring",
-    "--color-f1-special-page",
-    "--color-f1-special-highlight",
+    "--color-f0-background",
+    "--color-f0-foreground",
+    "--color-f0-foreground-secondary",
+    "--color-f0-foreground-tertiary",
+    "--color-f0-foreground-disabled",
+    "--color-f0-foreground-inverse",
+    "--color-f0-foreground-inverse-secondary",
+    "--color-f0-foreground-accent",
+    "--color-f0-foreground-critical",
+    "--color-f0-foreground-info",
+    "--color-f0-foreground-warning",
+    "--color-f0-foreground-positive",
+    "--color-f0-foreground-selected",
+    "--color-f0-background-hover",
+    "--color-f0-background-secondary",
+    "--color-f0-background-secondary-hover",
+    "--color-f0-background-tertiary",
+    "--color-f0-background-inverse",
+    "--color-f0-background-inverse-secondary",
+    "--color-f0-background-bold",
+    "--color-f0-background-accent",
+    "--color-f0-background-accent-bold",
+    "--color-f0-background-accent-bold-hover",
+    "--color-f0-background-promote",
+    "--color-f0-background-promote-hover",
+    "--color-f0-background-critical",
+    "--color-f0-background-critical-bold",
+    "--color-f0-background-info",
+    "--color-f0-background-info-bold",
+    "--color-f0-background-warning",
+    "--color-f0-background-warning-bold",
+    "--color-f0-background-positive",
+    "--color-f0-background-positive-bold",
+    "--color-f0-background-selected",
+    "--color-f0-background-selected-secondary",
+    "--color-f0-background-selected-hover",
+    "--color-f0-background-selected-bold",
+    "--color-f0-background-selected-bold-hover",
+    "--color-f0-background-overlay",
+    "--color-f0-border",
+    "--color-f0-border-hover",
+    "--color-f0-border-secondary",
+    "--color-f0-border-inverse",
+    "--color-f0-border-bold",
+    "--color-f0-border-promote",
+    "--color-f0-border-selected",
+    "--color-f0-border-selected-bold",
+    "--color-f0-border-critical",
+    "--color-f0-border-critical-bold",
+    "--color-f0-border-warning",
+    "--color-f0-border-warning-bold",
+    "--color-f0-border-info",
+    "--color-f0-border-info-bold",
+    "--color-f0-border-positive",
+    "--color-f0-border-positive-bold",
+    "--color-f0-icon",
+    "--color-f0-icon-secondary",
+    "--color-f0-icon-inverse",
+    "--color-f0-icon-bold",
+    "--color-f0-icon-critical",
+    "--color-f0-icon-critical-bold",
+    "--color-f0-icon-accent",
+    "--color-f0-icon-info",
+    "--color-f0-icon-warning",
+    "--color-f0-icon-positive",
+    "--color-f0-icon-promote",
+    "--color-f0-icon-selected",
+    "--color-f0-icon-selected-hover",
+    "--color-f0-icon-mood-super-negative",
+    "--color-f0-icon-mood-negative",
+    "--color-f0-icon-mood-neutral",
+    "--color-f0-icon-mood-positive",
+    "--color-f0-icon-mood-super-positive",
+    "--color-f0-special-ring",
+    "--color-f0-special-page",
+    "--color-f0-special-highlight",
   ]);
 
   // Semantic colors now map directly to base colors:
@@ -379,18 +379,18 @@ export default function Index() {
           width: size,
           height: size,
           backgroundColor: asString(color),
-          borderColor: asString(f1Border),
+          borderColor: asString(f0Border),
         }}
       />
       <Text
         className="text-center text-xs"
-        style={{ color: asString(f1ForegroundTertiary) }}
+        style={{ color: asString(f0ForegroundTertiary) }}
       >
         {name}
       </Text>
       <Text
         className="text-center font-mono text-xs"
-        style={{ color: asString(f1ForegroundTertiary) }}
+        style={{ color: asString(f0ForegroundTertiary) }}
       >
         {asString(color).substring(0, 20)}
       </Text>
@@ -407,7 +407,7 @@ export default function Index() {
     <View className="mb-8">
       <Text
         className="mb-4 text-2xl font-bold"
-        style={{ color: asString(f1Foreground) }}
+        style={{ color: asString(f0Foreground) }}
       >
         {title}
       </Text>
@@ -433,19 +433,19 @@ export default function Index() {
         style={{
           width: 100,
           height: parseFloat(asString(value).replace("px", "")) || 0,
-          backgroundColor: asString(f1Border),
-          borderColor: asString(f1Border),
+          backgroundColor: asString(f0Border),
+          borderColor: asString(f0Border),
         }}
       />
       <Text
         className="mt-2 text-center text-xs"
-        style={{ color: asString(f1ForegroundSecondary) }}
+        style={{ color: asString(f0ForegroundSecondary) }}
       >
         {name}
       </Text>
       <Text
         className="text-center font-mono text-xs"
-        style={{ color: asString(f1ForegroundSecondary) }}
+        style={{ color: asString(f0ForegroundSecondary) }}
       >
         {asString(value)}
       </Text>
@@ -469,20 +469,20 @@ export default function Index() {
           style={{
             width: 60,
             height: 60,
-            backgroundColor: asString(f1Background),
+            backgroundColor: asString(f0Background),
             borderWidth: 2,
-            borderColor: asString(f1Border),
+            borderColor: asString(f0Border),
           }}
         />
         <Text
           className="mt-2 text-center text-xs"
-          style={{ color: asString(f1ForegroundSecondary) }}
+          style={{ color: asString(f0ForegroundSecondary) }}
         >
           {name}
         </Text>
         <Text
           className="text-center font-mono text-xs"
-          style={{ color: asString(f1ForegroundSecondary) }}
+          style={{ color: asString(f0ForegroundSecondary) }}
         >
           {typeof value === "number" ? `${value}px` : asString(value)}
         </Text>
@@ -502,14 +502,14 @@ export default function Index() {
       <View
         className={`border ${className}`}
         style={{
-          backgroundColor: asString(f1BackgroundSecondary),
-          borderColor: asString(f1Border),
+          backgroundColor: asString(f0BackgroundSecondary),
+          borderColor: asString(f0Border),
           borderWidth: 1,
         }}
       >
         <View
           style={{
-            backgroundColor: asString(f1Background),
+            backgroundColor: asString(f0Background),
             minHeight: 40,
             justifyContent: "center",
             alignItems: "center",
@@ -517,7 +517,7 @@ export default function Index() {
         >
           <Text
             className="text-xs"
-            style={{ color: asString(f1ForegroundSecondary) }}
+            style={{ color: asString(f0ForegroundSecondary) }}
           >
             Content
           </Text>
@@ -525,7 +525,7 @@ export default function Index() {
       </View>
       <Text
         className="mt-1 text-xs"
-        style={{ color: asString(f1ForegroundSecondary) }}
+        style={{ color: asString(f0ForegroundSecondary) }}
       >
         {name}
       </Text>
@@ -542,7 +542,7 @@ export default function Index() {
   }) => (
     <View className="mb-4 items-center">
       <View
-        className={`${className} bg-f1-background`}
+        className={`${className} bg-f0-background`}
         style={{
           width: 80,
           height: 80,
@@ -552,14 +552,14 @@ export default function Index() {
       >
         <Text
           className="text-xs"
-          style={{ color: asString(f1ForegroundSecondary) }}
+          style={{ color: asString(f0ForegroundSecondary) }}
         >
           Box
         </Text>
       </View>
       <Text
         className="mt-2 text-center text-xs"
-        style={{ color: asString(f1ForegroundSecondary) }}
+        style={{ color: asString(f0ForegroundSecondary) }}
       >
         {name}
       </Text>
@@ -567,29 +567,29 @@ export default function Index() {
   );
 
   return (
-    <SafeAreaView className="bg-f1-background flex-1" edges={["top", "bottom"]}>
+    <SafeAreaView className="bg-f0-background flex-1" edges={["top", "bottom"]}>
       <ScrollView
         className="flex-1"
-        style={{ backgroundColor: asString(f1Background) }}
+        style={{ backgroundColor: asString(f0Background) }}
         contentContainerStyle={{ paddingBottom: 24 }}
       >
         <View className="p-6">
           <View className="mb-8">
             <Text
               className="mb-2 text-4xl font-bold"
-              style={{ color: asString(f1Foreground) }}
+              style={{ color: asString(f0Foreground) }}
             >
               F0-Core Design Tokens
             </Text>
             <Text
               className="mb-2 text-base"
-              style={{ color: asString(f1ForegroundSecondary) }}
+              style={{ color: asString(f0ForegroundSecondary) }}
             >
               Todos los tokens disponibles en el sistema de diseño
             </Text>
             <Text
               className="mb-4 text-sm"
-              style={{ color: asString(f1ForegroundTertiary) }}
+              style={{ color: asString(f0ForegroundTertiary) }}
             >
               Tema actual: {theme}
             </Text>
@@ -600,7 +600,7 @@ export default function Index() {
           <View className="mb-8">
             <Text
               className="mb-4 text-2xl font-bold"
-              style={{ color: asString(f1Foreground) }}
+              style={{ color: asString(f0Foreground) }}
             >
               Spacing Scale (valores)
             </Text>
@@ -637,7 +637,7 @@ export default function Index() {
           <View className="mb-8">
             <Text
               className="mb-4 text-2xl font-bold"
-              style={{ color: asString(f1Foreground) }}
+              style={{ color: asString(f0Foreground) }}
             >
               Padding Examples
             </Text>
@@ -655,7 +655,7 @@ export default function Index() {
           <View className="mb-8">
             <Text
               className="mb-4 text-2xl font-bold"
-              style={{ color: asString(f1Foreground) }}
+              style={{ color: asString(f0Foreground) }}
             >
               Margin Examples
             </Text>
@@ -663,13 +663,13 @@ export default function Index() {
               <View
                 className="m-1 border"
                 style={{
-                  backgroundColor: asString(f1BackgroundSecondary),
-                  borderColor: asString(f1Border),
+                  backgroundColor: asString(f0BackgroundSecondary),
+                  borderColor: asString(f0Border),
                 }}
               >
                 <Text
                   className="p-2 text-xs"
-                  style={{ color: asString(f1ForegroundSecondary) }}
+                  style={{ color: asString(f0ForegroundSecondary) }}
                 >
                   m-1
                 </Text>
@@ -679,13 +679,13 @@ export default function Index() {
               <View
                 className="m-2 border"
                 style={{
-                  backgroundColor: asString(f1BackgroundSecondary),
-                  borderColor: asString(f1Border),
+                  backgroundColor: asString(f0BackgroundSecondary),
+                  borderColor: asString(f0Border),
                 }}
               >
                 <Text
                   className="p-2 text-xs"
-                  style={{ color: asString(f1ForegroundSecondary) }}
+                  style={{ color: asString(f0ForegroundSecondary) }}
                 >
                   m-2
                 </Text>
@@ -695,13 +695,13 @@ export default function Index() {
               <View
                 className="m-4 border"
                 style={{
-                  backgroundColor: asString(f1BackgroundSecondary),
-                  borderColor: asString(f1Border),
+                  backgroundColor: asString(f0BackgroundSecondary),
+                  borderColor: asString(f0Border),
                 }}
               >
                 <Text
                   className="p-2 text-xs"
-                  style={{ color: asString(f1ForegroundSecondary) }}
+                  style={{ color: asString(f0ForegroundSecondary) }}
                 >
                   m-4
                 </Text>
@@ -711,13 +711,13 @@ export default function Index() {
               <View
                 className="mx-4 my-2 border"
                 style={{
-                  backgroundColor: asString(f1BackgroundSecondary),
-                  borderColor: asString(f1Border),
+                  backgroundColor: asString(f0BackgroundSecondary),
+                  borderColor: asString(f0Border),
                 }}
               >
                 <Text
                   className="p-2 text-xs"
-                  style={{ color: asString(f1ForegroundSecondary) }}
+                  style={{ color: asString(f0ForegroundSecondary) }}
                 >
                   mx-4 my-2
                 </Text>
@@ -729,7 +729,7 @@ export default function Index() {
           <View className="mb-8">
             <Text
               className="mb-4 text-2xl font-bold"
-              style={{ color: asString(f1Foreground) }}
+              style={{ color: asString(f0Foreground) }}
             >
               Border Radius
             </Text>
@@ -779,7 +779,7 @@ export default function Index() {
           <View className="mb-8">
             <Text
               className="mb-4 text-2xl font-bold"
-              style={{ color: asString(f1Foreground) }}
+              style={{ color: asString(f0Foreground) }}
             >
               Border Examples
             </Text>
@@ -802,7 +802,7 @@ export default function Index() {
           <View className="mb-8">
             <Text
               className="mb-4 text-2xl font-bold"
-              style={{ color: asString(f1Foreground) }}
+              style={{ color: asString(f0Foreground) }}
             >
               Gap Examples
             </Text>
@@ -810,28 +810,28 @@ export default function Index() {
               <View
                 className="h-12 w-12 border"
                 style={{
-                  backgroundColor: asString(f1BackgroundSecondary),
-                  borderColor: asString(f1Border),
+                  backgroundColor: asString(f0BackgroundSecondary),
+                  borderColor: asString(f0Border),
                 }}
               />
               <View
                 className="h-12 w-12 border"
                 style={{
-                  backgroundColor: asString(f1BackgroundSecondary),
-                  borderColor: asString(f1Border),
+                  backgroundColor: asString(f0BackgroundSecondary),
+                  borderColor: asString(f0Border),
                 }}
               />
               <View
                 className="h-12 w-12 border"
                 style={{
-                  backgroundColor: asString(f1BackgroundSecondary),
-                  borderColor: asString(f1Border),
+                  backgroundColor: asString(f0BackgroundSecondary),
+                  borderColor: asString(f0Border),
                 }}
               />
             </View>
             <Text
               className="mb-4 text-xs"
-              style={{ color: asString(f1ForegroundSecondary) }}
+              style={{ color: asString(f0ForegroundSecondary) }}
             >
               gap-1
             </Text>
@@ -840,28 +840,28 @@ export default function Index() {
               <View
                 className="h-12 w-12 border"
                 style={{
-                  backgroundColor: asString(f1BackgroundSecondary),
-                  borderColor: asString(f1Border),
+                  backgroundColor: asString(f0BackgroundSecondary),
+                  borderColor: asString(f0Border),
                 }}
               />
               <View
                 className="h-12 w-12 border"
                 style={{
-                  backgroundColor: asString(f1BackgroundSecondary),
-                  borderColor: asString(f1Border),
+                  backgroundColor: asString(f0BackgroundSecondary),
+                  borderColor: asString(f0Border),
                 }}
               />
               <View
                 className="h-12 w-12 border"
                 style={{
-                  backgroundColor: asString(f1BackgroundSecondary),
-                  borderColor: asString(f1Border),
+                  backgroundColor: asString(f0BackgroundSecondary),
+                  borderColor: asString(f0Border),
                 }}
               />
             </View>
             <Text
               className="mb-4 text-xs"
-              style={{ color: asString(f1ForegroundSecondary) }}
+              style={{ color: asString(f0ForegroundSecondary) }}
             >
               gap-2
             </Text>
@@ -870,28 +870,28 @@ export default function Index() {
               <View
                 className="h-12 w-12 border"
                 style={{
-                  backgroundColor: asString(f1BackgroundSecondary),
-                  borderColor: asString(f1Border),
+                  backgroundColor: asString(f0BackgroundSecondary),
+                  borderColor: asString(f0Border),
                 }}
               />
               <View
                 className="h-12 w-12 border"
                 style={{
-                  backgroundColor: asString(f1BackgroundSecondary),
-                  borderColor: asString(f1Border),
+                  backgroundColor: asString(f0BackgroundSecondary),
+                  borderColor: asString(f0Border),
                 }}
               />
               <View
                 className="h-12 w-12 border"
                 style={{
-                  backgroundColor: asString(f1BackgroundSecondary),
-                  borderColor: asString(f1Border),
+                  backgroundColor: asString(f0BackgroundSecondary),
+                  borderColor: asString(f0Border),
                 }}
               />
             </View>
             <Text
               className="mb-4 text-xs"
-              style={{ color: asString(f1ForegroundSecondary) }}
+              style={{ color: asString(f0ForegroundSecondary) }}
             >
               gap-4
             </Text>
@@ -900,28 +900,28 @@ export default function Index() {
               <View
                 className="h-12 w-12 border"
                 style={{
-                  backgroundColor: asString(f1BackgroundSecondary),
-                  borderColor: asString(f1Border),
+                  backgroundColor: asString(f0BackgroundSecondary),
+                  borderColor: asString(f0Border),
                 }}
               />
               <View
                 className="h-12 w-12 border"
                 style={{
-                  backgroundColor: asString(f1BackgroundSecondary),
-                  borderColor: asString(f1Border),
+                  backgroundColor: asString(f0BackgroundSecondary),
+                  borderColor: asString(f0Border),
                 }}
               />
               <View
                 className="h-12 w-12 border"
                 style={{
-                  backgroundColor: asString(f1BackgroundSecondary),
-                  borderColor: asString(f1Border),
+                  backgroundColor: asString(f0BackgroundSecondary),
+                  borderColor: asString(f0Border),
                 }}
               />
             </View>
             <Text
               className="mb-4 text-xs"
-              style={{ color: asString(f1ForegroundSecondary) }}
+              style={{ color: asString(f0ForegroundSecondary) }}
             >
               gap-8
             </Text>
@@ -1149,159 +1149,159 @@ export default function Index() {
             ]}
           />
 
-          {/* F1 Foreground Colors */}
+          {/* F0 Foreground Colors */}
           <ColorGroup
-            title="F1 Semantic - Foreground"
+            title="F0 Semantic - Foreground"
             colors={[
-              { name: "f1-foreground", color: f1Foreground },
-              { name: "f1-foreground-secondary", color: f1ForegroundSecondary },
-              { name: "f1-foreground-tertiary", color: f1ForegroundTertiary },
-              { name: "f1-foreground-disabled", color: f1ForegroundDisabled },
-              { name: "f1-foreground-inverse", color: f1ForegroundInverse },
+              { name: "f0-foreground", color: f0Foreground },
+              { name: "f0-foreground-secondary", color: f0ForegroundSecondary },
+              { name: "f0-foreground-tertiary", color: f0ForegroundTertiary },
+              { name: "f0-foreground-disabled", color: f0ForegroundDisabled },
+              { name: "f0-foreground-inverse", color: f0ForegroundInverse },
               {
-                name: "f1-foreground-inverse-secondary",
-                color: f1ForegroundInverseSecondary,
+                name: "f0-foreground-inverse-secondary",
+                color: f0ForegroundInverseSecondary,
               },
-              { name: "f1-foreground-accent", color: f1ForegroundAccent },
-              { name: "f1-foreground-critical", color: f1ForegroundCritical },
-              { name: "f1-foreground-info", color: f1ForegroundInfo },
-              { name: "f1-foreground-warning", color: f1ForegroundWarning },
-              { name: "f1-foreground-positive", color: f1ForegroundPositive },
-              { name: "f1-foreground-selected", color: f1ForegroundSelected },
+              { name: "f0-foreground-accent", color: f0ForegroundAccent },
+              { name: "f0-foreground-critical", color: f0ForegroundCritical },
+              { name: "f0-foreground-info", color: f0ForegroundInfo },
+              { name: "f0-foreground-warning", color: f0ForegroundWarning },
+              { name: "f0-foreground-positive", color: f0ForegroundPositive },
+              { name: "f0-foreground-selected", color: f0ForegroundSelected },
             ]}
           />
 
-          {/* F1 Background Colors */}
+          {/* F0 Background Colors */}
           <ColorGroup
-            title="F1 Semantic - Background"
+            title="F0 Semantic - Background"
             colors={[
-              { name: "f1-background", color: f1Background },
-              { name: "f1-background-hover", color: f1BackgroundHover },
-              { name: "f1-background-secondary", color: f1BackgroundSecondary },
+              { name: "f0-background", color: f0Background },
+              { name: "f0-background-hover", color: f0BackgroundHover },
+              { name: "f0-background-secondary", color: f0BackgroundSecondary },
               {
-                name: "f1-background-secondary-hover",
-                color: f1BackgroundSecondaryHover,
+                name: "f0-background-secondary-hover",
+                color: f0BackgroundSecondaryHover,
               },
-              { name: "f1-background-tertiary", color: f1BackgroundTertiary },
-              { name: "f1-background-inverse", color: f1BackgroundInverse },
+              { name: "f0-background-tertiary", color: f0BackgroundTertiary },
+              { name: "f0-background-inverse", color: f0BackgroundInverse },
               {
-                name: "f1-background-inverse-secondary",
-                color: f1BackgroundInverseSecondary,
+                name: "f0-background-inverse-secondary",
+                color: f0BackgroundInverseSecondary,
               },
-              { name: "f1-background-bold", color: f1BackgroundBold },
-              { name: "f1-background-accent", color: f1BackgroundAccent },
+              { name: "f0-background-bold", color: f0BackgroundBold },
+              { name: "f0-background-accent", color: f0BackgroundAccent },
               {
-                name: "f1-background-accent-bold",
-                color: f1BackgroundAccentBold,
-              },
-              {
-                name: "f1-background-accent-bold-hover",
-                color: f1BackgroundAccentBoldHover,
-              },
-              { name: "f1-background-promote", color: f1BackgroundPromote },
-              {
-                name: "f1-background-promote-hover",
-                color: f1BackgroundPromoteHover,
-              },
-              { name: "f1-background-critical", color: f1BackgroundCritical },
-              {
-                name: "f1-background-critical-bold",
-                color: f1BackgroundCriticalBold,
-              },
-              { name: "f1-background-info", color: f1BackgroundInfo },
-              { name: "f1-background-info-bold", color: f1BackgroundInfoBold },
-              { name: "f1-background-warning", color: f1BackgroundWarning },
-              {
-                name: "f1-background-warning-bold",
-                color: f1BackgroundWarningBold,
-              },
-              { name: "f1-background-positive", color: f1BackgroundPositive },
-              {
-                name: "f1-background-positive-bold",
-                color: f1BackgroundPositiveBold,
-              },
-              { name: "f1-background-selected", color: f1BackgroundSelected },
-              {
-                name: "f1-background-selected-secondary",
-                color: f1BackgroundSelectedSecondary,
+                name: "f0-background-accent-bold",
+                color: f0BackgroundAccentBold,
               },
               {
-                name: "f1-background-selected-hover",
-                color: f1BackgroundSelectedHover,
+                name: "f0-background-accent-bold-hover",
+                color: f0BackgroundAccentBoldHover,
+              },
+              { name: "f0-background-promote", color: f0BackgroundPromote },
+              {
+                name: "f0-background-promote-hover",
+                color: f0BackgroundPromoteHover,
+              },
+              { name: "f0-background-critical", color: f0BackgroundCritical },
+              {
+                name: "f0-background-critical-bold",
+                color: f0BackgroundCriticalBold,
+              },
+              { name: "f0-background-info", color: f0BackgroundInfo },
+              { name: "f0-background-info-bold", color: f0BackgroundInfoBold },
+              { name: "f0-background-warning", color: f0BackgroundWarning },
+              {
+                name: "f0-background-warning-bold",
+                color: f0BackgroundWarningBold,
+              },
+              { name: "f0-background-positive", color: f0BackgroundPositive },
+              {
+                name: "f0-background-positive-bold",
+                color: f0BackgroundPositiveBold,
+              },
+              { name: "f0-background-selected", color: f0BackgroundSelected },
+              {
+                name: "f0-background-selected-secondary",
+                color: f0BackgroundSelectedSecondary,
               },
               {
-                name: "f1-background-selected-bold",
-                color: f1BackgroundSelectedBold,
+                name: "f0-background-selected-hover",
+                color: f0BackgroundSelectedHover,
               },
               {
-                name: "f1-background-selected-bold-hover",
-                color: f1BackgroundSelectedBoldHover,
+                name: "f0-background-selected-bold",
+                color: f0BackgroundSelectedBold,
               },
-              { name: "f1-background-overlay", color: f1BackgroundOverlay },
+              {
+                name: "f0-background-selected-bold-hover",
+                color: f0BackgroundSelectedBoldHover,
+              },
+              { name: "f0-background-overlay", color: f0BackgroundOverlay },
             ]}
           />
 
-          {/* F1 Border Colors */}
+          {/* F0 Border Colors */}
           <ColorGroup
-            title="F1 Semantic - Border"
+            title="F0 Semantic - Border"
             colors={[
-              { name: "f1-border", color: f1Border },
-              { name: "f1-border-hover", color: f1BorderHover },
-              { name: "f1-border-secondary", color: f1BorderSecondary },
-              { name: "f1-border-inverse", color: f1BorderInverse },
-              { name: "f1-border-bold", color: f1BorderBold },
-              { name: "f1-border-promote", color: f1BorderPromote },
-              { name: "f1-border-selected", color: f1BorderSelected },
-              { name: "f1-border-selected-bold", color: f1BorderSelectedBold },
-              { name: "f1-border-critical", color: f1BorderCritical },
-              { name: "f1-border-critical-bold", color: f1BorderCriticalBold },
-              { name: "f1-border-warning", color: f1BorderWarning },
-              { name: "f1-border-warning-bold", color: f1BorderWarningBold },
-              { name: "f1-border-info", color: f1BorderInfo },
-              { name: "f1-border-info-bold", color: f1BorderInfoBold },
-              { name: "f1-border-positive", color: f1BorderPositive },
-              { name: "f1-border-positive-bold", color: f1BorderPositiveBold },
+              { name: "f0-border", color: f0Border },
+              { name: "f0-border-hover", color: f0BorderHover },
+              { name: "f0-border-secondary", color: f0BorderSecondary },
+              { name: "f0-border-inverse", color: f0BorderInverse },
+              { name: "f0-border-bold", color: f0BorderBold },
+              { name: "f0-border-promote", color: f0BorderPromote },
+              { name: "f0-border-selected", color: f0BorderSelected },
+              { name: "f0-border-selected-bold", color: f0BorderSelectedBold },
+              { name: "f0-border-critical", color: f0BorderCritical },
+              { name: "f0-border-critical-bold", color: f0BorderCriticalBold },
+              { name: "f0-border-warning", color: f0BorderWarning },
+              { name: "f0-border-warning-bold", color: f0BorderWarningBold },
+              { name: "f0-border-info", color: f0BorderInfo },
+              { name: "f0-border-info-bold", color: f0BorderInfoBold },
+              { name: "f0-border-positive", color: f0BorderPositive },
+              { name: "f0-border-positive-bold", color: f0BorderPositiveBold },
             ]}
           />
 
-          {/* F1 Icon Colors */}
+          {/* F0 Icon Colors */}
           <ColorGroup
-            title="F1 Semantic - Icon"
+            title="F0 Semantic - Icon"
             colors={[
-              { name: "f1-icon", color: f1Icon },
-              { name: "f1-icon-secondary", color: f1IconSecondary },
-              { name: "f1-icon-inverse", color: f1IconInverse },
-              { name: "f1-icon-bold", color: f1IconBold },
-              { name: "f1-icon-critical", color: f1IconCritical },
-              { name: "f1-icon-critical-bold", color: f1IconCriticalBold },
-              { name: "f1-icon-accent", color: f1IconAccent },
-              { name: "f1-icon-info", color: f1IconInfo },
-              { name: "f1-icon-warning", color: f1IconWarning },
-              { name: "f1-icon-positive", color: f1IconPositive },
-              { name: "f1-icon-promote", color: f1IconPromote },
-              { name: "f1-icon-selected", color: f1IconSelected },
-              { name: "f1-icon-selected-hover", color: f1IconSelectedHover },
+              { name: "f0-icon", color: f0Icon },
+              { name: "f0-icon-secondary", color: f0IconSecondary },
+              { name: "f0-icon-inverse", color: f0IconInverse },
+              { name: "f0-icon-bold", color: f0IconBold },
+              { name: "f0-icon-critical", color: f0IconCritical },
+              { name: "f0-icon-critical-bold", color: f0IconCriticalBold },
+              { name: "f0-icon-accent", color: f0IconAccent },
+              { name: "f0-icon-info", color: f0IconInfo },
+              { name: "f0-icon-warning", color: f0IconWarning },
+              { name: "f0-icon-positive", color: f0IconPositive },
+              { name: "f0-icon-promote", color: f0IconPromote },
+              { name: "f0-icon-selected", color: f0IconSelected },
+              { name: "f0-icon-selected-hover", color: f0IconSelectedHover },
               {
-                name: "f1-icon-mood-super-negative",
-                color: f1IconMoodSuperNegative,
+                name: "f0-icon-mood-super-negative",
+                color: f0IconMoodSuperNegative,
               },
-              { name: "f1-icon-mood-negative", color: f1IconMoodNegative },
-              { name: "f1-icon-mood-neutral", color: f1IconMoodNeutral },
-              { name: "f1-icon-mood-positive", color: f1IconMoodPositive },
+              { name: "f0-icon-mood-negative", color: f0IconMoodNegative },
+              { name: "f0-icon-mood-neutral", color: f0IconMoodNeutral },
+              { name: "f0-icon-mood-positive", color: f0IconMoodPositive },
               {
-                name: "f1-icon-mood-super-positive",
-                color: f1IconMoodSuperPositive,
+                name: "f0-icon-mood-super-positive",
+                color: f0IconMoodSuperPositive,
               },
             ]}
           />
 
-          {/* F1 Special Colors */}
+          {/* F0 Special Colors */}
           <ColorGroup
-            title="F1 Semantic - Special"
+            title="F0 Semantic - Special"
             colors={[
-              { name: "f1-special-ring", color: f1SpecialRing },
-              { name: "f1-special-page", color: f1SpecialPage },
-              { name: "f1-special-highlight", color: f1SpecialHighlight },
+              { name: "f0-special-ring", color: f0SpecialRing },
+              { name: "f0-special-page", color: f0SpecialPage },
+              { name: "f0-special-highlight", color: f0SpecialHighlight },
             ]}
           />
         </View>

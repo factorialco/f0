@@ -1,5 +1,8 @@
 import { ComponentProps, FC, forwardRef } from "react"
 
+import { withDataTestId } from "@/lib/data-testid"
+import { F0AvatarList } from "@/components/avatars/F0AvatarList"
+import { F0AvatarListProps } from "@/components/avatars/F0AvatarList/types"
 import { Weekdays } from "@/experimental/Widgets/Content/Weekdays"
 import { experimentalComponent } from "@/lib/experimental"
 import { cn } from "@/lib/utils"
@@ -25,6 +28,10 @@ type Content =
   | (ComponentProps<typeof DataList.DotTagItem> & {
       type: "dot-tag"
     })
+  | {
+      type: "avatar-list"
+      avatarList: F0AvatarListProps
+    }
 
 export interface DetailsItemType {
   title: string
@@ -45,6 +52,11 @@ const ItemContent: FC<{ content: Content }> = ({ content }) => (
     {content.type === "team" && <DataList.TeamItem {...content} />}
     {content.type === "company" && <DataList.CompanyItem {...content} />}
     {content.type === "dot-tag" && <DataList.DotTagItem {...content} />}
+    {content.type === "avatar-list" && (
+      <li className="w-fit list-none px-1.5 py-1">
+        <F0AvatarList {...content.avatarList} />
+      </li>
+    )}
   </>
 )
 
@@ -77,4 +89,6 @@ const _DetailsItem = forwardRef<HTMLDivElement, DetailsItemType>(
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export const DetailsItem = experimentalComponent("DetailsItem", _DetailsItem)
+export const DetailsItem = withDataTestId(
+  experimentalComponent("DetailsItem", _DetailsItem)
+)

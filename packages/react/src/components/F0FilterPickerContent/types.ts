@@ -19,3 +19,12 @@ export interface F0FilterPickerContentProps<
   /** Width of the content panel */
   width?: number
 }
+
+/**
+ * Public props for F0FilterPickerContent (includes dataTestId).
+ * Use this when typing props that include the optional dataTestId attribute.
+ * @template Filters - The type defining the structure of available filters
+ */
+export type F0FilterPickerContentPublicProps<
+  Filters extends FiltersDefinition,
+> = F0FilterPickerContentProps<Filters> & { dataTestId?: string }

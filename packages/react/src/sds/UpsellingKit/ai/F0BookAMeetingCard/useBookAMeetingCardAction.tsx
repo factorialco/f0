@@ -20,7 +20,7 @@ export const useBookAMeetingCardAction = () => {
         required: false,
       },
     ],
-    available: "disabled",
+    available: "frontend",
     render: (props) => {
       const args = props.args as BookAMeetingCardArgs
 

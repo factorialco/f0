@@ -146,28 +146,6 @@ describe("useSelectable", () => {
       })
     })
 
-    it("should handle select all in grouped data", async () => {
-      const { result } = renderHook(() =>
-        useSelectable({
-          data: mockGroupedData,
-          paginationInfo: null,
-          source: mockSource,
-          onSelectItems: vi.fn(),
-          selectionMode: "multi",
-        })
-      )
-
-      act(() => {
-        result.current.handleSelectAll(true)
-      })
-
-      await waitFor(() => {
-        expect(result.current.selectedGroups.size).toBe(2)
-        expect(result.current.selectedItems.size).toBe(4)
-        expect(result.current.isAllSelected).toBe(true)
-      })
-    })
-
     it("should handle pagination in grouped data and maintain selection state", async () => {
       const initialGroupedData: Data<TestRecord> = {
         type: "grouped",

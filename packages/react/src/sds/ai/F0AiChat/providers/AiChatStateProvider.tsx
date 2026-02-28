@@ -1,10 +1,12 @@
 "use client"
 
+import type { ReactNode } from "react"
+
 import { type Message, randomId } from "@copilotkit/shared"
 import {
   createContext,
-  FC,
-  PropsWithChildren,
+  type FC,
+  type PropsWithChildren,
   useContext,
   useEffect,
   useRef,
@@ -47,11 +49,13 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   resizable = false,
   defaultVisualizationMode = "sidepanel",
   lockVisualizationMode = false,
-  footer,
+  footer: initialFooter,
   onThumbsDown,
   onThumbsUp,
+  tracking,
   ...rest
 }) => {
+  const [footer, setFooter] = useState<ReactNode | undefined>(initialFooter)
   const [enabledInternal, setEnabledInternal] = useState(enabled)
   const [open, setOpen] = useState(defaultVisualizationMode === "fullscreen")
   const [visualizationMode, setVisualizationMode] = useState<VisualizationMode>(
@@ -73,6 +77,12 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   >(initialInitialMessage)
 
   const [chatWidth, setChatWidth] = useState(() => getStoredChatWidth())
+
+  useEffect(() => {
+    if (open) {
+      tracking?.onVisibility?.()
+    }
+  }, [open])
 
   // Persist chat width to localStorage
   useEffect(() => {
@@ -171,6 +181,7 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         setVisualizationMode,
         lockVisualizationMode,
         footer,
+        setFooter,
         shouldPlayEntranceAnimation,
         setShouldPlayEntranceAnimation,
         agent,
@@ -192,6 +203,7 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         chatWidth,
         setChatWidth,
         resetChatWidth,
+        tracking,
       }}
     >
       {children}
@@ -231,9 +243,12 @@ export function useAiChat(): AiChatProviderReturnValue {
       setSendMessageFunction: noopFn,
       disclaimer: undefined,
       resizable: false,
+      footer: undefined,
+      setFooter: noopFn,
       chatWidth: DEFAULT_CHAT_WIDTH,
       setChatWidth: noopFn,
       resetChatWidth: noopFn,
+      tracking: undefined,
     }
   }
 

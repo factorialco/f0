@@ -1,6 +1,6 @@
 import * as SwitchPrimitive from "@radix-ui/react-switch"
 import { motion } from "motion/react"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
@@ -15,10 +15,39 @@ import { useAiChat } from "../F0AiChat/providers/AiChatStateProvider"
 import { F0OneIcon } from "../F0OneIcon"
 import { F0OneSwitchProps } from "./types"
 
-export const F0OneSwitch = ({ className, disabled }: F0OneSwitchProps) => {
+export const F0OneSwitch = ({
+  className,
+  disabled,
+  onVisible,
+  tooltip,
+  autoOpen = false,
+  onToggle,
+}: F0OneSwitchProps) => {
   const { enabled, setOpen, open } = useAiChat()
   const translations = useI18n()
   const [isHover, setIsHover] = useState(false)
+  const [tooltipOpen, setTooltipOpen] = useState(false)
+  const [autoTooltipVisible, setAutoTooltipVisible] = useState(autoOpen)
+
+  const tooltipText =
+    disabled && tooltip?.whenDisabled
+      ? tooltip?.whenDisabled
+      : (tooltip?.whenEnabled ?? translations.ai.welcome)
+  const showTooltip = autoOpen ? autoTooltipVisible : tooltipOpen
+
+  useEffect(() => {
+    if (autoOpen) setAutoTooltipVisible(true)
+  }, [autoOpen])
+
+  useEffect(() => {
+    if (!autoOpen) return
+    const timer = setTimeout(() => setAutoTooltipVisible(false), 3000)
+    return () => clearTimeout(timer)
+  }, [autoOpen])
+
+  useEffect(() => {
+    onVisible?.()
+  }, [onVisible])
 
   if (!enabled) {
     return null
@@ -27,7 +56,12 @@ export const F0OneSwitch = ({ className, disabled }: F0OneSwitchProps) => {
   return (
     <div className="flex items-center">
       <TooltipProvider>
-        <Tooltip delayDuration={850} disableHoverableContent>
+        <Tooltip
+          delayDuration={850}
+          disableHoverableContent
+          open={!open && showTooltip}
+          onOpenChange={autoOpen ? () => {} : setTooltipOpen}
+        >
           <TooltipTrigger asChild>
             <motion.div
               animate={{
@@ -40,15 +74,11 @@ export const F0OneSwitch = ({ className, disabled }: F0OneSwitchProps) => {
                   repeat: Infinity,
                 },
               }}
-              style={
-                {
-                  "--gradient-angle": "180deg",
-                } as React.CSSProperties
-              }
             >
               <SwitchPrimitive.Root
                 onCheckedChange={(val) => {
                   setOpen(val)
+                  onToggle?.()
                 }}
                 checked={open}
                 aria-label={
@@ -88,8 +118,11 @@ export const F0OneSwitch = ({ className, disabled }: F0OneSwitchProps) => {
             </motion.div>
           </TooltipTrigger>
           {!open && (
-            <TooltipContent side="left" className="font-medium">
-              {translations.ai.welcome}
+            <TooltipContent
+              side="left"
+              className={cn("font-medium", autoOpen && "z-[100]")}
+            >
+              {tooltipText}
             </TooltipContent>
           )}
         </Tooltip>

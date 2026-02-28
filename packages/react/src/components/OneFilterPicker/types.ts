@@ -49,7 +49,7 @@ export type FiltersState<Definition extends Record<string, FilterDefinition>> =
     [K in keyof Definition]?: FilterValue<Definition[K]>
   }
 
-export type FiltersMode = "default" | "compact" | "simple"
+export type FiltersMode = "default" | "compact" | "simple" | "inline"
 
 /**
  * Record of filter definitions for a collection.

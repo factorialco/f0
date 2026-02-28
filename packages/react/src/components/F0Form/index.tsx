@@ -5,7 +5,15 @@ import { F0Form as F0FormComponent } from "./F0Form"
 // Export main types
 export type {
   F0FormProps,
+  F0FormPropsWithSingleSchema,
+  F0FormPropsWithPerSectionSchema,
+  F0FormPropsWithSingleSchemaDefinition,
+  F0FormPropsWithPerSectionDefinition,
   F0FormSchema,
+  F0PerSectionSchema,
+  F0PerSectionSectionConfig,
+  F0PerSectionSubmitConfig,
+  InferPerSectionValues,
   F0FormErrorTriggerMode,
   F0FormSubmitConfig,
   F0FormDiscardConfig,
@@ -41,6 +49,7 @@ export type {
   F0ArrayConfig,
   F0CustomFieldConfig,
   F0RichTextFieldConfig,
+  F0FileFieldConfig,
 } from "./f0Schema"
 
 // Export field types and configs
@@ -73,6 +82,7 @@ export type {
   F0DateRangeConfig,
   F0RichTextConfig,
   F0CustomConfig,
+  F0FileConfig,
   // Field types
   F0TextField,
   F0NumberField,
@@ -83,7 +93,15 @@ export type {
   F0DateField,
   F0DateRangeField,
   F0RichTextField,
+  F0FileField,
   F0CustomField,
+  // Upload types
+  MimeType,
+  InitialFile,
+  FileUploadResult,
+  FileUploadStatus,
+  FileUploadHookReturn,
+  UseFileUpload,
   // Other types
   RichTextValue,
   DateRangeValue,
@@ -101,13 +119,29 @@ export { generateAnchorId } from "./context"
 export { useF0Form } from "./useF0Form"
 export type { F0FormRef, UseF0FormReturn } from "./useF0Form"
 
-import type { F0FormProps, F0FormSchema } from "./types"
+import type {
+  F0FormPropsWithSingleSchema,
+  F0FormPropsWithPerSectionSchema,
+  F0FormPropsWithSingleSchemaDefinition,
+  F0FormPropsWithPerSectionDefinition,
+  F0FormSchema,
+  F0PerSectionSchema,
+} from "./types"
 
 /**
  * @experimental This is an experimental component, use it at your own risk
  */
-export const F0Form = experimentalComponent("F0Form", F0FormComponent) as <
-  TSchema extends F0FormSchema,
->(
-  props: F0FormProps<TSchema>
-) => React.ReactElement
+export const F0Form = experimentalComponent("F0Form", F0FormComponent) as {
+  <TSchema extends F0FormSchema>(
+    props: F0FormPropsWithSingleSchema<TSchema>
+  ): React.ReactElement
+  <T extends F0PerSectionSchema>(
+    props: F0FormPropsWithPerSectionSchema<T>
+  ): React.ReactElement
+  <TSchema extends F0FormSchema>(
+    props: F0FormPropsWithSingleSchemaDefinition<TSchema>
+  ): React.ReactElement
+  <T extends F0PerSectionSchema>(
+    props: F0FormPropsWithPerSectionDefinition<T>
+  ): React.ReactElement
+}

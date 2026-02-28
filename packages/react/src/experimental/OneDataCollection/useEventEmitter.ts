@@ -14,6 +14,8 @@ import { EventScalar, useF0EventCatcher } from "../../lib/providers/events"
 type UseEventEmitterParams<Sortings extends SortingsDefinition> = {
   defaultFilters?: FiltersState<FiltersDefinition>
   defaultSorting?: SortingsState<Sortings>
+  /** Current visualization index, included in filter/preset change events when per-visualization filters are active */
+  currentVisualization?: number
 }
 
 const isScalar = (value: unknown): value is EventScalar => {
@@ -28,6 +30,7 @@ const isScalar = (value: unknown): value is EventScalar => {
 export const useEventEmitter = <Sortings extends SortingsDefinition>({
   defaultFilters,
   defaultSorting,
+  currentVisualization,
 }: UseEventEmitterParams<Sortings>) => {
   const latestFilters = useRef<
     UseEventEmitterParams<Sortings>["defaultFilters"] | undefined
@@ -57,9 +60,12 @@ export const useEventEmitter = <Sortings extends SortingsDefinition>({
       onEvent("datacollection.filter-change", {
         name: field,
         value: value,
+        ...(currentVisualization !== undefined && {
+          visualization: currentVisualization,
+        }),
       })
     },
-    [onEvent]
+    [onEvent, currentVisualization]
   )
 
   const emitSortingChange = useCallback(
@@ -101,9 +107,12 @@ export const useEventEmitter = <Sortings extends SortingsDefinition>({
       onEvent("datacollection.preset-click", {
         name: field,
         value: value,
+        ...(currentVisualization !== undefined && {
+          visualization: currentVisualization,
+        }),
       })
     },
-    [onEvent]
+    [onEvent, currentVisualization]
   )
 
   return {

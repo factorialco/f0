@@ -40,6 +40,7 @@ const F0AiChatProviderComponent = ({
   onThumbsDown,
   children,
   agent,
+  tracking,
   ...copilotKitProps
 }: AiChatProviderProps) => {
   return (
@@ -56,6 +57,7 @@ const F0AiChatProviderComponent = ({
       defaultVisualizationMode={defaultVisualizationMode}
       lockVisualizationMode={lockVisualizationMode}
       footer={footer}
+      tracking={tracking}
     >
       <AiChatKitWrapper {...copilotKitProps}>{children}</AiChatKitWrapper>
     </AiChatStateProvider>
@@ -133,11 +135,23 @@ const ChatInput = (props: InputProps) => {
         fullscreenWelcome && "flex-1"
       )}
     >
-      <div className="w-full max-w-[712px]">
+      <motion.div
+        layout="position"
+        className="w-full max-w-[712px]"
+        transition={{
+          layout: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] },
+        }}
+      >
         <ChatTextarea {...props} />
-      </div>
+      </motion.div>
       {disclaimer?.text && (
-        <div className="flex flex-row items-center gap-1 w-full justify-center max-w-[712px]">
+        <motion.div
+          layout="position"
+          className="flex w-full max-w-[712px] flex-row items-center justify-center gap-1"
+          transition={{
+            layout: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] },
+          }}
+        >
           <OneEllipsis className="text-sm font-medium text-f1-foreground-tertiary">
             {disclaimer.text}
           </OneEllipsis>
@@ -152,7 +166,7 @@ const ChatInput = (props: InputProps) => {
               {disclaimer.linkText}
             </Link>
           )}
-        </div>
+        </motion.div>
       )}
       <AnimatePresence>
         {footer && isWelcomeScreen && (
@@ -160,7 +174,8 @@ const ChatInput = (props: InputProps) => {
             key="chat-footer"
             className={cn(
               "w-full py-4 mx-auto max-w-[712px]",
-              fullscreenWelcome && "mt-auto"
+              fullscreenWelcome && "mt-auto",
+              fullscreen && "flex justify-center"
             )}
             initial={{ opacity: 0, height: 0, overflow: "hidden" }}
             animate={{ opacity: 1, height: "auto" }}

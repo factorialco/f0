@@ -52,7 +52,7 @@ export function Th({
     <th
       {...props}
       className={cn(
-        "sticky top-0 border-0 border-b border-solid border-f1-border-secondary bg-f1-background px-3 py-2 text-left font-medium text-f1-foreground-secondary",
+        "sticky top-0 z-10 border-0 border-b border-solid border-f1-border-secondary bg-f1-background px-3 py-2 text-left font-medium text-f1-foreground-secondary",
         props.className
       )}
     >

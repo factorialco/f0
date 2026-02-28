@@ -26,6 +26,9 @@ export type DataCollectionStatus<
   search?: string | undefined
   navigationFilters?: NavigationFiltersState<NavigationFiltersDefinition>
   visualization?: number
+  /** Per-visualization filter states, keyed by visualization index.
+   *  Only present when visualizations declare per-view filter overrides. */
+  visualizationFilters?: Record<string, CurrentFiltersState>
 }
 
 export type DataCollectionStatusComplete<
@@ -44,6 +47,7 @@ export const dataCollectionStorageFeatures = [
   "grouping",
   "visualization",
   "search",
+  "visualizationFilters",
 ] as const
 
 export type DataCollectionStorageFeature =
@@ -95,5 +99,9 @@ export type FeatureProviders<
     setValue: React.Dispatch<
       React.SetStateAction<NavigationFiltersState<NavigationFilters>>
     >
+  }
+  visualizationFilters?: {
+    value: Record<string, FiltersState<Filters>>
+    setValue: (value: Record<string, FiltersState<Filters>>) => void
   }
 }

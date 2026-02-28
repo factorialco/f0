@@ -1,5 +1,6 @@
 import { forwardRef, PropsWithChildren } from "react"
 
+import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
 
 import { useTextFormatEnforcer } from "../../../lib/text"
@@ -32,7 +33,6 @@ _WidgetSection.displayName = "WidgetSection"
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export const WidgetSection = experimentalComponent(
-  "WidgetSection",
-  _WidgetSection
+export const WidgetSection = withDataTestId(
+  experimentalComponent("WidgetSection", _WidgetSection)
 )

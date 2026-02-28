@@ -138,3 +138,49 @@ export const Complete: Story = {
     </Card>
   ),
 }
+
+export const WithHrefLink: Story = {
+  render: () => (
+    <Card>
+      <CardHeader>
+        <CardTitle>Card with Navigation Link</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p>
+          The CardLink below uses an href, rendering as an anchor tag via the
+          Link component.
+        </p>
+      </CardContent>
+      <CardFooter>
+        <CardLink
+          title="Navigate to page"
+          icon={ChevronRight}
+          href="/example"
+        />
+      </CardFooter>
+    </Card>
+  ),
+}
+
+export const WithClickableLink: Story = {
+  render: () => (
+    <Card>
+      <CardHeader>
+        <CardTitle>Card with Clickable Link</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p>
+          The CardLink below uses onClick only (no href), rendering as a native
+          button for correct accessibility.
+        </p>
+      </CardContent>
+      <CardFooter>
+        <CardLink
+          title="Open panel"
+          icon={ChevronRight}
+          onClick={() => alert("Panel opened!")}
+        />
+      </CardFooter>
+    </Card>
+  ),
+}

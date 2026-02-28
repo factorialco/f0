@@ -27,16 +27,19 @@ export function DateTimeFieldRenderer({
   error,
   loading,
 }: DateTimeFieldRendererProps) {
-  const currentDate = formField.value as Date | undefined
+  // Form value may be null (used to represent cleared state)
+  const currentDate = (formField.value ?? undefined) as Date | undefined
 
   // Extract the time portion from the current Date value (for combining with date changes)
   const timeValue = useMemo(() => dateToTimeString(currentDate), [currentDate])
 
-  // Handle date changes - preserve the time portion
+  // Handle date changes - preserve the time portion.
+  // Uses null instead of undefined for cleared values because
+  // react-hook-form treats undefined as "use defaultValue".
   const handleDateChange = useCallback(
     (newDate: Date | undefined) => {
       if (!newDate) {
-        formField.onChange(undefined)
+        formField.onChange(null)
         return
       }
       // Combine new date with existing time

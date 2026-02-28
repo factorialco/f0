@@ -33,6 +33,7 @@ interface SelectTopActionsProps<
   asList?: boolean
   isFiltersOpen?: boolean
   onFiltersOpenChange?: (open: boolean) => void
+  showPreview?: boolean
 }
 
 export const SelectTopActions = <R extends RecordType = RecordType>({
@@ -48,6 +49,7 @@ export const SelectTopActions = <R extends RecordType = RecordType>({
   onFiltersChange,
   asList = false,
   onFiltersOpenChange,
+  showPreview = false,
 }: SelectTopActionsProps<R>) => {
   const i18n = useI18n()
 
@@ -72,8 +74,8 @@ export const SelectTopActions = <R extends RecordType = RecordType>({
   }
 
   return (
-    <div className="flex flex-col border-0 border-b border-solid border-f1-border-secondary">
-      <div className="flex gap-2 p-2">
+    <div className="flex flex-col">
+      <div className="flex gap-2 p-2 border-0 border-b border-solid border-f1-border-secondary">
         <div className="flex flex-1 flex-row gap-2">
           {showSearchBox && (
             <div className="flex-1">
@@ -92,7 +94,7 @@ export const SelectTopActions = <R extends RecordType = RecordType>({
               filters={filters}
               value={currentFilters}
               onChange={onFiltersChange}
-              mode={asList ? "simple" : "compact"}
+              mode={asList ? "simple" : showPreview ? "inline" : "compact"}
               onOpenChange={handleFiltersOpenChange}
             />
           )}

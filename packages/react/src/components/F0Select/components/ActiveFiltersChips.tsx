@@ -118,7 +118,7 @@ export const ActiveFiltersChips = <Filters extends FiltersDefinition>({
 
   return (
     <ScrollArea>
-      <div className="flex gap-1 border-0 px-2 pb-2 pt-0">
+      <div className="flex gap-1 border-0 p-2">
         <AnimatePresence mode="popLayout">
           {activeFilters.map((filter) => (
             <motion.div

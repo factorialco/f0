@@ -164,7 +164,7 @@ export const useQuestionCardAction = () => {
         required: false,
       },
     ],
-    available: "disabled",
+    available: "frontend",
     render: (props) => {
       const args = props.args as QuestionCardArgs
       const mapOptions = (

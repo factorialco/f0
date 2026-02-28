@@ -12,6 +12,7 @@ import type {
   SortingsDefinition,
 } from "@/hooks/datasource"
 
+import { WithDataTestIdProps } from "@/lib/data-testid"
 import { INPUTFIELD_SIZES, InputFieldProps } from "@/ui/InputField"
 
 import { Action } from "./components/SelectBottomActions"
@@ -41,7 +42,6 @@ type F0SelectBaseProps<T extends string, R = unknown> = {
   onOpenChange?: (open: boolean) => void
   searchEmptyMessage?: string
   className?: string
-  selectContentClassName?: string
   actions?: Action[]
   /** Container element to render the portal content into */
   portalContainer?: HTMLElement | null
@@ -50,7 +50,13 @@ type F0SelectBaseProps<T extends string, R = unknown> = {
    * Only displays the dropdown content with max height, border and scroll.
    */
   asList?: boolean
-}
+  /**
+   * When true, shows a selection preview panel on the right side of the dropdown
+   * for multi-select mode. When false and filters are present, filters use compact mode.
+   * @default false
+   */
+  showPreview?: boolean
+} & WithDataTestIdProps
 
 /**
  * Select component for choosing from a list of options.

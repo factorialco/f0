@@ -26,14 +26,14 @@ export const OnePreset = ({
           "flex grow-0 flex-row items-center gap-2 rounded border px-2.5 py-1.5 font-medium",
           number !== undefined && number !== null && "pr-1.5",
           selected
-            ? "border-f1-border-selected bg-f1-background-selected-secondary text-f1-foreground-selected"
-            : "border-f1-border text-f1-foreground"
+            ? "border-f0-border-selected bg-f0-background-selected-secondary text-f0-foreground-selected"
+            : "border-f0-border text-f0-foreground"
         )}
       >
         <Text
           className={cn(
             "whitespace-nowrap",
-            selected ? "text-f1-foreground-selected" : "text-f1-foreground"
+            selected ? "text-f0-foreground-selected" : "text-f0-foreground"
           )}
         >
           {label}

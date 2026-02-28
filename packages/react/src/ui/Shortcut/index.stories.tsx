@@ -1,6 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { ComponentProps } from "react"
+import { expect, within } from "storybook/test"
+
+import { UserPlatformProvider } from "@/lib/providers/user-platafform/UserPlatformProvider"
 
 import { Shortcut } from "./index"
 
@@ -50,4 +53,22 @@ export const InverseVariant: Story = {
       </div>
     ),
   ],
+}
+
+export const WithDataTestId: Story = {
+  args: {
+    ...Default.args,
+    dataTestId: "shortcut-test-id",
+  },
+  decorators: [
+    (Story) => (
+      <UserPlatformProvider platform="mac" renderDataTestIdAttribute={true}>
+        <Story />
+      </UserPlatformProvider>
+    ),
+  ],
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await expect(canvas.getByTestId("shortcut-test-id")).toBeInTheDocument()
+  },
 }

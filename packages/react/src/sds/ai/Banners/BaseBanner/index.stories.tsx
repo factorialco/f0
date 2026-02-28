@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
+import { expect, within } from "storybook/test"
+
 import { Download, Upsell } from "@/icons/app"
 
 import { BaseBanner } from "./index"
@@ -129,5 +131,16 @@ export const FullWidthText: Story = {
       onClick: () => alert("Learn More clicked"),
     },
     onClose: () => alert("Banner closed"),
+  },
+}
+
+export const WithDataTestId: Story = {
+  args: {
+    ...Default.args,
+    dataTestId: "banner-test-id",
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await expect(canvas.getByTestId("banner-test-id")).toBeInTheDocument()
   },
 }

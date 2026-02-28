@@ -3,6 +3,7 @@ import { useState } from "react"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Icon } from "@/components/F0Icon"
 import { EllipsisHorizontal } from "@/icons/app"
+import { DataTestIdWrapper, WithDataTestIdProps } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
 import { Link } from "@/lib/linkHandler"
 import { cn } from "@/lib/utils.ts"
@@ -30,22 +31,24 @@ type DropdownProps = Omit<
 > & {
   open?: boolean
   onOpenChange?: (open: boolean) => void
-}
+} & WithDataTestIdProps
 
 const _Dropdown = (props: DropdownProps) => {
-  const { open, onOpenChange, ...rest } = props
+  const { open, onOpenChange, dataTestId, ...rest } = props
   const publicProps = privateProps.reduce((acc, key) => {
     const { [key]: _, ...rest } = acc
     return rest
   }, rest as DropdownInternalProps)
 
   return (
-    <DropdownInternal
-      {...publicProps}
-      open={open}
-      onOpenChange={onOpenChange}
-      align={props.align || "end"}
-    />
+    <DataTestIdWrapper dataTestId={dataTestId}>
+      <DropdownInternal
+        {...publicProps}
+        open={open}
+        onOpenChange={onOpenChange}
+        align={props.align || "end"}
+      />
+    </DataTestIdWrapper>
   )
 }
 
@@ -56,100 +59,102 @@ export const Dropdown = experimentalComponent("Dropdown", _Dropdown)
 
 export type { DropdownItem, DropdownItemLabel, DropdownItemObject }
 
-const _MobileDropdown = ({ items, children }: DropdownProps) => {
+const _MobileDropdown = ({ items, children, dataTestId }: DropdownProps) => {
   const [open, setOpen] = useState(false)
 
   return (
-    <Drawer open={open} onOpenChange={setOpen}>
-      <DrawerTrigger asChild>
-        {children || (
-          <ButtonInternal
-            label="Other actions"
-            icon={EllipsisHorizontal}
-            variant="outline"
-            size="lg"
-            pressed={open}
-            noTitle
-          />
-        )}
-      </DrawerTrigger>
-      <DrawerOverlay className="bg-f1-background-overlay" />
-      <DrawerContent className="bg-f1-background">
-        <div className="flex flex-col px-2 pb-3 pt-2">
-          {items.map((item, index) => {
-            if (item.type === "separator") {
-              return (
-                <div
-                  key={`separator-${index}`}
-                  className="mx-[-8px] my-2 h-px w-[calc(100%+16px)] bg-f1-border-secondary"
-                />
-              )
-            }
+    <DataTestIdWrapper dataTestId={dataTestId}>
+      <Drawer open={open} onOpenChange={setOpen}>
+        <DrawerTrigger asChild>
+          {children || (
+            <ButtonInternal
+              label="Other actions"
+              icon={EllipsisHorizontal}
+              variant="outline"
+              size="lg"
+              pressed={open}
+              noTitle
+            />
+          )}
+        </DrawerTrigger>
+        <DrawerOverlay className="bg-f1-background-overlay" />
+        <DrawerContent className="bg-f1-background">
+          <div className="flex flex-col px-2 pb-3 pt-2">
+            {items.map((item, index) => {
+              if (item.type === "separator") {
+                return (
+                  <div
+                    key={`separator-${index}`}
+                    className="mx-[-8px] my-2 h-px w-[calc(100%+16px)] bg-f1-border-secondary"
+                  />
+                )
+              }
 
-            if (item.type === "label") {
-              return (
-                <span
-                  key={`label-${index}`}
-                  className="flex-1 px-3 py-2 text-xs font-medium leading-4 text-f1-foreground-secondary"
-                >
-                  {item.text}
-                </span>
-              )
-            }
-
-            if (item.href) {
-              return (
-                <Link
-                  key={`link-${index}`}
-                  href={item.href}
-                  className={cn(
-                    "flex w-full items-start gap-1.5",
-                    item.critical && "text-f1-foreground-critical",
-                    "text-f1-foreground no-underline hover:cursor-pointer"
-                  )}
-                >
-                  <DropdownItemContent item={item} />
-                </Link>
-              )
-            }
-
-            return (
-              <button
-                key={item.label}
-                onClick={(e) => {
-                  e.preventDefault()
-                  e.stopPropagation()
-                  item.onClick?.()
-                  setOpen(false)
-                }}
-                className="flex w-full items-center gap-2 p-3"
-              >
-                {item.icon && (
+              if (item.type === "label") {
+                return (
                   <span
+                    key={`label-${index}`}
+                    className="flex-1 px-3 py-2 text-xs font-medium leading-4 text-f1-foreground-secondary"
+                  >
+                    {item.text}
+                  </span>
+                )
+              }
+
+              if (item.href) {
+                return (
+                  <Link
+                    key={`link-${index}`}
+                    href={item.href}
                     className={cn(
-                      "h-5 w-5 text-f1-icon",
-                      item.critical && "text-f1-icon-critical"
+                      "flex w-full items-start gap-1.5",
+                      item.critical && "text-f1-foreground-critical",
+                      "text-f1-foreground no-underline hover:cursor-pointer"
                     )}
                   >
-                    <F0Icon icon={item.icon} size="md" />
-                  </span>
-                )}
-                <span
-                  className={cn(
-                    "font-medium",
-                    item.critical
-                      ? "text-f1-foreground-critical"
-                      : "text-f1-foreground"
-                  )}
+                    <DropdownItemContent item={item} />
+                  </Link>
+                )
+              }
+
+              return (
+                <button
+                  key={item.label}
+                  onClick={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    item.onClick?.()
+                    setOpen(false)
+                  }}
+                  className="flex w-full cursor-pointer items-center gap-2 p-3"
                 >
-                  {item.label}
-                </span>
-              </button>
-            )
-          })}
-        </div>
-      </DrawerContent>
-    </Drawer>
+                  {item.icon && (
+                    <span
+                      className={cn(
+                        "h-5 w-5 text-f1-icon",
+                        item.critical && "text-f1-icon-critical"
+                      )}
+                    >
+                      <F0Icon icon={item.icon} size="md" />
+                    </span>
+                  )}
+                  <span
+                    className={cn(
+                      "font-medium",
+                      item.critical
+                        ? "text-f1-foreground-critical"
+                        : "text-f1-foreground"
+                    )}
+                  >
+                    {item.label}
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+        </DrawerContent>
+      </Drawer>
+    </DataTestIdWrapper>
   )
 }
 

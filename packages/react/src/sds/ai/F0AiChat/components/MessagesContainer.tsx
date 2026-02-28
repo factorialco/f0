@@ -11,7 +11,6 @@ import { ButtonInternal } from "@/components/F0Button/internal"
 import { ArrowDown } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-import { ScrollArea } from "@/ui/scrollarea"
 
 import { F0Thinking as Thinking } from "../../F0Thinking"
 import { isAgentStateMessage } from "../internal-types"
@@ -79,8 +78,6 @@ const Messages = ({
   const prevTurnsCountRef = useRef(turns.length)
   const [turnMinHeight, setTurnMinHeight] = useState(0)
   const [showScrollBtn, setShowScrollBtn] = useState(false)
-  const [isAtTop, setIsAtTop] = useState(true)
-  const [hasContentBelow, setHasContentBelow] = useState(false)
 
   const scrollToBottom = useCallback((behavior: ScrollBehavior = "smooth") => {
     endRef.current?.scrollIntoView({ behavior })
@@ -99,6 +96,7 @@ const Messages = ({
       setTurnMinHeight(viewport.clientHeight - py)
     })
     observer.observe(viewport)
+    observer.observe(content)
     return () => observer.disconnect()
   }, [])
 
@@ -109,15 +107,6 @@ const Messages = ({
     const { scrollTop, scrollHeight, clientHeight } = el
     const distanceFromBottom = scrollHeight - scrollTop - clientHeight
     setShowScrollBtn(distanceFromBottom > clientHeight)
-    setIsAtTop(scrollTop <= 0)
-
-    // Bottom shadow: only when actual message content is below the viewport
-    const sentinel = contentEndRef.current
-    if (sentinel) {
-      const containerRect = el.getBoundingClientRect()
-      const sentinelRect = sentinel.getBoundingClientRect()
-      setHasContentBelow(sentinelRect.top > containerRect.bottom)
-    }
   }, [])
 
   useEffect(() => {
@@ -140,8 +129,6 @@ const Messages = ({
     // Reset scroll state when conversation is cleared
     if (turns.length === 0) {
       setShowScrollBtn(false)
-      setIsAtTop(true)
-      setHasContentBelow(false)
     }
     prevTurnsCountRef.current = turns.length
   }, [turns.length])
@@ -149,17 +136,24 @@ const Messages = ({
   return (
     <>
       <div className="relative flex flex-1 flex-col overflow-hidden">
-        <ScrollArea
-          className="flex-1 [&>div]:h-full [&>div>div]:h-full"
-          viewportRef={viewportRef}
+        <div
+          ref={viewportRef}
+          className={cn(
+            "flex-1 overflow-y-scroll pr-0",
+            "[scrollbar-width:thin] [scrollbar-color:transparent_transparent]",
+            "hover:[scrollbar-color:var(--scrollbar-thumb)_transparent]",
+            "[&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:bg-transparent",
+            "[&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-transparent",
+            "hover:[&::-webkit-scrollbar-thumb]:bg-f1-background-inverse/30"
+          )}
         >
           <div
             ref={contentRef}
-            className="flex flex-col p-4 h-full items-center"
+            className="flex h-full flex-col items-center py-4 pl-4 pr-1.5"
           >
             <div
               className={cn(
-                showWelcomeBlock ? "flex flex-1" : "flex flex-col gap-8",
+                showWelcomeBlock ? "flex flex-1" : "flex flex-col gap-6",
                 "w-full max-w-[712px]"
               )}
             >
@@ -254,14 +248,10 @@ const Messages = ({
               )}
             </AnimatePresence>
           </div>
-        </ScrollArea>
+        </div>
 
-        <AnimatePresence>
-          {!isAtTop && <ScrollShadow position="top" key="shadow-top" />}
-          {hasContentBelow && (
-            <ScrollShadow position="bottom" key="shadow-bottom" />
-          )}
-        </AnimatePresence>
+        <ScrollShadow position="top" key="shadow-top" />
+        <ScrollShadow position="bottom" key="shadow-bottom" />
       </div>
 
       {isOpen && (
@@ -270,6 +260,7 @@ const Messages = ({
             const callback =
               currentReaction === "like" ? onThumbsUp : onThumbsDown
             callback?.(message, { threadId, feedback })
+
             closeFeedbackModal()
           }}
           onClose={(message) => {
@@ -369,12 +360,18 @@ export function convertMessagesToTurns(messages: Message[]): Turn[] {
     if (isThinkingMessage(message)) {
       if (thinkingGroup) {
         const prev = thinkingGroup[thinkingGroup.length - 1]
-        if (prev.content !== message.content) {
+        if (getThinkingKey(prev) !== getThinkingKey(message)) {
           thinkingGroup.push(message)
         }
       } else {
         thinkingGroup = [message]
-        currentTurn.push(thinkingGroup)
+        // Always insert thinking group right after the user message (index 1)
+        // so it appears above any text messages from earlier runs in the same turn
+        if (currentTurn.length > 1) {
+          currentTurn.splice(1, 0, thinkingGroup)
+        } else {
+          currentTurn.push(thinkingGroup)
+        }
       }
       continue
     }
@@ -392,4 +389,21 @@ function isThinkingMessage(message: Message): boolean {
       (call) => call.function.name === "orchestratorThinking"
     ) === true
   )
+}
+
+/**
+ * Dedup key for thinking messages.
+ *
+ * CopilotKit action-execution messages have empty/undefined `content` — the
+ * actual preamble text lives in `toolCalls[0].function.arguments`.
+ * Fall back to `content` for backwards compatibility with any call-site that
+ * sets it directly, then to `id` as a last resort.
+ */
+function getThinkingKey(message: Message): string {
+  const tc = (
+    message as {
+      toolCalls?: { function: { name: string; arguments: string } }[]
+    }
+  ).toolCalls?.find((c) => c.function.name === "orchestratorThinking")
+  return tc?.function.arguments || message.content || message.id
 }

@@ -1,6 +1,7 @@
 import { forwardRef } from "react"
 
 import ExternalLink from "@/icons/app/ExternalLink"
+import { withDataTestId } from "@/lib/data-testid"
 import { Action, ActionLinkProps, ActionLinkVariant } from "@/ui/Action"
 
 import { F0Icon } from "../F0Icon"
@@ -11,7 +12,7 @@ export type F0LinkProps = Omit<ActionLinkProps, "variant" | "href"> & {
   href?: string
 }
 
-export const F0Link = forwardRef<HTMLAnchorElement, F0LinkProps>(function Link(
+const _F0Link = forwardRef<HTMLAnchorElement, F0LinkProps>(function Link(
   {
     className,
     children,
@@ -47,3 +48,5 @@ export const F0Link = forwardRef<HTMLAnchorElement, F0LinkProps>(function Link(
     </Action>
   )
 })
+
+export const F0Link = withDataTestId(_F0Link)

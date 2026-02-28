@@ -67,6 +67,13 @@ export interface TextProps
    * @default false
    */
   markdown?: boolean
+
+  /**
+   * Show a required indicator (red asterisk) after the content.
+   * Useful when the Text is used as a form label.
+   * @default false
+   */
+  required?: boolean
 }
 
 /**
@@ -83,16 +90,48 @@ export const Text = forwardRef<HTMLElement, TextProps>(
       ellipsis,
       noEllipsisTooltip,
       markdown,
+      required,
       ...htmlProps
     },
     forwardedRef
   ) => {
     const asTag = as ?? defaultTag[variant ?? "body"]
 
+    const requiredIndicator = required ? (
+      <span className="text-f1-foreground-critical" aria-hidden="true">
+        {" *"}
+      </span>
+    ) : null
+
     // If ellipsis is enabled, wrap with the ellipsis component
     // Note: markdown is disabled when ellipsis is enabled since OneEllipsis only accepts string children
     if (ellipsis !== undefined) {
       const lines = typeof ellipsis === "number" ? ellipsis : 1
+
+      if (requiredIndicator) {
+        return createElement(
+          asTag,
+          {
+            ...htmlProps,
+            className: cn(
+              textVariants({ variant, align }),
+              className,
+              "inline-flex gap-0.5"
+            ),
+            ref: forwardedRef,
+          },
+          <OneEllipsis
+            lines={lines}
+            noTooltip={noEllipsisTooltip}
+            tag="span"
+            className="min-w-0"
+            markdown={markdown}
+          >
+            {content}
+          </OneEllipsis>,
+          requiredIndicator
+        )
+      }
 
       return (
         <OneEllipsis
@@ -113,6 +152,19 @@ export const Text = forwardRef<HTMLElement, TextProps>(
     if (markdown) {
       const html = parseMarkdown(content)
 
+      if (requiredIndicator) {
+        return createElement(
+          asTag,
+          {
+            ...htmlProps,
+            className: cn(textVariants({ variant, align }), className),
+            ref: forwardedRef,
+          },
+          <span dangerouslySetInnerHTML={{ __html: html }} />,
+          requiredIndicator
+        )
+      }
+
       return createElement(asTag, {
         ...htmlProps,
         className: cn(textVariants({ variant, align }), className),
@@ -129,7 +181,8 @@ export const Text = forwardRef<HTMLElement, TextProps>(
         className: cn(textVariants({ variant, align }), className),
         ref: forwardedRef,
       },
-      content
+      content,
+      requiredIndicator
     )
   }
 )

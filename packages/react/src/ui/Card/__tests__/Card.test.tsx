@@ -134,6 +134,34 @@ describe("Card Components", () => {
       const link = screen.getByLabelText("Test Link")
       expect(link).toBeInTheDocument()
     })
+
+    it("renders a <button> when no href is provided", () => {
+      renderWithWrapper(
+        <CardLink title="Action" icon={ChevronRight} onClick={() => {}} />
+      )
+      const el = screen.getByLabelText("Action")
+      expect(el.tagName).toBe("BUTTON")
+      expect(el).toHaveAttribute("type", "button")
+      expect(el).not.toHaveAttribute("aria-disabled")
+      expect(el).not.toHaveAttribute("disabled")
+    })
+
+    it("fires onClick when rendered as a button", () => {
+      const handleClick = vi.fn()
+      renderWithWrapper(
+        <CardLink title="Click me" icon={ChevronRight} onClick={handleClick} />
+      )
+      fireEvent.click(screen.getByLabelText("Click me"))
+      expect(handleClick).toHaveBeenCalledTimes(1)
+    })
+
+    it("renders via Link when href is provided", () => {
+      renderWithWrapper(
+        <CardLink title="Navigate" icon={ChevronRight} href="/test" />
+      )
+      const el = screen.getByLabelText("Navigate")
+      expect(el.tagName).not.toBe("BUTTON")
+    })
   })
 
   describe("CardComment", () => {

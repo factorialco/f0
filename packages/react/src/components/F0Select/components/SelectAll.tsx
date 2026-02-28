@@ -8,8 +8,6 @@ import { Skeleton } from "@/ui/skeleton"
 
 import type { F0SelectItemObject } from "../types"
 
-import { ItemsPreviewHoverCard } from "./ItemsPreviewHoverCard"
-
 export type SelectAllProps = {
   selectedCount: number | Promise<number>
   value: boolean
@@ -17,7 +15,6 @@ export type SelectAllProps = {
   onChange: (checked: boolean) => void
   hideCheckbox?: boolean
   items?: F0SelectItemObject<string>[]
-  onDeselect?: (value: string) => void
   paddingTop?: boolean
 }
 
@@ -28,7 +25,6 @@ export const SelectAll = ({
   onChange,
   hideCheckbox = false,
   items,
-  onDeselect,
   paddingTop = false,
 }: SelectAllProps) => {
   const i18n = useI18n()
@@ -62,17 +58,9 @@ export const SelectAll = ({
         >
           {(resolvedCount: number) => (
             <div className="flex h-[24px] items-center">
-              {items && items.length > 0 ? (
-                <ItemsPreviewHoverCard items={items} onDeselect={onDeselect}>
-                  <OneEllipsis className="cursor-pointer text-f1-foreground-secondary transition-colors hover:text-f1-foreground">
-                    {selectedText(resolvedCount)}
-                  </OneEllipsis>
-                </ItemsPreviewHoverCard>
-              ) : (
-                <OneEllipsis className="text-f1-foreground-secondary">
-                  {selectedText(resolvedCount)}
-                </OneEllipsis>
-              )}
+              <OneEllipsis className="text-f1-foreground-secondary">
+                {selectedText(resolvedCount)}
+              </OneEllipsis>
             </div>
           )}
         </Await>

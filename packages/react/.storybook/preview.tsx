@@ -86,6 +86,7 @@ export const F0 = (Story: StoryFn, { parameters }: StoryContext) => {
       }}
       isDev={parameters.isDev ?? false}
       dataCollectionStorageHandler={dataCollectionLocalStorageHandler}
+      renderDataTestIdAttribute={true}
     >
       <Story />
     </F0Provider>
@@ -148,14 +149,16 @@ const preview: Preview = {
     options: {
       /*
        * Sort all the components and experimental stories in an aplhabetical order, but keep
-       * Introduction, How to contribute, Foundations, and Playground in specific order
+       * Introduction, How to contribute, Data test ID, Foundations, and Playground in specific order
        */
       storySort: (a, b) => {
         const topLevelOrder = [
           "introduction",
           "how-to-contribute",
+          "ai-configuration",
           "foundations",
           "library",
+          "data-testid",
           "hooks",
         ]
 
