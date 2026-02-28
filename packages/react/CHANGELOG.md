@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.386.0](https://github.com/factorialco/f0/compare/f0-react-v1.385.0...f0-react-v1.386.0) (2026-02-28)
+
+
+### Features
+
+* **ai-chat:** entity refs, [@mentions](https://github.com/mentions), tool hints, data download with Excel/CSV export ([#3553](https://github.com/factorialco/f0/issues/3553)) ([e3a2576](https://github.com/factorialco/f0/commit/e3a257601fa6ea579529a1d773c86641ad831720))
+
 ## [1.385.0](https://github.com/factorialco/f0/compare/f0-react-v1.384.0...f0-react-v1.385.0) (2026-02-27)
 
 
