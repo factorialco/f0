@@ -797,6 +797,7 @@ export const MultiplePaginatedAsList: Story = {
     value: ["3", "42", "500", "1200"],
     showSearchBox: true,
     asList: true,
+    showPreview: true,
     // Provide defaultItem for values not in the first page
     defaultItem: (() => {
       const ids = [42, 500, 1200]
@@ -823,12 +824,11 @@ export const MultiplePaginatedAsList: Story = {
     onSelectItems: fn((selectionStatus) => {
       console.log("selectionStatus", selectionStatus)
     }),
-    disableSelectAll: true,
     hideLabel: true,
   },
   render: (args) => {
     return (
-      <div className="flex h-[400px] flex-row">
+      <div className="flex h-[400px] flex-row w-[600px]">
         <F0Select {...(args as any)} />
       </div>
     )

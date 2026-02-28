@@ -167,7 +167,10 @@ const Messages = ({
               {turns.map((turnMessages, turnIndex) => (
                 <div
                   ref={turnIndex === turns.length - 1 ? lastTurnRef : undefined}
-                  className="flex flex-col items-start justify-start gap-2"
+                  className={cn(
+                    "flex flex-col items-start justify-start gap-2",
+                    turnIndex === turns.length - 1 && "pb-5"
+                  )}
                   key={`turn-${turnIndex}`}
                   style={{
                     minHeight:

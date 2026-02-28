@@ -745,7 +745,7 @@ const F0SelectComponent = forwardRef(function Select<
         </>
       }
       right={
-        multiple && !asList && !isFiltersOpen && showPreview ? (
+        multiple && !isFiltersOpen && showPreview ? (
           <SelectionPreview
             items={getDisplayItemsForSelection}
             onDeselect={(value) => onItemCheckChange(value, false)}
@@ -755,7 +755,7 @@ const F0SelectComponent = forwardRef(function Select<
           />
         ) : null
       }
-      forceMinHeight={!!localSource.filters && showPreview && !asList}
+      forceMinHeight={!!localSource.filters && showPreview}
       onScrollBottom={handleScrollBottom}
       scrollMargin={10}
       isLoadingMore={isLoadingMore}

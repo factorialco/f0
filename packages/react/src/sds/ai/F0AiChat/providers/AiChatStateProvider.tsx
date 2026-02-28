@@ -17,7 +17,11 @@ import { useI18n } from "@/lib/providers/i18n"
 
 import { DEFAULT_CHAT_WIDTH } from "../constants"
 import { AiChatProviderReturnValue, AiChatState } from "../internal-types"
-import { type VisualizationMode, WelcomeScreenSuggestion } from "../types"
+import {
+  type VisualizationMode,
+  type AiChatToolHint,
+  WelcomeScreenSuggestion,
+} from "../types"
 
 const AiChatStateContext = createContext<AiChatProviderReturnValue | null>(null)
 
@@ -50,6 +54,8 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   defaultVisualizationMode = "sidepanel",
   lockVisualizationMode = false,
   footer: initialFooter,
+  entityResolvers,
+  toolHints,
   onThumbsDown,
   onThumbsUp,
   tracking,
@@ -83,6 +89,10 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
       tracking?.onVisibility?.()
     }
   }, [open])
+
+  const [activeToolHint, setActiveToolHint] = useState<AiChatToolHint | null>(
+    null
+  )
 
   // Persist chat width to localStorage
   useEffect(() => {
@@ -204,6 +214,10 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         setChatWidth,
         resetChatWidth,
         tracking,
+        entityResolvers,
+        toolHints,
+        activeToolHint,
+        setActiveToolHint,
       }}
     >
       {children}
@@ -249,6 +263,10 @@ export function useAiChat(): AiChatProviderReturnValue {
       setChatWidth: noopFn,
       resetChatWidth: noopFn,
       tracking: undefined,
+      entityResolvers: undefined,
+      toolHints: undefined,
+      activeToolHint: null,
+      setActiveToolHint: noopFn,
     }
   }
 

@@ -290,7 +290,9 @@ const SelectContent = forwardRef<
               : undefined
           }
         >
-          {asList && <div className="flex-shrink-0">{props.top}</div>}
+          {asList && !props.right && (
+            <div className="flex-shrink-0">{props.top}</div>
+          )}
           <div className="flex min-h-0 flex-1 flex-row overflow-hidden">
             <div
               className={cn(
@@ -298,7 +300,7 @@ const SelectContent = forwardRef<
                 asList && "flex flex-col overflow-hidden flex-1 min-h-0"
               )}
             >
-              {!asList && props.top}
+              {(!asList || props.right) && props.top}
               {showLoadingIndicator && loadingNewContent && (
                 <div
                   className="absolute inset-0 flex cursor-progress items-center justify-center"
