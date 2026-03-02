@@ -72,8 +72,8 @@ function parseChangelog(
     }
 
     // Bullet entry
-    if (section && line.match(/^\* /)) {
-      const text = line.replace(/^\* /, "").trim();
+    if (section && line.match(/^[-*] /)) {
+      const text = line.replace(/^[-*] /, "").trim();
       current[section].push(text);
     }
   }
