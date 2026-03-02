@@ -64,7 +64,7 @@ jobs:
         # The key is stable so the same cache entry is always restored.
         uses: actions/cache/restore@v4
         with:
-          path: packages/changelog-summarizer/.cache/last-run
+          path: .cache/last-run
           key: changelog-summarizer-last-run
 
       - name: Generate summary
