@@ -51,6 +51,7 @@ function resolveDates(
   fromArg: string | undefined,
   toArg: string | undefined,
   repoRoot: string,
+  ignoreLastRun: boolean,
 ): { from: Date; to: Date } {
   const to = toArg ? parseDate(toArg, "--to") : new Date();
   to.setHours(23, 59, 59, 999);
@@ -61,7 +62,7 @@ function resolveDates(
 
   // Try to read last successful run date from cache
   const cachePath = join(repoRoot, LAST_RUN_CACHE_PATH);
-  if (existsSync(cachePath)) {
+  if (!ignoreLastRun && existsSync(cachePath)) {
     const raw = readFileSync(cachePath, "utf-8").trim();
     const lastRun = new Date(raw);
     if (!Number.isNaN(lastRun.getTime())) {
@@ -79,6 +80,8 @@ function resolveDates(
     console.error(
       `[dates] Cache file contained invalid date "${raw}", ignoring`,
     );
+  } else if (ignoreLastRun) {
+    console.error("[dates] --ignore-last-run set, skipping cache");
   }
 
   // Fallback: last 7 days
@@ -181,6 +184,10 @@ async function main(): Promise<void> {
       "Path to the git repo root (auto-detected by default)",
     )
     .option(
+      "--ignore-last-run",
+      "Ignore the cached last-run date and always fall back to 7 days ago",
+    )
+    .option(
       "--debug",
       "Save collected context (changelogs, commits, prompt) to a tmp folder before calling the LLM",
     )
@@ -199,6 +206,7 @@ async function main(): Promise<void> {
     prompt?: string;
     output?: string;
     repoRoot?: string;
+    ignoreLastRun?: boolean;
     debug?: boolean;
     debugDir?: string;
   }>();
@@ -221,7 +229,12 @@ async function main(): Promise<void> {
   console.error(`[init] Repo root: ${repoRoot}`);
 
   // Resolve dates
-  const { from, to } = resolveDates(opts.from, opts.to, repoRoot);
+  const { from, to } = resolveDates(
+    opts.from,
+    opts.to,
+    repoRoot,
+    opts.ignoreLastRun ?? false,
+  );
   const fromStr = from.toISOString().split("T")[0];
   const toStr = to.toISOString().split("T")[0];
   console.error(`[init] Date range: ${fromStr} → ${toStr}`);
