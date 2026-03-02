@@ -375,9 +375,12 @@ const e = {
         placeholder: "Share what didn’t work"
       }
     },
+    dataDownloadPreview: "Preview {{shown}} of {{total}} rows — download the Excel to see all data.",
     expandChat: "Expand chat",
     collapseChat: "Collapse chat",
     ask: "Ask One",
+    viewProfile: "View profile",
+    tools: "Tools",
     growth: {
       demoCard: {
         title: "See {{moduleName}} in action",
@@ -568,6 +571,12 @@ const e = {
         mustBeChecked: "This option must be selected"
       }
     }
+  },
+  wizard: {
+    previous: "Previous",
+    next: "Continue",
+    submit: "Submit",
+    stepOf: "Step {{current}} of {{total}}"
   }
 };
 export {

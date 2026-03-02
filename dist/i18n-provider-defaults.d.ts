@@ -375,9 +375,12 @@ export declare const defaultTranslations: {
                 readonly placeholder: "Share what didn’t work";
             };
         };
+        readonly dataDownloadPreview: "Preview {{shown}} of {{total}} rows — download the Excel to see all data.";
         readonly expandChat: "Expand chat";
         readonly collapseChat: "Collapse chat";
         readonly ask: "Ask One";
+        readonly viewProfile: "View profile";
+        readonly tools: "Tools";
         readonly growth: {
             readonly demoCard: {
                 readonly title: "See {{moduleName}} in action";
@@ -568,6 +571,12 @@ export declare const defaultTranslations: {
                 readonly mustBeChecked: "This option must be selected";
             };
         };
+    };
+    readonly wizard: {
+        readonly previous: "Previous";
+        readonly next: "Continue";
+        readonly submit: "Submit";
+        readonly stepOf: "Step {{current}} of {{total}}";
     };
 };
 
