@@ -25,7 +25,7 @@ type EditableRowContextValue<R extends RecordType> = {
 
 // React's createContext does not support per-usage generics.
 // The generic useEditableRow<R>() hook below provides type safety at consumption time.
-const EditableRowContext = createContext<EditableRowContextValue<any> | null>(
+const EditableRowContext = createContext<EditableRowContextValue<RecordType> | null>(
   null
 )
 
