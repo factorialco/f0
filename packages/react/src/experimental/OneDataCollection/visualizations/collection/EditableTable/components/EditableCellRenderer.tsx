@@ -77,7 +77,7 @@ export function EditableCellRenderer<
     )
   }
 
-  if (isEditable && cellEditType) {
+  if (isEditable && hasId && cellEditType) {
     const CellComponent = valueDisplayEditors[cellEditType]
 
     if (CellComponent) {
