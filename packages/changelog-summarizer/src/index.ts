@@ -292,7 +292,7 @@ async function main(): Promise<void> {
   // Check for empty context
   if (changelogs.length === 0 && commits.length === 0) {
     console.error("[warn] No changes found for the given date range");
-    const emptyMessage = `F0 Weekly Summary (${fromStr} – ${toStr})\n---\n_No changes this week._`;
+    const emptyMessage = `:f0-dev: F0 Weekly Summary (${fromStr} – ${toStr})\n---\n_No changes this week._`;
     if (opts.output) {
       writeFileSync(resolve(opts.output), emptyMessage);
     } else {
@@ -312,7 +312,7 @@ async function main(): Promise<void> {
 
   // Prepend a plain-text title line (used as the top-level Slack header block)
   // followed by --- so the workflow parser treats it as the first section delimiter.
-  const output = `F0 Weekly Summary (${fromStr} – ${toStr})\n---\n${summary}`;
+  const output = `:f0-dev: F0 Weekly Summary (${fromStr} – ${toStr})\n---\n${summary}`;
 
   // Output
   if (opts.output) {
