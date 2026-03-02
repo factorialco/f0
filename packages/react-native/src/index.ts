@@ -5,4 +5,4 @@ export * from "./components/exports"
 export * from "./icons"
 
 // Export utilities
-export { cn } from "./lib/utils"
+export { cn, omitProps } from "./lib/utils"

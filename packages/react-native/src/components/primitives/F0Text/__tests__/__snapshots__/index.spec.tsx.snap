@@ -1,0 +1,316 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`F0Text Snapshots renders all color variants: color-accent 1`] = `
+<Text
+  className="text-[14px] leading-[20px] font-normal text-f0-foreground-accent text-left"
+>
+  accent
+   text
+</Text>
+`;
+
+exports[`F0Text Snapshots renders all color variants: color-critical 1`] = `
+<Text
+  className="text-[14px] leading-[20px] font-normal text-f0-foreground-critical text-left"
+>
+  critical
+   text
+</Text>
+`;
+
+exports[`F0Text Snapshots renders all color variants: color-default 1`] = `
+<Text
+  className="text-[14px] leading-[20px] font-normal text-f0-foreground text-left"
+>
+  default
+   text
+</Text>
+`;
+
+exports[`F0Text Snapshots renders all color variants: color-disabled 1`] = `
+<Text
+  className="text-[14px] leading-[20px] font-normal text-f0-foreground-disabled text-left"
+>
+  disabled
+   text
+</Text>
+`;
+
+exports[`F0Text Snapshots renders all color variants: color-info 1`] = `
+<Text
+  className="text-[14px] leading-[20px] font-normal text-f0-foreground-info text-left"
+>
+  info
+   text
+</Text>
+`;
+
+exports[`F0Text Snapshots renders all color variants: color-inverse 1`] = `
+<Text
+  className="text-[14px] leading-[20px] font-normal text-f0-foreground-inverse text-left"
+>
+  inverse
+   text
+</Text>
+`;
+
+exports[`F0Text Snapshots renders all color variants: color-inverse-secondary 1`] = `
+<Text
+  className="text-[14px] leading-[20px] font-normal text-f0-foreground-inverse-secondary text-left"
+>
+  inverse-secondary
+   text
+</Text>
+`;
+
+exports[`F0Text Snapshots renders all color variants: color-positive 1`] = `
+<Text
+  className="text-[14px] leading-[20px] font-normal text-f0-foreground-positive text-left"
+>
+  positive
+   text
+</Text>
+`;
+
+exports[`F0Text Snapshots renders all color variants: color-secondary 1`] = `
+<Text
+  className="text-[14px] leading-[20px] font-normal text-f0-foreground-secondary text-left"
+>
+  secondary
+   text
+</Text>
+`;
+
+exports[`F0Text Snapshots renders all color variants: color-selected 1`] = `
+<Text
+  className="text-[14px] leading-[20px] font-normal text-f0-foreground-selected text-left"
+>
+  selected
+   text
+</Text>
+`;
+
+exports[`F0Text Snapshots renders all color variants: color-tertiary 1`] = `
+<Text
+  className="text-[14px] leading-[20px] font-normal text-f0-foreground-tertiary text-left"
+>
+  tertiary
+   text
+</Text>
+`;
+
+exports[`F0Text Snapshots renders all color variants: color-warning 1`] = `
+<Text
+  className="text-[14px] leading-[20px] font-normal text-f0-foreground-warning text-left"
+>
+  warning
+   text
+</Text>
+`;
+
+exports[`F0Text Snapshots renders all typography variants: variant-body-md-default 1`] = `
+<Text
+  className="text-[16px] leading-[24px] font-normal text-f0-foreground text-left"
+>
+  body-md-default
+   text
+</Text>
+`;
+
+exports[`F0Text Snapshots renders all typography variants: variant-body-md-medium 1`] = `
+<Text
+  className="text-[16px] leading-[24px] font-medium text-f0-foreground text-left"
+>
+  body-md-medium
+   text
+</Text>
+`;
+
+exports[`F0Text Snapshots renders all typography variants: variant-body-md-semibold 1`] = `
+<Text
+  className="text-[16px] leading-[24px] font-semibold text-f0-foreground text-left"
+>
+  body-md-semibold
+   text
+</Text>
+`;
+
+exports[`F0Text Snapshots renders all typography variants: variant-body-sm-default 1`] = `
+<Text
+  className="text-[14px] leading-[20px] font-normal text-f0-foreground text-left"
+>
+  body-sm-default
+   text
+</Text>
+`;
+
+exports[`F0Text Snapshots renders all typography variants: variant-body-sm-medium 1`] = `
+<Text
+  className="text-[14px] leading-[20px] font-medium text-f0-foreground text-left"
+>
+  body-sm-medium
+   text
+</Text>
+`;
+
+exports[`F0Text Snapshots renders all typography variants: variant-body-sm-semibold 1`] = `
+<Text
+  className="text-[14px] leading-[20px] font-semibold text-f0-foreground text-left"
+>
+  body-sm-semibold
+   text
+</Text>
+`;
+
+exports[`F0Text Snapshots renders all typography variants: variant-body-xs-medium 1`] = `
+<Text
+  className="text-[12px] leading-[16px] font-medium text-f0-foreground text-left"
+>
+  body-xs-medium
+   text
+</Text>
+`;
+
+exports[`F0Text Snapshots renders all typography variants: variant-heading-lg 1`] = `
+<Text
+  className="text-[24px] leading-[32px] tracking-[-0.2px] font-semibold text-f0-foreground text-left"
+>
+  heading-lg
+   text
+</Text>
+`;
+
+exports[`F0Text Snapshots renders all typography variants: variant-heading-md 1`] = `
+<Text
+  className="text-[20px] leading-[28px] tracking-[-0.2px] font-semibold text-f0-foreground text-left"
+>
+  heading-md
+   text
+</Text>
+`;
+
+exports[`F0Text Snapshots renders all typography variants: variant-heading-sm 1`] = `
+<Text
+  className="text-[16px] leading-[24px] font-semibold text-f0-foreground text-left"
+>
+  heading-sm
+   text
+</Text>
+`;
+
+exports[`F0Text Snapshots renders with alignment options: align-center 1`] = `
+<Text
+  className="text-[14px] leading-[20px] font-normal text-f0-foreground text-center"
+>
+  center
+   text
+</Text>
+`;
+
+exports[`F0Text Snapshots renders with alignment options: align-justify 1`] = `
+<Text
+  className="text-[14px] leading-[20px] font-normal text-f0-foreground text-justify"
+>
+  justify
+   text
+</Text>
+`;
+
+exports[`F0Text Snapshots renders with alignment options: align-left 1`] = `
+<Text
+  className="text-[14px] leading-[20px] font-normal text-f0-foreground text-left"
+>
+  left
+   text
+</Text>
+`;
+
+exports[`F0Text Snapshots renders with alignment options: align-right 1`] = `
+<Text
+  className="text-[14px] leading-[20px] font-normal text-f0-foreground text-right"
+>
+  right
+   text
+</Text>
+`;
+
+exports[`F0Text Snapshots renders with default variant (body-sm-default) 1`] = `
+<Text
+  className="text-[14px] leading-[20px] font-normal text-f0-foreground text-left"
+>
+  Default text
+</Text>
+`;
+
+exports[`F0Text Snapshots renders with numberOfLines truncation 1`] = `
+<Text
+  className="text-[14px] leading-[20px] font-normal text-f0-foreground text-left"
+  ellipsizeMode="tail"
+  numberOfLines={2}
+>
+  This is a very long text that should be truncated after two lines with an ellipsis at the end
+</Text>
+`;
+
+exports[`F0Text Snapshots renders with text decorations: decoration-line-through 1`] = `
+<Text
+  className="text-[14px] leading-[20px] font-normal text-f0-foreground text-left line-through"
+>
+  line-through
+   text
+</Text>
+`;
+
+exports[`F0Text Snapshots renders with text decorations: decoration-none 1`] = `
+<Text
+  className="text-[14px] leading-[20px] font-normal text-f0-foreground text-left"
+>
+  none
+   text
+</Text>
+`;
+
+exports[`F0Text Snapshots renders with text decorations: decoration-underline 1`] = `
+<Text
+  className="text-[14px] leading-[20px] font-normal text-f0-foreground text-left underline"
+>
+  underline
+   text
+</Text>
+`;
+
+exports[`F0Text Snapshots renders with text transforms: transform-capitalize 1`] = `
+<Text
+  className="text-[14px] leading-[20px] font-normal text-f0-foreground text-left capitalize"
+>
+  capitalize
+   text
+</Text>
+`;
+
+exports[`F0Text Snapshots renders with text transforms: transform-lowercase 1`] = `
+<Text
+  className="text-[14px] leading-[20px] font-normal text-f0-foreground text-left lowercase"
+>
+  lowercase
+   text
+</Text>
+`;
+
+exports[`F0Text Snapshots renders with text transforms: transform-none 1`] = `
+<Text
+  className="text-[14px] leading-[20px] font-normal text-f0-foreground text-left"
+>
+  none
+   text
+</Text>
+`;
+
+exports[`F0Text Snapshots renders with text transforms: transform-uppercase 1`] = `
+<Text
+  className="text-[14px] leading-[20px] font-normal text-f0-foreground text-left uppercase"
+>
+  uppercase
+   text
+</Text>
+`;
