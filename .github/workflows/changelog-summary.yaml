@@ -116,28 +116,82 @@ jobs:
         env:
           SUMMARY_FILE: ${{ steps.summarize.outputs.summary_file }}
         run: |
-          SUMMARY_RAW=$(cat "$SUMMARY_FILE")
+          # The summary file has the structure:
+          #   Line 1: plain-text title (e.g. "F0 Weekly Summary (2026-02-23 – 2026-03-01)")
+          #   ---
+          #   <package title line>   (e.g. "⚛️ F0 React — v1.380.0 → v1.384.0")
+          #   <body lines...>
+          #   ---
+          #   <next package title>
+          #   ...
+          #
+          # We build a Block Kit payload:
+          #   • One top-level "header" block for the title
+          #   • For each package section: "divider" + "header" (title) + "section" (body)
 
-          # Convert GitHub-style markdown → Slack mrkdwn
-          SUMMARY=$(echo "$SUMMARY_RAW" | perl -pe '
-            s/^### (.+)$/*\1*/;
-            s/^## (.+)$/*\1*/;
-            s/^(\s*[-*])\s+/• /;
-            s/\[([^\]]+)\]\(([^)]+)\)/<\2|\1>/g;
-          ')
+          CONTENT=$(cat "$SUMMARY_FILE")
 
-          # Build Block Kit payload
-          jq -n --arg body "$SUMMARY" '
-          {
-            blocks: [
-              {
-                type: "section",
-                text: { type: "mrkdwn", text: $body }
-              }
-            ]
-          }' > /tmp/payload.json
+          # Extract the top-level title (first line before the first ---)
+          TITLE=$(printf '%s' "$CONTENT" | head -n1)
 
-          # Send to Slack
+          # Start the blocks array with the top-level header
+          BLOCKS=$(jq -n --arg t "$TITLE" \
+            '[{ type: "header", text: { type: "plain_text", text: $t, emoji: true } }]')
+
+          # Split the file into sections on lines that are exactly "---"
+          # Skip the first segment (it's the title line we already handled).
+          # Each subsequent segment's first line is the package title; the rest is the body.
+          SEGMENT=""
+          FIRST_SEGMENT=true
+
+          while IFS= read -r line; do
+            if [ "$line" = "---" ]; then
+              if $FIRST_SEGMENT; then
+                # Discard the title segment — already captured above
+                FIRST_SEGMENT=false
+                SEGMENT=""
+                continue
+              fi
+              # Flush the accumulated segment as a package section
+              if [ -n "$SEGMENT" ]; then
+                PKG_TITLE=$(printf '%s' "$SEGMENT" | head -n1)
+                PKG_BODY=$(printf '%s' "$SEGMENT" | tail -n +2)
+                BLOCKS=$(printf '%s' "$BLOCKS" | jq \
+                  --arg h "$PKG_TITLE" \
+                  --arg b "$PKG_BODY" \
+                  '. + [
+                    { type: "divider" },
+                    { type: "header", text: { type: "plain_text", text: $h, emoji: true } },
+                    { type: "section", text: { type: "mrkdwn", text: $b } }
+                  ]')
+              fi
+              SEGMENT=""
+            else
+              if [ -z "$SEGMENT" ]; then
+                SEGMENT="$line"
+              else
+                SEGMENT="${SEGMENT}"$'\n'"${line}"
+              fi
+            fi
+          done <<< "$CONTENT"
+
+          # Flush the last segment (no trailing --- in the file)
+          if [ -n "$SEGMENT" ] && ! $FIRST_SEGMENT; then
+            PKG_TITLE=$(printf '%s' "$SEGMENT" | head -n1)
+            PKG_BODY=$(printf '%s' "$SEGMENT" | tail -n +2)
+            BLOCKS=$(printf '%s' "$BLOCKS" | jq \
+              --arg h "$PKG_TITLE" \
+              --arg b "$PKG_BODY" \
+              '. + [
+                { type: "divider" },
+                { type: "header", text: { type: "plain_text", text: $h, emoji: true } },
+                { type: "section", text: { type: "mrkdwn", text: $b } }
+              ]')
+          fi
+
+          # Build and send the final payload
+          jq -n --argjson blocks "$BLOCKS" '{ blocks: $blocks }' > /tmp/payload.json
+
           curl -X POST -H "Content-Type: application/json" \
             --data @/tmp/payload.json \
             "${{ secrets.SLACK_WEBHOOK_F0_SUMMARIZER }}"
