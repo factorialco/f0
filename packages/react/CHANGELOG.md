@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.388.1](https://github.com/factorialco/f0/compare/f0-react-v1.388.0...f0-react-v1.388.1) (2026-03-02)
+
+
+### Bug Fixes
+
+* question not being able to be changed to rating type in CoCreationForm ([#3562](https://github.com/factorialco/f0/issues/3562)) ([20a29d2](https://github.com/factorialco/f0/commit/20a29d2095b1c6129e02177699bcd34f8adab7f4))
+
 ## [1.388.0](https://github.com/factorialco/f0/compare/f0-react-v1.387.0...f0-react-v1.388.0) (2026-03-02)
 
 
