@@ -233,16 +233,17 @@ The API key is stored as `CHANGELOG_AI_API_KEY` in GitHub secrets.
 ```json
 {
   "dependencies": {
-    "ai": "^4.x",
-    "@ai-sdk/openai": "^1.x",
-    "@ai-sdk/anthropic": "^1.x",
-    "@ai-sdk/google": "^1.x",
-    "@ai-sdk/groq": "^1.x",
-    "commander": "^12.x"
+    "ai": "^6.0.105",
+    "@ai-sdk/openai": "^3.0.37",
+    "@ai-sdk/anthropic": "^3.0.50",
+    "@ai-sdk/google": "^3.0.34",
+    "@ai-sdk/groq": "^3.0.26",
+    "commander": "^14.0.3"
   },
   "devDependencies": {
-    "tsx": "^4.x",
-    "typescript": "^5.x"
+    "@types/node": "^22.13.9",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3"
   }
 }
 ```
