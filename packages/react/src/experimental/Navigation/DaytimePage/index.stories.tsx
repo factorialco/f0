@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
+import { expect, within } from "storybook/test"
+
 import { HomeLayout } from "@/layouts/HomeLayout"
 import { Default as DefaultHomeLayoutStory } from "@/layouts/HomeLayout/index.stories"
 
@@ -139,4 +141,28 @@ export const DaytimeHomeLayoutWithMoodNotSet: Story = {
       <HomeLayout {...DefaultHomeLayoutStory.args} />
     </DaytimePage>
   ),
+}
+
+export const WithDataTestId: Story = {
+  args: {
+    period: "morning",
+  },
+  render: ({ period }) => (
+    <DaytimePage
+      period={period}
+      header={{
+        employeeFirstName: "Saul",
+        employeeLastName: "Goodman",
+        title: "Good morning, Saul!",
+        employeeAvatar: "/avatars/person05.jpg",
+      }}
+      dataTestId="daytime-page-test-id"
+    >
+      <HomeLayout {...DefaultHomeLayoutStory.args} />
+    </DaytimePage>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await expect(canvas.getByTestId("daytime-page-test-id")).toBeInTheDocument()
+  },
 }

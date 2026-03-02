@@ -176,7 +176,7 @@ export function TableHead({
   return (
     <TableHeadRoot
       className={cn(
-        "group",
+        "group h-11",
         "bg-f1-background",
         isSticky &&
           (isScrolled || isScrolledRight) &&

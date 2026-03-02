@@ -9,6 +9,7 @@ import {
   F0ButtonDropdown,
 } from "@/components/F0ButtonDropdown"
 import { IconType } from "@/components/F0Icon"
+import { OneEllipsis } from "@/components/OneEllipsis"
 import { Dropdown, MobileDropdown } from "@/experimental/Navigation/Dropdown"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
@@ -90,6 +91,21 @@ interface ActionBarProps {
    * The warning message to show in the action bar
    */
   warningMessage?: string
+
+  /**
+   * Whether all-pages selection mode is active.
+   */
+  allPagesSelection?: boolean
+
+  /**
+   * Whether the user has opted to select ALL items across all pages.
+   */
+  isAllItemsSelected?: boolean
+
+  /**
+   * Total number of items across all pages.
+   */
+  totalItems?: number
 }
 
 const Alert = ({ message }: { message: string }) => {
@@ -107,14 +123,20 @@ export const ActionBar = ({
   selectedNumber = undefined,
   onUnselect,
   warningMessage,
+  allPagesSelection = false,
+  isAllItemsSelected = false,
+  totalItems,
   ...props
 }: ActionBarProps) => {
-  const i18n = useI18n()
+  const { t, ...i18n } = useI18n()
 
   const selectedText =
     selectedNumber === 1
       ? i18n.status.selected.singular
       : i18n.status.selected.plural
+
+  const showAllItemsSelected =
+    allPagesSelection && isAllItemsSelected && totalItems !== undefined
 
   const visibleSecondaryActions = secondaryActions.slice(0, 2)
   const dropdownActions = secondaryActions.slice(2).map((action) => ({
@@ -179,22 +201,32 @@ export const ActionBar = ({
           )}
         >
           {selectedNumber && (
-            <div className="dark flex h-8 w-full items-center justify-between gap-2 px-2 sm:h-auto sm:w-fit sm:justify-start sm:pl-2 sm:pr-0">
-              <span className="font-medium tabular-nums">
-                <NumberFlow
-                  value={selectedNumber}
-                  spinTiming={{
-                    duration: 200,
-                    easing: "cubic-bezier(0.175, 0.885, 0.32, 1.275)",
-                  }}
-                />
-                <span> {selectedText}</span>
-              </span>
+            <div className="dark flex h-8 w-full items-center justify-between gap-3 px-2 sm:h-auto sm:w-fit sm:justify-start sm:pl-2 sm:pr-0">
+              {showAllItemsSelected ? (
+                <span className="font-medium tabular-nums">
+                  {t("status.selected.allItemsSelected", {
+                    total: totalItems ?? 0,
+                  })}
+                </span>
+              ) : (
+                <span className="flex items-center gap-1 font-medium tabular-nums">
+                  <NumberFlow
+                    value={selectedNumber}
+                    spinTiming={{
+                      duration: 200,
+                      easing: "cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+                    }}
+                  />
+                  <OneEllipsis className="text-f1-foreground">
+                    {selectedText}
+                  </OneEllipsis>
+                </span>
+              )}
               <F0Button
                 variant="outline"
-                size="sm"
                 label={i18n.actions.unselect}
                 onClick={onUnselect}
+                size="sm"
               />
             </div>
           )}
@@ -217,7 +249,6 @@ export const ActionBar = ({
                         const action = getActionByValue(value)
                         ;(action as ActionType)?.onClick?.()
                       }}
-                      size="lg"
                     />
                   ) : (
                     <F0Button
@@ -225,7 +256,6 @@ export const ActionBar = ({
                       icon={singlePrimaryAction.icon}
                       onClick={singlePrimaryAction.onClick}
                       disabled={singlePrimaryAction.disabled}
-                      size="lg"
                     />
                   )}
                 </Fragment>

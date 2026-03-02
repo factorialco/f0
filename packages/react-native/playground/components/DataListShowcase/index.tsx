@@ -7,7 +7,7 @@ import { useCSSVariable } from "uniwind";
 const { Check } = AppIcons;
 
 export function DataListShowcase() {
-  const [f1Foreground] = useCSSVariable(['--color-f0-foreground']);
+  const [f0Foreground] = useCSSVariable(['--color-f0-foreground'])
 
   const asString = (value: string | number | undefined): string => {
     if (typeof value === 'string') return value;
@@ -22,7 +22,7 @@ export function DataListShowcase() {
       style={{ width: "100%" }}
     >
       {/* Basic Items */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f1Foreground) }}>
+      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
         Basic Items
       </Text>
       <View className="mb-6">
@@ -33,7 +33,7 @@ export function DataListShowcase() {
       </View>
 
       {/* With Actions */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f1Foreground) }}>
+      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
         Items with Actions
       </Text>
       <View className="mb-6">
@@ -57,7 +57,7 @@ export function DataListShowcase() {
       </View>
 
       {/* Person Items */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f1Foreground) }}>
+      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
         Person Items
       </Text>
       <View className="mb-6">
@@ -86,7 +86,7 @@ export function DataListShowcase() {
       </View>
 
       {/* Company Items */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f1Foreground) }}>
+      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
         Company Items
       </Text>
       <View className="mb-6">
@@ -103,7 +103,7 @@ export function DataListShowcase() {
       </View>
 
       {/* Team Items */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f1Foreground) }}>
+      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
         Team Items
       </Text>
       <View className="mb-6">
@@ -117,7 +117,7 @@ export function DataListShowcase() {
       </View>
 
       {/* Dot Tag Items */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f1Foreground) }}>
+      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
         Dot Tag Items
       </Text>
       <View className="mb-6">
@@ -129,7 +129,7 @@ export function DataListShowcase() {
       </View>
 
       {/* With Label */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f1Foreground) }}>
+      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
         With Label
       </Text>
       <View className="mb-6">
@@ -140,7 +140,7 @@ export function DataListShowcase() {
       </View>
 
       {/* Horizontal Layout */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f1Foreground) }}>
+      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
         Horizontal Layout
       </Text>
       <View className="mb-6">
@@ -152,7 +152,7 @@ export function DataListShowcase() {
       </View>
 
       {/* All Variants Combined */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f1Foreground) }}>
+      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
         All Variants Combined
       </Text>
       <View className="mb-6">

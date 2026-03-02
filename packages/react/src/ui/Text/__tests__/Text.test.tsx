@@ -52,6 +52,23 @@ describe("Text base component", () => {
     })
   })
 
+  describe("Required indicator", () => {
+    it("renders a required asterisk when required is true", () => {
+      render(<Text variant="label" content="Field label" required />)
+
+      expect(screen.getByText("Field label")).toBeInTheDocument()
+      expect(screen.getByText("*")).toBeInTheDocument()
+      expect(screen.getByText("*")).toHaveClass("text-f1-foreground-critical")
+    })
+
+    it("does not render a required asterisk when required is false", () => {
+      render(<Text variant="label" content="Field label" />)
+
+      expect(screen.getByText("Field label")).toBeInTheDocument()
+      expect(screen.queryByText("*")).not.toBeInTheDocument()
+    })
+  })
+
   describe("Ellipsis", () => {
     it("renders with single line ellipsis classes when ellipsis is true", () => {
       const { container } = render(<Text content="Long text" ellipsis={true} />)

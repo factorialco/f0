@@ -110,6 +110,19 @@ const config: StorybookConfig = {
     // Ensure base is set to '/' to prevent absolute path issues in CI
     // This ensures paths are relative and work correctly when served
     config.base = config.base || "/"
+
+    // Pre-bundle dependencies that Vite would otherwise discover lazily
+    // when navigating to certain stories. Late discovery triggers a
+    // re-optimisation that invalidates already-loaded modules and breaks
+    // the page with "Failed to fetch dynamically imported module" errors.
+    config.optimizeDeps = config.optimizeDeps || {}
+    config.optimizeDeps.include = [
+      ...(config.optimizeDeps.include || []),
+      "@storybook/addon-links/react",
+      "@copilotkit/react-core",
+      "@copilotkit/react-ui",
+      "@copilotkit/shared",
+    ]
     return config
   },
 }

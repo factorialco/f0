@@ -7,7 +7,7 @@ import { useCSSVariable } from "uniwind";
 const { Check, Alert, Home, Settings, Archive } = AppIcons;
 
 export function TagShowcase() {
-  const [f1Foreground] = useCSSVariable(['--color-f0-foreground']);
+  const [f0Foreground] = useCSSVariable(['--color-f0-foreground'])
 
   const asString = (value: string | number | undefined): string => {
     if (typeof value === 'string') return value;
@@ -22,7 +22,7 @@ export function TagShowcase() {
       style={{ width: "100%" }}
     >
       {/* AlertTag */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f1Foreground) }}>
+      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
         Alert Tag
       </Text>
       <View className="flex-row flex-wrap gap-2 mb-6">
@@ -32,7 +32,7 @@ export function TagShowcase() {
       </View>
 
       {/* DotTag with predefined colors */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f1Foreground) }}>
+      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
         Dot Tag - Predefined Colors
       </Text>
       <View className="flex-row flex-wrap gap-2 mb-6">
@@ -50,7 +50,7 @@ export function TagShowcase() {
       </View>
 
       {/* DotTag with custom colors */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f1Foreground) }}>
+      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
         Dot Tag - Custom Colors
       </Text>
       <View className="flex-row flex-wrap gap-2 mb-6">
@@ -60,7 +60,7 @@ export function TagShowcase() {
       </View>
 
       {/* RawTag */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f1Foreground) }}>
+      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
         Raw Tag - Basic
       </Text>
       <View className="flex-row flex-wrap gap-2 mb-6">
@@ -70,7 +70,7 @@ export function TagShowcase() {
       </View>
 
       {/* RawTag with icons */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f1Foreground) }}>
+      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
         Raw Tag - With Icons
       </Text>
       <View className="flex-row flex-wrap gap-2 mb-6">
@@ -82,7 +82,7 @@ export function TagShowcase() {
       </View>
 
       {/* RawTag without border */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f1Foreground) }}>
+      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
         Raw Tag - No Border
       </Text>
       <View className="flex-row flex-wrap gap-2 mb-6">
@@ -91,7 +91,7 @@ export function TagShowcase() {
       </View>
 
       {/* RawTag with additional accessible text */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f1Foreground) }}>
+      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
         Raw Tag - With Accessible Text
       </Text>
       <View className="flex-row flex-wrap gap-2 mb-6">
@@ -107,7 +107,7 @@ export function TagShowcase() {
       </View>
 
       {/* All variants summary */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f1Foreground) }}>
+      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
         All Variants Summary
       </Text>
       <View className="flex-row flex-wrap gap-2 mb-6">

@@ -4,10 +4,11 @@ import { Input } from "@/experimental/Forms/Fields/Input"
 import { Link, Envelope } from "@/icons/app"
 import { IconType } from "@/components/F0Icon"
 import type { F0TextConfig, F0TextField } from "./types"
+import type { ResolvedField } from "../types"
 import { FORM_SIZE } from "../../constants"
 
 interface TextFieldRendererProps {
-  field: F0TextField
+  field: ResolvedField<F0TextField>
   formField: ControllerRenderProps<FieldValues>
   error?: boolean
   loading?: boolean
@@ -42,17 +43,18 @@ export function TextFieldRenderer({
 
   return (
     <Input
+      {...formField}
       label={field.label}
       type={inputType}
       placeholder={placeholder}
       disabled={field.disabled}
-      {...formField}
       value={formField.value != null ? String(formField.value) : ""}
       size={FORM_SIZE}
       hideLabel
       error={error}
       loading={loading}
       icon={icon}
+      clearable={field.clearable}
     />
   )
 }

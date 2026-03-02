@@ -1,6 +1,13 @@
 import { type AIMessage, type Message } from "@copilotkit/shared"
 
-import { type AiChatDisclaimer, WelcomeScreenSuggestion } from "./types"
+import {
+  type AiChatDisclaimer,
+  type AiChatTrackingOptions,
+  type AiChatToolHint,
+  type EntityResolvers,
+  type VisualizationMode,
+  WelcomeScreenSuggestion,
+} from "./types"
 
 /**
  * Context type for fullscreen chat state
@@ -21,6 +28,11 @@ export interface AiChatState {
   welcomeScreenSuggestions?: WelcomeScreenSuggestion[]
   disclaimer?: AiChatDisclaimer
   resizable?: boolean
+  defaultVisualizationMode?: VisualizationMode
+  lockVisualizationMode?: boolean
+  footer?: React.ReactNode
+  entityResolvers?: EntityResolvers
+  toolHints?: AiChatToolHint[]
   placeholders?: string[]
   setPlaceholders?: React.Dispatch<React.SetStateAction<string[]>>
   onThumbsUp?: (
@@ -31,6 +43,7 @@ export interface AiChatState {
     message: AIMessage,
     { threadId, feedback }: { threadId: string; feedback: string }
   ) => void
+  tracking?: AiChatTrackingOptions
 }
 
 /**
@@ -46,15 +59,6 @@ export type AiChatProviderReturnValue = {
   tmp_setAgent: (agent?: string) => void
   placeholders: string[]
   setPlaceholders: React.Dispatch<React.SetStateAction<string[]>>
-  /**
-   * Set the amount of minutes after which the chat will be cleared automatically
-   * Set `null` to disable auto-clearing
-   *
-   * @default 15
-   */
-  setAutoClearMinutes: React.Dispatch<React.SetStateAction<number | null>>
-  autoClearMinutes: number | null
-
   /**
    * The initial message to display in the chat
    */
@@ -74,6 +78,7 @@ export type AiChatProviderReturnValue = {
     message: AIMessage,
     { threadId, feedback }: { threadId: string; feedback: string }
   ) => void
+  tracking?: AiChatTrackingOptions
   /**
    * Clear/reset the chat conversation
    */
@@ -102,7 +107,42 @@ export type AiChatProviderReturnValue = {
    * Reset the chat width to the default value (360px)
    */
   resetChatWidth: () => void
-} & Pick<AiChatState, "greeting" | "agent" | "disclaimer" | "resizable">
+  /**
+   * The current visualization mode of the chat
+   */
+  visualizationMode: VisualizationMode
+  /**
+   * Set the visualization mode
+   */
+  setVisualizationMode: React.Dispatch<React.SetStateAction<VisualizationMode>>
+  /**
+   * When true, prevents switching between visualization modes
+   */
+  lockVisualizationMode: boolean
+  /**
+   * Optional footer content rendered below the textarea
+   */
+  footer?: React.ReactNode
+  /**
+   * Set the footer content. Use this to update the footer from outside the provider (e.g. per page/route).
+   */
+  setFooter: React.Dispatch<React.SetStateAction<React.ReactNode | undefined>>
+} & Pick<
+  AiChatState,
+  | "greeting"
+  | "agent"
+  | "disclaimer"
+  | "resizable"
+  | "entityResolvers"
+  | "toolHints"
+> & {
+    /** The currently active tool hint, or null if none is selected */
+    activeToolHint: AiChatToolHint | null
+    /** Set the active tool hint (pass null to clear) */
+    setActiveToolHint: React.Dispatch<
+      React.SetStateAction<AiChatToolHint | null>
+    >
+  }
 
 /**
  * Helper function to check if a message is an agent state message

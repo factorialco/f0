@@ -1,4 +1,5 @@
 import { DateQuestionProps } from "./DateQuestion"
+import { DropdownSingleQuestionProps } from "./DropdownSingleQuestion/types"
 import { LinkQuestionProps } from "./LinkQuestion"
 import { NumericQuestionProps } from "./NumericQuestion"
 import { RatingQuestionProps } from "./RatingQuestion"
@@ -10,6 +11,7 @@ export type QuestionType =
   | "rating"
   | "select"
   | "multi-select"
+  | "dropdown-single"
   | "text"
   | "longText"
   | "numeric"
@@ -34,6 +36,10 @@ export type QuestionElement =
   | Omit<RatingQuestionProps & { type: "rating" }, QuestionPropsToOmit>
   | Omit<
       SelectQuestionProps & { type: "select" | "multi-select" },
+      QuestionPropsToOmit
+    >
+  | Omit<
+      DropdownSingleQuestionProps & { type: "dropdown-single" },
       QuestionPropsToOmit
     >
   | Omit<NumericQuestionProps & { type: "numeric" }, QuestionPropsToOmit>
@@ -86,6 +92,11 @@ type OnChangeQuestionParams = BaseQuestionOnChangeParams &
         type: "multi-select"
         value?: string[] | null
         options: SelectQuestionOption[]
+      }
+    | {
+        type: "dropdown-single"
+        value?: string | null
+        options?: SelectQuestionOption[]
       }
     | {
         type: "numeric"

@@ -4,10 +4,11 @@ import { ControllerRenderProps, FieldValues } from "react-hook-form"
 import { F0DatePicker, DatePickerValue } from "@/components/F0DatePicker"
 
 import type { F0DateRangeField, DateRangeValue } from "./types"
+import type { ResolvedField } from "../types"
 import { FORM_SIZE } from "../../constants"
 
 interface DateRangeFieldRendererProps {
-  field: F0DateRangeField
+  field: ResolvedField<F0DateRangeField>
   formField: ControllerRenderProps<FieldValues>
   error?: boolean
   loading?: boolean
@@ -49,15 +50,21 @@ export function DateRangeFieldRenderer({
   error,
   loading,
 }: DateRangeFieldRendererProps) {
-  // Convert form DateRangeValue to DatePickerValue for the picker
+  // Convert form DateRangeValue to DatePickerValue for the picker.
+  // Form value may be null (used to represent cleared state).
   const pickerValue = useMemo(
-    () => dateRangeToPickerValue(formField.value as DateRangeValue | undefined),
+    () =>
+      dateRangeToPickerValue(
+        (formField.value ?? undefined) as DateRangeValue | undefined
+      ),
     [formField.value]
   )
 
-  // Handle picker change by extracting DateRangeValue and updating form
+  // Handle picker change by extracting DateRangeValue and updating form.
+  // Uses null instead of undefined for cleared values because
+  // react-hook-form treats undefined as "use defaultValue".
   const handleChange = (value: DatePickerValue | undefined) => {
-    formField.onChange(pickerValueToDateRange(value))
+    formField.onChange(pickerValueToDateRange(value) ?? null)
   }
 
   // Build label with from/to labels if provided

@@ -188,6 +188,7 @@ export const SelectQuestion = ({ options, ...props }: SelectQuestionProps) => {
                   onChangeLabel={handleChangeLabel}
                   isEditMode={isEditMode}
                   locked={questionLocked}
+                  type={props.type}
                 />
               </div>
             ))}

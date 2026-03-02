@@ -27,11 +27,17 @@ export type FilterTypeComponentProps<
   value: Value
   onChange: (value: Value) => void
   isCompactMode?: boolean
+  /** Update a sibling filter key (used by nested/hierarchical filters) */
+  onFilterChange?: (key: string, value: unknown) => void
+  /** Current values of all filters (used to read sibling filter state) */
+  allFiltersValue?: Record<string, unknown>
 }
 
 export type FilterTypeContext<Options extends object = never> = {
   schema: FilterTypeSchema<Options>
   i18n: I18nContextType
+  /** The key of this filter in the FiltersDefinition (passed to chipLabel for nested label lookups) */
+  filterKey?: string
 }
 
 export type ChipLabel = {
@@ -69,6 +75,8 @@ export type FilterTypeDefinition<
     value: Value
     onChange: (value: Value) => void
     isCompactMode?: boolean
+    onFilterChange?: (key: string, value: unknown) => void
+    allFiltersValue?: Record<string, unknown>
   }) => React.ReactNode
   /**
    * The value label to display in the filter chips

@@ -11,4 +11,7 @@ export * from "@/hooks/datasource/types"
 export * from "./hooks/useDataCollectionData"
 export * from "./hooks/useDataCollectionSource"
 export * from "./hooks/useInfiniteScrollPagination"
-export type { CustomVisualizationProps } from "./visualizations/collection/types"
+export type {
+  CustomVisualizationProps,
+  VisualizationFilterOverrides,
+} from "./visualizations/collection/types"

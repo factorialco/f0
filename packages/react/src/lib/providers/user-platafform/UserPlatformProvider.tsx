@@ -7,6 +7,7 @@ type Context = {
   platform: Platform
   isDev: boolean
   showExperimentalWarnings: boolean
+  renderDataTestIdAttribute: boolean
 }
 
 const PlatformContext = createContext<Context | null>(null)
@@ -20,6 +21,7 @@ export const UserPlatformProvider = ({
   platform,
   isDev = false,
   showExperimentalWarnings = false,
+  renderDataTestIdAttribute = false,
 }: UserPlatformProviderProps) => {
   const [userPlatform, setUserPlatform] = useState<Platform>(
     platform ?? "unknown"
@@ -37,6 +39,7 @@ export const UserPlatformProvider = ({
         platform: userPlatform,
         isDev,
         showExperimentalWarnings,
+        renderDataTestIdAttribute,
       }}
     >
       {children}
@@ -64,6 +67,16 @@ export function useUserPlatform(): Platform {
   }
 
   return context.platform
+}
+
+/**
+ * Returns whether data-testid attributes should be rendered.
+ * When false (default when outside UserPlatformProvider), withDataTestId
+ * returns the original content without the wrapper or attribute.
+ */
+export function useRenderDataTestIdAttribute(): boolean {
+  const context = useContext(PlatformContext)
+  return context?.renderDataTestIdAttribute ?? false
 }
 export function useShowExperimentalWarnings(): boolean {
   const context = useContext(PlatformContext)

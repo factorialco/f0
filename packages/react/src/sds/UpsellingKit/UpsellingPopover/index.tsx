@@ -2,6 +2,7 @@ import { PopoverContentProps } from "@radix-ui/react-popover"
 import { useState } from "react"
 
 import { F0Button, F0ButtonProps } from "@/components/F0Button"
+import { withDataTestId } from "@/lib/data-testid"
 import { IconType } from "@/components/F0Icon"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
 
@@ -31,7 +32,7 @@ type UpsellingPopoverProps = {
 
 type ResponseStatus = "success" | "error" | null
 
-export function UpsellingPopover({
+function _UpsellingPopover({
   isOpen,
   setIsOpen,
   label,
@@ -146,3 +147,5 @@ export function UpsellingPopover({
     </>
   )
 }
+
+export const UpsellingPopover = withDataTestId(_UpsellingPopover)

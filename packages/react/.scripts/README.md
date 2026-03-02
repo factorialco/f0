@@ -337,5 +337,5 @@ pnpm exec tsx packages/react/.scripts/check-cycle-dependencies.ts --pre-commit
 
 ## Related Documentation
 
-- [Component Guidelines](../../.cursor/rules/01-component-guidelines.mdc)
-- [Project Overview](../../.cursor/rules/00-project-overview.mdc)
+- [Component Guidelines](../AGENTS.md)
+- [Project Overview](../../AGENTS.md)

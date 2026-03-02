@@ -48,7 +48,7 @@ export const useMessageSourcesAction = () => {
       },
     ],
     // render only when backend wants to attach sources
-    available: "disabled",
+    available: "frontend",
     render: (props) => {
       const sources: MessageSourceItem[] = props.args.sources ?? []
       return <MessageSources sources={sources} />

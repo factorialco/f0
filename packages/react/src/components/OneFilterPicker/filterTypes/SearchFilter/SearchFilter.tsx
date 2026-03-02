@@ -90,7 +90,7 @@ export function SearchFilter({
   }, [value])
 
   return (
-    <div className="space-y-4 p-3">
+    <div className="space-y-4 p-2">
       <InputInternal
         label={`Search ${schema.label.toLowerCase()}...`}
         hideLabel

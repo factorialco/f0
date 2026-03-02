@@ -6,7 +6,11 @@ import { fn } from "storybook/test"
 import { Input } from "@/ui/input"
 import { Label } from "@/ui/label"
 
-import type { FiltersDefinition, FiltersState } from "../types"
+import type {
+  FiltersDefinition,
+  FiltersState,
+  PresetsDefinition,
+} from "../types"
 
 import { InFilterOptions } from "../filterTypes/InFilter/types"
 import * as OneFilterPicker from "../index"
@@ -95,6 +99,80 @@ export const WithPreselectedFiltersAndItemCount: StoryObj = {
     presets: getPresetMock(true),
   },
 }
+
+const PresetsOverflowCounterConsistencyComponent = ({
+  width,
+}: {
+  width: number
+}) => {
+  const [filters, setFilters] = useState<FiltersState<typeof filterDefinition>>(
+    {}
+  )
+
+  const presetsWithCount: PresetsDefinition<typeof filterDefinition> = [
+    {
+      label: "Engineering Team",
+      filter: { department: ["engineering"] },
+      itemsCount: () => 42,
+    },
+    {
+      label: "Remote Workers",
+      filter: { location: ["remote"] },
+      itemsCount: () => 18,
+    },
+    {
+      label: "Alice's Team",
+      filter: { manager: ["alice"] },
+      itemsCount: () => 9,
+    },
+    {
+      label: "Senior Roles",
+      filter: { role: ["manager", "legal", "operations"] },
+      itemsCount: () => 12,
+    },
+    {
+      label: "High Salary",
+      filter: { salary: { value: 120000, mode: "single" } },
+      itemsCount: () => 5,
+    },
+  ]
+
+  return (
+    <div style={{ width }}>
+      <p className="mb-4 text-sm text-f1-foreground-secondary">
+        This story forces preset overflow. Counter values should stay the same
+        in visible pills and in the collapsed dropdown. Use the width control to
+        force collapse/expand behavior.
+      </p>
+      <OneFilterPickerComponent
+        filters={filterDefinition}
+        value={filters}
+        presets={presetsWithCount}
+        onChange={setFilters}
+      />
+    </div>
+  )
+}
+
+type OverflowCounterConsistencyStory = StoryObj<{ width: number }>
+
+export const WithPresetsOverflowCounterConsistency: OverflowCounterConsistencyStory =
+  {
+    args: {
+      width: 300,
+    },
+    argTypes: {
+      width: {
+        control: { type: "range", min: 220, max: 900, step: 10 },
+        description: "Container width in pixels to test overflow behavior",
+      },
+    },
+    render: (args) => (
+      <PresetsOverflowCounterConsistencyComponent
+        width={args.width as number}
+      />
+    ),
+  }
 
 export const WithPresetsAndInitialFilters: StoryObj = {
   args: {

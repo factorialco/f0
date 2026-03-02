@@ -1,5 +1,5 @@
 import { Markdown, type AssistantMessageProps } from "@copilotkit/react-ui"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 import { F0Icon } from "@/components/F0Icon"
 import {
@@ -14,6 +14,7 @@ import { ButtonCopy } from "@/ui/ButtonCopy"
 
 import { F0ActionItem } from "../../F0ActionItem"
 import { f0MarkdownRenderers } from "../../F0MarkdownRenderers"
+import { useAiChat } from "../providers/AiChatStateProvider"
 import { useFeedbackModal, UserReaction } from "./FeedbackProvider"
 
 export const AssistantMessage = ({
@@ -29,7 +30,6 @@ export const AssistantMessage = ({
     message.toolCalls?.find(
       (tool) => tool.function.name === "orchestratorThinking"
     )
-
   const subComponent = message?.generativeUI?.(
     isThinkingTool
       ? {
@@ -41,7 +41,16 @@ export const AssistantMessage = ({
 
   const translations = useI18n()
   const { open: openFeedbackModal } = useFeedbackModal()
+  const { tracking } = useAiChat()
   const [reactionValue, setReactionValue] = useState<UserReaction | null>(null)
+
+  const isStoppedMessage = content.includes("<!--response-stopped-->")
+
+  useEffect(() => {
+    if (message?.id && !isLoading && !isGenerating) {
+      tracking?.onMessage?.(message)
+    }
+  }, [message, isLoading, isGenerating, tracking])
 
   if (!isLoading && !isGenerating && isEmptyMessage) {
     return null
@@ -61,7 +70,7 @@ export const AssistantMessage = ({
             />
           </div>
 
-          {!isGenerating && !isLoading && !!content && (
+          {!isGenerating && !isLoading && !!content && !isStoppedMessage && (
             <div className="flex">
               <ButtonCopy
                 size="md"

@@ -2,6 +2,7 @@ import { ElementRef, forwardRef, useMemo } from "react"
 
 import { Badge } from "@/ui/IconBadge"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
+import { DataTestIdWrapper, WithDataTestIdProps } from "@/lib/data-testid"
 import { cn } from "@/lib/utils"
 import { Avatar, AvatarFallback, InternalAvatarProps } from "@/ui/Avatar"
 
@@ -18,10 +19,11 @@ export type F0AvatarFileProps = Omit<
   file: FileDef
   size?: AvatarFileSize
   badge?: AvatarBadge
-} & Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">
+} & Pick<BaseAvatarProps, "aria-label" | "aria-labelledby"> &
+  WithDataTestIdProps
 
 const F0AvatarFile = forwardRef<ElementRef<typeof Avatar>, F0AvatarFileProps>(
-  ({ file, badge, ...props }, ref) => {
+  ({ file, badge, dataTestId, ...props }, ref) => {
     const { type: fileType, color: fileColor } = getFileTypeInfo(file)
 
     const reversedSizesMapping = useMemo(
@@ -65,29 +67,31 @@ const F0AvatarFile = forwardRef<ElementRef<typeof Avatar>, F0AvatarFileProps>(
     }, [props])
 
     return (
-      <Avatar
-        ref={ref}
-        className={cn("bg-f1-background", "overflow-visible")}
-        {...props}
-        size={mappedSize}
-      >
-        <AvatarFallback
-          className={cn("select-none font-semibold", textSize, fileColor)}
+      <DataTestIdWrapper dataTestId={dataTestId}>
+        <Avatar
+          ref={ref}
+          className={cn("bg-f1-background", "overflow-visible")}
+          {...props}
+          size={mappedSize}
         >
-          {fileType}
-        </AvatarFallback>
-        {badge && (
-          <div className="absolute -bottom-0.5 -right-0.5">
-            {badge.tooltip ? (
-              <Tooltip description={badge.tooltip}>
-                <div className="cursor-help">{badgeContent}</div>
-              </Tooltip>
-            ) : (
-              badgeContent
-            )}
-          </div>
-        )}
-      </Avatar>
+          <AvatarFallback
+            className={cn("select-none font-semibold", textSize, fileColor)}
+          >
+            {fileType}
+          </AvatarFallback>
+          {badge && (
+            <div className="absolute -bottom-0.5 -right-0.5">
+              {badge.tooltip ? (
+                <Tooltip description={badge.tooltip}>
+                  <div className="cursor-help">{badgeContent}</div>
+                </Tooltip>
+              ) : (
+                badgeContent
+              )}
+            </div>
+          )}
+        </Avatar>
+      </DataTestIdWrapper>
     )
   }
 )

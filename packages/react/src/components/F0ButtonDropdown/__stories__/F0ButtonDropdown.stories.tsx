@@ -1,6 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
+import { expect, within } from "storybook/test"
+
 import { Add, Delete, Pencil, Replace, Save } from "@/icons/app/index.ts"
+import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
 import { withSnapshot } from "@/lib/storybook-utils/parameters.ts"
 
 import { F0ButtonDropdown } from "../index"
@@ -74,6 +77,7 @@ const meta = {
       control: "text",
       description: "Tooltip to explain the button",
     },
+    ...dataTestIdArgs,
   },
 } satisfies Meta<typeof F0ButtonDropdown>
 
@@ -100,6 +104,31 @@ export const Default: Story = {
         label: "Item 3",
       },
     ],
+  },
+}
+
+export const WithDataTestId: Story = {
+  args: {
+    variant: "default",
+    dataTestId: "my-test-button-dropdown",
+    items: [
+      {
+        value: "1",
+        label: "Item 1",
+        icon: Add,
+      },
+      {
+        value: "2",
+        label: "Item 2",
+        icon: Replace,
+      },
+    ],
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await expect(
+      canvas.getByTestId("my-test-button-dropdown")
+    ).toBeInTheDocument()
   },
 }
 

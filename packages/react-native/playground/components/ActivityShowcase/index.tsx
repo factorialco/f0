@@ -7,7 +7,7 @@ import { useCSSVariable } from "uniwind";
 const { Check, Alert, Home, Settings, Archive, Bell, MessageFilled } = AppIcons;
 
 export function ActivityShowcase() {
-  const [f1Foreground] = useCSSVariable(['--color-f0-foreground']);
+  const [f0Foreground] = useCSSVariable(['--color-f0-foreground'])
 
   const asString = (value: string | number | undefined): string => {
     if (typeof value === 'string') return value;
@@ -26,7 +26,7 @@ export function ActivityShowcase() {
       style={{ width: "100%" }}
     >
       {/* Basic Activity Items */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f1Foreground) }}>
+      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
         Basic Activity Items
       </Text>
       <View className="gap-2 mb-6">
@@ -60,7 +60,7 @@ export function ActivityShowcase() {
       </View>
 
       {/* With Unread Indicator */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f1Foreground) }}>
+      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
         Unread Activities
       </Text>
       <View className="gap-2 mb-6">
@@ -87,7 +87,7 @@ export function ActivityShowcase() {
       </View>
 
       {/* Without Description */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f1Foreground) }}>
+      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
         Without Description
       </Text>
       <View className="gap-2 mb-6">
@@ -110,7 +110,7 @@ export function ActivityShowcase() {
       </View>
 
       {/* Without Icon */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f1Foreground) }}>
+      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
         Without Icon
       </Text>
       <View className="gap-2 mb-6">
@@ -134,7 +134,7 @@ export function ActivityShowcase() {
       </View>
 
       {/* Long Descriptions */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f1Foreground) }}>
+      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
         Long Descriptions
       </Text>
       <View className="gap-2 mb-6">
@@ -150,7 +150,7 @@ export function ActivityShowcase() {
       </View>
 
       {/* Skeleton Loading State */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f1Foreground) }}>
+      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
         Skeleton Loading State
       </Text>
       <View className="gap-2 mb-6">
@@ -160,7 +160,7 @@ export function ActivityShowcase() {
       </View>
 
       {/* Mixed States */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f1Foreground) }}>
+      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
         Mixed States
       </Text>
       <View className="gap-2 mb-6">

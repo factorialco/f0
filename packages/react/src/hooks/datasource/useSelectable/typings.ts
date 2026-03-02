@@ -59,6 +59,22 @@ export type UseSelectableProps<
    * because the visible items are a filtered subset.
    */
   isSearchActive?: boolean
+  /**
+   * When true, selection spans across all pages (cross-page selection).
+   * - Selection state persists when navigating between pages
+   * - itemStatus includes items from all pages
+   *
+   * When false (default), selection is scoped to the current page only:
+   * - Selection state resets when navigating between pages
+   * - itemStatus only includes items from the current page
+   */
+  allPagesSelection?: boolean
+  /**
+   * When true (default), clears selection when the page changes
+   * (unless all items are selected). Set to false to persist
+   * selections across page changes unconditionally.
+   */
+  resetOnPageChange?: boolean
 }
 
 export type SelectionMeta<R extends RecordType> = {
@@ -103,9 +119,14 @@ export type UseSelectableReturn<
     checked: boolean
   ) => void
   /**
-   * Handles the change of the selected all items
+   * Handles "select all" for the current page only
    */
   handleSelectAll: (checked: boolean) => void
+  /**
+   * Handles "select all items" across all pages (full dataset).
+   * Only meaningful when allPagesSelection is enabled.
+   */
+  handleSelectAllItems: (checked: boolean) => void
   /**
    * Handles the change of the selected group.
    * Accepts either SelectionId(s) or a GroupRecord.

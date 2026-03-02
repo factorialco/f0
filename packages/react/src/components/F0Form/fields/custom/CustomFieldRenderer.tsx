@@ -1,12 +1,14 @@
 import { ControllerRenderProps, FieldValues } from "react-hook-form"
 
 import type { F0CustomField, CustomFieldRenderPropsBase } from "./types"
+import type { ResolvedField } from "../types"
 
 interface CustomFieldRendererProps {
-  field: F0CustomField
+  field: ResolvedField<F0CustomField>
   formField: ControllerRenderProps<FieldValues>
   error?: string
   isValidating: boolean
+  required?: boolean
 }
 
 /**
@@ -18,6 +20,7 @@ export function CustomFieldRenderer({
   formField,
   error,
   isValidating,
+  required,
 }: CustomFieldRendererProps) {
   const renderProps: CustomFieldRenderPropsBase & { config: unknown } = {
     id: field.id,
@@ -29,6 +32,7 @@ export function CustomFieldRenderer({
     error,
     isValidating,
     disabled: field.disabled,
+    required,
     config: field.fieldConfig,
   }
 

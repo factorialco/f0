@@ -2,10 +2,11 @@ import { ControllerRenderProps, FieldValues } from "react-hook-form"
 
 import { Textarea } from "@/experimental/Forms/Fields/TextArea"
 import type { F0TextareaField } from "./types"
+import type { ResolvedField } from "../types"
 import { FORM_SIZE } from "../../constants"
 
 interface TextareaFieldRendererProps {
-  field: F0TextareaField
+  field: ResolvedField<F0TextareaField>
   formField: ControllerRenderProps<FieldValues>
   error?: boolean
   loading?: boolean
@@ -22,12 +23,12 @@ export function TextareaFieldRenderer({
 }: TextareaFieldRendererProps) {
   return (
     <Textarea
+      {...formField}
       label={field.label}
       placeholder={field.placeholder}
       disabled={field.disabled}
       rows={field.rows}
       maxLength={field.maxLength}
-      {...formField}
       value={formField.value != null ? String(formField.value) : ""}
       size={FORM_SIZE}
       hideLabel

@@ -4,7 +4,7 @@ import { useCSSVariable } from "uniwind";
 import { DetailsItemsList } from "../../../src/components/experimental/Lists/DetailsItemsList";
 
 export function DetailsItemsListShowcase() {
-  const [f1Foreground] = useCSSVariable(['--color-f0-foreground']);
+  const [f0Foreground] = useCSSVariable(['--color-f0-foreground'])
 
   const asString = (value: string | number | undefined): string => {
     if (typeof value === 'string') return value;
@@ -19,7 +19,7 @@ export function DetailsItemsListShowcase() {
       style={{ width: "100%" }}
     >
       {/* Primary */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f1Foreground) }}>
+      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
         Primary
       </Text>
       <View className="mb-6">
@@ -83,7 +83,7 @@ export function DetailsItemsListShowcase() {
       </View>
 
       {/* Table View */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f1Foreground) }}>
+      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
         Table View
       </Text>
       <View className="mb-6">
@@ -148,7 +148,7 @@ export function DetailsItemsListShowcase() {
       </View>
 
       {/* Table View Horizontal Items */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f1Foreground) }}>
+      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
         Table View Horizontal Items
       </Text>
       <View className="mb-6">

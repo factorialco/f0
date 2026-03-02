@@ -3,6 +3,9 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import avatar01 from "@storybook-static/avatars/person01.jpg"
 import avatar02 from "@storybook-static/avatars/person02.jpg"
 import avatar03 from "@storybook-static/avatars/person03.jpg"
+import { expect, within } from "storybook/test"
+
+import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
 
 import { F0ChipList } from "./index"
 
@@ -13,6 +16,9 @@ const meta = {
     layout: "centered",
   },
   tags: ["autodocs", "experimental"],
+  argTypes: {
+    ...dataTestIdArgs,
+  },
 } satisfies Meta<typeof F0ChipList>
 
 export default meta
@@ -51,6 +57,28 @@ export const Default: Story = {
         },
       },
     ],
+  },
+}
+
+export const WithDataTestId: Story = {
+  args: {
+    ...Default.args,
+    dataTestId: "my-test-chip-list",
+    chips: [
+      {
+        label: "Chip with Test ID",
+        avatar: {
+          type: "person",
+          firstName: "John",
+          lastName: "Doe",
+          src: avatar01,
+        },
+      },
+    ],
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await expect(canvas.getByTestId("my-test-chip-list")).toBeInTheDocument()
   },
 }
 

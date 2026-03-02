@@ -4,6 +4,7 @@ interface PageProps {
   embedded?: boolean
 }
 
+import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
 
 function _Page({ children, header, embedded = false }: PageProps) {
@@ -26,4 +27,4 @@ _Page.displayName = "Page"
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export const Page = experimentalComponent("Page", _Page)
+export const Page = withDataTestId(experimentalComponent("Page", _Page))

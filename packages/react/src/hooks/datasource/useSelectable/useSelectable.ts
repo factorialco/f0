@@ -38,6 +38,8 @@ export function useSelectable<
   onSelectItems,
   disableSelectAll = false,
   isSearchActive = false,
+  allPagesSelection,
+  resetOnPageChange = true,
 }: UseSelectableProps<R, Filters, Sortings, Grouping>): UseSelectableReturn<
   R,
   Filters
@@ -46,6 +48,13 @@ export function useSelectable<
   const isGrouped = data.type === "grouped"
   const isMultiSelection = selectionMode === "multi"
   const getSelectable = source.selectable
+  // Use allPagesSelection from props, falling back to source.allPagesSelection, default false
+  // When allPagesSelection is false (default), selection is scoped to the current page only
+  const isPageOnlySelection = !(
+    allPagesSelection ??
+    source.allPagesSelection ??
+    false
+  )
 
   // State & Refs
 
@@ -70,12 +79,30 @@ export function useSelectable<
   const previousSelectionState = useRef<string>("")
   const isAllSelectedRef = useRef(false)
   const justClearedByFilterChange = useRef(false)
+  const previousPageIdentifierRef = useRef<string | number | null | undefined>(
+    undefined
+  )
 
   // Computed Values
 
   const totalKnownItemsCount = useMemo(() => {
+    // In page-only selection mode, only count items in current page
+    if (isPageOnlySelection) {
+      return data.records?.length || 0
+    }
     return paginationInfo ? paginationInfo.total : data.records?.length
-  }, [paginationInfo, data.records?.length])
+  }, [paginationInfo, data.records?.length, isPageOnlySelection])
+
+  const currentPageIdentifier = useMemo(() => {
+    if (!paginationInfo) return null
+    if ("type" in paginationInfo && paginationInfo.type === "pages") {
+      return paginationInfo.currentPage
+    }
+    if ("cursor" in paginationInfo) {
+      return paginationInfo.cursor
+    }
+    return null
+  }, [paginationInfo])
 
   const [checkedItems, uncheckedItems] = useMemo(() => {
     const checked = new Map()
@@ -194,16 +221,44 @@ export function useSelectable<
   const { itemsStatus, selectedIds } = useMemo(() => {
     const items = localSelectedState.items || new Map()
 
+    // In page-only selection mode, only include items from current page
+    const currentPageItemIds = isPageOnlySelection
+      ? new Set(
+          data.records
+            .map((record) => getSelectable?.(record))
+            .filter((id): id is SelectionId => id !== undefined)
+        )
+      : null
+
     const itemsStatus = Array.from(items.values())
-      .filter((itemState) => itemState.item !== undefined)
+      .filter((itemState) => {
+        if (itemState.item === undefined) return false
+        // Filter to only current page items in page-only selection mode
+        if (isPageOnlySelection && currentPageItemIds) {
+          return currentPageItemIds.has(itemState.id)
+        }
+        return true
+      })
       .map(({ item, checked }) => ({ item: item as R, checked }))
 
     const selectedIds = Array.from(items.entries())
-      .filter(([, itemState]) => itemState.checked)
+      .filter(([id, itemState]) => {
+        if (!itemState.checked) return false
+        // Filter to only current page items in page-only selection mode
+        if (isPageOnlySelection && currentPageItemIds) {
+          return currentPageItemIds.has(id)
+        }
+        return true
+      })
       .map(([id]) => id)
 
     return { itemsStatus, selectedIds }
-  }, [localSelectedState.items])
+  }, [
+    localSelectedState.items,
+    isPageOnlySelection,
+    data.records,
+    getSelectable,
+  ])
 
   const groupsStatus = useMemo(
     () =>
@@ -469,10 +524,70 @@ export function useSelectable<
   )
 
   /**
-   * Handles "Select All" functionality
-   * Supports both grouped and flat data structures
+   * Handles "Select All" for the current page only.
+   * Supports both grouped and flat data structures.
    */
   const handleSelectAll = useCallback(
+    (checked: boolean) => {
+      if (!isMultiSelection) return
+
+      if (!checked && allSelectedCheck) {
+        setAllSelectedCheck(false)
+        wasExplicitSelectAll.current = false
+        setSelectAllTotal(null)
+        setGroupsState(new Map())
+        isAllSelectedRef.current = false
+        setLocalSelectedState(() => ({
+          allSelected: false,
+          items: new Map(),
+          groups: new Map(),
+        }))
+        return
+      }
+
+      const currentPageCount = data.records?.length || 0
+
+      if (checked) {
+        setSelectAllTotal((prev) => (prev !== null ? prev : currentPageCount))
+      }
+
+      if (isGrouped && data.type === "grouped") {
+        const allGroupIds = data.groups.map((group) => group.key)
+        if (allGroupIds.length > 0) {
+          handleSelectGroupChange(allGroupIds, checked)
+        }
+      } else {
+        const allItemIds = data.records
+          .map((record) => getSelectable?.(record))
+          .filter((id): id is SelectionId => id !== undefined)
+
+        if (allItemIds.length > 0) {
+          handleSelectItemChangeInternal(allItemIds, checked)
+        }
+      }
+
+      if (!checked) {
+        setAllSelectedCheck(false)
+        wasExplicitSelectAll.current = false
+        setSelectAllTotal(null)
+      }
+    },
+    [
+      isMultiSelection,
+      allSelectedCheck,
+      isGrouped,
+      data,
+      getSelectable,
+      handleSelectGroupChange,
+      handleSelectItemChangeInternal,
+    ]
+  )
+
+  /**
+   * Handles "Select All Items" across all pages (full dataset).
+   * Only meaningful when allPagesSelection is enabled.
+   */
+  const handleSelectAllItems = useCallback(
     (checked: boolean) => {
       if (!isMultiSelection) return
 
@@ -499,7 +614,6 @@ export function useSelectable<
           handleSelectItemChangeInternal(allItemIds, checked)
         }
 
-        // Update items not in current page (e.g., items selected before pagination/filtering)
         setLocalSelectedState((current) => {
           const newItems = new Map(current.items)
           let hasChanges = false
@@ -596,6 +710,32 @@ export function useSelectable<
     }
   }, [source.currentFilters, clearSelectedItems, disableSelectAll])
 
+  // Clear selections when page changes, unless the user has triggered
+  // "select all items" (allSelectedCheck) or resetOnPageChange is disabled
+  useEffect(() => {
+    if (!resetOnPageChange) return
+
+    const previousPageIdentifier = previousPageIdentifierRef.current
+
+    if (previousPageIdentifier === undefined) {
+      previousPageIdentifierRef.current = currentPageIdentifier
+      return
+    }
+
+    if (currentPageIdentifier !== previousPageIdentifier) {
+      if (!allSelectedCheck) {
+        clearSelectedItems()
+      }
+    }
+
+    previousPageIdentifierRef.current = currentPageIdentifier
+  }, [
+    currentPageIdentifier,
+    allSelectedCheck,
+    clearSelectedItems,
+    resetOnPageChange,
+  ])
+
   // Store isAllSelected in ref to avoid circular dependencies
   useEffect(() => {
     isAllSelectedRef.current = isAllSelected
@@ -639,7 +779,7 @@ export function useSelectable<
         }
       }
     } else {
-      if (isMultiSelection) {
+      if (isMultiSelection && !isPageOnlySelection) {
         handleSelectItemChangeInternal(
           recordIds,
           isAllSelectedRef.current,
@@ -687,6 +827,7 @@ export function useSelectable<
     groupsState,
     isMultiSelection,
     handleSelectItemChangeInternal,
+    isPageOnlySelection,
   ])
 
   // Reset "all selected" state when empty
@@ -720,7 +861,8 @@ export function useSelectable<
         filters: source.currentFilters || {},
         selectedCount: selectedItemsCount,
       },
-      clearSelectedItems
+      clearSelectedItems,
+      handleSelectAllItems
     )
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
@@ -742,6 +884,7 @@ export function useSelectable<
     clearSelection: clearSelectedItems,
     handleSelectItemChange,
     handleSelectAll,
+    handleSelectAllItems,
     handleSelectGroupChange,
     selectionMeta: {
       selectedItemsCount,

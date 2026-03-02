@@ -1,3 +1,4 @@
+import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
 import { OverflowList } from "@/ui/OverflowList"
 
@@ -85,7 +86,6 @@ _F0ChipList.displayName = "F0ChipList"
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export const F0ChipList = experimentalComponent<typeof _F0ChipList>(
-  "F0ChipList",
-  _F0ChipList
+export const F0ChipList = withDataTestId(
+  experimentalComponent<typeof _F0ChipList>("F0ChipList", _F0ChipList)
 )

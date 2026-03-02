@@ -1,5 +1,7 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
 
+import { expect, within } from "storybook/test"
+
 import { OmniButton } from "./index"
 
 const meta: Meta<typeof OmniButton> = {
@@ -55,5 +57,16 @@ export const WithNewUpdate: Story = {
     label: "Help",
     options: mockOptions,
     hasNewUpdate: true,
+  },
+}
+
+export const WithDataTestId: Story = {
+  args: {
+    ...Default.args,
+    dataTestId: "omnibutton-test-id",
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await expect(canvas.getByTestId("omnibutton-test-id")).toBeInTheDocument()
   },
 }

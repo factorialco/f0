@@ -4,7 +4,7 @@ import { PageHeader } from "../../../src/components/Navigation/PageHeader";
 import { useCSSVariable } from "uniwind";
 
 export function PageHeaderShowcase() {
-  const [f1Foreground] = useCSSVariable(['--color-f0-foreground']);
+  const [f0Foreground] = useCSSVariable(['--color-f0-foreground'])
 
   const asString = (value: string | number | undefined): string => {
     if (typeof value === 'string') return value;
@@ -17,12 +17,12 @@ export function PageHeaderShowcase() {
       contentContainerStyle={{ paddingBottom: 20 }}
       style={{ width: "100%" }}
     >
-      <Text className="text-lg font-bold my-4 text-f0-foreground px-4" style={{ color: asString(f1Foreground) }}>
+      <Text className="text-lg font-bold my-4 text-f0-foreground px-4" style={{ color: asString(f0Foreground) }}>
         Default
       </Text>
       <PageHeader title="Timesheet" />
 
-      <Text className="text-lg font-bold my-4 text-f0-foreground px-4" style={{ color: asString(f1Foreground) }}>
+      <Text className="text-lg font-bold my-4 text-f0-foreground px-4" style={{ color: asString(f0Foreground) }}>
         With action
       </Text>
       <PageHeader
@@ -36,7 +36,7 @@ export function PageHeaderShowcase() {
         ]}
       />
 
-      <Text className="text-lg font-bold my-4 text-f0-foreground px-4" style={{ color: asString(f1Foreground) }}>
+      <Text className="text-lg font-bold my-4 text-f0-foreground px-4" style={{ color: asString(f0Foreground) }}>
         With action and badge
       </Text>
       <PageHeader

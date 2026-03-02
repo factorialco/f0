@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "skills": {
+    "a11y": {
+      "source": "joabgonzalez/ai-agents-framework",
+      "sourceType": "github",
+      "computedHash": "1d1847678930686474644f5ff1ef9a2fb53e25270d87361806001d1795c45eb7"
+    }
+  }
+}

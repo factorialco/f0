@@ -5,9 +5,10 @@ import { F0Checkbox } from "@/components/F0Checkbox"
 
 import { isZodType, unwrapZodSchema } from "../../f0Schema"
 import type { F0CheckboxField } from "./types"
+import type { ResolvedField } from "../types"
 
 interface CheckboxFieldRendererProps {
-  field: F0CheckboxField
+  field: ResolvedField<F0CheckboxField>
   formField: ControllerRenderProps<FieldValues>
 }
 
@@ -32,10 +33,10 @@ export function CheckboxFieldRenderer({
 
   return (
     <F0Checkbox
+      {...formField}
       title={field.label}
       disabled={field.disabled}
       required={isRequired}
-      {...formField}
       checked={Boolean(formField.value)}
       onCheckedChange={formField.onChange}
     />

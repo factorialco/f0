@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import image from "@storybook-static/avatars/person04.jpg"
 import { useState } from "react"
-import { fn } from "storybook/test"
+import { expect, fn, within } from "storybook/test"
 
 import {
   Add,
@@ -18,10 +18,15 @@ import {
   Office,
   Star,
 } from "@/icons/app"
+import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
 import { createAtlaskitDriver } from "@/lib/dnd/atlaskitDriver"
 import { DndProvider } from "@/lib/dnd/context"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { mockImage } from "@/testing/mocks/images"
+
+import { F0Link } from "@/components/F0Link"
+import { Switch } from "@/ui/switch"
+import { Text } from "@/ui/Text"
 
 import {
   cardImageFits,
@@ -39,6 +44,28 @@ const SlotComponent = () => {
   return (
     <div className="w-full rounded border-2 border-dashed border-f1-border-info bg-f1-background-info p-5 text-center font-medium text-f1-foreground-info">
       This is a slot (children)
+    </div>
+  )
+}
+
+const InteractiveChildrenContent = () => {
+  const [checked, setChecked] = useState(false)
+  return (
+    <div className="flex flex-col gap-3">
+      <p className="text-f1-foreground-secondary">
+        This card has a link, but the children are interactive.
+      </p>
+      <div className="flex items-center justify-between">
+        <F0Link href="https://google.com" target="_blank">
+          Click me (goes to Google)
+        </F0Link>
+        <Switch
+          title="Toggle"
+          checked={checked}
+          onCheckedChange={(value) => setChecked(value)}
+        />
+        <Text variant="body" content="Toggle" />
+      </div>
     </div>
   )
 }
@@ -77,6 +104,7 @@ const meta = {
         defaultValue: { summary: "sm" },
       },
     },
+    ...dataTestIdArgs,
   },
   args: {
     imageFit: "fit-width",
@@ -172,6 +200,18 @@ export const Default: Story = {
   },
 }
 
+export const WithDataTestId: Story = {
+  args: {
+    ...Default.args,
+    title: "Card with Test ID",
+    dataTestId: "my-test-card",
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await expect(canvas.getByTestId("my-test-card")).toBeInTheDocument()
+  },
+}
+
 export const WithActions: Story = {
   args: {
     title: "Product designer",
@@ -248,6 +288,15 @@ export const WithChildren: Story = {
   args: {
     title: "Card with children",
     children: <SlotComponent />,
+  },
+}
+
+export const WithInteractiveChildren: Story = {
+  args: {
+    title: "Card with interactive children",
+    link: "https://factorial.co",
+    onClick: () => alert("Card clicked!"),
+    children: <InteractiveChildrenContent />,
   },
 }
 

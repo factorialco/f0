@@ -17,7 +17,7 @@ import { useCSSVariable } from "uniwind";
 const { Check, Alert, Home } = AppIcons;
 
 export function AvatarShowcase() {
-  const [f1Foreground] = useCSSVariable(['--color-f0-foreground']);
+  const [f0Foreground] = useCSSVariable(['--color-f0-foreground'])
 
   const asString = (value: string | number | undefined): string => {
     if (typeof value === 'string') return value;
@@ -32,232 +32,232 @@ export function AvatarShowcase() {
       style={{ width: "100%" }}
     >
       {/* PersonAvatar */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f1Foreground) }}>
+      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
         Person Avatar
       </Text>
       <View className="flex-row flex-wrap gap-4 mb-6 items-center">
         <View className="items-center">
           <PersonAvatar firstName="John" lastName="Doe" size="xsmall" />
-          <Text className="text-xs mt-2 text-center" style={{ color: asString(f1Foreground) }}>
+          <Text className="text-xs mt-2 text-center" style={{ color: asString(f0Foreground) }}>
             XSmall
           </Text>
         </View>
         <View className="items-center">
           <PersonAvatar firstName="Jane" lastName="Smith" size="small" />
-          <Text className="text-xs mt-2 text-center" style={{ color: asString(f1Foreground) }}>
+          <Text className="text-xs mt-2 text-center" style={{ color: asString(f0Foreground) }}>
             Small
           </Text>
         </View>
         <View className="items-center">
           <PersonAvatar firstName="Bob" lastName="Johnson" size="medium" />
-          <Text className="text-xs mt-2 text-center" style={{ color: asString(f1Foreground) }}>
+          <Text className="text-xs mt-2 text-center" style={{ color: asString(f0Foreground) }}>
             Medium
           </Text>
         </View>
         <View className="items-center">
           <PersonAvatar firstName="Alice" lastName="Williams" size="large" />
-          <Text className="text-xs mt-2 text-center" style={{ color: asString(f1Foreground) }}>
+          <Text className="text-xs mt-2 text-center" style={{ color: asString(f0Foreground) }}>
             Large
           </Text>
         </View>
         <View className="items-center">
           <PersonAvatar firstName="Charlie" lastName="Brown" size="xlarge" />
-          <Text className="text-xs mt-2 text-center" style={{ color: asString(f1Foreground) }}>
+          <Text className="text-xs mt-2 text-center" style={{ color: asString(f0Foreground) }}>
             XLarge
           </Text>
         </View>
       </View>
 
       {/* CompanyAvatar */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f1Foreground) }}>
+      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
         Company Avatar
       </Text>
       <View className="flex-row flex-wrap gap-4 mb-6 items-center">
         <View className="items-center">
           <CompanyAvatar name="Acme Corp" size="small" />
-          <Text className="text-xs mt-2 text-center" style={{ color: asString(f1Foreground) }}>
+          <Text className="text-xs mt-2 text-center" style={{ color: asString(f0Foreground) }}>
             Small
           </Text>
         </View>
         <View className="items-center">
           <CompanyAvatar name="Tech Inc" size="medium" />
-          <Text className="text-xs mt-2 text-center" style={{ color: asString(f1Foreground) }}>
+          <Text className="text-xs mt-2 text-center" style={{ color: asString(f0Foreground) }}>
             Medium
           </Text>
         </View>
         <View className="items-center">
           <CompanyAvatar name="Global Systems" size="large" />
-          <Text className="text-xs mt-2 text-center" style={{ color: asString(f1Foreground) }}>
+          <Text className="text-xs mt-2 text-center" style={{ color: asString(f0Foreground) }}>
             Large
           </Text>
         </View>
       </View>
 
       {/* TeamAvatar */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f1Foreground) }}>
+      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
         Team Avatar
       </Text>
       <View className="flex-row flex-wrap gap-4 mb-6 items-center">
         <View className="items-center">
           <TeamAvatar name="Engineering" size="small" />
-          <Text className="text-xs mt-2 text-center" style={{ color: asString(f1Foreground) }}>
+          <Text className="text-xs mt-2 text-center" style={{ color: asString(f0Foreground) }}>
             Small
           </Text>
         </View>
         <View className="items-center">
           <TeamAvatar name="Design Team" size="medium" />
-          <Text className="text-xs mt-2 text-center" style={{ color: asString(f1Foreground) }}>
+          <Text className="text-xs mt-2 text-center" style={{ color: asString(f0Foreground) }}>
             Medium
           </Text>
         </View>
         <View className="items-center">
           <TeamAvatar name="Marketing" size="large" />
-          <Text className="text-xs mt-2 text-center" style={{ color: asString(f1Foreground) }}>
+          <Text className="text-xs mt-2 text-center" style={{ color: asString(f0Foreground) }}>
             Large
           </Text>
         </View>
       </View>
 
       {/* DateAvatar */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f1Foreground) }}>
+      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
         Date Avatar
       </Text>
       <View className="flex-row flex-wrap gap-4 mb-6 items-center">
         <View className="items-center">
           <DateAvatar date={new Date(2024, 0, 15)} />
-          <Text className="text-xs mt-2 text-center" style={{ color: asString(f1Foreground) }}>
+          <Text className="text-xs mt-2 text-center" style={{ color: asString(f0Foreground) }}>
             Jan 15
           </Text>
         </View>
         <View className="items-center">
           <DateAvatar date={new Date(2024, 5, 20)} />
-          <Text className="text-xs mt-2 text-center" style={{ color: asString(f1Foreground) }}>
+          <Text className="text-xs mt-2 text-center" style={{ color: asString(f0Foreground) }}>
             Jun 20
           </Text>
         </View>
         <View className="items-center">
           <DateAvatar date={new Date(2024, 11, 25)} />
-          <Text className="text-xs mt-2 text-center" style={{ color: asString(f1Foreground) }}>
+          <Text className="text-xs mt-2 text-center" style={{ color: asString(f0Foreground) }}>
             Dec 25
           </Text>
         </View>
       </View>
 
       {/* EmojiAvatar */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f1Foreground) }}>
+      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
         Emoji Avatar
       </Text>
       <View className="flex-row flex-wrap gap-4 mb-6 items-center">
         <View className="items-center">
           <EmojiAvatar emoji="😀" size="sm" />
-          <Text className="text-xs mt-2 text-center" style={{ color: asString(f1Foreground) }}>
+          <Text className="text-xs mt-2 text-center" style={{ color: asString(f0Foreground) }}>
             Small
           </Text>
         </View>
         <View className="items-center">
           <EmojiAvatar emoji="🎉" size="md" />
-          <Text className="text-xs mt-2 text-center" style={{ color: asString(f1Foreground) }}>
+          <Text className="text-xs mt-2 text-center" style={{ color: asString(f0Foreground) }}>
             Medium
           </Text>
         </View>
         <View className="items-center">
           <EmojiAvatar emoji="🚀" size="lg" />
-          <Text className="text-xs mt-2 text-center" style={{ color: asString(f1Foreground) }}>
+          <Text className="text-xs mt-2 text-center" style={{ color: asString(f0Foreground) }}>
             Large
           </Text>
         </View>
       </View>
 
       {/* IconAvatar */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f1Foreground) }}>
+      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
         Icon Avatar
       </Text>
       <View className="flex-row flex-wrap gap-4 mb-6 items-center">
         <View className="items-center">
           <IconAvatar icon={Home} size="sm" />
-          <Text className="text-xs mt-2 text-center" style={{ color: asString(f1Foreground) }}>
+          <Text className="text-xs mt-2 text-center" style={{ color: asString(f0Foreground) }}>
             Small
           </Text>
         </View>
         <View className="items-center">
           <IconAvatar icon={Check} size="md" />
-          <Text className="text-xs mt-2 text-center" style={{ color: asString(f1Foreground) }}>
+          <Text className="text-xs mt-2 text-center" style={{ color: asString(f0Foreground) }}>
             Medium
           </Text>
         </View>
         <View className="items-center">
           <IconAvatar icon={Alert} size="lg" />
-          <Text className="text-xs mt-2 text-center" style={{ color: asString(f1Foreground) }}>
+          <Text className="text-xs mt-2 text-center" style={{ color: asString(f0Foreground) }}>
             Large
           </Text>
         </View>
       </View>
 
       {/* ModuleAvatar */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f1Foreground) }}>
+      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
         Module Avatar
       </Text>
       <View className="flex-row flex-wrap gap-4 mb-6 items-center">
         <View className="items-center">
           <ModuleAvatar module="home" size="sm" />
-          <Text className="text-xs mt-2 text-center" style={{ color: asString(f1Foreground) }}>
+          <Text className="text-xs mt-2 text-center" style={{ color: asString(f0Foreground) }}>
             Small
           </Text>
         </View>
         <View className="items-center">
           <ModuleAvatar module="calendar" size="md" />
-          <Text className="text-xs mt-2 text-center" style={{ color: asString(f1Foreground) }}>
+          <Text className="text-xs mt-2 text-center" style={{ color: asString(f0Foreground) }}>
             Medium
           </Text>
         </View>
         <View className="items-center">
           <ModuleAvatar module="tasks" size="lg" />
-          <Text className="text-xs mt-2 text-center" style={{ color: asString(f1Foreground) }}>
+          <Text className="text-xs mt-2 text-center" style={{ color: asString(f0Foreground) }}>
             Large
           </Text>
         </View>
         <View className="items-center">
           <ModuleAvatar module="goals" size="xl" />
-          <Text className="text-xs mt-2 text-center" style={{ color: asString(f1Foreground) }}>
+          <Text className="text-xs mt-2 text-center" style={{ color: asString(f0Foreground) }}>
             XLarge
           </Text>
         </View>
       </View>
 
       {/* FileAvatar */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f1Foreground) }}>
+      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
         File Avatar
       </Text>
       <View className="flex-row flex-wrap gap-4 mb-6 items-center">
         <View className="items-center">
           <FileAvatar file={{ name: "document.pdf" }} size="small" />
-          <Text className="text-xs mt-2 text-center" style={{ color: asString(f1Foreground) }}>
+          <Text className="text-xs mt-2 text-center" style={{ color: asString(f0Foreground) }}>
             PDF
           </Text>
         </View>
         <View className="items-center">
           <FileAvatar file={{ name: "image.jpg" }} size="medium" />
-          <Text className="text-xs mt-2 text-center" style={{ color: asString(f1Foreground) }}>
+          <Text className="text-xs mt-2 text-center" style={{ color: asString(f0Foreground) }}>
             Image
           </Text>
         </View>
         <View className="items-center">
           <FileAvatar file={{ name: "spreadsheet.xlsx" }} size="large" />
-          <Text className="text-xs mt-2 text-center" style={{ color: asString(f1Foreground) }}>
+          <Text className="text-xs mt-2 text-center" style={{ color: asString(f0Foreground) }}>
             Excel
           </Text>
         </View>
       </View>
 
       {/* Avatar Colors */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f1Foreground) }}>
+      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
         Avatar Colors
       </Text>
       <View className="flex-row flex-wrap gap-4 mb-6 items-center">
         {(["viridian", "malibu", "yellow", "purple", "lilac", "barbie", "smoke", "army", "flubber", "indigo", "camel"] as const).map((color) => (
           <View key={color} className="items-center">
             <Avatar size="medium" color={color} />
-            <Text className="text-xs mt-2 text-center capitalize" style={{ color: asString(f1Foreground) }}>
+            <Text className="text-xs mt-2 text-center capitalize" style={{ color: asString(f0Foreground) }}>
               {color}
             </Text>
           </View>
@@ -265,7 +265,7 @@ export function AvatarShowcase() {
       </View>
 
       {/* Avatars with Badges */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f1Foreground) }}>
+      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
         Avatars with Badges
       </Text>
       <View className="flex-row flex-wrap gap-4 mb-6 items-center">
@@ -276,7 +276,7 @@ export function AvatarShowcase() {
             size="medium"
             badge={{ type: "positive", icon: Check }}
           />
-          <Text className="text-xs mt-2 text-center" style={{ color: asString(f1Foreground) }}>
+          <Text className="text-xs mt-2 text-center" style={{ color: asString(f0Foreground) }}>
             With Badge
           </Text>
         </View>
@@ -286,7 +286,7 @@ export function AvatarShowcase() {
             size="medium"
             badge={{ type: "module", module: "home" }}
           />
-          <Text className="text-xs mt-2 text-center" style={{ color: asString(f1Foreground) }}>
+          <Text className="text-xs mt-2 text-center" style={{ color: asString(f0Foreground) }}>
             Module Badge
           </Text>
         </View>

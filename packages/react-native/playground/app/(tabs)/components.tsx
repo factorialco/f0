@@ -56,9 +56,9 @@ const componentOptions = [
 
 export default function ComponentsShowcase() {
   const [selectedComponent, setSelectedComponent] =
-    useState<ComponentType>('activity');
+    useState<ComponentType>('activity')
 
-  const [f1Background, f1Foreground] = useCSSVariable([
+  const [f0Background, f0Foreground] = useCSSVariable([
     '--color-f0-background',
     '--color-f0-foreground',
   ]);
@@ -105,27 +105,18 @@ export default function ComponentsShowcase() {
   };
 
   return (
-    <SafeAreaView className='bg-f0-background flex-1' edges={['top', 'bottom']}>
-      <View
-        className='flex-1'
-        style={{ backgroundColor: asString(f1Background) }}
-      >
-        <View className='px-4 pt-3 pb-2'>
-          <View className='mb-2'>
-            <Text
-              className='mb-1 text-xl font-bold'
-              style={{ color: asString(f1Foreground) }}
-            >
+    <SafeAreaView className="flex-1 bg-f0-background" edges={['top', 'bottom']}>
+      <View className="flex-1" style={{ backgroundColor: asString(f0Background) }}>
+        <View className="px-4 pt-3 pb-2">
+          <View className="mb-2">
+            <Text className="text-xl font-bold mb-1" style={{ color: asString(f0Foreground) }}>
               Components Showcase
             </Text>
             <ThemeSwitcher />
           </View>
 
-          <View className='mb-2'>
-            <Text
-              className='mb-1 text-sm font-semibold'
-              style={{ color: asString(f1Foreground) }}
-            >
+          <View className="mb-2">
+            <Text className="text-sm font-semibold mb-1" style={{ color: asString(f0Foreground) }}>
               Select Component
             </Text>
             <Select
@@ -136,7 +127,7 @@ export default function ComponentsShowcase() {
           </View>
         </View>
 
-        <View className='flex-1' style={{ minHeight: 0 }}>
+        <View className="flex-1" style={{ minHeight: 0 }}>
           {renderComponent()}
         </View>
       </View>

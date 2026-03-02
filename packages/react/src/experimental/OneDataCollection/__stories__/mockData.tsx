@@ -84,7 +84,8 @@ export const filters = {
   },
   searchStrict: {
     type: "search",
-    label: "Search with strict toggle example",
+    label:
+      "Search with strict toggle example to clear the search value to clear the search value example to clear the search value to clear the search value",
     options: {
       strictToggle: true,
     },
@@ -235,6 +236,7 @@ export const getMockVisualizations = (options?: {
     noSorting?: boolean
     nestedRecords?: boolean
     applyLongText?: boolean
+    longColumnLabels?: boolean
   }
   cache?: MockDataCache<MockUser>
 }): Record<
@@ -332,7 +334,9 @@ export const getMockVisualizations = (options?: {
           },
           {
             id: "role3",
-            label: "Role 3",
+            label: options?.table?.longColumnLabels
+              ? "Role (Field with a very long label to test the ellipsis)"
+              : "Role 3",
             render: (item) => item.role,
             sorting: options?.table?.noSorting ? undefined : "role",
           },
@@ -1046,6 +1050,7 @@ export const ExampleComponent = ({
   frozenColumns = 0,
   selectable,
   defaultSelectedItems,
+  allPagesSelection,
   bulkActions,
   currentGrouping,
   currentSortings,
@@ -1106,6 +1111,7 @@ export const ExampleComponent = ({
   >
   defaultSelectedItems?: SelectedItemsState<MockUser>
   selectable?: (item: MockUser) => string | number | undefined
+  allPagesSelection?: boolean
   bulkActions?: BulkActionsDefinition<MockUser, FiltersType>
   onSelectItems?: OnSelectItemsCallback<MockUser, FiltersType>
   onBulkAction?: OnBulkActionCallback<MockUser, FiltersType>
@@ -1231,6 +1237,7 @@ export const ExampleComponent = ({
       ],
       selectable,
       defaultSelectedItems,
+      allPagesSelection,
       bulkActions,
       totalItemSummary,
       search:
@@ -1279,6 +1286,7 @@ export const ExampleComponent = ({
       className={cn("space-y-4", fullHeight && "max-h-full w-full bg-[#fff]")}
     >
       <OneDataCollection
+        dataTestId={`one-data-collection-${id ?? "example"}`}
         tmpFullWidth={tmpFullWidth}
         id={id}
         storage={storage}
