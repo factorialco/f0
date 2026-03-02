@@ -1,0 +1,101 @@
+name: "Weekly F0 Changelog Summary"
+
+on:
+  schedule:
+    - cron: "0 10 * * 5" # Every Friday at 10:00 UTC
+  workflow_dispatch:
+    inputs:
+      from:
+        description: "Start date (YYYY-MM-DD). Defaults to 7 days ago or last run."
+        required: false
+      to:
+        description: "End date (YYYY-MM-DD). Defaults to today."
+        required: false
+      provider:
+        description: "AI provider to use"
+        required: true
+        default: "openai"
+        type: choice
+        options:
+          - openai
+          - anthropic
+          - google
+          - groq
+
+jobs:
+  summarize:
+    name: "Generate and publish changelog summary"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          # Fetch full history so git log has all commits for the date range
+          fetch-depth: 0
+
+      - name: Setup Node and PNPM
+        uses: ./.github/actions/setup-node-pnpm
+
+      - name: Install changelog-summarizer dependencies
+        run: pnpm --filter @factorialco/f0-changelog-summarizer install
+
+      - name: Generate summary
+        id: summarize
+        env:
+          PROVIDER: ${{ inputs.provider || 'openai' }}
+          FROM_DATE: ${{ inputs.from || '' }}
+          TO_DATE: ${{ inputs.to || '' }}
+          CHANGELOG_AI_API_KEY: ${{ secrets.CHANGELOG_AI_API_KEY }}
+        run: |
+          ARGS="--provider $PROVIDER --api-key $CHANGELOG_AI_API_KEY"
+
+          if [ -n "$FROM_DATE" ]; then
+            ARGS="$ARGS --from $FROM_DATE"
+          fi
+
+          if [ -n "$TO_DATE" ]; then
+            ARGS="$ARGS --to $TO_DATE"
+          fi
+
+          pnpm tsx src/index.ts \
+            $ARGS \
+            --output /tmp/summary.md
+
+          echo "summary_file=/tmp/summary.md" >> "$GITHUB_OUTPUT"
+        working-directory: ${{ github.workspace }}/packages/changelog-summarizer
+
+      - name: Publish summary to Slack
+        env:
+          SUMMARY_FILE: ${{ steps.summarize.outputs.summary_file }}
+        run: |
+          SUMMARY_RAW=$(cat "$SUMMARY_FILE")
+
+          # Convert GitHub-style markdown → Slack mrkdwn
+          SUMMARY=$(echo "$SUMMARY_RAW" | perl -pe '
+            s/^### (.+)$/*\1*/;
+            s/^## (.+)$/*\1*/;
+            s/^(\s*[-*])\s+/• /;
+            s/\[([^\]]+)\]\(([^)]+)\)/<\2|\1>/g;
+          ')
+
+          # JSON-escape (newline-preserving)
+          BODY_JSON=$(printf "%s" "$SUMMARY" | jq -Rs .)
+
+          # Build Block Kit payload
+          jq -n --arg body "$SUMMARY" '
+          {
+            blocks: [
+              {
+                type: "section",
+                text: { type: "mrkdwn", text: $body }
+              }
+            ]
+          }' > /tmp/payload.json
+
+          # Send to Slack
+          curl -X POST -H "Content-Type: application/json" \
+            --data @/tmp/payload.json \
+            "${{ secrets.SLACK_WEBHOOK_ZERO_UPDATER }}"
