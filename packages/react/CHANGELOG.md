@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.388.0](https://github.com/factorialco/f0/compare/f0-react-v1.387.0...f0-react-v1.388.0) (2026-03-02)
+
+
+### Features
+
+* add get started module icon ([#3557](https://github.com/factorialco/f0/issues/3557)) ([b392902](https://github.com/factorialco/f0/commit/b3929025e02d2b14264e95c382c2bb7251b2fbc4))
+
+## [1.387.0](https://github.com/factorialco/f0/compare/f0-react-v1.386.0...f0-react-v1.387.0) (2026-03-02)
+
+
+### Features
+
+* **Select:** support TagPerson in select options ([#3536](https://github.com/factorialco/f0/issues/3536)) ([20b8917](https://github.com/factorialco/f0/commit/20b8917b5e4ee70c8855cad2f1af97ab15968fb8))
+
 ## [1.386.0](https://github.com/factorialco/f0/compare/f0-react-v1.385.0...f0-react-v1.386.0) (2026-02-28)
 
 
