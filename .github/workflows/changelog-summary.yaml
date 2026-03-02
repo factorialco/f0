@@ -71,13 +71,9 @@ jobs:
         env:
           FROM_DATE: ${{ inputs.from || '' }}
           TO_DATE: ${{ inputs.to || '' }}
-          CHANGELOG_AI_API_KEY: ${{ secrets.CHANGELOG_AI_API_KEY }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
         run: |
           ARGS=(--provider "$PROVIDER")
-
-          if [ -n "$CHANGELOG_AI_API_KEY" ]; then
-            ARGS+=(--api-key "$CHANGELOG_AI_API_KEY")
-          fi
 
           if [ -n "$FROM_DATE" ]; then
             ARGS+=(--from "$FROM_DATE")

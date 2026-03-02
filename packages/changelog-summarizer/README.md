@@ -117,5 +117,5 @@ The provider is fixed to `groq` (`llama-3.3-70b-versatile`) in the workflow env.
 
 | Secret                        | Description                                       |
 | ----------------------------- | ------------------------------------------------- |
-| `CHANGELOG_AI_API_KEY`        | API key for the configured provider               |
+| `GROQ_API_KEY`                | Groq API key (auto-resolved by the CLI)           |
 | `SLACK_WEBHOOK_F0_SUMMARIZER` | Incoming webhook URL for the target Slack channel |
