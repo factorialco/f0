@@ -89,9 +89,10 @@ jobs:
         working-directory: ${{ github.workspace }}/packages/changelog-summarizer
 
       - name: Save last-run cache
-        # Always save after a successful run so the next scheduled run knows
-        # where to resume from. Using actions/cache/save (instead of the
-        # combined restore+save action) lets us control exactly when to persist.
+        # Save after a successful non-dry run so the next scheduled run knows
+        # where to resume from. Skipped on dry runs to avoid advancing the
+        # watermark for a run that didn't actually publish anything.
+        if: ${{ inputs.dry_run != 'true' }}
         uses: actions/cache/save@v4
         with:
           path: packages/changelog-summarizer/.cache/last-run
