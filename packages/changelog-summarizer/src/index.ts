@@ -13,7 +13,7 @@ import type { Provider } from "./types.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-const LAST_RUN_CACHE_PATH = ".cache/last-run";
+const LAST_RUN_CACHE_PATH = ".cache/summarizer-last-run";
 const VALID_PROVIDERS: Provider[] = ["openai", "anthropic", "google", "groq"];
 
 /**

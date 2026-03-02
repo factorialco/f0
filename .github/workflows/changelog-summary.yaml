@@ -59,11 +59,11 @@ jobs:
         run: pnpm --filter @factorialco/f0-changelog-summarizer install
 
       - name: Restore last-run cache
-        # The CLI writes <repoRoot>/.cache/last-run (auto-detected git root =
-        # github.workspace). Cache the same path so the watermark persists.
+        # The CLI writes <repoRoot>/.cache/summarizer-last-run (auto-detected
+        # git root = github.workspace). Cache the same path so the watermark persists.
         uses: actions/cache/restore@v4
         with:
-          path: .cache/last-run
+          path: .cache/summarizer-last-run
           key: changelog-summarizer-last-run
 
       - name: Generate summary
@@ -107,7 +107,7 @@ jobs:
         if: ${{ inputs.dry_run != 'true' }}
         uses: actions/cache/save@v4
         with:
-          path: .cache/last-run
+          path: .cache/summarizer-last-run
           key: changelog-summarizer-last-run
 
       - name: Print summary (dry run)
