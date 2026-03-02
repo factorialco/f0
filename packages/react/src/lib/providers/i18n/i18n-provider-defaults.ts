@@ -145,6 +145,11 @@ export const defaultTranslations = {
         hideAllColumns: "Hide all",
       },
     },
+    editableTable: {
+      errors: {
+        saveFailed: "Save failed",
+      },
+    },
     itemsCount: "items",
     emptyStates: {
       noData: {

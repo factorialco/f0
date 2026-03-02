@@ -10,6 +10,7 @@ import {
 } from "react"
 
 import type { RecordType } from "@/hooks/datasource"
+import { useI18n } from "@/lib/providers/i18n"
 
 type EditableRowContextValue<R extends RecordType> = {
   /** The optimistic local copy of the item, updated immediately on change */
@@ -19,7 +20,7 @@ type EditableRowContextValue<R extends RecordType> = {
   /** Per-column loading state keyed by column id */
   cellLoading: Record<string, boolean>
   /** Update a single field and notify the parent via onCellChange */
-  handleCellChange: (columnId: string, value: string) => void
+  handleCellChange: (columnId: string, value: unknown) => void
 }
 
 // React's createContext does not support per-usage generics.
@@ -48,6 +49,8 @@ export function EditableRowProvider<R extends RecordType>({
   const [cellErrors, setCellErrors] = useState<Record<string, string>>({})
   const [cellLoading, setCellLoading] = useState<Record<string, boolean>>({})
 
+  const { t } = useI18n()
+
   const localItemRef = useRef(localItem)
   localItemRef.current = localItem
 
@@ -56,7 +59,7 @@ export function EditableRowProvider<R extends RecordType>({
   }, [item])
 
   const handleCellChange = useCallback(
-    (columnId: string, value: string) => {
+    (columnId: string, value: unknown) => {
       const updatedItem = { ...localItemRef.current, [columnId]: value } as R
 
       setLocalItem(updatedItem)
@@ -80,14 +83,17 @@ export function EditableRowProvider<R extends RecordType>({
         .catch((error: unknown) => {
           setCellErrors((prev) => ({
             ...prev,
-            [columnId]: error instanceof Error ? error.message : "Save failed",
+            [columnId]:
+              error instanceof Error
+                ? error.message
+                : t("collections.editableTable.errors.saveFailed"),
           }))
         })
         .finally(() => {
           setCellLoading((prev) => ({ ...prev, [columnId]: false }))
         })
     },
-    [onCellChange]
+    [onCellChange, t]
   )
 
   return (
