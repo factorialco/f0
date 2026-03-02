@@ -159,22 +159,19 @@ const e = {
     other: "Other actions",
     toggle: "Toggle",
     toggleDropdownMenu: "Toggle dropdown menu",
-    selectAll: "Select all"
+    selectAll: "Select all",
+    selectAllItems: "Select all {{total}} items"
   },
   status: {
     selected: {
       singular: "Selected",
       plural: "Selected",
-      all: "All selected"
-    }
-  },
-  syncStatus: {
-    synced: "Sync completed successfully.",
-    syncing: "Sync in progress.",
-    pending: "Not yet started.",
-    partiallySynced: "All aggregated data was synced but at least 1 failed.",
-    outdated: "Data might need to be synced again.",
-    failed: "Sync failed."
+      all: "All selected",
+      allOnPage: "All {{count}} items on this page are selected",
+      selectAllItems: "Select all {{total}} items",
+      allItemsSelected: "All {{total}} items selected"
+    },
+    noItemsSelected: "No items selected"
   },
   filters: {
     searchPlaceholder: "Search filters...",
@@ -359,6 +356,7 @@ const e = {
     defaultInitialMessage: "How can I help you today?",
     inputPlaceholder: "Ask about time, people, or company info and a lot of other things...",
     stopAnswerGeneration: "Stop generating",
+    responseStopped: "You stopped this response",
     sendMessage: "Send message",
     thoughtsGroupTitle: "Reflection",
     resourcesGroupTitle: "Resources",
@@ -377,7 +375,34 @@ const e = {
         placeholder: "Share what didn’t work"
       }
     },
-    ask: "Ask One"
+    dataDownloadPreview: "Preview {{shown}} of {{total}} rows — download the Excel to see all data.",
+    expandChat: "Expand chat",
+    collapseChat: "Collapse chat",
+    ask: "Ask One",
+    viewProfile: "View profile",
+    tools: "Tools",
+    growth: {
+      demoCard: {
+        title: "See {{moduleName}} in action",
+        actionLabel: "Start demo"
+      },
+      bookAMeetingCard: {
+        title: "Talk with an expert",
+        schedule: "Mon-Fri · 09:00-21:00 (CEST)",
+        actionLabel: "Book a meeting"
+      },
+      questionCard: {
+        actionLabel: "Next",
+        skipLabel: "Skip",
+        sendLabel: "Send"
+      },
+      moduleCard: {
+        actionLabel: "Learn more"
+      },
+      faqCard: {
+        title: "Questions before getting started"
+      }
+    }
   },
   select: {
     noResults: "No results found",
@@ -473,6 +498,9 @@ const e = {
     ordered: "Ordered",
     task: "Task",
     details: "Dropdown",
+    video: "Video",
+    videoUrlPrompt: "Enter a YouTube or Vimeo URL",
+    videoUrlInvalid: "Please enter a valid YouTube or Vimeo URL",
     link: "Link",
     linkPlaceholder: "Enter a link",
     groups: {
@@ -490,6 +518,65 @@ const e = {
       repeatButtonLabel: "Repeat",
       customPromptPlaceholder: "What do you want to do?"
     }
+  },
+  forms: {
+    actionBar: {
+      unsavedChanges: "You have changes pending to be saved",
+      saving: "Saving...",
+      saved: "Your changes have been saved",
+      discard: "Discard",
+      issues: {
+        one: "{{count}} issue",
+        other: "{{count}} issues"
+      }
+    },
+    file: {
+      dropzone: "Drag and drop a file, or click to select",
+      dropzoneActive: "Drop the file here",
+      dropzoneMultiple: "Drag and drop files, or click to select",
+      acceptedTypes: "Accepted formats: {{types}}",
+      remove: "Remove",
+      uploading: "Uploading…",
+      processing: "Processing…",
+      uploadFailed: "Upload failed",
+      fileTooLarge: "File exceeds {{maxSize}} MB limit",
+      invalidFileType: "File type not accepted. Accepted formats: {{types}}"
+    },
+    validation: {
+      required: "This field is required",
+      invalidType: "Invalid value",
+      string: {
+        email: "Enter a valid email address",
+        url: "Enter a valid URL",
+        min: "Must be at least {{min}} characters",
+        max: "Must be at most {{max}} characters"
+      },
+      number: {
+        min: "Must be at least {{min}}",
+        max: "Must be at most {{max}}",
+        positive: "Must be a positive number",
+        negative: "Must be a negative number",
+        integer: "Must be a whole number"
+      },
+      date: {
+        min: "Date must be after {{min}}",
+        max: "Date must be before {{max}}",
+        invalid: "Enter a valid date"
+      },
+      array: {
+        min: "Select at least {{min}} option",
+        max: "Select at most {{max}} options"
+      },
+      checkbox: {
+        mustBeChecked: "This option must be selected"
+      }
+    }
+  },
+  wizard: {
+    previous: "Previous",
+    next: "Continue",
+    submit: "Submit",
+    stepOf: "Step {{current}} of {{total}}"
   }
 };
 export {
