@@ -1,84 +1,22 @@
 import { Markdown } from "@copilotkit/react-ui"
-import { useCallback } from "react"
-import * as XLSX from "xlsx"
+import { useCallback, useMemo } from "react"
 
 import { F0ButtonDropdown } from "@/components/F0ButtonDropdown"
-import Download from "@/icons/app/Download"
+import { ButtonDropdownItem } from "@/components/F0ButtonDropdown/types"
 import { useI18n } from "@/lib/providers/i18n"
 
 import { f0MarkdownRenderersSimple } from "../F0MarkdownRenderers"
-import { F0DataDownloadDataset, F0DataDownloadProps } from "./types"
-
-/**
- * Generate an .xlsx file from a dataset and trigger a browser download.
- */
-function downloadAsExcel(
-  dataset: F0DataDownloadDataset,
-  filename: string
-): void {
-  const { columns, rows, columnLabels } = dataset
-  const headers = columns.map((col) => columnLabels?.[col] ?? col)
-  const wsData = [
-    headers,
-    ...rows.map((row) => columns.map((col) => row[col] ?? "")),
-  ]
-  const workbook = XLSX.utils.book_new()
-  const worksheet = XLSX.utils.aoa_to_sheet(wsData)
-  XLSX.utils.book_append_sheet(workbook, worksheet, "Data")
-
-  const buffer = XLSX.write(workbook, { type: "array", bookType: "xlsx" })
-  const blob = new Blob([buffer], {
-    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-  })
-
-  const link = document.createElement("a")
-  link.href = URL.createObjectURL(blob)
-  link.download = `${filename}.xlsx`
-  link.click()
-  URL.revokeObjectURL(link.href)
-}
-
-/**
- * Generate a CSV string from a dataset and trigger a browser download.
- */
-function downloadAsCsv(dataset: F0DataDownloadDataset, filename: string): void {
-  const { columns, rows, columnLabels } = dataset
-  const headers = columns.map((col) => columnLabels?.[col] ?? col)
-
-  const escapeCsv = (value: unknown): string => {
-    const str = value == null ? "" : String(value)
-    if (str.includes(",") || str.includes('"') || str.includes("\n")) {
-      return `"${str.replace(/"/g, '""')}"`
-    }
-    return str
-  }
-
-  const lines = [
-    headers.map(escapeCsv).join(","),
-    ...rows.map((row) => columns.map((col) => escapeCsv(row[col])).join(",")),
-  ]
-
-  const blob = new Blob([lines.join("\n")], {
-    type: "text/csv;charset=utf-8;",
-  })
-
-  const link = document.createElement("a")
-  link.href = URL.createObjectURL(blob)
-  link.download = `${filename}.csv`
-  link.click()
-  URL.revokeObjectURL(link.href)
-}
-
-const downloadItems = [
-  { value: "excel", label: "Download Excel", icon: Download },
-  { value: "csv", label: "Download CSV", icon: Download },
-]
+import { downloadFormats, downloadHandlers } from "./formats"
+import { F0DataDownloadProps } from "./types"
 
 /**
  * Component that renders an optional markdown preview followed by
  * a dropdown button with "Download Excel" as the primary action and
- * "Download CSV" as a secondary option. Files are generated client-side
- * from the raw dataset provided by the agent.
+ * additional formats (CSV, TSV, JSON, PDF) as secondary options.
+ * Files are generated client-side from the raw dataset provided by the agent.
+ *
+ * Format definitions live in `./formats/` — adding a new format only requires
+ * creating a file there and registering it in `./formats/index.ts`.
  */
 export const F0DataDownload = ({
   markdown,
@@ -87,12 +25,21 @@ export const F0DataDownload = ({
 }: F0DataDownloadProps) => {
   const i18n = useI18n()
 
+  const downloadItems = useMemo<ButtonDropdownItem<string>[]>(
+    () =>
+      downloadFormats.map((f) => ({
+        value: f.key,
+        label: i18n.t("ai.downloadFormat", { format: f.formatName }),
+        icon: f.icon,
+      })),
+    [i18n]
+  )
+
   const handleDownload = useCallback(
     (format: string, _item: unknown) => {
-      if (format === "excel") {
-        downloadAsExcel(dataset, filename)
-      } else if (format === "csv") {
-        downloadAsCsv(dataset, filename)
+      const handler = downloadHandlers[format]
+      if (handler) {
+        handler(dataset, filename)
       } else {
         console.warn(`[F0DataDownload] Unknown download format: "${format}"`)
       }
