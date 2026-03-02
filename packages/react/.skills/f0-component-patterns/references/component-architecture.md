@@ -20,32 +20,32 @@ F0Example/
 
 ```tsx
 // src/components/F0Card/index.tsx
-export * from "./F0Card";
+export * from "./F0Card"
 ```
 
 ### 2. Experimental Wrapper (components being stabilized)
 
 ```tsx
 // src/components/F0Select/index.tsx
-import { experimentalComponent } from "@/lib/experimental";
-import { F0Select as F0SelectComponent } from "./F0Select";
+import { experimentalComponent } from "@/lib/experimental"
+import { F0Select as F0SelectComponent } from "./F0Select"
 
-export * from "./types";
+export * from "./types"
 
-const F0Select = experimentalComponent("F0Select", F0SelectComponent);
-export { F0Select };
+const F0Select = experimentalComponent("F0Select", F0SelectComponent)
+export { F0Select }
 ```
 
 ### 3. Component() Metadata (XRay tooling integration)
 
 ```tsx
 // src/components/F0Box/index.tsx
-import { Component } from "../../lib/component/component";
-import { F0Box as BoxComponent, type F0BoxProps } from "./F0Box";
+import { Component } from "../../lib/component/component"
+import { F0Box as BoxComponent, type F0BoxProps } from "./F0Box"
 
-export const F0Box = Component({ name: "F0Box", type: "layout" }, BoxComponent);
+export const F0Box = Component({ name: "F0Box", type: "layout" }, BoxComponent)
 
-export type { F0BoxProps };
+export type { F0BoxProps }
 ```
 
 Valid `type` values: `"layout"`, `"info"`, `"action"`, `"form"`
@@ -60,9 +60,9 @@ Components with internal-only props use a two-layer pattern to prevent consumers
 
 ```tsx
 // src/components/F0Button/F0Button.tsx
-import { forwardRef } from "react";
-import { ButtonInternal } from "./internal";
-import { ButtonInternalProps } from "./internal-types";
+import { forwardRef } from "react"
+import { ButtonInternal } from "./internal"
+import { ButtonInternalProps } from "./internal-types"
 
 // 1. Define private prop names as const array
 const privateProps = [
@@ -73,15 +73,15 @@ const privateProps = [
   "noTitle",
   "noAutoTooltip",
   "style",
-] as const;
+] as const
 
 // 2. Derive public type by omitting private props
 export type F0ButtonProps = Omit<
   ButtonInternalProps,
   (typeof privateProps)[number] | "variant"
 > & {
-  variant?: Exclude<ButtonInternalProps["variant"], "ai">;
-};
+  variant?: Exclude<ButtonInternalProps["variant"], "ai">
+}
 
 // 3. Strip private props via reduce before forwarding
 const F0Button = forwardRef<
@@ -89,15 +89,15 @@ const F0Button = forwardRef<
   F0ButtonProps
 >((props, ref) => {
   const publicProps = privateProps.reduce((acc, key) => {
-    const { [key]: _, ...rest } = acc;
-    return rest;
-  }, props as ButtonInternalProps);
+    const { [key]: _, ...rest } = acc
+    return rest
+  }, props as ButtonInternalProps)
 
-  return <ButtonInternal {...publicProps} ref={ref} />;
-});
+  return <ButtonInternal {...publicProps} ref={ref} />
+})
 
-F0Button.displayName = "F0Button";
-export { F0Button };
+F0Button.displayName = "F0Button"
+export { F0Button }
 ```
 
 In `internal-types.ts`, private props are annotated with `@private` in JSDoc:
@@ -106,32 +106,29 @@ In `internal-types.ts`, private props are annotated with `@private` in JSDoc:
 // src/components/F0Button/internal-types.ts
 export type ButtonInternalProps /* ... */ = {
   /** @private Appends a React node after the button content */
-  append?: React.ReactNode;
+  append?: React.ReactNode
   /** @private If true, button is visually active (pressed state) */
-  pressed?: boolean;
+  pressed?: boolean
   /** @private */
-  noAutoTooltip?: boolean;
+  noAutoTooltip?: boolean
   // ...
-};
+}
 ```
 
 ### Simpler Example (F0Card)
 
 ```tsx
 // src/components/F0Card/F0Card.tsx
-const privateProps = ["forceVerticalMetadata", "disableOverlayLink"] as const;
-export type F0CardProps = Omit<
-  CardInternalProps,
-  (typeof privateProps)[number]
->;
+const privateProps = ["forceVerticalMetadata", "disableOverlayLink"] as const
+export type F0CardProps = Omit<CardInternalProps, (typeof privateProps)[number]>
 
 const F0CardBase = forwardRef<HTMLDivElement, F0CardProps>((props, ref) => {
   const publicProps = privateProps.reduce((acc, key) => {
-    const { [key]: _, ...rest } = acc;
-    return rest;
-  }, props as CardInternalProps);
-  return <CardInternal ref={ref} {...publicProps} />;
-});
+    const { [key]: _, ...rest } = acc
+    return rest
+  }, props as CardInternalProps)
+  return <CardInternal ref={ref} {...publicProps} />
+})
 ```
 
 ## forwardRef Convention
@@ -140,23 +137,23 @@ All components accepting refs must use `forwardRef` with explicit generic types 
 
 ```tsx
 // src/components/F0Heading/F0Heading.tsx
-import { forwardRef } from "react";
-import { Text, TextProps, type HeadingTags } from "@/ui/Text";
+import { forwardRef } from "react"
+import { Text, TextProps, type HeadingTags } from "@/ui/Text"
 
-const _allowedVariants = ["heading", "heading-large"] as const;
+const _allowedVariants = ["heading", "heading-large"] as const
 
 export type F0HeadingProps = Omit<TextProps, "className" | "variant" | "as"> & {
-  variant?: (typeof _allowedVariants)[number];
-  as?: HeadingTags;
-};
+  variant?: (typeof _allowedVariants)[number]
+  as?: HeadingTags
+}
 
 export const F0Heading = forwardRef<HTMLElement, F0HeadingProps>(
   (props, ref) => {
-    return <Text ref={ref} variant="heading" {...props} />;
-  },
-);
+    return <Text ref={ref} variant="heading" {...props} />
+  }
+)
 
-F0Heading.displayName = "F0Heading";
+F0Heading.displayName = "F0Heading"
 ```
 
 For generic components (e.g., F0Select), re-cast the export to preserve generic type parameters.
@@ -171,9 +168,9 @@ export function withSkeleton<
   T extends AnyReactComponent<any>,
   U extends AnyReactComponent<any>,
 >(Component: T, Skeleton: U): T & { Skeleton: U } {
-  const componentName = Component.displayName || Component.name || "Component";
-  Object.assign(Skeleton, { displayName: `${componentName}.Skeleton` });
-  return Object.assign(Component, { Skeleton });
+  const componentName = Component.displayName || Component.name || "Component"
+  Object.assign(Skeleton, { displayName: `${componentName}.Skeleton` })
+  return Object.assign(Component, { Skeleton })
 }
 ```
 
@@ -181,14 +178,14 @@ Usage:
 
 ```tsx
 // src/components/F0Card/F0Card.tsx
-import { withSkeleton } from "@/lib/skeleton";
+import { withSkeleton } from "@/lib/skeleton"
 
 const F0CardSkeleton = ({ compact = false }: { compact?: boolean }) => {
-  return <CardSkeleton compact={compact} />;
-};
+  return <CardSkeleton compact={compact} />
+}
 
-F0CardBase.displayName = "F0Card";
-export const F0Card = withSkeleton(F0CardBase, F0CardSkeleton);
+F0CardBase.displayName = "F0Card"
+export const F0Card = withSkeleton(F0CardBase, F0CardSkeleton)
 
 // Consumer usage:
 // <F0Card.Skeleton compact />
@@ -202,16 +199,16 @@ Components must never import Radix or third-party primitives directly. Always us
 
 ```tsx
 // CORRECT
-import { Action } from "@/ui/Action";
-import { Checkbox as CheckboxRoot } from "@/ui/checkbox";
-import { Dialog, DialogContent, DialogHeader } from "@/ui/Dialog/dialog";
-import { InputField } from "@/ui/InputField";
-import { GroupHeader } from "@/ui/GroupHeader/index";
-import { Select, SelectContent, SelectItem, SelectTrigger } from "@/ui/Select";
+import { Action } from "@/ui/Action"
+import { Checkbox as CheckboxRoot } from "@/ui/checkbox"
+import { Dialog, DialogContent, DialogHeader } from "@/ui/Dialog/dialog"
+import { InputField } from "@/ui/InputField"
+import { GroupHeader } from "@/ui/GroupHeader/index"
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/ui/Select"
 
 // WRONG - never do this
-import * as CheckboxPrimitive from "@radix-ui/react-checkbox";
-import * as DialogPrimitive from "@radix-ui/react-dialog";
+import * as CheckboxPrimitive from "@radix-ui/react-checkbox"
+import * as DialogPrimitive from "@radix-ui/react-dialog"
 ```
 
 ## DataAttributes Type
@@ -221,26 +218,26 @@ Use `DataAttributes` from `@/global.types` to support `data-*` props:
 ```tsx
 // src/global.types.ts
 export type DataAttributes = {
-  [key: `data-${string}`]: string | undefined;
-};
+  [key: `data-${string}`]: string | undefined
+}
 
 // Usage with extends:
 interface CheckboxProps extends DataAttributes {
-  title?: string;
-  checked?: boolean;
+  title?: string
+  checked?: boolean
 }
 
 // Usage with intersection:
 export type ButtonInternalProps = Pick<ActionProps, "size" | "disabled"> &
   DataAttributes & {
-    label: string;
-    onClick?: () => void;
-  };
+    label: string
+    onClick?: () => void
+  }
 ```
 
 ## withDataTestId HOC
 
-All public exported components **must** be wrapped with `withDataTestId` from `@/lib/data-testid`. This HOC adds a `dataTestId` prop that renders a `data-testid` HTML attribute for stable test selectors.
+All public exported components **must** expose a `dataTestId` prop — either via the `withDataTestId` HOC or via the inline `DataTestIdWrapper` pattern described below. The key invariant to verify is: **does the exported component accept `dataTestId` in its props?**
 
 ### How It Works
 
@@ -254,11 +251,11 @@ All public exported components **must** be wrapped with `withDataTestId` from `@
 
 ```tsx
 // src/components/F0Tag/index.ts
-import { withDataTestId } from "@/lib/data-testid";
-import { Tag as _Tag } from "./F0Tag";
+import { withDataTestId } from "@/lib/data-testid"
+import { Tag as _Tag } from "./F0Tag"
 
-export type { TagVariant } from "./F0Tag";
-export const Tag = withDataTestId(_Tag);
+export type { TagVariant } from "./F0Tag"
+export const Tag = withDataTestId(_Tag)
 ```
 
 ### Pattern 2: With experimentalComponent
@@ -267,13 +264,13 @@ When combining with `experimentalComponent`, always apply `withDataTestId` **out
 
 ```tsx
 // src/components/F0DatePicker/index.ts
-import { withDataTestId } from "@/lib/data-testid";
-import { experimentalComponent } from "@/lib/experimental";
-import { F0DatePicker as _F0DatePicker } from "./F0DatePicker";
+import { withDataTestId } from "@/lib/data-testid"
+import { experimentalComponent } from "@/lib/experimental"
+import { F0DatePicker as _F0DatePicker } from "./F0DatePicker"
 
 export const F0DatePicker = withDataTestId(
-  experimentalComponent<typeof _F0DatePicker>("F0DatePicker", _F0DatePicker),
-);
+  experimentalComponent<typeof _F0DatePicker>("F0DatePicker", _F0DatePicker)
+)
 ```
 
 ### Pattern 3: With withSkeleton
@@ -282,11 +279,11 @@ When combining with `withSkeleton`, apply `withSkeleton` first (so `.Skeleton` i
 
 ```tsx
 // src/components/F0Card/index.tsx
-import { withDataTestId } from "@/lib/data-testid";
-import { withSkeleton } from "@/lib/skeleton";
-import { F0CardBase, F0CardSkeleton } from "./F0Card";
+import { withDataTestId } from "@/lib/data-testid"
+import { withSkeleton } from "@/lib/skeleton"
+import { F0CardBase, F0CardSkeleton } from "./F0Card"
 
-export const F0Card = withDataTestId(withSkeleton(F0CardBase, F0CardSkeleton));
+export const F0Card = withDataTestId(withSkeleton(F0CardBase, F0CardSkeleton))
 ```
 
 ### Composition Order
@@ -300,9 +297,61 @@ When multiple HOCs are involved, apply them in this order (innermost to outermos
 ```tsx
 // Full example with all three:
 export const F0Widget = withDataTestId(
-  experimentalComponent("F0Widget", withSkeleton(WidgetBase, WidgetSkeleton)),
-);
+  experimentalComponent("F0Widget", withSkeleton(WidgetBase, WidgetSkeleton))
+)
 ```
+
+### Pattern 4: Inline DataTestIdWrapper (preferred for complex components)
+
+Some components cannot use the `withDataTestId` HOC without breaking type inference — for example:
+
+- **Generic components** (e.g. `F0Select<T, R>`) — the HOC erases generic type parameters
+- **`forwardRef` components with discriminated union props** — the HOC can collapse union branches
+- **Components that use `ReactDOM.createPortal`** — the HOC cannot wrap portal output
+
+For these, import `DataTestIdWrapper` and `WithDataTestIdProps` directly and handle `dataTestId` inside the component:
+
+```tsx
+// src/components/F0MyComponent/F0MyComponent.tsx
+import { DataTestIdWrapper, WithDataTestIdProps } from "@/lib/data-testid"
+
+export interface F0MyComponentProps extends WithDataTestIdProps {
+  // ... other props
+}
+
+export const F0MyComponent = ({ dataTestId, ...props }: F0MyComponentProps) => {
+  return (
+    <DataTestIdWrapper dataTestId={dataTestId}>
+      {/* component content */}
+    </DataTestIdWrapper>
+  )
+}
+```
+
+```tsx
+// src/components/F0MyComponent/index.tsx — no HOC needed, dataTestId is already in props
+export { F0MyComponent } from "./F0MyComponent"
+export type { F0MyComponentProps } from "./F0MyComponent"
+```
+
+This pattern is used by: `F0Select`, `RichTextEditor`, `RadarChart`, `Await`, `OneFilterPicker`, `F0FilterPickerContent`, `F0AvatarFile`, `NotesTextEditor`, `OneDateNavigator`, `Dropdown`, `MobileDropdown`.
+
+### When to Use Each Pattern
+
+| Situation                                   | Use                                    |
+| ------------------------------------------- | -------------------------------------- |
+| Simple component, fixed props               | `withDataTestId` HOC (Patterns 1–3)    |
+| Generic component (`<T extends ...>`)       | Inline `DataTestIdWrapper` (Pattern 4) |
+| `forwardRef` with discriminated union props | Inline `DataTestIdWrapper` (Pattern 4) |
+| `ReactDOM.createPortal` output              | Inline `DataTestIdWrapper` (Pattern 4) |
+
+### Verification Checklist
+
+When reviewing or writing a component, confirm:
+
+- [ ] The exported component accepts `dataTestId?: string` in its props
+- [ ] Either the HOC is applied at the export site, **or** `WithDataTestIdProps` is in the props interface and `DataTestIdWrapper` wraps the render output
+- [ ] `withDataTestId` is **not** applied on top of a component that already uses the inline pattern (would double-wrap)
 
 ### Types
 
@@ -311,12 +360,12 @@ export const F0Widget = withDataTestId(
 
 // Adds dataTestId prop to any component's props
 export type WithDataTestIdProps = {
-  dataTestId?: string;
-};
+  dataTestId?: string
+}
 
 // Use when ComponentProps<typeof Wrapped> inference fails (e.g., in Storybook stories)
 export type WithDataTestIdPropsOf<T extends React.ComponentType<unknown>> =
-  React.ComponentProps<T> & WithDataTestIdProps;
+  React.ComponentProps<T> & WithDataTestIdProps
 ```
 
 ### Enabling in Tests
@@ -341,6 +390,6 @@ export const colors = [
   "warning",
   "critical",
   "positive",
-] as const;
-export type Color = (typeof colors)[number];
+] as const
+export type Color = (typeof colors)[number]
 ```

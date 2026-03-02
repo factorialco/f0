@@ -1,6 +1,6 @@
 {
   "name": "@factorialco/f0-react-native",
-  "version": "0.25.0",
+  "version": "0.26.0",
   "type": "module",
   "description": "React Native components for F0 Design System",
   "main": "expo-router/entry",
@@ -73,7 +73,7 @@
     "dev:setup": "node scripts/set-main.cjs dev",
     "prepare": "node scripts/build-with-fix.cjs",
     "lint": "sh -c 'oxlint \"${@:-src/**/*}\" --max-warnings 0' --",
-    "lint-fix": "sh -c 'oxlint \"${@:-src/**/*}\" --fix --max-warnings 0' --",
+    "lint:fix": "sh -c 'oxlint \"${@:-src/**/*}\" --fix --max-warnings 0' --",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:ci": "jest --ci --coverage --coverageReporters=text --coverageReporters=lcov",

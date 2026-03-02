@@ -1,5 +1,52 @@
 # Changelog
 
+## [1.386.0](https://github.com/factorialco/f0/compare/f0-react-v1.385.0...f0-react-v1.386.0) (2026-02-28)
+
+
+### Features
+
+* **ai-chat:** entity refs, [@mentions](https://github.com/mentions), tool hints, data download with Excel/CSV export ([#3553](https://github.com/factorialco/f0/issues/3553)) ([e3a2576](https://github.com/factorialco/f0/commit/e3a257601fa6ea579529a1d773c86641ad831720))
+
+## [1.385.0](https://github.com/factorialco/f0/compare/f0-react-v1.384.0...f0-react-v1.385.0) (2026-02-27)
+
+
+### Features
+
+* **F0AiChat:** New events in ai chat ([#3501](https://github.com/factorialco/f0/issues/3501)) ([a3e7e01](https://github.com/factorialco/f0/commit/a3e7e010c054d186551cb1ea98d442ef336eee8d))
+
+## [1.384.0](https://github.com/factorialco/f0/compare/f0-react-v1.383.2...f0-react-v1.384.0) (2026-02-27)
+
+
+### Features
+
+* add min width of 320px (w-80) to select content ([#3542](https://github.com/factorialco/f0/issues/3542)) ([8bc550f](https://github.com/factorialco/f0/commit/8bc550f1b9ad7ba237ed2aeeb24fa98adc1c084e))
+
+## [1.383.2](https://github.com/factorialco/f0/compare/f0-react-v1.383.1...f0-react-v1.383.2) (2026-02-27)
+
+
+### Bug Fixes
+
+* update single-select questions in CoCreationForm radio appearance ([#3546](https://github.com/factorialco/f0/issues/3546)) ([79762f0](https://github.com/factorialco/f0/commit/79762f0970b3beaafc16cb395ec94c640d09c9b0))
+
+## [1.383.1](https://github.com/factorialco/f0/compare/f0-react-v1.383.0...f0-react-v1.383.1) (2026-02-27)
+
+
+### Bug Fixes
+
+* **data-testid:** preserve discriminated union props in WithDataTestIdPropsOf ([#3525](https://github.com/factorialco/f0/issues/3525)) ([5656938](https://github.com/factorialco/f0/commit/5656938da02d1867065b423f875f217f24ad7a28))
+
+## [1.383.0](https://github.com/factorialco/f0/compare/f0-react-v1.382.0...f0-react-v1.383.0) (2026-02-27)
+
+
+### Features
+
+* create F0Wizard and F0WizardForm components ([#3531](https://github.com/factorialco/f0/issues/3531)) ([7c81ef4](https://github.com/factorialco/f0/commit/7c81ef498f43e29de3eba4e4345895134301922c))
+
+
+### Bug Fixes
+
+* **datacollection:** fix sort column list ellipsis not working ([#3537](https://github.com/factorialco/f0/issues/3537)) ([6dec00d](https://github.com/factorialco/f0/commit/6dec00da8deeb4401de3c1c70e93e3ac03a4c2a7))
+
 ## [1.382.0](https://github.com/factorialco/f0/compare/f0-react-v1.381.0...f0-react-v1.382.0) (2026-02-25)
 
 

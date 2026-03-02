@@ -1,8 +1,6 @@
 import { ReactNode, useEffect, useState } from "react"
 
-import type { WithDataTestIdProps } from "@/lib/data-testid"
-
-import { withDataTestId } from "@/lib/data-testid"
+import { DataTestIdWrapper } from "@/lib/data-testid"
 
 export type AwaitProps<T> = {
   resolve: Promise<T> | T
@@ -17,7 +15,8 @@ const _Await = <T,>({
   fallback,
   error: errorFallback,
   children,
-}: AwaitProps<T>): ReactNode => {
+  dataTestId,
+}: AwaitProps<T> & { dataTestId?: string }): ReactNode => {
   const [resolvedValue, setResolvedValue] = useState<T | null>(null)
   const [error, setError] = useState<Error | null>(null)
   const [isPending, setIsPending] = useState(false)
@@ -42,21 +41,27 @@ const _Await = <T,>({
   }, [resolve])
 
   if (isPending) {
-    return fallback
+    return (
+      <DataTestIdWrapper dataTestId={dataTestId}>{fallback}</DataTestIdWrapper>
+    )
   }
   if (error) {
-    return errorFallback ?? null
+    return (
+      <DataTestIdWrapper dataTestId={dataTestId}>
+        {errorFallback ?? null}
+      </DataTestIdWrapper>
+    )
   }
   if (resolvedValue !== null) {
-    return children(resolvedValue)
+    return (
+      <DataTestIdWrapper dataTestId={dataTestId}>
+        {children(resolvedValue)}
+      </DataTestIdWrapper>
+    )
   }
-  return null
+  return <DataTestIdWrapper dataTestId={dataTestId}>{null}</DataTestIdWrapper>
 }
 
-/**
- * Generic component type so <Await resolve={value}> correctly types children as (value: T) => ReactNode.
- */
-type AwaitGeneric = <T>(props: AwaitProps<T> & WithDataTestIdProps) => ReactNode
-
-const AwaitWrapped = withDataTestId(_Await)
-export const Await = AwaitWrapped as unknown as AwaitGeneric
+export const Await = _Await as <T>(
+  props: AwaitProps<T> & { dataTestId?: string }
+) => ReactNode

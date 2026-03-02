@@ -25,7 +25,7 @@ export const ItemContainer = (props: ItemContainerProps) => {
   } = props
 
   return (
-    <View className="flex rounded font-medium text-f1-foreground *:flex-1">
+    <View className="flex rounded font-medium text-f0-foreground *:flex-1">
       <Action
         action={action}
         className={cn("flex flex-row items-center gap-1.5 p-1.5", className)}
@@ -36,7 +36,7 @@ export const ItemContainer = (props: ItemContainerProps) => {
           ) : (
             <Icon icon={LeftIcon} size="md" />
           ))}
-        <Text className="line-clamp-5 text-left text-f1-foreground">
+        <Text className="line-clamp-5 text-left text-f0-foreground">
           {text}
         </Text>
       </Action>
