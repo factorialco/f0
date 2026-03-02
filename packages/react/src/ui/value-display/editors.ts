@@ -18,7 +18,7 @@ export const valueDisplayEditors = {
 } as const satisfies Partial<
   Record<
     ValueDisplayRendererType,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Registry uses `any` for uniform lookup; actual type safety is enforced by each editor component's props.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- V is invariant in ValueDisplayEditorProps (covariant in value, contravariant in onChange), so no concrete type can serve as a universal supertype here.
     ComponentType<ValueDisplayEditorProps<any>>
   >
 >
