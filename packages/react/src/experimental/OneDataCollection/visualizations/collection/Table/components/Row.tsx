@@ -1,4 +1,4 @@
-import { forwardRef } from "react"
+import { forwardRef, useMemo } from "react"
 
 import { FiltersDefinition } from "@/components/OneFilterPicker/types"
 import { ItemActionsMobile } from "@/experimental/OneDataCollection/components/itemActions/ItemActionsMobile/ItemActionsMobile"
@@ -161,6 +161,16 @@ const RowComponentInner = <
 
   const isSelected = id !== undefined && selectedItems.has(id)
 
+  const showItemActions = useMemo(
+    () => hasItemActions && !loading && !nestedRowProps?.onLoadMoreChildren,
+    [hasItemActions, loading, nestedRowProps?.onLoadMoreChildren]
+  )
+
+  const localDisabledHover = useMemo(
+    () => disableHover || (!showItemActions && !itemHref && !itemOnClick),
+    [disableHover, showItemActions, itemHref, itemOnClick]
+  )
+
   return (
     <TableRow
       ref={ref}
@@ -169,7 +179,7 @@ const RowComponentInner = <
         "group transition-colors hover:bg-f1-background-hover",
         "after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-px after:w-full after:bg-f1-border-secondary after:content-['']",
         noBorder && "after:bg-white-100",
-        disableHover && "hover:bg-transparent",
+        localDisabledHover && "hover:bg-transparent",
         isSelected && "bg-f1-background-selected-secondary"
       )}
     >
@@ -218,7 +228,7 @@ const RowComponentInner = <
         </TableCell>
       ))}
 
-      {hasItemActions && !loading && !nestedRowProps?.onLoadMoreChildren && (
+      {showItemActions && (
         <>
           {/** Desktop item actions adds a sticky column to the table to not overflow when the table is scrolled horizontally*/}
           <td className="sticky right-0 top-0 z-10 hidden md:table-cell">
