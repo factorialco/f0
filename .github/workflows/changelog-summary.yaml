@@ -50,18 +50,22 @@ jobs:
           TO_DATE: ${{ inputs.to || '' }}
           CHANGELOG_AI_API_KEY: ${{ secrets.CHANGELOG_AI_API_KEY }}
         run: |
-          ARGS="--provider $PROVIDER --api-key $CHANGELOG_AI_API_KEY"
+          ARGS=(--provider "$PROVIDER")
+
+          if [ -n "$CHANGELOG_AI_API_KEY" ]; then
+            ARGS+=(--api-key "$CHANGELOG_AI_API_KEY")
+          fi
 
           if [ -n "$FROM_DATE" ]; then
-            ARGS="$ARGS --from $FROM_DATE"
+            ARGS+=(--from "$FROM_DATE")
           fi
 
           if [ -n "$TO_DATE" ]; then
-            ARGS="$ARGS --to $TO_DATE"
+            ARGS+=(--to "$TO_DATE")
           fi
 
           pnpm tsx src/index.ts \
-            $ARGS \
+            "${ARGS[@]}" \
             --output /tmp/summary.md
 
           echo "summary_file=/tmp/summary.md" >> "$GITHUB_OUTPUT"
