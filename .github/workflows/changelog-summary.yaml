@@ -42,6 +42,15 @@ jobs:
       - name: Install changelog-summarizer dependencies
         run: pnpm --filter @factorialco/f0-changelog-summarizer install
 
+      - name: Restore last-run cache
+        # Persist the .cache/last-run file across ephemeral workflow runs so the
+        # "use last successful run date" heuristic works on scheduled executions.
+        # The key is stable so the same cache entry is always restored.
+        uses: actions/cache/restore@v4
+        with:
+          path: packages/changelog-summarizer/.cache/last-run
+          key: changelog-summarizer-last-run
+
       - name: Generate summary
         id: summarize
         env:
@@ -70,6 +79,15 @@ jobs:
 
           echo "summary_file=/tmp/summary.md" >> "$GITHUB_OUTPUT"
         working-directory: ${{ github.workspace }}/packages/changelog-summarizer
+
+      - name: Save last-run cache
+        # Always save after a successful run so the next scheduled run knows
+        # where to resume from. Using actions/cache/save (instead of the
+        # combined restore+save action) lets us control exactly when to persist.
+        uses: actions/cache/save@v4
+        with:
+          path: packages/changelog-summarizer/.cache/last-run
+          key: changelog-summarizer-last-run
 
       - name: Publish summary to Slack
         env:
