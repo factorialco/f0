@@ -21,6 +21,14 @@ on:
           - anthropic
           - google
           - groq
+      dry_run:
+        description: "Skip publishing to Slack (summary is printed to the workflow log instead)"
+        required: false
+        default: "false"
+        type: choice
+        options:
+          - "false"
+          - "true"
 
 jobs:
   summarize:
@@ -89,7 +97,14 @@ jobs:
           path: packages/changelog-summarizer/.cache/last-run
           key: changelog-summarizer-last-run
 
+      - name: Print summary (dry run)
+        if: ${{ inputs.dry_run == 'true' }}
+        env:
+          SUMMARY_FILE: ${{ steps.summarize.outputs.summary_file }}
+        run: cat "$SUMMARY_FILE"
+
       - name: Publish summary to Slack
+        if: ${{ inputs.dry_run != 'true' }}
         env:
           SUMMARY_FILE: ${{ steps.summarize.outputs.summary_file }}
         run: |
