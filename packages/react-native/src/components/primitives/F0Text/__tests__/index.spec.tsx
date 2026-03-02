@@ -1,5 +1,6 @@
 import { render } from "@testing-library/react-native"
 import React from "react"
+import { Text as RNText } from "react-native"
 
 import { F0Text } from "../F0Text"
 
@@ -191,8 +192,25 @@ describe("F0Text", () => {
       expect(element.props.style).toBeUndefined()
     })
 
+    it("filters className prop at runtime (prevents override via spread)", () => {
+      const propsWithClassName = {
+        className: "font-bold text-red-500",
+        children: "Text with className attempt",
+      }
+      const { getByText } = render(
+        <F0Text
+          {...(propsWithClassName as React.ComponentProps<typeof F0Text>)}
+        >
+          Text with className attempt
+        </F0Text>
+      )
+      const element = getByText("Text with className attempt")
+      expect(element.props.className).not.toContain("font-bold")
+      expect(element.props.className).not.toContain("text-red-500")
+    })
+
     it("handles ref forwarding", () => {
-      const ref = React.createRef<any>()
+      const ref = React.createRef<RNText>()
       render(<F0Text ref={ref}>Ref text</F0Text>)
       expect(ref.current).toBeTruthy()
     })

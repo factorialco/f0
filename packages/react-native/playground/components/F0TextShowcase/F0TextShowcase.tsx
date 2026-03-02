@@ -1,17 +1,8 @@
 import React from 'react';
 import { ScrollView, View } from 'react-native';
-import { F0Text } from '../../../src/components/primitives/F0Text/F0Text';
-import { useCSSVariable } from 'uniwind';
+import { F0Text } from '../../../src/components/primitives/F0Text';
 
 export function F0TextShowcase() {
-  const [f0Foreground] = useCSSVariable(['--color-f0-foreground']);
-
-  const asString = (value: string | number | undefined): string => {
-    if (typeof value === 'string') return value;
-    if (typeof value === 'number') return String(value);
-    return '#000000';
-  };
-
   return (
     <ScrollView
       className='p-4'

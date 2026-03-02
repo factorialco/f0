@@ -21,10 +21,18 @@ import { F0Text } from "@factorialco/f0-react-native"
 ## Usage
 
 ```tsx
-<F0Text variant="heading-lg">Welcome</F0Text>
-<F0Text variant="body-sm-default" color="secondary">Secondary text</F0Text>
-<F0Text variant="body-md-medium" align="center">Centered text</F0Text>
-<F0Text variant="body-sm-default" numberOfLines={2}>Truncated text...</F0Text>
+<>
+  <F0Text variant="heading-lg">Welcome</F0Text>
+  <F0Text variant="body-sm-default" color="secondary">
+    Secondary text
+  </F0Text>
+  <F0Text variant="body-md-medium" align="center">
+    Centered text
+  </F0Text>
+  <F0Text variant="body-sm-default" numberOfLines={2}>
+    Truncated text...
+  </F0Text>
+</>
 ```
 
 ## API Reference
@@ -42,7 +50,7 @@ import { F0Text } from "@factorialco/f0-react-native"
 
 All React Native `TextProps` are also supported (onPress, testID, etc.).
 
-**Note**: `className` and `style` props are **not available**. Use semantic props for typography. For spacing/layout, wrap F0Text in a View. The `style` prop is filtered at runtime to prevent override via spread.
+**Note**: `className` and `style` props are **not available**. Use semantic props for typography. For spacing/layout, wrap F0Text in a View. Both props are filtered at runtime to prevent override via spread.
 
 ### Typography Variants
 
@@ -90,52 +98,77 @@ All variants use **Inter** font family with the weight included in the variant n
 ### Typography Variants
 
 ```tsx
-{/* Headings */}
-<F0Text variant="heading-lg">Large Heading</F0Text>
-<F0Text variant="heading-md">Medium Heading</F0Text>
-<F0Text variant="heading-sm">Small Heading</F0Text>
+<>
+  {/* Headings */}
+  <F0Text variant="heading-lg">Large Heading</F0Text>
+  <F0Text variant="heading-md">Medium Heading</F0Text>
+  <F0Text variant="heading-sm">Small Heading</F0Text>
 
-{/* Body with different weights */}
-<F0Text variant="body-md-default">Regular body text</F0Text>
-<F0Text variant="body-md-medium">Medium body text</F0Text>
-<F0Text variant="body-md-semibold">Semibold body text</F0Text>
+  {/* Body with different weights */}
+  <F0Text variant="body-md-default">Regular body text</F0Text>
+  <F0Text variant="body-md-medium">Medium body text</F0Text>
+  <F0Text variant="body-md-semibold">Semibold body text</F0Text>
 
-{/* Smaller sizes */}
-<F0Text variant="body-sm-default">Small regular text</F0Text>
-<F0Text variant="body-xs-medium">Extra small medium text</F0Text>
+  {/* Smaller sizes */}
+  <F0Text variant="body-sm-default">Small regular text</F0Text>
+  <F0Text variant="body-xs-medium">Extra small medium text</F0Text>
+</>
 ```
 
 ### Colors
 
 ```tsx
-<F0Text variant="body-sm-default" color="default">Primary text</F0Text>
-<F0Text variant="body-sm-default" color="secondary">Secondary information</F0Text>
-<F0Text variant="body-sm-default" color="critical">Error message</F0Text>
-<F0Text variant="body-sm-default" color="positive">Success message</F0Text>
-<F0Text variant="body-sm-default" color="accent">Highlighted text</F0Text>
+<>
+  <F0Text variant="body-sm-default" color="default">
+    Primary text
+  </F0Text>
+  <F0Text variant="body-sm-default" color="secondary">
+    Secondary information
+  </F0Text>
+  <F0Text variant="body-sm-default" color="critical">
+    Error message
+  </F0Text>
+  <F0Text variant="body-sm-default" color="positive">
+    Success message
+  </F0Text>
+  <F0Text variant="body-sm-default" color="accent">
+    Highlighted text
+  </F0Text>
+</>
 ```
 
 ### Text Decorations & Transforms
 
 ```tsx
-<F0Text variant="body-sm-default" decoration="underline">Underlined text</F0Text>
-<F0Text variant="body-sm-default" decoration="line-through">Strikethrough text</F0Text>
-<F0Text variant="body-sm-default" transform="uppercase">uppercase text</F0Text>
-<F0Text variant="body-sm-default" transform="capitalize">capitalize words</F0Text>
+<>
+  <F0Text variant="body-sm-default" decoration="underline">
+    Underlined text
+  </F0Text>
+  <F0Text variant="body-sm-default" decoration="line-through">
+    Strikethrough text
+  </F0Text>
+  <F0Text variant="body-sm-default" transform="uppercase">
+    uppercase text
+  </F0Text>
+  <F0Text variant="body-sm-default" transform="capitalize">
+    capitalize words
+  </F0Text>
+</>
 ```
 
 ### Truncation
 
 ```tsx
-<F0Text variant="body-sm-default" numberOfLines={1}>
-  This long text will be truncated after one line with an ellipsis...
-</F0Text>
+<>
+  <F0Text variant="body-sm-default" numberOfLines={1}>
+    This long text will be truncated after one line with an ellipsis...
+  </F0Text>
 
-<F0Text variant="body-md-default" numberOfLines={3}>
-  This text can span up to three lines before being truncated
-  with an ellipsis at the end. Perfect for card descriptions
-  or preview text.
-</F0Text>
+  <F0Text variant="body-md-default" numberOfLines={3}>
+    This text can span up to three lines before being truncated with an ellipsis
+    at the end. Perfect for card descriptions or preview text.
+  </F0Text>
+</>
 ```
 
 ### Spacing & Layout
@@ -143,27 +176,23 @@ All variants use **Inter** font family with the weight included in the variant n
 F0Text doesn't accept `className` to prevent typography override. Use a View wrapper for spacing:
 
 ```tsx
-{
-  /* Spacing with View wrapper */
-}
-;<View className="mt-4 mb-2">
-  <F0Text variant="body-sm-default">Text with margin</F0Text>
-</View>
+<>
+  {/* Spacing with View wrapper */}
+  <View className="mt-4 mb-2">
+    <F0Text variant="body-sm-default">Text with margin</F0Text>
+  </View>
 
-{
-  /* Layout with View wrapper */
-}
-;<View className="flex-1">
-  <F0Text variant="body-sm-default">Flexible text</F0Text>
-</View>
+  {/* Layout with View wrapper */}
+  <View className="flex-1">
+    <F0Text variant="body-sm-default">Flexible text</F0Text>
+  </View>
 
-{
-  /* Icon + Text pattern */
-}
-;<View className="flex-row items-center gap-2">
-  <F0Icon icon={Check} size="sm" />
-  <F0Text variant="body-sm-default">Success message</F0Text>
-</View>
+  {/* Icon + Text pattern */}
+  <View className="flex-row items-center gap-2">
+    <F0Icon icon={Check} size="sm" />
+    <F0Text variant="body-sm-default">Success message</F0Text>
+  </View>
+</>
 ```
 
 ### Combined Props
@@ -238,10 +267,10 @@ F0Text uses **Inter** font family through Tailwind/Uniwind font weight classes:
 
 ## Accessibility
 
-- Semantic HTML roles on web
-- Proper ellipsis with `numberOfLines`
-- F0 color system ensures proper contrast
-- Forwards all React Native Text accessibility props
+- Fully supports React Native `Text` accessibility props
+- Supports `accessibilityRole`, `accessibilityLabel`, `accessibilityHint`, `accessibilityState`, and `accessible`
+- Proper ellipsis and truncation with `numberOfLines`
+- F0 color system helps ensure sufficient contrast; verify with platform accessibility tools
 
 ## Performance
 
@@ -256,11 +285,13 @@ F0Text uses **Inter** font family through Tailwind/Uniwind font weight classes:
 
 // ❌ Bad: Don't try to override with className (not supported)
 // <F0Text className="font-bold">Text</F0Text>
+```
 
+```tsx
 // ✅ Good: Memoized handler
 const handlePress = useCallback(() => {}, [])
-<F0Text onPress={handlePress}>Click</F0Text>
+;<F0Text onPress={handlePress}>Click</F0Text>
 
 // ❌ Bad: Inline function
-<F0Text onPress={() => {}}>Click</F0Text>
+;<F0Text onPress={() => {}}>Click</F0Text>
 ```

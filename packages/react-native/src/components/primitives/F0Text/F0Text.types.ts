@@ -1,10 +1,11 @@
 import type { TextProps as RNTextProps } from "react-native"
 
 /**
- * Props that must not be passed through to the underlying RN Text.
+ * Props that must not be passed through to the underlying RN Text
+ * (`style` and `className` are handled by F0 instead).
  * Used with omitProps for runtime safety.
  */
-export const F0_TEXT_BANNED_PROPS = ["style"] as const
+export const F0_TEXT_BANNED_PROPS = ["style", "className"] as const
 
 /**
  * Typography variant types based on semantic design tokens
@@ -71,7 +72,7 @@ export const TEXT_TRANSFORMS = [
 export type TextTransform = (typeof TEXT_TRANSFORMS)[number]
 
 /**
- * Internal props for the F0Text component (includes className for internal use)
+ * Internal props for the F0Text component.
  * @private
  */
 interface F0TextPropsInternal extends Omit<RNTextProps, "style"> {
@@ -116,7 +117,7 @@ interface F0TextPropsInternal extends Omit<RNTextProps, "style"> {
   children?: React.ReactNode
 
   /**
-   * Internal use only - not exposed in public API
+   * Excluded from public API via Omit<F0TextPropsInternal, "className">.
    * @private
    */
   className?: string

@@ -43,10 +43,10 @@ const F0TextComponent = React.forwardRef<RNText, F0TextProps>(
     return (
       <RNText
         ref={ref}
+        {...omitProps(rest, F0_TEXT_BANNED_PROPS)}
         className={textClassName}
         numberOfLines={numberOfLines}
         ellipsizeMode={numberOfLines ? "tail" : undefined}
-        {...omitProps(rest, F0_TEXT_BANNED_PROPS)}
       >
         {children}
       </RNText>
