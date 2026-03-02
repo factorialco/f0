@@ -1,6 +1,11 @@
-import type { Meta, StoryObj } from "@storybook/react-vite"
+import type { Meta, StoryFn, StoryObj } from "@storybook/react-vite"
 
 import { F0DataChart } from "../index"
+import {
+  BarChartSkeleton,
+  FunnelChartSkeleton,
+  LineChartSkeleton,
+} from "../skeletons"
 import { ChartDecorator } from "./decorators"
 
 const meta = {
@@ -505,4 +510,174 @@ export const LineNoGrid: Story = {
     showLegend: false,
     showArea: true,
   },
+}
+
+// ---------------------------------------------------------------------------
+// Funnel stories
+// ---------------------------------------------------------------------------
+
+const FunnelDecorator = (Story: StoryFn) => (
+  <div className="h-[360px] w-[600px]">
+    <Story />
+  </div>
+)
+
+export const FunnelDefault: Story = {
+  decorators: [FunnelDecorator],
+  render: (args) => <F0DataChart {...args} />,
+  args: {
+    type: "funnel",
+    series: {
+      name: "Hiring Pipeline",
+      data: [
+        { value: 1200, name: "Applied" },
+        { value: 800, name: "Phone Screen" },
+        { value: 400, name: "Technical" },
+        { value: 180, name: "Onsite" },
+        { value: 80, name: "Offer" },
+        { value: 50, name: "Hired" },
+      ],
+    },
+  },
+}
+
+export const FunnelVertical: Story = {
+  render: (args) => <F0DataChart {...args} />,
+  args: {
+    type: "funnel",
+    orient: "vertical",
+    series: {
+      name: "Sales Pipeline",
+      data: [
+        { value: 500, name: "Leads" },
+        { value: 320, name: "Qualified" },
+        { value: 180, name: "Proposal" },
+        { value: 95, name: "Negotiation" },
+        { value: 60, name: "Closed Won" },
+      ],
+    },
+    valueFormatter: (v) => `${v} deals`,
+  },
+}
+
+export const FunnelCustomColors: Story = {
+  decorators: [FunnelDecorator],
+  render: (args) => <F0DataChart {...args} />,
+  args: {
+    type: "funnel",
+    series: {
+      name: "Conversion",
+      data: [
+        { value: 10_000, name: "Visitors", color: "malibu" },
+        { value: 6_500, name: "Signups", color: "purple" },
+        { value: 3_200, name: "Activated", color: "grass" },
+        { value: 1_800, name: "Subscribed", color: "orange" },
+        { value: 900, name: "Retained", color: "viridian" },
+      ],
+    },
+    valueFormatter: (v) =>
+      v >= 1000 ? `${(v / 1000).toFixed(1)}k` : String(v),
+  },
+}
+
+export const FunnelAscending: Story = {
+  decorators: [FunnelDecorator],
+  render: (args) => <F0DataChart {...args} />,
+  args: {
+    type: "funnel",
+    sort: "ascending",
+    series: {
+      name: "Growth",
+      data: [
+        { value: 20, name: "Week 1" },
+        { value: 45, name: "Week 2" },
+        { value: 80, name: "Week 3" },
+        { value: 130, name: "Week 4" },
+        { value: 200, name: "Week 5" },
+      ],
+    },
+  },
+}
+
+export const FunnelNoLegend: Story = {
+  decorators: [FunnelDecorator],
+  render: (args) => <F0DataChart {...args} />,
+  args: {
+    type: "funnel",
+    showLegend: false,
+    series: {
+      name: "Onboarding",
+      data: [
+        { value: 100, name: "Invited" },
+        { value: 82, name: "Registered" },
+        { value: 65, name: "Profile Complete" },
+        { value: 48, name: "First Task" },
+        { value: 35, name: "Active (30d)" },
+      ],
+    },
+    valueFormatter: (v) => `${v}%`,
+  },
+}
+
+export const FunnelInsideLabels: Story = {
+  render: (args) => <F0DataChart {...args} />,
+  args: {
+    type: "funnel",
+    labelPosition: "inside",
+    showConversion: false,
+    series: {
+      name: "Pipeline",
+      data: [
+        { value: 1000, name: "Awareness" },
+        { value: 750, name: "Interest" },
+        { value: 500, name: "Consideration" },
+        { value: 300, name: "Intent" },
+        { value: 150, name: "Purchase" },
+      ],
+    },
+  },
+}
+
+export const FunnelNoConversion: Story = {
+  decorators: [FunnelDecorator],
+  render: (args) => <F0DataChart {...args} />,
+  args: {
+    type: "funnel",
+    showConversion: false,
+    series: {
+      name: "Support Tickets",
+      data: [
+        { value: 450, name: "Received" },
+        { value: 380, name: "Triaged" },
+        { value: 290, name: "In Progress" },
+        { value: 250, name: "Resolved" },
+        { value: 230, name: "Closed" },
+      ],
+    },
+  },
+}
+
+// ---------------------------------------------------------------------------
+// Skeleton stories
+// ---------------------------------------------------------------------------
+
+const SkeletonDecorator = (Story: StoryFn) => (
+  <div className="h-[320px] w-[420px] rounded-lg border border-f1-border-secondary bg-f1-background p-4">
+    <Story />
+  </div>
+)
+
+export const SkeletonBar: StoryObj = {
+  decorators: [SkeletonDecorator],
+  render: () => <BarChartSkeleton />,
+}
+
+export const SkeletonLine: StoryObj = {
+  decorators: [SkeletonDecorator],
+  render: () => <LineChartSkeleton />,
+}
+
+export const SkeletonFunnel: StoryObj = {
+  decorators: [SkeletonDecorator],
+  render: () => <FunnelChartSkeleton />,
 }

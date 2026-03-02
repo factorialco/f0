@@ -130,13 +130,85 @@ export interface F0DataChartLineProps extends F0DataChartBaseProps {
 }
 
 // ---------------------------------------------------------------------------
+// Funnel data types
+// ---------------------------------------------------------------------------
+
+/**
+ * A single data point in a funnel chart series.
+ * Each point has a value and a stage name.
+ */
+export interface F0DataChartFunnelDataPoint {
+  /** Numeric value for this funnel stage */
+  value: number
+  /** Stage label (e.g. "Applied", "Phone Screen", "Hired") */
+  name: string
+  /** Override color for this individual stage. Must be an F0 design token name. */
+  color?: ChartColorToken
+}
+
+/**
+ * A single funnel series with named data points.
+ */
+export interface F0DataChartFunnelSeries {
+  /** Display name used in legend and tooltip */
+  name: string
+  /** Data points — one per funnel stage */
+  data: F0DataChartFunnelDataPoint[]
+  /** Override color for the entire series. Must be an F0 design token name. */
+  color?: ChartColorToken
+}
+
+// ---------------------------------------------------------------------------
+// Discriminated union: funnel variant
+// ---------------------------------------------------------------------------
+
+/**
+ * Funnel chart variant props.
+ *
+ * Funnels do NOT use category/value axes — stage names come from the data
+ * points themselves. This interface is separate from `F0DataChartBaseProps`.
+ */
+export interface F0DataChartFunnelProps {
+  /** Chart type */
+  type: "funnel"
+  /** The funnel series to render */
+  series: F0DataChartFunnelSeries
+  /** Sort direction of funnel stages. @default "descending" */
+  sort?: "descending" | "ascending" | "none"
+  /** Gap between funnel stages in pixels. @default 4 */
+  gap?: number
+  /** Funnel orientation. @default "horizontal" */
+  orient?: "horizontal" | "vertical"
+  /** Position of stage labels. @default "outside" */
+  labelPosition?: "inside" | "outside"
+  /** Show the legend below the chart. @default false */
+  showLegend?: boolean
+  /** Show value labels on each stage. @default true */
+  showLabels?: boolean
+  /**
+   * Show conversion percentages in labels.
+   * Each stage displays its value as a percentage of the first stage.
+   * The tooltip also shows step-over-step conversion.
+   * @default false
+   */
+  showConversion?: boolean
+  /** Format the value displayed in labels and tooltip */
+  valueFormatter?: (value: number) => string
+  /** Escape hatch: raw ECharts options merged (shallow) on top of the generated config */
+  echartsOptions?: Partial<echarts.EChartsOption>
+}
+
+// ---------------------------------------------------------------------------
 // Union
 // ---------------------------------------------------------------------------
 
 /**
  * Props for the F0DataChart component.
  *
- * A unified chart component that supports bar and line chart types
+ * A unified chart component that supports bar, line, and funnel chart types
  * via a discriminated `type` prop.
  */
-export type F0DataChartProps = F0DataChartBarProps | F0DataChartLineProps
+export type F0DataChartProps =
+  | F0DataChartBarProps
+  | F0DataChartLineProps
+  | F0DataChartFunnelProps

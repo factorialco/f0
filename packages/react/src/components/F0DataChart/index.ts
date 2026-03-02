@@ -6,6 +6,9 @@ export type {
   F0DataChartBarDataPoint,
   F0DataChartBarProps,
   F0DataChartBarSeries,
+  F0DataChartFunnelDataPoint,
+  F0DataChartFunnelProps,
+  F0DataChartFunnelSeries,
   F0DataChartLineDataPoint,
   F0DataChartLineProps,
   F0DataChartLineSeries,
@@ -15,6 +18,11 @@ export type {
 
 export { type ChartColorToken, chartColorTokens } from "./utils/colors"
 export type { ChartTheme } from "./utils/theme"
+export {
+  BarChartSkeleton,
+  FunnelChartSkeleton,
+  LineChartSkeleton,
+} from "./skeletons"
 
 /**
  * @experimental This is an experimental component use it at your own risk

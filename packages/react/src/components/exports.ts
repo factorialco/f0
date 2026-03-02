@@ -29,5 +29,7 @@ export * from "./F0TableOfContentPopover"
  * @deprecated UpsellingKit has moved to @/sds/UpsellingKit. Import from there instead.
  */
 export * from "../sds/UpsellingKit/exports"
+// Analytics
+export * from "./F0AnalyticsDashboard"
 // AI Components
 export * from "../ai/exports"

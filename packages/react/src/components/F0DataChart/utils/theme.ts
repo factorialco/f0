@@ -77,12 +77,11 @@ export interface ChartTheme {
 
 const LIGHT_TOOLTIP: ChartThemeTooltip = {
   padding: 16,
-  borderWidth: 0,
+  borderWidth: 1,
   borderRadius: 10,
   transitionDuration: 0.2,
-  boxShadow:
-    "0px 12px 24px -14px rgba(13, 22, 37, 0.2), 0px 0px 0px 1px rgba(13, 22, 37, 0.1)",
-  background: "rgba(255, 255, 255, 0.97)",
+  boxShadow: "0px 12px 24px -14px rgba(13, 22, 37, 0.2)",
+  background: "rgba(255, 255, 255, 0.85)",
 }
 
 // ---------------------------------------------------------------------------
@@ -91,12 +90,11 @@ const LIGHT_TOOLTIP: ChartThemeTooltip = {
 
 const DARK_TOOLTIP: ChartThemeTooltip = {
   padding: 16,
-  borderWidth: 0,
+  borderWidth: 1,
   borderRadius: 10,
   transitionDuration: 0.2,
-  boxShadow:
-    "0px 12px 24px -14px rgba(0, 0, 0, 0.4), 0px 0px 0px 1px rgba(255, 255, 255, 0.08)",
-  background: "rgba(15, 18, 25, 0.97)",
+  boxShadow: "0px 12px 24px -14px rgba(0, 0, 0, 0.4)",
+  background: "rgba(15, 18, 25, 0.85)",
 }
 
 // ---------------------------------------------------------------------------

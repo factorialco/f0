@@ -10,6 +10,32 @@ interface CategoryAxisOptions {
   data: string[]
   theme: ChartTheme
   formatter?: (value: string) => string
+  /** Container width in pixels — used to auto-compute label interval */
+  containerWidth?: number
+}
+
+/**
+ * Minimum pixels of space each category label needs before we start
+ * skipping labels. Labels narrower than this overlap and become unreadable.
+ */
+const MIN_LABEL_WIDTH = 60
+
+/**
+ * Compute how many labels to skip so that they don't overlap.
+ * Returns 0 (show every label) when there's enough room, or N to
+ * show every (N+1)th label.
+ */
+function computeLabelInterval(
+  categoryCount: number,
+  containerWidth: number | undefined
+): number | undefined {
+  if (!containerWidth || categoryCount <= 1) return undefined
+  const spacePerLabel = containerWidth / categoryCount
+  if (spacePerLabel >= MIN_LABEL_WIDTH) return undefined
+  // How many labels fit comfortably
+  const fitCount = Math.max(1, Math.floor(containerWidth / MIN_LABEL_WIDTH))
+  // interval = skip every N labels so that only fitCount labels are shown
+  return Math.max(0, Math.ceil(categoryCount / fitCount) - 1)
 }
 
 /** Build a styled category axis matching F0 chart conventions */
@@ -17,7 +43,10 @@ export function buildCategoryAxis({
   data,
   theme,
   formatter,
+  containerWidth,
 }: CategoryAxisOptions) {
+  const interval = computeLabelInterval(data.length, containerWidth)
+
   return {
     type: "category" as const,
     data,
@@ -33,6 +62,7 @@ export function buildCategoryAxis({
       fontSize: theme.textStyle.fontSize,
       fontWeight: theme.textStyle.fontWeight,
       color: theme.colors.foregroundTertiary,
+      ...(interval !== undefined ? { interval } : {}),
       ...(formatter
         ? {
             formatter: (_value: string | number) => formatter(String(_value)),
@@ -131,14 +161,14 @@ interface GridOptions {
   showLegend: boolean
 }
 
-/** Standard chart grid with containLabel and legend gap */
+/** Standard chart grid — minimal padding, containLabel keeps axis labels visible */
 export function buildGrid({ showLegend }: GridOptions) {
   return {
-    left: 10,
-    right: 10,
-    top: 10,
-    // Legend height (~20px) + 16px gap between chart and legend
-    bottom: showLegend ? 36 : 10,
+    left: 4,
+    right: 4,
+    top: 8,
+    // Legend height (~20px) + 8px gap between chart and legend
+    bottom: showLegend ? 28 : 4,
     containLabel: true,
   }
 }
@@ -222,7 +252,7 @@ export function buildTooltip({
     extraCssText: [
       `box-shadow: ${tooltip.boxShadow}`,
       `border-radius: ${tooltip.borderRadius}px`,
-      "border: none",
+      `border: 1px solid ${colors.borderSecondary}`,
       "backdrop-filter: blur(30px)",
       `-webkit-backdrop-filter: blur(30px)`,
       `background: ${tooltip.background}`,
@@ -269,6 +299,7 @@ export function buildAxes({
   showGrid,
   valueFormatter,
   categoryFormatter,
+  containerWidth,
 }: {
   isVertical: boolean
   categories: string[]
@@ -276,11 +307,13 @@ export function buildAxes({
   showGrid: boolean
   valueFormatter?: (value: number) => string
   categoryFormatter?: (value: string) => string
+  containerWidth?: number
 }) {
   const categoryAxis = buildCategoryAxis({
     data: categories,
     theme,
     formatter: categoryFormatter,
+    containerWidth,
   })
 
   const valueAxis = buildValueAxis({
@@ -326,6 +359,8 @@ interface BaseChartOptionsParams {
   tooltipFilterSeries?: (seriesName: string) => boolean
   /** User-provided ECharts overrides (shallow-merged on top) */
   echartsOptions?: Partial<echarts.EChartsOption>
+  /** Container width in pixels — used to auto-compute category label interval */
+  containerWidth?: number
 }
 
 /**
@@ -347,6 +382,7 @@ export function buildBaseChartOptions({
   categoryFormatter,
   tooltipFilterSeries,
   echartsOptions,
+  containerWidth,
 }: BaseChartOptionsParams): echarts.EChartsOption {
   const { xAxis, yAxis } = buildAxes({
     isVertical,
@@ -355,6 +391,7 @@ export function buildBaseChartOptions({
     showGrid,
     valueFormatter,
     categoryFormatter,
+    containerWidth,
   })
 
   const baseOptions: echarts.EChartsOption = {

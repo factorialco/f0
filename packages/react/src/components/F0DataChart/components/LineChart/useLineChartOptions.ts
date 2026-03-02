@@ -11,6 +11,7 @@ import type {
 import { paletteColor, resolveChartColorToken } from "../../utils/colors"
 import { buildBaseChartOptions } from "../../utils/options"
 import { useChartTheme } from "../../utils/useChartTheme"
+import { useContainerWidth } from "../../utils/useContainerWidth"
 
 /** Extract the numeric value from a data point */
 function getValue(point: F0DataChartLineDataPoint): number {
@@ -130,6 +131,7 @@ export function useLineChartOptions(
   }: F0DataChartLineProps
 ): echarts.EChartsOption {
   const theme = useChartTheme(containerRef)
+  const containerWidth = useContainerWidth(containerRef)
 
   return useMemo(() => {
     const echartsSeries = series.map((s, i) =>
@@ -157,6 +159,7 @@ export function useLineChartOptions(
       valueFormatter,
       categoryFormatter,
       echartsOptions,
+      containerWidth,
     })
   }, [
     categories,
@@ -171,5 +174,6 @@ export function useLineChartOptions(
     categoryFormatter,
     echartsOptions,
     theme,
+    containerWidth,
   ])
 }

@@ -10,6 +10,7 @@ import type {
 import { paletteColor, resolveChartColorToken } from "../../utils/colors"
 import { buildBaseChartOptions } from "../../utils/options"
 import { useChartTheme } from "../../utils/useChartTheme"
+import { useContainerWidth } from "../../utils/useContainerWidth"
 
 /** Extract the numeric value from a data point */
 function getValue(point: F0DataChartBarDataPoint): number {
@@ -90,13 +91,12 @@ function buildSeriesEntries(
       })
     : series.data.map(getValue)
 
-  const borderRadius = stacked
-    ? isLastSeries
-      ? isVertical
-        ? [4, 4, 0, 0]
-        : [0, 4, 4, 0]
-      : 0
-    : 4
+  // Round only the far end (away from the axis):
+  // - Vertical: top corners rounded, bottom flat against x-axis
+  // - Horizontal: right corners rounded, left flat against y-axis
+  const borderRadius = isVertical ? [4, 4, 0, 0] : [0, 4, 4, 0]
+  // Stacked series that aren't the last one get no rounding (sandwiched)
+  const effectiveBorderRadius = stacked && !isLastSeries ? 0 : borderRadius
 
   const mainSeries: echarts.BarSeriesOption = {
     name: series.name,
@@ -105,7 +105,7 @@ function buildSeriesEntries(
     stack: stackId,
     itemStyle: {
       color,
-      borderRadius,
+      borderRadius: effectiveBorderRadius,
     },
     label: {
       show: showLabels,
@@ -140,13 +140,13 @@ function buildSeriesEntries(
           color: new echarts.graphic.LinearGradient(
             ...(isVertical
               ? ([0, 0, 0, 1] as [number, number, number, number])
-              : ([0, 0, 1, 0] as [number, number, number, number])),
+              : ([1, 0, 0, 0] as [number, number, number, number])),
             [
               { offset: 0, color: `${pointColor}33` },
               { offset: 1, color: "rgba(0, 0, 0, 0)" },
             ]
           ),
-          borderRadius: isVertical ? [4, 4, 0, 0] : [0, 4, 4, 0],
+          borderRadius,
         },
       }
     }
@@ -165,11 +165,12 @@ function buildSeriesEntries(
     },
     itemStyle: {
       color: new echarts.graphic.LinearGradient(
-        // Gradient direction: for vertical bars, top-to-bottom (0,0 → 0,1)
-        // For horizontal bars, left-to-right (0,0 → 1,0)
+        // Gradient direction: offset 0 is the far end from the solid bar
+        // Vertical: top-to-bottom (0,0 → 0,1) — dark at top
+        // Horizontal: right-to-left (1,0 → 0,0) — dark at right
         ...(isVertical
           ? ([0, 0, 0, 1] as [number, number, number, number])
-          : ([0, 0, 1, 0] as [number, number, number, number])),
+          : ([1, 0, 0, 0] as [number, number, number, number])),
         [
           // offset 0 = far end from the solid bar → more opaque (darker)
           { offset: 0, color: `${color}33` },
@@ -178,7 +179,7 @@ function buildSeriesEntries(
         ]
       ),
       // Only round the far end (away from the solid bar)
-      borderRadius: isVertical ? [4, 4, 0, 0] : [0, 4, 4, 0],
+      borderRadius,
     },
     label: {
       show: false,
@@ -210,6 +211,7 @@ export function useBarChartOptions(
   }: F0DataChartBarProps
 ): echarts.EChartsOption {
   const theme = useChartTheme(containerRef)
+  const containerWidth = useContainerWidth(containerRef)
 
   return useMemo(() => {
     const isVertical = orientation === "vertical"
@@ -242,6 +244,7 @@ export function useBarChartOptions(
       categoryFormatter,
       tooltipFilterSeries: (name) => name.endsWith(" (target)"),
       echartsOptions,
+      containerWidth,
     })
   }, [
     categories,
@@ -255,5 +258,6 @@ export function useBarChartOptions(
     categoryFormatter,
     echartsOptions,
     theme,
+    containerWidth,
   ])
 }
