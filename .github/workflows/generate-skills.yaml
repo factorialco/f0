@@ -48,6 +48,7 @@ jobs:
         run: pnpm --filter @factorialco/f0-react run build-storybook
 
       - name: Generate SKILL.md files
+        continue-on-error: true
         uses: sergiocarracedo/storybook-to-skill-md-action@v1.2.0
         with:
           index-file: "packages/react/storybook-static/index.json"
@@ -63,6 +64,7 @@ jobs:
             Library/**
 
       - name: Remove stale skill directories
+        if: always()
         run: |
           OUTPUT_DIR="packages/react/f0-skills"
           INDEX_FILE="$OUTPUT_DIR/_index/SKILL.md"
@@ -93,7 +95,7 @@ jobs:
           done
 
       - name: Push generated skills
-        if: github.event_name == 'push'
+        if: always() && github.event_name == 'push'
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
