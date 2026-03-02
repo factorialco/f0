@@ -47,7 +47,7 @@ export const AddButton = () => {
   if (!isEditMode) return null
 
   return (
-    <div className="ml-[26px] flex justify-center">
+    <div className="ml-6 flex justify-center">
       <Dropdown
         items={newQuestionDropdownItems}
         icon={Add}

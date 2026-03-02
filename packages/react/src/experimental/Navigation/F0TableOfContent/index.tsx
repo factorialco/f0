@@ -911,7 +911,7 @@ function TOCContent({
           </div>
         </ScrollArea>
       ) : (
-        <div className="min-h-0 flex-1 overflow-hidden px-3 pb-2">
+        <div className="min-h-0 flex-1 overflow-hidden px-2 pb-2">
           <div className="flex flex-col gap-0.5">
             {(sortable ? filteredSortableItems : filteredItems).map((item) =>
               renderTOCItem(

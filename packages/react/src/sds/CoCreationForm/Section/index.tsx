@@ -23,7 +23,8 @@ export const Section = ({
   description,
   questions = [],
   locked,
-}: SectionProps) => {
+  hideQuestions,
+}: SectionProps & { hideQuestions?: boolean }) => {
   const { onSectionChange, isEditMode, deleteElement, onDuplicateElement } =
     useCoCreationFormContext()
 
@@ -139,27 +140,31 @@ export const Section = ({
           )}
         />
       </div>
-      <DragProvider>
-        <Reorder.Group
-          axis="y"
-          values={questions}
-          onReorder={handleReorderQuestions}
-          as="div"
-        >
-          <div className="group/section-list flex flex-col gap-4">
-            {questions.map((question) => (
-              <Item key={question.id} question={question} />
-            ))}
+      {!hideQuestions && (
+        <>
+          <DragProvider>
+            <Reorder.Group
+              axis="y"
+              values={questions}
+              onReorder={handleReorderQuestions}
+              as="div"
+            >
+              <div className="group/section-list flex flex-col gap-4">
+                {questions.map((question) => (
+                  <Item key={question.id} question={question} />
+                ))}
+              </div>
+            </Reorder.Group>
+          </DragProvider>
+          <div className="mt-8 flex flex-row items-center gap-4">
+            <div className="h-px flex-1 bg-f1-border-secondary" />
+            <span className="text-base font-medium text-f1-foreground-secondary">
+              {t("coCreationForm.labels.endOfSection")}
+            </span>
+            <div className="h-px flex-1 bg-f1-border-secondary" />
           </div>
-        </Reorder.Group>
-      </DragProvider>
-      <div className="mt-8 flex flex-row items-center gap-4">
-        <div className="h-px flex-1 bg-f1-border-secondary" />
-        <span className="text-base font-medium text-f1-foreground-secondary">
-          {t("coCreationForm.labels.endOfSection")}
-        </span>
-        <div className="h-px flex-1 bg-f1-border-secondary" />
-      </div>
+        </>
+      )}
     </div>
   )
 }

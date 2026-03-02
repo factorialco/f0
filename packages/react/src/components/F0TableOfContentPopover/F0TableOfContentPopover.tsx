@@ -37,6 +37,8 @@ export function F0TableOfContentPopover({
   className,
   activeItem,
   collapsible = false,
+  sortable,
+  onReorder,
   showChildrenCounter = false,
   barsAlign = "left",
   size = "md",
@@ -105,6 +107,8 @@ export function F0TableOfContentPopover({
           items={items}
           activeItem={activeItem}
           collapsible={collapsible}
+          sortable={sortable}
+          onReorder={onReorder}
           hideChildrenCounter={!showChildrenCounter}
           scrollable={false}
         />

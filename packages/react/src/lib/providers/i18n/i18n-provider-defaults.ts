@@ -335,6 +335,8 @@ export const defaultTranslations = {
       deleteQuestion: "Delete question",
       duplicateSection: "Duplicate section",
       deleteSection: "Delete section",
+      confirmMoveLastQuestion: "Move question",
+      cancelMoveLastQuestion: "Cancel",
     },
     questionTypes: {
       section: "Section",
@@ -373,6 +375,9 @@ export const defaultTranslations = {
       questionOptions: "Question options",
       actions: "Actions",
       sectionTitlePlaceholder: "Section title",
+      lastQuestionDialogTitle: "Remove last question from section",
+      lastQuestionDialogDescription:
+        "Moving this question will leave the section empty and it will be removed. Do you want to continue?",
     },
   },
   richTextEditor: {

@@ -131,21 +131,23 @@ export const useTableOfContentItems = (
                   deleteLabel: deleteSectionLabel,
                 }),
               }),
-            children: section.questions?.map((question: QuestionElement) => ({
-              id: `co-creation-question-${question.id}`,
-              label: question.title || untitledQuestionLabel,
-              icon: getQuestionIcon(question.type as QuestionType),
-              onClick: handleItemClick,
-              ...(isEditMode &&
-                !section.locked && {
-                  otherActions: buildQuestionActions(question.id, {
-                    onDuplicateElement,
-                    onDeleteElement,
-                    duplicateLabel: duplicateQuestionLabel,
-                    deleteLabel: deleteQuestionLabel,
+            children: (section.questions ?? []).map(
+              (question: QuestionElement) => ({
+                id: `co-creation-question-${question.id}`,
+                label: question.title || untitledQuestionLabel,
+                icon: getQuestionIcon(question.type as QuestionType),
+                onClick: handleItemClick,
+                ...(isEditMode &&
+                  !section.locked && {
+                    otherActions: buildQuestionActions(question.id, {
+                      onDuplicateElement,
+                      onDeleteElement,
+                      duplicateLabel: duplicateQuestionLabel,
+                      deleteLabel: deleteQuestionLabel,
+                    }),
                   }),
-                }),
-            })),
+              })
+            ),
           }
         }
 
