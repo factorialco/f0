@@ -1,8 +1,10 @@
 import React from "react"
 import { Text as RNText } from "react-native"
 
+import { omitProps } from "../../../lib/utils"
+
 import { textVariants } from "./F0Text.styles"
-import type { F0TextProps } from "./F0Text.types"
+import { F0_TEXT_BANNED_PROPS, type F0TextProps } from "./F0Text.types"
 
 /**
  * F0Text - Primitive Text component with semantic typography variants
@@ -44,7 +46,7 @@ const F0TextComponent = React.forwardRef<RNText, F0TextProps>(
         className={textClassName}
         numberOfLines={numberOfLines}
         ellipsizeMode={numberOfLines ? "tail" : undefined}
-        {...rest}
+        {...omitProps(rest, F0_TEXT_BANNED_PROPS)}
       >
         {children}
       </RNText>

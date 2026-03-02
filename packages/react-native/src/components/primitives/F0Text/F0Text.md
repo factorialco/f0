@@ -42,7 +42,7 @@ import { F0Text } from "@factorialco/f0-react-native"
 
 All React Native `TextProps` are also supported (onPress, testID, etc.).
 
-**Note**: `className` and `style` props are **not available**. Use semantic props for typography. For spacing/layout, wrap F0Text in a View.
+**Note**: `className` and `style` props are **not available**. Use semantic props for typography. For spacing/layout, wrap F0Text in a View. The `style` prop is filtered at runtime to prevent override via spread.
 
 ### Typography Variants
 

@@ -1,6 +1,12 @@
 import type { TextProps as RNTextProps } from "react-native"
 
 /**
+ * Props that must not be passed through to the underlying RN Text.
+ * Used with omitProps for runtime safety.
+ */
+export const F0_TEXT_BANNED_PROPS = ["style"] as const
+
+/**
  * Typography variant types based on semantic design tokens
  */
 export const TYPOGRAPHY_VARIANTS = [

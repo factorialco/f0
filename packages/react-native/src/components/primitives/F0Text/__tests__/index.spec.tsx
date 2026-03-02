@@ -177,6 +177,20 @@ describe("F0Text", () => {
       expect(element.props.onPress).toBe(onPress)
     })
 
+    it("filters style prop at runtime (prevents override via spread)", () => {
+      const propsWithStyle = {
+        style: { color: "red" },
+        children: "Text with style attempt",
+      }
+      const { getByText } = render(
+        <F0Text {...(propsWithStyle as React.ComponentProps<typeof F0Text>)}>
+          Text with style attempt
+        </F0Text>
+      )
+      const element = getByText("Text with style attempt")
+      expect(element.props.style).toBeUndefined()
+    })
+
     it("handles ref forwarding", () => {
       const ref = React.createRef<any>()
       render(<F0Text ref={ref}>Ref text</F0Text>)
