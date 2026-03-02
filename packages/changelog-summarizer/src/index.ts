@@ -16,6 +16,24 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const LAST_RUN_CACHE_PATH = ".cache/last-run";
 const VALID_PROVIDERS: Provider[] = ["openai", "anthropic", "google", "groq"];
 
+/**
+ * Parse a date string that must be in YYYY-MM-DD format.
+ * Throws a descriptive error if the format is wrong or the result is an
+ * invalid date (e.g. "2026-02-30").
+ */
+function parseDate(value: string, flag: string): Date {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    throw new Error(
+      `${flag} must be in YYYY-MM-DD format (received: "${value}")`,
+    );
+  }
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    throw new Error(`${flag} is not a valid date (received: "${value}")`);
+  }
+  return date;
+}
+
 function detectRepoRoot(startDir: string): string {
   try {
     return execSync("git rev-parse --show-toplevel", {
@@ -34,27 +52,33 @@ function resolveDates(
   toArg: string | undefined,
   repoRoot: string,
 ): { from: Date; to: Date } {
-  const to = toArg ? new Date(toArg) : new Date();
+  const to = toArg ? parseDate(toArg, "--to") : new Date();
   to.setHours(23, 59, 59, 999);
 
   if (fromArg) {
-    return { from: new Date(fromArg), to };
+    return { from: parseDate(fromArg, "--from"), to };
   }
 
   // Try to read last successful run date from cache
   const cachePath = join(repoRoot, LAST_RUN_CACHE_PATH);
   if (existsSync(cachePath)) {
-    const lastRun = new Date(readFileSync(cachePath, "utf-8").trim());
-    // Use whichever gives the shorter/more conservative window:
-    // the day after the last run vs. 7 days ago
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    const raw = readFileSync(cachePath, "utf-8").trim();
+    const lastRun = new Date(raw);
+    if (!Number.isNaN(lastRun.getTime())) {
+      // Use whichever gives the shorter/more conservative window:
+      // the day after the last run vs. 7 days ago
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-    const from = lastRun > sevenDaysAgo ? lastRun : sevenDaysAgo;
+      const from = lastRun > sevenDaysAgo ? lastRun : sevenDaysAgo;
+      console.error(
+        `[dates] Using from=${from.toISOString().split("T")[0]} (cache/7d heuristic)`,
+      );
+      return { from, to };
+    }
     console.error(
-      `[dates] Using from=${from.toISOString().split("T")[0]} (cache/7d heuristic)`,
+      `[dates] Cache file contained invalid date "${raw}", ignoring`,
     );
-    return { from, to };
   }
 
   // Fallback: last 7 days
