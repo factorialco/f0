@@ -41,13 +41,14 @@ export const NestedDataProvider = <R extends RecordType>({
     []
   )
 
-  const clearFetchedData = useCallback(() => {
-    setFetchedData({})
-  }, [])
-
   const [expandedRowIds, setExpandedRowIdsState] = useState<
     Record<string, boolean>
   >({})
+
+  const clearFetchedData = useCallback(() => {
+    setFetchedData({})
+    setExpandedRowIdsState({})
+  }, [])
 
   const setRowExpanded = useCallback((rowId: string, expanded: boolean) => {
     setExpandedRowIdsState((prev) => {
