@@ -90,18 +90,25 @@ export function EditableCellRenderer<
         : false
 
       return (
-        <CellComponent
-          label={editableColumn.label}
-          value={value}
-          align={editableColumn.align}
-          error={error}
-          loading={loading}
-          onChange={(v) => {
-            if (editableColumn.id) {
-              handleCellChange(editableColumn.id, v)
-            }
-          }}
-        />
+        // eslint-disable-next-line jsx-a11y/no-static-element-interactions -- stops cell navigation (href/onClick) from firing when interacting with the editor
+        <div
+          className="pointer-events-auto"
+          onClickCapture={(e) => e.stopPropagation()}
+          onMouseDownCapture={(e) => e.stopPropagation()}
+        >
+          <CellComponent
+            label={editableColumn.label}
+            value={value}
+            align={editableColumn.align}
+            error={error}
+            loading={loading}
+            onChange={(v) => {
+              if (editableColumn.id) {
+                handleCellChange(editableColumn.id, v)
+              }
+            }}
+          />
+        </div>
       )
     }
   }
