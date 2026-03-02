@@ -106,11 +106,12 @@ The workflow at `.github/workflows/changelog-summary.yaml` runs every Friday at 
 
 | Input             | Description                              | Default               |
 | ----------------- | ---------------------------------------- | --------------------- |
-| `provider`        | AI provider to use                       | `openai`              |
 | `from`            | Start date (YYYY-MM-DD)                  | last run / 7 days ago |
 | `to`              | End date (YYYY-MM-DD)                    | today                 |
 | `dry_run`         | Skip Slack publish, print to log instead | `false`               |
 | `ignore_last_run` | Ignore cached last-run date              | `false`               |
+
+The provider is fixed to `groq` (`llama-3.3-70b-versatile`) in the workflow env.
 
 ### Required secrets
 
