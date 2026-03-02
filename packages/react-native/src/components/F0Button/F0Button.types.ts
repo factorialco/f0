@@ -1,8 +1,8 @@
+import type { IconType } from "../primitives/F0Icon/F0Icon.types"
 import type {
   PressableFeedbackProps,
   PressableFeedbackVariant,
 } from "../primitives/PressableFeedback"
-import type { IconType } from "../primitives/F0Icon/F0Icon.types"
 
 /**
  * Button variant types

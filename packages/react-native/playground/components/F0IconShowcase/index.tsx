@@ -169,9 +169,9 @@ export function F0IconShowcase() {
     >
       {/* Search Section */}
       <View className='mb-4'>
-        <F0Text variant='heading-lg' className='mb-2'>
-          Search Icons
-        </F0Text>
+        <View className='mb-2'>
+          <F0Text variant='heading-lg'>Search Icons</F0Text>
+        </View>
         <TextInput
           className='mb-4 rounded-lg border p-3'
           style={{
@@ -223,9 +223,9 @@ export function F0IconShowcase() {
       )}
 
       {/* Size Variants */}
-      <F0Text variant='heading-lg' className='mt-6 mb-4'>
-        Size Variants
-      </F0Text>
+      <View className='mt-6 mb-4'>
+        <F0Text variant='heading-lg'>Size Variants</F0Text>
+      </View>
       <View
         className='mb-8 flex-row justify-around rounded-lg p-4'
         style={{ backgroundColor: asString(f0BackgroundSecondary) }}
@@ -260,9 +260,9 @@ export function F0IconShowcase() {
       </View>
 
       {/* Color Customization */}
-      <F0Text variant='heading-lg' className='mt-6 mb-4'>
-        Color Customization
-      </F0Text>
+      <View className='mt-6 mb-4'>
+        <F0Text variant='heading-lg'>Color Customization</F0Text>
+      </View>
       <View
         className='flex-row justify-around rounded-lg p-4'
         style={{ backgroundColor: asString(f0BackgroundSecondary) }}

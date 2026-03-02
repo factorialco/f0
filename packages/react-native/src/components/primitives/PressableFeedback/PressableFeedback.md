@@ -41,16 +41,16 @@ import { PressableFeedback } from "../primitives/PressableFeedback"
 
 ## Props
 
-| Prop                 | Type                          | Default           | Description                                  |
-| -------------------- | ----------------------------- | ----------------- | -------------------------------------------- |
-| `variant`            | `PressableFeedbackVariant`    | `"both"`          | Feedback style: highlight, scale, both, none |
-| `scaleAnimation`     | `ScaleAnimationConfig`        | `{ value: 0.98 }` | Scale animation configuration               |
-| `highlightAnimation` | `HighlightAnimationConfig`    | See below         | Highlight overlay configuration              |
-| `disableAnimation`   | `boolean`                     | `false`           | Disables all animations                      |
-| `disabled`           | `boolean`                     | —                 | Disables the pressable                       |
-| `className`          | `string`                      | —                 | Additional Tailwind classes                  |
-| `style`              | `PressableProps["style"]`     | —                 | Style (needed for Reanimated animated styles)|
-| `children`           | `React.ReactNode`             | —                 | Content to render                            |
+| Prop                 | Type                       | Default           | Description                                   |
+| -------------------- | -------------------------- | ----------------- | --------------------------------------------- |
+| `variant`            | `PressableFeedbackVariant` | `"both"`          | Feedback style: highlight, scale, both, none  |
+| `scaleAnimation`     | `ScaleAnimationConfig`     | `{ value: 0.98 }` | Scale animation configuration                 |
+| `highlightAnimation` | `HighlightAnimationConfig` | See below         | Highlight overlay configuration               |
+| `disableAnimation`   | `boolean`                  | `false`           | Disables all animations                       |
+| `disabled`           | `boolean`                  | —                 | Disables the pressable                        |
+| `className`          | `string`                   | —                 | Additional Tailwind classes                   |
+| `style`              | `PressableProps["style"]`  | —                 | Style (needed for Reanimated animated styles) |
+| `children`           | `React.ReactNode`          | —                 | Content to render                             |
 
 All `PressableProps` (except `style` and `children` which are re-declared) are also forwarded.
 

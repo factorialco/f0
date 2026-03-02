@@ -24,8 +24,10 @@ export interface HighlightAnimationConfig {
  * PressableFeedback is an internal primitive used by other F0 components.
  * It wraps React Native's Pressable with Reanimated scale/highlight animations.
  */
-export interface PressableFeedbackProps
-  extends Omit<PressableProps, "style" | "children"> {
+export interface PressableFeedbackProps extends Omit<
+  PressableProps,
+  "style" | "children"
+> {
   /** Visual feedback variant */
   variant?: PressableFeedbackVariant
   /** Scale animation configuration (only used when variant includes scale) */

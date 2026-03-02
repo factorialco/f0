@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { ScrollView, View, Text, TextInput, Pressable } from "react-native";
-import { Icon, type IconType } from "../../../src/components/Icon";
+import { F0Icon, type IconType } from "../../../src/components/primitives/F0Icon";
 import { AppIcons, ModuleIcons } from "../../../src/icons";
 import { useCSSVariable } from "uniwind";
 
@@ -30,7 +30,7 @@ const IconDisplay = ({ icon, name }: IconDisplayProps) => {
 
   return (
     <View className="items-center w-20 mb-4 p-2">
-      <Icon icon={icon} size="md" />
+      <F0Icon icon={icon} size="md" />
       <Text className="text-sm mt-2 text-center" style={{ color: asString(f0Foreground) }}>
         {name}
       </Text>
@@ -49,7 +49,7 @@ const SizeVariant = ({ icon, name, size }: SizeVariantProps) => {
 
   return (
     <View className="items-center justify-center">
-      <Icon icon={icon} size={size} />
+      <F0Icon icon={icon} size={size} />
       <Text className="text-xs mt-2 text-center" style={{ color: asString(f0Foreground) }}>
         {name}
       </Text>
@@ -68,7 +68,7 @@ const StyledIconDisplay = ({ icon, name, className }: StyledIconDisplayProps) =>
 
   return (
     <View className="items-center justify-center">
-      <Icon icon={icon} size="lg" className={className} />
+      <F0Icon icon={icon} size="lg" className={className} />
       <Text className="text-xs mt-2 text-center" style={{ color: asString(f0Foreground) }}>
         {name}
       </Text>
