@@ -1,21 +1,27 @@
 import * as echarts from "echarts"
 import { AriaComponent } from "echarts/components"
-import { useEffect, useRef } from "react"
-
-import { theme as f0LightTheme } from "../F0Chart/themes/f0.light"
-import type { F0BarChartProps } from "./types"
-import { useBarChartOptions } from "./useBarChartOptions"
+import { type RefObject, useEffect, useRef } from "react"
 
 // @ts-expect-error - Duplicate echarts types in dependency tree
 echarts.use(AriaComponent)
 
-export const F0BarChart = (props: F0BarChartProps) => {
-  const ref = useRef<HTMLDivElement>(null)
+/**
+ * Manages the ECharts instance lifecycle: init, resize, option updates,
+ * and cleanup. Shared across all ECharts-based F0 chart components.
+ *
+ * Accepts a ref to the container `<div>` so it can be shared with other
+ * hooks that need access to the same DOM element (e.g. `useChartTheme`
+ * for dark mode detection via `element.closest(".dark")`).
+ */
+export function useEChartsInstance(
+  ref: RefObject<HTMLDivElement | null>,
+  options: echarts.EChartsOption
+) {
   const chart = useRef<echarts.ECharts | null>(null)
 
   useEffect(() => {
     if (ref.current) {
-      chart.current = echarts.init(ref.current, f0LightTheme)
+      chart.current = echarts.init(ref.current)
 
       const container = ref.current
       const resizeObserver = new ResizeObserver(() => {
@@ -31,11 +37,7 @@ export const F0BarChart = (props: F0BarChartProps) => {
     }
   }, [ref])
 
-  const options = useBarChartOptions(props)
-
   useEffect(() => {
     chart.current?.setOption(options, true)
   }, [options])
-
-  return <div ref={ref} className="h-full w-full" />
 }
