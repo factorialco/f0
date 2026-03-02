@@ -24,7 +24,13 @@ export const ChatTextarea = ({
   onSend,
   onStop,
 }: ChatTextareaProps) => {
-  const { placeholders } = useAiChat()
+  const {
+    placeholders,
+    entityResolvers,
+    toolHints,
+    activeToolHint,
+    setActiveToolHint,
+  } = useAiChat()
   const { messages, setMessages } = useCopilotChatInternal()
   const translations = useI18n()
   const messagesRef = useRef(messages)
@@ -50,6 +56,10 @@ export const ChatTextarea = ({
       onSend={onSend}
       onStop={handleStop}
       placeholders={placeholders}
+      entityResolvers={entityResolvers}
+      toolHints={toolHints}
+      activeToolHint={activeToolHint}
+      onActiveToolHintChange={setActiveToolHint}
     />
   )
 }

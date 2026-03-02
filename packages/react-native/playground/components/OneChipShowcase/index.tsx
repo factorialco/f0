@@ -7,7 +7,7 @@ import { useCSSVariable } from "uniwind";
 const { Add, Check, Alert, Archive, Home, Settings } = AppIcons;
 
 export function OneChipShowcase() {
-  const [f1Foreground] = useCSSVariable(['--color-f1-foreground']);
+  const [f0Foreground] = useCSSVariable(['--color-f0-foreground']);
   const [selectedChips, setSelectedChips] = useState<Set<string>>(new Set());
 
   const asString = (value: string | number | undefined): string => {
@@ -39,7 +39,7 @@ export function OneChipShowcase() {
       style={{ width: "100%" }}
     >
       {/* Basic Variants */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f1Foreground) }}>
+      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
         Basic Variants
       </Text>
       <View className="flex-row flex-wrap gap-2 mb-6">
@@ -48,7 +48,7 @@ export function OneChipShowcase() {
       </View>
 
       {/* With Icons */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f1Foreground) }}>
+      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
         With Icons
       </Text>
       <View className="flex-row flex-wrap gap-2 mb-6">
@@ -61,7 +61,7 @@ export function OneChipShowcase() {
       </View>
 
       {/* With Close Button */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f1Foreground) }}>
+      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
         With Close Button
       </Text>
       <View className="flex-row flex-wrap gap-2 mb-6">
@@ -77,7 +77,7 @@ export function OneChipShowcase() {
       </View>
 
       {/* With Icon and Close */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f1Foreground) }}>
+      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
         With Icon and Close
       </Text>
       <View className="flex-row flex-wrap gap-2 mb-6">
@@ -95,7 +95,7 @@ export function OneChipShowcase() {
       </View>
 
       {/* Interactive (Clickable) */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f1Foreground) }}>
+      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
         Interactive (Click to Toggle Selection)
       </Text>
       <View className="flex-row flex-wrap gap-2 mb-6">
@@ -126,7 +126,7 @@ export function OneChipShowcase() {
       </View>
 
       {/* Different Labels */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f1Foreground) }}>
+      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
         Different Labels
       </Text>
       <View className="flex-row flex-wrap gap-2 mb-6">
@@ -137,7 +137,7 @@ export function OneChipShowcase() {
       </View>
 
       {/* All Variants Summary */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f1Foreground) }}>
+      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
         All Variants Summary
       </Text>
       <View className="flex-row flex-wrap gap-2 mb-6">

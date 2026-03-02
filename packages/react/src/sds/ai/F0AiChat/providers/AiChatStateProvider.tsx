@@ -1,5 +1,7 @@
 "use client"
 
+import type { ReactNode } from "react"
+
 import { type Message, randomId } from "@copilotkit/shared"
 import {
   createContext,
@@ -10,13 +12,16 @@ import {
   useRef,
   useState,
 } from "react"
-import type { ReactNode } from "react"
 
 import { useI18n } from "@/lib/providers/i18n"
 
 import { DEFAULT_CHAT_WIDTH } from "../constants"
 import { AiChatProviderReturnValue, AiChatState } from "../internal-types"
-import { type VisualizationMode, WelcomeScreenSuggestion } from "../types"
+import {
+  type VisualizationMode,
+  type AiChatToolHint,
+  WelcomeScreenSuggestion,
+} from "../types"
 
 const AiChatStateContext = createContext<AiChatProviderReturnValue | null>(null)
 
@@ -49,8 +54,11 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   defaultVisualizationMode = "sidepanel",
   lockVisualizationMode = false,
   footer: initialFooter,
+  entityResolvers,
+  toolHints,
   onThumbsDown,
   onThumbsUp,
+  tracking,
   ...rest
 }) => {
   const [footer, setFooter] = useState<ReactNode | undefined>(initialFooter)
@@ -75,6 +83,16 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   >(initialInitialMessage)
 
   const [chatWidth, setChatWidth] = useState(() => getStoredChatWidth())
+
+  useEffect(() => {
+    if (open) {
+      tracking?.onVisibility?.()
+    }
+  }, [open])
+
+  const [activeToolHint, setActiveToolHint] = useState<AiChatToolHint | null>(
+    null
+  )
 
   // Persist chat width to localStorage
   useEffect(() => {
@@ -195,6 +213,11 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         chatWidth,
         setChatWidth,
         resetChatWidth,
+        tracking,
+        entityResolvers,
+        toolHints,
+        activeToolHint,
+        setActiveToolHint,
       }}
     >
       {children}
@@ -239,6 +262,11 @@ export function useAiChat(): AiChatProviderReturnValue {
       chatWidth: DEFAULT_CHAT_WIDTH,
       setChatWidth: noopFn,
       resetChatWidth: noopFn,
+      tracking: undefined,
+      entityResolvers: undefined,
+      toolHints: undefined,
+      activeToolHint: null,
+      setActiveToolHint: noopFn,
     }
   }
 

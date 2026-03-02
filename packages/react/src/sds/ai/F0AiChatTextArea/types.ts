@@ -1,3 +1,5 @@
+import type { AiChatToolHint, EntityResolvers } from "../F0AiChat/types"
+
 /**
  * Props for the F0AiChatTextArea component
  */
@@ -33,14 +35,23 @@ export interface F0AiChatTextAreaProps {
    * @default true
    */
   autoFocus?: boolean
-}
-
-/**
- * Internal props for the TypewriterPlaceholder component
- */
-export interface TypewriterPlaceholderProps {
-  placeholders: string[]
-  defaultPlaceholder: string
-  inputValue: string
-  inProgress: boolean
+  /**
+   * Entity resolvers for @mention autocomplete and entity reference rendering.
+   * When `searchPersons` is provided, typing @ in the textarea opens an
+   * autocomplete popover to mention employees.
+   */
+  entityResolvers?: EntityResolvers
+  /**
+   * Available tool hints that the user can activate.
+   * Renders a selector button to the left of the send button.
+   */
+  toolHints?: AiChatToolHint[]
+  /**
+   * The currently active tool hint, or null if none is selected.
+   */
+  activeToolHint?: AiChatToolHint | null
+  /**
+   * Callback when the active tool hint changes (selection or removal).
+   */
+  onActiveToolHintChange?: (toolHint: AiChatToolHint | null) => void
 }
