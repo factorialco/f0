@@ -185,7 +185,7 @@ Instructs the LLM to:
 - Lead with high-impact changes (new components, breaking changes)
 - Group small fixes together
 - Reference version numbers
-- Keep total under 500 words
+- Keep total under 600 words
 - If a package had no changes, briefly note it
 
 ---
