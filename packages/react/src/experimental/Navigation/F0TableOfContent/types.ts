@@ -25,6 +25,7 @@ export type TOCItemAction =
       label: string
       onClick: () => void
       icon?: IconType
+      critical?: boolean
     }
   | {
       type: "separator"

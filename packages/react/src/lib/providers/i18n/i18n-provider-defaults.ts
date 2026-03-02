@@ -346,6 +346,7 @@ export const defaultTranslations = {
       numeric: "Numeric",
       link: "Link",
       date: "Date",
+      dropdownSingle: "Dropdown",
     },
     selectQuestion: {
       addOption: "Add option",

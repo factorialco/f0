@@ -81,7 +81,10 @@ export const Section = ({
   const inputDisabled = !isEditMode || locked
 
   return (
-    <div className="group/section flex w-full flex-col gap-1 bg-f1-background">
+    <div
+      id={`co-creation-section-${id}`}
+      className="group/section flex w-full flex-col gap-1 bg-f1-background"
+    >
       <div className="py-1 pl-5 pr-3">
         <div className="flex flex-row">
           <input

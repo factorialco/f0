@@ -13,6 +13,7 @@ import { Question as QuestionComponent, QuestionProps } from "../Question"
 import { Section as SectionComponent } from "../Section"
 import { CoCreationFormElement, CoCreationFormProps } from "../types"
 import { AddButton } from "./AddButton"
+import { TableOfContent } from "./TableOfContent"
 
 type ItemProps = {
   element: CoCreationFormElement
@@ -156,6 +157,8 @@ const _CoCreationForm = ({
     }
   }, [applyingChanges])
 
+  const showTableOfContent = !!elements.length
+
   return (
     <CoCreationFormProvider
       isEditMode={isEditMode}
@@ -164,49 +167,52 @@ const _CoCreationForm = ({
       disallowOptionalQuestions={disallowOptionalQuestions}
       allowedQuestionTypes={allowedQuestionTypes}
     >
-      <div className="relative">
-        <motion.div
-          className={cn(
-            "flex flex-col gap-6",
-            applyingChanges && "pointer-events-none"
-          )}
-          initial={{ filter: "blur(0px)" }}
-          animate={{ filter: applyingChanges ? "blur(2px)" : "none" }}
-          exit={{ filter: "blur(0px)" }}
-        >
-          <DragProvider>
-            <Reorder.Group
-              axis="y"
-              values={elements}
-              onReorder={onChange}
-              as="div"
-            >
-              <div className="flex flex-col gap-8">
-                {elements.map((element) => (
-                  <Item
-                    key={
-                      element.type === "section"
-                        ? element.section.id
-                        : element.question.id
-                    }
-                    element={element}
-                  />
-                ))}
-              </div>
-            </Reorder.Group>
-          </DragProvider>
-          {shouldShowAddButton && <AddButton />}
-        </motion.div>
-        {applyingChanges && (
+      <div className="flex flex-row gap-2">
+        {showTableOfContent && <TableOfContent elements={elements} />}
+        <div className="relative flex-1">
           <motion.div
-            className="sticky bottom-1/2 left-0 z-50 flex w-full items-center justify-center"
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
+            className={cn(
+              "flex flex-col gap-6",
+              applyingChanges && "pointer-events-none"
+            )}
+            initial={{ filter: "blur(0px)" }}
+            animate={{ filter: applyingChanges ? "blur(2px)" : "none" }}
+            exit={{ filter: "blur(0px)" }}
           >
-            <ApplyingChangesTag />
+            <DragProvider>
+              <Reorder.Group
+                axis="y"
+                values={elements}
+                onReorder={onChange}
+                as="div"
+              >
+                <div className="flex flex-col gap-8">
+                  {elements.map((element) => (
+                    <Item
+                      key={
+                        element.type === "section"
+                          ? element.section.id
+                          : element.question.id
+                      }
+                      element={element}
+                    />
+                  ))}
+                </div>
+              </Reorder.Group>
+            </DragProvider>
+            {shouldShowAddButton && <AddButton />}
           </motion.div>
-        )}
+          {applyingChanges && (
+            <motion.div
+              className="sticky bottom-1/2 left-0 z-50 flex w-full items-center justify-center"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+            >
+              <ApplyingChangesTag />
+            </motion.div>
+          )}
+        </div>
       </div>
     </CoCreationFormProvider>
   )
