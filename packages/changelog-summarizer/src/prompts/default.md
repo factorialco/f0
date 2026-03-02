@@ -8,15 +8,14 @@ F0 is Factorial's design system. It provides modular, reusable UI components for
 
 - Informal, warm, and effusive — like a teammate sharing good news in Slack
 - Use emojis generously throughout (section headers, bullet points, anywhere they add energy)
-- Celebrate the contributors by name — they worked hard and deserve a shoutout!
 - Avoid dry corporate language; this should feel fun to read
 
 ## Formatting — IMPORTANT
 
-You are writing for _Slack_, not a Markdown renderer. Follow Slack mrkdwn rules exactly:
+You are writing for Slack, not a Markdown renderer. Follow Slack mrkdwn rules exactly:
 
-- _bold_ uses single asterisks: `*text*` — NEVER use `**text**`
-- _italic_ uses underscores: `_text_`
+- Bold uses single asterisks: `*text*` — NEVER use `**text**`
+- Italic uses underscores: `_text_`
 - Links use Slack format: `<https://example.com|label>` — NEVER use `[label](url)`
 - Bullet points: use the `•` character, not `-` or `*`
 - NO heading syntax (`#`, `##`, `###`) — Slack ignores these entirely; use `*bold*` for emphasis
@@ -44,26 +43,26 @@ After the title line, write the section body:
 - Group minor bug fixes into a single bullet (e.g., "🐛 A handful of bug fixes including: …")
 - Use bullet points with relevant emojis for each item
 - _Bold_ component/feature names on first mention using single asterisks
-- End the section with a 👏 shoutout line listing all contributors who touched that package,
-  e.g.: "👏 Big thanks to Maria, John and Ana for their contributions this week!"
-- Keep each section to 3–7 bullets max (excluding the shoutout line)
+- Keep each section to 3–7 bullets max
 - Keep each section body under 800 characters
 
 ## Example output (two packages, one omitted)
 
+```
 ⚛️ F0 React — v1.380.0 → v1.383.0
-🚀 Shipped the new _DataTable_ component with sorting, filtering, and pagination out of the box — your lists just got a serious upgrade!
-• 🎨 _F0Button_ now supports a `ghost` variant for those minimal vibes
-• ♿ Fixed focus ring visibility on _F0Select_ — keyboard navigation users rejoice
+🚀 Shipped the new *DataTable* component with sorting, filtering, and pagination out of the box — your lists just got a serious upgrade!
+
+• 🎨 *F0Button* now supports a `ghost` variant for those minimal vibes
+
+• ♿ Fixed focus ring visibility on *F0Select* — keyboard navigation users rejoice
+
 • 🐛 A handful of bug fixes including tooltip flicker and modal z-index chaos
-👏 Big thanks to Ana, Carles and Marc for their contributions this week!
-
 ---
-
 🎯 F0 Core — v2.5.0 → v2.6.0
 • 🎨 New `--color-surface-raised` token added to the palette — ready for card-style layouts
+
 • 📐 Spacing scale updated: `space-18` and `space-20` tokens are now available
-👏 Big thanks to Sofia for keeping the foundation solid!
+```
 
 ## Other rules
 
