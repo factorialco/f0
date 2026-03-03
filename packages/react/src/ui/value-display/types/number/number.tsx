@@ -8,11 +8,13 @@ import { tableDisplayClassNames } from "../../const"
 import { ValueDisplayRendererContext } from "../../renderers"
 import { isShowingPlaceholder, resolveValue } from "../../utils"
 import { WithPlaceholder } from "../types"
+import { formatNumberParts } from "./format"
+import type { UnitsPosition } from "./format"
 
 interface NumberValue extends WithPlaceholder {
   number: number | undefined
   units?: string
-  unitsPosition?: "left" | "right"
+  unitsPosition?: UnitsPosition
   decimalPlaces?: number | undefined
 }
 
@@ -27,7 +29,7 @@ export const NumberCell = (
 
   const number = {
     // defaults
-    unitsPosition: "right",
+    unitsPosition: "right" as UnitsPosition,
     units: "",
     // if args is an object, use the amount from args, otherwise use the value
     ...(typeof args === "object" && "number" in args
@@ -37,6 +39,13 @@ export const NumberCell = (
           number: value,
         }),
   }
+
+  const formattedNumber = formatNumberParts({
+    number: number.number,
+    decimalPlaces: number.decimalPlaces,
+    units: number.units,
+    unitsPosition: number.unitsPosition,
+  })
 
   return (
     <div
@@ -49,14 +58,12 @@ export const NumberCell = (
         shouldShowPlaceholderStyling && "text-f1-foreground-secondary"
       )}
     >
-      {number.unitsPosition === "left" && number.units && (
-        <Units units={number.units} />
+      {formattedNumber.unitsPosition === "left" && formattedNumber.units && (
+        <Units units={formattedNumber.units} />
       )}
-      {number.decimalPlaces !== undefined
-        ? number.number?.toFixed(number.decimalPlaces)
-        : (number.number?.toString() ?? "")}
-      {number.unitsPosition === "right" && number.units && (
-        <Units units={number.units} />
+      {formattedNumber.value}
+      {formattedNumber.unitsPosition === "right" && formattedNumber.units && (
+        <Units units={formattedNumber.units} />
       )}
     </div>
   )

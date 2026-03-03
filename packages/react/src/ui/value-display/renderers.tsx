@@ -6,6 +6,7 @@ import { AmountCell } from "./types/amount"
 import { BarSeriesCell } from "./types/barSeries"
 import { AvatarListCell } from "./types/avatarList"
 import { CompanyCell } from "./types/company"
+import { CompoundCell } from "./types/compound"
 import { CountryCell } from "./types/country"
 import { DateCell } from "./types/date"
 import { DotTagCell } from "./types/dotTag"
@@ -44,6 +45,7 @@ export const valueDisplayRenderers = {
   number: NumberCell,
   date: DateCell,
   amount: AmountCell,
+  compound: CompoundCell,
   avatarList: AvatarListCell,
   status: StatusCell,
   alertTag: AlertTagCell,
