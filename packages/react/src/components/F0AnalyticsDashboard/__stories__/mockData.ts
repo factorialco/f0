@@ -106,7 +106,7 @@ export function fetchHeadcountByDepartment(
 ): Promise<DashboardChartData> {
   const dm = departmentMultiplier(filters)
   const sm = statusMultiplier(filters)
-  return delay(300).then(() => ({
+  return delay(2500).then(() => ({
     categories: ["Engineering", "Product", "Design", "Marketing"],
     series: [
       {
@@ -147,7 +147,7 @@ export function fetchRevenueTrend(
   filters: Filters
 ): Promise<DashboardChartData> {
   const sm = statusMultiplier(filters)
-  return delay(250).then(() => ({
+  return delay(2000).then(() => ({
     categories: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
     series: [
       {
@@ -175,7 +175,7 @@ export function fetchCostBreakdown(
   filters: Filters
 ): Promise<DashboardChartData> {
   const dm = departmentMultiplier(filters)
-  return delay(350).then(() => ({
+  return delay(3000).then(() => ({
     categories: ["Q1", "Q2", "Q3", "Q4"],
     series: [
       {
@@ -222,7 +222,7 @@ export function fetchAttritionRate(
   filters: Filters
 ): Promise<DashboardChartData> {
   const sm = statusMultiplier(filters)
-  return delay(200).then(() => ({
+  return delay(2200).then(() => ({
     categories: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
     series: [
       {
@@ -244,7 +244,7 @@ export function fetchSatisfactionScores(
   filters: Filters
 ): Promise<DashboardChartData> {
   const dm = departmentMultiplier(filters)
-  return delay(280).then(() => ({
+  return delay(2800).then(() => ({
     categories: ["Engineering", "Product", "Design", "Marketing"],
     series: [
       {
@@ -264,7 +264,7 @@ export function fetchHiringPipeline(
   filters: Filters
 ): Promise<DashboardChartData> {
   const dm = departmentMultiplier(filters)
-  return delay(320).then(() => ({
+  return delay(2600).then(() => ({
     categories: [
       "Applied",
       "Phone Screen",
@@ -334,7 +334,7 @@ export function fetchHiringFunnel(
   const dm = departmentMultiplier(filters)
   const total =
     240 * dm.Engineering + 120 * dm.Product + 80 * dm.Design + 60 * dm.Marketing
-  return delay(280).then(() => ({
+  return delay(3500).then(() => ({
     series: {
       name: "Hiring Pipeline",
       data: [
@@ -352,7 +352,7 @@ export function fetchHiringFunnel(
 export function fetchOnboardingFunnel(
   _filters: Filters
 ): Promise<DashboardChartData> {
-  return delay(250).then(() => ({
+  return delay(3000).then(() => ({
     series: {
       name: "Onboarding",
       data: [
@@ -389,14 +389,14 @@ export function fetchTotalHeadcount(
       38 * dm.Marketing) *
       sm
   )
-  return delay(200).then(() => ({ value: current, previousValue: previous }))
+  return delay(1800).then(() => ({ value: current, previousValue: previous }))
 }
 
 export function fetchAvgSalary(filters: Filters): Promise<DashboardMetricData> {
   const sm = statusMultiplier(filters)
   const current = Math.round(72_400 * sm)
   const previous = Math.round(68_900 * sm)
-  return delay(180).then(() => ({ value: current, previousValue: previous }))
+  return delay(2000).then(() => ({ value: current, previousValue: previous }))
 }
 
 export function fetchAttritionMetric(
@@ -405,7 +405,7 @@ export function fetchAttritionMetric(
   const sm = statusMultiplier(filters)
   const current = Math.round(4.2 * sm * 10) / 10
   const previous = Math.round(5.1 * sm * 10) / 10
-  return delay(220).then(() => ({ value: current, previousValue: previous }))
+  return delay(1500).then(() => ({ value: current, previousValue: previous }))
 }
 
 // ---------------------------------------------------------------------------
