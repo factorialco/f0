@@ -183,7 +183,7 @@ export function TableCell({
               <div
                 className={cn(
                   width !== "auto" && "overflow-hidden",
-                  "relative z-[1]"
+                  "relative z-[1] h-full"
                 )}
                 style={{
                   ...firstCellMarginLeft,

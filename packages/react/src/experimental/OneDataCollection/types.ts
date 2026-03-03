@@ -104,4 +104,6 @@ export type CollectionProps<
    * Temporary prop to force the full width of the data collection (removes the X padding)
    */
   tmpFullWidth?: boolean
+  /** Indicates the source visualization type */
+  fromVisualization?: "table" | "editableTable"
 } & VisualizationOptions

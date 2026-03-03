@@ -20,12 +20,13 @@ import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { Checkbox } from "@/ui/checkbox"
 
-import { ItemActionsRow } from "../../../../components/itemActions/ItemActionsRow/ItemActionsRow"
 import type {
   CellRendererProps,
   RowWrapperProps,
   TableColumnDefinition,
 } from "../types"
+
+import { ItemActionsRow } from "../../../../components/itemActions/ItemActionsRow/ItemActionsRow"
 import { useSticky } from "../useSticky"
 import { NestedRow } from "./NestedRow"
 
@@ -61,7 +62,9 @@ export type RowProps<
   nestedRowProps?: NestedRowProps
   disableHover?: boolean
   /** Optional custom cell renderer. When provided, wraps each cell's content. */
-  cellRenderer?: React.ComponentType<CellRendererProps<R, Sortings, Summaries>>
+  cellRenderer?: React.ComponentType<
+    CellRendererProps<R, Sortings, Summaries> & { isLastColumn?: boolean }
+  >
   /** Row wrapper passed through to NestedRow for wrapping child rows */
   rowWrapper?: React.ComponentType<RowWrapperProps<R>>
 }
@@ -230,9 +233,21 @@ const RowComponentInner = <
               rowWithChildren,
               tableWithChildren,
             }}
+            className={
+              CellRenderer
+                ? "h-[48px] p-0 align-middle first:pl-0 last:pr-0"
+                : undefined
+            }
           >
             {CellRenderer ? (
-              <CellRenderer item={item} column={column} cellIndex={cellIndex}>
+              <CellRenderer
+                item={item}
+                isLastColumn={
+                  !hasItemActions && cellIndex === columns.length - 1
+                }
+                column={column}
+                cellIndex={cellIndex}
+              >
                 {defaultContent}
               </CellRenderer>
             ) : (
