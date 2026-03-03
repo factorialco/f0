@@ -110,6 +110,7 @@ const resolveSegmentText = (
               decimalPlaces: segment.currency?.decimalPlaces,
               units: segment.currency?.symbol,
               unitsPosition: segment.currency?.symbolPosition,
+              unitsSpaced: true,
             })
           : undefined,
         segment.placeholder

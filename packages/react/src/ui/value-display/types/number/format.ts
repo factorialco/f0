@@ -5,6 +5,7 @@ export interface NumberFormatArgs {
   units?: string
   unitsPosition?: UnitsPosition
   decimalPlaces?: number
+  unitsSpaced?: boolean
 }
 
 export interface FormattedNumberParts {
@@ -37,7 +38,9 @@ export const formatNumberText = (args: NumberFormatArgs): string => {
     return number.value
   }
 
+  const space = args.unitsSpaced ? " " : ""
+
   return number.unitsPosition === "left"
-    ? `${number.units}${number.value}`
-    : `${number.value}${number.units}`
+    ? `${number.units}${space}${number.value}`
+    : `${number.value}${space}${number.units}`
 }

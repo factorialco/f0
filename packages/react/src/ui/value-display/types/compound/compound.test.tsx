@@ -84,7 +84,7 @@ describe("CompoundCell", () => {
     const { container } = render(CompoundCell(args, tableMeta))
     const wrapper = container.querySelector('[data-cell-type="compound"]')
 
-    expect(wrapper).toHaveTextContent("-12.3% / 2500EUR / $99.5")
+    expect(wrapper).toHaveTextContent("-12.3% / 2500 EUR / $ 99.5")
   })
 
   it("renders placeholders and missing values as secondary by default", () => {
