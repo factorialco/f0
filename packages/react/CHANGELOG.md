@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.388.4](https://github.com/factorialco/f0/compare/f0-react-v1.388.3...f0-react-v1.388.4) (2026-03-03)
+
+
+### Bug Fixes
+
+* revert fix many ts errors showing in the editor for test files ([#3579](https://github.com/factorialco/f0/issues/3579)) ([286526a](https://github.com/factorialco/f0/commit/286526a5686b970bf4320018d37a308749ec21a2))
+
 ## [1.388.3](https://github.com/factorialco/f0/compare/f0-react-v1.388.2...f0-react-v1.388.3) (2026-03-03)
 
 
