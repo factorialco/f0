@@ -383,17 +383,16 @@ function F0WizardFormPerSection<T extends F0PerSectionSchema>({
           fullData: { ...fullDataRef.current } as InferPerSectionValues<T>,
         } as Parameters<typeof onSubmit>[0])
         lastSubmitResultRef.current = result
-        if (result.success) {
-          showSuccess(result.message)
-        }
         return result
       },
-    [onSubmit, showSuccess]
+    [onSubmit]
   )
 
   const handleLastStepCompleted = useCallback(() => {
     const result = lastSubmitResultRef.current
     if (!result?.success) return
+
+    showSuccess(result.message)
 
     if (linkAfterLastStepSubmit) {
       const url = linkAfterLastStepSubmit({
@@ -406,7 +405,7 @@ function F0WizardFormPerSection<T extends F0PerSectionSchema>({
     if (autoCloseOnLastStepSubmit) {
       onClose?.()
     }
-  }, [autoCloseOnLastStepSubmit, linkAfterLastStepSubmit, onClose])
+  }, [autoCloseOnLastStepSubmit, linkAfterLastStepSubmit, onClose, showSuccess])
 
   const snapshotCurrentStepValues = useCallback(() => {
     const prevSectionIds = getSectionIdsForStep(
@@ -455,7 +454,7 @@ function F0WizardFormPerSection<T extends F0PerSectionSchema>({
 
         return (
           <>
-            <div className="flex flex-col gap-6">
+            <div className="flex flex-col gap-6 pb-5">
               {currentSectionIds.map((sectionId) => {
                 const sectionSchema = schema[sectionId]
                 if (!sectionSchema) return null
