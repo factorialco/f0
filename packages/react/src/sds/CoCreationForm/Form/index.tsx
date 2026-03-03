@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils"
 import ApplyingChangesTag from "../ApplyingChangesTag"
 import { CoCreationFormProvider } from "../Context"
 import { DragProvider } from "../DragContext"
+import { useDragContext } from "../DragContext"
 import { CoCreationFormElement, CoCreationFormProps } from "../types"
 import { AddButton } from "./AddButton"
 import { LastQuestionDialog } from "./LastQuestionDialog"
@@ -24,6 +25,15 @@ export {
   injectSectionEnds,
 } from "./utils"
 export type { FlatFormItem } from "./utils"
+
+/**
+ * Applies `select-none` to its children while a drag is in progress,
+ * preventing accidental text selection in inputs and textareas.
+ */
+function DragSelectGuard({ children }: { children: React.ReactNode }) {
+  const { isDragging } = useDragContext()
+  return <div className={cn(isDragging && "select-none")}>{children}</div>
+}
 
 const _CoCreationForm = ({
   elements: elementsProp,
@@ -124,71 +134,73 @@ const _CoCreationForm = ({
       disallowOptionalQuestions={disallowOptionalQuestions}
       allowedQuestionTypes={allowedQuestionTypes}
     >
-      <div className="flex flex-row gap-2">
-        {showTableOfContent && (
-          <TableOfContent elements={elements} onChange={onChange} />
-        )}
-        <div className="relative flex-1">
-          <motion.div
-            className={cn(
-              "flex flex-col gap-6",
-              applyingChanges && "pointer-events-none"
+      <DragProvider>
+        <DragSelectGuard>
+          <div className="flex flex-row gap-2">
+            {showTableOfContent && (
+              <TableOfContent elements={elements} onChange={onChange} />
             )}
-            initial={{ filter: "blur(0px)" }}
-            animate={{ filter: applyingChanges ? "blur(2px)" : "none" }}
-            exit={{ filter: "blur(0px)" }}
-          >
-            <DragProvider>
-              <Reorder.Group
-                axis="y"
-                values={reorderableItems}
-                onReorder={handleFlatReorder}
-                as="div"
+            <div className="relative flex-1">
+              <motion.div
+                className={cn(
+                  "flex flex-col gap-6",
+                  applyingChanges && "pointer-events-none"
+                )}
+                initial={{ filter: "blur(0px)" }}
+                animate={{ filter: applyingChanges ? "blur(2px)" : "none" }}
+                exit={{ filter: "blur(0px)" }}
               >
-                <div className="flex flex-col">
-                  {reorderableItems.map((item, index) => {
-                    const gapClass =
-                      index === 0
-                        ? ""
-                        : inSectionQuestionIds.has(item.id)
-                          ? "mt-4"
-                          : "mt-8"
+                <Reorder.Group
+                  axis="y"
+                  values={reorderableItems}
+                  onReorder={handleFlatReorder}
+                  as="div"
+                >
+                  <div className="flex flex-col">
+                    {reorderableItems.map((item, index) => {
+                      const gapClass =
+                        index === 0
+                          ? ""
+                          : inSectionQuestionIds.has(item.id)
+                            ? "mt-4"
+                            : "mt-8"
 
-                    if (item.type === "section-header") {
+                      if (item.type === "section-header") {
+                        return (
+                          <SectionHeaderItem
+                            key={item.id}
+                            item={item}
+                            className={gapClass}
+                          />
+                        )
+                      }
                       return (
-                        <SectionHeaderItem
+                        <QuestionItem
                           key={item.id}
                           item={item}
+                          showEndOfSection={sectionEndIds.has(item.id)}
                           className={gapClass}
                         />
                       )
-                    }
-                    return (
-                      <QuestionItem
-                        key={item.id}
-                        item={item}
-                        showEndOfSection={sectionEndIds.has(item.id)}
-                        className={gapClass}
-                      />
-                    )
-                  })}
-                </div>
-              </Reorder.Group>
-            </DragProvider>
-            {shouldShowAddButton && <AddButton />}
-          </motion.div>
-          {applyingChanges && (
-            <motion.div
-              className="sticky bottom-1/2 left-0 z-50 flex w-full items-center justify-center"
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-            >
-              <ApplyingChangesTag />
-            </motion.div>
-          )}
-        </div>
-      </div>
+                    })}
+                  </div>
+                </Reorder.Group>
+                {shouldShowAddButton && <AddButton />}
+              </motion.div>
+              {applyingChanges && (
+                <motion.div
+                  className="sticky bottom-1/2 left-0 z-50 flex w-full items-center justify-center"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                >
+                  <ApplyingChangesTag />
+                </motion.div>
+              )}
+            </div>
+          </div>
+        </DragSelectGuard>
+      </DragProvider>
       <LastQuestionDialog
         open={lastQuestionDialogOpen}
         onConfirm={handleConfirmLastQuestionMove}
