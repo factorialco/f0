@@ -518,7 +518,7 @@ describe("F0WizardForm — Per-section mode", () => {
     })
   })
 
-  it("shows default success message when onSubmit returns success without message", async () => {
+  it("does not show action bar when onSubmit returns success without message", async () => {
     const user = userEvent.setup()
     const definition = makePerSectionDefinition({
       onSubmit: vi.fn().mockResolvedValue({ success: true }),
@@ -533,10 +533,12 @@ describe("F0WizardForm — Per-section mode", () => {
     await user.click(screen.getByText("Continue"))
 
     await waitFor(() => {
-      expect(
-        screen.getByText("Your changes have been saved")
-      ).toBeInTheDocument()
+      expect(definition.onSubmit).toHaveBeenCalledTimes(1)
     })
+
+    expect(
+      screen.queryByText("Your changes have been saved")
+    ).not.toBeInTheDocument()
   })
 
   it("does not show success action bar when onSubmit returns success: false", async () => {
@@ -563,6 +565,39 @@ describe("F0WizardForm — Per-section mode", () => {
     expect(
       screen.queryByText("Your changes have been saved")
     ).not.toBeInTheDocument()
+  })
+
+  it("shows action bar only on steps whose onSubmit returns a message", async () => {
+    const user = userEvent.setup()
+    const onSubmit = vi
+      .fn()
+      .mockResolvedValueOnce({ success: true })
+      .mockResolvedValueOnce({ success: true, message: "All changes saved!" })
+    const definition = makePerSectionDefinition({
+      onSubmit,
+      defaultValues: {
+        general: { email: "test@test.com" },
+        work: { legalEntity: "Factorial" },
+      },
+    })
+
+    render(<PerSectionWrapper definition={definition} />)
+
+    // First step — no message, so no action bar
+    await user.click(screen.getByText("Continue"))
+
+    await waitFor(() => {
+      expect(screen.getByLabelText("Legal entity")).toBeInTheDocument()
+    })
+
+    expect(screen.queryByText("All changes saved!")).not.toBeInTheDocument()
+
+    // Second (last) step — has message, action bar appears
+    await user.click(screen.getByText("Submit"))
+
+    await waitFor(() => {
+      expect(screen.getByText("All changes saved!")).toBeInTheDocument()
+    })
   })
 
   // ---------------------------------------------------------------------------
