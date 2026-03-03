@@ -11,3 +11,16 @@ export type ValueDisplayRendererContext = {
   visualization: ValueDisplayVisualizationType
   i18n: TranslationsType
 }
+
+/**
+ * Props contract that every editable value-display component must implement.
+ * The generic `V` allows type-specific editors (e.g. `string` for text, `Date` for date pickers).
+ */
+export type ValueDisplayEditorProps<V = string> = {
+  label: string
+  value: V
+  align?: "left" | "right"
+  error?: string
+  loading?: boolean
+  onChange: (value: V) => void
+}

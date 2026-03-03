@@ -1,0 +1,310 @@
+import { Canvas, Meta } from "@storybook/addon-docs/blocks"
+import * as EditableTableStories from "./editable-table.stories"
+
+<Meta of={EditableTableStories} />
+
+# Editable Table Visualization
+
+> **🚧 Under construction** — This visualization is actively being developed.
+> Some features may change or be incomplete.
+
+## Introduction
+
+The Editable Table visualization is a tabular view that uses the same layout and
+features as the [Table](/?path=/docs/components-data-collection-visualizations-table--documentation)
+visualization (columns, sorting, selection, grouping, pagination, summaries).
+Its main differences are:
+
+- It keeps **its own column order and visibility state** separately from the
+  Table view.
+- Columns can provide an **`editType`** function that determines per-row how the
+  cell is rendered (e.g. as an inline text input or read-only).
+- An **`onCellChange`** callback is fired whenever a user edits a cell.
+
+Use it when you need an editable table view alongside (or instead of) a
+read-only Table view in the same data collection.
+
+## Examples
+
+<Canvas of={EditableTableStories.BasicEditableTable} />
+
+## Setting Up Editable Table Visualization
+
+Use `type: "editableTable"` in the `visualizations` prop:
+
+```tsx
+<OneDataCollection
+  source={dataSource}
+  visualizations={[
+    {
+      type: "editableTable",
+      options: {
+        columns: [
+          {
+            id: "name",
+            label: "Name",
+            editType: () => "text",
+            editable: () => true,
+            render: (item) => item.name,
+            sorting: "name",
+            width: 140,
+            // editType returns "text" + editable returns true → always editable
+          },
+          {
+            id: "email",
+            label: "Email",
+            editType: () => "text",
+            editable: (item) => item.role === "Designer",
+            render: (item) => item.email,
+            sorting: "email",
+            // editType + editable → only editable when role is "Designer"
+          },
+          {
+            id: "role",
+            label: "Role",
+            editType: () => "text",
+            editable: (item) => item.role === "Designer",
+            render: (item) => item.role,
+            sorting: "role",
+            // editType + editable → only editable when role is "Designer"
+          },
+          {
+            label: "Status",
+            editable: () => false,
+            render: (item) => ({
+              type: "status",
+              value: { status: "positive", label: item.status },
+            }),
+            // No editType + editable false → cell is rendered read-only
+          },
+        ],
+        onCellChange: (updatedItem) => {
+          console.log("Cell changed", updatedItem)
+        },
+        frozenColumns: 0,
+        allowColumnReordering: true,
+        allowColumnHiding: true,
+      },
+    },
+  ]}
+/>
+```
+
+## Options
+
+The Editable Table accepts the same base options as the Table visualization,
+plus editable-specific ones:
+
+- **columns** – Column definitions (extends the [Table column definition](/?path=/docs/components-data-collection-visualizations-table--documentation) with `editType` and `editable`; see [Editable Table Column Definition](#editable-table-column-definition) below).
+- **onCellChange** – `(updatedItem: R) => Promise<void | Record<string, string>>`. Called whenever a user changes a cell value. `updatedItem` is the full row object with the edited field already updated. Resolve with nothing for success, or with `{ columnId: "message" }` to set errors on specific columns. If the promise rejects, the edited cell displays an error state. See [Error handling](#error-handling) below.
+- **frozenColumns** – Number of columns to freeze on the left (`0`, `1`, or `2`). Frozen columns stay visible when the user scrolls horizontally.
+- **allowColumnReordering** – Let users reorder columns via settings.
+- **allowColumnHiding** – Let users show/hide columns via settings.
+
+### Column reordering
+
+Set `allowColumnReordering` to `true` to let users rearrange columns via the
+settings panel. Each column can optionally specify an `order` property to define
+its initial position.
+
+```tsx
+{
+  type: "editableTable",
+  options: {
+    allowColumnReordering: true,
+    columns: [/* ... */],
+    onCellChange: (updatedItem) => { /* ... */ },
+  },
+}
+```
+
+<Canvas of={EditableTableStories.EditableTableWithColumnReordering} />
+
+### Column hiding
+
+Set `allowColumnHiding` to `true` to let users show or hide columns via the
+settings panel. Individual columns can opt out by setting `noHiding: true`.
+Frozen columns are also excluded from hiding automatically.
+
+```tsx
+{
+  type: "editableTable",
+  options: {
+    allowColumnHiding: true,
+    columns: [
+      {
+        id: "name",
+        label: "Name",
+        noHiding: true, // ← cannot be hidden by the user
+        /* ... */
+      },
+      {
+        id: "email",
+        label: "Email",
+        hidden: true, // ← hidden by default
+        /* ... */
+      },
+      /* ... */
+    ],
+    onCellChange: (updatedItem) => { /* ... */ },
+  },
+}
+```
+
+<Canvas of={EditableTableStories.EditableTableWithColumnHiding} />
+
+### Frozen columns
+
+Set `frozenColumns` to `1` or `2` to pin columns on the left side of the table.
+Frozen columns remain visible while the user scrolls horizontally through the
+remaining columns.
+
+```tsx
+{
+  type: "editableTable",
+  options: {
+    frozenColumns: 1,
+    columns: [/* ... */],
+    onCellChange: (updatedItem) => { /* ... */ },
+  },
+}
+```
+
+<Canvas of={EditableTableStories.EditableTableWithFrozenColumns} />
+
+## Editable Table Column Definition
+
+The column definition extends the Table column definition with two additional
+properties:
+
+```ts
+type EditableTableColumnDefinition<T> = TableColumnDefinition<T> & {
+  /**
+   * Determines how the cell is rendered in edit mode.
+   * Receives the current item and returns the cell type (e.g. "text") or
+   * undefined to render the cell read-only.
+   * The column `id` is used as the record key to read/write the value.
+   * When omitted, the cell is always rendered read-only.
+   */
+  editType?: (item: T) => "text" | undefined
+
+  /**
+   * Function that determines if the cell should be editable for a given item.
+   * The cell is only editable if both `editType` returns a value AND
+   * this function returns `true` for the given item.
+   * Return `true` for all items to make the column always editable.
+   */
+  editable: (item: T) => boolean
+}
+```
+
+### `editType`
+
+A function that controls whether a cell is editable and which input type to use.
+It receives the current row item and returns a cell type or `undefined`:
+
+| Return value         | Behavior                                                                                                                                                                                           |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `"text"`             | Renders an inline text input. The column's `id` is used as the record key — the input is initialized from `item[id]`, and the updated value is merged back into the item passed to `onCellChange`. |
+| `undefined`          | Cell is **read-only** for this item — rendered with the standard `render` function.                                                                                                                |
+| _(function omitted)_ | Cell is **always read-only** — rendered with the standard `render` function, same as in the Table visualization.                                                                                   |
+
+> **Note:** Editable columns must have an `id` that matches a key on the record
+> type so the component can read and write the value.
+
+### `editable`
+
+A required callback that controls editability on a per-row basis. The cell is only
+rendered as an input if **both** `editType` returns a value **and**
+`editable(item)` returns `true`.
+
+- Use `editable: () => true` to make the column always editable.
+- Use `editable: (item) => item.role === "Admin"` to restrict editing to specific rows.
+
+This is useful when certain rows should be read-only based on their data (e.g. only
+designers can be edited, or locked rows should not be modified).
+
+<Canvas of={EditableTableStories.EditableTableWithEditableCallback} />
+
+## `onCellChange` outcomes
+
+`onCellChange` returns a `Promise<void | Record<string, string>>`. The promise
+can resolve in three ways:
+
+### Success
+
+Resolve without returning a value. No errors are set on any cell.
+
+```tsx
+onCellChange: async (updatedItem) => {
+  await api.updateUser(updatedItem)
+}
+```
+
+### Validation errors
+
+Return a `Record<string, string>` mapping column IDs to error messages. This is
+useful for server-side validation that may flag multiple fields at once.
+
+```tsx
+onCellChange: async (updatedItem) => {
+  const errors = await api.validateUser(updatedItem)
+  // errors might be { email: "Already taken", name: "Too short" }
+  return errors
+}
+```
+
+### Unexpected failure
+
+If the promise rejects, the edited cell displays `error.message` (or
+"Save failed" if the rejection value is not an `Error`).
+
+```tsx
+onCellChange: async (updatedItem) => {
+  const response = await api.updateUser(updatedItem)
+  if (!response.ok) {
+    throw new Error("Invalid value")
+  }
+}
+```
+
+Errors are cleared automatically when the user edits the same cell again.
+
+<Canvas of={EditableTableStories.EditableTableWithErrors} />
+
+## Architecture
+
+The Editable Table does **not** duplicate the Table implementation. Instead, it is
+a thin wrapper around `TableCollection` that injects editing behavior through
+composition:
+
+- **`rowWrapper`** — Each row is wrapped with an `EditableRowProvider` that
+  manages an optimistic local copy of the item, handles `onCellChange` callbacks,
+  and tracks per-cell error state via React context.
+- **`cellRenderer`** — An `EditableCellRenderer` resolves each column's
+  `editType(item)` function to determine which editable component to render.
+  The mapping from cell type to component is defined in the
+  `valueDisplayEditors` registry (`ui/value-display/editors.ts`), keeping
+  editors co-located with their read-only renderers in the value-display system.
+
+To add a new cell type (e.g. `"date"`, `"select"`):
+
+1. Create the editor component in `ui/value-display/types/<type>/<type>-editor.tsx`.
+2. Export it from `ui/value-display/types/<type>/index.tsx`.
+3. Register it in `valueDisplayEditors` (`ui/value-display/editors.ts`).
+
+## Table vs Editable Table
+
+| Aspect                    | Table                   | Editable Table                                |
+| ------------------------- | ----------------------- | --------------------------------------------- |
+| Storage key               | `table`                 | `editableTable`                               |
+| Column order/hidden state | Shared for "Table view" | Independent from Table                        |
+| Cell editing              | Read-only               | Supports inline editing via `editType`        |
+| Item actions              | Supported               | Disabled (cells are interactive)              |
+| `onCellChange` callback   | N/A                     | Fires on every cell edit with the updated row |
+| Use case                  | Default read-only table | Inline editing or a different default layout  |
+
+You can offer both in the same collection; users switch via the visualization
+selector and each view keeps its own column order and visibility.
+
+<Canvas of={EditableTableStories.TableAndEditableTable} />

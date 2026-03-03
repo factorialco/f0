@@ -10,12 +10,16 @@ import { TableColumnDefinition } from "../types"
 import { SortAndHideList } from "./SortAndHideList"
 import { SortAndHideListItem } from "./SortAndHideList/types"
 
+export type TableVisualizationSettingsKey = "table" | "editableTable"
+
 type TableSettingsProps = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- we dont care about the types here, just the columns names and props
   columns: Readonly<TableColumnDefinition<any, any, any>[]>
   frozenColumns: number
   allowSorting: boolean
   allowHiding: boolean
+  /** Settings key for column order/hidden state. Use "editableTable" for EditableTable visualization. */
+  visualizationKey?: TableVisualizationSettingsKey
 }
 
 export const TableSettings = ({
@@ -23,14 +27,17 @@ export const TableSettings = ({
   frozenColumns,
   allowSorting,
   allowHiding,
+  visualizationKey = "table",
 }: TableSettingsProps) => {
   const i18n = useI18n()
   const { settings, setVisualizationSettings } = useDataCollectionSettings()
 
+  const visualizationSettings = settings.visualization[visualizationKey]
+
   const { columnsWithStatus } = useColumns(
     originalColumns,
     frozenColumns,
-    settings.visualization.table,
+    visualizationSettings,
     allowSorting,
     allowHiding
   )
@@ -52,7 +59,7 @@ export const TableSettings = ({
   )
 
   const onChangeSettings = (newOrder: SortAndHideListItem[]) => {
-    setVisualizationSettings("table", (prev) => ({
+    setVisualizationSettings(visualizationKey, (prev) => ({
       ...prev,
       order: newOrder.map((item) => item.id),
       hidden: newOrder.filter((item) => !item.visible).map((item) => item.id),
