@@ -130,7 +130,7 @@ export const WithCustomSeparator: Story = {
       render: () => ({
         type: "compound",
         value: {
-          separator: " | ",
+          separator: "|",
           segments: [
             {
               type: "amount",

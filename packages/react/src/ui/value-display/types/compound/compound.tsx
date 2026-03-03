@@ -166,7 +166,11 @@ export const CompoundCell = (
         return (
           <Fragment key={`${segment.type}-${index}`}>
             {index > 0 && (
-              <span className={toneClassByValue.secondary}>{separator}</span>
+              <span
+                className={cn(toneClassByValue.secondary, "whitespace-pre")}
+              >
+                {separator}
+              </span>
             )}
             <span className={toneClassByValue[tone]}>
               {resolvedSegment.text}
