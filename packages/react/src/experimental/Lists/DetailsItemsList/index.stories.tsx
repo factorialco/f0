@@ -2,6 +2,9 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { expect, within } from "storybook/test"
 
+import { TagListProps } from "@/components/tags/F0TagList"
+import { TagDotProps } from "@/components/tags/F0TagDot"
+
 import { DetailsItemsList } from "./index"
 
 const meta: Meta = {
@@ -69,6 +72,66 @@ const meta: Meta = {
           type: "dot-tag",
           text: "Holidays",
           customColor: "#07A2AD",
+          info: "Time off category used for annual leave",
+        },
+      },
+      {
+        title: "Status",
+        content: {
+          type: "alert-tag",
+          text: "Approved",
+          level: "positive",
+          info: "Approved by your manager on Feb 28",
+        },
+      },
+      {
+        title: "Balance",
+        content: {
+          type: "balance-tag",
+          hint: "vs last month",
+          info: "Compared to the previous period",
+          percentage: 8.5,
+          amount: {
+            numericValue: {
+              value: 1522.48,
+              units: "€",
+              unitsPosition: "append",
+            },
+            formatterOptions: {
+              decimalPlaces: 2,
+              locale: "en-US",
+            },
+          },
+        },
+      },
+      {
+        title: "Review status",
+        content: {
+          type: "status-tag",
+          text: "Pending review",
+          variant: "warning",
+        },
+      },
+      {
+        title: "Category",
+        content: {
+          type: "raw-tag",
+          text: "Engineering",
+          info: "Department classification",
+        },
+      },
+      {
+        title: "Labels",
+        content: {
+          type: "tag-list",
+          tagList: {
+            type: "dot",
+            tags: [
+              { text: "Bug", customColor: "#E74C3C" },
+              { text: "Feature", color: "viridian" },
+              { text: "Urgent", customColor: "#F39C12" },
+            ] as TagDotProps[],
+          } as TagListProps<"dot">,
         },
       },
     ],
@@ -296,6 +359,66 @@ export const WithTeamAvatarList: Story = {
           type: "dot-tag",
           text: "Active",
           customColor: "#07A2AD",
+          info: "Project is currently active",
+        },
+      },
+      {
+        title: "Priority",
+        content: {
+          type: "alert-tag",
+          text: "High priority",
+          level: "warning",
+          info: "Escalated by the project lead",
+        },
+      },
+      {
+        title: "Growth",
+        content: {
+          type: "balance-tag",
+          hint: "vs last quarter",
+          info: "Revenue growth compared to Q3",
+          invertStatus: true,
+          percentage: -3.2,
+          amount: {
+            numericValue: {
+              value: -450.0,
+              units: "$",
+              unitsPosition: "prepend",
+            },
+            formatterOptions: {
+              decimalPlaces: 2,
+              locale: "en-US",
+            },
+          },
+        },
+      },
+      {
+        title: "Phase",
+        content: {
+          type: "status-tag",
+          text: "In progress",
+          variant: "info",
+        },
+      },
+      {
+        title: "Tag",
+        content: {
+          type: "raw-tag",
+          text: "Internal",
+          info: "Only visible to internal team members",
+        },
+      },
+      {
+        title: "Statuses",
+        content: {
+          type: "tag-list",
+          tagList: {
+            type: "status",
+            tags: [
+              { text: "Active", variant: "positive" },
+              { text: "Paused", variant: "warning" },
+            ],
+          } as TagListProps<"status">,
         },
       },
     ],

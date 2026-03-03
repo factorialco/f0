@@ -4,7 +4,12 @@ import { F0AvatarCompany } from "@/components/avatars/F0AvatarCompany"
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
 import { F0AvatarTeam } from "@/components/avatars/F0AvatarTeam"
 import { IconType } from "@/components/F0Icon"
+import { F0TagAlert, TagAlertProps } from "@/components/tags/F0TagAlert"
+import { F0TagBalance, TagBalanceProps } from "@/components/tags/F0TagBalance"
 import { F0TagDot, TagDotProps } from "@/components/tags/F0TagDot"
+import { F0TagList, TagListProps, TagType } from "@/components/tags/F0TagList"
+import { F0TagRaw, TagRawProps } from "@/components/tags/F0TagRaw"
+import { F0TagStatus, TagStatusProps } from "@/components/tags/F0TagStatus"
 import { experimentalComponent } from "@/lib/experimental"
 import { cn } from "@/lib/utils"
 
@@ -36,7 +41,7 @@ const _DataList = forwardRef<HTMLUListElement, DataListProps>(
           <p
             className={cn(
               "px-1.5 text-f1-foreground-secondary",
-              isHorizontal ? "mt-1.5 w-44 xs:px-0" : "mb-0.5"
+              isHorizontal ? "mt-2 w-44 xs:px-0" : "mb-0.5"
             )}
           >
             {label}
@@ -206,6 +211,104 @@ _DotTagItem.displayName = "DotTagItem"
  */
 const DotTagItem = experimentalComponent("DotTagItem", _DotTagItem)
 
+type AlertTagItemProps = TagAlertProps
+
+const _AlertTagItem = forwardRef<HTMLLIElement, AlertTagItemProps>(
+  ({ ...props }, ref) => {
+    return (
+      <li ref={ref} className="flex items-start pt-1">
+        <F0TagAlert {...props} />
+      </li>
+    )
+  }
+)
+
+_AlertTagItem.displayName = "AlertTagItem"
+
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+const AlertTagItem = experimentalComponent("AlertTagItem", _AlertTagItem)
+
+type BalanceTagItemProps = TagBalanceProps
+
+const _BalanceTagItem = forwardRef<HTMLLIElement, BalanceTagItemProps>(
+  ({ ...props }, ref) => {
+    return (
+      <li ref={ref} className="flex items-start pt-1">
+        <F0TagBalance {...props} />
+      </li>
+    )
+  }
+)
+
+_BalanceTagItem.displayName = "BalanceTagItem"
+
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+const BalanceTagItem = experimentalComponent("BalanceTagItem", _BalanceTagItem)
+
+type StatusTagItemProps = TagStatusProps
+
+const _StatusTagItem = forwardRef<HTMLLIElement, StatusTagItemProps>(
+  ({ ...props }, ref) => {
+    return (
+      <li ref={ref} className="flex items-start pt-1">
+        <F0TagStatus {...props} />
+      </li>
+    )
+  }
+)
+
+_StatusTagItem.displayName = "StatusTagItem"
+
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+const StatusTagItem = experimentalComponent("StatusTagItem", _StatusTagItem)
+
+type RawTagItemProps = TagRawProps
+
+const _RawTagItem = forwardRef<HTMLLIElement, RawTagItemProps>(
+  ({ ...props }, ref) => {
+    return (
+      <li ref={ref} className="flex items-start pt-1">
+        <F0TagRaw {...props} />
+      </li>
+    )
+  }
+)
+
+_RawTagItem.displayName = "RawTagItem"
+
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+const RawTagItem = experimentalComponent("RawTagItem", _RawTagItem)
+
+type TagListItemProps<T extends TagType> = TagListProps<T>
+
+function _TagListItemInner<T extends TagType>(
+  props: TagListItemProps<T>,
+  ref: React.ForwardedRef<HTMLLIElement>
+) {
+  return (
+    <li ref={ref} className="flex items-start pt-1">
+      <F0TagList {...props} />
+    </li>
+  )
+}
+
+const _TagListItem = forwardRef(_TagListItemInner) as <T extends TagType>(
+  props: TagListItemProps<T> & { ref?: React.Ref<HTMLLIElement> }
+) => ReturnType<typeof _TagListItemInner>
+
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+const TagListItem = experimentalComponent("TagListItem", _TagListItem)
+
 /**
  * convert simplified action type received from user to internal action format
  * @param action ActionType
@@ -233,4 +336,9 @@ export const DataList = Object.assign(_DataListComponent, {
   PersonItem,
   TeamItem,
   DotTagItem,
+  AlertTagItem,
+  BalanceTagItem,
+  StatusTagItem,
+  RawTagItem,
+  TagListItem,
 })
