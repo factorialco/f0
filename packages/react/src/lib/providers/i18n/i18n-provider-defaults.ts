@@ -399,6 +399,7 @@ export const defaultTranslations = {
       link: "Link",
       date: "Date",
       dropdownSingle: "Dropdown",
+      file: "File",
     },
     selectQuestion: {
       addOption: "Add option",
@@ -407,6 +408,9 @@ export const defaultTranslations = {
       remove: "Remove",
       correct: "Correct",
       optionPlaceholder: "Type anything you want here...",
+    },
+    fileQuestion: {
+      uploadButton: "Upload file",
     },
     answer: {
       label: "Answer",

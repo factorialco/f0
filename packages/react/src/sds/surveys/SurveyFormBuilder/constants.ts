@@ -9,6 +9,7 @@ import {
   Numbers,
   Star,
   TextSize,
+  Upload,
 } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 
@@ -70,6 +71,11 @@ export const useQuestionTypes = () => {
       icon: ChevronDown,
       questionType: "dropdown-single",
     },
+    {
+      label: t("coCreationForm.questionTypes.file"),
+      icon: Upload,
+      questionType: "file",
+    },
   ]
 
   const filteredQuestionTypes = allQuestionTypes.filter((questionType) =>
@@ -94,4 +100,5 @@ export const questionTypeIconMap: Record<QuestionType, IconType> = {
   link: Link,
   date: Calendar,
   "dropdown-single": ChevronDown,
+  file: Upload,
 }

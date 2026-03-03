@@ -1,5 +1,6 @@
 import { DateQuestionProps } from "./QuestionTypes/DateQuestion"
 import { DropdownSingleQuestionProps } from "./QuestionTypes/DropdownSingleQuestion/types"
+import { FileQuestionProps } from ".QuestionTypes/FileQuestion"
 import { LinkQuestionProps } from "./QuestionTypes/LinkQuestion"
 import { NumericQuestionProps } from "./QuestionTypes/NumericQuestion"
 import { RatingQuestionProps } from "./QuestionTypes/RatingQuestion"
@@ -17,6 +18,7 @@ export type QuestionType =
   | "numeric"
   | "link"
   | "date"
+  | "file"
 
 export type ElementType = QuestionType | "section"
 
@@ -45,6 +47,7 @@ export type QuestionElement =
   | Omit<NumericQuestionProps & { type: "numeric" }, QuestionPropsToOmit>
   | Omit<LinkQuestionProps & { type: "link" }, QuestionPropsToOmit>
   | Omit<DateQuestionProps & { type: "date" }, QuestionPropsToOmit>
+  | Omit<FileQuestionProps & { type: "file" }, QuestionPropsToOmit>
 
 export type SurveyFormBuilderElement =
   | { type: "section"; section: SectionElement }
@@ -109,6 +112,10 @@ type OnChangeQuestionParams = BaseQuestionOnChangeParams &
     | {
         type: "date"
         value?: Date | null
+      }
+    | {
+        type: "file"
+        value?: File[] | null
       }
   )
 
