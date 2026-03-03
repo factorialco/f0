@@ -383,7 +383,7 @@ function F0WizardFormPerSection<T extends F0PerSectionSchema>({
           fullData: { ...fullDataRef.current } as InferPerSectionValues<T>,
         } as Parameters<typeof onSubmit>[0])
         lastSubmitResultRef.current = result
-        if (result.success && result.message) {
+        if (result.success) {
           showSuccess(result.message)
         }
         return result
@@ -455,7 +455,7 @@ function F0WizardFormPerSection<T extends F0PerSectionSchema>({
 
         return (
           <>
-            <div className="flex flex-col gap-6 pb-5">
+            <div className="flex flex-col gap-6">
               {currentSectionIds.map((sectionId) => {
                 const sectionSchema = schema[sectionId]
                 if (!sectionSchema) return null
