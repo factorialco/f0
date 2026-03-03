@@ -11,6 +11,7 @@ export const F0_TEXT_BANNED_PROPS = ["style", "className"] as const
  * Typography variant types based on semantic design tokens
  */
 export const TYPOGRAPHY_VARIANTS = [
+  "heading-xl",
   "heading-lg",
   "heading-md",
   "heading-sm",

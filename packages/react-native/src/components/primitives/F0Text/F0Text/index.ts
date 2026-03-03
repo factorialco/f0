@@ -1,8 +1,7 @@
 /**
- * F0Text - Text primitive components
+ * F0Text - Text primitive component
  *
- * @see F0Text/F0Text.md for documentation
- * @see AnimatedF0Text/AnimatedF0Text.md for animated variant documentation
+ * @see F0Text.md for documentation
  */
 
 export { F0Text } from "./F0Text"
@@ -21,6 +20,3 @@ export {
   TEXT_DECORATIONS,
   TEXT_TRANSFORMS,
 } from "./F0Text"
-
-export { AnimatedF0Text } from "./AnimatedF0Text"
-export type { AnimatedF0TextProps } from "./AnimatedF0Text"

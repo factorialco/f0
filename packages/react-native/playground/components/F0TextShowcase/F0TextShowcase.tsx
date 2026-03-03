@@ -13,6 +13,7 @@ export function F0TextShowcase() {
       <F0Text variant='heading-lg'>Typography Variants</F0Text>
 
       <View className='mb-8 gap-4'>
+        <F0Text variant='heading-xl'>Heading XL (36px)</F0Text>
         <F0Text variant='heading-lg'>Heading LG (24px)</F0Text>
         <F0Text variant='heading-md'>Heading MD (20px)</F0Text>
         <F0Text variant='heading-sm'>Heading SM (16px)</F0Text>

@@ -10,6 +10,8 @@ export const textVariants = tv({
   variants: {
     variant: {
       // Heading variants
+      "heading-xl":
+        "text-[36px] leading-[40px] tracking-[-0.2px] font-semibold",
       "heading-lg":
         "text-[24px] leading-[32px] tracking-[-0.2px] font-semibold",
       "heading-md":

@@ -20,6 +20,7 @@ import { F0Text } from "@factorialco/f0-react-native"
 
 ## Usage
 
+<!-- prettier-ignore -->
 ```tsx
 <>
   <F0Text variant="heading-lg">Welcome</F0Text>
@@ -60,6 +61,7 @@ All variants use **Inter** font family with the weight included in the variant n
 
 | Variant      | Size | Line Height | Weight         | Letter Spacing |
 | ------------ | ---- | ----------- | -------------- | -------------- |
+| `heading-xl` | 36px | 40px        | Semibold (600) | -0.2px         |
 | `heading-lg` | 24px | 32px        | Semibold (600) | -0.2px         |
 | `heading-md` | 20px | 28px        | Semibold (600) | -0.2px         |
 | `heading-sm` | 16px | 24px        | Semibold (600) | -              |
@@ -97,9 +99,11 @@ All variants use **Inter** font family with the weight included in the variant n
 
 ### Typography Variants
 
+<!-- prettier-ignore -->
 ```tsx
 <>
   {/* Headings */}
+  <F0Text variant="heading-xl">Extra Large Heading</F0Text>
   <F0Text variant="heading-lg">Large Heading</F0Text>
   <F0Text variant="heading-md">Medium Heading</F0Text>
   <F0Text variant="heading-sm">Small Heading</F0Text>
@@ -117,6 +121,7 @@ All variants use **Inter** font family with the weight included in the variant n
 
 ### Colors
 
+<!-- prettier-ignore -->
 ```tsx
 <>
   <F0Text variant="body-sm-default" color="default">
@@ -139,6 +144,7 @@ All variants use **Inter** font family with the weight included in the variant n
 
 ### Text Decorations & Transforms
 
+<!-- prettier-ignore -->
 ```tsx
 <>
   <F0Text variant="body-sm-default" decoration="underline">
@@ -158,6 +164,7 @@ All variants use **Inter** font family with the weight included in the variant n
 
 ### Truncation
 
+<!-- prettier-ignore -->
 ```tsx
 <>
   <F0Text variant="body-sm-default" numberOfLines={1}>
@@ -175,6 +182,7 @@ All variants use **Inter** font family with the weight included in the variant n
 
 F0Text doesn't accept `className` to prevent typography override. Use a View wrapper for spacing:
 
+<!-- prettier-ignore -->
 ```tsx
 <>
   {/* Spacing with View wrapper */}
@@ -197,6 +205,7 @@ F0Text doesn't accept `className` to prevent typography override. Use a View wra
 
 ### Combined Props
 
+<!-- prettier-ignore -->
 ```tsx
 <F0Text
   variant="heading-md"
@@ -211,6 +220,7 @@ F0Text doesn't accept `className` to prevent typography override. Use a View wra
 
 ### Nested Text
 
+<!-- prettier-ignore -->
 ```tsx
 <F0Text variant="body-sm-default">
   This is regular text with{" "}
@@ -223,6 +233,7 @@ F0Text doesn't accept `className` to prevent typography override. Use a View wra
 
 ### Real-world Card Example
 
+<!-- prettier-ignore -->
 ```tsx
 <View className="rounded-lg bg-f0-background-secondary p-4">
   <View className="mb-2">
@@ -243,15 +254,25 @@ F0Text doesn't accept `className` to prevent typography override. Use a View wra
 ## Architecture
 
 ```
-F0Text/
-├── F0Text.tsx          # Main component
-├── F0Text.md           # Documentation
-├── F0Text.types.ts     # TypeScript types
-├── F0Text.styles.ts    # Tailwind variants config
-├── index.ts            # Public exports
-└── __tests__/
-    ├── index.spec.tsx
-    └── __snapshots__/
+F0Text/                        # Parent folder for text primitives
+├── F0Text/                    # Static text component
+│   ├── F0Text.tsx             # Main component
+│   ├── F0Text.md              # Documentation
+│   ├── F0Text.types.ts        # TypeScript types
+│   ├── F0Text.styles.ts       # Tailwind variants config
+│   ├── index.ts               # Public exports
+│   └── __tests__/
+│       ├── F0Text.spec.tsx
+│       └── __snapshots__/
+├── AnimatedF0Text/            # Animated text component
+│   ├── AnimatedF0Text.tsx
+│   ├── AnimatedF0Text.md
+│   ├── AnimatedF0Text.types.ts
+│   ├── index.ts
+│   └── __tests__/
+│       ├── AnimatedF0Text.spec.tsx
+│       └── __snapshots__/
+└── index.ts                   # Barrel re-exporting both
 ```
 
 ### Font Family
@@ -279,6 +300,7 @@ F0Text uses **Inter** font family through Tailwind/Uniwind font weight classes:
 
 ### Best Practices
 
+<!-- prettier-ignore -->
 ```tsx
 // ✅ Good: Use appropriate variant
 <F0Text variant="body-md-semibold">Bold text</F0Text>
@@ -287,11 +309,12 @@ F0Text uses **Inter** font family through Tailwind/Uniwind font weight classes:
 // <F0Text className="font-bold">Text</F0Text>
 ```
 
+<!-- prettier-ignore -->
 ```tsx
 // ✅ Good: Memoized handler
 const handlePress = useCallback(() => {}, [])
-;<F0Text onPress={handlePress}>Click</F0Text>
+<F0Text onPress={handlePress}>Click</F0Text>
 
 // ❌ Bad: Inline function
-;<F0Text onPress={() => {}}>Click</F0Text>
+<F0Text onPress={() => {}}>Click</F0Text>
 ```
