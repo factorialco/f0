@@ -12,6 +12,14 @@ interface CategoryAxisOptions {
   formatter?: (value: string) => string
   /** Container width in pixels — used to auto-compute label interval */
   containerWidth?: number
+  /**
+   * Whether to leave space at the edges of the category axis.
+   * - `true` (default for ECharts) — centres categories with padding at edges.
+   *   Appropriate for bar charts where bars need centering space.
+   * - `false` — first/last data points sit flush against the axis edges.
+   *   Appropriate for line charts.
+   */
+  boundaryGap?: boolean
 }
 
 /**
@@ -44,12 +52,14 @@ export function buildCategoryAxis({
   theme,
   formatter,
   containerWidth,
+  boundaryGap,
 }: CategoryAxisOptions) {
   const interval = computeLabelInterval(data.length, containerWidth)
 
   return {
     type: "category" as const,
     data,
+    ...(boundaryGap !== undefined ? { boundaryGap } : {}),
     axisLine: {
       lineStyle: {
         color: theme.colors.borderSecondary,
@@ -300,6 +310,7 @@ export function buildAxes({
   valueFormatter,
   categoryFormatter,
   containerWidth,
+  boundaryGap,
 }: {
   isVertical: boolean
   categories: string[]
@@ -308,12 +319,14 @@ export function buildAxes({
   valueFormatter?: (value: number) => string
   categoryFormatter?: (value: string) => string
   containerWidth?: number
+  boundaryGap?: boolean
 }) {
   const categoryAxis = buildCategoryAxis({
     data: categories,
     theme,
     formatter: categoryFormatter,
     containerWidth,
+    boundaryGap,
   })
 
   const valueAxis = buildValueAxis({
@@ -361,6 +374,8 @@ interface BaseChartOptionsParams {
   echartsOptions?: Partial<echarts.EChartsOption>
   /** Container width in pixels — used to auto-compute category label interval */
   containerWidth?: number
+  /** Whether to leave space at the edges of the category axis */
+  boundaryGap?: boolean
 }
 
 /**
@@ -383,6 +398,7 @@ export function buildBaseChartOptions({
   tooltipFilterSeries,
   echartsOptions,
   containerWidth,
+  boundaryGap,
 }: BaseChartOptionsParams): echarts.EChartsOption {
   const { xAxis, yAxis } = buildAxes({
     isVertical,
@@ -392,6 +408,7 @@ export function buildBaseChartOptions({
     valueFormatter,
     categoryFormatter,
     containerWidth,
+    boundaryGap,
   })
 
   const baseOptions: echarts.EChartsOption = {

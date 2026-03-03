@@ -672,12 +672,62 @@ export const SkeletonBar: StoryObj = {
   render: () => <BarChartSkeleton />,
 }
 
+export const SkeletonBarHorizontal: StoryObj = {
+  decorators: [SkeletonDecorator],
+  render: () => <BarChartSkeleton orientation="horizontal" />,
+}
+
+export const SkeletonBarStacked: StoryObj = {
+  decorators: [SkeletonDecorator],
+  render: () => <BarChartSkeleton stacked />,
+}
+
+export const SkeletonBarHorizontalStacked: StoryObj = {
+  decorators: [SkeletonDecorator],
+  render: () => <BarChartSkeleton orientation="horizontal" stacked />,
+}
+
 export const SkeletonLine: StoryObj = {
   decorators: [SkeletonDecorator],
   render: () => <LineChartSkeleton />,
 }
 
+export const SkeletonLineLinear: StoryObj = {
+  decorators: [SkeletonDecorator],
+  render: () => <LineChartSkeleton lineType="linear" />,
+}
+
+export const SkeletonLineStep: StoryObj = {
+  decorators: [SkeletonDecorator],
+  render: () => <LineChartSkeleton lineType="step" />,
+}
+
+export const SkeletonLineNoArea: StoryObj = {
+  decorators: [SkeletonDecorator],
+  render: () => <LineChartSkeleton showArea={false} />,
+}
+
+export const SkeletonLineWithDots: StoryObj = {
+  decorators: [SkeletonDecorator],
+  render: () => <LineChartSkeleton showDots />,
+}
+
 export const SkeletonFunnel: StoryObj = {
   decorators: [SkeletonDecorator],
   render: () => <FunnelChartSkeleton />,
+}
+
+export const SkeletonFunnelVertical: StoryObj = {
+  decorators: [SkeletonDecorator],
+  render: () => <FunnelChartSkeleton orient="vertical" />,
+}
+
+export const SkeletonFunnelAscending: StoryObj = {
+  decorators: [SkeletonDecorator],
+  render: () => <FunnelChartSkeleton sort="ascending" />,
+}
+
+export const SkeletonFunnelNoLegend: StoryObj = {
+  decorators: [SkeletonDecorator],
+  render: () => <FunnelChartSkeleton showLegend={false} />,
 }

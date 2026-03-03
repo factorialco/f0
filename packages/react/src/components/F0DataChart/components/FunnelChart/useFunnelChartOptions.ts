@@ -96,8 +96,8 @@ export function useFunnelChartOptions(
 
     // Funnel positioning — leave room for outside labels, and enough
     // bottom space so the last stage's label text is not clipped
-    const funnelLeft = isHorizontal && isOutside ? 80 : 4
-    const funnelRight = isHorizontal && isOutside ? 80 : 4
+    const funnelLeft = 4
+    const funnelRight = 4
     const funnelTop = isHorizontal ? 4 : isOutside ? 40 : 4
     const funnelBottom = showLegend
       ? 28

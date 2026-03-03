@@ -3,6 +3,8 @@ import type {
   FiltersState,
 } from "@/components/OneFilterPicker/types"
 
+import { F0Icon } from "@/components/F0Icon"
+import { ArrowUp, ArrowDown } from "@/icons/app"
 import { cn } from "@/lib/utils"
 
 import type {
@@ -97,22 +99,28 @@ export function MetricItem<Filters extends FiltersDefinition>({
       skeleton={<MetricSkeleton />}
     >
       {data && (
-        <div className="flex items-baseline gap-3 px-4 pb-4">
-          <span className="text-4xl font-bold tracking-tight text-f1-foreground">
+        <div className="flex items-end gap-3 px-4 pb-4">
+          <span className="text-4xl font-semibold leading-none tracking-tight text-f1-foreground">
             {formatValue(data.value, item.format, item.decimals)}
           </span>
           {trend && trend.direction !== "flat" && (
-            <span
-              className={cn(
-                "text-sm font-medium",
-                trend.direction === "up"
-                  ? "text-f1-foreground-positive"
-                  : "text-f1-foreground-critical"
+            <div className="flex h-fit">
+              {trend.direction === "up" ? (
+                <F0Icon icon={ArrowUp} color="positive" size="sm" />
+              ) : (
+                <F0Icon icon={ArrowDown} color="critical" size="sm" />
               )}
-            >
-              {trend.direction === "up" ? "\u2191" : "\u2193"}{" "}
-              {trend.percent.toFixed(1)}%
-            </span>
+              <span
+                className={cn(
+                  "text-base font-medium",
+                  trend.direction === "up"
+                    ? "text-f1-foreground-positive"
+                    : "text-f1-foreground-critical"
+                )}
+              >
+                {trend.percent.toFixed(1)}%
+              </span>
+            </div>
           )}
         </div>
       )}

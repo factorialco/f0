@@ -23,15 +23,34 @@ import type {
 import { useDashboardItemData } from "../../hooks/useDashboardItemData"
 import { DashboardItem } from "../DashboardItem/DashboardItem"
 
-/** Pick the skeleton component that matches the chart type */
+/** Pick the skeleton component that matches the chart type and config */
 function chartSkeleton(config: DashboardChartConfig) {
   switch (config.type) {
     case "bar":
-      return <BarChartSkeleton />
+      return (
+        <BarChartSkeleton
+          orientation={config.orientation}
+          stacked={config.stacked}
+          showLegend={config.showLegend}
+        />
+      )
     case "line":
-      return <LineChartSkeleton />
+      return (
+        <LineChartSkeleton
+          lineType={config.lineType}
+          showArea={config.showArea}
+          showDots={config.showDots}
+          showLegend={config.showLegend}
+        />
+      )
     case "funnel":
-      return <FunnelChartSkeleton />
+      return (
+        <FunnelChartSkeleton
+          orient={config.orient}
+          sort={config.sort}
+          showLegend={config.showLegend}
+        />
+      )
   }
 }
 

@@ -160,6 +160,7 @@ export function useLineChartOptions(
       categoryFormatter,
       echartsOptions,
       containerWidth,
+      boundaryGap: false,
     })
   }, [
     categories,
