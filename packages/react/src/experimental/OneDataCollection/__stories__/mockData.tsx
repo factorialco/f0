@@ -217,6 +217,16 @@ export class MockDataCache<T extends MockUser> {
     return item
   }
 
+  /**
+   * Replace an item in the cache with a new version.
+   */
+  updateItem(updatedItem: T): T | null {
+    if (!this.dataMap.has(updatedItem.id)) return null
+    this.dataMap.set(updatedItem.id, updatedItem)
+    this.notify()
+    return updatedItem
+  }
+
   reset(newData: T[]) {
     this.dataMap = new Map(newData.map((item) => [item.id, item]))
     this.notify()
@@ -388,6 +398,117 @@ export const getMockVisualizations = (options?: {
             order: options?.table?.allowColumnReordering ? 4 : undefined,
           },
         ],
+      },
+    } as Visualization<
+      MockUser,
+      FiltersType,
+      typeof sortings,
+      SummariesDefinition,
+      ItemActionsDefinition<MockUser>,
+      NavigationFiltersDefinition,
+      GroupingDefinition<MockUser>
+    >,
+    editableTable: {
+      type: "editableTable",
+      options: {
+        allowColumnHiding: options?.table?.allowColumnHiding,
+        allowColumnReordering: options?.table?.allowColumnReordering,
+        frozenColumns:
+          options?.table?.frozenColumns ?? options?.frozenColumns ?? 0,
+        columns: [
+          {
+            label: "Name",
+            width: options?.table?.nestedRecords ? 300 : 140,
+            render: (item) =>
+              !item.children && item.detailed
+                ? {
+                    type: "text",
+                    value: { placeholder: "N/A" },
+                  }
+                : {
+                    type: "person",
+                    value: {
+                      firstName: item.name.split(" ")[0],
+                      lastName: item.name.split(" ")[1],
+                    },
+                  },
+            id: "name",
+            editable: () => false,
+            sorting: options?.table?.noSorting ? undefined : "name",
+            order: options?.table?.allowColumnReordering ? 3 : undefined,
+          },
+          {
+            label: "Email",
+            editType: () => "text" as const,
+            editable: () => true,
+            render: (item) => item.email,
+            sorting: options?.table?.noSorting ? undefined : "email",
+            id: "email",
+          },
+          {
+            label: "Role",
+            editType: () => "text" as const,
+            editable: () => true,
+            render: (item) => item.role,
+            sorting: options?.table?.noSorting ? undefined : "role",
+            id: "role",
+            order: options?.table?.allowColumnReordering ? 2 : undefined,
+            noHiding: options?.table?.allowColumnHiding,
+          },
+          {
+            id: "department",
+            label: "Department",
+            editType: () => "text" as const,
+            editable: () => true,
+            render: (item) => item.department,
+            sorting: options?.table?.noSorting ? undefined : "department",
+            order: options?.table?.allowColumnReordering ? 4 : undefined,
+          },
+
+          ...((options?.table?.applyLongText ?? true)
+            ? [
+                {
+                  label: "Long",
+                  editable: () => false,
+                  render: () => ({
+                    type: "longText",
+                    value: {
+                      text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas facilisis eu elit in pharetra.",
+                      lines: 4,
+                    },
+                  }),
+                  id: "longText",
+                },
+              ]
+            : []),
+          {
+            label: "Permissions",
+            editable: () => false,
+            render: (item) =>
+              [
+                item.permissions?.read ? "Read" : "",
+                item.permissions?.write ? "Write" : "",
+                item.permissions?.delete ? "Delete" : "",
+              ]
+                .filter(Boolean)
+                .join(", "),
+            sorting: options?.table?.noSorting ? undefined : "permissions.read",
+            id: "permissions",
+            order: options?.table?.allowColumnReordering ? 4 : undefined,
+          },
+        ],
+        onCellChange: (() => {
+          if (options?.cache) {
+            return async (updatedItem: MockUser) => {
+              console.log("cache enabled: cell changed", updatedItem)
+              options.cache!.updateItem(updatedItem)
+            }
+          }
+          return async (_updatedItem: MockUser) => {
+            console.log("cache disabled: cell changed", _updatedItem)
+            // No-op handler when cache is not available
+          }
+        })(),
       },
     } as Visualization<
       MockUser,
@@ -1278,8 +1399,8 @@ export const ExampleComponent = ({
         { id: "other", filters: { department: ["Marketing"] } },
       ],
     },
-    [cacheVersion]
-  ) // Pass cacheVersion as dependency to force refetch on cache changes
+    [cacheVersion, dataAdapterMemoized]
+  ) // Pass cacheVersion and dataAdapter as dependencies to force refetch on cache or data changes
 
   return (
     <div
@@ -1308,6 +1429,7 @@ export const ExampleComponent = ({
             mockVisualizations.card,
             mockVisualizations.list,
             mockVisualizations.kanban,
+            mockVisualizations.editableTable,
           ]
         }
       />

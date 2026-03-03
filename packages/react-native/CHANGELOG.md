@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.27.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.26.0...f0-react-native-v0.27.0) (2026-03-03)
+
+
+### Features
+
+* **F0Text:** introduce F0Text primitive component  ([#3563](https://github.com/factorialco/f0/issues/3563)) ([a55dbcb](https://github.com/factorialco/f0/commit/a55dbcbd60e442b22e8b3f1f3a5f11f31d1ede7a))
+
 ## [0.26.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.25.0...f0-react-native-v0.26.0) (2026-02-27)
 
 

@@ -281,8 +281,6 @@ export function ActionsMenu({
   }
 
   const handleSelectRatingType = (ratingType: RatingOptionType) => {
-    if (questionType !== "rating") return
-
     onQuestionChange?.({
       id: questionId,
       type: "rating",

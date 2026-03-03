@@ -21,7 +21,11 @@ import { cn } from "@/lib/utils"
 import { Checkbox } from "@/ui/checkbox"
 
 import { ItemActionsRow } from "../../../../components/itemActions/ItemActionsRow/ItemActionsRow"
-import { TableColumnDefinition } from "../types"
+import type {
+  CellRendererProps,
+  RowWrapperProps,
+  TableColumnDefinition,
+} from "../types"
 import { useSticky } from "../useSticky"
 import { NestedRow } from "./NestedRow"
 
@@ -56,6 +60,10 @@ export type RowProps<
   tableWithChildren: boolean
   nestedRowProps?: NestedRowProps
   disableHover?: boolean
+  /** Optional custom cell renderer. When provided, wraps each cell's content. */
+  cellRenderer?: React.ComponentType<CellRendererProps<R, Sortings, Summaries>>
+  /** Row wrapper passed through to NestedRow for wrapping child rows */
+  rowWrapper?: React.ComponentType<RowWrapperProps<R>>
 }
 
 export type NestedRowProps = {
@@ -94,6 +102,8 @@ const RowComponentInner = <
     nestedRowProps,
     tableWithChildren,
     disableHover = false,
+    cellRenderer: CellRenderer,
+    rowWrapper,
   }: RowProps<
     R,
     Filters,
@@ -154,6 +164,8 @@ const RowComponentInner = <
         groupIndex={groupIndex}
         nestedRowProps={nestedRowProps}
         tableWithChildren={tableWithChildren}
+        cellRenderer={CellRenderer}
+        rowWrapper={rowWrapper}
         key={key}
       />
     )
@@ -192,21 +204,8 @@ const RowComponentInner = <
         </TableCell>
       )}
 
-      {columns.map((column, cellIndex) => (
-        <TableCell
-          key={`table-cell-${groupIndex}-${index}-${cellIndex}`}
-          firstCell={cellIndex === 0}
-          href={itemHref}
-          onClick={itemOnClick}
-          width={column.width}
-          sticky={getStickyPosition(cellIndex)}
-          loading={loading}
-          nestedRowProps={{
-            ...nestedRowProps,
-            rowWithChildren,
-            tableWithChildren,
-          }}
-        >
+      {columns.map((column, cellIndex) => {
+        const defaultContent = (
           <div
             className={cn(
               column.align === "right" ? "justify-end" : "",
@@ -215,8 +214,33 @@ const RowComponentInner = <
           >
             {renderCell(item, column)}
           </div>
-        </TableCell>
-      ))}
+        )
+
+        return (
+          <TableCell
+            key={`table-cell-${groupIndex}-${index}-${cellIndex}`}
+            firstCell={cellIndex === 0}
+            href={itemHref}
+            onClick={itemOnClick}
+            width={column.width}
+            sticky={getStickyPosition(cellIndex)}
+            loading={loading}
+            nestedRowProps={{
+              ...nestedRowProps,
+              rowWithChildren,
+              tableWithChildren,
+            }}
+          >
+            {CellRenderer ? (
+              <CellRenderer item={item} column={column} cellIndex={cellIndex}>
+                {defaultContent}
+              </CellRenderer>
+            ) : (
+              defaultContent
+            )}
+          </TableCell>
+        )
+      })}
 
       {hasItemActions && !loading && !nestedRowProps?.onLoadMoreChildren && (
         <>

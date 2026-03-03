@@ -129,6 +129,7 @@ export const defaultTranslations = {
     },
     visualizations: {
       table: "Table view",
+      editableTable: "Editable table view",
       card: "Card view",
       list: "List view",
       kanban: "Kanban view",
@@ -142,6 +143,11 @@ export const defaultTranslations = {
       settings: {
         showAllColumns: "Show all",
         hideAllColumns: "Hide all",
+      },
+    },
+    editableTable: {
+      errors: {
+        saveFailed: "Save failed",
       },
     },
     itemsCount: "items",

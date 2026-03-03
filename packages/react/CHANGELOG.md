@@ -1,5 +1,33 @@
 # Changelog
 
+## [1.388.4](https://github.com/factorialco/f0/compare/f0-react-v1.388.3...f0-react-v1.388.4) (2026-03-03)
+
+
+### Bug Fixes
+
+* revert fix many ts errors showing in the editor for test files ([#3579](https://github.com/factorialco/f0/issues/3579)) ([286526a](https://github.com/factorialco/f0/commit/286526a5686b970bf4320018d37a308749ec21a2))
+
+## [1.388.3](https://github.com/factorialco/f0/compare/f0-react-v1.388.2...f0-react-v1.388.3) (2026-03-03)
+
+
+### Bug Fixes
+
+* some sizing issues in F0WizardForm ([#3573](https://github.com/factorialco/f0/issues/3573)) ([abe0bfc](https://github.com/factorialco/f0/commit/abe0bfc1294f5a50748522661bab36b0e56fe403))
+
+## [1.388.2](https://github.com/factorialco/f0/compare/f0-react-v1.388.1...f0-react-v1.388.2) (2026-03-03)
+
+
+### Bug Fixes
+
+* add more detail item types to DetailItemsList component ([#3572](https://github.com/factorialco/f0/issues/3572)) ([255502b](https://github.com/factorialco/f0/commit/255502b5eb64c4edec9c328e612b244c6333d420))
+
+## [1.388.1](https://github.com/factorialco/f0/compare/f0-react-v1.388.0...f0-react-v1.388.1) (2026-03-02)
+
+
+### Bug Fixes
+
+* question not being able to be changed to rating type in CoCreationForm ([#3562](https://github.com/factorialco/f0/issues/3562)) ([20a29d2](https://github.com/factorialco/f0/commit/20a29d2095b1c6129e02177699bcd34f8adab7f4))
+
 ## [1.388.0](https://github.com/factorialco/f0/compare/f0-react-v1.387.0...f0-react-v1.388.0) (2026-03-02)
 
 
