@@ -27,6 +27,7 @@ import {
   useSelectable,
 } from "@/hooks/datasource"
 import { useI18n } from "@/lib/providers/i18n"
+import { Add } from "@/icons/app"
 import { cn } from "@/lib/utils"
 import { GroupHeader } from "@/ui/GroupHeader/index"
 import { Skeleton } from "@/ui/skeleton.tsx"
@@ -91,6 +92,7 @@ export const TableCollection = <
   cellRenderer,
   showItemActions: showItemActionsProp,
   visualizationSettings,
+  onAddRow,
 }: CollectionProps<
   R,
   Filters,
@@ -526,6 +528,7 @@ export const TableCollection = <
                               checkColumnWidth={checkColumnWidth}
                               rowWrapper={RowWrapper}
                               cellRenderer={cellRenderer}
+                              onAddRow={onAddRow}
                             />
                           )
                           if (RowWrapper) {
@@ -566,6 +569,7 @@ export const TableCollection = <
                     tableWithChildren={tableWithChildren}
                     rowWrapper={RowWrapper}
                     cellRenderer={cellRenderer}
+                    onAddRow={onAddRow}
                   />
                 )
                 if (RowWrapper) {
@@ -677,6 +681,29 @@ export const TableCollection = <
                     </TableCell>
                   </>
                 )}
+              </TableRow>
+            </TableFooter>
+          )}
+          {onAddRow && (
+            <TableFooter>
+              <TableRow>
+                <TableCell
+                  colSpan={
+                    columns.length +
+                    (source.selectable ? 1 : 0) +
+                    (showItemActions ? 2 : 0)
+                  }
+                >
+                  <div className="pointer-events-auto">
+                    <F0Button
+                      variant="ghost"
+                      icon={Add}
+                      label={t("collections.editableTable.addRow")}
+                      onClick={() => onAddRow?.()}
+                      size="sm"
+                    />
+                  </div>
+                </TableCell>
               </TableRow>
             </TableFooter>
           )}

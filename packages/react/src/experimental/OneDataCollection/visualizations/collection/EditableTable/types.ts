@@ -69,6 +69,8 @@ export type EditableTableVisualizationOptions<
    * Rejection sets an error on the edited column.
    */
   onCellChange: (updatedItem: R) => Promise<void | Record<string, string>>
+  /** When provided, renders an "Add" button row at the bottom of the table and nested rows. Receives the parent item when triggered from a nested row. Supports async functions for loading state. */
+  onAddRow?: (parentItem?: R) => void | Promise<void>
 }
 
 export type EditableTableCollectionProps<

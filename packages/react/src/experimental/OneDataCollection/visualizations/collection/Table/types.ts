@@ -162,4 +162,6 @@ export type TableCustomizationProps<
   showItemActions?: boolean
   /** Override the visualization settings key (column order/visibility). If not provided, uses the "table" key. */
   visualizationSettings?: TableVisualizationSettings
+  /** Callback invoked when the "Add" button is clicked. Receives the parent item when triggered from a nested row, undefined at root level. Supports async functions for loading state. */
+  onAddRow?: (parentItem?: R) => void | Promise<void>
 }

@@ -64,6 +64,8 @@ export type RowProps<
   cellRenderer?: React.ComponentType<CellRendererProps<R, Sortings, Summaries>>
   /** Row wrapper passed through to NestedRow for wrapping child rows */
   rowWrapper?: React.ComponentType<RowWrapperProps<R>>
+  /** Callback for the "Add" button rendered at the bottom of nested children. Receives the parent item when triggered from a nested row. */
+  onAddRow?: (parentItem?: R) => void | Promise<void>
 }
 
 export type NestedRowProps = {
@@ -104,6 +106,7 @@ const RowComponentInner = <
     disableHover = false,
     cellRenderer: CellRenderer,
     rowWrapper,
+    onAddRow,
   }: RowProps<
     R,
     Filters,
@@ -166,6 +169,7 @@ const RowComponentInner = <
         tableWithChildren={tableWithChildren}
         cellRenderer={CellRenderer}
         rowWrapper={rowWrapper}
+        onAddRow={onAddRow}
         key={key}
       />
     )

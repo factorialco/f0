@@ -18,16 +18,21 @@
 
 import { forwardRef, useCallback, useRef } from "react"
 
+import { F0Button } from "@/components/F0Button"
 import { FiltersDefinition } from "@/components/OneFilterPicker/types"
 import { DataCollectionSource } from "@/experimental/OneDataCollection/hooks/useDataCollectionSource/types"
 import { ItemActionsDefinition } from "@/experimental/OneDataCollection/item-actions"
 import { NavigationFiltersDefinition } from "@/experimental/OneDataCollection/navigationFilters/types"
 import { SummariesDefinition } from "@/experimental/OneDataCollection/summary"
+import { TableCell, TableRow } from "@/experimental/OneTable"
+import { SPACING_FACTOR } from "@/experimental/OneTable/TableCell/utils/nested"
 import {
   GroupingDefinition,
   RecordType,
   SortingsDefinition,
 } from "@/hooks/datasource"
+import { Add } from "@/icons/app"
+import { useI18n } from "@/lib/providers/i18n"
 
 import type {
   CellRendererProps,
@@ -74,6 +79,8 @@ export type RowProps<
   cellRenderer?: React.ComponentType<CellRendererProps<R, Sortings, Summaries>>
   /** Row wrapper for child rows (provides per-row context, e.g. editing state) */
   rowWrapper?: React.ComponentType<RowWrapperProps<R>>
+  /** Callback for the "Add" button rendered at the bottom of nested children. Receives the parent item when triggered from a nested row. */
+  onAddRow?: (parentItem?: R) => void | Promise<void>
 }
 
 const NestedRowContent = <
@@ -100,6 +107,7 @@ const NestedRowContent = <
     | null
 ) => {
   const internalRowRef = useRef<HTMLTableRowElement | null>(null)
+  const { t } = useI18n()
 
   const rowId = `${props.nestedRowProps?.depth ?? 0}-${"id" in props.item ? props.item.id + "-" + props.index : props.index}`
 
@@ -347,6 +355,33 @@ const NestedRowContent = <
             nestedVariant: childrenType,
           }}
         />
+      )}
+
+      {shouldShowChildren && props.onAddRow && (
+        <TableRow>
+          <TableCell
+            colSpan={
+              props.columns.length +
+              (props.source.selectable ? 1 : 0) +
+              (props.source.itemActions ? 2 : 0)
+            }
+          >
+            <div
+              className="pointer-events-auto"
+              style={{
+                marginLeft: `${((props.nestedRowProps?.depth ?? 0) + 1) * SPACING_FACTOR}px`,
+              }}
+            >
+              <F0Button
+                variant="ghost"
+                icon={Add}
+                label={t("collections.editableTable.addRow")}
+                onClick={() => props.onAddRow?.(props.item)}
+                size="sm"
+              />
+            </div>
+          </TableCell>
+        </TableRow>
       )}
     </>
   )

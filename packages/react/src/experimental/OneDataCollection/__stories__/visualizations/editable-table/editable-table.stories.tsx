@@ -27,8 +27,10 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 function useEditableTableData(
-  initialItems: MockUser[] = generateMockUsers(10)
+  initialItems: MockUser[] = generateMockUsers(10),
+  options?: { perPage?: number }
 ) {
+  const perPage = options?.perPage ?? 10
   const [items, setItems] = useState<MockUser[]>(initialItems)
   const itemsRef = useRef(items)
   itemsRef.current = items
@@ -44,20 +46,20 @@ function useEditableTableData(
     const adapter = createDataAdapter({
       data: items,
       paginationType: "pages",
-      perPage: 10,
+      perPage,
     })
-    adapter.fetchData = (options: unknown) => {
+    adapter.fetchData = (fetchOptions: unknown) => {
       const currentAdapter = createDataAdapter({
         data: itemsRef.current,
         paginationType: "pages",
-        perPage: 10,
+        perPage,
       })
-      return currentAdapter.fetchData(options as never)
+      return currentAdapter.fetchData(fetchOptions as never)
     }
     return adapter
-  }, [items])
+  }, [items, perPage])
 
-  return { items, dataAdapter, onCellChange }
+  return { items, setItems, dataAdapter, onCellChange }
 }
 
 export const BasicEditableTable: Story = {
@@ -427,6 +429,120 @@ export const EditableTableWithNestedRecordsDetailed: Story = {
         id="editable-table-nested-detailed/v1"
         nestedRecords
         nestedRecordsType="detailed"
+      />
+    )
+  },
+}
+
+export const EditableTableWithNestedRecordsAndAddRow: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Editable table with nested records and an Add button at the bottom of each expanded parent row. The `onAddRow` callback receives the parent item when triggered from a nested row.",
+      },
+    },
+  },
+  render: () => {
+    const mockVisualizations = getMockVisualizations({
+      table: {
+        noSorting: true,
+        nestedRecords: true,
+        applyLongText: false,
+      },
+    })
+
+    const onCellChange = async (updatedItem: MockUser) => {
+      action("onCellChange")(updatedItem)
+    }
+
+    return (
+      <ExampleComponent
+        noSorting
+        storage={false}
+        visualizations={[
+          {
+            type: "editableTable" as const,
+            options: {
+              ...(
+                mockVisualizations.editableTable as Extract<
+                  typeof mockVisualizations.editableTable,
+                  { type: "editableTable" }
+                >
+              ).options,
+              onCellChange,
+              onAddRow: action("onAddRow"),
+            },
+          },
+        ]}
+        id="editable-table-nested-add-row/v1"
+        nestedRecords
+      />
+    )
+  },
+}
+
+export const EditableTableWithAddRow: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Editable table with an Add button at the bottom. Clicking the button appends a new row with hardcoded values.",
+      },
+    },
+  },
+  render: () => {
+    const mockVisualizations = getMockVisualizations()
+    const { dataAdapter, onCellChange, setItems } = useEditableTableData(
+      generateMockUsers(10),
+      { perPage: 100 }
+    )
+    const counter = useRef(0)
+
+    const onAddRow = async () => {
+      counter.current += 1
+      const id = `new-${counter.current}`
+      action("onAddRow")()
+      setItems((prev) => [
+        ...prev,
+        {
+          index: prev.length,
+          id,
+          name: "New User",
+          email: "new.user@example.com",
+          role: "Designer",
+          department: "Engineering",
+          status: "Active",
+          isStarred: false,
+          manager: "John Doe",
+          image: "",
+          salary: 50000,
+          joinedAt: new Date(),
+          canBeSelected: true,
+          permissions: { read: true, write: true, delete: false },
+        },
+      ])
+    }
+
+    return (
+      <ExampleComponent
+        visualizations={[
+          {
+            type: "editableTable" as const,
+            options: {
+              ...(
+                mockVisualizations.editableTable as Extract<
+                  typeof mockVisualizations.editableTable,
+                  { type: "editableTable" }
+                >
+              ).options,
+              onCellChange,
+              onAddRow,
+            },
+          },
+        ]}
+        dataAdapter={dataAdapter}
+        id="editable-table-add-row/v1"
       />
     )
   },

@@ -29,6 +29,7 @@ export const EditableTableCollection = <
   Grouping extends GroupingDefinition<R>,
 >({
   onCellChange,
+  onAddRow,
   ...props
 }: CollectionProps<
   R,
@@ -73,6 +74,7 @@ export const EditableTableCollection = <
       cellRenderer={EditableCellRenderer}
       showItemActions={false}
       visualizationSettings={settings.visualization?.editableTable}
+      onAddRow={onAddRow}
     />
   )
 }
