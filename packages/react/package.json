@@ -43,7 +43,7 @@
     "test-storybook": "test-storybook --testTimeout=60000",
     "format": "sh -c 'oxfmt \"${@:-src/}\"' --",
     "format:check": "sh -c 'oxfmt --check \"${@:-src/}\"' --",
-    "tsc": "tsc --noEmit",
+    "tsc": "tsc --noEmit --project ./tsconfig-build.json",
     "vitest": "vitest --project=unit",
     "vitest:ui": "vitest --project=unit --ui",
     "vitest:watch": "vitest --project=unit dev",
