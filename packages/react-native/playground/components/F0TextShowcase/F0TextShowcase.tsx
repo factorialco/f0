@@ -10,7 +10,7 @@ export function F0TextShowcase() {
       style={{ width: '100%' }}
     >
       {/* Typography Variants */}
-      <F0Text variant='heading-lg'>Typography Variants</F0Text>
+      <F0Text variant='body-sm-semibold' color='secondary'>Typography Variants</F0Text>
 
       <View className='mb-8 gap-4'>
         <F0Text variant='heading-xl'>Heading XL (36px)</F0Text>
@@ -27,7 +27,7 @@ export function F0TextShowcase() {
       </View>
 
       {/* Color Variants */}
-      <F0Text variant='heading-lg'>Color Variants</F0Text>
+      <F0Text variant='body-sm-semibold' color='secondary'>Color Variants</F0Text>
 
       <View className='mb-8 gap-3'>
         <F0Text color='default'>Default foreground color</F0Text>
@@ -43,7 +43,7 @@ export function F0TextShowcase() {
       </View>
 
       {/* Text Alignment */}
-      <F0Text variant='heading-lg'>Text Alignment</F0Text>
+      <F0Text variant='body-sm-semibold' color='secondary'>Text Alignment</F0Text>
 
       <View className='bg-f0-background-secondary mb-8 gap-3 rounded p-4'>
         <F0Text align='left'>Left aligned text</F0Text>
@@ -56,7 +56,7 @@ export function F0TextShowcase() {
       </View>
 
       {/* Text Decorations */}
-      <F0Text variant='heading-lg'>Text Decorations</F0Text>
+      <F0Text variant='body-sm-semibold' color='secondary'>Text Decorations</F0Text>
 
       <View className='mb-8 gap-3'>
         <F0Text decoration='none'>No decoration</F0Text>
@@ -65,7 +65,7 @@ export function F0TextShowcase() {
       </View>
 
       {/* Text Transforms */}
-      <F0Text variant='heading-lg'>Text Transforms</F0Text>
+      <F0Text variant='body-sm-semibold' color='secondary'>Text Transforms</F0Text>
 
       <View className='mb-8 gap-3'>
         <F0Text transform='none'>Original text case</F0Text>
@@ -75,7 +75,7 @@ export function F0TextShowcase() {
       </View>
 
       {/* Number of Lines Truncation */}
-      <F0Text variant='heading-lg'>Text Truncation</F0Text>
+      <F0Text variant='body-sm-semibold' color='secondary'>Text Truncation</F0Text>
 
       <View className='bg-f0-background-secondary mb-8 gap-3 rounded p-4'>
         <F0Text variant='body-xs-medium' color='secondary'>
@@ -110,7 +110,7 @@ export function F0TextShowcase() {
       </View>
 
       {/* Nested Text */}
-      <F0Text variant='heading-lg'>Nested Text</F0Text>
+      <F0Text variant='body-sm-semibold' color='secondary'>Nested Text</F0Text>
 
       <View className='mb-8 gap-3'>
         <F0Text variant='body-sm-default'>
@@ -127,7 +127,7 @@ export function F0TextShowcase() {
       </View>
 
       {/* Real-world Examples */}
-      <F0Text variant='heading-lg'>Real-world Examples</F0Text>
+      <F0Text variant='body-sm-semibold' color='secondary'>Real-world Examples</F0Text>
 
       <View className='mb-8 gap-6'>
         {/* Card-like example */}
