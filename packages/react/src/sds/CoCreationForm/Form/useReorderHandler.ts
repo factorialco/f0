@@ -1,6 +1,6 @@
-import { useCallback, useMemo, useState } from "react"
+import { useCallback, useState } from "react"
 
-import { FlatFormItem, reconstructElements } from "./utils"
+import { FlatFormItem, injectSectionEnds, reconstructElements } from "./utils"
 
 type UseReorderHandlerParams = {
   flatItems: FlatFormItem[]
@@ -16,22 +16,11 @@ export function useReorderHandler({
   )
   const [lastQuestionDialogOpen, setLastQuestionDialogOpen] = useState(false)
 
-  const inSectionQuestionIds = useMemo(() => {
-    const result = new Set<string>()
-    let inSection = false
-    for (const item of flatItems) {
-      if (item.type === "section-header") {
-        inSection = true
-      } else if (inSection) {
-        result.add(item.id)
-      }
-    }
-    return result
-  }, [flatItems])
-
   const handleFlatReorder = useCallback(
     (reorderedItems: FlatFormItem[]) => {
       // Build a map of section-header id → original question ids.
+      // flatItems includes section-end markers so we can correctly stop
+      // at section boundaries.
       const originalSectionQuestions = new Map<string, Set<string>>()
       const lockedSectionIds = new Set<string>()
       let currentSectionId: string | null = null
@@ -42,19 +31,43 @@ export function useReorderHandler({
           if (fi.section.locked) {
             lockedSectionIds.add(fi.id)
           }
+        } else if (fi.type === "section-end") {
+          currentSectionId = null
         } else if (currentSectionId) {
           originalSectionQuestions.get(currentSectionId)!.add(fi.id)
         }
       }
 
       // Determine which sections need their questions pinned:
-      // - Sections whose header moved (keep questions together)
-      // - Locked sections (questions must not change)
-      const oldIndexMap = new Map(flatItems.map((fi, i) => [fi.id, i]))
+      // - Locked sections always have their questions pinned.
+      // - When a section header is dragged (the relative order of section
+      //   headers changed), pin the moved sections so their questions follow.
+      // - When only a question is dragged across sections, indices shift but
+      //   the section header order stays the same → do NOT pin.
+      const originalSectionOrder = flatItems
+        .filter((fi) => fi.type === "section-header")
+        .map((fi) => fi.id)
+      const newSectionOrder = reorderedItems
+        .filter((fi) => fi.type === "section-header")
+        .map((fi) => fi.id)
+      const sectionOrderChanged = originalSectionOrder.some(
+        (id, i) => newSectionOrder[i] !== id
+      )
+
+      const oldIndexMap = new Map(
+        flatItems
+          .filter((fi) => fi.type !== "section-end")
+          .map((fi, i) => [fi.id, i])
+      )
       const pinnedSections = new Set<string>(lockedSectionIds)
-      for (const [i, item] of reorderedItems.entries()) {
-        if (item.type === "section-header" && oldIndexMap.get(item.id) !== i) {
-          pinnedSections.add(item.id)
+      if (sectionOrderChanged) {
+        for (const [i, item] of reorderedItems.entries()) {
+          if (
+            item.type === "section-header" &&
+            oldIndexMap.get(item.id) !== i
+          ) {
+            pinnedSections.add(item.id)
+          }
         }
       }
 
@@ -101,102 +114,78 @@ export function useReorderHandler({
         finalItems = reorderedItems
       }
 
-      // Eject any foreign questions that ended up inside a locked section.
-      // They get placed right before the locked section header.
-      const lockedSectionOwnedQuestions = new Map<string, Set<string>>()
-      for (const sId of lockedSectionIds) {
-        lockedSectionOwnedQuestions.set(
-          sId,
-          originalSectionQuestions.get(sId) ?? new Set()
-        )
-      }
-
-      const ejected: FlatFormItem[] = []
-      let currentLockedSectionId: string | null = null
-      const cleaned: FlatFormItem[] = []
-
-      for (const item of finalItems) {
-        if (item.type === "section-header") {
-          currentLockedSectionId = lockedSectionIds.has(item.id)
-            ? item.id
-            : null
-          // Flush any ejected items right before this section header
-          if (ejected.length > 0) {
-            cleaned.push(...ejected.splice(0))
-          }
-          cleaned.push(item)
-        } else if (
-          currentLockedSectionId &&
-          !lockedSectionOwnedQuestions.get(currentLockedSectionId)!.has(item.id)
-        ) {
-          // Foreign question inside a locked section — eject it
-          ejected.push(item)
-        } else {
-          // Flush any ejected items before this non-locked-section question
-          if (ejected.length > 0) {
-            cleaned.push(...ejected.splice(0))
-          }
-          cleaned.push(item)
-        }
-      }
-      // Flush any remaining ejected items at the end
-      if (ejected.length > 0) {
-        cleaned.push(...ejected)
-      }
-
-      // Detect if a section lost its last question (would become empty).
-      // Build new section → question count map from cleaned items.
-      const newSectionQuestionCount = new Map<string, number>()
-      let trackingSectionId: string | null = null
-      for (const item of cleaned) {
-        if (item.type === "section-header") {
-          trackingSectionId = item.id
-          if (!newSectionQuestionCount.has(trackingSectionId)) {
-            newSectionQuestionCount.set(trackingSectionId, 0)
-          }
-        } else if (trackingSectionId) {
-          newSectionQuestionCount.set(
-            trackingSectionId,
-            (newSectionQuestionCount.get(trackingSectionId) ?? 0) + 1
-          )
+      // Build set of all question IDs that originally belonged to any section.
+      const allInSectionQuestionIds = new Set<string>()
+      for (const qIds of originalSectionQuestions.values()) {
+        for (const qId of qIds) {
+          allInSectionQuestionIds.add(qId)
         }
       }
 
-      const sectionWillBecomeEmpty = [
-        ...originalSectionQuestions.entries(),
-      ].some(
-        ([sectionId, originalQuestions]) =>
-          originalQuestions.size > 0 &&
-          (newSectionQuestionCount.get(sectionId) ?? 0) === 0
+      // Inject section-end markers using original membership.
+      const withSectionEnds = injectSectionEnds(
+        finalItems,
+        allInSectionQuestionIds
       )
 
+      // Detect if a section lost its last question (would become empty).
+      const sectionWillBecomeEmpty = [
+        ...originalSectionQuestions.entries(),
+      ].some(([sectionId, originalQuestions]) => {
+        if (originalQuestions.size === 0) return false
+        // Find the section header index
+        const headerIdx = withSectionEnds.findIndex((it) => it.id === sectionId)
+        if (headerIdx === -1) return false
+        const next = withSectionEnds[headerIdx + 1]
+        // Empty if immediately followed by section-end (or nothing)
+        return !next || next.type !== "question"
+      })
+
       if (sectionWillBecomeEmpty) {
-        setPendingReorder(cleaned)
+        setPendingReorder(withSectionEnds)
         setLastQuestionDialogOpen(true)
         return
       }
 
-      onChange(reconstructElements(cleaned))
+      onChange(reconstructElements(withSectionEnds))
     },
     [onChange, flatItems]
   )
 
   const handleConfirmLastQuestionMove = useCallback(() => {
     if (pendingReorder) {
-      // Remove empty section headers from the pending reorder
-      const withoutEmptySections: FlatFormItem[] = []
+      // Find which sections are now empty (header immediately followed by section-end)
+      const emptySectionIds = new Set<string>()
       for (let i = 0; i < pendingReorder.length; i++) {
         const item = pendingReorder[i]
         if (item.type === "section-header") {
-          const nextItem = pendingReorder[i + 1]
-          const isLastItem = i === pendingReorder.length - 1
-          if (isLastItem || !nextItem || nextItem.type === "section-header") {
-            // Section with no questions — skip it
-            continue
+          const next = pendingReorder[i + 1]
+          if (
+            !next ||
+            next.type === "section-end" ||
+            next.type === "section-header"
+          ) {
+            emptySectionIds.add(item.section.id)
           }
         }
-        withoutEmptySections.push(item)
       }
+
+      // Filter out empty section headers and their corresponding section-end items
+      const withoutEmptySections = pendingReorder.filter((item) => {
+        if (
+          item.type === "section-header" &&
+          emptySectionIds.has(item.section.id)
+        ) {
+          return false
+        }
+        if (
+          item.type === "section-end" &&
+          emptySectionIds.has(item.sectionId)
+        ) {
+          return false
+        }
+        return true
+      })
       onChange(reconstructElements(withoutEmptySections))
     }
     setLastQuestionDialogOpen(false)
@@ -213,6 +202,5 @@ export function useReorderHandler({
     handleConfirmLastQuestionMove,
     handleCancelLastQuestionMove,
     lastQuestionDialogOpen,
-    inSectionQuestionIds,
   }
 }

@@ -21,6 +21,7 @@ export {
   flattenElements,
   reconstructElements,
   computeSectionEndIds,
+  injectSectionEnds,
 } from "./utils"
 export type { FlatFormItem } from "./utils"
 
@@ -32,9 +33,7 @@ const _CoCreationForm = ({
   allowedQuestionTypes,
   applyingChanges,
 }: CoCreationFormProps) => {
-  const shouldShowAddButton =
-    isEditMode &&
-    (!elementsProp?.length || elementsProp?.at(-1)?.type === "section")
+  const shouldShowAddButton = isEditMode
 
   const elements = useMemo<CoCreationFormElement[]>(
     () =>
@@ -70,17 +69,36 @@ const _CoCreationForm = ({
   )
 
   const flatItems = useMemo(() => flattenElements(elements), [elements])
-  const sectionEndIds = useMemo(
-    () => computeSectionEndIds(flatItems),
+
+  // Items without section-end markers — used for Reorder.Group which
+  // requires every value to have a matching Reorder.Item child.
+  const reorderableItems = useMemo(
+    () => flatItems.filter((item) => item.type !== "section-end"),
     [flatItems]
   )
+
+  const sectionEndIds = useMemo(
+    () => computeSectionEndIds(elements),
+    [elements]
+  )
+
+  const inSectionQuestionIds = useMemo(() => {
+    const result = new Set<string>()
+    for (const element of elements) {
+      if (element.type === "section") {
+        for (const q of element.section.questions ?? []) {
+          result.add(`question-${q.id}`)
+        }
+      }
+    }
+    return result
+  }, [elements])
 
   const {
     handleFlatReorder,
     handleConfirmLastQuestionMove,
     handleCancelLastQuestionMove,
     lastQuestionDialogOpen,
-    inSectionQuestionIds,
   } = useReorderHandler({ flatItems, onChange })
 
   useEffect(() => {
@@ -123,12 +141,12 @@ const _CoCreationForm = ({
             <DragProvider>
               <Reorder.Group
                 axis="y"
-                values={flatItems}
+                values={reorderableItems}
                 onReorder={handleFlatReorder}
                 as="div"
               >
                 <div className="flex flex-col">
-                  {flatItems.map((item, index) => {
+                  {reorderableItems.map((item, index) => {
                     const gapClass =
                       index === 0
                         ? ""

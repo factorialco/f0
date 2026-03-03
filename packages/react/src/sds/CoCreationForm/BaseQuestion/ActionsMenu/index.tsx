@@ -186,7 +186,7 @@ const SimpleItem = ({
     className={cn(critical ? "text-f1-foreground-critical" : undefined)}
   >
     <div className="flex w-full flex-row items-center gap-2">
-      <F0Icon icon={icon} color={critical ? "critical" : "default"} />
+      <F0Icon icon={icon} />
       <span className="flex-1">{label}</span>
     </div>
   </DropdownMenuItem>
@@ -347,6 +347,7 @@ export function ActionsMenu({
               label={t("coCreationForm.actions.deleteQuestion")}
               icon={Delete}
               onClick={handleDeleteQuestion}
+              critical
             />
           )}
         </DropdownMenuGroup>
