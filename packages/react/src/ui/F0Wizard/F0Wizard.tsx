@@ -119,7 +119,7 @@ export const F0Wizard: FC<F0WizardProps> = ({
         steps={steps}
         allowStepSkipping={allowStepSkipping}
       >
-        <div className="flex min-h-[58vh] flex-1 flex-row">
+        <div className="flex h-[58vh] flex-1 flex-row">
           <div className="w-1/3 shrink-0 overflow-y-auto border-x-0 border-b-0 border-r border-t-0 border-dashed border-f1-border-secondary p-2">
             <WizardSteps />
           </div>
