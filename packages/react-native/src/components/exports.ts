@@ -14,3 +14,6 @@ export * from "./Tags/exports"
 export * from "./experimental/Lists/DataList"
 export * from "./experimental/Lists/DetailsItem"
 export * from "./experimental/Lists/DetailsItemsList"
+
+// Export primitives
+export * from "./primitives/F0Text"
