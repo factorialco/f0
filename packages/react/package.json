@@ -1,6 +1,6 @@
 {
   "name": "@factorialco/f0-react",
-  "version": "1.388.1",
+  "version": "1.388.2",
   "main": "dist/f0.js",
   "typings": "dist/f0.d.ts",
   "private": false,
@@ -43,7 +43,7 @@
     "test-storybook": "test-storybook --testTimeout=60000",
     "format": "sh -c 'oxfmt \"${@:-src/}\"' --",
     "format:check": "sh -c 'oxfmt --check \"${@:-src/}\"' --",
-    "tsc": "tsc --noEmit --project ./tsconfig-build.json",
+    "tsc": "tsc --noEmit",
     "vitest": "vitest --project=unit",
     "vitest:ui": "vitest --project=unit --ui",
     "vitest:watch": "vitest --project=unit dev",
