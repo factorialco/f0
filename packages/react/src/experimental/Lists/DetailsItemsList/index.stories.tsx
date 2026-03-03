@@ -2,8 +2,8 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { expect, within } from "storybook/test"
 
-import { TagListProps } from "@/components/tags/F0TagList"
-import { TagDotProps } from "@/components/tags/F0TagDot"
+import type { TagListProps } from "@/components/tags/F0TagList"
+import type { TagDotProps } from "@/components/tags/F0TagDot"
 
 import { DetailsItemsList } from "./index"
 

@@ -1,31 +1,30 @@
-import { forwardRef, ReactElement } from "react"
+import { forwardRef } from "react"
 
-import { F0AvatarCompany } from "@/components/avatars/F0AvatarCompany"
-import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
-import { F0AvatarTeam } from "@/components/avatars/F0AvatarTeam"
-import { IconType } from "@/components/F0Icon"
-import { F0TagAlert, TagAlertProps } from "@/components/tags/F0TagAlert"
-import { F0TagBalance, TagBalanceProps } from "@/components/tags/F0TagBalance"
-import { F0TagDot, TagDotProps } from "@/components/tags/F0TagDot"
-import { F0TagList, TagListProps, TagType } from "@/components/tags/F0TagList"
-import { F0TagRaw, TagRawProps } from "@/components/tags/F0TagRaw"
-import { F0TagStatus, TagStatusProps } from "@/components/tags/F0TagStatus"
 import { experimentalComponent } from "@/lib/experimental"
 import { cn } from "@/lib/utils"
 
-import { InternalActionType, ItemContainer } from "./ItemContainer"
+import {
+  AlertTagItem,
+  BalanceTagItem,
+  CompanyItem,
+  DotTagItem,
+  Item,
+  PersonItem,
+  RawTagItem,
+  StatusTagItem,
+  TagListItem,
+  TeamItem,
+} from "./items"
+import type { DataListProps } from "./types"
 
-export type DataListProps = {
-  children: ReactElement<Items>[] | ReactElement<Items>
-  label?: string
-  isHorizontal?: boolean
-}
-
-type Items =
-  | typeof Item
-  | typeof PersonItem
-  | typeof CompanyItem
-  | typeof TeamItem
+export type {
+  ActionType,
+  CopyActionType,
+  DataListProps,
+  ItemProps,
+  NavigateActionType,
+  OpenLinkActionType,
+} from "./types"
 
 const _DataList = forwardRef<HTMLUListElement, DataListProps>(
   ({ children, label, isHorizontal = false }, ref) => {
@@ -56,274 +55,6 @@ const _DataList = forwardRef<HTMLUListElement, DataListProps>(
 )
 
 _DataList.displayName = "DataList"
-
-export type ItemProps = {
-  text: string
-  icon?: IconType
-  action?: ActionType
-}
-
-export type ActionType =
-  | CopyActionType
-  | NavigateActionType
-  | OpenLinkActionType
-
-export type CopyActionType = {
-  type: "copy"
-  text?: string
-}
-
-export type NavigateActionType = {
-  type: "navigate"
-  href: string
-}
-
-export type OpenLinkActionType = {
-  type: "open-link"
-  href: string
-}
-
-const _Item = forwardRef<HTMLLIElement, ItemProps>(
-  ({ text, icon, action }, ref) => {
-    return (
-      <ItemContainer
-        ref={ref}
-        text={text}
-        leftIcon={icon}
-        action={getInternalAction(action, text)}
-      />
-    )
-  }
-)
-
-_Item.displayName = "DataList.Item"
-
-/**
- * @experimental This is an experimental component, use it at your own risk
- */
-const Item = experimentalComponent("DataList.Item", _Item)
-
-type URL = string
-
-type EmployeeItemProps = {
-  firstName: string
-  lastName: string
-  avatarUrl?: URL
-  action?: ActionType
-}
-
-const _PersonItem = forwardRef<HTMLLIElement, EmployeeItemProps>(
-  ({ action, avatarUrl, firstName, lastName }, ref) => {
-    const fullName = `${firstName} ${lastName}`
-    return (
-      <ItemContainer
-        ref={ref}
-        leftIcon={() => (
-          <F0AvatarPerson
-            size="xs"
-            src={avatarUrl}
-            firstName={firstName}
-            lastName={lastName}
-          />
-        )}
-        text={fullName}
-        action={getInternalAction(action, fullName)}
-      />
-    )
-  }
-)
-_PersonItem.displayName = "PersonItem"
-
-/**
- * @experimental This is an experimental component use it at your own risk
- */
-const PersonItem = experimentalComponent("PersonItem", _PersonItem)
-
-type CompanyItemProps = {
-  name: string
-  avatarUrl?: URL
-  action?: ActionType
-}
-
-const _CompanyItem = forwardRef<HTMLLIElement, CompanyItemProps>(
-  ({ avatarUrl, name, action }, ref) => {
-    return (
-      <ItemContainer
-        ref={ref}
-        leftIcon={() => (
-          <F0AvatarCompany name={name} size="xs" src={avatarUrl} />
-        )}
-        text={name}
-        action={getInternalAction(action, name)}
-      />
-    )
-  }
-)
-
-_CompanyItem.displayName = "CompanyItem"
-
-/**
- * @experimental This is an experimental component use it at your own risk
- */
-const CompanyItem = experimentalComponent("CompanyItem", _CompanyItem)
-
-type TeamItemProps = {
-  name: string
-  action?: ActionType
-}
-
-const _TeamItem = forwardRef<HTMLLIElement, TeamItemProps>(
-  ({ action, name }, ref) => {
-    return (
-      <ItemContainer
-        ref={ref}
-        leftIcon={() => <F0AvatarTeam name={name} size="xs" />}
-        text={name}
-        action={getInternalAction(action, name)}
-      />
-    )
-  }
-)
-
-_TeamItem.displayName = "TeamItem"
-
-/**
- * @experimental This is an experimental component use it at your own risk
- */
-const TeamItem = experimentalComponent("TeamItem", _TeamItem)
-
-type DotTagItemProps = TagDotProps
-
-const _DotTagItem = forwardRef<HTMLLIElement, DotTagItemProps>(
-  ({ ...props }, ref) => {
-    return (
-      <li ref={ref} className="flex items-start pt-1">
-        <F0TagDot {...props} />
-      </li>
-    )
-  }
-)
-
-_DotTagItem.displayName = "DotTagItem"
-
-/**
- * @experimental This is an experimental component use it at your own risk
- */
-const DotTagItem = experimentalComponent("DotTagItem", _DotTagItem)
-
-type AlertTagItemProps = TagAlertProps
-
-const _AlertTagItem = forwardRef<HTMLLIElement, AlertTagItemProps>(
-  ({ ...props }, ref) => {
-    return (
-      <li ref={ref} className="flex items-start pt-1">
-        <F0TagAlert {...props} />
-      </li>
-    )
-  }
-)
-
-_AlertTagItem.displayName = "AlertTagItem"
-
-/**
- * @experimental This is an experimental component use it at your own risk
- */
-const AlertTagItem = experimentalComponent("AlertTagItem", _AlertTagItem)
-
-type BalanceTagItemProps = TagBalanceProps
-
-const _BalanceTagItem = forwardRef<HTMLLIElement, BalanceTagItemProps>(
-  ({ ...props }, ref) => {
-    return (
-      <li ref={ref} className="flex items-start pt-1">
-        <F0TagBalance {...props} />
-      </li>
-    )
-  }
-)
-
-_BalanceTagItem.displayName = "BalanceTagItem"
-
-/**
- * @experimental This is an experimental component use it at your own risk
- */
-const BalanceTagItem = experimentalComponent("BalanceTagItem", _BalanceTagItem)
-
-type StatusTagItemProps = TagStatusProps
-
-const _StatusTagItem = forwardRef<HTMLLIElement, StatusTagItemProps>(
-  ({ ...props }, ref) => {
-    return (
-      <li ref={ref} className="flex items-start pt-1">
-        <F0TagStatus {...props} />
-      </li>
-    )
-  }
-)
-
-_StatusTagItem.displayName = "StatusTagItem"
-
-/**
- * @experimental This is an experimental component use it at your own risk
- */
-const StatusTagItem = experimentalComponent("StatusTagItem", _StatusTagItem)
-
-type RawTagItemProps = TagRawProps
-
-const _RawTagItem = forwardRef<HTMLLIElement, RawTagItemProps>(
-  ({ ...props }, ref) => {
-    return (
-      <li ref={ref} className="flex items-start pt-1">
-        <F0TagRaw {...props} />
-      </li>
-    )
-  }
-)
-
-_RawTagItem.displayName = "RawTagItem"
-
-/**
- * @experimental This is an experimental component use it at your own risk
- */
-const RawTagItem = experimentalComponent("RawTagItem", _RawTagItem)
-
-type TagListItemProps<T extends TagType> = TagListProps<T>
-
-function _TagListItemInner<T extends TagType>(
-  props: TagListItemProps<T>,
-  ref: React.ForwardedRef<HTMLLIElement>
-) {
-  return (
-    <li ref={ref} className="flex items-start pt-1">
-      <F0TagList {...props} />
-    </li>
-  )
-}
-
-const _TagListItem = forwardRef(_TagListItemInner) as <T extends TagType>(
-  props: TagListItemProps<T> & { ref?: React.Ref<HTMLLIElement> }
-) => ReturnType<typeof _TagListItemInner>
-
-/**
- * @experimental This is an experimental component use it at your own risk
- */
-const TagListItem = experimentalComponent("TagListItem", _TagListItem)
-
-/**
- * convert simplified action type received from user to internal action format
- * @param action ActionType
- * @param defaultCopyText what to use if copy text is not present
- */
-const getInternalAction = (
-  action: ActionType | undefined,
-  defaultCopyText: string
-): InternalActionType | undefined => {
-  if (action && action.type === "copy") {
-    return { type: "copy", text: action.text ?? defaultCopyText }
-  }
-
-  return action
-}
 
 /**
  * @experimental This is an experimental component use it at your own risk
