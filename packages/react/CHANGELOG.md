@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.388.2](https://github.com/factorialco/f0/compare/f0-react-v1.388.1...f0-react-v1.388.2) (2026-03-03)
+
+
+### Bug Fixes
+
+* add more detail item types to DetailItemsList component ([#3572](https://github.com/factorialco/f0/issues/3572)) ([255502b](https://github.com/factorialco/f0/commit/255502b5eb64c4edec9c328e612b244c6333d420))
+
 ## [1.388.1](https://github.com/factorialco/f0/compare/f0-react-v1.388.0...f0-react-v1.388.1) (2026-03-02)
 
 
