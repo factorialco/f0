@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.388.3](https://github.com/factorialco/f0/compare/f0-react-v1.388.2...f0-react-v1.388.3) (2026-03-03)
+
+
+### Bug Fixes
+
+* some sizing issues in F0WizardForm ([#3573](https://github.com/factorialco/f0/issues/3573)) ([abe0bfc](https://github.com/factorialco/f0/commit/abe0bfc1294f5a50748522661bab36b0e56fe403))
+
 ## [1.388.2](https://github.com/factorialco/f0/compare/f0-react-v1.388.1...f0-react-v1.388.2) (2026-03-03)
 
 
