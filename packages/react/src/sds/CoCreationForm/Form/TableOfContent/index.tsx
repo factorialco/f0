@@ -4,7 +4,6 @@ import { F0TableOfContentPopover } from "@/components/F0TableOfContentPopover/F0
 import { IdStructure } from "@/experimental/Navigation/F0TableOfContent/types"
 import { useI18n } from "@/lib/providers/i18n"
 
-import { useCoCreationFormContext } from "../../Context"
 import {
   CoCreationFormElement,
   QuestionElement,
@@ -86,33 +85,17 @@ export const TableOfContent = ({
   onChange: (elements: CoCreationFormElement[]) => void
 }) => {
   const { t } = useI18n()
-  const { deleteElement, onDuplicateElement, isEditMode } =
-    useCoCreationFormContext()
-
-  const handleDuplicateElement = useCallback(
-    (elementId: string) => {
-      onDuplicateElement?.({ elementId, type: "section" })
-    },
-    [onDuplicateElement]
-  )
-
-  const handleDeleteElement = useCallback(
-    (elementId: string) => {
-      deleteElement(elementId)
-    },
-    [deleteElement]
-  )
 
   const tocItems = useTableOfContentItems(elements, {
     untitledSectionLabel: t("coCreationForm.labels.sectionTitlePlaceholder"),
     untitledQuestionLabel: t("coCreationForm.labels.titlePlaceholder"),
-    onDuplicateElement: handleDuplicateElement,
-    onDeleteElement: handleDeleteElement,
     duplicateQuestionLabel: t("coCreationForm.actions.duplicateQuestion"),
     deleteQuestionLabel: t("coCreationForm.actions.deleteQuestion"),
     duplicateSectionLabel: t("coCreationForm.actions.duplicateSection"),
     deleteSectionLabel: t("coCreationForm.actions.deleteSection"),
-    isEditMode,
+    questionOptionsLabel: t("coCreationForm.labels.questionOptions"),
+    requiredLabel: t("coCreationForm.labels.required"),
+    questionTypeLabel: t("coCreationForm.labels.questionType"),
   })
 
   const handleReorder = useCallback(
@@ -130,7 +113,7 @@ export const TableOfContent = ({
         size="md"
         collapsible
         showChildrenCounter
-        sortable={isEditMode}
+        sortable
         onReorder={handleReorder}
       />
     </div>
