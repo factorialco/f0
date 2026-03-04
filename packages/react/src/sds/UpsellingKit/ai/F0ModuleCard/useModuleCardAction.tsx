@@ -42,7 +42,8 @@ export const useModuleCardAction = () => {
         required: false,
       },
     ],
-    available: "disabled",
+    available: "frontend",
+    followUp: false,
     render: (props) => {
       const args = props.args as ModuleCardArgs
       const moduleId = args.module as ModuleId

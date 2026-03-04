@@ -61,7 +61,8 @@ export const useFAQCardAction = () => {
         required: false,
       },
     ],
-    available: "disabled",
+    available: "frontend",
+    followUp: false,
     render: (props) => {
       const args = props.args as FAQCardArgs
       return (
