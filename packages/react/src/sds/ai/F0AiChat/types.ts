@@ -191,8 +191,9 @@ export const aiTranslations = {
         placeholder: "Share what didn't work",
       },
     },
+    downloadFormat: "Download {{format}}",
     dataDownloadPreview:
-      "Preview {{shown}} of {{total}} rows — download the Excel to see all data.",
+      "Preview {{shown}} of {{total}} rows — download to see all data.",
     expandChat: "Expand chat",
     collapseChat: "Collapse chat",
     ask: "Ask One",

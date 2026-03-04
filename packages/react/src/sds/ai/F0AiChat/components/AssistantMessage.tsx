@@ -1,28 +1,17 @@
 import { Markdown, type AssistantMessageProps } from "@copilotkit/react-ui"
-import { useEffect, useState } from "react"
+import { useEffect } from "react"
 
-import { F0Icon } from "@/components/F0Icon"
-import {
-  ThumbsDown,
-  ThumbsDownFilled,
-  ThumbsUp,
-  ThumbsUpFilled,
-} from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
-import { Action } from "@/ui/Action"
-import { ButtonCopy } from "@/ui/ButtonCopy"
 
 import { F0ActionItem } from "../../F0ActionItem"
 import { f0MarkdownRenderers } from "../../F0MarkdownRenderers"
 import { useAiChat } from "../providers/AiChatStateProvider"
-import { useFeedbackModal, UserReaction } from "./FeedbackProvider"
 
 export const AssistantMessage = ({
   isGenerating,
   isLoading,
   markdownTagRenderers,
   message,
-  onCopy,
 }: AssistantMessageProps) => {
   const content = message?.content || ""
   const isThinkingTool =
@@ -40,11 +29,7 @@ export const AssistantMessage = ({
   const isEmptyMessage = !content && !subComponent
 
   const translations = useI18n()
-  const { open: openFeedbackModal } = useFeedbackModal()
   const { tracking } = useAiChat()
-  const [reactionValue, setReactionValue] = useState<UserReaction | null>(null)
-
-  const isStoppedMessage = content.includes("<!--response-stopped-->")
 
   useEffect(() => {
     if (message?.id && !isLoading && !isGenerating) {
@@ -62,79 +47,12 @@ export const AssistantMessage = ({
         <F0ActionItem title={translations.ai.thinking} status="executing" />
       )}
       {message && (
-        <>
-          <div className="w-fit max-w-full [&>div]:flex [&>div]:flex-col [&>div]:gap-1">
-            <Markdown
-              content={content}
-              components={{ ...f0MarkdownRenderers, ...markdownTagRenderers }}
-            />
-          </div>
-
-          {!isGenerating && !isLoading && !!content && !isStoppedMessage && (
-            <div className="flex">
-              <ButtonCopy
-                size="md"
-                variant="ghost"
-                valueToCopy={content}
-                disabled={isGenerating}
-                onCopy={(e) => {
-                  e.currentTarget.blur()
-                  onCopy?.(content)
-                }}
-              />
-              <Action
-                onClick={(e) => {
-                  const newValue = reactionValue === "like" ? null : "like"
-                  if (newValue) {
-                    openFeedbackModal(newValue, message)
-                  }
-                  setReactionValue(newValue)
-                  e.currentTarget.blur()
-                }}
-                compact={true}
-                mode="only"
-                variant="ghost"
-                aria-label={translations.actions.thumbsUp}
-              >
-                <div className="flex min-w-0 flex-1 items-center justify-center gap-1">
-                  <F0Icon
-                    size="md"
-                    icon={reactionValue === "like" ? ThumbsUpFilled : ThumbsUp}
-                    color="default"
-                  />
-                </div>
-              </Action>
-
-              <Action
-                onClick={(e) => {
-                  const newValue =
-                    reactionValue === "dislike" ? null : "dislike"
-                  if (newValue) {
-                    openFeedbackModal(newValue, message)
-                  }
-                  setReactionValue(newValue)
-                  e.currentTarget.blur()
-                }}
-                compact={true}
-                mode="only"
-                variant="ghost"
-                aria-label={translations.actions.thumbsDown}
-              >
-                <div className="flex min-w-0 flex-1 items-center justify-center gap-1">
-                  <F0Icon
-                    size="md"
-                    icon={
-                      reactionValue === "dislike"
-                        ? ThumbsDownFilled
-                        : ThumbsDown
-                    }
-                    color="default"
-                  />
-                </div>
-              </Action>
-            </div>
-          )}
-        </>
+        <div className="w-fit max-w-full [&>div]:flex [&>div]:flex-col [&>div]:gap-1">
+          <Markdown
+            content={content}
+            components={{ ...f0MarkdownRenderers, ...markdownTagRenderers }}
+          />
+        </div>
       )}
       {!!subComponent && <div className="w-full">{subComponent}</div>}
     </div>

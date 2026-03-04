@@ -1,5 +1,7 @@
+import { IconType } from "@/components/F0Icon"
+
 /**
- * Inline dataset for client-side file generation (Excel / CSV).
+ * Inline dataset for client-side file generation (Excel / CSV / TSV / JSON / PDF).
  * Sent by the agent with the raw query results.
  */
 export type F0DataDownloadDataset = {
@@ -32,8 +34,8 @@ export type F0DataDownloadDataset = {
  * Props for the F0DataDownload component.
  *
  * Renders an optional markdown preview/description followed by
- * "Download Excel" and "Download CSV" buttons. The component generates
- * the files client-side from the provided dataset.
+ * "Download Excel" and other format buttons (CSV, TSV, JSON, PDF).
+ * The component generates the files client-side from the provided dataset.
  */
 export type F0DataDownloadProps = {
   /**
@@ -50,4 +52,21 @@ export type F0DataDownloadProps = {
    * Raw dataset for client-side Excel and CSV generation.
    */
   dataset: F0DataDownloadDataset
+}
+
+/**
+ * Definition for a download format.
+ *
+ * To add a new format, create a file in this folder that exports a
+ * `DownloadFormatDefinition` and register it in `./index.ts`.
+ */
+export type DownloadFormatDefinition = {
+  /** Unique key used as the button value (e.g. "excel", "csv"). */
+  key: string
+  /** Short format name used for i18n interpolation (e.g. "Excel", "CSV"). */
+  formatName: string
+  /** Icon component rendered next to the label. */
+  icon: IconType
+  /** Generate the file and trigger a browser download. */
+  handler: (dataset: F0DataDownloadDataset, filename: string) => void
 }

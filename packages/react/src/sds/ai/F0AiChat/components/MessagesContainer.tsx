@@ -3,7 +3,7 @@ import {
   useCopilotContext,
 } from "@copilotkit/react-core"
 import { type MessagesProps } from "@copilotkit/react-ui"
-import { type Message } from "@copilotkit/shared"
+import { type AIMessage, type Message } from "@copilotkit/shared"
 import { AnimatePresence, motion } from "motion/react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
@@ -18,6 +18,7 @@ import { useAiChat } from "../providers/AiChatStateProvider"
 import { FeedbackModal } from "./FeedbackModal"
 import { FeedbackModalProvider, useFeedbackModal } from "./FeedbackProvider"
 import { ScrollShadow } from "./ScrollShadow"
+import { TurnFeedback } from "./TurnFeedback"
 import { WelcomeScreen } from "./WelcomeScreen"
 
 type Turn = Array<Message | Array<Message>>
@@ -164,61 +165,78 @@ const Messages = ({
                   suggestions={welcomeScreenSuggestions}
                 />
               )}
-              {turns.map((turnMessages, turnIndex) => (
-                <div
-                  ref={turnIndex === turns.length - 1 ? lastTurnRef : undefined}
-                  className={cn(
-                    "flex flex-col items-start justify-start gap-2",
-                    turnIndex === turns.length - 1 && "pb-5"
-                  )}
-                  key={`turn-${turnIndex}`}
-                  style={{
-                    minHeight:
-                      turnIndex === turns.length - 1
+              {turns.map((turnMessages, turnIndex) => {
+                const isLastTurn = turnIndex === turns.length - 1
+                const turnIsComplete = !(inProgress && isLastTurn)
+                const assistantMessages = turnMessages.filter(
+                  (m): m is AIMessage =>
+                    !Array.isArray(m) &&
+                    m.role === "assistant" &&
+                    !!m.content &&
+                    !m.content.includes("<!--response-stopped-->")
+                )
+
+                return (
+                  <div
+                    ref={isLastTurn ? lastTurnRef : undefined}
+                    className={cn(
+                      "flex flex-col items-start justify-start gap-2",
+                      isLastTurn && "pb-5"
+                    )}
+                    key={`turn-${turnIndex}`}
+                    style={{
+                      minHeight: isLastTurn
                         ? turnMinHeight || undefined
                         : undefined,
-                  }}
-                >
-                  {turnMessages.map((message, index) => {
-                    const isCurrentMessage =
-                      turnIndex === turns.length - 1 &&
-                      index === turnMessages.length - 1
+                    }}
+                  >
+                    {turnMessages.map((message, index) => {
+                      const isCurrentMessage =
+                        isLastTurn && index === turnMessages.length - 1
 
-                    if (Array.isArray(message) && !isCurrentMessage) {
+                      if (Array.isArray(message) && !isCurrentMessage) {
+                        return (
+                          <Thinking
+                            key={`${turnIndex}-${index}`}
+                            messages={message}
+                            isActive={false}
+                            inProgress={inProgress}
+                            RenderMessage={RenderMessage}
+                            AssistantMessage={AssistantMessage}
+                          />
+                        )
+                      }
+
                       return (
-                        <Thinking
+                        <RenderMessage
                           key={`${turnIndex}-${index}`}
-                          messages={message}
-                          isActive={false}
+                          message={
+                            Array.isArray(message)
+                              ? message[message.length - 1]
+                              : message
+                          }
                           inProgress={inProgress}
-                          RenderMessage={RenderMessage}
+                          index={index}
+                          isCurrentMessage={isCurrentMessage}
                           AssistantMessage={AssistantMessage}
+                          UserMessage={UserMessage}
+                          ImageRenderer={ImageRenderer}
+                          onRegenerate={onRegenerate}
+                          onCopy={onCopy}
+                          markdownTagRenderers={markdownTagRenderers}
                         />
                       )
-                    }
+                    })}
 
-                    return (
-                      <RenderMessage
-                        key={`${turnIndex}-${index}`}
-                        message={
-                          Array.isArray(message)
-                            ? message[message.length - 1]
-                            : message
-                        }
-                        inProgress={inProgress}
-                        index={index}
-                        isCurrentMessage={isCurrentMessage}
-                        AssistantMessage={AssistantMessage}
-                        UserMessage={UserMessage}
-                        ImageRenderer={ImageRenderer}
-                        onRegenerate={onRegenerate}
+                    {turnIsComplete && assistantMessages.length > 0 && (
+                      <TurnFeedback
+                        messages={assistantMessages}
                         onCopy={onCopy}
-                        markdownTagRenderers={markdownTagRenderers}
                       />
-                    )
-                  })}
-                </div>
-              ))}
+                    )}
+                  </div>
+                )
+              })}
               {interrupt}
             </div>
 
@@ -408,5 +426,7 @@ function getThinkingKey(message: Message): string {
       toolCalls?: { function: { name: string; arguments: string } }[]
     }
   ).toolCalls?.find((c) => c.function.name === "orchestratorThinking")
-  return tc?.function.arguments || message.content || message.id
+  const content =
+    typeof message.content === "string" ? message.content : undefined
+  return tc?.function.arguments || content || message.id
 }

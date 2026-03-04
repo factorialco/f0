@@ -3,7 +3,7 @@ import {
   useCopilotContext,
 } from "@copilotkit/react-core"
 import { type MessagesProps } from "@copilotkit/react-ui"
-import { type Message } from "@copilotkit/shared"
+import { type AIMessage, type Message } from "@copilotkit/shared"
 import { AnimatePresence, motion } from "motion/react"
 import { useContext, useEffect, useMemo, useRef } from "react"
 
@@ -19,6 +19,7 @@ import { AssistantMessage as F0AssistantMessage } from "./AssistantMessage"
 import { FeedbackModal } from "./FeedbackModal"
 import { FeedbackModalProvider, useFeedbackModal } from "./FeedbackProvider"
 import { convertMessagesToTurns, useScrollToBottom } from "./MessagesContainer"
+import { TurnFeedback } from "./TurnFeedback"
 import { UserMessage as F0UserMessage } from "./UserMessage"
 import { WelcomeScreen } from "./WelcomeScreen"
 
@@ -304,78 +305,93 @@ const Messages = ({
             />
           )}
 
-          {turns.map((turnMessages, turnIndex) => (
-            <div
-              className="flex flex-col items-start justify-start gap-2"
-              key={`turn-${turnIndex}`}
-            >
-              {turnMessages.map((message, index) => {
-                const isCurrentMessage =
-                  turnIndex === turns.length - 1 &&
-                  index === turnMessages.length - 1
+          {turns.map((turnMessages, turnIndex) => {
+            const isLastTurn = turnIndex === turns.length - 1
+            const turnIsComplete = !(inProgress && isLastTurn)
+            const assistantMessages = turnMessages.filter(
+              (m): m is AIMessage =>
+                !Array.isArray(m) &&
+                m.role === "assistant" &&
+                !!m.content &&
+                !m.content.includes("<!--response-stopped-->")
+            )
 
-                if (Array.isArray(message) && !isCurrentMessage) {
+            return (
+              <div
+                className="flex flex-col items-start justify-start gap-2"
+                key={`turn-${turnIndex}`}
+              >
+                {turnMessages.map((message, index) => {
+                  const isCurrentMessage =
+                    isLastTurn && index === turnMessages.length - 1
+
+                  if (Array.isArray(message) && !isCurrentMessage) {
+                    return (
+                      <F0Thinking
+                        key={`${turnIndex}-${index}`}
+                        messages={message}
+                        isActive={false}
+                        inProgress={inProgress}
+                        RenderMessage={RenderMessageProp as any}
+                        AssistantMessage={AssistantMessage}
+                      />
+                    )
+                  }
+
+                  const messageToShow = Array.isArray(message)
+                    ? message[message.length - 1]
+                    : message
+
+                  const messageProps = {
+                    key: `${turnIndex}-${index}`,
+                    message: messageToShow,
+                    inProgress: inProgress,
+                    index: index,
+                    isCurrentMessage: isCurrentMessage,
+                    AssistantMessage: AssistantMessage,
+                    UserMessage: UserMessage,
+                    ImageRenderer: ImageRenderer,
+                    onRegenerate: onRegenerate,
+                    onCopy: onCopy,
+                    markdownTagRenderers: markdownTagRenderers,
+                    rawData: (messageToShow as any).rawData || {},
+                  }
+
+                  const { key, ...messageRestProps } = messageProps
+
+                  if (RenderMessageProp) {
+                    return (
+                      <RenderMessageProp
+                        key={key}
+                        {...(messageRestProps as any)}
+                      />
+                    )
+                  }
+
+                  if (messageToShow.role === "user") {
+                    return (
+                      <UserMessage key={key} {...(messageRestProps as any)} />
+                    )
+                  }
+
                   return (
-                    <F0Thinking
-                      key={`${turnIndex}-${index}`}
-                      messages={message}
-                      isActive={false}
-                      inProgress={inProgress}
-                      RenderMessage={RenderMessageProp as any}
-                      AssistantMessage={AssistantMessage}
-                    />
-                  )
-                }
-
-                const messageToShow = Array.isArray(message)
-                  ? message[message.length - 1]
-                  : message
-
-                const messageProps = {
-                  key: `${turnIndex}-${index}`,
-                  message: messageToShow,
-                  inProgress: inProgress,
-                  index: index,
-                  isCurrentMessage: isCurrentMessage,
-                  AssistantMessage: AssistantMessage,
-                  UserMessage: UserMessage,
-                  ImageRenderer: ImageRenderer,
-                  onRegenerate: onRegenerate,
-                  onCopy: onCopy,
-                  markdownTagRenderers: markdownTagRenderers,
-                  rawData: (messageToShow as any).rawData || {},
-                }
-
-                const { key, ...messageRestProps } = messageProps
-
-                if (RenderMessageProp) {
-                  return (
-                    <RenderMessageProp
+                    <AssistantMessage
                       key={key}
                       {...(messageRestProps as any)}
+                      isGenerating={inProgress && isCurrentMessage}
+                      isLoading={
+                        inProgress && isCurrentMessage && !messageToShow.content
+                      }
                     />
                   )
-                }
+                })}
 
-                if (messageToShow.role === "user") {
-                  return (
-                    <UserMessage key={key} {...(messageRestProps as any)} />
-                  )
-                }
-
-                return (
-                  <AssistantMessage
-                    key={key}
-                    {...(messageRestProps as any)}
-                    isGenerating={inProgress && isCurrentMessage}
-                    isLoading={
-                      inProgress && isCurrentMessage && !messageToShow.content
-                    }
-                  />
-                )
-              })}
-            </div>
-          ))}
+                {turnIsComplete && assistantMessages.length > 0 && (
+                  <TurnFeedback messages={assistantMessages} onCopy={onCopy} />
+                )}
+              </div>
+            )
+          })}
 
           {interrupt}
           <div ref={messagesEndRef} className="h-2" />
