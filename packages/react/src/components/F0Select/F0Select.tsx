@@ -664,6 +664,33 @@ const F0SelectComponent = forwardRef(function Select<
         }
       }
 
+      // Remove orphaned group headers (headers with no selectable items after them)
+      // This handles cases where search filtering removes all items under a header
+      for (let i = result.length - 1; i >= 0; i--) {
+        const item = result[i]
+        // Group headers have height 36 and no value
+        if (item.height === 36 && !("value" in item)) {
+          // Check if there are any selectable items between this header
+          // and the next header/separator/end
+          let hasSelectableItem = false
+          for (let j = i + 1; j < result.length; j++) {
+            if (result[j].height === 36 && !("value" in result[j])) break
+            if ("value" in result[j]) {
+              hasSelectableItem = true
+              break
+            }
+          }
+          if (!hasSelectableItem) {
+            // Remove the header and any auto-separator before it
+            if (i > 0 && result[i - 1].height === 1) {
+              result.splice(i - 1, 2)
+            } else {
+              result.splice(i, 1)
+            }
+          }
+        }
+      }
+
       return result
     },
     [optionMapper]
