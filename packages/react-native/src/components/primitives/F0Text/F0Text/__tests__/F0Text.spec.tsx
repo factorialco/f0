@@ -13,6 +13,7 @@ describe("F0Text", () => {
 
     it("renders all typography variants", () => {
       const variants = [
+        "heading-xl",
         "heading-lg",
         "heading-md",
         "heading-sm",

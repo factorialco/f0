@@ -198,6 +198,15 @@ exports[`F0Text Snapshots renders all typography variants: variant-heading-sm 1`
 </Text>
 `;
 
+exports[`F0Text Snapshots renders all typography variants: variant-heading-xl 1`] = `
+<Text
+  className="text-[36px] leading-[40px] tracking-[-0.2px] font-semibold text-f0-foreground text-left"
+>
+  heading-xl
+   text
+</Text>
+`;
+
 exports[`F0Text Snapshots renders with alignment options: align-center 1`] = `
 <Text
   className="text-[14px] leading-[20px] font-normal text-f0-foreground text-center"

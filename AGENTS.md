@@ -38,3 +38,4 @@ f0/
 ```
 
 For `packages/react/` conventions, see `packages/react/AGENTS.md`.
+For `packages/react-native/` conventions, see `packages/react-native/AGENTS.md`.

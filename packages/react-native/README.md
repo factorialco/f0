@@ -167,8 +167,8 @@ Use this section after each manual update so people can install the latest build
 ### ✅ Latest Update
 
 - **Branch / Channel:** `production`
-- **Update message:** `Typography Scale`
-- **Published at:** `Feb 6, 2026 1:19 PM`
+- **Update message:** `F0Text and AnimatedF0Text`
+- **Published at:** `Mar 4, 2026`
 
 ### 🔗 Deep Link
 
