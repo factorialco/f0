@@ -87,6 +87,11 @@ type TableVisualizationOptions<T> = {
    * Allow users to hide columns (you can define specifically non hideable columns in col props, also frozen columns are not hideable)
    */
   allowColumnHiding?: boolean
+
+  /**
+   * Marks rows as reference rows. Reference rows are rendered with a slanted background pattern.
+   */
+  isReferenceRow?: (item: T) => boolean
 }
 ```
 
@@ -353,6 +358,33 @@ Allow users to show/hide columns using column settings:
 ```
 
 <Canvas of={TableStories.TableColumnOrderingAndHidden} meta={TableStories} />
+
+### Reference Rows
+
+Use `isReferenceRow` to highlight one or more rows as reference rows. This is
+useful for baselines, target values, historical comparison rows, or any row
+that should be visually distinguished from regular records.
+
+```tsx
+{
+  type: "table",
+  options: {
+    isReferenceRow: (item) => item.status === "inactive",
+    columns: [
+      {
+        label: "Name",
+        render: (item) => item.name,
+      },
+      {
+        label: "Email",
+        render: (item) => item.email,
+      },
+    ],
+  },
+}
+```
+
+<Canvas of={TableStories.ReferenceRowsVisualization} meta={TableStories} />
 
 ## Nested Tables
 

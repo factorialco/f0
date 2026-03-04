@@ -247,6 +247,7 @@ export const getMockVisualizations = (options?: {
     nestedRecords?: boolean
     applyLongText?: boolean
     longColumnLabels?: boolean
+    referenceRows?: boolean
   }
   cache?: MockDataCache<MockUser>
 }): Record<
@@ -269,6 +270,9 @@ export const getMockVisualizations = (options?: {
         allowColumnReordering: options?.table?.allowColumnReordering,
         frozenColumns:
           options?.table?.frozenColumns ?? options?.frozenColumns ?? 0,
+        isReferenceRow: options?.table?.referenceRows
+          ? (item) => item.status === "inactive"
+          : undefined,
         columns: [
           {
             label: "Name",

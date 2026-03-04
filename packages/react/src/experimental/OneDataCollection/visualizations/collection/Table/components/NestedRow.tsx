@@ -76,6 +76,8 @@ export type RowProps<
   checkColumnWidth: number
   tableWithChildren: boolean
   nestedRowProps?: NestedRowProps
+  /** Optional predicate to mark a row as reference row with slanted background pattern. */
+  isReferenceRow?: (item: R) => boolean
   /** Custom cell renderer, passed through from Table to Row */
   cellRenderer?: React.ComponentType<CellRendererProps<R, Sortings, Summaries>>
   /** Row wrapper for child rows (provides per-row context, e.g. editing state) */

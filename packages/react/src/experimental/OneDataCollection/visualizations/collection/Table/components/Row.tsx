@@ -61,6 +61,8 @@ export type RowProps<
   tableWithChildren: boolean
   nestedRowProps?: NestedRowProps
   disableHover?: boolean
+  /** Optional predicate to mark a row as reference row with slanted background pattern. */
+  isReferenceRow?: (item: R) => boolean
   /** Optional custom cell renderer. When provided, wraps each cell's content. */
   cellRenderer?: React.ComponentType<
     CellRendererProps<R, Sortings, Summaries> & { isLastColumn?: boolean }
@@ -105,6 +107,7 @@ const RowComponentInner = <
     nestedRowProps,
     tableWithChildren,
     disableHover = false,
+    isReferenceRow: isReferenceRowFn,
     cellRenderer: CellRenderer,
     rowWrapper,
   }: RowProps<
@@ -167,6 +170,7 @@ const RowComponentInner = <
         groupIndex={groupIndex}
         nestedRowProps={nestedRowProps}
         tableWithChildren={tableWithChildren}
+        isReferenceRow={isReferenceRowFn}
         cellRenderer={CellRenderer}
         rowWrapper={rowWrapper}
         key={key}
@@ -175,6 +179,11 @@ const RowComponentInner = <
   }
 
   const isSelected = id !== undefined && selectedItems.has(id)
+  const isReferenceRow = isReferenceRowFn?.(item) ?? false
+  // Applies the slanted stripe pattern to the whole reference row.
+  // This is the base background that creates the visual "reference" treatment.
+  const referenceRowClass =
+    "bg-[repeating-linear-gradient(45deg,transparent_0px,transparent_8px,hsl(var(--neutral-20))_8px,hsl(var(--neutral-20))_9px)] [background-size:100%_100px]"
 
   return (
     <TableRow
@@ -185,7 +194,8 @@ const RowComponentInner = <
         "after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-px after:w-full after:bg-f1-border-secondary after:content-['']",
         noBorder && "after:bg-white-100",
         disableHover && "hover:bg-transparent",
-        isSelected && "bg-f1-background-selected-secondary"
+        isSelected && "bg-f1-background-selected-secondary",
+        isReferenceRow && referenceRowClass
       )}
     >
       {source.selectable && (
@@ -193,6 +203,7 @@ const RowComponentInner = <
           width={checkColumnWidth}
           sticky={{ left: 0 }}
           loading={loading}
+          isReferenceRow={isReferenceRow}
         >
           {id !== undefined && (
             <div className="pointer-events-auto ml-1.5 flex items-center justify-start">
@@ -238,6 +249,7 @@ const RowComponentInner = <
                 ? "h-[48px] p-0 align-middle first:pl-0 last:pr-0"
                 : undefined
             }
+            isReferenceRow={isReferenceRow}
           >
             {CellRenderer ? (
               <CellRenderer
