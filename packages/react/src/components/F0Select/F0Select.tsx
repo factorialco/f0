@@ -66,6 +66,7 @@ const defaultSearchFn = (
 ) => {
   return (
     option.type === "separator" ||
+    option.type === "group-header" ||
     !search ||
     option.label.toLowerCase().includes(search.toLowerCase())
   )
@@ -238,7 +239,8 @@ const F0SelectComponent = forwardRef(function Select<
           return undefined
         }
         const mappedOption = optionMapper(item)
-        return mappedOption.type !== "separator"
+        return mappedOption.type !== "separator" &&
+          mappedOption.type !== "group-header"
           ? String(mappedOption.value)
           : undefined
       },
@@ -303,7 +305,10 @@ const F0SelectComponent = forwardRef(function Select<
     // Only add items from paginated data (NOT fetchedItems)
     for (const record of data.records) {
       const mappedOption = optionMapper(record)
-      if (mappedOption.type !== "separator") {
+      if (
+        mappedOption.type !== "separator" &&
+        mappedOption.type !== "group-header"
+      ) {
         // Always use string keys for consistent lookups
         entries.push([
           String(mappedOption.value),
@@ -528,7 +533,7 @@ const F0SelectComponent = forwardRef(function Select<
       const values = checkedItems.map((item) => {
         if (item.item) {
           const option = optionMapper(item.item as ActualRecordType)
-          return option.type !== "separator"
+          return option.type !== "separator" && option.type !== "group-header"
             ? (option.value as T)
             : (String(item.id) as T)
         }
@@ -610,26 +615,53 @@ const F0SelectComponent = forwardRef(function Select<
     (
       records: WithGroupId<ActualRecordType>[] | ActualRecordType[]
     ): VirtualItem[] => {
-      return records.map((option, index) => {
+      let hasSeenGroupHeader = false
+      const result: VirtualItem[] = []
+
+      for (const [index, option] of records.entries()) {
         const mappedOption = optionMapper(option)
-        return mappedOption.type === "separator"
-          ? {
+        if (mappedOption.type === "separator") {
+          result.push({
+            height: 1,
+            item: <SelectSeparator key={`separator-${index}`} />,
+          })
+        } else if (mappedOption.type === "group-header") {
+          // Auto-insert separator before non-first group headers
+          if (hasSeenGroupHeader) {
+            result.push({
               height: 1,
-              item: <SelectSeparator key={`separator-${index}`} />,
-            }
-          : {
-              height: mappedOption.description ? 64 : 32,
-              item: (
-                <SelectItem
-                  key={String(mappedOption.value)}
-                  item={mappedOption}
-                />
-              ),
-              // Convert to string to ensure consistent comparison with selectedItemsValues
-              // which also converts to strings (line 623)
-              value: String(mappedOption.value),
-            }
-      })
+              item: <SelectSeparator key={`group-header-separator-${index}`} />,
+            })
+          }
+          hasSeenGroupHeader = true
+          result.push({
+            height: 36,
+            item: (
+              <div
+                key={`group-header-${index}`}
+                className="px-3 pt-3 pb-2 text-sm font-medium text-f1-foreground-secondary"
+              >
+                {mappedOption.label}
+              </div>
+            ),
+          })
+        } else {
+          result.push({
+            height: mappedOption.description ? 64 : 32,
+            item: (
+              <SelectItem
+                key={String(mappedOption.value)}
+                item={mappedOption}
+              />
+            ),
+            // Convert to string to ensure consistent comparison with selectedItemsValues
+            // which also converts to strings
+            value: String(mappedOption.value),
+          })
+        }
+      }
+
+      return result
     },
     [optionMapper]
   )

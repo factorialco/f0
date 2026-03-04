@@ -544,6 +544,7 @@ export const WithSearchBox: Story = {
             console.log("searchFn", option, searchValue)
             return (
               option.type === "separator" ||
+              option.type === "group-header" ||
               !searchValue ||
               option.label.toLowerCase().includes(searchValue.toLowerCase()) ||
               option.description
@@ -584,6 +585,30 @@ export const LargeList: Story = {
       ...(meta.args?.options || []),
       { type: "separator" },
       ...mockItems,
+    ],
+  },
+}
+
+/**
+ * Static options with group headers to visually separate sections.
+ * Group headers are non-selectable labels rendered using `{ type: "group-header", label: "..." }`.
+ * A separator is automatically inserted before each group header (except the first).
+ */
+export const WithGroupHeaders: Story = {
+  args: {
+    label: "Select a vacancy",
+    placeholder: "Select a vacancy",
+    showSearchBox: true,
+    value: undefined,
+    options: [
+      { type: "group-header", label: "Assigned to me" },
+      { value: "vacancy-1", label: "Senior Frontend Engineer" },
+      { value: "vacancy-2", label: "Product Designer" },
+      { type: "group-header", label: "All vacancies" },
+      { value: "vacancy-3", label: "Backend Engineer" },
+      { value: "vacancy-4", label: "Data Analyst" },
+      { value: "vacancy-5", label: "DevOps Engineer" },
+      { value: "vacancy-6", label: "QA Engineer" },
     ],
   },
 }
