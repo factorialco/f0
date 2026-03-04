@@ -23,6 +23,7 @@ import { DataCollectionSource } from "@/experimental/OneDataCollection/hooks/use
 import { ItemActionsDefinition } from "@/experimental/OneDataCollection/item-actions"
 import { NavigationFiltersDefinition } from "@/experimental/OneDataCollection/navigationFilters/types"
 import { SummariesDefinition } from "@/experimental/OneDataCollection/summary"
+import { TableVisualizationType } from "@/experimental/OneDataCollection/types"
 import {
   GroupingDefinition,
   RecordType,
@@ -74,6 +75,7 @@ export type RowProps<
   cellRenderer?: React.ComponentType<CellRendererProps<R, Sortings, Summaries>>
   /** Row wrapper for child rows (provides per-row context, e.g. editing state) */
   rowWrapper?: React.ComponentType<RowWrapperProps<R>>
+  fromVisualization?: TableVisualizationType
 }
 
 const NestedRowContent = <
@@ -198,6 +200,7 @@ const NestedRowContent = <
           isLastChild,
         }}
         tableWithChildren={props.tableWithChildren}
+        fromVisualization={props.fromVisualization}
       />
 
       {shouldShowChildren &&
@@ -263,6 +266,7 @@ const NestedRowContent = <
                   depth: depth,
                   isLastChild: childIsLastInTree,
                 }}
+                fromVisualization={props.fromVisualization}
               />
             )
 
@@ -300,6 +304,7 @@ const NestedRowContent = <
                   onExpand: handleExpand,
                   isLastChild: childIsLastInTree,
                 }}
+                fromVisualization={props.fromVisualization}
                 tableWithChildren={props.tableWithChildren}
               />
             )
@@ -425,6 +430,7 @@ const NestedRow = forwardRef(NestedRowComponentInner) as <
     Grouping
   > & {
     ref?: React.ForwardedRef<HTMLTableRowElement>
+    fromVisualization?: TableVisualizationType
   }
 ) => ReturnType<typeof NestedRowComponentInner>
 

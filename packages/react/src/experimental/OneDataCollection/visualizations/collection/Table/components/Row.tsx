@@ -9,6 +9,7 @@ import { ItemActionsDefinition } from "@/experimental/OneDataCollection/item-act
 import { NavigationFiltersDefinition } from "@/experimental/OneDataCollection/navigationFilters/types"
 import { renderProperty } from "@/experimental/OneDataCollection/property-render"
 import { SummariesDefinition } from "@/experimental/OneDataCollection/summary"
+import { TableVisualizationType } from "@/experimental/OneDataCollection/types"
 import { TableCell, TableRow } from "@/experimental/OneTable"
 import {
   GroupingDefinition,
@@ -67,6 +68,7 @@ export type RowProps<
   >
   /** Row wrapper passed through to NestedRow for wrapping child rows */
   rowWrapper?: React.ComponentType<RowWrapperProps<R>>
+  fromVisualization?: TableVisualizationType
 }
 
 export type NestedRowProps = {
@@ -107,6 +109,7 @@ const RowComponentInner = <
     disableHover = false,
     cellRenderer: CellRenderer,
     rowWrapper,
+    fromVisualization,
   }: RowProps<
     R,
     Filters,
@@ -170,6 +173,7 @@ const RowComponentInner = <
         cellRenderer={CellRenderer}
         rowWrapper={rowWrapper}
         key={key}
+        fromVisualization={fromVisualization}
       />
     )
   }
@@ -238,6 +242,7 @@ const RowComponentInner = <
                 ? "h-[48px] p-0 align-middle first:pl-0 last:pr-0"
                 : undefined
             }
+            fromVisualization={fromVisualization}
           >
             {CellRenderer ? (
               <CellRenderer
@@ -308,7 +313,10 @@ const Row = forwardRef(RowComponentInner) as <
     ItemActions,
     NavigationFilters,
     Grouping
-  > & { ref?: React.ForwardedRef<HTMLTableRowElement> }
+  > & {
+    ref?: React.ForwardedRef<HTMLTableRowElement>
+    fromVisualization?: TableVisualizationType
+  }
 ) => ReturnType<typeof RowComponentInner>
 
 export { Row }

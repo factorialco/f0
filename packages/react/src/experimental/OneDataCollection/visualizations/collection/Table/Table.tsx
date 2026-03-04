@@ -573,6 +573,7 @@ export const TableCollection = <
                     tableWithChildren={tableWithChildren}
                     rowWrapper={RowWrapper}
                     cellRenderer={cellRenderer}
+                    fromVisualization={fromVisualization}
                   />
                 )
                 if (RowWrapper) {

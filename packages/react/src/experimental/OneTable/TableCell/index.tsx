@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from "motion/react"
 import { useRef } from "react"
 
+import { TableVisualizationType } from "@/experimental/OneDataCollection/types"
 import { NestedRowProps } from "@/experimental/OneDataCollection/visualizations/collection/Table/components/Row"
 import { Skeleton } from "@/ui/skeleton"
 import { TableCell as TableCellRoot } from "@/ui/table"
@@ -71,6 +72,10 @@ interface TableCellProps {
     rowWithChildren?: boolean
     tableWithChildren?: boolean
   }
+  /**
+   * The visualization the cell is being rendered in
+   */
+  fromVisualization?: TableVisualizationType
 }
 
 export function TableCell({
@@ -84,6 +89,7 @@ export function TableCell({
   className,
   loading = false,
   nestedRowProps,
+  fromVisualization,
 }: TableCellProps) {
   const { isScrolled, isScrolledRight } = useTable()
   const { actions } = useI18n()
@@ -149,7 +155,11 @@ export function TableCell({
       </AnimatePresence>
 
       {firstCell && nestedRowProps?.tableWithChildren && (
-        <TreeConnector firstCell={firstCell} nestedRowProps={nestedRowProps} />
+        <TreeConnector
+          firstCell={firstCell}
+          nestedRowProps={nestedRowProps}
+          fromVisualization={fromVisualization}
+        />
       )}
 
       {loading && (

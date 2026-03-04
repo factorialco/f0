@@ -1,3 +1,4 @@
+import { TableVisualizationType } from "@/experimental/OneDataCollection/types"
 import { NestedRowProps } from "@/experimental/OneDataCollection/visualizations/collection/Table/components/Row"
 import { cn } from "@/lib/utils"
 
@@ -21,6 +22,7 @@ interface TreeConnectorProps {
     rowWithChildren?: boolean
     tableWithChildren?: boolean
   }
+  fromVisualization?: TableVisualizationType
 }
 
 export const connectorVariables = (
@@ -29,6 +31,7 @@ export const connectorVariables = (
     rowWithChildren?: boolean
     tableWithChildren?: boolean
   }
+  // fromVisualization?: TableVisualizationType
 ) => {
   const { rowWithChildren, nestedVariant, onLoadMoreChildren } =
     nestedRowProps ?? {}
@@ -84,6 +87,7 @@ export const horizontalConnectorStyles =
 export const TreeConnector = ({
   firstCell,
   nestedRowProps,
+  // fromVisualization,
 }: TreeConnectorProps) => {
   const firstCellWithDepth = isFirstCellWithDepth(
     firstCell,

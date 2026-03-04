@@ -65,6 +65,8 @@ export type OnLoadDataCallback<
   data: Record[]
 }) => void
 
+export type TableVisualizationType = "table" | "editableTable"
+
 export type OnLoadErrorCallback = (error: DataError) => void
 /**
  * Props for the Collection component.
@@ -105,5 +107,5 @@ export type CollectionProps<
    */
   tmpFullWidth?: boolean
   /** Indicates the source visualization type */
-  fromVisualization?: "table" | "editableTable"
+  fromVisualization?: TableVisualizationType
 } & VisualizationOptions

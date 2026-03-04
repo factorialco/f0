@@ -137,7 +137,7 @@ export const NestedCell = ({
           </div>
           <div
             className={cn(
-              firstCellWithChildren && "min-w-0",
+              firstCellWithChildren && "min-w-0 w-full",
               firstCellWithNoChildrenAndTableChildren &&
                 "pl-[var(--spacing-factor)]",
               "relative"
