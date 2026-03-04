@@ -6,6 +6,7 @@ import { DataCollectionSource } from "@/experimental/OneDataCollection/hooks/use
 import { ItemActionsDefinition } from "@/experimental/OneDataCollection/item-actions"
 import { NavigationFiltersDefinition } from "@/experimental/OneDataCollection/navigationFilters/types"
 import { SummariesDefinition } from "@/experimental/OneDataCollection/summary"
+import { TableVisualizationType } from "@/experimental/OneDataCollection/types"
 import {
   FiltersDefinition,
   GroupingDefinition,
