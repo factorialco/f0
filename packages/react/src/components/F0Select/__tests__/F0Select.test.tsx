@@ -424,3 +424,177 @@ describe("Select", () => {
     })
   })
 })
+
+describe("Group Headers", () => {
+  global.ResizeObserver = class MockResizeObserver {
+    observe = vi.fn()
+    unobserve = vi.fn()
+    disconnect = vi.fn()
+  } as typeof ResizeObserver
+
+  beforeEach(() => {
+    Object.defineProperty(HTMLElement.prototype, "offsetHeight", {
+      value: 800,
+    })
+    Object.defineProperty(HTMLElement.prototype, "offsetWidth", {
+      value: 800,
+    })
+    vi.spyOn(Element.prototype, "getBoundingClientRect").mockImplementation(
+      () => ({
+        width: 120,
+        height: 120,
+        top: 0,
+        left: 0,
+        bottom: 0,
+        right: 0,
+        x: 0,
+        y: 0,
+        toJSON: () => {},
+      })
+    )
+  })
+
+  const groupedOptions: F0SelectItemProps<string>[] = [
+    { type: "group-header", label: "Group A" },
+    { value: "a1", label: "Alpha 1" },
+    { value: "a2", label: "Alpha 2" },
+    { type: "group-header", label: "Group B" },
+    { value: "b1", label: "Beta 1" },
+  ]
+
+  const defaultGroupProps = {
+    label: "Pick an option",
+    placeholder: "Select...",
+    onChange: vi.fn(),
+  }
+
+  const openSelect = async (user: ReturnType<typeof userEvent.setup>) => {
+    user.click(screen.getByRole("combobox"))
+    await waitFor(() => expect(screen.getByRole("listbox")).toBeInTheDocument())
+    const teaser = screen.getByRole("listbox")
+    fireEvent.animationStart(teaser)
+  }
+
+  it("renders group header labels", async () => {
+    const user = userEvent.setup()
+    render(<F0Select {...defaultGroupProps} options={groupedOptions} />)
+
+    await openSelect(user)
+
+    expect(screen.getByText("Group A")).toBeInTheDocument()
+    expect(screen.getByText("Group B")).toBeInTheDocument()
+  })
+
+  it("renders group headers with role=presentation for accessibility", async () => {
+    const user = userEvent.setup()
+    render(<F0Select {...defaultGroupProps} options={groupedOptions} />)
+
+    await openSelect(user)
+
+    const presentations = screen.getAllByRole("presentation")
+    const groupHeaders = presentations.filter(
+      (el) => el.textContent === "Group A" || el.textContent === "Group B"
+    )
+    expect(groupHeaders).toHaveLength(2)
+  })
+
+  it("does not trigger onChange when a group header is clicked", async () => {
+    const handleChange = vi.fn()
+    const user = userEvent.setup()
+    render(
+      <F0Select
+        {...defaultGroupProps}
+        options={groupedOptions}
+        onChange={handleChange}
+      />
+    )
+
+    await openSelect(user)
+    await user.click(screen.getByText("Group A"))
+
+    expect(handleChange).not.toHaveBeenCalled()
+  })
+
+  it("renders selectable items alongside group headers", async () => {
+    const handleChange = vi.fn()
+    const user = userEvent.setup()
+    render(
+      <F0Select
+        {...defaultGroupProps}
+        options={groupedOptions}
+        onChange={handleChange}
+      />
+    )
+
+    await openSelect(user)
+    await user.click(screen.getByText("Alpha 1"))
+
+    expect(handleChange).toHaveBeenCalledWith(
+      "a1",
+      undefined,
+      expect.objectContaining({ label: "Alpha 1", value: "a1" })
+    )
+  })
+
+  it("hides orphaned group headers when search filters out all items in a group", async () => {
+    const user = userEvent.setup()
+    render(
+      <F0Select {...defaultGroupProps} options={groupedOptions} showSearchBox />
+    )
+
+    await openSelect(user)
+
+    // Search for "Beta" — only Group B items match
+    await user.type(screen.getByRole("searchbox"), "Beta")
+
+    await waitFor(() => {
+      expect(screen.getByText("Beta 1")).toBeInTheDocument()
+      expect(screen.getByText("Group B")).toBeInTheDocument()
+      // Group A header should be hidden since all its items are filtered out
+      expect(screen.queryByText("Group A")).not.toBeInTheDocument()
+    })
+  })
+
+  it("restores all group headers when search is cleared", async () => {
+    const user = userEvent.setup()
+    render(
+      <F0Select {...defaultGroupProps} options={groupedOptions} showSearchBox />
+    )
+
+    await openSelect(user)
+
+    // Type to filter
+    await user.type(screen.getByRole("searchbox"), "Beta")
+    await waitFor(() => {
+      expect(screen.queryByText("Group A")).not.toBeInTheDocument()
+    })
+
+    // Clear search
+    await user.clear(screen.getByRole("searchbox"))
+    await waitFor(() => {
+      expect(screen.getByText("Group A")).toBeInTheDocument()
+      expect(screen.getByText("Group B")).toBeInTheDocument()
+    })
+  })
+
+  it("hides all group headers when search matches no items", async () => {
+    const user = userEvent.setup()
+    render(
+      <F0Select
+        {...defaultGroupProps}
+        options={groupedOptions}
+        showSearchBox
+        searchEmptyMessage="No results"
+      />
+    )
+
+    await openSelect(user)
+    await user.type(screen.getByRole("searchbox"), "zzz-no-match")
+
+    await waitFor(() => {
+      expect(screen.queryByText("Group A")).not.toBeInTheDocument()
+      expect(screen.queryByText("Group B")).not.toBeInTheDocument()
+      expect(screen.getByText("No results")).toBeInTheDocument()
+    })
+  })
+})
