@@ -172,6 +172,8 @@ const NestedRowContent = <
     connectorHeight: calculatedHeight,
   }
 
+  const isTableVisualization = props.fromVisualization === "table"
+
   /**
    * Border logic for hierarchical rows:
    * - Border should only appear on the "last visible element" of the tree
@@ -181,7 +183,7 @@ const NestedRowContent = <
    */
   const firstRow = (props.nestedRowProps?.depth ?? 0) === 0
   const isLastChild = (props.nestedRowProps?.isLastChild || firstRow) ?? false
-  const shouldHideBorder = open || !isLastChild
+  const shouldHideBorder = (open || !isLastChild) && isTableVisualization
 
   return (
     <>
@@ -286,7 +288,8 @@ const NestedRowContent = <
           } else {
             // Base case: Leaf node with no children
             // For leaf nodes, border is shown only if it's the last visible element in the tree
-            const leafShouldHideBorder = !childIsLastInTree
+            const leafShouldHideBorder =
+              !childIsLastInTree && isTableVisualization
 
             const leafChild = (
               <Row

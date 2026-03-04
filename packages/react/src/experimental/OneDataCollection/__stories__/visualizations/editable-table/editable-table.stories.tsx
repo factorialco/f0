@@ -202,7 +202,8 @@ export const EditableTableWithEditableCallback: Story = {
                 ) {
                   return {
                     ...col,
-                    editable: (item: MockUser) => item.role === "Designer",
+                    editType: (item: MockUser) =>
+                      item.role === "Designer" ? "text" : "display-only",
                   }
                 }
                 return col

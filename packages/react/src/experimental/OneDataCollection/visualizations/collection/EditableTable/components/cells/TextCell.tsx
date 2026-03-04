@@ -1,29 +1,29 @@
 import { Input } from "@/experimental/Forms/Fields/Input"
+import { RecordType } from "@/hooks/datasource/types/records.typings"
 import { cn } from "@/lib/utils"
 
 import { EditableCellProps } from "."
 import { BaseCell } from "./BaseCell"
 
-export function TextCell({
-  label,
+export function TextCell<R extends RecordType>({
+  editableColumn,
   value,
-  align,
   error,
   loading,
   onChange,
-}: EditableCellProps) {
+}: EditableCellProps<R>) {
   return (
     <BaseCell>
       <div
         className={cn(
           "flex w-full min-w-0",
           "cursor-text items-center",
-          align === "right" && "justify-end"
+          editableColumn.align === "right" && "justify-end"
         )}
       >
         <Input
           type="text"
-          label={label}
+          label={editableColumn.label}
           hideLabel
           value={value}
           onChange={onChange}

@@ -44,7 +44,6 @@ Use `type: "editableTable"` in the `visualizations` prop:
             id: "name",
             label: "Name",
             editType: () => "text",
-            editable: () => true,
             render: (item) => item.name,
             sorting: "name",
             width: 140,
@@ -54,7 +53,6 @@ Use `type: "editableTable"` in the `visualizations` prop:
             id: "email",
             label: "Email",
             editType: () => "text",
-            editable: (item) => item.role === "Designer",
             render: (item) => item.email,
             sorting: "email",
             // editType + editable → only editable when role is "Designer"
@@ -63,14 +61,13 @@ Use `type: "editableTable"` in the `visualizations` prop:
             id: "role",
             label: "Role",
             editType: () => "text",
-            editable: (item) => item.role === "Designer",
             render: (item) => item.role,
             sorting: "role",
             // editType + editable → only editable when role is "Designer"
           },
           {
             label: "Status",
-            editable: () => false,
+            editType: () => "display-only" as const,
             render: (item) => ({
               type: "status",
               value: { status: "positive", label: item.status },
@@ -187,14 +184,6 @@ type EditableTableColumnDefinition<T> = TableColumnDefinition<T> & {
    * When omitted, the cell is always rendered read-only.
    */
   editType?: (item: T) => "text" | undefined
-
-  /**
-   * Function that determines if the cell should be editable for a given item.
-   * The cell is only editable if both `editType` returns a value AND
-   * this function returns `true` for the given item.
-   * Return `true` for all items to make the column always editable.
-   */
-  editable: (item: T) => boolean
 }
 ```
 
@@ -211,20 +200,6 @@ It receives the current row item and returns a cell type or `undefined`:
 
 > **Note:** Editable columns must have an `id` that matches a key on the record
 > type so the component can read and write the value.
-
-### `editable`
-
-A required callback that controls editability on a per-row basis. The cell is only
-rendered as an input if **both** `editType` returns a value **and**
-`editable(item)` returns `true`.
-
-- Use `editable: () => true` to make the column always editable.
-- Use `editable: (item) => item.role === "Admin"` to restrict editing to specific rows.
-
-This is useful when certain rows should be read-only based on their data (e.g. only
-designers can be edited, or locked rows should not be modified).
-
-<Canvas of={EditableTableStories.EditableTableWithEditableCallback} />
 
 ## `onCellChange` outcomes
 

@@ -163,7 +163,15 @@ export function TableCell({
       )}
 
       {loading && (
-        <div style={{ ...firstCellMarginLeft }}>
+        <div
+          style={{ ...firstCellMarginLeft }}
+          className={cn(
+            "flex h-full items-center",
+            fromVisualization === "editableTable"
+              ? "min-h-[32px]"
+              : "min-h-[24px]"
+          )}
+        >
           <Skeleton className="h-4 w-full" />
         </div>
       )}

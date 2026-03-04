@@ -239,7 +239,10 @@ const RowComponentInner = <
             }}
             className={
               CellRenderer
-                ? "h-[48px] p-0 align-middle first:pl-0 last:pr-0"
+                ? cn(
+                    "h-[48px] p-0 align-middle last:pr-0",
+                    !tableWithChildren && "first:pl-0"
+                  )
                 : undefined
             }
             fromVisualization={fromVisualization}

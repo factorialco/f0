@@ -39,14 +39,6 @@ export type EditableTableColumnDefinition<
    * When omitted, the cell is always rendered read-only.
    */
   editType?: (item: R) => EditableTableCellEditType | undefined
-
-  /**
-   * Function that determines if the cell should be editable for a given item.
-   * The cell is only editable if both `editType` returns a value AND
-   * this function returns `true` for the given item.
-   * Return `true` for all items to make the column always editable.
-   */
-  editable: (item: R) => boolean
 }
 
 export type EditableTableVisualizationOptions<

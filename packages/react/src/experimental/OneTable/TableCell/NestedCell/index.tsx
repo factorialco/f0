@@ -66,7 +66,7 @@ export const NestedCell = ({
     <div
       className={cn(
         width !== "auto" && "overflow-hidden",
-        "relative z-[1]",
+        "relative z-[1] h-full",
         firstCellWithChildren && "flex items-center gap-2"
       )}
       style={{
@@ -85,7 +85,11 @@ export const NestedCell = ({
     >
       {onLoadMoreChildren ? (
         <>
-          <div className={cn("pointer-events-auto cursor-pointer")}>
+          <div
+            className={cn(
+              "pointer-events-auto cursor-pointer flex items-center w-full h-full border-0 border-r-[1px] border-solid border-f1-border-secondary"
+            )}
+          >
             <F0Button
               variant="ghost"
               size="md"

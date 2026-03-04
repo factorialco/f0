@@ -34,7 +34,6 @@ const createEditableColumn = (
   width: undefined,
   render: (item) => item.name,
   editType: () => "text",
-  editable: () => true,
   ...overrides,
 })
 
@@ -51,7 +50,6 @@ const createReadonlyColumn = (
   sticky: undefined,
   width: undefined,
   render: (item) => item.email,
-  editable: () => false,
   ...overrides,
 })
 
@@ -93,7 +91,7 @@ describe("EditableCellRenderer", () => {
 
     it("renders readonly cell when editable returns false", () => {
       const column = createEditableColumn({
-        editable: () => false,
+        editType: () => "disabled" as const,
       })
 
       render(
