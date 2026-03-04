@@ -26,6 +26,8 @@ export declare const actionItemStatuses: readonly ["inProgress", "executing", "c
 
 /* Excluded from this release type: AgentState */
 
+export declare type AggregationType = "count" | "sum" | "avg" | "min" | "max" | "countDistinct";
+
 /**
  * Disclaimer configuration for the chat input
  */
@@ -162,6 +164,12 @@ declare type AiChatProviderReturnValue = {
     activeToolHint: AiChatToolHint | null;
     /** Set the active tool hint (pass null to clear) */
     setActiveToolHint: React.Dispatch<React.SetStateAction<AiChatToolHint | null>>;
+    /** The current canvas dashboard config, or null when canvas is closed */
+    canvasDashboard: ChatDashboardConfig | null;
+    /** Open the canvas panel with the given dashboard config */
+    openCanvas: (config: ChatDashboardConfig) => void;
+    /** Close the canvas panel and restore the previous visualization mode */
+    closeCanvas: () => void;
 };
 
 /**
@@ -282,7 +290,178 @@ export declare const aiTranslations: {
 
 export declare function Blockquote({ children, ...props }: React.HTMLAttributes<HTMLQuoteElement>): JSX_2.Element;
 
+export declare interface ChartComputation {
+    datasetId: string;
+    xAxis: string;
+    yAxis: string;
+    aggregation: AggregationType;
+    series?: string;
+    sortBy?: "value" | "category";
+    sortOrder?: "asc" | "desc";
+    limit?: number;
+}
+
+export declare interface ChatChartBarConfig extends ChatChartBase {
+    type: "bar";
+    series: ChatChartSeries[];
+    /** Stack all series into a single bar per category. @default false */
+    stacked?: boolean;
+}
+
+declare interface ChatChartBase {
+    /** Chart title displayed in the card header */
+    title: string;
+    /** Optional description displayed below the title */
+    description?: string;
+    /** Labels for the category axis (one per data point) */
+    categories: string[];
+}
+
+/**
+ * Union of chart configs the LLM can send via `displayChart`.
+ * Only bar and line are supported for now.
+ */
+export declare type ChatChartConfig = ChatChartBarConfig | ChatChartLineConfig;
+
+export declare interface ChatChartLineConfig extends ChatChartBase {
+    type: "line";
+    series: ChatChartSeries[];
+    /** Line interpolation type. @default "linear" */
+    lineType?: F0DataChartLineType;
+    /** Show gradient area fill below lines. @default true */
+    showArea?: boolean;
+    /** Show data point dots on the lines. @default false */
+    showDots?: boolean;
+}
+
+export declare interface ChatChartSeries {
+    name: string;
+    data: number[];
+}
+
+export declare interface ChatDashboardBarChartConfig extends ChatDashboardChartConfigBase {
+    type: "bar";
+    orientation?: "vertical" | "horizontal";
+    stacked?: boolean;
+}
+
+export declare type ChatDashboardChartConfig = ChatDashboardBarChartConfig | ChatDashboardLineChartConfig | ChatDashboardFunnelChartConfig;
+
+declare interface ChatDashboardChartConfigBase {
+    showLegend?: boolean;
+    showGrid?: boolean;
+    showLabels?: boolean;
+    valueFormat?: FormatPreset;
+}
+
+export declare interface ChatDashboardChartItem extends ChatDashboardItemBase {
+    type: "chart";
+    chart: ChatDashboardChartConfig;
+    computation: ChartComputation;
+}
+
+export declare interface ChatDashboardCollectionItem extends ChatDashboardItemBase {
+    type: "collection";
+    columns: ChatDashboardColumn[];
+    computation: CollectionComputation;
+}
+
+export declare interface ChatDashboardColumn {
+    /** Column key — must match a key in each row object */
+    id: string;
+    /** Display header label */
+    label: string;
+    /** Optional fixed width in pixels */
+    width?: number;
+}
+
+/**
+ * Complete dashboard configuration received via `displayDashboard`.
+ * The backend injects `datasets` from requestContext — the LLM only sends
+ * the declarative config (title, filters, items with computation specs).
+ * Fully JSON-serializable — no functions, no callbacks.
+ */
+export declare interface ChatDashboardConfig {
+    /** Dashboard title displayed in the canvas header and chat report card */
+    title: string;
+    /** Optional description */
+    description?: string;
+    /** Filter definitions — keys become filter IDs */
+    filters?: Record<string, ChatDashboardFilterDefinition>;
+    /** Ordered list of dashboard items with computation specs */
+    items: ChatDashboardItem[];
+    /** Raw datasets injected by the backend from requestContext */
+    datasets?: Record<string, ChatDashboardDataset>;
+}
+
+export declare interface ChatDashboardDataset {
+    columns: string[];
+    rows: Record<string, unknown>[];
+    columnLabels?: Record<string, string>;
+}
+
+export declare interface ChatDashboardFilterDefinition {
+    type: "in";
+    label: string;
+    column: string;
+    datasetId: string;
+}
+
+export declare interface ChatDashboardFunnelChartConfig {
+    type: "funnel";
+    sort?: "descending" | "ascending" | "none";
+    orient?: "horizontal" | "vertical";
+    labelPosition?: "inside" | "outside";
+    showLegend?: boolean;
+    showLabels?: boolean;
+    showConversion?: boolean;
+    valueFormat?: FormatPreset;
+}
+
+export declare type ChatDashboardItem = ChatDashboardChartItem | ChatDashboardMetricItem | ChatDashboardCollectionItem;
+
+declare interface ChatDashboardItemBase {
+    id: string;
+    title: string;
+    description?: string;
+    colSpan?: 1 | 2 | 3;
+}
+
+export declare interface ChatDashboardLineChartConfig extends ChatDashboardChartConfigBase {
+    type: "line";
+    lineType?: "linear" | "smooth" | "step";
+    showArea?: boolean;
+    showDots?: boolean;
+}
+
+export declare type ChatDashboardMetricFormat = {
+    type: "number";
+} | {
+    type: "currency";
+    currency?: string;
+} | {
+    type: "percent";
+} | {
+    type: "custom";
+    suffix?: string;
+    prefix?: string;
+};
+
+export declare interface ChatDashboardMetricItem extends ChatDashboardItemBase {
+    type: "metric";
+    format?: ChatDashboardMetricFormat;
+    decimals?: number;
+    computation: MetricComputation;
+}
+
 export declare const ChatSpinner: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+
+export declare interface CollectionComputation {
+    datasetId: string;
+    sortBy?: string;
+    sortOrder?: "asc" | "desc";
+    limit?: number;
+}
 
 export declare const defaultTranslations: {
     readonly countries: {
@@ -1036,6 +1215,62 @@ declare const F0AuraVoiceAnimationVariants: (props?: ({
 })) | undefined) => string;
 
 /**
+ * Card widget that renders an interactive chart inside the AI chat.
+ *
+ * Modeled after the dashboard `DashboardItem` card: rounded border,
+ * title, optional description, and a content area with the chart.
+ * The LLM sends chart configuration via the `displayChart` frontend
+ * tool, and this component maps it to `F0DataChart`.
+ */
+export declare function F0ChatChart(props: F0ChatChartProps): JSX_2.Element;
+
+/**
+ * Props for the F0ChatChart component.
+ * Renders a chart inside a card widget in the AI chat.
+ */
+export declare type F0ChatChartProps = ChatChartConfig;
+
+/**
+ * Renders an F0AnalyticsDashboard from a data-driven config.
+ *
+ * This wrapper bridges the gap between the LLM's declarative computation
+ * specs and F0AnalyticsDashboard's async fetchData interface. Each item's
+ * fetchData computes from the raw dataset, applying active filters
+ * client-side before aggregation.
+ */
+export declare function F0ChatDashboard({ config }: F0ChatDashboardProps): JSX_2.Element;
+
+export declare namespace F0ChatDashboard {
+    var displayName: string;
+}
+
+export declare interface F0ChatDashboardProps {
+    config: ChatDashboardConfig;
+}
+
+/**
+ * Compact card shown inline in the AI chat to represent a generated
+ * dashboard report. Uses F0Card with an icon avatar, the dashboard
+ * title/description, an item summary in metadata, and a "View report"
+ * primary action that opens the canvas panel.
+ */
+export declare function F0ChatReportCard({ config, onView }: F0ChatReportCardProps): JSX_2.Element;
+
+export declare namespace F0ChatReportCard {
+    var displayName: string;
+}
+
+export declare interface F0ChatReportCardProps {
+    /** The full dashboard config — passed through to the canvas on click */
+    config: ChatDashboardConfig;
+    /** Callback when the user clicks the card to view the report */
+    onView: (config: ChatDashboardConfig) => void;
+}
+
+/** Line interpolation type */
+declare type F0DataChartLineType = "linear" | "smooth" | "step";
+
+/**
  * Component that renders an optional markdown preview followed by
  * a dropdown button with "Download Excel" as the primary action and
  * "Download CSV" as a secondary option. Files are generated client-side
@@ -1242,6 +1477,22 @@ export declare type F0ThinkingProps = {
     title?: string;
 };
 
+/**
+ * A preset formatting instruction the LLM can specify instead of a
+ * real formatter function. The wrapper component maps these to actual
+ * `(value: number) => string` functions at render time.
+ */
+export declare type FormatPreset = {
+    type: "number";
+} | {
+    type: "currency";
+    currency?: string;
+} | {
+    type: "percent";
+} | {
+    type: "compact";
+};
+
 export declare const FullscreenChatContext: Context<FullscreenChatContextType>;
 
 /**
@@ -1277,6 +1528,12 @@ export { Image_2 as Image }
 declare type Join<T extends string[], D extends string> = T extends [] ? never : T extends [infer F] ? F : T extends [infer F, ...infer R] ? F extends string ? `${F}${D}${Join<Extract<R, string[]>, D>}` : never : string;
 
 export declare function Li({ children, ...props }: React.HTMLAttributes<HTMLLIElement>): JSX_2.Element;
+
+export declare interface MetricComputation {
+    datasetId: string;
+    aggregation: AggregationType;
+    column?: string;
+}
 
 export declare function Ol({ children, ...props }: React.HTMLAttributes<HTMLOListElement>): JSX_2.Element;
 
@@ -1371,7 +1628,7 @@ export declare const useOrchestratorThinkingAction: () => void;
 /**
  * Visualization mode for the AI chat
  */
-export declare type VisualizationMode = "sidepanel" | "fullscreen";
+export declare type VisualizationMode = "sidepanel" | "fullscreen" | "canvas";
 
 /**
  * Welcome screen suggestion item

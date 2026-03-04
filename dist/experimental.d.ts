@@ -6610,7 +6610,7 @@ export declare type VisualizationFilterOverrides<Filters extends FiltersDefiniti
 /**
  * Visualization mode for the AI chat
  */
-declare type VisualizationMode = "sidepanel" | "fullscreen";
+declare type VisualizationMode = "sidepanel" | "fullscreen" | "canvas";
 
 declare type VisualizationSettings = {
     [K in keyof typeof collectionVisualizations]: ExtractVisualizationSettings<(typeof collectionVisualizations)[K]>;
