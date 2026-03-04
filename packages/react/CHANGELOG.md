@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.389.0](https://github.com/factorialco/f0/compare/f0-react-v1.388.4...f0-react-v1.389.0) (2026-03-04)
+
+
+### Features
+
+* add table of content to CoCreationForm and better sorting ([#3564](https://github.com/factorialco/f0/issues/3564)) ([4fb9b89](https://github.com/factorialco/f0/commit/4fb9b8932bb2ec9b246dc3a21c41ce5cd68030c7))
+
 ## [1.388.4](https://github.com/factorialco/f0/compare/f0-react-v1.388.3...f0-react-v1.388.4) (2026-03-03)
 
 
