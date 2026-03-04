@@ -72,9 +72,29 @@ function buildChartProps(
   const { chart } = item
 
   if (chart.type === "funnel") {
+    // data.series may already be funnel-shaped (single object with .data as
+    // {value,name}[]) or the bar/line shape (array of {name, data: number[]}).
+    // Convert the bar/line shape to funnel shape when needed.
+    let funnelSeries: F0DataChartFunnelSeries
+
+    if (Array.isArray(data.series)) {
+      const firstSeries = data.series[0] as
+        | { name: string; data: number[] }
+        | undefined
+      funnelSeries = {
+        name: firstSeries?.name ?? "Funnel",
+        data: (data.categories ?? []).map((cat, i) => ({
+          name: cat,
+          value: firstSeries?.data[i] ?? 0,
+        })),
+      }
+    } else {
+      funnelSeries = data.series
+    }
+
     return {
       ...chart,
-      series: data.series as F0DataChartFunnelSeries,
+      series: funnelSeries,
     }
   }
 

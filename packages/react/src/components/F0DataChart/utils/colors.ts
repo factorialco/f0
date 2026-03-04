@@ -105,13 +105,13 @@ export function resolveCssColor(
 export const echartsColorPalette = [
   chartColor(baseColors.viridian[50]),
   chartColor(baseColors.purple[50]),
+  chartColor(baseColors.barbie[50]),
+  chartColor(baseColors.yellow[50]),
   chartColor(baseColors.indigo[50]),
   chartColor(baseColors.lilac[70]),
-  chartColor(baseColors.purple[60]),
   chartColor(baseColors.smoke[60]),
   chartColor(baseColors.malibu[70]),
   chartColor(baseColors.grass[50]),
-  chartColor(baseColors.yellow[50]),
   chartColor(baseColors.red[60]),
 ]
 

@@ -1,5 +1,4 @@
 import { baseColors } from "../../../../../core/src/tokens/colors"
-
 import { chartColor, echartsColorPalette, resolveCssColor } from "./colors"
 
 // ---------------------------------------------------------------------------
@@ -26,7 +25,7 @@ export interface ChartThemeColors {
 
 /** Tooltip visual configuration */
 export interface ChartThemeTooltip {
-  padding: number
+  padding: number[]
   borderWidth: number
   borderRadius: number
   transitionDuration: number
@@ -76,7 +75,8 @@ export interface ChartTheme {
 // ---------------------------------------------------------------------------
 
 const LIGHT_TOOLTIP: ChartThemeTooltip = {
-  padding: 16,
+  // text size 14px, padding 8px eje x 6 en eje y
+  padding: [6, 8],
   borderWidth: 1,
   borderRadius: 10,
   transitionDuration: 0.2,
@@ -89,7 +89,7 @@ const LIGHT_TOOLTIP: ChartThemeTooltip = {
 // ---------------------------------------------------------------------------
 
 const DARK_TOOLTIP: ChartThemeTooltip = {
-  padding: 16,
+  padding: [8, 6],
   borderWidth: 1,
   borderRadius: 10,
   transitionDuration: 0.2,

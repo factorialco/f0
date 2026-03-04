@@ -33,7 +33,7 @@ export function DashboardItem({
 }: DashboardItemProps) {
   if (error) {
     return (
-      <div className="flex h-full flex-col rounded-lg border border-solid border-f1-border-secondary bg-f1-background">
+      <div className="flex h-full flex-col rounded-lg border border-solid border-f1-border-secondary">
         <div className="flex flex-col p-4">
           <h3 className="text-lg font-semibold text-f1-foreground">{title}</h3>
           {description && (
@@ -60,7 +60,7 @@ export function DashboardItem({
 
   return (
     <div
-      className="flex h-full flex-col rounded-lg border border-solid border-f1-border-secondary bg-f1-background"
+      className="flex h-full flex-col rounded-lg border border-solid border-f1-border-secondary"
       aria-busy={isLoading ? "true" : undefined}
       aria-live={isLoading ? "polite" : undefined}
     >

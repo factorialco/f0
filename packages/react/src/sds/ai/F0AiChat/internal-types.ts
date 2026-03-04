@@ -1,5 +1,6 @@
 import { type AIMessage, type Message } from "@copilotkit/shared"
 
+import type { ChatDashboardConfig } from "../F0ChatDashboard/types"
 import {
   type AiChatDisclaimer,
   type AiChatTrackingOptions,
@@ -142,6 +143,12 @@ export type AiChatProviderReturnValue = {
     setActiveToolHint: React.Dispatch<
       React.SetStateAction<AiChatToolHint | null>
     >
+    /** The current canvas dashboard config, or null when canvas is closed */
+    canvasDashboard: ChatDashboardConfig | null
+    /** Open the canvas panel with the given dashboard config */
+    openCanvas: (config: ChatDashboardConfig) => void
+    /** Close the canvas panel and restore the previous visualization mode */
+    closeCanvas: () => void
   }
 
 /**

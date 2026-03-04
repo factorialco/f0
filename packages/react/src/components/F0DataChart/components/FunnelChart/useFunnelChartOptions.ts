@@ -67,6 +67,7 @@ export function useFunnelChartOptions(
   const theme = useChartTheme(containerRef)
 
   return useMemo(() => {
+    const dataPoints = series.data ?? []
     const resolvedSeriesColor = series.color
       ? resolveChartColorToken(series.color)
       : undefined
@@ -74,11 +75,11 @@ export function useFunnelChartOptions(
     // The first data point value is the reference for conversion percentages
     const firstValue =
       sort === "ascending"
-        ? (series.data[series.data.length - 1]?.value ?? 0)
-        : (series.data[0]?.value ?? 0)
+        ? (dataPoints[dataPoints.length - 1]?.value ?? 0)
+        : (dataPoints[0]?.value ?? 0)
 
     // Build data with resolved colors per point
-    const funnelData = series.data.map((point, i) => ({
+    const funnelData = dataPoints.map((point, i) => ({
       value: point.value,
       name: point.name,
       itemStyle: {
@@ -88,7 +89,7 @@ export function useFunnelChartOptions(
       },
     }))
 
-    const legendData = series.data.map((d) => d.name)
+    const legendData = dataPoints.map((d) => d.name)
 
     // Funnel positioning
     const isOutside = labelPosition === "outside"
@@ -229,7 +230,7 @@ export function useFunnelChartOptions(
     const buildTooltipFormatter = () => {
       // Create a lookup for step-over-step conversion
       const dataMap = new Map<string, { value: number; index: number }>()
-      series.data.forEach((d, i) => {
+      dataPoints.forEach((d, i) => {
         dataMap.set(d.name, { value: d.value, index: i })
       })
 
@@ -254,7 +255,7 @@ export function useFunnelChartOptions(
           // Step-over-step: compare with previous stage
           const prevIndex = info.index - 1
           if (prevIndex >= 0) {
-            const prevData = series.data[prevIndex]
+            const prevData = dataPoints[prevIndex]
             if (prevData && prevData.value > 0) {
               const stepPct = formatPercent(val, prevData.value)
               conversionHtml += `<div style="color: ${colors.foregroundTertiary}; font-size: 11px">From ${prevData.name}: ${stepPct}</div>`

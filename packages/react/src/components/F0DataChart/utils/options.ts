@@ -230,12 +230,13 @@ export function buildTooltip({
 
   return {
     trigger: "axis",
+    confine: true,
     padding: tooltip.padding,
     borderWidth: tooltip.borderWidth,
     transitionDuration: tooltip.transitionDuration,
     textStyle: {
       color: colors.foreground,
-      fontSize: theme.textStyle.fontSize,
+      fontSize: 14,
     },
     // Smart position: flip tooltip to the other side of the cursor at the
     // chart midpoint so it never clips outside the container
