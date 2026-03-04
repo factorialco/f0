@@ -639,6 +639,7 @@ const F0SelectComponent = forwardRef(function Select<
             item: (
               <div
                 key={`group-header-${index}`}
+                role="presentation"
                 className="px-3 pt-3 pb-2 text-sm font-medium text-f1-foreground-secondary"
               >
                 {mappedOption.label}
