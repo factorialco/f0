@@ -626,8 +626,10 @@ const F0SelectComponent = forwardRef(function Select<
             item: <SelectSeparator key={`separator-${index}`} />,
           })
         } else if (mappedOption.type === "group-header") {
-          // Auto-insert separator before non-first group headers
-          if (hasSeenGroupHeader) {
+          // Auto-insert separator before non-first group headers,
+          // but skip if the previous item is already a separator
+          const lastItem = result[result.length - 1]
+          if (hasSeenGroupHeader && lastItem?.height !== 1) {
             result.push({
               height: 1,
               item: <SelectSeparator key={`group-header-separator-${index}`} />,
