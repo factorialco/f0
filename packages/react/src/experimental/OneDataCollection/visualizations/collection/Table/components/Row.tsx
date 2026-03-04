@@ -20,12 +20,13 @@ import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { Checkbox } from "@/ui/checkbox"
 
-import { ItemActionsRow } from "../../../../components/itemActions/ItemActionsRow/ItemActionsRow"
 import type {
   CellRendererProps,
   RowWrapperProps,
   TableColumnDefinition,
 } from "../types"
+
+import { ItemActionsRow } from "../../../../components/itemActions/ItemActionsRow/ItemActionsRow"
 import { useSticky } from "../useSticky"
 import { NestedRow } from "./NestedRow"
 
@@ -66,6 +67,8 @@ export type RowProps<
   rowWrapper?: React.ComponentType<RowWrapperProps<R>>
   /** Callback for the "Add" button rendered at the bottom of nested children. Receives the parent item when triggered from a nested row. */
   onAddRow?: (parentItem?: R) => void | Promise<void>
+  /** Custom label for the nested-row "Add row" button. Falls back to the default i18n translation. */
+  nestedAddRowButtonLabel?: string
 }
 
 export type NestedRowProps = {
@@ -107,6 +110,7 @@ const RowComponentInner = <
     cellRenderer: CellRenderer,
     rowWrapper,
     onAddRow,
+    nestedAddRowButtonLabel,
   }: RowProps<
     R,
     Filters,
@@ -170,6 +174,7 @@ const RowComponentInner = <
         cellRenderer={CellRenderer}
         rowWrapper={rowWrapper}
         onAddRow={onAddRow}
+        addRowButtonLabel={nestedAddRowButtonLabel}
         key={key}
       />
     )

@@ -197,6 +197,46 @@ describe("NestedRow onAddRow", () => {
     expect(addRowButtons.length).toBeGreaterThanOrEqual(2)
   })
 
+  it("renders custom nestedAddRowButtonLabel when provided", async () => {
+    const user = userEvent.setup()
+
+    render(
+      <TableCollection<
+        Person,
+        TestFilters,
+        SortingsDefinition,
+        SummariesDefinition,
+        ItemActionsDefinition<Person>,
+        TestNavigationFilters,
+        GroupingDefinition<Person>
+      >
+        columns={testColumns}
+        source={createNestedTestSource()}
+        onSelectItems={vi.fn()}
+        onLoadData={vi.fn()}
+        onLoadError={vi.fn()}
+        onAddRow={vi.fn()}
+        nestedAddRowButtonLabel="Add line item"
+      />
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText("Parent User")).toBeInTheDocument()
+    })
+
+    const parentRow = screen.getByText("Parent User").closest("tr")!
+    const chevron = parentRow.querySelector("[class*='cursor-pointer']")!
+    await user.click(chevron)
+
+    await waitFor(() => {
+      expect(screen.getByText("Child A")).toBeInTheDocument()
+    })
+
+    expect(
+      screen.getByRole("button", { name: /add line item/i })
+    ).toBeInTheDocument()
+  })
+
   it("calls onAddRow with the parent item when the nested add-row button is clicked", async () => {
     const user = userEvent.setup()
     const onAddRowMock = vi.fn()

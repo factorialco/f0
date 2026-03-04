@@ -30,6 +30,8 @@ export const EditableTableCollection = <
 >({
   onCellChange,
   onAddRow,
+  addRowButtonLabel,
+  nestedAddRowButtonLabel,
   ...props
 }: CollectionProps<
   R,
@@ -75,6 +77,8 @@ export const EditableTableCollection = <
       showItemActions={false}
       visualizationSettings={settings.visualization?.editableTable}
       onAddRow={onAddRow}
+      addRowButtonLabel={addRowButtonLabel}
+      nestedAddRowButtonLabel={nestedAddRowButtonLabel}
     />
   )
 }

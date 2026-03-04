@@ -71,6 +71,10 @@ export type EditableTableVisualizationOptions<
   onCellChange: (updatedItem: R) => Promise<void | Record<string, string>>
   /** When provided, renders an "Add" button row at the bottom of the table and nested rows. Receives the parent item when triggered from a nested row. Supports async functions for loading state. */
   onAddRow?: (parentItem?: R) => void | Promise<void>
+  /** Custom label for the root-level "Add row" button. Falls back to the default i18n translation. */
+  addRowButtonLabel?: string
+  /** Custom label for the nested-row "Add row" button. Falls back to the default i18n translation. */
+  nestedAddRowButtonLabel?: string
 }
 
 export type EditableTableCollectionProps<

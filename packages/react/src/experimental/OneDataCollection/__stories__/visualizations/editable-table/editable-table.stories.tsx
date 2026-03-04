@@ -472,6 +472,8 @@ export const EditableTableWithNestedRecordsAndAddRow: Story = {
               ).options,
               onCellChange,
               onAddRow: action("onAddRow"),
+              addRowButtonLabel: "Add row",
+              nestedAddRowButtonLabel: "Add child row",
             },
           },
         ]}
@@ -538,6 +540,7 @@ export const EditableTableWithAddRow: Story = {
               ).options,
               onCellChange,
               onAddRow,
+              addRowButtonLabel: "Add row",
             },
           },
         ]}

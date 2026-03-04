@@ -81,6 +81,8 @@ export type RowProps<
   rowWrapper?: React.ComponentType<RowWrapperProps<R>>
   /** Callback for the "Add" button rendered at the bottom of nested children. Receives the parent item when triggered from a nested row. */
   onAddRow?: (parentItem?: R) => void | Promise<void>
+  /** Custom label for the "Add row" button. Falls back to the default i18n translation. */
+  addRowButtonLabel?: string
 }
 
 const NestedRowContent = <
@@ -375,7 +377,10 @@ const NestedRowContent = <
               <F0Button
                 variant="ghost"
                 icon={Add}
-                label={t("collections.editableTable.addRow")}
+                label={
+                  props.addRowButtonLabel ??
+                  t("collections.editableTable.addRow")
+                }
                 onClick={() => props.onAddRow?.(props.item)}
                 size="sm"
               />

@@ -1239,6 +1239,39 @@ describe("TableCollection", () => {
       ).toBeInTheDocument()
     })
 
+    it("renders custom addRowButtonLabel when provided", async () => {
+      render(
+        <TableCollection<
+          Person,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          TestNavigationFilters,
+          GroupingDefinition<Person>
+        >
+          columns={testColumns}
+          source={createTestSource()}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+          onAddRow={vi.fn()}
+          addRowButtonLabel="Add phase"
+        />
+      )
+
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+      })
+
+      expect(
+        screen.getByRole("button", { name: /add phase/i })
+      ).toBeInTheDocument()
+      expect(
+        screen.queryByRole("button", { name: /^add row$/i })
+      ).not.toBeInTheDocument()
+    })
+
     it("calls onAddRow with no arguments when the footer button is clicked", async () => {
       const user = userEvent.setup()
       const onAddRowMock = vi.fn()

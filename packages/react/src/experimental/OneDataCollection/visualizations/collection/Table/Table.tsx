@@ -93,6 +93,8 @@ export const TableCollection = <
   showItemActions: showItemActionsProp,
   visualizationSettings,
   onAddRow,
+  addRowButtonLabel,
+  nestedAddRowButtonLabel,
 }: CollectionProps<
   R,
   Filters,
@@ -529,6 +531,7 @@ export const TableCollection = <
                               rowWrapper={RowWrapper}
                               cellRenderer={cellRenderer}
                               onAddRow={onAddRow}
+                              nestedAddRowButtonLabel={nestedAddRowButtonLabel}
                             />
                           )
                           if (RowWrapper) {
@@ -570,6 +573,7 @@ export const TableCollection = <
                     rowWrapper={RowWrapper}
                     cellRenderer={cellRenderer}
                     onAddRow={onAddRow}
+                    nestedAddRowButtonLabel={nestedAddRowButtonLabel}
                   />
                 )
                 if (RowWrapper) {
@@ -698,7 +702,10 @@ export const TableCollection = <
                     <F0Button
                       variant="ghost"
                       icon={Add}
-                      label={t("collections.editableTable.addRow")}
+                      label={
+                        addRowButtonLabel ??
+                        t("collections.editableTable.addRow")
+                      }
                       onClick={() => onAddRow?.()}
                       size="sm"
                     />
