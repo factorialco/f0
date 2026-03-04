@@ -668,6 +668,7 @@ const F0SelectComponent = forwardRef(function Select<
       // This handles cases where search filtering removes all items under a header
       for (let i = result.length - 1; i >= 0; i--) {
         const item = result[i]
+        if (!item) continue
         // Group headers have height 36 and no value
         if (item.height === 36 && !("value" in item)) {
           // Check if there are any selectable items between this header
