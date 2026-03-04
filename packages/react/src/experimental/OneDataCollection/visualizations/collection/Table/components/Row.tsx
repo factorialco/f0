@@ -11,6 +11,7 @@ import { ItemActionsDefinition } from "@/experimental/OneDataCollection/item-act
 import { NavigationFiltersDefinition } from "@/experimental/OneDataCollection/navigationFilters/types"
 import { renderProperty } from "@/experimental/OneDataCollection/property-render"
 import { SummariesDefinition } from "@/experimental/OneDataCollection/summary"
+import { TableVisualizationType } from "@/experimental/OneDataCollection/types"
 import { TableCell, TableRow } from "@/experimental/OneTable"
 import {
   GroupingDefinition,
