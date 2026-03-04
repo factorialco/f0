@@ -3,6 +3,7 @@ import { ReactNode } from "react"
 import { ValueDisplayRendererContext } from "./types.ts"
 import { AlertTagCell } from "./types/alertTag"
 import { AmountCell } from "./types/amount"
+import { BarSeriesCell } from "./types/barSeries"
 import { AvatarListCell } from "./types/avatarList"
 import { CompanyCell } from "./types/company"
 import { CountryCell } from "./types/country"
@@ -10,6 +11,7 @@ import { DateCell } from "./types/date"
 import { DotTagCell } from "./types/dotTag"
 import { FileCell } from "./types/file"
 import { FolderCell } from "./types/folder"
+import { HourDistributionCell } from "./types/hourDistribution"
 import { IconCell } from "./types/icon"
 import { LongTextCell } from "./types/longText"
 import { NumberCell } from "./types/number"
@@ -17,7 +19,6 @@ import { PercentageCell } from "./types/percentage"
 import { PersonCell } from "./types/person"
 import { ProgressBarCell } from "./types/progressBar"
 import { StatusCell } from "./types/status"
-import { SyncStatusCell } from "./types/syncStatus"
 import { TagCell } from "./types/tag"
 import { TagListCell } from "./types/tagList"
 import { TeamCell } from "./types/team"
@@ -48,6 +49,8 @@ export const valueDisplayRenderers = {
   person: PersonCell,
   percentage: PercentageCell,
   progressBar: ProgressBarCell,
+  barSeries: BarSeriesCell,
+  hourDistribution: HourDistributionCell,
   company: CompanyCell,
   team: TeamCell,
   tag: TagCell,
@@ -57,7 +60,6 @@ export const valueDisplayRenderers = {
   file: FileCell,
   folder: FolderCell,
   country: CountryCell,
-  syncStatus: SyncStatusCell,
 } as const satisfies Record<string, ValueDisplayRenderer>
 
 /**

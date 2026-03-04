@@ -1,6 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { useState } from "react"
+import { expect, within } from "storybook/test"
+
+import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
 
 import type {
   FiltersDefinition,
@@ -8,7 +11,7 @@ import type {
 } from "../../OneFilterPicker/types"
 
 import { filterDefinition } from "../../OneFilterPicker/__stories__/mockData"
-import { F0FilterPickerContent } from "../F0FilterPickerContent"
+import { F0FilterPickerContent } from "../index"
 
 const simpleFilterDefinition = {
   department: {
@@ -49,6 +52,9 @@ const meta = {
   parameters: {
     layout: "centered",
   },
+  argTypes: {
+    ...dataTestIdArgs,
+  },
 } satisfies Meta<typeof F0FilterPickerContent>
 
 export default meta
@@ -83,6 +89,33 @@ const DefaultComponent = () => {
 
 export const Default: Story = {
   render: () => <DefaultComponent />,
+}
+
+const WithDataTestIdComponent = () => {
+  const [filters, setFilters] = useState<
+    FiltersState<typeof simpleFilterDefinition>
+  >({})
+
+  return (
+    <div className="w-[600px]">
+      <F0FilterPickerContent
+        filters={simpleFilterDefinition}
+        value={filters}
+        onChange={setFilters}
+        dataTestId="my-test-filter-picker-content"
+      />
+    </div>
+  )
+}
+
+export const WithDataTestId: Story = {
+  render: () => <WithDataTestIdComponent />,
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const canvas = within(canvasElement)
+    await expect(
+      canvas.getByTestId("my-test-filter-picker-content")
+    ).toBeInTheDocument()
+  },
 }
 
 /**

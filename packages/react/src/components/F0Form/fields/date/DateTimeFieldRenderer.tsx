@@ -1,14 +1,17 @@
 import { useCallback, useMemo } from "react"
 import { ControllerRenderProps, FieldValues } from "react-hook-form"
 
-import type { F0DateTimeField, F0DateField, F0TimeField } from "./types"
-import type { ResolvedField } from "../types"
+import type {
+  ResolvedDateTimeField,
+  ResolvedDateField,
+  ResolvedTimeField,
+} from "./types"
 import { DateFieldRenderer } from "./DateFieldRenderer"
 import { TimeFieldRenderer } from "./TimeFieldRenderer"
 import { dateToTimeString, combineDateAndTime } from "./utils"
 
 interface DateTimeFieldRendererProps {
-  field: ResolvedField<F0DateTimeField>
+  field: ResolvedDateTimeField
   formField: ControllerRenderProps<FieldValues>
   error?: boolean
   loading?: boolean
@@ -24,16 +27,19 @@ export function DateTimeFieldRenderer({
   error,
   loading,
 }: DateTimeFieldRendererProps) {
-  const currentDate = formField.value as Date | undefined
+  // Form value may be null (used to represent cleared state)
+  const currentDate = (formField.value ?? undefined) as Date | undefined
 
   // Extract the time portion from the current Date value (for combining with date changes)
   const timeValue = useMemo(() => dateToTimeString(currentDate), [currentDate])
 
-  // Handle date changes - preserve the time portion
+  // Handle date changes - preserve the time portion.
+  // Uses null instead of undefined for cleared values because
+  // react-hook-form treats undefined as "use defaultValue".
   const handleDateChange = useCallback(
     (newDate: Date | undefined) => {
       if (!newDate) {
-        formField.onChange(undefined)
+        formField.onChange(null)
         return
       }
       // Combine new date with existing time
@@ -70,7 +76,7 @@ export function DateTimeFieldRenderer({
   )
 
   // Create synthetic field and formField props for DateFieldRenderer
-  const dateField: ResolvedField<F0DateField> = useMemo(
+  const dateField: ResolvedDateField = useMemo(
     () => ({
       id: `${field.id}-date`,
       type: "date",
@@ -96,7 +102,7 @@ export function DateTimeFieldRenderer({
   )
 
   // Create synthetic field and formField props for TimeFieldRenderer
-  const timeField: ResolvedField<F0TimeField> = useMemo(
+  const timeField: ResolvedTimeField = useMemo(
     () => ({
       id: `${field.id}-time`,
       type: "time",

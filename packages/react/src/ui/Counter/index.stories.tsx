@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { ComponentProps } from "react"
+import { expect, within } from "storybook/test"
 
 import { Counter } from "./index"
 
@@ -33,5 +34,16 @@ export const MaxValue: Story = {
     value: 123,
     maxValue: 99,
     type: "bold",
+  },
+}
+
+export const WithDataTestId: Story = {
+  args: {
+    ...Default.args,
+    dataTestId: "counter-test-id",
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await expect(canvas.getByTestId("counter-test-id")).toBeInTheDocument()
   },
 }

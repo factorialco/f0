@@ -12,6 +12,7 @@ import { AvatarSize } from "../internal/BaseAvatar"
 export type AvatarProps = {
   avatar: AvatarVariant
   size?: AvatarSize
+  dataTestId?: string
 }
 
 export type AvatarVariant =
@@ -23,7 +24,11 @@ export type AvatarVariant =
   | ({ type: "emoji" } & Omit<F0AvatarEmojiProps, "size">)
   | ({ type: "icon" } & Omit<F0AvatarIconProps, "size">)
 
-export const F0Avatar = ({ avatar, size = "xs" }: AvatarProps): ReactNode => {
+export const F0Avatar = ({
+  avatar,
+  size = "xs",
+  dataTestId,
+}: AvatarProps): ReactNode => {
   switch (avatar.type) {
     case "person":
       return (
@@ -36,6 +41,7 @@ export const F0Avatar = ({ avatar, size = "xs" }: AvatarProps): ReactNode => {
           aria-label={avatar["aria-label"]}
           aria-labelledby={avatar["aria-labelledby"]}
           deactivated={avatar.deactivated}
+          dataTestId={dataTestId}
         />
       )
     case "team":
@@ -47,6 +53,7 @@ export const F0Avatar = ({ avatar, size = "xs" }: AvatarProps): ReactNode => {
           size={size}
           aria-label={avatar["aria-label"]}
           aria-labelledby={avatar["aria-labelledby"]}
+          dataTestId={dataTestId}
         />
       )
     case "company":
@@ -58,6 +65,7 @@ export const F0Avatar = ({ avatar, size = "xs" }: AvatarProps): ReactNode => {
           size={size}
           aria-label={avatar["aria-label"]}
           aria-labelledby={avatar["aria-labelledby"]}
+          dataTestId={dataTestId}
         />
       )
     case "file":
@@ -68,6 +76,7 @@ export const F0Avatar = ({ avatar, size = "xs" }: AvatarProps): ReactNode => {
           badge={avatar.badge}
           aria-label={avatar["aria-label"]}
           aria-labelledby={avatar["aria-labelledby"]}
+          dataTestId={dataTestId}
         />
       )
     case "flag":
@@ -78,6 +87,7 @@ export const F0Avatar = ({ avatar, size = "xs" }: AvatarProps): ReactNode => {
           badge={avatar.badge}
           aria-label={avatar["aria-label"]}
           aria-labelledby={avatar["aria-labelledby"]}
+          dataTestId={dataTestId}
         />
       )
     case "emoji":
@@ -87,6 +97,7 @@ export const F0Avatar = ({ avatar, size = "xs" }: AvatarProps): ReactNode => {
           size={size as ComponentProps<typeof F0AvatarEmoji>["size"]}
           aria-label={avatar["aria-label"]}
           aria-labelledby={avatar["aria-labelledby"]}
+          dataTestId={dataTestId}
         />
       )
     case "icon":
@@ -96,6 +107,7 @@ export const F0Avatar = ({ avatar, size = "xs" }: AvatarProps): ReactNode => {
           size={size as ComponentProps<typeof F0AvatarIcon>["size"]}
           aria-label={avatar["aria-label"]}
           aria-labelledby={avatar["aria-labelledby"]}
+          dataTestId={dataTestId}
         />
       )
   }

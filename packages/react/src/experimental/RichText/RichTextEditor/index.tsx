@@ -17,7 +17,11 @@ import {
   MentionsConfig,
   Toolbar,
 } from "@/experimental/RichText/CoreEditor"
+
+import { DataTestIdWrapper } from "@/lib/data-testid"
+
 import { useI18n } from "@/lib/providers/i18n/i18n-provider"
+
 import { withSkeleton } from "@/lib/skeleton"
 import { cn } from "@/lib/utils"
 
@@ -73,6 +77,7 @@ interface RichTextEditorProps {
   onFullscreenChange?: (fullscreen: boolean) => void
   /** Whether the editor is disabled */
   disabled?: boolean
+  dataTestId?: string
 }
 
 type RichTextEditorHandle = {
@@ -103,6 +108,7 @@ const RichTextEditorComponent = forwardRef<
     fullScreenMode = true,
     onFullscreenChange,
     disabled = false,
+    dataTestId,
   },
   ref
 ) {
@@ -444,9 +450,18 @@ const RichTextEditorComponent = forwardRef<
     </FocusScope>
   )
 
-  return isFullscreen
-    ? ReactDOM.createPortal(editorContent, document.body)
-    : editorContent
+  return isFullscreen ? (
+    ReactDOM.createPortal(
+      <DataTestIdWrapper dataTestId={dataTestId}>
+        {editorContent}
+      </DataTestIdWrapper>,
+      document.body
+    )
+  ) : (
+    <DataTestIdWrapper dataTestId={dataTestId}>
+      {editorContent}
+    </DataTestIdWrapper>
+  )
 })
 
 interface RichTextEditorSkeletonProps {

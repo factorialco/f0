@@ -67,13 +67,15 @@ const CardGrid = ({
   tmpFullWidth?: boolean
 }) => {
   return (
-    <div
-      className={cn(
-        "grid grid-cols-1 gap-4 px-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4",
-        tmpFullWidth && "px-0"
-      )}
-    >
-      {children}
+    <div className={cn("@container", tmpFullWidth ? "px-0" : "px-4")}>
+      <div
+        className={cn(
+          "grid grid-cols-1 gap-4",
+          "@sm:grid-cols-2 @5xl:grid-cols-3 @7xl:grid-cols-4"
+        )}
+      >
+        {children}
+      </div>
     </div>
   )
 }

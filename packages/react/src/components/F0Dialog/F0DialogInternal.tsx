@@ -37,7 +37,7 @@ const dialogContentClassName = cva({
       bottomSheet: "max-h-[95vh] bg-f1-background",
       sidePosition:
         "flex h-full w-full flex-col rounded-md border border-solid border-f1-border-secondary",
-      center: "flex max-h-[85vh] flex-1 flex-col rounded-xl",
+      center: "flex max-h-[95vh] flex-1 flex-col rounded-xl",
       fullscreen: "h-full w-full rounded-xl",
     },
     position: {

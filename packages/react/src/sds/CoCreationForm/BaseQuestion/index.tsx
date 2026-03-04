@@ -112,6 +112,7 @@ export const BaseQuestion = ({
 
   return (
     <div
+      id={`co-creation-question-${id}`}
       className={cn(
         "group/question relative flex w-full flex-col gap-4 rounded-xl border border-solid border-f1-border-secondary bg-f1-background px-3 py-4",
         !isDragging && "hover:border-f1-border-hover"

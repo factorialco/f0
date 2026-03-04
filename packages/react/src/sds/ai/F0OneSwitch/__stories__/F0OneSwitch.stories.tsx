@@ -30,3 +30,20 @@ export const Disabled: Story = {
     disabled: true,
   },
 }
+
+export const WithCustomTooltip: Story = {
+  args: {
+    tooltip: {
+      whenEnabled: "This is a custom tooltip",
+    },
+  },
+}
+
+export const WithAutoOpen: Story = {
+  args: {
+    tooltip: {
+      whenEnabled: "ONE assistant is available",
+    },
+    autoOpen: true,
+  },
+}

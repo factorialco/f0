@@ -139,6 +139,7 @@ export type FieldType =
   | "datetime"
   | "daterange"
   | "richtext"
+  | "file"
   | "custom"
 
 // ============================================================================
@@ -159,6 +160,8 @@ export type {
   F0TimeField,
   F0DateTimeConfig,
   F0DateTimeField,
+  F0DateConstraintProp,
+  F0DateConstraintFunction,
 } from "./date/types"
 export type {
   F0DateRangeConfig,
@@ -176,6 +179,16 @@ export type {
   CustomFieldRenderProps,
   CustomFieldRenderPropsBase,
 } from "./custom/types"
+export type {
+  MimeType,
+  InitialFile,
+  F0FileConfig,
+  F0FileField,
+  FileUploadResult,
+  FileUploadStatus,
+  FileUploadHookReturn,
+  UseFileUpload,
+} from "./file/types"
 
 // Import for union type
 import type { F0TextField } from "./text/types"
@@ -188,6 +201,7 @@ import type { F0DateField, F0TimeField, F0DateTimeField } from "./date/types"
 import type { F0DateRangeField } from "./daterange/types"
 import type { F0RichTextField } from "./richtext/types"
 import type { F0CustomField } from "./custom/types"
+import type { F0FileField } from "./file/types"
 
 /**
  * Union of all F0 field types used for rendering
@@ -204,4 +218,5 @@ export type F0Field =
   | F0DateTimeField
   | F0DateRangeField
   | F0RichTextField
+  | F0FileField
   | F0CustomField

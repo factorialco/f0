@@ -2,6 +2,7 @@ import { type VariantProps, cva } from "cva"
 
 import { F0Icon, F0IconProps } from "@/components/F0Icon"
 import { Windows } from "@/icons/app"
+import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
 import { useI18n } from "@/lib/providers/i18n"
 import { type Platform, useUserPlatform } from "@/lib/providers/user-platafform"
@@ -95,6 +96,6 @@ function _Shortcut({ keys, variant }: ShortcutProps) {
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-const Shortcut = experimentalComponent("Shortcut", _Shortcut)
+const Shortcut = withDataTestId(experimentalComponent("Shortcut", _Shortcut))
 
 export { Shortcut }

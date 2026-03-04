@@ -1,10 +1,12 @@
+import { useEffect, useState } from "react"
+
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { fn } from "storybook/test"
 
 import { Reset, Save } from "@/icons/app"
 
-import { F0ActionBar } from "."
+import { F0ActionBar, ActionBarStatus } from "."
 
 const meta: Meta<typeof F0ActionBar> = {
   title: "Experimental/F0ActionBar",
@@ -15,8 +17,6 @@ const meta: Meta<typeof F0ActionBar> = {
       story: { inline: false, height: "400px" },
     },
     a11y: {
-      // This rule is disabled as dark-themed buttons are not compliant, we have to fix this in Figma first
-      // Meanwhile, disabling this rule
       skipCi: true,
     },
   },
@@ -37,6 +37,11 @@ const meta: Meta<typeof F0ActionBar> = {
     label: {
       control: "text",
       description: "The label of the action bar",
+    },
+    status: {
+      control: "select",
+      options: ["idle", "loading", "success"],
+      description: "The current status of the action bar",
     },
   },
 }
@@ -63,4 +68,121 @@ export const Default: Story = {
     ],
     label: "Unsaved changes",
   },
+}
+
+export const Idle: Story = {
+  args: {
+    isOpen: true,
+    variant: "light",
+    status: "idle",
+    primaryActions: [
+      {
+        label: "Save",
+        onClick: fn(),
+        icon: Save,
+      },
+    ],
+    secondaryActions: [
+      {
+        label: "Discard",
+        onClick: fn(),
+      },
+    ],
+    label: "You have changes pending to be saved",
+  },
+}
+
+export const Loading: Story = {
+  args: {
+    isOpen: true,
+    variant: "light",
+    status: "loading",
+    primaryActions: [
+      {
+        label: "Save",
+        icon: Save,
+      },
+    ],
+    secondaryActions: [
+      {
+        label: "Discard",
+      },
+    ],
+    label: "Saving...",
+  },
+}
+
+export const Success: Story = {
+  args: {
+    isOpen: true,
+    variant: "light",
+    status: "success",
+    primaryActions: [
+      {
+        label: "Save",
+        icon: Save,
+      },
+    ],
+    secondaryActions: [
+      {
+        label: "Discard",
+      },
+    ],
+    label: "Your changes have been saved",
+  },
+}
+
+const StatusFlowDemo = () => {
+  const [status, setStatus] = useState<ActionBarStatus>("idle")
+  const [label, setLabel] = useState("You have changes pending to be saved")
+
+  const handleSave = () => {
+    setStatus("loading")
+    setLabel("Saving...")
+    setTimeout(() => {
+      setStatus("success")
+      setLabel("Your changes have been saved")
+    }, 2000)
+  }
+
+  const handleDiscard = () => {
+    setStatus("idle")
+    setLabel("You have changes pending to be saved")
+  }
+
+  useEffect(() => {
+    if (status === "success") {
+      const timer = setTimeout(() => {
+        setStatus("idle")
+        setLabel("You have changes pending to be saved")
+      }, 3000)
+      return () => clearTimeout(timer)
+    }
+  }, [status])
+
+  return (
+    <F0ActionBar
+      isOpen
+      variant="light"
+      status={status}
+      label={label}
+      primaryActions={[
+        {
+          label: "Save",
+          icon: Save,
+          onClick: handleSave,
+        },
+      ]}
+      secondaryActions={[
+        {
+          label: "Discard",
+          onClick: handleDiscard,
+        },
+      ]}
+    />
+  )
+}
+
+export const StatusFlow: Story = {
+  render: () => <StatusFlowDemo />,
 }

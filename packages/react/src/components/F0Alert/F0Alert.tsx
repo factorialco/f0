@@ -6,6 +6,7 @@ import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon"
 import { F0Button } from "@/components/F0Button"
 import { F0Link } from "@/components/F0Link"
 import { Placeholder } from "@/icons/app"
+import { withDataTestId } from "@/lib/data-testid"
 import { cn } from "@/lib/utils"
 
 import type { F0AlertProps } from "./types"
@@ -42,7 +43,7 @@ const titleVariants = cva({
   },
 })
 
-export const F0Alert = ({
+const _F0Alert = ({
   title,
   description,
   action,
@@ -57,7 +58,7 @@ export const F0Alert = ({
       <div className={alertVariants({ variant })}>
         <div
           className={cn(
-            "flex flex-col items-start gap-3 @sm:flex-row @sm:items-center @sm:justify-between"
+            "flex flex-col items-start gap-3 @xs:flex-row @xs:items-center @xs:justify-between"
           )}
         >
           <div className="flex flex-row gap-2">
@@ -78,7 +79,7 @@ export const F0Alert = ({
           {(action || link) && (
             <div
               className={cn(
-                "flex flex-shrink-0 flex-row items-center gap-3 pl-8 @sm:pl-0"
+                "flex flex-shrink-0 flex-row items-center gap-3 pl-8 @xs:pl-0"
               )}
             >
               {link && (
@@ -107,3 +108,5 @@ export const F0Alert = ({
     </div>
   )
 }
+
+export const F0Alert = withDataTestId(_F0Alert)

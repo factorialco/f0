@@ -1,6 +1,7 @@
 "use client"
 
 import { OneEllipsis } from "@/components/OneEllipsis/OneEllipsis"
+import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
 import { ScrollArea } from "@/ui/scrollarea"
 
@@ -54,9 +55,8 @@ function _F0VersionHistory({
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export const F0VersionHistory = experimentalComponent(
-  "F0VersionHistory",
-  _F0VersionHistory
+export const F0VersionHistory = withDataTestId(
+  experimentalComponent("F0VersionHistory", _F0VersionHistory)
 )
 
 export type {

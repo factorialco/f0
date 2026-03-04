@@ -7,7 +7,7 @@ import { useCSSVariable } from "uniwind";
 const { Add, Archive, Delete, Save } = AppIcons;
 
 export function ButtonShowcase() {
-  const [f1Foreground] = useCSSVariable(['--color-f1-foreground']);
+  const [f0Foreground] = useCSSVariable(['--color-f0-foreground']);
 
   const asString = (value: string | number | undefined): string => {
     if (typeof value === 'string') return value;
@@ -22,7 +22,7 @@ export function ButtonShowcase() {
       style={{ width: "100%" }}
     >
       {/* Basic Variants */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f1Foreground) }}>
+      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
         Default Variants
       </Text>
       <View className="flex-row flex-wrap gap-2 mb-6" style={{ width: "100%" }}>
@@ -59,7 +59,7 @@ export function ButtonShowcase() {
       </View>
 
       {/* With Icons */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f1Foreground) }}>
+      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
         With Icons
       </Text>
       <View className="flex-row flex-wrap gap-2 mb-6" style={{ width: "100%" }}>
@@ -102,7 +102,7 @@ export function ButtonShowcase() {
       </View>
 
       {/* Icon Only */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f1Foreground) }}>
+      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
         Icon Only
       </Text>
       <View className="flex-row flex-wrap gap-2 mb-6">
@@ -166,7 +166,7 @@ export function ButtonShowcase() {
       </View>
 
       {/* Sizes */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f1Foreground) }}>Sizes</Text>
+      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>Sizes</Text>
       <View className="flex-row items-center gap-2 mb-6">
         <Button size="sm" label="Small" accessibilityHint="Small size button" />
         <Button
@@ -178,7 +178,7 @@ export function ButtonShowcase() {
       </View>
 
       {/* States */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f1Foreground) }}>States</Text>
+      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>States</Text>
       <View className="flex-row flex-wrap gap-2 mb-6">
         <Button label="Default" accessibilityHint="Interactive button" />
         <Button
@@ -194,7 +194,7 @@ export function ButtonShowcase() {
       </View>
 
       {/* Icon Button Groups */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f1Foreground) }}>
+      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
         Icon Button Groups
       </Text>
       <View className="flex-row items-center gap-2 mb-6">
@@ -225,7 +225,7 @@ export function ButtonShowcase() {
       </View>
 
       {/* Icon Only Sizes */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f1Foreground) }}>
+      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
         Icon Only Sizes
       </Text>
       <View className="flex-row items-center gap-2 mb-6">
@@ -288,7 +288,7 @@ export function ButtonShowcase() {
       </View>
 
       {/* Emoji Buttons */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f1Foreground) }}>
+      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
         Emoji Buttons
       </Text>
       <View className="flex-row items-center gap-2 mb-6">
@@ -320,7 +320,7 @@ export function ButtonShowcase() {
       </View>
 
       {/* Notification Badge */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f1Foreground) }}>
+      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
         With Notification Badge
       </Text>
       <View className="flex-row flex-wrap gap-2 mb-6">
@@ -349,7 +349,7 @@ export function ButtonShowcase() {
       </View>
 
       {/* Async Example */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f1Foreground) }}>
+      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
         Async Action
       </Text>
       <View className="mb-6 items-start">

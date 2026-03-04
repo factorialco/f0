@@ -61,3 +61,6 @@ web-build/
 # Expo generated files
 expo-env.d.ts
 .cache
+
+# Local planning docs
+docs/plans/

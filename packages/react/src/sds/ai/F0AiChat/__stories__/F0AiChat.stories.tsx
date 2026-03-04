@@ -61,6 +61,23 @@ const meta = {
               link: "/permissions",
               linkText: "See more",
             }}
+            tracking={{
+              onVisibility: () => {
+                console.log("ai chat visibility")
+              },
+              onClose: () => {
+                console.log("ai chat close")
+              },
+              onWelcomeSuggestionClick: (suggestion) => {
+                console.log("ai chat welcome suggestion click", suggestion)
+              },
+              onNewChat: () => {
+                console.log("ai chat new chat")
+              },
+              onMessage: (message) => {
+                console.log("ai chat message", message)
+              },
+            }}
           >
             <AiChatWrapper>
               <Story />
@@ -76,3 +93,47 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 export const Default: Story = {}
+
+export const WithFooter: Story = {
+  decorators: [
+    (Story) => {
+      return (
+        <div className="h-full w-full flex-1 [&>div>div]:h-full [&>div>div]:w-full">
+          <F0AiChatProvider
+            enabled
+            runtimeUrl="https://mastra.local.factorial.dev/copilotkit"
+            agent="one-workflow"
+            credentials="include"
+            showDevConsole={false}
+            greeting="Hello, John"
+            disclaimer={{
+              text: "One works within your permissions.",
+              link: "/permissions",
+              linkText: "See more",
+            }}
+            footer={
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  className="rounded-md border border-f1-border bg-f1-background px-3 py-1.5 text-sm"
+                >
+                  Footer button 1
+                </button>
+                <button
+                  type="button"
+                  className="rounded-md border border-f1-border bg-f1-background px-3 py-1.5 text-sm"
+                >
+                  Footer button 2
+                </button>
+              </div>
+            }
+          >
+            <AiChatWrapper>
+              <Story />
+            </AiChatWrapper>
+          </F0AiChatProvider>
+        </div>
+      )
+    },
+  ],
+}

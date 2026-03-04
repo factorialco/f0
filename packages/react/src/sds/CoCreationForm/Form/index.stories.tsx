@@ -111,3 +111,143 @@ export const WithQuestionWithDuplicateOptions: Story = {
     ],
   },
 }
+
+export const WithMultipleSections: Story = {
+  args: {
+    isEditMode: true,
+    elements: [
+      {
+        type: "question",
+        question: {
+          id: "q-standalone-1",
+          title: "What is your full name?",
+          type: "text" as const,
+          required: true,
+        },
+      },
+      {
+        type: "question",
+        question: {
+          id: "q-standalone-2",
+          title: "When did you join the company?",
+          type: "date" as const,
+        },
+      },
+      {
+        type: "section",
+        section: {
+          id: "section-performance",
+          title: "Performance Evaluation",
+          description:
+            "This section evaluates overall job performance and contribution to the team.",
+          questions: [
+            {
+              id: "q-perf-1",
+              title:
+                "How would you rate your overall performance this quarter?",
+              type: "rating" as const,
+              options: [
+                { value: 1, label: "1" },
+                { value: 2, label: "2" },
+                { value: 3, label: "3" },
+                { value: 4, label: "4" },
+                { value: 5, label: "5" },
+              ],
+              required: true,
+            },
+            {
+              id: "q-perf-2",
+              title: "What were your main achievements this quarter?",
+              type: "longText" as const,
+              required: true,
+            },
+            {
+              id: "q-perf-3",
+              title: "Which department are you in?",
+              type: "select" as const,
+              options: [
+                { value: "engineering", label: "Engineering" },
+                { value: "design", label: "Design" },
+                { value: "product", label: "Product" },
+                { value: "marketing", label: "Marketing" },
+                { value: "sales", label: "Sales" },
+                { value: "hr", label: "Human Resources" },
+              ],
+            },
+            {
+              id: "q-perf-4",
+              title: "Select all skills you have improved",
+              type: "multi-select" as const,
+              options: [
+                { value: "communication", label: "Communication" },
+                { value: "leadership", label: "Leadership" },
+                { value: "technical", label: "Technical skills" },
+                { value: "time-management", label: "Time management" },
+                { value: "problem-solving", label: "Problem solving" },
+              ],
+            },
+            {
+              id: "q-perf-5",
+              title: "How many projects did you complete?",
+              type: "numeric" as const,
+              required: true,
+            },
+          ],
+        },
+      },
+      {
+        type: "section",
+        section: {
+          id: "section-growth",
+          title: "Growth & Development",
+          description:
+            "Questions about career growth, learning goals, and professional development.",
+          questions: [
+            {
+              id: "q-growth-1",
+              title: "What is your primary career goal for next year?",
+              type: "dropdown-single" as const,
+              options: [
+                { value: "promotion", label: "Get promoted" },
+                { value: "lateral-move", label: "Lateral move to new team" },
+                { value: "specialise", label: "Deepen specialisation" },
+                { value: "management", label: "Move into management" },
+                { value: "other", label: "Other" },
+              ],
+            },
+            {
+              id: "q-growth-2",
+              title:
+                "Link to your personal development plan or learning resource",
+              type: "link" as const,
+            },
+            {
+              id: "q-growth-3",
+              title:
+                "Rate how supported you feel in your professional development",
+              type: "rating" as const,
+              options: [
+                { value: 1, label: "1" },
+                { value: 2, label: "2" },
+                { value: 3, label: "3" },
+                { value: 4, label: "4" },
+                { value: 5, label: "5" },
+              ],
+              required: true,
+            },
+            {
+              id: "q-growth-4",
+              title: "Describe any additional feedback or comments",
+              type: "text" as const,
+            },
+            {
+              id: "q-growth-5",
+              title: "When do you expect to achieve your next milestone?",
+              type: "date" as const,
+            },
+          ],
+        },
+      },
+    ],
+  },
+}

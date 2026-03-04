@@ -47,6 +47,7 @@ import {
 } from "./hooks/useDataColectionStorage/types"
 import { useDataCollectionStorage } from "./hooks/useDataColectionStorage/useDataCollectionStorage"
 import { DataCollectionSource } from "./hooks/useDataCollectionSource"
+import { usePerVisualizationFilters } from "./hooks/usePerVisualizationFilters"
 import { CustomEmptyStates, useEmptyState } from "./hooks/useEmptyState"
 import { ItemActionsDefinition } from "./item-actions"
 import { NavigationFiltersDefinition } from "./navigationFilters/types"
@@ -205,10 +206,45 @@ const OneDataCollectionComp = <
 
   const [currentVisualization, setCurrentVisualization] = useState(0)
 
+  const {
+    effectiveFilters,
+    effectivePresets,
+    currentFilters: activeCurrentFilters,
+    setCurrentFilters: activeSetCurrentFilters,
+    allVisualizationFilters,
+    setAllVisualizationFilters,
+    hasPerVisualizationFilters,
+  } = usePerVisualizationFilters({
+    sourceFilters: filters,
+    sourcePresets: presets,
+    sourceCurrentFilters: currentFilters,
+    sourceSetCurrentFilters: setCurrentFilters,
+    visualizations,
+    currentVisualization,
+  })
+
+  // Patched source with per-viz currentFilters to avoid stale filters during transitions
+  const effectiveSource = useMemo(() => {
+    if (!hasPerVisualizationFilters) return source
+    return {
+      ...source,
+      currentFilters: activeCurrentFilters,
+      setCurrentFilters: activeSetCurrentFilters,
+    }
+  }, [
+    source,
+    hasPerVisualizationFilters,
+    activeCurrentFilters,
+    activeSetCurrentFilters,
+  ])
+
   const defaultSortings = useRef(currentSortings)
 
   const { emitSortingChange } = useEventEmitter<Sortings>({
     defaultSorting: defaultSortings.current,
+    currentVisualization: hasPerVisualizationFilters
+      ? currentVisualization
+      : undefined,
   })
 
   useEffect(() => {
@@ -333,15 +369,7 @@ const OneDataCollectionComp = <
 
   const [selectedItemsCount, setSelectedItemsCount] = useState(0)
 
-  /**
-   * All-pages selection state tracking
-   */
-  const [isAllCurrentPageSelected, setIsAllCurrentPageSelected] =
-    useState(false)
   const [isAllItemsSelected, setIsAllItemsSelected] = useState(false)
-  const [selectAllFunc, setSelectAllFunc] = useState<
-    ((checked: boolean) => void) | undefined
-  >(undefined)
 
   const i18n = useI18n()
 
@@ -380,20 +408,6 @@ const OneDataCollectionComp = <
      */
     setClearSelectedItemsFunc(() => clearSelectedItems)
 
-    /**
-     * Track all-pages selection state
-     */
-    if (handleSelectAll) {
-      setSelectAllFunc(() => handleSelectAll)
-    }
-
-    // Track whether all items on the current page are selected
-    const allOnPage =
-      selectedItems.itemsStatus.length > 0 &&
-      selectedItems.itemsStatus.every((item) => item.checked)
-    setIsAllCurrentPageSelected(allOnPage)
-
-    // Track whether all items across all pages are selected
     setIsAllItemsSelected(selectedItems.allSelected === true)
 
     /**
@@ -447,11 +461,11 @@ const OneDataCollectionComp = <
   const { emptyState, setEmptyStateType } = useEmptyState(emptyStates, {
     retry: () => {
       setEmptyStateType(false)
-      setCurrentFilters({ ...currentFilters })
+      activeSetCurrentFilters({ ...activeCurrentFilters })
     },
     clearFilters: () => {
       setEmptyStateType(false)
-      setCurrentFilters({})
+      activeSetCurrentFilters({})
       setCurrentSearch(undefined)
     },
   })
@@ -499,7 +513,7 @@ const OneDataCollectionComp = <
     setEmptyStateType(false)
     // eslint-disable-next-line react-hooks/exhaustive-deps -- This is intentional we should remove the empty state when the filters, search, navigation filters change
   }, [
-    currentFilters,
+    activeCurrentFilters,
     currentSearch,
     currentNavigationFilters,
     source.dataAdapter,
@@ -553,6 +567,14 @@ const OneDataCollectionComp = <
         value: currentFilters,
         setValue: setCurrentFilters,
       },
+      ...(hasPerVisualizationFilters
+        ? {
+            visualizationFilters: {
+              value: allVisualizationFilters,
+              setValue: setAllVisualizationFilters,
+            },
+          }
+        : {}),
     },
     storage === false
   )
@@ -565,22 +587,26 @@ const OneDataCollectionComp = <
   /** State */
   useDeepCompareEffect(() => {
     onStateChange?.({
-      filters: currentFilters,
+      filters: activeCurrentFilters,
       sortings: currentSortings as SortingsState<SortingsDefinition>,
       visualization: currentVisualization,
       grouping: currentGrouping as GroupingState<R, GroupingDefinition<R>>,
       search: currentSearch,
       navigationFilters: currentNavigationFilters,
       settings: settings,
+      ...(hasPerVisualizationFilters
+        ? { visualizationFilters: allVisualizationFilters }
+        : {}),
     })
   }, [
-    currentFilters,
+    activeCurrentFilters,
     currentSearch,
     currentNavigationFilters,
     currentSortings,
     currentVisualization,
     currentGrouping,
     settings,
+    allVisualizationFilters,
   ])
   /************************/
 
@@ -621,8 +647,8 @@ const OneDataCollectionComp = <
     if (!showTotalItemSummary) {
       return false
     }
-    return filters ? "top" : "bottom"
-  }, [filters, showTotalItemSummary])
+    return effectiveFilters ? "top" : "bottom"
+  }, [effectiveFilters, showTotalItemSummary])
 
   const navigationFiltersPosition = useMemo(() => {
     if (!navigationFilters) {
@@ -639,13 +665,13 @@ const OneDataCollectionComp = <
 
   const showBottomToolbar = useMemo(() => {
     return (
-      filters ||
+      effectiveFilters ||
       bottomRightHasItems ||
       navigationFiltersPosition === "bottom" ||
       totalItemSummaryPosition === "bottom"
     )
   }, [
-    filters,
+    effectiveFilters,
     bottomRightHasItems,
     navigationFiltersPosition,
     totalItemSummaryPosition,
@@ -698,11 +724,11 @@ const OneDataCollectionComp = <
           )}
           <div className="flex-1">
             <OneFilterPicker
-              filters={filters}
-              value={currentFilters}
-              presets={presets}
+              filters={effectiveFilters}
+              value={activeCurrentFilters}
+              presets={effectivePresets}
               presetsLoading={showPresetsLoading}
-              onChange={(value) => setCurrentFilters(value)}
+              onChange={(value) => activeSetCurrentFilters(value)}
             >
               {isLoading && (
                 <motion.div
@@ -764,7 +790,7 @@ const OneDataCollectionComp = <
       >
         <VisualizationRenderer
           visualization={visualizations[currentVisualization]}
-          source={source}
+          source={effectiveSource}
           onSelectItems={onSelectItemsLocal}
           onLoadData={onLoadData}
           onLoadError={onLoadError}
@@ -803,10 +829,8 @@ const OneDataCollectionComp = <
               }
               onUnselect={() => clearSelectedItemsFunc?.()}
               allPagesSelection={!!source.allPagesSelection}
-              isAllCurrentPageSelected={isAllCurrentPageSelected}
               isAllItemsSelected={isAllItemsSelected}
               totalItems={totalItems}
-              onSelectAllItems={() => selectAllFunc?.(true)}
             />
           )}
         </>

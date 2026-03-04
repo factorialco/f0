@@ -180,12 +180,14 @@ export function PrimitiveItem({
                       }}
                       className="flex items-center justify-center"
                     >
-                      <ItemDropDown
-                        otherActions={otherActions}
-                        open={open}
-                        setOpen={setOpen}
-                        disabled={disabled}
-                      />
+                      {otherActions && (
+                        <ItemDropDown
+                          otherActions={otherActions}
+                          open={open}
+                          setOpen={setOpen}
+                          disabled={disabled}
+                        />
+                      )}
                     </motion.div>
                   )
                 )}

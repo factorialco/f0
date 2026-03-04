@@ -1,6 +1,8 @@
+import type { ReactElement } from "react"
 import { useContext, useEffect, useMemo, useRef, useState } from "react"
 
 import { useEventEmitter } from "@/experimental/OneDataCollection/useEventEmitter"
+import { DataTestIdWrapper } from "@/lib/data-testid"
 import { cn } from "@/lib/utils"
 
 import type { FiltersDefinition, FiltersMode, FiltersState } from "./types"
@@ -273,34 +275,45 @@ FiltersChipsList.displayName = "OneFilterPicker.ChipsList"
 /**
  * OneFiltersPicker component to use as a single component
  */
-const OneFilterPicker = <Definition extends FiltersDefinition>(
-  props: OneFilterPickerRootProps<Definition>
+const _OneFilterPicker = <Definition extends FiltersDefinition>(
+  props: OneFilterPickerRootProps<Definition> & { dataTestId?: string }
 ) => {
+  const { dataTestId, ...rootProps } = props
   return (
-    <FiltersRoot {...props}>
-      <div
-        className={cn(
-          "flex items-center justify-between gap-4",
-          !props.filters && "justify-end"
+    <DataTestIdWrapper dataTestId={dataTestId}>
+      <FiltersRoot {...rootProps}>
+        <div
+          className={cn(
+            "flex items-center justify-between gap-4",
+            !rootProps.filters && "justify-end"
+          )}
+        >
+          {rootProps.filters && (
+            <div className="flex min-w-0 flex-1 gap-1">
+              <FiltersControls />
+              <FiltersPresets />
+            </div>
+          )}
+          {rootProps.children && (
+            <div className="flex shrink-0 items-center gap-2">
+              {rootProps.children}
+            </div>
+          )}
+        </div>
+        {(!rootProps.mode || rootProps.mode === "default") && (
+          <FiltersChipsList />
         )}
-      >
-        {props.filters && (
-          <div className="flex min-w-0 flex-1 gap-1">
-            <FiltersControls />
-            <FiltersPresets />
-          </div>
-        )}
-        {props.children && (
-          <div className="flex shrink-0 items-center gap-2">
-            {props.children}
-          </div>
-        )}
-      </div>
-      {(!props.mode || props.mode === "default") && <FiltersChipsList />}
-    </FiltersRoot>
+      </FiltersRoot>
+    </DataTestIdWrapper>
   )
 }
-OneFilterPicker.displayName = "OneFilterPicker"
+_OneFilterPicker.displayName = "OneFilterPicker"
+
+const OneFilterPicker = _OneFilterPicker as <
+  Definition extends FiltersDefinition,
+>(
+  props: OneFilterPickerRootProps<Definition> & { dataTestId?: string }
+) => ReactElement | null
 
 /**
  * Export the components as named exports to allow to customize the layout

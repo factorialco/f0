@@ -28,6 +28,7 @@ import {
   useSelectable,
   WithGroupId,
 } from "@/hooks/datasource"
+import { DataTestIdWrapper } from "@/lib/data-testid"
 import { useI18n } from "@/lib/providers/i18n"
 import { toArray } from "@/lib/toArray"
 import { cn } from "@/lib/utils"
@@ -54,6 +55,7 @@ import { Arrow } from "./components/Arrow"
 import { SelectAll } from "./components/SelectAll"
 import { SelectBottomActions } from "./components/SelectBottomActions"
 import { SelectedItems } from "./components/SelectedItems"
+import { SelectionPreview } from "./components/SelectionPreview"
 import { SelectItem } from "./components/SelectItem"
 import { SelectTopActions } from "./components/SelectTopActions"
 export * from "./types"
@@ -105,7 +107,6 @@ const F0SelectComponent = forwardRef(function Select<
     searchBoxPlaceholder,
     searchEmptyMessage,
     size = "sm",
-    selectContentClassName,
     actions,
     source,
     label,
@@ -121,6 +122,8 @@ const F0SelectComponent = forwardRef(function Select<
     multiple,
     portalContainer,
     asList = false,
+    showPreview = false,
+    dataTestId,
     ...props
   }: F0SelectProps<T, R>,
   ref: React.ForwardedRef<HTMLButtonElement>
@@ -347,7 +350,7 @@ const F0SelectComponent = forwardRef(function Select<
   }, [value, defaultValues, itemsByValue])
 
   const {
-    handleSelectAll,
+    handleSelectAllItems,
     handleSelectItemChange,
     selectedState,
     clearSelection,
@@ -362,6 +365,7 @@ const F0SelectComponent = forwardRef(function Select<
     disableSelectAll: disableSelectAll,
     isSearchActive: !!currentSearch,
     allPagesSelection: true,
+    resetOnPageChange: false,
   })
 
   /**
@@ -451,9 +455,9 @@ const F0SelectComponent = forwardRef(function Select<
   const handleSelectAllWithTracking = useCallback(
     (checked: boolean) => {
       hasUserInteracted.current = true
-      handleSelectAll(checked)
+      handleSelectAllItems(checked)
     },
-    [handleSelectAll]
+    [handleSelectAllItems]
   )
 
   /**
@@ -581,6 +585,21 @@ const F0SelectComponent = forwardRef(function Select<
   // Track when filters panel is open to hide bottom actions
   const [isFiltersOpen, setIsFiltersOpen] = useState(false)
 
+  // Clear selection cache and local value when filters change
+  const previousFiltersRef = useRef(localSource.currentFilters)
+  useEffect(() => {
+    const prev = JSON.stringify(previousFiltersRef.current)
+    const curr = JSON.stringify(localSource.currentFilters)
+    if (prev !== curr) {
+      previousFiltersRef.current = localSource.currentFilters
+      if (!disableSelectAll) {
+        selectedItemsCache.current.clear()
+        setLocalValue([])
+        hasUserInteracted.current = true
+      }
+    }
+  }, [localSource.currentFilters, disableSelectAll])
+
   const defaultOpenGroups = localSource.grouping?.defaultOpenGroups
   const { openGroups, setGroupOpen } = useGroups(
     data?.type === "grouped" ? data.groups : [],
@@ -681,7 +700,6 @@ const F0SelectComponent = forwardRef(function Select<
     <SelectContent
       items={items}
       taller={!!source?.filters}
-      className={selectContentClassName}
       emptyMessage={searchEmptyMessage ?? i18n.select.noResults}
       bottom={
         !isFiltersOpen ? (
@@ -707,6 +725,7 @@ const F0SelectComponent = forwardRef(function Select<
             onFiltersChange={localSource.setCurrentFilters}
             asList={asList}
             onFiltersOpenChange={setIsFiltersOpen}
+            showPreview={showPreview}
           />
           {multiple && !currentSearch && !isFiltersOpen && (
             <SelectAll
@@ -720,13 +739,23 @@ const F0SelectComponent = forwardRef(function Select<
               onChange={handleSelectAllWithTracking}
               hideCheckbox={disableSelectAll}
               items={getDisplayItemsForSelection}
-              onDeselect={(value) => onItemCheckChange(value, false)}
               paddingTop={!showSearchBox && !localSource.filters}
             />
           )}
         </>
       }
-      forceMinHeight={!!localSource.filters}
+      right={
+        multiple && !isFiltersOpen && showPreview ? (
+          <SelectionPreview
+            items={getDisplayItemsForSelection}
+            onDeselect={(value) => onItemCheckChange(value, false)}
+            allSelected={selectedState.allSelected}
+            onLoadMore={loadMore}
+            isLoadingMore={isLoadingMore}
+          />
+        ) : null
+      }
+      forceMinHeight={!!localSource.filters && showPreview}
       onScrollBottom={handleScrollBottom}
       scrollMargin={10}
       isLoadingMore={isLoadingMore}
@@ -738,42 +767,48 @@ const F0SelectComponent = forwardRef(function Select<
 
   if (asList) {
     return (
-      <div
-        className={cn(
-          "flex w-full max-h-full flex-col gap-2",
-          disabled && "cursor-not-allowed opacity-50"
-        )}
-      >
-        {label && !hideLabel && (
-          <Label
-            label={label}
-            required={required}
-            htmlFor={id}
-            icon={labelIcon}
-            disabled={disabled}
-          />
-        )}
-        {/* Select Container */}
+      <DataTestIdWrapper dataTestId={dataTestId}>
         <div
           className={cn(
-            "flex-1 min-h-0",
-            asListContainerVariants({
-              status: error ? "error" : status?.type ? status?.type : "default",
-            })
+            "flex w-full max-h-full flex-col gap-2",
+            disabled && "cursor-not-allowed opacity-50"
           )}
         >
-          <SelectPrimitive {...selectPrimitiveProps}>
-            {selectContent}
-          </SelectPrimitive>
+          {label && !hideLabel && (
+            <Label
+              label={label}
+              required={required}
+              htmlFor={id}
+              icon={labelIcon}
+              disabled={disabled}
+            />
+          )}
+          {/* Select Container */}
+          <div
+            className={cn(
+              "flex-1 min-h-0",
+              asListContainerVariants({
+                status: error
+                  ? "error"
+                  : status?.type
+                    ? status?.type
+                    : "default",
+              })
+            )}
+          >
+            <SelectPrimitive {...selectPrimitiveProps}>
+              {selectContent}
+            </SelectPrimitive>
+          </div>
+          {/* Hint or Status Message */}
+          <InputMessages status={status} />
         </div>
-        {/* Hint or Status Message */}
-        <InputMessages status={status} />
-      </div>
+      </DataTestIdWrapper>
     )
   }
 
   return (
-    <>
+    <DataTestIdWrapper dataTestId={dataTestId}>
       <SelectPrimitive {...selectPrimitiveProps}>
         <SelectTrigger ref={ref} asChild>
           {children ? (
@@ -861,11 +896,6 @@ const F0SelectComponent = forwardRef(function Select<
                     }
                     allSelected={selectedState.allSelected}
                     selection={getDisplayItemsForSelection}
-                    onDeselect={
-                      multiple
-                        ? (value) => onItemCheckChange(value, false)
-                        : undefined
-                    }
                   />
                 )}
               </button>
@@ -874,7 +904,7 @@ const F0SelectComponent = forwardRef(function Select<
         </SelectTrigger>
         {openLocal && selectContent}
       </SelectPrimitive>
-    </>
+    </DataTestIdWrapper>
   )
 })
 
@@ -882,5 +912,7 @@ export const F0Select = F0SelectComponent as <
   T extends string = string,
   R = unknown,
 >(
-  props: F0SelectProps<T, R> & { ref?: React.Ref<HTMLButtonElement> }
+  props: F0SelectProps<T, R> & {
+    ref?: React.Ref<HTMLButtonElement>
+  }
 ) => React.ReactElement

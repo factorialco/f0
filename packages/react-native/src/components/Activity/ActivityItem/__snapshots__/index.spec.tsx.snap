@@ -38,18 +38,18 @@ exports[`ActivityItem Snapshot 1`] = `
     className="flex-1"
   >
     <Text
-      className="line-clamp-1 text-lg font-medium text-f1-foreground"
+      className="line-clamp-1 text-lg font-medium text-f0-foreground"
     >
       Activity Title
     </Text>
     <Text
-      className="line-clamp-2 text-lg text-f1-foreground-secondary"
+      className="line-clamp-2 text-lg text-f0-foreground-secondary"
     />
     <View
       className="mt-1.5 flex flex-row"
     >
       <Text
-        className="text-md text-f1-foreground-secondary"
+        className="text-md text-f0-foreground-secondary"
       >
         Time off · Today
       </Text>

@@ -1,7 +1,5 @@
 import { useCopilotAction } from "@copilotkit/react-core"
 
-import type { ModuleId } from "@/components/avatars/F0AvatarModule"
-
 import { F0ModuleCard } from "../F0ModuleCard"
 import { ModuleCardArgs } from "./types"
 
@@ -16,18 +14,17 @@ export const useModuleCardAction = () => {
       "Display a module card with module icon, title, description, and an action button (e.g. 'Learn more') to redirect the user.",
     parameters: [
       {
-        name: "module",
-        type: "string",
-        description:
-          "Module id for the icon (e.g. company_projects, benefits, projects, calendar, reports)",
-        required: true,
-      },
-      {
         name: "moduleName",
         type: "string",
         description:
           "Module name for the icon (e.g. company_projects, benefits, projects, calendar, reports)",
         required: true,
+      },
+      {
+        name: "imageSrc",
+        type: "string",
+        description: "Optional image source for the avatar",
+        required: false,
       },
       {
         name: "description",
@@ -46,10 +43,9 @@ export const useModuleCardAction = () => {
     followUp: false,
     render: (props) => {
       const args = props.args as ModuleCardArgs
-      const moduleId = args.module as ModuleId
       return (
         <F0ModuleCard
-          module={moduleId}
+          imageSrc={args.imageSrc}
           moduleName={args.moduleName}
           description={args.description}
           actionHref={args.actionHref}

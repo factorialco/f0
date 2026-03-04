@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useMemo } from "react"
+import { Dispatch, SetStateAction } from "react"
 
 import { F0Button } from "@/components/F0Button"
 import { F0Icon, IconType } from "@/components/F0Icon/F0Icon"
@@ -27,21 +27,9 @@ import {
   DropdownMenuTrigger,
 } from "@/ui/dropdown-menu"
 
-import { useQuestionTypes } from "../../constants"
-import { useCoCreationFormContext } from "../../Context"
-import {
-  detectRatingOptionType,
-  getDefaultParamsForQuestionType,
-  getRatingOptions,
-  RatingOptionType,
-} from "../../lib"
-import { CoCreationFormCallbacks, QuestionType } from "../../types"
-
-const RATING_OPTIONS: { label: string; value: RatingOptionType }[] = [
-  { label: "1 - 5", value: "1-5" },
-  { label: "1 - 10", value: "1-10" },
-  { label: "Emojis", value: "emojis" },
-]
+import { RatingOptionType } from "../../lib"
+import { QuestionType } from "../../types"
+import { RATING_OPTIONS, useQuestionActions } from "./useQuestionActions"
 
 const ToggleItem = ({
   label,
@@ -186,7 +174,7 @@ const SimpleItem = ({
     className={cn(critical ? "text-f1-foreground-critical" : undefined)}
   >
     <div className="flex w-full flex-row items-center gap-2">
-      <F0Icon icon={icon} color={critical ? "critical" : "default"} />
+      <F0Icon icon={icon} />
       <span className="flex-1">{label}</span>
     </div>
   </DropdownMenuItem>
@@ -210,96 +198,20 @@ export function ActionsMenu({
   const { t } = useI18n()
 
   const {
-    onQuestionChange,
-    getQuestionById,
-    deleteElement,
-    onDuplicateElement,
+    question,
+    questionTypes,
+    currentRatingType,
     disallowOptionalQuestions,
-  } = useCoCreationFormContext()
-
-  const question = useMemo(
-    () => getQuestionById(questionId),
-    [questionId, getQuestionById]
-  )
-
-  const questionTypes = useQuestionTypes()
-
-  const currentRatingType = useMemo(() => {
-    if (
-      questionType !== "rating" ||
-      !question ||
-      !("options" in question) ||
-      question.type !== "rating"
-    ) {
-      return null
-    }
-    // Type guard: rating questions have options with number values
-    const ratingOptions = question.options
-    if (
-      !Array.isArray(ratingOptions) ||
-      ratingOptions.length === 0 ||
-      typeof ratingOptions[0]?.value !== "number"
-    ) {
-      return null
-    }
-
-    // TypeScript type assertion: we've verified this is a rating question with number options
-    return detectRatingOptionType(
-      ratingOptions as { value: number; label: string }[]
-    )
-  }, [questionType, question])
-
-  const handleChangeRequired = (checked: boolean) => {
-    onQuestionChange?.({
-      id: questionId,
-      type: questionType,
-      required: checked,
-    } as Parameters<
-      NonNullable<CoCreationFormCallbacks["onQuestionChange"]>
-    >[0])
-  }
-
-  const handleSelectQuestionType = (newQuestionType: QuestionType) => {
-    const changingType =
-      newQuestionType !== questionType &&
-      !(
-        (newQuestionType === "select" || newQuestionType === "multi-select") &&
-        question &&
-        "options" in question &&
-        !!question.options.length
-      )
-
-    onQuestionChange?.({
-      id: questionId,
-      type: newQuestionType,
-      ...(changingType && {
-        ...getDefaultParamsForQuestionType(newQuestionType),
-      }),
-    } as Parameters<
-      NonNullable<CoCreationFormCallbacks["onQuestionChange"]>
-    >[0])
-  }
-
-  const handleSelectRatingType = (ratingType: RatingOptionType) => {
-    if (questionType !== "rating") return
-
-    onQuestionChange?.({
-      id: questionId,
-      type: "rating",
-      value: 0,
-      options: getRatingOptions(ratingType),
-    } as Parameters<
-      NonNullable<CoCreationFormCallbacks["onQuestionChange"]>
-    >[0])
-  }
-
-  const handleDuplicateQuestion = () => {
-    onDuplicateElement?.({ elementId: questionId, type: questionType })
-  }
-
-  const handleDeleteQuestion = () => {
-    deleteElement(questionId)
-  }
+    handleChangeRequired,
+    handleSelectQuestionType,
+    handleSelectRatingType,
+    handleDuplicate,
+    handleDelete,
+  } = useQuestionActions({
+    questionId,
+    questionType,
+    canDelete: canDeleteQuestion,
+  })
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
@@ -342,13 +254,14 @@ export function ActionsMenu({
           <SimpleItem
             label={t("coCreationForm.actions.duplicateQuestion")}
             icon={LayersFront}
-            onClick={handleDuplicateQuestion}
+            onClick={handleDuplicate}
           />
           {canDeleteQuestion && (
             <SimpleItem
               label={t("coCreationForm.actions.deleteQuestion")}
               icon={Delete}
-              onClick={handleDeleteQuestion}
+              onClick={handleDelete}
+              critical
             />
           )}
         </DropdownMenuGroup>

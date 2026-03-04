@@ -18,7 +18,11 @@ import {
 import { generateAnchorId, useF0FormContext } from "../context"
 import { isFieldRequired } from "./schema"
 import type { F0Field } from "./types"
-import { evaluateDisabled, evaluateRenderIf } from "./utils"
+import {
+  evaluateDateConstraint,
+  evaluateDisabled,
+  evaluateRenderIf,
+} from "./utils"
 
 // Import field renderers
 import { CheckboxFieldRenderer } from "./checkbox/CheckboxFieldRenderer"
@@ -32,6 +36,7 @@ import { RichTextFieldRenderer } from "./richtext/RichTextFieldRenderer"
 import { SelectFieldRenderer } from "./select/SelectFieldRenderer"
 import { SwitchFieldRenderer } from "./switch/SwitchFieldRenderer"
 import { TextFieldRenderer } from "./text/TextFieldRenderer"
+import { FileFieldRenderer } from "./file/FileFieldRenderer"
 import { TextareaFieldRenderer } from "./textarea/TextareaFieldRenderer"
 
 interface FieldRendererProps {
@@ -126,7 +131,13 @@ function renderFieldInput({
     case "date":
       return (
         <DateFieldRenderer
-          field={{ ...field, disabled: isDisabled }}
+          field={{
+            ...field,
+            disabled: isDisabled,
+            // Evaluate dynamic date constraints
+            minDate: evaluateDateConstraint(field.minDate, values),
+            maxDate: evaluateDateConstraint(field.maxDate, values),
+          }}
           formField={formField}
           {...errorAndLoadingProps}
         />
@@ -134,7 +145,13 @@ function renderFieldInput({
     case "time":
       return (
         <TimeFieldRenderer
-          field={{ ...field, disabled: isDisabled }}
+          field={{
+            ...field,
+            disabled: isDisabled,
+            // Evaluate dynamic date constraints
+            minDate: evaluateDateConstraint(field.minDate, values),
+            maxDate: evaluateDateConstraint(field.maxDate, values),
+          }}
           formField={formField}
           {...errorAndLoadingProps}
         />
@@ -142,7 +159,13 @@ function renderFieldInput({
     case "datetime":
       return (
         <DateTimeFieldRenderer
-          field={{ ...field, disabled: isDisabled }}
+          field={{
+            ...field,
+            disabled: isDisabled,
+            // Evaluate dynamic date constraints
+            minDate: evaluateDateConstraint(field.minDate, values),
+            maxDate: evaluateDateConstraint(field.maxDate, values),
+          }}
           formField={formField}
           {...errorAndLoadingProps}
         />
@@ -160,6 +183,14 @@ function renderFieldInput({
         <RichTextFieldRenderer
           field={{ ...field, disabled: isDisabled }}
           formField={formField}
+        />
+      )
+    case "file":
+      return (
+        <FileFieldRenderer
+          field={{ ...field, disabled: isDisabled }}
+          formField={formField}
+          error={hasError}
         />
       )
     case "custom":

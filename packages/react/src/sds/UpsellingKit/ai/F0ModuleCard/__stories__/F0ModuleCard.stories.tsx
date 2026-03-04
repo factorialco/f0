@@ -21,16 +21,16 @@ const meta = {
   },
   tags: ["autodocs"],
   args: {
-    module: "company_projects",
+    imageSrc: "https://placehold.net/400x400.png",
     moduleName: "Projects",
     description:
       "Plan capacity, track time and profit, assign tasks, and stay ahead of blockers.",
     onAction: fn(),
   },
   argTypes: {
-    module: {
+    imageSrc: {
       control: "text",
-      description: "Module id for the icon (e.g. company_projects, benefits)",
+      description: "Optional image source for the avatar",
     },
     moduleName: {
       control: "text",
@@ -60,7 +60,7 @@ export const WithLink: Story = {
 
 export const Benefits: Story = {
   args: {
-    module: "benefits",
+    imageSrc: "https://example.com/image.png",
     moduleName: "Benefits",
     description:
       "Manage employee benefits, enrollments, and compliance in one place.",
