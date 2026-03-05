@@ -3,6 +3,31 @@ import { FieldErrors } from "react-hook-form"
 
 import { generateAnchorId } from "./context"
 
+const errorNavigateClassName = "f0-form-error-navigate"
+const errorNavigateTimeouts = new Map<string, ReturnType<typeof setTimeout>>()
+
+const applyErrorNavigationHighlight = (
+  element: HTMLElement,
+  anchorId: string
+) => {
+  const existingTimeout = errorNavigateTimeouts.get(anchorId)
+  if (existingTimeout) {
+    clearTimeout(existingTimeout)
+  }
+
+  // Remove and re-add class to restart animation
+  element.classList.remove(errorNavigateClassName)
+  void element.offsetWidth // Force reflow
+  element.classList.add(errorNavigateClassName)
+
+  const timeout = setTimeout(() => {
+    element.classList.remove(errorNavigateClassName)
+    errorNavigateTimeouts.delete(anchorId)
+  }, 600)
+
+  errorNavigateTimeouts.set(anchorId, timeout)
+}
+
 interface UseErrorNavigationOptions {
   /** Form name for generating anchor IDs */
   formName: string
@@ -30,13 +55,20 @@ interface UseErrorNavigationReturn {
 /**
  * Focuses a field element by its anchor ID
  */
-function focusFieldElement(anchorId: string) {
+function focusFieldElement(
+  anchorId: string,
+  { highlight = false }: { highlight?: boolean } = {}
+) {
   const element = document.getElementById(anchorId)
   if (element) {
     element.scrollIntoView({ behavior: "smooth", block: "center" })
-    const input = element.querySelector("input, textarea, select")
+    const input = element.querySelector("input, textarea, select, button")
     if (input instanceof HTMLElement) {
       input.focus()
+    }
+
+    if (highlight) {
+      applyErrorNavigationHighlight(element, anchorId)
     }
   }
 }
@@ -102,17 +134,17 @@ export function useErrorNavigation({
 
       const fieldId = fieldErrors[wrappedIndex]
       const anchorId = generateAnchorId(formName, undefined, fieldId)
-      focusFieldElement(anchorId)
+      focusFieldElement(anchorId, { highlight: true })
     },
     [fieldErrors, formName]
   )
 
   const goToPreviousError = useCallback(() => {
-    navigateToError(currentErrorIndex - 1)
+    navigateToError(currentErrorIndex + 1)
   }, [currentErrorIndex, navigateToError])
 
   const goToNextError = useCallback(() => {
-    navigateToError(currentErrorIndex + 1)
+    navigateToError(currentErrorIndex - 1)
   }, [currentErrorIndex, navigateToError])
 
   const resetErrorNavigation = useCallback(() => {

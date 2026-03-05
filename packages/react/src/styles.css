@@ -46,3 +46,52 @@ div[role="dialog"] {
 .scrollbar-macos::-webkit-scrollbar-thumb:hover {
   background-color: var(--scrollbar-thumb-hover);
 }
+
+@keyframes f0-form-error-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  15% {
+    transform: translateX(-4px);
+  }
+  30% {
+    transform: translateX(4px);
+  }
+  45% {
+    transform: translateX(-3px);
+  }
+  60% {
+    transform: translateX(3px);
+  }
+  75% {
+    transform: translateX(0);
+  }
+}
+
+@keyframes f0-form-error-glow {
+  0% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+  50% {
+    box-shadow: 0 0 8px 0px hsl(var(--critical-50));
+  }
+  100% {
+    box-shadow: 0 0 0px 0px hsl(var(--critical-50));
+  }
+}
+
+.f0-form-error-navigate [data-testid="input-field-wrapper"] {
+  border-color: hsl(var(--critical-50)) !important;
+  animation:
+    f0-form-error-shake 0.5s ease-in-out,
+    f0-form-error-glow 0.6s ease-in-out forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .f0-form-error-navigate [data-testid="input-field-wrapper"] {
+    animation: none;
+    border-color: hsl(var(--critical-50)) !important;
+    box-shadow: 0 0 4px 1px hsl(var(--critical--50));
+  }
+}
