@@ -433,6 +433,57 @@ export const EditableTableWithNestedRecordsDetailed: Story = {
   },
 }
 
+export const EditableTableWithSelectableNestedRecordsDetailed: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Editable table with detailed nested records. Children are displayed aligned with the parent without tree connectors, creating a flatter view.",
+      },
+    },
+  },
+  render: () => {
+    const mockVisualizations = getMockVisualizations({
+      table: {
+        noSorting: true,
+        nestedRecords: true,
+        applyLongText: false,
+      },
+    })
+
+    const onCellChange = async (updatedItem: MockUser) => {
+      action("onCellChange")(updatedItem)
+    }
+
+    return (
+      <ExampleComponent
+        noSorting
+        storage={false}
+        selectable={() => {
+          return ""
+        }}
+        visualizations={[
+          {
+            type: "editableTable" as const,
+            options: {
+              ...(
+                mockVisualizations.editableTable as Extract<
+                  typeof mockVisualizations.editableTable,
+                  { type: "editableTable" }
+                >
+              ).options,
+              onCellChange,
+            },
+          },
+        ]}
+        id="editable-table-nested-detailed/v1"
+        nestedRecords
+        nestedRecordsType="detailed"
+      />
+    )
+  },
+}
+
 export const TableAndEditableTable: Story = {
   parameters: {
     docs: {

@@ -13,6 +13,7 @@ import {
   isFirstCellWithDepth,
   LINE_WIDTH,
   PADDING_TOP,
+  SELECTABLE_ROW_OFFSET,
   SPACING_FACTOR,
 } from "../utils/nested"
 
@@ -21,6 +22,7 @@ interface TreeConnectorProps {
   nestedRowProps?: NestedRowProps & {
     rowWithChildren?: boolean
     tableWithChildren?: boolean
+    selectableRow?: boolean
   }
   fromVisualization?: TableVisualizationType
 }
@@ -30,6 +32,7 @@ export const connectorVariables = (
   nestedRowProps?: NestedRowProps & {
     rowWithChildren?: boolean
     tableWithChildren?: boolean
+    selectableRow?: boolean
   },
   fromVisualization?: TableVisualizationType
 ) => {
@@ -63,10 +66,10 @@ export const connectorVariables = (
       : {}
 
   return {
-    "--line-left": `-${2 * CHEVRON_SIZE}px`,
+    "--line-left": `-${2 * CHEVRON_SIZE - (nestedRowProps?.selectableRow ? SELECTABLE_ROW_OFFSET : 0)}px`,
     "--line-width": LINE_WIDTH,
     "--horizontal-offset": `${horizontalOffset}px`,
-    "--horizontal-left": `4px`,
+    "--horizontal-left": `calc(4px - ${nestedRowProps?.selectableRow ? SELECTABLE_ROW_OFFSET : 0}px)`,
     "--horizontal-height": `${SPACING_FACTOR / 2}px`,
     "--connector-width": `${connectorWidth}px`,
     ...(lineHeight ? { "--line-height": lineHeight } : {}),

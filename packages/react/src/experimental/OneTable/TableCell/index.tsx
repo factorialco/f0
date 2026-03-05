@@ -71,6 +71,7 @@ interface TableCellProps {
   nestedRowProps?: NestedRowProps & {
     rowWithChildren?: boolean
     tableWithChildren?: boolean
+    selectableRow?: boolean
   }
   /**
    * The visualization the cell is being rendered in

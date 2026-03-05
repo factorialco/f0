@@ -180,6 +180,13 @@ const RowComponentInner = <
 
   const isSelected = id !== undefined && selectedItems.has(id)
 
+  const cellRenderedClass = CellRenderer
+    ? cn(
+        "h-[48px] p-0 align-middle last:pr-0",
+        !tableWithChildren && "first:pl-0"
+      )
+    : undefined
+
   return (
     <TableRow
       ref={ref}
@@ -197,9 +204,13 @@ const RowComponentInner = <
           width={checkColumnWidth}
           sticky={{ left: 0 }}
           loading={loading}
+          className={cn(
+            loading && tableWithChildren ? "first:pl-4" : "",
+            cellRenderedClass
+          )}
         >
           {id !== undefined && (
-            <div className="pointer-events-auto ml-1.5 flex items-center justify-start">
+            <div className="pointer-events-auto ml-1.5 flex h-full items-center justify-start">
               <Checkbox
                 checked={selectedItems.has(id)}
                 onCheckedChange={onCheckedChange}
@@ -236,15 +247,9 @@ const RowComponentInner = <
               ...nestedRowProps,
               rowWithChildren,
               tableWithChildren,
+              selectableRow: !!source.selectable,
             }}
-            className={
-              CellRenderer
-                ? cn(
-                    "h-[48px] p-0 align-middle last:pr-0",
-                    !tableWithChildren && "first:pl-0"
-                  )
-                : undefined
-            }
+            className={cellRenderedClass}
             fromVisualization={fromVisualization}
           >
             {CellRenderer ? (
