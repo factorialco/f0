@@ -14,12 +14,14 @@ import {
 
 type CollectionActionProps = {
   primaryActions?: PrimaryActionItemDefinition[]
+  primaryActionsLabel?: string
   secondaryActions?: SecondaryActionItem[]
   otherActions?: SecondaryActionGroup[]
 }
 
 export const CollectionActions = ({
   primaryActions,
+  primaryActionsLabel,
   secondaryActions,
   otherActions,
 }: CollectionActionProps) => {
@@ -45,6 +47,11 @@ export const CollectionActions = ({
 
   const [open, onOpenChange] = useState(false)
 
+  // Determine if we should use dropdown mode: when any primary action has a description
+  const useDropdownMode = primaryActionsButtons.some(
+    (action) => action.description !== undefined
+  )
+
   if (
     primaryActionsButtons.length === 0 &&
     secondaryActionsButtons.length === 0 &&
@@ -54,7 +61,22 @@ export const CollectionActions = ({
 
   return (
     <div className="flex flex-row-reverse items-center gap-2">
-      {primaryActionsButtons.length === 1 ? (
+      {useDropdownMode ? (
+        <F0ButtonDropdown
+          mode="dropdown"
+          size="md"
+          trigger={primaryActionsLabel}
+          items={primaryActionsButtons.map((action, index) => ({
+            label: action.label,
+            icon: action.icon,
+            description: action.description,
+            value: index.toString(),
+          }))}
+          onClick={(value) => {
+            primaryActionsButtons[Number(value)]?.onClick?.()
+          }}
+        />
+      ) : primaryActionsButtons.length === 1 ? (
         <F0Button
           size="md"
           onClick={primaryActionsButtons[0].onClick}
