@@ -201,6 +201,13 @@ const RowComponentInner = <
       )
     : undefined
 
+  const cellRenderedClass = CellRenderer
+    ? cn(
+        "h-[48px] p-0 align-middle last:pr-0",
+        !tableWithChildren && "first:pl-0"
+      )
+    : undefined
+
   return (
     <TableRow
       ref={ref}
