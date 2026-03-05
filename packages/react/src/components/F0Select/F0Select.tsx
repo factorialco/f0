@@ -615,38 +615,47 @@ const F0SelectComponent = forwardRef(function Select<
     (
       records: WithGroupId<ActualRecordType>[] | ActualRecordType[]
     ): VirtualItem[] => {
-      let hasSeenGroupHeader = false
       const result: VirtualItem[] = []
+      let pendingHeader: { index: number; label: string } | null = null
 
       for (const [index, option] of records.entries()) {
         const mappedOption = optionMapper(option)
+
         if (mappedOption.type === "separator") {
           result.push({
             height: 1,
             item: <SelectSeparator key={`separator-${index}`} />,
           })
         } else if (mappedOption.type === "group-header") {
-          const lastItem = result[result.length - 1]
-          if (hasSeenGroupHeader && lastItem?.height !== 1) {
-            result.push({
-              height: 1,
-              item: <SelectSeparator key={`group-header-separator-${index}`} />,
-            })
-          }
-          hasSeenGroupHeader = true
-          result.push({
-            height: 36,
-            item: (
-              <div
-                key={`group-header-${index}`}
-                role="presentation"
-                className="px-3 pt-3 pb-2 text-sm font-medium text-f1-foreground-secondary"
-              >
-                {mappedOption.label}
-              </div>
-            ),
-          })
+          pendingHeader = { index, label: mappedOption.label }
         } else {
+          if (pendingHeader) {
+            const lastItem = result[result.length - 1]
+            if (result.length > 0 && lastItem?.height !== 1) {
+              result.push({
+                height: 1,
+                item: (
+                  <SelectSeparator
+                    key={`group-header-separator-${pendingHeader.index}`}
+                  />
+                ),
+              })
+            }
+            result.push({
+              height: 36,
+              item: (
+                <div
+                  key={`group-header-${pendingHeader.index}`}
+                  role="presentation"
+                  className="px-3 pt-3 pb-2 text-sm font-medium text-f1-foreground-secondary"
+                >
+                  {pendingHeader.label}
+                </div>
+              ),
+            })
+            pendingHeader = null
+          }
+
           result.push({
             height: mappedOption.description ? 64 : 32,
             item: (
@@ -655,33 +664,8 @@ const F0SelectComponent = forwardRef(function Select<
                 item={mappedOption}
               />
             ),
-            // Convert to string to ensure consistent comparison with selectedItemsValues
-            // which also converts to strings
             value: String(mappedOption.value),
           })
-        }
-      }
-
-      for (let i = result.length - 1; i >= 0; i--) {
-        const item = result[i]
-        if (!item) continue
-        // Group headers have height 36 and no value
-        if (item.height === 36 && !("value" in item)) {
-          let hasSelectableItem = false
-          for (let j = i + 1; j < result.length; j++) {
-            if (result[j].height === 36 && !("value" in result[j])) break
-            if ("value" in result[j]) {
-              hasSelectableItem = true
-              break
-            }
-          }
-          if (!hasSelectableItem) {
-            if (i > 0 && result[i - 1].height === 1) {
-              result.splice(i - 1, 2)
-            } else {
-              result.splice(i, 1)
-            }
-          }
         }
       }
 
