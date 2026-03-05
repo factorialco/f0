@@ -615,103 +615,102 @@ export const TableCollection = <
                 </tr>
               )}
           </TableBody>
-          {/* TODO: maybe as new component? */}
-          {summaryData && (
+          {(summaryData || onAddRow) && (
             <TableFooter>
-              <TableRow
-                className={cn(
-                  summaryData.sticky &&
-                    "sticky bottom-0 z-10 bg-f1-background shadow-[0_-1px_0_0_var(--f1-border-secondary)] hover:bg-f1-background",
-                  "font-medium"
-                )}
-              >
-                {source.selectable && (
-                  <TableCell width={checkColumnWidth} sticky={{ left: 0 }}>
-                    {summaryData.label && (
-                      <div className="font-medium text-f1-foreground-secondary">
-                        {summaryData.label}
-                      </div>
-                    )}
-                  </TableCell>
-                )}
-                {columns.map((column, cellIndex) => (
-                  <TableCell
-                    key={`summary-${String(column.label)}`}
-                    firstCell={cellIndex === 0}
-                    width={column.width}
-                    sticky={getStickyPosition(cellIndex)}
-                  >
-                    {cellIndex === 0 &&
-                    !source.selectable &&
-                    summaryData.label ? (
-                      <div className="font-medium text-f1-foreground-secondary">
-                        {summaryData.label}
-                      </div>
-                    ) : (
-                      <div
-                        className={cn(
-                          column.align === "right" ? "justify-end" : "",
-                          "flex"
-                        )}
-                      >
-                        {column.summary &&
-                        source.summaries &&
-                        source.summaries[column.summary]?.type === "sum" ? (
-                          <div className="flex gap-1">
-                            <span className="text-f1-foreground-secondary">
-                              {i18n.collections.summaries.types.sum}
-                            </span>
-                            {`${summaryData.data[column.summary]}`}
-                          </div>
-                        ) : (
-                          "-"
-                        )}
-                      </div>
-                    )}
-                  </TableCell>
-                ))}
-                {showItemActions && (
-                  <>
-                    <th className="hidden md:table-cell"></th>
-                    <TableCell
-                      key="summary-actions"
-                      width={68}
-                      sticky={{
-                        right: 0,
-                      }}
-                      className="table-cell md:hidden"
-                    >
-                      {""}
-                    </TableCell>
-                  </>
-                )}
-              </TableRow>
-            </TableFooter>
-          )}
-          {onAddRow && (
-            <TableFooter>
-              <TableRow>
-                <TableCell
-                  colSpan={
-                    columns.length +
-                    (source.selectable ? 1 : 0) +
-                    (showItemActions ? 2 : 0)
-                  }
+              {summaryData && (
+                <TableRow
+                  className={cn(
+                    summaryData.sticky &&
+                      "sticky bottom-0 z-10 bg-f1-background shadow-[0_-1px_0_0_var(--f1-border-secondary)] hover:bg-f1-background",
+                    "font-medium"
+                  )}
                 >
-                  <div className="pointer-events-auto">
-                    <F0Button
-                      variant="ghost"
-                      icon={Add}
-                      label={
-                        addRowButtonLabel ??
-                        t("collections.editableTable.addRow")
-                      }
-                      onClick={() => onAddRow?.()}
-                      size="sm"
-                    />
-                  </div>
-                </TableCell>
-              </TableRow>
+                  {source.selectable && (
+                    <TableCell width={checkColumnWidth} sticky={{ left: 0 }}>
+                      {summaryData.label && (
+                        <div className="font-medium text-f1-foreground-secondary">
+                          {summaryData.label}
+                        </div>
+                      )}
+                    </TableCell>
+                  )}
+                  {columns.map((column, cellIndex) => (
+                    <TableCell
+                      key={`summary-${String(column.label)}`}
+                      firstCell={cellIndex === 0}
+                      width={column.width}
+                      sticky={getStickyPosition(cellIndex)}
+                    >
+                      {cellIndex === 0 &&
+                      !source.selectable &&
+                      summaryData.label ? (
+                        <div className="font-medium text-f1-foreground-secondary">
+                          {summaryData.label}
+                        </div>
+                      ) : (
+                        <div
+                          className={cn(
+                            column.align === "right" ? "justify-end" : "",
+                            "flex"
+                          )}
+                        >
+                          {column.summary &&
+                          source.summaries &&
+                          source.summaries[column.summary]?.type === "sum" ? (
+                            <div className="flex gap-1">
+                              <span className="text-f1-foreground-secondary">
+                                {i18n.collections.summaries.types.sum}
+                              </span>
+                              {`${summaryData.data[column.summary]}`}
+                            </div>
+                          ) : (
+                            "-"
+                          )}
+                        </div>
+                      )}
+                    </TableCell>
+                  ))}
+                  {showItemActions && (
+                    <>
+                      <th className="hidden md:table-cell"></th>
+                      <TableCell
+                        key="summary-actions"
+                        width={68}
+                        sticky={{
+                          right: 0,
+                        }}
+                        className="table-cell md:hidden"
+                      >
+                        {""}
+                      </TableCell>
+                    </>
+                  )}
+                </TableRow>
+              )}
+              {onAddRow && (
+                <TableRow>
+                  <TableCell
+                    colSpan={
+                      columns.length +
+                      (source.selectable ? 1 : 0) +
+                      (showItemActions ? 2 : 0)
+                    }
+                  >
+                    <div className="pointer-events-auto">
+                      <F0Button
+                        variant="ghost"
+                        icon={Add}
+                        label={
+                          addRowButtonLabel ??
+                          t("collections.editableTable.addRow")
+                        }
+                        onClick={() => onAddRow?.()}
+                        size="sm"
+                      />
+                    </div>
+                  </TableCell>
+                </TableRow>
+              )}
             </TableFooter>
           )}
         </OneTable>
