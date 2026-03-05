@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.390.0](https://github.com/factorialco/f0/compare/f0-react-v1.389.0...f0-react-v1.390.0) (2026-03-05)
+
+
+### Features
+
+* button dropdown mode for primary actions with descriptions ([#3590](https://github.com/factorialco/f0/issues/3590)) ([e26efa6](https://github.com/factorialco/f0/commit/e26efa6252096bc1cda2b4c395696467b59ab454))
+
 ## [1.389.0](https://github.com/factorialco/f0/compare/f0-react-v1.388.4...f0-react-v1.389.0) (2026-03-04)
 
 
