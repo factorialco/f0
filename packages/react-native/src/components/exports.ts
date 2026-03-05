@@ -5,7 +5,6 @@ export * from "./Badge"
 export * from "./Button"
 export * from "./Counter"
 export * from "./ExampleComponent"
-export * from "./Icon"
 export * from "./Navigation/PageHeader"
 export * from "./OneChip"
 export * from "./OnePreset"
@@ -17,3 +16,4 @@ export * from "./experimental/Lists/DetailsItemsList"
 
 // Export primitives
 export * from "./primitives/F0Text"
+export * from "./primitives/F0Icon"
