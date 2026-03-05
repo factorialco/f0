@@ -8,21 +8,20 @@ import { Ellipsis } from "@/icons/app"
 
 import {
   PrimaryActionItemDefinition,
-  PrimaryActionsTriggerDefinition,
   SecondaryActionGroup,
   SecondaryActionItem,
 } from "../../actions"
 
 type CollectionActionProps = {
   primaryActions?: PrimaryActionItemDefinition[]
-  primaryActionsTrigger?: PrimaryActionsTriggerDefinition
+  primaryActionsLabel?: string
   secondaryActions?: SecondaryActionItem[]
   otherActions?: SecondaryActionGroup[]
 }
 
 export const CollectionActions = ({
   primaryActions,
-  primaryActionsTrigger,
+  primaryActionsLabel,
   secondaryActions,
   otherActions,
 }: CollectionActionProps) => {
@@ -66,14 +65,7 @@ export const CollectionActions = ({
         <F0ButtonDropdown
           mode="dropdown"
           size="md"
-          trigger={
-            primaryActionsTrigger
-              ? {
-                  label: primaryActionsTrigger.label,
-                  icon: primaryActionsTrigger.icon,
-                }
-              : undefined
-          }
+          trigger={primaryActionsLabel}
           items={primaryActionsButtons.map((action, index) => ({
             label: action.label,
             icon: action.icon,

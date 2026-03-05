@@ -38,15 +38,6 @@ export type ButtonDropdownGroup<T = string> = {
   items: ButtonDropdownItem<T>[]
 }
 
-/**
- * Defines the trigger button appearance for dropdown mode.
- * Used to customize the label and icon of the dropdown trigger button independently from the dropdown items.
- */
-export type ButtonDropdownTrigger = {
-  label: string
-  icon?: IconType
-}
-
 type F0ButtonDropdownBaseProps<T = string> = {
   /**
    * The size of the button.
@@ -117,11 +108,11 @@ type F0ButtonDropdownDropdownProps<T = string> =
      */
     mode: "dropdown"
     /**
-     * Optional trigger button configuration. Customize the label and icon shown on the
+     * Optional trigger button label. Customize the label shown on the
      * trigger button independently from the dropdown items.
-     * Falls back to the first item's label/icon if not provided.
+     * Falls back to the first item's label if not provided.
      */
-    trigger?: ButtonDropdownTrigger
+    trigger?: string
     /**
      * Called when a dropdown item is clicked.
      * @param value The value of the item that was clicked.

@@ -39,7 +39,7 @@ vi.mock("@/components/F0ButtonDropdown", () => ({
       }
       data-items={JSON.stringify(items)}
       data-mode={mode || "split"}
-      data-trigger={trigger ? JSON.stringify(trigger) : undefined}
+      data-trigger={trigger ? String(trigger) : undefined}
     >
       <button
         data-testid={
@@ -191,11 +191,7 @@ describe("CollectionActions", () => {
       expect(screen.queryByTestId("f0-button")).not.toBeInTheDocument()
     })
 
-    it("passes primaryActionsTrigger as trigger prop to F0ButtonDropdown", () => {
-      const triggerIcon: IconType = (() => (
-        <div data-testid="trigger-icon">trigger</div>
-      )) as unknown as IconType
-
+    it("passes primaryActionsLabel as trigger prop to F0ButtonDropdown", () => {
       const actions: PrimaryActionItemDefinition[] = [
         {
           label: "Regular expense",
@@ -214,18 +210,13 @@ describe("CollectionActions", () => {
       render(
         <CollectionActions
           primaryActions={actions}
-          primaryActionsTrigger={{
-            label: "New expense",
-            icon: triggerIcon,
-          }}
+          primaryActionsLabel="New expense"
         />
       )
 
       const dropdownMode = screen.getByTestId("button-dropdown-mode")
-      const trigger = JSON.parse(
-        dropdownMode.getAttribute("data-trigger") || "{}"
-      )
-      expect(trigger.label).toBe("New expense")
+      const trigger = dropdownMode.getAttribute("data-trigger")
+      expect(trigger).toBe("New expense")
     })
 
     it("uses dropdown mode when only some actions have descriptions", () => {

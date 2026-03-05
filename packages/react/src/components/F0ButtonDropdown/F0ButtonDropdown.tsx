@@ -16,7 +16,6 @@ import {
   ButtonDropdownGroup,
   ButtonDropdownItem,
   ButtonDropdownSize,
-  ButtonDropdownTrigger,
   ButtonDropdownVariant,
   F0ButtonDropdownProps,
 } from "./types.ts"
@@ -219,7 +218,7 @@ const DropdownMode = ({
   tooltip,
 }: {
   onClick: (value: string, item: ButtonDropdownItem<string>) => void
-  trigger?: ButtonDropdownTrigger
+  trigger?: string
   items:
     | ButtonDropdownItem<string>[]
     | ButtonDropdownGroup<string>[]
@@ -241,8 +240,7 @@ const DropdownMode = ({
     return items.flatMap((item) => item.items)
   }, [items])
 
-  const triggerLabel = trigger?.label || flattenedItems[0]?.label
-  const triggerIcon = trigger?.icon || flattenedItems[0]?.icon
+  const triggerLabel = trigger || flattenedItems[0]?.label
 
   const dropdownItems = useMemo(
     () =>
@@ -285,7 +283,6 @@ const DropdownMode = ({
         loading={loading}
         data-testid="button-dropdown-trigger"
         aria-label={triggerLabel}
-        prepend={triggerIcon && <F0Icon icon={triggerIcon} />}
         append={
           <F0Icon icon={ChevronDown} size={size === "sm" ? "sm" : "md"} />
         }

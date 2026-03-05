@@ -260,15 +260,11 @@ describe("F0ButtonDropdown", () => {
       expect(passedItems[2].description).toBe("Fixed daily travel allowance")
     })
 
-    it("uses custom trigger label and icon when provided", () => {
-      const triggerIcon: IconType = (() => (
-        <div data-testid="trigger-icon">trigger</div>
-      )) as unknown as IconType
-
+    it("uses custom trigger label when provided", () => {
       render(
         <F0ButtonDropdown
           mode="dropdown"
-          trigger={{ label: "New expense", icon: triggerIcon }}
+          trigger="New expense"
           items={mockItemsWithDescriptions}
           onClick={mockOnClick}
         />

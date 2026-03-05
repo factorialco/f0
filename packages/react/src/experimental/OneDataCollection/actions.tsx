@@ -10,15 +10,6 @@ export type PrimaryActionItemDefinition = Pick<
 }
 
 /**
- * Defines the trigger button appearance for primary actions when rendered in dropdown mode.
- * Used to customize the label and icon of the dropdown trigger button independently from the dropdown items.
- */
-export type PrimaryActionsTriggerDefinition = {
-  label: string
-  icon?: DropdownItemObject["icon"]
-}
-
-/**
  * Defines the structure and configuration of the primary action that can be performed on a collection.
  * @returns An action
  */

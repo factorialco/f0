@@ -274,10 +274,7 @@ export const DropdownMode: Story = {
 export const DropdownModeWithTrigger: Story = {
   args: {
     mode: "dropdown",
-    trigger: {
-      label: "New action",
-      icon: Add,
-    },
+    trigger: "New action",
     items: [
       {
         value: "1",
@@ -304,9 +301,7 @@ export const DropdownModeWithTrigger: Story = {
 export const DropdownModeWithGroups: Story = {
   args: {
     mode: "dropdown",
-    trigger: {
-      label: "Actions",
-    },
+    trigger: "Actions",
     items: [
       {
         label: "Group 1",
