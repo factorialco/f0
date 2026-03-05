@@ -81,7 +81,8 @@ div[role="dialog"] {
   }
 }
 
-.f0-form-error-navigate [data-testid="input-field-wrapper"] {
+.f0-form-error-navigate [data-testid="input-field-wrapper"],
+.f0-form-error-navigate .rich-text-editor-container {
   border-color: hsl(var(--critical-50)) !important;
   animation:
     f0-form-error-shake 0.5s ease-in-out,
@@ -89,7 +90,8 @@ div[role="dialog"] {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .f0-form-error-navigate [data-testid="input-field-wrapper"] {
+  .f0-form-error-navigate [data-testid="input-field-wrapper"],
+  .f0-form-error-navigate .rich-text-editor-container {
     animation: none;
     border-color: hsl(var(--critical-50)) !important;
     box-shadow: 0 0 4px 1px hsl(var(--critical--50));

@@ -64,6 +64,7 @@ interface RichTextEditorProps {
   secondaryAction?: secondaryActionsType
   primaryAction?: primaryActionType
   onChange: (result: resultType) => void
+  onBlur?: () => void
   maxCharacters?: number
   placeholder: string
   initialEditorState?: {
@@ -77,6 +78,10 @@ interface RichTextEditorProps {
   onFullscreenChange?: (fullscreen: boolean) => void
   /** Whether the editor is disabled */
   disabled?: boolean
+  /** Whether the editor has an error state */
+  error?: boolean
+  /** Whether the editor is in a loading state */
+  loading?: boolean
   dataTestId?: string
 }
 
@@ -108,6 +113,9 @@ const RichTextEditorComponent = forwardRef<
     fullScreenMode = true,
     onFullscreenChange,
     disabled = false,
+    error: errorProp = false,
+    loading: _loading = false,
+    onBlur,
     dataTestId,
   },
   ref
@@ -192,6 +200,9 @@ const RichTextEditorComponent = forwardRef<
     onUpdate: ({ editor }: { editor: Editor }) => {
       handleEditorUpdate({ editor, onChange, setEditorState })
     },
+    onBlur: () => {
+      onBlur?.()
+    },
   })
 
   useEffect(() => {
@@ -275,7 +286,12 @@ const RichTextEditorComponent = forwardRef<
           disabled ? "bg-f1-background-tertiary" : "bg-f1-background",
           isFullscreen
             ? "fixed inset-0 z-50"
-            : "relative w-full rounded-xl border border-solid border-f1-border"
+            : [
+                "relative w-full rounded-xl border border-solid",
+                error || errorProp
+                  ? "border-f1-border-critical-bold focus-within:border-f1-border-critical-bold focus-within:ring-f1-border-critical bg-f1-background-critical bg-opacity-10"
+                  : "border-f1-border",
+              ]
         )}
       >
         {isFullscreen && (
@@ -369,7 +385,7 @@ const RichTextEditorComponent = forwardRef<
         <div
           className={cn(
             "relative z-40 rounded-b-lg px-3",
-            !disabled && "bg-f1-background",
+            !disabled && !errorProp && "bg-f1-background",
             hasFullHeight && !isScrolledToBottom && "shadow-editor-tools"
           )}
         >

@@ -6,6 +6,8 @@ import {
   CardSelectableContainer,
   type CardSelectableItem,
 } from "@/experimental/Forms/CardSelectable"
+import { FormField as FormFieldPrimitive, FormMessage } from "@/ui/form"
+import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 
 import { isZodType, unwrapZodSchema } from "../f0Schema"
 import type { F0SwitchField } from "../fields/switch/types"
@@ -124,14 +126,43 @@ export function SwitchGroupRenderer({ fields }: SwitchGroupRendererProps) {
     }
   }
 
+  const { forms } = useI18n()
+
+  // Get error messages for required fields in the group
+  const groupErrors = visibleFields
+    .filter((field) => field.validation && isMustBeTrue(field.validation))
+    .map((field) => {
+      const error = form.formState.errors[field.id]
+      return error
+        ? { fieldId: field.id, label: field.label, message: error.message }
+        : null
+    })
+    .filter(Boolean)
+
   return (
-    <CardSelectableContainer
-      multiple
-      isToggle
-      grouped
-      items={items}
-      value={selectedIds}
-      onChange={handleChange}
-    />
+    <div className="flex flex-col gap-2">
+      <CardSelectableContainer
+        multiple
+        isToggle
+        grouped
+        items={items}
+        value={selectedIds}
+        onChange={handleChange}
+      />
+      {groupErrors.length > 0 && (
+        <div className="flex flex-col gap-1">
+          {groupErrors.map((error) => (
+            <FormFieldPrimitive
+              key={error!.fieldId}
+              control={form.control}
+              name={error!.fieldId}
+              render={() => (
+                <FormMessage fallback={forms.validation.required} />
+              )}
+            />
+          ))}
+        </div>
+      )}
+    </div>
   )
 }

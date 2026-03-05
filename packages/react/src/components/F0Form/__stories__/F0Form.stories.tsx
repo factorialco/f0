@@ -617,7 +617,7 @@ export const AllFieldTypes: Story = {
       ),
       richTextField: f0FormField(
         z.object({
-          value: z.string().nullable(),
+          value: z.string().min(1),
           mentionIds: z.array(z.number()).optional(),
         }),
         {
@@ -649,6 +649,9 @@ export const AllFieldTypes: Story = {
         datetimeField: undefined,
         dateRangeField: undefined,
         richTextField: { value: null },
+      },
+      submitConfig: {
+        type: "action-bar",
       },
       onSubmit: async ({ data }) => {
         await sleep(1000)
@@ -781,7 +784,7 @@ export const AllFieldTypesDisabled: Story = {
       ),
       richTextField: f0FormField(
         z.object({
-          value: z.string().nullable(),
+          value: z.string(),
           mentionIds: z.array(z.number()).optional(),
         }),
         {

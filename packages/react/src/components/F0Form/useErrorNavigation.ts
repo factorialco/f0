@@ -108,9 +108,9 @@ export function useErrorNavigation({
     )
 
     if (newErrorKey) {
-      // Focus the field with the new error
+      // Focus the field with the new error and trigger animation
       const anchorId = generateAnchorId(formName, undefined, newErrorKey)
-      focusFieldElement(anchorId)
+      focusFieldElement(anchorId, { highlight: true })
 
       // Update current error index to the new error
       const newErrorIndex = currentErrorKeys.indexOf(newErrorKey)
@@ -140,11 +140,11 @@ export function useErrorNavigation({
   )
 
   const goToPreviousError = useCallback(() => {
-    navigateToError(currentErrorIndex + 1)
+    navigateToError(currentErrorIndex - 1)
   }, [currentErrorIndex, navigateToError])
 
   const goToNextError = useCallback(() => {
-    navigateToError(currentErrorIndex - 1)
+    navigateToError(currentErrorIndex + 1)
   }, [currentErrorIndex, navigateToError])
 
   const resetErrorNavigation = useCallback(() => {
