@@ -43,6 +43,17 @@ vi.mock("@/experimental/Navigation/Dropdown/internal.tsx", () => ({
       onClick={() => onOpenChange && onOpenChange(!open)}
     >
       {children}
+      {items.map((item, i) =>
+        item.type === "separator" ? null : (
+          <button
+            key={i}
+            data-testid={`dropdown-item-${item.value}`}
+            onClick={item.onClick}
+          >
+            {item.label}
+          </button>
+        )
+      )}
     </div>
   ),
 }))
@@ -260,6 +271,29 @@ describe("F0ButtonDropdown", () => {
       expect(passedItems[2].description).toBe("Fixed daily travel allowance")
     })
 
+    it("calls onClick with correct value and item when a dropdown item is clicked", async () => {
+      const user = userEvent.setup()
+      render(
+        <F0ButtonDropdown
+          mode="dropdown"
+          items={mockItemsWithDescriptions}
+          onClick={mockOnClick}
+        />
+      )
+
+      await user.click(screen.getByTestId("dropdown-item-mileage"))
+
+      expect(mockOnClick).toHaveBeenCalledTimes(1)
+      expect(mockOnClick).toHaveBeenCalledWith(
+        "mileage",
+        expect.objectContaining({
+          value: "mileage",
+          label: "Mileage",
+          description: "Travel with a personal vehicle",
+        })
+      )
+    })
+
     it("uses custom trigger label when provided", () => {
       render(
         <F0ButtonDropdown
@@ -270,9 +304,9 @@ describe("F0ButtonDropdown", () => {
         />
       )
 
-      // Trigger should show custom label, not the first item's label
+      // Trigger button should show custom label, not the first item's label
       expect(screen.getByText("New expense")).toBeInTheDocument()
-      expect(screen.queryByText("Regular expense")).not.toBeInTheDocument()
+      expect(screen.getByTestId("action-label").textContent).toBe("New expense")
 
       // Dropdown items should still include all items
       const dropdown = screen.getByTestId("dropdown")
