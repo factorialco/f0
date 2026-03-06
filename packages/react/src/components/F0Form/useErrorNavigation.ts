@@ -4,13 +4,13 @@ import { FieldErrors } from "react-hook-form"
 import { generateAnchorId } from "./context"
 
 const errorNavigateClassName = "f0-form-error-navigate"
-const errorNavigateTimeouts = new Map<string, ReturnType<typeof setTimeout>>()
+const errorNavigateTimeouts = new WeakMap<
+  HTMLElement,
+  ReturnType<typeof setTimeout>
+>()
 
-const applyErrorNavigationHighlight = (
-  element: HTMLElement,
-  anchorId: string
-) => {
-  const existingTimeout = errorNavigateTimeouts.get(anchorId)
+const applyErrorNavigationHighlight = (element: HTMLElement) => {
+  const existingTimeout = errorNavigateTimeouts.get(element)
   if (existingTimeout) {
     clearTimeout(existingTimeout)
   }
@@ -22,10 +22,10 @@ const applyErrorNavigationHighlight = (
 
   const timeout = setTimeout(() => {
     element.classList.remove(errorNavigateClassName)
-    errorNavigateTimeouts.delete(anchorId)
+    errorNavigateTimeouts.delete(element)
   }, 600)
 
-  errorNavigateTimeouts.set(anchorId, timeout)
+  errorNavigateTimeouts.set(element, timeout)
 }
 
 interface UseErrorNavigationOptions {
@@ -84,7 +84,7 @@ function focusFieldElement(
     }
 
     if (highlight) {
-      applyErrorNavigationHighlight(visibleElement, anchorId)
+      applyErrorNavigationHighlight(visibleElement)
     }
   }
 }
@@ -102,13 +102,53 @@ export function useErrorNavigation({
   formName,
   errors,
 }: UseErrorNavigationOptions): UseErrorNavigationReturn {
-  // Extract field error keys (excluding root error)
-  const fieldErrors = Object.keys(errors).filter((key) => key !== "root")
+  // Extract field error keys (excluding root error), sorted by DOM position.
+  // Object.keys(errors) order is unstable — RHF may reorder keys when it
+  // re-validates a single field on blur (e.g. focusing a text input blurs the
+  // previous one, triggering re-validation). Sorting by DOM position keeps
+  // prev/next navigation consistent with the visual form layout.
+  const fieldErrors = Object.keys(errors)
+    .filter((key) => key !== "root")
+    .sort((a, b) => {
+      const anchorA = document.getElementById(
+        generateAnchorId(formName, undefined, a)
+      )
+      const anchorB = document.getElementById(
+        generateAnchorId(formName, undefined, b)
+      )
+      if (!anchorA || !anchorB) return 0
+      const position = anchorA.compareDocumentPosition(anchorB)
+      if (position & Node.DOCUMENT_POSITION_FOLLOWING) return -1
+      if (position & Node.DOCUMENT_POSITION_PRECEDING) return 1
+      return 0
+    })
   const hasErrors = fieldErrors.length > 0
   const errorCount = fieldErrors.length
 
-  // Track current error index for navigation
-  const [currentErrorIndex, setCurrentErrorIndex] = useState(0)
+  // Track current error by field ID so navigation stays correct when the
+  // error list changes (fields resolved / new fields validated).
+  // Uses state so index changes propagate to consumers via re-render.
+  const [currentFieldId, setCurrentFieldId] = useState<string | null>(null)
+
+  // Derive index from the tracked field ID
+  const currentErrorIndex = currentFieldId
+    ? Math.max(0, fieldErrors.indexOf(currentFieldId))
+    : 0
+
+  // Keep refs mirroring latest values so callbacks avoid stale closures
+  const fieldErrorsRef = useRef(fieldErrors)
+  fieldErrorsRef.current = fieldErrors
+
+  const currentFieldIdRef = useRef(currentFieldId)
+  currentFieldIdRef.current = currentFieldId
+
+  // Resolve the current index from the tracked field ID and the latest error list
+  const resolveCurrentIndex = useCallback(() => {
+    const id = currentFieldIdRef.current
+    if (!id) return 0
+    const idx = fieldErrorsRef.current.indexOf(id)
+    return idx === -1 ? 0 : idx
+  }, [])
 
   // Track previous errors to detect new ones
   const prevErrorKeysRef = useRef<string[]>([])
@@ -128,11 +168,8 @@ export function useErrorNavigation({
       const anchorId = generateAnchorId(formName, undefined, newErrorKey)
       focusFieldElement(anchorId, { highlight: true })
 
-      // Update current error index to the new error
-      const newErrorIndex = currentErrorKeys.indexOf(newErrorKey)
-      if (newErrorIndex !== -1) {
-        setCurrentErrorIndex(newErrorIndex)
-      }
+      // Track the newly focused field
+      setCurrentFieldId(newErrorKey)
     }
 
     prevErrorKeysRef.current = currentErrorKeys
@@ -141,30 +178,32 @@ export function useErrorNavigation({
   // Navigate to a specific error by index (with wrap-around)
   const navigateToError = useCallback(
     (index: number) => {
-      if (fieldErrors.length === 0) return
+      const errors = fieldErrorsRef.current
+      if (errors.length === 0) return
 
       // Wrap around
       const wrappedIndex =
-        ((index % fieldErrors.length) + fieldErrors.length) % fieldErrors.length
-      setCurrentErrorIndex(wrappedIndex)
+        ((index % errors.length) + errors.length) % errors.length
 
-      const fieldId = fieldErrors[wrappedIndex]
+      const fieldId = errors[wrappedIndex]
+      setCurrentFieldId(fieldId)
+
       const anchorId = generateAnchorId(formName, undefined, fieldId)
       focusFieldElement(anchorId, { highlight: true })
     },
-    [fieldErrors, formName]
+    [formName]
   )
 
   const goToPreviousError = useCallback(() => {
-    navigateToError(currentErrorIndex - 1)
-  }, [currentErrorIndex, navigateToError])
+    navigateToError(resolveCurrentIndex() - 1)
+  }, [resolveCurrentIndex, navigateToError])
 
   const goToNextError = useCallback(() => {
-    navigateToError(currentErrorIndex + 1)
-  }, [currentErrorIndex, navigateToError])
+    navigateToError(resolveCurrentIndex() + 1)
+  }, [resolveCurrentIndex, navigateToError])
 
   const resetErrorNavigation = useCallback(() => {
-    setCurrentErrorIndex(0)
+    setCurrentFieldId(null)
     prevErrorKeysRef.current = []
   }, [])
 

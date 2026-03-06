@@ -319,6 +319,69 @@ describe("useErrorNavigation", () => {
 
       expect(result.current.currentErrorIndex).toBe(0)
     })
+
+    it("navigates correctly after an earlier error is resolved", async () => {
+      const { el: el1 } = createMockElement("forms.test-form.field1")
+      createMockElement("forms.test-form.field2")
+      const { el: el3 } = createMockElement("forms.test-form.field3")
+
+      const initialErrors: FieldErrors = {
+        field1: { type: "required", message: "Required" },
+        field2: { type: "required", message: "Required" },
+        field3: { type: "required", message: "Required" },
+      }
+
+      const { result, rerender } = zeroRenderHook(
+        (props: { errors: FieldErrors }) =>
+          useErrorNavigation({
+            formName: "test-form",
+            errors: props.errors,
+          }),
+        { initialProps: { errors: initialErrors } }
+      )
+
+      // Wait for auto-focus on first error
+      await waitFor(() => {
+        expect(el1.classList.contains("f0-form-error-navigate")).toBe(true)
+      })
+
+      // Navigate to field3 (index 2)
+      act(() => {
+        vi.advanceTimersByTime(700)
+      })
+      act(() => {
+        result.current.goToNextError()
+      })
+      act(() => {
+        vi.advanceTimersByTime(700)
+      })
+      act(() => {
+        result.current.goToNextError()
+      })
+
+      await waitFor(() => {
+        expect(el3.classList.contains("f0-form-error-navigate")).toBe(true)
+      })
+
+      // Now field1 gets resolved — errors shift from [field1,field2,field3] to [field2,field3]
+      act(() => {
+        vi.advanceTimersByTime(700)
+      })
+      rerender({
+        errors: {
+          field2: { type: "required", message: "Required" },
+          field3: { type: "required", message: "Required" },
+        },
+      })
+
+      // Current field is still field3. "Previous" should go to field2 (the field before field3).
+      act(() => {
+        result.current.goToPreviousError()
+      })
+
+      // field3 is at index 1 in [field2,field3], so previous wraps to index 0 = field2
+      expect(result.current.currentErrorIndex).toBe(0)
+    })
   })
 
   describe("focusFieldElement finds buttons", () => {

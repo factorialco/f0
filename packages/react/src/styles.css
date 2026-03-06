@@ -102,7 +102,7 @@ div[role="dialog"] {
   .f0-form-error-navigate .rich-text-editor-container {
     animation: none;
     border-color: hsl(var(--critical-50)) !important;
-    box-shadow: 0 0 4px 1px hsl(var(--critical--50));
+    box-shadow: 0 0 4px 1px hsl(var(--critical-50));
   }
 
   .f0-form-error-navigate:not(:has([data-testid="input-field-wrapper"])):not(

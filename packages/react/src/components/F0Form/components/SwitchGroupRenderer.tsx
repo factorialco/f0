@@ -6,7 +6,11 @@ import {
   CardSelectableContainer,
   type CardSelectableItem,
 } from "@/experimental/Forms/CardSelectable"
-import { FormField as FormFieldPrimitive, FormMessage } from "@/ui/form"
+import {
+  FormField as FormFieldPrimitive,
+  FormItem,
+  FormMessage,
+} from "@/ui/form"
 import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 
 import { generateAnchorId, useF0FormContext } from "../context"
@@ -139,7 +143,12 @@ export function SwitchGroupRenderer({ fields }: SwitchGroupRendererProps) {
         ? { fieldId: field.id, label: field.label, message: error.message }
         : null
     })
-    .filter(Boolean)
+    .filter(
+      (
+        e
+      ): e is { fieldId: string; label: string; message: string | undefined } =>
+        e !== null
+    )
 
   // Generate anchor IDs for error navigation
   const fieldAnchorIds = useMemo(
@@ -172,11 +181,13 @@ export function SwitchGroupRenderer({ fields }: SwitchGroupRendererProps) {
         <div className="flex flex-col gap-1">
           {groupErrors.map((error) => (
             <FormFieldPrimitive
-              key={error!.fieldId}
+              key={error.fieldId}
               control={form.control}
-              name={error!.fieldId}
+              name={error.fieldId}
               render={() => (
-                <FormMessage fallback={forms.validation.required} />
+                <FormItem>
+                  <FormMessage fallback={forms.validation.required} />
+                </FormItem>
               )}
             />
           ))}

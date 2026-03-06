@@ -114,7 +114,7 @@ const RichTextEditorComponent = forwardRef<
     onFullscreenChange,
     disabled = false,
     error: errorProp = false,
-    loading: _loading = false,
+    loading = false,
     onBlur,
     dataTestId,
   },
@@ -281,6 +281,7 @@ const RichTextEditorComponent = forwardRef<
       <div
         ref={containerRef}
         id={editorId}
+        aria-busy={loading}
         className={cn(
           "rich-text-editor-container pointer-events-auto flex flex-col",
           disabled ? "bg-f1-background-tertiary" : "bg-f1-background",

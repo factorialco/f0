@@ -7,6 +7,11 @@ import userEvent from "@testing-library/user-event"
 import { F0Form } from "../F0Form"
 import { f0FormField } from "../f0Schema"
 
+// Mock tippy.js to avoid unhandled errors from TipTap's BubbleMenu in jsdom
+vi.mock("tippy.js", () => ({
+  default: () => ({ destroy: vi.fn(), setProps: vi.fn() }),
+}))
+
 /**
  * Tests for validation trigger improvements across field types:
  * - Select fields (single, multi, static options, data source) call onBlur on change
@@ -18,7 +23,10 @@ import { f0FormField } from "../f0Schema"
  */
 
 describe("F0Form select field validation", () => {
-  it("triggers validation error after clearing a required single-select field", async () => {
+  it("triggers validation error when required single-select field is empty", async () => {
+    const user = userEvent.setup()
+    const onSubmit = vi.fn().mockResolvedValue({ success: true })
+
     const formSchema = z.object({
       color: f0FormField(z.string().min(1), {
         label: "Color",
@@ -33,16 +41,22 @@ describe("F0Form select field validation", () => {
       <F0Form
         name="select-validation-test"
         schema={formSchema}
-        defaultValues={{ color: "red" }}
-        onSubmit={async () => ({ success: true })}
+        defaultValues={{ color: "" }}
+        onSubmit={onSubmit}
       />
     )
 
-    // The select should show "Red" initially
-    expect(screen.getByText("Red")).toBeInTheDocument()
+    // Submit without selecting a value
+    const submitButton = screen.getByText("Submit")
+    await user.click(submitButton)
+
+    // Form should not submit since the field is required
+    await waitFor(() => {
+      expect(onSubmit).not.toHaveBeenCalled()
+    })
   })
 
-  it("triggers validation error after deselecting all items in a required multi-select with static options", async () => {
+  it("submits successfully when required multi-select has selections", async () => {
     const user = userEvent.setup()
     const onSubmit = vi.fn().mockResolvedValue({ success: true })
 
@@ -81,7 +95,8 @@ describe("F0Form select field validation", () => {
 })
 
 describe("F0Form time field validation", () => {
-  it("triggers validation when time field value is cleared", async () => {
+  it("blocks submission when required time field has no value", async () => {
+    const user = userEvent.setup()
     const onSubmit = vi.fn().mockResolvedValue({ success: true })
 
     const formSchema = z.object({
@@ -100,15 +115,20 @@ describe("F0Form time field validation", () => {
         schema={formSchema}
         defaultValues={{
           title: "Meeting",
-          startTime: new Date("2026-03-06T09:00:00"),
+          startTime: undefined as unknown as Date,
         }}
         onSubmit={onSubmit}
       />
     )
 
-    // Time input should be present
-    const timeInput = screen.getByLabelText("Start Time")
-    expect(timeInput).toBeInTheDocument()
+    // Submit without a valid time value
+    const submitButton = screen.getByText("Submit")
+    await user.click(submitButton)
+
+    // Form should not submit since time is required
+    await waitFor(() => {
+      expect(onSubmit).not.toHaveBeenCalled()
+    })
   })
 })
 
