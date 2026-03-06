@@ -37,7 +37,10 @@ interface SwitchGroupRendererProps {
  * SwitchGroupRenderer renders multiple switch fields in a bordered container
  * using CardSelectableContainer with toggle indicators.
  */
-export function SwitchGroupRenderer({ fields }: SwitchGroupRendererProps) {
+export function SwitchGroupRenderer({
+  fields,
+  sectionId,
+}: SwitchGroupRendererProps) {
   const form = useFormContext()
   const { formName } = useF0FormContext()
   const { watch, setValue } = form
@@ -155,15 +158,15 @@ export function SwitchGroupRenderer({ fields }: SwitchGroupRendererProps) {
     () =>
       visibleFields.map((field) => ({
         fieldId: field.id,
-        anchorId: generateAnchorId(formName, undefined, field.id),
+        anchorId: generateAnchorId(formName, sectionId, field.id),
       })),
-    [visibleFields, formName]
+    [visibleFields, formName, sectionId]
   )
 
   return (
     <div className="flex flex-col gap-2">
       {/* First field's anchor wraps the container for wiggle animation */}
-      <div id={fieldAnchorIds[0]?.anchorId}>
+      <div id={fieldAnchorIds[0]?.anchorId} className="scroll-mt-4">
         {/* Additional field anchors so error navigation can find each field */}
         {fieldAnchorIds.slice(1).map(({ fieldId, anchorId }) => (
           <span key={fieldId} id={anchorId} className="hidden" />

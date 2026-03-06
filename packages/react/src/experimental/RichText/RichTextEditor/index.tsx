@@ -386,7 +386,7 @@ const RichTextEditorComponent = forwardRef<
         <div
           className={cn(
             "relative z-40 rounded-b-lg px-3",
-            !disabled && !errorProp && "bg-f1-background",
+            !disabled && !error && !errorProp && "bg-f1-background",
             hasFullHeight && !isScrolledToBottom && "shadow-editor-tools"
           )}
         >

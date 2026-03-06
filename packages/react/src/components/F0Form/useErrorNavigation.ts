@@ -9,6 +9,31 @@ const errorNavigateTimeouts = new WeakMap<
   ReturnType<typeof setTimeout>
 >()
 
+/**
+ * Finds the anchor element for a field, handling both sectioned and
+ * non-sectioned forms. First tries a direct lookup without section ID,
+ * then falls back to a suffix-match query for sectioned anchors
+ * (e.g. `forms.formName.sectionId.fieldId`).
+ */
+function findFieldAnchorElement(
+  formName: string,
+  fieldId: string
+): HTMLElement | null {
+  if (typeof document === "undefined") return null
+
+  // Try without section ID first (non-sectioned form)
+  const directId = generateAnchorId(formName, undefined, fieldId)
+  const direct = document.getElementById(directId)
+  if (direct) return direct
+
+  // Fallback: search for sectioned anchor (forms.formName.*.fieldId)
+  const prefix = `forms.${formName}.`
+  const suffix = `.${fieldId}`
+  return document.querySelector<HTMLElement>(
+    `[id^="${prefix}"][id$="${suffix}"]`
+  )
+}
+
 const applyErrorNavigationHighlight = (element: HTMLElement) => {
   const existingTimeout = errorNavigateTimeouts.get(element)
   if (existingTimeout) {
@@ -66,26 +91,36 @@ function getVisibleElement(element: HTMLElement): HTMLElement {
 }
 
 /**
- * Focuses a field element by its anchor ID
+ * Focuses a field element found via the anchor lookup helper,
+ * handling both sectioned and non-sectioned forms.
  */
-function focusFieldElement(
-  anchorId: string,
+function focusFieldByLookup(
+  formName: string,
+  fieldId: string,
   { highlight = false }: { highlight?: boolean } = {}
 ) {
-  const element = document.getElementById(anchorId)
+  const element = findFieldAnchorElement(formName, fieldId)
   if (element) {
-    const visibleElement = getVisibleElement(element)
-    visibleElement.scrollIntoView({ behavior: "smooth", block: "center" })
-    const input = visibleElement.querySelector(
-      "input, textarea, select, button"
-    )
-    if (input instanceof HTMLElement) {
-      input.focus()
-    }
+    focusElement(element, { highlight })
+  }
+}
 
-    if (highlight) {
-      applyErrorNavigationHighlight(visibleElement)
-    }
+/**
+ * Shared logic: scrolls, focuses, and optionally highlights an element.
+ */
+function focusElement(
+  element: HTMLElement,
+  { highlight = false }: { highlight?: boolean } = {}
+) {
+  const visibleElement = getVisibleElement(element)
+  visibleElement.scrollIntoView({ behavior: "smooth", block: "center" })
+  const input = visibleElement.querySelector("input, textarea, select, button")
+  if (input instanceof HTMLElement) {
+    input.focus()
+  }
+
+  if (highlight) {
+    applyErrorNavigationHighlight(visibleElement)
   }
 }
 
@@ -102,26 +137,28 @@ export function useErrorNavigation({
   formName,
   errors,
 }: UseErrorNavigationOptions): UseErrorNavigationReturn {
-  // Extract field error keys (excluding root error), sorted by DOM position.
+  // Extract field error keys (excluding root error).
   // Object.keys(errors) order is unstable — RHF may reorder keys when it
   // re-validates a single field on blur (e.g. focusing a text input blurs the
-  // previous one, triggering re-validation). Sorting by DOM position keeps
-  // prev/next navigation consistent with the visual form layout.
-  const fieldErrors = Object.keys(errors)
-    .filter((key) => key !== "root")
-    .sort((a, b) => {
-      const anchorA = document.getElementById(
-        generateAnchorId(formName, undefined, a)
-      )
-      const anchorB = document.getElementById(
-        generateAnchorId(formName, undefined, b)
-      )
-      if (!anchorA || !anchorB) return 0
-      const position = anchorA.compareDocumentPosition(anchorB)
-      if (position & Node.DOCUMENT_POSITION_FOLLOWING) return -1
-      if (position & Node.DOCUMENT_POSITION_PRECEDING) return 1
-      return 0
-    })
+  // previous one, triggering re-validation).
+  const fieldErrorKeys = Object.keys(errors).filter((key) => key !== "root")
+
+  // In the browser, sort by DOM position so prev/next navigation stays
+  // consistent with the visual form layout. In SSR / non-DOM environments,
+  // fall back to the original key order to avoid accessing `document`
+  // during render.
+  const fieldErrors =
+    typeof document === "undefined"
+      ? fieldErrorKeys
+      : [...fieldErrorKeys].sort((a, b) => {
+          const anchorA = findFieldAnchorElement(formName, a)
+          const anchorB = findFieldAnchorElement(formName, b)
+          if (!anchorA || !anchorB) return 0
+          const position = anchorA.compareDocumentPosition(anchorB)
+          if (position & Node.DOCUMENT_POSITION_FOLLOWING) return -1
+          if (position & Node.DOCUMENT_POSITION_PRECEDING) return 1
+          return 0
+        })
   const hasErrors = fieldErrors.length > 0
   const errorCount = fieldErrors.length
 
@@ -165,8 +202,7 @@ export function useErrorNavigation({
 
     if (newErrorKey) {
       // Focus the field with the new error and trigger animation
-      const anchorId = generateAnchorId(formName, undefined, newErrorKey)
-      focusFieldElement(anchorId, { highlight: true })
+      focusFieldByLookup(formName, newErrorKey, { highlight: true })
 
       // Track the newly focused field
       setCurrentFieldId(newErrorKey)
@@ -188,8 +224,7 @@ export function useErrorNavigation({
       const fieldId = errors[wrappedIndex]
       setCurrentFieldId(fieldId)
 
-      const anchorId = generateAnchorId(formName, undefined, fieldId)
-      focusFieldElement(anchorId, { highlight: true })
+      focusFieldByLookup(formName, fieldId, { highlight: true })
     },
     [formName]
   )
