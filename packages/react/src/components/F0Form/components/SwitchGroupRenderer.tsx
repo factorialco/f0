@@ -9,6 +9,7 @@ import {
 import { FormField as FormFieldPrimitive, FormMessage } from "@/ui/form"
 import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 
+import { generateAnchorId, useF0FormContext } from "../context"
 import { isZodType, unwrapZodSchema } from "../f0Schema"
 import type { F0SwitchField } from "../fields/switch/types"
 import { evaluateDisabled, evaluateRenderIf } from "../fields/utils"
@@ -34,6 +35,7 @@ interface SwitchGroupRendererProps {
  */
 export function SwitchGroupRenderer({ fields }: SwitchGroupRendererProps) {
   const form = useFormContext()
+  const { formName } = useF0FormContext()
   const { watch, setValue } = form
   const { isSubmitting } = form.formState
   const values = watch()
@@ -139,16 +141,33 @@ export function SwitchGroupRenderer({ fields }: SwitchGroupRendererProps) {
     })
     .filter(Boolean)
 
+  // Generate anchor IDs for error navigation
+  const fieldAnchorIds = useMemo(
+    () =>
+      visibleFields.map((field) => ({
+        fieldId: field.id,
+        anchorId: generateAnchorId(formName, undefined, field.id),
+      })),
+    [visibleFields, formName]
+  )
+
   return (
     <div className="flex flex-col gap-2">
-      <CardSelectableContainer
-        multiple
-        isToggle
-        grouped
-        items={items}
-        value={selectedIds}
-        onChange={handleChange}
-      />
+      {/* First field's anchor wraps the container for wiggle animation */}
+      <div id={fieldAnchorIds[0]?.anchorId}>
+        {/* Additional field anchors so error navigation can find each field */}
+        {fieldAnchorIds.slice(1).map(({ fieldId, anchorId }) => (
+          <span key={fieldId} id={anchorId} className="hidden" />
+        ))}
+        <CardSelectableContainer
+          multiple
+          isToggle
+          grouped
+          items={items}
+          value={selectedIds}
+          onChange={handleChange}
+        />
+      </div>
       {groupErrors.length > 0 && (
         <div className="flex flex-col gap-1">
           {groupErrors.map((error) => (

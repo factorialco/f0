@@ -536,7 +536,7 @@ export const AllFieldTypes: Story = {
         label: "Number Field",
         step: 1,
       }),
-      textareaField: f0FormField(z.string().max(500), {
+      textareaField: f0FormField(z.string().min(1).max(500), {
         label: "Textarea Field",
         fieldType: "textarea",
         rows: 3,
@@ -648,7 +648,7 @@ export const AllFieldTypes: Story = {
         timeField: undefined,
         datetimeField: undefined,
         dateRangeField: undefined,
-        richTextField: { value: null },
+        richTextField: { value: "" },
       },
       submitConfig: {
         type: "action-bar",

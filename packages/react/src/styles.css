@@ -89,11 +89,25 @@ div[role="dialog"] {
     f0-form-error-glow 0.6s ease-in-out forwards;
 }
 
+/* Checkbox and switch fields don't have an input-field-wrapper,
+   so we animate the FormItem itself as a fallback */
+.f0-form-error-navigate:not(:has([data-testid="input-field-wrapper"])):not(
+    :has(.rich-text-editor-container)
+  ) {
+  animation: f0-form-error-shake 0.5s ease-in-out;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .f0-form-error-navigate [data-testid="input-field-wrapper"],
   .f0-form-error-navigate .rich-text-editor-container {
     animation: none;
     border-color: hsl(var(--critical-50)) !important;
     box-shadow: 0 0 4px 1px hsl(var(--critical--50));
+  }
+
+  .f0-form-error-navigate:not(:has([data-testid="input-field-wrapper"])):not(
+      :has(.rich-text-editor-container)
+    ) {
+    animation: none;
   }
 }
