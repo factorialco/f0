@@ -7,9 +7,11 @@ import userEvent from "@testing-library/user-event"
 import { F0Form } from "../F0Form"
 import { f0FormField } from "../f0Schema"
 
-// Mock tippy.js to avoid unhandled errors from TipTap's BubbleMenu in jsdom
-vi.mock("tippy.js", () => ({
-  default: () => ({ destroy: vi.fn(), setProps: vi.fn() }),
+// Mock the EditorBubbleMenu to avoid unhandled tippy.js errors in jsdom.
+// TipTap's BubbleMenu uses tippy.js which isn't available in jsdom, and its
+// focusHandler sets a setTimeout that fires after tests complete.
+vi.mock("@/experimental/RichText/CoreEditor/BubbleMenu", () => ({
+  EditorBubbleMenu: () => null,
 }))
 
 /**
