@@ -81,11 +81,11 @@ export function EditableCellRenderer<
         : false
 
       return (
-        // eslint-disable-next-line jsx-a11y/no-static-element-interactions -- stops cell navigation (href/onClick) from firing when interacting with the editor
+        // eslint-disable-next-line jsx-a11y/no-static-element-interactions -- stops cell navigation (href/onClick) from bubbling to the row after child interactions complete
         <div
           className="pointer-events-auto h-full"
-          onClickCapture={(e) => e.stopPropagation()}
-          onMouseDownCapture={(e) => e.stopPropagation()}
+          onClick={(e) => e.stopPropagation()}
+          onMouseDown={(e) => e.stopPropagation()}
         >
           <CellComponent
             editableColumn={editableColumn}

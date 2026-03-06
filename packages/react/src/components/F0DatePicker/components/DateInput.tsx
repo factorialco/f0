@@ -5,6 +5,7 @@ import type {
   GranularityDefinitionKey,
 } from "@/experimental/OneCalendar"
 
+import { DateStringFormat } from "@/experimental/OneCalendar/granularities/types"
 import { isActiveDate } from "@/experimental/OneCalendar/utils"
 import { Calendar } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
@@ -24,6 +25,8 @@ type DateInputProps = {
   onClear?: () => void
   minDate?: Date
   maxDate?: Date
+  hideIcon?: boolean
+  displayFormat?: DateStringFormat
 } & Pick<InputFieldProps<string>, InputFieldInheritedProps>
 
 const DateInput = forwardRef<HTMLInputElement, DateInputProps>(
@@ -36,6 +39,8 @@ const DateInput = forwardRef<HTMLInputElement, DateInputProps>(
       minDate,
       maxDate,
       onClear,
+      hideIcon,
+      displayFormat,
       ...inputProps
     },
     ref
@@ -45,8 +50,10 @@ const DateInput = forwardRef<HTMLInputElement, DateInputProps>(
     const i18n = useI18n()
 
     useEffect(() => {
-      setInputValue(granularity.toString(value?.value, i18n, "long"))
-    }, [value, granularity, i18n])
+      setInputValue(
+        granularity.toString(value?.value, i18n, displayFormat ?? "long")
+      )
+    }, [value, granularity, i18n, displayFormat])
 
     const isValidDate = (date: Date | undefined | null) => {
       return isActiveDate(date, granularity, {
@@ -101,7 +108,7 @@ const DateInput = forwardRef<HTMLInputElement, DateInputProps>(
         <Input
           {...inputProps}
           placeholder={placeholder}
-          icon={Calendar}
+          icon={hideIcon ? undefined : Calendar}
           ref={ref}
           onFocus={() => onOpenChange?.(true)}
           onClear={() => {

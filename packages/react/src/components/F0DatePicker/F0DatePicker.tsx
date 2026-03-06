@@ -18,6 +18,8 @@ export function F0DatePicker({
   minDate,
   maxDate,
   open = false,
+  hideIcon,
+  displayFormat,
   ...inputProps
 }: F0DatePickerProps) {
   const [localValue, setLocalValue] = useState<DatePickerValue | undefined>()
@@ -52,22 +54,20 @@ export function F0DatePicker({
    */
   const toSafeRange = useCallback(
     (value: DatePickerValue | undefined) => {
-      if (!value) {
-        return undefined
-      }
+      if (!value) return undefined
 
-      const granularity = getGranularity(value?.granularity)
+      const granularity = getGranularity(value.granularity)
+      const range = granularity.toRange(
+        granularity.calendarMode === "range"
+          ? value.value
+          : (value.value?.from ?? undefined)
+      )
 
-      return value
-        ? {
-            value: granularity.toRange(
-              granularity.calendarMode === "range"
-                ? value.value
-                : (value.value?.from ?? undefined)
-            ),
-            granularity: value.granularity,
-          }
-        : undefined
+      // Normalize { value: undefined } to undefined so isSameDatePickerValue
+      // correctly detects "no change" on subsequent blur events after a clear.
+      if (!range) return undefined
+
+      return { value: range, granularity: value.granularity }
     },
     [getGranularity]
   )
@@ -89,7 +89,6 @@ export function F0DatePicker({
     const newGranularity = getGranularity(safeValue?.granularity)
     const shouldClose =
       newGranularity.calendarMode !== "range" &&
-      safeValue?.granularity === localValue?.granularity &&
       !isSameDatePickerValue(safeValue, localValue)
 
     handleChangeDate(safeValue)
@@ -148,6 +147,8 @@ export function F0DatePicker({
         value={localValue}
         granularity={granularity}
         onDateChange={handleChangeDate}
+        hideIcon={hideIcon}
+        displayFormat={displayFormat}
       />
     </DatePickerPopup>
   )

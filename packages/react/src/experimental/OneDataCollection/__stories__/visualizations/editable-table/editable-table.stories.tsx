@@ -1,4 +1,5 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
+import { format } from "date-fns"
 import { useMemo, useRef, useState } from "react"
 import { action } from "storybook/actions"
 
@@ -525,6 +526,70 @@ export const TableAndEditableTable: Story = {
         ]}
         dataAdapter={dataAdapter}
         id="table-and-editable/v1"
+      />
+    )
+  },
+}
+
+export const EditableTableWithDateCell: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Editable table with a date cell. Click any date cell to open the date picker and select a new date. Values are stored and emitted as ISO date strings (yyyy-MM-dd).",
+      },
+    },
+  },
+  render: () => {
+    const { dataAdapter, onCellChange } = useEditableTableData()
+
+    const baseOptions = (
+      getMockVisualizations().editableTable as Extract<
+        ReturnType<typeof getMockVisualizations>["editableTable"],
+        { type: "editableTable" }
+      >
+    ).options
+
+    return (
+      <ExampleComponent
+        visualizations={[
+          {
+            type: "editableTable" as const,
+            options: {
+              ...baseOptions,
+              columns: [
+                {
+                  label: "Name",
+                  render: (item: MockUser) => ({
+                    type: "person" as const,
+                    value: {
+                      firstName: item.name.split(" ")[0],
+                      lastName: item.name.split(" ")[1],
+                    },
+                  }),
+                  id: "name",
+                  editType: () => "display-only" as const,
+                },
+                {
+                  label: "Email",
+                  render: (item: MockUser) => item.email,
+                  id: "email",
+                  editType: () => "text" as const,
+                },
+                {
+                  label: "Start date",
+                  id: "startDate",
+                  render: (item: MockUser) =>
+                    format(item.joinedAt, "yyyy-MM-dd"),
+                  editType: () => "date" as const,
+                },
+              ],
+              onCellChange,
+            },
+          },
+        ]}
+        dataAdapter={dataAdapter}
+        id="editable-table-date/v1"
       />
     )
   },
