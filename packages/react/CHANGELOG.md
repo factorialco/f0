@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.390.2](https://github.com/factorialco/f0/compare/f0-react-v1.390.1...f0-react-v1.390.2) (2026-03-06)
+
+
+### Bug Fixes
+
+* error highlight animations & validation fixes across all field types in F0Form ([#3597](https://github.com/factorialco/f0/issues/3597)) ([095fc17](https://github.com/factorialco/f0/commit/095fc17c136556bfd5e1a86207a8f6b1baab732a))
+
 ## [1.390.1](https://github.com/factorialco/f0/compare/f0-react-v1.390.0...f0-react-v1.390.1) (2026-03-06)
 
 
