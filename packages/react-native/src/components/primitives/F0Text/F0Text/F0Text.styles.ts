@@ -4,6 +4,7 @@ import { tv, type VariantProps } from "tailwind-variants"
  * Text component variants using tailwind-variants
  * Font weights (font-normal, font-medium, font-semibold) map to
  * Inter font families (Inter-Regular, Inter-Medium, Inter-SemiBold)
+ * via --font-* CSS variables defined in @theme.
  */
 export const textVariants = tv({
   base: "",
