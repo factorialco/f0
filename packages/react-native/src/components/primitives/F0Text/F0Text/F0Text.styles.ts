@@ -2,8 +2,9 @@ import { tv, type VariantProps } from "tailwind-variants"
 
 /**
  * Text component variants using tailwind-variants
- * Font weights (font-normal, font-medium, font-semibold) map to
- * Inter font families (Inter-Regular, Inter-Medium, Inter-SemiBold)
+ * Font weights (font-normal, font-medium, font-semibold, font-bold) map to
+ * Inter font families (Inter-Regular, Inter-Medium, Inter-SemiBold, Inter-Bold)
+ * via --font-* CSS variables defined in @theme.
  */
 export const textVariants = tv({
   base: "",

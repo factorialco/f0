@@ -277,14 +277,59 @@ F0Text/                        # Parent folder for text primitives
 
 ### Font Family
 
-F0Text uses **Inter** font family through Tailwind/Uniwind font weight classes:
+F0Text uses the **Inter** font family through Tailwind/Uniwind `font-*` utility classes,
+which map to `--font-*` CSS variables defined in the app's `@theme`:
 
-| Tailwind Class  | React Native Font Family | Font Weight |
-| --------------- | ------------------------ | ----------- |
-| `font-normal`   | Inter-Regular            | 400         |
-| `font-medium`   | Inter-Medium             | 500         |
-| `font-semibold` | Inter-SemiBold           | 600         |
-| `font-bold`     | Inter-Bold               | 700         |
+| Tailwind Class  | CSS Variable      | Font Name      | Font Weight |
+| --------------- | ----------------- | -------------- | ----------- |
+| `font-normal`   | `--font-normal`   | Inter-Regular  | 400         |
+| `font-medium`   | `--font-medium`   | Inter-Medium   | 500         |
+| `font-semibold` | `--font-semibold` | Inter-SemiBold | 600         |
+| `font-bold`     | `--font-bold`     | Inter-Bold     | 700         |
+
+#### Host App Font Setup
+
+The consuming app must embed the Inter `.ttf` files and wire them up for both
+iOS and Android. See the [README "Add Inter Fonts"](../../../../../README.md#5️⃣-add-inter-fonts-host-app) section for the full
+step-by-step guide. The short version:
+
+1. **Name font files to match their PostScript name** (e.g. `Inter-Regular.ttf`
+   for PostScript name `Inter-Regular`). iOS resolves fonts by PostScript name,
+   Android by asset file name — matching them avoids platform-specific overrides.
+
+2. **Register via `expo-font`** config plugin in `app.json`:
+
+```json
+[
+  "expo-font",
+  {
+    "fonts": [
+      "./assets/fonts/Inter/Inter-Regular.ttf",
+      "./assets/fonts/Inter/Inter-Medium.ttf",
+      "./assets/fonts/Inter/Inter-SemiBold.ttf",
+      "./assets/fonts/Inter/Inter-Bold.ttf"
+    ]
+  }
+]
+```
+
+3. **Define `@theme` variables** in `global.css`:
+
+```css
+@theme {
+  --font-normal: "Inter-Regular";
+  --font-medium: "Inter-Medium";
+  --font-semibold: "Inter-SemiBold";
+  --font-bold: "Inter-Bold";
+}
+```
+
+The `@theme` values must match the file names (without `.ttf`). Uniwind maps
+`font-normal`, `font-medium`, `font-semibold`, and `font-bold` utility classes
+to these variables.
+
+> **Rebuild required:** Font changes are picked up at native build time.
+> Run `npx expo prebuild --clean` after adding or renaming font files.
 
 ## Accessibility
 
