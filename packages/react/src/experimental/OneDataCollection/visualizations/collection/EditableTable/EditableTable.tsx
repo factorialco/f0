@@ -16,6 +16,7 @@ import { SummariesDefinition } from "../../../summary"
 import { CollectionProps } from "../../../types"
 import { TableCollection } from "../Table/Table"
 import { EditableCellRenderer } from "./components/EditableCellRenderer"
+import { AddRowProvider } from "./context/AddRowContext"
 import { EditableRowProvider } from "./context/EditableRowContext"
 import { EditableTableVisualizationOptions } from "./types"
 
@@ -62,23 +63,26 @@ export const EditableTableCollection = <
   }, []) // eslint-disable-line react-hooks/exhaustive-deps -- onCellChange is considered constant
 
   return (
-    <TableCollection<
-      R,
-      Filters,
-      Sortings,
-      Summaries,
-      ItemActions,
-      NavigationFilters,
-      Grouping
-    >
-      {...props}
-      rowWrapper={RowWrapper}
-      cellRenderer={EditableCellRenderer}
-      showItemActions={false}
-      visualizationSettings={settings.visualization?.editableTable}
+    <AddRowProvider
       onAddRow={onAddRow}
       addRowButtonLabel={addRowButtonLabel}
       nestedAddRowButtonLabel={nestedAddRowButtonLabel}
-    />
+    >
+      <TableCollection<
+        R,
+        Filters,
+        Sortings,
+        Summaries,
+        ItemActions,
+        NavigationFilters,
+        Grouping
+      >
+        {...props}
+        rowWrapper={RowWrapper}
+        cellRenderer={EditableCellRenderer}
+        showItemActions={false}
+        visualizationSettings={settings.visualization?.editableTable}
+      />
+    </AddRowProvider>
   )
 }

@@ -1,4 +1,4 @@
-import { screen, waitFor } from "@testing-library/react"
+import { screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { describe, expect, it, vi } from "vitest"
 
@@ -10,6 +10,7 @@ import { NavigationFiltersDefinition } from "@/experimental/OneDataCollection/na
 import { BaseFetchOptions, FiltersDefinition } from "@/hooks/datasource"
 import { zeroRender as render } from "@/testing/test-utils"
 
+import { AddRowProvider } from "../../../EditableTable/context/AddRowContext"
 import { ItemActionsDefinition } from "../../../../../item-actions"
 import { SummariesDefinition } from "../../../../../summary"
 import { TableCollection } from "../../index"
@@ -160,22 +161,23 @@ describe("NestedRow onAddRow", () => {
     const user = userEvent.setup()
 
     render(
-      <TableCollection<
-        Person,
-        TestFilters,
-        SortingsDefinition,
-        SummariesDefinition,
-        ItemActionsDefinition<Person>,
-        TestNavigationFilters,
-        GroupingDefinition<Person>
-      >
-        columns={testColumns}
-        source={createNestedTestSource()}
-        onSelectItems={vi.fn()}
-        onLoadData={vi.fn()}
-        onLoadError={vi.fn()}
-        onAddRow={vi.fn()}
-      />
+      <AddRowProvider onAddRow={vi.fn()}>
+        <TableCollection<
+          Person,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          TestNavigationFilters,
+          GroupingDefinition<Person>
+        >
+          columns={testColumns}
+          source={createNestedTestSource()}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+        />
+      </AddRowProvider>
     )
 
     await waitFor(() => {
@@ -191,33 +193,37 @@ describe("NestedRow onAddRow", () => {
       expect(screen.getByText("Child A")).toBeInTheDocument()
     })
 
-    // The footer "Add row" button always exists (from TableCollection).
-    // The nested "Add row" button is the one inside the expanded row.
-    const addRowButtons = screen.getAllByRole("button", { name: /add row/i })
-    expect(addRowButtons.length).toBeGreaterThanOrEqual(2)
+    const tbody = screen.getByRole("table").querySelector("tbody")!
+    const nestedAddRowButton = within(tbody).getByRole("button", {
+      name: /add row/i,
+    })
+    expect(nestedAddRowButton).toBeInTheDocument()
   })
 
   it("renders custom nestedAddRowButtonLabel when provided", async () => {
     const user = userEvent.setup()
 
     render(
-      <TableCollection<
-        Person,
-        TestFilters,
-        SortingsDefinition,
-        SummariesDefinition,
-        ItemActionsDefinition<Person>,
-        TestNavigationFilters,
-        GroupingDefinition<Person>
-      >
-        columns={testColumns}
-        source={createNestedTestSource()}
-        onSelectItems={vi.fn()}
-        onLoadData={vi.fn()}
-        onLoadError={vi.fn()}
+      <AddRowProvider
         onAddRow={vi.fn()}
         nestedAddRowButtonLabel="Add line item"
-      />
+      >
+        <TableCollection<
+          Person,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          TestNavigationFilters,
+          GroupingDefinition<Person>
+        >
+          columns={testColumns}
+          source={createNestedTestSource()}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+        />
+      </AddRowProvider>
     )
 
     await waitFor(() => {
@@ -242,22 +248,23 @@ describe("NestedRow onAddRow", () => {
     const onAddRowMock = vi.fn()
 
     render(
-      <TableCollection<
-        Person,
-        TestFilters,
-        SortingsDefinition,
-        SummariesDefinition,
-        ItemActionsDefinition<Person>,
-        TestNavigationFilters,
-        GroupingDefinition<Person>
-      >
-        columns={testColumns}
-        source={createNestedTestSource()}
-        onSelectItems={vi.fn()}
-        onLoadData={vi.fn()}
-        onLoadError={vi.fn()}
-        onAddRow={onAddRowMock}
-      />
+      <AddRowProvider onAddRow={onAddRowMock}>
+        <TableCollection<
+          Person,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          TestNavigationFilters,
+          GroupingDefinition<Person>
+        >
+          columns={testColumns}
+          source={createNestedTestSource()}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+        />
+      </AddRowProvider>
     )
 
     await waitFor(() => {
@@ -273,13 +280,11 @@ describe("NestedRow onAddRow", () => {
       expect(screen.getByText("Child A")).toBeInTheDocument()
     })
 
-    // There should be at least 2 "Add row" buttons: one from the footer and one from the nested row.
-    // The nested one appears after the children, before the footer one.
-    const addRowButtons = screen.getAllByRole("button", { name: /add row/i })
-    expect(addRowButtons.length).toBeGreaterThanOrEqual(2)
-
-    // The first "Add row" button in DOM order is the one inside the nested row
-    await user.click(addRowButtons[0])
+    const tbody = screen.getByRole("table").querySelector("tbody")!
+    const nestedAddRowButton = within(tbody).getByRole("button", {
+      name: /add row/i,
+    })
+    await user.click(nestedAddRowButton)
 
     expect(onAddRowMock).toHaveBeenCalledTimes(1)
     expect(onAddRowMock).toHaveBeenCalledWith(

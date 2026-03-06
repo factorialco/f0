@@ -40,6 +40,7 @@ import type {
   TableColumnDefinition,
 } from "../types"
 
+import { useAddRow } from "../../EditableTable/context/AddRowContext"
 import { useCalculateConectorHeight } from "../hooks/useCalculateConectorHeight"
 import { useLoadChildren } from "../hooks/useLoadChildren"
 import { useNestedDataContext } from "../providers/NestedProvider"
@@ -79,10 +80,6 @@ export type RowProps<
   cellRenderer?: React.ComponentType<CellRendererProps<R, Sortings, Summaries>>
   /** Row wrapper for child rows (provides per-row context, e.g. editing state) */
   rowWrapper?: React.ComponentType<RowWrapperProps<R>>
-  /** Callback for the "Add" button rendered at the bottom of nested children. Receives the parent item when triggered from a nested row. */
-  onAddRow?: (parentItem?: R) => void | Promise<void>
-  /** Custom label for the "Add row" button. Falls back to the default i18n translation. */
-  addRowButtonLabel?: string
 }
 
 const NestedRowContent = <
@@ -110,6 +107,7 @@ const NestedRowContent = <
 ) => {
   const internalRowRef = useRef<HTMLTableRowElement | null>(null)
   const { t } = useI18n()
+  const addRow = useAddRow()
 
   const rowId = `${props.nestedRowProps?.depth ?? 0}-${"id" in props.item ? props.item.id + "-" + props.index : props.index}`
 
@@ -359,7 +357,7 @@ const NestedRowContent = <
         />
       )}
 
-      {shouldShowChildren && props.onAddRow && (
+      {shouldShowChildren && addRow?.onAddRow && (
         <TableRow>
           <TableCell
             colSpan={
@@ -378,10 +376,10 @@ const NestedRowContent = <
                 variant="ghost"
                 icon={Add}
                 label={
-                  props.addRowButtonLabel ??
+                  addRow.nestedAddRowButtonLabel ??
                   t("collections.editableTable.addRow")
                 }
-                onClick={() => props.onAddRow?.(props.item)}
+                onClick={() => addRow.onAddRow?.(props.item)}
                 size="sm"
               />
             </div>

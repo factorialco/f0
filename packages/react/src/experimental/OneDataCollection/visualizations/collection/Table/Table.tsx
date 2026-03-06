@@ -43,6 +43,7 @@ import { ItemActionsDefinition } from "../../../item-actions"
 import { NavigationFiltersDefinition } from "../../../navigationFilters/types"
 import { SummariesDefinition } from "../../../summary"
 import { CollectionProps } from "../../../types"
+import { useAddRow } from "../EditableTable/context/AddRowContext"
 import { statusToChecked } from "../utils"
 import { Row } from "./components/Row"
 import { useColumns } from "./hooks/useColums"
@@ -92,9 +93,6 @@ export const TableCollection = <
   cellRenderer,
   showItemActions: showItemActionsProp,
   visualizationSettings,
-  onAddRow,
-  addRowButtonLabel,
-  nestedAddRowButtonLabel,
 }: CollectionProps<
   R,
   Filters,
@@ -107,6 +105,7 @@ export const TableCollection = <
 > &
   TableCustomizationProps<R, Sortings, Summaries>) => {
   const { t, ...i18n } = useI18n()
+  const addRow = useAddRow()
   // Created a motion component for the row
   const [MotionRow] = useState(() =>
     motion.create(
@@ -530,8 +529,6 @@ export const TableCollection = <
                               checkColumnWidth={checkColumnWidth}
                               rowWrapper={RowWrapper}
                               cellRenderer={cellRenderer}
-                              onAddRow={onAddRow}
-                              nestedAddRowButtonLabel={nestedAddRowButtonLabel}
                             />
                           )
                           if (RowWrapper) {
@@ -572,8 +569,6 @@ export const TableCollection = <
                     tableWithChildren={tableWithChildren}
                     rowWrapper={RowWrapper}
                     cellRenderer={cellRenderer}
-                    onAddRow={onAddRow}
-                    nestedAddRowButtonLabel={nestedAddRowButtonLabel}
                   />
                 )
                 if (RowWrapper) {
@@ -615,7 +610,7 @@ export const TableCollection = <
                 </tr>
               )}
           </TableBody>
-          {(summaryData || onAddRow) && (
+          {(summaryData || addRow?.onAddRow) && (
             <TableFooter>
               {summaryData && (
                 <TableRow
@@ -687,7 +682,7 @@ export const TableCollection = <
                   )}
                 </TableRow>
               )}
-              {onAddRow && (
+              {addRow?.onAddRow && (
                 <TableRow>
                   <TableCell
                     colSpan={
@@ -701,10 +696,10 @@ export const TableCollection = <
                         variant="ghost"
                         icon={Add}
                         label={
-                          addRowButtonLabel ??
+                          addRow.addRowButtonLabel ??
                           t("collections.editableTable.addRow")
                         }
-                        onClick={() => onAddRow?.()}
+                        onClick={() => addRow.onAddRow?.()}
                         size="sm"
                       />
                     </div>

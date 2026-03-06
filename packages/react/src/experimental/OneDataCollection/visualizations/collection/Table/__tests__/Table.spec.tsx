@@ -18,6 +18,7 @@ import { zeroRender as render, zeroRenderHook } from "@/testing/test-utils"
 
 import { ItemActionsDefinition } from "../../../../item-actions"
 import { SummariesDefinition } from "../../../../summary"
+import { AddRowProvider } from "../../EditableTable/context/AddRowContext"
 import { TableCollection } from "../index"
 
 vi.mock("../../property", () => ({
@@ -1212,22 +1213,23 @@ describe("TableCollection", () => {
 
     it("renders an add-row button in the table footer when onAddRow is provided", async () => {
       render(
-        <TableCollection<
-          Person,
-          TestFilters,
-          SortingsDefinition,
-          SummariesDefinition,
-          ItemActionsDefinition<Person>,
-          TestNavigationFilters,
-          GroupingDefinition<Person>
-        >
-          columns={testColumns}
-          source={createTestSource()}
-          onSelectItems={vi.fn()}
-          onLoadData={vi.fn()}
-          onLoadError={vi.fn()}
-          onAddRow={vi.fn()}
-        />
+        <AddRowProvider onAddRow={vi.fn()}>
+          <TableCollection<
+            Person,
+            TestFilters,
+            SortingsDefinition,
+            SummariesDefinition,
+            ItemActionsDefinition<Person>,
+            TestNavigationFilters,
+            GroupingDefinition<Person>
+          >
+            columns={testColumns}
+            source={createTestSource()}
+            onSelectItems={vi.fn()}
+            onLoadData={vi.fn()}
+            onLoadError={vi.fn()}
+          />
+        </AddRowProvider>
       )
 
       await waitFor(() => {
@@ -1241,23 +1243,23 @@ describe("TableCollection", () => {
 
     it("renders custom addRowButtonLabel when provided", async () => {
       render(
-        <TableCollection<
-          Person,
-          TestFilters,
-          SortingsDefinition,
-          SummariesDefinition,
-          ItemActionsDefinition<Person>,
-          TestNavigationFilters,
-          GroupingDefinition<Person>
-        >
-          columns={testColumns}
-          source={createTestSource()}
-          onSelectItems={vi.fn()}
-          onLoadData={vi.fn()}
-          onLoadError={vi.fn()}
-          onAddRow={vi.fn()}
-          addRowButtonLabel="Add phase"
-        />
+        <AddRowProvider onAddRow={vi.fn()} addRowButtonLabel="Add phase">
+          <TableCollection<
+            Person,
+            TestFilters,
+            SortingsDefinition,
+            SummariesDefinition,
+            ItemActionsDefinition<Person>,
+            TestNavigationFilters,
+            GroupingDefinition<Person>
+          >
+            columns={testColumns}
+            source={createTestSource()}
+            onSelectItems={vi.fn()}
+            onLoadData={vi.fn()}
+            onLoadError={vi.fn()}
+          />
+        </AddRowProvider>
       )
 
       await waitFor(() => {
@@ -1277,22 +1279,23 @@ describe("TableCollection", () => {
       const onAddRowMock = vi.fn()
 
       render(
-        <TableCollection<
-          Person,
-          TestFilters,
-          SortingsDefinition,
-          SummariesDefinition,
-          ItemActionsDefinition<Person>,
-          TestNavigationFilters,
-          GroupingDefinition<Person>
-        >
-          columns={testColumns}
-          source={createTestSource()}
-          onSelectItems={vi.fn()}
-          onLoadData={vi.fn()}
-          onLoadError={vi.fn()}
-          onAddRow={onAddRowMock}
-        />
+        <AddRowProvider onAddRow={onAddRowMock}>
+          <TableCollection<
+            Person,
+            TestFilters,
+            SortingsDefinition,
+            SummariesDefinition,
+            ItemActionsDefinition<Person>,
+            TestNavigationFilters,
+            GroupingDefinition<Person>
+          >
+            columns={testColumns}
+            source={createTestSource()}
+            onSelectItems={vi.fn()}
+            onLoadData={vi.fn()}
+            onLoadError={vi.fn()}
+          />
+        </AddRowProvider>
       )
 
       await waitFor(() => {
