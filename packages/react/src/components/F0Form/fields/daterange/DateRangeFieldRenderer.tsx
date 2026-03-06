@@ -67,6 +67,13 @@ export function DateRangeFieldRenderer({
     formField.onChange(pickerValueToDateRange(value) ?? null)
   }
 
+  // Trigger validation when the picker closes, not on every change
+  const handleOpenChange = (open: boolean) => {
+    if (!open) {
+      formField.onBlur()
+    }
+  }
+
   // Build label with from/to labels if provided
   const label =
     field.fromLabel && field.toLabel
@@ -85,6 +92,7 @@ export function DateRangeFieldRenderer({
       clearable={field.clearable}
       value={pickerValue}
       onChange={handleChange}
+      onOpenChange={handleOpenChange}
       size={FORM_SIZE}
       hideLabel
       error={error}

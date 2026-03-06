@@ -413,6 +413,40 @@ describe("isFieldRequired", () => {
       expect(isFieldRequired(z.boolean().optional())).toBe(false)
     })
   })
+
+  describe("object fields (rich text)", () => {
+    it("returns false for z.object({ value: z.string().nullable() })", () => {
+      expect(
+        isFieldRequired(
+          z.object({
+            value: z.string().nullable(),
+            mentionIds: z.array(z.number()).optional(),
+          })
+        )
+      ).toBe(false)
+    })
+
+    it("returns true for z.object({ value: z.string().min(1) })", () => {
+      expect(
+        isFieldRequired(
+          z.object({
+            value: z.string().min(1),
+            mentionIds: z.array(z.number()).optional(),
+          })
+        )
+      ).toBe(true)
+    })
+
+    it("returns false for z.object({ value: z.string() }) without constraints", () => {
+      expect(
+        isFieldRequired(
+          z.object({
+            value: z.string(),
+          })
+        )
+      ).toBe(false)
+    })
+  })
 })
 
 describe("getSchemaDefinition - field types", () => {

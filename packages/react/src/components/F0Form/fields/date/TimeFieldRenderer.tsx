@@ -39,12 +39,16 @@ export function TimeFieldRenderer({
     (value: string | undefined) => {
       if (!value) {
         formField.onChange(null)
+        // Trigger validation after clearing
+        formField.onBlur()
         return
       }
 
       // Convert the time string to a Date object
       const date = timeStringToDate(value)
       formField.onChange(date)
+      // Trigger validation after selection
+      formField.onBlur()
     },
     [formField]
   )

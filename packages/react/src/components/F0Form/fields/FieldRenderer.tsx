@@ -183,6 +183,7 @@ function renderFieldInput({
         <RichTextFieldRenderer
           field={{ ...field, disabled: isDisabled }}
           formField={formField}
+          {...errorAndLoadingProps}
         />
       )
     case "file":
