@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.390.1](https://github.com/factorialco/f0/compare/f0-react-v1.390.0...f0-react-v1.390.1) (2026-03-06)
+
+
+### Bug Fixes
+
+* add dark mode to storybook in preview mode ([#3599](https://github.com/factorialco/f0/issues/3599)) ([b403daf](https://github.com/factorialco/f0/commit/b403dafa8b464f4455bff6e0b899a57790da1b85))
+
 ## [1.390.0](https://github.com/factorialco/f0/compare/f0-react-v1.389.0...f0-react-v1.390.0) (2026-03-05)
 
 
