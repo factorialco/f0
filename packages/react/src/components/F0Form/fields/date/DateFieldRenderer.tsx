@@ -65,6 +65,13 @@ export function DateFieldRenderer({
     formField.onChange(pickerValueToDate(value) ?? null)
   }
 
+  // Trigger validation when the picker closes, not on every change
+  const handleOpenChange = (open: boolean) => {
+    if (!open) {
+      formField.onBlur()
+    }
+  }
+
   return (
     <F0DatePicker
       label={field.label}
@@ -77,6 +84,7 @@ export function DateFieldRenderer({
       clearable={field.clearable}
       value={pickerValue}
       onChange={handleChange}
+      onOpenChange={handleOpenChange}
       size={FORM_SIZE}
       hideLabel
       error={error}

@@ -53,6 +53,19 @@ interface UseErrorNavigationReturn {
 }
 
 /**
+ * Returns the effective visible element for an anchor.
+ * If the anchor element is hidden (e.g. a hidden span used as a routing
+ * anchor in switch groups), walks up to find the nearest visible parent.
+ */
+function getVisibleElement(element: HTMLElement): HTMLElement {
+  let current: HTMLElement | null = element
+  while (current && current.offsetParent === null && current.parentElement) {
+    current = current.parentElement
+  }
+  return current ?? element
+}
+
+/**
  * Focuses a field element by its anchor ID
  */
 function focusFieldElement(
@@ -61,14 +74,17 @@ function focusFieldElement(
 ) {
   const element = document.getElementById(anchorId)
   if (element) {
-    element.scrollIntoView({ behavior: "smooth", block: "center" })
-    const input = element.querySelector("input, textarea, select, button")
+    const visibleElement = getVisibleElement(element)
+    visibleElement.scrollIntoView({ behavior: "smooth", block: "center" })
+    const input = visibleElement.querySelector(
+      "input, textarea, select, button"
+    )
     if (input instanceof HTMLElement) {
       input.focus()
     }
 
     if (highlight) {
-      applyErrorNavigationHighlight(element, anchorId)
+      applyErrorNavigationHighlight(visibleElement, anchorId)
     }
   }
 }
