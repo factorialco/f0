@@ -1,5 +1,6 @@
 export * from "./F0AiChat"
 export * from "./F0ActionItem"
+export * from "./F0AiMask"
 export * from "./F0AuraVoiceAnimation"
 export * from "./F0AiCollapsibleMessage"
 export * from "./F0DataDownload"
