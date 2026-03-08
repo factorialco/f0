@@ -90,6 +90,26 @@ export type AiChatProviderReturnValue = {
    */
   setClearFunction: (clearFn: (() => void) | null) => void
   /**
+   * Load a previous thread by its ID, restoring the conversation
+   */
+  loadThread: (threadId: string, title?: string) => Promise<void>
+  /**
+   * Internal function to set the loadThread function from CopilotKit
+   * @internal
+   */
+  setLoadThreadFunction: (
+    loadFn: ((threadId: string) => Promise<void>) | null
+  ) => void
+  /**
+   * Title of the currently loaded thread, or null for new conversations
+   */
+  currentThreadTitle: string | null
+  /**
+   * Set the current thread title (used by the threadTitle copilot action
+   * to update the header in real-time as the AI generates titles)
+   */
+  setCurrentThreadTitle: React.Dispatch<React.SetStateAction<string | null>>
+  /**
    * Send a message to the chat
    * @param message - The message content as a string, or a full Message object
    */

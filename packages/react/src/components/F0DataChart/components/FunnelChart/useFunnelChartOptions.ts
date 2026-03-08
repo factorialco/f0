@@ -8,7 +8,12 @@ import type {
 } from "../../types"
 
 import { paletteColor, resolveChartColorToken } from "../../utils/colors"
-import { buildGrid, buildLegend, DEFAULT_EMPHASIS } from "../../utils/options"
+import {
+  buildGrid,
+  buildLegend,
+  DEFAULT_EMPHASIS,
+  formatNumericValue,
+} from "../../utils/options"
 import { useChartTheme } from "../../utils/useChartTheme"
 
 /** Resolve the color for a single funnel data point */
@@ -143,7 +148,7 @@ export function useFunnelChartOptions(
           const val = Number(params.value ?? 0)
           const formattedVal = valueFormatter
             ? valueFormatter(val)
-            : String(val)
+            : formatNumericValue(val)
 
           if (showConversion && firstValue > 0) {
             const pct = formatPercent(val, firstValue)
@@ -171,7 +176,7 @@ export function useFunnelChartOptions(
           const val = Number(params.value ?? 0)
           const formattedVal = valueFormatter
             ? valueFormatter(val)
-            : String(val)
+            : formatNumericValue(val)
 
           if (showConversion && firstValue > 0) {
             const pct = formatPercent(val, firstValue)
@@ -243,7 +248,7 @@ export function useFunnelChartOptions(
         const val = Number(p.value ?? 0)
         const formattedValue = valueFormatter
           ? valueFormatter(val)
-          : String(val)
+          : formatNumericValue(val)
         const name = String(p.name ?? "")
         const info = dataMap.get(name)
 

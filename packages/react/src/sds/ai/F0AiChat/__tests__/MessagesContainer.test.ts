@@ -260,7 +260,7 @@ describe("convertMessagesToTurn", () => {
     ).toStrictEqual(["user", "array", "assistant", "assistant"])
   })
 
-  it("hoists agentState message above thinking tool calls if agentState comes between thinking calls", () => {
+  it("hoists thinking group above agentState messages", () => {
     const messages: Message[] = [
       {
         id: "1",
@@ -290,10 +290,11 @@ describe("convertMessagesToTurn", () => {
     expect(turns[0]).toHaveLength(4)
     expect(turns[1]).toHaveLength(1)
 
+    // Thinking group always at index 1, right after user message
     expect(
       turns[0].map((m) => (Array.isArray(m) ? "array" : m.role))
-    ).toStrictEqual(["user", "assistant", "assistant", "array"])
-    expect(turns[0][3]).toHaveLength(3)
+    ).toStrictEqual(["user", "array", "assistant", "assistant"])
+    expect(turns[0][1]).toHaveLength(3)
 
     expect(
       turns[1].map((m) => (Array.isArray(m) ? "array" : m.role))

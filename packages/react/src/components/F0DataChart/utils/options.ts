@@ -2,6 +2,14 @@ import type * as echarts from "echarts"
 
 import type { ChartTheme } from "./theme"
 
+/**
+ * Format a numeric value to at most 2 decimal places.
+ * Integers remain unchanged (no trailing ".00").
+ */
+export function formatNumericValue(value: number): string {
+  return Number.isInteger(value) ? String(value) : value.toFixed(3)
+}
+
 // ---------------------------------------------------------------------------
 // Category axis
 // ---------------------------------------------------------------------------
@@ -110,11 +118,10 @@ export function buildValueAxis({
       fontSize: theme.textStyle.fontSize,
       fontWeight: theme.textStyle.fontWeight,
       color: theme.colors.foregroundTertiary,
-      ...(formatter
-        ? {
-            formatter: (_value: string | number) => formatter(Number(_value)),
-          }
-        : {}),
+      formatter: (_value: string | number) =>
+        formatter
+          ? formatter(Number(_value))
+          : formatNumericValue(Number(_value)),
     },
     splitLine: {
       show: showGrid,
@@ -285,7 +292,7 @@ export function buildTooltip({
         .map((p: { marker?: string; seriesName?: string; value?: number }) => {
           const formattedValue = valueFormatter
             ? valueFormatter(Number(p.value))
-            : String(p.value)
+            : formatNumericValue(Number(p.value ?? 0))
           return `<div>${String(p.marker ?? "")} ${String(p.seriesName ?? "")} <strong>${formattedValue}</strong></div>`
         })
         .join("")

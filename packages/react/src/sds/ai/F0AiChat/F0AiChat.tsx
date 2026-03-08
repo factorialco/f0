@@ -78,6 +78,7 @@ const AiChatKitWrapper = ({
     <CopilotKit runtimeUrl="/copilotkit" agent={agent} {...copilotKitProps}>
       <ResetFunctionInjector />
       <SendMessageFunctionInjector />
+      <LoadThreadFunctionInjector />
       {children}
     </CopilotKit>
   )
@@ -114,6 +115,212 @@ const SendMessageFunctionInjector = () => {
       setSendMessageFunction(null)
     }
   }, [setSendMessageFunction, sendMessage])
+
+  return null
+}
+
+/**
+ * Shape of a part inside MastraMessageContentV2.
+ * Only the fields we need for conversion are typed here.
+ */
+type MastraPart =
+  | { type: "text"; text: string }
+  | {
+      type: "tool-invocation"
+      toolInvocation: {
+        state: "partial-call" | "call" | "result"
+        toolCallId: string
+        toolName: string
+        args: unknown
+        result?: unknown
+        step?: number
+      }
+    }
+  | { type: string }
+
+/** Raw message shape returned by the backend messages endpoint. */
+type MastraRawMessage = {
+  id: string
+  role: "user" | "assistant" | "system"
+  content: {
+    format?: number
+    parts?: MastraPart[]
+    content?: string
+    toolInvocations?: Array<{
+      state: string
+      toolCallId: string
+      toolName: string
+      args: unknown
+      result?: unknown
+    }>
+  }
+}
+
+type AguiMessage =
+  | { id: string; role: "user"; content: string }
+  | { id: string; role: "system"; content: string }
+  | {
+      id: string
+      role: "assistant"
+      content: string
+      toolCalls?: Array<{
+        id: string
+        type: "function"
+        function: { name: string; arguments: string }
+      }>
+    }
+  | {
+      id: string
+      role: "tool"
+      toolCallId: string
+      content: string
+      toolName?: string
+    }
+
+/**
+ * Convert raw Mastra messages (MastraDBMessage format with ContentV2)
+ * into CopilotKit AG-UI messages that setMessages() understands.
+ *
+ * Assistant messages with tool-invocation parts are split into:
+ *  1. An assistant message with toolCalls[]
+ *  2. Separate tool result messages for each completed invocation
+ */
+function convertMastraToAgui(raw: MastraRawMessage[]): AguiMessage[] {
+  const result: AguiMessage[] = []
+
+  for (const msg of raw) {
+    const parts: MastraPart[] = msg.content?.parts ?? []
+
+    // Extract text from parts, falling back to legacy content string
+    const textContent =
+      parts
+        .filter(
+          (p): p is Extract<MastraPart, { type: "text" }> => p.type === "text"
+        )
+        .map((p) => p.text)
+        .join("") ||
+      (typeof msg.content?.content === "string" ? msg.content.content : "")
+
+    // Extract tool invocations from parts
+    const toolParts = parts.filter(
+      (p): p is Extract<MastraPart, { type: "tool-invocation" }> =>
+        p.type === "tool-invocation"
+    )
+
+    // Also check legacy toolInvocations field
+    const legacyToolInvocations = msg.content?.toolInvocations ?? []
+
+    // Merge both sources of tool invocations
+    const allToolInvocations = [
+      ...toolParts.map((p) => p.toolInvocation),
+      ...legacyToolInvocations,
+    ]
+
+    if (msg.role === "user") {
+      result.push({ id: msg.id, role: "user", content: textContent })
+      continue
+    }
+
+    if (msg.role === "system") {
+      result.push({ id: msg.id, role: "system", content: textContent })
+      continue
+    }
+
+    // Assistant message
+    if (allToolInvocations.length === 0) {
+      // Plain assistant text message
+      result.push({ id: msg.id, role: "assistant", content: textContent })
+      continue
+    }
+
+    // Assistant message with tool calls
+    const toolCalls = allToolInvocations.map((inv) => ({
+      id: inv.toolCallId,
+      type: "function" as const,
+      function: {
+        name: inv.toolName,
+        arguments:
+          typeof inv.args === "string"
+            ? inv.args
+            : JSON.stringify(inv.args ?? {}),
+      },
+    }))
+
+    result.push({
+      id: msg.id,
+      role: "assistant",
+      content: textContent,
+      toolCalls,
+    })
+
+    // Add separate tool result messages for completed invocations
+    for (const inv of allToolInvocations) {
+      if (inv.state === "result" && inv.result !== undefined) {
+        result.push({
+          id: `result-${inv.toolCallId}`,
+          role: "tool",
+          toolCallId: inv.toolCallId,
+          content:
+            typeof inv.result === "string"
+              ? inv.result
+              : JSON.stringify(inv.result),
+          toolName: inv.toolName,
+        })
+      }
+    }
+  }
+
+  return result
+}
+
+const LoadThreadFunctionInjector = () => {
+  const { setLoadThreadFunction } = useAiChat()
+  const { reset, setMessages } = useCopilotChatInternal()
+  const { setThreadId, copilotApiConfig } = useCopilotContext()
+
+  useEffect(() => {
+    const loadThread = async (threadId: string) => {
+      const baseUrl = copilotApiConfig.chatApiEndpoint
+
+      // Fetch full messages (including tool invocations) from the backend
+      let rawMessages: MastraRawMessage[] = []
+      try {
+        const response = await fetch(
+          `${baseUrl}/chat-history/threads/${encodeURIComponent(threadId)}/messages`,
+          {
+            credentials: "include",
+            headers: { ...copilotApiConfig.headers },
+          }
+        )
+        if (response.ok) {
+          const data = (await response.json()) as {
+            messages: MastraRawMessage[]
+          }
+          rawMessages = data.messages
+        }
+      } catch {
+        // Silently fail — the chat will just start empty
+      }
+
+      // Convert Mastra format to CopilotKit AG-UI format
+      const messages = convertMastraToAgui(rawMessages)
+
+      // Switch to the thread
+      reset()
+      setThreadId(threadId)
+      setMessages(messages)
+
+      // Safety net: CopilotKit's loadAgentState effect fires on threadId
+      // change and may overwrite messages with []. Re-apply after it settles.
+      setTimeout(() => {
+        setMessages(messages)
+      }, 100)
+    }
+    setLoadThreadFunction(loadThread)
+    return () => {
+      setLoadThreadFunction(null)
+    }
+  }, [setLoadThreadFunction, reset, setThreadId, setMessages, copilotApiConfig])
 
   return null
 }

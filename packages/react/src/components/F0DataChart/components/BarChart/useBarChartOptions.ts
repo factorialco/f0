@@ -8,7 +8,7 @@ import type {
 } from "../../types"
 
 import { paletteColor, resolveChartColorToken } from "../../utils/colors"
-import { buildBaseChartOptions } from "../../utils/options"
+import { buildBaseChartOptions, formatNumericValue } from "../../utils/options"
 import { useChartTheme } from "../../utils/useChartTheme"
 import { useContainerWidth } from "../../utils/useContainerWidth"
 
@@ -112,6 +112,13 @@ function buildSeriesEntries(
       position: isVertical ? "top" : "right",
       color: labelColor,
       fontWeight: "bold",
+      formatter: (params: { value?: number | { value: number } }) => {
+        const val =
+          typeof params.value === "object"
+            ? params.value.value
+            : Number(params.value ?? 0)
+        return formatNumericValue(val)
+      },
     },
     emphasis: {
       itemStyle: {

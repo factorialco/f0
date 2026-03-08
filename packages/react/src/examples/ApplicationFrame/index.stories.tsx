@@ -150,7 +150,7 @@ const meta: Meta<typeof ApplicationFrame> = {
         person: mockPersonResolver,
         searchPersons: mockSearchPersons,
       },
-      toolHints: mockToolHints,
+      // toolHints: mockToolHints,
       disclaimer: {
         text: "One works within your permissions.",
         link: "/permissions",

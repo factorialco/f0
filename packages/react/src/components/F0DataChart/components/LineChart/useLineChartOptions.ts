@@ -9,7 +9,7 @@ import type {
 } from "../../types"
 
 import { paletteColor, resolveChartColorToken } from "../../utils/colors"
-import { buildBaseChartOptions } from "../../utils/options"
+import { buildBaseChartOptions, formatNumericValue } from "../../utils/options"
 import { useChartTheme } from "../../utils/useChartTheme"
 import { useContainerWidth } from "../../utils/useContainerWidth"
 
@@ -100,6 +100,8 @@ function buildSeriesEntry(
       position: "top",
       color: labelColor,
       fontWeight: "bold",
+      formatter: (params: { value?: number }) =>
+        formatNumericValue(Number(params.value ?? 0)),
     },
     emphasis: {
       itemStyle: {

@@ -100,6 +100,11 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   const [canvasDashboard, setCanvasDashboard] =
     useState<ChatDashboardConfig | null>(null)
 
+  // Title of the currently loaded historical thread (null = new conversation)
+  const [currentThreadTitle, setCurrentThreadTitle] = useState<string | null>(
+    null
+  )
+
   // Track the mode before canvas was opened so we can restore it on close
   const previousVisualizationModeRef = useRef<VisualizationMode>("sidepanel")
 
@@ -119,6 +124,10 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   const sendMessageFunctionRef = useRef<((message: Message) => void) | null>(
     null
   )
+  // Store the loadThread function from CopilotKit
+  const loadThreadFunctionRef = useRef<
+    ((threadId: string) => Promise<void>) | null
+  >(null)
 
   const tmp_setAgent = (newAgent?: string) => {
     setAgent(newAgent)
@@ -126,6 +135,12 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
 
   const setClearFunction = (clearFn: (() => void) | null) => {
     clearFunctionRef.current = clearFn
+  }
+
+  const setLoadThreadFunction = (
+    loadFn: ((threadId: string) => Promise<void>) | null
+  ) => {
+    loadThreadFunctionRef.current = loadFn
   }
 
   const setSendMessageFunction = (
@@ -138,7 +153,22 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
     if (clearFunctionRef.current) {
       clearFunctionRef.current()
     }
+    // Reset thread title for new conversation
+    setCurrentThreadTitle(null)
     // Close canvas when starting a new conversation
+    setCanvasDashboard(null)
+    if (visualizationMode === "canvas") {
+      setVisualizationMode(previousVisualizationModeRef.current)
+    }
+  }
+
+  const loadThread = async (threadId: string, title?: string) => {
+    if (loadThreadFunctionRef.current) {
+      await loadThreadFunctionRef.current(threadId)
+    }
+    // Store the thread title for display in the header
+    setCurrentThreadTitle(title ?? null)
+    // Close canvas when switching conversations
     setCanvasDashboard(null)
     if (visualizationMode === "canvas") {
       setVisualizationMode(previousVisualizationModeRef.current)
@@ -243,6 +273,10 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         onThumbsDown,
         clear,
         setClearFunction,
+        loadThread,
+        setLoadThreadFunction,
+        currentThreadTitle,
+        setCurrentThreadTitle,
         placeholders,
         setPlaceholders,
         sendMessage,
@@ -268,6 +302,7 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
 }
 
 const noopFn = () => {}
+const noopAsyncFn = () => Promise.resolve()
 
 export function useAiChat(): AiChatProviderReturnValue {
   const context = useContext(AiChatStateContext)
@@ -287,6 +322,10 @@ export function useAiChat(): AiChatProviderReturnValue {
       tmp_setAgent: noopFn,
       clear: noopFn,
       setClearFunction: noopFn,
+      loadThread: noopAsyncFn,
+      setLoadThreadFunction: noopFn,
+      currentThreadTitle: null,
+      setCurrentThreadTitle: noopFn,
       initialMessage: undefined,
       setInitialMessage: noopFn,
       placeholders: [],

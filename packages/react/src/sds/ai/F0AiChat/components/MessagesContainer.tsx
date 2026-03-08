@@ -13,7 +13,7 @@ import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
 import { F0Thinking as Thinking } from "../../F0Thinking"
-import { isAgentStateMessage } from "../internal-types"
+
 import { useAiChat } from "../providers/AiChatStateProvider"
 import { FeedbackModal } from "./FeedbackModal"
 import { FeedbackModalProvider, useFeedbackModal } from "./FeedbackProvider"
@@ -356,28 +356,26 @@ export function convertMessagesToTurns(messages: Message[]): Turn[] {
   const turns: Turn[] = []
   let thinkingGroup: Message[] | null = null
 
-  for (const [i, message] of messages.entries()) {
+  for (const message of messages) {
     if (message.role === "user") {
       turns.push([message])
       thinkingGroup = null
       continue
     }
 
-    const currentTurn = turns[turns.length - 1]
-
-    // Hoist agent state messages above the thinking group
-    if (isAgentStateMessage(message) && thinkingGroup) {
-      if (i !== messages.length - 1) {
-        const idx = currentTurn.indexOf(thinkingGroup)
-        if (idx !== -1) {
-          currentTurn.splice(idx, 1)
-        }
-        currentTurn.push(message, thinkingGroup)
-      }
+    // Skip invisible frontend tool messages (e.g. threadTitle) that only
+    // perform side effects — they have no visual content and would create
+    // phantom entries that disrupt thinking group positioning.
+    if (isInvisibleToolMessage(message)) {
       continue
     }
 
-    // Always merge thinking messages into a single group per turn, deduplicating consecutive identical content
+    const currentTurn = turns[turns.length - 1]
+
+    // Merge thinking messages into a single group per turn, deduplicating
+    // consecutive identical content. The group is appended here and then
+    // hoisted to index 1 (right after the user message) in the final pass
+    // below so it always renders above everything else.
     if (isThinkingMessage(message)) {
       if (thinkingGroup) {
         const prev = thinkingGroup[thinkingGroup.length - 1]
@@ -386,13 +384,7 @@ export function convertMessagesToTurns(messages: Message[]): Turn[] {
         }
       } else {
         thinkingGroup = [message]
-        // Always insert thinking group right after the user message (index 1)
-        // so it appears above any text messages from earlier runs in the same turn
-        if (currentTurn.length > 1) {
-          currentTurn.splice(1, 0, thinkingGroup)
-        } else {
-          currentTurn.push(thinkingGroup)
-        }
+        currentTurn.push(thinkingGroup)
       }
       continue
     }
@@ -400,7 +392,31 @@ export function convertMessagesToTurns(messages: Message[]): Turn[] {
     currentTurn.push(message)
   }
 
+  // Final pass: ensure the thinking group is always at index 1 (right after
+  // the user message) in every turn, regardless of message arrival order.
+  for (const turn of turns) {
+    const idx = turn.findIndex((entry) => Array.isArray(entry))
+    if (idx > 1) {
+      const [group] = turn.splice(idx, 1)
+      turn.splice(1, 0, group)
+    }
+  }
+
   return turns
+}
+
+/**
+ * Messages produced by frontend-only CopilotKit actions that exist solely for
+ * side effects (e.g. updating the thread title in state). Their `render`
+ * returns an empty fragment, but CopilotKit still creates an assistant message
+ * for them. We filter these out so they don't create phantom empty bubbles.
+ */
+function isInvisibleToolMessage(message: Message): boolean {
+  return (
+    message.role === "assistant" &&
+    message.toolCalls?.some((call) => call.function.name === "threadTitle") ===
+      true
+  )
 }
 
 function isThinkingMessage(message: Message): boolean {
