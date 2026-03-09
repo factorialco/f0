@@ -63,19 +63,27 @@ describe("TextV2 base component", () => {
       render(<TextV2 variant="code" content="const x = 1" />)
       const el = screen.getByText("const x = 1")
       expect(el.tagName).toBe("CODE")
-      expect(el).toHaveClass("text-sm", "font-normal", "font-mono")
+      expect(el).toHaveClass("text-base", "font-normal", "font-mono")
     })
-  })
-
-  describe("Size override", () => {
-    it("overrides variant default size", () => {
-      render(<TextV2 variant="title" size="lg" content="Small title" />)
-      expect(screen.getByText("Small title")).toHaveClass("text-lg")
+    it("supports explicit sized heading variants", () => {
+      render(<TextV2 variant="heading-lg" content="Heading lg" />)
+      expect(screen.getByText("Heading lg")).toHaveClass(
+        "text-2xl",
+        "font-semibold"
+      )
     })
 
-    it('size="default" keeps variant built-in size', () => {
-      render(<TextV2 variant="title" size="default" content="Default" />)
-      expect(screen.getByText("Default")).toHaveClass("text-3xl")
+    it("maps heading-xs variant to h4", () => {
+      render(<TextV2 variant="heading-xs" content="Heading extra small" />)
+      expect(screen.getByText("Heading extra small").tagName).toBe("H4")
+    })
+
+    it("supports explicit sized body variants", () => {
+      render(<TextV2 variant="body-xl" content="Body extra large" />)
+      expect(screen.getByText("Body extra large")).toHaveClass(
+        "text-xl",
+        "font-normal"
+      )
     })
   })
 

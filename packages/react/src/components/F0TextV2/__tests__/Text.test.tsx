@@ -71,23 +71,30 @@ describe("F0TextV2 Component", () => {
       )
     })
 
-    it("code → code with text-sm font-normal font-mono", () => {
+    it("code → code with text-base font-normal font-mono", () => {
       render(<F0TextV2 variant="code" content="const x = 1" />)
       const el = screen.getByText("const x = 1")
       expect(el.tagName).toBe("CODE")
-      expect(el).toHaveClass("text-sm", "font-normal", "font-mono")
+      expect(el).toHaveClass("text-base", "font-normal", "font-mono")
     })
-  })
-
-  describe("Size override", () => {
-    it("overrides variant default size", () => {
-      render(<F0TextV2 variant="title" size="sm" content="Small title" />)
-      expect(screen.getByText("Small title")).toHaveClass("text-sm")
+    it("heading-lg → h3 with text-2xl font-semibold", () => {
+      render(<F0TextV2 variant="heading-lg" content="Heading large" />)
+      const el = screen.getByText("Heading large")
+      expect(el.tagName).toBe("H3")
+      expect(el).toHaveClass("text-2xl", "font-semibold")
     })
 
-    it('size="default" keeps variant built-in size', () => {
-      render(<F0TextV2 variant="title" size="default" content="Default" />)
-      expect(screen.getByText("Default")).toHaveClass("text-3xl")
+    it("heading-xs → h4", () => {
+      render(<F0TextV2 variant="heading-xs" content="Heading extra small" />)
+      const el = screen.getByText("Heading extra small")
+      expect(el.tagName).toBe("H4")
+    })
+
+    it("body-xl → p with text-xl font-normal", () => {
+      render(<F0TextV2 variant="body-xl" content="Body extra large" />)
+      const el = screen.getByText("Body extra large")
+      expect(el.tagName).toBe("P")
+      expect(el).toHaveClass("text-xl", "font-normal")
     })
   })
 
@@ -147,11 +154,10 @@ describe("F0TextV2 Component", () => {
   })
 
   describe("Combined props", () => {
-    it("combines variant, size, color, decoration, and transform", () => {
+    it("combines variant, color, decoration, and transform", () => {
       render(
         <F0TextV2
           variant="label"
-          size="lg"
           color="critical"
           decoration="underline"
           transform="uppercase"
@@ -162,11 +168,16 @@ describe("F0TextV2 Component", () => {
       expect(el.tagName).toBe("LABEL")
       expect(el).toHaveClass(
         "font-medium",
-        "text-lg",
+        "text-base",
         "text-f1-foreground-critical",
         "underline",
         "uppercase"
       )
     })
+  })
+
+  it("supports dataTestId", () => {
+    render(<F0TextV2 content="With test id" dataTestId="text-v2" />)
+    expect(screen.getByTestId("text-v2")).toBeInTheDocument()
   })
 })

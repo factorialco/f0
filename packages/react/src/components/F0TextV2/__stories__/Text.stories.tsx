@@ -4,38 +4,59 @@ import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import { F0TextV2 } from "../index"
 
+const variants = [
+  // Title: lg → (default) → sm → xs
+  "title-lg",
+  "title",
+  "title-sm",
+  "title-xs",
+  // Heading: lg → (default) → sm → xs
+  "heading-lg",
+  "heading",
+  "heading-sm",
+  "heading-xs",
+  // Subtitle: xl → lg → (default) → sm
+  "subtitle-xl",
+  "subtitle-lg",
+  "subtitle",
+  "subtitle-sm",
+  // Body: xl → lg → (default) → sm → xs
+  "body-xl",
+  "body-lg",
+  "body",
+  "body-sm",
+  "body-xs",
+  // Label: lg → (default) → sm → xs
+  "label-lg",
+  "label",
+  "label-sm",
+  "label-xs",
+  // Description: (default) → sm → xs
+  "description",
+  "description-sm",
+  "description-xs",
+  // Caption: (default) → sm
+  "caption",
+  "caption-sm",
+  // Code: lg → (default) → sm
+  "code-lg",
+  "code",
+  "code-sm",
+] as const
+
 const meta = {
   component: F0TextV2,
   title: "TextV2",
   tags: ["autodocs", "experimental"],
   argTypes: {
     variant: {
-      options: [
-        "title",
-        "heading",
-        "subtitle",
-        "body",
-        "label",
-        "description",
-        "caption",
-        "code",
-      ],
+      options: variants,
       control: "select",
       description:
-        "Semantic text variant — controls font-weight and default HTML tag",
+        "Semantic text variant. Size is encoded in the variant token.",
       table: {
         type: { summary: "string" },
         defaultValue: { summary: "body" },
-      },
-    },
-    size: {
-      options: ["default", "xs", "sm", "md", "lg", "xl", "2xl", "3xl"],
-      control: "select",
-      description:
-        'Text size — independent from variant. "default" keeps the variant\'s built-in size.',
-      table: {
-        type: { summary: "string" },
-        defaultValue: { summary: "varies by variant" },
       },
     },
     color: {
@@ -54,8 +75,7 @@ const meta = {
         "selected",
       ],
       control: "select",
-      description:
-        "Semantic text color. description/subtitle/caption default to secondary.",
+      description: "Semantic text color",
       table: {
         type: { summary: "string" },
         defaultValue: { summary: "default" },
@@ -75,7 +95,6 @@ const meta = {
       description: "Whether to render the text with ellipsis",
       table: {
         type: { summary: "boolean | number" },
-        defaultValue: { summary: "false" },
       },
     },
     decoration: {
@@ -126,176 +145,73 @@ export const Default: Story = {
   },
 }
 
-export const Variants: Story = {
+export const SemanticVariants: Story = {
   args: {
     content: "",
   },
   render: () => (
     <div className="flex flex-col gap-2">
-      <F0TextV2 variant="title" content="Title text" />
-      <F0TextV2 variant="heading" content="Heading text" />
-      <F0TextV2
-        variant="subtitle"
-        content="Subtitle text (secondary by default)"
-      />
-      <F0TextV2
-        variant="body"
-        content="Body text. Lorem ipsum dolor sit amet, consectetur adipiscing elit."
-      />
-      <F0TextV2 variant="label" content="Label text" />
+      <F0TextV2 variant="title" content="Title (default scale)" />
+      <F0TextV2 variant="heading" content="Heading (default scale)" />
+      <F0TextV2 variant="subtitle" content="Subtitle (secondary by default)" />
+      <F0TextV2 variant="body" content="Body (default scale)" />
+      <F0TextV2 variant="label" content="Label (secondary by default)" />
       <F0TextV2
         variant="description"
-        content="Description text (secondary by default)"
+        content="Description (secondary by default)"
       />
-      <F0TextV2
-        variant="caption"
-        content="Caption text (secondary by default)"
-      />
-      <F0TextV2 variant="code" content="const example = 'code text';" />
+      <F0TextV2 variant="caption" content="Caption (secondary by default)" />
+      <F0TextV2 variant="code" content="const code = 'Code alias';" />
     </div>
   ),
 }
 
-export const TypographyScale: Story = {
+export const VariantScale: Story = {
   args: {
     content: "",
   },
   render: () => (
-    <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-2">
-        <F0TextV2
-          variant="label"
-          size="xs"
-          color="secondary"
-          transform="uppercase"
-          content="TITLE"
-        />
-        <F0TextV2 variant="title" content="Title default (3xl / 26px)" />
-        <F0TextV2 variant="title" size="2xl" content="Title 2xl (22px)" />
-        <F0TextV2 variant="title" size="xl" content="Title xl (18px)" />
-      </div>
-      <div className="flex flex-col gap-2">
-        <F0TextV2
-          variant="label"
-          size="xs"
-          color="secondary"
-          transform="uppercase"
-          content="HEADING"
-        />
-        <F0TextV2 variant="heading" size="2xl" content="Heading 2xl (22px)" />
-        <F0TextV2 variant="heading" content="Heading default (xl / 18px)" />
-        <F0TextV2 variant="heading" size="lg" content="Heading lg (16px)" />
-        <F0TextV2 variant="heading" size="md" content="Heading md (14px)" />
-        <F0TextV2 variant="heading" size="sm" content="Heading sm (12px)" />
-      </div>
-      <div className="flex flex-col gap-2">
-        <F0TextV2
-          variant="label"
-          size="xs"
-          color="secondary"
-          transform="uppercase"
-          content="SUBTITLE"
-        />
-        <F0TextV2
-          variant="subtitle"
-          size="xl"
-          content="Subtitle xl (18px, secondary)"
-        />
-        <F0TextV2
-          variant="subtitle"
-          content="Subtitle default (lg / 16px, secondary)"
-        />
-        <F0TextV2
-          variant="subtitle"
-          size="md"
-          content="Subtitle md (14px, secondary)"
-        />
-      </div>
-      <div className="flex flex-col gap-2">
-        <F0TextV2
-          variant="label"
-          size="xs"
-          color="secondary"
-          transform="uppercase"
-          content="BODY"
-        />
-        <F0TextV2 variant="body" size="lg" content="Body lg (16px normal)" />
-        <F0TextV2 variant="body" content="Body default (md / 14px normal)" />
-        <F0TextV2 variant="body" size="sm" content="Body sm (12px normal)" />
-        <F0TextV2 variant="body" size="xs" content="Body xs (10px normal)" />
-      </div>
-      <div className="flex flex-col gap-2">
-        <F0TextV2
-          variant="label"
-          size="xs"
-          color="secondary"
-          transform="uppercase"
-          content="LABEL"
-        />
-        <F0TextV2 variant="label" size="lg" content="Label lg (16px medium)" />
-        <F0TextV2 variant="label" size="md" content="Label md (14px medium)" />
-        <F0TextV2 variant="label" content="Label default (sm / 12px medium)" />
-        <F0TextV2 variant="label" size="xs" content="Label xs (10px medium)" />
-      </div>
-      <div className="flex flex-col gap-2">
-        <F0TextV2
-          variant="label"
-          size="xs"
-          color="secondary"
-          transform="uppercase"
-          content="DESCRIPTION"
-        />
-        <F0TextV2
-          variant="description"
-          size="md"
-          content="Description md (14px, secondary)"
-        />
-        <F0TextV2
-          variant="description"
-          content="Description default (sm / 12px, secondary)"
-        />
-        <F0TextV2
-          variant="description"
-          size="xs"
-          content="Description xs (10px, secondary)"
-        />
-      </div>
-      <div className="flex flex-col gap-2">
-        <F0TextV2
-          variant="label"
-          size="xs"
-          color="secondary"
-          transform="uppercase"
-          content="CAPTION"
-        />
-        <F0TextV2
-          variant="caption"
-          size="sm"
-          content="Caption sm (12px, secondary)"
-        />
-        <F0TextV2
-          variant="caption"
-          content="Caption default (xs / 10px, secondary)"
-        />
-      </div>
-      <div className="flex flex-col gap-2">
-        <F0TextV2
-          variant="label"
-          size="xs"
-          color="secondary"
-          transform="uppercase"
-          content="CODE"
-        />
-        <F0TextV2
-          variant="code"
-          size="md"
-          content="const codeMd = 'monospace 14px';"
-        />
-        <F0TextV2
-          variant="code"
-          content="const codeSm = 'monospace 12px (default)';"
-        />
-      </div>
+    <div className="flex flex-col gap-3">
+      {/* Title */}
+      <F0TextV2 variant="title-lg" content="Title lg" />
+      <F0TextV2 variant="title" content="Title (default)" />
+      <F0TextV2 variant="title-sm" content="Title sm" />
+      <F0TextV2 variant="title-xs" content="Title xs" />
+      {/* Heading */}
+      <F0TextV2 variant="heading-lg" content="Heading lg" />
+      <F0TextV2 variant="heading" content="Heading (default)" />
+      <F0TextV2 variant="heading-sm" content="Heading sm" />
+      <F0TextV2 variant="heading-xs" content="Heading xs" />
+      {/* Subtitle */}
+      <F0TextV2 variant="subtitle-xl" content="Subtitle xl (secondary)" />
+      <F0TextV2 variant="subtitle-lg" content="Subtitle lg (secondary)" />
+      <F0TextV2 variant="subtitle" content="Subtitle (secondary, default)" />
+      <F0TextV2 variant="subtitle-sm" content="Subtitle sm (secondary)" />
+      {/* Body */}
+      <F0TextV2 variant="body-xl" content="Body xl" />
+      <F0TextV2 variant="body-lg" content="Body lg" />
+      <F0TextV2 variant="body" content="Body (default)" />
+      <F0TextV2 variant="body-sm" content="Body sm" />
+      <F0TextV2 variant="body-xs" content="Body xs" />
+      {/* Label */}
+      <F0TextV2 variant="label-lg" content="Label lg (secondary)" />
+      <F0TextV2 variant="label" content="Label (secondary, default)" />
+      <F0TextV2 variant="label-sm" content="Label sm (secondary)" />
+      <F0TextV2 variant="label-xs" content="Label xs (secondary)" />
+      {/* Description */}
+      <F0TextV2
+        variant="description"
+        content="Description (secondary, default)"
+      />
+      <F0TextV2 variant="description-sm" content="Description sm (secondary)" />
+      <F0TextV2 variant="description-xs" content="Description xs (secondary)" />
+      {/* Caption */}
+      <F0TextV2 variant="caption" content="Caption (secondary, default)" />
+      <F0TextV2 variant="caption-sm" content="Caption sm (secondary)" />
+      {/* Code */}
+      <F0TextV2 variant="code-lg" content="const codeLg = 'Code lg';" />
+      <F0TextV2 variant="code" content="const code = 'Code (default)';" />
+      <F0TextV2 variant="code-sm" content="const codeSm = 'Code sm';" />
     </div>
   ),
 }
@@ -340,28 +256,16 @@ export const ColorWithVariant: Story = {
     <div className="flex flex-col gap-2">
       <F0TextV2
         variant="label"
-        size="md"
         color="critical"
         content="Critical label text"
       />
       <F0TextV2
-        variant="body"
-        size="sm"
+        variant="body-sm"
         color="positive"
         content="Small positive text"
       />
-      <F0TextV2
-        variant="body"
-        size="md"
-        color="warning"
-        content="Warning body text"
-      />
-      <F0TextV2
-        variant="label"
-        size="md"
-        color="accent"
-        content="Accent label text"
-      />
+      <F0TextV2 variant="body" color="warning" content="Warning body text" />
+      <F0TextV2 variant="label" color="accent" content="Accent label text" />
       <F0TextV2
         variant="subtitle"
         content="Subtitle text (secondary by default)"
@@ -375,10 +279,9 @@ export const ColorWithVariant: Story = {
         content="Caption text (secondary by default)"
       />
       <F0TextV2
-        variant="description"
-        size="sm"
+        variant="description-sm"
         color="default"
-        content="Description with explicit default color (overrides secondary)"
+        content="Description sm with explicit default color (overrides secondary)"
       />
     </div>
   ),
@@ -475,7 +378,6 @@ export const CombinedProps: Story = {
     <div className="flex flex-col gap-4">
       <F0TextV2
         variant="label"
-        size="md"
         color="critical"
         decoration="underline"
         content="Critical underlined label"
@@ -488,7 +390,6 @@ export const CombinedProps: Story = {
       />
       <F0TextV2
         variant="body"
-        size="md"
         color="warning"
         decoration="line-through"
         content="Warning body with strikethrough"
@@ -501,7 +402,6 @@ export const CombinedProps: Story = {
       />
       <F0TextV2
         variant="label"
-        size="md"
         color="info"
         transform="capitalize"
         decoration="underline"
@@ -523,100 +423,89 @@ export const Snapshot: Story = {
       <section>
         <h4 className="text-lg font-semibold">Title</h4>
         <div className="flex flex-col gap-2">
-          <F0TextV2 variant="title" content="Title default (3xl)" />
-          <F0TextV2 variant="title" size="2xl" content="Title 2xl" />
-          <F0TextV2 variant="title" size="xl" content="Title xl" />
+          <F0TextV2 variant="title-lg" content="Title lg" />
+          <F0TextV2 variant="title" content="Title (default)" />
+          <F0TextV2 variant="title-sm" content="Title sm" />
+          <F0TextV2 variant="title-xs" content="Title xs" />
         </div>
       </section>
 
       <section>
         <h4 className="text-lg font-semibold">Heading</h4>
         <div className="flex flex-col gap-2">
-          <F0TextV2 variant="heading" size="2xl" content="Heading 2xl" />
-          <F0TextV2 variant="heading" content="Heading default (xl)" />
-          <F0TextV2 variant="heading" size="lg" content="Heading lg" />
-          <F0TextV2 variant="heading" size="md" content="Heading md" />
-          <F0TextV2 variant="heading" size="sm" content="Heading sm" />
+          <F0TextV2 variant="heading-lg" content="Heading lg" />
+          <F0TextV2 variant="heading" content="Heading (default)" />
+          <F0TextV2 variant="heading-sm" content="Heading sm" />
+          <F0TextV2 variant="heading-xs" content="Heading xs" />
         </div>
       </section>
 
       <section>
         <h4 className="text-lg font-semibold">Subtitle</h4>
         <div className="flex flex-col gap-2">
+          <F0TextV2 variant="subtitle-xl" content="Subtitle xl (secondary)" />
+          <F0TextV2 variant="subtitle-lg" content="Subtitle lg (secondary)" />
           <F0TextV2
             variant="subtitle"
-            size="xl"
-            content="Subtitle xl (secondary)"
+            content="Subtitle (secondary, default)"
           />
-          <F0TextV2
-            variant="subtitle"
-            content="Subtitle default (lg, secondary)"
-          />
-          <F0TextV2
-            variant="subtitle"
-            size="md"
-            content="Subtitle md (secondary)"
-          />
+          <F0TextV2 variant="subtitle-sm" content="Subtitle sm (secondary)" />
         </div>
       </section>
 
       <section>
         <h4 className="text-lg font-semibold">Body</h4>
         <div className="flex flex-col gap-2">
-          <F0TextV2 variant="body" size="lg" content="Body lg" />
-          <F0TextV2 variant="body" size="md" content="Body md (default)" />
-          <F0TextV2 variant="body" size="sm" content="Body sm" />
-          <F0TextV2 variant="body" size="xs" content="Body xs" />
+          <F0TextV2 variant="body-xl" content="Body xl" />
+          <F0TextV2 variant="body-lg" content="Body lg" />
+          <F0TextV2 variant="body" content="Body (default)" />
+          <F0TextV2 variant="body-sm" content="Body sm" />
+          <F0TextV2 variant="body-xs" content="Body xs" />
         </div>
       </section>
 
       <section>
         <h4 className="text-lg font-semibold">Label</h4>
         <div className="flex flex-col gap-2">
-          <F0TextV2 variant="label" size="lg" content="Label lg" />
-          <F0TextV2 variant="label" size="md" content="Label md" />
-          <F0TextV2 variant="label" size="sm" content="Label sm (default)" />
-          <F0TextV2 variant="label" size="xs" content="Label xs" />
+          <F0TextV2 variant="label-lg" content="Label lg (secondary)" />
+          <F0TextV2 variant="label" content="Label (secondary, default)" />
+          <F0TextV2 variant="label-sm" content="Label sm (secondary)" />
+          <F0TextV2 variant="label-xs" content="Label xs (secondary)" />
         </div>
       </section>
 
       <section>
         <h4 className="text-lg font-semibold">Description</h4>
         <div className="flex flex-col gap-2">
-          <F0TextV2 variant="description" size="md" content="Description md" />
           <F0TextV2
             variant="description"
-            size="sm"
-            content="Description sm (default)"
+            content="Description (secondary, default)"
           />
-          <F0TextV2 variant="description" size="xs" content="Description xs" />
+          <F0TextV2
+            variant="description-sm"
+            content="Description sm (secondary)"
+          />
+          <F0TextV2
+            variant="description-xs"
+            content="Description xs (secondary)"
+          />
         </div>
       </section>
 
       <section>
         <h4 className="text-lg font-semibold">Caption</h4>
         <div className="flex flex-col gap-2">
-          <F0TextV2 variant="caption" size="sm" content="Caption sm" />
-          <F0TextV2
-            variant="caption"
-            content="Caption default (xs, secondary)"
-          />
+          <F0TextV2 variant="caption" content="Caption (secondary, default)" />
+          <F0TextV2 variant="caption-sm" content="Caption sm (secondary)" />
         </div>
       </section>
 
       <section>
         <h4 className="text-lg font-semibold">Code</h4>
         <div className="flex flex-col gap-2">
-          <F0TextV2
-            variant="code"
-            size="md"
-            content="const codeMd = 'Code md';"
-          />
-          <F0TextV2
-            variant="code"
-            size="sm"
-            content="const codeSm = 'Code sm (default)';"
-          />
+          <F0TextV2 variant="code-lg" content="const codeLg = 'Code lg';" />
+          <F0TextV2 variant="code" content="const code = 'Code (default)';" />
+          <F0TextV2 variant="code-sm" content="const codeSm = 'Code sm';" />
         </div>
       </section>
 
@@ -650,30 +539,14 @@ export const Snapshot: Story = {
       <section>
         <h4 className="text-lg font-semibold">Color + Variant Composition</h4>
         <div className="flex flex-col gap-2">
+          <F0TextV2 variant="label" color="critical" content="Critical label" />
           <F0TextV2
-            variant="label"
-            size="md"
-            color="critical"
-            content="Critical label"
-          />
-          <F0TextV2
-            variant="body"
-            size="sm"
+            variant="body-sm"
             color="positive"
-            content="Positive body"
+            content="Positive body sm"
           />
-          <F0TextV2
-            variant="body"
-            size="md"
-            color="warning"
-            content="Warning body"
-          />
-          <F0TextV2
-            variant="label"
-            size="md"
-            color="accent"
-            content="Accent label"
-          />
+          <F0TextV2 variant="body" color="warning" content="Warning body" />
+          <F0TextV2 variant="label" color="accent" content="Accent label" />
           <F0TextV2
             variant="subtitle"
             color="default"
@@ -683,20 +556,6 @@ export const Snapshot: Story = {
             variant="description"
             color="default"
             content="Description with default color override"
-          />
-        </div>
-      </section>
-
-      <section>
-        <h4 className="text-lg font-semibold">Size Independence</h4>
-        <div className="flex flex-col gap-2">
-          <F0TextV2 variant="heading" size="3xl" content="Heading at 3xl" />
-          <F0TextV2 variant="body" size="xl" content="Body at xl" />
-          <F0TextV2 variant="label" size="2xl" content="Label at 2xl" />
-          <F0TextV2
-            variant="code"
-            size="lg"
-            content="const code = 'Code at lg';"
           />
         </div>
       </section>
@@ -757,7 +616,6 @@ export const Snapshot: Story = {
         <div className="flex flex-col gap-2">
           <F0TextV2
             variant="label"
-            size="md"
             color="critical"
             decoration="underline"
             content="Critical underlined label"

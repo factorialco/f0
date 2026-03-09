@@ -6,18 +6,38 @@
 /**
  * Semantic text variant — controls font-weight, default size, and default HTML tag.
  *
- * | Variant     | Weight       | Default Tag | Default Size           |
- * |-------------|-------------|-------------|------------------------|
- * | title       | semibold    | h2          | 3xl (26px)             |
- * | heading     | semibold    | h3          | xl  (18px)             |
- * | subtitle    | normal      | p           | lg  (16px) + secondary |
- * | body        | normal      | p           | md  (14px)             |
- * | label       | medium      | label       | md  (14px) + secondary |
- * | description | normal      | p           | md  (14px) + secondary |
- * | caption     | normal      | span        | sm  (12px) + secondary |
- * | code        | normal+mono | code        | sm  (12px)             |
+ * Public API does not expose a free-form `size` prop.
+ * Size is encoded in each variant token to keep typography consistent.
+ *
+ * Naming model:
+ * - Base variants: `title`, `heading`, `subtitle`, `body`, `label`, `description`, `caption`, `code`
+ * - Scaled variants: `<base>-<scale>` (for example `heading-2xl`, `body-xl`, `code-lg`)
+ *
+ * Base variants represent the default scale for each semantic role.
  */
 export type VariantToken =
+  | "title-lg"
+  | "title-sm"
+  | "title-xs"
+  | "heading-lg"
+  | "heading-sm"
+  | "heading-xs"
+  | "subtitle-xl"
+  | "subtitle-lg"
+  | "subtitle-sm"
+  | "body-xl"
+  | "body-lg"
+  | "body-sm"
+  | "body-xs"
+  | "label-lg"
+  | "label-sm"
+  | "label-xs"
+  | "description-sm"
+  | "description-xs"
+  | "caption-sm"
+  | "code-lg"
+  | "code-sm"
+  // Base variants (default scale per semantic role)
   | "title"
   | "heading"
   | "subtitle"
@@ -26,30 +46,6 @@ export type VariantToken =
   | "description"
   | "caption"
   | "code"
-
-/**
- * Text size override — independent from variant.
- *
- * | Token   | Tailwind  | Value |
- * |---------|-----------|-------|
- * | default | (no-op)   | —     |
- * | xs      | text-xs   | 10px  |
- * | sm      | text-sm   | 12px  |
- * | md      | text-base | 14px  |
- * | lg      | text-lg   | 16px  |
- * | xl      | text-xl   | 18px  |
- * | 2xl     | text-2xl  | 22px  |
- * | 3xl     | text-3xl  | 26px  |
- */
-export type SizeToken =
-  | "default"
-  | "xs"
-  | "sm"
-  | "md"
-  | "lg"
-  | "xl"
-  | "2xl"
-  | "3xl"
 
 /**
  * Semantic text color from F0 design token system.

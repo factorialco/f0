@@ -5,7 +5,6 @@ import type {
   AllowedTag,
   ColorToken,
   DecorationToken,
-  SizeToken,
   TransformToken,
   VariantToken,
 } from "./types"
@@ -16,6 +15,28 @@ import type {
 
 export const variantClassMap = {
   variant: {
+    "title-lg": "text-4xl font-semibold",
+    "title-sm": "text-2xl font-semibold",
+    "title-xs": "text-xl font-semibold",
+    "heading-lg": "text-2xl font-semibold",
+    "heading-sm": "text-lg font-semibold",
+    "heading-xs": "text-base font-semibold",
+    "subtitle-xl": "text-2xl font-normal",
+    "subtitle-lg": "text-xl font-normal",
+    "subtitle-sm": "text-base font-normal",
+    "body-xl": "text-xl font-normal",
+    "body-lg": "text-lg font-normal",
+    "body-sm": "text-sm font-normal",
+    "body-xs": "text-xs font-normal",
+    "label-lg": "text-lg font-medium",
+    "label-sm": "text-sm font-medium",
+    "label-xs": "text-xs font-medium",
+    "description-sm": "text-sm font-normal",
+    "description-xs": "text-xs font-normal",
+    "caption-sm": "text-xs font-normal",
+    "code-lg": "text-lg font-normal font-mono",
+    "code-sm": "text-sm font-normal font-mono",
+    // Base variants (default scale)
     title: "text-3xl font-semibold",
     heading: "text-xl font-semibold",
     subtitle: "text-lg font-normal",
@@ -23,7 +44,7 @@ export const variantClassMap = {
     label: "text-base font-medium",
     description: "text-base font-normal",
     caption: "text-sm font-normal",
-    code: "text-sm font-normal font-mono",
+    code: "text-base font-normal font-mono",
   } satisfies Record<VariantToken, string>,
 }
 
@@ -32,6 +53,28 @@ export const variantClassMap = {
 // ---------------------------------------------------------------------------
 
 export const defaultTagMap: Record<VariantToken, AllowedTag> = {
+  "title-lg": "h2",
+  "title-sm": "h2",
+  "title-xs": "h2",
+  "heading-lg": "h3",
+  "heading-sm": "h3",
+  "heading-xs": "h4",
+  "subtitle-xl": "p",
+  "subtitle-lg": "p",
+  "subtitle-sm": "p",
+  "body-xl": "p",
+  "body-lg": "p",
+  "body-sm": "p",
+  "body-xs": "p",
+  "label-lg": "label",
+  "label-sm": "label",
+  "label-xs": "label",
+  "description-sm": "p",
+  "description-xs": "p",
+  "caption-sm": "span",
+  "code-lg": "code",
+  "code-sm": "code",
+  // Base variants (default scale)
   title: "h2",
   heading: "h3",
   subtitle: "p",
@@ -47,25 +90,20 @@ export const defaultTagMap: Record<VariantToken, AllowedTag> = {
 // ---------------------------------------------------------------------------
 
 export const SECONDARY_COLOR_VARIANTS: ReadonlySet<VariantToken> = new Set([
+  "subtitle-xl",
+  "subtitle-lg",
+  "subtitle-sm",
+  "label-lg",
+  "label-sm",
+  "label-xs",
+  "description-sm",
+  "description-xs",
+  "caption-sm",
   "description",
   "subtitle",
   "caption",
   "label",
 ])
-
-// ---------------------------------------------------------------------------
-// Size → Tailwind class map
-// ---------------------------------------------------------------------------
-
-export const sizeClassMap: Record<Exclude<SizeToken, "default">, string> = {
-  xs: "text-xs",
-  sm: "text-sm",
-  md: "text-base",
-  lg: "text-lg",
-  xl: "text-xl",
-  "2xl": "text-2xl",
-  "3xl": "text-3xl",
-}
 
 // ---------------------------------------------------------------------------
 // Color → Tailwind class map
@@ -157,9 +195,4 @@ export function resolveColor(
   if (color === "default") return undefined
   if (SECONDARY_COLOR_VARIANTS.has(variant)) return colorClassMap.secondary
   return undefined
-}
-
-export function resolveSize(size: SizeToken | undefined): string | undefined {
-  if (!size || size === "default") return undefined
-  return sizeClassMap[size]
 }

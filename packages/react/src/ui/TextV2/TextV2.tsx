@@ -8,7 +8,6 @@ import { cn } from "@/lib/utils"
 import type {
   ColorToken,
   DecorationToken,
-  SizeToken,
   TransformToken,
   VariantToken,
 } from "./types"
@@ -17,7 +16,6 @@ import {
   decorationClassMap,
   defaultTagMap,
   resolveColor,
-  resolveSize,
   textV2Variants,
   type TextV2Variants,
   transformClassMap,
@@ -35,12 +33,6 @@ export interface TextV2Props extends Omit<
    * @default "body"
    */
   variant?: VariantToken
-
-  /**
-   * Text size override — independent from variant.
-   * `"default"` or `undefined` keeps the variant's built-in size.
-   */
-  size?: SizeToken
 
   /**
    * Semantic text color.
@@ -93,7 +85,6 @@ export const TextV2 = forwardRef<HTMLElement, TextV2Props>(
     {
       content,
       variant = "body",
-      size,
       color,
       align,
       ellipsis,
@@ -109,7 +100,6 @@ export const TextV2 = forwardRef<HTMLElement, TextV2Props>(
 
     const composedClassName = cn(
       textV2Variants({ variant, align }),
-      resolveSize(size),
       resolveColor(color, variant),
       decoration && decoration !== "none"
         ? decorationClassMap[decoration]

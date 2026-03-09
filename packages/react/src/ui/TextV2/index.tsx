@@ -3,7 +3,6 @@ export type {
   AlignToken,
   ColorToken,
   DecorationToken,
-  SizeToken,
   TransformToken,
   VariantToken,
 } from "./types"
