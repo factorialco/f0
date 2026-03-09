@@ -25,6 +25,7 @@ export * from "./tags/exports"
 export * from "./Utilities/Await"
 export * from "./Utilities/F0GridStack"
 export * from "./F0TableOfContentPopover"
+export * from "./F0DataChart"
 /**
  * @deprecated UpsellingKit has moved to @/sds/UpsellingKit. Import from there instead.
  */
