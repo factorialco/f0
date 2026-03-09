@@ -1,11 +1,11 @@
-import { DateQuestionProps } from "./DateQuestion"
-import { DropdownSingleQuestionProps } from "./DropdownSingleQuestion/types"
-import { LinkQuestionProps } from "./LinkQuestion"
-import { NumericQuestionProps } from "./NumericQuestion"
-import { RatingQuestionProps } from "./RatingQuestion"
+import { DateQuestionProps } from "./QuestionTypes/DateQuestion"
+import { DropdownSingleQuestionProps } from "./QuestionTypes/DropdownSingleQuestion/types"
+import { LinkQuestionProps } from "./QuestionTypes/LinkQuestion"
+import { NumericQuestionProps } from "./QuestionTypes/NumericQuestion"
+import { RatingQuestionProps } from "./QuestionTypes/RatingQuestion"
 import { SectionProps } from "./Section/types"
-import { SelectQuestionProps } from "./SelectQuestion/types"
-import { TextQuestionProps } from "./TextQuestion"
+import { SelectQuestionProps } from "./QuestionTypes/SelectQuestion/types"
+import { TextQuestionProps } from "./QuestionTypes/TextQuestion"
 
 export type QuestionType =
   | "rating"

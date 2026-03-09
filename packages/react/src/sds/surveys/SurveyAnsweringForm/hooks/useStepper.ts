@@ -6,7 +6,7 @@ export function useStepper(questions: FlatQuestion[]) {
   const [currentStep, setCurrentStep] = useState(0)
 
   const totalSteps = questions.length
-  const progress = totalSteps > 0 ? ((currentStep + 1) / totalSteps) * 100 : 0
+  const progress = totalSteps > 0 ? (currentStep / totalSteps) * 100 : 0
   const currentQuestion = questions[currentStep] as FlatQuestion | undefined
   const isFirstStep = currentStep === 0
   const isLastStep = currentStep === totalSteps - 1

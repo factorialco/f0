@@ -16,7 +16,7 @@ import {
 import {
   RATING_OPTIONS,
   useQuestionActionsFactory,
-} from "../../BaseQuestion/ActionsMenu/useQuestionActions"
+} from "../../QuestionTypes/BaseQuestion/ActionsMenu/useQuestionActions"
 import { questionTypeIconMap } from "../../constants"
 import { useSurveyFormBuilderContext } from "../../Context"
 import {

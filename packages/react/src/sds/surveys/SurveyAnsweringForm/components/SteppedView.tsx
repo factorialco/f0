@@ -1,6 +1,9 @@
-import { Progress } from "@/ui/progress"
+import { ProgressBarCell } from "@/ui/value-display/types/progressBar"
 
-import { Question, QuestionProps } from "../../SurveyFormBuilder/Question"
+import {
+  Question,
+  QuestionProps,
+} from "../../SurveyFormBuilder/QuestionTypes/Question"
 import type {
   SurveyFormBuilderElement,
   QuestionElement,
@@ -40,8 +43,8 @@ export function SteppedView({
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="absolute top-0 left-0 right-0 [&>div]:rounded-none [&>div]:h-1">
-        <Progress value={progress} />
+      <div className="absolute top-0 left-0 right-0 [&>div>div>div]:rounded-none [&>div>div>div]:h-1">
+        <ProgressBarCell label="Value" value={progress} hideLabel />
       </div>
 
       {currentQuestion.sectionTitle && (

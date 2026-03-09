@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils"
 
 import { useSurveyFormBuilderContext } from "../../Context"
 import { useDragContext } from "../../DragContext"
-import { Question, QuestionProps } from "../../Question"
+import { Question, QuestionProps } from "../../QuestionTypes/Question"
 import { QuestionElement } from "../../types"
 
 type ItemProps = {

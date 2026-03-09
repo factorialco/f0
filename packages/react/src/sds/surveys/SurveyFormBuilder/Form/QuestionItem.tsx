@@ -6,7 +6,10 @@ import { cn } from "@/lib/utils"
 
 import { useSurveyFormBuilderContext } from "../Context"
 import { useDragContext } from "../DragContext"
-import { Question as QuestionComponent, QuestionProps } from "../Question"
+import {
+  Question as QuestionComponent,
+  QuestionProps,
+} from "../QuestionTypes/Question"
 import { EndOfSectionDivider } from "./EndOfSectionDivider"
 import { FlatFormItem } from "./utils"
 

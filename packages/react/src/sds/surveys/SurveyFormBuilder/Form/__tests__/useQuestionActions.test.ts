@@ -4,7 +4,7 @@ import {
   getCurrentRatingType,
   RATING_OPTIONS,
   shouldResetParamsOnTypeChange,
-} from "../../BaseQuestion/ActionsMenu/useQuestionActions"
+} from "../../QuestionTypes/BaseQuestion/ActionsMenu/useQuestionActions"
 
 describe("getCurrentRatingType", () => {
   it("returns null when questionType is not rating", () => {

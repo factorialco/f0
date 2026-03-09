@@ -1,4 +1,7 @@
-import { Question, QuestionProps } from "../../SurveyFormBuilder/Question"
+import {
+  Question,
+  QuestionProps,
+} from "../../SurveyFormBuilder/QuestionTypes/Question"
 import { Section } from "../../SurveyFormBuilder/Section"
 import type { SurveyFormBuilderElement } from "../../SurveyFormBuilder/types"
 
