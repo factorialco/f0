@@ -1,4 +1,6 @@
+// @ts-ignore - Node built-ins are available in Jest runtime
 import fs from "fs"
+// @ts-ignore - Node built-ins are available in Jest runtime
 import path from "path"
 
 import { ICON_COLORS } from "../F0Icon.types"
@@ -6,6 +8,7 @@ import { ICON_COLORS } from "../F0Icon.types"
 describe("F0Icon token sync", () => {
   it("ICON_COLORS matches f0-icon-* tokens in theme.css", () => {
     const css = fs.readFileSync(
+      // @ts-ignore - __dirname is available in Jest runtime
       path.resolve(__dirname, "../../../../styles/theme.css"),
       "utf-8"
     )
