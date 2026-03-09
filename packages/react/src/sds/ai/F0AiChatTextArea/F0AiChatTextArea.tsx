@@ -80,6 +80,7 @@ export const F0AiChatTextArea = ({
       onStop?.()
     } else if (clarifyingQuestion && !clarifyingQuestion.loading) {
       clarifyingQuestion.onConfirm()
+      setInputValue("")
     } else if (hasDataToSend) {
       const transformed = mentions.transformMentions(inputValue.trim())
       const withToolHint = activeToolHint
