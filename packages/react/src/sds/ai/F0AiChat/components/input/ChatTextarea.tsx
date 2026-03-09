@@ -4,13 +4,13 @@ import { randomId } from "@copilotkit/shared"
 import { motion } from "motion/react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
+import { F0Button } from "@/components/F0Button/F0Button"
 import { ButtonInternal } from "@/components/F0Button/internal"
-import { ArrowUp, SolidStop } from "@/icons/app"
+import { ArrowUp, Cross, SolidStop } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
 import { useAiChat } from "../../providers/AiChatStateProvider"
-
 import { MentionPopover } from "./MentionPopover"
 import { ToolHintSelector } from "./ToolHintSelector"
 import { TypewriterPlaceholder } from "./TypewriterPlaceholder"
@@ -124,7 +124,20 @@ export const ChatTextarea = ({
   const hasOverlay =
     mentions.mentions.length > 0 || mentions.inlineCompletion !== null
 
-  return (
+  const creditWarningConfig = {
+    soft: {
+      text: "You're running low on AI credits.",
+      bg: "bg-f1-background-info",
+      formBorder: "[&_form]:border-f1-border-info-bold",
+    },
+    hard: {
+      text: "You've run out of AI credits.",
+      bg: "bg-f1-background-warning",
+      formBorder: "[&_form]:border-f1-border-warning-bold",
+    },
+  }
+
+  const form = (
     <motion.form
       aria-busy={inProgress}
       ref={formRef}
@@ -314,5 +327,43 @@ export const ChatTextarea = ({
         </div>
       </div>
     </motion.form>
+  )
+
+  if (!creditWarning) return form
+
+  const config = creditWarningConfig[creditWarning]
+
+  return (
+    <div
+      className={cn("flex flex-col rounded-xl", config.bg, config.formBorder)}
+    >
+      <div className="flex items-center justify-between gap-2 px-4 py-2">
+        <p className="min-w-0 flex-1 text-sm font-medium text-f1-foreground">
+          {config.text}
+        </p>
+        <div className="flex shrink-0 items-center gap-1">
+          {onGetCredits && (
+            <F0Button
+              label="Get credits"
+              size="sm"
+              variant="outline"
+              tooltip="Get credits"
+              onClick={onGetCredits}
+            />
+          )}
+          {onDismissCreditWarning && (
+            <F0Button
+              label="Dismiss"
+              size="sm"
+              variant="ghost"
+              icon={Cross}
+              hideLabel
+              onClick={onDismissCreditWarning}
+            />
+          )}
+        </div>
+      </div>
+      {form}
+    </div>
   )
 }
