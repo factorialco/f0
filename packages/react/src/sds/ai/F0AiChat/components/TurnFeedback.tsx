@@ -12,7 +12,10 @@ import { useI18n } from "@/lib/providers/i18n"
 import { Action } from "@/ui/Action"
 import { ButtonCopy } from "@/ui/ButtonCopy"
 
-import { useFeedbackModal, type UserReaction } from "./FeedbackProvider"
+import {
+  useFeedbackModal,
+  type UserReaction,
+} from "../providers/FeedbackProvider"
 
 type TurnFeedbackProps = {
   /** All assistant messages with content in this turn */

@@ -199,7 +199,7 @@ export function computeChartData(
     return { name: seriesName, data }
   })
 
-  // Sort by total value across all series
+  // Sort categories
   if (computation.sortBy === "value") {
     const totals = categories.map((_, i) =>
       seriesArray.reduce((sum, s) => sum + s.data[i], 0)
@@ -209,6 +209,17 @@ export function computeChartData(
       computation.sortOrder === "asc"
         ? totals[a] - totals[b]
         : totals[b] - totals[a]
+    )
+    categories = indices.map((i) => categories[i])
+    for (const s of seriesArray) {
+      s.data = indices.map((i) => s.data[i])
+    }
+  } else if (computation.sortBy === "category") {
+    const indices = categories.map((_, i) => i)
+    indices.sort((a, b) =>
+      computation.sortOrder === "desc"
+        ? categories[b].localeCompare(categories[a])
+        : categories[a].localeCompare(categories[b])
     )
     categories = indices.map((i) => categories[i])
     for (const s of seriesArray) {

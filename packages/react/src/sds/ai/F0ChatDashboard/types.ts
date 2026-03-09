@@ -1,3 +1,12 @@
+import type {
+  BarChartConfig,
+  FunnelChartConfig,
+  LineChartConfig,
+  MetricFormat,
+} from "@/components/F0AnalyticsDashboard/types"
+
+export type { MetricFormat }
+
 // ---------------------------------------------------------------------------
 // Format presets — JSON-serializable value formatting instructions
 // ---------------------------------------------------------------------------
@@ -6,6 +15,10 @@
  * A preset formatting instruction the LLM can specify instead of a
  * real formatter function. The wrapper component maps these to actual
  * `(value: number) => string` functions at render time.
+ *
+ * This is intentionally separate from MetricFormat: it adds `compact`
+ * (useful for chart axes) and does not include `custom` (which requires
+ * prefix/suffix strings that aren't needed for chart axis labels).
  */
 export type FormatPreset =
   | { type: "number" }
@@ -15,53 +28,26 @@ export type FormatPreset =
 
 // ---------------------------------------------------------------------------
 // Chart config — the visual config part (no data, no functions)
+//
+// Derived from the F0AnalyticsDashboard base configs via Omit so that any
+// new visual options added to the base types are automatically available here.
+// Function formatters (valueFormatter, categoryFormatter) are replaced by the
+// JSON-serializable `valueFormat` preset the LLM can emit.
 // ---------------------------------------------------------------------------
 
-interface ChatDashboardChartConfigBase {
-  showLegend?: boolean
-  showGrid?: boolean
-  showLabels?: boolean
+/** Maps function formatters to a JSON-serializable preset. */
+type WithValueFormat<T> = Omit<T, "valueFormatter" | "categoryFormatter"> & {
   valueFormat?: FormatPreset
 }
 
-export interface ChatDashboardBarChartConfig extends ChatDashboardChartConfigBase {
-  type: "bar"
-  orientation?: "vertical" | "horizontal"
-  stacked?: boolean
-}
-
-export interface ChatDashboardLineChartConfig extends ChatDashboardChartConfigBase {
-  type: "line"
-  lineType?: "linear" | "smooth" | "step"
-  showArea?: boolean
-  showDots?: boolean
-}
-
-export interface ChatDashboardFunnelChartConfig {
-  type: "funnel"
-  sort?: "descending" | "ascending" | "none"
-  orient?: "horizontal" | "vertical"
-  labelPosition?: "inside" | "outside"
-  showLegend?: boolean
-  showLabels?: boolean
-  showConversion?: boolean
-  valueFormat?: FormatPreset
-}
+export type ChatDashboardBarChartConfig = WithValueFormat<BarChartConfig>
+export type ChatDashboardLineChartConfig = WithValueFormat<LineChartConfig>
+export type ChatDashboardFunnelChartConfig = WithValueFormat<FunnelChartConfig>
 
 export type ChatDashboardChartConfig =
   | ChatDashboardBarChartConfig
   | ChatDashboardLineChartConfig
   | ChatDashboardFunnelChartConfig
-
-// ---------------------------------------------------------------------------
-// Metric format — reuses the same shape as F0AnalyticsDashboard's MetricFormat
-// ---------------------------------------------------------------------------
-
-export type ChatDashboardMetricFormat =
-  | { type: "number" }
-  | { type: "currency"; currency?: string }
-  | { type: "percent" }
-  | { type: "custom"; suffix?: string; prefix?: string }
 
 // ---------------------------------------------------------------------------
 // Dataset — raw data from queryData, injected by the backend
@@ -152,7 +138,7 @@ export interface ChatDashboardChartItem extends ChatDashboardItemBase {
 
 export interface ChatDashboardMetricItem extends ChatDashboardItemBase {
   type: "metric"
-  format?: ChatDashboardMetricFormat
+  format?: MetricFormat
   decimals?: number
   computation: MetricComputation
 }

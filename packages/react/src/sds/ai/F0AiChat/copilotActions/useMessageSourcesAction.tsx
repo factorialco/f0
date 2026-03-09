@@ -1,6 +1,7 @@
 import { useCopilotAction } from "@copilotkit/react-core"
 
 import { F0MessageSources as MessageSources } from "../../F0MessageSources"
+import { FRONTEND_TOOL_NAMES } from "./tool-names"
 import { MessageSourceItem } from "./types"
 
 /**
@@ -9,7 +10,7 @@ import { MessageSourceItem } from "./types"
  */
 export const useMessageSourcesAction = () => {
   useCopilotAction({
-    name: "messageSources",
+    name: FRONTEND_TOOL_NAMES.messageSources,
     description:
       "Attach information sources to the assistant's response. Use this to show where the AI got its information from.",
     parameters: [

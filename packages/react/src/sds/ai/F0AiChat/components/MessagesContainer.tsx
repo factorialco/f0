@@ -1,27 +1,18 @@
-import {
-  useCopilotChatInternal as useCopilotChat,
-  useCopilotContext,
-} from "@copilotkit/react-core"
 import { type MessagesProps } from "@copilotkit/react-ui"
-import { type AIMessage, type Message } from "@copilotkit/shared"
 import { AnimatePresence, motion } from "motion/react"
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { ArrowDown } from "@/icons/app"
-import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
-import { F0Thinking as Thinking } from "../../F0Thinking"
-
-import { useAiChat } from "../providers/AiChatStateProvider"
 import { FeedbackModal } from "./FeedbackModal"
-import { FeedbackModalProvider, useFeedbackModal } from "./FeedbackProvider"
+import { FeedbackModalProvider } from "../providers/FeedbackProvider"
 import { ScrollShadow } from "./ScrollShadow"
-import { TurnFeedback } from "./TurnFeedback"
+import { TurnContent } from "./TurnContent"
+import { analyzeTurn } from "../utils/turnConversions"
+import { useMessagesSetup } from "../hooks/useMessagesSetup"
 import { WelcomeScreen } from "./WelcomeScreen"
-
-type Turn = Array<Message | Array<Message>>
 
 export const MessagesContainer = (props: MessagesProps) => (
   <FeedbackModalProvider>
@@ -40,35 +31,15 @@ const Messages = ({
   onCopy,
   markdownTagRenderers,
 }: MessagesProps) => {
-  const { messages, interrupt } = useCopilotChat()
-  const { threadId } = useCopilotContext()
   const {
-    close: closeFeedbackModal,
-    currentReaction,
-    currentMessage,
-    isOpen,
-  } = useFeedbackModal()
-
-  const translations = useI18n()
-  const {
+    interrupt,
+    translations,
     greeting,
-    initialMessage,
+    initialMessages,
     welcomeScreenSuggestions,
-    onThumbsUp,
-    onThumbsDown,
-  } = useAiChat()
-
-  const initialMessages = useMemo(
-    () =>
-      makeInitialMessages(
-        initialMessage || translations.ai.defaultInitialMessage
-      ),
-    [initialMessage, translations.ai.defaultInitialMessage]
-  )
-  const showWelcomeBlock =
-    messages.length === 0 && (greeting || initialMessages.length > 0)
-
-  const turns = useMemo(() => convertMessagesToTurns(messages), [messages])
+    showWelcomeBlock,
+    turns,
+  } = useMessagesSetup()
 
   // Scroll state
   const viewportRef = useRef<HTMLDivElement>(null)
@@ -166,55 +137,39 @@ const Messages = ({
                 />
               )}
               {turns.map((turnMessages, turnIndex) => {
-                const isLastTurn = turnIndex === turns.length - 1
-                const turnIsComplete = !(inProgress && isLastTurn)
-                const assistantMessages = turnMessages.filter(
-                  (m): m is AIMessage =>
-                    !Array.isArray(m) &&
-                    m.role === "assistant" &&
-                    !!m.content &&
-                    !m.content.includes("<!--response-stopped-->")
+                const analysis = analyzeTurn(
+                  turnMessages,
+                  turnIndex,
+                  turns.length,
+                  inProgress
                 )
 
                 return (
                   <div
-                    ref={isLastTurn ? lastTurnRef : undefined}
+                    ref={analysis.isLastTurn ? lastTurnRef : undefined}
                     className={cn(
                       "flex flex-col items-start justify-start gap-2",
-                      isLastTurn && "pb-5"
+                      analysis.isLastTurn && "pb-5"
                     )}
                     key={`turn-${turnIndex}`}
                     style={{
-                      minHeight: isLastTurn
+                      minHeight: analysis.isLastTurn
                         ? turnMinHeight || undefined
                         : undefined,
                     }}
                   >
-                    {turnMessages.map((message, index) => {
-                      const isCurrentMessage =
-                        isLastTurn && index === turnMessages.length - 1
-
-                      if (Array.isArray(message) && !isCurrentMessage) {
-                        return (
-                          <Thinking
-                            key={`${turnIndex}-${index}`}
-                            messages={message}
-                            isActive={false}
-                            inProgress={inProgress}
-                            RenderMessage={RenderMessage}
-                            AssistantMessage={AssistantMessage}
-                          />
-                        )
-                      }
-
-                      return (
+                    <TurnContent
+                      turnMessages={turnMessages}
+                      turnIndex={turnIndex}
+                      analysis={analysis}
+                      inProgress={inProgress}
+                      RenderMessage={RenderMessage}
+                      AssistantMessage={AssistantMessage}
+                      onCopy={onCopy}
+                      renderMessage={(message, index, isCurrentMessage) => (
                         <RenderMessage
                           key={`${turnIndex}-${index}`}
-                          message={
-                            Array.isArray(message)
-                              ? message[message.length - 1]
-                              : message
-                          }
+                          message={message}
                           inProgress={inProgress}
                           index={index}
                           isCurrentMessage={isCurrentMessage}
@@ -225,15 +180,8 @@ const Messages = ({
                           onCopy={onCopy}
                           markdownTagRenderers={markdownTagRenderers}
                         />
-                      )
-                    })}
-
-                    {turnIsComplete && assistantMessages.length > 0 && (
-                      <TurnFeedback
-                        messages={assistantMessages}
-                        onCopy={onCopy}
-                      />
-                    )}
+                      )}
+                    />
                   </div>
                 )
               })}
@@ -275,37 +223,9 @@ const Messages = ({
         <ScrollShadow position="bottom" key="shadow-bottom" />
       </div>
 
-      {isOpen && (
-        <FeedbackModal
-          onSubmit={(message, feedback) => {
-            const callback =
-              currentReaction === "like" ? onThumbsUp : onThumbsDown
-            callback?.(message, { threadId, feedback })
-
-            closeFeedbackModal()
-          }}
-          onClose={(message) => {
-            const callback =
-              currentReaction === "like" ? onThumbsUp : onThumbsDown
-            callback?.(message, { threadId, feedback: "" })
-            closeFeedbackModal()
-          }}
-          reactionType={currentReaction}
-          message={currentMessage}
-        />
-      )}
+      <FeedbackModal />
     </>
   )
-}
-
-function makeInitialMessages(initial?: string | string[]): Message[] {
-  if (!initial) return []
-  const arr = Array.isArray(initial) ? initial : [initial]
-  return arr.map((message) => ({
-    id: message,
-    role: "assistant",
-    content: message,
-  }))
 }
 
 /**
@@ -341,87 +261,4 @@ export function useScrollToBottom() {
     showScrollToBottom,
     scrollToBottom,
   }
-}
-
-export function convertMessagesToTurns(messages: Message[]): Turn[] {
-  if (messages.length === 0) {
-    return []
-  }
-
-  console.assert(
-    messages[0].role === "user",
-    "Invariant violation! Assistant message received before user message"
-  )
-
-  const turns: Turn[] = []
-  let thinkingGroup: Message[] | null = null
-
-  for (const message of messages) {
-    if (message.role === "user") {
-      turns.push([message])
-      thinkingGroup = null
-      continue
-    }
-
-    const currentTurn = turns[turns.length - 1]
-
-    // Merge thinking messages into a single group per turn, deduplicating
-    // consecutive identical content. The group is appended here and then
-    // hoisted to index 1 (right after the user message) in the final pass
-    // below so it always renders above everything else.
-    if (isThinkingMessage(message)) {
-      if (thinkingGroup) {
-        const prev = thinkingGroup[thinkingGroup.length - 1]
-        if (getThinkingKey(prev) !== getThinkingKey(message)) {
-          thinkingGroup.push(message)
-        }
-      } else {
-        thinkingGroup = [message]
-        currentTurn.push(thinkingGroup)
-      }
-      continue
-    }
-
-    currentTurn.push(message)
-  }
-
-  // Final pass: ensure the thinking group is always at index 1 (right after
-  // the user message) in every turn, regardless of message arrival order.
-  for (const turn of turns) {
-    const idx = turn.findIndex((entry) => Array.isArray(entry))
-    if (idx > 1) {
-      const [group] = turn.splice(idx, 1)
-      turn.splice(1, 0, group)
-    }
-  }
-
-  return turns
-}
-
-function isThinkingMessage(message: Message): boolean {
-  return (
-    message.role === "assistant" &&
-    message.toolCalls?.some(
-      (call) => call.function.name === "orchestratorThinking"
-    ) === true
-  )
-}
-
-/**
- * Dedup key for thinking messages.
- *
- * CopilotKit action-execution messages have empty/undefined `content` — the
- * actual preamble text lives in `toolCalls[0].function.arguments`.
- * Fall back to `content` for backwards compatibility with any call-site that
- * sets it directly, then to `id` as a last resort.
- */
-function getThinkingKey(message: Message): string {
-  const tc = (
-    message as {
-      toolCalls?: { function: { name: string; arguments: string } }[]
-    }
-  ).toolCalls?.find((c) => c.function.name === "orchestratorThinking")
-  const content =
-    typeof message.content === "string" ? message.content : undefined
-  return tc?.function.arguments || content || message.id
 }

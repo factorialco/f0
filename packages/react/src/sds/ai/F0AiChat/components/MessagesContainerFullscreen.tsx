@@ -1,25 +1,24 @@
 import {
-  useCopilotChatInternal as useCopilotChat,
-  useCopilotContext,
-} from "@copilotkit/react-core"
-import { type MessagesProps } from "@copilotkit/react-ui"
-import { type AIMessage, type Message } from "@copilotkit/shared"
+  type AssistantMessageProps,
+  type MessagesProps,
+  type RenderMessageProps,
+  type UserMessageProps,
+} from "@copilotkit/react-ui"
 import { AnimatePresence, motion } from "motion/react"
-import { useContext, useEffect, useMemo, useRef } from "react"
+import { useContext, useEffect, useRef } from "react"
 
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { ArrowDown } from "@/icons/app"
-import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
-import { F0Thinking } from "../../F0Thinking"
 import { FullscreenChatContext } from "../index"
-import { useAiChat } from "../providers/AiChatStateProvider"
 import { AssistantMessage as F0AssistantMessage } from "./AssistantMessage"
 import { FeedbackModal } from "./FeedbackModal"
-import { FeedbackModalProvider, useFeedbackModal } from "./FeedbackProvider"
-import { convertMessagesToTurns, useScrollToBottom } from "./MessagesContainer"
-import { TurnFeedback } from "./TurnFeedback"
+import { FeedbackModalProvider } from "../providers/FeedbackProvider"
+import { useScrollToBottom } from "./MessagesContainer"
+import { TurnContent } from "./TurnContent"
+import { analyzeTurn } from "../utils/turnConversions"
+import { useMessagesSetup } from "../hooks/useMessagesSetup"
 import { UserMessage as F0UserMessage } from "./UserMessage"
 import { WelcomeScreen } from "./WelcomeScreen"
 
@@ -48,7 +47,18 @@ const Messages = ({
   markdownTagRenderers,
 }: Partial<MessagesProps>) => {
   const turnsContainerRef = useRef<HTMLDivElement>(null)
-  const { messages, interrupt, isLoading } = useCopilotChat()
+
+  const {
+    messages,
+    interrupt,
+    isLoading,
+    translations,
+    greeting,
+    initialMessages,
+    welcomeScreenSuggestions,
+    showWelcomeBlock,
+    turns,
+  } = useMessagesSetup()
 
   const inProgress = inProgressProp ?? isLoading
 
@@ -56,44 +66,19 @@ const Messages = ({
   const UserMessage = UserMessageProp ?? F0UserMessage
   const ImageRenderer =
     ImageRendererProp ??
-    (({ image, content }: any) => (
+    (({ image, content }: { image: string; content?: string }) => (
       <img
         src={image}
         alt={content || "Assistant image"}
         className="max-w-full rounded-lg"
       />
     ))
-  const { threadId } = useCopilotContext()
+
   const { setInProgress } = useContext(FullscreenChatContext)
-  const {
-    close: closeFeedbackModal,
-    currentReaction,
-    currentMessage,
-    isOpen,
-  } = useFeedbackModal()
 
   useEffect(() => {
     setInProgress(inProgress)
   }, [inProgress, setInProgress])
-
-  const translations = useI18n()
-  const {
-    greeting,
-    initialMessage,
-    welcomeScreenSuggestions,
-    onThumbsUp,
-    onThumbsDown,
-  } = useAiChat()
-  const initialMessages = useMemo(
-    () =>
-      makeInitialMessages(
-        initialMessage || translations.ai.defaultInitialMessage
-      ),
-    [initialMessage, translations.ai.defaultInitialMessage]
-  )
-
-  const showWelcomeBlock =
-    messages.length === 0 && (greeting || initialMessages.length > 0)
 
   const {
     messagesContainerRef,
@@ -101,8 +86,6 @@ const Messages = ({
     showScrollToBottom,
     scrollToBottom,
   } = useScrollToBottom()
-
-  const turns = useMemo(() => convertMessagesToTurns(messages), [messages])
 
   // Auto-scroll for new messages and streaming content
   const prevMessagesLength = useRef(messages.length)
@@ -200,18 +183,20 @@ const Messages = ({
     }
 
     const handleTouchStart = (e: TouchEvent) => {
-      ;(container as any)._startY = e.touches[0].pageY
+      ;(container as unknown as { _startY: number })._startY =
+        e.touches[0].pageY
     }
 
     const handleTouchMove = (e: TouchEvent) => {
       const { scrollTop, scrollHeight, clientHeight } = container
       const isAtTop = scrollTop <= 0
-      const isAtBottom = scrollTop + clientHeight >= scrollHeight
+      const isAtContainerBottom = scrollTop + clientHeight >= scrollHeight
 
       // Get the direction of the swipe
       const touch = e.touches[0]
       const currentY = touch.pageY
-      const startY = (container as any)._startY || currentY
+      const startY =
+        (container as unknown as { _startY?: number })._startY || currentY
       const direction = currentY > startY ? "down" : "up"
 
       // 1. If the list is shorter than the container, block all scrolling
@@ -220,7 +205,7 @@ const Messages = ({
       if (
         scrollHeight <= clientHeight ||
         (isAtTop && direction === "down") ||
-        (isAtBottom && direction === "up")
+        (isAtContainerBottom && direction === "up")
       ) {
         if (e.cancelable) {
           e.preventDefault()
@@ -306,14 +291,11 @@ const Messages = ({
           )}
 
           {turns.map((turnMessages, turnIndex) => {
-            const isLastTurn = turnIndex === turns.length - 1
-            const turnIsComplete = !(inProgress && isLastTurn)
-            const assistantMessages = turnMessages.filter(
-              (m): m is AIMessage =>
-                !Array.isArray(m) &&
-                m.role === "assistant" &&
-                !!m.content &&
-                !m.content.includes("<!--response-stopped-->")
+            const analysis = analyzeTurn(
+              turnMessages,
+              turnIndex,
+              turns.length,
+              inProgress
             )
 
             return (
@@ -321,74 +303,64 @@ const Messages = ({
                 className="flex flex-col items-start justify-start gap-2"
                 key={`turn-${turnIndex}`}
               >
-                {turnMessages.map((message, index) => {
-                  const isCurrentMessage =
-                    isLastTurn && index === turnMessages.length - 1
+                <TurnContent
+                  turnMessages={turnMessages}
+                  turnIndex={turnIndex}
+                  analysis={analysis}
+                  inProgress={inProgress}
+                  RenderMessage={RenderMessageProp}
+                  AssistantMessage={AssistantMessage}
+                  onCopy={onCopy}
+                  renderMessage={(message, index, isCurrentMessage) => {
+                    const messageProps = {
+                      key: `${turnIndex}-${index}`,
+                      message,
+                      inProgress,
+                      index,
+                      isCurrentMessage,
+                      AssistantMessage,
+                      UserMessage,
+                      ImageRenderer,
+                      onRegenerate,
+                      onCopy,
+                      markdownTagRenderers,
+                      rawData:
+                        (message as unknown as { rawData?: object }).rawData ||
+                        {},
+                    }
 
-                  if (Array.isArray(message) && !isCurrentMessage) {
+                    const { key, ...messageRestProps } = messageProps
+
+                    if (RenderMessageProp) {
+                      return (
+                        <RenderMessageProp
+                          key={key}
+                          {...(messageRestProps as RenderMessageProps)}
+                        />
+                      )
+                    }
+
+                    if (message.role === "user") {
+                      return (
+                        <UserMessage
+                          key={key}
+                          {...(messageRestProps as UserMessageProps)}
+                        />
+                      )
+                    }
+
                     return (
-                      <F0Thinking
-                        key={`${turnIndex}-${index}`}
-                        messages={message}
-                        isActive={false}
-                        inProgress={inProgress}
-                        RenderMessage={RenderMessageProp as any}
-                        AssistantMessage={AssistantMessage}
-                      />
-                    )
-                  }
-
-                  const messageToShow = Array.isArray(message)
-                    ? message[message.length - 1]
-                    : message
-
-                  const messageProps = {
-                    key: `${turnIndex}-${index}`,
-                    message: messageToShow,
-                    inProgress: inProgress,
-                    index: index,
-                    isCurrentMessage: isCurrentMessage,
-                    AssistantMessage: AssistantMessage,
-                    UserMessage: UserMessage,
-                    ImageRenderer: ImageRenderer,
-                    onRegenerate: onRegenerate,
-                    onCopy: onCopy,
-                    markdownTagRenderers: markdownTagRenderers,
-                    rawData: (messageToShow as any).rawData || {},
-                  }
-
-                  const { key, ...messageRestProps } = messageProps
-
-                  if (RenderMessageProp) {
-                    return (
-                      <RenderMessageProp
+                      <AssistantMessage
                         key={key}
-                        {...(messageRestProps as any)}
+                        {...(messageRestProps as unknown as AssistantMessageProps)}
+                        isGenerating={inProgress && isCurrentMessage}
+                        isLoading={
+                          inProgress && isCurrentMessage && !message.content
+                        }
                       />
                     )
-                  }
-
-                  if (messageToShow.role === "user") {
-                    return (
-                      <UserMessage key={key} {...(messageRestProps as any)} />
-                    )
-                  }
-
-                  return (
-                    <AssistantMessage
-                      key={key}
-                      {...(messageRestProps as any)}
-                      isGenerating={inProgress && isCurrentMessage}
-                      isLoading={
-                        inProgress && isCurrentMessage && !messageToShow.content
-                      }
-                    />
-                  )
-                })}
-
-                {turnIsComplete && assistantMessages.length > 0 && (
-                  <TurnFeedback messages={assistantMessages} onCopy={onCopy} />
-                )}
+                  }}
+                />
               </div>
             )
           })}
@@ -420,41 +392,7 @@ const Messages = ({
         </AnimatePresence>
       </div>
 
-      {isOpen && (
-        <FeedbackModal
-          onSubmit={(message, feedback) => {
-            const callback =
-              currentReaction === "like" ? onThumbsUp : onThumbsDown
-            callback?.(message, { threadId, feedback })
-            closeFeedbackModal()
-          }}
-          onClose={(message) => {
-            const callback =
-              currentReaction === "like" ? onThumbsUp : onThumbsDown
-            callback?.(message, { threadId, feedback: "" })
-            closeFeedbackModal()
-          }}
-          reactionType={currentReaction}
-          message={currentMessage}
-        />
-      )}
+      <FeedbackModal />
     </>
   )
-}
-
-function makeInitialMessages(initial?: string | string[]): Message[] {
-  const initialArray: string[] = []
-  if (initial) {
-    if (Array.isArray(initial)) {
-      initialArray.push(...initial)
-    } else {
-      initialArray.push(initial)
-    }
-  }
-
-  return initialArray.map((message) => ({
-    id: message,
-    role: "assistant",
-    content: message,
-  }))
 }

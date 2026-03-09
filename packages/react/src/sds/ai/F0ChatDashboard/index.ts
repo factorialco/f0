@@ -13,10 +13,10 @@ export type {
   ChatDashboardFunnelChartConfig,
   ChatDashboardItem,
   ChatDashboardLineChartConfig,
-  ChatDashboardMetricFormat,
   ChatDashboardMetricItem,
   ChartComputation,
   CollectionComputation,
   FormatPreset,
   MetricComputation,
+  MetricFormat,
 } from "./types"

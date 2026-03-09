@@ -3,6 +3,7 @@ import { useRef } from "react"
 
 import { F0ChatReportCard } from "../../F0ChatReportCard"
 import type { ChatDashboardConfig } from "../../F0ChatDashboard/types"
+import { FRONTEND_TOOL_NAMES } from "./tool-names"
 import { useAiChat } from "../providers/AiChatStateProvider"
 
 /**
@@ -31,7 +32,7 @@ export const useDisplayDashboardAction = () => {
   const latestConfigRef = useRef<ChatDashboardConfig | null>(null)
 
   useCopilotAction({
-    name: "displayDashboard",
+    name: FRONTEND_TOOL_NAMES.displayDashboard,
     description:
       "Display a data-driven report dashboard in a canvas panel. The backend injects raw datasets; the frontend computes charts, metrics, and tables client-side with reactive filters.",
     parameters: [

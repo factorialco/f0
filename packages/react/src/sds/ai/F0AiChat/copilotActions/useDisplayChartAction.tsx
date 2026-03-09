@@ -2,6 +2,7 @@ import { useCopilotAction } from "@copilotkit/react-core"
 
 import { F0ChatChart } from "../../F0ChatChart"
 import type { F0ChatChartProps } from "../../F0ChatChart/types"
+import { FRONTEND_TOOL_NAMES } from "./tool-names"
 
 /**
  * Hook to register the displayChart copilot action.
@@ -16,7 +17,7 @@ import type { F0ChatChartProps } from "../../F0ChatChart/types"
  */
 export const useDisplayChartAction = () => {
   useCopilotAction({
-    name: "displayChart",
+    name: FRONTEND_TOOL_NAMES.displayChart,
     description:
       "Display an interactive chart (bar or line) inside the chat. The agent sends pre-transformed data series and chart configuration.",
     parameters: [

@@ -5,6 +5,7 @@ import { useI18n } from "@/lib/providers/i18n"
 
 import { F0ActionItem } from "../../F0ActionItem"
 import { f0MarkdownRenderers } from "../../F0MarkdownRenderers"
+import { FRONTEND_TOOL_NAMES } from "../copilotActions/tool-names"
 import { useAiChat } from "../providers/AiChatStateProvider"
 
 export const AssistantMessage = ({
@@ -17,7 +18,7 @@ export const AssistantMessage = ({
   const isThinkingTool =
     message?.role === "assistant" &&
     message.toolCalls?.find(
-      (tool) => tool.function.name === "orchestratorThinking"
+      (tool) => tool.function.name === FRONTEND_TOOL_NAMES.orchestratorThinking
     )
   const subComponent = message?.generativeUI?.(
     isThinkingTool

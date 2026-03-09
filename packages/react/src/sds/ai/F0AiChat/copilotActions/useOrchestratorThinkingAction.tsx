@@ -1,6 +1,7 @@
 import { useCopilotAction } from "@copilotkit/react-core"
 
 import { F0ActionItem } from "../../F0ActionItem"
+import { FRONTEND_TOOL_NAMES } from "./tool-names"
 import { OrchestratorThinkingResult } from "./types"
 
 /**
@@ -9,7 +10,7 @@ import { OrchestratorThinkingResult } from "./types"
  */
 export const useOrchestratorThinkingAction = () => {
   useCopilotAction({
-    name: "orchestratorThinking",
+    name: FRONTEND_TOOL_NAMES.orchestratorThinking,
     description: "Display orchestrator thinking process (non-blocking)",
     parameters: [
       {

@@ -2,6 +2,7 @@ import { useCopilotAction } from "@copilotkit/react-core"
 
 import { F0DataDownload } from "../../F0DataDownload"
 import { F0DataDownloadProps } from "../../F0DataDownload/types"
+import { FRONTEND_TOOL_NAMES } from "./tool-names"
 
 /**
  * Hook to register the data download copilot action.
@@ -15,7 +16,7 @@ import { F0DataDownloadProps } from "../../F0DataDownload/types"
  */
 export const useDataDownloadAction = () => {
   useCopilotAction({
-    name: "downloadData",
+    name: FRONTEND_TOOL_NAMES.downloadData,
     description:
       "Display download buttons for query results. Sends the raw dataset to the frontend for client-side Excel and CSV generation, optionally with a markdown preview table.",
     parameters: [

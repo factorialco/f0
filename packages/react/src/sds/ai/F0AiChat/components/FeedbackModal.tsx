@@ -1,37 +1,68 @@
-import { type AIMessage } from "@copilotkit/shared"
+import { useCopilotContext } from "@copilotkit/react-core"
 import { useCallback, useEffect, useState } from "react"
 
 import { F0Dialog } from "@/components/F0Dialog"
 import { Input } from "@/experimental/Forms/Fields/Input"
 import { useI18n } from "@/lib/providers/i18n"
 
-import { UserReaction } from "./FeedbackProvider"
+import { useAiChat } from "../providers/AiChatStateProvider"
+import { useFeedbackModal } from "../providers/FeedbackProvider"
 
-interface ReactionModalProps {
-  onClose: (message: AIMessage) => void
-  onSubmit: (message: AIMessage, feedback: string) => void
-  reactionType: UserReaction
-  message: AIMessage
+/**
+ * Feedback modal shown when the user reacts (thumbs up / thumbs down) to an
+ * assistant message. Reads all required state from context — no props needed.
+ *
+ * Must be rendered inside both `FeedbackModalProvider` and `AiChatStateProvider`.
+ */
+export const FeedbackModal = () => {
+  const { isOpen, currentReaction, currentMessage, close } = useFeedbackModal()
+  const { onThumbsUp, onThumbsDown } = useAiChat()
+  const { threadId } = useCopilotContext()
+
+  if (!isOpen) return null
+
+  return (
+    <FeedbackModalInner
+      reactionType={currentReaction}
+      onSubmit={(feedback) => {
+        const callback = currentReaction === "like" ? onThumbsUp : onThumbsDown
+        callback?.(currentMessage, { threadId, feedback })
+        close()
+      }}
+      onClose={() => {
+        const callback = currentReaction === "like" ? onThumbsUp : onThumbsDown
+        callback?.(currentMessage, { threadId, feedback: "" })
+        close()
+      }}
+    />
+  )
 }
 
-export const FeedbackModal = ({
-  onClose,
-  onSubmit,
+/**
+ * Inner dialog UI. Separated so that hooks inside (useState, useEffect) only
+ * mount when the modal is actually open, and reset cleanly on close.
+ */
+const FeedbackModalInner = ({
   reactionType,
-  message,
-}: ReactionModalProps) => {
+  onSubmit,
+  onClose,
+}: {
+  reactionType: "like" | "dislike"
+  onSubmit: (feedback: string) => void
+  onClose: () => void
+}) => {
   const [text, setText] = useState("")
   const translation = useI18n()
   const { title, label, placeholder } =
     reactionType === "like"
       ? translation.ai.feedbackModal.positive
       : translation.ai.feedbackModal.negative
+
   const handleSubmit = useCallback(() => {
-    onSubmit(message, text)
-  }, [text, message, onSubmit])
-  const handleClose = () => {
-    onClose(message)
-  }
+    onSubmit(text)
+  }, [text, onSubmit])
+
+  const handleClose = onClose
 
   // handle keyboard submit manually because using built-in <form> fails
   // due to unmount of the dialog before the form is processed
