@@ -105,11 +105,6 @@ export type AiChatProviderReturnValue = {
    */
   currentThreadTitle: string | null
   /**
-   * Set the current thread title (used by the threadTitle copilot action
-   * to update the header in real-time as the AI generates titles)
-   */
-  setCurrentThreadTitle: React.Dispatch<React.SetStateAction<string | null>>
-  /**
    * Send a message to the chat
    * @param message - The message content as a string, or a full Message object
    */

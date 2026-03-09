@@ -181,12 +181,15 @@ type AguiMessage =
  * Convert raw Mastra messages (MastraDBMessage format with ContentV2)
  * into CopilotKit AG-UI messages that setMessages() understands.
  *
- * Assistant messages with tool-invocation parts are split into:
- *  1. An assistant message with toolCalls[]
- *  2. Separate tool result messages for each completed invocation
+ * Parts are iterated in order so that the visual sequence from the
+ * original streaming session is reproduced.  Tool-invocation parts that
+ * appeared before the text part produce an assistant+tool message group
+ * before the text message, and vice-versa.
  */
 function convertMastraToAgui(raw: MastraRawMessage[]): AguiMessage[] {
   const result: AguiMessage[] = []
+  let seqId = 0
+  const nextId = (base: string) => `${base}-${seqId++}`
 
   for (const msg of raw) {
     const parts: MastraPart[] = msg.content?.parts ?? []
@@ -201,21 +204,6 @@ function convertMastraToAgui(raw: MastraRawMessage[]): AguiMessage[] {
         .join("") ||
       (typeof msg.content?.content === "string" ? msg.content.content : "")
 
-    // Extract tool invocations from parts
-    const toolParts = parts.filter(
-      (p): p is Extract<MastraPart, { type: "tool-invocation" }> =>
-        p.type === "tool-invocation"
-    )
-
-    // Also check legacy toolInvocations field
-    const legacyToolInvocations = msg.content?.toolInvocations ?? []
-
-    // Merge both sources of tool invocations
-    const allToolInvocations = [
-      ...toolParts.map((p) => p.toolInvocation),
-      ...legacyToolInvocations,
-    ]
-
     if (msg.role === "user") {
       result.push({ id: msg.id, role: "user", content: textContent })
       continue
@@ -226,46 +214,142 @@ function convertMastraToAgui(raw: MastraRawMessage[]): AguiMessage[] {
       continue
     }
 
-    // Assistant message
-    if (allToolInvocations.length === 0) {
-      // Plain assistant text message
+    // --- Assistant message ---
+
+    // Also check legacy toolInvocations field
+    const legacyToolInvocations = msg.content?.toolInvocations ?? []
+
+    // If there are no tool invocations at all (neither in parts nor legacy),
+    // emit a simple text message.
+    const hasToolParts = parts.some((p) => p.type === "tool-invocation")
+    if (!hasToolParts && legacyToolInvocations.length === 0) {
       result.push({ id: msg.id, role: "assistant", content: textContent })
       continue
     }
 
-    // Assistant message with tool calls
-    const toolCalls = allToolInvocations.map((inv) => ({
-      id: inv.toolCallId,
-      type: "function" as const,
-      function: {
-        name: inv.toolName,
-        arguments:
-          typeof inv.args === "string"
-            ? inv.args
-            : JSON.stringify(inv.args ?? {}),
-      },
-    }))
+    // Walk parts in order and produce separate messages for each segment
+    // so the visual order from the original streaming session is preserved.
+    // A "segment" is either a group of consecutive tool-invocation parts
+    // or a text part.
+    type ToolInv = Extract<
+      MastraPart,
+      { type: "tool-invocation" }
+    >["toolInvocation"]
+    let pendingTools: ToolInv[] = []
+    let textEmitted = false
 
-    result.push({
-      id: msg.id,
-      role: "assistant",
-      content: textContent,
-      toolCalls,
-    })
+    const flushTools = () => {
+      if (pendingTools.length === 0) return
 
-    // Add separate tool result messages for completed invocations
-    for (const inv of allToolInvocations) {
-      if (inv.state === "result" && inv.result !== undefined) {
-        result.push({
-          id: `result-${inv.toolCallId}`,
-          role: "tool",
-          toolCallId: inv.toolCallId,
-          content:
-            typeof inv.result === "string"
-              ? inv.result
-              : JSON.stringify(inv.result),
-          toolName: inv.toolName,
-        })
+      const toolCalls = pendingTools.map((inv) => ({
+        id: inv.toolCallId,
+        type: "function" as const,
+        function: {
+          name: inv.toolName,
+          arguments:
+            typeof inv.args === "string"
+              ? inv.args
+              : JSON.stringify(inv.args ?? {}),
+        },
+      }))
+
+      result.push({
+        id: nextId(msg.id),
+        role: "assistant",
+        content: "",
+        toolCalls,
+      })
+
+      // Separate tool result messages for completed invocations
+      for (const inv of pendingTools) {
+        if (inv.state === "result" && inv.result !== undefined) {
+          result.push({
+            id: `result-${inv.toolCallId}`,
+            role: "tool",
+            toolCallId: inv.toolCallId,
+            content:
+              typeof inv.result === "string"
+                ? inv.result
+                : JSON.stringify(inv.result),
+            toolName: inv.toolName,
+          })
+        }
+      }
+
+      pendingTools = []
+    }
+
+    const flushText = () => {
+      if (textEmitted) return
+      textEmitted = true
+      if (!textContent) return
+      result.push({
+        id: nextId(msg.id),
+        role: "assistant",
+        content: textContent,
+      })
+    }
+
+    for (const part of parts) {
+      if (part.type === "tool-invocation" && "toolInvocation" in part) {
+        pendingTools.push(
+          (part as Extract<MastraPart, { type: "tool-invocation" }>)
+            .toolInvocation
+        )
+      } else if (part.type === "text") {
+        // Flush any tools accumulated before this text part
+        flushTools()
+        flushText()
+      }
+    }
+
+    // Flush remaining tools that appeared after the text
+    flushTools()
+
+    // If text was never emitted (no text part in parts array), emit it now
+    // so the content is not lost.
+    if (!textEmitted && textContent) {
+      result.push({
+        id: nextId(msg.id),
+        role: "assistant",
+        content: textContent,
+      })
+    }
+
+    // Handle legacy toolInvocations (old format without parts ordering)
+    if (legacyToolInvocations.length > 0) {
+      const legacyToolCalls = legacyToolInvocations.map((inv) => ({
+        id: inv.toolCallId,
+        type: "function" as const,
+        function: {
+          name: inv.toolName,
+          arguments:
+            typeof inv.args === "string"
+              ? inv.args
+              : JSON.stringify(inv.args ?? {}),
+        },
+      }))
+
+      result.push({
+        id: nextId(msg.id),
+        role: "assistant",
+        content: "",
+        toolCalls: legacyToolCalls,
+      })
+
+      for (const inv of legacyToolInvocations) {
+        if (inv.state === "result" && inv.result !== undefined) {
+          result.push({
+            id: `result-${inv.toolCallId}`,
+            role: "tool",
+            toolCallId: inv.toolCallId,
+            content:
+              typeof inv.result === "string"
+                ? inv.result
+                : JSON.stringify(inv.result),
+            toolName: inv.toolName,
+          })
+        }
       }
     }
   }

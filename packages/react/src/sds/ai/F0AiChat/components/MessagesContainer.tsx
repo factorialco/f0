@@ -363,13 +363,6 @@ export function convertMessagesToTurns(messages: Message[]): Turn[] {
       continue
     }
 
-    // Skip invisible frontend tool messages (e.g. threadTitle) that only
-    // perform side effects — they have no visual content and would create
-    // phantom entries that disrupt thinking group positioning.
-    if (isInvisibleToolMessage(message)) {
-      continue
-    }
-
     const currentTurn = turns[turns.length - 1]
 
     // Merge thinking messages into a single group per turn, deduplicating
@@ -403,20 +396,6 @@ export function convertMessagesToTurns(messages: Message[]): Turn[] {
   }
 
   return turns
-}
-
-/**
- * Messages produced by frontend-only CopilotKit actions that exist solely for
- * side effects (e.g. updating the thread title in state). Their `render`
- * returns an empty fragment, but CopilotKit still creates an assistant message
- * for them. We filter these out so they don't create phantom empty bubbles.
- */
-function isInvisibleToolMessage(message: Message): boolean {
-  return (
-    message.role === "assistant" &&
-    message.toolCalls?.some((call) => call.function.name === "threadTitle") ===
-      true
-  )
 }
 
 function isThinkingMessage(message: Message): boolean {

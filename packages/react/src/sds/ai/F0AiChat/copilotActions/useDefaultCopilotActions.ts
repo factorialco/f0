@@ -8,7 +8,6 @@ import { useDisplayChartAction } from "./useDisplayChartAction"
 import { useDisplayDashboardAction } from "./useDisplayDashboardAction"
 import { useMessageSourcesAction } from "./useMessageSourcesAction"
 import { useOrchestratorThinkingAction } from "./useOrchestratorThinkingAction"
-import { useThreadTitleAction } from "./useThreadTitleAction"
 
 /**
  * Hook to register all default copilot actions.
@@ -29,7 +28,6 @@ export const useDefaultCopilotActions = () => {
   useDataDownloadAction()
   useDisplayChartAction()
   useDisplayDashboardAction()
-  useThreadTitleAction()
   useDemoCardAction()
   useBookAMeetingCardAction()
   useQuestionCardAction()

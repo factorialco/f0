@@ -204,9 +204,14 @@ export const aiTranslations = {
     thisMonth: "This month",
     older: "Older",
     searchChats: "Search conversations...",
+    pinnedChats: "Pinned",
+    pinChat: "Pin chat",
+    unpinChat: "Unpin chat",
+    deleteChat: "Delete chat",
     ask: "Ask One",
     viewProfile: "View profile",
     tools: "Tools",
+    threadOptions: "Thread options",
   },
 }
 

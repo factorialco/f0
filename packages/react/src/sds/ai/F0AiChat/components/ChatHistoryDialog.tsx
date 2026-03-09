@@ -1,11 +1,18 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { createPortal } from "react-dom"
 
+import { F0Button } from "@/components/F0Button"
 import { F0Icon } from "@/components/F0Icon"
 import { OneEllipsis } from "@/components/OneEllipsis"
-import { ChevronUp } from "@/icons/app"
+import {
+  Dropdown,
+  type DropdownItem as DropdownItemType,
+} from "@/experimental/Navigation/Dropdown"
+import { ChevronUp, EllipsisHorizontal } from "@/icons/app"
 import ChevronDown from "@/icons/app/ChevronDown"
+import Delete from "@/icons/app/Delete"
 import New from "@/icons/app/New"
+import PushPin from "@/icons/app/PushPin"
 import Search from "@/icons/app/Search"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
@@ -60,14 +67,80 @@ function groupThreadsByDate(threads: ChatThread[]): ThreadGroup[] {
     .map((key) => ({ key, threads: groups[key] }))
 }
 
+function ThreadItem({
+  thread,
+  isPinned,
+  onSelect,
+  onPin,
+  onUnpin,
+  onDelete,
+}: {
+  thread: ChatThread
+  isPinned: boolean
+  onSelect: (threadId: string, title: string) => void
+  onPin: (id: string) => void
+  onUnpin: (id: string) => void
+  onDelete: (id: string) => void
+}) {
+  const translations = useI18n()
+  const dropdownItems: DropdownItemType[] = useMemo(
+    () => [
+      {
+        label: isPinned ? translations.ai.unpinChat : translations.ai.pinChat,
+        icon: PushPin,
+        onClick: () => (isPinned ? onUnpin(thread.id) : onPin(thread.id)),
+      },
+      {
+        label: translations.ai.deleteChat,
+        icon: Delete,
+        critical: true,
+        onClick: () => onDelete(thread.id),
+      },
+    ],
+    [isPinned, thread.id, onPin, onUnpin, onDelete]
+  )
+
+  return (
+    <div className="group flex cursor-pointer items-center justify-between rounded-md py-1.5 pl-3 pr-1.5 hover:bg-f1-background-hover">
+      <div
+        className="flex w-full items-center gap-2"
+        onClick={() => onSelect(thread.id, thread.title)}
+      >
+        <OneEllipsis lines={1} className="text-left font-medium">
+          {thread.title}
+        </OneEllipsis>
+      </div>
+      <div className="flex items-center">
+        <Dropdown items={dropdownItems}>
+          <F0Button
+            icon={EllipsisHorizontal}
+            variant="ghost"
+            size="md"
+            label={translations.ai.threadOptions}
+            hideLabel
+          />
+        </Dropdown>
+      </div>
+    </div>
+  )
+}
+
 function CollapsibleGroup({
   label,
   threads,
+  pinnedIds,
   onSelect,
+  onPin,
+  onUnpin,
+  onDelete,
 }: {
   label: string
   threads: ChatThread[]
+  pinnedIds: Set<string>
   onSelect: (threadId: string, title: string) => void
+  onPin: (id: string) => void
+  onUnpin: (id: string) => void
+  onDelete: (id: string) => void
 }) {
   const [expanded, setExpanded] = useState(true)
 
@@ -93,7 +166,7 @@ function CollapsibleGroup({
         onClick={toggleExpanded}
         onKeyDown={handleKeyDown}
         className={cn(
-          "flex cursor-pointer items-center p-3",
+          "flex cursor-pointer items-center p-3 gap-1 hover:bg-f1-background-hover",
           focusRing("rounded")
         )}
       >
@@ -103,23 +176,21 @@ function CollapsibleGroup({
         <F0Icon
           icon={expanded ? ChevronDown : ChevronUp}
           color="secondary"
-          size="sm"
+          size="xs"
         />
       </div>
       {expanded && (
         <div className="flex flex-col">
           {threads.map((thread) => (
-            <Action
+            <ThreadItem
               key={thread.id}
-              variant="ghost"
-              size="md"
-              className="justify-start py-0.5 [&>div>span>span]:w-full"
-              onClick={() => onSelect(thread.id, thread.title)}
-            >
-              <OneEllipsis lines={1} className="text-left">
-                {thread.title}
-              </OneEllipsis>
-            </Action>
+              thread={thread}
+              isPinned={pinnedIds.has(thread.id)}
+              onSelect={onSelect}
+              onPin={onPin}
+              onUnpin={onUnpin}
+              onDelete={onDelete}
+            />
           ))}
         </div>
       )}
@@ -133,7 +204,15 @@ export const ChatHistoryDialog = ({
   onNewChat,
 }: ChatHistoryDialogProps) => {
   const translations = useI18n()
-  const { threads, isLoading, error } = useChatHistory({ enabled: true })
+  const {
+    threads,
+    isLoading,
+    error,
+    pinnedIds,
+    pinThread,
+    unpinThread,
+    deleteThread,
+  } = useChatHistory({ enabled: true })
   const [search, setSearch] = useState("")
 
   // Close on Escape
@@ -168,9 +247,19 @@ export const ChatHistoryDialog = ({
     return threads.filter((t) => t.title.toLowerCase().includes(query))
   }, [threads, search])
 
+  const pinnedThreads = useMemo(
+    () => filteredThreads.filter((t) => pinnedIds.has(t.id)),
+    [filteredThreads, pinnedIds]
+  )
+
+  const unpinnedThreads = useMemo(
+    () => filteredThreads.filter((t) => !pinnedIds.has(t.id)),
+    [filteredThreads, pinnedIds]
+  )
+
   const groups = useMemo(
-    () => groupThreadsByDate(filteredThreads),
-    [filteredThreads]
+    () => groupThreadsByDate(unpinnedThreads),
+    [unpinnedThreads]
   )
 
   const handleSelectThread = useCallback(
@@ -186,7 +275,14 @@ export const ChatHistoryDialog = ({
     onClose()
   }, [onNewChat, onClose])
 
-  const hasResults = groups.length > 0
+  const handleDelete = useCallback(
+    (id: string) => {
+      void deleteThread(id)
+    },
+    [deleteThread]
+  )
+
+  const hasResults = pinnedThreads.length > 0 || groups.length > 0
 
   return createPortal(
     <>
@@ -216,7 +312,7 @@ export const ChatHistoryDialog = ({
           )}
         >
           {/* Fixed search bar */}
-          <div className="flex flex-shrink-0 items-center gap-2 border-0 border-b border-solid border-f1-border-secondary py-3 pl-5 pr-3">
+          <div className="flex flex-shrink-0 items-center gap-2 border-0 border-b border-solid border-f1-border-secondary py-2 pl-5 pr-3">
             <F0Icon icon={Search} color="secondary" size="md" />
             <input
               type="text"
@@ -225,7 +321,7 @@ export const ChatHistoryDialog = ({
               placeholder={translations.ai.searchChats}
               className={cn(
                 "w-full",
-                "py-2 pr-3",
+                "py-2.5 pr-3",
                 "text-base text-f1-foreground-secondary placeholder:text-f1-foreground-tertiary focus:outline-none",
                 "outline-none"
               )}
@@ -233,7 +329,7 @@ export const ChatHistoryDialog = ({
           </div>
 
           {/* Scrollable thread list */}
-          <div className="flex flex-1 flex-col gap-2 overflow-y-auto p-2">
+          <div className="flex flex-1 flex-col gap-1 overflow-y-auto p-2">
             {/* New chat button */}
             <Action
               variant="ghost"
@@ -250,14 +346,14 @@ export const ChatHistoryDialog = ({
             </Action>
 
             {isLoading && (
-              <div className="flex flex-col gap-2 px-2 py-4">
+              <div className="flex flex-col gap-2 py-3">
                 {Array.from({ length: 5 }).map((_, i) => (
                   <div
                     key={i}
-                    className="flex items-center justify-between rounded-lg px-3 py-2"
+                    className="flex items-center justify-between gap-3 rounded-lg px-3 py-2"
                   >
-                    <div className="h-4 w-3/4 animate-pulse rounded bg-f1-background-secondary" />
-                    <div className="ml-3 h-3 w-12 animate-pulse rounded bg-f1-background-secondary" />
+                    <div className="h-5 w-full animate-pulse rounded bg-f1-background-secondary" />
+                    <div className="h-5 w-6 animate-pulse rounded bg-f1-background-secondary" />
                   </div>
                 ))}
               </div>
@@ -275,6 +371,20 @@ export const ChatHistoryDialog = ({
               </p>
             )}
 
+            {/* Pinned group */}
+            {!isLoading && !error && pinnedThreads.length > 0 && (
+              <CollapsibleGroup
+                label={translations.ai.pinnedChats}
+                threads={pinnedThreads}
+                pinnedIds={pinnedIds}
+                onSelect={handleSelectThread}
+                onPin={pinThread}
+                onUnpin={unpinThread}
+                onDelete={handleDelete}
+              />
+            )}
+
+            {/* Date groups (unpinned threads) */}
             {!isLoading &&
               !error &&
               groups.map((group) => (
@@ -282,7 +392,11 @@ export const ChatHistoryDialog = ({
                   key={group.key}
                   label={groupLabels[group.key]}
                   threads={group.threads}
+                  pinnedIds={pinnedIds}
                   onSelect={handleSelectThread}
+                  onPin={pinThread}
+                  onUnpin={unpinThread}
+                  onDelete={handleDelete}
                 />
               ))}
           </div>
