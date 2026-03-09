@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.28.1](https://github.com/factorialco/f0/compare/f0-react-native-v0.28.0...f0-react-native-v0.28.1) (2026-03-06)
+
+
+### Bug Fixes
+
+* font differences between Android and iOS ([#3596](https://github.com/factorialco/f0/issues/3596)) ([4ec216a](https://github.com/factorialco/f0/commit/4ec216a04cfae36f43b173d2805587ee52a0684b))
+
+## [0.28.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.27.0...f0-react-native-v0.28.0) (2026-03-04)
+
+
+### Features
+
+* f0-react-native-headingxl-and-animatedf0text ([#3581](https://github.com/factorialco/f0/issues/3581)) ([41e31f6](https://github.com/factorialco/f0/commit/41e31f6d85a801df4a84ec163b735deba441c847))
+
 ## [0.27.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.26.0...f0-react-native-v0.27.0) (2026-03-03)
 
 

@@ -1,5 +1,15 @@
 import { IconType } from "@/components/F0Icon/F0Icon"
-import { Check, CheckDouble, List, Numbers, Star, TextSize } from "@/icons/app"
+import {
+  Calendar,
+  Check,
+  CheckDouble,
+  ChevronDown,
+  Link,
+  List,
+  Numbers,
+  Star,
+  TextSize,
+} from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 
 import { useCoCreationFormContext } from "./Context"
@@ -45,6 +55,21 @@ export const useQuestionTypes = () => {
       icon: Numbers,
       questionType: "numeric",
     },
+    {
+      label: t("coCreationForm.questionTypes.link"),
+      icon: Link,
+      questionType: "link",
+    },
+    {
+      label: t("coCreationForm.questionTypes.date"),
+      icon: Calendar,
+      questionType: "date",
+    },
+    {
+      label: t("coCreationForm.questionTypes.dropdownSingle"),
+      icon: ChevronDown,
+      questionType: "dropdown-single",
+    },
   ]
 
   const filteredQuestionTypes = allQuestionTypes.filter((questionType) =>
@@ -52,4 +77,21 @@ export const useQuestionTypes = () => {
   )
 
   return filteredQuestionTypes
+}
+
+/**
+ * Context-free icon lookup for question types.
+ * Used by the table of content to map question types to icons
+ * without requiring CoCreationFormContext.
+ */
+export const questionTypeIconMap: Record<QuestionType, IconType> = {
+  rating: Star,
+  "multi-select": CheckDouble,
+  select: Check,
+  text: TextSize,
+  longText: List,
+  numeric: Numbers,
+  link: Link,
+  date: Calendar,
+  "dropdown-single": ChevronDown,
 }

@@ -15,16 +15,18 @@ import { OneChipShowcase } from "../../components/OneChipShowcase";
 import { OnePresetShowcase } from "../../components/OnePresetShowcase";
 import { PageHeaderShowcase } from "../../components/PageHeaderShowcase";
 import { Select } from "../../components/Select";
+import { AnimatedF0TextShowcase } from "../../components/AnimatedF0TextShowcase";
 import { F0TextShowcase } from "../../components/F0TextShowcase/F0TextShowcase";
 import { TagShowcase } from "../../components/TagShowcase";
 import { ThemeSwitcher } from "../../components/ThemeSwitcher";
 
 const SafeAreaView = withUniwind(RNSafeAreaView);
 
-type ComponentType = "activity" | "avatar" | "badge" | "button" | "counter" | "datalist" | "detailsitem" | "detailsitemslist" | "f0text" | "icon" | "onechip" | "onepreset" | "pageheader" | "tag";
+type ComponentType = "activity" | "animatedf0text" | "avatar" | "badge" | "button" | "counter" | "datalist" | "detailsitem" | "detailsitemslist" | "f0text" | "icon" | "onechip" | "onepreset" | "pageheader" | "tag";
 
 const componentOptions = [
   { value: "activity" as ComponentType, label: "Activity" },
+  { value: "animatedf0text" as ComponentType, label: "AnimatedF0Text" },
   { value: "avatar" as ComponentType, label: "Avatar" },
   { value: "badge" as ComponentType, label: "Badge" },
   { value: "button" as ComponentType, label: "Button" },
@@ -58,6 +60,8 @@ export default function ComponentsShowcase() {
     switch (selectedComponent) {
       case "activity":
         return <ActivityShowcase />;
+      case "animatedf0text":
+        return <AnimatedF0TextShowcase />;
       case "avatar":
         return <AvatarShowcase />;
       case "badge":

@@ -2,7 +2,7 @@ import { DropdownItemObject } from "@/experimental/Navigation/Dropdown/internal.
 
 export type PrimaryActionItemDefinition = Pick<
   DropdownItemObject,
-  "label" | "icon"
+  "label" | "icon" | "description"
 > & {
   loading?: boolean
   onClick?: () => void | Promise<void>
