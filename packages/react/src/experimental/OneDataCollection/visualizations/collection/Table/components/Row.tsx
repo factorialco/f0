@@ -20,12 +20,13 @@ import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { Checkbox } from "@/ui/checkbox"
 
-import { ItemActionsRow } from "../../../../components/itemActions/ItemActionsRow/ItemActionsRow"
 import type {
   CellRendererProps,
   RowWrapperProps,
   TableColumnDefinition,
 } from "../types"
+
+import { ItemActionsRow } from "../../../../components/itemActions/ItemActionsRow/ItemActionsRow"
 import { useSticky } from "../useSticky"
 import { NestedRow } from "./NestedRow"
 

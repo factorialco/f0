@@ -103,52 +103,64 @@ import "./global.css";
 
 > **Note:** Add `@source "./node_modules/@factorialco/f0-react-native/lib";` so Tailwind can detect all component classes.
 
-### 5️⃣ Add Custom Fonts (Host App)
+### 5️⃣ Add Inter Fonts (Host App)
 
-To use custom fonts in your host app, load them with Expo Font and override the font CSS variables.
+F0 components use the **Inter** font family. The host app must embed the font files
+and register them with Uniwind so both iOS and Android resolve them correctly.
 
-**Install font dependencies (Expo):**
+#### Step A: Add font files
 
-```bash
-pnpm add expo-font @expo-google-fonts/your-font
+Place the Inter `.ttf` files in your project. **File names must match the PostScript
+name embedded in each font file** (you can inspect PostScript names with tools like
+`fc-query` or `fontTools`):
+
+```
+assets/fonts/Inter/
+  Inter-Regular.ttf      # PostScript name: Inter-Regular   (weight 400)
+  Inter-Medium.ttf       # PostScript name: Inter-Medium    (weight 500)
+  Inter-SemiBold.ttf     # PostScript name: Inter-SemiBold  (weight 600)
+  Inter-Bold.ttf         # PostScript name: Inter-Bold      (weight 700)
 ```
 
-**Load fonts in your app (Expo):**
+> **Why file names matter:** iOS resolves fonts by PostScript name, Android by
+> asset file name (minus extension). When they match, a single CSS value works on
+> both platforms without platform-specific overrides.
 
-```tsx
-import { useFonts } from "expo-font";
-import {
-  YourFont_400Regular,
-  YourFont_500Medium,
-  YourFont_600SemiBold,
-} from "@expo-google-fonts/your-font";
+#### Step B: Register with `expo-font`
 
-export default function App() {
-  const [fontsLoaded] = useFonts({
-    YourFont_400Regular,
-    YourFont_500Medium,
-    YourFont_600SemiBold,
-  });
+Add the `expo-font` config plugin to your **`app.json`**:
 
-  if (!fontsLoaded) {
-    return null; // Or return a loading screen
-  }
-
-  return <YourApp />; // Render your app root
-}
+```json
+["expo-font", { "fonts": [
+  "./assets/fonts/Inter/Inter-Regular.ttf",
+  "./assets/fonts/Inter/Inter-Medium.ttf",
+  "./assets/fonts/Inter/Inter-SemiBold.ttf",
+  "./assets/fonts/Inter/Inter-Bold.ttf"
+]}]
 ```
 
-**Override font variables in `global.css`:**
+This embeds the fonts at build time — no runtime `useFonts` call needed.
+
+#### Step C: Define font variables in `global.css`
+
+Add a `@theme` block **after** the F0 style imports:
 
 ```css
 @theme {
-  --font-normal: "YourFont-Regular";
-  --font-medium: "YourFont-Medium";
-  --font-semibold: "YourFont-SemiBold";
+  --font-normal: "Inter-Regular";
+  --font-medium: "Inter-Medium";
+  --font-semibold: "Inter-SemiBold";
+  --font-bold: "Inter-Bold";
 }
 ```
 
-> **Note:** The font names must match the PostScript names of the loaded fonts. Use the exact names from your font package or assets.
+The values must match the file names (without `.ttf`). Uniwind maps Tailwind
+`font-normal`, `font-medium`, `font-semibold`, and `font-bold` utilities to
+these variables.
+
+> **Rebuild required:** Font changes are picked up at build time, not via
+> Metro hot reload. Run `npx expo prebuild --clean && npx expo run:ios` (or
+> `run:android`) after adding or renaming font files.
 
 ### 6️⃣ TypeScript Support (Optional)
 

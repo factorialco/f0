@@ -1,5 +1,47 @@
 # Changelog
 
+## [1.392.1](https://github.com/factorialco/f0/compare/f0-react-v1.392.0...f0-react-v1.392.1) (2026-03-09)
+
+
+### Bug Fixes
+
+* Adding new follow up props to Frontend tools ([#3589](https://github.com/factorialco/f0/issues/3589)) ([0a96517](https://github.com/factorialco/f0/commit/0a96517d78c3289bb849f9fa6b8d20f5822852b8))
+
+## [1.392.0](https://github.com/factorialco/f0/compare/f0-react-v1.391.0...f0-react-v1.392.0) (2026-03-09)
+
+
+### Features
+
+* AI Mask Effect Component ([#3603](https://github.com/factorialco/f0/issues/3603)) ([b491de7](https://github.com/factorialco/f0/commit/b491de7cbed38de96db744f74a85e2cf99ecf9c7))
+
+## [1.391.0](https://github.com/factorialco/f0/compare/f0-react-v1.390.2...f0-react-v1.391.0) (2026-03-09)
+
+
+### Features
+
+* add onAddRow button to EditableTable and nested rows ([#3576](https://github.com/factorialco/f0/issues/3576)) ([a83b94a](https://github.com/factorialco/f0/commit/a83b94abc857844185ec42590c779cdf19176b6e))
+
+## [1.390.2](https://github.com/factorialco/f0/compare/f0-react-v1.390.1...f0-react-v1.390.2) (2026-03-06)
+
+
+### Bug Fixes
+
+* error highlight animations & validation fixes across all field types in F0Form ([#3597](https://github.com/factorialco/f0/issues/3597)) ([095fc17](https://github.com/factorialco/f0/commit/095fc17c136556bfd5e1a86207a8f6b1baab732a))
+
+## [1.390.1](https://github.com/factorialco/f0/compare/f0-react-v1.390.0...f0-react-v1.390.1) (2026-03-06)
+
+
+### Bug Fixes
+
+* add dark mode to storybook in preview mode ([#3599](https://github.com/factorialco/f0/issues/3599)) ([b403daf](https://github.com/factorialco/f0/commit/b403dafa8b464f4455bff6e0b899a57790da1b85))
+
+## [1.390.0](https://github.com/factorialco/f0/compare/f0-react-v1.389.0...f0-react-v1.390.0) (2026-03-05)
+
+
+### Features
+
+* button dropdown mode for primary actions with descriptions ([#3590](https://github.com/factorialco/f0/issues/3590)) ([e26efa6](https://github.com/factorialco/f0/commit/e26efa6252096bc1cda2b4c395696467b59ab454))
+
 ## [1.389.0](https://github.com/factorialco/f0/compare/f0-react-v1.388.4...f0-react-v1.389.0) (2026-03-04)
 
 

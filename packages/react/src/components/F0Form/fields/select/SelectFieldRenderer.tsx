@@ -48,7 +48,11 @@ function SelectWithOptions({
         multiple={true}
         clearable={field.clearable}
         value={(formField.value as string[]) ?? []}
-        onChange={(value: string[]) => formField.onChange(value)}
+        onChange={(value: string[]) => {
+          formField.onChange(value)
+          // Trigger validation for multi-select
+          formField.onBlur()
+        }}
       />
     )
   }
@@ -59,7 +63,11 @@ function SelectWithOptions({
         {...baseProps}
         clearable={true}
         value={(formField.value as string) ?? undefined}
-        onChange={(value: string) => formField.onChange(value)}
+        onChange={(value: string) => {
+          formField.onChange(value)
+          // Trigger validation for single-select
+          formField.onBlur()
+        }}
       />
     )
   }
@@ -68,7 +76,11 @@ function SelectWithOptions({
     <F0Select
       {...baseProps}
       value={(formField.value as string) ?? undefined}
-      onChange={(value: string) => formField.onChange(value)}
+      onChange={(value: string) => {
+        formField.onChange(value)
+        // Trigger validation for single-select
+        formField.onBlur()
+      }}
     />
   )
 }
@@ -110,7 +122,11 @@ function SelectWithSource({
         multiple={true}
         clearable={field.clearable}
         value={(formField.value as string[]) ?? []}
-        onChange={(value: string[]) => formField.onChange(value)}
+        onChange={(value: string[]) => {
+          formField.onChange(value)
+          // Trigger validation for multi-select
+          formField.onBlur()
+        }}
       />
     )
   }
@@ -121,7 +137,11 @@ function SelectWithSource({
         {...baseProps}
         clearable={true}
         value={(formField.value as string) ?? undefined}
-        onChange={(value: string) => formField.onChange(value)}
+        onChange={(value: string) => {
+          formField.onChange(value)
+          // Trigger validation for single-select
+          formField.onBlur()
+        }}
       />
     )
   }
@@ -130,7 +150,11 @@ function SelectWithSource({
     <F0Select
       {...baseProps}
       value={(formField.value as string) ?? undefined}
-      onChange={(value: string) => formField.onChange(value)}
+      onChange={(value: string) => {
+        formField.onChange(value)
+        // Trigger validation for single-select
+        formField.onBlur()
+      }}
     />
   )
 }

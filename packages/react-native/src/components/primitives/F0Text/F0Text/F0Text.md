@@ -40,18 +40,19 @@ import { F0Text } from "@factorialco/f0-react-native"
 
 ### Props
 
-| Prop            | Type                | Default             | Description                                             |
-| --------------- | ------------------- | ------------------- | ------------------------------------------------------- |
-| `variant`       | `TypographyVariant` | `'body-sm-default'` | Typography variant with weight included                 |
-| `color`         | `TextColor`         | `'default'`         | Text color from F0 semantic color system                |
-| `align`         | `TextAlign`         | `'left'`            | Text alignment (left, center, right, justify)           |
-| `decoration`    | `TextDecoration`    | `'none'`            | Text decoration (none, underline, line-through)         |
-| `transform`     | `TextTransform`     | `'none'`            | Text transform (none, uppercase, lowercase, capitalize) |
-| `numberOfLines` | `number`            | `undefined`         | Max lines before truncation with ellipsis               |
+| Prop            | Type                | Default             | Description                                              |
+| --------------- | ------------------- | ------------------- | -------------------------------------------------------- |
+| `variant`       | `TypographyVariant` | `'body-sm-default'` | Typography variant with weight included                  |
+| `color`         | `TextColor`         | `'default'`         | Text color from F0 semantic color system                 |
+| `align`         | `TextAlign`         | `'left'`            | Text alignment (left, center, right, justify)            |
+| `decoration`    | `TextDecoration`    | `'none'`            | Text decoration (none, underline, line-through)          |
+| `transform`     | `TextTransform`     | `'none'`            | Text transform (none, uppercase, lowercase, capitalize)  |
+| `numberOfLines` | `number`            | `undefined`         | Max lines before truncation with ellipsis                |
+| `className`     | `string`            | `undefined`         | Layout/positioning classes (margin, padding, flex, etc.) |
 
-All React Native `TextProps` are also supported (onPress, testID, etc.).
+All React Native `TextProps` are also supported (onPress, testID, etc.), **except `style`** which is omitted from the type and filtered at runtime.
 
-**Note**: `className` and `style` props are **not available**. Use semantic props for typography. For spacing/layout, wrap F0Text in a View. Both props are filtered at runtime to prevent override via spread.
+Typography is controlled exclusively by semantic props (variant, color, align, etc.) and always takes precedence — any typography classes passed via `className` are automatically overridden by the semantic props via `twMerge`.
 
 ### Typography Variants
 
@@ -180,26 +181,33 @@ All variants use **Inter** font family with the weight included in the variant n
 
 ### Spacing & Layout
 
-F0Text doesn't accept `className` to prevent typography override. Use a View wrapper for spacing:
+F0Text accepts `className` for layout and positioning. Typography classes in `className` are safely overridden by semantic props via `twMerge`:
 
 <!-- prettier-ignore -->
 ```tsx
 <>
-  {/* Spacing with View wrapper */}
-  <View className="mt-4 mb-2">
-    <F0Text variant="body-sm-default">Text with margin</F0Text>
-  </View>
+  {/* Spacing directly on the text */}
+  <F0Text variant="body-sm-default" className="mt-4 mb-2">
+    Text with margin
+  </F0Text>
 
-  {/* Layout with View wrapper */}
-  <View className="flex-1">
-    <F0Text variant="body-sm-default">Flexible text</F0Text>
-  </View>
+  {/* Layout directly on the text */}
+  <F0Text variant="body-sm-default" className="flex-1">
+    Flexible text
+  </F0Text>
 
   {/* Icon + Text pattern */}
   <View className="flex-row items-center gap-2">
     <F0Icon icon={Check} size="sm" />
-    <F0Text variant="body-sm-default">Success message</F0Text>
+    <F0Text variant="body-sm-default" className="flex-1">
+      Success message
+    </F0Text>
   </View>
+
+  {/* Typography override attempts are safely ignored */}
+  <F0Text variant="body-sm-default" className="mt-4 font-bold text-red-500">
+    font-bold and text-red-500 are ignored; mt-4 is applied
+  </F0Text>
 </>
 ```
 
@@ -236,18 +244,16 @@ F0Text doesn't accept `className` to prevent typography override. Use a View wra
 <!-- prettier-ignore -->
 ```tsx
 <View className="rounded-lg bg-f0-background-secondary p-4">
-  <View className="mb-2">
-    <F0Text variant="heading-sm">Card Title</F0Text>
-  </View>
+  <F0Text variant="heading-sm" className="mb-2">
+    Card Title
+  </F0Text>
   <F0Text variant="body-sm-default" color="secondary" numberOfLines={2}>
     This is a description that will be truncated after two lines if it's too
     long to fit in the available space.
   </F0Text>
-  <View className="mt-2">
-    <F0Text variant="body-xs-medium" color="tertiary">
-      Last updated 2 hours ago
-    </F0Text>
-  </View>
+  <F0Text variant="body-xs-medium" color="tertiary" className="mt-2">
+    Last updated 2 hours ago
+  </F0Text>
 </View>
 ```
 
@@ -277,14 +283,59 @@ F0Text/                        # Parent folder for text primitives
 
 ### Font Family
 
-F0Text uses **Inter** font family through Tailwind/Uniwind font weight classes:
+F0Text uses the **Inter** font family through Tailwind/Uniwind `font-*` utility classes,
+which map to `--font-*` CSS variables defined in the app's `@theme`:
 
-| Tailwind Class  | React Native Font Family | Font Weight |
-| --------------- | ------------------------ | ----------- |
-| `font-normal`   | Inter-Regular            | 400         |
-| `font-medium`   | Inter-Medium             | 500         |
-| `font-semibold` | Inter-SemiBold           | 600         |
-| `font-bold`     | Inter-Bold               | 700         |
+| Tailwind Class  | CSS Variable      | Font Name      | Font Weight |
+| --------------- | ----------------- | -------------- | ----------- |
+| `font-normal`   | `--font-normal`   | Inter-Regular  | 400         |
+| `font-medium`   | `--font-medium`   | Inter-Medium   | 500         |
+| `font-semibold` | `--font-semibold` | Inter-SemiBold | 600         |
+| `font-bold`     | `--font-bold`     | Inter-Bold     | 700         |
+
+#### Host App Font Setup
+
+The consuming app must embed the Inter `.ttf` files and wire them up for both
+iOS and Android. See the [README "Add Inter Fonts"](../../../../../README.md#5️⃣-add-inter-fonts-host-app) section for the full
+step-by-step guide. The short version:
+
+1. **Name font files to match their PostScript name** (e.g. `Inter-Regular.ttf`
+   for PostScript name `Inter-Regular`). iOS resolves fonts by PostScript name,
+   Android by asset file name — matching them avoids platform-specific overrides.
+
+2. **Register via `expo-font`** config plugin in `app.json`:
+
+```json
+[
+  "expo-font",
+  {
+    "fonts": [
+      "./assets/fonts/Inter/Inter-Regular.ttf",
+      "./assets/fonts/Inter/Inter-Medium.ttf",
+      "./assets/fonts/Inter/Inter-SemiBold.ttf",
+      "./assets/fonts/Inter/Inter-Bold.ttf"
+    ]
+  }
+]
+```
+
+3. **Define `@theme` variables** in `global.css`:
+
+```css
+@theme {
+  --font-normal: "Inter-Regular";
+  --font-medium: "Inter-Medium";
+  --font-semibold: "Inter-SemiBold";
+  --font-bold: "Inter-Bold";
+}
+```
+
+The `@theme` values must match the file names (without `.ttf`). Uniwind maps
+`font-normal`, `font-medium`, `font-semibold`, and `font-bold` utility classes
+to these variables.
+
+> **Rebuild required:** Font changes are picked up at native build time.
+> Run `npx expo prebuild --clean` after adding or renaming font files.
 
 ## Accessibility
 
@@ -302,11 +353,16 @@ F0Text uses **Inter** font family through Tailwind/Uniwind font weight classes:
 
 <!-- prettier-ignore -->
 ```tsx
-// ✅ Good: Use appropriate variant
+// ✅ Good: Use semantic props for typography
 <F0Text variant="body-md-semibold">Bold text</F0Text>
 
-// ❌ Bad: Don't try to override with className (not supported)
-// <F0Text className="font-bold">Text</F0Text>
+// ✅ Good: Use className for layout
+<F0Text variant="body-md-semibold" className="mt-4 flex-1">Bold text</F0Text>
+
+// ❌ Bad: Don't use className for typography (it will be overridden)
+<F0Text variant="body-sm-default" className="font-bold text-red-500">
+  font-bold and text-red-500 are silently ignored
+</F0Text>
 ```
 
 <!-- prettier-ignore -->
