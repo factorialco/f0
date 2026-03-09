@@ -89,9 +89,9 @@ type TableVisualizationOptions<T> = {
   allowColumnHiding?: boolean
 
   /**
-   * Marks rows as reference rows. Reference rows are rendered with a slanted background pattern.
+   * Marks rows as reference rows. Reference rows are rendered with patterns depending on the type returned.
    */
-  isReferenceRow?: (item: T) => boolean
+  referenceRowType?: (item: T) => ReferenceType
 }
 ```
 
@@ -361,7 +361,7 @@ Allow users to show/hide columns using column settings:
 
 ### Reference Rows
 
-Use `isReferenceRow` to highlight one or more rows as reference rows. This is
+Use `referenceRowType` to highlight one or more rows as reference rows. This is
 useful for baselines, target values, historical comparison rows, or any row
 that should be visually distinguished from regular records.
 
@@ -369,7 +369,7 @@ that should be visually distinguished from regular records.
 {
   type: "table",
   options: {
-    isReferenceRow: (item) => item.status === "inactive",
+    referenceRowType: (item) => item.status === "inactive" ? 'striped' | 'none',
     columns: [
       {
         label: "Name",

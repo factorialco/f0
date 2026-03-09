@@ -22,6 +22,7 @@ import { Checkbox } from "@/ui/checkbox"
 
 import type {
   CellRendererProps,
+  ReferenceType,
   RowWrapperProps,
   TableColumnDefinition,
 } from "../types"
@@ -62,7 +63,7 @@ export type RowProps<
   nestedRowProps?: NestedRowProps
   disableHover?: boolean
   /** Optional predicate to mark a row as reference row with slanted background pattern. */
-  isReferenceRow?: (item: R) => boolean
+  referenceRowType?: (item: R) => ReferenceType
   /** Optional custom cell renderer. When provided, wraps each cell's content. */
   cellRenderer?: React.ComponentType<
     CellRendererProps<R, Sortings, Summaries> & { isLastColumn?: boolean }
@@ -81,6 +82,12 @@ export type NestedRowProps = {
   parentHasChildren?: boolean
   onExpand?: () => void
   onLoadMoreChildren?: () => void
+}
+
+const referenceTypeClasses: Record<ReferenceType, string> = {
+  none: "",
+  striped:
+    "bg-[repeating-linear-gradient(45deg,transparent_0px,transparent_8px,hsl(var(--neutral-20))_8px,hsl(var(--neutral-20))_9px)] [background-size:100%_100px]",
 }
 
 const RowComponentInner = <
@@ -107,7 +114,7 @@ const RowComponentInner = <
     nestedRowProps,
     tableWithChildren,
     disableHover = false,
-    isReferenceRow: isReferenceRowFn,
+    referenceRowType: referenceRowTypeFn,
     cellRenderer: CellRenderer,
     rowWrapper,
   }: RowProps<
@@ -170,7 +177,7 @@ const RowComponentInner = <
         groupIndex={groupIndex}
         nestedRowProps={nestedRowProps}
         tableWithChildren={tableWithChildren}
-        isReferenceRow={isReferenceRowFn}
+        referenceRowType={referenceRowTypeFn}
         cellRenderer={CellRenderer}
         rowWrapper={rowWrapper}
         key={key}
@@ -179,11 +186,7 @@ const RowComponentInner = <
   }
 
   const isSelected = id !== undefined && selectedItems.has(id)
-  const isReferenceRow = isReferenceRowFn?.(item) ?? false
-  // Applies the slanted stripe pattern to the whole reference row.
-  // This is the base background that creates the visual "reference" treatment.
-  const referenceRowClass =
-    "bg-[repeating-linear-gradient(45deg,transparent_0px,transparent_8px,hsl(var(--neutral-20))_8px,hsl(var(--neutral-20))_9px)] [background-size:100%_100px]"
+  const referenceRowType = referenceRowTypeFn?.(item) ?? "none"
 
   return (
     <TableRow
@@ -195,7 +198,7 @@ const RowComponentInner = <
         noBorder && "after:bg-white-100",
         disableHover && "hover:bg-transparent",
         isSelected && "bg-f1-background-selected-secondary",
-        isReferenceRow && referenceRowClass
+        referenceTypeClasses[referenceRowType]
       )}
     >
       {source.selectable && (
@@ -203,7 +206,7 @@ const RowComponentInner = <
           width={checkColumnWidth}
           sticky={{ left: 0 }}
           loading={loading}
-          isReferenceRow={isReferenceRow}
+          referenceRowType={referenceRowType}
         >
           {id !== undefined && (
             <div className="pointer-events-auto ml-1.5 flex items-center justify-start">
@@ -249,7 +252,7 @@ const RowComponentInner = <
                 ? "h-[48px] p-0 align-middle first:pl-0 last:pr-0"
                 : undefined
             }
-            isReferenceRow={isReferenceRow}
+            referenceRowType={referenceRowType}
           >
             {CellRenderer ? (
               <CellRenderer

@@ -270,8 +270,8 @@ export const getMockVisualizations = (options?: {
         allowColumnReordering: options?.table?.allowColumnReordering,
         frozenColumns:
           options?.table?.frozenColumns ?? options?.frozenColumns ?? 0,
-        isReferenceRow: options?.table?.referenceRows
-          ? (item) => item.status === "inactive"
+        referenceRowType: options?.table?.referenceRows
+          ? (item) => (item.status === "inactive" ? "striped" : "none")
           : undefined,
         columns: [
           {

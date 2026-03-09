@@ -89,7 +89,7 @@ export const TableCollection = <
   onLoadError,
   allowColumnHiding,
   allowColumnReordering,
-  isReferenceRow,
+  referenceRowType,
   rowWrapper: RowWrapper,
   cellRenderer,
   showItemActions: showItemActionsProp,
@@ -535,7 +535,7 @@ export const TableCollection = <
                               columns={columns}
                               frozenColumnsLeft={frozenColumnsLeft}
                               checkColumnWidth={checkColumnWidth}
-                              isReferenceRow={isReferenceRow}
+                              referenceRowType={referenceRowType}
                               rowWrapper={RowWrapper}
                               cellRenderer={cellRenderer}
                             />
@@ -576,7 +576,7 @@ export const TableCollection = <
                     frozenColumnsLeft={frozenColumnsLeft}
                     checkColumnWidth={checkColumnWidth}
                     tableWithChildren={tableWithChildren}
-                    isReferenceRow={isReferenceRow}
+                    referenceRowType={referenceRowType}
                     rowWrapper={RowWrapper}
                     cellRenderer={cellRenderer}
                   />

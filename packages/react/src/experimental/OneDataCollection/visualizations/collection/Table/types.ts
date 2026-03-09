@@ -74,6 +74,8 @@ export type TableColumnDefinition<
     noHiding?: boolean
   }
 
+export type ReferenceType = "none" | "striped"
+
 export type TableVisualizationOptions<
   R extends RecordType,
   _Filters extends FiltersDefinition,
@@ -101,7 +103,7 @@ export type TableVisualizationOptions<
    * Marks one or more rows as reference rows.
    * Reference rows are rendered with a slanted background pattern across the full row.
    */
-  isReferenceRow?: (item: R) => boolean
+  referenceRowType?: (item: R) => ReferenceType
 }
 
 export type TableCollectionProps<
