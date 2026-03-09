@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.392.0](https://github.com/factorialco/f0/compare/f0-react-v1.391.0...f0-react-v1.392.0) (2026-03-09)
+
+
+### Features
+
+* AI Mask Effect Component ([#3603](https://github.com/factorialco/f0/issues/3603)) ([b491de7](https://github.com/factorialco/f0/commit/b491de7cbed38de96db744f74a85e2cf99ecf9c7))
+
 ## [1.391.0](https://github.com/factorialco/f0/compare/f0-react-v1.390.2...f0-react-v1.391.0) (2026-03-09)
 
 
