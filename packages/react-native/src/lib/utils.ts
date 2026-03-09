@@ -10,11 +10,10 @@ export function cn(...args: CnOptions): string {
 
 /**
  * Omits specified keys from an object at runtime.
- * Used to filter blocked props (e.g. style, className) before spreading to primitives.
+ * Used to filter blocked props (e.g. style) before spreading to primitives.
  *
  * @example
  * omitProps(rest, ["style"])
- * omitProps(rest, ["style", "className"])
  */
 export function omitProps<T extends Record<string, unknown>, K extends string>(
   obj: T,
