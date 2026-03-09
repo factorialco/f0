@@ -3,6 +3,9 @@ import { format } from "date-fns"
 import { useMemo, useRef, useState } from "react"
 import { action } from "storybook/actions"
 
+import { createDataSourceDefinition, RecordType } from "@/hooks/datasource"
+import { ROLES_MOCK } from "@/mocks"
+
 import { OneDataCollection } from "../../.."
 import { useDataCollectionSource } from "../../../hooks/useDataCollectionSource"
 import {
@@ -750,45 +753,84 @@ export const EditableTableWithSummaryRowAndAddRow: Story = {
   },
 }
 
-export const TableAndEditableTable: Story = {
+type RoleRecord = { value: string; label: string }
+
+const roleNonPaginatedSource = createDataSourceDefinition<RoleRecord>({
+  dataAdapter: {
+    fetchData: async ({ search }) => {
+      await new Promise((resolve) => setTimeout(resolve, 150))
+
+      let results = ROLES_MOCK.map((role) => ({ value: role, label: role }))
+
+      if (search) {
+        const q = search.toLowerCase()
+        results = results.filter((r) => r.label.toLowerCase().includes(q))
+      }
+
+      return { records: results }
+    },
+  },
+})
+
+export const EditableTableWithDataSourceSelect: Story = {
   parameters: {
     docs: {
       description: {
         story:
-          "Both Table and Editable Table in the same collection. Switch via the settings selector; each view keeps its own column order and visibility.",
+          "Editable table where the Role column uses a source-based select with `defaultItem`. Some rows have a role pre-selected while others are empty, showing the placeholder.",
       },
     },
   },
   render: () => {
-    const mockVisualizations = getMockVisualizations({
-      table: {
-        allowColumnHiding: true,
-        allowColumnReordering: true,
-      },
-    })
-    const { dataAdapter, onCellChange } = useEditableTableData()
+    const mockVisualizations = getMockVisualizations()
+    const initialItems = generateMockUsers(10).map((user, i) =>
+      i % 2 === 0 ? { ...user, role: "" } : user
+    )
+    const { dataAdapter, onCellChange } = useEditableTableData(initialItems)
+
+    const baseOptions = (
+      mockVisualizations.editableTable as Extract<
+        typeof mockVisualizations.editableTable,
+        { type: "editableTable" }
+      >
+    ).options
 
     return (
       <ExampleComponent
-        tableAllowColumnReordering
-        tableAllowColumnHiding
         visualizations={[
-          mockVisualizations.table,
           {
             type: "editableTable" as const,
             options: {
-              ...(
-                mockVisualizations.editableTable as Extract<
-                  typeof mockVisualizations.editableTable,
-                  { type: "editableTable" }
-                >
-              ).options,
+              ...baseOptions,
+              columns: baseOptions.columns.map((col) => {
+                if (col.id === "role") {
+                  return {
+                    ...col,
+                    editType: () => "select" as const,
+                    render: (item: MockUser) => item.role || undefined,
+                    selectConfig: {
+                      source: roleNonPaginatedSource,
+                      mapOptions: (record: RecordType) => ({
+                        value: String(record.value),
+                        label: String(record.label),
+                      }),
+                      placeholder: "Select role",
+                      showSearchBox: true,
+                      defaultItem: (item: MockUser) => {
+                        if (!item.role) return undefined
+                        return { value: item.role, label: item.role }
+                      },
+                    },
+                  }
+                }
+                return col
+              }),
               onCellChange,
             },
           },
         ]}
         dataAdapter={dataAdapter}
-        id="table-and-editable/v1"
+        id="editable-table-datasource-select-partial/v1"
       />
     )
   },
@@ -853,6 +895,50 @@ export const EditableTableWithDateCell: Story = {
         ]}
         dataAdapter={dataAdapter}
         id="editable-table-date/v1"
+      />
+    )
+  },
+}
+
+export const TableAndEditableTable: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Both Table and Editable Table in the same collection. Switch via the settings selector; each view keeps its own column order and visibility.",
+      },
+    },
+  },
+  render: () => {
+    const mockVisualizations = getMockVisualizations({
+      table: {
+        allowColumnHiding: true,
+        allowColumnReordering: true,
+      },
+    })
+    const { dataAdapter, onCellChange } = useEditableTableData()
+
+    return (
+      <ExampleComponent
+        tableAllowColumnReordering
+        tableAllowColumnHiding
+        visualizations={[
+          mockVisualizations.table,
+          {
+            type: "editableTable" as const,
+            options: {
+              ...(
+                mockVisualizations.editableTable as Extract<
+                  typeof mockVisualizations.editableTable,
+                  { type: "editableTable" }
+                >
+              ).options,
+              onCellChange,
+            },
+          },
+        ]}
+        dataAdapter={dataAdapter}
+        id="table-and-editable/v1"
       />
     )
   },
