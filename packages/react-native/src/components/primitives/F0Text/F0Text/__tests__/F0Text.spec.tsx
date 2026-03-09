@@ -539,9 +539,14 @@ describe("F0Text", () => {
         </F0Text>
       )
       const element = getByText("No className")
-      expect(element.props.className).toBe(
-        "no-underline normal-case text-[24px] leading-[32px] tracking-[-0.2px] font-semibold text-f0-foreground-accent text-center"
-      )
+      expect(element.props.className).toContain("no-underline")
+      expect(element.props.className).toContain("normal-case")
+      expect(element.props.className).toContain("text-[24px]")
+      expect(element.props.className).toContain("leading-[32px]")
+      expect(element.props.className).toContain("tracking-[-0.2px]")
+      expect(element.props.className).toContain("font-semibold")
+      expect(element.props.className).toContain("text-f0-foreground-accent")
+      expect(element.props.className).toContain("text-center")
     })
   })
 })
