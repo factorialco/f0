@@ -50,9 +50,9 @@ import { F0Text } from "@factorialco/f0-react-native"
 | `numberOfLines` | `number`            | `undefined`         | Max lines before truncation with ellipsis                |
 | `className`     | `string`            | `undefined`         | Layout/positioning classes (margin, padding, flex, etc.) |
 
-All React Native `TextProps` are also supported (onPress, testID, etc.).
+All React Native `TextProps` are also supported (onPress, testID, etc.), **except `style`** which is omitted from the type and filtered at runtime.
 
-**Note**: `style` is **not available**. Typography is controlled exclusively by semantic props (variant, color, align, etc.) and always takes precedence — any typography classes passed via `className` are automatically overridden by the semantic props via `twMerge`.
+Typography is controlled exclusively by semantic props (variant, color, align, etc.) and always takes precedence — any typography classes passed via `className` are automatically overridden by the semantic props via `twMerge`.
 
 ### Typography Variants
 
