@@ -128,12 +128,12 @@ export const ChatTextarea = ({
     soft: {
       text: "You're running low on AI credits.",
       bg: "bg-f1-background-info",
-      formBorder: "[&_form]:border-f1-border-info-bold",
+      formBorder: "[&_form]:border-f1-border-info",
     },
     hard: {
       text: "You've run out of AI credits.",
       bg: "bg-f1-background-warning",
-      formBorder: "[&_form]:border-f1-border-warning-bold",
+      formBorder: "[&_form]:border-f1-border-warning",
     },
   }
 
