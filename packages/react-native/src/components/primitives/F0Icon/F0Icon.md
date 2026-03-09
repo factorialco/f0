@@ -17,7 +17,8 @@ F0Icon is an atomic component that wraps SVG icon components with automatic UniW
 <!-- prettier-ignore -->
 ```tsx
 import { F0Icon } from "@factorialco/f0-react-native"
-import { Archive, Home } from "@factorialco/f0-react-native/icons/app"
+import { Archive } from "@factorialco/f0-react-native/icons/app"
+import { Home } from "@factorialco/f0-react-native/icons/modules"
 
 <F0Icon icon={Archive} />
 

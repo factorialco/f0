@@ -15,7 +15,7 @@ describe("F0Icon token sync", () => {
     // but not --color-f0-icon which maps to "default")
     const tokenRegex = /--color-f0-icon-([a-z0-9][a-z0-9-]*):/g
     const tokensFromCSS = new Set<string>()
-    let match
+    let match: RegExpExecArray | null
     while ((match = tokenRegex.exec(css)) !== null) {
       tokensFromCSS.add(match[1])
     }

@@ -2,11 +2,13 @@ import React, { useMemo } from "react"
 import type { Svg } from "react-native-svg"
 import { withUniwind } from "uniwind"
 
+import { cn } from "../../../lib/utils"
+
 import { iconVariants } from "./F0Icon.styles"
 import type { F0IconProps, IconType } from "./F0Icon.types"
 
-// Keep track of icons that have already had withUniwind applied
-const interopAppliedIcons = new WeakSet<IconType>()
+// Cache original icon -> wrapped icon so withUniwind is only applied once per icon type
+const interopCache = new WeakMap<IconType, IconType>()
 
 /**
  * Applies UniWind interop to an icon component
@@ -14,12 +16,12 @@ const interopAppliedIcons = new WeakSet<IconType>()
  * @internal
  */
 export function applyIconInterop(icon: IconType): IconType {
-  if (!interopAppliedIcons.has(icon)) {
-    const wrappedIcon = withUniwind(icon) as IconType
-    interopAppliedIcons.add(wrappedIcon)
-    return wrappedIcon
+  let wrapped = interopCache.get(icon)
+  if (!wrapped) {
+    wrapped = withUniwind(icon) as IconType
+    interopCache.set(icon, wrapped)
   }
-  return icon
+  return wrapped
 }
 
 /**
@@ -46,12 +48,10 @@ const F0Icon = React.memo(
         [icon]
       )
 
-      const className = useMemo(() => {
-        const variantClasses = iconVariants({ size, color })
-        return customClassName
-          ? `${variantClasses} ${customClassName}`
-          : variantClasses
-      }, [size, color, customClassName])
+      const className = useMemo(
+        () => cn(iconVariants({ size, color }), customClassName),
+        [size, color, customClassName]
+      )
 
       // Early return if no icon provided (after all hooks)
       if (!icon || !IconComponent) return null
