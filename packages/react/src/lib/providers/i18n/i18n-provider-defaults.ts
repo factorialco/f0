@@ -149,6 +149,7 @@ export const defaultTranslations = {
       errors: {
         saveFailed: "Save failed",
       },
+      addRow: "Add row",
     },
     itemsCount: "items",
     emptyStates: {
