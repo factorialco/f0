@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.392.1](https://github.com/factorialco/f0/compare/f0-react-v1.392.0...f0-react-v1.392.1) (2026-03-09)
+
+
+### Bug Fixes
+
+* Adding new follow up props to Frontend tools ([#3589](https://github.com/factorialco/f0/issues/3589)) ([0a96517](https://github.com/factorialco/f0/commit/0a96517d78c3289bb849f9fa6b8d20f5822852b8))
+
 ## [1.392.0](https://github.com/factorialco/f0/compare/f0-react-v1.391.0...f0-react-v1.392.0) (2026-03-09)
 
 
