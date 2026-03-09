@@ -1,10 +1,12 @@
-import { motion } from "motion/react"
+import { AnimatePresence, motion } from "motion/react"
 import { useEffect, useMemo, useRef, useState } from "react"
 
 import { ButtonInternal } from "@/components/F0Button/internal"
-import { ArrowUp, SolidStop } from "@/icons/app"
+import { F0Checkbox } from "@/components/F0Checkbox/F0Checkbox"
+import { ArrowLeft, ArrowUp, SolidStop } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
+import { Skeleton } from "@/ui/skeleton"
 
 import type { F0AiChatTextAreaProps } from "./types"
 
@@ -26,6 +28,7 @@ export const F0AiChatTextArea = ({
   toolHints,
   activeToolHint,
   onActiveToolHintChange,
+  clarifyingQuestion,
 }: F0AiChatTextAreaProps) => {
   const [inputValue, setInputValue] = useState("")
   const [cursorPosition, setCursorPosition] = useState(0)
@@ -55,8 +58,18 @@ export const F0AiChatTextArea = ({
     }
   }, [autoFocus])
 
-  const resolvedDefaultPlaceholder =
-    defaultPlaceholder ?? translation.ai.inputPlaceholder
+  const isClarifying = !!clarifyingQuestion && !clarifyingQuestion.loading
+
+  // Clear the textarea whenever the active clarifying question changes
+  useEffect(() => {
+    if (isClarifying) {
+      setInputValue("")
+    }
+  }, [clarifyingQuestion?.question])
+
+  const resolvedDefaultPlaceholder = clarifyingQuestion
+    ? "Type your answer…"
+    : (defaultPlaceholder ?? translation.ai.inputPlaceholder)
 
   const hasDataToSend = inputValue.trim().length > 0
 
@@ -65,6 +78,8 @@ export const F0AiChatTextArea = ({
     mentions.close()
     if (inProgress) {
       onStop?.()
+    } else if (clarifyingQuestion && !clarifyingQuestion.loading) {
+      clarifyingQuestion.onConfirm()
     } else if (hasDataToSend) {
       const transformed = mentions.transformMentions(inputValue.trim())
       const withToolHint = activeToolHint
@@ -165,6 +180,81 @@ export const F0AiChatTextArea = ({
         position={mentions.popoverPosition}
         onSelect={mentions.selectPerson}
       />
+
+      {/* Clarifying question panel — expands inside the form above the textarea */}
+      <AnimatePresence>
+        {clarifyingQuestion && (
+          <motion.div
+            key="clarifying-question"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.25, ease: "easeOut" }}
+            className="overflow-hidden"
+          >
+            <div className="px-3 pb-1 pt-3">
+              <AnimatePresence mode="wait" initial={false}>
+                {clarifyingQuestion.loading ? (
+                  <motion.div
+                    key="skeleton"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.15 }}
+                    className="space-y-3"
+                  >
+                    <div className="flex items-center">
+                      <Skeleton className="h-3.5 w-48" />
+                    </div>
+                    <div className="space-y-1.5">
+                      {[1, 2, 3, 4].map((i) => (
+                        <div key={i} className="flex items-center gap-2">
+                          <Skeleton className="h-6 w-6 shrink-0 rounded-sm" />
+                          <Skeleton
+                            className="h-3.5"
+                            style={{ width: `${60 + i * 7}%` }}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="content"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.15 }}
+                    className="space-y-3"
+                  >
+                    <div className="flex items-center gap-2">
+                      <p className="text-base font-medium leading-snug text-f1-foreground">
+                        {clarifyingQuestion.question}
+                      </p>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      {clarifyingQuestion.options.map((option) => (
+                        <F0Checkbox
+                          key={option.id}
+                          id={`clarifying-${option.id}`}
+                          title={option.label}
+                          checked={clarifyingQuestion.selectedOptionIds.includes(
+                            option.id
+                          )}
+                          onCheckedChange={() =>
+                            clarifyingQuestion.onToggleOption(option.id)
+                          }
+                        />
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <div
         className={cn(
@@ -280,15 +370,30 @@ export const F0AiChatTextArea = ({
 
       <div className="flex shrink-0 items-center justify-between p-1 sm:p-3">
         <div className="flex items-center">
-          {toolHints && toolHints.length > 0 && onActiveToolHintChange && (
+          {clarifyingQuestion &&
+          !clarifyingQuestion.loading ? null : toolHints &&
+            toolHints.length > 0 &&
+            onActiveToolHintChange ? (
             <ToolHintSelector
               toolHints={toolHints}
               activeToolHint={activeToolHint ?? null}
               onChange={onActiveToolHintChange}
             />
-          )}
+          ) : null}
         </div>
-        <div className="flex items-center">
+        <div className="flex items-center gap-1">
+          {clarifyingQuestion &&
+            !clarifyingQuestion.loading &&
+            clarifyingQuestion.onBack && (
+              <ButtonInternal
+                type="button"
+                variant="outline"
+                label="Back"
+                icon={ArrowLeft}
+                hideLabel
+                onClick={clarifyingQuestion.onBack}
+              />
+            )}
           {inProgress ? (
             <ButtonInternal
               type="submit"
@@ -296,6 +401,23 @@ export const F0AiChatTextArea = ({
               label={translation.ai.stopAnswerGeneration}
               icon={SolidStop}
               hideLabel
+            />
+          ) : clarifyingQuestion && !clarifyingQuestion.loading ? (
+            <ButtonInternal
+              type="submit"
+              variant={
+                clarifyingQuestion.selectedOptionIds.length > 0 || hasDataToSend
+                  ? "default"
+                  : "neutral"
+              }
+              label={
+                clarifyingQuestion.confirmLabel ?? translation.ai.sendMessage
+              }
+              disabled={
+                clarifyingQuestion.selectedOptionIds.length === 0 &&
+                !hasDataToSend
+              }
+              hideLabel={false}
             />
           ) : (
             <ButtonInternal

@@ -13,6 +13,8 @@ import {
   useState,
 } from "react"
 
+import type { ClarifyingQuestion } from "@/sds/ai/F0AiChatTextArea/types"
+
 import { useI18n } from "@/lib/providers/i18n"
 
 import { DEFAULT_CHAT_WIDTH } from "../constants"
@@ -93,6 +95,10 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   const [activeToolHint, setActiveToolHint] = useState<AiChatToolHint | null>(
     null
   )
+
+  const [clarifyingQuestion, setClarifyingQuestion] = useState<
+    ClarifyingQuestion | undefined
+  >(undefined)
 
   // Persist chat width to localStorage
   useEffect(() => {
@@ -218,6 +224,8 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         toolHints,
         activeToolHint,
         setActiveToolHint,
+        clarifyingQuestion,
+        setClarifyingQuestion,
       }}
     >
       {children}
@@ -267,6 +275,8 @@ export function useAiChat(): AiChatProviderReturnValue {
       toolHints: undefined,
       activeToolHint: null,
       setActiveToolHint: noopFn,
+      clarifyingQuestion: undefined,
+      setClarifyingQuestion: noopFn,
     }
   }
 

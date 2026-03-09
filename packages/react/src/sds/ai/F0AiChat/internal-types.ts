@@ -1,5 +1,7 @@
 import { type AIMessage, type Message } from "@copilotkit/shared"
 
+import type { ClarifyingQuestion } from "@/sds/ai/F0AiChatTextArea/types"
+
 import {
   type AiChatDisclaimer,
   type AiChatTrackingOptions,
@@ -141,6 +143,12 @@ export type AiChatProviderReturnValue = {
     /** Set the active tool hint (pass null to clear) */
     setActiveToolHint: React.Dispatch<
       React.SetStateAction<AiChatToolHint | null>
+    >
+    /** The current clarifying question shown inline in the textarea, or undefined */
+    clarifyingQuestion: ClarifyingQuestion | undefined
+    /** Set or clear the clarifying question */
+    setClarifyingQuestion: React.Dispatch<
+      React.SetStateAction<ClarifyingQuestion | undefined>
     >
   }
 

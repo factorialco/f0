@@ -1,6 +1,40 @@
 import type { AiChatToolHint, EntityResolvers } from "../F0AiChat/types"
 
 /**
+ * A single option in a clarifying question presented by the AI.
+ */
+export interface ClarifyingOption {
+  id: string
+  label: string
+}
+
+/**
+ * A clarifying question the AI asks before proceeding.
+ * When provided the textarea grows upward to reveal the question
+ * with selectable options rendered as checkboxes.
+ */
+export interface ClarifyingQuestion {
+  /** The question text to display */
+  question: string
+  /** The selectable options */
+  options: ClarifyingOption[]
+  /** IDs of the currently selected options */
+  selectedOptionIds: string[]
+  /** Called when the user toggles an option */
+  onToggleOption: (id: string) => void
+  /** Called when the user confirms and moves forward */
+  onConfirm: () => void
+  /** Optional: called when the user wants to go back to a previous step */
+  onBack?: () => void
+  /** Step label, e.g. "1 / 3" */
+  stepLabel?: string
+  /** Label for the confirm button */
+  confirmLabel?: string
+  /** Whether the AI is still loading the question (shows skeleton) */
+  loading?: boolean
+}
+
+/**
  * Props for the F0AiChatTextArea component
  */
 export interface F0AiChatTextAreaProps {
@@ -54,4 +88,9 @@ export interface F0AiChatTextAreaProps {
    * Callback when the active tool hint changes (selection or removal).
    */
   onActiveToolHintChange?: (toolHint: AiChatToolHint | null) => void
+  /**
+   * When provided, the textarea grows upward to reveal a clarifying question
+   * with checkbox options. Shows a skeleton while `loading` is true.
+   */
+  clarifyingQuestion?: ClarifyingQuestion
 }

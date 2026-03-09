@@ -30,6 +30,7 @@ export const ChatTextarea = ({
     toolHints,
     activeToolHint,
     setActiveToolHint,
+    clarifyingQuestion,
   } = useAiChat()
   const { messages, setMessages } = useCopilotChatInternal()
   const translations = useI18n()
@@ -60,6 +61,7 @@ export const ChatTextarea = ({
       toolHints={toolHints}
       activeToolHint={activeToolHint}
       onActiveToolHintChange={setActiveToolHint}
+      clarifyingQuestion={clarifyingQuestion}
     />
   )
 }

@@ -1,6 +1,8 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
 import { useRef, useState } from "react"
 
+import type { ClarifyingOption } from "../types"
+
 import { F0AiChatTextArea } from "../F0AiChatTextArea"
 
 const PLACEHOLDERS = [
@@ -163,4 +165,173 @@ export const InProgress: Story = {
       />
     </div>
   ),
+}
+
+// --- WithClarifyingQuestions ---
+
+interface ClarifyingStep {
+  question: string
+  options: ClarifyingOption[]
+}
+
+const CLARIFYING_STEPS: ClarifyingStep[] = [
+  {
+    question: "What type of report do you need?",
+    options: [
+      { id: "attendance", label: "Attendance & absences" },
+      { id: "payroll", label: "Payroll & compensation" },
+      { id: "performance", label: "Performance & goals" },
+      { id: "headcount", label: "Headcount & turnover" },
+    ],
+  },
+  {
+    question: "Which time period should it cover?",
+    options: [
+      { id: "30d", label: "Last 30 days" },
+      { id: "quarter", label: "Last quarter" },
+      { id: "ytd", label: "Year to date" },
+      { id: "custom", label: "Custom range" },
+    ],
+  },
+  {
+    question: "Who should be included?",
+    options: [
+      { id: "all", label: "All employees" },
+      { id: "active", label: "Active employees only" },
+      { id: "dept", label: "A specific department" },
+      { id: "direct", label: "Direct reports only" },
+    ],
+  },
+]
+
+const ClarifyingQuestionsWrapper = () => {
+  const [isProcessing, setIsProcessing] = useState(false)
+  const [stepIndex, setStepIndex] = useState<number | null>(null)
+  const [loadingQuestion, setLoadingQuestion] = useState(false)
+  const [selections, setSelections] = useState<Record<number, string[]>>({})
+  const abortControllerRef = useRef<AbortController | null>(null)
+
+  const currentStep = stepIndex !== null ? CLARIFYING_STEPS[stepIndex] : null
+  const currentSelections =
+    stepIndex !== null ? (selections[stepIndex] ?? []) : []
+  const isLastStep = stepIndex === CLARIFYING_STEPS.length - 1
+
+  const toggleOption = (id: string) => {
+    if (stepIndex === null) return
+    setSelections((prev) => {
+      const current = prev[stepIndex] ?? []
+      const updated = current.includes(id)
+        ? current.filter((o) => o !== id)
+        : [...current, id]
+      return { ...prev, [stepIndex]: updated }
+    })
+  }
+
+  const handleNext = () => {
+    if (stepIndex === null) return
+    if (isLastStep) {
+      setStepIndex(null)
+      setIsProcessing(true)
+
+      abortControllerRef.current = new AbortController()
+      const timeout = setTimeout(() => {
+        setIsProcessing(false)
+        abortControllerRef.current = null
+      }, 2000)
+
+      abortControllerRef.current.signal.addEventListener(
+        "abort",
+        () => {
+          clearTimeout(timeout)
+          setIsProcessing(false)
+        },
+        { once: true }
+      )
+    } else {
+      // Simulate loading the next question
+      setLoadingQuestion(true)
+      setTimeout(() => {
+        setStepIndex((prev) => (prev !== null ? prev + 1 : 0))
+        setLoadingQuestion(false)
+      }, 800)
+    }
+  }
+
+  const handleBack = () => {
+    setStepIndex((prev) => (prev !== null && prev > 0 ? prev - 1 : null))
+  }
+
+  const handleSend = async (_message: string) => {
+    setIsProcessing(true)
+
+    abortControllerRef.current = new AbortController()
+
+    try {
+      await new Promise<void>((resolve, reject) => {
+        const timeout = setTimeout(resolve, 1500)
+        abortControllerRef.current?.signal.addEventListener(
+          "abort",
+          () => {
+            clearTimeout(timeout)
+            reject(new Error("aborted"))
+          },
+          { once: true }
+        )
+      })
+      setSelections({})
+      // Show skeleton briefly before revealing the first question
+      setLoadingQuestion(true)
+      setStepIndex(0)
+      setTimeout(() => setLoadingQuestion(false), 1000)
+    } catch {
+      // aborted — nothing to do
+    } finally {
+      setIsProcessing(false)
+      abortControllerRef.current = null
+    }
+  }
+
+  const handleStop = () => {
+    abortControllerRef.current?.abort()
+    setIsProcessing(false)
+  }
+
+  return (
+    <div className="w-96">
+      <F0AiChatTextArea
+        inProgress={isProcessing}
+        onSend={handleSend}
+        onStop={handleStop}
+        defaultPlaceholder="Ask me to generate a report…"
+        clarifyingQuestion={
+          currentStep
+            ? {
+                question: currentStep.question,
+                options: currentStep.options,
+                selectedOptionIds: currentSelections,
+                onToggleOption: toggleOption,
+                onConfirm: handleNext,
+                onBack:
+                  stepIndex !== null && stepIndex > 0 ? handleBack : undefined,
+                confirmLabel: isLastStep ? "Submit" : "Next",
+                loading: loadingQuestion,
+              }
+            : loadingQuestion
+              ? {
+                  question: "",
+                  options: [],
+                  selectedOptionIds: [],
+                  onToggleOption: () => {},
+                  onConfirm: () => {},
+                  loading: true,
+                }
+              : undefined
+        }
+      />
+    </div>
+  )
+}
+
+export const WithClarifyingQuestions: Story = {
+  render: () => <ClarifyingQuestionsWrapper />,
 }

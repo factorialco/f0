@@ -3,6 +3,7 @@ import { useDemoCardAction } from "../../../UpsellingKit/ai/F0DemoCard/useDemoCa
 import { useFAQCardAction } from "../../../UpsellingKit/ai/F0FAQCard/useFAQCardAction"
 import { useModuleCardAction } from "../../../UpsellingKit/ai/F0ModuleCard/useModuleCardAction"
 import { useQuestionCardAction } from "../../../UpsellingKit/ai/F0QuestionCard/useQuestionCardAction"
+import { useClarifyingQuestionAction } from "./useClarifyingQuestionAction"
 import { useDataDownloadAction } from "./useDataDownloadAction"
 import { useMessageSourcesAction } from "./useMessageSourcesAction"
 import { useOrchestratorThinkingAction } from "./useOrchestratorThinkingAction"
@@ -29,4 +30,5 @@ export const useDefaultCopilotActions = () => {
   useQuestionCardAction()
   useModuleCardAction()
   useFAQCardAction()
+  useClarifyingQuestionAction()
 }
