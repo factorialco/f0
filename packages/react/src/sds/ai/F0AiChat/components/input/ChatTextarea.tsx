@@ -126,13 +126,15 @@ export const ChatTextarea = ({
 
   const creditWarningConfig = {
     soft: {
-      text: "You're running low on AI credits.",
+      text: translation.ai.creditWarning.soft,
       bg: "bg-f1-background-info",
+      fontColor: "text-f1-foreground-info",
       formBorder: "[&_form]:border-f1-border-info",
     },
     hard: {
-      text: "You've run out of AI credits.",
+      text: translation.ai.creditWarning.hard,
       bg: "bg-f1-background-warning",
+      fontColor: "text-f1-foreground-warning",
       formBorder: "[&_form]:border-f1-border-warning",
     },
   }
@@ -337,23 +339,25 @@ export const ChatTextarea = ({
     <div
       className={cn("flex flex-col rounded-xl", config.bg, config.formBorder)}
     >
-      <div className="flex items-center justify-between gap-2 px-4 py-2">
-        <p className="min-w-0 flex-1 text-sm font-medium text-f1-foreground">
+      <div className="flex items-center justify-between gap-2 px-4 pb-1.5 pt-2">
+        <p
+          className={cn("min-w-0 flex-1 text-sm font-medium", config.fontColor)}
+        >
           {config.text}
         </p>
         <div className="flex shrink-0 items-center gap-1">
           {onGetCredits && (
             <F0Button
-              label="Get credits"
+              label={translation.ai.creditWarning.getCredits}
               size="sm"
               variant="outline"
-              tooltip="Get credits"
+              tooltip={translation.ai.creditWarning.getCredits}
               onClick={onGetCredits}
             />
           )}
           {onDismissCreditWarning && (
             <F0Button
-              label="Dismiss"
+              label={translation.ai.creditWarning.dismiss}
               size="sm"
               variant="ghost"
               icon={Cross}

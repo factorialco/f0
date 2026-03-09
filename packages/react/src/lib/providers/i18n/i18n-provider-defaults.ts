@@ -333,6 +333,12 @@ export const defaultTranslations = {
       controls: "← → to move",
       escToExit: "Esc to exit",
     },
+    creditWarning: {
+      soft: "You're running low on AI credits.",
+      hard: "You've run out of AI credits.",
+      getCredits: "Get credits",
+      dismiss: "Dismiss",
+    },
     growth: {
       demoCard: {
         title: "See {{moduleName}} in action",
