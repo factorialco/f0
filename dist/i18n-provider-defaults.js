@@ -229,6 +229,7 @@ const e = {
     },
     visualizations: {
       table: "Table view",
+      editableTable: "Editable table view",
       card: "Card view",
       list: "List view",
       kanban: "Kanban view",
@@ -243,6 +244,12 @@ const e = {
         showAllColumns: "Show all",
         hideAllColumns: "Hide all"
       }
+    },
+    editableTable: {
+      errors: {
+        saveFailed: "Save failed"
+      },
+      addRow: "Add row"
     },
     itemsCount: "items",
     emptyStates: {
@@ -375,9 +382,12 @@ const e = {
         placeholder: "Share what didn’t work"
       }
     },
+    dataDownloadPreview: "Preview {{shown}} of {{total}} rows — download the Excel to see all data.",
     expandChat: "Expand chat",
     collapseChat: "Collapse chat",
     ask: "Ask One",
+    viewProfile: "View profile",
+    tools: "Tools",
     growth: {
       demoCard: {
         title: "See {{moduleName}} in action",
@@ -429,7 +439,9 @@ const e = {
       duplicateQuestion: "Duplicate question",
       deleteQuestion: "Delete question",
       duplicateSection: "Duplicate section",
-      deleteSection: "Delete section"
+      deleteSection: "Delete section",
+      confirmMoveLastQuestion: "Move question",
+      cancelMoveLastQuestion: "Cancel"
     },
     questionTypes: {
       section: "Section",
@@ -440,7 +452,8 @@ const e = {
       longText: "Long text",
       numeric: "Numeric",
       link: "Link",
-      date: "Date"
+      date: "Date",
+      dropdownSingle: "Dropdown"
     },
     selectQuestion: {
       addOption: "Add option",
@@ -466,7 +479,9 @@ const e = {
       questionType: "Question type",
       questionOptions: "Question options",
       actions: "Actions",
-      sectionTitlePlaceholder: "Section title"
+      sectionTitlePlaceholder: "Section title",
+      lastQuestionDialogTitle: "Remove last question from section",
+      lastQuestionDialogDescription: "Moving this question will leave the section empty and it will be removed. Do you want to continue?"
     }
   },
   richTextEditor: {

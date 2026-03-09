@@ -229,6 +229,7 @@ export declare const defaultTranslations: {
         };
         readonly visualizations: {
             readonly table: "Table view";
+            readonly editableTable: "Editable table view";
             readonly card: "Card view";
             readonly list: "List view";
             readonly kanban: "Kanban view";
@@ -243,6 +244,12 @@ export declare const defaultTranslations: {
                 readonly showAllColumns: "Show all";
                 readonly hideAllColumns: "Hide all";
             };
+        };
+        readonly editableTable: {
+            readonly errors: {
+                readonly saveFailed: "Save failed";
+            };
+            readonly addRow: "Add row";
         };
         readonly itemsCount: "items";
         readonly emptyStates: {
@@ -375,9 +382,12 @@ export declare const defaultTranslations: {
                 readonly placeholder: "Share what didn’t work";
             };
         };
+        readonly dataDownloadPreview: "Preview {{shown}} of {{total}} rows — download the Excel to see all data.";
         readonly expandChat: "Expand chat";
         readonly collapseChat: "Collapse chat";
         readonly ask: "Ask One";
+        readonly viewProfile: "View profile";
+        readonly tools: "Tools";
         readonly growth: {
             readonly demoCard: {
                 readonly title: "See {{moduleName}} in action";
@@ -430,6 +440,8 @@ export declare const defaultTranslations: {
             readonly deleteQuestion: "Delete question";
             readonly duplicateSection: "Duplicate section";
             readonly deleteSection: "Delete section";
+            readonly confirmMoveLastQuestion: "Move question";
+            readonly cancelMoveLastQuestion: "Cancel";
         };
         readonly questionTypes: {
             readonly section: "Section";
@@ -441,6 +453,7 @@ export declare const defaultTranslations: {
             readonly numeric: "Numeric";
             readonly link: "Link";
             readonly date: "Date";
+            readonly dropdownSingle: "Dropdown";
         };
         readonly selectQuestion: {
             readonly addOption: "Add option";
@@ -467,6 +480,8 @@ export declare const defaultTranslations: {
             readonly questionOptions: "Question options";
             readonly actions: "Actions";
             readonly sectionTitlePlaceholder: "Section title";
+            readonly lastQuestionDialogTitle: "Remove last question from section";
+            readonly lastQuestionDialogDescription: "Moving this question will leave the section empty and it will be removed. Do you want to continue?";
         };
     };
     readonly richTextEditor: {
@@ -631,6 +646,11 @@ declare module "gridstack" {
 }
 
 
+declare namespace Calendar {
+    var displayName: string;
+}
+
+
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         aiBlock: {
@@ -677,9 +697,4 @@ declare module "@tiptap/core" {
             insertTranscript: (data: TranscriptData) => ReturnType;
         };
     }
-}
-
-
-declare namespace Calendar {
-    var displayName: string;
 }

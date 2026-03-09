@@ -57,7 +57,6 @@ import { F0TagPersonProps as F0TagPersonProps_2 } from './types';
 import { F0TagRawProps } from './types';
 import { F0TagStatusProps } from './types';
 import { F0TagTeamProps } from './types';
-import { F0TextV2Props as F0TextV2Props_2 } from './F0TextV2';
 import { f1Colors } from '@factorialco/f0-core';
 import { FC } from 'react';
 import { FileCellValue } from './f0';
@@ -125,6 +124,7 @@ import { TeamCellValue } from './f0';
 import { TeamCellValue as TeamCellValue_2 } from './types/team';
 import { TextCellValue } from './f0';
 import { TextCellValue as TextCellValue_2 } from './types/text';
+import { TextV2Props } from './f0';
 import { TrackReferenceOrPlaceholder } from '@livekit/components-react';
 import { ValueDisplayRendererContext } from './f0';
 import { VariantProps } from 'cva';
@@ -332,6 +332,19 @@ export declare type AiChatProviderProps = {
      * Optional footer content rendered below the textarea
      */
     footer?: React.ReactNode;
+    /**
+     * Async resolver functions for entity references in markdown.
+     * Used to fetch profile data for inline entity mentions (hover cards).
+     * The consuming app provides these so the chat can resolve entity IDs
+     * (e.g. employee IDs) into rich profile data without knowing the API.
+     */
+    entityResolvers?: EntityResolvers;
+    /**
+     * Available tool hints that the user can activate to provide intent context
+     * to the AI. Renders a selector button next to the send button.
+     * Only one tool hint can be active at a time.
+     */
+    toolHints?: AiChatToolHint[];
     onThumbsUp?: (message: AIMessage, { threadId, feedback }: {
         threadId: string;
         feedback: string;
@@ -340,6 +353,7 @@ export declare type AiChatProviderProps = {
         threadId: string;
         feedback: string;
     }) => void;
+    tracking?: AiChatTrackingOptions;
 } & Pick<CopilotKitProps, "agent" | "credentials" | "children" | "runtimeUrl" | "showDevConsole" | "threadId" | "headers">;
 
 /**
@@ -370,6 +384,7 @@ declare type AiChatProviderReturnValue = {
         threadId: string;
         feedback: string;
     }) => void;
+    tracking?: AiChatTrackingOptions;
     /**
      * Clear/reset the chat conversation
      */
@@ -410,7 +425,12 @@ declare type AiChatProviderReturnValue = {
      * Set the footer content. Use this to update the footer from outside the provider (e.g. per page/route).
      */
     setFooter: React.Dispatch<React.SetStateAction<React.ReactNode | undefined>>;
-} & Pick<AiChatState, "greeting" | "agent" | "disclaimer" | "resizable">;
+} & Pick<AiChatState, "greeting" | "agent" | "disclaimer" | "resizable" | "entityResolvers" | "toolHints"> & {
+    /** The currently active tool hint, or null if none is selected */
+    activeToolHint: AiChatToolHint | null;
+    /** Set the active tool hint (pass null to clear) */
+    setActiveToolHint: React.Dispatch<React.SetStateAction<AiChatToolHint | null>>;
+};
 
 /**
  * Internal state for the AiChat provider
@@ -426,6 +446,8 @@ declare interface AiChatState {
     defaultVisualizationMode?: VisualizationMode;
     lockVisualizationMode?: boolean;
     footer?: React.ReactNode;
+    entityResolvers?: EntityResolvers;
+    toolHints?: AiChatToolHint[];
     placeholders?: string[];
     setPlaceholders?: React.Dispatch<React.SetStateAction<string[]>>;
     onThumbsUp?: (message: AIMessage, { threadId, feedback }: {
@@ -436,7 +458,41 @@ declare interface AiChatState {
         threadId: string;
         feedback: string;
     }) => void;
+    tracking?: AiChatTrackingOptions;
 }
+
+/**
+ * A tool hint that can be activated to prepend invisible context to the user's
+ * message, telling the AI about the user's intent (e.g. "generate tables",
+ * "data analysis"). Similar to Gemini's tool selector UI.
+ *
+ * Only one tool hint can be active at a time. It persists across messages
+ * until the user explicitly removes it.
+ */
+export declare type AiChatToolHint = {
+    /** Unique identifier for this tool hint */
+    id: string;
+    /** Display label shown in the selector and chip */
+    label: string;
+    /** Optional icon shown in the selector and chip */
+    icon?: IconType;
+    /**
+     * Prompt text injected as invisible context before the user's message.
+     * The AI receives this but the user never sees it in the chat.
+     */
+    prompt: string;
+};
+
+/**
+ * Tracking options for the AI chat
+ */
+declare type AiChatTrackingOptions = {
+    onVisibility?: () => void;
+    onClose?: () => void;
+    onWelcomeSuggestionClick?: (suggestion: WelcomeScreenSuggestion) => void;
+    onNewChat?: () => void;
+    onMessage?: (message: Message) => void;
+};
 
 /**
  * AI Chat translations type
@@ -471,8 +527,6 @@ export declare const aiTranslations: {
         thoughtsGroupTitle: string;
         resourcesGroupTitle: string;
         thinking: string;
-        exportTable: string;
-        generatedTableFilename: string;
         feedbackModal: {
             positive: {
                 title: string;
@@ -485,9 +539,12 @@ export declare const aiTranslations: {
                 placeholder: string;
             };
         };
+        dataDownloadPreview: string;
         expandChat: string;
         collapseChat: string;
         ask: string;
+        viewProfile: string;
+        tools: string;
     };
 };
 
@@ -517,6 +574,9 @@ export declare type AlertVariant = "info" | "warning" | "critical" | "neutral" |
 
 /** Flex align items */
 export declare type AlignItemsToken = "start" | "center" | "end" | "stretch" | "baseline";
+
+/** Text alignment */
+export declare type AlignToken = "left" | "center" | "right";
 
 declare const _allowedVariants: readonly ["heading", "heading-large"];
 
@@ -995,6 +1055,10 @@ export declare type ButtonDropdownItem<T = string> = {
     description?: string;
 };
 
+export declare type ButtonDropdownMode = (typeof buttonDropdownModes)[number];
+
+export declare const buttonDropdownModes: readonly ["split", "dropdown"];
+
 export declare type ButtonDropdownSize = (typeof buttonDropdownSizes)[number];
 
 export declare const buttonDropdownSizes: readonly ["sm", "md", "lg"];
@@ -1462,12 +1526,19 @@ declare type CollectionProps<Record extends RecordType, Filters extends FiltersD
 
 declare type CollectionVisualizations<Record extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<Record>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<Record>> = {
     table: VisualizacionTypeDefinition<TableCollectionProps<Record, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>, TableVisualizationSettings>;
+    editableTable: VisualizacionTypeDefinition<EditableTableCollectionProps<Record, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>, EditableTableVisualizationSettings>;
     list: VisualizacionTypeDefinition<ListCollectionProps<Record, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>>;
     card: VisualizacionTypeDefinition<CardCollectionProps<Record, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>>;
     kanban: VisualizacionTypeDefinition<KanbanCollectionProps<Record, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>>;
 };
 
 declare const collectionVisualizations: CollectionVisualizations<RecordType, FiltersDefinition, SortingsDefinition, SummariesDefinition, ItemActionsDefinition<RecordType>, NavigationFiltersDefinition, GroupingDefinition<RecordType>>;
+
+/**
+ * Semantic text color from F0 design token system.
+ * Maps to `text-f1-foreground-*` utilities.
+ */
+export declare type ColorToken = "default" | "secondary" | "tertiary" | "inverse" | "inverse-secondary" | "disabled" | "accent" | "critical" | "warning" | "positive" | "info" | "selected";
 
 /** Grid column span for children (1–12 + full) */
 export declare type ColSpanToken = "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "10" | "11" | "12" | "full";
@@ -1565,6 +1636,12 @@ export declare const createPageLayoutBlock: <Props = unknown>(displayName: strin
 export declare const createPageLayoutBlockGroup: <Props = unknown>(displayName: string, Component: React.ComponentType<Props>) => React.ComponentType<Props> & PageLayoutGroupComponent;
 
 /**
+ * CSS RGB color string type
+ * @example 'rgb(255, 0, 0)' or 'rgb(255,0,0)'
+ */
+declare type CSSRgbString = `rgb(${number}, ${number}, ${number})` | `rgb(${number},${number},${number})`;
+
+/**
  * Extracts the current filters type from filter options.
  * Creates a type mapping filter keys to their respective value types.
  * Used for type-safe access to filter values.
@@ -1637,8 +1714,6 @@ declare interface CustomFieldRenderPropsBase {
     /** Whether the field is required (derived from Zod schema) */
     required?: boolean;
 }
-
-declare type CVAVariants = VariantProps<typeof f0TextV2Variants>;
 
 export declare const Dashboard: WithDataTestIdReturnType_3<ComponentType<DashboardProps_2> & PageLayoutGroupComponent_2>;
 
@@ -1730,6 +1805,8 @@ declare type DataCollectionSourceDefinition<R extends RecordType = RecordType, F
     itemActions?: ItemActions;
     /** Available primary actions that can be performed on the collection */
     primaryActions?: PrimaryActionsDefinitionFn;
+    /** Label for the primary actions dropdown trigger button */
+    primaryActionsLabel?: string;
     /** Available secondary actions that can be performed on the collection */
     secondaryActions?: SecondaryActionsDefinition;
     /** Available summaries fields. If not provided, summaries is not allowed. */
@@ -2075,6 +2152,9 @@ declare type DateValue = {
     granularity: GranularityDefinitionKey;
 };
 
+/** Text decoration */
+export declare type DecorationToken = "none" | "underline" | "overline" | "line-through";
+
 declare type DefaultAction = BannerAction;
 
 export declare const defaultTranslations: {
@@ -2308,6 +2388,7 @@ export declare const defaultTranslations: {
         };
         readonly visualizations: {
             readonly table: "Table view";
+            readonly editableTable: "Editable table view";
             readonly card: "Card view";
             readonly list: "List view";
             readonly kanban: "Kanban view";
@@ -2322,6 +2403,12 @@ export declare const defaultTranslations: {
                 readonly showAllColumns: "Show all";
                 readonly hideAllColumns: "Hide all";
             };
+        };
+        readonly editableTable: {
+            readonly errors: {
+                readonly saveFailed: "Save failed";
+            };
+            readonly addRow: "Add row";
         };
         readonly itemsCount: "items";
         readonly emptyStates: {
@@ -2454,9 +2541,12 @@ export declare const defaultTranslations: {
                 readonly placeholder: "Share what didn’t work";
             };
         };
+        readonly dataDownloadPreview: "Preview {{shown}} of {{total}} rows — download the Excel to see all data.";
         readonly expandChat: "Expand chat";
         readonly collapseChat: "Collapse chat";
         readonly ask: "Ask One";
+        readonly viewProfile: "View profile";
+        readonly tools: "Tools";
         readonly growth: {
             readonly demoCard: {
                 readonly title: "See {{moduleName}} in action";
@@ -2509,6 +2599,8 @@ export declare const defaultTranslations: {
             readonly deleteQuestion: "Delete question";
             readonly duplicateSection: "Duplicate section";
             readonly deleteSection: "Delete section";
+            readonly confirmMoveLastQuestion: "Move question";
+            readonly cancelMoveLastQuestion: "Cancel";
         };
         readonly questionTypes: {
             readonly section: "Section";
@@ -2520,6 +2612,7 @@ export declare const defaultTranslations: {
             readonly numeric: "Numeric";
             readonly link: "Link";
             readonly date: "Date";
+            readonly dropdownSingle: "Dropdown";
         };
         readonly selectQuestion: {
             readonly addOption: "Add option";
@@ -2546,6 +2639,8 @@ export declare const defaultTranslations: {
             readonly questionOptions: "Question options";
             readonly actions: "Actions";
             readonly sectionTitlePlaceholder: "Section title";
+            readonly lastQuestionDialogTitle: "Remove last question from section";
+            readonly lastQuestionDialogDescription: "Moving this question will leave the section empty and it will be removed. Do you want to continue?";
         };
     };
     readonly richTextEditor: {
@@ -2708,8 +2803,6 @@ export declare function DndProvider({ driver, children, }: {
     children: ReactNode;
 }): JSX_2.Element;
 
-export declare function downloadTableAsExcel(table: HTMLTableElement, filename?: string): void;
-
 export declare type DragPayload<T = unknown> = {
     kind: string;
     id: string;
@@ -2754,6 +2847,56 @@ export declare type DropIntent = {
     type: "cancel";
 };
 
+/** The edit mode for a column cell in the editable table. Derived from value-display editors. */
+declare type EditableTableCellEditType = EditableValueDisplayType;
+
+declare type EditableTableCollectionProps<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<R>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<R>> = CollectionProps<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping, EditableTableVisualizationOptions<R, Filters, Sortings, Summaries>>;
+
+/**
+ * Column definition for Editable Table.
+ *
+ * When `editType` is set, the column's `id` is used as the record key to
+ * read the initial value from `item[id]` and to merge the updated value
+ * back into the item passed to `onCellChange`.
+ */
+declare type EditableTableColumnDefinition<R extends RecordType, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition> = TableColumnDefinition<R, Sortings, Summaries> & {
+    /**
+     * Determines how the cell is rendered in edit mode.
+     * Receives the current item and returns the cell type (e.g. `"text"`) or
+     * `undefined` to render the cell read-only.
+     * The column `id` is used as the record key to read/write the value.
+     * When omitted, the cell is always rendered read-only.
+     */
+    editType?: (item: R) => EditableTableCellEditType | undefined;
+    /**
+     * Function that determines if the cell should be editable for a given item.
+     * The cell is only editable if both `editType` returns a value AND
+     * this function returns `true` for the given item.
+     * Return `true` for all items to make the column always editable.
+     */
+    editable: (item: R) => boolean;
+};
+
+declare type EditableTableVisualizationOptions<R extends RecordType, _Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition> = Omit<TableVisualizationOptions<R, _Filters, Sortings, Summaries>, "columns"> & {
+    columns: ReadonlyArray<EditableTableColumnDefinition<R, Sortings, Summaries>>;
+    /**
+     * Called when a cell value changes with the full updated row.
+     * Resolve with nothing for success, or `{ columnId: "message" }` to set errors.
+     * Rejection sets an error on the edited column.
+     */
+    onCellChange: (updatedItem: R) => Promise<void | Record<string, string>>;
+    /** When provided, renders an "Add" button row at the bottom of the table and nested rows. Receives the parent item when triggered from a nested row. Supports async functions for loading state. */
+    onAddRow?: (parentItem?: R) => void | Promise<void>;
+    /** Custom label for the root-level "Add row" button. Falls back to the default i18n translation. */
+    addRowButtonLabel?: string;
+    /** Custom label for the nested-row "Add row" button. Falls back to the default i18n translation. */
+    nestedAddRowButtonLabel?: string;
+};
+
+declare type EditableTableVisualizationSettings = TableVisualizationSettings;
+
+declare type EditableValueDisplayType = keyof typeof valueDisplayEditors;
+
 export declare function Em({ children, ...props }: React.HTMLAttributes<HTMLSpanElement>): JSX_2.Element;
 
 export declare function EmojiImage({ emoji, size, alt }: EmojiImageProps): JSX_2.Element;
@@ -2772,6 +2915,38 @@ declare const emojiVariants: (props?: ({
     class?: never;
     className?: ClassValue;
 })) | undefined) => string;
+
+/**
+ * Generic entity reference renderer for custom `<entity-ref>` HTML tags
+ * embedded in AI chat markdown output.
+ *
+ * Dispatches to type-specific renderers based on the `type` attribute.
+ * Falls back to rendering children as plain text for unknown types.
+ *
+ * Usage in markdown (via rehype-raw):
+ *   <entity-ref type="person" id="123">Ana García</entity-ref>
+ */
+export declare function EntityRef({ type, id, children, }: {
+    type?: string;
+    id?: string;
+    children?: ReactNode;
+}): JSX_2.Element;
+
+/**
+ * Map of async resolver functions keyed by entity type.
+ * Each resolver takes an entity ID and returns the profile data
+ * needed to render the entity reference hover card.
+ *
+ * Extensible: add new entity types here as needed (e.g. `team`, `department`).
+ */
+export declare type EntityResolvers = {
+    person?: (id: string) => Promise<PersonProfile>;
+    /**
+     * Search for persons by name query. Used by the @mention autocomplete
+     * in the chat input to let users reference specific employees.
+     */
+    searchPersons?: (query: string) => Promise<PersonProfile[]>;
+};
 
 declare type Enumerate<N extends number, Acc extends number[] = []> = Acc["length"] extends N ? [...Acc, N][number] : Enumerate<N, [...Acc, Acc["length"]]>;
 
@@ -2836,9 +3011,9 @@ export declare const F0AiChat: () => JSX_2.Element | null;
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const F0AiChatProvider: ({ enabled, greeting, initialMessage, welcomeScreenSuggestions, disclaimer, resizable, defaultVisualizationMode, lockVisualizationMode, footer, onThumbsUp, onThumbsDown, children, agent, ...copilotKitProps }: AiChatProviderProps) => JSX_2.Element;
+export declare const F0AiChatProvider: ({ enabled, greeting, initialMessage, welcomeScreenSuggestions, disclaimer, resizable, defaultVisualizationMode, lockVisualizationMode, footer, entityResolvers, toolHints, onThumbsUp, onThumbsDown, children, agent, tracking, ...copilotKitProps }: AiChatProviderProps) => JSX_2.Element;
 
-export declare const F0AiChatTextArea: ({ submitLabel, inProgress, onSend, onStop, placeholders, defaultPlaceholder, autoFocus, }: F0AiChatTextAreaProps) => JSX_2.Element;
+export declare const F0AiChatTextArea: ({ submitLabel, inProgress, onSend, onStop, placeholders, defaultPlaceholder, autoFocus, entityResolvers, toolHints, activeToolHint, onActiveToolHintChange, }: F0AiChatTextAreaProps) => JSX_2.Element;
 
 /**
  * Props for the F0AiChatTextArea component
@@ -2875,6 +3050,25 @@ export declare interface F0AiChatTextAreaProps {
      * @default true
      */
     autoFocus?: boolean;
+    /**
+     * Entity resolvers for @mention autocomplete and entity reference rendering.
+     * When `searchPersons` is provided, typing @ in the textarea opens an
+     * autocomplete popover to mention employees.
+     */
+    entityResolvers?: EntityResolvers;
+    /**
+     * Available tool hints that the user can activate.
+     * Renders a selector button to the left of the send button.
+     */
+    toolHints?: AiChatToolHint[];
+    /**
+     * The currently active tool hint, or null if none is selected.
+     */
+    activeToolHint?: AiChatToolHint | null;
+    /**
+     * Callback when the active tool hint changes (selection or removal).
+     */
+    onActiveToolHintChange?: (toolHint: AiChatToolHint | null) => void;
 }
 
 export declare const F0AiCollapsibleMessage: ({ icon, title, children, }: F0AiCollapsibleMessageProps) => JSX_2.Element;
@@ -2901,6 +3095,35 @@ export declare interface F0AiCollapsibleMessageProps {
  * @experimental This is an experimental component use it at your own risk
  */
 export declare const F0AiFullscreenChat: () => JSX_2.Element | null;
+
+export declare class F0AiMask {
+    readonly element: HTMLElement;
+    private canvas;
+    private options;
+    private running;
+    private disposed;
+    private startTime;
+    private lastTime;
+    private rafId;
+    private glr;
+    private observer?;
+    constructor(options?: MaskOptions);
+    start(): void;
+    pause(): void;
+    dispose(): void;
+    resize(width: number, height: number, ratio?: number): void;
+    /**
+     * Automatically resizes the canvas to match the dimensions of the given element.
+     * @note using ResizeObserver
+     */
+    autoResize(sourceElement: HTMLElement): void;
+    fadeIn(): Promise<void>;
+    fadeOut(): Promise<void>;
+    private checkGLError;
+    private getGLErrorName;
+    private setupGL;
+    private render;
+}
 
 export declare const F0Alert: WithDataTestIdReturnType_3<({ title, description, action, link, icon, variant, }: F0AlertProps) => JSX_2.Element>;
 
@@ -3292,9 +3515,9 @@ export declare const F0Button: WithDataTestIdReturnType_3<ForwardRefExoticCompon
 variant?: Exclude<ButtonInternalProps["variant"], "ai">;
 } & RefAttributes<HTMLAnchorElement | HTMLButtonElement>>>;
 
-export declare const F0ButtonDropdown: WithDataTestIdReturnType_6<({ onClick, value, ...props }: F0ButtonDropdownProps) => JSX_2.Element | undefined>;
+export declare const F0ButtonDropdown: WithDataTestIdReturnType_6<(props: F0ButtonDropdownProps) => JSX_2.Element>;
 
-export declare type F0ButtonDropdownProps<T = string> = {
+declare type F0ButtonDropdownBaseProps<T = string> = {
     /**
      * The size of the button.
      * @default "md"
@@ -3310,10 +3533,6 @@ export declare type F0ButtonDropdownProps<T = string> = {
      */
     variant?: ButtonDropdownVariant;
     /**
-     * The value of the button.
-     */
-    value?: T;
-    /**
      * The disabled state of the button.
      * @default false
      */
@@ -3328,8 +3547,51 @@ export declare type F0ButtonDropdownProps<T = string> = {
      * @default undefined
      */
     tooltip?: string;
+};
+
+/**
+ * Props for dropdown mode: a unified button with chevron that opens a dropdown
+ * showing all items (with optional descriptions and icons).
+ */
+declare type F0ButtonDropdownDropdownProps<T = string> = F0ButtonDropdownBaseProps<T> & {
     /**
-     * The callback function to be called when the button is clicked.
+     * The rendering mode.
+     * - "dropdown": Single button with chevron — clicking anywhere opens the dropdown with all items.
+     */
+    mode: "dropdown";
+    /**
+     * Optional trigger button label. Customize the label shown on the
+     * trigger button independently from the dropdown items.
+     * Falls back to the first item's label if not provided.
+     */
+    trigger?: string;
+    /**
+     * Called when a dropdown item is clicked.
+     * @param value The value of the item that was clicked.
+     * @param item The item that was clicked.
+     */
+    onClick: (value: T, item: ButtonDropdownItem<T>) => void;
+};
+
+export declare type F0ButtonDropdownProps<T = string> = F0ButtonDropdownSplitProps<T> | F0ButtonDropdownDropdownProps<T>;
+
+/**
+ * Props for split mode (default): a split button where the main button triggers the selected item,
+ * and a chevron reveals the remaining items.
+ */
+declare type F0ButtonDropdownSplitProps<T = string> = F0ButtonDropdownBaseProps<T> & {
+    /**
+     * The rendering mode.
+     * - "split": (default) Split button — main button triggers the selected item, chevron reveals others.
+     * @default "split"
+     */
+    mode?: "split";
+    /**
+     * The currently selected value. Defaults to the first item.
+     */
+    value?: T;
+    /**
+     * Called when the main button or a dropdown item is clicked.
      * @param value The value of the item that was clicked.
      * @param item The item that was clicked.
      */
@@ -3530,6 +3792,68 @@ declare type F0CustomFieldConfigBase<TValue = unknown> = F0BaseConfig & F0Custom
  */
 declare type F0CustomFieldConfigWithConfig<TValue = unknown, TConfig = unknown> = F0BaseConfig & F0CustomConfig<TValue, TConfig> & {
     fieldType: "custom";
+};
+
+/**
+ * Component that renders an optional markdown preview followed by
+ * a dropdown button with "Download Excel" as the primary action and
+ * "Download CSV" as a secondary option. Files are generated client-side
+ * from the raw dataset provided by the agent.
+ */
+export declare const F0DataDownload: ({ markdown, filename, dataset, }: F0DataDownloadProps) => JSX_2.Element;
+
+/**
+ * Inline dataset for client-side file generation (Excel / CSV).
+ * Sent by the agent with the raw query results.
+ */
+export declare type F0DataDownloadDataset = {
+    /**
+     * Column headers in display order.
+     */
+    columns: string[];
+    /**
+     * Array of row objects keyed by column name.
+     */
+    rows: Record<string, unknown>[];
+    /**
+     * Total number of rows returned by the query (before truncation).
+     * Used together with previewCount to render the preview note.
+     */
+    totalCount?: number;
+    /**
+     * Number of rows shown in the markdown preview table.
+     * Used together with totalCount to render the preview note.
+     */
+    previewCount?: number;
+    /**
+     * Map of raw column names to human-readable labels in the user's language.
+     * Used for Excel/CSV headers. Falls back to the raw column name when absent.
+     */
+    columnLabels?: Record<string, string>;
+};
+
+/**
+ * Props for the F0DataDownload component.
+ *
+ * Renders an optional markdown preview/description followed by
+ * "Download Excel" and "Download CSV" buttons. The component generates
+ * the files client-side from the provided dataset.
+ */
+export declare type F0DataDownloadProps = {
+    /**
+     * Optional markdown content to display above the download buttons.
+     * Typically a 5-row preview table generated by the agent.
+     */
+    markdown?: string;
+    /**
+     * Descriptive filename (without extension) for the downloaded files.
+     * Generated by the AI to reflect the query content in the user's language.
+     */
+    filename?: string;
+    /**
+     * Raw dataset for client-side Excel and CSV generation.
+     */
+    dataset: F0DataDownloadDataset;
 };
 
 /**
@@ -4345,6 +4669,12 @@ export declare type F0LinkProps = Omit<ActionLinkProps, "variant" | "href"> & {
 
 export declare const f0MarkdownRenderers: NonNullable<AssistantMessageProps["markdownTagRenderers"]>;
 
+/**
+ * Markdown renderers without the table download button.
+ * Use this when the parent component already provides its own download controls.
+ */
+export declare const f0MarkdownRenderersSimple: NonNullable<AssistantMessageProps["markdownTagRenderers"]>;
+
 export declare const F0MessageSources: ({ sources }: F0MessageSourcesProps) => JSX_2.Element | null;
 
 /**
@@ -4440,12 +4770,16 @@ export declare interface F0OneIconProps extends SVGProps<SVGSVGElement> {
     size?: "xs" | "sm" | "md" | "lg";
 }
 
-export declare const F0OneSwitch: ({ className, disabled, tooltip, autoOpen, }: F0OneSwitchProps) => JSX_2.Element | null;
+export declare const F0OneSwitch: ({ className, disabled, onVisible, tooltip, autoOpen, onToggle, }: F0OneSwitchProps) => JSX_2.Element | null;
 
 /**
  * Props for the F0OneSwitch component
  */
 export declare type F0OneSwitchProps = React.ComponentPropsWithoutRef<typeof SwitchPrimitive.Root> & {
+    /** Callback when the switch is visible */
+    onVisible?: () => void;
+    /** Callback when the switch is toggled */
+    onToggle?: () => void;
     /** Custom text shown in the tooltip when the chat is closed */
     tooltip?: {
         whenDisabled?: string;
@@ -4749,6 +5083,10 @@ export declare type F0SelectTagProp = string | {
     type: "dot";
     text: string;
     color: NewColor;
+} | {
+    type: "person";
+    name: string;
+    src?: string;
 };
 
 /**
@@ -4837,9 +5175,9 @@ export declare const F0TableOfContentPopover: WithDataTestIdReturnType_3<typeof 
  * Internal implementation of the TableOfContentPopover component.
  * This component includes all props including private ones.
  */
-declare function F0TableOfContentPopover_2({ title, items, className, activeItem, collapsible, showChildrenCounter, barsAlign, size, variant, }: F0TableOfContentPopoverProps): JSX_2.Element;
+declare function F0TableOfContentPopover_2({ title, items, className, activeItem, collapsible, sortable, onReorder, showChildrenCounter, barsAlign, size, variant, }: F0TableOfContentPopoverProps): JSX_2.Element;
 
-declare interface F0TableOfContentPopoverProps extends Omit<TOCProps, "sortable" | "onReorder" | "showSearchBox" | "title" | "hideChildrenCounter"> {
+declare interface F0TableOfContentPopoverProps extends Omit<TOCProps, "showSearchBox" | "title" | "hideChildrenCounter"> {
     /** Optional title displayed at the top of the menu popup */
     title?: string;
     /** Alignment of the collapsed bars (left or right) */
@@ -4933,115 +5271,9 @@ export declare type F0TextProps = Omit<TextProps, "className" | "variant" | "as"
     markdown?: boolean;
 };
 
-export declare const F0TextV2: ForwardRefExoticComponent<Omit<F0TextV2Props_2 & RefAttributes<HTMLElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>;
+export declare const F0TextV2: WithDataTestIdReturnType_5<ForwardRefExoticComponent<Omit<TextV2Props & RefAttributes<HTMLElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>>;
 
-/** Text alignment */
-export declare type F0TextV2Align = "left" | "center" | "right";
-
-/**
- * Semantic text color from F0 design token system.
- * Maps to `text-f1-foreground-*` utilities.
- */
-export declare type F0TextV2Color = "default" | "secondary" | "tertiary" | "inverse" | "inverse-secondary" | "disabled" | "accent" | "critical" | "warning" | "positive" | "info" | "selected";
-
-/** Text decoration */
-export declare type F0TextV2Decoration = "none" | "underline" | "overline" | "line-through";
-
-export declare interface F0TextV2Props extends Omit<React.ComponentPropsWithoutRef<"div">, "className" | "style"> {
-    /** Text content to render */
-    content: string;
-    /**
-     * Semantic text variant — controls font-weight, default size, and default HTML tag.
-     * @default "body"
-     */
-    variant?: F0TextV2Variant;
-    /**
-     * Text size override — independent from variant.
-     * `"default"` or `undefined` keeps the variant's built-in size.
-     */
-    size?: F0TextV2Size;
-    /**
-     * Semantic text color.
-     * `description`, `subtitle`, `caption`, and `label` default to `"secondary"`.
-     */
-    color?: F0TextV2Color;
-    /**
-     * Text alignment.
-     * @default "left"
-     */
-    align?: NonNullable<CVAVariants["align"]>;
-    /**
-     * Enable text ellipsis.
-     * - `true`: single-line ellipsis
-     * - `number`: multi-line ellipsis with specified line count
-     */
-    ellipsis?: boolean | number;
-    /**
-     * Disable tooltip when text is truncated.
-     * @default false
-     */
-    noEllipsisTooltip?: boolean;
-    /** Text decoration. */
-    decoration?: F0TextV2Decoration;
-    /** Text transform. */
-    transform?: F0TextV2Transform;
-    /**
-     * Show a required indicator (red asterisk) after the content.
-     * Useful when the Text is used as a form label.
-     * @default false
-     */
-    required?: boolean;
-}
-
-/**
- * Text size override — independent from variant.
- *
- * | Token   | Tailwind  | Value |
- * |---------|-----------|-------|
- * | default | (no-op)   | —     |
- * | xs      | text-xs   | 10px  |
- * | sm      | text-sm   | 12px  |
- * | md      | text-base | 14px  |
- * | lg      | text-lg   | 16px  |
- * | xl      | text-xl   | 18px  |
- * | 2xl     | text-2xl  | 22px  |
- * | 3xl     | text-3xl  | 26px  |
- */
-export declare type F0TextV2Size = "default" | "xs" | "sm" | "md" | "lg" | "xl" | "2xl" | "3xl";
-
-/** Text transform */
-export declare type F0TextV2Transform = "none" | "uppercase" | "lowercase" | "capitalize";
-
-/**
- * Token types for F0TextV2 props.
- * These map to the design tokens defined in @factorialco/f0-core.
- */
-/**
- * Semantic text variant — controls font-weight, default size, and default HTML tag.
- *
- * | Variant     | Weight       | Default Tag | Default Size           |
- * |-------------|-------------|-------------|------------------------|
- * | title       | semibold    | h2          | 3xl (26px)             |
- * | heading     | semibold    | h3          | xl  (18px)             |
- * | subtitle    | normal      | p           | lg  (16px) + secondary |
- * | body        | normal      | p           | md  (14px)             |
- * | label       | medium      | label       | md  (14px) + secondary |
- * | description | normal      | p           | md  (14px) + secondary |
- * | caption     | normal      | span        | sm  (12px) + secondary |
- * | code        | normal+mono | code        | sm  (12px)             |
- */
-export declare type F0TextV2Variant = "title" | "heading" | "subtitle" | "body" | "label" | "description" | "caption" | "code";
-
-declare const f0TextV2Variants: (props?: ({
-    align?: "center" | "left" | "right" | undefined;
-    variant?: "body" | "caption" | "code" | "label" | "title" | "description" | "heading" | "subtitle" | undefined;
-} & ({
-    class?: ClassValue;
-    className?: never;
-} | {
-    class?: never;
-    className?: ClassValue;
-})) | undefined) => string;
+export declare type F0TextV2Props = TextV2Props_2;
 
 export declare const F0Thinking: ({ messages, title }: F0ThinkingProps) => JSX_2.Element;
 
@@ -6097,6 +6329,62 @@ export declare interface LoadingStateProps {
 /** Margin tokens (spacing + auto for centering) */
 export declare type MarginToken = SpacingToken | "auto";
 
+declare type MaskOptions = {
+    /**
+     * The width of the Mask element.
+     * @default 600
+     */
+    width?: number;
+    /**
+     * The height of the Mask element.
+     * @default 600
+     */
+    height?: number;
+    /**
+     * Device pixel ratio multiplier; can be less than 1.
+     */
+    ratio?: number;
+    /**
+     * Color mode. Upon what background color will the element be displayed.
+     * - dark: optimize for dark background. (clean and luminous glow. may be invisible on light backgrounds.)
+     * - light: optimize for light background. (high saturation glow. not elegant on dark backgrounds.)
+     * @default light
+     * @note It's not possible to make a style that works well on both light and dark backgrounds.
+     * @note If you do not know the background color, start with light.
+     */
+    mode?: "dark" | "light";
+    /**
+     * Color list.
+     * @default ['rgb(57, 182, 255)', 'rgb(189, 69, 251)', 'rgb(255, 87, 51)', 'rgb(255, 214, 0)']
+     * @note The color list must be specified with 4 colors in an array, formatted as rgb color strings.
+     */
+    colors?: [CSSRgbString, CSSRgbString, CSSRgbString, CSSRgbString];
+    /**
+     * The width of the border.
+     * @default 8
+     */
+    borderWidth?: number;
+    /**
+     * The width of the glow effect.
+     * @default 200
+     *
+     */
+    glowWidth?: number;
+    /**
+     * The border radius.
+     * @default 8
+     */
+    borderRadius?: number;
+    /**
+     * Custom class names for wrapper and canvas elements.
+     */
+    classNames?: string;
+    /**
+     * Custom styles for wrapper and canvas elements.
+     */
+    styles?: Partial<CSSStyleDeclaration>;
+};
+
 declare const MAX_EXPANDED_ACTIONS = 2;
 
 declare type MentionedUser = {
@@ -6167,6 +6455,7 @@ export declare const modules: {
     readonly "finance-treasury": ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
     readonly "finance-workspace": ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
     readonly goals: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly get_started: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
     readonly home: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
     readonly hub: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
     readonly it_management: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
@@ -6625,6 +6914,18 @@ export declare type PersonAvatarVariant = Extract<AvatarVariant, {
     type: "person";
 }>;
 
+/**
+ * Profile data for a person entity (employee), resolved asynchronously
+ * and displayed in the entity reference hover card.
+ */
+export declare type PersonProfile = {
+    id: string | number;
+    firstName: string;
+    lastName: string;
+    avatarUrl?: string;
+    jobTitle?: string;
+};
+
 declare type PersonTagProps = ComponentProps<typeof F0TagPerson>;
 
 export declare const PieChart: WithDataTestIdReturnType_5<ForwardRefExoticComponent<Omit<PieChartProps & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>>;
@@ -6664,7 +6965,7 @@ declare type PrevNextDateNavigation = {
     next: DateRange | false;
 };
 
-declare type PrimaryActionItemDefinition = Pick<DropdownItemObject, "label" | "icon"> & {
+declare type PrimaryActionItemDefinition = Pick<DropdownItemObject, "label" | "icon" | "description"> & {
     loading?: boolean;
     onClick?: () => void | Promise<void>;
     disabled?: boolean;
@@ -7341,6 +7642,12 @@ declare interface TableHeadProps {
 
 declare type TableOfContentPopoverVariant = "dark" | "light";
 
+/**
+ * Table variant without the built-in download button.
+ * Used inside components that already provide their own download controls.
+ */
+export declare function TableSimple({ children, ...props }: React.HTMLAttributes<HTMLTableElement>): JSX_2.Element;
+
 declare type TableVisualizationOptions<R extends RecordType, _Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition> = {
     /**
      * The columns to display
@@ -7372,6 +7679,10 @@ tag: TagVariant_2;
 export declare type TagAlertProps<Text extends string = string> = {
     text: Text extends "" ? never : Text;
     level: Level;
+    /**
+     * Info text to display an i icon and a tooltip next to the tag
+     */
+    info?: string;
 };
 
 export declare type TagBalanceProps = {
@@ -7424,6 +7735,10 @@ export declare const tagDotColors: ["viridian", "malibu", "yellow", "purple", "l
 
 export declare type TagDotProps = {
     text: string;
+    /**
+     * Info text to display an i icon and a tooltip next to the tag
+     */
+    info?: string;
 } & ({
     color: NewColor;
 } | {
@@ -7459,6 +7774,10 @@ export declare type TagRawProps = {
      * Additional accessible text to display in the tag
      */
     additionalAccessibleText?: string;
+    /**
+     * Info text to display an i icon and a tooltip next to the tag
+     */
+    info?: string;
 } & ({
     icon: IconType;
     onlyIcon: true;
@@ -7608,6 +7927,62 @@ declare type TextTags = (typeof textTags)[number];
 
 declare const textTags: readonly ["p", "span", "div", "label", "code"];
 
+declare interface TextV2Props_2 extends Omit<default_2.ComponentPropsWithoutRef<"span">, "className"> {
+    /** Text content to render */
+    content: string;
+    /**
+     * Semantic text variant — controls font-weight, default size, and default HTML tag.
+     * @default "body"
+     */
+    variant?: VariantToken;
+    /**
+     * Semantic text color.
+     * `description`, `subtitle`, `caption`, and `label` default to `"secondary"`.
+     */
+    color?: ColorToken;
+    /**
+     * Text alignment.
+     * @default "left"
+     */
+    align?: NonNullable<TextV2Variants["align"]>;
+    /**
+     * Enable text ellipsis with optional line configuration.
+     * - `true`: Single line ellipsis (lines = 1)
+     * - `number`: Multi-line ellipsis with specified line count
+     * - `undefined`: No ellipsis
+     */
+    ellipsis?: boolean | number;
+    /**
+     * Disable tooltip when text is truncated.
+     * Only applies when ellipsis is enabled.
+     * @default false
+     */
+    noEllipsisTooltip?: boolean;
+    /** Text decoration. */
+    decoration?: DecorationToken;
+    /** Text transform. */
+    transform?: TransformToken;
+    /**
+     * Show a required indicator (red asterisk) after the content.
+     * Useful when the Text is used as a form label.
+     * @default false
+     */
+    required?: boolean;
+}
+
+declare type TextV2Variants = VariantProps<typeof textV2Variants>;
+
+declare const textV2Variants: (props?: ({
+    align?: "center" | "left" | "right" | undefined;
+    variant?: "body" | "caption" | "code" | "label" | "title" | "description" | "heading" | "title-lg" | "title-sm" | "title-xs" | "heading-lg" | "heading-sm" | "heading-xs" | "subtitle-xl" | "subtitle-lg" | "subtitle-sm" | "body-xl" | "body-lg" | "body-sm" | "body-xs" | "label-lg" | "label-sm" | "label-xs" | "description-sm" | "description-xs" | "caption-sm" | "code-lg" | "code-sm" | "subtitle" | undefined;
+} & ({
+    class?: ClassValue;
+    className?: never;
+} | {
+    class?: never;
+    className?: ClassValue;
+})) | undefined) => string;
+
 declare type TextVariant = NonNullable<TextVariants["variant"]>;
 
 declare type TextVariants = VariantProps<typeof textVariants>;
@@ -7633,8 +8008,27 @@ declare type TOCItemAction = {
     label: string;
     onClick: () => void;
     icon?: IconType;
+    critical?: boolean;
+    /** Show a check icon to indicate this item is selected */
+    selected?: boolean;
 } | {
     type: "separator";
+} | {
+    type: "label";
+    text: string;
+} | {
+    type: "toggle";
+    label: string;
+    icon?: IconType;
+    checked: boolean;
+    onCheckedChange: (checked: boolean) => void;
+} | {
+    type: "submenu";
+    label: string;
+    icon?: IconType;
+    /** Currently selected option label shown inline */
+    selectedLabel?: string;
+    children: TOCItemAction[];
 };
 
 declare interface TOCProps {
@@ -7652,6 +8046,9 @@ declare interface TOCProps {
     /** Enable vertical scrolling when content overflows (default: true) */
     scrollable?: boolean;
 }
+
+/** Text transform */
+export declare type TransformToken = "none" | "uppercase" | "lowercase" | "capitalize";
 
 declare type TranslationKey = Join<PathsToStringProps<typeof defaultTranslations>, ".">;
 
@@ -8254,6 +8651,41 @@ export declare const useXRay: () => {
     disable: () => void;
 };
 
+/**
+ * Props contract that every editable value-display component must implement.
+ * The generic `V` allows type-specific editors (e.g. `string` for text, `Date` for date pickers).
+ */
+declare type ValueDisplayEditorProps<V = string> = {
+    label: string;
+    value: V;
+    align?: "left" | "right";
+    error?: string;
+    loading?: boolean;
+    onChange: (value: V) => void;
+};
+
+/**
+ * Registry that maps value-display types to their editable cell components.
+ * Not every type needs an editor — only types with editing support are registered here.
+ *
+ * To add a new editable type:
+ *  1. Add its value type to `ValueDisplayEditorValueMap` above
+ *  2. Create the editor component in `types/<type>/<type>-editor.tsx`
+ *  3. Export it from `types/<type>/index.tsx`
+ *  4. Register it here
+ */
+declare const valueDisplayEditors: {
+    [K in keyof ValueDisplayEditorValueMap]: ComponentType<ValueDisplayEditorProps<ValueDisplayEditorValueMap[K]>>;
+};
+
+/**
+ * Maps each editable value-display type to the value type its editor operates on.
+ * Extend this when adding a new editor (e.g. `date: Date`, `select: string`).
+ */
+declare type ValueDisplayEditorValueMap = {
+    text: string;
+};
+
 declare type ValueDisplayRendererContext_2 = {
     visualization: ValueDisplayVisualizationType;
     i18n: TranslationsType;
@@ -8298,6 +8730,24 @@ declare const valueDisplayRenderers: {
 declare type ValueDisplayVisualizationType = "table" | "card" | "list" | (string & {});
 
 export declare type Variant = (typeof statuses)[number];
+
+/**
+ * Token types for TextV2 props.
+ * These map to the design tokens defined in @factorialco/f0-core.
+ */
+/**
+ * Semantic text variant — controls font-weight, default size, and default HTML tag.
+ *
+ * Public API does not expose a free-form `size` prop.
+ * Size is encoded in each variant token to keep typography consistent.
+ *
+ * Naming model:
+ * - Base variants: `title`, `heading`, `subtitle`, `body`, `label`, `description`, `caption`, `code`
+ * - Scaled variants: `<base>-<scale>` (for example `heading-2xl`, `body-xl`, `code-lg`)
+ *
+ * Base variants represent the default scale for each semantic role.
+ */
+export declare type VariantToken = "title-lg" | "title-sm" | "title-xs" | "heading-lg" | "heading-sm" | "heading-xs" | "subtitle-xl" | "subtitle-lg" | "subtitle-sm" | "body-xl" | "body-lg" | "body-sm" | "body-xs" | "label-lg" | "label-sm" | "label-xs" | "description-sm" | "description-xs" | "caption-sm" | "code-lg" | "code-sm" | "title" | "heading" | "subtitle" | "body" | "label" | "description" | "caption" | "code";
 
 export declare const VerticalBarChart: WithDataTestIdReturnType_5<ForwardRefExoticComponent<Omit<ChartPropsBase<ChartConfig_2> & {
 label?: boolean;
@@ -8442,6 +8892,11 @@ declare module "gridstack" {
 }
 
 
+declare namespace Calendar {
+    var displayName: string;
+}
+
+
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         aiBlock: {
@@ -8488,9 +8943,4 @@ declare module "@tiptap/core" {
             insertTranscript: (data: TranscriptData) => ReturnType;
         };
     }
-}
-
-
-declare namespace Calendar {
-    var displayName: string;
 }

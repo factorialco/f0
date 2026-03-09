@@ -64,6 +64,19 @@ export declare type AiChatProviderProps = {
      * Optional footer content rendered below the textarea
      */
     footer?: React.ReactNode;
+    /**
+     * Async resolver functions for entity references in markdown.
+     * Used to fetch profile data for inline entity mentions (hover cards).
+     * The consuming app provides these so the chat can resolve entity IDs
+     * (e.g. employee IDs) into rich profile data without knowing the API.
+     */
+    entityResolvers?: EntityResolvers;
+    /**
+     * Available tool hints that the user can activate to provide intent context
+     * to the AI. Renders a selector button next to the send button.
+     * Only one tool hint can be active at a time.
+     */
+    toolHints?: AiChatToolHint[];
     onThumbsUp?: (message: AIMessage, { threadId, feedback }: {
         threadId: string;
         feedback: string;
@@ -72,6 +85,7 @@ export declare type AiChatProviderProps = {
         threadId: string;
         feedback: string;
     }) => void;
+    tracking?: AiChatTrackingOptions;
 } & Pick<CopilotKitProps, "agent" | "credentials" | "children" | "runtimeUrl" | "showDevConsole" | "threadId" | "headers">;
 
 /**
@@ -102,6 +116,7 @@ declare type AiChatProviderReturnValue = {
         threadId: string;
         feedback: string;
     }) => void;
+    tracking?: AiChatTrackingOptions;
     /**
      * Clear/reset the chat conversation
      */
@@ -142,7 +157,12 @@ declare type AiChatProviderReturnValue = {
      * Set the footer content. Use this to update the footer from outside the provider (e.g. per page/route).
      */
     setFooter: React.Dispatch<React.SetStateAction<React.ReactNode | undefined>>;
-} & Pick<AiChatState, "greeting" | "agent" | "disclaimer" | "resizable">;
+} & Pick<AiChatState, "greeting" | "agent" | "disclaimer" | "resizable" | "entityResolvers" | "toolHints"> & {
+    /** The currently active tool hint, or null if none is selected */
+    activeToolHint: AiChatToolHint | null;
+    /** Set the active tool hint (pass null to clear) */
+    setActiveToolHint: React.Dispatch<React.SetStateAction<AiChatToolHint | null>>;
+};
 
 /**
  * Internal state for the AiChat provider
@@ -158,6 +178,8 @@ declare interface AiChatState {
     defaultVisualizationMode?: VisualizationMode;
     lockVisualizationMode?: boolean;
     footer?: React.ReactNode;
+    entityResolvers?: EntityResolvers;
+    toolHints?: AiChatToolHint[];
     placeholders?: string[];
     setPlaceholders?: React.Dispatch<React.SetStateAction<string[]>>;
     onThumbsUp?: (message: AIMessage, { threadId, feedback }: {
@@ -168,7 +190,41 @@ declare interface AiChatState {
         threadId: string;
         feedback: string;
     }) => void;
+    tracking?: AiChatTrackingOptions;
 }
+
+/**
+ * A tool hint that can be activated to prepend invisible context to the user's
+ * message, telling the AI about the user's intent (e.g. "generate tables",
+ * "data analysis"). Similar to Gemini's tool selector UI.
+ *
+ * Only one tool hint can be active at a time. It persists across messages
+ * until the user explicitly removes it.
+ */
+export declare type AiChatToolHint = {
+    /** Unique identifier for this tool hint */
+    id: string;
+    /** Display label shown in the selector and chip */
+    label: string;
+    /** Optional icon shown in the selector and chip */
+    icon?: IconType;
+    /**
+     * Prompt text injected as invisible context before the user's message.
+     * The AI receives this but the user never sees it in the chat.
+     */
+    prompt: string;
+};
+
+/**
+ * Tracking options for the AI chat
+ */
+declare type AiChatTrackingOptions = {
+    onVisibility?: () => void;
+    onClose?: () => void;
+    onWelcomeSuggestionClick?: (suggestion: WelcomeScreenSuggestion) => void;
+    onNewChat?: () => void;
+    onMessage?: (message: Message) => void;
+};
 
 /**
  * AI Chat translations type
@@ -203,8 +259,6 @@ export declare const aiTranslations: {
         thoughtsGroupTitle: string;
         resourcesGroupTitle: string;
         thinking: string;
-        exportTable: string;
-        generatedTableFilename: string;
         feedbackModal: {
             positive: {
                 title: string;
@@ -217,15 +271,24 @@ export declare const aiTranslations: {
                 placeholder: string;
             };
         };
+        dataDownloadPreview: string;
         expandChat: string;
         collapseChat: string;
         ask: string;
+        viewProfile: string;
+        tools: string;
     };
 };
 
 export declare function Blockquote({ children, ...props }: React.HTMLAttributes<HTMLQuoteElement>): JSX_2.Element;
 
 export declare const ChatSpinner: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+
+/**
+ * CSS RGB color string type
+ * @example 'rgb(255, 0, 0)' or 'rgb(255,0,0)'
+ */
+declare type CSSRgbString = `rgb(${number}, ${number}, ${number})` | `rgb(${number},${number},${number})`;
 
 export declare const defaultTranslations: {
     readonly countries: {
@@ -458,6 +521,7 @@ export declare const defaultTranslations: {
         };
         readonly visualizations: {
             readonly table: "Table view";
+            readonly editableTable: "Editable table view";
             readonly card: "Card view";
             readonly list: "List view";
             readonly kanban: "Kanban view";
@@ -472,6 +536,12 @@ export declare const defaultTranslations: {
                 readonly showAllColumns: "Show all";
                 readonly hideAllColumns: "Hide all";
             };
+        };
+        readonly editableTable: {
+            readonly errors: {
+                readonly saveFailed: "Save failed";
+            };
+            readonly addRow: "Add row";
         };
         readonly itemsCount: "items";
         readonly emptyStates: {
@@ -604,9 +674,12 @@ export declare const defaultTranslations: {
                 readonly placeholder: "Share what didn’t work";
             };
         };
+        readonly dataDownloadPreview: "Preview {{shown}} of {{total}} rows — download the Excel to see all data.";
         readonly expandChat: "Expand chat";
         readonly collapseChat: "Collapse chat";
         readonly ask: "Ask One";
+        readonly viewProfile: "View profile";
+        readonly tools: "Tools";
         readonly growth: {
             readonly demoCard: {
                 readonly title: "See {{moduleName}} in action";
@@ -659,6 +732,8 @@ export declare const defaultTranslations: {
             readonly deleteQuestion: "Delete question";
             readonly duplicateSection: "Duplicate section";
             readonly deleteSection: "Delete section";
+            readonly confirmMoveLastQuestion: "Move question";
+            readonly cancelMoveLastQuestion: "Cancel";
         };
         readonly questionTypes: {
             readonly section: "Section";
@@ -670,6 +745,7 @@ export declare const defaultTranslations: {
             readonly numeric: "Numeric";
             readonly link: "Link";
             readonly date: "Date";
+            readonly dropdownSingle: "Dropdown";
         };
         readonly selectQuestion: {
             readonly addOption: "Add option";
@@ -696,6 +772,8 @@ export declare const defaultTranslations: {
             readonly questionOptions: "Question options";
             readonly actions: "Actions";
             readonly sectionTitlePlaceholder: "Section title";
+            readonly lastQuestionDialogTitle: "Remove last question from section";
+            readonly lastQuestionDialogDescription: "Moving this question will leave the section empty and it will be removed. Do you want to continue?";
         };
     };
     readonly richTextEditor: {
@@ -806,9 +884,39 @@ export declare const defaultTranslations: {
     };
 };
 
-export declare function downloadTableAsExcel(table: HTMLTableElement, filename?: string): void;
-
 export declare function Em({ children, ...props }: React.HTMLAttributes<HTMLSpanElement>): JSX_2.Element;
+
+/**
+ * Generic entity reference renderer for custom `<entity-ref>` HTML tags
+ * embedded in AI chat markdown output.
+ *
+ * Dispatches to type-specific renderers based on the `type` attribute.
+ * Falls back to rendering children as plain text for unknown types.
+ *
+ * Usage in markdown (via rehype-raw):
+ *   <entity-ref type="person" id="123">Ana García</entity-ref>
+ */
+export declare function EntityRef({ type, id, children, }: {
+    type?: string;
+    id?: string;
+    children?: ReactNode;
+}): JSX_2.Element;
+
+/**
+ * Map of async resolver functions keyed by entity type.
+ * Each resolver takes an entity ID and returns the profile data
+ * needed to render the entity reference hover card.
+ *
+ * Extensible: add new entity types here as needed (e.g. `team`, `department`).
+ */
+export declare type EntityResolvers = {
+    person?: (id: string) => Promise<PersonProfile>;
+    /**
+     * Search for persons by name query. Used by the @mention autocomplete
+     * in the chat input to let users reference specific employees.
+     */
+    searchPersons?: (query: string) => Promise<PersonProfile[]>;
+};
 
 export declare const F0ActionItem: ({ title, status, inGroup }: F0ActionItemProps) => JSX_2.Element;
 
@@ -838,9 +946,9 @@ export declare const F0AiChat: () => JSX_2.Element | null;
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const F0AiChatProvider: ({ enabled, greeting, initialMessage, welcomeScreenSuggestions, disclaimer, resizable, defaultVisualizationMode, lockVisualizationMode, footer, onThumbsUp, onThumbsDown, children, agent, ...copilotKitProps }: AiChatProviderProps) => JSX_2.Element;
+export declare const F0AiChatProvider: ({ enabled, greeting, initialMessage, welcomeScreenSuggestions, disclaimer, resizable, defaultVisualizationMode, lockVisualizationMode, footer, entityResolvers, toolHints, onThumbsUp, onThumbsDown, children, agent, tracking, ...copilotKitProps }: AiChatProviderProps) => JSX_2.Element;
 
-export declare const F0AiChatTextArea: ({ submitLabel, inProgress, onSend, onStop, placeholders, defaultPlaceholder, autoFocus, }: F0AiChatTextAreaProps) => JSX_2.Element;
+export declare const F0AiChatTextArea: ({ submitLabel, inProgress, onSend, onStop, placeholders, defaultPlaceholder, autoFocus, entityResolvers, toolHints, activeToolHint, onActiveToolHintChange, }: F0AiChatTextAreaProps) => JSX_2.Element;
 
 /**
  * Props for the F0AiChatTextArea component
@@ -877,6 +985,25 @@ export declare interface F0AiChatTextAreaProps {
      * @default true
      */
     autoFocus?: boolean;
+    /**
+     * Entity resolvers for @mention autocomplete and entity reference rendering.
+     * When `searchPersons` is provided, typing @ in the textarea opens an
+     * autocomplete popover to mention employees.
+     */
+    entityResolvers?: EntityResolvers;
+    /**
+     * Available tool hints that the user can activate.
+     * Renders a selector button to the left of the send button.
+     */
+    toolHints?: AiChatToolHint[];
+    /**
+     * The currently active tool hint, or null if none is selected.
+     */
+    activeToolHint?: AiChatToolHint | null;
+    /**
+     * Callback when the active tool hint changes (selection or removal).
+     */
+    onActiveToolHintChange?: (toolHint: AiChatToolHint | null) => void;
 }
 
 export declare const F0AiCollapsibleMessage: ({ icon, title, children, }: F0AiCollapsibleMessageProps) => JSX_2.Element;
@@ -904,6 +1031,35 @@ export declare interface F0AiCollapsibleMessageProps {
  */
 export declare const F0AiFullscreenChat: () => JSX_2.Element | null;
 
+export declare class F0AiMask {
+    readonly element: HTMLElement;
+    private canvas;
+    private options;
+    private running;
+    private disposed;
+    private startTime;
+    private lastTime;
+    private rafId;
+    private glr;
+    private observer?;
+    constructor(options?: MaskOptions);
+    start(): void;
+    pause(): void;
+    dispose(): void;
+    resize(width: number, height: number, ratio?: number): void;
+    /**
+     * Automatically resizes the canvas to match the dimensions of the given element.
+     * @note using ResizeObserver
+     */
+    autoResize(sourceElement: HTMLElement): void;
+    fadeIn(): Promise<void>;
+    fadeOut(): Promise<void>;
+    private checkGLError;
+    private getGLErrorName;
+    private setupGL;
+    private render;
+}
+
 export declare function F0AuraVoiceAnimation({ size, state, color, colorShift, audioTrack, themeMode, className, ref, ...props }: F0AuraVoiceAnimationProps & ComponentProps<"div"> & VariantProps<typeof F0AuraVoiceAnimationVariants>): JSX_2.Element;
 
 export declare interface F0AuraVoiceAnimationProps {
@@ -925,6 +1081,68 @@ declare const F0AuraVoiceAnimationVariants: (props?: ({
     class?: never;
     className?: ClassValue;
 })) | undefined) => string;
+
+/**
+ * Component that renders an optional markdown preview followed by
+ * a dropdown button with "Download Excel" as the primary action and
+ * "Download CSV" as a secondary option. Files are generated client-side
+ * from the raw dataset provided by the agent.
+ */
+export declare const F0DataDownload: ({ markdown, filename, dataset, }: F0DataDownloadProps) => JSX_2.Element;
+
+/**
+ * Inline dataset for client-side file generation (Excel / CSV).
+ * Sent by the agent with the raw query results.
+ */
+export declare type F0DataDownloadDataset = {
+    /**
+     * Column headers in display order.
+     */
+    columns: string[];
+    /**
+     * Array of row objects keyed by column name.
+     */
+    rows: Record<string, unknown>[];
+    /**
+     * Total number of rows returned by the query (before truncation).
+     * Used together with previewCount to render the preview note.
+     */
+    totalCount?: number;
+    /**
+     * Number of rows shown in the markdown preview table.
+     * Used together with totalCount to render the preview note.
+     */
+    previewCount?: number;
+    /**
+     * Map of raw column names to human-readable labels in the user's language.
+     * Used for Excel/CSV headers. Falls back to the raw column name when absent.
+     */
+    columnLabels?: Record<string, string>;
+};
+
+/**
+ * Props for the F0DataDownload component.
+ *
+ * Renders an optional markdown preview/description followed by
+ * "Download Excel" and "Download CSV" buttons. The component generates
+ * the files client-side from the provided dataset.
+ */
+export declare type F0DataDownloadProps = {
+    /**
+     * Optional markdown content to display above the download buttons.
+     * Typically a 5-row preview table generated by the agent.
+     */
+    markdown?: string;
+    /**
+     * Descriptive filename (without extension) for the downloaded files.
+     * Generated by the AI to reflect the query content in the user's language.
+     */
+    filename?: string;
+    /**
+     * Raw dataset for client-side Excel and CSV generation.
+     */
+    dataset: F0DataDownloadDataset;
+};
 
 export declare const F0HILActionConfirmation: ({ text, confirmationText, onConfirm, cancelText, onCancel, }: F0HILActionConfirmationProps) => JSX_2.Element;
 
@@ -955,6 +1173,12 @@ export declare type F0HILActionConfirmationProps = {
 };
 
 export declare const f0MarkdownRenderers: NonNullable<AssistantMessageProps["markdownTagRenderers"]>;
+
+/**
+ * Markdown renderers without the table download button.
+ * Use this when the parent component already provides its own download controls.
+ */
+export declare const f0MarkdownRenderersSimple: NonNullable<AssistantMessageProps["markdownTagRenderers"]>;
 
 export declare const F0MessageSources: ({ sources }: F0MessageSourcesProps) => JSX_2.Element | null;
 
@@ -992,12 +1216,16 @@ export declare interface F0OneIconProps extends SVGProps<SVGSVGElement> {
     size?: "xs" | "sm" | "md" | "lg";
 }
 
-export declare const F0OneSwitch: ({ className, disabled, tooltip, autoOpen, }: F0OneSwitchProps) => JSX_2.Element | null;
+export declare const F0OneSwitch: ({ className, disabled, onVisible, tooltip, autoOpen, onToggle, }: F0OneSwitchProps) => JSX_2.Element | null;
 
 /**
  * Props for the F0OneSwitch component
  */
 export declare type F0OneSwitchProps = React.ComponentPropsWithoutRef<typeof SwitchPrimitive.Root> & {
+    /** Callback when the switch is visible */
+    onVisible?: () => void;
+    /** Callback when the switch is toggled */
+    onToggle?: () => void;
     /** Custom text shown in the tooltip when the chat is closed */
     tooltip?: {
         whenDisabled?: string;
@@ -1097,6 +1325,62 @@ declare type Join<T extends string[], D extends string> = T extends [] ? never :
 
 export declare function Li({ children, ...props }: React.HTMLAttributes<HTMLLIElement>): JSX_2.Element;
 
+declare type MaskOptions = {
+    /**
+     * The width of the Mask element.
+     * @default 600
+     */
+    width?: number;
+    /**
+     * The height of the Mask element.
+     * @default 600
+     */
+    height?: number;
+    /**
+     * Device pixel ratio multiplier; can be less than 1.
+     */
+    ratio?: number;
+    /**
+     * Color mode. Upon what background color will the element be displayed.
+     * - dark: optimize for dark background. (clean and luminous glow. may be invisible on light backgrounds.)
+     * - light: optimize for light background. (high saturation glow. not elegant on dark backgrounds.)
+     * @default light
+     * @note It's not possible to make a style that works well on both light and dark backgrounds.
+     * @note If you do not know the background color, start with light.
+     */
+    mode?: "dark" | "light";
+    /**
+     * Color list.
+     * @default ['rgb(57, 182, 255)', 'rgb(189, 69, 251)', 'rgb(255, 87, 51)', 'rgb(255, 214, 0)']
+     * @note The color list must be specified with 4 colors in an array, formatted as rgb color strings.
+     */
+    colors?: [CSSRgbString, CSSRgbString, CSSRgbString, CSSRgbString];
+    /**
+     * The width of the border.
+     * @default 8
+     */
+    borderWidth?: number;
+    /**
+     * The width of the glow effect.
+     * @default 200
+     *
+     */
+    glowWidth?: number;
+    /**
+     * The border radius.
+     * @default 8
+     */
+    borderRadius?: number;
+    /**
+     * Custom class names for wrapper and canvas elements.
+     */
+    classNames?: string;
+    /**
+     * Custom styles for wrapper and canvas elements.
+     */
+    styles?: Partial<CSSStyleDeclaration>;
+};
+
 export declare function Ol({ children, ...props }: React.HTMLAttributes<HTMLOListElement>): JSX_2.Element;
 
 export declare type OneIconSize = (typeof oneIconSizes)[number];
@@ -1109,11 +1393,29 @@ declare type PathsToStringProps<T> = T extends string ? [] : {
     [K in Extract<keyof T, string>]: [K, ...PathsToStringProps<T[K]>];
 }[Extract<keyof T, string>];
 
+/**
+ * Profile data for a person entity (employee), resolved asynchronously
+ * and displayed in the entity reference hover card.
+ */
+export declare type PersonProfile = {
+    id: string | number;
+    firstName: string;
+    lastName: string;
+    avatarUrl?: string;
+    jobTitle?: string;
+};
+
 export declare function Pre({ children, ...props }: React.HTMLAttributes<HTMLPreElement>): JSX_2.Element;
 
 export declare function Strong({ children, ...props }: React.HTMLAttributes<HTMLSpanElement>): JSX_2.Element;
 
 export declare function Table({ children, ...props }: React.HTMLAttributes<HTMLTableElement>): JSX_2.Element;
+
+/**
+ * Table variant without the built-in download button.
+ * Used inside components that already provide their own download controls.
+ */
+export declare function TableSimple({ children, ...props }: React.HTMLAttributes<HTMLTableElement>): JSX_2.Element;
 
 export declare function Td({ children, ...props }: React.HTMLAttributes<HTMLTableCellElement>): JSX_2.Element;
 
@@ -1223,6 +1525,11 @@ declare module "gridstack" {
 }
 
 
+declare namespace Calendar {
+    var displayName: string;
+}
+
+
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         aiBlock: {
@@ -1269,9 +1576,4 @@ declare module "@tiptap/core" {
             insertTranscript: (data: TranscriptData) => ReturnType;
         };
     }
-}
-
-
-declare namespace Calendar {
-    var displayName: string;
 }
