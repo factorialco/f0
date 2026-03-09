@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.391.0](https://github.com/factorialco/f0/compare/f0-react-v1.390.2...f0-react-v1.391.0) (2026-03-09)
+
+
+### Features
+
+* add onAddRow button to EditableTable and nested rows ([#3576](https://github.com/factorialco/f0/issues/3576)) ([a83b94a](https://github.com/factorialco/f0/commit/a83b94abc857844185ec42590c779cdf19176b6e))
+
 ## [1.390.2](https://github.com/factorialco/f0/compare/f0-react-v1.390.1...f0-react-v1.390.2) (2026-03-06)
 
 
