@@ -40,11 +40,12 @@ const TEXT_AREA_STYLE: object = {
 export const SelectOption = ({
   index,
   option,
-  selected,
   onClick,
   onClickAction,
   onChangeLabel,
-  isEditMode,
+  disabled,
+  answering,
+  selected,
   correct,
   locked,
   type,
@@ -58,7 +59,7 @@ export const SelectOption = ({
   const isDraggingThisItem = isDragging && draggedItemId === value
 
   const handleClick = () => {
-    if (isEditMode) return
+    if (disabled && !answering) return
     onClick(value)
   }
 
@@ -89,9 +90,11 @@ export const SelectOption = ({
     setDraggedItemId(null)
   }
 
-  const shouldToggleLeft = isDragging ? isDraggingThisItem : isEditMode
+  const shouldToggleLeft = isDragging
+    ? isDraggingThisItem
+    : !disabled && !answering
 
-  const dragEnabled = !!isEditMode && !locked
+  const dragEnabled = !disabled && !answering && !locked
 
   return (
     <Reorder.Item
@@ -105,7 +108,7 @@ export const SelectOption = ({
       <div
         className={cn(
           "group relative flex min-h-9 items-center gap-3 rounded-md bg-f1-background py-0.5 pl-2 pr-0.5 hover:bg-f1-background-hover",
-          !isEditMode && "cursor-pointer",
+          (disabled || answering) && "cursor-pointer",
           isDragging && "!cursor-grabbing active:!cursor-grabbing"
         )}
         onClick={handleClick}
@@ -120,16 +123,16 @@ export const SelectOption = ({
           {type === "multi-select" ? (
             <F0Checkbox
               title={label}
-              checked={!!(selected && !isEditMode)}
+              checked={answering ? !!selected : false}
               onCheckedChange={handleClick}
-              disabled={isEditMode}
-              presentational={isEditMode}
+              disabled={!answering}
+              presentational={!answering}
               hideLabel
             />
           ) : (
             <RadioIndicator
-              checked={!!(selected && !isEditMode)}
-              disabled={isEditMode}
+              checked={answering ? !!selected : false}
+              disabled={!answering}
             />
           )}
         </div>
@@ -146,7 +149,7 @@ export const SelectOption = ({
             <F0Icon icon={Handle} size="sm" />
           </div>
         </div>
-        {isEditMode && !locked ? (
+        {!disabled && !answering && !locked ? (
           <textarea
             placeholder={t(
               "surveyFormBuilder.selectQuestion.optionPlaceholder"
@@ -159,12 +162,12 @@ export const SelectOption = ({
         ) : (
           <p className="flex-1 font-medium">{label}</p>
         )}
-        {isEditMode && correct && (
+        {!disabled && !answering && correct && (
           <span className="text-sm font-medium text-f1-foreground-positive">
             {t("surveyFormBuilder.selectQuestion.correct")}
           </span>
         )}
-        {isEditMode && !locked ? (
+        {!disabled && !answering && !locked ? (
           <div className="hidden flex-row items-center gap-1 group-hover:inline-block">
             <F0Button
               label={t("surveyFormBuilder.selectQuestion.markAsCorrect")}

@@ -387,6 +387,16 @@ export const defaultTranslations = {
         "Moving this question will leave the section empty and it will be removed. Do you want to continue?",
     },
   },
+  surveyAnsweringForm: {
+    actions: {
+      submit: "Submit survey",
+      cancel: "Cancel",
+      next: "Next",
+      previous: "Previous",
+      expand: "Expand",
+      collapse: "Collapse",
+    },
+  },
   richTextEditor: {
     bold: "Bold",
     italic: "Italic",

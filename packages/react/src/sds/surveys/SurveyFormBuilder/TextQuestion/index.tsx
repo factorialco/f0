@@ -23,13 +23,11 @@ export const TextQuestion = ({
   value,
   ...baseQuestionComponentProps
 }: TextQuestionProps) => {
-  const { onQuestionChange, isEditMode } = useSurveyFormBuilderContext()
+  const { onQuestionChange, answering } = useSurveyFormBuilderContext()
 
   const { t } = useI18n()
 
   const handleChangeText = (newValue: string) => {
-    if (isEditMode) return
-
     onQuestionChange?.({
       ...baseQuestionComponentProps,
       value: newValue,
@@ -38,13 +36,11 @@ export const TextQuestion = ({
 
   const placeholder = t("surveyFormBuilder.answer.placeholder")
 
-  const inputValue = isEditMode ? placeholder : (value ?? undefined)
-
   const commonInputProps = {
-    value: inputValue,
+    value: answering ? (value ?? "") : placeholder,
     onChange: handleChangeText,
     placeholder,
-    disabled: isEditMode,
+    disabled: !answering,
     label: t("surveyFormBuilder.answer.label"),
     hideLabel: true,
     required: baseQuestionComponentProps.required,

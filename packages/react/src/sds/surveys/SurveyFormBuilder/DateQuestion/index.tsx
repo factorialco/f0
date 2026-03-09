@@ -22,13 +22,11 @@ export const DateQuestion = ({
   value,
   ...baseQuestionComponentProps
 }: DateQuestionProps) => {
-  const { onQuestionChange, isEditMode } = useSurveyFormBuilderContext()
+  const { onQuestionChange, answering } = useSurveyFormBuilderContext()
 
   const { t } = useI18n()
 
   const handleChangeDate = (newValue: DatePickerValue | undefined) => {
-    if (isEditMode) return
-
     onQuestionChange?.({
       ...baseQuestionComponentProps,
       type: "date",
@@ -54,11 +52,11 @@ export const DateQuestion = ({
           size="md"
           value={datePickerValue}
           onChange={handleChangeDate}
-          disabled={isEditMode}
+          disabled={!answering}
           label={t("surveyFormBuilder.answer.label")}
           hideLabel={true}
           required={baseQuestionComponentProps.required}
-          readonly={isEditMode}
+          readonly={!answering}
           clearable={!baseQuestionComponentProps.required}
         />
       </div>

@@ -63,7 +63,7 @@ export const useTableOfContentItems = (
     questionTypeLabel,
   } = options
 
-  const { deleteElement, onDuplicateElement, isEditMode } =
+  const { deleteElement, onDuplicateElement, disabled, answering } =
     useSurveyFormBuilderContext()
 
   const { getActionsForQuestion, questionTypes } = useQuestionActionsFactory()
@@ -185,7 +185,8 @@ export const useTableOfContentItems = (
             label: section.title || untitledSectionLabel,
             icon: AcademicCap,
             onClick: handleItemClick,
-            ...(isEditMode &&
+            ...(!disabled &&
+              !answering &&
               !section.locked && {
                 otherActions: [
                   {
@@ -211,7 +212,8 @@ export const useTableOfContentItems = (
               label: question.title || untitledQuestionLabel,
               icon: getQuestionIcon(question.type as QuestionType),
               onClick: handleItemClick,
-              ...(isEditMode &&
+              ...(!disabled &&
+                !answering &&
                 !section.locked && {
                   otherActions: buildQuestionActions(
                     question.id,
@@ -229,7 +231,8 @@ export const useTableOfContentItems = (
           label: question.title || untitledQuestionLabel,
           icon: getQuestionIcon(question.type as QuestionType),
           onClick: handleItemClick,
-          ...(isEditMode &&
+          ...(!disabled &&
+            !answering &&
             !question.locked && {
               otherActions: buildQuestionActions(
                 question.id,
@@ -244,7 +247,8 @@ export const useTableOfContentItems = (
       handleItemClick,
       untitledSectionLabel,
       untitledQuestionLabel,
-      isEditMode,
+      disabled,
+      answering,
       buildQuestionActions,
       duplicateSectionLabel,
       deleteSectionLabel,

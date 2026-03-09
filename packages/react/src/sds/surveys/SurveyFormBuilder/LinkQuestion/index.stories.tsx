@@ -7,7 +7,7 @@ import { SurveyFormBuilderProvider } from "../Context"
 import { SurveyFormBuilderElement, QuestionElement } from "../types"
 
 const meta: Meta<typeof LinkQuestion> = {
-  title: "SurveyFormBuilder/LinkQuestion",
+  title: "Surveys/SurveyFormBuilder/LinkQuestion",
   component: LinkQuestion,
   tags: ["autodocs", "experimental"],
   render: (args) => {
@@ -20,11 +20,7 @@ const meta: Meta<typeof LinkQuestion> = {
 
     return (
       <div className="max-w-[750px]">
-        <SurveyFormBuilderProvider
-          elements={elements}
-          onChange={setElements}
-          isEditMode
-        >
+        <SurveyFormBuilderProvider elements={elements} onChange={setElements}>
           <LinkQuestion {...args} {...question} />
         </SurveyFormBuilderProvider>
       </div>

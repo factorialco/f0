@@ -14,12 +14,13 @@ export type OnChangeLabelParams = {
 
 export type SelectOptionProps = {
   option: SelectQuestionOption
-  selected: boolean
   onClick: (value: string) => void
   index: number
   onChangeLabel: (params: OnChangeLabelParams) => void
   onClickAction: (params: OnClickOptionActionParams) => void
-  isEditMode?: boolean
+  disabled?: boolean
+  answering?: boolean
+  selected?: boolean
   correct?: boolean
   locked?: boolean
   type: "select" | "multi-select"

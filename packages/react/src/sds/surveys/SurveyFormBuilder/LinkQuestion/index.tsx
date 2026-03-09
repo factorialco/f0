@@ -22,11 +22,9 @@ export const LinkQuestion = ({
 }: LinkQuestionProps) => {
   const { t } = useI18n()
 
-  const { onQuestionChange, isEditMode } = useSurveyFormBuilderContext()
+  const { onQuestionChange, answering } = useSurveyFormBuilderContext()
 
   const handleChangeText = (newValue: string | null) => {
-    if (isEditMode) return
-
     onQuestionChange?.({
       ...baseQuestionComponentProps,
       type: "link",
@@ -42,7 +40,7 @@ export const LinkQuestion = ({
           size="md"
           value={value ?? undefined}
           onChange={handleChangeText}
-          disabled={isEditMode}
+          disabled={!answering}
           label={t("surveyFormBuilder.answer.label")}
           hideLabel={true}
           required={baseQuestionComponentProps.required}

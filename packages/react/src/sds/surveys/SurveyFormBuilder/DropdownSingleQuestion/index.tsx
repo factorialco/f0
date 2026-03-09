@@ -11,7 +11,7 @@ export const DropdownSingleQuestion = ({
   options,
   ...props
 }: DropdownSingleQuestionProps) => {
-  const { onQuestionChange, getSectionContainingQuestion, isEditMode } =
+  const { onQuestionChange, answering, getSectionContainingQuestion } =
     useSurveyFormBuilderContext()
 
   const containingSection = getSectionContainingQuestion(props.id)
@@ -38,7 +38,6 @@ export const DropdownSingleQuestion = ({
           options={selectOptions}
           value={props.value ?? ""}
           onChange={(value) => {
-            if (isEditMode) return
             onQuestionChange?.({
               id: props.id,
               type: "dropdown-single",
@@ -46,7 +45,7 @@ export const DropdownSingleQuestion = ({
             })
           }}
           placeholder={t("surveyFormBuilder.answer.placeholder")}
-          disabled={questionLocked || isEditMode}
+          disabled={answering ? false : questionLocked || true}
           required={props.required}
         />
       </div>

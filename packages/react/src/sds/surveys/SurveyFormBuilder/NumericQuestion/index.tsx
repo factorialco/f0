@@ -23,11 +23,9 @@ export const NumericQuestion = ({
 }: NumericQuestionProps) => {
   const { t } = useI18n()
 
-  const { onQuestionChange, isEditMode } = useSurveyFormBuilderContext()
+  const { onQuestionChange, answering } = useSurveyFormBuilderContext()
 
   const handleChangeText = (newValue: number | null) => {
-    if (isEditMode) return
-
     onQuestionChange?.({
       ...baseQuestionComponentProps,
       type: "numeric",
@@ -43,7 +41,7 @@ export const NumericQuestion = ({
           size="md"
           value={value}
           onChange={handleChangeText}
-          disabled={isEditMode}
+          disabled={!answering}
           label={t("surveyFormBuilder.answer.label")}
           hideLabel={true}
           required={baseQuestionComponentProps.required}

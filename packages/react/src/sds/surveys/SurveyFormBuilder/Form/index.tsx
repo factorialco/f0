@@ -37,13 +37,13 @@ function DragSelectGuard({ children }: { children: React.ReactNode }) {
 
 const _SurveyFormBuilder = ({
   elements: elementsProp,
-  isEditMode,
+  disabled,
   onChange,
   disallowOptionalQuestions,
   allowedQuestionTypes,
   applyingChanges,
 }: SurveyFormBuilderProps) => {
-  const shouldShowAddButton = isEditMode
+  const shouldShowAddButton = !disabled
 
   const elements = useMemo<SurveyFormBuilderElement[]>(
     () =>
@@ -128,7 +128,7 @@ const _SurveyFormBuilder = ({
 
   return (
     <SurveyFormBuilderProvider
-      isEditMode={isEditMode}
+      disabled={disabled}
       elements={elements}
       onChange={onChange}
       disallowOptionalQuestions={disallowOptionalQuestions}

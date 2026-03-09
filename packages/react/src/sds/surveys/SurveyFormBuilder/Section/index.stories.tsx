@@ -4,7 +4,7 @@ import { Section } from "."
 import { SurveyFormBuilderProvider } from "../Context"
 
 const meta: Meta = {
-  title: "SurveyFormBuilder/Section",
+  title: "Surveys/SurveyFormBuilder/Section",
   component: Section,
   tags: ["autodocs", "experimental"],
   decorators: [

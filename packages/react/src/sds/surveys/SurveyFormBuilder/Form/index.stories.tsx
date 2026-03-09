@@ -22,7 +22,7 @@ const meta: Meta<typeof SurveyFormBuilder> = {
   },
   decorators: [
     (Story) => (
-      <div className="w-[750px]">
+      <div className="max-w-[750px]">
         <Story />
       </div>
     ),
@@ -34,7 +34,6 @@ type Story = StoryObj<typeof SurveyFormBuilder>
 
 export const Default: Story = {
   args: {
-    isEditMode: true,
     elements: [
       {
         type: "question",
@@ -78,7 +77,6 @@ export const Default: Story = {
 
 export const Empty: Story = {
   args: {
-    isEditMode: true,
     elements: [],
   },
 }
@@ -94,7 +92,6 @@ export const WithQuestionWithDuplicateOptions: Story = {
   // TODO: Fix a11y issues
   parameters: withSkipA11y({}),
   args: {
-    isEditMode: true,
     elements: [
       {
         type: "question",
@@ -114,7 +111,6 @@ export const WithQuestionWithDuplicateOptions: Story = {
 
 export const WithMultipleSections: Story = {
   args: {
-    isEditMode: true,
     elements: [
       {
         type: "question",

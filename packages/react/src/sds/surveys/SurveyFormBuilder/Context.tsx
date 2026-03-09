@@ -22,7 +22,8 @@ import {
 } from "./types"
 
 type SurveyFormBuilderContextType = SurveyFormBuilderCallbacks & {
-  isEditMode?: boolean
+  disabled?: boolean
+  answering?: boolean
   disallowOptionalQuestions?: boolean
   lastElementId: string | undefined
   getQuestionById: (questionId: string) => QuestionElement | undefined
@@ -40,7 +41,8 @@ const SurveyFormBuilderContext = createContext<
 
 type SurveyFormBuilderProviderProps = {
   children: React.ReactNode
-  isEditMode?: boolean
+  disabled?: boolean
+  answering?: boolean
   elements: SurveyFormBuilderElement[]
   onChange: (elements: SurveyFormBuilderElement[]) => void
   disallowOptionalQuestions?: boolean
@@ -50,7 +52,8 @@ type SurveyFormBuilderProviderProps = {
 export function SurveyFormBuilderProvider({
   elements,
   children,
-  isEditMode,
+  disabled,
+  answering,
   disallowOptionalQuestions,
   onChange,
   allowedQuestionTypes,
@@ -368,14 +371,14 @@ export function SurveyFormBuilderProvider({
   useEffect(() => {
     if (isFirstRender.current) {
       isFirstRender.current = false
-      if (isEmpty && isEditMode) {
+      if (isEmpty && !disabled && !answering) {
         handleAddNewElement({
           type: "section",
         })
       }
       return
     }
-  }, [isEmpty, handleAddNewElement, isEditMode])
+  }, [isEmpty, handleAddNewElement, disabled])
 
   const isQuestionTypeAllowed = (questionType: QuestionType) => {
     return !allowedQuestionTypes || allowedQuestionTypes.includes(questionType)
@@ -390,7 +393,8 @@ export function SurveyFormBuilderProvider({
         onDuplicateElement: handleDuplicateElement,
         getIsSingleQuestionInSection,
         getSectionContainingQuestion,
-        isEditMode,
+        disabled,
+        answering,
         getQuestionById,
         deleteElement,
         lastElementId,

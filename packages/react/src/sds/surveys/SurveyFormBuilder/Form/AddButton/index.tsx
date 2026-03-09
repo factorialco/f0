@@ -8,7 +8,7 @@ import { useSurveyFormBuilderContext } from "../../Context"
 import { QuestionType } from "../../types"
 
 export const AddButton = () => {
-  const { isEditMode, onAddNewElement } = useSurveyFormBuilderContext()
+  const { disabled, answering, onAddNewElement } = useSurveyFormBuilderContext()
 
   const questionTypes = useQuestionTypes()
 
@@ -41,7 +41,7 @@ export const AddButton = () => {
     })),
   ]
 
-  if (!isEditMode) return null
+  if (disabled || answering) return null
 
   return (
     <div className="ml-6 flex justify-center">

@@ -31,7 +31,8 @@ export const BaseQuestion = ({
   const {
     onQuestionChange,
     onAddNewElement,
-    isEditMode,
+    disabled,
+    answering,
     getIsSingleQuestionInSection,
     getSectionContainingQuestion,
   } = useSurveyFormBuilderContext()
@@ -108,7 +109,7 @@ export const BaseQuestion = ({
 
   const isSingleQuestionInSection = getIsSingleQuestionInSection(id)
 
-  const inputDisabled = !isEditMode || locked
+  const inputDisabled = disabled || locked || answering
 
   return (
     <div
@@ -151,7 +152,7 @@ export const BaseQuestion = ({
               )}
             </div>
           </div>
-          {isEditMode && !locked && (
+          {!disabled && !answering && !locked && (
             <div
               className={cn(
                 "opacity-0 group-hover/question:opacity-100",
@@ -186,7 +187,7 @@ export const BaseQuestion = ({
         />
       </div>
       {children}
-      {isEditMode && !containingSection?.locked && (
+      {!disabled && !answering && !containingSection?.locked && (
         <div
           className={cn(
             "absolute bottom-0 left-1/2 translate-x-[-50%] translate-y-[50%] bg-f1-background opacity-0 group-hover/question:opacity-100",

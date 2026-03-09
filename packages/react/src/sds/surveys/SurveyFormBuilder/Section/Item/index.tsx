@@ -17,7 +17,7 @@ export const Item = ({ question }: ItemProps) => {
   const { isDragging, setIsDragging, setDraggedItemId } = useDragContext()
   const dragControls = useDragControls()
 
-  const { isEditMode, getSectionContainingQuestion } =
+  const { disabled, answering, getSectionContainingQuestion } =
     useSurveyFormBuilderContext()
 
   const containingSection = getSectionContainingQuestion(question.id)
@@ -34,7 +34,7 @@ export const Item = ({ question }: ItemProps) => {
 
   const questionLocked = question.locked || containingSection?.locked
 
-  const dragEnabled = !!isEditMode && !questionLocked
+  const dragEnabled = !disabled && !answering && !questionLocked
 
   return (
     <Reorder.Item
@@ -51,9 +51,9 @@ export const Item = ({ question }: ItemProps) => {
           "group/question-element flex flex-row items-start gap-1",
           isDragging && "cursor-grabbing"
         )}
-        style={{ marginLeft: isEditMode ? -27 : 0 }}
+        style={{ marginLeft: disabled || answering ? 0 : -27 }}
       >
-        {!!isEditMode && (
+        {!disabled && !answering && (
           <div
             className={cn(
               "mt-2 flex aspect-square w-6 scale-75 items-center opacity-0 hover:opacity-40 group-hover/question-element:opacity-40",

@@ -39,21 +39,19 @@ describe("SurveyFormBuilder", () => {
       makeSection("s1", "Section 1", [{ id: "q2", title: "Question 2" }]),
     ]
 
-    render(
-      <SurveyFormBuilder elements={elements} onChange={vi.fn()} isEditMode />
-    )
+    render(<SurveyFormBuilder elements={elements} onChange={vi.fn()} />)
 
     expect(screen.getByDisplayValue("Question 1")).toBeInTheDocument()
     expect(screen.getByDisplayValue("Section 1")).toBeInTheDocument()
   })
 
-  it("renders drag handles in edit mode", () => {
+  it("renders drag handles", () => {
     const elements: SurveyFormBuilderElement[] = [
       makeQuestion("q1", "Question 1"),
     ]
 
     const { container } = render(
-      <SurveyFormBuilder elements={elements} onChange={vi.fn()} isEditMode />
+      <SurveyFormBuilder elements={elements} onChange={vi.fn()} />
     )
 
     // Drag handles have cursor-grab class
@@ -61,20 +59,16 @@ describe("SurveyFormBuilder", () => {
     expect(grabElements.length).toBeGreaterThan(0)
   })
 
-  it("does not render drag handles when not in edit mode", () => {
+  it("does not render drag handles when disabled", () => {
     const elements: SurveyFormBuilderElement[] = [
       makeQuestion("q1", "Question 1"),
     ]
 
     const { container } = render(
-      <SurveyFormBuilder
-        elements={elements}
-        onChange={vi.fn()}
-        isEditMode={false}
-      />
+      <SurveyFormBuilder elements={elements} onChange={vi.fn()} disabled />
     )
 
-    // In non-edit mode, no grab cursors should be present
+    // In disabled mode, no grab cursors should be present
     const grabElements = container.querySelectorAll("[class*='cursor-grab']")
     expect(grabElements).toHaveLength(0)
   })
@@ -87,9 +81,7 @@ describe("SurveyFormBuilder", () => {
       ]),
     ]
 
-    render(
-      <SurveyFormBuilder elements={elements} onChange={vi.fn()} isEditMode />
-    )
+    render(<SurveyFormBuilder elements={elements} onChange={vi.fn()} />)
 
     expect(screen.getByText("End of section")).toBeInTheDocument()
   })
@@ -100,7 +92,7 @@ describe("SurveyFormBuilder", () => {
     ]
 
     const { container } = render(
-      <SurveyFormBuilder elements={elements} onChange={vi.fn()} isEditMode />
+      <SurveyFormBuilder elements={elements} onChange={vi.fn()} />
     )
 
     // Locked section header should show cursor-not-allowed
@@ -116,7 +108,7 @@ describe("SurveyFormBuilder", () => {
     ]
 
     const { container } = render(
-      <SurveyFormBuilder elements={elements} onChange={vi.fn()} isEditMode />
+      <SurveyFormBuilder elements={elements} onChange={vi.fn()} />
     )
 
     // All interactive items inside the locked section should have cursor-not-allowed
@@ -139,9 +131,7 @@ describe("SurveyFormBuilder", () => {
 
     const onChange = vi.fn()
 
-    render(
-      <SurveyFormBuilder elements={elements} onChange={onChange} isEditMode />
-    )
+    render(<SurveyFormBuilder elements={elements} onChange={onChange} />)
 
     // The dialog should not be visible initially
     expect(
@@ -154,9 +144,7 @@ describe("SurveyFormBuilder", () => {
       makeQuestion("q1", "Question 1"),
     ]
 
-    render(
-      <SurveyFormBuilder elements={elements} onChange={vi.fn()} isEditMode />
-    )
+    render(<SurveyFormBuilder elements={elements} onChange={vi.fn()} />)
 
     // TableOfContent should be present when elements exist
     // It renders an F0TableOfContentPopover which has a button
@@ -164,7 +152,7 @@ describe("SurveyFormBuilder", () => {
   })
 
   it("does not render table of content for empty elements", () => {
-    render(<SurveyFormBuilder elements={[]} onChange={vi.fn()} isEditMode />)
+    render(<SurveyFormBuilder elements={[]} onChange={vi.fn()} />)
 
     // With no elements, there should be no table of content
     // But the add button should still be visible (indirectly tested)
@@ -180,7 +168,6 @@ describe("SurveyFormBuilder", () => {
       <SurveyFormBuilder
         elements={elements}
         onChange={vi.fn()}
-        isEditMode
         applyingChanges
       />
     )
@@ -188,8 +175,8 @@ describe("SurveyFormBuilder", () => {
     expect(screen.getByText("Applying changes")).toBeInTheDocument()
   })
 
-  it("renders add button when form is empty in edit mode", () => {
-    render(<SurveyFormBuilder elements={[]} onChange={vi.fn()} isEditMode />)
+  it("renders add button when form is empty", () => {
+    render(<SurveyFormBuilder elements={[]} onChange={vi.fn()} />)
 
     // The add button should be present
     // It renders a dropdown trigger button
@@ -202,9 +189,7 @@ describe("SurveyFormBuilder", () => {
       makeSection("s1", "Section 1", [{ id: "q1", title: "Q1" }]),
     ]
 
-    render(
-      <SurveyFormBuilder elements={elements} onChange={vi.fn()} isEditMode />
-    )
+    render(<SurveyFormBuilder elements={elements} onChange={vi.fn()} />)
 
     // Should have the add button since last element is a section
     const buttons = screen.getAllByRole("button")

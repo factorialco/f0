@@ -138,7 +138,7 @@ export type SurveyFormBuilderCallbacks = {
 export type SurveyFormBuilderProps = {
   elements: SurveyFormBuilderElement[]
   onChange: (elements: SurveyFormBuilderElement[]) => void
-  isEditMode?: boolean
+  disabled?: boolean
   disallowOptionalQuestions?: boolean
   allowedQuestionTypes?: QuestionType[]
   applyingChanges?: boolean

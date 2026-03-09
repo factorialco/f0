@@ -18,8 +18,12 @@ import {
 import { SelectQuestionOnChangeParams, SelectQuestionProps } from "./types"
 
 export const SelectQuestion = ({ options, ...props }: SelectQuestionProps) => {
-  const { onQuestionChange, isEditMode, getSectionContainingQuestion } =
-    useSurveyFormBuilderContext()
+  const {
+    onQuestionChange,
+    disabled,
+    answering,
+    getSectionContainingQuestion,
+  } = useSurveyFormBuilderContext()
 
   const someOptionsWithSameValue =
     new Set(options.map((option) => option.value)).size !== options.length
@@ -108,10 +112,11 @@ export const SelectQuestion = ({ options, ...props }: SelectQuestionProps) => {
         type: props.type,
         value: optionValue,
       })
-    } else if (props.type === "multi-select" && Array.isArray(props.value)) {
-      const newValue = props.value.includes(optionValue)
-        ? props.value.filter((value) => value !== optionValue)
-        : [...props.value, optionValue]
+    } else if (props.type === "multi-select") {
+      const currentValue = Array.isArray(props.value) ? props.value : []
+      const newValue = currentValue.includes(optionValue)
+        ? currentValue.filter((value) => value !== optionValue)
+        : [...currentValue, optionValue]
 
       onQuestionChange?.({
         ...baseOnChangeParams,
@@ -172,29 +177,34 @@ export const SelectQuestion = ({ options, ...props }: SelectQuestionProps) => {
             onReorder={handleReorderOptions}
             as="div"
           >
-            {options.map((option, index) => (
-              <div className="w-full [&>div]:w-full" key={option.value}>
-                <SelectOption
-                  index={index}
-                  option={option}
-                  correct={option.correct}
-                  selected={
-                    Array.isArray(props.value)
-                      ? props.value.includes(option.value)
-                      : props.value === option.value
-                  }
-                  onClick={handleOptionClick}
-                  onClickAction={handleClickOptionAction}
-                  onChangeLabel={handleChangeLabel}
-                  isEditMode={isEditMode}
-                  locked={questionLocked}
-                  type={props.type}
-                />
-              </div>
-            ))}
+            {options.map((option, index) => {
+              const isSelected =
+                props.type === "select"
+                  ? props.value === option.value
+                  : Array.isArray(props.value) &&
+                    props.value.includes(option.value)
+
+              return (
+                <div className="w-full [&>div]:w-full" key={option.value}>
+                  <SelectOption
+                    index={index}
+                    option={option}
+                    correct={option.correct}
+                    onClick={handleOptionClick}
+                    onClickAction={handleClickOptionAction}
+                    onChangeLabel={handleChangeLabel}
+                    disabled={disabled}
+                    answering={answering}
+                    selected={isSelected}
+                    locked={questionLocked}
+                    type={props.type}
+                  />
+                </div>
+              )
+            })}
           </Reorder.Group>
         </DragProvider>
-        {isEditMode && !questionLocked && (
+        {!disabled && !answering && !questionLocked && (
           <div className="opacity-50">
             <F0Button
               label={t("surveyFormBuilder.selectQuestion.addOption")}

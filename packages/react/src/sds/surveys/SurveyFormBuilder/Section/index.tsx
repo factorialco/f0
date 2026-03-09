@@ -25,8 +25,13 @@ export const Section = ({
   locked,
   hideQuestions,
 }: SectionProps & { hideQuestions?: boolean }) => {
-  const { onSectionChange, isEditMode, deleteElement, onDuplicateElement } =
-    useSurveyFormBuilderContext()
+  const {
+    onSectionChange,
+    disabled,
+    answering,
+    deleteElement,
+    onDuplicateElement,
+  } = useSurveyFormBuilderContext()
 
   const [actionsDropdownOpen, setActionsDropdownOpen] = useState(false)
   const { t } = useI18n()
@@ -79,7 +84,7 @@ export const Section = ({
     },
   ]
 
-  const inputDisabled = !isEditMode || locked
+  const inputDisabled = disabled || locked || answering
 
   return (
     <div
@@ -101,7 +106,7 @@ export const Section = ({
             )}
             autoFocus
           />
-          {isEditMode && !locked && (
+          {!disabled && !answering && !locked && (
             <div
               className={cn(
                 "opacity-0 group-hover/section:opacity-100",
@@ -158,13 +163,15 @@ export const Section = ({
               </div>
             </Reorder.Group>
           </DragProvider>
-          <div className="mt-8 flex flex-row items-center gap-4">
-            <div className="h-px flex-1 bg-f1-border-secondary" />
-            <span className="text-base font-medium text-f1-foreground-secondary">
-              {t("surveyFormBuilder.labels.endOfSection")}
-            </span>
-            <div className="h-px flex-1 bg-f1-border-secondary" />
-          </div>
+          {!answering && (
+            <div className="mt-8 flex flex-row items-center gap-4">
+              <div className="h-px flex-1 bg-f1-border-secondary" />
+              <span className="text-base font-medium text-f1-foreground-secondary">
+                {t("surveyFormBuilder.labels.endOfSection")}
+              </span>
+              <div className="h-px flex-1 bg-f1-border-secondary" />
+            </div>
+          )}
         </>
       )}
     </div>

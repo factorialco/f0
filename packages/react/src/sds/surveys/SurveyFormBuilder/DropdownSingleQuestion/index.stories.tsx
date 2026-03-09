@@ -9,7 +9,7 @@ import { SurveyFormBuilderProvider } from "../Context"
 import { SurveyFormBuilderElement } from "../types"
 
 const meta: Meta<typeof DropdownSingleQuestion> = {
-  title: "SurveyFormBuilder/DropdownSingleQuestion",
+  title: "Surveys/SurveyFormBuilder/DropdownSingleQuestion",
   component: DropdownSingleQuestion,
   tags: ["autodocs", "experimental"],
   render: (args) => {
@@ -22,11 +22,7 @@ const meta: Meta<typeof DropdownSingleQuestion> = {
 
     return (
       <div className="max-w-[750px]">
-        <SurveyFormBuilderProvider
-          elements={elements}
-          onChange={setElements}
-          isEditMode
-        >
+        <SurveyFormBuilderProvider elements={elements} onChange={setElements}>
           <DropdownSingleQuestion {...args} {...question} />
         </SurveyFormBuilderProvider>
       </div>

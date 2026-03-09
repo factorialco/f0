@@ -21,7 +21,7 @@ export const SectionHeaderItem = ({
   const { isDragging, setIsDragging, setDraggedItemId, draggedItemId } =
     useDragContext()
   const dragControls = useDragControls()
-  const { isEditMode } = useSurveyFormBuilderContext()
+  const { disabled, answering } = useSurveyFormBuilderContext()
 
   const isDraggingThisSection = draggedItemId === item.section.id
 
@@ -35,7 +35,7 @@ export const SectionHeaderItem = ({
     setDraggedItemId(null)
   }
 
-  const dragEnabled = !!isEditMode && !item.section.locked
+  const dragEnabled = !disabled && !answering && !item.section.locked
 
   return (
     <Reorder.Item
@@ -56,7 +56,7 @@ export const SectionHeaderItem = ({
               isDragging && "cursor-grabbing"
             )}
           >
-            {!!isEditMode && (
+            {!disabled && !answering && (
               <div
                 className={cn(
                   "mt-2 flex aspect-square w-6 scale-75 items-center opacity-0 hover:opacity-40 group-hover/element:opacity-40",

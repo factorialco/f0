@@ -3,7 +3,9 @@ import { useCallback } from "react"
 import { F0TableOfContentPopover } from "@/components/F0TableOfContentPopover/F0TableOfContentPopover"
 import { IdStructure } from "@/experimental/Navigation/F0TableOfContent/types"
 import { useI18n } from "@/lib/providers/i18n"
+import { cn } from "@/lib/utils"
 
+import { useSurveyFormBuilderContext } from "../../Context"
 import {
   SurveyFormBuilderElement,
   QuestionElement,
@@ -85,6 +87,7 @@ export const TableOfContent = ({
   onChange: (elements: SurveyFormBuilderElement[]) => void
 }) => {
   const { t } = useI18n()
+  const { answering } = useSurveyFormBuilderContext()
 
   const tocItems = useTableOfContentItems(elements, {
     untitledSectionLabel: t("surveyFormBuilder.labels.sectionTitlePlaceholder"),
@@ -106,14 +109,19 @@ export const TableOfContent = ({
   )
 
   return (
-    <div className="sticky top-0 flex h-screen items-center">
+    <div
+      className={cn(
+        "absolute top-0 bottom-0 flex z-10",
+        answering ? "items-center pt-2" : "h-screen items-center"
+      )}
+    >
       <F0TableOfContentPopover
         items={tocItems}
         barsAlign="left"
         size="md"
         collapsible
         showChildrenCounter
-        sortable
+        sortable={!answering}
         onReorder={handleReorder}
       />
     </div>
