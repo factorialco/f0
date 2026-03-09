@@ -7,7 +7,7 @@ import { tv, type VariantProps } from "tailwind-variants"
  * via --font-* CSS variables defined in @theme.
  */
 export const textVariants = tv({
-  base: "",
+  base: "no-underline normal-case tracking-normal",
   variants: {
     variant: {
       // Heading variants

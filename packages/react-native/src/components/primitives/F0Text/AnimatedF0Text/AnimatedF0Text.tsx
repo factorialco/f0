@@ -2,6 +2,7 @@ import React from "react"
 import { Text as RNText } from "react-native"
 import Animated from "react-native-reanimated"
 
+import { cn } from "../../../../lib/utils"
 import { textVariants } from "../F0Text/F0Text.styles"
 
 import type { AnimatedF0TextProps } from "./AnimatedF0Text.types"
@@ -15,9 +16,16 @@ const AnimatedText = Animated.createAnimatedComponent(RNText)
  * typography system as F0Text. Supports `entering`, `exiting`, `layout`
  * animations and animated `style` props.
  *
+ * Typography is controlled by semantic props and always takes precedence.
+ * `className` is accepted for layout/positioning (margin, padding, flex, etc.).
+ * `style` is accepted for Reanimated animated values.
+ *
  * @example
  * <AnimatedF0Text variant="heading-xl" entering={FadeIn.duration(300)}>
  *   Welcome back
+ * </AnimatedF0Text>
+ * <AnimatedF0Text variant="body-sm-default" className="mt-4 flex-1" style={animatedStyle}>
+ *   Positioned animated text
  * </AnimatedF0Text>
  */
 const AnimatedF0TextComponent = React.forwardRef<
@@ -31,6 +39,7 @@ const AnimatedF0TextComponent = React.forwardRef<
       align = "left",
       decoration = "none",
       transform = "none",
+      className,
       children,
       numberOfLines,
       style,
@@ -40,14 +49,17 @@ const AnimatedF0TextComponent = React.forwardRef<
   ) => {
     const textClassName = React.useMemo(
       () =>
-        textVariants({
-          variant,
-          color,
-          align,
-          decoration,
-          transform,
-        }),
-      [variant, color, align, decoration, transform]
+        cn(
+          className,
+          textVariants({
+            variant,
+            color,
+            align,
+            decoration,
+            transform,
+          })
+        ),
+      [variant, color, align, decoration, transform, className]
     )
 
     return (
