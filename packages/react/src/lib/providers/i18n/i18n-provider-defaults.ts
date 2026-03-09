@@ -335,7 +335,7 @@ export const defaultTranslations = {
       dismiss: "Dismiss",
     },
   },
-  coCreationForm: {
+  surveyFormBuilder: {
     actions: {
       actions: "Actions",
       duplicateQuestion: "Duplicate question",
