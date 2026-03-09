@@ -5,6 +5,7 @@ Animated text primitive for React Native with semantic typography variants and R
 ## Features
 
 - All F0Text semantic typography variants and colors
+- `className` for layout/positioning (margin, padding, flex, etc.) — typography always wins via twMerge
 - Reanimated `entering`/`exiting` layout animations
 - Animated `style` prop for custom animations via `useAnimatedStyle`
 - Layout transition animations
@@ -90,6 +91,41 @@ import { LinearTransition } from "react-native-reanimated"
 </>
 ```
 
+### className for Layout/Positioning
+
+`className` accepts Tailwind classes for layout and positioning. Typography classes
+in `className` are ignored — semantic props always take precedence via twMerge.
+
+<!-- prettier-ignore -->
+```tsx
+import { AnimatedF0Text } from "@factorialco/f0-react-native"
+import { FadeIn } from "react-native-reanimated"
+import { useAnimatedStyle, useSharedValue } from "react-native-reanimated"
+
+const opacity = useSharedValue(1)
+const animatedStyle = useAnimatedStyle(() => ({ opacity: opacity.value }))
+
+<>
+  {/* className for static layout, style for animated values */}
+  <AnimatedF0Text
+    variant="heading-sm"
+    className="mt-4 flex-1"
+    style={animatedStyle}
+  >
+    Positioned animated heading
+  </AnimatedF0Text>
+
+  {/* className for layout + entering animation */}
+  <AnimatedF0Text
+    variant="body-sm-default"
+    className="mb-2 self-center"
+    entering={FadeIn.duration(300)}
+  >
+    Centered fade-in text
+  </AnimatedF0Text>
+</>
+```
+
 ## API Reference
 
 ### Props
@@ -98,14 +134,15 @@ AnimatedF0Text accepts all F0Text semantic props plus Reanimated animation props
 
 #### Typography Props (shared with F0Text)
 
-| Prop            | Type                | Default             | Description                              |
-| --------------- | ------------------- | ------------------- | ---------------------------------------- |
-| `variant`       | `TypographyVariant` | `'body-sm-default'` | Typography variant                       |
-| `color`         | `TextColor`         | `'default'`         | Text color from F0 semantic color system |
-| `align`         | `TextAlign`         | `'left'`            | Text alignment                           |
-| `decoration`    | `TextDecoration`    | `'none'`            | Text decoration                          |
-| `transform`     | `TextTransform`     | `'none'`            | Text transform                           |
-| `numberOfLines` | `number`            | `undefined`         | Max lines before truncation              |
+| Prop            | Type                | Default             | Description                                                                                               |
+| --------------- | ------------------- | ------------------- | --------------------------------------------------------------------------------------------------------- |
+| `variant`       | `TypographyVariant` | `'body-sm-default'` | Typography variant                                                                                        |
+| `color`         | `TextColor`         | `'default'`         | Text color from F0 semantic color system                                                                  |
+| `align`         | `TextAlign`         | `'left'`            | Text alignment                                                                                            |
+| `decoration`    | `TextDecoration`    | `'none'`            | Text decoration                                                                                           |
+| `transform`     | `TextTransform`     | `'none'`            | Text transform                                                                                            |
+| `numberOfLines` | `number`            | `undefined`         | Max lines before truncation                                                                               |
+| `className`     | `string`            | `undefined`         | Tailwind classes for layout/positioning. Typography classes are overridden by semantic props via twMerge. |
 
 #### Animation Props
 
