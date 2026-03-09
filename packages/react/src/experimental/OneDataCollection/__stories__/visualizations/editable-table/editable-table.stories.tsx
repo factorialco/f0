@@ -3,6 +3,9 @@ import { format } from "date-fns"
 import { useMemo, useRef, useState } from "react"
 import { action } from "storybook/actions"
 
+import { createDataSourceDefinition, RecordType } from "@/hooks/datasource"
+import { ROLES_MOCK } from "@/mocks"
+
 import {
   createDataAdapter,
   ExampleComponent,
@@ -482,6 +485,81 @@ export const EditableTableWithSelectableNestedRecordsDetailed: Story = {
         id="editable-table-nested-detailed/v1"
         nestedRecords
         nestedRecordsType="detailed"
+      />
+    )
+  },
+}
+
+type RoleRecord = { value: string; label: string }
+
+const roleNonPaginatedSource = createDataSourceDefinition<RoleRecord>({
+  dataAdapter: {
+    fetchData: async ({ search }) => {
+      await new Promise((resolve) => setTimeout(resolve, 150))
+
+      let results = ROLES_MOCK.map((role) => ({ value: role, label: role }))
+
+      if (search) {
+        const q = search.toLowerCase()
+        results = results.filter((r) => r.label.toLowerCase().includes(q))
+      }
+
+      return { records: results }
+    },
+  },
+})
+
+export const EditableTableWithDataSourceSelect: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Editable table where the Role column uses a non-paginated data source for its select options, demonstrating the `source` + `mapOptions` pattern in `selectConfig`.",
+      },
+    },
+  },
+  render: () => {
+    const mockVisualizations = getMockVisualizations()
+    const { dataAdapter, onCellChange } = useEditableTableData()
+
+    const baseOptions = (
+      mockVisualizations.editableTable as Extract<
+        typeof mockVisualizations.editableTable,
+        { type: "editableTable" }
+      >
+    ).options
+
+    return (
+      <ExampleComponent
+        visualizations={[
+          {
+            type: "editableTable" as const,
+            options: {
+              ...baseOptions,
+              columns: baseOptions.columns.map((col) => {
+                if (col.id === "role") {
+                  return {
+                    ...col,
+                    editType: () => "select" as const,
+                    selectConfig: {
+                      source: roleNonPaginatedSource,
+                      mapOptions: (record: RecordType) => ({
+                        value: String(record.value),
+                        label: String(record.label),
+                      }),
+                      placeholder: "Select role",
+                      showSearchBox: true,
+                    },
+                  }
+                }
+                return col
+              }),
+              onCellChange,
+            },
+          },
+        ]}
+        dataAdapter={dataAdapter}
+        id="editable-table-datasource-select/v1"
       />
     )
   },
