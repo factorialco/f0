@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.29.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.28.1...f0-react-native-v0.29.0) (2026-03-09)
+
+
+### Features
+
+* allow className for layout on F0Text ([#3606](https://github.com/factorialco/f0/issues/3606)) ([2ec6f3b](https://github.com/factorialco/f0/commit/2ec6f3b27f0f6b5a79ba568746d1fbfc15e0aa23))
+
 ## [0.28.1](https://github.com/factorialco/f0/compare/f0-react-native-v0.28.0...f0-react-native-v0.28.1) (2026-03-06)
 
 
