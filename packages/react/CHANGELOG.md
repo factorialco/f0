@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.393.0](https://github.com/factorialco/f0/compare/f0-react-v1.392.1...f0-react-v1.393.0) (2026-03-10)
+
+
+### Features
+
+* editable tables design ([#3539](https://github.com/factorialco/f0/issues/3539)) ([22cf18d](https://github.com/factorialco/f0/commit/22cf18df5d9be1c0bfffe640cabe22e16d7a3f04))
+
 ## [1.392.1](https://github.com/factorialco/f0/compare/f0-react-v1.392.0...f0-react-v1.392.1) (2026-03-09)
 
 
