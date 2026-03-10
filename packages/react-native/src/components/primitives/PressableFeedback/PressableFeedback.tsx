@@ -8,53 +8,30 @@ import Animated, {
   type WithTimingConfig,
 } from "react-native-reanimated"
 
-import { cn } from "../../lib/utils"
+import { cn } from "../../../lib/utils"
+
+import type { PressableFeedbackProps } from "./PressableFeedback.types"
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable)
-
-export type PressableFeedbackVariant = "highlight" | "scale" | "both" | "none"
-
-export interface ScaleAnimationConfig {
-  /** Scale value when pressed (0-1, default: 0.98) */
-  value?: number
-  /** Timing configuration for the animation */
-  timingConfig?: WithTimingConfig
-}
-
-export interface HighlightAnimationConfig {
-  /** Background color of the highlight overlay */
-  backgroundColor?: string
-  /** Opacity when pressed [min, max] (default: [0, 0.1]) */
-  opacity?: [number, number]
-  /** Timing configuration for the animation */
-  timingConfig?: WithTimingConfig
-}
-
-export interface PressableFeedbackProps extends Omit<
-  PressableProps,
-  "style" | "children"
-> {
-  /** Visual feedback variant */
-  variant?: PressableFeedbackVariant
-  /** Scale animation configuration (only used when variant includes scale) */
-  scaleAnimation?: ScaleAnimationConfig
-  /** Highlight animation configuration (only used when variant includes highlight) */
-  highlightAnimation?: HighlightAnimationConfig
-  /** Additional className for the pressable container */
-  className?: string
-  /** Style for the pressable container */
-  style?: PressableProps["style"]
-  /** Children to render inside the pressable */
-  children?: React.ReactNode
-  /** Whether animations are disabled */
-  disableAnimation?: boolean
-}
 
 const DEFAULT_TIMING_CONFIG: WithTimingConfig = {
   duration: 150,
   easing: Easing.out(Easing.ease),
 }
 
+/**
+ * PressableFeedback - Internal pressable primitive with animated feedback
+ *
+ * Wraps React Native's Pressable with Reanimated scale and highlight
+ * animations. Used internally by F0 components.
+ *
+ * @internal
+ *
+ * @example
+ * <PressableFeedback variant="both" onPress={handlePress}>
+ *   <View><F0Text>Press me</F0Text></View>
+ * </PressableFeedback>
+ */
 export const PressableFeedback = forwardRef<View, PressableFeedbackProps>(
   function PressableFeedback(
     {
@@ -72,11 +49,9 @@ export const PressableFeedback = forwardRef<View, PressableFeedbackProps>(
     },
     ref
   ) {
-    // Animation shared values
     const scale = useSharedValue(1)
     const highlightOpacity = useSharedValue(0)
 
-    // Config values
     const scaleValue = scaleAnimation?.value ?? 0.98
     const scaleTimingConfig = useMemo(
       () => ({
@@ -156,14 +131,12 @@ export const PressableFeedback = forwardRef<View, PressableFeedbackProps>(
       ]
     )
 
-    // Scale animation style
     const animatedContainerStyle = useAnimatedStyle(() => {
       return {
         transform: [{ scale: scale.value }],
       }
     })
 
-    // Highlight overlay animation style
     const animatedHighlightStyle = useAnimatedStyle(() => {
       return {
         opacity: highlightOpacity.value,
@@ -180,7 +153,6 @@ export const PressableFeedback = forwardRef<View, PressableFeedbackProps>(
         style={[animatedContainerStyle, style]}
         {...restProps}
       >
-        {/* Highlight overlay */}
         {shouldHighlight && (
           <Animated.View
             pointerEvents="none"
@@ -196,5 +168,7 @@ export const PressableFeedback = forwardRef<View, PressableFeedbackProps>(
     )
   }
 )
+
+PressableFeedback.displayName = "PressableFeedback"
 
 export default PressableFeedback
