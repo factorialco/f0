@@ -18,7 +18,8 @@ jobs:
     if: |
       needs.detect-changes.outputs.package_react_native == 'true' &&
       github.head_ref != 'release-please--branches--master' &&
-      !contains(github.event.pull_request.labels.*.name, 'autorelease')
+      !contains(github.event.pull_request.labels.*.name, 'autorelease') &&
+      github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     permissions:
       contents: read
