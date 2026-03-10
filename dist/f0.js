@@ -17311,7 +17311,7 @@ const Wl = He(
       o && o !== "none" ? Fg[o] : void 0,
       a && a !== "none" ? Pg[a] : void 0
     ), m = l ? /* @__PURE__ */ f("span", { className: "text-f1-foreground-critical", "aria-hidden": "true", children: " *" }) : null;
-    if (i !== void 0) {
+    if (i === !0 || typeof i == "number") {
       const b = typeof i == "number" ? i : 1;
       return m ? ar(
         u,

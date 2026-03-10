@@ -8743,7 +8743,7 @@ export declare type Variant = (typeof statuses)[number];
  *
  * Naming model:
  * - Base variants: `title`, `heading`, `subtitle`, `body`, `label`, `description`, `caption`, `code`
- * - Scaled variants: `<base>-<scale>` (for example `heading-2xl`, `body-xl`, `code-lg`)
+ * - Scaled variants: `<base>-<scale>` (for example `heading-lg`, `body-sm`, `code-lg`)
  *
  * Base variants represent the default scale for each semantic role.
  */
@@ -8892,11 +8892,6 @@ declare module "gridstack" {
 }
 
 
-declare namespace Calendar {
-    var displayName: string;
-}
-
-
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         aiBlock: {
@@ -8943,4 +8938,9 @@ declare module "@tiptap/core" {
             insertTranscript: (data: TranscriptData) => ReturnType;
         };
     }
+}
+
+
+declare namespace Calendar {
+    var displayName: string;
 }
