@@ -568,13 +568,14 @@ export const EditableTableWithDateCell: Story = {
                     },
                   }),
                   id: "name",
-                  editType: () => "display-only" as const,
+                  editable: () => false,
                 },
                 {
                   label: "Email",
                   render: (item: MockUser) => item.email,
                   id: "email",
                   editType: () => "text" as const,
+                  editable: () => true,
                 },
                 {
                   label: "Start date",
@@ -582,6 +583,7 @@ export const EditableTableWithDateCell: Story = {
                   render: (item: MockUser) =>
                     format(item.joinedAt, "yyyy-MM-dd"),
                   editType: () => "date" as const,
+                  editable: () => true,
                 },
               ],
               onCellChange,

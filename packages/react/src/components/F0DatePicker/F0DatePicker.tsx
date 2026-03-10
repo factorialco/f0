@@ -18,7 +18,7 @@ export function F0DatePicker({
   minDate,
   maxDate,
   open = false,
-  hideIcon,
+  showIcon = true,
   displayFormat,
   ...inputProps
 }: F0DatePickerProps) {
@@ -147,7 +147,7 @@ export function F0DatePicker({
         value={localValue}
         granularity={granularity}
         onDateChange={handleChangeDate}
-        hideIcon={hideIcon}
+        showIcon={showIcon}
         displayFormat={displayFormat}
       />
     </DatePickerPopup>

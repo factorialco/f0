@@ -25,7 +25,7 @@ type DateInputProps = {
   onClear?: () => void
   minDate?: Date
   maxDate?: Date
-  hideIcon?: boolean
+  showIcon?: boolean
   displayFormat?: DateStringFormat
 } & Pick<InputFieldProps<string>, InputFieldInheritedProps>
 
@@ -39,7 +39,7 @@ const DateInput = forwardRef<HTMLInputElement, DateInputProps>(
       minDate,
       maxDate,
       onClear,
-      hideIcon,
+      showIcon = true,
       displayFormat,
       ...inputProps
     },
@@ -108,7 +108,7 @@ const DateInput = forwardRef<HTMLInputElement, DateInputProps>(
         <Input
           {...inputProps}
           placeholder={placeholder}
-          icon={hideIcon ? undefined : Calendar}
+          icon={showIcon ? Calendar : undefined}
           ref={ref}
           onFocus={() => onOpenChange?.(true)}
           onClear={() => {

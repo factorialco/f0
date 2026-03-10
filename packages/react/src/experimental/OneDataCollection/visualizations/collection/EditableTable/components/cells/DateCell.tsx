@@ -4,22 +4,19 @@ import { useMemo } from "react"
 import type { DatePickerValue } from "@/components/F0DatePicker/types"
 
 import { F0DatePicker } from "@/components/F0DatePicker"
-import { RecordType } from "@/hooks/datasource/types/records.typings"
-
 import type { EditableCellProps } from "."
 
 import { BaseCell } from "./BaseCell"
 
 const ISO_FORMAT = "yyyy-MM-dd"
 
-export function DateCell<R extends RecordType>({
-  editableColumn,
+export function DateCell({
+  label,
   value,
   error,
   loading,
-  isLastColumn,
   onChange,
-}: EditableCellProps<R>) {
+}: EditableCellProps) {
   const datePickerValue = useMemo<DatePickerValue | undefined>(() => {
     if (!value) return undefined
     const date = parseISO(value)
@@ -36,11 +33,11 @@ export function DateCell<R extends RecordType>({
   }
 
   return (
-    <BaseCell showRightBorder={!isLastColumn}>
+    <BaseCell>
       <F0DatePicker
-        label={editableColumn.label}
+        label={label}
         hideLabel
-        hideIcon
+        showIcon={false}
         transparent
         displayFormat="default"
         value={datePickerValue}

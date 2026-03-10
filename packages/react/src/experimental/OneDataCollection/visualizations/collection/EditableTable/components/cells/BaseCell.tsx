@@ -2,6 +2,13 @@ import { ReactNode } from "react"
 
 import { cn } from "@/lib/utils"
 
+const cursorClass = {
+  text: "cursor-text",
+  pointer: "cursor-pointer",
+  default: "cursor-default",
+  "not-allowed": "cursor-not-allowed",
+} as const
+
 export function BaseCell({
   readonly = false,
   showRightBorder = true,
@@ -17,7 +24,7 @@ export function BaseCell({
     <div
       className={cn(
         "flex w-full h-full min-w-0 min-h-12 border-0 border-r-[1px] border-solid border-f1-border-secondary",
-        `cursor-${cursor}`,
+        cursorClass[cursor],
         !showRightBorder && "border-r-0",
         readonly && "bg-f1-background-secondary"
       )}
