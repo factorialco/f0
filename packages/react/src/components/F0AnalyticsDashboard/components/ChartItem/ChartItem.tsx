@@ -58,9 +58,14 @@ function chartSkeleton(config: DashboardChartConfig) {
         />
       )
     case "pie":
-      return <PieChartSkeleton />
+      return (
+        <PieChartSkeleton
+          innerRadius={config.innerRadius}
+          showLegend={config.showLegend}
+        />
+      )
     case "radar":
-      return <RadarChartSkeleton />
+      return <RadarChartSkeleton showLegend={config.showLegend} />
     case "gauge":
       return <GaugeChartSkeleton />
     case "heatmap":

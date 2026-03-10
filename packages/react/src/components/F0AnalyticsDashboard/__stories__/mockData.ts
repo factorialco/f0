@@ -252,7 +252,6 @@ export function fetchHeatmapData(): Promise<DashboardChartData> {
       "5pm",
     ],
     yCategories: ["Mon", "Tue", "Wed", "Thu", "Fri"],
-    series: { value: 0 },
     data: [
       [0, 0, 5],
       [1, 0, 12],
@@ -307,7 +306,6 @@ export function fetchHeatmapAttendanceData(): Promise<DashboardChartData> {
   return resolve({
     xCategories: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
     yCategories: ["Engineering", "Design", "Product", "Sales"],
-    series: { value: 0 },
     data: [
       [0, 0, 95],
       [1, 0, 92],

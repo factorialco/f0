@@ -72,8 +72,9 @@ export function useDashboardItemData<Filters extends FiltersDefinition, T>(
       })
   }, [enabled])
 
-  // Re-fetch whenever filters change (deep comparison via JSON)
-  const filtersKey = JSON.stringify(filters)
+  // Re-fetch whenever effective filters change (deep comparison via JSON).
+  // When disabled, use a static key so filter changes don't trigger refetch.
+  const filtersKey = enabled ? JSON.stringify(filters) : "disabled"
 
   useEffect(() => {
     doFetch()

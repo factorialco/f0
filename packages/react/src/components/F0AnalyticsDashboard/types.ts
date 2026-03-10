@@ -53,7 +53,7 @@ export interface FunnelChartConfig {
   type: "funnel"
   /** Sort direction of funnel stages. @default "descending" */
   sort?: "descending" | "ascending" | "none"
-  /** Gap between funnel stages in pixels. @default 4 */
+  /** Gap between funnel stages in pixels. @default 0 */
   gap?: number
   /** Funnel orientation. @default "horizontal" */
   orient?: "horizontal" | "vertical"
@@ -64,10 +64,10 @@ export interface FunnelChartConfig {
   /**
    * Show conversion percentages in labels.
    * Each stage displays its value as a percentage of the first stage.
-   * @default true
+   * @default false
    */
   showConversion?: boolean
-  /** Use a color scale gradient instead of distinct colors. @default false */
+  /** Use a color scale gradient instead of distinct colors. @default true */
   colorScale?: boolean
   /** Format the value displayed in labels and tooltip */
   valueFormatter?: (value: number) => string
@@ -79,7 +79,7 @@ export interface PieChartConfig {
   innerRadius?: number
   /** Show the legend below the chart. @default true */
   showLegend?: boolean
-  /** Show value labels on each segment. @default false */
+  /** Show value labels on each segment. @default true */
   showLabels?: boolean
   /** Show percentage in labels. @default false */
   showPercentage?: boolean
@@ -119,9 +119,9 @@ export interface HeatmapChartConfig {
   min?: number
   /** Maximum value for the color scale */
   max?: number
-  /** Show value labels on each cell. @default true */
+  /** Show value labels on each cell. @default false */
   showLabels?: boolean
-  /** Show the visual map legend. @default true */
+  /** Show the visual map legend. @default false */
   showVisualMap?: boolean
   /** Format the value displayed in cells and tooltip */
   valueFormatter?: (value: number) => string
@@ -153,8 +153,8 @@ export interface DashboardChartData {
   yCategories?: string[]
   /** Radar chart axis indicators. */
   indicators?: F0DataChartRadarIndicator[]
-  /** Chart series data — shape depends on chart type. */
-  series:
+  /** Chart series data — shape depends on chart type. Omit for heatmaps. */
+  series?:
     | F0DataChartBarSeries[]
     | F0DataChartLineSeries[]
     | F0DataChartFunnelSeries

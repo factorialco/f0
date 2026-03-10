@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
+
 import { F0AnalyticsDashboard } from "../index"
 import type { DashboardItem } from "../types"
 import {
@@ -485,4 +487,37 @@ export const MixedDashboard: Story = {
       items={mixedItems}
     />
   ),
+}
+
+// ---------------------------------------------------------------------------
+// Snapshot (Chromatic)
+// ---------------------------------------------------------------------------
+
+export const Snapshot: Story = {
+  parameters: withSnapshot({}),
+  render: () => {
+    const items: DashboardItem[] = [
+      {
+        id: "snap-metric",
+        title: "Total Headcount",
+        type: "metric",
+        fetchData: fetchMetricUp,
+      },
+      {
+        id: "snap-bar",
+        title: "Headcount",
+        type: "chart",
+        chart: { type: "bar" },
+        fetchData: fetchBarData,
+      },
+      {
+        id: "snap-line",
+        title: "Revenue",
+        type: "chart",
+        chart: { type: "line", showArea: true },
+        fetchData: fetchLineData,
+      },
+    ]
+    return <F0AnalyticsDashboard items={items} />
+  },
 }

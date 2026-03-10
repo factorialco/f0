@@ -369,7 +369,6 @@ function fetchActivityHeatmap(_filters: Filters): Promise<DashboardChartData> {
       "5pm",
     ],
     yCategories: ["Mon", "Tue", "Wed", "Thu", "Fri"],
-    series: { value: 0 },
     data: [
       [0, 0, 5],
       [1, 0, 12],
