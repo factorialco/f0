@@ -172,6 +172,227 @@ export const LineMultiSeries: Story = {
 }
 
 // ---------------------------------------------------------------------------
+// Funnel charts
+// ---------------------------------------------------------------------------
+
+/**
+ * Hiring pipeline funnel — shows candidate drop-off at each stage.
+ */
+export const Funnel: Story = {
+  render: (args) => <F0ChatChart {...args} />,
+  args: {
+    type: "funnel",
+    title: "Hiring pipeline",
+    description: "Senior Frontend Engineer opening",
+    stages: [
+      { name: "Applied", value: 320 },
+      { name: "Screened", value: 180 },
+      { name: "Interviewed", value: 52 },
+      { name: "Offered", value: 12 },
+      { name: "Hired", value: 4 },
+    ],
+  },
+}
+
+/**
+ * Funnel with conversion percentages displayed between stages.
+ */
+export const FunnelWithConversion: Story = {
+  render: (args) => <F0ChatChart {...args} />,
+  args: {
+    type: "funnel",
+    title: "Recruitment conversion",
+    description: "Q1 2026 hiring funnel with conversion rates",
+    stages: [
+      { name: "Applied", value: 500 },
+      { name: "Screened", value: 250 },
+      { name: "Interviewed", value: 100 },
+      { name: "Offered", value: 30 },
+      { name: "Hired", value: 18 },
+    ],
+    showConversion: true,
+  },
+}
+
+// ---------------------------------------------------------------------------
+// Pie charts
+// ---------------------------------------------------------------------------
+
+/**
+ * Contract type distribution as a simple pie chart.
+ */
+export const Pie: Story = {
+  render: (args) => <F0ChatChart {...args} />,
+  args: {
+    type: "pie",
+    title: "Contract types",
+    description: "Distribution across the company",
+    segments: [
+      { name: "Full-time", value: 185 },
+      { name: "Part-time", value: 32 },
+      { name: "Contractor", value: 24 },
+      { name: "Intern", value: 8 },
+    ],
+  },
+}
+
+/**
+ * Department budget allocation as a donut chart.
+ */
+export const PieDonut: Story = {
+  render: (args) => <F0ChatChart {...args} />,
+  args: {
+    type: "pie",
+    title: "Budget allocation",
+    description: "Department budget distribution for 2026",
+    segments: [
+      { name: "Engineering", value: 420000 },
+      { name: "Sales", value: 310000 },
+      { name: "Marketing", value: 180000 },
+      { name: "Design", value: 95000 },
+      { name: "HR", value: 75000 },
+    ],
+    donut: true,
+  },
+}
+
+// ---------------------------------------------------------------------------
+// Radar charts
+// ---------------------------------------------------------------------------
+
+/**
+ * Single-series radar showing an employee's skill assessment.
+ */
+export const Radar: Story = {
+  render: (args) => <F0ChatChart {...args} />,
+  args: {
+    type: "radar",
+    title: "Skills assessment",
+    description: "Senior Engineer performance review",
+    indicators: [
+      { name: "Technical", max: 10 },
+      { name: "Communication", max: 10 },
+      { name: "Leadership", max: 10 },
+      { name: "Problem solving", max: 10 },
+      { name: "Teamwork", max: 10 },
+    ],
+    series: [{ name: "Score", data: [9, 7, 6, 8, 8] }],
+  },
+}
+
+/**
+ * Multi-series radar comparing two teams.
+ */
+export const RadarMultiSeries: Story = {
+  render: (args) => <F0ChatChart {...args} />,
+  args: {
+    type: "radar",
+    title: "Team comparison",
+    description: "Engineering vs Product across key dimensions",
+    indicators: [
+      { name: "Velocity", max: 100 },
+      { name: "Quality", max: 100 },
+      { name: "Collaboration", max: 100 },
+      { name: "Innovation", max: 100 },
+      { name: "Delivery", max: 100 },
+    ],
+    series: [
+      { name: "Engineering", data: [85, 90, 70, 80, 88] },
+      { name: "Product", data: [60, 75, 92, 88, 72] },
+    ],
+  },
+}
+
+// ---------------------------------------------------------------------------
+// Gauge charts
+// ---------------------------------------------------------------------------
+
+/**
+ * eNPS gauge — employee Net Promoter Score on a 0–100 scale.
+ */
+export const Gauge: Story = {
+  render: (args) => <F0ChatChart {...args} />,
+  args: {
+    type: "gauge",
+    title: "Employee NPS",
+    description: "Current eNPS score across the company",
+    value: 72,
+    name: "eNPS",
+  },
+}
+
+/**
+ * Gauge with a custom range (0–500k budget utilization).
+ */
+export const GaugeCustomRange: Story = {
+  render: (args) => <F0ChatChart {...args} />,
+  args: {
+    type: "gauge",
+    title: "Budget utilization",
+    description: "Q1 2026 spend vs allocated budget",
+    value: 347000,
+    min: 0,
+    max: 500000,
+    name: "Spent (€)",
+  },
+}
+
+// ---------------------------------------------------------------------------
+// Heatmap charts
+// ---------------------------------------------------------------------------
+
+/**
+ * Absence heatmap — months on X axis, departments on Y axis.
+ */
+export const Heatmap: Story = {
+  render: (args) => <F0ChatChart {...args} />,
+  args: {
+    type: "heatmap",
+    title: "Absence heatmap",
+    description: "Days absent per department per month",
+    xCategories: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+    yCategories: ["Engineering", "Sales", "Marketing", "Design", "HR"],
+    data: [
+      // Engineering
+      [0, 0, 12],
+      [1, 0, 8],
+      [2, 0, 15],
+      [3, 0, 10],
+      [4, 0, 6],
+      [5, 0, 14],
+      // Sales
+      [0, 1, 9],
+      [1, 1, 11],
+      [2, 1, 7],
+      [3, 1, 13],
+      [4, 1, 8],
+      [5, 1, 5],
+      // Marketing
+      [0, 2, 4],
+      [1, 2, 6],
+      [2, 2, 3],
+      [3, 2, 8],
+      [4, 2, 10],
+      [5, 2, 7],
+      // Design
+      [0, 3, 2],
+      [1, 3, 5],
+      [2, 3, 4],
+      [3, 3, 3],
+      [4, 3, 7],
+      [5, 3, 6],
+      // HR
+      [0, 4, 1],
+      [1, 4, 3],
+      [2, 4, 2],
+      [3, 4, 4],
+      [4, 4, 2],
+      [5, 4, 3],
+    ],
+  },
+}
+
+// ---------------------------------------------------------------------------
 // Edge cases
 // ---------------------------------------------------------------------------
 
@@ -240,7 +461,7 @@ export const WideContainer: Story = {
     title: "Revenue per quarter",
     description: "Wide layout rendering",
     categories: ["Q1", "Q2", "Q3", "Q4"],
-    series: [{ name: "Revenue (k€)", data: [320, 410, 390, 480] }],
+    series: [{ name: "Revenue (k\u20AC)", data: [320, 410, 390, 480] }],
     showArea: true,
     lineType: "smooth",
   },

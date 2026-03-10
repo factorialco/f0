@@ -1,7 +1,13 @@
 import { useCopilotAction } from "@copilotkit/react-core"
 
 import { F0ChatChart } from "../../F0ChatChart"
-import type { F0ChatChartProps } from "../../F0ChatChart/types"
+import type {
+  ChatChartBarConfig,
+  ChatChartLineConfig,
+} from "../../F0ChatChart/types"
+
+/** Subset of chart configs supported by this CopilotKit action (bar + line) */
+type DisplayChartArgs = Partial<ChatChartBarConfig | ChatChartLineConfig>
 
 /**
  * Hook to register the displayChart copilot action.
@@ -100,14 +106,14 @@ export const useDisplayChartAction = () => {
     ],
     available: "frontend",
     render: (props) => {
-      const args = props.args as Partial<F0ChatChartProps>
+      const args = props.args as DisplayChartArgs
 
       // Bail out if essential data is missing (streaming not yet complete)
       if (!args.type || !args.title || !args.categories || !args.series) {
         return <></>
       }
 
-      const chartProps = args as F0ChatChartProps
+      const chartProps = args as ChatChartBarConfig | ChatChartLineConfig
       return <F0ChatChart {...chartProps} />
     },
   })
