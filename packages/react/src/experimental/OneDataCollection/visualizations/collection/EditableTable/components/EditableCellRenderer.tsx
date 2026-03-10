@@ -63,7 +63,7 @@ export function EditableCellRenderer<
   const hasId = editableColumn.id !== undefined
 
   const onChange = (value: string) => {
-    if (editableColumn.id) {
+    if (editableColumn.id !== undefined) {
       handleCellChange(editableColumn.id, value)
     }
   }
@@ -90,6 +90,7 @@ export function EditableCellRenderer<
           <CellComponent
             editableColumn={editableColumn}
             value={value}
+            inputPlaceholder={editableColumn.inputPlaceholder}
             error={error}
             item={localItem}
             isLastColumn={isLastColumn}

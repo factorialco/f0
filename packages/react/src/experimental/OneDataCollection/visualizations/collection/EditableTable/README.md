@@ -122,6 +122,11 @@ function MyEditableTable() {
 ```ts
 type EditableTableColumnDefinition<R> = TableColumnDefinition<R> & {
   /**
+   * Optional placeholder passed to editable inputs (for example date cells).
+   */
+  inputPlaceholder?: string
+
+  /**
    * Determines the editor type for the cell.
    * Returns the type ("text", "date", "select", "multiselect") or undefined for readonly.
    */

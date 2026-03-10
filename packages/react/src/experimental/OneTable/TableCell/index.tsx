@@ -92,6 +92,7 @@ const stickyScrolledBase =
 const stickyScrollClasses: Record<ReferenceType, string> = {
   none: `bg-f1-background ${stickyScrolledBase} before:bg-f1-background group-hover:before:bg-f1-background-hover`,
   striped: `bg-f1-background bg-[${stripedLines}] [background-size:100%_100px] ${stickyScrolledBase} before:bg-[${stripedLines},_var(--f1-background)] before:[background-size:100%_100px,_100%_100%] group-hover:before:bg-[${stripedLines},_var(--f1-background-hover)] group-hover:before:[background-size:100%_100px,_100%_100%]`,
+}
 
 export function TableCell({
   children,

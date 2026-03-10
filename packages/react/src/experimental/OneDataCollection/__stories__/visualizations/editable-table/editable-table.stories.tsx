@@ -583,6 +583,7 @@ export const EditableTableWithDateCell: Story = {
                   render: (item: MockUser) =>
                     format(item.joinedAt, "yyyy-MM-dd"),
                   editType: () => "date" as const,
+                  inputPlaceholder: "DD/MM/YYYY",
                   editable: () => true,
                 },
               ],

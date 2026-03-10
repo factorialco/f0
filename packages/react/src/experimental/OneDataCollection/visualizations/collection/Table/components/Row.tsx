@@ -11,7 +11,6 @@ import { ItemActionsDefinition } from "@/experimental/OneDataCollection/item-act
 import { NavigationFiltersDefinition } from "@/experimental/OneDataCollection/navigationFilters/types"
 import { renderProperty } from "@/experimental/OneDataCollection/property-render"
 import { SummariesDefinition } from "@/experimental/OneDataCollection/summary"
-import { TableVisualizationType } from "@/experimental/OneDataCollection/types"
 import { TableCell, TableRow } from "@/experimental/OneTable"
 import {
   GroupingDefinition,
@@ -193,13 +192,6 @@ const RowComponentInner = <
 
   const isSelected = id !== undefined && selectedItems.has(id)
   const referenceRowType = referenceRowTypeFn?.(item) ?? "none"
-
-  const cellRenderedClass = CellRenderer
-    ? cn(
-        "h-[48px] p-0 align-middle last:pr-0",
-        !tableWithChildren && "first:pl-0"
-      )
-    : undefined
 
   const cellRenderedClass = CellRenderer
     ? cn(
