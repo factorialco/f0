@@ -74,7 +74,8 @@ function aggregate(
   }
 
   if (aggregation === "countDistinct") {
-    const unique = new Set(rows.map((r) => r[column ?? ""]))
+    if (!column) return 0
+    const unique = new Set(rows.map((r) => r[column]))
     return unique.size
   }
 

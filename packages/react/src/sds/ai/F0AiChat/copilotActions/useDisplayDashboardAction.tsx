@@ -1,5 +1,4 @@
 import { useCopilotAction } from "@copilotkit/react-core"
-import { useRef } from "react"
 
 import { F0ChatReportCard } from "../../F0ChatReportCard"
 import type { ChatDashboardConfig } from "../../F0ChatDashboard/types"
@@ -26,9 +25,6 @@ import { useAiChat } from "../providers/AiChatStateProvider"
  */
 export const useDisplayDashboardAction = () => {
   const { openCanvas, visualizationMode } = useAiChat()
-  // Keep a ref to the latest config so re-clicking "View report"
-  // re-opens the same dashboard without needing a closure per render
-  const latestConfigRef = useRef<ChatDashboardConfig | null>(null)
 
   useCopilotAction({
     name: "displayDashboard",
@@ -130,7 +126,6 @@ export const useDisplayDashboardAction = () => {
       }
 
       const config = args as ChatDashboardConfig
-      latestConfigRef.current = config
 
       // Only auto-replace if the canvas is already open — otherwise
       // the user must click "View report" to open it

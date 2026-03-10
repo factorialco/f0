@@ -24,8 +24,8 @@ function countItemsByType(
 /**
  * Compact card shown inline in the AI chat to represent a generated
  * dashboard report. Uses F0Card with an icon avatar, the dashboard
- * title/description, an item summary in metadata, and a "View report"
- * primary action that opens the canvas panel.
+ * title/description, and an item summary in metadata. Clicking the
+ * card triggers `onView` to open the canvas panel.
  */
 export function F0ChatReportCard({ config, onView }: F0ChatReportCardProps) {
   const { title, description, items } = config

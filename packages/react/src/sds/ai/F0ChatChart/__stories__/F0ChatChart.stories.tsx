@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
+
 import { F0ChatChart } from "../F0ChatChart"
 
 const meta = {
@@ -465,4 +467,47 @@ export const WideContainer: Story = {
     showArea: true,
     lineType: "smooth",
   },
+}
+
+// ---------------------------------------------------------------------------
+// Snapshot (Chromatic)
+// ---------------------------------------------------------------------------
+
+export const Snapshot: Story = {
+  parameters: withSnapshot({}),
+  render: () => (
+    <div className="flex flex-col gap-4">
+      <F0ChatChart
+        type="bar"
+        title="Headcount by department"
+        categories={["Engineering", "Sales", "Marketing", "Design"]}
+        series={[{ name: "Employees", data: [42, 38, 25, 18] }]}
+      />
+      <F0ChatChart
+        type="line"
+        title="Monthly hires"
+        categories={["Jan", "Feb", "Mar", "Apr", "May", "Jun"]}
+        series={[{ name: "Hires", data: [8, 12, 10, 15, 20, 18] }]}
+      />
+      <F0ChatChart
+        type="pie"
+        title="Contract types"
+        segments={[
+          { name: "Full-time", value: 185 },
+          { name: "Part-time", value: 32 },
+          { name: "Contractor", value: 24 },
+        ]}
+      />
+      <F0ChatChart
+        type="funnel"
+        title="Hiring pipeline"
+        stages={[
+          { name: "Applied", value: 320 },
+          { name: "Screened", value: 180 },
+          { name: "Interviewed", value: 52 },
+          { name: "Hired", value: 4 },
+        ]}
+      />
+    </div>
+  ),
 }

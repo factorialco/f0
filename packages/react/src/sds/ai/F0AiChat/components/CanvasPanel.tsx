@@ -4,6 +4,7 @@ import { F0Button } from "@/components/F0Button"
 import { OneEllipsis } from "@/components/OneEllipsis"
 import { Cross } from "@/icons/app"
 import { useReducedMotion } from "@/lib/a11y"
+import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
 import { F0ChatDashboard } from "../../F0ChatDashboard"
@@ -19,6 +20,7 @@ import { useAiChat } from "../providers/AiChatStateProvider"
  */
 export function CanvasPanel() {
   const { canvasDashboard, closeCanvas } = useAiChat()
+  const translations = useI18n()
   const shouldReduceMotion = useReducedMotion()
 
   return (
@@ -71,7 +73,7 @@ export function CanvasPanel() {
                 size="md"
                 hideLabel
                 onClick={() => closeCanvas()}
-                label="Close dashboard"
+                label={translations.ai.closeDashboard}
               />
             </div>
 

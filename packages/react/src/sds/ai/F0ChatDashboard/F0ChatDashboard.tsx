@@ -2,6 +2,7 @@ import { useCallback, useMemo } from "react"
 
 import { F0AnalyticsDashboard } from "@/components/F0AnalyticsDashboard/F0AnalyticsDashboard"
 import type {
+  DashboardChartConfig,
   DashboardChartItem,
   DashboardCollectionItem,
   DashboardItem,
@@ -20,6 +21,7 @@ import {
   getUniqueValues,
 } from "./computations"
 import type {
+  ChatDashboardChartConfig,
   ChatDashboardChartItem,
   ChatDashboardCollectionItem,
   ChatDashboardConfig,
@@ -122,6 +124,33 @@ function toComputationFilters(
 }
 
 // ---------------------------------------------------------------------------
+// Chat chart config → Dashboard chart config mapper
+// ---------------------------------------------------------------------------
+
+function toDashboardChartConfig(
+  chatChart: ChatDashboardChartConfig
+): DashboardChartConfig {
+  const valueFormatter = buildFormatter(
+    "valueFormat" in chatChart ? chatChart.valueFormat : undefined
+  )
+
+  switch (chatChart.type) {
+    case "bar": {
+      const { valueFormat: _, ...rest } = chatChart
+      return { ...rest, ...(valueFormatter ? { valueFormatter } : {}) }
+    }
+    case "line": {
+      const { valueFormat: _, ...rest } = chatChart
+      return { ...rest, ...(valueFormatter ? { valueFormatter } : {}) }
+    }
+    case "funnel": {
+      const { valueFormat: _, ...rest } = chatChart
+      return { ...rest, ...(valueFormatter ? { valueFormatter } : {}) }
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Item mapper factory — creates mappers bound to datasets + filter specs
 // ---------------------------------------------------------------------------
 
@@ -132,25 +161,13 @@ function createChartItemMapper(
   return (
     item: ChatDashboardChartItem
   ): DashboardChartItem<FiltersDefinition> => {
-    const valueFormatter = buildFormatter(
-      "valueFormat" in item.chart ? item.chart.valueFormat : undefined
-    )
-
-    const { valueFormat: _vf, ...chartConfigRest } =
-      item.chart as unknown as Record<string, unknown>
-    const chart = {
-      ...chartConfigRest,
-      ...(valueFormatter ? { valueFormatter } : {}),
-    }
-
     return {
       id: item.id,
       title: item.title,
       description: item.description,
       colSpan: item.colSpan,
       type: "chart",
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      chart: chart as any,
+      chart: toDashboardChartConfig(item.chart),
       fetchData: (filters: FiltersState<FiltersDefinition>) => {
         const filterValues = toComputationFilters(filters)
         return Promise.resolve(

@@ -269,6 +269,7 @@ export const defaultTranslations = {
     thoughtsGroupTitle: "Reflection",
     resourcesGroupTitle: "Resources",
     thinking: "Thinking...",
+    closeDashboard: "Close dashboard",
     exportTable: "Download table",
     generatedTableFilename: "OneGeneratedTable",
     feedbackModal: {
