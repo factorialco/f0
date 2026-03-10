@@ -3,16 +3,23 @@ import { useMemo } from "react"
 import { F0Select } from "@/components/F0Select"
 import { useI18n } from "@/lib/providers/i18n"
 
-import { BaseQuestion } from "../BaseQuestion"
 import { useSurveyFormBuilderContext } from "../../Context"
+import { BaseQuestion } from "../BaseQuestion"
 import { DropdownSingleQuestionProps } from "./types"
 
 export const DropdownSingleQuestion = ({
   options,
   ...props
 }: DropdownSingleQuestionProps) => {
-  const { onQuestionChange, answering, getSectionContainingQuestion } =
-    useSurveyFormBuilderContext()
+  const {
+    onQuestionChange,
+    answering,
+    getSectionContainingQuestion,
+    errors,
+    onFieldBlur,
+  } = useSurveyFormBuilderContext()
+
+  const fieldError = errors?.[props.id]
 
   const containingSection = getSectionContainingQuestion(props.id)
 
@@ -28,7 +35,7 @@ export const DropdownSingleQuestion = ({
 
   return (
     <BaseQuestion {...props}>
-      <div className="-mx-0.5 flex flex-col items-start [&>div]:w-full">
+      <div className="flex flex-col items-start px-0.5 [&>div]:w-full">
         <F0Select
           label={t("surveyFormBuilder.answer.label")}
           hideLabel
@@ -43,10 +50,12 @@ export const DropdownSingleQuestion = ({
               type: "dropdown-single",
               value,
             })
+            onFieldBlur?.(props.id)
           }}
-          placeholder={t("surveyFormBuilder.answer.placeholder")}
+          placeholder={t("surveyFormBuilder.answer.dropdownPlaceholder")}
           disabled={answering ? false : questionLocked || true}
           required={props.required}
+          error={fieldError}
         />
       </div>
     </BaseQuestion>

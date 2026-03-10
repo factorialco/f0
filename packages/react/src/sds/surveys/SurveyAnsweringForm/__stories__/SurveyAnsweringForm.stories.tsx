@@ -1,12 +1,13 @@
-import { useState } from "react"
-
 import type { Meta, StoryObj } from "@storybook/react-vite"
+
+import { useState } from "react"
 
 import { F0Button } from "@/components/F0Button"
 
+import type { SurveyAnsweringFormProps } from "../types"
+
 import { SurveyFormBuilderElement } from "../../SurveyFormBuilder/types"
 import { SurveyAnsweringForm } from "../SurveyAnsweringForm"
-import type { SurveyAnsweringFormProps } from "../types"
 
 const sampleElements: SurveyFormBuilderElement[] = [
   {
@@ -204,38 +205,5 @@ export const WithDefaultValues: Story = {
       "q-perf-rating": { type: "rating", value: 4 },
       "q-department": { type: "select", value: "engineering" },
     },
-  },
-}
-
-export const SingleQuestion: Story = {
-  args: {
-    mode: "all-questions",
-    title: "Quick Feedback",
-    elements: [
-      {
-        type: "question",
-        question: {
-          id: "q-feedback",
-          title: "How are you feeling today?",
-          description: "Please share your current mood",
-          type: "rating" as const,
-          required: true,
-          options: [
-            { value: 1, label: "😞" },
-            { value: 2, label: "😐" },
-            { value: 3, label: "🙂" },
-            { value: 4, label: "😊" },
-            { value: 5, label: "🤩" },
-          ],
-        },
-      },
-    ],
-  },
-}
-
-export const SingleQuestionStepped: Story = {
-  args: {
-    ...SingleQuestion.args,
-    mode: "stepped",
   },
 }

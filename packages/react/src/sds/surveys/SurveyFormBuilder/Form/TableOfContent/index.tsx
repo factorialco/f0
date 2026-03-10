@@ -1,7 +1,7 @@
 import { useCallback, useContext } from "react"
 
-import { F0TableOfContentPopover } from "@/components/F0TableOfContentPopover/F0TableOfContentPopover"
 import { F0DialogContext } from "@/components/F0Dialog/components/F0DialogProvider"
+import { F0TableOfContentPopover } from "@/components/F0TableOfContentPopover/F0TableOfContentPopover"
 import { IdStructure } from "@/experimental/Navigation/F0TableOfContent/types"
 import { useI18n } from "@/lib/providers/i18n"
 
@@ -110,7 +110,7 @@ export const TableOfContent = ({
   )
 
   return (
-    <div className="sticky top-1/2 left-0 z-10 h-0 -translate-y-1/2">
+    <div className="sticky left-0 top-1/2 z-10 h-0 -translate-y-12 px-2">
       <F0TableOfContentPopover
         items={tocItems}
         barsAlign="left"

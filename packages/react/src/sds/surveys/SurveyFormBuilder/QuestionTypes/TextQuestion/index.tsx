@@ -2,12 +2,12 @@ import { Input } from "@/experimental/Forms/Fields/Input"
 import { Textarea } from "@/experimental/Forms/Fields/TextArea"
 import { useI18n } from "@/lib/providers/i18n"
 
+import { useSurveyFormBuilderContext } from "../../Context"
+import { BaseQuestionOnChangeParams } from "../../types"
 import {
   BaseQuestion,
   BaseQuestionPropsForOtherQuestionComponents,
 } from "../BaseQuestion"
-import { useSurveyFormBuilderContext } from "../../Context"
-import { BaseQuestionOnChangeParams } from "../../types"
 
 export type TextQuestionOnChangeParams = BaseQuestionOnChangeParams & {
   type: "text" | "longText"
@@ -23,7 +23,10 @@ export const TextQuestion = ({
   value,
   ...baseQuestionComponentProps
 }: TextQuestionProps) => {
-  const { onQuestionChange, answering } = useSurveyFormBuilderContext()
+  const { onQuestionChange, answering, errors, onFieldBlur } =
+    useSurveyFormBuilderContext()
+
+  const fieldError = errors?.[baseQuestionComponentProps.id]
 
   const { t } = useI18n()
 
@@ -34,7 +37,7 @@ export const TextQuestion = ({
     })
   }
 
-  const placeholder = t("surveyFormBuilder.answer.placeholder")
+  const placeholder = t("surveyFormBuilder.answer.textPlaceholder")
 
   const commonInputProps = {
     value: answering ? (value ?? "") : placeholder,
@@ -44,11 +47,15 @@ export const TextQuestion = ({
     label: t("surveyFormBuilder.answer.label"),
     hideLabel: true,
     required: baseQuestionComponentProps.required,
+    error: fieldError,
   }
 
   return (
     <BaseQuestion {...baseQuestionComponentProps}>
-      <div className="px-0.5">
+      <div
+        className="px-0.5"
+        onBlur={() => onFieldBlur?.(baseQuestionComponentProps.id)}
+      >
         {baseQuestionComponentProps.type === "text" && (
           <Input
             type="text"
@@ -58,7 +65,7 @@ export const TextQuestion = ({
           />
         )}
         {baseQuestionComponentProps.type === "longText" && (
-          <Textarea rows={4} {...commonInputProps} />
+          <Textarea rows={4} size="md" {...commonInputProps} />
         )}
       </div>
     </BaseQuestion>

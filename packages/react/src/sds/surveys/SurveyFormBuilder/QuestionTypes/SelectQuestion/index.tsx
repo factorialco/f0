@@ -6,10 +6,10 @@ import { F0Button } from "@/components/F0Button"
 import { Add } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 
-import { BaseQuestion } from "../BaseQuestion"
 import { useSurveyFormBuilderContext } from "../../Context"
 import { DragProvider } from "../../DragContext"
 import { SelectQuestionOption } from "../../types"
+import { BaseQuestion } from "../BaseQuestion"
 import { SelectOption } from "./SelectOption"
 import {
   OnChangeLabelParams,
@@ -107,10 +107,13 @@ export const SelectQuestion = ({ options, ...props }: SelectQuestionProps) => {
 
   const handleOptionClick = (optionValue: string) => {
     if (props.type === "select") {
+      const newValue =
+        !props.required && props.value === optionValue ? null : optionValue
+
       onQuestionChange?.({
         ...baseOnChangeParams,
         type: props.type,
-        value: optionValue,
+        value: newValue,
       })
     } else if (props.type === "multi-select") {
       const currentValue = Array.isArray(props.value) ? props.value : []

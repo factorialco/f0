@@ -33,6 +33,8 @@ type SurveyFormBuilderContextType = SurveyFormBuilderCallbacks & {
     questionId: string
   ) => SectionElement | undefined
   isQuestionTypeAllowed: (questionType: QuestionType) => boolean
+  errors?: Record<string, string>
+  onFieldBlur?: (questionId: string) => void
 }
 
 const SurveyFormBuilderContext = createContext<
@@ -47,6 +49,8 @@ type SurveyFormBuilderProviderProps = {
   onChange: (elements: SurveyFormBuilderElement[]) => void
   disallowOptionalQuestions?: boolean
   allowedQuestionTypes?: QuestionType[]
+  errors?: Record<string, string>
+  onFieldBlur?: (questionId: string) => void
 }
 
 export function SurveyFormBuilderProvider({
@@ -57,6 +61,8 @@ export function SurveyFormBuilderProvider({
   disallowOptionalQuestions,
   onChange,
   allowedQuestionTypes,
+  errors,
+  onFieldBlur,
 }: SurveyFormBuilderProviderProps) {
   const lastElementId = useMemo(() => {
     const lastElement = elements[elements.length - 1]
@@ -400,6 +406,8 @@ export function SurveyFormBuilderProvider({
         lastElementId,
         disallowOptionalQuestions,
         isQuestionTypeAllowed,
+        errors,
+        onFieldBlur,
       }}
     >
       {children}

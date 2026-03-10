@@ -1,17 +1,20 @@
 import { useCallback, useState } from "react"
 
-import { F0Dialog } from "@/components/F0Dialog"
 import type { DialogPosition } from "@/components/F0Dialog/types"
+
+import { F0Dialog } from "@/components/F0Dialog"
+import { ArrowLeft, ArrowRight, Maximize, Minimize } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 
-import { ArrowLeft, ArrowRight, Maximize, Minimize } from "@/icons/app"
+import type { SurveyAnsweringFormProps, SurveyFormSubmitResult } from "./types"
+
 import { SurveyFormBuilderProvider } from "../SurveyFormBuilder/Context"
 import { TableOfContent } from "../SurveyFormBuilder/Form/TableOfContent"
 import { AllQuestionsView } from "./components/AllQuestionsView"
 import { SteppedView } from "./components/SteppedView"
 import { useStepper } from "./hooks/useStepper"
 import { useSurveyForm } from "./hooks/useSurveyForm"
-import type { SurveyAnsweringFormProps, SurveyFormSubmitResult } from "./types"
+import { useSurveyValidation } from "./hooks/useSurveyValidation"
 
 export function SurveyAnsweringForm({
   elements,
@@ -31,11 +34,20 @@ export function SurveyAnsweringForm({
   const { currentElements, setCurrentElements, flatQuestions, getAnswers } =
     useSurveyForm(elements, defaultValues)
   const stepper = useStepper(flatQuestions)
+  const { errors, hasErrors, validateAll, validateField, onFieldBlur } =
+    useSurveyValidation({
+      mode,
+      elements: currentElements,
+      getAnswers,
+      t,
+    })
 
   const position: DialogPosition = isFullscreen ? "fullscreen" : "center"
   const showTableOfContent = mode === "all-questions"
 
   const handleSubmit = useCallback(async () => {
+    if (!validateAll()) return
+
     setIsSubmitting(true)
     try {
       const answers = getAnswers()
@@ -53,7 +65,7 @@ export function SurveyAnsweringForm({
     } finally {
       setIsSubmitting(false)
     }
-  }, [getAnswers, onSubmit, onClose])
+  }, [getAnswers, onSubmit, onClose, validateAll])
 
   const isCurrentStepValid = useCallback(() => {
     if (mode !== "stepped" || !stepper.currentQuestion) return true
@@ -68,10 +80,10 @@ export function SurveyAnsweringForm({
   }, [mode, stepper.currentQuestion, getAnswers])
 
   const handleNext = useCallback(() => {
-    if (isCurrentStepValid()) {
-      stepper.goToNext()
-    }
-  }, [isCurrentStepValid, stepper])
+    if (!isCurrentStepValid()) return
+    validateField(stepper.currentQuestion!.id)
+    stepper.goToNext()
+  }, [isCurrentStepValid, stepper, validateField])
 
   const otherActions = allowToChangeFullscreen
     ? [
@@ -96,7 +108,7 @@ export function SurveyAnsweringForm({
       : {
           label: t("surveyAnsweringForm.actions.submit"),
           onClick: handleSubmit,
-          disabled: isSubmitting,
+          disabled: isSubmitting || hasErrors,
           loading: isSubmitting,
         }
 
@@ -119,11 +131,14 @@ export function SurveyAnsweringForm({
       primaryAction={primaryAction}
       secondaryAction={secondaryAction}
       otherActions={otherActions}
+      disableContentPadding
     >
       <SurveyFormBuilderProvider
         answering
         elements={currentElements}
         onChange={setCurrentElements}
+        errors={errors}
+        onFieldBlur={onFieldBlur}
       >
         <div className="relative flex h-full flex-col">
           {showTableOfContent && (
@@ -132,7 +147,7 @@ export function SurveyAnsweringForm({
               onChange={setCurrentElements}
             />
           )}
-          <div className="flex flex-col h-full max-w-[750px] mx-auto py-12 justify-center">
+          <div className="mx-auto flex w-full flex-col justify-center px-4 py-12 md:w-[750px]">
             {mode === "all-questions" ? (
               <AllQuestionsView elements={currentElements} />
             ) : stepper.currentQuestion ? (

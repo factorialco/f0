@@ -367,7 +367,11 @@ export const defaultTranslations = {
     },
     answer: {
       label: "Answer",
-      placeholder: "Respondent's answer",
+      dropdownPlaceholder: "Pick an option",
+      textPlaceholder: "Type your answer",
+      numericPlaceholder: "Enter a number",
+      linkPlaceholder: "https://example.com",
+      invalidUrl: "Enter a valid URL",
     },
     labels: {
       applyingChanges: "Applying changes",
