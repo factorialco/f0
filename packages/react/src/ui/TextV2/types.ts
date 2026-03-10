@@ -11,7 +11,7 @@
  *
  * Naming model:
  * - Base variants: `title`, `heading`, `subtitle`, `body`, `label`, `description`, `caption`, `code`
- * - Scaled variants: `<base>-<scale>` (for example `heading-2xl`, `body-xl`, `code-lg`)
+ * - Scaled variants: `<base>-<scale>` (for example `heading-lg`, `body-sm`, `code-lg`)
  *
  * Base variants represent the default scale for each semantic role.
  */

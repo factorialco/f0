@@ -116,7 +116,7 @@ export const TextV2 = forwardRef<HTMLElement, TextV2Props>(
     ) : null
 
     // Ellipsis path
-    if (ellipsis !== undefined) {
+    if (ellipsis === true || typeof ellipsis === "number") {
       const lines = typeof ellipsis === "number" ? ellipsis : 1
 
       if (requiredIndicator) {
