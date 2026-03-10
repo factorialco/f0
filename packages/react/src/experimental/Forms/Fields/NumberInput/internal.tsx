@@ -117,7 +117,7 @@ export const NumberInputInternal = forwardRef<
   return (
     <div className="group relative">
       <Input
-        type="text"
+        type="number"
         ref={ref}
         value={fieldValue}
         inputMode="decimal"

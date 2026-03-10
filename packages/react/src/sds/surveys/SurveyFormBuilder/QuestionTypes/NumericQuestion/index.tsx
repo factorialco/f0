@@ -45,6 +45,7 @@ export const NumericQuestion = ({
           label={t("surveyFormBuilder.answer.label")}
           hideLabel={true}
           required={baseQuestionComponentProps.required}
+          maxDecimals={0}
         />
       </div>
     </BaseQuestion>

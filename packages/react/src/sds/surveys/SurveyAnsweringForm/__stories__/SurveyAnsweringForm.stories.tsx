@@ -14,6 +14,7 @@ const sampleElements: SurveyFormBuilderElement[] = [
     question: {
       id: "q-name",
       title: "What is your full name?",
+      description: "Please enter your first and last name",
       type: "text" as const,
       required: true,
     },
@@ -23,6 +24,7 @@ const sampleElements: SurveyFormBuilderElement[] = [
     question: {
       id: "q-join-date",
       title: "When did you join the company?",
+      description: "Select your official start date",
       type: "date" as const,
     },
   },
@@ -37,6 +39,7 @@ const sampleElements: SurveyFormBuilderElement[] = [
         {
           id: "q-perf-rating",
           title: "How would you rate your overall performance this quarter?",
+          description: "1 being the lowest and 5 being the highest",
           type: "rating" as const,
           options: [
             { value: 1, label: "1" },
@@ -50,12 +53,14 @@ const sampleElements: SurveyFormBuilderElement[] = [
         {
           id: "q-achievements",
           title: "What were your main achievements this quarter?",
+          description: "List your key accomplishments and contributions",
           type: "longText" as const,
           required: true,
         },
         {
           id: "q-department",
           title: "Which department are you in?",
+          description: "Select the department you currently belong to",
           type: "select" as const,
           options: [
             { value: "engineering", label: "Engineering" },
@@ -67,6 +72,7 @@ const sampleElements: SurveyFormBuilderElement[] = [
         {
           id: "q-skills",
           title: "Select all skills you have improved",
+          description: "Choose all that apply to your growth this quarter",
           type: "multi-select" as const,
           options: [
             { value: "communication", label: "Communication" },
@@ -78,6 +84,7 @@ const sampleElements: SurveyFormBuilderElement[] = [
         {
           id: "q-projects",
           title: "How many projects did you complete?",
+          description: "Enter the total number of completed projects",
           type: "numeric" as const,
           required: true,
         },
@@ -95,6 +102,8 @@ const sampleElements: SurveyFormBuilderElement[] = [
         {
           id: "q-career-goal",
           title: "What is your primary career goal for next year?",
+          description:
+            "Pick the option that best describes your career direction",
           type: "dropdown-single" as const,
           options: [
             { value: "promotion", label: "Get promoted" },
@@ -106,6 +115,7 @@ const sampleElements: SurveyFormBuilderElement[] = [
         {
           id: "q-dev-plan-link",
           title: "Link to your personal development plan",
+          description: "Paste the URL to your development plan document",
           type: "link" as const,
         },
       ],

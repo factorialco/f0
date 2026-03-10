@@ -171,20 +171,23 @@ export const BaseQuestion = ({
             </div>
           )}
         </div>
-        <textarea
-          value={description}
-          aria-label={t("surveyFormBuilder.labels.description")}
-          placeholder={t(
-            "surveyFormBuilder.labels.questionDescriptionPlaceholder"
-          )}
-          onChange={handleChangeDescription}
-          disabled={inputDisabled}
-          className={cn(
-            "w-full resize-none px-2 text-f1-foreground-secondary placeholder:text-f1-foreground-tertiary disabled:text-f1-foreground-secondary [&::-webkit-search-cancel-button]:hidden",
-            inputDisabled && "cursor-not-allowed"
-          )}
-          style={TEXT_AREA_STYLE}
-        />
+        {!answering ||
+          (!!description && (
+            <textarea
+              value={description}
+              aria-label={t("surveyFormBuilder.labels.description")}
+              placeholder={t(
+                "surveyFormBuilder.labels.questionDescriptionPlaceholder"
+              )}
+              onChange={handleChangeDescription}
+              disabled={inputDisabled}
+              className={cn(
+                "w-full resize-none px-2 text-f1-foreground-secondary placeholder:text-f1-foreground-tertiary disabled:text-f1-foreground-secondary [&::-webkit-search-cancel-button]:hidden",
+                inputDisabled && "cursor-not-allowed"
+              )}
+              style={TEXT_AREA_STYLE}
+            />
+          ))}
       </div>
       {children}
       {!disabled && !answering && !containingSection?.locked && (
