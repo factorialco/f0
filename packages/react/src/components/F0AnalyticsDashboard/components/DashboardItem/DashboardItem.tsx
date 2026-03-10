@@ -8,7 +8,7 @@ interface DashboardItemProps {
   description?: string
   isLoading: boolean
   error?: Error
-  onRetry: () => void
+  onRetry?: () => void
   /** Content-area skeleton shown while loading. Each item type provides its own. */
   skeleton?: ReactNode
   children: ReactNode
@@ -46,13 +46,11 @@ export function DashboardItem({
           variant="critical"
           title="Error loading data"
           description={error.message}
-          actions={[
-            {
-              type: "default",
-              label: "Retry",
-              onClick: onRetry,
-            },
-          ]}
+          actions={
+            onRetry
+              ? [{ type: "default", label: "Retry", onClick: onRetry }]
+              : []
+          }
         />
       </div>
     )

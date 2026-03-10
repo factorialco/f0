@@ -177,12 +177,15 @@ export function ChartItem<Filters extends FiltersDefinition>({
     DashboardChartData
   >(item.fetchData, filters, enabled)
 
+  const effectiveError =
+    error ?? (!isLoading && !data ? new Error("No data available") : undefined)
+
   return (
     <DashboardItem
       title={item.title}
       description={item.description}
       isLoading={isLoading}
-      error={error}
+      error={effectiveError}
       onRetry={retry}
       skeleton={chartSkeleton(item.chart)}
     >

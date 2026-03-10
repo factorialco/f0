@@ -53,8 +53,6 @@ export interface FunnelChartConfig {
   type: "funnel"
   /** Sort direction of funnel stages. @default "descending" */
   sort?: "descending" | "ascending" | "none"
-  /** Gap between funnel stages in pixels. @default 0 */
-  gap?: number
   /** Funnel orientation. @default "horizontal" */
   orient?: "horizontal" | "vertical"
   /** Show the legend below the chart. @default false */

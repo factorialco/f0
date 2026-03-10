@@ -51,7 +51,6 @@ export function CollectionItem<Filters extends FiltersDefinition>({
       title={item.title}
       description={item.description}
       isLoading={false}
-      onRetry={() => {}}
     >
       <OneDataCollection source={source} visualizations={item.visualizations} />
     </DashboardItem>

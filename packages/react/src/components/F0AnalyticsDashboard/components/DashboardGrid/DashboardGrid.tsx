@@ -146,7 +146,6 @@ function DashboardGridItem<Filters extends FiltersDefinition>({
               `Unknown dashboard item type: "${(unknownItem as { type: string }).type}"`
             )
           }
-          onRetry={() => {}}
         >
           {null}
         </DashboardItem>
