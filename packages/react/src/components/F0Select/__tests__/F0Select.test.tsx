@@ -485,7 +485,7 @@ describe("Group Headers", () => {
     expect(screen.getByText("Group B")).toBeInTheDocument()
   })
 
-  it("renders group headers with role=presentation for accessibility", async () => {
+  it("group header elements have role=presentation", async () => {
     const user = userEvent.setup()
     render(<F0Select {...defaultGroupProps} options={groupedOptions} />)
 
