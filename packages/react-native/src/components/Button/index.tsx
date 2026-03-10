@@ -3,8 +3,11 @@ import { Pressable, Text, View } from "react-native"
 import { tv, type VariantProps } from "tailwind-variants"
 
 import { cn } from "../../lib/utils"
-import { F0Icon, type IconType, type IconColor } from "../primitives/F0Icon"
+import { F0Icon, type IconColor, type IconType } from "../primitives/F0Icon"
 
+/**
+ * @deprecated Use `F0Button` from `../F0Button` instead.
+ */
 export const variants = [
   "default",
   "outline",
@@ -13,9 +16,20 @@ export const variants = [
   "ghost",
   "promote",
 ] as const
+
+/**
+ * @deprecated Use `ButtonVariant` from `../F0Button` instead.
+ */
 export type ButtonVariant = (typeof variants)[number]
 
+/**
+ * @deprecated Use `BUTTON_SIZES` from `../F0Button` instead.
+ */
 export const sizes = ["sm", "md", "lg"] as const
+
+/**
+ * @deprecated Use `ButtonSize` from `../F0Button` instead.
+ */
 export type ButtonSize = (typeof sizes)[number]
 
 const buttonVariants = tv({
@@ -115,6 +129,9 @@ const getTextColorClass = (variant: ButtonVariant, isPressed: boolean) => {
   }
 }
 
+/**
+ * @deprecated Use `F0ButtonProps` from `../F0Button` instead.
+ */
 export interface ButtonProps extends VariantProps<typeof buttonVariants> {
   label: string
   onPress?: () => void | Promise<unknown>
@@ -129,6 +146,9 @@ export interface ButtonProps extends VariantProps<typeof buttonVariants> {
   fullWidth?: boolean
 }
 
+/**
+ * @deprecated Use `F0Button` from `../F0Button` instead.
+ */
 export const Button = forwardRef<View, ButtonProps>(function Button(
   {
     label,

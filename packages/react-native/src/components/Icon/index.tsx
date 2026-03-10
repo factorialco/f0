@@ -21,6 +21,11 @@ const iconVariants = tv({
   },
 })
 
+/**
+ * @deprecated Use `F0IconProps` from `../primitives/F0Icon` instead.
+ * Migration: Replace `IconProps` with `F0IconProps`.
+ * `F0Icon` supports `icon`, `size`, `testID`, and `className`, and adds semantic `color` variants.
+ */
 export interface IconProps extends SvgProps, VariantProps<typeof iconVariants> {
   icon: IconType
   testID?: string

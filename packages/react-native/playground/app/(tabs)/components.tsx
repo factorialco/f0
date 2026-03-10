@@ -12,6 +12,7 @@ import { CounterShowcase } from "../../components/CounterShowcase"
 import { DataListShowcase } from "../../components/DataListShowcase"
 import { DetailsItemShowcase } from "../../components/DetailsItemShowcase"
 import { DetailsItemsListShowcase } from "../../components/DetailsItemsListShowcase"
+import { F0ButtonShowcase } from "../../components/F0ButtonShowcase"
 import { F0IconShowcase } from "../../components/F0IconShowcase"
 import { F0TextShowcase } from "../../components/F0TextShowcase/F0TextShowcase"
 import { OneChipShowcase } from "../../components/OneChipShowcase"
@@ -34,6 +35,7 @@ type ComponentType =
   | "datalist"
   | "detailsitem"
   | "detailsitemslist"
+  | "f0button"
   | "f0icon"
   | "f0text"
   | "onechip"
@@ -47,11 +49,12 @@ const componentOptions = [
   { value: "animatedf0text" as ComponentType, label: "AnimatedF0Text" },
   { value: "avatar" as ComponentType, label: "Avatar" },
   { value: "badge" as ComponentType, label: "Badge" },
-  { value: "button" as ComponentType, label: "Button" },
+  { value: "button" as ComponentType, label: "Button (deprecated)" },
   { value: "counter" as ComponentType, label: "Counter" },
   { value: "datalist" as ComponentType, label: "DataList" },
   { value: "detailsitem" as ComponentType, label: "DetailsItem" },
   { value: "detailsitemslist" as ComponentType, label: "DetailsItemsList" },
+  { value: "f0button" as ComponentType, label: "F0Button" },
   { value: "f0icon" as ComponentType, label: "F0Icon" },
   { value: "f0text" as ComponentType, label: "F0Text" },
   { value: "onechip" as ComponentType, label: "OneChip" },
@@ -96,6 +99,8 @@ export default function ComponentsShowcase() {
         return <DetailsItemShowcase />
       case "detailsitemslist":
         return <DetailsItemsListShowcase />
+      case "f0button":
+        return <F0ButtonShowcase />
       case "f0icon":
         return <F0IconShowcase />
       case "f0text":

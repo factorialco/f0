@@ -199,17 +199,19 @@ Use this section after each manual update so people can install the latest build
 ### Basic Component Usage
 
 ```tsx
-import { Button, Icon, AppIcons } from "@factorialco/f0-react-native";
+import { F0Button, F0Icon, AppIcons } from "@factorialco/f0-react-native";
 
 export default function App() {
   return (
     <>
-      <Button label="Click me" variant="default" size="md" />
-      <Icon icon={AppIcons.Calendar} size="md" />
+      <F0Button label="Click me" variant="default" size="md" />
+      <F0Icon icon={AppIcons.Calendar} size="md" />
     </>
   );
 }
 ```
+
+> Legacy `Button` and `Icon` remain available for backward compatibility, but are deprecated.
 
 ### Using the `cn` Utility
 
@@ -244,10 +246,10 @@ The `cn` utility:
 All components use `tailwind-variants` for type-safe variant props:
 
 ```tsx
-import { Button } from "@factorialco/f0-react-native";
+import { F0Button } from "@factorialco/f0-react-native";
 
 // Type-safe variants
-<Button 
+<F0Button
   label="Primary Button"
   variant="default"  // ✅ Autocomplete: "default" | "outline" | "critical" | "neutral" | "ghost" | "promote"
   size="md"          // ✅ Autocomplete: "sm" | "md" | "lg"
