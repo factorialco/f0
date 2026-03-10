@@ -207,4 +207,28 @@ describe("F0Button", () => {
     const button = screen.getByRole("button")
     expect(button.props.style?.[1]).toBeUndefined()
   })
+
+  it("ignores onPressIn passed via unsafe cast", () => {
+    const unsafeOnPressIn = jest.fn()
+    const unsafeProps = {
+      ...defaultProps,
+      onPressIn: unsafeOnPressIn,
+    } as unknown as React.ComponentProps<typeof F0Button>
+    render(<F0Button {...unsafeProps} />)
+
+    const button = screen.getByRole("button")
+    fireEvent(button, "pressIn")
+    expect(unsafeOnPressIn).not.toHaveBeenCalled()
+  })
+
+  it("ignores accessibilityLabel passed via unsafe cast", () => {
+    const unsafeProps = {
+      ...defaultProps,
+      accessibilityLabel: "Unsafe label override",
+    } as unknown as React.ComponentProps<typeof F0Button>
+    render(<F0Button {...unsafeProps} />)
+
+    const button = screen.getByRole("button")
+    expect(button.props.accessibilityLabel).toBe("Test Button")
+  })
 })

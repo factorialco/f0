@@ -13,7 +13,10 @@ import {
   getIconOnlyColor,
   getTextColor,
 } from "./F0Button.styles"
-import { F0_BUTTON_BANNED_PROPS, type F0ButtonProps } from "./F0Button.types"
+import {
+  F0_BUTTON_BLOCKED_FORWARD_PROPS,
+  type F0ButtonProps,
+} from "./F0Button.types"
 
 const F0Button = React.memo(
   forwardRef<View, F0ButtonProps>(function F0Button(
@@ -99,12 +102,13 @@ const F0Button = React.memo(
         : getIconColor(variant, shouldShowPressed)
       : undefined
     const textColor = getTextColor(variant, shouldShowPressed)
-    const forwardedProps = omitProps(rest, F0_BUTTON_BANNED_PROPS)
+    const forwardedProps = omitProps(rest, F0_BUTTON_BLOCKED_FORWARD_PROPS)
 
     return (
       <View className={`flex ${fullWidth ? "flex-1" : "item-start"}`}>
         <PressableFeedback
           ref={ref}
+          {...forwardedProps}
           disabled={isDisabled}
           variant={feedback}
           onPress={handlePress}
@@ -118,7 +122,6 @@ const F0Button = React.memo(
           }}
           accessibilityHint={accessibilityHint}
           testID={testID}
-          {...forwardedProps}
         >
           <View className={className}>
             {icon && (

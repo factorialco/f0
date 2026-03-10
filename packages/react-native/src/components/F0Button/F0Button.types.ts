@@ -28,14 +28,30 @@ export type ButtonSize = (typeof BUTTON_SIZES)[number]
 export type F0ButtonSize = ButtonSize
 
 /**
- * Props that must not be passed through to the underlying PressableFeedback.
- * F0Button follows a semantic API and intentionally blocks style/className.
+ * Props that are controlled by F0Button and must not be passed through.
+ * This preserves F0Button press-state behavior and accessibility contract.
  */
+const F0_BUTTON_CONTROLLED_PASSTHROUGH_PROPS = [
+  "onPressIn",
+  "onPressOut",
+  "accessibilityLabel",
+  "accessibilityRole",
+  "accessibilityState",
+] as const
+
 export const F0_BUTTON_BANNED_PROPS = ["style", "className"] as const
+
+export const F0_BUTTON_BLOCKED_FORWARD_PROPS = [
+  ...F0_BUTTON_CONTROLLED_PASSTHROUGH_PROPS,
+  ...F0_BUTTON_BANNED_PROPS,
+] as const
 
 interface F0ButtonPropsInternal extends Omit<
   PressableFeedbackProps,
-  "children" | "variant" | "disabled"
+  | "children"
+  | "variant"
+  | "disabled"
+  | (typeof F0_BUTTON_CONTROLLED_PASSTHROUGH_PROPS)[number]
 > {
   label: string
   onPress?: () => void | Promise<unknown>

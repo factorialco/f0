@@ -18,7 +18,7 @@ export const variants = [
 ] as const
 
 /**
- * @deprecated Use `ButtonVariant` from `../F0Button` instead.
+ * @deprecated Use `F0ButtonVariant` from `../F0Button` instead.
  */
 export type ButtonVariant = (typeof variants)[number]
 
@@ -28,7 +28,7 @@ export type ButtonVariant = (typeof variants)[number]
 export const sizes = ["sm", "md", "lg"] as const
 
 /**
- * @deprecated Use `ButtonSize` from `../F0Button` instead.
+ * @deprecated Use `F0ButtonSize` from `../F0Button` instead.
  */
 export type ButtonSize = (typeof sizes)[number]
 
