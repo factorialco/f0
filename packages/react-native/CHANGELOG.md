@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.30.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.29.0...f0-react-native-v0.30.0) (2026-03-10)
+
+
+### Features
+
+* add new primitive `F0Icon` ([#3594](https://github.com/factorialco/f0/issues/3594)) ([bea9161](https://github.com/factorialco/f0/commit/bea9161a0027d32c1669d0220c467bea5119d39b))
+
 ## [0.29.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.28.1...f0-react-native-v0.29.0) (2026-03-09)
 
 
