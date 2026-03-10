@@ -102,6 +102,7 @@ export function useFunnelChartOptions(
         borderRadius: 4,
       },
       emphasis: {
+        label: { show: false },
         itemStyle: {
           shadowBlur: 0,
           shadowOffsetX: 0,
