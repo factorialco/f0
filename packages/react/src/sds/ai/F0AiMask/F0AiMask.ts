@@ -37,7 +37,7 @@ export type MaskOptions = {
   mode?: "dark" | "light"
   /**
    * Color list.
-   * @default ['rgb(57, 182, 255)', 'rgb(189, 69, 251)', 'rgb(255, 87, 51)', 'rgb(255, 214, 0)']
+   * @default ['rgb(229, 25, 67)', 'rgb(229, 86, 25)', 'rgb(229, 25, 67)', 'rgb(161, 173, 229)']
    * @note The color list must be specified with 4 colors in an array, formatted as rgb color strings.
    */
   colors?: [CSSRgbString, CSSRgbString, CSSRgbString, CSSRgbString]
@@ -85,10 +85,10 @@ type GLResources = {
  * default light colors
  */
 const DEFAULT_COLORS = [
-  "rgb(57, 182, 255)",
-  "rgb(189, 69, 251)",
-  "rgb(255, 87, 51)",
-  "rgb(255, 214, 0)",
+  "rgb(229, 25, 67)", // #E51943 red
+  "rgb(229, 86, 25)", // #E55619 orange
+  "rgb(229, 25, 67)", // #E51943 red
+  "rgb(161, 173, 229)", // #A1ADE5 light blue
 ]
 
 /**

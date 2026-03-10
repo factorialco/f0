@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.394.1](https://github.com/factorialco/f0/compare/f0-react-v1.394.0...f0-react-v1.394.1) (2026-03-10)
+
+
+### Bug Fixes
+
+* ai mask ([#3624](https://github.com/factorialco/f0/issues/3624)) ([ae91869](https://github.com/factorialco/f0/commit/ae918695719eb0b51619b4abd0399e574a3f6357))
+
 ## [1.394.0](https://github.com/factorialco/f0/compare/f0-react-v1.393.0...f0-react-v1.394.0) (2026-03-10)
 
 

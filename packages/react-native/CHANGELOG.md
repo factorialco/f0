@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.33.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.32.0...f0-react-native-v0.33.0) (2026-03-10)
+
+
+### Features
+
+* add GitHub Actions workflow for automated Expo preview on PRs ([#3629](https://github.com/factorialco/f0/issues/3629)) ([d100867](https://github.com/factorialco/f0/commit/d100867292e605088257675b517db090568102a9))
+
 ## [0.32.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.31.0...f0-react-native-v0.32.0) (2026-03-10)
 
 
