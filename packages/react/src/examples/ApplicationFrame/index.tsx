@@ -24,6 +24,7 @@ import {
   AiChatProviderProps,
 } from "@/sds/ai/F0AiChat"
 import { DEFAULT_CHAT_WIDTH } from "@/sds/ai/F0AiChat/constants"
+import { CanvasPanel } from "@/sds/ai/F0AiChat/components/CanvasPanel"
 import { useAiChat } from "@/sds/ai/F0AiChat/providers/AiChatStateProvider"
 
 import { FrameProvider, SidebarState, useSidebar } from "./FrameProvider"
@@ -162,9 +163,11 @@ function useAutoCloseSidebar(
 
 /**
  * Z-index layers (within the isolate stacking context):
- *   z-5  Sidebar ()
- *   z-20  Sidebar backdrop / Chat (fullscreen)
+ *   z-5   Sidebar
  *   z-10  Main content
+ *   z-15  Canvas dashboard panel
+ *   z-20  Sidebar backdrop / Chat (fullscreen)
+ *   z-30  Sidebar (unlocked/floating)
  *   z-0   Chat (normal)
  */
 function ApplicationFrameContent({
@@ -180,10 +183,12 @@ function ApplicationFrameContent({
   const {
     open: isAiChatOpen,
     visualizationMode,
+    canvasDashboard,
     chatWidth,
     resizable,
   } = useAiChat()
   const isAiChatFullscreen = visualizationMode === "fullscreen"
+  const isCanvasMode = visualizationMode === "canvas"
   const { open: isAiPromotionChatOpen } = useAiPromotionChat()
   const reservedChatWidth = resizable ? chatWidth : DEFAULT_CHAT_WIDTH
 
@@ -315,6 +320,16 @@ function ApplicationFrameContent({
               </motion.main>
 
               {/* Chat */}
+              {/* Canvas dashboard panel */}
+              {ai?.enabled && isCanvasMode && canvasDashboard && (
+                <div
+                  className="pointer-events-none absolute top-0 bottom-0 left-0 z-[15]"
+                  style={{ right: reservedChatWidth }}
+                >
+                  <CanvasPanel />
+                </div>
+              )}
+
               {ai?.enabled && (
                 <motion.div
                   className={cn(
