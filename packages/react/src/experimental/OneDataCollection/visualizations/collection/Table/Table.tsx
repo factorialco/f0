@@ -93,6 +93,7 @@ export const TableCollection = <
   cellRenderer,
   showItemActions: showItemActionsProp,
   visualizationSettings,
+  fromVisualization = "table",
 }: CollectionProps<
   R,
   Filters,
@@ -429,6 +430,12 @@ export const TableCollection = <
                     width={column.width}
                     align={column.align}
                     sticky={getStickyPosition(index)}
+                    className={
+                      fromVisualization === "editableTable" &&
+                      index !== columns.length - 1
+                        ? "border-0 border-r-[1px] border-solid border-f1-border-secondary"
+                        : undefined
+                    }
                     {...column}
                     hidden={false}
                     onSortClick={

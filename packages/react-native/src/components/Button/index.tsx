@@ -3,7 +3,7 @@ import { Pressable, Text, View } from "react-native"
 import { tv, type VariantProps } from "tailwind-variants"
 
 import { cn } from "../../lib/utils"
-import { Icon, type IconType } from "../Icon"
+import { F0Icon, type IconType, type IconColor } from "../primitives/F0Icon"
 
 export const variants = [
   "default",
@@ -68,29 +68,35 @@ const pressedVariants = tv({
   },
 })
 
-const getIconColor = (variant: ButtonVariant, isPressed: boolean) => {
+const getIconColor = (
+  variant: ButtonVariant,
+  isPressed: boolean
+): IconColor => {
   switch (variant) {
     case "default":
-      return "text-f0-icon-inverse"
+      return "inverse"
     case "critical":
-      return isPressed ? "text-f0-icon-inverse" : "text-f0-icon-critical-bold"
+      return isPressed ? "inverse" : "critical-bold"
     default:
-      return "text-f0-icon"
+      return "default"
   }
 }
 
-const getIconOnlyColor = (variant: ButtonVariant, isPressed: boolean) => {
+const getIconOnlyColor = (
+  variant: ButtonVariant,
+  isPressed: boolean
+): IconColor => {
   switch (variant) {
     case "critical":
-      return isPressed ? "text-f0-icon-inverse" : "text-f0-icon-critical-bold"
+      return isPressed ? "inverse" : "critical-bold"
     case "default":
-      return "text-f0-icon-inverse"
+      return "inverse"
     case "outline":
     case "neutral":
     case "ghost":
     case "promote":
     default:
-      return "text-f0-icon-bold"
+      return "bold"
   }
 }
 
@@ -191,15 +197,15 @@ export const Button = forwardRef<View, ButtonProps>(function Button(
         accessibilityHint={accessibilityHint}
       >
         {icon && (
-          <Icon
+          <F0Icon
             icon={icon}
             size={size === "sm" ? "sm" : "md"}
-            className={cn(
-              hideLabel && round ? undefined : "-ml-0.5",
+            color={
               hideLabel && round
                 ? getIconOnlyColor(variant, shouldShowPressed)
                 : getIconColor(variant, shouldShowPressed)
-            )}
+            }
+            className={hideLabel && round ? undefined : "-ml-0.5"}
           />
         )}
         {emoji && (

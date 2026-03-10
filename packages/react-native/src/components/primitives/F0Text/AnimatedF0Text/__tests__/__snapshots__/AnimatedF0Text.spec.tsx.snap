@@ -2,7 +2,7 @@
 
 exports[`AnimatedF0Text Snapshots renders all typography variants: variant-body-md-default 1`] = `
 <Text
-  className="text-[16px] leading-[24px] font-normal text-f0-foreground text-left"
+  className="no-underline normal-case tracking-normal text-[16px] leading-[24px] font-normal text-f0-foreground text-left"
 >
   body-md-default
    text
@@ -11,7 +11,7 @@ exports[`AnimatedF0Text Snapshots renders all typography variants: variant-body-
 
 exports[`AnimatedF0Text Snapshots renders all typography variants: variant-body-md-medium 1`] = `
 <Text
-  className="text-[16px] leading-[24px] font-medium text-f0-foreground text-left"
+  className="no-underline normal-case tracking-normal text-[16px] leading-[24px] font-medium text-f0-foreground text-left"
 >
   body-md-medium
    text
@@ -20,7 +20,7 @@ exports[`AnimatedF0Text Snapshots renders all typography variants: variant-body-
 
 exports[`AnimatedF0Text Snapshots renders all typography variants: variant-body-md-semibold 1`] = `
 <Text
-  className="text-[16px] leading-[24px] font-semibold text-f0-foreground text-left"
+  className="no-underline normal-case tracking-normal text-[16px] leading-[24px] font-semibold text-f0-foreground text-left"
 >
   body-md-semibold
    text
@@ -29,7 +29,7 @@ exports[`AnimatedF0Text Snapshots renders all typography variants: variant-body-
 
 exports[`AnimatedF0Text Snapshots renders all typography variants: variant-body-sm-default 1`] = `
 <Text
-  className="text-[14px] leading-[20px] font-normal text-f0-foreground text-left"
+  className="no-underline normal-case tracking-normal text-[14px] leading-[20px] font-normal text-f0-foreground text-left"
 >
   body-sm-default
    text
@@ -38,7 +38,7 @@ exports[`AnimatedF0Text Snapshots renders all typography variants: variant-body-
 
 exports[`AnimatedF0Text Snapshots renders all typography variants: variant-body-sm-medium 1`] = `
 <Text
-  className="text-[14px] leading-[20px] font-medium text-f0-foreground text-left"
+  className="no-underline normal-case tracking-normal text-[14px] leading-[20px] font-medium text-f0-foreground text-left"
 >
   body-sm-medium
    text
@@ -47,7 +47,7 @@ exports[`AnimatedF0Text Snapshots renders all typography variants: variant-body-
 
 exports[`AnimatedF0Text Snapshots renders all typography variants: variant-body-sm-semibold 1`] = `
 <Text
-  className="text-[14px] leading-[20px] font-semibold text-f0-foreground text-left"
+  className="no-underline normal-case tracking-normal text-[14px] leading-[20px] font-semibold text-f0-foreground text-left"
 >
   body-sm-semibold
    text
@@ -56,7 +56,7 @@ exports[`AnimatedF0Text Snapshots renders all typography variants: variant-body-
 
 exports[`AnimatedF0Text Snapshots renders all typography variants: variant-body-xs-medium 1`] = `
 <Text
-  className="text-[12px] leading-[16px] font-medium text-f0-foreground text-left"
+  className="no-underline normal-case tracking-normal text-[12px] leading-[16px] font-medium text-f0-foreground text-left"
 >
   body-xs-medium
    text
@@ -65,7 +65,7 @@ exports[`AnimatedF0Text Snapshots renders all typography variants: variant-body-
 
 exports[`AnimatedF0Text Snapshots renders all typography variants: variant-heading-lg 1`] = `
 <Text
-  className="text-[24px] leading-[32px] tracking-[-0.2px] font-semibold text-f0-foreground text-left"
+  className="no-underline normal-case text-[24px] leading-[32px] tracking-[-0.2px] font-semibold text-f0-foreground text-left"
 >
   heading-lg
    text
@@ -74,7 +74,7 @@ exports[`AnimatedF0Text Snapshots renders all typography variants: variant-headi
 
 exports[`AnimatedF0Text Snapshots renders all typography variants: variant-heading-md 1`] = `
 <Text
-  className="text-[20px] leading-[28px] tracking-[-0.2px] font-semibold text-f0-foreground text-left"
+  className="no-underline normal-case text-[20px] leading-[28px] tracking-[-0.2px] font-semibold text-f0-foreground text-left"
 >
   heading-md
    text
@@ -83,7 +83,7 @@ exports[`AnimatedF0Text Snapshots renders all typography variants: variant-headi
 
 exports[`AnimatedF0Text Snapshots renders all typography variants: variant-heading-sm 1`] = `
 <Text
-  className="text-[16px] leading-[24px] font-semibold text-f0-foreground text-left"
+  className="no-underline normal-case tracking-normal text-[16px] leading-[24px] font-semibold text-f0-foreground text-left"
 >
   heading-sm
    text
@@ -92,7 +92,7 @@ exports[`AnimatedF0Text Snapshots renders all typography variants: variant-headi
 
 exports[`AnimatedF0Text Snapshots renders all typography variants: variant-heading-xl 1`] = `
 <Text
-  className="text-[36px] leading-[40px] tracking-[-0.2px] font-semibold text-f0-foreground text-left"
+  className="no-underline normal-case text-[36px] leading-[40px] tracking-[-0.2px] font-semibold text-f0-foreground text-left"
 >
   heading-xl
    text
@@ -101,7 +101,7 @@ exports[`AnimatedF0Text Snapshots renders all typography variants: variant-headi
 
 exports[`AnimatedF0Text Snapshots renders with color variants: color-accent 1`] = `
 <Text
-  className="text-[14px] leading-[20px] font-normal text-f0-foreground-accent text-left"
+  className="no-underline normal-case tracking-normal text-[14px] leading-[20px] font-normal text-f0-foreground-accent text-left"
 >
   accent
    text
@@ -110,7 +110,7 @@ exports[`AnimatedF0Text Snapshots renders with color variants: color-accent 1`] 
 
 exports[`AnimatedF0Text Snapshots renders with color variants: color-critical 1`] = `
 <Text
-  className="text-[14px] leading-[20px] font-normal text-f0-foreground-critical text-left"
+  className="no-underline normal-case tracking-normal text-[14px] leading-[20px] font-normal text-f0-foreground-critical text-left"
 >
   critical
    text
@@ -119,7 +119,7 @@ exports[`AnimatedF0Text Snapshots renders with color variants: color-critical 1`
 
 exports[`AnimatedF0Text Snapshots renders with color variants: color-default 1`] = `
 <Text
-  className="text-[14px] leading-[20px] font-normal text-f0-foreground text-left"
+  className="no-underline normal-case tracking-normal text-[14px] leading-[20px] font-normal text-f0-foreground text-left"
 >
   default
    text
@@ -128,7 +128,7 @@ exports[`AnimatedF0Text Snapshots renders with color variants: color-default 1`]
 
 exports[`AnimatedF0Text Snapshots renders with color variants: color-secondary 1`] = `
 <Text
-  className="text-[14px] leading-[20px] font-normal text-f0-foreground-secondary text-left"
+  className="no-underline normal-case tracking-normal text-[14px] leading-[20px] font-normal text-f0-foreground-secondary text-left"
 >
   secondary
    text
@@ -137,7 +137,7 @@ exports[`AnimatedF0Text Snapshots renders with color variants: color-secondary 1
 
 exports[`AnimatedF0Text Snapshots renders with default variant (body-sm-default) 1`] = `
 <Text
-  className="text-[14px] leading-[20px] font-normal text-f0-foreground text-left"
+  className="no-underline normal-case tracking-normal text-[14px] leading-[20px] font-normal text-f0-foreground text-left"
 >
   Default text
 </Text>

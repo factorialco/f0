@@ -165,6 +165,7 @@ export const useQuestionCardAction = () => {
       },
     ],
     available: "frontend",
+    followUp: false,
     render: (props) => {
       const args = props.args as QuestionCardArgs
       const mapOptions = (
