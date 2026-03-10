@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.31.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.30.0...f0-react-native-v0.31.0) (2026-03-10)
+
+
+### Features
+
+* pressableFeedback primitive ([#3620](https://github.com/factorialco/f0/issues/3620)) ([7603842](https://github.com/factorialco/f0/commit/760384269d416d0eff7899e31466827a8edf7255))
+
 ## [0.30.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.29.0...f0-react-native-v0.30.0) (2026-03-10)
 
 

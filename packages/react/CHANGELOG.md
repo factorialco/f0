@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.394.0](https://github.com/factorialco/f0/compare/f0-react-v1.393.0...f0-react-v1.394.0) (2026-03-10)
+
+
+### Features
+
+* **F0DataChart:** add unified chart component with multiple chart types ([#3613](https://github.com/factorialco/f0/issues/3613)) ([aa4e5e0](https://github.com/factorialco/f0/commit/aa4e5e07ee02f6bf4c17763e2247b46711e5d9a0))
+
 ## [1.393.0](https://github.com/factorialco/f0/compare/f0-react-v1.392.1...f0-react-v1.393.0) (2026-03-10)
 
 
