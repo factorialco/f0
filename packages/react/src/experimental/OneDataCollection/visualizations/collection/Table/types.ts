@@ -72,6 +72,14 @@ export type TableColumnDefinition<
      * Avoid hiding the column by the user
      */
     noHiding?: boolean
+
+    /**
+     * Assigns this column to a header group. Columns with the same
+     * headerGroupId are visually grouped under a shared spanning header.
+     * The label for each group is provided via `headerGroupLabels` in
+     * the visualization options.
+     */
+    headerGroupId?: string
   }
 
 export type ReferenceType = "none" | "striped"
@@ -104,6 +112,11 @@ export type TableVisualizationOptions<
    * Reference rows are rendered with a slanted background pattern across the full row.
    */
   referenceRowType?: (item: R) => ReferenceType
+  /**
+   * Labels for header groups. Keys are headerGroupId values used in column
+   * definitions, values are the display labels rendered in the spanning header row.
+   */
+  headerGroupLabels?: Record<string, string>
 }
 
 export type TableCollectionProps<
