@@ -12,6 +12,7 @@ import { ArrowDown } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
+import { F0ActionItem } from "../../F0ActionItem"
 import { F0Thinking as Thinking } from "../../F0Thinking"
 import { isAgentStateMessage } from "../internal-types"
 import { useAiChat } from "../providers/AiChatStateProvider"
@@ -164,61 +165,75 @@ const Messages = ({
                   suggestions={welcomeScreenSuggestions}
                 />
               )}
-              {turns.map((turnMessages, turnIndex) => (
-                <div
-                  ref={turnIndex === turns.length - 1 ? lastTurnRef : undefined}
-                  className={cn(
-                    "flex flex-col items-start justify-start gap-2",
-                    turnIndex === turns.length - 1 && "pb-5"
-                  )}
-                  key={`turn-${turnIndex}`}
-                  style={{
-                    minHeight:
-                      turnIndex === turns.length - 1
-                        ? turnMinHeight || undefined
-                        : undefined,
-                  }}
-                >
-                  {turnMessages.map((message, index) => {
-                    const isCurrentMessage =
-                      turnIndex === turns.length - 1 &&
-                      index === turnMessages.length - 1
+              {turns.map((turnMessages, turnIndex) => {
+                const { showActivityIndicator } = analyzeTurn(
+                  turnMessages,
+                  turnIndex,
+                  turns.length,
+                  inProgress
+                )
 
-                    if (Array.isArray(message) && !isCurrentMessage) {
+                return (
+                  <div
+                    ref={
+                      turnIndex === turns.length - 1 ? lastTurnRef : undefined
+                    }
+                    className={cn(
+                      "flex flex-col items-start justify-start gap-2",
+                      turnIndex === turns.length - 1 && "pb-5"
+                    )}
+                    key={`turn-${turnIndex}`}
+                    style={{
+                      minHeight:
+                        turnIndex === turns.length - 1
+                          ? turnMinHeight || undefined
+                          : undefined,
+                    }}
+                  >
+                    {turnMessages.map((message, index) => {
+                      const isCurrentMessage =
+                        turnIndex === turns.length - 1 &&
+                        index === turnMessages.length - 1
+
+                      if (Array.isArray(message) && !isCurrentMessage) {
+                        return (
+                          <Thinking
+                            key={`${turnIndex}-${index}`}
+                            messages={message}
+                            isActive={false}
+                            inProgress={inProgress}
+                            RenderMessage={RenderMessage}
+                            AssistantMessage={AssistantMessage}
+                          />
+                        )
+                      }
+
                       return (
-                        <Thinking
+                        <RenderMessage
                           key={`${turnIndex}-${index}`}
-                          messages={message}
-                          isActive={false}
+                          message={
+                            Array.isArray(message)
+                              ? message[message.length - 1]
+                              : message
+                          }
                           inProgress={inProgress}
-                          RenderMessage={RenderMessage}
+                          index={index}
+                          isCurrentMessage={isCurrentMessage}
                           AssistantMessage={AssistantMessage}
+                          UserMessage={UserMessage}
+                          ImageRenderer={ImageRenderer}
+                          onRegenerate={onRegenerate}
+                          onCopy={onCopy}
+                          markdownTagRenderers={markdownTagRenderers}
                         />
                       )
-                    }
-
-                    return (
-                      <RenderMessage
-                        key={`${turnIndex}-${index}`}
-                        message={
-                          Array.isArray(message)
-                            ? message[message.length - 1]
-                            : message
-                        }
-                        inProgress={inProgress}
-                        index={index}
-                        isCurrentMessage={isCurrentMessage}
-                        AssistantMessage={AssistantMessage}
-                        UserMessage={UserMessage}
-                        ImageRenderer={ImageRenderer}
-                        onRegenerate={onRegenerate}
-                        onCopy={onCopy}
-                        markdownTagRenderers={markdownTagRenderers}
-                      />
-                    )
-                  })}
-                </div>
-              ))}
+                    })}
+                    {showActivityIndicator && (
+                      <F0ActionItem title="" status="executing" />
+                    )}
+                  </div>
+                )
+              })}
               {interrupt}
             </div>
 
@@ -323,6 +338,31 @@ export function useScrollToBottom() {
     showScrollToBottom,
     scrollToBottom,
   }
+}
+
+export function analyzeTurn(
+  turnMessages: Turn,
+  turnIndex: number,
+  turnsCount: number,
+  inProgress: boolean
+) {
+  const isLastTurn = turnIndex === turnsCount - 1
+  const turnIsComplete = !(inProgress && isLastTurn)
+
+  const hasVisibleAssistantOutput = turnMessages.some(
+    (m) =>
+      !Array.isArray(m) &&
+      m.role === "assistant" &&
+      (!!m.content ||
+        m.toolCalls?.some((tc) => tc.function.name !== "orchestratorThinking"))
+  )
+
+  const showActivityIndicator =
+    !turnIsComplete &&
+    hasVisibleAssistantOutput &&
+    !Array.isArray(turnMessages[turnMessages.length - 1])
+
+  return { isLastTurn, turnIsComplete, showActivityIndicator }
 }
 
 export function convertMessagesToTurns(messages: Message[]): Turn[] {
