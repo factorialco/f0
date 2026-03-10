@@ -2,7 +2,7 @@
 
 exports[`F0Button Snapshot - critical variant 1`] = `
 <View
-  className="flex item-start"
+  className="flex items-start"
 >
   <View
     accessibilityLabel="Test Button"
@@ -79,7 +79,7 @@ exports[`F0Button Snapshot - critical variant 1`] = `
 
 exports[`F0Button Snapshot - default button 1`] = `
 <View
-  className="flex item-start"
+  className="flex items-start"
 >
   <View
     accessibilityLabel="Test Button"
@@ -156,7 +156,7 @@ exports[`F0Button Snapshot - default button 1`] = `
 
 exports[`F0Button Snapshot - different sizes 1`] = `
 <View
-  className="flex item-start"
+  className="flex items-start"
 >
   <View
     accessibilityLabel="Test Button"
@@ -233,7 +233,7 @@ exports[`F0Button Snapshot - different sizes 1`] = `
 
 exports[`F0Button Snapshot - different sizes 2`] = `
 <View
-  className="flex item-start"
+  className="flex items-start"
 >
   <View
     accessibilityLabel="Test Button"
@@ -310,7 +310,7 @@ exports[`F0Button Snapshot - different sizes 2`] = `
 
 exports[`F0Button Snapshot - different sizes 3`] = `
 <View
-  className="flex item-start"
+  className="flex items-start"
 >
   <View
     accessibilityLabel="Test Button"
@@ -387,7 +387,7 @@ exports[`F0Button Snapshot - different sizes 3`] = `
 
 exports[`F0Button Snapshot - disabled state 1`] = `
 <View
-  className="flex item-start"
+  className="flex items-start"
 >
   <View
     accessibilityLabel="Test Button, disabled"
@@ -464,7 +464,7 @@ exports[`F0Button Snapshot - disabled state 1`] = `
 
 exports[`F0Button Snapshot - loading state 1`] = `
 <View
-  className="flex item-start"
+  className="flex items-start"
 >
   <View
     accessibilityLabel="Test Button, disabled, loading"
@@ -541,7 +541,7 @@ exports[`F0Button Snapshot - loading state 1`] = `
 
 exports[`F0Button Snapshot - outline variant 1`] = `
 <View
-  className="flex item-start"
+  className="flex items-start"
 >
   <View
     accessibilityLabel="Test Button"
@@ -618,7 +618,7 @@ exports[`F0Button Snapshot - outline variant 1`] = `
 
 exports[`F0Button Snapshot - round button with hidden label 1`] = `
 <View
-  className="flex item-start"
+  className="flex items-start"
 >
   <View
     accessibilityLabel="Test Button"
@@ -689,7 +689,7 @@ exports[`F0Button Snapshot - round button with hidden label 1`] = `
 
 exports[`F0Button Snapshot - with emoji 1`] = `
 <View
-  className="flex item-start"
+  className="flex items-start"
 >
   <View
     accessibilityLabel="Test Button"
@@ -771,7 +771,7 @@ exports[`F0Button Snapshot - with emoji 1`] = `
 
 exports[`F0Button Snapshot - with icon 1`] = `
 <View
-  className="flex item-start"
+  className="flex items-start"
 >
   <View
     accessibilityLabel="Test Button"

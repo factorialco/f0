@@ -191,7 +191,7 @@ export const Button = forwardRef<View, ButtonProps>(function Button(
   const shouldShowPressed = isPressed && !isDisabled
 
   return (
-    <View className={`flex ${fullWidth ? "flex-1" : "item-start"}`}>
+    <View className={`flex ${fullWidth ? "flex-1" : "items-start"}`}>
       <Pressable
         ref={ref}
         disabled={isDisabled}

@@ -105,7 +105,7 @@ const F0Button = React.memo(
     const forwardedProps = omitProps(rest, F0_BUTTON_BLOCKED_FORWARD_PROPS)
 
     return (
-      <View className={`flex ${fullWidth ? "flex-1" : "item-start"}`}>
+      <View className={`flex ${fullWidth ? "flex-1" : "items-start"}`}>
         <PressableFeedback
           ref={ref}
           {...forwardedProps}
