@@ -52,7 +52,8 @@ Use `type: "editableTable"` in the `visualizations` prop:
           {
             id: "email",
             label: "Email",
-            editType: () => "text",
+            editType: (item) =>
+              item.role === "Designer" ? "text" : "display-only",
             render: (item) => item.email,
             sorting: "email",
             // editType + editable → only editable when role is "Designer"

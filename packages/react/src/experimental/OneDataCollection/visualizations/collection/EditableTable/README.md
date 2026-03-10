@@ -85,7 +85,7 @@ const columns = [
     label: "Status",
     render: (item) => item.status,
     // No editType → always readonly
-    editType: (item) => "readonly",
+    editType: (item) => "disabled",
   },
 ] as const
 

@@ -4,13 +4,27 @@ import userEvent from "@testing-library/user-event"
 import { describe, expect, it, vi } from "vitest"
 
 import { zeroRender as render } from "../../../../../../testing/test-utils"
+import { EditableCellProps } from "../components/cells"
 import { TextCell } from "../components/cells/TextCell"
 
-describe("TextCell", () => {
-  const defaultProps = {
+type TestRecord = { id: string; name: string }
+
+function makeEditableColumn(
+  overrides: Partial<EditableCellProps<TestRecord>["editableColumn"]> = {}
+) {
+  return {
     label: "Name",
+    render: (item: TestRecord) => item.name,
+    ...overrides,
+  } as EditableCellProps<TestRecord>["editableColumn"]
+}
+
+describe("TextCell", () => {
+  const defaultProps: EditableCellProps<TestRecord> = {
+    editableColumn: makeEditableColumn(),
     value: "John Doe",
     onChange: vi.fn(),
+    item: { id: "1", name: "John Doe" },
   }
 
   it("renders with the provided value", () => {
@@ -30,12 +44,16 @@ describe("TextCell", () => {
     await user.clear(input)
     await user.type(input, "Jane")
 
-    // onChange is called for each character typed after clear
     expect(onChange).toHaveBeenCalled()
   })
 
   it("renders with right alignment when align is right", () => {
-    render(<TextCell {...defaultProps} align="right" />)
+    render(
+      <TextCell
+        {...defaultProps}
+        editableColumn={makeEditableColumn({ align: "right" })}
+      />
+    )
 
     const container = screen.getByRole("textbox").closest(".justify-end")
     expect(container).toBeInTheDocument()

@@ -9,7 +9,6 @@ import { BaseCell } from "../BaseCell"
 export function DisabledCell<R extends RecordType>({
   editableColumn,
   item,
-  isLastColumn,
 }: EditableCellProps<R>) {
   const i18n = useI18n()
 
@@ -19,8 +18,6 @@ export function DisabledCell<R extends RecordType>({
         className={cn(
           editableColumn.align === "right" ? "justify-end" : "",
           "flex p-4 min-h-12 items-center border-0 h-full",
-          !isLastColumn &&
-            "border-r-[1px] border-solid border-f1-border-secondary",
           "bg-f1-background-hover h-full",
           "cursor-pointer w-full"
         )}

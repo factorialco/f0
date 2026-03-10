@@ -1,4 +1,5 @@
-import { TableVisualizationType } from "@/experimental/OneDataCollection/types"
+import type { TableVisualizationType } from "@/experimental/OneDataCollection/types"
+
 import { NestedRowProps } from "@/experimental/OneDataCollection/visualizations/collection/Table/components/Row"
 import { cn } from "@/lib/utils"
 
@@ -61,7 +62,11 @@ export const connectorVariables = (
       ? {
           "--horizontal-offset": `${horizontalOffset + (isDetailedVariant ? 12 : 8)}px`,
           "--starting-y": "52px",
-          "--line-height": `calc(${lineHeight} - ${isDetailedVariant ? 12 : 0}px)`,
+          ...(lineHeight
+            ? {
+                "--line-height": `calc(${lineHeight} - ${isDetailedVariant ? 12 : 0}px)`,
+              }
+            : {}),
         }
       : {}
 

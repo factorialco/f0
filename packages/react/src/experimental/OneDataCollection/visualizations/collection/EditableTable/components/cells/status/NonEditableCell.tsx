@@ -9,11 +9,12 @@ import { BaseCell } from "../BaseCell"
 export function NonEditableCell<R extends RecordType>({
   editableColumn,
   item,
+  isLastColumn,
 }: EditableCellProps<R>) {
   const i18n = useI18n()
 
   return (
-    <BaseCell>
+    <BaseCell showRightBorder={!isLastColumn}>
       <div
         className={cn(
           "flex w-full min-w-0",

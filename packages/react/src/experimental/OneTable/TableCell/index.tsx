@@ -1,7 +1,8 @@
 import { AnimatePresence, motion } from "motion/react"
 import { useRef } from "react"
 
-import { TableVisualizationType } from "@/experimental/OneDataCollection/types"
+import type { TableVisualizationType } from "@/experimental/OneDataCollection/types"
+
 import { NestedRowProps } from "@/experimental/OneDataCollection/visualizations/collection/Table/components/Row"
 import { Skeleton } from "@/ui/skeleton"
 import { TableCell as TableCellRoot } from "@/ui/table"

@@ -18,13 +18,14 @@
 
 import { forwardRef, useCallback, useRef } from "react"
 
+import type { TableVisualizationType } from "@/experimental/OneDataCollection/types"
+
 import { F0Button } from "@/components/F0Button"
 import { FiltersDefinition } from "@/components/OneFilterPicker/types"
 import { DataCollectionSource } from "@/experimental/OneDataCollection/hooks/useDataCollectionSource/types"
 import { ItemActionsDefinition } from "@/experimental/OneDataCollection/item-actions"
 import { NavigationFiltersDefinition } from "@/experimental/OneDataCollection/navigationFilters/types"
 import { SummariesDefinition } from "@/experimental/OneDataCollection/summary"
-import { TableVisualizationType } from "@/experimental/OneDataCollection/types"
 import { TableCell, TableRow } from "@/experimental/OneTable"
 import { SPACING_FACTOR } from "@/experimental/OneTable/TableCell/utils/nested"
 import {
