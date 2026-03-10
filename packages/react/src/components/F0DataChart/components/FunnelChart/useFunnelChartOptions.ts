@@ -40,10 +40,14 @@ export function useFunnelChartOptions(
       ? resolveChartColorToken(series.color)
       : undefined
 
-    const firstValue =
+    // First value in rendered order (largest stage for conversion base)
+    const sortedForFirst =
       sort === "ascending"
-        ? (dataPoints[dataPoints.length - 1]?.value ?? 0)
-        : (dataPoints[0]?.value ?? 0)
+        ? [...dataPoints].sort((a, b) => a.value - b.value)
+        : sort === "descending"
+          ? [...dataPoints].sort((a, b) => b.value - a.value)
+          : dataPoints
+    const firstValue = sortedForFirst[0]?.value ?? 0
 
     const baseColor = theme.palette[0] ?? "#0aa69b"
     const lightColor = theme.colors.borderSecondary
@@ -110,9 +114,17 @@ export function useFunnelChartOptions(
     const { colors } = theme
 
     const buildTooltipFormatter = () => {
-      const dataMap = new Map<string, { value: number; index: number }>()
-      dataPoints.forEach((d, i) => {
-        dataMap.set(d.name, { value: d.value, index: i })
+      // Use sorted order for step-over-step conversion
+      const sorted =
+        sort === "none"
+          ? dataPoints
+          : sort === "ascending"
+            ? [...dataPoints].sort((a, b) => a.value - b.value)
+            : [...dataPoints].sort((a, b) => b.value - a.value)
+
+      const sortedIndexMap = new Map<string, number>()
+      sorted.forEach((d, i) => {
+        sortedIndexMap.set(d.name, i)
       })
 
       return (params: unknown) => {
@@ -126,16 +138,16 @@ export function useFunnelChartOptions(
           ? valueFormatter(val)
           : String(val)
         const name = String(p.name ?? "")
-        const info = dataMap.get(name)
+        const sortedIndex = sortedIndexMap.get(name)
 
         let conversionHtml = ""
-        if (showConversion && firstValue > 0 && info) {
+        if (showConversion && firstValue > 0 && sortedIndex !== undefined) {
           const overallPct = formatPercent(val, firstValue)
           conversionHtml = `<div style="margin-top: 4px; color: ${colors.foregroundTertiary}; font-size: 11px">Overall: ${overallPct}</div>`
 
-          const prevIndex = info.index - 1
+          const prevIndex = sortedIndex - 1
           if (prevIndex >= 0) {
-            const prevData = dataPoints[prevIndex]
+            const prevData = sorted[prevIndex]
             if (prevData && prevData.value > 0) {
               const stepPct = formatPercent(val, prevData.value)
               conversionHtml += `<div style="color: ${colors.foregroundTertiary}; font-size: 11px">From ${prevData.name}: ${stepPct}</div>`

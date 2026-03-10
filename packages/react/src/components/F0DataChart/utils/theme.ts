@@ -75,7 +75,7 @@ export interface ChartTheme {
 // ---------------------------------------------------------------------------
 
 const LIGHT_TOOLTIP: ChartThemeTooltip = {
-  // text size 14px, padding 8px eje x 6 en eje y
+  // 6px vertical, 8px horizontal
   padding: [6, 8],
   borderWidth: 1,
   borderRadius: 10,

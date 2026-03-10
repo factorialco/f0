@@ -48,7 +48,7 @@ export const FunnelChart = (props: F0DataChartFunnelProps) => {
         <div
           className={`pointer-events-none absolute inset-0 z-10 flex ${isHorizontal ? "" : "flex-col"}`}
         >
-          {sorted.map((point, i) => {
+          {sorted.map((point) => {
             const formattedValue = valueFormatter
               ? valueFormatter(point.value)
               : String(point.value)
@@ -59,7 +59,7 @@ export const FunnelChart = (props: F0DataChartFunnelProps) => {
 
             return (
               <div
-                key={i}
+                key={point.name}
                 className={
                   isHorizontal
                     ? "min-w-0 flex-1 border-0 border-l border-dashed border-f1-border"
