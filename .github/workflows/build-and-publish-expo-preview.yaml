@@ -1,0 +1,109 @@
+name: "Build and Publish Expo Preview"
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  detect-changes:
+    uses: ./.github/workflows/_check-workspaces-changes.yaml
+
+  publish-expo-preview-react-native:
+    name: "[📱 REACT NATIVE] Build and Publish Expo Preview"
+    needs: detect-changes
+    if: |
+      needs.detect-changes.outputs.package_react_native == 'true' &&
+      github.head_ref != 'release-please--branches--master' &&
+      !contains(github.event.pull_request.labels.*.name, 'autorelease')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Check for EXPO_TOKEN
+        run: |
+          if [ -z "${{ secrets.EXPO_TOKEN }}" ]; then
+            echo "You must provide an EXPO_TOKEN secret linked to this project's Expo account."
+            exit 1
+          fi
+
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - uses: ./.github/actions/setup-node-pnpm
+        name: Setup Node and pnpm
+
+      - name: Build React Native package
+        run: pnpm --filter @factorialco/f0-react-native build
+
+      - name: Setup EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Compose update message
+        id: update-message
+        run: |
+          COMMIT_SUBJECT="$(git log -1 --pretty=%s | tr -d '\r')"
+          SHORT_SHA="$(git rev-parse --short HEAD)"
+          BRANCH_NAME="${{ github.event.pull_request.head.ref }}"
+
+          if [ -n "$COMMIT_SUBJECT" ]; then
+            MESSAGE="$COMMIT_SUBJECT ($SHORT_SHA)"
+          else
+            MESSAGE="$BRANCH_NAME ($SHORT_SHA)"
+          fi
+
+          echo "value<<MESSAGE_EOF" >> $GITHUB_OUTPUT
+          echo "$MESSAGE" >> $GITHUB_OUTPUT
+          echo "MESSAGE_EOF" >> $GITHUB_OUTPUT
+
+      - name: Create Expo preview
+        id: preview
+        uses: expo/expo-github-action/preview@v8
+        env:
+          EAS_UPDATE_MESSAGE: ${{ steps.update-message.outputs.value }}
+        with:
+          working-directory: packages/react-native
+          comment: false
+          command: eas update --branch development --message "$EAS_UPDATE_MESSAGE" --non-interactive
+
+      - name: Build PR comment body
+        id: comment
+        run: |
+          {
+            echo "## 📱 Expo Go Preview Published"
+            echo ""
+            echo "- Branch: \`development\`"
+            echo "- Message: \`${{ steps.preview.outputs.message || steps.update-message.outputs.value }}\`"
+            echo "- Group ID: \`${{ steps.preview.outputs.groupId }}\`"
+            echo "- Created at: \`${{ steps.preview.outputs.createdAt }}\`"
+            echo ""
+            echo "### Links"
+            echo ""
+            echo "- [Open update page](${{ steps.preview.outputs.link }})"
+            echo "- [Open QR directly](${{ steps.preview.outputs.qr }})"
+            echo ""
+            echo "### QR Code"
+            echo ""
+            echo "![Expo Go Preview QR](${{ steps.preview.outputs.qr }})"
+          } > /tmp/expo-preview-comment.md
+
+          echo "body<<COMMENT_BODY_EOF" >> $GITHUB_OUTPUT
+          cat /tmp/expo-preview-comment.md >> $GITHUB_OUTPUT
+          echo "COMMENT_BODY_EOF" >> $GITHUB_OUTPUT
+
+      - name: Comment on PR with Expo preview
+        uses: ./.github/actions/add-or-update-pr-comment
+        with:
+          comment-type: expo_go_preview
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          pr-number: ${{ github.event.pull_request.number }}
+          comment-body: ${{ steps.comment.outputs.body }}
