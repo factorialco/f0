@@ -68,12 +68,10 @@ jobs:
       - name: Create Expo preview
         id: preview
         uses: expo/expo-github-action/preview@v8
-        env:
-          EAS_UPDATE_MESSAGE: ${{ steps.update-message.outputs.value }}
         with:
           working-directory: packages/react-native
           comment: false
-          command: eas update --branch development --message "$EAS_UPDATE_MESSAGE" --non-interactive
+          command: eas update --auto --branch development --non-interactive
 
       - name: Build PR comment body
         id: comment
