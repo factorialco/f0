@@ -1,3 +1,4 @@
+import { useCopilotContext } from "@copilotkit/react-core"
 import { AIMessage } from "@copilotkit/shared"
 import {
   createContext,
@@ -6,6 +7,8 @@ import {
   useContext,
   useState,
 } from "react"
+
+import { useAiChat } from "./AiChatStateProvider"
 
 const FeedbackContext = createContext<FeedbackModal | null>(null)
 
@@ -73,4 +76,26 @@ export const useFeedbackModal = (): FeedbackModal => {
   }
 
   return context
+}
+
+export function useFeedbackSubmit() {
+  const modal = useFeedbackModal()
+  const { threadId } = useCopilotContext()
+  const { onThumbsUp, onThumbsDown } = useAiChat()
+
+  const handleSubmit = (message: AIMessage, feedback: string) => {
+    const callback =
+      modal.currentReaction === "like" ? onThumbsUp : onThumbsDown
+    callback?.(message, { threadId, feedback })
+    modal.close()
+  }
+
+  const handleClose = (message: AIMessage) => {
+    const callback =
+      modal.currentReaction === "like" ? onThumbsUp : onThumbsDown
+    callback?.(message, { threadId, feedback: "" })
+    modal.close()
+  }
+
+  return { modal, handleSubmit, handleClose }
 }

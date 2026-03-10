@@ -1,7 +1,4 @@
-import {
-  useCopilotChatInternal as useCopilotChat,
-  useCopilotContext,
-} from "@copilotkit/react-core"
+import { useCopilotChatInternal as useCopilotChat } from "@copilotkit/react-core"
 import { type MessagesProps } from "@copilotkit/react-ui"
 import { type Message } from "@copilotkit/shared"
 import { AnimatePresence, motion } from "motion/react"
@@ -14,14 +11,16 @@ import { cn } from "@/lib/utils"
 
 import { F0ActionItem } from "../../F0ActionItem"
 import { F0Thinking as Thinking } from "../../F0Thinking"
-import { isAgentStateMessage } from "../internal-types"
 import { useAiChat } from "../providers/AiChatStateProvider"
+import {
+  FeedbackModalProvider,
+  useFeedbackSubmit,
+} from "../providers/FeedbackProvider"
+import { analyzeTurn, convertMessagesToTurns } from "../utils/turnUtils"
 import { FeedbackModal } from "./FeedbackModal"
-import { FeedbackModalProvider, useFeedbackModal } from "./FeedbackProvider"
 import { ScrollShadow } from "./ScrollShadow"
+import { TurnFeedback } from "./TurnFeedback"
 import { WelcomeScreen } from "./WelcomeScreen"
-
-type Turn = Array<Message | Array<Message>>
 
 export const MessagesContainer = (props: MessagesProps) => (
   <FeedbackModalProvider>
@@ -41,22 +40,10 @@ const Messages = ({
   markdownTagRenderers,
 }: MessagesProps) => {
   const { messages, interrupt } = useCopilotChat()
-  const { threadId } = useCopilotContext()
-  const {
-    close: closeFeedbackModal,
-    currentReaction,
-    currentMessage,
-    isOpen,
-  } = useFeedbackModal()
+  const { modal, handleSubmit, handleClose } = useFeedbackSubmit()
 
   const translations = useI18n()
-  const {
-    greeting,
-    initialMessage,
-    welcomeScreenSuggestions,
-    onThumbsUp,
-    onThumbsDown,
-  } = useAiChat()
+  const { greeting, initialMessage, welcomeScreenSuggestions } = useAiChat()
 
   const initialMessages = useMemo(
     () =>
@@ -166,7 +153,7 @@ const Messages = ({
                 />
               )}
               {turns.map((turnMessages, turnIndex) => {
-                const { showActivityIndicator } = analyzeTurn(
+                const { turnIsComplete, showActivityIndicator } = analyzeTurn(
                   turnMessages,
                   turnIndex,
                   turns.length,
@@ -231,6 +218,9 @@ const Messages = ({
                     {showActivityIndicator && (
                       <F0ActionItem title="" status="executing" />
                     )}
+                    {turnIsComplete && (
+                      <TurnFeedback messages={turnMessages} onCopy={onCopy} />
+                    )}
                   </div>
                 )
               })}
@@ -272,23 +262,12 @@ const Messages = ({
         <ScrollShadow position="bottom" key="shadow-bottom" />
       </div>
 
-      {isOpen && (
+      {modal.isOpen && (
         <FeedbackModal
-          onSubmit={(message, feedback) => {
-            const callback =
-              currentReaction === "like" ? onThumbsUp : onThumbsDown
-            callback?.(message, { threadId, feedback })
-
-            closeFeedbackModal()
-          }}
-          onClose={(message) => {
-            const callback =
-              currentReaction === "like" ? onThumbsUp : onThumbsDown
-            callback?.(message, { threadId, feedback: "" })
-            closeFeedbackModal()
-          }}
-          reactionType={currentReaction}
-          message={currentMessage}
+          onSubmit={handleSubmit}
+          onClose={handleClose}
+          reactionType={modal.currentReaction}
+          message={modal.currentMessage}
         />
       )}
     </>
@@ -303,150 +282,4 @@ function makeInitialMessages(initial?: string | string[]): Message[] {
     role: "assistant",
     content: message,
   }))
-}
-
-/**
- * Simplified scroll-to-bottom hook.
- * Provides a scroll utility and a "scroll to bottom" button visibility flag.
- */
-export function useScrollToBottom() {
-  const messagesEndRef = useRef<HTMLDivElement>(null)
-  const messagesContainerRef = useRef<HTMLDivElement | null>(null)
-  const [showScrollToBottom, setShowScrollToBottom] = useState(false)
-
-  const scrollToBottom = useCallback((behavior: ScrollBehavior = "smooth") => {
-    messagesEndRef.current?.scrollIntoView({ behavior })
-  }, [])
-
-  useEffect(() => {
-    const el = messagesContainerRef.current
-    if (!el) return
-
-    const handleScroll = () => {
-      const distanceFromBottom =
-        el.scrollHeight - el.scrollTop - el.clientHeight
-      setShowScrollToBottom(distanceFromBottom > el.clientHeight)
-    }
-
-    el.addEventListener("scroll", handleScroll, { passive: true })
-    return () => el.removeEventListener("scroll", handleScroll)
-  }, [])
-
-  return {
-    messagesEndRef,
-    messagesContainerRef,
-    showScrollToBottom,
-    scrollToBottom,
-  }
-}
-
-export function analyzeTurn(
-  turnMessages: Turn,
-  turnIndex: number,
-  turnsCount: number,
-  inProgress: boolean
-) {
-  const isLastTurn = turnIndex === turnsCount - 1
-  const turnIsComplete = !(inProgress && isLastTurn)
-
-  const hasVisibleAssistantOutput = turnMessages.some(
-    (m) =>
-      !Array.isArray(m) &&
-      m.role === "assistant" &&
-      (!!m.content ||
-        m.toolCalls?.some((tc) => tc.function.name !== "orchestratorThinking"))
-  )
-
-  const showActivityIndicator =
-    !turnIsComplete &&
-    hasVisibleAssistantOutput &&
-    !Array.isArray(turnMessages[turnMessages.length - 1])
-
-  return { isLastTurn, turnIsComplete, showActivityIndicator }
-}
-
-export function convertMessagesToTurns(messages: Message[]): Turn[] {
-  if (messages.length === 0) {
-    return []
-  }
-
-  console.assert(
-    messages[0].role === "user",
-    "Invariant violation! Assistant message received before user message"
-  )
-
-  const turns: Turn[] = []
-  let thinkingGroup: Message[] | null = null
-
-  for (const [i, message] of messages.entries()) {
-    if (message.role === "user") {
-      turns.push([message])
-      thinkingGroup = null
-      continue
-    }
-
-    const currentTurn = turns[turns.length - 1]
-
-    // Hoist agent state messages above the thinking group
-    if (isAgentStateMessage(message) && thinkingGroup) {
-      if (i !== messages.length - 1) {
-        const idx = currentTurn.indexOf(thinkingGroup)
-        if (idx !== -1) {
-          currentTurn.splice(idx, 1)
-        }
-        currentTurn.push(message, thinkingGroup)
-      }
-      continue
-    }
-
-    // Always merge thinking messages into a single group per turn, deduplicating consecutive identical content
-    if (isThinkingMessage(message)) {
-      if (thinkingGroup) {
-        const prev = thinkingGroup[thinkingGroup.length - 1]
-        if (getThinkingKey(prev) !== getThinkingKey(message)) {
-          thinkingGroup.push(message)
-        }
-      } else {
-        thinkingGroup = [message]
-        // Always insert thinking group right after the user message (index 1)
-        // so it appears above any text messages from earlier runs in the same turn
-        if (currentTurn.length > 1) {
-          currentTurn.splice(1, 0, thinkingGroup)
-        } else {
-          currentTurn.push(thinkingGroup)
-        }
-      }
-      continue
-    }
-
-    currentTurn.push(message)
-  }
-
-  return turns
-}
-
-function isThinkingMessage(message: Message): boolean {
-  return (
-    message.role === "assistant" &&
-    message.toolCalls?.some(
-      (call) => call.function.name === "orchestratorThinking"
-    ) === true
-  )
-}
-
-/**
- * Dedup key for thinking messages.
- *
- * CopilotKit action-execution messages have empty/undefined `content` — the
- * actual preamble text lives in `toolCalls[0].function.arguments`.
- * Fall back to `content` for backwards compatibility with any call-site that
- * sets it directly, then to `id` as a last resort.
- */
-function getThinkingKey(message: Message): string {
-  const tc = (
-    message as {
-      toolCalls?: { function: { name: string; arguments: string } }[]
-    }
-  ).toolCalls?.find((c) => c.function.name === "orchestratorThinking")
-  return tc?.function.arguments || message.content || message.id
 }

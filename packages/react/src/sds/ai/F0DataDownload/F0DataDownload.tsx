@@ -105,7 +105,7 @@ export const F0DataDownload = ({
     totalCount != null && previewCount != null && totalCount > previewCount
 
   return (
-    <div className="flex flex-col gap-1 pb-3">
+    <div className="flex flex-col gap-2 pb-3">
       {markdown && (
         <div className="w-fit max-w-full [&>div]:flex [&>div]:flex-col [&>div]:gap-1">
           <Markdown content={markdown} components={f0MarkdownRenderersSimple} />
@@ -119,7 +119,7 @@ export const F0DataDownload = ({
           })}
         </p>
       )}
-      <div className="mt-3 flex justify-start">
+      <div className="flex justify-start">
         <F0ButtonDropdown
           variant="outline"
           size="sm"

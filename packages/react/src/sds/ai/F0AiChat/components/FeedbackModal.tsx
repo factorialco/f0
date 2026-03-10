@@ -5,7 +5,7 @@ import { F0Dialog } from "@/components/F0Dialog"
 import { Input } from "@/experimental/Forms/Fields/Input"
 import { useI18n } from "@/lib/providers/i18n"
 
-import { UserReaction } from "./FeedbackProvider"
+import { UserReaction } from "../providers/FeedbackProvider"
 
 interface ReactionModalProps {
   onClose: (message: AIMessage) => void

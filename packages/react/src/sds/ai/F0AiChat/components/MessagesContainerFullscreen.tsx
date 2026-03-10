@@ -1,7 +1,4 @@
-import {
-  useCopilotChatInternal as useCopilotChat,
-  useCopilotContext,
-} from "@copilotkit/react-core"
+import { useCopilotChatInternal as useCopilotChat } from "@copilotkit/react-core"
 import { type MessagesProps } from "@copilotkit/react-ui"
 import { type Message } from "@copilotkit/shared"
 import { AnimatePresence, motion } from "motion/react"
@@ -16,14 +13,15 @@ import { F0ActionItem } from "../../F0ActionItem"
 import { F0Thinking } from "../../F0Thinking"
 import { FullscreenChatContext } from "../index"
 import { useAiChat } from "../providers/AiChatStateProvider"
+import {
+  FeedbackModalProvider,
+  useFeedbackSubmit,
+} from "../providers/FeedbackProvider"
+import { useScrollToBottom } from "../hooks/useScrollToBottom"
+import { analyzeTurn, convertMessagesToTurns } from "../utils/turnUtils"
 import { AssistantMessage as F0AssistantMessage } from "./AssistantMessage"
 import { FeedbackModal } from "./FeedbackModal"
-import { FeedbackModalProvider, useFeedbackModal } from "./FeedbackProvider"
-import {
-  analyzeTurn,
-  convertMessagesToTurns,
-  useScrollToBottom,
-} from "./MessagesContainer"
+import { TurnFeedback } from "./TurnFeedback"
 import { UserMessage as F0UserMessage } from "./UserMessage"
 import { WelcomeScreen } from "./WelcomeScreen"
 
@@ -67,27 +65,15 @@ const Messages = ({
         className="max-w-full rounded-lg"
       />
     ))
-  const { threadId } = useCopilotContext()
   const { setInProgress } = useContext(FullscreenChatContext)
-  const {
-    close: closeFeedbackModal,
-    currentReaction,
-    currentMessage,
-    isOpen,
-  } = useFeedbackModal()
+  const { modal, handleSubmit, handleClose } = useFeedbackSubmit()
 
   useEffect(() => {
     setInProgress(inProgress)
   }, [inProgress, setInProgress])
 
   const translations = useI18n()
-  const {
-    greeting,
-    initialMessage,
-    welcomeScreenSuggestions,
-    onThumbsUp,
-    onThumbsDown,
-  } = useAiChat()
+  const { greeting, initialMessage, welcomeScreenSuggestions } = useAiChat()
   const initialMessages = useMemo(
     () =>
       makeInitialMessages(
@@ -310,7 +296,7 @@ const Messages = ({
           )}
 
           {turns.map((turnMessages, turnIndex) => {
-            const { showActivityIndicator } = analyzeTurn(
+            const { turnIsComplete, showActivityIndicator } = analyzeTurn(
               turnMessages,
               turnIndex,
               turns.length,
@@ -390,6 +376,9 @@ const Messages = ({
                 {showActivityIndicator && (
                   <F0ActionItem title="" status="executing" />
                 )}
+                {turnIsComplete && (
+                  <TurnFeedback messages={turnMessages} onCopy={onCopy} />
+                )}
               </div>
             )
           })}
@@ -421,22 +410,12 @@ const Messages = ({
         </AnimatePresence>
       </div>
 
-      {isOpen && (
+      {modal.isOpen && (
         <FeedbackModal
-          onSubmit={(message, feedback) => {
-            const callback =
-              currentReaction === "like" ? onThumbsUp : onThumbsDown
-            callback?.(message, { threadId, feedback })
-            closeFeedbackModal()
-          }}
-          onClose={(message) => {
-            const callback =
-              currentReaction === "like" ? onThumbsUp : onThumbsDown
-            callback?.(message, { threadId, feedback: "" })
-            closeFeedbackModal()
-          }}
-          reactionType={currentReaction}
-          message={currentMessage}
+          onSubmit={handleSubmit}
+          onClose={handleClose}
+          reactionType={modal.currentReaction}
+          message={modal.currentMessage}
         />
       )}
     </>
