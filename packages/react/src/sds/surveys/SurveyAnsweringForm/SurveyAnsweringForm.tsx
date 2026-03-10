@@ -39,7 +39,14 @@ export function SurveyAnsweringForm({
     setIsSubmitting(true)
     try {
       const answers = getAnswers()
-      const result: SurveyFormSubmitResult = await onSubmit(answers)
+      const plainAnswers: Record<
+        string,
+        string | number | string[] | Date | null
+      > = {}
+      for (const [key, answer] of Object.entries(answers)) {
+        plainAnswers[key] = answer.value
+      }
+      const result: SurveyFormSubmitResult = await onSubmit(plainAnswers)
       if (result.success) {
         onClose()
       }
@@ -118,22 +125,24 @@ export function SurveyAnsweringForm({
         elements={currentElements}
         onChange={setCurrentElements}
       >
-        {showTableOfContent && (
-          <TableOfContent
-            elements={currentElements}
-            onChange={setCurrentElements}
-          />
-        )}
-        <div className="flex flex-col h-full max-w-[750px] mx-auto py-12 justify-center">
-          {mode === "all-questions" ? (
-            <AllQuestionsView elements={currentElements} />
-          ) : stepper.currentQuestion ? (
-            <SteppedView
+        <div className="relative flex h-full flex-col">
+          {showTableOfContent && (
+            <TableOfContent
               elements={currentElements}
-              currentQuestion={stepper.currentQuestion}
-              progress={stepper.progress}
+              onChange={setCurrentElements}
             />
-          ) : null}
+          )}
+          <div className="flex flex-col h-full max-w-[750px] mx-auto py-12 justify-center">
+            {mode === "all-questions" ? (
+              <AllQuestionsView elements={currentElements} />
+            ) : stepper.currentQuestion ? (
+              <SteppedView
+                elements={currentElements}
+                currentQuestion={stepper.currentQuestion}
+                progress={stepper.progress}
+              />
+            ) : null}
+          </div>
         </div>
       </SurveyFormBuilderProvider>
     </F0Dialog>

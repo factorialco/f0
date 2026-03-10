@@ -1,7 +1,12 @@
+import { useState } from "react"
+
 import type { Meta, StoryObj } from "@storybook/react-vite"
+
+import { F0Button } from "@/components/F0Button"
 
 import { SurveyFormBuilderElement } from "../../SurveyFormBuilder/types"
 import { SurveyAnsweringForm } from "../SurveyAnsweringForm"
+import type { SurveyAnsweringFormProps } from "../types"
 
 const sampleElements: SurveyFormBuilderElement[] = [
   {
@@ -110,13 +115,32 @@ const sampleElements: SurveyFormBuilderElement[] = [
 
 const handleSubmit = async () => ({ success: true as const })
 
-const meta: Meta<typeof SurveyAnsweringForm> = {
+function SurveyAnsweringFormStory(
+  props: Omit<SurveyAnsweringFormProps, "isOpen" | "onClose">
+) {
+  const [isOpen, setIsOpen] = useState(false)
+
+  return (
+    <>
+      <F0Button label="Open survey" onClick={() => setIsOpen(true)} />
+      <SurveyAnsweringForm
+        {...props}
+        isOpen={isOpen}
+        onSubmit={(answers) => {
+          console.log({ answers })
+          return { success: true as const }
+        }}
+        onClose={() => setIsOpen(false)}
+      />
+    </>
+  )
+}
+
+const meta: Meta<typeof SurveyAnsweringFormStory> = {
   title: "Surveys/SurveyAnsweringForm",
-  component: SurveyAnsweringForm,
+  component: SurveyAnsweringFormStory,
   tags: ["autodocs", "experimental"],
   args: {
-    isOpen: true,
-    onClose: () => {},
     onSubmit: handleSubmit,
     elements: sampleElements,
     title: "Employee Review Q4",
@@ -127,7 +151,7 @@ const meta: Meta<typeof SurveyAnsweringForm> = {
 }
 
 export default meta
-type Story = StoryObj<typeof SurveyAnsweringForm>
+type Story = StoryObj<typeof SurveyAnsweringFormStory>
 
 export const AllQuestions: Story = {
   args: {

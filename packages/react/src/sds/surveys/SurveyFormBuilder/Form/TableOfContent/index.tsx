@@ -1,9 +1,9 @@
-import { useCallback } from "react"
+import { useCallback, useContext } from "react"
 
 import { F0TableOfContentPopover } from "@/components/F0TableOfContentPopover/F0TableOfContentPopover"
+import { F0DialogContext } from "@/components/F0Dialog/components/F0DialogProvider"
 import { IdStructure } from "@/experimental/Navigation/F0TableOfContent/types"
 import { useI18n } from "@/lib/providers/i18n"
-import { cn } from "@/lib/utils"
 
 import { useSurveyFormBuilderContext } from "../../Context"
 import {
@@ -88,6 +88,7 @@ export const TableOfContent = ({
 }) => {
   const { t } = useI18n()
   const { answering } = useSurveyFormBuilderContext()
+  const { portalContainer } = useContext(F0DialogContext)
 
   const tocItems = useTableOfContentItems(elements, {
     untitledSectionLabel: t("surveyFormBuilder.labels.sectionTitlePlaceholder"),
@@ -109,12 +110,7 @@ export const TableOfContent = ({
   )
 
   return (
-    <div
-      className={cn(
-        "absolute top-0 bottom-0 flex z-10",
-        answering ? "items-center pt-2" : "h-screen items-center"
-      )}
-    >
+    <div className="sticky top-1/2 left-0 z-10 h-0 -translate-y-1/2">
       <F0TableOfContentPopover
         items={tocItems}
         barsAlign="left"
@@ -123,6 +119,7 @@ export const TableOfContent = ({
         showChildrenCounter
         sortable={!answering}
         onReorder={handleReorder}
+        portalContainer={portalContainer}
       />
     </div>
   )

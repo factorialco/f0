@@ -4,6 +4,7 @@ export type {
   SurveyAnsweringFormMode,
   SurveyAnswerValue,
   SurveyAnswers,
+  SurveySubmitAnswers,
   SurveyFormSubmitResult,
   FlatQuestion,
 } from "./types"

@@ -12,6 +12,11 @@ export type SurveyAnswerValue =
 
 export type SurveyAnswers = Record<string, SurveyAnswerValue>
 
+export type SurveySubmitAnswers = Record<
+  string,
+  string | number | string[] | Date | null
+>
+
 export type SurveyFormSubmitResult =
   | { success: true; message?: string }
   | { success: false; errors?: Record<string, string> }
@@ -21,7 +26,7 @@ export type SurveyAnsweringFormMode = "stepped" | "all-questions"
 export interface SurveyAnsweringFormProps {
   elements: SurveyFormBuilderElement[]
   onSubmit: (
-    answers: SurveyAnswers
+    answers: SurveySubmitAnswers
   ) => Promise<SurveyFormSubmitResult> | SurveyFormSubmitResult
   mode: SurveyAnsweringFormMode
   title: string

@@ -32,7 +32,11 @@ export type { FlatFormItem } from "./utils"
  */
 function DragSelectGuard({ children }: { children: React.ReactNode }) {
   const { isDragging } = useDragContext()
-  return <div className={cn(isDragging && "select-none")}>{children}</div>
+  return (
+    <div className={cn("relative", isDragging && "select-none")}>
+      {children}
+    </div>
+  )
 }
 
 const _SurveyFormBuilder = ({
@@ -136,68 +140,66 @@ const _SurveyFormBuilder = ({
     >
       <DragProvider>
         <DragSelectGuard>
-          <div className="flex flex-row gap-2">
-            {showTableOfContent && (
-              <TableOfContent elements={elements} onChange={onChange} />
-            )}
-            <div className="relative flex-1">
-              <motion.div
-                className={cn(
-                  "flex flex-col gap-6",
-                  applyingChanges && "pointer-events-none"
-                )}
-                initial={{ filter: "blur(0px)" }}
-                animate={{ filter: applyingChanges ? "blur(2px)" : "none" }}
-                exit={{ filter: "blur(0px)" }}
+          {showTableOfContent && (
+            <TableOfContent elements={elements} onChange={onChange} />
+          )}
+          <div className="relative flex-1">
+            <motion.div
+              className={cn(
+                "flex flex-col gap-6",
+                applyingChanges && "pointer-events-none"
+              )}
+              initial={{ filter: "blur(0px)" }}
+              animate={{ filter: applyingChanges ? "blur(2px)" : "none" }}
+              exit={{ filter: "blur(0px)" }}
+            >
+              <Reorder.Group
+                axis="y"
+                values={reorderableItems}
+                onReorder={handleFlatReorder}
+                as="div"
               >
-                <Reorder.Group
-                  axis="y"
-                  values={reorderableItems}
-                  onReorder={handleFlatReorder}
-                  as="div"
-                >
-                  <div className="flex flex-col">
-                    {reorderableItems.map((item, index) => {
-                      const gapClass =
-                        index === 0
-                          ? ""
-                          : inSectionQuestionIds.has(item.id)
-                            ? "mt-4"
-                            : "mt-8"
+                <div className="flex flex-col">
+                  {reorderableItems.map((item, index) => {
+                    const gapClass =
+                      index === 0
+                        ? ""
+                        : inSectionQuestionIds.has(item.id)
+                          ? "mt-4"
+                          : "mt-8"
 
-                      if (item.type === "section-header") {
-                        return (
-                          <SectionHeaderItem
-                            key={item.id}
-                            item={item}
-                            className={gapClass}
-                          />
-                        )
-                      }
+                    if (item.type === "section-header") {
                       return (
-                        <QuestionItem
+                        <SectionHeaderItem
                           key={item.id}
                           item={item}
-                          showEndOfSection={sectionEndIds.has(item.id)}
                           className={gapClass}
                         />
                       )
-                    })}
-                  </div>
-                </Reorder.Group>
-                {shouldShowAddButton && <AddButton />}
+                    }
+                    return (
+                      <QuestionItem
+                        key={item.id}
+                        item={item}
+                        showEndOfSection={sectionEndIds.has(item.id)}
+                        className={gapClass}
+                      />
+                    )
+                  })}
+                </div>
+              </Reorder.Group>
+              {shouldShowAddButton && <AddButton />}
+            </motion.div>
+            {applyingChanges && (
+              <motion.div
+                className="sticky bottom-1/2 left-0 z-50 flex w-full items-center justify-center"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+              >
+                <ApplyingChangesTag />
               </motion.div>
-              {applyingChanges && (
-                <motion.div
-                  className="sticky bottom-1/2 left-0 z-50 flex w-full items-center justify-center"
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                >
-                  <ApplyingChangesTag />
-                </motion.div>
-              )}
-            </div>
+            )}
           </div>
         </DragSelectGuard>
       </DragProvider>
