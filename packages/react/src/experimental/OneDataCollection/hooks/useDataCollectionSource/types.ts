@@ -127,6 +127,8 @@ export type DataCollectionSourceDefinition<
   itemActions?: ItemActions
   /** Available primary actions that can be performed on the collection */
   primaryActions?: PrimaryActionsDefinitionFn
+  /** Label for the primary actions dropdown trigger button */
+  primaryActionsLabel?: string
   /** Available secondary actions that can be performed on the collection */
   secondaryActions?: SecondaryActionsDefinition
   /** Available summaries fields. If not provided, summaries is not allowed. */

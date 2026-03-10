@@ -1,16 +1,17 @@
 import type { TextProps as RNTextProps } from "react-native"
 
 /**
- * Props that must not be passed through to the underlying RN Text
- * (`style` and `className` are handled by F0 instead).
- * Used with omitProps for runtime safety.
+ * Props that must not be passed through to the underlying RN Text.
+ * `style` is blocked to enforce the semantic API; `className` is allowed
+ * for layout/positioning and merged with typography classes via twMerge.
  */
-export const F0_TEXT_BANNED_PROPS = ["style", "className"] as const
+export const F0_TEXT_BANNED_PROPS = ["style"] as const
 
 /**
  * Typography variant types based on semantic design tokens
  */
 export const TYPOGRAPHY_VARIANTS = [
+  "heading-xl",
   "heading-lg",
   "heading-md",
   "heading-sm",
@@ -72,10 +73,14 @@ export const TEXT_TRANSFORMS = [
 export type TextTransform = (typeof TEXT_TRANSFORMS)[number]
 
 /**
- * Internal props for the F0Text component.
- * @private
+ * Props for the F0Text component.
+ *
+ * `className` is available for layout/positioning (margin, padding, flex, etc.).
+ * Typography is controlled exclusively by semantic props (variant, color, align, etc.)
+ * and always takes precedence — any typography classes in `className` are overridden.
+ * `style` is NOT available (omitted from RNTextProps and filtered at runtime).
  */
-interface F0TextPropsInternal extends Omit<RNTextProps, "style"> {
+export interface F0TextProps extends Omit<RNTextProps, "style"> {
   /**
    * Semantic typography variant
    * @default "body-sm-default"
@@ -117,17 +122,17 @@ interface F0TextPropsInternal extends Omit<RNTextProps, "style"> {
   children?: React.ReactNode
 
   /**
-   * Excluded from public API via Omit<F0TextPropsInternal, "className">.
-   * @private
+   * Tailwind classes for layout and positioning.
+   *
+   * Allowed: margin, padding, flex, position, width, height, opacity, z-index, etc.
+   * Ignored: font-size, font-weight, line-height, letter-spacing, color, text-align,
+   * text-decoration, text-transform — these are controlled by semantic props and
+   * always take precedence via twMerge.
+   *
+   * @example
+   * className="mt-4 flex-1"
+   * className="mb-2 self-center"
+   * className="absolute top-0 left-0"
    */
   className?: string
 }
-
-/**
- * Public props for the F0Text component
- *
- * Note: `className` and `style` props are NOT available.
- * Use semantic props (variant, color, align, etc.) for typography.
- * For spacing/layout, wrap F0Text in a View with className.
- */
-export type F0TextProps = Omit<F0TextPropsInternal, "className">

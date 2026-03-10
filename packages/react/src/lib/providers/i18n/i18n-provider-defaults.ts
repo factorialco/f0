@@ -149,6 +149,7 @@ export const defaultTranslations = {
       errors: {
         saveFailed: "Save failed",
       },
+      addRow: "Add row",
     },
     itemsCount: "items",
     emptyStates: {
@@ -341,6 +342,8 @@ export const defaultTranslations = {
       deleteQuestion: "Delete question",
       duplicateSection: "Duplicate section",
       deleteSection: "Delete section",
+      confirmMoveLastQuestion: "Move question",
+      cancelMoveLastQuestion: "Cancel",
     },
     questionTypes: {
       section: "Section",
@@ -352,6 +355,7 @@ export const defaultTranslations = {
       numeric: "Numeric",
       link: "Link",
       date: "Date",
+      dropdownSingle: "Dropdown",
     },
     selectQuestion: {
       addOption: "Add option",
@@ -378,6 +382,9 @@ export const defaultTranslations = {
       questionOptions: "Question options",
       actions: "Actions",
       sectionTitlePlaceholder: "Section title",
+      lastQuestionDialogTitle: "Remove last question from section",
+      lastQuestionDialogDescription:
+        "Moving this question will leave the section empty and it will be removed. Do you want to continue?",
     },
   },
   richTextEditor: {

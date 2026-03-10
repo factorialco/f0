@@ -311,6 +311,9 @@ export function FileFieldRenderer({
       } else if (!isMultiple) {
         formField.onChange(undefined)
       }
+
+      // Trigger validation after removing a file
+      formField.onBlur()
     },
     [entries, isMultiple, formField]
   )
@@ -345,7 +348,7 @@ export function FileFieldRenderer({
             isDragOver
               ? "border-f1-border-accent bg-f1-background-accent-bold/5"
               : error || validationError
-                ? "border-f1-border-critical bg-f1-background"
+                ? "border-f1-border-critical-bold bg-f1-background-critical bg-opacity-10"
                 : "border-f1-border bg-f1-background",
             !field.disabled &&
               !isDragOver &&

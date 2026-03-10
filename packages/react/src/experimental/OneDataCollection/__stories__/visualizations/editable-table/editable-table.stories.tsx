@@ -27,8 +27,10 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 function useEditableTableData(
-  initialItems: MockUser[] = generateMockUsers(10)
+  initialItems: MockUser[] = generateMockUsers(10),
+  options?: { perPage?: number }
 ) {
+  const perPage = options?.perPage ?? 10
   const [items, setItems] = useState<MockUser[]>(initialItems)
   const itemsRef = useRef(items)
   itemsRef.current = items
@@ -44,20 +46,20 @@ function useEditableTableData(
     const adapter = createDataAdapter({
       data: items,
       paginationType: "pages",
-      perPage: 10,
+      perPage,
     })
-    adapter.fetchData = (options: unknown) => {
+    adapter.fetchData = (fetchOptions: unknown) => {
       const currentAdapter = createDataAdapter({
         data: itemsRef.current,
         paginationType: "pages",
-        perPage: 10,
+        perPage,
       })
-      return currentAdapter.fetchData(options as never)
+      return currentAdapter.fetchData(fetchOptions as never)
     }
     return adapter
-  }, [items])
+  }, [items, perPage])
 
-  return { items, dataAdapter, onCellChange }
+  return { items, setItems, dataAdapter, onCellChange }
 }
 
 export const BasicEditableTable: Story = {

@@ -8,7 +8,7 @@ export type TableOfContentPopoverVariant = "dark" | "light"
 
 export interface F0TableOfContentPopoverProps extends Omit<
   TOCProps,
-  "sortable" | "onReorder" | "showSearchBox" | "title" | "hideChildrenCounter"
+  "showSearchBox" | "title" | "hideChildrenCounter"
 > {
   /** Optional title displayed at the top of the menu popup */
   title?: string

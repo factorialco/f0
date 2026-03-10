@@ -25,9 +25,31 @@ export type TOCItemAction =
       label: string
       onClick: () => void
       icon?: IconType
+      critical?: boolean
+      /** Show a check icon to indicate this item is selected */
+      selected?: boolean
     }
   | {
       type: "separator"
+    }
+  | {
+      type: "label"
+      text: string
+    }
+  | {
+      type: "toggle"
+      label: string
+      icon?: IconType
+      checked: boolean
+      onCheckedChange: (checked: boolean) => void
+    }
+  | {
+      type: "submenu"
+      label: string
+      icon?: IconType
+      /** Currently selected option label shown inline */
+      selectedLabel?: string
+      children: TOCItemAction[]
     }
 
 export type IdStructure = {

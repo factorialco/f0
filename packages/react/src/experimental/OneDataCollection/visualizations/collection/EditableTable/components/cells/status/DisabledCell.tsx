@@ -21,7 +21,7 @@ export function DisabledCell<R extends RecordType>({
           "flex p-4 min-h-12 items-center border-0 h-full",
           !isLastColumn &&
             "border-r-[1px] border-solid border-f1-border-secondary",
-          "bg-f1-background-secondary h-full",
+          "bg-f1-background-hover h-full",
           "cursor-pointer w-full"
         )}
       >
