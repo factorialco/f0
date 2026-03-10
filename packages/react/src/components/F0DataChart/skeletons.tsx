@@ -340,8 +340,12 @@ export function LineChartSkeleton({
 // ---------------------------------------------------------------------------
 
 interface FunnelChartSkeletonProps {
+  /** Funnel orientation. @default "horizontal" */
+  orient?: "horizontal" | "vertical"
   /** Sort direction. @default "descending" */
   sort?: "descending" | "ascending" | "none"
+  /** Show legend below chart. @default true */
+  showLegend?: boolean
 }
 
 /** Default stage sizes (descending — largest first) */
@@ -355,34 +359,83 @@ const FUNNEL_STAGES_DESC = [
 
 /**
  * Skeleton for funnel chart content area.
- * Renders a horizontal funnel with label placeholders above each stage
- * and smooth curved SVG shapes matching the custom funnel chart.
+ *
+ * - `orient: "horizontal"` (default): left-to-right trapezoids with
+ *   decreasing heights, centered vertically.
+ * - `orient: "vertical"`: top-to-bottom trapezoids with decreasing widths,
+ *   centered horizontally.
+ * - `sort: "ascending"`: reverses stage order (smallest first).
  */
 export function FunnelChartSkeleton({
+  orient = "horizontal",
   sort = "descending",
+  showLegend = true,
 }: FunnelChartSkeletonProps = {}) {
   const stages =
     sort === "ascending"
       ? [...FUNNEL_STAGES_DESC].reverse()
       : FUNNEL_STAGES_DESC
 
-  const n = stages.length
+  if (orient === "vertical") {
+    const gap = 3
+    const stageHeight = (100 - gap * (stages.length - 1)) / stages.length
+
+    return (
+      <div className="flex h-full animate-pulse flex-col px-4 py-3">
+        <div className="min-h-0 flex-1">
+          <svg
+            viewBox="0 0 100 100"
+            preserveAspectRatio="none"
+            className="h-full w-full"
+          >
+            {stages.map((stage, i) => {
+              const y = i * (stageHeight + gap)
+              const w = stage.sizePct
+              const x = (100 - w) / 2
+              return (
+                <rect
+                  key={i}
+                  x={x}
+                  y={y}
+                  width={w}
+                  height={stageHeight}
+                  rx="2"
+                  className="fill-f1-background-secondary"
+                />
+              )
+            })}
+          </svg>
+        </div>
+
+        {/* Label placeholders */}
+        <div className="flex justify-center gap-4 pt-1.5">
+          {stages.map((stage, i) => (
+            <Skeleton
+              key={i}
+              className={`h-2.5 flex-shrink-0 rounded-sm ${stage.label}`}
+            />
+          ))}
+        </div>
+
+        {/* Legend */}
+        {showLegend && (
+          <div className="flex items-center justify-center gap-4 pt-1.5">
+            <div className="flex items-center gap-1.5">
+              <Skeleton className="size-2.5 rounded-full" />
+              <Skeleton className="h-2.5 w-14 rounded-sm" />
+            </div>
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  // Horizontal funnel (default): left-to-right with decreasing heights
+  const gap = 3
+  const stageWidth = (100 - gap * (stages.length - 1)) / stages.length
 
   return (
     <div className="flex h-full animate-pulse flex-col px-4 py-3">
-      {/* Label placeholders above each stage */}
-      <div className="flex gap-1.5 pb-2">
-        {stages.map((stage, i) => (
-          <div key={i} className="flex flex-1 flex-col gap-1">
-            <Skeleton
-              className={`h-2.5 flex-shrink-0 rounded-sm ${stage.label}`}
-            />
-            <Skeleton className="h-4 w-8 rounded-sm" />
-          </div>
-        ))}
-      </div>
-
-      {/* Funnel body — smooth curved stages matching the real chart shape */}
       <div className="min-h-0 flex-1">
         <svg
           viewBox="0 0 100 100"
@@ -390,35 +443,401 @@ export function FunnelChartSkeleton({
           className="h-full w-full"
         >
           {stages.map((stage, i) => {
-            const stageWidth = 100 / n
-            const x = i * stageWidth
-            const midX = x + stageWidth / 2
-            const nextX = x + stageWidth
-            const leftH = stage.sizePct
-            const nextH = stages[i + 1]?.sizePct ?? stage.sizePct
-
-            const topL = 50 - leftH / 2
-            const botL = 50 + leftH / 2
-            const topR = 50 - nextH / 2
-            const botR = 50 + nextH / 2
-
-            const cp1X = midX + stageWidth * 0.15
-            const cp2X = midX + stageWidth * 0.4
-            const d = [
-              `M ${x},${topL}`,
-              `L ${midX},${topL}`,
-              `C ${cp1X},${topL} ${cp2X},${topR} ${nextX},${topR}`,
-              `L ${nextX},${botR}`,
-              `C ${cp2X},${botR} ${cp1X},${botL} ${midX},${botL}`,
-              `L ${x},${botL}`,
-              "Z",
-            ].join(" ")
-
+            const x = i * (stageWidth + gap)
+            const h = stage.sizePct
+            const y = (100 - h) / 2
             return (
-              <path key={i} d={d} className="fill-f1-background-secondary" />
+              <rect
+                key={i}
+                x={x}
+                y={y}
+                width={stageWidth}
+                height={h}
+                rx="2"
+                className="fill-f1-background-secondary"
+              />
             )
           })}
         </svg>
+      </div>
+
+      {/* Label placeholders below each stage */}
+      <div className="flex gap-1.5 pt-1.5">
+        {stages.map((stage, i) => (
+          <div key={i} className="flex flex-1 justify-center">
+            <Skeleton
+              className={`h-2.5 flex-shrink-0 rounded-sm ${stage.label}`}
+            />
+          </div>
+        ))}
+      </div>
+
+      {/* Legend */}
+      {showLegend && (
+        <div className="flex items-center justify-center gap-4 pt-1.5">
+          <div className="flex items-center gap-1.5">
+            <Skeleton className="size-2.5 rounded-full" />
+            <Skeleton className="h-2.5 w-14 rounded-sm" />
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// PieChartSkeleton
+// ---------------------------------------------------------------------------
+
+interface PieChartSkeletonProps {
+  /** Show legend below chart. @default true */
+  showLegend?: boolean
+  /** Inner radius percentage. 0 = pie, >0 = donut. @default 0 */
+  innerRadius?: number
+}
+
+/**
+ * Skeleton for pie/donut chart content area.
+ *
+ * - `innerRadius: 0` (default): solid pie circle.
+ * - `innerRadius > 0`: donut with a hollow center.
+ */
+export function PieChartSkeleton({
+  showLegend = true,
+  innerRadius = 0,
+}: PieChartSkeletonProps = {}) {
+  const outerR = 40
+  const innerR = innerRadius > 0 ? outerR * (innerRadius / 100) : 0
+
+  return (
+    <div className="flex h-full animate-pulse flex-col items-center px-4 py-3">
+      <div className="flex min-h-0 flex-1 items-center justify-center">
+        <svg
+          viewBox="0 0 100 100"
+          className="h-full max-h-[200px] w-full max-w-[200px]"
+        >
+          {/* Background circle */}
+          <circle
+            cx="50"
+            cy="50"
+            r={outerR}
+            className="fill-f1-background-secondary"
+          />
+          {/* Segment dividers */}
+          <line
+            x1="50"
+            y1="50"
+            x2="50"
+            y2={50 - outerR}
+            stroke="currentColor"
+            strokeWidth="1.5"
+            className="text-f1-background"
+          />
+          <line
+            x1="50"
+            y1="50"
+            x2={50 + outerR * 0.87}
+            y2={50 + outerR * 0.5}
+            stroke="currentColor"
+            strokeWidth="1.5"
+            className="text-f1-background"
+          />
+          <line
+            x1="50"
+            y1="50"
+            x2={50 - outerR * 0.71}
+            y2={50 + outerR * 0.71}
+            stroke="currentColor"
+            strokeWidth="1.5"
+            className="text-f1-background"
+          />
+          <line
+            x1="50"
+            y1="50"
+            x2={50 - outerR * 0.34}
+            y2={50 - outerR * 0.94}
+            stroke="currentColor"
+            strokeWidth="1.5"
+            className="text-f1-background"
+          />
+          {/* Inner circle for donut */}
+          {innerR > 0 && (
+            <circle cx="50" cy="50" r={innerR} className="fill-f1-background" />
+          )}
+        </svg>
+      </div>
+
+      {/* Legend */}
+      {showLegend && (
+        <div className="flex items-center justify-center gap-4 pt-3">
+          <div className="flex items-center gap-1.5">
+            <Skeleton className="size-2.5 rounded-full" />
+            <Skeleton className="h-2.5 w-10 rounded-sm" />
+          </div>
+          <div className="flex items-center gap-1.5">
+            <Skeleton className="size-2.5 rounded-full" />
+            <Skeleton className="h-2.5 w-12 rounded-sm" />
+          </div>
+          <div className="flex items-center gap-1.5">
+            <Skeleton className="size-2.5 rounded-full" />
+            <Skeleton className="h-2.5 w-8 rounded-sm" />
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// RadarChartSkeleton
+// ---------------------------------------------------------------------------
+
+interface RadarChartSkeletonProps {
+  /** Show legend below chart. @default true */
+  showLegend?: boolean
+}
+
+/**
+ * Skeleton for radar chart content area.
+ *
+ * Renders a hexagonal shape with concentric rings and radial lines.
+ */
+export function RadarChartSkeleton({
+  showLegend = true,
+}: RadarChartSkeletonProps = {}) {
+  const cx = 50
+  const cy = 45
+  const sides = 6
+  const outerR = 35
+  const rings = [1, 0.75, 0.5, 0.25]
+  const dataR = 0.6
+
+  // Generate polygon points for a given radius
+  const polygonPoints = (r: number) =>
+    Array.from({ length: sides }, (_, i) => {
+      const angle = (Math.PI * 2 * i) / sides - Math.PI / 2
+      return `${cx + r * Math.cos(angle)},${cy + r * Math.sin(angle)}`
+    }).join(" ")
+
+  // Radial lines from center to vertices
+  const radialLines = Array.from({ length: sides }, (_, i) => {
+    const angle = (Math.PI * 2 * i) / sides - Math.PI / 2
+    return {
+      x: cx + outerR * Math.cos(angle),
+      y: cy + outerR * Math.sin(angle),
+    }
+  })
+
+  return (
+    <div className="flex h-full animate-pulse flex-col items-center px-4 py-3">
+      <div className="flex min-h-0 flex-1 items-center justify-center">
+        <svg
+          viewBox="0 0 100 100"
+          className="h-full max-h-[220px] w-full max-w-[220px]"
+        >
+          {/* Concentric rings */}
+          {rings.map((scale) => (
+            <polygon
+              key={scale}
+              points={polygonPoints(outerR * scale)}
+              fill="none"
+              strokeWidth="0.5"
+              stroke="currentColor"
+              strokeOpacity="0.15"
+              className="text-f1-foreground-secondary"
+            />
+          ))}
+          {/* Radial lines */}
+          {radialLines.map((pt, i) => (
+            <line
+              key={i}
+              x1={cx}
+              y1={cy}
+              x2={pt.x}
+              y2={pt.y}
+              strokeWidth="0.5"
+              stroke="currentColor"
+              strokeOpacity="0.15"
+              className="text-f1-foreground-secondary"
+            />
+          ))}
+          {/* Data polygon placeholder */}
+          <polygon
+            points={polygonPoints(outerR * dataR)}
+            className="fill-f1-background-secondary"
+            strokeWidth="1"
+            stroke="currentColor"
+            strokeOpacity="0.2"
+          />
+        </svg>
+      </div>
+
+      {/* Legend */}
+      {showLegend && (
+        <div className="flex items-center justify-center gap-4 pt-3">
+          <div className="flex items-center gap-1.5">
+            <Skeleton className="size-2.5 rounded-full" />
+            <Skeleton className="h-2.5 w-10 rounded-sm" />
+          </div>
+          <div className="flex items-center gap-1.5">
+            <Skeleton className="size-2.5 rounded-full" />
+            <Skeleton className="h-2.5 w-12 rounded-sm" />
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// GaugeChartSkeleton
+// ---------------------------------------------------------------------------
+
+/**
+ * Skeleton for gauge chart content area.
+ *
+ * Renders a 270° arc with rounded caps and a large value placeholder,
+ * matching the real gauge component style (width 18, roundCap, centered value).
+ */
+export function GaugeChartSkeleton() {
+  const cx = 50
+  const cy = 50
+  const r = 35
+  const strokeWidth = 8
+
+  // ECharts gauge default: 225° start, -45° end (270° sweep)
+  // SVG angles: 0° = right, clockwise
+  const startAngle = (225 * Math.PI) / 180
+  const endAngle = (-45 * Math.PI) / 180
+
+  // Full background arc (270°)
+  const bgStartX = cx + r * Math.cos(startAngle)
+  const bgStartY = cy - r * Math.sin(startAngle)
+  const bgEndX = cx + r * Math.cos(endAngle)
+  const bgEndY = cy - r * Math.sin(endAngle)
+
+  // Progress arc (~50% of the 270° sweep = 135°)
+  const progressAngle = startAngle - (startAngle - endAngle) * 0.5
+  const progEndX = cx + r * Math.cos(progressAngle)
+  const progEndY = cy - r * Math.sin(progressAngle)
+
+  return (
+    <div className="relative flex h-full animate-pulse items-center justify-center px-4 py-3">
+      <svg
+        viewBox="0 0 100 100"
+        className="h-full max-h-[200px] w-full max-w-[200px]"
+      >
+        {/* Background arc (270°) */}
+        <path
+          d={`M ${bgStartX} ${bgStartY} A ${r} ${r} 0 1 1 ${bgEndX} ${bgEndY}`}
+          fill="none"
+          strokeWidth={strokeWidth}
+          strokeLinecap="round"
+          stroke="currentColor"
+          strokeOpacity="0.1"
+          className="text-f1-foreground-secondary"
+        />
+        {/* Progress arc (~50%) */}
+        <path
+          d={`M ${bgStartX} ${bgStartY} A ${r} ${r} 0 0 1 ${progEndX} ${progEndY}`}
+          fill="none"
+          strokeWidth={strokeWidth}
+          strokeLinecap="round"
+          className="stroke-f1-background-secondary"
+        />
+      </svg>
+      {/* Value placeholder — centered inside the arc */}
+      <div className="absolute inset-0 flex flex-col items-center justify-center">
+        <Skeleton className="h-6 w-14 rounded-sm" />
+        <Skeleton className="mt-2 h-3 w-16 rounded-sm" />
+      </div>
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// HeatmapChartSkeleton
+// ---------------------------------------------------------------------------
+
+/**
+ * Skeleton for heatmap chart content area.
+ *
+ * Renders a 5×4 grid of rectangles with varied opacities to simulate
+ * heatmap data, plus placeholder axis labels.
+ */
+export function HeatmapChartSkeleton() {
+  const cols = 5
+  const rows = 4
+  const gap = 3
+  const labelMarginX = 12
+  const gridWidth = 100 - labelMarginX
+  const gridHeight = 92
+  const cellW = (gridWidth - gap * (cols - 1)) / cols
+  const cellH = (gridHeight - gap * (rows - 1)) / rows
+
+  // Pre-defined opacities to simulate varying data values
+  const opacities = [
+    [0.9, 0.4, 0.6, 0.2, 0.7],
+    [0.3, 0.8, 0.5, 0.7, 0.4],
+    [0.6, 0.2, 0.9, 0.3, 0.8],
+    [0.4, 0.7, 0.3, 0.6, 0.5],
+  ]
+
+  return (
+    <div className="flex h-full animate-pulse flex-col px-4 py-3">
+      <div className="min-h-0 flex-1">
+        <svg
+          viewBox="0 0 100 100"
+          preserveAspectRatio="none"
+          className="h-full w-full"
+        >
+          {/* Y-axis label placeholders */}
+          {Array.from({ length: rows }, (_, r) => (
+            <rect
+              key={`y-${r}`}
+              x={0}
+              y={r * (cellH + gap) + cellH / 2 - 1.5}
+              width={9}
+              height={3}
+              rx={1}
+              className="fill-f1-background-secondary"
+            />
+          ))}
+          {/* Heatmap cells */}
+          {Array.from({ length: rows }, (_, r) =>
+            Array.from({ length: cols }, (_, c) => (
+              <rect
+                key={`${r}-${c}`}
+                x={labelMarginX + c * (cellW + gap)}
+                y={r * (cellH + gap)}
+                width={cellW}
+                height={cellH}
+                rx={2}
+                className="fill-f1-background-secondary"
+                opacity={opacities[r]?.[c] ?? 0.5}
+              />
+            ))
+          )}
+          {/* X-axis label placeholders */}
+          {Array.from({ length: cols }, (_, c) => (
+            <rect
+              key={`x-${c}`}
+              x={labelMarginX + c * (cellW + gap) + cellW / 2 - 4}
+              y={gridHeight + 3}
+              width={8}
+              height={3}
+              rx={1}
+              className="fill-f1-background-secondary"
+            />
+          ))}
+        </svg>
+      </div>
+
+      {/* Visual map placeholder */}
+      <div className="flex items-center justify-center gap-2 pt-2">
+        <Skeleton className="h-2.5 w-5 rounded-sm" />
+        <Skeleton className="h-2.5 w-20 rounded-sm" />
+        <Skeleton className="h-2.5 w-5 rounded-sm" />
       </div>
     </div>
   )

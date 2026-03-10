@@ -2,14 +2,6 @@ import type * as echarts from "echarts"
 
 import type { ChartTheme } from "./theme"
 
-/**
- * Format a numeric value to at most 3 decimal places.
- * Integers remain unchanged (no trailing ".000").
- */
-export function formatNumericValue(value: number): string {
-  return Number.isInteger(value) ? String(value) : value.toFixed(3)
-}
-
 // ---------------------------------------------------------------------------
 // Category axis
 // ---------------------------------------------------------------------------
@@ -300,6 +292,48 @@ export function buildTooltip({
 
       return `${header}${items}`
     },
+  } as echarts.EChartsOption["tooltip"]
+}
+
+// ---------------------------------------------------------------------------
+// Item tooltip (non-axis charts: pie, funnel, etc.)
+// ---------------------------------------------------------------------------
+
+interface ItemTooltipOptions {
+  theme: ChartTheme
+  formatter: (params: unknown) => string
+}
+
+/**
+ * Build a styled item-triggered tooltip for non-axis charts (pie, funnel, etc.).
+ *
+ * Shares the same visual style as `buildTooltip` (frosted glass, shadows, etc.)
+ * but uses `trigger: "item"` and accepts a custom `formatter`.
+ */
+export function buildItemTooltip({
+  theme,
+  formatter,
+}: ItemTooltipOptions): echarts.EChartsOption["tooltip"] {
+  const { tooltip, colors } = theme
+
+  return {
+    trigger: "item",
+    padding: tooltip.padding,
+    borderWidth: tooltip.borderWidth,
+    transitionDuration: tooltip.transitionDuration,
+    textStyle: {
+      color: colors.foreground,
+      fontSize: theme.textStyle.fontSize,
+    },
+    extraCssText: [
+      `box-shadow: ${tooltip.boxShadow}`,
+      `border-radius: ${tooltip.borderRadius}px`,
+      `border: 1px solid ${colors.borderSecondary}`,
+      "backdrop-filter: blur(30px)",
+      `-webkit-backdrop-filter: blur(30px)`,
+      `background: ${tooltip.background}`,
+    ].join("; "),
+    formatter,
   } as echarts.EChartsOption["tooltip"]
 }
 

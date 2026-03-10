@@ -175,14 +175,205 @@ export interface F0DataChartFunnelProps {
   series: F0DataChartFunnelSeries
   /** Sort direction of funnel stages. @default "descending" */
   sort?: "descending" | "ascending" | "none"
+  /** Gap between funnel stages in pixels. @default 0 */
+  gap?: number
+  /** Funnel orientation. @default "horizontal" */
+  orient?: "horizontal" | "vertical"
+  /** Show the legend below the chart. @default false */
+  showLegend?: boolean
+  /** Show value labels on each stage. @default true */
+  showLabels?: boolean
   /**
    * Show conversion percentages in labels.
    * Each stage displays its value as a percentage of the first stage.
+   * The tooltip also shows step-over-step conversion.
    * @default false
    */
   showConversion?: boolean
-  /** Format the value displayed in labels */
+  /** Format the value displayed in labels and tooltip */
   valueFormatter?: (value: number) => string
+  /**
+   * Map stage colors to their values using a gradient scale (light→dark).
+   * When enabled, higher values get a more intense color. @default true
+   */
+  colorScale?: boolean
+  /** Escape hatch: raw ECharts options merged (shallow) on top of the generated config */
+  echartsOptions?: Partial<echarts.EChartsOption>
+}
+
+// ---------------------------------------------------------------------------
+// Pie data types
+// ---------------------------------------------------------------------------
+
+/**
+ * A single data point in a pie chart.
+ */
+export interface F0DataChartPieDataPoint {
+  /** Numeric value for this segment */
+  value: number
+  /** Segment label */
+  name: string
+  /** Override color for this individual segment. Must be an F0 design token name. */
+  color?: ChartColorToken
+}
+
+/**
+ * A single pie series with named data points.
+ */
+export interface F0DataChartPieSeries {
+  /** Display name used in tooltip */
+  name: string
+  /** Data points — one per pie segment */
+  data: F0DataChartPieDataPoint[]
+  /** Override color for the entire series. Must be an F0 design token name. */
+  color?: ChartColorToken
+}
+
+// ---------------------------------------------------------------------------
+// Discriminated union: pie variant
+// ---------------------------------------------------------------------------
+
+/**
+ * Pie/donut chart variant props.
+ *
+ * Pies do NOT use category/value axes — segment names come from the data
+ * points themselves. This interface is separate from `F0DataChartBaseProps`.
+ */
+export interface F0DataChartPieProps {
+  /** Chart type */
+  type: "pie"
+  /** The pie series to render */
+  series: F0DataChartPieSeries
+  /** Inner radius percentage. 0 = pie, >0 = donut. @default 0 */
+  innerRadius?: number
+  /** Show the legend below the chart. @default true */
+  showLegend?: boolean
+  /** Show value labels on each segment. @default true */
+  showLabels?: boolean
+  /** Show percentage in labels. @default false */
+  showPercentage?: boolean
+  /** Format the value displayed in labels and tooltip */
+  valueFormatter?: (value: number) => string
+  /** Escape hatch: raw ECharts options merged (shallow) on top of the generated config */
+  echartsOptions?: Partial<echarts.EChartsOption>
+}
+
+// ---------------------------------------------------------------------------
+// Radar data types
+// ---------------------------------------------------------------------------
+
+/**
+ * A radar chart indicator (axis/dimension).
+ */
+export interface F0DataChartRadarIndicator {
+  /** Name of the axis/dimension (e.g. "Performance", "Engagement") */
+  name: string
+  /** Maximum value for this axis. @default auto-calculated from data */
+  max?: number
+}
+
+/**
+ * A series of data points for a radar chart.
+ */
+export interface F0DataChartRadarSeries {
+  /** Display name used in legend and tooltip (e.g. "Team A", "Team B") */
+  name: string
+  /** Values — one per indicator, in the same order */
+  data: number[]
+  /** Override color for this series. Must be an F0 design token name. */
+  color?: ChartColorToken
+}
+
+// ---------------------------------------------------------------------------
+// Discriminated union: radar variant
+// ---------------------------------------------------------------------------
+
+/**
+ * Radar chart variant props.
+ *
+ * Radar charts use a polar coordinate system — no cartesian axes.
+ */
+export interface F0DataChartRadarProps {
+  /** Chart type */
+  type: "radar"
+  /** Axes of the radar — defines the dimensions to compare */
+  indicators: F0DataChartRadarIndicator[]
+  /** Series to compare (one or more) */
+  series: F0DataChartRadarSeries[]
+  /** Fill the area of each series with semi-transparent color. @default true */
+  showArea?: boolean
+  /** Show the legend below the chart. @default true */
+  showLegend?: boolean
+  /** Show value labels on each vertex. @default false */
+  showLabels?: boolean
+  /** Format values in labels and tooltip */
+  valueFormatter?: (value: number) => string
+  /** Escape hatch: raw ECharts options merged (shallow) on top of the generated config */
+  echartsOptions?: Partial<echarts.EChartsOption>
+}
+
+// ---------------------------------------------------------------------------
+// Discriminated union: gauge variant
+// ---------------------------------------------------------------------------
+
+/**
+ * Gauge/KPI chart variant props.
+ *
+ * A single-value gauge indicator — no axes, no legend.
+ */
+export interface F0DataChartGaugeProps {
+  /** Chart type */
+  type: "gauge"
+  /** Current value */
+  value: number
+  /** Minimum value. @default 0 */
+  min?: number
+  /** Maximum value. @default 100 */
+  max?: number
+  /** Label shown below the value */
+  name?: string
+  /** Override color. Must be an F0 design token name. */
+  color?: ChartColorToken
+  /** Show the numeric value in the center. @default true */
+  showValue?: boolean
+  /** Format the value displayed */
+  valueFormatter?: (value: number) => string
+  /** Escape hatch: raw ECharts options merged (shallow) on top of the generated config */
+  echartsOptions?: Partial<echarts.EChartsOption>
+}
+
+// ---------------------------------------------------------------------------
+// Discriminated union: heatmap variant
+// ---------------------------------------------------------------------------
+
+/**
+ * Heatmap chart variant props.
+ *
+ * Renders a grid where each cell's color intensity represents a numeric value.
+ * Uses two category axes (x for columns, y for rows) and a visualMap for
+ * value→color mapping.
+ */
+export interface F0DataChartHeatmapProps {
+  /** Chart type */
+  type: "heatmap"
+  /** Column labels (x-axis) */
+  xCategories: string[]
+  /** Row labels (y-axis) */
+  yCategories: string[]
+  /** Data as [xIndex, yIndex, value] tuples */
+  data: [number, number, number][]
+  /** Minimum value for color scale. @default auto from data */
+  min?: number
+  /** Maximum value for color scale. @default auto from data */
+  max?: number
+  /** Show value labels inside cells. @default false */
+  showLabels?: boolean
+  /** Show the visual map (color scale legend). @default false */
+  showVisualMap?: boolean
+  /** Format values in labels and tooltip */
+  valueFormatter?: (value: number) => string
+  /** Escape hatch: raw ECharts options merged (shallow) on top of the generated config */
+  echartsOptions?: Partial<echarts.EChartsOption>
 }
 
 // ---------------------------------------------------------------------------
@@ -192,10 +383,14 @@ export interface F0DataChartFunnelProps {
 /**
  * Props for the F0DataChart component.
  *
- * A unified chart component that supports bar, line, and funnel chart types
- * via a discriminated `type` prop.
+ * A unified chart component that supports bar, line, funnel, pie, radar,
+ * gauge, and heatmap chart types via a discriminated `type` prop.
  */
 export type F0DataChartProps =
   | F0DataChartBarProps
   | F0DataChartLineProps
   | F0DataChartFunnelProps
+  | F0DataChartPieProps
+  | F0DataChartRadarProps
+  | F0DataChartGaugeProps
+  | F0DataChartHeatmapProps

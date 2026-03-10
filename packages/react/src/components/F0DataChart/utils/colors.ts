@@ -119,3 +119,43 @@ export const echartsColorPalette = [
 export function paletteColor(index: number): string {
   return echartsColorPalette[index % echartsColorPalette.length] ?? "#999"
 }
+
+/** Linearly interpolate between two hex colors */
+export function lerpColor(from: string, to: string, t: number): string {
+  const f = colord(from).toRgb()
+  const toRgb = colord(to).toRgb()
+  const r = Math.round(f.r + (toRgb.r - f.r) * t)
+  const g = Math.round(f.g + (toRgb.g - f.g) * t)
+  const b = Math.round(f.b + (toRgb.b - f.b) * t)
+  return colord({ r, g, b }).toHex()
+}
+
+/**
+ * Resolve the color for a single data point (pie, funnel, etc.).
+ *
+ * - Per-point `color` override takes priority.
+ * - Series-level `color` override takes second priority.
+ * - When `colorScale` is provided, interpolates between light and base color.
+ * - Default: uses the palette color by index.
+ */
+export function resolveDataPointColor(
+  pointColor: ChartColorToken | undefined,
+  seriesColor: string | undefined,
+  index: number,
+  colorScale?: { ratio: number; lightColor: string; baseColor: string }
+): string {
+  if (pointColor) {
+    return resolveChartColorToken(pointColor)
+  }
+  if (seriesColor) {
+    return seriesColor
+  }
+  if (colorScale) {
+    return lerpColor(
+      colorScale.lightColor,
+      colorScale.baseColor,
+      colorScale.ratio
+    )
+  }
+  return paletteColor(index)
+}

@@ -9,11 +9,19 @@ export type {
   F0DataChartFunnelDataPoint,
   F0DataChartFunnelProps,
   F0DataChartFunnelSeries,
+  F0DataChartGaugeProps,
+  F0DataChartHeatmapProps,
   F0DataChartLineDataPoint,
   F0DataChartLineProps,
   F0DataChartLineSeries,
   F0DataChartLineType,
+  F0DataChartPieDataPoint,
+  F0DataChartPieProps,
+  F0DataChartPieSeries,
   F0DataChartProps,
+  F0DataChartRadarIndicator,
+  F0DataChartRadarProps,
+  F0DataChartRadarSeries,
 } from "./types"
 
 export { type ChartColorToken, chartColorTokens } from "./utils/colors"
@@ -21,7 +29,11 @@ export type { ChartTheme } from "./utils/theme"
 export {
   BarChartSkeleton,
   FunnelChartSkeleton,
+  GaugeChartSkeleton,
+  HeatmapChartSkeleton,
   LineChartSkeleton,
+  PieChartSkeleton,
+  RadarChartSkeleton,
 } from "./skeletons"
 
 /**
