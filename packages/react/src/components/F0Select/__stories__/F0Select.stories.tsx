@@ -644,6 +644,7 @@ export const WithDataSourceGrouping: Story = {
       grouping: {
         mandatory: true,
         collapsible: true,
+        defaultOpenGroups: true,
         groupBy: {
           role: {
             name: "Role",
