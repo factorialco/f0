@@ -619,7 +619,7 @@ export const TableCollection = <
                         }
                       >
                         <GroupHeader
-                          className="px-3"
+                          className={source.selectable ? "pl-1.5 pr-3" : "px-3"}
                           selectable={!!source.selectable}
                           select={statusToChecked(
                             groupAllSelectedStatus[group.key]
