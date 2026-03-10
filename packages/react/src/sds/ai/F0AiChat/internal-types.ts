@@ -1,4 +1,5 @@
 import { type AIMessage, type Message } from "@copilotkit/shared"
+import type { ChatDashboardConfig } from "../F0ChatDashboard/types"
 
 import {
   type AiChatDisclaimer,
@@ -136,6 +137,12 @@ export type AiChatProviderReturnValue = {
   | "entityResolvers"
   | "toolHints"
 > & {
+    /** The current canvas dashboard config, or null when canvas is closed */
+    canvasDashboard: ChatDashboardConfig | null
+    /** Open the canvas panel with the given dashboard config */
+    openCanvas: (config: ChatDashboardConfig) => void
+    /** Close the canvas panel and restore the previous visualization mode */
+    closeCanvas: () => void
     /** The currently active tool hint, or null if none is selected */
     activeToolHint: AiChatToolHint | null
     /** Set the active tool hint (pass null to clear) */

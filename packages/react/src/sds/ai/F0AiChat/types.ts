@@ -56,7 +56,7 @@ export type AiChatToolHint = {
 /**
  * Visualization mode for the AI chat
  */
-export type VisualizationMode = "sidepanel" | "fullscreen"
+export type VisualizationMode = "sidepanel" | "fullscreen" | "canvas"
 
 /**
  * Tracking options for the AI chat

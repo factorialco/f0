@@ -7,6 +7,7 @@ import {
   createContext,
   type FC,
   type PropsWithChildren,
+  useCallback,
   useContext,
   useEffect,
   useRef,
@@ -14,6 +15,8 @@ import {
 } from "react"
 
 import { useI18n } from "@/lib/providers/i18n"
+
+import type { ChatDashboardConfig } from "../../F0ChatDashboard/types"
 
 import { DEFAULT_CHAT_WIDTH } from "../constants"
 import { AiChatProviderReturnValue, AiChatState } from "../internal-types"
@@ -90,6 +93,12 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
     }
   }, [open])
 
+  const [canvasDashboard, setCanvasDashboard] =
+    useState<ChatDashboardConfig | null>(null)
+
+  // Track the mode before canvas was opened so we can restore it on close
+  const previousVisualizationModeRef = useRef<VisualizationMode>("sidepanel")
+
   const [activeToolHint, setActiveToolHint] = useState<AiChatToolHint | null>(
     null
   )
@@ -129,6 +138,11 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
     if (clearFunctionRef.current) {
       clearFunctionRef.current()
     }
+    // Close canvas when starting a new conversation
+    setCanvasDashboard(null)
+    if (visualizationMode === "canvas") {
+      setVisualizationMode(previousVisualizationModeRef.current)
+    }
   }
 
   const resetChatWidth = () => {
@@ -164,6 +178,7 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   // Reset visualization mode when chat closes
   useEffect(() => {
     if (!open) {
+      setCanvasDashboard(null)
       setVisualizationMode("sidepanel")
       const prefersReducedMotion = window.matchMedia(
         "(prefers-reduced-motion: reduce)"
@@ -178,6 +193,30 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
       setOpen(true)
     }
   }, [visualizationMode, open])
+
+  // Open the canvas panel with a dashboard config.
+  // Saves the current visualization mode so it can be restored on close.
+  const openCanvas = useCallback(
+    (config: ChatDashboardConfig) => {
+      if (visualizationMode !== "canvas") {
+        previousVisualizationModeRef.current = visualizationMode
+      }
+      setCanvasDashboard(config)
+      setVisualizationMode("canvas")
+      if (!open) {
+        setOpen(true)
+      }
+    },
+    [visualizationMode, open]
+  )
+
+  // Close the canvas panel and restore the previous visualization mode.
+  const closeCanvas = useCallback(() => {
+    setCanvasDashboard(null)
+    if (visualizationMode === "canvas") {
+      setVisualizationMode(previousVisualizationModeRef.current)
+    }
+  }, [visualizationMode])
 
   return (
     <AiChatStateContext.Provider
@@ -216,6 +255,9 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         tracking,
         entityResolvers,
         toolHints,
+        canvasDashboard,
+        openCanvas,
+        closeCanvas,
         activeToolHint,
         setActiveToolHint,
       }}
@@ -265,6 +307,9 @@ export function useAiChat(): AiChatProviderReturnValue {
       tracking: undefined,
       entityResolvers: undefined,
       toolHints: undefined,
+      canvasDashboard: null,
+      openCanvas: noopFn,
+      closeCanvas: noopFn,
       activeToolHint: null,
       setActiveToolHint: noopFn,
     }
