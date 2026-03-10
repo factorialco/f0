@@ -82,6 +82,7 @@ export const EditableTableCollection = <
         cellRenderer={EditableCellRenderer}
         showItemActions={false}
         visualizationSettings={settings.visualization?.editableTable}
+        fromVisualization="editableTable"
       />
     </AddRowProvider>
   )

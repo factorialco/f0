@@ -3,12 +3,12 @@ import type { RecordType, SortingsDefinition } from "@/hooks/datasource"
 import { renderProperty } from "@/experimental/OneDataCollection/property-render"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-import { valueDisplayEditors } from "@/ui/value-display/editors"
 
 import type { SummariesDefinition } from "../../../../summary"
 import type { CellRendererProps } from "../../Table/types"
 import type { EditableTableColumnDefinition } from "../types"
 
+import { editableCellMap } from "../consts"
 import { useEditableRow } from "../context/EditableRowContext"
 
 /**
@@ -30,11 +30,6 @@ function getCellValue<R extends RecordType>(
   if (typeof rendered === "string") return rendered
   if (typeof rendered === "number") return String(rendered)
 
-  if (process.env.NODE_ENV === "development") {
-    console.warn(
-      `EditableTable: getCellValue for column "${column.id}" returned a non-primitive render value.`
-    )
-  }
   return ""
 }
 
@@ -48,7 +43,11 @@ export function EditableCellRenderer<
   R extends RecordType,
   Sortings extends SortingsDefinition,
   Summaries extends SummariesDefinition,
->({ column, children }: CellRendererProps<R, Sortings, Summaries>) {
+>({
+  column,
+  children,
+  isLastColumn,
+}: CellRendererProps<R, Sortings, Summaries> & { isLastColumn?: boolean }) {
   const editableCtx = useEditableRow<R>()
   const i18n = useI18n()
 
@@ -69,16 +68,8 @@ export function EditableCellRenderer<
 
   const hasId = editableColumn.id !== undefined
 
-  if (process.env.NODE_ENV === "development" && isEditable && !hasId) {
-    // Columns with an editType must define an id to support updates
-    // and error/loading state. Without an id the cell will be read-only.
-    console.warn(
-      `EditableTable: column "${editableColumn.label}" is editable but has no "id" defined. It will render as read-only.`
-    )
-  }
-
   if (isEditable && hasId && cellEditType) {
-    const CellComponent = valueDisplayEditors[cellEditType]
+    const CellComponent = editableCellMap[cellEditType]
 
     if (CellComponent) {
       const value = getCellValue(localItem, editableColumn)
@@ -92,7 +83,7 @@ export function EditableCellRenderer<
       return (
         // eslint-disable-next-line jsx-a11y/no-static-element-interactions -- stops cell navigation (href/onClick) from firing when interacting with the editor
         <div
-          className="pointer-events-auto"
+          className="pointer-events-auto h-full"
           onClickCapture={(e) => e.stopPropagation()}
           onMouseDownCapture={(e) => e.stopPropagation()}
         >
@@ -117,7 +108,10 @@ export function EditableCellRenderer<
     <div
       className={cn(
         editableColumn.align === "right" ? "justify-end" : "",
-        "flex"
+        "flex p-4 min-h-12 items-center border-0 h-full",
+        !isLastColumn &&
+          "border-r-[1px] border-solid border-f1-border-secondary",
+        "bg-f1-background-secondary h-full"
       )}
     >
       {renderProperty(localItem, editableColumn, "editableTable", i18n)}

@@ -5,23 +5,19 @@ import {
   SortingsDefinition,
 } from "@/hooks/datasource"
 
-import { ItemActionsDefinition } from "../../../item-actions"
-import { NavigationFiltersDefinition } from "../../../navigationFilters/types"
-import { SummariesDefinition } from "../../../summary"
-import { CollectionProps } from "../../../types"
-
-import type { EditableValueDisplayType } from "@/ui/value-display/editors"
-
 import type {
   TableColumnDefinition,
   TableVisualizationOptions,
   TableVisualizationSettings,
 } from "../Table/types"
 
-export type EditableTableVisualizationSettings = TableVisualizationSettings
+import { ItemActionsDefinition } from "../../../item-actions"
+import { NavigationFiltersDefinition } from "../../../navigationFilters/types"
+import { SummariesDefinition } from "../../../summary"
+import { CollectionProps } from "../../../types"
+import { EditableTableCellEditType } from "./components/cells"
 
-/** The edit mode for a column cell in the editable table. Derived from value-display editors. */
-export type EditableTableCellEditType = EditableValueDisplayType
+export type EditableTableVisualizationSettings = TableVisualizationSettings
 
 /**
  * Column definition for Editable Table.
