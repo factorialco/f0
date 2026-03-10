@@ -1,20 +1,23 @@
-import { useCallback, useState } from "react"
+import { useCallback, useRef, useState } from "react"
 
 import type { DialogPosition } from "@/components/F0Dialog/types"
+import type { F0FormSubmitResult } from "@/components/F0Form/types"
 
 import { F0Dialog } from "@/components/F0Dialog"
+import { F0Form } from "@/components/F0Form/F0Form"
+import { useF0Form } from "@/components/F0Form/useF0Form"
 import { ArrowLeft, ArrowRight, Maximize, Minimize } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
+import { ProgressBarCell } from "@/ui/value-display/types/progressBar"
 
-import type { SurveyAnsweringFormProps, SurveyFormSubmitResult } from "./types"
+import type { SurveyAnsweringFormProps, SurveySubmitAnswers } from "./types"
 
 import { SurveyFormBuilderProvider } from "../SurveyFormBuilder/Context"
 import { TableOfContent } from "../SurveyFormBuilder/Form/TableOfContent"
-import { AllQuestionsView } from "./components/AllQuestionsView"
-import { SteppedView } from "./components/SteppedView"
 import { useStepper } from "./hooks/useStepper"
-import { useSurveyForm } from "./hooks/useSurveyForm"
-import { useSurveyValidation } from "./hooks/useSurveyValidation"
+import { useSurveyFormSchema } from "./hooks/useSurveyFormSchema"
+
+const noop = () => {}
 
 export function SurveyAnsweringForm({
   elements,
@@ -29,61 +32,73 @@ export function SurveyAnsweringForm({
 }: SurveyAnsweringFormProps) {
   const { t } = useI18n()
   const [isFullscreen, setIsFullscreen] = useState(fullscreenProp)
-  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const { currentElements, setCurrentElements, flatQuestions, getAnswers } =
-    useSurveyForm(elements, defaultValues)
+  const { formRef, submit, isSubmitting, hasErrors } = useF0Form()
+
+  const visibleQuestionIdRef = useRef<string | undefined>(undefined)
+
+  const {
+    schema,
+    defaultValues: formDefaultValues,
+    flatQuestions,
+    sections,
+  } = useSurveyFormSchema(
+    elements,
+    mode,
+    t,
+    defaultValues,
+    visibleQuestionIdRef
+  )
+
   const stepper = useStepper(flatQuestions)
-  const { errors, hasErrors, validateAll, validateField, onFieldBlur } =
-    useSurveyValidation({
-      mode,
-      elements: currentElements,
-      getAnswers,
-      t,
-    })
+  visibleQuestionIdRef.current = stepper.currentQuestion?.id
 
   const position: DialogPosition = isFullscreen ? "fullscreen" : "center"
-  const showTableOfContent = mode === "all-questions"
 
-  const handleSubmit = useCallback(async () => {
-    if (!validateAll()) return
-
-    setIsSubmitting(true)
-    try {
-      const answers = getAnswers()
-      const plainAnswers: Record<
-        string,
-        string | number | string[] | Date | null
-      > = {}
-      for (const [key, answer] of Object.entries(answers)) {
-        plainAnswers[key] = answer.value
+  const handleF0Submit = useCallback(
+    async (data: Record<string, unknown>): Promise<F0FormSubmitResult> => {
+      const submitData: SurveySubmitAnswers = {}
+      for (const [key, val] of Object.entries(data)) {
+        submitData[key] = (val === undefined ? null : val) as
+          | string
+          | number
+          | string[]
+          | Date
+          | null
       }
-      const result: SurveyFormSubmitResult = await onSubmit(plainAnswers)
+      const result = await onSubmit(submitData)
       if (result.success) {
         onClose()
+        return { success: true }
       }
-    } finally {
-      setIsSubmitting(false)
-    }
-  }, [getAnswers, onSubmit, onClose, validateAll])
+      return { success: false, errors: result.errors }
+    },
+    [onSubmit, onClose]
+  )
 
   const isCurrentStepValid = useCallback(() => {
     if (mode !== "stepped" || !stepper.currentQuestion) return true
     if (!stepper.currentQuestion.required) return true
-    const answers = getAnswers()
-    const answer = answers[stepper.currentQuestion.id]
-    if (!answer) return false
-    const { value } = answer
+    const values = formRef.current?.getValues() ?? {}
+    const value = values[stepper.currentQuestion.id]
     if (value === null || value === undefined) return false
     if (Array.isArray(value) && value.length === 0) return false
+    if (typeof value === "string" && value.trim() === "") return false
     return true
-  }, [mode, stepper.currentQuestion, getAnswers])
+  }, [mode, stepper.currentQuestion, formRef])
 
   const handleNext = useCallback(() => {
     if (!isCurrentStepValid()) return
-    validateField(stepper.currentQuestion!.id)
     stepper.goToNext()
-  }, [isCurrentStepValid, stepper, validateField])
+  }, [isCurrentStepValid, stepper])
+
+  const handleSubmit = useCallback(async () => {
+    try {
+      await submit()
+    } catch {
+      // Validation failed — F0Form shows errors
+    }
+  }, [submit])
 
   const otherActions = allowToChangeFullscreen
     ? [
@@ -121,6 +136,9 @@ export function SurveyAnsweringForm({
         }
       : undefined
 
+  const showTableOfContent = mode === "all-questions"
+  const isStepped = mode === "stepped"
+
   return (
     <F0Dialog
       isOpen={isOpen}
@@ -133,30 +151,45 @@ export function SurveyAnsweringForm({
       otherActions={otherActions}
       disableContentPadding
     >
-      <SurveyFormBuilderProvider
-        answering
-        elements={currentElements}
-        onChange={setCurrentElements}
-        errors={errors}
-        onFieldBlur={onFieldBlur}
-      >
+      <SurveyFormBuilderProvider answering elements={elements} onChange={noop}>
         <div className="relative flex h-full flex-col">
           {showTableOfContent && (
-            <TableOfContent
-              elements={currentElements}
-              onChange={setCurrentElements}
-            />
+            <TableOfContent elements={elements} onChange={noop} answering />
+          )}
+          {isStepped && (
+            <div className="absolute left-0 right-0 top-0 [&>div>div>div]:h-1 [&>div>div>div]:rounded-none">
+              <ProgressBarCell
+                label="Value"
+                value={stepper.progress}
+                hideLabel
+              />
+            </div>
           )}
           <div className="mx-auto flex w-full flex-col justify-center px-4 py-12 md:w-[750px]">
-            {mode === "all-questions" ? (
-              <AllQuestionsView elements={currentElements} />
-            ) : stepper.currentQuestion ? (
-              <SteppedView
-                elements={currentElements}
-                currentQuestion={stepper.currentQuestion}
-                progress={stepper.progress}
-              />
-            ) : null}
+            {isStepped && stepper.currentQuestion?.sectionTitle && (
+              <div className="py-1 pl-5">
+                <span className="text-lg font-semibold text-f1-foreground">
+                  {stepper.currentQuestion.sectionTitle}
+                </span>
+                {stepper.currentQuestion.sectionDescription && (
+                  <p className="text-f1-foreground-secondary">
+                    {stepper.currentQuestion.sectionDescription}
+                  </p>
+                )}
+              </div>
+            )}
+            <F0Form
+              formRef={formRef}
+              name="survey-answering"
+              schema={schema}
+              defaultValues={formDefaultValues}
+              onSubmit={handleF0Submit}
+              submitConfig={{ hideSubmitButton: true, hideActionBar: true }}
+              errorTriggerMode={
+                mode === "all-questions" ? "on-blur" : "on-submit"
+              }
+              sections={sections}
+            />
           </div>
         </div>
       </SurveyFormBuilderProvider>

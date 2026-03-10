@@ -1,29 +1,22 @@
 import { useMemo } from "react"
 
-import { F0Select } from "@/components/F0Select"
+import type { F0Field } from "@/components/F0Form/fields/types"
+
+import { F0FormField } from "@/components/F0FormField"
+import { Input } from "@/experimental/Forms/Fields/Input"
 import { useI18n } from "@/lib/providers/i18n"
 
 import { useSurveyFormBuilderContext } from "../../Context"
-import { BaseQuestion } from "../BaseQuestion"
+import { BaseQuestion, useQuestionDisabled } from "../BaseQuestion"
 import { DropdownSingleQuestionProps } from "./types"
 
 export const DropdownSingleQuestion = ({
   options,
   ...props
 }: DropdownSingleQuestionProps) => {
-  const {
-    onQuestionChange,
-    answering,
-    getSectionContainingQuestion,
-    errors,
-    onFieldBlur,
-  } = useSurveyFormBuilderContext()
+  const { onQuestionChange, answering } = useSurveyFormBuilderContext()
 
-  const fieldError = errors?.[props.id]
-
-  const containingSection = getSectionContainingQuestion(props.id)
-
-  const questionLocked = props.locked || containingSection?.locked
+  const disabled = useQuestionDisabled(props)
 
   const { t } = useI18n()
 
@@ -33,30 +26,49 @@ export const DropdownSingleQuestion = ({
     [options]
   )
 
+  const placeholder = t("surveyFormBuilder.answer.dropdownPlaceholder")
+
+  const field: F0Field = useMemo(
+    () => ({
+      id: props.id,
+      type: "select" as const,
+      label: t("surveyFormBuilder.answer.label"),
+      placeholder,
+      options: selectOptions,
+      clearable: !props.required,
+      multiple: false,
+    }),
+    [props.id, props.required, selectOptions, t]
+  )
+
   return (
     <BaseQuestion {...props}>
       <div className="flex flex-col items-start px-0.5 [&>div]:w-full">
-        <F0Select
-          label={t("surveyFormBuilder.answer.label")}
-          hideLabel
-          size="md"
-          clearable={!props.required}
-          multiple={false}
-          options={selectOptions}
-          value={props.value ?? ""}
-          onChange={(value) => {
-            onQuestionChange?.({
-              id: props.id,
-              type: "dropdown-single",
-              value,
-            })
-            onFieldBlur?.(props.id)
-          }}
-          placeholder={t("surveyFormBuilder.answer.dropdownPlaceholder")}
-          disabled={answering ? false : questionLocked || true}
-          required={props.required}
-          error={fieldError}
-        />
+        {answering ? (
+          <F0FormField
+            field={field}
+            value={props.value ?? ""}
+            onChange={(value) => {
+              onQuestionChange?.({
+                id: props.id,
+                type: "dropdown-single",
+                value: value as string,
+              })
+            }}
+            disabled={disabled}
+            hideLabel
+          />
+        ) : (
+          <Input
+            type="text"
+            size="md"
+            value={placeholder}
+            onChange={() => {}}
+            disabled
+            label={t("surveyFormBuilder.answer.label")}
+            hideLabel={true}
+          />
+        )}
       </div>
     </BaseQuestion>
   )

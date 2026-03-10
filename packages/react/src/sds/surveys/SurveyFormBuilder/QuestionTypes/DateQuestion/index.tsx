@@ -1,6 +1,6 @@
-import { useMemo } from "react"
+import type { F0Field } from "@/components/F0Form/fields/types"
 
-import { DatePickerValue, F0DatePicker } from "@/components/F0DatePicker"
+import { F0FormField } from "@/components/F0FormField"
 import { useI18n } from "@/lib/providers/i18n"
 
 import { useSurveyFormBuilderContext } from "../../Context"
@@ -8,6 +8,7 @@ import { BaseQuestionOnChangeParams } from "../../types"
 import {
   BaseQuestion,
   BaseQuestionPropsForOtherQuestionComponents,
+  useQuestionDisabled,
 } from "../BaseQuestion"
 
 export type DateQuestionOnChangeParams = BaseQuestionOnChangeParams & {
@@ -22,47 +23,34 @@ export const DateQuestion = ({
   value,
   ...baseQuestionComponentProps
 }: DateQuestionProps) => {
-  const { onQuestionChange, answering, errors, onFieldBlur } =
-    useSurveyFormBuilderContext()
+  const { onQuestionChange } = useSurveyFormBuilderContext()
 
-  const fieldError = errors?.[baseQuestionComponentProps.id]
+  const disabled = useQuestionDisabled(baseQuestionComponentProps)
 
   const { t } = useI18n()
 
-  const handleChangeDate = (newValue: DatePickerValue | undefined) => {
-    onQuestionChange?.({
-      ...baseQuestionComponentProps,
-      type: "date",
-      value: newValue?.value?.from,
-    })
-    onFieldBlur?.(baseQuestionComponentProps.id)
+  const field: F0Field = {
+    id: baseQuestionComponentProps.id,
+    type: "date",
+    label: t("surveyFormBuilder.answer.label"),
+    clearable: !baseQuestionComponentProps.required,
   }
-
-  const datePickerValue = useMemo(
-    () =>
-      value
-        ? {
-            granularity: "day" as const,
-            value: { from: value, to: value },
-          }
-        : undefined,
-    [value]
-  )
 
   return (
     <BaseQuestion {...baseQuestionComponentProps}>
       <div className="px-0.5">
-        <F0DatePicker
-          size="md"
-          value={datePickerValue}
-          onChange={handleChangeDate}
-          disabled={!answering}
-          label={t("surveyFormBuilder.answer.label")}
-          hideLabel={true}
-          required={baseQuestionComponentProps.required}
-          readonly={!answering}
-          clearable={!baseQuestionComponentProps.required}
-          error={fieldError}
+        <F0FormField
+          field={field}
+          value={value ?? undefined}
+          onChange={(v) => {
+            onQuestionChange?.({
+              ...baseQuestionComponentProps,
+              type: "date",
+              value: (v as Date | null) ?? undefined,
+            })
+          }}
+          disabled={disabled}
+          hideLabel
         />
       </div>
     </BaseQuestion>

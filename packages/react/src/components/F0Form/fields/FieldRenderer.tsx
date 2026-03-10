@@ -15,29 +15,29 @@ import {
   FormMessage,
 } from "@/ui/form"
 
-import { generateAnchorId, useF0FormContext } from "../context"
-import { isFieldRequired } from "./schema"
 import type { F0Field } from "./types"
+
+import { generateAnchorId, useF0FormContext } from "../context"
+// Import field renderers
+import { CheckboxFieldRenderer } from "./checkbox/CheckboxFieldRenderer"
+import { CustomFieldRenderer } from "./custom/CustomFieldRenderer"
+import { DateFieldRenderer } from "./date/DateFieldRenderer"
+import { DateTimeFieldRenderer } from "./date/DateTimeFieldRenderer"
+import { TimeFieldRenderer } from "./date/TimeFieldRenderer"
+import { DateRangeFieldRenderer } from "./daterange/DateRangeFieldRenderer"
+import { FileFieldRenderer } from "./file/FileFieldRenderer"
+import { NumberFieldRenderer } from "./number/NumberFieldRenderer"
+import { RichTextFieldRenderer } from "./richtext/RichTextFieldRenderer"
+import { isFieldRequired } from "./schema"
+import { SelectFieldRenderer } from "./select/SelectFieldRenderer"
+import { SwitchFieldRenderer } from "./switch/SwitchFieldRenderer"
+import { TextFieldRenderer } from "./text/TextFieldRenderer"
+import { TextareaFieldRenderer } from "./textarea/TextareaFieldRenderer"
 import {
   evaluateDateConstraint,
   evaluateDisabled,
   evaluateRenderIf,
 } from "./utils"
-
-// Import field renderers
-import { CheckboxFieldRenderer } from "./checkbox/CheckboxFieldRenderer"
-import { CustomFieldRenderer } from "./custom/CustomFieldRenderer"
-import { DateFieldRenderer } from "./date/DateFieldRenderer"
-import { TimeFieldRenderer } from "./date/TimeFieldRenderer"
-import { DateTimeFieldRenderer } from "./date/DateTimeFieldRenderer"
-import { DateRangeFieldRenderer } from "./daterange/DateRangeFieldRenderer"
-import { NumberFieldRenderer } from "./number/NumberFieldRenderer"
-import { RichTextFieldRenderer } from "./richtext/RichTextFieldRenderer"
-import { SelectFieldRenderer } from "./select/SelectFieldRenderer"
-import { SwitchFieldRenderer } from "./switch/SwitchFieldRenderer"
-import { TextFieldRenderer } from "./text/TextFieldRenderer"
-import { FileFieldRenderer } from "./file/FileFieldRenderer"
-import { TextareaFieldRenderer } from "./textarea/TextareaFieldRenderer"
 
 interface FieldRendererProps {
   field: F0Field
@@ -62,7 +62,7 @@ interface RenderFieldInputOptions {
 /**
  * Renders the appropriate input component based on field type
  */
-function renderFieldInput({
+export function renderFieldInput({
   field,
   formField,
   fieldState,

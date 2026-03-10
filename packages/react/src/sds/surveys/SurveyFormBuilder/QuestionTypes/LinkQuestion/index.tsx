@@ -1,5 +1,6 @@
-import { Input } from "@/experimental/Forms/Fields/Input"
-import { Link } from "@/icons/app"
+import type { F0Field } from "@/components/F0Form/fields/types"
+
+import { F0FormField } from "@/components/F0FormField"
 import { useI18n } from "@/lib/providers/i18n"
 
 import { useSurveyFormBuilderContext } from "../../Context"
@@ -7,6 +8,7 @@ import { BaseQuestionOnChangeParams } from "../../types"
 import {
   BaseQuestion,
   BaseQuestionPropsForOtherQuestionComponents,
+  useQuestionDisabled,
 } from "../BaseQuestion"
 
 export type LinkQuestionOnChangeParams = BaseQuestionOnChangeParams & {
@@ -23,38 +25,36 @@ export const LinkQuestion = ({
 }: LinkQuestionProps) => {
   const { t } = useI18n()
 
-  const { onQuestionChange, answering, errors, onFieldBlur } =
-    useSurveyFormBuilderContext()
+  const { onQuestionChange, answering } = useSurveyFormBuilderContext()
 
-  const fieldError = errors?.[baseQuestionComponentProps.id]
+  const disabled = useQuestionDisabled(baseQuestionComponentProps)
 
-  const handleChangeText = (newValue: string | null) => {
-    onQuestionChange?.({
-      ...baseQuestionComponentProps,
-      type: "link",
-      value: newValue,
-    })
+  const placeholder = t("surveyFormBuilder.answer.linkPlaceholder")
+
+  const field: F0Field = {
+    id: baseQuestionComponentProps.id,
+    type: "text",
+    inputType: "url",
+    label: t("surveyFormBuilder.answer.label"),
+    placeholder,
+    clearable: !baseQuestionComponentProps.required,
   }
 
   return (
     <BaseQuestion {...baseQuestionComponentProps}>
-      <div
-        className="px-0.5"
-        onBlur={() => onFieldBlur?.(baseQuestionComponentProps.id)}
-      >
-        <Input
-          type="url"
-          size="md"
-          value={value ?? undefined}
-          onChange={handleChangeText}
-          disabled={!answering}
-          label={t("surveyFormBuilder.answer.label")}
-          hideLabel={true}
-          required={baseQuestionComponentProps.required}
-          clearable={!baseQuestionComponentProps.required}
-          placeholder={t("surveyFormBuilder.answer.linkPlaceholder")}
-          error={fieldError}
-          icon={Link}
+      <div className="px-0.5">
+        <F0FormField
+          field={field}
+          value={answering ? (value ?? "") : placeholder}
+          onChange={(v) => {
+            onQuestionChange?.({
+              ...baseQuestionComponentProps,
+              type: "link",
+              value: (v as string) || null,
+            })
+          }}
+          disabled={disabled}
+          hideLabel
         />
       </div>
     </BaseQuestion>

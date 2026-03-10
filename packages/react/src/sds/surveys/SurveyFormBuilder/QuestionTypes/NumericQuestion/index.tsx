@@ -1,3 +1,4 @@
+import { Input } from "@/experimental/Forms/Fields/Input"
 import { NumberInput } from "@/experimental/Forms/Fields/NumberInput"
 import { Numbers } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
@@ -7,6 +8,7 @@ import { BaseQuestionOnChangeParams } from "../../types"
 import {
   BaseQuestion,
   BaseQuestionPropsForOtherQuestionComponents,
+  useQuestionDisabled,
 } from "../BaseQuestion"
 
 export type NumericQuestionOnChangeParams = BaseQuestionOnChangeParams & {
@@ -24,10 +26,9 @@ export const NumericQuestion = ({
 }: NumericQuestionProps) => {
   const { t } = useI18n()
 
-  const { onQuestionChange, answering, errors, onFieldBlur } =
-    useSurveyFormBuilderContext()
+  const { onQuestionChange, answering } = useSurveyFormBuilderContext()
 
-  const fieldError = errors?.[baseQuestionComponentProps.id]
+  const disabled = useQuestionDisabled(baseQuestionComponentProps)
 
   const handleChangeText = (newValue: number | null) => {
     onQuestionChange?.({
@@ -37,26 +38,37 @@ export const NumericQuestion = ({
     })
   }
 
+  const placeholder = t("surveyFormBuilder.answer.numericPlaceholder")
+
   return (
     <BaseQuestion {...baseQuestionComponentProps}>
-      <div
-        className="px-0.5"
-        onBlur={() => onFieldBlur?.(baseQuestionComponentProps.id)}
-      >
-        <NumberInput
-          locale="en-US"
-          size="md"
-          value={value}
-          onChange={handleChangeText}
-          disabled={!answering}
-          label={t("surveyFormBuilder.answer.label")}
-          hideLabel={true}
-          required={baseQuestionComponentProps.required}
-          maxDecimals={0}
-          placeholder={t("surveyFormBuilder.answer.numericPlaceholder")}
-          icon={Numbers}
-          error={fieldError}
-        />
+      <div className="px-0.5">
+        {answering ? (
+          <NumberInput
+            locale="en-US"
+            size="md"
+            value={value}
+            onChange={handleChangeText}
+            disabled={disabled}
+            label={t("surveyFormBuilder.answer.label")}
+            hideLabel={true}
+            required={baseQuestionComponentProps.required}
+            maxDecimals={0}
+            placeholder={placeholder}
+            icon={Numbers}
+          />
+        ) : (
+          <Input
+            type="text"
+            size="md"
+            value={placeholder}
+            onChange={() => {}}
+            disabled
+            label={t("surveyFormBuilder.answer.label")}
+            hideLabel={true}
+            icon={Numbers}
+          />
+        )}
       </div>
     </BaseQuestion>
   )

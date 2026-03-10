@@ -64,6 +64,12 @@ export function SurveyFormBuilderProvider({
   errors,
   onFieldBlur,
 }: SurveyFormBuilderProviderProps) {
+  const elementsRef = useRef(elements)
+  elementsRef.current = elements
+
+  const onChangeRef = useRef(onChange)
+  onChangeRef.current = onChange
+
   const lastElementId = useMemo(() => {
     const lastElement = elements[elements.length - 1]
     if (!lastElement) return undefined
@@ -75,10 +81,10 @@ export function SurveyFormBuilderProvider({
 
   const handleQuestionChange: NonNullable<
     SurveyFormBuilderCallbacks["onQuestionChange"]
-  > = (params) => {
+  > = useCallback((params) => {
     const questionId = params.id
 
-    const newElements = elements.map((element) => {
+    const newElements = elementsRef.current.map((element) => {
       if (element.type === "question") {
         if (element.question.id === questionId) {
           return {
@@ -119,15 +125,15 @@ export function SurveyFormBuilderProvider({
       return element
     })
 
-    onChange(newElements)
-  }
+    onChangeRef.current(newElements)
+  }, [])
 
   const handleSectionChange: NonNullable<
     SurveyFormBuilderCallbacks["onSectionChange"]
-  > = (params) => {
+  > = useCallback((params) => {
     const sectionId = params.id
 
-    const newElements = elements.map((element) => {
+    const newElements = elementsRef.current.map((element) => {
       if (element.type === "section" && element.section.id === sectionId) {
         return {
           ...element,
@@ -140,8 +146,8 @@ export function SurveyFormBuilderProvider({
       return element
     })
 
-    onChange(newElements)
-  }
+    onChangeRef.current(newElements)
+  }, [])
 
   const handleAddElement = useCallback(
     ({
@@ -151,11 +157,11 @@ export function SurveyFormBuilderProvider({
       element: SurveyFormBuilderElement
       afterId?: string
     }) => {
-      const newElements = [...elements]
+      const newElements = [...elementsRef.current]
 
       if (!afterId) {
         newElements.push(element)
-        onChange(newElements)
+        onChangeRef.current(newElements)
         return
       }
 
@@ -180,7 +186,7 @@ export function SurveyFormBuilderProvider({
 
       if (
         element.type === "question" &&
-        newElements.length === elements.length
+        newElements.length === elementsRef.current.length
       ) {
         newElements.forEach((currentElement, index) => {
           if (currentElement.type !== "section") {
@@ -205,9 +211,9 @@ export function SurveyFormBuilderProvider({
         })
       }
 
-      onChange(newElements)
+      onChangeRef.current(newElements)
     },
-    [elements, onChange]
+    []
   )
 
   const handleAddNewElement: NonNullable<

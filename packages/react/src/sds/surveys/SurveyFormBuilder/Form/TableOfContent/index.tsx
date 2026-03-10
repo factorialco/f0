@@ -5,7 +5,6 @@ import { F0TableOfContentPopover } from "@/components/F0TableOfContentPopover/F0
 import { IdStructure } from "@/experimental/Navigation/F0TableOfContent/types"
 import { useI18n } from "@/lib/providers/i18n"
 
-import { useSurveyFormBuilderContext } from "../../Context"
 import {
   SurveyFormBuilderElement,
   QuestionElement,
@@ -82,12 +81,13 @@ function reorderElements(
 export const TableOfContent = ({
   elements,
   onChange,
+  answering,
 }: {
   elements: SurveyFormBuilderElement[]
   onChange: (elements: SurveyFormBuilderElement[]) => void
+  answering?: boolean
 }) => {
   const { t } = useI18n()
-  const { answering } = useSurveyFormBuilderContext()
   const { portalContainer } = useContext(F0DialogContext)
 
   const tocItems = useTableOfContentItems(elements, {
