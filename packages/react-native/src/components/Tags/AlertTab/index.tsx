@@ -1,7 +1,7 @@
 import { AlertCircle, InfoCircle, Warning } from "../../../icons/app"
 import { useTextFormatEnforcer } from "../../../lib/text"
 import { cn } from "../../../lib/utils"
-import { Icon, IconType } from "../../Icon"
+import { F0Icon, type IconType } from "../../primitives/F0Icon"
 import { BaseTag } from "../BaseTag"
 
 type Level = "info" | "warning" | "critical"
@@ -40,7 +40,7 @@ export const AlertTag = <T extends string>({ text, level }: Props<T>) => {
         }[level]
       )}
       left={
-        <Icon
+        <F0Icon
           icon={iconMap[level]}
           className={cn(
             {
