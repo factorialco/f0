@@ -1,6 +1,10 @@
 import type {
   F0DataChartBarSeries,
+  F0DataChartFunnelSeries,
   F0DataChartLineSeries,
+  F0DataChartPieSeries,
+  F0DataChartProps,
+  F0DataChartRadarSeries,
 } from "@/components/F0DataChart"
 
 import { F0DataChart } from "@/components/F0DataChart/F0DataChart"
@@ -23,6 +27,106 @@ function toLineSeries(series: ChatChartSeries[]): F0DataChartLineSeries[] {
   return series.map((s) => ({ name: s.name, data: s.data }))
 }
 
+function toRadarSeries(series: ChatChartSeries[]): F0DataChartRadarSeries[] {
+  return series.map((s) => ({ name: s.name, data: s.data }))
+}
+
+function buildChartProps(props: F0ChatChartProps): {
+  chartProps: F0DataChartProps
+  useSquareAspect: boolean
+} {
+  switch (props.type) {
+    case "bar":
+      return {
+        chartProps: {
+          type: "bar",
+          categories: props.categories,
+          series: toBarSeries(props.series),
+          stacked: props.stacked,
+          showLegend: false,
+          categoryFormatter: truncateLabel,
+        },
+        useSquareAspect: false,
+      }
+    case "line":
+      return {
+        chartProps: {
+          type: "line",
+          categories: props.categories,
+          series: toLineSeries(props.series),
+          lineType: props.lineType,
+          showArea: props.showArea,
+          showDots: props.showDots,
+          showLegend: false,
+          categoryFormatter: truncateLabel,
+        },
+        useSquareAspect: false,
+      }
+    case "funnel": {
+      const funnelSeries: F0DataChartFunnelSeries = {
+        name: "Funnel",
+        data: props.stages.map((s) => ({ name: s.name, value: s.value })),
+      }
+      return {
+        chartProps: {
+          type: "funnel",
+          series: funnelSeries,
+          showConversion: props.showConversion,
+          showLegend: false,
+        },
+        useSquareAspect: false,
+      }
+    }
+    case "pie": {
+      const pieSeries: F0DataChartPieSeries = {
+        name: "Pie",
+        data: props.segments.map((s) => ({ name: s.name, value: s.value })),
+      }
+      return {
+        chartProps: {
+          type: "pie",
+          series: pieSeries,
+          innerRadius: props.donut ? 60 : undefined,
+          showLegend: false,
+        },
+        useSquareAspect: true,
+      }
+    }
+    case "radar":
+      return {
+        chartProps: {
+          type: "radar",
+          indicators: props.indicators,
+          series: toRadarSeries(props.series),
+          showLegend: props.series.length > 1,
+        },
+        useSquareAspect: true,
+      }
+    case "gauge":
+      return {
+        chartProps: {
+          type: "gauge",
+          value: props.value,
+          min: props.min,
+          max: props.max,
+          name: props.name,
+        },
+        useSquareAspect: true,
+      }
+    case "heatmap":
+      return {
+        chartProps: {
+          type: "heatmap",
+          xCategories: props.xCategories,
+          yCategories: props.yCategories,
+          data: props.data,
+          showLabels: true,
+        },
+        useSquareAspect: false,
+      }
+  }
+}
+
 /**
  * Card widget that renders an interactive chart inside the AI chat.
  *
@@ -32,28 +136,8 @@ function toLineSeries(series: ChatChartSeries[]): F0DataChartLineSeries[] {
  * tool, and this component maps it to `F0DataChart`.
  */
 export function F0ChatChart(props: F0ChatChartProps) {
-  const { title, description, categories, ...rest } = props
-
-  const chartProps =
-    rest.type === "bar"
-      ? {
-          type: "bar" as const,
-          categories,
-          series: toBarSeries(rest.series),
-          stacked: rest.stacked,
-          showLegend: false,
-          categoryFormatter: truncateLabel,
-        }
-      : {
-          type: "line" as const,
-          categories,
-          series: toLineSeries(rest.series),
-          lineType: rest.lineType,
-          showArea: rest.showArea,
-          showDots: rest.showDots,
-          showLegend: false,
-          categoryFormatter: truncateLabel,
-        }
+  const { title, description } = props
+  const { chartProps, useSquareAspect } = buildChartProps(props)
 
   return (
     <div
@@ -73,7 +157,14 @@ export function F0ChatChart(props: F0ChatChartProps) {
           </p>
         )}
       </div>
-      <div className="aspect-[5/4] w-full p-4 pb-3 @[350px]:aspect-[4/3] @[500px]:aspect-[2/1]">
+      <div
+        className={cn(
+          "w-full p-4 pb-3",
+          useSquareAspect
+            ? "aspect-square @[350px]:aspect-[4/3] @[500px]:aspect-[3/2]"
+            : "aspect-[5/4] @[350px]:aspect-[4/3] @[500px]:aspect-[2/1]"
+        )}
+      >
         <F0DataChart {...chartProps} />
       </div>
     </div>

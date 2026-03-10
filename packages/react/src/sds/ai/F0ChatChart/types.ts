@@ -10,26 +10,35 @@ export interface ChatChartSeries {
 }
 
 // ---------------------------------------------------------------------------
-// Discriminated union for chart configs sent by the LLM
+// Base types
 // ---------------------------------------------------------------------------
 
-interface ChatChartBase {
+/** Shared card fields for all chart types */
+interface ChatChartCardBase {
   /** Chart title displayed in the card header */
   title: string
   /** Optional description displayed below the title */
   description?: string
+}
+
+/** Card base + category axis (bar, line) */
+interface ChatChartCategoryBase extends ChatChartCardBase {
   /** Labels for the category axis (one per data point) */
   categories: string[]
 }
 
-export interface ChatChartBarConfig extends ChatChartBase {
+// ---------------------------------------------------------------------------
+// Discriminated union for chart configs sent by the LLM
+// ---------------------------------------------------------------------------
+
+export interface ChatChartBarConfig extends ChatChartCategoryBase {
   type: "bar"
   series: ChatChartSeries[]
   /** Stack all series into a single bar per category. @default false */
   stacked?: boolean
 }
 
-export interface ChatChartLineConfig extends ChatChartBase {
+export interface ChatChartLineConfig extends ChatChartCategoryBase {
   type: "line"
   series: ChatChartSeries[]
   /** Line interpolation type. @default "linear" */
@@ -40,11 +49,62 @@ export interface ChatChartLineConfig extends ChatChartBase {
   showDots?: boolean
 }
 
+export interface ChatChartFunnelConfig extends ChatChartCardBase {
+  type: "funnel"
+  /** Named stages of the funnel (e.g. Applied → Hired) */
+  stages: { name: string; value: number }[]
+  /** Show conversion percentages between stages. @default false */
+  showConversion?: boolean
+}
+
+export interface ChatChartPieConfig extends ChatChartCardBase {
+  type: "pie"
+  /** Named segments of the pie */
+  segments: { name: string; value: number }[]
+  /** Render as a donut (hollow center). @default false */
+  donut?: boolean
+}
+
+export interface ChatChartRadarConfig extends ChatChartCardBase {
+  type: "radar"
+  /** Axes of the radar chart */
+  indicators: { name: string; max?: number }[]
+  series: ChatChartSeries[]
+}
+
+export interface ChatChartGaugeConfig extends ChatChartCardBase {
+  type: "gauge"
+  /** Current value to display */
+  value: number
+  /** Minimum value. @default 0 */
+  min?: number
+  /** Maximum value. @default 100 */
+  max?: number
+  /** Label for the gauge metric */
+  name?: string
+}
+
+export interface ChatChartHeatmapConfig extends ChatChartCardBase {
+  type: "heatmap"
+  /** Labels for the X axis */
+  xCategories: string[]
+  /** Labels for the Y axis */
+  yCategories: string[]
+  /** Data tuples [xIndex, yIndex, value] */
+  data: [number, number, number][]
+}
+
 /**
  * Union of chart configs the LLM can send via `displayChart`.
- * Only bar and line are supported for now.
  */
-export type ChatChartConfig = ChatChartBarConfig | ChatChartLineConfig
+export type ChatChartConfig =
+  | ChatChartBarConfig
+  | ChatChartLineConfig
+  | ChatChartFunnelConfig
+  | ChatChartPieConfig
+  | ChatChartRadarConfig
+  | ChatChartGaugeConfig
+  | ChatChartHeatmapConfig
 
 /**
  * Props for the F0ChatChart component.
