@@ -3,8 +3,8 @@ import { tv, type VariantProps } from "tailwind-variants"
 
 import { CrossedCircle } from "../../icons/app"
 import { cn } from "../../lib/utils"
-import { PressableFeedback } from "../PressableFeedback"
 import { F0Icon, type IconType } from "../primitives/F0Icon"
+import { PressableFeedback } from "../primitives/PressableFeedback"
 
 export const chipContainerVariants = tv({
   base: "flex items-center gap-1 rounded-full border border-solid border-f0-border px-2 py-0.5 grow-0",

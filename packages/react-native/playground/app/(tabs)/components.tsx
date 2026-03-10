@@ -17,6 +17,7 @@ import { F0TextShowcase } from "../../components/F0TextShowcase/F0TextShowcase"
 import { OneChipShowcase } from "../../components/OneChipShowcase"
 import { OnePresetShowcase } from "../../components/OnePresetShowcase"
 import { PageHeaderShowcase } from "../../components/PageHeaderShowcase"
+import { PressableFeedbackShowcase } from "../../components/PressableFeedbackShowcase"
 import { Select } from "../../components/Select"
 import { TagShowcase } from "../../components/TagShowcase"
 import { ThemeSwitcher } from "../../components/ThemeSwitcher"
@@ -38,6 +39,7 @@ type ComponentType =
   | "onechip"
   | "onepreset"
   | "pageheader"
+  | "pressablefeedback"
   | "tag"
 
 const componentOptions = [
@@ -55,6 +57,7 @@ const componentOptions = [
   { value: "onechip" as ComponentType, label: "OneChip" },
   { value: "onepreset" as ComponentType, label: "OnePreset" },
   { value: "pageheader" as ComponentType, label: "PageHeader" },
+  { value: "pressablefeedback" as ComponentType, label: "PressableFeedback" },
   { value: "tag" as ComponentType, label: "Tag" },
 ]
 
@@ -103,6 +106,8 @@ export default function ComponentsShowcase() {
         return <OnePresetShowcase />
       case "pageheader":
         return <PageHeaderShowcase />
+      case "pressablefeedback":
+        return <PressableFeedbackShowcase />
       case "tag":
         return <TagShowcase />
       default:
