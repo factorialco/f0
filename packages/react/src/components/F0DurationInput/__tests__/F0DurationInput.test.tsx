@@ -4,7 +4,11 @@ import { zeroRender as render, screen, userEvent } from "@/testing/test-utils"
 import { fireEvent } from "@testing-library/react"
 
 import { F0DurationInput } from ".."
-import { fieldsToSeconds, secondsToFields } from "../utils"
+import {
+  fieldsToSeconds,
+  secondsToFields,
+  secondsToVisibleFields,
+} from "../utils"
 
 describe("secondsToFields", () => {
   it("converts 0 seconds", () => {
@@ -103,6 +107,46 @@ describe("secondsToFields", () => {
       hours: 0,
       minutes: 0,
       seconds: 0,
+    })
+  })
+})
+
+describe("secondsToVisibleFields", () => {
+  it("rolls hours into minutes when only minutes visible", () => {
+    expect(secondsToVisibleFields(7200, ["minutes"])).toEqual({
+      days: 0,
+      hours: 0,
+      minutes: 120,
+      seconds: 0,
+    })
+  })
+
+  it("rolls days and hours into hours when only hours visible", () => {
+    expect(secondsToVisibleFields(90000, ["hours"])).toEqual({
+      days: 0,
+      hours: 25,
+      minutes: 0,
+      seconds: 0,
+    })
+  })
+
+  it("drops sub-unit remainder for hidden finer units", () => {
+    expect(secondsToVisibleFields(7261, ["hours"])).toEqual({
+      days: 0,
+      hours: 2,
+      minutes: 0,
+      seconds: 0,
+    })
+  })
+
+  it("decomposes normally when all units visible", () => {
+    expect(
+      secondsToVisibleFields(90061, ["days", "hours", "minutes", "seconds"])
+    ).toEqual({
+      days: 1,
+      hours: 1,
+      minutes: 1,
+      seconds: 1,
     })
   })
 })
@@ -353,17 +397,17 @@ describe("F0DurationInput", () => {
     })
 
     it("hides the label when label is an empty string and warns", () => {
-      const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {})
+      const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {})
       const { container } = render(
         <F0DurationInput label="" value={0} onChange={() => {}} />
       )
 
       expect(screen.getByRole("group")).toBeInTheDocument()
       expect(container.querySelector("label")).toBeNull()
-      expect(errorSpy).toHaveBeenCalledWith(
+      expect(warnSpy).toHaveBeenCalledWith(
         expect.stringContaining("label is required for accessibility")
       )
-      errorSpy.mockRestore()
+      warnSpy.mockRestore()
     })
 
     it("keeps readonly inputs focusable but non-editable", () => {
@@ -526,6 +570,39 @@ describe("F0DurationInput", () => {
 
       fireEvent.change(screen.getByLabelText("Minutes"), {
         target: { value: "120" },
+      })
+
+      expect(onChange).toHaveBeenLastCalledWith(7200)
+    })
+
+    it("rolls hidden units into visible ones on render", () => {
+      render(
+        <F0DurationInput
+          label="Duration"
+          value={7200}
+          onChange={() => {}}
+          units={["minutes"]}
+        />
+      )
+
+      expect(screen.getByLabelText("Minutes")).toHaveValue("120")
+    })
+
+    it("does not preserve hidden unit remainder on change", () => {
+      const onChange = vi.fn()
+      render(
+        <F0DurationInput
+          label="Duration"
+          value={3661}
+          onChange={onChange}
+          units={["hours"]}
+        />
+      )
+
+      expect(screen.getByLabelText("Hours")).toHaveValue("1")
+
+      fireEvent.change(screen.getByLabelText("Hours"), {
+        target: { value: "2" },
       })
 
       expect(onChange).toHaveBeenLastCalledWith(7200)

@@ -26,7 +26,7 @@ import {
   clampValue,
   fieldsToSeconds,
   getAutoMax,
-  secondsToFields,
+  secondsToVisibleFields,
 } from "./utils"
 
 const STATIC_SUFFIXES: Record<DurationUnit, string> = {
@@ -126,15 +126,6 @@ export const F0DurationInput = forwardRef<HTMLDivElement, F0DurationInputProps>(
   ) {
     const baseId = useId()
     const inputRefs = useRef<Map<DurationUnit, HTMLInputElement>>(new Map())
-    const [localFields, setLocalFields] = useState<DurationFields>(() =>
-      secondsToFields(value)
-    )
-    const lastEmittedRef = useRef(value)
-
-    if (value !== lastEmittedRef.current) {
-      lastEmittedRef.current = value
-      setLocalFields(secondsToFields(value))
-    }
 
     const visibleUnits = useMemo(() => {
       const filtered = UNIT_ORDER.filter((u) => units.includes(u))
@@ -142,7 +133,36 @@ export const F0DurationInput = forwardRef<HTMLDivElement, F0DurationInputProps>(
       return UNIT_ORDER.filter((u) => DEFAULT_UNITS.includes(u))
     }, [units])
 
+    const [localFields, setLocalFields] = useState<DurationFields>(() =>
+      secondsToVisibleFields(value, visibleUnits)
+    )
+    const lastEmittedRef = useRef(value)
+
+    if (value !== lastEmittedRef.current) {
+      lastEmittedRef.current = value
+      setLocalFields(secondsToVisibleFields(value, visibleUnits))
+    }
+
     const firstUnitId = `${baseId}-${visibleUnits[0]}`
+
+    const emitChange = useCallback(
+      (updatedFields: DurationFields) => {
+        const normalized: DurationFields = {
+          days: 0,
+          hours: 0,
+          minutes: 0,
+          seconds: 0,
+        }
+        for (const u of visibleUnits) {
+          normalized[u] = updatedFields[u]
+        }
+        setLocalFields(normalized)
+        const total = fieldsToSeconds(normalized)
+        lastEmittedRef.current = total
+        onChange(total)
+      },
+      [visibleUnits, onChange]
+    )
 
     const handleFieldChange = useCallback(
       (unit: DurationUnit, max: number | undefined) =>
@@ -150,11 +170,7 @@ export const F0DurationInput = forwardRef<HTMLDivElement, F0DurationInputProps>(
           const raw = e.target.value
 
           if (raw === "") {
-            const updatedFields = { ...localFields, [unit]: 0 }
-            setLocalFields(updatedFields)
-            const total = fieldsToSeconds(updatedFields)
-            lastEmittedRef.current = total
-            onChange(total)
+            emitChange({ ...localFields, [unit]: 0 })
             return
           }
 
@@ -165,13 +181,9 @@ export const F0DurationInput = forwardRef<HTMLDivElement, F0DurationInputProps>(
           if (isNaN(parsed)) return
 
           const clamped = clampValue(parsed, max)
-          const updatedFields = { ...localFields, [unit]: clamped }
-          setLocalFields(updatedFields)
-          const total = fieldsToSeconds(updatedFields)
-          lastEmittedRef.current = total
-          onChange(total)
+          emitChange({ ...localFields, [unit]: clamped })
         },
-      [localFields, onChange]
+      [localFields, emitChange]
     )
 
     const handleKeyDown = useCallback(
@@ -214,8 +226,8 @@ export const F0DurationInput = forwardRef<HTMLDivElement, F0DurationInputProps>(
       []
     )
 
-    if (!label) {
-      console.error(
+    if (process.env.NODE_ENV !== "production" && !label) {
+      console.warn(
         "F0DurationInput: label is required for accessibility reasons. If you don't want to show a label, set hideLabel to true."
       )
     }
@@ -224,7 +236,13 @@ export const F0DurationInput = forwardRef<HTMLDivElement, F0DurationInputProps>(
     const showLabel = !hideLabel && label.length > 0
 
     return (
-      <div ref={ref} className="flex flex-col gap-2">
+      <div
+        ref={ref}
+        className={cn(
+          "flex flex-col gap-2",
+          disabled && "pointer-events-none cursor-not-allowed"
+        )}
+      >
         {showLabel && (
           <Label
             label={label}

@@ -14,4 +14,8 @@ export const F0DurationInput = withDataTestId(
 )
 
 export * from "./types"
-export { secondsToFields, fieldsToSeconds } from "./utils"
+export {
+  secondsToFields,
+  secondsToVisibleFields,
+  fieldsToSeconds,
+} from "./utils"

@@ -62,6 +62,24 @@ export function getAutoMax(
   return undefined
 }
 
+export function secondsToVisibleFields(
+  totalSeconds: number,
+  visibleUnits: DurationUnit[]
+): DurationFields {
+  const safe = Number.isFinite(totalSeconds) ? totalSeconds : 0
+  let remaining = Math.max(0, Math.floor(safe))
+
+  const fields: DurationFields = { days: 0, hours: 0, minutes: 0, seconds: 0 }
+  const ordered = UNIT_ORDER.filter((u) => visibleUnits.includes(u))
+
+  for (const unit of ordered) {
+    fields[unit] = Math.floor(remaining / SECONDS_PER_UNIT[unit])
+    remaining = remaining % SECONDS_PER_UNIT[unit]
+  }
+
+  return fields
+}
+
 export function clampValue(val: number, max: number | undefined): number {
   if (max != null && val > max) return max
   if (val < 0) return 0
