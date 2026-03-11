@@ -126,6 +126,7 @@ export const F0DurationInput = forwardRef<HTMLDivElement, F0DurationInputProps>(
   ) {
     const baseId = useId()
     const inputRefs = useRef<Map<DurationUnit, HTMLInputElement>>(new Map())
+    const hasWarnedRef = useRef(false)
 
     const visibleUnits = useMemo(() => {
       const filtered = UNIT_ORDER.filter((u) => units.includes(u))
@@ -222,7 +223,12 @@ export const F0DurationInput = forwardRef<HTMLDivElement, F0DurationInputProps>(
       []
     )
 
-    if (process.env.NODE_ENV !== "production" && !label) {
+    if (
+      process.env.NODE_ENV !== "production" &&
+      !label &&
+      !hasWarnedRef.current
+    ) {
+      hasWarnedRef.current = true
       console.warn(
         "F0DurationInput: label is required for accessibility reasons. If you don't want to show a label, set hideLabel to true."
       )
@@ -261,7 +267,7 @@ export const F0DurationInput = forwardRef<HTMLDivElement, F0DurationInputProps>(
           )}
           onClick={handleContainerClick}
           role="group"
-          aria-label={label || undefined}
+          aria-label={label}
           aria-disabled={disabled || undefined}
           data-status={statusType}
           data-disabled={disabled ? "" : undefined}

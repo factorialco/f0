@@ -396,17 +396,31 @@ describe("F0DurationInput", () => {
       expect(input.id).toBe(htmlFor)
     })
 
-    it("hides the label when label is an empty string and warns", () => {
+    it("hides the label when label is an empty string and warns once", () => {
       const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {})
-      const { container } = render(
+      const { container, rerender } = render(
         <F0DurationInput label="" value={0} onChange={() => {}} />
       )
 
       expect(screen.getByRole("group")).toBeInTheDocument()
       expect(container.querySelector("label")).toBeNull()
+      expect(warnSpy).toHaveBeenCalledTimes(1)
       expect(warnSpy).toHaveBeenCalledWith(
         expect.stringContaining("label is required for accessibility")
       )
+
+      rerender(<F0DurationInput label="" value={60} onChange={() => {}} />)
+      expect(warnSpy).toHaveBeenCalledTimes(1)
+
+      warnSpy.mockRestore()
+    })
+
+    it("sets aria-label on group even when label is empty", () => {
+      const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {})
+      render(<F0DurationInput label="" value={0} onChange={() => {}} />)
+
+      const group = screen.getByRole("group")
+      expect(group).toHaveAttribute("aria-label", "")
       warnSpy.mockRestore()
     })
 
