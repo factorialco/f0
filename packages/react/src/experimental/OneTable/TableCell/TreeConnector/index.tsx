@@ -14,6 +14,7 @@ import {
   isFirstCellWithDepth,
   LINE_WIDTH,
   PADDING_TOP,
+  SELECTABLE_EDITABLE_ROW_OFFSET,
   SELECTABLE_ROW_OFFSET,
   SPACING_FACTOR,
 } from "../utils/nested"
@@ -70,11 +71,16 @@ export const connectorVariables = (
         }
       : {}
 
+  const rowOffset =
+    fromVisualization === "editableTable"
+      ? SELECTABLE_EDITABLE_ROW_OFFSET
+      : SELECTABLE_ROW_OFFSET
+
   return {
-    "--line-left": `-${2 * CHEVRON_SIZE - (nestedRowProps?.selectableRow ? SELECTABLE_ROW_OFFSET : 0)}px`,
+    "--line-left": `-${2 * CHEVRON_SIZE - (nestedRowProps?.selectableRow ? rowOffset : 0)}px`,
     "--line-width": LINE_WIDTH,
     "--horizontal-offset": `${horizontalOffset}px`,
-    "--horizontal-left": `calc(4px - ${nestedRowProps?.selectableRow ? SELECTABLE_ROW_OFFSET : 0}px)`,
+    "--horizontal-left": `calc(4px - ${nestedRowProps?.selectableRow ? rowOffset : 0}px)`,
     "--horizontal-height": `${SPACING_FACTOR / 2}px`,
     "--connector-width": `${connectorWidth}px`,
     ...(lineHeight ? { "--line-height": lineHeight } : {}),

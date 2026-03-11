@@ -74,6 +74,8 @@ export type TableColumnDefinition<
     noHiding?: boolean
   }
 
+export type ReferenceType = "none" | "striped"
+
 export type TableVisualizationOptions<
   R extends RecordType,
   _Filters extends FiltersDefinition,
@@ -96,6 +98,12 @@ export type TableVisualizationOptions<
    * Allow users to hide columns (you can define especifcally non hiddable columns in col props, also frozen columns are not hiddable)
    */
   allowColumnHiding?: boolean
+
+  /**
+   * Marks one or more rows as reference rows.
+   * Reference rows are rendered with a slanted background pattern across the full row.
+   */
+  referenceRowType?: (item: R) => ReferenceType
 }
 
 export type TableCollectionProps<

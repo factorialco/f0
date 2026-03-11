@@ -1,5 +1,47 @@
 # Changelog
 
+## [1.397.0](https://github.com/factorialco/f0/compare/f0-react-v1.396.0...f0-react-v1.397.0) (2026-03-11)
+
+
+### Features
+
+* **F0AnalyticsDashboard:** add all chart types + rewrite stories as reference catalog ([#3617](https://github.com/factorialco/f0/issues/3617)) ([193a9fe](https://github.com/factorialco/f0/commit/193a9fe574ca5c990e1261ee0478d951a8221d5f))
+
+## [1.396.0](https://github.com/factorialco/f0/compare/f0-react-v1.395.0...f0-react-v1.396.0) (2026-03-11)
+
+
+### Features
+
+* add delta display cell ([#3574](https://github.com/factorialco/f0/issues/3574)) ([3d943d8](https://github.com/factorialco/f0/commit/3d943d8ce9f7bb26772836768efb9fa64e36b1ae))
+
+## [1.395.0](https://github.com/factorialco/f0/compare/f0-react-v1.394.1...f0-react-v1.395.0) (2026-03-11)
+
+
+### Features
+
+* data collection reference row ([#3585](https://github.com/factorialco/f0/issues/3585)) ([820243f](https://github.com/factorialco/f0/commit/820243f2c16bf2032d8e1aeb90c61b9ee09b3b7e))
+
+## [1.394.1](https://github.com/factorialco/f0/compare/f0-react-v1.394.0...f0-react-v1.394.1) (2026-03-10)
+
+
+### Bug Fixes
+
+* ai mask ([#3624](https://github.com/factorialco/f0/issues/3624)) ([ae91869](https://github.com/factorialco/f0/commit/ae918695719eb0b51619b4abd0399e574a3f6357))
+
+## [1.394.0](https://github.com/factorialco/f0/compare/f0-react-v1.393.0...f0-react-v1.394.0) (2026-03-10)
+
+
+### Features
+
+* **F0DataChart:** add unified chart component with multiple chart types ([#3613](https://github.com/factorialco/f0/issues/3613)) ([aa4e5e0](https://github.com/factorialco/f0/commit/aa4e5e07ee02f6bf4c17763e2247b46711e5d9a0))
+
+## [1.393.0](https://github.com/factorialco/f0/compare/f0-react-v1.392.1...f0-react-v1.393.0) (2026-03-10)
+
+
+### Features
+
+* editable tables design ([#3539](https://github.com/factorialco/f0/issues/3539)) ([22cf18d](https://github.com/factorialco/f0/commit/22cf18df5d9be1c0bfffe640cabe22e16d7a3f04))
+
 ## [1.392.1](https://github.com/factorialco/f0/compare/f0-react-v1.392.0...f0-react-v1.392.1) (2026-03-09)
 
 
