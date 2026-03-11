@@ -45,10 +45,10 @@ const UNIT_LABELS: Record<DurationUnit, string> = {
 
 const containerVariants = cva({
   base: [
-    "inline-flex cursor-text items-center gap-1 rounded-[10px]",
+    "inline-flex items-center gap-1 rounded-[10px]",
     "border border-solid border-f1-border bg-f1-background",
-    "transition-all",
-    "focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-0",
+    "transition-[border-color]",
+    "focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-0 focus-within:transition-none active:transition-none",
   ],
   variants: {
     size: {
@@ -66,7 +66,7 @@ const containerVariants = cva({
     },
     disabled: {
       true: "cursor-not-allowed opacity-50",
-      false: "",
+      false: "cursor-text",
     },
     readonly: {
       true: "border-f1-border-secondary bg-f1-background-secondary",
@@ -78,7 +78,7 @@ const containerVariants = cva({
       disabled: false,
       readonly: false,
       status: "default",
-      class: "hover:border-f1-border-selected-bold",
+      class: "hover:border-[hsl(var(--neutral-40))]",
     },
     {
       disabled: false,
@@ -213,10 +213,11 @@ export const F0DurationInput = forwardRef<HTMLDivElement, F0DurationInputProps>(
     )
 
     const statusType = status?.type ?? "default"
+    const showLabel = !hideLabel && label.length > 0
 
     return (
       <div ref={ref} className="flex flex-col gap-2">
-        {!hideLabel && (
+        {showLabel && (
           <Label
             label={label}
             required={required}
@@ -236,7 +237,7 @@ export const F0DurationInput = forwardRef<HTMLDivElement, F0DurationInputProps>(
           )}
           onClick={handleContainerClick}
           role="group"
-          aria-label={label}
+          aria-label={label || undefined}
           aria-disabled={disabled || undefined}
           data-status={statusType}
           data-disabled={String(disabled)}

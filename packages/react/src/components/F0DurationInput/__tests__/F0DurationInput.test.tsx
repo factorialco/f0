@@ -310,6 +310,14 @@ describe("F0DurationInput", () => {
       expect(input.id).toBe(htmlFor)
     })
 
+    it("hides the label when label is an empty string", () => {
+      render(<F0DurationInput label="" value={0} onChange={() => {}} />)
+
+      const group = screen.getByRole("group")
+      expect(group).toBeInTheDocument()
+      expect(screen.queryByRole("label")).not.toBeInTheDocument()
+    })
+
     it("keeps readonly inputs focusable but non-editable", () => {
       render(
         <F0DurationInput
