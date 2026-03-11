@@ -22,12 +22,12 @@ export function F0BadgeShowcase() {
       contentContainerStyle={{ paddingBottom: 20 }}
       style={{ width: "100%" }}
     >
-      {/* Type Variants */}
+      {/* Variant Showcase */}
       <Text
         className="mb-4 text-lg font-bold"
         style={{ color: asString(f0Foreground) }}
       >
-        Type Variants
+        Variant Showcase
       </Text>
       <View className="mb-6 flex-row flex-wrap items-center gap-4">
         <View className="items-center">
@@ -123,12 +123,12 @@ export function F0BadgeShowcase() {
         </View>
       </View>
 
-      {/* All Types with Small Size */}
+      {/* All variants with small size */}
       <Text
         className="mb-4 text-lg font-bold"
         style={{ color: asString(f0Foreground) }}
       >
-        All Types - Small Size
+        All Variants - Small Size
       </Text>
       <View className="mb-6 flex-row flex-wrap items-center gap-4">
         <View className="items-center">
@@ -178,12 +178,12 @@ export function F0BadgeShowcase() {
         </View>
       </View>
 
-      {/* All Types with Large Size */}
+      {/* All variants with large size */}
       <Text
         className="mb-4 text-lg font-bold"
         style={{ color: asString(f0Foreground) }}
       >
-        All Types - Large Size
+        All Variants - Large Size
       </Text>
       <View className="mb-6 flex-row flex-wrap items-center gap-4">
         <View className="items-center">

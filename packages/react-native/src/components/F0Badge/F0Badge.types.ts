@@ -2,21 +2,23 @@ import type { VariantProps } from "tailwind-variants"
 
 import type { IconType } from "../primitives/F0Icon"
 
-import type { badgeVariants } from "./F0Badge.styles"
+import {
+  badgeSizeClasses,
+  badgeVariantClasses,
+  type badgeVariants,
+} from "./F0Badge.styles"
 
-export const F0_BADGE_VARIANTS = [
-  "neutral",
-  "highlight",
-  "positive",
-  "critical",
-  "warning",
-] as const
+export type F0BadgeVariant = keyof typeof badgeVariantClasses
 
-export type F0BadgeVariant = (typeof F0_BADGE_VARIANTS)[number]
+export const F0_BADGE_VARIANTS = Object.keys(
+  badgeVariantClasses
+) as ReadonlyArray<F0BadgeVariant>
 
-export const F0_BADGE_SIZES = ["xs", "sm", "md", "lg"] as const
+export type F0BadgeSize = keyof typeof badgeSizeClasses
 
-export type F0BadgeSize = (typeof F0_BADGE_SIZES)[number]
+export const F0_BADGE_SIZES = Object.keys(
+  badgeSizeClasses
+) as ReadonlyArray<F0BadgeSize>
 
 export const F0_BADGE_ICON_SIZES = {
   xs: "xs",
