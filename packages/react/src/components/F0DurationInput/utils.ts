@@ -1,11 +1,7 @@
+import { durationUnits } from "./types"
 import type { DurationFields, DurationUnit } from "./types"
 
-export const UNIT_ORDER: DurationUnit[] = [
-  "days",
-  "hours",
-  "minutes",
-  "seconds",
-]
+export const UNIT_ORDER: DurationUnit[] = [...durationUnits]
 
 export const DEFAULT_UNITS: DurationUnit[] = ["hours", "minutes"]
 
