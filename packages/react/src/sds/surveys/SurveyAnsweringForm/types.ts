@@ -1,6 +1,8 @@
 import type { F0FormErrorTriggerMode } from "@/components/F0Form/types"
 
-import { SurveyFormBuilderElement } from "../SurveyFormBuilder/types"
+import type { SurveyFormBuilderElement } from "../SurveyFormBuilder/types"
+
+export type { SurveyFormBuilderElement }
 
 export type SurveyAnswerValue =
   | { type: "text" | "longText"; value: string | null }
