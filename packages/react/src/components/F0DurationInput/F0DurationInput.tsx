@@ -184,6 +184,8 @@ export const F0DurationInput = forwardRef<HTMLDivElement, F0DurationInputProps>(
           "ArrowRight",
           "Home",
           "End",
+          "Enter",
+          "Escape",
         ]
         if (allowed.includes(e.key)) return
         if (e.metaKey || e.ctrlKey) return
@@ -252,7 +254,12 @@ export const F0DurationInput = forwardRef<HTMLDivElement, F0DurationInputProps>(
             return (
               <Fragment key={unit}>
                 {index > 0 && (
-                  <F0Icon icon={Bullet} size="xs" color="default" />
+                  <F0Icon
+                    icon={Bullet}
+                    size="xs"
+                    color="default"
+                    aria-hidden="true"
+                  />
                 )}
                 <input
                   ref={setInputRef(unit)}
