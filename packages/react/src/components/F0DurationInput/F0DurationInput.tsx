@@ -262,7 +262,7 @@ export const F0DurationInput = forwardRef<HTMLDivElement, F0DurationInputProps>(
                     "text-right font-inherit text-[length:inherit] leading-[inherit]",
                     "placeholder:text-f1-foreground-secondary placeholder:opacity-100",
                     "focus:placeholder:opacity-40",
-                    disabled && "pointer-events-none cursor-not-allowed"
+                    disabled && "cursor-not-allowed"
                   )}
                   style={{ width: `${Math.max(displayValue.length, 1)}ch` }}
                   aria-label={UNIT_LABELS[unit]}
