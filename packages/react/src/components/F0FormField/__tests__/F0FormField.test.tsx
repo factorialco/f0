@@ -39,7 +39,8 @@ describe("F0FormField", () => {
       render(<F0FormField field={field} value={0} onChange={onChange} />)
 
       const input = screen.getByLabelText("Age") as HTMLInputElement
-      expect(input.type).toBe("number")
+      expect(input.type).toBe("text")
+      expect(input.inputMode).toBe("decimal")
     })
 
     it("renders a textarea field", () => {

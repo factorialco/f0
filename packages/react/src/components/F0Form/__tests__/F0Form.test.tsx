@@ -1,9 +1,13 @@
+import userEvent from "@testing-library/user-event"
 import React from "react"
-import { zeroRender as render, screen, waitFor } from "@/testing/test-utils"
 import { describe, expect, it, vi } from "vitest"
 import { z } from "zod"
-import userEvent from "@testing-library/user-event"
 
+import { zeroRender as render, screen, waitFor } from "@/testing/test-utils"
+
+import type { F0SectionConfig } from "../types"
+
+import { createConditionalResolver } from "../conditionalResolver"
 import { F0Form } from "../F0Form"
 import {
   f0FormField,
@@ -11,11 +15,9 @@ import {
   hasF0Config,
   inferFieldType,
 } from "../f0Schema"
-import type { F0SectionConfig } from "../types"
-import { getSchemaDefinition } from "../useSchemaDefinition"
 import { isFieldRequired, isOptionalOrNullable } from "../fields/schema"
 import { evaluateDisabled, evaluateRenderIf } from "../fields/utils"
-import { createConditionalResolver } from "../conditionalResolver"
+import { getSchemaDefinition } from "../useSchemaDefinition"
 
 describe("F0Form", () => {
   it("renders a basic form using schema prop", () => {
