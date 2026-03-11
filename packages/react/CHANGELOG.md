@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.399.0](https://github.com/factorialco/f0/compare/f0-react-v1.398.0...f0-react-v1.399.0) (2026-03-11)
+
+
+### Features
+
+* editable table - nested design fixes ([#3588](https://github.com/factorialco/f0/issues/3588)) ([ed9969f](https://github.com/factorialco/f0/commit/ed9969f0ba1fea53fa6b21a704a2ec6ce018f794))
+
 ## [1.398.0](https://github.com/factorialco/f0/compare/f0-react-v1.397.0...f0-react-v1.398.0) (2026-03-11)
 
 
