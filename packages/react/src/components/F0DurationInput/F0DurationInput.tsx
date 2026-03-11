@@ -267,7 +267,7 @@ export const F0DurationInput = forwardRef<HTMLDivElement, F0DurationInputProps>(
           )}
           onClick={handleContainerClick}
           role="group"
-          aria-label={label}
+          aria-label={label || undefined}
           aria-disabled={disabled || undefined}
           data-status={statusType}
           data-disabled={disabled ? "" : undefined}
@@ -299,7 +299,9 @@ export const F0DurationInput = forwardRef<HTMLDivElement, F0DurationInputProps>(
                     "focus:placeholder:opacity-40",
                     disabled && "pointer-events-none"
                   )}
-                  style={{ width: `${Math.max(displayValue.length, 1)}ch` }}
+                  style={{
+                    width: `${Math.min(Math.max(displayValue.length, 1), 4)}ch`,
+                  }}
                   aria-label={
                     fieldConfig?.[unit]?.ariaLabel ?? UNIT_LABELS[unit]
                   }
@@ -312,7 +314,7 @@ export const F0DurationInput = forwardRef<HTMLDivElement, F0DurationInputProps>(
                   readOnly={readonly}
                   aria-readonly={readonly || undefined}
                 />
-                <span className="text-f1-foreground-secondary/[0.61]">
+                <span className="text-f1-foreground-secondary opacity-[0.61]">
                   {suffix}
                 </span>
               </Fragment>

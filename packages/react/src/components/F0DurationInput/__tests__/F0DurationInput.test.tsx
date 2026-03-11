@@ -415,12 +415,12 @@ describe("F0DurationInput", () => {
       warnSpy.mockRestore()
     })
 
-    it("sets aria-label on group even when label is empty", () => {
+    it("omits aria-label when label is empty", () => {
       const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {})
       render(<F0DurationInput label="" value={0} onChange={() => {}} />)
 
       const group = screen.getByRole("group")
-      expect(group).toHaveAttribute("aria-label", "")
+      expect(group).not.toHaveAttribute("aria-label")
       warnSpy.mockRestore()
     })
 
