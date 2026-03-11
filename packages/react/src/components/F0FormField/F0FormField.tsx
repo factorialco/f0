@@ -7,7 +7,7 @@ import { AlertCircle } from "@/icons/app"
 
 import type { F0FormFieldProps } from "./types"
 
-import { renderFieldInput } from "../F0Form/fields/FieldRenderer"
+import { renderFieldInput } from "../F0Form/fields/renderFieldInput"
 import { isFieldRequired } from "../F0Form/fields/schema"
 
 /**
