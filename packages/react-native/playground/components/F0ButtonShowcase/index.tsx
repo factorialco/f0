@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useCallback, useState } from "react"
 import { ScrollView, View, Text } from "react-native"
 import { useCSSVariable } from "uniwind"
 
@@ -9,12 +9,23 @@ const { Add, Archive, Delete, Save } = AppIcons
 
 export function F0ButtonShowcase() {
   const [f0Foreground] = useCSSVariable(["--color-f0-foreground"])
+  const [isControlledLoading, setIsControlledLoading] = useState(false)
+  const [saveCount, setSaveCount] = useState(0)
 
   const asString = (value: string | number | undefined): string => {
     if (typeof value === "string") return value
     if (typeof value === "number") return String(value)
     return "#000000"
   }
+
+  const handleControlledLoading = useCallback(() => {
+    if (isControlledLoading) return
+
+    setIsControlledLoading(true)
+    setTimeout(() => {
+      setIsControlledLoading(false)
+    }, 2000)
+  }, [isControlledLoading])
 
   return (
     <ScrollView
@@ -353,17 +364,30 @@ export function F0ButtonShowcase() {
         />
       </View>
 
-      {/* Async Example */}
+      {/* Loading Showcase */}
       <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
-        Async Action
+        Loading Showcase
       </Text>
-      <View className="mb-6 items-start">
+      <View className="mb-6 items-start gap-2">
         <F0Button
-          label="Save Changes"
+          label={isControlledLoading ? "Loading..." : "Controlled loading"}
+          loading={isControlledLoading}
+          onPress={handleControlledLoading}
+          accessibilityHint="External loading state demo"
+        />
+        <F0Button
+          label="Start controlled loading"
+          variant="outline"
+          onPress={handleControlledLoading}
+          accessibilityHint="Starts controlled loading for 2 seconds"
+        />
+        <F0Button
+          label={`Async action (${saveCount})`}
           icon={Save}
-          accessibilityHint="Save changes with loading state"
+          accessibilityHint="Async loading state demo"
           onPress={async () => {
             await new Promise((resolve) => setTimeout(resolve, 2000))
+            setSaveCount((current) => current + 1)
           }}
         />
       </View>

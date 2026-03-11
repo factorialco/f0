@@ -11,6 +11,7 @@ F0Button is the semantic button API for React Native in F0. It supports:
 - Optional icon / emoji content
 - Icon-only round mode
 - Async press handlers with automatic loading-state handling
+- Visible loading indicator when busy
 - Press feedback control through `PressableFeedback`
 
 ## Architecture
@@ -92,6 +93,14 @@ If `onPress` returns a Promise, F0Button enters internal loading state until it 
   }}
 />
 ```
+
+### Loading visuals
+
+When `loading` is `true` (external) or an async `onPress` is pending (internal):
+
+- the button becomes non-interactive (`disabled`)
+- a centered spinner indicator is rendered
+- button content is visually hidden (`opacity`) to keep layout stable
 
 ### Press feedback
 

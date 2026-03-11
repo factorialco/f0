@@ -56,6 +56,15 @@ describe("F0Button", () => {
     expect(toJSON()).toMatchSnapshot()
   })
 
+  it("renders loading indicator and hides content when loading", () => {
+    render(<F0Button {...defaultProps} loading />)
+
+    expect(screen.getByTestId("f0-button-loading-indicator")).toBeDefined()
+    expect(screen.getByTestId("f0-button-content").props.className).toContain(
+      "opacity-0"
+    )
+  })
+
   it("Snapshot - different sizes", () => {
     const sizes = ["sm", "md", "lg"] as const
     sizes.forEach((size) => {
@@ -163,10 +172,23 @@ describe("F0Button", () => {
 
     await act(async () => {
       fireEvent.press(screen.getByRole("button"))
-      expect(asyncOnPress).toHaveBeenCalled()
+    })
+
+    expect(asyncOnPress).toHaveBeenCalled()
+    expect(screen.getByTestId("f0-button-loading-indicator")).toBeDefined()
+    expect(screen.getByTestId("f0-button-content").props.className).toContain(
+      "opacity-0"
+    )
+
+    await act(async () => {
       resolvePromise!()
       await asyncOnPress.mock.results[0].value
     })
+
+    expect(screen.queryByTestId("f0-button-loading-indicator")).toBeNull()
+    expect(screen.getByTestId("f0-button-content").props.className).toContain(
+      "opacity-100"
+    )
   })
 
   it("renders all six variants without error", () => {

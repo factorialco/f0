@@ -55,6 +55,41 @@ export const pressedVariants = tv({
   },
 })
 
+export const loadingContentVariants = tv({
+  variants: {
+    loading: {
+      true: "opacity-0",
+      false: "opacity-100",
+    },
+  },
+  defaultVariants: {
+    loading: false,
+  },
+})
+
+export const loadingIndicatorVariants = tv({
+  base: "rounded-full border-solid border-t-transparent",
+  variants: {
+    variant: {
+      default: "border-f0-foreground-inverse",
+      outline: "border-f0-foreground",
+      neutral: "border-f0-foreground",
+      critical: "border-f0-icon-critical",
+      ghost: "border-f0-foreground",
+      promote: "border-f0-icon-promote",
+    },
+    size: {
+      sm: "h-3 w-3 border",
+      md: "h-4 w-4 border-2",
+      lg: "h-5 w-5 border-2",
+    },
+  },
+  defaultVariants: {
+    variant: "default",
+    size: "md",
+  },
+})
+
 export const getIconColor = (
   variant: ButtonVariant,
   isPressed: boolean

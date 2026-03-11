@@ -1,5 +1,19 @@
-import React, { forwardRef, useCallback, useMemo, useState } from "react"
+import React, {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react"
 import { View } from "react-native"
+import Animated, {
+  Easing,
+  cancelAnimation,
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withTiming,
+} from "react-native-reanimated"
 
 import { cn, omitProps } from "../../lib/utils"
 import { F0Icon } from "../primitives/F0Icon"
@@ -8,6 +22,8 @@ import { PressableFeedback } from "../primitives/PressableFeedback"
 
 import {
   buttonVariants,
+  loadingContentVariants,
+  loadingIndicatorVariants,
   pressedVariants,
   getIconColor,
   getIconOnlyColor,
@@ -42,8 +58,10 @@ const F0Button = React.memo(
   ) {
     const [isLoading, setIsLoading] = useState(false)
     const [isPressed, setIsPressed] = useState(false)
+    const spinnerRotation = useSharedValue(0)
 
-    const isDisabled = disabled || loading || isLoading
+    const isBusy = loading || isLoading
+    const isDisabled = disabled || isBusy
     const isRound = hideLabel && round
 
     const handlePress = useCallback(async () => {
@@ -60,6 +78,24 @@ const F0Button = React.memo(
         }
       }
     }, [onPress, isDisabled])
+
+    useEffect(() => {
+      if (!isBusy) {
+        cancelAnimation(spinnerRotation)
+        spinnerRotation.value = 0
+        return
+      }
+
+      spinnerRotation.value = 0
+      spinnerRotation.value = withRepeat(
+        withTiming(1, {
+          duration: 1000,
+          easing: Easing.linear,
+        }),
+        -1,
+        false
+      )
+    }, [isBusy, spinnerRotation])
 
     const handlePressIn = useCallback(() => {
       if (!isDisabled) {
@@ -85,9 +121,9 @@ const F0Button = React.memo(
     const accessibilityLabel = useMemo(() => {
       const parts = [label]
       if (isDisabled) parts.push("disabled")
-      if (loading || isLoading) parts.push("loading")
+      if (isBusy) parts.push("loading")
       return parts.join(", ")
-    }, [label, isDisabled, loading, isLoading])
+    }, [label, isBusy, isDisabled])
 
     const shouldShowPressed = isPressed && !isDisabled
 
@@ -103,6 +139,12 @@ const F0Button = React.memo(
       : undefined
     const textColor = getTextColor(variant, shouldShowPressed)
     const forwardedProps = omitProps(rest, F0_BUTTON_BLOCKED_FORWARD_PROPS)
+    const loadingIndicatorStyle = useAnimatedStyle(() => {
+      return {
+        borderTopColor: "transparent",
+        transform: [{ rotateZ: `${spinnerRotation.value * 360}deg` }],
+      }
+    })
 
     return (
       <View className={`flex ${fullWidth ? "flex-1" : "items-start"}`}>
@@ -118,29 +160,49 @@ const F0Button = React.memo(
           accessibilityRole="button"
           accessibilityState={{
             disabled: isDisabled,
-            busy: loading || isLoading,
+            busy: isBusy,
           }}
           accessibilityHint={accessibilityHint}
           testID={testID}
         >
-          <View className={className}>
-            {icon && (
-              <F0Icon
-                icon={icon}
-                size="lg"
-                className={isRound ? undefined : "-ml-0.5"}
-                color={iconColor}
-              />
-            )}
-            {emoji && (
-              <F0Text variant="body-md-medium" color={textColor}>
-                {emoji}
-              </F0Text>
-            )}
-            {!hideLabel && (
-              <F0Text variant="body-md-medium" color={textColor}>
-                {label}
-              </F0Text>
+          <View className={cn("relative", className)}>
+            <View
+              testID="f0-button-content"
+              className={loadingContentVariants({ loading: isBusy })}
+            >
+              <View className="flex-row items-center justify-center gap-1">
+                {icon && (
+                  <F0Icon
+                    icon={icon}
+                    size="lg"
+                    className={isRound ? undefined : "-ml-0.5"}
+                    color={iconColor}
+                  />
+                )}
+                {emoji && (
+                  <F0Text variant="body-md-medium" color={textColor}>
+                    {emoji}
+                  </F0Text>
+                )}
+                {!hideLabel && (
+                  <F0Text variant="body-md-medium" color={textColor}>
+                    {label}
+                  </F0Text>
+                )}
+              </View>
+            </View>
+            {isBusy && (
+              <View
+                pointerEvents="none"
+                className="absolute inset-0 items-center justify-center"
+              >
+                <Animated.View
+                  testID="f0-button-loading-indicator"
+                  accessibilityLabel="Loading indicator"
+                  className={loadingIndicatorVariants({ variant, size })}
+                  style={loadingIndicatorStyle}
+                />
+              </View>
             )}
           </View>
         </PressableFeedback>
