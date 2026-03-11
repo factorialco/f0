@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.34.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.33.0...f0-react-native-v0.34.0) (2026-03-11)
+
+
+### Features
+
+* **F0Badge:** introduce F0Badge component with variants and sizes ([#3631](https://github.com/factorialco/f0/issues/3631)) ([72febd3](https://github.com/factorialco/f0/commit/72febd3dbe6f7dc3bc1973f865f001069e98078e))
+
 ## [0.33.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.32.0...f0-react-native-v0.33.0) (2026-03-10)
 
 
