@@ -1,10 +1,9 @@
-import type { ComponentType } from "react"
-
-import {
-  EditableCellProps,
-  EditableTableCellEditType,
-} from "./components/cells"
+import { EditableTableCellEditType } from "./components/cells"
+import { DisabledCell } from "./components/cells/status/DisabledCell"
+import { NonEditableCell } from "./components/cells/status/NonEditableCell"
 import { TextCell } from "./components/cells/TextCell"
+
+type EditableCellComponent = typeof TextCell | typeof NonEditableCell
 
 /**
  * Registry that maps each `editType` to its corresponding cell component.
@@ -15,10 +14,12 @@ import { TextCell } from "./components/cells/TextCell"
  */
 export const editableCellMap: Record<
   EditableTableCellEditType,
-  ComponentType<EditableCellProps>
+  EditableCellComponent
 > = {
   text: TextCell,
   date: TextCell,
   select: TextCell,
   multiselect: TextCell,
+  "display-only": NonEditableCell,
+  disabled: DisabledCell,
 }

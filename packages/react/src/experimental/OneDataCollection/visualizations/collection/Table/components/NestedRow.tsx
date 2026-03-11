@@ -18,6 +18,8 @@
 
 import { forwardRef, useCallback, useRef } from "react"
 
+import type { TableVisualizationType } from "@/experimental/OneDataCollection/types"
+
 import { F0Button } from "@/components/F0Button"
 import { FiltersDefinition } from "@/components/OneFilterPicker/types"
 import { DataCollectionSource } from "@/experimental/OneDataCollection/hooks/useDataCollectionSource/types"
@@ -82,6 +84,7 @@ export type RowProps<
   cellRenderer?: React.ComponentType<CellRendererProps<R, Sortings, Summaries>>
   /** Row wrapper for child rows (provides per-row context, e.g. editing state) */
   rowWrapper?: React.ComponentType<RowWrapperProps<R>>
+  fromVisualization?: TableVisualizationType
 }
 
 const NestedRowContent = <
@@ -180,6 +183,8 @@ const NestedRowContent = <
     connectorHeight: calculatedHeight,
   }
 
+  const isTableVisualization = props.fromVisualization === "table"
+
   /**
    * Border logic for hierarchical rows:
    * - Border should only appear on the "last visible element" of the tree
@@ -189,7 +194,7 @@ const NestedRowContent = <
    */
   const firstRow = (props.nestedRowProps?.depth ?? 0) === 0
   const isLastChild = (props.nestedRowProps?.isLastChild || firstRow) ?? false
-  const shouldHideBorder = open || !isLastChild
+  const shouldHideBorder = (open || !isLastChild) && isTableVisualization
 
   return (
     <>
@@ -208,6 +213,7 @@ const NestedRowContent = <
           isLastChild,
         }}
         tableWithChildren={props.tableWithChildren}
+        fromVisualization={props.fromVisualization}
       />
 
       {shouldShowChildren &&
@@ -273,6 +279,7 @@ const NestedRowContent = <
                   depth: depth,
                   isLastChild: childIsLastInTree,
                 }}
+                fromVisualization={props.fromVisualization}
               />
             )
 
@@ -292,7 +299,8 @@ const NestedRowContent = <
           } else {
             // Base case: Leaf node with no children
             // For leaf nodes, border is shown only if it's the last visible element in the tree
-            const leafShouldHideBorder = !childIsLastInTree
+            const leafShouldHideBorder =
+              !childIsLastInTree && isTableVisualization
 
             const leafChild = (
               <Row
@@ -310,6 +318,7 @@ const NestedRowContent = <
                   onExpand: handleExpand,
                   isLastChild: childIsLastInTree,
                 }}
+                fromVisualization={props.fromVisualization}
                 tableWithChildren={props.tableWithChildren}
               />
             )
@@ -465,6 +474,7 @@ const NestedRow = forwardRef(NestedRowComponentInner) as <
     Grouping
   > & {
     ref?: React.ForwardedRef<HTMLTableRowElement>
+    fromVisualization?: TableVisualizationType
   }
 ) => ReturnType<typeof NestedRowComponentInner>
 

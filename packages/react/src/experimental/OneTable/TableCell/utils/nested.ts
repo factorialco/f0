@@ -10,6 +10,8 @@ export const BUTTON_PADDING = 4
 export const CONNECTOR_WIDTH = 40
 export const CONNECTOR_WIDTH_WITH_CHILDREN =
   CONNECTOR_WIDTH - CHEVRON_PARENT_SIZE
+export const SELECTABLE_EDITABLE_ROW_OFFSET = 24
+export const SELECTABLE_ROW_OFFSET = 16
 
 export const getNestedMarginLeft = ({
   depth,

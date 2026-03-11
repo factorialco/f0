@@ -579,6 +579,7 @@ export const TableCollection = <
                     referenceRowType={referenceRowType}
                     rowWrapper={RowWrapper}
                     cellRenderer={cellRenderer}
+                    fromVisualization={fromVisualization}
                   />
                 )
                 if (RowWrapper) {

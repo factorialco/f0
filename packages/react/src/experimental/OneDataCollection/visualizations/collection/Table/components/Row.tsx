@@ -1,5 +1,7 @@
 import { forwardRef } from "react"
 
+import type { TableVisualizationType } from "@/experimental/OneDataCollection/types"
+
 import { FiltersDefinition } from "@/components/OneFilterPicker/types"
 import { ItemActionsMobile } from "@/experimental/OneDataCollection/components/itemActions/ItemActionsMobile/ItemActionsMobile"
 import { ItemActionsRowContainer } from "@/experimental/OneDataCollection/components/itemActions/ItemActionsRowContainer"
@@ -70,6 +72,7 @@ export type RowProps<
   >
   /** Row wrapper passed through to NestedRow for wrapping child rows */
   rowWrapper?: React.ComponentType<RowWrapperProps<R>>
+  fromVisualization?: TableVisualizationType
 }
 
 export type NestedRowProps = {
@@ -117,6 +120,7 @@ const RowComponentInner = <
     referenceRowType: referenceRowTypeFn,
     cellRenderer: CellRenderer,
     rowWrapper,
+    fromVisualization,
   }: RowProps<
     R,
     Filters,
@@ -181,12 +185,20 @@ const RowComponentInner = <
         cellRenderer={CellRenderer}
         rowWrapper={rowWrapper}
         key={key}
+        fromVisualization={fromVisualization}
       />
     )
   }
 
   const isSelected = id !== undefined && selectedItems.has(id)
   const referenceRowType = referenceRowTypeFn?.(item) ?? "none"
+
+  const cellRenderedClass = CellRenderer
+    ? cn(
+        "h-[48px] p-0 align-middle last:pr-0",
+        !tableWithChildren && "first:pl-0"
+      )
+    : undefined
 
   return (
     <TableRow
@@ -206,10 +218,14 @@ const RowComponentInner = <
           width={checkColumnWidth}
           sticky={{ left: 0 }}
           loading={loading}
+          className={cn(
+            loading && tableWithChildren ? "first:pl-4" : "",
+            cellRenderedClass
+          )}
           referenceRowType={referenceRowType}
         >
           {id !== undefined && (
-            <div className="pointer-events-auto ml-1.5 flex items-center justify-start">
+            <div className="pointer-events-auto ml-1.5 flex h-full items-center justify-start">
               <Checkbox
                 checked={selectedItems.has(id)}
                 onCheckedChange={onCheckedChange}
@@ -246,12 +262,10 @@ const RowComponentInner = <
               ...nestedRowProps,
               rowWithChildren,
               tableWithChildren,
+              selectableRow: !!source.selectable,
             }}
-            className={
-              CellRenderer
-                ? "h-[48px] p-0 align-middle first:pl-0 last:pr-0"
-                : undefined
-            }
+            className={cellRenderedClass}
+            fromVisualization={fromVisualization}
             referenceRowType={referenceRowType}
           >
             {CellRenderer ? (
@@ -323,7 +337,10 @@ const Row = forwardRef(RowComponentInner) as <
     ItemActions,
     NavigationFilters,
     Grouping
-  > & { ref?: React.ForwardedRef<HTMLTableRowElement> }
+  > & {
+    ref?: React.ForwardedRef<HTMLTableRowElement>
+    fromVisualization?: TableVisualizationType
+  }
 ) => ReturnType<typeof RowComponentInner>
 
 export { Row }

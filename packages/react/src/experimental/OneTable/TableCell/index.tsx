@@ -1,6 +1,9 @@
 import { AnimatePresence, motion } from "motion/react"
 import { useRef } from "react"
 
+import type { TableVisualizationType } from "@/experimental/OneDataCollection/types"
+
+import { ReferenceType } from "@/experimental/OneDataCollection/visualizations/collection/Table"
 import { NestedRowProps } from "@/experimental/OneDataCollection/visualizations/collection/Table/components/Row"
 import { Skeleton } from "@/ui/skeleton"
 import { TableCell as TableCellRoot } from "@/ui/table"
@@ -17,7 +20,6 @@ import {
   isFirstCellWithTableChildren,
   SPACING_FACTOR,
 } from "./utils/nested"
-import { ReferenceType } from "@/experimental/OneDataCollection/visualizations/collection/Table"
 
 interface TableCellProps {
   children: React.ReactNode
@@ -71,7 +73,12 @@ interface TableCellProps {
   nestedRowProps?: NestedRowProps & {
     rowWithChildren?: boolean
     tableWithChildren?: boolean
+    selectableRow?: boolean
   }
+  /**
+   * The visualization the cell is being rendered in
+   */
+  fromVisualization?: TableVisualizationType
 
   referenceRowType?: ReferenceType
 }
@@ -98,6 +105,7 @@ export function TableCell({
   className,
   loading = false,
   nestedRowProps,
+  fromVisualization,
   referenceRowType = "none",
 }: TableCellProps) {
   const { isScrolled, isScrolledRight } = useTable()
@@ -161,11 +169,23 @@ export function TableCell({
       </AnimatePresence>
 
       {firstCell && nestedRowProps?.tableWithChildren && (
-        <TreeConnector firstCell={firstCell} nestedRowProps={nestedRowProps} />
+        <TreeConnector
+          firstCell={firstCell}
+          nestedRowProps={nestedRowProps}
+          fromVisualization={fromVisualization}
+        />
       )}
 
       {loading && (
-        <div style={{ ...firstCellMarginLeft }}>
+        <div
+          style={{ ...firstCellMarginLeft }}
+          className={cn(
+            "flex h-full items-center",
+            fromVisualization === "editableTable"
+              ? "min-h-[32px]"
+              : "min-h-[24px]"
+          )}
+        >
           <Skeleton className="h-4 w-full" />
         </div>
       )}

@@ -437,14 +437,13 @@ export const getMockVisualizations = (options?: {
                     },
                   },
             id: "name",
-            editable: () => false,
+            editType: () => "display-only" as const,
             sorting: options?.table?.noSorting ? undefined : "name",
             order: options?.table?.allowColumnReordering ? 3 : undefined,
           },
           {
             label: "Email",
             editType: () => "text" as const,
-            editable: () => true,
             render: (item) => item.email,
             sorting: options?.table?.noSorting ? undefined : "email",
             id: "email",
@@ -452,7 +451,6 @@ export const getMockVisualizations = (options?: {
           {
             label: "Role",
             editType: () => "text" as const,
-            editable: () => true,
             render: (item) => item.role,
             sorting: options?.table?.noSorting ? undefined : "role",
             id: "role",
@@ -463,7 +461,6 @@ export const getMockVisualizations = (options?: {
             id: "department",
             label: "Department",
             editType: () => "text" as const,
-            editable: () => true,
             render: (item) => item.department,
             sorting: options?.table?.noSorting ? undefined : "department",
             order: options?.table?.allowColumnReordering ? 4 : undefined,
@@ -473,7 +470,7 @@ export const getMockVisualizations = (options?: {
             ? [
                 {
                   label: "Long",
-                  editable: () => false,
+                  editType: () => "disabled" as const,
                   render: () => ({
                     type: "longText",
                     value: {
@@ -487,7 +484,7 @@ export const getMockVisualizations = (options?: {
             : []),
           {
             label: "Permissions",
-            editable: () => false,
+            editType: () => "disabled" as const,
             render: (item) =>
               [
                 item.permissions?.read ? "Read" : "",

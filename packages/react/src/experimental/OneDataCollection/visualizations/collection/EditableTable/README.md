@@ -73,21 +73,19 @@ const columns = [
     label: "Name",
     render: (item) => item.name,
     editType: () => "text", // Always shows text editor
-    editable: () => true, // Always editable
   },
   {
     id: "email",
     label: "Email",
     render: (item) => item.email,
-    editType: () => "text",
-    editable: (item) => !item.locked, // Only editable if not locked
+    editType: (item) => (!item.locked ? "text" : "display-only"),
   },
   {
     id: "status",
     label: "Status",
     render: (item) => item.status,
     // No editType → always readonly
-    editable: () => false,
+    editType: (item) => "disabled",
   },
 ] as const
 
@@ -128,14 +126,6 @@ type EditableTableColumnDefinition<R> = TableColumnDefinition<R> & {
    * Returns the type ("text", "date", "select", "multiselect") or undefined for readonly.
    */
   editType?: (item: R) => EditableTableCellEditType | undefined
-
-  /**
-   * Determines if the cell is editable for a given item.
-   * The cell is only editable if BOTH:
-   * - editType returns a value
-   * - editable returns true
-   */
-  editable: (item: R) => boolean
 }
 ```
 
