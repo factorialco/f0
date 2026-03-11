@@ -240,7 +240,8 @@ export const F0DurationInput = forwardRef<HTMLDivElement, F0DurationInputProps>(
         ref={ref}
         className={cn(
           "flex flex-col gap-2",
-          disabled && "pointer-events-none cursor-not-allowed"
+          "pointer-events-none",
+          disabled && "cursor-not-allowed"
         )}
       >
         {showLabel && (
@@ -254,6 +255,7 @@ export const F0DurationInput = forwardRef<HTMLDivElement, F0DurationInputProps>(
         )}
         <div
           className={cn(
+            "pointer-events-auto",
             containerVariants({
               size,
               status: statusType,
