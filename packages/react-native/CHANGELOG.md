@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.35.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.34.0...f0-react-native-v0.35.0) (2026-03-11)
+
+
+### Features
+
+* introduce F0Button component ([#3626](https://github.com/factorialco/f0/issues/3626)) ([05bc2b2](https://github.com/factorialco/f0/commit/05bc2b2f29b7db8da6a487639fc7dc21184dfb54))
+
 ## [0.34.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.33.0...f0-react-native-v0.34.0) (2026-03-11)
 
 
