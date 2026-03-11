@@ -492,6 +492,8 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
   const centerActionBarInFrameContent =
     isActionBar && !!submitConfig?.centerActionBarInFrameContent
 
+  const successMessageDuration = submitConfig?.successMessageDuration
+
   // Infer the form values type from the schema
   type TValues = z.infer<TSchema>
 
@@ -610,7 +612,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
         setActionBarStatus("idle")
         setSuccessMessage(undefined)
         successTimerRef.current = null
-      }, 3000)
+      }, successMessageDuration ?? 2000)
     } else {
       setActionBarStatus("idle")
 
@@ -633,18 +635,6 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
       }
     }
   }, [])
-
-  // Reset action bar status when the form becomes dirty again after a successful save
-  useEffect(() => {
-    if (isDirty && actionBarStatus === "success") {
-      if (successTimerRef.current) {
-        clearTimeout(successTimerRef.current)
-        successTimerRef.current = null
-      }
-      setActionBarStatus("idle")
-      setSuccessMessage(undefined)
-    }
-  }, [isDirty, actionBarStatus])
 
   // Handle discard action
   const handleDiscard = () => {

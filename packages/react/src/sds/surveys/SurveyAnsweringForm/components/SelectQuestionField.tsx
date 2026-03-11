@@ -40,19 +40,30 @@ export function SelectQuestionField({
 }: SelectQuestionFieldProps) {
   const { options, type, required } = config
 
+  const handleSingleSelectChange = (optionValue: string) => {
+    if (type !== "select") return
+    const newValue =
+      !required && value === optionValue ? undefined : optionValue
+    onChange(newValue)
+    onBlur()
+  }
+
+  const handleMultiSelectChange = (optionValue: string) => {
+    if (type !== "multi-select") return
+    const currentValue = Array.isArray(value) ? value : []
+    const newValue = currentValue.includes(optionValue)
+      ? currentValue.filter((v: string) => v !== optionValue)
+      : [...currentValue, optionValue]
+    onChange(newValue)
+    onBlur()
+  }
+
   const handleOptionClick = (optionValue: string) => {
     if (type === "select") {
-      const newValue =
-        !required && value === optionValue ? undefined : optionValue
-      onChange(newValue)
+      handleSingleSelectChange(optionValue)
     } else {
-      const currentValue = Array.isArray(value) ? value : []
-      const newValue = currentValue.includes(optionValue)
-        ? currentValue.filter((v: string) => v !== optionValue)
-        : [...currentValue, optionValue]
-      onChange(newValue)
+      handleMultiSelectChange(optionValue)
     }
-    onBlur()
   }
 
   return (
@@ -67,15 +78,23 @@ export function SelectQuestionField({
           <div
             key={option.value}
             className="flex min-h-9 w-full cursor-pointer items-center gap-3 rounded-md bg-f1-background py-0.5 pl-2 pr-0.5 hover:bg-f1-background-hover"
-            onClick={() => handleOptionClick(option.value)}
+            onClick={(e) => {
+              // For multi-select, only trigger on parent div click, not on checkbox
+              if (
+                type === "multi-select" &&
+                (e.target as Element).closest("input")
+              ) {
+                return
+              }
+              handleOptionClick(option.value)
+            }}
           >
             {type === "multi-select" ? (
               <F0Checkbox
                 title={option.label}
                 checked={!!isSelected}
-                onCheckedChange={() => handleOptionClick(option.value)}
+                onCheckedChange={() => handleMultiSelectChange(option.value)}
                 hideLabel
-                stopPropagation
               />
             ) : (
               <RadioIndicator checked={!!isSelected} />

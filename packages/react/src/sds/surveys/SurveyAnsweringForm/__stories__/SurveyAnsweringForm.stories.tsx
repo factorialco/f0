@@ -139,7 +139,10 @@ function SurveyAnsweringFormStory(
         isOpen={isOpen}
         onSubmit={(answers) => {
           console.log({ answers })
-          return { success: true as const }
+          return {
+            success: true as const,
+            message: "Your answers have been submitted successfully!",
+          }
         }}
         onClose={() => setIsOpen(false)}
       />

@@ -9,6 +9,12 @@ import { useF0FormDefinition } from "@/components/F0WizardForm"
 import { createDataSourceDefinition } from "@/hooks/datasource"
 import { ExternalLink, Plus, Settings } from "@/icons/app"
 
+import type {
+  FileUploadHookReturn,
+  FileUploadResult,
+  FileUploadStatus,
+} from "../fields/types"
+
 import {
   f0FormField,
   F0Form,
@@ -16,18 +22,13 @@ import {
   CustomFieldRenderProps,
   useF0Form,
 } from "../index"
-import type {
-  FileUploadHookReturn,
-  FileUploadResult,
-  FileUploadStatus,
-} from "../fields/types"
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
 const meta: Meta = {
-  title: "Experimental/F0Form",
+  title: "Forms/F0Form",
   component: F0Form,
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs"],
   parameters: { a11y: { skipCi: true } },
 }
 

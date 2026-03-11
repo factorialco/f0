@@ -4,12 +4,14 @@ import { useState } from "react"
 
 import type { F0Field } from "@/components/F0Form/fields/types"
 
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
+
 import { F0FormField } from "../F0FormField"
 
 const meta: Meta<typeof F0FormField> = {
-  title: "Experimental/F0FormField",
+  title: "Forms/F0FormField",
   component: F0FormField,
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs"],
   parameters: { a11y: { skipCi: true } },
 }
 
@@ -498,6 +500,109 @@ export const ComposedForm: Story = {
           value={role}
           onChange={(v) => setRole(v as string)}
         />
+      </div>
+    )
+  },
+}
+
+/**
+ * Snapshot story rendering key field variants for visual regression testing.
+ */
+export const Snapshot: Story = {
+  parameters: withSnapshot({}),
+  render() {
+    const textField: F0Field = {
+      id: "text",
+      type: "text",
+      label: "Text field",
+      placeholder: "Enter text",
+      helpText: "Helper text",
+    }
+
+    const selectField: F0Field = {
+      id: "select",
+      type: "select",
+      label: "Select field",
+      placeholder: "Choose an option",
+      options: [
+        { value: "a", label: "Option A" },
+        { value: "b", label: "Option B" },
+      ],
+    }
+
+    const checkboxField: F0Field = {
+      id: "checkbox",
+      type: "checkbox",
+      label: "Checkbox field",
+    }
+
+    const switchField: F0Field = {
+      id: "switch",
+      type: "switch",
+      label: "Switch field",
+    }
+
+    const numberField: F0Field = {
+      id: "number",
+      type: "number",
+      label: "Number field",
+      placeholder: "0",
+    }
+
+    const textareaField: F0Field = {
+      id: "textarea",
+      type: "textarea",
+      label: "Textarea field",
+      placeholder: "Enter long text",
+    }
+
+    return (
+      <div className="flex max-w-sm flex-col gap-6">
+        <section className="flex flex-col gap-4">
+          <h4 className="text-lg font-semibold">Field types</h4>
+          <F0FormField field={textField} value="" onChange={() => {}} />
+          <F0FormField
+            field={numberField}
+            value={undefined}
+            onChange={() => {}}
+          />
+          <F0FormField field={textareaField} value="" onChange={() => {}} />
+          <F0FormField field={selectField} value="" onChange={() => {}} />
+          <F0FormField
+            field={checkboxField}
+            value={false}
+            onChange={() => {}}
+          />
+          <F0FormField field={switchField} value={false} onChange={() => {}} />
+        </section>
+
+        <section className="flex flex-col gap-4">
+          <h4 className="text-lg font-semibold">States</h4>
+          <F0FormField
+            field={{ ...textField, id: "filled", label: "Filled" }}
+            value="Hello world"
+            onChange={() => {}}
+          />
+          <F0FormField
+            field={{ ...textField, id: "required", label: "Required" }}
+            value=""
+            onChange={() => {}}
+            required
+          />
+          <F0FormField
+            field={{ ...textField, id: "disabled", label: "Disabled" }}
+            value="Cannot edit"
+            onChange={() => {}}
+            disabled
+          />
+          <F0FormField
+            field={{ ...textField, id: "error", label: "With error" }}
+            value=""
+            onChange={() => {}}
+            error
+            errorMessage="This field is required"
+          />
+        </section>
       </div>
     )
   },

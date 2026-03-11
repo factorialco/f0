@@ -66,6 +66,19 @@ export function SurveyAnsweringForm({
 
   const position: DialogPosition = isFullscreen ? "fullscreen" : "center"
 
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const scheduleClose = useCallback(
+    (delay: number) => {
+      if (closeTimerRef.current) clearTimeout(closeTimerRef.current)
+      closeTimerRef.current = setTimeout(() => {
+        closeTimerRef.current = null
+        onClose()
+      }, delay)
+    },
+    [onClose]
+  )
+
   const handleF0Submit = useCallback(
     async (data: Record<string, unknown>): Promise<F0FormSubmitResult> => {
       if (isStepped && !stepper.isLastStep) {
@@ -97,8 +110,8 @@ export function SurveyAnsweringForm({
           new Promise((r) => setTimeout(r, 1000)),
         ])
         if (result.success) {
-          onClose()
-          return { success: true }
+          scheduleClose(result.message ? 1000 : 0)
+          return { success: true, message: result.message }
         }
         stepper.setProgress(null)
         return { success: false, errors: result.errors }
@@ -106,14 +119,14 @@ export function SurveyAnsweringForm({
 
       const result = await onSubmit(submitData)
       if (result.success) {
-        onClose()
-        return { success: true }
+        scheduleClose(result.message ? 1000 : 0)
+        return { success: true, message: result.message }
       }
       return { success: false, errors: result.errors }
     },
     [
       onSubmit,
-      onClose,
+      scheduleClose,
       isStepped,
       stepper.isLastStep,
       stepper.goToNext,
@@ -221,7 +234,9 @@ export function SurveyAnsweringForm({
               schema={schema}
               defaultValues={formDefaultValues}
               onSubmit={handleF0Submit}
-              submitConfig={{ hideSubmitButton: true, hideActionBar: true }}
+              submitConfig={{
+                hideSubmitButton: true,
+              }}
               errorTriggerMode={errorTriggerMode}
               sections={sections}
             />
