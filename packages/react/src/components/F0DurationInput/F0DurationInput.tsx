@@ -195,19 +195,8 @@ export const F0DurationInput = forwardRef<HTMLDivElement, F0DurationInputProps>(
 
     const handleKeyDown = useCallback(
       (e: React.KeyboardEvent<HTMLInputElement>) => {
-        const allowed = [
-          "Backspace",
-          "Delete",
-          "Tab",
-          "ArrowLeft",
-          "ArrowRight",
-          "Home",
-          "End",
-          "Enter",
-          "Escape",
-        ]
-        if (allowed.includes(e.key)) return
-        if (e.metaKey || e.ctrlKey) return
+        if (e.metaKey || e.ctrlKey || e.altKey) return
+        if (e.key.length > 1) return
         if (!/^\d$/.test(e.key)) {
           e.preventDefault()
         }
