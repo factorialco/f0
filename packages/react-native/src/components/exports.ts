@@ -19,4 +19,5 @@ export * from "./experimental/Lists/DetailsItemsList"
 // Export primitives
 export * from "./primitives/F0Text"
 export * from "./primitives/F0Icon"
+export * from "./primitives/F0Image"
 export * from "./primitives/PressableFeedback"
