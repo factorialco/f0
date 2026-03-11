@@ -89,6 +89,11 @@ export type EditableTableColumnDefinition<
   /**
    * Configuration for `"select"` cells. Required when `editType` returns `"select"`.
    * Accepts either static `options` or a `source` + `mapOptions` for async data.
+   *
+   * If `editType` returns `"select"` but `selectConfig` is missing, the cell
+   * falls back to a non-editable display with a `console.warn` at runtime.
+   * Type-level enforcement is not possible because `editType` is a per-row
+   * function whose return value isn't statically known.
    */
   selectConfig?: SelectCellConfig<R>
 }

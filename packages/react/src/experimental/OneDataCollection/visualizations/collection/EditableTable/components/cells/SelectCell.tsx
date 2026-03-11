@@ -1,5 +1,7 @@
 import { F0Select } from "@/components/F0Select"
+import { renderProperty } from "@/experimental/OneDataCollection/property-render"
 import { RecordType } from "@/hooks/datasource/types/records.typings"
+import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 import { cn } from "@/lib/utils"
 
 import { EditableCellProps } from "."
@@ -13,14 +15,24 @@ export function SelectCell<R extends RecordType>({
   onChange,
   item,
 }: EditableCellProps<R>) {
+  const i18n = useI18n()
   const config = editableColumn.selectConfig
-  if (!config) return null
+  if (!config) {
+    console.warn(
+      `SelectCell: column "${editableColumn.label}" has editType "select" but no selectConfig`
+    )
+    return (
+      <BaseCell>
+        {renderProperty(item, editableColumn, "editableTable", i18n)}
+      </BaseCell>
+    )
+  }
 
   const sharedProps = {
     label: editableColumn.label,
     hideLabel: true as const,
     value: value || undefined,
-    onChange: (val: string) => {
+    onChange: (val: string | undefined) => {
       const newVal = val ?? ""
       if (newVal !== value) {
         onChange(newVal)
@@ -52,7 +64,11 @@ export function SelectCell<R extends RecordType>({
           "[&_[data-testid=input-field-wrapper]]:focus-within:ring-0",
           "[&_[data-testid=input-field-wrapper]]:focus-within:ring-offset-0",
           "[&_[data-testid=input-field-wrapper]]:h-full",
+          "[&_[data-testid=input-field-wrapper]_.absolute]:top-1/2",
+          "[&_[data-testid=input-field-wrapper]_.absolute]:-translate-y-1/2",
+          "[&_[data-testid=input-field-wrapper]_.absolute]:bottom-auto",
           "[&>div]:h-full",
+          "[&>div]:w-full",
           "[&>div>button]:h-full",
           editableColumn.align === "right" && "justify-end"
         )}

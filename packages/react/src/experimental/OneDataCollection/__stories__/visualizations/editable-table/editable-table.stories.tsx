@@ -514,13 +514,16 @@ export const EditableTableWithDataSourceSelect: Story = {
     docs: {
       description: {
         story:
-          "Editable table where the Role column uses a non-paginated data source for its select options, demonstrating the `source` + `mapOptions` pattern in `selectConfig`.",
+          "Editable table where the Role column uses a source-based select with `defaultItem`. Some rows have a role pre-selected while others are empty, showing the placeholder.",
       },
     },
   },
   render: () => {
     const mockVisualizations = getMockVisualizations()
-    const { dataAdapter, onCellChange } = useEditableTableData()
+    const initialItems = generateMockUsers(10).map((user, i) =>
+      i % 2 === 0 ? { ...user, role: "" } : user
+    )
+    const { dataAdapter, onCellChange } = useEditableTableData(initialItems)
 
     const baseOptions = (
       mockVisualizations.editableTable as Extract<
@@ -541,6 +544,7 @@ export const EditableTableWithDataSourceSelect: Story = {
                   return {
                     ...col,
                     editType: () => "select" as const,
+                    render: (item: MockUser) => item.role || undefined,
                     selectConfig: {
                       source: roleNonPaginatedSource,
                       mapOptions: (record: RecordType) => ({
@@ -549,6 +553,10 @@ export const EditableTableWithDataSourceSelect: Story = {
                       }),
                       placeholder: "Select role",
                       showSearchBox: true,
+                      defaultItem: (item: MockUser) => {
+                        if (!item.role) return undefined
+                        return { value: item.role, label: item.role }
+                      },
                     },
                   }
                 }
@@ -559,7 +567,7 @@ export const EditableTableWithDataSourceSelect: Story = {
           },
         ]}
         dataAdapter={dataAdapter}
-        id="editable-table-datasource-select/v1"
+        id="editable-table-datasource-select-partial/v1"
       />
     )
   },
