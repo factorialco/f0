@@ -81,7 +81,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
         {...props}
       >
         <textarea
-          className={cn("block w-full", className)}
+          className={cn("block w-full pt-2", className)}
           ref={ref}
           value={value}
           cols={cols}

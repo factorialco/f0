@@ -335,7 +335,7 @@ export const defaultTranslations = {
       dismiss: "Dismiss",
     },
   },
-  coCreationForm: {
+  surveyFormBuilder: {
     actions: {
       actions: "Actions",
       duplicateQuestion: "Duplicate question",
@@ -367,7 +367,11 @@ export const defaultTranslations = {
     },
     answer: {
       label: "Answer",
-      placeholder: "Respondent's answer",
+      dropdownPlaceholder: "Pick an option",
+      textPlaceholder: "Type your answer",
+      numericPlaceholder: "Enter a number",
+      linkPlaceholder: "https://example.com",
+      invalidUrl: "Enter a valid URL",
     },
     labels: {
       applyingChanges: "Applying changes",
@@ -385,6 +389,16 @@ export const defaultTranslations = {
       lastQuestionDialogTitle: "Remove last question from section",
       lastQuestionDialogDescription:
         "Moving this question will leave the section empty and it will be removed. Do you want to continue?",
+    },
+  },
+  surveyAnsweringForm: {
+    actions: {
+      submit: "Submit survey",
+      cancel: "Cancel",
+      next: "Next",
+      previous: "Previous",
+      expand: "Expand",
+      collapse: "Collapse",
     },
   },
   richTextEditor: {
