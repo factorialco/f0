@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.36.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.35.0...f0-react-native-v0.36.0) (2026-03-11)
+
+
+### Features
+
+* f0 react native f0image primitive ([#3639](https://github.com/factorialco/f0/issues/3639)) ([ebfae3f](https://github.com/factorialco/f0/commit/ebfae3fdd50bead2f4191555313700e1f509493a))
+
 ## [0.35.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.34.0...f0-react-native-v0.35.0) (2026-03-11)
 
 
