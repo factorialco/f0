@@ -172,14 +172,17 @@ const F0SelectComponent = forwardRef(function Select<
 
   // Always store localValue as strings for consistent comparison
   const [localValue, setLocalValue] = useState(() => {
-    const initial = toArray(value) ?? defaultValues ?? []
+    const valueArray = toArray(value)
+    const initial = valueArray.length > 0 ? valueArray : (defaultValues ?? [])
     return initial.map(String)
   })
 
   useEffect(() => {
-    const incomingValues = (toArray(value) ?? []).map(String)
+    const incomingValues = toArray(value).map(String)
     if (!isEqual(incomingValues, localValue ?? [])) {
-      const newValue = toArray(value) ?? defaultValues ?? []
+      const valueArray = toArray(value)
+      const newValue =
+        valueArray.length > 0 ? valueArray : (defaultValues ?? [])
       // Ensure unique values and convert to strings
       setLocalValue(Array.from(new Set(newValue.map(String))))
     }
@@ -322,7 +325,8 @@ const F0SelectComponent = forwardRef(function Select<
   const initialSelectedState = useMemo(():
     | SelectedItemsState<ActualRecordType>
     | undefined => {
-    const values = toArray(value) ?? defaultValues ?? []
+    const valueArray = toArray(value)
+    const values = valueArray.length > 0 ? valueArray : (defaultValues ?? [])
     if (values.length === 0) {
       return undefined
     }
