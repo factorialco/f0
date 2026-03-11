@@ -264,7 +264,7 @@ export function FieldRenderer({ field, sectionId }: FieldRendererProps) {
       <FormFieldPrimitive
         control={form.control}
         name={field.id}
-        render={() => <span className="hidden" aria-hidden="true" />}
+        render={() => null}
       />
     )
   }

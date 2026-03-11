@@ -267,58 +267,61 @@ export function SurveyFormBuilderProvider({
 
   const handleDuplicateElement: NonNullable<
     SurveyFormBuilderCallbacks["onDuplicateElement"]
-  > = ({ elementId }) => {
-    const flattenedElements = flatten(
-      elements.map((element) =>
-        element.type === "section"
-          ? [element, ...(element.section.questions ?? [])]
-          : [element.question]
+  > = useCallback(
+    ({ elementId }) => {
+      const flattenedElements = flatten(
+        elementsRef.current.map((element) =>
+          element.type === "section"
+            ? [element, ...(element.section.questions ?? [])]
+            : [element.question]
+        )
       )
-    )
 
-    const element = flattenedElements.find((element) =>
-      element.type === "section"
-        ? element.section.id === elementId
-        : element.id === elementId
-    )
-
-    let newElement: SurveyFormBuilderElement | undefined = undefined
-    if (element) {
-      newElement =
+      const element = flattenedElements.find((element) =>
         element.type === "section"
-          ? {
-              ...element,
-              section: {
-                ...element.section,
-                id: getNewElementId("section"),
-              },
-            }
-          : {
-              type: "question" as const,
-              question: { ...element, id: getNewElementId("question") },
-            }
-    }
+          ? element.section.id === elementId
+          : element.id === elementId
+      )
 
-    if (!newElement) {
-      return
-    }
+      let newElement: SurveyFormBuilderElement | undefined = undefined
+      if (element) {
+        newElement =
+          element.type === "section"
+            ? {
+                ...element,
+                section: {
+                  ...element.section,
+                  id: getNewElementId("section"),
+                },
+              }
+            : {
+                type: "question" as const,
+                question: { ...element, id: getNewElementId("question") },
+              }
+      }
 
-    handleAddElement({ element: newElement, afterId: elementId })
-  }
+      if (!newElement) {
+        return
+      }
 
-  const getQuestionById = (questionId: string) => {
+      handleAddElement({ element: newElement, afterId: elementId })
+    },
+    [handleAddElement]
+  )
+
+  const getQuestionById = useCallback((questionId: string) => {
     const questions = flatten(
-      elements.map((element) =>
+      elementsRef.current.map((element) =>
         element.type === "question"
           ? [element.question]
           : element.section.questions
       )
     )
     return questions.find((question) => question?.id === questionId)
-  }
+  }, [])
 
-  const deleteElement = (elementId: string) => {
-    let newElements = elements.filter((element) => {
+  const deleteElement = useCallback((elementId: string) => {
+    let newElements = elementsRef.current.filter((element) => {
       if (element.type === "section") {
         return element.section.id !== elementId
       }
@@ -328,7 +331,7 @@ export function SurveyFormBuilderProvider({
       return true
     })
 
-    if (newElements.length === elements.length) {
+    if (newElements.length === elementsRef.current.length) {
       newElements = newElements.map((element) => {
         if (element.type === "section") {
           return {
@@ -345,11 +348,11 @@ export function SurveyFormBuilderProvider({
       })
     }
 
-    onChange(newElements)
-  }
+    onChangeRef.current(newElements)
+  }, [])
 
-  const getIsSingleQuestionInSection = (questionId: string) => {
-    const sectionWithQuestion = elements.find((element) => {
+  const getIsSingleQuestionInSection = useCallback((questionId: string) => {
+    const sectionWithQuestion = elementsRef.current.find((element) => {
       if (element.type === "section") {
         return element.section.questions?.some(
           (question) => question.id === questionId
@@ -362,10 +365,10 @@ export function SurveyFormBuilderProvider({
       sectionWithQuestion?.type === "section" &&
       sectionWithQuestion?.section.questions?.length === 1
     )
-  }
+  }, [])
 
-  const getSectionContainingQuestion = (questionId: string) => {
-    const element = elements.find((element) => {
+  const getSectionContainingQuestion = useCallback((questionId: string) => {
+    const element = elementsRef.current.find((element) => {
       if (element.type === "section") {
         return element.section.questions?.some(
           (question) => question.id === questionId
@@ -374,7 +377,7 @@ export function SurveyFormBuilderProvider({
       return false
     })
     return element?.type === "section" ? element.section : undefined
-  }
+  }, [])
 
   const isFirstRender = useRef(true)
 
@@ -392,30 +395,54 @@ export function SurveyFormBuilderProvider({
     }
   }, [isEmpty, handleAddNewElement, disabled])
 
-  const isQuestionTypeAllowed = (questionType: QuestionType) => {
-    return !allowedQuestionTypes || allowedQuestionTypes.includes(questionType)
-  }
+  const isQuestionTypeAllowed = useCallback(
+    (questionType: QuestionType) => {
+      return (
+        !allowedQuestionTypes || allowedQuestionTypes.includes(questionType)
+      )
+    },
+    [allowedQuestionTypes]
+  )
+
+  const contextValue = useMemo(
+    () => ({
+      onQuestionChange: handleQuestionChange,
+      onSectionChange: handleSectionChange,
+      onAddNewElement: handleAddNewElement,
+      onDuplicateElement: handleDuplicateElement,
+      getIsSingleQuestionInSection,
+      getSectionContainingQuestion,
+      disabled,
+      answering,
+      getQuestionById,
+      deleteElement,
+      lastElementId,
+      disallowOptionalQuestions,
+      isQuestionTypeAllowed,
+      errors,
+      onFieldBlur,
+    }),
+    [
+      handleQuestionChange,
+      handleSectionChange,
+      handleAddNewElement,
+      handleDuplicateElement,
+      getIsSingleQuestionInSection,
+      getSectionContainingQuestion,
+      disabled,
+      answering,
+      getQuestionById,
+      deleteElement,
+      lastElementId,
+      disallowOptionalQuestions,
+      isQuestionTypeAllowed,
+      errors,
+      onFieldBlur,
+    ]
+  )
 
   return (
-    <SurveyFormBuilderContext.Provider
-      value={{
-        onQuestionChange: handleQuestionChange,
-        onSectionChange: handleSectionChange,
-        onAddNewElement: handleAddNewElement,
-        onDuplicateElement: handleDuplicateElement,
-        getIsSingleQuestionInSection,
-        getSectionContainingQuestion,
-        disabled,
-        answering,
-        getQuestionById,
-        deleteElement,
-        lastElementId,
-        disallowOptionalQuestions,
-        isQuestionTypeAllowed,
-        errors,
-        onFieldBlur,
-      }}
-    >
+    <SurveyFormBuilderContext.Provider value={contextValue}>
       {children}
     </SurveyFormBuilderContext.Provider>
   )

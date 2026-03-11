@@ -1,3 +1,5 @@
+import type { F0FormErrorTriggerMode } from "@/components/F0Form/types"
+
 import { SurveyFormBuilderElement } from "../SurveyFormBuilder/types"
 
 export type SurveyAnswerValue =
@@ -35,6 +37,7 @@ export interface SurveyAnsweringFormProps {
   fullscreen?: boolean
   allowToChangeFullscreen?: boolean
   defaultValues?: Partial<SurveyAnswers>
+  errorTriggerMode?: F0FormErrorTriggerMode
 }
 
 export type FlatQuestion = {

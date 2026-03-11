@@ -75,6 +75,7 @@ export function SelectQuestionField({
                 checked={!!isSelected}
                 onCheckedChange={() => handleOptionClick(option.value)}
                 hideLabel
+                stopPropagation
               />
             ) : (
               <RadioIndicator checked={!!isSelected} />

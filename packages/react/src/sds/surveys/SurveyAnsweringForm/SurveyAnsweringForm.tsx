@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from "react"
+import { useCallback, useRef, useState, useMemo } from "react"
 
 import type { DialogPosition } from "@/components/F0Dialog/types"
 import type { F0FormSubmitResult } from "@/components/F0Form/types"
@@ -15,7 +15,10 @@ import type { SurveyAnsweringFormProps, SurveySubmitAnswers } from "./types"
 import { SurveyFormBuilderProvider } from "../SurveyFormBuilder/Context"
 import { TableOfContent } from "../SurveyFormBuilder/Form/TableOfContent"
 import { useStepper } from "./hooks/useStepper"
-import { useSurveyFormSchema } from "./hooks/useSurveyFormSchema"
+import {
+  extractFlatQuestions,
+  useSurveyFormSchema,
+} from "./hooks/useSurveyFormSchema"
 
 const noop = () => {}
 
@@ -29,36 +32,57 @@ export function SurveyAnsweringForm({
   fullscreen: fullscreenProp = false,
   allowToChangeFullscreen = false,
   defaultValues,
+  errorTriggerMode = "on-blur",
 }: SurveyAnsweringFormProps) {
   const { t } = useI18n()
   const [isFullscreen, setIsFullscreen] = useState(fullscreenProp)
 
   const { formRef, submit, isSubmitting, hasErrors } = useF0Form()
 
-  const visibleQuestionIdRef = useRef<string | undefined>(undefined)
+  const accumulatedValuesRef = useRef<Record<string, unknown>>({})
+
+  const flatQuestions = useMemo(
+    () => extractFlatQuestions(elements),
+    [elements]
+  )
+
+  const stepper = useStepper(flatQuestions)
+
+  const isStepped = mode === "stepped"
+  const currentQuestionId = isStepped ? stepper.currentQuestion?.id : undefined
 
   const {
     schema,
     defaultValues: formDefaultValues,
-    flatQuestions,
     sections,
   } = useSurveyFormSchema(
     elements,
     mode,
     t,
     defaultValues,
-    visibleQuestionIdRef
+    currentQuestionId,
+    isStepped ? accumulatedValuesRef.current : undefined
   )
-
-  const stepper = useStepper(flatQuestions)
-  visibleQuestionIdRef.current = stepper.currentQuestion?.id
 
   const position: DialogPosition = isFullscreen ? "fullscreen" : "center"
 
   const handleF0Submit = useCallback(
     async (data: Record<string, unknown>): Promise<F0FormSubmitResult> => {
+      if (isStepped && !stepper.isLastStep) {
+        accumulatedValuesRef.current = {
+          ...accumulatedValuesRef.current,
+          ...data,
+        }
+        stepper.goToNext()
+        return { success: true }
+      }
+
+      const allData = isStepped
+        ? { ...accumulatedValuesRef.current, ...data }
+        : data
+
       const submitData: SurveySubmitAnswers = {}
-      for (const [key, val] of Object.entries(data)) {
+      for (const [key, val] of Object.entries(allData)) {
         submitData[key] = (val === undefined ? null : val) as
           | string
           | number
@@ -73,24 +97,8 @@ export function SurveyAnsweringForm({
       }
       return { success: false, errors: result.errors }
     },
-    [onSubmit, onClose]
+    [onSubmit, onClose, isStepped, stepper.isLastStep, stepper.goToNext]
   )
-
-  const isCurrentStepValid = useCallback(() => {
-    if (mode !== "stepped" || !stepper.currentQuestion) return true
-    if (!stepper.currentQuestion.required) return true
-    const values = formRef.current?.getValues() ?? {}
-    const value = values[stepper.currentQuestion.id]
-    if (value === null || value === undefined) return false
-    if (Array.isArray(value) && value.length === 0) return false
-    if (typeof value === "string" && value.trim() === "") return false
-    return true
-  }, [mode, stepper.currentQuestion, formRef])
-
-  const handleNext = useCallback(() => {
-    if (!isCurrentStepValid()) return
-    stepper.goToNext()
-  }, [isCurrentStepValid, stepper])
 
   const handleSubmit = useCallback(async () => {
     try {
@@ -99,6 +107,15 @@ export function SurveyAnsweringForm({
       // Validation failed — F0Form shows errors
     }
   }, [submit])
+
+  const handlePrevious = useCallback(() => {
+    const values = formRef.current?.getValues() ?? {}
+    accumulatedValuesRef.current = {
+      ...accumulatedValuesRef.current,
+      ...values,
+    }
+    stepper.goToPrevious()
+  }, [formRef, stepper.goToPrevious])
 
   const otherActions = allowToChangeFullscreen
     ? [
@@ -113,12 +130,11 @@ export function SurveyAnsweringForm({
     : undefined
 
   const primaryAction =
-    mode === "stepped" && !stepper.isLastStep
+    isStepped && !stepper.isLastStep
       ? {
           label: t("surveyAnsweringForm.actions.next"),
-          onClick: handleNext,
+          onClick: handleSubmit,
           icon: ArrowRight,
-          disabled: !isCurrentStepValid(),
         }
       : {
           label: t("surveyAnsweringForm.actions.submit"),
@@ -128,16 +144,15 @@ export function SurveyAnsweringForm({
         }
 
   const secondaryAction =
-    mode === "stepped" && !stepper.isFirstStep
+    isStepped && !stepper.isFirstStep
       ? {
           label: t("surveyAnsweringForm.actions.previous"),
-          onClick: stepper.goToPrevious,
+          onClick: handlePrevious,
           icon: ArrowLeft,
         }
       : undefined
 
   const showTableOfContent = mode === "all-questions"
-  const isStepped = mode === "stepped"
 
   return (
     <F0Dialog
@@ -165,7 +180,7 @@ export function SurveyAnsweringForm({
               />
             </div>
           )}
-          <div className="mx-auto flex w-full flex-col justify-center px-4 py-12 md:w-[750px]">
+          <div className="mx-auto flex h-full w-full flex-col justify-center px-4 py-12 md:w-[750px]">
             {isStepped && stepper.currentQuestion?.sectionTitle && (
               <div className="py-1 pl-5">
                 <span className="text-lg font-semibold text-f1-foreground">
@@ -179,15 +194,14 @@ export function SurveyAnsweringForm({
               </div>
             )}
             <F0Form
+              key={isStepped ? stepper.currentStep : undefined}
               formRef={formRef}
               name="survey-answering"
               schema={schema}
               defaultValues={formDefaultValues}
               onSubmit={handleF0Submit}
               submitConfig={{ hideSubmitButton: true, hideActionBar: true }}
-              errorTriggerMode={
-                mode === "all-questions" ? "on-blur" : "on-submit"
-              }
+              errorTriggerMode={errorTriggerMode}
               sections={sections}
             />
           </div>

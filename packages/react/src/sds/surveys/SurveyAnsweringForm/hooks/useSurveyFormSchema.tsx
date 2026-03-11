@@ -1,4 +1,4 @@
-import { useMemo, type RefObject } from "react"
+import { useMemo } from "react"
 import { z, type ZodTypeAny } from "zod"
 
 import type { F0Field } from "@/components/F0Form/fields/types"
@@ -138,7 +138,7 @@ function getDefaultValue(
   return null
 }
 
-function extractFlatQuestions(
+export function extractFlatQuestions(
   elements: SurveyFormBuilderElement[]
 ): FlatQuestion[] {
   const questions: FlatQuestion[] = []
@@ -167,14 +167,12 @@ function extractFlatQuestions(
 function buildFieldForQuestion(
   q: QuestionElement,
   t: (key: TranslationKey) => string,
-  sectionId?: string,
-  renderIf?: () => boolean
+  sectionId?: string
 ): ZodTypeAny {
   const label = q.title ?? ""
   const baseConfig = {
     label,
     section: sectionId,
-    renderIf,
   }
 
   const questionProps = {
@@ -441,7 +439,8 @@ export function useSurveyFormSchema(
   mode: SurveyAnsweringFormMode,
   t: (key: TranslationKey) => string,
   defaultValues?: Partial<SurveyAnswers>,
-  visibleQuestionIdRef?: RefObject<string | undefined>
+  currentQuestionId?: string,
+  accumulatedValues?: Record<string, unknown>
 ) {
   return useMemo(() => {
     const shape: Record<string, ZodTypeAny> = {}
@@ -464,26 +463,26 @@ export function useSurveyFormSchema(
         }
 
         for (const q of section.questions ?? []) {
-          const renderIf = isStepped
-            ? () => visibleQuestionIdRef?.current === q.id
-            : undefined
+          if (isStepped && currentQuestionId && q.id !== currentQuestionId)
+            continue
 
           shape[q.id] = buildFieldForQuestion(
             q,
             t,
-            mode === "all-questions" ? sectionId : undefined,
-            renderIf
+            mode === "all-questions" ? sectionId : undefined
           )
-          defaults[q.id] = getDefaultValue(q, defaultValues)
+          defaults[q.id] =
+            accumulatedValues?.[q.id] ?? getDefaultValue(q, defaultValues)
         }
       } else {
         const q = element.question
-        const renderIf = isStepped
-          ? () => visibleQuestionIdRef?.current === q.id
-          : undefined
 
-        shape[q.id] = buildFieldForQuestion(q, t, undefined, renderIf)
-        defaults[q.id] = getDefaultValue(q, defaultValues)
+        if (isStepped && currentQuestionId && q.id !== currentQuestionId)
+          continue
+
+        shape[q.id] = buildFieldForQuestion(q, t)
+        defaults[q.id] =
+          accumulatedValues?.[q.id] ?? getDefaultValue(q, defaultValues)
       }
     }
 
@@ -494,5 +493,5 @@ export function useSurveyFormSchema(
       sections,
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [elements, mode, t, defaultValues])
+  }, [elements, mode, t, defaultValues, currentQuestionId])
 }
