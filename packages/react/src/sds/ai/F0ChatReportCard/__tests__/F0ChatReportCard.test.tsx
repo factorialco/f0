@@ -1,16 +1,9 @@
-import { render, screen } from "@testing-library/react"
-import userEvent from "@testing-library/user-event"
-import { type ReactNode } from "react"
 import { describe, expect, it, vi } from "vitest"
 
-import { defaultTranslations, I18nProvider } from "@/lib/providers/i18n"
+import { screen, userEvent, zeroRender } from "@/testing/test-utils"
 
 import type { ChatDashboardConfig } from "../../F0ChatDashboard/types"
 import { F0ChatReportCard } from "../F0ChatReportCard"
-
-const wrapper = ({ children }: { children: ReactNode }) => (
-  <I18nProvider translations={defaultTranslations}>{children}</I18nProvider>
-)
 
 const sampleConfig: ChatDashboardConfig = {
   title: "Headcount Overview",
@@ -61,33 +54,25 @@ const sampleConfig: ChatDashboardConfig = {
 
 describe("F0ChatReportCard", () => {
   it("renders the dashboard title", () => {
-    render(<F0ChatReportCard config={sampleConfig} onView={() => {}} />, {
-      wrapper,
-    })
+    zeroRender(<F0ChatReportCard config={sampleConfig} onView={() => {}} />)
     expect(screen.getByText("Headcount Overview")).toBeInTheDocument()
   })
 
   it("renders the dashboard description", () => {
-    render(<F0ChatReportCard config={sampleConfig} onView={() => {}} />, {
-      wrapper,
-    })
+    zeroRender(<F0ChatReportCard config={sampleConfig} onView={() => {}} />)
     expect(
       screen.getByText("Company-wide headcount breakdown")
     ).toBeInTheDocument()
   })
 
   it("shows item count summary", () => {
-    render(<F0ChatReportCard config={sampleConfig} onView={() => {}} />, {
-      wrapper,
-    })
+    zeroRender(<F0ChatReportCard config={sampleConfig} onView={() => {}} />)
     expect(screen.getByText("2 charts, 1 metric, 1 table")).toBeInTheDocument()
   })
 
   it("calls onView with config when clicked", async () => {
     const onView = vi.fn()
-    render(<F0ChatReportCard config={sampleConfig} onView={onView} />, {
-      wrapper,
-    })
+    zeroRender(<F0ChatReportCard config={sampleConfig} onView={onView} />)
 
     await userEvent.click(screen.getByText("Headcount Overview"))
     expect(onView).toHaveBeenCalledWith(sampleConfig)

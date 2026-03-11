@@ -249,6 +249,38 @@ describe("computeChartData", () => {
     expect(result.series).toEqual([])
   })
 
+  it("sorts multi-series by category ascending", () => {
+    const computation: ChartComputation = {
+      datasetId: "employees",
+      xAxis: "department",
+      yAxis: "*",
+      aggregation: "count",
+      series: "contract",
+      sortBy: "category",
+      sortOrder: "asc",
+    }
+    const result = computeChartData(computation, datasets, undefined, undefined)
+    expect(result.categories[0]).toBe("Engineering")
+    expect(result.categories[1]).toBe("Marketing")
+    expect(result.categories[2]).toBe("Sales")
+  })
+
+  it("sorts multi-series by category descending", () => {
+    const computation: ChartComputation = {
+      datasetId: "employees",
+      xAxis: "department",
+      yAxis: "*",
+      aggregation: "count",
+      series: "contract",
+      sortBy: "category",
+      sortOrder: "desc",
+    }
+    const result = computeChartData(computation, datasets, undefined, undefined)
+    expect(result.categories[0]).toBe("Sales")
+    expect(result.categories[1]).toBe("Marketing")
+    expect(result.categories[2]).toBe("Engineering")
+  })
+
   // Multi-series
   it("computes multi-series data split by series column", () => {
     const computation: ChartComputation = {

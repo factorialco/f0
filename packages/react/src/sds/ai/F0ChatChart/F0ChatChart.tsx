@@ -7,7 +7,7 @@ import type {
   F0DataChartRadarSeries,
 } from "@/components/F0DataChart"
 
-import { F0DataChart } from "@/components/F0DataChart/F0DataChart"
+import { F0DataChart } from "@/components/F0DataChart"
 import { cn } from "@/lib/utils"
 
 import type { ChatChartSeries, F0ChatChartProps } from "./types"

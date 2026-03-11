@@ -215,6 +215,17 @@ export function computeChartData(
     for (const s of seriesArray) {
       s.data = indices.map((i) => s.data[i])
     }
+  } else if (computation.sortBy === "category") {
+    const indices = categories.map((_, i) => i)
+    indices.sort((a, b) =>
+      computation.sortOrder === "desc"
+        ? categories[b].localeCompare(categories[a])
+        : categories[a].localeCompare(categories[b])
+    )
+    categories = indices.map((i) => categories[i])
+    for (const s of seriesArray) {
+      s.data = indices.map((i) => s.data[i])
+    }
   }
 
   // Limit

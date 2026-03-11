@@ -10,7 +10,7 @@ export function Table({
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="group/table scrollbar-macos overflow-auto rounded-md border border-solid border-f1-border-secondary">
+      <div className="group/table scrollbar-macos overflow-x-auto rounded-md border border-solid border-f1-border-secondary">
         <table
           ref={ref}
           {...props}
@@ -36,7 +36,7 @@ export function TableSimple({
 }: React.HTMLAttributes<HTMLTableElement>) {
   return (
     <div className="flex flex-col gap-2 text-sm [&_*]:text-sm">
-      <div className="scrollbar-macos overflow-auto rounded-md border border-solid border-f1-border-secondary">
+      <div className="scrollbar-macos overflow-x-auto rounded-md border border-solid border-f1-border-secondary">
         <table
           {...props}
           className={cn(

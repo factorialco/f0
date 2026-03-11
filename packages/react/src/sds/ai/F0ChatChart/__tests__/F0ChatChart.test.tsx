@@ -1,18 +1,19 @@
-import { render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
+
+import { screen, zeroRender } from "@/testing/test-utils"
 
 import { F0ChatChart } from "../F0ChatChart"
 
 // F0DataChart uses ECharts which needs a DOM canvas — mock it to avoid
 // heavy setup in unit tests. We only verify the wrapper renders the
 // surrounding card with title/description.
-vi.mock("@/components/F0DataChart/F0DataChart", () => ({
+vi.mock("@/components/F0DataChart", () => ({
   F0DataChart: () => <div data-testid="mock-chart" />,
 }))
 
 describe("F0ChatChart", () => {
   it("renders title and description for a bar chart", () => {
-    render(
+    zeroRender(
       <F0ChatChart
         type="bar"
         title="Headcount by department"
@@ -27,7 +28,7 @@ describe("F0ChatChart", () => {
   })
 
   it("renders a line chart", () => {
-    render(
+    zeroRender(
       <F0ChatChart
         type="line"
         title="Monthly hires"
@@ -39,7 +40,7 @@ describe("F0ChatChart", () => {
   })
 
   it("renders a pie chart", () => {
-    render(
+    zeroRender(
       <F0ChatChart
         type="pie"
         title="Contract types"
@@ -53,7 +54,7 @@ describe("F0ChatChart", () => {
   })
 
   it("renders a funnel chart", () => {
-    render(
+    zeroRender(
       <F0ChatChart
         type="funnel"
         title="Hiring pipeline"
@@ -67,7 +68,7 @@ describe("F0ChatChart", () => {
   })
 
   it("renders without description", () => {
-    render(
+    zeroRender(
       <F0ChatChart
         type="bar"
         title="Absences"
