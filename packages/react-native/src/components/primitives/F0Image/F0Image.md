@@ -6,6 +6,8 @@ Image primitive for React Native in F0.
 
 `F0Image` is a thin wrapper around `expo-image` with className support and consistent defaults for `contentFit`, `transition`, and `cachePolicy`.
 
+`expo-image` is a runtime peer dependency of `@factorialco/f0-react-native`. Ensure your app installs a compatible `expo-image` version.
+
 ## Usage
 
 <!-- prettier-ignore -->
