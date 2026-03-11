@@ -12,18 +12,6 @@ export const SECONDS_PER_UNIT: Record<DurationUnit, number> = {
   seconds: 1,
 }
 
-const COARSER_UNIT: Partial<Record<DurationUnit, DurationUnit>> = {
-  hours: "days",
-  minutes: "hours",
-  seconds: "minutes",
-}
-
-const AUTO_MAX: Partial<Record<DurationUnit, number>> = {
-  hours: 23,
-  minutes: 59,
-  seconds: 59,
-}
-
 export function secondsToFields(totalSeconds: number): DurationFields {
   const safe = Number.isFinite(totalSeconds) ? totalSeconds : 0
   let remaining = Math.max(0, Math.floor(safe))
@@ -41,21 +29,45 @@ export function secondsToFields(totalSeconds: number): DurationFields {
 }
 
 export function fieldsToSeconds(fields: DurationFields): number {
-  return UNIT_ORDER.reduce(
-    (total, unit) => total + fields[unit] * SECONDS_PER_UNIT[unit],
-    0
-  )
+  return UNIT_ORDER.reduce((total, unit) => {
+    const raw = fields[unit]
+    const finite = Number.isFinite(raw) ? raw : 0
+    const normalized = Math.max(0, Math.floor(finite))
+    return total + normalized * SECONDS_PER_UNIT[unit]
+  }, 0)
 }
 
 export function getAutoMax(
   unit: DurationUnit,
   visibleUnits: DurationUnit[]
 ): number | undefined {
-  const coarser = COARSER_UNIT[unit]
-  if (coarser && visibleUnits.includes(coarser)) {
-    return AUTO_MAX[unit]
+  const unitIndex = UNIT_ORDER.indexOf(unit)
+  if (unitIndex <= 0) {
+    return undefined
   }
-  return undefined
+
+  let coarserVisible: DurationUnit | undefined
+  for (let i = unitIndex - 1; i >= 0; i -= 1) {
+    const candidate = UNIT_ORDER[i]
+    if (visibleUnits.includes(candidate)) {
+      coarserVisible = candidate
+      break
+    }
+  }
+
+  if (!coarserVisible) {
+    return undefined
+  }
+
+  const coarserSeconds = SECONDS_PER_UNIT[coarserVisible]
+  const unitSeconds = SECONDS_PER_UNIT[unit]
+  const ratio = coarserSeconds / unitSeconds
+
+  if (!Number.isFinite(ratio) || ratio <= 0) {
+    return undefined
+  }
+
+  return Math.floor(ratio) - 1
 }
 
 export function secondsToVisibleFields(

@@ -295,8 +295,7 @@ export const F0DurationInput = forwardRef<HTMLDivElement, F0DurationInputProps>(
                   className={cn(
                     "border-none bg-transparent p-0 text-inherit outline-none",
                     "text-right font-inherit text-[length:inherit] leading-[inherit]",
-                    "placeholder:text-f1-foreground-secondary placeholder:opacity-100",
-                    "focus:placeholder:opacity-40",
+                    "placeholder:text-f1-foreground-secondary placeholder:opacity-[0.37]",
                     disabled && "pointer-events-none"
                   )}
                   style={{

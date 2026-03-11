@@ -175,6 +175,17 @@ describe("fieldsToSeconds", () => {
       0
     )
   })
+
+  it("normalizes non-finite, fractional, and negative inputs", () => {
+    expect(
+      fieldsToSeconds({
+        days: NaN,
+        hours: 1.9,
+        minutes: -10,
+        seconds: Infinity,
+      })
+    ).toBe(3600)
+  })
 })
 
 describe("F0DurationInput", () => {
@@ -587,6 +598,24 @@ describe("F0DurationInput", () => {
       })
 
       expect(onChange).toHaveBeenLastCalledWith(7200)
+    })
+
+    it("clamps minutes based on nearest visible coarser unit", () => {
+      const onChange = vi.fn()
+      render(
+        <F0DurationInput
+          label="Duration"
+          value={0}
+          onChange={onChange}
+          units={["days", "minutes"]}
+        />
+      )
+
+      fireEvent.change(screen.getByLabelText("Minutes"), {
+        target: { value: "2000" },
+      })
+
+      expect(onChange).toHaveBeenLastCalledWith(86340)
     })
 
     it("rolls hidden units into visible ones on render", () => {
