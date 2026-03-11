@@ -12,10 +12,11 @@ import { CounterShowcase } from "../../components/CounterShowcase"
 import { DataListShowcase } from "../../components/DataListShowcase"
 import { DetailsItemShowcase } from "../../components/DetailsItemShowcase"
 import { DetailsItemsListShowcase } from "../../components/DetailsItemsListShowcase"
-import { F0ButtonShowcase } from "../../components/F0ButtonShowcase"
 import { F0BadgeShowcase } from "../../components/F0BadgeShowcase"
+import { F0ButtonShowcase } from "../../components/F0ButtonShowcase"
 import { F0IconShowcase } from "../../components/F0IconShowcase"
 import { F0ImageShowcase } from "../../components/F0ImageShowcase"
+import { F0TagShowcase } from "../../components/F0TagShowcase"
 import { F0TextShowcase } from "../../components/F0TextShowcase/F0TextShowcase"
 import { OneChipShowcase } from "../../components/OneChipShowcase"
 import { OnePresetShowcase } from "../../components/OnePresetShowcase"
@@ -41,6 +42,7 @@ type ComponentType =
   | "f0badge"
   | "f0icon"
   | "f0image"
+  | "f0tag"
   | "f0text"
   | "onechip"
   | "onepreset"
@@ -62,6 +64,7 @@ const componentOptions = [
   { value: "f0badge" as ComponentType, label: "F0Badge" },
   { value: "f0icon" as ComponentType, label: "F0Icon" },
   { value: "f0image" as ComponentType, label: "F0Image" },
+  { value: "f0tag" as ComponentType, label: "F0Tag" },
   { value: "f0text" as ComponentType, label: "F0Text" },
   { value: "onechip" as ComponentType, label: "OneChip" },
   { value: "onepreset" as ComponentType, label: "OnePreset" },
@@ -113,6 +116,8 @@ export default function ComponentsShowcase() {
         return <F0IconShowcase />
       case "f0image":
         return <F0ImageShowcase />
+      case "f0tag":
+        return <F0TagShowcase />
       case "f0text":
         return <F0TextShowcase />
       case "onechip":

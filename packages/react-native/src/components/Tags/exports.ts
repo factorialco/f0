@@ -1,3 +1,39 @@
-export * from "./AlertTab"
-export * from "./DotTag"
-export * from "./RawTag"
+/**
+ * @deprecated Use `F0Tag.Alert` from `src/components/F0Tag`.
+ */
+export { AlertTag } from "./AlertTab"
+
+/**
+ * @deprecated Use `F0Tag.Dot` from `src/components/F0Tag`.
+ */
+export { DotTag } from "./DotTag"
+
+/**
+ * @deprecated Use `dotTagColors` from `src/components/F0Tag`.
+ */
+export { dotTagColors as legacyDotTagColors } from "./DotTag"
+
+/**
+ * @deprecated Use `F0Tag.Raw` from `src/components/F0Tag`.
+ */
+export { RawTag } from "./RawTag"
+
+/**
+ * @deprecated Use `F0Tag` namespace from `src/components/F0Tag`.
+ */
+export { Tag } from "./Tag"
+
+/**
+ * @deprecated Use `F0Tag.AlertProps` from `src/components/F0Tag`.
+ */
+export type { AlertTagProps } from "./AlertTab"
+
+/**
+ * @deprecated Use `F0Tag.DotProps` from `src/components/F0Tag`.
+ */
+export type { DotTagProps, NewColor } from "./DotTag"
+
+/**
+ * @deprecated Use `F0Tag.RawProps` from `src/components/F0Tag`.
+ */
+export type { RawTagProps } from "./RawTag"
