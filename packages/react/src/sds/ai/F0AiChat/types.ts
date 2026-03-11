@@ -179,6 +179,9 @@ export const aiTranslations = {
     thoughtsGroupTitle: "Reflection",
     resourcesGroupTitle: "Resources",
     thinking: "Thinking...",
+    closeDashboard: "Close dashboard",
+    exportTable: "Download table",
+    generatedTableFilename: "OneGeneratedTable",
     feedbackModal: {
       positive: {
         title: "What did you like about this response?",
