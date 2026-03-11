@@ -4,7 +4,29 @@ export * from "./F0AiMask"
 export * from "./F0AuraVoiceAnimation"
 export * from "./F0AiCollapsibleMessage"
 export * from "./F0ChatChart"
-export * from "./F0ChatDashboard"
+// F0ChatDashboard is exported via its own entry point (src/F0ChatDashboard.ts)
+// to avoid pulling F0AnalyticsDashboard + ECharts into the ai bundle.
+// Only re-export types here so consumers can reference them without the heavy dep.
+export type {
+  AggregationType,
+  ChatDashboardBarChartConfig,
+  ChatDashboardChartConfig,
+  ChatDashboardChartItem,
+  ChatDashboardCollectionItem,
+  ChatDashboardColumn,
+  ChatDashboardConfig,
+  ChatDashboardDataset,
+  ChatDashboardFilterDefinition,
+  ChatDashboardFunnelChartConfig,
+  ChatDashboardItem,
+  ChatDashboardLineChartConfig,
+  ChatDashboardMetricFormat,
+  ChatDashboardMetricItem,
+  ChartComputation,
+  CollectionComputation,
+  FormatPreset,
+  MetricComputation,
+} from "./F0ChatDashboard/types"
 export * from "./F0ChatReportCard"
 export * from "./F0DataDownload"
 export * from "./F0HILActionConfirmation"
