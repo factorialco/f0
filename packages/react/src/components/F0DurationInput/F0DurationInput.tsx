@@ -214,6 +214,12 @@ export const F0DurationInput = forwardRef<HTMLDivElement, F0DurationInputProps>(
       []
     )
 
+    if (!label) {
+      console.error(
+        "F0DurationInput: label is required for accessibility reasons. If you don't want to show a label, set hideLabel to true."
+      )
+    }
+
     const statusType = status?.type ?? "default"
     const showLabel = !hideLabel && label.length > 0
 

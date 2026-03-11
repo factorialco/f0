@@ -352,13 +352,18 @@ describe("F0DurationInput", () => {
       expect(input.id).toBe(htmlFor)
     })
 
-    it("hides the label when label is an empty string", () => {
+    it("hides the label when label is an empty string and warns", () => {
+      const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {})
       const { container } = render(
         <F0DurationInput label="" value={0} onChange={() => {}} />
       )
 
       expect(screen.getByRole("group")).toBeInTheDocument()
       expect(container.querySelector("label")).toBeNull()
+      expect(errorSpy).toHaveBeenCalledWith(
+        expect.stringContaining("label is required for accessibility")
+      )
+      errorSpy.mockRestore()
     })
 
     it("keeps readonly inputs focusable but non-editable", () => {

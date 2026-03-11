@@ -1,4 +1,4 @@
-import { InputFieldStatus } from "@/ui/InputField/types"
+import type { InputFieldStatus } from "@/ui/InputField/types"
 
 export const durationUnits = ["days", "hours", "minutes", "seconds"] as const
 export type DurationUnit = (typeof durationUnits)[number]
