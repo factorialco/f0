@@ -90,6 +90,20 @@ export function SurveyAnsweringForm({
           | Date
           | null
       }
+      if (isStepped) {
+        stepper.setProgress(100)
+        const [result] = await Promise.all([
+          onSubmit(submitData),
+          new Promise((r) => setTimeout(r, 1000)),
+        ])
+        if (result.success) {
+          onClose()
+          return { success: true }
+        }
+        stepper.setProgress(null)
+        return { success: false, errors: result.errors }
+      }
+
       const result = await onSubmit(submitData)
       if (result.success) {
         onClose()
@@ -97,7 +111,14 @@ export function SurveyAnsweringForm({
       }
       return { success: false, errors: result.errors }
     },
-    [onSubmit, onClose, isStepped, stepper.isLastStep, stepper.goToNext]
+    [
+      onSubmit,
+      onClose,
+      isStepped,
+      stepper.isLastStep,
+      stepper.goToNext,
+      stepper.setProgress,
+    ]
   )
 
   const handleSubmit = useCallback(async () => {
