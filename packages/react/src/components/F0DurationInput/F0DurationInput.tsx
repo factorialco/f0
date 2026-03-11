@@ -242,7 +242,7 @@ export const F0DurationInput = forwardRef<HTMLDivElement, F0DurationInputProps>(
           aria-label={label || undefined}
           aria-disabled={disabled || undefined}
           data-status={statusType}
-          data-disabled={String(disabled)}
+          data-disabled={disabled ? "" : undefined}
         >
           {visibleUnits.map((unit, index) => {
             const max =
@@ -272,7 +272,9 @@ export const F0DurationInput = forwardRef<HTMLDivElement, F0DurationInputProps>(
                     disabled && "cursor-not-allowed"
                   )}
                   style={{ width: `${Math.max(displayValue.length, 1)}ch` }}
-                  aria-label={UNIT_LABELS[unit]}
+                  aria-label={
+                    fieldConfig?.[unit]?.ariaLabel ?? UNIT_LABELS[unit]
+                  }
                   value={displayValue}
                   placeholder="0"
                   onChange={handleFieldChange(unit, max)}

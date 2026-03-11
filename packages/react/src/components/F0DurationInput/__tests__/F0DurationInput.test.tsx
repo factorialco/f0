@@ -250,8 +250,32 @@ describe("F0DurationInput", () => {
       )
 
       const container = screen.getByRole("group", { name: "Duration" })
-      expect(container).toHaveAttribute("data-disabled", "true")
+      expect(container).toHaveAttribute("data-disabled", "")
       expect(container).toHaveAttribute("aria-disabled", "true")
+    })
+
+    it("omits data-disabled when not disabled", () => {
+      render(<F0DurationInput label="Duration" value={0} onChange={() => {}} />)
+
+      const container = screen.getByRole("group", { name: "Duration" })
+      expect(container).not.toHaveAttribute("data-disabled")
+    })
+
+    it("uses custom ariaLabel from fields config", () => {
+      render(
+        <F0DurationInput
+          label="Duration"
+          value={0}
+          onChange={() => {}}
+          fields={{
+            hours: { ariaLabel: "Horas" },
+            minutes: { ariaLabel: "Minutos" },
+          }}
+        />
+      )
+
+      expect(screen.getByLabelText("Horas")).toBeInTheDocument()
+      expect(screen.getByLabelText("Minutos")).toBeInTheDocument()
     })
 
     it("renders error status with message", () => {

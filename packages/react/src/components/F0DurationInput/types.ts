@@ -11,6 +11,7 @@ export type DurationFields = Record<DurationUnit, number>
 export interface DurationFieldConfig {
   suffix?: string
   max?: number
+  ariaLabel?: string
 }
 
 export interface F0DurationInputProps {
