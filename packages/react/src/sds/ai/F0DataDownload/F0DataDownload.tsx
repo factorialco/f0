@@ -105,14 +105,14 @@ export const F0DataDownload = ({
     totalCount != null && previewCount != null && totalCount > previewCount
 
   return (
-    <div className="flex flex-col gap-2 pb-3">
+    <div className="flex flex-col gap-2 pb-2">
       {markdown && (
         <div className="w-fit max-w-full [&>div]:flex [&>div]:flex-col [&>div]:gap-1">
           <Markdown content={markdown} components={f0MarkdownRenderersSimple} />
         </div>
       )}
       {showPreviewNote && (
-        <p className="text-sm italic text-f1-foreground-secondary">
+        <p className="text-sm font-medium text-f1-foreground-secondary">
           {i18n.t("ai.dataDownloadPreview", {
             shown: previewCount,
             total: totalCount,
@@ -122,7 +122,7 @@ export const F0DataDownload = ({
       <div className="flex justify-start">
         <F0ButtonDropdown
           variant="outline"
-          size="sm"
+          size="md"
           items={downloadItems}
           value="excel"
           onClick={handleDownload}

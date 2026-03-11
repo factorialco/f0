@@ -35,7 +35,7 @@ export function TableSimple({
   ...props
 }: React.HTMLAttributes<HTMLTableElement>) {
   return (
-    <div className="flex flex-col gap-2 text-sm [&_*]:text-sm">
+    <div className="flex flex-col gap-2 text-base [&_*]:text-base">
       <div className="scrollbar-macos overflow-x-auto rounded-md border border-solid border-f1-border-secondary">
         <table
           {...props}
