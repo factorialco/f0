@@ -17,6 +17,7 @@ import {
   isFirstCellWithTableChildren,
   SPACING_FACTOR,
 } from "./utils/nested"
+import { ReferenceType } from "@/experimental/OneDataCollection/visualizations/collection/Table"
 
 interface TableCellProps {
   children: React.ReactNode
@@ -71,6 +72,19 @@ interface TableCellProps {
     rowWithChildren?: boolean
     tableWithChildren?: boolean
   }
+
+  referenceRowType?: ReferenceType
+}
+
+const stripedLines =
+  "repeating-linear-gradient(45deg,transparent_0px,transparent_8px,hsl(var(--neutral-20))_8px,hsl(var(--neutral-20))_9px)"
+
+const stickyScrolledBase =
+  "before:absolute before:inset-0 before:z-[-1] before:h-[calc(100%-1px)] before:w-full before:transition-all before:content-[''] after:absolute after:inset-x-0 after:bottom-0 after:h-px after:w-full after:bg-f1-border-secondary after:content-['']"
+
+const stickyScrollClasses: Record<ReferenceType, string> = {
+  none: `bg-f1-background ${stickyScrolledBase} before:bg-f1-background group-hover:before:bg-f1-background-hover`,
+  striped: `bg-f1-background bg-[${stripedLines}] [background-size:100%_100px] ${stickyScrolledBase} before:bg-[${stripedLines},_var(--f1-background)] before:[background-size:100%_100px,_100%_100%] group-hover:before:bg-[${stripedLines},_var(--f1-background-hover)] group-hover:before:[background-size:100%_100px,_100%_100%]`,
 }
 
 export function TableCell({
@@ -84,6 +98,7 @@ export function TableCell({
   className,
   loading = false,
   nestedRowProps,
+  referenceRowType = "none",
 }: TableCellProps) {
   const { isScrolled, isScrolledRight } = useTable()
   const { actions } = useI18n()
@@ -113,12 +128,9 @@ export function TableCell({
       className={cn(
         "h-full",
         firstCell && "peer font-medium",
-        isSticky &&
-          isScrolled &&
-          "bg-f1-background before:absolute before:inset-0 before:z-[-1] before:h-[calc(100%-1px)] before:w-full before:bg-f1-background before:transition-all before:content-[''] after:absolute after:inset-x-0 after:bottom-0 after:h-px after:w-full after:bg-f1-border-secondary after:content-[''] group-hover:before:bg-f1-background-hover",
+        isSticky && isScrolled && stickyScrollClasses[referenceRowType],
         isSticky && "sticky z-10",
-        isStickyRight &&
-          "bg-f1-background before:absolute before:inset-0 before:z-[-1] before:h-[calc(100%-1px)] before:w-full before:bg-f1-background before:transition-all before:content-[''] after:absolute after:inset-x-0 after:bottom-0 after:h-px after:w-full after:bg-f1-border-secondary after:content-[''] group-hover:before:bg-f1-background-hover",
+        isStickyRight && stickyScrollClasses[referenceRowType],
         href && "cursor-pointer",
         className
       )}

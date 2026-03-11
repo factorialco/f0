@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.396.0](https://github.com/factorialco/f0/compare/f0-react-v1.395.0...f0-react-v1.396.0) (2026-03-11)
+
+
+### Features
+
+* add delta display cell ([#3574](https://github.com/factorialco/f0/issues/3574)) ([3d943d8](https://github.com/factorialco/f0/commit/3d943d8ce9f7bb26772836768efb9fa64e36b1ae))
+
+## [1.395.0](https://github.com/factorialco/f0/compare/f0-react-v1.394.1...f0-react-v1.395.0) (2026-03-11)
+
+
+### Features
+
+* data collection reference row ([#3585](https://github.com/factorialco/f0/issues/3585)) ([820243f](https://github.com/factorialco/f0/commit/820243f2c16bf2032d8e1aeb90c61b9ee09b3b7e))
+
 ## [1.394.1](https://github.com/factorialco/f0/compare/f0-react-v1.394.0...f0-react-v1.394.1) (2026-03-10)
 
 

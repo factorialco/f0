@@ -13,6 +13,7 @@ import { DataListShowcase } from "../../components/DataListShowcase"
 import { DetailsItemShowcase } from "../../components/DetailsItemShowcase"
 import { DetailsItemsListShowcase } from "../../components/DetailsItemsListShowcase"
 import { F0ButtonShowcase } from "../../components/F0ButtonShowcase"
+import { F0BadgeShowcase } from "../../components/F0BadgeShowcase"
 import { F0IconShowcase } from "../../components/F0IconShowcase"
 import { F0TextShowcase } from "../../components/F0TextShowcase/F0TextShowcase"
 import { OneChipShowcase } from "../../components/OneChipShowcase"
@@ -36,6 +37,8 @@ type ComponentType =
   | "detailsitem"
   | "detailsitemslist"
   | "f0button"
+  | "f0badge"
+  | "f0button"
   | "f0icon"
   | "f0text"
   | "onechip"
@@ -48,13 +51,14 @@ const componentOptions = [
   { value: "activity" as ComponentType, label: "Activity" },
   { value: "animatedf0text" as ComponentType, label: "AnimatedF0Text" },
   { value: "avatar" as ComponentType, label: "Avatar" },
-  { value: "badge" as ComponentType, label: "Badge" },
-  { value: "button" as ComponentType, label: "Button (deprecated)" },
+  { value: "badge" as ComponentType, label: "Badge (deprecated)" },
+  { value: "button" as ComponentType, label: "Button" },
   { value: "counter" as ComponentType, label: "Counter" },
   { value: "datalist" as ComponentType, label: "DataList" },
   { value: "detailsitem" as ComponentType, label: "DetailsItem" },
   { value: "detailsitemslist" as ComponentType, label: "DetailsItemsList" },
   { value: "f0button" as ComponentType, label: "F0Button" },
+  { value: "f0badge" as ComponentType, label: "F0Badge" },
   { value: "f0icon" as ComponentType, label: "F0Icon" },
   { value: "f0text" as ComponentType, label: "F0Text" },
   { value: "onechip" as ComponentType, label: "OneChip" },
@@ -99,6 +103,10 @@ export default function ComponentsShowcase() {
         return <DetailsItemShowcase />
       case "detailsitemslist":
         return <DetailsItemsListShowcase />
+      case "f0button":
+        return <F0ButtonShowcase />
+      case "f0badge":
+        return <F0BadgeShowcase />
       case "f0button":
         return <F0ButtonShowcase />
       case "f0icon":

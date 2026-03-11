@@ -29,6 +29,14 @@ export const mockItem = {
       src: "/avatars/person02.jpg",
     },
   ],
+  positiveDelta: {
+    label: "10%",
+    deltaStatus: "positive" as const,
+  },
+  negativeDelta: {
+    label: "10%",
+    deltaStatus: "negative" as const,
+  },
   companyName: "Factorial",
   companyLogo: "/avatars/factorial.png",
   teamName: "Engineering",

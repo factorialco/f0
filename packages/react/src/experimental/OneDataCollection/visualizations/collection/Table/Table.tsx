@@ -89,6 +89,7 @@ export const TableCollection = <
   onLoadError,
   allowColumnHiding,
   allowColumnReordering,
+  referenceRowType,
   rowWrapper: RowWrapper,
   cellRenderer,
   showItemActions: showItemActionsProp,
@@ -534,6 +535,7 @@ export const TableCollection = <
                               columns={columns}
                               frozenColumnsLeft={frozenColumnsLeft}
                               checkColumnWidth={checkColumnWidth}
+                              referenceRowType={referenceRowType}
                               rowWrapper={RowWrapper}
                               cellRenderer={cellRenderer}
                             />
@@ -574,6 +576,7 @@ export const TableCollection = <
                     frozenColumnsLeft={frozenColumnsLeft}
                     checkColumnWidth={checkColumnWidth}
                     tableWithChildren={tableWithChildren}
+                    referenceRowType={referenceRowType}
                     rowWrapper={RowWrapper}
                     cellRenderer={cellRenderer}
                   />
