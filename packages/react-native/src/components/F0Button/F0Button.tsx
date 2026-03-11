@@ -67,15 +67,21 @@ const F0Button = React.memo(
     const handlePress = useCallback(async () => {
       if (!onPress || isDisabled) return
 
-      const result = onPress()
+      try {
+        const result = onPress()
 
-      if (result instanceof Promise) {
-        setIsLoading(true)
-        try {
-          await result
-        } finally {
-          setIsLoading(false)
+        if (result && typeof result.then === "function") {
+          setIsLoading(true)
+          try {
+            await result
+          } catch {
+            // Avoid bubbling async handler rejections from a design-system component.
+          } finally {
+            setIsLoading(false)
+          }
         }
+      } catch {
+        // Avoid bubbling sync exceptions from a design-system component.
       }
     }, [onPress, isDisabled])
 

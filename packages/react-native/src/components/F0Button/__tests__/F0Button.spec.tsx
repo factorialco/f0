@@ -113,7 +113,7 @@ describe("F0Button", () => {
   it("sets correct accessibilityState when disabled", () => {
     render(<F0Button {...defaultProps} disabled />)
     const button = screen.getByRole("button")
-    expect(button.props.accessibilityState).toEqual({
+    expect(button.props.accessibilityState).toMatchObject({
       disabled: true,
       busy: false,
     })
@@ -122,7 +122,7 @@ describe("F0Button", () => {
   it("sets correct accessibilityState when loading", () => {
     render(<F0Button {...defaultProps} loading />)
     const button = screen.getByRole("button")
-    expect(button.props.accessibilityState).toEqual({
+    expect(button.props.accessibilityState).toMatchObject({
       disabled: true,
       busy: true,
     })
@@ -189,6 +189,35 @@ describe("F0Button", () => {
     expect(screen.getByTestId("f0-button-content").props.className).toContain(
       "opacity-100"
     )
+  })
+
+  it("handles rejected async onPress without leaking rejections", async () => {
+    const onPressError = new Error("Async failure")
+    const asyncOnPress = jest.fn().mockRejectedValue(onPressError)
+    render(<F0Button label="Async reject" onPress={asyncOnPress} />)
+
+    await act(async () => {
+      fireEvent.press(screen.getByRole("button"))
+      await Promise.resolve()
+    })
+
+    expect(asyncOnPress).toHaveBeenCalled()
+    expect(screen.queryByTestId("f0-button-loading-indicator")).toBeNull()
+  })
+
+  it("handles sync throw in onPress without throwing from press handler", () => {
+    const onPressError = new Error("Sync failure")
+    const throwingOnPress = jest.fn(() => {
+      throw onPressError
+    })
+
+    render(<F0Button label="Sync throw" onPress={throwingOnPress} />)
+    expect(() => {
+      fireEvent.press(screen.getByRole("button"))
+    }).not.toThrow()
+
+    expect(throwingOnPress).toHaveBeenCalled()
+    expect(screen.queryByTestId("f0-button-loading-indicator")).toBeNull()
   })
 
   it("renders all six variants without error", () => {

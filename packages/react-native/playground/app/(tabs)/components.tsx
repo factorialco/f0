@@ -38,7 +38,6 @@ type ComponentType =
   | "detailsitemslist"
   | "f0button"
   | "f0badge"
-  | "f0button"
   | "f0icon"
   | "f0text"
   | "onechip"
@@ -52,7 +51,7 @@ const componentOptions = [
   { value: "animatedf0text" as ComponentType, label: "AnimatedF0Text" },
   { value: "avatar" as ComponentType, label: "Avatar" },
   { value: "badge" as ComponentType, label: "Badge (deprecated)" },
-  { value: "button" as ComponentType, label: "Button" },
+  { value: "button" as ComponentType, label: "Button (deprecated)" },
   { value: "counter" as ComponentType, label: "Counter" },
   { value: "datalist" as ComponentType, label: "DataList" },
   { value: "detailsitem" as ComponentType, label: "DetailsItem" },
@@ -107,8 +106,6 @@ export default function ComponentsShowcase() {
         return <F0ButtonShowcase />
       case "f0badge":
         return <F0BadgeShowcase />
-      case "f0button":
-        return <F0ButtonShowcase />
       case "f0icon":
         return <F0IconShowcase />
       case "f0text":
