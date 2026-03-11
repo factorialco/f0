@@ -87,6 +87,24 @@ describe("secondsToFields", () => {
       seconds: 1,
     })
   })
+
+  it("normalizes NaN to zero", () => {
+    expect(secondsToFields(NaN)).toEqual({
+      days: 0,
+      hours: 0,
+      minutes: 0,
+      seconds: 0,
+    })
+  })
+
+  it("normalizes Infinity to zero", () => {
+    expect(secondsToFields(Infinity)).toEqual({
+      days: 0,
+      hours: 0,
+      minutes: 0,
+      seconds: 0,
+    })
+  })
 })
 
 describe("fieldsToSeconds", () => {
@@ -311,11 +329,12 @@ describe("F0DurationInput", () => {
     })
 
     it("hides the label when label is an empty string", () => {
-      render(<F0DurationInput label="" value={0} onChange={() => {}} />)
+      const { container } = render(
+        <F0DurationInput label="" value={0} onChange={() => {}} />
+      )
 
-      const group = screen.getByRole("group")
-      expect(group).toBeInTheDocument()
-      expect(screen.queryByRole("label")).not.toBeInTheDocument()
+      expect(screen.getByRole("group")).toBeInTheDocument()
+      expect(container.querySelector("label")).toBeNull()
     })
 
     it("keeps readonly inputs focusable but non-editable", () => {

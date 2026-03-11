@@ -9,7 +9,7 @@ import { durationInputSizes } from "../types"
 
 const meta = {
   component: F0DurationInput,
-  tags: ["autodocs"],
+  tags: ["autodocs", "stable"],
   title: "DurationInput",
   parameters: {
     layout: "centered",
@@ -119,6 +119,21 @@ export const Disabled: Story = {
         value={3600}
         onChange={() => {}}
         disabled
+      />
+    )
+  },
+}
+
+export const DisabledWithError: Story = {
+  render: () => {
+    return (
+      <F0DurationInput
+        label="Duration"
+        value={3661}
+        onChange={() => {}}
+        disabled
+        units={["hours", "minutes", "seconds"]}
+        status={{ type: "error", message: "This field has an error" }}
       />
     )
   },
@@ -237,6 +252,14 @@ export const Snapshot: Story = {
           value={3600}
           onChange={() => {}}
           disabled
+        />
+        <F0DurationInput
+          label="Disabled + Error"
+          value={3661}
+          onChange={() => {}}
+          disabled
+          units={["hours", "minutes", "seconds"]}
+          status={{ type: "error", message: "This field has an error" }}
         />
         <F0DurationInput
           label="Required"

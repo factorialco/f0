@@ -78,7 +78,7 @@ const containerVariants = cva({
       disabled: false,
       readonly: false,
       status: "default",
-      class: "hover:border-[hsl(var(--neutral-40))]",
+      class: "hover:border-f1-border-hover",
     },
     {
       disabled: false,
@@ -136,13 +136,13 @@ export const F0DurationInput = forwardRef<HTMLDivElement, F0DurationInputProps>(
       setLocalFields(secondsToFields(value))
     }
 
-    const visibleUnits = useMemo(
-      () => UNIT_ORDER.filter((u) => units.includes(u)),
-      [units]
-    )
+    const visibleUnits = useMemo(() => {
+      const filtered = UNIT_ORDER.filter((u) => units.includes(u))
+      if (filtered.length > 0) return filtered
+      return UNIT_ORDER.filter((u) => DEFAULT_UNITS.includes(u))
+    }, [units])
 
-    const firstUnitId =
-      visibleUnits.length > 0 ? `${baseId}-${visibleUnits[0]}` : ""
+    const firstUnitId = `${baseId}-${visibleUnits[0]}`
 
     const handleFieldChange = useCallback(
       (unit: DurationUnit, max: number | undefined) =>
