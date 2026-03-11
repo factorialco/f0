@@ -3,7 +3,7 @@ import "@testing-library/jest-dom/vitest"
 import { zeroRender as render, screen, userEvent } from "@/testing/test-utils"
 import { fireEvent } from "@testing-library/react"
 
-import { F0DurationInput } from "../F0DurationInput"
+import { F0DurationInput } from ".."
 import { fieldsToSeconds, secondsToFields } from "../utils"
 
 describe("secondsToFields", () => {
@@ -67,6 +67,24 @@ describe("secondsToFields", () => {
       hours: 0,
       minutes: 0,
       seconds: 0,
+    })
+  })
+
+  it("normalizes negative values to zero", () => {
+    expect(secondsToFields(-100)).toEqual({
+      days: 0,
+      hours: 0,
+      minutes: 0,
+      seconds: 0,
+    })
+  })
+
+  it("floors fractional seconds", () => {
+    expect(secondsToFields(3661.7)).toEqual({
+      days: 0,
+      hours: 1,
+      minutes: 1,
+      seconds: 1,
     })
   })
 })
@@ -272,19 +290,6 @@ describe("F0DurationInput", () => {
       expect(screen.getByText("*")).toBeInTheDocument()
     })
 
-    it("applies data-testid", () => {
-      render(
-        <F0DurationInput
-          label="Duration"
-          value={0}
-          onChange={() => {}}
-          data-testid="my-duration"
-        />
-      )
-
-      expect(screen.getByTestId("my-duration")).toBeInTheDocument()
-    })
-
     it("renders as a group with accessible label", () => {
       render(
         <F0DurationInput label="Working time" value={0} onChange={() => {}} />
@@ -293,6 +298,31 @@ describe("F0DurationInput", () => {
       expect(
         screen.getByRole("group", { name: "Working time" })
       ).toBeInTheDocument()
+    })
+
+    it("links label to first input via htmlFor", () => {
+      render(<F0DurationInput label="Duration" value={0} onChange={() => {}} />)
+
+      const label = screen.getByText("Duration")
+      const htmlFor = label.closest("label")?.getAttribute("for")
+      expect(htmlFor).toBeTruthy()
+      const input = screen.getByLabelText("Hours")
+      expect(input.id).toBe(htmlFor)
+    })
+
+    it("keeps readonly inputs focusable but non-editable", () => {
+      render(
+        <F0DurationInput
+          label="Duration"
+          value={3600}
+          onChange={() => {}}
+          readonly
+        />
+      )
+
+      const hours = screen.getByLabelText("Hours")
+      expect(hours).not.toBeDisabled()
+      expect(hours).toHaveAttribute("readonly")
     })
   })
 
@@ -378,6 +408,71 @@ describe("F0DurationInput", () => {
       await user.click(container)
 
       expect(screen.getByLabelText("Hours")).toHaveFocus()
+    })
+
+    it("clamps minutes to 59 when hours unit is visible", () => {
+      const onChange = vi.fn()
+      render(<F0DurationInput label="Duration" value={0} onChange={onChange} />)
+
+      fireEvent.change(screen.getByLabelText("Minutes"), {
+        target: { value: "75" },
+      })
+
+      expect(onChange).toHaveBeenLastCalledWith(3540)
+    })
+
+    it("clamps seconds to 59 when minutes unit is visible", () => {
+      const onChange = vi.fn()
+      render(
+        <F0DurationInput
+          label="Duration"
+          value={0}
+          onChange={onChange}
+          units={["minutes", "seconds"]}
+        />
+      )
+
+      fireEvent.change(screen.getByLabelText("Seconds"), {
+        target: { value: "99" },
+      })
+
+      expect(onChange).toHaveBeenLastCalledWith(59)
+    })
+
+    it("clamps hours to 23 when days unit is visible", () => {
+      const onChange = vi.fn()
+      render(
+        <F0DurationInput
+          label="Duration"
+          value={0}
+          onChange={onChange}
+          units={["days", "hours"]}
+        />
+      )
+
+      fireEvent.change(screen.getByLabelText("Hours"), {
+        target: { value: "30" },
+      })
+
+      expect(onChange).toHaveBeenLastCalledWith(82800)
+    })
+
+    it("does not clamp minutes when hours unit is not visible", () => {
+      const onChange = vi.fn()
+      render(
+        <F0DurationInput
+          label="Duration"
+          value={0}
+          onChange={onChange}
+          units={["minutes"]}
+        />
+      )
+
+      fireEvent.change(screen.getByLabelText("Minutes"), {
+        target: { value: "120" },
+      })
+
+      expect(onChange).toHaveBeenLastCalledWith(7200)
     })
   })
 })

@@ -2,7 +2,10 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { useState } from "react"
 
-import { F0DurationInput } from "../F0DurationInput"
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
+
+import { F0DurationInput } from ".."
+import { durationInputSizes } from "../types"
 
 const meta = {
   component: F0DurationInput,
@@ -24,7 +27,10 @@ const meta = {
     disabled: { control: "boolean" },
     required: { control: "boolean" },
     readonly: { control: "boolean" },
-    size: { control: "radio", options: ["sm", "md"] },
+    size: {
+      control: "radio",
+      options: [...durationInputSizes],
+    },
     hideLabel: { control: "boolean" },
   },
 } satisfies Meta<typeof F0DurationInput>
@@ -178,17 +184,94 @@ export const CustomSuffixes: Story = {
   },
 }
 
-export const DisabledWithError: Story = {
-  render: () => {
-    return (
-      <F0DurationInput
-        label="Duration"
-        value={0}
-        onChange={() => {}}
-        disabled
-        status={{ type: "error", message: "Invalid duration" }}
-        units={["hours", "minutes", "seconds"]}
-      />
-    )
-  },
+export const Snapshot: Story = {
+  parameters: withSnapshot({}),
+  render: () => (
+    <div className="flex flex-col gap-6 p-4">
+      <section className="flex flex-col gap-3">
+        <h3 className="text-sm font-semibold">Sizes</h3>
+        <F0DurationInput
+          label="Medium (default)"
+          value={5400}
+          onChange={() => {}}
+          size="md"
+        />
+        <F0DurationInput
+          label="Small"
+          value={5400}
+          onChange={() => {}}
+          size="sm"
+        />
+      </section>
+
+      <section className="flex flex-col gap-3">
+        <h3 className="text-sm font-semibold">Statuses</h3>
+        <F0DurationInput label="Default" value={3600} onChange={() => {}} />
+        <F0DurationInput
+          label="Error"
+          value={0}
+          onChange={() => {}}
+          status={{ type: "error", message: "Duration is required" }}
+        />
+        <F0DurationInput
+          label="Warning"
+          value={36000}
+          onChange={() => {}}
+          status={{
+            type: "warning",
+            message: "Exceeds standard hours",
+          }}
+        />
+        <F0DurationInput
+          label="Info"
+          value={3600}
+          onChange={() => {}}
+          status={{ type: "info", message: "Max 8 hours per day" }}
+        />
+      </section>
+
+      <section className="flex flex-col gap-3">
+        <h3 className="text-sm font-semibold">States</h3>
+        <F0DurationInput
+          label="Disabled"
+          value={3600}
+          onChange={() => {}}
+          disabled
+        />
+        <F0DurationInput
+          label="Required"
+          value={0}
+          onChange={() => {}}
+          required
+        />
+        <F0DurationInput
+          label="Hidden label"
+          value={1800}
+          onChange={() => {}}
+          hideLabel
+        />
+      </section>
+
+      <section className="flex flex-col gap-3">
+        <h3 className="text-sm font-semibold">Unit combinations</h3>
+        <F0DurationInput
+          label="All units"
+          value={90061}
+          onChange={() => {}}
+          units={["days", "hours", "minutes", "seconds"]}
+        />
+        <F0DurationInput
+          label="Hours + Minutes"
+          value={5400}
+          onChange={() => {}}
+        />
+        <F0DurationInput
+          label="Days + Hours"
+          value={90000}
+          onChange={() => {}}
+          units={["days", "hours"]}
+        />
+      </section>
+    </div>
+  ),
 }

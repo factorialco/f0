@@ -3,6 +3,7 @@ import {
   Fragment,
   forwardRef,
   useCallback,
+  useId,
   useMemo,
   useRef,
   useState,
@@ -10,7 +11,7 @@ import {
 
 import { F0Icon } from "@/components/F0Icon"
 import { Bullet } from "@/icons/app"
-import { cn, focusRing } from "@/lib/utils"
+import { cn } from "@/lib/utils"
 import { InputMessages } from "@/ui/InputField/components/InputMessages"
 import { Label } from "@/ui/InputField/components/Label"
 
@@ -44,21 +45,24 @@ const UNIT_LABELS: Record<DurationUnit, string> = {
 
 const containerVariants = cva({
   base: [
-    "inline-flex cursor-text items-center gap-1",
+    "inline-flex cursor-text items-center gap-1 rounded-[10px]",
     "border border-solid border-f1-border bg-f1-background",
     "transition-all",
+    "focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-0",
   ],
   variants: {
     size: {
-      sm: "rounded-[10px] px-2 py-1",
-      md: "rounded-[12px] px-3 py-[6px]",
+      sm: "px-2 py-1",
+      md: "px-3 py-[6px]",
     },
     status: {
-      default: "",
-      warning: "border-f1-border-warning-bold",
-      info: "border-f1-border-info-bold",
+      default:
+        "focus-within:border-f1-border-selected-bold focus-within:ring-f1-background-selected",
+      warning:
+        "border-f1-border-warning-bold focus-within:border-f1-border-warning-bold focus-within:ring-f1-border-warning",
+      info: "border-f1-border-info-bold focus-within:border-f1-border-info-bold focus-within:ring-f1-border-info",
       error:
-        "border-f1-border-critical-bold bg-f1-background-critical bg-opacity-10",
+        "border-f1-border-critical-bold bg-f1-background-critical bg-opacity-10 focus-within:border-f1-border-critical-bold focus-within:ring-f1-border-critical",
     },
     disabled: {
       true: "cursor-not-allowed opacity-50",
@@ -117,10 +121,10 @@ export const F0DurationInput = forwardRef<HTMLDivElement, F0DurationInputProps>(
       required = false,
       readonly = false,
       size = "md",
-      "data-testid": testId,
     },
     ref
   ) {
+    const baseId = useId()
     const inputRefs = useRef<Map<DurationUnit, HTMLInputElement>>(new Map())
     const [localFields, setLocalFields] = useState<DurationFields>(() =>
       secondsToFields(value)
@@ -137,7 +141,8 @@ export const F0DurationInput = forwardRef<HTMLDivElement, F0DurationInputProps>(
       [units]
     )
 
-    const noEdit = disabled || readonly
+    const firstUnitId =
+      visibleUnits.length > 0 ? `${baseId}-${visibleUnits[0]}` : ""
 
     const handleFieldChange = useCallback(
       (unit: DurationUnit, max: number | undefined) =>
@@ -191,12 +196,12 @@ export const F0DurationInput = forwardRef<HTMLDivElement, F0DurationInputProps>(
 
     const handleContainerClick = useCallback(
       (e: React.MouseEvent) => {
-        if (noEdit) return
+        if (disabled) return
         if (e.target instanceof HTMLInputElement) return
         const firstUnit = visibleUnits[0]
         if (firstUnit) inputRefs.current.get(firstUnit)?.focus()
       },
-      [noEdit, visibleUnits]
+      [disabled, visibleUnits]
     )
 
     const setInputRef = useCallback(
@@ -210,12 +215,12 @@ export const F0DurationInput = forwardRef<HTMLDivElement, F0DurationInputProps>(
     const statusType = status?.type ?? "default"
 
     return (
-      <div ref={ref} className="flex flex-col gap-2" data-testid={testId}>
+      <div ref={ref} className="flex flex-col gap-2">
         {!hideLabel && (
           <Label
             label={label}
             required={required}
-            htmlFor=""
+            htmlFor={firstUnitId}
             className="min-w-0 flex-1"
             disabled={disabled}
           />
@@ -227,8 +232,7 @@ export const F0DurationInput = forwardRef<HTMLDivElement, F0DurationInputProps>(
               status: statusType,
               disabled,
               readonly,
-            }),
-            !noEdit && focusRing()
+            })
           )}
           onClick={handleContainerClick}
           role="group"
@@ -251,6 +255,7 @@ export const F0DurationInput = forwardRef<HTMLDivElement, F0DurationInputProps>(
                 )}
                 <input
                   ref={setInputRef(unit)}
+                  id={`${baseId}-${unit}`}
                   className={cn(
                     "border-none bg-transparent p-0 text-inherit outline-none",
                     "text-right font-inherit text-[length:inherit] leading-[inherit]",
@@ -265,8 +270,9 @@ export const F0DurationInput = forwardRef<HTMLDivElement, F0DurationInputProps>(
                   onChange={handleFieldChange(unit, max)}
                   onKeyDown={handleKeyDown}
                   inputMode="numeric"
-                  disabled={noEdit}
+                  disabled={disabled}
                   readOnly={readonly}
+                  aria-readonly={readonly || undefined}
                 />
                 <span className="text-f1-foreground-secondary">{suffix}</span>
               </Fragment>

@@ -25,5 +25,4 @@ export interface F0DurationInputProps {
   required?: boolean
   readonly?: boolean
   size?: DurationInputSize
-  "data-testid"?: string
 }

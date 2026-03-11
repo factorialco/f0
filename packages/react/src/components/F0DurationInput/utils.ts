@@ -29,7 +29,7 @@ const AUTO_MAX: Partial<Record<DurationUnit, number>> = {
 }
 
 export function secondsToFields(totalSeconds: number): DurationFields {
-  let remaining = totalSeconds
+  let remaining = Math.max(0, Math.floor(totalSeconds))
 
   const days = Math.floor(remaining / SECONDS_PER_UNIT.days)
   remaining = remaining % SECONDS_PER_UNIT.days
