@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.398.0](https://github.com/factorialco/f0/compare/f0-react-v1.397.0...f0-react-v1.398.0) (2026-03-11)
+
+
+### Features
+
+* survey answering component ([#3610](https://github.com/factorialco/f0/issues/3610)) ([5b72edf](https://github.com/factorialco/f0/commit/5b72edf218f23796acbdf70fe8a458c112970d48))
+
 ## [1.397.0](https://github.com/factorialco/f0/compare/f0-react-v1.396.0...f0-react-v1.397.0) (2026-03-11)
 
 
