@@ -1,12 +1,43 @@
+import { useCallback, useState } from "react"
+
 import userEvent from "@testing-library/user-event"
 import { describe, it, expect, vi } from "vitest"
 import { z } from "zod"
 
 import { zeroRender as render, screen } from "@/testing/test-utils"
 
+import type {
+  FileUploadResult,
+  FileUploadStatus,
+  UseFileUpload,
+} from "../../F0Form/fields/file/types"
 import type { F0Field } from "../../F0Form/fields/types"
 
 import { F0FormField } from "../F0FormField"
+
+function createMockUploadHook(): UseFileUpload {
+  return () => {
+    const [progress, setProgress] = useState(0)
+    const [status, setStatus] = useState<FileUploadStatus>("idle")
+
+    const upload = useCallback(
+      async (file: File): Promise<FileUploadResult> => {
+        setStatus("uploading")
+        setProgress(1)
+        setStatus("success")
+        return { type: "success", value: `signed_${file.name}` }
+      },
+      []
+    )
+
+    const cancelUpload = useCallback(() => {
+      setStatus("idle")
+      setProgress(0)
+    }, [])
+
+    return { upload, cancelUpload, progress, status }
+  }
+}
 
 describe("F0FormField", () => {
   describe("text field rendering", () => {
@@ -115,6 +146,53 @@ describe("F0FormField", () => {
       render(<F0FormField field={field} value={null} onChange={onChange} />)
 
       expect(screen.getByLabelText("Birth Date")).toBeInTheDocument()
+    })
+
+    it("renders a file field", () => {
+      const field: F0Field = {
+        id: "resume",
+        type: "file",
+        label: "Resume",
+        useUpload: createMockUploadHook(),
+      }
+      const onChange = vi.fn()
+
+      render(
+        <F0FormField field={field} value={undefined} onChange={onChange} />
+      )
+
+      expect(screen.getByText("Resume")).toBeInTheDocument()
+      expect(
+        screen.getByText("Drag and drop a file, or click to select")
+      ).toBeInTheDocument()
+    })
+
+    it("renders initial file metadata for a file field", () => {
+      const field: F0Field = {
+        id: "contract",
+        type: "file",
+        label: "Contract",
+        useUpload: createMockUploadHook(),
+      }
+      const onChange = vi.fn()
+
+      render(
+        <F0FormField
+          field={field}
+          value="signed_contract.pdf"
+          onChange={onChange}
+          initialFiles={[
+            {
+              value: "signed_contract.pdf",
+              name: "contract.pdf",
+              type: "application/pdf",
+              size: 1024,
+            },
+          ]}
+        />
+      )
+
+      expect(screen.getByText("contract.pdf")).toBeInTheDocument()
     })
   })
 

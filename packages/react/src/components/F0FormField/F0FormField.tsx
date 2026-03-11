@@ -15,10 +15,8 @@ import { isFieldRequired } from "../F0Form/fields/schema"
  * without requiring a react-hook-form context.
  *
  * Supports all field types that F0Form supports: text, number, textarea,
- * select, checkbox, switch, date, time, datetime, daterange, richtext, and custom.
- *
- * Note: "file" fields are not supported in standalone mode because they
- * require F0Form context for initial file metadata.
+ * select, checkbox, switch, date, time, datetime, daterange, richtext, custom,
+ * and file.
  */
 export function F0FormField({
   field,
@@ -31,6 +29,7 @@ export function F0FormField({
   required,
   disabled,
   hideLabel: hideLabelProp,
+  initialFiles,
 }: F0FormFieldProps) {
   const id = useId()
 
@@ -55,6 +54,7 @@ export function F0FormField({
   }
 
   const resolvedField = disabled !== undefined ? { ...field, disabled } : field
+  const fileInitialFiles = field.type === "file" ? initialFiles : undefined
 
   return (
     <div className="space-y-2" id={id}>
@@ -76,6 +76,7 @@ export function F0FormField({
         isSubmitting: false,
         isRequired,
         values: {},
+        initialFiles: fileInitialFiles,
       })}
       {field.helpText && (
         <p className="text-base text-f1-foreground-secondary">

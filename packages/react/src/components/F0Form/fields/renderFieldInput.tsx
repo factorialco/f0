@@ -1,5 +1,6 @@
 import { ControllerRenderProps, FieldError, FieldValues } from "react-hook-form"
 
+import type { InitialFile } from "./file/types"
 import type { F0Field } from "./types"
 
 import { CheckboxFieldRenderer } from "./checkbox/CheckboxFieldRenderer"
@@ -29,6 +30,7 @@ export interface RenderFieldInputOptions {
   isSubmitting: boolean
   isRequired?: boolean
   values: Record<string, unknown>
+  initialFiles?: InitialFile[]
 }
 
 /**
@@ -41,6 +43,7 @@ export function renderFieldInput({
   isSubmitting,
   isRequired,
   values,
+  initialFiles,
 }: RenderFieldInputOptions): React.ReactNode {
   const hasError = !!fieldState.error
   const { isValidating } = fieldState
@@ -164,6 +167,7 @@ export function renderFieldInput({
           field={{ ...field, disabled: isDisabled }}
           formField={formField}
           error={hasError}
+          initialFiles={initialFiles}
         />
       )
     case "custom":

@@ -1,12 +1,56 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { useState } from "react"
+import { useCallback, useRef, useState } from "react"
 
-import type { F0Field } from "@/components/F0Form/fields/types"
+import type {
+  F0Field,
+  FileUploadHookReturn,
+  FileUploadResult,
+  FileUploadStatus,
+} from "@/components/F0Form/fields/types"
 
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import { F0FormField } from "../F0FormField"
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+
+function useMockUpload(): FileUploadHookReturn {
+  const [progress, setProgress] = useState(0)
+  const [status, setStatus] = useState<FileUploadStatus>("idle")
+  const abortRef = useRef(false)
+
+  const upload = useCallback(async (file: File): Promise<FileUploadResult> => {
+    abortRef.current = false
+    setStatus("processing")
+    setProgress(0)
+
+    await sleep(500)
+    if (abortRef.current) return { type: "aborted" }
+
+    setStatus("uploading")
+
+    for (let i = 1; i <= 10; i++) {
+      await sleep(200)
+      if (abortRef.current) return { type: "aborted" }
+      setProgress(i / 10)
+    }
+
+    setStatus("success")
+    return {
+      type: "success",
+      value: `signed_${file.name}_${globalThis.Date.now()}`,
+    }
+  }, [])
+
+  const cancelUpload = useCallback(() => {
+    abortRef.current = true
+    setStatus("idle")
+    setProgress(0)
+  }, [])
+
+  return { upload, cancelUpload, progress, status }
+}
 
 const meta: Meta<typeof F0FormField> = {
   title: "Forms/F0FormField",
@@ -300,6 +344,35 @@ export const Custom: Story = {
           ))}
         </div>
       ),
+    }
+
+    return (
+      <div className="max-w-sm">
+        <F0FormField
+          field={field}
+          value={value}
+          onChange={(v) => setValue(v as string)}
+        />
+      </div>
+    )
+  },
+}
+
+/**
+ * A standalone file upload field using a mocked upload hook.
+ */
+export const File: Story = {
+  render() {
+    const [value, setValue] = useState("")
+
+    const field: F0Field = {
+      id: "resume",
+      type: "file",
+      label: "Resume",
+      description: "Upload a PDF file up to 5 MB",
+      accept: ["application/pdf"],
+      maxSizeMB: 5,
+      useUpload: useMockUpload,
     }
 
     return (

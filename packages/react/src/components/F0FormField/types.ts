@@ -1,4 +1,5 @@
-import type { F0Field } from "../F0Form/fields/types"
+import type { InitialFile } from "../F0Form/fields/file/types"
+import type { F0Field, F0FileField } from "../F0Form/fields/types"
 
 /**
  * Standalone form field props — decoupled from react-hook-form.
@@ -17,9 +18,8 @@ export interface FormFieldProps {
   ref?: React.RefCallback<HTMLElement>
 }
 
-export interface F0FormFieldProps {
+interface F0FormFieldCommonProps {
   /** Field definition (type, label, placeholder, etc.) */
-  field: F0Field
   /** Current field value */
   value: unknown
   /** Called when the field value changes */
@@ -39,3 +39,19 @@ export interface F0FormFieldProps {
   /** Whether to hide the label (useful when label is rendered externally) */
   hideLabel?: boolean
 }
+
+export interface F0FormFieldFileProps extends F0FormFieldCommonProps {
+  /** File field definition */
+  field: F0FileField
+  /** Shared pool of pre-existing file metadata for standalone file fields */
+  initialFiles?: InitialFile[]
+}
+
+export interface F0FormFieldNonFileProps extends F0FormFieldCommonProps {
+  /** Non-file field definition */
+  field: Exclude<F0Field, F0FileField>
+  /** Only supported for file fields */
+  initialFiles?: never
+}
+
+export type F0FormFieldProps = F0FormFieldFileProps | F0FormFieldNonFileProps
