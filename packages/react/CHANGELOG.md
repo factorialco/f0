@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.397.0](https://github.com/factorialco/f0/compare/f0-react-v1.396.0...f0-react-v1.397.0) (2026-03-11)
+
+
+### Features
+
+* **F0AnalyticsDashboard:** add all chart types + rewrite stories as reference catalog ([#3617](https://github.com/factorialco/f0/issues/3617)) ([193a9fe](https://github.com/factorialco/f0/commit/193a9fe574ca5c990e1261ee0478d951a8221d5f))
+
 ## [1.396.0](https://github.com/factorialco/f0/compare/f0-react-v1.395.0...f0-react-v1.396.0) (2026-03-11)
 
 
