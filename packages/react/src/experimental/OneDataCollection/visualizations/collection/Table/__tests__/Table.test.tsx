@@ -1132,6 +1132,35 @@ describe("TableCollection", () => {
       expect(within(salaryCell).getByText("0")).toBeInTheDocument()
       expect(within(salaryCell).queryByText("ROW")).not.toBeInTheDocument()
     })
+
+    it("treats empty-string summaries as empty and shows the placeholder", async () => {
+      render(
+        <TableCollection<
+          SummaryPerson,
+          TestFilters,
+          SortingsDefinition,
+          SummaryTestDefinitions,
+          ItemActionsDefinition<SummaryPerson>,
+          TestNavigationFilters,
+          GroupingDefinition<SummaryPerson>
+        >
+          columns={summaryColumns}
+          source={createSummarySource({ salarySummary: "" })}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+          summaryPlaceholder="ROW"
+        />
+      )
+
+      const summaryCells = await getSummaryRowCells()
+      const salaryCell = summaryCells[2]
+
+      expect(within(salaryCell).queryByText(/sum/i)).not.toBeInTheDocument()
+      expect(within(salaryCell).getByText("ROW")).toHaveClass(
+        "text-f1-foreground-secondary"
+      )
+    })
   })
 
   describe("Item Actions", () => {
