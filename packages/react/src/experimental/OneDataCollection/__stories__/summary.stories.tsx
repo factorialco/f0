@@ -224,6 +224,7 @@ export const WithSummaryPlaceholders: Story = {
           {
             type: "table",
             options: {
+              summaryPlaceholder: "Row placeholder",
               columns: [
                 { label: "Name", render: (item) => item.name },
                 {
