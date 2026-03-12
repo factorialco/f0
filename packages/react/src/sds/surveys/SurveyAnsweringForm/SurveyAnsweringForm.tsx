@@ -10,6 +10,7 @@ import { useF0Form } from "@/components/F0Form/useF0Form"
 import { OneEmptyState } from "@/experimental/OneEmptyState"
 import { ArrowLeft, ArrowRight, Maximize, Minimize } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
+import { cn } from "@/lib/utils"
 import { ProgressBarCell } from "@/ui/value-display/types/progressBar"
 
 import type { SurveyAnsweringFormProps, SurveySubmitAnswers } from "./types"
@@ -231,7 +232,7 @@ export function SurveyAnsweringForm({
       disableContentPadding
     >
       <SurveyFormBuilderProvider answering elements={elements} onChange={noop}>
-        <div className="relative flex h-full flex-col">
+        <div className="relative flex min-h-full flex-col">
           {showTableOfContent && (
             <TableOfContent elements={elements} onChange={noop} answering />
           )}
@@ -244,7 +245,14 @@ export function SurveyAnsweringForm({
               />
             </div>
           )}
-          <div className="mx-auto flex h-full w-full flex-col justify-center px-4 py-12 md:w-[750px]">
+          <div
+            className={cn(
+              "mx-auto flex w-full flex-col px-4 py-12 md:w-[750px]",
+              mode === "all-questions"
+                ? "justify-start"
+                : "h-full justify-center"
+            )}
+          >
             {loading ? (
               mode === "stepped" ? (
                 <SurveySteppedLoadingSkeleton />
