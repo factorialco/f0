@@ -629,7 +629,7 @@ export const TableCollection = <
                                   groupAllSelectedStatus[group.key]
                                 ) === "indeterminate"
                               }
-                              title="Select all"
+                              title={i18n.actions.selectAll}
                               hideLabel
                               onCheckedChange={(checked) =>
                                 handleSelectGroupChange(group, checked)
@@ -643,7 +643,6 @@ export const TableCollection = <
                           left: source.selectable ? checkColumnWidth : 0,
                         }}
                         colSpan={frozenColumnsLeft || 1}
-                        className="pl-3"
                       >
                         <GroupHeader
                           selectable={false}
@@ -655,11 +654,7 @@ export const TableCollection = <
                         />
                       </TableCell>
                       <TableCell
-                        colSpan={
-                          columns.length -
-                          (frozenColumnsLeft || 1) +
-                          (source.selectable ? 1 : 0)
-                        }
+                        colSpan={columns.length - (frozenColumnsLeft || 1)}
                       >
                         &nbsp;
                       </TableCell>
