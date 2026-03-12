@@ -20574,7 +20574,7 @@ function Lme({
     label: h("surveyAnsweringForm.actions.previous"),
     onClick: $,
     icon: Tk
-  } : void 0 : void 0, pe = t === "all-questions" && S && !c, Be = D && S && !c, ee = D && !!x.currentQuestion?.sectionTitle && !c, J = !S && !c || D || D && c;
+  } : void 0 : void 0, pe = t === "all-questions" && S && !c, Be = D && S && !c, ee = D && !!x.currentQuestion?.sectionTitle && !c, J = !S && !c || D;
   return /* @__PURE__ */ C(
     gG,
     {
