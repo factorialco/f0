@@ -17,9 +17,9 @@ export const buttonVariants = tv({
       promote: "bg-f0-background-promote border border-f0-border-promote",
     },
     size: {
-      sm: "h-6 rounded-sm",
-      md: "h-8 rounded",
-      lg: "h-10 rounded-md",
+      sm: "h-7 rounded-sm",
+      md: "h-9 rounded",
+      lg: "h-11 rounded-md",
     },
     disabled: {
       true: "opacity-50",
