@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.37.1](https://github.com/factorialco/f0/compare/f0-react-native-v0.37.0...f0-react-native-v0.37.1) (2026-03-12)
+
+
+### Bug Fixes
+
+* **F0Button:** update button sizes in styles and snapshots for consis… ([#3650](https://github.com/factorialco/f0/issues/3650)) ([da3103c](https://github.com/factorialco/f0/commit/da3103c17ec8814c1068afb75ac785c0faf77381))
+
 ## [0.37.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.36.0...f0-react-native-v0.37.0) (2026-03-12)
 
 
