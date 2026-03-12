@@ -249,8 +249,7 @@ export function SurveyAnsweringForm({
   const showSectionHeader =
     isStepped && !!stepper.currentQuestion?.sectionTitle && !loading
 
-  const shouldCenterContent =
-    (!hasQuestions && !loading) || isStepped || (isStepped && loading)
+  const shouldCenterContent = (!hasQuestions && !loading) || isStepped
 
   return (
     <F0Dialog
