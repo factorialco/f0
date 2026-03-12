@@ -294,6 +294,36 @@ describe("F0DurationInput", () => {
       expect(minutes).toHaveAttribute("placeholder", "0")
     })
 
+    it("uses fixed 2ch width for each segment", () => {
+      render(
+        <F0DurationInput
+          label="Duration"
+          value={0}
+          onChange={() => {}}
+          units={["days", "seconds"]}
+        />
+      )
+
+      expect(screen.getByLabelText("Days")).toHaveStyle({ width: "2ch" })
+      expect(screen.getByLabelText("Seconds")).toHaveStyle({ width: "2ch" })
+    })
+
+    it("does not set maxLength on segment inputs", () => {
+      render(
+        <F0DurationInput
+          label="Duration"
+          value={90061}
+          onChange={() => {}}
+          units={["days", "hours", "minutes", "seconds"]}
+        />
+      )
+
+      expect(screen.getByLabelText("Days")).not.toHaveAttribute("maxLength")
+      expect(screen.getByLabelText("Hours")).not.toHaveAttribute("maxLength")
+      expect(screen.getByLabelText("Minutes")).not.toHaveAttribute("maxLength")
+      expect(screen.getByLabelText("Seconds")).not.toHaveAttribute("maxLength")
+    })
+
     it("renders with disabled state", () => {
       render(
         <F0DurationInput
@@ -535,7 +565,7 @@ describe("F0DurationInput", () => {
       expect(screen.getByLabelText("Hours")).toHaveFocus()
     })
 
-    it("clamps minutes to 59 when hours unit is visible", () => {
+    it("rolls minutes into hours when hours unit is visible", () => {
       const onChange = vi.fn()
       render(<F0DurationInput label="Duration" value={0} onChange={onChange} />)
 
@@ -543,10 +573,10 @@ describe("F0DurationInput", () => {
         target: { value: "75" },
       })
 
-      expect(onChange).toHaveBeenLastCalledWith(3540)
+      expect(onChange).toHaveBeenLastCalledWith(4500)
     })
 
-    it("clamps seconds to 59 when minutes unit is visible", () => {
+    it("rolls seconds into minutes when minutes unit is visible", () => {
       const onChange = vi.fn()
       render(
         <F0DurationInput
@@ -561,10 +591,10 @@ describe("F0DurationInput", () => {
         target: { value: "99" },
       })
 
-      expect(onChange).toHaveBeenLastCalledWith(59)
+      expect(onChange).toHaveBeenLastCalledWith(99)
     })
 
-    it("clamps hours to 23 when days unit is visible", () => {
+    it("rolls hours into days when days unit is visible", () => {
       const onChange = vi.fn()
       render(
         <F0DurationInput
@@ -579,7 +609,7 @@ describe("F0DurationInput", () => {
         target: { value: "30" },
       })
 
-      expect(onChange).toHaveBeenLastCalledWith(82800)
+      expect(onChange).toHaveBeenLastCalledWith(108000)
     })
 
     it("does not clamp minutes when hours unit is not visible", () => {
@@ -600,7 +630,25 @@ describe("F0DurationInput", () => {
       expect(onChange).toHaveBeenLastCalledWith(7200)
     })
 
-    it("clamps minutes based on nearest visible coarser unit", () => {
+    it("accepts more than two digits with fixed 2ch width", () => {
+      const onChange = vi.fn()
+      render(
+        <F0DurationInput
+          label="Duration"
+          value={0}
+          onChange={onChange}
+          units={["days"]}
+        />
+      )
+
+      fireEvent.change(screen.getByLabelText("Days"), {
+        target: { value: "200" },
+      })
+
+      expect(onChange).toHaveBeenLastCalledWith(17280000)
+    })
+
+    it("rolls minutes into days when days and minutes are visible", () => {
       const onChange = vi.fn()
       render(
         <F0DurationInput
@@ -615,7 +663,25 @@ describe("F0DurationInput", () => {
         target: { value: "2000" },
       })
 
-      expect(onChange).toHaveBeenLastCalledWith(86340)
+      expect(onChange).toHaveBeenLastCalledWith(120000)
+    })
+
+    it("respects explicit field max when provided", () => {
+      const onChange = vi.fn()
+      render(
+        <F0DurationInput
+          label="Duration"
+          value={0}
+          onChange={onChange}
+          fields={{ minutes: { max: 59 } }}
+        />
+      )
+
+      fireEvent.change(screen.getByLabelText("Minutes"), {
+        target: { value: "75" },
+      })
+
+      expect(onChange).toHaveBeenLastCalledWith(3540)
     })
 
     it("rolls hidden units into visible ones on render", () => {

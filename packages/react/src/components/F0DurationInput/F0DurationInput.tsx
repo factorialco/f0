@@ -25,7 +25,6 @@ import {
   UNIT_ORDER,
   clampValue,
   fieldsToSeconds,
-  getAutoMax,
   secondsToVisibleFields,
 } from "./utils"
 
@@ -45,7 +44,7 @@ const UNIT_LABELS: Record<DurationUnit, string> = {
 
 const containerVariants = cva({
   base: [
-    "inline-flex items-center gap-1 rounded-[10px]",
+    "inline-flex items-center gap-1 overflow-hidden rounded-[10px]",
     "border border-solid border-f1-border bg-f1-background",
     "transition-[border-color]",
     "focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-0 focus-within:transition-none active:transition-none",
@@ -164,8 +163,8 @@ export const F0DurationInput = forwardRef<HTMLDivElement, F0DurationInputProps>(
         for (const u of visibleUnits) {
           normalized[u] = updatedFields[u]
         }
-        setLocalFields(normalized)
         const total = fieldsToSeconds(normalized)
+        setLocalFields(secondsToVisibleFields(total, visibleUnits))
         lastEmittedRef.current = total
         onChange(total)
       },
@@ -273,8 +272,7 @@ export const F0DurationInput = forwardRef<HTMLDivElement, F0DurationInputProps>(
           data-disabled={disabled ? "" : undefined}
         >
           {visibleUnits.map((unit, index) => {
-            const max =
-              fieldConfig?.[unit]?.max ?? getAutoMax(unit, visibleUnits)
+            const max = fieldConfig?.[unit]?.max
             const fieldValue = localFields[unit]
             const suffix = fieldConfig?.[unit]?.suffix ?? STATIC_SUFFIXES[unit]
             const displayValue = fieldValue > 0 ? String(fieldValue) : ""
@@ -299,7 +297,7 @@ export const F0DurationInput = forwardRef<HTMLDivElement, F0DurationInputProps>(
                     disabled && "pointer-events-none"
                   )}
                   style={{
-                    width: `${Math.min(Math.max(displayValue.length, 1), 4)}ch`,
+                    width: "2ch",
                   }}
                   aria-label={
                     fieldConfig?.[unit]?.ariaLabel ?? UNIT_LABELS[unit]
