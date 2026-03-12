@@ -8,7 +8,7 @@ import { tv } from "tailwind-variants"
  * `notification` are borderless — matching Figma exactly.
  */
 export const f0CounterContainerVariants = tv({
-  base: "flex items-center justify-center rounded-xs grow-0 overflow-hidden",
+  base: "flex items-center justify-center rounded-xs grow-0",
   variants: {
     size: {
       md: "min-w-5 p-0.5",
