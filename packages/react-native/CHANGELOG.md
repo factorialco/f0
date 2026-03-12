@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.39.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.38.0...f0-react-native-v0.39.0) (2026-03-12)
+
+
+### Features
+
+* add F0Preset component with showcase and documentation ([#3654](https://github.com/factorialco/f0/issues/3654)) ([5faacc6](https://github.com/factorialco/f0/commit/5faacc6714855241b734977ed015a72ae67cd66c))
+
 ## [0.38.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.37.1...f0-react-native-v0.38.0) (2026-03-12)
 
 
