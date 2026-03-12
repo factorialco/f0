@@ -4,10 +4,10 @@ import { ReactNode } from "react"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Icon } from "@/components/F0Icon"
 import { OneEllipsis } from "@/components/OneEllipsis/OneEllipsis"
-import { Counter } from "@/ui/Counter"
 import { ChevronDown, Handle } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
+import { Counter } from "@/ui/Counter"
 
 import { TOCItem } from "../types"
 import { ItemDropDown } from "./ItemDropDown"
@@ -43,19 +43,23 @@ export function PrimitiveItem({
 }: PrimitiveItemProps) {
   const translations = useI18n()
   const { label, onClick, icon, disabled, otherActions } = item
+  const canToggleOnRowClick = collapsible && !onClick
+  const showStandaloneToggleButton = collapsible && !canToggleOnRowClick
+  const isRowClickable = !!onClick || canToggleOnRowClick
 
   // Logic: Show counter by default (if exists), show dropdown on hover (if actions exist)
   // Keep dropdown visible while it's open to prevent flickering
   const hasOtherActions = otherActions && otherActions.length > 0
   const shouldShowDropdown = hasOtherActions && (isHovered || open)
   const shouldShowCounter = counter && !shouldShowDropdown
+  const shouldIsolateActionsClick = shouldShowDropdown && !canToggleOnRowClick
 
   // Show handle icon on hover or when dropdown is open
   const showHandleIcon = sortable && (isHovered || open)
 
   return (
     <div className="flex w-full min-w-0 items-center">
-      {collapsible && (
+      {showStandaloneToggleButton && (
         <ButtonInternal
           compact
           size="sm"
@@ -73,16 +77,50 @@ export function PrimitiveItem({
           icon={ChevronDown}
         ></ButtonInternal>
       )}
+      {canToggleOnRowClick && (
+        <div
+          aria-hidden="true"
+          className={cn(
+            "flex h-8 w-8 items-center justify-center rounded-[10px] text-f1-icon transition-colors",
+            !disabled && "cursor-pointer hover:bg-f1-background-hover",
+            !isExpanded && "-rotate-90"
+          )}
+          onClick={
+            disabled
+              ? undefined
+              : () => {
+                  onToggleExpanded?.(item.id)
+                }
+          }
+        >
+          <F0Icon icon={ChevronDown} size="sm" />
+        </div>
+      )}
       <div
         className={cn(
           focusRing("focus:border-f1-border-focus"),
           "relative flex h-[36px] min-w-0 flex-grow items-center gap-1 rounded-[10px] border border-solid border-transparent px-1.5 text-sm transition-colors",
           isActive && "bg-f1-background-selected",
-          onClick && !disabled && "cursor-pointer hover:bg-f1-background-hover",
+          isRowClickable &&
+            !disabled &&
+            "cursor-pointer hover:bg-f1-background-hover",
           disabled && "cursor-not-allowed opacity-30"
         )}
         data-active={isActive || undefined}
-        onClick={disabled ? undefined : () => onClick?.(item.id)}
+        onClick={
+          disabled
+            ? undefined
+            : () => {
+                if (onClick) {
+                  onClick(item.id)
+                  return
+                }
+
+                if (canToggleOnRowClick) {
+                  onToggleExpanded?.(item.id)
+                }
+              }
+        }
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
@@ -149,7 +187,11 @@ export function PrimitiveItem({
                 duration: 0.15,
                 ease: [0.25, 0.1, 0.25, 1],
               }}
-              onClick={(e) => e.stopPropagation()}
+              onClick={(e) => {
+                if (shouldIsolateActionsClick) {
+                  e.stopPropagation()
+                }
+              }}
               className="relative flex h-[24px] w-[24px] flex-shrink-0 items-center justify-center"
             >
               <AnimatePresence mode="wait">

@@ -2,23 +2,23 @@ import { useCallback, useMemo } from "react"
 
 import { IconType } from "@/components/F0Icon/F0Icon"
 import {
+  TOCItem,
+  TOCItemAction,
+} from "@/experimental/Navigation/F0TableOfContent"
+import {
   AcademicCap,
   AlertCircleLine,
   Delete,
   Hub,
   LayersFront,
 } from "@/icons/app"
-import {
-  TOCItem,
-  TOCItemAction,
-} from "@/experimental/Navigation/F0TableOfContent"
 
+import { questionTypeIconMap } from "../../constants"
+import { useSurveyFormBuilderContext } from "../../Context"
 import {
   RATING_OPTIONS,
   useQuestionActionsFactory,
 } from "../../QuestionTypes/BaseQuestion/ActionsMenu/useQuestionActions"
-import { questionTypeIconMap } from "../../constants"
-import { useSurveyFormBuilderContext } from "../../Context"
 import {
   SurveyFormBuilderElement,
   QuestionElement,
@@ -29,10 +29,152 @@ const getQuestionIcon = (type: QuestionType): IconType => {
   return questionTypeIconMap[type]
 }
 
-const scrollToElement = (elementId: string) => {
-  document
-    .getElementById(elementId)
-    ?.scrollIntoView({ behavior: "smooth", block: "start" })
+const triggerWiggleEffect = (element: HTMLElement) => {
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    return
+  }
+
+  element.animate(
+    [
+      { transform: "translateX(0)" },
+      { transform: "translateX(-4px)" },
+      { transform: "translateX(4px)" },
+      { transform: "translateX(-3px)" },
+      { transform: "translateX(3px)" },
+      { transform: "translateX(0)" },
+    ],
+    {
+      duration: 320,
+      easing: "ease-out",
+    }
+  )
+}
+
+const triggerWiggleAfterScroll = (
+  element: HTMLElement,
+  scroller?: HTMLElement | Window
+) => {
+  const scrollTarget: HTMLElement | Window = scroller ?? window
+  const eventTarget = scrollTarget as EventTarget & {
+    addEventListener: (
+      type: string,
+      listener: EventListenerOrEventListenerObject,
+      options?: boolean | AddEventListenerOptions
+    ) => void
+    removeEventListener: (
+      type: string,
+      listener: EventListenerOrEventListenerObject,
+      options?: boolean | EventListenerOptions
+    ) => void
+  }
+  const supportsScrollEnd = "onscrollend" in scrollTarget
+  let hasTriggered = false
+
+  const triggerOnce = () => {
+    if (hasTriggered) return
+    hasTriggered = true
+    triggerWiggleEffect(element)
+  }
+
+  if (supportsScrollEnd) {
+    const handleScrollEnd = () => {
+      triggerOnce()
+    }
+
+    eventTarget.addEventListener("scrollend", handleScrollEnd, {
+      once: true,
+    })
+
+    // Fallback in case the browser never emits scrollend.
+    window.setTimeout(() => {
+      eventTarget.removeEventListener("scrollend", handleScrollEnd)
+      triggerOnce()
+    }, 900)
+
+    return
+  }
+
+  let settleTimer: number | null = null
+
+  const cleanup = () => {
+    eventTarget.removeEventListener("scroll", handleScroll)
+    if (settleTimer) {
+      clearTimeout(settleTimer)
+      settleTimer = null
+    }
+  }
+
+  const finish = () => {
+    cleanup()
+    triggerOnce()
+  }
+
+  const handleScroll = () => {
+    if (settleTimer) {
+      clearTimeout(settleTimer)
+    }
+    settleTimer = window.setTimeout(finish, 120)
+  }
+
+  eventTarget.addEventListener("scroll", handleScroll, { passive: true })
+  handleScroll()
+
+  // Hard stop to avoid listeners hanging around if scroll events are not fired.
+  window.setTimeout(finish, 1000)
+}
+
+const getScrollableParent = (element: HTMLElement): HTMLElement | null => {
+  let parent = element.parentElement
+
+  while (parent) {
+    const { overflowY } = window.getComputedStyle(parent)
+    const canScroll =
+      (overflowY === "auto" ||
+        overflowY === "scroll" ||
+        overflowY === "overlay") &&
+      parent.scrollHeight > parent.clientHeight
+
+    if (canScroll) {
+      return parent
+    }
+
+    parent = parent.parentElement
+  }
+
+  return null
+}
+
+const scrollToElement = (elementId: string, offset = 0) => {
+  const target = document.getElementById(elementId)
+  if (!target) return
+
+  const scrollableParent = getScrollableParent(target)
+
+  if (scrollableParent) {
+    const parentRect = scrollableParent.getBoundingClientRect()
+    const targetRect = target.getBoundingClientRect()
+    const targetTop =
+      scrollableParent.scrollTop +
+      (targetRect.top - parentRect.top) -
+      Math.max(0, offset)
+
+    scrollableParent.scrollTo({
+      top: Math.max(0, targetTop),
+      behavior: "smooth",
+    })
+
+    triggerWiggleAfterScroll(target, scrollableParent)
+
+    return
+  }
+
+  target.scrollIntoView({ behavior: "smooth", block: "start" })
+
+  if (offset > 0) {
+    window.scrollBy({ top: -offset, behavior: "smooth" })
+  }
+
+  triggerWiggleAfterScroll(target)
 }
 
 type UseTableOfContentItemsOptions = {
@@ -45,6 +187,7 @@ type UseTableOfContentItemsOptions = {
   questionOptionsLabel: string
   requiredLabel: string
   questionTypeLabel: string
+  scrollOffset?: number
 }
 
 export const useTableOfContentItems = (
@@ -61,6 +204,7 @@ export const useTableOfContentItems = (
     questionOptionsLabel,
     requiredLabel,
     questionTypeLabel,
+    scrollOffset = 0,
   } = options
 
   const { deleteElement, onDuplicateElement, disabled, answering } =
@@ -68,9 +212,12 @@ export const useTableOfContentItems = (
 
   const { getActionsForQuestion, questionTypes } = useQuestionActionsFactory()
 
-  const handleItemClick = useCallback((id: string) => {
-    scrollToElement(id)
-  }, [])
+  const handleItemClick = useCallback(
+    (id: string) => {
+      scrollToElement(id, scrollOffset)
+    },
+    [scrollOffset]
+  )
 
   const buildQuestionActions = useCallback(
     (
@@ -184,7 +331,7 @@ export const useTableOfContentItems = (
             id: sectionId,
             label: section.title || untitledSectionLabel,
             icon: AcademicCap,
-            onClick: handleItemClick,
+            ...(!answering && { onClick: handleItemClick }),
             ...(!disabled &&
               !answering &&
               !section.locked && {

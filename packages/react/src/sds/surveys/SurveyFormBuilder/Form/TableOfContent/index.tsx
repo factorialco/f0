@@ -82,10 +82,12 @@ export const TableOfContent = ({
   elements,
   onChange,
   answering,
+  scrollOffset,
 }: {
   elements: SurveyFormBuilderElement[]
   onChange: (elements: SurveyFormBuilderElement[]) => void
   answering?: boolean
+  scrollOffset?: number
 }) => {
   const { t } = useI18n()
   const { portalContainer } = useContext(F0DialogContext)
@@ -100,6 +102,7 @@ export const TableOfContent = ({
     questionOptionsLabel: t("surveyFormBuilder.labels.questionOptions"),
     requiredLabel: t("surveyFormBuilder.labels.required"),
     questionTypeLabel: t("surveyFormBuilder.labels.questionType"),
+    scrollOffset,
   })
 
   const handleReorder = useCallback(

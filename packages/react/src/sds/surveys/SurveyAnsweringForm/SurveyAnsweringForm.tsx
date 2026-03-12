@@ -28,6 +28,7 @@ import {
 } from "./hooks/useSurveyFormSchema"
 
 const noop = () => {}
+const ANSWERING_TOC_SCROLL_OFFSET = 24
 
 export function SurveyAnsweringForm({
   elements,
@@ -272,7 +273,12 @@ export function SurveyAnsweringForm({
           )}
         >
           {showTableOfContent && (
-            <TableOfContent elements={elements} onChange={noop} answering />
+            <TableOfContent
+              elements={elements}
+              onChange={noop}
+              answering
+              scrollOffset={ANSWERING_TOC_SCROLL_OFFSET}
+            />
           )}
           {showStepperProgress && (
             <div className="absolute left-0 right-0 top-0 [&>div>div>div]:h-1 [&>div>div>div]:rounded-none">
