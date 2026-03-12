@@ -423,6 +423,7 @@ export function useSchemaDefinition(
         section: {
           title: sectionConfig?.title ?? sectionId,
           description: sectionConfig?.description,
+          withInset: sectionConfig?.withInset,
           renderIf: sectionConfig?.renderIf,
           action: sectionConfig?.action,
           fields: groupFieldsIntoRows(fields),
@@ -499,6 +500,7 @@ export function getSchemaDefinition(
       section: {
         title: sectionConfig?.title ?? sectionId,
         description: sectionConfig?.description,
+        withInset: sectionConfig?.withInset,
         renderIf: sectionConfig?.renderIf,
         action: sectionConfig?.action,
         fields: groupFieldsIntoRows(fields),

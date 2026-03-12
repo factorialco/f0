@@ -119,8 +119,9 @@ export const BaseQuestion = ({
     <div
       id={`co-creation-question-${id}`}
       className={cn(
-        "group/question relative flex w-full flex-col gap-4 rounded-xl border border-solid border-f1-border-secondary bg-f1-background px-3 py-4",
-        !isDragging && !answering && "hover:border-f1-border-hover"
+        "group/question relative flex w-full flex-col rounded-xl border border-solid border-f1-border-secondary bg-f1-background px-3 py-4",
+        !isDragging && !answering && "hover:border-f1-border-hover",
+        !answering || !!description ? "gap-4" : "gap-2"
       )}
     >
       <div className="flex flex-col gap-0.5">

@@ -66,7 +66,8 @@ export function SectionRenderer({ section }: SectionRendererProps) {
   const values = form.watch()
   const { formName } = useF0FormContext()
 
-  const { title, description, renderIf, action, fields } = section.section
+  const { title, description, withInset, renderIf, action, fields } =
+    section.section
   const sectionId = section.id
 
   // Check if section should be rendered based on renderIf condition
@@ -84,6 +85,7 @@ export function SectionRenderer({ section }: SectionRendererProps) {
       <div
         className={cn(
           "flex items-start justify-between py-5",
+          withInset && "px-5",
           "[&>div]:px-0.5 [&>div]:mx-0 [&>div]:border-0"
         )}
       >

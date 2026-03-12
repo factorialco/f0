@@ -465,6 +465,7 @@ export function useSurveyFormSchema(
           sections[sectionId] = {
             title: section.title,
             description: section.description,
+            withInset: true,
           }
         }
 
