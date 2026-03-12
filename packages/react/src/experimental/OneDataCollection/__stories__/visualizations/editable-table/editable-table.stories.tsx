@@ -622,9 +622,19 @@ export const EditableTableWithSummaryRowAndAddRow: Story = {
     const counter = useRef(0)
 
     const onCellChange = async (updatedItem: MockUser) => {
-      action("onCellChange")(updatedItem)
+      const normalized: MockUser = {
+        ...updatedItem,
+        salary:
+          updatedItem.salary === undefined ||
+          updatedItem.salary === null ||
+          (typeof updatedItem.salary === "string" &&
+            updatedItem.salary === "")
+            ? undefined
+            : Number(updatedItem.salary),
+      }
+      action("onCellChange")(normalized)
       setItems((prev) =>
-        prev.map((i) => (i.id === updatedItem.id ? updatedItem : i))
+        prev.map((i) => (i.id === normalized.id ? normalized : i))
       )
     }
 
@@ -645,14 +655,17 @@ export const EditableTableWithSummaryRowAndAddRow: Story = {
       return adapter
     }, [items])
 
-    const dataSource = useDataCollectionSource({
-      summaries: {
-        salary: {
-          type: "sum",
+    const dataSource = useDataCollectionSource(
+      {
+        summaries: {
+          salary: {
+            type: "sum",
+          },
         },
+        dataAdapter,
       },
-      dataAdapter,
-    })
+      [dataAdapter],
+    )
 
     const onAddRow = async () => {
       counter.current += 1
@@ -732,7 +745,6 @@ export const EditableTableWithSummaryRowAndAddRow: Story = {
             },
           },
         ]}
-        nestedRecordsType="detailed"
       />
     )
   },
