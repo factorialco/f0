@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.400.0](https://github.com/factorialco/f0/compare/f0-react-v1.399.0...f0-react-v1.400.0) (2026-03-12)
+
+
+### Features
+
+* **EditableTable:** add date cell type with F0DatePicker integration ([#3600](https://github.com/factorialco/f0/issues/3600)) ([b49a804](https://github.com/factorialco/f0/commit/b49a8043e88e538139c85acca895f97c57e1cede))
+
 ## [1.399.0](https://github.com/factorialco/f0/compare/f0-react-v1.398.0...f0-react-v1.399.0) (2026-03-11)
 
 
