@@ -211,3 +211,19 @@ export const WithDefaultValues: Story = {
     },
   },
 }
+
+export const NoElements: Story = {
+  args: {
+    mode: "all-questions",
+    elements: [],
+    fullscreen: true,
+    labels: {
+      empty: {
+        title: "Nothing to answer yet",
+        description:
+          "Questions will appear here once the survey is configured.",
+        emoji: "🧩",
+      },
+    },
+  },
+}

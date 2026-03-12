@@ -40,6 +40,13 @@ export interface SurveyAnsweringFormProps {
   allowToChangeFullscreen?: boolean
   defaultValues?: Partial<SurveyAnswers>
   errorTriggerMode?: F0FormErrorTriggerMode
+  labels?: {
+    empty?: {
+      title?: string
+      description?: string
+      emoji?: string
+    }
+  }
 }
 
 export type FlatQuestion = {

@@ -400,6 +400,13 @@ export const defaultTranslations = {
       expand: "Expand",
       collapse: "Collapse",
     },
+    labels: {
+      empty: {
+        title: "No questions to answer",
+        description: "This survey has no questions yet.",
+        emoji: "📝",
+      },
+    },
   },
   richTextEditor: {
     bold: "Bold",

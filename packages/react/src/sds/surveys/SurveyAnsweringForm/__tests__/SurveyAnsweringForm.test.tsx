@@ -52,6 +52,50 @@ const defaultProps = {
 // --- Tests ---
 
 describe("SurveyAnsweringForm", () => {
+  describe("empty state", () => {
+    it("renders default empty state labels when there are no elements", () => {
+      render(
+        <SurveyAnsweringForm
+          {...defaultProps}
+          elements={[]}
+          onSubmit={vi.fn()}
+        />
+      )
+
+      expect(screen.getByText("No questions to answer")).toBeInTheDocument()
+      expect(
+        screen.getByText("This survey has no questions yet.")
+      ).toBeInTheDocument()
+      expect(screen.getByText("📝")).toBeInTheDocument()
+      expect(
+        screen.queryByRole("button", { name: /submit/i })
+      ).not.toBeInTheDocument()
+    })
+
+    it("renders custom empty state labels when provided", () => {
+      render(
+        <SurveyAnsweringForm
+          {...defaultProps}
+          elements={[]}
+          labels={{
+            empty: {
+              title: "Nothing to answer",
+              description: "Survey has no questions configured yet.",
+              emoji: "🧩",
+            },
+          }}
+          onSubmit={vi.fn()}
+        />
+      )
+
+      expect(screen.getByText("Nothing to answer")).toBeInTheDocument()
+      expect(
+        screen.getByText("Survey has no questions configured yet.")
+      ).toBeInTheDocument()
+      expect(screen.getByText("🧩")).toBeInTheDocument()
+    })
+  })
+
   describe("validation on submit", () => {
     it("does not call onSubmit when required fields are empty", async () => {
       const onSubmit = vi.fn()
