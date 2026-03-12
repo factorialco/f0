@@ -173,7 +173,7 @@ const F0SelectComponent = forwardRef(function Select<
   // Always store localValue as strings for consistent comparison
   const [localValue, setLocalValue] = useState(() => {
     const valueArray = toArray(value)
-    const initial = valueArray.length > 0 ? valueArray : (defaultValues ?? [])
+    const initial = value !== undefined ? valueArray : (defaultValues ?? [])
     return initial.map(String)
   })
 
@@ -182,7 +182,7 @@ const F0SelectComponent = forwardRef(function Select<
     if (!isEqual(incomingValues, localValue ?? [])) {
       const valueArray = toArray(value)
       const newValue =
-        valueArray.length > 0 ? valueArray : (defaultValues ?? [])
+        value !== undefined ? valueArray : (defaultValues ?? [])
       // Ensure unique values and convert to strings
       setLocalValue(Array.from(new Set(newValue.map(String))))
     }
