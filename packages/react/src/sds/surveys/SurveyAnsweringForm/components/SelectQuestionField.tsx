@@ -7,6 +7,7 @@ export interface SelectFieldConfig {
   options: SelectQuestionOption[]
   type: "select" | "multi-select"
   required?: boolean
+  disabled?: boolean
 }
 
 export interface SelectQuestionFieldProps {
@@ -38,9 +39,10 @@ export function SelectQuestionField({
   onBlur,
   config,
 }: SelectQuestionFieldProps) {
-  const { options, type, required } = config
+  const { options, type, required, disabled } = config
 
   const handleSingleSelectChange = (optionValue: string) => {
+    if (disabled) return
     if (type !== "select") return
     const newValue =
       !required && value === optionValue ? undefined : optionValue
@@ -49,6 +51,7 @@ export function SelectQuestionField({
   }
 
   const handleMultiSelectChange = (optionValue: string) => {
+    if (disabled) return
     if (type !== "multi-select") return
     const currentValue = Array.isArray(value) ? value : []
     const newValue = currentValue.includes(optionValue)
@@ -77,8 +80,14 @@ export function SelectQuestionField({
         return (
           <div
             key={option.value}
-            className="flex min-h-9 w-full cursor-pointer items-center gap-3 rounded-md bg-f1-background py-0.5 pl-2 pr-0.5 hover:bg-f1-background-hover"
+            className={cn(
+              "flex min-h-9 w-full items-center gap-3 rounded-md bg-f1-background py-0.5 pl-2 pr-0.5",
+              disabled
+                ? "cursor-not-allowed opacity-50"
+                : "cursor-pointer hover:bg-f1-background-hover"
+            )}
             onClick={(e) => {
+              if (disabled) return
               // For multi-select, only trigger on parent div click, not on checkbox
               if (
                 type === "multi-select" &&
@@ -94,6 +103,7 @@ export function SelectQuestionField({
                 title={option.label}
                 checked={!!isSelected}
                 onCheckedChange={() => handleMultiSelectChange(option.value)}
+                disabled={disabled}
                 hideLabel
               />
             ) : (

@@ -27,11 +27,8 @@ export type SurveyFormSubmitResult =
 
 export type SurveyAnsweringFormMode = "stepped" | "all-questions"
 
-export interface SurveyAnsweringFormProps {
+interface SurveyAnsweringFormBaseProps {
   elements: SurveyFormBuilderElement[]
-  onSubmit: (
-    answers: SurveySubmitAnswers
-  ) => Promise<SurveyFormSubmitResult> | SurveyFormSubmitResult
   mode: SurveyAnsweringFormMode
   title: string
   isOpen: boolean
@@ -49,6 +46,22 @@ export interface SurveyAnsweringFormProps {
     }
   }
 }
+
+export interface SurveyAnsweringFormDefaultProps extends SurveyAnsweringFormBaseProps {
+  preview?: false
+  onSubmit: (
+    answers: SurveySubmitAnswers
+  ) => Promise<SurveyFormSubmitResult> | SurveyFormSubmitResult
+}
+
+export interface SurveyAnsweringFormPreviewProps extends SurveyAnsweringFormBaseProps {
+  preview: true
+  onSubmit?: never
+}
+
+export type SurveyAnsweringFormProps =
+  | SurveyAnsweringFormDefaultProps
+  | SurveyAnsweringFormPreviewProps
 
 export type FlatQuestion = {
   id: string

@@ -4,7 +4,10 @@ import { useState } from "react"
 
 import { F0Button } from "@/components/F0Button"
 
-import type { SurveyAnsweringFormProps } from "../types"
+import type {
+  SurveyAnsweringFormDefaultProps,
+  SurveyAnsweringFormPreviewProps,
+} from "../types"
 
 import { SurveyFormBuilderElement } from "../../SurveyFormBuilder/types"
 import { SurveyAnsweringForm } from "../SurveyAnsweringForm"
@@ -125,18 +128,32 @@ const sampleElements: SurveyFormBuilderElement[] = [
   },
 ]
 
-const handleSubmit = async () => ({ success: true as const })
-
 function SurveyAnsweringFormStory(
-  props: Omit<SurveyAnsweringFormProps, "isOpen" | "onClose">
+  props:
+    | Omit<SurveyAnsweringFormDefaultProps, "isOpen" | "onClose">
+    | Omit<SurveyAnsweringFormPreviewProps, "isOpen" | "onClose">
 ) {
   const [isOpen, setIsOpen] = useState(false)
+
+  if (props.preview === true) {
+    return (
+      <>
+        <F0Button label="Open survey" onClick={() => setIsOpen(true)} />
+        <SurveyAnsweringForm
+          {...props}
+          isOpen={isOpen}
+          onClose={() => setIsOpen(false)}
+        />
+      </>
+    )
+  }
 
   return (
     <>
       <F0Button label="Open survey" onClick={() => setIsOpen(true)} />
       <SurveyAnsweringForm
         {...props}
+        preview={false}
         isOpen={isOpen}
         onSubmit={(answers) => {
           console.log({ answers })
@@ -156,7 +173,6 @@ const meta: Meta<typeof SurveyAnsweringFormStory> = {
   component: SurveyAnsweringFormStory,
   tags: ["autodocs", "experimental"],
   args: {
-    onSubmit: handleSubmit,
     elements: sampleElements,
     title: "Employee Review Q4",
   },
@@ -239,5 +255,24 @@ export const LoadingStepped: Story = {
   args: {
     mode: "stepped",
     loading: true,
+  },
+}
+
+export const Preview: Story = {
+  args: {
+    mode: "all-questions",
+    preview: true,
+  },
+}
+
+export const PreviewWithDefaultValues: Story = {
+  args: {
+    mode: "all-questions",
+    preview: true,
+    defaultValues: {
+      "q-name": { type: "text", value: "Jane Doe" },
+      "q-perf-rating": { type: "rating", value: 4 },
+      "q-department": { type: "select", value: "engineering" },
+    },
   },
 }

@@ -31,7 +31,7 @@ const noop = () => {}
 
 export function SurveyAnsweringForm({
   elements,
-  onSubmit,
+  onSubmit: onSubmitProp,
   mode,
   title,
   isOpen,
@@ -42,6 +42,7 @@ export function SurveyAnsweringForm({
   errorTriggerMode = "on-blur",
   loading = false,
   labels,
+  preview = false,
 }: SurveyAnsweringFormProps) {
   const { t } = useI18n()
   const [isFullscreen, setIsFullscreen] = useState(fullscreenProp)
@@ -67,6 +68,10 @@ export function SurveyAnsweringForm({
   }
 
   const isStepped = mode === "stepped"
+  const hasPreviewDefaultValues =
+    preview && !!defaultValues && Object.keys(defaultValues).length > 0
+  const isReadonlyPreview = hasPreviewDefaultValues
+  const isEditablePreview = preview && !isReadonlyPreview
   const currentQuestionId = isStepped ? stepper.currentQuestion?.id : undefined
 
   const {
@@ -79,7 +84,8 @@ export function SurveyAnsweringForm({
     t,
     defaultValues,
     currentQuestionId,
-    isStepped ? accumulatedValuesRef.current : undefined
+    isStepped ? accumulatedValuesRef.current : undefined,
+    isReadonlyPreview
   )
 
   const position: DialogPosition = isFullscreen ? "fullscreen" : "center"
@@ -99,6 +105,13 @@ export function SurveyAnsweringForm({
 
   const handleF0Submit = useCallback(
     async (data: Record<string, unknown>): Promise<F0FormSubmitResult> => {
+      if (preview) {
+        return { success: true }
+      }
+      if (!onSubmitProp) {
+        throw new Error("onSubmit is required when preview is false")
+      }
+
       if (isStepped && !stepper.isLastStep) {
         accumulatedValuesRef.current = {
           ...accumulatedValuesRef.current,
@@ -124,7 +137,7 @@ export function SurveyAnsweringForm({
       if (isStepped) {
         stepper.setProgress(100)
         const [result] = await Promise.all([
-          onSubmit(submitData),
+          onSubmitProp(submitData),
           new Promise((r) => setTimeout(r, 1000)),
         ])
         if (result.success) {
@@ -135,7 +148,7 @@ export function SurveyAnsweringForm({
         return { success: false, errors: result.errors }
       }
 
-      const result = await onSubmit(submitData)
+      const result = await onSubmitProp(submitData)
       if (result.success) {
         scheduleClose(result.message ? 1000 : 0)
         return { success: true, message: result.message }
@@ -143,7 +156,8 @@ export function SurveyAnsweringForm({
       return { success: false, errors: result.errors }
     },
     [
-      onSubmit,
+      onSubmitProp,
+      preview,
       scheduleClose,
       isStepped,
       stepper.isLastStep,
@@ -185,30 +199,46 @@ export function SurveyAnsweringForm({
   const primaryAction = hasQuestions
     ? loading
       ? undefined
-      : isStepped && !stepper.isLastStep
-        ? {
-            label: t("surveyAnsweringForm.actions.next"),
-            onClick: handleSubmit,
-            icon: ArrowRight,
-          }
-        : {
-            label: t("surveyAnsweringForm.actions.submit"),
-            onClick: handleSubmit,
-            disabled: isSubmitting || hasErrors,
-            loading: isSubmitting,
-          }
+      : isReadonlyPreview
+        ? undefined
+        : isEditablePreview
+          ? isStepped && !stepper.isLastStep
+            ? {
+                label: t("surveyAnsweringForm.actions.next"),
+                onClick: stepper.goToNext,
+                icon: ArrowRight,
+              }
+            : {
+                label: t("surveyAnsweringForm.actions.submit"),
+                onClick: noop,
+                disabled: true,
+              }
+          : isStepped && !stepper.isLastStep
+            ? {
+                label: t("surveyAnsweringForm.actions.next"),
+                onClick: handleSubmit,
+                icon: ArrowRight,
+              }
+            : {
+                label: t("surveyAnsweringForm.actions.submit"),
+                onClick: handleSubmit,
+                disabled: isSubmitting || hasErrors,
+                loading: isSubmitting,
+              }
     : undefined
 
   const secondaryAction = hasQuestions
     ? loading
       ? undefined
-      : isStepped && !stepper.isFirstStep
-        ? {
-            label: t("surveyAnsweringForm.actions.previous"),
-            onClick: handlePrevious,
-            icon: ArrowLeft,
-          }
-        : undefined
+      : isReadonlyPreview
+        ? undefined
+        : isStepped && !stepper.isFirstStep
+          ? {
+              label: t("surveyAnsweringForm.actions.previous"),
+              onClick: handlePrevious,
+              icon: ArrowLeft,
+            }
+          : undefined
     : undefined
 
   const showTableOfContent =

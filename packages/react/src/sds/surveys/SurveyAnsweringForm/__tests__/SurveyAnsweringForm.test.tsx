@@ -145,6 +145,42 @@ describe("SurveyAnsweringForm", () => {
     })
   })
 
+  describe("preview mode", () => {
+    it("shows disabled submit and keeps fields editable when preview has no default values", () => {
+      render(
+        <SurveyAnsweringForm
+          {...defaultProps}
+          preview
+          elements={[makeTextQuestion("q1", "Name", true)]}
+        />
+      )
+
+      const input = screen.getByRole("textbox")
+      const submitButton = screen.getByRole("button", { name: /submit/i })
+
+      expect(input).not.toBeDisabled()
+      expect(submitButton).toBeDisabled()
+    })
+
+    it("renders fields as disabled and hides submit when preview has default values", () => {
+      render(
+        <SurveyAnsweringForm
+          {...defaultProps}
+          preview
+          elements={[makeTextQuestion("q1", "Name", true)]}
+          defaultValues={{
+            q1: { type: "text", value: "John" },
+          }}
+        />
+      )
+
+      expect(screen.getByDisplayValue("John")).toBeDisabled()
+      expect(
+        screen.queryByRole("button", { name: /submit/i })
+      ).not.toBeInTheDocument()
+    })
+  })
+
   describe("validation on submit", () => {
     it("does not call onSubmit when required fields are empty", async () => {
       const onSubmit = vi.fn()

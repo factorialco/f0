@@ -167,7 +167,8 @@ export function extractFlatQuestions(
 function buildFieldForQuestion(
   q: QuestionElement,
   t: (key: TranslationKey) => string,
-  sectionId?: string
+  sectionId?: string,
+  preview = false
 ): ZodTypeAny {
   const label = q.title ?? ""
   const baseConfig = {
@@ -191,6 +192,7 @@ function buildFieldForQuestion(
         type: "text",
         label,
         placeholder: t("surveyFormBuilder.answer.textPlaceholder"),
+        disabled: preview,
       }
       return f0FormField(buildStringSchema(!!q.required, t), {
         ...baseConfig,
@@ -219,6 +221,7 @@ function buildFieldForQuestion(
         label,
         placeholder: t("surveyFormBuilder.answer.textPlaceholder"),
         rows: 4,
+        disabled: preview,
       }
       return f0FormField(buildStringSchema(!!q.required, t), {
         ...baseConfig,
@@ -246,6 +249,7 @@ function buildFieldForQuestion(
         type: "number",
         label,
         placeholder: t("surveyFormBuilder.answer.numericPlaceholder"),
+        disabled: preview,
       }
       return f0FormField(buildNumberSchema(!!q.required, t), {
         ...baseConfig,
@@ -274,6 +278,7 @@ function buildFieldForQuestion(
         inputType: "url",
         label,
         placeholder: t("surveyFormBuilder.answer.linkPlaceholder"),
+        disabled: preview,
       }
       return f0FormField(buildLinkSchema(!!q.required, t), {
         ...baseConfig,
@@ -301,6 +306,7 @@ function buildFieldForQuestion(
         type: "date",
         label,
         clearable: !q.required,
+        disabled: preview,
       }
       return f0FormField(buildDateSchema(!!q.required, t), {
         ...baseConfig,
@@ -334,6 +340,7 @@ function buildFieldForQuestion(
         options,
         clearable: !q.required,
         multiple: false,
+        disabled: preview,
       }
       return f0FormField(buildStringSchema(!!q.required, t), {
         ...baseConfig,
@@ -363,6 +370,7 @@ function buildFieldForQuestion(
         options: selectOptions,
         type: "select",
         required: q.required,
+        disabled: preview,
       }
       return f0FormField(buildStringSchema(!!q.required, t), {
         ...baseConfig,
@@ -389,6 +397,7 @@ function buildFieldForQuestion(
         options: multiOptions,
         type: "multi-select",
         required: q.required,
+        disabled: preview,
       }
       return f0FormField(buildMultiSelectSchema(!!q.required, t), {
         ...baseConfig,
@@ -413,7 +422,10 @@ function buildFieldForQuestion(
           options: { value: number; label: string }[]
         }
       ).options
-      const fieldConfig: RatingFieldConfig = { options: ratingOptions }
+      const fieldConfig: RatingFieldConfig = {
+        options: ratingOptions,
+        disabled: preview,
+      }
       return f0FormField(buildNumberSchema(!!q.required, t), {
         ...baseConfig,
         fieldType: "custom",
@@ -446,7 +458,8 @@ export function useSurveyFormSchema(
   t: (key: TranslationKey) => string,
   defaultValues?: Partial<SurveyAnswers>,
   currentQuestionId?: string,
-  accumulatedValues?: Record<string, unknown>
+  accumulatedValues?: Record<string, unknown>,
+  preview = false
 ) {
   return useMemo(() => {
     const shape: Record<string, ZodTypeAny> = {}
@@ -476,7 +489,8 @@ export function useSurveyFormSchema(
           shape[q.id] = buildFieldForQuestion(
             q,
             t,
-            mode === "all-questions" ? sectionId : undefined
+            mode === "all-questions" ? sectionId : undefined,
+            preview
           )
           defaults[q.id] =
             accumulatedValues?.[q.id] ?? getDefaultValue(q, defaultValues)
@@ -487,7 +501,7 @@ export function useSurveyFormSchema(
         if (isStepped && currentQuestionId && q.id !== currentQuestionId)
           continue
 
-        shape[q.id] = buildFieldForQuestion(q, t)
+        shape[q.id] = buildFieldForQuestion(q, t, undefined, preview)
         defaults[q.id] =
           accumulatedValues?.[q.id] ?? getDefaultValue(q, defaultValues)
       }
@@ -500,5 +514,5 @@ export function useSurveyFormSchema(
       sections,
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [elements, mode, t, defaultValues, currentQuestionId])
+  }, [elements, mode, t, defaultValues, currentQuestionId, preview])
 }
