@@ -65,6 +65,7 @@ export function FieldRenderer({ field, sectionId }: FieldRendererProps) {
 
   // For checkbox and custom fields, label is handled internally
   const showLabel = field.type !== "checkbox" && field.type !== "custom"
+  const showFormMessage = field.type !== "custom"
 
   // Determine if field is required based on validation schema
   const isRequired = field.validation && isFieldRequired(field.validation)
@@ -114,13 +115,15 @@ export function FieldRenderer({ field, sectionId }: FieldRendererProps) {
           {field.helpText && (
             <FormDescription>{field.helpText}</FormDescription>
           )}
-          <FormMessage
-            fallback={
-              isRequired
-                ? forms.validation.required
-                : forms.validation.invalidType
-            }
-          />
+          {showFormMessage && (
+            <FormMessage
+              fallback={
+                isRequired
+                  ? forms.validation.required
+                  : forms.validation.invalidType
+              }
+            />
+          )}
         </FormItem>
       )}
     />

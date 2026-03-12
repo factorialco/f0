@@ -69,6 +69,7 @@ const sampleElements: SurveyFormBuilderElement[] = [
             { value: "product", label: "Product" },
             { value: "marketing", label: "Marketing" },
           ],
+          required: true,
         },
         {
           id: "q-skills",
@@ -81,6 +82,7 @@ const sampleElements: SurveyFormBuilderElement[] = [
             { value: "technical", label: "Technical skills" },
             { value: "time-management", label: "Time management" },
           ],
+          required: true,
         },
         {
           id: "q-projects",
@@ -112,6 +114,7 @@ const sampleElements: SurveyFormBuilderElement[] = [
             { value: "specialise", label: "Deepen specialisation" },
             { value: "management", label: "Move into management" },
           ],
+          required: true,
         },
         {
           id: "q-dev-plan-link",

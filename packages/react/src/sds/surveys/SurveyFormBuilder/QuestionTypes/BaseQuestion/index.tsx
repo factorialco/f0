@@ -5,6 +5,7 @@ import { DropdownInternalProps } from "@/experimental/Navigation/Dropdown/intern
 import { AcademicCap, Add } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
+import { FormMessage } from "@/ui/form"
 
 import { useQuestionTypes } from "../../constants"
 import { useSurveyFormBuilderContext } from "../../Context"
@@ -209,6 +210,16 @@ export const BaseQuestion = ({
         )}
       </div>
       {children}
+      {answering && (
+        <FormMessage
+          className="-mt-2"
+          fallback={
+            required
+              ? t("forms.validation.required")
+              : t("forms.validation.invalidType")
+          }
+        />
+      )}
       {!disabled && !answering && !containingSection?.locked && (
         <div
           className={cn(

@@ -195,7 +195,7 @@ function buildFieldForQuestion(
       return f0FormField(buildStringSchema(!!q.required, t), {
         ...baseConfig,
         fieldType: "custom",
-        render: ({ value, onChange, onBlur }) => (
+        render: ({ value, onChange, onBlur, error }) => (
           <BaseQuestion {...questionProps}>
             <div className="px-0.5">
               <F0FormField
@@ -203,6 +203,7 @@ function buildFieldForQuestion(
                 value={value ?? ""}
                 onChange={onChange as (value: unknown) => void}
                 onBlur={onBlur}
+                error={!!error}
                 hideLabel
               />
             </div>
@@ -222,7 +223,7 @@ function buildFieldForQuestion(
       return f0FormField(buildStringSchema(!!q.required, t), {
         ...baseConfig,
         fieldType: "custom",
-        render: ({ value, onChange, onBlur }) => (
+        render: ({ value, onChange, onBlur, error }) => (
           <BaseQuestion {...questionProps}>
             <div className="px-0.5">
               <F0FormField
@@ -230,6 +231,7 @@ function buildFieldForQuestion(
                 value={value ?? ""}
                 onChange={onChange as (value: unknown) => void}
                 onBlur={onBlur}
+                error={!!error}
                 hideLabel
               />
             </div>
@@ -248,7 +250,7 @@ function buildFieldForQuestion(
       return f0FormField(buildNumberSchema(!!q.required, t), {
         ...baseConfig,
         fieldType: "custom",
-        render: ({ value, onChange, onBlur }) => (
+        render: ({ value, onChange, onBlur, error }) => (
           <BaseQuestion {...questionProps}>
             <div className="px-0.5">
               <F0FormField
@@ -256,6 +258,7 @@ function buildFieldForQuestion(
                 value={value}
                 onChange={onChange as (value: unknown) => void}
                 onBlur={onBlur}
+                error={!!error}
                 hideLabel
               />
             </div>
@@ -275,7 +278,7 @@ function buildFieldForQuestion(
       return f0FormField(buildLinkSchema(!!q.required, t), {
         ...baseConfig,
         fieldType: "custom",
-        render: ({ value, onChange, onBlur }) => (
+        render: ({ value, onChange, onBlur, error }) => (
           <BaseQuestion {...questionProps}>
             <div className="px-0.5">
               <F0FormField
@@ -283,6 +286,7 @@ function buildFieldForQuestion(
                 value={value ?? ""}
                 onChange={onChange as (value: unknown) => void}
                 onBlur={onBlur}
+                error={!!error}
                 hideLabel
               />
             </div>
@@ -301,7 +305,7 @@ function buildFieldForQuestion(
       return f0FormField(buildDateSchema(!!q.required, t), {
         ...baseConfig,
         fieldType: "custom",
-        render: ({ value, onChange, onBlur }) => (
+        render: ({ value, onChange, onBlur, error }) => (
           <BaseQuestion {...questionProps}>
             <div className="px-0.5">
               <F0FormField
@@ -309,6 +313,7 @@ function buildFieldForQuestion(
                 value={value}
                 onChange={onChange as (value: unknown) => void}
                 onBlur={onBlur}
+                error={!!error}
                 hideLabel
               />
             </div>
@@ -333,7 +338,7 @@ function buildFieldForQuestion(
       return f0FormField(buildStringSchema(!!q.required, t), {
         ...baseConfig,
         fieldType: "custom",
-        render: ({ value, onChange, onBlur }) => (
+        render: ({ value, onChange, onBlur, error }) => (
           <BaseQuestion {...questionProps}>
             <div className="flex flex-col items-start px-0.5 [&>div]:w-full">
               <F0FormField
@@ -341,6 +346,7 @@ function buildFieldForQuestion(
                 value={value ?? ""}
                 onChange={onChange as (value: unknown) => void}
                 onBlur={onBlur}
+                error={!!error}
                 hideLabel
               />
             </div>
