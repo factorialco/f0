@@ -13,6 +13,7 @@ type GroupHeaderProps = {
   open?: boolean
   onOpenChange?: (open: boolean) => void
   showOpenChange?: boolean
+  openChangePosition?: "end" | "inline"
   selectable?: boolean
   select?: true | false | "indeterminate"
   onSelectChange?: (selected: boolean) => void
@@ -25,6 +26,7 @@ export const GroupHeader = ({
   open,
   onOpenChange,
   showOpenChange,
+  openChangePosition = "end",
   selectable,
   select,
   onSelectChange,
@@ -48,6 +50,12 @@ export const GroupHeader = ({
       onSelectChange?.(!select)
     }
   }
+
+  const openChange = showOpenChange ? (
+    <span className="text-f1-icon-secondary">
+      <ChevronToggle open={isOpen} size="sm" />
+    </span>
+  ) : null
 
   return (
     <div
@@ -79,13 +87,10 @@ export const GroupHeader = ({
           >
             {(count) => count !== undefined && <Counter value={count} />}
           </Await>
+          {openChangePosition === "inline" && openChange}
         </div>
       </div>
-      {showOpenChange && (
-        <span className="text-f1-icon-secondary">
-          <ChevronToggle open={isOpen} size="sm" />
-        </span>
-      )}
+      {openChangePosition === "end" && openChange}
     </div>
   )
 }
