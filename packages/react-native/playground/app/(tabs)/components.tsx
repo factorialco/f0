@@ -9,6 +9,7 @@ import { AvatarShowcase } from "../../components/AvatarShowcase"
 import { BadgeShowcase } from "../../components/BadgeShowcase"
 import { ButtonShowcase } from "../../components/ButtonShowcase"
 import { CounterShowcase } from "../../components/CounterShowcase"
+import { F0CounterShowcase } from "../../components/F0CounterShowcase"
 import { DataListShowcase } from "../../components/DataListShowcase"
 import { DetailsItemShowcase } from "../../components/DetailsItemShowcase"
 import { DetailsItemsListShowcase } from "../../components/DetailsItemsListShowcase"
@@ -40,6 +41,7 @@ type ComponentType =
   | "detailsitemslist"
   | "f0button"
   | "f0badge"
+  | "f0counter"
   | "f0icon"
   | "f0image"
   | "f0tag"
@@ -56,12 +58,13 @@ const componentOptions = [
   { value: "avatar" as ComponentType, label: "Avatar" },
   { value: "badge" as ComponentType, label: "Badge (deprecated)" },
   { value: "button" as ComponentType, label: "Button (deprecated)" },
-  { value: "counter" as ComponentType, label: "Counter" },
+  { value: "counter" as ComponentType, label: "Counter (deprecated)" },
   { value: "datalist" as ComponentType, label: "DataList" },
   { value: "detailsitem" as ComponentType, label: "DetailsItem" },
   { value: "detailsitemslist" as ComponentType, label: "DetailsItemsList" },
   { value: "f0button" as ComponentType, label: "F0Button" },
   { value: "f0badge" as ComponentType, label: "F0Badge" },
+  { value: "f0counter" as ComponentType, label: "F0Counter" },
   { value: "f0icon" as ComponentType, label: "F0Icon" },
   { value: "f0image" as ComponentType, label: "F0Image" },
   { value: "f0tag" as ComponentType, label: "F0Tag" },
@@ -112,6 +115,8 @@ export default function ComponentsShowcase() {
         return <F0ButtonShowcase />
       case "f0badge":
         return <F0BadgeShowcase />
+      case "f0counter":
+        return <F0CounterShowcase />
       case "f0icon":
         return <F0IconShowcase />
       case "f0image":
