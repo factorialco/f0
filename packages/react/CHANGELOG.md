@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.402.0](https://github.com/factorialco/f0/compare/f0-react-v1.401.1...f0-react-v1.402.0) (2026-03-12)
+
+
+### Features
+
+* add F0DurationInput compound input component ([#3641](https://github.com/factorialco/f0/issues/3641)) ([7dc3112](https://github.com/factorialco/f0/commit/7dc311200f8f12d5b61f6104ec069a00daaeceb9))
+
 ## [1.401.1](https://github.com/factorialco/f0/compare/f0-react-v1.401.0...f0-react-v1.401.1) (2026-03-12)
 
 
