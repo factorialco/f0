@@ -13,6 +13,14 @@ When adding or migrating components, use these as implementation references:
 
 Prefer consistency with these components over introducing new patterns.
 
+## Primitive-First Rule
+
+- Prefer F0 internal primitives over raw React Native primitives when an F0 primitive exists.
+- Use `F0Text` instead of `Text` for visible semantic text.
+- Use `F0Image` instead of `Image` for image rendering.
+- Use `F0Icon` and `PressableFeedback` for icon/interaction semantics.
+- Use raw React Native primitives only when there is no equivalent F0 primitive, or for non-visual structural wrappers.
+
 ## Component Architecture Conventions
 
 - Public component APIs should use named exports only (no default exports).
@@ -26,6 +34,43 @@ Prefer consistency with these components over introducing new patterns.
 - Register public components in `src/components/exports.ts`.
 - Every new component must include a playground showcase in `playground/components/` and be registered in `playground/app/(tabs)/components.tsx`.
 - Keep TypeScript strict. Do not introduce `any`.
+
+## Multi-Variant Semantic Components (F0Tag-like)
+
+Use this pattern for component families that expose multiple semantic variants under one namespace.
+
+### Preferred API shape
+
+- Use namespaced variants as the primary public API (for example, `F0Tag.Person`, `F0Tag.Balance`).
+- Keep a shared internal primitive (`ComponentRoot`) for layout, interaction, and accessibility behavior.
+- Do not introduce provider/context by default. Use it only when child parts require shared runtime state.
+- Do not add variant adapters unless there is an active product use case (for example, server-driven UI).
+
+### Internal layering
+
+- Layer 1: shared primitive (`ComponentRoot`) + shared styles/types.
+- Layer 2: thin semantic variants that map domain props into root props.
+- Layer 3: namespace assembly (`Object.assign(ComponentRoot, { ...variants })`).
+
+### File organization
+
+- Keep one component folder with per-variant files while variants remain thin.
+- Move variants into dedicated subfolders only when a variant accumulates substantial own logic/styles/tests/docs.
+
+### Naming rules
+
+- Reserve `Root` for the shared primitive only.
+- Avoid navigation naming (`router`) for non-navigation responsibilities.
+- Prefer semantic names (`variant`, `status`, `level`, `tone`) over generic terms.
+
+### Required quality gates
+
+- Showcase includes all variants and important edge cases (long text, null states, disabled/deactivated, hint/info).
+- Tests cover namespace contract, representative snapshots for variants, and key behavior (press, accessibility, truncation).
+- Docs explicitly describe:
+  - the primary API (`Component.*`)
+  - the internal primitive role (`ComponentRoot`)
+  - any advanced API and when to use it.
 
 ## Semantic Styling Contract
 
