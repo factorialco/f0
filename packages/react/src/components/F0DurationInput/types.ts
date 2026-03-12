@@ -16,9 +16,11 @@ export interface DurationFieldConfig {
 
 export interface F0DurationInputProps {
   label: string
+  ariaLabel?: string
   hideLabel?: boolean
   value: number
   onChange: (seconds: number) => void
+  onBlur?: () => void
   units?: DurationUnit[]
   fields?: Partial<Record<DurationUnit, DurationFieldConfig>>
   status?: InputFieldStatus

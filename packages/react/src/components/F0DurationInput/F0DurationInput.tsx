@@ -3,6 +3,7 @@ import {
   Fragment,
   forwardRef,
   useCallback,
+  useEffect,
   useId,
   useMemo,
   useRef,
@@ -110,9 +111,11 @@ export const F0DurationInput = forwardRef<HTMLDivElement, F0DurationInputProps>(
   function F0DurationInput(
     {
       label,
+      ariaLabel,
       hideLabel = false,
       value,
       onChange,
+      onBlur,
       units = DEFAULT_UNITS,
       fields: fieldConfig,
       status,
@@ -222,16 +225,23 @@ export const F0DurationInput = forwardRef<HTMLDivElement, F0DurationInputProps>(
       []
     )
 
-    if (
-      process.env.NODE_ENV !== "production" &&
-      !label &&
-      !hasWarnedRef.current
-    ) {
-      hasWarnedRef.current = true
-      console.warn(
-        "F0DurationInput: label is required for accessibility reasons. If you don't want to show a label, set hideLabel to true."
-      )
-    }
+    const resolvedAriaLabel =
+      (ariaLabel && ariaLabel.trim().length > 0 ? ariaLabel : undefined) ||
+      label ||
+      undefined
+
+    useEffect(() => {
+      if (
+        process.env.NODE_ENV !== "production" &&
+        !resolvedAriaLabel &&
+        !hasWarnedRef.current
+      ) {
+        hasWarnedRef.current = true
+        console.warn(
+          "F0DurationInput: provide a non-empty label or ariaLabel for accessibility."
+        )
+      }
+    }, [resolvedAriaLabel])
 
     const statusType = status?.type ?? "default"
     const showLabel = !hideLabel && label.length > 0
@@ -266,7 +276,7 @@ export const F0DurationInput = forwardRef<HTMLDivElement, F0DurationInputProps>(
           )}
           onClick={handleContainerClick}
           role="group"
-          aria-label={label || undefined}
+          aria-label={resolvedAriaLabel}
           aria-disabled={disabled || undefined}
           data-status={statusType}
           data-disabled={disabled ? "" : undefined}
@@ -292,12 +302,12 @@ export const F0DurationInput = forwardRef<HTMLDivElement, F0DurationInputProps>(
                   id={`${baseId}-${unit}`}
                   className={cn(
                     "border-none bg-transparent p-0 text-inherit outline-none",
-                    "text-right font-inherit text-[length:inherit] leading-[inherit]",
+                    "font-inherit text-[length:inherit] leading-[inherit]",
                     "placeholder:text-f1-foreground-secondary placeholder:opacity-[0.37]",
                     disabled && "pointer-events-none"
                   )}
                   style={{
-                    width: "2ch",
+                    width: `${Math.min(Math.max(displayValue.length, 1), 2)}ch`,
                   }}
                   aria-label={
                     fieldConfig?.[unit]?.ariaLabel ?? UNIT_LABELS[unit]
@@ -305,6 +315,7 @@ export const F0DurationInput = forwardRef<HTMLDivElement, F0DurationInputProps>(
                   value={displayValue}
                   placeholder="0"
                   onChange={handleFieldChange(unit, max)}
+                  onBlur={onBlur}
                   onKeyDown={handleKeyDown}
                   inputMode="numeric"
                   disabled={disabled}

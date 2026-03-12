@@ -74,6 +74,24 @@ describe("F0FormField", () => {
       expect(input.inputMode).toBe("decimal")
     })
 
+    it("renders a duration field", () => {
+      const field: F0Field = {
+        id: "duration",
+        type: "duration",
+        label: "Duration",
+        units: ["hours", "minutes"],
+      }
+      const onChange = vi.fn()
+
+      render(<F0FormField field={field} value={5400} onChange={onChange} />)
+
+      expect(
+        screen.getByRole("group", { name: "Duration" })
+      ).toBeInTheDocument()
+      expect(screen.getByLabelText("Hours")).toBeInTheDocument()
+      expect(screen.getByLabelText("Minutes")).toBeInTheDocument()
+    })
+
     it("renders a textarea field", () => {
       const field: F0Field = {
         id: "bio",
@@ -299,6 +317,71 @@ describe("F0FormField", () => {
 
       // Alert circle icon expects errorMessage to be present
       expect(screen.queryByText(/Full Name/)).toBeInTheDocument()
+    })
+
+    it("displays warning status message", () => {
+      const field: F0Field = {
+        id: "name",
+        type: "text",
+        label: "Full Name",
+      }
+      const onChange = vi.fn()
+
+      render(
+        <F0FormField
+          field={field}
+          value=""
+          onChange={onChange}
+          status={{ type: "warning", message: "Review this value" }}
+        />
+      )
+
+      const message = screen.getByText("Review this value")
+      expect(message).toHaveClass("text-f1-foreground-warning")
+    })
+
+    it("displays info status message for non-input fields", () => {
+      const field: F0Field = {
+        id: "notifications",
+        type: "switch",
+        label: "Enable notifications",
+      }
+      const onChange = vi.fn()
+
+      render(
+        <F0FormField
+          field={field}
+          value={false}
+          onChange={onChange}
+          status={{ type: "info", message: "This will notify managers" }}
+        />
+      )
+
+      const message = screen.getByText("This will notify managers")
+      expect(message).toHaveClass("text-f1-foreground-info")
+    })
+
+    it("prioritizes error over other statuses", () => {
+      const field: F0Field = {
+        id: "name",
+        type: "text",
+        label: "Full Name",
+      }
+      const onChange = vi.fn()
+
+      render(
+        <F0FormField
+          field={field}
+          value=""
+          onChange={onChange}
+          error
+          errorMessage="Name is required"
+          status={{ type: "warning", message: "Review this value" }}
+        />
+      )
+
+      expect(screen.getByText("Name is required")).toBeInTheDocument()
+      expect(screen.queryByText("Review this value")).not.toBeInTheDocument()
     })
   })
 

@@ -294,7 +294,7 @@ describe("F0DurationInput", () => {
       expect(minutes).toHaveAttribute("placeholder", "0")
     })
 
-    it("uses fixed 2ch width for each segment", () => {
+    it("uses 1ch width for single-digit values", () => {
       render(
         <F0DurationInput
           label="Duration"
@@ -304,8 +304,22 @@ describe("F0DurationInput", () => {
         />
       )
 
+      expect(screen.getByLabelText("Days")).toHaveStyle({ width: "1ch" })
+      expect(screen.getByLabelText("Seconds")).toHaveStyle({ width: "1ch" })
+    })
+
+    it("caps width at 2ch for values with more than two digits", () => {
+      render(
+        <F0DurationInput
+          label="Duration"
+          value={17280000}
+          onChange={() => {}}
+          units={["days"]}
+        />
+      )
+
+      expect(screen.getByLabelText("Days")).toHaveValue("200")
       expect(screen.getByLabelText("Days")).toHaveStyle({ width: "2ch" })
-      expect(screen.getByLabelText("Seconds")).toHaveStyle({ width: "2ch" })
     })
 
     it("does not set maxLength on segment inputs", () => {
@@ -447,7 +461,7 @@ describe("F0DurationInput", () => {
       expect(container.querySelector("label")).toBeNull()
       expect(warnSpy).toHaveBeenCalledTimes(1)
       expect(warnSpy).toHaveBeenCalledWith(
-        expect.stringContaining("label is required for accessibility")
+        expect.stringContaining("provide a non-empty label or ariaLabel")
       )
 
       rerender(<F0DurationInput label="" value={60} onChange={() => {}} />)
@@ -463,6 +477,22 @@ describe("F0DurationInput", () => {
       const group = screen.getByRole("group")
       expect(group).not.toHaveAttribute("aria-label")
       warnSpy.mockRestore()
+    })
+
+    it("uses ariaLabel prop as the group accessible name", () => {
+      render(
+        <F0DurationInput
+          label=""
+          ariaLabel="Duration field"
+          hideLabel
+          value={0}
+          onChange={() => {}}
+        />
+      )
+
+      expect(
+        screen.getByRole("group", { name: "Duration field" })
+      ).toBeInTheDocument()
     })
 
     it("keeps readonly inputs focusable but non-editable", () => {
@@ -630,7 +660,7 @@ describe("F0DurationInput", () => {
       expect(onChange).toHaveBeenLastCalledWith(7200)
     })
 
-    it("accepts more than two digits with fixed 2ch width", () => {
+    it("accepts more than two digits with capped 2ch width", () => {
       const onChange = vi.fn()
       render(
         <F0DurationInput

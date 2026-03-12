@@ -2,6 +2,7 @@ import { ControllerRenderProps, FieldError, FieldValues } from "react-hook-form"
 
 import type { InitialFile } from "./file/types"
 import type { F0Field } from "./types"
+import type { InputFieldStatus } from "@/ui/InputField/types"
 
 import { CheckboxFieldRenderer } from "./checkbox/CheckboxFieldRenderer"
 import { CustomFieldRenderer } from "./custom/CustomFieldRenderer"
@@ -9,6 +10,7 @@ import { DateFieldRenderer } from "./date/DateFieldRenderer"
 import { DateTimeFieldRenderer } from "./date/DateTimeFieldRenderer"
 import { TimeFieldRenderer } from "./date/TimeFieldRenderer"
 import { DateRangeFieldRenderer } from "./daterange/DateRangeFieldRenderer"
+import { DurationFieldRenderer } from "./duration/DurationFieldRenderer"
 import { FileFieldRenderer } from "./file/FileFieldRenderer"
 import { NumberFieldRenderer } from "./number/NumberFieldRenderer"
 import { RichTextFieldRenderer } from "./richtext/RichTextFieldRenderer"
@@ -27,6 +29,7 @@ export interface RenderFieldInputOptions {
   field: F0Field
   formField: ControllerRenderProps<FieldValues>
   fieldState: FieldState
+  fieldStatus?: InputFieldStatus
   isSubmitting: boolean
   isRequired?: boolean
   values: Record<string, unknown>
@@ -40,6 +43,7 @@ export function renderFieldInput({
   field,
   formField,
   fieldState,
+  fieldStatus,
   isSubmitting,
   isRequired,
   values,
@@ -56,6 +60,17 @@ export function renderFieldInput({
     loading: isValidating,
   }
 
+  const visualStatus = hasError
+    ? ({ type: "error" } as const)
+    : fieldStatus
+      ? fieldStatus.type === "error"
+        ? ({ type: "error" } as const)
+        : ({
+            type: fieldStatus.type,
+            message: "",
+          } as const)
+      : undefined
+
   switch (field.type) {
     case "text":
       return (
@@ -63,6 +78,7 @@ export function renderFieldInput({
           field={{ ...field, disabled: isDisabled }}
           formField={formField}
           {...errorAndLoadingProps}
+          status={visualStatus}
         />
       )
     case "number":
@@ -71,6 +87,16 @@ export function renderFieldInput({
           field={{ ...field, disabled: isDisabled }}
           formField={formField}
           {...errorAndLoadingProps}
+          status={visualStatus}
+        />
+      )
+    case "duration":
+      return (
+        <DurationFieldRenderer
+          field={{ ...field, disabled: isDisabled }}
+          formField={formField}
+          error={hasError}
+          status={visualStatus}
         />
       )
     case "textarea":
@@ -79,6 +105,7 @@ export function renderFieldInput({
           field={{ ...field, disabled: isDisabled }}
           formField={formField}
           {...errorAndLoadingProps}
+          status={visualStatus}
         />
       )
     case "select":
@@ -87,6 +114,7 @@ export function renderFieldInput({
           field={{ ...field, disabled: isDisabled }}
           formField={formField}
           {...errorAndLoadingProps}
+          status={visualStatus}
         />
       )
     case "checkbox":
@@ -115,6 +143,7 @@ export function renderFieldInput({
           }}
           formField={formField}
           {...errorAndLoadingProps}
+          status={visualStatus}
         />
       )
     case "time":
@@ -129,6 +158,7 @@ export function renderFieldInput({
           }}
           formField={formField}
           {...errorAndLoadingProps}
+          status={visualStatus}
         />
       )
     case "datetime":
@@ -143,6 +173,7 @@ export function renderFieldInput({
           }}
           formField={formField}
           {...errorAndLoadingProps}
+          status={visualStatus}
         />
       )
     case "daterange":
@@ -151,6 +182,7 @@ export function renderFieldInput({
           field={{ ...field, disabled: isDisabled }}
           formField={formField}
           {...errorAndLoadingProps}
+          status={visualStatus}
         />
       )
     case "richtext":
@@ -167,6 +199,7 @@ export function renderFieldInput({
           field={{ ...field, disabled: isDisabled }}
           formField={formField}
           error={hasError}
+          statusType={visualStatus?.type}
           initialFiles={initialFiles}
         />
       )

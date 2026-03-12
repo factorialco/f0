@@ -2,8 +2,7 @@ import type { ControllerRenderProps, FieldValues } from "react-hook-form"
 
 import { useId } from "react"
 
-import { F0Icon } from "@/components/F0Icon"
-import { AlertCircle } from "@/icons/app"
+import { InputMessages } from "@/ui/InputField/components/InputMessages"
 
 import type { F0FormFieldProps } from "./types"
 
@@ -15,7 +14,7 @@ import { isFieldRequired } from "../F0Form/fields/schema"
  * without requiring a react-hook-form context.
  *
  * Supports all field types that F0Form supports: text, number, textarea,
- * select, checkbox, switch, date, time, datetime, daterange, richtext, custom,
+ * duration, select, checkbox, switch, date, time, datetime, daterange, richtext, custom,
  * and file.
  */
 export function F0FormField({
@@ -25,6 +24,7 @@ export function F0FormField({
   onBlur,
   error,
   errorMessage,
+  status,
   loading,
   required,
   disabled,
@@ -49,9 +49,19 @@ export function F0FormField({
   } as ControllerRenderProps<FieldValues>
 
   const fieldState = {
-    error: error ? { type: "custom", message: errorMessage } : undefined,
+    error:
+      error || status?.type === "error"
+        ? {
+            type: "custom",
+            message: errorMessage ?? status?.message,
+          }
+        : undefined,
     isValidating: !!loading,
   }
+
+  const resolvedStatus = error
+    ? { type: "error" as const, message: errorMessage }
+    : status
 
   const resolvedField = disabled !== undefined ? { ...field, disabled } : field
   const fileInitialFiles = field.type === "file" ? initialFiles : undefined
@@ -77,20 +87,14 @@ export function F0FormField({
         isRequired,
         values: {},
         initialFiles: fileInitialFiles,
+        fieldStatus: resolvedStatus,
       })}
       {field.helpText && (
         <p className="text-base text-f1-foreground-secondary">
           {field.helpText}
         </p>
       )}
-      {error && errorMessage && (
-        <div className="flex gap-1">
-          <F0Icon icon={AlertCircle} color="critical" />
-          <span className="text-base font-medium text-f1-foreground-critical">
-            {errorMessage}
-          </span>
-        </div>
-      )}
+      <InputMessages status={resolvedStatus} />
     </div>
   )
 }

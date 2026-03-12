@@ -57,6 +57,7 @@ function configToF0Field(
     label: config.label,
     placeholder: config.placeholder,
     helpText: config.helpText,
+    status: config.status,
     disabled: config.disabled,
     resetOnDisable: config.resetOnDisable,
     validation: schema,
@@ -94,6 +95,17 @@ function configToF0Field(
         renderIf: config.renderIf,
       } as F0Field
     }
+
+    case "duration":
+      return {
+        ...baseProps,
+        type: "duration",
+        units: "units" in config ? config.units : undefined,
+        fields: "fields" in config ? config.fields : undefined,
+        readonly: "readonly" in config ? config.readonly : undefined,
+        size: "size" in config ? config.size : undefined,
+        renderIf: config.renderIf,
+      } as F0Field
 
     case "textarea": {
       const { maxLength } = extractTextareaConstraints(schema)

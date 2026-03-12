@@ -116,6 +116,53 @@ describe("F0Form", () => {
     expect(screen.getByLabelText("First Name")).toBeInTheDocument()
     expect(screen.getByLabelText("Last Name")).toBeInTheDocument()
   })
+
+  it("renders warning status configured in schema", () => {
+    const formSchema = z.object({
+      name: f0FormField(z.string(), {
+        label: "Name",
+        status: { type: "warning", message: "Check this value" },
+      }),
+    })
+
+    render(
+      <F0Form
+        name="schema-warning-status"
+        schema={formSchema}
+        defaultValues={{ name: "" }}
+        onSubmit={async () => ({ success: true })}
+      />
+    )
+
+    const message = screen.getByText("Check this value")
+    expect(message).toHaveClass("text-f1-foreground-warning")
+  })
+
+  it("hides schema status message when field validation has errors", async () => {
+    const formSchema = z.object({
+      name: f0FormField(z.string().min(2, "Too short"), {
+        label: "Name",
+        status: { type: "warning", message: "Check this value" },
+      }),
+    })
+
+    render(
+      <F0Form
+        name="schema-status-error-precedence"
+        schema={formSchema}
+        defaultValues={{ name: "" }}
+        onSubmit={async () => ({ success: true })}
+      />
+    )
+
+    expect(screen.getByText("Check this value")).toBeInTheDocument()
+
+    await userEvent.click(screen.getByText("Submit"))
+
+    await waitFor(() => {
+      expect(screen.queryByText("Check this value")).not.toBeInTheDocument()
+    })
+  })
 })
 
 describe("f0FormField function", () => {
@@ -147,6 +194,7 @@ describe("f0FormField function", () => {
       section: "section1",
       placeholder: "Enter text",
       helpText: "Help text",
+      status: { type: "info", message: "Info message" },
       disabled: true,
       row: "row1",
     })
@@ -156,6 +204,7 @@ describe("f0FormField function", () => {
     expect(config?.section).toBe("section1")
     expect(config?.placeholder).toBe("Enter text")
     expect(config?.helpText).toBe("Help text")
+    expect(config?.status).toEqual({ type: "info", message: "Info message" })
     expect(config?.disabled).toBe(true)
     expect(config?.row).toBe("row1")
   })
@@ -184,6 +233,12 @@ describe("inferFieldType", () => {
     const schema = z.number()
     const config = { label: "Test", fieldType: "number" } as const
     expect(inferFieldType(schema, config)).toBe("number")
+  })
+
+  it("infers duration type from explicit fieldType", () => {
+    const schema = z.number()
+    const config = { label: "Test", fieldType: "duration" } as const
+    expect(inferFieldType(schema, config)).toBe("duration")
   })
 
   it("infers switch type from ZodBoolean", () => {
@@ -233,6 +288,26 @@ describe("getSchemaDefinition", () => {
     expect(definition).toHaveLength(2)
     expect(definition[0].type).toBe("field")
     expect(definition[1].type).toBe("field")
+  })
+
+  it("maps field status from schema config", () => {
+    const formSchema = z.object({
+      name: f0FormField(z.string(), {
+        label: "Name",
+        status: { type: "info", message: "Additional context" },
+      }),
+    })
+
+    const definition = getSchemaDefinition(formSchema)
+    const fieldItem = definition[0] as {
+      type: "field"
+      field: { status?: { type: string; message?: string } }
+    }
+
+    expect(fieldItem.field.status).toEqual({
+      type: "info",
+      message: "Additional context",
+    })
   })
 
   it("groups fields by section", () => {
@@ -498,6 +573,28 @@ describe("getSchemaDefinition - field types", () => {
     }
 
     expect(fieldItem.field.type).toBe("datetime")
+  })
+
+  it("creates duration field from z.number() with fieldType duration", () => {
+    const formSchema = z.object({
+      duration: f0FormField(z.number(), {
+        label: "Duration",
+        fieldType: "duration",
+        units: ["hours", "minutes"],
+      }),
+    })
+
+    const definition = getSchemaDefinition(formSchema)
+    const fieldItem = definition[0] as {
+      type: "field"
+      field: {
+        type: string
+        units?: string[]
+      }
+    }
+
+    expect(fieldItem.field.type).toBe("duration")
+    expect(fieldItem.field.units).toEqual(["hours", "minutes"])
   })
 
   it("sets clearable true for optional fields", () => {

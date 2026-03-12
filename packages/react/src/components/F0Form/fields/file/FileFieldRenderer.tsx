@@ -5,6 +5,7 @@ import { F0Icon } from "@/components/F0Icon"
 import { Upload } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 import { cn, focusRing } from "@/lib/utils"
+import type { InputFieldStatusType } from "@/ui/InputField/types"
 
 import type { ResolvedField } from "../types"
 import type { F0FileField, FileEntry, InitialFile } from "./types"
@@ -95,6 +96,7 @@ interface FileFieldRendererProps {
   field: ResolvedField<F0FileField>
   formField: ControllerRenderProps<FieldValues>
   error?: boolean
+  statusType?: InputFieldStatusType
   initialFiles?: InitialFile[]
 }
 
@@ -135,6 +137,7 @@ export function FileFieldRenderer({
   field,
   formField,
   error,
+  statusType,
   initialFiles,
 }: FileFieldRendererProps) {
   const { forms } = useI18n()
@@ -350,9 +353,13 @@ export function FileFieldRenderer({
             "flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed px-4 py-6 transition-colors",
             isDragOver
               ? "border-f1-border-accent bg-f1-background-accent-bold/5"
-              : error || validationError
+              : error || validationError || statusType === "error"
                 ? "border-f1-border-critical-bold bg-f1-background-critical bg-opacity-10"
-                : "border-f1-border bg-f1-background",
+                : statusType === "warning"
+                  ? "border-f1-border-warning-bold"
+                  : statusType === "info"
+                    ? "border-f1-border-info-bold"
+                    : "border-f1-border bg-f1-background",
             !field.disabled &&
               !isDragOver &&
               "hover:border-f1-border-hover hover:bg-f1-background-secondary",

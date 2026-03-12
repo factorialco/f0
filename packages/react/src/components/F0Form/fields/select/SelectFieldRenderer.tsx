@@ -1,6 +1,7 @@
 import { ControllerRenderProps, FieldValues } from "react-hook-form"
 
 import { F0Select } from "@/components/F0Select"
+import type { InputFieldStatus } from "@/ui/InputField/types"
 
 import type { F0SelectField } from "./types"
 import type { ResolvedField } from "../types"
@@ -11,6 +12,7 @@ interface SelectFieldRendererProps {
   formField: ControllerRenderProps<FieldValues>
   error?: boolean
   loading?: boolean
+  status?: InputFieldStatus
 }
 
 /**
@@ -21,6 +23,7 @@ function SelectWithOptions({
   formField,
   error,
   loading,
+  status,
 }: SelectFieldRendererProps & {
   field: ResolvedField<F0SelectField> & {
     options: NonNullable<F0SelectField["options"]>
@@ -36,6 +39,7 @@ function SelectWithOptions({
     name: formField.name,
     onBlur: formField.onBlur,
     error,
+    status,
     loading,
     size: FORM_SIZE,
     hideLabel: true as const,
@@ -93,6 +97,7 @@ function SelectWithSource({
   formField,
   error,
   loading,
+  status,
 }: SelectFieldRendererProps & {
   field: ResolvedField<F0SelectField> & {
     source: NonNullable<F0SelectField["source"]>
@@ -110,6 +115,7 @@ function SelectWithSource({
     name: formField.name,
     onBlur: formField.onBlur,
     error,
+    status,
     loading,
     size: FORM_SIZE,
     hideLabel: true as const,
