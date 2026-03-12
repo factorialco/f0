@@ -650,5 +650,31 @@ describe("F0DurationInput", () => {
 
       expect(onChange).toHaveBeenLastCalledWith(7200)
     })
+
+    it("blocks printable non-digit keys", () => {
+      render(<F0DurationInput label="Duration" value={0} onChange={() => {}} />)
+      const hours = screen.getByLabelText("Hours")
+
+      expect(fireEvent.keyDown(hours, { key: "a" })).toBe(false)
+    })
+
+    it("allows digits and non-printable keys", () => {
+      render(<F0DurationInput label="Duration" value={0} onChange={() => {}} />)
+      const hours = screen.getByLabelText("Hours")
+
+      expect(fireEvent.keyDown(hours, { key: "5" })).toBe(true)
+      expect(fireEvent.keyDown(hours, { key: "Enter" })).toBe(true)
+      expect(fireEvent.keyDown(hours, { key: "ArrowUp" })).toBe(true)
+      expect(fireEvent.keyDown(hours, { key: "PageDown" })).toBe(true)
+    })
+
+    it("allows printable keys when modifiers are pressed", () => {
+      render(<F0DurationInput label="Duration" value={0} onChange={() => {}} />)
+      const hours = screen.getByLabelText("Hours")
+
+      expect(fireEvent.keyDown(hours, { key: "v", ctrlKey: true })).toBe(true)
+      expect(fireEvent.keyDown(hours, { key: "c", metaKey: true })).toBe(true)
+      expect(fireEvent.keyDown(hours, { key: "x", altKey: true })).toBe(true)
+    })
   })
 })
