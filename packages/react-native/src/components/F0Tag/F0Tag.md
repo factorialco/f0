@@ -146,7 +146,7 @@ Internal primitive used to implement `F0Tag.*` variants. Prefer `F0Tag.*` for pr
 
 - `F0Tag.Dot` renders `null` when neither a valid `color` nor `customColor` is resolved.
 - `F0Tag` root uses `PressableFeedback` with `variant="both"` only when `onPress` exists.
-- Text formatting validation is enforced with `useTextFormatEnforcer`.
+- Text formatting validation is enforced with `useTextFormatEnforcer` for direct label inputs (`F0Tag.Dot`, `F0Tag.Raw`, `F0Tag.Alert`, `F0Tag.Status`, `F0Tag.Person`, `F0Tag.Team`, `F0Tag.Company`).
 - `F0Tag.Raw` with `onlyIcon` keeps label as accessibility fallback text.
 
 ## Accessibility Notes

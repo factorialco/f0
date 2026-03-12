@@ -1,5 +1,6 @@
 import React from "react"
 
+import { useTextFormatEnforcer } from "../../lib/text"
 import { Avatar } from "../Avatars/Avatar"
 
 import type { F0TagPersonProps } from "./F0Tag.types"
@@ -13,6 +14,8 @@ const F0TagPerson = React.memo(function F0TagPerson({
   name,
   deactivated,
 }: F0TagPersonProps) {
+  useTextFormatEnforcer(name, { disallowEmpty: true })
+
   return (
     <F0TagRoot
       className="border border-solid border-f0-border-secondary py-px pl-px"

@@ -16,7 +16,7 @@ export {
   F0_TAG_ALERT_LEVELS,
   F0_TAG_BALANCE_STATUSES,
   F0_TAG_STATUS_VARIANTS,
-  dotTagColors,
+  dotTagColors as f0TagDotColors,
   f0TagAlertTextLevelColors,
   f0TagAlertLevelClasses,
   f0TagStatusDotClasses,

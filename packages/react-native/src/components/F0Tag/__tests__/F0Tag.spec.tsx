@@ -7,7 +7,7 @@ import {
   F0TagList,
   F0_TAG_ALERT_LEVELS,
   F0_TAG_STATUS_VARIANTS,
-  dotTagColors,
+  f0TagDotColors,
 } from "../"
 import { AppIcons } from "../../../icons"
 import { F0Icon } from "../../primitives/F0Icon"
@@ -36,7 +36,7 @@ describe("F0Tag", () => {
   })
 
   it("Snapshot - dot colors", () => {
-    dotTagColors.forEach((color) => {
+    f0TagDotColors.forEach((color) => {
       const { toJSON } = render(<F0Tag.Dot text={color} color={color} />)
       expect(toJSON()).toMatchSnapshot()
     })

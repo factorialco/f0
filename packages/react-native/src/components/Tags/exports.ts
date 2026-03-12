@@ -9,7 +9,11 @@ export { AlertTag } from "./AlertTab"
 export { DotTag } from "./DotTag"
 
 /**
- * @deprecated Use `dotTagColors` from `src/components/F0Tag`.
+ * @deprecated Use `f0TagDotColors` from `src/components/F0Tag`.
+ */
+export { dotTagColors } from "./DotTag"
+/**
+ * @deprecated Use `f0TagDotColors` from `src/components/F0Tag`.
  */
 export { dotTagColors as legacyDotTagColors } from "./DotTag"
 
@@ -24,16 +28,16 @@ export { RawTag } from "./RawTag"
 export { Tag } from "./Tag"
 
 /**
- * @deprecated Use `F0Tag.AlertProps` from `src/components/F0Tag`.
+ * @deprecated Use `F0TagAlertProps` from `src/components/F0Tag`.
  */
 export type { AlertTagProps } from "./AlertTab"
 
 /**
- * @deprecated Use `F0Tag.DotProps` from `src/components/F0Tag`.
+ * @deprecated Use `F0TagDotProps` and `F0TagDotColor` from `src/components/F0Tag`.
  */
 export type { DotTagProps, NewColor } from "./DotTag"
 
 /**
- * @deprecated Use `F0Tag.RawProps` from `src/components/F0Tag`.
+ * @deprecated Use `F0TagRawProps` from `src/components/F0Tag`.
  */
 export type { RawTagProps } from "./RawTag"

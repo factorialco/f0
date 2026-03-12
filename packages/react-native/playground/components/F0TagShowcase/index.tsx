@@ -8,7 +8,7 @@ import {
   type F0TagAlertLevel,
   type F0TagBalanceProps,
   type F0TagStatusVariant,
-  dotTagColors,
+  f0TagDotColors,
 } from "../../../src/components/F0Tag"
 import { AppIcons } from "../../../src/icons"
 
@@ -159,7 +159,7 @@ export function F0TagShowcase() {
         TagDot
       </Text>
       <View className="mb-6 gap-2">
-        {dotTagColors.map((color) => (
+        {f0TagDotColors.map((color) => (
           <View key={color} className="flex-row items-center gap-3">
             <Text className="w-20 text-sm font-medium text-f0-foreground-secondary">
               {color}
