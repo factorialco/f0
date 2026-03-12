@@ -1,4 +1,4 @@
-export type SummaryType = "sum"
+export type SummaryType = "sum" | "count"
 
 export type SummariesDefinition = Record<
   string,

@@ -17,6 +17,21 @@ export type GroupingDefinition<R extends RecordType> = {
   hideSelector?: boolean
   groupBy: {
     [K in RecordPaths<R>]?: {
+      summaries?: {
+        label?: string
+        emptyPlaceholder?: string
+        fields: Record<
+          string,
+          | {
+              type: "sum"
+              getValue: (record: R) => number
+            }
+          | {
+              type: "count"
+              getValue?: (records: R[]) => number
+            }
+        >
+      }
       /** The label for the grouping */
       name: string
       /** The item count for the grouping */

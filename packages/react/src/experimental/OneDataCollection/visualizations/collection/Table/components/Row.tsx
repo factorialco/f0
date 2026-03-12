@@ -194,10 +194,7 @@ const RowComponentInner = <
   const referenceRowType = referenceRowTypeFn?.(item) ?? "none"
 
   const cellRenderedClass = CellRenderer
-    ? cn(
-        "h-[48px] p-0 align-middle last:pr-0",
-        !tableWithChildren && "first:pl-0"
-      )
+    ? cn("h-[48px] p-0 align-middle ", !tableWithChildren && "first:pl-0")
     : undefined
 
   return (

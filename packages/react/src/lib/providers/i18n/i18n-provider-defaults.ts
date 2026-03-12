@@ -171,6 +171,7 @@ export const defaultTranslations = {
     summaries: {
       types: {
         sum: "sum",
+        count: "count",
       },
     },
   },

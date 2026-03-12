@@ -108,10 +108,18 @@ export interface UseDataReturn<R extends RecordType> {
 
 type DataType<T> = PromiseState<T>
 
+export type GroupSummaryData = {
+  label?: string
+  emptyPlaceholder?: string
+  definitions: Record<string, { type: "sum" | "count" }>
+  data: Record<string, number>
+}
+
 export type GroupRecord<RecordType> = {
   key: string
   label: string | Promise<string>
   itemCount: number | undefined | Promise<number | undefined>
+  summaryRow?: GroupSummaryData
   records: RecordType[]
 }
 
@@ -465,6 +473,21 @@ export function useData<
       const groupConfig = (grouping.groupBy as Record<string, unknown>)[
         fieldName
       ] as {
+        summaries?: {
+          label?: string
+          emptyPlaceholder?: string
+          fields: Record<
+            string,
+            | {
+                type: "sum"
+                getValue: (record: R) => number
+              }
+            | {
+                type: "count"
+                getValue?: (records: R[]) => number
+              }
+          >
+        }
         label: (
           groupId: unknown,
           filters: FiltersState<FiltersDefinition>
@@ -479,15 +502,46 @@ export function useData<
         type: "grouped" as const,
         records: data,
         groups: Array.from(groupedData.entries()).map(
-          ([groupKey, groupRecords]) => ({
-            key: groupKey,
-            label: groupConfig.label(groupKey as unknown, mergedFilters),
-            itemCount: groupConfig.itemCount?.(
-              groupKey as unknown,
-              mergedFilters
-            ),
-            records: groupRecords,
-          })
+          ([groupKey, groupRecords]) => {
+            const summaryDefinitions = groupConfig.summaries?.fields
+
+            return {
+              key: groupKey,
+              label: groupConfig.label(groupKey as unknown, mergedFilters),
+              itemCount: groupConfig.itemCount?.(
+                groupKey as unknown,
+                mergedFilters
+              ),
+              summaryRow: summaryDefinitions
+                ? {
+                    label: groupConfig.summaries?.label,
+                    emptyPlaceholder: groupConfig.summaries?.emptyPlaceholder,
+                    definitions: Object.fromEntries(
+                      Object.entries(summaryDefinitions).map(
+                        ([summaryKey, summaryConfig]) => [
+                          summaryKey,
+                          { type: summaryConfig.type },
+                        ]
+                      )
+                    ),
+                    data: Object.fromEntries(
+                      Object.entries(summaryDefinitions).map(
+                        ([summaryKey, summaryConfig]) => [
+                          summaryKey,
+                          summaryConfig.type === "count"
+                            ? (summaryConfig.getValue?.(groupRecords) ??
+                              groupRecords.length)
+                            : groupRecords.reduce((total, record) => {
+                                return total + summaryConfig.getValue(record)
+                              }, 0),
+                        ]
+                      )
+                    ),
+                  }
+                : undefined,
+              records: groupRecords,
+            }
+          }
         ),
       }
     }
@@ -503,6 +557,7 @@ export function useData<
           key: "all",
           label: "All",
           itemCount: data.length,
+          summaryRow: undefined,
           records: data,
         },
       ],

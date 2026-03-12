@@ -26,9 +26,8 @@ import {
   useGroups,
   useSelectable,
 } from "@/hooks/datasource"
-import { useI18n } from "@/lib/providers/i18n"
 import { Add } from "@/icons/app"
-import { cn } from "@/lib/utils"
+import { useI18n } from "@/lib/providers/i18n"
 import { GroupHeader } from "@/ui/GroupHeader/index"
 import { Skeleton } from "@/ui/skeleton.tsx"
 
@@ -46,6 +45,7 @@ import { CollectionProps } from "../../../types"
 import { useAddRow } from "../EditableTable/context/AddRowContext"
 import { statusToChecked } from "../utils"
 import { Row } from "./components/Row"
+import { SummaryRow } from "./components/SummaryRow"
 import { useColumns } from "./hooks/useColums"
 import { NestedDataProvider } from "./providers/NestedProvider"
 import { useSticky } from "./useSticky"
@@ -108,7 +108,6 @@ export const TableCollection = <
   TableCustomizationProps<R, Sortings, Summaries>) => {
   const { t, ...i18n } = useI18n()
   const addRow = useAddRow()
-  // Created a motion component for the row
   const [MotionRow] = useState(() =>
     motion.create(
       Row<
@@ -125,7 +124,6 @@ export const TableCollection = <
 
   const { settings } = useDataCollectionSettings()
 
-  // Sorted and hidden columns
   const { columns } = useColumns(
     originalColumns,
     frozenColumns,
@@ -167,9 +165,18 @@ export const TableCollection = <
             itemActions: undefined,
           } as typeof source)
         : source,
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- only recompute when source identity or showItemActions changes
     [source, showItemActionsProp]
   )
+
+  const summaryData = useMemo(() => {
+    if (!summariesData || !source.summaries) return null
+
+    return {
+      data: summariesData as R,
+      sticky: true,
+      label: source.summaries?.label,
+    }
+  }, [summariesData, source.summaries])
 
   // Infinite scroll pagination
   const { loadingIndicatorRef } = useInfiniteScrollPagination(
@@ -217,17 +224,6 @@ export const TableCollection = <
     selectionMode: "multi",
     selectedState: source.defaultSelectedItems,
   })
-  const summaryData = useMemo(() => {
-    // Early return if no summaries configuration or summaries data is available
-
-    if (!summariesData || !source.summaries) return null
-
-    return {
-      data: summariesData as R,
-      sticky: true,
-      label: source.summaries?.label,
-    }
-  }, [summariesData, source.summaries])
 
   /**
    * Determine the sort state of a column
@@ -484,7 +480,7 @@ export const TableCollection = <
                         }
                       >
                         <GroupHeader
-                          className="px-3"
+                          className="pl-1.5 pr-3"
                           selectable={!!source.selectable}
                           select={statusToChecked(
                             groupAllSelectedStatus[group.key]
@@ -554,6 +550,27 @@ export const TableCollection = <
 
                           return motionRow
                         })}
+                      {(!collapsible || openGroups[group.key]) &&
+                        group.summaryRow && (
+                          <SummaryRow
+                            label={group.summaryRow.label}
+                            data={group.summaryRow.data}
+                            emptyPlaceholder={group.summaryRow.emptyPlaceholder}
+                            keyPrefix={`group-${group.key}`}
+                            definitions={group.summaryRow.definitions}
+                            columns={columns}
+                            selectable={!!source.selectable}
+                            showItemActions={showItemActions}
+                            checkColumnWidth={checkColumnWidth}
+                            getStickyPosition={getStickyPosition}
+                            typeLabels={i18n.collections.summaries.types}
+                            fromVisualization={fromVisualization}
+                            animationIndex={group.records.length}
+                            initialAnimationState={
+                              collapsible ? "hidden" : "visible"
+                            }
+                          />
+                        )}
                     </AnimatePresence>
                   </Fragment>
                 )
@@ -623,76 +640,6 @@ export const TableCollection = <
           </TableBody>
           {(summaryData || addRow?.onAddRow) && (
             <TableFooter>
-              {summaryData && (
-                <TableRow
-                  className={cn(
-                    summaryData.sticky &&
-                      "sticky bottom-0 z-10 bg-f1-background shadow-[0_-1px_0_0_var(--f1-border-secondary)] hover:bg-f1-background",
-                    "font-medium"
-                  )}
-                >
-                  {source.selectable && (
-                    <TableCell width={checkColumnWidth} sticky={{ left: 0 }}>
-                      {summaryData.label && (
-                        <div className="font-medium text-f1-foreground-secondary">
-                          {summaryData.label}
-                        </div>
-                      )}
-                    </TableCell>
-                  )}
-                  {columns.map((column, cellIndex) => (
-                    <TableCell
-                      key={`summary-${String(column.label)}`}
-                      firstCell={cellIndex === 0}
-                      width={column.width}
-                      sticky={getStickyPosition(cellIndex)}
-                    >
-                      {cellIndex === 0 &&
-                      !source.selectable &&
-                      summaryData.label ? (
-                        <div className="font-medium text-f1-foreground-secondary">
-                          {summaryData.label}
-                        </div>
-                      ) : (
-                        <div
-                          className={cn(
-                            column.align === "right" ? "justify-end" : "",
-                            "flex"
-                          )}
-                        >
-                          {column.summary &&
-                          source.summaries &&
-                          source.summaries[column.summary]?.type === "sum" ? (
-                            <div className="flex gap-1">
-                              <span className="text-f1-foreground-secondary">
-                                {i18n.collections.summaries.types.sum}
-                              </span>
-                              {`${summaryData.data[column.summary]}`}
-                            </div>
-                          ) : (
-                            "-"
-                          )}
-                        </div>
-                      )}
-                    </TableCell>
-                  ))}
-                  {showItemActions && (
-                    <>
-                      <th className="hidden md:table-cell"></th>
-                      <TableCell
-                        key="summary-actions"
-                        width={68}
-                        sticky={{
-                          right: 0,
-                        }}
-                        className="table-cell md:hidden"
-                      >
-                        {""}
-                      </TableCell>
-                    </>
-                  )}
-                </TableRow>
-              )}
               {addRow?.onAddRow && (
                 <TableRow>
                   <TableCell
@@ -716,6 +663,27 @@ export const TableCollection = <
                     </div>
                   </TableCell>
                 </TableRow>
+              )}
+              {summaryData && (
+                <SummaryRow
+                  label={summaryData.label}
+                  data={summaryData.data as Record<string, unknown>}
+                  sticky={summaryData.sticky}
+                  keyPrefix="global"
+                  definitions={
+                    source.summaries as Record<
+                      string,
+                      { type: "sum" | "count" }
+                    >
+                  }
+                  columns={columns}
+                  selectable={!!source.selectable}
+                  showItemActions={showItemActions}
+                  checkColumnWidth={checkColumnWidth}
+                  getStickyPosition={getStickyPosition}
+                  typeLabels={i18n.collections.summaries.types}
+                  fromVisualization={fromVisualization}
+                />
               )}
             </TableFooter>
           )}

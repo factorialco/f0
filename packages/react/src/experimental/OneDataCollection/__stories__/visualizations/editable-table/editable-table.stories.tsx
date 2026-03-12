@@ -487,6 +487,98 @@ export const EditableTableWithSelectableNestedRecordsDetailed: Story = {
   },
 }
 
+export const GroupedEditableTable: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Editable table grouped by department. This PoC adds a summary row below each group, using a grouping-level summaries definition similar to the global table footer.",
+      },
+    },
+  },
+  render: () => {
+    const mockVisualizations = getMockVisualizations({
+      table: {
+        applyLongText: false,
+      },
+    })
+    const { dataAdapter, items, onCellChange } = useEditableTableData()
+    const baseOptions = (
+      mockVisualizations.editableTable as Extract<
+        typeof mockVisualizations.editableTable,
+        { type: "editableTable" }
+      >
+    ).options
+
+    return (
+      <ExampleComponent
+        storage={false}
+        selectable={(item) => item.id}
+        visualizations={[
+          {
+            type: "editableTable" as const,
+            options: {
+              ...baseOptions,
+              columns: [
+                ...baseOptions.columns.map((col) => {
+                  return {
+                    ...col,
+                    align: "right" as const,
+                    ...(col.id === "role" ? { summary: "role" as const } : {}),
+                  }
+                }),
+                {
+                  id: "salary",
+                  label: "Salary",
+                  render: (item: MockUser) => item.salary ?? 0,
+                  editType: () => "display-only" as const,
+                  align: "right",
+                  summary: "salary",
+                },
+              ],
+              onCellChange,
+            },
+          },
+        ]}
+        dataAdapter={dataAdapter}
+        grouping={{
+          mandatory: true,
+          collapsible: true,
+          defaultOpenGroups: ["Engineering"],
+          groupBy: {
+            department: {
+              name: "Department",
+              label: (groupId) => groupId,
+              itemCount: (groupId) => {
+                return items.filter((item) => item.department === groupId)
+                  .length
+              },
+              summaries: {
+                emptyPlaceholder: "",
+                fields: {
+                  salary: {
+                    type: "sum",
+                    getValue: (record) => record.salary ?? 0,
+                  },
+                  role: {
+                    type: "count",
+                    getValue: () => 2,
+                  },
+                },
+              },
+            },
+          },
+        }}
+        currentGrouping={{
+          field: "department",
+          order: "asc",
+        }}
+        id="editable-table-grouped/v1"
+      />
+    )
+  },
+}
+
 export const TableAndEditableTable: Story = {
   parameters: {
     docs: {

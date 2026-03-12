@@ -70,7 +70,7 @@ describe("GroupHeader", () => {
       <GroupHeader label="Test Group" itemCount={5} className="custom-class" />
     )
 
-    const header = screen.getByText("Test Group").closest("div")
+    const header = screen.getByText("Test Group").closest(".custom-class")
     expect(header).toHaveClass("custom-class")
   })
 
