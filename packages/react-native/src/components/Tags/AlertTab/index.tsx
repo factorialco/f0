@@ -8,7 +8,7 @@ type Level = "info" | "warning" | "critical"
 
 type NonEmpty<T extends string> = T extends "" ? never : T
 
-type Props<T extends string = string> = {
+export type AlertTagProps<T extends string = string> = {
   text: NonEmpty<T>
   level: Level
 }
@@ -19,7 +19,10 @@ const iconMap: Record<Level, IconType> = {
   critical: AlertCircle,
 }
 
-export const AlertTag = <T extends string>({ text, level }: Props<T>) => {
+export const AlertTag = <T extends string>({
+  text,
+  level,
+}: AlertTagProps<T>) => {
   useTextFormatEnforcer(text, { disallowEmpty: true })
 
   return (

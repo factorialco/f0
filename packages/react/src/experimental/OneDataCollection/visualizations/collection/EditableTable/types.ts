@@ -31,6 +31,9 @@ export type EditableTableColumnDefinition<
   Sortings extends SortingsDefinition,
   Summaries extends SummariesDefinition,
 > = TableColumnDefinition<R, Sortings, Summaries> & {
+  /** Optional placeholder passed to editable inputs (e.g. date cells). */
+  inputPlaceholder?: string
+
   /**
    * Determines how the cell is rendered in edit mode.
    * Receives the current item and returns the cell type (e.g. `"text"`) or

@@ -22,7 +22,7 @@ const meta: Meta<typeof SurveyFormBuilder> = {
   },
   decorators: [
     (Story) => (
-      <div className="max-w-[750px]">
+      <div className="max-w-[1400px]">
         <Story />
       </div>
     ),

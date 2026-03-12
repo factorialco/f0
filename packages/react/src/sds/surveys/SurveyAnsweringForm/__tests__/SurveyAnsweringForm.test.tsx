@@ -52,6 +52,135 @@ const defaultProps = {
 // --- Tests ---
 
 describe("SurveyAnsweringForm", () => {
+  describe("loading state", () => {
+    it("renders all-questions loading skeleton without form controls", () => {
+      render(
+        <SurveyAnsweringForm
+          {...defaultProps}
+          elements={[makeTextQuestion("q1", "Name", true)]}
+          loading
+          onSubmit={vi.fn()}
+        />
+      )
+
+      expect(
+        screen.getByTestId("survey-answering-form-loading-all-questions")
+      ).toBeInTheDocument()
+      expect(screen.getAllByTestId("skeleton").length).toBeGreaterThan(0)
+      expect(screen.queryByText("Name")).not.toBeInTheDocument()
+      expect(
+        screen.queryByRole("button", { name: /submit/i })
+      ).not.toBeInTheDocument()
+      expect(
+        screen.queryByText("No questions to answer")
+      ).not.toBeInTheDocument()
+    })
+
+    it("renders stepped loading skeleton variant", () => {
+      render(
+        <SurveyAnsweringForm
+          {...defaultProps}
+          mode="stepped"
+          elements={[makeTextQuestion("q1", "Name", true)]}
+          loading
+          onSubmit={vi.fn()}
+        />
+      )
+
+      expect(
+        screen.getByTestId("survey-answering-form-loading-stepped")
+      ).toBeInTheDocument()
+      expect(
+        screen.queryByTestId("survey-answering-form-loading-all-questions")
+      ).not.toBeInTheDocument()
+      expect(screen.getAllByTestId("skeleton").length).toBeGreaterThan(0)
+      expect(screen.queryByText("Name")).not.toBeInTheDocument()
+      expect(
+        screen.queryByRole("button", { name: /submit|next/i })
+      ).not.toBeInTheDocument()
+    })
+  })
+
+  describe("empty state", () => {
+    it("renders default empty state labels when there are no elements", () => {
+      render(
+        <SurveyAnsweringForm
+          {...defaultProps}
+          elements={[]}
+          onSubmit={vi.fn()}
+        />
+      )
+
+      expect(screen.getByText("No questions to answer")).toBeInTheDocument()
+      expect(
+        screen.getByText("This survey has no questions yet.")
+      ).toBeInTheDocument()
+      expect(screen.getByRole("img", { name: "📝" })).toBeInTheDocument()
+      expect(
+        screen.queryByRole("button", { name: /submit/i })
+      ).not.toBeInTheDocument()
+    })
+
+    it("renders custom empty state labels when provided", () => {
+      render(
+        <SurveyAnsweringForm
+          {...defaultProps}
+          elements={[]}
+          labels={{
+            empty: {
+              title: "Nothing to answer",
+              description: "Survey has no questions configured yet.",
+              emoji: "🧩",
+            },
+          }}
+          onSubmit={vi.fn()}
+        />
+      )
+
+      expect(screen.getByText("Nothing to answer")).toBeInTheDocument()
+      expect(
+        screen.getByText("Survey has no questions configured yet.")
+      ).toBeInTheDocument()
+      expect(screen.getByRole("img", { name: "🧩" })).toBeInTheDocument()
+    })
+  })
+
+  describe("preview mode", () => {
+    it("shows disabled submit and keeps fields editable when preview has no default values", () => {
+      render(
+        <SurveyAnsweringForm
+          {...defaultProps}
+          preview
+          elements={[makeTextQuestion("q1", "Name", true)]}
+        />
+      )
+
+      const input = screen.getByRole("textbox")
+      const submitButton = screen.getByRole("button", { name: /submit/i })
+
+      expect(input).not.toBeDisabled()
+      expect(submitButton).toBeDisabled()
+    })
+
+    it("renders fields as disabled and hides submit when preview has default values", () => {
+      render(
+        <SurveyAnsweringForm
+          {...defaultProps}
+          preview
+          elements={[makeTextQuestion("q1", "Name", true)]}
+          defaultValues={{
+            q1: { type: "text", value: "John" },
+          }}
+        />
+      )
+
+      expect(screen.getByDisplayValue("John")).toBeDisabled()
+      expect(
+        screen.queryByRole("button", { name: /submit/i })
+      ).not.toBeInTheDocument()
+    })
+  })
+
   describe("validation on submit", () => {
     it("does not call onSubmit when required fields are empty", async () => {
       const onSubmit = vi.fn()

@@ -2,6 +2,7 @@ import { cn } from "@/lib/utils"
 
 export interface RatingFieldConfig {
   options: { value: number; label: string }[]
+  disabled?: boolean
 }
 
 export interface RatingQuestionFieldProps {
@@ -17,9 +18,10 @@ export function RatingQuestionField({
   onBlur,
   config,
 }: RatingQuestionFieldProps) {
-  const { options } = config
+  const { options, disabled } = config
 
   const handleClick = (optionValue: number) => {
+    if (disabled) return
     onChange(optionValue)
     onBlur()
   }
@@ -30,7 +32,8 @@ export function RatingQuestionField({
         <div
           key={option.value}
           className={cn(
-            "flex h-10 min-w-20 cursor-pointer items-center justify-center rounded-md border border-solid border-f1-border-secondary text-center font-medium",
+            "flex h-10 min-w-20 items-center justify-center rounded-md border border-solid border-f1-border-secondary text-center font-medium",
+            disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer",
             value === option.value &&
               "border-f1-border-selected bg-f1-background-selected-secondary"
           )}

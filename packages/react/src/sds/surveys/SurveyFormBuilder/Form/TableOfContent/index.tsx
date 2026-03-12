@@ -110,7 +110,7 @@ export const TableOfContent = ({
   )
 
   return (
-    <div className="sticky left-0 top-1/2 z-10 h-0 -translate-y-12 px-2">
+    <div className="sticky left-0 top-1/2 z-10 hidden h-0 -translate-y-12 px-2 md:block">
       <F0TableOfContentPopover
         items={tocItems}
         barsAlign="left"

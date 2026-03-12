@@ -1,5 +1,33 @@
 # Changelog
 
+## [0.39.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.38.0...f0-react-native-v0.39.0) (2026-03-12)
+
+
+### Features
+
+* add F0Preset component with showcase and documentation ([#3654](https://github.com/factorialco/f0/issues/3654)) ([5faacc6](https://github.com/factorialco/f0/commit/5faacc6714855241b734977ed015a72ae67cd66c))
+
+## [0.38.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.37.1...f0-react-native-v0.38.0) (2026-03-12)
+
+
+### Features
+
+* add F0Counter component with size and type variants ([#3649](https://github.com/factorialco/f0/issues/3649)) ([d8bbae4](https://github.com/factorialco/f0/commit/d8bbae450dad7453b08eab68027970b7df1c71d8))
+
+## [0.37.1](https://github.com/factorialco/f0/compare/f0-react-native-v0.37.0...f0-react-native-v0.37.1) (2026-03-12)
+
+
+### Bug Fixes
+
+* **F0Button:** update button sizes in styles and snapshots for consis… ([#3650](https://github.com/factorialco/f0/issues/3650)) ([da3103c](https://github.com/factorialco/f0/commit/da3103c17ec8814c1068afb75ac785c0faf77381))
+
+## [0.37.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.36.0...f0-react-native-v0.37.0) (2026-03-12)
+
+
+### Features
+
+* introduce F0Tag component with multiple variants ([#3642](https://github.com/factorialco/f0/issues/3642)) ([12f1927](https://github.com/factorialco/f0/commit/12f19272b3fe4df2a1ca7e1b7e2aa1ce9e302924))
+
 ## [0.36.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.35.0...f0-react-native-v0.36.0) (2026-03-11)
 
 

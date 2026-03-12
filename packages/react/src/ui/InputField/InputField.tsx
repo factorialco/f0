@@ -509,6 +509,7 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
             </div>
             {!noEdit && (
               <div
+                data-slot="placeholder"
                 className={cn(
                   "pointer-events-none absolute left-0 top-[1px] z-10 flex flex-1 justify-start px-3 text-f1-foreground-secondary transition-opacity line-clamp-1",
                   !canGrow && "bottom-0",

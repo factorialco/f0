@@ -1,12 +1,20 @@
-import { useEffect } from "react"
-
-type Rules = {
+type TextFormatRules = {
   disallowEmpty?: boolean
   minLength?: number
   maxLength?: number
 }
 
-const textFormatEnforcer = (text: string, rules: Rules) => {
+/**
+ * Validates text against formatting rules synchronously.
+ * Only runs in development builds to avoid runtime throws in production.
+ */
+export const enforceTextFormat = (
+  text: string | undefined,
+  rules: TextFormatRules
+) => {
+  if (typeof __DEV__ !== "undefined" && !__DEV__) return
+  if (text === undefined) return
+
   if (rules.disallowEmpty && text.length === 0) {
     throw Error("You need to provide some text that is not empty")
   }
@@ -22,10 +30,14 @@ const textFormatEnforcer = (text: string, rules: Rules) => {
   }
 }
 
-export const useTextFormatEnforcer = (text?: string, rules?: Rules) => {
-  useEffect(() => {
-    if (text !== undefined && rules) {
-      textFormatEnforcer(text, rules)
-    }
-  }, [text, rules])
+/**
+ * @deprecated Use `enforceTextFormat` directly (synchronous, dev-only).
+ */
+export const useTextFormatEnforcer = (
+  text?: string,
+  rules?: TextFormatRules
+) => {
+  if (text !== undefined && rules) {
+    enforceTextFormat(text, rules)
+  }
 }

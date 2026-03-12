@@ -234,10 +234,10 @@ exports[`DetailsItemsList Snapshot  1`] = `
                         className="aspect-square h-full w-full"
                       >
                         <Image
-                          aria-label="S"
+                          aria-label="J"
                           source={
                             {
-                              "uri": "https://github.com/sauldom102.png",
+                              "uri": "https://github.com/octocat.png",
                             }
                           }
                           style={
@@ -254,7 +254,7 @@ exports[`DetailsItemsList Snapshot  1`] = `
                 <Text
                   className="line-clamp-5 text-left text-f0-foreground"
                 >
-                  Saul Dominguez
+                  John Doe
                 </Text>
               </View>
               <RNSVGSvgView

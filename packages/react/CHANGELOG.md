@@ -1,5 +1,26 @@
 # Changelog
 
+## [1.401.1](https://github.com/factorialco/f0/compare/f0-react-v1.401.0...f0-react-v1.401.1) (2026-03-12)
+
+
+### Bug Fixes
+
+* UI improvements in survey answering form component ([#3648](https://github.com/factorialco/f0/issues/3648)) ([8351016](https://github.com/factorialco/f0/commit/83510169d59e8ea43409ba2b04679de7bcd1d183))
+
+## [1.401.0](https://github.com/factorialco/f0/compare/f0-react-v1.400.0...f0-react-v1.401.0) (2026-03-12)
+
+
+### Features
+
+* **F0Card:** add 16:9 image aspect ratio ([#3652](https://github.com/factorialco/f0/issues/3652)) ([fa71f7f](https://github.com/factorialco/f0/commit/fa71f7f00c9e58983878579fb4ec4ddab3deb5f6))
+
+## [1.400.0](https://github.com/factorialco/f0/compare/f0-react-v1.399.0...f0-react-v1.400.0) (2026-03-12)
+
+
+### Features
+
+* **EditableTable:** add date cell type with F0DatePicker integration ([#3600](https://github.com/factorialco/f0/issues/3600)) ([b49a804](https://github.com/factorialco/f0/commit/b49a8043e88e538139c85acca895f97c57e1cede))
+
 ## [1.399.0](https://github.com/factorialco/f0/compare/f0-react-v1.398.0...f0-react-v1.399.0) (2026-03-11)
 
 
