@@ -116,6 +116,134 @@ describe("F0Form", () => {
     expect(screen.getByLabelText("First Name")).toBeInTheDocument()
     expect(screen.getByLabelText("Last Name")).toBeInTheDocument()
   })
+
+  it("renders warning status configured in schema", () => {
+    const formSchema = z.object({
+      name: f0FormField(z.string(), {
+        label: "Name",
+        status: { type: "warning", message: "Check this value" },
+      }),
+    })
+
+    render(
+      <F0Form
+        name="schema-warning-status"
+        schema={formSchema}
+        defaultValues={{ name: "" }}
+        onSubmit={async () => ({ success: true })}
+      />
+    )
+
+    const message = screen.getByText("Check this value")
+    expect(message).toHaveClass("text-f1-foreground-warning")
+  })
+
+  it("hides schema status message when field validation has errors", async () => {
+    const formSchema = z.object({
+      name: f0FormField(z.string().min(2, "Too short"), {
+        label: "Name",
+        status: { type: "warning", message: "Check this value" },
+      }),
+    })
+
+    render(
+      <F0Form
+        name="schema-status-error-precedence"
+        schema={formSchema}
+        defaultValues={{ name: "" }}
+        onSubmit={async () => ({ success: true })}
+      />
+    )
+
+    expect(screen.getByText("Check this value")).toBeInTheDocument()
+
+    await userEvent.click(screen.getByText("Submit"))
+
+    await waitFor(() => {
+      expect(screen.queryByText("Check this value")).not.toBeInTheDocument()
+    })
+  })
+
+  it("applies FormControl aria attributes to duration segment inputs", async () => {
+    const formSchema = z.object({
+      duration: f0FormField(z.number().min(1, "Duration is required"), {
+        label: "Duration",
+        fieldType: "duration",
+        units: ["hours", "minutes"],
+        helpText: "Use hours and minutes",
+      }),
+    })
+
+    render(
+      <F0Form
+        name="duration-formcontrol-a11y"
+        schema={formSchema}
+        defaultValues={{ duration: 0 }}
+        onSubmit={async () => ({ success: true })}
+      />
+    )
+
+    const hoursInput = screen.getByLabelText("Hours")
+    const minutesInput = screen.getByLabelText("Minutes")
+    const helpText = screen.getByText("Use hours and minutes")
+    const helpTextId = helpText.getAttribute("id")
+    const resolvedHelpTextId = helpTextId ?? ""
+
+    expect(helpTextId).toBeTruthy()
+    expect(hoursInput).toHaveAttribute("aria-describedby")
+    expect(minutesInput).toHaveAttribute("aria-describedby")
+    expect(hoursInput).toHaveAttribute("aria-invalid", "false")
+    expect(minutesInput).toHaveAttribute("aria-invalid", "false")
+    expect(hoursInput.getAttribute("aria-describedby")).toContain(
+      resolvedHelpTextId
+    )
+    expect(minutesInput.getAttribute("aria-describedby")).toContain(
+      resolvedHelpTextId
+    )
+
+    await userEvent.click(screen.getByText("Submit"))
+
+    const errorMessage = await screen.findByText("Duration is required")
+    const errorContainerId = errorMessage.closest("div")?.getAttribute("id")
+    const resolvedErrorContainerId = errorContainerId ?? ""
+
+    expect(errorContainerId).toBeTruthy()
+    expect(hoursInput).toHaveAttribute("aria-invalid", "true")
+    expect(minutesInput).toHaveAttribute("aria-invalid", "true")
+    expect(hoursInput.getAttribute("aria-describedby")).toContain(
+      resolvedErrorContainerId
+    )
+    expect(minutesInput.getAttribute("aria-describedby")).toContain(
+      resolvedErrorContainerId
+    )
+  })
+
+  it("applies duration maxVisibleDigits from schema config", () => {
+    const formSchema = z.object({
+      duration: f0FormField(z.number(), {
+        label: "Duration",
+        fieldType: "duration",
+        units: ["hours"],
+        fields: {
+          hours: {
+            maxVisibleDigits: 4,
+          },
+        },
+      }),
+    })
+
+    render(
+      <F0Form
+        name="duration-max-visible-digits"
+        schema={formSchema}
+        defaultValues={{ duration: 3600 * 1234 }}
+        onSubmit={async () => ({ success: true })}
+      />
+    )
+
+    expect(screen.getByLabelText("Hours")).toHaveValue("1234")
+    expect(screen.getByLabelText("Hours")).toHaveStyle({ width: "4ch" })
+  })
 })
 
 describe("f0FormField function", () => {
@@ -147,6 +275,7 @@ describe("f0FormField function", () => {
       section: "section1",
       placeholder: "Enter text",
       helpText: "Help text",
+      status: { type: "info", message: "Info message" },
       disabled: true,
       row: "row1",
     })
@@ -156,6 +285,7 @@ describe("f0FormField function", () => {
     expect(config?.section).toBe("section1")
     expect(config?.placeholder).toBe("Enter text")
     expect(config?.helpText).toBe("Help text")
+    expect(config?.status).toEqual({ type: "info", message: "Info message" })
     expect(config?.disabled).toBe(true)
     expect(config?.row).toBe("row1")
   })
@@ -184,6 +314,12 @@ describe("inferFieldType", () => {
     const schema = z.number()
     const config = { label: "Test", fieldType: "number" } as const
     expect(inferFieldType(schema, config)).toBe("number")
+  })
+
+  it("infers duration type from explicit fieldType", () => {
+    const schema = z.number()
+    const config = { label: "Test", fieldType: "duration" } as const
+    expect(inferFieldType(schema, config)).toBe("duration")
   })
 
   it("infers switch type from ZodBoolean", () => {
@@ -233,6 +369,26 @@ describe("getSchemaDefinition", () => {
     expect(definition).toHaveLength(2)
     expect(definition[0].type).toBe("field")
     expect(definition[1].type).toBe("field")
+  })
+
+  it("maps field status from schema config", () => {
+    const formSchema = z.object({
+      name: f0FormField(z.string(), {
+        label: "Name",
+        status: { type: "info", message: "Additional context" },
+      }),
+    })
+
+    const definition = getSchemaDefinition(formSchema)
+    const fieldItem = definition[0] as {
+      type: "field"
+      field: { status?: { type: string; message?: string } }
+    }
+
+    expect(fieldItem.field.status).toEqual({
+      type: "info",
+      message: "Additional context",
+    })
   })
 
   it("groups fields by section", () => {
@@ -498,6 +654,28 @@ describe("getSchemaDefinition - field types", () => {
     }
 
     expect(fieldItem.field.type).toBe("datetime")
+  })
+
+  it("creates duration field from z.number() with fieldType duration", () => {
+    const formSchema = z.object({
+      duration: f0FormField(z.number(), {
+        label: "Duration",
+        fieldType: "duration",
+        units: ["hours", "minutes"],
+      }),
+    })
+
+    const definition = getSchemaDefinition(formSchema)
+    const fieldItem = definition[0] as {
+      type: "field"
+      field: {
+        type: string
+        units?: string[]
+      }
+    }
+
+    expect(fieldItem.field.type).toBe("duration")
+    expect(fieldItem.field.units).toEqual(["hours", "minutes"])
   })
 
   it("sets clearable true for optional fields", () => {

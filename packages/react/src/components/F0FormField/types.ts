@@ -1,5 +1,6 @@
 import type { InitialFile } from "../F0Form/fields/file/types"
 import type { F0Field, F0FileField } from "../F0Form/fields/types"
+import type { InputFieldStatus } from "@/ui/InputField/types"
 
 /**
  * Standalone form field props — decoupled from react-hook-form.
@@ -30,6 +31,8 @@ interface F0FormFieldCommonProps {
   error?: boolean
   /** Error message to display */
   errorMessage?: string
+  /** Field status for warning/info/error/default messages */
+  status?: InputFieldStatus
   /** Whether the field is in a loading/validating state */
   loading?: boolean
   /** Whether the field is required */

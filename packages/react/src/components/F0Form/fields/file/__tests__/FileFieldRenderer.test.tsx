@@ -100,6 +100,60 @@ describe("FileFieldRenderer", () => {
     ).toBeInTheDocument()
   })
 
+  it("applies neutral hover classes when no status is set", () => {
+    const schema = z.object({
+      file: f0FormField(z.string().optional(), {
+        label: "Document",
+        fieldType: "file",
+        useUpload: createMockUploadHook(),
+      }),
+    })
+
+    render(
+      <F0Form
+        name="test-file-hover-default"
+        schema={schema}
+        defaultValues={{ file: "" }}
+        onSubmit={async () => ({ success: true })}
+      />
+    )
+
+    const dropzone = screen.getByRole("button", {
+      name: /drag and drop a file, or click to select/i,
+    })
+
+    expect(dropzone).toHaveClass("hover:border-f1-border-hover")
+    expect(dropzone).toHaveClass("hover:bg-f1-background-secondary")
+  })
+
+  it("keeps warning dropzone styles by skipping neutral hover classes", () => {
+    const schema = z.object({
+      file: f0FormField(z.string().optional(), {
+        label: "Document",
+        fieldType: "file",
+        status: { type: "warning", message: "Potential issue" },
+        useUpload: createMockUploadHook(),
+      }),
+    })
+
+    render(
+      <F0Form
+        name="test-file-hover-warning"
+        schema={schema}
+        defaultValues={{ file: "" }}
+        onSubmit={async () => ({ success: true })}
+      />
+    )
+
+    const dropzone = screen.getByRole("button", {
+      name: /drag and drop a file, or click to select/i,
+    })
+
+    expect(dropzone).toHaveClass("border-f1-border-warning-bold")
+    expect(dropzone).not.toHaveClass("hover:border-f1-border-hover")
+    expect(dropzone).not.toHaveClass("hover:bg-f1-background-secondary")
+  })
+
   it("renders custom description text", () => {
     const schema = z.object({
       file: f0FormField(z.string().optional(), {

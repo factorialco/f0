@@ -2,6 +2,7 @@ import { useMemo } from "react"
 import { ControllerRenderProps, FieldValues } from "react-hook-form"
 
 import { F0DatePicker, DatePickerValue } from "@/components/F0DatePicker"
+import type { InputFieldStatus } from "@/ui/InputField/types"
 
 import type { F0DateField, ResolvedDateField } from "./types"
 import { FORM_SIZE } from "../../constants"
@@ -11,6 +12,7 @@ interface DateFieldRendererProps {
   formField: ControllerRenderProps<FieldValues>
   error?: boolean
   loading?: boolean
+  status?: InputFieldStatus
 }
 
 /**
@@ -45,6 +47,7 @@ export function DateFieldRenderer({
   formField,
   error,
   loading,
+  status,
 }: DateFieldRendererProps) {
   // Convert form Date value to DatePickerValue for the picker
   // Form value may be null (used instead of undefined to prevent
@@ -88,6 +91,7 @@ export function DateFieldRenderer({
       size={FORM_SIZE}
       hideLabel
       error={error}
+      status={status}
       loading={loading}
     />
   )

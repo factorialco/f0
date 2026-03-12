@@ -537,6 +537,11 @@ export const AllFieldTypes: Story = {
         label: "Number Field",
         step: 1,
       }),
+      durationField: f0FormField(z.number().min(0), {
+        label: "Duration Field",
+        fieldType: "duration",
+        units: ["hours", "minutes", "seconds"],
+      }),
       textareaField: f0FormField(z.string().min(1).max(500), {
         label: "Textarea Field",
         fieldType: "textarea",
@@ -638,6 +643,7 @@ export const AllFieldTypes: Story = {
         emailField: "",
         passwordField: "",
         numberField: 0,
+        durationField: 3661,
         textareaField: "",
         selectField: "option1",
         multiSelectField: [],
@@ -688,6 +694,12 @@ export const AllFieldTypesDisabled: Story = {
       numberField: f0FormField(z.number().min(0).max(100), {
         label: "Number Field",
         step: 1,
+        disabled: true,
+      }),
+      durationField: f0FormField(z.number().min(0), {
+        label: "Duration Field",
+        fieldType: "duration",
+        units: ["hours", "minutes", "seconds"],
         disabled: true,
       }),
       textareaField: f0FormField(z.string().max(500), {
@@ -806,6 +818,7 @@ export const AllFieldTypesDisabled: Story = {
         emailField: "user@example.com",
         passwordField: "secretpassword",
         numberField: 42,
+        durationField: 3661,
         textareaField:
           "This is a longer piece of text that demonstrates the textarea field in its disabled state.",
         selectField: "option2",

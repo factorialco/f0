@@ -3,6 +3,7 @@ import { ControllerRenderProps, FieldValues } from "react-hook-form"
 
 import { Input } from "@/experimental/Forms/Fields/Input"
 import { Clock } from "@/icons/app"
+import type { InputFieldStatus } from "@/ui/InputField/types"
 
 import type { ResolvedTimeField } from "./types"
 import { dateToTimeString, timeStringToDate } from "./utils"
@@ -13,6 +14,7 @@ export interface TimeFieldRendererProps {
   formField: ControllerRenderProps<FieldValues>
   error?: boolean
   loading?: boolean
+  status?: InputFieldStatus
 }
 
 /**
@@ -24,6 +26,7 @@ export function TimeFieldRenderer({
   formField,
   error,
   loading,
+  status,
 }: TimeFieldRendererProps) {
   // Convert Date value to HH:mm string for the native time input.
   // Form value may be null (used to represent cleared state).
@@ -63,6 +66,7 @@ export function TimeFieldRenderer({
       size={FORM_SIZE}
       hideLabel
       error={error}
+      status={status}
       loading={loading}
       clearable={field.clearable}
       name={formField.name}

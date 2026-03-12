@@ -9,6 +9,7 @@ import {
   FormItem,
   FormMessage,
 } from "@/ui/form"
+import { InputMessages } from "@/ui/InputField/components/InputMessages"
 
 import type { F0Field } from "./types"
 
@@ -107,6 +108,7 @@ export function FieldRenderer({ field, sectionId }: FieldRendererProps) {
               field,
               formField,
               fieldState,
+              fieldStatus: field.status,
               isSubmitting,
               isRequired,
               values,
@@ -114,6 +116,9 @@ export function FieldRenderer({ field, sectionId }: FieldRendererProps) {
           </FormControl>
           {field.helpText && (
             <FormDescription>{field.helpText}</FormDescription>
+          )}
+          {showFormMessage && !fieldState.error && (
+            <InputMessages status={field.status} />
           )}
           {showFormMessage && (
             <FormMessage

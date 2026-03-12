@@ -3,6 +3,7 @@ import { ControllerRenderProps, FieldValues } from "react-hook-form"
 import { Input } from "@/experimental/Forms/Fields/Input"
 import { Link, Envelope } from "@/icons/app"
 import { IconType } from "@/components/F0Icon"
+import type { InputFieldStatus } from "@/ui/InputField/types"
 import type { F0TextConfig, F0TextField } from "./types"
 import type { ResolvedField } from "../types"
 import { FORM_SIZE } from "../../constants"
@@ -12,6 +13,7 @@ interface TextFieldRendererProps {
   formField: ControllerRenderProps<FieldValues>
   error?: boolean
   loading?: boolean
+  status?: InputFieldStatus
 }
 
 const DEFAULT_PLACEHOLDERS: Partial<
@@ -35,6 +37,7 @@ export function TextFieldRenderer({
   formField,
   error,
   loading,
+  status,
 }: TextFieldRendererProps) {
   const inputType = field.inputType ?? "text"
   const placeholder =
@@ -52,6 +55,7 @@ export function TextFieldRenderer({
       size={FORM_SIZE}
       hideLabel
       error={error}
+      status={status}
       loading={loading}
       icon={icon}
       clearable={field.clearable}
