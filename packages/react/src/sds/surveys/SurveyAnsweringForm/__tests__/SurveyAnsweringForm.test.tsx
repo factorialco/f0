@@ -52,6 +52,55 @@ const defaultProps = {
 // --- Tests ---
 
 describe("SurveyAnsweringForm", () => {
+  describe("loading state", () => {
+    it("renders all-questions loading skeleton without form controls", () => {
+      render(
+        <SurveyAnsweringForm
+          {...defaultProps}
+          elements={[makeTextQuestion("q1", "Name", true)]}
+          loading
+          onSubmit={vi.fn()}
+        />
+      )
+
+      expect(
+        screen.getByTestId("survey-answering-form-loading-all-questions")
+      ).toBeInTheDocument()
+      expect(screen.getAllByTestId("skeleton").length).toBeGreaterThan(0)
+      expect(screen.queryByText("Name")).not.toBeInTheDocument()
+      expect(
+        screen.queryByRole("button", { name: /submit/i })
+      ).not.toBeInTheDocument()
+      expect(
+        screen.queryByText("No questions to answer")
+      ).not.toBeInTheDocument()
+    })
+
+    it("renders stepped loading skeleton variant", () => {
+      render(
+        <SurveyAnsweringForm
+          {...defaultProps}
+          mode="stepped"
+          elements={[makeTextQuestion("q1", "Name", true)]}
+          loading
+          onSubmit={vi.fn()}
+        />
+      )
+
+      expect(
+        screen.getByTestId("survey-answering-form-loading-stepped")
+      ).toBeInTheDocument()
+      expect(
+        screen.queryByTestId("survey-answering-form-loading-all-questions")
+      ).not.toBeInTheDocument()
+      expect(screen.getAllByTestId("skeleton").length).toBeGreaterThan(0)
+      expect(screen.queryByText("Name")).not.toBeInTheDocument()
+      expect(
+        screen.queryByRole("button", { name: /submit|next/i })
+      ).not.toBeInTheDocument()
+    })
+  })
+
   describe("empty state", () => {
     it("renders default empty state labels when there are no elements", () => {
       render(
@@ -66,7 +115,7 @@ describe("SurveyAnsweringForm", () => {
       expect(
         screen.getByText("This survey has no questions yet.")
       ).toBeInTheDocument()
-      expect(screen.getByText("📝")).toBeInTheDocument()
+      expect(screen.getByRole("img", { name: "📝" })).toBeInTheDocument()
       expect(
         screen.queryByRole("button", { name: /submit/i })
       ).not.toBeInTheDocument()
@@ -92,7 +141,7 @@ describe("SurveyAnsweringForm", () => {
       expect(
         screen.getByText("Survey has no questions configured yet.")
       ).toBeInTheDocument()
-      expect(screen.getByText("🧩")).toBeInTheDocument()
+      expect(screen.getByRole("img", { name: "🧩" })).toBeInTheDocument()
     })
   })
 

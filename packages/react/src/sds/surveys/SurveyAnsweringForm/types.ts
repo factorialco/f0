@@ -40,6 +40,7 @@ export interface SurveyAnsweringFormProps {
   allowToChangeFullscreen?: boolean
   defaultValues?: Partial<SurveyAnswers>
   errorTriggerMode?: F0FormErrorTriggerMode
+  loading?: boolean
   labels?: {
     empty?: {
       title?: string

@@ -227,3 +227,17 @@ export const NoElements: Story = {
     },
   },
 }
+
+export const LoadingAllQuestions: Story = {
+  args: {
+    mode: "all-questions",
+    loading: true,
+  },
+}
+
+export const LoadingStepped: Story = {
+  args: {
+    mode: "stepped",
+    loading: true,
+  },
+}

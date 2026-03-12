@@ -16,6 +16,10 @@ import type { SurveyAnsweringFormProps, SurveySubmitAnswers } from "./types"
 
 import { SurveyFormBuilderProvider } from "../SurveyFormBuilder/Context"
 import { TableOfContent } from "../SurveyFormBuilder/Form/TableOfContent"
+import {
+  SurveyAllQuestionsLoadingSkeleton,
+  SurveySteppedLoadingSkeleton,
+} from "./components/skeletons/SurveyAnsweringFormLoadingSkeletons"
 import { useStepper } from "./hooks/useStepper"
 import {
   extractFlatQuestions,
@@ -35,6 +39,7 @@ export function SurveyAnsweringForm({
   allowToChangeFullscreen = false,
   defaultValues,
   errorTriggerMode = "on-blur",
+  loading = false,
   labels,
 }: SurveyAnsweringFormProps) {
   const { t } = useI18n()
@@ -163,48 +168,55 @@ export function SurveyAnsweringForm({
     stepper.goToPrevious()
   }, [formRef, stepper.goToPrevious])
 
-  const otherActions = allowToChangeFullscreen
-    ? [
-        {
-          label: isFullscreen
-            ? t("surveyAnsweringForm.actions.collapse")
-            : t("surveyAnsweringForm.actions.expand"),
-          icon: isFullscreen ? Minimize : Maximize,
-          onClick: () => setIsFullscreen((prev) => !prev),
-        },
-      ]
-    : undefined
+  const otherActions =
+    allowToChangeFullscreen && !loading
+      ? [
+          {
+            label: isFullscreen
+              ? t("surveyAnsweringForm.actions.collapse")
+              : t("surveyAnsweringForm.actions.expand"),
+            icon: isFullscreen ? Minimize : Maximize,
+            onClick: () => setIsFullscreen((prev) => !prev),
+          },
+        ]
+      : undefined
 
   const primaryAction = hasQuestions
-    ? isStepped && !stepper.isLastStep
-      ? {
-          label: t("surveyAnsweringForm.actions.next"),
-          onClick: handleSubmit,
-          icon: ArrowRight,
-        }
-      : {
-          label: t("surveyAnsweringForm.actions.submit"),
-          onClick: handleSubmit,
-          disabled: isSubmitting || hasErrors,
-          loading: isSubmitting,
-        }
+    ? loading
+      ? undefined
+      : isStepped && !stepper.isLastStep
+        ? {
+            label: t("surveyAnsweringForm.actions.next"),
+            onClick: handleSubmit,
+            icon: ArrowRight,
+          }
+        : {
+            label: t("surveyAnsweringForm.actions.submit"),
+            onClick: handleSubmit,
+            disabled: isSubmitting || hasErrors,
+            loading: isSubmitting,
+          }
     : undefined
 
   const secondaryAction = hasQuestions
-    ? isStepped && !stepper.isFirstStep
-      ? {
-          label: t("surveyAnsweringForm.actions.previous"),
-          onClick: handlePrevious,
-          icon: ArrowLeft,
-        }
-      : undefined
+    ? loading
+      ? undefined
+      : isStepped && !stepper.isFirstStep
+        ? {
+            label: t("surveyAnsweringForm.actions.previous"),
+            onClick: handlePrevious,
+            icon: ArrowLeft,
+          }
+        : undefined
     : undefined
 
-  const showTableOfContent = mode === "all-questions" && hasQuestions
+  const showTableOfContent =
+    mode === "all-questions" && hasQuestions && !loading
 
-  const showStepperProgress = isStepped && hasQuestions
+  const showStepperProgress = isStepped && hasQuestions && !loading
 
-  const showSectionHeader = isStepped && !!stepper.currentQuestion?.sectionTitle
+  const showSectionHeader =
+    isStepped && !!stepper.currentQuestion?.sectionTitle && !loading
 
   return (
     <F0Dialog
@@ -233,7 +245,13 @@ export function SurveyAnsweringForm({
             </div>
           )}
           <div className="mx-auto flex h-full w-full flex-col justify-center px-4 py-12 md:w-[750px]">
-            {!hasQuestions ? (
+            {loading ? (
+              mode === "stepped" ? (
+                <SurveySteppedLoadingSkeleton />
+              ) : (
+                <SurveyAllQuestionsLoadingSkeleton />
+              )
+            ) : !hasQuestions ? (
               <F0Box
                 display="flex"
                 flexDirection="column"
@@ -261,7 +279,7 @@ export function SurveyAnsweringForm({
                 )}
               </div>
             )}
-            {hasQuestions && (
+            {hasQuestions && !loading && (
               <F0Form
                 key={isStepped ? stepper.currentStep : undefined}
                 formRef={formRef}
