@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.38.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.37.1...f0-react-native-v0.38.0) (2026-03-12)
+
+
+### Features
+
+* add F0Counter component with size and type variants ([#3649](https://github.com/factorialco/f0/issues/3649)) ([d8bbae4](https://github.com/factorialco/f0/commit/d8bbae450dad7453b08eab68027970b7df1c71d8))
+
 ## [0.37.1](https://github.com/factorialco/f0/compare/f0-react-native-v0.37.0...f0-react-native-v0.37.1) (2026-03-12)
 
 
