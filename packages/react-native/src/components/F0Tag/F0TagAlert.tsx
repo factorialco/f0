@@ -1,7 +1,7 @@
 import React from "react"
 
 import { AlertCircle, CheckCircle, InfoCircle, Warning } from "../../icons/app"
-import { useTextFormatEnforcer } from "../../lib/text"
+import { enforceTextFormat } from "../../lib/text"
 import { cn } from "../../lib/utils"
 import { F0Icon, type F0IconProps, type IconType } from "../primitives/F0Icon"
 
@@ -37,7 +37,7 @@ const F0TagAlert = React.memo(function F0TagAlert({
   level,
   info,
 }: F0TagAlertProps) {
-  useTextFormatEnforcer(text, { disallowEmpty: true })
+  enforceTextFormat(text, { disallowEmpty: true })
 
   return (
     <F0TagRoot

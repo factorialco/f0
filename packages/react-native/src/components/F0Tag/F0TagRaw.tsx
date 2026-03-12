@@ -1,6 +1,6 @@
 import React from "react"
 
-import { useTextFormatEnforcer } from "../../lib/text"
+import { enforceTextFormat } from "../../lib/text"
 import { cn } from "../../lib/utils"
 import { F0Icon } from "../primitives/F0Icon"
 
@@ -19,7 +19,7 @@ const F0TagRaw = React.memo(function F0TagRaw({
   onlyIcon,
   info,
 }: F0TagRawProps) {
-  useTextFormatEnforcer(text, { disallowEmpty: true })
+  enforceTextFormat(text, { disallowEmpty: true })
 
   return (
     <F0TagRoot

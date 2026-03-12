@@ -1,6 +1,6 @@
 import React from "react"
 
-import { useTextFormatEnforcer } from "../../lib/text"
+import { enforceTextFormat } from "../../lib/text"
 import { Avatar } from "../Avatars/Avatar"
 
 import type { F0TagTeamProps } from "./F0Tag.types"
@@ -10,7 +10,7 @@ import { F0TagRoot } from "./F0TagRoot"
  * Team semantic tag with square avatar shape.
  */
 const F0TagTeam = React.memo(function F0TagTeam({ src, name }: F0TagTeamProps) {
-  useTextFormatEnforcer(name, { disallowEmpty: true })
+  enforceTextFormat(name, { disallowEmpty: true })
 
   return (
     <F0TagRoot

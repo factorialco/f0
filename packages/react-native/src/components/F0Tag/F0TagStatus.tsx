@@ -1,7 +1,7 @@
 import React from "react"
 import { View } from "react-native"
 
-import { useTextFormatEnforcer } from "../../lib/text"
+import { enforceTextFormat } from "../../lib/text"
 import { cn } from "../../lib/utils"
 
 import {
@@ -31,7 +31,7 @@ const F0TagStatus = React.memo(function F0TagStatus({
   additionalAccessibleText,
   variant,
 }: F0TagStatusProps) {
-  useTextFormatEnforcer(text, { disallowEmpty: true })
+  enforceTextFormat(text, { disallowEmpty: true })
 
   return (
     <F0TagRoot

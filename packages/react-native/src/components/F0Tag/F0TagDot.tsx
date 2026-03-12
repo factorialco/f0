@@ -1,7 +1,7 @@
 import React from "react"
 import { View } from "react-native"
 
-import { useTextFormatEnforcer } from "../../lib/text"
+import { enforceTextFormat } from "../../lib/text"
 import { baseColors } from "../../styles"
 
 import type { F0TagDotProps } from "./F0Tag.types"
@@ -16,7 +16,7 @@ const F0TagDot = React.memo(function F0TagDot({
   info,
   ...props
 }: F0TagDotProps) {
-  useTextFormatEnforcer(text, { disallowEmpty: true })
+  enforceTextFormat(text, { disallowEmpty: true })
 
   const backgroundColor =
     "color" in props && props.color

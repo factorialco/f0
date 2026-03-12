@@ -146,7 +146,7 @@ Internal primitive used to implement `F0Tag.*` variants. Prefer `F0Tag.*` for pr
 
 - `F0Tag.Dot` renders `null` when neither a valid `color` nor `customColor` is resolved.
 - `F0Tag` root uses `PressableFeedback` with `variant="both"` only when `onPress` exists.
-- Text formatting validation is enforced with `useTextFormatEnforcer` for direct label inputs (`F0Tag.Dot`, `F0Tag.Raw`, `F0Tag.Alert`, `F0Tag.Status`, `F0Tag.Person`, `F0Tag.Team`, `F0Tag.Company`).
+- Text formatting validation is enforced synchronously via `enforceTextFormat` (dev-only) for direct label inputs (`F0Tag.Dot`, `F0Tag.Raw`, `F0Tag.Alert`, `F0Tag.Status`, `F0Tag.Person`, `F0Tag.Team`, `F0Tag.Company`).
 - `F0Tag.Raw` with `onlyIcon` keeps label as accessibility fallback text.
 
 ## Accessibility Notes
@@ -163,6 +163,42 @@ Main tests:
 
 Coverage includes namespace contract assertions, snapshots for variants, and basic behavior checks.
 
+## F0TagList
+
+Renders a homogeneous list of `F0Tag` variants with a `+N` overflow counter.
+
+### Usage
+
+<!-- prettier-ignore -->
+```tsx
+import { F0TagList } from "@factorialco/f0-react-native"
+
+<F0TagList
+  type="person"
+  max={3}
+  tags={[
+    { name: "John Doe", src: "https://example.com/avatar.jpg" },
+    { name: "Jane Smith" },
+    { name: "Bob Johnson" },
+    { name: "Alice Brown" },
+  ]}
+/>
+```
+
+### Props
+
+| Prop             | Type            | Default  | Description                                         |
+| ---------------- | --------------- | -------- | --------------------------------------------------- |
+| `type`           | `F0TagListType` | required | Tag variant type for all items                      |
+| `tags`           | `Array<...>`    | required | Props array matching the selected `type`            |
+| `max`            | `number`        | `4`      | Max visible tags before overflow counter            |
+| `remainingCount` | `number`        | `-`      | External remaining count added to computed overflow |
+| `className`      | `string`        | `-`      | Container class override                            |
+
+### Overflow behavior
+
+Current implementation uses count-based overflow (`max`). Web uses width-based overflow via `OverflowList`. Width-based overflow for RN is planned as a phase 2 enhancement.
+
 ## File Structure
 
 ```
@@ -177,6 +213,8 @@ src/components/F0Tag/
 ├── F0TagTeam.tsx
 ├── F0TagCompany.tsx
 ├── F0TagBalance.tsx
+├── F0TagList.tsx
+├── F0TagList.types.ts
 ├── F0Tag.types.ts
 ├── F0Tag.styles.ts
 ├── F0Tag.md

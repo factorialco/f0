@@ -1,6 +1,6 @@
 import React from "react"
 
-import { useTextFormatEnforcer } from "../../lib/text"
+import { enforceTextFormat } from "../../lib/text"
 import { Avatar } from "../Avatars/Avatar"
 
 import type { F0TagCompanyProps } from "./F0Tag.types"
@@ -13,7 +13,7 @@ const F0TagCompany = React.memo(function F0TagCompany({
   src,
   name,
 }: F0TagCompanyProps) {
-  useTextFormatEnforcer(name, { disallowEmpty: true })
+  enforceTextFormat(name, { disallowEmpty: true })
 
   return (
     <F0TagRoot
