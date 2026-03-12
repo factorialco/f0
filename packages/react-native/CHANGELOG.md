@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.37.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.36.0...f0-react-native-v0.37.0) (2026-03-12)
+
+
+### Features
+
+* introduce F0Tag component with multiple variants ([#3642](https://github.com/factorialco/f0/issues/3642)) ([12f1927](https://github.com/factorialco/f0/commit/12f19272b3fe4df2a1ca7e1b7e2aa1ce9e302924))
+
 ## [0.36.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.35.0...f0-react-native-v0.36.0) (2026-03-11)
 
 
