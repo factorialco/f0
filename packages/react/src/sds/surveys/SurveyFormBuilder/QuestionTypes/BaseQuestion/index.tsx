@@ -128,7 +128,7 @@ export const BaseQuestion = ({
         <div className="flex flex-row gap-2">
           <div className="relative w-full">
             {answering ? (
-              <div className="w-full px-2 py-1 text-lg font-semibold text-f1-foreground">
+              <div className="w-full whitespace-pre-wrap break-words px-2 py-1 text-lg font-semibold text-f1-foreground">
                 {title || t("surveyFormBuilder.labels.titlePlaceholder")}
                 {required && (
                   <span className="text-f1-foreground-critical"> *</span>
@@ -189,7 +189,7 @@ export const BaseQuestion = ({
         </div>
         {answering ? (
           description ? (
-            <p className="w-full px-2 text-f1-foreground-secondary">
+            <p className="w-full whitespace-pre-wrap break-words px-2 text-f1-foreground-secondary">
               {description}
             </p>
           ) : null
