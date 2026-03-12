@@ -14,6 +14,7 @@ export type EditableCellProps<R extends RecordType> = {
     SummariesDefinition
   >
   value: string
+  inputPlaceholder?: string
   error?: string
   loading?: boolean
   onChange: (value: string) => void

@@ -1,4 +1,5 @@
 export const inputFieldInheritedProps = [
+  "className",
   "label",
   "placeholder",
   "hideLabel",
@@ -12,6 +13,7 @@ export const inputFieldInheritedProps = [
   "status",
   "hint",
   "loading",
+  "transparent",
 ] as const
 
 export type InputFieldInheritedProps = (typeof inputFieldInheritedProps)[number]

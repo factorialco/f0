@@ -1,9 +1,14 @@
 import { EditableTableCellEditType } from "./components/cells"
+import { DateCell } from "./components/cells/DateCell"
 import { DisabledCell } from "./components/cells/status/DisabledCell"
 import { NonEditableCell } from "./components/cells/status/NonEditableCell"
 import { TextCell } from "./components/cells/TextCell"
 
-type EditableCellComponent = typeof TextCell | typeof NonEditableCell
+type EditableCellComponent =
+  | typeof TextCell
+  | typeof DateCell
+  | typeof NonEditableCell
+  | typeof DisabledCell
 
 /**
  * Registry that maps each `editType` to its corresponding cell component.
@@ -17,7 +22,7 @@ export const editableCellMap: Record<
   EditableCellComponent
 > = {
   text: TextCell,
-  date: TextCell,
+  date: DateCell,
   select: TextCell,
   multiselect: TextCell,
   "display-only": NonEditableCell,
