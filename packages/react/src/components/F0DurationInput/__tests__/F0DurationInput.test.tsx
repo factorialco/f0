@@ -442,6 +442,44 @@ describe("F0DurationInput", () => {
       ).toBeInTheDocument()
     })
 
+    it("forwards aria-describedby and aria-invalid to all segment inputs", () => {
+      render(
+        <F0DurationInput
+          id="duration-control"
+          aria-describedby="duration-help duration-error"
+          aria-invalid
+          label="Duration"
+          value={0}
+          onChange={() => {}}
+        />
+      )
+
+      const group = screen.getByRole("group", { name: "Duration" })
+      expect(group).toHaveAttribute("id", "duration-control")
+      expect(group).toHaveAttribute(
+        "aria-describedby",
+        "duration-help duration-error"
+      )
+      expect(group).toHaveAttribute("aria-invalid", "true")
+
+      expect(screen.getByLabelText("Hours")).toHaveAttribute(
+        "aria-describedby",
+        "duration-help duration-error"
+      )
+      expect(screen.getByLabelText("Hours")).toHaveAttribute(
+        "aria-invalid",
+        "true"
+      )
+      expect(screen.getByLabelText("Minutes")).toHaveAttribute(
+        "aria-describedby",
+        "duration-help duration-error"
+      )
+      expect(screen.getByLabelText("Minutes")).toHaveAttribute(
+        "aria-invalid",
+        "true"
+      )
+    })
+
     it("links label to first input via htmlFor", () => {
       render(<F0DurationInput label="Duration" value={0} onChange={() => {}} />)
 

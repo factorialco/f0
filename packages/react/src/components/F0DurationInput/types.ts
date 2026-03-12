@@ -1,4 +1,5 @@
 import type { InputFieldStatus } from "@/ui/InputField/types"
+import type { AriaAttributes } from "react"
 
 export const durationUnits = ["days", "hours", "minutes", "seconds"] as const
 export type DurationUnit = (typeof durationUnits)[number]
@@ -15,6 +16,9 @@ export interface DurationFieldConfig {
 }
 
 export interface F0DurationInputProps {
+  id?: string
+  "aria-describedby"?: string
+  "aria-invalid"?: AriaAttributes["aria-invalid"]
   label: string
   ariaLabel?: string
   hideLabel?: boolean

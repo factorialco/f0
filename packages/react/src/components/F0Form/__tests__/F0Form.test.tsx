@@ -163,6 +163,60 @@ describe("F0Form", () => {
       expect(screen.queryByText("Check this value")).not.toBeInTheDocument()
     })
   })
+
+  it("applies FormControl aria attributes to duration segment inputs", async () => {
+    const formSchema = z.object({
+      duration: f0FormField(z.number().min(1, "Duration is required"), {
+        label: "Duration",
+        fieldType: "duration",
+        units: ["hours", "minutes"],
+        helpText: "Use hours and minutes",
+      }),
+    })
+
+    render(
+      <F0Form
+        name="duration-formcontrol-a11y"
+        schema={formSchema}
+        defaultValues={{ duration: 0 }}
+        onSubmit={async () => ({ success: true })}
+      />
+    )
+
+    const hoursInput = screen.getByLabelText("Hours")
+    const minutesInput = screen.getByLabelText("Minutes")
+    const helpText = screen.getByText("Use hours and minutes")
+    const helpTextId = helpText.getAttribute("id")
+    const resolvedHelpTextId = helpTextId ?? ""
+
+    expect(helpTextId).toBeTruthy()
+    expect(hoursInput).toHaveAttribute("aria-describedby")
+    expect(minutesInput).toHaveAttribute("aria-describedby")
+    expect(hoursInput).toHaveAttribute("aria-invalid", "false")
+    expect(minutesInput).toHaveAttribute("aria-invalid", "false")
+    expect(hoursInput.getAttribute("aria-describedby")).toContain(
+      resolvedHelpTextId
+    )
+    expect(minutesInput.getAttribute("aria-describedby")).toContain(
+      resolvedHelpTextId
+    )
+
+    await userEvent.click(screen.getByText("Submit"))
+
+    const errorMessage = await screen.findByText("Duration is required")
+    const errorContainerId = errorMessage.closest("div")?.getAttribute("id")
+    const resolvedErrorContainerId = errorContainerId ?? ""
+
+    expect(errorContainerId).toBeTruthy()
+    expect(hoursInput).toHaveAttribute("aria-invalid", "true")
+    expect(minutesInput).toHaveAttribute("aria-invalid", "true")
+    expect(hoursInput.getAttribute("aria-describedby")).toContain(
+      resolvedErrorContainerId
+    )
+    expect(minutesInput.getAttribute("aria-describedby")).toContain(
+      resolvedErrorContainerId
+    )
+  })
 })
 
 describe("f0FormField function", () => {

@@ -110,6 +110,9 @@ const containerVariants = cva({
 export const F0DurationInput = forwardRef<HTMLDivElement, F0DurationInputProps>(
   function F0DurationInput(
     {
+      id,
+      "aria-describedby": ariaDescribedBy,
+      "aria-invalid": ariaInvalid,
       label,
       ariaLabel,
       hideLabel = false,
@@ -283,6 +286,7 @@ export const F0DurationInput = forwardRef<HTMLDivElement, F0DurationInputProps>(
           />
         )}
         <div
+          id={id}
           className={cn(
             "pointer-events-auto",
             containerVariants({
@@ -295,6 +299,8 @@ export const F0DurationInput = forwardRef<HTMLDivElement, F0DurationInputProps>(
           onClick={handleContainerClick}
           role="group"
           aria-label={resolvedAriaLabel}
+          aria-describedby={ariaDescribedBy}
+          aria-invalid={ariaInvalid}
           aria-disabled={disabled || undefined}
           data-status={statusType}
           data-disabled={disabled ? "" : undefined}
@@ -330,6 +336,8 @@ export const F0DurationInput = forwardRef<HTMLDivElement, F0DurationInputProps>(
                   aria-label={
                     fieldConfig?.[unit]?.ariaLabel ?? UNIT_LABELS[unit]
                   }
+                  aria-describedby={ariaDescribedBy}
+                  aria-invalid={ariaInvalid}
                   value={displayValue}
                   placeholder="0"
                   onChange={handleFieldChange(unit, max)}

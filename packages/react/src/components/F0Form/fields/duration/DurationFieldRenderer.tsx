@@ -1,4 +1,5 @@
 import { ControllerRenderProps, FieldValues } from "react-hook-form"
+import type { AriaAttributes } from "react"
 
 import { F0DurationInput } from "@/components/F0DurationInput"
 import type { InputFieldStatus } from "@/ui/InputField/types"
@@ -11,6 +12,9 @@ interface DurationFieldRendererProps {
   formField: ControllerRenderProps<FieldValues>
   error?: boolean
   status?: InputFieldStatus
+  id?: string
+  "aria-describedby"?: string
+  "aria-invalid"?: AriaAttributes["aria-invalid"]
 }
 
 export function DurationFieldRenderer({
@@ -18,6 +22,9 @@ export function DurationFieldRenderer({
   formField,
   error,
   status,
+  id,
+  "aria-describedby": ariaDescribedBy,
+  "aria-invalid": ariaInvalid,
 }: DurationFieldRendererProps) {
   const value =
     typeof formField.value === "number" && Number.isFinite(formField.value)
@@ -29,6 +36,9 @@ export function DurationFieldRenderer({
 
   return (
     <F0DurationInput
+      id={id}
+      aria-describedby={ariaDescribedBy}
+      aria-invalid={ariaInvalid}
       label={field.label}
       hideLabel
       value={value}
