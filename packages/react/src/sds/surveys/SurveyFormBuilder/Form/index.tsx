@@ -143,10 +143,10 @@ const _SurveyFormBuilder = ({
           {showTableOfContent && (
             <TableOfContent elements={elements} onChange={onChange} />
           )}
-          <div className="relative flex-1">
+          <div className="relative flex flex-1 flex-col">
             <motion.div
               className={cn(
-                "flex flex-col gap-6",
+                "flex w-full max-w-[750px] self-center flex-col gap-6",
                 applyingChanges && "pointer-events-none"
               )}
               initial={{ filter: "blur(0px)" }}

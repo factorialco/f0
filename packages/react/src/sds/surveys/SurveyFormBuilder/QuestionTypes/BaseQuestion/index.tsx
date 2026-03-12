@@ -5,6 +5,7 @@ import { DropdownInternalProps } from "@/experimental/Navigation/Dropdown/intern
 import { AcademicCap, Add } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
+import { FormMessage } from "@/ui/form"
 
 import { useQuestionTypes } from "../../constants"
 import { useSurveyFormBuilderContext } from "../../Context"
@@ -112,46 +113,60 @@ export const BaseQuestion = ({
 
   const inputDisabled = disabled || locked || answering
 
+  const showCursorNotAllowed = !answering && inputDisabled
+
   return (
     <div
       id={`co-creation-question-${id}`}
       className={cn(
-        "group/question relative flex w-full flex-col gap-4 rounded-xl border border-solid border-f1-border-secondary bg-f1-background px-3 py-4",
-        !isDragging && "hover:border-f1-border-hover"
+        "group/question relative flex w-full flex-col rounded-xl border border-solid border-f1-border-secondary bg-f1-background px-3 py-4",
+        !isDragging && !answering && "hover:border-f1-border-hover",
+        !answering || !!description ? "gap-4" : "gap-2"
       )}
     >
       <div className="flex flex-col gap-0.5">
         <div className="flex flex-row gap-2">
           <div className="relative w-full">
-            <textarea
-              value={title}
-              aria-label={t("surveyFormBuilder.labels.title")}
-              placeholder={t("surveyFormBuilder.labels.titlePlaceholder")}
-              onChange={handleChangeTitle}
-              disabled={inputDisabled}
-              className={cn(
-                "w-full resize-none px-2 py-1 text-lg font-semibold disabled:text-f1-foreground [&::-webkit-search-cancel-button]:hidden",
-                inputDisabled && "cursor-not-allowed"
-              )}
-              style={TEXT_AREA_STYLE}
-              autoFocus={!isSingleQuestionInSection}
-            />
-            <div className="textarea-overlay pointer-events-none absolute left-0 top-0 h-full w-full whitespace-pre-wrap break-words px-2 py-1 text-lg font-semibold">
-              <span className="opacity-0">
+            {answering ? (
+              <div className="w-full whitespace-pre-wrap break-words px-2 py-1 text-lg font-semibold text-f1-foreground">
                 {title || t("surveyFormBuilder.labels.titlePlaceholder")}
-              </span>
-              {required && (
-                <span
+                {required && (
+                  <span className="text-f1-foreground-critical"> *</span>
+                )}
+              </div>
+            ) : (
+              <>
+                <textarea
+                  value={title}
+                  aria-label={t("surveyFormBuilder.labels.title")}
+                  placeholder={t("surveyFormBuilder.labels.titlePlaceholder")}
+                  onChange={handleChangeTitle}
+                  disabled={inputDisabled}
                   className={cn(
-                    "text-f1-foreground-critical",
-                    !title && "text-f1-foreground-secondary"
+                    "w-full resize-none px-2 py-1 text-lg font-semibold disabled:text-f1-foreground [&::-webkit-search-cancel-button]:hidden",
+                    showCursorNotAllowed && "cursor-not-allowed"
                   )}
-                >
-                  {" "}
-                  *
-                </span>
-              )}
-            </div>
+                  style={TEXT_AREA_STYLE}
+                  autoFocus={!isSingleQuestionInSection}
+                />
+                <div className="textarea-overlay pointer-events-none absolute left-0 top-0 h-full w-full whitespace-pre-wrap break-words px-2 py-1 text-lg font-semibold">
+                  <span className="opacity-0">
+                    {title || t("surveyFormBuilder.labels.titlePlaceholder")}
+                  </span>
+                  {required && (
+                    <span
+                      className={cn(
+                        "text-f1-foreground-critical",
+                        !title && "text-f1-foreground-secondary"
+                      )}
+                    >
+                      {" "}
+                      *
+                    </span>
+                  )}
+                </div>
+              </>
+            )}
           </div>
           {!disabled && !answering && !locked && (
             <div
@@ -172,7 +187,13 @@ export const BaseQuestion = ({
             </div>
           )}
         </div>
-        {(!answering || !!description) && (
+        {answering ? (
+          description ? (
+            <p className="w-full whitespace-pre-wrap break-words px-2 text-f1-foreground-secondary">
+              {description}
+            </p>
+          ) : null
+        ) : (
           <textarea
             value={description}
             aria-label={t("surveyFormBuilder.labels.description")}
@@ -183,13 +204,23 @@ export const BaseQuestion = ({
             disabled={inputDisabled}
             className={cn(
               "w-full resize-none px-2 text-f1-foreground-secondary placeholder:text-f1-foreground-tertiary disabled:text-f1-foreground-secondary [&::-webkit-search-cancel-button]:hidden",
-              inputDisabled && "cursor-not-allowed"
+              showCursorNotAllowed && "cursor-not-allowed"
             )}
             style={TEXT_AREA_STYLE}
           />
         )}
       </div>
       {children}
+      {answering && (
+        <FormMessage
+          className="-mt-2"
+          fallback={
+            required
+              ? t("forms.validation.required")
+              : t("forms.validation.invalidType")
+          }
+        />
+      )}
       {!disabled && !answering && !containingSection?.locked && (
         <div
           className={cn(

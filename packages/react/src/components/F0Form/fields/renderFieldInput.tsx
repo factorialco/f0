@@ -175,6 +175,7 @@ export function renderFieldInput({
         <CustomFieldRenderer
           field={{ ...field, disabled: isDisabled }}
           formField={formField}
+          error={fieldState.error?.message}
           isValidating={isValidating}
           required={isRequired}
         />

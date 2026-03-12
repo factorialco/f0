@@ -52,6 +52,8 @@ export interface F0SectionConfig {
   title: string
   /** Section description */
   description?: string
+  /** Applies default horizontal inset to the section header (title/subtitle/action row) */
+  withInset?: boolean
   /** Conditional rendering for the entire section */
   renderIf?: SectionRenderIf
   /** Optional action button for the section */
@@ -92,6 +94,8 @@ export interface SectionDefinition {
     title: string
     /** Section description */
     description?: string
+    /** Applies default horizontal inset to the section header (title/subtitle/action row) */
+    withInset?: boolean
     /** Conditional rendering for the entire section */
     renderIf?: SectionRenderIf
     /** Optional action button for the section */
