@@ -65,7 +65,7 @@ exports[`F0Button Snapshot - critical variant 1`] = `
       }
     />
     <View
-      className="relative flex-row items-center justify-center border-none grow-0 bg-f0-background-secondary border border-f0-border h-8 rounded gap-1 px-2 sm:px-3 lg:px-4"
+      className="relative flex-row items-center justify-center border-none grow-0 bg-f0-background-secondary border border-f0-border h-9 rounded gap-1 px-2 sm:px-3 lg:px-4"
     >
       <View
         className="opacity-100"
@@ -151,7 +151,7 @@ exports[`F0Button Snapshot - default button 1`] = `
       }
     />
     <View
-      className="relative flex-row items-center justify-center border-none grow-0 bg-f0-background-accent-bold h-8 rounded gap-1 px-2 sm:px-3 lg:px-4"
+      className="relative flex-row items-center justify-center border-none grow-0 bg-f0-background-accent-bold h-9 rounded gap-1 px-2 sm:px-3 lg:px-4"
     >
       <View
         className="opacity-100"
@@ -237,7 +237,7 @@ exports[`F0Button Snapshot - different sizes 1`] = `
       }
     />
     <View
-      className="relative flex-row items-center justify-center border-none grow-0 bg-f0-background-accent-bold h-6 rounded-sm gap-1 px-2 sm:px-3 lg:px-4"
+      className="relative flex-row items-center justify-center border-none grow-0 bg-f0-background-accent-bold h-7 rounded-sm gap-1 px-2 sm:px-3 lg:px-4"
     >
       <View
         className="opacity-100"
@@ -323,7 +323,7 @@ exports[`F0Button Snapshot - different sizes 2`] = `
       }
     />
     <View
-      className="relative flex-row items-center justify-center border-none grow-0 bg-f0-background-accent-bold h-8 rounded gap-1 px-2 sm:px-3 lg:px-4"
+      className="relative flex-row items-center justify-center border-none grow-0 bg-f0-background-accent-bold h-9 rounded gap-1 px-2 sm:px-3 lg:px-4"
     >
       <View
         className="opacity-100"
@@ -409,7 +409,7 @@ exports[`F0Button Snapshot - different sizes 3`] = `
       }
     />
     <View
-      className="relative flex-row items-center justify-center border-none grow-0 bg-f0-background-accent-bold h-10 rounded-md gap-1 px-2 sm:px-3 lg:px-4"
+      className="relative flex-row items-center justify-center border-none grow-0 bg-f0-background-accent-bold h-11 rounded-md gap-1 px-2 sm:px-3 lg:px-4"
     >
       <View
         className="opacity-100"
@@ -495,7 +495,7 @@ exports[`F0Button Snapshot - disabled state 1`] = `
       }
     />
     <View
-      className="relative flex-row items-center justify-center border-none grow-0 bg-f0-background-accent-bold h-8 rounded opacity-50 gap-1 px-2 sm:px-3 lg:px-4"
+      className="relative flex-row items-center justify-center border-none grow-0 bg-f0-background-accent-bold h-9 rounded opacity-50 gap-1 px-2 sm:px-3 lg:px-4"
     >
       <View
         className="opacity-100"
@@ -581,7 +581,7 @@ exports[`F0Button Snapshot - loading state 1`] = `
       }
     />
     <View
-      className="relative flex-row items-center justify-center border-none grow-0 bg-f0-background-accent-bold h-8 rounded opacity-50 gap-1 px-2 sm:px-3 lg:px-4"
+      className="relative flex-row items-center justify-center border-none grow-0 bg-f0-background-accent-bold h-9 rounded opacity-50 gap-1 px-2 sm:px-3 lg:px-4"
     >
       <View
         className="opacity-0"
@@ -687,7 +687,7 @@ exports[`F0Button Snapshot - outline variant 1`] = `
       }
     />
     <View
-      className="relative flex-row items-center justify-center border-none grow-0 bg-f0-background-inverse-secondary border border-f0-border h-8 rounded gap-1 px-2 sm:px-3 lg:px-4"
+      className="relative flex-row items-center justify-center border-none grow-0 bg-f0-background-inverse-secondary border border-f0-border h-9 rounded gap-1 px-2 sm:px-3 lg:px-4"
     >
       <View
         className="opacity-100"
@@ -773,7 +773,7 @@ exports[`F0Button Snapshot - round button with hidden label 1`] = `
       }
     />
     <View
-      className="relative flex-row items-center justify-center border-none grow-0 bg-f0-background-accent-bold h-8 rounded aspect-square p-0"
+      className="relative flex-row items-center justify-center border-none grow-0 bg-f0-background-accent-bold h-9 rounded aspect-square p-0"
     >
       <View
         className="opacity-100"
@@ -853,7 +853,7 @@ exports[`F0Button Snapshot - with emoji 1`] = `
       }
     />
     <View
-      className="relative flex-row items-center justify-center border-none grow-0 bg-f0-background-accent-bold h-8 rounded gap-1 px-2 sm:px-3 lg:px-4"
+      className="relative flex-row items-center justify-center border-none grow-0 bg-f0-background-accent-bold h-9 rounded gap-1 px-2 sm:px-3 lg:px-4"
     >
       <View
         className="opacity-100"
@@ -944,7 +944,7 @@ exports[`F0Button Snapshot - with icon 1`] = `
       }
     />
     <View
-      className="relative flex-row items-center justify-center border-none grow-0 bg-f0-background-accent-bold h-8 rounded gap-1 px-2 sm:px-3 lg:px-4"
+      className="relative flex-row items-center justify-center border-none grow-0 bg-f0-background-accent-bold h-9 rounded gap-1 px-2 sm:px-3 lg:px-4"
     >
       <View
         className="opacity-100"
