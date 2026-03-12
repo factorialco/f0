@@ -232,7 +232,12 @@ export function SurveyAnsweringForm({
       disableContentPadding
     >
       <SurveyFormBuilderProvider answering elements={elements} onChange={noop}>
-        <div className="relative flex min-h-full flex-col">
+        <div
+          className={cn(
+            "relative flex min-h-full flex-col",
+            !hasQuestions && "h-full"
+          )}
+        >
           {showTableOfContent && (
             <TableOfContent elements={elements} onChange={noop} answering />
           )}
@@ -248,7 +253,7 @@ export function SurveyAnsweringForm({
           <div
             className={cn(
               "mx-auto flex w-full flex-col px-4 py-12 md:w-[750px]",
-              mode === "all-questions"
+              mode === "all-questions" && hasQuestions
                 ? "justify-start"
                 : "h-full justify-center"
             )}
