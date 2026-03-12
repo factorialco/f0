@@ -92,6 +92,34 @@ function formatAcceptedTypes(accept: string[] | undefined): string | undefined {
   return labels.length > 0 ? labels.join(", ") : undefined
 }
 
+function getDropzoneStatusClasses({
+  isDragOver,
+  hasCriticalStatus,
+  statusType,
+}: {
+  isDragOver: boolean
+  hasCriticalStatus: boolean
+  statusType?: InputFieldStatusType
+}): string {
+  if (isDragOver) {
+    return "border-f1-border-accent bg-f1-background-accent-bold/5"
+  }
+
+  if (hasCriticalStatus) {
+    return "border-f1-border-critical-bold bg-f1-background-critical bg-opacity-10"
+  }
+
+  if (statusType === "warning") {
+    return "border-f1-border-warning-bold bg-f1-background"
+  }
+
+  if (statusType === "info") {
+    return "border-f1-border-info-bold bg-f1-background"
+  }
+
+  return "border-f1-border bg-f1-background"
+}
+
 interface FileFieldRendererProps {
   field: ResolvedField<F0FileField>
   formField: ControllerRenderProps<FieldValues>
@@ -336,6 +364,14 @@ export function FileFieldRenderer({
     ? translations.dropzoneActive
     : (field.description ??
       (isMultiple ? translations.dropzoneMultiple : translations.dropzone))
+  const hasCriticalStatus = Boolean(
+    error || validationError || statusType === "error"
+  )
+  const dropzoneStatusClasses = getDropzoneStatusClasses({
+    isDragOver,
+    hasCriticalStatus,
+    statusType,
+  })
 
   return (
     <div className="flex flex-col gap-2">
@@ -351,15 +387,7 @@ export function FileFieldRenderer({
           aria-disabled={field.disabled}
           className={cn(
             "flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed px-4 py-6 transition-colors",
-            isDragOver
-              ? "border-f1-border-accent bg-f1-background-accent-bold/5"
-              : error || validationError || statusType === "error"
-                ? "border-f1-border-critical-bold bg-f1-background-critical bg-opacity-10"
-                : statusType === "warning"
-                  ? "border-f1-border-warning-bold bg-f1-background"
-                  : statusType === "info"
-                    ? "border-f1-border-info-bold bg-f1-background"
-                    : "border-f1-border bg-f1-background",
+            dropzoneStatusClasses,
             !field.disabled &&
               !isDragOver &&
               "hover:border-f1-border-hover hover:bg-f1-background-secondary",

@@ -155,23 +155,32 @@ export const F0DurationInput = forwardRef<HTMLDivElement, F0DurationInputProps>(
 
     const firstUnitId = `${baseId}-${visibleUnits[0]}`
 
-    const emitChange = useCallback(
-      (updatedFields: DurationFields) => {
+    const toVisibleOnlyFields = useCallback(
+      (fields: DurationFields): DurationFields => {
         const normalized: DurationFields = {
           days: 0,
           hours: 0,
           minutes: 0,
           seconds: 0,
         }
-        for (const u of visibleUnits) {
-          normalized[u] = updatedFields[u]
+        for (const unit of visibleUnits) {
+          normalized[unit] = fields[unit]
         }
+        return normalized
+      },
+      [visibleUnits]
+    )
+
+    const emitChange = useCallback(
+      (updatedFields: DurationFields) => {
+        const normalized = toVisibleOnlyFields(updatedFields)
         const total = fieldsToSeconds(normalized)
-        setLocalFields(secondsToVisibleFields(total, visibleUnits))
+        // Keep typed values while editing; canonical rollover happens on blur.
+        setLocalFields(normalized)
         lastEmittedRef.current = total
         onChange(total)
       },
-      [visibleUnits, onChange]
+      [onChange, toVisibleOnlyFields]
     )
 
     const handleFieldChange = useCallback(
@@ -195,6 +204,15 @@ export const F0DurationInput = forwardRef<HTMLDivElement, F0DurationInputProps>(
         },
       [localFields, emitChange]
     )
+
+    const handleFieldBlur = useCallback(() => {
+      const normalized = toVisibleOnlyFields(localFields)
+      const total = fieldsToSeconds(normalized)
+      // Normalize visible units on blur (e.g. 75 min -> 1h 15m).
+      setLocalFields(secondsToVisibleFields(total, visibleUnits))
+      lastEmittedRef.current = total
+      onBlur?.()
+    }, [localFields, onBlur, toVisibleOnlyFields, visibleUnits])
 
     const handleKeyDown = useCallback(
       (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -315,7 +333,7 @@ export const F0DurationInput = forwardRef<HTMLDivElement, F0DurationInputProps>(
                   value={displayValue}
                   placeholder="0"
                   onChange={handleFieldChange(unit, max)}
-                  onBlur={onBlur}
+                  onBlur={handleFieldBlur}
                   onKeyDown={handleKeyDown}
                   inputMode="numeric"
                   disabled={disabled}

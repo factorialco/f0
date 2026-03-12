@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest"
 import "@testing-library/jest-dom/vitest"
 import { zeroRender as render, screen, userEvent } from "@/testing/test-utils"
 import { fireEvent } from "@testing-library/react"
+import { useState } from "react"
 
 import { F0DurationInput } from ".."
 import {
@@ -595,15 +596,43 @@ describe("F0DurationInput", () => {
       expect(screen.getByLabelText("Hours")).toHaveFocus()
     })
 
-    it("rolls minutes into hours when hours unit is visible", () => {
+    it("rolls minutes into hours on blur when hours unit is visible", () => {
       const onChange = vi.fn()
-      render(<F0DurationInput label="Duration" value={0} onChange={onChange} />)
+      const onBlur = vi.fn()
 
-      fireEvent.change(screen.getByLabelText("Minutes"), {
+      function ControlledDurationInput() {
+        const [value, setValue] = useState(0)
+        return (
+          <F0DurationInput
+            label="Duration"
+            value={value}
+            onChange={(nextValue) => {
+              onChange(nextValue)
+              setValue(nextValue)
+            }}
+            onBlur={onBlur}
+          />
+        )
+      }
+
+      render(<ControlledDurationInput />)
+
+      const hours = screen.getByLabelText("Hours")
+      const minutes = screen.getByLabelText("Minutes")
+
+      fireEvent.change(minutes, {
         target: { value: "75" },
       })
 
       expect(onChange).toHaveBeenLastCalledWith(4500)
+      expect(hours).toHaveValue("")
+      expect(minutes).toHaveValue("75")
+
+      fireEvent.blur(minutes)
+
+      expect(onBlur).toHaveBeenCalledTimes(1)
+      expect(hours).toHaveValue("1")
+      expect(minutes).toHaveValue("15")
     })
 
     it("rolls seconds into minutes when minutes unit is visible", () => {
@@ -660,7 +689,7 @@ describe("F0DurationInput", () => {
       expect(onChange).toHaveBeenLastCalledWith(7200)
     })
 
-    it("accepts more than two digits with capped 2ch width", () => {
+    it("accepts more than two digits", () => {
       const onChange = vi.fn()
       render(
         <F0DurationInput
