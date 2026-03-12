@@ -32,6 +32,9 @@ const F0Preset = React.memo(function F0Preset({
       variant="both"
       onPress={onPress}
       disabled={!onPress}
+      accessibilityRole="button"
+      accessibilityState={{ selected }}
+      accessibilityLabel={label}
       className={cn(
         f0PresetContainerVariants({ selected, hasCounter }),
         className

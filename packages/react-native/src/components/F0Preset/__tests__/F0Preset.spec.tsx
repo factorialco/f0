@@ -18,7 +18,7 @@ describe("F0Preset", () => {
   it("does not render counter when number is omitted", () => {
     render(<F0Preset label="Draft" />)
     expect(screen.getByText("Draft")).toBeDefined()
-    expect(screen.queryByText("0")).toBeNull()
+    expect(screen.queryByText(/^\d+$/)).toBeNull()
   })
 
   it("calls onPress when pressed", () => {
@@ -26,6 +26,25 @@ describe("F0Preset", () => {
     render(<F0Preset label="Click me" onPress={handler} />)
     fireEvent.press(screen.getByText("Click me"))
     expect(handler).toHaveBeenCalledTimes(1)
+  })
+
+  it("has accessible role and selected=false by default", () => {
+    render(<F0Preset label="Filter" onPress={jest.fn()} />)
+    const button = screen.getByRole("button", { name: "Filter" })
+    expect(button).toBeDefined()
+    expect(button.props.accessibilityState).toMatchObject({ selected: false })
+  })
+
+  it("has accessible selected=true when selected", () => {
+    render(<F0Preset label="Active" selected onPress={jest.fn()} />)
+    const button = screen.getByRole("button", { name: "Active" })
+    expect(button.props.accessibilityState).toMatchObject({ selected: true })
+  })
+
+  it("is disabled when onPress is omitted", () => {
+    render(<F0Preset label="Static" />)
+    const button = screen.getByRole("button", { name: "Static" })
+    expect(button.props.accessibilityState).toMatchObject({ disabled: true })
   })
 
   it("Snapshot - default without counter", () => {

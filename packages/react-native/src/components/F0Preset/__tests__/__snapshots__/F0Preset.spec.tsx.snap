@@ -2,13 +2,15 @@
 
 exports[`F0Preset Snapshot - default with counter 1`] = `
 <View
+  accessibilityLabel="Label"
+  accessibilityRole="button"
   accessibilityState={
     {
       "busy": undefined,
       "checked": undefined,
       "disabled": true,
       "expanded": undefined,
-      "selected": undefined,
+      "selected": false,
     }
   }
   accessibilityValue={
@@ -80,13 +82,15 @@ exports[`F0Preset Snapshot - default with counter 1`] = `
 
 exports[`F0Preset Snapshot - default without counter 1`] = `
 <View
+  accessibilityLabel="Label"
+  accessibilityRole="button"
   accessibilityState={
     {
       "busy": undefined,
       "checked": undefined,
       "disabled": true,
       "expanded": undefined,
-      "selected": undefined,
+      "selected": false,
     }
   }
   accessibilityValue={
@@ -147,13 +151,15 @@ exports[`F0Preset Snapshot - default without counter 1`] = `
 
 exports[`F0Preset Snapshot - selected with counter 1`] = `
 <View
+  accessibilityLabel="Label"
+  accessibilityRole="button"
   accessibilityState={
     {
       "busy": undefined,
       "checked": undefined,
       "disabled": true,
       "expanded": undefined,
-      "selected": undefined,
+      "selected": true,
     }
   }
   accessibilityValue={
@@ -225,13 +231,15 @@ exports[`F0Preset Snapshot - selected with counter 1`] = `
 
 exports[`F0Preset Snapshot - selected without counter 1`] = `
 <View
+  accessibilityLabel="Label"
+  accessibilityRole="button"
   accessibilityState={
     {
       "busy": undefined,
       "checked": undefined,
       "disabled": true,
       "expanded": undefined,
-      "selected": undefined,
+      "selected": true,
     }
   }
   accessibilityValue={

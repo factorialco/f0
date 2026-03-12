@@ -15,6 +15,11 @@ interface PresetProps {
 }
 
 /**
+ * @deprecated Use `F0PresetProps` from `F0Preset`.
+ */
+export type OnePresetProps = PresetProps
+
+/**
  * @deprecated Use `F0Preset` from `src/components/F0Preset`.
  */
 export const OnePreset = ({

@@ -54,7 +54,7 @@ When `number` is provided the counter renders with `F0Counter`:
 ## Usage
 
 ```tsx
-import { F0Preset } from "@factorial/f0-react-native"
+import { F0Preset } from "@factorialco/f0-react-native"
 
 <F0Preset label="Active" onPress={toggle} />
 <F0Preset label="Pending" number={5} selected onPress={toggle} />
