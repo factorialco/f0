@@ -3,6 +3,7 @@ import { useEffect, useMemo } from "react"
 
 import {
   F0Card,
+  type CardImageAspectRatio,
   type CardImageFit,
   type CardImageSize,
 } from "@/components/F0Card"
@@ -48,6 +49,7 @@ export type CardVisualizationOptions<
   image?: (record: T) => string
   imageFit?: CardImageFit
   imageSize?: CardImageSize
+  imageAspectRatio?: CardImageAspectRatio
   blurredBackground?: boolean
   compact?: boolean
 }
@@ -135,6 +137,7 @@ type GroupCardsProps<
   image?: (record: Record) => string
   imageFit?: CardImageFit
   imageSize?: CardImageSize
+  imageAspectRatio?: CardImageAspectRatio
   blurredBackground?: boolean
   compact?: boolean
   tmpFullWidth?: boolean
@@ -160,6 +163,7 @@ const GroupCards = <
   image,
   imageFit,
   imageSize,
+  imageAspectRatio,
   blurredBackground,
   compact,
   tmpFullWidth,
@@ -286,6 +290,7 @@ const GroupCards = <
               image={image ? image(item) : undefined}
               imageFit={imageFit}
               imageSize={imageSize}
+              imageAspectRatio={imageAspectRatio}
               blurredBackground={blurredBackground}
               selected={selectable && selectedItems.has(id)}
               onSelect={(selected) => handleSelectItemChange(item, selected)}
@@ -321,6 +326,7 @@ export const CardCollection = <
   image,
   imageFit,
   imageSize,
+  imageAspectRatio,
   blurredBackground,
   compact,
   source,
@@ -474,6 +480,7 @@ export const CardCollection = <
                           image={image}
                           imageFit={imageFit}
                           imageSize={imageSize}
+                          imageAspectRatio={imageAspectRatio}
                           blurredBackground={blurredBackground}
                           compact={compact}
                           tmpFullWidth={tmpFullWidth}
@@ -497,6 +504,7 @@ export const CardCollection = <
                 image={image}
                 imageFit={imageFit}
                 imageSize={imageSize}
+                imageAspectRatio={imageAspectRatio}
                 blurredBackground={blurredBackground}
                 compact={compact}
                 tmpFullWidth={tmpFullWidth}
