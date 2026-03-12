@@ -4,6 +4,9 @@ import { cn } from "../../lib/utils"
 import { Counter } from "../Counter"
 import { PressableFeedback } from "../primitives/PressableFeedback"
 
+/**
+ * @deprecated Use `F0PresetProps` from `F0Preset`.
+ */
 interface PresetProps {
   label: string
   number?: number
@@ -11,6 +14,9 @@ interface PresetProps {
   selected?: boolean
 }
 
+/**
+ * @deprecated Use `F0Preset` from `src/components/F0Preset`.
+ */
 export const OnePreset = ({
   label,
   number,

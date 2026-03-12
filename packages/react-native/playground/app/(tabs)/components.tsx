@@ -17,6 +17,7 @@ import { F0BadgeShowcase } from "../../components/F0BadgeShowcase"
 import { F0ButtonShowcase } from "../../components/F0ButtonShowcase"
 import { F0IconShowcase } from "../../components/F0IconShowcase"
 import { F0ImageShowcase } from "../../components/F0ImageShowcase"
+import { F0PresetShowcase } from "../../components/F0PresetShowcase"
 import { F0TagShowcase } from "../../components/F0TagShowcase"
 import { F0TextShowcase } from "../../components/F0TextShowcase/F0TextShowcase"
 import { OneChipShowcase } from "../../components/OneChipShowcase"
@@ -43,6 +44,7 @@ type ComponentType =
   | "f0badge"
   | "f0counter"
   | "f0icon"
+  | "f0preset"
   | "f0image"
   | "f0tag"
   | "f0text"
@@ -66,11 +68,12 @@ const componentOptions = [
   { value: "f0badge" as ComponentType, label: "F0Badge" },
   { value: "f0counter" as ComponentType, label: "F0Counter" },
   { value: "f0icon" as ComponentType, label: "F0Icon" },
+  { value: "f0preset" as ComponentType, label: "F0Preset" },
   { value: "f0image" as ComponentType, label: "F0Image" },
   { value: "f0tag" as ComponentType, label: "F0Tag" },
   { value: "f0text" as ComponentType, label: "F0Text" },
   { value: "onechip" as ComponentType, label: "OneChip" },
-  { value: "onepreset" as ComponentType, label: "OnePreset" },
+  { value: "onepreset" as ComponentType, label: "OnePreset (deprecated)" },
   { value: "pageheader" as ComponentType, label: "PageHeader" },
   { value: "pressablefeedback" as ComponentType, label: "PressableFeedback" },
   { value: "tag" as ComponentType, label: "Tag (deprecated)" },
@@ -119,6 +122,8 @@ export default function ComponentsShowcase() {
         return <F0CounterShowcase />
       case "f0icon":
         return <F0IconShowcase />
+      case "f0preset":
+        return <F0PresetShowcase />
       case "f0image":
         return <F0ImageShowcase />
       case "f0tag":
