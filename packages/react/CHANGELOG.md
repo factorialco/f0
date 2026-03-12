@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.401.0](https://github.com/factorialco/f0/compare/f0-react-v1.400.0...f0-react-v1.401.0) (2026-03-12)
+
+
+### Features
+
+* **F0Card:** add 16:9 image aspect ratio ([#3652](https://github.com/factorialco/f0/issues/3652)) ([fa71f7f](https://github.com/factorialco/f0/commit/fa71f7f00c9e58983878579fb4ec4ddab3deb5f6))
+
 ## [1.400.0](https://github.com/factorialco/f0/compare/f0-react-v1.399.0...f0-react-v1.400.0) (2026-03-12)
 
 
