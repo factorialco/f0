@@ -310,6 +310,15 @@ export const WithEmoji: Story = {
   },
 }
 
+export const WithAspectRatio16x9: Story = {
+  args: {
+    ...Default.args,
+    image: imageTypes.wide,
+    imageAspectRatio: "16/9",
+    imageFit: "cover",
+  },
+}
+
 export const WithIconAndImage: Story = {
   args: {
     ...Default.args,
