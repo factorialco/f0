@@ -224,13 +224,18 @@ export const WithSummaryPlaceholders: Story = {
           {
             type: "table",
             options: {
-              summaryPlaceholder: "",
+              summaryPlaceholder: "No value",
               columns: [
                 { label: "Name", render: (item) => item.name },
-                { label: "Department", render: (item) => item.department },
+                {
+                  label: "Department",
+                  render: (item) => item.department,
+                  summaryPlaceholder: "No department summary",
+                },
                 {
                   label: "Salary",
                   summary: "salary",
+                  summaryPlaceholder: "No salary",
                   align: "right",
                   render: (item) => item.salary,
                 },

@@ -55,8 +55,9 @@ export type TableColumnDefinition<
     summary?: SummaryKey<Summaries>
 
     /**
-     * Placeholder to display for empty summary values in this column.
-     * Takes precedence over the row-level `summaryPlaceholder`.
+     * Placeholder to display in this column's summary-row cell when no summary
+     * value is rendered. This also applies to columns without a `summary`
+     * definition. Takes precedence over the row-level `summaryPlaceholder`.
      */
     summaryPlaceholder?: string
 
@@ -94,7 +95,8 @@ export type TableVisualizationOptions<
   columns: ReadonlyArray<TableColumnDefinition<R, Sortings, Summaries>>
 
   /**
-   * Placeholder to display for summary row cells without value.
+   * Placeholder to display in summary-row cells when no summary value is
+   * rendered. This also applies to columns without a `summary` definition.
    * Column-level `summaryPlaceholder` takes precedence.
    * @default "-"
    */
