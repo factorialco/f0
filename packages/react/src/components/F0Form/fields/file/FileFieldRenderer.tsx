@@ -367,6 +367,8 @@ export function FileFieldRenderer({
   const hasCriticalStatus = Boolean(
     error || validationError || statusType === "error"
   )
+  const hasDecorativeStatus =
+    hasCriticalStatus || statusType === "warning" || statusType === "info"
   const dropzoneStatusClasses = getDropzoneStatusClasses({
     isDragOver,
     hasCriticalStatus,
@@ -390,6 +392,7 @@ export function FileFieldRenderer({
             dropzoneStatusClasses,
             !field.disabled &&
               !isDragOver &&
+              !hasDecorativeStatus &&
               "hover:border-f1-border-hover hover:bg-f1-background-secondary",
             field.disabled && "cursor-not-allowed opacity-50",
             focusRing("rounded-lg")
