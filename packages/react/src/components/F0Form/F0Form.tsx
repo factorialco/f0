@@ -3,7 +3,6 @@ import { flushSync } from "react-dom"
 import { DefaultValues, Path, useForm } from "react-hook-form"
 import { z } from "zod"
 
-import { F0Button } from "@/components/F0Button"
 import type {
   F0FormDefinitionPerSection,
   F0FormDefinitionSingleSchema,
@@ -11,6 +10,8 @@ import type {
   F0FormSchema as WizardFormSchema,
   InferPerSectionValues,
 } from "@/components/F0WizardForm/types"
+
+import { F0Button } from "@/components/F0Button"
 import { ActionBarStatus } from "@/experimental/F0ActionBar"
 import { F0TableOfContent } from "@/experimental/Navigation/F0TableOfContent"
 import { TOCItem } from "@/experimental/Navigation/F0TableOfContent/types"
@@ -491,6 +492,8 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
   const centerActionBarInFrameContent =
     isActionBar && !!submitConfig?.centerActionBarInFrameContent
 
+  const successMessageDuration = submitConfig?.successMessageDuration
+
   // Infer the form values type from the schema
   type TValues = z.infer<TSchema>
 
@@ -609,7 +612,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
         setActionBarStatus("idle")
         setSuccessMessage(undefined)
         successTimerRef.current = null
-      }, 3000)
+      }, successMessageDuration ?? 2000)
     } else {
       setActionBarStatus("idle")
 
@@ -632,18 +635,6 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
       }
     }
   }, [])
-
-  // Reset action bar status when the form becomes dirty again after a successful save
-  useEffect(() => {
-    if (isDirty && actionBarStatus === "success") {
-      if (successTimerRef.current) {
-        clearTimeout(successTimerRef.current)
-        successTimerRef.current = null
-      }
-      setActionBarStatus("idle")
-      setSuccessMessage(undefined)
-    }
-  }, [isDirty, actionBarStatus])
 
   // Handle discard action
   const handleDiscard = () => {
@@ -738,7 +729,10 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
             )
           case "field":
             return (
-              <div key={groupedItem.item.field.id} className={fieldGapClass}>
+              <div
+                key={groupedItem.item.field.id}
+                className={cn(fieldGapClass, "empty:hidden")}
+              >
                 <FieldRenderer field={groupedItem.item.field} />
               </div>
             )

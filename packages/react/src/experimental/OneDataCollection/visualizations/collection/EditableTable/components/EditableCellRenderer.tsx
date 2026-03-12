@@ -1,15 +1,12 @@
 import type { RecordType, SortingsDefinition } from "@/hooks/datasource"
 
-import { renderProperty } from "@/experimental/OneDataCollection/property-render"
-import { useI18n } from "@/lib/providers/i18n"
-import { cn } from "@/lib/utils"
-import { valueDisplayEditors } from "@/ui/value-display/editors"
-
 import type { SummariesDefinition } from "../../../../summary"
 import type { CellRendererProps } from "../../Table/types"
 import type { EditableTableColumnDefinition } from "../types"
 
+import { editableCellMap } from "../consts"
 import { useEditableRow } from "../context/EditableRowContext"
+import { NonEditableCell } from "./cells/status/NonEditableCell"
 
 /**
  * Get the display value for an editable cell from the local item.
@@ -30,11 +27,6 @@ function getCellValue<R extends RecordType>(
   if (typeof rendered === "string") return rendered
   if (typeof rendered === "number") return String(rendered)
 
-  if (process.env.NODE_ENV === "development") {
-    console.warn(
-      `EditableTable: getCellValue for column "${column.id}" returned a non-primitive render value.`
-    )
-  }
   return ""
 }
 
@@ -48,9 +40,12 @@ export function EditableCellRenderer<
   R extends RecordType,
   Sortings extends SortingsDefinition,
   Summaries extends SummariesDefinition,
->({ column, children }: CellRendererProps<R, Sortings, Summaries>) {
+>({
+  column,
+  children,
+  isLastColumn,
+}: CellRendererProps<R, Sortings, Summaries> & { isLastColumn?: boolean }) {
   const editableCtx = useEditableRow<R>()
-  const i18n = useI18n()
 
   if (!editableCtx) {
     return <>{children}</>
@@ -64,24 +59,20 @@ export function EditableCellRenderer<
   >
 
   const cellEditType = editableColumn.editType?.(localItem)
-  const isEditable =
-    cellEditType !== undefined && editableColumn.editable(localItem)
 
   const hasId = editableColumn.id !== undefined
 
-  if (process.env.NODE_ENV === "development" && isEditable && !hasId) {
-    // Columns with an editType must define an id to support updates
-    // and error/loading state. Without an id the cell will be read-only.
-    console.warn(
-      `EditableTable: column "${editableColumn.label}" is editable but has no "id" defined. It will render as read-only.`
-    )
+  const onChange = (value: string) => {
+    if (editableColumn.id !== undefined) {
+      handleCellChange(editableColumn.id, value)
+    }
   }
 
-  if (isEditable && hasId && cellEditType) {
-    const CellComponent = valueDisplayEditors[cellEditType]
+  if (hasId && cellEditType) {
+    const CellComponent = editableCellMap[cellEditType]
+    const value = getCellValue(localItem, editableColumn)
 
     if (CellComponent) {
-      const value = getCellValue(localItem, editableColumn)
       const error = editableColumn.id
         ? cellErrors[editableColumn.id]
         : undefined
@@ -90,23 +81,21 @@ export function EditableCellRenderer<
         : false
 
       return (
-        // eslint-disable-next-line jsx-a11y/no-static-element-interactions -- stops cell navigation (href/onClick) from firing when interacting with the editor
+        // eslint-disable-next-line jsx-a11y/no-static-element-interactions -- stops cell navigation (href/onClick) from bubbling to the row after child interactions complete
         <div
-          className="pointer-events-auto"
-          onClickCapture={(e) => e.stopPropagation()}
-          onMouseDownCapture={(e) => e.stopPropagation()}
+          className="pointer-events-auto h-full"
+          onClick={(e) => e.stopPropagation()}
+          onMouseDown={(e) => e.stopPropagation()}
         >
           <CellComponent
-            label={editableColumn.label}
+            editableColumn={editableColumn}
             value={value}
-            align={editableColumn.align}
+            inputPlaceholder={editableColumn.inputPlaceholder}
             error={error}
+            item={localItem}
+            isLastColumn={isLastColumn}
             loading={loading}
-            onChange={(v) => {
-              if (editableColumn.id) {
-                handleCellChange(editableColumn.id, v)
-              }
-            }}
+            onChange={onChange}
           />
         </div>
       )
@@ -114,13 +103,12 @@ export function EditableCellRenderer<
   }
 
   return (
-    <div
-      className={cn(
-        editableColumn.align === "right" ? "justify-end" : "",
-        "flex"
-      )}
-    >
-      {renderProperty(localItem, editableColumn, "editableTable", i18n)}
-    </div>
+    <NonEditableCell
+      editableColumn={editableColumn}
+      item={localItem}
+      value={getCellValue(localItem, editableColumn)}
+      isLastColumn={isLastColumn}
+      onChange={onChange}
+    />
   )
 }

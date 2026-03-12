@@ -1,6 +1,6 @@
 {
   "name": "@factorialco/f0-react-native",
-  "version": "0.28.0",
+  "version": "0.38.0",
   "type": "module",
   "description": "React Native components for F0 Design System",
   "main": "expo-router/entry",
@@ -95,6 +95,7 @@
   "license": "MIT",
   "peerDependencies": {
     "date-fns": "^3.6.0",
+    "expo-image": "~3.0.11",
     "react": "*",
     "react-native": "*",
     "react-native-reanimated": "^3.19.4",

@@ -8,6 +8,8 @@ import type { ResolvedField } from "../types"
 interface RichTextFieldRendererProps {
   field: ResolvedField<F0RichTextField>
   formField: ControllerRenderProps<FieldValues>
+  error?: boolean
+  loading?: boolean
 }
 
 /**
@@ -16,11 +18,14 @@ interface RichTextFieldRendererProps {
 export function RichTextFieldRenderer({
   field,
   formField,
+  error,
+  loading,
 }: RichTextFieldRendererProps) {
   const currentValue = formField.value as RichTextValue | undefined
 
   return (
     <RichTextEditor
+      {...formField}
       title={field.label}
       placeholder={field.placeholder ?? ""}
       maxCharacters={field.maxCharacters}
@@ -28,6 +33,8 @@ export function RichTextFieldRenderer({
       height={field.height}
       plainHtmlMode={field.plainHtmlMode}
       disabled={field.disabled}
+      error={error}
+      loading={loading}
       initialEditorState={{
         content: currentValue?.value ?? "",
       }}

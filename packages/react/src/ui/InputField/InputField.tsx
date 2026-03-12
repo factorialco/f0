@@ -16,9 +16,9 @@ import { F0Avatar } from "@/components/avatars/F0Avatar/F0Avatar"
 import { AvatarVariant } from "@/components/avatars/F0Avatar/types"
 import { F0ButtonToggle } from "@/components/F0ButtonToggle/F0ButtonToggle"
 import { F0Icon, IconType } from "@/components/F0Icon"
-import { Spinner } from "@/ui/Spinner"
 import { CrossedCircle } from "@/icons/app"
 import { cn, focusRing } from "@/lib/utils.ts"
+import { Spinner } from "@/ui/Spinner"
 
 import { AppendTag } from "./AppendTag"
 import { InputMessages } from "./components/InputMessages"
@@ -214,6 +214,7 @@ export type InputFieldProps<T> = {
     disabled?: boolean
     onChange: (selected: boolean) => void
   }
+  transparent?: boolean
 }
 
 const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
@@ -255,6 +256,7 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
       "aria-controls": ariaControls,
       "aria-expanded": ariaExpanded,
       buttonToggle,
+      transparent,
       ...props
     }: InputFieldProps<string>,
     ref
@@ -396,6 +398,7 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
           "flex flex-col gap-2",
           "pointer-events-none",
           disabled && "cursor-not-allowed",
+          transparent && "bg-transparent h-full w-full",
           className
         )}
         ref={ref}
@@ -432,18 +435,22 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
         <div
           className={cn(
             "relative h-fit transition-all",
-            "border-[1px] border-solid border-f1-border bg-f1-background",
             !noEdit && !disabled && "hover:border-f1-border-hover",
-            "group focus-within:border-f1-border-hover focus-within:ring-1 focus-within:ring-f1-border-hover",
+            !transparent && [
+              "border-[1px] border-solid border-f1-border bg-f1-background",
+              "group focus-within:border-f1-border-hover focus-within:ring-1 focus-within:ring-f1-border-hover",
+              "focus-within:outline-none focus-within:ring-1 focus-within:ring-offset-1",
+              inputFieldStatusVariants({
+                status: status?.type ?? "default",
+                disabled: disabled || readonly,
+              }),
+              inputFieldVariants({ size, canGrow }),
+            ],
             "active-within:border-f1-border active-within:ring-1 active-within:ring-f1-border-hover",
-            "focus-within:outline-none focus-within:ring-1 focus-within:ring-offset-1",
-            inputFieldStatusVariants({
-              status: status?.type ?? "default",
-              disabled: disabled || readonly,
-            }),
             readonly && "border-f1-border-secondary bg-f1-background-secondary",
             disabled && "cursor-not-allowed bg-f1-background-tertiary",
-            inputFieldVariants({ size, canGrow })
+
+            transparent && "h-full w-full "
           )}
           data-testid="input-field-wrapper"
         >
@@ -502,8 +509,11 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
             </div>
             {!noEdit && (
               <div
+                data-slot="placeholder"
                 className={cn(
-                  "pointer-events-none absolute bottom-0 left-0 top-[1px] z-10 flex flex-1 justify-start px-3 text-f1-foreground-secondary transition-opacity line-clamp-1",
+                  "pointer-events-none absolute left-0 top-[1px] z-10 flex flex-1 justify-start px-3 text-f1-foreground-secondary transition-opacity line-clamp-1",
+                  !canGrow && "bottom-0",
+                  canGrow && "items-start",
                   (icon || avatar) && "pl-8",
                   (icon || avatar) && size === "md" && "pl-9",
                   inputElementVariants({ size }),

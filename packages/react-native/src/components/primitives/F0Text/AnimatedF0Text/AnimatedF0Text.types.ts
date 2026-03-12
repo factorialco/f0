@@ -58,4 +58,19 @@ export interface AnimatedF0TextProps extends Omit<
    * Children content
    */
   children?: React.ReactNode
+
+  /**
+   * Tailwind classes for layout and positioning.
+   *
+   * Allowed: margin, padding, flex, position, width, height, opacity, z-index, etc.
+   * Ignored: font-size, font-weight, line-height, letter-spacing, color, text-align,
+   * text-decoration, text-transform — these are controlled by semantic props and
+   * always take precedence via twMerge.
+   *
+   * @example
+   * className="mt-4 flex-1"
+   * className="mb-2 self-center"
+   * className="absolute top-0 left-0"
+   */
+  className?: string
 }

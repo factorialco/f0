@@ -5,23 +5,19 @@ import {
   SortingsDefinition,
 } from "@/hooks/datasource"
 
-import { ItemActionsDefinition } from "../../../item-actions"
-import { NavigationFiltersDefinition } from "../../../navigationFilters/types"
-import { SummariesDefinition } from "../../../summary"
-import { CollectionProps } from "../../../types"
-
-import type { EditableValueDisplayType } from "@/ui/value-display/editors"
-
 import type {
   TableColumnDefinition,
   TableVisualizationOptions,
   TableVisualizationSettings,
 } from "../Table/types"
 
-export type EditableTableVisualizationSettings = TableVisualizationSettings
+import { ItemActionsDefinition } from "../../../item-actions"
+import { NavigationFiltersDefinition } from "../../../navigationFilters/types"
+import { SummariesDefinition } from "../../../summary"
+import { CollectionProps } from "../../../types"
+import { EditableTableCellEditType } from "./components/cells"
 
-/** The edit mode for a column cell in the editable table. Derived from value-display editors. */
-export type EditableTableCellEditType = EditableValueDisplayType
+export type EditableTableVisualizationSettings = TableVisualizationSettings
 
 /**
  * Column definition for Editable Table.
@@ -35,6 +31,9 @@ export type EditableTableColumnDefinition<
   Sortings extends SortingsDefinition,
   Summaries extends SummariesDefinition,
 > = TableColumnDefinition<R, Sortings, Summaries> & {
+  /** Optional placeholder passed to editable inputs (e.g. date cells). */
+  inputPlaceholder?: string
+
   /**
    * Determines how the cell is rendered in edit mode.
    * Receives the current item and returns the cell type (e.g. `"text"`) or
@@ -43,14 +42,6 @@ export type EditableTableColumnDefinition<
    * When omitted, the cell is always rendered read-only.
    */
   editType?: (item: R) => EditableTableCellEditType | undefined
-
-  /**
-   * Function that determines if the cell should be editable for a given item.
-   * The cell is only editable if both `editType` returns a value AND
-   * this function returns `true` for the given item.
-   * Return `true` for all items to make the column always editable.
-   */
-  editable: (item: R) => boolean
 }
 
 export type EditableTableVisualizationOptions<
@@ -69,6 +60,12 @@ export type EditableTableVisualizationOptions<
    * Rejection sets an error on the edited column.
    */
   onCellChange: (updatedItem: R) => Promise<void | Record<string, string>>
+  /** When provided, renders an "Add" button row at the bottom of the table and nested rows. Receives the parent item when triggered from a nested row. Supports async functions for loading state. */
+  onAddRow?: (parentItem?: R) => void | Promise<void>
+  /** Custom label for the root-level "Add row" button. Falls back to the default i18n translation. */
+  addRowButtonLabel?: string
+  /** Custom label for the nested-row "Add row" button. Falls back to the default i18n translation. */
+  nestedAddRowButtonLabel?: string
 }
 
 export type EditableTableCollectionProps<

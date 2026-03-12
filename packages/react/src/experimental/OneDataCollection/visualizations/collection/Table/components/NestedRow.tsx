@@ -18,16 +18,23 @@
 
 import { forwardRef, useCallback, useRef } from "react"
 
+import type { TableVisualizationType } from "@/experimental/OneDataCollection/types"
+
+import { F0Button } from "@/components/F0Button"
 import { FiltersDefinition } from "@/components/OneFilterPicker/types"
 import { DataCollectionSource } from "@/experimental/OneDataCollection/hooks/useDataCollectionSource/types"
 import { ItemActionsDefinition } from "@/experimental/OneDataCollection/item-actions"
 import { NavigationFiltersDefinition } from "@/experimental/OneDataCollection/navigationFilters/types"
 import { SummariesDefinition } from "@/experimental/OneDataCollection/summary"
+import { TableCell, TableRow } from "@/experimental/OneTable"
+import { SPACING_FACTOR } from "@/experimental/OneTable/TableCell/utils/nested"
 import {
   GroupingDefinition,
   RecordType,
   SortingsDefinition,
 } from "@/hooks/datasource"
+import { Add } from "@/icons/app"
+import { useI18n } from "@/lib/providers/i18n"
 
 import type {
   CellRendererProps,
@@ -35,6 +42,7 @@ import type {
   TableColumnDefinition,
 } from "../types"
 
+import { useAddRow } from "../../EditableTable/context/AddRowContext"
 import { useCalculateConectorHeight } from "../hooks/useCalculateConectorHeight"
 import { useLoadChildren } from "../hooks/useLoadChildren"
 import { useNestedDataContext } from "../providers/NestedProvider"
@@ -70,10 +78,13 @@ export type RowProps<
   checkColumnWidth: number
   tableWithChildren: boolean
   nestedRowProps?: NestedRowProps
+  /** Optional predicate to mark a row as reference row with slanted background pattern. */
+  referenceRowType?: (item: R) => "none" | "striped"
   /** Custom cell renderer, passed through from Table to Row */
   cellRenderer?: React.ComponentType<CellRendererProps<R, Sortings, Summaries>>
   /** Row wrapper for child rows (provides per-row context, e.g. editing state) */
   rowWrapper?: React.ComponentType<RowWrapperProps<R>>
+  fromVisualization?: TableVisualizationType
 }
 
 const NestedRowContent = <
@@ -100,6 +111,8 @@ const NestedRowContent = <
     | null
 ) => {
   const internalRowRef = useRef<HTMLTableRowElement | null>(null)
+  const { t } = useI18n()
+  const addRow = useAddRow()
 
   const rowId = `${props.nestedRowProps?.depth ?? 0}-${"id" in props.item ? props.item.id + "-" + props.index : props.index}`
 
@@ -170,6 +183,8 @@ const NestedRowContent = <
     connectorHeight: calculatedHeight,
   }
 
+  const isTableVisualization = props.fromVisualization === "table"
+
   /**
    * Border logic for hierarchical rows:
    * - Border should only appear on the "last visible element" of the tree
@@ -179,7 +194,7 @@ const NestedRowContent = <
    */
   const firstRow = (props.nestedRowProps?.depth ?? 0) === 0
   const isLastChild = (props.nestedRowProps?.isLastChild || firstRow) ?? false
-  const shouldHideBorder = open || !isLastChild
+  const shouldHideBorder = (open || !isLastChild) && isTableVisualization
 
   return (
     <>
@@ -198,6 +213,7 @@ const NestedRowContent = <
           isLastChild,
         }}
         tableWithChildren={props.tableWithChildren}
+        fromVisualization={props.fromVisualization}
       />
 
       {shouldShowChildren &&
@@ -263,6 +279,7 @@ const NestedRowContent = <
                   depth: depth,
                   isLastChild: childIsLastInTree,
                 }}
+                fromVisualization={props.fromVisualization}
               />
             )
 
@@ -282,7 +299,8 @@ const NestedRowContent = <
           } else {
             // Base case: Leaf node with no children
             // For leaf nodes, border is shown only if it's the last visible element in the tree
-            const leafShouldHideBorder = !childIsLastInTree
+            const leafShouldHideBorder =
+              !childIsLastInTree && isTableVisualization
 
             const leafChild = (
               <Row
@@ -300,6 +318,7 @@ const NestedRowContent = <
                   onExpand: handleExpand,
                   isLastChild: childIsLastInTree,
                 }}
+                fromVisualization={props.fromVisualization}
                 tableWithChildren={props.tableWithChildren}
               />
             )
@@ -347,6 +366,36 @@ const NestedRowContent = <
             nestedVariant: childrenType,
           }}
         />
+      )}
+
+      {shouldShowChildren && addRow?.onAddRow && (
+        <TableRow>
+          <TableCell
+            colSpan={
+              props.columns.length +
+              (props.source.selectable ? 1 : 0) +
+              (props.source.itemActions ? 2 : 0)
+            }
+          >
+            <div
+              className="pointer-events-auto"
+              style={{
+                marginLeft: `${((props.nestedRowProps?.depth ?? 0) + 1) * SPACING_FACTOR}px`,
+              }}
+            >
+              <F0Button
+                variant="ghost"
+                icon={Add}
+                label={
+                  addRow.nestedAddRowButtonLabel ??
+                  t("collections.editableTable.addRow")
+                }
+                onClick={() => addRow.onAddRow?.(props.item)}
+                size="sm"
+              />
+            </div>
+          </TableCell>
+        </TableRow>
       )}
     </>
   )
@@ -425,6 +474,7 @@ const NestedRow = forwardRef(NestedRowComponentInner) as <
     Grouping
   > & {
     ref?: React.ForwardedRef<HTMLTableRowElement>
+    fromVisualization?: TableVisualizationType
   }
 ) => ReturnType<typeof NestedRowComponentInner>
 

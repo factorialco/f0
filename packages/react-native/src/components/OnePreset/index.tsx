@@ -2,7 +2,7 @@ import { Text, View } from "react-native"
 
 import { cn } from "../../lib/utils"
 import { Counter } from "../Counter"
-import { PressableFeedback } from "../PressableFeedback"
+import { PressableFeedback } from "../primitives/PressableFeedback"
 
 interface PresetProps {
   label: string

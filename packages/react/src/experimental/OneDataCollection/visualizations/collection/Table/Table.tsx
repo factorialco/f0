@@ -27,6 +27,7 @@ import {
   useSelectable,
 } from "@/hooks/datasource"
 import { useI18n } from "@/lib/providers/i18n"
+import { Add } from "@/icons/app"
 import { cn } from "@/lib/utils"
 import { GroupHeader } from "@/ui/GroupHeader/index"
 import { Skeleton } from "@/ui/skeleton.tsx"
@@ -42,6 +43,7 @@ import { ItemActionsDefinition } from "../../../item-actions"
 import { NavigationFiltersDefinition } from "../../../navigationFilters/types"
 import { SummariesDefinition } from "../../../summary"
 import { CollectionProps } from "../../../types"
+import { useAddRow } from "../EditableTable/context/AddRowContext"
 import { statusToChecked } from "../utils"
 import { Row } from "./components/Row"
 import { useColumns } from "./hooks/useColums"
@@ -87,10 +89,12 @@ export const TableCollection = <
   onLoadError,
   allowColumnHiding,
   allowColumnReordering,
+  referenceRowType,
   rowWrapper: RowWrapper,
   cellRenderer,
   showItemActions: showItemActionsProp,
   visualizationSettings,
+  fromVisualization = "table",
 }: CollectionProps<
   R,
   Filters,
@@ -103,6 +107,7 @@ export const TableCollection = <
 > &
   TableCustomizationProps<R, Sortings, Summaries>) => {
   const { t, ...i18n } = useI18n()
+  const addRow = useAddRow()
   // Created a motion component for the row
   const [MotionRow] = useState(() =>
     motion.create(
@@ -426,6 +431,12 @@ export const TableCollection = <
                     width={column.width}
                     align={column.align}
                     sticky={getStickyPosition(index)}
+                    className={
+                      fromVisualization === "editableTable" &&
+                      index !== columns.length - 1
+                        ? "border-0 border-r-[1px] border-solid border-f1-border-secondary"
+                        : undefined
+                    }
                     {...column}
                     hidden={false}
                     onSortClick={
@@ -524,6 +535,7 @@ export const TableCollection = <
                               columns={columns}
                               frozenColumnsLeft={frozenColumnsLeft}
                               checkColumnWidth={checkColumnWidth}
+                              referenceRowType={referenceRowType}
                               rowWrapper={RowWrapper}
                               cellRenderer={cellRenderer}
                             />
@@ -564,8 +576,10 @@ export const TableCollection = <
                     frozenColumnsLeft={frozenColumnsLeft}
                     checkColumnWidth={checkColumnWidth}
                     tableWithChildren={tableWithChildren}
+                    referenceRowType={referenceRowType}
                     rowWrapper={RowWrapper}
                     cellRenderer={cellRenderer}
+                    fromVisualization={fromVisualization}
                   />
                 )
                 if (RowWrapper) {
@@ -607,77 +621,102 @@ export const TableCollection = <
                 </tr>
               )}
           </TableBody>
-          {/* TODO: maybe as new component? */}
-          {summaryData && (
+          {(summaryData || addRow?.onAddRow) && (
             <TableFooter>
-              <TableRow
-                className={cn(
-                  summaryData.sticky &&
-                    "sticky bottom-0 z-10 bg-f1-background shadow-[0_-1px_0_0_var(--f1-border-secondary)] hover:bg-f1-background",
-                  "font-medium"
-                )}
-              >
-                {source.selectable && (
-                  <TableCell width={checkColumnWidth} sticky={{ left: 0 }}>
-                    {summaryData.label && (
-                      <div className="font-medium text-f1-foreground-secondary">
-                        {summaryData.label}
-                      </div>
-                    )}
-                  </TableCell>
-                )}
-                {columns.map((column, cellIndex) => (
-                  <TableCell
-                    key={`summary-${String(column.label)}`}
-                    firstCell={cellIndex === 0}
-                    width={column.width}
-                    sticky={getStickyPosition(cellIndex)}
-                  >
-                    {cellIndex === 0 &&
-                    !source.selectable &&
-                    summaryData.label ? (
-                      <div className="font-medium text-f1-foreground-secondary">
-                        {summaryData.label}
-                      </div>
-                    ) : (
-                      <div
-                        className={cn(
-                          column.align === "right" ? "justify-end" : "",
-                          "flex"
-                        )}
-                      >
-                        {column.summary &&
-                        source.summaries &&
-                        source.summaries[column.summary]?.type === "sum" ? (
-                          <div className="flex gap-1">
-                            <span className="text-f1-foreground-secondary">
-                              {i18n.collections.summaries.types.sum}
-                            </span>
-                            {`${summaryData.data[column.summary]}`}
-                          </div>
-                        ) : (
-                          "-"
-                        )}
-                      </div>
-                    )}
-                  </TableCell>
-                ))}
-                {showItemActions && (
-                  <>
-                    <th className="hidden md:table-cell"></th>
-                    <TableCell
-                      key="summary-actions"
-                      width={68}
-                      sticky={{
-                        right: 0,
-                      }}
-                      className="table-cell md:hidden"
-                    >
-                      {""}
+              {summaryData && (
+                <TableRow
+                  className={cn(
+                    summaryData.sticky &&
+                      "sticky bottom-0 z-10 bg-f1-background shadow-[0_-1px_0_0_var(--f1-border-secondary)] hover:bg-f1-background",
+                    "font-medium"
+                  )}
+                >
+                  {source.selectable && (
+                    <TableCell width={checkColumnWidth} sticky={{ left: 0 }}>
+                      {summaryData.label && (
+                        <div className="font-medium text-f1-foreground-secondary">
+                          {summaryData.label}
+                        </div>
+                      )}
                     </TableCell>
-                  </>
-                )}
-              </TableRow>
+                  )}
+                  {columns.map((column, cellIndex) => (
+                    <TableCell
+                      key={`summary-${String(column.label)}`}
+                      firstCell={cellIndex === 0}
+                      width={column.width}
+                      sticky={getStickyPosition(cellIndex)}
+                    >
+                      {cellIndex === 0 &&
+                      !source.selectable &&
+                      summaryData.label ? (
+                        <div className="font-medium text-f1-foreground-secondary">
+                          {summaryData.label}
+                        </div>
+                      ) : (
+                        <div
+                          className={cn(
+                            column.align === "right" ? "justify-end" : "",
+                            "flex"
+                          )}
+                        >
+                          {column.summary &&
+                          source.summaries &&
+                          source.summaries[column.summary]?.type === "sum" ? (
+                            <div className="flex gap-1">
+                              <span className="text-f1-foreground-secondary">
+                                {i18n.collections.summaries.types.sum}
+                              </span>
+                              {`${summaryData.data[column.summary]}`}
+                            </div>
+                          ) : (
+                            "-"
+                          )}
+                        </div>
+                      )}
+                    </TableCell>
+                  ))}
+                  {showItemActions && (
+                    <>
+                      <th className="hidden md:table-cell"></th>
+                      <TableCell
+                        key="summary-actions"
+                        width={68}
+                        sticky={{
+                          right: 0,
+                        }}
+                        className="table-cell md:hidden"
+                      >
+                        {""}
+                      </TableCell>
+                    </>
+                  )}
+                </TableRow>
+              )}
+              {addRow?.onAddRow && (
+                <TableRow>
+                  <TableCell
+                    colSpan={
+                      columns.length +
+                      (source.selectable ? 1 : 0) +
+                      (showItemActions ? 2 : 0)
+                    }
+                  >
+                    <div className="pointer-events-auto">
+                      <F0Button
+                        variant="ghost"
+                        icon={Add}
+                        label={
+                          addRow.addRowButtonLabel ??
+                          t("collections.editableTable.addRow")
+                        }
+                        onClick={() => addRow.onAddRow?.()}
+                        size="sm"
+                      />
+                    </div>
+                  </TableCell>
+                </TableRow>
+              )}
             </TableFooter>
           )}
         </OneTable>

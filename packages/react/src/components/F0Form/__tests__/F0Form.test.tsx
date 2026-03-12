@@ -1,9 +1,13 @@
+import userEvent from "@testing-library/user-event"
 import React from "react"
-import { zeroRender as render, screen, waitFor } from "@/testing/test-utils"
 import { describe, expect, it, vi } from "vitest"
 import { z } from "zod"
-import userEvent from "@testing-library/user-event"
 
+import { zeroRender as render, screen, waitFor } from "@/testing/test-utils"
+
+import type { F0SectionConfig } from "../types"
+
+import { createConditionalResolver } from "../conditionalResolver"
 import { F0Form } from "../F0Form"
 import {
   f0FormField,
@@ -11,11 +15,9 @@ import {
   hasF0Config,
   inferFieldType,
 } from "../f0Schema"
-import type { F0SectionConfig } from "../types"
-import { getSchemaDefinition } from "../useSchemaDefinition"
 import { isFieldRequired, isOptionalOrNullable } from "../fields/schema"
 import { evaluateDisabled, evaluateRenderIf } from "../fields/utils"
-import { createConditionalResolver } from "../conditionalResolver"
+import { getSchemaDefinition } from "../useSchemaDefinition"
 
 describe("F0Form", () => {
   it("renders a basic form using schema prop", () => {
@@ -411,6 +413,40 @@ describe("isFieldRequired", () => {
 
     it("returns false for z.boolean().optional()", () => {
       expect(isFieldRequired(z.boolean().optional())).toBe(false)
+    })
+  })
+
+  describe("object fields (rich text)", () => {
+    it("returns false for z.object({ value: z.string().nullable() })", () => {
+      expect(
+        isFieldRequired(
+          z.object({
+            value: z.string().nullable(),
+            mentionIds: z.array(z.number()).optional(),
+          })
+        )
+      ).toBe(false)
+    })
+
+    it("returns true for z.object({ value: z.string().min(1) })", () => {
+      expect(
+        isFieldRequired(
+          z.object({
+            value: z.string().min(1),
+            mentionIds: z.array(z.number()).optional(),
+          })
+        )
+      ).toBe(true)
+    })
+
+    it("returns false for z.object({ value: z.string() }) without constraints", () => {
+      expect(
+        isFieldRequired(
+          z.object({
+            value: z.string(),
+          })
+        )
+      ).toBe(false)
     })
   })
 })

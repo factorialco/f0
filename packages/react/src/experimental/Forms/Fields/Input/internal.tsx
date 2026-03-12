@@ -37,6 +37,7 @@ export type InputInternalProps<T extends string> = Pick<
     | "buttonToggle"
     | "hideMaxLength"
     | "loading"
+    | "transparent"
   > & {
     type?: Exclude<HTMLInputTypeAttribute, "number">
     onPressEnter?: () => void

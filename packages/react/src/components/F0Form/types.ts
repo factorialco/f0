@@ -133,6 +133,12 @@ interface F0FormSubmitConfigBase {
   icon?: IconType | null
   /** Label shown in the action bar while submitting (defaults to i18n "forms.actionBar.saving") */
   savingMessage?: string
+  /**
+   * Duration in ms before the success message auto-clears.
+   * - number: auto-clear after this many ms (default: 3000)
+   * - null: never auto-clear (caller is responsible for unmounting)
+   */
+  successMessageDuration?: number | null
 }
 
 /**

@@ -4,7 +4,7 @@ import { Pressable, View } from "react-native"
 import { GenericActionType } from ".."
 import { ChevronRight } from "../../../../../icons/app"
 import { cn } from "../../../../../lib/utils"
-import { Icon } from "../../../../Icon"
+import { F0Icon } from "../../../../primitives/F0Icon"
 
 export type GenericActionProps = {
   children: ReactNode
@@ -24,7 +24,7 @@ export const GenericAction = memo(
         )}
       >
         <View className="flex flex-row items-center gap-1.5">{children}</View>
-        <Icon
+        <F0Icon
           aria-hidden={true}
           icon={ChevronRight}
           size="md"

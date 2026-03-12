@@ -1,4 +1,5 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
+import { format } from "date-fns"
 import { useMemo, useRef, useState } from "react"
 import { action } from "storybook/actions"
 
@@ -27,8 +28,10 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 function useEditableTableData(
-  initialItems: MockUser[] = generateMockUsers(10)
+  initialItems: MockUser[] = generateMockUsers(10),
+  options?: { perPage?: number }
 ) {
+  const perPage = options?.perPage ?? 10
   const [items, setItems] = useState<MockUser[]>(initialItems)
   const itemsRef = useRef(items)
   itemsRef.current = items
@@ -44,20 +47,20 @@ function useEditableTableData(
     const adapter = createDataAdapter({
       data: items,
       paginationType: "pages",
-      perPage: 10,
+      perPage,
     })
-    adapter.fetchData = (options: unknown) => {
+    adapter.fetchData = (fetchOptions: unknown) => {
       const currentAdapter = createDataAdapter({
         data: itemsRef.current,
         paginationType: "pages",
-        perPage: 10,
+        perPage,
       })
-      return currentAdapter.fetchData(options as never)
+      return currentAdapter.fetchData(fetchOptions as never)
     }
     return adapter
-  }, [items])
+  }, [items, perPage])
 
-  return { items, dataAdapter, onCellChange }
+  return { items, setItems, dataAdapter, onCellChange }
 }
 
 export const BasicEditableTable: Story = {
@@ -202,7 +205,8 @@ export const EditableTableWithEditableCallback: Story = {
                 ) {
                   return {
                     ...col,
-                    editable: (item: MockUser) => item.role === "Designer",
+                    editType: (item: MockUser) =>
+                      item.role === "Designer" ? "text" : "display-only",
                   }
                 }
                 return col
@@ -432,6 +436,57 @@ export const EditableTableWithNestedRecordsDetailed: Story = {
   },
 }
 
+export const EditableTableWithSelectableNestedRecordsDetailed: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Editable table with detailed nested records. Children are displayed aligned with the parent without tree connectors, creating a flatter view.",
+      },
+    },
+  },
+  render: () => {
+    const mockVisualizations = getMockVisualizations({
+      table: {
+        noSorting: true,
+        nestedRecords: true,
+        applyLongText: false,
+      },
+    })
+
+    const onCellChange = async (updatedItem: MockUser) => {
+      action("onCellChange")(updatedItem)
+    }
+
+    return (
+      <ExampleComponent
+        noSorting
+        storage={false}
+        selectable={() => {
+          return ""
+        }}
+        visualizations={[
+          {
+            type: "editableTable" as const,
+            options: {
+              ...(
+                mockVisualizations.editableTable as Extract<
+                  typeof mockVisualizations.editableTable,
+                  { type: "editableTable" }
+                >
+              ).options,
+              onCellChange,
+            },
+          },
+        ]}
+        id="editable-table-nested-detailed/v1"
+        nestedRecords
+        nestedRecordsType="detailed"
+      />
+    )
+  },
+}
+
 export const TableAndEditableTable: Story = {
   parameters: {
     docs: {
@@ -471,6 +526,70 @@ export const TableAndEditableTable: Story = {
         ]}
         dataAdapter={dataAdapter}
         id="table-and-editable/v1"
+      />
+    )
+  },
+}
+
+export const EditableTableWithDateCell: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Editable table with a date cell. Click any date cell to open the date picker and select a new date. Values are stored and emitted as ISO date strings (yyyy-MM-dd).",
+      },
+    },
+  },
+  render: () => {
+    const { dataAdapter, onCellChange } = useEditableTableData()
+
+    const baseOptions = (
+      getMockVisualizations().editableTable as Extract<
+        ReturnType<typeof getMockVisualizations>["editableTable"],
+        { type: "editableTable" }
+      >
+    ).options
+
+    return (
+      <ExampleComponent
+        visualizations={[
+          {
+            type: "editableTable" as const,
+            options: {
+              ...baseOptions,
+              columns: [
+                {
+                  label: "Name",
+                  render: (item: MockUser) => ({
+                    type: "person" as const,
+                    value: {
+                      firstName: item.name.split(" ")[0],
+                      lastName: item.name.split(" ")[1],
+                    },
+                  }),
+                  id: "name",
+                },
+                {
+                  label: "Email",
+                  render: (item: MockUser) => item.email,
+                  id: "email",
+                  editType: () => "text" as const,
+                },
+                {
+                  label: "Start date",
+                  id: "startDate",
+                  render: (item: MockUser) =>
+                    format(item.joinedAt, "yyyy-MM-dd"),
+                  editType: () => "date" as const,
+                  inputPlaceholder: "DD/MM/YYYY",
+                },
+              ],
+              onCellChange,
+            },
+          },
+        ]}
+        dataAdapter={dataAdapter}
+        id="editable-table-date/v1"
       />
     )
   },

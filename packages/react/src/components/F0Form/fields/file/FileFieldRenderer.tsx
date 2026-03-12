@@ -6,10 +6,10 @@ import { Upload } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 import { cn, focusRing } from "@/lib/utils"
 
-import { useF0FormContext } from "../../context"
 import type { ResolvedField } from "../types"
 import type { F0FileField, FileEntry, InitialFile } from "./types"
 
+import { useOptionalF0FormContext } from "../../context"
 import { FileUploadItem } from "./FileUploadItem"
 
 const BARE_CATEGORIES = new Set([
@@ -95,6 +95,7 @@ interface FileFieldRendererProps {
   field: ResolvedField<F0FileField>
   formField: ControllerRenderProps<FieldValues>
   error?: boolean
+  initialFiles?: InitialFile[]
 }
 
 /**
@@ -134,9 +135,11 @@ export function FileFieldRenderer({
   field,
   formField,
   error,
+  initialFiles,
 }: FileFieldRendererProps) {
   const { forms } = useI18n()
-  const { initialFiles: initialFilesPool } = useF0FormContext()
+  const context = useOptionalF0FormContext()
+  const initialFilesPool = initialFiles ?? context?.initialFiles
   const inputId = useId()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [isDragOver, setIsDragOver] = useState(false)
@@ -311,6 +314,9 @@ export function FileFieldRenderer({
       } else if (!isMultiple) {
         formField.onChange(undefined)
       }
+
+      // Trigger validation after removing a file
+      formField.onBlur()
     },
     [entries, isMultiple, formField]
   )
@@ -345,7 +351,7 @@ export function FileFieldRenderer({
             isDragOver
               ? "border-f1-border-accent bg-f1-background-accent-bold/5"
               : error || validationError
-                ? "border-f1-border-critical bg-f1-background"
+                ? "border-f1-border-critical-bold bg-f1-background-critical bg-opacity-10"
                 : "border-f1-border bg-f1-background",
             !field.disabled &&
               !isDragOver &&

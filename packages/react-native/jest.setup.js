@@ -27,3 +27,15 @@ jest.mock("react-native/Libraries/NativeComponent/ViewConfigIgnore", () => {
 jest.mock("react-native-reanimated", () =>
   require("react-native-reanimated/mock"),
 );
+
+// Mock expo-image for Jest environment
+jest.mock("expo-image", () => {
+  const React = require("react");
+  const { Image } = require("react-native");
+
+  return {
+    Image: React.forwardRef((props, ref) =>
+      React.createElement(Image, { ...props, ref })
+    ),
+  };
+});

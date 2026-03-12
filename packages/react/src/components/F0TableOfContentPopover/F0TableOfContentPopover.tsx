@@ -44,6 +44,7 @@ export function F0TableOfContentPopover({
   barsAlign = "left",
   size = "md",
   variant = "light",
+  portalContainer,
 }: F0TableOfContentPopoverProps) {
   const [isOpen, setIsOpen] = useState(false)
   const shouldScrollRef = useRef(false)
@@ -104,6 +105,7 @@ export function F0TableOfContentPopover({
         side={barsAlign === "left" ? "right" : "left"}
         align="center"
         sideOffset={-28}
+        container={portalContainer}
         className={cn(
           contentVariants({ size }),
           !title && "pt-2",

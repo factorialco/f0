@@ -1,5 +1,7 @@
 import { forwardRef, useLayoutEffect, useRef } from "react"
 
+import type { TableVisualizationType } from "@/experimental/OneDataCollection/types"
+
 import { DataCollectionSource } from "@/experimental/OneDataCollection/hooks/useDataCollectionSource"
 import { ItemActionsDefinition } from "@/experimental/OneDataCollection/item-actions"
 import { NavigationFiltersDefinition } from "@/experimental/OneDataCollection/navigationFilters/types"
@@ -39,6 +41,7 @@ const SingleLoadingRowInner = <
     checkColumnWidth,
     tableWithChildren,
     shouldHideBorder,
+    fromVisualization,
   }: RowProps<
     R,
     Filters,
@@ -51,6 +54,7 @@ const SingleLoadingRowInner = <
     rowRef: React.RefObject<HTMLTableRowElement>
     rowIndex: number
     shouldHideBorder?: boolean
+    fromVisualization?: TableVisualizationType
   },
   ref:
     | ((element: HTMLTableRowElement | null) => void)
@@ -102,6 +106,7 @@ const SingleLoadingRowInner = <
         expanded: false,
       }}
       tableWithChildren={tableWithChildren}
+      fromVisualization={fromVisualization}
     />
   )
 }
@@ -168,6 +173,7 @@ const RowLoadingInner = <
     >
     paginationInfo?: ChildrenPaginationInfo
     shouldHideBorder?: boolean
+    fromVisualization?: TableVisualizationType
   },
   ref:
     | ((element: HTMLTableRowElement | null) => void)

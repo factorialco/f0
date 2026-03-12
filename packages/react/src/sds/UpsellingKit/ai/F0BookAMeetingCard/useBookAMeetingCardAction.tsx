@@ -42,6 +42,7 @@ export const useBookAMeetingCardAction = () => {
       },
     ],
     available: "frontend",
+    followUp: false,
     render: (props) => {
       const args = props.args as BookAMeetingCardArgs
 

@@ -40,6 +40,7 @@ export const useModuleCardAction = () => {
       },
     ],
     available: "frontend",
+    followUp: false,
     render: (props) => {
       const args = props.args as ModuleCardArgs
       return (

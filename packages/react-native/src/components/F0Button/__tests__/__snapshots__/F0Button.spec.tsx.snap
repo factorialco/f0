@@ -1,0 +1,966 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`F0Button Snapshot - critical variant 1`] = `
+<View
+  className="flex items-start"
+>
+  <View
+    accessibilityLabel="Test Button"
+    accessibilityRole="button"
+    accessibilityState={
+      {
+        "busy": false,
+        "checked": undefined,
+        "disabled": false,
+        "expanded": undefined,
+        "selected": undefined,
+      }
+    }
+    accessibilityValue={
+      {
+        "max": undefined,
+        "min": undefined,
+        "now": undefined,
+        "text": undefined,
+      }
+    }
+    accessible={true}
+    className="overflow-hidden"
+    collapsable={false}
+    focusable={true}
+    onBlur={[Function]}
+    onClick={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      [
+        {
+          "transform": [
+            {
+              "scale": 1,
+            },
+          ],
+        },
+        undefined,
+      ]
+    }
+  >
+    <View
+      className="absolute inset-0"
+      pointerEvents="none"
+      style={
+        [
+          {
+            "opacity": 0,
+          },
+          {
+            "backgroundColor": "rgba(0, 0, 0, 1)",
+          },
+        ]
+      }
+    />
+    <View
+      className="relative flex-row items-center justify-center border-none grow-0 bg-f0-background-secondary border border-f0-border h-9 rounded gap-1 px-2 sm:px-3 lg:px-4"
+    >
+      <View
+        className="opacity-100"
+        testID="f0-button-content"
+      >
+        <View
+          className="flex-row items-center justify-center gap-1"
+        >
+          <Text
+            className="no-underline normal-case tracking-normal text-[16px] leading-[24px] font-medium text-f0-foreground-critical text-left"
+          >
+            Test Button
+          </Text>
+        </View>
+      </View>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`F0Button Snapshot - default button 1`] = `
+<View
+  className="flex items-start"
+>
+  <View
+    accessibilityLabel="Test Button"
+    accessibilityRole="button"
+    accessibilityState={
+      {
+        "busy": false,
+        "checked": undefined,
+        "disabled": false,
+        "expanded": undefined,
+        "selected": undefined,
+      }
+    }
+    accessibilityValue={
+      {
+        "max": undefined,
+        "min": undefined,
+        "now": undefined,
+        "text": undefined,
+      }
+    }
+    accessible={true}
+    className="overflow-hidden"
+    collapsable={false}
+    focusable={true}
+    onBlur={[Function]}
+    onClick={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      [
+        {
+          "transform": [
+            {
+              "scale": 1,
+            },
+          ],
+        },
+        undefined,
+      ]
+    }
+  >
+    <View
+      className="absolute inset-0"
+      pointerEvents="none"
+      style={
+        [
+          {
+            "opacity": 0,
+          },
+          {
+            "backgroundColor": "rgba(0, 0, 0, 1)",
+          },
+        ]
+      }
+    />
+    <View
+      className="relative flex-row items-center justify-center border-none grow-0 bg-f0-background-accent-bold h-9 rounded gap-1 px-2 sm:px-3 lg:px-4"
+    >
+      <View
+        className="opacity-100"
+        testID="f0-button-content"
+      >
+        <View
+          className="flex-row items-center justify-center gap-1"
+        >
+          <Text
+            className="no-underline normal-case tracking-normal text-[16px] leading-[24px] font-medium text-f0-foreground-inverse text-left"
+          >
+            Test Button
+          </Text>
+        </View>
+      </View>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`F0Button Snapshot - different sizes 1`] = `
+<View
+  className="flex items-start"
+>
+  <View
+    accessibilityLabel="Test Button"
+    accessibilityRole="button"
+    accessibilityState={
+      {
+        "busy": false,
+        "checked": undefined,
+        "disabled": false,
+        "expanded": undefined,
+        "selected": undefined,
+      }
+    }
+    accessibilityValue={
+      {
+        "max": undefined,
+        "min": undefined,
+        "now": undefined,
+        "text": undefined,
+      }
+    }
+    accessible={true}
+    className="overflow-hidden"
+    collapsable={false}
+    focusable={true}
+    onBlur={[Function]}
+    onClick={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      [
+        {
+          "transform": [
+            {
+              "scale": 1,
+            },
+          ],
+        },
+        undefined,
+      ]
+    }
+  >
+    <View
+      className="absolute inset-0"
+      pointerEvents="none"
+      style={
+        [
+          {
+            "opacity": 0,
+          },
+          {
+            "backgroundColor": "rgba(0, 0, 0, 1)",
+          },
+        ]
+      }
+    />
+    <View
+      className="relative flex-row items-center justify-center border-none grow-0 bg-f0-background-accent-bold h-7 rounded-sm gap-1 px-2 sm:px-3 lg:px-4"
+    >
+      <View
+        className="opacity-100"
+        testID="f0-button-content"
+      >
+        <View
+          className="flex-row items-center justify-center gap-1"
+        >
+          <Text
+            className="no-underline normal-case tracking-normal text-[16px] leading-[24px] font-medium text-f0-foreground-inverse text-left"
+          >
+            Test Button
+          </Text>
+        </View>
+      </View>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`F0Button Snapshot - different sizes 2`] = `
+<View
+  className="flex items-start"
+>
+  <View
+    accessibilityLabel="Test Button"
+    accessibilityRole="button"
+    accessibilityState={
+      {
+        "busy": false,
+        "checked": undefined,
+        "disabled": false,
+        "expanded": undefined,
+        "selected": undefined,
+      }
+    }
+    accessibilityValue={
+      {
+        "max": undefined,
+        "min": undefined,
+        "now": undefined,
+        "text": undefined,
+      }
+    }
+    accessible={true}
+    className="overflow-hidden"
+    collapsable={false}
+    focusable={true}
+    onBlur={[Function]}
+    onClick={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      [
+        {
+          "transform": [
+            {
+              "scale": 1,
+            },
+          ],
+        },
+        undefined,
+      ]
+    }
+  >
+    <View
+      className="absolute inset-0"
+      pointerEvents="none"
+      style={
+        [
+          {
+            "opacity": 0,
+          },
+          {
+            "backgroundColor": "rgba(0, 0, 0, 1)",
+          },
+        ]
+      }
+    />
+    <View
+      className="relative flex-row items-center justify-center border-none grow-0 bg-f0-background-accent-bold h-9 rounded gap-1 px-2 sm:px-3 lg:px-4"
+    >
+      <View
+        className="opacity-100"
+        testID="f0-button-content"
+      >
+        <View
+          className="flex-row items-center justify-center gap-1"
+        >
+          <Text
+            className="no-underline normal-case tracking-normal text-[16px] leading-[24px] font-medium text-f0-foreground-inverse text-left"
+          >
+            Test Button
+          </Text>
+        </View>
+      </View>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`F0Button Snapshot - different sizes 3`] = `
+<View
+  className="flex items-start"
+>
+  <View
+    accessibilityLabel="Test Button"
+    accessibilityRole="button"
+    accessibilityState={
+      {
+        "busy": false,
+        "checked": undefined,
+        "disabled": false,
+        "expanded": undefined,
+        "selected": undefined,
+      }
+    }
+    accessibilityValue={
+      {
+        "max": undefined,
+        "min": undefined,
+        "now": undefined,
+        "text": undefined,
+      }
+    }
+    accessible={true}
+    className="overflow-hidden"
+    collapsable={false}
+    focusable={true}
+    onBlur={[Function]}
+    onClick={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      [
+        {
+          "transform": [
+            {
+              "scale": 1,
+            },
+          ],
+        },
+        undefined,
+      ]
+    }
+  >
+    <View
+      className="absolute inset-0"
+      pointerEvents="none"
+      style={
+        [
+          {
+            "opacity": 0,
+          },
+          {
+            "backgroundColor": "rgba(0, 0, 0, 1)",
+          },
+        ]
+      }
+    />
+    <View
+      className="relative flex-row items-center justify-center border-none grow-0 bg-f0-background-accent-bold h-11 rounded-md gap-1 px-2 sm:px-3 lg:px-4"
+    >
+      <View
+        className="opacity-100"
+        testID="f0-button-content"
+      >
+        <View
+          className="flex-row items-center justify-center gap-1"
+        >
+          <Text
+            className="no-underline normal-case tracking-normal text-[16px] leading-[24px] font-medium text-f0-foreground-inverse text-left"
+          >
+            Test Button
+          </Text>
+        </View>
+      </View>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`F0Button Snapshot - disabled state 1`] = `
+<View
+  className="flex items-start"
+>
+  <View
+    accessibilityLabel="Test Button, disabled"
+    accessibilityRole="button"
+    accessibilityState={
+      {
+        "busy": false,
+        "checked": undefined,
+        "disabled": true,
+        "expanded": undefined,
+        "selected": undefined,
+      }
+    }
+    accessibilityValue={
+      {
+        "max": undefined,
+        "min": undefined,
+        "now": undefined,
+        "text": undefined,
+      }
+    }
+    accessible={true}
+    className="overflow-hidden"
+    collapsable={false}
+    focusable={true}
+    onBlur={[Function]}
+    onClick={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      [
+        {
+          "transform": [
+            {
+              "scale": 1,
+            },
+          ],
+        },
+        undefined,
+      ]
+    }
+  >
+    <View
+      className="absolute inset-0"
+      pointerEvents="none"
+      style={
+        [
+          {
+            "opacity": 0,
+          },
+          {
+            "backgroundColor": "rgba(0, 0, 0, 1)",
+          },
+        ]
+      }
+    />
+    <View
+      className="relative flex-row items-center justify-center border-none grow-0 bg-f0-background-accent-bold h-9 rounded opacity-50 gap-1 px-2 sm:px-3 lg:px-4"
+    >
+      <View
+        className="opacity-100"
+        testID="f0-button-content"
+      >
+        <View
+          className="flex-row items-center justify-center gap-1"
+        >
+          <Text
+            className="no-underline normal-case tracking-normal text-[16px] leading-[24px] font-medium text-f0-foreground-inverse text-left"
+          >
+            Test Button
+          </Text>
+        </View>
+      </View>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`F0Button Snapshot - loading state 1`] = `
+<View
+  className="flex items-start"
+>
+  <View
+    accessibilityLabel="Test Button, disabled, loading"
+    accessibilityRole="button"
+    accessibilityState={
+      {
+        "busy": true,
+        "checked": undefined,
+        "disabled": true,
+        "expanded": undefined,
+        "selected": undefined,
+      }
+    }
+    accessibilityValue={
+      {
+        "max": undefined,
+        "min": undefined,
+        "now": undefined,
+        "text": undefined,
+      }
+    }
+    accessible={true}
+    className="overflow-hidden"
+    collapsable={false}
+    focusable={true}
+    onBlur={[Function]}
+    onClick={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      [
+        {
+          "transform": [
+            {
+              "scale": 1,
+            },
+          ],
+        },
+        undefined,
+      ]
+    }
+  >
+    <View
+      className="absolute inset-0"
+      pointerEvents="none"
+      style={
+        [
+          {
+            "opacity": 0,
+          },
+          {
+            "backgroundColor": "rgba(0, 0, 0, 1)",
+          },
+        ]
+      }
+    />
+    <View
+      className="relative flex-row items-center justify-center border-none grow-0 bg-f0-background-accent-bold h-9 rounded opacity-50 gap-1 px-2 sm:px-3 lg:px-4"
+    >
+      <View
+        className="opacity-0"
+        testID="f0-button-content"
+      >
+        <View
+          className="flex-row items-center justify-center gap-1"
+        >
+          <Text
+            className="no-underline normal-case tracking-normal text-[16px] leading-[24px] font-medium text-f0-foreground-inverse text-left"
+          >
+            Test Button
+          </Text>
+        </View>
+      </View>
+      <View
+        className="absolute inset-0 items-center justify-center"
+        pointerEvents="none"
+      >
+        <View
+          accessibilityLabel="Loading indicator"
+          className="rounded-full border-solid border-f0-foreground-inverse h-4 w-4 border-2"
+          style={
+            {
+              "borderTopColor": "transparent",
+              "transform": [
+                {
+                  "rotateZ": "0deg",
+                },
+              ],
+            }
+          }
+          testID="f0-button-loading-indicator"
+        />
+      </View>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`F0Button Snapshot - outline variant 1`] = `
+<View
+  className="flex items-start"
+>
+  <View
+    accessibilityLabel="Test Button"
+    accessibilityRole="button"
+    accessibilityState={
+      {
+        "busy": false,
+        "checked": undefined,
+        "disabled": false,
+        "expanded": undefined,
+        "selected": undefined,
+      }
+    }
+    accessibilityValue={
+      {
+        "max": undefined,
+        "min": undefined,
+        "now": undefined,
+        "text": undefined,
+      }
+    }
+    accessible={true}
+    className="overflow-hidden"
+    collapsable={false}
+    focusable={true}
+    onBlur={[Function]}
+    onClick={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      [
+        {
+          "transform": [
+            {
+              "scale": 1,
+            },
+          ],
+        },
+        undefined,
+      ]
+    }
+  >
+    <View
+      className="absolute inset-0"
+      pointerEvents="none"
+      style={
+        [
+          {
+            "opacity": 0,
+          },
+          {
+            "backgroundColor": "rgba(0, 0, 0, 1)",
+          },
+        ]
+      }
+    />
+    <View
+      className="relative flex-row items-center justify-center border-none grow-0 bg-f0-background-inverse-secondary border border-f0-border h-9 rounded gap-1 px-2 sm:px-3 lg:px-4"
+    >
+      <View
+        className="opacity-100"
+        testID="f0-button-content"
+      >
+        <View
+          className="flex-row items-center justify-center gap-1"
+        >
+          <Text
+            className="no-underline normal-case tracking-normal text-[16px] leading-[24px] font-medium text-f0-foreground text-left"
+          >
+            Test Button
+          </Text>
+        </View>
+      </View>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`F0Button Snapshot - round button with hidden label 1`] = `
+<View
+  className="flex items-start"
+>
+  <View
+    accessibilityLabel="Test Button"
+    accessibilityRole="button"
+    accessibilityState={
+      {
+        "busy": false,
+        "checked": undefined,
+        "disabled": false,
+        "expanded": undefined,
+        "selected": undefined,
+      }
+    }
+    accessibilityValue={
+      {
+        "max": undefined,
+        "min": undefined,
+        "now": undefined,
+        "text": undefined,
+      }
+    }
+    accessible={true}
+    className="overflow-hidden"
+    collapsable={false}
+    focusable={true}
+    onBlur={[Function]}
+    onClick={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      [
+        {
+          "transform": [
+            {
+              "scale": 1,
+            },
+          ],
+        },
+        undefined,
+      ]
+    }
+  >
+    <View
+      className="absolute inset-0"
+      pointerEvents="none"
+      style={
+        [
+          {
+            "opacity": 0,
+          },
+          {
+            "backgroundColor": "rgba(0, 0, 0, 1)",
+          },
+        ]
+      }
+    />
+    <View
+      className="relative flex-row items-center justify-center border-none grow-0 bg-f0-background-accent-bold h-9 rounded aspect-square p-0"
+    >
+      <View
+        className="opacity-100"
+        testID="f0-button-content"
+      >
+        <View
+          className="flex-row items-center justify-center gap-1"
+        />
+      </View>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`F0Button Snapshot - with emoji 1`] = `
+<View
+  className="flex items-start"
+>
+  <View
+    accessibilityLabel="Test Button"
+    accessibilityRole="button"
+    accessibilityState={
+      {
+        "busy": false,
+        "checked": undefined,
+        "disabled": false,
+        "expanded": undefined,
+        "selected": undefined,
+      }
+    }
+    accessibilityValue={
+      {
+        "max": undefined,
+        "min": undefined,
+        "now": undefined,
+        "text": undefined,
+      }
+    }
+    accessible={true}
+    className="overflow-hidden"
+    collapsable={false}
+    focusable={true}
+    onBlur={[Function]}
+    onClick={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      [
+        {
+          "transform": [
+            {
+              "scale": 1,
+            },
+          ],
+        },
+        undefined,
+      ]
+    }
+  >
+    <View
+      className="absolute inset-0"
+      pointerEvents="none"
+      style={
+        [
+          {
+            "opacity": 0,
+          },
+          {
+            "backgroundColor": "rgba(0, 0, 0, 1)",
+          },
+        ]
+      }
+    />
+    <View
+      className="relative flex-row items-center justify-center border-none grow-0 bg-f0-background-accent-bold h-9 rounded gap-1 px-2 sm:px-3 lg:px-4"
+    >
+      <View
+        className="opacity-100"
+        testID="f0-button-content"
+      >
+        <View
+          className="flex-row items-center justify-center gap-1"
+        >
+          <Text
+            className="no-underline normal-case tracking-normal text-[16px] leading-[24px] font-medium text-f0-foreground-inverse text-left"
+          >
+            👋
+          </Text>
+          <Text
+            className="no-underline normal-case tracking-normal text-[16px] leading-[24px] font-medium text-f0-foreground-inverse text-left"
+          >
+            Test Button
+          </Text>
+        </View>
+      </View>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`F0Button Snapshot - with icon 1`] = `
+<View
+  className="flex items-start"
+>
+  <View
+    accessibilityLabel="Test Button"
+    accessibilityRole="button"
+    accessibilityState={
+      {
+        "busy": false,
+        "checked": undefined,
+        "disabled": false,
+        "expanded": undefined,
+        "selected": undefined,
+      }
+    }
+    accessibilityValue={
+      {
+        "max": undefined,
+        "min": undefined,
+        "now": undefined,
+        "text": undefined,
+      }
+    }
+    accessible={true}
+    className="overflow-hidden"
+    collapsable={false}
+    focusable={true}
+    onBlur={[Function]}
+    onClick={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      [
+        {
+          "transform": [
+            {
+              "scale": 1,
+            },
+          ],
+        },
+        undefined,
+      ]
+    }
+  >
+    <View
+      className="absolute inset-0"
+      pointerEvents="none"
+      style={
+        [
+          {
+            "opacity": 0,
+          },
+          {
+            "backgroundColor": "rgba(0, 0, 0, 1)",
+          },
+        ]
+      }
+    />
+    <View
+      className="relative flex-row items-center justify-center border-none grow-0 bg-f0-background-accent-bold h-9 rounded gap-1 px-2 sm:px-3 lg:px-4"
+    >
+      <View
+        className="opacity-100"
+        testID="f0-button-content"
+      >
+        <View
+          className="flex-row items-center justify-center gap-1"
+        >
+          <Text
+            className="no-underline normal-case tracking-normal text-[16px] leading-[24px] font-medium text-f0-foreground-inverse text-left"
+          >
+            Test Button
+          </Text>
+        </View>
+      </View>
+    </View>
+  </View>
+</View>
+`;

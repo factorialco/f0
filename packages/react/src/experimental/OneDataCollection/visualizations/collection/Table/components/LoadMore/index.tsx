@@ -62,6 +62,7 @@ const LoadMoreRowInner = <
   const formattedColumns = props.columns.map((column) => ({
     ...column,
     render: () => "",
+    editType: () => "display-only" as const,
   }))
 
   return (

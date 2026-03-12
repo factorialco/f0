@@ -1,5 +1,7 @@
 import { forwardRef } from "react"
 
+import type { TableVisualizationType } from "@/experimental/OneDataCollection/types"
+
 import { FiltersDefinition } from "@/components/OneFilterPicker/types"
 import { ItemActionsMobile } from "@/experimental/OneDataCollection/components/itemActions/ItemActionsMobile/ItemActionsMobile"
 import { ItemActionsRowContainer } from "@/experimental/OneDataCollection/components/itemActions/ItemActionsRowContainer"
@@ -20,12 +22,14 @@ import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { Checkbox } from "@/ui/checkbox"
 
-import { ItemActionsRow } from "../../../../components/itemActions/ItemActionsRow/ItemActionsRow"
 import type {
   CellRendererProps,
+  ReferenceType,
   RowWrapperProps,
   TableColumnDefinition,
 } from "../types"
+
+import { ItemActionsRow } from "../../../../components/itemActions/ItemActionsRow/ItemActionsRow"
 import { useSticky } from "../useSticky"
 import { NestedRow } from "./NestedRow"
 
@@ -60,10 +64,15 @@ export type RowProps<
   tableWithChildren: boolean
   nestedRowProps?: NestedRowProps
   disableHover?: boolean
+  /** Optional predicate to mark a row as reference row with slanted background pattern. */
+  referenceRowType?: (item: R) => ReferenceType
   /** Optional custom cell renderer. When provided, wraps each cell's content. */
-  cellRenderer?: React.ComponentType<CellRendererProps<R, Sortings, Summaries>>
+  cellRenderer?: React.ComponentType<
+    CellRendererProps<R, Sortings, Summaries> & { isLastColumn?: boolean }
+  >
   /** Row wrapper passed through to NestedRow for wrapping child rows */
   rowWrapper?: React.ComponentType<RowWrapperProps<R>>
+  fromVisualization?: TableVisualizationType
 }
 
 export type NestedRowProps = {
@@ -76,6 +85,12 @@ export type NestedRowProps = {
   parentHasChildren?: boolean
   onExpand?: () => void
   onLoadMoreChildren?: () => void
+}
+
+const referenceTypeClasses: Record<ReferenceType, string> = {
+  none: "",
+  striped:
+    "bg-[repeating-linear-gradient(45deg,transparent_0px,transparent_8px,hsl(var(--neutral-20))_8px,hsl(var(--neutral-20))_9px)] [background-size:100%_100px]",
 }
 
 const RowComponentInner = <
@@ -102,8 +117,10 @@ const RowComponentInner = <
     nestedRowProps,
     tableWithChildren,
     disableHover = false,
+    referenceRowType: referenceRowTypeFn,
     cellRenderer: CellRenderer,
     rowWrapper,
+    fromVisualization,
   }: RowProps<
     R,
     Filters,
@@ -164,14 +181,24 @@ const RowComponentInner = <
         groupIndex={groupIndex}
         nestedRowProps={nestedRowProps}
         tableWithChildren={tableWithChildren}
+        referenceRowType={referenceRowTypeFn}
         cellRenderer={CellRenderer}
         rowWrapper={rowWrapper}
         key={key}
+        fromVisualization={fromVisualization}
       />
     )
   }
 
   const isSelected = id !== undefined && selectedItems.has(id)
+  const referenceRowType = referenceRowTypeFn?.(item) ?? "none"
+
+  const cellRenderedClass = CellRenderer
+    ? cn(
+        "h-[48px] p-0 align-middle last:pr-0",
+        !tableWithChildren && "first:pl-0"
+      )
+    : undefined
 
   return (
     <TableRow
@@ -182,7 +209,8 @@ const RowComponentInner = <
         "after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-px after:w-full after:bg-f1-border-secondary after:content-['']",
         noBorder && "after:bg-white-100",
         disableHover && "hover:bg-transparent",
-        isSelected && "bg-f1-background-selected-secondary"
+        isSelected && "bg-f1-background-selected-secondary",
+        referenceTypeClasses[referenceRowType]
       )}
     >
       {source.selectable && (
@@ -190,9 +218,14 @@ const RowComponentInner = <
           width={checkColumnWidth}
           sticky={{ left: 0 }}
           loading={loading}
+          className={cn(
+            loading && tableWithChildren ? "first:pl-4" : "",
+            cellRenderedClass
+          )}
+          referenceRowType={referenceRowType}
         >
           {id !== undefined && (
-            <div className="pointer-events-auto ml-1.5 flex items-center justify-start">
+            <div className="pointer-events-auto ml-1.5 flex h-full items-center justify-start">
               <Checkbox
                 checked={selectedItems.has(id)}
                 onCheckedChange={onCheckedChange}
@@ -229,10 +262,21 @@ const RowComponentInner = <
               ...nestedRowProps,
               rowWithChildren,
               tableWithChildren,
+              selectableRow: !!source.selectable,
             }}
+            className={cellRenderedClass}
+            fromVisualization={fromVisualization}
+            referenceRowType={referenceRowType}
           >
             {CellRenderer ? (
-              <CellRenderer item={item} column={column} cellIndex={cellIndex}>
+              <CellRenderer
+                item={item}
+                isLastColumn={
+                  !hasItemActions && cellIndex === columns.length - 1
+                }
+                column={column}
+                cellIndex={cellIndex}
+              >
                 {defaultContent}
               </CellRenderer>
             ) : (
@@ -293,7 +337,10 @@ const Row = forwardRef(RowComponentInner) as <
     ItemActions,
     NavigationFilters,
     Grouping
-  > & { ref?: React.ForwardedRef<HTMLTableRowElement> }
+  > & {
+    ref?: React.ForwardedRef<HTMLTableRowElement>
+    fromVisualization?: TableVisualizationType
+  }
 ) => ReturnType<typeof RowComponentInner>
 
 export { Row }

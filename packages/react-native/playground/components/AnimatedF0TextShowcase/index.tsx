@@ -20,7 +20,7 @@ import {
   withTiming,
 } from "react-native-reanimated"
 
-import { PressableFeedback } from "../../../src/components/PressableFeedback"
+import { PressableFeedback } from "../../../src/components/primitives/PressableFeedback"
 import { AnimatedF0Text } from "../../../src/components/primitives/F0Text"
 import { F0Text } from "../../../src/components/primitives/F0Text"
 

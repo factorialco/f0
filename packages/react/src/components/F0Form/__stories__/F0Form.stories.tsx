@@ -9,6 +9,12 @@ import { useF0FormDefinition } from "@/components/F0WizardForm"
 import { createDataSourceDefinition } from "@/hooks/datasource"
 import { ExternalLink, Plus, Settings } from "@/icons/app"
 
+import type {
+  FileUploadHookReturn,
+  FileUploadResult,
+  FileUploadStatus,
+} from "../fields/types"
+
 import {
   f0FormField,
   F0Form,
@@ -16,18 +22,13 @@ import {
   CustomFieldRenderProps,
   useF0Form,
 } from "../index"
-import type {
-  FileUploadHookReturn,
-  FileUploadResult,
-  FileUploadStatus,
-} from "../fields/types"
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
 const meta: Meta = {
-  title: "Experimental/F0Form",
+  title: "Forms/F0Form",
   component: F0Form,
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs"],
   parameters: { a11y: { skipCi: true } },
 }
 
@@ -536,7 +537,7 @@ export const AllFieldTypes: Story = {
         label: "Number Field",
         step: 1,
       }),
-      textareaField: f0FormField(z.string().max(500), {
+      textareaField: f0FormField(z.string().min(1).max(500), {
         label: "Textarea Field",
         fieldType: "textarea",
         rows: 3,
@@ -585,12 +586,12 @@ export const AllFieldTypes: Story = {
         fieldType: "switch",
         helpText: "Toggle this switch",
       }),
-      dateField: f0FormField(z.date().optional(), {
+      dateField: f0FormField(z.date(), {
         label: "Date Field",
         placeholder: "Select a date",
         granularities: ["day"],
       }),
-      timeField: f0FormField(z.date().optional(), {
+      timeField: f0FormField(z.date(), {
         label: "Time Field",
         fieldType: "time",
         helpText: "Select a time (HH:mm)",
@@ -601,12 +602,10 @@ export const AllFieldTypes: Story = {
         helpText: "Select date and time",
       }),
       dateRangeField: f0FormField(
-        z
-          .object({
-            from: z.date(),
-            to: z.date(),
-          })
-          .optional(),
+        z.object({
+          from: z.date(),
+          to: z.date(),
+        }),
         {
           label: "Date Range Field",
           placeholder: "Select date range",
@@ -617,7 +616,7 @@ export const AllFieldTypes: Story = {
       ),
       richTextField: f0FormField(
         z.object({
-          value: z.string().nullable(),
+          value: z.string().min(1),
           mentionIds: z.array(z.number()).optional(),
         }),
         {
@@ -648,7 +647,10 @@ export const AllFieldTypes: Story = {
         timeField: undefined,
         datetimeField: undefined,
         dateRangeField: undefined,
-        richTextField: { value: null },
+        richTextField: { value: "" },
+      },
+      submitConfig: {
+        type: "action-bar",
       },
       onSubmit: async ({ data }) => {
         await sleep(1000)
@@ -781,7 +783,7 @@ export const AllFieldTypesDisabled: Story = {
       ),
       richTextField: f0FormField(
         z.object({
-          value: z.string().nullable(),
+          value: z.string(),
           mentionIds: z.array(z.number()).optional(),
         }),
         {

@@ -1,5 +1,103 @@
 # Changelog
 
+## [1.400.0](https://github.com/factorialco/f0/compare/f0-react-v1.399.0...f0-react-v1.400.0) (2026-03-12)
+
+
+### Features
+
+* **EditableTable:** add date cell type with F0DatePicker integration ([#3600](https://github.com/factorialco/f0/issues/3600)) ([b49a804](https://github.com/factorialco/f0/commit/b49a8043e88e538139c85acca895f97c57e1cede))
+
+## [1.399.0](https://github.com/factorialco/f0/compare/f0-react-v1.398.0...f0-react-v1.399.0) (2026-03-11)
+
+
+### Features
+
+* editable table - nested design fixes ([#3588](https://github.com/factorialco/f0/issues/3588)) ([ed9969f](https://github.com/factorialco/f0/commit/ed9969f0ba1fea53fa6b21a704a2ec6ce018f794))
+
+## [1.398.0](https://github.com/factorialco/f0/compare/f0-react-v1.397.0...f0-react-v1.398.0) (2026-03-11)
+
+
+### Features
+
+* survey answering component ([#3610](https://github.com/factorialco/f0/issues/3610)) ([5b72edf](https://github.com/factorialco/f0/commit/5b72edf218f23796acbdf70fe8a458c112970d48))
+
+## [1.397.0](https://github.com/factorialco/f0/compare/f0-react-v1.396.0...f0-react-v1.397.0) (2026-03-11)
+
+
+### Features
+
+* **F0AnalyticsDashboard:** add all chart types + rewrite stories as reference catalog ([#3617](https://github.com/factorialco/f0/issues/3617)) ([193a9fe](https://github.com/factorialco/f0/commit/193a9fe574ca5c990e1261ee0478d951a8221d5f))
+
+## [1.396.0](https://github.com/factorialco/f0/compare/f0-react-v1.395.0...f0-react-v1.396.0) (2026-03-11)
+
+
+### Features
+
+* add delta display cell ([#3574](https://github.com/factorialco/f0/issues/3574)) ([3d943d8](https://github.com/factorialco/f0/commit/3d943d8ce9f7bb26772836768efb9fa64e36b1ae))
+
+## [1.395.0](https://github.com/factorialco/f0/compare/f0-react-v1.394.1...f0-react-v1.395.0) (2026-03-11)
+
+
+### Features
+
+* data collection reference row ([#3585](https://github.com/factorialco/f0/issues/3585)) ([820243f](https://github.com/factorialco/f0/commit/820243f2c16bf2032d8e1aeb90c61b9ee09b3b7e))
+
+## [1.394.1](https://github.com/factorialco/f0/compare/f0-react-v1.394.0...f0-react-v1.394.1) (2026-03-10)
+
+
+### Bug Fixes
+
+* ai mask ([#3624](https://github.com/factorialco/f0/issues/3624)) ([ae91869](https://github.com/factorialco/f0/commit/ae918695719eb0b51619b4abd0399e574a3f6357))
+
+## [1.394.0](https://github.com/factorialco/f0/compare/f0-react-v1.393.0...f0-react-v1.394.0) (2026-03-10)
+
+
+### Features
+
+* **F0DataChart:** add unified chart component with multiple chart types ([#3613](https://github.com/factorialco/f0/issues/3613)) ([aa4e5e0](https://github.com/factorialco/f0/commit/aa4e5e07ee02f6bf4c17763e2247b46711e5d9a0))
+
+## [1.393.0](https://github.com/factorialco/f0/compare/f0-react-v1.392.1...f0-react-v1.393.0) (2026-03-10)
+
+
+### Features
+
+* editable tables design ([#3539](https://github.com/factorialco/f0/issues/3539)) ([22cf18d](https://github.com/factorialco/f0/commit/22cf18df5d9be1c0bfffe640cabe22e16d7a3f04))
+
+## [1.392.1](https://github.com/factorialco/f0/compare/f0-react-v1.392.0...f0-react-v1.392.1) (2026-03-09)
+
+
+### Bug Fixes
+
+* Adding new follow up props to Frontend tools ([#3589](https://github.com/factorialco/f0/issues/3589)) ([0a96517](https://github.com/factorialco/f0/commit/0a96517d78c3289bb849f9fa6b8d20f5822852b8))
+
+## [1.392.0](https://github.com/factorialco/f0/compare/f0-react-v1.391.0...f0-react-v1.392.0) (2026-03-09)
+
+
+### Features
+
+* AI Mask Effect Component ([#3603](https://github.com/factorialco/f0/issues/3603)) ([b491de7](https://github.com/factorialco/f0/commit/b491de7cbed38de96db744f74a85e2cf99ecf9c7))
+
+## [1.391.0](https://github.com/factorialco/f0/compare/f0-react-v1.390.2...f0-react-v1.391.0) (2026-03-09)
+
+
+### Features
+
+* add onAddRow button to EditableTable and nested rows ([#3576](https://github.com/factorialco/f0/issues/3576)) ([a83b94a](https://github.com/factorialco/f0/commit/a83b94abc857844185ec42590c779cdf19176b6e))
+
+## [1.390.2](https://github.com/factorialco/f0/compare/f0-react-v1.390.1...f0-react-v1.390.2) (2026-03-06)
+
+
+### Bug Fixes
+
+* error highlight animations & validation fixes across all field types in F0Form ([#3597](https://github.com/factorialco/f0/issues/3597)) ([095fc17](https://github.com/factorialco/f0/commit/095fc17c136556bfd5e1a86207a8f6b1baab732a))
+
+## [1.390.1](https://github.com/factorialco/f0/compare/f0-react-v1.390.0...f0-react-v1.390.1) (2026-03-06)
+
+
+### Bug Fixes
+
+* add dark mode to storybook in preview mode ([#3599](https://github.com/factorialco/f0/issues/3599)) ([b403daf](https://github.com/factorialco/f0/commit/b403dafa8b464f4455bff6e0b899a57790da1b85))
+
 ## [1.390.0](https://github.com/factorialco/f0/compare/f0-react-v1.389.0...f0-react-v1.390.0) (2026-03-05)
 
 
