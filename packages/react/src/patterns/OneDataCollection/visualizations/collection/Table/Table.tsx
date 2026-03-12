@@ -653,11 +653,13 @@ export const TableCollection = <
                           onOpenChange={(open) => setGroupOpen(group.key, open)}
                         />
                       </TableCell>
-                      <TableCell
-                        colSpan={columns.length - (frozenColumnsLeft || 1)}
-                      >
-                        &nbsp;
-                      </TableCell>
+                      {columns.length - (frozenColumnsLeft || 1) > 0 && (
+                        <TableCell
+                          colSpan={columns.length - (frozenColumnsLeft || 1)}
+                        >
+                          &nbsp;
+                        </TableCell>
+                      )}
                     </TableRow>
 
                     <AnimatePresence key={`group-animate-${groupIndex}`}>
