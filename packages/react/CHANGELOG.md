@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.401.1](https://github.com/factorialco/f0/compare/f0-react-v1.401.0...f0-react-v1.401.1) (2026-03-12)
+
+
+### Bug Fixes
+
+* UI improvements in survey answering form component ([#3648](https://github.com/factorialco/f0/issues/3648)) ([8351016](https://github.com/factorialco/f0/commit/83510169d59e8ea43409ba2b04679de7bcd1d183))
+
 ## [1.401.0](https://github.com/factorialco/f0/compare/f0-react-v1.400.0...f0-react-v1.401.0) (2026-03-12)
 
 
