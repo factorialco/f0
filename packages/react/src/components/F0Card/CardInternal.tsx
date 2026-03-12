@@ -39,7 +39,7 @@ export const cardImageSizes = ["xs", "sm", "md", "lg", "xl"] as const
 
 export type CardImageSize = (typeof cardImageSizes)[number]
 
-export const cardImageAspectRatios = ["16/9"] as const
+export const cardImageAspectRatios = ["default", "video"] as const
 
 export type CardImageAspectRatio = (typeof cardImageAspectRatios)[number]
 
@@ -82,7 +82,7 @@ export interface CardInternalProps {
   /**
    * Constrain the image container to a fixed aspect ratio instead of a fixed height.
    * When set, `imageSize` is ignored for height.
-   * @example "16/9"
+   * @example "video"
    */
   imageAspectRatio?: CardImageAspectRatio
 
@@ -193,7 +193,7 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
       image,
       imageFit = "fit-width",
       imageSize = "sm",
-      imageAspectRatio,
+      imageAspectRatio = "default",
       blurredBackground = true,
       title,
       description,
@@ -257,7 +257,7 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
           <div
             className={cn(
               "relative -mx-3 -mt-3 mb-4 rounded-md",
-              imageAspectRatio === "16/9"
+              imageAspectRatio === "video"
                 ? "aspect-video"
                 : imageSizeClassMap[imageSize],
               compact && "-mx-2 -mt-2 mb-3",

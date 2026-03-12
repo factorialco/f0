@@ -314,7 +314,7 @@ export const WithAspectRatio16x9: Story = {
   args: {
     ...Default.args,
     image: imageTypes.wide,
-    imageAspectRatio: "16/9",
+    imageAspectRatio: "video",
     imageFit: "cover",
   },
 }
