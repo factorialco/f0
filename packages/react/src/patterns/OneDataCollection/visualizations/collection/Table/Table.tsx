@@ -612,21 +612,41 @@ export const TableCollection = <
                 return (
                   <Fragment key={`group-${group.key}`}>
                     <TableRow key={`group-header-${group.key}`} sticky>
+                      {source.selectable && (
+                        <TableCell
+                          width={checkColumnWidth}
+                          sticky={{ left: 0 }}
+                        >
+                          <div className="ml-1.5 flex items-center justify-start">
+                            <F0Checkbox
+                              checked={
+                                !!statusToChecked(
+                                  groupAllSelectedStatus[group.key]
+                                )
+                              }
+                              indeterminate={
+                                statusToChecked(
+                                  groupAllSelectedStatus[group.key]
+                                ) === "indeterminate"
+                              }
+                              title="Select all"
+                              hideLabel
+                              onCheckedChange={(checked) =>
+                                handleSelectGroupChange(group, checked)
+                              }
+                            />
+                          </div>
+                        </TableCell>
+                      )}
                       <TableCell
-                        sticky={{ left: 0 }}
-                        colSpan={
-                          (frozenColumnsLeft || 1) + (source.selectable ? 1 : 0)
-                        }
+                        sticky={{
+                          left: source.selectable ? checkColumnWidth : 0,
+                        }}
+                        colSpan={frozenColumnsLeft || 1}
                       >
                         <GroupHeader
-                          className={source.selectable ? "pl-1.5 pr-3" : "px-3"}
-                          selectable={!!source.selectable}
-                          select={statusToChecked(
-                            groupAllSelectedStatus[group.key]
-                          )}
-                          onSelectChange={(checked) =>
-                            handleSelectGroupChange(group, checked)
-                          }
+                          className="px-3"
+                          selectable={false}
                           showOpenChange={collapsible}
                           label={group.label}
                           itemCount={itemCount}
