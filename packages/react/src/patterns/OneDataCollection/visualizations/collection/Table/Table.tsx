@@ -643,9 +643,9 @@ export const TableCollection = <
                           left: source.selectable ? checkColumnWidth : 0,
                         }}
                         colSpan={frozenColumnsLeft || 1}
+                        className="pl-3"
                       >
                         <GroupHeader
-                          className="px-3"
                           selectable={false}
                           showOpenChange={collapsible}
                           label={group.label}
