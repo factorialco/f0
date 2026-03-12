@@ -37,39 +37,6 @@ export function fieldsToSeconds(fields: DurationFields): number {
   }, 0)
 }
 
-export function getAutoMax(
-  unit: DurationUnit,
-  visibleUnits: DurationUnit[]
-): number | undefined {
-  const unitIndex = UNIT_ORDER.indexOf(unit)
-  if (unitIndex <= 0) {
-    return undefined
-  }
-
-  let coarserVisible: DurationUnit | undefined
-  for (let i = unitIndex - 1; i >= 0; i -= 1) {
-    const candidate = UNIT_ORDER[i]
-    if (visibleUnits.includes(candidate)) {
-      coarserVisible = candidate
-      break
-    }
-  }
-
-  if (!coarserVisible) {
-    return undefined
-  }
-
-  const coarserSeconds = SECONDS_PER_UNIT[coarserVisible]
-  const unitSeconds = SECONDS_PER_UNIT[unit]
-  const ratio = coarserSeconds / unitSeconds
-
-  if (!Number.isFinite(ratio) || ratio <= 0) {
-    return undefined
-  }
-
-  return Math.floor(ratio) - 1
-}
-
 export function secondsToVisibleFields(
   totalSeconds: number,
   visibleUnits: DurationUnit[]

@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
@@ -40,13 +40,26 @@ type Story = StoryObj<typeof F0DurationInput>
 
 export const Default: Story = {
   render: (args) => {
+    const { label: labelArg, onChange: onChangeArg, ...restArgs } = args
     const [value, setValue] = useState(args.value ?? 5400)
+
+    useEffect(() => {
+      if (args.value !== undefined) {
+        setValue(args.value)
+      }
+    }, [args.value])
+
+    const handleChange = (nextValue: number) => {
+      setValue(nextValue)
+      onChangeArg?.(nextValue)
+    }
+
     return (
       <F0DurationInput
-        {...args}
-        label="Duration"
+        {...restArgs}
+        label={labelArg ?? "Duration"}
         value={value}
-        onChange={setValue}
+        onChange={handleChange}
       />
     )
   },
