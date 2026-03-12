@@ -2,15 +2,17 @@ import { useCopilotChatInternal as useCopilotChat } from "@copilotkit/react-core
 import { type MessagesProps } from "@copilotkit/react-ui"
 import { type Message } from "@copilotkit/shared"
 import { AnimatePresence, motion } from "motion/react"
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { useMemo, useRef } from "react"
 
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { ArrowDown } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
+import { Skeleton } from "@/ui/skeleton"
 
 import { F0ActionItem } from "../../F0ActionItem"
 import { F0Thinking as Thinking } from "../../F0Thinking"
+import { useMessageScroll } from "../hooks/useMessageScroll"
 import { useAiChat } from "../providers/AiChatStateProvider"
 import {
   FeedbackModalProvider,
@@ -43,7 +45,12 @@ const Messages = ({
   const { modal, handleSubmit, handleClose } = useFeedbackSubmit()
 
   const translations = useI18n()
-  const { greeting, initialMessage, welcomeScreenSuggestions } = useAiChat()
+  const {
+    greeting,
+    initialMessage,
+    welcomeScreenSuggestions,
+    isLoadingThread,
+  } = useAiChat()
 
   const initialMessages = useMemo(
     () =>
@@ -63,63 +70,14 @@ const Messages = ({
   const endRef = useRef<HTMLDivElement>(null)
   const contentEndRef = useRef<HTMLDivElement>(null)
   const lastTurnRef = useRef<HTMLDivElement>(null)
-  const prevTurnsCountRef = useRef(turns.length)
-  const [turnMinHeight, setTurnMinHeight] = useState(0)
-  const [showScrollBtn, setShowScrollBtn] = useState(false)
 
-  const scrollToBottom = useCallback((behavior: ScrollBehavior = "smooth") => {
-    endRef.current?.scrollIntoView({ behavior })
-  }, [])
-
-  // Measure usable height for the last turn: viewport height minus the content wrapper's bottom padding
-  useEffect(() => {
-    const viewport = viewportRef.current
-    const content = contentRef.current
-    if (!viewport || !content) return
-    const observer = new ResizeObserver(() => {
-      const py =
-        parseFloat(getComputedStyle(content).paddingTop) +
-        parseFloat(getComputedStyle(content).paddingBottom) +
-        1 // -1 for the sentinel element
-      setTurnMinHeight(viewport.clientHeight - py)
-    })
-    observer.observe(viewport)
-    observer.observe(content)
-    return () => observer.disconnect()
-  }, [])
-
-  // Scroll tracking
-  const handleScroll = useCallback(() => {
-    const el = viewportRef.current
-    if (!el) return
-    const { scrollTop, scrollHeight, clientHeight } = el
-    const distanceFromBottom = scrollHeight - scrollTop - clientHeight
-    setShowScrollBtn(distanceFromBottom > clientHeight)
-  }, [])
-
-  useEffect(() => {
-    const el = viewportRef.current
-    if (!el) return
-    el.addEventListener("scroll", handleScroll, { passive: true })
-    return () => el.removeEventListener("scroll", handleScroll)
-  }, [handleScroll])
-
-  // Auto-scroll the last turn to the top when the user sends a message
-  useEffect(() => {
-    if (turns.length > prevTurnsCountRef.current) {
-      requestAnimationFrame(() => {
-        lastTurnRef.current?.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
-        })
-      })
-    }
-    // Reset scroll state when conversation is cleared
-    if (turns.length === 0) {
-      setShowScrollBtn(false)
-    }
-    prevTurnsCountRef.current = turns.length
-  }, [turns.length])
+  const { showScrollBtn, turnMinHeight, scrollToBottom } = useMessageScroll({
+    viewportRef,
+    contentRef,
+    endRef,
+    lastTurnRef,
+    turnsCount: turns.length,
+  })
 
   return (
     <>
@@ -141,89 +99,93 @@ const Messages = ({
           >
             <div
               className={cn(
-                showWelcomeBlock ? "flex flex-1" : "flex flex-col gap-6",
+                showWelcomeBlock && !isLoadingThread
+                  ? "flex flex-1"
+                  : "flex flex-col gap-6",
                 "w-full max-w-[712px]"
               )}
             >
-              {showWelcomeBlock && (
+              {isLoadingThread && <MessagesSkeleton />}
+              {!isLoadingThread && showWelcomeBlock && (
                 <WelcomeScreen
                   greeting={greeting}
                   initialMessages={initialMessages}
                   suggestions={welcomeScreenSuggestions}
                 />
               )}
-              {turns.map((turnMessages, turnIndex) => {
-                const { turnIsComplete, showActivityIndicator } = analyzeTurn(
-                  turnMessages,
-                  turnIndex,
-                  turns.length,
-                  inProgress
-                )
+              {!isLoadingThread &&
+                turns.map((turnMessages, turnIndex) => {
+                  const { turnIsComplete, showActivityIndicator } = analyzeTurn(
+                    turnMessages,
+                    turnIndex,
+                    turns.length,
+                    inProgress
+                  )
 
-                return (
-                  <div
-                    ref={
-                      turnIndex === turns.length - 1 ? lastTurnRef : undefined
-                    }
-                    className={cn(
-                      "flex flex-col items-start justify-start gap-2",
-                      turnIndex === turns.length - 1 && "pb-5"
-                    )}
-                    key={`turn-${turnIndex}`}
-                    style={{
-                      minHeight:
-                        turnIndex === turns.length - 1
-                          ? turnMinHeight || undefined
-                          : undefined,
-                    }}
-                  >
-                    {turnMessages.map((message, index) => {
-                      const isCurrentMessage =
-                        turnIndex === turns.length - 1 &&
-                        index === turnMessages.length - 1
+                  return (
+                    <div
+                      ref={
+                        turnIndex === turns.length - 1 ? lastTurnRef : undefined
+                      }
+                      className={cn(
+                        "flex flex-col items-start justify-start gap-2",
+                        turnIndex === turns.length - 1 && "pb-5"
+                      )}
+                      key={`turn-${turnIndex}`}
+                      style={{
+                        minHeight:
+                          turnIndex === turns.length - 1
+                            ? turnMinHeight || undefined
+                            : undefined,
+                      }}
+                    >
+                      {turnMessages.map((message, index) => {
+                        const isCurrentMessage =
+                          turnIndex === turns.length - 1 &&
+                          index === turnMessages.length - 1
 
-                      if (Array.isArray(message) && !isCurrentMessage) {
+                        if (Array.isArray(message) && !isCurrentMessage) {
+                          return (
+                            <Thinking
+                              key={`${turnIndex}-${index}`}
+                              messages={message}
+                              isActive={false}
+                              inProgress={inProgress}
+                              RenderMessage={RenderMessage}
+                              AssistantMessage={AssistantMessage}
+                            />
+                          )
+                        }
+
                         return (
-                          <Thinking
+                          <RenderMessage
                             key={`${turnIndex}-${index}`}
-                            messages={message}
-                            isActive={false}
+                            message={
+                              Array.isArray(message)
+                                ? message[message.length - 1]
+                                : message
+                            }
                             inProgress={inProgress}
-                            RenderMessage={RenderMessage}
+                            index={index}
+                            isCurrentMessage={isCurrentMessage}
                             AssistantMessage={AssistantMessage}
+                            UserMessage={UserMessage}
+                            ImageRenderer={ImageRenderer}
+                            onRegenerate={onRegenerate}
+                            onCopy={onCopy}
+                            markdownTagRenderers={markdownTagRenderers}
                           />
                         )
-                      }
-
-                      return (
-                        <RenderMessage
-                          key={`${turnIndex}-${index}`}
-                          message={
-                            Array.isArray(message)
-                              ? message[message.length - 1]
-                              : message
-                          }
-                          inProgress={inProgress}
-                          index={index}
-                          isCurrentMessage={isCurrentMessage}
-                          AssistantMessage={AssistantMessage}
-                          UserMessage={UserMessage}
-                          ImageRenderer={ImageRenderer}
-                          onRegenerate={onRegenerate}
-                          onCopy={onCopy}
-                          markdownTagRenderers={markdownTagRenderers}
-                        />
-                      )
-                    })}
-                    {showActivityIndicator && (
-                      <F0ActionItem title="" status="executing" />
-                    )}
-                    {turnIsComplete && (
-                      <TurnFeedback messages={turnMessages} onCopy={onCopy} />
-                    )}
-                  </div>
-                )
-              })}
+                      })}
+                      {showActivityIndicator && (
+                        <F0ActionItem title="" status="executing" />
+                      )}
+                      {turnIsComplete && (
+                        <TurnFeedback messages={turnMessages} onCopy={onCopy} />
+                      )}
+                    </div>
+                  )
+                })}
               {interrupt}
             </div>
 
@@ -273,6 +235,19 @@ const Messages = ({
     </>
   )
 }
+
+const MessagesSkeleton = () => (
+  <div className="flex h-full w-full max-w-[712px] flex-col gap-6">
+    <div className="flex flex-col gap-2">
+      <div className="flex justify-end">
+        <Skeleton className="h-12 w-2/5 rounded-full" />
+      </div>
+      <Skeleton className="mt-6 h-5 w-full rounded-md" />
+      <Skeleton className="h-5 w-2/5 rounded-md" />
+      <Skeleton className="h-5 w-4/5 rounded-md" />
+    </div>
+  </div>
+)
 
 function makeInitialMessages(initial?: string | string[]): Message[] {
   if (!initial) return []

@@ -8,6 +8,12 @@ import { F0ChatReportCard } from "../F0ChatReportCard"
 const sampleConfig: ChatDashboardConfig = {
   title: "Headcount Overview",
   description: "Company-wide headcount breakdown",
+  fetchSpecs: {
+    employees: {
+      fetch: [{ toolId: "fetchEmployees", args: {} }],
+      query: "SELECT * FROM fetchemployees",
+    },
+  },
   items: [
     {
       id: "chart-1",

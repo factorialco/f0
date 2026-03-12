@@ -27,6 +27,8 @@ export const F0AnalyticsDashboard = <
   presets,
   defaultFilters,
   items,
+  editMode,
+  onLayoutChange,
 }: F0AnalyticsDashboardProps<Filters>) => {
   const [currentFilters, setCurrentFilters] = useState<FiltersState<Filters>>(
     () => defaultFilters ?? ({} as FiltersState<Filters>)
@@ -40,7 +42,12 @@ export const F0AnalyticsDashboard = <
         presets={presets}
         onChange={setCurrentFilters}
       />
-      <DashboardGrid items={items} filters={currentFilters} />
+      <DashboardGrid
+        items={items}
+        filters={currentFilters}
+        editMode={editMode}
+        onLayoutChange={onLayoutChange}
+      />
     </div>
   )
 }

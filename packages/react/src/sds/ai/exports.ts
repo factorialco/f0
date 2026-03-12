@@ -15,7 +15,6 @@ export type {
   ChatDashboardCollectionItem,
   ChatDashboardColumn,
   ChatDashboardConfig,
-  ChatDashboardDataset,
   ChatDashboardFilterDefinition,
   ChatDashboardFunnelChartConfig,
   ChatDashboardItem,
@@ -24,6 +23,7 @@ export type {
   ChatDashboardMetricItem,
   ChartComputation,
   CollectionComputation,
+  DashboardFetchSpec,
   FormatPreset,
   MetricComputation,
 } from "./F0ChatDashboard/types"

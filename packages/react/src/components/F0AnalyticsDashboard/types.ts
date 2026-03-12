@@ -290,6 +290,20 @@ export type DashboardItem<
   | DashboardCollectionItem<Filters>
 
 // ---------------------------------------------------------------------------
+// Layout change descriptor — emitted by edit mode callbacks
+// ---------------------------------------------------------------------------
+
+/**
+ * Minimal descriptor of a dashboard item's position and size.
+ * Used by `onLayoutChange` so the consumer can reconcile layout
+ * edits against its own source-of-truth config items.
+ */
+export type DashboardItemLayout = {
+  id: string
+  colSpan: 1 | 2 | 3
+}
+
+// ---------------------------------------------------------------------------
 // Root component props
 // ---------------------------------------------------------------------------
 
@@ -324,4 +338,14 @@ export interface F0AnalyticsDashboardProps<
    * Each item declares its type, visual config, grid span, and data fetcher.
    */
   items: DashboardItem<Filters>[]
+  /**
+   * When true, enables drag-and-drop reordering, resize, and delete controls.
+   */
+  editMode?: boolean
+  /**
+   * Called when items are reordered, resized, or deleted in edit mode.
+   * Receives a layout descriptor (ordered list of { id, colSpan }) so
+   * the consumer can reconcile against the original config items.
+   */
+  onLayoutChange?: (layout: DashboardItemLayout[]) => void
 }

@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
 import { F0AnalyticsDashboard } from "@/components/F0AnalyticsDashboard/F0AnalyticsDashboard"
 import type {
@@ -6,6 +6,7 @@ import type {
   DashboardChartItem,
   DashboardCollectionItem,
   DashboardItem,
+  DashboardItemLayout,
   DashboardMetricItem,
 } from "@/components/F0AnalyticsDashboard/types"
 import type {
@@ -14,19 +15,12 @@ import type {
 } from "@/components/OneFilterPicker/types"
 import type { RecordType } from "@/hooks/datasource"
 
-import {
-  computeChartData,
-  computeCollectionRows,
-  computeMetricData,
-  getUniqueValues,
-} from "./computations"
+import { useDashboardCompute, type ItemResult } from "./useDashboardCompute"
 import type {
   ChatDashboardChartConfig,
   ChatDashboardChartItem,
   ChatDashboardCollectionItem,
   ChatDashboardConfig,
-  ChatDashboardDataset,
-  ChatDashboardFilterDefinition,
   ChatDashboardMetricItem,
   FormatPreset,
 } from "./types"
@@ -75,55 +69,6 @@ function buildFormatter(
 }
 
 // ---------------------------------------------------------------------------
-// Build F0AnalyticsDashboard filter definitions from LLM filter specs
-// ---------------------------------------------------------------------------
-
-function buildFilterDefinitions(
-  filterSpecs: Record<string, ChatDashboardFilterDefinition> | undefined,
-  datasets: Record<string, ChatDashboardDataset>
-): FiltersDefinition | undefined {
-  if (!filterSpecs || Object.keys(filterSpecs).length === 0) return undefined
-
-  const result: Record<
-    string,
-    {
-      type: "in"
-      label: string
-      options: { options: Array<{ value: string; label: string }> }
-    }
-  > = {}
-
-  for (const [key, spec] of Object.entries(filterSpecs)) {
-    const uniqueValues = getUniqueValues(datasets, spec.datasetId, spec.column)
-    result[key] = {
-      type: "in",
-      label: spec.label,
-      options: {
-        options: uniqueValues.map((v) => ({ value: v, label: v })),
-      },
-    }
-  }
-
-  return result as FiltersDefinition
-}
-
-// ---------------------------------------------------------------------------
-// Filter values converter — maps FiltersState to the shape computations expect
-// ---------------------------------------------------------------------------
-
-function toComputationFilters(
-  filtersState: FiltersState<FiltersDefinition>
-): Record<string, unknown[] | undefined> {
-  const result: Record<string, unknown[] | undefined> = {}
-  for (const [key, value] of Object.entries(filtersState)) {
-    if (Array.isArray(value)) {
-      result[key] = value as unknown[]
-    }
-  }
-  return result
-}
-
-// ---------------------------------------------------------------------------
 // Chat chart config → Dashboard chart config mapper
 // ---------------------------------------------------------------------------
 
@@ -151,140 +96,10 @@ function toDashboardChartConfig(
 }
 
 // ---------------------------------------------------------------------------
-// Item mapper factory — creates mappers bound to datasets + filter specs
+// Constants
 // ---------------------------------------------------------------------------
 
-function createChartItemMapper(
-  datasets: Record<string, ChatDashboardDataset>,
-  filterSpecs: Record<string, ChatDashboardFilterDefinition> | undefined
-) {
-  return (
-    item: ChatDashboardChartItem
-  ): DashboardChartItem<FiltersDefinition> => {
-    return {
-      id: item.id,
-      title: item.title,
-      description: item.description,
-      colSpan: item.colSpan,
-      type: "chart",
-      chart: toDashboardChartConfig(item.chart),
-      fetchData: (filters: FiltersState<FiltersDefinition>) => {
-        const filterValues = toComputationFilters(filters)
-        return Promise.resolve(
-          computeChartData(
-            item.computation,
-            datasets,
-            filterSpecs,
-            filterValues
-          )
-        )
-      },
-    }
-  }
-}
-
-function createMetricItemMapper(
-  datasets: Record<string, ChatDashboardDataset>,
-  filterSpecs: Record<string, ChatDashboardFilterDefinition> | undefined
-) {
-  return (
-    item: ChatDashboardMetricItem
-  ): DashboardMetricItem<FiltersDefinition> => {
-    return {
-      id: item.id,
-      title: item.title,
-      description: item.description,
-      colSpan: item.colSpan,
-      type: "metric",
-      format: item.format,
-      decimals: item.decimals,
-      fetchData: (filters: FiltersState<FiltersDefinition>) => {
-        const filterValues = toComputationFilters(filters)
-        return Promise.resolve(
-          computeMetricData(
-            item.computation,
-            datasets,
-            filterSpecs,
-            filterValues
-          )
-        )
-      },
-    }
-  }
-}
-
 const COLLECTION_PER_PAGE = 20
-
-function createCollectionItemMapper(
-  datasets: Record<string, ChatDashboardDataset>,
-  filterSpecs: Record<string, ChatDashboardFilterDefinition> | undefined
-) {
-  return (
-    item: ChatDashboardCollectionItem
-  ): DashboardCollectionItem<FiltersDefinition> => {
-    return {
-      id: item.id,
-      title: item.title,
-      description: item.description,
-      colSpan: item.colSpan ?? 3,
-      type: "collection",
-      createSource: (filters: FiltersState<FiltersDefinition>) => {
-        const filterValues = toComputationFilters(filters)
-        const allRows = computeCollectionRows(
-          item.computation,
-          datasets,
-          filterSpecs,
-          filterValues
-        ) as RecordType[]
-
-        return {
-          dataAdapter: {
-            paginationType: "pages" as const,
-            perPage: COLLECTION_PER_PAGE,
-            fetchData: ({
-              pagination,
-            }: {
-              filters: Record<string, unknown>
-              sortings: unknown
-              pagination: { currentPage: number; perPage?: number }
-            }) => {
-              const page = pagination?.currentPage ?? 1
-              const perPage = pagination?.perPage ?? COLLECTION_PER_PAGE
-              const start = (page - 1) * perPage
-              const pageRecords = allRows.slice(start, start + perPage)
-
-              return {
-                type: "pages" as const,
-                records: pageRecords,
-                total: allRows.length,
-                currentPage: page,
-                perPage,
-                pagesCount: Math.ceil(allRows.length / perPage),
-              }
-            },
-          },
-        }
-      },
-      visualizations: [
-        {
-          type: "table" as const,
-          options: {
-            columns: item.columns.map((col) => ({
-              label: col.label,
-              id: col.id,
-              ...(col.width ? { width: col.width } : {}),
-              render: (row: RecordType) => {
-                const value = row[col.id]
-                if (value == null) return "-"
-                return String(value)
-              },
-            })),
-          },
-        },
-      ],
-    }
-  }
-}
 
 // ---------------------------------------------------------------------------
 // Component
@@ -292,38 +107,111 @@ function createCollectionItemMapper(
 
 export interface F0ChatDashboardProps {
   config: ChatDashboardConfig
+  apiConfig: { baseUrl: string; headers: Record<string, string> }
+  refreshKey?: number
+  editMode?: boolean
+  onLayoutChange?: (layout: DashboardItemLayout[]) => void
 }
 
 /**
- * Renders an F0AnalyticsDashboard from a data-driven config.
+ * Renders an F0AnalyticsDashboard from a server-computed config.
  *
- * This wrapper bridges the gap between the LLM's declarative computation
- * specs and F0AnalyticsDashboard's async fetchData interface. Each item's
- * fetchData computes from the raw dataset, applying active filters
- * client-side before aggregation.
+ * All data computation happens server-side via POST /api/dashboard/compute.
+ * Multiple widget fetchData calls within the same filter state share a
+ * single batch request.
  */
-export function F0ChatDashboard({ config }: F0ChatDashboardProps) {
-  const datasets = config.datasets ?? {}
-  const filterSpecs = config.filters
-
-  const filterDefinitions = useMemo(
-    () => buildFilterDefinitions(filterSpecs, datasets),
-    [filterSpecs, datasets]
+export function F0ChatDashboard({
+  config,
+  apiConfig,
+  refreshKey = 0,
+  editMode,
+  onLayoutChange,
+}: F0ChatDashboardProps) {
+  const { fetchItem, getFilterOptions } = useDashboardCompute(
+    config,
+    apiConfig,
+    refreshKey
   )
 
-  const mapChartItem = useCallback(
-    createChartItemMapper(datasets, filterSpecs),
-    [datasets, filterSpecs]
-  )
+  // Filter options from the first compute response
+  const [filterOptions, setFilterOptions] = useState<
+    Record<string, string[]> | undefined
+  >()
 
-  const mapMetricItem = useCallback(
-    createMetricItemMapper(datasets, filterSpecs),
-    [datasets, filterSpecs]
-  )
+  // Update filter options when they become available
+  const filterOptionsPolledRef = useRef(false)
 
-  const mapCollectionItem = useCallback(
-    createCollectionItemMapper(datasets, filterSpecs),
-    [datasets, filterSpecs]
+  // Reset polling flag when refreshKey changes so filter options are re-polled
+  useEffect(() => {
+    filterOptionsPolledRef.current = false
+  }, [refreshKey])
+
+  useEffect(() => {
+    if (filterOptionsPolledRef.current) return
+    // Poll briefly for filter options from the initial request
+    const interval = setInterval(() => {
+      const opts = getFilterOptions()
+      if (opts) {
+        setFilterOptions(opts)
+        filterOptionsPolledRef.current = true
+        clearInterval(interval)
+      }
+    }, 100)
+    return () => clearInterval(interval)
+  }, [getFilterOptions, refreshKey])
+
+  const filterDefinitions = useMemo(() => {
+    const filterSpecs = config.filters
+    if (!filterSpecs || Object.keys(filterSpecs).length === 0) return undefined
+    if (!filterOptions) return undefined
+
+    const result: Record<
+      string,
+      {
+        type: "in"
+        label: string
+        options: { options: Array<{ value: string; label: string }> }
+      }
+    > = {}
+
+    for (const [key, spec] of Object.entries(filterSpecs)) {
+      const options = filterOptions[key] ?? []
+      result[key] = {
+        type: "in",
+        label: spec.label,
+        options: {
+          options: options.map((v) => ({ value: v, label: v })),
+        },
+      }
+    }
+
+    return result as FiltersDefinition
+  }, [config.filters, filterOptions])
+
+  // Create fetchData functions that call the batch compute endpoint
+  const makeFetchData = useCallback(
+    (itemId: string) => {
+      return (
+        filters: FiltersState<FiltersDefinition>
+      ): Promise<ItemResult> => {
+        const filterValues: Record<string, unknown[]> = {}
+        for (const [key, value] of Object.entries(filters)) {
+          if (Array.isArray(value) && value.length > 0) {
+            filterValues[key] = value as unknown[]
+          }
+        }
+        return fetchItem(itemId, filterValues).then((result) => {
+          // Update filter options from the response
+          const opts = getFilterOptions()
+          if (opts && !filterOptionsPolledRef.current) {
+            setFilterOptions(opts)
+            filterOptionsPolledRef.current = true
+          }
+          return result
+        })
+      }
+    },
+    [fetchItem, getFilterOptions]
   )
 
   const items: DashboardItem<FiltersDefinition>[] = useMemo(
@@ -331,17 +219,146 @@ export function F0ChatDashboard({ config }: F0ChatDashboardProps) {
       config.items.map((item) => {
         switch (item.type) {
           case "chart":
-            return mapChartItem(item)
+            return mapChartItem(item, makeFetchData(item.id))
           case "metric":
-            return mapMetricItem(item)
+            return mapMetricItem(item, makeFetchData(item.id))
           case "collection":
-            return mapCollectionItem(item)
+            return mapCollectionItem(item, makeFetchData(item.id))
         }
       }),
-    [config.items, mapChartItem, mapMetricItem, mapCollectionItem]
+    [config.items, makeFetchData]
   )
 
-  return <F0AnalyticsDashboard filters={filterDefinitions} items={items} />
+  return (
+    <F0AnalyticsDashboard
+      key={refreshKey}
+      filters={filterDefinitions}
+      items={items}
+      editMode={editMode}
+      onLayoutChange={onLayoutChange}
+    />
+  )
 }
 
 F0ChatDashboard.displayName = "F0ChatDashboard"
+
+// ---------------------------------------------------------------------------
+// Item mappers — use server-side results via fetchData
+// ---------------------------------------------------------------------------
+
+function mapChartItem(
+  item: ChatDashboardChartItem,
+  fetchData: (filters: FiltersState<FiltersDefinition>) => Promise<ItemResult>
+): DashboardChartItem<FiltersDefinition> {
+  return {
+    id: item.id,
+    title: item.title,
+    description: item.description,
+    colSpan: item.colSpan,
+    type: "chart",
+    chart: toDashboardChartConfig(item.chart),
+    fetchData: (filters: FiltersState<FiltersDefinition>) =>
+      fetchData(filters).then((r) => r.chart ?? { categories: [], series: [] }),
+  }
+}
+
+function mapMetricItem(
+  item: ChatDashboardMetricItem,
+  fetchData: (filters: FiltersState<FiltersDefinition>) => Promise<ItemResult>
+): DashboardMetricItem<FiltersDefinition> {
+  return {
+    id: item.id,
+    title: item.title,
+    description: item.description,
+    colSpan: item.colSpan,
+    type: "metric",
+    format: item.format,
+    decimals: item.decimals,
+    fetchData: (filters: FiltersState<FiltersDefinition>) =>
+      fetchData(filters).then((r) => r.metric ?? { value: 0 }),
+  }
+}
+
+function mapCollectionItem(
+  item: ChatDashboardCollectionItem,
+  fetchData: (filters: FiltersState<FiltersDefinition>) => Promise<ItemResult>
+): DashboardCollectionItem<FiltersDefinition> {
+  return {
+    id: item.id,
+    title: item.title,
+    description: item.description,
+    colSpan: item.colSpan ?? 3,
+    type: "collection",
+    createSource: (filters: FiltersState<FiltersDefinition>) => {
+      // Eagerly fetch data, then paginate client-side from the result
+      let cachedRows: RecordType[] | null = null
+      const dataPromise = fetchData(filters).then((r) => {
+        cachedRows = (r.collection?.rows ?? []) as RecordType[]
+        return cachedRows
+      })
+
+      return {
+        dataAdapter: {
+          paginationType: "pages" as const,
+          perPage: COLLECTION_PER_PAGE,
+          fetchData: async ({
+            pagination,
+            search,
+          }: {
+            filters: Record<string, unknown>
+            sortings: unknown
+            pagination: { currentPage: number; perPage?: number }
+            search?: string
+          }) => {
+            // Wait for the batch result if not yet available
+            const allRows = cachedRows ?? (await dataPromise)
+
+            let rows = allRows
+            if (search) {
+              const q = search.toLowerCase()
+              rows = rows.filter((row) =>
+                Object.values(row).some(
+                  (v) => v != null && String(v).toLowerCase().includes(q)
+                )
+              )
+            }
+            const page = pagination?.currentPage ?? 1
+            const perPage = pagination?.perPage ?? COLLECTION_PER_PAGE
+            const start = (page - 1) * perPage
+            const pageRecords = rows.slice(start, start + perPage)
+
+            return {
+              type: "pages" as const,
+              records: pageRecords,
+              total: rows.length,
+              currentPage: page,
+              perPage,
+              pagesCount: Math.ceil(rows.length / perPage),
+            }
+          },
+        },
+        search: {
+          enabled: true,
+          sync: true,
+        },
+      }
+    },
+    visualizations: [
+      {
+        type: "table" as const,
+        options: {
+          columns: item.columns.map((col) => ({
+            label: col.label,
+            id: col.id,
+            ...(col.width ? { width: col.width } : {}),
+            render: (row: RecordType) => {
+              const value = row[col.id]
+              if (value == null) return "-"
+              return String(value)
+            },
+          })),
+        },
+      },
+    ],
+  }
+}

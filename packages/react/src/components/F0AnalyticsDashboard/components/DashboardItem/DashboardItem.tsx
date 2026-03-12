@@ -1,7 +1,13 @@
-import type { ReactNode } from "react"
+import { useState, type ReactNode } from "react"
 
+import { ButtonInternal } from "@/components/F0Button/internal"
 import { OneEllipsis } from "@/components/OneEllipsis"
+import {
+  Dropdown,
+  type DropdownItem as DropdownItemType,
+} from "@/experimental/Navigation/Dropdown"
 import { OneEmptyState } from "@/experimental/OneEmptyState"
+import { Ellipsis } from "@/icons/app"
 
 interface DashboardItemProps {
   title: string
@@ -12,6 +18,8 @@ interface DashboardItemProps {
   /** Content-area skeleton shown while loading. Each item type provides its own. */
   skeleton?: ReactNode
   children: ReactNode
+  /** Dropdown actions for edit capabilities (reorder, resize, delete) */
+  actions?: DropdownItemType[]
 }
 
 /**
@@ -30,7 +38,10 @@ export function DashboardItem({
   onRetry,
   skeleton,
   children,
+  actions,
 }: DashboardItemProps) {
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+
   if (error) {
     return (
       <div className="flex h-full flex-col rounded-lg border border-solid border-f1-border-secondary">
@@ -58,21 +69,45 @@ export function DashboardItem({
 
   return (
     <div
-      className="flex h-full flex-col rounded-lg border border-solid border-f1-border-secondary"
+      className="group/dashitem flex h-full flex-col rounded-lg border border-solid border-f1-border-secondary"
       aria-busy={isLoading ? "true" : undefined}
       aria-live={isLoading ? "polite" : undefined}
     >
-      <div className="flex flex-col p-4">
-        <OneEllipsis
-          tag="h3"
-          className="text-lg font-semibold text-f1-foreground"
-        >
-          {title}
-        </OneEllipsis>
-        {description && (
-          <OneEllipsis className="text-base text-f1-foreground-secondary">
-            {description}
+      <div className="flex items-start p-4">
+        <div className="flex min-w-0 flex-1 flex-col">
+          <OneEllipsis
+            tag="h3"
+            className="text-lg font-semibold text-f1-foreground"
+          >
+            {title}
           </OneEllipsis>
+          {description && (
+            <OneEllipsis className="text-base text-f1-foreground-secondary">
+              {description}
+            </OneEllipsis>
+          )}
+        </div>
+        {actions && actions.length > 0 && (
+          <div
+            className={`flex-shrink-0 opacity-100 transition-opacity delay-150 duration-150 focus-within:delay-0 group-hover/dashitem:delay-0 sm:opacity-0 focus-within:sm:opacity-100 group-hover/dashitem:sm:opacity-100 ${isDropdownOpen ? "delay-0 sm:opacity-100" : ""}`}
+          >
+            <Dropdown
+              items={actions}
+              open={isDropdownOpen}
+              onOpenChange={setIsDropdownOpen}
+            >
+              <ButtonInternal
+                label="Options"
+                icon={Ellipsis}
+                variant="ghost"
+                size="sm"
+                hideLabel
+                pressed={isDropdownOpen}
+                compact
+                onClick={(e: React.MouseEvent) => e.stopPropagation()}
+              />
+            </Dropdown>
+          </div>
         )}
       </div>
       <div className="min-h-0 flex-1">{isLoading ? skeleton : children}</div>

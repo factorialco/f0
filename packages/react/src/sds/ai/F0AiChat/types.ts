@@ -3,6 +3,21 @@ import { type AIMessage, type Message } from "@copilotkit/shared"
 
 import { IconType } from "@/components/F0Icon"
 
+import type { ChatDashboardConfig } from "../F0ChatDashboard/types"
+
+/**
+ * Discriminated union for canvas panel content.
+ * Expand this union to support new content types in the canvas.
+ */
+export type CanvasContent = {
+  type: "dashboard"
+  title: string
+  description?: string
+  config: ChatDashboardConfig
+  apiConfig: { baseUrl: string; headers: Record<string, string> }
+  toolCallId?: string
+}
+
 /**
  * Profile data for a person entity (employee), resolved asynchronously
  * and displayed in the entity reference hover card.
@@ -195,12 +210,28 @@ export const aiTranslations = {
       },
     },
     dataDownloadPreview:
-      "Preview {{shown}} of {{total}} rows — download the Excel to see all data.",
+      "Preview {{shown}} of {{total}} rows — download to see all data.",
     expandChat: "Expand chat",
     collapseChat: "Collapse chat",
+    chatHistory: "Chat history",
+    noPreviousChats: "No previous conversations",
+    newConversation: "New conversation",
+    today: "Today",
+    yesterday: "Yesterday",
+    thisMonth: "This month",
+    older: "Older",
+    searchChats: "Search conversations...",
+    pinnedChats: "Pinned",
+    threadOptions: "Thread options",
+    pinChat: "Pin chat",
+    unpinChat: "Unpin chat",
+    deleteChat: "Delete chat",
     ask: "Ask One",
     viewProfile: "View profile",
     tools: "Tools",
+    unsavedChanges: "Unsaved changes",
+    saveChanges: "Save changes",
+    discardChanges: "Discard",
   },
 }
 

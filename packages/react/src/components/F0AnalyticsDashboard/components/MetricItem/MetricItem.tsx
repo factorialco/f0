@@ -20,6 +20,7 @@ import { MetricSkeleton } from "../DashboardItem/DashboardItemSkeleton"
 interface MetricItemProps<Filters extends FiltersDefinition> {
   item: DashboardMetricItem<Filters>
   filters: FiltersState<Filters>
+  actions?: import("@/experimental/Navigation/Dropdown").DropdownItem[]
 }
 
 function formatValue(
@@ -80,6 +81,7 @@ function computeTrend(
 export function MetricItem<Filters extends FiltersDefinition>({
   item,
   filters,
+  actions,
 }: MetricItemProps<Filters>) {
   const enabled = item.useDashboardFilters !== false
   const { data, isLoading, error, retry } = useDashboardItemData<
@@ -97,6 +99,7 @@ export function MetricItem<Filters extends FiltersDefinition>({
       error={error}
       onRetry={retry}
       skeleton={<MetricSkeleton />}
+      actions={actions}
     >
       {data && (
         <div className="flex items-end gap-3 px-4 pb-4">

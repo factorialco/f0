@@ -18,11 +18,14 @@ import { useReducedMotion } from "@/lib/a11y"
 import { experimentalComponent } from "@/lib/experimental"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
+import {
+  F0AiChat,
+  F0AiChatProvider,
+  AiChatProviderProps,
+} from "@/sds/ai/F0AiChat"
 import { CanvasPanel } from "@/sds/ai/F0AiChat/components/CanvasPanel"
 import { DEFAULT_CHAT_WIDTH } from "@/sds/ai/F0AiChat/constants"
-import { F0AiChat, F0AiChatProvider } from "@/sds/ai/F0AiChat/F0AiChat"
 import { useAiChat } from "@/sds/ai/F0AiChat/providers/AiChatStateProvider"
-import { AiChatProviderProps } from "@/sds/ai/F0AiChat/types"
 
 import { FrameProvider, SidebarState, useSidebar } from "./FrameProvider"
 
@@ -180,7 +183,7 @@ function ApplicationFrameContent({
   const {
     open: isAiChatOpen,
     visualizationMode,
-    canvasDashboard,
+    canvasContent,
     chatWidth,
     resizable,
   } = useAiChat()
@@ -318,7 +321,7 @@ function ApplicationFrameContent({
 
               {/* Chat */}
               {/* Canvas dashboard panel */}
-              {ai?.enabled && isCanvasMode && canvasDashboard && (
+              {ai?.enabled && isCanvasMode && canvasContent && (
                 <div
                   className="pointer-events-none absolute bottom-0 left-0 top-0 z-[15]"
                   style={{ right: reservedChatWidth }}

@@ -6,6 +6,7 @@ export { FullscreenChatContext } from "./F0AiFullscreenChat"
 export type {
   AiChatProviderProps,
   AiChatToolHint,
+  CanvasContent,
   EntityResolvers,
   PersonProfile,
   VisualizationMode,

@@ -1,5 +1,4 @@
 import { Message } from "@copilotkit/shared"
-import { randomUUID } from "node:crypto"
 import { describe, expect, it } from "vitest"
 
 import { convertMessagesToTurns } from "../utils/turnUtils"
@@ -305,12 +304,12 @@ const createToolCallMessage = (
   name: string | undefined = "toolName"
 ): Message => {
   return {
-    id: randomUUID(),
+    id: crypto.randomUUID(),
     role: "assistant",
     content: "",
     toolCalls: [
       {
-        id: randomUUID(),
+        id: crypto.randomUUID(),
         type: "function",
         function: {
           name,
@@ -321,13 +320,15 @@ const createToolCallMessage = (
   }
 }
 
-const createThinkingMessage = (content: string = randomUUID()): Message => ({
-  id: randomUUID(),
+const createThinkingMessage = (
+  content: string = crypto.randomUUID()
+): Message => ({
+  id: crypto.randomUUID(),
   role: "assistant",
   content,
   toolCalls: [
     {
-      id: randomUUID(),
+      id: crypto.randomUUID(),
       type: "function",
       function: {
         name: "orchestratorThinking",
@@ -342,12 +343,12 @@ const createThinkingMessage = (content: string = randomUUID()): Message => ({
  * content is undefined, preamble text lives in toolCalls arguments.
  */
 const createActionThinkingMessage = (preamble: string): Message => ({
-  id: randomUUID(),
+  id: crypto.randomUUID(),
   role: "assistant",
   content: undefined as unknown as string,
   toolCalls: [
     {
-      id: randomUUID(),
+      id: crypto.randomUUID(),
       type: "function",
       function: {
         name: "orchestratorThinking",

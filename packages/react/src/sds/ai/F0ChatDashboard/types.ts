@@ -64,17 +64,17 @@ export type ChatDashboardMetricFormat =
   | { type: "custom"; suffix?: string; prefix?: string }
 
 // ---------------------------------------------------------------------------
-// Dataset — raw data from queryData, injected by the backend
+// Fetch spec — describes how to obtain data server-side (no raw data)
 // ---------------------------------------------------------------------------
 
-export interface ChatDashboardDataset {
-  columns: string[]
-  rows: Record<string, unknown>[]
+export interface DashboardFetchSpec {
+  fetch: Array<{ toolId: string; args: Record<string, unknown> }>
+  query: string | null
   columnLabels?: Record<string, string>
 }
 
 // ---------------------------------------------------------------------------
-// Computation specs — declarative data transformations applied client-side
+// Computation specs — declarative data transformations applied server-side
 // ---------------------------------------------------------------------------
 
 export type AggregationType =
@@ -174,9 +174,8 @@ export type ChatDashboardItem =
 
 /**
  * Complete dashboard configuration received via `displayDashboard`.
- * The backend injects `datasets` from requestContext — the LLM only sends
- * the declarative config (title, filters, items with computation specs).
- * Fully JSON-serializable — no functions, no callbacks.
+ * Contains fetchSpecs that describe how to obtain data server-side —
+ * no raw data is included. Fully JSON-serializable.
  */
 export interface ChatDashboardConfig {
   /** Dashboard title displayed in the canvas header and chat report card */
@@ -187,6 +186,6 @@ export interface ChatDashboardConfig {
   filters?: Record<string, ChatDashboardFilterDefinition>
   /** Ordered list of dashboard items with computation specs */
   items: ChatDashboardItem[]
-  /** Raw datasets injected by the backend from requestContext */
-  datasets?: Record<string, ChatDashboardDataset>
+  /** Fetch specs for server-side data retrieval, keyed by datasetId */
+  fetchSpecs: Record<string, DashboardFetchSpec>
 }

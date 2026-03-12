@@ -15,6 +15,7 @@ import { DashboardItem } from "../DashboardItem/DashboardItem"
 interface CollectionItemProps<Filters extends FiltersDefinition> {
   item: DashboardCollectionItem<Filters>
   filters: FiltersState<Filters>
+  actions?: import("@/experimental/Navigation/Dropdown").DropdownItem[]
 }
 
 /**
@@ -28,6 +29,7 @@ interface CollectionItemProps<Filters extends FiltersDefinition> {
 export function CollectionItem<Filters extends FiltersDefinition>({
   item,
   filters,
+  actions,
 }: CollectionItemProps<Filters>) {
   const enabled = item.useDashboardFilters !== false
   const effectiveFilters = enabled ? filters : ({} as FiltersState<Filters>)
@@ -51,6 +53,7 @@ export function CollectionItem<Filters extends FiltersDefinition>({
       title={item.title}
       description={item.description}
       isLoading={false}
+      actions={actions}
     >
       <OneDataCollection source={source} visualizations={item.visualizations} />
     </DashboardItem>

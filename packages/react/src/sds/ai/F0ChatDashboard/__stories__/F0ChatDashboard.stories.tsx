@@ -8,17 +8,10 @@ import type { ChatDashboardConfig } from "../types"
 const sampleConfig: ChatDashboardConfig = {
   title: "Headcount Overview",
   description: "Company-wide headcount breakdown",
-  datasets: {
+  fetchSpecs: {
     employees: {
-      columns: ["department", "salary", "contract"],
-      rows: [
-        { department: "Engineering", salary: 80000, contract: "Full-time" },
-        { department: "Engineering", salary: 90000, contract: "Full-time" },
-        { department: "Engineering", salary: 75000, contract: "Part-time" },
-        { department: "Sales", salary: 60000, contract: "Full-time" },
-        { department: "Sales", salary: 65000, contract: "Contractor" },
-        { department: "Marketing", salary: 55000, contract: "Full-time" },
-      ],
+      fetch: [{ toolId: "fetchEmployees", args: {} }],
+      query: "SELECT department, salary, contract FROM fetchemployees",
     },
   },
   items: [
@@ -49,6 +42,11 @@ const sampleConfig: ChatDashboardConfig = {
   ],
 }
 
+const sampleApiConfig = {
+  baseUrl: "/api",
+  headers: {},
+}
+
 const meta = {
   component: F0ChatDashboard,
   title: "AI/F0ChatDashboard",
@@ -61,6 +59,7 @@ type Story = StoryObj<typeof F0ChatDashboard>
 export const Default: Story = {
   args: {
     config: sampleConfig,
+    apiConfig: sampleApiConfig,
   },
 }
 
@@ -70,6 +69,7 @@ export const WithMetricOnly: Story = {
       ...sampleConfig,
       items: [sampleConfig.items[1]],
     },
+    apiConfig: sampleApiConfig,
   },
 }
 
@@ -77,5 +77,6 @@ export const Snapshot: Story = {
   parameters: withSnapshot({}),
   args: {
     config: sampleConfig,
+    apiConfig: sampleApiConfig,
   },
 }

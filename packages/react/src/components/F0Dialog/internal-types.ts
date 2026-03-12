@@ -71,4 +71,6 @@ export type F0DialogInternalProps = {
   children: ReactNode
   // Disable the default padding from the dialog content area
   disableContentPadding?: boolean
+  // Override the DOM element the dialog is portaled into. Pass `null` to portal to `document.body` (useful to escape stacking contexts).
+  container?: HTMLElement | null
 } & Partial<Pick<TabsProps, "tabs" | "activeTabId" | "setActiveTabId">>

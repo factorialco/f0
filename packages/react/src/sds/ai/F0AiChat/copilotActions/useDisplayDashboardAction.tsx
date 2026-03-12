@@ -1,4 +1,5 @@
-import { useCopilotAction } from "@copilotkit/react-core"
+import { useCopilotAction, useCopilotContext } from "@copilotkit/react-core"
+import { useMemo } from "react"
 
 import { F0ChatReportCard } from "../../F0ChatReportCard"
 import type { ChatDashboardConfig } from "../../F0ChatDashboard/types"
@@ -9,11 +10,11 @@ import { useAiChat } from "../providers/AiChatStateProvider"
  *
  * The agent triggers this frontend tool after gathering data via
  * multiple `queryData` calls (each with a `datasetId`). The backend
- * `displayDashboard` tool reads stored datasets from requestContext
+ * `displayDashboard` tool reads stored fetchSpecs from requestContext
  * and injects them into the emitFrontendTool payload. The frontend
- * receives the full config (title, items with computation specs,
- * filter definitions) alongside all raw datasets, and computes
- * charts/metrics/tables client-side with reactive filtering.
+ * receives the config (title, items with computation specs, filter
+ * definitions, fetchSpecs) and computes everything server-side via
+ * POST /api/dashboard/compute.
  *
  * The canvas panel is NOT opened automatically — the user must click
  * "View report" on the card to open it. The only exception is when
@@ -25,11 +26,20 @@ import { useAiChat } from "../providers/AiChatStateProvider"
  */
 export const useDisplayDashboardAction = () => {
   const { openCanvas, visualizationMode } = useAiChat()
+  const { copilotApiConfig } = useCopilotContext()
+
+  const apiConfig = useMemo(
+    () => ({
+      baseUrl: copilotApiConfig.chatApiEndpoint,
+      headers: copilotApiConfig.headers as Record<string, string>,
+    }),
+    [copilotApiConfig.chatApiEndpoint, copilotApiConfig.headers]
+  )
 
   useCopilotAction({
     name: "displayDashboard",
     description:
-      "Display a data-driven report dashboard in a canvas panel. The backend injects raw datasets; the frontend computes charts, metrics, and tables client-side with reactive filters.",
+      "Display a data-driven report dashboard in a canvas panel. Data is computed server-side via the dashboard compute endpoint.",
     parameters: [
       {
         name: "title",
@@ -97,25 +107,19 @@ export const useDisplayDashboardAction = () => {
         required: false,
       },
       {
-        name: "datasets",
+        name: "fetchSpecs",
         type: "object",
         description:
-          "Raw datasets injected by the backend from requestContext. Keyed by datasetId, each with columns, rows, and optional columnLabels.",
+          "Fetch specifications for server-side data retrieval. Keyed by datasetId, each describes how to fetch and query data.",
         required: false,
       },
     ],
     available: "frontend",
     render: (props) => {
       const args = props.args as Partial<ChatDashboardConfig>
+      const toolCallId = (props as { toolCallId?: string }).toolCallId
 
       // Bail out while arguments are still streaming in.
-      // For `available: "frontend"` actions, CopilotKit's status goes:
-      //   "inProgress" → "executing" (terminal — "complete" never fires
-      //   because no handler runs and no ResultMessage is created).
-      // During "inProgress", args are partial JSON (datasets/filters
-      // arrive after title+items). We must wait for "executing" to
-      // ensure the full payload is present.
-
       if (
         props.status === "inProgress" ||
         !args.title ||
@@ -130,10 +134,31 @@ export const useDisplayDashboardAction = () => {
       // Only auto-replace if the canvas is already open — otherwise
       // the user must click "View report" to open it
       if (visualizationMode === "canvas") {
-        openCanvas(config)
+        openCanvas({
+          type: "dashboard",
+          title: config.title,
+          description: config.description,
+          config,
+          apiConfig,
+          toolCallId,
+        })
       }
 
-      return <F0ChatReportCard config={config} onView={(c) => openCanvas(c)} />
+      return (
+        <F0ChatReportCard
+          config={config}
+          onView={(c) =>
+            openCanvas({
+              type: "dashboard",
+              title: c.title,
+              description: c.description,
+              config: c,
+              apiConfig,
+              toolCallId,
+            })
+          }
+        />
+      )
     },
   })
 }
