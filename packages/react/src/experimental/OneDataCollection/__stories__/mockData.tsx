@@ -465,6 +465,14 @@ export const getMockVisualizations = (options?: {
             sorting: options?.table?.noSorting ? undefined : "department",
             order: options?.table?.allowColumnReordering ? 4 : undefined,
           },
+          {
+            id: "salary",
+            label: "Salary",
+            editType: () => "text" as const,
+            align: "right" as const,
+            render: (item) =>
+              item.salary !== undefined ? String(item.salary) : "",
+          },
 
           ...((options?.table?.applyLongText ?? true)
             ? [

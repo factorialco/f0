@@ -18,7 +18,7 @@ export function TextCell<R extends RecordType>({
         className={cn(
           "flex w-full min-w-0",
           "cursor-text items-center",
-          editableColumn.align === "right" && "justify-end"
+          editableColumn.align === "right" && "[&_input]:text-right"
         )}
       >
         <Input
