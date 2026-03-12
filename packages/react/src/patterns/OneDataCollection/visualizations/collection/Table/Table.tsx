@@ -792,7 +792,7 @@ export const TableCollection = <
                   <TableRow
                     className={cn(
                       summaryData.sticky &&
-                        "sticky bottom-0 z-10 bg-f1-background shadow-[0_-1px_0_0_var(--f1-border-secondary)] hover:bg-f1-background",
+                        "sticky bottom-0 z-30 bg-f1-background shadow-[0_-1px_0_0_var(--f1-border-secondary)] hover:bg-f1-background",
                       "font-medium"
                     )}
                   >
