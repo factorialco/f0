@@ -255,6 +255,7 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
 
         {image && (
           <div
+            data-testid="card-image-container"
             className={cn(
               "relative -mx-3 -mt-3 mb-4 rounded-md",
               imageAspectRatio === "video"

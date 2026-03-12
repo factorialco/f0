@@ -160,6 +160,25 @@ describe("F0Card Component", () => {
     expect(handlePrimaryAction).toHaveBeenCalledTimes(1)
   })
 
+  it("applies aspect-video class and no fixed-height class when imageAspectRatio is 16/9", () => {
+    render(
+      <F0Card
+        title="Aspect Ratio Card"
+        image="/path/to/image.jpg"
+        imageAspectRatio="16/9"
+        imageFit="cover"
+      />
+    )
+
+    const imageContainer = screen.getByTestId("card-image-container")
+    expect(imageContainer).toHaveClass("aspect-video")
+    expect(imageContainer).not.toHaveClass("h-24")
+    expect(imageContainer).not.toHaveClass("h-32")
+    expect(imageContainer).not.toHaveClass("h-40")
+    expect(imageContainer).not.toHaveClass("h-48")
+    expect(imageContainer).not.toHaveClass("h-64")
+  })
+
   it("renders a secondary action link", async () => {
     const secondaryLink: CardSecondaryLink = {
       label: "View more",
