@@ -4,12 +4,13 @@ import { F0Button } from "@/components/F0Button"
 import { SectionHeader } from "@/experimental/Information/Headers/SectionHeader"
 import { cn } from "@/lib/utils"
 
+import type { F0SwitchField } from "../fields/switch/types"
+import type { FieldItem, RowDefinition, SectionDefinition } from "../types"
+
 import { FIELD_GAP } from "../constants"
 import { generateAnchorId, useF0FormContext } from "../context"
 import { FieldRenderer } from "../fields/FieldRenderer"
-import type { F0SwitchField } from "../fields/switch/types"
 import { evaluateRenderIf } from "../fields/utils"
-import type { FieldItem, RowDefinition, SectionDefinition } from "../types"
 import { RowRenderer } from "./RowRenderer"
 import { SwitchGroupRenderer } from "./SwitchGroupRenderer"
 
@@ -81,7 +82,7 @@ export function SectionRenderer({ section }: SectionRendererProps) {
   const anchorId = generateAnchorId(formName, sectionId)
 
   return (
-    <section id={anchorId} className="flex flex-col scroll-mt-4">
+    <section id={anchorId} className="flex scroll-mt-4 flex-col">
       <div
         className={cn(
           "flex items-start justify-between py-5",
