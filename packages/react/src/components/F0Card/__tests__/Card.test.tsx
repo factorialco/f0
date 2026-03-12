@@ -160,6 +160,26 @@ describe("F0Card Component", () => {
     expect(handlePrimaryAction).toHaveBeenCalledTimes(1)
   })
 
+  it("renders image container with aspect-video class when imageAspectRatio is 16/9", () => {
+    render(
+      <F0Card
+        title="Aspect Ratio Card"
+        image="/path/to/test-image.jpg"
+        imageAspectRatio="16/9"
+      />
+    )
+
+    const img = screen.getByRole("img", { name: "Aspect Ratio Card" })
+    const imageContainer = img.parentElement
+
+    expect(imageContainer).toHaveClass("aspect-video")
+    expect(imageContainer).not.toHaveClass("h-24")
+    expect(imageContainer).not.toHaveClass("h-32")
+    expect(imageContainer).not.toHaveClass("h-40")
+    expect(imageContainer).not.toHaveClass("h-48")
+    expect(imageContainer).not.toHaveClass("h-64")
+  })
+
   it("renders a secondary action link", async () => {
     const secondaryLink: CardSecondaryLink = {
       label: "View more",
