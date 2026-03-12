@@ -217,6 +217,33 @@ describe("F0Form", () => {
       resolvedErrorContainerId
     )
   })
+
+  it("applies duration maxVisibleDigits from schema config", () => {
+    const formSchema = z.object({
+      duration: f0FormField(z.number(), {
+        label: "Duration",
+        fieldType: "duration",
+        units: ["hours"],
+        fields: {
+          hours: {
+            maxVisibleDigits: 4,
+          },
+        },
+      }),
+    })
+
+    render(
+      <F0Form
+        name="duration-max-visible-digits"
+        schema={formSchema}
+        defaultValues={{ duration: 3600 * 1234 }}
+        onSubmit={async () => ({ success: true })}
+      />
+    )
+
+    expect(screen.getByLabelText("Hours")).toHaveValue("1234")
+    expect(screen.getByLabelText("Hours")).toHaveStyle({ width: "4ch" })
+  })
 })
 
 describe("f0FormField function", () => {

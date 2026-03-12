@@ -43,6 +43,8 @@ const UNIT_LABELS: Record<DurationUnit, string> = {
   seconds: "Seconds",
 }
 
+const DEFAULT_MAX_VISIBLE_DIGITS = 2
+
 const containerVariants = cva({
   base: [
     "inline-flex items-center gap-1 overflow-hidden rounded-[10px]",
@@ -310,6 +312,12 @@ export const F0DurationInput = forwardRef<HTMLDivElement, F0DurationInputProps>(
             const fieldValue = localFields[unit]
             const suffix = fieldConfig?.[unit]?.suffix ?? STATIC_SUFFIXES[unit]
             const displayValue = fieldValue > 0 ? String(fieldValue) : ""
+            const maxVisibleDigits = fieldConfig?.[unit]?.maxVisibleDigits
+            const resolvedMaxVisibleDigits =
+              typeof maxVisibleDigits === "number" &&
+              Number.isFinite(maxVisibleDigits)
+                ? Math.max(1, Math.floor(maxVisibleDigits))
+                : DEFAULT_MAX_VISIBLE_DIGITS
 
             return (
               <Fragment key={unit}>
@@ -331,7 +339,10 @@ export const F0DurationInput = forwardRef<HTMLDivElement, F0DurationInputProps>(
                     disabled && "pointer-events-none"
                   )}
                   style={{
-                    width: `${Math.min(Math.max(displayValue.length, 1), 2)}ch`,
+                    width: `${Math.min(
+                      Math.max(displayValue.length, 1),
+                      resolvedMaxVisibleDigits
+                    )}ch`,
                   }}
                   aria-label={
                     fieldConfig?.[unit]?.ariaLabel ?? UNIT_LABELS[unit]

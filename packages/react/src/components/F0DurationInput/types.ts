@@ -12,6 +12,11 @@ export type DurationFields = Record<DurationUnit, number>
 export interface DurationFieldConfig {
   suffix?: string
   max?: number
+  /**
+   * Maximum number of visible digits for this segment input.
+   * Defaults to 2 when omitted.
+   */
+  maxVisibleDigits?: number
   ariaLabel?: string
 }
 

@@ -323,6 +323,35 @@ describe("F0DurationInput", () => {
       expect(screen.getByLabelText("Days")).toHaveStyle({ width: "2ch" })
     })
 
+    it("uses maxVisibleDigits override from field config", () => {
+      render(
+        <F0DurationInput
+          label="Duration"
+          value={172800000}
+          onChange={() => {}}
+          units={["days"]}
+          fields={{ days: { maxVisibleDigits: 4 } }}
+        />
+      )
+
+      expect(screen.getByLabelText("Days")).toHaveValue("2000")
+      expect(screen.getByLabelText("Days")).toHaveStyle({ width: "4ch" })
+    })
+
+    it("normalizes invalid maxVisibleDigits to at least 1", () => {
+      render(
+        <F0DurationInput
+          label="Duration"
+          value={1728000}
+          onChange={() => {}}
+          units={["days"]}
+          fields={{ days: { maxVisibleDigits: 0 } }}
+        />
+      )
+
+      expect(screen.getByLabelText("Days")).toHaveStyle({ width: "1ch" })
+    })
+
     it("does not set maxLength on segment inputs", () => {
       render(
         <F0DurationInput

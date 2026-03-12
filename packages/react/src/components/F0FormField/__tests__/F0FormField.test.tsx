@@ -92,6 +92,28 @@ describe("F0FormField", () => {
       expect(screen.getByLabelText("Minutes")).toBeInTheDocument()
     })
 
+    it("applies duration maxVisibleDigits override", () => {
+      const field: F0Field = {
+        id: "duration-with-width-override",
+        type: "duration",
+        label: "Duration",
+        units: ["hours"],
+        fields: {
+          hours: {
+            maxVisibleDigits: 4,
+          },
+        },
+      }
+      const onChange = vi.fn()
+
+      render(
+        <F0FormField field={field} value={3600 * 1234} onChange={onChange} />
+      )
+
+      expect(screen.getByLabelText("Hours")).toHaveValue("1234")
+      expect(screen.getByLabelText("Hours")).toHaveStyle({ width: "4ch" })
+    })
+
     it("renders a textarea field", () => {
       const field: F0Field = {
         id: "bio",
