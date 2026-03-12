@@ -669,6 +669,7 @@ export const Snapshot: Story = {
       <F0Card {...Compact.args} />
       <F0Card {...WithActionsAndLink.args} />
       <F0Card {...WithImage.args} />
+      <F0Card {...WithAspectRatio16x9.args} />
       <F0Card {...WithProgressBar.args} />
       <F0Card {...WithProgressBarCustomColor.args} />
     </div>
