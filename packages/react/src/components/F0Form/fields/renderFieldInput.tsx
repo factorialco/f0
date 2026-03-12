@@ -63,12 +63,7 @@ export function renderFieldInput({
   const visualStatus = hasError
     ? ({ type: "error" } as const)
     : fieldStatus
-      ? fieldStatus.type === "error"
-        ? ({ type: "error" } as const)
-        : ({
-            type: fieldStatus.type,
-            message: "",
-          } as const)
+      ? ({ type: fieldStatus.type } as const)
       : undefined
 
   switch (field.type) {

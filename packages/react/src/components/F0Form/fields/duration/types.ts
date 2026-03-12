@@ -8,26 +8,14 @@ import type {
   CommonRenderIfCondition,
   F0BaseField,
   F0BaseFieldRenderIfFunction,
+  NumberRenderIfCondition,
 } from "../types"
 
 // ============================================================================
 // Duration Field RenderIf Conditions
 // ============================================================================
 
-interface DurationRenderIfBase {
-  fieldId: string
-}
-
-export type DurationRenderIfCondition = DurationRenderIfBase &
-  (
-    | { equalsTo: number }
-    | { notEqualsTo: number }
-    | { greaterThan: number }
-    | { greaterThanOrEqual: number }
-    | { lowerThan: number }
-    | { lowerThanOrEqual: number }
-    | { isEmpty: boolean }
-  )
+export type DurationRenderIfCondition = NumberRenderIfCondition
 
 export type DurationFieldRenderIf =
   | DurationRenderIfCondition

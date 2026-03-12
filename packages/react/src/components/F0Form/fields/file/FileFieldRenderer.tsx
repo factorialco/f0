@@ -356,9 +356,9 @@ export function FileFieldRenderer({
               : error || validationError || statusType === "error"
                 ? "border-f1-border-critical-bold bg-f1-background-critical bg-opacity-10"
                 : statusType === "warning"
-                  ? "border-f1-border-warning-bold"
+                  ? "border-f1-border-warning-bold bg-f1-background"
                   : statusType === "info"
-                    ? "border-f1-border-info-bold"
+                    ? "border-f1-border-info-bold bg-f1-background"
                     : "border-f1-border bg-f1-background",
             !field.disabled &&
               !isDragOver &&
