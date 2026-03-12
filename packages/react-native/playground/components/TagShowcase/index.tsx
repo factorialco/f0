@@ -2,7 +2,6 @@ import React from "react"
 import { ScrollView, View, Text } from "react-native"
 import { useCSSVariable } from "uniwind"
 
-import { F0TagList } from "../../../src/components/F0Tag"
 import { AlertTag, DotTag, RawTag } from "../../../src/components/Tags/exports"
 import { AppIcons } from "../../../src/icons"
 
@@ -144,23 +143,6 @@ export function TagShowcase() {
         <RawTag text="Raw No Border" noBorder />
       </View>
 
-      <Text
-        className="mb-4 text-lg font-bold"
-        style={{ color: asString(f0Foreground) }}
-      >
-        F0TagList (new API)
-      </Text>
-      <View className="mb-6 flex-row flex-wrap gap-2">
-        <F0TagList
-          type="person"
-          max={2}
-          tags={[
-            { name: "John Doe", src: "https://github.com/octocat.png" },
-            { name: "Jane Smith", src: "https://github.com/octocat.png" },
-            { name: "Alex Roe", src: "https://github.com/octocat.png" },
-          ]}
-        />
-      </View>
     </ScrollView>
   )
 }

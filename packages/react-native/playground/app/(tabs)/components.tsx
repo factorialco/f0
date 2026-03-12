@@ -70,7 +70,7 @@ const componentOptions = [
   { value: "onepreset" as ComponentType, label: "OnePreset" },
   { value: "pageheader" as ComponentType, label: "PageHeader" },
   { value: "pressablefeedback" as ComponentType, label: "PressableFeedback" },
-  { value: "tag" as ComponentType, label: "Tag" },
+  { value: "tag" as ComponentType, label: "Tag (deprecated)" },
 ]
 
 export default function ComponentsShowcase() {
