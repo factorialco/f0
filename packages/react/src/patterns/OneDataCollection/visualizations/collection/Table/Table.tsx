@@ -617,7 +617,7 @@ export const TableCollection = <
                           width={checkColumnWidth}
                           sticky={{ left: 0 }}
                         >
-                          <div className="ml-1.5 flex items-center justify-start">
+                          <div className="pointer-events-auto ml-1.5 flex items-center justify-start">
                             <F0Checkbox
                               checked={
                                 !!statusToChecked(
