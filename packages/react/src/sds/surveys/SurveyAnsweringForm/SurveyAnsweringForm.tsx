@@ -219,6 +219,9 @@ export function SurveyAnsweringForm({
   const showSectionHeader =
     isStepped && !!stepper.currentQuestion?.sectionTitle && !loading
 
+  const shouldCenterContent =
+    (!hasQuestions && !loading) || isStepped || (isStepped && loading)
+
   return (
     <F0Dialog
       isOpen={isOpen}
@@ -235,7 +238,8 @@ export function SurveyAnsweringForm({
         <div
           className={cn(
             "relative flex min-h-full flex-col",
-            !hasQuestions && "h-full"
+            isStepped && !isFullscreen && "min-h-[600px]",
+            shouldCenterContent && "h-full"
           )}
         >
           {showTableOfContent && (
@@ -253,9 +257,9 @@ export function SurveyAnsweringForm({
           <div
             className={cn(
               "mx-auto flex w-full flex-col px-4 py-12 md:w-[750px]",
-              mode === "all-questions" && hasQuestions
+              mode === "all-questions" && !shouldCenterContent
                 ? "justify-start"
-                : "h-full justify-center"
+                : "flex-1 justify-center"
             )}
           >
             {loading ? (
