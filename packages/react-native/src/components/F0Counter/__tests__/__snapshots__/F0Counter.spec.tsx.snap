@@ -2,7 +2,7 @@
 
 exports[`F0Counter Snapshot - all type variants at md size 1`] = `
 <View
-  className="flex items-center justify-center rounded-xs grow-0 overflow-hidden min-w-5 p-0.5 bg-f0-background-secondary border border-f0-border-secondary"
+  className="flex items-center justify-center rounded-xs grow-0 min-w-5 p-0.5 bg-f0-background-secondary border border-f0-border-secondary"
 >
   <Text
     className="tabular-nums no-underline normal-case tracking-normal text-[12px] leading-[16px] font-medium text-f0-foreground text-center"
@@ -16,7 +16,7 @@ exports[`F0Counter Snapshot - all type variants at md size 1`] = `
 
 exports[`F0Counter Snapshot - all type variants at md size 2`] = `
 <View
-  className="flex items-center justify-center rounded-xs grow-0 overflow-hidden min-w-5 p-0.5 border border-f0-border-inverse"
+  className="flex items-center justify-center rounded-xs grow-0 min-w-5 p-0.5 border border-f0-border-inverse"
 >
   <Text
     className="tabular-nums no-underline normal-case tracking-normal text-[12px] leading-[16px] font-medium text-f0-foreground-inverse text-center"
@@ -30,7 +30,7 @@ exports[`F0Counter Snapshot - all type variants at md size 2`] = `
 
 exports[`F0Counter Snapshot - all type variants at md size 3`] = `
 <View
-  className="flex items-center justify-center rounded-xs grow-0 overflow-hidden min-w-5 p-0.5 bg-f0-background-selected-bold"
+  className="flex items-center justify-center rounded-xs grow-0 min-w-5 p-0.5 bg-f0-background-selected-bold"
 >
   <Text
     className="tabular-nums no-underline normal-case tracking-normal text-[12px] leading-[16px] font-medium text-f0-foreground-inverse text-center"
@@ -44,7 +44,7 @@ exports[`F0Counter Snapshot - all type variants at md size 3`] = `
 
 exports[`F0Counter Snapshot - all type variants at md size 4`] = `
 <View
-  className="flex items-center justify-center rounded-xs grow-0 overflow-hidden min-w-5 p-0.5 bg-f0-background-accent-bold"
+  className="flex items-center justify-center rounded-xs grow-0 min-w-5 p-0.5 bg-f0-background-accent-bold"
 >
   <Text
     className="tabular-nums no-underline normal-case tracking-normal text-[12px] leading-[16px] font-medium text-f0-foreground-inverse text-center"
@@ -58,7 +58,7 @@ exports[`F0Counter Snapshot - all type variants at md size 4`] = `
 
 exports[`F0Counter Snapshot - all type variants at sm size 1`] = `
 <View
-  className="flex items-center justify-center rounded-xs grow-0 overflow-hidden min-w-4 px-0.5 bg-f0-background-secondary border border-f0-border-secondary"
+  className="flex items-center justify-center rounded-xs grow-0 min-w-4 px-0.5 bg-f0-background-secondary border border-f0-border-secondary"
 >
   <Text
     className="tabular-nums no-underline normal-case tracking-normal text-[12px] leading-[16px] font-medium text-f0-foreground text-center"
@@ -72,7 +72,7 @@ exports[`F0Counter Snapshot - all type variants at sm size 1`] = `
 
 exports[`F0Counter Snapshot - all type variants at sm size 2`] = `
 <View
-  className="flex items-center justify-center rounded-xs grow-0 overflow-hidden min-w-4 px-0.5 border border-f0-border-inverse"
+  className="flex items-center justify-center rounded-xs grow-0 min-w-4 px-0.5 border border-f0-border-inverse"
 >
   <Text
     className="tabular-nums no-underline normal-case tracking-normal text-[12px] leading-[16px] font-medium text-f0-foreground-inverse text-center"
@@ -86,7 +86,7 @@ exports[`F0Counter Snapshot - all type variants at sm size 2`] = `
 
 exports[`F0Counter Snapshot - all type variants at sm size 3`] = `
 <View
-  className="flex items-center justify-center rounded-xs grow-0 overflow-hidden min-w-4 px-0.5 bg-f0-background-selected-bold"
+  className="flex items-center justify-center rounded-xs grow-0 min-w-4 px-0.5 bg-f0-background-selected-bold"
 >
   <Text
     className="tabular-nums no-underline normal-case tracking-normal text-[12px] leading-[16px] font-medium text-f0-foreground-inverse text-center"
@@ -100,7 +100,7 @@ exports[`F0Counter Snapshot - all type variants at sm size 3`] = `
 
 exports[`F0Counter Snapshot - all type variants at sm size 4`] = `
 <View
-  className="flex items-center justify-center rounded-xs grow-0 overflow-hidden min-w-4 px-0.5 bg-f0-background-accent-bold"
+  className="flex items-center justify-center rounded-xs grow-0 min-w-4 px-0.5 bg-f0-background-accent-bold"
 >
   <Text
     className="tabular-nums no-underline normal-case tracking-normal text-[12px] leading-[16px] font-medium text-f0-foreground-inverse text-center"
@@ -114,7 +114,7 @@ exports[`F0Counter Snapshot - all type variants at sm size 4`] = `
 
 exports[`F0Counter Snapshot - maxValue overflow 1`] = `
 <View
-  className="flex items-center justify-center rounded-xs grow-0 overflow-hidden min-w-5 p-0.5 bg-f0-background-accent-bold"
+  className="flex items-center justify-center rounded-xs grow-0 min-w-5 p-0.5 bg-f0-background-accent-bold"
 >
   <Text
     className="tabular-nums no-underline normal-case tracking-normal text-[12px] leading-[16px] font-medium text-f0-foreground-inverse text-center"

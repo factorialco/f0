@@ -67,7 +67,7 @@ exports[`F0Preset Snapshot - default with counter 1`] = `
     Label
   </Text>
   <View
-    className="flex items-center justify-center rounded-xs grow-0 overflow-hidden min-w-5 p-0.5 bg-f0-background-secondary border border-f0-border-secondary"
+    className="flex items-center justify-center rounded-xs grow-0 min-w-5 p-0.5 bg-f0-background-secondary border border-f0-border-secondary"
   >
     <Text
       className="tabular-nums no-underline normal-case tracking-normal text-[12px] leading-[16px] font-medium text-f0-foreground text-center"
@@ -216,7 +216,7 @@ exports[`F0Preset Snapshot - selected with counter 1`] = `
     Label
   </Text>
   <View
-    className="flex items-center justify-center rounded-xs grow-0 overflow-hidden min-w-5 p-0.5 bg-f0-background-selected-bold"
+    className="flex items-center justify-center rounded-xs grow-0 min-w-5 p-0.5 bg-f0-background-selected-bold"
   >
     <Text
       className="tabular-nums no-underline normal-case tracking-normal text-[12px] leading-[16px] font-medium text-f0-foreground-inverse text-center"
