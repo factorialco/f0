@@ -467,7 +467,7 @@ export const TableCollection = <
                       hidden
                       sticky={{
                         right: 0,
-                    }}
+                      }}
                       className="table-cell md:hidden"
                     >
                       {i18n.collections.actions.actions}
