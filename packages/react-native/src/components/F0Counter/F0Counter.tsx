@@ -44,6 +44,7 @@ const F0Counter = React.memo(function F0Counter({
         color={textColorByType[type]}
         align="center"
         className="tabular-nums"
+        numberOfLines={1}
       >
         {displayValue}
       </F0Text>

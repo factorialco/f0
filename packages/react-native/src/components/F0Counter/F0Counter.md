@@ -28,7 +28,7 @@ import { F0Counter } from "@factorialco/f0-react-native"
 ### Size
 
 - **md** — `min-w-5 p-0.5` (20px min, content-driven height)
-- **sm** — `min-w-4 h-4 px-0.5` (16px fixed pill)
+- **sm** — `min-w-4 px-0.5` (16px min, content-driven height)
 
 ### Type
 
