@@ -537,7 +537,7 @@ export const AllFieldTypes: Story = {
         label: "Number Field",
         step: 1,
       }),
-      durationField: f0FormField(z.number().min(0), {
+      durationField: f0FormField(z.number().min(1, "Duration is required"), {
         label: "Duration Field",
         fieldType: "duration",
         units: ["hours", "minutes", "seconds"],
@@ -643,7 +643,7 @@ export const AllFieldTypes: Story = {
         emailField: "",
         passwordField: "",
         numberField: 0,
-        durationField: 3661,
+        durationField: 0,
         textareaField: "",
         selectField: "option1",
         multiSelectField: [],

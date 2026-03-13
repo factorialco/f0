@@ -102,6 +102,14 @@ export const RequiredFieldsTest: Story = {
         }
       ),
 
+      // Required duration - must be greater than zero
+      duration: f0FormField(z.number().min(1, "Duration is required"), {
+        label: "Duration (Required)",
+        fieldType: "duration",
+        units: ["hours", "minutes"],
+        helpText: "Set a duration greater than zero",
+      }),
+
       // Optional field for reference
       notes: f0FormField(z.string().optional(), {
         label: "Notes (Optional)",
@@ -119,6 +127,7 @@ export const RequiredFieldsTest: Story = {
         description: { value: null, mentionIds: [] },
         category: "",
         tags: [],
+        duration: 0,
         notes: "",
       },
       onSubmit: async ({ data }) => {
@@ -140,6 +149,10 @@ export const RequiredFieldsTest: Story = {
             <li>Check that the richtext field shows error message</li>
             <li>Check that the single-select field shows error message</li>
             <li>Check that the multi-select field shows error message</li>
+            <li>
+              Check that the duration field shakes/highlights and shows its
+              error
+            </li>
           </ol>
         </div>
         <F0Form formDefinition={formDefinition} />

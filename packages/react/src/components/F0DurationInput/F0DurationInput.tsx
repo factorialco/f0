@@ -67,15 +67,20 @@ const containerVariants = cva({
         "border-f1-border-critical-bold bg-f1-background-critical bg-opacity-10 focus-within:border-f1-border-critical-bold focus-within:ring-f1-border-critical",
     },
     disabled: {
-      true: "cursor-not-allowed aria-disabled:cursor-not-allowed opacity-50",
+      true: "cursor-not-allowed aria-disabled:cursor-not-allowed bg-f1-background-tertiary",
       false: "cursor-text",
     },
     readonly: {
-      true: "border-f1-border-secondary bg-f1-background-secondary",
+      true: "border-f1-border-secondary",
       false: "",
     },
   },
   compoundVariants: [
+    {
+      disabled: false,
+      readonly: true,
+      class: "bg-f1-background-secondary",
+    },
     {
       disabled: false,
       readonly: false,
@@ -289,6 +294,7 @@ export const F0DurationInput = forwardRef<HTMLDivElement, F0DurationInputProps>(
         )}
         <div
           id={id}
+          data-testid="input-field-wrapper"
           className={cn(
             "pointer-events-auto",
             containerVariants({
@@ -335,7 +341,7 @@ export const F0DurationInput = forwardRef<HTMLDivElement, F0DurationInputProps>(
                   className={cn(
                     "border-none bg-transparent p-0 text-inherit outline-none",
                     "font-inherit text-[length:inherit] leading-[inherit]",
-                    "placeholder:text-f1-foreground-secondary placeholder:opacity-[0.37]",
+                    "placeholder:text-f1-foreground-secondary",
                     disabled && "pointer-events-none"
                   )}
                   style={{
@@ -359,9 +365,7 @@ export const F0DurationInput = forwardRef<HTMLDivElement, F0DurationInputProps>(
                   readOnly={readonly}
                   aria-readonly={readonly || undefined}
                 />
-                <span className="text-f1-foreground-secondary opacity-[0.61]">
-                  {suffix}
-                </span>
+                <span className="text-f1-foreground-secondary">{suffix}</span>
               </Fragment>
             )
           })}
