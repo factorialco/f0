@@ -68,6 +68,7 @@ const LoadMoreRowInner = <
   return (
     <Row
       {...props}
+      source={{ ...props.source, selectable: () => undefined }}
       columns={formattedColumns}
       ref={combinedRef}
       noBorder={depth > 0}

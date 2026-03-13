@@ -54,7 +54,7 @@ export type RowProps<
   item: R
   index: number
   groupIndex: number
-  onCheckedChange: (checked: boolean) => void
+  onSelectItem: (item: R, checked: boolean) => void
   selectedItems: Map<string | number, R>
   columns: ReadonlyArray<TableColumnDefinition<R, Sortings, Summaries>>
   frozenColumnsLeft: number
@@ -105,7 +105,7 @@ const RowComponentInner = <
   {
     source,
     item,
-    onCheckedChange,
+    onSelectItem,
     selectedItems,
     columns,
     frozenColumnsLeft,
@@ -172,7 +172,7 @@ const RowComponentInner = <
       <NestedRow
         source={source}
         item={item}
-        onCheckedChange={onCheckedChange}
+        onSelectItem={onSelectItem}
         selectedItems={selectedItems}
         columns={columns}
         frozenColumnsLeft={frozenColumnsLeft}
@@ -228,7 +228,7 @@ const RowComponentInner = <
             <div className="pointer-events-auto ml-1.5 flex h-full items-center justify-start">
               <Checkbox
                 checked={selectedItems.has(id)}
-                onCheckedChange={onCheckedChange}
+                onCheckedChange={(checked) => onSelectItem(item, !!checked)}
                 title={`Select ${source.selectable(item)}`}
                 hideLabel
               />
