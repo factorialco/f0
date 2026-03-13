@@ -67,7 +67,7 @@ const containerVariants = cva({
         "border-f1-border-critical-bold bg-f1-background-critical bg-opacity-10 focus-within:border-f1-border-critical-bold focus-within:ring-f1-border-critical",
     },
     disabled: {
-      true: "cursor-not-allowed aria-disabled:cursor-not-allowed opacity-50",
+      true: "cursor-not-allowed aria-disabled:cursor-not-allowed bg-f1-background-tertiary",
       false: "cursor-text",
     },
     readonly: {
@@ -289,6 +289,7 @@ export const F0DurationInput = forwardRef<HTMLDivElement, F0DurationInputProps>(
         )}
         <div
           id={id}
+          data-testid="input-field-wrapper"
           className={cn(
             "pointer-events-auto",
             containerVariants({

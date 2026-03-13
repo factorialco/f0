@@ -218,6 +218,26 @@ describe("F0Form", () => {
     )
   })
 
+  it("renders duration field wrapper used by error navigation highlight", () => {
+    const formSchema = z.object({
+      duration: f0FormField(z.number(), {
+        label: "Duration",
+        fieldType: "duration",
+      }),
+    })
+
+    render(
+      <F0Form
+        name="duration-error-navigation-highlight"
+        schema={formSchema}
+        defaultValues={{ duration: 0 }}
+        onSubmit={async () => ({ success: true })}
+      />
+    )
+
+    expect(screen.getByTestId("input-field-wrapper")).toBeInTheDocument()
+  })
+
   it("applies duration maxVisibleDigits from schema config", () => {
     const formSchema = z.object({
       duration: f0FormField(z.number(), {

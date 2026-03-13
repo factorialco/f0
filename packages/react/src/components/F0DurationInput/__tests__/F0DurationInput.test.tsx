@@ -381,6 +381,8 @@ describe("F0DurationInput", () => {
       const container = screen.getByRole("group", { name: "Duration" })
       expect(container).toHaveAttribute("data-disabled", "")
       expect(container).toHaveAttribute("aria-disabled", "true")
+      expect(container).toHaveClass("bg-f1-background-tertiary")
+      expect(container).not.toHaveClass("opacity-50")
     })
 
     it("omits data-disabled when not disabled", () => {
@@ -469,6 +471,12 @@ describe("F0DurationInput", () => {
       expect(
         screen.getByRole("group", { name: "Working time" })
       ).toBeInTheDocument()
+    })
+
+    it("exposes input wrapper test id for form error navigation animation", () => {
+      render(<F0DurationInput label="Duration" value={0} onChange={() => {}} />)
+
+      expect(screen.getByTestId("input-field-wrapper")).toBeInTheDocument()
     })
 
     it("forwards aria-describedby and aria-invalid to all segment inputs", () => {
