@@ -16,6 +16,9 @@ import {
 
 import { useI18n } from "@/lib/providers/i18n"
 
+import type { ChatDashboardConfig } from "../../F0ChatDashboard/types"
+import { savedDashboardConfigStore } from "./savedDashboardConfigStore"
+
 import { DEFAULT_CHAT_WIDTH } from "../constants"
 import {
   readFromLocalStorage,
@@ -93,6 +96,21 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   }, [open])
 
   const [canvasContent, setCanvasContent] = useState<CanvasContent | null>(null)
+
+  // Saved dashboard configs live in an external store so that
+  // F0ChatReportCard (rendered inside CopilotKit) can subscribe
+  // via useSyncExternalStore independently of React context.
+  const getSavedDashboardConfig = useCallback(
+    (toolCallId: string) => savedDashboardConfigStore.get(toolCallId),
+    []
+  )
+
+  const updateDashboardConfig = useCallback(
+    (toolCallId: string, config: ChatDashboardConfig) => {
+      savedDashboardConfigStore.set(toolCallId, config)
+    },
+    []
+  )
 
   // Track the mode before canvas was opened so we can restore it on close
   const previousVisualizationModeRef = useRef<VisualizationMode>("sidepanel")
@@ -290,6 +308,8 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         closeCanvas,
         activeToolHint,
         setActiveToolHint,
+        getSavedDashboardConfig,
+        updateDashboardConfig,
       }}
     >
       {children}
@@ -348,6 +368,8 @@ export function useAiChat(): AiChatProviderReturnValue {
       closeCanvas: noopFn,
       activeToolHint: null,
       setActiveToolHint: noopFn,
+      getSavedDashboardConfig: () => undefined,
+      updateDashboardConfig: noopFn,
     }
   }
 

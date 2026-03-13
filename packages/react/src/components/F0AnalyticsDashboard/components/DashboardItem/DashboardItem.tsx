@@ -69,11 +69,11 @@ export function DashboardItem({
 
   return (
     <div
-      className="group/dashitem flex h-full flex-col rounded-lg border border-solid border-f1-border-secondary"
+      className="group/dashitem flex h-full flex-col rounded-lg border border-solid border-f1-border-secondary bg-f1-background"
       aria-busy={isLoading ? "true" : undefined}
       aria-live={isLoading ? "polite" : undefined}
     >
-      <div className="flex items-start p-4">
+      <div className="flex items-start px-4 py-3">
         <div className="flex min-w-0 flex-1 flex-col">
           <OneEllipsis
             tag="h3"

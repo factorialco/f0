@@ -25,7 +25,7 @@ import { useAiChat } from "../providers/AiChatStateProvider"
  * via `emitFrontendTool` from the `displayDashboard` proxy tool.
  */
 export const useDisplayDashboardAction = () => {
-  const { openCanvas, visualizationMode } = useAiChat()
+  const { openCanvas, visualizationMode, getSavedDashboardConfig } = useAiChat()
   const { copilotApiConfig } = useCopilotContext()
 
   const apiConfig = useMemo(
@@ -87,7 +87,8 @@ export const useDisplayDashboardAction = () => {
           {
             name: "colSpan",
             type: "number",
-            description: "Column span (1, 2, or 3). Defaults to 1.",
+            description:
+              "Column span (1-12). Metrics default to 3, charts to 4 or 6, tables to 12.",
             required: false,
           },
           {
@@ -117,7 +118,7 @@ export const useDisplayDashboardAction = () => {
     available: "frontend",
     render: (props) => {
       const args = props.args as Partial<ChatDashboardConfig>
-      const toolCallId = (props as { toolCallId?: string }).toolCallId
+      const toolCallId = (props as { messageId?: string }).messageId
 
       // Bail out while arguments are still streaming in.
       if (
@@ -134,11 +135,15 @@ export const useDisplayDashboardAction = () => {
       // Only auto-replace if the canvas is already open — otherwise
       // the user must click "View report" to open it
       if (visualizationMode === "canvas") {
+        // Use saved config if available for auto-replace
+        const effectiveConfig =
+          (toolCallId ? getSavedDashboardConfig(toolCallId) : undefined) ??
+          config
         openCanvas({
           type: "dashboard",
-          title: config.title,
-          description: config.description,
-          config,
+          title: effectiveConfig.title,
+          description: effectiveConfig.description,
+          config: effectiveConfig,
           apiConfig,
           toolCallId,
         })
@@ -147,6 +152,7 @@ export const useDisplayDashboardAction = () => {
       return (
         <F0ChatReportCard
           config={config}
+          toolCallId={toolCallId}
           onView={(c) =>
             openCanvas({
               type: "dashboard",

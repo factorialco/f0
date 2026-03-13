@@ -56,7 +56,9 @@ export const ChatHeader = (props: HeaderProps) => {
   return (
     <>
       <header
-        className={cn("flex justify-between px-4 py-3 w-full overflow-hidden")}
+        className={cn(
+          "flex justify-between px-4 py-3 w-full overflow-hidden gap-3"
+        )}
       >
         <div className="flex min-w-0 flex-1 items-center">
           {!lockVisualizationMode && (
@@ -70,7 +72,7 @@ export const ChatHeader = (props: HeaderProps) => {
                 <OneEllipsis lines={1} className="min-w-0 text-left">
                   {currentThreadTitle ?? translations.ai.newConversation}
                 </OneEllipsis>
-                <F0Icon icon={ChevronDown} color="primary" size="md" />
+                <F0Icon icon={ChevronDown} color="default" size="md" />
               </div>
             </Action>
           )}

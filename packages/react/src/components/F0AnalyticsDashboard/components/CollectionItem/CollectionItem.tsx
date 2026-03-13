@@ -10,6 +10,7 @@ import { OneDataCollection } from "@/experimental/OneDataCollection"
 import { useDataCollectionSource } from "@/experimental/OneDataCollection/hooks/useDataCollectionSource"
 
 import type { DashboardCollectionItem } from "../../types"
+
 import { DashboardItem } from "../DashboardItem/DashboardItem"
 
 interface CollectionItemProps<Filters extends FiltersDefinition> {
@@ -55,7 +56,11 @@ export function CollectionItem<Filters extends FiltersDefinition>({
       isLoading={false}
       actions={actions}
     >
-      <OneDataCollection source={source} visualizations={item.visualizations} />
+      <OneDataCollection
+        fullHeight
+        source={source}
+        visualizations={item.visualizations}
+      />
     </DashboardItem>
   )
 }

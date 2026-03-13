@@ -102,7 +102,7 @@ export function MetricItem<Filters extends FiltersDefinition>({
       actions={actions}
     >
       {data && (
-        <div className="flex items-end gap-3 px-4 pb-4">
+        <div className="flex h-full items-end gap-3 px-4 pb-4">
           <span className="text-4xl font-semibold leading-none tracking-tight text-f1-foreground">
             {formatValue(data.value, item.format, item.decimals)}
           </span>

@@ -6,8 +6,7 @@ import type { DashboardItemLayout } from "@/components/F0AnalyticsDashboard/type
 
 import { F0Button } from "@/components/F0Button"
 import { OneEllipsis } from "@/components/OneEllipsis"
-import { F0ActionBar, type ActionBarStatus } from "@/experimental/F0ActionBar"
-import { ArrowCycle, Cross } from "@/icons/app"
+import { Cross, Pencil } from "@/icons/app"
 import { useReducedMotion } from "@/lib/a11y"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
@@ -27,13 +26,13 @@ import { useAiChat } from "../providers/AiChatStateProvider"
  * clears `canvasContent` and restores the previous visualization mode.
  */
 export function CanvasPanel() {
-  const { canvasContent, closeCanvas, openCanvas } = useAiChat()
+  const { canvasContent, closeCanvas, openCanvas, updateDashboardConfig } =
+    useAiChat()
   const { threadId } = useCopilotContext()
   const translations = useI18n()
   const shouldReduceMotion = useReducedMotion()
   const [refreshKey, setRefreshKey] = useState(0)
-  const [actionBarStatus, setActionBarStatus] =
-    useState<ActionBarStatus>("idle")
+  const [editMode, setEditMode] = useState(false)
 
   // When a new dashboard is displayed (LLM regeneration), auto-increment
   // refreshKey to bust the compute cache in useDashboardCompute.
@@ -51,7 +50,6 @@ export function CanvasPanel() {
 
   // Pending layout changes that haven't been saved yet
   const pendingLayoutRef = useRef<DashboardItemLayout[] | null>(null)
-  const [hasPendingChanges, setHasPendingChanges] = useState(false)
 
   const saveConfigFn = useSaveDashboardConfig(
     canvasContent?.apiConfig ?? { baseUrl: "", headers: {} }
@@ -71,7 +69,13 @@ export function CanvasPanel() {
         .map((entry) => {
           const original = itemsById.get(entry.id)
           if (!original) return null
-          return { ...original, colSpan: entry.colSpan }
+          return {
+            ...original,
+            colSpan: entry.colSpan,
+            rowSpan: entry.rowSpan,
+            x: entry.x,
+            y: entry.y,
+          }
         })
         .filter((item) => item !== null)
 
@@ -82,47 +86,40 @@ export function CanvasPanel() {
 
   const handleLayoutChange = useCallback((layout: DashboardItemLayout[]) => {
     pendingLayoutRef.current = layout
-    setHasPendingChanges(true)
   }, [])
 
   const handleSave = async () => {
-    if (!canvasContent || !pendingLayoutRef.current) return
+    if (!canvasContent) return
 
-    const updatedConfig = applyLayout(pendingLayoutRef.current)
-    if (!updatedConfig) return
+    if (pendingLayoutRef.current) {
+      const updatedConfig = applyLayout(pendingLayoutRef.current)
+      if (!updatedConfig || !threadId) return
 
-    if (!threadId) return
+      try {
+        await saveConfigFn(threadId, canvasContent.toolCallId, updatedConfig)
 
-    setActionBarStatus("loading")
-    try {
-      // Save to backend
-      await saveConfigFn(threadId, canvasContent.toolCallId, updatedConfig)
+        if (canvasContent.toolCallId) {
+          updateDashboardConfig(canvasContent.toolCallId, updatedConfig)
+        }
 
-      // Update canvas content locally
-      openCanvas({
-        ...canvasContent,
-        config: updatedConfig,
-      })
+        openCanvas({
+          ...canvasContent,
+          config: updatedConfig,
+        })
 
-      pendingLayoutRef.current = null
-      setActionBarStatus("success")
-      // Hide the action bar after showing success briefly
-      setTimeout(() => {
-        setHasPendingChanges(false)
-        setActionBarStatus("idle")
-      }, 1500)
-    } catch {
-      // Reset to idle so user can retry
-      setActionBarStatus("idle")
+        pendingLayoutRef.current = null
+      } catch {
+        // Keep edit mode open so user can retry
+        return
+      }
     }
+
+    setEditMode(false)
   }
 
   const handleDiscard = () => {
     pendingLayoutRef.current = null
-    setHasPendingChanges(false)
-    setActionBarStatus("idle")
-    // Force re-render to reset the dashboard to its original config
-    setRefreshKey((k) => k + 1)
+    setEditMode(false)
   }
 
   return (
@@ -145,7 +142,7 @@ export function CanvasPanel() {
           <motion.div
             className={cn(
               "flex h-full w-full flex-col overflow-hidden rounded-lg border border-solid border-f1-border-secondary",
-              "p-1 bg-f1-special-page"
+              "bg-f1-special-page"
             )}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -155,36 +152,46 @@ export function CanvasPanel() {
             }}
           >
             {/* Header */}
-            <div className="flex shrink-0 items-start gap-3 border-0 border-b border-solid border-f1-border-secondary px-4 py-2">
-              <div className="flex min-w-0 flex-1 flex-col">
-                <OneEllipsis
-                  tag="h2"
-                  className="text-2xl font-semibold text-f1-foreground"
-                >
-                  {canvasContent.title}
-                </OneEllipsis>
-                {canvasContent.description && (
-                  <OneEllipsis className="text-base text-f1-foreground-secondary">
-                    {canvasContent.description}
-                  </OneEllipsis>
-                )}
-              </div>
-              <F0Button
-                variant="ghost"
-                icon={ArrowCycle}
-                size="md"
-                hideLabel
-                onClick={() => setRefreshKey((k) => k + 1)}
-                label="Refresh"
-              />
-              <F0Button
-                variant="ghost"
-                icon={Cross}
-                size="md"
-                hideLabel
-                onClick={() => closeCanvas()}
-                label={translations.ai.closeDashboard}
-              />
+            <div className="flex shrink-0 items-center gap-3 border-0 border-b border-solid border-f1-border-secondary px-4 py-2">
+              <OneEllipsis
+                tag="h2"
+                className="min-w-0 flex-1 text-2xl font-semibold text-f1-foreground"
+              >
+                {canvasContent.title}
+              </OneEllipsis>
+              {editMode ? (
+                <>
+                  <F0Button
+                    variant="outline"
+                    label={translations.ai.discardChanges}
+                    onClick={handleDiscard}
+                    size="md"
+                  />
+                  <F0Button
+                    label={translations.ai.saveChanges}
+                    onClick={handleSave}
+                    size="md"
+                  />
+                </>
+              ) : (
+                <>
+                  <F0Button
+                    variant="outline"
+                    icon={Pencil}
+                    size="md"
+                    onClick={() => setEditMode(true)}
+                    label="Edit"
+                  />
+                  <F0Button
+                    variant="outline"
+                    icon={Cross}
+                    size="md"
+                    hideLabel
+                    onClick={() => closeCanvas()}
+                    label={translations.ai.closeDashboard}
+                  />
+                </>
+              )}
             </div>
 
             {/* Content */}
@@ -194,28 +201,10 @@ export function CanvasPanel() {
                   config={canvasContent.config}
                   apiConfig={canvasContent.apiConfig}
                   refreshKey={refreshKey}
-                  editMode
+                  editMode={editMode}
                   onLayoutChange={handleLayoutChange}
                 />
               )}
-              <F0ActionBar
-                isOpen={hasPendingChanges}
-                variant="dark"
-                status={actionBarStatus}
-                label={translations.ai.unsavedChanges}
-                primaryActions={[
-                  {
-                    label: translations.ai.saveChanges,
-                    onClick: handleSave,
-                  },
-                ]}
-                secondaryActions={[
-                  {
-                    label: translations.ai.discardChanges,
-                    onClick: handleDiscard,
-                  },
-                ]}
-              />
             </div>
           </motion.div>
         </motion.div>

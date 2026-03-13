@@ -174,8 +174,14 @@ export interface DashboardItemBase {
   title: string
   /** Optional description below the title */
   description?: string
-  /** Number of grid columns this item spans (1–3). @default 1 */
-  colSpan?: 1 | 2 | 3
+  /** Number of grid columns this item spans (1–12). */
+  colSpan?: number
+  /** Number of grid rows this item spans. */
+  rowSpan?: number
+  /** Grid column position (0-based). When set, skip auto-packing. */
+  x?: number
+  /** Grid row position (0-based). When set, skip auto-packing. */
+  y?: number
   /**
    * Whether this item receives dashboard-level filters in its fetchData.
    * When false, fetchData receives an empty object.
@@ -300,7 +306,10 @@ export type DashboardItem<
  */
 export type DashboardItemLayout = {
   id: string
-  colSpan: 1 | 2 | 3
+  colSpan: number
+  rowSpan: number
+  x: number
+  y: number
 }
 
 // ---------------------------------------------------------------------------

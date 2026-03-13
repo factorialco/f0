@@ -141,7 +141,10 @@ interface ChatDashboardItemBase {
   id: string
   title: string
   description?: string
-  colSpan?: 1 | 2 | 3
+  colSpan?: number
+  rowSpan?: number
+  x?: number
+  y?: number
 }
 
 export interface ChatDashboardChartItem extends ChatDashboardItemBase {

@@ -255,6 +255,9 @@ function mapChartItem(
     title: item.title,
     description: item.description,
     colSpan: item.colSpan,
+    rowSpan: item.rowSpan,
+    x: item.x,
+    y: item.y,
     type: "chart",
     chart: toDashboardChartConfig(item.chart),
     fetchData: (filters: FiltersState<FiltersDefinition>) =>
@@ -271,6 +274,9 @@ function mapMetricItem(
     title: item.title,
     description: item.description,
     colSpan: item.colSpan,
+    rowSpan: item.rowSpan,
+    x: item.x,
+    y: item.y,
     type: "metric",
     format: item.format,
     decimals: item.decimals,
@@ -287,7 +293,10 @@ function mapCollectionItem(
     id: item.id,
     title: item.title,
     description: item.description,
-    colSpan: item.colSpan ?? 3,
+    colSpan: item.colSpan ?? 12,
+    rowSpan: item.rowSpan,
+    x: item.x,
+    y: item.y,
     type: "collection",
     createSource: (filters: FiltersState<FiltersDefinition>) => {
       // Eagerly fetch data, then paginate client-side from the result
