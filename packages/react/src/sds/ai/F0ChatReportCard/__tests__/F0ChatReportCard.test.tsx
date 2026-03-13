@@ -7,7 +7,6 @@ import { F0ChatReportCard } from "../F0ChatReportCard"
 
 const sampleConfig: ChatDashboardConfig = {
   title: "Headcount Overview",
-  description: "Company-wide headcount breakdown",
   fetchSpecs: {
     employees: {
       fetch: [{ toolId: "fetchEmployees", args: {} }],
@@ -64,23 +63,11 @@ describe("F0ChatReportCard", () => {
     expect(screen.getByText("Headcount Overview")).toBeInTheDocument()
   })
 
-  it("renders the dashboard description", () => {
-    zeroRender(<F0ChatReportCard config={sampleConfig} onView={() => {}} />)
-    expect(
-      screen.getByText("Company-wide headcount breakdown")
-    ).toBeInTheDocument()
-  })
-
-  it("shows item count summary", () => {
-    zeroRender(<F0ChatReportCard config={sampleConfig} onView={() => {}} />)
-    expect(screen.getByText("2 charts, 1 metric, 1 table")).toBeInTheDocument()
-  })
-
   it("calls onView with config when clicked", async () => {
     const onView = vi.fn()
     zeroRender(<F0ChatReportCard config={sampleConfig} onView={onView} />)
 
-    await userEvent.click(screen.getByText("Headcount Overview"))
+    await userEvent.click(screen.getByText("Open"))
     expect(onView).toHaveBeenCalledWith(sampleConfig)
   })
 })

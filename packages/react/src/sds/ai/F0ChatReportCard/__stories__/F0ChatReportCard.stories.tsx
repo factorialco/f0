@@ -7,7 +7,6 @@ import type { ChatDashboardConfig } from "../../F0ChatDashboard/types"
 
 const sampleConfig: ChatDashboardConfig = {
   title: "Headcount Overview",
-  description: "Company-wide headcount breakdown by department",
   fetchSpecs: {
     employees: {
       fetch: [{ toolId: "fetchEmployees", args: {} }],

@@ -183,8 +183,6 @@ export type ChatDashboardItem =
 export interface ChatDashboardConfig {
   /** Dashboard title displayed in the canvas header and chat report card */
   title: string
-  /** Optional description */
-  description?: string
   /** Filter definitions — keys become filter IDs */
   filters?: Record<string, ChatDashboardFilterDefinition>
   /** Ordered list of dashboard items with computation specs */

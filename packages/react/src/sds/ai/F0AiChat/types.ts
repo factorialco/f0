@@ -12,7 +12,6 @@ import type { ChatDashboardConfig } from "../F0ChatDashboard/types"
 export type CanvasContent = {
   type: "dashboard"
   title: string
-  description?: string
   config: ChatDashboardConfig
   apiConfig: { baseUrl: string; headers: Record<string, string> }
   toolCallId?: string

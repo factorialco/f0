@@ -1,28 +1,12 @@
 import { useSyncExternalStore } from "react"
 
-import { F0Card } from "@/components/F0Card"
-import { BarGraph } from "@/icons/app"
-
-import { savedDashboardConfigStore } from "../F0AiChat/providers/savedDashboardConfigStore"
-import type { ChatDashboardConfig } from "../F0ChatDashboard/types"
+import { F0AvatarModule } from "@/components/avatars/F0AvatarModule/F0AvatarModule"
+import { F0Button } from "@/components/F0Button"
+import { OneEllipsis } from "@/components/OneEllipsis"
 
 import type { F0ChatReportCardProps } from "./types"
 
-function countItemsByType(items: ChatDashboardConfig["items"]): string {
-  const counts: Record<string, number> = {}
-  for (const item of items) {
-    counts[item.type] = (counts[item.type] ?? 0) + 1
-  }
-
-  const parts: string[] = []
-  if (counts.chart)
-    parts.push(`${counts.chart} chart${counts.chart > 1 ? "s" : ""}`)
-  if (counts.metric)
-    parts.push(`${counts.metric} metric${counts.metric > 1 ? "s" : ""}`)
-  if (counts.collection)
-    parts.push(`${counts.collection} table${counts.collection > 1 ? "s" : ""}`)
-  return parts.join(", ")
-}
+import { savedDashboardConfigStore } from "../F0AiChat/providers/savedDashboardConfigStore"
 
 /**
  * Compact card shown inline in the AI chat to represent a generated
@@ -50,26 +34,27 @@ export function F0ChatReportCard({
     (toolCallId ? savedDashboardConfigStore.get(toolCallId) : undefined) ??
     originalConfig
 
-  const { title, description, items } = config
-  const summary = countItemsByType(items)
-
+  const { title } = config
   return (
-    <F0Card
-      avatar={{ type: "icon", icon: BarGraph }}
-      title={title}
-      description={description}
-      metadata={
-        summary
-          ? [
-              {
-                icon: BarGraph,
-                property: { type: "text" as const, value: summary },
-              },
-            ]
-          : undefined
-      }
-      onClick={() => onView(config)}
-    />
+    <div className="shadow-sm flex flex-row items-center justify-between gap-3 rounded-lg border border-solid border-f1-border-secondary p-4">
+      <div className="flex min-w-0 flex-row items-center gap-3">
+        <F0AvatarModule module="analytics" size="lg" />
+        <div className="flex min-w-0 flex-col">
+          <OneEllipsis className="text-lg font-semibold text-f1-foreground">
+            {title}
+          </OneEllipsis>
+          <OneEllipsis className="text-base text-f1-foreground-secondary">
+            Report
+          </OneEllipsis>
+        </div>
+      </div>
+      <F0Button
+        variant="neutral"
+        size="md"
+        label="Open"
+        onClick={() => onView(config)}
+      />
+    </div>
   )
 }
 

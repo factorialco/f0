@@ -142,7 +142,6 @@ export const useDisplayDashboardAction = () => {
         openCanvas({
           type: "dashboard",
           title: effectiveConfig.title,
-          description: effectiveConfig.description,
           config: effectiveConfig,
           apiConfig,
           toolCallId,
@@ -157,7 +156,6 @@ export const useDisplayDashboardAction = () => {
             openCanvas({
               type: "dashboard",
               title: c.title,
-              description: c.description,
               config: c,
               apiConfig,
               toolCallId,
