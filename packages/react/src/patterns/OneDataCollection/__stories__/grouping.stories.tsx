@@ -544,6 +544,81 @@ export const SelectableGrouping: Story = {
   ),
 }
 
+export const WithGroupingAndSummary: Story = {
+  parameters: { a11y: { skipCi: true } },
+  render: () => {
+    const paginatedMockUsers = generateMockUsers(50)
+
+    const grouping: GroupingDefinition<MockUser> = {
+      mandatory: true,
+      collapsible: true,
+      defaultOpenGroups: ["Engineering"],
+      groupBy: {
+        department: {
+          name: "Department",
+          label: (groupId) => groupId,
+          itemCount: async (groupId) => {
+            await new Promise((resolve) => setTimeout(resolve, 1000))
+            return paginatedMockUsers.filter(
+              (user) => user.department === groupId
+            ).length
+          },
+        },
+        role: {
+          name: "Role",
+          label: (groupId) => groupId,
+          itemCount: (groupId) =>
+            paginatedMockUsers.filter((user) => user.role === groupId).length,
+        },
+      },
+    }
+
+    const source = useDataCollectionSource({
+      sortings,
+      grouping,
+      currentGrouping: { field: "department", order: "asc" },
+      summaries: {
+        salary: { type: "sum", label: "Total" },
+      },
+      dataAdapter: createDataAdapter({
+        data: paginatedMockUsers,
+        delay: 500,
+        paginationType: "infinite-scroll",
+        perPage: 10,
+        useObservable: true,
+      }),
+    })
+
+    return (
+      <div style={{ height: 500 }}>
+        <OneDataCollection
+          fullHeight
+          source={source}
+          visualizations={[
+            {
+              type: "table",
+              options: {
+                columns: [
+                  { label: "Name", render: (item) => item.name },
+                  { label: "Email", render: (item) => item.email },
+                  { label: "Role", render: (item) => item.role },
+                  { label: "Department", render: (item) => item.department },
+                  {
+                    label: "Salary",
+                    summary: "salary",
+                    align: "right",
+                    render: (item) => item.salary,
+                  },
+                ],
+              },
+            },
+          ]}
+        />
+      </div>
+    )
+  },
+}
+
 export const SelectableGroupingAndActions: Story = {
   render: () => (
     <ExampleComponent
