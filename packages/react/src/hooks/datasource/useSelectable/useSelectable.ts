@@ -541,7 +541,7 @@ export function useSelectable<
     (checked: boolean) => {
       if (!isMultiSelection) return
 
-      if (!checked && allSelectedCheck) {
+      if (!checked) {
         setAllSelectedCheck(false)
         wasExplicitSelectAll.current = false
         setSelectAllTotal(null)
@@ -557,9 +557,7 @@ export function useSelectable<
 
       const currentPageCount = data.records?.length || 0
 
-      if (checked) {
-        setSelectAllTotal((prev) => (prev !== null ? prev : currentPageCount))
-      }
+      setSelectAllTotal((prev) => (prev !== null ? prev : currentPageCount))
 
       if (isGrouped && data.type === "grouped") {
         const allGroupIds = data.groups.map((group) => group.key)
@@ -574,12 +572,6 @@ export function useSelectable<
         if (allItemIds.length > 0) {
           handleSelectItemChangeInternal(allItemIds, checked)
         }
-      }
-
-      if (!checked) {
-        setAllSelectedCheck(false)
-        wasExplicitSelectAll.current = false
-        setSelectAllTotal(null)
       }
     },
     [
