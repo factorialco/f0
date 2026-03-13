@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.402.2](https://github.com/factorialco/f0/compare/f0-react-v1.402.1...f0-react-v1.402.2) (2026-03-13)
+
+
+### Bug Fixes
+
+* **react:** align F0DurationInput disabled and error highlight ([#3665](https://github.com/factorialco/f0/issues/3665)) ([a026b34](https://github.com/factorialco/f0/commit/a026b3444800929cd79282b131f1f4d17a361fe9))
+
 ## [1.402.1](https://github.com/factorialco/f0/compare/f0-react-v1.402.0...f0-react-v1.402.1) (2026-03-13)
 
 
