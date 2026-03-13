@@ -1,5 +1,5 @@
 import React from "react"
-import { ScrollView, View } from "react-native"
+import { Image as RNImage, ScrollView, View } from "react-native"
 
 import {
   Bell,
@@ -19,6 +19,27 @@ import {
 } from "../../../src/icons/app"
 import { F0Avatar } from "../../../src/components/F0Avatar"
 import { F0Text } from "../../../src/components/primitives/F0Text"
+
+const assetUri = (asset: number) => RNImage.resolveAssetSource(asset).uri
+
+/* eslint-disable @typescript-eslint/no-require-imports */
+const IMG = {
+  person1: assetUri(require("../../../assets/images/users/Person01.png")),
+  person2: assetUri(require("../../../assets/images/users/Person02.png")),
+  person3: assetUri(require("../../../assets/images/users/Person03.png")),
+  person4: assetUri(require("../../../assets/images/users/Person04.png")),
+  person5: assetUri(require("../../../assets/images/users/Person05.png")),
+  person6: assetUri(require("../../../assets/images/users/Person06.png")),
+  team1: assetUri(require("../../../assets/images/users/Team01.png")),
+  team2: assetUri(require("../../../assets/images/users/Team02.png")),
+  team3: assetUri(require("../../../assets/images/users/Team03.png")),
+  company1: assetUri(require("../../../assets/images/users/Company01.png")),
+  company2: assetUri(require("../../../assets/images/users/Company02.png")),
+  companyFactorial: assetUri(
+    require("../../../assets/images/users/CompanyFactorial.png")
+  ),
+}
+/* eslint-enable @typescript-eslint/no-require-imports */
 
 export function F0AvatarShowcase() {
   const sectionTitle = (text: string) => (
@@ -57,37 +78,37 @@ export function F0AvatarShowcase() {
         <F0Avatar.Person
           firstName="Ada"
           lastName="Lovelace"
-          src="https://i.pravatar.cc/150?u=ada"
+          src={IMG.person1}
           size="xs"
         />
         <F0Avatar.Person
           firstName="Ada"
           lastName="Lovelace"
-          src="https://i.pravatar.cc/150?u=ada"
+          src={IMG.person1}
           size="sm"
         />
         <F0Avatar.Person
           firstName="Ada"
           lastName="Lovelace"
-          src="https://i.pravatar.cc/150?u=ada"
+          src={IMG.person1}
           size="md"
         />
         <F0Avatar.Person
           firstName="Ada"
           lastName="Lovelace"
-          src="https://i.pravatar.cc/150?u=ada"
+          src={IMG.person1}
           size="lg"
         />
         <F0Avatar.Person
           firstName="Ada"
           lastName="Lovelace"
-          src="https://i.pravatar.cc/150?u=ada"
+          src={IMG.person1}
           size="xl"
         />
         <F0Avatar.Person
           firstName="Ada"
           lastName="Lovelace"
-          src="https://i.pravatar.cc/150?u=ada"
+          src={IMG.person1}
           size="2xl"
         />
       </View>
@@ -237,21 +258,9 @@ export function F0AvatarShowcase() {
 
       {sectionTitle("F0Avatar.Team — With Image")}
       <View className="mb-6 flex-row flex-wrap items-end gap-3">
-        <F0Avatar.Team
-          name="Design"
-          src="https://i.pravatar.cc/150?u=team"
-          size="sm"
-        />
-        <F0Avatar.Team
-          name="Design"
-          src="https://i.pravatar.cc/150?u=team"
-          size="md"
-        />
-        <F0Avatar.Team
-          name="Design"
-          src="https://i.pravatar.cc/150?u=team"
-          size="lg"
-        />
+        <F0Avatar.Team name="Design" src={IMG.team1} size="sm" />
+        <F0Avatar.Team name="Design" src={IMG.team1} size="md" />
+        <F0Avatar.Team name="Design" src={IMG.team1} size="lg" />
       </View>
 
       {sectionTitle("F0Avatar.Team — Badges (all sizes)")}
@@ -303,21 +312,9 @@ export function F0AvatarShowcase() {
 
       {sectionTitle("F0Avatar.Company — With Image")}
       <View className="mb-6 flex-row flex-wrap items-end gap-3">
-        <F0Avatar.Company
-          name="Google"
-          src="https://i.pravatar.cc/150?u=company"
-          size="sm"
-        />
-        <F0Avatar.Company
-          name="Google"
-          src="https://i.pravatar.cc/150?u=company"
-          size="md"
-        />
-        <F0Avatar.Company
-          name="Google"
-          src="https://i.pravatar.cc/150?u=company"
-          size="lg"
-        />
+        <F0Avatar.Company name="Factorial" src={IMG.companyFactorial} size="sm" />
+        <F0Avatar.Company name="Factorial" src={IMG.companyFactorial} size="md" />
+        <F0Avatar.Company name="Factorial" src={IMG.companyFactorial} size="lg" />
       </View>
 
       {sectionTitle("F0Avatar.Company — Badges (all sizes)")}
@@ -661,21 +658,9 @@ export function F0AvatarShowcase() {
           type="person"
           size="sm"
           avatars={[
-            {
-              firstName: "Ana",
-              lastName: "G",
-              src: "https://i.pravatar.cc/100?u=ana",
-            },
-            {
-              firstName: "Ben",
-              lastName: "T",
-              src: "https://i.pravatar.cc/100?u=ben",
-            },
-            {
-              firstName: "Cai",
-              lastName: "L",
-              src: "https://i.pravatar.cc/100?u=cai",
-            },
+            { firstName: "Ana", lastName: "G", src: IMG.person2 },
+            { firstName: "Ben", lastName: "T", src: IMG.person3 },
+            { firstName: "Cai", lastName: "L", src: IMG.person4 },
             { firstName: "Dan", lastName: "P" },
             { firstName: "Eva", lastName: "R" },
           ]}
@@ -1025,14 +1010,14 @@ export function F0AvatarShowcase() {
         <F0Avatar.Person
           firstName="Gone"
           lastName="User"
-          src="https://i.pravatar.cc/150?u=gone"
+          src={IMG.person5}
           size="md"
           deactivated
         />
         <F0Avatar.Person
           firstName="Gone"
           lastName="User"
-          src="https://i.pravatar.cc/150?u=gone"
+          src={IMG.person5}
           size="lg"
           deactivated
         />
