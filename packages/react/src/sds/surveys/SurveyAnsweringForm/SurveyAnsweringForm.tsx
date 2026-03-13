@@ -7,6 +7,7 @@ import { F0Box } from "@/components/F0Box"
 import { F0Dialog } from "@/components/F0Dialog"
 import { F0Form } from "@/components/F0Form/F0Form"
 import { useF0Form } from "@/components/F0Form/useF0Form"
+import { ResourceHeader } from "@/experimental/Information/Headers/ResourceHeader"
 import { OneEmptyState } from "@/experimental/OneEmptyState"
 import { ArrowLeft, ArrowRight, Maximize, Minimize } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
@@ -34,9 +35,12 @@ export function SurveyAnsweringForm({
   onSubmit: onSubmitProp,
   mode,
   title,
+  description,
+  resourceHeader,
   isOpen,
   onClose,
   position: positionProp = "center",
+  module,
   allowToChangeFullscreen = false,
   defaultValues,
   errorTriggerMode = "on-blur",
@@ -258,17 +262,19 @@ export function SurveyAnsweringForm({
 
   const shouldCenterContent = (!hasQuestions && !loading) || isStepped
 
+  const disableContentPadding = position === "center"
+
   return (
     <F0Dialog
       isOpen={isOpen}
       onClose={onClose}
-      title={title}
+      module={module}
       position={position}
       width={dialogWidth}
       primaryAction={primaryAction}
       secondaryAction={secondaryAction}
       otherActions={otherActions}
-      disableContentPadding
+      disableContentPadding={disableContentPadding}
     >
       <SurveyFormBuilderProvider answering elements={elements} onChange={noop}>
         <div
@@ -292,12 +298,20 @@ export function SurveyAnsweringForm({
           )}
           <div
             className={cn(
-              "mx-auto flex w-full flex-col px-4 py-12 @lg:w-[750px] max-w-full",
+              "mx-auto flex w-full flex-col @lg:w-[750px] max-w-full",
               mode === "all-questions" && !shouldCenterContent
                 ? "justify-start"
-                : "flex-1 justify-center"
+                : "flex-1 justify-center",
+              disableContentPadding && "px-4 py-12"
             )}
           >
+            <div className="mb-6">
+              <ResourceHeader
+                title={title}
+                description={description}
+                {...resourceHeader}
+              />
+            </div>
             {loading ? (
               mode === "stepped" ? (
                 <SurveySteppedLoadingSkeleton />

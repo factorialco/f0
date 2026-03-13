@@ -88,7 +88,7 @@ export function SelectQuestionField({
             className={cn(
               "flex min-h-9 w-full items-center gap-3 rounded-md bg-f1-background py-0.5 pl-2 pr-0.5",
               disabled
-                ? "cursor-not-allowed opacity-50"
+                ? "cursor-not-allowed"
                 : "cursor-pointer hover:bg-f1-background-hover"
             )}
             onClick={(e) => {
