@@ -1044,25 +1044,44 @@ const createdMixedNestedRecords = (filteredData: MockUser[]) => {
         ? [
             {
               ...user,
+              id: `${user.id}-child-0`,
               children: [
-                { ...user },
+                { ...user, id: `${user.id}-child-0-0` },
                 {
                   ...user,
+                  id: `${user.id}-child-0-1`,
                   detailed: index === 0,
                   children: [
-                    { ...user, detailed: index === 0 },
-                    { ...user, detailed: index === 0 },
+                    {
+                      ...user,
+                      id: `${user.id}-child-0-1-0`,
+                      detailed: index === 0,
+                    },
+                    {
+                      ...user,
+                      id: `${user.id}-child-0-1-1`,
+                      detailed: index === 0,
+                    },
                   ],
                 },
-                { ...user },
+                { ...user, id: `${user.id}-child-0-2` },
               ],
             },
             {
               ...user,
+              id: `${user.id}-child-1`,
               detailed: index === 0,
               children: [
-                { ...user, detailed: index === 0 },
-                { ...user, detailed: index === 0 },
+                {
+                  ...user,
+                  id: `${user.id}-child-1-0`,
+                  detailed: index === 0,
+                },
+                {
+                  ...user,
+                  id: `${user.id}-child-1-1`,
+                  detailed: index === 0,
+                },
               ],
             },
           ]
@@ -1074,8 +1093,8 @@ const createdBasicNestedRecords = (filteredData: MockUser[]) => {
   return filteredData.map((user) => ({
     ...user,
     children: [
-      { ...user, name: "Child_of " + user.name },
-      { ...user, name: "Child_of " + user.name },
+      { ...user, id: `${user.id}-child-0`, name: "Child_of " + user.name },
+      { ...user, id: `${user.id}-child-1`, name: "Child_of " + user.name },
     ],
   }))
 }
@@ -1085,8 +1104,18 @@ const createdDetailedNestedRecords = (filteredData: MockUser[]) => {
     ...user,
     detailed: true,
     children: [
-      { ...user, name: "Child_of " + user.name, detailed: true },
-      { ...user, name: "Child_of " + user.name, detailed: true },
+      {
+        ...user,
+        id: `${user.id}-child-0`,
+        name: "Child_of " + user.name,
+        detailed: true,
+      },
+      {
+        ...user,
+        id: `${user.id}-child-1`,
+        name: "Child_of " + user.name,
+        detailed: true,
+      },
     ],
   }))
 }

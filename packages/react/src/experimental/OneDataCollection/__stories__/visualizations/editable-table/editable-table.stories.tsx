@@ -465,9 +465,7 @@ export const EditableTableWithSelectableNestedRecordsDetailed: Story = {
       <ExampleComponent
         noSorting
         storage={false}
-        selectable={() => {
-          return ""
-        }}
+        selectable={(item) => item.id}
         visualizations={[
           {
             type: "editableTable" as const,
