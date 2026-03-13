@@ -1,9 +1,9 @@
+import { useSurveyFormBuilderContext } from "../../Context"
+import { detectRatingOptionType } from "../../lib"
 import {
   BaseQuestion,
   BaseQuestionPropsForOtherQuestionComponents,
 } from "../BaseQuestion"
-import { useSurveyFormBuilderContext } from "../../Context"
-import { detectRatingOptionType } from "../../lib"
 import { ScoreEditOption } from "./ScoreEditOption"
 
 export type BaseScoreQuestionProps =
@@ -46,7 +46,7 @@ export const BaseScoreQuestion = ({
 
   return (
     <BaseQuestion {...baseQuestionComponentProps}>
-      <div className="grid grid-cols-3 gap-3 md:grid-cols-5">
+      <div className="grid grid-cols-3 gap-3 @md:grid-cols-5">
         {options.map((option) => (
           <ScoreEditOption
             key={option.value}

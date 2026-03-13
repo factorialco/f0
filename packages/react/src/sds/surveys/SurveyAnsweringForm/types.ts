@@ -1,3 +1,4 @@
+import type { DialogPosition } from "@/components/F0Dialog/types"
 import type { F0FormErrorTriggerMode } from "@/components/F0Form/types"
 
 import type { SurveyFormBuilderElement } from "../SurveyFormBuilder/types"
@@ -33,7 +34,7 @@ interface SurveyAnsweringFormBaseProps {
   title: string
   isOpen: boolean
   onClose: () => void
-  fullscreen?: boolean
+  position?: DialogPosition
   allowToChangeFullscreen?: boolean
   defaultValues?: Partial<SurveyAnswers>
   errorTriggerMode?: F0FormErrorTriggerMode

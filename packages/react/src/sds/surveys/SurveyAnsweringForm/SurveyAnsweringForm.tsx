@@ -36,7 +36,7 @@ export function SurveyAnsweringForm({
   title,
   isOpen,
   onClose,
-  fullscreen: fullscreenProp = false,
+  position: positionProp = "center",
   allowToChangeFullscreen = false,
   defaultValues,
   errorTriggerMode = "on-blur",
@@ -45,7 +45,10 @@ export function SurveyAnsweringForm({
   preview = false,
 }: SurveyAnsweringFormProps) {
   const { t } = useI18n()
-  const [isFullscreen, setIsFullscreen] = useState(fullscreenProp)
+  const initialIsFullscreen = positionProp === "fullscreen"
+  const nonFullscreenPosition =
+    positionProp === "fullscreen" ? "center" : positionProp
+  const [isFullscreen, setIsFullscreen] = useState(initialIsFullscreen)
 
   const { formRef, submit, isSubmitting, hasErrors } = useF0Form()
 
@@ -88,7 +91,10 @@ export function SurveyAnsweringForm({
     isReadonlyPreview
   )
 
-  const position: DialogPosition = isFullscreen ? "fullscreen" : "center"
+  const position: DialogPosition = isFullscreen
+    ? "fullscreen"
+    : nonFullscreenPosition
+  const dialogWidth = position === "center" ? "xl" : undefined
 
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -257,7 +263,7 @@ export function SurveyAnsweringForm({
       onClose={onClose}
       title={title}
       position={position}
-      width="xl"
+      width={dialogWidth}
       primaryAction={primaryAction}
       secondaryAction={secondaryAction}
       otherActions={otherActions}
@@ -266,7 +272,7 @@ export function SurveyAnsweringForm({
       <SurveyFormBuilderProvider answering elements={elements} onChange={noop}>
         <div
           className={cn(
-            "relative flex min-h-full flex-col",
+            "relative flex min-h-full flex-col @container",
             isStepped && !isFullscreen && "min-h-[600px]",
             shouldCenterContent && "h-full"
           )}
@@ -285,7 +291,7 @@ export function SurveyAnsweringForm({
           )}
           <div
             className={cn(
-              "mx-auto flex w-full flex-col px-4 py-12 md:w-[750px]",
+              "mx-auto flex w-full flex-col px-4 py-12 @lg:w-[750px] max-w-full",
               mode === "all-questions" && !shouldCenterContent
                 ? "justify-start"
                 : "flex-1 justify-center"

@@ -199,7 +199,7 @@ export const Stepped: Story = {
 export const Fullscreen: Story = {
   args: {
     mode: "all-questions",
-    fullscreen: true,
+    position: "fullscreen",
   },
 }
 
@@ -210,10 +210,18 @@ export const FullscreenToggle: Story = {
   },
 }
 
+export const RightSide: Story = {
+  args: {
+    mode: "all-questions",
+    position: "right",
+    allowToChangeFullscreen: true,
+  },
+}
+
 export const SteppedFullscreen: Story = {
   args: {
     mode: "stepped",
-    fullscreen: true,
+    position: "fullscreen",
   },
 }
 
@@ -232,7 +240,7 @@ export const NoElements: Story = {
   args: {
     mode: "all-questions",
     elements: [],
-    fullscreen: true,
+    position: "fullscreen",
     labels: {
       empty: {
         title: "Nothing to answer yet",

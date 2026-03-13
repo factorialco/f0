@@ -33,7 +33,7 @@ export type { FlatFormItem } from "./utils"
 function DragSelectGuard({ children }: { children: React.ReactNode }) {
   const { isDragging } = useDragContext()
   return (
-    <div className={cn("relative", isDragging && "select-none")}>
+    <div className={cn("relative @container", isDragging && "select-none")}>
       {children}
     </div>
   )
