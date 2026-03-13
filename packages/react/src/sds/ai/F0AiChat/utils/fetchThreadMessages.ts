@@ -44,7 +44,7 @@ type ActionWithRender = {
  * During a live conversation CopilotKit creates a separate message per
  * tool call. The backend collapses everything into a single stored message
  * with an ordered `parts` array. This function re-expands them so the UI
- * renders each tool (downloadData, displayChart, etc.) as its own widget
+ * renders each tool (downloadData, displayDashboard, etc.) as its own widget
  * in the correct position.
  */
 export function convertBackendMessage(

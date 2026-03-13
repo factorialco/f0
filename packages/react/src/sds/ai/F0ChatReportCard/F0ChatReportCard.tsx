@@ -36,7 +36,7 @@ export function F0ChatReportCard({
 
   const { title } = config
   return (
-    <div className="shadow-sm flex flex-row items-center justify-between gap-3 rounded-lg border border-solid border-f1-border-secondary p-4">
+    <div className="flex flex-row items-center justify-between gap-3 rounded-lg border border-solid border-f1-border-secondary p-4">
       <div className="flex min-w-0 flex-row items-center gap-3">
         <F0AvatarModule module="analytics" size="lg" />
         <div className="flex min-w-0 flex-col">

@@ -60,8 +60,8 @@ describe("convertBackendMessage", () => {
             type: "tool-invocation",
             toolInvocation: {
               toolCallId: "tc_2",
-              toolName: "displayChart",
-              args: { type: "bar" },
+              toolName: "displayDashboard",
+              args: { title: "Overview" },
               state: "result",
             },
           },
@@ -95,7 +95,7 @@ describe("convertBackendMessage", () => {
       ],
     })
 
-    // displayChart tool call
+    // displayDashboard tool call
     expect(result[2]).toMatchObject({
       id: "msg_3_tc2",
       role: "assistant",
@@ -105,8 +105,8 @@ describe("convertBackendMessage", () => {
           id: "tc_2",
           type: "function",
           function: {
-            name: "displayChart",
-            arguments: JSON.stringify({ type: "bar" }),
+            name: "displayDashboard",
+            arguments: JSON.stringify({ title: "Overview" }),
           },
         },
       ],
