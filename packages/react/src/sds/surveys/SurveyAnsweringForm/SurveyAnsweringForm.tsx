@@ -262,12 +262,14 @@ export function SurveyAnsweringForm({
 
   const shouldCenterContent = (!hasQuestions && !loading) || isStepped
 
-  const disableContentPadding = position === "center"
+  const disableContentPadding =
+    position === "center" || position === "fullscreen"
 
   return (
     <F0Dialog
       isOpen={isOpen}
       onClose={onClose}
+      title={title}
       module={module}
       position={position}
       width={dialogWidth}
