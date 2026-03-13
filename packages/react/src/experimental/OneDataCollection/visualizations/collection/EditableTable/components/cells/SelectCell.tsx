@@ -7,6 +7,8 @@ import { cn } from "@/lib/utils"
 import { EditableCellProps } from "."
 import { BaseCell } from "./BaseCell"
 
+const warnedColumns = new Set<string>()
+
 export function SelectCell<R extends RecordType>({
   editableColumn,
   value,
@@ -18,9 +20,12 @@ export function SelectCell<R extends RecordType>({
   const i18n = useI18n()
   const config = editableColumn.selectConfig
   if (!config) {
-    console.warn(
-      `SelectCell: column "${editableColumn.label}" has editType "select" but no selectConfig`
-    )
+    if (!warnedColumns.has(editableColumn.label)) {
+      warnedColumns.add(editableColumn.label)
+      console.warn(
+        `SelectCell: column "${editableColumn.label}" has editType "select" but no selectConfig`
+      )
+    }
     return (
       <BaseCell>
         {renderProperty(item, editableColumn, "editableTable", i18n)}
