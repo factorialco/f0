@@ -4,10 +4,10 @@ import {
   Controls,
   Unstyled,
   Story,
-} from "@storybook/addon-docs/blocks";
-import { DoDonts } from "@/lib/storybook-utils/do-donts";
+} from "@storybook/addon-docs/blocks"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
 
-import * as GroupingStories from "./grouping.stories";
+import * as GroupingStories from "./grouping.stories"
 
 <Meta title="Data collection/Grouping" />
 
@@ -75,23 +75,23 @@ The grouping is configured in the `grouping` property of the `useDataCollection`
 
 ```ts
 export type GroupingDefinition<R extends RecordType> = {
-  mandatory?: boolean;
-  collapsible?: boolean;
-  defaultOpenGroups?: boolean | string[];
+  mandatory?: boolean
+  collapsible?: boolean
+  defaultOpenGroups?: boolean | string[]
   groupBy: {
     [K in keyof R]?: {
-      name: string;
+      name: string
       label: (
         groupId: R[K],
-        filters: FiltersState<FiltersDefinition>,
-      ) => string | Promise<string>;
+        filters: FiltersState<FiltersDefinition>
+      ) => string | Promise<string>
       itemCount?: (
         groupId: R[K],
-        filters: FiltersState<FiltersDefinition>,
-      ) => number | undefined | Promise<number | undefined>;
-    };
-  };
-};
+        filters: FiltersState<FiltersDefinition>
+      ) => number | undefined | Promise<number | undefined>
+    }
+  }
+}
 ```
 
 ### Mandatory
@@ -128,7 +128,7 @@ field of the record and the value is an object with the following properties:
 >   manager: {
 >     name: "John Doe",
 >   },
-> };
+> }
 > ```
 >
 > "manager.name" will group by the `name` property of the `manager` object.
