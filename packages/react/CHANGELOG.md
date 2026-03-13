@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.402.1](https://github.com/factorialco/f0/compare/f0-react-v1.402.0...f0-react-v1.402.1) (2026-03-13)
+
+
+### Bug Fixes
+
+* add support for survey answering form to be on side position ([#3666](https://github.com/factorialco/f0/issues/3666)) ([f6aad7f](https://github.com/factorialco/f0/commit/f6aad7f3a6a6a8b4574c5a03bf6a21d351f73f44))
+
 ## [1.402.0](https://github.com/factorialco/f0/compare/f0-react-v1.401.1...f0-react-v1.402.0) (2026-03-12)
 
 
