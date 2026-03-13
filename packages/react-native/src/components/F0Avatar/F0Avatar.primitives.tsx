@@ -2,15 +2,19 @@ import * as React from "react"
 import { View, Text, Image } from "react-native"
 import { tv } from "tailwind-variants"
 
-import { cn } from "../lib/utils"
+import { cn } from "../../lib/utils"
 
-/** @deprecated Use F0Avatar from components/F0Avatar instead */
-export const sizes = ["xsmall", "small", "medium", "large", "xlarge"] as const
+export const sizes = [
+  "xsmall",
+  "small",
+  "medium",
+  "lg",
+  "large",
+  "xlarge",
+] as const
 
-/** @deprecated Use F0Avatar from components/F0Avatar instead */
 export const type = ["base", "rounded"] as const
 
-/** @deprecated Use F0Avatar from components/F0Avatar instead */
 export const color = [
   "viridian",
   "malibu",
@@ -25,10 +29,11 @@ export const color = [
   "camel",
 ] as const
 
-const textSizes = {
+export const textSizes = {
   xsmall: "text-sm",
   small: "text-sm",
   medium: "text-md",
+  lg: "text-lg",
   large: "text-2xl",
   xlarge: "text-3xl",
 }
@@ -40,6 +45,7 @@ const avatarVariants = tv({
       xsmall: "w-5 h-5 rounded-xs",
       small: "w-6 h-6 rounded-sm",
       medium: "w-8 h-8 rounded",
+      lg: "w-10 h-10 rounded-lg",
       large: "w-14 h-14 rounded-xl",
       xlarge: "w-18 h-18 rounded-[20px]",
     } satisfies Record<(typeof sizes)[number], string>,
@@ -114,5 +120,4 @@ const AvatarFallback = ({
   />
 )
 
-/** @deprecated Use F0Avatar from components/F0Avatar instead */
 export { Avatar, AvatarFallback, AvatarImage }
