@@ -385,6 +385,23 @@ describe("F0DurationInput", () => {
       expect(container).not.toHaveClass("opacity-50")
     })
 
+    it("prioritizes disabled background when readonly and disabled are both true", () => {
+      render(
+        <F0DurationInput
+          label="Duration"
+          value={0}
+          onChange={() => {}}
+          readonly
+          disabled
+        />
+      )
+
+      const container = screen.getByRole("group", { name: "Duration" })
+      expect(container).toHaveClass("bg-f1-background-tertiary")
+      expect(container).not.toHaveClass("bg-f1-background-secondary")
+      expect(container).toHaveClass("border-f1-border-secondary")
+    })
+
     it("omits data-disabled when not disabled", () => {
       render(<F0DurationInput label="Duration" value={0} onChange={() => {}} />)
 

@@ -71,11 +71,16 @@ const containerVariants = cva({
       false: "cursor-text",
     },
     readonly: {
-      true: "border-f1-border-secondary bg-f1-background-secondary",
+      true: "border-f1-border-secondary",
       false: "",
     },
   },
   compoundVariants: [
+    {
+      disabled: false,
+      readonly: true,
+      class: "bg-f1-background-secondary",
+    },
     {
       disabled: false,
       readonly: false,
