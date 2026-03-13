@@ -417,6 +417,14 @@ describe("F0DurationInput", () => {
       expect(minutesSuffix).not.toHaveClass("opacity-[0.61]")
     })
 
+    it("renders placeholder styling without reduced opacity", () => {
+      render(<F0DurationInput label="Duration" value={0} onChange={() => {}} />)
+
+      const [hoursInput] = screen.getAllByPlaceholderText("0")
+      expect(hoursInput).toHaveClass("placeholder:text-f1-foreground-secondary")
+      expect(hoursInput).not.toHaveClass("placeholder:opacity-[0.37]")
+    })
+
     it("uses custom ariaLabel from fields config", () => {
       render(
         <F0DurationInput
