@@ -128,6 +128,39 @@ const sampleElements: SurveyFormBuilderElement[] = [
   },
 ]
 
+const quizElements: SurveyFormBuilderElement[] = [
+  {
+    type: "question",
+    question: {
+      id: "q-single-correct",
+      title: "Which planet is known as the Red Planet?",
+      type: "select" as const,
+      options: [
+        { value: "earth", label: "Earth" },
+        { value: "mars", label: "Mars", correct: true },
+        { value: "venus", label: "Venus" },
+        { value: "jupiter", label: "Jupiter" },
+      ],
+      required: true,
+    },
+  },
+  {
+    type: "question",
+    question: {
+      id: "q-multi-correct",
+      title: "Select all prime numbers",
+      type: "multi-select" as const,
+      options: [
+        { value: "2", label: "2", correct: true },
+        { value: "3", label: "3", correct: true },
+        { value: "4", label: "4" },
+        { value: "5", label: "5", correct: true },
+      ],
+      required: true,
+    },
+  },
+]
+
 function SurveyAnsweringFormStory(
   props:
     | Omit<SurveyAnsweringFormDefaultProps, "isOpen" | "onClose">
@@ -281,6 +314,22 @@ export const PreviewWithDefaultValues: Story = {
       "q-name": { type: "text", value: "Jane Doe" },
       "q-perf-rating": { type: "rating", value: 4 },
       "q-department": { type: "select", value: "engineering" },
+    },
+  },
+}
+
+export const RightSideMixedCorrectAnswers: Story = {
+  args: {
+    mode: "all-questions",
+    position: "right",
+    elements: quizElements,
+    title: "Knowledge Check",
+    preview: true,
+    defaultValues: {
+      // Correct single-select answer
+      "q-single-correct": { type: "select", value: "mars" },
+      // Mixed multi-select answer: includes one wrong option and misses one correct
+      "q-multi-correct": { type: "multi-select", value: ["2", "4"] },
     },
   },
 }

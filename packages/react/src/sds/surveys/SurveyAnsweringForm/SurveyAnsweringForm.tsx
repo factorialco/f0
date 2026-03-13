@@ -88,6 +88,7 @@ export function SurveyAnsweringForm({
     defaultValues,
     currentQuestionId,
     isStepped ? accumulatedValuesRef.current : undefined,
+    preview,
     isReadonlyPreview
   )
 
