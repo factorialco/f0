@@ -73,6 +73,8 @@ export type RowProps<
   /** Row wrapper passed through to NestedRow for wrapping child rows */
   rowWrapper?: React.ComponentType<RowWrapperProps<R>>
   fromVisualization?: TableVisualizationType
+  indeterminate?: boolean
+  allChildrenSelected?: boolean
 }
 
 export type NestedRowProps = {
@@ -121,6 +123,8 @@ const RowComponentInner = <
     cellRenderer: CellRenderer,
     rowWrapper,
     fromVisualization,
+    indeterminate = false,
+    allChildrenSelected = false,
   }: RowProps<
     R,
     Filters,
@@ -190,7 +194,9 @@ const RowComponentInner = <
     )
   }
 
-  const isSelected = id !== undefined && selectedItems.has(id)
+  const isSelected =
+    id !== undefined &&
+    (selectedItems.has(id) || indeterminate || allChildrenSelected)
   const referenceRowType = referenceRowTypeFn?.(item) ?? "none"
 
   const cellRenderedClass = CellRenderer
@@ -227,7 +233,10 @@ const RowComponentInner = <
           {id !== undefined && (
             <div className="pointer-events-auto ml-1.5 flex h-full items-center justify-start">
               <Checkbox
-                checked={selectedItems.has(id)}
+                checked={
+                  selectedItems.has(id) || indeterminate || allChildrenSelected
+                }
+                indeterminate={indeterminate}
                 onCheckedChange={(checked) => onSelectItem(item, !!checked)}
                 title={`Select ${source.selectable(item)}`}
                 hideLabel
