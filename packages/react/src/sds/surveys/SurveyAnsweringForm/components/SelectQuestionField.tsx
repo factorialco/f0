@@ -1,4 +1,6 @@
 import { F0Checkbox } from "@/components/F0Checkbox"
+import { F0Icon } from "@/components/F0Icon"
+import { CheckCircleLine, Cross } from "@/icons/app"
 import { cn } from "@/lib/utils"
 
 import type { SelectQuestionOption } from "../../SurveyFormBuilder/types"
@@ -8,6 +10,7 @@ export interface SelectFieldConfig {
   type: "select" | "multi-select"
   required?: boolean
   disabled?: boolean
+  showAnswerValidation?: boolean
 }
 
 export interface SelectQuestionFieldProps {
@@ -39,7 +42,9 @@ export function SelectQuestionField({
   onBlur,
   config,
 }: SelectQuestionFieldProps) {
-  const { options, type, required, disabled } = config
+  const { options, type, required, disabled, showAnswerValidation } = config
+  const hasCorrectAnswers = options.some((option) => option.correct)
+  const shouldShowValidation = !!showAnswerValidation && hasCorrectAnswers
 
   const handleSingleSelectChange = (optionValue: string) => {
     if (disabled) return
@@ -83,7 +88,7 @@ export function SelectQuestionField({
             className={cn(
               "flex min-h-9 w-full items-center gap-3 rounded-md bg-f1-background py-0.5 pl-2 pr-0.5",
               disabled
-                ? "cursor-not-allowed opacity-50"
+                ? "cursor-not-allowed"
                 : "cursor-pointer hover:bg-f1-background-hover"
             )}
             onClick={(e) => {
@@ -103,14 +108,23 @@ export function SelectQuestionField({
                 title={option.label}
                 checked={!!isSelected}
                 onCheckedChange={() => handleMultiSelectChange(option.value)}
-                disabled={disabled}
                 hideLabel
               />
             ) : (
               <RadioIndicator checked={!!isSelected} />
             )}
             <p className="flex-1 font-medium">{option.label}</p>
-            <div className="min-h-8" />
+            {shouldShowValidation ? (
+              <div className="min-h-8 p-1">
+                <F0Icon
+                  icon={option.correct ? CheckCircleLine : Cross}
+                  color={option.correct ? "positive" : "critical"}
+                  aria-hidden
+                />
+              </div>
+            ) : (
+              <div className="min-h-8" />
+            )}
           </div>
         )
       })}

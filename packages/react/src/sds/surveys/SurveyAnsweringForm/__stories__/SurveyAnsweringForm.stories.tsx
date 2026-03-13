@@ -4,10 +4,7 @@ import { useState } from "react"
 
 import { F0Button } from "@/components/F0Button"
 
-import type {
-  SurveyAnsweringFormDefaultProps,
-  SurveyAnsweringFormPreviewProps,
-} from "../types"
+import type { SurveyAnsweringFormProps } from "../types"
 
 import { SurveyFormBuilderElement } from "../../SurveyFormBuilder/types"
 import { SurveyAnsweringForm } from "../SurveyAnsweringForm"
@@ -128,11 +125,92 @@ const sampleElements: SurveyFormBuilderElement[] = [
   },
 ]
 
-function SurveyAnsweringFormStory(
-  props:
-    | Omit<SurveyAnsweringFormDefaultProps, "isOpen" | "onClose">
-    | Omit<SurveyAnsweringFormPreviewProps, "isOpen" | "onClose">
-) {
+const quizElements: SurveyFormBuilderElement[] = [
+  {
+    type: "question",
+    question: {
+      id: "q-single-correct",
+      title: "Which planet is known as the Red Planet?",
+      type: "select" as const,
+      options: [
+        { value: "earth", label: "Earth" },
+        { value: "mars", label: "Mars", correct: true },
+        { value: "venus", label: "Venus" },
+        { value: "jupiter", label: "Jupiter" },
+      ],
+      required: true,
+    },
+  },
+  {
+    type: "question",
+    question: {
+      id: "q-multi-correct",
+      title: "Select all prime numbers",
+      type: "multi-select" as const,
+      options: [
+        { value: "2", label: "2", correct: true },
+        { value: "3", label: "3", correct: true },
+        { value: "4", label: "4" },
+        { value: "5", label: "5", correct: true },
+      ],
+      required: true,
+    },
+  },
+  {
+    type: "question",
+    question: {
+      id: "q-confidence",
+      title: "How confident do you feel about this topic now?",
+      description: "1 is low confidence and 5 is very confident",
+      type: "rating" as const,
+      options: [
+        { value: 1, label: "1" },
+        { value: 2, label: "2" },
+        { value: 3, label: "3" },
+        { value: 4, label: "4" },
+        { value: 5, label: "5" },
+      ],
+      required: true,
+    },
+  },
+  {
+    type: "question",
+    question: {
+      id: "q-study-hours",
+      title: "How many hours did you spend preparing?",
+      type: "numeric" as const,
+      required: true,
+    },
+  },
+  {
+    type: "question",
+    question: {
+      id: "q-notes",
+      title: "What was the most difficult part?",
+      description: "Share any notes about topics you want to revisit",
+      type: "longText" as const,
+    },
+  },
+  {
+    type: "question",
+    question: {
+      id: "q-next-review",
+      title: "When will you review this topic again?",
+      type: "date" as const,
+    },
+  },
+]
+
+type DistributiveOmit<T, K extends PropertyKey> = T extends unknown
+  ? Omit<T, K>
+  : never
+
+type SurveyAnsweringFormStoryProps = DistributiveOmit<
+  SurveyAnsweringFormProps,
+  "isOpen" | "onClose"
+>
+
+function SurveyAnsweringFormStory(props: SurveyAnsweringFormStoryProps) {
   const [isOpen, setIsOpen] = useState(false)
 
   if (props.preview === true) {
@@ -175,6 +253,13 @@ const meta: Meta<typeof SurveyAnsweringFormStory> = {
   args: {
     elements: sampleElements,
     title: "Employee Review Q4",
+    description:
+      "Help us understand your recent performance, strengths, and growth goals.",
+    module: {
+      id: "engagement",
+      label: "Engagement",
+      href: "#",
+    },
   },
   parameters: {
     layout: "fullscreen",
@@ -199,7 +284,7 @@ export const Stepped: Story = {
 export const Fullscreen: Story = {
   args: {
     mode: "all-questions",
-    fullscreen: true,
+    position: "fullscreen",
   },
 }
 
@@ -210,10 +295,23 @@ export const FullscreenToggle: Story = {
   },
 }
 
+export const RightSide: Story = {
+  args: {
+    mode: "all-questions",
+    position: "right",
+    module: {
+      id: "engagement",
+      label: "Engagement",
+      href: "#",
+    },
+    allowToChangeFullscreen: true,
+  },
+}
+
 export const SteppedFullscreen: Story = {
   args: {
     mode: "stepped",
-    fullscreen: true,
+    position: "fullscreen",
   },
 }
 
@@ -232,7 +330,7 @@ export const NoElements: Story = {
   args: {
     mode: "all-questions",
     elements: [],
-    fullscreen: true,
+    position: "fullscreen",
     labels: {
       empty: {
         title: "Nothing to answer yet",
@@ -273,6 +371,36 @@ export const PreviewWithDefaultValues: Story = {
       "q-name": { type: "text", value: "Jane Doe" },
       "q-perf-rating": { type: "rating", value: 4 },
       "q-department": { type: "select", value: "engineering" },
+    },
+  },
+}
+
+export const RightSideMixedCorrectAnswers: Story = {
+  args: {
+    mode: "all-questions",
+    position: "right",
+    module: {
+      id: "my_trainings",
+      label: "Trainings",
+      href: "#",
+    },
+    elements: quizElements,
+    title: "Knowledge Check",
+    description:
+      "Review each answer and compare your response against the expected options.",
+    preview: true,
+    defaultValues: {
+      // Correct single-select answer
+      "q-single-correct": { type: "select", value: "mars" },
+      // Mixed multi-select answer: includes one wrong option and misses one correct
+      "q-multi-correct": { type: "multi-select", value: ["2", "4"] },
+      "q-confidence": { type: "rating", value: 4 },
+      "q-study-hours": { type: "numeric", value: 6 },
+      "q-notes": {
+        type: "longText",
+        value: "Prime numbers above 10 are still a bit confusing for me.",
+      },
+      "q-next-review": { type: "date", value: new Date("2026-03-20") },
     },
   },
 }

@@ -7,6 +7,7 @@ import { F0Box } from "@/components/F0Box"
 import { F0Dialog } from "@/components/F0Dialog"
 import { F0Form } from "@/components/F0Form/F0Form"
 import { useF0Form } from "@/components/F0Form/useF0Form"
+import { ResourceHeader } from "@/experimental/Information/Headers/ResourceHeader"
 import { OneEmptyState } from "@/experimental/OneEmptyState"
 import { ArrowLeft, ArrowRight, Maximize, Minimize } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
@@ -34,9 +35,12 @@ export function SurveyAnsweringForm({
   onSubmit: onSubmitProp,
   mode,
   title,
+  description,
+  resourceHeader,
   isOpen,
   onClose,
-  fullscreen: fullscreenProp = false,
+  position: positionProp = "center",
+  module,
   allowToChangeFullscreen = false,
   defaultValues,
   errorTriggerMode = "on-blur",
@@ -45,7 +49,10 @@ export function SurveyAnsweringForm({
   preview = false,
 }: SurveyAnsweringFormProps) {
   const { t } = useI18n()
-  const [isFullscreen, setIsFullscreen] = useState(fullscreenProp)
+  const initialIsFullscreen = positionProp === "fullscreen"
+  const nonFullscreenPosition =
+    positionProp === "fullscreen" ? "center" : positionProp
+  const [isFullscreen, setIsFullscreen] = useState(initialIsFullscreen)
 
   const { formRef, submit, isSubmitting, hasErrors } = useF0Form()
 
@@ -85,10 +92,14 @@ export function SurveyAnsweringForm({
     defaultValues,
     currentQuestionId,
     isStepped ? accumulatedValuesRef.current : undefined,
+    preview,
     isReadonlyPreview
   )
 
-  const position: DialogPosition = isFullscreen ? "fullscreen" : "center"
+  const position: DialogPosition = isFullscreen
+    ? "fullscreen"
+    : nonFullscreenPosition
+  const dialogWidth = position === "center" ? "xl" : undefined
 
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -251,22 +262,26 @@ export function SurveyAnsweringForm({
 
   const shouldCenterContent = (!hasQuestions && !loading) || isStepped
 
+  const disableContentPadding =
+    position === "center" || position === "fullscreen"
+
   return (
     <F0Dialog
       isOpen={isOpen}
       onClose={onClose}
       title={title}
+      module={module}
       position={position}
-      width="xl"
+      width={dialogWidth}
       primaryAction={primaryAction}
       secondaryAction={secondaryAction}
       otherActions={otherActions}
-      disableContentPadding
+      disableContentPadding={disableContentPadding}
     >
       <SurveyFormBuilderProvider answering elements={elements} onChange={noop}>
         <div
           className={cn(
-            "relative flex min-h-full flex-col",
+            "relative flex min-h-full flex-col @container",
             isStepped && !isFullscreen && "min-h-[600px]",
             shouldCenterContent && "h-full"
           )}
@@ -285,12 +300,20 @@ export function SurveyAnsweringForm({
           )}
           <div
             className={cn(
-              "mx-auto flex w-full flex-col px-4 py-12 md:w-[750px]",
+              "mx-auto flex w-full flex-col @lg:w-[750px] max-w-full",
               mode === "all-questions" && !shouldCenterContent
                 ? "justify-start"
-                : "flex-1 justify-center"
+                : "flex-1 justify-center",
+              disableContentPadding && "px-4 py-12"
             )}
           >
+            <div className="mb-6">
+              <ResourceHeader
+                title={title}
+                description={description}
+                {...resourceHeader}
+              />
+            </div>
             {loading ? (
               mode === "stepped" ? (
                 <SurveySteppedLoadingSkeleton />

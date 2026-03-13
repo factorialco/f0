@@ -47,6 +47,11 @@ const defaultProps = {
   isOpen: true,
   onClose: vi.fn(),
   mode: "all-questions" as const,
+  module: {
+    id: "test-module",
+    label: "Test Module",
+    href: "/test-module",
+  },
 }
 
 // --- Tests ---

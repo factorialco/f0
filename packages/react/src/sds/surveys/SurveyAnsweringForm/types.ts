@@ -1,4 +1,7 @@
+import type { ModuleId } from "@/components/avatars/F0AvatarModule"
+import type { DialogPosition } from "@/components/F0Dialog/types"
 import type { F0FormErrorTriggerMode } from "@/components/F0Form/types"
+import type { ResourceHeaderProps } from "@/experimental/Information/Headers/ResourceHeader"
 
 import type { SurveyFormBuilderElement } from "../SurveyFormBuilder/types"
 
@@ -27,13 +30,22 @@ export type SurveyFormSubmitResult =
 
 export type SurveyAnsweringFormMode = "stepped" | "all-questions"
 
+type SurveyAnsweringFormModule = {
+  id: ModuleId
+  label: string
+  href: string
+}
+
 interface SurveyAnsweringFormBaseProps {
   elements: SurveyFormBuilderElement[]
   mode: SurveyAnsweringFormMode
   title: string
+  description?: string
+  resourceHeader?: Omit<ResourceHeaderProps, "title" | "description">
+  module: SurveyAnsweringFormModule
+  position?: DialogPosition
   isOpen: boolean
   onClose: () => void
-  fullscreen?: boolean
   allowToChangeFullscreen?: boolean
   defaultValues?: Partial<SurveyAnswers>
   errorTriggerMode?: F0FormErrorTriggerMode
@@ -47,14 +59,14 @@ interface SurveyAnsweringFormBaseProps {
   }
 }
 
-export interface SurveyAnsweringFormDefaultProps extends SurveyAnsweringFormBaseProps {
+export type SurveyAnsweringFormDefaultProps = SurveyAnsweringFormBaseProps & {
   preview?: false
   onSubmit: (
     answers: SurveySubmitAnswers
   ) => Promise<SurveyFormSubmitResult> | SurveyFormSubmitResult
 }
 
-export interface SurveyAnsweringFormPreviewProps extends SurveyAnsweringFormBaseProps {
+export type SurveyAnsweringFormPreviewProps = SurveyAnsweringFormBaseProps & {
   preview: true
   onSubmit?: never
 }

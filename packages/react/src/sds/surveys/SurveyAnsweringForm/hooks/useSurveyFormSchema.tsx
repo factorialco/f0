@@ -168,7 +168,8 @@ function buildFieldForQuestion(
   q: QuestionElement,
   t: (key: TranslationKey) => string,
   sectionId?: string,
-  preview = false
+  previewMode = false,
+  disableFields = previewMode
 ): ZodTypeAny {
   const label = q.title ?? ""
   const baseConfig = {
@@ -192,7 +193,7 @@ function buildFieldForQuestion(
         type: "text",
         label,
         placeholder: t("surveyFormBuilder.answer.textPlaceholder"),
-        disabled: preview,
+        disabled: disableFields,
       }
       return f0FormField(buildStringSchema(!!q.required, t), {
         ...baseConfig,
@@ -221,7 +222,7 @@ function buildFieldForQuestion(
         label,
         placeholder: t("surveyFormBuilder.answer.textPlaceholder"),
         rows: 4,
-        disabled: preview,
+        disabled: disableFields,
       }
       return f0FormField(buildStringSchema(!!q.required, t), {
         ...baseConfig,
@@ -249,7 +250,7 @@ function buildFieldForQuestion(
         type: "number",
         label,
         placeholder: t("surveyFormBuilder.answer.numericPlaceholder"),
-        disabled: preview,
+        disabled: disableFields,
       }
       return f0FormField(buildNumberSchema(!!q.required, t), {
         ...baseConfig,
@@ -278,7 +279,7 @@ function buildFieldForQuestion(
         inputType: "url",
         label,
         placeholder: t("surveyFormBuilder.answer.linkPlaceholder"),
-        disabled: preview,
+        disabled: disableFields,
       }
       return f0FormField(buildLinkSchema(!!q.required, t), {
         ...baseConfig,
@@ -306,7 +307,7 @@ function buildFieldForQuestion(
         type: "date",
         label,
         clearable: !q.required,
-        disabled: preview,
+        disabled: disableFields,
       }
       return f0FormField(buildDateSchema(!!q.required, t), {
         ...baseConfig,
@@ -340,7 +341,7 @@ function buildFieldForQuestion(
         options,
         clearable: !q.required,
         multiple: false,
-        disabled: preview,
+        disabled: disableFields,
       }
       return f0FormField(buildStringSchema(!!q.required, t), {
         ...baseConfig,
@@ -370,7 +371,8 @@ function buildFieldForQuestion(
         options: selectOptions,
         type: "select",
         required: q.required,
-        disabled: preview,
+        disabled: disableFields,
+        showAnswerValidation: previewMode,
       }
       return f0FormField(buildStringSchema(!!q.required, t), {
         ...baseConfig,
@@ -397,7 +399,8 @@ function buildFieldForQuestion(
         options: multiOptions,
         type: "multi-select",
         required: q.required,
-        disabled: preview,
+        disabled: disableFields,
+        showAnswerValidation: previewMode,
       }
       return f0FormField(buildMultiSelectSchema(!!q.required, t), {
         ...baseConfig,
@@ -424,7 +427,7 @@ function buildFieldForQuestion(
       ).options
       const fieldConfig: RatingFieldConfig = {
         options: ratingOptions,
-        disabled: preview,
+        disabled: disableFields,
       }
       return f0FormField(buildNumberSchema(!!q.required, t), {
         ...baseConfig,
@@ -459,7 +462,8 @@ export function useSurveyFormSchema(
   defaultValues?: Partial<SurveyAnswers>,
   currentQuestionId?: string,
   accumulatedValues?: Record<string, unknown>,
-  preview = false
+  previewMode = false,
+  disableFields = previewMode
 ) {
   return useMemo(() => {
     const shape: Record<string, ZodTypeAny> = {}
@@ -490,7 +494,8 @@ export function useSurveyFormSchema(
             q,
             t,
             mode === "all-questions" ? sectionId : undefined,
-            preview
+            previewMode,
+            disableFields
           )
           defaults[q.id] =
             accumulatedValues?.[q.id] ?? getDefaultValue(q, defaultValues)
@@ -501,7 +506,13 @@ export function useSurveyFormSchema(
         if (isStepped && currentQuestionId && q.id !== currentQuestionId)
           continue
 
-        shape[q.id] = buildFieldForQuestion(q, t, undefined, preview)
+        shape[q.id] = buildFieldForQuestion(
+          q,
+          t,
+          undefined,
+          previewMode,
+          disableFields
+        )
         defaults[q.id] =
           accumulatedValues?.[q.id] ?? getDefaultValue(q, defaultValues)
       }
@@ -514,5 +525,13 @@ export function useSurveyFormSchema(
       sections,
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [elements, mode, t, defaultValues, currentQuestionId, preview])
+  }, [
+    elements,
+    mode,
+    t,
+    defaultValues,
+    currentQuestionId,
+    previewMode,
+    disableFields,
+  ])
 }
