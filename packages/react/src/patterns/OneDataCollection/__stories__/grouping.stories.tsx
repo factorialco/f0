@@ -590,7 +590,7 @@ export const WithGroupingAndSummary: Story = {
     })
 
     return (
-      <div style={{ height: 500 }}>
+      <div className="h-[500px]">
         <OneDataCollection
           fullHeight
           source={source}
