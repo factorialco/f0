@@ -409,6 +409,14 @@ describe("F0DurationInput", () => {
       expect(container).not.toHaveAttribute("data-disabled")
     })
 
+    it("renders suffixes without reduced-opacity text styling", () => {
+      render(<F0DurationInput label="Duration" value={0} onChange={() => {}} />)
+
+      const minutesSuffix = screen.getByText("min")
+      expect(minutesSuffix).toHaveClass("text-f1-foreground-secondary")
+      expect(minutesSuffix).not.toHaveClass("opacity-[0.61]")
+    })
+
     it("uses custom ariaLabel from fields config", () => {
       render(
         <F0DurationInput

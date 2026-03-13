@@ -365,9 +365,7 @@ export const F0DurationInput = forwardRef<HTMLDivElement, F0DurationInputProps>(
                   readOnly={readonly}
                   aria-readonly={readonly || undefined}
                 />
-                <span className="text-f1-foreground-secondary opacity-[0.61]">
-                  {suffix}
-                </span>
+                <span className="text-f1-foreground-secondary">{suffix}</span>
               </Fragment>
             )
           })}
