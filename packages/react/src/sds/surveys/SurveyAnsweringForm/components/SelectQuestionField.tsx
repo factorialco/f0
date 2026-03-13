@@ -119,6 +119,7 @@ export function SelectQuestionField({
                 <F0Icon
                   icon={option.correct ? CheckCircleLine : Cross}
                   color={option.correct ? "positive" : "critical"}
+                  aria-hidden
                 />
               </div>
             ) : (

@@ -47,7 +47,7 @@ const Checkbox = React.forwardRef<
           disabled={disabled}
         >
           <AnimatePresence>
-            <CheckboxPrimitive.Indicator className="absolute inset-0 z-[2] flex items-center justify-center text-f1-icon-inverse transition-none">
+            <CheckboxPrimitive.Indicator className="absolute inset-0 z-[2] flex items-center justify-center text-current transition-none">
               {indeterminate ? (
                 <F0Icon icon={Minus} size="sm" />
               ) : (
