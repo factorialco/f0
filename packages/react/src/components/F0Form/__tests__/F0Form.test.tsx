@@ -8,6 +8,7 @@ import { zeroRender as render, screen, waitFor } from "@/testing/test-utils"
 import type { F0SectionConfig } from "../types"
 
 import { createConditionalResolver } from "../conditionalResolver"
+import { generateAnchorId } from "../context"
 import { F0Form } from "../F0Form"
 import {
   f0FormField,
@@ -256,7 +257,7 @@ describe("F0Form", () => {
     )
 
     const durationAnchor = document.getElementById(
-      "forms.duration-validation-shake.duration"
+      generateAnchorId("duration-validation-shake", undefined, "duration")
     )
     const durationWrapper = durationAnchor?.querySelector(
       '[data-testid="input-field-wrapper"]'
