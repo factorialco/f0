@@ -1,9 +1,7 @@
-import type { ComponentProps } from "react"
-
 import type { ModuleId } from "@/components/avatars/F0AvatarModule"
 import type { DialogPosition } from "@/components/F0Dialog/types"
 import type { F0FormErrorTriggerMode } from "@/components/F0Form/types"
-import type { ResourceHeader } from "@/experimental/Information/Headers/ResourceHeader"
+import type { ResourceHeaderProps } from "@/experimental/Information/Headers/ResourceHeader"
 
 import type { SurveyFormBuilderElement } from "../SurveyFormBuilder/types"
 
@@ -43,10 +41,7 @@ interface SurveyAnsweringFormBaseProps {
   mode: SurveyAnsweringFormMode
   title: string
   description?: string
-  resourceHeader?: Omit<
-    ComponentProps<typeof ResourceHeader>,
-    "title" | "description"
-  >
+  resourceHeader?: Omit<ResourceHeaderProps, "title" | "description">
   module: SurveyAnsweringFormModule
   position?: DialogPosition
   isOpen: boolean
