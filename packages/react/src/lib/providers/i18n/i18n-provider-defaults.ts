@@ -290,6 +290,8 @@ export const defaultTranslations = {
     ask: "Ask One",
     viewProfile: "View profile",
     tools: "Tools",
+    attachFile: "Attach file",
+    removeFile: "Remove",
     growth: {
       demoCard: {
         title: "See {{moduleName}} in action",

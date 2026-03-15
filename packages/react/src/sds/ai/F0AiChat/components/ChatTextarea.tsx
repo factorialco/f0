@@ -28,6 +28,7 @@ export const ChatTextarea = ({
     placeholders,
     entityResolvers,
     toolHints,
+    fileAttachments,
     activeToolHint,
     setActiveToolHint,
   } = useAiChat()
@@ -60,6 +61,9 @@ export const ChatTextarea = ({
       toolHints={toolHints}
       activeToolHint={activeToolHint}
       onActiveToolHintChange={setActiveToolHint}
+      onUploadFiles={fileAttachments?.onUploadFiles}
+      allowedMimeTypes={fileAttachments?.allowedMimeTypes}
+      maxFiles={fileAttachments?.maxFiles}
     />
   )
 }

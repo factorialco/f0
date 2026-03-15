@@ -1,11 +1,15 @@
 import { motion } from "motion/react"
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
 import { ButtonInternal } from "@/components/F0Button/internal"
+import { FileItem } from "@/experimental/RichText/FileItem"
+import { CrossedCircle, Paperclip } from "@/icons/app"
+import { Skeleton } from "@/ui/skeleton"
 import { ArrowUp, SolidStop } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
+import type { AttachedFile } from "./types"
 import type { F0AiChatTextAreaProps } from "./types"
 
 import { MentionPopover } from "./MentionPopover"
@@ -26,13 +30,81 @@ export const F0AiChatTextArea = ({
   toolHints,
   activeToolHint,
   onActiveToolHintChange,
+  onUploadFiles,
+  allowedMimeTypes,
+  maxFiles,
 }: F0AiChatTextAreaProps) => {
   const [inputValue, setInputValue] = useState("")
   const [cursorPosition, setCursorPosition] = useState(0)
   const formRef = useRef<HTMLFormElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const highlightRef = useRef<HTMLDivElement>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([])
   const translation = useI18n()
+
+  const acceptValue = useMemo(() => {
+    if (!allowedMimeTypes) return undefined
+    if (Array.isArray(allowedMimeTypes)) return allowedMimeTypes.join(",")
+    return allowedMimeTypes
+  }, [allowedMimeTypes])
+
+  const isAtMaxFiles =
+    maxFiles !== undefined && attachedFiles.length >= maxFiles
+
+  const handleFileSelect = useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      let files = Array.from(e.target.files ?? [])
+      if (files.length === 0 || !onUploadFiles) return
+
+      if (maxFiles !== undefined) {
+        const remaining = maxFiles - attachedFiles.length
+        if (remaining <= 0) return
+        files = files.slice(0, remaining)
+      }
+
+      const newAttached: AttachedFile[] = files.map((file) => ({
+        id: crypto.randomUUID(),
+        file,
+        status: "uploading" as const,
+      }))
+
+      setAttachedFiles((prev) => [...prev, ...newAttached])
+
+      try {
+        const uploaded = await onUploadFiles(files)
+        setAttachedFiles((prev) =>
+          prev.map((att) => {
+            const idx = newAttached.findIndex((n) => n.id === att.id)
+            if (idx !== -1 && uploaded[idx]) {
+              return {
+                ...att,
+                status: "uploaded" as const,
+                uploadedFile: uploaded[idx],
+              }
+            }
+            return att
+          })
+        )
+      } catch {
+        setAttachedFiles((prev) =>
+          prev.map((att) =>
+            newAttached.some((n) => n.id === att.id)
+              ? { ...att, status: "error" as const }
+              : att
+          )
+        )
+      }
+
+      // Reset input so the same file can be re-selected
+      e.target.value = ""
+    },
+    [onUploadFiles, maxFiles, attachedFiles.length]
+  )
+
+  const handleRemoveFile = useCallback((id: string) => {
+    setAttachedFiles((prev) => prev.filter((att) => att.id !== id))
+  }, [])
 
   const mentions = useMentions({
     inputValue,
@@ -58,6 +130,8 @@ export const F0AiChatTextArea = ({
   const resolvedDefaultPlaceholder =
     defaultPlaceholder ?? translation.ai.inputPlaceholder
 
+  const uploadedFiles = attachedFiles.filter((f) => f.status === "uploaded")
+  const isUploading = attachedFiles.some((f) => f.status === "uploading")
   const hasDataToSend = inputValue.trim().length > 0
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -65,13 +139,23 @@ export const F0AiChatTextArea = ({
     mentions.close()
     if (inProgress) {
       onStop?.()
-    } else if (hasDataToSend) {
+    } else if (hasDataToSend && !isUploading) {
       const transformed = mentions.transformMentions(inputValue.trim())
+
+      // Prepend file attachment metadata if there are uploaded files
+      const filePrefix =
+        uploadedFiles.length > 0
+          ? `<file-attachments>${JSON.stringify(uploadedFiles.map((f) => f.uploadedFile))}</file-attachments>\n\n`
+          : ""
+
+      const withFiles = filePrefix + transformed
+
       const withToolHint = activeToolHint
-        ? `<tool-context tool="${activeToolHint.id}">${activeToolHint.prompt}</tool-context>\n\n${transformed}`
-        : transformed
+        ? `<tool-context tool="${activeToolHint.id}">${activeToolHint.prompt}</tool-context>\n\n${withFiles}`
+        : withFiles
       onSend(withToolHint)
       setInputValue("")
+      setAttachedFiles([])
     }
 
     textareaRef.current?.focus()
@@ -165,6 +249,29 @@ export const F0AiChatTextArea = ({
         position={mentions.popoverPosition}
         onSelect={mentions.selectPerson}
       />
+
+      {attachedFiles.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 px-3 pt-3">
+          {attachedFiles.map((att) =>
+            att.status === "uploading" ? (
+              <Skeleton key={att.id} className="h-9 w-36 rounded-lg" />
+            ) : (
+              <FileItem
+                key={att.id}
+                file={att.file}
+                size="lg"
+                actions={[
+                  {
+                    label: translation.ai.removeFile,
+                    icon: CrossedCircle,
+                    onClick: () => handleRemoveFile(att.id),
+                  },
+                ]}
+              />
+            )
+          )}
+        </div>
+      )}
 
       <div
         className={cn(
@@ -279,7 +386,32 @@ export const F0AiChatTextArea = ({
       </div>
 
       <div className="flex shrink-0 items-center justify-between p-1 sm:p-3">
-        <div className="flex items-center">
+        <div className="flex items-center gap-2">
+          {onUploadFiles && (
+            <>
+              <ButtonInternal
+                label={translation.ai.attachFile}
+                hideLabel
+                type="button"
+                icon={Paperclip}
+                variant="outline"
+                size="md"
+                disabled={isAtMaxFiles}
+                onClick={(e) => {
+                  e.preventDefault()
+                  fileInputRef.current?.click()
+                }}
+              />
+              <input
+                ref={fileInputRef}
+                type="file"
+                multiple
+                accept={acceptValue}
+                className="hidden"
+                onChange={handleFileSelect}
+              />
+            </>
+          )}
           {toolHints && toolHints.length > 0 && onActiveToolHintChange && (
             <ToolHintSelector
               toolHints={toolHints}
@@ -300,8 +432,8 @@ export const F0AiChatTextArea = ({
           ) : (
             <ButtonInternal
               type="submit"
-              disabled={!hasDataToSend}
-              variant={hasDataToSend ? "default" : "neutral"}
+              disabled={!hasDataToSend || isUploading}
+              variant={hasDataToSend && !isUploading ? "default" : "neutral"}
               label={submitLabel || translation.ai.sendMessage}
               icon={submitLabel ? undefined : ArrowUp}
               hideLabel={!submitLabel}

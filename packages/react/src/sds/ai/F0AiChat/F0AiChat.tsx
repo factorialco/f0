@@ -38,6 +38,7 @@ const F0AiChatProviderComponent = ({
   footer,
   entityResolvers,
   toolHints,
+  fileAttachments,
   onThumbsUp,
   onThumbsDown,
   children,
@@ -62,6 +63,7 @@ const F0AiChatProviderComponent = ({
       tracking={tracking}
       entityResolvers={entityResolvers}
       toolHints={toolHints}
+      fileAttachments={fileAttachments}
     >
       <AiChatKitWrapper {...copilotKitProps}>{children}</AiChatKitWrapper>
     </AiChatStateProvider>

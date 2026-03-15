@@ -56,6 +56,7 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   footer: initialFooter,
   entityResolvers,
   toolHints,
+  fileAttachments,
   onThumbsDown,
   onThumbsUp,
   tracking,
@@ -216,6 +217,7 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         tracking,
         entityResolvers,
         toolHints,
+        fileAttachments,
         activeToolHint,
         setActiveToolHint,
       }}
@@ -265,6 +267,7 @@ export function useAiChat(): AiChatProviderReturnValue {
       tracking: undefined,
       entityResolvers: undefined,
       toolHints: undefined,
+      fileAttachments: undefined,
       activeToolHint: null,
       setActiveToolHint: noopFn,
     }

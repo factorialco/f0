@@ -1,8 +1,11 @@
 import { type UserMessageProps } from "@copilotkit/react-ui"
 import { type ReactNode, useContext, useEffect, useRef } from "react"
 
+import { FileItem } from "@/experimental/RichText/FileItem"
+
 import { PersonEntityRef } from "../../F0MarkdownRenderers/components/PersonEntityRef"
 import { FullscreenChatContext } from "../index"
+import type { UploadedFile } from "../types"
 
 function getTextContent(
   content: string | Array<{ type: string; text?: string }> | undefined
@@ -30,6 +33,23 @@ const ENTITY_REF_RE =
  */
 const TOOL_CONTEXT_RE =
   /<tool-context\s+tool="[^"]*">[\s\S]*?<\/tool-context>\s*/g
+
+/**
+ * Regex to match <file-attachments>JSON</file-attachments> prefix.
+ */
+const FILE_ATTACHMENTS_RE =
+  /<file-attachments>([\s\S]*?)<\/file-attachments>\s*/g
+
+function parseFileAttachments(content: string): UploadedFile[] {
+  FILE_ATTACHMENTS_RE.lastIndex = 0
+  const match = FILE_ATTACHMENTS_RE.exec(content)
+  if (!match) return []
+  try {
+    return JSON.parse(match[1])
+  } catch {
+    return []
+  }
+}
 
 type ContentSegment =
   | { kind: "text"; text: string }
@@ -86,8 +106,10 @@ function UserMessageContent({
 }): ReactNode {
   if (!content) return null
 
-  // Strip invisible tool-context prefix before rendering
-  const cleaned = content.replace(TOOL_CONTEXT_RE, "")
+  // Strip invisible prefixes before rendering
+  const cleaned = content
+    .replace(FILE_ATTACHMENTS_RE, "")
+    .replace(TOOL_CONTEXT_RE, "")
 
   const segments = parseEntityRefs(cleaned)
 
@@ -137,12 +159,28 @@ export const UserMessage = ({ message, ImageRenderer }: UserMessageProps) => {
     )
   }
 
+  const rawContent = getTextContent(message?.content)
+  const fileAttachments = rawContent ? parseFileAttachments(rawContent) : []
+
   return (
     <div
       ref={ref}
-      className="my-4 w-fit max-w-[min(90%,330px)] self-end whitespace-pre-wrap rounded-2xl border border-solid border-f1-border-secondary bg-f1-background-tertiary px-4 py-3 first:mt-0 last:mb-0"
+      className="gap-1 my-4 w-fit max-w-[min(90%,330px)] self-end first:mt-0 last:mb-0 flex flex-col gap-2 items-end"
     >
-      <UserMessageContent content={getTextContent(message?.content)} />
+      {fileAttachments.length > 0 && (
+        <div className="flex flex-wrap justify-end gap-1">
+          {fileAttachments.map((file, i) => (
+            <FileItem
+              key={i}
+              file={new File([], file.filename, { type: file.mimetype })}
+              size="lg"
+            />
+          ))}
+        </div>
+      )}
+      <div className="w-fit whitespace-pre-wrap rounded-2xl border border-solid border-f1-border-secondary bg-f1-background-tertiary px-4 py-3">
+        <UserMessageContent content={rawContent} />
+      </div>
     </div>
   )
 }

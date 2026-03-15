@@ -1,3 +1,4 @@
+import { cva, type VariantProps } from "cva"
 import { forwardRef } from "react"
 
 import { F0AvatarFile } from "@/components/avatars/F0AvatarFile"
@@ -18,14 +19,43 @@ type FileAction = {
   critical?: boolean
 }
 
+const fileItemVariants = cva({
+  base: "flex w-fit flex-row items-center overflow-hidden bg-f1-background-tertiary",
+  variants: {
+    size: {
+      md: "max-w-40 gap-2 rounded-md p-0.5 pr-2",
+      lg: "max-w-56 gap-2.5 rounded-lg p-1 pr-3",
+    },
+  },
+  defaultVariants: {
+    size: "md",
+  },
+})
+
+type FileItemSize = NonNullable<VariantProps<typeof fileItemVariants>["size"]>
+
+const avatarSizeMap: Record<FileItemSize, "sm" | "md"> = {
+  md: "sm",
+  lg: "md",
+}
+
+const iconSizeMap: Record<FileItemSize, "md" | "lg"> = {
+  md: "md",
+  lg: "lg",
+}
+
 interface FileItemProps extends React.HTMLAttributes<HTMLDivElement> {
   file: File
   actions?: FileAction[]
   disabled?: boolean
+  size?: FileItemSize
 }
 
 const _FileItem = forwardRef<HTMLDivElement, FileItemProps>(
-  ({ file, actions = [], disabled = false, className, ...props }, ref) => {
+  (
+    { file, actions = [], disabled = false, size = "md", className, ...props },
+    ref
+  ) => {
     const hasActions = actions.length > 0
     const singleAction = actions.length === 1 ? actions[0] : null
 
@@ -39,13 +69,10 @@ const _FileItem = forwardRef<HTMLDivElement, FileItemProps>(
     return (
       <div
         ref={ref}
-        className={cn(
-          "flex w-fit max-w-40 flex-row items-center gap-2 overflow-hidden rounded-md bg-f1-background-tertiary p-0.5 pr-2",
-          className
-        )}
+        className={cn(fileItemVariants({ size }), className)}
         {...props}
       >
-        <F0AvatarFile file={file} />
+        <F0AvatarFile file={file} size={avatarSizeMap[size]} />
         <Tooltip label={file.name}>
           <p className="text-neutral-1000 grow overflow-hidden truncate text-ellipsis text-sm font-medium">
             {file.name}
@@ -54,7 +81,7 @@ const _FileItem = forwardRef<HTMLDivElement, FileItemProps>(
         {hasActions &&
           (singleAction ? (
             <F0Icon
-              size="md"
+              size={iconSizeMap[size]}
               icon={singleAction.icon ?? CrossedCircle}
               className={cn(
                 "cursor-pointer text-f1-icon",
@@ -73,4 +100,4 @@ const _FileItem = forwardRef<HTMLDivElement, FileItemProps>(
 _FileItem.displayName = "FileItem"
 
 export const FileItem = withDataTestId(_FileItem)
-export type { FileAction }
+export type { FileAction, FileItemSize }
