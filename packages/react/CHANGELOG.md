@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.404.2](https://github.com/factorialco/f0/compare/f0-react-v1.404.1...f0-react-v1.404.2) (2026-03-16)
+
+
+### Bug Fixes
+
+* **react:** handle query params in isActive link matching ([#3680](https://github.com/factorialco/f0/issues/3680)) ([67ba14d](https://github.com/factorialco/f0/commit/67ba14d5e722df5dfe0dcc4c69266a8f8c9422ea))
+
 ## [1.404.1](https://github.com/factorialco/f0/compare/f0-react-v1.404.0...f0-react-v1.404.1) (2026-03-16)
 
 
