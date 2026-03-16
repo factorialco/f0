@@ -1,14 +1,16 @@
 import React, { ReactElement } from "react"
-import { View, Text, Image } from "react-native"
+import { View, Text } from "react-native"
 import Svg, { Circle } from "react-native-svg"
+import { useCSSVariable } from "uniwind"
 
 import { cn } from "../../../../lib/utils"
 import { CompanyAvatar } from "../../../Avatars/CompanyAvatar"
 import { PersonAvatar } from "../../../Avatars/PersonAvatar"
 import { TeamAvatar } from "../../../Avatars/TeamAvatar"
-import { AlertTag, F0Text, Icon, PressableFeedback } from "../../../exports"
+import { AlertTag, F0Image, F0Text, PressableFeedback } from "../../../exports"
 import { F0Icon, type IconType } from "../../../primitives/F0Icon"
 import { DotTag, DotTagProps, NewColor } from "../../../Tags/DotTag"
+
 import { ItemContainer } from "./ItemContainer"
 
 export type DataListProps = {
@@ -170,9 +172,9 @@ const DotTagItem = ({ ...props }: DotTagItemProps) => {
 
 type CardMetadataProperty = {
   icon?: IconType
-  type: "text" | "progress" | "statusTag" | "alertTag" | "dateAlert"
+  type: "text" | "progress" | "statusTag" | "alertTag"
   value: string
-  status?: "completed" | "neutral"
+  status?: "warning" | "critical" | "completed" | "neutral"
   level?: "info" | "warning" | "critical"
 }
 
@@ -184,7 +186,15 @@ type CardItemProps = {
 }
 
 const CardItem = ({ action, name, thumbnailUrl, metadata }: CardItemProps) => {
-  const statusColor: Record<typeof status, NewColor> = {
+  const [trackColor, activeColor] = useCSSVariable([
+    "--color-f0-border",
+    "--color-f0-background-info-bold",
+  ])
+
+  const statusColor: Record<
+    "warning" | "critical" | "completed" | "neutral",
+    NewColor
+  > = {
     warning: "yellow",
     critical: "army",
     completed: "viridian",
@@ -195,7 +205,7 @@ const CardItem = ({ action, name, thumbnailUrl, metadata }: CardItemProps) => {
       case "text":
         return <F0Text variant="body-sm-default">{property.value}</F0Text>
       case "progress": {
-        //TODO: USe the F0ProgressCircle component once it's implemented instead of manually calculating the progress circle
+        //TODO: Use the F0ProgressCircle component once it's implemented instead of manually calculating the progress circle
         const size = 16
         const strokeWidth = 2.5
         const radius = (size - strokeWidth) / 2
@@ -210,7 +220,7 @@ const CardItem = ({ action, name, thumbnailUrl, metadata }: CardItemProps) => {
                 cx={size / 2}
                 cy={size / 2}
                 r={radius}
-                stroke="#e5e7eb"
+                stroke={String(trackColor)}
                 strokeWidth={strokeWidth}
                 fill="none"
               />
@@ -218,7 +228,7 @@ const CardItem = ({ action, name, thumbnailUrl, metadata }: CardItemProps) => {
                 cx={size / 2}
                 cy={size / 2}
                 r={radius}
-                stroke="#3b82f6"
+                stroke={String(activeColor)}
                 strokeWidth={strokeWidth}
                 fill="none"
                 strokeDasharray={`${circumference}`}
@@ -240,7 +250,6 @@ const CardItem = ({ action, name, thumbnailUrl, metadata }: CardItemProps) => {
           />
         )
       case "alertTag":
-      case "dateAlert":
         return (
           <AlertTag text={property.value} level={property.level ?? "info"} />
         )
@@ -254,16 +263,10 @@ const CardItem = ({ action, name, thumbnailUrl, metadata }: CardItemProps) => {
     <>
       {thumbnailUrl ? (
         <View className="h-32 w-full overflow-hidden rounded-lg">
-          <Image
-            style={{ width: "100%", height: "100%" }}
-            source={{
-              uri: thumbnailUrl,
-            }}
-            aria-label={name}
-          />
+          <F0Image source={thumbnailUrl} accessibilityLabel={name} />
         </View>
       ) : (
-        <View className="bg-f1-background-secondary aspect-square h-32 w-32 rounded-sm" />
+        <View className="aspect-square h-32 w-32 rounded-sm bg-f0-background-secondary" />
       )}
       <View className="flex w-full flex-1 flex-col gap-2">
         <F0Text variant="heading-sm">{name}</F0Text>
@@ -284,7 +287,7 @@ const CardItem = ({ action, name, thumbnailUrl, metadata }: CardItemProps) => {
   )
 
   return (
-    <View className="border-f0-border-secondary flex w-full items-start gap-3 rounded-lg border p-3">
+    <View className="flex w-full items-start gap-3 rounded-lg border border-f0-border-secondary p-3">
       {handlePress ? (
         <PressableFeedback onPress={handlePress} className="flex w-full gap-3">
           {cardContent}

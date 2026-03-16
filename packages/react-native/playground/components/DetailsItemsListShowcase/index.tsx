@@ -1,6 +1,5 @@
 import React from "react"
 import { ScrollView, Text, View } from "react-native"
-import { Clock } from "src/icons/app"
 import { useCSSVariable } from "uniwind"
 
 import { DetailsItemsList } from "../../../src/components/experimental/Lists/DetailsItemsList"

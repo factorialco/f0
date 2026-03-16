@@ -205,7 +205,7 @@ export function DataListShowcase() {
                 value: "50",
               },
               {
-                type: "dateAlert",
+                type: "alertTag",
                 value: "Due on Feb 13",
                 level: "warning",
               },
@@ -251,7 +251,7 @@ export function DataListShowcase() {
                 value: "1 hour",
               },
               {
-                type: "dateAlert",
+                type: "alertTag",
                 value: "Overdue",
                 level: "critical",
               },

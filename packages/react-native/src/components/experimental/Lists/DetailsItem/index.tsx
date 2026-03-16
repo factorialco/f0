@@ -30,6 +30,7 @@ export interface DetailsItemType {
   spacingAtTheBottom?: boolean
   isHorizontalItem?: boolean
   tableView?: boolean
+  fullWidth?: boolean
 }
 
 const ItemContent: FC<{ content: Content }> = ({ content }) => (
@@ -48,10 +49,10 @@ export const DetailsItem = ({
   content,
   isHorizontalItem = false,
   tableView = false,
+  fullWidth = false,
   spacingAtTheBottom,
 }: DetailsItemType) => {
   const contentArray = Array.isArray(content) ? content : [content]
-  const hasCard = contentArray.some((c) => c.type === "card")
 
   return (
     <View
@@ -64,7 +65,7 @@ export const DetailsItem = ({
         label={title}
         isHorizontalItem={isHorizontalItem}
         tableView={tableView}
-        fullWidth={hasCard}
+        fullWidth={fullWidth}
       >
         {contentArray.map((c, i) => (
           <ItemContent key={i} content={c} />
