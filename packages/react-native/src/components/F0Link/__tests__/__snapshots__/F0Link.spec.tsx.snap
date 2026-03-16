@@ -1,0 +1,758 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`F0Link Snapshot - all sizes 1`] = `
+<View
+  accessibilityLabel="Link"
+  accessibilityRole="link"
+  accessibilityState={
+    {
+      "busy": undefined,
+      "checked": undefined,
+      "disabled": false,
+      "expanded": undefined,
+      "selected": undefined,
+    }
+  }
+  accessibilityValue={
+    {
+      "max": undefined,
+      "min": undefined,
+      "now": undefined,
+      "text": undefined,
+    }
+  }
+  accessible={true}
+  className="overflow-hidden flex-row items-center self-start gap-0.5"
+  collapsable={false}
+  focusable={true}
+  onBlur={[Function]}
+  onClick={[Function]}
+  onFocus={[Function]}
+  onResponderGrant={[Function]}
+  onResponderMove={[Function]}
+  onResponderRelease={[Function]}
+  onResponderTerminate={[Function]}
+  onResponderTerminationRequest={[Function]}
+  onStartShouldSetResponder={[Function]}
+  style={
+    [
+      {
+        "transform": [
+          {
+            "scale": 1,
+          },
+        ],
+      },
+      undefined,
+    ]
+  }
+>
+  <View
+    className="pb-[1px] border-f0-foreground-secondary"
+    style={
+      {
+        "borderBottomWidth": 0.5,
+      }
+    }
+  >
+    <Text
+      className="no-underline normal-case tracking-normal text-[12px] leading-[16px] font-medium text-f0-foreground text-left"
+      ellipsizeMode="tail"
+      numberOfLines={1}
+    >
+      Link
+    </Text>
+  </View>
+</View>
+`;
+
+exports[`F0Link Snapshot - all sizes 2`] = `
+<View
+  accessibilityLabel="Link"
+  accessibilityRole="link"
+  accessibilityState={
+    {
+      "busy": undefined,
+      "checked": undefined,
+      "disabled": false,
+      "expanded": undefined,
+      "selected": undefined,
+    }
+  }
+  accessibilityValue={
+    {
+      "max": undefined,
+      "min": undefined,
+      "now": undefined,
+      "text": undefined,
+    }
+  }
+  accessible={true}
+  className="overflow-hidden flex-row items-center self-start gap-0.5"
+  collapsable={false}
+  focusable={true}
+  onBlur={[Function]}
+  onClick={[Function]}
+  onFocus={[Function]}
+  onResponderGrant={[Function]}
+  onResponderMove={[Function]}
+  onResponderRelease={[Function]}
+  onResponderTerminate={[Function]}
+  onResponderTerminationRequest={[Function]}
+  onStartShouldSetResponder={[Function]}
+  style={
+    [
+      {
+        "transform": [
+          {
+            "scale": 1,
+          },
+        ],
+      },
+      undefined,
+    ]
+  }
+>
+  <View
+    className="pb-[1px] border-f0-foreground-secondary"
+    style={
+      {
+        "borderBottomWidth": 0.5,
+      }
+    }
+  >
+    <Text
+      className="no-underline normal-case tracking-normal text-[14px] leading-[20px] font-medium text-f0-foreground text-left"
+      ellipsizeMode="tail"
+      numberOfLines={1}
+    >
+      Link
+    </Text>
+  </View>
+</View>
+`;
+
+exports[`F0Link Snapshot - all sizes 3`] = `
+<View
+  accessibilityLabel="Link"
+  accessibilityRole="link"
+  accessibilityState={
+    {
+      "busy": undefined,
+      "checked": undefined,
+      "disabled": false,
+      "expanded": undefined,
+      "selected": undefined,
+    }
+  }
+  accessibilityValue={
+    {
+      "max": undefined,
+      "min": undefined,
+      "now": undefined,
+      "text": undefined,
+    }
+  }
+  accessible={true}
+  className="overflow-hidden flex-row items-center self-start gap-0.5"
+  collapsable={false}
+  focusable={true}
+  onBlur={[Function]}
+  onClick={[Function]}
+  onFocus={[Function]}
+  onResponderGrant={[Function]}
+  onResponderMove={[Function]}
+  onResponderRelease={[Function]}
+  onResponderTerminate={[Function]}
+  onResponderTerminationRequest={[Function]}
+  onStartShouldSetResponder={[Function]}
+  style={
+    [
+      {
+        "transform": [
+          {
+            "scale": 1,
+          },
+        ],
+      },
+      undefined,
+    ]
+  }
+>
+  <View
+    className="pb-[1px] border-f0-foreground-secondary"
+    style={
+      {
+        "borderBottomWidth": 0.5,
+      }
+    }
+  >
+    <Text
+      className="no-underline normal-case tracking-normal text-[16px] leading-[24px] font-medium text-f0-foreground text-left"
+      ellipsizeMode="tail"
+      numberOfLines={1}
+    >
+      Link
+    </Text>
+  </View>
+</View>
+`;
+
+exports[`F0Link Snapshot - all variants 1`] = `
+<View
+  accessibilityLabel="Link"
+  accessibilityRole="link"
+  accessibilityState={
+    {
+      "busy": undefined,
+      "checked": undefined,
+      "disabled": false,
+      "expanded": undefined,
+      "selected": undefined,
+    }
+  }
+  accessibilityValue={
+    {
+      "max": undefined,
+      "min": undefined,
+      "now": undefined,
+      "text": undefined,
+    }
+  }
+  accessible={true}
+  className="overflow-hidden flex-row items-center self-start gap-0.5"
+  collapsable={false}
+  focusable={true}
+  onBlur={[Function]}
+  onClick={[Function]}
+  onFocus={[Function]}
+  onResponderGrant={[Function]}
+  onResponderMove={[Function]}
+  onResponderRelease={[Function]}
+  onResponderTerminate={[Function]}
+  onResponderTerminationRequest={[Function]}
+  onStartShouldSetResponder={[Function]}
+  style={
+    [
+      {
+        "transform": [
+          {
+            "scale": 1,
+          },
+        ],
+      },
+      undefined,
+    ]
+  }
+>
+  <View
+    className="pb-[1px] border-f0-foreground-secondary"
+    style={
+      {
+        "borderBottomWidth": 0.5,
+      }
+    }
+  >
+    <Text
+      className="no-underline normal-case tracking-normal text-[16px] leading-[24px] font-medium text-f0-foreground text-left"
+      ellipsizeMode="tail"
+      numberOfLines={1}
+    >
+      Link
+    </Text>
+  </View>
+</View>
+`;
+
+exports[`F0Link Snapshot - all variants 2`] = `
+<View
+  accessibilityLabel="Link"
+  accessibilityRole="link"
+  accessibilityState={
+    {
+      "busy": undefined,
+      "checked": undefined,
+      "disabled": false,
+      "expanded": undefined,
+      "selected": undefined,
+    }
+  }
+  accessibilityValue={
+    {
+      "max": undefined,
+      "min": undefined,
+      "now": undefined,
+      "text": undefined,
+    }
+  }
+  accessible={true}
+  className="overflow-hidden flex-row items-center self-start gap-0.5"
+  collapsable={false}
+  focusable={true}
+  onBlur={[Function]}
+  onClick={[Function]}
+  onFocus={[Function]}
+  onResponderGrant={[Function]}
+  onResponderMove={[Function]}
+  onResponderRelease={[Function]}
+  onResponderTerminate={[Function]}
+  onResponderTerminationRequest={[Function]}
+  onStartShouldSetResponder={[Function]}
+  style={
+    [
+      {
+        "transform": [
+          {
+            "scale": 1,
+          },
+        ],
+      },
+      undefined,
+    ]
+  }
+>
+  <Text
+    className="no-underline normal-case tracking-normal text-[16px] leading-[24px] font-medium text-f0-foreground text-left"
+    ellipsizeMode="tail"
+    numberOfLines={1}
+  >
+    Link
+  </Text>
+</View>
+`;
+
+exports[`F0Link Snapshot - all variants 3`] = `
+<View
+  accessibilityLabel="Link"
+  accessibilityRole="link"
+  accessibilityState={
+    {
+      "busy": undefined,
+      "checked": undefined,
+      "disabled": false,
+      "expanded": undefined,
+      "selected": undefined,
+    }
+  }
+  accessibilityValue={
+    {
+      "max": undefined,
+      "min": undefined,
+      "now": undefined,
+      "text": undefined,
+    }
+  }
+  accessible={true}
+  className="overflow-hidden flex-row items-center self-start gap-0.5 rounded px-1.5 bg-f0-background-secondary"
+  collapsable={false}
+  focusable={true}
+  onBlur={[Function]}
+  onClick={[Function]}
+  onFocus={[Function]}
+  onResponderGrant={[Function]}
+  onResponderMove={[Function]}
+  onResponderRelease={[Function]}
+  onResponderTerminate={[Function]}
+  onResponderTerminationRequest={[Function]}
+  onStartShouldSetResponder={[Function]}
+  style={
+    [
+      {
+        "transform": [
+          {
+            "scale": 1,
+          },
+        ],
+      },
+      undefined,
+    ]
+  }
+>
+  <Text
+    className="no-underline normal-case tracking-normal text-[16px] leading-[24px] font-medium text-f0-foreground text-left"
+    ellipsizeMode="tail"
+    numberOfLines={1}
+  >
+    Link
+  </Text>
+</View>
+`;
+
+exports[`F0Link Snapshot - disabled 1`] = `
+<View
+  accessibilityLabel="Link"
+  accessibilityRole="link"
+  accessibilityState={
+    {
+      "busy": undefined,
+      "checked": undefined,
+      "disabled": true,
+      "expanded": undefined,
+      "selected": undefined,
+    }
+  }
+  accessibilityValue={
+    {
+      "max": undefined,
+      "min": undefined,
+      "now": undefined,
+      "text": undefined,
+    }
+  }
+  accessible={true}
+  className="overflow-hidden flex-row items-center self-start gap-0.5 opacity-30"
+  collapsable={false}
+  focusable={true}
+  onBlur={[Function]}
+  onClick={[Function]}
+  onFocus={[Function]}
+  onResponderGrant={[Function]}
+  onResponderMove={[Function]}
+  onResponderRelease={[Function]}
+  onResponderTerminate={[Function]}
+  onResponderTerminationRequest={[Function]}
+  onStartShouldSetResponder={[Function]}
+  style={
+    [
+      {
+        "transform": [
+          {
+            "scale": 1,
+          },
+        ],
+      },
+      undefined,
+    ]
+  }
+>
+  <View
+    className="pb-[1px] border-f0-foreground-disabled"
+    style={
+      {
+        "borderBottomWidth": 0.5,
+      }
+    }
+  >
+    <Text
+      className="no-underline normal-case tracking-normal text-[16px] leading-[24px] font-medium text-f0-foreground-disabled text-left"
+      ellipsizeMode="tail"
+      numberOfLines={1}
+    >
+      Link
+    </Text>
+  </View>
+</View>
+`;
+
+exports[`F0Link Snapshot - explicit external prop path 1`] = `
+<View
+  accessibilityLabel="Link"
+  accessibilityRole="link"
+  accessibilityState={
+    {
+      "busy": undefined,
+      "checked": undefined,
+      "disabled": false,
+      "expanded": undefined,
+      "selected": undefined,
+    }
+  }
+  accessibilityValue={
+    {
+      "max": undefined,
+      "min": undefined,
+      "now": undefined,
+      "text": undefined,
+    }
+  }
+  accessible={true}
+  className="overflow-hidden flex-row items-center self-start gap-0.5"
+  collapsable={false}
+  focusable={true}
+  onBlur={[Function]}
+  onClick={[Function]}
+  onFocus={[Function]}
+  onResponderGrant={[Function]}
+  onResponderMove={[Function]}
+  onResponderRelease={[Function]}
+  onResponderTerminate={[Function]}
+  onResponderTerminationRequest={[Function]}
+  onStartShouldSetResponder={[Function]}
+  style={
+    [
+      {
+        "transform": [
+          {
+            "scale": 1,
+          },
+        ],
+      },
+      undefined,
+    ]
+  }
+>
+  <View
+    className="pb-[1px] border-f0-foreground-secondary"
+    style={
+      {
+        "borderBottomWidth": 0.5,
+      }
+    }
+  >
+    <Text
+      className="no-underline normal-case tracking-normal text-[16px] leading-[24px] font-medium text-f0-foreground text-left"
+      ellipsizeMode="tail"
+      numberOfLines={1}
+    >
+      Link
+    </Text>
+  </View>
+  <RNSVGSvgView
+    align="xMidYMid"
+    bbHeight="100%"
+    bbWidth="100%"
+    className="shrink-0 w-4 h-4 stroke-sm text-f0-icon"
+    fill="none"
+    focusable={false}
+    meetOrSlice={0}
+    minX={0}
+    minY={0}
+    style={
+      [
+        {
+          "backgroundColor": "transparent",
+          "borderWidth": 0,
+        },
+        [
+          {},
+        ],
+        {
+          "flex": 0,
+          "height": "100%",
+          "width": "100%",
+        },
+      ]
+    }
+    vbHeight={24}
+    vbWidth={24}
+  >
+    <RNSVGGroup
+      fill={null}
+      propList={
+        [
+          "fill",
+        ]
+      }
+    >
+      <RNSVGPath
+        d="M10 5H8a3 3 0 0 0-3 3v8a3 3 0 0 0 3 3h8a3 3 0 0 0 3-3v-2.5M12.5 11.5 20 4m0 0h-4.5M20 4v4.5"
+        fill={
+          {
+            "payload": 4278190080,
+            "type": 0,
+          }
+        }
+        propList={
+          [
+            "stroke",
+            "strokeLinecap",
+            "strokeLinejoin",
+          ]
+        }
+        stroke={
+          {
+            "type": 2,
+          }
+        }
+        strokeLinecap={1}
+        strokeLinejoin={1}
+      />
+    </RNSVGGroup>
+  </RNSVGSvgView>
+</View>
+`;
+
+exports[`F0Link Snapshot - mention does not show external icon 1`] = `
+<View
+  accessibilityLabel="User name"
+  accessibilityRole="link"
+  accessibilityState={
+    {
+      "busy": undefined,
+      "checked": undefined,
+      "disabled": false,
+      "expanded": undefined,
+      "selected": undefined,
+    }
+  }
+  accessibilityValue={
+    {
+      "max": undefined,
+      "min": undefined,
+      "now": undefined,
+      "text": undefined,
+    }
+  }
+  accessible={true}
+  className="overflow-hidden flex-row items-center self-start gap-0.5 rounded px-1.5 bg-f0-background-secondary"
+  collapsable={false}
+  focusable={true}
+  onBlur={[Function]}
+  onClick={[Function]}
+  onFocus={[Function]}
+  onResponderGrant={[Function]}
+  onResponderMove={[Function]}
+  onResponderRelease={[Function]}
+  onResponderTerminate={[Function]}
+  onResponderTerminationRequest={[Function]}
+  onStartShouldSetResponder={[Function]}
+  style={
+    [
+      {
+        "transform": [
+          {
+            "scale": 1,
+          },
+        ],
+      },
+      undefined,
+    ]
+  }
+>
+  <Text
+    className="no-underline normal-case tracking-normal text-[16px] leading-[24px] font-medium text-f0-foreground text-left"
+    ellipsizeMode="tail"
+    numberOfLines={1}
+  >
+    User name
+  </Text>
+</View>
+`;
+
+exports[`F0Link Snapshot - target blank (recommended external path) 1`] = `
+<View
+  accessibilityLabel="Link"
+  accessibilityRole="link"
+  accessibilityState={
+    {
+      "busy": undefined,
+      "checked": undefined,
+      "disabled": false,
+      "expanded": undefined,
+      "selected": undefined,
+    }
+  }
+  accessibilityValue={
+    {
+      "max": undefined,
+      "min": undefined,
+      "now": undefined,
+      "text": undefined,
+    }
+  }
+  accessible={true}
+  className="overflow-hidden flex-row items-center self-start gap-0.5"
+  collapsable={false}
+  focusable={true}
+  onBlur={[Function]}
+  onClick={[Function]}
+  onFocus={[Function]}
+  onResponderGrant={[Function]}
+  onResponderMove={[Function]}
+  onResponderRelease={[Function]}
+  onResponderTerminate={[Function]}
+  onResponderTerminationRequest={[Function]}
+  onStartShouldSetResponder={[Function]}
+  style={
+    [
+      {
+        "transform": [
+          {
+            "scale": 1,
+          },
+        ],
+      },
+      undefined,
+    ]
+  }
+>
+  <View
+    className="pb-[1px] border-f0-foreground-secondary"
+    style={
+      {
+        "borderBottomWidth": 0.5,
+      }
+    }
+  >
+    <Text
+      className="no-underline normal-case tracking-normal text-[16px] leading-[24px] font-medium text-f0-foreground text-left"
+      ellipsizeMode="tail"
+      numberOfLines={1}
+    >
+      Link
+    </Text>
+  </View>
+  <RNSVGSvgView
+    align="xMidYMid"
+    bbHeight="100%"
+    bbWidth="100%"
+    className="shrink-0 w-4 h-4 stroke-sm text-f0-icon"
+    fill="none"
+    focusable={false}
+    meetOrSlice={0}
+    minX={0}
+    minY={0}
+    style={
+      [
+        {
+          "backgroundColor": "transparent",
+          "borderWidth": 0,
+        },
+        [
+          {},
+        ],
+        {
+          "flex": 0,
+          "height": "100%",
+          "width": "100%",
+        },
+      ]
+    }
+    vbHeight={24}
+    vbWidth={24}
+  >
+    <RNSVGGroup
+      fill={null}
+      propList={
+        [
+          "fill",
+        ]
+      }
+    >
+      <RNSVGPath
+        d="M10 5H8a3 3 0 0 0-3 3v8a3 3 0 0 0 3 3h8a3 3 0 0 0 3-3v-2.5M12.5 11.5 20 4m0 0h-4.5M20 4v4.5"
+        fill={
+          {
+            "payload": 4278190080,
+            "type": 0,
+          }
+        }
+        propList={
+          [
+            "stroke",
+            "strokeLinecap",
+            "strokeLinejoin",
+          ]
+        }
+        stroke={
+          {
+            "type": 2,
+          }
+        }
+        strokeLinecap={1}
+        strokeLinejoin={1}
+      />
+    </RNSVGGroup>
+  </RNSVGSvgView>
+</View>
+`;
