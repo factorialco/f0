@@ -1,9 +1,10 @@
 import * as React from "react"
-import { Text, View } from "react-native"
+import { View } from "react-native"
 import { tv } from "tailwind-variants"
 
 import { cn } from "../../lib/utils"
 import { F0Image } from "../primitives/F0Image"
+import { F0Text, type TypographyVariant } from "../primitives/F0Text"
 
 export const sizes = [
   "xsmall",
@@ -37,6 +38,15 @@ export const textSizes = {
   lg: "text-lg",
   large: "text-2xl",
   xlarge: "text-3xl",
+}
+
+const fallbackVariant: Record<(typeof sizes)[number], TypographyVariant> = {
+  xsmall: "body-sm-semibold",
+  small: "body-sm-semibold",
+  medium: "body-md-semibold",
+  lg: "heading-sm",
+  large: "heading-lg",
+  xlarge: "heading-lg",
 }
 
 const avatarVariants = tv({
@@ -106,10 +116,12 @@ const AvatarFallback = ({
   className,
   size = "medium",
   ...props
-}: React.ComponentPropsWithoutRef<typeof Text> & {
+}: Omit<React.ComponentPropsWithoutRef<typeof F0Text>, "variant" | "color"> & {
   size?: (typeof sizes)[number]
 }) => (
-  <Text
+  <F0Text
+    variant={fallbackVariant[size]}
+    color="inverse"
     className={cn("text-f0-foreground-inverse/90", textSizes[size], className)}
     {...props}
   />
