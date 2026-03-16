@@ -460,7 +460,14 @@ export const getMockVisualizations = (options?: {
           {
             id: "department",
             label: "Department",
-            editType: () => "text" as const,
+            editType: () => "select" as const,
+            selectConfig: {
+              options: DEPARTMENTS_MOCK.map((dept) => ({
+                value: dept,
+                label: dept,
+              })),
+              placeholder: "Select department",
+            },
             render: (item) => item.department,
             sorting: options?.table?.noSorting ? undefined : "department",
             order: options?.table?.allowColumnReordering ? 4 : undefined,
