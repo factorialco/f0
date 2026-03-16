@@ -21,7 +21,11 @@ export {
 // Re-export useF0Form hook and types
 export { useF0Form } from "./useF0Form"
 import type { F0FormRef } from "./useF0Form"
-export type { F0FormRef, UseF0FormReturn } from "./useF0Form"
+export type {
+  F0FormRef,
+  F0FormSetValueOptions,
+  UseF0FormReturn,
+} from "./useF0Form"
 
 /**
  * Conditional rendering for sections - can be a condition object or a function

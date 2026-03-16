@@ -45,6 +45,7 @@ import { SwitchGroupRenderer } from "./components/SwitchGroupRenderer"
 import { createConditionalResolver } from "./conditionalResolver"
 import { FORM_MAX_WIDTH, SECTION_MARGIN } from "./constants"
 import { F0FormContext, generateAnchorId } from "./context"
+import { useF0AiFormRegistry } from "./F0AiFormRegistry"
 import { FieldRenderer } from "./fields/FieldRenderer"
 import { useErrorNavigation } from "./useErrorNavigation"
 import { useSchemaDefinition } from "./useSchemaDefinition"
@@ -675,6 +676,55 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
         },
         isDirty: () => form.formState.isDirty,
         getValues: () => form.getValues() as Record<string, unknown>,
+        setValue: (fieldName, value, options) => {
+          form.setValue(
+            fieldName as Path<TValues>,
+            value as TValues[keyof TValues],
+            {
+              shouldValidate: options?.shouldValidate ?? true,
+              shouldDirty: options?.shouldDirty ?? true,
+            }
+          )
+        },
+        setValues: (values, options) => {
+          for (const [fieldName, value] of Object.entries(values)) {
+            form.setValue(
+              fieldName as Path<TValues>,
+              value as TValues[keyof TValues],
+              {
+                shouldValidate: false,
+                shouldDirty: options?.shouldDirty ?? true,
+              }
+            )
+          }
+          if (options?.shouldValidate !== false) {
+            void form.trigger()
+          }
+        },
+        trigger: async (fieldName) => {
+          if (fieldName) {
+            return form.trigger(fieldName as Path<TValues>)
+          }
+          return form.trigger()
+        },
+        getErrors: () => {
+          const result: Record<string, string> = {}
+          const { errors: currentErrors } = form.formState
+          for (const [key, error] of Object.entries(currentErrors)) {
+            if (
+              key !== "root" &&
+              error &&
+              typeof error === "object" &&
+              "message" in error
+            ) {
+              result[key] = (error.message as string) ?? ""
+            }
+          }
+          return result
+        },
+        getFieldNames: () => {
+          return Object.keys(form.getValues() as Record<string, unknown>)
+        },
         _setStateCallback: (callback: F0FormStateCallback) => {
           stateCallbackRef.current = callback
         },
@@ -698,6 +748,95 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
       })
     }
   }, [isSubmitting, hasErrors])
+
+  // Auto-register with AI form registry (when available)
+  const aiFormRegistry = useF0AiFormRegistry()
+  const internalFormRef = useRef<F0FormRef | null>(null)
+  // Keep a stable ref that mirrors formRef or internalFormRef
+  const registryFormRef = formRef ?? internalFormRef
+
+  useEffect(() => {
+    if (aiFormRegistry) {
+      // Mirror internal ref if no external formRef
+      if (!formRef && registryFormRef !== formRef) {
+        // Build a minimal ref for registry use when no external formRef is provided
+        const refMethods: F0FormRef = {
+          submit: () =>
+            new Promise<void>((resolve, reject) => {
+              form.handleSubmit(
+                async (data) => {
+                  await handleSubmit(data)
+                  resolve()
+                },
+                () => reject(new Error("Form validation failed"))
+              )()
+            }),
+          reset: () => {
+            form.reset()
+            resetErrorNavigation()
+          },
+          isDirty: () => form.formState.isDirty,
+          getValues: () => form.getValues() as Record<string, unknown>,
+          setValue: (fieldName, value, options) => {
+            form.setValue(
+              fieldName as Path<TValues>,
+              value as TValues[keyof TValues],
+              {
+                shouldValidate: options?.shouldValidate ?? true,
+                shouldDirty: options?.shouldDirty ?? true,
+              }
+            )
+          },
+          setValues: (values, options) => {
+            for (const [fn, v] of Object.entries(values)) {
+              form.setValue(fn as Path<TValues>, v as TValues[keyof TValues], {
+                shouldValidate: false,
+                shouldDirty: options?.shouldDirty ?? true,
+              })
+            }
+            if (options?.shouldValidate !== false) {
+              void form.trigger()
+            }
+          },
+          trigger: async (fieldName) =>
+            fieldName
+              ? form.trigger(fieldName as Path<TValues>)
+              : form.trigger(),
+          getErrors: () => {
+            const result: Record<string, string> = {}
+            for (const [key, error] of Object.entries(form.formState.errors)) {
+              if (
+                key !== "root" &&
+                error &&
+                typeof error === "object" &&
+                "message" in error
+              ) {
+                result[key] = (error.message as string) ?? ""
+              }
+            }
+            return result
+          },
+          getFieldNames: () =>
+            Object.keys(form.getValues() as Record<string, unknown>),
+          _setStateCallback: () => {},
+        }
+        internalFormRef.current = refMethods
+      }
+      aiFormRegistry.register(name, registryFormRef, schema)
+      return () => {
+        aiFormRegistry.unregister(name)
+      }
+    }
+  }, [
+    aiFormRegistry,
+    name,
+    schema,
+    formRef,
+    registryFormRef,
+    form,
+    resetErrorNavigation,
+    handleSubmit,
+  ])
 
   // Group contiguous switch fields
   const groupedItems = groupContiguousSwitches(definition)

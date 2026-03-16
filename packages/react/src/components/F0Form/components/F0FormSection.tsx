@@ -9,12 +9,6 @@ import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 import { cn } from "@/lib/utils"
 import { Form as FormProvider } from "@/ui/form"
 
-import { RowRenderer } from "./RowRenderer"
-import { SwitchGroupRenderer } from "./SwitchGroupRenderer"
-import { createConditionalResolver } from "../conditionalResolver"
-import { FIELD_GAP } from "../constants"
-import { F0FormContext } from "../context"
-import { FieldRenderer } from "../fields/FieldRenderer"
 import type { F0SwitchField } from "../fields/switch/types"
 import type {
   F0FormErrorTriggerMode,
@@ -27,8 +21,15 @@ import type {
   RowDefinition,
 } from "../types"
 import type { F0FormRef, F0FormStateCallback } from "../useF0Form"
+
+import { createConditionalResolver } from "../conditionalResolver"
+import { FIELD_GAP } from "../constants"
+import { F0FormContext } from "../context"
+import { FieldRenderer } from "../fields/FieldRenderer"
 import { useSchemaDefinition } from "../useSchemaDefinition"
 import { createZodErrorMap } from "../zodErrorMap"
+import { RowRenderer } from "./RowRenderer"
+import { SwitchGroupRenderer } from "./SwitchGroupRenderer"
 
 const ERROR_TRIGGER_MODE_MAP = {
   "on-blur": "onBlur",
@@ -182,6 +183,55 @@ export function F0FormSection<TSchema extends F0FormSchema>({
         reset: () => form.reset(),
         isDirty: () => form.formState.isDirty,
         getValues: () => form.getValues() as Record<string, unknown>,
+        setValue: (fieldName, value, options) => {
+          form.setValue(
+            fieldName as Path<TValues>,
+            value as TValues[keyof TValues],
+            {
+              shouldValidate: options?.shouldValidate ?? true,
+              shouldDirty: options?.shouldDirty ?? true,
+            }
+          )
+        },
+        setValues: (values, options) => {
+          for (const [fieldName, value] of Object.entries(values)) {
+            form.setValue(
+              fieldName as Path<TValues>,
+              value as TValues[keyof TValues],
+              {
+                shouldValidate: false,
+                shouldDirty: options?.shouldDirty ?? true,
+              }
+            )
+          }
+          if (options?.shouldValidate !== false) {
+            void form.trigger()
+          }
+        },
+        trigger: async (fieldName) => {
+          if (fieldName) {
+            return form.trigger(fieldName as Path<TValues>)
+          }
+          return form.trigger()
+        },
+        getErrors: () => {
+          const result: Record<string, string> = {}
+          const { errors: currentErrors } = form.formState
+          for (const [key, error] of Object.entries(currentErrors)) {
+            if (
+              key !== "root" &&
+              error &&
+              typeof error === "object" &&
+              "message" in error
+            ) {
+              result[key] = (error.message as string) ?? ""
+            }
+          }
+          return result
+        },
+        getFieldNames: () => {
+          return Object.keys(form.getValues() as Record<string, unknown>)
+        },
         _setStateCallback: (callback: F0FormStateCallback) => {
           stateCallbackRef.current = callback
         },

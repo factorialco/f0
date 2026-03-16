@@ -30,4 +30,10 @@ export {
   useDefaultCopilotActions,
   useOrchestratorThinkingAction,
   useMessageSourcesAction,
+  useF0AiFormActions,
+  useFormListAction,
+  useFormDescribeAction,
+  useFormFillAction,
+  useFormSubmitAction,
+  useFormGetStateAction,
 } from "./copilotActions"

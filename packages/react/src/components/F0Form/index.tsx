@@ -117,7 +117,22 @@ export { generateAnchorId } from "./context"
 
 // Export form control hook
 export { useF0Form } from "./useF0Form"
-export type { F0FormRef, UseF0FormReturn } from "./useF0Form"
+export type {
+  F0FormRef,
+  F0FormSetValueOptions,
+  UseF0FormReturn,
+} from "./useF0Form"
+
+// Export schema introspection
+export { describeFormSchema } from "./describeFormSchema"
+export type { FormFieldDescription } from "./describeFormSchema"
+
+// Export AI form registry
+export {
+  F0AiFormRegistryProvider,
+  useF0AiFormRegistry,
+} from "./F0AiFormRegistry"
+export type { F0AiFormEntry } from "./F0AiFormRegistry"
 
 import type {
   F0FormPropsWithSingleSchema,
