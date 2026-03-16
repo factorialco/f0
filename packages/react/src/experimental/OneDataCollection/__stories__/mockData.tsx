@@ -76,6 +76,100 @@ import {
 import { OnBulkActionCallback } from "../types"
 import { Visualization, VisualizationType } from "../visualizations/collection"
 
+// Mock data for nested subfilters (office → space → desk)
+const OFFICES = [
+  { id: 101, name: "Barcelona HQ" },
+  { id: 102, name: "Madrid Office" },
+  { id: 103, name: "London" },
+  { id: 104, name: "New York" },
+] as const
+
+const SPACES = [
+  { id: 1, name: "Floor 1", officeId: 101 },
+  { id: 2, name: "Floor 2", officeId: 101 },
+  { id: 3, name: "Rooftop Terrace", officeId: 101 },
+  { id: 4, name: "Floor 1", officeId: 102 },
+  { id: 5, name: "Floor 2", officeId: 102 },
+  { id: 6, name: "Ground Floor", officeId: 103 },
+  { id: 7, name: "Main Floor", officeId: 104 },
+] as const
+
+const DESKS = [
+  { id: 100, name: "Desk A1", spaceId: 1 },
+  { id: 101, name: "Desk A2", spaceId: 1 },
+  { id: 102, name: "Desk B1", spaceId: 2 },
+  { id: 103, name: "Desk B2", spaceId: 2 },
+  { id: 104, name: "Hot Desk 1", spaceId: 7 },
+] as const
+
+export const nestedFilters = {
+  office: {
+    type: "in" as const,
+    label: "Office",
+    options: {
+      options: OFFICES.map((office) => {
+        const officeSpaces = SPACES.filter((s) => s.officeId === office.id)
+        return {
+          value: String(office.id),
+          label: office.name,
+          ...(officeSpaces.length > 0 && {
+            children: {
+              filterKey: "space",
+              options: officeSpaces.map((space) => {
+                const spaceDesks = DESKS.filter((d) => d.spaceId === space.id)
+                return {
+                  value: String(space.id),
+                  label: space.name,
+                  ...(spaceDesks.length > 0 && {
+                    children: {
+                      filterKey: "desk",
+                      options: spaceDesks.map((desk) => ({
+                        value: String(desk.id),
+                        label: desk.name,
+                      })),
+                    },
+                  }),
+                }
+              }),
+            },
+          }),
+        }
+      }),
+    },
+  },
+  space: {
+    type: "in" as const,
+    label: "Space",
+    hideSelector: true,
+    options: {
+      options: SPACES.map((space) => ({
+        value: String(space.id),
+        label: space.name,
+      })),
+    },
+  },
+  desk: {
+    type: "in" as const,
+    label: "Desk",
+    hideSelector: true,
+    options: {
+      options: DESKS.map((desk) => ({
+        value: String(desk.id),
+        label: desk.name,
+      })),
+    },
+  },
+  department: {
+    type: "in" as const,
+    label: "Department",
+    options: {
+      options: DEPARTMENTS_MOCK.map((value) => ({ value, label: value })),
+    },
+  },
+} as const
+
+export type NestedFiltersType = typeof nestedFilters
+
 // Example filter definition
 export const filters = {
   search: {
@@ -1440,6 +1534,72 @@ export const ExampleComponent = ({
             mockVisualizations.editableTable,
           ]
         }
+      />
+    </div>
+  )
+}
+
+export const SubfiltersExampleComponent = () => {
+  const dataAdapterMemoized = useMemo(
+    () => ({
+      fetchData: (
+        options: DataCollectionBaseFetchOptions<
+          NestedFiltersType,
+          NavigationFiltersDefinition
+        >
+      ) => {
+        const { filters: f, sortings: s, search } = options
+        return new Promise<BaseResponse<MockUser>>((resolve) => {
+          setTimeout(() => {
+            const filtered = filterUsers(
+              mockUsers,
+              f as FiltersState<FiltersType>,
+              s,
+              undefined,
+              search
+            )
+            resolve({ records: filtered })
+          }, 100)
+        })
+      },
+    }),
+    []
+  )
+
+  const dataSource = useDataCollectionSource(
+    {
+      filters: nestedFilters,
+      sortings,
+      itemOnClick: (item) => () => console.log(`Clicking ${item.name}`),
+      itemUrl: (item) => `/users/${item.id}`,
+      dataAdapter: dataAdapterMemoized,
+    },
+    []
+  )
+
+  const mockVisualizations = getMockVisualizations({}) as unknown as Record<
+    string,
+    Visualization<
+      MockUser,
+      NestedFiltersType,
+      typeof sortings,
+      SummariesDefinition,
+      ItemActionsDefinition<MockUser>,
+      NavigationFiltersDefinition,
+      GroupingDefinition<MockUser>
+    >
+  >
+
+  return (
+    <div className="space-y-4">
+      <OneDataCollection
+        dataTestId="one-data-collection-subfilters"
+        source={dataSource}
+        visualizations={[
+          mockVisualizations.table,
+          mockVisualizations.card,
+          mockVisualizations.list,
+        ]}
       />
     </div>
   )
