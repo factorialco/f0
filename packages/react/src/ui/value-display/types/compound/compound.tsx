@@ -5,8 +5,12 @@ import { cn } from "@/lib/utils"
 import { tableDisplayClassNames } from "../../const"
 import { ValueDisplayRendererContext } from "../../renderers"
 import type { CurrencyDef } from "../amount"
-import { formatNumberText } from "../number/format"
-import type { UnitsPosition } from "../number/format"
+import { FormattedNumberContent } from "../number/formattedContent"
+import {
+  formatNumberParts,
+  type FormattedNumberParts,
+  type UnitsPosition,
+} from "../number/format"
 import { WithPlaceholder } from "../types"
 
 export const compoundTones = [
@@ -54,7 +58,7 @@ export interface CompoundCellValue {
 }
 
 const defaultSeparator = " / "
-const defaultMissingValue = "-"
+const defaultMissingValue = "–"
 
 const toneClassByValue: Record<CompoundTone, string> = {
   neutral: "text-f1-foreground",
@@ -69,21 +73,33 @@ const toneClassByValue: Record<CompoundTone, string> = {
 const resolveValue = (
   value: string | undefined,
   placeholder?: string
-): { text: string; isMissing: boolean } => {
+): ResolvedTextSegment => {
   if (value !== undefined) {
-    return { text: value, isMissing: false }
+    return { kind: "text", text: value, isMissing: false }
   }
 
   if (placeholder !== undefined) {
-    return { text: placeholder, isMissing: true }
+    return { kind: "text", text: placeholder, isMissing: true }
   }
 
-  return { text: defaultMissingValue, isMissing: true }
+  return { kind: "text", text: defaultMissingValue, isMissing: true }
 }
 
-const resolveSegmentText = (
-  segment: CompoundSegment
-): { text: string; isMissing: boolean } => {
+interface ResolvedTextSegment {
+  kind: "text"
+  text: string
+  isMissing: boolean
+}
+
+interface ResolvedFormattedSegment {
+  kind: "formatted"
+  parts: FormattedNumberParts
+  isMissing: false
+}
+
+type ResolvedSegment = ResolvedTextSegment | ResolvedFormattedSegment
+
+const resolveSegmentText = (segment: CompoundSegment): ResolvedSegment => {
   switch (segment.type) {
     case "text":
       return resolveValue(
@@ -91,30 +107,35 @@ const resolveSegmentText = (
         segment.placeholder
       )
     case "number":
-      return resolveValue(
-        segment.value !== undefined
-          ? formatNumberText({
-              number: segment.value,
-              decimalPlaces: segment.decimalPlaces,
-              units: segment.units,
-              unitsPosition: segment.unitsPosition,
-            })
-          : undefined,
-        segment.placeholder
-      )
+      if (segment.value === undefined) {
+        return resolveValue(undefined, segment.placeholder)
+      }
+
+      return {
+        kind: "formatted",
+        parts: formatNumberParts({
+          number: segment.value,
+          decimalPlaces: segment.decimalPlaces,
+          units: segment.units,
+          unitsPosition: segment.unitsPosition,
+        }),
+        isMissing: false,
+      }
     case "amount":
-      return resolveValue(
-        segment.value !== undefined
-          ? formatNumberText({
-              number: segment.value,
-              decimalPlaces: segment.currency?.decimalPlaces,
-              units: segment.currency?.symbol,
-              unitsPosition: segment.currency?.symbolPosition,
-              unitsSpaced: true,
-            })
-          : undefined,
-        segment.placeholder
-      )
+      if (segment.value === undefined) {
+        return resolveValue(undefined, segment.placeholder)
+      }
+
+      return {
+        kind: "formatted",
+        parts: formatNumberParts({
+          number: segment.value,
+          decimalPlaces: segment.currency?.decimalPlaces,
+          units: segment.currency?.symbol,
+          unitsPosition: segment.currency?.symbolPosition,
+        }),
+        isMissing: false,
+      }
   }
 }
 
@@ -133,33 +154,28 @@ export const CompoundCell = (
   args: CompoundCellValue,
   meta: ValueDisplayRendererContext
 ) => {
+  const wrapperClassName = cn(
+    "flex flex-1 items-center text-f1-foreground",
+    meta.visualization === "table" && [
+      "justify-end",
+      tableDisplayClassNames.text,
+    ]
+  )
+
   if (args.segments.length === 0) {
     return (
-      <span
-        className={cn(
-          "text-f1-foreground-secondary",
-          meta.visualization === "table" && tableDisplayClassNames.text
-        )}
-        data-cell-type="compound"
-      >
-        {defaultMissingValue}
-      </span>
+      <div className={wrapperClassName} data-cell-type="compound">
+        <span className={toneClassByValue.secondary}>
+          {defaultMissingValue}
+        </span>
+      </div>
     )
   }
 
   const separator = args.separator ?? defaultSeparator
 
   return (
-    <div
-      className={cn(
-        "flex flex-1 items-center text-f1-foreground",
-        meta.visualization === "table" && [
-          "justify-end",
-          tableDisplayClassNames.text,
-        ]
-      )}
-      data-cell-type="compound"
-    >
+    <div className={wrapperClassName} data-cell-type="compound">
       {args.segments.map((segment, index) => {
         const resolvedSegment = resolveSegmentText(segment)
         const tone = resolveTone(segment.tone, resolvedSegment.isMissing)
@@ -173,8 +189,18 @@ export const CompoundCell = (
                 {separator}
               </span>
             )}
-            <span className={toneClassByValue[tone]}>
-              {resolvedSegment.text}
+            <span
+              className={cn(
+                toneClassByValue[tone],
+                resolvedSegment.kind === "formatted" &&
+                  "inline-flex items-center gap-1"
+              )}
+            >
+              {resolvedSegment.kind === "formatted" ? (
+                <FormattedNumberContent parts={resolvedSegment.parts} />
+              ) : (
+                resolvedSegment.text
+              )}
             </span>
           </Fragment>
         )

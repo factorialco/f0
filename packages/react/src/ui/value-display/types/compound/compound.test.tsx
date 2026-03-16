@@ -83,8 +83,13 @@ describe("CompoundCell", () => {
 
     const { container } = render(CompoundCell(args, tableMeta))
     const wrapper = container.querySelector('[data-cell-type="compound"]')
+    const separators = container.querySelectorAll(".whitespace-pre")
 
-    expect(wrapper).toHaveTextContent("-12.3% / 2500 EUR / $ 99.5")
+    expect(separators).toHaveLength(2)
+    expect(screen.getByText("%").parentElement).toHaveTextContent("-12.3%")
+    expect(screen.getByText("EUR").parentElement).toHaveTextContent("2500EUR")
+    expect(screen.getByText("$").parentElement).toHaveTextContent("$99.5")
+    expect(wrapper).toHaveTextContent("-12.3% / 2500EUR / $99.5")
   })
 
   it("renders placeholders and missing values as secondary by default", () => {
@@ -98,18 +103,21 @@ describe("CompoundCell", () => {
     render(CompoundCell(args, tableMeta))
 
     expect(screen.getByText("N/A")).toHaveClass("text-f1-foreground-secondary")
-    expect(screen.getByText("-")).toHaveClass("text-f1-foreground-secondary")
+    expect(screen.getByText("–")).toHaveClass("text-f1-foreground-secondary")
   })
 
-  it("renders fallback when there are no segments", () => {
+  it("renders aligned fallback when there are no segments", () => {
     const args: CompoundCellValue = {
       segments: [],
     }
 
     render(CompoundCell(args, tableMeta))
 
-    const fallback = screen.getByText("-")
-    expect(fallback).toHaveAttribute("data-cell-type", "compound")
+    const fallback = screen.getByText("–")
+    const wrapper = fallback.closest('[data-cell-type="compound"]')
+
+    expect(wrapper).toHaveAttribute("data-cell-type", "compound")
+    expect(wrapper).toHaveClass("justify-end")
   })
 
   it("keeps table right alignment and list natural flow", () => {
