@@ -859,6 +859,33 @@ declare type BaseFilterDefinition<T extends FilterTypeKey> = {
     hideSelector?: boolean;
 };
 
+declare function BaseHeader({ title, avatar, deactivated, description, primaryAction, secondaryActions, otherActions, status, metadata, }: BaseHeaderProps_2): JSX_2.Element;
+
+declare type BaseHeaderProps = ComponentProps<typeof BaseHeader>;
+
+declare interface BaseHeaderProps_2 {
+    title: string;
+    deactivated?: boolean;
+    avatar?: {
+        type: "generic";
+        name: string;
+        src?: string;
+    } | AvatarVariant;
+    description?: string;
+    primaryAction?: PrimaryActionButton | PrimaryDropdownAction<string>;
+    secondaryActions?: HeaderSecondaryAction[];
+    otherActions?: (DropdownItem & {
+        isVisible?: boolean;
+    })[];
+    status?: {
+        label: string;
+        text: string;
+        variant: StatusVariant;
+        actions?: MetadataAction[];
+    };
+    metadata?: MetadataProps["items"];
+}
+
 /**
  * Represents a base structure for paginated API responses, providing
  * details about the records on the current page and pagination metadata.
@@ -6489,6 +6516,10 @@ export declare function H3({ children, ...props }: React.HTMLAttributes<HTMLHead
  */
 export declare function hasF0Config(schema: ZodTypeAny): boolean;
 
+declare type HeaderSecondaryAction = SecondaryAction & {
+    hideLabel?: boolean;
+};
+
 declare type HeadingTags = (typeof headingTags)[number];
 
 declare const headingTags: readonly ["h1", "h2", "h3", "h4", "h5", "h6"];
@@ -7025,6 +7056,90 @@ declare type MentionsConfig = {
     onMentionQueryStringChanged?: (queryString: string) => Promise<MentionedUser[]> | undefined;
     users: MentionedUser[];
 };
+
+declare type MetadataAction = {
+    icon: IconType;
+    label: string;
+    onClick: () => void;
+    type?: never;
+};
+
+declare type MetadataCopyAction = {
+    icon?: never;
+    label?: never;
+    onClick?: never;
+    copyValue?: string;
+    type: "copy";
+};
+
+declare function MetadataItem({ item }: {
+    item: MetadataItem;
+}): JSX_2.Element;
+
+declare interface MetadataItem {
+    label: string;
+    value: MetadataItemValue;
+    actions?: (MetadataAction | MetadataCopyAction)[];
+    hideLabel?: boolean;
+    /**
+     * Optional info text. When provided, displays an info icon next to the label
+     * that shows this text in a tooltip when hovered.
+     */
+    info?: {
+        title: string;
+        description?: string;
+    };
+}
+
+declare type MetadataItemValue = {
+    type: "text";
+    content: string;
+} | {
+    type: "avatar";
+    variant: AvatarVariant;
+    text: string;
+} | {
+    type: "status";
+    label: string;
+    variant: StatusVariant;
+} | ({
+    type: "list";
+} & ({
+    variant: "person";
+    avatars: (PersonAvatarVariant | (PersonAvatarVariant & Record<string, unknown>))[];
+} | {
+    variant: "team";
+    avatars: (TeamAvatarVariant | (TeamAvatarVariant & Record<string, unknown>))[];
+} | {
+    variant: "company";
+    avatars: (CompanyAvatarVariant | (CompanyAvatarVariant & Record<string, unknown>))[];
+})) | {
+    type: "data-list";
+    data: string[];
+} | {
+    type: "tag-list";
+    tags: string[];
+} | {
+    type: "dot-tag";
+    label: string;
+    color: NewColor;
+} | {
+    type: "date";
+    formattedDate: string;
+    icon?: "warning" | "critical";
+};
+
+declare interface MetadataProps {
+    /**
+     * Everything is not a MetadataItem is ignored.
+     * Undefined and boolean enable conditional items
+     **/
+    items: (MetadataItem | undefined | boolean)[];
+    /**
+     * If true and the metadata type is a list, it will be collapsed to the first item
+     */
+    collapse?: boolean;
+}
 
 /** How to format the metric value */
 export declare type MetricFormat = {
@@ -7674,6 +7789,18 @@ declare type PrevNextDateNavigation = {
     next: DateRange | false;
 };
 
+declare interface PrimaryAction {
+    disabled?: boolean;
+    tooltip?: string;
+    isVisible?: boolean;
+}
+
+declare interface PrimaryActionButton extends PrimaryAction {
+    label: string;
+    icon?: IconType;
+    onClick: () => void;
+}
+
 declare type PrimaryActionItemDefinition = Pick<DropdownItemObject, "label" | "icon" | "description"> & {
     loading?: boolean;
     onClick?: () => void | Promise<void>;
@@ -7685,6 +7812,12 @@ declare type PrimaryActionItemDefinition = Pick<DropdownItemObject, "label" | "i
  * @returns An action
  */
 declare type PrimaryActionsDefinitionFn = () => PrimaryActionItemDefinition | PrimaryActionItemDefinition[] | undefined;
+
+declare interface PrimaryDropdownAction<T> extends PrimaryAction {
+    items: ButtonDropdownItem<T>[];
+    value?: T;
+    onClick: (value: T, item: ButtonDropdownItem<T>) => void;
+}
 
 export declare const PrivacyModeProvider: React_2.FC<{
     initiallyEnabled?: boolean;
@@ -7893,6 +8026,8 @@ declare type Props_3 = {
     list?: TagCounterItem[];
 };
 
+declare type Props_4 = {} & Pick<BaseHeaderProps, "avatar" | "title" | "description" | "primaryAction" | "secondaryActions" | "otherActions" | "metadata" | "status" | "deactivated">;
+
 export declare type QuestionActionParams = {
     questionId: string;
     type: ActionType;
@@ -7993,6 +8128,8 @@ export declare type RenderIfCondition = CommonRenderIfCondition | TextRenderIfCo
 
 export declare type ResolvedRecordType<R> = R extends RecordType ? R : RecordType;
 
+declare type ResourceHeaderProps = Props_4;
+
 /** All styling props that can be overridden per breakpoint */
 export declare interface ResponsiveStyleProps {
     display?: DisplayToken;
@@ -8082,6 +8219,10 @@ declare type SearchOptions = {
     /** Debounce time for search */
     debounceTime?: number;
 };
+
+declare interface SecondaryAction extends PrimaryActionButton {
+    variant?: "outline" | "critical" | "outlinePromote" | "promote";
+}
 
 declare type SecondaryActionGroup = {
     label?: string;
@@ -8365,15 +8506,18 @@ declare type SummaryKey<Definition extends SummariesDefinition> = Definition ext
 
 declare type SummaryType = "sum";
 
-export declare function SurveyAnsweringForm({ elements, onSubmit: onSubmitProp, mode, title, isOpen, onClose, fullscreen: fullscreenProp, allowToChangeFullscreen, defaultValues, errorTriggerMode, loading, labels, preview, }: SurveyAnsweringFormProps): JSX_2.Element;
+export declare function SurveyAnsweringForm({ elements, onSubmit: onSubmitProp, mode, title, description, resourceHeader, isOpen, onClose, position: positionProp, module, allowToChangeFullscreen, defaultValues, errorTriggerMode, loading, labels, preview, }: SurveyAnsweringFormProps): JSX_2.Element;
 
 declare interface SurveyAnsweringFormBaseProps {
     elements: SurveyFormBuilderElement[];
     mode: SurveyAnsweringFormMode;
     title: string;
+    description?: string;
+    resourceHeader?: Omit<ResourceHeaderProps, "title" | "description">;
+    module: SurveyAnsweringFormModule;
+    position?: DialogPosition;
     isOpen: boolean;
     onClose: () => void;
-    fullscreen?: boolean;
     allowToChangeFullscreen?: boolean;
     defaultValues?: Partial<SurveyAnswers>;
     errorTriggerMode?: F0FormErrorTriggerMode;
@@ -8387,17 +8531,23 @@ declare interface SurveyAnsweringFormBaseProps {
     };
 }
 
-declare interface SurveyAnsweringFormDefaultProps extends SurveyAnsweringFormBaseProps {
+declare type SurveyAnsweringFormDefaultProps = SurveyAnsweringFormBaseProps & {
     preview?: false;
     onSubmit: (answers: SurveySubmitAnswers) => Promise<SurveyFormSubmitResult> | SurveyFormSubmitResult;
-}
+};
 
 export declare type SurveyAnsweringFormMode = "stepped" | "all-questions";
 
-declare interface SurveyAnsweringFormPreviewProps extends SurveyAnsweringFormBaseProps {
+declare type SurveyAnsweringFormModule = {
+    id: ModuleId;
+    label: string;
+    href: string;
+};
+
+declare type SurveyAnsweringFormPreviewProps = SurveyAnsweringFormBaseProps & {
     preview: true;
     onSubmit?: never;
-}
+};
 
 export declare type SurveyAnsweringFormProps = SurveyAnsweringFormDefaultProps | SurveyAnsweringFormPreviewProps;
 
@@ -9708,8 +9858,13 @@ declare module "gridstack" {
 }
 
 
-declare namespace Calendar {
-    var displayName: string;
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
+        aiBlock: {
+            insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
+            executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
+        };
+    }
 }
 
 
@@ -9718,16 +9873,6 @@ declare module "@tiptap/core" {
         enhanceHighlight: {
             setEnhanceHighlight: (from: number, to: number) => ReturnType;
             clearEnhanceHighlight: () => ReturnType;
-        };
-    }
-}
-
-
-declare module "@tiptap/core" {
-    interface Commands<ReturnType> {
-        aiBlock: {
-            insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
-            executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
         };
     }
 }
@@ -9744,6 +9889,15 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
+        transcript: {
+            insertTranscript: (data: TranscriptData) => ReturnType;
+        };
+    }
+}
+
+
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
         videoEmbed: {
             setVideoEmbed: (options: {
                 src: string;
@@ -9753,10 +9907,6 @@ declare module "@tiptap/core" {
 }
 
 
-declare module "@tiptap/core" {
-    interface Commands<ReturnType> {
-        transcript: {
-            insertTranscript: (data: TranscriptData) => ReturnType;
-        };
-    }
+declare namespace Calendar {
+    var displayName: string;
 }
