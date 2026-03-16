@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.405.0](https://github.com/factorialco/f0/compare/f0-react-v1.404.2...f0-react-v1.405.0) (2026-03-16)
+
+
+### Features
+
+* data collection grouped headers ([#3616](https://github.com/factorialco/f0/issues/3616)) ([209db3d](https://github.com/factorialco/f0/commit/209db3d47996f669652755035e330a6400c49349))
+
 ## [1.404.2](https://github.com/factorialco/f0/compare/f0-react-v1.404.1...f0-react-v1.404.2) (2026-03-16)
 
 
