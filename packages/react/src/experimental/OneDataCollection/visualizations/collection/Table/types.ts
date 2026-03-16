@@ -55,6 +55,13 @@ export type TableColumnDefinition<
     summary?: SummaryKey<Summaries>
 
     /**
+     * Placeholder to display in this column's summary-row cell when no summary
+     * value is rendered. This also applies to columns without a `summary`
+     * definition. Takes precedence over the row-level `summaryPlaceholder`.
+     */
+    summaryPlaceholder?: string
+
+    /**
      * The id of the column (if not provided, the id will be the label of the column)
      */
     id?: ColId
@@ -86,6 +93,14 @@ export type TableVisualizationOptions<
    * The columns to display
    */
   columns: ReadonlyArray<TableColumnDefinition<R, Sortings, Summaries>>
+
+  /**
+   * Placeholder to display in summary-row cells when no summary value is
+   * rendered. This also applies to columns without a `summary` definition.
+   * Column-level `summaryPlaceholder` takes precedence.
+   * @default "-"
+   */
+  summaryPlaceholder?: string
   /**
    * The number of columns to freeze on the left
    */
