@@ -40,7 +40,7 @@ export const NumberCell = (
     unitsPosition: "right",
     units: "",
     decimalPlaces: undefined,
-    // if args is an object, use the amount from args, otherwise use the value
+    // if args is an object, use the number and related properties from args
     ...(typeof args === "object" && "number" in args ? args : {}),
     number:
       typeof args === "object" && args !== null && "number" in args
