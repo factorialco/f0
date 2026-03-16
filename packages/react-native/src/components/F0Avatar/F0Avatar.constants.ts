@@ -7,6 +7,7 @@ import {
   type F0AvatarFlagSize,
   type F0AvatarModuleSize,
   type F0AvatarSize,
+  type F0AvatarUtilitySize,
 } from "./F0Avatar.types"
 import { type AvatarListSize } from "./F0AvatarList.types"
 
@@ -47,6 +48,30 @@ export const F0_AVATAR_INTERNAL_SIZE_TO_BADGE_SIZE: Record<
   medium: "sm",
   lg: "sm",
   large: "md",
+  xlarge: "lg",
+}
+
+export const F0_AVATAR_INTERNAL_SIZE_TO_FLAG_SIZE: Record<
+  F0AvatarInternalSize,
+  F0AvatarFlagSize
+> = {
+  xsmall: "xs",
+  small: "sm",
+  medium: "md",
+  lg: "lg",
+  large: "lg",
+  xlarge: "lg",
+}
+
+export const F0_AVATAR_INTERNAL_SIZE_TO_UTILITY_SIZE: Record<
+  F0AvatarInternalSize,
+  F0AvatarUtilitySize
+> = {
+  xsmall: "sm",
+  small: "sm",
+  medium: "md",
+  lg: "lg",
+  large: "lg",
   xlarge: "lg",
 }
 

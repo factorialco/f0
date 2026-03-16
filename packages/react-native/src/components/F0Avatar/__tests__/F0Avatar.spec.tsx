@@ -371,6 +371,38 @@ describe("F0Avatar", () => {
       expect(toJSON()).toMatchSnapshot()
     })
 
+    it("maps oversized root sizes to valid flag sizes", () => {
+      const oversizedRootSizes = ["xl", "2xl"] as const
+
+      oversizedRootSizes.forEach((size) => {
+        const { toJSON } = render(
+          <F0Avatar avatar={{ type: "flag", flag: "ES" }} size={size} />
+        )
+        const serialized = JSON.stringify(toJSON())
+
+        expect(serialized).toContain("h-10 w-10 rounded-lg")
+      })
+    })
+
+    it("maps oversized root sizes to valid utility sizes", () => {
+      const oversizedRootSizes = ["xl", "2xl"] as const
+      const utilityVariants = [
+        { type: "emoji", emoji: "peach" } as const,
+        { type: "icon", icon: Calendar } as const,
+        { type: "alert", alertType: "critical" } as const,
+      ]
+
+      oversizedRootSizes.forEach((size) => {
+        utilityVariants.forEach((avatar) => {
+          const { toJSON } = render(<F0Avatar avatar={avatar} size={size} />)
+          const serialized = JSON.stringify(toJSON())
+
+          expect(serialized).toContain("rounded-lg")
+          expect(serialized).toMatch(/(h-10 w-10|w-10 h-10)/)
+        })
+      })
+    })
+
     it("renders all discriminated root variants", () => {
       const variants = [
         { type: "person", firstName: "Ada", lastName: "L" } as const,

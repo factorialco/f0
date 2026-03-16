@@ -1,5 +1,11 @@
 import { type ReactNode } from "react"
 
+import {
+  F0_AVATAR_INTERNAL_SIZE_TO_FLAG_SIZE,
+  F0_AVATAR_INTERNAL_SIZE_TO_MODULE_SIZE,
+  F0_AVATAR_INTERNAL_SIZE_TO_UTILITY_SIZE,
+  F0_AVATAR_SIZE_TO_INTERNAL_SIZE,
+} from "./F0Avatar.constants"
 import { type F0AvatarProps } from "./F0Avatar.types"
 import { F0AvatarAlert } from "./F0AvatarAlert"
 import { F0AvatarCompany } from "./F0AvatarCompany"
@@ -14,6 +20,11 @@ import { F0AvatarPerson } from "./F0AvatarPerson"
 import { F0AvatarTeam } from "./F0AvatarTeam"
 
 const F0AvatarRoot = ({ avatar, size = "xs" }: F0AvatarProps): ReactNode => {
+  const internalSize = F0_AVATAR_SIZE_TO_INTERNAL_SIZE[size]
+  const utilitySize = F0_AVATAR_INTERNAL_SIZE_TO_UTILITY_SIZE[internalSize]
+  const flagSize = F0_AVATAR_INTERNAL_SIZE_TO_FLAG_SIZE[internalSize]
+  const moduleSize = F0_AVATAR_INTERNAL_SIZE_TO_MODULE_SIZE[internalSize]
+
   switch (avatar.type) {
     case "person":
       return (
@@ -51,36 +62,23 @@ const F0AvatarRoot = ({ avatar, size = "xs" }: F0AvatarProps): ReactNode => {
         />
       )
     case "emoji":
-      return (
-        <F0AvatarEmoji emoji={avatar.emoji} size={size as "sm" | "md" | "lg"} />
-      )
+      return <F0AvatarEmoji emoji={avatar.emoji} size={utilitySize} />
     case "file":
       return (
         <F0AvatarFile file={avatar.file} size={size} badge={avatar.badge} />
       )
     case "icon":
-      return (
-        <F0AvatarIcon icon={avatar.icon} size={size as "sm" | "md" | "lg"} />
-      )
+      return <F0AvatarIcon icon={avatar.icon} size={utilitySize} />
     case "flag":
       return (
-        <F0AvatarFlag
-          flag={avatar.flag}
-          size={size as "xs" | "sm" | "md" | "lg"}
-          badge={avatar.badge}
-        />
+        <F0AvatarFlag flag={avatar.flag} size={flagSize} badge={avatar.badge} />
       )
     case "alert":
-      return (
-        <F0AvatarAlert
-          alertType={avatar.alertType}
-          size={size as "sm" | "md" | "lg"}
-        />
-      )
+      return <F0AvatarAlert alertType={avatar.alertType} size={utilitySize} />
     case "date":
       return <F0AvatarDate date={avatar.date} />
     case "module":
-      return <F0AvatarModule module={avatar.module} />
+      return <F0AvatarModule module={avatar.module} size={moduleSize} />
   }
 }
 

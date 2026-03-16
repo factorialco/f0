@@ -508,7 +508,7 @@ exports[`F0Avatar Alert Snapshot - all types at sm 4`] = `
 
 exports[`F0Avatar Company Snapshot - default 1`] = `
 <View
-  className="inline-flex "
+  className="inline-flex"
 >
   <View
     className="h-fit w-fit"
@@ -532,7 +532,7 @@ exports[`F0Avatar Company Snapshot - default 1`] = `
 
 exports[`F0Avatar Company Snapshot - with badge 1`] = `
 <View
-  className="inline-flex "
+  className="inline-flex"
 >
   <View
     className="h-fit w-fit"
@@ -675,7 +675,7 @@ exports[`F0Avatar Emoji Snapshot - all sizes 3`] = `
 
 exports[`F0Avatar File Snapshot - DOC 1`] = `
 <View
-  className="inline-flex "
+  className="inline-flex"
 >
   <View
     className="h-fit w-fit"
@@ -697,7 +697,7 @@ exports[`F0Avatar File Snapshot - DOC 1`] = `
 
 exports[`F0Avatar File Snapshot - PDF 1`] = `
 <View
-  className="inline-flex "
+  className="inline-flex"
 >
   <View
     className="h-fit w-fit"
@@ -895,7 +895,7 @@ exports[`F0Avatar File Snapshot - with badge 1`] = `
 
 exports[`F0Avatar Flag Snapshot - all sizes 1`] = `
 <View
-  className="inline-flex "
+  className="inline-flex"
 >
   <View
     className="h-fit w-fit"
@@ -929,7 +929,7 @@ exports[`F0Avatar Flag Snapshot - all sizes 1`] = `
 
 exports[`F0Avatar Flag Snapshot - all sizes 2`] = `
 <View
-  className="inline-flex "
+  className="inline-flex"
 >
   <View
     className="h-fit w-fit"
@@ -963,7 +963,7 @@ exports[`F0Avatar Flag Snapshot - all sizes 2`] = `
 
 exports[`F0Avatar Flag Snapshot - all sizes 3`] = `
 <View
-  className="inline-flex "
+  className="inline-flex"
 >
   <View
     className="h-fit w-fit"
@@ -997,7 +997,7 @@ exports[`F0Avatar Flag Snapshot - all sizes 3`] = `
 
 exports[`F0Avatar Flag Snapshot - all sizes 4`] = `
 <View
-  className="inline-flex "
+  className="inline-flex"
 >
   <View
     className="h-fit w-fit"
@@ -1031,7 +1031,7 @@ exports[`F0Avatar Flag Snapshot - all sizes 4`] = `
 
 exports[`F0Avatar Flag Snapshot - with icon badge 1`] = `
 <View
-  className="inline-flex "
+  className="inline-flex"
 >
   <View
     className="h-fit w-fit"
@@ -1319,7 +1319,7 @@ exports[`F0Avatar Flag Snapshot - with module badge 1`] = `
 
 exports[`F0Avatar Flag renders with accessibility label 1`] = `
 <View
-  className="inline-flex "
+  className="inline-flex"
 >
   <View
     className="h-fit w-fit"
@@ -2096,7 +2096,7 @@ exports[`F0Avatar List Snapshot - file list 1`] = `
       }
     >
       <View
-        className="inline-flex "
+        className="inline-flex"
       >
         <View
           className="h-fit w-fit"
@@ -2371,7 +2371,7 @@ exports[`F0Avatar List Snapshot - flag list 1`] = `
       }
     >
       <View
-        className="inline-flex "
+        className="inline-flex"
       >
         <View
           className="h-fit w-fit"
@@ -2758,7 +2758,7 @@ exports[`F0Avatar List Snapshot - person list 1`] = `
       }
     >
       <View
-        className="inline-flex "
+        className="inline-flex"
       >
         <View
           className="h-fit w-fit"
@@ -4066,7 +4066,7 @@ exports[`F0Avatar Module Snapshot - all sizes 6`] = `
 
 exports[`F0Avatar Person Snapshot - all sizes 1`] = `
 <View
-  className="inline-flex "
+  className="inline-flex"
 >
   <View
     className="h-fit w-fit"
@@ -4090,7 +4090,7 @@ exports[`F0Avatar Person Snapshot - all sizes 1`] = `
 
 exports[`F0Avatar Person Snapshot - all sizes 2`] = `
 <View
-  className="inline-flex "
+  className="inline-flex"
 >
   <View
     className="h-fit w-fit"
@@ -4114,7 +4114,7 @@ exports[`F0Avatar Person Snapshot - all sizes 2`] = `
 
 exports[`F0Avatar Person Snapshot - all sizes 3`] = `
 <View
-  className="inline-flex "
+  className="inline-flex"
 >
   <View
     className="h-fit w-fit"
@@ -4138,7 +4138,7 @@ exports[`F0Avatar Person Snapshot - all sizes 3`] = `
 
 exports[`F0Avatar Person Snapshot - all sizes 4`] = `
 <View
-  className="inline-flex "
+  className="inline-flex"
 >
   <View
     className="h-fit w-fit"
@@ -4162,7 +4162,7 @@ exports[`F0Avatar Person Snapshot - all sizes 4`] = `
 
 exports[`F0Avatar Person Snapshot - all sizes 5`] = `
 <View
-  className="inline-flex "
+  className="inline-flex"
 >
   <View
     className="h-fit w-fit"
@@ -4186,7 +4186,7 @@ exports[`F0Avatar Person Snapshot - all sizes 5`] = `
 
 exports[`F0Avatar Person Snapshot - all sizes 6`] = `
 <View
-  className="inline-flex "
+  className="inline-flex"
 >
   <View
     className="h-fit w-fit"
@@ -4210,7 +4210,7 @@ exports[`F0Avatar Person Snapshot - all sizes 6`] = `
 
 exports[`F0Avatar Person Snapshot - deactivated 1`] = `
 <View
-  className="inline-flex "
+  className="inline-flex"
 >
   <View
     className="h-fit w-fit"
@@ -4332,7 +4332,7 @@ exports[`F0Avatar Person Snapshot - deactivated 1`] = `
 
 exports[`F0Avatar Person Snapshot - default size 1`] = `
 <View
-  className="inline-flex "
+  className="inline-flex"
 >
   <View
     className="h-fit w-fit"
@@ -4534,7 +4534,7 @@ exports[`F0Avatar Person Snapshot - with badge 1`] = `
 
 exports[`F0Avatar Person Snapshot - with icon badge 1`] = `
 <View
-  className="inline-flex "
+  className="inline-flex"
 >
   <View
     className="h-fit w-fit"
@@ -4685,7 +4685,7 @@ exports[`F0Avatar Polymorphic root Snapshot - alert via root 1`] = `
 
 exports[`F0Avatar Polymorphic root Snapshot - company via root 1`] = `
 <View
-  className="inline-flex "
+  className="inline-flex"
 >
   <View
     className="h-fit w-fit"
@@ -4897,7 +4897,7 @@ exports[`F0Avatar Polymorphic root Snapshot - flag with badge via root 1`] = `
 
 exports[`F0Avatar Polymorphic root Snapshot - person via root 1`] = `
 <View
-  className="inline-flex "
+  className="inline-flex"
 >
   <View
     className="h-fit w-fit"
@@ -4921,7 +4921,7 @@ exports[`F0Avatar Polymorphic root Snapshot - person via root 1`] = `
 
 exports[`F0Avatar Team Snapshot - default 1`] = `
 <View
-  className="inline-flex "
+  className="inline-flex"
 >
   <View
     className="h-fit w-fit"

@@ -23,5 +23,5 @@ export function renderAvatarBadge({
 }
 
 export function getAvatarBadgeContainerClassName(badge?: AvatarBadge): string {
-  return badge?.type === "module" ? "inline-flex p-[3px]" : "inline-flex "
+  return badge?.type === "module" ? "inline-flex p-[3px]" : "inline-flex"
 }
