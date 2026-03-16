@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.404.1](https://github.com/factorialco/f0/compare/f0-react-v1.404.0...f0-react-v1.404.1) (2026-03-16)
+
+
+### Bug Fixes
+
+* **one-data-collection:** add summary placeholders (FCT-48392) ([#3538](https://github.com/factorialco/f0/issues/3538)) ([59e7051](https://github.com/factorialco/f0/commit/59e7051fecd83d3b3be386c95ca6f391ea3257bd))
+
 ## [1.404.0](https://github.com/factorialco/f0/compare/f0-react-v1.403.1...f0-react-v1.404.0) (2026-03-16)
 
 
