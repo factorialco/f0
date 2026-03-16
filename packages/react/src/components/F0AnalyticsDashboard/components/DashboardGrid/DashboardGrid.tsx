@@ -12,7 +12,7 @@ import {
   type GridStackReactWidget,
 } from "@/components/Utilities/F0GridStack/F0GridStack"
 import { Minus } from "@/icons/app"
-import { useI18n } from "@/i18n"
+import { useI18n } from "@/lib/providers/i18n"
 
 import type {
   DashboardItem as DashboardItemType,
@@ -147,7 +147,7 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
               variant="outline"
               hideLabel
               icon={Minus}
-              label={t("delete")}
+              label={t("actions.delete")}
               onClick={() => handleDelete(item.id)}
               size="sm"
             />
