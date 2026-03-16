@@ -235,6 +235,13 @@ export const aiTranslations = {
     ask: "Ask One",
     viewProfile: "View profile",
     tools: "Tools",
+    reportCard: {
+      reportLabel: "Report",
+      openButton: "Open",
+    },
+    dataDownload: {
+      download: "Download {{format}}",
+    },
     unsavedChanges: "Unsaved changes",
     saveChanges: "Save changes",
     discardChanges: "Discard",

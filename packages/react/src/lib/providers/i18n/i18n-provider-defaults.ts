@@ -307,6 +307,13 @@ export const defaultTranslations = {
     ask: "Ask One",
     viewProfile: "View profile",
     tools: "Tools",
+    reportCard: {
+      reportLabel: "Report",
+      openButton: "Open",
+    },
+    dataDownload: {
+      download: "Download {{format}}",
+    },
     growth: {
       demoCard: {
         title: "See {{moduleName}} in action",

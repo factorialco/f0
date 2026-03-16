@@ -69,11 +69,6 @@ function downloadAsCsv(dataset: F0DataDownloadDataset, filename: string): void {
   URL.revokeObjectURL(link.href)
 }
 
-const downloadItems = [
-  { value: "excel", label: "Download Excel", icon: Download },
-  { value: "csv", label: "Download CSV", icon: Download },
-]
-
 /**
  * Component that renders an optional markdown preview followed by
  * a dropdown button with "Download Excel" as the primary action and
@@ -86,6 +81,19 @@ export const F0DataDownload = ({
   dataset,
 }: F0DataDownloadProps) => {
   const i18n = useI18n()
+
+  const downloadItems = [
+    {
+      value: "excel",
+      label: i18n.t("ai.dataDownload.download", { format: "Excel" }),
+      icon: Download,
+    },
+    {
+      value: "csv",
+      label: i18n.t("ai.dataDownload.download", { format: "CSV" }),
+      icon: Download,
+    },
+  ]
 
   const handleDownload = useCallback(
     (format: string, _item: unknown) => {

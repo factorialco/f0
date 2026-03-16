@@ -3,6 +3,7 @@ import { useSyncExternalStore } from "react"
 import { F0AvatarModule } from "@/components/avatars/F0AvatarModule/F0AvatarModule"
 import { F0Button } from "@/components/F0Button"
 import { OneEllipsis } from "@/components/OneEllipsis"
+import { useI18n } from "@/lib/providers/i18n"
 
 import type { F0ChatReportCardProps } from "./types"
 
@@ -30,6 +31,8 @@ export function F0ChatReportCard({
     savedDashboardConfigStore.getSnapshot
   )
 
+  const translations = useI18n()
+
   const config =
     (toolCallId ? savedDashboardConfigStore.get(toolCallId) : undefined) ??
     originalConfig
@@ -44,14 +47,14 @@ export function F0ChatReportCard({
             {title}
           </OneEllipsis>
           <OneEllipsis className="text-base text-f1-foreground-secondary">
-            Report
+            {translations.ai.reportCard.reportLabel}
           </OneEllipsis>
         </div>
       </div>
       <F0Button
         variant="neutral"
         size="md"
-        label="Open"
+        label={translations.ai.reportCard.openButton}
         onClick={() => onView(config)}
       />
     </div>
