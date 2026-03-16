@@ -89,7 +89,7 @@ const Messages = ({
         <div
           ref={viewportRef}
           className={cn(
-            "flex-1 overflow-y-scroll pr-0",
+            "flex-1 overflow-y-scroll",
             "[scrollbar-width:thin] [scrollbar-color:transparent_transparent]",
             "hover:[scrollbar-color:var(--scrollbar-thumb)_transparent]",
             "[&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:bg-transparent",
@@ -99,7 +99,7 @@ const Messages = ({
         >
           <div
             ref={contentRef}
-            className="flex h-full flex-col items-center py-4 pl-4 pr-1.5"
+            className="flex h-full flex-col items-center px-4 py-4"
           >
             <div
               className={cn(
