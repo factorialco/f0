@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.404.0](https://github.com/factorialco/f0/compare/f0-react-v1.403.1...f0-react-v1.404.0) (2026-03-16)
+
+
+### Features
+
+* add SelectCell for EditableTable with F0Select integration ([#3607](https://github.com/factorialco/f0/issues/3607)) ([49fe9a1](https://github.com/factorialco/f0/commit/49fe9a195bee19902cce73b85535ed80934a7605))
+
 ## [1.403.1](https://github.com/factorialco/f0/compare/f0-react-v1.403.0...f0-react-v1.403.1) (2026-03-16)
 
 
