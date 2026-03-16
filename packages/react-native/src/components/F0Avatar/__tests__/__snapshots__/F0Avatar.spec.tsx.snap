@@ -520,7 +520,7 @@ exports[`F0Avatar Company Snapshot - default 1`] = `
       role="img"
     >
       <Text
-        className="text-f0-foreground-inverse/90 text-sm"
+        className="no-underline normal-case tracking-normal text-[14px] leading-[20px] font-semibold text-f0-foreground-inverse text-left"
         data-a11y-color-contrast-ignore={true}
       >
         F
@@ -544,7 +544,7 @@ exports[`F0Avatar Company Snapshot - with badge 1`] = `
       role="img"
     >
       <Text
-        className="text-f0-foreground-inverse/90 text-lg"
+        className="no-underline normal-case tracking-normal text-[16px] leading-[24px] font-semibold text-f0-foreground-inverse text-left"
         data-a11y-color-contrast-ignore={true}
       >
         FA
@@ -2770,7 +2770,7 @@ exports[`F0Avatar List Snapshot - person list 1`] = `
             role="img"
           >
             <Text
-              className="text-f0-foreground-inverse/90 text-md"
+              className="no-underline normal-case tracking-normal text-[16px] leading-[24px] font-semibold text-f0-foreground-inverse text-left"
               data-a11y-color-contrast-ignore={true}
             >
               CL
@@ -4078,7 +4078,7 @@ exports[`F0Avatar Person Snapshot - all sizes 1`] = `
       role="img"
     >
       <Text
-        className="text-f0-foreground-inverse/90 text-sm"
+        className="no-underline normal-case tracking-normal text-[14px] leading-[20px] font-semibold text-f0-foreground-inverse text-left"
         data-a11y-color-contrast-ignore={true}
       >
         J
@@ -4102,7 +4102,7 @@ exports[`F0Avatar Person Snapshot - all sizes 2`] = `
       role="img"
     >
       <Text
-        className="text-f0-foreground-inverse/90 text-sm"
+        className="no-underline normal-case tracking-normal text-[14px] leading-[20px] font-semibold text-f0-foreground-inverse text-left"
         data-a11y-color-contrast-ignore={true}
       >
         J
@@ -4126,7 +4126,7 @@ exports[`F0Avatar Person Snapshot - all sizes 3`] = `
       role="img"
     >
       <Text
-        className="text-f0-foreground-inverse/90 text-md"
+        className="no-underline normal-case tracking-normal text-[16px] leading-[24px] font-semibold text-f0-foreground-inverse text-left"
         data-a11y-color-contrast-ignore={true}
       >
         JD
@@ -4150,7 +4150,7 @@ exports[`F0Avatar Person Snapshot - all sizes 4`] = `
       role="img"
     >
       <Text
-        className="text-f0-foreground-inverse/90 text-lg"
+        className="no-underline normal-case tracking-normal text-[16px] leading-[24px] font-semibold text-f0-foreground-inverse text-left"
         data-a11y-color-contrast-ignore={true}
       >
         JD
@@ -4174,7 +4174,7 @@ exports[`F0Avatar Person Snapshot - all sizes 5`] = `
       role="img"
     >
       <Text
-        className="text-f0-foreground-inverse/90 text-2xl"
+        className="no-underline normal-case text-[24px] leading-[32px] tracking-[-0.2px] font-semibold text-f0-foreground-inverse text-left"
         data-a11y-color-contrast-ignore={true}
       >
         JD
@@ -4198,7 +4198,7 @@ exports[`F0Avatar Person Snapshot - all sizes 6`] = `
       role="img"
     >
       <Text
-        className="text-f0-foreground-inverse/90 text-3xl"
+        className="no-underline normal-case text-[24px] leading-[32px] tracking-[-0.2px] font-semibold text-f0-foreground-inverse text-left"
         data-a11y-color-contrast-ignore={true}
       >
         JD
@@ -4344,7 +4344,7 @@ exports[`F0Avatar Person Snapshot - default size 1`] = `
       role="img"
     >
       <Text
-        className="text-f0-foreground-inverse/90 text-sm"
+        className="no-underline normal-case tracking-normal text-[14px] leading-[20px] font-semibold text-f0-foreground-inverse text-left"
         data-a11y-color-contrast-ignore={true}
       >
         J
@@ -4368,7 +4368,7 @@ exports[`F0Avatar Person Snapshot - with badge 1`] = `
       role="img"
     >
       <Text
-        className="text-f0-foreground-inverse/90 text-md"
+        className="no-underline normal-case tracking-normal text-[16px] leading-[24px] font-semibold text-f0-foreground-inverse text-left"
         data-a11y-color-contrast-ignore={true}
       >
         JD
@@ -4546,7 +4546,7 @@ exports[`F0Avatar Person Snapshot - with icon badge 1`] = `
       role="img"
     >
       <Text
-        className="text-f0-foreground-inverse/90 text-lg"
+        className="no-underline normal-case tracking-normal text-[16px] leading-[24px] font-semibold text-f0-foreground-inverse text-left"
         data-a11y-color-contrast-ignore={true}
       >
         JD
@@ -4697,7 +4697,7 @@ exports[`F0Avatar Polymorphic root Snapshot - company via root 1`] = `
       role="img"
     >
       <Text
-        className="text-f0-foreground-inverse/90 text-md"
+        className="no-underline normal-case tracking-normal text-[16px] leading-[24px] font-semibold text-f0-foreground-inverse text-left"
         data-a11y-color-contrast-ignore={true}
       >
         FA
@@ -4909,7 +4909,7 @@ exports[`F0Avatar Polymorphic root Snapshot - person via root 1`] = `
       role="img"
     >
       <Text
-        className="text-f0-foreground-inverse/90 text-md"
+        className="no-underline normal-case tracking-normal text-[16px] leading-[24px] font-semibold text-f0-foreground-inverse text-left"
         data-a11y-color-contrast-ignore={true}
       >
         AL
@@ -4933,7 +4933,7 @@ exports[`F0Avatar Team Snapshot - default 1`] = `
       role="img"
     >
       <Text
-        className="text-f0-foreground-inverse/90 text-sm"
+        className="no-underline normal-case tracking-normal text-[14px] leading-[20px] font-semibold text-f0-foreground-inverse text-left"
         data-a11y-color-contrast-ignore={true}
       >
         E
@@ -4957,7 +4957,7 @@ exports[`F0Avatar Team Snapshot - with badge 1`] = `
       role="img"
     >
       <Text
-        className="text-f0-foreground-inverse/90 text-md"
+        className="no-underline normal-case tracking-normal text-[16px] leading-[24px] font-semibold text-f0-foreground-inverse text-left"
         data-a11y-color-contrast-ignore={true}
       >
         DE
