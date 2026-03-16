@@ -33,6 +33,7 @@ export interface AiChatState {
   resizable?: boolean
   defaultVisualizationMode?: VisualizationMode
   lockVisualizationMode?: boolean
+  historyEnabled?: boolean
   footer?: React.ReactNode
   entityResolvers?: EntityResolvers
   toolHints?: AiChatToolHint[]
@@ -139,6 +140,7 @@ export type AiChatProviderReturnValue = {
    * When true, prevents switching between visualization modes
    */
   lockVisualizationMode: boolean
+  historyEnabled: boolean
   /**
    * Optional footer content rendered below the textarea
    */

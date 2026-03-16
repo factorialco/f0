@@ -2,12 +2,12 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
-import { F0ChatDashboard } from "../F0ChatDashboard"
 import type { ChatDashboardConfig } from "../types"
+
+import { F0ChatDashboard } from "../F0ChatDashboard"
 
 const sampleConfig: ChatDashboardConfig = {
   title: "Headcount Overview",
-  description: "Company-wide headcount breakdown",
   fetchSpecs: {
     employees: {
       fetch: [{ toolId: "fetchEmployees", args: {} }],

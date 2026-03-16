@@ -2,7 +2,7 @@ import { useCopilotChatInternal as useCopilotChat } from "@copilotkit/react-core
 import { type MessagesProps } from "@copilotkit/react-ui"
 import { type Message } from "@copilotkit/shared"
 import { AnimatePresence, motion } from "motion/react"
-import { useContext, useEffect, useMemo, useRef } from "react"
+import { Fragment, useContext, useEffect, useMemo, useRef } from "react"
 
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { ArrowDown } from "@/icons/app"
@@ -18,7 +18,11 @@ import {
   useFeedbackSubmit,
 } from "../providers/FeedbackProvider"
 import { useScrollToBottom } from "../hooks/useScrollToBottom"
-import { analyzeTurn, convertMessagesToTurns } from "../utils/turnUtils"
+import {
+  analyzeTurn,
+  convertMessagesToTurns,
+  extractThinkingGroup,
+} from "../utils/turnUtils"
 import { AssistantMessage as F0AssistantMessage } from "./AssistantMessage"
 import { FeedbackModal } from "./FeedbackModal"
 import { TurnFeedback } from "./TurnFeedback"
@@ -302,33 +306,29 @@ const Messages = ({
               turns.length,
               inProgress
             )
+            const { thinkingGroup, restMessages } =
+              extractThinkingGroup(turnMessages)
+            const isLastTurn = turnIndex === turns.length - 1
 
             return (
               <div
                 className="flex flex-col items-start justify-start gap-2"
                 key={`turn-${turnIndex}`}
               >
-                {turnMessages.map((message, index) => {
+                {restMessages.map((message, index) => {
                   const isCurrentMessage =
-                    turnIndex === turns.length - 1 &&
-                    index === turnMessages.length - 1
+                    isLastTurn && index === restMessages.length - 1
 
-                  if (Array.isArray(message) && !isCurrentMessage) {
-                    return (
-                      <F0Thinking
-                        key={`${turnIndex}-${index}`}
-                        messages={message}
-                        isActive={false}
-                        inProgress={inProgress}
-                        RenderMessage={RenderMessageProp as any}
-                        AssistantMessage={AssistantMessage}
-                      />
-                    )
-                  }
+                  const messageToShow = message as Message
 
-                  const messageToShow = Array.isArray(message)
-                    ? message[message.length - 1]
-                    : message
+                  // Find the index of the first assistant message
+                  const firstAssistantIndex = restMessages.findIndex(
+                    (m) => (m as Message).role === "assistant"
+                  )
+                  const showThinkingBefore =
+                    thinkingGroup &&
+                    !(isLastTurn && !turnIsComplete) &&
+                    index === firstAssistantIndex
 
                   const messageProps = {
                     key: `${turnIndex}-${index}`,
@@ -349,10 +349,18 @@ const Messages = ({
 
                   if (RenderMessageProp) {
                     return (
-                      <RenderMessageProp
-                        key={key}
-                        {...(messageRestProps as any)}
-                      />
+                      <Fragment key={key}>
+                        {showThinkingBefore && (
+                          <F0Thinking
+                            messages={thinkingGroup}
+                            isActive={false}
+                            inProgress={inProgress}
+                            RenderMessage={RenderMessageProp as any}
+                            AssistantMessage={AssistantMessage}
+                          />
+                        )}
+                        <RenderMessageProp {...(messageRestProps as any)} />
+                      </Fragment>
                     )
                   }
 
@@ -363,16 +371,65 @@ const Messages = ({
                   }
 
                   return (
-                    <AssistantMessage
-                      key={key}
-                      {...(messageRestProps as any)}
-                      isGenerating={inProgress && isCurrentMessage}
-                      isLoading={
-                        inProgress && isCurrentMessage && !messageToShow.content
-                      }
-                    />
+                    <Fragment key={key}>
+                      {showThinkingBefore && (
+                        <F0Thinking
+                          messages={thinkingGroup}
+                          isActive={false}
+                          inProgress={inProgress}
+                          RenderMessage={RenderMessageProp as any}
+                          AssistantMessage={AssistantMessage}
+                        />
+                      )}
+                      <AssistantMessage
+                        {...(messageRestProps as any)}
+                        isGenerating={inProgress && isCurrentMessage}
+                        isLoading={
+                          inProgress &&
+                          isCurrentMessage &&
+                          !messageToShow.content
+                        }
+                      />
+                    </Fragment>
                   )
                 })}
+                {/* Live thinking: render last thinking message while streaming */}
+                {thinkingGroup &&
+                  isLastTurn &&
+                  !turnIsComplete &&
+                  !showActivityIndicator &&
+                  (() => {
+                    const liveMessage = thinkingGroup[thinkingGroup.length - 1]
+                    const liveProps = {
+                      message: liveMessage,
+                      inProgress: inProgress,
+                      index: restMessages.length,
+                      isCurrentMessage: true,
+                      AssistantMessage: AssistantMessage,
+                      UserMessage: UserMessage,
+                      ImageRenderer: ImageRenderer,
+                      onRegenerate: onRegenerate,
+                      onCopy: onCopy,
+                      markdownTagRenderers: markdownTagRenderers,
+                      rawData: (liveMessage as any).rawData || {},
+                    }
+                    if (RenderMessageProp) {
+                      return (
+                        <RenderMessageProp
+                          key={`thinking-live-${turnIndex}`}
+                          {...(liveProps as any)}
+                        />
+                      )
+                    }
+                    return (
+                      <AssistantMessage
+                        key={`thinking-live-${turnIndex}`}
+                        {...(liveProps as any)}
+                        isGenerating={true}
+                        isLoading={!liveMessage.content}
+                      />
+                    )
+                  })()}
                 {showActivityIndicator && (
                   <F0ActionItem title="" status="executing" />
                 )}

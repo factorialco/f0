@@ -36,6 +36,7 @@ const F0AiChatProviderComponent = ({
   resizable = false,
   defaultVisualizationMode,
   lockVisualizationMode,
+  historyEnabled,
   footer,
   entityResolvers,
   toolHints,
@@ -59,6 +60,7 @@ const F0AiChatProviderComponent = ({
       resizable={resizable}
       defaultVisualizationMode={defaultVisualizationMode}
       lockVisualizationMode={lockVisualizationMode}
+      historyEnabled={historyEnabled}
       footer={footer}
       tracking={tracking}
       entityResolvers={entityResolvers}

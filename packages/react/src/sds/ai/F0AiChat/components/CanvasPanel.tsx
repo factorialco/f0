@@ -152,7 +152,7 @@ export function CanvasPanel() {
             }}
           >
             {/* Header */}
-            <div className="flex shrink-0 items-center gap-3 border-0 border-b border-solid border-f1-border-secondary px-4 py-3">
+            <div className="flex shrink-0 items-center gap-2 border-0 border-b border-solid border-f1-border-secondary px-7 py-5">
               <OneEllipsis
                 tag="h2"
                 className="min-w-0 flex-1 text-2xl font-semibold text-f1-foreground"
@@ -183,7 +183,7 @@ export function CanvasPanel() {
                     label="Edit"
                   />
                   <F0Button
-                    variant="outline"
+                    variant="ghost"
                     icon={Cross}
                     size="md"
                     hideLabel

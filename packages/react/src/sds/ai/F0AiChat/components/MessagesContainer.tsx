@@ -2,7 +2,7 @@ import { useCopilotChatInternal as useCopilotChat } from "@copilotkit/react-core
 import { type MessagesProps } from "@copilotkit/react-ui"
 import { type Message } from "@copilotkit/shared"
 import { AnimatePresence, motion } from "motion/react"
-import { useMemo, useRef } from "react"
+import { Fragment, useMemo, useRef } from "react"
 
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { ArrowDown } from "@/icons/app"
@@ -18,7 +18,11 @@ import {
   FeedbackModalProvider,
   useFeedbackSubmit,
 } from "../providers/FeedbackProvider"
-import { analyzeTurn, convertMessagesToTurns } from "../utils/turnUtils"
+import {
+  analyzeTurn,
+  convertMessagesToTurns,
+  extractThinkingGroup,
+} from "../utils/turnUtils"
 import { FeedbackModal } from "./FeedbackModal"
 import { ScrollShadow } from "./ScrollShadow"
 import { TurnFeedback } from "./TurnFeedback"
@@ -121,53 +125,76 @@ const Messages = ({
                     turns.length,
                     inProgress
                   )
+                  const { thinkingGroup, restMessages } =
+                    extractThinkingGroup(turnMessages)
+                  const isLastTurn = turnIndex === turns.length - 1
 
                   return (
                     <div
-                      ref={
-                        turnIndex === turns.length - 1 ? lastTurnRef : undefined
-                      }
+                      ref={isLastTurn ? lastTurnRef : undefined}
                       className={cn(
                         "flex flex-col items-start justify-start gap-2",
-                        turnIndex === turns.length - 1 && "pb-5"
+                        isLastTurn && "pb-5"
                       )}
                       key={`turn-${turnIndex}`}
                       style={{
-                        minHeight:
-                          turnIndex === turns.length - 1
-                            ? turnMinHeight || undefined
-                            : undefined,
+                        minHeight: isLastTurn
+                          ? turnMinHeight || undefined
+                          : undefined,
                       }}
                     >
-                      {turnMessages.map((message, index) => {
+                      {restMessages.map((message, index) => {
                         const isCurrentMessage =
-                          turnIndex === turns.length - 1 &&
-                          index === turnMessages.length - 1
+                          isLastTurn && index === restMessages.length - 1
+                        const msg = message as Message
 
-                        if (Array.isArray(message) && !isCurrentMessage) {
-                          return (
-                            <Thinking
-                              key={`${turnIndex}-${index}`}
-                              messages={message}
-                              isActive={false}
-                              inProgress={inProgress}
-                              RenderMessage={RenderMessage}
-                              AssistantMessage={AssistantMessage}
-                            />
-                          )
-                        }
+                        // Find the index of the first assistant message
+                        const firstAssistantIndex = restMessages.findIndex(
+                          (m) => (m as Message).role === "assistant"
+                        )
+                        const showThinkingBefore =
+                          thinkingGroup &&
+                          !(isLastTurn && !turnIsComplete) &&
+                          index === firstAssistantIndex
 
                         return (
+                          <Fragment key={`${turnIndex}-${index}`}>
+                            {showThinkingBefore && (
+                              <Thinking
+                                key={`thinking-${turnIndex}`}
+                                messages={thinkingGroup}
+                                isActive={false}
+                                inProgress={inProgress}
+                                RenderMessage={RenderMessage}
+                                AssistantMessage={AssistantMessage}
+                              />
+                            )}
+                            <RenderMessage
+                              message={msg}
+                              inProgress={inProgress}
+                              index={index}
+                              isCurrentMessage={isCurrentMessage}
+                              AssistantMessage={AssistantMessage}
+                              UserMessage={UserMessage}
+                              ImageRenderer={ImageRenderer}
+                              onRegenerate={onRegenerate}
+                              onCopy={onCopy}
+                              markdownTagRenderers={markdownTagRenderers}
+                            />
+                          </Fragment>
+                        )
+                      })}
+                      {/* Live thinking: render last thinking message while streaming */}
+                      {thinkingGroup &&
+                        isLastTurn &&
+                        !turnIsComplete &&
+                        !showActivityIndicator && (
                           <RenderMessage
-                            key={`${turnIndex}-${index}`}
-                            message={
-                              Array.isArray(message)
-                                ? message[message.length - 1]
-                                : message
-                            }
+                            key={`thinking-live-${turnIndex}`}
+                            message={thinkingGroup[thinkingGroup.length - 1]}
                             inProgress={inProgress}
-                            index={index}
-                            isCurrentMessage={isCurrentMessage}
+                            index={restMessages.length}
+                            isCurrentMessage={true}
                             AssistantMessage={AssistantMessage}
                             UserMessage={UserMessage}
                             ImageRenderer={ImageRenderer}
@@ -175,8 +202,7 @@ const Messages = ({
                             onCopy={onCopy}
                             markdownTagRenderers={markdownTagRenderers}
                           />
-                        )
-                      })}
+                        )}
                       {showActivityIndicator && (
                         <F0ActionItem title="" status="executing" />
                       )}

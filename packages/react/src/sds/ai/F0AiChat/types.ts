@@ -109,6 +109,13 @@ export type AiChatProviderProps = {
    */
   lockVisualizationMode?: boolean
   /**
+   * Enable chat history UI (clickable header title + history dialog).
+   * When false (default), the header shows a simple "New Chat" button instead.
+   * Set to true only when the backend supports the /copilotkit/chat-history/threads route.
+   * @default false
+   */
+  historyEnabled?: boolean
+  /**
    * Optional footer content rendered below the textarea
    */
   footer?: React.ReactNode

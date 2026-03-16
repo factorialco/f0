@@ -89,6 +89,20 @@ export function convertMessagesToTurns(messages: Message[]): Turn[] {
   return turns
 }
 
+export function extractThinkingGroup(turnMessages: Turn): {
+  thinkingGroup: Message[] | null
+  restMessages: Array<Message | Array<Message>>
+} {
+  const thinkingGroup = turnMessages.find((m) => Array.isArray(m)) as
+    | Message[]
+    | undefined
+  const restMessages = turnMessages.filter((m) => !Array.isArray(m))
+  return {
+    thinkingGroup: thinkingGroup ?? null,
+    restMessages,
+  }
+}
+
 function isThinkingMessage(message: Message): boolean {
   return (
     message.role === "assistant" &&
