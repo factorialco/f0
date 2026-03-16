@@ -227,6 +227,32 @@ const NestedRowContent = <
     props.selectedItems,
   ])
 
+  const prevParentSelectedRef = useRef(false)
+
+  useEffect(() => {
+    const parentId = props.source.selectable?.(props.item)
+    if (parentId === undefined || children.length === 0) return
+
+    const parentIsSelected = props.selectedItems.has(parentId)
+    const wasSelected = prevParentSelectedRef.current
+    prevParentSelectedRef.current = parentIsSelected
+
+    if (parentIsSelected && !wasSelected) {
+      for (const child of children) {
+        const childId = props.source.selectable?.(child as R)
+        if (childId !== undefined && !props.selectedItems.has(childId)) {
+          props.onSelectItem(child as R, true)
+        }
+      }
+    }
+  }, [
+    props.selectedItems,
+    props.source,
+    props.item,
+    children,
+    props.onSelectItem,
+  ])
+
   const sharedNestedRowProps = {
     depth: props.nestedRowProps?.depth ?? 0,
     expanded: open,
