@@ -9,6 +9,11 @@ import { Fragment, useEffect, useRef } from "react"
 import { useMediaQuery } from "usehooks-ts"
 
 import {
+  FrameProvider,
+  SidebarState,
+  useSidebar,
+} from "@/examples/ApplicationFrame/FrameProvider"
+import {
   AiPromotionChat,
   AiPromotionChatProvider,
   AiPromotionChatProviderProps,
@@ -16,21 +21,13 @@ import {
 import { useAiPromotionChat } from "@/experimental/AiPromotionChat/providers/AiPromotionChatStateProvider"
 import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
-
-import {
-  F0AiChat,
-  F0AiChatProvider,
-  AiChatProviderProps,
-} from "@/sds/ai/F0AiChat"
+import { F0AiChat, F0AiChatProvider } from "@/sds/ai/F0AiChat/F0AiChat"
 import { useAiChat } from "@/sds/ai/F0AiChat/providers/AiChatStateProvider"
+import { AiChatProviderProps } from "@/sds/ai/F0AiChat/types"
+
 import { useReducedMotion } from "../../../lib/a11y"
 import { useI18n } from "../../../lib/providers/i18n"
 import { cn, focusRing } from "../../../lib/utils"
-import {
-  FrameProvider,
-  SidebarState,
-  useSidebar,
-} from "@/examples/ApplicationFrame/FrameProvider"
 
 export interface ApplicationFrameProps {
   ai?: Omit<AiChatProviderProps, "children">
