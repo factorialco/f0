@@ -12,6 +12,7 @@ import {
   type GridStackReactWidget,
 } from "@/components/Utilities/F0GridStack/F0GridStack"
 import { Minus } from "@/icons/app"
+import { useI18n } from "@/i18n"
 
 import type {
   DashboardItem as DashboardItemType,
@@ -124,6 +125,7 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
       allowedSizes.push({ w, h })
     }
   }
+  const { t } = useI18n()
 
   const widgets: GridStackReactWidget[] = visibleItems.map((item, i) => ({
     id: item.id,
@@ -145,7 +147,7 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
               variant="outline"
               hideLabel
               icon={Minus}
-              label="Delete"
+              label={t("delete")}
               onClick={() => handleDelete(item.id)}
               size="sm"
             />
