@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.403.0](https://github.com/factorialco/f0/compare/f0-react-v1.402.3...f0-react-v1.403.0) (2026-03-16)
+
+
+### Features
+
+* restore add-row and summary stories for editable table ([#3643](https://github.com/factorialco/f0/issues/3643)) ([7574eff](https://github.com/factorialco/f0/commit/7574eff1db077bbe8f0e502190e6d2c071f09e72))
+
 ## [1.402.3](https://github.com/factorialco/f0/compare/f0-react-v1.402.2...f0-react-v1.402.3) (2026-03-16)
 
 
