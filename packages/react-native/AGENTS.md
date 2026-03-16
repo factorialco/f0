@@ -35,9 +35,10 @@ Prefer consistency with these components over introducing new patterns.
 - Every new component must include a playground showcase in `playground/components/` and be registered in `playground/app/(tabs)/components.tsx`.
 - Keep TypeScript strict. Do not introduce `any`.
 
-## Multi-Variant Semantic Components (F0Tag-like)
+## Multi-Variant Semantic Components (F0Tag / F0Avatar Pattern)
 
 Use this pattern for component families that expose multiple semantic variants under one namespace.
+Use `F0Tag` and `F0Avatar` as reference implementations.
 
 ### Preferred API shape
 
@@ -51,6 +52,9 @@ Use this pattern for component families that expose multiple semantic variants u
 - Layer 1: shared primitive (`ComponentRoot`) + shared styles/types.
 - Layer 2: thin semantic variants that map domain props into root props.
 - Layer 3: namespace assembly (`Object.assign(ComponentRoot, { ...variants })`).
+- Keep shared maps in a dedicated `*.constants.ts` file (for example size/token mappings).
+- Use focused `internal/*` modules for domain logic (for example `badge`, `name`, list rendering helpers) instead of catch-all `utils` files.
+- For list components, prefer strict discriminated `type -> props` mappings over `Record<string, unknown>` and unsafe casts.
 
 ### File organization
 
