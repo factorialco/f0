@@ -14,6 +14,7 @@ import type {
   OnLoadErrorCallback,
 } from "../../types"
 import type { CardVisualizationOptions } from "./Card"
+import type { EditableTableVisualizationOptions } from "./EditableTable"
 import type { KanbanVisualizationOptions } from "./Kanban"
 import type { TableVisualizationOptions } from "./Table"
 
@@ -74,6 +75,17 @@ export type Visualization<
       type: "table"
       /** Configuration options for table visualization */
       options: TableVisualizationOptions<R, Filters, Sortings, Summaries>
+    } & VisualizationFilterOverrides<Filters>)
+  | ({
+      /** Editable table-based visualization type */
+      type: "editableTable"
+      /** Configuration options for editable table visualization */
+      options: EditableTableVisualizationOptions<
+        R,
+        Filters,
+        Sortings,
+        Summaries
+      >
     } & VisualizationFilterOverrides<Filters>)
   | ({
       /** List-based visualization type */

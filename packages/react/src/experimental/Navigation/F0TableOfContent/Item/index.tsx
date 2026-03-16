@@ -224,24 +224,10 @@ export function Item({
         overEdge === "bottom" &&
           "after:bg-f1-border-focus after:absolute after:bottom-0 after:left-0 after:right-0 after:z-10 after:h-0.5",
         isOverInside && canDropInside && "bg-f1-background-hover/30",
-        justDropped && "bg-f1-background-hover/50 shadow-lg"
+        justDropped && "bg-f1-background-selected"
       )}
-      animate={
-        justDropped
-          ? {
-              scale: [1, 1.05, 1],
-              y: [0, -2, 0],
-            }
-          : {}
-      }
-      transition={
-        justDropped
-          ? {
-              duration: 0.8,
-              ease: [0.34, 1.56, 0.64, 1], // Bouncy ease for more evident effect
-            }
-          : {}
-      }
+      animate={{}}
+      transition={{ duration: 0 }}
     >
       <PrimitiveItem
         item={item}

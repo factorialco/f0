@@ -65,6 +65,7 @@ function hasNonEmptyConstraint(schema: ZodTypeAny): boolean {
  * - Optional/nullable fields are never required
  * - String fields are required if they have constraints that need non-empty content
  *   (min >= 1, email, url, uuid, etc.)
+ * - Rich text object schemas are not required if their "value" property is nullable
  * - Other field types are required if not optional/nullable
  *
  * @example
@@ -76,6 +77,8 @@ function hasNonEmptyConstraint(schema: ZodTypeAny): boolean {
  * isFieldRequired(z.string().optional()) // false - optional
  * isFieldRequired(z.number()) // true - required
  * isFieldRequired(z.number().optional()) // false - optional
+ * isFieldRequired(z.object({ value: z.string().nullable() })) // false - rich text with nullable value
+ * isFieldRequired(z.object({ value: z.string().min(1) })) // true - rich text with required value
  * ```
  */
 export function isFieldRequired(schema: ZodTypeAny): boolean {
@@ -89,6 +92,21 @@ export function isFieldRequired(schema: ZodTypeAny): boolean {
   // For string fields, required if there's a constraint requiring non-empty content
   if (isZodType(inner, "ZodString")) {
     return hasNonEmptyConstraint(schema)
+  }
+
+  // For object schemas (like rich text), check the "value" property
+  if (isZodType(inner, "ZodObject")) {
+    const shape = inner._def.shape()
+    if (shape && "value" in shape) {
+      // If the value property is nullable/optional, the field is not required
+      if (isOptionalOrNullable(shape.value)) {
+        return false
+      }
+      // If the value property is a string, require a non-empty constraint (e.g. min(1))
+      if (isZodType(unwrapZodSchema(shape.value), "ZodString")) {
+        return hasNonEmptyConstraint(shape.value)
+      }
+    }
   }
 
   // Other types are required if not optional/nullable

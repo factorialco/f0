@@ -7,8 +7,10 @@ import {
   CardInternal,
   CardInternalProps,
   CardSkeleton,
+  cardImageAspectRatios,
   cardImageFits,
   cardImageSizes,
+  type CardImageAspectRatio,
   type CardImageFit,
   type CardImageSize,
 } from "./CardInternal"
@@ -17,8 +19,8 @@ const privateProps = ["forceVerticalMetadata", "disableOverlayLink"] as const
 
 export type F0CardProps = Omit<CardInternalProps, (typeof privateProps)[number]>
 
-export { cardImageFits, cardImageSizes }
-export type { CardImageFit, CardImageSize }
+export { cardImageAspectRatios, cardImageFits, cardImageSizes }
+export type { CardImageAspectRatio, CardImageFit, CardImageSize }
 
 const F0CardBase = forwardRef<HTMLDivElement, F0CardProps>((props, ref) => {
   const publicProps = privateProps.reduce((acc, key) => {

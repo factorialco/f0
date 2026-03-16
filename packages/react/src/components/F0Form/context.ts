@@ -22,6 +22,10 @@ export function useF0FormContext() {
   return context
 }
 
+export function useOptionalF0FormContext() {
+  return useContext(F0FormContext)
+}
+
 /**
  * Generates an anchor ID for a form element
  * Format: forms.[formName].[sectionId].[fieldId]

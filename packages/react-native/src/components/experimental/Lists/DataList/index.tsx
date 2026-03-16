@@ -5,7 +5,7 @@ import { cn } from "../../../../lib/utils"
 import { CompanyAvatar } from "../../../Avatars/CompanyAvatar"
 import { PersonAvatar } from "../../../Avatars/PersonAvatar"
 import { TeamAvatar } from "../../../Avatars/TeamAvatar"
-import { IconType } from "../../../Icon"
+import { type IconType } from "../../../primitives/F0Icon"
 import { DotTag, DotTagProps } from "../../../Tags/DotTag"
 
 import { ItemContainer } from "./ItemContainer"
@@ -41,7 +41,7 @@ const _DataList = ({
       {!!label && (
         <Text
           className={cn(
-            "px-1.5 text-f1-foreground-secondary",
+            "px-1.5 text-f0-foreground-secondary",
             isHorizontalItem ? "mt-1.5 w-36 shrink-0" : ""
           )}
         >

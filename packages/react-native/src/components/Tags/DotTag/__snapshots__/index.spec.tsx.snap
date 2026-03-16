@@ -23,7 +23,7 @@ exports[`RawTag Snapshot 1`] = `
       }
     }
     accessible={true}
-    className="overflow-hidden flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f1-border-secondary"
+    className="overflow-hidden flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f0-border-secondary"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -58,7 +58,7 @@ exports[`RawTag Snapshot 1`] = `
       }
     />
     <Text
-      className="line-clamp-1 text-base font-medium text-f1-foreground"
+      className="line-clamp-1 text-base font-medium text-f0-foreground"
     >
       Label
     </Text>
@@ -89,7 +89,7 @@ exports[`RawTag Snapshot 2`] = `
       }
     }
     accessible={true}
-    className="overflow-hidden flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f1-border-secondary"
+    className="overflow-hidden flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f0-border-secondary"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -124,7 +124,7 @@ exports[`RawTag Snapshot 2`] = `
       }
     />
     <Text
-      className="line-clamp-1 text-base font-medium text-f1-foreground"
+      className="line-clamp-1 text-base font-medium text-f0-foreground"
     >
       Label
     </Text>
@@ -155,7 +155,7 @@ exports[`RawTag Snapshot 3`] = `
       }
     }
     accessible={true}
-    className="overflow-hidden flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f1-border-secondary"
+    className="overflow-hidden flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f0-border-secondary"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -190,7 +190,7 @@ exports[`RawTag Snapshot 3`] = `
       }
     />
     <Text
-      className="line-clamp-1 text-base font-medium text-f1-foreground"
+      className="line-clamp-1 text-base font-medium text-f0-foreground"
     >
       Label
     </Text>
@@ -221,7 +221,7 @@ exports[`RawTag Snapshot 4`] = `
       }
     }
     accessible={true}
-    className="overflow-hidden flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f1-border-secondary"
+    className="overflow-hidden flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f0-border-secondary"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -256,7 +256,7 @@ exports[`RawTag Snapshot 4`] = `
       }
     />
     <Text
-      className="line-clamp-1 text-base font-medium text-f1-foreground"
+      className="line-clamp-1 text-base font-medium text-f0-foreground"
     >
       Label
     </Text>
@@ -287,7 +287,7 @@ exports[`RawTag Snapshot 5`] = `
       }
     }
     accessible={true}
-    className="overflow-hidden flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f1-border-secondary"
+    className="overflow-hidden flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f0-border-secondary"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -322,7 +322,7 @@ exports[`RawTag Snapshot 5`] = `
       }
     />
     <Text
-      className="line-clamp-1 text-base font-medium text-f1-foreground"
+      className="line-clamp-1 text-base font-medium text-f0-foreground"
     >
       Label
     </Text>
@@ -353,7 +353,7 @@ exports[`RawTag Snapshot 6`] = `
       }
     }
     accessible={true}
-    className="overflow-hidden flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f1-border-secondary"
+    className="overflow-hidden flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f0-border-secondary"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -388,7 +388,7 @@ exports[`RawTag Snapshot 6`] = `
       }
     />
     <Text
-      className="line-clamp-1 text-base font-medium text-f1-foreground"
+      className="line-clamp-1 text-base font-medium text-f0-foreground"
     >
       Label
     </Text>
@@ -419,7 +419,7 @@ exports[`RawTag Snapshot 7`] = `
       }
     }
     accessible={true}
-    className="overflow-hidden flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f1-border-secondary"
+    className="overflow-hidden flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f0-border-secondary"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -454,7 +454,7 @@ exports[`RawTag Snapshot 7`] = `
       }
     />
     <Text
-      className="line-clamp-1 text-base font-medium text-f1-foreground"
+      className="line-clamp-1 text-base font-medium text-f0-foreground"
     >
       Label
     </Text>
@@ -485,7 +485,7 @@ exports[`RawTag Snapshot 8`] = `
       }
     }
     accessible={true}
-    className="overflow-hidden flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f1-border-secondary"
+    className="overflow-hidden flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f0-border-secondary"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -520,7 +520,7 @@ exports[`RawTag Snapshot 8`] = `
       }
     />
     <Text
-      className="line-clamp-1 text-base font-medium text-f1-foreground"
+      className="line-clamp-1 text-base font-medium text-f0-foreground"
     >
       Label
     </Text>
@@ -551,7 +551,7 @@ exports[`RawTag Snapshot 9`] = `
       }
     }
     accessible={true}
-    className="overflow-hidden flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f1-border-secondary"
+    className="overflow-hidden flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f0-border-secondary"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -586,7 +586,7 @@ exports[`RawTag Snapshot 9`] = `
       }
     />
     <Text
-      className="line-clamp-1 text-base font-medium text-f1-foreground"
+      className="line-clamp-1 text-base font-medium text-f0-foreground"
     >
       Label
     </Text>
@@ -617,7 +617,7 @@ exports[`RawTag Snapshot 10`] = `
       }
     }
     accessible={true}
-    className="overflow-hidden flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f1-border-secondary"
+    className="overflow-hidden flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f0-border-secondary"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -652,7 +652,7 @@ exports[`RawTag Snapshot 10`] = `
       }
     />
     <Text
-      className="line-clamp-1 text-base font-medium text-f1-foreground"
+      className="line-clamp-1 text-base font-medium text-f0-foreground"
     >
       Label
     </Text>
@@ -683,7 +683,7 @@ exports[`RawTag Snapshot 11`] = `
       }
     }
     accessible={true}
-    className="overflow-hidden flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f1-border-secondary"
+    className="overflow-hidden flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f0-border-secondary"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -718,7 +718,7 @@ exports[`RawTag Snapshot 11`] = `
       }
     />
     <Text
-      className="line-clamp-1 text-base font-medium text-f1-foreground"
+      className="line-clamp-1 text-base font-medium text-f0-foreground"
     >
       Label
     </Text>
@@ -749,7 +749,7 @@ exports[`RawTag Snapshot 12`] = `
       }
     }
     accessible={true}
-    className="overflow-hidden flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f1-border-secondary"
+    className="overflow-hidden flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f0-border-secondary"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -784,7 +784,7 @@ exports[`RawTag Snapshot 12`] = `
       }
     />
     <Text
-      className="line-clamp-1 text-base font-medium text-f1-foreground"
+      className="line-clamp-1 text-base font-medium text-f0-foreground"
     >
       Label
     </Text>
@@ -815,7 +815,7 @@ exports[`RawTag Snapshot 13`] = `
       }
     }
     accessible={true}
-    className="overflow-hidden flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f1-border-secondary"
+    className="overflow-hidden flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f0-border-secondary"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -850,7 +850,7 @@ exports[`RawTag Snapshot 13`] = `
       }
     />
     <Text
-      className="line-clamp-1 text-base font-medium text-f1-foreground"
+      className="line-clamp-1 text-base font-medium text-f0-foreground"
     >
       Label
     </Text>
@@ -881,7 +881,7 @@ exports[`RawTag Snapshot 14`] = `
       }
     }
     accessible={true}
-    className="overflow-hidden flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f1-border-secondary"
+    className="overflow-hidden flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f0-border-secondary"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -916,7 +916,7 @@ exports[`RawTag Snapshot 14`] = `
       }
     />
     <Text
-      className="line-clamp-1 text-base font-medium text-f1-foreground"
+      className="line-clamp-1 text-base font-medium text-f0-foreground"
     >
       Label
     </Text>
@@ -947,7 +947,7 @@ exports[`RawTag Snapshot 15`] = `
       }
     }
     accessible={true}
-    className="overflow-hidden flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f1-border-secondary"
+    className="overflow-hidden flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f0-border-secondary"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -982,7 +982,7 @@ exports[`RawTag Snapshot 15`] = `
       }
     />
     <Text
-      className="line-clamp-1 text-base font-medium text-f1-foreground"
+      className="line-clamp-1 text-base font-medium text-f0-foreground"
     >
       Label
     </Text>
@@ -1013,7 +1013,7 @@ exports[`RawTag Snapshot 16`] = `
       }
     }
     accessible={true}
-    className="overflow-hidden flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f1-border-secondary"
+    className="overflow-hidden flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f0-border-secondary"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -1048,7 +1048,7 @@ exports[`RawTag Snapshot 16`] = `
       }
     />
     <Text
-      className="line-clamp-1 text-base font-medium text-f1-foreground"
+      className="line-clamp-1 text-base font-medium text-f0-foreground"
     >
       Label
     </Text>
@@ -1079,7 +1079,7 @@ exports[`RawTag Snapshot 17`] = `
       }
     }
     accessible={true}
-    className="overflow-hidden flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f1-border-secondary"
+    className="overflow-hidden flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f0-border-secondary"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -1114,7 +1114,7 @@ exports[`RawTag Snapshot 17`] = `
       }
     />
     <Text
-      className="line-clamp-1 text-base font-medium text-f1-foreground"
+      className="line-clamp-1 text-base font-medium text-f0-foreground"
     >
       Label
     </Text>
@@ -1145,7 +1145,7 @@ exports[`RawTag Snapshot 18`] = `
       }
     }
     accessible={true}
-    className="overflow-hidden flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f1-border-secondary"
+    className="overflow-hidden flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f0-border-secondary"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -1180,7 +1180,7 @@ exports[`RawTag Snapshot 18`] = `
       }
     />
     <Text
-      className="line-clamp-1 text-base font-medium text-f1-foreground"
+      className="line-clamp-1 text-base font-medium text-f0-foreground"
     >
       Label
     </Text>
@@ -1211,7 +1211,7 @@ exports[`RawTag Snapshot 19`] = `
       }
     }
     accessible={true}
-    className="overflow-hidden flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f1-border-secondary"
+    className="overflow-hidden flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f0-border-secondary"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -1246,7 +1246,7 @@ exports[`RawTag Snapshot 19`] = `
       }
     />
     <Text
-      className="line-clamp-1 text-base font-medium text-f1-foreground"
+      className="line-clamp-1 text-base font-medium text-f0-foreground"
     >
       Label
     </Text>

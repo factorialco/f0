@@ -2,6 +2,7 @@ import { useMemo } from "react"
 import { ControllerRenderProps, FieldValues } from "react-hook-form"
 
 import { F0DatePicker, DatePickerValue } from "@/components/F0DatePicker"
+import type { InputFieldStatus } from "@/ui/InputField/types"
 
 import type { F0DateRangeField, DateRangeValue } from "./types"
 import type { ResolvedField } from "../types"
@@ -12,6 +13,7 @@ interface DateRangeFieldRendererProps {
   formField: ControllerRenderProps<FieldValues>
   error?: boolean
   loading?: boolean
+  status?: InputFieldStatus
 }
 
 /**
@@ -49,6 +51,7 @@ export function DateRangeFieldRenderer({
   formField,
   error,
   loading,
+  status,
 }: DateRangeFieldRendererProps) {
   // Convert form DateRangeValue to DatePickerValue for the picker.
   // Form value may be null (used to represent cleared state).
@@ -65,6 +68,13 @@ export function DateRangeFieldRenderer({
   // react-hook-form treats undefined as "use defaultValue".
   const handleChange = (value: DatePickerValue | undefined) => {
     formField.onChange(pickerValueToDateRange(value) ?? null)
+  }
+
+  // Trigger validation when the picker closes, not on every change
+  const handleOpenChange = (open: boolean) => {
+    if (!open) {
+      formField.onBlur()
+    }
   }
 
   // Build label with from/to labels if provided
@@ -85,9 +95,11 @@ export function DateRangeFieldRenderer({
       clearable={field.clearable}
       value={pickerValue}
       onChange={handleChange}
+      onOpenChange={handleOpenChange}
       size={FORM_SIZE}
       hideLabel
       error={error}
+      status={status}
       loading={loading}
     />
   )

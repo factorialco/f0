@@ -1,4 +1,5 @@
 import { ZodTypeAny } from "zod"
+import type { InputFieldStatus } from "@/ui/InputField/types"
 
 // ============================================================================
 // Base RenderIf Condition Types
@@ -95,6 +96,8 @@ export interface F0BaseField {
   validation?: ZodTypeAny
   /** Helper text displayed below the field */
   helpText?: string
+  /** Optional non-validation field status (warning/info/error/default) */
+  status?: InputFieldStatus
   /** Placeholder text for the input */
   placeholder?: string
   /**
@@ -130,6 +133,7 @@ export type ResolvedField<T extends F0BaseField> = Omit<T, "disabled"> & {
 export type FieldType =
   | "text"
   | "number"
+  | "duration"
   | "textarea"
   | "select"
   | "checkbox"
@@ -148,6 +152,7 @@ export type FieldType =
 
 export type { F0TextConfig, F0TextField } from "./text/types"
 export type { F0NumberConfig, F0NumberField } from "./number/types"
+export type { F0DurationConfig, F0DurationField } from "./duration/types"
 export type { F0TextareaConfig, F0TextareaField } from "./textarea/types"
 export type { F0SelectConfig, F0SelectField } from "./select/types"
 export type { F0CheckboxConfig, F0CheckboxField } from "./checkbox/types"
@@ -193,6 +198,7 @@ export type {
 // Import for union type
 import type { F0TextField } from "./text/types"
 import type { F0NumberField } from "./number/types"
+import type { F0DurationField } from "./duration/types"
 import type { F0TextareaField } from "./textarea/types"
 import type { F0SelectField } from "./select/types"
 import type { F0CheckboxField } from "./checkbox/types"
@@ -209,6 +215,7 @@ import type { F0FileField } from "./file/types"
 export type F0Field =
   | F0TextField
   | F0NumberField
+  | F0DurationField
   | F0TextareaField
   | F0SelectField
   | F0CheckboxField

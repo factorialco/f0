@@ -1,6 +1,6 @@
 import { useTextFormatEnforcer } from "../../../lib/text"
 import { cn } from "../../../lib/utils"
-import { Icon, IconType } from "../../Icon"
+import { F0Icon, type IconType } from "../../primitives/F0Icon"
 import { BaseTag } from "../BaseTag"
 
 export type RawTagProps = {
@@ -23,13 +23,13 @@ export const RawTag = ({
   return (
     <BaseTag
       classNameContainer={cn(
-        !noBorder && "border border-solid border-f1-border-secondary",
+        !noBorder && "border border-solid border-f0-border-secondary",
         className
       )}
-      classNameText="text-f1-foreground"
+      classNameText="text-f0-foreground"
       left={
         icon ? (
-          <Icon icon={icon} size="sm" className="text-f1-icon" aria-hidden />
+          <F0Icon icon={icon} size="sm" color="default" aria-hidden />
         ) : null
       }
       text={text}

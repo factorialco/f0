@@ -129,6 +129,7 @@ export const defaultTranslations = {
     },
     visualizations: {
       table: "Table view",
+      editableTable: "Editable table view",
       card: "Card view",
       list: "List view",
       kanban: "Kanban view",
@@ -143,6 +144,12 @@ export const defaultTranslations = {
         showAllColumns: "Show all",
         hideAllColumns: "Hide all",
       },
+    },
+    editableTable: {
+      errors: {
+        saveFailed: "Save failed",
+      },
+      addRow: "Add row",
     },
     itemsCount: "items",
     emptyStates: {
@@ -276,9 +283,13 @@ export const defaultTranslations = {
         placeholder: "Share what didn’t work",
       },
     },
+    dataDownloadPreview:
+      "Preview {{shown}} of {{total}} rows — download the Excel to see all data.",
     expandChat: "Expand chat",
     collapseChat: "Collapse chat",
     ask: "Ask One",
+    viewProfile: "View profile",
+    tools: "Tools",
     growth: {
       demoCard: {
         title: "See {{moduleName}} in action",
@@ -324,13 +335,15 @@ export const defaultTranslations = {
       dismiss: "Dismiss",
     },
   },
-  coCreationForm: {
+  surveyFormBuilder: {
     actions: {
       actions: "Actions",
       duplicateQuestion: "Duplicate question",
       deleteQuestion: "Delete question",
       duplicateSection: "Duplicate section",
       deleteSection: "Delete section",
+      confirmMoveLastQuestion: "Move question",
+      cancelMoveLastQuestion: "Cancel",
     },
     questionTypes: {
       section: "Section",
@@ -342,6 +355,7 @@ export const defaultTranslations = {
       numeric: "Numeric",
       link: "Link",
       date: "Date",
+      dropdownSingle: "Dropdown",
     },
     selectQuestion: {
       addOption: "Add option",
@@ -353,7 +367,11 @@ export const defaultTranslations = {
     },
     answer: {
       label: "Answer",
-      placeholder: "Respondent's answer",
+      dropdownPlaceholder: "Pick an option",
+      textPlaceholder: "Type your answer",
+      numericPlaceholder: "Enter a number",
+      linkPlaceholder: "https://example.com",
+      invalidUrl: "Enter a valid URL",
     },
     labels: {
       applyingChanges: "Applying changes",
@@ -368,6 +386,26 @@ export const defaultTranslations = {
       questionOptions: "Question options",
       actions: "Actions",
       sectionTitlePlaceholder: "Section title",
+      lastQuestionDialogTitle: "Remove last question from section",
+      lastQuestionDialogDescription:
+        "Moving this question will leave the section empty and it will be removed. Do you want to continue?",
+    },
+  },
+  surveyAnsweringForm: {
+    actions: {
+      submit: "Submit survey",
+      cancel: "Cancel",
+      next: "Next",
+      previous: "Previous",
+      expand: "Expand",
+      collapse: "Collapse",
+    },
+    labels: {
+      empty: {
+        title: "No questions to answer",
+        description: "This survey has no questions yet.",
+        emoji: "📝",
+      },
     },
   },
   richTextEditor: {
@@ -469,6 +507,12 @@ export const defaultTranslations = {
         mustBeChecked: "This option must be selected",
       },
     },
+  },
+  wizard: {
+    previous: "Previous",
+    next: "Continue",
+    submit: "Submit",
+    stepOf: "Step {{current}} of {{total}}",
   },
 } as const
 

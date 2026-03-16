@@ -37,6 +37,7 @@ export type InputProps = Omit<
     | "readonly"
     | "autocomplete"
     | "buttonToggle"
+    | "transparent"
   >
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
@@ -75,6 +76,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       onKeyDown,
       readonly,
       buttonToggle,
+      transparent,
       ...props
     },
     ref
@@ -114,6 +116,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         inputRef={ref}
         readonly={readonly}
         buttonToggle={buttonToggle}
+        transparent={transparent}
       >
         <input
           type={type}

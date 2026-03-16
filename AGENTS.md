@@ -14,6 +14,15 @@ F0 is Factorial's design system. It provides modular, reusable UI components for
 - All code and comments in English
 - Use `pnpm` as the package manager
 
+### Formatting
+
+The project uses `oxfmt` configured via `.oxfmtrc.json` at the repo root. Key rules that affect code generation:
+
+- **No semicolons** (`"semi": false`) — never add `;` at the end of lines
+- Double quotes (`"singleQuote": false`)
+- 2-space indentation
+- Trailing commas where valid in ES5 (`"trailingComma": "es5"`)
+
 ### Monorepo Structure
 
 ```
@@ -29,3 +38,4 @@ f0/
 ```
 
 For `packages/react/` conventions, see `packages/react/AGENTS.md`.
+For `packages/react-native/` conventions, see `packages/react-native/AGENTS.md`.

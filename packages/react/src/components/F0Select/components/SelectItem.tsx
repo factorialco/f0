@@ -2,6 +2,7 @@ import { F0Avatar } from "@/components/avatars/F0Avatar"
 import { F0Icon } from "@/components/F0Icon"
 import { OneEllipsis } from "@/components/OneEllipsis"
 import { F0TagDot } from "@/components/tags/F0TagDot"
+import { F0TagPerson } from "@/components/tags/F0TagPerson"
 import { F0TagRaw } from "@/components/tags/F0TagRaw"
 import { SelectItem as SelectItemPrimitive } from "@/ui/Select"
 
@@ -41,8 +42,10 @@ export const SelectItem = <T extends string, R>({
           <div className={item.description ? "self-start" : "self-center"}>
             {typeof item.tag === "string" ? (
               <F0TagRaw text={item.tag} />
-            ) : (
+            ) : item.tag.type === "dot" ? (
               <F0TagDot {...item.tag} />
+            ) : (
+              <F0TagPerson name={item.tag.name} src={item.tag.src} />
             )}
           </div>
         )}

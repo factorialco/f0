@@ -12,6 +12,7 @@ import type {
   SortingsDefinition,
 } from "@/hooks/datasource"
 
+import { WithDataTestIdProps } from "@/lib/data-testid"
 import { INPUTFIELD_SIZES, InputFieldProps } from "@/ui/InputField"
 
 import { Action } from "./components/SelectBottomActions"
@@ -41,7 +42,6 @@ type F0SelectBaseProps<T extends string, R = unknown> = {
   onOpenChange?: (open: boolean) => void
   searchEmptyMessage?: string
   className?: string
-  selectContentClassName?: string
   actions?: Action[]
   /** Container element to render the portal content into */
   portalContainer?: HTMLElement | null
@@ -56,7 +56,7 @@ type F0SelectBaseProps<T extends string, R = unknown> = {
    * @default false
    */
   showPreview?: boolean
-}
+} & WithDataTestIdProps
 
 /**
  * Select component for choosing from a list of options.
@@ -171,6 +171,7 @@ export type F0SelectProps<T extends string, R = unknown> = F0SelectBaseProps<
 export type F0SelectTagProp =
   | string
   | { type: "dot"; text: string; color: NewColor }
+  | { type: "person"; name: string; src?: string }
 
 export type F0SelectItemObject<T, R = unknown> = {
   type?: "item"

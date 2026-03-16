@@ -16,23 +16,36 @@
  *
  */
 
-import { forwardRef, useCallback, useRef, useState } from "react"
+import { forwardRef, useCallback, useRef } from "react"
 
+import type { TableVisualizationType } from "@/experimental/OneDataCollection/types"
+
+import { F0Button } from "@/components/F0Button"
 import { FiltersDefinition } from "@/components/OneFilterPicker/types"
 import { DataCollectionSource } from "@/experimental/OneDataCollection/hooks/useDataCollectionSource/types"
 import { ItemActionsDefinition } from "@/experimental/OneDataCollection/item-actions"
 import { NavigationFiltersDefinition } from "@/experimental/OneDataCollection/navigationFilters/types"
 import { SummariesDefinition } from "@/experimental/OneDataCollection/summary"
+import { TableCell, TableRow } from "@/experimental/OneTable"
+import { SPACING_FACTOR } from "@/experimental/OneTable/TableCell/utils/nested"
 import {
   GroupingDefinition,
   RecordType,
   SortingsDefinition,
 } from "@/hooks/datasource"
+import { Add } from "@/icons/app"
+import { useI18n } from "@/lib/providers/i18n"
 
+import type {
+  CellRendererProps,
+  RowWrapperProps,
+  TableColumnDefinition,
+} from "../types"
+
+import { useAddRow } from "../../EditableTable/context/AddRowContext"
 import { useCalculateConectorHeight } from "../hooks/useCalculateConectorHeight"
 import { useLoadChildren } from "../hooks/useLoadChildren"
-import { NestedDataProvider } from "../providers/NestedProvider"
-import { TableColumnDefinition } from "../types"
+import { useNestedDataContext } from "../providers/NestedProvider"
 import { LoadMoreRow } from "./LoadMore"
 import { NestedRowProps, Row } from "./Row"
 import { RowLoading } from "./RowLoading"
@@ -65,6 +78,13 @@ export type RowProps<
   checkColumnWidth: number
   tableWithChildren: boolean
   nestedRowProps?: NestedRowProps
+  /** Optional predicate to mark a row as reference row with slanted background pattern. */
+  referenceRowType?: (item: R) => "none" | "striped"
+  /** Custom cell renderer, passed through from Table to Row */
+  cellRenderer?: React.ComponentType<CellRendererProps<R, Sortings, Summaries>>
+  /** Row wrapper for child rows (provides per-row context, e.g. editing state) */
+  rowWrapper?: React.ComponentType<RowWrapperProps<R>>
+  fromVisualization?: TableVisualizationType
 }
 
 const NestedRowContent = <
@@ -90,11 +110,14 @@ const NestedRowContent = <
     | React.RefObject<HTMLTableRowElement>
     | null
 ) => {
-  const [open, setOpen] = useState(false)
-
   const internalRowRef = useRef<HTMLTableRowElement | null>(null)
+  const { t } = useI18n()
+  const addRow = useAddRow()
 
-  const rowId = `${props.nestedRowProps?.depth ?? 0}-${"id" in props.item ? props.item.id : props.index}`
+  const rowId = `${props.nestedRowProps?.depth ?? 0}-${"id" in props.item ? props.item.id + "-" + props.index : props.index}`
+
+  const { expandedRowIds, setRowExpanded } = useNestedDataContext()
+  const open = expandedRowIds[rowId] ?? false
 
   /**
    * useLoadChildren hook manages:
@@ -108,7 +131,7 @@ const NestedRowContent = <
       rowId: rowId,
       item: props.item,
       source: props.source,
-      onClearFetchedData: () => setOpen(false),
+      onClearFetchedData: () => setRowExpanded(rowId, false),
     })
 
   const shouldShowLoading = open && isLoading
@@ -145,7 +168,7 @@ const NestedRowContent = <
 
   const handleExpand = () => {
     const isExpanding = !open
-    setOpen(isExpanding)
+    setRowExpanded(rowId, isExpanding)
 
     if (isExpanding && !children.length) {
       loadChildren()
@@ -160,6 +183,8 @@ const NestedRowContent = <
     connectorHeight: calculatedHeight,
   }
 
+  const isTableVisualization = props.fromVisualization === "table"
+
   /**
    * Border logic for hierarchical rows:
    * - Border should only appear on the "last visible element" of the tree
@@ -169,7 +194,7 @@ const NestedRowContent = <
    */
   const firstRow = (props.nestedRowProps?.depth ?? 0) === 0
   const isLastChild = (props.nestedRowProps?.isLastChild || firstRow) ?? false
-  const shouldHideBorder = open || !isLastChild
+  const shouldHideBorder = (open || !isLastChild) && isTableVisualization
 
   return (
     <>
@@ -188,6 +213,7 @@ const NestedRowContent = <
           isLastChild,
         }}
         tableWithChildren={props.tableWithChildren}
+        fromVisualization={props.fromVisualization}
       />
 
       {shouldShowChildren &&
@@ -235,9 +261,11 @@ const NestedRowContent = <
           const childIsLastInTree =
             isLastChildInLevel && isLastChild && !shouldShowLoadMore
 
+          const RowWrapper = props.rowWrapper
+
           // Recursive case: Child has its own children
           if (childHasChildren) {
-            return (
+            const nestedChild = (
               <NestedRow
                 {...props}
                 key={`nested-row-${props.groupIndex}-${child.id}-${props.index}-${childIndex}`}
@@ -251,14 +279,30 @@ const NestedRowContent = <
                   depth: depth,
                   isLastChild: childIsLastInTree,
                 }}
+                fromVisualization={props.fromVisualization}
               />
             )
+
+            if (RowWrapper) {
+              return (
+                <RowWrapper
+                  key={`nested-row-${props.groupIndex}-${child.id}-${props.index}-${childIndex}`}
+                  item={childItem}
+                  index={childIndex}
+                >
+                  {nestedChild}
+                </RowWrapper>
+              )
+            }
+
+            return nestedChild
           } else {
             // Base case: Leaf node with no children
             // For leaf nodes, border is shown only if it's the last visible element in the tree
-            const leafShouldHideBorder = !childIsLastInTree
+            const leafShouldHideBorder =
+              !childIsLastInTree && isTableVisualization
 
-            return (
+            const leafChild = (
               <Row
                 {...props}
                 key={`row-${props.groupIndex}-${props.index}-${childIndex}`}
@@ -274,9 +318,24 @@ const NestedRowContent = <
                   onExpand: handleExpand,
                   isLastChild: childIsLastInTree,
                 }}
+                fromVisualization={props.fromVisualization}
                 tableWithChildren={props.tableWithChildren}
               />
             )
+
+            if (RowWrapper) {
+              return (
+                <RowWrapper
+                  key={`row-${props.groupIndex}-${props.index}-${childIndex}`}
+                  item={childItem}
+                  index={childIndex}
+                >
+                  {leafChild}
+                </RowWrapper>
+              )
+            }
+
+            return leafChild
           }
         })}
 
@@ -308,6 +367,36 @@ const NestedRowContent = <
           }}
         />
       )}
+
+      {shouldShowChildren && addRow?.onAddRow && (
+        <TableRow>
+          <TableCell
+            colSpan={
+              props.columns.length +
+              (props.source.selectable ? 1 : 0) +
+              (props.source.itemActions ? 2 : 0)
+            }
+          >
+            <div
+              className="pointer-events-auto"
+              style={{
+                marginLeft: `${((props.nestedRowProps?.depth ?? 0) + 1) * SPACING_FACTOR}px`,
+              }}
+            >
+              <F0Button
+                variant="ghost"
+                icon={Add}
+                label={
+                  addRow.nestedAddRowButtonLabel ??
+                  t("collections.editableTable.addRow")
+                }
+                onClick={() => addRow.onAddRow?.(props.item)}
+                size="sm"
+              />
+            </div>
+          </TableCell>
+        </TableRow>
+      )}
     </>
   )
 }
@@ -335,17 +424,9 @@ const NestedRowComponentInner = <
     | React.RefObject<HTMLTableRowElement>
     | null
 ) => {
-  // Only wrap with Provider at the root level (depth === 0 or undefined)
-  // This ensures we have a single shared context for the entire tree
-  if ((props.nestedRowProps?.depth ?? 0) === 0) {
-    return (
-      <NestedDataProvider>
-        <NestedRowContentWithRef {...props} ref={ref} />
-      </NestedDataProvider>
-    )
-  }
-
-  // Nested children render without additional provider wrapping
+  // Provider is mounted at Table level when tableWithChildren is true, so we
+  // never wrap here. This keeps expansion state and fetched data in a single
+  // context that survives parent re-renders (e.g. GraphQL refetch).
   return <NestedRowContentWithRef {...props} ref={ref} />
 }
 
@@ -393,6 +474,7 @@ const NestedRow = forwardRef(NestedRowComponentInner) as <
     Grouping
   > & {
     ref?: React.ForwardedRef<HTMLTableRowElement>
+    fromVisualization?: TableVisualizationType
   }
 ) => ReturnType<typeof NestedRowComponentInner>
 

@@ -168,7 +168,7 @@ const meta: Meta = {
         "  label: string\n" +
         "  description?: string\n" +
         "  avatar?: AvatarVariant\n" +
-        "  tag?: string | { type: 'dot'; text: string; color: NewColor }\n" +
+        "  tag?: string | { type: 'dot'; text: string; color: NewColor } | { type: 'person'; name: string; src?: string }\n" +
         "  icon?: IconType\n" +
         "  item?: unknown\n" +
         "  disabled?: boolean\n" +
@@ -410,6 +410,39 @@ export const WithDotTags: Story = {
         label: "Inactive",
         description: "Inactive description",
         icon: Desktop,
+        tag: "Disabled",
+      },
+    ],
+  },
+}
+
+export const WithPersonTags: Story = {
+  args: {
+    label: "Select a reviewer",
+    placeholder: "Select a reviewer",
+    onChange: fn(),
+    options: [
+      {
+        value: "isabella",
+        label: "Isabella Tangari",
+        description: "Product Designer",
+        tag: {
+          type: "person",
+          name: "Marta Serrano",
+        },
+      },
+      {
+        value: "saul",
+        label: "Saul Dominguez",
+        tag: {
+          type: "person",
+          name: "Eliseo Quintanilla",
+        },
+      },
+      {
+        value: "inactive",
+        label: "Inactive",
+        icon: Appearance,
         tag: "Disabled",
       },
     ],
@@ -797,6 +830,7 @@ export const MultiplePaginatedAsList: Story = {
     value: ["3", "42", "500", "1200"],
     showSearchBox: true,
     asList: true,
+    showPreview: true,
     // Provide defaultItem for values not in the first page
     defaultItem: (() => {
       const ids = [42, 500, 1200]
@@ -823,12 +857,11 @@ export const MultiplePaginatedAsList: Story = {
     onSelectItems: fn((selectionStatus) => {
       console.log("selectionStatus", selectionStatus)
     }),
-    disableSelectAll: true,
     hideLabel: true,
   },
   render: (args) => {
     return (
-      <div className="flex h-[400px] flex-row">
+      <div className="flex h-[400px] flex-row w-[600px]">
         <F0Select {...(args as any)} />
       </div>
     )

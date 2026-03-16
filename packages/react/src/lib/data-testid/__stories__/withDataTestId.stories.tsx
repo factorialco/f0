@@ -5,7 +5,11 @@ import { useState } from "react"
 import { expect, userEvent, within } from "storybook/test"
 
 import { F0Button } from "../../../components/F0Button"
-import { withDataTestId } from "../index"
+import {
+  DataTestIdWrapper,
+  WithDataTestIdProps,
+  withDataTestId,
+} from "../index"
 
 const WrappedButton = withDataTestId(F0Button)
 
@@ -116,5 +120,56 @@ export const CustomComponent: Story = {
   }): Promise<void> => {
     const canvas = within(canvasElement)
     await expect(canvas.getByTestId("custom-component-id")).toBeInTheDocument()
+  },
+}
+
+// Example using the inline DataTestIdWrapper pattern (Pattern B)
+// Use this pattern when the component has generic type parameters or
+// discriminated union props that the HOC would erase.
+interface InlineComponentProps extends WithDataTestIdProps {
+  label: string
+  onToggle: (active: boolean) => void
+  active?: boolean
+}
+
+const InlineComponent = ({
+  label,
+  onToggle,
+  active = false,
+  dataTestId,
+}: InlineComponentProps) => (
+  <DataTestIdWrapper dataTestId={dataTestId}>
+    <button
+      className="rounded border px-3 py-1"
+      onClick={() => onToggle(!active)}
+    >
+      {label} ({active ? "on" : "off"})
+    </button>
+  </DataTestIdWrapper>
+)
+
+export const InlineWrapper: StoryObj<typeof InlineComponent> = {
+  render: () => {
+    const [active, setActive] = useState(false)
+    return (
+      <InlineComponent
+        label="Toggle"
+        active={active}
+        onToggle={setActive}
+        dataTestId="inline-wrapper-component"
+      />
+    )
+  },
+  play: async ({
+    canvasElement,
+  }: {
+    canvasElement: HTMLElement
+  }): Promise<void> => {
+    const canvas = within(canvasElement)
+    await expect(
+      canvas.getByTestId("inline-wrapper-component")
+    ).toBeInTheDocument()
+    await userEvent.click(canvas.getByText("Toggle (off)"))
+    await expect(canvas.getByText("Toggle (on)")).toBeInTheDocument()
   },
 }

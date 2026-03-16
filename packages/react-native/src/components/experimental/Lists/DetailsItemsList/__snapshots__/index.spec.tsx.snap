@@ -5,7 +5,7 @@ exports[`DetailsItemsList Snapshot  1`] = `
   className="flex gap-4"
 >
   <Text
-    className="mb-1 pl-1.5 text-sm font-semibold text-f1-foreground-secondary"
+    className="mb-1 pl-1.5 text-sm font-semibold text-f0-foreground-secondary"
   >
     DETAILS
   </Text>
@@ -19,7 +19,7 @@ exports[`DetailsItemsList Snapshot  1`] = `
         className="max-w-72 min-w-32"
       >
         <Text
-          className="px-1.5 text-f1-foreground-secondary"
+          className="px-1.5 text-f0-foreground-secondary"
         >
           Legal entity
         </Text>
@@ -27,7 +27,7 @@ exports[`DetailsItemsList Snapshot  1`] = `
           className="flex flex-shrink justify-center gap-0.5"
         >
           <View
-            className="flex rounded font-medium text-f1-foreground *:flex-1"
+            className="flex rounded font-medium text-f0-foreground *:flex-1"
           >
             <View
               accessibilityLabel="Copy Everyday Software SL"
@@ -49,7 +49,7 @@ exports[`DetailsItemsList Snapshot  1`] = `
                 }
               }
               accessible={true}
-              className="group flex flex-row justify-between gap-1.5 rounded p-1.5 transition-colors duration-300 active:bg-f1-background-secondary-hover"
+              className="group flex flex-row justify-between gap-1.5 rounded p-1.5 transition-colors duration-300 active:bg-f0-background-secondary-hover"
               collapsable={false}
               focusable={true}
               onBlur={[Function]}
@@ -66,7 +66,7 @@ exports[`DetailsItemsList Snapshot  1`] = `
                 className="flex flex-row items-center gap-1.5"
               >
                 <Text
-                  className="line-clamp-5 text-left text-f1-foreground"
+                  className="line-clamp-5 text-left text-f0-foreground"
                 >
                   Everyday Software SL
                 </Text>
@@ -79,7 +79,7 @@ exports[`DetailsItemsList Snapshot  1`] = `
                   aria-hidden={true}
                   bbHeight="100%"
                   bbWidth="100%"
-                  className="shrink-0 w-5 h-5 stroke-md col-start-1 col-end-2 row-start-1 row-end-2 text-f1-icon-bold"
+                  className="shrink-0 w-5 h-5 stroke-md text-f0-icon-bold col-start-1 col-end-2 row-start-1 row-end-2"
                   fill="none"
                   focusable={false}
                   meetOrSlice={0}
@@ -171,7 +171,7 @@ exports[`DetailsItemsList Snapshot  1`] = `
         className="max-w-72 min-w-32"
       >
         <Text
-          className="px-1.5 text-f1-foreground-secondary"
+          className="px-1.5 text-f0-foreground-secondary"
         >
           Manager
         </Text>
@@ -179,7 +179,7 @@ exports[`DetailsItemsList Snapshot  1`] = `
           className="flex flex-shrink justify-center gap-0.5"
         >
           <View
-            className="flex rounded font-medium text-f1-foreground *:flex-1"
+            className="flex rounded font-medium text-f0-foreground *:flex-1"
           >
             <View
               accessibilityState={
@@ -200,7 +200,7 @@ exports[`DetailsItemsList Snapshot  1`] = `
                 }
               }
               accessible={true}
-              className="group justify-between rounded text-inherit no-underline hover:bg-f1-background-hover focus-visible:outline-2 focus-visible:outline-f1-border-selected-bold active:bg-f1-background-secondary-hover flex flex-row items-center gap-1.5 p-1.5"
+              className="group justify-between rounded text-inherit no-underline hover:bg-f0-background-hover focus-visible:outline-2 focus-visible:outline-f0-border-selected-bold active:bg-f0-background-secondary-hover flex flex-row items-center gap-1.5 p-1.5"
               collapsable={false}
               focusable={true}
               handlePress={[Function]}
@@ -226,7 +226,7 @@ exports[`DetailsItemsList Snapshot  1`] = `
                   >
                     <View
                       aria-hidden={true}
-                      className="flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold w-5 h-5 rounded-full bg-f1-background dark:bg-f1-background-inverse-secondary"
+                      className="flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold w-5 h-5 rounded-full bg-f0-background dark:bg-f0-background-inverse-secondary"
                       data-a11y-color-contrast-ignore={true}
                       role="img"
                     >
@@ -234,10 +234,10 @@ exports[`DetailsItemsList Snapshot  1`] = `
                         className="aspect-square h-full w-full"
                       >
                         <Image
-                          aria-label="S"
+                          aria-label="J"
                           source={
                             {
-                              "uri": "https://github.com/sauldom102.png",
+                              "uri": "https://github.com/octocat.png",
                             }
                           }
                           style={
@@ -252,9 +252,9 @@ exports[`DetailsItemsList Snapshot  1`] = `
                   </View>
                 </View>
                 <Text
-                  className="line-clamp-5 text-left text-f1-foreground"
+                  className="line-clamp-5 text-left text-f0-foreground"
                 >
-                  Saul Dominguez
+                  John Doe
                 </Text>
               </View>
               <RNSVGSvgView
@@ -262,7 +262,7 @@ exports[`DetailsItemsList Snapshot  1`] = `
                 aria-hidden={true}
                 bbHeight="100%"
                 bbWidth="100%"
-                className="shrink-0 w-5 h-5 stroke-md text-f1-foreground"
+                className="shrink-0 w-5 h-5 stroke-md text-f0-foreground"
                 fill="none"
                 focusable={false}
                 meetOrSlice={0}
@@ -332,7 +332,7 @@ exports[`DetailsItemsList Snapshot  1`] = `
         className="max-w-72 min-w-32"
       >
         <Text
-          className="px-1.5 text-f1-foreground-secondary"
+          className="px-1.5 text-f0-foreground-secondary"
         >
           Teams
         </Text>
@@ -340,7 +340,7 @@ exports[`DetailsItemsList Snapshot  1`] = `
           className="flex flex-shrink justify-center gap-0.5"
         >
           <View
-            className="flex rounded font-medium text-f1-foreground *:flex-1"
+            className="flex rounded font-medium text-f0-foreground *:flex-1"
           >
             <View
               accessibilityState={
@@ -361,7 +361,7 @@ exports[`DetailsItemsList Snapshot  1`] = `
                 }
               }
               accessible={true}
-              className="group justify-between rounded text-inherit no-underline hover:bg-f1-background-hover focus-visible:outline-2 focus-visible:outline-f1-border-selected-bold active:bg-f1-background-secondary-hover flex flex-row items-center gap-1.5 p-1.5"
+              className="group justify-between rounded text-inherit no-underline hover:bg-f0-background-hover focus-visible:outline-2 focus-visible:outline-f0-border-selected-bold active:bg-f0-background-secondary-hover flex flex-row items-center gap-1.5 p-1.5"
               collapsable={false}
               focusable={true}
               handlePress={[Function]}
@@ -392,7 +392,7 @@ exports[`DetailsItemsList Snapshot  1`] = `
                       role="img"
                     >
                       <Text
-                        className="text-f1-foreground-inverse/90 text-sm"
+                        className="text-f0-foreground-inverse/90 text-sm"
                         data-a11y-color-contrast-ignore={true}
                       >
                         M
@@ -401,7 +401,7 @@ exports[`DetailsItemsList Snapshot  1`] = `
                   </View>
                 </View>
                 <Text
-                  className="line-clamp-5 text-left text-f1-foreground"
+                  className="line-clamp-5 text-left text-f0-foreground"
                 >
                   Management
                 </Text>
@@ -411,7 +411,7 @@ exports[`DetailsItemsList Snapshot  1`] = `
                 aria-hidden={true}
                 bbHeight="100%"
                 bbWidth="100%"
-                className="shrink-0 w-5 h-5 stroke-md text-f1-foreground"
+                className="shrink-0 w-5 h-5 stroke-md text-f0-foreground"
                 fill="none"
                 focusable={false}
                 meetOrSlice={0}
@@ -472,7 +472,7 @@ exports[`DetailsItemsList Snapshot  1`] = `
             </View>
           </View>
           <View
-            className="flex rounded font-medium text-f1-foreground *:flex-1"
+            className="flex rounded font-medium text-f0-foreground *:flex-1"
           >
             <View
               accessibilityState={
@@ -493,7 +493,7 @@ exports[`DetailsItemsList Snapshot  1`] = `
                 }
               }
               accessible={true}
-              className="group justify-between rounded text-inherit no-underline hover:bg-f1-background-hover focus-visible:outline-2 focus-visible:outline-f1-border-selected-bold active:bg-f1-background-secondary-hover flex flex-row items-center gap-1.5 p-1.5"
+              className="group justify-between rounded text-inherit no-underline hover:bg-f0-background-hover focus-visible:outline-2 focus-visible:outline-f0-border-selected-bold active:bg-f0-background-secondary-hover flex flex-row items-center gap-1.5 p-1.5"
               collapsable={false}
               focusable={true}
               handlePress={[Function]}
@@ -524,7 +524,7 @@ exports[`DetailsItemsList Snapshot  1`] = `
                       role="img"
                     >
                       <Text
-                        className="text-f1-foreground-inverse/90 text-sm"
+                        className="text-f0-foreground-inverse/90 text-sm"
                         data-a11y-color-contrast-ignore={true}
                       >
                         E
@@ -533,7 +533,7 @@ exports[`DetailsItemsList Snapshot  1`] = `
                   </View>
                 </View>
                 <Text
-                  className="line-clamp-5 text-left text-f1-foreground"
+                  className="line-clamp-5 text-left text-f0-foreground"
                 >
                   Engineering
                 </Text>
@@ -543,7 +543,7 @@ exports[`DetailsItemsList Snapshot  1`] = `
                 aria-hidden={true}
                 bbHeight="100%"
                 bbWidth="100%"
-                className="shrink-0 w-5 h-5 stroke-md text-f1-foreground"
+                className="shrink-0 w-5 h-5 stroke-md text-f0-foreground"
                 fill="none"
                 focusable={false}
                 meetOrSlice={0}
@@ -613,7 +613,7 @@ exports[`DetailsItemsList Snapshot  1`] = `
         className="max-w-72 min-w-32"
       >
         <Text
-          className="px-1.5 text-f1-foreground-secondary"
+          className="px-1.5 text-f0-foreground-secondary"
         >
           Type
         </Text>
@@ -645,7 +645,7 @@ exports[`DetailsItemsList Snapshot  1`] = `
                   }
                 }
                 accessible={true}
-                className="overflow-hidden flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f1-border-secondary"
+                className="overflow-hidden flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f0-border-secondary"
                 collapsable={false}
                 focusable={true}
                 onBlur={[Function]}
@@ -680,7 +680,7 @@ exports[`DetailsItemsList Snapshot  1`] = `
                   }
                 />
                 <Text
-                  className="line-clamp-1 text-base font-medium text-f1-foreground"
+                  className="line-clamp-1 text-base font-medium text-f0-foreground"
                 >
                   Holidays
                 </Text>

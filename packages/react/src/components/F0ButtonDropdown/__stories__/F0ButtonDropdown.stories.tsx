@@ -7,7 +7,11 @@ import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
 import { withSnapshot } from "@/lib/storybook-utils/parameters.ts"
 
 import { F0ButtonDropdown } from "../index"
-import { buttonDropdownSizes, buttonDropdownVariants } from "../types.ts"
+import {
+  buttonDropdownModes,
+  buttonDropdownSizes,
+  buttonDropdownVariants,
+} from "../types.ts"
 
 const meta = {
   title: "ButtonDropdown",
@@ -76,6 +80,16 @@ const meta = {
     tooltip: {
       control: "text",
       description: "Tooltip to explain the button",
+    },
+    mode: {
+      control: "select",
+      options: buttonDropdownModes,
+      description: "Rendering mode of the button",
+      table: {
+        type: {
+          summary: buttonDropdownModes.join(" | "),
+        },
+      },
     },
     ...dataTestIdArgs,
   },
@@ -190,6 +204,104 @@ export const WithDescription: Story = {
 
 export const WithGroups: Story = {
   args: {
+    items: [
+      {
+        label: "Group 1",
+        items: [
+          {
+            value: "1",
+            label: "Item 1",
+            description: "New creation process",
+            icon: Add,
+          },
+          {
+            value: "2",
+            label: "Item 2",
+            description: "Edit item's information",
+            icon: Pencil,
+          },
+        ],
+      },
+      {
+        label: "Group 2",
+        items: [
+          {
+            value: "3",
+            label: "Item 3",
+            description: "Save changes",
+            icon: Save,
+          },
+        ],
+      },
+    ],
+  },
+}
+
+// Dropdown mode stories
+export const DropdownMode: Story = {
+  args: {
+    mode: "dropdown",
+    items: [
+      {
+        value: "1",
+        label: "Item 1",
+        description: "New creation process",
+        icon: Add,
+      },
+      {
+        value: "2",
+        label: "Item 2",
+        description: "Edit item's information",
+        icon: Pencil,
+      },
+      {
+        value: "3",
+        label: "Item 3",
+        description: "Save changes",
+        icon: Save,
+      },
+      {
+        value: "4",
+        label: "Item 4",
+        description: "Delete item",
+        icon: Delete,
+        critical: true,
+      },
+    ],
+  },
+}
+
+export const DropdownModeWithTrigger: Story = {
+  args: {
+    mode: "dropdown",
+    trigger: "New action",
+    items: [
+      {
+        value: "1",
+        label: "Item 1",
+        description: "New creation process",
+        icon: Add,
+      },
+      {
+        value: "2",
+        label: "Item 2",
+        description: "Edit item's information",
+        icon: Pencil,
+      },
+      {
+        value: "3",
+        label: "Item 3",
+        description: "Save changes",
+        icon: Save,
+      },
+    ],
+  },
+}
+
+export const DropdownModeWithGroups: Story = {
+  args: {
+    mode: "dropdown",
+    trigger: "Actions",
     items: [
       {
         label: "Group 1",

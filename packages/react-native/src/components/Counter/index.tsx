@@ -3,6 +3,7 @@ import { tv, type VariantProps } from "tailwind-variants"
 
 import { cn } from "../../lib/utils"
 
+/** @deprecated Use `f0CounterContainerVariants` from `F0Counter`. */
 const counterContainerVariants = tv({
   base: "flex items-center justify-center rounded-xs grow-0 px-0.5",
   variants: {
@@ -11,9 +12,9 @@ const counterContainerVariants = tv({
       sm: "min-w-4 h-4",
     },
     type: {
-      default: "bg-f1-background-secondary border border-f1-border",
-      selected: "bg-f1-background-selected-bold outline-f1-border-selected",
-      bold: "bg-f1-background-accent-bold",
+      default: "bg-f0-background-secondary border border-f0-border",
+      selected: "bg-f0-background-selected-bold outline-f0-border-selected",
+      bold: "bg-f0-background-accent-bold",
     },
   },
   defaultVariants: {
@@ -22,6 +23,7 @@ const counterContainerVariants = tv({
   },
 })
 
+/** @deprecated Use `F0Counter` from `F0Counter`. */
 const counterTextVariants = tv({
   base: "text-center text-sm font-medium tabular-nums whitespace-nowrap",
   variants: {
@@ -30,9 +32,9 @@ const counterTextVariants = tv({
       sm: "leading-none py-0.5",
     },
     type: {
-      default: "text-f1-foreground",
-      selected: "text-f1-foreground-inverse",
-      bold: "text-f1-foreground-inverse",
+      default: "text-f0-foreground",
+      selected: "text-f0-foreground-inverse",
+      bold: "text-f0-foreground-inverse",
     },
   },
   defaultVariants: {
@@ -40,11 +42,17 @@ const counterTextVariants = tv({
   },
 })
 
-type CounterProps = {
+/**
+ * @deprecated Use `F0CounterProps` from `F0Counter`.
+ */
+export type CounterProps = {
   value: number
   maxValue?: number
 } & VariantProps<typeof counterContainerVariants>
 
+/**
+ * @deprecated Use `F0Counter` from `src/components/F0Counter`.
+ */
 export function Counter({ size, type, value, maxValue }: CounterProps) {
   const displayValue = maxValue && value > maxValue ? `+${maxValue}` : value
 

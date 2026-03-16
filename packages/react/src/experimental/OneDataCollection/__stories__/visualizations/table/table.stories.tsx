@@ -28,6 +28,15 @@ export const BasicListVisualization: Story = {
   },
 }
 
+export const ReferenceRowsVisualization: Story = {
+  render: () => {
+    const mockVisualizations = getMockVisualizations({
+      table: { referenceRows: true },
+    })
+    return <ExampleComponent visualizations={[mockVisualizations.table]} />
+  },
+}
+
 export const TableFrozenCols: Story = {
   render: () => <ExampleComponent frozenColumns={2} />,
 }
@@ -82,6 +91,7 @@ export const TableWithNestedRecords: Story = {
     const mockVisualizations = getMockVisualizations({
       table: {
         noSorting: true,
+        referenceRows: true,
         allowColumnHiding: true,
         allowColumnReordering: true,
         nestedRecords: true,
@@ -155,6 +165,37 @@ export const TableWithMixedNestedRecords: Story = {
         id="employees/v1"
         nestedRecords
         nestedRecordsType="mixed"
+      />
+    )
+  },
+}
+
+export const TableWithSelectableNestedRecords: Story = {
+  render: () => {
+    const mockVisualizations = getMockVisualizations({
+      table: {
+        noSorting: true,
+        allowColumnHiding: true,
+        allowColumnReordering: true,
+        nestedRecords: true,
+        applyLongText: false,
+      },
+    })
+
+    return (
+      <ExampleComponent
+        frozenColumns={2}
+        tableAllowColumnReordering
+        tableAllowColumnHiding
+        noSorting
+        storage={false}
+        visualizations={[mockVisualizations.table]}
+        id="employees/v1"
+        nestedRecords
+        nestedRecordsType="mixed"
+        selectable={() => {
+          return ""
+        }}
       />
     )
   },

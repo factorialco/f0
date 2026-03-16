@@ -1,3 +1,5 @@
+import type { TableVisualizationType } from "@/experimental/OneDataCollection/types"
+
 import { NestedRowProps } from "@/experimental/OneDataCollection/visualizations/collection/Table/components/Row"
 import { cn } from "@/lib/utils"
 
@@ -12,6 +14,8 @@ import {
   isFirstCellWithDepth,
   LINE_WIDTH,
   PADDING_TOP,
+  SELECTABLE_EDITABLE_ROW_OFFSET,
+  SELECTABLE_ROW_OFFSET,
   SPACING_FACTOR,
 } from "../utils/nested"
 
@@ -20,7 +24,9 @@ interface TreeConnectorProps {
   nestedRowProps?: NestedRowProps & {
     rowWithChildren?: boolean
     tableWithChildren?: boolean
+    selectableRow?: boolean
   }
+  fromVisualization?: TableVisualizationType
 }
 
 export const connectorVariables = (
@@ -28,7 +34,9 @@ export const connectorVariables = (
   nestedRowProps?: NestedRowProps & {
     rowWithChildren?: boolean
     tableWithChildren?: boolean
-  }
+    selectableRow?: boolean
+  },
+  fromVisualization?: TableVisualizationType
 ) => {
   const { rowWithChildren, nestedVariant, onLoadMoreChildren } =
     nestedRowProps ?? {}
@@ -50,14 +58,34 @@ export const connectorVariables = (
     height !== 0 &&
     `calc(${height}px - ${CHEVRON_PARENT_SIZE + PADDING_TOP}px )`
 
+  const editableTableVars =
+    fromVisualization === "editableTable"
+      ? {
+          "--horizontal-offset": `${horizontalOffset + (isDetailedVariant ? 12 : 8)}px`,
+          "--starting-y": "52px",
+          ...(lineHeight
+            ? {
+                "--line-height": `calc(${lineHeight} - ${isDetailedVariant ? 12 : 0}px)`,
+              }
+            : {}),
+        }
+      : {}
+
+  const rowOffset =
+    fromVisualization === "editableTable"
+      ? SELECTABLE_EDITABLE_ROW_OFFSET
+      : SELECTABLE_ROW_OFFSET
+
   return {
-    "--line-left": `-${2 * CHEVRON_SIZE}px`,
+    "--line-left": `-${2 * CHEVRON_SIZE - (nestedRowProps?.selectableRow ? rowOffset : 0)}px`,
     "--line-width": LINE_WIDTH,
     "--horizontal-offset": `${horizontalOffset}px`,
-    "--horizontal-left": `4px`,
+    "--horizontal-left": `calc(4px - ${nestedRowProps?.selectableRow ? rowOffset : 0}px)`,
     "--horizontal-height": `${SPACING_FACTOR / 2}px`,
     "--connector-width": `${connectorWidth}px`,
     ...(lineHeight ? { "--line-height": lineHeight } : {}),
+    "--starting-y": "40px",
+    ...editableTableVars,
   }
 }
 
@@ -65,7 +93,7 @@ export const verticalConnectorStyles =
   "h-full overflow-visible " +
   "before:absolute " +
   "before:-left-[var(--line-left)] " +
-  "before:top-[40px] " +
+  "before:top-[var(--starting-y)] " +
   "before:h-[var(--line-height)] " +
   "before:w-[var(--line-width)] " +
   "before:bg-f1-foreground-disabled " +
@@ -84,6 +112,7 @@ export const horizontalConnectorStyles =
 export const TreeConnector = ({
   firstCell,
   nestedRowProps,
+  fromVisualization,
 }: TreeConnectorProps) => {
   const firstCellWithDepth = isFirstCellWithDepth(
     firstCell,
@@ -132,7 +161,11 @@ export const TreeConnector = ({
       )}
       style={{
         marginLeft,
-        ...connectorVariables(connectorHeight, nestedRowProps),
+        ...connectorVariables(
+          connectorHeight,
+          nestedRowProps,
+          fromVisualization
+        ),
       }}
     />
   )
