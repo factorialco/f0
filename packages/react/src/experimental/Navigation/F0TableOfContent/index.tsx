@@ -1,3 +1,4 @@
+import { dropTargetForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter"
 import { AnimatePresence, motion } from "motion/react"
 import {
   ReactElement,
@@ -10,6 +11,7 @@ import {
 
 import { OneEllipsis } from "@/components/OneEllipsis/OneEllipsis"
 import { F1SearchBox } from "@/experimental/Forms/Fields/F1SearchBox"
+import { withDataTestId } from "@/lib/data-testid"
 import { createAtlaskitDriver } from "@/lib/dnd/atlaskitDriver"
 import { DndProvider } from "@/lib/dnd/context"
 import { useDndEvents } from "@/lib/dnd/hooks"
@@ -101,24 +103,16 @@ function renderTOCItem(
 
   return (
     <>
-      {/* Placeholder before item - creates visual gap like motion/react */}
-      <AnimatePresence>
-        {showPlaceholderBefore && (
-          <motion.div
-            key="placeholder-before"
-            initial={{ opacity: 0, height: 0, marginTop: 0, marginBottom: 0 }}
-            animate={{
-              opacity: 1,
-              height: 40,
-              marginTop: isFirstItem ? 0 : 2,
-              marginBottom: 2,
-            }}
-            exit={{ opacity: 0, height: 0, marginTop: 0, marginBottom: 0 }}
-            transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
-            className="rounded-[10px] border-2 border-dashed border-f1-border-secondary bg-f1-background-hover/40"
-          />
-        )}
-      </AnimatePresence>
+      {/* Placeholder before item — instant, pointer-events-none to avoid layout thrashing */}
+      {showPlaceholderBefore && (
+        <div
+          className={cn(
+            "pointer-events-none h-10 rounded-[10px] border-2 border-dashed border-f1-border-secondary bg-f1-background-hover/40",
+            isFirstItem ? "mt-0" : "mt-0.5",
+            "mb-0.5"
+          )}
+        />
+      )}
       {Component === Item ? (
         <Item
           key={item.id}
@@ -219,6 +213,62 @@ function renderTOCItem(
   )
 }
 
+/**
+ * Invisible sentinel drop zone rendered at the top/bottom of the list.
+ * Expands the valid drop area so users can easily drop at the very start or end.
+ */
+function EdgeDropZone({
+  targetItemId,
+  position,
+  onDragOver,
+  onDragLeave,
+  onDrop,
+  visible,
+}: {
+  targetItemId: string
+  position: "before" | "after"
+  onDragOver: (itemId: string, position: "before" | "after" | "inside") => void
+  onDragLeave: () => void
+  onDrop: (itemId: string, position: "before" | "after" | "inside") => void
+  visible: boolean
+}) {
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!ref.current) return
+
+    return dropTargetForElements({
+      element: ref.current,
+      canDrop: ({ source }) => {
+        const sourceData = source.data as { kind?: string; id?: string }
+        return sourceData.kind === "toc-item" && sourceData.id !== targetItemId
+      },
+      onDragEnter: () => {
+        onDragOver(targetItemId, position)
+      },
+      onDrag: () => {
+        onDragOver(targetItemId, position)
+      },
+      onDragLeave: () => {
+        onDragLeave()
+      },
+      onDrop: () => {
+        onDrop(targetItemId, position)
+      },
+    })
+  }, [targetItemId, position, onDragOver, onDragLeave, onDrop])
+
+  return (
+    <div
+      ref={ref}
+      className={cn(
+        "w-full shrink-0 transition-[height]",
+        visible ? "h-5" : "h-1"
+      )}
+    />
+  )
+}
+
 function TOCContent({
   title,
   items,
@@ -305,37 +355,44 @@ function TOCContent({
 
   const handleMoveItem = useCallback(
     (itemId: string, targetParentId: string | null, targetIndex: number) => {
-      // Prevent cycles
-      if (wouldCreateCycle(sortableItems, itemId, targetParentId)) {
-        return
-      }
+      setSortableItems((prevItems) => {
+        // Prevent cycles
+        if (wouldCreateCycle(prevItems, itemId, targetParentId)) {
+          return prevItems
+        }
 
-      // Find the item to move
-      const itemData = findItemInTree(sortableItems, itemId)
-      if (!itemData) return
+        // Find the item to move
+        const itemData = findItemInTree(prevItems, itemId)
+        if (!itemData) return prevItems
 
-      const itemToMove = itemData.item
+        const itemToMove = itemData.item
 
-      // Remove item from current location
-      let updatedItems = removeItemFromTree(sortableItems, itemId)
+        // Remove item from current location
+        let updatedItems = removeItemFromTree(prevItems, itemId)
 
-      // Calculate the correct index after removal
-      const adjustedIndex = calculateAdjustedIndex(
-        sortableItems,
-        itemId,
-        targetParentId,
-        targetIndex
-      )
+        // Calculate the correct index after removal
+        const adjustedIndex = calculateAdjustedIndex(
+          prevItems,
+          itemId,
+          targetParentId,
+          targetIndex
+        )
 
-      // Insert item at new location
-      updatedItems = insertItemInTree(
-        updatedItems,
-        itemToMove,
-        targetParentId,
-        adjustedIndex
-      )
+        // Insert item at new location
+        updatedItems = insertItemInTree(
+          updatedItems,
+          itemToMove,
+          targetParentId,
+          adjustedIndex
+        )
 
-      setSortableItems(updatedItems)
+        // Notify parent with hierarchical IDs structure
+        if (onReorder) {
+          onReorder(convertToIds(updatedItems))
+        }
+
+        return updatedItems
+      })
 
       // Expand target parent if moving into it
       if (targetParentId !== null) {
@@ -345,13 +402,8 @@ function TOCContent({
           return newSet
         })
       }
-
-      // Notify parent with hierarchical IDs structure
-      if (onReorder) {
-        onReorder(convertToIds(updatedItems))
-      }
     },
-    [sortableItems, onReorder, convertToIds]
+    [onReorder, convertToIds]
   )
 
   const filteredSortableItems = useMemo(() => {
@@ -685,7 +737,7 @@ function TOCContent({
           // Clear animation state after animation completes
           setTimeout(() => {
             setJustDroppedItemId(null)
-          }, 800) // Match animation duration
+          }, 300)
         }
       }
 
@@ -879,40 +931,25 @@ function TOCContent({
           )}
         </div>
       )}
-      {scrollable ? (
-        <ScrollArea className="min-h-0 flex-1">
-          <div className="px-3 pb-2">
-            <div className="flex flex-col gap-0.5">
-              {(sortable ? filteredSortableItems : filteredItems).map((item) =>
-                renderTOCItem(
-                  item,
-                  sortable,
-                  0,
-                  activeItem,
-                  collapsible,
-                  hideChildrenCounter,
-                  expandedItems,
-                  handleToggleExpanded,
-                  handleMoveItem,
-                  sortableItems,
-                  draggedItemId,
-                  dragOverItemId,
-                  dragOverPosition,
-                  sortable ? handleChildrenReorder : undefined,
-                  null,
-                  handleDragOver,
-                  handleDragLeave,
-                  handleDrop,
-                  justDroppedItemId
-                )
-              )}
-            </div>
-          </div>
-        </ScrollArea>
-      ) : (
-        <div className="min-h-0 flex-1 overflow-hidden px-3 pb-2">
-          <div className="flex flex-col gap-0.5">
-            {(sortable ? filteredSortableItems : filteredItems).map((item) =>
+      {(() => {
+        const displayItems = sortable ? filteredSortableItems : filteredItems
+        const firstItem = displayItems[0]
+        const lastItem = displayItems[displayItems.length - 1]
+        const hasDrag = Boolean(draggedItemId)
+
+        const listContent = (
+          <>
+            {sortable && firstItem && (
+              <EdgeDropZone
+                targetItemId={firstItem.id}
+                position="before"
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                visible={hasDrag}
+              />
+            )}
+            {displayItems.map((item) =>
               renderTOCItem(
                 item,
                 sortable,
@@ -935,9 +972,31 @@ function TOCContent({
                 justDroppedItemId
               )
             )}
+            {sortable && lastItem && (
+              <EdgeDropZone
+                targetItemId={lastItem.id}
+                position="after"
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                visible={hasDrag}
+              />
+            )}
+          </>
+        )
+
+        return scrollable ? (
+          <ScrollArea className="min-h-0 flex-1">
+            <div className="px-3 pb-2">
+              <div className="flex flex-col gap-0.5">{listContent}</div>
+            </div>
+          </ScrollArea>
+        ) : (
+          <div className="min-h-0 flex-1 overflow-hidden px-2 pb-2">
+            <div className="flex flex-col gap-0.5">{listContent}</div>
           </div>
-        </div>
-      )}
+        )
+      })()}
     </nav>
   )
 }
@@ -959,9 +1018,8 @@ function _F0TableOfContent(props: TOCProps) {
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export const F0TableOfContent = experimentalComponent(
-  "F0TableOfContent",
-  _F0TableOfContent
+export const F0TableOfContent = withDataTestId(
+  experimentalComponent("F0TableOfContent", _F0TableOfContent)
 )
 
 export { Item, ItemSectionHeader }

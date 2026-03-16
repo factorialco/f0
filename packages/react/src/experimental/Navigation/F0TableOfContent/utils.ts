@@ -118,7 +118,7 @@ export function removeItemFromTree(
         const filteredChildren = removeItemFromTree(item.children, itemId)
         return {
           ...item,
-          children: filteredChildren.length > 0 ? filteredChildren : undefined,
+          children: filteredChildren,
         }
       }
 
@@ -140,6 +140,15 @@ export function insertItemInTree(
   if (targetParentId === null) {
     const newItems = [...items]
     newItems.splice(targetIndex, 0, item)
+    return newItems
+  }
+
+  // Verify the target parent exists before attempting insertion
+  const parentExists = findItemInTree(items, targetParentId)
+  if (!parentExists) {
+    // Fallback: insert at root level to prevent silent data loss
+    const newItems = [...items]
+    newItems.splice(Math.min(targetIndex, newItems.length), 0, item)
     return newItems
   }
 
