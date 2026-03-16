@@ -20,7 +20,7 @@ export {
   F0_AVATAR_ALERT_TYPES,
   F0_AVATAR_MODULE_SIZES,
 } from "./F0Avatar.types"
-export { AVATAR_LIST_SIZES } from "./F0AvatarList.types"
+export { AVATAR_LIST_SIZES, F0_AVATAR_LIST_TYPES } from "./F0AvatarList.types"
 export type {
   F0AvatarSize,
   F0AvatarUtilitySize,
@@ -43,4 +43,8 @@ export type {
   ModuleId,
   FileLike,
 } from "./F0Avatar.types"
-export type { AvatarListSize, F0AvatarListProps } from "./F0AvatarList.types"
+export type {
+  AvatarListSize,
+  F0AvatarListType,
+  F0AvatarListProps,
+} from "./F0AvatarList.types"

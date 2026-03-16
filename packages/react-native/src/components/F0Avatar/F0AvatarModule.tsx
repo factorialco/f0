@@ -1,15 +1,15 @@
-import React from "react"
+import React, { useId } from "react"
 import { View } from "react-native"
 import Svg, { Defs, LinearGradient, Stop, Path } from "react-native-svg"
 import { tv } from "tailwind-variants"
 
 import { applyIconInterop } from "../primitives/F0Icon"
 
-import { modules } from "./F0Avatar.modules"
 import {
   type F0AvatarModuleProps,
   type F0AvatarModuleSize,
 } from "./F0Avatar.types"
+import { moduleIcons } from "./internal/module-icons"
 
 const moduleAvatarVariants = tv({
   base: "relative flex shrink-0 items-center justify-center",
@@ -69,9 +69,9 @@ export const F0AvatarModule = React.memo(function F0AvatarModule({
   module,
   size = "lg",
 }: F0AvatarModuleProps) {
-  const IconComponent = applyIconInterop(modules[module])
-  const code = Math.random().toString(36).substring(2, 15)
-  const gradientId = `gradient-${code}`
+  const IconComponent = applyIconInterop(moduleIcons[module])
+  const componentId = useId()
+  const gradientId = `gradient-${componentId.replace(/:/g, "-")}`
 
   return (
     <View className={moduleAvatarVariants({ size })} accessibilityRole="image">

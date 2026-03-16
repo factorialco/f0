@@ -1,11 +1,11 @@
-import { type BadgeProps } from "../Badge"
+import type { F0BadgeProps, F0BadgeVariant } from "../F0Badge"
 import { type IconType } from "../primitives/F0Icon"
 
-import { type FileLike } from "./F0Avatar.fileUtils"
-import { type ModuleId } from "./F0Avatar.modules"
+import { type FileLike } from "./internal/file-type"
+import { type ModuleId } from "./internal/module-icons"
 
-export type { ModuleId } from "./F0Avatar.modules"
-export type { FileLike } from "./F0Avatar.fileUtils"
+export type { ModuleId } from "./internal/module-icons"
+export type { FileLike } from "./internal/file-type"
 
 export type AvatarBadge = (
   | {
@@ -13,11 +13,17 @@ export type AvatarBadge = (
       module: ModuleId
     }
   | {
-      type: Exclude<BadgeProps["type"], undefined>
-      icon: BadgeProps["icon"]
+      type: F0BadgeVariant
+      icon: F0BadgeProps["icon"]
     }
 ) & {
   tooltip?: string
+}
+
+export const F0_AVATAR_BANNED_PROPS = ["className", "style"] as const
+
+type F0AvatarBannedProps = {
+  [K in (typeof F0_AVATAR_BANNED_PROPS)[number]]?: never
 }
 
 /**
@@ -60,7 +66,7 @@ export type F0AvatarPersonProps = {
   deactivated?: boolean
   "aria-label"?: string
   "aria-labelledby"?: string
-}
+} & F0AvatarBannedProps
 
 export type F0AvatarTeamProps = {
   name: string
@@ -69,7 +75,7 @@ export type F0AvatarTeamProps = {
   badge?: AvatarBadge
   "aria-label"?: string
   "aria-labelledby"?: string
-}
+} & F0AvatarBannedProps
 
 export type F0AvatarCompanyProps = {
   name: string
@@ -78,43 +84,43 @@ export type F0AvatarCompanyProps = {
   badge?: AvatarBadge
   "aria-label"?: string
   "aria-labelledby"?: string
-}
+} & F0AvatarBannedProps
 
 export type F0AvatarEmojiProps = {
   emoji: string
   size?: F0AvatarUtilitySize
-}
+} & F0AvatarBannedProps
 
 export type F0AvatarFileProps = {
   file: FileLike
   size?: F0AvatarSize
   badge?: AvatarBadge
-}
+} & F0AvatarBannedProps
 
 export type F0AvatarIconProps = {
   icon: IconType
   size?: F0AvatarUtilitySize
-}
+} & F0AvatarBannedProps
 
 export type F0AvatarFlagProps = {
   flag: string
   size?: F0AvatarFlagSize
   badge?: AvatarBadge
-}
+} & F0AvatarBannedProps
 
 export type F0AvatarAlertProps = {
   alertType: F0AvatarAlertType
   size?: F0AvatarUtilitySize
-}
+} & F0AvatarBannedProps
 
 export type F0AvatarDateProps = {
   date: Date
-}
+} & F0AvatarBannedProps
 
 export type F0AvatarModuleProps = {
   module: ModuleId
   size?: F0AvatarModuleSize
-}
+} & F0AvatarBannedProps
 
 export type F0AvatarVariant =
   | ({ type: "person" } & Omit<F0AvatarPersonProps, "size">)
@@ -131,4 +137,4 @@ export type F0AvatarVariant =
 export type F0AvatarProps = {
   avatar: F0AvatarVariant
   size?: F0AvatarSize
-}
+} & F0AvatarBannedProps

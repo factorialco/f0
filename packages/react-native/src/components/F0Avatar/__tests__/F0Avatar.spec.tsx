@@ -12,16 +12,6 @@ import {
 import { Calendar } from "../../../icons/app"
 
 describe("F0Avatar", () => {
-  let mathRandomSpy: jest.SpyInstance
-
-  beforeEach(() => {
-    mathRandomSpy = jest.spyOn(Math, "random").mockReturnValue(0.123456789)
-  })
-
-  afterEach(() => {
-    mathRandomSpy.mockRestore()
-  })
-
   it("exposes namespaced components", () => {
     expect(F0Avatar.Person).toBeDefined()
     expect(F0Avatar.Team).toBeDefined()
@@ -316,6 +306,30 @@ describe("F0Avatar", () => {
       )
       expect(toJSON()).toMatchSnapshot()
     })
+
+    it("keeps deterministic clip id references for visible items", () => {
+      const { toJSON } = render(
+        <F0Avatar.List
+          type="person"
+          size="md"
+          avatars={[
+            { firstName: "Ana", lastName: "G" },
+            { firstName: "Ben", lastName: "T" },
+            { firstName: "Cai", lastName: "L" },
+          ]}
+          max={2}
+        />
+      )
+
+      const serialized = JSON.stringify(toJSON())
+      const clipMatches = [...serialized.matchAll(/-clip-\d+/g)].map(
+        (match) => match[0]
+      )
+
+      expect(clipMatches).toContain("-clip-0")
+      expect(clipMatches).toContain("-clip-1")
+      expect(new Set(clipMatches).size).toBeGreaterThanOrEqual(2)
+    })
   })
 
   describe("Polymorphic root", () => {
@@ -355,6 +369,83 @@ describe("F0Avatar", () => {
         />
       )
       expect(toJSON()).toMatchSnapshot()
+    })
+
+    it("renders all discriminated root variants", () => {
+      const variants = [
+        { type: "person", firstName: "Ada", lastName: "L" } as const,
+        { type: "team", name: "People Ops" } as const,
+        { type: "company", name: "Factorial" } as const,
+        { type: "emoji", emoji: "peach" } as const,
+        { type: "file", file: { name: "report.pdf" } } as const,
+        { type: "icon", icon: Calendar } as const,
+        { type: "flag", flag: "ES" } as const,
+        { type: "alert", alertType: "critical" } as const,
+        { type: "date", date: new Date(2025, 6, 10) } as const,
+        { type: "module", module: "home" } as const,
+      ]
+
+      variants.forEach((avatar) => {
+        const { toJSON } = render(<F0Avatar avatar={avatar} size="md" />)
+        expect(toJSON()).not.toBeNull()
+      })
+    })
+  })
+
+  describe("Contracts", () => {
+    it("renders module and semantic badges through different paths", () => {
+      const { toJSON: moduleBadgeJson } = render(
+        <F0Avatar.Person
+          firstName="Jane"
+          lastName="Doe"
+          size="md"
+          badge={{ type: "module", module: "home" }}
+        />
+      )
+      const { toJSON: semanticBadgeJson } = render(
+        <F0Avatar.Person
+          firstName="Jane"
+          lastName="Doe"
+          size="md"
+          badge={{ type: "positive", icon: Calendar }}
+        />
+      )
+
+      const moduleSerialized = JSON.stringify(moduleBadgeJson())
+      const semanticSerialized = JSON.stringify(semanticBadgeJson())
+
+      expect(moduleSerialized).toContain("gradient-")
+      expect(semanticSerialized).toContain("bg-f0-background-positive")
+      expect(semanticSerialized).not.toContain("gradient-")
+    })
+
+    it("ignores unsafe visual override props at runtime", () => {
+      const unsafePersonProps = {
+        firstName: "Jane",
+        lastName: "Doe",
+        className: "bg-red-500",
+      } as unknown as React.ComponentProps<typeof F0Avatar.Person>
+
+      const unsafeRootProps = {
+        avatar: {
+          type: "company",
+          name: "Factorial",
+          className: "bg-blue-500",
+        },
+        className: "bg-green-500",
+      } as unknown as React.ComponentProps<typeof F0Avatar>
+
+      const { toJSON: personJson } = render(
+        <F0Avatar.Person {...unsafePersonProps} />
+      )
+      const { toJSON: rootJson } = render(<F0Avatar {...unsafeRootProps} />)
+
+      const personSerialized = JSON.stringify(personJson())
+      const rootSerialized = JSON.stringify(rootJson())
+
+      expect(personSerialized).not.toContain("bg-red-500")
+      expect(rootSerialized).not.toContain("bg-blue-500")
+      expect(rootSerialized).not.toContain("bg-green-500")
     })
   })
 })

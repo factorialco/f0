@@ -790,7 +790,7 @@ exports[`F0Avatar File Snapshot - with badge 1`] = `
               }
               gradientTransform={null}
               gradientUnits={0}
-              name="gradient-4fzzzxjylrx"
+              name="gradient-«r2»"
               x1="0%"
               x2="100%"
               y1="0%"
@@ -801,7 +801,7 @@ exports[`F0Avatar File Snapshot - with badge 1`] = `
             d="M50,0 C43,0 36,0 30,1 23,2 17,5 12,9 5,16 1,25 0,36 0,43 0,57 0,64 1,75 5,84 12,91 17,95 23,98 30,99 36,100 43,100 50,100 57,100 64,100 70,99 77,98 83,95 88,91 95,84 99,75 100,64 100,57 100,43 100,36 99,25 95,16 88,9 83,5 77,2 70,1 64,0 57,0 50,0"
             fill={
               {
-                "brushRef": "gradient-4fzzzxjylrx",
+                "brushRef": "gradient-«r2»",
                 "type": 1,
               }
             }
@@ -1214,7 +1214,7 @@ exports[`F0Avatar Flag Snapshot - with module badge 1`] = `
               }
               gradientTransform={null}
               gradientUnits={0}
-              name="gradient-4fzzzxjylrx"
+              name="gradient-«r3»"
               x1="0%"
               x2="100%"
               y1="0%"
@@ -1225,7 +1225,7 @@ exports[`F0Avatar Flag Snapshot - with module badge 1`] = `
             d="M50,0 C43,0 36,0 30,1 23,2 17,5 12,9 5,16 1,25 0,36 0,43 0,57 0,64 1,75 5,84 12,91 17,95 23,98 30,99 36,100 43,100 50,100 57,100 64,100 70,99 77,98 83,95 88,91 95,84 99,75 100,64 100,57 100,43 100,36 99,25 95,16 88,9 83,5 77,2 70,1 64,0 57,0 50,0"
             fill={
               {
-                "brushRef": "gradient-4fzzzxjylrx",
+                "brushRef": "gradient-«r3»",
                 "type": 1,
               }
             }
@@ -1611,7 +1611,7 @@ exports[`F0Avatar List Snapshot - company list with remainingCount 1`] = `
                 "type": 0,
               }
             }
-            name="«r2»-clip-0"
+            name="«rc»-clip-0"
           >
             <RNSVGPath
               d="M1.08993 5.46009C0 7.59921 0 10.3995 0 16C0 21.6005 0 24.4008 1.08993 26.5399C2.04867 28.4215 3.57847 29.9513 5.46009 30.9101C7.59921 32 10.3995 32 16 32C21.6005 32 24.4008 32 26.5399 30.9101C27.4506 30.446 28.279 29.8482 29 29.1414C28.2314 28.388 27.5846 27.5108 27.0899 26.5399C26 24.4008 26 21.6005 26 16C26 10.3995 26 7.59921 27.0899 5.46009C27.5846 4.48921 28.2314 3.612 29 2.85857C28.279 2.15181 27.4506 1.55398 26.5399 1.08993C24.4008 0 21.6005 0 16 0C10.3995 0 7.59921 0 5.46009 1.08993C3.57847 2.04867 2.04867 3.57847 1.08993 5.46009Z"
@@ -1625,7 +1625,7 @@ exports[`F0Avatar List Snapshot - company list with remainingCount 1`] = `
           </RNSVGClipPath>
         </RNSVGDefs>
         <RNSVGGroup
-          clipPath="«r2»-clip-0"
+          clipPath="«rc»-clip-0"
           fill={
             {
               "payload": 4278190080,
@@ -1779,7 +1779,7 @@ exports[`F0Avatar List Snapshot - company list with remainingCount 1`] = `
                 "type": 0,
               }
             }
-            name="«r2»-clip-1"
+            name="«rc»-clip-1"
           >
             <RNSVGPath
               d="M1.08993 5.46009C0 7.59921 0 10.3995 0 16C0 21.6005 0 24.4008 1.08993 26.5399C2.04867 28.4215 3.57847 29.9513 5.46009 30.9101C7.59921 32 10.3995 32 16 32C21.6005 32 24.4008 32 26.5399 30.9101C27.4506 30.446 28.279 29.8482 29 29.1414C28.2314 28.388 27.5846 27.5108 27.0899 26.5399C26 24.4008 26 21.6005 26 16C26 10.3995 26 7.59921 27.0899 5.46009C27.5846 4.48921 28.2314 3.612 29 2.85857C28.279 2.15181 27.4506 1.55398 26.5399 1.08993C24.4008 0 21.6005 0 16 0C10.3995 0 7.59921 0 5.46009 1.08993C3.57847 2.04867 2.04867 3.57847 1.08993 5.46009Z"
@@ -1793,7 +1793,7 @@ exports[`F0Avatar List Snapshot - company list with remainingCount 1`] = `
           </RNSVGClipPath>
         </RNSVGDefs>
         <RNSVGGroup
-          clipPath="«r2»-clip-1"
+          clipPath="«rc»-clip-1"
           fill={
             {
               "payload": 4278190080,
@@ -1974,7 +1974,7 @@ exports[`F0Avatar List Snapshot - file list 1`] = `
                 "type": 0,
               }
             }
-            name="«r4»-clip-0"
+            name="«re»-clip-0"
           >
             <RNSVGPath
               d="M1.08993 5.46009C0 7.59921 0 10.3995 0 16C0 21.6005 0 24.4008 1.08993 26.5399C2.04867 28.4215 3.57847 29.9513 5.46009 30.9101C7.59921 32 10.3995 32 16 32C21.6005 32 24.4008 32 26.5399 30.9101C27.4506 30.446 28.279 29.8482 29 29.1414C28.2314 28.388 27.5846 27.5108 27.0899 26.5399C26 24.4008 26 21.6005 26 16C26 10.3995 26 7.59921 27.0899 5.46009C27.5846 4.48921 28.2314 3.612 29 2.85857C28.279 2.15181 27.4506 1.55398 26.5399 1.08993C24.4008 0 21.6005 0 16 0C10.3995 0 7.59921 0 5.46009 1.08993C3.57847 2.04867 2.04867 3.57847 1.08993 5.46009Z"
@@ -1988,7 +1988,7 @@ exports[`F0Avatar List Snapshot - file list 1`] = `
           </RNSVGClipPath>
         </RNSVGDefs>
         <RNSVGGroup
-          clipPath="«r4»-clip-0"
+          clipPath="«re»-clip-0"
           fill={
             {
               "payload": 4278190080,
@@ -2172,7 +2172,7 @@ exports[`F0Avatar List Snapshot - flag list 1`] = `
                 "type": 0,
               }
             }
-            name="«r3»-clip-0"
+            name="«rd»-clip-0"
           >
             <RNSVGPath
               d="M0.653961 3.27606C0 4.55953 0 6.23969 0 9.6V11.4C0 14.7603 0 16.4405 0.653961 17.7239C1.2292 18.8529 2.14708 19.7708 3.27606 20.346C4.55953 21 6.23969 21 9.6 21H10.4C13.7603 21 15.4405 21 16.7239 20.346C17.188 20.1096 17.6164 19.8152 18 19.4721C17.4504 18.9805 16.9927 18.3889 16.654 17.7239C16 16.4405 16 14.7603 16 11.4V9.6C16 6.23969 16 4.55953 16.654 3.27606C16.9927 2.61115 17.4504 2.01946 18 1.52786C17.6164 1.18476 17.188 0.890414 16.7239 0.653961C15.4405 0 13.7603 0 10.4 0H9.6C6.23969 0 4.55953 0 3.27606 0.653961C2.14708 1.2292 1.2292 2.14708 0.653961 3.27606Z"
@@ -2186,7 +2186,7 @@ exports[`F0Avatar List Snapshot - flag list 1`] = `
           </RNSVGClipPath>
         </RNSVGDefs>
         <RNSVGGroup
-          clipPath="«r3»-clip-0"
+          clipPath="«rd»-clip-0"
           fill={
             {
               "payload": 4278190080,
@@ -2288,7 +2288,7 @@ exports[`F0Avatar List Snapshot - flag list 1`] = `
                 "type": 0,
               }
             }
-            name="«r3»-clip-1"
+            name="«rd»-clip-1"
           >
             <RNSVGPath
               d="M0.653961 3.27606C0 4.55953 0 6.23969 0 9.6V11.4C0 14.7603 0 16.4405 0.653961 17.7239C1.2292 18.8529 2.14708 19.7708 3.27606 20.346C4.55953 21 6.23969 21 9.6 21H10.4C13.7603 21 15.4405 21 16.7239 20.346C17.188 20.1096 17.6164 19.8152 18 19.4721C17.4504 18.9805 16.9927 18.3889 16.654 17.7239C16 16.4405 16 14.7603 16 11.4V9.6C16 6.23969 16 4.55953 16.654 3.27606C16.9927 2.61115 17.4504 2.01946 18 1.52786C17.6164 1.18476 17.188 0.890414 16.7239 0.653961C15.4405 0 13.7603 0 10.4 0H9.6C6.23969 0 4.55953 0 3.27606 0.653961C2.14708 1.2292 1.2292 2.14708 0.653961 3.27606Z"
@@ -2302,7 +2302,7 @@ exports[`F0Avatar List Snapshot - flag list 1`] = `
           </RNSVGClipPath>
         </RNSVGDefs>
         <RNSVGGroup
-          clipPath="«r3»-clip-1"
+          clipPath="«rd»-clip-1"
           fill={
             {
               "payload": 4278190080,
@@ -2459,7 +2459,7 @@ exports[`F0Avatar List Snapshot - person list 1`] = `
                 "type": 0,
               }
             }
-            name="«r0»-clip-0"
+            name="«ra»-clip-0"
           >
             <RNSVGPath
               d="M29 6.67055C27.1119 9.29683 26 12.5186 26 16C26 19.4814 27.1119 22.7032 29 25.3295C26.0958 29.3692 21.3551 32 16 32C7.16344 32 0 24.8366 0 16C0 7.16344 7.16344 0 16 0C21.3551 0 26.0958 2.63083 29 6.67055Z"
@@ -2473,7 +2473,7 @@ exports[`F0Avatar List Snapshot - person list 1`] = `
           </RNSVGClipPath>
         </RNSVGDefs>
         <RNSVGGroup
-          clipPath="«r0»-clip-0"
+          clipPath="«ra»-clip-0"
           fill={
             {
               "payload": 4278190080,
@@ -2625,7 +2625,7 @@ exports[`F0Avatar List Snapshot - person list 1`] = `
                 "type": 0,
               }
             }
-            name="«r0»-clip-1"
+            name="«ra»-clip-1"
           >
             <RNSVGPath
               d="M29 6.67055C27.1119 9.29683 26 12.5186 26 16C26 19.4814 27.1119 22.7032 29 25.3295C26.0958 29.3692 21.3551 32 16 32C7.16344 32 0 24.8366 0 16C0 7.16344 7.16344 0 16 0C21.3551 0 26.0958 2.63083 29 6.67055Z"
@@ -2639,7 +2639,7 @@ exports[`F0Avatar List Snapshot - person list 1`] = `
           </RNSVGClipPath>
         </RNSVGDefs>
         <RNSVGGroup
-          clipPath="«r0»-clip-1"
+          clipPath="«ra»-clip-1"
           fill={
             {
               "payload": 4278190080,
@@ -2836,7 +2836,7 @@ exports[`F0Avatar List Snapshot - team list with overflow 1`] = `
                 "type": 0,
               }
             }
-            name="«r1»-clip-0"
+            name="«rb»-clip-0"
           >
             <RNSVGPath
               d="M0.608964 4.93853C0 6.4087 0 8.27247 0 12C0 15.7275 0 17.5913 0.608964 19.0615C1.42092 21.0217 2.97831 22.5791 4.93853 23.391C6.4087 24 8.27247 24 12 24C15.7275 24 17.5913 24 19.0615 23.391C19.9729 23.0135 20.7972 22.4749 21.5 21.8095C20.6912 21.0438 20.0434 20.1103 19.609 19.0615C19 17.5913 19 15.7275 19 12C19 8.27247 19 6.4087 19.609 4.93853C20.0434 3.88971 20.6912 2.95622 21.5 2.19052C20.7972 1.52515 19.9729 0.986481 19.0615 0.608964C17.5913 0 15.7275 0 12 0C8.27247 0 6.4087 0 4.93853 0.608964C2.97831 1.42092 1.42092 2.97831 0.608964 4.93853Z"
@@ -2850,7 +2850,7 @@ exports[`F0Avatar List Snapshot - team list with overflow 1`] = `
           </RNSVGClipPath>
         </RNSVGDefs>
         <RNSVGGroup
-          clipPath="«r1»-clip-0"
+          clipPath="«rb»-clip-0"
           fill={
             {
               "payload": 4278190080,
@@ -3004,7 +3004,7 @@ exports[`F0Avatar List Snapshot - team list with overflow 1`] = `
                 "type": 0,
               }
             }
-            name="«r1»-clip-1"
+            name="«rb»-clip-1"
           >
             <RNSVGPath
               d="M0.608964 4.93853C0 6.4087 0 8.27247 0 12C0 15.7275 0 17.5913 0.608964 19.0615C1.42092 21.0217 2.97831 22.5791 4.93853 23.391C6.4087 24 8.27247 24 12 24C15.7275 24 17.5913 24 19.0615 23.391C19.9729 23.0135 20.7972 22.4749 21.5 21.8095C20.6912 21.0438 20.0434 20.1103 19.609 19.0615C19 17.5913 19 15.7275 19 12C19 8.27247 19 6.4087 19.609 4.93853C20.0434 3.88971 20.6912 2.95622 21.5 2.19052C20.7972 1.52515 19.9729 0.986481 19.0615 0.608964C17.5913 0 15.7275 0 12 0C8.27247 0 6.4087 0 4.93853 0.608964C2.97831 1.42092 1.42092 2.97831 0.608964 4.93853Z"
@@ -3018,7 +3018,7 @@ exports[`F0Avatar List Snapshot - team list with overflow 1`] = `
           </RNSVGClipPath>
         </RNSVGDefs>
         <RNSVGGroup
-          clipPath="«r1»-clip-1"
+          clipPath="«rb»-clip-1"
           fill={
             {
               "payload": 4278190080,
@@ -3198,7 +3198,7 @@ exports[`F0Avatar Module Snapshot - all sizes 1`] = `
           }
           gradientTransform={null}
           gradientUnits={0}
-          name="gradient-4fzzzxjylrx"
+          name="gradient-«r4»"
           x1="0%"
           x2="100%"
           y1="0%"
@@ -3209,7 +3209,7 @@ exports[`F0Avatar Module Snapshot - all sizes 1`] = `
         d="M50,0 C43,0 36,0 30,1 23,2 17,5 12,9 5,16 1,25 0,36 0,43 0,57 0,64 1,75 5,84 12,91 17,95 23,98 30,99 36,100 43,100 50,100 57,100 64,100 70,99 77,98 83,95 88,91 95,84 99,75 100,64 100,57 100,43 100,36 99,25 95,16 88,9 83,5 77,2 70,1 64,0 57,0 50,0"
         fill={
           {
-            "brushRef": "gradient-4fzzzxjylrx",
+            "brushRef": "gradient-«r4»",
             "type": 1,
           }
         }
@@ -3351,7 +3351,7 @@ exports[`F0Avatar Module Snapshot - all sizes 2`] = `
           }
           gradientTransform={null}
           gradientUnits={0}
-          name="gradient-4fzzzxjylrx"
+          name="gradient-«r5»"
           x1="0%"
           x2="100%"
           y1="0%"
@@ -3362,7 +3362,7 @@ exports[`F0Avatar Module Snapshot - all sizes 2`] = `
         d="M50,0 C43,0 36,0 30,1 23,2 17,5 12,9 5,16 1,25 0,36 0,43 0,57 0,64 1,75 5,84 12,91 17,95 23,98 30,99 36,100 43,100 50,100 57,100 64,100 70,99 77,98 83,95 88,91 95,84 99,75 100,64 100,57 100,43 100,36 99,25 95,16 88,9 83,5 77,2 70,1 64,0 57,0 50,0"
         fill={
           {
-            "brushRef": "gradient-4fzzzxjylrx",
+            "brushRef": "gradient-«r5»",
             "type": 1,
           }
         }
@@ -3504,7 +3504,7 @@ exports[`F0Avatar Module Snapshot - all sizes 3`] = `
           }
           gradientTransform={null}
           gradientUnits={0}
-          name="gradient-4fzzzxjylrx"
+          name="gradient-«r6»"
           x1="0%"
           x2="100%"
           y1="0%"
@@ -3515,7 +3515,7 @@ exports[`F0Avatar Module Snapshot - all sizes 3`] = `
         d="M50,0 C43,0 36,0 30,1 23,2 17,5 12,9 5,16 1,25 0,36 0,43 0,57 0,64 1,75 5,84 12,91 17,95 23,98 30,99 36,100 43,100 50,100 57,100 64,100 70,99 77,98 83,95 88,91 95,84 99,75 100,64 100,57 100,43 100,36 99,25 95,16 88,9 83,5 77,2 70,1 64,0 57,0 50,0"
         fill={
           {
-            "brushRef": "gradient-4fzzzxjylrx",
+            "brushRef": "gradient-«r6»",
             "type": 1,
           }
         }
@@ -3657,7 +3657,7 @@ exports[`F0Avatar Module Snapshot - all sizes 4`] = `
           }
           gradientTransform={null}
           gradientUnits={0}
-          name="gradient-4fzzzxjylrx"
+          name="gradient-«r7»"
           x1="0%"
           x2="100%"
           y1="0%"
@@ -3668,7 +3668,7 @@ exports[`F0Avatar Module Snapshot - all sizes 4`] = `
         d="M50,0 C43,0 36,0 30,1 23,2 17,5 12,9 5,16 1,25 0,36 0,43 0,57 0,64 1,75 5,84 12,91 17,95 23,98 30,99 36,100 43,100 50,100 57,100 64,100 70,99 77,98 83,95 88,91 95,84 99,75 100,64 100,57 100,43 100,36 99,25 95,16 88,9 83,5 77,2 70,1 64,0 57,0 50,0"
         fill={
           {
-            "brushRef": "gradient-4fzzzxjylrx",
+            "brushRef": "gradient-«r7»",
             "type": 1,
           }
         }
@@ -3810,7 +3810,7 @@ exports[`F0Avatar Module Snapshot - all sizes 5`] = `
           }
           gradientTransform={null}
           gradientUnits={0}
-          name="gradient-4fzzzxjylrx"
+          name="gradient-«r8»"
           x1="0%"
           x2="100%"
           y1="0%"
@@ -3821,7 +3821,7 @@ exports[`F0Avatar Module Snapshot - all sizes 5`] = `
         d="M50,0 C43,0 36,0 30,1 23,2 17,5 12,9 5,16 1,25 0,36 0,43 0,57 0,64 1,75 5,84 12,91 17,95 23,98 30,99 36,100 43,100 50,100 57,100 64,100 70,99 77,98 83,95 88,91 95,84 99,75 100,64 100,57 100,43 100,36 99,25 95,16 88,9 83,5 77,2 70,1 64,0 57,0 50,0"
         fill={
           {
-            "brushRef": "gradient-4fzzzxjylrx",
+            "brushRef": "gradient-«r8»",
             "type": 1,
           }
         }
@@ -3963,7 +3963,7 @@ exports[`F0Avatar Module Snapshot - all sizes 6`] = `
           }
           gradientTransform={null}
           gradientUnits={0}
-          name="gradient-4fzzzxjylrx"
+          name="gradient-«r9»"
           x1="0%"
           x2="100%"
           y1="0%"
@@ -3974,7 +3974,7 @@ exports[`F0Avatar Module Snapshot - all sizes 6`] = `
         d="M50,0 C43,0 36,0 30,1 23,2 17,5 12,9 5,16 1,25 0,36 0,43 0,57 0,64 1,75 5,84 12,91 17,95 23,98 30,99 36,100 43,100 50,100 57,100 64,100 70,99 77,98 83,95 88,91 95,84 99,75 100,64 100,57 100,43 100,36 99,25 95,16 88,9 83,5 77,2 70,1 64,0 57,0 50,0"
         fill={
           {
-            "brushRef": "gradient-4fzzzxjylrx",
+            "brushRef": "gradient-«r9»",
             "type": 1,
           }
         }
@@ -4429,7 +4429,7 @@ exports[`F0Avatar Person Snapshot - with badge 1`] = `
               }
               gradientTransform={null}
               gradientUnits={0}
-              name="gradient-4fzzzxjylrx"
+              name="gradient-«r0»"
               x1="0%"
               x2="100%"
               y1="0%"
@@ -4440,7 +4440,7 @@ exports[`F0Avatar Person Snapshot - with badge 1`] = `
             d="M50,0 C43,0 36,0 30,1 23,2 17,5 12,9 5,16 1,25 0,36 0,43 0,57 0,64 1,75 5,84 12,91 17,95 23,98 30,99 36,100 43,100 50,100 57,100 64,100 70,99 77,98 83,95 88,91 95,84 99,75 100,64 100,57 100,43 100,36 99,25 95,16 88,9 83,5 77,2 70,1 64,0 57,0 50,0"
             fill={
               {
-                "brushRef": "gradient-4fzzzxjylrx",
+                "brushRef": "gradient-«r0»",
                 "type": 1,
               }
             }
@@ -4792,7 +4792,7 @@ exports[`F0Avatar Polymorphic root Snapshot - flag with badge via root 1`] = `
               }
               gradientTransform={null}
               gradientUnits={0}
-              name="gradient-4fzzzxjylrx"
+              name="gradient-«rg»"
               x1="0%"
               x2="100%"
               y1="0%"
@@ -4803,7 +4803,7 @@ exports[`F0Avatar Polymorphic root Snapshot - flag with badge via root 1`] = `
             d="M50,0 C43,0 36,0 30,1 23,2 17,5 12,9 5,16 1,25 0,36 0,43 0,57 0,64 1,75 5,84 12,91 17,95 23,98 30,99 36,100 43,100 50,100 57,100 64,100 70,99 77,98 83,95 88,91 95,84 99,75 100,64 100,57 100,43 100,36 99,25 95,16 88,9 83,5 77,2 70,1 64,0 57,0 50,0"
             fill={
               {
-                "brushRef": "gradient-4fzzzxjylrx",
+                "brushRef": "gradient-«rg»",
                 "type": 1,
               }
             }
@@ -5018,7 +5018,7 @@ exports[`F0Avatar Team Snapshot - with badge 1`] = `
               }
               gradientTransform={null}
               gradientUnits={0}
-              name="gradient-4fzzzxjylrx"
+              name="gradient-«r1»"
               x1="0%"
               x2="100%"
               y1="0%"
@@ -5029,7 +5029,7 @@ exports[`F0Avatar Team Snapshot - with badge 1`] = `
             d="M50,0 C43,0 36,0 30,1 23,2 17,5 12,9 5,16 1,25 0,36 0,43 0,57 0,64 1,75 5,84 12,91 17,95 23,98 30,99 36,100 43,100 50,100 57,100 64,100 70,99 77,98 83,95 88,91 95,84 99,75 100,64 100,57 100,43 100,36 99,25 95,16 88,9 83,5 77,2 70,1 64,0 57,0 50,0"
             fill={
               {
-                "brushRef": "gradient-4fzzzxjylrx",
+                "brushRef": "gradient-«r1»",
                 "type": 1,
               }
             }

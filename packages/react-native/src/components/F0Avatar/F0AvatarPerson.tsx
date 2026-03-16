@@ -2,17 +2,9 @@ import React from "react"
 
 import { PersonNegative } from "../../icons/app"
 
-import { type F0AvatarPersonProps, type F0AvatarSize } from "./F0Avatar.types"
-import { BaseAvatar, type BaseAvatarProps } from "./F0AvatarBase"
-
-const sizeMap: Record<F0AvatarSize, NonNullable<BaseAvatarProps["size"]>> = {
-  xs: "xsmall",
-  sm: "small",
-  md: "medium",
-  lg: "lg",
-  xl: "large",
-  "2xl": "xlarge",
-}
+import { F0_AVATAR_SIZE_TO_INTERNAL_SIZE } from "./F0Avatar.constants"
+import { type F0AvatarPersonProps } from "./F0Avatar.types"
+import { BaseAvatar } from "./F0AvatarBase"
 
 export const F0AvatarPerson = React.memo(function F0AvatarPerson({
   firstName,
@@ -29,7 +21,7 @@ export const F0AvatarPerson = React.memo(function F0AvatarPerson({
       type="rounded"
       name={[firstName, lastName]}
       src={src}
-      size={sizeMap[size]}
+      size={F0_AVATAR_SIZE_TO_INTERNAL_SIZE[size]}
       color="random"
       badge={badge}
       icon={

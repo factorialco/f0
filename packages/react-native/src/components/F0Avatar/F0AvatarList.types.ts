@@ -9,30 +9,31 @@ import {
 export const AVATAR_LIST_SIZES = ["xs", "sm", "md"] as const
 export type AvatarListSize = (typeof AVATAR_LIST_SIZES)[number]
 
-export type F0AvatarListPropsAvatars =
-  | {
-      type: "person"
-      avatars: (Omit<F0AvatarPersonProps, "size"> & Record<string, unknown>)[]
-    }
-  | {
-      type: "team"
-      avatars: (Omit<F0AvatarTeamProps, "size"> & Record<string, unknown>)[]
-    }
-  | {
-      type: "company"
-      avatars: (Omit<F0AvatarCompanyProps, "size"> & Record<string, unknown>)[]
-    }
-  | {
-      type: "flag"
-      avatars: (Omit<F0AvatarFlagProps, "size"> & Record<string, unknown>)[]
-    }
-  | {
-      type: "file"
-      avatars: (Omit<F0AvatarFileProps, "size"> & Record<string, unknown>)[]
-    }
+export const F0_AVATAR_LIST_TYPES = [
+  "person",
+  "team",
+  "company",
+  "flag",
+  "file",
+] as const
+export type F0AvatarListType = (typeof F0_AVATAR_LIST_TYPES)[number]
 
-export type F0AvatarListProps = {
+type F0AvatarListTypeMapping = {
+  person: Omit<F0AvatarPersonProps, "size">
+  team: Omit<F0AvatarTeamProps, "size">
+  company: Omit<F0AvatarCompanyProps, "size">
+  flag: Omit<F0AvatarFlagProps, "size">
+  file: Omit<F0AvatarFileProps, "size">
+}
+
+export type F0AvatarListProps<T extends F0AvatarListType = F0AvatarListType> = {
+  type: T
+  avatars: Array<F0AvatarListTypeMapping[T]>
   size?: AvatarListSize
   max?: number
   remainingCount?: number
-} & F0AvatarListPropsAvatars
+}
+
+export type F0AvatarListAnyProps = {
+  [K in F0AvatarListType]: F0AvatarListProps<K>
+}[F0AvatarListType]

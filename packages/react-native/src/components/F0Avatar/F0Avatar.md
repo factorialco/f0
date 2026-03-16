@@ -12,6 +12,25 @@ F0Avatar follows the same namespace pattern as `F0Tag`:
 
 The root is useful for data-driven rendering (e.g., server-driven UI where avatar type comes from an API). For static usage, prefer the namespaced variants directly.
 
+### Architecture Decisions
+
+- Namespaced API (`F0Avatar.*`) remains the primary usage model.
+- `F0Avatar` root dispatcher remains available for data-driven rendering.
+- Shared sizing and badge mappings are centralized in `F0Avatar.constants.ts`.
+- Badge overlay rendering is centralized in `internal/badge.tsx` to avoid per-variant duplication.
+- Name/initials/color logic is centralized in `internal/name.ts` (replacing the old catch-all utils file).
+- Deterministic rendering is enforced in `F0AvatarModule` by using `useId` for gradient IDs.
+- Runtime visual override props are blocked in public avatar API types (`className`, `style`).
+
+### Migration Notes
+
+- `F0Avatar.utils.ts` was removed in favor of focused internal modules.
+- `F0Avatar.fileUtils.ts` moved to `internal/file-type.ts`.
+- `F0Avatar.modules.ts` moved to `internal/module-icons.ts`.
+- `F0AvatarList` now uses strict `type -> avatars` mapping and no unsafe casts.
+- `F0AvatarList` internals are split into focused files under `internal/`.
+- Snapshot output changed for deterministic gradient/clip IDs.
+
 ## Usage
 
 ### Namespaced variants (preferred)
@@ -168,6 +187,8 @@ Tests cover:
 2. Snapshot coverage for each variant with key prop combinations.
 3. Size variant snapshots.
 4. Polymorphic root rendering.
+5. Contract checks for list clip id determinism and badge rendering paths.
+6. Root dispatcher coverage for all discriminated variants.
 
 Run tests: `pnpm test -- --watchman=false`
 
@@ -177,6 +198,7 @@ Run tests: `pnpm test -- --watchman=false`
 F0Avatar/
   F0Avatar.tsx              # Namespace assembly + polymorphic root
   F0Avatar.types.ts         # Types, size constants, discriminated union
+  F0Avatar.constants.ts     # Shared size + badge mapping constants
   F0Avatar.styles.ts        # tv() variants for Alert and Flag containers
   F0AvatarPerson.tsx        # Person variant wrapper
   F0AvatarTeam.tsx          # Team variant wrapper
@@ -188,6 +210,18 @@ F0Avatar/
   F0AvatarAlert.tsx         # Alert variant (new)
   F0AvatarDate.tsx          # Date variant wrapper
   F0AvatarModule.tsx        # Module variant wrapper
+  F0AvatarList.tsx          # Typed list renderer with SVG clipping
+  F0AvatarList.types.ts     # List discriminated mapping
+  F0AvatarList.clips.ts     # List clipping paths + geometry
+  internal/
+    badge.tsx               # Shared badge renderer
+    file-type.ts            # File extension/MIME classification
+    list-avatar.tsx         # List avatar data + variant renderer
+    list-counter.tsx        # List overflow counter renderer
+    list-svg.tsx            # List SVG ring/content/clipped wrapper
+    list-types.ts           # List-specific render input types
+    module-icons.ts         # Module icon map + ModuleId
+    name.ts                 # Initials + deterministic color helpers
   F0Avatar.md               # This file
   index.ts                  # Barrel exports
   __tests__/

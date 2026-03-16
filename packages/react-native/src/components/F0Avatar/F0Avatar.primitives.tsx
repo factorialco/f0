@@ -1,8 +1,9 @@
 import * as React from "react"
-import { View, Text, Image } from "react-native"
+import { Text, View } from "react-native"
 import { tv } from "tailwind-variants"
 
 import { cn } from "../../lib/utils"
+import { F0Image } from "../primitives/F0Image"
 
 export const sizes = [
   "xsmall",
@@ -97,13 +98,7 @@ const AvatarImage = ({
   alt: string
 }) => (
   <View className={cn("aspect-square h-full w-full", className)} {...props}>
-    <Image
-      style={{ width: "100%", height: "100%" }}
-      source={{
-        uri: src,
-      }}
-      aria-label={alt}
-    />
+    <F0Image source={{ uri: src }} accessibilityLabel={alt} />
   </View>
 )
 

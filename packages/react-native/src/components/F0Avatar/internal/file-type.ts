@@ -1,11 +1,11 @@
-import { type TextColor } from "../primitives/F0Text"
+import type { TextColor } from "../../primitives/F0Text"
 
-type FileTypeInfo = {
+export type FileTypeInfo = {
   type: string
   color: TextColor
 }
 
-type FileLike = {
+export type FileLike = {
   name: string
   type?: string
 }
@@ -81,7 +81,7 @@ const EXTENSION_MAP: Record<string, keyof typeof FILE_TYPE_MAP> = {
   markdown: "markdown",
 }
 
-const getFileTypeInfo = (file: FileLike): FileTypeInfo => {
+export function getFileTypeInfo(file: FileLike): FileTypeInfo {
   const mimeType = file.type?.toLowerCase() ?? ""
 
   const matchedMimeKey = Object.keys(MIME_MATCH_MAP).find((key) =>
@@ -100,6 +100,3 @@ const getFileTypeInfo = (file: FileLike): FileTypeInfo => {
 
   return FILE_TYPE_MAP.default
 }
-
-export { getFileTypeInfo }
-export type { FileTypeInfo, FileLike }

@@ -1,53 +1,25 @@
-import { ComponentProps, useMemo } from "react"
+import { ComponentProps } from "react"
 import { View } from "react-native"
 
-import { Badge, BadgeProps } from "../Badge"
 import { F0Icon, type F0IconProps, type IconType } from "../primitives/F0Icon"
 
+import {
+  F0_AVATAR_INTERNAL_SIZE_TO_BADGE_SIZE,
+  F0_AVATAR_INTERNAL_SIZE_TO_MODULE_SIZE,
+} from "./F0Avatar.constants"
 import {
   Avatar as AvatarComponent,
   AvatarFallback,
   AvatarImage,
 } from "./F0Avatar.primitives"
-import { type AvatarBadge, type F0AvatarModuleSize } from "./F0Avatar.types"
-import { getAvatarColor, getInitials } from "./F0Avatar.utils"
-import { F0AvatarModule } from "./F0AvatarModule"
+import { type AvatarBadge } from "./F0Avatar.types"
+import {
+  getAvatarBadgeContainerClassName,
+  renderAvatarBadge,
+} from "./internal/badge"
+import { getAvatarColorByText, getAvatarInitials } from "./internal/name"
 
 type ShadAvatarProps = ComponentProps<typeof AvatarComponent>
-
-const getModuleAvatarSize = (
-  size: ShadAvatarProps["size"]
-): F0AvatarModuleSize => {
-  const sizeMap: Record<
-    NonNullable<ShadAvatarProps["size"]>,
-    F0AvatarModuleSize
-  > = {
-    xsmall: "xs",
-    small: "sm",
-    medium: "sm",
-    lg: "sm",
-    large: "md",
-    xlarge: "lg",
-  }
-  return sizeMap[size ?? "medium"]
-}
-
-const getBadgeSize = (
-  size: ShadAvatarProps["size"]
-): NonNullable<BadgeProps["size"]> => {
-  const sizeMap: Record<
-    NonNullable<ShadAvatarProps["size"]>,
-    NonNullable<BadgeProps["size"]>
-  > = {
-    xsmall: "xs",
-    small: "sm",
-    medium: "sm",
-    lg: "sm",
-    large: "md",
-    xlarge: "lg",
-  }
-  return sizeMap[size ?? "medium"]
-}
 
 export type BaseAvatarProps = {
   type: ShadAvatarProps["type"]
@@ -85,35 +57,26 @@ export const BaseAvatar = ({
   badge,
   icon,
 }: BaseAvatarProps) => {
-  const initials = getInitials(name, size)
+  const internalSize = size ?? "medium"
+  const initials = getAvatarInitials(name, internalSize)
   const avatarColor =
     color === "random"
-      ? getAvatarColor(Array.isArray(name) ? name.join("") : name)
+      ? getAvatarColorByText(Array.isArray(name) ? name.join("") : name)
       : color
 
   const hasAria = Boolean(ariaLabel || ariaLabelledby)
-  const badgeSize = getBadgeSize(size)
-  const moduleAvatarSize = getModuleAvatarSize(size)
-
-  const badgeContent = useMemo(
-    () =>
-      badge ? (
-        <>
-          {badge.type === "module" && (
-            <F0AvatarModule module={badge.module} size={moduleAvatarSize} />
-          )}
-          {badge.type !== "module" && (
-            <Badge type={badge.type} icon={badge.icon} size={badgeSize} />
-          )}
-        </>
-      ) : null,
-    [badge, badgeSize, moduleAvatarSize]
-  )
+  const badgeSize = F0_AVATAR_INTERNAL_SIZE_TO_BADGE_SIZE[internalSize]
+  const moduleAvatarSize = F0_AVATAR_INTERNAL_SIZE_TO_MODULE_SIZE[internalSize]
+  const badgeContent = badge
+    ? renderAvatarBadge({
+        badge,
+        badgeSize,
+        moduleSize: moduleAvatarSize,
+      })
+    : null
 
   return (
-    <View
-      className={`inline-flex ${badge && badge.type === "module" ? "p-[3px]" : ""}`}
-    >
+    <View className={getAvatarBadgeContainerClassName(badge)}>
       <View className="h-fit w-fit">
         <AvatarComponent
           size={size}
