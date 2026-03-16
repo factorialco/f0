@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.403.1](https://github.com/factorialco/f0/compare/f0-react-v1.403.0...f0-react-v1.403.1) (2026-03-16)
+
+
+### Bug Fixes
+
+* handle text overflow for unspaced content in CommunityPost ([#3527](https://github.com/factorialco/f0/issues/3527)) ([00306e0](https://github.com/factorialco/f0/commit/00306e0ebfcdf874cd43fb34ce9d9b641b8e03ea))
+
 ## [1.403.0](https://github.com/factorialco/f0/compare/f0-react-v1.402.3...f0-react-v1.403.0) (2026-03-16)
 
 
