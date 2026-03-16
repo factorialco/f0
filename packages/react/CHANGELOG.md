@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.402.3](https://github.com/factorialco/f0/compare/f0-react-v1.402.2...f0-react-v1.402.3) (2026-03-16)
+
+
+### Bug Fixes
+
+* javascript heap out of memory ([#3672](https://github.com/factorialco/f0/issues/3672)) ([de8aad4](https://github.com/factorialco/f0/commit/de8aad42676e2be95a2dc20f6b68011c07280729))
+
 ## [1.402.2](https://github.com/factorialco/f0/compare/f0-react-v1.402.1...f0-react-v1.402.2) (2026-03-13)
 
 
