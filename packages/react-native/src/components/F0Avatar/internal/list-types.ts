@@ -1,16 +1,16 @@
 import type {
-  F0AvatarCompanyProps,
-  F0AvatarFileProps,
-  F0AvatarFlagProps,
-  F0AvatarPersonProps,
-  F0AvatarTeamProps,
-} from "../F0Avatar.types"
+  F0AvatarListCompanyItem,
+  F0AvatarListFileItem,
+  F0AvatarListFlagItem,
+  F0AvatarListPersonItem,
+  F0AvatarListTeamItem,
+} from "../F0AvatarList.types"
 
-export type PersonListAvatar = Omit<F0AvatarPersonProps, "size">
-export type TeamListAvatar = Omit<F0AvatarTeamProps, "size">
-export type CompanyListAvatar = Omit<F0AvatarCompanyProps, "size">
-export type FlagListAvatar = Omit<F0AvatarFlagProps, "size">
-export type FileListAvatar = Omit<F0AvatarFileProps, "size">
+export type PersonListAvatar = F0AvatarListPersonItem
+export type TeamListAvatar = F0AvatarListTeamItem
+export type CompanyListAvatar = F0AvatarListCompanyItem
+export type FlagListAvatar = F0AvatarListFlagItem
+export type FileListAvatar = F0AvatarListFileItem
 
 export type AvatarRenderInput =
   | { type: "person"; avatar: PersonListAvatar }

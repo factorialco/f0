@@ -18,12 +18,21 @@ export const F0_AVATAR_LIST_TYPES = [
 ] as const
 export type F0AvatarListType = (typeof F0_AVATAR_LIST_TYPES)[number]
 
+export type F0AvatarListPersonItem = Pick<
+  F0AvatarPersonProps,
+  "firstName" | "lastName" | "src"
+>
+export type F0AvatarListTeamItem = Pick<F0AvatarTeamProps, "name" | "src">
+export type F0AvatarListCompanyItem = Pick<F0AvatarCompanyProps, "name" | "src">
+export type F0AvatarListFlagItem = Pick<F0AvatarFlagProps, "flag">
+export type F0AvatarListFileItem = Pick<F0AvatarFileProps, "file">
+
 type F0AvatarListTypeMapping = {
-  person: Omit<F0AvatarPersonProps, "size">
-  team: Omit<F0AvatarTeamProps, "size">
-  company: Omit<F0AvatarCompanyProps, "size">
-  flag: Omit<F0AvatarFlagProps, "size">
-  file: Omit<F0AvatarFileProps, "size">
+  person: F0AvatarListPersonItem
+  team: F0AvatarListTeamItem
+  company: F0AvatarListCompanyItem
+  flag: F0AvatarListFlagItem
+  file: F0AvatarListFileItem
 }
 
 export type F0AvatarListProps<T extends F0AvatarListType = F0AvatarListType> = {
