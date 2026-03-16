@@ -528,9 +528,7 @@ export const TableCollection = <
                               item={item}
                               index={index}
                               groupIndex={groupIndex}
-                              onCheckedChange={(checked) =>
-                                handleSelectItemChange(item, checked)
-                              }
+                              onSelectItem={handleSelectItemChange}
                               selectedItems={selectedItems}
                               columns={columns}
                               frozenColumnsLeft={frozenColumnsLeft}
@@ -568,9 +566,7 @@ export const TableCollection = <
                     source={effectiveSource}
                     item={item}
                     index={index}
-                    onCheckedChange={(checked) =>
-                      handleSelectItemChange(item, checked)
-                    }
+                    onSelectItem={handleSelectItemChange}
                     selectedItems={selectedItems}
                     columns={columns}
                     frozenColumnsLeft={frozenColumnsLeft}

@@ -16,7 +16,7 @@
  *
  */
 
-import { forwardRef, useCallback, useRef } from "react"
+import { forwardRef, useCallback, useEffect, useMemo, useRef } from "react"
 
 import type { TableVisualizationType } from "@/experimental/OneDataCollection/types"
 
@@ -71,7 +71,7 @@ export type RowProps<
   item: R
   index: number
   groupIndex: number
-  onCheckedChange: (checked: boolean) => void
+  onSelectItem: (item: R, checked: boolean) => void
   selectedItems: Map<string | number, R>
   columns: ReadonlyArray<TableColumnDefinition<R, Sortings, Summaries>>
   frozenColumnsLeft: number
@@ -85,6 +85,8 @@ export type RowProps<
   /** Row wrapper for child rows (provides per-row context, e.g. editing state) */
   rowWrapper?: React.ComponentType<RowWrapperProps<R>>
   fromVisualization?: TableVisualizationType
+  indeterminate?: boolean
+  allChildrenSelected?: boolean
 }
 
 const NestedRowContent = <
@@ -175,6 +177,82 @@ const NestedRowContent = <
     }
   }
 
+  const handleSelectItemWithChildren = useCallback(
+    (selectedItem: R, checked: boolean) => {
+      props.onSelectItem(selectedItem, checked)
+
+      const selectedId = props.source.selectable?.(selectedItem)
+      const parentId = props.source.selectable?.(props.item)
+      if (
+        selectedId !== undefined &&
+        selectedId === parentId &&
+        children.length > 0
+      ) {
+        for (const child of children) {
+          props.onSelectItem(child as R, checked)
+        }
+      }
+    },
+    [props.onSelectItem, props.source, props.item, children]
+  )
+
+  const { parentIndeterminate, allChildrenSelected } = useMemo(() => {
+    if (children.length === 0)
+      return { parentIndeterminate: false, allChildrenSelected: false }
+    const childIds = children
+      .map((child) => props.source.selectable?.(child as R))
+      .filter((id): id is string | number => id !== undefined)
+    if (childIds.length === 0)
+      return { parentIndeterminate: false, allChildrenSelected: false }
+    const selectedCount = childIds.filter((id) =>
+      props.selectedItems.has(id)
+    ).length
+    return {
+      parentIndeterminate: selectedCount > 0 && selectedCount < childIds.length,
+      allChildrenSelected: selectedCount === childIds.length,
+    }
+  }, [children, props.source, props.selectedItems])
+
+  useEffect(() => {
+    if (!allChildrenSelected || children.length === 0) return
+    const parentId = props.source.selectable?.(props.item)
+    if (parentId === undefined || props.selectedItems.has(parentId)) return
+    props.onSelectItem(props.item, true)
+  }, [
+    allChildrenSelected,
+    children.length,
+    props.source,
+    props.item,
+    props.onSelectItem,
+    props.selectedItems,
+  ])
+
+  const prevParentSelectedRef = useRef(false)
+
+  useEffect(() => {
+    const parentId = props.source.selectable?.(props.item)
+    if (parentId === undefined || children.length === 0) return
+
+    const parentIsSelected = props.selectedItems.has(parentId)
+    const wasSelected = prevParentSelectedRef.current
+    prevParentSelectedRef.current = parentIsSelected
+
+    if (parentIsSelected && !wasSelected) {
+      for (const child of children) {
+        const childId = props.source.selectable?.(child as R)
+        if (childId !== undefined && !props.selectedItems.has(childId)) {
+          props.onSelectItem(child as R, true)
+        }
+      }
+    }
+  }, [
+    props.selectedItems,
+    props.source,
+    props.item,
+    children,
+    props.onSelectItem,
+  ])
+
   const sharedNestedRowProps = {
     depth: props.nestedRowProps?.depth ?? 0,
     expanded: open,
@@ -200,6 +278,9 @@ const NestedRowContent = <
     <>
       <Row
         {...props}
+        onSelectItem={handleSelectItemWithChildren}
+        indeterminate={parentIndeterminate}
+        allChildrenSelected={allChildrenSelected}
         disableHover={!props.source.itemOnClick}
         noBorder={shouldHideBorder}
         ref={combinedRowRef}

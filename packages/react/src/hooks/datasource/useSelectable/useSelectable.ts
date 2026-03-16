@@ -233,9 +233,13 @@ export function useSelectable<
     const itemsStatus = Array.from(items.values())
       .filter((itemState) => {
         if (itemState.item === undefined) return false
-        // Filter to only current page items in page-only selection mode
+        // In page-only mode, include items from the current page OR items
+        // with a resolved item reference (e.g. children loaded via nested rows
+        // that aren't in data.records but are visible on the current page).
         if (isPageOnlySelection && currentPageItemIds) {
-          return currentPageItemIds.has(itemState.id)
+          return (
+            currentPageItemIds.has(itemState.id) || itemState.item !== undefined
+          )
         }
         return true
       })
@@ -244,9 +248,8 @@ export function useSelectable<
     const selectedIds = Array.from(items.entries())
       .filter(([id, itemState]) => {
         if (!itemState.checked) return false
-        // Filter to only current page items in page-only selection mode
         if (isPageOnlySelection && currentPageItemIds) {
-          return currentPageItemIds.has(id)
+          return currentPageItemIds.has(id) || itemState.item !== undefined
         }
         return true
       })
@@ -420,7 +423,8 @@ export function useSelectable<
     (
       itemId: SelectionId | readonly SelectionId[],
       checked: boolean,
-      onlyIfNotPreviousState: boolean = false
+      onlyIfNotPreviousState: boolean = false,
+      itemRef?: WithGroupId<R>
     ) => {
       const itemIds = (Array.isArray(itemId) ? itemId : [itemId]).slice(
         0,
@@ -443,6 +447,7 @@ export function useSelectable<
           const existingItem = current.items?.get(id)?.item
           const item =
             existingItem ??
+            itemRef ??
             data.records.find((record) => {
               const recordId = getSelectable?.(record)
               return recordId !== undefined && recordId === id
@@ -513,7 +518,12 @@ export function useSelectable<
       if (isRecordItem(itemOrId, getSelectable !== undefined)) {
         const id = getSelectable?.(itemOrId)
         if (id !== undefined) {
-          handleSelectItemChangeInternal(id, checked)
+          handleSelectItemChangeInternal(
+            id,
+            checked,
+            false,
+            itemOrId as WithGroupId<R>
+          )
         }
         return
       }
@@ -531,7 +541,7 @@ export function useSelectable<
     (checked: boolean) => {
       if (!isMultiSelection) return
 
-      if (!checked && allSelectedCheck) {
+      if (!checked) {
         setAllSelectedCheck(false)
         wasExplicitSelectAll.current = false
         setSelectAllTotal(null)
@@ -547,9 +557,7 @@ export function useSelectable<
 
       const currentPageCount = data.records?.length || 0
 
-      if (checked) {
-        setSelectAllTotal((prev) => (prev !== null ? prev : currentPageCount))
-      }
+      setSelectAllTotal((prev) => (prev !== null ? prev : currentPageCount))
 
       if (isGrouped && data.type === "grouped") {
         const allGroupIds = data.groups.map((group) => group.key)
@@ -564,12 +572,6 @@ export function useSelectable<
         if (allItemIds.length > 0) {
           handleSelectItemChangeInternal(allItemIds, checked)
         }
-      }
-
-      if (!checked) {
-        setAllSelectedCheck(false)
-        wasExplicitSelectAll.current = false
-        setSelectAllTotal(null)
       }
     },
     [

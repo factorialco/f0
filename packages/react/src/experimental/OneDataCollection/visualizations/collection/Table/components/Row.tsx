@@ -54,7 +54,7 @@ export type RowProps<
   item: R
   index: number
   groupIndex: number
-  onCheckedChange: (checked: boolean) => void
+  onSelectItem: (item: R, checked: boolean) => void
   selectedItems: Map<string | number, R>
   columns: ReadonlyArray<TableColumnDefinition<R, Sortings, Summaries>>
   frozenColumnsLeft: number
@@ -73,6 +73,8 @@ export type RowProps<
   /** Row wrapper passed through to NestedRow for wrapping child rows */
   rowWrapper?: React.ComponentType<RowWrapperProps<R>>
   fromVisualization?: TableVisualizationType
+  indeterminate?: boolean
+  allChildrenSelected?: boolean
 }
 
 export type NestedRowProps = {
@@ -105,7 +107,7 @@ const RowComponentInner = <
   {
     source,
     item,
-    onCheckedChange,
+    onSelectItem,
     selectedItems,
     columns,
     frozenColumnsLeft,
@@ -121,6 +123,8 @@ const RowComponentInner = <
     cellRenderer: CellRenderer,
     rowWrapper,
     fromVisualization,
+    indeterminate = false,
+    allChildrenSelected = false,
   }: RowProps<
     R,
     Filters,
@@ -172,7 +176,7 @@ const RowComponentInner = <
       <NestedRow
         source={source}
         item={item}
-        onCheckedChange={onCheckedChange}
+        onSelectItem={onSelectItem}
         selectedItems={selectedItems}
         columns={columns}
         frozenColumnsLeft={frozenColumnsLeft}
@@ -190,7 +194,9 @@ const RowComponentInner = <
     )
   }
 
-  const isSelected = id !== undefined && selectedItems.has(id)
+  const isSelected =
+    id !== undefined &&
+    (selectedItems.has(id) || indeterminate || allChildrenSelected)
   const referenceRowType = referenceRowTypeFn?.(item) ?? "none"
 
   const cellRenderedClass = CellRenderer
@@ -227,8 +233,11 @@ const RowComponentInner = <
           {id !== undefined && (
             <div className="pointer-events-auto ml-1.5 flex h-full items-center justify-start">
               <Checkbox
-                checked={selectedItems.has(id)}
-                onCheckedChange={onCheckedChange}
+                checked={
+                  selectedItems.has(id) || indeterminate || allChildrenSelected
+                }
+                indeterminate={indeterminate}
+                onCheckedChange={(checked) => onSelectItem(item, !!checked)}
                 title={`Select ${source.selectable(item)}`}
                 hideLabel
               />
