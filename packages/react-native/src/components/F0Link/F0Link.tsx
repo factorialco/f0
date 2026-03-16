@@ -50,6 +50,7 @@ const F0Link = React.memo(
       onPress,
       onFocus,
       onBlur,
+      className,
       accessibilityLabel,
       testID,
       ...rest
@@ -120,7 +121,7 @@ const F0Link = React.memo(
 
     const forwardedProps = omitProps(rest, F0_LINK_BLOCKED_FORWARD_PROPS)
 
-    const className = useMemo(
+    const containerClassName = useMemo(
       () =>
         cn(
           f0LinkContainerVariants({
@@ -129,9 +130,10 @@ const F0Link = React.memo(
             disabled,
             pressed: isPressed,
             focused: isFocused,
-          })
+          }),
+          className
         ),
-      [variant, size, disabled, isPressed, isFocused]
+      [variant, size, disabled, isPressed, isFocused, className]
     )
 
     const textVariant = F0_LINK_TEXT_VARIANT_BY_SIZE[size]
@@ -153,7 +155,7 @@ const F0Link = React.memo(
         {...forwardedProps}
         variant="none"
         disableAnimation
-        className={className}
+        className={containerClassName}
         disabled={disabled}
         onPress={handlePress}
         onPressIn={handlePressIn}

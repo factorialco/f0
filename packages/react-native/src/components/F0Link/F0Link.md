@@ -36,7 +36,6 @@ import { F0Link } from "@factorialco/f0-react-native"
 | `external`        | `boolean`                                    | `false`  | Shows external-link icon                                                                        |
 | `disabled`        | `boolean`                                    | `false`  | Disables interaction and applies disabled styles                                                |
 | `numberOfLines`   | `number`                                     | `1`      | Text truncation lines                                                                           |
-| `numberOfLines`   | `number`                                     | `1`      | Text truncation lines                                                                           |
 | `className`       | `string`                                     | `-`      | Tailwind classes for the outer container (layout/positioning only — e.g. `mt-4`, `self-center`) |
 | `testID`          | `string`                                     | `-`      | Test id                                                                                         |
 
