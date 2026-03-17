@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils"
 
 import type { FiltersDefinition, FiltersMode, FiltersState } from "./types"
 
+import { collectNestedFilterKeys } from "./filterTypes/InFilter/components/option-utils"
 import { FiltersChipsList as FiltersChipsListComponent } from "./components/FiltersChipsList"
 import { FiltersControls as FiltersControlsComponent } from "./components/FiltersControls"
 import { FiltersPresets as FiltersPresetsComponent } from "./components/FiltersPresets"
@@ -130,6 +131,16 @@ const FiltersRoot = <Definition extends FiltersDefinition>({
   const removeFilterValue = (key: keyof Definition) => {
     const newFilters = { ...localFiltersValue }
     delete newFilters[key]
+
+    // Also clear nested child filter keys to avoid orphaned values
+    const filterDef = filters?.[key]
+    if (filterDef?.type === "in" && filterDef.options) {
+      const nestedKeys = collectNestedFilterKeys(filterDef.options)
+      nestedKeys.forEach((nestedKey) => {
+        delete newFilters[nestedKey as keyof Definition]
+      })
+    }
+
     setLocalFiltersValue(newFilters as FiltersState<Definition>)
     props.onChange(newFilters as FiltersState<Definition>)
   }
