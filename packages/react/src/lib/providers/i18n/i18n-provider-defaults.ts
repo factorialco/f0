@@ -399,7 +399,7 @@ export const defaultTranslations = {
       link: "Link",
       date: "Date",
       dropdownSingle: "Dropdown",
-      file: "File",
+      file: "File upload",
     },
     selectQuestion: {
       addOption: "Add option",

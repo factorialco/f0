@@ -1,6 +1,6 @@
 import { DateQuestionProps } from "./QuestionTypes/DateQuestion"
 import { DropdownSingleQuestionProps } from "./QuestionTypes/DropdownSingleQuestion/types"
-import { FileQuestionProps } from ".QuestionTypes/FileQuestion"
+import { FileQuestionProps } from "./QuestionTypes/FileQuestion"
 import { LinkQuestionProps } from "./QuestionTypes/LinkQuestion"
 import { NumericQuestionProps } from "./QuestionTypes/NumericQuestion"
 import { RatingQuestionProps } from "./QuestionTypes/RatingQuestion"

@@ -7,7 +7,7 @@ import { SurveyFormBuilderElement, QuestionElement } from "../../types"
 import { SurveyFormBuilderProvider } from "../../Context"
 
 const meta: Meta<typeof FileQuestion> = {
-  title: "CoCreationForm/FileQuestion",
+  title: "Surveys/SurveyFormBuilder/FileQuestion",
   component: FileQuestion,
   tags: ["autodocs", "experimental"],
   render: (args) => {

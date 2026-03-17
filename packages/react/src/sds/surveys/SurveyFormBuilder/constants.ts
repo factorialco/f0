@@ -72,7 +72,7 @@ export const useQuestionTypes = () => {
       questionType: "dropdown-single",
     },
     {
-      label: t("coCreationForm.questionTypes.file"),
+      label: t("surveyFormBuilder.questionTypes.file"),
       icon: Upload,
       questionType: "file",
     },
