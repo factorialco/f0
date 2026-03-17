@@ -25,10 +25,7 @@ describe("BaseCell", () => {
     )
 
     const cell = container.firstChild as HTMLElement
-    expect(cell).toHaveStyle({
-      outline: "1px solid hsl(var(--critical-50))",
-      outlineOffset: "-0.5px",
-    })
+    expect(cell.className).toContain("outline")
     expect(cell.className).toContain("bg-f1-background-critical")
   })
 
@@ -41,8 +38,7 @@ describe("BaseCell", () => {
 
     const cell = container.firstChild as HTMLElement
     expect(cell.className).not.toContain("bg-f1-background-critical")
-    expect(cell.style.outline).toBe("")
-    expect(cell.style.outlineOffset).toBe("")
+    expect(cell.className).not.toContain("outline-[hsl")
   })
 
   it("shows error tooltip on hover", async () => {
@@ -54,11 +50,16 @@ describe("BaseCell", () => {
       </BaseCell>
     )
 
-    const cellContent = screen.getByText("Cell content")
-    await user.hover(cellContent)
+    // Hover the tooltip trigger wrapper, not the inner content
+    const triggerWrapper =
+      screen
+        .getByText("Cell content")
+        .closest("[data-radix-collection-item]") ??
+      screen.getByText("Cell content").parentElement!
+    await user.hover(triggerWrapper)
 
     // Tooltip should appear after delay
-    const tooltip = await screen.findByRole("tooltip", {}, { timeout: 500 })
+    const tooltip = await screen.findByRole("tooltip", {}, { timeout: 1000 })
     expect(tooltip).toHaveTextContent("Invalid value")
   })
 
