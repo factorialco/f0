@@ -14,14 +14,19 @@ export const useFormListAction = () => {
     name: "formListForms",
     description:
       "List all currently active forms on the page. Returns form names that can be used with formDescribe, formFill, formSubmit, and formGetState.",
-    available: "frontend",
     parameters: [],
     handler: async () => {
+      console.log("[F0AiFormTools] formListForms called")
+      console.log({ registry })
       if (!registry) {
-        return { forms: [], error: "Form registry is not available" }
+        return JSON.stringify({
+          forms: [],
+          error: "Form registry is not available",
+        })
       }
 
-      return { forms: registry.getFormNames() }
+      const result = { forms: registry.getFormNames() }
+      return JSON.stringify(result)
     },
   })
 }

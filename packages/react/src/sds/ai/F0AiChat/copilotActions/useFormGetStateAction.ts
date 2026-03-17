@@ -13,7 +13,6 @@ export const useFormGetStateAction = () => {
     name: "formGetState",
     description:
       "Get the current state of an active form: field values, whether it has unsaved changes, and any validation errors.",
-    available: "frontend",
     parameters: [
       {
         name: "formName",
@@ -23,31 +22,32 @@ export const useFormGetStateAction = () => {
       },
     ],
     handler: async ({ formName }: { formName: string }) => {
+      console.log("[F0AiFormTools] formGetState called", { formName })
       if (!registry) {
-        return { error: "Form registry is not available" }
+        return JSON.stringify({ error: "Form registry is not available" })
       }
 
       const entry = registry.get(formName)
       if (!entry) {
         const available = registry.getFormNames()
-        return {
+        return JSON.stringify({
           error: `Form "${formName}" not found`,
           availableForms: available,
-        }
+        })
       }
 
       const ref = entry.ref.current
       if (!ref) {
-        return { error: `Form "${formName}" is not mounted` }
+        return JSON.stringify({ error: `Form "${formName}" is not mounted` })
       }
 
-      return {
+      return JSON.stringify({
         formName,
         values: ref.getValues(),
         isDirty: ref.isDirty(),
         errors: ref.getErrors(),
         fieldNames: ref.getFieldNames(),
-      }
+      })
     },
   })
 }

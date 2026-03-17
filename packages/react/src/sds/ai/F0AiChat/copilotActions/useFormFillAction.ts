@@ -13,7 +13,6 @@ export const useFormFillAction = () => {
     name: "formFill",
     description:
       "Fill one or more fields in an active form. After setting values, validation runs automatically. Returns success or any validation errors. Use formDescribe first to learn field names and types.",
-    available: "frontend",
     parameters: [
       {
         name: "formName",
@@ -50,26 +49,30 @@ export const useFormFillAction = () => {
       formName: string
       values: { fieldName: string; value: string }[]
     }) => {
+      console.log("[F0AiFormTools] formFill called", { formName, values })
       if (!registry) {
-        return { success: false, error: "Form registry is not available" }
+        return JSON.stringify({
+          success: false,
+          error: "Form registry is not available",
+        })
       }
 
       const entry = registry.get(formName)
       if (!entry) {
         const available = registry.getFormNames()
-        return {
+        return JSON.stringify({
           success: false,
           error: `Form "${formName}" not found`,
           availableForms: available,
-        }
+        })
       }
 
       const ref = entry.ref.current
       if (!ref) {
-        return {
+        return JSON.stringify({
           success: false,
           error: `Form "${formName}" is not mounted`,
-        }
+        })
       }
 
       const valuesToSet: Record<string, unknown> = {}
@@ -85,11 +88,11 @@ export const useFormFillAction = () => {
       const errors = ref.getErrors()
       const hasErrors = Object.keys(errors).length > 0
 
-      return {
+      return JSON.stringify({
         success: !hasErrors,
         ...(hasErrors ? { errors } : {}),
         currentValues: ref.getValues(),
-      }
+      })
     },
   })
 }

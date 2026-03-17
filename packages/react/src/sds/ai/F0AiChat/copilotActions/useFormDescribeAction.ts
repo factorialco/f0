@@ -15,7 +15,6 @@ export const useFormDescribeAction = () => {
     name: "formDescribe",
     description:
       "Describe the fields of an active form. Returns field names, types, labels, options, and whether they are required. Call this before filling a form to understand its structure.",
-    available: "frontend",
     parameters: [
       {
         name: "formName",
@@ -26,21 +25,22 @@ export const useFormDescribeAction = () => {
       },
     ],
     handler: async ({ formName }: { formName: string }) => {
+      console.log("[F0AiFormTools] formDescribe called", { formName })
       if (!registry) {
-        return { error: "Form registry is not available" }
+        return JSON.stringify({ error: "Form registry is not available" })
       }
 
       const entry = registry.get(formName)
       if (!entry) {
         const available = registry.getFormNames()
-        return {
+        return JSON.stringify({
           error: `Form "${formName}" not found`,
           availableForms: available,
-        }
+        })
       }
 
       const fields = describeFormSchema(entry.schema)
-      return { formName, fields }
+      return JSON.stringify({ formName, fields })
     },
   })
 }

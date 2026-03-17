@@ -59,6 +59,8 @@ export function F0AiFormRegistryProvider({
   // This triggers re-renders so consumers (useF0AiFormActions) see the latest context.
   const [formDescriptions, setFormDescriptions] = useState<string>("")
 
+  console.log({ formDescriptions })
+
   const rebuildDescriptions = useCallback(() => {
     const entries = Array.from(registryRef.current.entries())
     if (entries.length === 0) {

@@ -13,7 +13,6 @@ export const useFormSubmitAction = () => {
     name: "formSubmit",
     description:
       "Submit an active form. Validates all fields first. Only calls the form's onSubmit handler if validation passes. Returns success or validation errors.",
-    available: "frontend",
     parameters: [
       {
         name: "formName",
@@ -23,37 +22,41 @@ export const useFormSubmitAction = () => {
       },
     ],
     handler: async ({ formName }: { formName: string }) => {
+      console.log("[F0AiFormTools] formSubmit called", { formName })
       if (!registry) {
-        return { success: false, error: "Form registry is not available" }
+        return JSON.stringify({
+          success: false,
+          error: "Form registry is not available",
+        })
       }
 
       const entry = registry.get(formName)
       if (!entry) {
         const available = registry.getFormNames()
-        return {
+        return JSON.stringify({
           success: false,
           error: `Form "${formName}" not found`,
           availableForms: available,
-        }
+        })
       }
 
       const ref = entry.ref.current
       if (!ref) {
-        return {
+        return JSON.stringify({
           success: false,
           error: `Form "${formName}" is not mounted`,
-        }
+        })
       }
 
       try {
         await ref.submit()
-        return { success: true }
+        return JSON.stringify({ success: true })
       } catch {
         const errors = ref.getErrors()
-        return {
+        return JSON.stringify({
           success: false,
           errors,
-        }
+        })
       }
     },
   })
