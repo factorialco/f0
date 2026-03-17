@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.41.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.40.0...f0-react-native-v0.41.0) (2026-03-17)
+
+
+### Features
+
+* added `f0link` component ([#3677](https://github.com/factorialco/f0/issues/3677)) ([59657c9](https://github.com/factorialco/f0/commit/59657c958dd6076e4afdbdf957d9f0737083c071))
+
 ## [0.40.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.39.0...f0-react-native-v0.40.0) (2026-03-17)
 
 
