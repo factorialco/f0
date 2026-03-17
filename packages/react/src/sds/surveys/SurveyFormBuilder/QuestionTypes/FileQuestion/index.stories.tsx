@@ -3,15 +3,15 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useState } from "react"
 
 import { FileQuestion } from "."
-import { CoCreationFormProvider } from "../Context"
-import { CoCreationFormElement, QuestionElement } from "../types"
+import { SurveyFormBuilderElement, QuestionElement } from "../../types"
+import { SurveyFormBuilderProvider } from "../../Context"
 
 const meta: Meta<typeof FileQuestion> = {
   title: "CoCreationForm/FileQuestion",
   component: FileQuestion,
   tags: ["autodocs", "experimental"],
   render: (args) => {
-    const [elements, setElements] = useState<CoCreationFormElement[]>([
+    const [elements, setElements] = useState<SurveyFormBuilderElement[]>([
       { type: "question" as const, question: args as QuestionElement },
     ])
 
@@ -20,13 +20,9 @@ const meta: Meta<typeof FileQuestion> = {
 
     return (
       <div className="max-w-[750px]">
-        <CoCreationFormProvider
-          elements={elements}
-          onChange={setElements}
-          isEditMode
-        >
+        <SurveyFormBuilderProvider elements={elements} onChange={setElements}>
           <FileQuestion {...args} {...question} />
-        </CoCreationFormProvider>
+        </SurveyFormBuilderProvider>
       </div>
     )
   },
