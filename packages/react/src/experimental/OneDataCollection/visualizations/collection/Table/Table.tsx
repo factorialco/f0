@@ -2,6 +2,7 @@ import { AnimatePresence, motion } from "motion/react"
 import { Fragment, useEffect, useMemo, useState } from "react"
 
 import { F0Button } from "@/components/F0Button"
+import { F0ButtonDropdown } from "@/components/F0ButtonDropdown"
 import { F0Checkbox } from "@/components/F0Checkbox"
 import { PagesPagination } from "@/experimental/OneDataCollection/components/PagesPagination"
 import { useDataCollectionSettings } from "@/experimental/OneDataCollection/Settings/SettingsProvider"
@@ -43,6 +44,7 @@ import { ItemActionsDefinition } from "../../../item-actions"
 import { NavigationFiltersDefinition } from "../../../navigationFilters/types"
 import { SummariesDefinition } from "../../../summary"
 import { CollectionProps } from "../../../types"
+import { PrimaryActionItemDefinition } from "../../../actions"
 import { useAddRow } from "../EditableTable/context/AddRowContext"
 import { statusToChecked } from "../utils"
 import { Row } from "./components/Row"
@@ -51,6 +53,18 @@ import { groupBorderClass, useHeaderGroups } from "./hooks/useHeaderGroups"
 import { NestedDataProvider } from "./providers/NestedProvider"
 import { useSticky } from "./useSticky"
 export * from "./settings/SettingsRenderer"
+
+const normalizeAddRowActions = (
+  result:
+    | PrimaryActionItemDefinition
+    | PrimaryActionItemDefinition[]
+    | undefined
+): PrimaryActionItemDefinition[] => {
+  if (!result) return []
+  return (Array.isArray(result) ? result : [result]).filter(
+    (item): item is PrimaryActionItemDefinition => item !== undefined
+  )
+}
 
 const HighlightedCount = ({ text, count }: { text: string; count: number }) => {
   const countStr = String(count)
@@ -715,7 +729,7 @@ export const TableCollection = <
                 </tr>
               )}
           </TableBody>
-          {(summaryData || addRow?.onAddRow) && (
+          {(summaryData || addRow?.addRowActions) && (
             <TableFooter>
               {summaryData && (
                 <TableRow
@@ -812,30 +826,78 @@ export const TableCollection = <
                   )}
                 </TableRow>
               )}
-              {addRow?.onAddRow && (
-                <TableRow>
-                  <TableCell
-                    colSpan={
-                      columns.length +
-                      (source.selectable ? 1 : 0) +
-                      (showItemActions ? 2 : 0)
-                    }
-                  >
-                    <div className="pointer-events-auto">
-                      <F0Button
-                        variant="ghost"
-                        icon={Add}
-                        label={
-                          addRow.addRowButtonLabel ??
-                          t("collections.editableTable.addRow")
-                        }
-                        onClick={() => addRow.onAddRow?.()}
-                        size="sm"
-                      />
-                    </div>
-                  </TableCell>
-                </TableRow>
-              )}
+              {(() => {
+                const actions = normalizeAddRowActions(
+                  addRow?.addRowActions?.()
+                )
+                if (actions.length === 0) return null
+                return (
+                  <TableRow>
+                    <TableCell
+                      colSpan={
+                        columns.length +
+                        (source.selectable ? 1 : 0) +
+                        (showItemActions ? 2 : 0)
+                      }
+                      className="h-[48px] align-middle"
+                    >
+                      <div
+                        className="pointer-events-auto flex h-full items-center"
+                        onClick={(e) => e.stopPropagation()}
+                        onMouseDownCapture={(e) => e.stopPropagation()}
+                      >
+                        {actions.length === 1 ? (
+                          <F0Button
+                            variant="ghost"
+                            icon={actions[0].icon ?? Add}
+                            label={actions[0].label}
+                            onClick={actions[0].onClick}
+                            loading={actions[0].loading}
+                            disabled={actions[0].disabled}
+                            size="sm"
+                          />
+                        ) : actions.some((a) => a.description !== undefined) ? (
+                          <F0ButtonDropdown
+                            mode="dropdown"
+                            variant="ghost"
+                            size="sm"
+                            icon={actions[0].icon ?? Add}
+                            trigger={addRow?.addRowActionsLabel}
+                            items={actions.map((action) => ({
+                              value: action.label,
+                              label: action.label,
+                              icon: action.icon,
+                              description: action.description,
+                            }))}
+                            onClick={(value) => {
+                              const action = actions.find(
+                                (a) => a.label === value
+                              )
+                              action?.onClick?.()
+                            }}
+                          />
+                        ) : (
+                          <F0ButtonDropdown
+                            variant="ghost"
+                            size="sm"
+                            items={actions.map((action) => ({
+                              value: action.label,
+                              label: action.label,
+                              icon: action.icon,
+                            }))}
+                            onClick={(value) => {
+                              const action = actions.find(
+                                (a) => a.label === value
+                              )
+                              action?.onClick?.()
+                            }}
+                          />
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )
+              })()}
             </TableFooter>
           )}
         </OneTable>

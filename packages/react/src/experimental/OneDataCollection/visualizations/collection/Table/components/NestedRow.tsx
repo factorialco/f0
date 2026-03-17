@@ -20,21 +20,16 @@ import { forwardRef, useCallback, useRef } from "react"
 
 import type { TableVisualizationType } from "@/experimental/OneDataCollection/types"
 
-import { F0Button } from "@/components/F0Button"
 import { FiltersDefinition } from "@/components/OneFilterPicker/types"
 import { DataCollectionSource } from "@/experimental/OneDataCollection/hooks/useDataCollectionSource/types"
 import { ItemActionsDefinition } from "@/experimental/OneDataCollection/item-actions"
 import { NavigationFiltersDefinition } from "@/experimental/OneDataCollection/navigationFilters/types"
 import { SummariesDefinition } from "@/experimental/OneDataCollection/summary"
-import { TableCell, TableRow } from "@/experimental/OneTable"
-import { SPACING_FACTOR } from "@/experimental/OneTable/TableCell/utils/nested"
 import {
   GroupingDefinition,
   RecordType,
   SortingsDefinition,
 } from "@/hooks/datasource"
-import { Add } from "@/icons/app"
-import { useI18n } from "@/lib/providers/i18n"
 
 import type {
   CellRendererProps,
@@ -42,14 +37,28 @@ import type {
   TableColumnDefinition,
 } from "../types"
 
+import { PrimaryActionItemDefinition } from "../../../../actions"
 import { useAddRow } from "../../EditableTable/context/AddRowContext"
 import { useCalculateConectorHeight } from "../hooks/useCalculateConectorHeight"
 import { useLoadChildren } from "../hooks/useLoadChildren"
 import { useNestedDataContext } from "../providers/NestedProvider"
+import { AddRowRow } from "./AddRow"
 import { LoadMoreRow } from "./LoadMore"
 import { NestedRowProps, Row } from "./Row"
 import { RowLoading } from "./RowLoading"
 import { HeaderGroupEntry } from "../hooks/useHeaderGroups"
+
+const normalizeAddRowActions = (
+  result:
+    | PrimaryActionItemDefinition
+    | PrimaryActionItemDefinition[]
+    | undefined
+): PrimaryActionItemDefinition[] => {
+  if (!result) return []
+  return (Array.isArray(result) ? result : [result]).filter(
+    (item): item is PrimaryActionItemDefinition => item !== undefined
+  )
+}
 
 export type RowProps<
   R extends RecordType,
@@ -113,7 +122,6 @@ const NestedRowContent = <
     | null
 ) => {
   const internalRowRef = useRef<HTMLTableRowElement | null>(null)
-  const { t } = useI18n()
   const addRow = useAddRow()
 
   const rowId = `${props.nestedRowProps?.depth ?? 0}-${"id" in props.item ? props.item.id + "-" + props.index : props.index}`
@@ -140,13 +148,21 @@ const NestedRowContent = <
   const shouldShowChildren = open
   const shouldShowLoadMore = open && paginationInfo?.hasMore
 
+  const addRowActions = normalizeAddRowActions(
+    addRow?.addNestedRowActions?.(props.item)
+  )
+  const hasAddRowActions = shouldShowChildren && addRowActions.length > 0
+
   /**
    * useCalculateConectorHeight manages the visual tree connector lines
    * It calculates the height between first and last visible child to draw
    * the vertical line connecting them to their parent
    */
   const { calculatedHeight, setFirstChildRef, setLastChildRef } =
-    useCalculateConectorHeight(childrenType, !!shouldShowLoadMore)
+    useCalculateConectorHeight(
+      childrenType,
+      !!shouldShowLoadMore || hasAddRowActions
+    )
 
   /**
    * Combine internal and external refs
@@ -242,7 +258,11 @@ const NestedRowContent = <
               return (el: HTMLTableRowElement | null) => {
                 setFirstChildRef(el)
               }
-            } else if (isLastChildInLevel && !shouldShowLoadMore) {
+            } else if (
+              isLastChildInLevel &&
+              !shouldShowLoadMore &&
+              !hasAddRowActions
+            ) {
               return (el: HTMLTableRowElement | null) => {
                 setLastChildRef(el)
               }
@@ -361,7 +381,7 @@ const NestedRowContent = <
           disableHover={true}
           rowRef={internalRowRef}
           onLoadMoreChildren={loadChildren}
-          ref={setLastChildRef}
+          ref={hasAddRowActions ? undefined : setLastChildRef}
           nestedRowProps={{
             ...props.nestedRowProps,
             parentHasChildren: true,
@@ -370,34 +390,20 @@ const NestedRowContent = <
         />
       )}
 
-      {shouldShowChildren && addRow?.onAddRow && (
-        <TableRow>
-          <TableCell
-            colSpan={
-              props.columns.length +
-              (props.source.selectable ? 1 : 0) +
-              (props.source.itemActions ? 2 : 0)
-            }
-          >
-            <div
-              className="pointer-events-auto"
-              style={{
-                marginLeft: `${((props.nestedRowProps?.depth ?? 0) + 1) * SPACING_FACTOR}px`,
-              }}
-            >
-              <F0Button
-                variant="ghost"
-                icon={Add}
-                label={
-                  addRow.nestedAddRowButtonLabel ??
-                  t("collections.editableTable.addRow")
-                }
-                onClick={() => addRow.onAddRow?.(props.item)}
-                size="sm"
-              />
-            </div>
-          </TableCell>
-        </TableRow>
+      {hasAddRowActions && (
+        <AddRowRow
+          {...props}
+          disableHover={true}
+          rowRef={internalRowRef}
+          addRowActions={addRowActions}
+          addRowLabel={addRow?.addNestedRowActionsLabel}
+          ref={setLastChildRef}
+          nestedRowProps={{
+            ...props.nestedRowProps,
+            parentHasChildren: true,
+            nestedVariant: childrenType,
+          }}
+        />
       )}
     </>
   )

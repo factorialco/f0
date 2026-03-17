@@ -1,7 +1,12 @@
 import { IconType } from "@/components/F0Icon"
 import { actionSizes } from "@/ui/Action"
 
-export const buttonDropdownVariants = ["default", "outline", "neutral"] as const
+export const buttonDropdownVariants = [
+  "default",
+  "outline",
+  "neutral",
+  "ghost",
+] as const
 export type ButtonDropdownVariant = (typeof buttonDropdownVariants)[number]
 export const buttonDropdownSizes = actionSizes
 export type ButtonDropdownSize = (typeof buttonDropdownSizes)[number]
@@ -113,6 +118,10 @@ type F0ButtonDropdownDropdownProps<T = string> =
      * Falls back to the first item's label if not provided.
      */
     trigger?: string
+    /**
+     * Optional icon displayed before the trigger label.
+     */
+    icon?: IconType
     /**
      * Called when a dropdown item is clicked.
      * @param value The value of the item that was clicked.

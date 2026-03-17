@@ -1425,8 +1425,8 @@ describe("TableCollection", () => {
     })
   })
 
-  describe("onAddRow", () => {
-    it("does not render add-row button when onAddRow is not provided", async () => {
+  describe("addRowActions", () => {
+    it("does not render add-row button when addRowActions is not provided", async () => {
       render(
         <TableCollection<
           Person,
@@ -1454,9 +1454,11 @@ describe("TableCollection", () => {
       ).not.toBeInTheDocument()
     })
 
-    it("renders an add-row button in the table footer when onAddRow is provided", async () => {
+    it("renders an add-row button in the table footer when addRowActions is provided", async () => {
       render(
-        <AddRowProvider onAddRow={vi.fn()}>
+        <AddRowProvider
+          addRowActions={() => ({ label: "Add row", onClick: vi.fn() })}
+        >
           <TableCollection<
             Person,
             TestFilters,
@@ -1484,9 +1486,11 @@ describe("TableCollection", () => {
       ).toBeInTheDocument()
     })
 
-    it("renders custom addRowButtonLabel when provided", async () => {
+    it("renders custom label from addRowActions", async () => {
       render(
-        <AddRowProvider onAddRow={vi.fn()} addRowButtonLabel="Add phase">
+        <AddRowProvider
+          addRowActions={() => ({ label: "Add phase", onClick: vi.fn() })}
+        >
           <TableCollection<
             Person,
             TestFilters,
@@ -1517,12 +1521,14 @@ describe("TableCollection", () => {
       ).not.toBeInTheDocument()
     })
 
-    it("calls onAddRow with no arguments when the footer button is clicked", async () => {
+    it("calls onClick when the footer button is clicked", async () => {
       const user = userEvent.setup()
-      const onAddRowMock = vi.fn()
+      const onClickMock = vi.fn()
 
       render(
-        <AddRowProvider onAddRow={onAddRowMock}>
+        <AddRowProvider
+          addRowActions={() => ({ label: "Add row", onClick: onClickMock })}
+        >
           <TableCollection<
             Person,
             TestFilters,
@@ -1548,8 +1554,7 @@ describe("TableCollection", () => {
       const addRowButton = screen.getByRole("button", { name: /add row/i })
       await user.click(addRowButton)
 
-      expect(onAddRowMock).toHaveBeenCalledTimes(1)
-      expect(onAddRowMock).toHaveBeenCalledWith()
+      expect(onClickMock).toHaveBeenCalledTimes(1)
     })
   })
 })

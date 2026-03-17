@@ -210,6 +210,7 @@ const SplitMode = ({
 const DropdownMode = ({
   onClick,
   trigger,
+  icon,
   items: rawItems,
   size,
   variant,
@@ -219,6 +220,7 @@ const DropdownMode = ({
 }: {
   onClick: (value: string, item: ButtonDropdownItem<string>) => void
   trigger?: string
+  icon?: import("@/components/F0Icon").IconType
   items:
     | ButtonDropdownItem<string>[]
     | ButtonDropdownGroup<string>[]
@@ -283,14 +285,12 @@ const DropdownMode = ({
         loading={loading}
         data-testid="button-dropdown-trigger"
         aria-label={triggerLabel}
+        prepend={icon && <F0Icon icon={icon} />}
         append={
           <F0Icon icon={ChevronDown} size={size === "sm" ? "sm" : "md"} />
         }
         pressed={isOpen && !disabled}
         tooltip={tooltip}
-        onClick={() => {
-          if (!disabled) setIsOpen(!isOpen)
-        }}
       >
         {triggerLabel}
       </Action>
@@ -306,6 +306,7 @@ const _F0ButtonDropdown = (props: F0ButtonDropdownProps) => {
       <DropdownMode
         onClick={props.onClick}
         trigger={"trigger" in props ? props.trigger : undefined}
+        icon={"icon" in props ? props.icon : undefined}
         items={props.items}
         size={props.size}
         variant={props.variant}

@@ -30,9 +30,10 @@ export const EditableTableCollection = <
   Grouping extends GroupingDefinition<R>,
 >({
   onCellChange,
-  onAddRow,
-  addRowButtonLabel,
-  nestedAddRowButtonLabel,
+  addRowActions,
+  addRowActionsLabel,
+  addNestedRowActions,
+  addNestedRowActionsLabel,
   ...props
 }: CollectionProps<
   R,
@@ -64,9 +65,10 @@ export const EditableTableCollection = <
 
   return (
     <AddRowProvider
-      onAddRow={onAddRow}
-      addRowButtonLabel={addRowButtonLabel}
-      nestedAddRowButtonLabel={nestedAddRowButtonLabel}
+      addRowActions={addRowActions}
+      addRowActionsLabel={addRowActionsLabel}
+      addNestedRowActions={addNestedRowActions}
+      addNestedRowActionsLabel={addNestedRowActionsLabel}
     >
       <TableCollection<
         R,

@@ -7,6 +7,7 @@ export const internalButtonVariantsStyles = (
     default: { borderColor: "hsl(var(--accent-60))" },
     outline: { borderColor: "hsl(var(--neutral-30))" },
     neutral: { borderColor: "hsl(var(--neutral-30))" },
+    ghost: { borderColor: "transparent" },
   }
   return variants[variant || "default"]
 }

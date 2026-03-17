@@ -117,8 +117,8 @@ const createNestedTestSource = (
   ...overrides,
 })
 
-describe("NestedRow onAddRow", () => {
-  it("does not render add-row button when onAddRow is not provided", async () => {
+describe("NestedRow addRowActions", () => {
+  it("does not render add-row button when addRowActions is not provided", async () => {
     const user = userEvent.setup()
 
     render(
@@ -143,7 +143,6 @@ describe("NestedRow onAddRow", () => {
       expect(screen.getByText("Parent User")).toBeInTheDocument()
     })
 
-    // Expand the parent row by clicking the chevron
     const parentRow = screen.getByText("Parent User").closest("tr")!
     const chevron = parentRow.querySelector("[class*='cursor-pointer']")!
     await user.click(chevron)
@@ -157,11 +156,13 @@ describe("NestedRow onAddRow", () => {
     ).not.toBeInTheDocument()
   })
 
-  it("renders add-row button when onAddRow is provided and row is expanded", async () => {
+  it("renders add-row button when addNestedRowActions is provided and row is expanded", async () => {
     const user = userEvent.setup()
 
     render(
-      <AddRowProvider onAddRow={vi.fn()}>
+      <AddRowProvider
+        addNestedRowActions={() => ({ label: "Add row", onClick: vi.fn() })}
+      >
         <TableCollection<
           Person,
           TestFilters,
@@ -184,7 +185,6 @@ describe("NestedRow onAddRow", () => {
       expect(screen.getByText("Parent User")).toBeInTheDocument()
     })
 
-    // Expand the parent row
     const parentRow = screen.getByText("Parent User").closest("tr")!
     const chevron = parentRow.querySelector("[class*='cursor-pointer']")!
     await user.click(chevron)
@@ -200,13 +200,15 @@ describe("NestedRow onAddRow", () => {
     expect(nestedAddRowButton).toBeInTheDocument()
   })
 
-  it("renders custom nestedAddRowButtonLabel when provided", async () => {
+  it("renders custom label from addNestedRowActions for nested rows", async () => {
     const user = userEvent.setup()
 
     render(
       <AddRowProvider
-        onAddRow={vi.fn()}
-        nestedAddRowButtonLabel="Add line item"
+        addNestedRowActions={(parentItem) => ({
+          label: parentItem ? "Add line item" : "Add root row",
+          onClick: vi.fn(),
+        })}
       >
         <TableCollection<
           Person,
@@ -243,12 +245,17 @@ describe("NestedRow onAddRow", () => {
     ).toBeInTheDocument()
   })
 
-  it("calls onAddRow with the parent item when the nested add-row button is clicked", async () => {
+  it("calls onClick when the nested add-row button is clicked", async () => {
     const user = userEvent.setup()
-    const onAddRowMock = vi.fn()
+    const onClickMock = vi.fn()
 
     render(
-      <AddRowProvider onAddRow={onAddRowMock}>
+      <AddRowProvider
+        addNestedRowActions={(parentItem) => ({
+          label: "Add row",
+          onClick: () => onClickMock(parentItem),
+        })}
+      >
         <TableCollection<
           Person,
           TestFilters,
@@ -271,7 +278,6 @@ describe("NestedRow onAddRow", () => {
       expect(screen.getByText("Parent User")).toBeInTheDocument()
     })
 
-    // Expand the parent row
     const parentRow = screen.getByText("Parent User").closest("tr")!
     const chevron = parentRow.querySelector("[class*='cursor-pointer']")!
     await user.click(chevron)
@@ -286,8 +292,8 @@ describe("NestedRow onAddRow", () => {
     })
     await user.click(nestedAddRowButton)
 
-    expect(onAddRowMock).toHaveBeenCalledTimes(1)
-    expect(onAddRowMock).toHaveBeenCalledWith(
+    expect(onClickMock).toHaveBeenCalledTimes(1)
+    expect(onClickMock).toHaveBeenCalledWith(
       expect.objectContaining({
         id: parentItem.id,
         name: parentItem.name,
