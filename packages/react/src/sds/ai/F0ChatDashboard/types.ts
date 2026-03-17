@@ -48,10 +48,45 @@ export interface ChatDashboardFunnelChartConfig {
   valueFormat?: FormatPreset
 }
 
+export interface ChatDashboardRadarChartConfig extends ChatDashboardChartConfigBase {
+  type: "radar"
+  showArea?: boolean
+}
+
+export interface ChatDashboardPieChartConfig {
+  type: "pie"
+  innerRadius?: number
+  showLegend?: boolean
+  showLabels?: boolean
+  showPercentage?: boolean
+  valueFormat?: FormatPreset
+}
+
+export interface ChatDashboardGaugeChartConfig {
+  type: "gauge"
+  min?: number
+  max?: number
+  showValue?: boolean
+  valueFormat?: FormatPreset
+}
+
+export interface ChatDashboardHeatmapChartConfig {
+  type: "heatmap"
+  min?: number
+  max?: number
+  showLabels?: boolean
+  showVisualMap?: boolean
+  valueFormat?: FormatPreset
+}
+
 export type ChatDashboardChartConfig =
   | ChatDashboardBarChartConfig
   | ChatDashboardLineChartConfig
   | ChatDashboardFunnelChartConfig
+  | ChatDashboardRadarChartConfig
+  | ChatDashboardPieChartConfig
+  | ChatDashboardGaugeChartConfig
+  | ChatDashboardHeatmapChartConfig
 
 // ---------------------------------------------------------------------------
 // Metric format — reuses the same shape as F0AnalyticsDashboard's MetricFormat
@@ -102,6 +137,42 @@ export interface MetricComputation {
   column?: string
 }
 
+export interface RadarComputation {
+  datasetId: string
+  seriesColumn: string
+  indicators: Array<{ column: string; label: string; max?: number }>
+  limit?: number
+  sortBy?: string
+  sortOrder?: "asc" | "desc"
+}
+
+export interface PieComputation {
+  datasetId: string
+  nameColumn: string
+  valueColumn: string
+  aggregation: AggregationType
+  sortBy?: "value" | "name"
+  sortOrder?: "asc" | "desc"
+  limit?: number
+}
+
+export interface GaugeComputation {
+  datasetId: string
+  aggregation: AggregationType
+  column?: string
+  min?: number
+  max?: number
+  name?: string
+}
+
+export interface HeatmapComputation {
+  datasetId: string
+  xAxis: string
+  yAxis: string
+  valueColumn: string
+  aggregation: AggregationType
+}
+
 export interface CollectionComputation {
   datasetId: string
   sortBy?: string
@@ -141,6 +212,8 @@ interface ChatDashboardItemBase {
   id: string
   title: string
   description?: string
+  /** Source attribution shown as a subtitle (e.g. "Based on 8 feedbacks from 3 evaluators") */
+  sourceDescription?: string
   colSpan?: number
   rowSpan?: number
   x?: number
@@ -150,7 +223,12 @@ interface ChatDashboardItemBase {
 export interface ChatDashboardChartItem extends ChatDashboardItemBase {
   type: "chart"
   chart: ChatDashboardChartConfig
-  computation: ChartComputation
+  computation:
+    | ChartComputation
+    | RadarComputation
+    | PieComputation
+    | GaugeComputation
+    | HeatmapComputation
 }
 
 export interface ChatDashboardMetricItem extends ChatDashboardItemBase {

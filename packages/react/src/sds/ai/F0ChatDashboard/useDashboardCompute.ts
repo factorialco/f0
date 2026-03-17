@@ -7,8 +7,17 @@ import type { ChatDashboardConfig } from "./types"
 // ---------------------------------------------------------------------------
 
 type ChartResult = {
-  categories: string[]
-  series: Array<{ name: string; data: number[] }>
+  categories?: string[]
+  indicators?: Array<{ name: string; max?: number }>
+  series?:
+    | Array<{ name: string; data: number[] }>
+    | { name: string; data: Array<{ name: string; value: number }> }
+    | { value: number; name?: string }
+  xCategories?: string[]
+  yCategories?: string[]
+  data?: [number, number, number][]
+  min?: number
+  max?: number
 }
 
 type MetricResult = {

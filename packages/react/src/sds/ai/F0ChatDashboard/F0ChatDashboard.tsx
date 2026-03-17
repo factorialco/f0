@@ -92,6 +92,22 @@ function toDashboardChartConfig(
       const { valueFormat: _, ...rest } = chatChart
       return { ...rest, ...(valueFormatter ? { valueFormatter } : {}) }
     }
+    case "radar": {
+      const { valueFormat: _, ...rest } = chatChart
+      return { ...rest, ...(valueFormatter ? { valueFormatter } : {}) }
+    }
+    case "pie": {
+      const { valueFormat: _, ...rest } = chatChart
+      return { ...rest, ...(valueFormatter ? { valueFormatter } : {}) }
+    }
+    case "gauge": {
+      const { valueFormat: _, ...rest } = chatChart
+      return { ...rest, ...(valueFormatter ? { valueFormatter } : {}) }
+    }
+    case "heatmap": {
+      const { valueFormat: _, ...rest } = chatChart
+      return { ...rest, ...(valueFormatter ? { valueFormatter } : {}) }
+    }
   }
 }
 
@@ -253,7 +269,7 @@ function mapChartItem(
   return {
     id: item.id,
     title: item.title,
-    description: item.description,
+    description: buildDescription(item.description, item.sourceDescription),
     colSpan: item.colSpan,
     rowSpan: item.rowSpan,
     x: item.x,
@@ -265,6 +281,18 @@ function mapChartItem(
   }
 }
 
+function buildDescription(
+  description?: string,
+  sourceDescription?: string
+): string | undefined {
+  if (sourceDescription) {
+    return description
+      ? `${description}\n${sourceDescription}`
+      : sourceDescription
+  }
+  return description
+}
+
 function mapMetricItem(
   item: ChatDashboardMetricItem,
   fetchData: (filters: FiltersState<FiltersDefinition>) => Promise<ItemResult>
@@ -272,7 +300,7 @@ function mapMetricItem(
   return {
     id: item.id,
     title: item.title,
-    description: item.description,
+    description: buildDescription(item.description, item.sourceDescription),
     colSpan: item.colSpan,
     rowSpan: item.rowSpan,
     x: item.x,
@@ -292,7 +320,7 @@ function mapCollectionItem(
   return {
     id: item.id,
     title: item.title,
-    description: item.description,
+    description: buildDescription(item.description, item.sourceDescription),
     colSpan: item.colSpan ?? 12,
     rowSpan: item.rowSpan,
     x: item.x,
