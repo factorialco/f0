@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.40.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.39.0...f0-react-native-v0.40.0) (2026-03-17)
+
+
+### Features
+
+* f0 react native F0Avatar component ([#3670](https://github.com/factorialco/f0/issues/3670)) ([a91f808](https://github.com/factorialco/f0/commit/a91f808ef9182249cbcddddbba6ed76123f69b25))
+
 ## [0.39.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.38.0...f0-react-native-v0.39.0) (2026-03-12)
 
 
