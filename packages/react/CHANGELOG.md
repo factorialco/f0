@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.405.1](https://github.com/factorialco/f0/compare/f0-react-v1.405.0...f0-react-v1.405.1) (2026-03-17)
+
+
+### Bug Fixes
+
+* **react:** fix subfilter bugs and add WithSubfilters story ([#3684](https://github.com/factorialco/f0/issues/3684)) ([8d4b399](https://github.com/factorialco/f0/commit/8d4b39991a6481f5a9067980603befbbd1665038))
+
 ## [1.405.0](https://github.com/factorialco/f0/compare/f0-react-v1.404.2...f0-react-v1.405.0) (2026-03-16)
 
 
