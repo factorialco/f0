@@ -49,6 +49,7 @@ import { useNestedDataContext } from "../providers/NestedProvider"
 import { LoadMoreRow } from "./LoadMore"
 import { NestedRowProps, Row } from "./Row"
 import { RowLoading } from "./RowLoading"
+import { HeaderGroupEntry } from "../hooks/useHeaderGroups"
 
 export type RowProps<
   R extends RecordType,
@@ -85,6 +86,7 @@ export type RowProps<
   /** Row wrapper for child rows (provides per-row context, e.g. editing state) */
   rowWrapper?: React.ComponentType<RowWrapperProps<R>>
   fromVisualization?: TableVisualizationType
+  headerGroups: HeaderGroupEntry[] | null
 }
 
 const NestedRowContent = <

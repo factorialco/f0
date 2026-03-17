@@ -1,4 +1,9 @@
+import type {
+  F0SelectItemObject,
+  F0SelectItemProps,
+} from "@/components/F0Select"
 import {
+  DataSourceDefinition,
   FiltersDefinition,
   GroupingDefinition,
   RecordType,
@@ -18,6 +23,45 @@ import { CollectionProps } from "../../../types"
 import { EditableTableCellEditType } from "./components/cells"
 
 export type EditableTableVisualizationSettings = TableVisualizationSettings
+
+/**
+ * Configuration for select-type cells. Mirrors F0Select's two data modes:
+ * - Static `options` (array or per-row function)
+ * - Async `source` (DataSourceDefinition) with `mapOptions`
+ */
+export type SelectCellConfig<R extends RecordType> = {
+  placeholder?: string
+  clearable?: boolean
+  showSearchBox?: boolean
+  defaultItem?: (item: R) => F0SelectItemObject<string, RecordType> | undefined
+} & (
+  | {
+      options:
+        | F0SelectItemProps<string>[]
+        | ((item: R) => F0SelectItemProps<string>[])
+      source?: never
+      mapOptions?: never
+    }
+  | {
+      source: Omit<
+        DataSourceDefinition<
+          RecordType,
+          FiltersDefinition,
+          SortingsDefinition,
+          GroupingDefinition<RecordType>
+        >,
+        | "selectable"
+        | "grouping"
+        | "defaultGrouping"
+        | "currentGrouping"
+        | "fetchChildren"
+        | "itemsWithChildren"
+        | "childrenCount"
+      >
+      mapOptions: (record: RecordType) => F0SelectItemProps<string, RecordType>
+      options?: never
+    }
+)
 
 /**
  * Column definition for Editable Table.
@@ -42,6 +86,16 @@ export type EditableTableColumnDefinition<
    * When omitted, the cell is always rendered read-only.
    */
   editType?: (item: R) => EditableTableCellEditType | undefined
+  /**
+   * Configuration for `"select"` cells. Required when `editType` returns `"select"`.
+   * Accepts either static `options` or a `source` + `mapOptions` for async data.
+   *
+   * If `editType` returns `"select"` but `selectConfig` is missing, the cell
+   * falls back to a non-editable display with a `console.warn` at runtime.
+   * Type-level enforcement is not possible because `editType` is a per-row
+   * function whose return value isn't statically known.
+   */
+  selectConfig?: SelectCellConfig<R>
 }
 
 export type EditableTableVisualizationOptions<

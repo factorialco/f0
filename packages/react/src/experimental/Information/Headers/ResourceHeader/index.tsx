@@ -45,6 +45,8 @@ const _ResourceHeader = ({
   )
 }
 
+export type ResourceHeaderProps = Props
+
 /**
  * @experimental This is an experimental component use it at your own risk
  */

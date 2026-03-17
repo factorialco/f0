@@ -32,6 +32,7 @@ import type {
 import { ItemActionsRow } from "../../../../components/itemActions/ItemActionsRow/ItemActionsRow"
 import { useSticky } from "../useSticky"
 import { NestedRow } from "./NestedRow"
+import { groupBorderClass, HeaderGroupEntry } from "../hooks/useHeaderGroups"
 
 export type RowProps<
   R extends RecordType,
@@ -73,6 +74,7 @@ export type RowProps<
   /** Row wrapper passed through to NestedRow for wrapping child rows */
   rowWrapper?: React.ComponentType<RowWrapperProps<R>>
   fromVisualization?: TableVisualizationType
+  headerGroups: HeaderGroupEntry[] | null
 }
 
 export type NestedRowProps = {
@@ -121,6 +123,7 @@ const RowComponentInner = <
     cellRenderer: CellRenderer,
     rowWrapper,
     fromVisualization,
+    headerGroups,
   }: RowProps<
     R,
     Filters,
@@ -184,6 +187,7 @@ const RowComponentInner = <
         referenceRowType={referenceRowTypeFn}
         cellRenderer={CellRenderer}
         rowWrapper={rowWrapper}
+        headerGroups={headerGroups}
         key={key}
         fromVisualization={fromVisualization}
       />
@@ -220,6 +224,8 @@ const RowComponentInner = <
           loading={loading}
           className={cn(
             loading && tableWithChildren ? "first:pl-4" : "",
+            headerGroups && "[&>div:first-child]:hidden",
+            headerGroups && groupBorderClass,
             cellRenderedClass
           )}
           referenceRowType={referenceRowType}
@@ -238,6 +244,18 @@ const RowComponentInner = <
       )}
 
       {columns.map((column, cellIndex) => {
+        const headerGroup = headerGroups?.find((group) => {
+          return (
+            group.type === "group" && group.columnIndices.includes(cellIndex)
+          )
+        })
+
+        const isLastInGroup =
+          !!headerGroups &&
+          (!headerGroup ||
+            headerGroup.columnIndices[headerGroup.columnIndices.length - 1] ===
+              cellIndex)
+
         const defaultContent = (
           <div
             className={cn(
@@ -264,9 +282,9 @@ const RowComponentInner = <
               tableWithChildren,
               selectableRow: !!source.selectable,
             }}
-            className={cellRenderedClass}
             fromVisualization={fromVisualization}
             referenceRowType={referenceRowType}
+            className={cn(cellRenderedClass, isLastInGroup && groupBorderClass)}
           >
             {CellRenderer ? (
               <CellRenderer

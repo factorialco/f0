@@ -8,6 +8,7 @@ import { zeroRender as render, screen, waitFor } from "@/testing/test-utils"
 import type { F0SectionConfig } from "../types"
 
 import { createConditionalResolver } from "../conditionalResolver"
+import { generateAnchorId } from "../context"
 import { F0Form } from "../F0Form"
 import {
   f0FormField,
@@ -216,6 +217,70 @@ describe("F0Form", () => {
     expect(minutesInput.getAttribute("aria-describedby")).toContain(
       resolvedErrorContainerId
     )
+  })
+
+  it("renders duration field wrapper used by error navigation highlight", () => {
+    const formSchema = z.object({
+      duration: f0FormField(z.number(), {
+        label: "Duration",
+        fieldType: "duration",
+      }),
+    })
+
+    render(
+      <F0Form
+        name="duration-error-navigation-highlight"
+        schema={formSchema}
+        defaultValues={{ duration: 0 }}
+        onSubmit={async () => ({ success: true })}
+      />
+    )
+
+    expect(screen.getByTestId("input-field-wrapper")).toBeInTheDocument()
+  })
+
+  it("applies shake highlight class to duration field on validation failure", async () => {
+    const formSchema = z.object({
+      duration: f0FormField(z.number().min(1, "Duration is required"), {
+        label: "Duration",
+        fieldType: "duration",
+      }),
+    })
+
+    render(
+      <F0Form
+        name="duration-validation-shake"
+        schema={formSchema}
+        defaultValues={{ duration: 0 }}
+        onSubmit={async () => ({ success: true })}
+      />
+    )
+
+    const durationAnchor = document.getElementById(
+      generateAnchorId("duration-validation-shake", undefined, "duration")
+    )
+    const durationWrapper = durationAnchor?.querySelector(
+      '[data-testid="input-field-wrapper"]'
+    )
+
+    // jsdom does not compute layout, so offsetParent is null by default.
+    // Force visibility semantics so useErrorNavigation highlights this anchor.
+    if (durationAnchor) {
+      Object.defineProperty(durationAnchor, "offsetParent", {
+        value: document.body,
+        writable: true,
+      })
+    }
+
+    expect(durationAnchor).toBeInTheDocument()
+    expect(durationWrapper).toBeInTheDocument()
+
+    await userEvent.click(screen.getByText("Submit"))
+    await screen.findByText("Duration is required")
+
+    await waitFor(() => {
+      expect(durationAnchor).toHaveClass("f0-form-error-navigate")
+    })
   })
 
   it("applies duration maxVisibleDigits from schema config", () => {

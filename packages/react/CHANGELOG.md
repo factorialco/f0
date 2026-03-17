@@ -1,5 +1,68 @@
 # Changelog
 
+## [1.405.0](https://github.com/factorialco/f0/compare/f0-react-v1.404.2...f0-react-v1.405.0) (2026-03-16)
+
+
+### Features
+
+* data collection grouped headers ([#3616](https://github.com/factorialco/f0/issues/3616)) ([209db3d](https://github.com/factorialco/f0/commit/209db3d47996f669652755035e330a6400c49349))
+
+## [1.404.2](https://github.com/factorialco/f0/compare/f0-react-v1.404.1...f0-react-v1.404.2) (2026-03-16)
+
+
+### Bug Fixes
+
+* **react:** handle query params in isActive link matching ([#3680](https://github.com/factorialco/f0/issues/3680)) ([67ba14d](https://github.com/factorialco/f0/commit/67ba14d5e722df5dfe0dcc4c69266a8f8c9422ea))
+
+## [1.404.1](https://github.com/factorialco/f0/compare/f0-react-v1.404.0...f0-react-v1.404.1) (2026-03-16)
+
+
+### Bug Fixes
+
+* **one-data-collection:** add summary placeholders (FCT-48392) ([#3538](https://github.com/factorialco/f0/issues/3538)) ([59e7051](https://github.com/factorialco/f0/commit/59e7051fecd83d3b3be386c95ca6f391ea3257bd))
+
+## [1.404.0](https://github.com/factorialco/f0/compare/f0-react-v1.403.1...f0-react-v1.404.0) (2026-03-16)
+
+
+### Features
+
+* add SelectCell for EditableTable with F0Select integration ([#3607](https://github.com/factorialco/f0/issues/3607)) ([49fe9a1](https://github.com/factorialco/f0/commit/49fe9a195bee19902cce73b85535ed80934a7605))
+
+## [1.403.1](https://github.com/factorialco/f0/compare/f0-react-v1.403.0...f0-react-v1.403.1) (2026-03-16)
+
+
+### Bug Fixes
+
+* handle text overflow for unspaced content in CommunityPost ([#3527](https://github.com/factorialco/f0/issues/3527)) ([00306e0](https://github.com/factorialco/f0/commit/00306e0ebfcdf874cd43fb34ce9d9b641b8e03ea))
+
+## [1.403.0](https://github.com/factorialco/f0/compare/f0-react-v1.402.3...f0-react-v1.403.0) (2026-03-16)
+
+
+### Features
+
+* restore add-row and summary stories for editable table ([#3643](https://github.com/factorialco/f0/issues/3643)) ([7574eff](https://github.com/factorialco/f0/commit/7574eff1db077bbe8f0e502190e6d2c071f09e72))
+
+## [1.402.3](https://github.com/factorialco/f0/compare/f0-react-v1.402.2...f0-react-v1.402.3) (2026-03-16)
+
+
+### Bug Fixes
+
+* javascript heap out of memory ([#3672](https://github.com/factorialco/f0/issues/3672)) ([de8aad4](https://github.com/factorialco/f0/commit/de8aad42676e2be95a2dc20f6b68011c07280729))
+
+## [1.402.2](https://github.com/factorialco/f0/compare/f0-react-v1.402.1...f0-react-v1.402.2) (2026-03-13)
+
+
+### Bug Fixes
+
+* **react:** align F0DurationInput disabled and error highlight ([#3665](https://github.com/factorialco/f0/issues/3665)) ([a026b34](https://github.com/factorialco/f0/commit/a026b3444800929cd79282b131f1f4d17a361fe9))
+
+## [1.402.1](https://github.com/factorialco/f0/compare/f0-react-v1.402.0...f0-react-v1.402.1) (2026-03-13)
+
+
+### Bug Fixes
+
+* add support for survey answering form to be on side position ([#3666](https://github.com/factorialco/f0/issues/3666)) ([f6aad7f](https://github.com/factorialco/f0/commit/f6aad7f3a6a6a8b4574c5a03bf6a21d351f73f44))
+
 ## [1.402.0](https://github.com/factorialco/f0/compare/f0-react-v1.401.1...f0-react-v1.402.0) (2026-03-12)
 
 

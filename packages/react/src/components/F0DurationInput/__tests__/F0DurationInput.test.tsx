@@ -381,6 +381,25 @@ describe("F0DurationInput", () => {
       const container = screen.getByRole("group", { name: "Duration" })
       expect(container).toHaveAttribute("data-disabled", "")
       expect(container).toHaveAttribute("aria-disabled", "true")
+      expect(container).toHaveClass("bg-f1-background-tertiary")
+      expect(container).not.toHaveClass("opacity-50")
+    })
+
+    it("prioritizes disabled background when readonly and disabled are both true", () => {
+      render(
+        <F0DurationInput
+          label="Duration"
+          value={0}
+          onChange={() => {}}
+          readonly
+          disabled
+        />
+      )
+
+      const container = screen.getByRole("group", { name: "Duration" })
+      expect(container).toHaveClass("bg-f1-background-tertiary")
+      expect(container).not.toHaveClass("bg-f1-background-secondary")
+      expect(container).toHaveClass("border-f1-border-secondary")
     })
 
     it("omits data-disabled when not disabled", () => {
@@ -388,6 +407,22 @@ describe("F0DurationInput", () => {
 
       const container = screen.getByRole("group", { name: "Duration" })
       expect(container).not.toHaveAttribute("data-disabled")
+    })
+
+    it("renders suffixes without reduced-opacity text styling", () => {
+      render(<F0DurationInput label="Duration" value={0} onChange={() => {}} />)
+
+      const minutesSuffix = screen.getByText("min")
+      expect(minutesSuffix).toHaveClass("text-f1-foreground-secondary")
+      expect(minutesSuffix).not.toHaveClass("opacity-[0.61]")
+    })
+
+    it("renders placeholder styling without reduced opacity", () => {
+      render(<F0DurationInput label="Duration" value={0} onChange={() => {}} />)
+
+      const [hoursInput] = screen.getAllByPlaceholderText("0")
+      expect(hoursInput).toHaveClass("placeholder:text-f1-foreground-secondary")
+      expect(hoursInput).not.toHaveClass("placeholder:opacity-[0.37]")
     })
 
     it("uses custom ariaLabel from fields config", () => {
@@ -469,6 +504,12 @@ describe("F0DurationInput", () => {
       expect(
         screen.getByRole("group", { name: "Working time" })
       ).toBeInTheDocument()
+    })
+
+    it("exposes input wrapper test id for form error navigation animation", () => {
+      render(<F0DurationInput label="Duration" value={0} onChange={() => {}} />)
+
+      expect(screen.getByTestId("input-field-wrapper")).toBeInTheDocument()
     })
 
     it("forwards aria-describedby and aria-invalid to all segment inputs", () => {

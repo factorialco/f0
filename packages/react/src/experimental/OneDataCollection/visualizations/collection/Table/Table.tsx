@@ -47,6 +47,7 @@ import { useAddRow } from "../EditableTable/context/AddRowContext"
 import { statusToChecked } from "../utils"
 import { Row } from "./components/Row"
 import { useColumns } from "./hooks/useColums"
+import { groupBorderClass, useHeaderGroups } from "./hooks/useHeaderGroups"
 import { NestedDataProvider } from "./providers/NestedProvider"
 import { useSticky } from "./useSticky"
 export * from "./settings/SettingsRenderer"
@@ -90,11 +91,13 @@ export const TableCollection = <
   allowColumnHiding,
   allowColumnReordering,
   referenceRowType,
+  headerGroupLabels,
   rowWrapper: RowWrapper,
   cellRenderer,
   showItemActions: showItemActionsProp,
   visualizationSettings,
   fromVisualization = "table",
+  summaryPlaceholder = "-",
 }: CollectionProps<
   R,
   Filters,
@@ -250,6 +253,12 @@ export const TableCollection = <
       : "none"
   }
 
+  const isEmptySummaryValue = (value: unknown) =>
+    value === null || value === undefined || value === ""
+
+  const getSummaryPlaceholder = (columnPlaceholder?: string) =>
+    columnPlaceholder ?? summaryPlaceholder
+
   /**
    * Handle column sort click
    */
@@ -290,6 +299,8 @@ export const TableCollection = <
     columns,
     !!source.selectable
   )
+
+  const headerGroups = useHeaderGroups(columns, headerGroupLabels)
 
   const tableWithChildren = data?.records.some((item) =>
     source.itemsWithChildren?.(item)
@@ -402,72 +413,153 @@ export const TableCollection = <
                 </th>
               </TableRow>
             ) : (
-              <TableRow>
-                {source.selectable && (
-                  <TableHead
-                    width={checkColumnWidth}
-                    sticky={{ left: 0 }}
-                    align="left"
-                  >
-                    <div className="ml-1.5 flex w-full items-center justify-start">
-                      <F0Checkbox
-                        checked={false}
-                        onCheckedChange={handleSelectAll}
-                        title={i18n.actions.selectAll}
-                        hideLabel
-                        disabled={data?.records.length === 0}
-                      />
-                    </div>
-                  </TableHead>
-                )}
-                {columns.map(({ sorting, label, ...column }, index) => (
-                  <TableHead
-                    key={`table-head-${index}`}
-                    sortState={getColumnSortState(
-                      sorting,
-                      source.sortings,
-                      currentSortings
+              <>
+                {headerGroups ? (
+                  <TableRow>
+                    {source.selectable && (
+                      <TableHead
+                        align="left"
+                        sticky={{ left: 0 }}
+                        width={checkColumnWidth}
+                        className={cn(
+                          groupBorderClass,
+                          "hover:after:bg-transparent"
+                        )}
+                      >
+                        <div className="ml-1.5 flex w-full items-center justify-start" />
+                      </TableHead>
                     )}
-                    width={column.width}
-                    align={column.align}
-                    sticky={getStickyPosition(index)}
-                    className={
-                      fromVisualization === "editableTable" &&
-                      index !== columns.length - 1
-                        ? "border-0 border-r-[1px] border-solid border-f1-border-secondary"
-                        : undefined
-                    }
-                    {...column}
-                    hidden={false}
-                    onSortClick={
-                      sorting
-                        ? () => {
-                            if (!sorting) return
-                            handleSortClick(sorting)
-                          }
-                        : undefined
-                    }
-                  >
-                    {label}
-                  </TableHead>
-                ))}
-                {showItemActions && (
-                  <>
-                    <th className="hidden md:table-cell"></th>
+                    {headerGroups.map((entry, entryIndex) => {
+                      const borderClass = cn(
+                        groupBorderClass,
+                        "hover:after:bg-transparent"
+                      )
+                      return entry.type === "group" ? (
+                        <TableHead
+                          align="right"
+                          colSpan={entry.colSpan}
+                          className={borderClass}
+                          key={`header-group-${entry.id}-${entryIndex}`}
+                        >
+                          {entry.label}
+                        </TableHead>
+                      ) : (
+                        <TableHead
+                          align="right"
+                          className={borderClass}
+                          width={columns[entry.columnIndices[0]].width}
+                          key={`header-ungrouped-${entry.columnIndices[0]}`}
+                          sticky={getStickyPosition(entry.columnIndices[0])}
+                        >
+                          <span />
+                        </TableHead>
+                      )
+                    })}
+                    {showItemActions && (
+                      <>
+                        <th className="hidden md:table-cell" />
+                        <TableHead
+                          hidden
+                          width={68}
+                          key="actions"
+                          sticky={{ right: 0 }}
+                          className="table-cell md:hidden"
+                        >
+                          <span />
+                        </TableHead>
+                      </>
+                    )}
+                  </TableRow>
+                ) : null}
+                <TableRow>
+                  {source.selectable && (
                     <TableHead
-                      key="actions"
-                      width={68}
-                      hidden
-                      sticky={{
-                        right: 0,
-                      }}
-                      className="table-cell md:hidden"
+                      width={checkColumnWidth}
+                      sticky={{ left: 0 }}
+                      align="left"
+                      className={
+                        headerGroups
+                          ? cn("[&>div:first-child]:hidden", groupBorderClass)
+                          : undefined
+                      }
                     >
-                      {i18n.collections.actions.actions}
+                      <div className="ml-1.5 flex w-full items-center justify-start">
+                        <F0Checkbox
+                          checked={false}
+                          onCheckedChange={handleSelectAll}
+                          title={i18n.actions.selectAll}
+                          hideLabel
+                          disabled={data?.records.length === 0}
+                        />
+                      </div>
                     </TableHead>
-                  </>
-                )}
-              </TableRow>
+                  )}
+                  {columns.map(({ sorting, label, ...column }, index) => {
+                    const headerGroup = headerGroups?.find(
+                      (group) =>
+                        group.type === "group" &&
+                        group.columnIndices.includes(index)
+                    )
+                    const isLastInGroup =
+                      !!headerGroups &&
+                      (!headerGroup ||
+                        headerGroup.columnIndices[
+                          headerGroup.columnIndices.length - 1
+                        ] === index)
+
+                    return (
+                      <TableHead
+                        key={`table-head-${index}`}
+                        sortState={getColumnSortState(
+                          sorting,
+                          source.sortings,
+                          currentSortings
+                        )}
+                        width={column.width}
+                        align={column.align}
+                        sticky={getStickyPosition(index)}
+                        {...column}
+                        hidden={false}
+                        className={
+                          cn(
+                            headerGroups && "[&>div:first-child]:hidden",
+                            isLastInGroup && groupBorderClass,
+                            fromVisualization === "editableTable" &&
+                              index !== columns.length - 1 &&
+                              "border-0 border-r-[1px] border-solid border-f1-border-secondary"
+                          ) || undefined
+                        }
+                        onSortClick={
+                          sorting
+                            ? () => {
+                                if (!sorting) return
+                                handleSortClick(sorting)
+                              }
+                            : undefined
+                        }
+                      >
+                        {label}
+                      </TableHead>
+                    )
+                  })}
+                  {showItemActions && (
+                    <>
+                      <th className="hidden md:table-cell"></th>
+                      <TableHead
+                        key="actions"
+                        width={68}
+                        hidden
+                        sticky={{
+                          right: 0,
+                        }}
+                        className="table-cell md:hidden"
+                      >
+                        {i18n.collections.actions.actions}
+                      </TableHead>
+                    </>
+                  )}
+                </TableRow>
+              </>
             )}
           </TableHeader>
           <TableBody>
@@ -538,6 +630,7 @@ export const TableCollection = <
                               referenceRowType={referenceRowType}
                               rowWrapper={RowWrapper}
                               cellRenderer={cellRenderer}
+                              headerGroups={headerGroups}
                             />
                           )
                           if (RowWrapper) {
@@ -580,6 +673,7 @@ export const TableCollection = <
                     rowWrapper={RowWrapper}
                     cellRenderer={cellRenderer}
                     fromVisualization={fromVisualization}
+                    headerGroups={headerGroups}
                   />
                 )
                 if (RowWrapper) {
@@ -660,18 +754,43 @@ export const TableCollection = <
                             "flex"
                           )}
                         >
-                          {column.summary &&
-                          source.summaries &&
-                          source.summaries[column.summary]?.type === "sum" ? (
-                            <div className="flex gap-1">
+                          {(() => {
+                            const placeholder = getSummaryPlaceholder(
+                              column.summaryPlaceholder
+                            )
+
+                            if (
+                              column.summary &&
+                              source.summaries &&
+                              source.summaries[column.summary]?.type === "sum"
+                            ) {
+                              const summaryValue =
+                                summaryData.data[column.summary]
+
+                              if (isEmptySummaryValue(summaryValue)) {
+                                return (
+                                  <span className="text-f1-foreground-secondary">
+                                    {placeholder}
+                                  </span>
+                                )
+                              }
+
+                              return (
+                                <div className="flex gap-1">
+                                  <span className="text-f1-foreground-secondary">
+                                    {i18n.collections.summaries.types.sum}
+                                  </span>
+                                  {`${summaryValue}`}
+                                </div>
+                              )
+                            }
+
+                            return (
                               <span className="text-f1-foreground-secondary">
-                                {i18n.collections.summaries.types.sum}
+                                {placeholder}
                               </span>
-                              {`${summaryData.data[column.summary]}`}
-                            </div>
-                          ) : (
-                            "-"
-                          )}
+                            )
+                          })()}
                         </div>
                       )}
                     </TableCell>

@@ -20,6 +20,7 @@ import { ItemActionsDefinition } from "../../../../item-actions"
 import { SummariesDefinition } from "../../../../summary"
 import { AddRowProvider } from "../../EditableTable/context/AddRowContext"
 import { TableCollection } from "../index"
+import type { TableColumnDefinition } from "../types"
 
 vi.mock("../../property", () => ({
   propertyRenderers: {
@@ -917,6 +918,248 @@ describe("TableCollection", () => {
 
       // Verify data from hidden column is NOT shown
       expect(screen.queryByText(testData[0].email)).not.toBeInTheDocument()
+    })
+  })
+
+  describe("summary placeholders", () => {
+    type SummaryTestDefinitions = {
+      salary: {
+        type: "sum"
+      }
+    }
+
+    type SummaryPerson = Person & {
+      salary?: number | null | string
+    }
+
+    const summaryColumns: ReadonlyArray<
+      TableColumnDefinition<
+        SummaryPerson,
+        SortingsDefinition,
+        SummaryTestDefinitions
+      >
+    > = [
+      { label: "name", render: (item: SummaryPerson) => item.name },
+      { label: "email", render: (item: SummaryPerson) => item.email },
+      {
+        label: "salary",
+        summary: "salary" as const,
+        align: "right" as const,
+        render: (item: SummaryPerson) => item.salary ?? undefined,
+      },
+    ]
+
+    const createSummarySource = ({
+      salarySummary,
+    }: {
+      salarySummary: SummaryPerson["salary"]
+    }): DataCollectionSource<
+      SummaryPerson,
+      TestFilters,
+      SortingsDefinition,
+      SummaryTestDefinitions,
+      ItemActionsDefinition<SummaryPerson>,
+      TestNavigationFilters,
+      GroupingDefinition<SummaryPerson>
+    > => ({
+      currentFilters: {},
+      setCurrentFilters: vi.fn(),
+      currentSortings: null,
+      setCurrentSortings: vi.fn(),
+      currentNavigationFilters: {},
+      setCurrentNavigationFilters: vi.fn(),
+      navigationFilters: undefined,
+      currentSearch: undefined,
+      debouncedCurrentSearch: undefined,
+      setCurrentSearch: vi.fn(),
+      isLoading: false,
+      setIsLoading: vi.fn(),
+      dataAdapter: {
+        fetchData: async ({
+          filters: _filters,
+        }: BaseFetchOptions<TestFilters>) => ({
+          records: testData,
+          summaries: {
+            ...testData[0],
+            salary: salarySummary,
+          } as SummaryPerson,
+        }),
+      },
+      currentGrouping: undefined,
+      setCurrentGrouping: vi.fn(),
+      summaries: {
+        salary: { type: "sum" },
+      },
+    })
+
+    const getSummaryRowCells = async () => {
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+      })
+
+      const rows = screen.getAllByRole("row")
+      const summaryRow = rows[rows.length - 1]
+      return within(summaryRow).getAllByRole("cell")
+    }
+
+    it("uses default '-' placeholder for empty summary values", async () => {
+      render(
+        <TableCollection<
+          SummaryPerson,
+          TestFilters,
+          SortingsDefinition,
+          SummaryTestDefinitions,
+          ItemActionsDefinition<SummaryPerson>,
+          TestNavigationFilters,
+          GroupingDefinition<SummaryPerson>
+        >
+          columns={summaryColumns}
+          source={createSummarySource({ salarySummary: null })}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+        />
+      )
+
+      const summaryCells = await getSummaryRowCells()
+      const salaryCell = summaryCells[2]
+
+      expect(within(salaryCell).queryByText(/sum/i)).not.toBeInTheDocument()
+      expect(within(salaryCell).getByText("-")).toHaveClass(
+        "text-f1-foreground-secondary"
+      )
+    })
+
+    it("applies row-level summaryPlaceholder to empty summary and non-summary cells", async () => {
+      render(
+        <TableCollection<
+          SummaryPerson,
+          TestFilters,
+          SortingsDefinition,
+          SummaryTestDefinitions,
+          ItemActionsDefinition<SummaryPerson>,
+          TestNavigationFilters,
+          GroupingDefinition<SummaryPerson>
+        >
+          columns={summaryColumns}
+          source={createSummarySource({ salarySummary: null })}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+          summaryPlaceholder="ROW"
+        />
+      )
+
+      const summaryCells = await getSummaryRowCells()
+      const emailCell = summaryCells[1]
+      const salaryCell = summaryCells[2]
+
+      expect(within(emailCell).getByText("ROW")).toHaveClass(
+        "text-f1-foreground-secondary"
+      )
+      expect(within(salaryCell).queryByText(/sum/i)).not.toBeInTheDocument()
+      expect(within(salaryCell).getByText("ROW")).toHaveClass(
+        "text-f1-foreground-secondary"
+      )
+    })
+
+    it("uses per-column summaryPlaceholder over row-level placeholder", async () => {
+      render(
+        <TableCollection<
+          SummaryPerson,
+          TestFilters,
+          SortingsDefinition,
+          SummaryTestDefinitions,
+          ItemActionsDefinition<SummaryPerson>,
+          TestNavigationFilters,
+          GroupingDefinition<SummaryPerson>
+        >
+          columns={
+            [
+              ...summaryColumns.slice(0, 2),
+              {
+                ...summaryColumns[2],
+                summaryPlaceholder: "COLUMN",
+              },
+            ] as ReadonlyArray<
+              TableColumnDefinition<
+                SummaryPerson,
+                SortingsDefinition,
+                SummaryTestDefinitions
+              >
+            >
+          }
+          source={createSummarySource({ salarySummary: null })}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+          summaryPlaceholder="ROW"
+        />
+      )
+
+      const summaryCells = await getSummaryRowCells()
+      const emailCell = summaryCells[1]
+      const salaryCell = summaryCells[2]
+
+      expect(within(emailCell).getByText("ROW")).toBeInTheDocument()
+      expect(within(salaryCell).getByText("COLUMN")).toBeInTheDocument()
+    })
+
+    it("keeps sum prefix for non-empty values and treats 0 as non-empty", async () => {
+      render(
+        <TableCollection<
+          SummaryPerson,
+          TestFilters,
+          SortingsDefinition,
+          SummaryTestDefinitions,
+          ItemActionsDefinition<SummaryPerson>,
+          TestNavigationFilters,
+          GroupingDefinition<SummaryPerson>
+        >
+          columns={summaryColumns}
+          source={createSummarySource({ salarySummary: 0 })}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+          summaryPlaceholder="ROW"
+        />
+      )
+
+      const summaryCells = await getSummaryRowCells()
+      const salaryCell = summaryCells[2]
+
+      expect(within(salaryCell).getByText(/sum/i)).toBeInTheDocument()
+      expect(within(salaryCell).getByText("0")).toBeInTheDocument()
+      expect(within(salaryCell).queryByText("ROW")).not.toBeInTheDocument()
+    })
+
+    it("treats empty-string summaries as empty and shows the placeholder", async () => {
+      render(
+        <TableCollection<
+          SummaryPerson,
+          TestFilters,
+          SortingsDefinition,
+          SummaryTestDefinitions,
+          ItemActionsDefinition<SummaryPerson>,
+          TestNavigationFilters,
+          GroupingDefinition<SummaryPerson>
+        >
+          columns={summaryColumns}
+          source={createSummarySource({ salarySummary: "" })}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+          summaryPlaceholder="ROW"
+        />
+      )
+
+      const summaryCells = await getSummaryRowCells()
+      const salaryCell = summaryCells[2]
+
+      expect(within(salaryCell).queryByText(/sum/i)).not.toBeInTheDocument()
+      expect(within(salaryCell).getByText("ROW")).toHaveClass(
+        "text-f1-foreground-secondary"
+      )
     })
   })
 

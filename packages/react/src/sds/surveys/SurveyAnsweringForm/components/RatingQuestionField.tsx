@@ -33,7 +33,7 @@ export function RatingQuestionField({
           key={option.value}
           className={cn(
             "flex h-10 min-w-20 items-center justify-center rounded-md border border-solid border-f1-border-secondary text-center font-medium",
-            disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer",
+            disabled ? "cursor-not-allowed" : "cursor-pointer",
             value === option.value &&
               "border-f1-border-selected bg-f1-background-selected-secondary"
           )}
