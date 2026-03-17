@@ -1,0 +1,37 @@
+import { tv } from "tailwind-variants"
+
+export const f0AvatarAlertContainerVariants = tv({
+  base: "flex shrink-0 items-center justify-center overflow-hidden border border-solid",
+  variants: {
+    size: {
+      sm: "h-6 w-6 rounded-sm",
+      md: "h-8 w-8 rounded",
+      lg: "h-10 w-10 rounded-lg",
+    },
+    alertType: {
+      critical: "bg-f0-background-critical border-f0-border-critical",
+      warning: "bg-f0-background-warning border-f0-border-warning",
+      info: "bg-f0-background-info border-f0-border-info",
+      positive: "bg-f0-background-positive border-f0-border-positive",
+    },
+  },
+  defaultVariants: {
+    size: "sm",
+    alertType: "critical",
+  },
+})
+
+export const f0AvatarFlagContainerVariants = tv({
+  base: "flex shrink-0 items-center justify-center overflow-hidden border border-solid border-f0-border-secondary",
+  variants: {
+    size: {
+      xs: "h-5 w-5 rounded-xs",
+      sm: "h-6 w-6 rounded-sm",
+      md: "h-8 w-8 rounded",
+      lg: "h-10 w-10 rounded-lg",
+    },
+  },
+  defaultVariants: {
+    size: "xs",
+  },
+})

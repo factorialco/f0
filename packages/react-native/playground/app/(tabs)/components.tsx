@@ -13,6 +13,7 @@ import { F0CounterShowcase } from "../../components/F0CounterShowcase"
 import { DataListShowcase } from "../../components/DataListShowcase"
 import { DetailsItemShowcase } from "../../components/DetailsItemShowcase"
 import { DetailsItemsListShowcase } from "../../components/DetailsItemsListShowcase"
+import { F0AvatarShowcase } from "../../components/F0AvatarShowcase"
 import { F0BadgeShowcase } from "../../components/F0BadgeShowcase"
 import { F0ButtonShowcase } from "../../components/F0ButtonShowcase"
 import { F0IconShowcase } from "../../components/F0IconShowcase"
@@ -40,6 +41,7 @@ type ComponentType =
   | "datalist"
   | "detailsitem"
   | "detailsitemslist"
+  | "f0avatar"
   | "f0button"
   | "f0badge"
   | "f0counter"
@@ -57,13 +59,14 @@ type ComponentType =
 const componentOptions = [
   { value: "activity" as ComponentType, label: "Activity" },
   { value: "animatedf0text" as ComponentType, label: "AnimatedF0Text" },
-  { value: "avatar" as ComponentType, label: "Avatar" },
+  { value: "avatar" as ComponentType, label: "Avatar (deprecated)" },
   { value: "badge" as ComponentType, label: "Badge (deprecated)" },
   { value: "button" as ComponentType, label: "Button (deprecated)" },
   { value: "counter" as ComponentType, label: "Counter (deprecated)" },
   { value: "datalist" as ComponentType, label: "DataList" },
   { value: "detailsitem" as ComponentType, label: "DetailsItem" },
   { value: "detailsitemslist" as ComponentType, label: "DetailsItemsList" },
+  { value: "f0avatar" as ComponentType, label: "F0Avatar" },
   { value: "f0button" as ComponentType, label: "F0Button" },
   { value: "f0badge" as ComponentType, label: "F0Badge" },
   { value: "f0counter" as ComponentType, label: "F0Counter" },
@@ -114,6 +117,8 @@ export default function ComponentsShowcase() {
         return <DetailsItemShowcase />
       case "detailsitemslist":
         return <DetailsItemsListShowcase />
+      case "f0avatar":
+        return <F0AvatarShowcase />
       case "f0button":
         return <F0ButtonShowcase />
       case "f0badge":

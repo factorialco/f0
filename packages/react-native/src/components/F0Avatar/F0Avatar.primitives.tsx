@@ -1,16 +1,22 @@
 import * as React from "react"
-import { View, Text, Image } from "react-native"
+import { View } from "react-native"
 import { tv } from "tailwind-variants"
 
-import { cn } from "../lib/utils"
+import { cn } from "../../lib/utils"
+import { F0Image } from "../primitives/F0Image"
+import { F0Text, type TypographyVariant } from "../primitives/F0Text"
 
-/** @deprecated Use F0Avatar from components/F0Avatar instead */
-export const sizes = ["xsmall", "small", "medium", "large", "xlarge"] as const
+export const sizes = [
+  "xsmall",
+  "small",
+  "medium",
+  "lg",
+  "large",
+  "xlarge",
+] as const
 
-/** @deprecated Use F0Avatar from components/F0Avatar instead */
 export const type = ["base", "rounded"] as const
 
-/** @deprecated Use F0Avatar from components/F0Avatar instead */
 export const color = [
   "viridian",
   "malibu",
@@ -25,12 +31,22 @@ export const color = [
   "camel",
 ] as const
 
-const textSizes = {
+export const textSizes = {
   xsmall: "text-sm",
   small: "text-sm",
   medium: "text-md",
+  lg: "text-lg",
   large: "text-2xl",
   xlarge: "text-3xl",
+}
+
+const fallbackVariant: Record<(typeof sizes)[number], TypographyVariant> = {
+  xsmall: "body-sm-semibold",
+  small: "body-sm-semibold",
+  medium: "body-md-semibold",
+  lg: "heading-sm",
+  large: "heading-lg",
+  xlarge: "heading-lg",
 }
 
 const avatarVariants = tv({
@@ -40,6 +56,7 @@ const avatarVariants = tv({
       xsmall: "w-5 h-5 rounded-xs",
       small: "w-6 h-6 rounded-sm",
       medium: "w-8 h-8 rounded",
+      lg: "w-10 h-10 rounded-lg",
       large: "w-14 h-14 rounded-xl",
       xlarge: "w-18 h-18 rounded-[20px]",
     } satisfies Record<(typeof sizes)[number], string>,
@@ -91,13 +108,7 @@ const AvatarImage = ({
   alt: string
 }) => (
   <View className={cn("aspect-square h-full w-full", className)} {...props}>
-    <Image
-      style={{ width: "100%", height: "100%" }}
-      source={{
-        uri: src,
-      }}
-      aria-label={alt}
-    />
+    <F0Image source={{ uri: src }} accessibilityLabel={alt} />
   </View>
 )
 
@@ -105,14 +116,15 @@ const AvatarFallback = ({
   className,
   size = "medium",
   ...props
-}: React.ComponentPropsWithoutRef<typeof Text> & {
+}: Omit<React.ComponentPropsWithoutRef<typeof F0Text>, "variant" | "color"> & {
   size?: (typeof sizes)[number]
 }) => (
-  <Text
+  <F0Text
+    variant={fallbackVariant[size]}
+    color="inverse"
     className={cn("text-f0-foreground-inverse/90", textSizes[size], className)}
     {...props}
   />
 )
 
-/** @deprecated Use F0Avatar from components/F0Avatar instead */
 export { Avatar, AvatarFallback, AvatarImage }
