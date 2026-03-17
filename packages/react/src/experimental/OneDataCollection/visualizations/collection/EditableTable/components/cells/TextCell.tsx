@@ -13,7 +13,7 @@ export function TextCell<R extends RecordType>({
   onChange,
 }: EditableCellProps<R>) {
   return (
-    <BaseCell>
+    <BaseCell error={error}>
       <div
         className={cn(
           "flex w-full min-w-0",
@@ -27,7 +27,6 @@ export function TextCell<R extends RecordType>({
           hideLabel
           value={value}
           onChange={onChange}
-          error={error}
           loading={loading}
           transparent
         />
