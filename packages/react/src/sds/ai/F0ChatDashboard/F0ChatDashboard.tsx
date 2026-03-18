@@ -192,6 +192,7 @@ export function F0ChatDashboard({
 
     for (const [key, spec] of Object.entries(filterSpecs)) {
       const options = filterOptions[key] ?? []
+      if (options.length === 0) continue
       result[key] = {
         type: "in",
         label: spec.label,
@@ -200,6 +201,8 @@ export function F0ChatDashboard({
         },
       }
     }
+
+    if (Object.keys(result).length === 0) return undefined
 
     return result as FiltersDefinition
   }, [config.filters, filterOptions])

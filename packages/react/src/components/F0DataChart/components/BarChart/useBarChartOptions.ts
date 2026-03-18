@@ -10,7 +10,7 @@ import type {
 import { paletteColor, resolveChartColorToken } from "../../utils/colors"
 import { buildBaseChartOptions } from "../../utils/options"
 import { useChartTheme } from "../../utils/useChartTheme"
-import { useContainerWidth } from "../../utils/useContainerWidth"
+import { useContainerSize } from "../../utils/useContainerSize"
 
 /** Extract the numeric value from a data point */
 function getValue(point: F0DataChartBarDataPoint): number {
@@ -211,7 +211,8 @@ export function useBarChartOptions(
   }: F0DataChartBarProps
 ): echarts.EChartsOption {
   const theme = useChartTheme(containerRef)
-  const containerWidth = useContainerWidth(containerRef)
+  const { width: containerWidth, height: containerHeight } =
+    useContainerSize(containerRef)
 
   return useMemo(() => {
     const isVertical = orientation === "vertical"
@@ -245,6 +246,7 @@ export function useBarChartOptions(
       tooltipFilterSeries: (name) => name.endsWith(" (target)"),
       echartsOptions,
       containerWidth,
+      containerHeight,
     })
   }, [
     categories,
@@ -259,5 +261,6 @@ export function useBarChartOptions(
     echartsOptions,
     theme,
     containerWidth,
+    containerHeight,
   ])
 }

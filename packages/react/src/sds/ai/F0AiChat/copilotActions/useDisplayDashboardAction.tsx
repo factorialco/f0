@@ -16,16 +16,14 @@ import { useAiChat } from "../providers/AiChatStateProvider"
  * definitions, fetchSpecs) and computes everything server-side via
  * POST /api/dashboard/compute.
  *
- * The canvas panel is NOT opened automatically — the user must click
- * "View report" on the card to open it. The only exception is when
- * the canvas is already open: a new dashboard replaces the current
- * one automatically.
+ * An inline report card is rendered in the chat. The user clicks
+ * "Open" on the card to view the dashboard in the canvas panel.
  *
  * Uses `available: "frontend"` so the backend agent can invoke it
  * via `emitFrontendTool` from the `displayDashboard` proxy tool.
  */
 export const useDisplayDashboardAction = () => {
-  const { openCanvas, visualizationMode, getSavedDashboardConfig } = useAiChat()
+  const { openCanvas } = useAiChat()
   const { copilotApiConfig } = useCopilotContext()
 
   const apiConfig = useMemo(
@@ -131,22 +129,6 @@ export const useDisplayDashboardAction = () => {
       }
 
       const config = args as ChatDashboardConfig
-
-      // Only auto-replace if the canvas is already open — otherwise
-      // the user must click "View report" to open it
-      if (visualizationMode === "canvas") {
-        // Use saved config if available for auto-replace
-        const effectiveConfig =
-          (toolCallId ? getSavedDashboardConfig(toolCallId) : undefined) ??
-          config
-        openCanvas({
-          type: "dashboard",
-          title: effectiveConfig.title,
-          config: effectiveConfig,
-          apiConfig,
-          toolCallId,
-        })
-      }
 
       return (
         <F0ChatReportCard
