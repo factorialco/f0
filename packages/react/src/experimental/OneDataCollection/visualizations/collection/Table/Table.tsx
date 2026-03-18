@@ -726,26 +726,33 @@ export const TableCollection = <
                 </tr>
               )}
           </TableBody>
-          {(summaryData || addRow?.addRowActions) && (
-            <TableFooter>
-              {summaryData && (
-                <TableRow
-                  className={cn(
-                    summaryData.sticky &&
-                      "sticky bottom-0 z-10 bg-f1-background shadow-[0_-1px_0_0_var(--f1-border-secondary)] hover:bg-f1-background",
-                    "font-medium"
-                  )}
-                >
-                  {source.selectable && (
-                    <TableCell width={checkColumnWidth} sticky={{ left: 0 }}>
-                      {summaryData.label && (
-                        <div className="font-medium text-f1-foreground-secondary">
-                          {summaryData.label}
-                        </div>
-                      )}
-                    </TableCell>
-                  )}
-                  {columns.map((column, cellIndex) => (
+          {(() => {
+            const actions = normalizeAddRowActions(addRow?.addRowActions?.())
+
+            if (!summaryData && actions.length === 0) {
+              return null
+            }
+
+            return (
+              <TableFooter>
+                {summaryData && (
+                  <TableRow
+                    className={cn(
+                      summaryData.sticky &&
+                        "sticky bottom-0 z-10 bg-f1-background shadow-[0_-1px_0_0_var(--f1-border-secondary)] hover:bg-f1-background",
+                      "font-medium"
+                    )}
+                  >
+                    {source.selectable && (
+                      <TableCell width={checkColumnWidth} sticky={{ left: 0 }}>
+                        {summaryData.label && (
+                          <div className="font-medium text-f1-foreground-secondary">
+                            {summaryData.label}
+                          </div>
+                        )}
+                      </TableCell>
+                    )}
+                    {columns.map((column, cellIndex) => (
                     <TableCell
                       key={`summary-${String(column.label)}`}
                       firstCell={cellIndex === 0}
@@ -805,30 +812,25 @@ export const TableCollection = <
                         </div>
                       )}
                     </TableCell>
-                  ))}
-                  {showItemActions && (
-                    <>
-                      <th className="hidden md:table-cell"></th>
-                      <TableCell
-                        key="summary-actions"
-                        width={68}
-                        sticky={{
-                          right: 0,
-                        }}
-                        className="table-cell md:hidden"
-                      >
-                        {""}
-                      </TableCell>
-                    </>
-                  )}
-                </TableRow>
-              )}
-              {(() => {
-                const actions = normalizeAddRowActions(
-                  addRow?.addRowActions?.()
-                )
-                if (actions.length === 0) return null
-                return (
+                    ))}
+                    {showItemActions && (
+                      <>
+                        <th className="hidden md:table-cell"></th>
+                        <TableCell
+                          key="summary-actions"
+                          width={68}
+                          sticky={{
+                            right: 0,
+                          }}
+                          className="table-cell md:hidden"
+                        >
+                          {""}
+                        </TableCell>
+                      </>
+                    )}
+                  </TableRow>
+                )}
+                {actions.length > 0 && (
                   <TableRow>
                     <TableCell
                       colSpan={
@@ -893,10 +895,10 @@ export const TableCollection = <
                       </div>
                     </TableCell>
                   </TableRow>
-                )
-              })()}
-            </TableFooter>
-          )}
+                )}
+              </TableFooter>
+            )
+          })()}
         </OneTable>
         <PagesPagination
           paginationInfo={paginationInfo}
