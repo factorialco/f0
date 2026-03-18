@@ -148,10 +148,10 @@ const NestedRowContent = <
   const shouldShowChildren = open
   const shouldShowLoadMore = open && paginationInfo?.hasMore
 
-  const addRowActions = normalizeAddRowActions(
-    addRow?.addNestedRowActions?.(props.item)
-  )
-  const hasAddRowActions = shouldShowChildren && addRowActions.length > 0
+  const addRowActions = open
+    ? normalizeAddRowActions(addRow?.addNestedRowActions?.(props.item))
+    : []
+  const hasAddRowActions = addRowActions.length > 0
 
   /**
    * useCalculateConectorHeight manages the visual tree connector lines
