@@ -21,10 +21,31 @@ vi.mock("../../property", () => ({
   },
 }))
 
+type MockDropdownItem = {
+  value: string
+  label: string
+  items?: MockDropdownItem[]
+}
+
+type MockDropdownProps = {
+  items: MockDropdownItem[] | { items: MockDropdownItem[] }[]
+  onClick: (value: string, item: MockDropdownItem) => void
+  mode?: string
+  trigger?: string
+  disabled?: boolean
+  value?: string
+}
+
 vi.mock("@/components/F0ButtonDropdown", () => ({
-  F0ButtonDropdown: ({ items, onClick, mode, trigger, ...props }: any) => {
+  F0ButtonDropdown: ({
+    items,
+    onClick,
+    mode,
+    trigger,
+    ...props
+  }: MockDropdownProps) => {
     const flatItems = Array.isArray(items)
-      ? items.flatMap((g: any) => ("items" in g ? g.items : [g]))
+      ? items.flatMap((g) => ("items" in g ? g.items : [g]))
       : []
     if (mode === "dropdown") {
       return (
@@ -35,7 +56,7 @@ vi.mock("@/components/F0ButtonDropdown", () => ({
           >
             {trigger ?? flatItems[0]?.label}
           </button>
-          {flatItems.map((item: any) => (
+          {flatItems.map((item) => (
             <button
               key={item.value}
               data-testid={`dropdown-item-${item.value}`}
@@ -49,19 +70,19 @@ vi.mock("@/components/F0ButtonDropdown", () => ({
     }
     // split mode (default)
     const selected =
-      flatItems.find((i: any) => i.value === props.value) ?? flatItems[0]
+      flatItems.find((i) => i.value === props.value) ?? flatItems[0]
     return (
       <div data-testid="f0-button-dropdown-mock">
         <button
           aria-label={selected?.label}
           disabled={props.disabled}
-          onClick={() => onClick(selected?.value, selected)}
+          onClick={() => selected && onClick(selected.value, selected)}
         >
           {selected?.label}
         </button>
         {flatItems
-          .filter((i: any) => i.value !== selected?.value)
-          .map((item: any) => (
+          .filter((i) => i.value !== selected?.value)
+          .map((item) => (
             <button
               key={item.value}
               data-testid={`dropdown-item-${item.value}`}
