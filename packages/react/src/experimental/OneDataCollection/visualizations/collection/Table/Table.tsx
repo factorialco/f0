@@ -44,7 +44,7 @@ import { ItemActionsDefinition } from "../../../item-actions"
 import { NavigationFiltersDefinition } from "../../../navigationFilters/types"
 import { SummariesDefinition } from "../../../summary"
 import { CollectionProps } from "../../../types"
-import { PrimaryActionItemDefinition } from "../../../actions"
+import { PrimaryActionItemDefinition, getPrimaryActions } from "../../../actions"
 import { useAddRow } from "../EditableTable/context/AddRowContext"
 import { statusToChecked } from "../utils"
 import { Row } from "./components/Row"
@@ -60,10 +60,7 @@ const normalizeAddRowActions = (
     | PrimaryActionItemDefinition[]
     | undefined
 ): PrimaryActionItemDefinition[] => {
-  if (!result) return []
-  return (Array.isArray(result) ? result : [result]).filter(
-    (item): item is PrimaryActionItemDefinition => item !== undefined
-  )
+  return getPrimaryActions(result)
 }
 
 const HighlightedCount = ({ text, count }: { text: string; count: number }) => {
