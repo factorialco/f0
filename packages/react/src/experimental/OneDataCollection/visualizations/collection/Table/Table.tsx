@@ -865,6 +865,8 @@ export const TableCollection = <
                             size="sm"
                             icon={actions[0].icon ?? Add}
                             trigger={addRow?.addRowActionsLabel}
+                            disabled={actions.every((a) => a.disabled)}
+                            loading={actions.some((a) => a.loading)}
                             items={actions.map((action, index) => ({
                               value: index.toString(),
                               label: action.label,
@@ -879,6 +881,8 @@ export const TableCollection = <
                           <F0ButtonDropdown
                             variant="outline"
                             size="sm"
+                            disabled={actions.every((a) => a.disabled)}
+                            loading={actions.some((a) => a.loading)}
                             items={actions.map((action, index) => ({
                               value: index.toString(),
                               label: action.label,

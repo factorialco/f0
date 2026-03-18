@@ -4,17 +4,12 @@ import { createContext, useContext } from "react"
 
 import type { RecordType } from "@/hooks/datasource"
 
-import type { PrimaryActionItemDefinition } from "../../../../actions"
-
-type AddRowActionsResult =
-  | PrimaryActionItemDefinition
-  | PrimaryActionItemDefinition[]
-  | undefined
+import type { AddRowActionsResult } from "../types"
 
 type AddRowContextValue = {
   addRowActions?: () => AddRowActionsResult
   addRowActionsLabel?: string
-  addNestedRowActions?: (parentItem: unknown) => AddRowActionsResult
+  addNestedRowActions?: (parentItem: RecordType) => AddRowActionsResult
   addNestedRowActionsLabel?: string
 }
 

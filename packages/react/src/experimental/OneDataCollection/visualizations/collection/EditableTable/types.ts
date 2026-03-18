@@ -23,7 +23,7 @@ import { SummariesDefinition } from "../../../summary"
 import { CollectionProps } from "../../../types"
 import { EditableTableCellEditType } from "./components/cells"
 
-type AddRowActionsResult =
+export type AddRowActionsResult =
   | PrimaryActionItemDefinition
   | PrimaryActionItemDefinition[]
   | undefined

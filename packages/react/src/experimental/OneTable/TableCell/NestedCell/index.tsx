@@ -113,6 +113,8 @@ export const NestedCell = ({
               size="sm"
               icon={onAddRow.actions[0].icon ?? Add}
               trigger={onAddRow.label}
+              disabled={onAddRow.actions.every((a) => a.disabled)}
+              loading={onAddRow.actions.some((a) => a.loading)}
               items={onAddRow.actions.map((action, index) => ({
                 value: index.toString(),
                 label: action.label,
@@ -128,6 +130,8 @@ export const NestedCell = ({
             <F0ButtonDropdown
               variant="outline"
               size="sm"
+              disabled={onAddRow.actions.every((a) => a.disabled)}
+              loading={onAddRow.actions.some((a) => a.loading)}
               items={onAddRow.actions.map((action, index) => ({
                 value: index.toString(),
                 label: action.label,
