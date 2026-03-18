@@ -1,6 +1,5 @@
 import { z, ZodRawShape, ZodEffects } from "zod"
 
-import { DialogWidth } from "@/components/F0Dialog"
 import type {
   F0FormErrorTriggerMode,
   F0FormSubmitConfig,
@@ -9,6 +8,8 @@ import type {
   F0SectionConfig,
   F0PerSectionSectionConfig,
 } from "@/components/F0Form/types"
+
+import { DialogWidth } from "@/components/F0Dialog"
 
 export type F0FormSchema<T extends ZodRawShape = ZodRawShape> =
   | z.ZodObject<T>
@@ -102,6 +103,8 @@ export type F0FormDefinition<
 // F0WizardForm props — wizard-only props + definition
 // =============================================================================
 
+import type { RenderCustomFieldFunction } from "@/components/F0Form/types"
+
 interface F0WizardFormBaseProps {
   isOpen: boolean
   onClose?: () => void
@@ -135,6 +138,11 @@ interface F0WizardFormBaseProps {
    * @default false
    */
   autoSkipCompletedSteps?: boolean
+  /**
+   * Callback that renders custom fields identified by `customFieldName`.
+   * When a field has `customFieldName`, this function is called instead of the inline `render`.
+   */
+  renderCustomField?: RenderCustomFieldFunction
 }
 
 export interface F0WizardFormSingleSchemaProps<

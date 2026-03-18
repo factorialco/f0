@@ -93,7 +93,12 @@ export function F0FormSkeleton({
 
   return (
     <div
-      className={cn("flex w-full flex-col", FORM_MAX_WIDTH, FIELD_GAP, className)}
+      className={cn(
+        "flex w-full flex-col",
+        FORM_MAX_WIDTH,
+        FIELD_GAP,
+        className
+      )}
       aria-busy="true"
       aria-live="polite"
     >
@@ -118,16 +123,17 @@ export function F0FormSkeleton({
           return (
             <div
               key={idx}
-              className={cn("flex flex-col", FIELD_GAP, idx !== 0 && SECTION_MARGIN)}
+              className={cn(
+                "flex flex-col",
+                FIELD_GAP,
+                idx !== 0 && SECTION_MARGIN
+              )}
             >
               <SectionHeaderSkeleton />
               {item.section.fields.map((sectionItem, sIdx) => {
                 if (sectionItem.type === "field") {
                   return (
-                    <FieldSkeleton
-                      key={sIdx}
-                      type={sectionItem.field.type}
-                    />
+                    <FieldSkeleton key={sIdx} type={sectionItem.field.type} />
                   )
                 }
                 if (sectionItem.type === "row") {
@@ -188,7 +194,11 @@ export function F0FormPerSectionSkeleton({
         return (
           <div
             key={sectionId}
-            className={cn("flex flex-col", FIELD_GAP, idx !== 0 && SECTION_MARGIN)}
+            className={cn(
+              "flex flex-col",
+              FIELD_GAP,
+              idx !== 0 && SECTION_MARGIN
+            )}
           >
             {sectionConfig && <SectionHeaderSkeleton />}
             {definition.map((item, itemIdx) => {

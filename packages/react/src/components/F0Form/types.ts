@@ -2,6 +2,7 @@ import type { z, ZodRawShape, ZodEffects } from "zod"
 
 import type { IconType } from "@/components/F0Icon"
 
+import type { CustomFieldRenderPropsBase } from "./fields/custom/types"
 import type {
   F0Field,
   F0BaseFieldRenderIfFunction,
@@ -241,6 +242,29 @@ export type F0FormSchema<T extends ZodRawShape = ZodRawShape> =
  */
 export type F0PerSectionSchema = Record<string, F0FormSchema>
 
+// ============================================================================
+// renderCustomField types
+// ============================================================================
+
+/**
+ * Props passed to the form-level `renderCustomField` callback.
+ * Extends the base custom field render props with a required `customFieldName`.
+ */
+export interface RenderCustomFieldProps extends CustomFieldRenderPropsBase {
+  /** Name identifying this custom field type */
+  customFieldName: string
+  /** Custom configuration (if provided via fieldConfig) */
+  config: unknown
+}
+
+/**
+ * Callback provided to F0Form / F0WizardForm that renders custom fields
+ * identified by `customFieldName` instead of an inline `render` function.
+ */
+export type RenderCustomFieldFunction = (
+  props: RenderCustomFieldProps
+) => React.ReactNode
+
 /**
  * Helper type to infer the combined values from a per-section schema record.
  * Merges all section schemas into a single type.
@@ -313,6 +337,11 @@ export interface F0FormPropsWithSingleSchema<TSchema extends F0FormSchema> {
    * `defaultValues` against `InitialFile.value`.
    */
   initialFiles?: InitialFile[]
+  /**
+   * Callback that renders custom fields identified by `customFieldName`.
+   * When a field has `customFieldName`, this function is called instead of the inline `render`.
+   */
+  renderCustomField?: RenderCustomFieldFunction
 }
 
 /**
@@ -392,6 +421,11 @@ export interface F0FormPropsWithPerSectionSchema<T extends F0PerSectionSchema> {
    * `defaultValues` against `InitialFile.value`.
    */
   initialFiles?: InitialFile[]
+  /**
+   * Callback that renders custom fields identified by `customFieldName`.
+   * When a field has `customFieldName`, this function is called instead of the inline `render`.
+   */
+  renderCustomField?: RenderCustomFieldFunction
 }
 
 /**
@@ -407,6 +441,11 @@ export interface F0FormPropsWithSingleSchemaDefinition<
   styling?: F0FormStylingConfig
   formRef?: React.MutableRefObject<F0FormRef | null>
   initialFiles?: InitialFile[]
+  /**
+   * Callback that renders custom fields identified by `customFieldName`.
+   * When a field has `customFieldName`, this function is called instead of the inline `render`.
+   */
+  renderCustomField?: RenderCustomFieldFunction
 }
 
 /**
@@ -422,6 +461,11 @@ export interface F0FormPropsWithPerSectionDefinition<
   styling?: F0FormStylingConfig
   formRef?: React.MutableRefObject<F0FormRef | null>
   initialFiles?: InitialFile[]
+  /**
+   * Callback that renders custom fields identified by `customFieldName`.
+   * When a field has `customFieldName`, this function is called instead of the inline `render`.
+   */
+  renderCustomField?: RenderCustomFieldFunction
 }
 
 /**

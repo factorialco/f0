@@ -19,8 +19,8 @@ import {
   f0FormField,
   F0Form,
   F0SectionConfig,
-  CustomFieldRenderProps,
   useF0Form,
+  RenderCustomFieldProps,
 } from "../index"
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
@@ -1011,8 +1011,13 @@ export const FileFieldsWithInitialFiles: Story = {
 }
 
 /**
- * Demonstrates custom field type for integrating external components.
- * Uses `fieldConfig` to pass typed configuration to the render function.
+ * Demonstrates the `renderCustomField` prop for integrating external
+ * components without inlining a `render` function in each field definition.
+ *
+ * Fields declare a `customFieldName` and optional `fieldConfig`; the form-level
+ * `renderCustomField` callback dispatches on the name and renders the right
+ * component. This keeps schema definitions declarative and lets consuming apps
+ * register their custom renderers in a single place.
  */
 export const CustomField: Story = {
   render() {
@@ -1059,6 +1064,57 @@ export const CustomField: Story = {
       </div>
     )
 
+    const PriorityPicker = ({
+      label,
+      value,
+      onChange,
+      error,
+      disabled,
+    }: {
+      label: string
+      value: string | undefined
+      onChange: (value: string | undefined) => void
+      error?: string
+      disabled?: boolean
+    }) => {
+      const priorities = [
+        { id: "low", label: "Low", color: "bg-blue-100 text-blue-800" },
+        {
+          id: "medium",
+          label: "Medium",
+          color: "bg-yellow-100 text-yellow-800",
+        },
+        { id: "high", label: "High", color: "bg-red-100 text-red-800" },
+      ]
+      return (
+        <div className="flex flex-col gap-1">
+          <label className="text-sm font-medium text-f1-foreground-secondary">
+            {label}
+          </label>
+          <div className="flex gap-2">
+            {priorities.map((p) => (
+              <button
+                key={p.id}
+                type="button"
+                disabled={disabled}
+                onClick={() => onChange(value === p.id ? undefined : p.id)}
+                className={`rounded-full px-3 py-1 text-xs font-medium transition-all ${
+                  value === p.id
+                    ? `${p.color} ring-2 ring-offset-1`
+                    : "bg-f1-background-tertiary text-f1-foreground-secondary"
+                } ${disabled ? "opacity-50" : "cursor-pointer"}`}
+              >
+                {p.label}
+              </button>
+            ))}
+          </div>
+          {error && (
+            <span className="text-sm text-f1-foreground-critical">{error}</span>
+          )}
+        </div>
+      )
+    }
+
     const employees = [
       { id: "1", name: "John Doe" },
       { id: "2", name: "Jane Smith" },
@@ -1070,48 +1126,18 @@ export const CustomField: Story = {
         label: "Task Title",
         placeholder: "Enter task title",
       }),
-      // Using fieldConfig to pass typed options to the custom renderer
+      // Declared with customFieldName — rendered by renderCustomField
       assignee: f0FormField(z.string().min(1, "Please select an assignee"), {
         label: "Assignee",
         fieldType: "custom",
-        fieldConfig: {
-          options: employees,
-        },
-        render: ({
-          label,
-          value,
-          onChange,
-          placeholder,
-          error,
-          disabled,
-          config,
-        }) => (
-          <ExternalSelector
-            label={label}
-            value={value || undefined}
-            onChange={(v) => onChange(v ?? "")}
-            error={error}
-            disabled={disabled}
-            options={config.options}
-            placeholder={placeholder}
-          />
-        ),
+        customFieldName: "employee-selector",
+        fieldConfig: { options: employees },
       }),
-      // Without fieldConfig - options passed directly
-      reviewer: f0FormField(z.string().optional(), {
-        label: "Reviewer (Optional)",
+      // Different customFieldName — same renderCustomField dispatches it
+      priority: f0FormField(z.string().optional(), {
+        label: "Priority",
         fieldType: "custom",
-        render: (props: CustomFieldRenderProps<string | undefined>) => (
-          <ExternalSelector
-            label={props.label}
-            value={props.value || undefined}
-            onChange={(v) => props.onChange(v)}
-            error={props.error}
-            disabled={props.disabled}
-            options={employees}
-            placeholder="Choose a reviewer..."
-          />
-        ),
+        customFieldName: "priority-picker",
       }),
       description: f0FormField(z.string().optional(), {
         label: "Description",
@@ -1126,7 +1152,7 @@ export const CustomField: Story = {
       defaultValues: {
         title: "",
         assignee: "",
-        reviewer: "",
+        priority: "",
         description: "",
       },
       onSubmit: async ({ data }) => {
@@ -1137,7 +1163,44 @@ export const CustomField: Story = {
       submitConfig: { label: "Create Task", icon: null },
     })
 
-    return <F0Form formDefinition={formDefinition} />
+    const renderCustomField = useCallback((props: RenderCustomFieldProps) => {
+      switch (props.customFieldName) {
+        case "employee-selector":
+          return (
+            <ExternalSelector
+              label={props.label}
+              value={(props.value as string) || undefined}
+              onChange={(v) => props.onChange(v ?? "")}
+              error={props.error}
+              disabled={props.disabled}
+              options={
+                (props.config as { options: { id: string; name: string }[] })
+                  .options
+              }
+              placeholder={props.placeholder}
+            />
+          )
+        case "priority-picker":
+          return (
+            <PriorityPicker
+              label={props.label}
+              value={(props.value as string) || undefined}
+              onChange={(v) => props.onChange(v ?? "")}
+              error={props.error}
+              disabled={props.disabled}
+            />
+          )
+        default:
+          return null
+      }
+    }, [])
+
+    return (
+      <F0Form
+        formDefinition={formDefinition}
+        renderCustomField={renderCustomField}
+      />
+    )
   },
 }
 

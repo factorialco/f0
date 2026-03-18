@@ -4,9 +4,9 @@ import { z } from "zod"
 
 import { zeroRender as render, screen, waitFor } from "@/testing/test-utils"
 
+import { useF0FormDefinition } from "../../F0WizardForm/useF0FormDefinition"
 import { F0Form } from "../F0Form"
 import { f0FormField } from "../f0Schema"
-import { useF0FormDefinition } from "../../F0WizardForm/useF0FormDefinition"
 
 // =============================================================================
 // Test schemas
@@ -51,7 +51,10 @@ function PerSectionForm({
   defaultValues,
 }: {
   defaultValues:
-    | { personal?: Partial<{ name: string }>; contact?: Partial<{ email: string }> }
+    | {
+        personal?: Partial<{ name: string }>
+        contact?: Partial<{ email: string }>
+      }
     | ((signal: AbortSignal) => Promise<{
         personal?: Partial<{ name: string }>
         contact?: Partial<{ email: string }>
@@ -145,18 +148,19 @@ describe("F0Form async defaultValues (per-section)", () => {
     vi.useFakeTimers({ shouldAdvanceTime: true })
 
     const asyncFn = () =>
-      new Promise<{ personal?: Partial<{ name: string }>; contact?: Partial<{ email: string }> }>(
-        (resolve) => {
-          setTimeout(
-            () =>
-              resolve({
-                personal: { name: "Alice" },
-                contact: { email: "a@b.com" },
-              }),
-            1000
-          )
-        }
-      )
+      new Promise<{
+        personal?: Partial<{ name: string }>
+        contact?: Partial<{ email: string }>
+      }>((resolve) => {
+        setTimeout(
+          () =>
+            resolve({
+              personal: { name: "Alice" },
+              contact: { email: "a@b.com" },
+            }),
+          1000
+        )
+      })
 
     render(<PerSectionForm defaultValues={asyncFn} />)
 

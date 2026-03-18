@@ -254,8 +254,10 @@ function configToF0Field(
       return {
         ...baseProps,
         type: "custom",
-        render: "render" in config ? config.render : () => null,
+        render: "render" in config ? config.render : undefined,
         fieldConfig: "fieldConfig" in config ? config.fieldConfig : undefined,
+        customFieldName:
+          "customFieldName" in config ? config.customFieldName : undefined,
         renderIf: config.renderIf,
       } as F0Field
 

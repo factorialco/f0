@@ -38,8 +38,11 @@ import type {
 import type { F0FormStateCallback } from "./useF0Form"
 
 import { FormActionBar } from "./components/ActionBar"
-import { F0FormSkeleton, F0FormPerSectionSkeleton } from "./components/F0FormSkeleton"
 import { F0FormSection } from "./components/F0FormSection"
+import {
+  F0FormSkeleton,
+  F0FormPerSectionSkeleton,
+} from "./components/F0FormSkeleton"
 import { RowRenderer } from "./components/RowRenderer"
 import { SectionRenderer } from "./components/SectionRenderer"
 import { SwitchGroupRenderer } from "./components/SwitchGroupRenderer"
@@ -130,6 +133,7 @@ function F0FormPerSection<T extends F0PerSectionSchema>(
     errorTriggerMode = "on-blur",
     styling,
     initialFiles,
+    renderCustomField,
   } = props
 
   const showSectionsSidepanel = styling?.showSectionsSidepanel ?? false
@@ -192,6 +196,7 @@ function F0FormPerSection<T extends F0PerSectionSchema>(
               submitConfig={perSectionSubmitConfig}
               errorTriggerMode={errorTriggerMode}
               initialFiles={initialFiles}
+              renderCustomField={renderCustomField}
             />
           </div>
         )
@@ -314,7 +319,14 @@ function F0FormFromDefinition(
     | F0FormPropsWithSingleSchemaDefinition<F0FormSchema>
     | F0FormPropsWithPerSectionDefinition<F0PerSectionSchema>
 ) {
-  const { formDefinition, className, styling, formRef, initialFiles } = props
+  const {
+    formDefinition,
+    className,
+    styling,
+    formRef,
+    initialFiles,
+    renderCustomField,
+  } = props
 
   if (formDefinition.isLoading) {
     if (formDefinition._brand === "single") {
@@ -345,6 +357,7 @@ function F0FormFromDefinition(
         styling={styling}
         formRef={formRef}
         initialFiles={initialFiles}
+        renderCustomField={renderCustomField}
       />
     )
   }
@@ -358,6 +371,7 @@ function F0FormFromDefinition(
       styling={styling}
       formRef={formRef}
       initialFiles={initialFiles}
+      renderCustomField={renderCustomField}
     />
   )
 }
@@ -368,6 +382,7 @@ function F0FormFromSingleDefinition<TSchema extends F0FormSchema>({
   styling,
   formRef,
   initialFiles,
+  renderCustomField,
 }: F0FormPropsWithSingleSchemaDefinition<TSchema>) {
   const def = formDefinition as F0FormDefinitionSingleSchema<TSchema>
 
@@ -392,6 +407,7 @@ function F0FormFromSingleDefinition<TSchema extends F0FormSchema>({
       styling={styling}
       formRef={formRef}
       initialFiles={initialFiles}
+      renderCustomField={renderCustomField}
     />
   )
 }
@@ -402,6 +418,7 @@ function F0FormFromPerSectionDefinition<T extends F0PerSectionSchema>({
   styling,
   formRef,
   initialFiles,
+  renderCustomField,
 }: F0FormPropsWithPerSectionDefinition<T>) {
   const def = formDefinition as F0FormDefinitionPerSection<T>
 
@@ -445,6 +462,7 @@ function F0FormFromPerSectionDefinition<T extends F0PerSectionSchema>({
       styling={styling}
       formRef={formRef}
       initialFiles={initialFiles}
+      renderCustomField={renderCustomField}
     />
   )
 }
@@ -863,8 +881,12 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
 
   // Context value for anchor links
   const contextValue = useMemo(
-    () => ({ formName: name, initialFiles: props.initialFiles }),
-    [name, props.initialFiles]
+    () => ({
+      formName: name,
+      initialFiles: props.initialFiles,
+      renderCustomField: props.renderCustomField,
+    }),
+    [name, props.initialFiles, props.renderCustomField]
   )
 
   // Form content component to avoid repetition

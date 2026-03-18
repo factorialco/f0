@@ -79,17 +79,20 @@ const employeeSchema = z.object({
       { value: "other", label: "Other" },
     ],
   }),
-  skills: f0FormField(z.array(z.string()), {
-    label: "Skills",
-    multiple: true,
-    options: [
-      { value: "react", label: "React" },
-      { value: "typescript", label: "TypeScript" },
-      { value: "ruby", label: "Ruby" },
-      { value: "python", label: "Python" },
-      { value: "figma", label: "Figma" },
-    ],
-  }),
+  skills: f0FormField(
+    z.array(z.enum(["react", "typescript", "ruby", "python", "figma"])),
+    {
+      label: "Skills",
+      multiple: true,
+      options: [
+        { value: "react", label: "React" },
+        { value: "typescript", label: "TypeScript" },
+        { value: "ruby", label: "Ruby" },
+        { value: "python", label: "Python" },
+        { value: "figma", label: "Figma" },
+      ],
+    }
+  ),
 
   // -- Date / time fields --
   startDate: f0FormField(z.date(), {

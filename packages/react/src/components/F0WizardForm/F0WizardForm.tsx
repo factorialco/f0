@@ -216,6 +216,7 @@ function F0WizardFormPerSection<T extends F0PerSectionSchema>({
   autoCloseOnLastStepSubmit,
   linkAfterLastStepSubmit,
   autoSkipCompletedSteps = false,
+  renderCustomField,
 }: F0WizardFormPerSectionProps<T>) {
   const {
     name,
@@ -452,10 +453,7 @@ function F0WizardFormPerSection<T extends F0PerSectionSchema>({
           return (
             <div className="flex flex-col gap-6 pb-5">
               {Object.entries(schema).map(([sectionId, sectionSchema]) => (
-                <F0FormSkeleton
-                  key={sectionId}
-                  schema={sectionSchema}
-                />
+                <F0FormSkeleton key={sectionId} schema={sectionSchema} />
               ))}
             </div>
           )
@@ -501,6 +499,7 @@ function F0WizardFormPerSection<T extends F0PerSectionSchema>({
                         return { ...prev, [sectionId]: hasErrors }
                       })
                     }}
+                    renderCustomField={renderCustomField}
                   />
                 )
               })}
@@ -528,6 +527,7 @@ function PerSectionFormWrapper<TSchema extends F0FormSchema>({
   errorTriggerMode,
   sectionForms,
   onErrorStateChange,
+  renderCustomField,
 }: {
   sectionId: string
   formName: string
@@ -539,6 +539,7 @@ function PerSectionFormWrapper<TSchema extends F0FormSchema>({
   errorTriggerMode: "on-blur" | "on-change" | "on-submit"
   sectionForms: Record<string, ReturnType<typeof useF0Form> | null>
   onErrorStateChange: (hasErrors: boolean) => void
+  renderCustomField?: import("@/components/F0Form/types").RenderCustomFieldFunction
 }) {
   const form = useF0Form()
 
@@ -570,6 +571,7 @@ function PerSectionFormWrapper<TSchema extends F0FormSchema>({
       }}
       errorTriggerMode={errorTriggerMode}
       formRef={form.formRef}
+      renderCustomField={renderCustomField}
     />
   )
 }
@@ -593,6 +595,7 @@ function F0WizardFormSingleSchema<TSchema extends F0FormSchema>({
   autoCloseOnLastStepSubmit,
   linkAfterLastStepSubmit,
   autoSkipCompletedSteps = false,
+  renderCustomField,
 }: F0WizardFormSingleSchemaProps<TSchema>) {
   const {
     name,
@@ -805,6 +808,7 @@ function F0WizardFormSingleSchema<TSchema extends F0FormSchema>({
                 submitConfig={{ hideSubmitButton: true, hideActionBar: true }}
                 errorTriggerMode={errorTriggerMode}
                 formRef={form.formRef}
+                renderCustomField={renderCustomField}
               />
             </div>
             {ActionBar}

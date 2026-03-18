@@ -72,9 +72,10 @@ function isZodSchema(value: unknown): boolean {
 // Internal hook for resolving async defaultValues
 // =============================================================================
 
-function useAsyncDefaultValues<T>(
-  defaultValues: AsyncOrSync<T> | undefined
-): { resolved: T | undefined; isLoading: boolean } {
+function useAsyncDefaultValues<T>(defaultValues: AsyncOrSync<T> | undefined): {
+  resolved: T | undefined
+  isLoading: boolean
+} {
   const isAsync = typeof defaultValues === "function"
 
   const [resolved, setResolved] = useState<T | undefined>(
