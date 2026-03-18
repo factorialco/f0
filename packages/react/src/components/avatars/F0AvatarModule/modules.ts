@@ -3,6 +3,7 @@ import * as ModuleIcons from "@/icons/modules"
 
 export const modules = {
   "ai-reports": ModuleIcons.Reports,
+  ai_ticketing: ModuleIcons.Inbox,
   analytics: ModuleIcons.Reports,
   ats: ModuleIcons.Recruitment,
   benefits: ModuleIcons.Benefits,
