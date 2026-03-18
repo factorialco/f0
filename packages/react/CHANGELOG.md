@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.406.0](https://github.com/factorialco/f0/compare/f0-react-v1.405.1...f0-react-v1.406.0) (2026-03-18)
+
+
+### Features
+
+* add ai_ticketing module icon ([#3693](https://github.com/factorialco/f0/issues/3693)) ([78c41b6](https://github.com/factorialco/f0/commit/78c41b62caeff77bfb3f56c7f939c356cd9aa031))
+
 ## [1.405.1](https://github.com/factorialco/f0/compare/f0-react-v1.405.0...f0-react-v1.405.1) (2026-03-17)
 
 
