@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react"
 
-import { F0Icon } from "@/components/F0Icon"
+import { F0Icon, type IconType } from "@/components/F0Icon"
 import {
   DropdownInternal,
   DropdownItem,
@@ -220,7 +220,7 @@ const DropdownMode = ({
 }: {
   onClick: (value: string, item: ButtonDropdownItem<string>) => void
   trigger?: string
-  icon?: import("@/components/F0Icon").IconType
+  icon?: IconType
   items:
     | ButtonDropdownItem<string>[]
     | ButtonDropdownGroup<string>[]

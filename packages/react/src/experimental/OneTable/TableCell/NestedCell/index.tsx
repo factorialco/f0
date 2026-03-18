@@ -95,7 +95,7 @@ export const NestedCell = ({
         >
           {onAddRow.actions.length === 1 ? (
             <F0Button
-              variant="ghost"
+              variant="outline"
               size="sm"
               icon={onAddRow.actions[0].icon ?? Add}
               label={onAddRow.actions[0].label}
@@ -109,32 +109,32 @@ export const NestedCell = ({
           ) : onAddRow.actions.some((a) => a.description !== undefined) ? (
             <F0ButtonDropdown
               mode="dropdown"
-              variant="ghost"
+              variant="outline"
               size="sm"
               icon={onAddRow.actions[0].icon ?? Add}
               trigger={onAddRow.label}
-              items={onAddRow.actions.map((action) => ({
-                value: action.label,
+              items={onAddRow.actions.map((action, index) => ({
+                value: index.toString(),
                 label: action.label,
                 icon: action.icon,
                 description: action.description,
               }))}
               onClick={(value) => {
-                const action = onAddRow.actions.find((a) => a.label === value)
+                const action = onAddRow.actions[Number(value)]
                 action?.onClick?.()
               }}
             />
           ) : (
             <F0ButtonDropdown
-              variant="ghost"
+              variant="outline"
               size="sm"
-              items={onAddRow.actions.map((action) => ({
-                value: action.label,
+              items={onAddRow.actions.map((action, index) => ({
+                value: index.toString(),
                 label: action.label,
                 icon: action.icon,
               }))}
               onClick={(value) => {
-                const action = onAddRow.actions.find((a) => a.label === value)
+                const action = onAddRow.actions[Number(value)]
                 action?.onClick?.()
               }}
             />

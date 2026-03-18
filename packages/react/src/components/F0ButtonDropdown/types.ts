@@ -1,12 +1,7 @@
 import { IconType } from "@/components/F0Icon"
 import { actionSizes } from "@/ui/Action"
 
-export const buttonDropdownVariants = [
-  "default",
-  "outline",
-  "neutral",
-  "ghost",
-] as const
+export const buttonDropdownVariants = ["default", "outline", "neutral"] as const
 export type ButtonDropdownVariant = (typeof buttonDropdownVariants)[number]
 export const buttonDropdownSizes = actionSizes
 export type ButtonDropdownSize = (typeof buttonDropdownSizes)[number]

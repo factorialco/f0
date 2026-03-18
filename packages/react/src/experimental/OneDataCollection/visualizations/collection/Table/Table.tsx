@@ -44,7 +44,7 @@ import { ItemActionsDefinition } from "../../../item-actions"
 import { NavigationFiltersDefinition } from "../../../navigationFilters/types"
 import { SummariesDefinition } from "../../../summary"
 import { CollectionProps } from "../../../types"
-import { PrimaryActionItemDefinition, getPrimaryActions } from "../../../actions"
+import { PrimaryActionItemDefinition } from "../../../actions"
 import { useAddRow } from "../EditableTable/context/AddRowContext"
 import { statusToChecked } from "../utils"
 import { Row } from "./components/Row"
@@ -60,7 +60,10 @@ const normalizeAddRowActions = (
     | PrimaryActionItemDefinition[]
     | undefined
 ): PrimaryActionItemDefinition[] => {
-  return getPrimaryActions(result)
+  if (!result) return []
+  return (Array.isArray(result) ? result : [result]).filter(
+    (item): item is PrimaryActionItemDefinition => item !== undefined
+  )
 }
 
 const HighlightedCount = ({ text, count }: { text: string; count: number }) => {
@@ -753,65 +756,65 @@ export const TableCollection = <
                       </TableCell>
                     )}
                     {columns.map((column, cellIndex) => (
-                    <TableCell
-                      key={`summary-${String(column.label)}`}
-                      firstCell={cellIndex === 0}
-                      width={column.width}
-                      sticky={getStickyPosition(cellIndex)}
-                    >
-                      {cellIndex === 0 &&
-                      !source.selectable &&
-                      summaryData.label ? (
-                        <div className="font-medium text-f1-foreground-secondary">
-                          {summaryData.label}
-                        </div>
-                      ) : (
-                        <div
-                          className={cn(
-                            column.align === "right" ? "justify-end" : "",
-                            "flex"
-                          )}
-                        >
-                          {(() => {
-                            const placeholder = getSummaryPlaceholder(
-                              column.summaryPlaceholder
-                            )
+                      <TableCell
+                        key={`summary-${String(column.label)}`}
+                        firstCell={cellIndex === 0}
+                        width={column.width}
+                        sticky={getStickyPosition(cellIndex)}
+                      >
+                        {cellIndex === 0 &&
+                        !source.selectable &&
+                        summaryData.label ? (
+                          <div className="font-medium text-f1-foreground-secondary">
+                            {summaryData.label}
+                          </div>
+                        ) : (
+                          <div
+                            className={cn(
+                              column.align === "right" ? "justify-end" : "",
+                              "flex"
+                            )}
+                          >
+                            {(() => {
+                              const placeholder = getSummaryPlaceholder(
+                                column.summaryPlaceholder
+                              )
 
-                            if (
-                              column.summary &&
-                              source.summaries &&
-                              source.summaries[column.summary]?.type === "sum"
-                            ) {
-                              const summaryValue =
-                                summaryData.data[column.summary]
+                              if (
+                                column.summary &&
+                                source.summaries &&
+                                source.summaries[column.summary]?.type === "sum"
+                              ) {
+                                const summaryValue =
+                                  summaryData.data[column.summary]
 
-                              if (isEmptySummaryValue(summaryValue)) {
+                                if (isEmptySummaryValue(summaryValue)) {
+                                  return (
+                                    <span className="text-f1-foreground-secondary">
+                                      {placeholder}
+                                    </span>
+                                  )
+                                }
+
                                 return (
-                                  <span className="text-f1-foreground-secondary">
-                                    {placeholder}
-                                  </span>
+                                  <div className="flex gap-1">
+                                    <span className="text-f1-foreground-secondary">
+                                      {i18n.collections.summaries.types.sum}
+                                    </span>
+                                    {`${summaryValue}`}
+                                  </div>
                                 )
                               }
 
                               return (
-                                <div className="flex gap-1">
-                                  <span className="text-f1-foreground-secondary">
-                                    {i18n.collections.summaries.types.sum}
-                                  </span>
-                                  {`${summaryValue}`}
-                                </div>
+                                <span className="text-f1-foreground-secondary">
+                                  {placeholder}
+                                </span>
                               )
-                            }
-
-                            return (
-                              <span className="text-f1-foreground-secondary">
-                                {placeholder}
-                              </span>
-                            )
-                          })()}
-                        </div>
-                      )}
-                    </TableCell>
+                            })()}
+                          </div>
+                        )}
+                      </TableCell>
                     ))}
                     {showItemActions && (
                       <>
@@ -847,7 +850,7 @@ export const TableCollection = <
                       >
                         {actions.length === 1 ? (
                           <F0Button
-                            variant="ghost"
+                            variant="outline"
                             icon={actions[0].icon ?? Add}
                             label={actions[0].label}
                             onClick={actions[0].onClick}
@@ -858,37 +861,31 @@ export const TableCollection = <
                         ) : actions.some((a) => a.description !== undefined) ? (
                           <F0ButtonDropdown
                             mode="dropdown"
-                            variant="ghost"
+                            variant="outline"
                             size="sm"
                             icon={actions[0].icon ?? Add}
                             trigger={addRow?.addRowActionsLabel}
-                            items={actions.map((action) => ({
-                              value: action.label,
+                            items={actions.map((action, index) => ({
+                              value: index.toString(),
                               label: action.label,
                               icon: action.icon,
                               description: action.description,
                             }))}
                             onClick={(value) => {
-                              const action = actions.find(
-                                (a) => a.label === value
-                              )
-                              action?.onClick?.()
+                              actions[Number(value)]?.onClick?.()
                             }}
                           />
                         ) : (
                           <F0ButtonDropdown
-                            variant="ghost"
+                            variant="outline"
                             size="sm"
-                            items={actions.map((action) => ({
-                              value: action.label,
+                            items={actions.map((action, index) => ({
+                              value: index.toString(),
                               label: action.label,
                               icon: action.icon,
                             }))}
                             onClick={(value) => {
-                              const action = actions.find(
-                                (a) => a.label === value
-                              )
-                              action?.onClick?.()
+                              actions[Number(value)]?.onClick?.()
                             }}
                           />
                         )}
