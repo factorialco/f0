@@ -1,6 +1,15 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
+import {
+  useContext,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react"
+
 import { useDebounceValue } from "usehooks-ts"
 
+import { F0DialogContext } from "@/components/F0Dialog"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
 
 import { cn } from "../../../lib/utils"
@@ -47,6 +56,15 @@ export const EntitySelect = <T,>(
       ),
     [props.entities]
   )
+
+  const dialogContext = useContext(F0DialogContext)
+  const shouldUseDialogContainer =
+    dialogContext.portalContainer &&
+    (dialogContext.position === "center" ||
+      dialogContext.position === "fullscreen")
+  const effectivePopoverContainer = shouldUseDialogContainer
+    ? dialogContext.portalContainer
+    : undefined
 
   function onPrivateSelect(entity: EntitySelectEntity) {
     if (props.singleSelector) {
@@ -487,8 +505,9 @@ export const EntitySelect = <T,>(
         )}
       </PopoverTrigger>
       <PopoverContent
+        container={effectivePopoverContainer}
         className={cn(
-          "scrollbar-macos relative w-full overflow-auto rounded-xl border-[1px] border-solid border-f1-border-secondary bg-transparent p-0"
+          "scrollbar-macos relative w-full overflow-auto overscroll-contain rounded-xl border-[1px] border-solid border-f1-border-secondary bg-transparent p-0"
         )}
       >
         <Content

@@ -1,4 +1,5 @@
-import { useMemo } from "react"
+import { useMemo, useRef, useState } from "react"
+import { useResizeObserver } from "usehooks-ts"
 
 import { VirtualList } from "../../../../Navigation/VirtualList"
 import { ListTag } from "../../ListTag"
@@ -8,6 +9,8 @@ import {
   EntitySelectSubEntity,
   FlattenedItem,
 } from "../../types"
+
+const DEFAULT_LIST_HEIGHT = 425
 
 export const SecondaryContent = ({
   groupView,
@@ -29,6 +32,16 @@ export const SecondaryContent = ({
   disabled?: boolean
   hiddenAvatar?: boolean
 }) => {
+  const listContainerRef = useRef<HTMLDivElement>(null)
+  const [listHeight, setListHeight] = useState(DEFAULT_LIST_HEIGHT)
+
+  useResizeObserver({
+    ref: listContainerRef,
+    onResize: ({ height }) => {
+      if (height) setListHeight(height)
+    },
+  })
+
   const flattenedList = useMemo<FlattenedItem[]>(() => {
     const rawFlattened = !groupView
       ? selectedEntities.map((el) => ({
@@ -61,7 +74,7 @@ export const SecondaryContent = ({
   const totalSelectedSubItems = flattenedList.length
 
   return (
-    <div className="w-full flex-col rounded-r-xl">
+    <div className="flex h-full w-full flex-col rounded-r-xl">
       <div className="flex h-[48px] rounded-tr-xl border-0 border-b-[1px] border-solid border-f1-border-secondary bg-f1-background/30 p-3 backdrop-blur-2xl">
         {selectedLabel && (
           <span className="my-auto text-f1-foreground-secondary">
@@ -69,9 +82,12 @@ export const SecondaryContent = ({
           </span>
         )}
       </div>
-      <div className="flex flex-col gap-3 rounded-br-xl bg-f1-background pb-0 pl-2">
+      <div
+        ref={listContainerRef}
+        className="flex min-h-0 flex-1 flex-col gap-3 rounded-br-xl bg-f1-background pb-0 pl-2"
+      >
         <VirtualList
-          height={425}
+          height={listHeight}
           itemCount={totalSelectedSubItems}
           itemSize={30}
           className="overflow-x-hidden"

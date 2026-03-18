@@ -1,5 +1,6 @@
 import { VirtualItem } from "@tanstack/react-virtual"
-import React, { useCallback, useMemo } from "react"
+import React, { useCallback, useMemo, useState } from "react"
+import { useResizeObserver } from "usehooks-ts"
 
 import { F0Select } from "@/components/F0Select"
 
@@ -94,6 +95,15 @@ export const MainContent: React.FC<MainContentProps> = ({
   hiddenAvatar = false,
 }) => {
   const ref = React.useRef<HTMLDivElement | null>(null)
+  const sectionRef = React.useRef<HTMLDivElement>(null)
+  const [listHeight, setListHeight] = useState(VIRTUAL_LIST_HEIGHT)
+
+  useResizeObserver({
+    ref: sectionRef,
+    onResize: ({ height }) => {
+      if (height) setListHeight(height)
+    },
+  })
 
   const totalFilteredEntities = useMemo(
     () =>
@@ -439,7 +449,7 @@ export const MainContent: React.FC<MainContentProps> = ({
   return (
     <div
       className={cn(
-        "flex w-full flex-col rounded-l-xl border-0",
+        "flex h-full w-full flex-col rounded-l-xl border-0",
         singleSelector || loading ? "rounded-r-xl" : "",
         className
       )}
@@ -477,8 +487,9 @@ export const MainContent: React.FC<MainContentProps> = ({
         )}
       </header>
       <section
+        ref={sectionRef}
         className={cn(
-          "flex-grow-1 flex h-96 flex-col justify-start gap-1 border-0 border-r-[1px] border-solid border-f1-border-secondary bg-f1-background",
+          "flex min-h-0 flex-1 flex-col justify-start gap-1 border-0 border-r-[1px] border-solid border-f1-border-secondary bg-f1-background",
           !showFooter ? "rounded-b-xl border-r-0" : ""
         )}
       >
@@ -491,7 +502,7 @@ export const MainContent: React.FC<MainContentProps> = ({
           <div
             className="absolute flex w-full flex-col items-center justify-center gap-0.5 p-5"
             style={{
-              height: VIRTUAL_LIST_HEIGHT,
+              height: listHeight,
             }}
           >
             <span className="text-lg font-medium">{notFoundTitle}</span>
@@ -504,7 +515,7 @@ export const MainContent: React.FC<MainContentProps> = ({
           <div className="h-full">
             {!groupView ? (
               <VirtualList
-                height={VIRTUAL_LIST_HEIGHT}
+                height={listHeight}
                 itemCount={entities.length + (onCreate ? 1 : 0)}
                 itemSize={ITEM_SIZE_DEFAULT}
                 renderer={itemRenderer}
@@ -512,7 +523,7 @@ export const MainContent: React.FC<MainContentProps> = ({
               />
             ) : (
               <VirtualList
-                height={VIRTUAL_LIST_HEIGHT}
+                height={listHeight}
                 itemCount={totalFlattenedItems + (onCreate ? 1 : 0)}
                 itemSize={(index) => {
                   if (index === 0 && onCreate) return ITEM_SIZE_DEFAULT

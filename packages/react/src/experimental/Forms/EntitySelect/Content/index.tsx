@@ -80,7 +80,7 @@ export const Content = ({
       }}
     >
       <div
-        className="absolute right-0 top-0"
+        className="absolute right-0 top-0 h-full"
         style={{
           width: asideWidth + "px",
         }}
@@ -96,7 +96,7 @@ export const Content = ({
         />
       </div>
       <div
-        className="absolute left-0"
+        className="absolute left-0 h-full"
         style={{ width: finalWidthMain + 1 + "px" }}
       >
         <MainContent
