@@ -207,34 +207,6 @@ const createNestedTestSource = (
 })
 
 describe("EditableTable addRowActions (footer)", () => {
-  it("does not render add-row button when addRowActions is not provided", async () => {
-    render(
-      <TableCollection<
-        Person,
-        TestFilters,
-        SortingsDefinition,
-        SummariesDefinition,
-        ItemActionsDefinition<Person>,
-        TestNavigationFilters,
-        GroupingDefinition<Person>
-      >
-        columns={testColumns}
-        source={createTestSource()}
-        onSelectItems={vi.fn()}
-        onLoadData={vi.fn()}
-        onLoadError={vi.fn()}
-      />
-    )
-
-    await waitFor(() => {
-      expect(screen.getByText(testData[0].name)).toBeInTheDocument()
-    })
-
-    expect(
-      screen.queryByRole("button", { name: /add row/i })
-    ).not.toBeInTheDocument()
-  })
-
   it("renders an add-row button in the table footer when addRowActions is provided", async () => {
     render(
       <AddRowProvider

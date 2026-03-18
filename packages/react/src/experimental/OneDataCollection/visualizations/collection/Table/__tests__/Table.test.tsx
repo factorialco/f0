@@ -1423,4 +1423,32 @@ describe("TableCollection", () => {
       ).not.toBeInTheDocument()
     })
   })
+
+  it("does not render add-row button when no AddRowProvider wraps the table", async () => {
+    render(
+      <TableCollection<
+        Person,
+        TestFilters,
+        SortingsDefinition,
+        SummariesDefinition,
+        ItemActionsDefinition<Person>,
+        TestNavigationFilters,
+        GroupingDefinition<Person>
+      >
+        columns={testColumns}
+        source={createTestSource()}
+        onSelectItems={vi.fn()}
+        onLoadData={vi.fn()}
+        onLoadError={vi.fn()}
+      />
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+    })
+
+    expect(
+      screen.queryByRole("button", { name: /add row/i })
+    ).not.toBeInTheDocument()
+  })
 })
