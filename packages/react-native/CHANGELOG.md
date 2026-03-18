@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.42.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.41.0...f0-react-native-v0.42.0) (2026-03-18)
+
+
+### Features
+
+* new item to datalist ([#3532](https://github.com/factorialco/f0/issues/3532)) ([0eebb0a](https://github.com/factorialco/f0/commit/0eebb0a13aa3222e1d684c98f136c9ddffa138bb))
+
 ## [0.41.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.40.0...f0-react-native-v0.41.0) (2026-03-17)
 
 
