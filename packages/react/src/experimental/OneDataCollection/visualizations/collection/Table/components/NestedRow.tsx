@@ -37,7 +37,7 @@ import type {
   TableColumnDefinition,
 } from "../types"
 
-import { PrimaryActionItemDefinition } from "../../../../actions"
+import { PrimaryActionItemDefinition, getPrimaryActions } from "../../../../actions"
 import { useAddRow } from "../../EditableTable/context/AddRowContext"
 import { useCalculateConectorHeight } from "../hooks/useCalculateConectorHeight"
 import { useLoadChildren } from "../hooks/useLoadChildren"
@@ -54,10 +54,7 @@ const normalizeAddRowActions = (
     | PrimaryActionItemDefinition[]
     | undefined
 ): PrimaryActionItemDefinition[] => {
-  if (!result) return []
-  return (Array.isArray(result) ? result : [result]).filter(
-    (item): item is PrimaryActionItemDefinition => item !== undefined
-  )
+  return getPrimaryActions(result)
 }
 
 export type RowProps<
