@@ -28,6 +28,60 @@ vi.mock("../../property", () => ({
   },
 }))
 
+vi.mock("@/components/F0ButtonDropdown", () => ({
+  F0ButtonDropdown: ({ items, onClick, mode, trigger, ...props }: any) => {
+    const flatItems = Array.isArray(items)
+      ? items.flatMap((g: any) => ("items" in g ? g.items : [g]))
+      : []
+    if (mode === "dropdown") {
+      return (
+        <div data-testid="f0-button-dropdown-mock">
+          <button
+            aria-label={trigger ?? flatItems[0]?.label}
+            disabled={props.disabled}
+          >
+            {trigger ?? flatItems[0]?.label}
+          </button>
+          {flatItems.map((item: any) => (
+            <button
+              key={item.value}
+              data-testid={`dropdown-item-${item.value}`}
+              onClick={() => onClick(item.value, item)}
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
+      )
+    }
+    // split mode (default)
+    const selected =
+      flatItems.find((i: any) => i.value === props.value) ?? flatItems[0]
+    return (
+      <div data-testid="f0-button-dropdown-mock">
+        <button
+          aria-label={selected?.label}
+          disabled={props.disabled}
+          onClick={() => onClick(selected?.value, selected)}
+        >
+          {selected?.label}
+        </button>
+        {flatItems
+          .filter((i: any) => i.value !== selected?.value)
+          .map((item: any) => (
+            <button
+              key={item.value}
+              data-testid={`dropdown-item-${item.value}`}
+              onClick={() => onClick(item.value, item)}
+            >
+              {item.label}
+            </button>
+          ))}
+      </div>
+    )
+  },
+}))
+
 type TestFilters = FiltersDefinition
 type TestNavigationFilters = NavigationFiltersDefinition
 type Person = {
@@ -1555,6 +1609,105 @@ describe("TableCollection", () => {
       await user.click(addRowButton)
 
       expect(onClickMock).toHaveBeenCalledTimes(1)
+    })
+
+    it("renders dropdown button and dispatches correct action when multiple actions have descriptions", async () => {
+      const user = userEvent.setup()
+      const onClickAction1 = vi.fn()
+      const onClickAction2 = vi.fn()
+
+      render(
+        <AddRowProvider
+          addRowActions={() => [
+            {
+              label: "Add type A",
+              description: "Adds a type A row",
+              onClick: onClickAction1,
+            },
+            {
+              label: "Add type B",
+              description: "Adds a type B row",
+              onClick: onClickAction2,
+            },
+          ]}
+          addRowActionsLabel="Add row"
+        >
+          <TableCollection<
+            Person,
+            TestFilters,
+            SortingsDefinition,
+            SummariesDefinition,
+            ItemActionsDefinition<Person>,
+            TestNavigationFilters,
+            GroupingDefinition<Person>
+          >
+            columns={testColumns}
+            source={createTestSource()}
+            onSelectItems={vi.fn()}
+            onLoadData={vi.fn()}
+            onLoadError={vi.fn()}
+          />
+        </AddRowProvider>
+      )
+
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+      })
+
+      // Dropdown mode: trigger button should be visible with the label
+      const triggerButton = screen.getByRole("button", { name: /add row/i })
+      expect(triggerButton).toBeInTheDocument()
+
+      // Click the second action in the dropdown
+      await user.click(screen.getByTestId("dropdown-item-1"))
+
+      expect(onClickAction2).toHaveBeenCalledTimes(1)
+      expect(onClickAction1).not.toHaveBeenCalled()
+    })
+
+    it("renders split button and dispatches correct action when multiple actions have no descriptions", async () => {
+      const user = userEvent.setup()
+      const onClickAction1 = vi.fn()
+      const onClickAction2 = vi.fn()
+
+      render(
+        <AddRowProvider
+          addRowActions={() => [
+            { label: "Add type A", onClick: onClickAction1 },
+            { label: "Add type B", onClick: onClickAction2 },
+          ]}
+        >
+          <TableCollection<
+            Person,
+            TestFilters,
+            SortingsDefinition,
+            SummariesDefinition,
+            ItemActionsDefinition<Person>,
+            TestNavigationFilters,
+            GroupingDefinition<Person>
+          >
+            columns={testColumns}
+            source={createTestSource()}
+            onSelectItems={vi.fn()}
+            onLoadData={vi.fn()}
+            onLoadError={vi.fn()}
+          />
+        </AddRowProvider>
+      )
+
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+      })
+
+      // Split mode: primary button shows the first action's label
+      const primaryButton = screen.getByRole("button", { name: /add type a/i })
+      expect(primaryButton).toBeInTheDocument()
+
+      // Click the primary button — should trigger the first action
+      await user.click(primaryButton)
+
+      expect(onClickAction1).toHaveBeenCalledTimes(1)
+      expect(onClickAction2).not.toHaveBeenCalled()
     })
   })
 })

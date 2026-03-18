@@ -121,3 +121,4 @@ export const AddRowRow = forwardRef(AddRowRowInner) as <
       | null
   }
 ) => ReturnType<typeof AddRowRowInner>
+;(AddRowRow as { displayName?: string }).displayName = "AddRowRow"
