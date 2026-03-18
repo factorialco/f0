@@ -10,12 +10,12 @@ import { NavigationFiltersDefinition } from "@/experimental/OneDataCollection/na
 import { BaseFetchOptions, FiltersDefinition } from "@/hooks/datasource"
 import { zeroRender as render } from "@/testing/test-utils"
 
-import { AddRowProvider } from "../../../EditableTable/context/AddRowContext"
-import { ItemActionsDefinition } from "../../../../../item-actions"
-import { SummariesDefinition } from "../../../../../summary"
-import { TableCollection } from "../../index"
+import { ItemActionsDefinition } from "../../../../item-actions"
+import { SummariesDefinition } from "../../../../summary"
+import { TableCollection } from "../../Table/index"
+import { AddRowProvider } from "../context/AddRowContext"
 
-vi.mock("../../../property", () => ({
+vi.mock("../../property", () => ({
   propertyRenderers: {
     text: TextCell,
   },
@@ -81,8 +81,13 @@ type Person = {
   id: number
   name: string
   email: string
-  hasChildren: boolean
+  hasChildren?: boolean
 }
+
+const testData: Person[] = [
+  { id: 1, name: "John Doe", email: "john@example.com" },
+  { id: 2, name: "Jane Smith", email: "jane@example.com" },
+]
 
 const parentItem: Person = {
   id: 1,
@@ -122,6 +127,36 @@ class MockIntersectionObserver implements IntersectionObserver {
   unobserve = vi.fn()
 }
 window.IntersectionObserver = MockIntersectionObserver
+
+const createTestSource = (): DataCollectionSource<
+  Person,
+  TestFilters,
+  SortingsDefinition,
+  SummariesDefinition,
+  ItemActionsDefinition<Person>,
+  TestNavigationFilters,
+  GroupingDefinition<Person>
+> => ({
+  currentFilters: {},
+  setCurrentFilters: vi.fn(),
+  currentSortings: null,
+  setCurrentSortings: vi.fn(),
+  currentNavigationFilters: {},
+  setCurrentNavigationFilters: vi.fn(),
+  navigationFilters: undefined,
+  currentSearch: undefined,
+  debouncedCurrentSearch: undefined,
+  setCurrentSearch: vi.fn(),
+  isLoading: false,
+  setIsLoading: vi.fn(),
+  dataAdapter: {
+    fetchData: async (_options: BaseFetchOptions<TestFilters>) => ({
+      records: testData,
+    }),
+  },
+  currentGrouping: undefined,
+  setCurrentGrouping: vi.fn(),
+})
 
 const createNestedTestSource = (
   overrides?: Partial<
@@ -163,7 +198,7 @@ const createNestedTestSource = (
   },
   currentGrouping: undefined,
   setCurrentGrouping: vi.fn(),
-  itemsWithChildren: (item: Person) => item.hasChildren,
+  itemsWithChildren: (item: Person) => !!item.hasChildren,
   fetchChildren: () => ({
     records: childItems,
     type: "basic" as const,
@@ -171,8 +206,238 @@ const createNestedTestSource = (
   ...overrides,
 })
 
-describe("NestedRow addRowActions", () => {
+describe("EditableTable addRowActions (footer)", () => {
   it("does not render add-row button when addRowActions is not provided", async () => {
+    render(
+      <TableCollection<
+        Person,
+        TestFilters,
+        SortingsDefinition,
+        SummariesDefinition,
+        ItemActionsDefinition<Person>,
+        TestNavigationFilters,
+        GroupingDefinition<Person>
+      >
+        columns={testColumns}
+        source={createTestSource()}
+        onSelectItems={vi.fn()}
+        onLoadData={vi.fn()}
+        onLoadError={vi.fn()}
+      />
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+    })
+
+    expect(
+      screen.queryByRole("button", { name: /add row/i })
+    ).not.toBeInTheDocument()
+  })
+
+  it("renders an add-row button in the table footer when addRowActions is provided", async () => {
+    render(
+      <AddRowProvider
+        addRowActions={() => ({ label: "Add row", onClick: vi.fn() })}
+      >
+        <TableCollection<
+          Person,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          TestNavigationFilters,
+          GroupingDefinition<Person>
+        >
+          columns={testColumns}
+          source={createTestSource()}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+        />
+      </AddRowProvider>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+    })
+
+    expect(screen.getByRole("button", { name: /add row/i })).toBeInTheDocument()
+  })
+
+  it("renders custom label from addRowActions", async () => {
+    render(
+      <AddRowProvider
+        addRowActions={() => ({ label: "Add phase", onClick: vi.fn() })}
+      >
+        <TableCollection<
+          Person,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          TestNavigationFilters,
+          GroupingDefinition<Person>
+        >
+          columns={testColumns}
+          source={createTestSource()}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+        />
+      </AddRowProvider>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+    })
+
+    expect(
+      screen.getByRole("button", { name: /add phase/i })
+    ).toBeInTheDocument()
+    expect(
+      screen.queryByRole("button", { name: /^add row$/i })
+    ).not.toBeInTheDocument()
+  })
+
+  it("calls onClick when the footer button is clicked", async () => {
+    const user = userEvent.setup()
+    const onClickMock = vi.fn()
+
+    render(
+      <AddRowProvider
+        addRowActions={() => ({ label: "Add row", onClick: onClickMock })}
+      >
+        <TableCollection<
+          Person,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          TestNavigationFilters,
+          GroupingDefinition<Person>
+        >
+          columns={testColumns}
+          source={createTestSource()}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+        />
+      </AddRowProvider>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+    })
+
+    const addRowButton = screen.getByRole("button", { name: /add row/i })
+    await user.click(addRowButton)
+
+    expect(onClickMock).toHaveBeenCalledTimes(1)
+  })
+
+  it("renders dropdown button and dispatches correct action when multiple actions have descriptions", async () => {
+    const user = userEvent.setup()
+    const onClickAction1 = vi.fn()
+    const onClickAction2 = vi.fn()
+
+    render(
+      <AddRowProvider
+        addRowActions={() => [
+          {
+            label: "Add type A",
+            description: "Adds a type A row",
+            onClick: onClickAction1,
+          },
+          {
+            label: "Add type B",
+            description: "Adds a type B row",
+            onClick: onClickAction2,
+          },
+        ]}
+        addRowActionsLabel="Add row"
+      >
+        <TableCollection<
+          Person,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          TestNavigationFilters,
+          GroupingDefinition<Person>
+        >
+          columns={testColumns}
+          source={createTestSource()}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+        />
+      </AddRowProvider>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+    })
+
+    // Dropdown mode: trigger button should be visible with the label
+    const triggerButton = screen.getByRole("button", { name: /add row/i })
+    expect(triggerButton).toBeInTheDocument()
+
+    // Click the second action in the dropdown
+    await user.click(screen.getByTestId("dropdown-item-1"))
+
+    expect(onClickAction2).toHaveBeenCalledTimes(1)
+    expect(onClickAction1).not.toHaveBeenCalled()
+  })
+
+  it("renders split button and dispatches correct action when multiple actions have no descriptions", async () => {
+    const user = userEvent.setup()
+    const onClickAction1 = vi.fn()
+    const onClickAction2 = vi.fn()
+
+    render(
+      <AddRowProvider
+        addRowActions={() => [
+          { label: "Add type A", onClick: onClickAction1 },
+          { label: "Add type B", onClick: onClickAction2 },
+        ]}
+      >
+        <TableCollection<
+          Person,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          TestNavigationFilters,
+          GroupingDefinition<Person>
+        >
+          columns={testColumns}
+          source={createTestSource()}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+        />
+      </AddRowProvider>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+    })
+
+    // Split mode: primary button shows the first action's label
+    const primaryButton = screen.getByRole("button", { name: /add type a/i })
+    expect(primaryButton).toBeInTheDocument()
+
+    // Click the primary button — should trigger the first action
+    await user.click(primaryButton)
+
+    expect(onClickAction1).toHaveBeenCalledTimes(1)
+    expect(onClickAction2).not.toHaveBeenCalled()
+  })
+})
+
+describe("EditableTable addNestedRowActions", () => {
+  it("does not render add-row button when addNestedRowActions is not provided", async () => {
     const user = userEvent.setup()
 
     render(
