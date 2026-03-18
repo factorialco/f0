@@ -131,7 +131,10 @@ export {
   F0AiFormRegistryProvider,
   useF0AiFormRegistry,
 } from "./F0AiFormRegistry"
-export type { F0AiFormEntry } from "./F0AiFormRegistry"
+export type {
+  F0AiFormEntry,
+  F0AiAvailableFormDefinition,
+} from "./F0AiFormRegistry"
 
 import type {
   F0FormPropsWithSingleSchema,

@@ -1,7 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { useEffect } from "react"
+import { ComponentProps, useEffect } from "react"
 import { z } from "zod"
+
+import type { F0AiAvailableFormDefinition } from "@/components/F0Form"
 
 import {
   f0FormField,
@@ -10,6 +12,12 @@ import {
   useF0Form,
 } from "@/components/F0Form"
 import { useF0FormDefinition } from "@/components/F0WizardForm"
+import * as SidebarStories from "@/components/Navigation/Sidebar/index.stories"
+import { Sidebar } from "@/components/Navigation/Sidebar/Sidebar"
+import { ApplicationFrame } from "@/examples/ApplicationFrame"
+import ApplicationFrameStoryMeta from "@/examples/ApplicationFrame/index.stories"
+import { PageHeader } from "@/experimental/Navigation/Header/PageHeader"
+import { Page } from "@/experimental/Navigation/Page"
 
 import { F0AiChat, F0AiChatProvider, useAiChat } from ".."
 
@@ -215,6 +223,179 @@ export const FormWithAiChat: Story = {
             <FormWithAiDemo />
           </AutoOpenChat>
         </F0AiChatProvider>
+      </F0AiFormRegistryProvider>
+    )
+  },
+}
+
+// =============================================================================
+// Story: Available Form Definitions (no rendered forms)
+// =============================================================================
+
+const timeOffRequestSchema = z.object({
+  employeeName: f0FormField(z.string().min(1), {
+    label: "Employee Name",
+    placeholder: "e.g. Jane Doe",
+  }),
+  leaveType: f0FormField(z.enum(["vacation", "sick", "personal", "parental"]), {
+    label: "Leave Type",
+    options: [
+      { value: "vacation", label: "Vacation" },
+      { value: "sick", label: "Sick Leave" },
+      { value: "personal", label: "Personal Day" },
+      { value: "parental", label: "Parental Leave" },
+    ],
+  }),
+  startDate: f0FormField(z.date(), {
+    label: "Start Date",
+    granularities: ["day"],
+  }),
+  endDate: f0FormField(z.date(), {
+    label: "End Date",
+    granularities: ["day"],
+  }),
+  reason: f0FormField(z.string().optional(), {
+    label: "Reason",
+    fieldType: "textarea",
+    placeholder: "Optional reason for the request...",
+    rows: 3,
+  }),
+})
+
+const expenseReportSchema = z.object({
+  description: f0FormField(z.string().min(1), {
+    label: "Description",
+    placeholder: "e.g. Client dinner",
+  }),
+  amount: f0FormField(z.number().min(0.01), {
+    label: "Amount (€)",
+    placeholder: "e.g. 125.50",
+  }),
+  category: f0FormField(
+    z.enum(["travel", "meals", "supplies", "software", "other"]),
+    {
+      label: "Category",
+      options: [
+        { value: "travel", label: "Travel" },
+        { value: "meals", label: "Meals & Entertainment" },
+        { value: "supplies", label: "Office Supplies" },
+        { value: "software", label: "Software & Tools" },
+        { value: "other", label: "Other" },
+      ],
+    }
+  ),
+  date: f0FormField(z.date(), {
+    label: "Expense Date",
+    granularities: ["day"],
+  }),
+  notes: f0FormField(z.string().optional(), {
+    label: "Notes",
+    fieldType: "textarea",
+    placeholder: "Additional details...",
+    rows: 2,
+  }),
+})
+
+const availableForms: F0AiAvailableFormDefinition[] = [
+  {
+    name: "time-off-request",
+    schema: timeOffRequestSchema,
+    defaultValues: {
+      employeeName: "",
+      leaveType: undefined,
+      startDate: undefined,
+      endDate: undefined,
+      reason: "",
+    },
+    onSubmit: async (values) => {
+      // eslint-disable-next-line no-console
+      console.info(
+        "Time-off request submitted:",
+        JSON.stringify(values, null, 2)
+      )
+    },
+  },
+  {
+    name: "expense-report",
+    schema: expenseReportSchema,
+    defaultValues: {
+      description: "",
+      amount: undefined,
+      category: undefined,
+      date: undefined,
+      notes: "",
+    },
+    onSubmit: async (values) => {
+      // eslint-disable-next-line no-console
+      console.info("Expense report submitted:", JSON.stringify(values, null, 2))
+    },
+  },
+]
+
+const applicationFrameProps = ApplicationFrameStoryMeta.args as ComponentProps<
+  typeof ApplicationFrame
+>
+
+const storyModule = {
+  name: "Dashboard",
+  href: "/dashboard",
+  id: "benefits" as const,
+}
+
+/**
+ * Full-screen ApplicationFrame with AI chat. Two form definitions
+ * (`time-off-request` and `expense-report`) are registered via
+ * `availableFormDefinitions` — no forms are rendered on the page.
+ *
+ * The AI can still list, describe, fill, read state, and submit these forms
+ * through the standard form tools.
+ *
+ * **Requires a running Mastra dev server** at
+ * `https://mastra.local.factorial.dev/copilotkit`.
+ *
+ * Try prompts like:
+ * - "What forms are available?"
+ * - "Fill the time-off request for Jane Doe, vacation from April 1 to April 10"
+ * - "Submit the expense report with: Client dinner, 85€, meals category, today"
+ * - "What's the current state of the time-off request?"
+ */
+export const AvailableFormDefinitions: Story = {
+  render() {
+    return (
+      <F0AiFormRegistryProvider availableFormDefinitions={availableForms}>
+        <ApplicationFrame
+          {...applicationFrameProps}
+          sidebar={<Sidebar {...SidebarStories.default.args} />}
+        >
+          <Page header={<PageHeader module={storyModule} />}>
+            <div className="mx-auto max-w-2xl p-8">
+              <h1 className="font-bold mb-2 text-2xl text-f1-foreground">
+                Available Form Definitions
+              </h1>
+              <p className="mb-4 text-sm text-f1-foreground-secondary">
+                No forms are rendered on this page, but the AI knows about two
+                form definitions registered via{" "}
+                <code className="rounded bg-f1-background-tertiary px-1 py-0.5 text-xs">
+                  availableFormDefinitions
+                </code>
+                :
+              </p>
+              <ul className="list-disc space-y-2 pl-6 text-sm text-f1-foreground-secondary">
+                <li>
+                  <strong>time-off-request</strong> — Employee name, leave type,
+                  start/end dates, and optional reason
+                </li>
+                <li>
+                  <strong>expense-report</strong> — Description, amount,
+                  category, date, and optional notes
+                </li>
+              </ul>
+              <p className="mt-4 text-sm text-f1-foreground-secondary">
+                Open the AI chat and try interacting with these forms.
+              </p>
+            </div>
+          </Page>
+        </ApplicationFrame>
       </F0AiFormRegistryProvider>
     )
   },
