@@ -123,10 +123,6 @@ export type {
   UseF0FormReturn,
 } from "./useF0Form"
 
-// Export schema introspection
-export { describeFormSchema } from "./describeFormSchema"
-export type { FormFieldDescription } from "./describeFormSchema"
-
 // Export AI form registry
 export {
   F0AiFormRegistryProvider,

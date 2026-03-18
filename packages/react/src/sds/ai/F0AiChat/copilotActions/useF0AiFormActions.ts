@@ -1,10 +1,8 @@
 import { useCopilotReadable } from "@copilotkit/react-core"
 
 import { useF0AiFormRegistry } from "../../../../components/F0Form/F0AiFormRegistry"
-import { useFormDescribeAction } from "./useFormDescribeAction"
 import { useFormFillAction } from "./useFormFillAction"
 import { useFormGetStateAction } from "./useFormGetStateAction"
-import { useFormListAction } from "./useFormListAction"
 import { useFormSubmitAction } from "./useFormSubmitAction"
 
 /**
@@ -23,16 +21,16 @@ export const useF0AiFormActions = () => {
   useCopilotReadable(
     {
       description:
-        "Active forms on the current page. Use the form tools (formListForms, formDescribe, formFill, formSubmit, formGetState) to interact with them.",
-      value:
-        registry?.formDescriptions ||
-        "No forms are currently active on this page.",
+        "Active forms on the current page. Each entry contains the form name, its JSON schema, current values, validation errors, and dirty state. Use the form tools (formListForms, formFill, formSubmit, formGetState) to interact with them.",
+      value: registry?.formDescriptions.length
+        ? registry.formDescriptions
+        : "No forms are currently active on this page.",
     },
-    [registry?.formDescriptions]
+    [JSON.stringify(registry?.formDescriptions)]
   )
 
-  useFormListAction()
-  useFormDescribeAction()
+  console.log({ formDescriptions: registry?.formDescriptions })
+
   useFormFillAction()
   useFormSubmitAction()
   useFormGetStateAction()

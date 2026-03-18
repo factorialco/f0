@@ -1,4 +1,4 @@
-import { useCopilotAction } from "@copilotkit/react-core"
+import { useFrontendTool } from "@copilotkit/react-core"
 
 import { useF0AiFormRegistry } from "@/components/F0Form/F0AiFormRegistry"
 
@@ -9,8 +9,8 @@ import { useF0AiFormRegistry } from "@/components/F0Form/F0AiFormRegistry"
 export const useFormSubmitAction = () => {
   const registry = useF0AiFormRegistry()
 
-  useCopilotAction({
-    name: "formSubmit",
+  useFrontendTool({
+    name: "forms.formSubmit",
     description:
       "Submit an active form. Validates all fields first. Only calls the form's onSubmit handler if validation passes. Returns success or validation errors.",
     parameters: [
@@ -21,42 +21,41 @@ export const useFormSubmitAction = () => {
         required: true,
       },
     ],
-    handler: async ({ formName }: { formName: string }) => {
+    handler: ({ formName }: { formName: string }) => {
       console.log("[F0AiFormTools] formSubmit called", { formName })
       if (!registry) {
-        return JSON.stringify({
-          success: false,
-          error: "Form registry is not available",
-        })
+        return { success: false, error: "Form registry is not available" }
       }
 
       const entry = registry.get(formName)
       if (!entry) {
         const available = registry.getFormNames()
-        return JSON.stringify({
+        return {
           success: false,
           error: `Form "${formName}" not found`,
           availableForms: available,
-        })
+        }
       }
 
       const ref = entry.ref.current
       if (!ref) {
-        return JSON.stringify({
+        return {
           success: false,
           error: `Form "${formName}" is not mounted`,
-        })
+        }
       }
 
       try {
-        await ref.submit()
-        return JSON.stringify({ success: true })
+        ref.submit()
+        registry.rebuildDescriptions()
+        return { success: true }
       } catch {
         const errors = ref.getErrors()
-        return JSON.stringify({
+        registry.rebuildDescriptions()
+        return {
           success: false,
           errors,
-        })
+        }
       }
     },
   })

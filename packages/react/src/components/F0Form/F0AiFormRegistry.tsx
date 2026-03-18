@@ -1,9 +1,8 @@
 import { createContext, useCallback, useContext, useRef, useState } from "react"
+import { zodToJsonSchema } from "zod-to-json-schema"
 
 import type { F0FormSchema } from "./types"
 import type { F0FormRef } from "./useF0Form"
-
-import { describeFormSchema } from "./describeFormSchema"
 
 /**
  * Entry in the AI form registry
@@ -25,8 +24,16 @@ interface F0AiFormRegistryContextValue {
   unregister: (name: string) => void
   get: (name: string) => F0AiFormEntry | undefined
   getFormNames: () => string[]
-  /** Serialized descriptions of all active forms, updated on register/unregister */
-  formDescriptions: string
+  /** Rebuild the form descriptions snapshot (call after mutating form state) */
+  rebuildDescriptions: () => void
+  /** Structured descriptions of all active forms, updated on register/unregister */
+  formDescriptions: {
+    formName: string
+    formSchema: Record<string, unknown>
+    formValues: Record<string, unknown>
+    formErrors: Record<string, unknown>
+    isDirty: boolean
+  }[]
 }
 
 const F0AiFormRegistryContext =
@@ -54,39 +61,54 @@ export function F0AiFormRegistryProvider({
   children: React.ReactNode
 }) {
   const registryRef = useRef<Map<string, F0AiFormEntry>>(new Map())
+  const lastDescriptionsJsonRef = useRef<string>("")
 
   // State-based snapshot of form descriptions, updated on register/unregister.
   // This triggers re-renders so consumers (useF0AiFormActions) see the latest context.
-  const [formDescriptions, setFormDescriptions] = useState<string>("")
-
-  console.log({ formDescriptions })
+  const [formDescriptions, setFormDescriptions] = useState<
+    F0AiFormRegistryContextValue["formDescriptions"]
+  >([])
 
   const rebuildDescriptions = useCallback(() => {
-    const entries = Array.from(registryRef.current.entries())
-    if (entries.length === 0) {
-      setFormDescriptions("")
-      return
-    }
+    // Defer to avoid setState during render — register() is called from
+    // F0Form's useEffect while the form may still be completing its render.
+    queueMicrotask(() => {
+      const entries = Array.from(registryRef.current.entries())
+      if (entries.length === 0) {
+        if (lastDescriptionsJsonRef.current !== "[]") {
+          lastDescriptionsJsonRef.current = "[]"
+          setFormDescriptions([])
+        }
+        return
+      }
 
-    const descriptions = entries.map(([name, entry]) => {
-      const fields = describeFormSchema(entry.schema)
-      const fieldsSummary = fields
-        .map((f) => {
-          let desc = `- ${f.name} (${f.type}): "${f.label}"${f.required ? " [required]" : ""}`
-          if (f.options) {
-            desc += ` options: ${f.options.map((o) => `"${o.value}"`).join(", ")}`
+      const descriptions = entries
+        .map(([name, entry]) => {
+          const ref = entry.ref.current
+
+          if (!ref) {
+            return
           }
-          if (f.optionsSource === "dynamic") {
-            desc += " (options loaded dynamically)"
+
+          return {
+            formName: name,
+            formSchema: zodToJsonSchema(entry.schema) as Record<
+              string,
+              unknown
+            >,
+            formValues: ref.getValues(),
+            formErrors: ref.getErrors(),
+            isDirty: ref.isDirty(),
           }
-          return desc
         })
-        .join("\n")
+        .filter((el) => !!el)
 
-      return `Form "${name}":\n${fieldsSummary}`
+      const json = JSON.stringify(descriptions)
+      if (json !== lastDescriptionsJsonRef.current) {
+        lastDescriptionsJsonRef.current = json
+        setFormDescriptions(descriptions)
+      }
     })
-
-    setFormDescriptions(descriptions.join("\n\n"))
   }, [])
 
   const register = useCallback(
@@ -122,6 +144,7 @@ export function F0AiFormRegistryProvider({
     unregister,
     get,
     getFormNames,
+    rebuildDescriptions,
     formDescriptions,
   }
 

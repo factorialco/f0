@@ -1,4 +1,4 @@
-import { useCopilotAction } from "@copilotkit/react-core"
+import { useFrontendTool } from "@copilotkit/react-core"
 
 import { useF0AiFormRegistry } from "@/components/F0Form/F0AiFormRegistry"
 
@@ -9,8 +9,8 @@ import { useF0AiFormRegistry } from "@/components/F0Form/F0AiFormRegistry"
 export const useFormGetStateAction = () => {
   const registry = useF0AiFormRegistry()
 
-  useCopilotAction({
-    name: "formGetState",
+  useFrontendTool({
+    name: "forms.formGetState",
     description:
       "Get the current state of an active form: field values, whether it has unsaved changes, and any validation errors.",
     parameters: [
@@ -21,33 +21,32 @@ export const useFormGetStateAction = () => {
         required: true,
       },
     ],
-    handler: async ({ formName }: { formName: string }) => {
-      console.log("[F0AiFormTools] formGetState called", { formName })
+    handler: ({ formName }: { formName: string }) => {
       if (!registry) {
-        return JSON.stringify({ error: "Form registry is not available" })
+        return { error: "Form registry is not available" }
       }
 
       const entry = registry.get(formName)
       if (!entry) {
         const available = registry.getFormNames()
-        return JSON.stringify({
+        return {
           error: `Form "${formName}" not found`,
           availableForms: available,
-        })
+        }
       }
 
       const ref = entry.ref.current
       if (!ref) {
-        return JSON.stringify({ error: `Form "${formName}" is not mounted` })
+        return { error: `Form "${formName}" is not mounted` }
       }
 
-      return JSON.stringify({
+      return {
         formName,
         values: ref.getValues(),
         isDirty: ref.isDirty(),
         errors: ref.getErrors(),
         fieldNames: ref.getFieldNames(),
-      })
+      }
     },
   })
 }

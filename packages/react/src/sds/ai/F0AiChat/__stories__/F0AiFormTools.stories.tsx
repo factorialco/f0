@@ -28,6 +28,7 @@ type Story = StoryObj
 // -- Shared schema for the demo form --
 
 const employeeSchema = z.object({
+  // -- Text fields --
   firstName: f0FormField(z.string().min(1), {
     label: "First Name",
     placeholder: "e.g. Jane",
@@ -40,6 +41,35 @@ const employeeSchema = z.object({
     label: "Email",
     placeholder: "jane@factorial.co",
   }),
+  notes: f0FormField(z.string().optional(), {
+    label: "Notes",
+    fieldType: "textarea",
+    placeholder: "Any additional notes...",
+    rows: 3,
+  }),
+
+  // -- Number fields --
+  salary: f0FormField(z.number().min(0), {
+    label: "Annual Salary",
+    placeholder: "e.g. 50000",
+  }),
+  lunchBreak: f0FormField(z.number().min(0), {
+    label: "Lunch Break",
+    fieldType: "duration",
+    units: ["hours", "minutes"],
+  }),
+
+  // -- Boolean fields --
+  remote: f0FormField(z.boolean(), {
+    label: "Remote Worker",
+    fieldType: "switch",
+  }),
+  termsAccepted: f0FormField(z.boolean(), {
+    label: "Accepts Terms & Conditions",
+    fieldType: "checkbox",
+  }),
+
+  // -- Select fields --
   role: f0FormField(z.enum(["engineer", "designer", "pm", "other"]), {
     label: "Role",
     options: [
@@ -49,24 +79,38 @@ const employeeSchema = z.object({
       { value: "other", label: "Other" },
     ],
   }),
+  skills: f0FormField(z.array(z.string()), {
+    label: "Skills",
+    multiple: true,
+    options: [
+      { value: "react", label: "React" },
+      { value: "typescript", label: "TypeScript" },
+      { value: "ruby", label: "Ruby" },
+      { value: "python", label: "Python" },
+      { value: "figma", label: "Figma" },
+    ],
+  }),
+
+  // -- Date / time fields --
   startDate: f0FormField(z.date(), {
     label: "Start Date",
     granularities: ["day"],
   }),
-  salary: f0FormField(z.number().min(0), {
-    label: "Annual Salary",
-    placeholder: "e.g. 50000",
+  checkInTime: f0FormField(z.date(), {
+    label: "Check-in Time",
+    fieldType: "time",
   }),
-  notes: f0FormField(z.string().optional(), {
-    label: "Notes",
-    fieldType: "textarea",
-    placeholder: "Any additional notes...",
-    rows: 3,
+  orientationDateTime: f0FormField(z.date(), {
+    label: "Orientation Date & Time",
+    fieldType: "datetime",
   }),
-  remote: f0FormField(z.boolean(), {
-    label: "Remote Worker",
-    fieldType: "switch",
-  }),
+  probationPeriod: f0FormField(
+    z.object({ from: z.date(), to: z.date().optional() }),
+    {
+      label: "Probation Period",
+      fieldType: "daterange",
+    }
+  ),
 })
 
 // -- Chat auto-opener --
@@ -94,11 +138,17 @@ function FormWithAiDemo() {
       firstName: "",
       lastName: "",
       email: "",
-      role: undefined,
-      startDate: undefined,
-      salary: undefined,
       notes: "",
+      salary: undefined,
+      lunchBreak: undefined,
       remote: false,
+      termsAccepted: false,
+      role: undefined,
+      skills: [],
+      startDate: undefined,
+      checkInTime: undefined,
+      orientationDateTime: undefined,
+      probationPeriod: undefined,
     },
     onSubmit: async ({ data }) => {
       // eslint-disable-next-line no-console
