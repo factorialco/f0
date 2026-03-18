@@ -68,6 +68,8 @@ export interface F0FormDefinitionSingleSchema<TSchema extends F0FormSchema> {
   ) => Promise<F0FormSubmitResult> | F0FormSubmitResult
   submitConfig?: F0FormSubmitConfig
   errorTriggerMode?: F0FormErrorTriggerMode
+  /** Whether async defaultValues are still being resolved */
+  isLoading: boolean
 }
 
 export interface F0FormDefinitionPerSection<T extends F0PerSectionSchema> {
@@ -82,6 +84,8 @@ export interface F0FormDefinitionPerSection<T extends F0PerSectionSchema> {
   ) => Promise<F0FormSubmitResult> | F0FormSubmitResult
   submitConfig?: F0PerSectionSubmitConfig
   errorTriggerMode?: F0FormErrorTriggerMode
+  /** Whether async defaultValues are still being resolved */
+  isLoading: boolean
 }
 
 export type F0FormDefinition<

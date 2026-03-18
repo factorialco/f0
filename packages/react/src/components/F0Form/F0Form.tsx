@@ -38,6 +38,7 @@ import type {
 import type { F0FormStateCallback } from "./useF0Form"
 
 import { FormActionBar } from "./components/ActionBar"
+import { F0FormSkeleton, F0FormPerSectionSkeleton } from "./components/F0FormSkeleton"
 import { F0FormSection } from "./components/F0FormSection"
 import { RowRenderer } from "./components/RowRenderer"
 import { SectionRenderer } from "./components/SectionRenderer"
@@ -314,6 +315,25 @@ function F0FormFromDefinition(
     | F0FormPropsWithPerSectionDefinition<F0PerSectionSchema>
 ) {
   const { formDefinition, className, styling, formRef, initialFiles } = props
+
+  if (formDefinition.isLoading) {
+    if (formDefinition._brand === "single") {
+      return (
+        <F0FormSkeleton
+          schema={formDefinition.schema}
+          sections={formDefinition.sections}
+          className={className}
+        />
+      )
+    }
+    return (
+      <F0FormPerSectionSkeleton
+        schema={formDefinition.schema}
+        sections={formDefinition.sections}
+        className={className}
+      />
+    )
+  }
 
   if (formDefinition._brand === "single") {
     return (

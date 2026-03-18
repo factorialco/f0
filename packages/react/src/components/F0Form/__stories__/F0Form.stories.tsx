@@ -2102,3 +2102,130 @@ export const PerSectionShowSubmitWhenDirty: Story = {
     return <F0Form formDefinition={formDefinition} />
   },
 }
+
+/**
+ * Form with async `defaultValues` fetched from an external source.
+ * While loading, the form displays field-shaped skeleton placeholders
+ * that match the real form layout. Once resolved, the form appears
+ * pre-filled with the fetched values.
+ *
+ * Pass an async function to `defaultValues` that receives an `AbortSignal`
+ * for cancellation support (e.g. with `fetch()`).
+ */
+export const AsyncDefaultValues: Story = {
+  render() {
+    const formSchema = z.object({
+      firstName: f0FormField(z.string().min(1), {
+        label: "First Name",
+        placeholder: "Enter first name",
+      }),
+      lastName: f0FormField(z.string().min(1), {
+        label: "Last Name",
+        placeholder: "Enter last name",
+      }),
+      email: f0FormField(z.string().email(), {
+        label: "Email",
+        placeholder: "you@example.com",
+      }),
+      bio: f0FormField(z.string().max(500).optional(), {
+        label: "Biography",
+        fieldType: "textarea",
+        rows: 3,
+      }),
+      notifications: f0FormField(z.boolean(), {
+        label: "Enable notifications",
+        fieldType: "switch",
+      }),
+    })
+
+    const formDefinition = useF0FormDefinition({
+      name: "async-defaults",
+      schema: formSchema,
+      defaultValues: async (_signal) => {
+        // Simulate fetching user profile from an API
+        await sleep(2000)
+        return {
+          firstName: "Jane",
+          lastName: "Smith",
+          email: "jane.smith@example.com",
+          bio: "Software engineer passionate about design systems.",
+          notifications: true,
+        }
+      },
+      onSubmit: async ({ data }) => {
+        await sleep(1000)
+        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+        return { success: true, message: "Profile updated" }
+      },
+      submitConfig: { label: "Save Profile" },
+    })
+
+    return <F0Form formDefinition={formDefinition} />
+  },
+}
+
+/**
+ * Per-section form with async `defaultValues`.
+ * Each section independently shows skeleton placeholders while
+ * the shared async function resolves. All sections populate
+ * once the promise completes.
+ */
+export const AsyncDefaultValuesPerSection: Story = {
+  render() {
+    const schema = {
+      personal: z.object({
+        firstName: f0FormField(z.string().min(1), {
+          label: "First Name",
+          placeholder: "Enter first name",
+        }),
+        lastName: f0FormField(z.string().min(1), {
+          label: "Last Name",
+          placeholder: "Enter last name",
+        }),
+      }),
+      contact: z.object({
+        email: f0FormField(z.string().email(), {
+          label: "Email",
+          placeholder: "you@example.com",
+        }),
+        phone: f0FormField(z.string().optional(), {
+          label: "Phone",
+          placeholder: "+1 (555) 000-0000",
+        }),
+      }),
+    }
+
+    const formDefinition = useF0FormDefinition({
+      name: "async-per-section",
+      schema,
+      sections: {
+        personal: {
+          title: "Personal Information",
+          description: "Your basic profile details",
+        },
+        contact: {
+          title: "Contact Details",
+          description: "How we can reach you",
+        },
+      },
+      defaultValues: async (_signal) => {
+        // Simulate API call
+        await sleep(2000)
+        return {
+          personal: { firstName: "Jane", lastName: "Smith" },
+          contact: { email: "jane@example.com", phone: "+1 555 123 4567" },
+        }
+      },
+      onSubmit: async ({ sectionId, data }) => {
+        await sleep(1000)
+        console.info(
+          `Section "${sectionId}" submitted: ${JSON.stringify(data, null, 2)}`
+        )
+        return { success: true }
+      },
+      submitConfig: { label: "Save" },
+    })
+
+    return <F0Form formDefinition={formDefinition} />
+  },
+}
