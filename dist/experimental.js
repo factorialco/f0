@@ -10509,7 +10509,7 @@ const Ex = V("Reactions", _x), Tx = ({
   return /* @__PURE__ */ g(
     "div",
     {
-      className: "flex w-full cursor-pointer flex-row gap-3 rounded-xl border border-solid border-transparent p-3 pt-2 focus:border-f1-border-secondary focus:outline focus:outline-1 focus:outline-offset-1 focus:outline-f1-border-selected-bold md:pb-4 md:pt-3",
+      className: "flex w-full cursor-pointer flex-row gap-3 rounded-xl border border-solid border-transparent p-3 pt-2 shadow-[0px_2px_20px_0px_#0D16250A] transition-shadow hover:shadow-[0px_-4px_20px_0px_#0D162514] focus:border-f1-border-secondary focus:outline focus:outline-1 focus:outline-offset-1 focus:outline-f1-border-selected-bold md:pb-4 md:pt-3",
       onClick: S,
       id: `community-post-${t}`,
       children: [
