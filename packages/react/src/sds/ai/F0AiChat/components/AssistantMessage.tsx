@@ -1,4 +1,5 @@
 import { Markdown, type AssistantMessageProps } from "@copilotkit/react-ui"
+import { type ToolCall } from "@copilotkit/shared"
 import { useEffect } from "react"
 
 import { useI18n } from "@/lib/providers/i18n"
@@ -17,8 +18,7 @@ export const AssistantMessage = ({
   const isThinkingTool =
     message?.role === "assistant" &&
     message.toolCalls?.find(
-      (tool: { function: { name: string } }) =>
-        tool.function.name === "orchestratorThinking"
+      (tool: ToolCall) => tool.function.name === "orchestratorThinking"
     )
   const subComponent = message?.generativeUI?.(
     isThinkingTool

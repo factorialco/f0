@@ -403,6 +403,7 @@ const Messages = ({
                     const liveMessage = thinkingGroup[thinkingGroup.length - 1]
                     const liveProps = {
                       message: liveMessage,
+                      messages: messages,
                       inProgress: inProgress,
                       index: restMessages.length,
                       isCurrentMessage: true,

@@ -1,4 +1,4 @@
-import { type Message } from "@copilotkit/shared"
+import { type Message, type ToolCall } from "@copilotkit/shared"
 
 import { isAgentStateMessage } from "../internal-types"
 
@@ -19,8 +19,7 @@ export function analyzeTurn(
       m.role === "assistant" &&
       (!!m.content ||
         m.toolCalls?.some(
-          (tc: { function: { name: string } }) =>
-            tc.function.name !== "orchestratorThinking"
+          (tc: ToolCall) => tc.function.name !== "orchestratorThinking"
         ))
   )
 
@@ -110,8 +109,7 @@ function isThinkingMessage(message: Message): boolean {
   return (
     message.role === "assistant" &&
     message.toolCalls?.some(
-      (call: { function: { name: string } }) =>
-        call.function.name === "orchestratorThinking"
+      (call: ToolCall) => call.function.name === "orchestratorThinking"
     ) === true
   )
 }
