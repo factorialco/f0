@@ -279,9 +279,304 @@ export const FormWithAiChat: Story = {
   },
 }
 
+const applicationFrameProps = ApplicationFrameStoryMeta.args as ComponentProps<
+  typeof ApplicationFrame
+>
+
+const storyModule = {
+  name: "Dashboard",
+  href: "/dashboard",
+  id: "benefits" as const,
+}
+
 // =============================================================================
-// Story: Available Form Definitions (no rendered forms)
+// Story: presentForm — AI opens forms in dialog or wizard mode
 // =============================================================================
+
+const presentableFormSchema = z.object({
+  // -- Personal Information --
+  firstName: f0FormField(z.string().min(1), {
+    label: "First Name",
+    section: "personal",
+    placeholder: "e.g. Jane",
+    helpText: "Legal first name as it appears on official documents",
+  }),
+  lastName: f0FormField(z.string().min(1), {
+    label: "Last Name",
+    section: "personal",
+    placeholder: "e.g. Doe",
+    helpText: "Legal last name as it appears on official documents",
+  }),
+  email: f0FormField(z.string().email(), {
+    label: "Work Email",
+    section: "personal",
+    placeholder: "jane@factorial.co",
+    helpText: "This will be used as the login email",
+  }),
+  personalEmail: f0FormField(z.string().email().optional(), {
+    label: "Personal Email",
+    section: "personal",
+    placeholder: "jane.doe@gmail.com",
+    helpText: "Optional — used for pre-boarding communications",
+  }),
+  phone: f0FormField(z.string().optional(), {
+    label: "Phone Number",
+    section: "personal",
+    placeholder: "+34 600 000 000",
+  }),
+  dateOfBirth: f0FormField(z.date().optional(), {
+    label: "Date of Birth",
+    section: "personal",
+    granularities: ["day"],
+  }),
+  nationality: f0FormField(
+    z
+      .enum(["spanish", "french", "german", "italian", "portuguese", "other"])
+      .optional(),
+    {
+      label: "Nationality",
+      section: "personal",
+      options: [
+        { value: "spanish", label: "Spanish" },
+        { value: "french", label: "French" },
+        { value: "german", label: "German" },
+        { value: "italian", label: "Italian" },
+        { value: "portuguese", label: "Portuguese" },
+        { value: "other", label: "Other" },
+      ],
+    }
+  ),
+  gender: f0FormField(
+    z.enum(["male", "female", "non-binary", "prefer-not-to-say"]).optional(),
+    {
+      label: "Gender",
+      section: "personal",
+      options: [
+        { value: "male", label: "Male" },
+        { value: "female", label: "Female" },
+        { value: "non-binary", label: "Non-binary" },
+        { value: "prefer-not-to-say", label: "Prefer not to say" },
+      ],
+    }
+  ),
+
+  // -- Work Details --
+  role: f0FormField(
+    z.enum(["engineer", "designer", "pm", "data", "qa", "devops", "other"]),
+    {
+      label: "Role",
+      section: "work",
+      options: [
+        { value: "engineer", label: "Engineer" },
+        { value: "designer", label: "Designer" },
+        { value: "pm", label: "Product Manager" },
+        { value: "data", label: "Data Analyst" },
+        { value: "qa", label: "QA Engineer" },
+        { value: "devops", label: "DevOps Engineer" },
+        { value: "other", label: "Other" },
+      ],
+    }
+  ),
+  department: f0FormField(
+    z.enum([
+      "engineering",
+      "design",
+      "product",
+      "hr",
+      "finance",
+      "marketing",
+      "sales",
+    ]),
+    {
+      label: "Department",
+      section: "work",
+      options: [
+        { value: "engineering", label: "Engineering" },
+        { value: "design", label: "Design" },
+        { value: "product", label: "Product" },
+        { value: "hr", label: "Human Resources" },
+        { value: "finance", label: "Finance" },
+        { value: "marketing", label: "Marketing" },
+        { value: "sales", label: "Sales" },
+      ],
+    }
+  ),
+  team: f0FormField(z.string().optional(), {
+    label: "Team",
+    section: "work",
+    placeholder: "e.g. Platform, Growth, Core",
+    helpText: "Specific team within the department",
+  }),
+  manager: f0FormField(z.string().optional(), {
+    label: "Direct Manager",
+    section: "work",
+    placeholder: "e.g. John Smith",
+    helpText: "Name of the reporting manager",
+  }),
+  skills: f0FormField(
+    z.array(
+      z.enum([
+        "react",
+        "typescript",
+        "ruby",
+        "python",
+        "figma",
+        "sql",
+        "go",
+        "java",
+      ])
+    ),
+    {
+      label: "Skills",
+      section: "work",
+      multiple: true,
+      helpText: "Select all that apply",
+      options: [
+        { value: "react", label: "React" },
+        { value: "typescript", label: "TypeScript" },
+        { value: "ruby", label: "Ruby" },
+        { value: "python", label: "Python" },
+        { value: "figma", label: "Figma" },
+        { value: "sql", label: "SQL" },
+        { value: "go", label: "Go" },
+        { value: "java", label: "Java" },
+      ],
+    }
+  ),
+  contractType: f0FormField(
+    z.enum(["full-time", "part-time", "contractor", "intern"]),
+    {
+      label: "Contract Type",
+      section: "work",
+      options: [
+        { value: "full-time", label: "Full-time" },
+        { value: "part-time", label: "Part-time" },
+        { value: "contractor", label: "Contractor" },
+        { value: "intern", label: "Intern" },
+      ],
+    }
+  ),
+  location: f0FormField(
+    z
+      .enum(["barcelona", "madrid", "lisbon", "berlin", "london", "remote"])
+      .optional(),
+    {
+      label: "Office Location",
+      section: "work",
+      options: [
+        { value: "barcelona", label: "Barcelona" },
+        { value: "madrid", label: "Madrid" },
+        { value: "lisbon", label: "Lisbon" },
+        { value: "berlin", label: "Berlin" },
+        { value: "london", label: "London" },
+        { value: "remote", label: "Fully Remote" },
+      ],
+    }
+  ),
+  remote: f0FormField(z.boolean(), {
+    label: "Remote Worker",
+    section: "work",
+    fieldType: "switch",
+    helpText: "Enable if the employee works remotely full-time",
+  }),
+
+  // -- Compensation --
+  salary: f0FormField(z.number().min(0), {
+    label: "Annual Salary",
+    section: "compensation",
+    placeholder: "e.g. 50000",
+    helpText: "Gross annual salary in EUR",
+  }),
+  currency: f0FormField(z.enum(["eur", "usd", "gbp"]).optional(), {
+    label: "Currency",
+    section: "compensation",
+    options: [
+      { value: "eur", label: "EUR (€)" },
+      { value: "usd", label: "USD ($)" },
+      { value: "gbp", label: "GBP (£)" },
+    ],
+  }),
+  payFrequency: f0FormField(
+    z.enum(["monthly", "biweekly", "weekly"]).optional(),
+    {
+      label: "Pay Frequency",
+      section: "compensation",
+      options: [
+        { value: "monthly", label: "Monthly" },
+        { value: "biweekly", label: "Bi-weekly" },
+        { value: "weekly", label: "Weekly" },
+      ],
+    }
+  ),
+  bonus: f0FormField(z.number().min(0).optional(), {
+    label: "Signing Bonus",
+    section: "compensation",
+    placeholder: "e.g. 5000",
+    helpText: "One-time signing bonus amount",
+  }),
+  lunchBreak: f0FormField(z.number().min(0).optional(), {
+    label: "Lunch Break",
+    section: "compensation",
+    fieldType: "duration",
+    units: ["hours", "minutes"],
+    helpText: "Daily lunch break duration",
+  }),
+
+  // -- Important Dates --
+  startDate: f0FormField(z.date(), {
+    label: "Start Date",
+    section: "dates",
+    granularities: ["day"],
+    helpText: "First day of work",
+  }),
+  checkInTime: f0FormField(z.date().optional(), {
+    label: "Check-in Time",
+    section: "dates",
+    fieldType: "time",
+    helpText: "Expected daily check-in time",
+  }),
+  orientationDateTime: f0FormField(z.date().optional(), {
+    label: "Orientation Date & Time",
+    section: "dates",
+    fieldType: "datetime",
+    helpText: "When the onboarding session is scheduled",
+  }),
+  probationPeriod: f0FormField(
+    z.object({ from: z.date(), to: z.date().optional() }).optional(),
+    {
+      label: "Probation Period",
+      section: "dates",
+      fieldType: "daterange",
+      helpText: "Leave end date empty for open-ended probation",
+    }
+  ),
+
+  // -- Additional --
+  emergencyContactName: f0FormField(z.string().optional(), {
+    label: "Emergency Contact Name",
+    section: "additional",
+    placeholder: "e.g. Maria Doe",
+  }),
+  emergencyContactPhone: f0FormField(z.string().optional(), {
+    label: "Emergency Contact Phone",
+    section: "additional",
+    placeholder: "+34 600 000 000",
+  }),
+  notes: f0FormField(z.string().optional(), {
+    label: "Notes",
+    section: "additional",
+    fieldType: "textarea",
+    placeholder: "Any additional notes about this employee...",
+    rows: 3,
+    helpText: "Internal notes visible only to HR",
+  }),
+  termsAccepted: f0FormField(z.boolean(), {
+    label: "Accepts Terms & Conditions",
+    section: "additional",
+    fieldType: "checkbox",
+    helpText: "Employee must accept before starting",
+  }),
+})
 
 const timeOffRequestSchema = z.object({
   employeeName: f0FormField(z.string().min(1), {
@@ -347,16 +642,18 @@ const expenseReportSchema = z.object({
   }),
 })
 
-const availableForms: F0AiAvailableFormDefinition[] = [
+const presentableFormDefinitions: F0AiAvailableFormDefinition[] = [
   {
     name: "time-off-request",
     schema: timeOffRequestSchema,
+    title: "Time Off Request",
+    description: "Request time off for an employee",
     defaultValues: {
       employeeName: "",
       leaveType: undefined,
       startDate: undefined,
       endDate: undefined,
-      reason: "",
+      reason: undefined,
     },
     onSubmit: async (values) => {
       // eslint-disable-next-line no-console
@@ -369,126 +666,20 @@ const availableForms: F0AiAvailableFormDefinition[] = [
   {
     name: "expense-report",
     schema: expenseReportSchema,
+    title: "Expense Report",
+    description: "Submit an expense report for reimbursement",
     defaultValues: {
       description: "",
       amount: undefined,
       category: undefined,
       date: undefined,
-      notes: "",
+      notes: undefined,
     },
     onSubmit: async (values) => {
       // eslint-disable-next-line no-console
       console.info("Expense report submitted:", JSON.stringify(values, null, 2))
     },
   },
-]
-
-const applicationFrameProps = ApplicationFrameStoryMeta.args as ComponentProps<
-  typeof ApplicationFrame
->
-
-const storyModule = {
-  name: "Dashboard",
-  href: "/dashboard",
-  id: "benefits" as const,
-}
-
-/**
- * Full-screen ApplicationFrame with AI chat. Two form definitions
- * (`time-off-request` and `expense-report`) are registered via
- * `availableFormDefinitions` — no forms are rendered on the page.
- *
- * The AI can still list, describe, fill, read state, and submit these forms
- * through the standard form tools.
- *
- * **Requires a running Mastra dev server** at
- * `https://mastra.local.factorial.dev/copilotkit`.
- *
- * Try prompts like:
- * - "What forms are available?"
- * - "Fill the time-off request for Jane Doe, vacation from April 1 to April 10"
- * - "Submit the expense report with: Client dinner, 85€, meals category, today"
- * - "What's the current state of the time-off request?"
- */
-export const AvailableFormDefinitions: Story = {
-  render() {
-    return (
-      <F0AiFormRegistryProvider availableFormDefinitions={availableForms}>
-        <ApplicationFrame
-          {...applicationFrameProps}
-          sidebar={<Sidebar {...SidebarStories.default.args} />}
-        >
-          <Page header={<PageHeader module={storyModule} />}>
-            <div className="mx-auto max-w-2xl p-8">
-              <h1 className="font-bold mb-2 text-2xl text-f1-foreground">
-                Available Form Definitions
-              </h1>
-              <p className="mb-4 text-sm text-f1-foreground-secondary">
-                No forms are rendered on this page, but the AI knows about two
-                form definitions registered via{" "}
-                <code className="rounded bg-f1-background-tertiary px-1 py-0.5 text-xs">
-                  availableFormDefinitions
-                </code>
-                :
-              </p>
-              <ul className="list-disc space-y-2 pl-6 text-sm text-f1-foreground-secondary">
-                <li>
-                  <strong>time-off-request</strong> — Employee name, leave type,
-                  start/end dates, and optional reason
-                </li>
-                <li>
-                  <strong>expense-report</strong> — Description, amount,
-                  category, date, and optional notes
-                </li>
-              </ul>
-              <p className="mt-4 text-sm text-f1-foreground-secondary">
-                Open the AI chat and try interacting with these forms.
-              </p>
-            </div>
-          </Page>
-        </ApplicationFrame>
-      </F0AiFormRegistryProvider>
-    )
-  },
-}
-
-// =============================================================================
-// Story: presentForm — AI opens forms in dialog or wizard mode
-// =============================================================================
-
-const presentableFormSchema = z.object({
-  firstName: f0FormField(z.string().min(1), {
-    label: "First Name",
-    section: "personal",
-    placeholder: "e.g. Jane",
-  }),
-  lastName: f0FormField(z.string().min(1), {
-    label: "Last Name",
-    section: "personal",
-    placeholder: "e.g. Doe",
-  }),
-  email: f0FormField(z.string().email(), {
-    label: "Email",
-    section: "personal",
-    placeholder: "jane@factorial.co",
-  }),
-  role: f0FormField(z.enum(["engineer", "designer", "pm"]), {
-    label: "Role",
-    section: "work",
-    options: [
-      { value: "engineer", label: "Engineer" },
-      { value: "designer", label: "Designer" },
-      { value: "pm", label: "Product Manager" },
-    ],
-  }),
-  salary: f0FormField(z.number().min(0), {
-    label: "Annual Salary",
-    section: "compensation",
-    placeholder: "e.g. 50000",
-  }),
-})
-
-const presentableFormDefinitions: F0AiAvailableFormDefinition[] = [
   {
     name: "quick-contact",
     schema: z.object({
@@ -522,27 +713,62 @@ const presentableFormDefinitions: F0AiAvailableFormDefinition[] = [
       firstName: "",
       lastName: "",
       email: "",
+      personalEmail: undefined,
+      phone: undefined,
+      dateOfBirth: undefined,
+      nationality: undefined,
+      gender: undefined,
       role: undefined,
+      department: undefined,
+      team: undefined,
+      manager: undefined,
+      skills: [],
+      contractType: undefined,
+      location: undefined,
+      remote: false,
       salary: undefined,
+      currency: undefined,
+      payFrequency: undefined,
+      bonus: undefined,
+      lunchBreak: undefined,
+      startDate: undefined,
+      checkInTime: undefined,
+      orientationDateTime: undefined,
+      probationPeriod: undefined,
+      emergencyContactName: undefined,
+      emergencyContactPhone: undefined,
+      notes: undefined,
+      termsAccepted: false,
     },
     sections: {
       personal: {
         title: "Personal Information",
-        description: "Name and contact details",
+        description: "Identity, contact details, and demographics",
       },
       work: {
         title: "Work Details",
-        description: "Role and department",
+        description: "Role, department, team, skills, and work arrangement",
       },
       compensation: {
         title: "Compensation",
-        description: "Salary information",
+        description: "Salary, currency, pay schedule, and benefits",
+      },
+      dates: {
+        title: "Important Dates",
+        description: "Start date, schedule, and probation period",
+      },
+      additional: {
+        title: "Additional",
+        description: "Emergency contacts, notes, and legal agreements",
       },
     },
     title: "New Employee",
     steps: [
       { title: "Personal Info", sectionIds: ["personal"] },
-      { title: "Work & Compensation", sectionIds: ["work", "compensation"] },
+      { title: "Work Details", sectionIds: ["work"] },
+      { title: "Compensation", sectionIds: ["compensation"] },
+      { title: "Dates & Schedule", sectionIds: ["dates"] },
+      { title: "Additional", sectionIds: ["additional"] },
     ],
     onSubmit: async (values) => {
       // eslint-disable-next-line no-console
@@ -552,23 +778,27 @@ const presentableFormDefinitions: F0AiAvailableFormDefinition[] = [
 ]
 
 /**
- * AI can present forms dynamically using the `presentForm` tool.
+ * AI can interact with virtual forms: fill fields, read state, submit,
+ * and present them dynamically in dialog or wizard mode.
  *
- * Two forms are registered via `availableFormDefinitions`:
- * - **quick-contact** — A simple 3-field form (best suited for dialog mode)
+ * Four forms are registered via `availableFormDefinitions`:
+ * - **time-off-request** — Simple leave request (dialog)
+ * - **expense-report** — Expense submission (dialog)
+ * - **quick-contact** — A simple 3-field form (dialog)
  * - **new-employee** — A multi-section form with wizard steps
  *
- * The AI chooses mode `"dialog"` or `"wizard"` based on form complexity.
- * Once presented, the form is live and can be filled/submitted via other tools.
+ * The AI can `fillForm` to pre-populate values, then `presentForm` to show
+ * the form to the user in either `"dialog"` or `"wizard"` mode.
  *
  * **Requires a running Mastra dev server** at
  * `https://mastra.local.factorial.dev/copilotkit`.
  *
  * Try prompts like:
  * - "What forms are available?"
+ * - "Fill the time-off request for Jane Doe, vacation from April 1 to April 10"
+ * - "Present the expense report as a dialog"
+ * - "Fill the new employee form with Jane Doe, engineer, salary 75000 and then present it as a wizard"
  * - "Open the quick contact form"
- * - "Present the new employee form as a wizard"
- * - "Fill the contact form with John Doe, john@test.com"
  */
 export const PresentForm: Story = {
   render() {
@@ -582,7 +812,7 @@ export const PresentForm: Story = {
           agent="one-workflow"
           credentials="include"
           showDevConsole={false}
-          greeting="Hello! I can open forms for you. Ask me to present the quick contact form (dialog) or the new employee form (wizard)."
+          greeting="Hello! I can help you with forms. I can fill, describe, present, and submit any of the available forms. Try asking me to fill a time-off request or present the new employee form as a wizard."
         >
           <AutoOpenChat>
             <ApplicationFrame
@@ -592,18 +822,25 @@ export const PresentForm: Story = {
               <Page header={<PageHeader module={storyModule} />}>
                 <div className="mx-auto max-w-2xl p-8">
                   <h1 className="font-bold mb-2 text-2xl text-f1-foreground">
-                    AI Form Presenter
+                    AI Form Tools
                   </h1>
                   <p className="mb-4 text-sm text-f1-foreground-secondary">
-                    No forms are rendered on this page. The AI can dynamically
-                    open forms using the{" "}
+                    No forms are rendered on this page. The AI can fill, read,
+                    submit, and present forms dynamically using{" "}
                     <code className="rounded bg-f1-background-tertiary px-1 py-0.5 text-xs">
-                      presentForm
-                    </code>{" "}
-                    tool in either <strong>dialog</strong> or{" "}
-                    <strong>wizard</strong> mode.
+                      availableFormDefinitions
+                    </code>
+                    .
                   </p>
                   <ul className="list-disc space-y-2 pl-6 text-sm text-f1-foreground-secondary">
+                    <li>
+                      <strong>time-off-request</strong> — Employee name, leave
+                      type, start/end dates, and optional reason
+                    </li>
+                    <li>
+                      <strong>expense-report</strong> — Description, amount,
+                      category, date, and optional notes
+                    </li>
                     <li>
                       <strong>quick-contact</strong> — Simple form, best as a
                       dialog
@@ -614,7 +851,7 @@ export const PresentForm: Story = {
                     </li>
                   </ul>
                   <p className="mt-4 text-sm text-f1-foreground-secondary">
-                    Open the AI chat and ask it to present a form.
+                    Open the AI chat and try interacting with these forms.
                   </p>
                 </div>
               </Page>

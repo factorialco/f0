@@ -792,6 +792,7 @@ function F0WizardFormSingleSchema<TSchema extends F0FormSchema>({
           <>
             <div className="pb-5">
               <F0Form
+                key={currentStep}
                 name={`${name}-step-${currentStep}`}
                 schema={stepSchema}
                 sections={stepSections}

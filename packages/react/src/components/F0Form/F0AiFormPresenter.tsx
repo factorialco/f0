@@ -1,3 +1,5 @@
+import { useMemo } from "react"
+
 import type { F0FormDefinitionSingleSchema } from "@/components/F0WizardForm/types"
 
 import { F0Dialog } from "@/components/F0Dialog"
@@ -79,7 +81,6 @@ function WizardPresenter({
     sections: definition.sections,
     onSubmit: async ({ data }) => {
       await definition.onSubmit?.(data as Record<string, unknown>)
-      onClose()
       return { success: true }
     },
   })
@@ -105,9 +106,18 @@ export function F0AiFormPresenter({
 }) {
   const { mode, definition, initialValues } = presentedForm
 
+  // Stable key that changes when a different form is presented or the same
+  // form is re-presented with different values. This forces react-hook-form
+  // to remount with the new defaultValues instead of keeping stale state.
+  const formKey = useMemo(
+    () => `${presentedForm.name}-${JSON.stringify(initialValues)}`,
+    [presentedForm.name, initialValues]
+  )
+
   if (mode === "wizard") {
     return (
       <WizardPresenter
+        key={formKey}
         definition={definition}
         initialValues={initialValues}
         onClose={onClose}
@@ -116,6 +126,7 @@ export function F0AiFormPresenter({
   }
   return (
     <DialogPresenter
+      key={formKey}
       definition={definition}
       initialValues={initialValues}
       onClose={onClose}

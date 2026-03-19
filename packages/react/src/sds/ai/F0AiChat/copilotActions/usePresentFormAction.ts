@@ -16,7 +16,8 @@ export const usePresentFormAction = () => {
       "Opens a form for the user to fill in. " +
       "Use mode 'dialog' for simple forms with few fields. " +
       "Use mode 'wizard' for complex forms with multiple sections or steps. " +
-      "Once presented, the form is live — use formFill, formGetState, formSubmit to interact with it.",
+      "Once presented, the form is live — use formFill, formGetState, formSubmit to interact with it. " +
+      "If the form has a defaultValuesParamsSchema, you can pass defaultValuesParams to pre-populate contextual default values.",
     parameters: [
       {
         name: "formName",
@@ -33,19 +34,34 @@ export const usePresentFormAction = () => {
         enum: ["dialog", "wizard"],
         required: true,
       },
+      {
+        name: "defaultValuesParams",
+        type: "object",
+        description:
+          "Optional parameters to pass to the form's defaultValues function. " +
+          "Check the form's defaultValuesParamsSchema in the form descriptions to see what params are accepted.",
+        required: false,
+      },
     ],
-    handler: ({
-      formName,
-      mode,
-    }: {
+    handler: (args: {
       formName: string
       mode: "dialog" | "wizard"
+      defaultValuesParams?: object
     }) => {
-      console.log("[F0AiFormTools] presentForm called", { formName, mode })
+      const { formName, mode, defaultValuesParams } = args
+      console.log("[F0AiFormTools] presentForm called", {
+        formName,
+        mode,
+        defaultValuesParams,
+      })
       if (!registry) {
         return { success: false, error: "Form registry is not available" }
       }
-      return registry.presentForm(formName, mode)
+      return registry.presentForm(
+        formName,
+        mode,
+        defaultValuesParams as Record<string, unknown> | undefined
+      )
     },
   })
 }

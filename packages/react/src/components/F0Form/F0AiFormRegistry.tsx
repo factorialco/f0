@@ -6,7 +6,7 @@ import {
   useRef,
   useState,
 } from "react"
-import type { ZodRawShape } from "zod"
+import type { ZodRawShape, ZodType } from "zod"
 import { zodToJsonSchema } from "zod-to-json-schema"
 
 import type { F0FormSchema, F0SectionConfig } from "./types"
@@ -25,18 +25,39 @@ export interface F0AiFormEntry {
   virtual?: boolean
   /** Section configs (title, description) keyed by section ID */
   sections?: Record<string, F0SectionConfig>
+  /** Zod schema for params accepted by presentForm (virtual entries only) */
+  defaultValuesParamsSchema?: ZodType
+  /** Field names explicitly set via setValue/setValues on a virtual ref */
+  dirtyFields?: Set<string>
 }
 
 /**
  * A form definition that the AI can interact with even though the form is not rendered.
+ *
+ * Use the generic parameter to type the params accepted by a functional `defaultValues`.
+ * Prefer using {@link defineAvailableForm} for automatic inference from `defaultValuesParamsSchema`.
  */
-export interface F0AiAvailableFormDefinition {
+export interface F0AiAvailableFormDefinition<
+  TParams extends Record<string, unknown> = Record<string, unknown>,
+> {
   /** Unique name to identify the form */
   name: string
   /** Zod schema that defines the form's fields and validation */
   schema: F0FormSchema
-  /** Default values for the form fields */
-  defaultValues?: Record<string, unknown>
+  /**
+   * Default values for the form fields.
+   * Can be a static object or a function that receives params (supplied by the AI via presentForm)
+   * and returns the defaults.
+   */
+  defaultValues?:
+    | Record<string, unknown>
+    | ((params: TParams) => Record<string, unknown>)
+  /**
+   * Zod schema that describes the params accepted by a functional `defaultValues`.
+   * When provided, the AI will see this schema and can supply params when calling presentForm.
+   * Params are validated against this schema before being passed to `defaultValues`.
+   */
+  defaultValuesParamsSchema?: ZodType<TParams>
   /** Section configs (title, description) keyed by section ID */
   sections?: Record<string, F0SectionConfig>
   /** Optional submit handler. Called when AI triggers formSubmit on this form. */
@@ -50,6 +71,48 @@ export interface F0AiAvailableFormDefinition {
 }
 
 /**
+ * Helper to define an available form with proper params typing.
+ * TypeScript infers `TParams` from `defaultValuesParamsSchema`, so the
+ * `defaultValues` callback receives fully typed params.
+ *
+ * @example
+ * ```tsx
+ * const employeeForm = defineAvailableForm({
+ *   name: "edit-employee",
+ *   schema: employeeSchema,
+ *   defaultValuesParamsSchema: z.object({ employeeId: z.string() }),
+ *   defaultValues: (params) => ({
+ *     // params.employeeId is typed as string
+ *     name: `Employee ${params.employeeId}`,
+ *   }),
+ * })
+ * ```
+ */
+export function defineAvailableForm<
+  TParams extends Record<string, unknown> = Record<string, unknown>,
+>(
+  definition: F0AiAvailableFormDefinition<TParams>
+): F0AiAvailableFormDefinition {
+  return definition as F0AiAvailableFormDefinition
+}
+
+/**
+ * Resolves defaultValues from a definition, handling both static objects and functions.
+ */
+function resolveDefaultValues(
+  defaultValues:
+    | Record<string, unknown>
+    | ((params: Record<string, unknown>) => Record<string, unknown>)
+    | undefined,
+  params: Record<string, unknown> = {}
+): Record<string, unknown> {
+  if (typeof defaultValues === "function") {
+    return defaultValues(params)
+  }
+  return defaultValues ?? {}
+}
+
+/**
  * Creates a virtual F0FormRef backed by in-memory state.
  * Used for form definitions that are available to the AI but not rendered.
  */
@@ -57,9 +120,10 @@ function createVirtualFormRef(
   schema: F0FormSchema,
   defaultValues: Record<string, unknown> = {},
   onSubmit?: (values: Record<string, unknown>) => void | Promise<void>
-): React.MutableRefObject<F0FormRef> {
+): { ref: React.MutableRefObject<F0FormRef>; dirtyFields: Set<string> } {
   let values = { ...defaultValues }
   const initial = { ...defaultValues }
+  const dirtyFields = new Set<string>()
 
   const getShapeKeys = (): string[] => {
     const unwrapped = unwrapZodSchema(schema) as { shape?: ZodRawShape }
@@ -77,6 +141,7 @@ function createVirtualFormRef(
       },
       reset: () => {
         values = { ...initial }
+        dirtyFields.clear()
       },
       isDirty: () => JSON.stringify(values) !== JSON.stringify(initial),
       getValues: () => ({ ...values }),
@@ -86,12 +151,16 @@ function createVirtualFormRef(
         _options?: F0FormSetValueOptions
       ) => {
         values = { ...values, [fieldName]: value }
+        dirtyFields.add(fieldName)
       },
       setValues: (
         newValues: Record<string, unknown>,
         _options?: F0FormSetValueOptions
       ) => {
         values = { ...values, ...newValues }
+        for (const key of Object.keys(newValues)) {
+          dirtyFields.add(key)
+        }
       },
       trigger: async (fieldName?: string) => {
         if (fieldName) {
@@ -124,7 +193,7 @@ function createVirtualFormRef(
     },
   }
 
-  return ref
+  return { ref, dirtyFields }
 }
 
 /**
@@ -239,13 +308,16 @@ interface F0AiFormRegistryContextValue {
     formValues: Record<string, unknown>
     formErrors: Record<string, unknown>
     isDirty: boolean
+    /** JSON Schema of defaultValuesParams accepted by presentForm (only for forms with defaultValuesParamsSchema) */
+    defaultValuesParamsSchema?: Record<string, unknown>
   }[]
   /** Currently AI-presented form, or null */
   presentedForm: F0AiPresentedForm | null
   /** Called by the AI tool to present a form */
   presentForm: (
     formName: string,
-    mode: "dialog" | "wizard"
+    mode: "dialog" | "wizard",
+    defaultValuesParams?: Record<string, unknown>
   ) => { success: boolean; error?: string }
   /** Called when the presented form is closed (submit/cancel) */
   dismissForm: () => void
@@ -311,7 +383,7 @@ export function F0AiFormRegistryProvider({
             return
           }
 
-          return {
+          const description = {
             formName: name,
             formSchema: zodToJsonSchema(entry.schema) as Record<
               string,
@@ -322,7 +394,16 @@ export function F0AiFormRegistryProvider({
             formValues: ref.getValues(),
             formErrors: ref.getErrors(),
             isDirty: ref.isDirty(),
+            ...(entry.defaultValuesParamsSchema
+              ? {
+                  defaultValuesParamsSchema: zodToJsonSchema(
+                    entry.defaultValuesParamsSchema
+                  ) as Record<string, unknown>,
+                }
+              : {}),
           }
+
+          return description
         })
         .filter((el) => !!el)
 
@@ -357,9 +438,9 @@ export function F0AiFormRegistryProvider({
       // If there's a virtual definition with this name, re-register it
       const virtualDef = availableFormDefinitions?.find((d) => d.name === name)
       if (virtualDef) {
-        const virtualRef = createVirtualFormRef(
+        const { ref: virtualRef, dirtyFields } = createVirtualFormRef(
           virtualDef.schema,
-          virtualDef.defaultValues,
+          resolveDefaultValues(virtualDef.defaultValues),
           virtualDef.onSubmit
         )
         registryRef.current.set(name, {
@@ -367,6 +448,8 @@ export function F0AiFormRegistryProvider({
           schema: virtualDef.schema,
           sections: virtualDef.sections,
           virtual: true,
+          defaultValuesParamsSchema: virtualDef.defaultValuesParamsSchema,
+          dirtyFields,
         })
       }
       rebuildDescriptions()
@@ -383,7 +466,11 @@ export function F0AiFormRegistryProvider({
   }, [])
 
   const presentForm = useCallback(
-    (formName: string, mode: "dialog" | "wizard") => {
+    (
+      formName: string,
+      mode: "dialog" | "wizard",
+      defaultValuesParams?: Record<string, unknown>
+    ) => {
       const def = availableFormDefinitions?.find((d) => d.name === formName)
       if (!def) {
         return {
@@ -391,11 +478,49 @@ export function F0AiFormRegistryProvider({
           error: `Form "${formName}" not found in availableFormDefinitions`,
         }
       }
-      // Capture current values from the virtual form ref so the presented
-      // form starts with whatever the AI has already filled
+
+      // Validate defaultValuesParams against the schema if provided
+      if (defaultValuesParams && def.defaultValuesParamsSchema) {
+        const parseResult =
+          def.defaultValuesParamsSchema.safeParse(defaultValuesParams)
+        if (!parseResult.success) {
+          return {
+            success: false,
+            error: `Invalid defaultValuesParams for form "${formName}": ${parseResult.error.issues.map((i) => i.message).join(", ")}`,
+          }
+        }
+      }
+
+      // Resolve defaults — if defaultValuesParams are provided and defaultValues is a function,
+      // call it with the validated params
+      const resolvedDefaults = resolveDefaultValues(
+        def.defaultValues,
+        defaultValuesParams ?? {}
+      )
+
+      // Merge values from the virtual form ref (which may have been set via fillForm).
+      // When defaultValuesParams are provided, use per-field dirty tracking so that
+      // param-resolved defaults are used for untouched fields. Otherwise, use the
+      // full ref values — they are either AI-modified or the original defaults.
       const entry = registryRef.current.get(formName)
-      const currentValues =
-        entry?.ref.current?.getValues() ?? def.defaultValues ?? {}
+      const ref = entry?.ref.current
+      let currentValues: Record<string, unknown>
+
+      if (defaultValuesParams && entry?.dirtyFields) {
+        // Params provided: start from param-resolved defaults, overlay only AI-touched fields
+        const refValues = ref?.getValues() ?? {}
+        const aiModified: Record<string, unknown> = {}
+        for (const field of entry.dirtyFields) {
+          if (field in refValues) {
+            aiModified[field] = refValues[field]
+          }
+        }
+        currentValues = { ...resolvedDefaults, ...aiModified }
+      } else {
+        // No params: just use whatever the ref has (fillForm values or original defaults)
+        currentValues = ref?.getValues() ?? resolvedDefaults
+      }
+
       setPresentedForm({
         name: formName,
         mode,
@@ -426,9 +551,9 @@ export function F0AiFormRegistryProvider({
       // Skip if already registered as virtual
       if (existing?.virtual) continue
 
-      const virtualRef = createVirtualFormRef(
+      const { ref: virtualRef, dirtyFields } = createVirtualFormRef(
         def.schema,
-        def.defaultValues,
+        resolveDefaultValues(def.defaultValues),
         def.onSubmit
       )
       registryRef.current.set(def.name, {
@@ -436,6 +561,8 @@ export function F0AiFormRegistryProvider({
         schema: def.schema,
         sections: def.sections,
         virtual: true,
+        defaultValuesParamsSchema: def.defaultValuesParamsSchema,
+        dirtyFields,
       })
     }
 
