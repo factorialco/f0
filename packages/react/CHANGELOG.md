@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.406.1](https://github.com/factorialco/f0/compare/f0-react-v1.406.0...f0-react-v1.406.1) (2026-03-19)
+
+
+### Bug Fixes
+
+* add lms icon to modules ([#3699](https://github.com/factorialco/f0/issues/3699)) ([b3652bf](https://github.com/factorialco/f0/commit/b3652bfa8f2dc3ff5b5d5b29a1c7bdcb6ec4be69))
+
 ## [1.406.0](https://github.com/factorialco/f0/compare/f0-react-v1.405.1...f0-react-v1.406.0) (2026-03-18)
 
 
