@@ -4,35 +4,52 @@
 
 React Native implementation of the F0 Design System.
 
+## New Architecture compatibility
+
+This package supports React Native **New Architecture only** (Fabric/TurboModules) and **Expo SDK 54+ only**. See [`docs/new-architecture.md`](docs/new-architecture.md) for requirements and troubleshooting (notably Reanimated + Uniwind host app setup).
+
+### Supported compatibility matrix
+
+| Host stack                                       | Support          |
+| ------------------------------------------------ | ---------------- |
+| Expo SDK 54+                                     | ✅ Supported     |
+| Expo SDK 53 and below                            | ❌ Not supported |
+| New Architecture enabled (`expo.newArchEnabled`) | ✅ Required      |
+| Old Architecture                                 | ❌ Not supported |
+
 ## 🚀 Quick Setup
 
 ### 1️⃣ Install Dependencies
 
 ```bash
-# Install package and peer dependencies
+# 1) Install package + JS peer dependencies
 pnpm add @factorialco/f0-react-native \
   date-fns@^3.6.0 \
-  react-native-reanimated@^3.19.4 \
-  react-native-safe-area-context@^5.4.0 \
-  react-native-svg@^15.12.1 \
-  react-native-worklets-core@^1.6.2 \
   tailwind-merge@^3.4.0 \
   tailwind-variants@^3.2.2 \
   tailwindcss@^4.1.18 \
   uniwind@^1.2.7 \
   twemoji-parser@^14.0.0
+
+# 2) Install Expo-native dependencies pinned to your SDK
+npx expo install \
+  expo-image \
+  react-native-reanimated \
+  react-native-worklets \
+  react-native-safe-area-context \
+  react-native-svg
 ```
 
 > **Note:** The following peer dependencies are required:
+>
 > - `uniwind` and `tailwindcss` - Required for styling (must be configured in Metro and CSS files)
 > - `tailwind-merge` and `tailwind-variants` - Required for component variant system and class merging
 > - `react-native-reanimated` - Required for animations
+> - `react-native-worklets` - Required by Reanimated 4
 > - `react-native-safe-area-context` - Required for safe area handling
 > - `react-native-svg` - Required for icon components
 > - `date-fns` - Required for date utilities
 > - `twemoji-parser` - Required for emoji support
-> 
-> `react-native-worklets-core` is optional but recommended for better performance.
 
 ### 2️⃣ Configure Babel
 
@@ -43,15 +60,11 @@ module.exports = function (api) {
   api.cache(true);
   return {
     presets: ["babel-preset-expo"], // Expo only
-    plugins: [
-      "react-native-worklets-core/plugin",
-      "react-native-reanimated/plugin", // MUST be last
-    ],
   };
 };
 ```
 
-> **Note:** Uniwind doesn't require special Babel configuration. The above is a standard Expo setup.
+> **Note:** For Expo SDK 54+, no additional Reanimated/Worklets Babel plugins are needed when using `babel-preset-expo`.
 
 ### 3️⃣ Configure Metro
 
@@ -77,11 +90,11 @@ module.exports = withUniwindConfig(config, {
 **`global.css` (root):**
 
 ```css
-@import 'tailwindcss';
-@import 'uniwind';
+@import "tailwindcss";
+@import "uniwind";
 
 /* Import F0 styles (theme tokens + base styles) */
-@import '@factorialco/f0-react-native/styles';
+@import "@factorialco/f0-react-native/styles";
 
 /* Add your app's source paths for Tailwind CSS v4 */
 @source "./app/**/*.{js,jsx,ts,tsx}";
@@ -92,7 +105,6 @@ module.exports = withUniwindConfig(config, {
 
 /* Also scan library source files */
 @source "./node_modules/@factorialco/f0-react-native/src/**/*.{js,jsx,ts,tsx}";
-
 ```
 
 **Import in your entry file (`App.tsx` or `index.js`):**
@@ -131,12 +143,17 @@ assets/fonts/Inter/
 Add the `expo-font` config plugin to your **`app.json`**:
 
 ```json
-["expo-font", { "fonts": [
-  "./assets/fonts/Inter/Inter-Regular.ttf",
-  "./assets/fonts/Inter/Inter-Medium.ttf",
-  "./assets/fonts/Inter/Inter-SemiBold.ttf",
-  "./assets/fonts/Inter/Inter-Bold.ttf"
-]}]
+[
+  "expo-font",
+  {
+    "fonts": [
+      "./assets/fonts/Inter/Inter-Regular.ttf",
+      "./assets/fonts/Inter/Inter-Medium.ttf",
+      "./assets/fonts/Inter/Inter-SemiBold.ttf",
+      "./assets/fonts/Inter/Inter-Bold.ttf"
+    ]
+  }
+]
 ```
 
 This embeds the fonts at build time — no runtime `useFonts` call needed.
@@ -250,10 +267,10 @@ function MyComponent({ className, isActive }) {
   return (
     <View
       className={cn(
-        'bg-background p-4 rounded-lg',
-        'border border-divider',
-        isActive && 'bg-accent',
-        className
+        "bg-background p-4 rounded-lg",
+        "border border-divider",
+        isActive && "bg-accent",
+        className,
       )}
     />
   );
@@ -261,6 +278,7 @@ function MyComponent({ className, isActive }) {
 ```
 
 The `cn` utility:
+
 - ✅ Automatically merges Tailwind classes with conflict resolution
 - ✅ Uses `tailwind-merge` under the hood
 - ✅ Supports custom opacity class groups
@@ -276,9 +294,9 @@ import { F0Button } from "@factorialco/f0-react-native";
 // Type-safe variants
 <F0Button
   label="Primary Button"
-  variant="default"  // ✅ Autocomplete: "default" | "outline" | "critical" | "neutral" | "ghost" | "promote"
-  size="md"          // ✅ Autocomplete: "sm" | "md" | "lg"
-/>
+  variant="default" // ✅ Autocomplete: "default" | "outline" | "critical" | "neutral" | "ghost" | "promote"
+  size="md" // ✅ Autocomplete: "sm" | "md" | "lg"
+/>;
 ```
 
 ## 🔧 Troubleshooting
@@ -288,12 +306,14 @@ import { F0Button } from "@factorialco/f0-react-native";
 If styles from F0 components aren't being applied, ensure:
 
 1. **Import styles and add source paths:** Your `global.css` includes the F0 styles and the F0 source path:
+
    ```css
-   @import '@factorialco/f0-react-native/styles';
+   @import "@factorialco/f0-react-native/styles";
    @source "./node_modules/@factorialco/f0-react-native/lib";
    ```
 
 2. **Metro Cache:** Clear Metro bundler cache:
+
    ```bash
    npx expo start --clear
    # or
@@ -316,6 +336,7 @@ pnpm add tailwind-variants@^3.2.2
 ### Build Errors
 
 If you encounter build errors, ensure:
+
 - All peer dependencies are installed
 - Metro config includes CSS file extensions
 - Babel plugins are properly configured
@@ -340,20 +361,20 @@ pnpm build
 
 This package requires the following peer dependencies to be installed in your host project:
 
-| Package | Version | Required | Purpose |
-|---------|---------|----------|---------|
-| `react` | `*` | ✅ Yes | React library |
-| `react-native` | `*` | ✅ Yes | React Native framework |
-| `tailwindcss` | `^4.1.18` | ✅ Yes | CSS framework |
-| `uniwind` | `^1.2.7` | ✅ Yes | Tailwind CSS for React Native |
-| `tailwind-merge` | `^3.4.0` | ✅ Yes | Class merging utility |
-| `tailwind-variants` | `^3.2.2` | ✅ Yes | Variant system |
-| `react-native-reanimated` | `^3.19.4` | ✅ Yes | Animations |
-| `react-native-safe-area-context` | `^5.4.0` | ✅ Yes | Safe area handling |
-| `react-native-svg` | `^15.12.1` | ✅ Yes | SVG support for icons |
-| `date-fns` | `^3.6.0` | ✅ Yes | Date utilities |
-| `twemoji-parser` | `^14.0.0` | ✅ Yes | Emoji support |
-| `react-native-worklets-core` | `^1.6.2` | ⚠️ Optional | Performance optimization |
+| Package                          | Version          | Required | Purpose                          |
+| -------------------------------- | ---------------- | -------- | -------------------------------- |
+| `react`                          | `*`              | ✅ Yes   | React library                    |
+| `react-native`                   | `*`              | ✅ Yes   | React Native framework           |
+| `tailwindcss`                    | `^4.1.18`        | ✅ Yes   | CSS framework                    |
+| `uniwind`                        | `^1.2.7`         | ✅ Yes   | Tailwind CSS for React Native    |
+| `tailwind-merge`                 | `^3.4.0`         | ✅ Yes   | Class merging utility            |
+| `tailwind-variants`              | `^3.2.2`         | ✅ Yes   | Variant system                   |
+| `react-native-reanimated`        | `^4.1.0`         | ✅ Yes   | Animations                       |
+| `react-native-worklets`          | `>=0.5.0 <1.0.0` | ✅ Yes   | Worklet runtime for Reanimated 4 |
+| `react-native-safe-area-context` | `^5.6.0`         | ✅ Yes   | Safe area handling               |
+| `react-native-svg`               | `^15.12.1`       | ✅ Yes   | SVG support for icons            |
+| `date-fns`                       | `^3.6.0`         | ✅ Yes   | Date utilities                   |
+| `twemoji-parser`                 | `^14.0.0`        | ✅ Yes   | Emoji support                    |
 
 ## 📄 License
 
