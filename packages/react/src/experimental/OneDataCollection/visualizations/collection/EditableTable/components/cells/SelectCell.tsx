@@ -43,7 +43,6 @@ export function SelectCell<R extends RecordType>({
         onChange(newVal)
       }
     },
-    error,
     loading,
     size: "sm" as const,
     placeholder: config.placeholder,
@@ -57,7 +56,7 @@ export function SelectCell<R extends RecordType>({
     : ({} as const)
 
   return (
-    <BaseCell>
+    <BaseCell error={error}>
       <div
         className={cn(
           "flex w-full min-w-0 h-full",

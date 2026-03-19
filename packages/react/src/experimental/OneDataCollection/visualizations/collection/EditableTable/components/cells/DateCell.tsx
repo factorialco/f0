@@ -37,7 +37,7 @@ export function DateCell<R extends RecordType>({
   }
 
   return (
-    <BaseCell showRightBorder={!isLastColumn}>
+    <BaseCell showRightBorder={!isLastColumn} error={error}>
       <div
         className={cn(
           "flex w-full min-w-0 items-center",
@@ -60,7 +60,6 @@ export function DateCell<R extends RecordType>({
           displayFormat="default"
           value={datePickerValue}
           onChange={handleChange}
-          error={error}
           loading={loading}
         />
       </div>
