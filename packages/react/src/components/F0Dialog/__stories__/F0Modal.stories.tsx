@@ -47,7 +47,7 @@ const meta: Meta<typeof F0Dialog> = {
     },
     width: {
       description:
-        "The width of the dialog. ⚠️ Applies to center and side panel positions (left/right)",
+        "The width of the dialog. Applies to center and side panel positions (left/right)",
       control: {
         type: "select",
         options: dialogWidths,
