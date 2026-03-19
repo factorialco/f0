@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.407.0](https://github.com/factorialco/f0/compare/f0-react-v1.406.1...f0-react-v1.407.0) (2026-03-19)
+
+
+### Features
+
+* **editable-table:** right-align text inside input for numeric columns ([#3647](https://github.com/factorialco/f0/issues/3647)) ([896b932](https://github.com/factorialco/f0/commit/896b93270dbd8c3afcd31e6d5371e162fa859d73))
+
 ## [1.406.1](https://github.com/factorialco/f0/compare/f0-react-v1.406.0...f0-react-v1.406.1) (2026-03-19)
 
 
