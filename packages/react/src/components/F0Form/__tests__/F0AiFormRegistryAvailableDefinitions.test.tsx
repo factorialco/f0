@@ -10,6 +10,7 @@ import {
   F0AiFormRegistryProvider,
   useF0AiFormRegistry,
 } from "../F0AiFormRegistry"
+import { f0FormField } from "../f0Schema"
 
 function RegistryInspector({
   onRegistry,
@@ -29,6 +30,30 @@ const simpleSchema = z.object({
   name: z.string().min(1, "Name is required"),
   email: z.string().email("Invalid email"),
 })
+
+const describedSchema = z.object({
+  firstName: f0FormField(
+    z.string().min(1).describe("The employee first name"),
+    {
+      label: "First Name",
+      placeholder: "e.g. Jane",
+      helpText: "Legal first name",
+      section: "personal",
+    }
+  ),
+  role: f0FormField(z.enum(["engineer", "designer"]), {
+    label: "Role",
+    section: "work",
+  }),
+})
+
+const describedSections = {
+  personal: {
+    title: "Personal Information",
+    description: "Basic employee details",
+  },
+  work: { title: "Work Details" },
+}
 
 describe("F0AiFormRegistryProvider availableFormDefinitions", () => {
   it("registers virtual forms from availableFormDefinitions", async () => {
@@ -336,6 +361,86 @@ describe("F0AiFormRegistryProvider availableFormDefinitions", () => {
       email: "alice@test.com",
     })
     expect(desc.isDirty).toBe(false)
+  })
+
+  it("includes fieldDescriptions from f0FormField metadata in formDescriptions", async () => {
+    const definitions: F0AiAvailableFormDefinition[] = [
+      {
+        name: "employee-form",
+        schema: describedSchema,
+        sections: describedSections,
+        defaultValues: { firstName: "", role: undefined },
+      },
+    ]
+
+    let capturedRegistry: ReturnType<typeof useF0AiFormRegistry> = null
+
+    render(
+      <F0AiFormRegistryProvider availableFormDefinitions={definitions}>
+        <RegistryInspector
+          onRegistry={(r) => {
+            capturedRegistry = r
+          }}
+        />
+      </F0AiFormRegistryProvider>
+    )
+
+    await waitFor(() => {
+      expect(capturedRegistry?.formDescriptions).toHaveLength(1)
+    })
+
+    const desc = capturedRegistry!.formDescriptions[0]
+    expect(desc.fieldDescriptions).toEqual({
+      firstName: {
+        label: "First Name",
+        section: "personal",
+        placeholder: "e.g. Jane",
+        helpText: "Legal first name",
+        description: "The employee first name",
+      },
+      role: {
+        label: "Role",
+        section: "work",
+      },
+    })
+  })
+
+  it("includes sectionDescriptions from sections config in formDescriptions", async () => {
+    const definitions: F0AiAvailableFormDefinition[] = [
+      {
+        name: "employee-form",
+        schema: describedSchema,
+        sections: describedSections,
+        defaultValues: { firstName: "", role: undefined },
+      },
+    ]
+
+    let capturedRegistry: ReturnType<typeof useF0AiFormRegistry> = null
+
+    render(
+      <F0AiFormRegistryProvider availableFormDefinitions={definitions}>
+        <RegistryInspector
+          onRegistry={(r) => {
+            capturedRegistry = r
+          }}
+        />
+      </F0AiFormRegistryProvider>
+    )
+
+    await waitFor(() => {
+      expect(capturedRegistry?.formDescriptions).toHaveLength(1)
+    })
+
+    const desc = capturedRegistry!.formDescriptions[0]
+    expect(desc.sectionDescriptions).toEqual({
+      personal: {
+        title: "Personal Information",
+        description: "Basic employee details",
+      },
+      work: {
+        title: "Work Details",
+      },
+    })
   })
 
   it("removes virtual forms when definitions change", async () => {

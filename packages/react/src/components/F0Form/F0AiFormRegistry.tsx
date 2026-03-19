@@ -9,9 +9,11 @@ import {
 import type { ZodRawShape } from "zod"
 import { zodToJsonSchema } from "zod-to-json-schema"
 
-import type { F0FormSchema } from "./types"
-import { unwrapZodSchema } from "./f0Schema"
+import type { F0FormSchema, F0SectionConfig } from "./types"
+import { getF0Config, unwrapZodSchema } from "./f0Schema"
 import type { F0FormRef, F0FormSetValueOptions } from "./useF0Form"
+import type { F0WizardFormStep } from "../F0WizardForm/types"
+import { F0AiFormPresenter } from "./F0AiFormPresenter"
 
 /**
  * Entry in the AI form registry
@@ -21,6 +23,8 @@ export interface F0AiFormEntry {
   schema: F0FormSchema
   /** Whether this entry was registered from an availableFormDefinition (not a rendered form) */
   virtual?: boolean
+  /** Section configs (title, description) keyed by section ID */
+  sections?: Record<string, F0SectionConfig>
 }
 
 /**
@@ -33,8 +37,16 @@ export interface F0AiAvailableFormDefinition {
   schema: F0FormSchema
   /** Default values for the form fields */
   defaultValues?: Record<string, unknown>
+  /** Section configs (title, description) keyed by section ID */
+  sections?: Record<string, F0SectionConfig>
   /** Optional submit handler. Called when AI triggers formSubmit on this form. */
   onSubmit?: (values: Record<string, unknown>) => void | Promise<void>
+  /** Title shown in the dialog header or wizard header */
+  title?: string
+  /** Description shown under the title in dialog mode */
+  description?: string
+  /** Wizard steps (required for wizard mode to work with multiple steps) */
+  steps?: F0WizardFormStep[]
 }
 
 /**
@@ -116,13 +128,93 @@ function createVirtualFormRef(
 }
 
 /**
+ * Extracts human-readable field descriptions from f0FormField metadata.
+ * Returns a record mapping field name → { label, placeholder?, helpText?, description? }
+ */
+function extractFieldDescriptions(
+  schema: F0FormSchema
+): Record<
+  string,
+  {
+    label: string
+    section?: string
+    placeholder?: string
+    helpText?: string
+    description?: string
+  }
+> {
+  const unwrapped = unwrapZodSchema(schema) as { shape?: ZodRawShape }
+  const shape = unwrapped.shape
+  if (!shape) return {}
+
+  const result: Record<
+    string,
+    {
+      label: string
+      section?: string
+      placeholder?: string
+      helpText?: string
+      description?: string
+    }
+  > = {}
+
+  for (const [key, fieldSchema] of Object.entries(shape)) {
+    const config = getF0Config(fieldSchema)
+    const zodDescription = (fieldSchema as { description?: string }).description
+
+    if (config?.label || zodDescription) {
+      result[key] = {
+        label: config?.label ?? key,
+        ...(config?.section && { section: config.section }),
+        ...(config?.placeholder && { placeholder: config.placeholder }),
+        ...(config?.helpText && { helpText: config.helpText }),
+        ...(zodDescription && { description: zodDescription }),
+      }
+    }
+  }
+
+  return result
+}
+
+/**
+ * Extracts section title and description from section configs.
+ */
+function extractSectionDescriptions(
+  sections?: Record<string, F0SectionConfig>
+): Record<string, { title: string; description?: string }> {
+  if (!sections) return {}
+
+  const result: Record<string, { title: string; description?: string }> = {}
+  for (const [id, config] of Object.entries(sections)) {
+    result[id] = {
+      title: config.title,
+      ...(config.description && { description: config.description }),
+    }
+  }
+  return result
+}
+
+/**
+ * Tracks an AI-presented form (opened via the presentForm tool)
+ */
+export interface F0AiPresentedForm {
+  /** Name of the form (matches an availableFormDefinition) */
+  name: string
+  /** Render mode chosen by the LLM */
+  mode: "dialog" | "wizard"
+  /** Resolved definition from availableFormDefinitions */
+  definition: F0AiAvailableFormDefinition
+}
+
+/**
  * Context value for the AI form registry
  */
 interface F0AiFormRegistryContextValue {
   register: (
     name: string,
     ref: React.MutableRefObject<F0FormRef | null>,
-    schema: F0FormSchema
+    schema: F0FormSchema,
+    sections?: Record<string, F0SectionConfig>
   ) => void
   unregister: (name: string) => void
   get: (name: string) => F0AiFormEntry | undefined
@@ -133,10 +225,30 @@ interface F0AiFormRegistryContextValue {
   formDescriptions: {
     formName: string
     formSchema: Record<string, unknown>
+    fieldDescriptions: Record<
+      string,
+      {
+        label: string
+        section?: string
+        placeholder?: string
+        helpText?: string
+        description?: string
+      }
+    >
+    sectionDescriptions: Record<string, { title: string; description?: string }>
     formValues: Record<string, unknown>
     formErrors: Record<string, unknown>
     isDirty: boolean
   }[]
+  /** Currently AI-presented form, or null */
+  presentedForm: F0AiPresentedForm | null
+  /** Called by the AI tool to present a form */
+  presentForm: (
+    formName: string,
+    mode: "dialog" | "wizard"
+  ) => { success: boolean; error?: string }
+  /** Called when the presented form is closed (submit/cancel) */
+  dismissForm: () => void
 }
 
 const F0AiFormRegistryContext =
@@ -168,6 +280,9 @@ export function F0AiFormRegistryProvider({
 }) {
   const registryRef = useRef<Map<string, F0AiFormEntry>>(new Map())
   const lastDescriptionsJsonRef = useRef<string>("")
+  const [presentedForm, setPresentedForm] = useState<F0AiPresentedForm | null>(
+    null
+  )
 
   // State-based snapshot of form descriptions, updated on register/unregister.
   // This triggers re-renders so consumers (useF0AiFormActions) see the latest context.
@@ -202,6 +317,8 @@ export function F0AiFormRegistryProvider({
               string,
               unknown
             >,
+            fieldDescriptions: extractFieldDescriptions(entry.schema),
+            sectionDescriptions: extractSectionDescriptions(entry.sections),
             formValues: ref.getValues(),
             formErrors: ref.getErrors(),
             isDirty: ref.isDirty(),
@@ -221,10 +338,11 @@ export function F0AiFormRegistryProvider({
     (
       name: string,
       ref: React.MutableRefObject<F0FormRef | null>,
-      schema: F0FormSchema
+      schema: F0FormSchema,
+      sections?: Record<string, F0SectionConfig>
     ) => {
       // Rendered forms always take precedence over virtual entries
-      registryRef.current.set(name, { ref, schema })
+      registryRef.current.set(name, { ref, schema, sections })
       rebuildDescriptions()
     },
     [rebuildDescriptions]
@@ -247,6 +365,7 @@ export function F0AiFormRegistryProvider({
         registryRef.current.set(name, {
           ref: virtualRef,
           schema: virtualDef.schema,
+          sections: virtualDef.sections,
           virtual: true,
         })
       }
@@ -261,6 +380,25 @@ export function F0AiFormRegistryProvider({
 
   const getFormNames = useCallback(() => {
     return Array.from(registryRef.current.keys())
+  }, [])
+
+  const presentForm = useCallback(
+    (formName: string, mode: "dialog" | "wizard") => {
+      const def = availableFormDefinitions?.find((d) => d.name === formName)
+      if (!def) {
+        return {
+          success: false,
+          error: `Form "${formName}" not found in availableFormDefinitions`,
+        }
+      }
+      setPresentedForm({ name: formName, mode, definition: def })
+      return { success: true }
+    },
+    [availableFormDefinitions]
+  )
+
+  const dismissForm = useCallback(() => {
+    setPresentedForm(null)
   }, [])
 
   // Sync virtual form definitions: register forms that aren't rendered,
@@ -286,6 +424,7 @@ export function F0AiFormRegistryProvider({
       registryRef.current.set(def.name, {
         ref: virtualRef,
         schema: def.schema,
+        sections: def.sections,
         virtual: true,
       })
     }
@@ -322,11 +461,20 @@ export function F0AiFormRegistryProvider({
     getFormNames,
     rebuildDescriptions,
     formDescriptions,
+    presentedForm,
+    presentForm,
+    dismissForm,
   }
 
   return (
     <F0AiFormRegistryContext.Provider value={value}>
       {children}
+      {presentedForm && (
+        <F0AiFormPresenter
+          presentedForm={presentedForm}
+          onClose={dismissForm}
+        />
+      )}
     </F0AiFormRegistryContext.Provider>
   )
 }

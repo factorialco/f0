@@ -4,6 +4,7 @@ import { useF0AiFormRegistry } from "../../../../components/F0Form/F0AiFormRegis
 import { useFormFillAction } from "./useFormFillAction"
 import { useFormGetStateAction } from "./useFormGetStateAction"
 import { useFormSubmitAction } from "./useFormSubmitAction"
+import { usePresentFormAction } from "./usePresentFormAction"
 
 /**
  * Hook that registers all AI form interaction tools and pushes
@@ -34,4 +35,5 @@ export const useF0AiFormActions = () => {
   useFormFillAction()
   useFormSubmitAction()
   useFormGetStateAction()
+  usePresentFormAction()
 }

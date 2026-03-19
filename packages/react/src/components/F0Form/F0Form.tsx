@@ -860,7 +860,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
         }
         internalFormRef.current = refMethods
       }
-      aiFormRegistry.register(name, registryFormRef, schema)
+      aiFormRegistry.register(name, registryFormRef, schema, sections)
       return () => {
         aiFormRegistry.unregister(name)
       }
@@ -869,6 +869,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
     aiFormRegistry,
     name,
     schema,
+    sections,
     formRef,
     registryFormRef,
     form,
