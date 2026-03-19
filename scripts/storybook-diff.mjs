@@ -92,19 +92,64 @@ function extractComponents(indexJson) {
     const category = parts.slice(0, -1).join("/")
 
     if (!components[name]) {
-      components[name] = { category, stories: [] }
+      // Store the first story id to build a direct Storybook URL later
+      components[name] = {
+        category,
+        tags: entry.tags ?? [],
+        storyId: entry.id ?? "",
+      }
     }
-    components[name].stories.push(entry.name ?? entry.id)
   }
 
   return components
 }
 
 // ---------------------------------------------------------------------------
+// Classify a changed component into one of three buckets
+//
+// Rules (based on what index.json actually exposes):
+//
+//   Breaking Changes — a component that existed before and is now gone, AND
+//     it was tagged `stable` (removing something stable is a breaking risk)
+//     OR it was tagged `deprecated` (removal finalises a deprecation cycle)
+//
+//   Visual Tweaks — component lives under Foundations/ (tokens: colors,
+//     spacing, typography, borders, shadows, icons)
+//
+//   New Atoms — everything else that is newly added
+// ---------------------------------------------------------------------------
+
+function classify(component, direction) {
+  const { category, tags } = component
+  const tagSet = new Set(tags ?? [])
+
+  if (direction === "removed") {
+    if (tagSet.has("stable") || tagSet.has("deprecated")) {
+      return "breaking"
+    }
+  }
+
+  if (category.startsWith("Foundations")) {
+    return "visual"
+  }
+
+  return "new"
+}
+
+// ---------------------------------------------------------------------------
+// Build a direct Storybook URL for a component
+// ---------------------------------------------------------------------------
+
+function storybookUrl(baseUrl, storyId) {
+  if (!storyId) return baseUrl
+  return `${baseUrl}/?path=/story/${storyId}`
+}
+
+// ---------------------------------------------------------------------------
 // Diff
 // ---------------------------------------------------------------------------
 
-function diff(prev, curr) {
+function diff(prev, curr, storybookBase) {
   const added = []
   const removed = []
 
@@ -113,13 +158,27 @@ function diff(prev, curr) {
 
   for (const key of currKeys) {
     if (!prevKeys.has(key)) {
-      added.push({ name: key, category: curr[key].category })
+      const c = curr[key]
+      added.push({
+        name: key,
+        category: c.category,
+        tags: c.tags,
+        url: storybookUrl(storybookBase, c.storyId),
+        bucket: classify(c, "added"),
+      })
     }
   }
 
   for (const key of prevKeys) {
     if (!currKeys.has(key)) {
-      removed.push({ name: key, category: prev[key].category })
+      const c = prev[key]
+      removed.push({
+        name: key,
+        category: c.category,
+        tags: c.tags,
+        url: storybookUrl(storybookBase, c.storyId),
+        bucket: classify(c, "removed"),
+      })
     }
   }
 
@@ -135,18 +194,54 @@ function buildIssueBody(changes, commitSha, repo) {
   const commitUrl = `https://github.com/${repo}/commit/${commitSha}`
   const lines = []
 
-  if (added.length > 0) {
-    lines.push("## New components\n")
-    for (const c of added) {
-      lines.push(`- \`${c.name}\` — \`${c.category}\``)
+  // ── Bucket helpers ──────────────────────────────────────────────────────
+  const breaking = removed.filter((c) => c.bucket === "breaking")
+  const visual = [...added, ...removed].filter((c) => c.bucket === "visual")
+  const newAtoms = added.filter((c) => c.bucket === "new")
+
+  // ── Breaking Changes ────────────────────────────────────────────────────
+  if (breaking.length > 0) {
+    lines.push("## ⚠️ Breaking Changes")
+    lines.push(
+      "_Components that were `stable` or `deprecated` and have been removed. Designs referencing these may be affected._\n"
+    )
+    for (const c of breaking) {
+      const tagBadges = c.tags.length ? ` · \`${c.tags.join("` `")}\`` : ""
+      lines.push(`- **${c.name}** (${c.category}${tagBadges}) — [View in Storybook](${c.url})`)
     }
     lines.push("")
   }
 
-  if (removed.length > 0) {
-    lines.push("## Removed components\n")
-    for (const c of removed) {
-      lines.push(`- \`${c.name}\` — \`${c.category}\``)
+  // ── New Atoms ───────────────────────────────────────────────────────────
+  if (newAtoms.length > 0) {
+    lines.push("## ✨ New Atoms")
+    lines.push("_Components that did not exist before._\n")
+    for (const c of newAtoms) {
+      const tagBadges = c.tags.length ? ` · \`${c.tags.join("` `")}\`` : ""
+      lines.push(`- **${c.name}** (${c.category}${tagBadges}) — [View in Storybook](${c.url})`)
+    }
+    lines.push("")
+  }
+
+  // ── Visual Tweaks ────────────────────────────────────────────────────────
+  if (visual.length > 0) {
+    lines.push("## 🎨 Visual Tweaks")
+    lines.push("_Changes to Foundations (tokens, colors, spacing, typography, borders, shadows, icons)._\n")
+    for (const c of visual) {
+      const direction = added.includes(c) ? "added" : "removed"
+      lines.push(`- **${c.name}** (${c.category}) — ${direction} — [View in Storybook](${c.url})`)
+    }
+    lines.push("")
+  }
+
+  // ── Fallback: other removed (not stable/deprecated) ─────────────────────
+  const otherRemoved = removed.filter((c) => c.bucket !== "breaking" && c.bucket !== "visual")
+  if (otherRemoved.length > 0) {
+    lines.push("## 🗑️ Removed")
+    lines.push("_Components removed from Storybook (were experimental or internal)._\n")
+    for (const c of otherRemoved) {
+      const tagBadges = c.tags.length ? ` · \`${c.tags.join("` `")}\`` : ""
+      lines.push(`- **${c.name}** (${c.category}${tagBadges}) — [View in Storybook](${c.url})`)
     }
     lines.push("")
   }
@@ -196,7 +291,7 @@ async function main() {
     return
   }
 
-  const changes = diff(prevComponents, currentComponents)
+  const changes = diff(prevComponents, currentComponents, STORYBOOK_URL)
   const { added, removed } = changes
   const total = added.length + removed.length
 
@@ -217,7 +312,12 @@ async function main() {
     return
   }
 
-  const title = `[Storybook] ${total} change${total !== 1 ? "s" : ""} detected (${SHORT_SHA})`
+  const breaking = removed.filter((c) => c.bucket === "breaking").length
+  const titleParts = []
+  if (breaking > 0) titleParts.push(`${breaking} breaking`)
+  if (added.length > 0) titleParts.push(`${added.length} added`)
+  if (removed.length - breaking > 0) titleParts.push(`${removed.length - breaking} removed`)
+  const title = `[Design System] ${titleParts.join(", ")} · ${SHORT_SHA}`
   const body = buildIssueBody(changes, COMMIT_SHA, GITHUB_REPO)
   const issueUrl = await openGithubIssue(GITHUB_TOKEN, GITHUB_REPO, title, body)
 
