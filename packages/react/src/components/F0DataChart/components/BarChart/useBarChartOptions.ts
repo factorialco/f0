@@ -112,6 +112,8 @@ function buildSeriesEntries(
       position: isVertical ? "top" : "right",
       color: labelColor,
       fontWeight: "bold",
+      overflow: "truncate",
+      ellipsis: "...",
     },
     emphasis: {
       itemStyle: {
@@ -233,7 +235,7 @@ export function useBarChartOptions(
     // Legend should only show the main series (not the target ghost bars)
     const legendData = series.map((s) => s.name)
 
-    return buildBaseChartOptions({
+    const options = buildBaseChartOptions({
       categories,
       theme,
       series: echartsSeries,
@@ -248,6 +250,18 @@ export function useBarChartOptions(
       containerWidth,
       containerHeight,
     })
+
+    if (!isVertical && showLabels) {
+      const userGridRight = (echartsOptions?.grid as { right?: number })?.right
+      if (userGridRight === undefined) {
+        const grid = options.grid as { right?: number }
+        if (grid) {
+          grid.right = 60
+        }
+      }
+    }
+
+    return options
   }, [
     categories,
     series,

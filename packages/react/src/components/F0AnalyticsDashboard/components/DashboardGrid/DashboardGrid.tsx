@@ -24,7 +24,7 @@ import { CollectionItem } from "../CollectionItem/CollectionItem"
 import { DashboardItem } from "../DashboardItem/DashboardItem"
 import { MetricItem } from "../MetricItem/MetricItem"
 
-const GRID_GAP = 8
+const GRID_GAP = 6
 const GRID_COLS = 12
 
 const CELL_HEIGHT = 48

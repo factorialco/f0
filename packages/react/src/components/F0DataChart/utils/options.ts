@@ -471,6 +471,7 @@ export function buildBaseChartOptions({
     xAxis,
     yAxis,
     series,
+    labelLayout: { hideOverlap: true },
     legend: buildLegend({
       show: showLegend,
       data: legendData,
