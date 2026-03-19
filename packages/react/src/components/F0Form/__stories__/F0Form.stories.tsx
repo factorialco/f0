@@ -134,6 +134,115 @@ export const WithRows: Story = {
 }
 
 /**
+ * Form with rows where some fields have validation errors.
+ * Demonstrates that error messages appear directly under the field that
+ * triggered them, not displaced to adjacent fields in the same row.
+ *
+ * Click "Submit" to trigger validation — mandatory fields show errors
+ * only under their own labels, while optional fields remain clean.
+ */
+export const WithRowsAndValidation: Story = {
+  render() {
+    const formSchema = z.object({
+      title: f0FormField(z.string().min(1), {
+        label: "Job Title",
+        placeholder: "Enter job title",
+      }),
+      location: f0FormField(z.string().min(1), {
+        label: "Location",
+        row: "location-team",
+        options: [
+          { value: "madrid", label: "Madrid" },
+          { value: "barcelona", label: "Barcelona" },
+          { value: "london", label: "London" },
+        ],
+        placeholder: "Select location",
+      }),
+      team: f0FormField(z.string().optional(), {
+        label: "Team",
+        row: "location-team",
+        options: [
+          { value: "engineering", label: "Engineering" },
+          { value: "design", label: "Design" },
+          { value: "product", label: "Product" },
+        ],
+        placeholder: "Select team",
+      }),
+      vacancies: f0FormField(z.number().positive().optional(), {
+        label: "Number of Vacancies",
+        placeholder: "1",
+        fieldType: "number",
+        row: "vacancies-date",
+      }),
+      startDate: f0FormField(z.date().optional(), {
+        label: "Start Date",
+        placeholder: "Select a date",
+        row: "vacancies-date",
+      }),
+      legalEntity: f0FormField(z.string().min(1), {
+        label: "Legal Entity",
+        row: "legal-type",
+        options: [
+          { value: "acme-corp", label: "Acme Corp" },
+          { value: "acme-eu", label: "Acme EU" },
+        ],
+        placeholder: "Select legal entity",
+      }),
+      workplaceType: f0FormField(
+        z.enum(["onsite", "hybrid", "remote"], {
+          required_error: "Please select a workplace type",
+        }),
+        {
+          label: "Workplace Type",
+          row: "legal-type",
+          fieldType: "select",
+          placeholder: "Select type",
+          options: [
+            { value: "onsite", label: "On-site" },
+            { value: "hybrid", label: "Hybrid" },
+            { value: "remote", label: "Remote" },
+          ],
+        }
+      ),
+      allowReferral: f0FormField(z.boolean().default(false), {
+        label: "Allow referrals",
+        fieldType: "checkbox",
+        row: "checkboxes",
+      }),
+      allowInternal: f0FormField(z.literal(true), {
+        label: "Allow internal applications",
+        fieldType: "checkbox",
+        row: "checkboxes",
+      }),
+    })
+
+    const formDefinition = useF0FormDefinition({
+      name: "rows-validation",
+      schema: formSchema,
+      defaultValues: {
+        title: "",
+        location: "",
+        team: undefined,
+        vacancies: undefined,
+        startDate: undefined,
+        legalEntity: "",
+        workplaceType: undefined,
+        allowReferral: false,
+        allowInternal: false,
+      },
+      errorTriggerMode: "on-submit",
+      onSubmit: async ({ data }) => {
+        await sleep(1000)
+        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+        return { success: true }
+      },
+    })
+
+    return <F0Form formDefinition={formDefinition} />
+  },
+}
+
+/**
  * Form with sections for organizing related fields.
  * Fields define which section they belong to via the `section` property.
  */
