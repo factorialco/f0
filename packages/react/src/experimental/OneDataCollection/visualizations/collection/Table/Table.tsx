@@ -2,6 +2,7 @@ import { AnimatePresence, motion } from "motion/react"
 import { Fragment, useEffect, useMemo, useState } from "react"
 
 import { F0Button } from "@/components/F0Button"
+import { F0ButtonDropdown } from "@/components/F0ButtonDropdown"
 import { F0Checkbox } from "@/components/F0Checkbox"
 import { PagesPagination } from "@/experimental/OneDataCollection/components/PagesPagination"
 import { useDataCollectionSettings } from "@/experimental/OneDataCollection/Settings/SettingsProvider"
@@ -26,8 +27,8 @@ import {
   useGroups,
   useSelectable,
 } from "@/hooks/datasource"
-import { useI18n } from "@/lib/providers/i18n"
 import { Add } from "@/icons/app"
+import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { GroupHeader } from "@/ui/GroupHeader/index"
 import { Skeleton } from "@/ui/skeleton.tsx"
@@ -37,6 +38,7 @@ import type {
   TableVisualizationOptions,
 } from "./types"
 
+import { PrimaryActionItemDefinition } from "../../../actions"
 import { useDataCollectionData } from "../../../hooks/useDataCollectionData"
 import { useInfiniteScrollPagination } from "../../../hooks/useInfiniteScrollPagination"
 import { ItemActionsDefinition } from "../../../item-actions"
@@ -51,6 +53,18 @@ import { groupBorderClass, useHeaderGroups } from "./hooks/useHeaderGroups"
 import { NestedDataProvider } from "./providers/NestedProvider"
 import { useSticky } from "./useSticky"
 export * from "./settings/SettingsRenderer"
+
+const normalizeAddRowActions = (
+  result:
+    | PrimaryActionItemDefinition
+    | PrimaryActionItemDefinition[]
+    | undefined
+): PrimaryActionItemDefinition[] => {
+  if (!result) return []
+  return (Array.isArray(result) ? result : [result]).filter(
+    (item): item is PrimaryActionItemDefinition => item !== undefined
+  )
+}
 
 const HighlightedCount = ({ text, count }: { text: string; count: number }) => {
   const countStr = String(count)
@@ -715,129 +729,176 @@ export const TableCollection = <
                 </tr>
               )}
           </TableBody>
-          {(summaryData || addRow?.onAddRow) && (
-            <TableFooter>
-              {summaryData && (
-                <TableRow
-                  className={cn(
-                    summaryData.sticky &&
-                      "sticky bottom-0 z-10 bg-f1-background shadow-[0_-1px_0_0_var(--f1-border-secondary)] hover:bg-f1-background",
-                    "font-medium"
-                  )}
-                >
-                  {source.selectable && (
-                    <TableCell width={checkColumnWidth} sticky={{ left: 0 }}>
-                      {summaryData.label && (
-                        <div className="font-medium text-f1-foreground-secondary">
-                          {summaryData.label}
-                        </div>
-                      )}
-                    </TableCell>
-                  )}
-                  {columns.map((column, cellIndex) => (
-                    <TableCell
-                      key={`summary-${String(column.label)}`}
-                      firstCell={cellIndex === 0}
-                      width={column.width}
-                      sticky={getStickyPosition(cellIndex)}
-                    >
-                      {cellIndex === 0 &&
-                      !source.selectable &&
-                      summaryData.label ? (
-                        <div className="font-medium text-f1-foreground-secondary">
-                          {summaryData.label}
-                        </div>
-                      ) : (
-                        <div
-                          className={cn(
-                            column.align === "right" ? "justify-end" : "",
-                            "flex"
-                          )}
-                        >
-                          {(() => {
-                            const placeholder = getSummaryPlaceholder(
-                              column.summaryPlaceholder
-                            )
+          {(() => {
+            const actions = normalizeAddRowActions(addRow?.addRowActions?.())
 
-                            if (
-                              column.summary &&
-                              source.summaries &&
-                              source.summaries[column.summary]?.type === "sum"
-                            ) {
-                              const summaryValue =
-                                summaryData.data[column.summary]
+            if (!summaryData && actions.length === 0) {
+              return null
+            }
 
-                              if (isEmptySummaryValue(summaryValue)) {
+            return (
+              <TableFooter>
+                {summaryData && (
+                  <TableRow
+                    className={cn(
+                      summaryData.sticky &&
+                        "sticky bottom-0 z-10 bg-f1-background shadow-[0_-1px_0_0_var(--f1-border-secondary)] hover:bg-f1-background",
+                      "font-medium"
+                    )}
+                  >
+                    {source.selectable && (
+                      <TableCell width={checkColumnWidth} sticky={{ left: 0 }}>
+                        {summaryData.label && (
+                          <div className="font-medium text-f1-foreground-secondary">
+                            {summaryData.label}
+                          </div>
+                        )}
+                      </TableCell>
+                    )}
+                    {columns.map((column, cellIndex) => (
+                      <TableCell
+                        key={`summary-${String(column.label)}`}
+                        firstCell={cellIndex === 0}
+                        width={column.width}
+                        sticky={getStickyPosition(cellIndex)}
+                      >
+                        {cellIndex === 0 &&
+                        !source.selectable &&
+                        summaryData.label ? (
+                          <div className="font-medium text-f1-foreground-secondary">
+                            {summaryData.label}
+                          </div>
+                        ) : (
+                          <div
+                            className={cn(
+                              column.align === "right" ? "justify-end" : "",
+                              "flex"
+                            )}
+                          >
+                            {(() => {
+                              const placeholder = getSummaryPlaceholder(
+                                column.summaryPlaceholder
+                              )
+
+                              if (
+                                column.summary &&
+                                source.summaries &&
+                                source.summaries[column.summary]?.type === "sum"
+                              ) {
+                                const summaryValue =
+                                  summaryData.data[column.summary]
+
+                                if (isEmptySummaryValue(summaryValue)) {
+                                  return (
+                                    <span className="text-f1-foreground-secondary">
+                                      {placeholder}
+                                    </span>
+                                  )
+                                }
+
                                 return (
-                                  <span className="text-f1-foreground-secondary">
-                                    {placeholder}
-                                  </span>
+                                  <div className="flex gap-1">
+                                    <span className="text-f1-foreground-secondary">
+                                      {i18n.collections.summaries.types.sum}
+                                    </span>
+                                    {`${summaryValue}`}
+                                  </div>
                                 )
                               }
 
                               return (
-                                <div className="flex gap-1">
-                                  <span className="text-f1-foreground-secondary">
-                                    {i18n.collections.summaries.types.sum}
-                                  </span>
-                                  {`${summaryValue}`}
-                                </div>
+                                <span className="text-f1-foreground-secondary">
+                                  {placeholder}
+                                </span>
                               )
-                            }
-
-                            return (
-                              <span className="text-f1-foreground-secondary">
-                                {placeholder}
-                              </span>
-                            )
-                          })()}
-                        </div>
-                      )}
-                    </TableCell>
-                  ))}
-                  {showItemActions && (
-                    <>
-                      <th className="hidden md:table-cell"></th>
-                      <TableCell
-                        key="summary-actions"
-                        width={68}
-                        sticky={{
-                          right: 0,
-                        }}
-                        className="table-cell md:hidden"
-                      >
-                        {""}
+                            })()}
+                          </div>
+                        )}
                       </TableCell>
-                    </>
-                  )}
-                </TableRow>
-              )}
-              {addRow?.onAddRow && (
-                <TableRow>
-                  <TableCell
-                    colSpan={
-                      columns.length +
-                      (source.selectable ? 1 : 0) +
-                      (showItemActions ? 2 : 0)
-                    }
-                  >
-                    <div className="pointer-events-auto">
-                      <F0Button
-                        variant="ghost"
-                        icon={Add}
-                        label={
-                          addRow.addRowButtonLabel ??
-                          t("collections.editableTable.addRow")
-                        }
-                        onClick={() => addRow.onAddRow?.()}
-                        size="sm"
-                      />
-                    </div>
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableFooter>
-          )}
+                    ))}
+                    {showItemActions && (
+                      <>
+                        <th className="hidden md:table-cell"></th>
+                        <TableCell
+                          key="summary-actions"
+                          width={68}
+                          sticky={{
+                            right: 0,
+                          }}
+                          className="table-cell md:hidden"
+                        >
+                          {""}
+                        </TableCell>
+                      </>
+                    )}
+                  </TableRow>
+                )}
+                {actions.length > 0 && (
+                  <TableRow>
+                    <TableCell
+                      colSpan={
+                        columns.length +
+                        (source.selectable ? 1 : 0) +
+                        (showItemActions ? 2 : 0)
+                      }
+                      className="h-[48px] align-middle"
+                    >
+                      <div
+                        className="pointer-events-auto flex h-full items-center"
+                        onClick={(e) => e.stopPropagation()}
+                        onMouseDownCapture={(e) => e.stopPropagation()}
+                      >
+                        {actions.length === 1 ? (
+                          <F0Button
+                            variant="outline"
+                            icon={actions[0].icon ?? Add}
+                            label={actions[0].label}
+                            onClick={actions[0].onClick}
+                            loading={actions[0].loading}
+                            disabled={actions[0].disabled}
+                            size="sm"
+                          />
+                        ) : actions.some((a) => a.description !== undefined) ? (
+                          <F0ButtonDropdown
+                            mode="dropdown"
+                            variant="outline"
+                            size="sm"
+                            trigger={addRow?.addRowActionsLabel}
+                            disabled={actions.every((a) => a.disabled)}
+                            loading={actions.some((a) => a.loading)}
+                            items={actions.map((action, index) => ({
+                              value: index.toString(),
+                              label: action.label,
+                              icon: action.icon,
+                              description: action.description,
+                            }))}
+                            onClick={(value) => {
+                              actions[Number(value)]?.onClick?.()
+                            }}
+                          />
+                        ) : (
+                          <F0ButtonDropdown
+                            variant="outline"
+                            size="sm"
+                            disabled={actions.every((a) => a.disabled)}
+                            loading={actions.some((a) => a.loading)}
+                            items={actions.map((action, index) => ({
+                              value: index.toString(),
+                              label: action.label,
+                              icon: action.icon,
+                            }))}
+                            onClick={(value) => {
+                              actions[Number(value)]?.onClick?.()
+                            }}
+                          />
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableFooter>
+            )
+          })()}
         </OneTable>
         <PagesPagination
           paginationInfo={paginationInfo}

@@ -38,17 +38,18 @@ export const connectorVariables = (
   },
   fromVisualization?: TableVisualizationType
 ) => {
-  const { rowWithChildren, nestedVariant, onLoadMoreChildren } =
+  const { rowWithChildren, nestedVariant, onLoadMoreChildren, onAddRow } =
     nestedRowProps ?? {}
 
   const isDetailedVariant = nestedVariant === "detailed"
+  const isActionRow = onLoadMoreChildren || onAddRow
 
-  const horizontalOffset = onLoadMoreChildren
+  const horizontalOffset = isActionRow
     ? BUTTON_HEIGHT / 2 - PADDING_TOP
     : CHEVRON_PARENT_SIZE / 2 - PADDING_TOP
 
   const connectorWidth =
-    rowWithChildren && !onLoadMoreChildren
+    rowWithChildren && !isActionRow
       ? CONNECTOR_WIDTH_WITH_CHILDREN
       : isDetailedVariant
         ? CONNECTOR_WIDTH - 6
@@ -127,8 +128,9 @@ export const TreeConnector = ({
   const typeDetailed = nestedRowProps?.nestedVariant === "detailed"
 
   const basicOrWithChildren = typeBasic || nestedRowProps?.rowWithChildren
-  const detailedWithLoadMore =
-    typeDetailed && nestedRowProps?.onLoadMoreChildren
+  const detailedWithActionRow =
+    typeDetailed &&
+    (nestedRowProps?.onLoadMoreChildren || nestedRowProps?.onAddRow)
 
   const marginLeft = firstCellWithDepth
     ? getNestedMarginLeft({
@@ -156,7 +158,7 @@ export const TreeConnector = ({
         nestedRowProps?.parentHasChildren &&
           firstCellWithDepth &&
           basicOrWithChildren &&
-          !detailedWithLoadMore &&
+          !detailedWithActionRow &&
           horizontalConnectorStyles
       )}
       style={{

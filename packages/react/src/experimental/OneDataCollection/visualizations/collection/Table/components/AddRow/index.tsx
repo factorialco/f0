@@ -10,12 +10,11 @@ import {
   SortingsDefinition,
 } from "@/hooks/datasource"
 
-import { type RowProps } from "../Row"
+import { PrimaryActionItemDefinition } from "../../../../../actions"
+import { type AddRowAction, type RowProps } from "../Row"
 import { NestedActionRow } from "../NestedActionRow"
 
-export const DEFAULT_LOADING_ROWS_COUNT = 3
-
-type LoadMoreRowProps<
+type AddRowRowProps<
   R extends RecordType,
   Filters extends FiltersDefinition,
   Sortings extends SortingsDefinition,
@@ -32,11 +31,12 @@ type LoadMoreRowProps<
   NavigationFilters,
   Grouping
 > & {
-  onLoadMoreChildren: () => void
+  addRowActions: PrimaryActionItemDefinition[]
+  addRowLabel?: string
   rowRef: React.RefObject<HTMLTableRowElement>
 }
 
-const LoadMoreRowInner = <
+const AddRowRowInner = <
   R extends RecordType,
   Filters extends FiltersDefinition,
   Sortings extends SortingsDefinition,
@@ -45,7 +45,7 @@ const LoadMoreRowInner = <
   NavigationFilters extends NavigationFiltersDefinition,
   Grouping extends GroupingDefinition<R>,
 >(
-  props: LoadMoreRowProps<
+  props: AddRowRowProps<
     R,
     Filters,
     Sortings,
@@ -59,18 +59,30 @@ const LoadMoreRowInner = <
     | React.RefObject<HTMLTableRowElement>
     | null
 ) => {
+  const actions: AddRowAction[] = props.addRowActions.map((action) => ({
+    label: action.label,
+    icon: action.icon,
+    description: action.description,
+    onClick: action.onClick,
+    loading: action.loading,
+    disabled: action.disabled,
+  }))
+
   return (
     <NestedActionRow
       {...props}
       ref={ref}
       nestedRowPropsOverride={{
-        onLoadMoreChildren: props.onLoadMoreChildren,
+        onAddRow: {
+          actions,
+          label: props.addRowLabel,
+        },
       }}
     />
   )
 }
 
-export const LoadMoreRow = forwardRef(LoadMoreRowInner) as <
+export const AddRowRow = forwardRef(AddRowRowInner) as <
   R extends RecordType,
   Filters extends FiltersDefinition,
   Sortings extends SortingsDefinition,
@@ -79,7 +91,7 @@ export const LoadMoreRow = forwardRef(LoadMoreRowInner) as <
   NavigationFilters extends NavigationFiltersDefinition,
   Grouping extends GroupingDefinition<R>,
 >(
-  props: LoadMoreRowProps<
+  props: AddRowRowProps<
     R,
     Filters,
     Sortings,
@@ -93,4 +105,5 @@ export const LoadMoreRow = forwardRef(LoadMoreRowInner) as <
       | React.RefObject<HTMLTableRowElement>
       | null
   }
-) => ReturnType<typeof LoadMoreRowInner>
+) => ReturnType<typeof AddRowRowInner>
+;(AddRowRow as { displayName?: string }).displayName = "AddRowRow"
