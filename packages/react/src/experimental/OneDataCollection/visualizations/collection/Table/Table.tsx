@@ -27,8 +27,8 @@ import {
   useGroups,
   useSelectable,
 } from "@/hooks/datasource"
-import { useI18n } from "@/lib/providers/i18n"
 import { Add } from "@/icons/app"
+import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { GroupHeader } from "@/ui/GroupHeader/index"
 import { Skeleton } from "@/ui/skeleton.tsx"
@@ -38,13 +38,13 @@ import type {
   TableVisualizationOptions,
 } from "./types"
 
+import { PrimaryActionItemDefinition } from "../../../actions"
 import { useDataCollectionData } from "../../../hooks/useDataCollectionData"
 import { useInfiniteScrollPagination } from "../../../hooks/useInfiniteScrollPagination"
 import { ItemActionsDefinition } from "../../../item-actions"
 import { NavigationFiltersDefinition } from "../../../navigationFilters/types"
 import { SummariesDefinition } from "../../../summary"
 import { CollectionProps } from "../../../types"
-import { PrimaryActionItemDefinition } from "../../../actions"
 import { useAddRow } from "../EditableTable/context/AddRowContext"
 import { statusToChecked } from "../utils"
 import { Row } from "./components/Row"
@@ -863,7 +863,6 @@ export const TableCollection = <
                             mode="dropdown"
                             variant="outline"
                             size="sm"
-                            icon={actions[0].icon ?? Add}
                             trigger={addRow?.addRowActionsLabel}
                             disabled={actions.every((a) => a.disabled)}
                             loading={actions.some((a) => a.loading)}

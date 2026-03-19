@@ -111,7 +111,6 @@ export const NestedCell = ({
               mode="dropdown"
               variant="outline"
               size="sm"
-              icon={onAddRow.actions[0].icon ?? Add}
               trigger={onAddRow.label}
               disabled={onAddRow.actions.every((a) => a.disabled)}
               loading={onAddRow.actions.some((a) => a.loading)}

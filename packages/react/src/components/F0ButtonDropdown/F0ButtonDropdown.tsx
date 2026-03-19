@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react"
 
-import { F0Icon, type IconType } from "@/components/F0Icon"
+import { F0Icon } from "@/components/F0Icon"
 import {
   DropdownInternal,
   DropdownItem,
@@ -210,7 +210,6 @@ const SplitMode = ({
 const DropdownMode = ({
   onClick,
   trigger,
-  icon,
   items: rawItems,
   size,
   variant,
@@ -220,7 +219,6 @@ const DropdownMode = ({
 }: {
   onClick: (value: string, item: ButtonDropdownItem<string>) => void
   trigger?: string
-  icon?: IconType
   items:
     | ButtonDropdownItem<string>[]
     | ButtonDropdownGroup<string>[]
@@ -285,7 +283,6 @@ const DropdownMode = ({
         loading={loading}
         data-testid="button-dropdown-trigger"
         aria-label={triggerLabel}
-        prepend={icon && <F0Icon icon={icon} />}
         append={
           <F0Icon icon={ChevronDown} size={size === "sm" ? "sm" : "md"} />
         }
@@ -306,7 +303,6 @@ const _F0ButtonDropdown = (props: F0ButtonDropdownProps) => {
       <DropdownMode
         onClick={props.onClick}
         trigger={"trigger" in props ? props.trigger : undefined}
-        icon={"icon" in props ? props.icon : undefined}
         items={props.items}
         size={props.size}
         variant={props.variant}

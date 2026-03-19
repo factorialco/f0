@@ -114,10 +114,6 @@ type F0ButtonDropdownDropdownProps<T = string> =
      */
     trigger?: string
     /**
-     * Optional icon displayed before the trigger label.
-     */
-    icon?: IconType
-    /**
      * Called when a dropdown item is clicked.
      * @param value The value of the item that was clicked.
      * @param item The item that was clicked.
