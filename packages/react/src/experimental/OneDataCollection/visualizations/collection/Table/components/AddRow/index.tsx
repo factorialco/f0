@@ -55,6 +55,8 @@ const AddRowRowInner = <
 
     if (typeof ref === "function") {
       ref(element)
+    } else if (ref) {
+      ref.current = element
     }
   }
 
