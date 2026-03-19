@@ -4,7 +4,7 @@ import { motion } from "motion/react"
 import { useCallback } from "react"
 
 import { ButtonInternal } from "@/components/F0Button/internal"
-import { New } from "@/icons/app"
+import { Microphone, MicrophoneNegative, New } from "@/icons/app"
 import Cross from "@/icons/app/Cross"
 import Maximize from "@/icons/app/Maximize"
 import Minimize from "@/icons/app/Minimize"
@@ -23,6 +23,9 @@ export const ChatHeader = (props: HeaderProps) => {
     setVisualizationMode,
     lockVisualizationMode,
     tracking,
+    voice,
+    voiceMode,
+    setVoiceMode,
   } = useAiChat()
   const fullscreen = visualizationMode === "fullscreen"
   const translations = useI18n()
@@ -74,6 +77,19 @@ export const ChatHeader = (props: HeaderProps) => {
                 prev === "fullscreen" ? "sidepanel" : "fullscreen"
               )
             }
+          />
+        )}
+        {voice?.enabled && (
+          <ButtonInternal
+            variant="ghost"
+            hideLabel
+            label={
+              voiceMode
+                ? translations.ai.switchToText
+                : translations.ai.switchToVoice
+            }
+            icon={voiceMode ? MicrophoneNegative : Microphone}
+            onClick={() => setVoiceMode((prev) => !prev)}
           />
         )}
         <ButtonInternal

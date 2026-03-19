@@ -20,6 +20,7 @@ import { AiChatProviderReturnValue, AiChatState } from "../internal-types"
 import {
   type VisualizationMode,
   type AiChatToolHint,
+  type AiChatOpenOptions,
   WelcomeScreenSuggestion,
 } from "../types"
 
@@ -43,7 +44,9 @@ const getStoredChatWidth = (): number => {
   return DEFAULT_CHAT_WIDTH
 }
 
-export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
+export const AiChatStateProvider: FC<
+  PropsWithChildren<Omit<AiChatState, "voiceMode">>
+> = ({
   children,
   enabled,
   agent: initialAgent,
@@ -56,6 +59,7 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   footer: initialFooter,
   entityResolvers,
   toolHints,
+  voice,
   onThumbsDown,
   onThumbsUp,
   tracking,
@@ -83,6 +87,13 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   >(initialInitialMessage)
 
   const [chatWidth, setChatWidth] = useState(() => getStoredChatWidth())
+  const [voiceMode, setVoiceMode] = useState(false)
+
+  useEffect(() => {
+    if (!voice?.enabled) {
+      setVoiceMode(false)
+    }
+  }, [voice?.enabled])
 
   useEffect(() => {
     if (open) {
@@ -110,6 +121,7 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   const sendMessageFunctionRef = useRef<((message: Message) => void) | null>(
     null
   )
+  const pendingTaskRef = useRef<Message | null>(null)
 
   const tmp_setAgent = (newAgent?: string) => {
     setAgent(newAgent)
@@ -123,6 +135,11 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
     sendFn: ((message: Message) => void) | null
   ) => {
     sendMessageFunctionRef.current = sendFn
+
+    if (sendFn && pendingTaskRef.current) {
+      sendFn(pendingTaskRef.current)
+      pendingTaskRef.current = null
+    }
   }
 
   const clear = () => {
@@ -155,6 +172,41 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         : message
 
     sendMessageFunctionRef.current?.(messageToSend)
+  }
+
+  const openChat = (options?: AiChatOpenOptions) => {
+    if (options?.agent !== undefined) {
+      setAgent(options.agent)
+    }
+
+    if (options?.voiceMode !== undefined) {
+      const shouldEnableVoiceMode = options.voiceMode && voice?.enabled
+      setVoiceMode(Boolean(shouldEnableVoiceMode))
+    }
+
+    if (!open) {
+      setOpen(true)
+    }
+
+    if (!options?.task) {
+      return
+    }
+
+    const taskMessage: Message =
+      typeof options.task === "string"
+        ? {
+            id: randomId(),
+            role: "user",
+            content: options.task,
+          }
+        : options.task
+
+    if (sendMessageFunctionRef.current) {
+      sendMessageFunctionRef.current(taskMessage)
+      return
+    }
+
+    pendingTaskRef.current = taskMessage
   }
 
   useEffect(() => {
@@ -207,6 +259,7 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         placeholders,
         setPlaceholders,
         sendMessage,
+        openChat,
         setSendMessageFunction,
         disclaimer,
         resizable,
@@ -216,6 +269,9 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         tracking,
         entityResolvers,
         toolHints,
+        voice,
+        voiceMode,
+        setVoiceMode,
         activeToolHint,
         setActiveToolHint,
       }}
@@ -254,6 +310,10 @@ export function useAiChat(): AiChatProviderReturnValue {
       onThumbsUp: noopFn,
       onThumbsDown: noopFn,
       sendMessage: noopFn,
+      openChat: noopFn,
+      voice: undefined,
+      voiceMode: false,
+      setVoiceMode: noopFn,
       setSendMessageFunction: noopFn,
       disclaimer: undefined,
       resizable: false,

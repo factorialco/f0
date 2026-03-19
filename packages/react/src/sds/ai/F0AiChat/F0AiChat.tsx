@@ -38,6 +38,7 @@ const F0AiChatProviderComponent = ({
   footer,
   entityResolvers,
   toolHints,
+  voice,
   onThumbsUp,
   onThumbsDown,
   children,
@@ -62,6 +63,7 @@ const F0AiChatProviderComponent = ({
       tracking={tracking}
       entityResolvers={entityResolvers}
       toolHints={toolHints}
+      voice={voice}
     >
       <AiChatKitWrapper {...copilotKitProps}>{children}</AiChatKitWrapper>
     </AiChatStateProvider>
@@ -119,12 +121,17 @@ const SendMessageFunctionInjector = () => {
 }
 
 const ChatInput = (props: InputProps) => {
-  const { disclaimer, footer, visualizationMode } = useAiChat()
+  const { disclaimer, footer, visualizationMode, voice, voiceMode } =
+    useAiChat()
   const { messages } = useCopilotChatInternal()
   const containerRef = useRef<HTMLDivElement>(null)
   const isWelcomeScreen = messages.length === 0
   const fullscreen = visualizationMode === "fullscreen"
   const fullscreenWelcome = fullscreen && isWelcomeScreen
+
+  if (voiceMode && voice?.enabled) {
+    return null
+  }
 
   useEffect(() => {
     const textarea = containerRef.current?.querySelector("textarea")

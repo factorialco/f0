@@ -38,6 +38,21 @@ const AiChatWrapper = ({ children }: { children: React.ReactElement }) => {
   return <div className="flex h-[700px] flex-1">{children}</div>
 }
 
+const ProgrammaticVoiceOpen = () => {
+  const { openChat } = useAiChat()
+
+  useEffect(() => {
+    openChat({
+      voiceMode: true,
+      agent: "one-voice-agent",
+      task: "Summarize my pending approvals",
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  return null
+}
+
 const meta = {
   title: "AI/F0AiChat",
   component: F0AiChat,
@@ -128,6 +143,38 @@ export const WithFooter: Story = {
               </div>
             }
           >
+            <AiChatWrapper>
+              <Story />
+            </AiChatWrapper>
+          </F0AiChatProvider>
+        </div>
+      )
+    },
+  ],
+}
+
+export const ProgrammaticVoiceMode: Story = {
+  decorators: [
+    (Story) => {
+      return (
+        <div className="h-full w-full flex-1 [&>div>div]:h-full [&>div>div]:w-full">
+          <F0AiChatProvider
+            enabled
+            runtimeUrl="https://mastra.local.factorial.dev/copilotkit"
+            agent="one-workflow"
+            credentials="include"
+            showDevConsole={false}
+            greeting="Hello, John"
+            voice={{
+              enabled: true,
+              renderContent: () => (
+                <div className="flex h-full items-center justify-center text-f1-foreground-secondary">
+                  Voice UI placeholder
+                </div>
+              ),
+            }}
+          >
+            <ProgrammaticVoiceOpen />
             <AiChatWrapper>
               <Story />
             </AiChatWrapper>

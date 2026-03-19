@@ -70,6 +70,25 @@ export type AiChatTrackingOptions = {
 }
 
 /**
+ * Options for opening the chat programmatically.
+ */
+export type AiChatOpenOptions = {
+  /**
+   * Force voice mode when opening the chat.
+   * If voice is not enabled in the provider, this value is ignored.
+   */
+  voiceMode?: boolean
+  /**
+   * Override the target agent for this chat session.
+   */
+  agent?: string
+  /**
+   * Optional task/prompt to send immediately after opening.
+   */
+  task?: string | Message
+}
+
+/**
  * Props for the AiChatProvider component
  */
 export type AiChatProviderProps = {
@@ -119,6 +138,12 @@ export type AiChatProviderProps = {
     message: AIMessage,
     { threadId, feedback }: { threadId: string; feedback: string }
   ) => void
+  voice?: {
+    /** When true, a mic button appears in the chat panel header */
+    enabled: boolean
+    /** Renders the voice UI inside the chat panel body */
+    renderContent: () => React.ReactNode
+  }
   tracking?: AiChatTrackingOptions
 } & Pick<
   CopilotKitProps,
@@ -195,6 +220,11 @@ export const aiTranslations = {
       "Preview {{shown}} of {{total}} rows — download the Excel to see all data.",
     expandChat: "Expand chat",
     collapseChat: "Collapse chat",
+    switchToVoice: "Switch to voice",
+    switchToText: "Switch to text chat",
+    voiceModeEnabled: "Voice mode enabled",
+    textModeEnabled: "Text mode enabled",
+    voiceChatRegion: "Voice chat",
     ask: "Ask One",
     viewProfile: "View profile",
     tools: "Tools",

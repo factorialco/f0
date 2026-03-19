@@ -55,7 +55,50 @@ const Messages = ({
     welcomeScreenSuggestions,
     onThumbsUp,
     onThumbsDown,
+    voice,
+    voiceMode,
   } = useAiChat()
+
+  const voiceContainerRef = useRef<HTMLDivElement>(null)
+  const [modeAnnouncement, setModeAnnouncement] = useState<string>("")
+
+  useEffect(() => {
+    if (!voice?.enabled) {
+      setModeAnnouncement("")
+      return
+    }
+
+    setModeAnnouncement(
+      voiceMode
+        ? translations.ai.voiceModeEnabled
+        : translations.ai.textModeEnabled
+    )
+  }, [voice?.enabled, voiceMode, translations])
+
+  useEffect(() => {
+    if (voiceMode && voice?.enabled) {
+      voiceContainerRef.current?.focus()
+    }
+  }, [voiceMode, voice?.enabled])
+
+  if (voiceMode && voice?.enabled) {
+    return (
+      <>
+        <span className="sr-only" aria-live="polite">
+          {modeAnnouncement}
+        </span>
+        <div
+          ref={voiceContainerRef}
+          className="flex h-full w-full flex-1 flex-col overflow-hidden"
+          role="region"
+          aria-label={translations.ai.voiceChatRegion}
+          tabIndex={-1}
+        >
+          {voice.renderContent()}
+        </div>
+      </>
+    )
+  }
 
   const initialMessages = useMemo(
     () =>
@@ -135,6 +178,9 @@ const Messages = ({
 
   return (
     <>
+      <span className="sr-only" aria-live="polite">
+        {modeAnnouncement}
+      </span>
       <div className="relative flex flex-1 flex-col overflow-hidden">
         <div
           ref={viewportRef}

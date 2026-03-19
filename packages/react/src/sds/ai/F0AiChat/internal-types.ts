@@ -1,10 +1,12 @@
 import { type AIMessage, type Message } from "@copilotkit/shared"
 
 import {
+  type AiChatProviderProps,
   type AiChatDisclaimer,
   type AiChatTrackingOptions,
   type AiChatToolHint,
   type EntityResolvers,
+  type AiChatOpenOptions,
   type VisualizationMode,
   WelcomeScreenSuggestion,
 } from "./types"
@@ -43,6 +45,8 @@ export interface AiChatState {
     message: AIMessage,
     { threadId, feedback }: { threadId: string; feedback: string }
   ) => void
+  voice?: AiChatProviderProps["voice"]
+  voiceMode: boolean
   tracking?: AiChatTrackingOptions
 }
 
@@ -94,6 +98,12 @@ export type AiChatProviderReturnValue = {
    */
   sendMessage: (message: string | Message) => void
   /**
+   * Open chat with optional voice mode, agent and initial task.
+   */
+  openChat: (options?: AiChatOpenOptions) => void
+  voiceMode: boolean
+  setVoiceMode: React.Dispatch<React.SetStateAction<boolean>>
+  /**
    * Internal function to set the sendMessage function from CopilotKit
    * @internal
    */
@@ -133,6 +143,7 @@ export type AiChatProviderReturnValue = {
   | "agent"
   | "disclaimer"
   | "resizable"
+  | "voice"
   | "entityResolvers"
   | "toolHints"
 > & {

@@ -9,6 +9,7 @@ export type {
   EntityResolvers,
   PersonProfile,
   VisualizationMode,
+  AiChatOpenOptions,
   WelcomeScreenSuggestion,
   AiChatTranslations,
   AiChatTranslationsProviderProps,
