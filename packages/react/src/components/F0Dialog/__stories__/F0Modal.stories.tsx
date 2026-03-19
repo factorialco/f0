@@ -4,8 +4,8 @@ import { ComponentProps, FC, useState } from "react"
 import { expect, within } from "storybook/test"
 
 import { F0Button } from "@/components/F0Button"
-import { ActivityItemList } from "@/sds/inbox/Activity/ActivityItemList"
-import { Default as ActivityItemListDefault } from "@/sds/inbox/Activity/ActivityItemList/index.stories"
+import { ApplicationFrame } from "@/examples/ApplicationFrame"
+import ApplicationFrameStoryMeta from "@/examples/ApplicationFrame/index.stories"
 import { ResourceHeader } from "@/experimental/Information/Headers/ResourceHeader"
 import { Default as ResourceHeaderDefault } from "@/experimental/Information/Headers/ResourceHeader/index.stories"
 import {
@@ -13,8 +13,6 @@ import {
   OnePersonListItemProps,
 } from "@/experimental/Lists/OnePersonListItem"
 import { Default as OnePersonListItemDefault } from "@/experimental/Lists/OnePersonListItem/index.stories"
-import { ApplicationFrame } from "@/examples/ApplicationFrame"
-import ApplicationFrameStoryMeta from "@/examples/ApplicationFrame/index.stories"
 import { Placeholder } from "@/icons/app"
 import CheckDoubleIcon from "@/icons/app/CheckDouble"
 import CrossIcon from "@/icons/app/Cross"
@@ -23,6 +21,8 @@ import PencilIcon from "@/icons/app/Pencil"
 import SaveIcon from "@/icons/app/Save"
 import ShareIcon from "@/icons/app/Share"
 import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
+import { ActivityItemList } from "@/sds/inbox/Activity/ActivityItemList"
+import { Default as ActivityItemListDefault } from "@/sds/inbox/Activity/ActivityItemList/index.stories"
 
 import { F0Dialog } from "../index"
 import { dialogPositions, dialogWidths } from "../types"
@@ -252,59 +252,10 @@ export const WithRightPosition: Story = {
   },
 }
 
-export const WithLeftPositionSmWidth: Story = {
-  args: {
-    ...WithLeftPosition.args,
-    width: "sm",
-  },
-}
-
-export const WithLeftPositionMdWidth: Story = {
-  args: {
-    ...WithLeftPosition.args,
-    width: "md",
-  },
-}
-
 export const WithLeftPositionLgWidth: Story = {
   args: {
     ...WithLeftPosition.args,
     width: "lg",
-  },
-}
-
-export const WithLeftPositionXlWidth: Story = {
-  args: {
-    ...WithLeftPosition.args,
-    width: "xl",
-  },
-}
-
-export const WithRightPositionSmWidth: Story = {
-  args: {
-    ...WithRightPosition.args,
-    width: "sm",
-  },
-}
-
-export const WithRightPositionMdWidth: Story = {
-  args: {
-    ...WithRightPosition.args,
-    width: "md",
-  },
-}
-
-export const WithRightPositionLgWidth: Story = {
-  args: {
-    ...WithRightPosition.args,
-    width: "lg",
-  },
-}
-
-export const WithRightPositionXlWidth: Story = {
-  args: {
-    ...WithRightPosition.args,
-    width: "xl",
   },
 }
 
