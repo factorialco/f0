@@ -76,6 +76,7 @@ function chartSkeleton(config: DashboardChartConfig) {
 interface ChartItemProps<Filters extends FiltersDefinition> {
   item: DashboardChartItem<Filters>
   filters: FiltersState<Filters>
+  actions?: import("@/experimental/Navigation/Dropdown").DropdownItem[]
 }
 
 /**
@@ -170,6 +171,7 @@ function buildChartProps(
 export function ChartItem<Filters extends FiltersDefinition>({
   item,
   filters,
+  actions,
 }: ChartItemProps<Filters>) {
   const enabled = item.useDashboardFilters !== false
   const { data, isLoading, error, retry } = useDashboardItemData<
@@ -188,6 +190,7 @@ export function ChartItem<Filters extends FiltersDefinition>({
       error={effectiveError}
       onRetry={retry}
       skeleton={chartSkeleton(item.chart)}
+      actions={actions}
     >
       {data && (
         <div className="h-full w-full px-4 py-3">

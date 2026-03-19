@@ -22,6 +22,7 @@ import { MessagesContainer } from "./components/MessagesContainer"
 import { UserMessage } from "./components/UserMessage"
 import { WelcomeScreenSuggestion } from "./components/WelcomeScreen"
 import { useDefaultCopilotActions } from "./copilotActions"
+import { fetchThreadMessages } from "./utils/fetchThreadMessages"
 import { F0AiFullscreenChatComponent } from "./F0AiFullscreenChat"
 import { AiChatStateProvider, useAiChat } from "./providers/AiChatStateProvider"
 import { AiChatProviderProps } from "./types"
@@ -35,6 +36,7 @@ const F0AiChatProviderComponent = ({
   resizable = false,
   defaultVisualizationMode,
   lockVisualizationMode,
+  historyEnabled,
   footer,
   entityResolvers,
   toolHints,
@@ -58,6 +60,7 @@ const F0AiChatProviderComponent = ({
       resizable={resizable}
       defaultVisualizationMode={defaultVisualizationMode}
       lockVisualizationMode={lockVisualizationMode}
+      historyEnabled={historyEnabled}
       footer={footer}
       tracking={tracking}
       entityResolvers={entityResolvers}
@@ -76,18 +79,28 @@ const AiChatKitWrapper = ({
 
   return (
     <CopilotKit runtimeUrl="/copilotkit" agent={agent} {...copilotKitProps}>
-      <ResetFunctionInjector />
-      <SendMessageFunctionInjector />
+      <CopilotFunctionBridge />
       {children}
     </CopilotKit>
   )
 }
 
-const ResetFunctionInjector = () => {
-  const { setClearFunction } = useAiChat()
-  const { reset } = useCopilotChatInternal()
-  const { setThreadId } = useCopilotContext()
+/**
+ * Bridges CopilotKit internal functions (reset, loadThread, sendMessage) to
+ * the AiChat state provider via refs. Consolidates the three separate
+ * injector components into one.
+ */
+const CopilotFunctionBridge = () => {
+  const {
+    setClearFunction,
+    setLoadThreadFunction,
+    setIsLoadingThread,
+    setSendMessageFunction,
+  } = useAiChat()
+  const { reset, setMessages, sendMessage } = useCopilotChatInternal()
+  const { setThreadId, copilotApiConfig, actions } = useCopilotContext()
 
+  // Reset / clear
   useEffect(() => {
     const resetWithNewThread = () => {
       reset()
@@ -99,13 +112,37 @@ const ResetFunctionInjector = () => {
     }
   }, [setClearFunction, reset, setThreadId])
 
-  return null
-}
+  // Load thread messages
+  useEffect(() => {
+    setLoadThreadFunction((threadId: string) => {
+      setMessages([])
+      setIsLoadingThread(true)
+      setThreadId(threadId)
+      void fetchThreadMessages(
+        copilotApiConfig.chatApiEndpoint,
+        copilotApiConfig.headers,
+        threadId,
+        actions as Record<string, { render?: (...args: any[]) => any }>
+      )
+        .then(
+          (msgs) => setMessages(msgs),
+          () => {} // Best-effort: if it fails, stay empty
+        )
+        .finally(() => setIsLoadingThread(false))
+    })
+    return () => {
+      setLoadThreadFunction(null)
+    }
+  }, [
+    setLoadThreadFunction,
+    setThreadId,
+    setMessages,
+    setIsLoadingThread,
+    copilotApiConfig,
+    actions,
+  ])
 
-const SendMessageFunctionInjector = () => {
-  const { setSendMessageFunction } = useAiChat()
-  const { sendMessage } = useCopilotChatInternal()
-
+  // Send message
   useEffect(() => {
     if (sendMessage) {
       setSendMessageFunction(sendMessage)
@@ -119,10 +156,10 @@ const SendMessageFunctionInjector = () => {
 }
 
 const ChatInput = (props: InputProps) => {
-  const { disclaimer, footer, visualizationMode } = useAiChat()
+  const { disclaimer, footer, visualizationMode, isLoadingThread } = useAiChat()
   const { messages } = useCopilotChatInternal()
   const containerRef = useRef<HTMLDivElement>(null)
-  const isWelcomeScreen = messages.length === 0
+  const isWelcomeScreen = messages.length === 0 && !isLoadingThread
   const fullscreen = visualizationMode === "fullscreen"
   const fullscreenWelcome = fullscreen && isWelcomeScreen
 

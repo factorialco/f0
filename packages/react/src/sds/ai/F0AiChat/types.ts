@@ -3,6 +3,20 @@ import { type AIMessage, type Message } from "@copilotkit/shared"
 
 import { IconType } from "@/components/F0Icon"
 
+import type { ChatDashboardConfig } from "../F0ChatDashboard/types"
+
+/**
+ * Discriminated union for canvas panel content.
+ * Expand this union to support new content types in the canvas.
+ */
+export type CanvasContent = {
+  type: "dashboard"
+  title: string
+  config: ChatDashboardConfig
+  apiConfig: { baseUrl: string; headers: Record<string, string> }
+  toolCallId?: string
+}
+
 /**
  * Profile data for a person entity (employee), resolved asynchronously
  * and displayed in the entity reference hover card.
@@ -56,7 +70,7 @@ export type AiChatToolHint = {
 /**
  * Visualization mode for the AI chat
  */
-export type VisualizationMode = "sidepanel" | "fullscreen"
+export type VisualizationMode = "sidepanel" | "fullscreen" | "canvas"
 
 /**
  * Tracking options for the AI chat
@@ -94,6 +108,13 @@ export type AiChatProviderProps = {
    * @default false
    */
   lockVisualizationMode?: boolean
+  /**
+   * Enable chat history UI (clickable header title + history dialog).
+   * When false (default), the header shows a simple "New Chat" button instead.
+   * Set to true only when the backend supports the /copilotkit/chat-history/threads route.
+   * @default false
+   */
+  historyEnabled?: boolean
   /**
    * Optional footer content rendered below the textarea
    */
@@ -179,6 +200,9 @@ export const aiTranslations = {
     thoughtsGroupTitle: "Reflection",
     resourcesGroupTitle: "Resources",
     thinking: "Thinking...",
+    closeDashboard: "Close dashboard",
+    exportTable: "Download table",
+    generatedTableFilename: "OneGeneratedTable",
     feedbackModal: {
       positive: {
         title: "What did you like about this response?",
@@ -192,12 +216,35 @@ export const aiTranslations = {
       },
     },
     dataDownloadPreview:
-      "Preview {{shown}} of {{total}} rows — download the Excel to see all data.",
+      "Preview {{shown}} of {{total}} rows — download to see all data.",
     expandChat: "Expand chat",
     collapseChat: "Collapse chat",
+    chatHistory: "Chat history",
+    noPreviousChats: "No previous conversations",
+    newConversation: "New conversation",
+    today: "Today",
+    yesterday: "Yesterday",
+    thisMonth: "This month",
+    older: "Older",
+    searchChats: "Search conversations...",
+    pinnedChats: "Pinned",
+    threadOptions: "Thread options",
+    pinChat: "Pin chat",
+    unpinChat: "Unpin chat",
+    deleteChat: "Delete chat",
     ask: "Ask One",
     viewProfile: "View profile",
     tools: "Tools",
+    reportCard: {
+      reportLabel: "Report",
+      openButton: "Open",
+    },
+    dataDownload: {
+      download: "Download {{format}}",
+    },
+    unsavedChanges: "Unsaved changes",
+    saveChanges: "Save changes",
+    discardChanges: "Discard",
   },
 }
 

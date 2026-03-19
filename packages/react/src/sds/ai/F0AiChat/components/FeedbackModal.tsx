@@ -5,7 +5,7 @@ import { F0Dialog } from "@/components/F0Dialog"
 import { Input } from "@/experimental/Forms/Fields/Input"
 import { useI18n } from "@/lib/providers/i18n"
 
-import { UserReaction } from "./FeedbackProvider"
+import { UserReaction } from "../providers/FeedbackProvider"
 
 interface ReactionModalProps {
   onClose: (message: AIMessage) => void
@@ -57,6 +57,7 @@ export const FeedbackModal = ({
       onClose={handleClose}
       width="md"
       title={title}
+      container={null}
       primaryAction={{
         label: translation.actions.send,
         onClick: handleSubmit,

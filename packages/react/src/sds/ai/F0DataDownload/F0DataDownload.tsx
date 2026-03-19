@@ -69,11 +69,6 @@ function downloadAsCsv(dataset: F0DataDownloadDataset, filename: string): void {
   URL.revokeObjectURL(link.href)
 }
 
-const downloadItems = [
-  { value: "excel", label: "Download Excel", icon: Download },
-  { value: "csv", label: "Download CSV", icon: Download },
-]
-
 /**
  * Component that renders an optional markdown preview followed by
  * a dropdown button with "Download Excel" as the primary action and
@@ -86,6 +81,19 @@ export const F0DataDownload = ({
   dataset,
 }: F0DataDownloadProps) => {
   const i18n = useI18n()
+
+  const downloadItems = [
+    {
+      value: "excel",
+      label: i18n.t("ai.dataDownload.download", { format: "Excel" }),
+      icon: Download,
+    },
+    {
+      value: "csv",
+      label: i18n.t("ai.dataDownload.download", { format: "CSV" }),
+      icon: Download,
+    },
+  ]
 
   const handleDownload = useCallback(
     (format: string, _item: unknown) => {
@@ -105,24 +113,24 @@ export const F0DataDownload = ({
     totalCount != null && previewCount != null && totalCount > previewCount
 
   return (
-    <div className="flex flex-col gap-1 pb-3">
+    <div className="flex flex-col gap-2 pb-2">
       {markdown && (
         <div className="w-fit max-w-full [&>div]:flex [&>div]:flex-col [&>div]:gap-1">
           <Markdown content={markdown} components={f0MarkdownRenderersSimple} />
         </div>
       )}
       {showPreviewNote && (
-        <p className="text-sm italic text-f1-foreground-secondary">
+        <p className="text-sm font-medium text-f1-foreground-secondary">
           {i18n.t("ai.dataDownloadPreview", {
             shown: previewCount,
             total: totalCount,
           })}
         </p>
       )}
-      <div className="mt-3 flex justify-start">
+      <div className="flex justify-start">
         <F0ButtonDropdown
           variant="outline"
-          size="sm"
+          size="md"
           items={downloadItems}
           value="excel"
           onClick={handleDownload}

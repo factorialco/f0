@@ -10,7 +10,7 @@ import type {
 import { paletteColor, resolveChartColorToken } from "../../utils/colors"
 import { buildBaseChartOptions } from "../../utils/options"
 import { useChartTheme } from "../../utils/useChartTheme"
-import { useContainerWidth } from "../../utils/useContainerWidth"
+import { useContainerSize } from "../../utils/useContainerSize"
 
 /** Extract the numeric value from a data point */
 function getValue(point: F0DataChartBarDataPoint): number {
@@ -112,6 +112,8 @@ function buildSeriesEntries(
       position: isVertical ? "top" : "right",
       color: labelColor,
       fontWeight: "bold",
+      overflow: "truncate",
+      ellipsis: "...",
     },
     emphasis: {
       itemStyle: {
@@ -211,7 +213,8 @@ export function useBarChartOptions(
   }: F0DataChartBarProps
 ): echarts.EChartsOption {
   const theme = useChartTheme(containerRef)
-  const containerWidth = useContainerWidth(containerRef)
+  const { width: containerWidth, height: containerHeight } =
+    useContainerSize(containerRef)
 
   return useMemo(() => {
     const isVertical = orientation === "vertical"
@@ -232,7 +235,7 @@ export function useBarChartOptions(
     // Legend should only show the main series (not the target ghost bars)
     const legendData = series.map((s) => s.name)
 
-    return buildBaseChartOptions({
+    const options = buildBaseChartOptions({
       categories,
       theme,
       series: echartsSeries,
@@ -245,7 +248,20 @@ export function useBarChartOptions(
       tooltipFilterSeries: (name) => name.endsWith(" (target)"),
       echartsOptions,
       containerWidth,
+      containerHeight,
     })
+
+    if (!isVertical && showLabels) {
+      const userGridRight = (echartsOptions?.grid as { right?: number })?.right
+      if (userGridRight === undefined) {
+        const grid = options.grid as { right?: number }
+        if (grid) {
+          grid.right = 60
+        }
+      }
+    }
+
+    return options
   }, [
     categories,
     series,
@@ -259,5 +275,6 @@ export function useBarChartOptions(
     echartsOptions,
     theme,
     containerWidth,
+    containerHeight,
   ])
 }
