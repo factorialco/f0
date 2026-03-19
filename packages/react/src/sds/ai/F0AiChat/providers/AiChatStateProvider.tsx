@@ -17,13 +17,8 @@ import {
 import { useI18n } from "@/lib/providers/i18n"
 
 import type { ChatDashboardConfig } from "../../F0ChatDashboard/types"
-import { savedDashboardConfigStore } from "./savedDashboardConfigStore"
 
 import { DEFAULT_CHAT_WIDTH } from "../constants"
-import {
-  readFromLocalStorage,
-  writeToLocalStorage,
-} from "../utils/local-storage"
 import { AiChatProviderReturnValue, AiChatState } from "../internal-types"
 import {
   type AiChatMode,
@@ -32,6 +27,11 @@ import {
   type AiChatToolHint,
   WelcomeScreenSuggestion,
 } from "../types"
+import {
+  readFromLocalStorage,
+  writeToLocalStorage,
+} from "../utils/local-storage"
+import { savedDashboardConfigStore } from "./savedDashboardConfigStore"
 
 const AiChatStateContext = createContext<AiChatProviderReturnValue | null>(null)
 
