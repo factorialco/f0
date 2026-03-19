@@ -134,6 +134,10 @@ describe("F0AiFormRegistryProvider presentForm", () => {
       expect(capturedRegistry!.presentedForm!.name).toBe("user-form")
       expect(capturedRegistry!.presentedForm!.mode).toBe("dialog")
       expect(capturedRegistry!.presentedForm!.definition.title).toBe("Add User")
+      expect(capturedRegistry!.presentedForm!.initialValues).toEqual({
+        name: "",
+        email: "",
+      })
     })
   })
 
@@ -269,6 +273,49 @@ describe("F0AiFormRegistryProvider presentForm", () => {
     await waitFor(() => {
       expect(capturedRegistry!.presentedForm!.name).toBe("form-b")
       expect(capturedRegistry!.presentedForm!.mode).toBe("wizard")
+    })
+  })
+
+  it("presentForm captures pre-filled values from virtual form", async () => {
+    const definitions: F0AiAvailableFormDefinition[] = [
+      {
+        name: "user-form",
+        schema: simpleSchema,
+        defaultValues: { name: "", email: "" },
+      },
+    ]
+
+    let capturedRegistry: ReturnType<typeof useF0AiFormRegistry> = null
+
+    render(
+      <F0AiFormRegistryProvider availableFormDefinitions={definitions}>
+        <RegistryInspector
+          onRegistry={(r) => {
+            capturedRegistry = r
+          }}
+        />
+      </F0AiFormRegistryProvider>
+    )
+
+    await waitFor(() => {
+      expect(capturedRegistry?.get("user-form")).toBeDefined()
+    })
+
+    // Simulate AI filling the virtual form before presenting
+    const ref = capturedRegistry!.get("user-form")!.ref.current!
+    ref.setValues({ name: "Alice", email: "alice@test.com" })
+
+    act(() => {
+      const result = capturedRegistry!.presentForm("user-form", "dialog")
+      expect(result.success).toBe(true)
+    })
+
+    await waitFor(() => {
+      expect(capturedRegistry!.presentedForm).not.toBeNull()
+      expect(capturedRegistry!.presentedForm!.initialValues).toEqual({
+        name: "Alice",
+        email: "alice@test.com",
+      })
     })
   })
 })

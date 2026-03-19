@@ -23,16 +23,18 @@ const DynamicF0Form = F0Form as React.FC<{
 
 function DialogPresenter({
   definition,
+  initialValues,
   onClose,
 }: {
   definition: F0AiAvailableFormDefinition
+  initialValues: Record<string, unknown>
   onClose: () => void
 }) {
   const { formRef, submit, isSubmitting, hasErrors } = useF0Form()
   const formDefinition = useF0FormDefinition({
     name: definition.name,
     schema: definition.schema,
-    defaultValues: definition.defaultValues ?? {},
+    defaultValues: initialValues,
     sections: definition.sections,
     submitConfig: { type: "default", hideSubmitButton: true },
     onSubmit: async ({ data }) => {
@@ -63,15 +65,17 @@ function DialogPresenter({
 
 function WizardPresenter({
   definition,
+  initialValues,
   onClose,
 }: {
   definition: F0AiAvailableFormDefinition
+  initialValues: Record<string, unknown>
   onClose: () => void
 }) {
   const formDefinition = useF0FormDefinition({
     name: definition.name,
     schema: definition.schema,
-    defaultValues: definition.defaultValues ?? {},
+    defaultValues: initialValues,
     sections: definition.sections,
     onSubmit: async ({ data }) => {
       await definition.onSubmit?.(data as Record<string, unknown>)
@@ -99,10 +103,22 @@ export function F0AiFormPresenter({
   presentedForm: F0AiPresentedForm
   onClose: () => void
 }) {
-  const { mode, definition } = presentedForm
+  const { mode, definition, initialValues } = presentedForm
 
   if (mode === "wizard") {
-    return <WizardPresenter definition={definition} onClose={onClose} />
+    return (
+      <WizardPresenter
+        definition={definition}
+        initialValues={initialValues}
+        onClose={onClose}
+      />
+    )
   }
-  return <DialogPresenter definition={definition} onClose={onClose} />
+  return (
+    <DialogPresenter
+      definition={definition}
+      initialValues={initialValues}
+      onClose={onClose}
+    />
+  )
 }

@@ -131,9 +131,7 @@ function createVirtualFormRef(
  * Extracts human-readable field descriptions from f0FormField metadata.
  * Returns a record mapping field name → { label, placeholder?, helpText?, description? }
  */
-function extractFieldDescriptions(
-  schema: F0FormSchema
-): Record<
+function extractFieldDescriptions(schema: F0FormSchema): Record<
   string,
   {
     label: string
@@ -204,6 +202,8 @@ export interface F0AiPresentedForm {
   mode: "dialog" | "wizard"
   /** Resolved definition from availableFormDefinitions */
   definition: F0AiAvailableFormDefinition
+  /** Snapshot of the virtual form's values at the time presentForm was called */
+  initialValues: Record<string, unknown>
 }
 
 /**
@@ -391,7 +391,17 @@ export function F0AiFormRegistryProvider({
           error: `Form "${formName}" not found in availableFormDefinitions`,
         }
       }
-      setPresentedForm({ name: formName, mode, definition: def })
+      // Capture current values from the virtual form ref so the presented
+      // form starts with whatever the AI has already filled
+      const entry = registryRef.current.get(formName)
+      const currentValues =
+        entry?.ref.current?.getValues() ?? def.defaultValues ?? {}
+      setPresentedForm({
+        name: formName,
+        mode,
+        definition: def,
+        initialValues: currentValues,
+      })
       return { success: true }
     },
     [availableFormDefinitions]
