@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.411.0](https://github.com/factorialco/f0/compare/f0-react-v1.410.0...f0-react-v1.411.0) (2026-03-19)
+
+
+### Features
+
+* **Dialog:** enable width variants for side panel positions ([#3492](https://github.com/factorialco/f0/issues/3492)) ([789d327](https://github.com/factorialco/f0/commit/789d327b170d1c95b17a48c8e39c6ae32ab44f53))
+
 ## [1.410.0](https://github.com/factorialco/f0/compare/f0-react-v1.409.0...f0-react-v1.410.0) (2026-03-19)
 
 
