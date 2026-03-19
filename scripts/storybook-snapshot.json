@@ -1,0 +1,3449 @@
+{
+  "Introduction": {
+    "category": "",
+    "stories": [
+      "Documentation"
+    ]
+  },
+  "Add a new icon": {
+    "category": "Foundations/Icons",
+    "stories": [
+      "Documentation"
+    ]
+  },
+  "Borders": {
+    "category": "Foundations",
+    "stories": [
+      "Documentation"
+    ]
+  },
+  "Colors": {
+    "category": "Foundations",
+    "stories": [
+      "Documentation"
+    ]
+  },
+  "Icons": {
+    "category": "Foundations",
+    "stories": [
+      "Documentation"
+    ]
+  },
+  "Shadows": {
+    "category": "Foundations",
+    "stories": [
+      "Documentation"
+    ]
+  },
+  "Spacing": {
+    "category": "Foundations",
+    "stories": [
+      "Documentation"
+    ]
+  },
+  "Typography": {
+    "category": "Foundations",
+    "stories": [
+      "Documentation"
+    ]
+  },
+  "withDataTestId": {
+    "category": "Library/Lib",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Dynamic Update",
+      "Custom Component",
+      "Inline Wrapper"
+    ]
+  },
+  "Numeric": {
+    "category": "Library",
+    "stories": [
+      "Documentation"
+    ]
+  },
+  "Examples": {
+    "category": "Hooks/Datasource",
+    "stories": [
+      "Documentation",
+      "Basic",
+      "Grouped",
+      "Selectable",
+      "Complete",
+      "With Filters"
+    ]
+  },
+  "Datasource": {
+    "category": "Hooks",
+    "stories": [
+      "Documentation"
+    ]
+  },
+  "useData": {
+    "category": "Hooks/Datasource",
+    "stories": [
+      "Documentation"
+    ]
+  },
+  "useDataSource": {
+    "category": "Hooks/Datasource",
+    "stories": [
+      "Documentation"
+    ]
+  },
+  "useGroups": {
+    "category": "Hooks/Datasource",
+    "stories": [
+      "Documentation"
+    ]
+  },
+  "useSelectable": {
+    "category": "Hooks/Datasource",
+    "stories": [
+      "Documentation"
+    ]
+  },
+  "Badge": {
+    "category": "🔒 Internal",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Types",
+      "With Data Test Id"
+    ]
+  },
+  "Action": {
+    "category": "🔒 Internal/Components",
+    "stories": [
+      "Documentation",
+      "Basic",
+      "As Link",
+      "As Link With Button Variant",
+      "As Button With Link Variant",
+      "Disabled",
+      "With Prepend",
+      "With Append Outside",
+      "Link Disabled",
+      "All Variants",
+      "All Sizes",
+      "All Compact"
+    ]
+  },
+  "ButtonCopy": {
+    "category": "🔒 Internal/Components",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Variants",
+      "Sizes",
+      "Custom Labels",
+      "Different Values",
+      "States",
+      "Interactive Copy Test",
+      "Animation States",
+      "In Context"
+    ]
+  },
+  "Card": {
+    "category": "🔒 Internal/Components",
+    "stories": [
+      "Documentation",
+      "Basic",
+      "With Subtitle",
+      "With Info",
+      "With Footer",
+      "With Comment",
+      "Clickable",
+      "Disabled",
+      "Complete",
+      "With Href Link",
+      "With Clickable Link",
+      "Documentation",
+      "Default",
+      "With Data Test Id",
+      "With Actions",
+      "With Actions And Link",
+      "With Link",
+      "Selectable",
+      "With Children",
+      "With Interactive Children",
+      "With Emoji",
+      "With Aspect Ratio 16 X 9",
+      "With Icon And Image",
+      "With Image",
+      "With Avatar File",
+      "Compact",
+      "With Progress Bar",
+      "With Progress Bar Custom Color",
+      "Skeleton",
+      "Skeleton Compact",
+      "Intents Showcase",
+      "With Image Controls",
+      "Image Fit Options",
+      "Snapshot",
+      "Documentation",
+      "Basic Card Visualization",
+      "Image Fit Options"
+    ]
+  },
+  "ChevronToggle": {
+    "category": "🔒 Internal/Components",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Open",
+      "Interactive",
+      "With Custom Size"
+    ]
+  },
+  "DatePickerPopup": {
+    "category": "🔒 Internal/Components",
+    "stories": [
+      "Documentation",
+      "Simple",
+      "Month Granularity",
+      "Multiple Granularities",
+      "With Custom Range",
+      "Hide Go To Current",
+      "With Default Date",
+      "With Presets",
+      "Week View",
+      "Quarter View",
+      "Half Year View",
+      "Year View",
+      "With Min Max Dates"
+    ]
+  },
+  "Dialog": {
+    "category": "🔒 Internal/Components",
+    "stories": [
+      "Documentation",
+      "Simple",
+      "With Header And Footer",
+      "Custom Content",
+      "Without Animation",
+      "Large Content",
+      "Documentation",
+      "Default",
+      "With Data Test Id",
+      "With Sm Width",
+      "With Md Width",
+      "With Lg Width",
+      "With Xl Width",
+      "With Description",
+      "With Person List Items",
+      "With Left Position",
+      "With Right Position",
+      "With Left Position Lg Width",
+      "With Fullscreen Position",
+      "With Fullscreen Position And Actions",
+      "With Multiple Primary Actions",
+      "With Module",
+      "With Module And Fullscreen Position",
+      "With Resource Header",
+      "With Resource Header And Fullscreen Position",
+      "With Few Items",
+      "Documentation",
+      "Critical",
+      "Warning",
+      "Info",
+      "With Trigger",
+      "With Data Test Id"
+    ]
+  },
+  "InputField": {
+    "category": "🔒 Internal/Components",
+    "stories": [
+      "Documentation",
+      "Default",
+      "With A Textarea",
+      "Size Sm",
+      "Loading",
+      "Icon Label",
+      "Long Label",
+      "With Max Length",
+      "With Icon",
+      "Clearable",
+      "Disabled",
+      "Readonly",
+      "Error",
+      "Error Message",
+      "Info Message",
+      "Warning Message",
+      "Hint Message",
+      "Required",
+      "Hide Label",
+      "With Append",
+      "With Append Tag",
+      "Long Placeholder",
+      "Snapshot"
+    ]
+  },
+  "OverflowList": {
+    "category": "🔒 Internal/Components",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Presets",
+      "With Custom Overflow Indicator"
+    ]
+  },
+  "Select": {
+    "category": "🔒 Internal/Components",
+    "stories": [
+      "Documentation",
+      "Default",
+      "As List",
+      "Multiple",
+      "With Top Content",
+      "With Bottom Content",
+      "With Both Top And Bottom",
+      "Virtualized Items",
+      "With Custom Trigger",
+      "Documentation",
+      "Default",
+      "With Data Test Id",
+      "With Preselected Value",
+      "With Disabled Options",
+      "With Dot Tags",
+      "With Person Tags",
+      "With Placeholder",
+      "With Hidden Label",
+      "With Icon",
+      "With Label Icon",
+      "Size Md",
+      "With Error",
+      "With Warning",
+      "With Info",
+      "With Hint",
+      "Clearable",
+      "With Search Box",
+      "With Actions",
+      "Large List",
+      "With Data Source Not Paginated",
+      "With Data Source Paginated",
+      "With Data Source Grouping",
+      "Multiple Not Paginated",
+      "Multiple Paginated",
+      "Multiple Paginated With Preview",
+      "Multiple Paginated As List",
+      "As List",
+      "Multiple Manual Selection Only",
+      "Single Select With Filters",
+      "With Custom Trigger",
+      "Snapshot"
+    ]
+  },
+  "VerticalOverflowList": {
+    "category": "🔒 Internal/Components",
+    "stories": [
+      "Documentation",
+      "Default"
+    ]
+  },
+  "Counter": {
+    "category": "🔒 Internal",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Max Value",
+      "With Data Test Id"
+    ]
+  },
+  "F0Wizard": {
+    "category": "🔒 Internal",
+    "stories": [
+      "Documentation",
+      "Default",
+      "With Custom Labels",
+      "With Step Level Labels",
+      "With Completed Steps",
+      "With Async On Next",
+      "With Is Completed Gate",
+      "Allow Step Skipping",
+      "Auto Close On Submit",
+      "Many Steps",
+      "Auto Skip Completed Steps",
+      "Snapshot"
+    ]
+  },
+  "IconBadge": {
+    "category": "🔒 Internal",
+    "stories": [
+      "Documentation"
+    ]
+  },
+  "Kanban": {
+    "category": "🔒 Internal/Kanban",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Project Statuses",
+      "Simple On Move Test",
+      "Documentation",
+      "Basic Kanban Visualization",
+      "Kanban With Create Actions"
+    ]
+  },
+  "KanbanLane": {
+    "category": "🔒 Internal/Kanban",
+    "stories": [
+      "Documentation",
+      "Default"
+    ]
+  },
+  "Lane": {
+    "category": "🔒 Internal",
+    "stories": [
+      "Documentation",
+      "Default",
+      "With Fetch More",
+      "Empty State",
+      "Custom Empty State",
+      "Loading",
+      "Compact Cards",
+      "With Images",
+      "Two Lanes Dn D"
+    ]
+  },
+  "Omnibutton": {
+    "category": "🔒 Internal",
+    "stories": [
+      "Documentation",
+      "Default",
+      "With New Update",
+      "With Data Test Id"
+    ]
+  },
+  "OneRestrictComponent": {
+    "category": "🔒 Internal",
+    "stories": [
+      "Documentation"
+    ]
+  },
+  "Pagination": {
+    "category": "🔒 Internal",
+    "stories": [
+      "Documentation",
+      "Default",
+      "With Data Test Id",
+      "Long List",
+      "Without Controls",
+      "Custom Visible Range",
+      "Indeterminate",
+      "Disabled",
+      "Documentation"
+    ]
+  },
+  "Preset": {
+    "category": "🔒 Internal",
+    "stories": [
+      "Documentation",
+      "Default",
+      "No Number",
+      "Not Interactive"
+    ]
+  },
+  "Shortcut": {
+    "category": "🔒 Internal",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Multiple Keys",
+      "Inverse Variant",
+      "With Data Test Id"
+    ]
+  },
+  "Spinner": {
+    "category": "🔒 Internal",
+    "stories": [
+      "Documentation",
+      "Default",
+      "With Data Test Id"
+    ]
+  },
+  "Value Display": {
+    "category": "🔒 Internal",
+    "stories": [
+      "Documentation",
+      "Documentation"
+    ]
+  },
+  "Alert Tag": {
+    "category": "🔒 Internal/Value Display",
+    "stories": [
+      "Documentation",
+      "Alert Tag Type"
+    ]
+  },
+  "Amount": {
+    "category": "🔒 Internal/Value Display",
+    "stories": [
+      "Documentation",
+      "Amount Input As Object",
+      "Amount Value Input As Object",
+      "Amount With Placeholder",
+      "Amount With Currency",
+      "Amount With Currency Euro"
+    ]
+  },
+  "Avatar List": {
+    "category": "🔒 Internal/Value Display",
+    "stories": [
+      "Documentation",
+      "Avatar List Type"
+    ]
+  },
+  "BarSeries": {
+    "category": "🔒 Internal/Value Display",
+    "stories": [
+      "Documentation",
+      "Bar Series Values",
+      "Bar Series With Secondary",
+      "Bar Series Empty"
+    ]
+  },
+  "Company": {
+    "category": "🔒 Internal/Value Display",
+    "stories": [
+      "Documentation",
+      "Company Type"
+    ]
+  },
+  "Country": {
+    "category": "🔒 Internal/Value Display",
+    "stories": [
+      "Documentation",
+      "Country Type",
+      "Country Type With Label",
+      "Snapshot"
+    ]
+  },
+  "Date": {
+    "category": "🔒 Internal/Value Display",
+    "stories": [
+      "Documentation",
+      "Date Input As Object",
+      "Date Value Input As Object",
+      "Date With Placeholder"
+    ]
+  },
+  "Delta": {
+    "category": "🔒 Internal/Value Display",
+    "stories": [
+      "Documentation",
+      "Delta Type",
+      "Negative Delta Type"
+    ]
+  },
+  "Dot Tag": {
+    "category": "🔒 Internal/Value Display",
+    "stories": [
+      "Documentation",
+      "Dot Tag Type"
+    ]
+  },
+  "File": {
+    "category": "🔒 Internal/Value Display",
+    "stories": [
+      "Documentation",
+      "File Type"
+    ]
+  },
+  "Folder": {
+    "category": "🔒 Internal/Value Display",
+    "stories": [
+      "Documentation",
+      "Folder Type"
+    ]
+  },
+  "HourDistribution": {
+    "category": "🔒 Internal/Value Display",
+    "stories": [
+      "Documentation",
+      "Hour Distribution With Data",
+      "Hour Distribution Short Period",
+      "Hour Distribution With Planned",
+      "Hour Distribution Empty"
+    ]
+  },
+  "Icon": {
+    "category": "🔒 Internal/Value Display",
+    "stories": [
+      "Documentation",
+      "Icon Type",
+      "Icon With Hidden Label",
+      "Icon With Tooltip",
+      "Documentation",
+      "App",
+      "With Data Test Id",
+      "Module",
+      "Animated",
+      "Special",
+      "AI",
+      "Documentation",
+      "Default"
+    ]
+  },
+  "Long Text": {
+    "category": "🔒 Internal/Value Display",
+    "stories": [
+      "Documentation",
+      "Long Text Type",
+      "Long Text With Lines",
+      "Long Text Full Text",
+      "Long Text With Placeholder"
+    ]
+  },
+  "Number": {
+    "category": "🔒 Internal/Value Display",
+    "stories": [
+      "Documentation",
+      "Number Input As Object",
+      "Number Value Input As Object",
+      "Number Value Input As Object With Decimals",
+      "Number Value Input As Object With Units",
+      "Number With Placeholder",
+      "Documentation",
+      "Primary",
+      "With Step",
+      "Disabled",
+      "With Label",
+      "With Hidden Label",
+      "With Label Icon",
+      "With Icon",
+      "With Error",
+      "With Max Length",
+      "Clearable",
+      "With Units"
+    ]
+  },
+  "Percentage": {
+    "category": "🔒 Internal/Value Display",
+    "stories": [
+      "Documentation",
+      "Percentage Input As Object",
+      "Percentage Value Input As Object",
+      "Percentage With Label",
+      "Percentage With Placeholder"
+    ]
+  },
+  "Person": {
+    "category": "🔒 Internal/Value Display",
+    "stories": [
+      "Documentation",
+      "Person Type",
+      "Deactivated Person Type",
+      "Person Type With Badge",
+      "Person Type With Module Badge"
+    ]
+  },
+  "ProgressBar": {
+    "category": "🔒 Internal/Value Display",
+    "stories": [
+      "Documentation",
+      "Progress Bar Simple",
+      "Progress Bar With Label",
+      "Progress Bar With Custom Max",
+      "Progress Bar With Custom Color",
+      "Progress Bar Warning Color",
+      "Progress Bar With Placeholder"
+    ]
+  },
+  "Status": {
+    "category": "🔒 Internal/Value Display",
+    "stories": [
+      "Documentation",
+      "Status Type"
+    ]
+  },
+  "Tag": {
+    "category": "🔒 Internal/Value Display",
+    "stories": [
+      "Documentation",
+      "Tag Type"
+    ]
+  },
+  "Tag List": {
+    "category": "🔒 Internal/Value Display",
+    "stories": [
+      "Documentation",
+      "Tag Array Type"
+    ]
+  },
+  "Team": {
+    "category": "🔒 Internal/Value Display",
+    "stories": [
+      "Documentation",
+      "Team Type"
+    ]
+  },
+  "Text": {
+    "category": "🔒 Internal/Value Display",
+    "stories": [
+      "Documentation",
+      "Text Type",
+      "Text Input As Object",
+      "Text Value Input As Object",
+      "Text With Placeholder",
+      "Documentation",
+      "Primary",
+      "File",
+      "Password",
+      "Disabled",
+      "With Label",
+      "With Hidden Label",
+      "With Label Icon",
+      "With Icon",
+      "With Error",
+      "With Warning",
+      "With Info",
+      "With Hint",
+      "With Max Length",
+      "Clearable",
+      "Snapshot",
+      "Documentation",
+      "Default",
+      "With Data Test Id",
+      "Variants",
+      "Text Alignment",
+      "Text Ellipsis",
+      "Markdown",
+      "Markdown With Ellipsis",
+      "Required",
+      "Snapshot"
+    ]
+  },
+  "AI Configuration": {
+    "category": "",
+    "stories": [
+      "Documentation"
+    ]
+  },
+  "Changelog": {
+    "category": "",
+    "stories": [
+      "Documentation"
+    ]
+  },
+  "Components maturity": {
+    "category": "",
+    "stories": [
+      "Documentation"
+    ]
+  },
+  "ActionBar": {
+    "category": "Components",
+    "stories": [
+      "Documentation",
+      "Default",
+      "No Selected Items",
+      "Multiple Primary Actions",
+      "With Groups And Description"
+    ]
+  },
+  "Alert": {
+    "category": "Components",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Narrow",
+      "Deactivated Action",
+      "With Data Test Id",
+      "In Dialog"
+    ]
+  },
+  "ApplicationFrame": {
+    "category": "Components",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Documentation",
+      "Default",
+      "With Ai Promotion",
+      "Fullscreen With Actions"
+    ]
+  },
+  "Avatar": {
+    "category": "Components/Avatars",
+    "stories": [
+      "Documentation",
+      "With Data Test Id",
+      "Person Avatar",
+      "Team Avatar",
+      "Company Avatar",
+      "All Types",
+      "With Badges"
+    ]
+  },
+  "AvatarAlert": {
+    "category": "Components/Avatars",
+    "stories": [
+      "Documentation",
+      "Default"
+    ]
+  },
+  "AvatarCompany": {
+    "category": "Components/Avatars",
+    "stories": [
+      "Documentation",
+      "Default",
+      "With Image",
+      "With Module Badge",
+      "Snapshot"
+    ]
+  },
+  "AvatarDate": {
+    "category": "Components/Avatars",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Snapshot"
+    ]
+  },
+  "AvatarEmoji": {
+    "category": "Components/Avatars",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Snapshot"
+    ]
+  },
+  "AvatarFile": {
+    "category": "Components/Avatars",
+    "stories": [
+      "Documentation",
+      "Default",
+      "With Badge",
+      "All File Types",
+      "Snapshot"
+    ]
+  },
+  "AvatarFlag": {
+    "category": "Components/Avatars",
+    "stories": [
+      "Documentation",
+      "Default",
+      "With Flag",
+      "With Module Badge",
+      "Snapshot"
+    ]
+  },
+  "AvatarIcon": {
+    "category": "Components/Avatars",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Snapshot"
+    ]
+  },
+  "AvatarList": {
+    "category": "Components/Avatars",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Companies",
+      "Teams",
+      "With Max Avatars",
+      "Large Avatars List",
+      "Companies With Max Avatars",
+      "With Remaining Count",
+      "Snapshot"
+    ]
+  },
+  "AvatarModule": {
+    "category": "Components/Avatars",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Snapshot"
+    ]
+  },
+  "AvatarPerson": {
+    "category": "Components/Avatars",
+    "stories": [
+      "Documentation",
+      "Default",
+      "With Image",
+      "With Badge",
+      "With Badge Tooltip",
+      "Deactivated",
+      "Snapshot"
+    ]
+  },
+  "AvatarPulse": {
+    "category": "Components/Avatars",
+    "stories": [
+      "Documentation",
+      "Default",
+      "With Selected Pulse",
+      "Snapshot"
+    ]
+  },
+  "AvatarTeam": {
+    "category": "Components/Avatars",
+    "stories": [
+      "Documentation",
+      "Default",
+      "With Image",
+      "With Badge",
+      "Snapshot"
+    ]
+  },
+  "Await": {
+    "category": "Components",
+    "stories": [
+      "Documentation",
+      "Default",
+      "With Skeleton",
+      "With Data Test Id"
+    ]
+  },
+  "BigNumber": {
+    "category": "Components",
+    "stories": [
+      "Documentation",
+      "Default",
+      "With Data Test Id",
+      "With Comparison",
+      "With Trend",
+      "With Trend Invert Status",
+      "Skeleton",
+      "Snapshot"
+    ]
+  },
+  "Controls": {
+    "category": "Components/BigNumber",
+    "stories": [
+      "Documentation",
+      "Documentation",
+      "Documentation",
+      "Documentation",
+      "Documentation",
+      "Documentation"
+    ]
+  },
+  "Box": {
+    "category": "Components",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Display",
+      "Position",
+      "Padding",
+      "Margin",
+      "Flex Layout",
+      "Grid Layout",
+      "Dimensions",
+      "Background",
+      "Border Width",
+      "Border Per Side",
+      "Border Shorthand With Overrides",
+      "Border Colors",
+      "Border Style",
+      "Border Radius",
+      "Overflow",
+      "Dividers",
+      "Responsive Padding",
+      "Responsive Flex Direction",
+      "Responsive Grid",
+      "Responsive Dashboard",
+      "Responsive Display",
+      "Nested Layout",
+      "Responsive Dashboard Example",
+      "List With Dividers",
+      "Token Reference"
+    ]
+  },
+  "Button": {
+    "category": "Components",
+    "stories": [
+      "Documentation",
+      "Default",
+      "With Href",
+      "Variants",
+      "Icon Variants",
+      "Sizes",
+      "Ellipsis",
+      "Disabled",
+      "Loading",
+      "Async Action",
+      "Icon Button Group",
+      "Only Emoji",
+      "States",
+      "Async Loading",
+      "With Data Test Id"
+    ]
+  },
+  "ButtonDropdown": {
+    "category": "Components",
+    "stories": [
+      "Documentation",
+      "Default",
+      "With Data Test Id",
+      "With Tooltip",
+      "With Description",
+      "With Groups",
+      "Dropdown Mode",
+      "Dropdown Mode With Trigger",
+      "Dropdown Mode With Groups",
+      "Snapshot"
+    ]
+  },
+  "ButtonToggle": {
+    "category": "Components",
+    "stories": [
+      "Documentation",
+      "Default",
+      "With Data Test Id",
+      "Single Icon",
+      "Variant Expanded",
+      "Controlled",
+      "Uncontrolled With Default Selected",
+      "Snapshot"
+    ]
+  },
+  "Internal": {
+    "category": "Components/ButtonToggle",
+    "stories": [
+      "Documentation",
+      "With Border",
+      "Documentation"
+    ]
+  },
+  "ButtonToggleGroup": {
+    "category": "Components",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Single",
+      "Single Required",
+      "Variant Expanded",
+      "Multiple",
+      "Multiple Required",
+      "Sizes",
+      "With Disabled Item",
+      "Disabled",
+      "Flow",
+      "Snapshot",
+      "With Data Test Id"
+    ]
+  },
+  "Calendar": {
+    "category": "Components",
+    "stories": [
+      "Documentation",
+      "Month Single",
+      "Month Range",
+      "Year Single",
+      "Year Range",
+      "Day Single",
+      "Day Range",
+      "Week",
+      "Quarter Single",
+      "Quarter Range",
+      "Half Year Single",
+      "Half Year Range",
+      "Day Range With Input",
+      "Month Range With Input",
+      "Quarter Range With Input",
+      "Half Year Range With Input",
+      "Year Range With Input",
+      "With Min And Max Day",
+      "With Min And Max Week",
+      "With Min And Max Month",
+      "With Min And Max Half Year",
+      "With Min And Max Quarter",
+      "With Min And Max Year",
+      "Compact Month Single",
+      "Compact Month Range",
+      "Compact Week",
+      "Compact Day Range",
+      "Regular Vs Compact"
+    ]
+  },
+  "Carousel": {
+    "category": "Components/Carousel",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Custom Columns",
+      "Double Columns",
+      "Auto Scroll",
+      "Sneak Peek",
+      "No Columns",
+      "Multiple Widths",
+      "Random With Columns",
+      "Few Items With Columns",
+      "With Data Test Id"
+    ]
+  },
+  "DynamicCarousel": {
+    "category": "Components/Carousel",
+    "stories": [
+      "Documentation",
+      "Default"
+    ]
+  },
+  "AreaChart": {
+    "category": "Components/Charts",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Dashed Area",
+      "Multiple Areas"
+    ]
+  },
+  "BarChart": {
+    "category": "Components/Charts",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Multiple Bars",
+      "Financial Values"
+    ]
+  },
+  "CategoryBarChart": {
+    "category": "Components/Charts",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Multiple Values"
+    ]
+  },
+  "ComboChart": {
+    "category": "Components/Charts",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Bar And Line",
+      "Biaxial"
+    ]
+  },
+  "F0Chart": {
+    "category": "Components/Charts",
+    "stories": [
+      "Documentation",
+      "Default",
+      "With Custom Size",
+      "Compact Size"
+    ]
+  },
+  "Area": {
+    "category": "Components/Charts/F0Chart",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Dashed Area",
+      "Multiple Areas"
+    ]
+  },
+  "Bar": {
+    "category": "Components/Charts/F0Chart",
+    "stories": [
+      "Documentation",
+      "Single Bar",
+      "Multiple Bars",
+      "Stacked Bars",
+      "Documentation",
+      "Default",
+      "Multiple Series",
+      "With Targets",
+      "Multiple Series With Targets",
+      "Horizontal",
+      "Horizontal With Targets",
+      "Custom Formatters",
+      "No Grid",
+      "Per Bar Colors",
+      "Per Bar Colors With Targets",
+      "Stacked",
+      "Stacked Horizontal",
+      "All Colors"
+    ]
+  },
+  "Bar Horizontal": {
+    "category": "Components/Charts/F0Chart",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Multiple Bars"
+    ]
+  },
+  "Funnel": {
+    "category": "Components/Charts/F0Chart",
+    "stories": [
+      "Documentation",
+      "Funnel",
+      "Documentation",
+      "Default",
+      "With Conversion",
+      "Custom Colors",
+      "Ascending",
+      "Vertical",
+      "No Legend",
+      "No Color Scale"
+    ]
+  },
+  "Line": {
+    "category": "Components/Charts/F0Chart",
+    "stories": [
+      "Documentation",
+      "Line Chart",
+      "Multiple Lines",
+      "Documentation",
+      "Linear",
+      "Smooth",
+      "Step",
+      "No Fill",
+      "Multiple Series",
+      "Multiple Series With Dashed",
+      "Custom Formatters",
+      "With Dots",
+      "No Grid"
+    ]
+  },
+  "Pie": {
+    "category": "Components/Charts/F0Chart",
+    "stories": [
+      "Documentation",
+      "Simple Pie",
+      "Donut Chart",
+      "Pie With Labels",
+      "Documentation",
+      "Default",
+      "Donut",
+      "Custom Colors",
+      "With Percentage",
+      "No Legend"
+    ]
+  },
+  "Radar": {
+    "category": "Components/Charts/F0Chart",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Documentation",
+      "Default",
+      "Multiple Series",
+      "No Area",
+      "With Labels",
+      "Custom Colors"
+    ]
+  },
+  "LineChart": {
+    "category": "Components/Charts",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Multiple Lines"
+    ]
+  },
+  "PieChart": {
+    "category": "Components/Charts",
+    "stories": [
+      "Documentation",
+      "Default"
+    ]
+  },
+  "ProgressBarDuo": {
+    "category": "Components/Charts",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Empty",
+      "Full",
+      "Twenty Five",
+      "Seventy Five",
+      "Custom Max"
+    ]
+  },
+  "ProgressChart": {
+    "category": "Components/Charts",
+    "stories": [
+      "Documentation",
+      "Default"
+    ]
+  },
+  "RadarChart": {
+    "category": "Components/Charts",
+    "stories": [
+      "Documentation",
+      "Default",
+      "With Custom Scale",
+      "With Data Test Id"
+    ]
+  },
+  "RadialProgressChart": {
+    "category": "Components/Charts",
+    "stories": [
+      "Documentation",
+      "Default",
+      "With Overview"
+    ]
+  },
+  "VerticalBarChart": {
+    "category": "Components/Charts",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Multiple Bars",
+      "With Ratios"
+    ]
+  },
+  "Checkbox": {
+    "category": "Components",
+    "stories": [
+      "Documentation",
+      "Default",
+      "With Data Test Id",
+      "Disabled",
+      "Indeterminate",
+      "Checked"
+    ]
+  },
+  "Chip": {
+    "category": "Components",
+    "stories": [
+      "Documentation",
+      "Default",
+      "With Close",
+      "With Avatar",
+      "With Deactivated Avatar And Label",
+      "With Icon",
+      "Selected With Close"
+    ]
+  },
+  "ChipList": {
+    "category": "Components",
+    "stories": [
+      "Documentation",
+      "Default",
+      "With Data Test Id",
+      "With Close",
+      "With Fill Layout"
+    ]
+  },
+  "Data collection": {
+    "category": "Components",
+    "stories": [
+      "Documentation"
+    ]
+  },
+  "Actions": {
+    "category": "Components/Data collection",
+    "stories": [
+      "Documentation"
+    ]
+  },
+  "Callbacks": {
+    "category": "Components/Data collection",
+    "stories": [
+      "Documentation",
+      "Default"
+    ]
+  },
+  "Collection Actions": {
+    "category": "Components/Data Collection",
+    "stories": [
+      "Documentation",
+      "Basic Actions Example",
+      "Multiple Primary Actions Example",
+      "Multiple Primary Actions With Descriptions Example",
+      "With Expanded Actions Example",
+      "With Grouped Expanded Actions Example",
+      "Hidden Label Expanded Actions Example",
+      "Card Actions Example"
+    ]
+  },
+  "Empty State": {
+    "category": "Components/Data collection",
+    "stories": [
+      "Documentation",
+      "No Data Example",
+      "No Results Example",
+      "Error Example",
+      "Custom Messages And Actions",
+      "Empty To Data Example"
+    ]
+  },
+  "Filters": {
+    "category": "Components/Data collection",
+    "stories": [
+      "Documentation",
+      "With Async Search",
+      "With Sync Search",
+      "With Subfilters",
+      "Presets Example"
+    ]
+  },
+  "Per Visualization": {
+    "category": "Components/Data Collection/Filters",
+    "stories": [
+      "Documentation",
+      "Filters Per Visualization",
+      "Mixed Global And Per View Filters",
+      "Per View Presets Only"
+    ]
+  },
+  "Full height": {
+    "category": "Components/Data collection",
+    "stories": [
+      "Documentation",
+      "Basic",
+      "With Pagination",
+      "With Pagination And Grouping"
+    ]
+  },
+  "Grouping": {
+    "category": "Components/Data collection",
+    "stories": [
+      "Documentation",
+      "With Grouping",
+      "With Optional Grouping",
+      "Collapsible Grouping",
+      "Collapsible Grouping With Default Open Groups",
+      "With Pagination And Grouping",
+      "With Infinite Scroll Pagination And Grouping",
+      "Selectable Grouping",
+      "Selectable Grouping And Actions"
+    ]
+  },
+  "SortAndHideList": {
+    "category": "Components/Data Collection/Internal",
+    "stories": [
+      "Documentation",
+      "Default",
+      "With All Items Visible",
+      "With All Items Hidden",
+      "With Mixed States",
+      "Empty List",
+      "Single Item",
+      "Long Labels"
+    ]
+  },
+  "Item Actions": {
+    "category": "Components/Data Collection",
+    "stories": [
+      "Documentation",
+      "Basic Actions Example",
+      "Card Actions Example"
+    ]
+  },
+  "Loading": {
+    "category": "Components/Data collection",
+    "stories": [
+      "Documentation"
+    ]
+  },
+  "Miscellaneous": {
+    "category": "Components/Data Collection",
+    "stories": [
+      "Documentation",
+      "Simplest",
+      "Basic Table View",
+      "With Linked Items",
+      "Basic Card View",
+      "Renderer Types",
+      "Custom Card Properties",
+      "Switchable Visualizations",
+      "With Selectable And Bulk Actions",
+      "With Page Only Selection",
+      "With Cross Page Selection",
+      "With Selectable And Default Selected Items",
+      "With Selectable And Default Selected Groups",
+      "With Custom Json View",
+      "With Table Visualization",
+      "With Card Visualization",
+      "With Multiple Visualizations",
+      "With Pages Pagination",
+      "With Infinite Scroll Pagination",
+      "With Infinite Scroll Pagination One Col",
+      "With Synchronous Data",
+      "With Advanced Actions",
+      "Table Column Properties",
+      "Table With No Filters And Search",
+      "Table With No Filters",
+      "Table With Secondary Actions",
+      "With Progress Bar"
+    ]
+  },
+  "Navigation filters": {
+    "category": "Components/Data collection",
+    "stories": [
+      "Documentation"
+    ]
+  },
+  "Navigation Filters": {
+    "category": "Components/Data Collection",
+    "stories": [
+      "Default",
+      "Week Granularity",
+      "Month Granularity",
+      "Year Granularity",
+      "Range Granularity",
+      "No Go To Current",
+      "Multiple Granularities",
+      "With Presets"
+    ]
+  },
+  "Selectable and bulk actions": {
+    "category": "Components/Data collection",
+    "stories": [
+      "Documentation"
+    ]
+  },
+  "Sorting": {
+    "category": "Components/Data collection",
+    "stories": [
+      "Documentation"
+    ]
+  },
+  "Status Persistence": {
+    "category": "Components/Data collection",
+    "stories": [
+      "Documentation"
+    ]
+  },
+  "Summary": {
+    "category": "Components/Data Collection",
+    "stories": [
+      "Documentation",
+      "Basic Summary Row",
+      "With Infinite Scroll Summary Sticky",
+      "With Infinite Scroll Summary Sticky Frozen Columns",
+      "With Summary Placeholders"
+    ]
+  },
+  "Temporary or Deprecated features": {
+    "category": "Components/Data Collection",
+    "stories": [
+      "Documentation",
+      "Tmp Full Width"
+    ]
+  },
+  "Top Header": {
+    "category": "Components/Data collection",
+    "stories": [
+      "Documentation"
+    ]
+  },
+  "Total Items Summary": {
+    "category": "Components/Data Collection",
+    "stories": [
+      "Documentation",
+      "Total Items Summary",
+      "Total Items Summary Custom",
+      "Total Items Summary With Filters"
+    ]
+  },
+  "Visualizations": {
+    "category": "Components/Data collection",
+    "stories": [
+      "Documentation"
+    ]
+  },
+  "Editable Table": {
+    "category": "Components/Data Collection/Visualizations",
+    "stories": [
+      "Documentation",
+      "Basic Editable Table",
+      "Editable Table With Column Settings",
+      "Editable Table With Errors",
+      "Editable Table With Editable Callback",
+      "Editable Table With Column Reordering",
+      "Editable Table With Column Hiding",
+      "Editable Table With Frozen Columns",
+      "Editable Table With Nested Records",
+      "Editable Table With Nested Records Detailed",
+      "Editable Table With Selectable Nested Records Detailed",
+      "Editable Table With Nested Records And Add Row",
+      "Editable Table With Multiple Add Row Actions",
+      "Editable Table With Add Row",
+      "Editable Table With Summary Row And Add Row",
+      "Editable Table With Data Source Select",
+      "Editable Table With Date Cell",
+      "Table And Editable Table"
+    ]
+  },
+  "List": {
+    "category": "Components/Data Collection/Visualizations",
+    "stories": [
+      "Documentation",
+      "Basic List Visualization",
+      "List Visualization With Grouping",
+      "List Visualization With Grouping And All Groups Open By Default",
+      "List Visualization With Infinite Scroll Pagination",
+      "List Visualization With Regular Pagination"
+    ]
+  },
+  "Table": {
+    "category": "Components/Data Collection/Visualizations",
+    "stories": [
+      "Documentation",
+      "Basic List Visualization",
+      "Reference Rows Visualization",
+      "Table Frozen Cols",
+      "Table Column Ordering And Hidden",
+      "Table Column Ordering And Hidden No Persistent Storage",
+      "Table With Nested Records",
+      "Table With Nested Records Detailed",
+      "Table With Mixed Nested Records",
+      "Table With Selectable Nested Records",
+      "Table Column Ordering",
+      "Table Column Hidden",
+      "Table Column Ordering And Hidden With Columns Changes",
+      "Table With Grouped Headers",
+      "Documentation",
+      "Default",
+      "Check",
+      "Info Header",
+      "Sortable",
+      "Sticky Column",
+      "Skeleton",
+      "Summatory",
+      "Footer",
+      "Actions",
+      "With Links",
+      "Loading",
+      "With On Click"
+    ]
+  },
+  "DateNavigator": {
+    "category": "Components",
+    "stories": [
+      "Documentation",
+      "Simple",
+      "Month Granularity",
+      "Multiple Granularities",
+      "With Custom Range",
+      "Hide Go To Current",
+      "With Default Date",
+      "With Presets",
+      "With Presets Hide Navigation",
+      "Week View",
+      "Week View Sunday Start",
+      "Quarter View",
+      "Half Year View",
+      "Year View",
+      "With Min Max Dates",
+      "With Compare To",
+      "Change Value From Outside",
+      "With Default Compare To"
+    ]
+  },
+  "Compare To": {
+    "category": "Components/DateNavigator",
+    "stories": [
+      "Documentation"
+    ]
+  },
+  "Presets": {
+    "category": "Components/DateNavigator",
+    "stories": [
+      "Documentation",
+      "Documentation"
+    ]
+  },
+  "DatePicker": {
+    "category": "Components",
+    "stories": [
+      "Documentation",
+      "Default",
+      "With Data Test Id",
+      "With Value With Month Granularity",
+      "With Value With Week Granularity",
+      "With Value With Range Granularity",
+      "With Multiple Granularities",
+      "With Presets",
+      "With Min Max Dates",
+      "With Error",
+      "With Warning",
+      "With Info",
+      "With Hint",
+      "With Clearable",
+      "Snapshot"
+    ]
+  },
+  "Dropdown": {
+    "category": "Components",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Play Test",
+      "With Custom Trigger",
+      "With Links",
+      "With Avatars",
+      "With Labels",
+      "Mobile Dropdown",
+      "With Data Test Id"
+    ]
+  },
+  "DurationInput": {
+    "category": "Components",
+    "stories": [
+      "Documentation",
+      "Default",
+      "All Units",
+      "With Error",
+      "With Warning",
+      "With Info",
+      "Disabled",
+      "Disabled With Error",
+      "Required",
+      "Small Size",
+      "Hidden Label",
+      "Custom Suffixes",
+      "Snapshot"
+    ]
+  },
+  "Ellipsis": {
+    "category": "Components",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Single Line",
+      "Multi Line",
+      "Short Text",
+      "Short Text Multi Line"
+    ]
+  },
+  "EmptyState": {
+    "category": "Components",
+    "stories": [
+      "Documentation",
+      "Basic",
+      "With Data Test Id",
+      "With Alert",
+      "With Upsell",
+      "Documentation",
+      "Performance Empty State",
+      "Salary Empty State",
+      "With Data Test Id"
+    ]
+  },
+  "EmployeeSelector": {
+    "category": "Components/EntitySelect",
+    "stories": [
+      "Documentation",
+      "Default",
+      "With Actions"
+    ]
+  },
+  "EntitySelect": {
+    "category": "Components/EntitySelect",
+    "stories": [
+      "Documentation",
+      "Default",
+      "With Selected Group",
+      "Single Selector",
+      "Always Open",
+      "Always Open In Form",
+      "With Custom Trigger",
+      "With Search",
+      "Loading State",
+      "Hidden Avatar",
+      "With Actions",
+      "With Size Md",
+      "With Label",
+      "With Label Icon",
+      "With Deactivated Entities",
+      "Error",
+      "Hint",
+      "Disabled"
+    ]
+  },
+  "ListItem": {
+    "category": "Components/EntitySelect",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Default Deactivated",
+      "Group View Selected",
+      "Group View Partial",
+      "Group View Expanded",
+      "Default In Form"
+    ]
+  },
+  "ListTag": {
+    "category": "Components/EntitySelect",
+    "stories": [
+      "Documentation",
+      "Default",
+      "With Deactivated Tag"
+    ]
+  },
+  "Trigger": {
+    "category": "Components/EntitySelect",
+    "stories": [
+      "Documentation",
+      "Default"
+    ]
+  },
+  "F0ActionBar": {
+    "category": "Components/Experimental",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Idle",
+      "Loading",
+      "Success",
+      "Status Flow"
+    ]
+  },
+  "ValidationIssues": {
+    "category": "Components/Experimental/F0Form",
+    "stories": [
+      "Documentation",
+      "Required Fields Test"
+    ]
+  },
+  "F0VersionHistory": {
+    "category": "Components/Experimental",
+    "stories": [
+      "Documentation",
+      "Default",
+      "With Clickable Current Version",
+      "Without Current Version"
+    ]
+  },
+  "CardSelectable": {
+    "category": "Components/Experimental/Forms",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Unselected",
+      "Multiple Selection",
+      "With Numbers",
+      "Horizontal",
+      "Title Only",
+      "With Disabled Item",
+      "Disabled",
+      "With Icon Avatar",
+      "With Person Avatar",
+      "With Team Avatar",
+      "With Emoji Avatar",
+      "Mixed Avatars",
+      "Multiple With Avatars",
+      "With Toggle Indicator",
+      "Single Toggle",
+      "Grouped Toggles",
+      "Grouped Radios",
+      "Grouped Checkboxes"
+    ]
+  },
+  "F0AnalyticsDashboard": {
+    "category": "Components",
+    "stories": [
+      "Documentation",
+      "Mixed Dashboard",
+      "Snapshot"
+    ]
+  },
+  "Gauge": {
+    "category": "Components/F0DataChart",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Custom Range",
+      "Custom Color",
+      "With Formatter",
+      "No Value"
+    ]
+  },
+  "Heatmap": {
+    "category": "Components/F0DataChart",
+    "stories": [
+      "Documentation",
+      "Default",
+      "With Labels",
+      "Custom Range",
+      "No Visual Map"
+    ]
+  },
+  "Overview": {
+    "category": "Components/F0DataChart",
+    "stories": [
+      "Documentation"
+    ]
+  },
+  "Skeletons": {
+    "category": "Components/F0DataChart",
+    "stories": [
+      "Documentation",
+      "Bar",
+      "Bar Horizontal",
+      "Bar Stacked",
+      "Bar Horizontal Stacked",
+      "Line",
+      "Line Linear",
+      "Line Step",
+      "Line No Area",
+      "Line With Dots",
+      "Funnel",
+      "Funnel Ascending",
+      "Funnel Vertical",
+      "Pie",
+      "Pie Donut",
+      "Radar",
+      "Gauge",
+      "Heatmap"
+    ]
+  },
+  "FilterPicker": {
+    "category": "Components",
+    "stories": [
+      "Documentation",
+      "Interactive",
+      "With Initial Filters",
+      "With Presets",
+      "With Preselected Filters And Item Count",
+      "With Presets Overflow Counter Consistency",
+      "With Presets And Initial Filters",
+      "With Additive Presets",
+      "Default",
+      "With Presets Args",
+      "With Children",
+      "With Url Serialization",
+      "With Presets And Url Serialization",
+      "With Async Options",
+      "With Large Async Options",
+      "With Large Async Options With Cache",
+      "With Source Based Pagination",
+      "With Number Filter"
+    ]
+  },
+  "InFilter": {
+    "category": "Components/FilterPicker/Filters",
+    "stories": [
+      "Documentation",
+      "Default",
+      "With Selected Values",
+      "Interactive",
+      "Async Options",
+      "Async Options With Search",
+      "Slow Async Options",
+      "Async Options With Error",
+      "Empty Options",
+      "Sync Function Options",
+      "With Data Source"
+    ]
+  },
+  "NumberFilter": {
+    "category": "Components/FilterPicker/Filters",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Single With Selected Values",
+      "Range With Selected Values",
+      "Range With Open Close Toggle"
+    ]
+  },
+  "SearchFilter": {
+    "category": "Components/FilterPicker/Filters",
+    "stories": [
+      "Documentation",
+      "Default",
+      "With Strict Toggle"
+    ]
+  },
+  "FilterPickerContent": {
+    "category": "Components",
+    "stories": [
+      "Documentation",
+      "Default",
+      "With Data Test Id",
+      "With Preselected Values",
+      "Without Apply Button",
+      "Custom Dimensions",
+      "Custom Apply Label",
+      "In Modal",
+      "Complex Filters",
+      "Complex Filters With Values",
+      "Complex Filters Without Apply Button"
+    ]
+  },
+  "F0Form": {
+    "category": "Components/Forms",
+    "stories": [
+      "Documentation",
+      "Default",
+      "With Rows",
+      "With Sections",
+      "With Sections Sidepanel",
+      "Conditional Rendering",
+      "Dynamic Disabled",
+      "All Field Types",
+      "All Field Types Disabled",
+      "File Fields",
+      "File Fields With Initial Files",
+      "Custom Field",
+      "Server Validation",
+      "Visual Design Example",
+      "With Action Bar",
+      "With Action Bar And Discard",
+      "Error Trigger Modes",
+      "Select With Data Source",
+      "Form In Dialog",
+      "Dynamic Date Constraints",
+      "Per Section Submit",
+      "Per Section With Sidebar",
+      "Per Section Show Submit When Dirty"
+    ]
+  },
+  "F0FormField": {
+    "category": "Components/Forms",
+    "stories": [
+      "Documentation",
+      "Text",
+      "Textarea",
+      "Number",
+      "Select",
+      "Date",
+      "Time",
+      "Date Time",
+      "Date Range",
+      "Rich Text",
+      "Custom",
+      "File",
+      "Checkbox",
+      "Switch",
+      "With Error",
+      "Disabled",
+      "Required",
+      "Composed Form",
+      "Snapshot"
+    ]
+  },
+  "F0WizardForm": {
+    "category": "Components/Forms",
+    "stories": [
+      "Documentation",
+      "Single Schema",
+      "Per Section Schema",
+      "Custom Step Grouping",
+      "Disabled Step Auto Completed",
+      "With Default Step Index",
+      "Auto Close Per Section",
+      "Link After Submit",
+      "Many Fields Per Section",
+      "Snapshot"
+    ]
+  },
+  "Heading": {
+    "category": "Components",
+    "stories": [
+      "Documentation",
+      "Default",
+      "With Data Test Id",
+      "Variants",
+      "Heading Alignment",
+      "Heading Ellipsis",
+      "Snapshot"
+    ]
+  },
+  "Image": {
+    "category": "Components",
+    "stories": [
+      "Documentation",
+      "Basic"
+    ]
+  },
+  "Search": {
+    "category": "Components/Input",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Disabled",
+      "Clearable",
+      "With Threshold",
+      "With Debounce"
+    ]
+  },
+  "TextArea": {
+    "category": "Components/Input",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Disabled",
+      "With Label",
+      "With Hidden Label",
+      "With Label Icon",
+      "With Icon",
+      "With Error",
+      "With Warning",
+      "With Info",
+      "With Hint",
+      "With Max Length",
+      "Required",
+      "Clearable"
+    ]
+  },
+  "AutoGrid": {
+    "category": "Components/Layout/Blocks",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Small",
+      "Medium",
+      "Large"
+    ]
+  },
+  "Split": {
+    "category": "Components/Layout/Blocks",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Wrap",
+      "Grow",
+      "Wrap Grow",
+      "Vertical Align",
+      "Inline"
+    ]
+  },
+  "Stack": {
+    "category": "Components/Layout/Blocks",
+    "stories": [
+      "Documentation",
+      "Default"
+    ]
+  },
+  "Link": {
+    "category": "Components",
+    "stories": [
+      "Documentation",
+      "Default",
+      "With Data Test Id",
+      "States",
+      "Interactive Examples",
+      "Snapshot"
+    ]
+  },
+  "DataList": {
+    "category": "Components/List",
+    "stories": [
+      "Documentation",
+      "Primary",
+      "With Label"
+    ]
+  },
+  "DetailsItem": {
+    "category": "Components/List",
+    "stories": [
+      "Documentation",
+      "Default",
+      "With Long Text",
+      "With More Lines Than Allowed",
+      "Horizontal",
+      "With Data Test Id"
+    ]
+  },
+  "DetailsItemsList": {
+    "category": "Components/List",
+    "stories": [
+      "Documentation",
+      "Primary",
+      "Table View",
+      "With Data Test Id",
+      "Table View With Person List",
+      "With Avatar List",
+      "Table View With Avatar List",
+      "With Team Avatar List"
+    ]
+  },
+  "OnePersonListItem": {
+    "category": "Components/List",
+    "stories": [
+      "Documentation",
+      "Default",
+      "With Actions",
+      "With Tags",
+      "Minimal",
+      "Skeleton",
+      "With Data Test Id"
+    ]
+  },
+  "Breadcrumbs": {
+    "category": "Components/Navigation",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Loading Last Item",
+      "Loading Last Two Items",
+      "With Select Breadcrumb",
+      "With Select Breadcrumb With Datasource",
+      "Long Breadcrumbs",
+      "Interactive"
+    ]
+  },
+  "BreadcrumbSelect": {
+    "category": "Components/Navigation",
+    "stories": [
+      "Documentation",
+      "Default",
+      "With Searchbox",
+      "Async Data",
+      "Async Data With Large Dataset"
+    ]
+  },
+  "DaytimePage": {
+    "category": "Components/Navigation",
+    "stories": [
+      "Documentation",
+      "Daytime Home Layout",
+      "Daytime Home Layout With Description",
+      "Daytime Home Layout With Mood",
+      "Daytime Home Layout With Mood Not Set",
+      "With Data Test Id"
+    ]
+  },
+  "Page": {
+    "category": "Components/Navigation",
+    "stories": [
+      "Documentation",
+      "Default",
+      "With Breadcrumbs",
+      "With Breadcrumbs And Status",
+      "With Navigation",
+      "With Navigation And Status",
+      "Embedded",
+      "With Data Test Id"
+    ]
+  },
+  "PageHeader": {
+    "category": "Components/Navigation",
+    "stories": [
+      "Documentation",
+      "Default",
+      "With Actions",
+      "With Status",
+      "With Status Variants",
+      "With Navigation",
+      "With Navigation Disabled",
+      "With Breadcrumbs",
+      "With Select Breadcrumb",
+      "With Everything",
+      "With Product Update",
+      "With Favorites",
+      "Embedded",
+      "Embedded With Loading",
+      "With One Switch Custom Tooltip",
+      "With One Switch Tooltip Always Visible"
+    ]
+  },
+  "Sidebar": {
+    "category": "Components/Navigation",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Snapshot",
+      "With Data Test Id"
+    ]
+  },
+  "TableOfContent": {
+    "category": "Components/Navigation",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Collapsible",
+      "Sortable",
+      "With Search Box",
+      "Sortable With Search Box",
+      "Hide Children Counter",
+      "With Data Test Id"
+    ]
+  },
+  "TableOfContentPopover": {
+    "category": "Components/Navigation",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Collapsible",
+      "With Children Counter",
+      "Size Small",
+      "Size Large",
+      "Right Aligned",
+      "With Title",
+      "Course Modules",
+      "Dark Variant"
+    ]
+  },
+  "Tabs": {
+    "category": "Components/Navigation",
+    "stories": [
+      "Documentation",
+      "Primary",
+      "Primary With Variants",
+      "Piled",
+      "Secondary",
+      "Skeleton",
+      "Single Tab",
+      "Embedded",
+      "With Ids",
+      "With Ids And Variants",
+      "With Data Test Id"
+    ]
+  },
+  "Reactions": {
+    "category": "Components",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Empty"
+    ]
+  },
+  "Resource header": {
+    "category": "Components",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Simple",
+      "Metadata",
+      "With Other Actions",
+      "With Dropdown Action",
+      "Company Header",
+      "Person Header",
+      "Emoji Header",
+      "Team Header",
+      "With Long Description",
+      "No Description",
+      "Deactivated Employee",
+      "Snapshot"
+    ]
+  },
+  "Metadata": {
+    "category": "Components/Resource header",
+    "stories": [
+      "Documentation",
+      "Default",
+      "With Actions"
+    ]
+  },
+  "FileItem": {
+    "category": "Components/Rich text",
+    "stories": [
+      "Documentation",
+      "Default",
+      "With Multiple Actions",
+      "Without Actions",
+      "Disabled",
+      "With Data Test Id"
+    ]
+  },
+  "NotesTextEditor": {
+    "category": "Components/Rich text",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Blank",
+      "Skeleton - Basic",
+      "With Data Test Id"
+    ]
+  },
+  "RichTextDisplay": {
+    "category": "Components/Rich text",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Markdown",
+      "With Data Test Id"
+    ]
+  },
+  "RichTextEditor": {
+    "category": "Components/Rich text",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Blank",
+      "Skeleton",
+      "With Data Test Id"
+    ]
+  },
+  "ScrollArea": {
+    "category": "Components",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Horizontal",
+      "Both",
+      "Comparison"
+    ]
+  },
+  "Section header": {
+    "category": "Components",
+    "stories": [
+      "Documentation",
+      "Default",
+      "No Action",
+      "Primary Action",
+      "In Layout",
+      "Snapshot"
+    ]
+  },
+  "CompanySelector": {
+    "category": "Components/Sidebar",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Single Entry",
+      "Loading Companies"
+    ]
+  },
+  "Header": {
+    "category": "Components/Sidebar",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Notification"
+    ]
+  },
+  "Menu": {
+    "category": "Components/Sidebar",
+    "stories": [
+      "Documentation",
+      "Default"
+    ]
+  },
+  "SearchBar": {
+    "category": "Components/Sidebar",
+    "stories": [
+      "Documentation",
+      "Default"
+    ]
+  },
+  "SidebarFooter": {
+    "category": "Components/Sidebar",
+    "stories": [
+      "Documentation",
+      "Default"
+    ]
+  },
+  "Switch": {
+    "category": "Components",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Disabled",
+      "Checked",
+      "No Label"
+    ]
+  },
+  "Tag (Router)": {
+    "category": "Components/Tags",
+    "stories": [
+      "Documentation"
+    ]
+  },
+  "TagAlert": {
+    "category": "Components/Tags",
+    "stories": [
+      "Documentation",
+      "Info Alert Tag",
+      "Warning Alert Tag",
+      "Critical Alert Tag",
+      "Positive Alert Tag",
+      "Snapshot"
+    ]
+  },
+  "TagBalance": {
+    "category": "Components/Tags",
+    "stories": [
+      "Documentation",
+      "Positive Balance Tag",
+      "Neutral Balance Tag",
+      "Negative Balance Tag",
+      "Inverted Balance Status Tag",
+      "Balance Tag With Info",
+      "Balance Tag With Null",
+      "Snapshot"
+    ]
+  },
+  "TagCompany": {
+    "category": "Components/Tags",
+    "stories": [
+      "Documentation",
+      "Default Company Tag",
+      "Snapshot"
+    ]
+  },
+  "TagDot": {
+    "category": "Components/Tags",
+    "stories": [
+      "Documentation",
+      "Default Dot Tag",
+      "Snapshot"
+    ]
+  },
+  "TagList": {
+    "category": "Components/Tags",
+    "stories": [
+      "Documentation",
+      "With Custom Max",
+      "With Remaining Count",
+      "Snapshot"
+    ]
+  },
+  "TagPerson": {
+    "category": "Components/Tags",
+    "stories": [
+      "Documentation",
+      "Default Person Tag",
+      "Deactivated Person Tag",
+      "Snapshot"
+    ]
+  },
+  "TagRaw": {
+    "category": "Components/Tags",
+    "stories": [
+      "Documentation",
+      "Default Raw Tag",
+      "No Icon Tag",
+      "Icon Tag",
+      "Snapshot"
+    ]
+  },
+  "TagStatus": {
+    "category": "Components/Tags",
+    "stories": [
+      "Documentation",
+      "Neutral Status Tag",
+      "Info Status Tag",
+      "Positive Tag",
+      "Warning Status Tag",
+      "Critical Status Tag",
+      "Snapshot"
+    ]
+  },
+  "TagTeam": {
+    "category": "Components/Tags",
+    "stories": [
+      "Documentation",
+      "Default Team Tag",
+      "Snapshot"
+    ]
+  },
+  "ToggleGroup": {
+    "category": "Components",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Single",
+      "Disabled",
+      "Prefilled"
+    ]
+  },
+  "Tooltip": {
+    "category": "Components",
+    "stories": [
+      "Documentation",
+      "Basic",
+      "With Shortcut",
+      "With Data Test Id"
+    ]
+  },
+  "GridStack": {
+    "category": "Components/Utilities",
+    "stories": [
+      "Documentation",
+      "Default",
+      "With Data Test Id",
+      "With Methods"
+    ]
+  },
+  "VirtualList": {
+    "category": "Components",
+    "stories": [
+      "Documentation",
+      "Default"
+    ]
+  },
+  "Widget": {
+    "category": "Components",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Interactive",
+      "With AI Button",
+      "With Actions",
+      "Full",
+      "Selected",
+      "Skeleton",
+      "Documentation",
+      "Default",
+      "With Link",
+      "With Link And Custom Icon",
+      "With Info",
+      "With Action",
+      "With Critical Alert",
+      "With Status",
+      "Multiple Content",
+      "Full",
+      "Full Height",
+      "With Data Test Id",
+      "With On Click Only Link"
+    ]
+  },
+  "Widgets": {
+    "category": "Components",
+    "stories": [
+      "Documentation"
+    ]
+  },
+  "AreaChartWidget": {
+    "category": "Components/Widgets/Charts",
+    "stories": [
+      "Documentation",
+      "Default",
+      "With Y Axis",
+      "With Comment",
+      "With Blur"
+    ]
+  },
+  "BarChartWidget": {
+    "category": "Components/Widgets/Charts",
+    "stories": [
+      "Documentation",
+      "Default"
+    ]
+  },
+  "LineChartWidget": {
+    "category": "Components/Widgets/Charts",
+    "stories": [
+      "Documentation",
+      "Default"
+    ]
+  },
+  "PieChartWidget": {
+    "category": "Components/Widgets/Charts",
+    "stories": [
+      "Documentation",
+      "Default"
+    ]
+  },
+  "RadialProgressWidget": {
+    "category": "Components/Widgets/Charts",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Custom Color"
+    ]
+  },
+  "SummariesWidget": {
+    "category": "Components/Widgets/Charts",
+    "stories": [
+      "Documentation",
+      "Default"
+    ]
+  },
+  "VerticalBarChartWidget": {
+    "category": "Components/Widgets/Charts",
+    "stories": [
+      "Documentation",
+      "Default"
+    ]
+  },
+  "CalendarEvent": {
+    "category": "Components/Widgets/Content",
+    "stories": [
+      "Documentation",
+      "Primary",
+      "No Background",
+      "No Left Tags",
+      "No Right Tags"
+    ]
+  },
+  "CalendarEventList": {
+    "category": "Components/Widgets/Content",
+    "stories": [
+      "Documentation",
+      "Primary"
+    ]
+  },
+  "IndicatorsList": {
+    "category": "Components/Widgets/Content",
+    "stories": [
+      "Documentation",
+      "Two Elements",
+      "Three Elements",
+      "Two Line Label"
+    ]
+  },
+  "TwoColumnsList": {
+    "category": "Components/Widgets/Content",
+    "stories": [
+      "Documentation",
+      "Primary",
+      "Title",
+      "Progress",
+      "Title With Value",
+      "Title With Tooltip"
+    ]
+  },
+  "Weekdays": {
+    "category": "Components/Widgets/Content",
+    "stories": [
+      "Documentation",
+      "Primary",
+      "Custom Days"
+    ]
+  },
+  "Dashboard": {
+    "category": "Components/Widgets/Layout",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Skeleton",
+      "Small",
+      "Documentation",
+      "Default",
+      "With Data Test Id"
+    ]
+  },
+  "WidgetStrip": {
+    "category": "Components/Widgets/Layout",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Single",
+      "Overflow",
+      "Employees List",
+      "Skeleton"
+    ]
+  },
+  "Skeleton": {
+    "category": "Components/Widgets/Widget",
+    "stories": [
+      "Documentation",
+      "Default",
+      "With Title",
+      "With Subtitle",
+      "Full Height"
+    ]
+  },
+  "WidgetAvatarsListItem": {
+    "category": "Components/Widgets",
+    "stories": [
+      "Documentation",
+      "Default",
+      "With Long Title",
+      "With Alert Avatar"
+    ]
+  },
+  "WidgetEmptyState": {
+    "category": "Components/Widgets",
+    "stories": [
+      "Documentation",
+      "Default",
+      "With Data Test Id"
+    ]
+  },
+  "WidgetHighlightButton": {
+    "category": "Components/Widgets",
+    "stories": [
+      "Documentation",
+      "Default",
+      "With Long Title",
+      "Without On Click"
+    ]
+  },
+  "WidgetInboxList": {
+    "category": "Components/Widgets",
+    "stories": [
+      "Documentation",
+      "Default",
+      "With Long Titles",
+      "With All Items"
+    ]
+  },
+  "WidgetInboxListItem": {
+    "category": "Components/Widgets",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Default Module",
+      "With Long Title"
+    ]
+  },
+  "WidgetSection": {
+    "category": "Components/Widgets",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Without Title",
+      "With Data Test Id"
+    ]
+  },
+  "WidgetSimpleList": {
+    "category": "Components/Widgets",
+    "stories": [
+      "Documentation",
+      "Default",
+      "With Long Titles",
+      "With All Items"
+    ]
+  },
+  "WidgetSimpleListItem": {
+    "category": "Components/Widgets",
+    "stories": [
+      "Documentation",
+      "Default",
+      "With Long Title"
+    ]
+  },
+  "Data Test ID": {
+    "category": "",
+    "stories": [
+      "Documentation"
+    ]
+  },
+  "How to contribute?": {
+    "category": "",
+    "stories": [
+      "Documentation"
+    ]
+  },
+  "HomeLayout": {
+    "category": "Layouts",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Mobile",
+      "Tablet"
+    ]
+  },
+  "Layout": {
+    "category": "Layouts",
+    "stories": [
+      "Documentation"
+    ]
+  },
+  "Layout System": {
+    "category": "Layouts",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Profile Example",
+      "Aside Main Variant",
+      "With Content Blocks",
+      "With Group Masonry",
+      "With Group Grid",
+      "With Data Test Id"
+    ]
+  },
+  "StandardLayout": {
+    "category": "Layouts",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Narrow",
+      "With Data Test Id"
+    ]
+  },
+  "TwoColumnLayout": {
+    "category": "Layouts",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Profile",
+      "Profile With Sticky",
+      "Main Column Right",
+      "With Data Test Id"
+    ]
+  },
+  "F0ActionItem": {
+    "category": "SDS/AI",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Infinite Status Cycling"
+    ]
+  },
+  "ChatSpinner": {
+    "category": "SDS/AI/F0ActionItem",
+    "stories": [
+      "Documentation",
+      "Default"
+    ]
+  },
+  "F0AiChat": {
+    "category": "SDS/AI",
+    "stories": [
+      "Documentation",
+      "Default",
+      "With Footer"
+    ]
+  },
+  "AssistantMessage": {
+    "category": "SDS/AI/F0AiChat",
+    "stories": [
+      "Documentation",
+      "Plain Text",
+      "Markdown Content",
+      "Loading",
+      "Loading With Partial Content"
+    ]
+  },
+  "ChatTextarea (with context)": {
+    "category": "SDS/AI/F0AiChat",
+    "stories": [
+      "Documentation",
+      "Default",
+      "With Placeholders",
+      "With One Placeholder"
+    ]
+  },
+  "F0AiChatTextArea": {
+    "category": "SDS/AI",
+    "stories": [
+      "Documentation",
+      "Default",
+      "With Multiple Placeholders",
+      "With Single Placeholder",
+      "With Custom Default Placeholder",
+      "With Submit Label",
+      "In Progress"
+    ]
+  },
+  "F0AiCollapsibleMessage": {
+    "category": "SDS/AI",
+    "stories": [
+      "Documentation",
+      "Default",
+      "With Search Icon"
+    ]
+  },
+  "F0AiMask": {
+    "category": "SDS/AI",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Dark Mode"
+    ]
+  },
+  "F0AuraVoiceAnimation": {
+    "category": "SDS/AI",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Idle",
+      "Listening",
+      "Thinking",
+      "Speaking",
+      "Custom Color",
+      "Light Theme",
+      "Dark Theme"
+    ]
+  },
+  "F0ChatDashboard": {
+    "category": "SDS/AI",
+    "stories": [
+      "Documentation",
+      "Default",
+      "With Metric Only",
+      "With Radar Chart",
+      "With Pie Chart",
+      "With Gauge Chart",
+      "With Heatmap Chart",
+      "Snapshot"
+    ]
+  },
+  "F0ChatReportCard": {
+    "category": "SDS/AI",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Charts Only",
+      "Snapshot"
+    ]
+  },
+  "F0DataDownload": {
+    "category": "SDS/AI",
+    "stories": [
+      "Documentation",
+      "Default",
+      "With Description",
+      "No Markdown"
+    ]
+  },
+  "F0HILActionConfirmation": {
+    "category": "SDS/AI",
+    "stories": [
+      "Documentation",
+      "Default",
+      "With Descriptive Text"
+    ]
+  },
+  "F0MarkdownRenderers": {
+    "category": "SDS/AI",
+    "stories": [
+      "Documentation",
+      "Typography",
+      "Links",
+      "Lists",
+      "Blocks",
+      "Table Example"
+    ]
+  },
+  "F0MessageSources": {
+    "category": "SDS/AI",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Without Links",
+      "Mixed Sources"
+    ]
+  },
+  "F0OneIcon": {
+    "category": "SDS/AI",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Sizes",
+      "Spinning",
+      "Hover",
+      "With Background"
+    ]
+  },
+  "F0OneSwitch": {
+    "category": "SDS/AI",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Disabled",
+      "With Custom Tooltip",
+      "With Auto Open"
+    ]
+  },
+  "F0Thinking": {
+    "category": "SDS/AI",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Single Thought",
+      "In Progress",
+      "Many Thoughts",
+      "Custom Title"
+    ]
+  },
+  "F0BookAMeetingCard": {
+    "category": "SDS/AI/Widgets/UpsellKit",
+    "stories": [
+      "Documentation",
+      "Default"
+    ]
+  },
+  "F0DemoCard": {
+    "category": "SDS/AI/Widgets/UpsellKit",
+    "stories": [
+      "Documentation",
+      "With Image Preview"
+    ]
+  },
+  "F0FAQCard": {
+    "category": "SDS/AI/Widgets/UpsellKit",
+    "stories": [
+      "Documentation",
+      "Default",
+      "With Default Expanded",
+      "Allow Multiple",
+      "Custom Title",
+      "Controlled",
+      "Single Question"
+    ]
+  },
+  "F0ModuleCard": {
+    "category": "SDS/AI/Widgets/UpsellKit",
+    "stories": [
+      "Documentation",
+      "Default",
+      "With Link",
+      "Benefits"
+    ]
+  },
+  "F0QuestionCard": {
+    "category": "SDS/AI/Widgets/UpsellKit",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Single Step",
+      "Send As Message"
+    ]
+  },
+  "AIButton": {
+    "category": "SDS",
+    "stories": [
+      "Documentation",
+      "Default",
+      "With Icon",
+      "Icon Only",
+      "Sizes",
+      "One Icon",
+      "Disabled"
+    ]
+  },
+  "AiBanner": {
+    "category": "SDS/Banners",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Without Actions",
+      "Skeleton",
+      "Skeleton Compact",
+      "With Data Test Id"
+    ]
+  },
+  "Callout": {
+    "category": "SDS/Banners",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Without Actions",
+      "With Close Only",
+      "Skeleton",
+      "Skeleton Compact",
+      "Variants",
+      "Variants With Actions",
+      "With Data Test Id"
+    ]
+  },
+  "BaseBanner": {
+    "category": "SDS/Experimental/Banners",
+    "stories": [
+      "Documentation",
+      "Default",
+      "With Video",
+      "No Actions",
+      "With Custom Actions",
+      "Loading",
+      "With Icons",
+      "Full Width Text",
+      "With Data Test Id"
+    ]
+  },
+  "ClockInControls": {
+    "category": "SDS/Home",
+    "stories": [
+      "Documentation",
+      "Clocked Out",
+      "Clocked In",
+      "No Graph Nor Remaining Time",
+      "On Break",
+      "With Overtime",
+      "Overtime Only",
+      "Collapsed",
+      "With No Location Or Project",
+      "Clocked Out With Some Time",
+      "With Break Types",
+      "With One Break Type",
+      "With Disabled Selectors",
+      "With Hidden Location And Project"
+    ]
+  },
+  "ClockInGraph": {
+    "category": "SDS/Home",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Empty",
+      "With Some Progress",
+      "With Consecutive Breaks",
+      "With Alternating Entries",
+      "With Alternating Entries And Final Clocked In",
+      "Without Remaining Minutes",
+      "With Overtime"
+    ]
+  },
+  "Celebration": {
+    "category": "SDS/Home/Communities",
+    "stories": [
+      "Documentation",
+      "Default",
+      "With Reaction",
+      "No Image",
+      "Skeleton"
+    ]
+  },
+  "HighlightBanner": {
+    "category": "SDS/Home/Communities",
+    "stories": [
+      "Documentation",
+      "Default"
+    ]
+  },
+  "CommunityPost": {
+    "category": "SDS/Home/Communities/Post",
+    "stories": [
+      "Documentation",
+      "Default",
+      "With Image",
+      "No Image No Event",
+      "No Author",
+      "With Video",
+      "With Event And Video",
+      "With Single Custom Button",
+      "With Multiple Custom Buttons",
+      "With Custom Button Without Label",
+      "Long Unspaced Text",
+      "Skeleton",
+      "Skeleton With Image"
+    ]
+  },
+  "PostDescription": {
+    "category": "SDS/Home/Communities/Post",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Collapsed",
+      "Skeleton"
+    ]
+  },
+  "PostEvent": {
+    "category": "SDS/Home/Communities/Post",
+    "stories": [
+      "Documentation",
+      "Default",
+      "No Image",
+      "Skeleton"
+    ]
+  },
+  "ActivityItemList": {
+    "category": "SDS/Inbox/Activity",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Loading More Items",
+      "Skeleton"
+    ]
+  },
+  "ActivityItem": {
+    "category": "SDS/Inbox",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Skeleton"
+    ]
+  },
+  "ApprovalHistory": {
+    "category": "SDS/Inbox",
+    "stories": [
+      "Documentation",
+      "Single Approval",
+      "Multiple Approvals",
+      "Rejected Approval",
+      "Waiting Approval"
+    ]
+  },
+  "CategoryBarSection": {
+    "category": "SDS/Profile",
+    "stories": [
+      "Documentation",
+      "Default",
+      "With Help Text"
+    ]
+  },
+  "PrivateBox": {
+    "category": "SDS/Profile",
+    "stories": [
+      "Documentation",
+      "Private Box Example"
+    ]
+  },
+  "TaskItem": {
+    "category": "SDS/Profile",
+    "stories": [
+      "Documentation",
+      "In Progress Past Due",
+      "In Progress No Past Due",
+      "Todo Past Due",
+      "Pressable Todo Past Due",
+      "Done",
+      "Done No Past Due"
+    ]
+  },
+  "TasksList": {
+    "category": "SDS/Profile",
+    "stories": [
+      "Documentation",
+      "Default",
+      "With Labels",
+      "With Counters",
+      "With Long Task Titles",
+      "Empty State"
+    ]
+  },
+  "SurveyAnsweringForm": {
+    "category": "SDS/Surveys",
+    "stories": [
+      "Documentation",
+      "All Questions",
+      "Stepped",
+      "Fullscreen",
+      "Fullscreen Toggle",
+      "Right Side",
+      "Stepped Fullscreen",
+      "With Default Values",
+      "No Elements",
+      "Loading All Questions",
+      "Loading Stepped",
+      "Preview",
+      "Preview With Default Values",
+      "Right Side Mixed Correct Answers"
+    ]
+  },
+  "SurveyFormBuilder": {
+    "category": "SDS/Surveys",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Empty",
+      "Applying Changes",
+      "With Question With Duplicate Options",
+      "With Multiple Sections"
+    ]
+  },
+  "BaseQuestion": {
+    "category": "SDS/Surveys/SurveyFormBuilder",
+    "stories": [
+      "Documentation",
+      "Default"
+    ]
+  },
+  "DateQuestion": {
+    "category": "SDS/Surveys/SurveyFormBuilder",
+    "stories": [
+      "Documentation",
+      "Default"
+    ]
+  },
+  "DropdownSingleQuestion": {
+    "category": "SDS/Surveys/SurveyFormBuilder",
+    "stories": [
+      "Documentation",
+      "Default"
+    ]
+  },
+  "LinkQuestion": {
+    "category": "SDS/Surveys/SurveyFormBuilder",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Long Question Title"
+    ]
+  },
+  "NumericQuestion": {
+    "category": "SDS/Surveys/SurveyFormBuilder",
+    "stories": [
+      "Documentation",
+      "Default"
+    ]
+  },
+  "RatingQuestion": {
+    "category": "SDS/Surveys/SurveyFormBuilder",
+    "stories": [
+      "Documentation",
+      "Default",
+      "With Selected Value",
+      "Small Range",
+      "With Emoji Options"
+    ]
+  },
+  "Section": {
+    "category": "SDS/Surveys/SurveyFormBuilder",
+    "stories": [
+      "Documentation",
+      "Default"
+    ]
+  },
+  "SelectQuestion": {
+    "category": "SDS/Surveys/SurveyFormBuilder",
+    "stories": [
+      "Documentation",
+      "Default",
+      "With Selected Value",
+      "Many Options",
+      "Multi Select",
+      "With Duplicate Options"
+    ]
+  },
+  "TextQuestion": {
+    "category": "SDS/Surveys/SurveyFormBuilder",
+    "stories": [
+      "Documentation",
+      "Default",
+      "With Initial Text",
+      "Long Text"
+    ]
+  },
+  "ProductBlankslate": {
+    "category": "SDS/UpsellingKit",
+    "stories": [
+      "Documentation",
+      "Default",
+      "With Upselling Button",
+      "With No Actions"
+    ]
+  },
+  "ProductCard": {
+    "category": "SDS/UpsellingKit",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Dismissable",
+      "LMS"
+    ]
+  },
+  "ProductModal": {
+    "category": "SDS/UpsellingKit",
+    "stories": [
+      "Documentation",
+      "Default"
+    ]
+  },
+  "ProductWidget": {
+    "category": "SDS/UpsellingKit",
+    "stories": [
+      "Documentation",
+      "Default",
+      "With Upselling Button"
+    ]
+  },
+  "UpsellingBanner": {
+    "category": "SDS/UpsellingKit",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Promote",
+      "Only Primary",
+      "Skeleton"
+    ]
+  },
+  "UpsellingButton": {
+    "category": "SDS/UpsellingKit",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Without Icon",
+      "Loading",
+      "Disabled",
+      "Outline Promote",
+      "Sizes"
+    ]
+  },
+  "UpsellingPopover": {
+    "category": "SDS/UpsellingKit",
+    "stories": [
+      "Documentation",
+      "Default",
+      "With Upselling Button"
+    ]
+  },
+  "UpsellRequestResponseDialog": {
+    "category": "SDS/UpsellingKit",
+    "stories": [
+      "Documentation",
+      "Default",
+      "Success Example",
+      "Error Example"
+    ]
+  }
+}
