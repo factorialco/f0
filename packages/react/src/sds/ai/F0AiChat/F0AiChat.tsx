@@ -38,6 +38,7 @@ const F0AiChatProviderComponent = ({
   lockVisualizationMode,
   historyEnabled,
   footer,
+  VoiceMode,
   entityResolvers,
   toolHints,
   onThumbsUp,
@@ -62,6 +63,7 @@ const F0AiChatProviderComponent = ({
       lockVisualizationMode={lockVisualizationMode}
       historyEnabled={historyEnabled}
       footer={footer}
+      VoiceMode={VoiceMode}
       tracking={tracking}
       entityResolvers={entityResolvers}
       toolHints={toolHints}
@@ -232,13 +234,23 @@ const ChatInput = (props: InputProps) => {
 }
 
 const F0AiChatComponent = () => {
-  const { enabled, open, setOpen } = useAiChat()
+  const { enabled, open, setOpen, mode, VoiceMode } = useAiChat()
 
   // Register all default copilot actions
   useDefaultCopilotActions()
 
   if (!enabled) {
     return null
+  }
+
+  if (mode === "voice" && VoiceMode) {
+    return (
+      <SidebarWindow clickOutsideToClose hitEscapeToClose shortcut="">
+        <div className="flex h-full w-full flex-col">
+          <VoiceMode />
+        </div>
+      </SidebarWindow>
+    )
   }
 
   return (

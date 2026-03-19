@@ -4,6 +4,7 @@ export { FullscreenChatContext } from "./F0AiFullscreenChat"
 
 // Types
 export type {
+  AiChatMode,
   AiChatProviderProps,
   AiChatToolHint,
   CanvasContent,

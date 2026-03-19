@@ -68,6 +68,11 @@ export type AiChatToolHint = {
 }
 
 /**
+ * Interaction mode for the AI chat
+ */
+export type AiChatMode = "chat" | "voice"
+
+/**
  * Visualization mode for the AI chat
  */
 export type VisualizationMode = "sidepanel" | "fullscreen" | "canvas"
@@ -119,6 +124,10 @@ export type AiChatProviderProps = {
    * Optional footer content rendered below the textarea
    */
   footer?: React.ReactNode
+  /**
+   * Optional component rendered in place of the chat UI when voice mode is active.
+   */
+  VoiceMode?: React.ComponentType
   /**
    * Async resolver functions for entity references in markdown.
    * Used to fetch profile data for inline entity mentions (hover cards).

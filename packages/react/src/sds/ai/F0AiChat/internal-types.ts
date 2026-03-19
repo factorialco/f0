@@ -4,6 +4,7 @@ import type { ChatDashboardConfig } from "../F0ChatDashboard/types"
 
 import {
   type AiChatDisclaimer,
+  type AiChatMode,
   type AiChatTrackingOptions,
   type AiChatToolHint,
   type CanvasContent,
@@ -35,6 +36,7 @@ export interface AiChatState {
   lockVisualizationMode?: boolean
   historyEnabled?: boolean
   footer?: React.ReactNode
+  VoiceMode?: React.ComponentType
   entityResolvers?: EntityResolvers
   toolHints?: AiChatToolHint[]
   placeholders?: string[]
@@ -137,6 +139,14 @@ export type AiChatProviderReturnValue = {
    */
   setVisualizationMode: React.Dispatch<React.SetStateAction<VisualizationMode>>
   /**
+   * The current interaction mode
+   */
+  mode: AiChatMode
+  /**
+   * Set the interaction mode
+   */
+  setMode: React.Dispatch<React.SetStateAction<AiChatMode>>
+  /**
    * When true, prevents switching between visualization modes
    */
   lockVisualizationMode: boolean
@@ -145,6 +155,10 @@ export type AiChatProviderReturnValue = {
    * Optional footer content rendered below the textarea
    */
   footer?: React.ReactNode
+  /**
+   * Optional component rendered when voice mode is active.
+   */
+  VoiceMode?: React.ComponentType
   /**
    * Set the footer content. Use this to update the footer from outside the provider (e.g. per page/route).
    */
