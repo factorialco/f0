@@ -64,7 +64,7 @@ module.exports = function (api) {
 };
 ```
 
-> **Note:** For Expo SDK 54+, no additional Reanimated/Worklets Babel plugins are needed when using `babel-preset-expo`.
+> **Note:** In managed Expo SDK 54+ apps using the standard `babel-preset-expo`, Reanimated/Worklets Babel plugins are already included and should not be added manually. In custom/bare hosts, follow [`docs/new-architecture.md`](docs/new-architecture.md) and add the required plugins explicitly.
 
 ### 3️⃣ Configure Metro
 

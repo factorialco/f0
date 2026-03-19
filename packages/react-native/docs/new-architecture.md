@@ -14,10 +14,12 @@
 
 Reanimated 4 must be correctly configured in the **host app**:
 
-- `babel.config.js`:
-  - Include `"react-native-worklets/plugin"`
-  - Include `"react-native-reanimated/plugin"` **as the last plugin**
-- Install the compatible version required by your Expo/RN version.
+- Managed Expo SDK 54+ with standard `babel-preset-expo`:
+  - No manual Reanimated/Worklets Babel plugins are required.
+- Custom or bare React Native host app:
+  - `babel.config.js` must include `"react-native-worklets/plugin"`.
+  - Keep `"react-native-worklets/plugin"` **as the last plugin**.
+- Install versions compatible with your Expo/RN host runtime.
 
 ### Uniwind + Tailwind CSS v4
 
@@ -43,7 +45,8 @@ Expo SDK 53 and below are not supported by this package because they are tied to
 
 ### “Worklet” / “Failed to create a worklet” / “Reanimated is not configured”
 
-- Ensure `"react-native-reanimated/plugin"` is present and **last** in the host app Babel config.
+- Managed Expo SDK 54+: ensure you are using `babel-preset-expo` and have not overridden Babel in a way that removes Worklets/Reanimated preset behavior.
+- Custom or bare React Native host app: ensure `"react-native-worklets/plugin"` is present and **last** in Babel plugins.
 - Clear bundler caches and rebuild the native app (new arch toggles require a rebuild).
 
 ### Styles not applied
