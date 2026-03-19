@@ -37,6 +37,7 @@ export const modules = {
   hub: ModuleIcons.Hub,
   it_management: ModuleIcons.ItManagement,
   kudos: ModuleIcons.Kudos,
+  lms: ModuleIcons.LMS,
   meetings: ModuleIcons.Meetings,
   my_benefits: ModuleIcons.Benefits,
   my_documents: ModuleIcons.MyDocuments,
