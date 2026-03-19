@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.408.0](https://github.com/factorialco/f0/compare/f0-react-v1.407.0...f0-react-v1.408.0) (2026-03-19)
+
+
+### Features
+
+* **editable-table:** add cell-level error tooltip state ([#3690](https://github.com/factorialco/f0/issues/3690)) ([36ce446](https://github.com/factorialco/f0/commit/36ce446801a18a5d78aa1cf460848509ce3e1cf7))
+
 ## [1.407.0](https://github.com/factorialco/f0/compare/f0-react-v1.406.1...f0-react-v1.407.0) (2026-03-19)
 
 
