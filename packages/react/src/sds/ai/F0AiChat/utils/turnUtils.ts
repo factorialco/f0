@@ -18,7 +18,10 @@ export function analyzeTurn(
       !Array.isArray(m) &&
       m.role === "assistant" &&
       (!!m.content ||
-        m.toolCalls?.some((tc) => tc.function.name !== "orchestratorThinking"))
+        m.toolCalls?.some(
+          (tc: { function: { name: string } }) =>
+            tc.function.name !== "orchestratorThinking"
+        ))
   )
 
   const showActivityIndicator =
@@ -107,7 +110,8 @@ function isThinkingMessage(message: Message): boolean {
   return (
     message.role === "assistant" &&
     message.toolCalls?.some(
-      (call) => call.function.name === "orchestratorThinking"
+      (call: { function: { name: string } }) =>
+        call.function.name === "orchestratorThinking"
     ) === true
   )
 }
@@ -126,5 +130,7 @@ function getThinkingKey(message: Message): string {
       toolCalls?: { function: { name: string; arguments: string } }[]
     }
   ).toolCalls?.find((c) => c.function.name === "orchestratorThinking")
-  return tc?.function.arguments || message.content || message.id
+  const content =
+    typeof message.content === "string" ? message.content : undefined
+  return tc?.function.arguments || content || message.id
 }

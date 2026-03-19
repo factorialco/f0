@@ -171,6 +171,7 @@ const Messages = ({
                             )}
                             <RenderMessage
                               message={msg}
+                              messages={messages}
                               inProgress={inProgress}
                               index={index}
                               isCurrentMessage={isCurrentMessage}
@@ -192,6 +193,7 @@ const Messages = ({
                           <RenderMessage
                             key={`thinking-live-${turnIndex}`}
                             message={thinkingGroup[thinkingGroup.length - 1]}
+                            messages={messages}
                             inProgress={inProgress}
                             index={restMessages.length}
                             isCurrentMessage={true}

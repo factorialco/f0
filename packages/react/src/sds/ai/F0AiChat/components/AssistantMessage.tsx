@@ -17,7 +17,8 @@ export const AssistantMessage = ({
   const isThinkingTool =
     message?.role === "assistant" &&
     message.toolCalls?.find(
-      (tool) => tool.function.name === "orchestratorThinking"
+      (tool: { function: { name: string } }) =>
+        tool.function.name === "orchestratorThinking"
     )
   const subComponent = message?.generativeUI?.(
     isThinkingTool

@@ -333,6 +333,7 @@ const Messages = ({
                   const messageProps = {
                     key: `${turnIndex}-${index}`,
                     message: messageToShow,
+                    messages: messages,
                     inProgress: inProgress,
                     index: index,
                     isCurrentMessage: isCurrentMessage,
