@@ -105,44 +105,65 @@ function extractComponents(indexJson) {
 }
 
 // ---------------------------------------------------------------------------
-// Classify a changed component into one of three buckets
+// Classify a changed component into one of four buckets
 //
-// Rules (based on what index.json actually exposes):
+//   breaking  — removed component that had the `stable` tag
+//               OR a component whose tag changed from `stable` to `deprecated`
+//               (i.e. it was `stable` in the snapshot and is now `deprecated`)
 //
-//   Breaking Changes — a component that existed before and is now gone, AND
-//     it was tagged `stable` (removing something stable is a breaking risk)
-//     OR it was tagged `deprecated` (removal finalises a deprecation cycle)
+//   visual    — any change (added or removed) whose category starts with
+//               "Foundations" (colors, spacing, typography, borders, shadows,
+//               icons) — these are token/style changes critical for designs
 //
-//   Visual Tweaks — component lives under Foundations/ (tokens: colors,
-//     spacing, typography, borders, shadows, icons)
+//   new       — component is brand-new (added, not in snapshot), not Foundations,
+//               not experimental/internal
 //
-//   New Atoms — everything else that is newly added
+//   low       — experimental or internal components (lower priority noise)
 // ---------------------------------------------------------------------------
 
-function classify(component, direction) {
+function classify(component, direction, prevComponent) {
   const { category, tags } = component
   const tagSet = new Set(tags ?? [])
 
-  if (direction === "removed") {
-    if (tagSet.has("stable") || tagSet.has("deprecated")) {
-      return "breaking"
-    }
-  }
-
+  // Foundations first — takes priority for both added and removed
   if (category.startsWith("Foundations")) {
     return "visual"
   }
 
-  return "new"
+  if (direction === "removed") {
+    const prevTagSet = new Set(prevComponent?.tags ?? [])
+    if (prevTagSet.has("stable")) {
+      return "breaking"
+    }
+  }
+
+  if (direction === "added") {
+    // stable→deprecated transition is handled in diff() via a separate "changed" list
+    if (tagSet.has("experimental") || tagSet.has("internal")) {
+      return "low"
+    }
+    return "new"
+  }
+
+  // removed, non-stable, non-Foundations
+  if (tagSet.has("experimental") || tagSet.has("internal")) {
+    return "low"
+  }
+
+  return "low"
 }
 
 // ---------------------------------------------------------------------------
-// Build a direct Storybook URL for a component
+// Build a direct Storybook docs URL for a component
+// Using /docs/ so the link lands on the documentation page, not a raw story
 // ---------------------------------------------------------------------------
 
 function storybookUrl(baseUrl, storyId) {
   if (!storyId) return baseUrl
-  return `${baseUrl}/?path=/story/${storyId}`
+  // Convert story id to docs id: strip the trailing story variant
+  // e.g. "components-f0button--default" → "components-f0button--docs"
+  const docsId = storyId.replace(/--[^-]+$/, "--docs")
+  return `${baseUrl}/?path=/docs/${docsId}`
 }
 
 // ---------------------------------------------------------------------------
@@ -152,6 +173,7 @@ function storybookUrl(baseUrl, storyId) {
 function diff(prev, curr, storybookBase) {
   const added = []
   const removed = []
+  const degraded = [] // stable → deprecated transitions
 
   const prevKeys = new Set(Object.keys(prev))
   const currKeys = new Set(Object.keys(curr))
@@ -164,8 +186,23 @@ function diff(prev, curr, storybookBase) {
         category: c.category,
         tags: c.tags,
         url: storybookUrl(storybookBase, c.storyId),
-        bucket: classify(c, "added"),
+        bucket: classify(c, "added", null),
       })
+    } else {
+      // Component exists in both — check for stable → deprecated transition
+      const prevC = prev[key]
+      const currC = curr[key]
+      const prevTags = new Set(prevC.tags ?? [])
+      const currTags = new Set(currC.tags ?? [])
+      if (prevTags.has("stable") && currTags.has("deprecated") && !prevTags.has("deprecated")) {
+        degraded.push({
+          name: key,
+          category: currC.category,
+          tags: currC.tags,
+          url: storybookUrl(storybookBase, currC.storyId),
+          bucket: "breaking",
+        })
+      }
     }
   }
 
@@ -177,12 +214,12 @@ function diff(prev, curr, storybookBase) {
         category: c.category,
         tags: c.tags,
         url: storybookUrl(storybookBase, c.storyId),
-        bucket: classify(c, "removed"),
+        bucket: classify(c, "removed", prev[key]),
       })
     }
   }
 
-  return { added, removed }
+  return { added, removed, degraded }
 }
 
 // ---------------------------------------------------------------------------
@@ -190,64 +227,82 @@ function diff(prev, curr, storybookBase) {
 // ---------------------------------------------------------------------------
 
 function buildIssueBody(changes, commitSha, repo) {
-  const { added, removed } = changes
+  const { added, removed, degraded } = changes
   const commitUrl = `https://github.com/${repo}/commit/${commitSha}`
   const lines = []
 
-  // ── Bucket helpers ──────────────────────────────────────────────────────
-  const breaking = removed.filter((c) => c.bucket === "breaking")
-  const visual = [...added, ...removed].filter((c) => c.bucket === "visual")
+  // ── Buckets ──────────────────────────────────────────────────────────────
+  const breaking = [
+    ...degraded,
+    ...removed.filter((c) => c.bucket === "breaking"),
+  ]
+  const visual = [
+    ...added.filter((c) => c.bucket === "visual"),
+    ...removed.filter((c) => c.bucket === "visual"),
+  ]
   const newAtoms = added.filter((c) => c.bucket === "new")
+  const lowImpact = [
+    ...added.filter((c) => c.bucket === "low"),
+    ...removed.filter((c) => c.bucket === "low"),
+  ]
 
-  // ── Breaking Changes ────────────────────────────────────────────────────
+  // ── 1. Breaking Changes ─────────────────────────────────────────────────
   if (breaking.length > 0) {
-    lines.push("## ⚠️ Breaking Changes")
+    lines.push("## 🔴 Breaking Changes")
     lines.push(
-      "_Components that were `stable` or `deprecated` and have been removed. Designs referencing these may be affected._\n"
+      "_Componentes `stable` eliminados o marcados como `deprecated`. Revisa tus diseños — pueden estar usando algo que ya no existe._\n"
     )
     for (const c of breaking) {
-      const tagBadges = c.tags.length ? ` · \`${c.tags.join("` `")}\`` : ""
-      lines.push(`- **${c.name}** (${c.category}${tagBadges}) — [View in Storybook](${c.url})`)
+      const reason = degraded.includes(c) ? "degraded to `deprecated`" : "removed"
+      lines.push(`- **[${c.name}](${c.url})** \`${c.category}\` — ${reason}`)
     }
     lines.push("")
   }
 
-  // ── New Atoms ───────────────────────────────────────────────────────────
-  if (newAtoms.length > 0) {
-    lines.push("## ✨ New Atoms")
-    lines.push("_Components that did not exist before._\n")
-    for (const c of newAtoms) {
-      const tagBadges = c.tags.length ? ` · \`${c.tags.join("` `")}\`` : ""
-      lines.push(`- **${c.name}** (${c.category}${tagBadges}) — [View in Storybook](${c.url})`)
-    }
-    lines.push("")
-  }
-
-  // ── Visual Tweaks ────────────────────────────────────────────────────────
+  // ── 2. Visual Tweaks (Foundations) ──────────────────────────────────────
   if (visual.length > 0) {
-    lines.push("## 🎨 Visual Tweaks")
-    lines.push("_Changes to Foundations (tokens, colors, spacing, typography, borders, shadows, icons)._\n")
+    lines.push("## 🎨 Visual Tweaks — Foundations")
+    lines.push(
+      "_Cambios en tokens de diseño (colores, espaciado, tipografía, bordes, sombras, iconos). Impacto directo en todos los diseños._\n"
+    )
     for (const c of visual) {
       const direction = added.includes(c) ? "added" : "removed"
-      lines.push(`- **${c.name}** (${c.category}) — ${direction} — [View in Storybook](${c.url})`)
+      lines.push(`- **[${c.name}](${c.url})** \`${c.category}\` — ${direction}`)
     }
     lines.push("")
   }
 
-  // ── Fallback: other removed (not stable/deprecated) ─────────────────────
-  const otherRemoved = removed.filter((c) => c.bucket !== "breaking" && c.bucket !== "visual")
-  if (otherRemoved.length > 0) {
-    lines.push("## 🗑️ Removed")
-    lines.push("_Components removed from Storybook (were experimental or internal)._\n")
-    for (const c of otherRemoved) {
-      const tagBadges = c.tags.length ? ` · \`${c.tags.join("` `")}\`` : ""
-      lines.push(`- **${c.name}** (${c.category}${tagBadges}) — [View in Storybook](${c.url})`)
+  // ── 3. New Atoms ─────────────────────────────────────────────────────────
+  if (newAtoms.length > 0) {
+    lines.push("## ✨ New Atoms")
+    lines.push("_Componentes nuevos que no existían en el snapshot anterior._\n")
+    for (const c of newAtoms) {
+      const tagBadges = c.tags.filter((t) => ["stable", "experimental", "deprecated"].includes(t))
+      const badge = tagBadges.length ? ` \`${tagBadges.join("` `")}\`` : ""
+      lines.push(`- **[${c.name}](${c.url})** \`${c.category}\`${badge}`)
     }
+    lines.push("")
+  }
+
+  // ── 4. Low Impact (Experimental / Internal) ──────────────────────────────
+  if (lowImpact.length > 0) {
+    lines.push("<details>")
+    lines.push("<summary>🔇 Bajo impacto — Experimental / Internal</summary>\n")
+    lines.push(
+      "_Cambios en componentes experimentales o internos. No requieren acción inmediata._\n"
+    )
+    for (const c of lowImpact) {
+      const direction = added.includes(c) ? "added" : "removed"
+      lines.push(`- **[${c.name}](${c.url})** \`${c.category}\` — ${direction}`)
+    }
+    lines.push("</details>")
     lines.push("")
   }
 
   lines.push("---")
-  lines.push(`Triggered by [${commitSha.slice(0, 7)}](${commitUrl}) · [View Storybook](https://ds.factorial.dev)`)
+  lines.push(
+    `Triggered by [${commitSha.slice(0, 7)}](${commitUrl}) · [View Storybook](https://ds.factorial.dev)`
+  )
 
   return lines.join("\n")
 }
@@ -292,10 +347,10 @@ async function main() {
   }
 
   const changes = diff(prevComponents, currentComponents, STORYBOOK_URL)
-  const { added, removed } = changes
-  const total = added.length + removed.length
+  const { added, removed, degraded } = changes
+  const total = added.length + removed.length + degraded.length
 
-  console.log(`Diff: +${added.length} added, -${removed.length} removed`)
+  console.log(`Diff: +${added.length} added, -${removed.length} removed, ~${degraded.length} degraded`)
 
   // Always update snapshot
   fs.writeFileSync(SNAPSHOT_PATH, JSON.stringify(currentComponents, null, 2), "utf-8")
@@ -312,12 +367,14 @@ async function main() {
     return
   }
 
-  const breaking = removed.filter((c) => c.bucket === "breaking").length
+  const breakingCount = degraded.length + removed.filter((c) => c.bucket === "breaking").length
   const titleParts = []
-  if (breaking > 0) titleParts.push(`${breaking} breaking`)
-  if (added.length > 0) titleParts.push(`${added.length} added`)
-  if (removed.length - breaking > 0) titleParts.push(`${removed.length - breaking} removed`)
-  const title = `[Design System] ${titleParts.join(", ")} · ${SHORT_SHA}`
+  if (breakingCount > 0) titleParts.push(`🔴 ${breakingCount} breaking`)
+  if (added.filter((c) => c.bucket === "new").length > 0)
+    titleParts.push(`✨ ${added.filter((c) => c.bucket === "new").length} new`)
+  if (added.filter((c) => c.bucket === "visual").length + removed.filter((c) => c.bucket === "visual").length > 0)
+    titleParts.push(`🎨 foundations`)
+  const title = `[Design System] ${titleParts.join(" · ")} · ${SHORT_SHA}`
   const body = buildIssueBody(changes, COMMIT_SHA, GITHUB_REPO)
   const issueUrl = await openGithubIssue(GITHUB_TOKEN, GITHUB_REPO, title, body)
 
