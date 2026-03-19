@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.409.0](https://github.com/factorialco/f0/compare/f0-react-v1.408.0...f0-react-v1.409.0) (2026-03-19)
+
+
+### Features
+
+* **ai:** add chat chart/dashboard components, canvas panel, and copilot actions ([#3623](https://github.com/factorialco/f0/issues/3623)) ([0a7b16f](https://github.com/factorialco/f0/commit/0a7b16f0c0b38a1da53b11ec8dc93ec85448de24))
+
 ## [1.408.0](https://github.com/factorialco/f0/compare/f0-react-v1.407.0...f0-react-v1.408.0) (2026-03-19)
 
 
