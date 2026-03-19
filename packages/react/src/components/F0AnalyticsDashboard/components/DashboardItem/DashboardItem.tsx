@@ -8,6 +8,7 @@ import {
 } from "@/experimental/Navigation/Dropdown"
 import { OneEmptyState } from "@/experimental/OneEmptyState"
 import { Ellipsis } from "@/icons/app"
+import { useI18n } from "@/lib/providers/i18n"
 
 interface DashboardItemProps {
   title: string
@@ -41,7 +42,7 @@ export function DashboardItem({
   actions,
 }: DashboardItemProps) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
-
+  const translations = useI18n()
   if (error) {
     return (
       <div className="flex h-full flex-col rounded-lg border border-solid border-f1-border-secondary">
@@ -97,7 +98,7 @@ export function DashboardItem({
               onOpenChange={setIsDropdownOpen}
             >
               <ButtonInternal
-                label="Options"
+                label={translations.actions.other}
                 icon={Ellipsis}
                 variant="ghost"
                 size="sm"
