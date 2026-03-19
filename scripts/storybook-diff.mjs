@@ -270,6 +270,15 @@ function buildIssueBody(changes, commitSha, repo) {
       lines.push(`- **[${c.name}](${c.url})** \`${c.category}\` — ${direction}`)
     }
     lines.push("")
+
+    // ── Acción requerida (solo cuando hay cambios en Foundations) ───────────
+    lines.push("### ⚡ Acción requerida")
+    lines.push("")
+    lines.push("- [ ] Revisar los tokens actualizados en Storybook y contrastar con la librería de Figma")
+    lines.push("- [ ] Verificar que los componentes que usan estos tokens se ven correctamente en los ficheros de diseño activos")
+    lines.push("- [ ] Notificar al equipo de producto si algún cambio afecta a pantallas en producción")
+    lines.push("- [ ] Actualizar las anotaciones de redline / specs si el cambio altera dimensiones o colores documentados")
+    lines.push("")
   }
 
   // ── 3. New Atoms ─────────────────────────────────────────────────────────
