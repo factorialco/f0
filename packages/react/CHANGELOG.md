@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.410.0](https://github.com/factorialco/f0/compare/f0-react-v1.409.0...f0-react-v1.410.0) (2026-03-19)
+
+
+### Features
+
+* Add row with dropdown ([#3679](https://github.com/factorialco/f0/issues/3679)) ([323a263](https://github.com/factorialco/f0/commit/323a263f6b49212bc82bca4c1cb1629fd20bda42))
+
 ## [1.409.0](https://github.com/factorialco/f0/compare/f0-react-v1.408.0...f0-react-v1.409.0) (2026-03-19)
 
 
