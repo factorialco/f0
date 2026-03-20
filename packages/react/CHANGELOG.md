@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.412.0](https://github.com/factorialco/f0/compare/f0-react-v1.411.1...f0-react-v1.412.0) (2026-03-20)
+
+
+### Features
+
+* **ResourceHeader:** :sparkles: Add loading prop to primary/secondary actions ([#3698](https://github.com/factorialco/f0/issues/3698)) ([7ce4b18](https://github.com/factorialco/f0/commit/7ce4b188d4ef1b9b7e5f0ce3f8157a0bdb75dae2))
+
 ## [1.411.1](https://github.com/factorialco/f0/compare/f0-react-v1.411.0...f0-react-v1.411.1) (2026-03-20)
 
 
