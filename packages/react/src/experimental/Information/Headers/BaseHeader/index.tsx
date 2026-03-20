@@ -152,6 +152,7 @@ export function BaseHeader({
                 size="lg"
                 disabled={primaryAction.disabled}
                 tooltip={primaryAction.tooltip}
+                loading={primaryAction.loading}
               />
             </div>
           )}
@@ -165,6 +166,7 @@ export function BaseHeader({
                 size="lg"
                 disabled={primaryAction.disabled}
                 tooltip={primaryAction.tooltip}
+                loading={primaryAction.loading}
               />
             </div>
           )}
@@ -181,6 +183,7 @@ export function BaseHeader({
                   hideLabel={action.hideLabel}
                   disabled={action.disabled}
                   tooltip={action.tooltip}
+                  loading={action.loading}
                 />
               </div>
             </Fragment>
@@ -210,6 +213,7 @@ export function BaseHeader({
                   hideLabel={action.hideLabel}
                   disabled={action.disabled}
                   tooltip={action.tooltip}
+                  loading={action.loading}
                 />
               </div>
             </Fragment>
@@ -227,6 +231,7 @@ export function BaseHeader({
                 icon={primaryAction.icon}
                 disabled={primaryAction.disabled}
                 tooltip={primaryAction.tooltip}
+                loading={primaryAction.loading}
               />
             </div>
           )}
@@ -240,6 +245,7 @@ export function BaseHeader({
                 size="md"
                 disabled={primaryAction.disabled}
                 tooltip={primaryAction.tooltip}
+                loading={primaryAction.loading}
               />
             </div>
           )}
