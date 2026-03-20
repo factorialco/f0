@@ -8,13 +8,31 @@ import { F0ActionItem } from "../../F0ActionItem"
 import { f0MarkdownRenderers } from "../../F0MarkdownRenderers"
 import { useAiChat } from "../providers/AiChatStateProvider"
 
+/**
+ * Normalize message content to a plain string.
+ * CopilotKit 1.54.0+ may provide `content` as `string | InputContent[]`.
+ * Extract text parts when it's an array; fall back to "" otherwise.
+ */
+function getTextContent(
+  content: string | Array<{ type: string; text?: string }> | undefined
+): string {
+  if (typeof content === "string") return content
+  if (Array.isArray(content)) {
+    return content
+      .filter((part) => part.type === "text" && part.text)
+      .map((part) => part.text)
+      .join("")
+  }
+  return ""
+}
+
 export const AssistantMessage = ({
   isGenerating,
   isLoading,
   markdownTagRenderers,
   message,
 }: AssistantMessageProps) => {
-  const content = message?.content || ""
+  const content = getTextContent(message?.content)
   const isThinkingTool =
     message?.role === "assistant" &&
     message.toolCalls?.find(

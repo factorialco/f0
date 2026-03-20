@@ -124,10 +124,8 @@ function isThinkingMessage(message: Message): boolean {
  */
 function getThinkingKey(message: Message): string {
   const tc = (
-    message as {
-      toolCalls?: { function: { name: string; arguments: string } }[]
-    }
-  ).toolCalls?.find((c) => c.function.name === "orchestratorThinking")
+    message.role === "assistant" ? message.toolCalls : undefined
+  )?.find((c: ToolCall) => c.function.name === "orchestratorThinking")
   const content =
     typeof message.content === "string" ? message.content : undefined
   return tc?.function.arguments || content || message.id
