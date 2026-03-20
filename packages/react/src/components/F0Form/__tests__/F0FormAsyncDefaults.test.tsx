@@ -83,7 +83,7 @@ describe("F0Form async defaultValues (single schema)", () => {
     vi.useRealTimers()
   })
 
-  it("shows skeleton while async defaultValues are loading", () => {
+  it("shows loading indicators while async defaultValues are loading", () => {
     const asyncFn = () =>
       new Promise<Partial<z.infer<typeof singleSchema>>>((resolve) => {
         setTimeout(() => resolve({ name: "Alice", email: "a@b.com" }), 1000)
@@ -91,8 +91,9 @@ describe("F0Form async defaultValues (single schema)", () => {
 
     render(<SingleSchemaForm defaultValues={asyncFn} />)
 
-    expect(screen.getByRole("generic", { busy: true })).toBeInTheDocument()
-    expect(screen.queryByLabelText("Name")).not.toBeInTheDocument()
+    // Fields render immediately with loading indicators instead of skeleton
+    expect(screen.getByLabelText("Name")).toBeInTheDocument()
+    expect(screen.getByLabelText("Name")).toHaveAttribute("aria-busy", "true")
   })
 
   it("renders resolved values after async defaultValues resolve", async () => {
@@ -144,7 +145,7 @@ describe("F0Form async defaultValues (single schema)", () => {
 })
 
 describe("F0Form async defaultValues (per-section)", () => {
-  it("shows skeleton while async per-section defaultValues are loading", () => {
+  it("shows loading indicators while async per-section defaultValues are loading", () => {
     vi.useFakeTimers({ shouldAdvanceTime: true })
 
     const asyncFn = () =>
@@ -164,8 +165,9 @@ describe("F0Form async defaultValues (per-section)", () => {
 
     render(<PerSectionForm defaultValues={asyncFn} />)
 
-    expect(screen.getByRole("generic", { busy: true })).toBeInTheDocument()
-    expect(screen.queryByLabelText("Name")).not.toBeInTheDocument()
+    // Fields render immediately with loading indicators instead of skeleton
+    expect(screen.getByLabelText("Name")).toBeInTheDocument()
+    expect(screen.getByLabelText("Name")).toHaveAttribute("aria-busy", "true")
 
     vi.useRealTimers()
   })

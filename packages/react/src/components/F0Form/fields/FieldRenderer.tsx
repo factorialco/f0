@@ -39,7 +39,7 @@ export function FieldRenderer({ field, sectionId }: FieldRendererProps) {
   const form = useFormContext()
   const values = form.watch()
   const { isSubmitting } = form.formState
-  const { formName } = useF0FormContext()
+  const { formName, isLoading: isFormLoading } = useF0FormContext()
   const { forms } = useI18n()
 
   // Evaluate if field is currently disabled
@@ -112,6 +112,7 @@ export function FieldRenderer({ field, sectionId }: FieldRendererProps) {
               isSubmitting,
               isRequired,
               values,
+              isFormLoading,
             })}
           </FormControl>
           {field.helpText && (

@@ -680,3 +680,27 @@ export const Snapshot: Story = {
     )
   },
 }
+
+export const LoadingState: Story = {
+  render() {
+    const textField: F0Field = {
+      id: "text",
+      type: "text",
+      label: "Text field",
+      placeholder: "Enter text",
+      helpText: "Helper text",
+    }
+
+    return (
+      <div className="flex max-w-sm flex-col gap-6">
+        <F0FormField
+          field={textField}
+          value=""
+          onChange={() => {}}
+          disabled
+          loading
+        />
+      </div>
+    )
+  },
+}

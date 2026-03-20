@@ -10,7 +10,6 @@ import type {
 import type { F0WizardStep } from "@/ui/F0Wizard/types"
 
 import { F0FormSection } from "@/components/F0Form/components/F0FormSection"
-import { F0FormSkeleton } from "@/components/F0Form/components/F0FormSkeleton"
 import { F0Form } from "@/components/F0Form/F0Form"
 import { getF0Config, unwrapToZodObject } from "@/components/F0Form/f0Schema"
 import { useF0Form } from "@/components/F0Form/useF0Form"
@@ -449,16 +448,6 @@ function F0WizardFormPerSection<T extends F0PerSectionSchema>({
       allowStepSkipping={allowStepSkipping}
     >
       {({ currentStep }) => {
-        if (formDefinition.isLoading) {
-          return (
-            <div className="flex flex-col gap-6 pb-5">
-              {Object.entries(schema).map(([sectionId, sectionSchema]) => (
-                <F0FormSkeleton key={sectionId} schema={sectionSchema} />
-              ))}
-            </div>
-          )
-        }
-
         const currentSectionIds = getSectionIdsForStep(
           currentStep,
           sectionIds,
@@ -500,6 +489,7 @@ function F0WizardFormPerSection<T extends F0PerSectionSchema>({
                       })
                     }}
                     renderCustomField={renderCustomField}
+                    isLoading={formDefinition.isLoading}
                   />
                 )
               })}
@@ -528,6 +518,7 @@ function PerSectionFormWrapper<TSchema extends F0FormSchema>({
   sectionForms,
   onErrorStateChange,
   renderCustomField,
+  isLoading,
 }: {
   sectionId: string
   formName: string
@@ -540,6 +531,7 @@ function PerSectionFormWrapper<TSchema extends F0FormSchema>({
   sectionForms: Record<string, ReturnType<typeof useF0Form> | null>
   onErrorStateChange: (hasErrors: boolean) => void
   renderCustomField?: import("@/components/F0Form/types").RenderCustomFieldFunction
+  isLoading?: boolean
 }) {
   const form = useF0Form()
 
@@ -572,6 +564,7 @@ function PerSectionFormWrapper<TSchema extends F0FormSchema>({
       errorTriggerMode={errorTriggerMode}
       formRef={form.formRef}
       renderCustomField={renderCustomField}
+      isLoading={isLoading}
     />
   )
 }
@@ -763,14 +756,6 @@ function F0WizardFormSingleSchema<TSchema extends F0FormSchema>({
       allowStepSkipping={allowStepSkipping}
     >
       {({ currentStep }) => {
-        if (formDefinition.isLoading) {
-          return (
-            <div className="pb-5">
-              <F0FormSkeleton schema={schema} sections={sections} />
-            </div>
-          )
-        }
-
         const currentSectionIds = getSectionIdsForStep(
           currentStep,
           sectionIds,
@@ -810,6 +795,7 @@ function F0WizardFormSingleSchema<TSchema extends F0FormSchema>({
                 errorTriggerMode={errorTriggerMode}
                 formRef={form.formRef}
                 renderCustomField={renderCustomField}
+                isLoading={formDefinition.isLoading}
               />
             </div>
             {ActionBar}

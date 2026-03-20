@@ -10,6 +10,8 @@ interface F0FormContextValue {
   initialFiles?: InitialFile[]
   /** Callback that renders custom fields identified by customFieldName */
   renderCustomField?: RenderCustomFieldFunction
+  /** Whether async defaultValues are still being resolved */
+  isLoading?: boolean
 }
 
 export const F0FormContext = createContext<F0FormContextValue | null>(null)

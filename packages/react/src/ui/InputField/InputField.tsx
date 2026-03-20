@@ -507,7 +507,7 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                 ),
               })}
             </div>
-            {!noEdit && (
+            {noEdit && (
               <div
                 data-slot="placeholder"
                 className={cn(

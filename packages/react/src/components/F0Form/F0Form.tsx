@@ -39,10 +39,6 @@ import type { F0FormStateCallback } from "./useF0Form"
 
 import { FormActionBar } from "./components/ActionBar"
 import { F0FormSection } from "./components/F0FormSection"
-import {
-  F0FormSkeleton,
-  F0FormPerSectionSkeleton,
-} from "./components/F0FormSkeleton"
 import { RowRenderer } from "./components/RowRenderer"
 import { SectionRenderer } from "./components/SectionRenderer"
 import { SwitchGroupRenderer } from "./components/SwitchGroupRenderer"
@@ -134,6 +130,7 @@ function F0FormPerSection<T extends F0PerSectionSchema>(
     styling,
     initialFiles,
     renderCustomField,
+    isLoading: isFormLoading,
   } = props
 
   const showSectionsSidepanel = styling?.showSectionsSidepanel ?? false
@@ -197,6 +194,7 @@ function F0FormPerSection<T extends F0PerSectionSchema>(
               errorTriggerMode={errorTriggerMode}
               initialFiles={initialFiles}
               renderCustomField={renderCustomField}
+              isLoading={isFormLoading}
             />
           </div>
         )
@@ -331,18 +329,30 @@ function F0FormFromDefinition(
   if (formDefinition.isLoading) {
     if (formDefinition._brand === "single") {
       return (
-        <F0FormSkeleton
-          schema={formDefinition.schema}
-          sections={formDefinition.sections}
+        <F0FormFromSingleDefinition
+          formDefinition={
+            formDefinition as F0FormDefinitionSingleSchema<WizardFormSchema>
+          }
           className={className}
+          styling={styling}
+          formRef={formRef}
+          initialFiles={initialFiles}
+          renderCustomField={renderCustomField}
+          isLoading
         />
       )
     }
     return (
-      <F0FormPerSectionSkeleton
-        schema={formDefinition.schema}
-        sections={formDefinition.sections}
+      <F0FormFromPerSectionDefinition
+        formDefinition={
+          formDefinition as F0FormDefinitionPerSection<WizardPerSectionSchema>
+        }
         className={className}
+        styling={styling}
+        formRef={formRef}
+        initialFiles={initialFiles}
+        renderCustomField={renderCustomField}
+        isLoading
       />
     )
   }
@@ -383,7 +393,8 @@ function F0FormFromSingleDefinition<TSchema extends F0FormSchema>({
   formRef,
   initialFiles,
   renderCustomField,
-}: F0FormPropsWithSingleSchemaDefinition<TSchema>) {
+  isLoading,
+}: F0FormPropsWithSingleSchemaDefinition<TSchema> & { isLoading?: boolean }) {
   const def = formDefinition as F0FormDefinitionSingleSchema<TSchema>
 
   const adaptedOnSubmit = useCallback(
@@ -408,6 +419,7 @@ function F0FormFromSingleDefinition<TSchema extends F0FormSchema>({
       formRef={formRef}
       initialFiles={initialFiles}
       renderCustomField={renderCustomField}
+      isLoading={isLoading}
     />
   )
 }
@@ -419,7 +431,8 @@ function F0FormFromPerSectionDefinition<T extends F0PerSectionSchema>({
   formRef,
   initialFiles,
   renderCustomField,
-}: F0FormPropsWithPerSectionDefinition<T>) {
+  isLoading,
+}: F0FormPropsWithPerSectionDefinition<T> & { isLoading?: boolean }) {
   const def = formDefinition as F0FormDefinitionPerSection<T>
 
   const fullDataRef = useRef<Record<string, unknown>>(
@@ -463,6 +476,7 @@ function F0FormFromPerSectionDefinition<T extends F0PerSectionSchema>({
       formRef={formRef}
       initialFiles={initialFiles}
       renderCustomField={renderCustomField}
+      isLoading={isLoading}
     />
   )
 }
@@ -484,6 +498,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
     errorTriggerMode = "on-blur",
     styling,
     formRef,
+    isLoading: isFormLoading,
   } = props
 
   // Resolve styling configuration
@@ -593,6 +608,15 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
     mode: formMode,
     defaultValues: defaultValues as DefaultValues<TValues>,
   })
+
+  // When async defaultValues finish loading, reset the form with resolved values
+  const wasLoadingRef = useRef(isFormLoading)
+  useEffect(() => {
+    if (wasLoadingRef.current && !isFormLoading && defaultValues) {
+      form.reset(defaultValues as DefaultValues<TValues>)
+    }
+    wasLoadingRef.current = isFormLoading
+  }, [isFormLoading, defaultValues, form])
 
   const rootError = form.formState.errors.root
   const { isDirty, isSubmitting, errors } = form.formState
@@ -886,8 +910,9 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
       formName: name,
       initialFiles: props.initialFiles,
       renderCustomField: props.renderCustomField,
+      isLoading: isFormLoading,
     }),
-    [name, props.initialFiles, props.renderCustomField]
+    [name, props.initialFiles, props.renderCustomField, isFormLoading]
   )
 
   // Form content component to avoid repetition
@@ -953,7 +978,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
             label={submitLabel}
             icon={submitIcon}
             loading={isSubmitting}
-            disabled={hasErrors}
+            disabled={hasErrors || isFormLoading}
           />
         </div>
       )}

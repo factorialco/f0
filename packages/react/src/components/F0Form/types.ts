@@ -342,6 +342,12 @@ export interface F0FormPropsWithSingleSchema<TSchema extends F0FormSchema> {
    * When a field has `customFieldName`, this function is called instead of the inline `render`.
    */
   renderCustomField?: RenderCustomFieldFunction
+  /**
+   * Whether async defaultValues are still being resolved.
+   * When true, the form renders with loading indicators inside each field
+   * instead of replacing the entire form with skeleton placeholders.
+   */
+  isLoading?: boolean
 }
 
 /**
@@ -426,6 +432,12 @@ export interface F0FormPropsWithPerSectionSchema<T extends F0PerSectionSchema> {
    * When a field has `customFieldName`, this function is called instead of the inline `render`.
    */
   renderCustomField?: RenderCustomFieldFunction
+  /**
+   * Whether async defaultValues are still being resolved.
+   * When true, the form renders with loading indicators inside each field
+   * instead of replacing the entire form with skeleton placeholders.
+   */
+  isLoading?: boolean
 }
 
 /**
@@ -466,6 +478,12 @@ export interface F0FormPropsWithPerSectionDefinition<
    * When a field has `customFieldName`, this function is called instead of the inline `render`.
    */
   renderCustomField?: RenderCustomFieldFunction
+  /**
+   * Whether async defaultValues are still being resolved.
+   * When true, the form renders with loading indicators inside each field
+   * instead of replacing the entire form with skeleton placeholders.
+   */
+  isLoading?: boolean
 }
 
 /**

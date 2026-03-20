@@ -88,6 +88,8 @@ interface F0FormSectionProps<TSchema extends F0FormSchema> {
   initialFiles?: import("../fields/file/types").InitialFile[]
   formRef?: React.MutableRefObject<F0FormRef | null>
   renderCustomField?: RenderCustomFieldFunction
+  /** Whether async defaultValues are still being resolved */
+  isLoading?: boolean
 }
 
 /**
@@ -107,6 +109,7 @@ export function F0FormSection<TSchema extends F0FormSchema>({
   initialFiles,
   formRef,
   renderCustomField,
+  isLoading: isFormLoading,
 }: F0FormSectionProps<TSchema>) {
   const i18n = useI18n()
 
@@ -133,6 +136,15 @@ export function F0FormSection<TSchema extends F0FormSchema>({
     mode: formMode,
     defaultValues: defaultValues as DefaultValues<TValues>,
   })
+
+  // When async defaultValues finish loading, reset the form with resolved values
+  const wasLoadingRef = useRef(isFormLoading)
+  useEffect(() => {
+    if (wasLoadingRef.current && !isFormLoading && defaultValues) {
+      form.reset(defaultValues as DefaultValues<TValues>)
+    }
+    wasLoadingRef.current = isFormLoading
+  }, [isFormLoading, defaultValues, form])
 
   const rootError = form.formState.errors.root
   const { isSubmitting, isDirty } = form.formState
@@ -258,8 +270,13 @@ export function F0FormSection<TSchema extends F0FormSchema>({
   const groupedItems = groupContiguousSwitches(definition)
 
   const contextValue = useMemo(
-    () => ({ formName, initialFiles, renderCustomField }),
-    [formName, initialFiles, renderCustomField]
+    () => ({
+      formName,
+      initialFiles,
+      renderCustomField,
+      isLoading: isFormLoading,
+    }),
+    [formName, initialFiles, renderCustomField, isFormLoading]
   )
 
   const title = sectionConfig?.title ?? sectionId
@@ -337,7 +354,7 @@ export function F0FormSection<TSchema extends F0FormSchema>({
                 label={submitLabel}
                 icon={submitIcon}
                 loading={isSubmitting}
-                disabled={hasErrors}
+                disabled={hasErrors || isFormLoading}
               />
             </div>
           )}
