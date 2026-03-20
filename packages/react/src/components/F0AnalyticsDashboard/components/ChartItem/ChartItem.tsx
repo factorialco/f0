@@ -1,3 +1,5 @@
+import { useState } from "react"
+
 import type {
   F0DataChartFunnelSeries,
   F0DataChartPieSeries,
@@ -19,6 +21,7 @@ import {
   PieChartSkeleton,
   RadarChartSkeleton,
 } from "@/components/F0DataChart"
+import { ChipsList, Controls, Root } from "@/components/OneFilterPicker"
 
 import type {
   DashboardChartConfig,
@@ -173,16 +176,25 @@ export function ChartItem<Filters extends FiltersDefinition>({
   filters,
   actions,
 }: ChartItemProps<Filters>) {
+  const [localItemFilters, setLocalItemFilters] = useState<
+    FiltersState<FiltersDefinition>
+  >(() => item.defaultItemFilters ?? {})
+
   const enabled = item.useDashboardFilters !== false
+  const mergedFilters = {
+    ...(enabled ? filters : {}),
+    ...localItemFilters,
+  } as FiltersState<Filters>
+
   const { data, isLoading, error, retry } = useDashboardItemData<
     Filters,
     DashboardChartData
-  >(item.fetchData, filters, enabled)
+  >(item.fetchData, mergedFilters, true)
 
   const effectiveError =
     error ?? (!isLoading && !data ? new Error("No data available") : undefined)
 
-  return (
+  const content = (
     <DashboardItem
       title={item.title}
       description={item.description}
@@ -191,6 +203,8 @@ export function ChartItem<Filters extends FiltersDefinition>({
       onRetry={retry}
       skeleton={chartSkeleton(item.chart)}
       actions={actions}
+      filterControls={item.itemFilters ? <Controls /> : undefined}
+      filterChips={item.itemFilters ? <ChipsList /> : undefined}
     >
       {data && (
         <div className="h-full w-full px-4 py-3">
@@ -199,4 +213,19 @@ export function ChartItem<Filters extends FiltersDefinition>({
       )}
     </DashboardItem>
   )
+
+  if (item.itemFilters) {
+    return (
+      <Root
+        filters={item.itemFilters}
+        value={localItemFilters}
+        onChange={setLocalItemFilters}
+        mode="simple"
+      >
+        {content}
+      </Root>
+    )
+  }
+
+  return content
 }

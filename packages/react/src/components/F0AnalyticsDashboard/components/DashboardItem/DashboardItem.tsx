@@ -21,6 +21,10 @@ interface DashboardItemProps {
   children: ReactNode
   /** Dropdown actions for edit capabilities (reorder, resize, delete) */
   actions?: DropdownItemType[]
+  /** Item-level filter controls rendered inline with the header (right side) */
+  filterControls?: ReactNode
+  /** Item-level filter chips rendered below the header row */
+  filterChips?: ReactNode
 }
 
 /**
@@ -40,6 +44,8 @@ export function DashboardItem({
   skeleton,
   children,
   actions,
+  filterControls,
+  filterChips,
 }: DashboardItemProps) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const translations = useI18n()
@@ -88,6 +94,9 @@ export function DashboardItem({
             </OneEllipsis>
           )}
         </div>
+        {filterControls && (
+          <div className="flex shrink-0 items-center">{filterControls}</div>
+        )}
         {actions && actions.length > 0 && (
           <div
             className={`flex-shrink-0 opacity-100 transition-opacity delay-150 duration-150 focus-within:delay-0 group-hover/dashitem:delay-0 sm:opacity-0 focus-within:sm:opacity-100 group-hover/dashitem:sm:opacity-100 ${isDropdownOpen ? "delay-0 sm:opacity-100" : ""}`}
@@ -111,6 +120,7 @@ export function DashboardItem({
           </div>
         )}
       </div>
+      {filterChips && <div className="px-4 pb-2">{filterChips}</div>}
       <div className="min-h-0 flex-1">{isLoading ? skeleton : children}</div>
     </div>
   )

@@ -119,8 +119,6 @@ export interface HeatmapChartConfig {
   max?: number
   /** Show value labels on each cell. @default false */
   showLabels?: boolean
-  /** Show the visual map legend. @default false */
-  showVisualMap?: boolean
   /** Format the value displayed in cells and tooltip */
   valueFormatter?: (value: number) => string
 }
@@ -188,6 +186,10 @@ export interface DashboardItemBase {
    * @default true
    */
   useDashboardFilters?: boolean
+  /** Item-level filter definitions. Renders a compact filter bar within the card. */
+  itemFilters?: FiltersDefinition
+  /** Initial values for item-level filters. */
+  defaultItemFilters?: FiltersState<FiltersDefinition>
 }
 
 // ---------------------------------------------------------------------------

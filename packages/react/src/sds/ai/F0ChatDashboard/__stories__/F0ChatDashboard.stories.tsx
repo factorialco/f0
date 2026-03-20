@@ -203,7 +203,6 @@ const heatmapConfig: ChatDashboardConfig = {
       chart: {
         type: "heatmap",
         showLabels: true,
-        showVisualMap: true,
       },
       computation: {
         datasetId: "absences",

@@ -3,7 +3,12 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import { F0AnalyticsDashboard } from "../index"
-import { dashboardFilters, dashboardPresets, mixedItems } from "./mockDataMixed"
+import {
+  dashboardFilters,
+  dashboardPresets,
+  itemFilterItems,
+  mixedItems,
+} from "./mockDataMixed"
 
 const meta = {
   component: F0AnalyticsDashboard,
@@ -24,6 +29,21 @@ export const MixedDashboard: Story = {
       filters={dashboardFilters}
       presets={dashboardPresets}
       items={mixedItems}
+    />
+  ),
+}
+
+/**
+ * Dashboard with item-level filters: a metric with a "Period" picker,
+ * a chart with a "Quarter" picker, and a collection with a "Role" picker.
+ * Items without `itemFilters` work exactly as before (backward compatible).
+ */
+export const WithItemFilters: Story = {
+  render: () => (
+    <F0AnalyticsDashboard
+      filters={dashboardFilters}
+      presets={dashboardPresets}
+      items={itemFilterItems}
     />
   ),
 }

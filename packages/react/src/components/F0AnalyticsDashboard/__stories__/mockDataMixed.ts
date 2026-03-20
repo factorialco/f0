@@ -1,4 +1,7 @@
-import type { PresetsDefinition } from "@/components/OneFilterPicker/types"
+import type {
+  FiltersDefinition,
+  PresetsDefinition,
+} from "@/components/OneFilterPicker/types"
 import type { RecordType } from "@/hooks/datasource"
 import type { PageBasedPaginatedResponse } from "@/hooks/datasource/types"
 
@@ -666,6 +669,273 @@ const collectionItem: DashboardCollectionItem<DashboardFiltersType> = {
   createSource: createEmployeeSource,
   visualizations: [employeeTableVisualization],
 }
+
+// ---------------------------------------------------------------------------
+// Mixed items — full dashboard with all types and filter reactivity
+// ---------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------
+// Item-level filter definitions
+// ---------------------------------------------------------------------------
+
+const QUARTERS = ["Q1", "Q2", "Q3", "Q4"] as const
+
+const quarterFilter: FiltersDefinition = {
+  quarter: {
+    type: "in",
+    label: "Quarter",
+    options: {
+      options: QUARTERS.map((q) => ({ value: q, label: q })),
+    },
+  },
+} as const
+
+const periodFilter: FiltersDefinition = {
+  period: {
+    type: "in",
+    label: "Period",
+    options: {
+      options: [
+        { value: "YTD", label: "Year to Date" },
+        { value: "lastYear", label: "Last Year" },
+      ],
+    },
+  },
+} as const
+
+const roleFilter: FiltersDefinition = {
+  role: {
+    type: "in",
+    label: "Role",
+    options: {
+      options: [
+        { value: "Frontend Engineer", label: "Frontend Engineer" },
+        { value: "Backend Engineer", label: "Backend Engineer" },
+        { value: "Product Manager", label: "Product Manager" },
+        { value: "UI Designer", label: "UI Designer" },
+        { value: "Content Strategist", label: "Content Strategist" },
+      ],
+    },
+  },
+} as const
+
+// ---------------------------------------------------------------------------
+// Item-filter-aware fetch functions
+// ---------------------------------------------------------------------------
+
+function fetchCostByQuarter(filters: Filters): Promise<DashboardChartData> {
+  const dm = departmentMultiplier(filters)
+  const selectedQuarters =
+    Array.isArray(filters.quarter) && filters.quarter.length > 0
+      ? (filters.quarter as string[])
+      : [...QUARTERS]
+
+  return delay(700).then(() => {
+    const allData: Record<string, number[]> = {
+      Engineering: [320_000, 340_000, 310_000, 350_000].map((v) =>
+        Math.round(v * dm.Engineering)
+      ),
+      Product: [180_000, 190_000, 175_000, 195_000].map((v) =>
+        Math.round(v * dm.Product)
+      ),
+      Design: [120_000, 130_000, 125_000, 135_000].map((v) =>
+        Math.round(v * dm.Design)
+      ),
+      Marketing: [95_000, 100_000, 92_000, 105_000].map((v) =>
+        Math.round(v * dm.Marketing)
+      ),
+    }
+
+    const quarterIndices = selectedQuarters.map((q) =>
+      QUARTERS.indexOf(q as (typeof QUARTERS)[number])
+    )
+
+    return {
+      categories: selectedQuarters,
+      series: Object.entries(allData).map(([name, data]) => ({
+        name,
+        data: quarterIndices.map((i) => data[i]),
+      })),
+    }
+  })
+}
+
+function fetchRevenueByPeriod(filters: Filters): Promise<DashboardMetricData> {
+  const sm = statusMultiplier(filters)
+  const period =
+    Array.isArray(filters.period) && filters.period.length > 0
+      ? (filters.period[0] as string)
+      : "YTD"
+
+  return delay(400).then(() => {
+    if (period === "lastYear") {
+      return {
+        value: Math.round(28_500_000 * sm),
+        previousValue: Math.round(25_200_000 * sm),
+      }
+    }
+    return {
+      value: Math.round(34_400_000 * sm),
+      previousValue: Math.round(28_500_000 * sm),
+    }
+  })
+}
+
+function createEmployeeSourceWithRole(filters: Filters) {
+  return {
+    dataAdapter: {
+      paginationType: "pages" as const,
+      perPage: PER_PAGE,
+      fetchData: ({
+        filters: dcFilters,
+        sortings: _sortings,
+        pagination,
+      }: {
+        filters: Record<string, unknown>
+        sortings: unknown
+        pagination: { currentPage: number; perPage?: number }
+      }) => {
+        return new Promise<PageBasedPaginatedResponse<Employee>>((resolve) => {
+          setTimeout(() => {
+            let filtered = [...MOCK_EMPLOYEES]
+
+            // Dashboard-level filters come through the `filters` closure
+            const deptFilter = (filters.department ?? dcFilters.department) as
+              | string[]
+              | undefined
+            if (deptFilter && deptFilter.length > 0) {
+              filtered = filtered.filter((e) =>
+                deptFilter.includes(e.department)
+              )
+            }
+
+            const statusFilter = (filters.status ?? dcFilters.status) as
+              | string[]
+              | undefined
+            if (statusFilter && statusFilter.length > 0) {
+              filtered = filtered.filter((e) => statusFilter.includes(e.status))
+            }
+
+            // Item-level role filter comes through dcFilters (OneDataCollection's native filter bar)
+            const roleFilterVal = dcFilters.role as string[] | undefined
+            if (roleFilterVal && roleFilterVal.length > 0) {
+              filtered = filtered.filter((e) => roleFilterVal.includes(e.role))
+            }
+
+            const page = pagination?.currentPage ?? 1
+            const perPage = pagination?.perPage ?? PER_PAGE
+            const startIndex = (page - 1) * perPage
+            const pageRecords = filtered.slice(startIndex, startIndex + perPage)
+
+            resolve({
+              type: "pages",
+              records: pageRecords,
+              total: filtered.length,
+              currentPage: page,
+              perPage,
+              pagesCount: Math.ceil(filtered.length / perPage),
+            })
+          }, 200)
+        })
+      },
+    },
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Items with item-level filters
+// ---------------------------------------------------------------------------
+
+export const itemFilterItems: DashboardItem<DashboardFiltersType>[] = [
+  {
+    id: "revenue-metric",
+    title: "Total Revenue",
+    description: "Revenue with period selector",
+    type: "metric",
+    colSpan: 4,
+    x: 0,
+    y: 0,
+    rowSpan: 4,
+    format: { type: "currency", currency: "EUR" },
+    fetchData: fetchRevenueByPeriod,
+    itemFilters: periodFilter,
+    defaultItemFilters: { period: ["YTD"] },
+  },
+  {
+    id: "total-headcount-no-item-filter",
+    title: "Total Headcount",
+    description: "No item filter — global filters only",
+    type: "metric",
+    colSpan: 4,
+    x: 4,
+    y: 0,
+    rowSpan: 4,
+    fetchData: fetchTotalHeadcount,
+  },
+  {
+    id: "attrition-no-item-filter",
+    title: "Attrition Rate",
+    description: "No item filter — global filters only",
+    type: "metric",
+    colSpan: 4,
+    x: 8,
+    y: 0,
+    rowSpan: 4,
+    format: { type: "percent" },
+    decimals: 1,
+    fetchData: fetchAttritionMetric,
+  },
+  {
+    id: "cost-by-quarter",
+    title: "Cost by Quarter",
+    description: "Filter quarters locally",
+    type: "chart",
+    colSpan: 6,
+    x: 0,
+    y: 4,
+    rowSpan: 8,
+    chart: {
+      type: "bar",
+      stacked: true,
+      valueFormatter: (v: number) => `$${Math.round(v / 1_000)}k`,
+    },
+    fetchData: fetchCostByQuarter,
+    itemFilters: quarterFilter,
+  },
+  {
+    id: "revenue-trend-no-item-filter",
+    title: "Revenue Trend",
+    description: "No item filter — global filters only",
+    type: "chart",
+    colSpan: 6,
+    x: 6,
+    y: 4,
+    rowSpan: 8,
+    chart: {
+      type: "line",
+      showArea: true,
+      showDots: true,
+      valueFormatter: (v: number) =>
+        v >= 1_000_000
+          ? `$${(v / 1_000_000).toFixed(1)}M`
+          : `$${Math.round(v / 1_000)}k`,
+    },
+    fetchData: fetchRevenueTrend,
+  },
+  {
+    id: "employee-table-with-role",
+    title: "Employee Directory",
+    description: "Filter by role within the card",
+    type: "collection",
+    colSpan: 12,
+    x: 0,
+    y: 12,
+    rowSpan: 10,
+    createSource: createEmployeeSourceWithRole,
+    visualizations: [employeeTableVisualization],
+    itemFilters: roleFilter,
+  },
+]
 
 // ---------------------------------------------------------------------------
 // Mixed items — full dashboard with all types and filter reactivity

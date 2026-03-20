@@ -24,8 +24,10 @@ interface CollectionItemProps<Filters extends FiltersDefinition> {
  *
  * Calls `item.createSource(filters)` to produce a DataCollectionSourceDefinition,
  * then feeds it to `useDataCollectionSource` which manages the full lifecycle.
- * The collection renders without its own filter bar — dashboard-level filters
- * are already baked into the source definition.
+ *
+ * When `item.itemFilters` is defined, the filter definitions are injected into the
+ * source definition so that OneDataCollection renders them natively in its own
+ * filter bar — no separate OneFilterPicker is needed.
  */
 export function CollectionItem<Filters extends FiltersDefinition>({
   item,
@@ -40,9 +42,23 @@ export function CollectionItem<Filters extends FiltersDefinition>({
   const filtersKey = JSON.stringify(effectiveFilters)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const sourceDefinition = useMemo(
-    () => item.createSource(effectiveFilters),
+    () => {
+      const base = item.createSource(effectiveFilters)
+
+      // Inject item-level filters into the source so OneDataCollection
+      // renders them in its native filter bar.
+      if (item.itemFilters) {
+        return {
+          ...base,
+          filters: item.itemFilters,
+          defaultFilters: item.defaultItemFilters,
+        }
+      }
+
+      return base
+    },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [filtersKey]
+    [filtersKey, item.itemFilters, item.defaultItemFilters]
   )
 
   const source = useDataCollectionSource<RecordType>(sourceDefinition, [

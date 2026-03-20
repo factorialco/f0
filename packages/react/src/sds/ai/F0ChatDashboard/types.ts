@@ -1,3 +1,11 @@
+import type {
+  DashboardItemBase,
+  MetricFormat,
+} from "@/components/F0AnalyticsDashboard/types"
+
+// Re-export as alias for backward compatibility
+export type ChatDashboardMetricFormat = MetricFormat
+
 // ---------------------------------------------------------------------------
 // Format presets — JSON-serializable value formatting instructions
 // ---------------------------------------------------------------------------
@@ -75,7 +83,6 @@ export interface ChatDashboardHeatmapChartConfig {
   min?: number
   max?: number
   showLabels?: boolean
-  showVisualMap?: boolean
   valueFormat?: FormatPreset
 }
 
@@ -87,16 +94,6 @@ export type ChatDashboardChartConfig =
   | ChatDashboardPieChartConfig
   | ChatDashboardGaugeChartConfig
   | ChatDashboardHeatmapChartConfig
-
-// ---------------------------------------------------------------------------
-// Metric format — reuses the same shape as F0AnalyticsDashboard's MetricFormat
-// ---------------------------------------------------------------------------
-
-export type ChatDashboardMetricFormat =
-  | { type: "number" }
-  | { type: "currency"; currency?: string }
-  | { type: "percent" }
-  | { type: "custom"; suffix?: string; prefix?: string }
 
 // ---------------------------------------------------------------------------
 // Fetch spec — describes how to obtain data server-side (no raw data)
@@ -208,16 +205,9 @@ export interface ChatDashboardColumn {
 // Dashboard items — discriminated union on `type`
 // ---------------------------------------------------------------------------
 
-interface ChatDashboardItemBase {
-  id: string
-  title: string
-  description?: string
+interface ChatDashboardItemBase extends DashboardItemBase {
   /** Source attribution shown as a subtitle (e.g. "Based on 8 feedbacks from 3 evaluators") */
   sourceDescription?: string
-  colSpan?: number
-  rowSpan?: number
-  x?: number
-  y?: number
 }
 
 export interface ChatDashboardChartItem extends ChatDashboardItemBase {
