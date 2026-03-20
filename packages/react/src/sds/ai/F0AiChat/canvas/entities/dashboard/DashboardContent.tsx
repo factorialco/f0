@@ -1,6 +1,4 @@
-import { breakpoints } from "@factorialco/f0-core"
 import type { ReactNode } from "react"
-import { useMediaQuery } from "usehooks-ts"
 
 import { F0ChatDashboard } from "../../../../F0ChatDashboard"
 
@@ -15,9 +13,6 @@ export function DashboardContent({
   refreshKey: number
 }): ReactNode {
   const { editMode, onLayoutChange } = useDashboardCanvas()
-  const isSmallScreen = useMediaQuery(`(max-width: ${breakpoints.md}px)`, {
-    initializeWithValue: true,
-  })
 
   return (
     <F0ChatDashboard
@@ -26,7 +21,6 @@ export function DashboardContent({
       refreshKey={refreshKey}
       editMode={editMode}
       onLayoutChange={onLayoutChange}
-      forceFullWidth={isSmallScreen}
     />
   )
 }

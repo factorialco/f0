@@ -29,7 +29,6 @@ export const F0AnalyticsDashboard = <
   items,
   editMode,
   onLayoutChange,
-  forceFullWidth,
 }: F0AnalyticsDashboardProps<Filters>) => {
   const [currentFilters, setCurrentFilters] = useState<FiltersState<Filters>>(
     () => defaultFilters ?? ({} as FiltersState<Filters>)
@@ -48,7 +47,6 @@ export const F0AnalyticsDashboard = <
         filters={currentFilters}
         editMode={editMode}
         onLayoutChange={onLayoutChange}
-        forceFullWidth={forceFullWidth}
       />
     </div>
   )

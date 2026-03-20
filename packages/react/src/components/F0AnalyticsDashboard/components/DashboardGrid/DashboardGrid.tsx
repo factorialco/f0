@@ -29,13 +29,14 @@ const GRID_COLS = 12
 
 const CELL_HEIGHT = 48
 
+/** Container width below which items are forced to full-width (1 per row). */
+const NARROW_THRESHOLD = 640
+
 interface DashboardGridProps<Filters extends FiltersDefinition> {
   items: DashboardItemType<Filters>[]
   filters: FiltersState<Filters>
   editMode?: boolean
   onLayoutChange?: (layout: DashboardItemLayout[]) => void
-  /** When true, all items span 12 columns (one per row). */
-  forceFullWidth?: boolean
 }
 
 /**
@@ -43,16 +44,33 @@ interface DashboardGridProps<Filters extends FiltersDefinition> {
  *
  * When `editMode` is true, items are draggable and resizable with a delete button.
  * When false, items are locked in place.
+ *
+ * When the container is narrower than NARROW_THRESHOLD, all items are forced to
+ * 12 columns (one per row) regardless of their configured colSpan.
  */
 export function DashboardGrid<Filters extends FiltersDefinition>({
   items,
   filters,
   editMode,
   onLayoutChange,
-  forceFullWidth,
 }: DashboardGridProps<Filters>) {
   const [deletedIds, setDeletedIds] = useState<Set<string>>(new Set())
   const [positionSyncKey, setPositionSyncKey] = useState(0)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [isNarrow, setIsNarrow] = useState(false)
+
+  // Measure container width to decide single-column layout
+  useEffect(() => {
+    const el = containerRef.current
+    if (!el) return
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        setIsNarrow(entry.contentRect.width < NARROW_THRESHOLD)
+      }
+    })
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
 
   // Reset deleted items and force position sync when exiting edit mode
   const prevEditModeRef = useRef(editMode)
@@ -64,8 +82,17 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
     prevEditModeRef.current = editMode
   }, [editMode])
 
+  // Force position sync when switching between narrow/wide
+  const prevIsNarrowRef = useRef(isNarrow)
+  useEffect(() => {
+    if (prevIsNarrowRef.current !== isNarrow) {
+      setPositionSyncKey((k) => k + 1)
+    }
+    prevIsNarrowRef.current = isNarrow
+  }, [isNarrow])
+
   const getEffectiveSpan = (item: DashboardItemType<Filters>): number => {
-    if (forceFullWidth) return 12
+    if (isNarrow) return 12
     if (item.colSpan) return item.colSpan
     if (item.type === "metric") return 3
     if (item.type === "collection") return 12
@@ -99,7 +126,7 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
       )
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [items, onLayoutChange]
+    [items, onLayoutChange, isNarrow]
   )
 
   const handleChange = useCallback(
@@ -135,8 +162,9 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
     id: item.id,
     w: getEffectiveSpan(item),
     h: getEffectiveRowSpan(item),
-    x: item.x ?? packed[i].x,
-    y: item.y ?? packed[i].y,
+    // In narrow mode, always use packed positions (ignore saved x/y)
+    x: isNarrow ? packed[i].x : (item.x ?? packed[i].x),
+    y: isNarrow ? packed[i].y : (item.y ?? packed[i].y),
     allowedSizes,
     content: (
       <div className="relative h-full">
@@ -175,13 +203,15 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
   )
 
   return (
-    <F0GridStack
-      options={gridOptions}
-      static={!editMode}
-      widgets={widgets}
-      onChange={editMode ? handleChange : undefined}
-      forcePositionSync={positionSyncKey}
-    />
+    <div ref={containerRef}>
+      <F0GridStack
+        options={gridOptions}
+        static={!editMode || isNarrow}
+        widgets={widgets}
+        onChange={editMode && !isNarrow ? handleChange : undefined}
+        forcePositionSync={positionSyncKey}
+      />
+    </div>
   )
 }
 
