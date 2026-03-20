@@ -125,10 +125,10 @@ export const F0AiChatTextArea = ({
       ref={formRef}
       className={cn(
         "relative isolate z-20",
-        "flex flex-row items-end sm:flex-col sm:items-stretch gap-3",
+        "flex flex-col items-stretch md:gap-3 gap-2",
         "rounded-lg border border-solid border-f1-border",
         "transition-all hover:cursor-text",
-        "py-px pl-3 pr-1 sm:p-0",
+        "p-0",
         "before:pointer-events-none before:absolute before:inset-0 before:z-[-1]",
         "before:rounded-[inherit] before:bg-f1-background before:content-['']",
         "after:pointer-events-none after:absolute after:inset-0.5 after:z-[-2]",
@@ -169,7 +169,7 @@ export const F0AiChatTextArea = ({
       <div
         className={cn(
           "grid flex-1 grid-cols-1 grid-rows-1",
-          "min-h-[20px] py-2.5 sm:min-h-[20px] sm:py-0"
+          "min-h-[20px] py-0"
         )}
       >
         <div
@@ -177,10 +177,10 @@ export const F0AiChatTextArea = ({
           className={cn(
             "col-start-1 row-start-1",
             "pointer-events-none invisible",
-            "min-h-[20px] max-h-[120px] sm:min-h-[20px] sm:max-h-[240px]",
+            "min-h-[20px] max-h-[240px]",
             "whitespace-pre-wrap break-words",
-            "sm:text-[14px] text-[16px] leading-[20px] font-normal text-f1-foreground",
-            "sm:mt-3 sm:px-3"
+            "text-[16px] sm:text-[14px] leading-[20px] font-normal text-f1-foreground",
+            "mt-3 px-3"
           )}
         >
           {inputValue.endsWith("\n") ? inputValue + "_" : inputValue}
@@ -193,10 +193,10 @@ export const F0AiChatTextArea = ({
             className={cn(
               "col-start-1 row-start-1",
               "pointer-events-none",
-              "min-h-[20px] max-h-[120px] sm:min-h-[20px] sm:max-h-[240px]",
+              "min-h-[20px] max-h-[240px]",
               "whitespace-pre-wrap break-words",
-              "sm:text-[14px] text-[16px] leading-[20px] font-normal text-f1-foreground",
-              "px-0 sm:mt-3 sm:px-3",
+              "text-[16px] sm:text-[14px] leading-[20px] font-normal text-f1-foreground",
+              "mt-3 px-3",
               "overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
             )}
           >
@@ -227,8 +227,8 @@ export const F0AiChatTextArea = ({
               "col-start-1 row-start-1",
               "pointer-events-none",
               "text-f1-foreground-secondary",
-              "sm:text-[14px] text-[16px] leading-[20px] font-normal",
-              "sm:pt-3 sm:px-3",
+              "text-[16px] sm:text-[14px] leading-[20px] font-normal",
+              "pt-3 px-3",
               "overflow-hidden text-ellipsis whitespace-nowrap"
             )}
           >
@@ -252,11 +252,11 @@ export const F0AiChatTextArea = ({
           onScroll={syncHighlightScroll}
           className={cn(
             "col-start-1 row-start-1",
-            "min-h-[20px] max-h-[120px] sm:min-h-[20px] sm:max-h-[240px] sm:h-auto",
+            "min-h-[20px] max-h-[240px] h-auto",
             "resize-none",
             "whitespace-pre-wrap break-words",
-            "sm:text-[14px] text-[16px] leading-[20px] font-normal",
-            "px-0 sm:mt-3 sm:px-3",
+            "text-[16px] sm:text-[14px] leading-[20px] font-normal",
+            "mt-3 px-3",
             "overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
             "outline-none",
             hasOverlay
@@ -278,7 +278,7 @@ export const F0AiChatTextArea = ({
         )}
       </div>
 
-      <div className="flex shrink-0 items-center justify-between p-1 sm:p-3">
+      <div className="flex shrink-0 items-center justify-between p-3">
         <div className="flex items-center">
           {toolHints && toolHints.length > 0 && onActiveToolHintChange && (
             <ToolHintSelector

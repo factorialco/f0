@@ -2,7 +2,7 @@ import { useCopilotChatInternal as useCopilotChat } from "@copilotkit/react-core
 import { type MessagesProps } from "@copilotkit/react-ui"
 import { type Message } from "@copilotkit/shared"
 import { AnimatePresence, motion } from "motion/react"
-import { Fragment, useMemo, useRef } from "react"
+import { Fragment, useEffect, useMemo, useRef } from "react"
 
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { ArrowDown } from "@/icons/app"
@@ -19,33 +19,36 @@ import {
   useFeedbackSubmit,
 } from "../providers/FeedbackProvider"
 import {
+  type Turn,
   analyzeTurn,
   convertMessagesToTurns,
   extractThinkingGroup,
 } from "../utils/turnUtils"
+import { AssistantMessage as F0AssistantMessage } from "./AssistantMessage"
 import { FeedbackModal } from "./FeedbackModal"
 import { ScrollShadow } from "./ScrollShadow"
 import { TurnFeedback } from "./TurnFeedback"
+import { UserMessage as F0UserMessage } from "./UserMessage"
 import { WelcomeScreen } from "./WelcomeScreen"
 
-export const MessagesContainer = (props: MessagesProps) => (
+export const MessagesContainer = (props: Partial<MessagesProps>) => (
   <FeedbackModalProvider>
     <Messages {...props} />
   </FeedbackModalProvider>
 )
 
 const Messages = ({
-  inProgress,
+  inProgress: inProgressProp,
   children,
-  RenderMessage,
-  AssistantMessage,
-  UserMessage,
-  ImageRenderer,
+  RenderMessage: RenderMessageProp,
+  AssistantMessage: AssistantMessageProp,
+  UserMessage: UserMessageProp,
+  ImageRenderer: ImageRendererProp,
   onRegenerate,
   onCopy,
   markdownTagRenderers,
-}: MessagesProps) => {
-  const { messages, interrupt } = useCopilotChat()
+}: Partial<MessagesProps>) => {
+  const { messages, interrupt, isLoading } = useCopilotChat()
   const { modal, handleSubmit, handleClose } = useFeedbackSubmit()
 
   const translations = useI18n()
@@ -54,7 +57,27 @@ const Messages = ({
     initialMessage,
     welcomeScreenSuggestions,
     isLoadingThread,
+    setInProgress,
   } = useAiChat()
+
+  const inProgress = inProgressProp ?? isLoading
+
+  // Sync inProgress to the central provider so FullscreenChatInput can read it
+  useEffect(() => {
+    setInProgress(inProgress)
+  }, [inProgress, setInProgress])
+
+  const AssistantMessage = AssistantMessageProp ?? F0AssistantMessage
+  const UserMessage = UserMessageProp ?? F0UserMessage
+  const ImageRenderer =
+    ImageRendererProp ??
+    (({ image, content }: any) => (
+      <img
+        src={image}
+        alt={content || "Assistant image"}
+        className="max-w-full rounded-lg"
+      />
+    ))
 
   const initialMessages = useMemo(
     () =>
@@ -82,6 +105,149 @@ const Messages = ({
     lastTurnRef,
     turnsCount: turns.length,
   })
+
+  // ─── Render a single turn's messages ───
+  const renderTurnMessages = (turnMessages: Turn, turnIndex: number) => {
+    const { turnIsComplete, showActivityIndicator } = analyzeTurn(
+      turnMessages,
+      turnIndex,
+      turns.length,
+      inProgress
+    )
+    const { thinkingGroup, restMessages } = extractThinkingGroup(turnMessages)
+    const isLastTurn = turnIndex === turns.length - 1
+
+    const renderMessage = (message: Message, index: number) => {
+      const isCurrentMessage = isLastTurn && index === restMessages.length - 1
+
+      const firstAssistantIndex = restMessages.findIndex(
+        (m) => (m as Message).role === "assistant"
+      )
+      const showThinkingBefore =
+        thinkingGroup &&
+        !(isLastTurn && !turnIsComplete) &&
+        index === firstAssistantIndex
+
+      const messageProps = {
+        message,
+        inProgress,
+        index,
+        isCurrentMessage,
+        AssistantMessage,
+        UserMessage,
+        ImageRenderer,
+        onRegenerate,
+        onCopy,
+        markdownTagRenderers,
+        rawData: (message as any).rawData || {},
+      }
+
+      if (RenderMessageProp) {
+        return (
+          <Fragment key={`${turnIndex}-${index}`}>
+            {showThinkingBefore && (
+              <Thinking
+                messages={thinkingGroup}
+                isActive={false}
+                inProgress={inProgress}
+                RenderMessage={RenderMessageProp as any}
+                AssistantMessage={AssistantMessage}
+              />
+            )}
+            <RenderMessageProp {...(messageProps as any)} />
+          </Fragment>
+        )
+      }
+
+      // Default rendering (no custom RenderMessage)
+      if (message.role === "user") {
+        return (
+          <UserMessage
+            key={`${turnIndex}-${index}`}
+            {...(messageProps as any)}
+          />
+        )
+      }
+
+      return (
+        <Fragment key={`${turnIndex}-${index}`}>
+          {showThinkingBefore && (
+            <Thinking
+              messages={thinkingGroup}
+              isActive={false}
+              inProgress={inProgress}
+              RenderMessage={RenderMessageProp as any}
+              AssistantMessage={AssistantMessage}
+            />
+          )}
+          <AssistantMessage
+            {...(messageProps as any)}
+            isGenerating={inProgress && isCurrentMessage}
+            isLoading={inProgress && isCurrentMessage && !message.content}
+          />
+        </Fragment>
+      )
+    }
+
+    return (
+      <div
+        ref={isLastTurn ? lastTurnRef : undefined}
+        className={cn(
+          "flex flex-col items-start justify-start gap-2",
+          isLastTurn && "pb-5"
+        )}
+        key={`turn-${turnIndex}`}
+        style={{
+          minHeight: isLastTurn ? turnMinHeight || undefined : undefined,
+        }}
+      >
+        {restMessages.map((message, index) =>
+          renderMessage(message as Message, index)
+        )}
+        {/* Live thinking: render last thinking message while streaming */}
+        {thinkingGroup &&
+          isLastTurn &&
+          !turnIsComplete &&
+          !showActivityIndicator &&
+          (() => {
+            const liveMessage = thinkingGroup[thinkingGroup.length - 1]
+            const liveProps = {
+              message: liveMessage,
+              inProgress,
+              index: restMessages.length,
+              isCurrentMessage: true,
+              AssistantMessage,
+              UserMessage,
+              ImageRenderer,
+              onRegenerate,
+              onCopy,
+              markdownTagRenderers,
+              rawData: (liveMessage as any).rawData || {},
+            }
+            if (RenderMessageProp) {
+              return (
+                <RenderMessageProp
+                  key={`thinking-live-${turnIndex}`}
+                  {...(liveProps as any)}
+                />
+              )
+            }
+            return (
+              <AssistantMessage
+                key={`thinking-live-${turnIndex}`}
+                {...(liveProps as any)}
+                isGenerating={true}
+                isLoading={!liveMessage.content}
+              />
+            )
+          })()}
+        {showActivityIndicator && <F0ActionItem title="" status="executing" />}
+        {turnIsComplete && (
+          <TurnFeedback messages={turnMessages} onCopy={onCopy} />
+        )}
+      </div>
+    )
+  }
 
   return (
     <>
@@ -118,100 +284,9 @@ const Messages = ({
                 />
               )}
               {!isLoadingThread &&
-                turns.map((turnMessages, turnIndex) => {
-                  const { turnIsComplete, showActivityIndicator } = analyzeTurn(
-                    turnMessages,
-                    turnIndex,
-                    turns.length,
-                    inProgress
-                  )
-                  const { thinkingGroup, restMessages } =
-                    extractThinkingGroup(turnMessages)
-                  const isLastTurn = turnIndex === turns.length - 1
-
-                  return (
-                    <div
-                      ref={isLastTurn ? lastTurnRef : undefined}
-                      className={cn(
-                        "flex flex-col items-start justify-start gap-2",
-                        isLastTurn && "pb-5"
-                      )}
-                      key={`turn-${turnIndex}`}
-                      style={{
-                        minHeight: isLastTurn
-                          ? turnMinHeight || undefined
-                          : undefined,
-                      }}
-                    >
-                      {restMessages.map((message, index) => {
-                        const isCurrentMessage =
-                          isLastTurn && index === restMessages.length - 1
-                        const msg = message as Message
-
-                        // Find the index of the first assistant message
-                        const firstAssistantIndex = restMessages.findIndex(
-                          (m) => (m as Message).role === "assistant"
-                        )
-                        const showThinkingBefore =
-                          thinkingGroup &&
-                          !(isLastTurn && !turnIsComplete) &&
-                          index === firstAssistantIndex
-
-                        return (
-                          <Fragment key={`${turnIndex}-${index}`}>
-                            {showThinkingBefore && (
-                              <Thinking
-                                key={`thinking-${turnIndex}`}
-                                messages={thinkingGroup}
-                                isActive={false}
-                                inProgress={inProgress}
-                                RenderMessage={RenderMessage}
-                                AssistantMessage={AssistantMessage}
-                              />
-                            )}
-                            <RenderMessage
-                              message={msg}
-                              inProgress={inProgress}
-                              index={index}
-                              isCurrentMessage={isCurrentMessage}
-                              AssistantMessage={AssistantMessage}
-                              UserMessage={UserMessage}
-                              ImageRenderer={ImageRenderer}
-                              onRegenerate={onRegenerate}
-                              onCopy={onCopy}
-                              markdownTagRenderers={markdownTagRenderers}
-                            />
-                          </Fragment>
-                        )
-                      })}
-                      {/* Live thinking: render last thinking message while streaming */}
-                      {thinkingGroup &&
-                        isLastTurn &&
-                        !turnIsComplete &&
-                        !showActivityIndicator && (
-                          <RenderMessage
-                            key={`thinking-live-${turnIndex}`}
-                            message={thinkingGroup[thinkingGroup.length - 1]}
-                            inProgress={inProgress}
-                            index={restMessages.length}
-                            isCurrentMessage={true}
-                            AssistantMessage={AssistantMessage}
-                            UserMessage={UserMessage}
-                            ImageRenderer={ImageRenderer}
-                            onRegenerate={onRegenerate}
-                            onCopy={onCopy}
-                            markdownTagRenderers={markdownTagRenderers}
-                          />
-                        )}
-                      {showActivityIndicator && (
-                        <F0ActionItem title="" status="executing" />
-                      )}
-                      {turnIsComplete && (
-                        <TurnFeedback messages={turnMessages} onCopy={onCopy} />
-                      )}
-                    </div>
-                  )
-                })}
+                turns.map((turnMessages, turnIndex) =>
+                  renderTurnMessages(turnMessages, turnIndex)
+                )}
               {interrupt}
             </div>
 

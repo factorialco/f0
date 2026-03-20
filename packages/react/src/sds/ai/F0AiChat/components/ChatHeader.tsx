@@ -1,7 +1,9 @@
+import { breakpoints } from "@factorialco/f0-core"
 import { useCopilotChatInternal } from "@copilotkit/react-core"
 import { useChatContext, type HeaderProps } from "@copilotkit/react-ui"
 import { motion } from "motion/react"
 import { useCallback, useState } from "react"
+import { useMediaQuery } from "usehooks-ts"
 
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Icon } from "@/components/F0Icon"
@@ -42,6 +44,9 @@ const ChatHeaderWithHistory = (props: HeaderProps) => {
   const fullscreen = visualizationMode === "fullscreen"
   const translations = useI18n()
   const [isHistoryOpen, setIsHistoryOpen] = useState(false)
+  const isSmallScreen = useMediaQuery(`(max-width: ${breakpoints.md}px)`, {
+    initializeWithValue: true,
+  })
 
   const handleClose = useCallback(() => {
     if (fullscreen) {
@@ -90,7 +95,7 @@ const ChatHeaderWithHistory = (props: HeaderProps) => {
           )}
         </div>
         <motion.div className="flex shrink-0 items-center" {...props}>
-          {!lockVisualizationMode && (
+          {!lockVisualizationMode && !isSmallScreen && (
             <ButtonInternal
               variant="ghost"
               hideLabel
@@ -142,6 +147,9 @@ const ChatHeaderLegacy = (props: HeaderProps) => {
   const translations = useI18n()
   const hasDefaultTitle = labels.title === "CopilotKit"
   const hasMessages = messages.length > 0
+  const isSmallScreen = useMediaQuery(`(max-width: ${breakpoints.md}px)`, {
+    initializeWithValue: true,
+  })
 
   const handleClose = useCallback(() => {
     if (fullscreen) {
@@ -173,7 +181,7 @@ const ChatHeaderLegacy = (props: HeaderProps) => {
             }}
           />
         )}
-        {!lockVisualizationMode && (
+        {!lockVisualizationMode && !isSmallScreen && (
           <ButtonInternal
             variant="ghost"
             hideLabel

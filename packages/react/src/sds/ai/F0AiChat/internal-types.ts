@@ -12,14 +12,6 @@ import {
 } from "./types"
 
 /**
- * Context type for fullscreen chat state
- */
-export type FullscreenChatContextType = {
-  inProgress: boolean
-  setInProgress: (value: boolean) => void
-}
-
-/**
  * Internal state for the AiChat provider
  */
 export interface AiChatState {
@@ -161,6 +153,10 @@ export type AiChatProviderReturnValue = {
    * Set the footer content. Use this to update the footer from outside the provider (e.g. per page/route).
    */
   setFooter: React.Dispatch<React.SetStateAction<React.ReactNode | undefined>>
+  /** Whether the assistant is currently generating a response */
+  inProgress: boolean
+  /** Set the in-progress state (synced from CopilotKit's isLoading) */
+  setInProgress: (value: boolean) => void
 } & Pick<
   AiChatState,
   | "greeting"

@@ -1,5 +1,7 @@
+import { breakpoints } from "@factorialco/f0-core"
 import { useCopilotAction, useCopilotContext } from "@copilotkit/react-core"
 import { useEffect, useMemo, useRef } from "react"
+import { useMediaQuery } from "usehooks-ts"
 
 import type { ChatDashboardConfig } from "../../F0ChatDashboard/types"
 import type { CanvasContent } from "../types"
@@ -12,13 +14,17 @@ import "../canvas/entities/dashboard"
 /**
  * Renders alongside the report card to auto-open the canvas
  * the first time a dashboard is received from the agent.
+ * On small screens, skip auto-open so the user can open manually via the card.
  */
 function AutoOpenCanvas({ content }: { content: CanvasContent }) {
   const { openCanvas } = useAiChat()
   const opened = useRef(false)
+  const isSmallScreen = useMediaQuery(`(max-width: ${breakpoints.md}px)`, {
+    initializeWithValue: true,
+  })
 
   useEffect(() => {
-    if (!opened.current) {
+    if (!opened.current && !isSmallScreen) {
       opened.current = true
       openCanvas(content)
     }

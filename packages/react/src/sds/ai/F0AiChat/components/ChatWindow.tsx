@@ -1,6 +1,8 @@
+import { breakpoints } from "@factorialco/f0-core"
 import { type WindowProps } from "@copilotkit/react-ui"
 import { AnimatePresence, motion } from "motion/react"
 import { useCallback, useMemo, useState } from "react"
+import { useMediaQuery } from "usehooks-ts"
 
 import { MAX_CHAT_WIDTH, MIN_CHAT_WIDTH } from "../constants"
 import { useAiChat } from "../providers/AiChatStateProvider"
@@ -18,6 +20,9 @@ export const SidebarWindow = ({ children }: WindowProps) => {
   } = useAiChat()
   const fullscreen = visualizationMode === "fullscreen"
   const [isResizing, setIsResizing] = useState(false)
+  const isSmallScreen = useMediaQuery(`(max-width: ${breakpoints.md}px)`, {
+    initializeWithValue: true,
+  })
 
   const handleResize = useCallback(
     (deltaX: number) => {
@@ -41,7 +46,7 @@ export const SidebarWindow = ({ children }: WindowProps) => {
       {open && (
         <motion.div
           key="chat-wrapper"
-          className="bg-f1-transparent pointer-events-auto relative ml-auto flex h-full py-1 pr-1 dark:bg-f1-background xs:rounded-xl"
+          className="bg-f1-transparent pointer-events-auto relative ml-auto flex h-full md:py-1 md:pr-1 dark:bg-f1-background xs:rounded-xl"
           initial={
             shouldPlayEntranceAnimation ? { opacity: 0, width: 0 } : false
           }
@@ -58,7 +63,7 @@ export const SidebarWindow = ({ children }: WindowProps) => {
             }
           }}
         >
-          {resizable && !fullscreen && (
+          {resizable && !fullscreen && !isSmallScreen && (
             <ResizeHandle
               onResize={handleResize}
               onReset={resetChatWidth}

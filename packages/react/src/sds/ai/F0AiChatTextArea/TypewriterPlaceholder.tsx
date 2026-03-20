@@ -136,14 +136,14 @@ export const TypewriterPlaceholder = ({
           "col-start-1 row-start-1",
           "pointer-events-none",
           "text-f1-foreground-secondary",
-          "sm:text-[14px] text-[16px] leading-[20px] font-normal",
-          "sm:pt-3 sm:px-3"
+          "text-[16px] sm:text-[14px] leading-[20px] font-normal",
+          "pt-3 px-3"
         )}
       >
         <div
           className={cn(
             "overflow-hidden text-ellipsis whitespace-nowrap",
-            "sm:whitespace-pre-wrap sm:break-words sm:overflow-visible"
+            "whitespace-pre-wrap break-words overflow-visible"
           )}
         >
           {displayedPlaceholder}

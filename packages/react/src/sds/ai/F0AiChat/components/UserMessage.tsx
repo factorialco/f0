@@ -1,8 +1,8 @@
 import { type UserMessageProps } from "@copilotkit/react-ui"
-import { type ReactNode, useContext, useEffect, useRef } from "react"
+import { type ReactNode, useEffect, useRef } from "react"
 
 import { PersonEntityRef } from "../../F0MarkdownRenderers/components/PersonEntityRef"
-import { FullscreenChatContext } from "../index"
+import { useAiChat } from "../providers/AiChatStateProvider"
 
 function getTextContent(
   content: string | Array<{ type: string; text?: string }> | undefined
@@ -111,9 +111,8 @@ export const UserMessage = ({ message, ImageRenderer }: UserMessageProps) => {
   const isImageMessage = message && "image" in message && message.image
   const ref = useRef<HTMLDivElement>(null)
 
-  // Get context to check if we are in fullscreen
-  const fullscreenContext = useContext(FullscreenChatContext)
-  const isFullscreen = !!fullscreenContext?.setInProgress
+  const { visualizationMode } = useAiChat()
+  const isFullscreen = visualizationMode === "fullscreen"
 
   useEffect(() => {
     if (!ref.current || isFullscreen) return

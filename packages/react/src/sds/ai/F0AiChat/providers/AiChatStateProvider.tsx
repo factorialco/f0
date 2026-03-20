@@ -95,6 +95,11 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
     }
   }, [open])
 
+  const [inProgress, setInProgressState] = useState(false)
+  const setInProgress = useCallback((value: boolean) => {
+    setInProgressState(value)
+  }, [])
+
   const [canvasContent, setCanvasContent] = useState<CanvasContent | null>(null)
 
   // Track the mode before canvas was opened so we can restore it on close
@@ -290,6 +295,8 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         tracking,
         entityResolvers,
         toolHints,
+        inProgress,
+        setInProgress,
         canvasContent,
         openCanvas,
         closeCanvas,
@@ -351,6 +358,8 @@ export function useAiChat(): AiChatProviderReturnValue {
       tracking: undefined,
       entityResolvers: undefined,
       toolHints: undefined,
+      inProgress: false,
+      setInProgress: noopFn,
       canvasContent: null,
       openCanvas: noopFn,
       closeCanvas: noopFn,

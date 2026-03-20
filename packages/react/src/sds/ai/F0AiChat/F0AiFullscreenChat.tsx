@@ -1,23 +1,16 @@
 import { useCopilotChatInternal } from "@copilotkit/react-core"
-import { createContext, useContext, useEffect, useRef, useState } from "react"
+import { useEffect, useRef } from "react"
 
 import { cn } from "@/lib/utils"
 
 import { ChatTextarea } from "./components/ChatTextarea"
-import { MessagesContainerFullscreen } from "./components/MessagesContainerFullscreen"
+import { MessagesContainer } from "./components/MessagesContainer"
 import { useDefaultCopilotActions } from "./copilotActions"
-import { FullscreenChatContextType } from "./internal-types"
 import { useAiChat } from "./providers/AiChatStateProvider"
 
-export const FullscreenChatContext = createContext<FullscreenChatContextType>({
-  inProgress: false,
-  setInProgress: () => {},
-})
-
 const FullscreenChatInput = () => {
-  const { sendMessage } = useAiChat()
+  const { sendMessage, inProgress } = useAiChat()
   const { interrupt } = useCopilotChatInternal()
-  const { inProgress } = useContext(FullscreenChatContext)
 
   const handleSend = async (text: string) => {
     sendMessage(text)
@@ -52,7 +45,6 @@ const FullscreenChatInput = () => {
 
 export const F0AiFullscreenChatComponent = () => {
   const { enabled } = useAiChat()
-  const [inProgress, setInProgress] = useState(false)
   const inputContainerRef = useRef<HTMLDivElement>(null)
 
   useDefaultCopilotActions()
@@ -110,48 +102,46 @@ export const F0AiFullscreenChatComponent = () => {
   }
 
   return (
-    <FullscreenChatContext.Provider value={{ inProgress, setInProgress }}>
+    <div
+      className="bg-white"
+      style={{
+        height: "100%",
+        width: "100%",
+        display: "flex",
+        flexDirection: "column",
+        overflow: "hidden",
+        overscrollBehavior: "none",
+      }}
+    >
       <div
-        className="bg-white"
         style={{
-          height: "100%",
-          width: "100%",
+          flex: 1,
+          minHeight: 0,
           display: "flex",
           flexDirection: "column",
           overflow: "hidden",
-          overscrollBehavior: "none",
         }}
       >
-        <div
-          style={{
-            flex: 1,
-            minHeight: 0,
-            display: "flex",
-            flexDirection: "column",
-            overflow: "hidden",
-          }}
-        >
-          <MessagesContainerFullscreen />
-        </div>
-
-        <div
-          ref={inputContainerRef}
-          className={cn(
-            "flex-shrink-0 w-full bg-white border-t border-f1-border transition-all",
-            "pb-[env(safe-area-inset-bottom,12px)] focus-within:pb-0"
-          )}
-          style={{
-            flexShrink: 0,
-            width: "100%",
-            display: "flex",
-            flexDirection: "column",
-            zIndex: 10,
-            touchAction: "none",
-          }}
-        >
-          <FullscreenChatInput />
-        </div>
+        <MessagesContainer />
       </div>
-    </FullscreenChatContext.Provider>
+
+      <div
+        ref={inputContainerRef}
+        className={cn(
+          "flex-shrink-0 w-full bg-white border-t border-f1-border transition-all",
+          "pb-[env(safe-area-inset-bottom,12px)] focus-within:pb-0"
+        )}
+        style={{
+          flexShrink: 0,
+          width: "100%",
+          display: "flex",
+          flexDirection: "column",
+          zIndex: 10,
+          touchAction: "none",
+        }}
+      >
+        <FullscreenChatInput />
+      </div>
+    </div>
   )
 }
