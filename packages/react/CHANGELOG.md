@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.413.0](https://github.com/factorialco/f0/compare/f0-react-v1.412.0...f0-react-v1.413.0) (2026-03-20)
+
+
+### Features
+
+* One Voice Mode ([#3710](https://github.com/factorialco/f0/issues/3710)) ([b785fe2](https://github.com/factorialco/f0/commit/b785fe22fe858b4c1a0ebfb1295c7fa627f44469))
+
 ## [1.412.0](https://github.com/factorialco/f0/compare/f0-react-v1.411.1...f0-react-v1.412.0) (2026-03-20)
 
 
