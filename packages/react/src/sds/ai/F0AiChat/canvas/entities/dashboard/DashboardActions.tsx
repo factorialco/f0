@@ -1,4 +1,6 @@
+import { breakpoints } from "@factorialco/f0-core"
 import type { ReactNode } from "react"
+import { useMediaQuery } from "usehooks-ts"
 
 import { F0Button } from "@/components/F0Button"
 import { Pencil } from "@/icons/app"
@@ -10,6 +12,13 @@ export function DashboardActions(): ReactNode {
   const { editMode, setEditMode, handleSave, handleDiscard } =
     useDashboardCanvas()
   const translations = useI18n()
+  const isSmallScreen = useMediaQuery(`(max-width: ${breakpoints.md}px)`, {
+    initializeWithValue: true,
+  })
+
+  if (isSmallScreen) {
+    return null
+  }
 
   if (editMode) {
     return (

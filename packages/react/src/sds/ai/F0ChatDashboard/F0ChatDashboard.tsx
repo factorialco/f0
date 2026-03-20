@@ -127,6 +127,8 @@ export interface F0ChatDashboardProps {
   refreshKey?: number
   editMode?: boolean
   onLayoutChange?: (layout: DashboardItemLayout[]) => void
+  /** When true, all grid items span 12 columns (one item per row). */
+  forceFullWidth?: boolean
 }
 
 /**
@@ -142,6 +144,7 @@ export function F0ChatDashboard({
   refreshKey = 0,
   editMode,
   onLayoutChange,
+  forceFullWidth,
 }: F0ChatDashboardProps) {
   const { fetchItem, getFilterOptions } = useDashboardCompute(
     config,
@@ -255,6 +258,7 @@ export function F0ChatDashboard({
       items={items}
       editMode={editMode}
       onLayoutChange={onLayoutChange}
+      forceFullWidth={forceFullWidth}
     />
   )
 }

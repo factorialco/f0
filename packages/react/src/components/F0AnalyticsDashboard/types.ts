@@ -357,4 +357,8 @@ export interface F0AnalyticsDashboardProps<
    * the consumer can reconcile against the original config items.
    */
   onLayoutChange?: (layout: DashboardItemLayout[]) => void
+  /**
+   * When true, all grid items span 12 columns (one item per row).
+   */
+  forceFullWidth?: boolean
 }

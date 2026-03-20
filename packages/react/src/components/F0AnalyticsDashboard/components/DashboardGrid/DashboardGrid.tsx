@@ -34,6 +34,8 @@ interface DashboardGridProps<Filters extends FiltersDefinition> {
   filters: FiltersState<Filters>
   editMode?: boolean
   onLayoutChange?: (layout: DashboardItemLayout[]) => void
+  /** When true, all items span 12 columns (one per row). */
+  forceFullWidth?: boolean
 }
 
 /**
@@ -47,6 +49,7 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
   filters,
   editMode,
   onLayoutChange,
+  forceFullWidth,
 }: DashboardGridProps<Filters>) {
   const [deletedIds, setDeletedIds] = useState<Set<string>>(new Set())
   const [positionSyncKey, setPositionSyncKey] = useState(0)
@@ -62,6 +65,7 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
   }, [editMode])
 
   const getEffectiveSpan = (item: DashboardItemType<Filters>): number => {
+    if (forceFullWidth) return 12
     if (item.colSpan) return item.colSpan
     if (item.type === "metric") return 3
     if (item.type === "collection") return 12
