@@ -21,8 +21,7 @@ export const useFormSubmitAction = () => {
         required: true,
       },
     ],
-    handler: ({ formName }: { formName: string }) => {
-      console.log("[F0AiFormTools] formSubmit called", { formName })
+    handler: async ({ formName }: { formName: string }) => {
       if (!registry) {
         return { success: false, error: "Form registry is not available" }
       }
@@ -46,16 +45,20 @@ export const useFormSubmitAction = () => {
       }
 
       try {
-        ref.submit()
-        registry.rebuildDescriptions()
+        await ref.submit()
+        const errors = ref.getErrors()
+        if (Object.keys(errors).length > 0) {
+          return { success: false, errors }
+        }
         return { success: true }
       } catch {
         const errors = ref.getErrors()
-        registry.rebuildDescriptions()
         return {
           success: false,
           errors,
         }
+      } finally {
+        registry.rebuildDescriptions()
       }
     },
   })

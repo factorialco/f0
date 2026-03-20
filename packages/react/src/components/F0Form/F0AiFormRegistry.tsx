@@ -420,7 +420,7 @@ export function F0AiFormRegistryProvider({
 
           return description
         })
-        .filter((el) => !!el)
+        .filter((el): el is NonNullable<typeof el> => el !== null)
 
       const json = JSON.stringify(descriptions)
       if (json !== lastDescriptionsJsonRef.current) {

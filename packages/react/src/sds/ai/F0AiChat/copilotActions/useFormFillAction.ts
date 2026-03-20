@@ -92,7 +92,7 @@ export const useFormFillAction = () => {
   useFrontendTool({
     name: "forms.formFill",
     description:
-      "Fill one or more fields in an active form. After setting values, validation runs automatically. Returns success or any validation errors. Use formDescribe first to learn field names and types.",
+      "Fill one or more fields in an active form. After setting values, validation runs automatically. Returns success or any validation errors. Use formGetState first to learn field names and types.",
     parameters: [
       {
         name: "formName",
@@ -122,14 +122,13 @@ export const useFormFillAction = () => {
         ],
       },
     ],
-    handler: ({
+    handler: async ({
       formName,
       values,
     }: {
       formName: string
       values: { fieldName: string; value: string }[]
     }) => {
-      console.log("[F0AiFormTools] formFill called", { formName, values })
       if (!registry) {
         return { success: false, error: "Form registry is not available" }
       }
@@ -161,11 +160,10 @@ export const useFormFillAction = () => {
           : value
       }
 
-      console.log({ valuesToSet })
+      ref.setValues(valuesToSet, { shouldValidate: false, shouldDirty: true })
+      await ref.trigger()
 
-      ref.setValues(valuesToSet, { shouldValidate: true, shouldDirty: true })
-
-      // Refresh the registry snapshot so useCopilotReadable picks up new values
+      // Refresh the registry snapshot so the co-agent picks up new values
       registry.rebuildDescriptions()
 
       const errors = ref.getErrors()

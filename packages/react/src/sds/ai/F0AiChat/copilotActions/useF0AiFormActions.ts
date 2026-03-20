@@ -1,7 +1,8 @@
 import { useCoAgent } from "@copilotkit/react-core"
 import { useEffect } from "react"
 
-import { useF0AiFormRegistry } from "../../../../components/F0Form/F0AiFormRegistry"
+import { useF0AiFormRegistry } from "@/components/F0Form/F0AiFormRegistry"
+
 import { useAiChat } from "../providers/AiChatStateProvider"
 import { useFormFillAction } from "./useFormFillAction"
 import { useFormGetStateAction } from "./useFormGetStateAction"

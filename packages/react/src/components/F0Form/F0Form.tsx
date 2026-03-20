@@ -820,6 +820,9 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
   const internalFormRef = useRef<F0FormRef | null>(null)
   // Keep a stable ref that mirrors formRef or internalFormRef
   const registryFormRef = formRef ?? internalFormRef
+  // Stable ref to avoid re-registering on every render
+  const handleSubmitRef = useRef(handleSubmit)
+  handleSubmitRef.current = handleSubmit
 
   useEffect(() => {
     if (aiFormRegistry) {
@@ -831,7 +834,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
             new Promise<void>((resolve, reject) => {
               form.handleSubmit(
                 async (data) => {
-                  await handleSubmit(data)
+                  await handleSubmitRef.current(data)
                   resolve()
                 },
                 () => reject(new Error("Form validation failed"))
@@ -909,7 +912,6 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
     registryFormRef,
     form,
     resetErrorNavigation,
-    handleSubmit,
     defaultValuesParamsSchema,
   ])
 

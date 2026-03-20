@@ -23,13 +23,14 @@ export const useFormGetStateAction = () => {
     ],
     handler: ({ formName }: { formName: string }) => {
       if (!registry) {
-        return { error: "Form registry is not available" }
+        return { success: false, error: "Form registry is not available" }
       }
 
       const entry = registry.get(formName)
       if (!entry) {
         const available = registry.getFormNames()
         return {
+          success: false,
           error: `Form "${formName}" not found`,
           availableForms: available,
         }
@@ -37,10 +38,14 @@ export const useFormGetStateAction = () => {
 
       const ref = entry.ref.current
       if (!ref) {
-        return { error: `Form "${formName}" is not mounted` }
+        return {
+          success: false,
+          error: `Form "${formName}" is not mounted`,
+        }
       }
 
       return {
+        success: true,
         formName,
         values: ref.getValues(),
         isDirty: ref.isDirty(),
