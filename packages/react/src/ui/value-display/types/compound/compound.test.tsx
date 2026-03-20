@@ -92,17 +92,40 @@ describe("CompoundCell", () => {
     expect(wrapper).toHaveTextContent("-12.3% / 2500EUR / $99.5")
   })
 
+  it("renders percentage segments as compact inline text", () => {
+    const args: CompoundCellValue = {
+      segments: [
+        {
+          type: "percentage",
+          value: -12.345,
+          decimalPlaces: 1,
+          tone: "critical",
+        },
+      ],
+    }
+
+    render(CompoundCell(args, tableMeta))
+
+    expect(screen.getByText("-12.3%")).toHaveClass(
+      "text-f1-foreground-critical"
+    )
+  })
+
   it("renders placeholders and missing values as secondary by default", () => {
     const args: CompoundCellValue = {
       segments: [
         { type: "text", value: undefined, placeholder: "N/A" },
         { type: "number", value: undefined },
+        { type: "percentage", value: undefined, placeholder: "No margin" },
       ],
     }
 
     render(CompoundCell(args, tableMeta))
 
     expect(screen.getByText("N/A")).toHaveClass("text-f1-foreground-secondary")
+    expect(screen.getByText("No margin")).toHaveClass(
+      "text-f1-foreground-secondary"
+    )
     expect(screen.getByText("–")).toHaveClass("text-f1-foreground-secondary")
   })
 

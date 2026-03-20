@@ -10,7 +10,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "Renders compound values composed of multiple segments (text, number, amount) separated by a custom delimiter. Each segment supports semantic tones.",
+          "Renders compound values composed of multiple segments (text, number, amount, percentage) separated by a custom delimiter. Each segment supports semantic tones.",
       },
       source: {
         code: null,
@@ -65,10 +65,9 @@ export const MixedSegments: Story = {
               tone: "secondary",
             },
             {
-              type: "number",
+              type: "percentage",
               value: -12.3,
               decimalPlaces: 1,
-              units: "%",
               tone: "critical",
             },
             {
@@ -110,9 +109,8 @@ export const WithPlaceholders: Story = {
               currency: { symbol: "EUR", decimalPlaces: 0 },
             },
             {
-              type: "number",
+              type: "percentage",
               value: undefined,
-              units: "%",
               placeholder: "-",
             },
           ],
@@ -143,9 +141,8 @@ export const WithCustomSeparator: Story = {
               currency: { symbol: "EUR", decimalPlaces: 0 },
             },
             {
-              type: "number",
+              type: "percentage",
               value: -40,
-              units: "%",
               tone: "critical",
             },
           ],

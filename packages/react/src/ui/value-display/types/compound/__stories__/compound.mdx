@@ -33,6 +33,13 @@ type CompoundSegment =
       tone?: CompoundTone
     }
   | {
+      type: "percentage"
+      value: number | undefined
+      decimalPlaces?: number
+      placeholder?: string
+      tone?: CompoundTone
+    }
+  | {
       type: "amount"
       value: number | undefined
       currency?: {

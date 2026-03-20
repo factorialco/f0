@@ -40,6 +40,13 @@ export interface CompoundNumberSegment extends WithPlaceholder {
   tone?: CompoundTone
 }
 
+export interface CompoundPercentageSegment extends WithPlaceholder {
+  type: "percentage"
+  value: number | undefined
+  decimalPlaces?: number
+  tone?: CompoundTone
+}
+
 export interface CompoundAmountSegment extends WithPlaceholder {
   type: "amount"
   value: number | undefined
@@ -50,6 +57,7 @@ export interface CompoundAmountSegment extends WithPlaceholder {
 export type CompoundSegment =
   | CompoundTextSegment
   | CompoundNumberSegment
+  | CompoundPercentageSegment
   | CompoundAmountSegment
 
 export interface CompoundCellValue {
@@ -121,6 +129,19 @@ const resolveSegmentText = (segment: CompoundSegment): ResolvedSegment => {
         }),
         isMissing: false,
       }
+    case "percentage":
+      if (segment.value === undefined) {
+        return resolveValue(undefined, segment.placeholder)
+      }
+
+      return resolveValue(
+        `${
+          formatNumberParts({
+            number: segment.value,
+            decimalPlaces: segment.decimalPlaces,
+          }).value
+        }%`
+      )
     case "amount":
       if (segment.value === undefined) {
         return resolveValue(undefined, segment.placeholder)

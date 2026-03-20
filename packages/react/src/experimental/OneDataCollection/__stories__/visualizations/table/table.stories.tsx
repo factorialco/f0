@@ -238,9 +238,8 @@ const makePercentageSegment = (
   tone: CompoundTone = "neutral",
   decimalPlaces = 0
 ) => ({
-  type: "number" as const,
+  type: "percentage" as const,
   value,
-  units: "%",
   decimalPlaces,
   tone,
 })
