@@ -178,6 +178,7 @@ export const f1Colors = {
         hover: "hsl(var(--selected-70))",
       },
     },
+    disabled: "hsl(var(--neutral-2))",
     overlay: {
       DEFAULT: "hsl(var(--neutral-40))",
     },
