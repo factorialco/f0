@@ -6,16 +6,29 @@ import { IconType } from "@/components/F0Icon"
 import type { ChatDashboardConfig } from "../F0ChatDashboard/types"
 
 /**
- * Discriminated union for canvas panel content.
- * Expand this union to support new content types in the canvas.
+ * Base shape shared by all canvas content types.
+ * Every entity adds its own fields on top of this.
  */
-export type CanvasContent = {
-  type: "dashboard"
+export type CanvasContentBase = {
+  type: string
   title: string
-  config: ChatDashboardConfig
-  apiConfig: { baseUrl: string; headers: Record<string, string> }
   toolCallId?: string
 }
+
+/**
+ * Dashboard canvas content — renders an analytics dashboard.
+ */
+export type DashboardCanvasContent = CanvasContentBase & {
+  type: "dashboard"
+  config: ChatDashboardConfig
+  apiConfig: { baseUrl: string; headers: Record<string, string> }
+}
+
+/**
+ * Discriminated union for canvas panel content.
+ * Add new entity types to this union as they are implemented.
+ */
+export type CanvasContent = DashboardCanvasContent
 
 /**
  * Profile data for a person entity (employee), resolved asynchronously

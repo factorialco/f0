@@ -1,0 +1,127 @@
+import { useCopilotContext } from "@copilotkit/react-core"
+import {
+  createContext,
+  type ReactNode,
+  useCallback,
+  useContext,
+  useRef,
+  useState,
+} from "react"
+
+import type { DashboardItemLayout } from "@/components/F0AnalyticsDashboard/types"
+
+import type { ChatDashboardConfig } from "../../../../F0ChatDashboard/types"
+import { useSaveDashboardConfig } from "../../../../F0ChatDashboard/useSaveDashboardConfig"
+import { useAiChat } from "../../../providers/AiChatStateProvider"
+
+import { savedDashboardConfigStore } from "./configStore"
+import type { DashboardCanvasContent } from "./types"
+
+type DashboardCanvasContextValue = {
+  editMode: boolean
+  setEditMode: (editMode: boolean) => void
+  onLayoutChange: (layout: DashboardItemLayout[]) => void
+  handleSave: () => Promise<void>
+  handleDiscard: () => void
+}
+
+const DashboardCanvasContext =
+  createContext<DashboardCanvasContextValue | null>(null)
+
+export function useDashboardCanvas(): DashboardCanvasContextValue {
+  const ctx = useContext(DashboardCanvasContext)
+  if (!ctx) {
+    throw new Error(
+      "useDashboardCanvas must be used within DashboardCanvasProvider"
+    )
+  }
+  return ctx
+}
+
+export function DashboardCanvasProvider({
+  content,
+  children,
+}: {
+  content: DashboardCanvasContent
+  children: ReactNode
+}): ReactNode {
+  const [editMode, setEditMode] = useState(false)
+  const pendingLayoutRef = useRef<DashboardItemLayout[] | null>(null)
+  const { openCanvas } = useAiChat()
+  const { threadId } = useCopilotContext()
+
+  const saveConfigFn = useSaveDashboardConfig(content.apiConfig)
+
+  const applyLayout = useCallback(
+    (layout: DashboardItemLayout[]): ChatDashboardConfig | null => {
+      const itemsById = new Map(
+        content.config.items.map((item) => [item.id, item])
+      )
+      const newItems = layout
+        .map((entry) => {
+          const original = itemsById.get(entry.id)
+          if (!original) return null
+          return {
+            ...original,
+            colSpan: entry.colSpan,
+            rowSpan: entry.rowSpan,
+            x: entry.x,
+            y: entry.y,
+          }
+        })
+        .filter((item) => item !== null)
+
+      return { ...content.config, items: newItems }
+    },
+    [content]
+  )
+
+  const onLayoutChange = useCallback((layout: DashboardItemLayout[]) => {
+    pendingLayoutRef.current = layout
+  }, [])
+
+  const handleSave = async () => {
+    if (pendingLayoutRef.current) {
+      const updatedConfig = applyLayout(pendingLayoutRef.current)
+      if (!updatedConfig || !threadId) return
+
+      try {
+        await saveConfigFn(threadId, content.toolCallId, updatedConfig)
+
+        if (content.toolCallId) {
+          savedDashboardConfigStore.set(content.toolCallId, updatedConfig)
+        }
+
+        openCanvas({
+          ...content,
+          config: updatedConfig,
+        })
+
+        pendingLayoutRef.current = null
+      } catch {
+        return
+      }
+    }
+
+    setEditMode(false)
+  }
+
+  const handleDiscard = () => {
+    pendingLayoutRef.current = null
+    setEditMode(false)
+  }
+
+  return (
+    <DashboardCanvasContext.Provider
+      value={{
+        editMode,
+        setEditMode,
+        onLayoutChange,
+        handleSave,
+        handleDiscard,
+      }}
+    >
+      {children}
+    </DashboardCanvasContext.Provider>
+  )
+}
