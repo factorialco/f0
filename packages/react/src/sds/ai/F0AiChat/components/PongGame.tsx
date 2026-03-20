@@ -1,15 +1,18 @@
+import confetti from "canvas-confetti"
 import { useCallback, useEffect, useRef, useState } from "react"
 import { createPortal } from "react-dom"
 
 import { F0Button } from "@/components/F0Button"
 import { Cross } from "@/icons/app"
+import { useReducedMotion } from "@/lib/a11y"
+import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
 import { F0OneIcon } from "../../F0OneIcon"
 
 // Layout
 const BALL_SIZE = 32
-const PADDLE_WIDTH_INITIAL = 88
+const PADDLE_WIDTH_INITIAL = 64
 const PADDLE_WIDTH_MIN = PADDLE_WIDTH_INITIAL * 0.5 // 50% of original
 const PADDLE_HEIGHT = 8
 const PADDLE_EDGE_MARGIN = 24
@@ -23,12 +26,9 @@ const SPEED_INCREMENT_PER_POINT = 0.15
 const SPIN_FACTOR = 2.5
 const SERVE_DELAY_MS = 800
 
-// AI — human-like behavior
-const AI_SMOOTHING = 0.08
-const AI_IMPRECISION_BASE = 12
-const AI_FAIL_INTERVAL_MIN = 4
-const AI_FAIL_INTERVAL_MAX = 7
-const AI_OVERSHOOT = 0.15
+// AI behavior
+const AI_SMOOTHING = 0.18
+const AI_IMPRECISION_BASE = 3
 
 // Trail
 const TRAIL_LENGTH = 5
@@ -68,8 +68,12 @@ function randomServeAngle(): { vx: number; vy: number } {
 }
 
 export const PongGame = ({ onClose }: PongGameProps) => {
+  const translations = useI18n()
+  const shouldReduceMotion = useReducedMotion()
   const mountRef = useRef<HTMLDivElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
+  const confettiCanvasRef = useRef<HTMLCanvasElement>(null)
+  const confettiInstanceRef = useRef<confetti.CreateTypes | null>(null)
   const [portalTarget, setPortalTarget] = useState<HTMLElement | null>(null)
 
   // Game state refs (mutation-friendly for rAF loop)
@@ -95,17 +99,7 @@ export const PongGame = ({ onClose }: PongGameProps) => {
   const totalRalliesRef = useRef(0)
   const paddleWidthRef = useRef(PADDLE_WIDTH_INITIAL)
   const globalSpeedBonus = useRef(0)
-  // AI human-like state
   const aiVelocity = useRef(0)
-  const aiNextFailAt = useRef(
-    Math.floor(
-      Math.random() * (AI_FAIL_INTERVAL_MAX - AI_FAIL_INTERVAL_MIN) +
-        AI_FAIL_INTERVAL_MIN
-    )
-  )
-  const aiRallySinceLastFail = useRef(0)
-  const aiFailing = useRef(false)
-  const aiFailOffsetX = useRef(0)
   // Ball rotation
   const ballRotation = useRef(0)
   const ballAngularVel = useRef(0)
@@ -167,6 +161,17 @@ export const PongGame = ({ onClose }: PongGameProps) => {
     return () => clearInterval(interval)
   }, [centerBall, serveBall])
 
+  const fireConfetti = useCallback(() => {
+    if (shouldReduceMotion || !confettiInstanceRef.current) return
+    confettiInstanceRef.current({
+      particleCount: 80,
+      spread: 70,
+      origin: { y: 0.7 },
+      colors: ["#9D76F3", "#3FC495", "#E61D46", "#F6AF3D"],
+      disableForReducedMotion: true,
+    })
+  }, [shouldReduceMotion])
+
   const handleScore = useCallback(
     (scorer: "player" | "ai") => {
       const newScore = { ...scoreRef.current }
@@ -182,12 +187,21 @@ export const PongGame = ({ onClose }: PongGameProps) => {
         globalSpeedBonus.current + SPEED_INCREMENT_PER_POINT
       )
 
-      // First to 2 wins
-      if (newScore.player >= 2 || newScore.ai >= 2) {
+      // Confetti on player goal
+      if (scorer === "player") {
+        fireConfetti()
+      }
+
+      // First to 3 wins
+      if (newScore.player >= 3 || newScore.ai >= 3) {
         phaseRef.current = "gameover"
         setPhase("gameover")
         centerBall()
-        setEndMessage(newScore.player >= 2 ? "You win!" : "You lose!")
+        setEndMessage(
+          newScore.player >= 3
+            ? translations.ai.pong.youWin
+            : translations.ai.pong.youLose
+        )
         setTimeout(() => onClose(), 2000)
         return
       }
@@ -203,7 +217,7 @@ export const PongGame = ({ onClose }: PongGameProps) => {
         }
       }, SERVE_DELAY_MS)
     },
-    [centerBall, startCountdown]
+    [centerBall, startCountdown, fireConfetti, translations]
   )
 
   // Portal detection
@@ -213,6 +227,19 @@ export const PongGame = ({ onClose }: PongGameProps) => {
       if (target) setPortalTarget(target as HTMLElement)
     }
   }, [])
+
+  // Confetti canvas init
+  useEffect(() => {
+    if (confettiCanvasRef.current) {
+      confettiInstanceRef.current = confetti.create(confettiCanvasRef.current, {
+        resize: true,
+        useWorker: false,
+      })
+    }
+    return () => {
+      confettiInstanceRef.current?.reset()
+    }
+  }, [portalTarget])
 
   // Keyboard
   useEffect(() => {
@@ -242,8 +269,6 @@ export const PongGame = ({ onClose }: PongGameProps) => {
     setRenderPaddleWidth(PADDLE_WIDTH_INITIAL)
     globalSpeedBonus.current = 0
     aiVelocity.current = 0
-    aiRallySinceLastFail.current = 0
-    aiFailing.current = false
 
     const cleanupCountdown = startCountdown()
 
@@ -350,7 +375,6 @@ export const PongGame = ({ onClose }: PongGameProps) => {
           b.vy = Math.cos(angle) * b.speed
           ballAngularVel.current = hitOffset * 1.5 + b.vx * 0.08
           rallyRef.current++
-          aiRallySinceLastFail.current++
         }
 
         // Score: ball out of bounds
@@ -360,65 +384,34 @@ export const PongGame = ({ onClose }: PongGameProps) => {
           handleScore("ai")
         }
 
-        // AI behavior: human-like with momentum, fails, and overshoot
-        // Decide if AI should deliberately fail this rally
-        if (
-          !aiFailing.current &&
-          aiRallySinceLastFail.current >= aiNextFailAt.current &&
-          b.vy < 0 &&
-          b.y < height * 0.5
-        ) {
-          aiFailing.current = true
-          // Aim for wrong side of the field
-          aiFailOffsetX.current =
-            (Math.random() > 0.5 ? 1 : -1) *
-            (width * 0.3 + Math.random() * width * 0.2)
-        }
-
+        // AI behavior
         if (b.vy < 0) {
           // Ball approaching AI
           const timeToReach = Math.max(1, (b.y - PADDLE_EDGE_MARGIN) / -b.vy)
-          let predictedX = b.x + b.vx * timeToReach
+          const predictedX = b.x + b.vx * timeToReach
 
           // Add imprecision that increases with ball speed
           const imprecision = AI_IMPRECISION_BASE * (1 + b.speed / MAX_SPEED)
           const jitter = (Math.random() - 0.5) * imprecision
 
-          if (aiFailing.current) {
-            // AI "misreads" the ball — aims for wrong spot
-            predictedX += aiFailOffsetX.current
-          }
-
-          // Smooth target convergence with slight overshoot
+          // Smooth target convergence
           const targetDiff = predictedX + jitter - aiTargetX.current
-          aiTargetX.current +=
-            targetDiff * AI_SMOOTHING * dt +
-            targetDiff * AI_OVERSHOOT * AI_SMOOTHING * dt
+          aiTargetX.current += targetDiff * AI_SMOOTHING * dt
         } else {
           // Ball going away — drift lazily toward center with slight wander
           const wander = Math.sin(Date.now() * 0.002) * 15
           aiTargetX.current +=
             (width / 2 + wander - aiTargetX.current) * 0.025 * dt
-
-          // Reset fail state when ball is going away
-          if (aiFailing.current) {
-            aiFailing.current = false
-            aiRallySinceLastFail.current = 0
-            aiNextFailAt.current = Math.floor(
-              Math.random() * (AI_FAIL_INTERVAL_MAX - AI_FAIL_INTERVAL_MIN) +
-                AI_FAIL_INTERVAL_MIN
-            )
-          }
         }
 
         // Physics-based movement with acceleration and deceleration
         const targetDiff = aiTargetX.current - aiX.current
-        const acceleration = targetDiff * 0.08 * dt
+        const acceleration = targetDiff * 0.14 * dt
         aiVelocity.current += acceleration
         // Damping for natural deceleration
         aiVelocity.current *= 0.88
         // Clamp max velocity
-        const maxVel = 5 + rallyRef.current * 0.12
+        const maxVel = 8 + rallyRef.current * 0.15
         aiVelocity.current = clamp(aiVelocity.current, -maxVel, maxVel)
         aiX.current += aiVelocity.current * dt
         aiX.current = clamp(
@@ -473,9 +466,9 @@ export const PongGame = ({ onClose }: PongGameProps) => {
       <div className="flex flex-1 flex-col bg-f1-special-page">
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3">
-          <div className="flex items-baseline gap-3 text-sm tracking-widest text-f1-foreground-secondary font-medium">
+          <div className="flex items-baseline gap-3 text-sm font-medium tracking-widest text-f1-foreground-secondary">
             <div className="flex items-baseline gap-2">
-              <span>AI</span>
+              <span>{translations.ai.pong.ai}</span>
               <span className="text-center text-base font-semibold text-f1-foreground">
                 {score.ai}
               </span>
@@ -485,12 +478,12 @@ export const PongGame = ({ onClose }: PongGameProps) => {
               <span className="text-center text-base font-semibold text-f1-foreground">
                 {score.player}
               </span>
-              <span>YOU</span>
+              <span>{translations.ai.pong.you}</span>
             </div>
           </div>
           <F0Button
             icon={Cross}
-            label="Close"
+            label={translations.actions.close}
             onClick={onClose}
             variant="ghost"
             hideLabel
@@ -614,6 +607,12 @@ export const PongGame = ({ onClose }: PongGameProps) => {
               </span>
             </div>
           )}
+
+          {/* Confetti canvas */}
+          <canvas
+            ref={confettiCanvasRef}
+            className="pointer-events-none absolute inset-0 z-50"
+          />
         </div>
       </div>
     </div>,
