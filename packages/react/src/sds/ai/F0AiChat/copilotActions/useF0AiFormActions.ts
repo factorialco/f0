@@ -1,6 +1,8 @@
-import { useCopilotReadable } from "@copilotkit/react-core"
+import { useCoAgent } from "@copilotkit/react-core"
+import { useEffect } from "react"
 
 import { useF0AiFormRegistry } from "../../../../components/F0Form/F0AiFormRegistry"
+import { useAiChat } from "../providers/AiChatStateProvider"
 import { useFormFillAction } from "./useFormFillAction"
 import { useFormGetStateAction } from "./useFormGetStateAction"
 import { useFormSubmitAction } from "./useFormSubmitAction"
@@ -8,29 +10,31 @@ import { usePresentFormAction } from "./usePresentFormAction"
 
 /**
  * Hook that registers all AI form interaction tools and pushes
- * form context to the AI backend via `useCopilotReadable`.
+ * form context to the co-agent shared state via `useCoAgent`.
  *
  * Must be called inside a component tree that has both:
  * - A `F0AiFormRegistryProvider` ancestor (for form lookup)
- * - A CopilotKit context (for tool registration + readable context)
+ * - A CopilotKit context (for tool registration + co-agent state)
+ * - An `AiChatStateProvider` ancestor (for the agent name)
  */
 export const useF0AiFormActions = () => {
   const registry = useF0AiFormRegistry()
+  const { agent } = useAiChat()
 
-  // Push form descriptions from the registry into CopilotKit readable context
-  // so the AI backend knows what forms are active on the page.
-  useCopilotReadable(
-    {
-      description:
-        "Active forms on the current page. Each entry contains the form name, its JSON schema, current values, validation errors, and dirty state. Use the form tools (formListForms, formFill, formSubmit, formGetState) to interact with them.",
-      value: registry?.formDescriptions.length
+  // Sync form descriptions into the co-agent shared state so the
+  // backend agent can see what forms are active on the page.
+  const { setState } = useCoAgent({
+    name: agent ?? "one-workflow",
+  })
+
+  useEffect(() => {
+    setState((prev: Record<string, unknown>) => ({
+      ...prev,
+      formDescriptions: registry?.formDescriptions.length
         ? registry.formDescriptions
-        : "No forms are currently active on this page.",
-    },
-    [JSON.stringify(registry?.formDescriptions)]
-  )
-
-  console.log({ formDescriptions: registry?.formDescriptions })
+        : [],
+    }))
+  }, [JSON.stringify(registry?.formDescriptions)])
 
   useFormFillAction()
   useFormSubmitAction()
