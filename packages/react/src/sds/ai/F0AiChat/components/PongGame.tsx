@@ -27,8 +27,8 @@ const SPIN_FACTOR = 2.5
 const SERVE_DELAY_MS = 800
 
 // AI behavior
-const AI_SMOOTHING = 0.18
-const AI_IMPRECISION_BASE = 3
+const AI_SMOOTHING = 0.12
+const AI_IMPRECISION_BASE = 8
 
 // Trail
 const TRAIL_LENGTH = 5
@@ -166,7 +166,7 @@ export const PongGame = ({ onClose }: PongGameProps) => {
     confettiInstanceRef.current({
       particleCount: 80,
       spread: 70,
-      origin: { y: 0.7 },
+      origin: { x: 0.5, y: 0.7 },
       colors: ["#9D76F3", "#3FC495", "#E61D46", "#F6AF3D"],
       disableForReducedMotion: true,
     })
@@ -406,12 +406,12 @@ export const PongGame = ({ onClose }: PongGameProps) => {
 
         // Physics-based movement with acceleration and deceleration
         const targetDiff = aiTargetX.current - aiX.current
-        const acceleration = targetDiff * 0.14 * dt
+        const acceleration = targetDiff * 0.1 * dt
         aiVelocity.current += acceleration
         // Damping for natural deceleration
         aiVelocity.current *= 0.88
         // Clamp max velocity
-        const maxVel = 8 + rallyRef.current * 0.15
+        const maxVel = 6 + rallyRef.current * 0.12
         aiVelocity.current = clamp(aiVelocity.current, -maxVel, maxVel)
         aiX.current += aiVelocity.current * dt
         aiX.current = clamp(
@@ -611,7 +611,7 @@ export const PongGame = ({ onClose }: PongGameProps) => {
           {/* Confetti canvas */}
           <canvas
             ref={confettiCanvasRef}
-            className="pointer-events-none absolute inset-0 z-50"
+            className="pointer-events-none absolute inset-0 z-50 h-full w-full"
           />
         </div>
       </div>
