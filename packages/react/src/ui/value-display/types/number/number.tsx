@@ -34,18 +34,16 @@ export const NumberCell = (
 ) => {
   const value = resolveValue<number>(args, "number")
   const shouldShowPlaceholderStyling = isShowingPlaceholder(args, "number")
+  const rawNumber =
+    typeof args === "object" && args !== null && "number" in args
+      ? args
+      : undefined
 
   const number: ResolvedNumberValue = {
-    // defaults
-    unitsPosition: "right",
-    units: "",
-    decimalPlaces: undefined,
-    // if args is an object, use the number and related properties from args
-    ...(typeof args === "object" && "number" in args ? args : {}),
-    number:
-      typeof args === "object" && args !== null && "number" in args
-        ? (args.number ?? value)
-        : value,
+    number: rawNumber?.number ?? value,
+    decimalPlaces: rawNumber?.decimalPlaces,
+    units: rawNumber?.units ?? "",
+    unitsPosition: rawNumber?.unitsPosition ?? "right",
   }
 
   const formattedNumber = formatNumberParts({

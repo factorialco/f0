@@ -78,7 +78,7 @@ const toneClassByValue: Record<CompoundTone, string> = {
   selected: "text-f1-foreground-selected",
 }
 
-const resolveValue = (
+const resolveCompoundTextValue = (
   value: string | undefined,
   placeholder?: string
 ): ResolvedTextSegment => {
@@ -110,13 +110,13 @@ type ResolvedSegment = ResolvedTextSegment | ResolvedFormattedSegment
 const resolveSegmentText = (segment: CompoundSegment): ResolvedSegment => {
   switch (segment.type) {
     case "text":
-      return resolveValue(
+      return resolveCompoundTextValue(
         segment.value !== undefined ? segment.value.toString() : undefined,
         segment.placeholder
       )
     case "number":
       if (segment.value === undefined) {
-        return resolveValue(undefined, segment.placeholder)
+        return resolveCompoundTextValue(undefined, segment.placeholder)
       }
 
       return {
@@ -131,10 +131,10 @@ const resolveSegmentText = (segment: CompoundSegment): ResolvedSegment => {
       }
     case "percentage":
       if (segment.value === undefined) {
-        return resolveValue(undefined, segment.placeholder)
+        return resolveCompoundTextValue(undefined, segment.placeholder)
       }
 
-      return resolveValue(
+      return resolveCompoundTextValue(
         `${
           formatNumberParts({
             number: segment.value,
@@ -144,7 +144,7 @@ const resolveSegmentText = (segment: CompoundSegment): ResolvedSegment => {
       )
     case "amount":
       if (segment.value === undefined) {
-        return resolveValue(undefined, segment.placeholder)
+        return resolveCompoundTextValue(undefined, segment.placeholder)
       }
 
       return {

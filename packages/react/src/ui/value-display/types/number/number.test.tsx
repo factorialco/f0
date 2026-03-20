@@ -60,4 +60,20 @@ describe("NumberCell", () => {
     expect(units.parentElement).toHaveTextContent("N/A%")
     expect(units.parentElement).toHaveClass("text-f1-foreground-secondary")
   })
+
+  it("normalizes undefined unit fields from object inputs", () => {
+    render(
+      NumberCell(
+        {
+          number: 12,
+          units: undefined,
+          unitsPosition: undefined,
+        },
+        tableMeta
+      )
+    )
+
+    expect(screen.getByText("12")).toBeInTheDocument()
+    expect(screen.queryByText("%")).not.toBeInTheDocument()
+  })
 })
