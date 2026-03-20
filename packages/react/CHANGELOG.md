@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.411.1](https://github.com/factorialco/f0/compare/f0-react-v1.411.0...f0-react-v1.411.1) (2026-03-20)
+
+
+### Bug Fixes
+
+* **f0-form:** fix row field alignment when validation errors appear ([#3709](https://github.com/factorialco/f0/issues/3709)) ([4e550f0](https://github.com/factorialco/f0/commit/4e550f00349386983f2edbe294c23527a452de2a))
+
 ## [1.411.0](https://github.com/factorialco/f0/compare/f0-react-v1.410.0...f0-react-v1.411.0) (2026-03-19)
 
 
