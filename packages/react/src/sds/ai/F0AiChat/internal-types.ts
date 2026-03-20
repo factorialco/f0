@@ -1,7 +1,5 @@
 import { type AIMessage, type Message } from "@copilotkit/shared"
 
-import type { ChatDashboardConfig } from "../F0ChatDashboard/types"
-
 import {
   type AiChatDisclaimer,
   type AiChatMode,
@@ -174,8 +172,6 @@ export type AiChatProviderReturnValue = {
 > & {
     /** The current canvas content, or null when canvas is closed */
     canvasContent: CanvasContent | null
-    /** The dashboard config from the current canvas content, or null */
-    canvasDashboard: ChatDashboardConfig | null
     /** Open the canvas panel with the given content */
     openCanvas: (content: CanvasContent) => void
     /** Close the canvas panel and restore the previous visualization mode */
@@ -186,15 +182,6 @@ export type AiChatProviderReturnValue = {
     setActiveToolHint: React.Dispatch<
       React.SetStateAction<AiChatToolHint | null>
     >
-    /** Get a saved dashboard config by toolCallId (returns updated config after user edits) */
-    getSavedDashboardConfig: (
-      toolCallId: string
-    ) => ChatDashboardConfig | undefined
-    /** Save an updated dashboard config keyed by toolCallId */
-    updateDashboardConfig: (
-      toolCallId: string,
-      config: ChatDashboardConfig
-    ) => void
   }
 
 /**

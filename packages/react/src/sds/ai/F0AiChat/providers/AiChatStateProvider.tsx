@@ -16,8 +16,6 @@ import {
 
 import { useI18n } from "@/lib/providers/i18n"
 
-import type { ChatDashboardConfig } from "../../F0ChatDashboard/types"
-
 import { DEFAULT_CHAT_WIDTH } from "../constants"
 import { AiChatProviderReturnValue, AiChatState } from "../internal-types"
 import {
@@ -31,8 +29,6 @@ import {
   readFromLocalStorage,
   writeToLocalStorage,
 } from "../utils/local-storage"
-import { savedDashboardConfigStore } from "./savedDashboardConfigStore"
-
 const AiChatStateContext = createContext<AiChatProviderReturnValue | null>(null)
 
 const CHAT_WIDTH_STORAGE_KEY = "ONE-ai-chat-width"
@@ -100,21 +96,6 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   }, [open])
 
   const [canvasContent, setCanvasContent] = useState<CanvasContent | null>(null)
-
-  // Saved dashboard configs live in an external store so that
-  // F0ChatReportCard (rendered inside CopilotKit) can subscribe
-  // via useSyncExternalStore independently of React context.
-  const getSavedDashboardConfig = useCallback(
-    (toolCallId: string) => savedDashboardConfigStore.get(toolCallId),
-    []
-  )
-
-  const updateDashboardConfig = useCallback(
-    (toolCallId: string, config: ChatDashboardConfig) => {
-      savedDashboardConfigStore.set(toolCallId, config)
-    },
-    []
-  )
 
   // Track the mode before canvas was opened so we can restore it on close
   const previousVisualizationModeRef = useRef<VisualizationMode>("sidepanel")
@@ -310,14 +291,10 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         entityResolvers,
         toolHints,
         canvasContent,
-        canvasDashboard:
-          canvasContent?.type === "dashboard" ? canvasContent.config : null,
         openCanvas,
         closeCanvas,
         activeToolHint,
         setActiveToolHint,
-        getSavedDashboardConfig,
-        updateDashboardConfig,
       }}
     >
       {children}
@@ -375,13 +352,10 @@ export function useAiChat(): AiChatProviderReturnValue {
       entityResolvers: undefined,
       toolHints: undefined,
       canvasContent: null,
-      canvasDashboard: null,
       openCanvas: noopFn,
       closeCanvas: noopFn,
       activeToolHint: null,
       setActiveToolHint: noopFn,
-      getSavedDashboardConfig: () => undefined,
-      updateDashboardConfig: noopFn,
     }
   }
 

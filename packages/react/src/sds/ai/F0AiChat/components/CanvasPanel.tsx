@@ -1,41 +1,30 @@
-import { useCopilotContext } from "@copilotkit/react-core"
 import { AnimatePresence, motion } from "motion/react"
-import { useCallback, useEffect, useRef, useState } from "react"
-
-import type { DashboardItemLayout } from "@/components/F0AnalyticsDashboard/types"
+import { type ReactNode, useEffect, useRef, useState } from "react"
 
 import { F0Button } from "@/components/F0Button"
 import { OneEllipsis } from "@/components/OneEllipsis"
-import { Cross, Pencil } from "@/icons/app"
+import { Cross } from "@/icons/app"
 import { useReducedMotion } from "@/lib/a11y"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
-import type { ChatDashboardConfig } from "../../F0ChatDashboard/types"
-
-import { F0ChatDashboard } from "../../F0ChatDashboard"
-import { useSaveDashboardConfig } from "../../F0ChatDashboard/useSaveDashboardConfig"
+import { getCanvasEntity } from "../canvas"
 import { useAiChat } from "../providers/AiChatStateProvider"
 
 /**
- * Canvas panel that renders content alongside the chat sidebar.
+ * Entity-agnostic canvas panel that renders content alongside the chat sidebar.
  *
- * Appears to the left of the chat sidebar when a copilot action opens
- * the canvas (e.g. `displayDashboard`). Overlays the main content
- * area (nav sidebar stays visible). Closes via the X button which
- * clears `canvasContent` and restores the previous visualization mode.
+ * Looks up the entity definition from the registry based on `canvasContent.type`
+ * and delegates rendering of body and header actions to the entity module.
+ * The canvas shell handles: animation, title, close button, and refreshKey.
  */
-export function CanvasPanel() {
-  const { canvasContent, closeCanvas, openCanvas, updateDashboardConfig } =
-    useAiChat()
-  const { threadId } = useCopilotContext()
+export function CanvasPanel(): ReactNode {
+  const { canvasContent, closeCanvas } = useAiChat()
   const translations = useI18n()
   const shouldReduceMotion = useReducedMotion()
   const [refreshKey, setRefreshKey] = useState(0)
-  const [editMode, setEditMode] = useState(false)
 
-  // When a new dashboard is displayed (LLM regeneration), auto-increment
-  // refreshKey to bust the compute cache in useDashboardCompute.
+  // Auto-increment refreshKey when content changes (e.g. LLM regeneration)
   const prevCanvasContentRef = useRef(canvasContent)
   useEffect(() => {
     if (
@@ -48,78 +37,48 @@ export function CanvasPanel() {
     prevCanvasContentRef.current = canvasContent
   }, [canvasContent])
 
-  // Pending layout changes that haven't been saved yet
-  const pendingLayoutRef = useRef<DashboardItemLayout[] | null>(null)
+  const entity = canvasContent ? getCanvasEntity(canvasContent.type) : undefined
 
-  const saveConfigFn = useSaveDashboardConfig(
-    canvasContent?.apiConfig ?? { baseUrl: "", headers: {} }
-  )
+  const renderInner = (): ReactNode => {
+    if (!canvasContent || !entity) return null
 
-  /**
-   * Reconcile a layout descriptor against the original config items.
-   * Reorders, resizes (colSpan), and removes items as described.
-   */
-  const applyLayout = useCallback(
-    (layout: DashboardItemLayout[]): ChatDashboardConfig | null => {
-      if (!canvasContent) return null
-      const itemsById = new Map(
-        canvasContent.config.items.map((item) => [item.id, item])
-      )
-      const newItems = layout
-        .map((entry) => {
-          const original = itemsById.get(entry.id)
-          if (!original) return null
-          return {
-            ...original,
-            colSpan: entry.colSpan,
-            rowSpan: entry.rowSpan,
-            x: entry.x,
-            y: entry.y,
-          }
-        })
-        .filter((item) => item !== null)
+    const headerActions = entity.renderHeaderActions({ content: canvasContent })
+    const content = entity.renderContent({
+      content: canvasContent,
+      refreshKey,
+    })
 
-      return { ...canvasContent.config, items: newItems }
-    },
-    [canvasContent]
-  )
+    const inner = (
+      <>
+        {/* Header */}
+        <div className="flex shrink-0 items-center gap-2 border-0 border-b border-solid border-f1-border-secondary px-7 py-5">
+          <OneEllipsis
+            tag="h2"
+            className="min-w-0 flex-1 text-2xl font-semibold text-f1-foreground"
+          >
+            {canvasContent.title}
+          </OneEllipsis>
+          {headerActions}
+          <F0Button
+            variant="ghost"
+            icon={Cross}
+            size="md"
+            hideLabel
+            onClick={() => closeCanvas()}
+            label={translations.ai.closeDashboard}
+          />
+        </div>
 
-  const handleLayoutChange = useCallback((layout: DashboardItemLayout[]) => {
-    pendingLayoutRef.current = layout
-  }, [])
+        {/* Content */}
+        <div className="relative flex-1 overflow-auto p-5">{content}</div>
+      </>
+    )
 
-  const handleSave = async () => {
-    if (!canvasContent) return
-
-    if (pendingLayoutRef.current) {
-      const updatedConfig = applyLayout(pendingLayoutRef.current)
-      if (!updatedConfig || !threadId) return
-
-      try {
-        await saveConfigFn(threadId, canvasContent.toolCallId, updatedConfig)
-
-        if (canvasContent.toolCallId) {
-          updateDashboardConfig(canvasContent.toolCallId, updatedConfig)
-        }
-
-        openCanvas({
-          ...canvasContent,
-          config: updatedConfig,
-        })
-
-        pendingLayoutRef.current = null
-      } catch {
-        // Keep edit mode open so user can retry
-        return
-      }
+    if (entity.wrapper) {
+      return entity.wrapper({ content: canvasContent, children: inner })
     }
 
-    setEditMode(false)
-  }
-
-  const handleDiscard = () => {
-    pendingLayoutRef.current = null
-    setEditMode(false)
+    return inner
   }
 
   return (
@@ -151,61 +110,7 @@ export function CanvasPanel() {
               duration: shouldReduceMotion ? 0 : 0.2,
             }}
           >
-            {/* Header */}
-            <div className="flex shrink-0 items-center gap-2 border-0 border-b border-solid border-f1-border-secondary px-7 py-5">
-              <OneEllipsis
-                tag="h2"
-                className="min-w-0 flex-1 text-2xl font-semibold text-f1-foreground"
-              >
-                {canvasContent.title}
-              </OneEllipsis>
-              {editMode ? (
-                <>
-                  <F0Button
-                    variant="outline"
-                    label={translations.ai.discardChanges}
-                    onClick={handleDiscard}
-                    size="md"
-                  />
-                  <F0Button
-                    label={translations.ai.saveChanges}
-                    onClick={handleSave}
-                    size="md"
-                  />
-                </>
-              ) : (
-                <>
-                  <F0Button
-                    variant="outline"
-                    icon={Pencil}
-                    size="md"
-                    onClick={() => setEditMode(true)}
-                    label="Edit"
-                  />
-                  <F0Button
-                    variant="ghost"
-                    icon={Cross}
-                    size="md"
-                    hideLabel
-                    onClick={() => closeCanvas()}
-                    label={translations.ai.closeDashboard}
-                  />
-                </>
-              )}
-            </div>
-
-            {/* Content */}
-            <div className="relative flex-1 overflow-auto p-5">
-              {canvasContent.type === "dashboard" && (
-                <F0ChatDashboard
-                  config={canvasContent.config}
-                  apiConfig={canvasContent.apiConfig}
-                  refreshKey={refreshKey}
-                  editMode={editMode}
-                  onLayoutChange={handleLayoutChange}
-                />
-              )}
-            </div>
+            {renderInner()}
           </motion.div>
         </motion.div>
       )}
