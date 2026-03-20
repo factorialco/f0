@@ -3,7 +3,7 @@ import { ControllerRenderProps, FieldValues } from "react-hook-form"
 import type { ResolvedField } from "../types"
 import type { F0CustomField, CustomFieldRenderPropsBase } from "./types"
 
-import { useF0FormContext } from "../../context"
+import { useOptionalF0FormContext } from "../../context"
 
 interface CustomFieldRendererProps {
   field: ResolvedField<F0CustomField>
@@ -27,7 +27,8 @@ export function CustomFieldRenderer({
   isValidating,
   required,
 }: CustomFieldRendererProps) {
-  const { renderCustomField } = useF0FormContext()
+  const context = useOptionalF0FormContext()
+  const renderCustomField = context?.renderCustomField
 
   const renderProps: CustomFieldRenderPropsBase & { config: unknown } = {
     id: field.id,
