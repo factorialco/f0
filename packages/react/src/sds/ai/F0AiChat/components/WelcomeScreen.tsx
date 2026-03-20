@@ -1,7 +1,7 @@
 import { useCopilotChatInternal } from "@copilotkit/react-core"
 import { Message, randomId } from "@copilotkit/shared"
 import { AnimatePresence, motion } from "motion/react"
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 
 import { useAiChat } from "@/ai"
 import { ButtonInternal } from "@/components/F0Button/internal"
@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils"
 
 import { F0OneIcon } from "../../F0OneIcon"
 import { WelcomeScreenSuggestion } from "../types"
+import { PongGame } from "./PongGame"
 
 export type { WelcomeScreenSuggestion }
 
@@ -32,6 +33,7 @@ export const WelcomeScreen = ({
   initialMessages?: Message[]
   suggestions?: WelcomeScreenSuggestion[]
 }) => {
+  const [showPong, setShowPong] = useState(false)
   const { sendMessage } = useCopilotChatInternal()
 
   const { visualizationMode, tracking } = useAiChat()
@@ -42,6 +44,10 @@ export const WelcomeScreen = ({
     () => pickRandomSuggestions(suggestions),
     [suggestions]
   )
+
+  if (showPong) {
+    return <PongGame onClose={() => setShowPong(false)} />
+  }
 
   return (
     <AnimatePresence mode="popLayout">
@@ -61,7 +67,9 @@ export const WelcomeScreen = ({
               delay: 0.4,
             }}
           >
-            <F0OneIcon spin size="lg" className="my-4" />
+            <div className="cursor-pointer" onClick={() => setShowPong(true)}>
+              <F0OneIcon spin size="lg" className="my-4" />
+            </div>
           </motion.div>
           {greeting && !isFullscreen && (
             <motion.p
