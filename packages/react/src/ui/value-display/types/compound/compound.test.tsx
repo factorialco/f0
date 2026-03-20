@@ -1,4 +1,5 @@
-import { render, screen } from "@testing-library/react"
+import { defaultTranslations } from "@/lib/providers/i18n"
+import { screen, zeroRender as render } from "@/testing/test-utils"
 import { describe, expect, it } from "vitest"
 
 import { ValueDisplayRendererContext } from "../../renderers"
@@ -6,10 +7,12 @@ import { CompoundCell, CompoundCellValue } from "./compound"
 
 const tableMeta: ValueDisplayRendererContext = {
   visualization: "table",
+  i18n: defaultTranslations,
 }
 
 const listMeta: ValueDisplayRendererContext = {
   visualization: "list",
+  i18n: defaultTranslations,
 }
 
 describe("CompoundCell", () => {
