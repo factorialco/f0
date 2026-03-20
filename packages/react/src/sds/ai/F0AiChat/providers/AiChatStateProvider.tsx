@@ -17,20 +17,21 @@ import {
 import { useI18n } from "@/lib/providers/i18n"
 
 import type { ChatDashboardConfig } from "../../F0ChatDashboard/types"
-import { savedDashboardConfigStore } from "./savedDashboardConfigStore"
 
 import { DEFAULT_CHAT_WIDTH } from "../constants"
-import {
-  readFromLocalStorage,
-  writeToLocalStorage,
-} from "../utils/local-storage"
 import { AiChatProviderReturnValue, AiChatState } from "../internal-types"
 import {
+  type AiChatMode,
   type CanvasContent,
   type VisualizationMode,
   type AiChatToolHint,
   WelcomeScreenSuggestion,
 } from "../types"
+import {
+  readFromLocalStorage,
+  writeToLocalStorage,
+} from "../utils/local-storage"
+import { savedDashboardConfigStore } from "./savedDashboardConfigStore"
 
 const AiChatStateContext = createContext<AiChatProviderReturnValue | null>(null)
 
@@ -60,6 +61,7 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   lockVisualizationMode = false,
   historyEnabled = false,
   footer: initialFooter,
+  VoiceMode,
   entityResolvers,
   toolHints,
   onThumbsDown,
@@ -70,6 +72,7 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   const [footer, setFooter] = useState<ReactNode | undefined>(initialFooter)
   const [enabledInternal, setEnabledInternal] = useState(enabled)
   const [open, setOpen] = useState(defaultVisualizationMode === "fullscreen")
+  const [mode, setMode] = useState<AiChatMode>("chat")
   const [visualizationMode, setVisualizationMode] = useState<VisualizationMode>(
     defaultVisualizationMode
   )
@@ -268,11 +271,14 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         setEnabled: setEnabledInternal,
         open,
         setOpen,
+        mode,
+        setMode,
         visualizationMode,
         setVisualizationMode,
         lockVisualizationMode,
         historyEnabled,
         footer,
+        VoiceMode,
         setFooter,
         shouldPlayEntranceAnimation,
         setShouldPlayEntranceAnimation,
@@ -330,6 +336,8 @@ export function useAiChat(): AiChatProviderReturnValue {
       setEnabled: noopFn,
       open: false,
       setOpen: noopFn,
+      mode: "chat",
+      setMode: noopFn,
       visualizationMode: "sidepanel",
       setVisualizationMode: noopFn,
       lockVisualizationMode: false,
@@ -358,6 +366,7 @@ export function useAiChat(): AiChatProviderReturnValue {
       disclaimer: undefined,
       resizable: false,
       footer: undefined,
+      VoiceMode: undefined,
       setFooter: noopFn,
       chatWidth: DEFAULT_CHAT_WIDTH,
       setChatWidth: noopFn,
