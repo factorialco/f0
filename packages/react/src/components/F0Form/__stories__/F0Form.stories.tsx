@@ -209,7 +209,7 @@ export const WithRowsAndValidation: Story = {
         fieldType: "checkbox",
         row: "checkboxes",
       }),
-      allowInternal: f0FormField(z.literal(true), {
+      allowInternal: f0FormField(z.boolean().default(false), {
         label: "Allow internal applications",
         fieldType: "checkbox",
         row: "checkboxes",
