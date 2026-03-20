@@ -200,6 +200,8 @@
     "playwright": "^1.57.0",
     "postcss": "^8.5.3",
     "postcss-import": "^16.1.0",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
     "react-syntax-highlighter": "^15.6.1",
     "remark-gfm": "^4.0.1",
     "rollup-plugin-jsx-remove-attributes": "^3.1.1",

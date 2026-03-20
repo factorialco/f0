@@ -3,19 +3,7 @@ import { type ReactNode, useContext, useEffect, useRef } from "react"
 
 import { PersonEntityRef } from "../../F0MarkdownRenderers/components/PersonEntityRef"
 import { FullscreenChatContext } from "../index"
-
-function getTextContent(
-  content: string | Array<{ type: string; text?: string }> | undefined
-): string | undefined {
-  if (typeof content === "string") return content
-  if (Array.isArray(content)) {
-    return content
-      .filter((part) => part.type === "text" && part.text)
-      .map((part) => part.text)
-      .join("")
-  }
-  return undefined
-}
+import { getTextContent } from "../utils/contentHelpers"
 
 /**
  * Regex to match <entity-ref type="person" id="X">Name</entity-ref>
@@ -131,7 +119,7 @@ export const UserMessage = ({ message, ImageRenderer }: UserMessageProps) => {
       <div className="copilotKitMessage copilotKitUserMessage">
         <ImageRenderer
           image={imageMessage.image!}
-          content={imageMessage.content}
+          content={getTextContent(imageMessage.content)}
         />
       </div>
     )
