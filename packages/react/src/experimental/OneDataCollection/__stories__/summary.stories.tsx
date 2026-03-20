@@ -185,3 +185,72 @@ export const WithInfiniteScrollSummaryStickyFrozenColumns: Story = {
     )
   },
 }
+
+export const WithSummaryPlaceholders: Story = {
+  parameters: { a11y: { skipCi: true } },
+  render: () => {
+    const users = generateMockUsers(6).map((user) => ({
+      ...user,
+      estimatedMargin: Math.round((user.salary ?? 0) * 0.2),
+    }))
+
+    const dataSource = useDataCollectionSource({
+      dataAdapter: {
+        fetchData: async () => ({
+          records: users,
+          summaries: {
+            ...users[0],
+            salary: undefined,
+            estimatedMargin: users.reduce((total, user) => {
+              return total + user.estimatedMargin
+            }, 0),
+          },
+        }),
+      },
+      summaries: {
+        salary: {
+          type: "sum",
+        },
+        estimatedMargin: {
+          type: "sum",
+        },
+      },
+    })
+
+    return (
+      <OneDataCollection
+        source={dataSource}
+        visualizations={[
+          {
+            type: "table",
+            options: {
+              summaryPlaceholder: "Row placeholder",
+              columns: [
+                { label: "Name", render: (item) => item.name },
+                {
+                  label: "Department",
+                  render: (item) => item.department,
+                  summaryPlaceholder: "",
+                },
+                {
+                  label: "Salary",
+                  summary: "salary",
+                  summaryPlaceholder: "Text placeholder",
+                  align: "right",
+                  render: (item) => item.salary,
+                },
+                {
+                  label: "Estimated margin",
+                  summary: "estimatedMargin",
+                  align: "right",
+                  render: (item) => item.estimatedMargin,
+                },
+              ],
+              frozenColumns: 1,
+            },
+          },
+        ]}
+      />
+    )
+  },
+}

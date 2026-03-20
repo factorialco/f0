@@ -7,6 +7,7 @@ import {
   createContext,
   type FC,
   type PropsWithChildren,
+  useCallback,
   useContext,
   useEffect,
   useRef,
@@ -15,9 +16,17 @@ import {
 
 import { useI18n } from "@/lib/providers/i18n"
 
+import type { ChatDashboardConfig } from "../../F0ChatDashboard/types"
+import { savedDashboardConfigStore } from "./savedDashboardConfigStore"
+
 import { DEFAULT_CHAT_WIDTH } from "../constants"
+import {
+  readFromLocalStorage,
+  writeToLocalStorage,
+} from "../utils/local-storage"
 import { AiChatProviderReturnValue, AiChatState } from "../internal-types"
 import {
+  type CanvasContent,
   type VisualizationMode,
   type AiChatToolHint,
   WelcomeScreenSuggestion,
@@ -29,16 +38,12 @@ const CHAT_WIDTH_STORAGE_KEY = "ONE-ai-chat-width"
 
 const getStoredChatWidth = (): number => {
   if (typeof window === "undefined") return DEFAULT_CHAT_WIDTH
-  try {
-    const stored = localStorage.getItem(CHAT_WIDTH_STORAGE_KEY)
-    if (stored) {
-      const parsed = parseInt(stored, 10)
-      if (!isNaN(parsed) && parsed >= 300 && parsed <= 712) {
-        return parsed
-      }
-    }
-  } catch {
-    // localStorage might not be available
+  const stored = readFromLocalStorage<number | null>(
+    CHAT_WIDTH_STORAGE_KEY,
+    null
+  )
+  if (stored !== null && !isNaN(stored) && stored >= 300 && stored <= 712) {
+    return stored
   }
   return DEFAULT_CHAT_WIDTH
 }
@@ -53,6 +58,7 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   resizable = false,
   defaultVisualizationMode = "sidepanel",
   lockVisualizationMode = false,
+  historyEnabled = false,
   footer: initialFooter,
   entityResolvers,
   toolHints,
@@ -90,6 +96,26 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
     }
   }, [open])
 
+  const [canvasContent, setCanvasContent] = useState<CanvasContent | null>(null)
+
+  // Saved dashboard configs live in an external store so that
+  // F0ChatReportCard (rendered inside CopilotKit) can subscribe
+  // via useSyncExternalStore independently of React context.
+  const getSavedDashboardConfig = useCallback(
+    (toolCallId: string) => savedDashboardConfigStore.get(toolCallId),
+    []
+  )
+
+  const updateDashboardConfig = useCallback(
+    (toolCallId: string, config: ChatDashboardConfig) => {
+      savedDashboardConfigStore.set(toolCallId, config)
+    },
+    []
+  )
+
+  // Track the mode before canvas was opened so we can restore it on close
+  const previousVisualizationModeRef = useRef<VisualizationMode>("sidepanel")
+
   const [activeToolHint, setActiveToolHint] = useState<AiChatToolHint | null>(
     null
   )
@@ -97,19 +123,24 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   // Persist chat width to localStorage
   useEffect(() => {
     if (typeof window === "undefined") return
-    try {
-      localStorage.setItem(CHAT_WIDTH_STORAGE_KEY, String(chatWidth))
-    } catch {
-      // localStorage might not be available
-    }
+    writeToLocalStorage(CHAT_WIDTH_STORAGE_KEY, chatWidth)
   }, [chatWidth])
 
   // Store the reset function from CopilotKit
   const clearFunctionRef = useRef<(() => void) | null>(null)
+  // Store the loadThread function from CopilotKit
+  const loadThreadFunctionRef = useRef<((threadId: string) => void) | null>(
+    null
+  )
   // Store the sendMessage function from CopilotKit
   const sendMessageFunctionRef = useRef<((message: Message) => void) | null>(
     null
   )
+
+  const [currentThreadTitle, setCurrentThreadTitle] = useState<string | null>(
+    null
+  )
+  const [isLoadingThread, setIsLoadingThread] = useState(false)
 
   const tmp_setAgent = (newAgent?: string) => {
     setAgent(newAgent)
@@ -117,6 +148,12 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
 
   const setClearFunction = (clearFn: (() => void) | null) => {
     clearFunctionRef.current = clearFn
+  }
+
+  const setLoadThreadFunction = (
+    loadFn: ((threadId: string) => void) | null
+  ) => {
+    loadThreadFunctionRef.current = loadFn
   }
 
   const setSendMessageFunction = (
@@ -128,6 +165,25 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   const clear = () => {
     if (clearFunctionRef.current) {
       clearFunctionRef.current()
+    }
+    setCurrentThreadTitle(null)
+    setIsLoadingThread(false)
+    // Close canvas when starting a new conversation
+    setCanvasContent(null)
+    if (visualizationMode === "canvas") {
+      setVisualizationMode(previousVisualizationModeRef.current)
+    }
+  }
+
+  const loadThread = (threadId: string, title: string) => {
+    if (loadThreadFunctionRef.current) {
+      loadThreadFunctionRef.current(threadId)
+    }
+    setCurrentThreadTitle(title)
+    // Close canvas when loading a different thread
+    setCanvasContent(null)
+    if (visualizationMode === "canvas") {
+      setVisualizationMode(previousVisualizationModeRef.current)
     }
   }
 
@@ -164,6 +220,7 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   // Reset visualization mode when chat closes
   useEffect(() => {
     if (!open) {
+      setCanvasContent(null)
       setVisualizationMode("sidepanel")
       const prefersReducedMotion = window.matchMedia(
         "(prefers-reduced-motion: reduce)"
@@ -179,6 +236,30 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
     }
   }, [visualizationMode, open])
 
+  // Open the canvas panel with a dashboard config.
+  // Saves the current visualization mode so it can be restored on close.
+  const openCanvas = useCallback(
+    (content: CanvasContent) => {
+      if (visualizationMode !== "canvas") {
+        previousVisualizationModeRef.current = visualizationMode
+      }
+      setCanvasContent(content)
+      setVisualizationMode("canvas")
+      if (!open) {
+        setOpen(true)
+      }
+    },
+    [visualizationMode, open]
+  )
+
+  // Close the canvas panel and restore the previous visualization mode.
+  const closeCanvas = useCallback(() => {
+    setCanvasContent(null)
+    if (visualizationMode === "canvas") {
+      setVisualizationMode(previousVisualizationModeRef.current)
+    }
+  }, [visualizationMode])
+
   return (
     <AiChatStateContext.Provider
       value={{
@@ -190,6 +271,7 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         visualizationMode,
         setVisualizationMode,
         lockVisualizationMode,
+        historyEnabled,
         footer,
         setFooter,
         shouldPlayEntranceAnimation,
@@ -204,6 +286,11 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         onThumbsDown,
         clear,
         setClearFunction,
+        currentThreadTitle,
+        loadThread,
+        setLoadThreadFunction,
+        isLoadingThread,
+        setIsLoadingThread,
         placeholders,
         setPlaceholders,
         sendMessage,
@@ -216,8 +303,15 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         tracking,
         entityResolvers,
         toolHints,
+        canvasContent,
+        canvasDashboard:
+          canvasContent?.type === "dashboard" ? canvasContent.config : null,
+        openCanvas,
+        closeCanvas,
         activeToolHint,
         setActiveToolHint,
+        getSavedDashboardConfig,
+        updateDashboardConfig,
       }}
     >
       {children}
@@ -239,12 +333,18 @@ export function useAiChat(): AiChatProviderReturnValue {
       visualizationMode: "sidepanel",
       setVisualizationMode: noopFn,
       lockVisualizationMode: false,
+      historyEnabled: false,
       shouldPlayEntranceAnimation: true,
       setShouldPlayEntranceAnimation: noopFn,
       agent: undefined,
       tmp_setAgent: noopFn,
       clear: noopFn,
       setClearFunction: noopFn,
+      currentThreadTitle: null,
+      loadThread: noopFn,
+      setLoadThreadFunction: noopFn,
+      isLoadingThread: false,
+      setIsLoadingThread: noopFn,
       initialMessage: undefined,
       setInitialMessage: noopFn,
       placeholders: [],
@@ -265,8 +365,14 @@ export function useAiChat(): AiChatProviderReturnValue {
       tracking: undefined,
       entityResolvers: undefined,
       toolHints: undefined,
+      canvasContent: null,
+      canvasDashboard: null,
+      openCanvas: noopFn,
+      closeCanvas: noopFn,
       activeToolHint: null,
       setActiveToolHint: noopFn,
+      getSavedDashboardConfig: () => undefined,
+      updateDashboardConfig: noopFn,
     }
   }
 

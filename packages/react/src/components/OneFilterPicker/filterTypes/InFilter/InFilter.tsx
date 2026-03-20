@@ -18,8 +18,13 @@ import {
   collectNestedFilterKeys,
   optionMatchesSearch,
 } from "./components/option-utils"
-import { InFilterOptions } from "./types"
-import { cacheLabel, getCacheKey, useLoadOptions } from "./useLoadOptions"
+import { InFilterOptionItem, InFilterOptions } from "./types"
+import {
+  cacheLabel,
+  cacheNestedLabel,
+  getCacheKey,
+  useLoadOptions,
+} from "./useLoadOptions"
 
 /**
  * Props for the InFilter component.
@@ -102,6 +107,34 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
   })
 
   const cacheKey = getCacheKey(schema)
+
+  // Pre-populate nested label cache for existing selections (e.g., after localStorage restore)
+  useEffect(() => {
+    if (!allFiltersValue || !options.length) return
+
+    const populateNestedCache = (parentOptions: InFilterOptionItem<T>[]) => {
+      for (const option of parentOptions) {
+        if (option.children) {
+          const { filterKey, options: childOptions } = option.children
+          const childValues = (allFiltersValue[filterKey] as T[]) ?? []
+
+          for (const child of childOptions) {
+            if (childValues.includes(child.value as T)) {
+              const contextualLabel = `${option.label} > ${child.label}`
+              cacheNestedLabel(filterKey, child.value, contextualLabel)
+              cacheLabel(cacheKey, child.value, child.label)
+            }
+            // Recurse for deeper nesting
+            if (child.children) {
+              populateNestedCache([child as InFilterOptionItem<T>])
+            }
+          }
+        }
+      }
+    }
+
+    populateNestedCache(options as InFilterOptionItem<T>[])
+  }, [options, allFiltersValue, cacheKey])
 
   useEffect(() => {
     let timeout: NodeJS.Timeout

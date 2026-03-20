@@ -1,8 +1,10 @@
 import { Message } from "@copilotkit/shared"
-import { randomUUID } from "node:crypto"
 import { describe, expect, it } from "vitest"
 
-import { convertMessagesToTurns } from "../components/MessagesContainer"
+import {
+  convertMessagesToTurns,
+  extractThinkingGroup,
+} from "../utils/turnUtils"
 
 describe("convertMessagesToTurn", () => {
   it("every user message creates new turn", () => {
@@ -301,16 +303,64 @@ describe("convertMessagesToTurn", () => {
   })
 })
 
+describe("extractThinkingGroup", () => {
+  it("extracts the thinking group from a turn", () => {
+    const thinkingMessages: Message[] = [
+      createThinkingMessage(),
+      createThinkingMessage(),
+    ]
+    const turn = [
+      { id: "1", role: "user" as const, content: "Hello" },
+      thinkingMessages,
+      { id: "2", role: "assistant" as const, content: "Hi" },
+    ]
+
+    const { thinkingGroup, restMessages } = extractThinkingGroup(turn)
+
+    expect(thinkingGroup).toBe(thinkingMessages)
+    expect(restMessages).toHaveLength(2)
+    expect(restMessages.every((m) => !Array.isArray(m))).toBe(true)
+  })
+
+  it("returns null when turn has no thinking group", () => {
+    const turn = [
+      { id: "1", role: "user" as const, content: "Hello" },
+      { id: "2", role: "assistant" as const, content: "Hi" },
+    ]
+
+    const { thinkingGroup, restMessages } = extractThinkingGroup(turn)
+
+    expect(thinkingGroup).toBeNull()
+    expect(restMessages).toHaveLength(2)
+  })
+
+  it("restMessages preserves order of non-array messages", () => {
+    const turn = [
+      { id: "1", role: "user" as const, content: "Hello" },
+      [createThinkingMessage()],
+      { id: "2", role: "assistant" as const, content: "First" },
+      { id: "3", role: "assistant" as const, content: "Second" },
+    ]
+
+    const { restMessages } = extractThinkingGroup(turn)
+
+    expect(restMessages).toHaveLength(3)
+    expect((restMessages[0] as Message).content).toBe("Hello")
+    expect((restMessages[1] as Message).content).toBe("First")
+    expect((restMessages[2] as Message).content).toBe("Second")
+  })
+})
+
 const createToolCallMessage = (
   name: string | undefined = "toolName"
 ): Message => {
   return {
-    id: randomUUID(),
+    id: crypto.randomUUID(),
     role: "assistant",
     content: "",
     toolCalls: [
       {
-        id: randomUUID(),
+        id: crypto.randomUUID(),
         type: "function",
         function: {
           name,
@@ -321,13 +371,15 @@ const createToolCallMessage = (
   }
 }
 
-const createThinkingMessage = (content: string = randomUUID()): Message => ({
-  id: randomUUID(),
+const createThinkingMessage = (
+  content: string = crypto.randomUUID()
+): Message => ({
+  id: crypto.randomUUID(),
   role: "assistant",
   content,
   toolCalls: [
     {
-      id: randomUUID(),
+      id: crypto.randomUUID(),
       type: "function",
       function: {
         name: "orchestratorThinking",
@@ -342,12 +394,12 @@ const createThinkingMessage = (content: string = randomUUID()): Message => ({
  * content is undefined, preamble text lives in toolCalls arguments.
  */
 const createActionThinkingMessage = (preamble: string): Message => ({
-  id: randomUUID(),
+  id: crypto.randomUUID(),
   role: "assistant",
   content: undefined as unknown as string,
   toolCalls: [
     {
-      id: randomUUID(),
+      id: crypto.randomUUID(),
       type: "function",
       function: {
         name: "orchestratorThinking",

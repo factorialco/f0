@@ -55,8 +55,9 @@ describe("TextCell", () => {
       />
     )
 
-    const container = screen.getByRole("textbox").closest(".justify-end")
-    expect(container).toBeInTheDocument()
+    const input = screen.getByRole("textbox")
+    const alignWrapper = input.closest('[class*="[&_input]"]')
+    expect(alignWrapper).toBeInTheDocument()
   })
 
   it("shows loading state when loading is true", () => {

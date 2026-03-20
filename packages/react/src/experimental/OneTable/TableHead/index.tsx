@@ -66,6 +66,11 @@ interface TableHeadProps {
    * The class name of the header cell
    */
   className?: string
+
+  /**
+   * The number of columns this header cell should span
+   */
+  colSpan?: number
 }
 
 export function TableHead({
@@ -79,6 +84,7 @@ export function TableHead({
   hidden = false,
   align = "left",
   className,
+  colSpan,
 }: TableHeadProps) {
   const { isScrolled, isScrolledRight } = useTable()
 
@@ -186,6 +192,7 @@ export function TableHead({
         className
       )}
       tabIndex={sticky ? 0 : undefined}
+      colSpan={colSpan}
       // Min and max width is needed to prevent the cell from shrinking or expanding when the table is scrolled
       style={{
         width: colWidth,

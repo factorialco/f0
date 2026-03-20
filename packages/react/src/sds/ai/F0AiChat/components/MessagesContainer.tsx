@@ -1,26 +1,32 @@
-import {
-  useCopilotChatInternal as useCopilotChat,
-  useCopilotContext,
-} from "@copilotkit/react-core"
+import { useCopilotChatInternal as useCopilotChat } from "@copilotkit/react-core"
 import { type MessagesProps } from "@copilotkit/react-ui"
 import { type Message } from "@copilotkit/shared"
 import { AnimatePresence, motion } from "motion/react"
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { Fragment, useMemo, useRef } from "react"
 
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { ArrowDown } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
+import { Skeleton } from "@/ui/skeleton"
 
+import { F0ActionItem } from "../../F0ActionItem"
 import { F0Thinking as Thinking } from "../../F0Thinking"
-import { isAgentStateMessage } from "../internal-types"
+import { useMessageScroll } from "../hooks/useMessageScroll"
 import { useAiChat } from "../providers/AiChatStateProvider"
+import {
+  FeedbackModalProvider,
+  useFeedbackSubmit,
+} from "../providers/FeedbackProvider"
+import {
+  analyzeTurn,
+  convertMessagesToTurns,
+  extractThinkingGroup,
+} from "../utils/turnUtils"
 import { FeedbackModal } from "./FeedbackModal"
-import { FeedbackModalProvider, useFeedbackModal } from "./FeedbackProvider"
 import { ScrollShadow } from "./ScrollShadow"
+import { TurnFeedback } from "./TurnFeedback"
 import { WelcomeScreen } from "./WelcomeScreen"
-
-type Turn = Array<Message | Array<Message>>
 
 export const MessagesContainer = (props: MessagesProps) => (
   <FeedbackModalProvider>
@@ -40,21 +46,14 @@ const Messages = ({
   markdownTagRenderers,
 }: MessagesProps) => {
   const { messages, interrupt } = useCopilotChat()
-  const { threadId } = useCopilotContext()
-  const {
-    close: closeFeedbackModal,
-    currentReaction,
-    currentMessage,
-    isOpen,
-  } = useFeedbackModal()
+  const { modal, handleSubmit, handleClose } = useFeedbackSubmit()
 
   const translations = useI18n()
   const {
     greeting,
     initialMessage,
     welcomeScreenSuggestions,
-    onThumbsUp,
-    onThumbsDown,
+    isLoadingThread,
   } = useAiChat()
 
   const initialMessages = useMemo(
@@ -75,63 +74,14 @@ const Messages = ({
   const endRef = useRef<HTMLDivElement>(null)
   const contentEndRef = useRef<HTMLDivElement>(null)
   const lastTurnRef = useRef<HTMLDivElement>(null)
-  const prevTurnsCountRef = useRef(turns.length)
-  const [turnMinHeight, setTurnMinHeight] = useState(0)
-  const [showScrollBtn, setShowScrollBtn] = useState(false)
 
-  const scrollToBottom = useCallback((behavior: ScrollBehavior = "smooth") => {
-    endRef.current?.scrollIntoView({ behavior })
-  }, [])
-
-  // Measure usable height for the last turn: viewport height minus the content wrapper's bottom padding
-  useEffect(() => {
-    const viewport = viewportRef.current
-    const content = contentRef.current
-    if (!viewport || !content) return
-    const observer = new ResizeObserver(() => {
-      const py =
-        parseFloat(getComputedStyle(content).paddingTop) +
-        parseFloat(getComputedStyle(content).paddingBottom) +
-        1 // -1 for the sentinel element
-      setTurnMinHeight(viewport.clientHeight - py)
-    })
-    observer.observe(viewport)
-    observer.observe(content)
-    return () => observer.disconnect()
-  }, [])
-
-  // Scroll tracking
-  const handleScroll = useCallback(() => {
-    const el = viewportRef.current
-    if (!el) return
-    const { scrollTop, scrollHeight, clientHeight } = el
-    const distanceFromBottom = scrollHeight - scrollTop - clientHeight
-    setShowScrollBtn(distanceFromBottom > clientHeight)
-  }, [])
-
-  useEffect(() => {
-    const el = viewportRef.current
-    if (!el) return
-    el.addEventListener("scroll", handleScroll, { passive: true })
-    return () => el.removeEventListener("scroll", handleScroll)
-  }, [handleScroll])
-
-  // Auto-scroll the last turn to the top when the user sends a message
-  useEffect(() => {
-    if (turns.length > prevTurnsCountRef.current) {
-      requestAnimationFrame(() => {
-        lastTurnRef.current?.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
-        })
-      })
-    }
-    // Reset scroll state when conversation is cleared
-    if (turns.length === 0) {
-      setShowScrollBtn(false)
-    }
-    prevTurnsCountRef.current = turns.length
-  }, [turns.length])
+  const { showScrollBtn, turnMinHeight, scrollToBottom } = useMessageScroll({
+    viewportRef,
+    contentRef,
+    endRef,
+    lastTurnRef,
+    turnsCount: turns.length,
+  })
 
   return (
     <>
@@ -139,7 +89,7 @@ const Messages = ({
         <div
           ref={viewportRef}
           className={cn(
-            "flex-1 overflow-y-scroll pr-0",
+            "flex-1 overflow-y-scroll",
             "[scrollbar-width:thin] [scrollbar-color:transparent_transparent]",
             "hover:[scrollbar-color:var(--scrollbar-thumb)_transparent]",
             "[&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:bg-transparent",
@@ -149,76 +99,119 @@ const Messages = ({
         >
           <div
             ref={contentRef}
-            className="flex h-full flex-col items-center py-4 pl-4 pr-1.5"
+            className="flex h-full flex-col items-center px-4 py-4"
           >
             <div
               className={cn(
-                showWelcomeBlock ? "flex flex-1" : "flex flex-col gap-6",
+                showWelcomeBlock && !isLoadingThread
+                  ? "flex flex-1"
+                  : "flex flex-col gap-6",
                 "w-full max-w-[712px]"
               )}
             >
-              {showWelcomeBlock && (
+              {isLoadingThread && <MessagesSkeleton />}
+              {!isLoadingThread && showWelcomeBlock && (
                 <WelcomeScreen
                   greeting={greeting}
                   initialMessages={initialMessages}
                   suggestions={welcomeScreenSuggestions}
                 />
               )}
-              {turns.map((turnMessages, turnIndex) => (
-                <div
-                  ref={turnIndex === turns.length - 1 ? lastTurnRef : undefined}
-                  className={cn(
-                    "flex flex-col items-start justify-start gap-2",
-                    turnIndex === turns.length - 1 && "pb-5"
-                  )}
-                  key={`turn-${turnIndex}`}
-                  style={{
-                    minHeight:
-                      turnIndex === turns.length - 1
-                        ? turnMinHeight || undefined
-                        : undefined,
-                  }}
-                >
-                  {turnMessages.map((message, index) => {
-                    const isCurrentMessage =
-                      turnIndex === turns.length - 1 &&
-                      index === turnMessages.length - 1
+              {!isLoadingThread &&
+                turns.map((turnMessages, turnIndex) => {
+                  const { turnIsComplete, showActivityIndicator } = analyzeTurn(
+                    turnMessages,
+                    turnIndex,
+                    turns.length,
+                    inProgress
+                  )
+                  const { thinkingGroup, restMessages } =
+                    extractThinkingGroup(turnMessages)
+                  const isLastTurn = turnIndex === turns.length - 1
 
-                    if (Array.isArray(message) && !isCurrentMessage) {
-                      return (
-                        <Thinking
-                          key={`${turnIndex}-${index}`}
-                          messages={message}
-                          isActive={false}
-                          inProgress={inProgress}
-                          RenderMessage={RenderMessage}
-                          AssistantMessage={AssistantMessage}
-                        />
-                      )
-                    }
+                  return (
+                    <div
+                      ref={isLastTurn ? lastTurnRef : undefined}
+                      className={cn(
+                        "flex flex-col items-start justify-start gap-2",
+                        isLastTurn && "pb-5"
+                      )}
+                      key={`turn-${turnIndex}`}
+                      style={{
+                        minHeight: isLastTurn
+                          ? turnMinHeight || undefined
+                          : undefined,
+                      }}
+                    >
+                      {restMessages.map((message, index) => {
+                        const isCurrentMessage =
+                          isLastTurn && index === restMessages.length - 1
+                        const msg = message as Message
 
-                    return (
-                      <RenderMessage
-                        key={`${turnIndex}-${index}`}
-                        message={
-                          Array.isArray(message)
-                            ? message[message.length - 1]
-                            : message
-                        }
-                        inProgress={inProgress}
-                        index={index}
-                        isCurrentMessage={isCurrentMessage}
-                        AssistantMessage={AssistantMessage}
-                        UserMessage={UserMessage}
-                        ImageRenderer={ImageRenderer}
-                        onRegenerate={onRegenerate}
-                        onCopy={onCopy}
-                        markdownTagRenderers={markdownTagRenderers}
-                      />
-                    )
-                  })}
-                </div>
-              ))}
+                        // Find the index of the first assistant message
+                        const firstAssistantIndex = restMessages.findIndex(
+                          (m) => (m as Message).role === "assistant"
+                        )
+                        const showThinkingBefore =
+                          thinkingGroup &&
+                          !(isLastTurn && !turnIsComplete) &&
+                          index === firstAssistantIndex
+
+                        return (
+                          <Fragment key={`${turnIndex}-${index}`}>
+                            {showThinkingBefore && (
+                              <Thinking
+                                key={`thinking-${turnIndex}`}
+                                messages={thinkingGroup}
+                                isActive={false}
+                                inProgress={inProgress}
+                                RenderMessage={RenderMessage}
+                                AssistantMessage={AssistantMessage}
+                              />
+                            )}
+                            <RenderMessage
+                              message={msg}
+                              inProgress={inProgress}
+                              index={index}
+                              isCurrentMessage={isCurrentMessage}
+                              AssistantMessage={AssistantMessage}
+                              UserMessage={UserMessage}
+                              ImageRenderer={ImageRenderer}
+                              onRegenerate={onRegenerate}
+                              onCopy={onCopy}
+                              markdownTagRenderers={markdownTagRenderers}
+                            />
+                          </Fragment>
+                        )
+                      })}
+                      {/* Live thinking: render last thinking message while streaming */}
+                      {thinkingGroup &&
+                        isLastTurn &&
+                        !turnIsComplete &&
+                        !showActivityIndicator && (
+                          <RenderMessage
+                            key={`thinking-live-${turnIndex}`}
+                            message={thinkingGroup[thinkingGroup.length - 1]}
+                            inProgress={inProgress}
+                            index={restMessages.length}
+                            isCurrentMessage={true}
+                            AssistantMessage={AssistantMessage}
+                            UserMessage={UserMessage}
+                            ImageRenderer={ImageRenderer}
+                            onRegenerate={onRegenerate}
+                            onCopy={onCopy}
+                            markdownTagRenderers={markdownTagRenderers}
+                          />
+                        )}
+                      {showActivityIndicator && (
+                        <F0ActionItem title="" status="executing" />
+                      )}
+                      {turnIsComplete && (
+                        <TurnFeedback messages={turnMessages} onCopy={onCopy} />
+                      )}
+                    </div>
+                  )
+                })}
               {interrupt}
             </div>
 
@@ -257,28 +250,30 @@ const Messages = ({
         <ScrollShadow position="bottom" key="shadow-bottom" />
       </div>
 
-      {isOpen && (
+      {modal.isOpen && (
         <FeedbackModal
-          onSubmit={(message, feedback) => {
-            const callback =
-              currentReaction === "like" ? onThumbsUp : onThumbsDown
-            callback?.(message, { threadId, feedback })
-
-            closeFeedbackModal()
-          }}
-          onClose={(message) => {
-            const callback =
-              currentReaction === "like" ? onThumbsUp : onThumbsDown
-            callback?.(message, { threadId, feedback: "" })
-            closeFeedbackModal()
-          }}
-          reactionType={currentReaction}
-          message={currentMessage}
+          onSubmit={handleSubmit}
+          onClose={handleClose}
+          reactionType={modal.currentReaction}
+          message={modal.currentMessage}
         />
       )}
     </>
   )
 }
+
+const MessagesSkeleton = () => (
+  <div className="flex h-full w-full max-w-[712px] flex-col gap-6">
+    <div className="flex flex-col gap-2">
+      <div className="flex justify-end">
+        <Skeleton className="h-12 w-2/5 rounded-full" />
+      </div>
+      <Skeleton className="mt-6 h-5 w-full rounded-md" />
+      <Skeleton className="h-5 w-2/5 rounded-md" />
+      <Skeleton className="h-5 w-4/5 rounded-md" />
+    </div>
+  </div>
+)
 
 function makeInitialMessages(initial?: string | string[]): Message[] {
   if (!initial) return []
@@ -288,125 +283,4 @@ function makeInitialMessages(initial?: string | string[]): Message[] {
     role: "assistant",
     content: message,
   }))
-}
-
-/**
- * Simplified scroll-to-bottom hook.
- * Provides a scroll utility and a "scroll to bottom" button visibility flag.
- */
-export function useScrollToBottom() {
-  const messagesEndRef = useRef<HTMLDivElement>(null)
-  const messagesContainerRef = useRef<HTMLDivElement | null>(null)
-  const [showScrollToBottom, setShowScrollToBottom] = useState(false)
-
-  const scrollToBottom = useCallback((behavior: ScrollBehavior = "smooth") => {
-    messagesEndRef.current?.scrollIntoView({ behavior })
-  }, [])
-
-  useEffect(() => {
-    const el = messagesContainerRef.current
-    if (!el) return
-
-    const handleScroll = () => {
-      const distanceFromBottom =
-        el.scrollHeight - el.scrollTop - el.clientHeight
-      setShowScrollToBottom(distanceFromBottom > el.clientHeight)
-    }
-
-    el.addEventListener("scroll", handleScroll, { passive: true })
-    return () => el.removeEventListener("scroll", handleScroll)
-  }, [])
-
-  return {
-    messagesEndRef,
-    messagesContainerRef,
-    showScrollToBottom,
-    scrollToBottom,
-  }
-}
-
-export function convertMessagesToTurns(messages: Message[]): Turn[] {
-  if (messages.length === 0) {
-    return []
-  }
-
-  console.assert(
-    messages[0].role === "user",
-    "Invariant violation! Assistant message received before user message"
-  )
-
-  const turns: Turn[] = []
-  let thinkingGroup: Message[] | null = null
-
-  for (const [i, message] of messages.entries()) {
-    if (message.role === "user") {
-      turns.push([message])
-      thinkingGroup = null
-      continue
-    }
-
-    const currentTurn = turns[turns.length - 1]
-
-    // Hoist agent state messages above the thinking group
-    if (isAgentStateMessage(message) && thinkingGroup) {
-      if (i !== messages.length - 1) {
-        const idx = currentTurn.indexOf(thinkingGroup)
-        if (idx !== -1) {
-          currentTurn.splice(idx, 1)
-        }
-        currentTurn.push(message, thinkingGroup)
-      }
-      continue
-    }
-
-    // Always merge thinking messages into a single group per turn, deduplicating consecutive identical content
-    if (isThinkingMessage(message)) {
-      if (thinkingGroup) {
-        const prev = thinkingGroup[thinkingGroup.length - 1]
-        if (getThinkingKey(prev) !== getThinkingKey(message)) {
-          thinkingGroup.push(message)
-        }
-      } else {
-        thinkingGroup = [message]
-        // Always insert thinking group right after the user message (index 1)
-        // so it appears above any text messages from earlier runs in the same turn
-        if (currentTurn.length > 1) {
-          currentTurn.splice(1, 0, thinkingGroup)
-        } else {
-          currentTurn.push(thinkingGroup)
-        }
-      }
-      continue
-    }
-
-    currentTurn.push(message)
-  }
-
-  return turns
-}
-
-function isThinkingMessage(message: Message): boolean {
-  return (
-    message.role === "assistant" &&
-    message.toolCalls?.some(
-      (call) => call.function.name === "orchestratorThinking"
-    ) === true
-  )
-}
-
-/**
- * Dedup key for thinking messages.
- *
- * CopilotKit action-execution messages have empty/undefined `content` — the
- * actual preamble text lives in `toolCalls[0].function.arguments`.
- * Fall back to `content` for backwards compatibility with any call-site that
- * sets it directly, then to `id` as a last resort.
- */
-function getThinkingKey(message: Message): string {
-  const tc = (
-    message as {
-      toolCalls?: { function: { name: string; arguments: string } }[]
-    }
-  ).toolCalls?.find((c) => c.function.name === "orchestratorThinking")
-  return tc?.function.arguments || message.content || message.id
 }

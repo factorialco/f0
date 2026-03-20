@@ -42,6 +42,7 @@ const SingleLoadingRowInner = <
     tableWithChildren,
     shouldHideBorder,
     fromVisualization,
+    headerGroups,
   }: RowProps<
     R,
     Filters,
@@ -98,6 +99,7 @@ const SingleLoadingRowInner = <
       selectedItems={selectedItems}
       checkColumnWidth={checkColumnWidth}
       loading
+      headerGroups={headerGroups}
       ref={combinedRef}
       nestedRowProps={{
         ...nestedRowProps,

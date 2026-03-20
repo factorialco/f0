@@ -2,6 +2,7 @@
 export { useOrchestratorThinkingAction } from "./useOrchestratorThinkingAction"
 export { useMessageSourcesAction } from "./useMessageSourcesAction"
 export { useDataDownloadAction } from "./useDataDownloadAction"
+export { useDisplayDashboardAction } from "./useDisplayDashboardAction"
 
 // Form AI tools
 export { useF0AiFormActions } from "./useF0AiFormActions"

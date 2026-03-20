@@ -10,8 +10,8 @@ interface CategoryAxisOptions {
   data: string[]
   theme: ChartTheme
   formatter?: (value: string) => string
-  /** Container width in pixels — used to auto-compute label interval */
-  containerWidth?: number
+  /** Axis length in pixels — used to auto-compute label interval */
+  axisLength?: number
   /**
    * Whether to leave space at the edges of the category axis.
    * - `true` (default for ECharts) — centres categories with padding at edges.
@@ -33,7 +33,7 @@ const MIN_LABEL_WIDTH = 60
  * Returns 0 (show every label) when there's enough room, or N to
  * show every (N+1)th label.
  */
-function computeLabelInterval(
+export function computeLabelInterval(
   categoryCount: number,
   containerWidth: number | undefined
 ): number | undefined {
@@ -51,10 +51,10 @@ export function buildCategoryAxis({
   data,
   theme,
   formatter,
-  containerWidth,
+  axisLength,
   boundaryGap,
 }: CategoryAxisOptions) {
-  const interval = computeLabelInterval(data.length, containerWidth)
+  const interval = computeLabelInterval(data.length, axisLength)
 
   return {
     type: "category" as const,
@@ -72,6 +72,7 @@ export function buildCategoryAxis({
       fontSize: theme.textStyle.fontSize,
       fontWeight: theme.textStyle.fontWeight,
       color: theme.colors.foregroundTertiary,
+      hideOverlap: true,
       ...(interval !== undefined ? { interval } : {}),
       ...(formatter
         ? {
@@ -110,6 +111,7 @@ export function buildValueAxis({
       fontSize: theme.textStyle.fontSize,
       fontWeight: theme.textStyle.fontWeight,
       color: theme.colors.foregroundTertiary,
+      hideOverlap: true,
       ...(formatter
         ? {
             formatter: (_value: string | number) => formatter(Number(_value)),
@@ -353,6 +355,7 @@ export function buildAxes({
   valueFormatter,
   categoryFormatter,
   containerWidth,
+  containerHeight,
   boundaryGap,
 }: {
   isVertical: boolean
@@ -362,13 +365,14 @@ export function buildAxes({
   valueFormatter?: (value: number) => string
   categoryFormatter?: (value: string) => string
   containerWidth?: number
+  containerHeight?: number
   boundaryGap?: boolean
 }) {
   const categoryAxis = buildCategoryAxis({
     data: categories,
     theme,
     formatter: categoryFormatter,
-    containerWidth,
+    axisLength: isVertical ? containerWidth : containerHeight,
     boundaryGap,
   })
 
@@ -417,6 +421,8 @@ interface BaseChartOptionsParams {
   echartsOptions?: Partial<echarts.EChartsOption>
   /** Container width in pixels — used to auto-compute category label interval */
   containerWidth?: number
+  /** Container height in pixels — used for horizontal orientation label interval */
+  containerHeight?: number
   /** Whether to leave space at the edges of the category axis */
   boundaryGap?: boolean
 }
@@ -441,6 +447,7 @@ export function buildBaseChartOptions({
   tooltipFilterSeries,
   echartsOptions,
   containerWidth,
+  containerHeight,
   boundaryGap,
 }: BaseChartOptionsParams): echarts.EChartsOption {
   const { xAxis, yAxis } = buildAxes({
@@ -451,6 +458,7 @@ export function buildBaseChartOptions({
     valueFormatter,
     categoryFormatter,
     containerWidth,
+    containerHeight,
     boundaryGap,
   })
 
@@ -463,6 +471,7 @@ export function buildBaseChartOptions({
     xAxis,
     yAxis,
     series,
+    labelLayout: { hideOverlap: true },
     legend: buildLegend({
       show: showLegend,
       data: legendData,

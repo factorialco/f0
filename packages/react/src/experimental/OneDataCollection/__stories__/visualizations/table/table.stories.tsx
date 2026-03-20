@@ -305,3 +305,79 @@ export const TableColumnOrderingAndHiddenWithColumnsChanges: Story = {
     )
   },
 }
+
+export const TableWithGroupedHeaders: Story = {
+  render: () => {
+    const mockVisualizations = getMockVisualizations({
+      table: { noSorting: true },
+    })
+    const baseOptions = (mockVisualizations.table as any)["options"]
+
+    return (
+      <ExampleComponent
+        noSorting
+        frozenColumns={2}
+        visualizations={[
+          {
+            ...mockVisualizations.table,
+            type: "table",
+            options: {
+              ...baseOptions,
+              headerGroupLabels: {
+                personal: "Personal Information",
+                employment: "Employment Details",
+              },
+              columns: [
+                {
+                  label: "Employee",
+                  render: (item: any) => ({
+                    type: "person",
+                    value: {
+                      firstName: item.name.split(" ")[0],
+                      lastName: item.name.split(" ")[1],
+                    },
+                  }),
+                  id: "name",
+                },
+                {
+                  label: "Email",
+                  align: "right",
+                  render: (item: any) => item.email,
+                  id: "email",
+                  headerGroupId: "personal",
+                },
+                {
+                  label: "Role",
+                  align: "right",
+                  render: (item: any) => item.role,
+                  id: "role",
+                  headerGroupId: "employment",
+                },
+                {
+                  label: "Department",
+                  align: "right",
+                  render: (item: any) => item.department,
+                  id: "department",
+                  headerGroupId: "employment",
+                },
+                {
+                  label: "Manager",
+                  align: "right",
+                  render: (item: any) => item.manager,
+                  id: "manager",
+                  headerGroupId: "employment",
+                },
+                {
+                  label: "Status",
+                  align: "right",
+                  render: (item: any) => item.status,
+                  id: "status",
+                },
+              ],
+            },
+          },
+        ]}
+      />
+    )
+  },
+}

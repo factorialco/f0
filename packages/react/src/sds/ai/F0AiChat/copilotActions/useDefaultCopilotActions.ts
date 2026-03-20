@@ -4,6 +4,7 @@ import { useFAQCardAction } from "../../../UpsellingKit/ai/F0FAQCard/useFAQCardA
 import { useModuleCardAction } from "../../../UpsellingKit/ai/F0ModuleCard/useModuleCardAction"
 import { useQuestionCardAction } from "../../../UpsellingKit/ai/F0QuestionCard/useQuestionCardAction"
 import { useDataDownloadAction } from "./useDataDownloadAction"
+import { useDisplayDashboardAction } from "./useDisplayDashboardAction"
 import { useF0AiFormActions } from "./useF0AiFormActions"
 import { useMessageSourcesAction } from "./useMessageSourcesAction"
 import { useOrchestratorThinkingAction } from "./useOrchestratorThinkingAction"
@@ -31,4 +32,5 @@ export const useDefaultCopilotActions = () => {
   useModuleCardAction()
   useFAQCardAction()
   useF0AiFormActions()
+  useDisplayDashboardAction()
 }

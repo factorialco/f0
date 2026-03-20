@@ -82,6 +82,7 @@ export const F0DialogInternal: FC<F0DialogInternalProps> = ({
   activeTabId,
   setActiveTabId,
   disableContentPadding,
+  container: containerProp,
 }) => {
   // Use state to store the container element so we can trigger re-renders
   // when it's set. This ensures child components like F0Select get the
@@ -118,14 +119,11 @@ export const F0DialogInternal: FC<F0DialogInternalProps> = ({
     return "center"
   }, [isSmallScreen, asBottomSheetInMobile, isSidePosition, position])
 
-  // Forces the width to be "sm" for sidePosition variants
+  // Side panel positions (left/right) accept width variants
   const localWidth = useMemo(() => {
-    if (variant === "sidePosition") {
-      return "sm"
-    }
-    if (width && position !== "center") {
+    if (width && !["center", "left", "right"].includes(position)) {
       console.warn(
-        "F0Dialog: `width` prop is only applicable to center position"
+        "F0Dialog: `width` prop is only applicable to center and side panel positions"
       )
     }
 
@@ -197,6 +195,7 @@ export const F0DialogInternal: FC<F0DialogInternalProps> = ({
           })}
           className={contentClassName}
           onOpenAutoFocus={(e) => e.preventDefault()}
+          container={containerProp}
         >
           <F0DialogHeader {...headerProps} />
           <F0DialogContent disableContentPadding={disableContentPadding}>
