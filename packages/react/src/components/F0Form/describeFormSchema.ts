@@ -24,6 +24,7 @@ export interface FormFieldDescription {
   options?: { label: string; value: string | number }[]
   optionsSource?: "dynamic"
   section?: string
+  customFieldName?: string
 }
 
 /**
@@ -68,6 +69,10 @@ export function describeFormSchema(
 
     if (config.section) {
       description.section = config.section
+    }
+
+    if (config.customFieldName) {
+      description.customFieldName = config.customFieldName
     }
 
     // Extract options for select fields

@@ -96,7 +96,6 @@ export type F0CustomConfigBase<TValue = unknown> =
   | {
       /** Render function for the custom component */
       render: (props: CustomFieldRenderProps<TValue, undefined>) => ReactNode
-      customFieldName?: never
     }
   | {
       /** Name identifying this custom field type (resolved by renderCustomField on the form) */
@@ -117,7 +116,6 @@ export type F0CustomConfigWithFieldConfig<TValue = unknown, TConfig = unknown> =
       fieldConfig: TConfig
       /** Render function for the custom component */
       render: (props: CustomFieldRenderProps<TValue, TConfig>) => ReactNode
-      customFieldName?: never
     }
   | {
       /** Custom configuration to pass to the render function */

@@ -1,4 +1,4 @@
-import { z, ZodRawShape, ZodEffects } from "zod"
+import { z, ZodRawShape, ZodEffects, type ZodType } from "zod"
 
 import type {
   F0FormErrorTriggerMode,
@@ -71,6 +71,12 @@ export interface F0FormDefinitionSingleSchema<TSchema extends F0FormSchema> {
   errorTriggerMode?: F0FormErrorTriggerMode
   /** Whether async defaultValues are still being resolved */
   isLoading: boolean
+  /** Zod schema describing params the AI can supply when calling presentForm */
+  defaultValuesParamsSchema?: ZodType
+  /** Raw defaultValues function for AI registry use when params are involved */
+  defaultValuesFn?: (
+    params: Record<string, unknown>
+  ) => Promise<Partial<z.infer<TSchema>>>
 }
 
 export interface F0FormDefinitionPerSection<T extends F0PerSectionSchema> {
@@ -87,6 +93,12 @@ export interface F0FormDefinitionPerSection<T extends F0PerSectionSchema> {
   errorTriggerMode?: F0FormErrorTriggerMode
   /** Whether async defaultValues are still being resolved */
   isLoading: boolean
+  /** Zod schema describing params the AI can supply when calling presentForm */
+  defaultValuesParamsSchema?: ZodType
+  /** Raw defaultValues function for AI registry use when params are involved */
+  defaultValuesFn?: (
+    params: Record<string, unknown>
+  ) => Promise<{ [K in keyof T]?: Partial<z.infer<T[K]>> }>
 }
 
 export type F0FormDefinition<

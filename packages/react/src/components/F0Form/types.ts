@@ -1,4 +1,4 @@
-import type { z, ZodRawShape, ZodEffects } from "zod"
+import type { z, ZodRawShape, ZodEffects, ZodType } from "zod"
 
 import type { IconType } from "@/components/F0Icon"
 
@@ -255,15 +255,54 @@ export interface RenderCustomFieldProps extends CustomFieldRenderPropsBase {
   customFieldName: string
   /** Custom configuration (if provided via fieldConfig) */
   config: unknown
+  /** The field type this customFieldName is attached to (e.g. "select", "custom") */
+  fieldType: string
 }
+
+/**
+ * Select field configuration that `renderCustomField` can return
+ * for select fields with `customFieldName` (e.g. reusable entity selectors).
+ *
+ * Mirrors the select field config shape — either static `options` or dynamic `source`+`mapOptions`.
+ */
+export interface RenderCustomFieldSelectConfig {
+  _type: "select-config"
+  /** Data source for fetching options dynamically */
+  source?: unknown
+  /** Function to map data source items to select options */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  mapOptions?: (item: any) => any
+  /** Static options array */
+  options?: unknown[]
+  /** Whether multiple selection is allowed */
+  multiple?: boolean
+  /** Whether to show the search box */
+  showSearchBox?: boolean
+  /** Placeholder for the search box */
+  searchBoxPlaceholder?: string
+}
+
+/**
+ * Return type for the `renderCustomField` callback.
+ * Can return either:
+ * - A React node (rendered directly as a custom component)
+ * - A select config object (merged into the select field props)
+ */
+export type RenderCustomFieldResult =
+  | React.ReactNode
+  | RenderCustomFieldSelectConfig
 
 /**
  * Callback provided to F0Form / F0WizardForm that renders custom fields
  * identified by `customFieldName` instead of an inline `render` function.
+ *
+ * For `fieldType: "custom"` — return a ReactNode (component) as before.
+ * For `fieldType: "select"` — return either a ReactNode or a `RenderCustomFieldSelectConfig`
+ * with `{ _type: "select-config", source, mapOptions }` to configure the select dynamically.
  */
 export type RenderCustomFieldFunction = (
   props: RenderCustomFieldProps
-) => React.ReactNode
+) => RenderCustomFieldResult
 
 /**
  * Helper type to infer the combined values from a per-section schema record.
@@ -348,6 +387,18 @@ export interface F0FormPropsWithSingleSchema<TSchema extends F0FormSchema> {
    * instead of replacing the entire form with skeleton placeholders.
    */
   isLoading?: boolean
+  /**
+   * Zod schema describing params the AI can supply when calling presentForm.
+   * Passed through to the AI form registry.
+   */
+  defaultValuesParamsSchema?: ZodType
+  /**
+   * Raw defaultValues function for the AI registry to call with params.
+   * Set automatically when using `useF0FormDefinition` with a functional `defaultValues`.
+   */
+  defaultValuesFn?: (
+    params: Record<string, unknown>
+  ) => Promise<Record<string, unknown>>
 }
 
 /**

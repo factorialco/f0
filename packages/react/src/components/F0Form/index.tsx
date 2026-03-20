@@ -109,7 +109,11 @@ export type {
 } from "./fields/types"
 
 // Export renderCustomField types
-export type { RenderCustomFieldProps, RenderCustomFieldFunction } from "./types"
+export type {
+  RenderCustomFieldProps,
+  RenderCustomFieldFunction,
+  RenderCustomFieldSelectConfig,
+} from "./types"
 
 // Export schema definition utilities
 export { useSchemaDefinition, getSchemaDefinition } from "./useSchemaDefinition"

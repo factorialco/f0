@@ -61,6 +61,8 @@ function configToF0Field(
     status: config.status,
     disabled: config.disabled,
     resetOnDisable: config.resetOnDisable,
+    customFieldName:
+      "customFieldName" in config ? config.customFieldName : undefined,
     validation: schema,
   }
 
@@ -256,8 +258,6 @@ function configToF0Field(
         type: "custom",
         render: "render" in config ? config.render : undefined,
         fieldConfig: "fieldConfig" in config ? config.fieldConfig : undefined,
-        customFieldName:
-          "customFieldName" in config ? config.customFieldName : undefined,
         renderIf: config.renderIf,
       } as F0Field
 

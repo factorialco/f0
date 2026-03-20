@@ -1,3 +1,5 @@
+import type { ZodRawShape, ZodType } from "zod"
+
 import {
   createContext,
   useCallback,
@@ -6,14 +8,14 @@ import {
   useRef,
   useState,
 } from "react"
-import type { ZodRawShape, ZodType } from "zod"
 import { zodToJsonSchema } from "zod-to-json-schema"
 
-import type { F0FormSchema, F0SectionConfig } from "./types"
-import { getF0Config, unwrapZodSchema } from "./f0Schema"
-import type { F0FormRef, F0FormSetValueOptions } from "./useF0Form"
 import type { F0WizardFormStep } from "../F0WizardForm/types"
+import type { F0FormSchema, F0SectionConfig } from "./types"
+import type { F0FormRef, F0FormSetValueOptions } from "./useF0Form"
+
 import { F0AiFormPresenter } from "./F0AiFormPresenter"
+import { getF0Config, unwrapZodSchema } from "./f0Schema"
 
 /**
  * Entry in the AI form registry
@@ -27,6 +29,10 @@ export interface F0AiFormEntry {
   sections?: Record<string, F0SectionConfig>
   /** Zod schema for params accepted by presentForm (virtual entries only) */
   defaultValuesParamsSchema?: ZodType
+  /** Raw defaultValues function that accepts params (from rendered forms with defaultValuesParamsSchema) */
+  defaultValuesFn?: (
+    params: Record<string, unknown>
+  ) => Promise<Record<string, unknown>>
   /** Field names explicitly set via setValue/setValues on a virtual ref */
   dirtyFields?: Set<string>
 }
@@ -208,6 +214,7 @@ function extractFieldDescriptions(schema: F0FormSchema): Record<
     placeholder?: string
     helpText?: string
     description?: string
+    customFieldName?: string
   }
 > {
   const unwrapped = unwrapZodSchema(schema) as { shape?: ZodRawShape }
@@ -222,6 +229,7 @@ function extractFieldDescriptions(schema: F0FormSchema): Record<
       placeholder?: string
       helpText?: string
       description?: string
+      customFieldName?: string
     }
   > = {}
 
@@ -236,6 +244,9 @@ function extractFieldDescriptions(schema: F0FormSchema): Record<
         ...(config?.placeholder && { placeholder: config.placeholder }),
         ...(config?.helpText && { helpText: config.helpText }),
         ...(zodDescription && { description: zodDescription }),
+        ...(config?.customFieldName && {
+          customFieldName: config.customFieldName,
+        }),
       }
     }
   }
@@ -283,7 +294,11 @@ interface F0AiFormRegistryContextValue {
     name: string,
     ref: React.MutableRefObject<F0FormRef | null>,
     schema: F0FormSchema,
-    sections?: Record<string, F0SectionConfig>
+    sections?: Record<string, F0SectionConfig>,
+    defaultValuesParamsSchema?: ZodType,
+    defaultValuesFn?: (
+      params: Record<string, unknown>
+    ) => Promise<Record<string, unknown>>
   ) => void
   unregister: (name: string) => void
   get: (name: string) => F0AiFormEntry | undefined
@@ -420,10 +435,20 @@ export function F0AiFormRegistryProvider({
       name: string,
       ref: React.MutableRefObject<F0FormRef | null>,
       schema: F0FormSchema,
-      sections?: Record<string, F0SectionConfig>
+      sections?: Record<string, F0SectionConfig>,
+      defaultValuesParamsSchema?: ZodType,
+      defaultValuesFn?: (
+        params: Record<string, unknown>
+      ) => Promise<Record<string, unknown>>
     ) => {
       // Rendered forms always take precedence over virtual entries
-      registryRef.current.set(name, { ref, schema, sections })
+      registryRef.current.set(name, {
+        ref,
+        schema,
+        sections,
+        defaultValuesParamsSchema,
+        defaultValuesFn,
+      })
       rebuildDescriptions()
     },
     [rebuildDescriptions]

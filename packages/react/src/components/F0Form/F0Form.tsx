@@ -420,6 +420,8 @@ function F0FormFromSingleDefinition<TSchema extends F0FormSchema>({
       initialFiles={initialFiles}
       renderCustomField={renderCustomField}
       isLoading={isLoading}
+      defaultValuesParamsSchema={def.defaultValuesParamsSchema}
+      defaultValuesFn={def.defaultValuesFn}
     />
   )
 }
@@ -499,6 +501,8 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
     styling,
     formRef,
     isLoading: isFormLoading,
+    defaultValuesParamsSchema,
+    defaultValuesFn,
   } = props
 
   // Resolve styling configuration
@@ -884,7 +888,14 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
         }
         internalFormRef.current = refMethods
       }
-      aiFormRegistry.register(name, registryFormRef, schema, sections)
+      aiFormRegistry.register(
+        name,
+        registryFormRef,
+        schema,
+        sections,
+        defaultValuesParamsSchema,
+        defaultValuesFn
+      )
       return () => {
         aiFormRegistry.unregister(name)
       }
@@ -899,6 +910,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
     form,
     resetErrorNavigation,
     handleSubmit,
+    defaultValuesParamsSchema,
   ])
 
   // Group contiguous switch fields

@@ -54,6 +54,7 @@ export function CustomFieldRenderer({
         {renderCustomField({
           ...renderProps,
           customFieldName: field.customFieldName,
+          fieldType: "custom",
         })}
       </>
     )
