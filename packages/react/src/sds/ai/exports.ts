@@ -2,6 +2,7 @@ export * from "./F0AiChat"
 export * from "./F0ActionItem"
 export * from "./F0AiMask"
 export * from "./F0AuraVoiceAnimation"
+export * from "./F0OrbVoiceAnimation"
 export * from "./F0AiCollapsibleMessage"
 // F0ChatDashboard is exported via its own entry point (src/F0ChatDashboard.ts)
 // to avoid pulling F0AnalyticsDashboard + ECharts into the ai bundle.
