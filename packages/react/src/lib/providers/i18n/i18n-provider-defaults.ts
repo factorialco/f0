@@ -57,13 +57,6 @@ export const defaultTranslations = {
     thumbsUp: "Like",
     thumbsDown: "Dislike",
     other: "Other actions",
-    download: "Download",
-    downloadAsPng: "Download as PNG",
-    downloadAsJpg: "Download as JPG",
-    downloadAsExcel: "Download as Excel",
-    downloadAsCsv: "Download as CSV",
-    exportDashboard: "Export dashboard",
-    exporting: "Exporting...",
     toggle: "Toggle",
     toggleDropdownMenu: "Toggle dropdown menu",
     selectAll: "Select all",
@@ -320,6 +313,8 @@ export const defaultTranslations = {
     },
     dataDownload: {
       download: "Download {{format}}",
+      exportDashboardAsExcel: "Export dashboard as Excel",
+      exporting: "Exporting...",
     },
     pong: {
       ai: "AI",

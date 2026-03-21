@@ -35,12 +35,12 @@ export function useCollectionDownloadActions({
     if (records.length === 0) return []
     return [
       {
-        label: t("actions.downloadAsExcel"),
+        label: t("ai.dataDownload.download", { format: "Excel" }),
         icon: Download,
         onClick: handleExcel,
       },
       {
-        label: t("actions.downloadAsCsv"),
+        label: t("ai.dataDownload.download", { format: "CSV" }),
         icon: Download,
         onClick: handleCsv,
       },

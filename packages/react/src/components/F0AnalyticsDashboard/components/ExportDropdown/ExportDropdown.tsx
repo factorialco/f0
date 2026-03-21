@@ -1,6 +1,5 @@
-import { ButtonInternal } from "@/components/F0Button/internal"
 import { Dropdown } from "@/experimental/Navigation/Dropdown"
-import { Download, EllipsisHorizontal } from "@/icons/app"
+import { Download } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 
 interface ExportDropdownProps {
@@ -19,21 +18,12 @@ export function ExportDropdown({
       items={[
         {
           label: isExporting
-            ? t("actions.exporting")
-            : t("actions.exportDashboard"),
+            ? t("ai.dataDownload.exporting")
+            : t("ai.dataDownload.exportDashboardAsExcel"),
           icon: Download,
           onClick: onExportExcel,
         },
       ]}
-    >
-      <ButtonInternal
-        label={t("actions.other")}
-        icon={EllipsisHorizontal}
-        variant="outline"
-        size="md"
-        disabled={isExporting}
-        noTitle
-      />
-    </Dropdown>
+    ></Dropdown>
   )
 }

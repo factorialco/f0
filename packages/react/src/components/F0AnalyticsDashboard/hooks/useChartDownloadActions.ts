@@ -69,22 +69,22 @@ export function useChartDownloadActions({
     if (!data) return []
     return [
       {
-        label: t("actions.downloadAsPng"),
+        label: t("ai.dataDownload.download", { format: "PNG" }),
         icon: Image,
         onClick: () => handleImage("png"),
       },
       {
-        label: t("actions.downloadAsJpg"),
+        label: t("ai.dataDownload.download", { format: "JPG" }),
         icon: Image,
         onClick: () => handleImage("jpg"),
       },
       {
-        label: t("actions.downloadAsExcel"),
+        label: t("ai.dataDownload.download", { format: "Excel" }),
         icon: Download,
         onClick: handleExcel,
       },
       {
-        label: t("actions.downloadAsCsv"),
+        label: t("ai.dataDownload.download", { format: "CSV" }),
         icon: Download,
         onClick: handleCsv,
       },
