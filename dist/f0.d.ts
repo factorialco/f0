@@ -5729,6 +5729,22 @@ export declare type F0OneSwitchProps = React.ComponentPropsWithoutRef<typeof Swi
     autoOpen?: boolean;
 };
 
+export declare function F0OrbVoiceAnimation({ state, audioTrack, colors, className, ref, ...props }: F0OrbVoiceAnimationProps & ComponentProps<"div">): JSX_2.Element;
+
+export declare interface F0OrbVoiceAnimationColors {
+    colorA: string;
+    colorB: string;
+    colorC: string;
+    colorD: string;
+}
+
+export declare interface F0OrbVoiceAnimationProps {
+    className?: string;
+    state?: AgentState;
+    audioTrack?: LocalAudioTrack | RemoteAudioTrack | TrackReferenceOrPlaceholder;
+    colors?: F0OrbVoiceAnimationColors;
+}
+
 /**
  * A record mapping section IDs to their individual schemas.
  * When used, each section gets independent validation and its own submit button.
@@ -10373,11 +10389,6 @@ declare module "gridstack" {
 }
 
 
-declare namespace Calendar {
-    var displayName: string;
-}
-
-
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         aiBlock: {
@@ -10424,4 +10435,9 @@ declare module "@tiptap/core" {
             }) => ReturnType;
         };
     }
+}
+
+
+declare namespace Calendar {
+    var displayName: string;
 }
