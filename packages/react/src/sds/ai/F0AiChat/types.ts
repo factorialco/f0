@@ -2,6 +2,7 @@ import { CopilotKitProps } from "@copilotkit/react-core"
 import { type AIMessage, type Message } from "@copilotkit/shared"
 
 import { IconType } from "@/components/F0Icon"
+import { defaultTranslations } from "@/lib/providers/i18n/i18n-provider-defaults"
 
 import type { ChatDashboardConfig } from "../F0ChatDashboard/types"
 
@@ -204,76 +205,11 @@ type TranslationShape<T> = {
 }
 
 /**
- * Default AI chat translations
+ * Default AI chat translations — derived from the global defaultTranslations
+ * to avoid manual duplication.
  */
 export const aiTranslations = {
-  ai: {
-    openChat: "Open Chat with One AI",
-    closeChat: "Close Chat with One AI",
-    startNewChat: "Start new chat",
-    scrollToBottom: "Scroll to bottom",
-    welcome: "Ask or create with One",
-    defaultInitialMessage: "How can I help you today?",
-    inputPlaceholder:
-      "Ask about time, people, or company info and a lot of other things...",
-    stopAnswerGeneration: "Stop generating",
-    responseStopped: "You stopped this response",
-    sendMessage: "Send message",
-    thoughtsGroupTitle: "Reflection",
-    resourcesGroupTitle: "Resources",
-    thinking: "Thinking...",
-    closeDashboard: "Close dashboard",
-    exportTable: "Download table",
-    generatedTableFilename: "OneGeneratedTable",
-    feedbackModal: {
-      positive: {
-        title: "What did you like about this response?",
-        label: "Your feedback helps us make Factorial AI better",
-        placeholder: "Share what worked well",
-      },
-      negative: {
-        title: "What could have been better?",
-        label: "Your feedback helps us improve future answers",
-        placeholder: "Share what didn't work",
-      },
-    },
-    dataDownloadPreview:
-      "Preview {{shown}} of {{total}} rows — download to see all data.",
-    expandChat: "Expand chat",
-    collapseChat: "Collapse chat",
-    chatHistory: "Chat history",
-    noPreviousChats: "No previous conversations",
-    newConversation: "New conversation",
-    today: "Today",
-    yesterday: "Yesterday",
-    thisMonth: "This month",
-    older: "Older",
-    searchChats: "Search conversations...",
-    pinnedChats: "Pinned",
-    threadOptions: "Thread options",
-    pinChat: "Pin chat",
-    unpinChat: "Unpin chat",
-    deleteChat: "Delete chat",
-    ask: "Ask One",
-    viewProfile: "View profile",
-    tools: "Tools",
-    reportCard: {
-      reportLabel: "Report",
-      openButton: "Open",
-    },
-    dataDownload: {
-      download: "Download {{format}}",
-    },
-    pong: {
-      ai: "AI",
-      you: "YOU",
-      youWin: "You win!",
-      youLose: "You lose!",
-    },
-    unsavedChanges: "Unsaved changes",
-    saveChanges: "Save changes",
-    discardChanges: "Discard",
-  },
+  ai: defaultTranslations.ai,
 }
 
 /**

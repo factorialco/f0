@@ -79,6 +79,9 @@ export function useChartDownloadActions({
         onClick: () => handleImage("jpg"),
       },
       {
+        type: "separator",
+      },
+      {
         label: t("ai.dataDownload.download", { format: "Excel" }),
         icon: Download,
         onClick: handleExcel,

@@ -1,5 +1,5 @@
 import { Dropdown } from "@/experimental/Navigation/Dropdown"
-import { Download } from "@/icons/app"
+import { Download, Ellipsis } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 
 interface ExportDropdownProps {
@@ -19,11 +19,12 @@ export function ExportDropdown({
         {
           label: isExporting
             ? t("ai.dataDownload.exporting")
-            : t("ai.dataDownload.exportDashboardAsExcel"),
+            : t("ai.dataDownload.exportDashboard", { format: "Excel" }),
           icon: Download,
           onClick: onExportExcel,
         },
       ]}
-    ></Dropdown>
+      icon={Ellipsis}
+    />
   )
 }

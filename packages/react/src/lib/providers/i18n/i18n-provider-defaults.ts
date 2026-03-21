@@ -313,7 +313,7 @@ export const defaultTranslations = {
     },
     dataDownload: {
       download: "Download {{format}}",
-      exportDashboardAsExcel: "Export dashboard as Excel",
+      exportDashboard: "Export dashboard as {{format}}",
       exporting: "Exporting...",
     },
     pong: {

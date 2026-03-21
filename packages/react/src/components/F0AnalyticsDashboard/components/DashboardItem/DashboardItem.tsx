@@ -103,7 +103,7 @@ export function DashboardItem({
                 label={translations.actions.other}
                 icon={Ellipsis}
                 variant="ghost"
-                size="sm"
+                size="md"
                 hideLabel
                 pressed={isDropdownOpen}
                 compact
