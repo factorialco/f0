@@ -8,7 +8,9 @@ import type {
 import type { F0AnalyticsDashboardProps } from "./types"
 
 import { DashboardGrid } from "./components/DashboardGrid/DashboardGrid"
+import { ExportDropdown } from "./components/ExportDropdown/ExportDropdown"
 import { FilterBar } from "./components/FilterBar/FilterBar"
+import { useDashboardExport } from "./hooks/useDashboardExport"
 
 /**
  * F0AnalyticsDashboard — a declarative, config-driven analytics dashboard.
@@ -29,19 +31,35 @@ export const F0AnalyticsDashboard = <
   items,
   editMode,
   onLayoutChange,
+  enableExport,
 }: F0AnalyticsDashboardProps<Filters>) => {
   const [currentFilters, setCurrentFilters] = useState<FiltersState<Filters>>(
     () => defaultFilters ?? ({} as FiltersState<Filters>)
   )
 
+  const { exportAsExcel, isExporting } = useDashboardExport({
+    items,
+    filters: currentFilters,
+  })
+
   return (
     <div className="flex flex-col gap-4">
-      <FilterBar
-        filters={filters}
-        value={currentFilters}
-        presets={presets}
-        onChange={setCurrentFilters}
-      />
+      <div className="flex items-center justify-between gap-4">
+        <div className="w-full">
+          <FilterBar
+            filters={filters}
+            value={currentFilters}
+            presets={presets}
+            onChange={setCurrentFilters}
+          />
+        </div>
+        {enableExport && (
+          <ExportDropdown
+            onExportExcel={exportAsExcel}
+            isExporting={isExporting}
+          />
+        )}
+      </div>
       <DashboardGrid
         items={items}
         filters={currentFilters}

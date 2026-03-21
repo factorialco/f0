@@ -357,4 +357,9 @@ export interface F0AnalyticsDashboardProps<
    * the consumer can reconcile against the original config items.
    */
   onLayoutChange?: (layout: DashboardItemLayout[]) => void
+  /**
+   * Show a dashboard-level export button (PDF/Excel).
+   * @default false
+   */
+  enableExport?: boolean
 }

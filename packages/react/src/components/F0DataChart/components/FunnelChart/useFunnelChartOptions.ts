@@ -16,6 +16,7 @@ import {
   DEFAULT_EMPHASIS,
 } from "../../utils/options"
 import { useChartTheme } from "../../utils/useChartTheme"
+import { useContainerSize } from "../../utils/useContainerSize"
 
 export function useFunnelChartOptions(
   containerRef: RefObject<HTMLDivElement | null>,
@@ -33,6 +34,7 @@ export function useFunnelChartOptions(
   }: F0DataChartFunnelProps
 ): echarts.EChartsOption {
   const theme = useChartTheme(containerRef)
+  const { width: containerWidth } = useContainerSize(containerRef)
 
   return useMemo(() => {
     const dataPoints = series.data ?? []
@@ -171,6 +173,7 @@ export function useFunnelChartOptions(
         show: showLegend,
         data: legendData,
         theme,
+        containerWidth,
       }),
       grid: buildGrid({ showLegend }),
       tooltip: buildItemTooltip({
@@ -197,5 +200,6 @@ export function useFunnelChartOptions(
     valueFormatter,
     echartsOptions,
     theme,
+    containerWidth,
   ])
 }
