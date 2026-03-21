@@ -1,4 +1,4 @@
-#version 300 es
+export default `#version 300 es
 precision lowp float;
 
 in vec2 vUV;
@@ -205,3 +205,4 @@ void main() {
 
 	outColor = vec4(color, alpha);
 }
+`
