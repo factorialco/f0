@@ -86,11 +86,7 @@ if (process.env.BUILD_TYPES) {
         // - ../../../components/Charts/* (BarChart, LineChart, PieChart, VerticalBarChart)
         // - ../F0Avatar, ../internal/BaseAvatar, ../Layout, ../Widget
         // - ../../f0 (self-reference that should be ./f0)
-        const dtsFiles = [
-          "f0.d.ts",
-          "experimental.d.ts",
-          // "F0ChatDashboard.d.ts",
-        ]
+        const dtsFiles = ["f0.d.ts", "experimental.d.ts"]
         for (const file of dtsFiles) {
           const filePath = resolve(__dirname, `dist/${file}`)
           if (existsSync(filePath)) {
@@ -143,7 +139,6 @@ export default defineConfig({
         ["f0"]: resolve(__dirname, "src/f0.ts"),
         ["experimental"]: resolve(__dirname, "src/experimental.ts"),
         ["ai"]: resolve(__dirname, "src/ai.ts"),
-        // ["F0ChatDashboard"]: resolve(__dirname, "src/F0ChatDashboard.ts"),
         ["i18n-provider-defaults"]: resolve(
           __dirname,
           "src/lib/providers/i18n/i18n-provider-defaults.ts"

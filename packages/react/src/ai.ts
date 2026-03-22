@@ -6,29 +6,3 @@ export {
   type I18nProviderProps,
   type TranslationsType,
 } from "./lib/providers/i18n"
-
-export {
-  ChatDashboard,
-  type ChatDashboardProps,
-} from "./sds/ai/F0AiChat/canvas/entities/dashboard/DashboardContent"
-
-export type {
-  AggregationType,
-  ChatDashboardBarChartConfig,
-  ChatDashboardChartConfig,
-  ChatDashboardChartItem,
-  ChatDashboardCollectionItem,
-  ChatDashboardColumn,
-  ChatDashboardConfig,
-  ChatDashboardFilterDefinition,
-  ChatDashboardFunnelChartConfig,
-  ChatDashboardItem,
-  ChatDashboardLineChartConfig,
-  ChatDashboardMetricFormat,
-  ChatDashboardMetricItem,
-  ChartComputation,
-  CollectionComputation,
-  DashboardFetchSpec,
-  FormatPreset,
-  MetricComputation,
-} from "./sds/ai/F0AiChat/canvas/entities/dashboard/types"
