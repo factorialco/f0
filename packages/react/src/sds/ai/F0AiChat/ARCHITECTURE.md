@@ -1,205 +1,130 @@
 # F0AiChat Architecture
 
-This document explains the architecture of the F0AiChat component, how to extend it with new copilot actions, canvas entities, and features.
-
 ## Directory structure
 
 ```
 F0AiChat/
-├── F0AiChat.tsx                     # Slim entry: provider composition + exports
+├── F0AiChat.tsx                     # Entry: provider composition + exports
 ├── F0AiFullscreenChat.tsx           # Fullscreen variant (mobile/standalone)
-├── index.ts                         # Public API barrel (stable contract)
+├── index.ts                         # Public API barrel
 ├── types.ts                         # Public types
 ├── internal-types.ts                # Internal state types
-├── constants.ts                     # Chat width constants
 │
 ├── actions/                         # Copilot action system (plugin-based)
-│   ├── index.ts                     # Barrel with side-effect registrations
 │   ├── registry.ts                  # registerCopilotAction / getRegisteredActions
 │   ├── useRegisteredActions.ts      # Hook that invokes all registered factories
-│   ├── COPILOT_ACTIONS.md           # Comprehensive guide for action development
-│   ├── core/                        # Built-in actions (always registered)
-│   │   ├── orchestratorThinking/
-│   │   │   ├── useOrchestratorThinkingAction.tsx
-│   │   │   └── types.ts
-│   │   ├── messageSources/
-│   │   │   ├── useMessageSourcesAction.tsx
-│   │   │   ├── MessageSources.tsx
-│   │   │   └── types.ts
-│   │   ├── dataDownload/
-│   │   │   ├── useDataDownloadAction.tsx
-│   │   │   ├── DataDownload.tsx
-│   │   │   └── types.ts
-│   │   └── displayDashboard/
-│   │       └── useDisplayDashboardAction.tsx
-│   └── extensions/
-│       └── upselling.ts            # UpsellingKit actions (decoupled from core)
+│   ├── index.ts                     # Barrel with side-effect registrations
+│   ├── COPILOT_ACTIONS.md           # Guide for action development
+│   ├── core/                        # Built-in actions
+│   └── extensions/                  # Decoupled/optional actions
 │
 ├── canvas/                          # Canvas entity system (plugin-based)
 │   ├── registry.ts                  # registerCanvasEntity / getCanvasEntity
 │   ├── types.ts                     # CanvasEntityDefinition contract
 │   ├── index.ts                     # Barrel + entity registrations
-│   ├── AutoOpenCanvas.tsx           # Helper: auto-opens canvas on mount
-│   ├── CANVAS_ENTITIES.md           # How to add new canvas entities
-│   ├── components/
-│   │   └── CanvasCard.tsx           # Shared inline card component
-│   └── entities/
-│       └── dashboard/               # Dashboard entity (template for new entities)
+│   ├── AutoOpenCanvas.tsx           # Auto-opens canvas on mount
+│   ├── CANVAS_ENTITIES.md           # Guide for canvas entities
+│   ├── components/                  # Shared canvas UI (CanvasCard, etc.)
+│   └── entities/                    # One folder per entity type
 │
-├── components/                        # UI components organized by domain
-│   ├── messages/                    # Message rendering (thread, welcome, scroll)
-│   │   ├── __tests__/
-│   │   ├── __stories__/
-│   │   ├── MessagesContainer.tsx
-│   │   ├── AssistantMessage.tsx
-│   │   ├── UserMessage.tsx
-│   │   ├── ScrollShadow.tsx
-│   │   ├── WelcomeScreen.tsx
-│   │   ├── Thinking.tsx             # Collapsible thinking/reflection steps
-│   │   └── types.ts                 # ThinkingProps, shared message types
-│   ├── feedback/                    # Feedback system (thumbs up/down + modal)
-│   │   ├── FeedbackModal.tsx
-│   │   ├── TurnFeedback.tsx
-│   │   └── FeedbackProvider.tsx
-│   ├── history/                     # Thread history (list, group, pin/delete)
-│   │   ├── ChatHistoryDialog.tsx    # Dialog shell: search, grouped list, empty state
-│   │   ├── useChatHistory.ts        # Data fetching + CRUD (pin/unpin/delete)
-│   │   ├── types.ts                 # DateGroup, ThreadGroup, ThreadActionHandlers
-│   │   ├── utils.ts                 # getDateGroup(), groupThreadsByDate()
-│   │   └── components/
-│   │       ├── ThreadItem.tsx       # Single thread row with dropdown actions
-│   │       ├── CollapsibleGroup.tsx  # Collapsible date-group section
-│   │       └── ThreadListSkeleton.tsx # Loading skeleton (5 rows)
-│   ├── input/                       # Input area
-│   │   ├── __stories__/
-│   │   ├── ChatInput.tsx            # Full input area (textarea + disclaimer + footer)
-│   │   ├── ChatTextarea.tsx         # Context-aware textarea wrapper
-│   │   ├── MentionPopover.tsx       # @mention autocomplete popover
-│   │   ├── ToolHintSelector.tsx     # Tool hint chip selector
-│   │   ├── TypewriterPlaceholder.tsx # Animated rotating placeholder
-│   │   ├── useMentions.ts           # Mention detection + entity search
-│   │   └── utils.ts                 # Input helper utilities
-│   ├── layout/                      # Chat shell
-│   │   ├── ChatWindow.tsx           # Sidebar window with resize + animation
-│   │   ├── ChatHeader.tsx           # Header with history/expand/close
-│   │   ├── CanvasPanel.tsx          # Entity-agnostic canvas shell
-│   │   └── ResizeHandle.tsx
-│   └── shared/
-│       └── CopilotFunctionBridge.tsx # Bridges CopilotKit internals to state
+├── components/
+│   ├── markdownRenderers/           # Markdown rendering system
+│   │   ├── MarkdownRenderers.tsx    # Renderer map (tag → component)
+│   │   ├── index.ts                 # Public exports
+│   │   ├── ENTITY_REFS.md          # Guide for entity refs
+│   │   ├── components/              # Tag renderers (Block, Table, etc.)
+│   │   └── entityRef/               # Entity reference system (plugin-based)
+│   │       ├── entityRefRegistry.ts # registerEntityRef / getEntityRefRenderer
+│   │       ├── EntityRef.tsx        # Dispatcher (reads registry)
+│   │       └── entities/            # One folder per entity type
+│   │           └── person/
+│   ├── messages/                    # Message rendering
+│   ├── feedback/                    # Thumbs up/down + feedback modal
+│   ├── history/                     # Thread history (list, search, CRUD)
+│   ├── input/                       # Textarea, mentions, tool hints
+│   ├── layout/                      # Chat shell (window, header, canvas, resize)
+│   └── shared/                      # Cross-cutting components
 │
 ├── providers/                       # Global providers
 │   ├── AiChatStateProvider.tsx      # Central state (context + refs)
 │   └── AiChatTranslationsProvider.tsx
 │
 ├── hooks/                           # Cross-cutting hooks
-│   ├── useMessageScroll.ts
-│   └── useAutoOpenCanvas.ts         # Auto-open canvas on first content
+├── utils/                           # Helpers, fetch, storage
 │
-├── utils/
-│   ├── __tests__/
-│   ├── fetchThreadMessages.ts
-│   ├── local-storage.ts
-│   └── turnUtils.ts
-│
-│
-└── __stories__/                     # Stories for the composed components
-    ├── F0AiChat.stories.tsx
-    └── F0AiFullscreenChat.stories.tsx
+└── __stories__/                     # Composed component stories
 ```
 
-## Two plugin systems
+## Three plugin registries
 
-F0AiChat uses two parallel plugin registries, both following the same pattern:
+F0AiChat uses three registries, all following the same side-effect pattern:
 
-### 1. Action registry (`actions/`)
+| Registry        | Location                                           | Registers                           | Lookup used by           |
+| --------------- | -------------------------------------------------- | ----------------------------------- | ------------------------ |
+| **Actions**     | `actions/registry.ts`                              | Copilot action hooks                | `useRegisteredActions()` |
+| **Canvas**      | `canvas/registry.ts`                               | Entity definitions (card + content) | `CanvasPanel`            |
+| **Entity refs** | `markdownRenderers/entityRef/entityRefRegistry.ts` | Inline mention renderers            | `EntityRef` dispatcher   |
 
-Registers copilot action **hooks** (factories). Each factory calls `useCopilotAction()` internally.
+All three work the same way:
 
-```
-┌─────────────┐   import-time    ┌──────────┐
-│ action file  │ ───────────────▶ │ registry │
-│ (side-effect)│  registerCopilot │ (Map)    │
-└─────────────┘  Action(name, fn) └──────────┘
-                                       │
-                                       ▼
-                               useRegisteredActions()
-                               iterates & calls all hooks
-```
+1. A `register*()` function adds to a `Map` at module scope
+2. Each plugin calls `register*()` as a side-effect when imported
+3. A barrel `index.ts` imports all plugins to trigger registration
+4. A consumer reads from the registry at render time
 
-### 2. Canvas registry (`canvas/`)
+Registries are populated at module load and never mutate after the first render.
 
-Registers canvas entity **definitions** (render functions + wrapper).
+## Extending each system
 
-```
-┌──────────────┐   import-time    ┌──────────┐
-│ entity index  │ ───────────────▶ │ registry │
-│ (side-effect) │  registerCanvas  │ (Map)    │
-└──────────────┘  Entity(def)     └──────────┘
-                                       │
-                                       ▼
-                               CanvasPanel looks up entity
-                               by content.type at render time
-```
+### Adding a copilot action
 
-Both registries are populated at module load time (side-effects) and never mutate after the first render. This guarantees Rules of Hooks safety for the action registry.
+See `actions/COPILOT_ACTIONS.md`.
 
-## How to add a new copilot action
+1. Create `actions/core/<name>/use<Name>Action.tsx`
+2. Call `useCopilotAction()` + `registerCopilotAction()` at module scope
+3. Import in `actions/index.ts`
 
-See `actions/COPILOT_ACTIONS.md` for the comprehensive guide. Quick summary:
+### Adding a canvas entity
 
-1. Create `actions/core/myAction/useMyAction.tsx`
-2. Call `useCopilotAction()` and `registerCopilotAction()` at module scope
-3. Add import to `actions/index.ts`
+See `canvas/CANVAS_ENTITIES.md`.
 
-## How to add a new canvas entity
+1. Define content type in `types.ts`
+2. Create `canvas/entities/<name>/` with card, content, and header
+3. Register via `registerCanvasEntity()` in the entity's `index.tsx`
+4. Import in `canvas/index.ts`
+5. Create a copilot action that renders the entity card
 
-See `canvas/CANVAS_ENTITIES.md` for the full step-by-step guide.
+### Adding an entity ref
 
-**AutoOpenCanvas**: Use the `canvas/AutoOpenCanvas.tsx` helper component inside a copilot action's `render` callback to automatically open the canvas panel when content is first received. It skips auto-open on small screens. See `useDisplayDashboardAction` for a reference implementation.
+See `markdownRenderers/ENTITY_REFS.md`.
 
-Summary:
+1. Define profile type in `types.ts` + add resolver to `EntityResolvers`
+2. Create `entityRef/entities/<name>/<Name>EntityRef.tsx`
+3. Call `registerEntityRef()` at module scope
+4. Import in `entityRef/EntityRef.tsx`
 
-1. Define the content type in `types.ts`
-2. Create the entity folder in `canvas/entities/`
-3. Implement card, content, and actions components
-4. Register via `registerCanvasEntity()` in the entity's `index.tsx`
-5. Import the entity in `canvas/index.ts`
-6. Create a copilot action in `actions/core/` that renders the card
+### Adding a UI feature
 
-## How to add a new feature
-
-Features live in `components/` organized by domain. Each domain folder contains:
-
-- Components (`.tsx`)
-- Tests in `__tests__/`
-- Stories in `__stories__/`
-- Domain-specific hooks and providers
-
-To add a new domain:
-
-1. Create `components/myDomain/`
-2. Add components, co-located tests, and stories
-3. Import from `components/myDomain/` wherever needed
+Components live in `components/` organized by domain. Each domain folder contains components, `__tests__/`, `__stories__/`, and domain-specific hooks.
 
 ## Provider hierarchy
 
 ```
 F0AiChatProvider (user-facing)
-  └── AiChatStateProvider (central state, context + refs)
-        └── CopilotKit (CopilotKit runtime)
+  └── AiChatStateProvider (central state)
+        └── CopilotKit (runtime)
               └── CopilotFunctionBridge (bridges reset/load/send)
-                    └── F0AiChat or F0AiFullscreenChat (UI)
+                    └── F0AiChat / F0AiFullscreenChat (UI)
                           └── useRegisteredActions() (all actions)
 ```
 
 ## Public API
 
-The `index.ts` barrel exports a stable API. Internal paths should not be imported directly by consumers. The only exceptions are deep imports for `CanvasPanel` (used by ApplicationFrame) and `AiChatStateProvider` (for the `useAiChat` hook, which is also re-exported from the barrel).
+`index.ts` exports a stable API. Internal paths should not be imported directly by consumers.
 
-## Key conventions
+## Conventions
 
 - **Named exports only** — no default exports
-- **Side-effect registration** — actions and entities register themselves when imported
+- **Side-effect registration** — actions, entities, and entity refs register themselves when imported
 - **Tests in `__tests__/`** — co-located within each domain folder
 - **Stories in `__stories__/`** — co-located within each domain folder
-- **Root `__stories__/`** — only for composed component stories (F0AiChat, F0AiFullscreenChat)
