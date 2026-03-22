@@ -6,7 +6,7 @@ export function CloseCanvasButton({ onClick }: { onClick: () => void }) {
   const translations = useI18n()
   return (
     <F0Button
-      variant="ghost"
+      variant="outline"
       icon={Cross}
       size="md"
       hideLabel

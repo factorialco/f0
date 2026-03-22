@@ -49,7 +49,7 @@ export function CanvasPanel(): ReactNode {
     const inner = (
       <>
         {header}
-        <div className="relative flex-1 overflow-auto p-5">{content}</div>
+        <div className="relative flex-1 overflow-auto">{content}</div>
       </>
     )
 

@@ -362,4 +362,15 @@ export interface F0AnalyticsDashboardProps<
    * @default false
    */
   enableExport?: boolean
+  /**
+   * Called when the export function becomes available (or undefined on unmount).
+   * Allows a parent to trigger export imperatively without rendering the
+   * built-in ExportDropdown.
+   */
+  /**
+   * Custom filename for the exported Excel file (without extension).
+   * @default "dashboard"
+   */
+  exportFilename?: string
+  onExportReady?: (exportFn: (() => Promise<void>) | undefined) => void
 }

@@ -1,6 +1,8 @@
 import type { ReactNode } from "react"
-import { useEffect, useRef, useState } from "react"
 
+import { useCallback, useRef, useState } from "react"
+
+import { ExportDropdown } from "@/components/F0AnalyticsDashboard/components/ExportDropdown/ExportDropdown"
 import { F0Button } from "@/components/F0Button"
 import { OneEllipsis } from "@/components/OneEllipsis"
 import { Pencil } from "@/icons/app"
@@ -8,9 +10,6 @@ import { useI18n } from "@/lib/providers/i18n"
 
 import { CloseCanvasButton } from "../../components/CloseCanvasButton"
 import { useDashboardCanvas } from "./DashboardContext"
-
-/** Hide edit controls when the parent container is narrower than this. */
-const NARROW_THRESHOLD = 600
 
 export function DashboardHeader({
   title,
@@ -20,7 +19,7 @@ export function DashboardHeader({
   onClose: () => void
 }) {
   return (
-    <div className="flex shrink-0 items-center gap-2 border-0 border-b border-solid border-f1-border-secondary px-7 py-5">
+    <div className="flex shrink-0 items-center gap-2 border-0 border-b border-solid border-f1-border-secondary p-5">
       <OneEllipsis
         tag="h2"
         className="min-w-0 flex-1 text-2xl font-semibold text-f1-foreground"
@@ -28,33 +27,28 @@ export function DashboardHeader({
         {title}
       </OneEllipsis>
       <DashboardActions />
+      <div className="mx-1 h-4 w-px bg-f1-background-secondary-hover" />
       <CloseCanvasButton onClick={onClose} />
     </div>
   )
 }
 
 function DashboardActions(): ReactNode {
-  const { editMode, setEditMode, handleSave, handleDiscard } =
+  const { editMode, setEditMode, handleSave, handleDiscard, exportAsExcel } =
     useDashboardCanvas()
   const translations = useI18n()
   const ref = useRef<HTMLDivElement>(null)
-  const [isNarrow, setIsNarrow] = useState(false)
+  const [isExporting, setIsExporting] = useState(false)
 
-  useEffect(() => {
-    const el = ref.current?.parentElement
-    if (!el) return
-    const observer = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        setIsNarrow(entry.contentRect.width < NARROW_THRESHOLD)
-      }
-    })
-    observer.observe(el)
-    return () => observer.disconnect()
-  }, [])
-
-  if (isNarrow) {
-    return <div ref={ref} />
-  }
+  const handleExport = useCallback(async () => {
+    if (!exportAsExcel) return
+    setIsExporting(true)
+    try {
+      await exportAsExcel()
+    } finally {
+      setIsExporting(false)
+    }
+  }, [exportAsExcel])
 
   if (editMode) {
     return (
@@ -75,7 +69,13 @@ function DashboardActions(): ReactNode {
   }
 
   return (
-    <div ref={ref}>
+    <div ref={ref} className="flex items-center gap-2">
+      {exportAsExcel && (
+        <ExportDropdown
+          onExportExcel={handleExport}
+          isExporting={isExporting}
+        />
+      )}
       <F0Button
         variant="outline"
         icon={Pencil}

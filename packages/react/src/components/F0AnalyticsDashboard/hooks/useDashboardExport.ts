@@ -25,6 +25,7 @@ type SheetData = {
 interface UseDashboardExportOptions<Filters extends FiltersDefinition> {
   items: DashboardItem<Filters>[]
   filters: FiltersState<Filters>
+  filename?: string
 }
 
 interface UseDashboardExportResult {
@@ -144,6 +145,7 @@ async function buildAllSheets<Filters extends FiltersDefinition>(
 export function useDashboardExport<Filters extends FiltersDefinition>({
   items,
   filters,
+  filename = "dashboard",
 }: UseDashboardExportOptions<Filters>): UseDashboardExportResult {
   const [isExporting, setIsExporting] = useState(false)
 
@@ -152,12 +154,12 @@ export function useDashboardExport<Filters extends FiltersDefinition>({
     try {
       const sheets = await buildAllSheets(items, filters)
       if (sheets.length > 0) {
-        downloadMultiSheetExcel(sheets, "dashboard")
+        downloadMultiSheetExcel(sheets, filename)
       }
     } finally {
       setIsExporting(false)
     }
-  }, [items, filters])
+  }, [items, filters, filename])
 
   return { exportAsExcel, isExporting }
 }

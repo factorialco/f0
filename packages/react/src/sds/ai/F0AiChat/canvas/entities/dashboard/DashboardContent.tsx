@@ -134,7 +134,8 @@ export interface F0ChatDashboardProps {
   refreshKey?: number
   editMode?: boolean
   onLayoutChange?: (layout: DashboardItemLayout[]) => void
-  enableExport?: boolean
+  onExportReady?: (exportFn: (() => Promise<void>) | undefined) => void
+  exportFilename?: string
 }
 
 /**
@@ -150,7 +151,8 @@ export function F0ChatDashboard({
   refreshKey = 0,
   editMode,
   onLayoutChange,
-  enableExport,
+  onExportReady,
+  exportFilename,
 }: F0ChatDashboardProps) {
   const { fetchItem, getFilterOptions } = useDashboardCompute(
     config,
@@ -264,7 +266,8 @@ export function F0ChatDashboard({
       items={items}
       editMode={editMode}
       onLayoutChange={onLayoutChange}
-      enableExport={enableExport}
+      onExportReady={onExportReady}
+      exportFilename={exportFilename}
     />
   )
 }
@@ -286,7 +289,7 @@ export function DashboardContent({
   content: DashboardCanvasContent
   refreshKey: number
 }): ReactNode {
-  const { editMode, onLayoutChange } = useDashboardCanvas()
+  const { editMode, onLayoutChange, registerExport } = useDashboardCanvas()
 
   return (
     <F0ChatDashboard
@@ -295,7 +298,8 @@ export function DashboardContent({
       refreshKey={refreshKey}
       editMode={editMode}
       onLayoutChange={onLayoutChange}
-      enableExport
+      onExportReady={registerExport}
+      exportFilename={content.title}
     />
   )
 }

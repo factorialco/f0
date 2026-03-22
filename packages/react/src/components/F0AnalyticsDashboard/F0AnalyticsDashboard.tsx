@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 import type {
   FiltersDefinition,
@@ -32,6 +32,8 @@ export const F0AnalyticsDashboard = <
   editMode,
   onLayoutChange,
   enableExport,
+  exportFilename,
+  onExportReady,
 }: F0AnalyticsDashboardProps<Filters>) => {
   const [currentFilters, setCurrentFilters] = useState<FiltersState<Filters>>(
     () => defaultFilters ?? ({} as FiltersState<Filters>)
@@ -40,32 +42,42 @@ export const F0AnalyticsDashboard = <
   const { exportAsExcel, isExporting } = useDashboardExport({
     items,
     filters: currentFilters,
+    filename: exportFilename,
   })
 
+  useEffect(() => {
+    onExportReady?.(exportAsExcel)
+    return () => onExportReady?.(undefined)
+  }, [exportAsExcel, onExportReady])
+
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex items-center justify-between gap-4">
-        <div className="w-full">
-          <FilterBar
-            filters={filters}
-            value={currentFilters}
-            presets={presets}
-            onChange={setCurrentFilters}
-          />
+    <div className="flex flex-col gap-3.5 py-4">
+      {(filters || enableExport) && (
+        <div className="flex items-center justify-between gap-4 px-5">
+          <div className="w-full">
+            <FilterBar
+              filters={filters}
+              value={currentFilters}
+              presets={presets}
+              onChange={setCurrentFilters}
+            />
+          </div>
+          {enableExport && (
+            <ExportDropdown
+              onExportExcel={exportAsExcel}
+              isExporting={isExporting}
+            />
+          )}
         </div>
-        {enableExport && (
-          <ExportDropdown
-            onExportExcel={exportAsExcel}
-            isExporting={isExporting}
-          />
-        )}
+      )}
+      <div className="px-3.5">
+        <DashboardGrid
+          items={items}
+          filters={currentFilters}
+          editMode={editMode}
+          onLayoutChange={onLayoutChange}
+        />
       </div>
-      <DashboardGrid
-        items={items}
-        filters={currentFilters}
-        editMode={editMode}
-        onLayoutChange={onLayoutChange}
-      />
     </div>
   )
 }
