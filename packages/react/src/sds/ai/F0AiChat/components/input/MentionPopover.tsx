@@ -1,12 +1,12 @@
-import { useEffect, useRef } from "react"
+import { useEffect, useLayoutEffect, useRef } from "react"
 
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson/F0AvatarPerson"
 import { OneEllipsis } from "@/components/OneEllipsis"
 import { cn } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
 
-import type { PersonProfile } from "../../types"
 import type { PopoverPosition } from "./useMentions"
+import { PersonProfile } from "../markdownRenderers/entityRef/entities/person/types"
 
 export type MentionPopoverProps = {
   /** Whether the popover is visible */
@@ -44,6 +44,17 @@ export function MentionPopover({
   useEffect(() => {
     selectedItemRef.current?.scrollIntoView({ block: "nearest" })
   }, [selectedIndex])
+
+  // Clamp horizontal position so the popover never overflows the container
+  useLayoutEffect(() => {
+    const el = listRef.current
+    const parent = el?.offsetParent as HTMLElement | null
+    if (!el || !parent) return
+    const overflow = el.offsetLeft + el.offsetWidth - parent.clientWidth
+    if (overflow > 0) {
+      el.style.left = `${Math.max(0, el.offsetLeft - overflow)}px`
+    }
+  }, [position])
 
   const showLoading = isLoading && results.length === 0
   const showEmpty = !isLoading && results.length === 0

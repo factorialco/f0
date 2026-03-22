@@ -1,7 +1,6 @@
 import { useCopilotAction } from "@copilotkit/react-core"
 
 import { MessageSources } from "./MessageSources"
-import { registerCopilotAction } from "../../registry"
 import { Source } from "./types"
 
 /**
@@ -56,5 +55,3 @@ export const useMessageSourcesAction = () => {
     },
   })
 }
-
-registerCopilotAction("messageSources", useMessageSourcesAction)

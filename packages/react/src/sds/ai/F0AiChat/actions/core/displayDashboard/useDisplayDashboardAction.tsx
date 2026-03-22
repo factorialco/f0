@@ -6,10 +6,6 @@ import type { CanvasContent } from "../../../types"
 import { useAiChat } from "../../../providers/AiChatStateProvider"
 import { AutoOpenCanvas } from "../../../canvas/AutoOpenCanvas"
 import { DashboardCard } from "../../../canvas/entities/dashboard/DashboardCard"
-import { registerCopilotAction } from "../../registry"
-
-// Ensure dashboard entity is registered
-import "../../../canvas/entities/dashboard"
 
 /**
  * Hook to register the displayDashboard copilot action.
@@ -165,5 +161,3 @@ export const useDisplayDashboardAction = () => {
     },
   })
 }
-
-registerCopilotAction("displayDashboard", useDisplayDashboardAction)

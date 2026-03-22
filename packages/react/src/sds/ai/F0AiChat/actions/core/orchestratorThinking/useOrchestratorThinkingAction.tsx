@@ -1,7 +1,6 @@
 import { useCopilotAction } from "@copilotkit/react-core"
 
 import { F0ActionItem } from "../../../../F0ActionItem"
-import { registerCopilotAction } from "../../registry"
 import type { OrchestratorThinkingResult } from "./types"
 
 /**
@@ -34,5 +33,3 @@ export const useOrchestratorThinkingAction = () => {
     },
   })
 }
-
-registerCopilotAction("orchestratorThinking", useOrchestratorThinkingAction)

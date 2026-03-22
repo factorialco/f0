@@ -2,9 +2,6 @@ import { type ReactNode } from "react"
 
 import { getEntityRefRenderer } from "./entityRefRegistry"
 
-// Import entity modules to trigger registration (side-effect)
-import "./entities/person/PersonEntityRef"
-
 /**
  * Extract plain text from a ReactNode tree.
  * Handles strings, numbers, arrays, and fragments.

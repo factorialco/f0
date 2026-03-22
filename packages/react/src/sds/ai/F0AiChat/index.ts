@@ -20,7 +20,7 @@ export type {
 } from "./types"
 
 // Canvas entity registry
-export { registerCanvasEntity, getCanvasEntity } from "./canvas"
+export { getCanvasEntity } from "./canvas"
 export type { CanvasEntityDefinition } from "./canvas"
 
 export { aiTranslations } from "./types"
@@ -44,6 +44,3 @@ export {
   useFormSubmitAction,
   useFormGetStateAction,
 } from "./actions"
-
-// Action registry
-export { registerCopilotAction } from "./actions"

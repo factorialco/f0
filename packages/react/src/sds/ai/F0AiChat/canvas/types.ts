@@ -6,13 +6,13 @@ import type { CanvasContentBase } from "../types"
  * Contract for a canvas entity type.
  *
  * Each entity (dashboard, survey, goal, job-posting…) implements this
- * interface and registers itself via `registerCanvasEntity()`.
+ * interface and is added to the `canvasEntities` record in `registry.ts`.
  *
  * To add a new entity type:
  * 1. Create a folder in `canvas/entities/<your-entity>/`
  * 2. Define a type extending `CanvasContentBase` in `types.ts`
- * 3. Implement `CanvasEntityDefinition` in `index.ts`
- * 4. Import the entity module in `canvas/index.ts`
+ * 3. Implement and export `CanvasEntityDefinition` in `index.tsx`
+ * 4. Add the entity to the record in `canvas/registry.ts`
  */
 export type CanvasEntityDefinition<
   T extends CanvasContentBase = CanvasContentBase,

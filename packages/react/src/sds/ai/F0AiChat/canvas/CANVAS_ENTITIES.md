@@ -7,15 +7,15 @@ The canvas system renders content alongside the AI chat sidebar. Each **entity t
 ```
 canvas/
 ├── types.ts                    # CanvasEntityDefinition contract
-├── registry.ts                 # register/get entity definitions
-├── index.ts                    # Barrel + triggers entity registrations
+├── registry.ts                 # canvasEntities record (type → definition)
+├── index.ts                    # Barrel + re-exports
 ├── CANVAS_ENTITIES.md          # This file
 ├── components/
 │   ├── CanvasCard.tsx          # Shared inline card (module avatar + title + description + Open/Close toggle)
 │   └── CloseCanvasButton.tsx   # Shared close button for canvas headers
 └── entities/
     └── dashboard/              # Example entity
-        ├── index.tsx           # Entity definition + registration (side-effect)
+        ├── index.tsx           # Entity definition (exported)
         ├── DashboardCard.tsx   # Uses CanvasCard + dashboard-specific store logic
         ├── DashboardContent.tsx# Canvas body renderer
         ├── DashboardHeader.tsx # Full header (title + edit actions + close button)
@@ -89,7 +89,7 @@ export type CanvasContent = DashboardCanvasContent | SurveyCanvasContent
 
 ```
 canvas/entities/survey/
-├── index.tsx            # Entity definition + registration
+├── index.tsx            # Entity definition (exported)
 ├── SurveyCard.tsx       # Inline chat card (uses CanvasCard)
 ├── SurveyContent.tsx    # Canvas body
 ├── SurveyHeader.tsx     # Full header (title + actions + close)
@@ -187,11 +187,10 @@ export function SurveyHeader({
 
 If your header and content need to communicate (e.g. edit mode state), create a context provider and register it as the entity's `wrapper`.
 
-### 7. Register the entity
+### 7. Export the entity definition
 
 ```tsx
 // index.tsx
-import { registerCanvasEntity } from "../../registry"
 import type { CanvasEntityDefinition } from "../../types"
 import { SurveyContent } from "./SurveyContent"
 import { SurveyHeader } from "./SurveyHeader"
@@ -208,38 +207,33 @@ export const surveyCanvasEntity: CanvasEntityDefinition<SurveyCanvasContent> = {
   // wrapper: ({ content, children }) => <SurveyProvider ...>{children}</SurveyProvider>,
 }
 
-registerCanvasEntity(surveyCanvasEntity)
-
 export { SurveyCard } from "./SurveyCard"
 export type { SurveyCanvasContent } from "./types"
 ```
 
-### 8. Trigger registration
+### 8. Add to the registry
 
-Add the import in `canvas/index.ts`:
+Import the entity definition in `canvas/registry.ts` and add it to the record:
 
 ```ts
-import "./entities/survey"
+import { surveyCanvasEntity } from "./entities/survey"
+
+const canvasEntities: Record<string, CanvasEntityDefinition<any>> = {
+  dashboard: dashboardCanvasEntity,
+  survey: surveyCanvasEntity,
+}
 ```
 
 ### 9. Create the copilot action
 
 In `actions/core/`, create `displaySurvey/useDisplaySurveyAction.tsx` that:
 
-- Registers the copilot action via `useCopilotAction`
+- Calls `useCopilotAction` with the action definition
 - Renders `SurveyCard` + `AutoOpenCanvas` in the `render` callback
-- Imports the entity module to ensure registration
-- Self-registers via `registerCopilotAction()` at module scope
 
-### 10. Trigger action registration
+Then add the hook to the `copilotActions` array in `actions/registry.ts`.
 
-Import your action module in `actions/index.ts`:
-
-```ts
-import "./core/displaySurvey/useDisplaySurveyAction"
-```
-
-### 11. Write tests
+### 10. Write tests
 
 Create a `__tests__/` folder inside the entity directory with tests for each component:
 
@@ -259,7 +253,7 @@ Use vitest + testing-library. Test rendering, user interactions (open/close togg
 2. **Use `CanvasCard` for cards.** All entity cards share the same visual structure. Only wrap it if you need extra logic (e.g. store subscriptions).
 3. **Entity controls header and content.** Each entity renders its own complete header (title, actions, close button) and content. The shared canvas is a thin shell that only handles animation and scroll area.
 4. **Use `CloseCanvasButton` for close.** Every header should use the shared `CloseCanvasButton` component for a consistent close affordance.
-5. **Registration via side-effect.** Importing the entity module registers it. No switch statements, no config objects.
+5. **Declarative configuration.** Export the entity definition and add it to the record in `registry.ts`. No switch statements, no side-effects.
 6. **New entity = new folder.** Zero changes to `CanvasPanel.tsx` or the shared canvas infrastructure.
 7. **Auto-open on receive.** Use the `AutoOpenCanvas` component in your copilot action's render to open the canvas immediately when the agent produces content.
 8. **Write tests for every entity.** Each entity should have tests in a `__tests__/` subfolder covering rendering and interactions.

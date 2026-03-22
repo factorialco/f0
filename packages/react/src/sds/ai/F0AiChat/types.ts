@@ -5,6 +5,9 @@ import { IconType } from "@/components/F0Icon"
 import { defaultTranslations } from "@/lib/providers/i18n/i18n-provider-defaults"
 
 import type { ChatDashboardConfig } from "./canvas/entities/dashboard/types"
+export type { PersonProfile } from "./components/markdownRenderers/entityRef/entities/person/types"
+export type { EntityResolvers } from "./components/markdownRenderers/entityRef/types"
+import type { EntityResolvers } from "./components/markdownRenderers/entityRef/types"
 
 /**
  * Base shape shared by all canvas content types.
@@ -30,34 +33,6 @@ export type DashboardCanvasContent = CanvasContentBase & {
  * Add new entity types to this union as they are implemented.
  */
 export type CanvasContent = DashboardCanvasContent
-
-/**
- * Profile data for a person entity (employee), resolved asynchronously
- * and displayed in the entity reference hover card.
- */
-export type PersonProfile = {
-  id: string | number
-  firstName: string
-  lastName: string
-  avatarUrl?: string
-  jobTitle?: string
-}
-
-/**
- * Map of async resolver functions keyed by entity type.
- * Each resolver takes an entity ID and returns the profile data
- * needed to render the entity reference hover card.
- *
- * Extensible: add new entity types here as needed (e.g. `team`, `department`).
- */
-export type EntityResolvers = {
-  person?: (id: string) => Promise<PersonProfile>
-  /**
-   * Search for persons by name query. Used by the @mention autocomplete
-   * in the chat input to let users reference specific employees.
-   */
-  searchPersons?: (query: string) => Promise<PersonProfile[]>
-}
 
 /**
  * A tool hint that can be activated to prepend invisible context to the user's

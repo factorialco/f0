@@ -8,7 +8,7 @@ import {
   waitFor,
 } from "@/testing/test-utils"
 
-import type { PersonProfile } from "../../../../../../types"
+import type { PersonProfile } from "../types"
 
 const mockResolver = vi.fn<(id: string) => Promise<PersonProfile>>()
 let mockEntityResolvers: { person?: typeof mockResolver } = {
@@ -19,11 +19,6 @@ vi.mock("../../../../../../providers/AiChatStateProvider", () => ({
   useAiChat: () => ({
     entityResolvers: mockEntityResolvers,
   }),
-}))
-
-// Mock registerEntityRef to prevent side-effect errors
-vi.mock("../../../entityRefRegistry", () => ({
-  registerEntityRef: vi.fn(),
 }))
 
 import { PersonEntityRef } from "../PersonEntityRef"

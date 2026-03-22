@@ -1,19 +1,16 @@
 import type { ComponentType } from "react"
 
+import { PersonEntityRef } from "./entities/person/PersonEntityRef"
+
 export type EntityRefRendererProps = { id: string; label: string }
 export type EntityRefRenderer = ComponentType<EntityRefRendererProps>
 
-const registry = new Map<string, EntityRefRenderer>()
-
-export function registerEntityRef(
-  type: string,
-  renderer: EntityRefRenderer
-): void {
-  registry.set(type, renderer)
+const entityRefRenderers: Record<string, EntityRefRenderer> = {
+  person: PersonEntityRef,
 }
 
 export function getEntityRefRenderer(
   type: string
 ): EntityRefRenderer | undefined {
-  return registry.get(type)
+  return entityRefRenderers[type]
 }

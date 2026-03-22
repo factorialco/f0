@@ -10,18 +10,17 @@ F0AiChat/
 ├── types.ts                         # Public types
 ├── internal-types.ts                # Internal state types
 │
-├── actions/                         # Copilot action system (plugin-based)
-│   ├── registry.ts                  # registerCopilotAction / getRegisteredActions
-│   ├── useRegisteredActions.ts      # Hook that invokes all registered factories
-│   ├── index.ts                     # Barrel with side-effect registrations
+├── actions/                         # Copilot action system (declarative)
+│   ├── registry.ts                  # copilotActions array (all action factories)
+│   ├── useRegisteredActions.ts      # Hook that invokes all configured factories
+│   ├── index.ts                     # Barrel with re-exports
 │   ├── COPILOT_ACTIONS.md           # Guide for action development
-│   ├── core/                        # Built-in actions
-│   └── extensions/                  # Decoupled/optional actions
+│   └── core/                        # Built-in actions
 │
-├── canvas/                          # Canvas entity system (plugin-based)
-│   ├── registry.ts                  # registerCanvasEntity / getCanvasEntity
+├── canvas/                          # Canvas entity system (declarative)
+│   ├── registry.ts                  # canvasEntities record (type → definition)
 │   ├── types.ts                     # CanvasEntityDefinition contract
-│   ├── index.ts                     # Barrel + entity registrations
+│   ├── index.ts                     # Barrel + re-exports
 │   ├── AutoOpenCanvas.tsx           # Auto-opens canvas on mount
 │   ├── CANVAS_ENTITIES.md           # Guide for canvas entities
 │   ├── components/                  # Shared canvas UI (CanvasCard, etc.)
@@ -33,8 +32,8 @@ F0AiChat/
 │   │   ├── index.ts                 # Public exports
 │   │   ├── ENTITY_REFS.md          # Guide for entity refs
 │   │   ├── components/              # Tag renderers (Block, Table, etc.)
-│   │   └── entityRef/               # Entity reference system (plugin-based)
-│   │       ├── entityRefRegistry.ts # registerEntityRef / getEntityRefRenderer
+│   │   └── entityRef/               # Entity reference system (declarative)
+│   │       ├── entityRefRegistry.ts # entityRefRenderers record + getEntityRefRenderer
 │   │       ├── EntityRef.tsx        # Dispatcher (reads registry)
 │   │       └── entities/            # One folder per entity type
 │   │           └── person/
@@ -55,24 +54,23 @@ F0AiChat/
 └── __stories__/                     # Composed component stories
 ```
 
-## Three plugin registries
+## Three declarative registries
 
-F0AiChat uses three registries, all following the same side-effect pattern:
+F0AiChat uses three registries, all following the same declarative configuration pattern:
 
-| Registry        | Location                                           | Registers                           | Lookup used by           |
+| Registry        | Location                                           | Contains                            | Lookup used by           |
 | --------------- | -------------------------------------------------- | ----------------------------------- | ------------------------ |
-| **Actions**     | `actions/registry.ts`                              | Copilot action hooks                | `useRegisteredActions()` |
+| **Actions**     | `actions/registry.ts`                              | Copilot action hook factories       | `useRegisteredActions()` |
 | **Canvas**      | `canvas/registry.ts`                               | Entity definitions (card + content) | `CanvasPanel`            |
 | **Entity refs** | `markdownRenderers/entityRef/entityRefRegistry.ts` | Inline mention renderers            | `EntityRef` dispatcher   |
 
 All three work the same way:
 
-1. A `register*()` function adds to a `Map` at module scope
-2. Each plugin calls `register*()` as a side-effect when imported
-3. A barrel `index.ts` imports all plugins to trigger registration
-4. A consumer reads from the registry at render time
+1. Each plugin exports its definition (hook, entity definition, or component)
+2. The registry file imports all plugins and declares them in a static array/record
+3. A consumer reads from the registry at render time
 
-Registries are populated at module load and never mutate after the first render.
+Registries are static configuration — they never mutate at runtime.
 
 ## Extending each system
 
@@ -81,8 +79,8 @@ Registries are populated at module load and never mutate after the first render.
 See `actions/COPILOT_ACTIONS.md`.
 
 1. Create `actions/core/<name>/use<Name>Action.tsx`
-2. Call `useCopilotAction()` + `registerCopilotAction()` at module scope
-3. Import in `actions/index.ts`
+2. Export the hook
+3. Add it to the `copilotActions` array in `actions/registry.ts`
 
 ### Adding a canvas entity
 
@@ -90,8 +88,8 @@ See `canvas/CANVAS_ENTITIES.md`.
 
 1. Define content type in `types.ts`
 2. Create `canvas/entities/<name>/` with card, content, and header
-3. Register via `registerCanvasEntity()` in the entity's `index.tsx`
-4. Import in `canvas/index.ts`
+3. Export the `CanvasEntityDefinition` from the entity's `index.tsx`
+4. Add it to the `canvasEntities` record in `canvas/registry.ts`
 5. Create a copilot action that renders the entity card
 
 ### Adding an entity ref
@@ -100,8 +98,7 @@ See `markdownRenderers/ENTITY_REFS.md`.
 
 1. Define profile type in `types.ts` + add resolver to `EntityResolvers`
 2. Create `entityRef/entities/<name>/<Name>EntityRef.tsx`
-3. Call `registerEntityRef()` at module scope
-4. Import in `entityRef/EntityRef.tsx`
+3. Add it to the `entityRefRenderers` record in `entityRef/entityRefRegistry.ts`
 
 ### Adding a UI feature
 
@@ -125,6 +122,6 @@ F0AiChatProvider (user-facing)
 ## Conventions
 
 - **Named exports only** — no default exports
-- **Side-effect registration** — actions, entities, and entity refs register themselves when imported
+- **Declarative configuration** — actions, entities, and entity refs are declared in static arrays/records
 - **Tests in `__tests__/`** — co-located within each domain folder
 - **Stories in `__stories__/`** — co-located within each domain folder

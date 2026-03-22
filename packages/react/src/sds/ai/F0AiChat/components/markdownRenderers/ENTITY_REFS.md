@@ -11,13 +11,15 @@ markdownRenderers/
 ├── ENTITY_REFS.md                         # this file
 ├── entityRef/
 │   ├── EntityRef.tsx                      # dispatcher (reads registry)
-│   ├── entityRefRegistry.ts               # register / lookup renderers
+│   ├── entityRefRegistry.ts               # entityRefRenderers record + getEntityRefRenderer
+│   ├── types.ts                           # EntityResolvers (imports from each entity)
 │   ├── __tests__/
 │   │   ├── EntityRef.test.tsx
 │   │   └── entityRefRegistry.test.tsx
 │   └── entities/
 │       └── person/
-│           ├── PersonEntityRef.tsx         # "person" renderer (self-registers)
+│           ├── PersonEntityRef.tsx         # "person" renderer
+│           ├── types.ts                   # PersonProfile type
 │           └── __tests__/
 │               └── PersonEntityRef.test.tsx
 ```
@@ -26,12 +28,20 @@ markdownRenderers/
 
 ### `entityRef/entityRefRegistry.ts`
 
-A simple `Map<string, Component>` exposed via two functions:
+A static `Record<string, Component>` exposed via one function:
 
-| Function                            | Purpose                                 |
-| ----------------------------------- | --------------------------------------- |
-| `registerEntityRef(type, Renderer)` | Called at module scope by each renderer |
-| `getEntityRefRenderer(type)`        | Used by `EntityRef` to dispatch         |
+| Function                     | Purpose                                       |
+| ---------------------------- | --------------------------------------------- |
+| `getEntityRefRenderer(type)` | Used by `EntityRef` to dispatch to a renderer |
+
+To add a new renderer, import the component and add it to the `entityRefRenderers` record.
+
+### `entityRef/types.ts`
+
+Contains `EntityResolvers` — the map of async resolver functions keyed by
+entity type. Each resolver entry imports its profile type from the
+corresponding entity folder, keeping the type ownership co-located with
+the entity that uses it.
 
 ### `entityRef/EntityRef.tsx`
 
@@ -39,16 +49,14 @@ The dispatcher component mounted by rehype-raw when it encounters an
 `<entity-ref>` tag. It extracts the plain-text label from children, looks up
 the renderer in the registry, and renders it — or falls back to a `<span>`.
 
-Side-effect imports at the top of this file ensure all entity modules are
-loaded and registered before the first render.
-
 ## How to add a new entity ref
 
 Use `entityRef/entities/person/` as a reference implementation.
 
 ### Step 1 — Define the profile type
 
-In `F0AiChat/types.ts`, add a profile type for your entity:
+Create `entityRef/entities/team/types.ts` with the profile type for your
+entity. Each entity owns its own types:
 
 ```ts
 export type TeamProfile = {
@@ -59,11 +67,13 @@ export type TeamProfile = {
 }
 ```
 
-### Step 2 — Add the resolver
+### Step 2 — Add the resolver to `entityRef/types.ts`
 
-Extend `EntityResolvers` in `F0AiChat/types.ts`:
+Import your profile type and extend `EntityResolvers`:
 
 ```ts
+import { TeamProfile } from "./entities/team/types"
+
 export type EntityResolvers = {
   person?: (id: string) => Promise<PersonProfile>
   team?: (id: string) => Promise<TeamProfile>
@@ -71,45 +81,37 @@ export type EntityResolvers = {
 }
 ```
 
-### Step 3 — Create the entity folder and renderer
+### Step 3 — Create the renderer
 
 Create `entityRef/entities/team/TeamEntityRef.tsx`:
 
 ```tsx
-import { registerEntityRef } from "../../entityRefRegistry"
 import type { EntityRefRendererProps } from "../../entityRefRegistry"
 
 export function TeamEntityRef({ id, label }: EntityRefRendererProps) {
   // Fetch and render team data — see PersonEntityRef for the full pattern
   // (useAiChat → entityResolvers.team, cache, hover card, etc.)
 }
-
-registerEntityRef("team", TeamEntityRef)
 ```
 
 The component receives `{ id, label }` and is responsible for its own data
 fetching, caching, and presentation.
 
-### Step 4 — Self-register
+### Step 4 — Add to the registry
 
-The `registerEntityRef("team", TeamEntityRef)` call at module scope (see
-above) is all you need. No switch statements to update.
-
-### Step 5 — Trigger registration
-
-Add a side-effect import in `entityRef/EntityRef.tsx`:
+Import the component in `entityRef/entityRefRegistry.ts` and add it to the
+`entityRefRenderers` record:
 
 ```ts
-import "./entities/team/TeamEntityRef"
+import { TeamEntityRef } from "./entities/team/TeamEntityRef"
+
+const entityRefRenderers: Record<string, EntityRefRenderer> = {
+  person: PersonEntityRef,
+  team: TeamEntityRef,
+}
 ```
 
-This import ensures the module executes and the renderer is registered
-before the first render. Both `AssistantMessage` and `UserMessage` render
-entity refs through the shared `<Markdown>` component with
-`markdownRenderers`, so a single registration point in `EntityRef.tsx`
-is sufficient.
-
-### Step 6 — Write tests
+### Step 5 — Write tests
 
 Create `entityRef/entities/team/__tests__/TeamEntityRef.test.tsx` covering:
 
@@ -120,11 +122,14 @@ Create `entityRef/entities/team/__tests__/TeamEntityRef.test.tsx` covering:
 
 ## Key principles
 
-1. **Side-effect registration** — each renderer registers itself at module
-   scope. The dispatcher never needs to know about specific types.
-2. **Fallback to plain text** — unknown or unregistered types render
+1. **Declarative configuration** — each renderer is added to the
+   `entityRefRenderers` record in `entityRefRegistry.ts`. No side-effects.
+2. **Co-located types** — each entity defines its own profile type in
+   `entities/<name>/types.ts`. `EntityResolvers` in `entityRef/types.ts`
+   imports from each entity to build the resolver map.
+3. **Fallback to plain text** — unknown or unregistered types render
    children as a `<span>`, so the chat never breaks.
-3. **Lazy data fetching** — profile data is fetched on hover, not on mount,
+4. **Lazy data fetching** — profile data is fetched on hover, not on mount,
    to keep the initial render fast.
-4. **Use PersonEntityRef as reference** — it demonstrates the full pattern:
+5. **Use PersonEntityRef as reference** — it demonstrates the full pattern:
    resolver lookup, caching, loading/error states, and hover card UI.

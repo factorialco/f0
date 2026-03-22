@@ -1,13 +1,11 @@
-import { getRegisteredActions } from "./registry"
+import { copilotActions } from "./registry"
 
 /**
- * Hook that invokes every registered copilot action factory.
- * Replaces the monolithic useDefaultCopilotActions — new actions
- * only need to call registerCopilotAction() at import time.
+ * Hook that invokes every configured copilot action factory.
+ * Actions are declared in the `copilotActions` array in `registry.ts`.
  */
 export function useRegisteredActions(): void {
-  const factories = getRegisteredActions()
-  for (const factory of factories) {
+  for (const factory of copilotActions) {
     factory()
   }
 }

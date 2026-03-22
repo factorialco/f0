@@ -7,8 +7,7 @@ import { cn, focusRing } from "@/lib/utils"
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/ui/hover-card"
 
 import { useAiChat } from "../../../../../providers/AiChatStateProvider"
-import { type PersonProfile } from "../../../../../types"
-import { registerEntityRef } from "../../entityRefRegistry"
+import type { PersonProfile } from "./types"
 
 /**
  * Inline person entity reference with a hover card showing profile details.
@@ -51,7 +50,7 @@ export function PersonEntityRef({ id, label }: { id: string; label: string }) {
     setIsLoading(true)
     setHasError(false)
     resolver(id)
-      .then((data) => {
+      .then((data: PersonProfile) => {
         cacheRef.current.set(id, data)
         if (mountedRef.current) setProfile(data)
       })
@@ -166,5 +165,3 @@ function PersonEntityRefContent({
     </>
   )
 }
-
-registerEntityRef("person", PersonEntityRef)

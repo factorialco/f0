@@ -2,7 +2,6 @@ import { useCopilotAction } from "@copilotkit/react-core"
 
 import { DataDownload } from "./DataDownload"
 import { DataDownloadProps } from "./types"
-import { registerCopilotAction } from "../../registry"
 
 /**
  * Hook to register the data download copilot action.
@@ -89,5 +88,3 @@ export const useDataDownloadAction = () => {
     },
   })
 }
-
-registerCopilotAction("dataDownload", useDataDownloadAction)

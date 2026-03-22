@@ -1,5 +1,4 @@
 import type { CanvasEntityDefinition } from "../../types"
-import { registerCanvasEntity } from "../../registry"
 
 import { DashboardContent } from "./DashboardContent"
 import { DashboardCanvasProvider } from "./DashboardContext"
@@ -21,8 +20,6 @@ export const dashboardCanvasEntity: CanvasEntityDefinition<DashboardCanvasConten
       </DashboardCanvasProvider>
     ),
   }
-
-registerCanvasEntity(dashboardCanvasEntity)
 
 export type { DashboardCanvasContent } from "../../../types"
 export { savedDashboardConfigStore } from "./configStore"

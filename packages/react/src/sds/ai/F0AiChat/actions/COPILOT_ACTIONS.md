@@ -21,38 +21,37 @@ Inline chat UI (React component)
 
 ## Architecture
 
-### Registry pattern
+### Declarative registry
 
-Actions use a **side-effect registration** pattern. Each action module calls `registerCopilotAction()` at import time, adding its factory (a React hook) to a global `Map`. At render time, `useRegisteredActions()` iterates the map and calls every factory.
+Actions are declared in a static array in `registry.ts`. Each entry is a React hook factory. At render time, `useRegisteredActions()` iterates the array and calls every factory.
 
 ```
-┌─────────────────┐  import-time   ┌──────────┐
-│ useMyAction.tsx  │ ─────────────▶ │ registry │
-│ (side-effect)   │ registerCopilot│ (Map)    │
-└─────────────────┘ Action(name,fn)└──────────┘
-                                        │
-                                        ▼
-                                useRegisteredActions()
-                                iterates & calls all hooks
+┌─────────────────┐                 ┌────────────┐
+│ useMyAction.tsx  │  ── import ──▶  │ registry   │
+│ (exports hook)  │                 │ (array)    │
+└─────────────────┘                 └────────────┘
+                                         │
+                                         ▼
+                                 useRegisteredActions()
+                                 iterates & calls all hooks
 ```
 
 ### Key files
 
-| File                      | Purpose                                              |
-| ------------------------- | ---------------------------------------------------- |
-| `registry.ts`             | `registerCopilotAction()` / `getRegisteredActions()` |
-| `useRegisteredActions.ts` | Hook that invokes all registered factories           |
-| `index.ts`                | Barrel with side-effect imports + re-exports         |
+| File                      | Purpose                                       |
+| ------------------------- | --------------------------------------------- |
+| `registry.ts`             | `copilotActions` array (all action factories) |
+| `useRegisteredActions.ts` | Hook that invokes all configured factories    |
+| `index.ts`                | Barrel with re-exports                        |
 
 ### Factory = hook
 
-Each registered factory is a React hook (starts with `use`). It calls `useCopilotAction()` from CopilotKit internally. The hook is called unconditionally on every render to satisfy Rules of Hooks.
+Each entry in the array is a React hook (starts with `use`). It calls `useCopilotAction()` from CopilotKit internally. The hook is called unconditionally on every render to satisfy Rules of Hooks.
 
 ## Action anatomy
 
 ```tsx
 import { useCopilotAction } from "@copilotkit/react-core"
-import { registerCopilotAction } from "../../registry"
 
 export const useMyAction = () => {
   useCopilotAction({
@@ -75,9 +74,6 @@ export const useMyAction = () => {
     },
   })
 }
-
-// Self-register at import time
-registerCopilotAction("myAction", useMyAction)
 ```
 
 ## Step-by-step: create a new action
@@ -86,7 +82,7 @@ registerCopilotAction("myAction", useMyAction)
 
 ```
 actions/core/myAction/
-├── useMyAction.tsx        # Hook with useCopilotAction + registration
+├── useMyAction.tsx        # Hook with useCopilotAction
 ├── MyComponent.tsx        # Render component (optional, can inline)
 ├── types.ts               # Action-specific types
 └── __stories__/
@@ -128,7 +124,6 @@ export function MyComponent({ title, items }: MyActionProps) {
 ```tsx
 // actions/core/myAction/useMyAction.tsx
 import { useCopilotAction } from "@copilotkit/react-core"
-import { registerCopilotAction } from "../../registry"
 import { MyComponent } from "./MyComponent"
 import { MyActionProps } from "./types"
 
@@ -147,16 +142,19 @@ export const useMyAction = () => {
     },
   })
 }
-
-registerCopilotAction("myAction", useMyAction)
 ```
 
-### 5. Register in the barrel
+### 5. Add to the registry
 
-Add one import to `actions/index.ts`:
+Import your hook in `actions/registry.ts` and add it to the `copilotActions` array:
 
 ```ts
-import "./core/myAction/useMyAction"
+import { useMyAction } from "./core/myAction/useMyAction"
+
+export const copilotActions: ActionFactory[] = [
+  // ... existing actions
+  useMyAction,
+]
 ```
 
 That's it. The action will automatically be invoked by `useRegisteredActions()`.
@@ -221,20 +219,6 @@ render: (props) => {
 
 `AutoOpenCanvas` auto-opens the canvas once on mount (skipped on small screens). The `CanvasCard` stays in the chat for manual re-opening.
 
-## Extension actions
-
-For actions from external packages (e.g. UpsellingKit), create a thin wrapper in `actions/extensions/`:
-
-```ts
-// actions/extensions/myExtension.ts
-import { useSomeAction } from "../../../../SomePackage/useSomeAction"
-import { registerCopilotAction } from "../registry"
-
-registerCopilotAction("someAction", useSomeAction)
-```
-
-Then import it in `actions/index.ts`. The hook implementation lives in the external package.
-
 ## Testing
 
 - Stories live in `__stories__/` co-located with the action
@@ -250,4 +234,3 @@ Then import it in `actions/index.ts`. The hook implementation lives in the exter
 | Render with streaming guard | `dataDownload`         | `useDataDownloadAction.tsx`         |
 | Canvas + inline card        | `displayDashboard`     | `useDisplayDashboardAction.tsx`     |
 | Non-blocking status         | `orchestratorThinking` | `useOrchestratorThinkingAction.tsx` |
-| Extension (external hook)   | `upselling`            | `extensions/upselling.ts`           |

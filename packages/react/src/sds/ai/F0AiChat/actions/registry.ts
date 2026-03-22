@@ -1,23 +1,23 @@
+import { useOrchestratorThinkingAction } from "./core/orchestratorThinking/useOrchestratorThinkingAction"
+import { useMessageSourcesAction } from "./core/messageSources/useMessageSourcesAction"
+import { useDataDownloadAction } from "./core/dataDownload/useDataDownloadAction"
+import { useDisplayDashboardAction } from "./core/displayDashboard/useDisplayDashboardAction"
+import { useBookAMeetingCardAction } from "../../../UpsellingKit/ai/F0BookAMeetingCard/useBookAMeetingCardAction"
+import { useDemoCardAction } from "../../../UpsellingKit/ai/F0DemoCard/useDemoCardAction"
+import { useFAQCardAction } from "../../../UpsellingKit/ai/F0FAQCard/useFAQCardAction"
+import { useModuleCardAction } from "../../../UpsellingKit/ai/F0ModuleCard/useModuleCardAction"
+import { useQuestionCardAction } from "../../../UpsellingKit/ai/F0QuestionCard/useQuestionCardAction"
+
 type ActionFactory = () => void
 
-const actionFactories = new Map<string, ActionFactory>()
-
-/**
- * Register a copilot action factory.
- * Called as a side-effect when each action module is imported.
- */
-export function registerCopilotAction(
-  name: string,
-  factory: ActionFactory
-): void {
-  actionFactories.set(name, factory)
-}
-
-/**
- * Return all registered action factories.
- * The Map is populated at import-time and never mutates after first render,
- * so the iteration order is stable across renders (Rules of Hooks safe).
- */
-export function getRegisteredActions(): ActionFactory[] {
-  return Array.from(actionFactories.values())
-}
+export const copilotActions: ActionFactory[] = [
+  useOrchestratorThinkingAction,
+  useMessageSourcesAction,
+  useDataDownloadAction,
+  useDisplayDashboardAction,
+  useDemoCardAction,
+  useBookAMeetingCardAction,
+  useQuestionCardAction,
+  useModuleCardAction,
+  useFAQCardAction,
+]

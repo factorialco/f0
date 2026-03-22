@@ -13,13 +13,7 @@
   ],
   "type": "module",
   "sideEffects": [
-    "**/*.css",
-    "**/F0AiChat/actions/index.ts",
-    "**/F0AiChat/actions/core/**/use*.tsx",
-    "**/F0AiChat/actions/extensions/*.ts",
-    "**/F0AiChat/canvas/index.ts",
-    "**/F0AiChat/canvas/entities/**/index.tsx",
-    "**/F0AiChat/components/markdownRenderers/entityRef/entities/**/*.tsx"
+    "**/*.css"
   ],
   "main": "dist/f0.js",
   "typings": "dist/f0.d.ts",

@@ -5,27 +5,12 @@ import { zeroRender as render, screen } from "@/testing/test-utils"
 
 // Mock the registry so we control which renderers are available
 vi.mock("../entityRefRegistry", () => {
-  const renderers = new Map<
-    string,
-    React.ComponentType<{ id: string; label: string }>
-  >()
   return {
-    registerEntityRef: vi.fn(
-      (
-        type: string,
-        renderer: React.ComponentType<{ id: string; label: string }>
-      ) => {
-        renderers.set(type, renderer)
-      }
-    ),
-    getEntityRefRenderer: vi.fn((type: string) => renderers.get(type)),
+    getEntityRefRenderer: vi.fn(),
   }
 })
 
-// Mock PersonEntityRef to prevent its side-effect import from hitting real providers
-vi.mock("../entities/person/PersonEntityRef", () => ({}))
-
-import { registerEntityRef, getEntityRefRenderer } from "../entityRefRegistry"
+import { getEntityRefRenderer } from "../entityRefRegistry"
 import { EntityRef, extractText } from "../EntityRef"
 
 describe("EntityRef", () => {
@@ -34,9 +19,6 @@ describe("EntityRef", () => {
     // Register a mock renderer for "person"
     const MockPerson = ({ id, label }: { id: string; label: string }) => (
       <span data-testid="mock-person">{`${label} (${id})`}</span>
-    )
-    ;(registerEntityRef as ReturnType<typeof vi.fn>).mockImplementation(
-      () => {}
     )
     ;(getEntityRefRenderer as ReturnType<typeof vi.fn>).mockImplementation(
       (type: string) => {
