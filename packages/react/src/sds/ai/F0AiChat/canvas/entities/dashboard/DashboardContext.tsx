@@ -10,12 +10,12 @@ import {
 
 import type { DashboardItemLayout } from "@/components/F0AnalyticsDashboard/types"
 
-import type { ChatDashboardConfig } from "../../../../F0ChatDashboard/types"
-import { useSaveDashboardConfig } from "../../../../F0ChatDashboard/useSaveDashboardConfig"
+import type { ChatDashboardConfig } from "./types"
+import { useSaveDashboardConfig } from "./useSaveDashboardConfig"
 import { useAiChat } from "../../../providers/AiChatStateProvider"
 
 import { savedDashboardConfigStore } from "./configStore"
-import type { DashboardCanvasContent } from "./types"
+import type { DashboardCanvasContent } from "../../../types"
 
 type DashboardCanvasContextValue = {
   editMode: boolean

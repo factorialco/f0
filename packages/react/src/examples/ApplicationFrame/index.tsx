@@ -23,7 +23,7 @@ import {
   F0AiChatProvider,
   AiChatProviderProps,
 } from "@/sds/ai/F0AiChat"
-import { CanvasPanel } from "@/sds/ai/F0AiChat/components/CanvasPanel"
+import { CanvasPanel } from "@/sds/ai/F0AiChat/components/layout/CanvasPanel"
 import { DEFAULT_CHAT_WIDTH } from "@/sds/ai/F0AiChat/constants"
 import { useAiChat } from "@/sds/ai/F0AiChat/providers/AiChatStateProvider"
 

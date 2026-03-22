@@ -1,0 +1,26 @@
+// Side-effect imports: each module registers its action factory at import time
+import "./core/orchestratorThinking/useOrchestratorThinkingAction"
+import "./core/messageSources/useMessageSourcesAction"
+import "./core/dataDownload/useDataDownloadAction"
+import "./core/displayDashboard/useDisplayDashboardAction"
+import "./core/forms/useF0AiFormActions"
+import "./extensions/upselling"
+
+// Registry
+export { registerCopilotAction } from "./registry"
+export { useRegisteredActions } from "./useRegisteredActions"
+
+// Backward compat
+export { useRegisteredActions as useDefaultCopilotActions } from "./useRegisteredActions"
+
+// Individual action hooks (for external consumers)
+export { useOrchestratorThinkingAction } from "./core/orchestratorThinking/useOrchestratorThinkingAction"
+export { useMessageSourcesAction } from "./core/messageSources/useMessageSourcesAction"
+export { useDataDownloadAction } from "./core/dataDownload/useDataDownloadAction"
+export { useDisplayDashboardAction } from "./core/displayDashboard/useDisplayDashboardAction"
+
+// Form AI tools
+export { useF0AiFormActions } from "./core/forms/useF0AiFormActions"
+export { useFormFillAction } from "./core/forms/useFormFillAction"
+export { useFormSubmitAction } from "./core/forms/useFormSubmitAction"
+export { useFormGetStateAction } from "./core/forms/useFormGetStateAction"

@@ -4,7 +4,7 @@ import { registerCanvasEntity } from "../../registry"
 import { DashboardActions } from "./DashboardActions"
 import { DashboardContent } from "./DashboardContent"
 import { DashboardCanvasProvider } from "./DashboardContext"
-import type { DashboardCanvasContent } from "./types"
+import type { DashboardCanvasContent } from "../../../types"
 
 export const dashboardCanvasEntity: CanvasEntityDefinition<DashboardCanvasContent> =
   {
@@ -22,7 +22,7 @@ export const dashboardCanvasEntity: CanvasEntityDefinition<DashboardCanvasConten
 
 registerCanvasEntity(dashboardCanvasEntity)
 
-export type { DashboardCanvasContent } from "./types"
+export type { DashboardCanvasContent } from "../../../types"
 export { savedDashboardConfigStore } from "./configStore"
 export { DashboardCard } from "./DashboardCard"
 export type { DashboardCardProps } from "./DashboardCard"

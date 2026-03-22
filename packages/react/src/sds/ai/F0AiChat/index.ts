@@ -3,11 +3,13 @@ export { F0AiChat, F0AiChatProvider, F0AiFullscreenChat } from "./F0AiChat"
 
 // Types
 export type {
+  AiChatCredits,
   AiChatMode,
   AiChatProviderProps,
   AiChatToolHint,
   CanvasContent,
   CanvasContentBase,
+  CreditsUsage,
   DashboardCanvasContent,
   EntityResolvers,
   PersonProfile,
@@ -41,4 +43,7 @@ export {
   useFormFillAction,
   useFormSubmitAction,
   useFormGetStateAction,
-} from "./copilotActions"
+} from "./actions"
+
+// Action registry
+export { registerCopilotAction } from "./actions"

@@ -4,7 +4,7 @@ import { type AIMessage, type Message } from "@copilotkit/shared"
 import { IconType } from "@/components/F0Icon"
 import { defaultTranslations } from "@/lib/providers/i18n/i18n-provider-defaults"
 
-import type { ChatDashboardConfig } from "../F0ChatDashboard/types"
+import type { ChatDashboardConfig } from "./canvas/entities/dashboard/types"
 
 /**
  * Base shape shared by all canvas content types.

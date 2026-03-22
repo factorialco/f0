@@ -23,7 +23,7 @@ canvas/
         └── types.ts            # DashboardCanvasContent type
 ```
 
-The `CanvasPanel.tsx` lives in `F0AiChat/components/` and is the generic shell (animation, title, close button). It delegates to the entity definition looked up from the registry.
+The `CanvasPanel.tsx` lives in `F0AiChat/components/layout/` and is the generic shell (animation, title, close button). It delegates to the entity definition looked up from the registry.
 
 ## Shared components
 
@@ -173,15 +173,20 @@ import "./entities/survey"
 
 ### 9. Create the copilot action
 
-In `copilotActions/`, create `useDisplaySurveyAction.tsx` that:
+In `actions/core/`, create `displaySurvey/useDisplaySurveyAction.tsx` that:
 
 - Registers the copilot action via `useCopilotAction`
 - Renders `SurveyCard` + `AutoOpenCanvas` in the `render` callback
 - Imports the entity module to ensure registration
+- Self-registers via `registerCopilotAction()` at module scope
 
-### 10. Add to default actions
+### 10. Trigger action registration
 
-Import your action in `useDefaultCopilotActions.ts`.
+Import your action module in `actions/index.ts`:
+
+```ts
+import "./core/displaySurvey/useDisplaySurveyAction"
+```
 
 ## Key principles
 

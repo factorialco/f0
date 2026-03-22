@@ -2,7 +2,7 @@ import { useSyncExternalStore } from "react"
 
 import { useI18n } from "@/lib/providers/i18n"
 
-import type { ChatDashboardConfig } from "../../../../F0ChatDashboard/types"
+import type { ChatDashboardConfig } from "./types"
 
 import { CanvasCard } from "../../components/CanvasCard"
 import { savedDashboardConfigStore } from "./configStore"
