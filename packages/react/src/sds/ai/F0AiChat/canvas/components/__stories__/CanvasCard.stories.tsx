@@ -28,6 +28,19 @@ export const Default: Story = {
     title: "Headcount Overview",
     description: "Employee distribution by department",
     onOpen: fn(),
+    onClose: fn(),
+    isActive: false,
+  },
+}
+
+export const Active: Story = {
+  args: {
+    module: "analytics",
+    title: "Headcount Overview",
+    description: "Employee distribution by department",
+    onOpen: fn(),
+    onClose: fn(),
+    isActive: true,
   },
 }
 
@@ -39,6 +52,8 @@ export const LongTitle: Story = {
     description:
       "A comprehensive view of team performance across all departments for Q1 2026",
     onOpen: fn(),
+    onClose: fn(),
+    isActive: false,
   },
 }
 
@@ -48,5 +63,7 @@ export const DifferentModule: Story = {
     title: "Employee Satisfaction Survey",
     description: "Results from the latest pulse survey",
     onOpen: fn(),
+    onClose: fn(),
+    isActive: false,
   },
 }

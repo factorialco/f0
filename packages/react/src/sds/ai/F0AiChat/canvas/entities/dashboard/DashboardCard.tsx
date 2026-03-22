@@ -6,6 +6,7 @@ import type { ChatDashboardConfig } from "./types"
 
 import { CanvasCard } from "../../components/CanvasCard"
 import { savedDashboardConfigStore } from "./configStore"
+import { useAiChat } from "../../../providers/AiChatStateProvider"
 
 export type DashboardCardProps = {
   /** The original dashboard config from the agent */
@@ -32,10 +33,16 @@ export function DashboardCard({
   )
 
   const translations = useI18n()
+  const { canvasContent, closeCanvas } = useAiChat()
 
   const config =
     (toolCallId ? savedDashboardConfigStore.get(toolCallId) : undefined) ??
     originalConfig
+
+  const isActive =
+    canvasContent?.type === "dashboard" &&
+    canvasContent.toolCallId != null &&
+    canvasContent.toolCallId === toolCallId
 
   return (
     <CanvasCard
@@ -43,6 +50,8 @@ export function DashboardCard({
       title={config.title}
       description={translations.ai.reportCard.reportLabel}
       onOpen={() => onView(config)}
+      onClose={() => closeCanvas()}
+      isActive={isActive}
     />
   )
 }

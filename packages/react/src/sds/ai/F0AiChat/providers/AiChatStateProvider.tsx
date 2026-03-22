@@ -16,7 +16,7 @@ import {
 
 import { useI18n } from "@/lib/providers/i18n"
 
-import { DEFAULT_CHAT_WIDTH } from "../constants"
+import { DEFAULT_CHAT_WIDTH } from "../utils/constants"
 import { AiChatProviderReturnValue, AiChatState } from "../internal-types"
 import {
   type AiChatMode,

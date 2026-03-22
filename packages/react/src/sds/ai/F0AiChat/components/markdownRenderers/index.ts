@@ -1,11 +1,8 @@
-export {
-  f0MarkdownRenderers,
-  f0MarkdownRenderersSimple,
-} from "./F0MarkdownRenderers"
+export { markdownRenderers, markdownRenderersSimple } from "./MarkdownRenderers"
 
 // Export individual components for customization
 export { Blockquote, Hr, Pre } from "./components/Block"
-export { EntityRef } from "./components/EntityRef"
+export { EntityRef } from "./entityRef/EntityRef"
 export { Image } from "./components/Image"
 export { A } from "./components/Link"
 export { Li, Ol, Ul } from "./components/Lists"

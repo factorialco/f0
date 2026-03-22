@@ -9,7 +9,7 @@ import { Table, Td, Th } from "../components/Table"
 import { Em, H1, H2, H3, P, Strong } from "../components/Typography"
 
 const meta: Meta = {
-  title: "AI/F0MarkdownRenderers",
+  title: "AI/MarkdownRenderers",
   parameters: {
     layout: "padded",
   },

@@ -1,7 +1,7 @@
 import { motion } from "motion/react"
-import { useState } from "react"
+import { useState, ReactNode } from "react"
 
-import { F0Icon } from "@/components/F0Icon"
+import { F0Icon, IconType } from "@/components/F0Icon"
 import ChevronRight from "@/icons/app/ChevronRight"
 import { useReducedMotion } from "@/lib/a11y"
 import {
@@ -10,13 +10,26 @@ import {
   CollapsibleTrigger,
 } from "@/ui/collapsible"
 
-import { F0AiCollapsibleMessageProps } from "./types"
+interface AiCollapsibleMessageProps {
+  /**
+   * Icon to display in the collapsible trigger
+   */
+  icon: IconType
+  /**
+   * Title text for the collapsible trigger
+   */
+  title: string
+  /**
+   * Content to show when expanded
+   */
+  children: ReactNode
+}
 
-export const F0AiCollapsibleMessage = ({
+export const AiCollapsibleMessage = ({
   icon,
   title,
   children,
-}: F0AiCollapsibleMessageProps) => {
+}: AiCollapsibleMessageProps) => {
   const [isExpanded, setIsExpanded] = useState(false)
   const shouldReduceMotion = useReducedMotion()
 

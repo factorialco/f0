@@ -2,15 +2,38 @@ import type { ReactNode } from "react"
 import { useEffect, useRef, useState } from "react"
 
 import { F0Button } from "@/components/F0Button"
+import { OneEllipsis } from "@/components/OneEllipsis"
 import { Pencil } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 
+import { CloseCanvasButton } from "../../components/CloseCanvasButton"
 import { useDashboardCanvas } from "./DashboardContext"
 
 /** Hide edit controls when the parent container is narrower than this. */
 const NARROW_THRESHOLD = 600
 
-export function DashboardActions(): ReactNode {
+export function DashboardHeader({
+  title,
+  onClose,
+}: {
+  title: string
+  onClose: () => void
+}) {
+  return (
+    <div className="flex shrink-0 items-center gap-2 border-0 border-b border-solid border-f1-border-secondary px-7 py-5">
+      <OneEllipsis
+        tag="h2"
+        className="min-w-0 flex-1 text-2xl font-semibold text-f1-foreground"
+      >
+        {title}
+      </OneEllipsis>
+      <DashboardActions />
+      <CloseCanvasButton onClick={onClose} />
+    </div>
+  )
+}
+
+function DashboardActions(): ReactNode {
   const { editMode, setEditMode, handleSave, handleDiscard } =
     useDashboardCanvas()
   const translations = useI18n()

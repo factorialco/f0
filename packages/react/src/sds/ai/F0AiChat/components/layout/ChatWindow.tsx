@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from "motion/react"
 import { useCallback, useMemo, useState } from "react"
 import { useMediaQuery } from "usehooks-ts"
 
-import { MAX_CHAT_WIDTH, MIN_CHAT_WIDTH } from "../../constants"
+import { MAX_CHAT_WIDTH, MIN_CHAT_WIDTH } from "../../utils/constants"
 import { useAiChat } from "../../providers/AiChatStateProvider"
 import { ResizeHandle } from "./ResizeHandle"
 

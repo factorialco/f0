@@ -6,7 +6,7 @@ import { F0ButtonDropdown } from "@/components/F0ButtonDropdown"
 import Download from "@/icons/app/Download"
 import { useI18n } from "@/lib/providers/i18n"
 
-import { f0MarkdownRenderersSimple } from "../../../../F0MarkdownRenderers"
+import { markdownRenderersSimple } from "../../../components/markdownRenderers"
 import { DataDownloadDataset, DataDownloadProps } from "./types"
 
 /**
@@ -113,7 +113,7 @@ export const DataDownload = ({
     <div className="flex flex-col gap-2 pb-2">
       {markdown && (
         <div className="w-fit max-w-full [&>div]:flex [&>div]:flex-col [&>div]:gap-1">
-          <Markdown content={markdown} components={f0MarkdownRenderersSimple} />
+          <Markdown content={markdown} components={markdownRenderersSimple} />
         </div>
       )}
       {showPreviewNote && (

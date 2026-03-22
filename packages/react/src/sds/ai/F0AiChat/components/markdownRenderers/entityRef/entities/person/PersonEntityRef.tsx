@@ -6,8 +6,9 @@ import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/ui/hover-card"
 
-import { useAiChat } from "../../F0AiChat/providers/AiChatStateProvider"
-import { type PersonProfile } from "../../F0AiChat/types"
+import { useAiChat } from "../../../../../providers/AiChatStateProvider"
+import { type PersonProfile } from "../../../../../types"
+import { registerEntityRef } from "../../entityRefRegistry"
 
 /**
  * Inline person entity reference with a hover card showing profile details.
@@ -165,3 +166,5 @@ function PersonEntityRefContent({
     </>
   )
 }
+
+registerEntityRef("person", PersonEntityRef)

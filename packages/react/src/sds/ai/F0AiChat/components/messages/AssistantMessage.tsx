@@ -4,7 +4,7 @@ import { useEffect } from "react"
 import { useI18n } from "@/lib/providers/i18n"
 
 import { F0ActionItem } from "../../../F0ActionItem"
-import { f0MarkdownRenderers } from "../../../F0MarkdownRenderers"
+import { markdownRenderers } from "../markdownRenderers"
 import { useAiChat } from "../../providers/AiChatStateProvider"
 
 export const AssistantMessage = ({
@@ -50,7 +50,7 @@ export const AssistantMessage = ({
         <div className="w-fit max-w-full [&>div]:flex [&>div]:flex-col [&>div]:gap-1">
           <Markdown
             content={content}
-            components={{ ...f0MarkdownRenderers, ...markdownTagRenderers }}
+            components={{ ...markdownRenderers, ...markdownTagRenderers }}
           />
         </div>
       )}

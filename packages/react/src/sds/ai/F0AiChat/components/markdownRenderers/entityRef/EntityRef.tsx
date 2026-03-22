@@ -1,12 +1,15 @@
 import { type ReactNode } from "react"
 
-import { PersonEntityRef } from "./PersonEntityRef"
+import { getEntityRefRenderer } from "./entityRefRegistry"
+
+// Import entity modules to trigger registration (side-effect)
+import "./entities/person/PersonEntityRef"
 
 /**
  * Extract plain text from a ReactNode tree.
  * Handles strings, numbers, arrays, and fragments.
  */
-function extractText(node: ReactNode): string {
+export function extractText(node: ReactNode): string {
   if (typeof node === "string") return node
   if (typeof node === "number") return String(node)
   if (Array.isArray(node)) return node.map(extractText).join("")
@@ -20,7 +23,7 @@ function extractText(node: ReactNode): string {
  * Generic entity reference renderer for custom `<entity-ref>` HTML tags
  * embedded in AI chat markdown output.
  *
- * Dispatches to type-specific renderers based on the `type` attribute.
+ * Dispatches to type-specific renderers via the entity ref registry.
  * Falls back to rendering children as plain text for unknown types.
  *
  * Usage in markdown (via rehype-raw):
@@ -35,16 +38,16 @@ export function EntityRef({
   id?: string
   children?: ReactNode
 }) {
-  if (!id) {
+  if (!id || !type) {
     return <span>{children}</span>
   }
 
   const label = extractText(children)
+  const Renderer = getEntityRefRenderer(type)
 
-  switch (type) {
-    case "person":
-      return <PersonEntityRef id={id} label={label} />
-    default:
-      return <span>{children}</span>
+  if (!Renderer) {
+    return <span>{children}</span>
   }
+
+  return <Renderer id={id} label={label} />
 }

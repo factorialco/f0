@@ -1,11 +1,7 @@
 import { AnimatePresence, motion } from "motion/react"
 import { type ReactNode, useEffect, useRef, useState } from "react"
 
-import { F0Button } from "@/components/F0Button"
-import { OneEllipsis } from "@/components/OneEllipsis"
-import { Cross } from "@/icons/app"
 import { useReducedMotion } from "@/lib/a11y"
-import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
 import { getCanvasEntity } from "../../canvas"
@@ -20,7 +16,6 @@ import { useAiChat } from "../../providers/AiChatStateProvider"
  */
 export function CanvasPanel(): ReactNode {
   const { canvasContent, closeCanvas } = useAiChat()
-  const translations = useI18n()
   const shouldReduceMotion = useReducedMotion()
   const [refreshKey, setRefreshKey] = useState(0)
 
@@ -42,7 +37,10 @@ export function CanvasPanel(): ReactNode {
   const renderInner = (): ReactNode => {
     if (!canvasContent || !entity) return null
 
-    const headerActions = entity.renderHeaderActions({ content: canvasContent })
+    const header = entity.renderHeader({
+      content: canvasContent,
+      onClose: closeCanvas,
+    })
     const content = entity.renderContent({
       content: canvasContent,
       refreshKey,
@@ -50,26 +48,7 @@ export function CanvasPanel(): ReactNode {
 
     const inner = (
       <>
-        {/* Header */}
-        <div className="flex shrink-0 items-center gap-2 border-0 border-b border-solid border-f1-border-secondary px-7 py-5">
-          <OneEllipsis
-            tag="h2"
-            className="min-w-0 flex-1 text-2xl font-semibold text-f1-foreground"
-          >
-            {canvasContent.title}
-          </OneEllipsis>
-          {headerActions}
-          <F0Button
-            variant="ghost"
-            icon={Cross}
-            size="md"
-            hideLabel
-            onClick={() => closeCanvas()}
-            label={translations.ai.closeDashboard}
-          />
-        </div>
-
-        {/* Content */}
+        {header}
         <div className="relative flex-1 overflow-auto p-5">{content}</div>
       </>
     )

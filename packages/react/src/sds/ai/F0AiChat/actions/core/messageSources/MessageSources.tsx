@@ -4,8 +4,8 @@ import { ExternalLink, Search } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { Action } from "@/ui/Action/Action"
 
-import { F0AiCollapsibleMessage } from "../../../../F0AiCollapsibleMessage"
 import { MessageSourcesProps } from "./types"
+import { AiCollapsibleMessage } from "../../../components/shared/AiCollapsibleMessage"
 
 const getIconComponent = (iconName: string): IconType => {
   const IconFromName = (Icons as Record<string, IconType>)[iconName]
@@ -30,7 +30,7 @@ export const MessageSources = ({ sources }: MessageSourcesProps) => {
   }
 
   return (
-    <F0AiCollapsibleMessage
+    <AiCollapsibleMessage
       icon={Search}
       title={translations.ai.resourcesGroupTitle}
     >
@@ -67,6 +67,6 @@ export const MessageSources = ({ sources }: MessageSourcesProps) => {
           )
         })}
       </div>
-    </F0AiCollapsibleMessage>
+    </AiCollapsibleMessage>
   )
 }

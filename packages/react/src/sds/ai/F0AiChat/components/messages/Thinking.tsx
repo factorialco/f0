@@ -1,14 +1,14 @@
 import Lightbulb from "@/icons/app/Lightbulb"
 import { useI18n } from "@/lib/providers/i18n"
 
-import { F0AiCollapsibleMessage } from "../../../F0AiCollapsibleMessage"
 import { ThinkingProps } from "./types"
+import { AiCollapsibleMessage } from "../shared/AiCollapsibleMessage"
 
 export const Thinking = ({ messages, title }: ThinkingProps) => {
   const translations = useI18n()
 
   return (
-    <F0AiCollapsibleMessage
+    <AiCollapsibleMessage
       icon={Lightbulb}
       title={title ?? translations.ai.thoughtsGroupTitle}
     >
@@ -23,6 +23,6 @@ export const Thinking = ({ messages, title }: ThinkingProps) => {
           </div>
         ))}
       </div>
-    </F0AiCollapsibleMessage>
+    </AiCollapsibleMessage>
   )
 }
