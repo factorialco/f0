@@ -11,23 +11,23 @@ import { cn } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
 
 import { F0ActionItem } from "../../../F0ActionItem"
-import { Thinking } from "./Thinking"
 import { useMessageScroll } from "../../hooks/useMessageScroll"
 import { useAiChat } from "../../providers/AiChatStateProvider"
-import {
-  FeedbackModalProvider,
-  useFeedbackSubmit,
-} from "../feedback/FeedbackProvider"
 import {
   type Turn,
   analyzeTurn,
   convertMessagesToTurns,
   extractThinkingGroup,
 } from "../../utils/turnUtils"
-import { AssistantMessage as F0AssistantMessage } from "./AssistantMessage"
 import { FeedbackModal } from "../feedback/FeedbackModal"
-import { ScrollShadow } from "./ScrollShadow"
+import {
+  FeedbackModalProvider,
+  useFeedbackSubmit,
+} from "../feedback/FeedbackProvider"
 import { TurnFeedback } from "../feedback/TurnFeedback"
+import { AssistantMessage as F0AssistantMessage } from "./AssistantMessage"
+import { ScrollShadow } from "./ScrollShadow"
+import { Thinking } from "./Thinking"
 import { UserMessage as F0UserMessage } from "./UserMessage"
 import { WelcomeScreen } from "./WelcomeScreen"
 
@@ -43,7 +43,6 @@ const Messages = ({
   RenderMessage: RenderMessageProp,
   AssistantMessage: AssistantMessageProp,
   UserMessage: UserMessageProp,
-  ImageRenderer: ImageRendererProp,
   onRegenerate,
   onCopy,
   markdownTagRenderers,
@@ -69,15 +68,6 @@ const Messages = ({
 
   const AssistantMessage = AssistantMessageProp ?? F0AssistantMessage
   const UserMessage = UserMessageProp ?? F0UserMessage
-  const ImageRenderer =
-    ImageRendererProp ??
-    (({ image, content }: any) => (
-      <img
-        src={image}
-        alt={content || "Assistant image"}
-        className="max-w-full rounded-lg"
-      />
-    ))
 
   const initialMessages = useMemo(
     () =>
@@ -135,7 +125,6 @@ const Messages = ({
         isCurrentMessage,
         AssistantMessage,
         UserMessage,
-        ImageRenderer,
         onRegenerate,
         onCopy,
         markdownTagRenderers,
@@ -218,7 +207,6 @@ const Messages = ({
               isCurrentMessage: true,
               AssistantMessage,
               UserMessage,
-              ImageRenderer,
               onRegenerate,
               onCopy,
               markdownTagRenderers,

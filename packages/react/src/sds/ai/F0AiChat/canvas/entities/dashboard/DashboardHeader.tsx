@@ -81,7 +81,7 @@ function DashboardActions(): ReactNode {
         icon={Pencil}
         size="md"
         onClick={() => setEditMode(true)}
-        label="Edit"
+        label={translations.actions.edit}
       />
     </div>
   )
