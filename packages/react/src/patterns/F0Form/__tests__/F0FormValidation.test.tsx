@@ -374,7 +374,7 @@ describe("F0Form rich text field error and loading props", () => {
       content: f0FormField(
         z.object({
           value: z.string().min(1),
-          mentionIds: z.array(z.number()).optional(),
+          mentionIds: z.array(z.string()).optional(),
         }),
         {
           label: "Content",
@@ -412,7 +412,7 @@ describe("F0Form rich text field error and loading props", () => {
       content: f0FormField(
         z.object({
           value: z.string().nullable(),
-          mentionIds: z.array(z.number()).optional(),
+          mentionIds: z.array(z.string()).optional(),
         }),
         {
           label: "Content",

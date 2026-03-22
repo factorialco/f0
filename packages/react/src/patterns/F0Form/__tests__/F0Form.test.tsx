@@ -696,7 +696,7 @@ describe("isFieldRequired", () => {
         isFieldRequired(
           z.object({
             value: z.string().nullable(),
-            mentionIds: z.array(z.number()).optional(),
+            mentionIds: z.array(z.string()).optional(),
           })
         )
       ).toBe(false)
@@ -707,7 +707,7 @@ describe("isFieldRequired", () => {
         isFieldRequired(
           z.object({
             value: z.string().min(1),
-            mentionIds: z.array(z.number()).optional(),
+            mentionIds: z.array(z.string()).optional(),
           })
         )
       ).toBe(true)

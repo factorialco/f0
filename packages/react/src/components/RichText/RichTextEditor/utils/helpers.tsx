@@ -114,12 +114,12 @@ const handleEditorUpdate = ({
     json: null,
   })
 
-  const mentions: number[] = []
+  const mentions: string[] = []
   const doc = editor.state.doc
 
   doc.descendants((node) => {
     if (node.type.name === "mention") {
-      mentions.push(Number(node.attrs.id))
+      mentions.push(String(node.attrs.id))
     }
   })
 

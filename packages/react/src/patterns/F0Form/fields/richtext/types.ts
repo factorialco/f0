@@ -30,7 +30,7 @@ export interface RichTextValue {
   /** HTML content of the editor */
   value: string | null
   /** IDs of mentioned users */
-  mentionIds?: number[]
+  mentionIds?: string[]
 }
 
 // ============================================================================
