@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.413.1](https://github.com/factorialco/f0/compare/f0-react-v1.413.0...f0-react-v1.413.1) (2026-03-22)
+
+
+### Bug Fixes
+
+* remove .glsl file format from F0AiMask ([#3720](https://github.com/factorialco/f0/issues/3720)) ([a7c795b](https://github.com/factorialco/f0/commit/a7c795bdd820eaa18e3537930c200fc6ae9b4268))
+
 ## [1.413.0](https://github.com/factorialco/f0/compare/f0-react-v1.412.0...f0-react-v1.413.0) (2026-03-20)
 
 
