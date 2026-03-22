@@ -7,7 +7,6 @@ import {
   useState,
 } from "react"
 
-import { F0AnalyticsDashboard } from "@/components/F0AnalyticsDashboard/F0AnalyticsDashboard"
 import type {
   DashboardChartConfig,
   DashboardChartItem,
@@ -22,7 +21,8 @@ import type {
 } from "@/components/OneFilterPicker/types"
 import type { RecordType } from "@/hooks/datasource"
 
-import { useDashboardCompute, type ItemResult } from "./useDashboardCompute"
+import { F0AnalyticsDashboard } from "@/components/F0AnalyticsDashboard/F0AnalyticsDashboard"
+
 import type {
   ChatDashboardChartConfig,
   ChatDashboardChartItem,
@@ -31,6 +31,8 @@ import type {
   ChatDashboardMetricItem,
   FormatPreset,
 } from "./types"
+
+import { useDashboardCompute, type ItemResult } from "./useDashboardCompute"
 
 // ---------------------------------------------------------------------------
 // Format preset → formatter function
@@ -128,7 +130,7 @@ const COLLECTION_PER_PAGE = 20
 // Component
 // ---------------------------------------------------------------------------
 
-export interface F0ChatDashboardProps {
+export interface ChatDashboardProps {
   config: ChatDashboardConfig
   apiConfig: { baseUrl: string; headers: Record<string, string> }
   refreshKey?: number
@@ -145,7 +147,7 @@ export interface F0ChatDashboardProps {
  * Multiple widget fetchData calls within the same filter state share a
  * single batch request.
  */
-export function F0ChatDashboard({
+export function ChatDashboard({
   config,
   apiConfig,
   refreshKey = 0,
@@ -153,7 +155,7 @@ export function F0ChatDashboard({
   onLayoutChange,
   onExportReady,
   exportFilename,
-}: F0ChatDashboardProps) {
+}: ChatDashboardProps) {
   const { fetchItem, getFilterOptions } = useDashboardCompute(
     config,
     apiConfig,
@@ -272,10 +274,10 @@ export function F0ChatDashboard({
   )
 }
 
-F0ChatDashboard.displayName = "F0ChatDashboard"
+ChatDashboard.displayName = "ChatDashboard"
 
 // ---------------------------------------------------------------------------
-// Canvas content wrapper — bridges canvas context to F0ChatDashboard props
+// Canvas content wrapper — bridges canvas context to ChatDashboard props
 // ---------------------------------------------------------------------------
 
 import type { DashboardCanvasContent } from "../../../types"
@@ -292,7 +294,7 @@ export function DashboardContent({
   const { editMode, onLayoutChange, registerExport } = useDashboardCanvas()
 
   return (
-    <F0ChatDashboard
+    <ChatDashboard
       config={content.config}
       apiConfig={content.apiConfig}
       refreshKey={refreshKey}

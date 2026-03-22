@@ -4,7 +4,7 @@ import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import type { ChatDashboardConfig } from "../types"
 
-import { F0ChatDashboard } from "../DashboardContent"
+import { ChatDashboard } from "../DashboardContent"
 
 const sampleConfig: ChatDashboardConfig = {
   title: "Headcount Overview",
@@ -48,13 +48,13 @@ const sampleApiConfig = {
 }
 
 const meta = {
-  component: F0ChatDashboard,
+  component: ChatDashboard,
   title: "AI/F0AiChat/Canvas/Dashboard",
   tags: ["autodocs"],
-} satisfies Meta<typeof F0ChatDashboard>
+} satisfies Meta<typeof ChatDashboard>
 
 export default meta
-type Story = StoryObj<typeof F0ChatDashboard>
+type Story = StoryObj<typeof ChatDashboard>
 
 export const Default: Story = {
   args: {
