@@ -1,4 +1,4 @@
-#version 300 es
+export default `#version 300 es
 
 in vec2 aPosition;
 in vec2 aUV;
@@ -7,3 +7,4 @@ void main() {
 	vUV = aUV;
 	gl_Position = vec4(aPosition, 0.0, 1.0);
 }
+`
