@@ -315,29 +315,38 @@ const MultitaskDemo = () => {
         onExpandToggle={() => setExpanded(!expanded)}
         isLast
       >
-        {/* Subtask 1: in-progress with actions */}
         <F0TimelineRow
           hideStatus
           status="in-progress"
           icon={Pencil}
           title="Complete form"
-          description="Estimated on 18/07/2025"
-          assignees={Array.from({ length: 70 }, (_, i) => ({
-            firstName: `User`,
-            lastName: `${i + 1}`,
-          }))}
-          right={
-            <div className="flex items-center gap-1 text-sm text-f1-foreground-secondary">
-              <span className="inline-flex items-center gap-1 rounded bg-f1-background-critical px-1.5 py-0.5 text-xs text-f1-foreground-critical">
-                ★ IT team
-              </span>
-              <span>·</span>
-              <span className="inline-flex items-center gap-1 rounded bg-f1-background-secondary px-1.5 py-0.5 text-xs text-f1-foreground-secondary">
-                SY
-              </span>
-              <span>Vendor assessment form</span>
-            </div>
-          }
+          description="Estimated on 24/07/2025"
+          assignees={[
+            { firstName: "Quigley", lastName: "Smitty" },
+            { firstName: "James", lastName: "Hopper" },
+            { firstName: "Sarah", lastName: "Connor" },
+            { firstName: "John", lastName: "Doe" },
+            { firstName: "Jane", lastName: "Smith" },
+            { firstName: "Alex", lastName: "Rashfold" },
+            { firstName: "Emily", lastName: "Chen" },
+          ]}
+        />
+        <F0TimelineRow
+          hideStatus
+          status="in-progress"
+          icon={Pencil}
+          title="Complete form"
+          description="Estimated on 24/07/2025"
+          assignees={[{ firstName: "Alex", lastName: "Rashfold" }]}
+        />
+        <F0TimelineRow
+          hideStatus
+          status="not-started"
+          icon={Pencil}
+          title="Lunch"
+          description="Estimated on 24/07/2025"
+          assignees={[{ firstName: "James", lastName: "Hopper" }]}
+          isLast
           primaryAction={{
             label: "Approve",
             icon: Check,
@@ -355,28 +364,6 @@ const MultitaskDemo = () => {
               onClick: () => {},
             },
           ]}
-          otherActions={[
-            { label: "Reassign", onClick: () => {} },
-            { type: "separator" },
-            { label: "Remove task", critical: true, onClick: () => {} },
-          ]}
-        />
-        {/* Subtask 2: not-started */}
-        <F0TimelineRow
-          hideStatus
-          status="not-started"
-          icon={ThumbsUp}
-          title="Manager approval"
-          description="Estimated on 24/07/2025"
-        />
-        {/* Subtask 3: not-started, last */}
-        <F0TimelineRow
-          hideStatus
-          status="not-started"
-          icon={Pencil}
-          title="Next steps pending"
-          description="The next steps depend on the outcome of previous ones."
-          isLast
         />
       </F0TimelineRow>
     </div>
