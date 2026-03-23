@@ -6,7 +6,7 @@ import {
   type AiChatTrackingOptions,
   type AiChatToolHint,
   type CanvasContent,
-  type CreditsUsage,
+  type AiChatCredits,
   type EntityResolvers,
   type VisualizationMode,
   WelcomeScreenSuggestion,
@@ -30,8 +30,7 @@ export interface AiChatState {
   VoiceMode?: React.ComponentType
   entityResolvers?: EntityResolvers
   toolHints?: AiChatToolHint[]
-  fetchCreditsUsage?: () => Promise<CreditsUsage>
-  upgradePlanUrl?: string
+  credits?: AiChatCredits
   placeholders?: string[]
   setPlaceholders?: React.Dispatch<React.SetStateAction<string[]>>
   onThumbsUp?: (
@@ -168,8 +167,7 @@ export type AiChatProviderReturnValue = {
   | "resizable"
   | "entityResolvers"
   | "toolHints"
-  | "fetchCreditsUsage"
-  | "upgradePlanUrl"
+  | "credits"
 > & {
     /** The current canvas content, or null when canvas is closed */
     canvasContent: CanvasContent | null

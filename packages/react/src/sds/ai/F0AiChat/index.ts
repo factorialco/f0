@@ -9,6 +9,7 @@ export type {
   AiChatToolHint,
   CanvasContent,
   CanvasContentBase,
+  AiChatCredits,
   CreditsUsage,
   DashboardCanvasContent,
   EntityResolvers,

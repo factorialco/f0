@@ -65,6 +65,25 @@ export type CreditsUsage = {
 }
 
 /**
+ * Credits configuration for the AI chat.
+ * Groups all credits-related props into a single object.
+ *
+ * When provided, a credits button is shown in the chat header.
+ */
+export type AiChatCredits = {
+  /** Async function to fetch credits usage. Called each time the popover opens. */
+  fetchUsage: () => Promise<CreditsUsage>
+  /** URL to the plan upgrade page. When provided, a link is shown in the popover. */
+  upgradePlanUrl?: string
+  /** Company name displayed in the popover header. */
+  companyName?: string
+  /** Company logo URL displayed in the popover header. */
+  companyLogoUrl?: string
+  /** Plan name displayed below the company name (e.g. "Free plan", "Enterprise"). */
+  planName?: string
+}
+
+/**
  * Interaction mode for the AI chat
  */
 export type AiChatMode = "chat" | "voice"
@@ -139,17 +158,10 @@ export type AiChatProviderProps = {
    */
   toolHints?: AiChatToolHint[]
   /**
-   * Async function to fetch credits usage data.
-   * Called each time the credits popover is opened.
-   * When provided, a credits button is shown in the chat header.
+   * Credits configuration. When provided, a credits button is shown in the chat header.
+   * Groups fetchUsage, upgradePlanUrl, and company/plan display info.
    */
-  fetchCreditsUsage?: () => Promise<CreditsUsage>
-  /**
-   * URL to the plan upgrade page.
-   * When provided, a link is shown inside the credits popover.
-   * Opens in a new tab.
-   */
-  upgradePlanUrl?: string
+  credits?: AiChatCredits
   onThumbsUp?: (
     message: AIMessage,
     { threadId, feedback }: { threadId: string; feedback: string }

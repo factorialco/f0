@@ -160,8 +160,13 @@ const meta: Meta<typeof ApplicationFrame> = {
         searchPersons: mockSearchPersons,
       },
       toolHints: mockToolHints,
-      fetchCreditsUsage: mockFetchCreditsUsage,
-      upgradePlanUrl: "https://example.com/upgrade",
+      credits: {
+        fetchUsage: mockFetchCreditsUsage,
+        upgradePlanUrl: "https://example.com/upgrade",
+        companyName: "Factorial",
+        companyLogoUrl: "/avatars/factorial.png",
+        planName: "Free plan",
+      },
       disclaimer: {
         text: "One works within your permissions.",
         link: "/permissions",
@@ -376,8 +381,13 @@ export const FullscreenWithActions: Story = {
         searchPersons: mockSearchPersons,
       },
       toolHints: mockToolHints,
-      fetchCreditsUsage: mockFetchCreditsUsage,
-      upgradePlanUrl: "https://example.com/upgrade",
+      credits: {
+        fetchUsage: mockFetchCreditsUsage,
+        upgradePlanUrl: "https://example.com/upgrade",
+        companyName: "Factorial",
+        companyLogoUrl: "/avatars/factorial.png",
+        planName: "Free plan",
+      },
       disclaimer: {
         text: "One works within your permissions.",
         link: "/permissions",

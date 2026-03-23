@@ -1,7 +1,9 @@
 import { motion } from "motion/react"
 import { useCallback, useState } from "react"
 
+import { F0AvatarCompany } from "@/components/avatars/F0AvatarCompany"
 import { ButtonInternal } from "@/components/F0Button/internal"
+import { OneEllipsis } from "@/components/OneEllipsis"
 import { Sliders } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { Action } from "@/ui/Action"
@@ -12,7 +14,7 @@ import type { CreditsUsage } from "../../types"
 import { useAiChat } from "../../providers/AiChatStateProvider"
 
 export function CreditsPopover() {
-  const { fetchCreditsUsage, upgradePlanUrl } = useAiChat()
+  const { credits } = useAiChat()
   const i18n = useI18n()
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -22,10 +24,11 @@ export function CreditsPopover() {
   const handleOpenChange = useCallback(
     (isOpen: boolean) => {
       setOpen(isOpen)
-      if (isOpen && fetchCreditsUsage) {
+      if (isOpen && credits?.fetchUsage) {
         setLoading(true)
         setError(false)
-        fetchCreditsUsage()
+        credits
+          .fetchUsage()
           .then((result) => {
             setData(result)
             setError(false)
@@ -38,14 +41,16 @@ export function CreditsPopover() {
           })
       }
     },
-    [fetchCreditsUsage]
+    [credits]
   )
 
-  if (!fetchCreditsUsage) return null
+  if (!credits) return null
 
   const percentage = data
     ? Math.min(100, Math.round((data.used / data.total) * 100))
     : 0
+
+  const hasHeader = credits.companyName
 
   return (
     <Popover open={open} onOpenChange={handleOpenChange}>
@@ -61,15 +66,45 @@ export function CreditsPopover() {
       <PopoverContent
         side="bottom"
         align="end"
-        sideOffset={8}
-        className="w-[336px] rounded-md border border-solid border-f1-border-secondary p-3"
+        alignOffset={-68}
+        sideOffset={4}
+        className="flex w-[324px] flex-col gap-3 rounded-md border border-solid border-f1-border-secondary p-3"
       >
+        {hasHeader && (
+          <div className="flex min-w-0 max-w-full flex-1 items-center gap-2 overflow-hidden rounded text-lg text-f1-foreground transition-colors">
+            <F0AvatarCompany
+              name={credits.companyName ?? ""}
+              src={credits.companyLogoUrl}
+              size="lg"
+            />
+            <div className="flex flex-col">
+              <OneEllipsis tag="span" className="font-medium">
+                {credits.companyName ?? ""}
+              </OneEllipsis>
+              {credits.planName && (
+                <OneEllipsis
+                  tag="span"
+                  className="text-sm font-medium text-f1-foreground-secondary"
+                >
+                  {credits.planName}
+                </OneEllipsis>
+              )}
+            </div>
+          </div>
+        )}
         <div className="flex flex-col rounded border border-solid border-f1-border-secondary">
           <div className="flex flex-col gap-2 p-3">
             {loading && (
               <div className="flex flex-col gap-2">
-                <div className="h-3 w-full animate-pulse rounded-full bg-f1-background-secondary" />
-                <div className="h-[16px] w-24 animate-pulse rounded bg-f1-background-secondary" />
+                <div className="flex justify-between">
+                  <div className="h-5 w-16 animate-pulse rounded bg-f1-background-secondary" />
+                  <div className="h-5 w-20 animate-pulse rounded bg-f1-background-secondary" />
+                </div>
+                <div className="h-2 w-full animate-pulse rounded-full bg-f1-background-secondary" />
+                <div className="flex items-center gap-1.5">
+                  <div className="h-2 w-2 animate-pulse rounded-full bg-f1-background-secondary" />
+                  <div className="h-3 w-28 animate-pulse rounded bg-f1-background-secondary" />
+                </div>
               </div>
             )}
             {error && (
@@ -83,7 +118,11 @@ export function CreditsPopover() {
                   <span className="text-base font-medium text-f1-foreground">
                     {i18n.t("ai.credits.title")}
                   </span>
-                  <span>{data.used.toLocaleString()}</span>
+                  <span className="font-medium text-f1-foreground-secondary">
+                    {i18n.t("ai.credits.creditsLeft", {
+                      total: data.used.toLocaleString(),
+                    })}
+                  </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="relative h-2 w-full overflow-hidden rounded-full bg-f1-background-secondary">
@@ -107,8 +146,8 @@ export function CreditsPopover() {
                     />
                   </div>
                 </div>
-                <div className="flex items-center gap-1">
-                  <div className="h-2 w-2 rounded-full bg-f1-border"></div>
+                <div className="flex items-center gap-1.5">
+                  <div className="h-2 w-2 rounded-full bg-f1-border" />
                   <span className="text-sm tabular-nums text-f1-foreground-secondary">
                     {i18n.t("ai.credits.monthlyCredits")}
                   </span>
@@ -116,10 +155,10 @@ export function CreditsPopover() {
               </>
             )}
           </div>
-          {upgradePlanUrl && (
+          {credits.upgradePlanUrl && (
             <div className="flex items-center justify-between border-0 border-t border-solid border-f1-border-secondary p-3">
               <span>{i18n.t("ai.credits.needMoreCredits")}</span>
-              <Action variant="outline" href={upgradePlanUrl}>
+              <Action variant="outline" href={credits.upgradePlanUrl}>
                 {i18n.t("ai.credits.upgradePlan")}
               </Action>
             </div>
