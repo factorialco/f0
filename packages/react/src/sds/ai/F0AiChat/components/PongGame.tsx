@@ -8,7 +8,7 @@ import { useReducedMotion } from "@/lib/a11y"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
-import { ChatSpinner } from "../../F0ActionItem/components/ChatSpinner"
+// ChatSpinner removed — ball now uses conic gradient
 
 // Layout
 const BALL_SIZE = 40
@@ -573,19 +573,18 @@ export const PongGame = ({ onClose }: PongGameProps) => {
               }}
             />
 
-            {/* Ball — ChatSpinner, hidden during countdown */}
+            {/* Ball — soft linear gradient, hidden during countdown */}
             <div
-              className="pointer-events-none absolute z-30 [&>div]:!h-full [&>div]:!w-full"
+              className="pointer-events-none absolute z-30 rounded-full"
               style={{
                 width: BALL_SIZE,
                 height: BALL_SIZE,
+                background: "linear-gradient(135deg, #E8845E, #B89BD6)",
                 transform: `translate(${ballPos.x - BALL_SIZE / 2}px, ${ballPos.y - BALL_SIZE / 2}px) rotate(${ballAngle}rad)`,
                 opacity: phase === "countdown" ? 0 : 1,
                 transition: "opacity 0.3s ease-in",
               }}
-            >
-              <ChatSpinner />
-            </div>
+            />
 
             {/* Player Paddle (bottom) — gradient aura like AI paddle */}
             <div
@@ -614,9 +613,14 @@ export const PongGame = ({ onClose }: PongGameProps) => {
               </span>
             </div>
 
-            {/* Goal indicator — left side */}
+            {/* Goal indicator — bottom half when player scores, top half when AI scores */}
             {phase === "scored" && lastScorer && (
-              <div className="pointer-events-none absolute left-4 top-1/2 mt-4 flex items-center">
+              <div
+                className={cn(
+                  "pointer-events-none absolute left-4 flex items-center",
+                  lastScorer === "player" ? "top-1/2 mt-4" : "bottom-1/2 -mt-4"
+                )}
+              >
                 <span className="text-2xl font-semibold text-f1-foreground-secondary/60">
                   {translations.ai.pong.goal}
                 </span>
@@ -670,9 +674,11 @@ export const PongGame = ({ onClose }: PongGameProps) => {
         </div>
 
         {/* Footer — controls hint */}
-        <div className="flex items-center justify-center gap-4 px-4 py-3 text-sm font-medium text-f1-foreground-secondary">
-          <span>{translations.ai.pong.controls}</span>
-          <span>{translations.ai.pong.escToExit}</span>
+        <div className="flex items-center justify-center px-4 py-3 text-sm font-medium text-f1-foreground-secondary">
+          <div className="flex gap-5">
+            <span>{translations.ai.pong.controls}</span>
+            <span>{translations.ai.pong.escToExit}</span>
+          </div>
         </div>
       </div>
     </div>,
