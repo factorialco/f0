@@ -3,10 +3,8 @@ import { useDemoCardAction } from "../../../UpsellingKit/ai/F0DemoCard/useDemoCa
 import { useFAQCardAction } from "../../../UpsellingKit/ai/F0FAQCard/useFAQCardAction"
 import { useModuleCardAction } from "../../../UpsellingKit/ai/F0ModuleCard/useModuleCardAction"
 import { useQuestionCardAction } from "../../../UpsellingKit/ai/F0QuestionCard/useQuestionCardAction"
-
 import { useDataDownloadAction } from "./core/dataDownload/useDataDownloadAction"
 import { useDisplayDashboardAction } from "./core/displayDashboard/useDisplayDashboardAction"
-import { useF0AiFormActions } from "./core/forms/useF0AiFormActions"
 import { useMessageSourcesAction } from "./core/messageSources/useMessageSourcesAction"
 import { useOrchestratorThinkingAction } from "./core/orchestratorThinking/useOrchestratorThinkingAction"
 
@@ -17,7 +15,6 @@ export const copilotActions: ActionFactory[] = [
   useMessageSourcesAction,
   useDataDownloadAction,
   useDisplayDashboardAction,
-  useF0AiFormActions,
   useDemoCardAction,
   useBookAMeetingCardAction,
   useQuestionCardAction,
