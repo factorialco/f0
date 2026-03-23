@@ -43,6 +43,34 @@ type GroupedItem =
   | { type: "row"; item: RowDefinition; index: number }
   | { type: "switchGroup"; fields: F0SwitchField[] }
 
+/**
+ * Flatten RHF FieldErrors into a dot-path → message map.
+ * Handles nested errors (e.g. daterange `errors.range.from`).
+ */
+function flattenFormErrors(
+  errors: Record<string, unknown>
+): Record<string, string> {
+  const result: Record<string, string> = {}
+
+  function walk(obj: Record<string, unknown>, prefix: string) {
+    for (const [key, value] of Object.entries(obj)) {
+      if (key === "root") continue
+      const path = prefix ? `${prefix}.${key}` : key
+      if (value && typeof value === "object" && !Array.isArray(value)) {
+        const err = value as Record<string, unknown>
+        if ("message" in err && typeof err.message === "string") {
+          result[path] = err.message
+        } else {
+          walk(err, path)
+        }
+      }
+    }
+  }
+
+  walk(errors, "")
+  return result
+}
+
 function groupContiguousSwitches(
   definition: FormDefinitionItem[]
 ): GroupedItem[] {
@@ -229,21 +257,8 @@ export function F0FormSection<TSchema extends F0FormSchema>({
           }
           return form.trigger()
         },
-        getErrors: () => {
-          const result: Record<string, string> = {}
-          const { errors: currentErrors } = form.formState
-          for (const [key, error] of Object.entries(currentErrors)) {
-            if (
-              key !== "root" &&
-              error &&
-              typeof error === "object" &&
-              "message" in error
-            ) {
-              result[key] = (error.message as string) ?? ""
-            }
-          }
-          return result
-        },
+        getErrors: () =>
+          flattenFormErrors(form.formState.errors as Record<string, unknown>),
         getFieldNames: () => {
           return Object.keys(form.getValues() as Record<string, unknown>)
         },

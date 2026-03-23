@@ -98,8 +98,8 @@ export function defineAvailableForm<
   TParams extends Record<string, unknown> = Record<string, unknown>,
 >(
   definition: F0AiAvailableFormDefinition<TParams>
-): F0AiAvailableFormDefinition {
-  return definition as F0AiAvailableFormDefinition
+): F0AiAvailableFormDefinition<TParams> {
+  return definition
 }
 
 /**

@@ -8,6 +8,7 @@ import type {
   F0SectionConfig,
   F0PerSectionSectionConfig,
 } from "@/components/F0Form/types"
+import type { RenderCustomFieldFunction } from "@/components/F0Form/types"
 
 import { DialogWidth } from "@/components/F0Dialog"
 
@@ -70,7 +71,7 @@ export interface F0FormDefinitionSingleSchema<TSchema extends F0FormSchema> {
   submitConfig?: F0FormSubmitConfig
   errorTriggerMode?: F0FormErrorTriggerMode
   /** Whether async defaultValues are still being resolved */
-  isLoading: boolean
+  isLoading?: boolean
   /** Zod schema describing params the AI can supply when calling presentForm */
   defaultValuesParamsSchema?: ZodType
   /** Raw defaultValues function for AI registry use when params are involved */
@@ -92,7 +93,7 @@ export interface F0FormDefinitionPerSection<T extends F0PerSectionSchema> {
   submitConfig?: F0PerSectionSubmitConfig
   errorTriggerMode?: F0FormErrorTriggerMode
   /** Whether async defaultValues are still being resolved */
-  isLoading: boolean
+  isLoading?: boolean
   /** Zod schema describing params the AI can supply when calling presentForm */
   defaultValuesParamsSchema?: ZodType
   /** Raw defaultValues function for AI registry use when params are involved */
@@ -114,8 +115,6 @@ export type F0FormDefinition<
 // =============================================================================
 // F0WizardForm props — wizard-only props + definition
 // =============================================================================
-
-import type { RenderCustomFieldFunction } from "@/components/F0Form/types"
 
 interface F0WizardFormBaseProps {
   isOpen: boolean

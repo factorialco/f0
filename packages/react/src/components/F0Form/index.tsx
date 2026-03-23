@@ -134,12 +134,17 @@ export type {
 export {
   F0AiFormRegistryProvider,
   useF0AiFormRegistry,
+  defineAvailableForm,
 } from "./F0AiFormRegistry"
 export type {
   F0AiFormEntry,
   F0AiAvailableFormDefinition,
   F0AiPresentedForm,
 } from "./F0AiFormRegistry"
+
+// Export AI schema description utility
+export { describeFormSchema } from "./describeFormSchema"
+export type { FormFieldDescription } from "./describeFormSchema"
 
 import type {
   F0FormPropsWithSingleSchema,

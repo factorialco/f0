@@ -270,8 +270,7 @@ export interface RenderCustomFieldSelectConfig {
   /** Data source for fetching options dynamically */
   source?: unknown
   /** Function to map data source items to select options */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  mapOptions?: (item: any) => any
+  mapOptions?: (item: never) => unknown
   /** Static options array */
   options?: unknown[]
   /** Whether multiple selection is allowed */

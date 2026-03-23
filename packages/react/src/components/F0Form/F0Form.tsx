@@ -58,6 +58,34 @@ type GroupedItem =
   | { type: "switchGroup"; fields: F0SwitchField[] }
 
 /**
+ * Flatten RHF FieldErrors into a dot-path → message map.
+ * Handles nested errors (e.g. daterange `errors.range.from`).
+ */
+function flattenFormErrors(
+  errors: Record<string, unknown>
+): Record<string, string> {
+  const result: Record<string, string> = {}
+
+  function walk(obj: Record<string, unknown>, prefix: string) {
+    for (const [key, value] of Object.entries(obj)) {
+      if (key === "root") continue
+      const path = prefix ? `${prefix}.${key}` : key
+      if (value && typeof value === "object" && !Array.isArray(value)) {
+        const err = value as Record<string, unknown>
+        if ("message" in err && typeof err.message === "string") {
+          result[path] = err.message
+        } else {
+          walk(err, path)
+        }
+      }
+    }
+  }
+
+  walk(errors, "")
+  return result
+}
+
+/**
  * Groups contiguous switch fields together for rendering in a bordered container
  */
 function groupContiguousSwitches(
@@ -718,84 +746,69 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
   // Store state callback from useF0Form hook
   const stateCallbackRef = useRef<F0FormStateCallback | null>(null)
 
+  // Stable ref to the submit handler for use in refs
+  const handleSubmitRef = useRef(handleSubmit)
+  handleSubmitRef.current = handleSubmit
+
+  // Shared builder for F0FormRef methods — used by both formRef and AI registry
+  const buildRefMethods = useCallback(
+    (opts?: { stateCallback?: boolean }): F0FormRef => ({
+      submit: () =>
+        new Promise<void>((resolve, reject) => {
+          form.handleSubmit(
+            async (data) => {
+              await handleSubmitRef.current(data)
+              resolve()
+            },
+            () => reject(new Error("Form validation failed"))
+          )()
+        }),
+      reset: () => {
+        form.reset()
+        resetErrorNavigation()
+      },
+      isDirty: () => form.formState.isDirty,
+      getValues: () => form.getValues() as Record<string, unknown>,
+      setValue: (fieldName, value, options) => {
+        form.setValue(
+          fieldName as Path<TValues>,
+          value as TValues[keyof TValues],
+          {
+            shouldValidate: options?.shouldValidate ?? true,
+            shouldDirty: options?.shouldDirty ?? true,
+          }
+        )
+      },
+      setValues: (values, options) => {
+        for (const [fn, v] of Object.entries(values)) {
+          form.setValue(fn as Path<TValues>, v as TValues[keyof TValues], {
+            shouldValidate: false,
+            shouldDirty: options?.shouldDirty ?? true,
+          })
+        }
+        if (options?.shouldValidate !== false) {
+          void form.trigger()
+        }
+      },
+      trigger: async (fieldName) =>
+        fieldName ? form.trigger(fieldName as Path<TValues>) : form.trigger(),
+      getErrors: () =>
+        flattenFormErrors(form.formState.errors as Record<string, unknown>),
+      getFieldNames: () =>
+        Object.keys(form.getValues() as Record<string, unknown>),
+      _setStateCallback: opts?.stateCallback
+        ? (callback: F0FormStateCallback) => {
+            stateCallbackRef.current = callback
+          }
+        : () => {},
+    }),
+    [form, resetErrorNavigation]
+  )
+
   // Expose form methods via ref for external control
   useEffect(() => {
     if (formRef) {
-      const refMethods: F0FormRef = {
-        submit: () => {
-          return new Promise<void>((resolve, reject) => {
-            form.handleSubmit(
-              async (data) => {
-                await handleSubmit(data)
-                resolve()
-              },
-              () => {
-                // Validation failed - reject to signal the caller
-                reject(new Error("Form validation failed"))
-              }
-            )()
-          })
-        },
-        reset: () => {
-          form.reset()
-          resetErrorNavigation()
-        },
-        isDirty: () => form.formState.isDirty,
-        getValues: () => form.getValues() as Record<string, unknown>,
-        setValue: (fieldName, value, options) => {
-          form.setValue(
-            fieldName as Path<TValues>,
-            value as TValues[keyof TValues],
-            {
-              shouldValidate: options?.shouldValidate ?? true,
-              shouldDirty: options?.shouldDirty ?? true,
-            }
-          )
-        },
-        setValues: (values, options) => {
-          for (const [fieldName, value] of Object.entries(values)) {
-            form.setValue(
-              fieldName as Path<TValues>,
-              value as TValues[keyof TValues],
-              {
-                shouldValidate: false,
-                shouldDirty: options?.shouldDirty ?? true,
-              }
-            )
-          }
-          if (options?.shouldValidate !== false) {
-            void form.trigger()
-          }
-        },
-        trigger: async (fieldName) => {
-          if (fieldName) {
-            return form.trigger(fieldName as Path<TValues>)
-          }
-          return form.trigger()
-        },
-        getErrors: () => {
-          const result: Record<string, string> = {}
-          const { errors: currentErrors } = form.formState
-          for (const [key, error] of Object.entries(currentErrors)) {
-            if (
-              key !== "root" &&
-              error &&
-              typeof error === "object" &&
-              "message" in error
-            ) {
-              result[key] = (error.message as string) ?? ""
-            }
-          }
-          return result
-        },
-        getFieldNames: () => {
-          return Object.keys(form.getValues() as Record<string, unknown>)
-        },
-        _setStateCallback: (callback: F0FormStateCallback) => {
-          stateCallbackRef.current = callback
-        },
-      }
-      formRef.current = refMethods
+      formRef.current = buildRefMethods({ stateCallback: true })
     }
 
     return () => {
@@ -803,7 +816,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
         formRef.current = null
       }
     }
-  }, [formRef, form, resetErrorNavigation])
+  }, [formRef, buildRefMethods])
 
   // Notify useF0Form hook of state changes
   useEffect(() => {
@@ -820,76 +833,12 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
   const internalFormRef = useRef<F0FormRef | null>(null)
   // Keep a stable ref that mirrors formRef or internalFormRef
   const registryFormRef = formRef ?? internalFormRef
-  // Stable ref to avoid re-registering on every render
-  const handleSubmitRef = useRef(handleSubmit)
-  handleSubmitRef.current = handleSubmit
 
   useEffect(() => {
     if (aiFormRegistry) {
-      // Mirror internal ref if no external formRef
-      if (!formRef && registryFormRef !== formRef) {
-        // Build a minimal ref for registry use when no external formRef is provided
-        const refMethods: F0FormRef = {
-          submit: () =>
-            new Promise<void>((resolve, reject) => {
-              form.handleSubmit(
-                async (data) => {
-                  await handleSubmitRef.current(data)
-                  resolve()
-                },
-                () => reject(new Error("Form validation failed"))
-              )()
-            }),
-          reset: () => {
-            form.reset()
-            resetErrorNavigation()
-          },
-          isDirty: () => form.formState.isDirty,
-          getValues: () => form.getValues() as Record<string, unknown>,
-          setValue: (fieldName, value, options) => {
-            form.setValue(
-              fieldName as Path<TValues>,
-              value as TValues[keyof TValues],
-              {
-                shouldValidate: options?.shouldValidate ?? true,
-                shouldDirty: options?.shouldDirty ?? true,
-              }
-            )
-          },
-          setValues: (values, options) => {
-            for (const [fn, v] of Object.entries(values)) {
-              form.setValue(fn as Path<TValues>, v as TValues[keyof TValues], {
-                shouldValidate: false,
-                shouldDirty: options?.shouldDirty ?? true,
-              })
-            }
-            if (options?.shouldValidate !== false) {
-              void form.trigger()
-            }
-          },
-          trigger: async (fieldName) =>
-            fieldName
-              ? form.trigger(fieldName as Path<TValues>)
-              : form.trigger(),
-          getErrors: () => {
-            const result: Record<string, string> = {}
-            for (const [key, error] of Object.entries(form.formState.errors)) {
-              if (
-                key !== "root" &&
-                error &&
-                typeof error === "object" &&
-                "message" in error
-              ) {
-                result[key] = (error.message as string) ?? ""
-              }
-            }
-            return result
-          },
-          getFieldNames: () =>
-            Object.keys(form.getValues() as Record<string, unknown>),
-          _setStateCallback: () => {},
-        }
-        internalFormRef.current = refMethods
+      // Build ref for registry use when no external formRef is provided
+      if (!formRef) {
+        internalFormRef.current = buildRefMethods()
       }
       aiFormRegistry.register(
         name,
@@ -910,8 +859,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
     sections,
     formRef,
     registryFormRef,
-    form,
-    resetErrorNavigation,
+    buildRefMethods,
     defaultValuesParamsSchema,
   ])
 

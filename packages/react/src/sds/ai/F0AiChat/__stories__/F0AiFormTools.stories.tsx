@@ -21,17 +21,17 @@ import { Page } from "@/experimental/Navigation/Page"
 
 import { F0AiChat, F0AiChatProvider, useAiChat } from ".."
 
-const meta: Meta = {
+const meta = {
   title: "AI/F0AiFormTools",
   parameters: {
     layout: "fullscreen",
     a11y: { skipCi: true },
   },
   tags: ["autodocs"],
-}
+} satisfies Meta
 
 export default meta
-type Story = StoryObj
+type Story = StoryObj<typeof meta>
 
 // -- Shared schema for the demo form --
 

@@ -49,11 +49,6 @@ export const usePresentFormAction = () => {
       defaultValuesParams?: object
     }) => {
       const { formName, mode, defaultValuesParams } = args
-      console.log("[F0AiFormTools] presentForm called", {
-        formName,
-        mode,
-        defaultValuesParams,
-      })
       if (!registry) {
         return { success: false, error: "Form registry is not available" }
       }

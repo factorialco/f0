@@ -109,7 +109,7 @@ export const useFormFillAction = () => {
           {
             name: "fieldName",
             type: "string",
-            description: "The field name (from formDescribe).",
+            description: "The field name (from formGetState).",
             required: true,
           },
           {
