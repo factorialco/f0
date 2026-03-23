@@ -1,7 +1,7 @@
 import { useCopilotChatInternal } from "@copilotkit/react-core"
 import { Message, randomId } from "@copilotkit/shared"
 import { AnimatePresence, motion } from "motion/react"
-import { useMemo, useState } from "react"
+import { useCallback, useMemo, useRef, useState } from "react"
 
 import { useAiChat } from "@/ai"
 import { ButtonInternal } from "@/components/F0Button/internal"
@@ -34,6 +34,22 @@ export const WelcomeScreen = ({
   suggestions?: WelcomeScreenSuggestion[]
 }) => {
   const [showPong, setShowPong] = useState(false)
+  const tapCountRef = useRef(0)
+  const tapTimerRef = useRef<ReturnType<typeof setTimeout>>()
+
+  const handleIconClick = useCallback(() => {
+    tapCountRef.current += 1
+    clearTimeout(tapTimerRef.current)
+    if (tapCountRef.current >= 3) {
+      tapCountRef.current = 0
+      setShowPong(true)
+    } else {
+      tapTimerRef.current = setTimeout(() => {
+        tapCountRef.current = 0
+      }, 600)
+    }
+  }, [])
+
   const { sendMessage } = useCopilotChatInternal()
 
   const { visualizationMode, tracking } = useAiChat()
@@ -67,7 +83,7 @@ export const WelcomeScreen = ({
               delay: 0.4,
             }}
           >
-            <div className="cursor-pointer" onClick={() => setShowPong(true)}>
+            <div className="cursor-pointer" onClick={handleIconClick}>
               <F0OneIcon spin size="lg" className="my-4" />
             </div>
           </motion.div>
