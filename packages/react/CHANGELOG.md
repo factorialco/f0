@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.416.1](https://github.com/factorialco/f0/compare/f0-react-v1.416.0...f0-react-v1.416.1) (2026-03-23)
+
+
+### Bug Fixes
+
+* **ai:** extract PongBall component and fix credits display ([#3734](https://github.com/factorialco/f0/issues/3734)) ([34f1a1b](https://github.com/factorialco/f0/commit/34f1a1bb8d7fe34a6d7d4e24116ee452a2286bfd))
+
 ## [1.416.0](https://github.com/factorialco/f0/compare/f0-react-v1.415.0...f0-react-v1.416.0) (2026-03-23)
 
 
