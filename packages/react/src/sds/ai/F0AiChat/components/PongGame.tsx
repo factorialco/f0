@@ -8,7 +8,7 @@ import { useReducedMotion } from "@/lib/a11y"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
-// ChatSpinner removed — ball now uses conic gradient
+import { PongBall } from "./shared/PongBall"
 
 // Layout
 const BALL_SIZE = 40
@@ -579,12 +579,10 @@ export const PongGame = ({ onClose }: PongGameProps) => {
             />
 
             {/* Ball — soft linear gradient, hidden during countdown */}
-            <div
-              className="pointer-events-none absolute z-30 rounded-full"
+            <PongBall
+              size={BALL_SIZE}
+              className="pointer-events-none absolute z-30"
               style={{
-                width: BALL_SIZE,
-                height: BALL_SIZE,
-                background: "linear-gradient(135deg, #E8845E, #B89BD6)",
                 transform: `translate(${ballPos.x - BALL_SIZE / 2}px, ${ballPos.y - BALL_SIZE / 2}px) rotate(${ballAngle}rad)`,
                 opacity: phase === "countdown" ? 0 : 1,
                 transition: "opacity 0.3s ease-in",
