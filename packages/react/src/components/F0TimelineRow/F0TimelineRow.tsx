@@ -24,12 +24,12 @@ const STATUS_COLORS = {
 } as const
 
 const CompletedIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-    <circle cx="12" cy="12" r="8" fill={STATUS_COLORS.completed} />
+  <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+    <circle cx="14" cy="14" r="10" fill={STATUS_COLORS.completed} />
     <path
-      d="M8.5 12.5L10.5 14.5L15.5 9.5"
+      d="M10 14.5L12.5 17L18 11"
       stroke="white"
-      strokeWidth="1.5"
+      strokeWidth="1.8"
       strokeLinecap="round"
       strokeLinejoin="round"
     />
@@ -37,32 +37,32 @@ const CompletedIcon = () => (
 )
 
 const InProgressIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-    <circle cx="12" cy="12" r="8" fill="white" />
+  <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+    <circle cx="14" cy="14" r="10" fill="white" />
     <path
-      d="M12 12L12 4A8 8 0 0 1 18.928 16Z"
+      d="M14 14L14 4A10 10 0 0 1 22.66 19Z"
       fill={STATUS_COLORS["in-progress"]}
     />
     <circle
-      cx="12"
-      cy="12"
-      r="8"
+      cx="14"
+      cy="14"
+      r="10"
       stroke={STATUS_COLORS["in-progress"]}
-      strokeWidth="1.3"
+      strokeWidth="1.5"
       fill="none"
     />
   </svg>
 )
 
 const NotStartedIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+  <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
     <circle
-      cx="12"
-      cy="12"
-      r="8"
+      cx="14"
+      cy="14"
+      r="10"
       stroke={STATUS_COLORS["not-started"]}
-      strokeWidth="1.5"
-      strokeDasharray="0.1 3.8"
+      strokeWidth="1.8"
+      strokeDasharray="0.1 4.5"
       strokeLinecap="round"
       fill="none"
     />
@@ -72,7 +72,7 @@ const NotStartedIcon = () => (
 const StatusIndicator = ({ status }: { status: TimelineRowStatus }) => {
   if (status === "completed") {
     return (
-      <div className="flex h-6 w-6 items-center justify-center" aria-hidden>
+      <div className="flex h-7 w-7 items-center justify-center" aria-hidden>
         <CompletedIcon />
       </div>
     )
@@ -80,14 +80,14 @@ const StatusIndicator = ({ status }: { status: TimelineRowStatus }) => {
 
   if (status === "in-progress") {
     return (
-      <div className="flex h-6 w-6 items-center justify-center" aria-hidden>
+      <div className="flex h-7 w-7 items-center justify-center" aria-hidden>
         <InProgressIcon />
       </div>
     )
   }
 
   return (
-    <div className="flex h-6 w-6 items-center justify-center" aria-hidden>
+    <div className="flex h-7 w-7 items-center justify-center" aria-hidden>
       <NotStartedIcon />
     </div>
   )
