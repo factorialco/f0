@@ -314,6 +314,12 @@ export const defaultTranslations = {
     dataDownload: {
       download: "Download {{format}}",
     },
+    pong: {
+      ai: "AI",
+      you: "YOU",
+      youWin: "You win!",
+      youLose: "You lose!",
+    },
     growth: {
       demoCard: {
         title: "See {{moduleName}} in action",

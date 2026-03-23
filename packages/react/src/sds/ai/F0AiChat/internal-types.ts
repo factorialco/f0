@@ -1,9 +1,8 @@
 import { type AIMessage, type Message } from "@copilotkit/shared"
 
-import type { ChatDashboardConfig } from "../F0ChatDashboard/types"
-
 import {
   type AiChatDisclaimer,
+  type AiChatMode,
   type AiChatTrackingOptions,
   type AiChatToolHint,
   type CanvasContent,
@@ -35,6 +34,7 @@ export interface AiChatState {
   lockVisualizationMode?: boolean
   historyEnabled?: boolean
   footer?: React.ReactNode
+  VoiceMode?: React.ComponentType
   entityResolvers?: EntityResolvers
   toolHints?: AiChatToolHint[]
   placeholders?: string[]
@@ -137,6 +137,14 @@ export type AiChatProviderReturnValue = {
    */
   setVisualizationMode: React.Dispatch<React.SetStateAction<VisualizationMode>>
   /**
+   * The current interaction mode
+   */
+  mode: AiChatMode
+  /**
+   * Set the interaction mode
+   */
+  setMode: React.Dispatch<React.SetStateAction<AiChatMode>>
+  /**
    * When true, prevents switching between visualization modes
    */
   lockVisualizationMode: boolean
@@ -145,6 +153,10 @@ export type AiChatProviderReturnValue = {
    * Optional footer content rendered below the textarea
    */
   footer?: React.ReactNode
+  /**
+   * Optional component rendered when voice mode is active.
+   */
+  VoiceMode?: React.ComponentType
   /**
    * Set the footer content. Use this to update the footer from outside the provider (e.g. per page/route).
    */
@@ -160,8 +172,6 @@ export type AiChatProviderReturnValue = {
 > & {
     /** The current canvas content, or null when canvas is closed */
     canvasContent: CanvasContent | null
-    /** The dashboard config from the current canvas content, or null */
-    canvasDashboard: ChatDashboardConfig | null
     /** Open the canvas panel with the given content */
     openCanvas: (content: CanvasContent) => void
     /** Close the canvas panel and restore the previous visualization mode */
@@ -172,15 +182,6 @@ export type AiChatProviderReturnValue = {
     setActiveToolHint: React.Dispatch<
       React.SetStateAction<AiChatToolHint | null>
     >
-    /** Get a saved dashboard config by toolCallId (returns updated config after user edits) */
-    getSavedDashboardConfig: (
-      toolCallId: string
-    ) => ChatDashboardConfig | undefined
-    /** Save an updated dashboard config keyed by toolCallId */
-    updateDashboardConfig: (
-      toolCallId: string,
-      config: ChatDashboardConfig
-    ) => void
   }
 
 /**

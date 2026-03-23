@@ -1,9 +1,31 @@
 import { useCopilotAction, useCopilotContext } from "@copilotkit/react-core"
-import { useMemo } from "react"
+import { useEffect, useMemo, useRef } from "react"
 
-import { F0ChatReportCard } from "../../F0ChatReportCard"
 import type { ChatDashboardConfig } from "../../F0ChatDashboard/types"
+import type { CanvasContent } from "../types"
 import { useAiChat } from "../providers/AiChatStateProvider"
+import { DashboardCard } from "../canvas/entities/dashboard/DashboardCard"
+
+// Ensure dashboard entity is registered
+import "../canvas/entities/dashboard"
+
+/**
+ * Renders alongside the report card to auto-open the canvas
+ * the first time a dashboard is received from the agent.
+ */
+function AutoOpenCanvas({ content }: { content: CanvasContent }) {
+  const { openCanvas } = useAiChat()
+  const opened = useRef(false)
+
+  useEffect(() => {
+    if (!opened.current) {
+      opened.current = true
+      openCanvas(content)
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps -- open once on mount
+
+  return null
+}
 
 /**
  * Hook to register the displayDashboard copilot action.
@@ -16,8 +38,8 @@ import { useAiChat } from "../providers/AiChatStateProvider"
  * definitions, fetchSpecs) and computes everything server-side via
  * POST /api/dashboard/compute.
  *
- * An inline report card is rendered in the chat. The user clicks
- * "Open" on the card to view the dashboard in the canvas panel.
+ * An inline report card is rendered in the chat. New dashboards
+ * auto-open in the canvas panel. The card stays for re-opening later.
  *
  * Uses `available: "frontend"` so the backend agent can invoke it
  * via `emitFrontendTool` from the `displayDashboard` proxy tool.
@@ -130,20 +152,31 @@ export const useDisplayDashboardAction = () => {
 
       const config = args as ChatDashboardConfig
 
+      const canvasContent: CanvasContent = {
+        type: "dashboard",
+        title: config.title,
+        config,
+        apiConfig,
+        toolCallId,
+      }
+
       return (
-        <F0ChatReportCard
-          config={config}
-          toolCallId={toolCallId}
-          onView={(c) =>
-            openCanvas({
-              type: "dashboard",
-              title: c.title,
-              config: c,
-              apiConfig,
-              toolCallId,
-            })
-          }
-        />
+        <>
+          <AutoOpenCanvas content={canvasContent} />
+          <DashboardCard
+            config={config}
+            toolCallId={toolCallId}
+            onView={(c) =>
+              openCanvas({
+                type: "dashboard",
+                title: c.title,
+                config: c,
+                apiConfig,
+                toolCallId,
+              })
+            }
+          />
+        </>
       )
     },
   })

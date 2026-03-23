@@ -4,9 +4,12 @@ export { FullscreenChatContext } from "./F0AiFullscreenChat"
 
 // Types
 export type {
+  AiChatMode,
   AiChatProviderProps,
   AiChatToolHint,
   CanvasContent,
+  CanvasContentBase,
+  DashboardCanvasContent,
   EntityResolvers,
   PersonProfile,
   VisualizationMode,
@@ -14,6 +17,10 @@ export type {
   AiChatTranslations,
   AiChatTranslationsProviderProps,
 } from "./types"
+
+// Canvas entity registry
+export { registerCanvasEntity, getCanvasEntity } from "./canvas"
+export type { CanvasEntityDefinition } from "./canvas"
 
 export { aiTranslations } from "./types"
 
