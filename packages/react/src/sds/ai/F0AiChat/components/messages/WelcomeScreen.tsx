@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils"
 import { F0OneIcon } from "../../../F0OneIcon"
 import { WelcomeScreenSuggestion } from "../../types"
 import { PongGame } from "../PongGame"
+import { PongBall } from "../shared/PongBall"
 
 export type { WelcomeScreenSuggestion }
 
@@ -103,12 +104,7 @@ export const WelcomeScreen = ({
                 }}
                 transition={{ duration: 0.3, ease: "easeOut" }}
               >
-                <div
-                  className="h-10 w-10 rounded-full shadow-lg"
-                  style={{
-                    background: "linear-gradient(135deg, #E8845E, #B89BD6)",
-                  }}
-                />
+                <PongBall size={40} className="shadow-lg" />
               </motion.div>
             </div>
           </motion.div>

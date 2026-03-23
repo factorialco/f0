@@ -120,7 +120,10 @@ export function CreditsPopover() {
                   </span>
                   <span className="font-medium text-f1-foreground-secondary">
                     {i18n.t("ai.credits.creditsLeft", {
-                      total: data.used.toLocaleString(),
+                      total: Math.max(
+                        0,
+                        data.total - data.used
+                      ).toLocaleString(),
                     })}
                   </span>
                 </div>
