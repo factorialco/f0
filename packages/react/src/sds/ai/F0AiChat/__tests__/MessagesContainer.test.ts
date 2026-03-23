@@ -7,6 +7,45 @@ import {
 } from "../utils/turnUtils"
 
 describe("convertMessagesToTurn", () => {
+  it("returns empty array when all messages are non-user (e.g. coagent placeholder)", () => {
+    const messages: Message[] = [
+      {
+        id: "placeholder",
+        role: "assistant",
+        content: "",
+        name: "coagent-state-render",
+      },
+    ]
+    expect(convertMessagesToTurns(messages)).toHaveLength(0)
+  })
+
+  it("drops leading non-user messages and groups the rest normally", () => {
+    const messages: Message[] = [
+      {
+        id: "placeholder",
+        role: "assistant",
+        content: "",
+        name: "coagent-state-render",
+      },
+      {
+        id: "1",
+        role: "user",
+        content: "Hello!",
+      },
+      {
+        id: "2",
+        role: "assistant",
+        content: "Hi there!",
+      },
+    ]
+    const turns = convertMessagesToTurns(messages)
+    expect(turns).toHaveLength(1)
+    expect(turns[0]).toHaveLength(2)
+    expect(
+      turns[0].map((m) => (Array.isArray(m) ? "array" : m.role))
+    ).toStrictEqual(["user", "assistant"])
+  })
+
   it("every user message creates new turn", () => {
     const onlyUserMessages: Message[] = [
       {

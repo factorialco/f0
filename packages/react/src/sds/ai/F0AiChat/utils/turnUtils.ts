@@ -36,15 +36,21 @@ export function convertMessagesToTurns(messages: Message[]): Turn[] {
     return []
   }
 
-  console.assert(
-    messages[0].role === "user",
-    "Invariant violation! Assistant message received before user message"
-  )
+  // CopilotKit 1.54.0 can inject a synthetic "coagent-state-render" assistant
+  // placeholder before any user message exists (e.g. during initial agent
+  // connection when `agent.isRunning` is true).  Drop leading non-user
+  // messages so the turn-grouping logic below — which expects the first
+  // message to be a user message — doesn't crash.
+  const firstUserIdx = messages.findIndex((m) => m.role === "user")
+  if (firstUserIdx === -1) {
+    return []
+  }
+  const filtered = firstUserIdx > 0 ? messages.slice(firstUserIdx) : messages
 
   const turns: Turn[] = []
   let thinkingGroup: Message[] | null = null
 
-  for (const [i, message] of messages.entries()) {
+  for (const [i, message] of filtered.entries()) {
     if (message.role === "user") {
       turns.push([message])
       thinkingGroup = null
@@ -55,7 +61,7 @@ export function convertMessagesToTurns(messages: Message[]): Turn[] {
 
     // Hoist agent state messages above the thinking group
     if (isAgentStateMessage(message) && thinkingGroup) {
-      if (i !== messages.length - 1) {
+      if (i !== filtered.length - 1) {
         const idx = currentTurn.indexOf(thinkingGroup)
         if (idx !== -1) {
           currentTurn.splice(idx, 1)
