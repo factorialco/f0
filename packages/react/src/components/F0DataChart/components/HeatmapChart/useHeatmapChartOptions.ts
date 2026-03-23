@@ -83,9 +83,9 @@ export function useHeatmapChartOptions(
         max,
         calculable: false,
         orient: "horizontal",
-        bottom: 0,
+        bottom: 10,
         left: "center",
-        show: showVisualMap,
+        show: false,
         inRange: {
           color: [colors.borderSecondary, baseColor],
         },

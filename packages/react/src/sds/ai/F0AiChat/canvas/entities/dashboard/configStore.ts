@@ -1,4 +1,4 @@
-import type { ChatDashboardConfig } from "../../../../F0ChatDashboard/types"
+import type { ChatDashboardConfig } from "./types"
 
 /**
  * External store for saved (user-edited) dashboard configs.

@@ -8,23 +8,26 @@ import { useReducedMotion } from "@/lib/a11y"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
-import { F0OneIcon } from "../../F0OneIcon"
+// ChatSpinner removed — ball now uses conic gradient
 
 // Layout
-const BALL_SIZE = 32
-const PADDLE_WIDTH_INITIAL = 64
+const BALL_SIZE = 40
+const PADDLE_WIDTH_INITIAL = 93
 const PADDLE_WIDTH_MIN = PADDLE_WIDTH_INITIAL * 0.5 // 50% of original
-const PADDLE_HEIGHT = 8
+const PADDLE_HEIGHT = 32
 const PADDLE_EDGE_MARGIN = 24
 const WALL_INSET = 8
+const SCORE_PANEL_WIDTH = 48
+const KEYBOARD_SPEED = 10
 
 // Physics
-const BASE_SPEED = 4.5
-const MAX_SPEED = 14
+const BASE_SPEED = 7
+const MAX_SPEED = 18
 const SPEED_INCREMENT_PER_HIT = 0.25
 const SPEED_INCREMENT_PER_POINT = 0.15
-const SPIN_FACTOR = 2.5
 const SERVE_DELAY_MS = 800
+const MAX_BOUNCE_ANGLE = Math.PI / 3 // 60° max deflection from vertical
+const BALL_RADIUS = BALL_SIZE / 2
 
 // AI behavior
 const AI_SMOOTHING = 0.12
@@ -76,6 +79,9 @@ export const PongGame = ({ onClose }: PongGameProps) => {
   const confettiInstanceRef = useRef<confetti.CreateTypes | null>(null)
   const [portalTarget, setPortalTarget] = useState<HTMLElement | null>(null)
 
+  // Keyboard tracking
+  const keysPressed = useRef(new Set<string>())
+
   // Game state refs (mutation-friendly for rAF loop)
   const ball = useRef<Ball>({
     x: 0,
@@ -103,6 +109,8 @@ export const PongGame = ({ onClose }: PongGameProps) => {
   // Ball rotation
   const ballRotation = useRef(0)
   const ballAngularVel = useRef(0)
+  // Track last scorer for "Goal" display
+  const lastScorerRef = useRef<"player" | "ai" | null>(null)
 
   // Render state
   const [ballPos, setBallPos] = useState<Vec2>({ x: 0, y: 0 })
@@ -117,6 +125,7 @@ export const PongGame = ({ onClose }: PongGameProps) => {
   const [shake, setShake] = useState(0)
   const [ballAngle, setBallAngle] = useState(0)
   const [endMessage, setEndMessage] = useState<string | null>(null)
+  const [lastScorer, setLastScorer] = useState<"player" | "ai" | null>(null)
 
   const centerBall = useCallback(() => {
     const { width, height } = containerSize.current
@@ -141,6 +150,8 @@ export const PongGame = ({ onClose }: PongGameProps) => {
     ball.current.speed = currentSpeed
     phaseRef.current = "playing"
     setPhase("playing")
+    lastScorerRef.current = null
+    setLastScorer(null)
   }, [])
 
   const startCountdown = useCallback(() => {
@@ -180,6 +191,8 @@ export const PongGame = ({ onClose }: PongGameProps) => {
       scoreRef.current = newScore
       setScore(newScore)
       shakeRef.current = 8
+      lastScorerRef.current = scorer
+      setLastScorer(scorer)
 
       // Ball gets permanently faster each point
       globalSpeedBonus.current = Math.min(
@@ -245,9 +258,20 @@ export const PongGame = ({ onClose }: PongGameProps) => {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose()
+      if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+        e.preventDefault()
+        keysPressed.current.add(e.key)
+      }
+    }
+    const handleKeyUp = (e: KeyboardEvent) => {
+      keysPressed.current.delete(e.key)
     }
     window.addEventListener("keydown", handleKeyDown)
-    return () => window.removeEventListener("keydown", handleKeyDown)
+    window.addEventListener("keyup", handleKeyUp)
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown)
+      window.removeEventListener("keyup", handleKeyUp)
+    }
   }, [onClose])
 
   // Main game loop
@@ -293,6 +317,23 @@ export const PongGame = ({ onClose }: PongGameProps) => {
       const { width, height } = containerSize.current
       const b = ball.current
 
+      // Keyboard-based player movement
+      const pw = paddleWidthRef.current
+      if (keysPressed.current.has("ArrowLeft")) {
+        playerX.current = clamp(
+          playerX.current - KEYBOARD_SPEED * dt,
+          pw / 2 + WALL_INSET,
+          width - pw / 2 - WALL_INSET
+        )
+      }
+      if (keysPressed.current.has("ArrowRight")) {
+        playerX.current = clamp(
+          playerX.current + KEYBOARD_SPEED * dt,
+          pw / 2 + WALL_INSET,
+          width - pw / 2 - WALL_INSET
+        )
+      }
+
       // Shake decay
       if (shakeRef.current > 0) {
         shakeRef.current *= 0.85
@@ -330,23 +371,26 @@ export const PongGame = ({ onClose }: PongGameProps) => {
         }
 
         // Player paddle collision (bottom)
-        const pw = paddleWidthRef.current
-        const playerPaddleY = height - PADDLE_EDGE_MARGIN
+        const playerPaddleTop = height - PADDLE_EDGE_MARGIN - PADDLE_HEIGHT
+        const playerHalfW = pw / 2
         if (
-          b.y + BALL_SIZE / 2 >= playerPaddleY &&
-          b.y + BALL_SIZE / 2 <= playerPaddleY + PADDLE_HEIGHT + 4 &&
+          b.y + BALL_RADIUS >= playerPaddleTop &&
+          b.y - BALL_RADIUS <= playerPaddleTop + PADDLE_HEIGHT &&
           b.vy > 0 &&
-          b.x > playerX.current - pw / 2 - BALL_SIZE / 4 &&
-          b.x < playerX.current + pw / 2 + BALL_SIZE / 4
+          b.x >= playerX.current - playerHalfW - BALL_RADIUS &&
+          b.x <= playerX.current + playerHalfW + BALL_RADIUS
         ) {
-          b.y = playerPaddleY - BALL_SIZE / 2
-          const hitOffset = (b.x - playerX.current) / (pw / 2 + BALL_SIZE / 4)
+          // Push ball out so it never embeds inside the paddle
+          b.y = playerPaddleTop - BALL_RADIUS
+          // Normalized hit position clamped to [-1, 1]
+          const hitOffset = clamp((b.x - playerX.current) / playerHalfW, -1, 1)
           b.speed = Math.min(b.speed + SPEED_INCREMENT_PER_HIT, MAX_SPEED)
-          const angle = hitOffset * (Math.PI / 3)
-          b.vx = Math.sin(angle) * b.speed + hitOffset * SPIN_FACTOR
+          // Angle from vertical, proportional to where ball hit
+          const angle = hitOffset * MAX_BOUNCE_ANGLE
+          // Set velocity with consistent magnitude = speed
+          b.vx = Math.sin(angle) * b.speed
           b.vy = -Math.cos(angle) * b.speed
-          // Impart angular velocity based on where ball hit paddle
-          ballAngularVel.current = hitOffset * 1.5 + b.vx * 0.08
+          ballAngularVel.current = hitOffset * 1.2
           rallyRef.current++
           totalRalliesRef.current++
           // Shrink paddle: exponential decay toward 50% of initial
@@ -358,22 +402,22 @@ export const PongGame = ({ onClose }: PongGameProps) => {
         }
 
         // AI paddle collision (top)
-        const aiPaddleY = PADDLE_EDGE_MARGIN + PADDLE_HEIGHT
+        const aiPaddleBottom = PADDLE_EDGE_MARGIN + PADDLE_HEIGHT
+        const aiHalfW = PADDLE_WIDTH_INITIAL / 2
         if (
-          b.y - BALL_SIZE / 2 <= aiPaddleY &&
-          b.y - BALL_SIZE / 2 >= aiPaddleY - PADDLE_HEIGHT - 4 &&
+          b.y - BALL_RADIUS <= aiPaddleBottom &&
+          b.y + BALL_RADIUS >= PADDLE_EDGE_MARGIN &&
           b.vy < 0 &&
-          b.x > aiX.current - PADDLE_WIDTH_INITIAL / 2 - BALL_SIZE / 4 &&
-          b.x < aiX.current + PADDLE_WIDTH_INITIAL / 2 + BALL_SIZE / 4
+          b.x >= aiX.current - aiHalfW - BALL_RADIUS &&
+          b.x <= aiX.current + aiHalfW + BALL_RADIUS
         ) {
-          b.y = aiPaddleY + BALL_SIZE / 2
-          const hitOffset =
-            (b.x - aiX.current) / (PADDLE_WIDTH_INITIAL / 2 + BALL_SIZE / 4)
+          b.y = aiPaddleBottom + BALL_RADIUS
+          const hitOffset = clamp((b.x - aiX.current) / aiHalfW, -1, 1)
           b.speed = Math.min(b.speed + SPEED_INCREMENT_PER_HIT, MAX_SPEED)
-          const angle = hitOffset * (Math.PI / 3)
-          b.vx = Math.sin(angle) * b.speed + hitOffset * SPIN_FACTOR
+          const angle = hitOffset * MAX_BOUNCE_ANGLE
+          b.vx = Math.sin(angle) * b.speed
           b.vy = Math.cos(angle) * b.speed
-          ballAngularVel.current = hitOffset * 1.5 + b.vx * 0.08
+          ballAngularVel.current = hitOffset * 1.2
           rallyRef.current++
         }
 
@@ -466,21 +510,9 @@ export const PongGame = ({ onClose }: PongGameProps) => {
       <div className="flex flex-1 flex-col bg-f1-special-page">
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3">
-          <div className="flex items-baseline gap-3 text-sm font-medium tracking-widest text-f1-foreground-secondary">
-            <div className="flex items-baseline gap-2">
-              <span>{translations.ai.pong.ai}</span>
-              <span className="text-center text-base font-semibold text-f1-foreground">
-                {score.ai}
-              </span>
-            </div>
-            <span className="text-f1-foreground">:</span>
-            <div className="flex items-baseline gap-2">
-              <span className="text-center text-base font-semibold text-f1-foreground">
-                {score.player}
-              </span>
-              <span>{translations.ai.pong.you}</span>
-            </div>
-          </div>
+          <span className="text-base font-medium text-f1-foreground">
+            {translations.ai.pong.title}
+          </span>
           <F0Button
             icon={Cross}
             label={translations.actions.close}
@@ -490,129 +522,168 @@ export const PongGame = ({ onClose }: PongGameProps) => {
           />
         </div>
 
-        {/* Game area */}
-        <div
-          ref={containerRef}
-          className="relative flex-1 cursor-none overflow-hidden"
-          style={{
-            touchAction: "none",
-            transform: `translate(${shakeX}px, ${shakeY}px)`,
-          }}
-        >
-          {/* Center line */}
+        {/* Game area with scores */}
+        <div className="relative flex-1">
+          {/* Game canvas — full width, ball renders above score panel */}
           <div
-            className="pointer-events-none absolute left-0 right-0"
+            ref={containerRef}
+            className="absolute inset-0 cursor-none overflow-hidden"
             style={{
-              top: "50%",
-              height: 2,
-              backgroundImage:
-                "repeating-linear-gradient(90deg, var(--f1-foreground-secondary) 0, var(--f1-foreground-secondary) 8px, transparent 8px, transparent 20px)",
-              opacity: 0.15,
+              touchAction: "none",
+              transform: `translate(${shakeX}px, ${shakeY}px)`,
             }}
-          />
+          >
+            {/* Center line — solid, subtle */}
+            <div className="pointer-events-none absolute left-0 right-0 top-1/2 h-px translate-y-1/2 bg-f1-border" />
 
-          {/* Wall indicators */}
-          <div
-            className="pointer-events-none absolute bottom-0 left-0 top-0 bg-f1-foreground-secondary/5"
-            style={{ width: WALL_INSET }}
-          />
-          <div
-            className="pointer-events-none absolute bottom-0 right-0 top-0 bg-f1-foreground-secondary/5"
-            style={{ width: WALL_INSET }}
-          />
+            {/* Ball trail */}
+            {trail.map((pos, i) => {
+              const progress = (i + 1) / trail.length
+              const size = BALL_SIZE * (0.15 + progress * 0.25)
+              return (
+                <div
+                  key={i}
+                  className="pointer-events-none absolute rounded-full bg-f1-foreground-secondary/40"
+                  style={{
+                    width: size,
+                    height: size,
+                    opacity: progress * TRAIL_MAX_OPACITY,
+                    transform: `translate(${pos.x - size / 2}px, ${pos.y - size / 2}px)`,
+                  }}
+                />
+              )
+            })}
 
-          {/* Ball trail */}
-          {trail.map((pos, i) => {
-            const progress = (i + 1) / trail.length
-            const size = BALL_SIZE * (0.15 + progress * 0.25)
-            return (
-              <div
-                key={i}
-                className="pointer-events-none absolute rounded-full bg-f1-foreground-secondary/40"
-                style={{
-                  width: size,
-                  height: size,
-                  opacity: progress * TRAIL_MAX_OPACITY,
-                  transform: `translate(${pos.x - size / 2}px, ${pos.y - size / 2}px)`,
-                }}
-              />
-            )
-          })}
-
-          {/* AI Paddle (top) — animated gradient like AI textarea */}
-          <div
-            className={cn(
-              "absolute isolate rounded-full",
-              "before:pointer-events-none before:absolute before:inset-0 before:z-[1]",
-              "before:rounded-[inherit] before:bg-f1-foreground-tertiary before:content-['']",
-              "after:pointer-events-none after:absolute after:-inset-0.5 after:z-[0]",
-              "after:rounded-[inherit] after:blur-[3px] after:content-['']",
-              "after:bg-[conic-gradient(from_var(--gradient-angle),var(--tw-gradient-stops))]",
-              "from-[#E55619] via-[#A1ADE5] to-[#E51943]",
-              "after:opacity-80"
-            )}
-            style={
-              {
+            {/* AI Paddle (top) — ChatTextarea border/outline style */}
+            <div
+              className={cn(
+                "absolute isolate rounded",
+                "border border-solid border-f1-border",
+                "before:pointer-events-none before:absolute before:inset-0 before:z-[-1]",
+                "before:rounded-[inherit] before:bg-f1-special-page before:content-['']",
+                "after:pointer-events-none after:absolute after:inset-0.5 after:z-[-2]",
+                "after:rounded-[inherit] after:blur-[5px] after:content-['']",
+                "after:bg-[conic-gradient(from_var(--gradient-angle),var(--tw-gradient-stops))]",
+                "from-[#E55619] via-[#A1ADE5] to-[#E51943]",
+                "after:scale-100 after:opacity-100"
+              )}
+              style={{
                 width: PADDLE_WIDTH_INITIAL,
                 height: PADDLE_HEIGHT,
                 top: PADDLE_EDGE_MARGIN,
                 transform: `translateX(${renderAiX - PADDLE_WIDTH_INITIAL / 2}px)`,
-                "--gradient-angle": "0deg",
                 animation: "pong-ai-glow 4s linear infinite",
-              } as React.CSSProperties
-            }
-          />
+                // @ts-expect-error CSS custom property
+                "--gradient-angle": "0deg",
+              }}
+            />
 
-          {/* Ball */}
-          <div
-            className="pointer-events-none absolute"
-            style={{
-              transform: `translate(${ballPos.x - BALL_SIZE / 2}px, ${ballPos.y - BALL_SIZE / 2}px) rotate(${ballAngle}rad)`,
-            }}
-          >
-            <F0OneIcon size="md" />
-          </div>
+            {/* Ball — soft linear gradient, hidden during countdown */}
+            <div
+              className="pointer-events-none absolute z-30 rounded-full"
+              style={{
+                width: BALL_SIZE,
+                height: BALL_SIZE,
+                background: "linear-gradient(135deg, #E8845E, #B89BD6)",
+                transform: `translate(${ballPos.x - BALL_SIZE / 2}px, ${ballPos.y - BALL_SIZE / 2}px) rotate(${ballAngle}rad)`,
+                opacity: phase === "countdown" ? 0 : 1,
+                transition: "opacity 0.3s ease-in",
+              }}
+            />
 
-          {/* Player Paddle (bottom) */}
-          <div
-            className="absolute rounded-full bg-f1-foreground-tertiary"
-            style={{
-              width: renderPaddleWidth,
-              height: PADDLE_HEIGHT,
-              bottom: PADDLE_EDGE_MARGIN,
-              transform: `translateX(${renderPlayerX - renderPaddleWidth / 2}px)`,
-              transition: "width 0.3s ease-out",
-            }}
-          />
+            {/* Player Paddle (bottom) — gradient aura like AI paddle */}
+            <div
+              className="absolute rounded border-2 border-solid border-f1-border"
+              style={{
+                width: renderPaddleWidth,
+                height: PADDLE_HEIGHT,
+                bottom: PADDLE_EDGE_MARGIN,
+                transform: `translateX(${renderPlayerX - renderPaddleWidth / 2}px)`,
+                transition: "width 0.3s ease-out",
+              }}
+            >
+              <div className="h-full w-full rounded bg-f1-special-page" />
+            </div>
 
-          {/* Countdown overlay */}
-          {phase === "countdown" && (
-            <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+            {/* Center circle — always visible, like a football pitch */}
+            <div className="pointer-events-none absolute left-1/2 top-1/2 flex h-20 w-20 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-solid border-f1-border bg-f1-special-page">
               <span
-                className="text-5xl font-semibold text-f1-foreground-secondary"
+                className="text-3xl font-semibold text-f1-foreground-secondary"
                 style={{
-                  animation: "pulse 0.6s ease-out infinite",
+                  opacity: phase === "countdown" ? 1 : 0,
+                  transition: "opacity 0.3s ease-out",
                 }}
               >
-                {countdown}
+                {phase === "countdown" ? countdown : ""}
               </span>
             </div>
-          )}
 
-          {/* Game over overlay */}
-          {phase === "gameover" && endMessage && (
-            <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-f1-special-page/60 backdrop-blur-sm">
-              <span className="text-2xl font-semibold text-f1-foreground">
-                {endMessage}
+            {/* Goal indicator — bottom half when player scores, top half when AI scores */}
+            {phase === "scored" && lastScorer && (
+              <div
+                className={cn(
+                  "pointer-events-none absolute left-4 flex items-center",
+                  lastScorer === "player" ? "top-1/2 mt-4" : "bottom-1/2 -mt-4"
+                )}
+              >
+                <span className="text-2xl font-semibold text-f1-foreground-secondary/60">
+                  {translations.ai.pong.goal}
+                </span>
+              </div>
+            )}
+
+            {/* Game over overlay */}
+            {phase === "gameover" && endMessage && (
+              <div className="pointer-events-none absolute inset-0 z-40 flex items-center justify-center bg-f1-special-page/60 backdrop-blur-sm">
+                <span className="text-2xl font-semibold text-f1-foreground">
+                  {endMessage}
+                </span>
+              </div>
+            )}
+
+            {/* Confetti canvas */}
+            <canvas
+              ref={confettiCanvasRef}
+              className="pointer-events-none absolute inset-0 z-50 h-full w-full"
+            />
+          </div>
+
+          {/* Right score panel — absolute, ball passes over it */}
+          <div
+            className="pointer-events-none absolute inset-y-0 right-0 flex flex-col items-center justify-center"
+            style={{ width: SCORE_PANEL_WIDTH }}
+          >
+            <div className="flex flex-col items-center gap-6">
+              <span
+                className={cn(
+                  "text-2xl font-semibold",
+                  score.ai > 0
+                    ? "text-f1-foreground-secondary"
+                    : "text-f1-foreground-disabled"
+                )}
+              >
+                {score.ai}
+              </span>
+              <span
+                className={cn(
+                  "text-2xl font-semibold",
+                  score.player > 0
+                    ? "text-f1-foreground-secondary"
+                    : "text-f1-foreground-disabled"
+                )}
+              >
+                {score.player}
               </span>
             </div>
-          )}
+          </div>
+        </div>
 
-          {/* Confetti canvas */}
-          <canvas
-            ref={confettiCanvasRef}
-            className="pointer-events-none absolute inset-0 z-50 h-full w-full"
-          />
+        {/* Footer — controls hint */}
+        <div className="flex items-center justify-center px-4 py-3 text-sm font-medium text-f1-foreground-secondary">
+          <div className="flex gap-5">
+            <span>{translations.ai.pong.controls}</span>
+            <span>{translations.ai.pong.escToExit}</span>
+          </div>
         </div>
       </div>
     </div>,

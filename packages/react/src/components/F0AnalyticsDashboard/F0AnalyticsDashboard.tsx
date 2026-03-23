@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 import type {
   FiltersDefinition,
@@ -8,7 +8,9 @@ import type {
 import type { F0AnalyticsDashboardProps } from "./types"
 
 import { DashboardGrid } from "./components/DashboardGrid/DashboardGrid"
+import { ExportDropdown } from "./components/ExportDropdown/ExportDropdown"
 import { FilterBar } from "./components/FilterBar/FilterBar"
+import { useDashboardExport } from "./hooks/useDashboardExport"
 
 /**
  * F0AnalyticsDashboard — a declarative, config-driven analytics dashboard.
@@ -29,25 +31,53 @@ export const F0AnalyticsDashboard = <
   items,
   editMode,
   onLayoutChange,
+  enableExport,
+  exportFilename,
+  onExportReady,
 }: F0AnalyticsDashboardProps<Filters>) => {
   const [currentFilters, setCurrentFilters] = useState<FiltersState<Filters>>(
     () => defaultFilters ?? ({} as FiltersState<Filters>)
   )
 
+  const { exportAsExcel, isExporting } = useDashboardExport({
+    items,
+    filters: currentFilters,
+    filename: exportFilename,
+  })
+
+  useEffect(() => {
+    onExportReady?.(exportAsExcel)
+    return () => onExportReady?.(undefined)
+  }, [exportAsExcel, onExportReady])
+
   return (
-    <div className="flex flex-col gap-4">
-      <FilterBar
-        filters={filters}
-        value={currentFilters}
-        presets={presets}
-        onChange={setCurrentFilters}
-      />
-      <DashboardGrid
-        items={items}
-        filters={currentFilters}
-        editMode={editMode}
-        onLayoutChange={onLayoutChange}
-      />
+    <div className="flex flex-col gap-3.5 py-4">
+      {(filters || enableExport) && (
+        <div className="flex items-center justify-between gap-4 px-5">
+          <div className="w-full">
+            <FilterBar
+              filters={filters}
+              value={currentFilters}
+              presets={presets}
+              onChange={setCurrentFilters}
+            />
+          </div>
+          {enableExport && (
+            <ExportDropdown
+              onExportExcel={exportAsExcel}
+              isExporting={isExporting}
+            />
+          )}
+        </div>
+      )}
+      <div className="px-3.5">
+        <DashboardGrid
+          items={items}
+          filters={currentFilters}
+          editMode={editMode}
+          onLayoutChange={onLayoutChange}
+        />
+      </div>
     </div>
   )
 }

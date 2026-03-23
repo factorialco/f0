@@ -1,14 +1,15 @@
 // Main components
 export { F0AiChat, F0AiChatProvider, F0AiFullscreenChat } from "./F0AiChat"
-export { FullscreenChatContext } from "./F0AiFullscreenChat"
 
 // Types
 export type {
+  AiChatCredits,
   AiChatMode,
   AiChatProviderProps,
   AiChatToolHint,
   CanvasContent,
   CanvasContentBase,
+  CreditsUsage,
   DashboardCanvasContent,
   EntityResolvers,
   PersonProfile,
@@ -19,7 +20,7 @@ export type {
 } from "./types"
 
 // Canvas entity registry
-export { registerCanvasEntity, getCanvasEntity } from "./canvas"
+export { getCanvasEntity } from "./canvas"
 export type { CanvasEntityDefinition } from "./canvas"
 
 export { aiTranslations } from "./types"
@@ -38,8 +39,4 @@ export {
   useDefaultCopilotActions,
   useOrchestratorThinkingAction,
   useMessageSourcesAction,
-  useF0AiFormActions,
-  useFormFillAction,
-  useFormSubmitAction,
-  useFormGetStateAction,
-} from "./copilotActions"
+} from "./actions"

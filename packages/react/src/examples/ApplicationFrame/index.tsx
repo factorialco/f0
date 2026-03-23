@@ -23,8 +23,8 @@ import {
   F0AiChatProvider,
   AiChatProviderProps,
 } from "@/sds/ai/F0AiChat"
-import { CanvasPanel } from "@/sds/ai/F0AiChat/components/CanvasPanel"
-import { DEFAULT_CHAT_WIDTH } from "@/sds/ai/F0AiChat/constants"
+import { CanvasPanel } from "@/sds/ai/F0AiChat/components/layout/CanvasPanel"
+import { DEFAULT_CHAT_WIDTH } from "@/sds/ai/F0AiChat/utils/constants"
 import { useAiChat } from "@/sds/ai/F0AiChat/providers/AiChatStateProvider"
 
 import { FrameProvider, SidebarState, useSidebar } from "./FrameProvider"
@@ -226,6 +226,10 @@ function ApplicationFrameContent({
     { initializeWithValue: true }
   )
 
+  const isSmallViewport = useMediaQuery(`(max-width: ${breakpoints.md}px)`, {
+    initializeWithValue: true,
+  })
+
   useEffect(() => {
     setForceFloat(isAiChatOpen)
   }, [isAiChatOpen, setForceFloat])
@@ -288,7 +292,8 @@ function ApplicationFrameContent({
             <motion.div
               className="relative min-w-0 flex-1"
               animate={{
-                paddingRight: isAiChatOpen ? reservedChatWidth : 0,
+                paddingRight:
+                  isAiChatOpen && !isSmallViewport ? reservedChatWidth : 0,
               }}
               transition={{ paddingRight: CONTENT_TRANSITION }}
             >
@@ -323,8 +328,15 @@ function ApplicationFrameContent({
               {/* Canvas dashboard panel */}
               {ai?.enabled && isCanvasMode && canvasContent && (
                 <div
-                  className="pointer-events-none absolute bottom-0 left-0 top-0 z-[15]"
-                  style={{ right: reservedChatWidth }}
+                  className={cn(
+                    "pointer-events-none",
+                    isSmallViewport
+                      ? "fixed inset-0 z-[25]"
+                      : "absolute bottom-0 left-0 top-0 z-[15]"
+                  )}
+                  style={
+                    isSmallViewport ? undefined : { right: reservedChatWidth }
+                  }
                 >
                   <CanvasPanel />
                 </div>
@@ -333,15 +345,23 @@ function ApplicationFrameContent({
               {ai?.enabled && (
                 <motion.div
                   className={cn(
-                    "pointer-events-none absolute right-0 top-0 bottom-0",
+                    "pointer-events-none",
                     "[&_.copilotKitSidebarContentWrapper]:relative [&_.copilotKitSidebarContentWrapper]:h-full [&_.copilotKitSidebarContentWrapper]:w-full",
-                    isInFullscreenTransition ? "z-20" : "z-0",
-                    sidebarState === "hidden" && isInFullscreenTransition
-                      ? "pl-1"
-                      : "pl-0"
+                    isSmallViewport
+                      ? "fixed inset-0 z-[30]"
+                      : cn(
+                          "absolute right-0 top-0 bottom-0",
+                          isInFullscreenTransition ? "z-20" : "z-0",
+                          sidebarState === "hidden" && isInFullscreenTransition
+                            ? "pl-1"
+                            : "pl-0"
+                        )
                   )}
                   animate={{
-                    width: isAiChatFullscreen ? "100%" : reservedChatWidth,
+                    width:
+                      isSmallViewport || isAiChatFullscreen
+                        ? "100%"
+                        : reservedChatWidth,
                   }}
                   transition={chatContainerTransition}
                   onAnimationComplete={() => {
