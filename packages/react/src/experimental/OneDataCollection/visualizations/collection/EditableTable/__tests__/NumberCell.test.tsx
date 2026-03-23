@@ -104,4 +104,25 @@ describe("NumberCell", () => {
 
     expect(screen.getByText("EUR")).toBeInTheDocument()
   })
+
+  it("renders value '0' when stored value is '0' (no units)", () => {
+    render(<NumberCell {...defaultProps} value="0" />)
+
+    expect(screen.getByRole("textbox")).toHaveValue("0")
+  })
+
+  it("renders value '0' with units suffix when stored value is '0'", () => {
+    render(
+      <NumberCell
+        {...defaultProps}
+        value="0"
+        editableColumn={makeEditableColumn({
+          numberConfig: { units: "€" },
+        })}
+      />
+    )
+
+    expect(screen.getByRole("textbox")).toHaveValue("0")
+    expect(screen.getByText("€")).toBeInTheDocument()
+  })
 })
