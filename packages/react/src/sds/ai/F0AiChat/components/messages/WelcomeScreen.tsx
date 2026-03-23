@@ -1,7 +1,7 @@
 import { useCopilotChatInternal } from "@copilotkit/react-core"
 import { Message, randomId } from "@copilotkit/shared"
 import { AnimatePresence, motion } from "motion/react"
-import { useMemo, useState } from "react"
+import { useCallback, useMemo, useRef, useState } from "react"
 
 import { useAiChat } from "@/ai"
 import { ButtonInternal } from "@/components/F0Button/internal"
@@ -34,6 +34,17 @@ export const WelcomeScreen = ({
   suggestions?: WelcomeScreenSuggestion[]
 }) => {
   const [showPong, setShowPong] = useState(false)
+  const [isHovered, setIsHovered] = useState(false)
+  const hoverTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const handleMouseEnter = useCallback(() => {
+    hoverTimeout.current = setTimeout(() => setIsHovered(true), 80)
+  }, [])
+
+  const handleMouseLeave = useCallback(() => {
+    if (hoverTimeout.current) clearTimeout(hoverTimeout.current)
+    setIsHovered(false)
+  }, [])
 
   const { sendMessage } = useCopilotChatInternal()
 
@@ -68,8 +79,37 @@ export const WelcomeScreen = ({
               delay: 0.4,
             }}
           >
-            <div className="cursor-pointer" onClick={() => setShowPong(true)}>
-              <F0OneIcon spin size="lg" className="my-4" />
+            <div
+              className="relative cursor-pointer"
+              onClick={() => setShowPong(true)}
+              onMouseEnter={handleMouseEnter}
+              onMouseLeave={handleMouseLeave}
+            >
+              <motion.div
+                animate={{
+                  opacity: isHovered ? 0 : 1,
+                  scale: isHovered ? 0.6 : 1,
+                }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
+              >
+                <F0OneIcon spin size="lg" className="my-4" />
+              </motion.div>
+              <motion.div
+                className="absolute inset-0 flex items-center justify-center"
+                initial={{ opacity: 0, scale: 0.4 }}
+                animate={{
+                  opacity: isHovered ? 1 : 0,
+                  scale: isHovered ? 1 : 0.4,
+                }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
+              >
+                <div
+                  className="h-10 w-10 rounded-full shadow-lg"
+                  style={{
+                    background: "linear-gradient(135deg, #E8845E, #B89BD6)",
+                  }}
+                />
+              </motion.div>
             </div>
           </motion.div>
           {greeting && !isFullscreen && (
