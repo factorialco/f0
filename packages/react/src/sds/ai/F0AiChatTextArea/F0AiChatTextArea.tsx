@@ -147,12 +147,13 @@ export const F0AiChatTextArea = ({
         ? `<tool-context tool="${activeToolHint.id}">${activeToolHint.prompt}</tool-context>\n\n${transformed}`
         : transformed
 
-      // When files are attached and the multipart callback is available,
-      // delegate to it so the caller can build a proper multipart message
-      // (e.g. CopilotKit Message with BinaryInputContent parts).
-      const files = uploadedFiles
-        .map((f) => f.uploadedFile)
-        .filter((f) => f !== undefined)
+      // When files are attached, delegate to onSendWithFiles so the caller
+      // can build a proper multipart message (e.g. CopilotKit Message with
+      // BinaryInputContent parts). Otherwise, fall back to the plain-text
+      // onSend callback.
+      const files = uploadedFiles.flatMap((f) =>
+        f.uploadedFile ? [f.uploadedFile] : []
+      )
 
       if (files.length > 0 && onSendWithFiles) {
         onSendWithFiles(withToolHint, files)
