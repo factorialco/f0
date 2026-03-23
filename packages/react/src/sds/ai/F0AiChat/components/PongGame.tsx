@@ -21,12 +21,13 @@ const SCORE_PANEL_WIDTH = 48
 const KEYBOARD_SPEED = 10
 
 // Physics
-const BASE_SPEED = 4.5
-const MAX_SPEED = 14
+const BASE_SPEED = 7
+const MAX_SPEED = 18
 const SPEED_INCREMENT_PER_HIT = 0.25
 const SPEED_INCREMENT_PER_POINT = 0.15
-const SPIN_FACTOR = 2.5
 const SERVE_DELAY_MS = 800
+const MAX_BOUNCE_ANGLE = Math.PI / 3 // 60° max deflection from vertical
+const BALL_RADIUS = BALL_SIZE / 2
 
 // AI behavior
 const AI_SMOOTHING = 0.12
@@ -371,21 +372,25 @@ export const PongGame = ({ onClose }: PongGameProps) => {
 
         // Player paddle collision (bottom)
         const playerPaddleTop = height - PADDLE_EDGE_MARGIN - PADDLE_HEIGHT
+        const playerHalfW = pw / 2
         if (
-          b.y + BALL_SIZE / 2 >= playerPaddleTop &&
-          b.y + BALL_SIZE / 2 <= playerPaddleTop + PADDLE_HEIGHT + 4 &&
+          b.y + BALL_RADIUS >= playerPaddleTop &&
+          b.y - BALL_RADIUS <= playerPaddleTop + PADDLE_HEIGHT &&
           b.vy > 0 &&
-          b.x > playerX.current - pw / 2 - BALL_SIZE / 4 &&
-          b.x < playerX.current + pw / 2 + BALL_SIZE / 4
+          b.x >= playerX.current - playerHalfW - BALL_RADIUS &&
+          b.x <= playerX.current + playerHalfW + BALL_RADIUS
         ) {
-          b.y = playerPaddleTop - BALL_SIZE / 2
-          const hitOffset = (b.x - playerX.current) / (pw / 2 + BALL_SIZE / 4)
+          // Push ball out so it never embeds inside the paddle
+          b.y = playerPaddleTop - BALL_RADIUS
+          // Normalized hit position clamped to [-1, 1]
+          const hitOffset = clamp((b.x - playerX.current) / playerHalfW, -1, 1)
           b.speed = Math.min(b.speed + SPEED_INCREMENT_PER_HIT, MAX_SPEED)
-          const angle = hitOffset * (Math.PI / 3)
-          b.vx = Math.sin(angle) * b.speed + hitOffset * SPIN_FACTOR
+          // Angle from vertical, proportional to where ball hit
+          const angle = hitOffset * MAX_BOUNCE_ANGLE
+          // Set velocity with consistent magnitude = speed
+          b.vx = Math.sin(angle) * b.speed
           b.vy = -Math.cos(angle) * b.speed
-          // Impart angular velocity based on where ball hit paddle
-          ballAngularVel.current = hitOffset * 1.5 + b.vx * 0.08
+          ballAngularVel.current = hitOffset * 1.2
           rallyRef.current++
           totalRalliesRef.current++
           // Shrink paddle: exponential decay toward 50% of initial
@@ -397,22 +402,22 @@ export const PongGame = ({ onClose }: PongGameProps) => {
         }
 
         // AI paddle collision (top)
-        const aiPaddleY = PADDLE_EDGE_MARGIN + PADDLE_HEIGHT
+        const aiPaddleBottom = PADDLE_EDGE_MARGIN + PADDLE_HEIGHT
+        const aiHalfW = PADDLE_WIDTH_INITIAL / 2
         if (
-          b.y - BALL_SIZE / 2 <= aiPaddleY &&
-          b.y - BALL_SIZE / 2 >= aiPaddleY - PADDLE_HEIGHT - 4 &&
+          b.y - BALL_RADIUS <= aiPaddleBottom &&
+          b.y + BALL_RADIUS >= PADDLE_EDGE_MARGIN &&
           b.vy < 0 &&
-          b.x > aiX.current - PADDLE_WIDTH_INITIAL / 2 - BALL_SIZE / 4 &&
-          b.x < aiX.current + PADDLE_WIDTH_INITIAL / 2 + BALL_SIZE / 4
+          b.x >= aiX.current - aiHalfW - BALL_RADIUS &&
+          b.x <= aiX.current + aiHalfW + BALL_RADIUS
         ) {
-          b.y = aiPaddleY + BALL_SIZE / 2
-          const hitOffset =
-            (b.x - aiX.current) / (PADDLE_WIDTH_INITIAL / 2 + BALL_SIZE / 4)
+          b.y = aiPaddleBottom + BALL_RADIUS
+          const hitOffset = clamp((b.x - aiX.current) / aiHalfW, -1, 1)
           b.speed = Math.min(b.speed + SPEED_INCREMENT_PER_HIT, MAX_SPEED)
-          const angle = hitOffset * (Math.PI / 3)
-          b.vx = Math.sin(angle) * b.speed + hitOffset * SPIN_FACTOR
+          const angle = hitOffset * MAX_BOUNCE_ANGLE
+          b.vx = Math.sin(angle) * b.speed
           b.vy = Math.cos(angle) * b.speed
-          ballAngularVel.current = hitOffset * 1.5 + b.vx * 0.08
+          ballAngularVel.current = hitOffset * 1.2
           rallyRef.current++
         }
 
