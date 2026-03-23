@@ -310,7 +310,7 @@ const MultitaskDemo = () => {
         status="in-progress"
         icon={Settings}
         title="Tasks"
-        taskCount={3}
+        taskCount={6}
         expanded={expanded}
         onExpandToggle={() => setExpanded(!expanded)}
         isLast
@@ -319,8 +319,8 @@ const MultitaskDemo = () => {
           hideStatus
           status="in-progress"
           icon={Pencil}
-          title="Complete form"
-          description="Estimated on 24/07/2025"
+          title="General task"
+          description="Estimated on 03/23/2026"
           assignees={[
             { firstName: "Quigley", lastName: "Smitty" },
             { firstName: "James", lastName: "Hopper" },
@@ -329,24 +329,23 @@ const MultitaskDemo = () => {
             { firstName: "Jane", lastName: "Smith" },
             { firstName: "Alex", lastName: "Rashfold" },
             { firstName: "Emily", lastName: "Chen" },
+            { firstName: "Mike", lastName: "Ross" },
+            { firstName: "Rachel", lastName: "Green" },
+            { firstName: "Monica", lastName: "Geller" },
           ]}
+          primaryAction={{
+            label: "Mark as done",
+            icon: Check,
+            onClick: () => {},
+          }}
         />
         <F0TimelineRow
           hideStatus
           status="in-progress"
-          icon={Pencil}
-          title="Complete form"
-          description="Estimated on 24/07/2025"
+          icon={ThumbsUp}
+          title="Manual review"
+          description="Estimated on 03/23/2026"
           assignees={[{ firstName: "Alex", lastName: "Rashfold" }]}
-        />
-        <F0TimelineRow
-          hideStatus
-          status="not-started"
-          icon={Pencil}
-          title="Lunch"
-          description="Estimated on 24/07/2025"
-          assignees={[{ firstName: "James", lastName: "Hopper" }]}
-          isLast
           primaryAction={{
             label: "Approve",
             icon: Check,
@@ -364,6 +363,40 @@ const MultitaskDemo = () => {
               onClick: () => {},
             },
           ]}
+        />
+        <F0TimelineRow
+          hideStatus
+          status="not-started"
+          icon={Pencil}
+          title="Upload document"
+          description="Estimated on 03/23/2026"
+          assignees={[{ firstName: "James", lastName: "Hopper" }]}
+        />
+        <F0TimelineRow
+          hideStatus
+          status="not-started"
+          icon={ThumbsUp}
+          title="Manager approval"
+          description="Estimated on 03/25/2026"
+        />
+        <F0TimelineRow
+          hideStatus
+          status="not-started"
+          icon={Pencil}
+          title="Sign contract"
+          description="Estimated on 03/26/2026"
+          assignees={[
+            { firstName: "Sarah", lastName: "Connor" },
+            { firstName: "John", lastName: "Doe" },
+          ]}
+        />
+        <F0TimelineRow
+          hideStatus
+          status="not-started"
+          icon={Pencil}
+          title="Final review"
+          description="The next steps depend on the outcome of previous ones."
+          isLast
         />
       </F0TimelineRow>
     </div>
