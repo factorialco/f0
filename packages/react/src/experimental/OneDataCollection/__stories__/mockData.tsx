@@ -569,8 +569,12 @@ export const getMockVisualizations = (options?: {
           {
             id: "salary",
             label: "Salary",
-            editType: () => "text" as const,
+            editType: () => "number" as const,
             align: "right" as const,
+            numberConfig: {
+              min: 0,
+              units: "€",
+            },
             render: (item) =>
               item.salary !== undefined ? String(item.salary) : "",
           },

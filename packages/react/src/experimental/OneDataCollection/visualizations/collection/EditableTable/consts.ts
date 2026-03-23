@@ -1,5 +1,6 @@
 import { EditableTableCellEditType } from "./components/cells"
 import { DateCell } from "./components/cells/DateCell"
+import { NumberCell } from "./components/cells/NumberCell"
 import { SelectCell } from "./components/cells/SelectCell"
 import { DisabledCell } from "./components/cells/status/DisabledCell"
 import { NonEditableCell } from "./components/cells/status/NonEditableCell"
@@ -7,6 +8,7 @@ import { TextCell } from "./components/cells/TextCell"
 
 type EditableCellComponent =
   | typeof TextCell
+  | typeof NumberCell
   | typeof DateCell
   | typeof SelectCell
   | typeof NonEditableCell
@@ -24,6 +26,7 @@ export const editableCellMap: Record<
   EditableCellComponent
 > = {
   text: TextCell,
+  number: NumberCell,
   date: DateCell,
   select: SelectCell,
   multiselect: TextCell,
