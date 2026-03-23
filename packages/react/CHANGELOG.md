@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.415.0](https://github.com/factorialco/f0/compare/f0-react-v1.414.1...f0-react-v1.415.0) (2026-03-23)
+
+
+### Features
+
+* one tools to interact with F0Form ([#3683](https://github.com/factorialco/f0/issues/3683)) ([788ae77](https://github.com/factorialco/f0/commit/788ae77d054df44a11619fcbb6aa0df7ca3f8cb8))
+
 ## [1.414.1](https://github.com/factorialco/f0/compare/f0-react-v1.414.0...f0-react-v1.414.1) (2026-03-23)
 
 
