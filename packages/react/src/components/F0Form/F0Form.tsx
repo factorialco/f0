@@ -45,6 +45,7 @@ import { SwitchGroupRenderer } from "./components/SwitchGroupRenderer"
 import { createConditionalResolver } from "./conditionalResolver"
 import { FORM_MAX_WIDTH, SECTION_MARGIN } from "./constants"
 import { F0FormContext, generateAnchorId } from "./context"
+import { useF0AiFormRegistry } from "./F0AiFormRegistry"
 import { FieldRenderer } from "./fields/FieldRenderer"
 import { useErrorNavigation } from "./useErrorNavigation"
 import { useSchemaDefinition } from "./useSchemaDefinition"
@@ -55,6 +56,34 @@ type GroupedItem =
   | { type: "row"; item: RowDefinition; index: number }
   | { type: "section"; item: SectionDefinition }
   | { type: "switchGroup"; fields: F0SwitchField[] }
+
+/**
+ * Flatten RHF FieldErrors into a dot-path → message map.
+ * Handles nested errors (e.g. daterange `errors.range.from`).
+ */
+function flattenFormErrors(
+  errors: Record<string, unknown>
+): Record<string, string> {
+  const result: Record<string, string> = {}
+
+  function walk(obj: Record<string, unknown>, prefix: string) {
+    for (const [key, value] of Object.entries(obj)) {
+      if (key === "root") continue
+      const path = prefix ? `${prefix}.${key}` : key
+      if (value && typeof value === "object" && !Array.isArray(value)) {
+        const err = value as Record<string, unknown>
+        if ("message" in err && typeof err.message === "string") {
+          result[path] = err.message
+        } else {
+          walk(err, path)
+        }
+      }
+    }
+  }
+
+  walk(errors, "")
+  return result
+}
 
 /**
  * Groups contiguous switch fields together for rendering in a bordered container
@@ -128,6 +157,8 @@ function F0FormPerSection<T extends F0PerSectionSchema>(
     errorTriggerMode = "on-blur",
     styling,
     initialFiles,
+    renderCustomField,
+    isLoading: isFormLoading,
   } = props
 
   const showSectionsSidepanel = styling?.showSectionsSidepanel ?? false
@@ -190,6 +221,8 @@ function F0FormPerSection<T extends F0PerSectionSchema>(
               submitConfig={perSectionSubmitConfig}
               errorTriggerMode={errorTriggerMode}
               initialFiles={initialFiles}
+              renderCustomField={renderCustomField}
+              isLoading={isFormLoading}
             />
           </div>
         )
@@ -312,7 +345,45 @@ function F0FormFromDefinition(
     | F0FormPropsWithSingleSchemaDefinition<F0FormSchema>
     | F0FormPropsWithPerSectionDefinition<F0PerSectionSchema>
 ) {
-  const { formDefinition, className, styling, formRef, initialFiles } = props
+  const {
+    formDefinition,
+    className,
+    styling,
+    formRef,
+    initialFiles,
+    renderCustomField,
+  } = props
+
+  if (formDefinition.isLoading) {
+    if (formDefinition._brand === "single") {
+      return (
+        <F0FormFromSingleDefinition
+          formDefinition={
+            formDefinition as F0FormDefinitionSingleSchema<WizardFormSchema>
+          }
+          className={className}
+          styling={styling}
+          formRef={formRef}
+          initialFiles={initialFiles}
+          renderCustomField={renderCustomField}
+          isLoading
+        />
+      )
+    }
+    return (
+      <F0FormFromPerSectionDefinition
+        formDefinition={
+          formDefinition as F0FormDefinitionPerSection<WizardPerSectionSchema>
+        }
+        className={className}
+        styling={styling}
+        formRef={formRef}
+        initialFiles={initialFiles}
+        renderCustomField={renderCustomField}
+        isLoading
+      />
+    )
+  }
 
   if (formDefinition._brand === "single") {
     return (
@@ -324,6 +395,7 @@ function F0FormFromDefinition(
         styling={styling}
         formRef={formRef}
         initialFiles={initialFiles}
+        renderCustomField={renderCustomField}
       />
     )
   }
@@ -337,6 +409,7 @@ function F0FormFromDefinition(
       styling={styling}
       formRef={formRef}
       initialFiles={initialFiles}
+      renderCustomField={renderCustomField}
     />
   )
 }
@@ -347,7 +420,9 @@ function F0FormFromSingleDefinition<TSchema extends F0FormSchema>({
   styling,
   formRef,
   initialFiles,
-}: F0FormPropsWithSingleSchemaDefinition<TSchema>) {
+  renderCustomField,
+  isLoading,
+}: F0FormPropsWithSingleSchemaDefinition<TSchema> & { isLoading?: boolean }) {
   const def = formDefinition as F0FormDefinitionSingleSchema<TSchema>
 
   const adaptedOnSubmit = useCallback(
@@ -371,6 +446,10 @@ function F0FormFromSingleDefinition<TSchema extends F0FormSchema>({
       styling={styling}
       formRef={formRef}
       initialFiles={initialFiles}
+      renderCustomField={renderCustomField}
+      isLoading={isLoading}
+      defaultValuesParamsSchema={def.defaultValuesParamsSchema}
+      defaultValuesFn={def.defaultValuesFn}
     />
   )
 }
@@ -381,7 +460,9 @@ function F0FormFromPerSectionDefinition<T extends F0PerSectionSchema>({
   styling,
   formRef,
   initialFiles,
-}: F0FormPropsWithPerSectionDefinition<T>) {
+  renderCustomField,
+  isLoading,
+}: F0FormPropsWithPerSectionDefinition<T> & { isLoading?: boolean }) {
   const def = formDefinition as F0FormDefinitionPerSection<T>
 
   const fullDataRef = useRef<Record<string, unknown>>(
@@ -424,6 +505,8 @@ function F0FormFromPerSectionDefinition<T extends F0PerSectionSchema>({
       styling={styling}
       formRef={formRef}
       initialFiles={initialFiles}
+      renderCustomField={renderCustomField}
+      isLoading={isLoading}
     />
   )
 }
@@ -445,6 +528,9 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
     errorTriggerMode = "on-blur",
     styling,
     formRef,
+    isLoading: isFormLoading,
+    defaultValuesParamsSchema,
+    defaultValuesFn,
   } = props
 
   // Resolve styling configuration
@@ -555,6 +641,15 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
     defaultValues: defaultValues as DefaultValues<TValues>,
   })
 
+  // When async defaultValues finish loading, reset the form with resolved values
+  const wasLoadingRef = useRef(isFormLoading)
+  useEffect(() => {
+    if (wasLoadingRef.current && !isFormLoading && defaultValues) {
+      form.reset(defaultValues as DefaultValues<TValues>)
+    }
+    wasLoadingRef.current = isFormLoading
+  }, [isFormLoading, defaultValues, form])
+
   const rootError = form.formState.errors.root
   const { isDirty, isSubmitting, errors } = form.formState
 
@@ -651,35 +746,69 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
   // Store state callback from useF0Form hook
   const stateCallbackRef = useRef<F0FormStateCallback | null>(null)
 
+  // Stable ref to the submit handler for use in refs
+  const handleSubmitRef = useRef(handleSubmit)
+  handleSubmitRef.current = handleSubmit
+
+  // Shared builder for F0FormRef methods — used by both formRef and AI registry
+  const buildRefMethods = useCallback(
+    (opts?: { stateCallback?: boolean }): F0FormRef => ({
+      submit: () =>
+        new Promise<void>((resolve, reject) => {
+          form.handleSubmit(
+            async (data) => {
+              await handleSubmitRef.current(data)
+              resolve()
+            },
+            () => reject(new Error("Form validation failed"))
+          )()
+        }),
+      reset: () => {
+        form.reset()
+        resetErrorNavigation()
+      },
+      isDirty: () => form.formState.isDirty,
+      getValues: () => form.getValues() as Record<string, unknown>,
+      setValue: (fieldName, value, options) => {
+        form.setValue(
+          fieldName as Path<TValues>,
+          value as TValues[keyof TValues],
+          {
+            shouldValidate: options?.shouldValidate ?? true,
+            shouldDirty: options?.shouldDirty ?? true,
+          }
+        )
+      },
+      setValues: (values, options) => {
+        for (const [fn, v] of Object.entries(values)) {
+          form.setValue(fn as Path<TValues>, v as TValues[keyof TValues], {
+            shouldValidate: false,
+            shouldDirty: options?.shouldDirty ?? true,
+          })
+        }
+        if (options?.shouldValidate !== false) {
+          void form.trigger()
+        }
+      },
+      trigger: async (fieldName) =>
+        fieldName ? form.trigger(fieldName as Path<TValues>) : form.trigger(),
+      getErrors: () =>
+        flattenFormErrors(form.formState.errors as Record<string, unknown>),
+      getFieldNames: () =>
+        Object.keys(form.getValues() as Record<string, unknown>),
+      _setStateCallback: opts?.stateCallback
+        ? (callback: F0FormStateCallback) => {
+            stateCallbackRef.current = callback
+          }
+        : () => {},
+    }),
+    [form, resetErrorNavigation]
+  )
+
   // Expose form methods via ref for external control
   useEffect(() => {
     if (formRef) {
-      const refMethods: F0FormRef = {
-        submit: () => {
-          return new Promise<void>((resolve, reject) => {
-            form.handleSubmit(
-              async (data) => {
-                await handleSubmit(data)
-                resolve()
-              },
-              () => {
-                // Validation failed - reject to signal the caller
-                reject(new Error("Form validation failed"))
-              }
-            )()
-          })
-        },
-        reset: () => {
-          form.reset()
-          resetErrorNavigation()
-        },
-        isDirty: () => form.formState.isDirty,
-        getValues: () => form.getValues() as Record<string, unknown>,
-        _setStateCallback: (callback: F0FormStateCallback) => {
-          stateCallbackRef.current = callback
-        },
-      }
-      formRef.current = refMethods
+      formRef.current = buildRefMethods({ stateCallback: true })
     }
 
     return () => {
@@ -687,7 +816,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
         formRef.current = null
       }
     }
-  }, [formRef, form, resetErrorNavigation])
+  }, [formRef, buildRefMethods])
 
   // Notify useF0Form hook of state changes
   useEffect(() => {
@@ -699,13 +828,53 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
     }
   }, [isSubmitting, hasErrors])
 
+  // Auto-register with AI form registry (when available)
+  const aiFormRegistry = useF0AiFormRegistry()
+  const internalFormRef = useRef<F0FormRef | null>(null)
+  // Keep a stable ref that mirrors formRef or internalFormRef
+  const registryFormRef = formRef ?? internalFormRef
+
+  useEffect(() => {
+    if (aiFormRegistry) {
+      // Build ref for registry use when no external formRef is provided
+      if (!formRef) {
+        internalFormRef.current = buildRefMethods()
+      }
+      aiFormRegistry.register(
+        name,
+        registryFormRef,
+        schema,
+        sections,
+        defaultValuesParamsSchema,
+        defaultValuesFn
+      )
+      return () => {
+        aiFormRegistry.unregister(name)
+      }
+    }
+  }, [
+    aiFormRegistry,
+    name,
+    schema,
+    sections,
+    formRef,
+    registryFormRef,
+    buildRefMethods,
+    defaultValuesParamsSchema,
+  ])
+
   // Group contiguous switch fields
   const groupedItems = groupContiguousSwitches(definition)
 
   // Context value for anchor links
   const contextValue = useMemo(
-    () => ({ formName: name, initialFiles: props.initialFiles }),
-    [name, props.initialFiles]
+    () => ({
+      formName: name,
+      initialFiles: props.initialFiles,
+      renderCustomField: props.renderCustomField,
+      isLoading: isFormLoading,
+    }),
+    [name, props.initialFiles, props.renderCustomField, isFormLoading]
   )
 
   // Form content component to avoid repetition
@@ -771,7 +940,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
             label={submitLabel}
             icon={submitIcon}
             loading={isSubmitting}
-            disabled={hasErrors}
+            disabled={hasErrors || isFormLoading}
           />
         </div>
       )}

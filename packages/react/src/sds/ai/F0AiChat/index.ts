@@ -38,4 +38,8 @@ export {
   useDefaultCopilotActions,
   useOrchestratorThinkingAction,
   useMessageSourcesAction,
+  useF0AiFormActions,
+  useFormFillAction,
+  useFormSubmitAction,
+  useFormGetStateAction,
 } from "./copilotActions"
