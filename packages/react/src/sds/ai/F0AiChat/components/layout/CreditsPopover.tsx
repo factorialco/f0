@@ -43,7 +43,9 @@ export function CreditsPopover() {
 
   if (!fetchCreditsUsage) return null
 
-  const percentage = data ? Math.round((data.used / data.total) * 100) : 0
+  const percentage = data
+    ? Math.min(100, Math.round((data.used / data.total) * 100))
+    : 0
 
   return (
     <Popover open={open} onOpenChange={handleOpenChange}>
@@ -101,7 +103,7 @@ export function CreditsPopover() {
                   />
                 </div>
               </div>
-              <div className="flex items-center justify-between">
+              <div className="flex items-center">
                 <span className="text-f1-foreground-secondary text-sm tabular-nums">
                   {data.used.toLocaleString()} / {data.total.toLocaleString()}{" "}
                   {i18n.t("ai.creditsUsed")}
