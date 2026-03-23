@@ -72,13 +72,11 @@ describe("PersonEntityRef", () => {
 
     const trigger = screen.getByText("@Ana García")
 
-    // First hover triggers fetch
     await user.hover(trigger)
     await waitFor(() => {
       expect(mockResolver).toHaveBeenCalledTimes(1)
     })
 
-    // Unhover and re-hover should not trigger another fetch
     await user.unhover(trigger)
     await user.hover(trigger)
 
@@ -87,7 +85,6 @@ describe("PersonEntityRef", () => {
 
   it("shows skeleton while loading", async () => {
     const user = userEvent.setup()
-    // Never-resolving promise to keep loading state
     mockResolver.mockReturnValue(new Promise(() => {}))
 
     render(<PersonEntityRef id="42" label="Ana García" />)
@@ -95,7 +92,6 @@ describe("PersonEntityRef", () => {
     await user.hover(screen.getByRole("button"))
 
     await waitFor(() => {
-      // F0Card.Skeleton renders an animated placeholder
       expect(document.querySelector("[class*='animate']")).toBeInTheDocument()
     })
   })
@@ -109,7 +105,6 @@ describe("PersonEntityRef", () => {
     await user.hover(screen.getByRole("button"))
 
     await waitFor(() => {
-      // Fallback card shows the label as title
       expect(screen.getByText("Ana García")).toBeInTheDocument()
     })
   })

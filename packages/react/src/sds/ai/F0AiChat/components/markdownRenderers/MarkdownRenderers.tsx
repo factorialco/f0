@@ -1,7 +1,7 @@
 import { type AssistantMessageProps } from "@copilotkit/react-ui"
 
 import { Blockquote, Hr, Pre } from "./components/Block"
-import { EntityRef } from "./entityRef/EntityRef"
+import { EntityRef } from "./entityRef/components/EntityRef"
 import { Image } from "./components/Image"
 import { A } from "./components/Link"
 import { Li, Ol, Ul } from "./components/Lists"

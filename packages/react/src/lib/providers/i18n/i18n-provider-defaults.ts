@@ -308,10 +308,14 @@ export const defaultTranslations = {
     ask: "Ask One",
     viewProfile: "View profile",
     tools: "Tools",
-    credits: "Credits",
-    creditsUsed: "used",
-    creditsError: "Could not load credits",
-    upgradePlan: "Upgrade plan",
+    credits: {
+      title: "Credits",
+      creditsLeft: "{{total}} left",
+      monthlyCredits: "Monthly credits",
+      creditsError: "Could not load credits",
+      upgradePlan: "Upgrade",
+      needMoreCredits: "Need more credits?",
+    },
     reportCard: {
       reportLabel: "Report",
       openButton: "Open",
