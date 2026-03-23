@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.46.1](https://github.com/factorialco/f0/compare/f0-core-v1.46.0...f0-core-v1.46.1) (2026-03-19)
+
+
+### Bug Fixes
+
+* add lms icon to modules ([#3699](https://github.com/factorialco/f0/issues/3699)) ([b3652bf](https://github.com/factorialco/f0/commit/b3652bfa8f2dc3ff5b5d5b29a1c7bdcb6ec4be69))
+
 ## [1.46.0](https://github.com/factorialco/f0/compare/f0-core-v1.45.0...f0-core-v1.46.0) (2026-02-26)
 
 

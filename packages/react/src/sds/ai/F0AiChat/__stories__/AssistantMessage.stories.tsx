@@ -1,7 +1,7 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
 
 import { AssistantMessage } from "../components/AssistantMessage"
-import { FeedbackModalProvider } from "../components/FeedbackProvider"
+import { FeedbackModalProvider } from "../providers/FeedbackProvider"
 
 const meta = {
   title: "AI/F0AiChat/AssistantMessage",

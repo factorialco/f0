@@ -1,0 +1,31 @@
+import type { ReactNode } from "react"
+
+import type { CanvasContentBase } from "../types"
+
+/**
+ * Contract for a canvas entity type.
+ *
+ * Each entity (dashboard, survey, goal, job-posting…) implements this
+ * interface and registers itself via `registerCanvasEntity()`.
+ *
+ * To add a new entity type:
+ * 1. Create a folder in `canvas/entities/<your-entity>/`
+ * 2. Define a type extending `CanvasContentBase` in `types.ts`
+ * 3. Implement `CanvasEntityDefinition` in `index.ts`
+ * 4. Import the entity module in `canvas/index.ts`
+ */
+export type CanvasEntityDefinition<
+  T extends CanvasContentBase = CanvasContentBase,
+> = {
+  /** Must match the `type` discriminant on the content object */
+  type: T["type"]
+  /** Renders the main body of the canvas panel */
+  renderContent: (props: { content: T; refreshKey: number }) => ReactNode
+  /** Renders header actions (placed before the close button) */
+  renderHeaderActions: (props: { content: T }) => ReactNode
+  /**
+   * Optional wrapper providing entity-scoped context around
+   * both header actions and body (e.g. shared edit-mode state).
+   */
+  wrapper?: (props: { content: T; children: ReactNode }) => ReactNode
+}

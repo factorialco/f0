@@ -1,5 +1,6 @@
 import { forwardRef } from "react"
 
+import type { IconType } from "@/components/F0Icon"
 import type { TableVisualizationType } from "@/experimental/OneDataCollection/types"
 
 import { FiltersDefinition } from "@/components/OneFilterPicker/types"
@@ -32,6 +33,7 @@ import type {
 import { ItemActionsRow } from "../../../../components/itemActions/ItemActionsRow/ItemActionsRow"
 import { useSticky } from "../useSticky"
 import { NestedRow } from "./NestedRow"
+import { groupBorderClass, HeaderGroupEntry } from "../hooks/useHeaderGroups"
 
 export type RowProps<
   R extends RecordType,
@@ -73,6 +75,21 @@ export type RowProps<
   /** Row wrapper passed through to NestedRow for wrapping child rows */
   rowWrapper?: React.ComponentType<RowWrapperProps<R>>
   fromVisualization?: TableVisualizationType
+  headerGroups: HeaderGroupEntry[] | null
+}
+
+export type AddRowAction = {
+  label: string
+  icon?: IconType
+  description?: string
+  onClick?: () => void | Promise<void>
+  loading?: boolean
+  disabled?: boolean
+}
+
+export type OnAddRowConfig = {
+  actions: AddRowAction[]
+  label?: string
 }
 
 export type NestedRowProps = {
@@ -85,6 +102,7 @@ export type NestedRowProps = {
   parentHasChildren?: boolean
   onExpand?: () => void
   onLoadMoreChildren?: () => void
+  onAddRow?: OnAddRowConfig
 }
 
 const referenceTypeClasses: Record<ReferenceType, string> = {
@@ -121,6 +139,7 @@ const RowComponentInner = <
     cellRenderer: CellRenderer,
     rowWrapper,
     fromVisualization,
+    headerGroups,
   }: RowProps<
     R,
     Filters,
@@ -184,6 +203,7 @@ const RowComponentInner = <
         referenceRowType={referenceRowTypeFn}
         cellRenderer={CellRenderer}
         rowWrapper={rowWrapper}
+        headerGroups={headerGroups}
         key={key}
         fromVisualization={fromVisualization}
       />
@@ -220,6 +240,8 @@ const RowComponentInner = <
           loading={loading}
           className={cn(
             loading && tableWithChildren ? "first:pl-4" : "",
+            headerGroups && "[&>div:first-child]:hidden",
+            headerGroups && groupBorderClass,
             cellRenderedClass
           )}
           referenceRowType={referenceRowType}
@@ -238,6 +260,18 @@ const RowComponentInner = <
       )}
 
       {columns.map((column, cellIndex) => {
+        const headerGroup = headerGroups?.find((group) => {
+          return (
+            group.type === "group" && group.columnIndices.includes(cellIndex)
+          )
+        })
+
+        const isLastInGroup =
+          !!headerGroups &&
+          (!headerGroup ||
+            headerGroup.columnIndices[headerGroup.columnIndices.length - 1] ===
+              cellIndex)
+
         const defaultContent = (
           <div
             className={cn(
@@ -264,9 +298,9 @@ const RowComponentInner = <
               tableWithChildren,
               selectableRow: !!source.selectable,
             }}
-            className={cellRenderedClass}
             fromVisualization={fromVisualization}
             referenceRowType={referenceRowType}
+            className={cn(cellRenderedClass, isLastInGroup && groupBorderClass)}
           >
             {CellRenderer ? (
               <CellRenderer
@@ -286,36 +320,39 @@ const RowComponentInner = <
         )
       })}
 
-      {hasItemActions && !loading && !nestedRowProps?.onLoadMoreChildren && (
-        <>
-          {/** Desktop item actions adds a sticky column to the table to not overflow when the table is scrolled horizontally*/}
-          <td className="sticky right-0 top-0 z-10 hidden md:table-cell">
-            <ItemActionsRowContainer dropDownOpen={dropDownOpen}>
-              <ItemActionsRow
-                primaryItemActions={primaryItemActions}
-                dropdownItemActions={dropdownItemActions}
-                handleDropDownOpenChange={handleDropDownOpenChange}
+      {hasItemActions &&
+        !loading &&
+        !nestedRowProps?.onLoadMoreChildren &&
+        !nestedRowProps?.onAddRow && (
+          <>
+            {/** Desktop item actions adds a sticky column to the table to not overflow when the table is scrolled horizontally*/}
+            <td className="sticky right-0 top-0 z-10 hidden md:table-cell">
+              <ItemActionsRowContainer dropDownOpen={dropDownOpen}>
+                <ItemActionsRow
+                  primaryItemActions={primaryItemActions}
+                  dropdownItemActions={dropdownItemActions}
+                  handleDropDownOpenChange={handleDropDownOpenChange}
+                />
+              </ItemActionsRowContainer>
+            </td>
+            {/** Mobile item actions */}
+            <TableCell
+              key={`table-cell-${groupIndex}-${index}-actions`}
+              width={68}
+              sticky={{
+                right: 0,
+              }}
+              href={itemHref}
+              className="table-cell md:hidden"
+              loading={loading}
+            >
+              <ItemActionsMobile
+                items={mobileDropdownItemActions}
+                onOpenChange={handleDropDownOpenChange}
               />
-            </ItemActionsRowContainer>
-          </td>
-          {/** Mobile item actions */}
-          <TableCell
-            key={`table-cell-${groupIndex}-${index}-actions`}
-            width={68}
-            sticky={{
-              right: 0,
-            }}
-            href={itemHref}
-            className="table-cell md:hidden"
-            loading={loading}
-          >
-            <ItemActionsMobile
-              items={mobileDropdownItemActions}
-              onOpenChange={handleDropDownOpenChange}
-            />
-          </TableCell>
-        </>
-      )}
+            </TableCell>
+          </>
+        )}
     </TableRow>
   )
 }

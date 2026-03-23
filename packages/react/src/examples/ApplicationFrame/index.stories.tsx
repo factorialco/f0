@@ -161,6 +161,7 @@ const meta: Meta<typeof ApplicationFrame> = {
   },
   args: {
     ai: {
+      historyEnabled: true,
       runtimeUrl: "https://mastra.local.factorial.dev/copilotkit",
       agent: "one-workflow",
       credentials: "include",

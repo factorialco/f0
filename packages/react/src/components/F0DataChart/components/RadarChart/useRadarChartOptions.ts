@@ -7,6 +7,7 @@ import type { F0DataChartRadarProps } from "../../types"
 import { paletteColor, resolveChartColorToken } from "../../utils/colors"
 import { buildLegend, DEFAULT_EMPHASIS } from "../../utils/options"
 import { useChartTheme } from "../../utils/useChartTheme"
+import { useContainerSize } from "../../utils/useContainerSize"
 
 export function useRadarChartOptions(
   containerRef: RefObject<HTMLDivElement | null>,
@@ -21,8 +22,10 @@ export function useRadarChartOptions(
   }: F0DataChartRadarProps
 ): echarts.EChartsOption {
   const theme = useChartTheme(containerRef)
+  const size = useContainerSize(containerRef)
 
   return useMemo(() => {
+    const maxNameWidth = Math.floor(size.width / 4) || undefined
     // Auto-calculate max for each indicator if not provided
     const radarIndicators = indicators.map((ind, i) => {
       const maxFromData =
@@ -75,6 +78,8 @@ export function useRadarChartOptions(
           fontSize: theme.textStyle.fontSize,
           fontWeight: theme.textStyle.fontWeight,
           fontFamily: theme.textStyle.fontFamily,
+          overflow: "truncate",
+          ...(maxNameWidth ? { width: maxNameWidth } : {}),
         },
         splitArea: {
           show: false,
@@ -165,5 +170,6 @@ export function useRadarChartOptions(
     valueFormatter,
     echartsOptions,
     theme,
+    size,
   ])
 }

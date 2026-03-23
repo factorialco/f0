@@ -87,6 +87,27 @@ const mockUsers = [
   },
 ]
 
+const buildPrimaryActionsWithDescriptions = () => [
+  {
+    label: "Add manually",
+    icon: Pencil,
+    description: "Create an employee profile by filling out the form",
+    onClick: () => console.log("Adding employee manually"),
+  },
+  {
+    label: "Invite employee",
+    icon: Person,
+    description: "Send an invite so the employee can finish setup later",
+    onClick: () => console.log("Inviting employee"),
+  },
+  {
+    label: "Import CSV",
+    icon: Upload,
+    description: "Upload a spreadsheet to create multiple employees at once",
+    onClick: () => console.log("Importing employees"),
+  },
+]
+
 function BaseStory<
   Filters extends FiltersDefinition,
   Sortings extends SortingsDefinition,
@@ -198,6 +219,24 @@ export const MultiplePrimaryActionsExample: Story = {
           disabled: true,
         },
       ],
+      secondaryActions: {
+        expanded: 0,
+        actions: buildSecondaryActions,
+      },
+    })
+
+    return <BaseStory dataSource={dataSource} />
+  },
+}
+
+export const MultiplePrimaryActionsWithDescriptionsExample: Story = {
+  render: () => {
+    const dataSource = useDataCollectionSource({
+      dataAdapter: {
+        fetchData: () => Promise.resolve({ records: mockUsers }),
+      },
+      primaryActions: buildPrimaryActionsWithDescriptions,
+      primaryActionsLabel: "New employee",
       secondaryActions: {
         expanded: 0,
         actions: buildSecondaryActions,

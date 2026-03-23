@@ -12,6 +12,7 @@ import type {
 import { F0WizardForm as F0WizardFormComponent } from "./F0WizardForm"
 
 export { useF0FormDefinition } from "./useF0FormDefinition"
+export type { AsyncOrSync } from "./useF0FormDefinition"
 
 export type {
   F0FormDefinition,

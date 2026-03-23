@@ -27,6 +27,12 @@ interface GridStackProviderProps {
   onResizeStop?: (event: Event, el: GridItemHTMLElement) => void
   onChange?: (widgets: GridStackReactWidget[]) => void
   widgets?: GridStackReactWidget[]
+  /** Toggle static mode imperatively via `gridStack.setStatic()`.
+   *  Unlike putting `staticGrid` in options, this does NOT recreate the grid. */
+  static?: boolean
+  /** Incrementing counter that forces all widget positions to match the
+   *  current prop values. Used to reset positions on layout discard. */
+  forcePositionSync?: number
 }
 
 const propsToObserve = [
@@ -103,6 +109,8 @@ export function GridStackProvider({
   onResizeStop,
   onChange,
   widgets,
+  static: isStatic,
+  forcePositionSync,
 }: PropsWithChildren<GridStackProviderProps>) {
   const [gridStack, setGridStack] = useState<GridStack | null>(null)
   const gridStackRef = useRef<GridStack | null>(null)
@@ -178,6 +186,13 @@ export function GridStackProvider({
   useEffect(() => {
     originalContentMapRef.current = originalContentMap
   }, [originalContentMap])
+
+  // Ref to track onChange synchronously for emitChange callback
+  // This ensures emitChange always calls the latest onChange without needing to recreate the callback
+  const onChangeRef = useRef(onChange)
+  useEffect(() => {
+    onChangeRef.current = onChange
+  }, [onChange])
 
   // Store only converted widgets (with function content) for GridStack operations
   const [rawWidgetMetaMap, setRawWidgetMetaMap] = useState(() => {
@@ -395,7 +410,6 @@ export function GridStackProvider({
           const sizeProps = ["w", "h", "x", "y"] as const
           const interactionProps = ["noMove", "noResize", "locked"] as const
 
-          // Check if only interaction properties changed (not size/position)
           const changedSizeProps = propertiesChanged.filter((prop) =>
             sizeProps.includes(prop as (typeof sizeProps)[number])
           )
@@ -403,16 +417,16 @@ export function GridStackProvider({
             interactionProps.includes(prop as (typeof interactionProps)[number])
           )
 
-          // If sizes differ between GridStack and props, but only interaction props changed in the update,
-          // preserve GridStack's current sizes (don't reset them to prop values)
-          // This prevents resizing when only editMode changes
+          // When both size/position and interaction props changed (e.g. toggling
+          // static mode while GridStack has user-dragged positions), preserve
+          // GridStack's current positions and only update interaction props.
+          // This prevents layout resets on re-renders and resize events.
           if (
             changedSizeProps.length > 0 &&
             changedInteractionProps.length > 0 &&
             changedSizeProps.length + changedInteractionProps.length ===
               propertiesChanged.length
           ) {
-            // Only update interaction properties, preserve sizes from GridStack
             changedInteractionProps.forEach((prop) => {
               const value = widget[prop]
               if (value !== undefined) {
@@ -420,7 +434,6 @@ export function GridStackProvider({
               }
             })
           } else {
-            // Normal update: include all changed properties
             propertiesChanged.forEach((prop) => {
               const value = widget[prop]
               if (value !== undefined) {
@@ -501,6 +514,44 @@ export function GridStackProvider({
       isInitializedRef.current = true
     }
   }, [widgets])
+
+  // Toggle static mode imperatively without recreating the grid
+  useEffect(() => {
+    if (!gridStack || isStatic === undefined) return
+    gridStack.setStatic(isStatic)
+  }, [gridStack, isStatic])
+
+  // Force all widgets to match prop positions when forcePositionSync changes.
+  // This bypasses the special case that normally preserves GridStack's
+  // internal positions, allowing explicit layout resets (e.g. discard).
+  const prevForceSyncRef = useRef(forcePositionSync)
+  useEffect(() => {
+    if (
+      !gridStack ||
+      forcePositionSync === undefined ||
+      forcePositionSync === prevForceSyncRef.current
+    )
+      return
+    prevForceSyncRef.current = forcePositionSync
+
+    const widgetsToSync = widgets || []
+    gridStack.batchUpdate()
+    widgetsToSync.forEach((widget) => {
+      const element = gridStack.el.querySelector<GridItemHTMLElement>(
+        `[gs-id="${widget.id}"]`
+      )
+      if (element) {
+        gridStack.update(element, {
+          x: widget.x ?? 0,
+          y: widget.y ?? 0,
+          w: widget.w ?? 1,
+          h: widget.h ?? 1,
+        })
+      }
+    })
+    gridStack.batchUpdate(false)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gridStack, forcePositionSync])
 
   // Ensure handle option is applied after widgets are synced and rendered
   useEffect(() => {
@@ -584,7 +635,7 @@ export function GridStackProvider({
         })
         .filter((widget): widget is GridStackReactWidget => widget !== null)
 
-      onChange?.(updatedWidgets)
+      onChangeRef.current?.(updatedWidgets)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gridStack])

@@ -3,6 +3,33 @@ import { type AIMessage, type Message } from "@copilotkit/shared"
 
 import { IconType } from "@/components/F0Icon"
 
+import type { ChatDashboardConfig } from "../F0ChatDashboard/types"
+
+/**
+ * Base shape shared by all canvas content types.
+ * Every entity adds its own fields on top of this.
+ */
+export type CanvasContentBase = {
+  type: string
+  title: string
+  toolCallId?: string
+}
+
+/**
+ * Dashboard canvas content — renders an analytics dashboard.
+ */
+export type DashboardCanvasContent = CanvasContentBase & {
+  type: "dashboard"
+  config: ChatDashboardConfig
+  apiConfig: { baseUrl: string; headers: Record<string, string> }
+}
+
+/**
+ * Discriminated union for canvas panel content.
+ * Add new entity types to this union as they are implemented.
+ */
+export type CanvasContent = DashboardCanvasContent
+
 /**
  * Profile data for a person entity (employee), resolved asynchronously
  * and displayed in the entity reference hover card.
@@ -54,9 +81,14 @@ export type AiChatToolHint = {
 }
 
 /**
+ * Interaction mode for the AI chat
+ */
+export type AiChatMode = "chat" | "voice"
+
+/**
  * Visualization mode for the AI chat
  */
-export type VisualizationMode = "sidepanel" | "fullscreen"
+export type VisualizationMode = "sidepanel" | "fullscreen" | "canvas"
 
 /**
  * Tracking options for the AI chat
@@ -112,9 +144,20 @@ export type AiChatProviderProps = {
    */
   lockVisualizationMode?: boolean
   /**
+   * Enable chat history UI (clickable header title + history dialog).
+   * When false (default), the header shows a simple "New Chat" button instead.
+   * Set to true only when the backend supports the /copilotkit/chat-history/threads route.
+   * @default false
+   */
+  historyEnabled?: boolean
+  /**
    * Optional footer content rendered below the textarea
    */
   footer?: React.ReactNode
+  /**
+   * Optional component rendered in place of the chat UI when voice mode is active.
+   */
+  VoiceMode?: React.ComponentType
   /**
    * Async resolver functions for entity references in markdown.
    * Used to fetch profile data for inline entity mentions (hover cards).
@@ -200,6 +243,9 @@ export const aiTranslations = {
     thoughtsGroupTitle: "Reflection",
     resourcesGroupTitle: "Resources",
     thinking: "Thinking...",
+    closeDashboard: "Close dashboard",
+    exportTable: "Download table",
+    generatedTableFilename: "OneGeneratedTable",
     feedbackModal: {
       positive: {
         title: "What did you like about this response?",
@@ -216,11 +262,40 @@ export const aiTranslations = {
       "Preview {{shown}} of {{total}} rows — download the Excel to see all data.",
     expandChat: "Expand chat",
     collapseChat: "Collapse chat",
+    chatHistory: "Chat history",
+    noPreviousChats: "No previous conversations",
+    newConversation: "New conversation",
+    today: "Today",
+    yesterday: "Yesterday",
+    thisMonth: "This month",
+    older: "Older",
+    searchChats: "Search conversations...",
+    pinnedChats: "Pinned",
+    threadOptions: "Thread options",
+    pinChat: "Pin chat",
+    unpinChat: "Unpin chat",
+    deleteChat: "Delete chat",
     ask: "Ask One",
     viewProfile: "View profile",
     tools: "Tools",
     attachFile: "Attach file",
     removeFile: "Remove",
+    reportCard: {
+      reportLabel: "Report",
+      openButton: "Open",
+    },
+    dataDownload: {
+      download: "Download {{format}}",
+    },
+    pong: {
+      ai: "AI",
+      you: "YOU",
+      youWin: "You win!",
+      youLose: "You lose!",
+    },
+    unsavedChanges: "Unsaved changes",
+    saveChanges: "Save changes",
+    discardChanges: "Discard",
   },
 }
 

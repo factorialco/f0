@@ -206,6 +206,28 @@ export const WithCustomButtonWithoutLabel: Story = {
   },
 }
 
+export const LongUnspacedText: Story = {
+  decorators: [
+    (Story) => (
+      <div>
+        <Story />
+      </div>
+    ),
+  ],
+  args: {
+    ...Default.args,
+    event: undefined,
+    mediaUrl: undefined,
+    title:
+      "ThisisaverylongtitlewithnospacesthatshouldbreakintothecontainercorrectlywithoutoverflowingThisisaverylongtitlewithnospacesthatshouldbreakintothecontainercorrectlywithoutoverflowing",
+    description: `<p class="TextEditorTheme__paragraph" dir="ltr"><span>ThisisaverylongdescriptionwithabsolutelynospacesatallwhichmightcauseoverflowissuesonmobileifnothandledcorrectlyThisisaverylongdescriptionwithabsolutelynospacesatallwhichmightcauseoverflowissuesonmobileifnothandledcorrectlyThisisaverylongdescriptionwithabsolutelynospacesatallwhichmightcauseoverflowissuesonmobileifnothandledcorrectlyThisisaverylongdescriptionwithabsolutelynospacesatallwhichmightcauseoverflowissuesonmobileifnothandledcorrectlyThisisaverylongdescriptionwithabsolutelynospacesatallwhichmightcauseoverflowissuesonmobileifnothandledcorrectly</span></p>`,
+    group: {
+      title: "Averylonggroupnamewithoutanyspaces",
+      onClick: () => {},
+    },
+  },
+}
+
 type SkeletonStory = StoryObj<typeof CommunityPost.Skeleton>
 
 export const Skeleton: SkeletonStory = {

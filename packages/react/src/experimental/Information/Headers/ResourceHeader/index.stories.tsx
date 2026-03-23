@@ -91,6 +91,11 @@ export const Default: Story = {
         hideLabel: true,
         onClick: fn(),
       },
+      {
+        label: "Syncing",
+        loading: true,
+        onClick: fn(),
+      },
     ],
 
     otherActions: [

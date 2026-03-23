@@ -1,4 +1,9 @@
+import type {
+  F0SelectItemObject,
+  F0SelectItemProps,
+} from "@/components/F0Select"
 import {
+  DataSourceDefinition,
   FiltersDefinition,
   GroupingDefinition,
   RecordType,
@@ -11,13 +16,58 @@ import type {
   TableVisualizationSettings,
 } from "../Table/types"
 
+import { PrimaryActionItemDefinition } from "../../../actions"
 import { ItemActionsDefinition } from "../../../item-actions"
 import { NavigationFiltersDefinition } from "../../../navigationFilters/types"
 import { SummariesDefinition } from "../../../summary"
 import { CollectionProps } from "../../../types"
 import { EditableTableCellEditType } from "./components/cells"
 
+export type AddRowActionsResult =
+  | PrimaryActionItemDefinition
+  | PrimaryActionItemDefinition[]
+  | undefined
+
 export type EditableTableVisualizationSettings = TableVisualizationSettings
+
+/**
+ * Configuration for select-type cells. Mirrors F0Select's two data modes:
+ * - Static `options` (array or per-row function)
+ * - Async `source` (DataSourceDefinition) with `mapOptions`
+ */
+export type SelectCellConfig<R extends RecordType> = {
+  placeholder?: string
+  clearable?: boolean
+  showSearchBox?: boolean
+  defaultItem?: (item: R) => F0SelectItemObject<string, RecordType> | undefined
+} & (
+  | {
+      options:
+        | F0SelectItemProps<string>[]
+        | ((item: R) => F0SelectItemProps<string>[])
+      source?: never
+      mapOptions?: never
+    }
+  | {
+      source: Omit<
+        DataSourceDefinition<
+          RecordType,
+          FiltersDefinition,
+          SortingsDefinition,
+          GroupingDefinition<RecordType>
+        >,
+        | "selectable"
+        | "grouping"
+        | "defaultGrouping"
+        | "currentGrouping"
+        | "fetchChildren"
+        | "itemsWithChildren"
+        | "childrenCount"
+      >
+      mapOptions: (record: RecordType) => F0SelectItemProps<string, RecordType>
+      options?: never
+    }
+)
 
 /**
  * Column definition for Editable Table.
@@ -42,6 +92,16 @@ export type EditableTableColumnDefinition<
    * When omitted, the cell is always rendered read-only.
    */
   editType?: (item: R) => EditableTableCellEditType | undefined
+  /**
+   * Configuration for `"select"` cells. Required when `editType` returns `"select"`.
+   * Accepts either static `options` or a `source` + `mapOptions` for async data.
+   *
+   * If `editType` returns `"select"` but `selectConfig` is missing, the cell
+   * falls back to a non-editable display with a `console.warn` at runtime.
+   * Type-level enforcement is not possible because `editType` is a per-row
+   * function whose return value isn't statically known.
+   */
+  selectConfig?: SelectCellConfig<R>
 }
 
 export type EditableTableVisualizationOptions<
@@ -60,12 +120,26 @@ export type EditableTableVisualizationOptions<
    * Rejection sets an error on the edited column.
    */
   onCellChange: (updatedItem: R) => Promise<void | Record<string, string>>
-  /** When provided, renders an "Add" button row at the bottom of the table and nested rows. Receives the parent item when triggered from a nested row. Supports async functions for loading state. */
-  onAddRow?: (parentItem?: R) => void | Promise<void>
-  /** Custom label for the root-level "Add row" button. Falls back to the default i18n translation. */
-  addRowButtonLabel?: string
-  /** Custom label for the nested-row "Add row" button. Falls back to the default i18n translation. */
-  nestedAddRowButtonLabel?: string
+  /**
+   * When provided, renders action buttons at the bottom of the root-level table.
+   * Returns a single action, an array of actions, or undefined to hide the row.
+   */
+  addRowActions?: () => AddRowActionsResult
+  /**
+   * Label for the dropdown trigger button when multiple root-level add-row
+   * actions are provided. Falls back to the first action's label if omitted.
+   */
+  addRowActionsLabel?: string
+  /**
+   * When provided, renders action buttons at the bottom of each expanded nested row.
+   * Receives the parent item whose children the new row will be added to.
+   */
+  addNestedRowActions?: (parent: R) => AddRowActionsResult
+  /**
+   * Label for the dropdown trigger button when multiple nested add-row
+   * actions are provided. Falls back to the first action's label if omitted.
+   */
+  addNestedRowActionsLabel?: string
 }
 
 export type EditableTableCollectionProps<

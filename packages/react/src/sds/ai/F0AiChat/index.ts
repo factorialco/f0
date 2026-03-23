@@ -5,8 +5,12 @@ export { FullscreenChatContext } from "./F0AiFullscreenChat"
 // Types
 export type {
   AiChatFileAttachmentConfig,
+  AiChatMode,
   AiChatProviderProps,
   AiChatToolHint,
+  CanvasContent,
+  CanvasContentBase,
+  DashboardCanvasContent,
   EntityResolvers,
   PersonProfile,
   UploadedFile,
@@ -15,6 +19,10 @@ export type {
   AiChatTranslations,
   AiChatTranslationsProviderProps,
 } from "./types"
+
+// Canvas entity registry
+export { registerCanvasEntity, getCanvasEntity } from "./canvas"
+export type { CanvasEntityDefinition } from "./canvas"
 
 export { aiTranslations } from "./types"
 
@@ -32,4 +40,8 @@ export {
   useDefaultCopilotActions,
   useOrchestratorThinkingAction,
   useMessageSourcesAction,
+  useF0AiFormActions,
+  useFormFillAction,
+  useFormSubmitAction,
+  useFormGetStateAction,
 } from "./copilotActions"

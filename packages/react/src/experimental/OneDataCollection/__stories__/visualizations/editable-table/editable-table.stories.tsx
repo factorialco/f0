@@ -3,6 +3,11 @@ import { format } from "date-fns"
 import { useMemo, useRef, useState } from "react"
 import { action } from "storybook/actions"
 
+import { createDataSourceDefinition, RecordType } from "@/hooks/datasource"
+import { ROLES_MOCK } from "@/mocks"
+
+import { OneDataCollection } from "../../.."
+import { useDataCollectionSource } from "../../../hooks/useDataCollectionSource"
 import {
   createDataAdapter,
   ExampleComponent,
@@ -487,30 +492,33 @@ export const EditableTableWithSelectableNestedRecordsDetailed: Story = {
   },
 }
 
-export const TableAndEditableTable: Story = {
+export const EditableTableWithNestedRecordsAndAddRow: Story = {
   parameters: {
     docs: {
       description: {
         story:
-          "Both Table and Editable Table in the same collection. Switch via the settings selector; each view keeps its own column order and visibility.",
+          "Editable table with nested records and add-row actions. Uses `addRowActions` for root-level and `addNestedRowActions` for nested rows.",
       },
     },
   },
   render: () => {
     const mockVisualizations = getMockVisualizations({
       table: {
-        allowColumnHiding: true,
-        allowColumnReordering: true,
+        noSorting: true,
+        nestedRecords: true,
+        applyLongText: false,
       },
     })
-    const { dataAdapter, onCellChange } = useEditableTableData()
+
+    const onCellChange = async (updatedItem: MockUser) => {
+      action("onCellChange")(updatedItem)
+    }
 
     return (
       <ExampleComponent
-        tableAllowColumnReordering
-        tableAllowColumnHiding
+        noSorting
+        storage={false}
         visualizations={[
-          mockVisualizations.table,
           {
             type: "editableTable" as const,
             options: {
@@ -521,11 +529,389 @@ export const TableAndEditableTable: Story = {
                 >
               ).options,
               onCellChange,
+              addRowActionsLabel: "Add item",
+              addRowActions: () => ({
+                label: "Add row",
+                onClick: () => action("onAddRow")(),
+              }),
+              addNestedRowActionsLabel: "Add item",
+              addNestedRowActions: (parentItem) => ({
+                label: "Add child row",
+                onClick: () => action("onAddChildRow")(parentItem),
+              }),
+            },
+          },
+        ]}
+        id="editable-table-nested-add-row/v1"
+        nestedRecords
+      />
+    )
+  },
+}
+
+export const EditableTableWithMultipleAddRowActions: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Editable table with multiple add-row actions at both root and nested levels. When any action has a `description`, a dropdown button is used (all items shown in a menu). Otherwise, a split button is used where the first action is the primary click target. This story includes descriptions to demonstrate dropdown mode.",
+      },
+    },
+  },
+  render: () => {
+    const mockVisualizations = getMockVisualizations({
+      table: { noSorting: true, nestedRecords: true, applyLongText: false },
+    })
+
+    const onCellChange = async (updatedItem: MockUser) => {
+      action("onCellChange")(updatedItem)
+    }
+
+    return (
+      <ExampleComponent
+        noSorting
+        storage={false}
+        visualizations={[
+          {
+            type: "editableTable" as const,
+            options: {
+              ...(
+                mockVisualizations.editableTable as Extract<
+                  typeof mockVisualizations.editableTable,
+                  { type: "editableTable" }
+                >
+              ).options,
+              onCellChange,
+              addRowActionsLabel: "Add row",
+              addRowActions: () => [
+                {
+                  label: "Add row1",
+                  description: "Add a row of type 1 to the table",
+                  onClick: () => action("onAddRow")(),
+                },
+                {
+                  label: "Add row2",
+                  description: "Add a row of type 2 to the table",
+                  onClick: () => action("onAddSecondOption")(),
+                },
+              ],
+              addNestedRowActionsLabel: "Add nested row",
+              addNestedRowActions: (parentItem) => [
+                {
+                  label: "Add nested row 1",
+                  description: "Add a nested child row of type 1",
+                  onClick: () => action("onAddChildrenItem")(parentItem),
+                },
+                {
+                  label: "Add nested row 2",
+                  description: "Add a nested child row of type 2",
+                  onClick: () =>
+                    action("onAddSecondaryChildrenItem")(parentItem),
+                },
+              ],
+            },
+          },
+        ]}
+        id="editable-table-multi-add-row/v1"
+        nestedRecords
+      />
+    )
+  },
+}
+
+export const EditableTableWithAddRow: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Editable table with an Add button at the bottom. Clicking the button appends a new row with hardcoded values.",
+      },
+    },
+  },
+  render: () => {
+    const mockVisualizations = getMockVisualizations()
+    const { dataAdapter, onCellChange, setItems } = useEditableTableData(
+      generateMockUsers(10),
+      { perPage: 100 }
+    )
+    const counter = useRef(0)
+
+    const onAddRow = async () => {
+      counter.current += 1
+      const id = `new-${counter.current}`
+      action("onAddRow")()
+      setItems((prev) => [
+        ...prev,
+        {
+          index: prev.length,
+          id,
+          name: "New User",
+          email: "new.user@example.com",
+          role: "Designer",
+          department: "Engineering",
+          status: "Active",
+          isStarred: false,
+          manager: "John Doe",
+          image: "",
+          salary: 50000,
+          joinedAt: new Date(),
+          canBeSelected: true,
+          permissions: { read: true, write: true, delete: false },
+        },
+      ])
+    }
+
+    return (
+      <ExampleComponent
+        visualizations={[
+          {
+            type: "editableTable" as const,
+            options: {
+              ...(
+                mockVisualizations.editableTable as Extract<
+                  typeof mockVisualizations.editableTable,
+                  { type: "editableTable" }
+                >
+              ).options,
+              onCellChange,
+              addRowActions: () => ({
+                label: "Add row",
+                onClick: onAddRow,
+              }),
             },
           },
         ]}
         dataAdapter={dataAdapter}
-        id="table-and-editable/v1"
+        id="editable-table-add-row/v1"
+      />
+    )
+  },
+}
+
+export const EditableTableWithSummaryRowAndAddRow: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Editable table combining a summary row (salary sum) with an Add Row button. The summary row updates as cells are edited or new rows are added.",
+      },
+    },
+  },
+  render: () => {
+    const initialItems = generateMockUsers(10)
+    const [items, setItems] = useState<MockUser[]>(initialItems)
+    const itemsRef = useRef(items)
+    itemsRef.current = items
+    const counter = useRef(0)
+
+    const onCellChange = async (updatedItem: MockUser) => {
+      const normalized: MockUser = {
+        ...updatedItem,
+        salary:
+          updatedItem.salary === undefined ||
+          updatedItem.salary === null ||
+          (typeof updatedItem.salary === "string" && updatedItem.salary === "")
+            ? undefined
+            : Number(updatedItem.salary),
+      }
+      action("onCellChange")(normalized)
+      setItems((prev) =>
+        prev.map((i) => (i.id === normalized.id ? normalized : i))
+      )
+    }
+
+    const dataAdapter = useMemo(() => {
+      const adapter = createDataAdapter({
+        data: items,
+        paginationType: "pages",
+        perPage: 100,
+      })
+      adapter.fetchData = (fetchOptions: unknown) => {
+        const currentAdapter = createDataAdapter({
+          data: itemsRef.current,
+          paginationType: "pages",
+          perPage: 100,
+        })
+        return currentAdapter.fetchData(fetchOptions as never)
+      }
+      return adapter
+    }, [items])
+
+    const dataSource = useDataCollectionSource(
+      {
+        summaries: {
+          salary: {
+            type: "sum",
+          },
+        },
+        dataAdapter,
+      },
+      [dataAdapter]
+    )
+
+    const onAddRow = async () => {
+      counter.current += 1
+      const id = `new-${counter.current}`
+      action("onAddRow")()
+      setItems((prev) => [
+        ...prev,
+        {
+          index: prev.length,
+          id,
+          name: "New User",
+          email: "new.user@example.com",
+          role: "Designer",
+          department: "Engineering",
+          status: "Active",
+          isStarred: false,
+          manager: "John Doe",
+          image: "",
+          salary: 50000,
+          joinedAt: new Date(),
+          canBeSelected: true,
+          permissions: { read: true, write: true, delete: false },
+        },
+      ])
+    }
+
+    return (
+      <OneDataCollection
+        source={dataSource}
+        visualizations={[
+          {
+            type: "editableTable" as const,
+            options: {
+              columns: [
+                {
+                  id: "name",
+                  label: "Name",
+                  render: (item: MockUser) => ({
+                    type: "person",
+                    value: {
+                      firstName: item.name.split(" ")[0],
+                      lastName: item.name.split(" ")[1],
+                    },
+                  }),
+                  editType: () => "display-only" as const,
+                },
+                {
+                  id: "email",
+                  label: "Email",
+                  render: (item: MockUser) => item.email,
+                  editType: () => "text" as const,
+                },
+                {
+                  id: "role",
+                  label: "Role",
+                  render: (item: MockUser) => item.role,
+                  editType: () => "text" as const,
+                },
+                {
+                  id: "department",
+                  label: "Department",
+                  render: (item: MockUser) => item.department,
+                  editType: () => "text" as const,
+                },
+                {
+                  id: "salary",
+                  label: "Salary",
+                  align: "right" as const,
+                  summary: "salary",
+                  render: (item: MockUser) => item.salary,
+                  editType: () => "text" as const,
+                },
+              ],
+              onCellChange,
+              addRowActions: () => ({
+                label: "Add row",
+                onClick: onAddRow,
+              }),
+            },
+          },
+        ]}
+      />
+    )
+  },
+}
+
+type RoleRecord = { value: string; label: string }
+
+const roleNonPaginatedSource = createDataSourceDefinition<RoleRecord>({
+  dataAdapter: {
+    fetchData: async ({ search }) => {
+      await new Promise((resolve) => setTimeout(resolve, 150))
+
+      let results = ROLES_MOCK.map((role) => ({ value: role, label: role }))
+
+      if (search) {
+        const q = search.toLowerCase()
+        results = results.filter((r) => r.label.toLowerCase().includes(q))
+      }
+
+      return { records: results }
+    },
+  },
+})
+
+export const EditableTableWithDataSourceSelect: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Editable table where the Role column uses a source-based select with `defaultItem`. Some rows have a role pre-selected while others are empty, showing the placeholder.",
+      },
+    },
+  },
+  render: () => {
+    const mockVisualizations = getMockVisualizations()
+    const initialItems = generateMockUsers(10).map((user, i) =>
+      i % 2 === 0 ? { ...user, role: "" } : user
+    )
+    const { dataAdapter, onCellChange } = useEditableTableData(initialItems)
+
+    const baseOptions = (
+      mockVisualizations.editableTable as Extract<
+        typeof mockVisualizations.editableTable,
+        { type: "editableTable" }
+      >
+    ).options
+
+    return (
+      <ExampleComponent
+        visualizations={[
+          {
+            type: "editableTable" as const,
+            options: {
+              ...baseOptions,
+              columns: baseOptions.columns.map((col) => {
+                if (col.id === "role") {
+                  return {
+                    ...col,
+                    editType: () => "select" as const,
+                    render: (item: MockUser) => item.role || undefined,
+                    selectConfig: {
+                      source: roleNonPaginatedSource,
+                      mapOptions: (record: RecordType) => ({
+                        value: String(record.value),
+                        label: String(record.label),
+                      }),
+                      placeholder: "Select role",
+                      showSearchBox: true,
+                      defaultItem: (item: MockUser) => {
+                        if (!item.role) return undefined
+                        return { value: item.role, label: item.role }
+                      },
+                    },
+                  }
+                }
+                return col
+              }),
+              onCellChange,
+            },
+          },
+        ]}
+        dataAdapter={dataAdapter}
+        id="editable-table-datasource-select-partial/v1"
       />
     )
   },
@@ -590,6 +976,50 @@ export const EditableTableWithDateCell: Story = {
         ]}
         dataAdapter={dataAdapter}
         id="editable-table-date/v1"
+      />
+    )
+  },
+}
+
+export const TableAndEditableTable: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Both Table and Editable Table in the same collection. Switch via the settings selector; each view keeps its own column order and visibility.",
+      },
+    },
+  },
+  render: () => {
+    const mockVisualizations = getMockVisualizations({
+      table: {
+        allowColumnHiding: true,
+        allowColumnReordering: true,
+      },
+    })
+    const { dataAdapter, onCellChange } = useEditableTableData()
+
+    return (
+      <ExampleComponent
+        tableAllowColumnReordering
+        tableAllowColumnHiding
+        visualizations={[
+          mockVisualizations.table,
+          {
+            type: "editableTable" as const,
+            options: {
+              ...(
+                mockVisualizations.editableTable as Extract<
+                  typeof mockVisualizations.editableTable,
+                  { type: "editableTable" }
+                >
+              ).options,
+              onCellChange,
+            },
+          },
+        ]}
+        dataAdapter={dataAdapter}
+        id="table-and-editable/v1"
       />
     )
   },

@@ -4,10 +4,13 @@ import { tv } from "tailwind-variants"
 
 import { cn } from "../lib/utils"
 
+/** @deprecated Use F0Avatar from components/F0Avatar instead */
 export const sizes = ["xsmall", "small", "medium", "large", "xlarge"] as const
 
+/** @deprecated Use F0Avatar from components/F0Avatar instead */
 export const type = ["base", "rounded"] as const
 
+/** @deprecated Use F0Avatar from components/F0Avatar instead */
 export const color = [
   "viridian",
   "malibu",
@@ -111,4 +114,5 @@ const AvatarFallback = ({
   />
 )
 
+/** @deprecated Use F0Avatar from components/F0Avatar instead */
 export { Avatar, AvatarFallback, AvatarImage }

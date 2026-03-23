@@ -14,13 +14,14 @@ import type {
   FileUploadResult,
   FileUploadStatus,
 } from "../fields/types"
+import type { RenderCustomFieldSelectConfig } from "../types"
 
 import {
   f0FormField,
   F0Form,
   F0SectionConfig,
-  CustomFieldRenderProps,
   useF0Form,
+  RenderCustomFieldProps,
 } from "../index"
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
@@ -123,6 +124,115 @@ export const WithRows: Story = {
         city: "",
         country: "",
       },
+      onSubmit: async ({ data }) => {
+        await sleep(1000)
+        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+        return { success: true }
+      },
+    })
+
+    return <F0Form formDefinition={formDefinition} />
+  },
+}
+
+/**
+ * Form with rows where some fields have validation errors.
+ * Demonstrates that error messages appear directly under the field that
+ * triggered them, not displaced to adjacent fields in the same row.
+ *
+ * Click "Submit" to trigger validation — mandatory fields show errors
+ * only under their own labels, while optional fields remain clean.
+ */
+export const WithRowsAndValidation: Story = {
+  render() {
+    const formSchema = z.object({
+      title: f0FormField(z.string().min(1), {
+        label: "Job Title",
+        placeholder: "Enter job title",
+      }),
+      location: f0FormField(z.string().min(1), {
+        label: "Location",
+        row: "location-team",
+        options: [
+          { value: "madrid", label: "Madrid" },
+          { value: "barcelona", label: "Barcelona" },
+          { value: "london", label: "London" },
+        ],
+        placeholder: "Select location",
+      }),
+      team: f0FormField(z.string().optional(), {
+        label: "Team",
+        row: "location-team",
+        options: [
+          { value: "engineering", label: "Engineering" },
+          { value: "design", label: "Design" },
+          { value: "product", label: "Product" },
+        ],
+        placeholder: "Select team",
+      }),
+      vacancies: f0FormField(z.number().positive().optional(), {
+        label: "Number of Vacancies",
+        placeholder: "1",
+        fieldType: "number",
+        row: "vacancies-date",
+      }),
+      startDate: f0FormField(z.date().optional(), {
+        label: "Start Date",
+        placeholder: "Select a date",
+        row: "vacancies-date",
+      }),
+      legalEntity: f0FormField(z.string().min(1), {
+        label: "Legal Entity",
+        row: "legal-type",
+        options: [
+          { value: "acme-corp", label: "Acme Corp" },
+          { value: "acme-eu", label: "Acme EU" },
+        ],
+        placeholder: "Select legal entity",
+      }),
+      workplaceType: f0FormField(
+        z.enum(["onsite", "hybrid", "remote"], {
+          required_error: "Please select a workplace type",
+        }),
+        {
+          label: "Workplace Type",
+          row: "legal-type",
+          fieldType: "select",
+          placeholder: "Select type",
+          options: [
+            { value: "onsite", label: "On-site" },
+            { value: "hybrid", label: "Hybrid" },
+            { value: "remote", label: "Remote" },
+          ],
+        }
+      ),
+      allowReferral: f0FormField(z.boolean().default(false), {
+        label: "Allow referrals",
+        fieldType: "checkbox",
+        row: "checkboxes",
+      }),
+      allowInternal: f0FormField(z.boolean().default(false), {
+        label: "Allow internal applications",
+        fieldType: "checkbox",
+        row: "checkboxes",
+      }),
+    })
+
+    const formDefinition = useF0FormDefinition({
+      name: "rows-validation",
+      schema: formSchema,
+      defaultValues: {
+        title: "",
+        location: "",
+        team: undefined,
+        vacancies: undefined,
+        startDate: undefined,
+        legalEntity: "",
+        workplaceType: undefined,
+        allowReferral: false,
+        allowInternal: false,
+      },
+      errorTriggerMode: "on-submit",
       onSubmit: async ({ data }) => {
         await sleep(1000)
         console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
@@ -1011,8 +1121,13 @@ export const FileFieldsWithInitialFiles: Story = {
 }
 
 /**
- * Demonstrates custom field type for integrating external components.
- * Uses `fieldConfig` to pass typed configuration to the render function.
+ * Demonstrates the `renderCustomField` prop for integrating external
+ * components without inlining a `render` function in each field definition.
+ *
+ * Fields declare a `customFieldName` and optional `fieldConfig`; the form-level
+ * `renderCustomField` callback dispatches on the name and renders the right
+ * component. This keeps schema definitions declarative and lets consuming apps
+ * register their custom renderers in a single place.
  */
 export const CustomField: Story = {
   render() {
@@ -1059,6 +1174,57 @@ export const CustomField: Story = {
       </div>
     )
 
+    const PriorityPicker = ({
+      label,
+      value,
+      onChange,
+      error,
+      disabled,
+    }: {
+      label: string
+      value: string | undefined
+      onChange: (value: string | undefined) => void
+      error?: string
+      disabled?: boolean
+    }) => {
+      const priorities = [
+        { id: "low", label: "Low", color: "bg-blue-100 text-blue-800" },
+        {
+          id: "medium",
+          label: "Medium",
+          color: "bg-yellow-100 text-yellow-800",
+        },
+        { id: "high", label: "High", color: "bg-red-100 text-red-800" },
+      ]
+      return (
+        <div className="flex flex-col gap-1">
+          <label className="text-sm font-medium text-f1-foreground-secondary">
+            {label}
+          </label>
+          <div className="flex gap-2">
+            {priorities.map((p) => (
+              <button
+                key={p.id}
+                type="button"
+                disabled={disabled}
+                onClick={() => onChange(value === p.id ? undefined : p.id)}
+                className={`rounded-full px-3 py-1 text-xs font-medium transition-all ${
+                  value === p.id
+                    ? `${p.color} ring-2 ring-offset-1`
+                    : "bg-f1-background-tertiary text-f1-foreground-secondary"
+                } ${disabled ? "opacity-50" : "cursor-pointer"}`}
+              >
+                {p.label}
+              </button>
+            ))}
+          </div>
+          {error && (
+            <span className="text-sm text-f1-foreground-critical">{error}</span>
+          )}
+        </div>
+      )
+    }
+
     const employees = [
       { id: "1", name: "John Doe" },
       { id: "2", name: "Jane Smith" },
@@ -1070,48 +1236,18 @@ export const CustomField: Story = {
         label: "Task Title",
         placeholder: "Enter task title",
       }),
-      // Using fieldConfig to pass typed options to the custom renderer
+      // Declared with customFieldName — rendered by renderCustomField
       assignee: f0FormField(z.string().min(1, "Please select an assignee"), {
         label: "Assignee",
         fieldType: "custom",
-        fieldConfig: {
-          options: employees,
-        },
-        render: ({
-          label,
-          value,
-          onChange,
-          placeholder,
-          error,
-          disabled,
-          config,
-        }) => (
-          <ExternalSelector
-            label={label}
-            value={value || undefined}
-            onChange={(v) => onChange(v ?? "")}
-            error={error}
-            disabled={disabled}
-            options={config.options}
-            placeholder={placeholder}
-          />
-        ),
+        customFieldName: "employee-selector",
+        fieldConfig: { options: employees },
       }),
-      // Without fieldConfig - options passed directly
-      reviewer: f0FormField(z.string().optional(), {
-        label: "Reviewer (Optional)",
+      // Different customFieldName — same renderCustomField dispatches it
+      priority: f0FormField(z.string().optional(), {
+        label: "Priority",
         fieldType: "custom",
-        render: (props: CustomFieldRenderProps<string | undefined>) => (
-          <ExternalSelector
-            label={props.label}
-            value={props.value || undefined}
-            onChange={(v) => props.onChange(v)}
-            error={props.error}
-            disabled={props.disabled}
-            options={employees}
-            placeholder="Choose a reviewer..."
-          />
-        ),
+        customFieldName: "priority-picker",
       }),
       description: f0FormField(z.string().optional(), {
         label: "Description",
@@ -1126,7 +1262,7 @@ export const CustomField: Story = {
       defaultValues: {
         title: "",
         assignee: "",
-        reviewer: "",
+        priority: "",
         description: "",
       },
       onSubmit: async ({ data }) => {
@@ -1137,7 +1273,160 @@ export const CustomField: Story = {
       submitConfig: { label: "Create Task", icon: null },
     })
 
-    return <F0Form formDefinition={formDefinition} />
+    const renderCustomField = useCallback((props: RenderCustomFieldProps) => {
+      switch (props.customFieldName) {
+        case "employee-selector":
+          return (
+            <ExternalSelector
+              label={props.label}
+              value={(props.value as string) || undefined}
+              onChange={(v) => props.onChange(v ?? "")}
+              error={props.error}
+              disabled={props.disabled}
+              options={
+                (props.config as { options: { id: string; name: string }[] })
+                  .options
+              }
+              placeholder={props.placeholder}
+            />
+          )
+        case "priority-picker":
+          return (
+            <PriorityPicker
+              label={props.label}
+              value={(props.value as string) || undefined}
+              onChange={(v) => props.onChange(v ?? "")}
+              error={props.error}
+              disabled={props.disabled}
+            />
+          )
+        default:
+          return null
+      }
+    }, [])
+
+    return (
+      <F0Form
+        formDefinition={formDefinition}
+        renderCustomField={renderCustomField}
+      />
+    )
+  },
+}
+
+/**
+ * Demonstrates `customFieldName` on a regular **select** field.
+ *
+ * Instead of using `fieldType: "custom"`, the field stays `fieldType: "select"`
+ * but adds `customFieldName`. The `renderCustomField` callback returns a
+ * `RenderCustomFieldSelectConfig` object with the `source` and `mapOptions`,
+ * which are merged into the field — so the native F0 Select component is rendered
+ * with dynamically-provided data.
+ */
+export const SelectWithCustomFieldName: Story = {
+  render() {
+    type Department = {
+      id: number
+      name: string
+      headcount: number
+    }
+
+    const departmentsData: Department[] = [
+      { id: 1, name: "Engineering", headcount: 42 },
+      { id: 2, name: "Design", headcount: 15 },
+      { id: 3, name: "Product", headcount: 8 },
+      { id: 4, name: "Marketing", headcount: 20 },
+      { id: 5, name: "Sales", headcount: 30 },
+      { id: 6, name: "Support", headcount: 25 },
+    ]
+
+    const departmentsSource = createDataSourceDefinition<Department>({
+      dataAdapter: {
+        fetchData: async ({ search }) => {
+          await sleep(200)
+          let results = departmentsData
+          if (search) {
+            const s = search.toLowerCase()
+            results = results.filter((d) => d.name.toLowerCase().includes(s))
+          }
+          return { records: results }
+        },
+      },
+    })
+
+    const mapDepartmentOption = (dept: Department) => ({
+      value: dept.id,
+      label: dept.name,
+      description: `${dept.headcount} people`,
+    })
+
+    const formSchema = z.object({
+      name: f0FormField(z.string().min(1, "Name is required"), {
+        label: "Employee Name",
+        placeholder: "Enter name",
+      }),
+      // Select field with customFieldName — source/mapOptions provided by renderCustomField
+      department: f0FormField(
+        z.number({ required_error: "Pick a department" }),
+        {
+          label: "Department",
+          fieldType: "select",
+          placeholder: "Select a department...",
+          showSearchBox: true,
+          customFieldName: "department-selector",
+        }
+      ),
+      // Multi-select field with customFieldName
+      secondaryDepartments: f0FormField(z.array(z.number()).optional(), {
+        label: "Secondary Departments",
+        fieldType: "select",
+        placeholder: "Select additional departments...",
+        showSearchBox: true,
+        multiple: true,
+        customFieldName: "department-selector",
+      }),
+    })
+
+    const formDefinition = useF0FormDefinition({
+      name: "select-custom-field-name",
+      schema: formSchema,
+      defaultValues: {
+        name: "",
+        department: undefined as unknown as number,
+        secondaryDepartments: [],
+      },
+      onSubmit: async ({ data }) => {
+        await sleep(1000)
+        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+        return { success: true }
+      },
+      submitConfig: { label: "Save", icon: null },
+    })
+
+    const renderCustomField = useCallback(
+      (props: RenderCustomFieldProps): RenderCustomFieldSelectConfig => {
+        // All fields with customFieldName "department-selector" share the same source
+        if (props.customFieldName === "department-selector") {
+          return {
+            _type: "select-config",
+            source: departmentsSource,
+            mapOptions: mapDepartmentOption,
+          }
+        }
+        // Fallback — should not happen in this example
+        return { _type: "select-config" }
+      },
+      []
+    )
+
+    return (
+      <div className="max-w-lg">
+        <F0Form
+          formDefinition={formDefinition}
+          renderCustomField={renderCustomField}
+        />
+      </div>
+    )
   },
 }
 
@@ -2097,6 +2386,223 @@ export const PerSectionShowSubmitWhenDirty: Story = {
         return { success: true }
       },
       submitConfig: { label: "Save" },
+    })
+
+    return <F0Form formDefinition={formDefinition} />
+  },
+}
+
+/**
+ * Form with async `defaultValues` fetched from an external source.
+ * While loading, the form displays field-shaped skeleton placeholders
+ * that match the real form layout. Once resolved, the form appears
+ * pre-filled with the fetched values.
+ *
+ * Pass an async function to `defaultValues` that receives an `AbortSignal`
+ * for cancellation support (e.g. with `fetch()`).
+ */
+export const AsyncDefaultValues: Story = {
+  render() {
+    const formSchema = z.object({
+      firstName: f0FormField(z.string().min(1), {
+        label: "First Name",
+        placeholder: "Enter first name",
+      }),
+      lastName: f0FormField(z.string().min(1), {
+        label: "Last Name",
+        placeholder: "Enter last name",
+      }),
+      email: f0FormField(z.string().email(), {
+        label: "Email",
+        placeholder: "you@example.com",
+      }),
+      bio: f0FormField(z.string().max(500).optional(), {
+        label: "Biography",
+        fieldType: "textarea",
+        rows: 3,
+      }),
+      notifications: f0FormField(z.boolean(), {
+        label: "Enable notifications",
+        fieldType: "switch",
+      }),
+    })
+
+    const formDefinition = useF0FormDefinition({
+      name: "async-defaults",
+      schema: formSchema,
+      defaultValues: async (_signal: AbortSignal) => {
+        // Simulate fetching user profile from an API
+        await sleep(2000)
+        return {
+          firstName: "Jane",
+          lastName: "Smith",
+          email: "jane.smith@example.com",
+          bio: "Software engineer passionate about design systems.",
+          notifications: true,
+        }
+      },
+      onSubmit: async ({ data }) => {
+        await sleep(1000)
+        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+        return { success: true, message: "Profile updated" }
+      },
+      submitConfig: { label: "Save Profile" },
+    })
+
+    return <F0Form formDefinition={formDefinition} />
+  },
+}
+
+/**
+ * Per-section form with async `defaultValues`.
+ * Each section independently shows skeleton placeholders while
+ * the shared async function resolves. All sections populate
+ * once the promise completes.
+ */
+export const AsyncDefaultValuesPerSection: Story = {
+  render() {
+    const schema = {
+      personal: z.object({
+        firstName: f0FormField(z.string().min(1), {
+          label: "First Name",
+          placeholder: "Enter first name",
+        }),
+        lastName: f0FormField(z.string().min(1), {
+          label: "Last Name",
+          placeholder: "Enter last name",
+        }),
+      }),
+      contact: z.object({
+        email: f0FormField(z.string().email(), {
+          label: "Email",
+          placeholder: "you@example.com",
+        }),
+        phone: f0FormField(z.string().optional(), {
+          label: "Phone",
+          placeholder: "+1 (555) 000-0000",
+        }),
+      }),
+    }
+
+    const formDefinition = useF0FormDefinition({
+      name: "async-per-section",
+      schema,
+      sections: {
+        personal: {
+          title: "Personal Information",
+          description: "Your basic profile details",
+        },
+        contact: {
+          title: "Contact Details",
+          description: "How we can reach you",
+        },
+      },
+      defaultValues: async (_signal: AbortSignal) => {
+        // Simulate API call
+        await sleep(2000)
+        return {
+          personal: { firstName: "Jane", lastName: "Smith" },
+          contact: { email: "jane@example.com", phone: "+1 555 123 4567" },
+        }
+      },
+      onSubmit: async ({ sectionId, data }) => {
+        await sleep(1000)
+        console.info(
+          `Section "${sectionId}" submitted: ${JSON.stringify(data, null, 2)}`
+        )
+        return { success: true }
+      },
+      submitConfig: { label: "Save" },
+    })
+
+    return <F0Form formDefinition={formDefinition} />
+  },
+}
+
+/**
+ * Form definition with `defaultValuesParamsSchema`.
+ *
+ * The schema tells the AI what params it can supply when calling `presentForm`.
+ * When `defaultValuesParamsSchema` is provided, `defaultValues` can be a
+ * function that receives typed params — e.g. `async ({ employeeId }) => { ... }`.
+ *
+ * For rendered forms, `defaultValues` is resolved at mount time with empty
+ * params (`{}`). When the AI calls `presentForm` with params, the registry
+ * calls the same function with the actual params.
+ *
+ * In this example the AI can supply an `employeeId` when presenting the form,
+ * which causes the async `defaultValues` to fetch that employee's data.
+ */
+export const WithDefaultValuesParamsSchema: Story = {
+  render() {
+    const formSchema = z.object({
+      firstName: f0FormField(z.string().min(1), {
+        label: "First Name",
+        placeholder: "Enter first name",
+      }),
+      lastName: f0FormField(z.string().min(1), {
+        label: "Last Name",
+        placeholder: "Enter last name",
+      }),
+      email: f0FormField(z.string().email(), {
+        label: "Email",
+        placeholder: "you@example.com",
+      }),
+      role: f0FormField(z.string().optional(), {
+        label: "Role",
+        placeholder: "e.g. Engineer",
+      }),
+    })
+
+    // Mock employee database
+    const employees: Record<
+      string,
+      {
+        firstName: string
+        lastName: string
+        email: string
+        role: string
+      }
+    > = {
+      "emp-1": {
+        firstName: "Jane",
+        lastName: "Doe",
+        email: "jane.doe@factorial.co",
+        role: "Staff Engineer",
+      },
+      "emp-2": {
+        firstName: "John",
+        lastName: "Smith",
+        email: "john.smith@factorial.co",
+        role: "Product Manager",
+      },
+    }
+
+    const formDefinition = useF0FormDefinition({
+      name: "edit-employee",
+      schema: formSchema,
+      // TParams is inferred from defaultValuesParamsSchema
+      defaultValuesParamsSchema: z.object({
+        employeeId: z.string().describe("The ID of the employee to edit"),
+      }),
+      // defaultValues receives typed params — auto-inferred from defaultValuesParamsSchema
+      defaultValues: async ({ employeeId }) => {
+        await sleep(1500)
+        // At mount time params is {} so employeeId is undefined — return sensible defaults
+        const employee = employeeId ? employees[employeeId] : employees["emp-1"]
+        return {
+          firstName: employee?.firstName ?? "",
+          lastName: employee?.lastName ?? "",
+          email: employee?.email ?? "",
+          role: employee?.role ?? "",
+        }
+      },
+      onSubmit: async ({ data }) => {
+        await sleep(1000)
+        console.info(`Employee updated: ${JSON.stringify(data, null, 2)}`)
+        return { success: true, message: "Employee updated" }
+      },
+      submitConfig: { label: "Save Changes" },
     })
 
     return <F0Form formDefinition={formDefinition} />

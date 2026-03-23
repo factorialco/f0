@@ -1,30 +1,31 @@
 import { z, ZodTypeAny } from "zod"
 
 import type {
-  F0BaseFieldDisabledProp,
-  F0BaseFieldRenderIfProp,
-} from "./fields/types"
-import type { F0TextConfig } from "./fields/text/types"
-import type { F0NumberConfig } from "./fields/number/types"
-import type { F0TextareaConfig } from "./fields/textarea/types"
-import type { F0SelectConfig } from "./fields/select/types"
+  DurationFieldConfig,
+  DurationInputSize,
+  DurationUnit,
+} from "@/components/F0DurationInput/types"
+import type { InputFieldStatus } from "@/ui/InputField/types"
+
 import type { F0CheckboxConfig } from "./fields/checkbox/types"
-import type { F0SwitchConfig } from "./fields/switch/types"
+import type { F0CustomConfig } from "./fields/custom/types"
 import type {
   F0DateConfig,
   F0DateTimeConfig,
   F0TimeConfig,
 } from "./fields/date/types"
 import type { F0DateRangeConfig } from "./fields/daterange/types"
-import type { F0RichTextConfig } from "./fields/richtext/types"
-import type { F0CustomConfig } from "./fields/custom/types"
 import type { F0FileConfig } from "./fields/file/types"
-import type { InputFieldStatus } from "@/ui/InputField/types"
+import type { F0NumberConfig } from "./fields/number/types"
+import type { F0RichTextConfig } from "./fields/richtext/types"
+import type { F0SelectConfig } from "./fields/select/types"
+import type { F0SwitchConfig } from "./fields/switch/types"
+import type { F0TextConfig } from "./fields/text/types"
+import type { F0TextareaConfig } from "./fields/textarea/types"
 import type {
-  DurationFieldConfig,
-  DurationInputSize,
-  DurationUnit,
-} from "@/components/F0DurationInput/types"
+  F0BaseFieldDisabledProp,
+  F0BaseFieldRenderIfProp,
+} from "./fields/types"
 
 /**
  * Zod type names for type checking without instanceof
@@ -131,6 +132,12 @@ export interface F0BaseConfig {
    * renderIf: ({ values }) => values.status === 'active'
    */
   renderIf?: F0BaseFieldRenderIfProp
+  /**
+   * Name identifying a reusable custom field type.
+   * When set, the form-level `renderCustomField` callback is invoked to provide
+   * field-specific configuration (e.g. data source, options) or a custom component.
+   */
+  customFieldName?: string
 }
 
 // Re-export field-specific config types
