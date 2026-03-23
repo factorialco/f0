@@ -103,10 +103,9 @@ describe("F0Form async defaultValues (single schema)", () => {
     render(<SingleSchemaForm defaultValues={asyncFn} />)
 
     await waitFor(() => {
-      expect(screen.getByLabelText("Name")).toBeInTheDocument()
+      expect(screen.getByLabelText("Name")).toHaveValue("Alice")
     })
 
-    expect(screen.getByLabelText("Name")).toHaveValue("Alice")
     expect(screen.getByLabelText("Email")).toHaveValue("alice@test.com")
   })
 
@@ -182,10 +181,9 @@ describe("F0Form async defaultValues (per-section)", () => {
     render(<PerSectionForm defaultValues={asyncFn} />)
 
     await waitFor(() => {
-      expect(screen.getByLabelText("Name")).toBeInTheDocument()
+      expect(screen.getByLabelText("Name")).toHaveValue("Alice")
     })
 
-    expect(screen.getByLabelText("Name")).toHaveValue("Alice")
     expect(screen.getByLabelText("Email")).toHaveValue("alice@test.com")
   })
 })
