@@ -326,10 +326,12 @@ export const defaultTranslations = {
       exporting: "Exporting...",
     },
     pong: {
-      ai: "AI",
-      you: "YOU",
+      title: "Pong",
       youWin: "You win!",
       youLose: "You lose!",
+      goal: "Goal",
+      controls: "← → to move",
+      escToExit: "Esc to exit",
     },
     growth: {
       demoCard: {
