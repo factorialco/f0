@@ -37,7 +37,7 @@ export function ErrorTooltip({ message, children }: ErrorTooltipProps) {
           </TooltipTrigger>
           <TooltipContent
             side="top"
-            className="flex items-center gap-1 !border-black/10 !bg-[#fff] shadow-md"
+            className="flex items-center gap-1 border-black/10 bg-[#fff] shadow-md"
           >
             <F0Icon icon={AlertCircle} color="critical" size="sm" />
             <span className="text-sm font-medium text-f1-foreground-critical">
