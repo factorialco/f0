@@ -192,7 +192,7 @@ export const F0TimelineRow = forwardRef<HTMLDivElement, F0TimelineRowProps>(
     const isMultitask = taskCount !== undefined && taskCount > 0
 
     return (
-      <div ref={ref} className="flex gap-3">
+      <div ref={ref} className="flex gap-4">
         {/* Status indicator + vertical connector */}
         {!hideStatus && (
           <div className="flex flex-col items-center">
@@ -202,12 +202,12 @@ export const F0TimelineRow = forwardRef<HTMLDivElement, F0TimelineRowProps>(
         )}
 
         {/* Content */}
-        <div className="flex flex-1 flex-col gap-2 pb-4">
-          <div className="flex min-h-6 items-center gap-2">
+        <div className="flex flex-1 flex-col gap-3 pb-5">
+          <div className="flex min-h-7 items-center gap-2">
             {isMultitask ? (
               <div
                 className={cn(
-                  "flex h-6 w-6 shrink-0 items-center justify-center rounded",
+                  "flex h-7 w-7 shrink-0 items-center justify-center rounded",
                   status === "completed"
                     ? "border border-f1-border-secondary bg-white"
                     : "bg-f1-background-tertiary"
@@ -218,19 +218,19 @@ export const F0TimelineRow = forwardRef<HTMLDivElement, F0TimelineRowProps>(
             ) : (
               <div
                 className={cn(
-                  "flex h-6 w-6 shrink-0 items-center justify-center rounded",
+                  "flex h-7 w-7 shrink-0 items-center justify-center rounded",
                   status === "completed"
                     ? "border border-f1-border-secondary bg-white"
                     : "bg-f1-background-tertiary"
                 )}
               >
-                <F0Icon icon={icon} size="xs" color="default" />
+                <F0Icon icon={icon} size="sm" color="default" />
               </div>
             )}
             {isMultitask ? (
               <button
                 type="button"
-                className="flex items-center gap-1 text-sm font-semibold text-f1-foreground"
+                className="flex items-center gap-1 text-base font-semibold text-f1-foreground"
                 onClick={onExpandToggle}
               >
                 {taskCount} {title}
@@ -244,7 +244,7 @@ export const F0TimelineRow = forwardRef<HTMLDivElement, F0TimelineRowProps>(
               <>
                 <span
                   className={cn(
-                    "text-sm font-semibold text-f1-foreground",
+                    "text-base font-semibold text-f1-foreground",
                     status === "completed" && "line-through"
                   )}
                 >
@@ -277,11 +277,13 @@ export const F0TimelineRow = forwardRef<HTMLDivElement, F0TimelineRowProps>(
               {(primaryAction ||
                 (secondaryActions && secondaryActions.length > 0) ||
                 (otherActions && otherActions.length > 0)) && (
-                <Actions
-                  primaryAction={primaryAction}
-                  secondaryActions={secondaryActions}
-                  otherActions={otherActions}
-                />
+                <div className="mb-3">
+                  <Actions
+                    primaryAction={primaryAction}
+                    secondaryActions={secondaryActions}
+                    otherActions={otherActions}
+                  />
+                </div>
               )}
             </>
           )}
