@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.414.0](https://github.com/factorialco/f0/compare/f0-react-v1.413.1...f0-react-v1.414.0) (2026-03-23)
+
+
+### Features
+
+* **F0AiChat:** Pong easter egg in welcome screen ([#3711](https://github.com/factorialco/f0/issues/3711)) ([cc4c2e7](https://github.com/factorialco/f0/commit/cc4c2e7d7fa8e6a1bc7897b695a62c94d96f9658))
+
 ## [1.413.1](https://github.com/factorialco/f0/compare/f0-react-v1.413.0...f0-react-v1.413.1) (2026-03-22)
 
 
