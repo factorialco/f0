@@ -258,6 +258,7 @@ export const defaultTranslations = {
     openChat: "Open Chat with One AI",
     closeChat: "Close Chat with One AI",
     startNewChat: "Start new chat",
+    settings: "Settings",
     scrollToBottom: "Scroll to bottom",
     welcome: "Ask or create with One",
     defaultInitialMessage: "How can I help you today?",
@@ -307,6 +308,10 @@ export const defaultTranslations = {
     ask: "Ask One",
     viewProfile: "View profile",
     tools: "Tools",
+    credits: "Credits",
+    creditsUsed: "used",
+    creditsError: "Could not load credits",
+    upgradePlan: "Upgrade plan",
     reportCard: {
       reportLabel: "Report",
       openButton: "Open",

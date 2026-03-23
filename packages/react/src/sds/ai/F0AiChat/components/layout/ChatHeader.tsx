@@ -19,6 +19,7 @@ import { Action } from "@/ui/Action"
 
 import { useAiChat } from "../../providers/AiChatStateProvider"
 import { ChatHistoryDialog } from "../history/ChatHistoryDialog"
+import { CreditsPopover } from "./CreditsPopover"
 
 export const ChatHeader = (props: HeaderProps) => {
   const { historyEnabled } = useAiChat()
@@ -95,6 +96,7 @@ const ChatHeaderWithHistory = (props: HeaderProps) => {
           )}
         </div>
         <motion.div className="flex shrink-0 items-center" {...props}>
+          <CreditsPopover />
           {!lockVisualizationMode && !isSmallScreen && (
             <ButtonInternal
               variant="ghost"

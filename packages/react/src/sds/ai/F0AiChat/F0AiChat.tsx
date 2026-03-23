@@ -30,6 +30,8 @@ const F0AiChatProviderComponent = ({
   VoiceMode,
   entityResolvers,
   toolHints,
+  fetchCreditsUsage,
+  upgradePlanUrl,
   onThumbsUp,
   onThumbsDown,
   children,
@@ -56,6 +58,8 @@ const F0AiChatProviderComponent = ({
       tracking={tracking}
       entityResolvers={entityResolvers}
       toolHints={toolHints}
+      fetchCreditsUsage={fetchCreditsUsage}
+      upgradePlanUrl={upgradePlanUrl}
     >
       <AiChatKitWrapper {...copilotKitProps}>{children}</AiChatKitWrapper>
     </AiChatStateProvider>

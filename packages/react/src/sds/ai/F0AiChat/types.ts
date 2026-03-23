@@ -57,6 +57,14 @@ export type AiChatToolHint = {
 }
 
 /**
+ * Credits usage data returned by the host app
+ */
+export type CreditsUsage = {
+  used: number
+  total: number
+}
+
+/**
  * Interaction mode for the AI chat
  */
 export type AiChatMode = "chat" | "voice"
@@ -130,6 +138,18 @@ export type AiChatProviderProps = {
    * Only one tool hint can be active at a time.
    */
   toolHints?: AiChatToolHint[]
+  /**
+   * Async function to fetch credits usage data.
+   * Called each time the credits popover is opened.
+   * When provided, a credits button is shown in the chat header.
+   */
+  fetchCreditsUsage?: () => Promise<CreditsUsage>
+  /**
+   * URL to the plan upgrade page.
+   * When provided, a link is shown inside the credits popover.
+   * Opens in a new tab.
+   */
+  upgradePlanUrl?: string
   onThumbsUp?: (
     message: AIMessage,
     { threadId, feedback }: { threadId: string; feedback: string }
