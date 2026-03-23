@@ -68,34 +68,28 @@ export const useDisplayDashboardAction = () => {
         required: true,
       },
       {
-        name: "description",
-        type: "string",
-        description: "Optional dashboard description",
-        required: false,
-      },
-      {
         name: "items",
         type: "object[]",
         description:
-          "Ordered list of dashboard items. Each item has a type (chart, metric, or collection) with computation specs referencing datasets.",
+          "Ordered list of dashboard items (chart, metric, or collection) with computation specs.",
         required: true,
         attributes: [
           {
             name: "id",
             type: "string",
-            description: "Unique identifier for the item",
+            description: "Unique item identifier",
             required: true,
           },
           {
             name: "type",
             type: "string",
-            description: 'Item type: "chart", "metric", or "collection"',
+            description: '"chart", "metric", or "collection"',
             required: true,
           },
           {
             name: "title",
             type: "string",
-            description: "Item title displayed in the card header",
+            description: "Item title",
             required: true,
           },
           {
@@ -105,10 +99,21 @@ export const useDisplayDashboardAction = () => {
             required: false,
           },
           {
+            name: "sourceDescription",
+            type: "string",
+            description: "Source attribution subtitle",
+            required: false,
+          },
+          {
             name: "colSpan",
             type: "number",
-            description:
-              "Column span (1-12). Metrics default to 3, charts to 4 or 6, tables to 12.",
+            description: "Column span (1-12)",
+            required: false,
+          },
+          {
+            name: "rowSpan",
+            type: "number",
+            description: "Row span (1-10)",
             required: false,
           },
           {
@@ -118,20 +123,44 @@ export const useDisplayDashboardAction = () => {
               "Declarative computation spec (datasetId, aggregation, axes, etc.)",
             required: true,
           },
+          {
+            name: "chart",
+            type: "object",
+            description:
+              "Chart visual config (type, orientation, showLegend, etc.)",
+            required: false,
+          },
+          {
+            name: "format",
+            type: "object",
+            description: "Metric format (number, currency, percent, custom)",
+            required: false,
+          },
+          {
+            name: "decimals",
+            type: "number",
+            description: "Metric decimal places",
+            required: false,
+          },
+          {
+            name: "columns",
+            type: "object[]",
+            description: "Collection column definitions (id, label, width)",
+            required: false,
+          },
         ],
       },
       {
         name: "filters",
         type: "object",
-        description:
-          "Filter definitions keyed by filter ID. Each defines a multi-select filter on a dataset column.",
+        description: "Filter definitions keyed by filter ID.",
         required: false,
       },
       {
         name: "fetchSpecs",
         type: "object",
         description:
-          "Fetch specifications for server-side data retrieval. Keyed by datasetId, each describes how to fetch and query data.",
+          "Fetch specs for server-side data retrieval, keyed by datasetId.",
         required: false,
       },
     ],

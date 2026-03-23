@@ -368,8 +368,6 @@ export interface F0DataChartHeatmapProps {
   max?: number
   /** Show value labels inside cells. @default false */
   showLabels?: boolean
-  /** Show the visual map (color scale legend). @default false */
-  showVisualMap?: boolean
   /** Format values in labels and tooltip */
   valueFormatter?: (value: number) => string
   /** Escape hatch: raw ECharts options merged (shallow) on top of the generated config */

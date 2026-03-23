@@ -148,7 +148,6 @@ export const NoVisualMap: Story = {
     type: "heatmap",
     xCategories: ["Mon", "Tue", "Wed", "Thu", "Fri"],
     yCategories: ["Morning", "Afternoon", "Evening"],
-    showVisualMap: false,
     showLabels: true,
     data: [
       [0, 0, 8],

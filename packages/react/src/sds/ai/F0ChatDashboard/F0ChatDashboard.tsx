@@ -78,37 +78,13 @@ function toDashboardChartConfig(
   const valueFormatter = buildFormatter(
     "valueFormat" in chatChart ? chatChart.valueFormat : undefined
   )
-
-  switch (chatChart.type) {
-    case "bar": {
-      const { valueFormat: _, ...rest } = chatChart
-      return { ...rest, ...(valueFormatter ? { valueFormatter } : {}) }
-    }
-    case "line": {
-      const { valueFormat: _, ...rest } = chatChart
-      return { ...rest, ...(valueFormatter ? { valueFormatter } : {}) }
-    }
-    case "funnel": {
-      const { valueFormat: _, ...rest } = chatChart
-      return { ...rest, ...(valueFormatter ? { valueFormatter } : {}) }
-    }
-    case "radar": {
-      const { valueFormat: _, ...rest } = chatChart
-      return { ...rest, ...(valueFormatter ? { valueFormatter } : {}) }
-    }
-    case "pie": {
-      const { valueFormat: _, ...rest } = chatChart
-      return { ...rest, ...(valueFormatter ? { valueFormatter } : {}) }
-    }
-    case "gauge": {
-      const { valueFormat: _, ...rest } = chatChart
-      return { ...rest, ...(valueFormatter ? { valueFormatter } : {}) }
-    }
-    case "heatmap": {
-      const { valueFormat: _, ...rest } = chatChart
-      return { ...rest, ...(valueFormatter ? { valueFormatter } : {}) }
-    }
+  const { valueFormat: _, ...rest } = chatChart as ChatDashboardChartConfig & {
+    valueFormat?: FormatPreset
   }
+  return {
+    ...rest,
+    ...(valueFormatter ? { valueFormatter } : {}),
+  } as DashboardChartConfig
 }
 
 // ---------------------------------------------------------------------------

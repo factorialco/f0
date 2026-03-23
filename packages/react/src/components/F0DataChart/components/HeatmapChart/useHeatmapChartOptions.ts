@@ -17,7 +17,6 @@ export function useHeatmapChartOptions(
     min: minProp,
     max: maxProp,
     showLabels = false,
-    showVisualMap = false,
     valueFormatter,
     echartsOptions,
   }: F0DataChartHeatmapProps
@@ -85,7 +84,7 @@ export function useHeatmapChartOptions(
         orient: "horizontal",
         bottom: 0,
         left: "center",
-        show: showVisualMap,
+        show: false,
         inRange: {
           color: [colors.borderSecondary, baseColor],
         },
@@ -97,7 +96,7 @@ export function useHeatmapChartOptions(
           ? (value: unknown) => valueFormatter(Number(value))
           : undefined,
       },
-      grid: buildGrid({ showLegend: showVisualMap }),
+      grid: buildGrid({ showLegend: false }),
       series: [
         {
           type: "heatmap" as const,
@@ -176,7 +175,6 @@ export function useHeatmapChartOptions(
     minProp,
     maxProp,
     showLabels,
-    showVisualMap,
     valueFormatter,
     echartsOptions,
     theme,

@@ -1,9 +1,12 @@
+import { useState } from "react"
+
 import type {
   FiltersDefinition,
   FiltersState,
 } from "@/components/OneFilterPicker/types"
 
 import { F0Icon } from "@/components/F0Icon"
+import { ChipsList, Controls, Root } from "@/components/OneFilterPicker"
 import { ArrowUp, ArrowDown } from "@/icons/app"
 import { cn } from "@/lib/utils"
 
@@ -83,15 +86,24 @@ export function MetricItem<Filters extends FiltersDefinition>({
   filters,
   actions,
 }: MetricItemProps<Filters>) {
+  const [localItemFilters, setLocalItemFilters] = useState<
+    FiltersState<FiltersDefinition>
+  >(() => item.defaultItemFilters ?? {})
+
   const enabled = item.useDashboardFilters !== false
+  const mergedFilters = {
+    ...(enabled ? filters : {}),
+    ...localItemFilters,
+  } as FiltersState<Filters>
+
   const { data, isLoading, error, retry } = useDashboardItemData<
     Filters,
     DashboardMetricData
-  >(item.fetchData, filters, enabled)
+  >(item.fetchData, mergedFilters, true)
 
   const trend = data ? computeTrend(data.value, data.previousValue) : undefined
 
-  return (
+  const content = (
     <DashboardItem
       title={item.title}
       description={item.description}
@@ -100,6 +112,8 @@ export function MetricItem<Filters extends FiltersDefinition>({
       onRetry={retry}
       skeleton={<MetricSkeleton />}
       actions={actions}
+      filterControls={item.itemFilters ? <Controls /> : undefined}
+      filterChips={item.itemFilters ? <ChipsList /> : undefined}
     >
       {data && (
         <div className="flex h-full items-end gap-3 px-4 pb-4">
@@ -129,4 +143,19 @@ export function MetricItem<Filters extends FiltersDefinition>({
       )}
     </DashboardItem>
   )
+
+  if (item.itemFilters) {
+    return (
+      <Root
+        filters={item.itemFilters}
+        value={localItemFilters}
+        onChange={setLocalItemFilters}
+        mode="simple"
+      >
+        {content}
+      </Root>
+    )
+  }
+
+  return content
 }
