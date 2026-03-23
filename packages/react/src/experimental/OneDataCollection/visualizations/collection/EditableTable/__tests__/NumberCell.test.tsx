@@ -34,23 +34,43 @@ describe("NumberCell", () => {
     expect(input).toHaveValue("42000")
   })
 
-  it("renders an empty input when value is an empty string", () => {
+  it("renders 0 when value is an empty string", () => {
     render(<NumberCell {...defaultProps} value="" />)
 
     const input = screen.getByRole("textbox")
-    expect(input).toHaveValue("")
+    expect(input).toHaveValue("0")
   })
 
-  it("calls onChange when input value changes", async () => {
+  it("calls onChange with the serialized string value", async () => {
     const user = userEvent.setup()
     const onChange = vi.fn()
 
     render(<NumberCell {...defaultProps} value="" onChange={onChange} />)
 
     const input = screen.getByRole("textbox")
-    await user.type(input, "100")
+    await user.type(input, "5")
 
-    expect(onChange).toHaveBeenCalled()
+    expect(onChange).toHaveBeenCalledWith("5")
+  })
+
+  it("calls onChange with '0' when value is cleared", async () => {
+    const user = userEvent.setup()
+    const onChange = vi.fn()
+
+    render(<NumberCell {...defaultProps} value="42000" onChange={onChange} />)
+
+    const input = screen.getByRole("textbox")
+    await user.clear(input)
+
+    expect(onChange).toHaveBeenCalledWith("0")
+  })
+
+  it("does not call onChange when value is unchanged", () => {
+    const onChange = vi.fn()
+
+    render(<NumberCell {...defaultProps} value="42000" onChange={onChange} />)
+
+    expect(onChange).not.toHaveBeenCalled()
   })
 
   it("hides the label visually", () => {
@@ -92,7 +112,7 @@ describe("NumberCell", () => {
     expect(input).toBeInTheDocument()
   })
 
-  it("shows units suffix when provided in numberConfig", () => {
+  it("passes units to NumberInput when provided in numberConfig", () => {
     render(
       <NumberCell
         {...defaultProps}

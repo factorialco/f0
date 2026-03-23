@@ -17,8 +17,9 @@ export function NumberCell<R extends RecordType>({
   const config = editableColumn.numberConfig
   const locale = config?.locale ?? contextLocale
 
-  const parsed = value !== "" && value != null ? Number(value) : NaN
-  const numericValue: number | null = isFinite(parsed) ? parsed : null
+  const trimmed = typeof value === "string" ? value.trim() : value
+  const parsed = trimmed !== "" && trimmed != null ? Number(trimmed) : NaN
+  const numericValue: number | null = isFinite(parsed) ? parsed : 0
 
   const isZero = numericValue === 0
 
