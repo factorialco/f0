@@ -49,7 +49,7 @@ describe("F0TimelineRow", () => {
     expect(title.parentElement).toBe(desc.parentElement)
   })
 
-  it("renders description on separate line for in-progress status", () => {
+  it("renders description inline with title for in-progress status", () => {
     render(
       <F0TimelineRow
         {...defaultProps}
@@ -59,8 +59,8 @@ describe("F0TimelineRow", () => {
     )
     const title = screen.getByText("Submit payment")
     const desc = screen.getByText("Estimated on 18/07/2025")
-    // Description should NOT be in the same parent as title
-    expect(title.parentElement).not.toBe(desc.parentElement)
+    // Description should be in the same parent as title
+    expect(title.parentElement).toBe(desc.parentElement)
   })
 
   it("does not render a description when not provided", () => {
