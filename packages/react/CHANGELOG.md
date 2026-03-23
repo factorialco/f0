@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.416.0](https://github.com/factorialco/f0/compare/f0-react-v1.415.0...f0-react-v1.416.0) (2026-03-23)
+
+
+### Features
+
+* **ai:** pong ball hover effect on welcome screen icon ([#3731](https://github.com/factorialco/f0/issues/3731)) ([499a9c8](https://github.com/factorialco/f0/commit/499a9c8047b766458d8d592ba28c1d5f080931fc))
+
 ## [1.415.0](https://github.com/factorialco/f0/compare/f0-react-v1.414.1...f0-react-v1.415.0) (2026-03-23)
 
 
