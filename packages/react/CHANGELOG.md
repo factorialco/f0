@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.414.1](https://github.com/factorialco/f0/compare/f0-react-v1.414.0...f0-react-v1.414.1) (2026-03-23)
+
+
+### Bug Fixes
+
+* **editable-table:** fix ErrorTooltip white background and input vert… ([#3714](https://github.com/factorialco/f0/issues/3714)) ([f19d80b](https://github.com/factorialco/f0/commit/f19d80b4227ca8c1cd0d7cb2cd9207d2a3c5e853))
+
 ## [1.414.0](https://github.com/factorialco/f0/compare/f0-react-v1.413.1...f0-react-v1.414.0) (2026-03-23)
 
 
