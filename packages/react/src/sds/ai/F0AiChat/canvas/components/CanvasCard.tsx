@@ -41,9 +41,7 @@ export function CanvasCard({
     <div
       className={cn(
         "flex flex-row items-center justify-between gap-3 rounded-lg border border-solid p-4",
-        isActive
-          ? "border-f1-border ring-2 ring-f1-special-ring ring-offset-1"
-          : "border-f1-border-secondary"
+        isActive ? "border-f1-border-hover" : "border-f1-border-secondary"
       )}
     >
       <div className="flex min-w-0 flex-row items-center gap-3">
