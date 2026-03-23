@@ -25,8 +25,12 @@ describe("BaseCell", () => {
     )
 
     const cell = container.firstChild as HTMLElement
-    expect(cell.className).toContain("outline")
+    expect(cell.className).toContain(
+      "shadow-[inset_0_0_0_1px_hsl(var(--critical-50))]"
+    )
     expect(cell.className).toContain("bg-f1-background-critical")
+    expect(cell.className).toContain("relative")
+    expect(cell.className).toContain("z-[1]")
   })
 
   it("does not apply error styling when no error", () => {
@@ -38,7 +42,9 @@ describe("BaseCell", () => {
 
     const cell = container.firstChild as HTMLElement
     expect(cell.className).not.toContain("bg-f1-background-critical")
-    expect(cell.className).not.toContain("outline-[hsl")
+    expect(cell.className).not.toContain(
+      "shadow-[inset_0_0_0_1px_hsl(var(--critical-50))]"
+    )
   })
 
   it("shows error tooltip on hover", async () => {

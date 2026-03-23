@@ -31,9 +31,9 @@ import type {
 } from "../types"
 
 import { ItemActionsRow } from "../../../../components/itemActions/ItemActionsRow/ItemActionsRow"
+import { groupBorderClass, HeaderGroupEntry } from "../hooks/useHeaderGroups"
 import { useSticky } from "../useSticky"
 import { NestedRow } from "./NestedRow"
-import { groupBorderClass, HeaderGroupEntry } from "../hooks/useHeaderGroups"
 
 export type RowProps<
   R extends RecordType,
