@@ -1,27 +1,27 @@
-import { useCopilotChatInternal } from "@copilotkit/react-core";
-import { Message, randomId } from "@copilotkit/shared";
-import { AnimatePresence, motion } from "motion/react";
-import { useMemo, useState } from "react";
+import { useCopilotChatInternal } from "@copilotkit/react-core"
+import { Message, randomId } from "@copilotkit/shared"
+import { AnimatePresence, motion } from "motion/react"
+import { useMemo, useState } from "react"
 
-import { useAiChat } from "@/ai";
-import { ButtonInternal } from "@/components/F0Button/internal";
-import { cn } from "@/lib/utils";
+import { useAiChat } from "@/ai"
+import { ButtonInternal } from "@/components/F0Button/internal"
+import { cn } from "@/lib/utils"
 
-import { F0OneIcon } from "../../F0OneIcon";
-import { WelcomeScreenSuggestion } from "../types";
-import { getTextContent } from "../utils/contentHelpers";
-import { PongGame } from "./PongGame";
+import { F0OneIcon } from "../../F0OneIcon"
+import { WelcomeScreenSuggestion } from "../types"
+import { getTextContent } from "../utils/contentHelpers"
+import { PongGame } from "./PongGame"
 
-export type { WelcomeScreenSuggestion };
+export type { WelcomeScreenSuggestion }
 
-const MAX_SUGGESTIONS = 3;
+const MAX_SUGGESTIONS = 3
 
 function pickRandomSuggestions(
   list: WelcomeScreenSuggestion[],
-  amount: number = MAX_SUGGESTIONS,
+  amount: number = MAX_SUGGESTIONS
 ): WelcomeScreenSuggestion[] {
-  const shuffled = [...list].sort(() => 0.5 - Math.random());
-  return shuffled.slice(0, amount);
+  const shuffled = [...list].sort(() => 0.5 - Math.random())
+  return shuffled.slice(0, amount)
 }
 
 export const WelcomeScreen = ({
@@ -29,25 +29,25 @@ export const WelcomeScreen = ({
   initialMessages = [],
   suggestions = [],
 }: {
-  greeting?: string;
+  greeting?: string
   // todo make it string
-  initialMessages?: Message[];
-  suggestions?: WelcomeScreenSuggestion[];
+  initialMessages?: Message[]
+  suggestions?: WelcomeScreenSuggestion[]
 }) => {
-  const [showPong, setShowPong] = useState(false);
-  const { sendMessage } = useCopilotChatInternal();
+  const [showPong, setShowPong] = useState(false)
+  const { sendMessage } = useCopilotChatInternal()
 
-  const { visualizationMode, tracking } = useAiChat();
+  const { visualizationMode, tracking } = useAiChat()
 
-  const isFullscreen = visualizationMode === "fullscreen";
+  const isFullscreen = visualizationMode === "fullscreen"
 
   const pickedSuggestions = useMemo(
     () => pickRandomSuggestions(suggestions),
-    [suggestions],
-  );
+    [suggestions]
+  )
 
   if (showPong) {
-    return <PongGame onClose={() => setShowPong(false)} />;
+    return <PongGame onClose={() => setShowPong(false)} />
   }
 
   return (
@@ -90,7 +90,7 @@ export const WelcomeScreen = ({
             <motion.p
               className={cn(
                 "text-xl font-semibold leading-[24px] text-f1-foreground",
-                isFullscreen ? "text-3xl" : "",
+                isFullscreen ? "text-3xl" : ""
               )}
               key={message.id}
               initial={{ opacity: 0, filter: "blur(2px)", y: -8 }}
@@ -125,12 +125,12 @@ export const WelcomeScreen = ({
                   label={suggestion.message}
                   icon={suggestion.icon}
                   onClick={() => {
-                    tracking?.onWelcomeSuggestionClick?.(suggestion);
+                    tracking?.onWelcomeSuggestionClick?.(suggestion)
                     sendMessage({
                       id: randomId(),
                       role: "user",
                       content: suggestion.prompt || suggestion.message,
-                    });
+                    })
                   }}
                 />
               </motion.div>
@@ -139,5 +139,5 @@ export const WelcomeScreen = ({
         )}
       </motion.div>
     </AnimatePresence>
-  );
-};
+  )
+}

@@ -2,7 +2,7 @@
  * Normalize CopilotKit message content to a plain string.
  *
  * Since CopilotKit 1.54.0 / AG-UI, `message.content` may be
- * `string | InputContent[] | Record<string, any>`. This helper
+ * `string | InputContent[] | Record<string, unknown>`. This helper
  * extracts the text parts from the array form and concatenates them,
  * returns the string as-is, or falls back to "" for other shapes.
  */
