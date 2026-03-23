@@ -5,7 +5,17 @@ import { FileItem } from "@/experimental/RichText/FileItem"
 
 import { PersonEntityRef } from "../../F0MarkdownRenderers/components/PersonEntityRef"
 import { FullscreenChatContext } from "../index"
-import type { UploadedFile } from "../types"
+
+/**
+ * A binary content part from the message's InputContent[] array.
+ * Matches @ag-ui/core's BinaryInputContent shape without importing it directly.
+ */
+type BinaryContentPart = {
+  type: "binary"
+  mimeType: string
+  url?: string
+  filename?: string
+}
 
 function getTextContent(
   content: string | Array<{ type: string; text?: string }> | undefined
@@ -21,6 +31,19 @@ function getTextContent(
 }
 
 /**
+ * Extract binary content parts (file attachments) from a message's content.
+ * When content is an InputContent[] array, binary parts carry file metadata.
+ */
+function getBinaryParts(
+  content: string | Array<{ type: string }> | undefined
+): BinaryContentPart[] {
+  if (!Array.isArray(content)) return []
+  return content.filter(
+    (part): part is BinaryContentPart => part.type === "binary"
+  )
+}
+
+/**
  * Regex to match <entity-ref type="person" id="X">Name</entity-ref>
  * Captures: [1] id, [2] display name
  */
@@ -33,23 +56,6 @@ const ENTITY_REF_RE =
  */
 const TOOL_CONTEXT_RE =
   /<tool-context\s+tool="[^"]*">[\s\S]*?<\/tool-context>\s*/g
-
-/**
- * Regex to match <file-attachments>JSON</file-attachments> prefix.
- */
-const FILE_ATTACHMENTS_RE =
-  /<file-attachments>([\s\S]*?)<\/file-attachments>\s*/g
-
-function parseFileAttachments(content: string): UploadedFile[] {
-  FILE_ATTACHMENTS_RE.lastIndex = 0
-  const match = FILE_ATTACHMENTS_RE.exec(content)
-  if (!match) return []
-  try {
-    return JSON.parse(match[1])
-  } catch {
-    return []
-  }
-}
 
 type ContentSegment =
   | { kind: "text"; text: string }
@@ -107,9 +113,7 @@ function UserMessageContent({
   if (!content) return null
 
   // Strip invisible prefixes before rendering
-  const cleaned = content
-    .replace(FILE_ATTACHMENTS_RE, "")
-    .replace(TOOL_CONTEXT_RE, "")
+  const cleaned = content.replace(TOOL_CONTEXT_RE, "")
 
   const segments = parseEntityRefs(cleaned)
 
@@ -153,26 +157,31 @@ export const UserMessage = ({ message, ImageRenderer }: UserMessageProps) => {
       <div className="copilotKitMessage copilotKitUserMessage">
         <ImageRenderer
           image={imageMessage.image!}
-          content={imageMessage.content}
+          content={getTextContent(imageMessage.content)}
         />
       </div>
     )
   }
 
   const rawContent = getTextContent(message?.content)
-  const fileAttachments = rawContent ? parseFileAttachments(rawContent) : []
+  // Extract file attachments from BinaryInputContent parts in the message
+  const binaryParts = getBinaryParts(message?.content)
 
   return (
     <div
       ref={ref}
       className="gap-1 my-4 w-fit max-w-[min(90%,330px)] self-end first:mt-0 last:mb-0 flex flex-col gap-2 items-end"
     >
-      {fileAttachments.length > 0 && (
+      {binaryParts.length > 0 && (
         <div className="flex flex-wrap justify-end gap-1">
-          {fileAttachments.map((file, i) => (
+          {binaryParts.map((part, i) => (
             <FileItem
               key={i}
-              file={new File([], file.filename, { type: file.mimetype })}
+              file={
+                new File([], part.filename ?? "file", {
+                  type: part.mimeType,
+                })
+              }
               size="lg"
             />
           ))}

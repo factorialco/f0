@@ -22,6 +22,7 @@ export const F0AiChatTextArea = ({
   submitLabel,
   inProgress,
   onSend,
+  onSendWithFiles,
   onStop,
   placeholders = [],
   defaultPlaceholder,
@@ -142,18 +143,23 @@ export const F0AiChatTextArea = ({
     } else if (hasDataToSend && !isUploading) {
       const transformed = mentions.transformMentions(inputValue.trim())
 
-      // Prepend file attachment metadata if there are uploaded files
-      const filePrefix =
-        uploadedFiles.length > 0
-          ? `<file-attachments>${JSON.stringify(uploadedFiles.map((f) => f.uploadedFile))}</file-attachments>\n\n`
-          : ""
-
-      const withFiles = filePrefix + transformed
-
       const withToolHint = activeToolHint
-        ? `<tool-context tool="${activeToolHint.id}">${activeToolHint.prompt}</tool-context>\n\n${withFiles}`
-        : withFiles
-      onSend(withToolHint)
+        ? `<tool-context tool="${activeToolHint.id}">${activeToolHint.prompt}</tool-context>\n\n${transformed}`
+        : transformed
+
+      // When files are attached and the multipart callback is available,
+      // delegate to it so the caller can build a proper multipart message
+      // (e.g. CopilotKit Message with BinaryInputContent parts).
+      const files = uploadedFiles
+        .map((f) => f.uploadedFile)
+        .filter((f) => f !== undefined)
+
+      if (files.length > 0 && onSendWithFiles) {
+        onSendWithFiles(withToolHint, files)
+      } else {
+        onSend(withToolHint)
+      }
+
       setInputValue("")
       setAttachedFiles([])
     }

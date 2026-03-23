@@ -20,9 +20,15 @@ export interface F0AiChatTextAreaProps {
    */
   inProgress: boolean
   /**
-   * Callback when the user sends a message
+   * Callback when the user sends a plain text message (no file attachments).
    */
   onSend: (message: string) => void
+  /**
+   * Callback when the user sends a message with file attachments.
+   * Receives the text content and the list of uploaded files.
+   * When provided and files are attached, this is called instead of onSend.
+   */
+  onSendWithFiles?: (text: string, files: UploadedFile[]) => void
   /**
    * Callback when the user stops the current generation
    */
