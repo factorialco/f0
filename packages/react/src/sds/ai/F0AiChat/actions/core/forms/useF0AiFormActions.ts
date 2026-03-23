@@ -4,7 +4,6 @@ import { useEffect } from "react"
 import { useF0AiFormRegistry } from "@/components/F0Form/F0AiFormRegistry"
 
 import { useAiChat } from "../../../providers/AiChatStateProvider"
-import { registerCopilotAction } from "../../registry"
 import { useFormFillAction } from "./useFormFillAction"
 import { useFormGetStateAction } from "./useFormGetStateAction"
 import { useFormSubmitAction } from "./useFormSubmitAction"
@@ -43,5 +42,3 @@ export const useF0AiFormActions = () => {
   useFormGetStateAction()
   usePresentFormAction()
 }
-
-registerCopilotAction("f0AiFormActions", useF0AiFormActions)

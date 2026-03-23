@@ -1,13 +1,4 @@
-// Side-effect imports: each module registers its action factory at import time
-import "./core/orchestratorThinking/useOrchestratorThinkingAction"
-import "./core/messageSources/useMessageSourcesAction"
-import "./core/dataDownload/useDataDownloadAction"
-import "./core/displayDashboard/useDisplayDashboardAction"
-import "./core/forms/useF0AiFormActions"
-import "./extensions/upselling"
-
 // Registry
-export { registerCopilotAction } from "./registry"
 export { useRegisteredActions } from "./useRegisteredActions"
 
 // Backward compat

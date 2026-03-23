@@ -37,10 +37,10 @@ vi.mock("@/sds/ai/F0AiChat/providers/AiChatStateProvider", () => ({
 }))
 
 // Import the hooks after mocks are set up
-import { useFormFillAction } from "@/sds/ai/F0AiChat/copilotActions/useFormFillAction"
-import { useFormGetStateAction } from "@/sds/ai/F0AiChat/copilotActions/useFormGetStateAction"
-import { useFormSubmitAction } from "@/sds/ai/F0AiChat/copilotActions/useFormSubmitAction"
-import { usePresentFormAction } from "@/sds/ai/F0AiChat/copilotActions/usePresentFormAction"
+import { useFormFillAction } from "../useFormFillAction"
+import { useFormGetStateAction } from "../useFormGetStateAction"
+import { useFormSubmitAction } from "../useFormSubmitAction"
+import { usePresentFormAction } from "../usePresentFormAction"
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
