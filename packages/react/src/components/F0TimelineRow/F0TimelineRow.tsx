@@ -250,7 +250,7 @@ export const F0TimelineRow = forwardRef<HTMLDivElement, F0TimelineRowProps>(
                 >
                   {title}
                 </span>
-                {status === "completed" && description && (
+                {description && (
                   <span className="text-sm text-f1-foreground-secondary">
                     {description}
                   </span>
@@ -261,12 +261,6 @@ export const F0TimelineRow = forwardRef<HTMLDivElement, F0TimelineRowProps>(
 
           {!isMultitask && (
             <>
-              {status !== "completed" && description && (
-                <span className="text-sm text-f1-foreground-secondary">
-                  {description}
-                </span>
-              )}
-
               {right && <div className="flex items-center gap-2">{right}</div>}
 
               {assignees && assignees.length > 0 && (
