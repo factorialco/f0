@@ -1,6 +1,5 @@
 import { describe, expect, it, vi } from "vitest"
 import "@testing-library/jest-dom/vitest"
-
 import { zeroRender as render, screen, userEvent } from "@/testing/test-utils"
 
 import { CanvasCard } from "../CanvasCard"
@@ -54,14 +53,13 @@ describe("CanvasCard", () => {
     expect(onClose).toHaveBeenCalledTimes(1)
   })
 
-  it("applies focus ring styles when active", () => {
+  it("applies focus styles when active", () => {
     const { container } = render(
       <CanvasCard {...defaultProps} isActive={true} />
     )
 
     const card = container.firstElementChild as HTMLElement
-    expect(card.className).toContain("ring-2")
-    expect(card.className).toContain("ring-f1-special-ring")
+    expect(card.className).toContain("border-f1-border-hover")
   })
 
   it("does not apply focus ring styles when inactive", () => {
