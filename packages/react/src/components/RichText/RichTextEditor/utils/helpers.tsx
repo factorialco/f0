@@ -118,7 +118,7 @@ const handleEditorUpdate = ({
   const doc = editor.state.doc
 
   doc.descendants((node) => {
-    if (node.type.name === "mention") {
+    if (node.type.name === "mention" && node.attrs.id != null) {
       mentions.push(String(node.attrs.id))
     }
   })
