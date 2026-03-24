@@ -91,23 +91,23 @@ describe("F0TimelineRow", () => {
     const { container } = render(
       <F0TimelineRow {...defaultProps} status="completed" />
     )
-    const circle = container.querySelector("circle[fill='#10B881']")
-    expect(circle).toBeInTheDocument()
+    const icon = container.querySelector(".text-f1-icon-positive")
+    expect(icon).toBeInTheDocument()
   })
 
   it("renders with in-progress status indicator", () => {
     const { container } = render(
       <F0TimelineRow {...defaultProps} status="in-progress" />
     )
-    const svg = container.querySelector("svg[color='#FF9153']")
-    expect(svg).toBeInTheDocument()
+    const icon = container.querySelector(".text-f1-icon-warning")
+    expect(icon).toBeInTheDocument()
   })
 
   it("renders with not-started status indicator", () => {
     const { container } = render(
       <F0TimelineRow {...defaultProps} status="not-started" />
     )
-    const circle = container.querySelector("circle[stroke='#868E96']")
+    const circle = container.querySelector("circle.stroke-f1-icon-secondary")
     expect(circle).toBeInTheDocument()
   })
 
