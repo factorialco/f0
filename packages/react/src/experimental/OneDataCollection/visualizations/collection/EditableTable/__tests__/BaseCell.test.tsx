@@ -80,6 +80,49 @@ describe("BaseCell", () => {
     expect(cell.className).toContain("border-r-0")
   })
 
+  it("has focus-within styling classes for child focus", () => {
+    const { container } = render(
+      <BaseCell>
+        <button>Click me</button>
+      </BaseCell>
+    )
+
+    const cell = container.firstChild as HTMLElement
+    expect(cell.className).toContain("focus-within:bg-f1-background")
+    expect(cell.className).toContain(
+      "focus-within:shadow-[inset_0_0_0_1px_hsl(var(--selected-50))]"
+    )
+    expect(cell.className).toContain("focus-within:relative")
+    expect(cell.className).toContain("focus-within:z-[1]")
+    expect(cell.className).toContain("focus-within:border-r-0")
+  })
+
+  it("applies active styling when isActive is true", () => {
+    const { container } = render(
+      <BaseCell isActive>
+        <button>Click me</button>
+      </BaseCell>
+    )
+
+    const cell = container.firstChild as HTMLElement
+    expect(cell.className).toContain(
+      "shadow-[inset_0_0_0_1px_hsl(var(--selected-50))]"
+    )
+    expect(cell.className).toContain("relative z-[1] border-r-0")
+    expect(cell.className).not.toContain("focus-within:")
+  })
+
+  it("does not have focus-within styling when error is present", () => {
+    const { container } = render(
+      <BaseCell error="Something went wrong">
+        <button>Click me</button>
+      </BaseCell>
+    )
+
+    const cell = container.firstChild as HTMLElement
+    expect(cell.className).not.toContain("focus-within:bg-f1-background")
+  })
+
   it("applies readonly background when readonly", () => {
     const { container } = render(
       <BaseCell readonly>
