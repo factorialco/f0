@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.419.0](https://github.com/factorialco/f0/compare/f0-react-v1.418.1...f0-react-v1.419.0) (2026-03-24)
+
+
+### Features
+
+* add support for alert and more info link on f0form fields ([#3541](https://github.com/factorialco/f0/issues/3541)) ([0c25a26](https://github.com/factorialco/f0/commit/0c25a26c1d48c20a77de8c532e070b57dd675217))
+
 ## [1.418.1](https://github.com/factorialco/f0/compare/f0-react-v1.418.0...f0-react-v1.418.1) (2026-03-24)
 
 
