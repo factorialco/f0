@@ -1,5 +1,33 @@
 # Changelog
 
+## [1.416.1](https://github.com/factorialco/f0/compare/f0-react-v1.416.0...f0-react-v1.416.1) (2026-03-23)
+
+
+### Bug Fixes
+
+* **ai:** extract PongBall component and fix credits display ([#3734](https://github.com/factorialco/f0/issues/3734)) ([34f1a1b](https://github.com/factorialco/f0/commit/34f1a1bb8d7fe34a6d7d4e24116ee452a2286bfd))
+
+## [1.416.0](https://github.com/factorialco/f0/compare/f0-react-v1.415.0...f0-react-v1.416.0) (2026-03-23)
+
+
+### Features
+
+* **ai:** pong ball hover effect on welcome screen icon ([#3731](https://github.com/factorialco/f0/issues/3731)) ([499a9c8](https://github.com/factorialco/f0/commit/499a9c8047b766458d8d592ba28c1d5f080931fc))
+
+## [1.415.0](https://github.com/factorialco/f0/compare/f0-react-v1.414.1...f0-react-v1.415.0) (2026-03-23)
+
+
+### Features
+
+* one tools to interact with F0Form ([#3683](https://github.com/factorialco/f0/issues/3683)) ([788ae77](https://github.com/factorialco/f0/commit/788ae77d054df44a11619fcbb6aa0df7ca3f8cb8))
+
+## [1.414.1](https://github.com/factorialco/f0/compare/f0-react-v1.414.0...f0-react-v1.414.1) (2026-03-23)
+
+
+### Bug Fixes
+
+* **editable-table:** fix ErrorTooltip white background and input vert… ([#3714](https://github.com/factorialco/f0/issues/3714)) ([f19d80b](https://github.com/factorialco/f0/commit/f19d80b4227ca8c1cd0d7cb2cd9207d2a3c5e853))
+
 ## [1.414.0](https://github.com/factorialco/f0/compare/f0-react-v1.413.1...f0-react-v1.414.0) (2026-03-23)
 
 

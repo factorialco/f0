@@ -28,6 +28,20 @@ export const MixedDashboard: Story = {
   ),
 }
 
+/**
+ * Dashboard with the global export button enabled (PDF / Excel).
+ */
+export const WithExport: Story = {
+  render: () => (
+    <F0AnalyticsDashboard
+      filters={dashboardFilters}
+      presets={dashboardPresets}
+      items={mixedItems}
+      enableExport
+    />
+  ),
+}
+
 export const Snapshot: Story = {
   parameters: withSnapshot({}),
   render: () => (

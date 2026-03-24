@@ -15,6 +15,7 @@ import {
   DEFAULT_EMPHASIS,
 } from "../../utils/options"
 import { useChartTheme } from "../../utils/useChartTheme"
+import { useContainerSize } from "../../utils/useContainerSize"
 
 export function usePieChartOptions(
   containerRef: RefObject<HTMLDivElement | null>,
@@ -29,6 +30,7 @@ export function usePieChartOptions(
   }: F0DataChartPieProps
 ): echarts.EChartsOption {
   const theme = useChartTheme(containerRef)
+  const { width: containerWidth } = useContainerSize(containerRef)
 
   return useMemo(() => {
     const dataPoints = series.data ?? []
@@ -121,6 +123,7 @@ export function usePieChartOptions(
         show: showLegend,
         data: legendData,
         theme,
+        containerWidth,
       }),
       grid: buildGrid({ showLegend }),
       tooltip: buildItemTooltip({
@@ -157,5 +160,6 @@ export function usePieChartOptions(
     valueFormatter,
     echartsOptions,
     theme,
+    containerWidth,
   ])
 }

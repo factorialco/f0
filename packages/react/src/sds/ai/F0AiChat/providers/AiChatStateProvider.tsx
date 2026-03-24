@@ -16,7 +16,7 @@ import {
 
 import { useI18n } from "@/lib/providers/i18n"
 
-import { DEFAULT_CHAT_WIDTH } from "../constants"
+import { DEFAULT_CHAT_WIDTH } from "../utils/constants"
 import { AiChatProviderReturnValue, AiChatState } from "../internal-types"
 import {
   type AiChatMode,
@@ -60,6 +60,7 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   VoiceMode,
   entityResolvers,
   toolHints,
+  credits,
   onThumbsDown,
   onThumbsUp,
   tracking,
@@ -94,6 +95,11 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
       tracking?.onVisibility?.()
     }
   }, [open])
+
+  const [inProgress, setInProgressState] = useState(false)
+  const setInProgress = useCallback((value: boolean) => {
+    setInProgressState(value)
+  }, [])
 
   const [canvasContent, setCanvasContent] = useState<CanvasContent | null>(null)
 
@@ -290,6 +296,9 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         tracking,
         entityResolvers,
         toolHints,
+        credits,
+        inProgress,
+        setInProgress,
         canvasContent,
         openCanvas,
         closeCanvas,
@@ -351,6 +360,9 @@ export function useAiChat(): AiChatProviderReturnValue {
       tracking: undefined,
       entityResolvers: undefined,
       toolHints: undefined,
+      credits: undefined,
+      inProgress: false,
+      setInProgress: noopFn,
       canvasContent: null,
       openCanvas: noopFn,
       closeCanvas: noopFn,

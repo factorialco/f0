@@ -10,6 +10,7 @@ import type {
 
 import { formatPercent } from "../../utils/formatters"
 import { useEChartsInstance } from "../../utils/useEChartsInstance"
+import { useLegendInteraction } from "../../utils/useLegendInteraction"
 import { useFunnelChartOptions } from "./useFunnelChartOptions"
 
 /** Sort funnel data points according to the sort prop */
@@ -35,7 +36,8 @@ export const FunnelChart = (props: F0DataChartFunnelProps) => {
 
   const ref = useRef<HTMLDivElement>(null)
   const options = useFunnelChartOptions(ref, props)
-  useEChartsInstance(ref, options)
+  const chartRef = useEChartsInstance(ref, options)
+  useLegendInteraction(chartRef)
 
   const sorted = sortFunnelData(series.data ?? [], sort)
   const firstValue = sorted[0]?.value ?? 0

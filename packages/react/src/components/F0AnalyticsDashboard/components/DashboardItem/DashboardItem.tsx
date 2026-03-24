@@ -45,8 +45,8 @@ export function DashboardItem({
   const translations = useI18n()
   if (error) {
     return (
-      <div className="flex h-full flex-col rounded-lg border border-solid border-f1-border-secondary">
-        <div className="flex flex-col p-4">
+      <div className="flex h-full flex-col overflow-hidden rounded-lg border border-solid border-f1-border-secondary">
+        <div className="flex shrink-0 flex-col p-4">
           <h3 className="text-lg font-semibold text-f1-foreground">{title}</h3>
           {description && (
             <p className="text-base text-f1-foreground-secondary">
@@ -54,16 +54,18 @@ export function DashboardItem({
             </p>
           )}
         </div>
-        <OneEmptyState
-          variant="critical"
-          title="Error loading data"
-          description={error.message}
-          actions={
-            onRetry
-              ? [{ type: "default", label: "Retry", onClick: onRetry }]
-              : []
-          }
-        />
+        <div className="min-h-0 flex-1 overflow-auto">
+          <OneEmptyState
+            variant="critical"
+            title="Error loading data"
+            description={error.message}
+            actions={
+              onRetry
+                ? [{ type: "default", label: "Retry", onClick: onRetry }]
+                : []
+            }
+          />
+        </div>
       </div>
     )
   }
@@ -101,7 +103,7 @@ export function DashboardItem({
                 label={translations.actions.other}
                 icon={Ellipsis}
                 variant="ghost"
-                size="sm"
+                size="md"
                 hideLabel
                 pressed={isDropdownOpen}
                 compact

@@ -108,6 +108,13 @@ export type {
   CustomFieldRenderProps,
 } from "./fields/types"
 
+// Export renderCustomField types
+export type {
+  RenderCustomFieldProps,
+  RenderCustomFieldFunction,
+  RenderCustomFieldSelectConfig,
+} from "./types"
+
 // Export schema definition utilities
 export { useSchemaDefinition, getSchemaDefinition } from "./useSchemaDefinition"
 
@@ -117,7 +124,27 @@ export { generateAnchorId } from "./context"
 
 // Export form control hook
 export { useF0Form } from "./useF0Form"
-export type { F0FormRef, UseF0FormReturn } from "./useF0Form"
+export type {
+  F0FormRef,
+  F0FormSetValueOptions,
+  UseF0FormReturn,
+} from "./useF0Form"
+
+// Export AI form registry
+export {
+  F0AiFormRegistryProvider,
+  useF0AiFormRegistry,
+  defineAvailableForm,
+} from "./F0AiFormRegistry"
+export type {
+  F0AiFormEntry,
+  F0AiAvailableFormDefinition,
+  F0AiPresentedForm,
+} from "./F0AiFormRegistry"
+
+// Export AI schema description utility
+export { describeFormSchema } from "./describeFormSchema"
+export type { FormFieldDescription } from "./describeFormSchema"
 
 import type {
   F0FormPropsWithSingleSchema,

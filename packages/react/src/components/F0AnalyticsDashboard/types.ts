@@ -357,4 +357,20 @@ export interface F0AnalyticsDashboardProps<
    * the consumer can reconcile against the original config items.
    */
   onLayoutChange?: (layout: DashboardItemLayout[]) => void
+  /**
+   * Show a dashboard-level export button (PDF/Excel).
+   * @default false
+   */
+  enableExport?: boolean
+  /**
+   * Called when the export function becomes available (or undefined on unmount).
+   * Allows a parent to trigger export imperatively without rendering the
+   * built-in ExportDropdown.
+   */
+  /**
+   * Custom filename for the exported Excel file (without extension).
+   * @default "dashboard"
+   */
+  exportFilename?: string
+  onExportReady?: (exportFn: (() => Promise<void>) | undefined) => void
 }

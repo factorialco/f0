@@ -258,6 +258,7 @@ export const defaultTranslations = {
     openChat: "Open Chat with One AI",
     closeChat: "Close Chat with One AI",
     startNewChat: "Start new chat",
+    settings: "Settings",
     scrollToBottom: "Scroll to bottom",
     welcome: "Ask or create with One",
     defaultInitialMessage: "How can I help you today?",
@@ -307,18 +308,30 @@ export const defaultTranslations = {
     ask: "Ask One",
     viewProfile: "View profile",
     tools: "Tools",
+    credits: {
+      title: "Credits",
+      creditsLeft: "{{total}} left",
+      monthlyCredits: "Monthly credits",
+      creditsError: "Could not load credits",
+      upgradePlan: "Upgrade",
+      needMoreCredits: "Need more credits?",
+    },
     reportCard: {
       reportLabel: "Report",
       openButton: "Open",
     },
     dataDownload: {
       download: "Download {{format}}",
+      exportDashboard: "Export dashboard as {{format}}",
+      exporting: "Exporting...",
     },
     pong: {
-      ai: "AI",
-      you: "YOU",
+      title: "Pong",
       youWin: "You win!",
       youLose: "You lose!",
+      goal: "Goal",
+      controls: "← → to move",
+      escToExit: "Esc to exit",
     },
     growth: {
       demoCard: {

@@ -28,14 +28,17 @@ export function ErrorTooltip({ message, children }: ErrorTooltipProps) {
         <Tooltip open={open} onOpenChange={setOpen}>
           <TooltipTrigger asChild className="pointer-events-auto h-full w-full">
             <div
-              className="h-full w-full"
+              className="flex h-full w-full items-center"
               onFocusCapture={handleFocusCapture}
               onBlurCapture={handleBlurCapture}
             >
               {children}
             </div>
           </TooltipTrigger>
-          <TooltipContent side="top" className="flex items-center gap-1">
+          <TooltipContent
+            side="top"
+            className="flex items-center gap-1 border-black/10 bg-[#fff] shadow-md"
+          >
             <F0Icon icon={AlertCircle} color="critical" size="sm" />
             <span className="text-sm font-medium text-f1-foreground-critical">
               {message}
