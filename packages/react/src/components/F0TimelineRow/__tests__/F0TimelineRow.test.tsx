@@ -79,6 +79,14 @@ describe("F0TimelineRow", () => {
     expect(screen.getByText("IT team")).toBeInTheDocument()
   })
 
+  it("renders files when provided", () => {
+    const files = [
+      new File(["test"], "report.pdf", { type: "application/pdf" }),
+    ]
+    render(<F0TimelineRow {...defaultProps} files={files} />)
+    expect(screen.getByText("report.pdf")).toBeInTheDocument()
+  })
+
   it("renders with completed status indicator", () => {
     const { container } = render(
       <F0TimelineRow {...defaultProps} status="completed" />

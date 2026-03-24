@@ -58,6 +58,8 @@ export interface F0TimelineRowProps {
   assignees?: F0TimelineRowAssignee[]
   /** Content to display on the right side (e.g., tags, badges) */
   right?: ReactNode
+  /** Files attached to this timeline entry */
+  files?: File[]
   /** Primary action button (displayed on the right after a divider) */
   primaryAction?: F0TimelineRowPrimaryAction
   /** Secondary action buttons (displayed on the left) */

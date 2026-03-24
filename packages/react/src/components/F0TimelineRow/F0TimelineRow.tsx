@@ -5,6 +5,7 @@ import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
 import { F0Button } from "@/components/F0Button"
 import { F0Icon } from "@/components/F0Icon"
 import { Dropdown } from "@/experimental/Navigation/Dropdown"
+import { FileItem } from "@/experimental/RichText/FileItem"
 import Check from "@/icons/app/Check"
 import ChevronDown from "@/icons/app/ChevronDown"
 import ChevronUp from "@/icons/app/ChevronUp"
@@ -167,6 +168,7 @@ export const F0TimelineRow = forwardRef<HTMLDivElement, F0TimelineRowProps>(
       description,
       assignees,
       right,
+      files,
       primaryAction,
       secondaryActions,
       otherActions,
@@ -275,43 +277,53 @@ export const F0TimelineRow = forwardRef<HTMLDivElement, F0TimelineRowProps>(
                   </span>
                 )}
                 {status === "completed" &&
-                  assignees &&
-                  assignees.length > 0 && (
-                    <div className="ml-auto flex shrink-0 items-center">
-                      {assignees.length <= 3 ? (
+                  (right || files || (assignees && assignees.length > 0)) && (
+                    <div className="ml-auto flex shrink-0 items-center gap-3">
+                      {right}
+                      {files && files.length > 0 && (
                         <div className="flex items-center gap-2">
-                          {assignees.map((assignee) => (
-                            <div
-                              key={`${assignee.firstName}-${assignee.lastName}`}
-                              className="flex items-center gap-1.5"
-                            >
-                              <F0AvatarPerson
-                                firstName={assignee.firstName}
-                                lastName={assignee.lastName}
-                                src={assignee.src}
-                                size="xs"
-                                badge={{ type: "positive", icon: Check }}
-                              />
-                              <span className="text-sm text-f1-foreground-secondary">
-                                {assignee.firstName} {assignee.lastName}
-                              </span>
-                            </div>
+                          {files.map((file) => (
+                            <FileItem key={file.name} file={file} />
                           ))}
                         </div>
-                      ) : (
-                        <F0AvatarList
-                          type="person"
-                          avatars={assignees.map((a) => ({
-                            ...a,
-                            badge: {
-                              type: "positive" as const,
-                              icon: Check,
-                            },
-                          }))}
-                          size="xs"
-                          max={3}
-                        />
                       )}
+                      {status === "completed" &&
+                        assignees &&
+                        assignees.length > 0 &&
+                        (assignees.length <= 3 ? (
+                          <div className="flex items-center gap-2">
+                            {assignees.map((assignee) => (
+                              <div
+                                key={`${assignee.firstName}-${assignee.lastName}`}
+                                className="flex items-center gap-1.5"
+                              >
+                                <F0AvatarPerson
+                                  firstName={assignee.firstName}
+                                  lastName={assignee.lastName}
+                                  src={assignee.src}
+                                  size="xs"
+                                  badge={{ type: "positive", icon: Check }}
+                                />
+                                <span className="text-sm text-f1-foreground-secondary">
+                                  {assignee.firstName} {assignee.lastName}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <F0AvatarList
+                            type="person"
+                            avatars={assignees.map((a) => ({
+                              ...a,
+                              badge: {
+                                type: "positive" as const,
+                                icon: Check,
+                              },
+                            }))}
+                            size="xs"
+                            max={3}
+                          />
+                        ))}
                     </div>
                   )}
               </>
@@ -322,6 +334,14 @@ export const F0TimelineRow = forwardRef<HTMLDivElement, F0TimelineRowProps>(
             <div className="pl-9">
               {right && (
                 <div className="mb-3 flex items-center gap-2">{right}</div>
+              )}
+
+              {files && files.length > 0 && (
+                <div className="mb-3 flex items-center gap-2">
+                  {files.map((file) => (
+                    <FileItem key={file.name} file={file} />
+                  ))}
+                </div>
               )}
 
               {assignees && assignees.length > 0 && (

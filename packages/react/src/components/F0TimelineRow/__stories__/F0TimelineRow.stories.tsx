@@ -55,6 +55,9 @@ export const Completed: Story = {
       { firstName: "Alex", lastName: "Rashfold" },
       { firstName: "James", lastName: "Hopper" },
     ],
+    files: [
+      new File(["test"], "Climate Survey.pdf", { type: "application/pdf" }),
+    ],
   },
 }
 
@@ -99,11 +102,11 @@ export const WithRightContent: Story = {
         <span className="rounded bg-f1-background-critical px-2 py-0.5 text-xs text-f1-foreground-critical">
           IT team
         </span>
-        <span className="rounded bg-f1-background-secondary px-2 py-0.5 text-xs text-f1-foreground-secondary">
-          Climate Survey
-        </span>
       </div>
     ),
+    files: [
+      new File(["test"], "Climate Survey.pdf", { type: "application/pdf" }),
+    ],
   },
 }
 
