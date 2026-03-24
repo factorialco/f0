@@ -2,7 +2,10 @@ import { useMemo } from "react"
 import { z, type ZodTypeAny } from "zod"
 
 import type { F0Field, F0FileField } from "@/components/F0Form/fields/types"
-import type { UseFileUpload } from "@/components/F0Form/fields/file/types"
+import type {
+  MimeType,
+  UseFileUpload,
+} from "@/components/F0Form/fields/file/types"
 import type { F0SectionConfig } from "@/components/F0Form/types"
 import type { TranslationKey } from "@/lib/providers/i18n/i18n-provider-defaults"
 
@@ -476,16 +479,21 @@ function buildFieldForQuestion(
     }
 
     case "file": {
-      const useUpload = (q as QuestionElement & { useUpload?: UseFileUpload })
-        .useUpload
+      const fileQ = q as QuestionElement & {
+        useUpload?: UseFileUpload
+        accept?: MimeType[]
+        maxSizeMB?: number
+      }
+      const hasUpload = !!fileQ.useUpload
       const field: F0FileField = {
         id: q.id,
         type: "file",
         label,
         multiple: true,
-        accept: DEFAULT_FILE_ACCEPT,
-        useUpload: useUpload ?? noopFileUpload,
-        disabled: disableFields,
+        accept: fileQ.accept ?? DEFAULT_FILE_ACCEPT,
+        maxSizeMB: fileQ.maxSizeMB,
+        useUpload: fileQ.useUpload ?? noopFileUpload,
+        disabled: disableFields || !hasUpload,
       }
       return f0FormField(buildFileSchema(!!q.required, t), {
         ...baseConfig,
