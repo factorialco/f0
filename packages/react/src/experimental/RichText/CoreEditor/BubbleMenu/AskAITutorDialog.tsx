@@ -74,7 +74,7 @@ const AiTutorChatInner = ({
     ],
     available: onGoDeeper ? "frontend" : "disabled",
     render: (props) => {
-      if (props.status === "inProgress") return null
+      if (props.status === "inProgress") return <></>
       return (
         <F0HILActionConfirmation
           text={
