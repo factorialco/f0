@@ -27,7 +27,7 @@ exports[`F0Progress Snapshot - circular variant 1`] = `
     <View
       style={
         {
-          "backgroundColor": "undefined",
+          "backgroundColor": "#5596F6",
           "borderRadius": 14,
           "height": 28,
           "opacity": 0.1,
@@ -96,7 +96,12 @@ exports[`F0Progress Snapshot - circular variant 1`] = `
             ]
           }
           r={10.375}
-          stroke={null}
+          stroke={
+            {
+              "payload": 4283799286,
+              "type": 0,
+            }
+          }
           strokeDasharray={
             [
               "65.18804756198821",

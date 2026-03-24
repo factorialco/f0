@@ -1,6 +1,20 @@
 import { render, screen } from "@testing-library/react-native"
 import React from "react"
 
+jest.mock("uniwind", () => ({
+  useCSSVariable: (variables: string[]) =>
+    variables.map((variable) => {
+      const colorByVariable: Record<string, string> = {
+        "--color-f0-icon-info": "#5596F6",
+        "--color-f0-icon-positive": "#2E9B62",
+        "--color-f0-icon-warning": "#D98C00",
+        "--color-f0-icon-critical": "#D14343",
+      }
+
+      return colorByVariable[variable] ?? "#000000"
+    }),
+}))
+
 import { getCircularStrokeDashoffset } from "../F0Progress"
 import {
   F0_PROGRESS_CIRCULAR_BACKGROUND_OPACITY,
