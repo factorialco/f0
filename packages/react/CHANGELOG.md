@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.417.2](https://github.com/factorialco/f0/compare/f0-react-v1.417.1...f0-react-v1.417.2) (2026-03-24)
+
+
+### Bug Fixes
+
+* use label in data collection cards instead of tooltip ([#3744](https://github.com/factorialco/f0/issues/3744)) ([817d0e2](https://github.com/factorialco/f0/commit/817d0e22bc431c6fffeb90bea968fbc352fd314e))
+
 ## [1.417.1](https://github.com/factorialco/f0/compare/f0-react-v1.417.0...f0-react-v1.417.1) (2026-03-24)
 
 
