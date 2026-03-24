@@ -255,6 +255,14 @@ export const defaultTranslations = {
   },
   notifications: "Notifications",
   ai: {
+    orbVoiceAnimation: {
+      connecting: "Connecting...",
+      listening: "Listening...",
+      thinking: "Thinking...",
+      buffering: "Buffering...",
+      disconnected: "Disconnected",
+      failed: "Failed",
+    },
     openChat: "Open Chat with One AI",
     closeChat: "Close Chat with One AI",
     startNewChat: "Start new chat",

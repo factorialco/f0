@@ -1,0 +1,120 @@
+.shine-text {
+  background: linear-gradient(
+    90deg,
+    #888 0%,
+    #aaa 33%,
+    #888 50%,
+    #aaa 66%,
+    #888 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: orb-label-shine 2s ease-in-out infinite;
+}
+
+@keyframes orb-label-shine {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* -------------------------------------------------------------------------
+   Speaking orb — blob animations
+   All pixel values are relative to the fixed 90×90px inner container.
+   ------------------------------------------------------------------------- */
+
+.orb-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(16px);
+}
+
+.orb-blob--1 {
+  width: 60px;
+  height: 60px;
+  top: -10px;
+  left: -10px;
+  animation: blob-move-1 3.5s ease-in-out infinite;
+}
+
+.orb-blob--2 {
+  width: 50px;
+  height: 50px;
+  bottom: -8px;
+  right: -8px;
+  animation: blob-move-2 4.2s ease-in-out infinite;
+}
+
+.orb-blob--3 {
+  width: 45px;
+  height: 45px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  animation: blob-move-3 2.9s ease-in-out infinite;
+}
+
+.orb-blob--4 {
+  width: 35px;
+  height: 35px;
+  bottom: 5px;
+  left: 10px;
+  animation: blob-move-4 5.1s ease-in-out infinite;
+}
+
+@keyframes blob-move-1 {
+  0%,
+  100% {
+    transform: translate(0px, 0px) scale(1);
+  }
+  33% {
+    transform: translate(18px, 12px) scale(1.15);
+  }
+  66% {
+    transform: translate(8px, 22px) scale(0.9);
+  }
+}
+
+@keyframes blob-move-2 {
+  0%,
+  100% {
+    transform: translate(0px, 0px) scale(1);
+  }
+  25% {
+    transform: translate(-14px, -10px) scale(1.1);
+  }
+  60% {
+    transform: translate(-20px, 6px) scale(0.95);
+  }
+}
+
+@keyframes blob-move-3 {
+  0%,
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+  40% {
+    transform: translate(calc(-50% + 16px), calc(-50% - 12px)) scale(1.2);
+  }
+  75% {
+    transform: translate(calc(-50% - 10px), calc(-50% + 8px)) scale(0.85);
+  }
+}
+
+@keyframes blob-move-4 {
+  0%,
+  100% {
+    transform: translate(0px, 0px) scale(1);
+  }
+  30% {
+    transform: translate(20px, -16px) scale(1.1);
+  }
+  65% {
+    transform: translate(30px, 10px) scale(0.9);
+  }
+}
