@@ -5,6 +5,7 @@ import { z } from "zod"
 
 import { zeroRender as render, screen, waitFor } from "@/testing/test-utils"
 
+import type { F0FieldAlertProps } from "../f0Schema"
 import type { F0SectionConfig } from "../types"
 
 import { createConditionalResolver } from "../conditionalResolver"
@@ -2436,5 +2437,291 @@ describe("F0Form per-section server errors", () => {
     await waitFor(() => {
       expect(screen.getByText("Server error occurred")).toBeInTheDocument()
     })
+  })
+})
+
+describe("F0Form alert feature", () => {
+  it("renders a static alert below the field", () => {
+    const formSchema = z.object({
+      count: f0FormField(z.number().min(0), {
+        label: "Count",
+        alert: {
+          title: "Static alert title",
+          description: "Static alert description",
+        },
+      }),
+    })
+
+    render(
+      <F0Form
+        name="alert-static"
+        schema={formSchema}
+        defaultValues={{ count: 0 }}
+        onSubmit={async () => ({ success: true })}
+      />
+    )
+
+    expect(screen.getByText("Static alert title")).toBeInTheDocument()
+    expect(screen.getByText("Static alert description")).toBeInTheDocument()
+  })
+
+  it("renders conditional alert when callback returns props", () => {
+    const formSchema = z.object({
+      count: f0FormField(z.number().min(0), {
+        label: "Count",
+        alert: ({ fieldValue }) =>
+          fieldValue === 0
+            ? {
+                title: "Zero value alert",
+                description: "The value is zero",
+                variant: "warning" as const,
+              }
+            : null,
+      }),
+    })
+
+    render(
+      <F0Form
+        name="alert-conditional"
+        schema={formSchema}
+        defaultValues={{ count: 0 }}
+        onSubmit={async () => ({ success: true })}
+      />
+    )
+
+    expect(screen.getByText("Zero value alert")).toBeInTheDocument()
+    expect(screen.getByText("The value is zero")).toBeInTheDocument()
+  })
+
+  it("does not render alert when callback returns null", () => {
+    const formSchema = z.object({
+      count: f0FormField(z.number().min(0), {
+        label: "Count",
+        alert: ({ fieldValue }) =>
+          fieldValue === 0
+            ? { title: "Should not appear", description: "Hidden" }
+            : null,
+      }),
+    })
+
+    render(
+      <F0Form
+        name="alert-hidden"
+        schema={formSchema}
+        defaultValues={{ count: 5 }}
+        onSubmit={async () => ({ success: true })}
+      />
+    )
+
+    expect(screen.queryByText("Should not appear")).not.toBeInTheDocument()
+  })
+
+  it("shows alert when field value changes to match condition", async () => {
+    const user = userEvent.setup()
+
+    const formSchema = z.object({
+      enabled: f0FormField(z.boolean(), {
+        label: "Enable feature",
+        fieldType: "switch",
+        alert: ({ fieldValue }) =>
+          fieldValue === true
+            ? {
+                title: "Feature enabled",
+                description: "This feature is now active",
+              }
+            : null,
+      }),
+    })
+
+    render(
+      <F0Form
+        name="alert-toggle"
+        schema={formSchema}
+        defaultValues={{ enabled: false }}
+        onSubmit={async () => ({ success: true })}
+      />
+    )
+
+    expect(screen.queryByText("Feature enabled")).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole("switch"))
+
+    await waitFor(() => {
+      expect(screen.getByText("Feature enabled")).toBeInTheDocument()
+      expect(screen.getByText("This feature is now active")).toBeInTheDocument()
+    })
+  })
+
+  it("renders alert on a switch field within a switch group", () => {
+    const formSchema = z.object({
+      optionA: f0FormField(z.boolean(), {
+        label: "Option A",
+        fieldType: "switch",
+        row: "switches",
+        alert: {
+          title: "Group alert title",
+          description: "Group alert description",
+        },
+      }),
+      optionB: f0FormField(z.boolean(), {
+        label: "Option B",
+        fieldType: "switch",
+        row: "switches",
+      }),
+    })
+
+    render(
+      <F0Form
+        name="alert-switch-group"
+        schema={formSchema}
+        defaultValues={{ optionA: true, optionB: false }}
+        onSubmit={async () => ({ success: true })}
+      />
+    )
+
+    expect(screen.getByText("Group alert title")).toBeInTheDocument()
+    expect(screen.getByText("Group alert description")).toBeInTheDocument()
+  })
+})
+
+describe("F0Form moreInfoLink feature", () => {
+  it("renders moreInfoLink with href and default label", () => {
+    const formSchema = z.object({
+      toggle: f0FormField(z.boolean(), {
+        label: "Enable notifications",
+        fieldType: "switch",
+        moreInfoLink: {
+          href: "https://help.example.com/notifications",
+        },
+      }),
+    })
+
+    render(
+      <F0Form
+        name="moreinfo-default-label"
+        schema={formSchema}
+        defaultValues={{ toggle: false }}
+        onSubmit={async () => ({ success: true })}
+      />
+    )
+
+    const link = screen.getByText("More information")
+    expect(link).toBeInTheDocument()
+    expect(link.closest("a")).toHaveAttribute(
+      "href",
+      "https://help.example.com/notifications"
+    )
+  })
+
+  it("renders moreInfoLink with custom label", () => {
+    const formSchema = z.object({
+      toggle: f0FormField(z.boolean(), {
+        label: "Enable workflows",
+        fieldType: "switch",
+        moreInfoLink: {
+          href: "https://help.example.com/workflows",
+          label: "Learn more about workflows",
+        },
+      }),
+    })
+
+    render(
+      <F0Form
+        name="moreinfo-custom-label"
+        schema={formSchema}
+        defaultValues={{ toggle: false }}
+        onSubmit={async () => ({ success: true })}
+      />
+    )
+
+    const link = screen.getByText("Learn more about workflows")
+    expect(link).toBeInTheDocument()
+    expect(link.closest("a")).toHaveAttribute(
+      "href",
+      "https://help.example.com/workflows"
+    )
+  })
+})
+
+describe("getSchemaDefinition - alert and moreInfoLink config extraction", () => {
+  it("attaches static alert config to field definition", () => {
+    const alertProps: F0FieldAlertProps = {
+      title: "Note",
+      description: "Important info",
+    }
+    const formSchema = z.object({
+      name: f0FormField(z.string(), {
+        label: "Name",
+        alert: alertProps,
+      }),
+    })
+
+    const definition = getSchemaDefinition(formSchema)
+    const fieldItem = definition[0] as {
+      type: "field"
+      field: { alert?: unknown }
+    }
+
+    expect(fieldItem.field.alert).toEqual(alertProps)
+  })
+
+  it("attaches alert callback to field definition", () => {
+    const alertFn = ({ fieldValue }: { fieldValue: unknown }) =>
+      fieldValue === 0 ? { title: "Zero", description: "Value is zero" } : null
+
+    const formSchema = z.object({
+      count: f0FormField(z.number(), {
+        label: "Count",
+        alert: alertFn,
+      }),
+    })
+
+    const definition = getSchemaDefinition(formSchema)
+    const fieldItem = definition[0] as {
+      type: "field"
+      field: { alert?: unknown }
+    }
+
+    expect(fieldItem.field.alert).toBe(alertFn)
+  })
+
+  it("attaches moreInfoLink config to switch field definition", () => {
+    const formSchema = z.object({
+      toggle: f0FormField(z.boolean(), {
+        label: "Toggle",
+        fieldType: "switch",
+        moreInfoLink: {
+          href: "https://example.com/help",
+          label: "Read docs",
+        },
+      }),
+    })
+
+    const definition = getSchemaDefinition(formSchema)
+    const fieldItem = definition[0] as {
+      type: "field"
+      field: { moreInfoLink?: { href: string; label?: string } }
+    }
+
+    expect(fieldItem.field.moreInfoLink).toEqual({
+      href: "https://example.com/help",
+      label: "Read docs",
+    })
+  })
+
+  it("does not include moreInfoLink on non-switch fields", () => {
+    const formSchema = z.object({
+      name: f0FormField(z.string(), {
+        label: "Name",
+      }),
+    })
+
+    const definition = getSchemaDefinition(formSchema)
+    const fieldItem = definition[0] as unknown as {
+      type: "field"
+      field: Record<string, unknown>
+    }
+
+    expect(fieldItem.field.moreInfoLink).toBeUndefined()
   })
 })
