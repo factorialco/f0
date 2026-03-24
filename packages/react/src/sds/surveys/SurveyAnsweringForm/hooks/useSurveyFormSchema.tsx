@@ -1,7 +1,8 @@
 import { useMemo } from "react"
 import { z, type ZodTypeAny } from "zod"
 
-import type { F0Field } from "@/components/F0Form/fields/types"
+import type { F0Field, F0FileField } from "@/components/F0Form/fields/types"
+import type { UseFileUpload } from "@/components/F0Form/fields/file/types"
 import type { F0SectionConfig } from "@/components/F0Form/types"
 import type { TranslationKey } from "@/lib/providers/i18n/i18n-provider-defaults"
 
@@ -20,6 +21,7 @@ import type {
 } from "../types"
 
 import { BaseQuestion } from "../../SurveyFormBuilder/QuestionTypes/BaseQuestion"
+import { DEFAULT_FILE_ACCEPT } from "../../SurveyFormBuilder/QuestionTypes/FileQuestion"
 import {
   RatingQuestionField,
   type RatingFieldConfig,
@@ -30,6 +32,16 @@ import {
 } from "../components/SelectQuestionField"
 
 const URL_PATTERN = /^(https?:\/\/)?[\w.-]+\.[a-z]{2,}(:\d+)?(\/[^\s]*)?$/i
+
+const noopFileUpload: UseFileUpload = () => ({
+  upload: async (file: File) => ({
+    type: "success" as const,
+    value: `local-${file.name}-${Date.now()}`,
+  }),
+  cancelUpload: () => {},
+  progress: 0,
+  status: "idle" as const,
+})
 
 function buildStringSchema(
   isRequired: boolean,
@@ -115,6 +127,23 @@ function buildDateSchema(
     .optional()
     .superRefine((v, ctx) => {
       if (isRequired && !v) {
+        ctx.addIssue({
+          code: "custom",
+          message: t("forms.validation.required"),
+        })
+      }
+    })
+}
+
+function buildFileSchema(
+  isRequired: boolean,
+  t: (key: TranslationKey) => string
+) {
+  return z
+    .array(z.string())
+    .optional()
+    .superRefine((v, ctx) => {
+      if (isRequired && (!v || v.length === 0)) {
         ctx.addIssue({
           code: "custom",
           message: t("forms.validation.required"),
@@ -441,6 +470,38 @@ function buildFieldForQuestion(
               onBlur={onBlur}
               config={config}
             />
+          </BaseQuestion>
+        ),
+      })
+    }
+
+    case "file": {
+      const useUpload = (q as QuestionElement & { useUpload?: UseFileUpload })
+        .useUpload
+      const field: F0FileField = {
+        id: q.id,
+        type: "file",
+        label,
+        multiple: true,
+        accept: DEFAULT_FILE_ACCEPT,
+        useUpload: useUpload ?? noopFileUpload,
+        disabled: disableFields,
+      }
+      return f0FormField(buildFileSchema(!!q.required, t), {
+        ...baseConfig,
+        fieldType: "custom",
+        render: ({ value, onChange, onBlur, error }) => (
+          <BaseQuestion {...questionProps}>
+            <div className="px-0.5">
+              <F0FormField
+                field={field}
+                value={value ?? []}
+                onChange={onChange as (value: unknown) => void}
+                onBlur={onBlur}
+                error={!!error}
+                hideLabel
+              />
+            </div>
           </BaseQuestion>
         ),
       })

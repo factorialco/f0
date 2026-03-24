@@ -120,6 +120,13 @@ const sampleElements: SurveyFormBuilderElement[] = [
           description: "Paste the URL to your development plan document",
           type: "link" as const,
         },
+        {
+          id: "q-supporting-docs",
+          title: "Upload supporting documents",
+          description:
+            "Attach any relevant files such as certificates or reports",
+          type: "file" as const,
+        },
       ],
     },
   },

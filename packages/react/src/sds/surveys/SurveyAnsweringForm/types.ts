@@ -16,6 +16,7 @@ export type SurveyAnswerValue =
   | { type: "numeric"; value: number | null }
   | { type: "link"; value: string | null }
   | { type: "date"; value: Date | null }
+  | { type: "file"; value: string[] | null }
 
 export type SurveyAnswers = Record<string, SurveyAnswerValue>
 

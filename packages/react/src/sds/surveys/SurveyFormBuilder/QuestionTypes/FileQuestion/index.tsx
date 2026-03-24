@@ -28,7 +28,7 @@ export type FileQuestionProps = BaseQuestionPropsForOtherQuestionComponents & {
   maxSizeMB?: number
 }
 
-const DEFAULT_ACCEPT: MimeType[] = [
+export const DEFAULT_FILE_ACCEPT: MimeType[] = [
   "image/*",
   "application/pdf",
   "application/msword",
@@ -42,7 +42,10 @@ const DEFAULT_ACCEPT: MimeType[] = [
 ]
 
 const noopUpload: UseFileUpload = () => ({
-  upload: async () => ({ type: "aborted" as const }),
+  upload: async (file: File) => ({
+    type: "success" as const,
+    value: `local-${file.name}-${Date.now()}`,
+  }),
   cancelUpload: () => {},
   progress: 0,
   status: "idle" as const,
@@ -66,7 +69,7 @@ export const FileQuestion = ({
     type: "file",
     label: t("surveyFormBuilder.answer.label"),
     multiple: true,
-    accept: accept ?? DEFAULT_ACCEPT,
+    accept: accept ?? DEFAULT_FILE_ACCEPT,
     maxSizeMB,
     useUpload: useUpload ?? noopUpload,
   }
