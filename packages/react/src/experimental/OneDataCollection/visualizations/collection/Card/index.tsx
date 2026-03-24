@@ -34,7 +34,6 @@ import { CollectionProps } from "../../../types"
 
 export type CardPropertyDefinition<T> = PropertyDefinition<T> & {
   icon?: IconType
-  tooltip?: string
 }
 
 export type CardVisualizationOptions<
@@ -193,15 +192,20 @@ const GroupCards = <
 
         const cardProperty = convertToCardMetadataProperty(result)
         if (!cardProperty) return null
-        if (cardProperty.type === "file")
+
+        const propertyWithLabel = {
+          ...cardProperty,
+          label: property.label,
+        } as CardMetadataProperty
+
+        if (propertyWithLabel.type === "file")
           return {
-            property: cardProperty,
+            property: propertyWithLabel,
           }
 
         return {
           icon: property.icon ?? Placeholder,
-          tooltip: property.tooltip,
-          property: cardProperty,
+          property: propertyWithLabel,
         }
       })
       .filter((item): item is CardMetadata => item !== null)
@@ -209,7 +213,7 @@ const GroupCards = <
 
   function convertToCardMetadataProperty(
     value: unknown
-  ): CardMetadataProperty | null {
+  ): Omit<CardMetadataProperty, "label"> | null {
     if (typeof value === "string") {
       return { type: "text", value }
     }
