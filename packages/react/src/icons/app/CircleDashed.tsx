@@ -1,4 +1,5 @@
 import type { SVGProps } from "react"
+
 import { Ref, forwardRef } from "react"
 const SvgCircleDashed = (
   props: SVGProps<SVGSVGElement>,
@@ -17,7 +18,7 @@ const SvgCircleDashed = (
       r={8.5}
       stroke="currentColor"
       strokeWidth={1.8}
-      strokeDasharray="0.1 4.5"
+      strokeDasharray="0.1 4.35"
       strokeLinecap="round"
       fill="none"
     />

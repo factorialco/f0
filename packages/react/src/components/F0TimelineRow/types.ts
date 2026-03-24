@@ -15,22 +15,9 @@ export type F0TimelineRowAssignee = {
   firstName: string
   lastName: string
   src?: string
-} & Record<string, unknown>
-
-export interface F0TimelineRowPrimaryAction {
-  /** Button label */
-  label: string
-  /** Optional icon for the button */
-  icon?: IconType
-  /** Click handler */
-  onClick: () => void
-  /** Whether the button is disabled */
-  disabled?: boolean
-  /** Whether the button is in a loading state */
-  loading?: boolean
 }
 
-export interface F0TimelineRowSecondaryAction {
+export interface F0TimelineRowAction {
   /** Button label */
   label: string
   /** Optional icon for the button */
@@ -45,7 +32,8 @@ export interface F0TimelineRowSecondaryAction {
 
 export type F0TimelineRowOtherAction = DropdownItem
 
-export interface F0TimelineRowProps {
+/** Props for a single-task timeline row */
+export interface F0TimelineRowTaskProps {
   /** The current status of this timeline entry */
   status: TimelineRowStatus
   /** The icon representing the task type (defaults to Marker) */
@@ -61,23 +49,39 @@ export interface F0TimelineRowProps {
   /** Files attached to this timeline entry */
   files?: File[]
   /** Primary action button (displayed on the right after a divider) */
-  primaryAction?: F0TimelineRowPrimaryAction
+  primaryAction?: F0TimelineRowAction
   /** Secondary action buttons (displayed on the left) */
-  secondaryActions?: F0TimelineRowSecondaryAction[]
+  secondaryActions?: F0TimelineRowAction[]
   /** Overflow menu items (displayed as a dropdown via ellipsis button) */
   otherActions?: F0TimelineRowOtherAction[]
   /** Whether this is the last row in the timeline (hides the bottom connector line) */
   isLast?: boolean
-  /** Number of grouped tasks (renders as a collapsible multitask row) */
-  taskCount?: number
-  /** Number of completed tasks in the group (shows a progress pill) */
-  completedCount?: number
-  /** Whether the multitask row is expanded (controlled) */
-  expanded?: boolean
-  /** Callback when multitask row expand/collapse is toggled */
-  onExpandToggle?: () => void
-  /** Collapsible children content (shown when multitask row is expanded) */
-  children?: ReactNode
   /** Hide the status indicator column (used for subtasks inside multitask rows) */
   hideStatus?: boolean
 }
+
+/** Props for a multitask (collapsible group) timeline row */
+export interface F0TimelineRowMultitaskProps {
+  /** The current status of this timeline entry */
+  status: TimelineRowStatus
+  /** The title of the timeline entry (e.g., "Tasks") */
+  title: string
+  /** Number of grouped tasks */
+  taskCount: number
+  /** Number of completed tasks in the group (shows a progress pill) */
+  completedCount?: number
+  /** Whether the multitask row is expanded (controlled) */
+  expanded: boolean
+  /** Callback when multitask row expand/collapse is toggled */
+  onExpandToggle: () => void
+  /** The subtask items to render when expanded */
+  items: F0TimelineRowTaskProps[]
+  /** Whether this is the last row in the timeline (hides the bottom connector line) */
+  isLast?: boolean
+  /** Hide the status indicator column */
+  hideStatus?: boolean
+}
+
+export type F0TimelineRowProps =
+  | F0TimelineRowTaskProps
+  | F0TimelineRowMultitaskProps

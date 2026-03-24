@@ -1,11 +1,11 @@
 import { userEvent } from "@testing-library/user-event"
 import { describe, expect, it, vi } from "vitest"
 
-import { zeroRender as render, screen } from "@/testing/test-utils"
 import Check from "@/icons/app/Check"
 import Comment from "@/icons/app/Comment"
 import Cross from "@/icons/app/Cross"
 import Settings from "@/icons/app/Settings"
+import { zeroRender as render, screen } from "@/testing/test-utils"
 
 import { F0TimelineRow } from "../F0TimelineRow"
 
@@ -148,11 +148,12 @@ describe("F0TimelineRow", () => {
     it("renders task count in title", () => {
       render(
         <F0TimelineRow
-          {...defaultProps}
           status="in-progress"
-          icon={Settings}
           title="Tasks"
           taskCount={3}
+          expanded={false}
+          onExpandToggle={() => {}}
+          items={[]}
         />
       )
       expect(screen.getByText("3 Tasks")).toBeInTheDocument()
@@ -161,12 +162,12 @@ describe("F0TimelineRow", () => {
     it("renders as a button when taskCount is provided", () => {
       render(
         <F0TimelineRow
-          {...defaultProps}
           status="in-progress"
-          icon={Settings}
           title="Tasks"
           taskCount={3}
+          expanded={false}
           onExpandToggle={() => {}}
+          items={[]}
         />
       )
       expect(
@@ -179,46 +180,54 @@ describe("F0TimelineRow", () => {
       const onToggle = vi.fn()
       render(
         <F0TimelineRow
-          {...defaultProps}
           status="in-progress"
-          icon={Settings}
           title="Tasks"
           taskCount={3}
+          expanded={false}
           onExpandToggle={onToggle}
+          items={[]}
         />
       )
       await user.click(screen.getByRole("button", { name: /3 Tasks/i }))
       expect(onToggle).toHaveBeenCalledOnce()
     })
 
-    it("shows children when expanded", () => {
+    it("shows items when expanded", () => {
       render(
         <F0TimelineRow
-          {...defaultProps}
           status="in-progress"
-          icon={Settings}
           title="Tasks"
           taskCount={3}
           expanded
-        >
-          <span>Child task content</span>
-        </F0TimelineRow>
+          onExpandToggle={() => {}}
+          items={[
+            {
+              status: "in-progress",
+              icon: Settings,
+              title: "Child task content",
+            },
+          ]}
+        />
       )
       expect(screen.getByText("Child task content")).toBeInTheDocument()
     })
 
-    it("hides children when collapsed", () => {
+    it("hides items when collapsed", () => {
       render(
         <F0TimelineRow
-          {...defaultProps}
           status="in-progress"
-          icon={Settings}
           title="Tasks"
           taskCount={3}
           expanded={false}
-        >
-          <span>Child task content</span>
-        </F0TimelineRow>
+          onExpandToggle={() => {}}
+          items={[
+            {
+              status: "in-progress",
+              icon: Settings,
+              title: "Child task content",
+            },
+          ]}
+        />
       )
       expect(screen.queryByText("Child task content")).not.toBeInTheDocument()
     })

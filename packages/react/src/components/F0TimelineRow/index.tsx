@@ -4,11 +4,12 @@ import { experimentalComponent } from "@/lib/experimental"
 import { F0TimelineRow as _F0TimelineRow } from "./F0TimelineRow"
 
 export type {
+  F0TimelineRowAction,
   F0TimelineRowAssignee,
+  F0TimelineRowMultitaskProps,
   F0TimelineRowOtherAction,
-  F0TimelineRowPrimaryAction,
   F0TimelineRowProps,
-  F0TimelineRowSecondaryAction,
+  F0TimelineRowTaskProps,
   TimelineRowStatus,
 } from "./types"
 export { timelineRowStatuses } from "./types"

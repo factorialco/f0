@@ -1,11 +1,11 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
+
 import { useState } from "react"
 
 import Check from "@/icons/app/Check"
 import Comment from "@/icons/app/Comment"
 import Cross from "@/icons/app/Cross"
 import Marker from "@/icons/app/Marker"
-import Settings from "@/icons/app/Settings"
 import ThumbsUp from "@/icons/app/ThumbsUp"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
@@ -231,70 +231,67 @@ const MultitaskTimelineDemo = () => {
       />
       <F0TimelineRow
         status="in-progress"
-        icon={Settings}
         title="Tasks"
         taskCount={3}
         completedCount={2}
         expanded={expanded}
         onExpandToggle={() => setExpanded(!expanded)}
-      >
-        <F0TimelineRow
-          hideStatus
-          status="in-progress"
-          icon={Marker}
-          title="Complete form"
-          description="Estimated on 18/07/2025"
-          assignees={[
-            { firstName: "Quigley", lastName: "Smitty" },
-            { firstName: "James", lastName: "Hopper" },
-            { firstName: "Sarah", lastName: "Connor" },
-          ]}
-          right={
-            <div className="flex items-center gap-1 text-sm text-f1-foreground-secondary">
-              <span className="inline-flex items-center gap-1 rounded bg-f1-background-critical px-1.5 py-0.5 text-xs text-f1-foreground-critical">
-                ★ IT team
-              </span>
-              <span>·</span>
-              <span className="inline-flex items-center gap-1 rounded bg-f1-background-secondary px-1.5 py-0.5 text-xs text-f1-foreground-secondary">
-                SY
-              </span>
-              <span>Vendor assessment form</span>
-            </div>
-          }
-          primaryAction={{
-            label: "Approve",
-            icon: Check,
-            onClick: () => {},
-          }}
-          secondaryActions={[
-            {
-              label: "Request changes",
-              icon: Comment,
+        items={[
+          {
+            status: "in-progress",
+            icon: Marker,
+            title: "Complete form",
+            description: "Estimated on 18/07/2025",
+            assignees: [
+              { firstName: "Quigley", lastName: "Smitty" },
+              { firstName: "James", lastName: "Hopper" },
+              { firstName: "Sarah", lastName: "Connor" },
+            ],
+            right: (
+              <div className="flex items-center gap-1 text-sm text-f1-foreground-secondary">
+                <span className="inline-flex items-center gap-1 rounded bg-f1-background-critical px-1.5 py-0.5 text-xs text-f1-foreground-critical">
+                  ★ IT team
+                </span>
+                <span>·</span>
+                <span className="inline-flex items-center gap-1 rounded bg-f1-background-secondary px-1.5 py-0.5 text-xs text-f1-foreground-secondary">
+                  SY
+                </span>
+                <span>Vendor assessment form</span>
+              </div>
+            ),
+            primaryAction: {
+              label: "Approve",
+              icon: Check,
               onClick: () => {},
             },
-            {
-              label: "Reject",
-              icon: Cross,
-              onClick: () => {},
-            },
-          ]}
-        />
-        <F0TimelineRow
-          hideStatus
-          status="not-started"
-          icon={ThumbsUp}
-          title="Manager approval"
-          description="Estimated on 24/07/2025"
-        />
-        <F0TimelineRow
-          hideStatus
-          status="not-started"
-          icon={Marker}
-          title="Next steps pending"
-          description="The next steps depend on the outcome of previous ones."
-          isLast
-        />
-      </F0TimelineRow>
+            secondaryActions: [
+              {
+                label: "Request changes",
+                icon: Comment,
+                onClick: () => {},
+              },
+              {
+                label: "Reject",
+                icon: Cross,
+                onClick: () => {},
+              },
+            ],
+          },
+          {
+            status: "not-started",
+            icon: ThumbsUp,
+            title: "Manager approval",
+            description: "Estimated on 24/07/2025",
+          },
+          {
+            status: "not-started",
+            icon: Marker,
+            title: "Next steps pending",
+            description:
+              "The next steps depend on the outcome of previous ones.",
+          },
+        ]}
+      />
       <F0TimelineRow
         status="not-started"
         icon={Marker}
@@ -329,98 +326,92 @@ const MultitaskDemo = () => {
     <div className="w-[500px]">
       <F0TimelineRow
         status="in-progress"
-        icon={Settings}
         title="Tasks"
         taskCount={6}
         completedCount={2}
         expanded={expanded}
         onExpandToggle={() => setExpanded(!expanded)}
         isLast
-      >
-        <F0TimelineRow
-          hideStatus
-          status="in-progress"
-          icon={Marker}
-          title="General task"
-          description="Estimated on 03/23/2026"
-          assignees={[
-            { firstName: "Quigley", lastName: "Smitty" },
-            { firstName: "James", lastName: "Hopper" },
-            { firstName: "Sarah", lastName: "Connor" },
-            { firstName: "John", lastName: "Doe" },
-            { firstName: "Jane", lastName: "Smith" },
-            { firstName: "Alex", lastName: "Rashfold" },
-            { firstName: "Emily", lastName: "Chen" },
-            { firstName: "Mike", lastName: "Ross" },
-            { firstName: "Rachel", lastName: "Green" },
-            { firstName: "Monica", lastName: "Geller" },
-          ]}
-          primaryAction={{
-            label: "Mark as done",
-            icon: Check,
-            onClick: () => {},
-          }}
-        />
-        <F0TimelineRow
-          hideStatus
-          status="in-progress"
-          icon={ThumbsUp}
-          title="Manual review"
-          description="Estimated on 03/23/2026"
-          assignees={[{ firstName: "Alex", lastName: "Rashfold" }]}
-          primaryAction={{
-            label: "Approve",
-            icon: Check,
-            onClick: () => {},
-          }}
-          secondaryActions={[
-            {
-              label: "Request changes",
-              icon: Comment,
+        items={[
+          {
+            status: "in-progress",
+            icon: Marker,
+            title: "General task",
+            description: "Estimated on 03/23/2026",
+            assignees: [
+              { firstName: "Quigley", lastName: "Smitty" },
+              { firstName: "James", lastName: "Hopper" },
+              { firstName: "Sarah", lastName: "Connor" },
+              { firstName: "John", lastName: "Doe" },
+              { firstName: "Jane", lastName: "Smith" },
+              { firstName: "Alex", lastName: "Rashfold" },
+              { firstName: "Emily", lastName: "Chen" },
+              { firstName: "Mike", lastName: "Ross" },
+              { firstName: "Rachel", lastName: "Green" },
+              { firstName: "Monica", lastName: "Geller" },
+            ],
+            primaryAction: {
+              label: "Mark as done",
+              icon: Check,
               onClick: () => {},
             },
-            {
-              label: "Reject",
-              icon: Cross,
+          },
+          {
+            status: "in-progress",
+            icon: ThumbsUp,
+            title: "Manual review",
+            description: "Estimated on 03/23/2026",
+            assignees: [{ firstName: "Alex", lastName: "Rashfold" }],
+            primaryAction: {
+              label: "Approve",
+              icon: Check,
               onClick: () => {},
             },
-          ]}
-        />
-        <F0TimelineRow
-          hideStatus
-          status="not-started"
-          icon={Marker}
-          title="Upload document"
-          description="Estimated on 03/23/2026"
-          assignees={[{ firstName: "James", lastName: "Hopper" }]}
-        />
-        <F0TimelineRow
-          hideStatus
-          status="not-started"
-          icon={ThumbsUp}
-          title="Manager approval"
-          description="Estimated on 03/25/2026"
-        />
-        <F0TimelineRow
-          hideStatus
-          status="not-started"
-          icon={Marker}
-          title="Sign contract"
-          description="Estimated on 03/26/2026"
-          assignees={[
-            { firstName: "Sarah", lastName: "Connor" },
-            { firstName: "John", lastName: "Doe" },
-          ]}
-        />
-        <F0TimelineRow
-          hideStatus
-          status="not-started"
-          icon={Marker}
-          title="Final review"
-          description="The next steps depend on the outcome of previous ones."
-          isLast
-        />
-      </F0TimelineRow>
+            secondaryActions: [
+              {
+                label: "Request changes",
+                icon: Comment,
+                onClick: () => {},
+              },
+              {
+                label: "Reject",
+                icon: Cross,
+                onClick: () => {},
+              },
+            ],
+          },
+          {
+            status: "not-started",
+            icon: Marker,
+            title: "Upload document",
+            description: "Estimated on 03/23/2026",
+            assignees: [{ firstName: "James", lastName: "Hopper" }],
+          },
+          {
+            status: "not-started",
+            icon: ThumbsUp,
+            title: "Manager approval",
+            description: "Estimated on 03/25/2026",
+          },
+          {
+            status: "not-started",
+            icon: Marker,
+            title: "Sign contract",
+            description: "Estimated on 03/26/2026",
+            assignees: [
+              { firstName: "Sarah", lastName: "Connor" },
+              { firstName: "John", lastName: "Doe" },
+            ],
+          },
+          {
+            status: "not-started",
+            icon: Marker,
+            title: "Final review",
+            description:
+              "The next steps depend on the outcome of previous ones.",
+          },
+        ]}
+      />
     </div>
   )
 }
