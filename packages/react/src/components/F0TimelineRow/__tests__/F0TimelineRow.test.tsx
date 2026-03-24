@@ -91,8 +91,8 @@ describe("F0TimelineRow", () => {
     const { container } = render(
       <F0TimelineRow {...defaultProps} status="in-progress" />
     )
-    const path = container.querySelector("path[fill='#FF9153']")
-    expect(path).toBeInTheDocument()
+    const circle = container.querySelector("circle[fill='#FF9153']")
+    expect(circle).toBeInTheDocument()
   })
 
   it("renders with not-started status indicator", () => {

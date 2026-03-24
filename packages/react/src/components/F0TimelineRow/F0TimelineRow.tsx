@@ -40,12 +40,22 @@ const CompletedIcon = () => (
 )
 
 const InProgressIcon = () => (
-  <svg width="28" height="28" viewBox="0 0 18 18" fill="none">
+  <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+    <circle cx="14" cy="14" r="10" fill={STATUS_COLORS["in-progress"]} />
+    <circle
+      cx="14"
+      cy="14"
+      r="5"
+      stroke="white"
+      strokeWidth="1.3"
+      fill="none"
+    />
     <path
-      fillRule="evenodd"
-      clipRule="evenodd"
-      d="M8.54199 1.08398C12.6611 1.08398 15.999 4.42188 15.999 8.54199C15.999 12.6611 12.6611 15.999 8.54199 15.999C4.42188 15.999 1.08398 12.6611 1.08398 8.54199C1.08398 4.42188 4.42188 1.08398 8.54199 1.08398ZM8.54199 2.16699C5.01953 2.16699 2.16699 5.01953 2.16699 8.54199C2.16699 12.0645 5.01953 14.917 8.54199 14.917C12.0645 14.917 14.917 12.0645 14.917 8.54199C14.917 5.01953 12.0645 2.16699 8.54199 2.16699ZM9.08301 4.33301V8.31738L11.9238 11.1582L11.1582 11.9238L8 8.76562V4.33301H9.08301Z"
-      fill={STATUS_COLORS["in-progress"]}
+      d="M14 11.5V14L16 15.5"
+      stroke="white"
+      strokeWidth="1.3"
+      strokeLinecap="round"
+      strokeLinejoin="round"
     />
   </svg>
 )
