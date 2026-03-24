@@ -1,4 +1,4 @@
-import { forwardRef } from "react"
+import { forwardRef, useId } from "react"
 
 import { F0AvatarList } from "@/components/avatars/F0AvatarList"
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
@@ -10,9 +10,11 @@ import Check from "@/icons/app/Check"
 import CheckCircle from "@/icons/app/CheckCircle"
 import ChevronDown from "@/icons/app/ChevronDown"
 import ChevronUp from "@/icons/app/ChevronUp"
+import CircleDashed from "@/icons/app/CircleDashed"
 import Marker from "@/icons/app/Marker"
+import Multitask from "@/icons/app/Multitask"
 import ProgressClock from "@/icons/app/ProgressClock"
-import { cn } from "@/lib/utils"
+import { cn, focusRing } from "@/lib/utils"
 
 import type {
   F0TimelineRowOtherAction,
@@ -31,24 +33,17 @@ const InProgressIcon = () => (
 )
 
 const NotStartedIcon = () => (
-  <svg className="h-7 w-7" viewBox="0 0 28 28" fill="none">
-    <circle
-      cx="14"
-      cy="14"
-      r="10"
-      className="stroke-f1-icon-secondary"
-      strokeWidth="1.8"
-      strokeDasharray="0.1 4.5"
-      strokeLinecap="round"
-      fill="none"
-    />
-  </svg>
+  <F0Icon icon={CircleDashed} size="lg" color="secondary" />
 )
 
 const StatusIndicator = ({ status }: { status: TimelineRowStatus }) => {
   if (status === "completed") {
     return (
-      <div className="flex h-7 w-7 items-center justify-center" aria-hidden>
+      <div
+        className="flex h-7 w-7 items-center justify-center"
+        aria-hidden
+        data-testid={`timeline-status-${status}`}
+      >
         <CompletedIcon />
       </div>
     )
@@ -56,31 +51,32 @@ const StatusIndicator = ({ status }: { status: TimelineRowStatus }) => {
 
   if (status === "in-progress") {
     return (
-      <div className="flex h-7 w-7 items-center justify-center" aria-hidden>
+      <div
+        className="flex h-7 w-7 items-center justify-center"
+        aria-hidden
+        data-testid={`timeline-status-${status}`}
+      >
         <InProgressIcon />
       </div>
     )
   }
 
   return (
-    <div className="flex h-7 w-7 items-center justify-center" aria-hidden>
+    <div
+      className="flex h-7 w-7 items-center justify-center"
+      aria-hidden
+      data-testid={`timeline-status-${status}`}
+    >
       <NotStartedIcon />
     </div>
   )
 }
 
-const MultitaskIcon = () => (
-  <svg className="h-3.5 w-3.5" viewBox="0 0 13 13" fill="none" aria-hidden>
-    <path
-      d="M2.9834 0C3.89458 0 4.63365 0.739241 4.63379 1.65039V1.66699H8.33398V1.65039C8.33413 0.73924 9.07319 0 9.98438 0H11.3174C12.2284 0.000211338 12.9676 0.739371 12.9678 1.65039V2.9834C12.9678 3.89454 12.2285 4.63358 11.3174 4.63379H11.3008V8.33398H11.3174C12.2285 8.3342 12.9678 9.07324 12.9678 9.98438V11.3174C12.9676 12.2283 12.2283 12.9676 11.3174 12.9678H9.98438C9.07323 12.9678 8.3342 12.2285 8.33398 11.3174V11.3008H4.63379V11.3174C4.63358 12.2285 3.89454 12.9678 2.9834 12.9678H1.65039C0.73937 12.9676 0.000211338 12.2284 0 11.3174V9.98438C0 9.07319 0.739241 8.33413 1.65039 8.33398H1.66699V4.63379H1.65039C0.73924 4.63365 0 3.89458 0 2.9834V1.65039C0.000140817 0.739327 0.739328 0.000140817 1.65039 0H2.9834ZM1.65039 9.63477C1.45721 9.63491 1.30078 9.79116 1.30078 9.98438V11.3174C1.30099 11.5104 1.45734 11.6678 1.65039 11.668H2.9834C3.17657 11.668 3.33377 11.5105 3.33398 11.3174V9.98438C3.33398 9.79107 3.1767 9.63477 2.9834 9.63477H1.65039ZM9.98438 9.63477C9.79107 9.63477 9.63477 9.79108 9.63477 9.98438V11.3174C9.63498 11.5105 9.79121 11.668 9.98438 11.668H11.3174C11.5104 11.6678 11.6678 11.5104 11.668 11.3174V9.98438C11.668 9.79121 11.5105 9.63498 11.3174 9.63477H9.98438ZM4.63379 2.9834C4.63379 3.89467 3.89467 4.63379 2.9834 4.63379H2.96777V8.33398H2.9834C3.89467 8.33398 4.63379 9.07311 4.63379 9.98438V10H8.33398V9.98438C8.33398 9.0731 9.07311 8.33398 9.98438 8.33398H10V4.63379H9.98438C9.0731 4.63379 8.33398 3.89467 8.33398 2.9834V2.96777H4.63379V2.9834ZM1.65039 1.30078C1.4573 1.30092 1.30092 1.4573 1.30078 1.65039V2.9834C1.30078 3.17661 1.45721 3.33384 1.65039 3.33398H2.9834C3.1767 3.33398 3.33398 3.1767 3.33398 2.9834V1.65039C3.33384 1.45721 3.17661 1.30078 2.9834 1.30078H1.65039ZM9.98438 1.30078C9.79116 1.30078 9.63491 1.45721 9.63477 1.65039V2.9834C9.63477 3.1767 9.79108 3.33398 9.98438 3.33398H11.3174C11.5105 3.33377 11.668 3.17657 11.668 2.9834V1.65039C11.6678 1.45734 11.5104 1.30099 11.3174 1.30078H9.98438Z"
-      fill="currentColor"
-      fillOpacity="0.61"
-    />
-  </svg>
-)
+const MultitaskIcon = () => <Multitask className="h-3.5 w-3.5" aria-hidden />
 
 const ConnectorLine = ({ status }: { status: TimelineRowStatus }) => (
   <div
+    data-testid="timeline-connector"
     className={cn(
       "mt-1 w-0.5 min-h-2 flex-1",
       status === "completed" && "bg-f1-icon-positive",
@@ -160,6 +156,7 @@ export const F0TimelineRow = forwardRef<HTMLDivElement, F0TimelineRowProps>(
     ref
   ) => {
     const isMultitask = taskCount !== undefined && taskCount > 0
+    const contentId = useId()
 
     return (
       <div ref={ref} className="flex gap-4">
@@ -199,18 +196,29 @@ export const F0TimelineRow = forwardRef<HTMLDivElement, F0TimelineRowProps>(
             )}
             {isMultitask ? (
               <div className="flex flex-1 items-center justify-between">
-                <button
-                  type="button"
-                  className="flex items-center gap-1 text-base font-semibold text-f1-foreground"
-                  onClick={onExpandToggle}
-                >
-                  {taskCount} {title}
-                  <F0Icon
-                    icon={expanded ? ChevronUp : ChevronDown}
-                    size="xs"
-                    color="default"
-                  />
-                </button>
+                {onExpandToggle ? (
+                  <button
+                    type="button"
+                    className={cn(
+                      "flex items-center gap-1 rounded text-base font-semibold text-f1-foreground",
+                      focusRing()
+                    )}
+                    onClick={() => onExpandToggle?.()}
+                    aria-expanded={expanded}
+                    aria-controls={contentId}
+                  >
+                    {taskCount} {title}
+                    <F0Icon
+                      icon={expanded ? ChevronUp : ChevronDown}
+                      size="xs"
+                      color="default"
+                    />
+                  </button>
+                ) : (
+                  <span className="flex items-center gap-1 text-base font-semibold text-f1-foreground">
+                    {taskCount} {title}
+                  </span>
+                )}
                 {completedCount !== undefined && taskCount !== undefined && (
                   <span className="inline-flex items-center gap-1 rounded-full bg-f1-background-secondary px-2.5 py-1 text-sm font-semibold text-f1-foreground-secondary">
                     <svg
@@ -369,7 +377,9 @@ export const F0TimelineRow = forwardRef<HTMLDivElement, F0TimelineRowProps>(
           )}
 
           {isMultitask && expanded && children && (
-            <div className="flex flex-col pl-4">{children}</div>
+            <div id={contentId} className="flex flex-col pl-4">
+              {children}
+            </div>
           )}
         </div>
       </div>

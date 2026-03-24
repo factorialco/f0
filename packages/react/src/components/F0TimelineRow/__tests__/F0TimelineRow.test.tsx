@@ -1,3 +1,4 @@
+import { userEvent } from "@testing-library/user-event"
 import { describe, expect, it, vi } from "vitest"
 
 import { zeroRender as render, screen } from "@/testing/test-utils"
@@ -91,36 +92,41 @@ describe("F0TimelineRow", () => {
     const { container } = render(
       <F0TimelineRow {...defaultProps} status="completed" />
     )
-    const icon = container.querySelector(".text-f1-icon-positive")
-    expect(icon).toBeInTheDocument()
+    expect(
+      container.querySelector("[data-testid='timeline-status-completed']")
+    ).toBeInTheDocument()
   })
 
   it("renders with in-progress status indicator", () => {
     const { container } = render(
       <F0TimelineRow {...defaultProps} status="in-progress" />
     )
-    const icon = container.querySelector(".text-f1-icon-warning")
-    expect(icon).toBeInTheDocument()
+    expect(
+      container.querySelector("[data-testid='timeline-status-in-progress']")
+    ).toBeInTheDocument()
   })
 
   it("renders with not-started status indicator", () => {
     const { container } = render(
       <F0TimelineRow {...defaultProps} status="not-started" />
     )
-    const circle = container.querySelector("circle.stroke-f1-icon-secondary")
-    expect(circle).toBeInTheDocument()
+    expect(
+      container.querySelector("[data-testid='timeline-status-not-started']")
+    ).toBeInTheDocument()
   })
 
   it("renders connector for completed rows", () => {
     const { container } = render(<F0TimelineRow {...defaultProps} />)
-    const connector = container.querySelector(".mt-1.flex-1")
-    expect(connector).toBeInTheDocument()
+    expect(
+      container.querySelector("[data-testid='timeline-connector']")
+    ).toBeInTheDocument()
   })
 
   it("hides the connector line when isLast is true", () => {
     const { container } = render(<F0TimelineRow {...defaultProps} isLast />)
-    const connector = container.querySelector(".mt-1.flex-1")
-    expect(connector).not.toBeInTheDocument()
+    expect(
+      container.querySelector("[data-testid='timeline-connector']")
+    ).not.toBeInTheDocument()
   })
 
   it("renders assignees with names when 3 or fewer", () => {
@@ -134,11 +140,8 @@ describe("F0TimelineRow", () => {
   })
 
   it("does not render assignees when array is empty", () => {
-    const { container } = render(
-      <F0TimelineRow {...defaultProps} assignees={[]} />
-    )
-    // No avatar list should be rendered
-    expect(container.querySelectorAll("[class*='avatar']")).toHaveLength(0)
+    render(<F0TimelineRow {...defaultProps} assignees={[]} />)
+    expect(screen.queryByRole("img")).not.toBeInTheDocument()
   })
 
   describe("multitask", () => {
@@ -171,7 +174,8 @@ describe("F0TimelineRow", () => {
       ).toBeInTheDocument()
     })
 
-    it("calls onExpandToggle when clicking the multitask title", () => {
+    it("calls onExpandToggle when clicking the multitask title", async () => {
+      const user = userEvent.setup()
       const onToggle = vi.fn()
       render(
         <F0TimelineRow
@@ -183,7 +187,7 @@ describe("F0TimelineRow", () => {
           onExpandToggle={onToggle}
         />
       )
-      screen.getByRole("button", { name: /3 Tasks/i }).click()
+      await user.click(screen.getByRole("button", { name: /3 Tasks/i }))
       expect(onToggle).toHaveBeenCalledOnce()
     })
 
