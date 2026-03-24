@@ -67,7 +67,7 @@ function configToF0Field(
   }
 
   // Non-required fields should be clearable
-  const clearable = !isFieldRequired(schema)
+  const clearable = !isFieldRequired(schema, fieldType)
 
   switch (fieldType) {
     case "text": {

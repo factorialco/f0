@@ -50,7 +50,7 @@ export function describeFormSchema(
     if (!config) continue
 
     const fieldType = inferFieldType(zodSchema, config)
-    const required = isFieldRequired(zodSchema)
+    const required = isFieldRequired(zodSchema, fieldType)
 
     const description: FormFieldDescription = {
       name: fieldId,
