@@ -168,6 +168,15 @@ export type BackgroundToken =
   | "selected-bold"
   | "overlay"
 
+/** Hover background tokens mapped to the f1 theme hover states */
+export type HoverBackgroundToken =
+  | "default"
+  | "secondary"
+  | "accent-bold"
+  | "promote"
+  | "selected"
+  | "selected-bold"
+
 /** Border color tokens mapped to the f1 theme */
 export type BorderColorToken =
   | "default"

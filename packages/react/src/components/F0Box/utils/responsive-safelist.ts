@@ -144,6 +144,20 @@ export const RESPONSIVE_SAFELIST = [
   "xl:bg-f1-background-positive", "xl:bg-f1-background-positive-bold",
   "xl:bg-f1-background-selected", "xl:bg-f1-background-selected-secondary", "xl:bg-f1-background-selected-bold", "xl:bg-f1-background-overlay",
 
+  // ===================== HOVER BACKGROUND =====================
+  "sm:hover:bg-f1-background-hover", "sm:hover:bg-f1-background-secondary-hover",
+  "sm:hover:bg-f1-background-accent-bold-hover", "sm:hover:bg-f1-background-promote-hover",
+  "sm:hover:bg-f1-background-selected-hover", "sm:hover:bg-f1-background-selected-bold-hover",
+  "md:hover:bg-f1-background-hover", "md:hover:bg-f1-background-secondary-hover",
+  "md:hover:bg-f1-background-accent-bold-hover", "md:hover:bg-f1-background-promote-hover",
+  "md:hover:bg-f1-background-selected-hover", "md:hover:bg-f1-background-selected-bold-hover",
+  "lg:hover:bg-f1-background-hover", "lg:hover:bg-f1-background-secondary-hover",
+  "lg:hover:bg-f1-background-accent-bold-hover", "lg:hover:bg-f1-background-promote-hover",
+  "lg:hover:bg-f1-background-selected-hover", "lg:hover:bg-f1-background-selected-bold-hover",
+  "xl:hover:bg-f1-background-hover", "xl:hover:bg-f1-background-secondary-hover",
+  "xl:hover:bg-f1-background-accent-bold-hover", "xl:hover:bg-f1-background-promote-hover",
+  "xl:hover:bg-f1-background-selected-hover", "xl:hover:bg-f1-background-selected-bold-hover",
+
   // ===================== BORDER COLOR =====================
   "sm:border-f1-border", "sm:border-f1-border-secondary", "sm:border-f1-border-bold",
   "sm:border-f1-border-selected", "sm:border-f1-border-selected-bold",

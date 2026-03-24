@@ -1,4 +1,4 @@
-import type { BackgroundToken } from "../types"
+import type { BackgroundToken, HoverBackgroundToken } from "../types"
 
 export const backgroundVariants = {
   background: {
@@ -25,4 +25,12 @@ export const backgroundVariants = {
     "selected-bold": "bg-f1-background-selected-bold",
     overlay: "bg-f1-background-overlay",
   } satisfies Record<BackgroundToken, string>,
+  hoverBackground: {
+    default: "hover:bg-f1-background-hover",
+    secondary: "hover:bg-f1-background-secondary-hover",
+    "accent-bold": "hover:bg-f1-background-accent-bold-hover",
+    promote: "hover:bg-f1-background-promote-hover",
+    selected: "hover:bg-f1-background-selected-hover",
+    "selected-bold": "hover:bg-f1-background-selected-bold-hover",
+  } satisfies Record<HoverBackgroundToken, string>,
 }
