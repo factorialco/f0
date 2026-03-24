@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.418.1](https://github.com/factorialco/f0/compare/f0-react-v1.418.0...f0-react-v1.418.1) (2026-03-24)
+
+
+### Bug Fixes
+
+* some fields not being marked properly as required ([#3747](https://github.com/factorialco/f0/issues/3747)) ([c8c16d6](https://github.com/factorialco/f0/commit/c8c16d60933e5609f96eb2f4dee3512483a99535))
+
 ## [1.418.0](https://github.com/factorialco/f0/compare/f0-react-v1.417.2...f0-react-v1.418.0) (2026-03-24)
 
 
