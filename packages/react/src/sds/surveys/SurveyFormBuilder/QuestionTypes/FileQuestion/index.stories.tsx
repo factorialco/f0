@@ -34,6 +34,7 @@ type Story = StoryObj<typeof meta>
 export const Default: Story = {
   args: {
     id: "question-1",
+    type: "file",
     title: "Upload your documents",
     description: "Please upload any relevant files",
     value: null,

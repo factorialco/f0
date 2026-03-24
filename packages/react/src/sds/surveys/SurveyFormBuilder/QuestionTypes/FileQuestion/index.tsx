@@ -17,12 +17,12 @@ import {
 
 export type FileQuestionOnChangeParams = BaseQuestionOnChangeParams & {
   type: "file"
-  value?: File[] | null
+  value?: string[] | null
 }
 
 export type FileQuestionProps = BaseQuestionPropsForOtherQuestionComponents & {
   type: "file"
-  value?: File[] | null
+  value?: string[] | null
   useUpload?: UseFileUpload
   accept?: MimeType[]
   maxSizeMB?: number
@@ -84,7 +84,7 @@ export const FileQuestion = ({
             onQuestionChange?.({
               ...baseQuestionComponentProps,
               type: "file",
-              value: (v as File[]) || null,
+              value: (v as string[]) || null,
             })
           }}
           disabled={disabled}

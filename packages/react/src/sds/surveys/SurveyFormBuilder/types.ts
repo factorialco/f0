@@ -115,7 +115,7 @@ type OnChangeQuestionParams = BaseQuestionOnChangeParams &
       }
     | {
         type: "file"
-        value?: File[] | null
+        value?: string[] | null
       }
   )
 
