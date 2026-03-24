@@ -1,0 +1,198 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`F0Progress Snapshot - circular variant 1`] = `
+<View
+  accessibilityRole="progressbar"
+  accessibilityValue={
+    {
+      "max": 100,
+      "min": 0,
+      "now": 50,
+    }
+  }
+  accessible={true}
+  className="shrink-0"
+>
+  <View
+    className="shrink-0"
+    style={
+      {
+        "alignItems": "center",
+        "height": 28,
+        "justifyContent": "center",
+        "width": 28,
+      }
+    }
+  >
+    <View
+      style={
+        {
+          "backgroundColor": "undefined",
+          "borderRadius": 14,
+          "height": 28,
+          "opacity": 0.1,
+          "position": "absolute",
+          "width": 28,
+        }
+      }
+      testID="f0-progress-circular-track"
+    />
+    <RNSVGSvgView
+      align="xMidYMid"
+      bbHeight={24}
+      bbWidth={24}
+      focusable={false}
+      height={24}
+      meetOrSlice={0}
+      minX={0}
+      minY={0}
+      style={
+        [
+          {
+            "backgroundColor": "transparent",
+            "borderWidth": 0,
+          },
+          {
+            "flex": 0,
+            "height": 24,
+            "width": 24,
+          },
+        ]
+      }
+      testID="f0-progress-circular-svg"
+      vbHeight={24}
+      vbWidth={24}
+      width={24}
+    >
+      <RNSVGGroup
+        fill={
+          {
+            "payload": 4278190080,
+            "type": 0,
+          }
+        }
+      >
+        <RNSVGCircle
+          cx={12}
+          cy={12}
+          fill={null}
+          matrix={
+            [
+              6.123233995736766e-17,
+              -1,
+              1,
+              6.123233995736766e-17,
+              0,
+              24,
+            ]
+          }
+          propList={
+            [
+              "fill",
+              "stroke",
+              "strokeWidth",
+              "strokeDasharray",
+              "strokeLinecap",
+            ]
+          }
+          r={10.375}
+          stroke={null}
+          strokeDasharray={
+            [
+              "65.18804756198821",
+              "65.18804756198821",
+            ]
+          }
+          strokeLinecap={1}
+          strokeWidth={3.25}
+          testID="f0-progress-circular-fill"
+        />
+      </RNSVGGroup>
+    </RNSVGSvgView>
+  </View>
+</View>
+`;
+
+exports[`F0Progress Snapshot - linear variant 1`] = `
+<View
+  accessibilityRole="progressbar"
+  accessibilityValue={
+    {
+      "max": 100,
+      "min": 0,
+      "now": 50,
+    }
+  }
+  accessible={true}
+  className="shrink-0 w-full"
+>
+  <View
+    className="shrink-0 w-full"
+  >
+    <View
+      className="h-1 w-full overflow-hidden rounded-full bg-f0-background-info"
+      testID="f0-progress-linear-track"
+    >
+      <View
+        className="h-full w-full rounded-full bg-f0-icon-info"
+        style={
+          {
+            "transform": [
+              {
+                "scaleX": 0.5,
+              },
+            ],
+            "transformOrigin": "left center",
+          }
+        }
+        testID="f0-progress-linear-fill"
+      />
+    </View>
+  </View>
+</View>
+`;
+
+exports[`F0Progress Snapshot - linear variant with label 1`] = `
+<View
+  accessibilityRole="progressbar"
+  accessibilityValue={
+    {
+      "max": 100,
+      "min": 0,
+      "now": 50,
+    }
+  }
+  accessible={true}
+  className="shrink-0 w-full flex-row items-center gap-2"
+>
+  <View
+    className="w-full flex-1"
+  >
+    <View
+      className="h-1 w-full overflow-hidden rounded-full bg-f0-background-info"
+      testID="f0-progress-linear-track"
+    >
+      <View
+        className="h-full w-full rounded-full bg-f0-icon-info"
+        style={
+          {
+            "transform": [
+              {
+                "scaleX": 0.5,
+              },
+            ],
+            "transformOrigin": "left center",
+          }
+        }
+        testID="f0-progress-linear-fill"
+      />
+    </View>
+  </View>
+  <Text
+    className="no-underline normal-case tracking-normal text-[14px] leading-[20px] font-normal text-f0-foreground text-left"
+    testID="f0-progress-label"
+  >
+    50%
+  </Text>
+</View>
+`;
