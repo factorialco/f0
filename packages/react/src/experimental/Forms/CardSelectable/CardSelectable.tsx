@@ -181,7 +181,7 @@ function _CardSelectable<T extends CardSelectableValue>({
             target="_blank"
             variant="link"
             className="self-start"
-            onClick={(e) => e.stopPropagation()}
+            stopPropagation
           >
             {item.moreInfoLink.label ?? forms.moreInformation}
           </F0Link>

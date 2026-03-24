@@ -1,12 +1,11 @@
 import { z, ZodTypeAny } from "zod"
 
-import type { AlertVariant } from "@/components/F0Alert/types"
+import type { F0AlertProps } from "@/components/F0Alert/types"
 import type {
   DurationFieldConfig,
   DurationInputSize,
   DurationUnit,
 } from "@/components/F0DurationInput/types"
-import type { IconType } from "@/components/F0Icon"
 import type { InputFieldStatus } from "@/ui/InputField/types"
 
 import type { F0CheckboxConfig } from "./fields/checkbox/types"
@@ -95,22 +94,10 @@ export type F0FieldType =
  */
 /**
  * Alert props returned by the field alert callback.
- * Same as F0AlertProps but with `variant` defaulting to "info".
+ * Derived from F0AlertProps with `variant` defaulting to "info".
  */
-export interface F0FieldAlertProps {
-  title: string
-  description: string
-  action?: {
-    label: string
-    disabled?: boolean
-    onClick: () => void
-  }
-  link?: {
-    label: string
-    href: string
-  }
-  icon?: IconType
-  variant?: AlertVariant
+export type F0FieldAlertProps = Omit<F0AlertProps, "variant"> & {
+  variant?: F0AlertProps["variant"]
 }
 
 /**

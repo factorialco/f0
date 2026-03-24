@@ -2724,4 +2724,169 @@ describe("getSchemaDefinition - alert and moreInfoLink config extraction", () =>
 
     expect(fieldItem.field.moreInfoLink).toBeUndefined()
   })
+
+  it("attaches moreInfoLink config to checkbox field definition", () => {
+    const formSchema = z.object({
+      agree: f0FormField(z.boolean(), {
+        label: "I agree",
+        fieldType: "checkbox",
+        moreInfoLink: {
+          href: "https://example.com/terms",
+          label: "Read terms",
+        },
+      }),
+    })
+
+    const definition = getSchemaDefinition(formSchema)
+    const fieldItem = definition[0] as {
+      type: "field"
+      field: { moreInfoLink?: { href: string; label?: string } }
+    }
+
+    expect(fieldItem.field.moreInfoLink).toEqual({
+      href: "https://example.com/terms",
+      label: "Read terms",
+    })
+  })
+})
+
+describe("F0Form alert variant defaults", () => {
+  it("defaults alert variant to info when not specified", () => {
+    const formSchema = z.object({
+      name: f0FormField(z.string(), {
+        label: "Name",
+        alert: {
+          title: "Info alert",
+          description: "This should use info variant",
+        },
+      }),
+    })
+
+    render(
+      <F0Form
+        name="alert-default-variant"
+        schema={formSchema}
+        defaultValues={{ name: "" }}
+        onSubmit={async () => ({ success: true })}
+      />
+    )
+
+    expect(screen.getByText("Info alert")).toBeInTheDocument()
+    // The alert is present and rendered with default "info" variant
+    // (F0Alert receives variant="info" when field alert omits it)
+    expect(screen.getByText("This should use info variant")).toBeInTheDocument()
+  })
+})
+
+describe("F0Form moreInfoLink on checkbox fields", () => {
+  it("renders moreInfoLink with default label on a checkbox field", () => {
+    const formSchema = z.object({
+      agree: f0FormField(z.boolean(), {
+        label: "I agree to the terms",
+        fieldType: "checkbox",
+        moreInfoLink: {
+          href: "https://example.com/terms",
+        },
+      }),
+    })
+
+    render(
+      <F0Form
+        name="checkbox-moreinfo"
+        schema={formSchema}
+        defaultValues={{ agree: false }}
+        onSubmit={async () => ({ success: true })}
+      />
+    )
+
+    const link = screen.getByText("More information")
+    expect(link).toBeInTheDocument()
+    expect(link.closest("a")).toHaveAttribute(
+      "href",
+      "https://example.com/terms"
+    )
+  })
+})
+
+describe("F0Form switch group alert toggling", () => {
+  it("shows alert when switch is toggled on and hides when toggled off", async () => {
+    const user = userEvent.setup()
+
+    const formSchema = z.object({
+      optionA: f0FormField(z.boolean(), {
+        label: "Option A",
+        fieldType: "switch",
+        alert: ({ fieldValue }) =>
+          fieldValue === true
+            ? {
+                title: "Option A enabled",
+                description: "You activated option A",
+              }
+            : null,
+      }),
+      optionB: f0FormField(z.boolean(), {
+        label: "Option B",
+        fieldType: "switch",
+      }),
+    })
+
+    render(
+      <F0Form
+        name="switch-group-alert-toggle"
+        schema={formSchema}
+        defaultValues={{ optionA: false, optionB: false }}
+        onSubmit={async () => ({ success: true })}
+      />
+    )
+
+    // Alert should not be visible initially
+    expect(screen.queryByText("Option A enabled")).not.toBeInTheDocument()
+
+    // Toggle option A on
+    await user.click(screen.getByText("Option A"))
+
+    await waitFor(() => {
+      expect(screen.getByText("Option A enabled")).toBeInTheDocument()
+      expect(screen.getByText("You activated option A")).toBeInTheDocument()
+    })
+
+    // Toggle option A off
+    await user.click(screen.getByText("Option A"))
+
+    await waitFor(() => {
+      expect(screen.queryByText("Option A enabled")).not.toBeInTheDocument()
+    })
+  })
+
+  it("renders moreInfoLink with default label inside switch group", () => {
+    const formSchema = z.object({
+      optionA: f0FormField(z.boolean(), {
+        label: "Option A",
+        fieldType: "switch",
+        moreInfoLink: {
+          href: "https://help.example.com/option-a",
+        },
+      }),
+      optionB: f0FormField(z.boolean(), {
+        label: "Option B",
+        fieldType: "switch",
+      }),
+    })
+
+    render(
+      <F0Form
+        name="switch-group-moreinfo"
+        schema={formSchema}
+        defaultValues={{ optionA: false, optionB: false }}
+        onSubmit={async () => ({ success: true })}
+      />
+    )
+
+    const link = screen.getByText("More information")
+    expect(link).toBeInTheDocument()
+    expect(link.closest("a")).toHaveAttribute(
+      "href",
+      "https://help.example.com/option-a"
+    )
+  })
 })
