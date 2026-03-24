@@ -2031,7 +2031,7 @@ export const WithProgressBar: Story = {
                 {
                   label: "Progress",
                   icon: ChartPie,
-                  tooltip: "Course completion progress",
+
                   render: (item) => ({
                     type: "progressBar",
                     value: {
@@ -2044,7 +2044,7 @@ export const WithProgressBar: Story = {
                 {
                   label: "Status",
                   icon: ChartLine,
-                  tooltip: "Current status",
+
                   render: (item) => ({
                     type: "dotTag",
                     value: {
@@ -2061,7 +2061,7 @@ export const WithProgressBar: Story = {
                 {
                   label: "Work Mode",
                   icon: Office,
-                  tooltip: "Work location",
+
                   render: (item) => item.workMode,
                 },
               ],
