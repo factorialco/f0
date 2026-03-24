@@ -1,0 +1,28 @@
+/* ─── F0AiMask — visual overlay ──────────────────────────────────────────
+ *
+ *  Two stacked radial gradients from Figma.
+ *  Layer 1 (front): wider bloom — orange-transparent → red → blue
+ *  Layer 2 (back):  tight edge glow — white → blue → red → orange
+ *
+ *  border-radius and width/height are applied via inline style
+ *  (driven by MaskOptions.borderRadius and resize()).
+ */
+
+.f0-ai-mask {
+  overflow: hidden;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      76.26% 73.92% at 50% 50%,
+      rgba(229, 86, 25, 0) 80%,
+      rgba(229, 25, 67, 0.12) 90%,
+      rgba(161, 173, 229, 0.24) 100%
+    ),
+    radial-gradient(
+      79.97% 59.64% at 50% 50%,
+      rgba(255, 255, 255, 0.08) 83.65%,
+      rgba(161, 173, 229, 0.14) 88.22%,
+      rgba(229, 25, 67, 0.1) 96.88%,
+      rgba(229, 86, 25, 0.1) 100%
+    );
+}
