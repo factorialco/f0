@@ -632,6 +632,10 @@ describe("isFieldRequired", () => {
       expect(isFieldRequired(z.string(), "daterange")).toBe(true)
     })
 
+    it("returns true for z.string() with fieldType file", () => {
+      expect(isFieldRequired(z.string(), "file")).toBe(true)
+    })
+
     it("returns false for z.string() with fieldType text (not selection-based)", () => {
       expect(isFieldRequired(z.string(), "text")).toBe(false)
     })

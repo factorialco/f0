@@ -1,5 +1,7 @@
 import { ZodTypeAny } from "zod"
 
+import type { F0FieldType } from "../f0Schema"
+
 import { isZodType, unwrapZodSchema } from "../f0Schema"
 
 /**
@@ -64,12 +66,13 @@ function hasNonEmptyConstraint(schema: ZodTypeAny): boolean {
  * z.string() effectively means "must select a value" and should show
  * the required asterisk.
  */
-const SELECTION_FIELD_TYPES = new Set([
+const SELECTION_FIELD_TYPES = new Set<F0FieldType>([
   "select",
   "date",
   "time",
   "datetime",
   "daterange",
+  "file",
 ])
 
 /**
@@ -101,7 +104,7 @@ const SELECTION_FIELD_TYPES = new Set([
  */
 export function isFieldRequired(
   schema: ZodTypeAny,
-  fieldType?: string
+  fieldType?: F0FieldType
 ): boolean {
   // Optional/nullable fields are never required
   if (isOptionalOrNullable(schema)) {
