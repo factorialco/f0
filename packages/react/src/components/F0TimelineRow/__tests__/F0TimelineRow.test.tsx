@@ -69,7 +69,13 @@ describe("F0TimelineRow", () => {
   })
 
   it("renders right content when provided", () => {
-    render(<F0TimelineRow {...defaultProps} right={<span>IT team</span>} />)
+    render(
+      <F0TimelineRow
+        {...defaultProps}
+        status="in-progress"
+        right={<span>IT team</span>}
+      />
+    )
     expect(screen.getByText("IT team")).toBeInTheDocument()
   })
 
@@ -250,7 +256,7 @@ describe("F0TimelineRow", () => {
         />
       )
       expect(
-        container.querySelector(".bg-f1-border-secondary.h-5.w-px")
+        container.querySelector(".bg-f1-border-secondary.h-6.w-px")
       ).toBeInTheDocument()
     })
 

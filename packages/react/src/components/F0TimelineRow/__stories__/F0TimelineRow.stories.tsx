@@ -49,7 +49,14 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-export const Completed: Story = {}
+export const Completed: Story = {
+  args: {
+    assignees: [
+      { firstName: "Alex", lastName: "Rashfold" },
+      { firstName: "James", lastName: "Hopper" },
+    ],
+  },
+}
 
 export const InProgress: Story = {
   args: {
@@ -108,12 +115,17 @@ export const Timeline: Story = {
         icon={Pencil}
         title="Submit payment"
         description="Completed on 20/2025"
+        assignees={[{ firstName: "Alex", lastName: "Rashfold" }]}
       />
       <F0TimelineRow
         status="completed"
         icon={Pencil}
         title="Complete form"
         description="Completed on 20/2025"
+        assignees={[
+          { firstName: "James", lastName: "Hopper" },
+          { firstName: "Sarah", lastName: "Connor" },
+        ]}
       />
       <F0TimelineRow
         status="in-progress"
@@ -196,12 +208,17 @@ const MultitaskTimelineDemo = () => {
         icon={Pencil}
         title="Submit payment"
         description="Completed on 20/2025"
+        assignees={[{ firstName: "Alex", lastName: "Rashfold" }]}
       />
       <F0TimelineRow
         status="completed"
         icon={Pencil}
         title="Complete form"
         description="Completed on 20/2025"
+        assignees={[
+          { firstName: "James", lastName: "Hopper" },
+          { firstName: "Sarah", lastName: "Connor" },
+        ]}
       />
       <F0TimelineRow
         status="completed"
@@ -214,6 +231,7 @@ const MultitaskTimelineDemo = () => {
         icon={Settings}
         title="Tasks"
         taskCount={3}
+        completedCount={2}
         expanded={expanded}
         onExpandToggle={() => setExpanded(!expanded)}
       >
@@ -311,6 +329,7 @@ const MultitaskDemo = () => {
         icon={Settings}
         title="Tasks"
         taskCount={6}
+        completedCount={2}
         expanded={expanded}
         onExpandToggle={() => setExpanded(!expanded)}
         isLast

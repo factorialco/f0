@@ -68,6 +68,8 @@ export interface F0TimelineRowProps {
   isLast?: boolean
   /** Number of grouped tasks (renders as a collapsible multitask row) */
   taskCount?: number
+  /** Number of completed tasks in the group (shows a progress pill) */
+  completedCount?: number
   /** Whether the multitask row is expanded (controlled) */
   expanded?: boolean
   /** Callback when multitask row expand/collapse is toggled */

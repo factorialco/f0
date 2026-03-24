@@ -139,28 +139,28 @@ const Actions = ({
 
   return (
     <div className="flex items-center gap-2">
-      {hasOther && <Dropdown items={otherActions} size="sm" />}
+      {hasOther && <Dropdown items={otherActions} size="md" />}
       {secondaryActions?.map((action) => (
         <F0Button
           key={action.label}
           label={action.label}
           icon={action.icon}
           variant="outline"
-          size="sm"
+          size="md"
           onClick={action.onClick}
           disabled={action.disabled}
           loading={action.loading}
         />
       ))}
       {hasSecondary && primaryAction && (
-        <div className="h-5 w-px bg-f1-border-secondary" />
+        <div className="h-6 w-px bg-f1-border-secondary" />
       )}
       {primaryAction && (
         <F0Button
           label={primaryAction.label}
           icon={primaryAction.icon}
           variant="default"
-          size="sm"
+          size="md"
           onClick={primaryAction.onClick}
           disabled={primaryAction.disabled}
           loading={primaryAction.loading}
@@ -184,6 +184,7 @@ export const F0TimelineRow = forwardRef<HTMLDivElement, F0TimelineRowProps>(
       otherActions,
       isLast = false,
       taskCount,
+      completedCount,
       expanded,
       onExpandToggle,
       children,
@@ -230,18 +231,46 @@ export const F0TimelineRow = forwardRef<HTMLDivElement, F0TimelineRowProps>(
               </div>
             )}
             {isMultitask ? (
-              <button
-                type="button"
-                className="flex items-center gap-1 text-base font-semibold text-f1-foreground"
-                onClick={onExpandToggle}
-              >
-                {taskCount} {title}
-                <F0Icon
-                  icon={expanded ? ChevronUp : ChevronDown}
-                  size="xs"
-                  color="default"
-                />
-              </button>
+              <div className="flex flex-1 items-center justify-between">
+                <button
+                  type="button"
+                  className="flex items-center gap-1 text-base font-semibold text-f1-foreground"
+                  onClick={onExpandToggle}
+                >
+                  {taskCount} {title}
+                  <F0Icon
+                    icon={expanded ? ChevronUp : ChevronDown}
+                    size="xs"
+                    color="default"
+                  />
+                </button>
+                {completedCount !== undefined && taskCount !== undefined && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-f1-background-secondary px-2.5 py-1 text-sm font-semibold text-f1-foreground-secondary">
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 14 14"
+                      fill="none"
+                      aria-hidden
+                    >
+                      <circle
+                        cx="7"
+                        cy="7"
+                        r="6"
+                        fill={STATUS_COLORS["not-started"]}
+                      />
+                      <path
+                        d="M4.5 7.25L6 8.75L9.5 5.25"
+                        stroke="white"
+                        strokeWidth="1.2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                    {completedCount}/{taskCount}
+                  </span>
+                )}
+              </div>
             ) : (
               <>
                 <span
@@ -257,11 +286,51 @@ export const F0TimelineRow = forwardRef<HTMLDivElement, F0TimelineRowProps>(
                     {description}
                   </span>
                 )}
+                {status === "completed" &&
+                  assignees &&
+                  assignees.length > 0 && (
+                    <div className="ml-auto flex shrink-0 items-center">
+                      {assignees.length <= 3 ? (
+                        <div className="flex items-center gap-2">
+                          {assignees.map((assignee) => (
+                            <div
+                              key={`${assignee.firstName}-${assignee.lastName}`}
+                              className="flex items-center gap-1.5"
+                            >
+                              <F0AvatarPerson
+                                firstName={assignee.firstName}
+                                lastName={assignee.lastName}
+                                src={assignee.src}
+                                size="xs"
+                                badge={{ type: "positive", icon: Check }}
+                              />
+                              <span className="text-sm text-f1-foreground-secondary">
+                                {assignee.firstName} {assignee.lastName}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <F0AvatarList
+                          type="person"
+                          avatars={assignees.map((a) => ({
+                            ...a,
+                            badge: {
+                              type: "positive" as const,
+                              icon: Check,
+                            },
+                          }))}
+                          size="xs"
+                          max={3}
+                        />
+                      )}
+                    </div>
+                  )}
               </>
             )}
           </div>
 
-          {!isMultitask && (
+          {!isMultitask && status !== "completed" && (
             <div className="pl-9">
               {right && (
                 <div className="mb-3 flex items-center gap-2">{right}</div>
@@ -281,11 +350,6 @@ export const F0TimelineRow = forwardRef<HTMLDivElement, F0TimelineRowProps>(
                             lastName={assignee.lastName}
                             src={assignee.src}
                             size="sm"
-                            badge={
-                              status === "completed"
-                                ? { type: "positive", icon: Check }
-                                : undefined
-                            }
                           />
                           <span className="text-sm text-f1-foreground">
                             {assignee.firstName} {assignee.lastName}
@@ -297,13 +361,7 @@ export const F0TimelineRow = forwardRef<HTMLDivElement, F0TimelineRowProps>(
                     <div className="w-fit">
                       <F0AvatarList
                         type="person"
-                        avatars={assignees.map((a) => ({
-                          ...a,
-                          badge:
-                            status === "completed"
-                              ? { type: "positive" as const, icon: Check }
-                              : undefined,
-                        }))}
+                        avatars={assignees}
                         size="sm"
                         max={3}
                       />
