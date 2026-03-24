@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.417.0](https://github.com/factorialco/f0/compare/f0-react-v1.416.1...f0-react-v1.417.0) (2026-03-24)
+
+
+### Features
+
+* 7 new icons ([#3741](https://github.com/factorialco/f0/issues/3741)) ([8802553](https://github.com/factorialco/f0/commit/8802553d91e9b9b8be245f7d486357fa8303ddf9))
+
 ## [1.416.1](https://github.com/factorialco/f0/compare/f0-react-v1.416.0...f0-react-v1.416.1) (2026-03-23)
 
 
