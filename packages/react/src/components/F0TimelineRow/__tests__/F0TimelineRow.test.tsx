@@ -91,8 +91,8 @@ describe("F0TimelineRow", () => {
     const { container } = render(
       <F0TimelineRow {...defaultProps} status="in-progress" />
     )
-    const circle = container.querySelector("circle[fill='#FF9153']")
-    expect(circle).toBeInTheDocument()
+    const svg = container.querySelector("svg[color='#FF9153']")
+    expect(svg).toBeInTheDocument()
   })
 
   it("renders with not-started status indicator", () => {

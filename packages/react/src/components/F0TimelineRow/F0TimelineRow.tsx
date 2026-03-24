@@ -9,6 +9,7 @@ import Check from "@/icons/app/Check"
 import ChevronDown from "@/icons/app/ChevronDown"
 import ChevronUp from "@/icons/app/ChevronUp"
 import Marker from "@/icons/app/Marker"
+import ProgressClock from "@/icons/app/ProgressClock"
 import { cn } from "@/lib/utils"
 
 import type {
@@ -40,24 +41,7 @@ const CompletedIcon = () => (
 )
 
 const InProgressIcon = () => (
-  <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-    <circle cx="14" cy="14" r="10" fill={STATUS_COLORS["in-progress"]} />
-    <circle
-      cx="14"
-      cy="14"
-      r="5"
-      stroke="white"
-      strokeWidth="1.3"
-      fill="none"
-    />
-    <path
-      d="M14 11.5V14L16 15.5"
-      stroke="white"
-      strokeWidth="1.3"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
+  <ProgressClock width="28" height="28" color={STATUS_COLORS["in-progress"]} />
 )
 
 const NotStartedIcon = () => (
