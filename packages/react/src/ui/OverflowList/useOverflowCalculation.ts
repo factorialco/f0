@@ -154,7 +154,8 @@ export function useOverflowCalculation<T>(
     if (
       overflowItems.length === 1 &&
       !!visibleItems.length &&
-      overflowButtonWidth === (itemWidths[itemWidths.length - 1] ?? 0) - gap
+      itemWidths.length > 0 &&
+      overflowButtonWidth === itemWidths[itemWidths.length - 1] - gap
     ) {
       visibleItems = items
       overflowItems = []
