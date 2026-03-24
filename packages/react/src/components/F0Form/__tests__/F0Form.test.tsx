@@ -607,6 +607,40 @@ describe("isFieldRequired", () => {
     })
   })
 
+  describe("select fields (selection-based string inputs)", () => {
+    it("returns true for z.string() with fieldType select", () => {
+      expect(isFieldRequired(z.string(), "select")).toBe(true)
+    })
+
+    it("returns false for z.string().optional() with fieldType select", () => {
+      expect(isFieldRequired(z.string().optional(), "select")).toBe(false)
+    })
+
+    it("returns true for z.string() with fieldType date", () => {
+      expect(isFieldRequired(z.string(), "date")).toBe(true)
+    })
+
+    it("returns true for z.string() with fieldType time", () => {
+      expect(isFieldRequired(z.string(), "time")).toBe(true)
+    })
+
+    it("returns true for z.string() with fieldType datetime", () => {
+      expect(isFieldRequired(z.string(), "datetime")).toBe(true)
+    })
+
+    it("returns true for z.string() with fieldType daterange", () => {
+      expect(isFieldRequired(z.string(), "daterange")).toBe(true)
+    })
+
+    it("returns true for z.string() with fieldType file", () => {
+      expect(isFieldRequired(z.string(), "file")).toBe(true)
+    })
+
+    it("returns false for z.string() with fieldType text (not selection-based)", () => {
+      expect(isFieldRequired(z.string(), "text")).toBe(false)
+    })
+  })
+
   describe("number fields", () => {
     it("returns true for z.number()", () => {
       expect(isFieldRequired(z.number())).toBe(true)
