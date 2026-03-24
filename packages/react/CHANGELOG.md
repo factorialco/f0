@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.417.1](https://github.com/factorialco/f0/compare/f0-react-v1.417.0...f0-react-v1.417.1) (2026-03-24)
+
+
+### Bug Fixes
+
+* add hysteresis to OverflowList to prevent visible count oscillation ([#3740](https://github.com/factorialco/f0/issues/3740)) ([a2a4f42](https://github.com/factorialco/f0/commit/a2a4f42291c3b29292a6233604cf352e90630b2e))
+
 ## [1.417.0](https://github.com/factorialco/f0/compare/f0-react-v1.416.1...f0-react-v1.417.0) (2026-03-24)
 
 
