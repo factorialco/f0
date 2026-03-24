@@ -133,6 +133,11 @@ function _CardSelectable<T extends CardSelectableValue>({
       tabIndex={isDisabled ? -1 : 0}
       onClick={handleClick}
       onKeyDown={(e) => {
+        // Ignore key events from interactive descendants (e.g. links, buttons)
+        // to prevent toggling selection when activating nested controls
+        const target = e.target as HTMLElement
+        if (target.closest("a, button") && target !== e.currentTarget) return
+
         if ((e.key === "Enter" || e.key === " ") && !isDisabled) {
           e.preventDefault()
           handleClick()
