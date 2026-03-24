@@ -48,8 +48,8 @@ export type F0TimelineRowOtherAction = DropdownItem
 export interface F0TimelineRowProps {
   /** The current status of this timeline entry */
   status: TimelineRowStatus
-  /** The icon representing the task type */
-  icon: IconType
+  /** The icon representing the task type (defaults to Marker) */
+  icon?: IconType
   /** The title of the timeline entry */
   title: string
   /** Description text (e.g., "Completed on 20/2025") */

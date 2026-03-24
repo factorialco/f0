@@ -4,7 +4,7 @@ import { useState } from "react"
 import Check from "@/icons/app/Check"
 import Comment from "@/icons/app/Comment"
 import Cross from "@/icons/app/Cross"
-import Pencil from "@/icons/app/Pencil"
+import Marker from "@/icons/app/Marker"
 import Settings from "@/icons/app/Settings"
 import ThumbsUp from "@/icons/app/ThumbsUp"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
@@ -39,7 +39,7 @@ const meta = {
   },
   args: {
     status: "completed",
-    icon: Pencil,
+    icon: Marker,
     title: "Submit payment",
     description: "Completed on 20/2025",
     isLast: false,
@@ -112,14 +112,14 @@ export const Timeline: Story = {
     <div>
       <F0TimelineRow
         status="completed"
-        icon={Pencil}
+        icon={Marker}
         title="Submit payment"
         description="Completed on 20/2025"
         assignees={[{ firstName: "Alex", lastName: "Rashfold" }]}
       />
       <F0TimelineRow
         status="completed"
-        icon={Pencil}
+        icon={Marker}
         title="Complete form"
         description="Completed on 20/2025"
         assignees={[
@@ -129,7 +129,7 @@ export const Timeline: Story = {
       />
       <F0TimelineRow
         status="in-progress"
-        icon={Pencil}
+        icon={Marker}
         title="Complete form"
         description="Estimated on 24/07/2025"
         assignees={[
@@ -146,7 +146,7 @@ export const Timeline: Story = {
       />
       <F0TimelineRow
         status="not-started"
-        icon={Pencil}
+        icon={Marker}
         title="Next steps pending"
         description="Estimated on 25/07/2025"
         isLast
@@ -158,7 +158,7 @@ export const Timeline: Story = {
 export const WithActions: Story = {
   args: {
     status: "in-progress",
-    icon: Pencil,
+    icon: Marker,
     title: "Complete form",
     description: "Estimated on 18/07/2025",
     assignees: [
@@ -205,14 +205,14 @@ const MultitaskTimelineDemo = () => {
     <div className="w-[600px]">
       <F0TimelineRow
         status="completed"
-        icon={Pencil}
+        icon={Marker}
         title="Submit payment"
         description="Completed on 20/2025"
         assignees={[{ firstName: "Alex", lastName: "Rashfold" }]}
       />
       <F0TimelineRow
         status="completed"
-        icon={Pencil}
+        icon={Marker}
         title="Complete form"
         description="Completed on 20/2025"
         assignees={[
@@ -222,7 +222,7 @@ const MultitaskTimelineDemo = () => {
       />
       <F0TimelineRow
         status="completed"
-        icon={Pencil}
+        icon={Marker}
         title="Submit payment"
         description="Completed on 20/2025"
       />
@@ -238,7 +238,7 @@ const MultitaskTimelineDemo = () => {
         <F0TimelineRow
           hideStatus
           status="in-progress"
-          icon={Pencil}
+          icon={Marker}
           title="Complete form"
           description="Estimated on 18/07/2025"
           assignees={[
@@ -286,7 +286,7 @@ const MultitaskTimelineDemo = () => {
         <F0TimelineRow
           hideStatus
           status="not-started"
-          icon={Pencil}
+          icon={Marker}
           title="Next steps pending"
           description="The next steps depend on the outcome of previous ones."
           isLast
@@ -294,7 +294,7 @@ const MultitaskTimelineDemo = () => {
       </F0TimelineRow>
       <F0TimelineRow
         status="not-started"
-        icon={Pencil}
+        icon={Marker}
         title="Complete form"
         description="Estimated on 18/07/2025"
       />
@@ -306,7 +306,7 @@ const MultitaskTimelineDemo = () => {
       />
       <F0TimelineRow
         status="not-started"
-        icon={Pencil}
+        icon={Marker}
         title="Next steps pending"
         description="The next steps depend on the outcome of previous ones."
         isLast
@@ -337,7 +337,7 @@ const MultitaskDemo = () => {
         <F0TimelineRow
           hideStatus
           status="in-progress"
-          icon={Pencil}
+          icon={Marker}
           title="General task"
           description="Estimated on 03/23/2026"
           assignees={[
@@ -386,7 +386,7 @@ const MultitaskDemo = () => {
         <F0TimelineRow
           hideStatus
           status="not-started"
-          icon={Pencil}
+          icon={Marker}
           title="Upload document"
           description="Estimated on 03/23/2026"
           assignees={[{ firstName: "James", lastName: "Hopper" }]}
@@ -401,7 +401,7 @@ const MultitaskDemo = () => {
         <F0TimelineRow
           hideStatus
           status="not-started"
-          icon={Pencil}
+          icon={Marker}
           title="Sign contract"
           description="Estimated on 03/26/2026"
           assignees={[
@@ -412,7 +412,7 @@ const MultitaskDemo = () => {
         <F0TimelineRow
           hideStatus
           status="not-started"
-          icon={Pencil}
+          icon={Marker}
           title="Final review"
           description="The next steps depend on the outcome of previous ones."
           isLast
@@ -438,7 +438,7 @@ export const Snapshot: Story = {
       />
       <F0TimelineRow
         status="in-progress"
-        icon={Pencil}
+        icon={Marker}
         title="Complete form"
         description="Estimated on 24/07/2025"
         assignees={[
@@ -454,7 +454,7 @@ export const Snapshot: Story = {
       />
       <F0TimelineRow
         status="not-started"
-        icon={Pencil}
+        icon={Marker}
         title="Next steps"
         isLast
       />
