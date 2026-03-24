@@ -13,6 +13,7 @@ import type {
   FlexDirectionToken,
   FlexWrapToken,
   GapToken,
+  HoverBackgroundToken,
   JustifyContentToken,
   MarginToken,
   OverflowToken,
@@ -74,6 +75,7 @@ export interface ResponsiveStyleProps {
   maxHeight?: SizeToken
   // Background
   background?: BackgroundToken
+  hoverBackground?: HoverBackgroundToken
   // Border
   borderColor?: BorderColorToken
   border?: BorderWidthToken

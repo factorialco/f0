@@ -168,6 +168,7 @@ export const F0Box = forwardRef<HTMLDivElement, F0BoxProps>(
         ref={ref}
         className={cn(
           hasPerSideBorder && "border-0",
+          hoverBackground && "transition-colors",
           boxVariants({
             display,
             position,
