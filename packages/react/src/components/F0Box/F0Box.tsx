@@ -109,6 +109,7 @@ export const F0Box = forwardRef<HTMLDivElement, F0BoxProps>(
       maxHeight,
       // Background
       background,
+      hoverBackground,
       // Border
       borderColor,
       border,
@@ -197,6 +198,7 @@ export const F0Box = forwardRef<HTMLDivElement, F0BoxProps>(
             maxWidth,
             maxHeight,
             background,
+            hoverBackground,
             borderColor,
             border,
             borderTop,
