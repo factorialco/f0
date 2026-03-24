@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest"
 import "@testing-library/jest-dom/vitest"
+import { Briefcase } from "@/icons/app"
 import {
   zeroRender as render,
   screen,
@@ -178,5 +179,28 @@ describe("F0Card Component", () => {
     expect(linkElement).toHaveAttribute("href", "/test-page")
     expect(linkElement).toHaveAttribute("target", "_blank")
     expect(linkElement).not.toHaveAttribute("disabled")
+  })
+
+  it("renders tooltip with property label on metadata icon hover", async () => {
+    const user = userEvent.setup()
+
+    render(
+      <F0Card
+        title="Card with metadata"
+        metadata={[
+          {
+            icon: Briefcase,
+            property: { type: "text", label: "Job title", value: "Engineer" },
+          },
+        ]}
+      />
+    )
+
+    const icon = document.querySelector("svg")!
+    await user.hover(icon)
+
+    await waitFor(() => {
+      expect(screen.getByRole("tooltip")).toHaveTextContent("Job title")
+    })
   })
 })
