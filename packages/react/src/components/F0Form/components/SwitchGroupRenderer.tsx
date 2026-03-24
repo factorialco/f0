@@ -185,7 +185,10 @@ export function SwitchGroupRenderer({
   return (
     <div className="flex flex-col gap-2">
       {/* First field's anchor wraps the container for wiggle animation */}
-      <div id={fieldAnchorIds[0]?.anchorId} className="scroll-mt-4">
+      <div
+        id={fieldAnchorIds[0]?.anchorId}
+        className="flex scroll-mt-4 flex-col gap-4"
+      >
         {/* Additional field anchors so error navigation can find each field */}
         {fieldAnchorIds.slice(1).map(({ fieldId, anchorId }) => (
           <span key={fieldId} id={anchorId} className="hidden" />
