@@ -69,14 +69,14 @@ export function useOrbVoiceAnimation(
   useEffect(() => {
     switch (state) {
       case "idle":
-      case "failed":
-      case "disconnected":
         animateStatePhase(0, DEFAULT_TRANSITION)
         animateSpeed(1.2, DEFAULT_TRANSITION)
         animateIntensity(0.36, DEFAULT_TRANSITION)
         animateComplexity(0.34, DEFAULT_TRANSITION)
         animateScale(0.96, DEFAULT_TRANSITION)
         return
+      case "failed":
+      case "disconnected":
       case "listening":
       case "pre-connect-buffering":
         animateStatePhase(1, DEFAULT_TRANSITION)

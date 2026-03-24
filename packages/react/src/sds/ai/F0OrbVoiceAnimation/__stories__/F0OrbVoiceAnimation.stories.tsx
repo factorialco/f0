@@ -32,15 +32,7 @@ const meta = {
   },
   decorators: [
     (Story) => (
-      <div
-        style={{
-          width: 480,
-          height: 480,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
+      <div style={{ width: 120 }}>
         <Story />
       </div>
     ),
