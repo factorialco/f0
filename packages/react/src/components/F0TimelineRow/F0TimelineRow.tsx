@@ -1,9 +1,11 @@
 import { forwardRef } from "react"
 
 import { F0AvatarList } from "@/components/avatars/F0AvatarList"
+import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
 import { F0Button } from "@/components/F0Button"
 import { F0Icon } from "@/components/F0Icon"
 import { Dropdown } from "@/experimental/Navigation/Dropdown"
+import Check from "@/icons/app/Check"
 import ChevronDown from "@/icons/app/ChevronDown"
 import ChevronUp from "@/icons/app/ChevronUp"
 import { cn } from "@/lib/utils"
@@ -260,17 +262,53 @@ export const F0TimelineRow = forwardRef<HTMLDivElement, F0TimelineRowProps>(
           </div>
 
           {!isMultitask && (
-            <>
-              {right && <div className="flex items-center gap-2">{right}</div>}
+            <div className="pl-9">
+              {right && (
+                <div className="mb-3 flex items-center gap-2">{right}</div>
+              )}
 
               {assignees && assignees.length > 0 && (
-                <div className="w-fit">
-                  <F0AvatarList
-                    type="person"
-                    avatars={assignees}
-                    size="sm"
-                    max={3}
-                  />
+                <div className="mb-3">
+                  {assignees.length <= 3 ? (
+                    <div className="flex flex-wrap items-center gap-3">
+                      {assignees.map((assignee) => (
+                        <div
+                          key={`${assignee.firstName}-${assignee.lastName}`}
+                          className="flex items-center gap-2"
+                        >
+                          <F0AvatarPerson
+                            firstName={assignee.firstName}
+                            lastName={assignee.lastName}
+                            src={assignee.src}
+                            size="sm"
+                            badge={
+                              status === "completed"
+                                ? { type: "positive", icon: Check }
+                                : undefined
+                            }
+                          />
+                          <span className="text-sm text-f1-foreground">
+                            {assignee.firstName} {assignee.lastName}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="w-fit">
+                      <F0AvatarList
+                        type="person"
+                        avatars={assignees.map((a) => ({
+                          ...a,
+                          badge:
+                            status === "completed"
+                              ? { type: "positive" as const, icon: Check }
+                              : undefined,
+                        }))}
+                        size="sm"
+                        max={3}
+                      />
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -285,7 +323,7 @@ export const F0TimelineRow = forwardRef<HTMLDivElement, F0TimelineRowProps>(
                   />
                 </div>
               )}
-            </>
+            </div>
           )}
 
           {isMultitask && expanded && children && (
