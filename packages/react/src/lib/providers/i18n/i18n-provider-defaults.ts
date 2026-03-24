@@ -521,6 +521,7 @@ export const defaultTranslations = {
       fileTooLarge: "File exceeds {{maxSize}} MB limit",
       invalidFileType: "File type not accepted. Accepted formats: {{types}}",
     },
+    moreInformation: "More information",
     validation: {
       required: "This field is required",
       invalidType: "Invalid value",

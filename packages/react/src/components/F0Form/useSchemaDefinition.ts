@@ -61,6 +61,7 @@ function configToF0Field(
     status: config.status,
     disabled: config.disabled,
     resetOnDisable: config.resetOnDisable,
+    alert: config.alert,
     customFieldName:
       "customFieldName" in config ? config.customFieldName : undefined,
     validation: schema,
@@ -154,6 +155,8 @@ function configToF0Field(
       return {
         ...baseProps,
         type: "checkbox",
+        moreInfoLink:
+          "moreInfoLink" in config ? config.moreInfoLink : undefined,
         renderIf: config.renderIf,
       } as F0Field
 
@@ -161,6 +164,8 @@ function configToF0Field(
       return {
         ...baseProps,
         type: "switch",
+        moreInfoLink:
+          "moreInfoLink" in config ? config.moreInfoLink : undefined,
         renderIf: config.renderIf,
       } as F0Field
 
