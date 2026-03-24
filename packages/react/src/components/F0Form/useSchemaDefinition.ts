@@ -253,7 +253,6 @@ function configToF0Field(
         maxSizeMB: "maxSizeMB" in config ? config.maxSizeMB : undefined,
         multiple: "multiple" in config ? config.multiple : undefined,
         description: "description" in config ? config.description : undefined,
-        useUpload: "useUpload" in config ? config.useUpload : undefined,
         renderIf: config.renderIf,
       } as F0Field
 

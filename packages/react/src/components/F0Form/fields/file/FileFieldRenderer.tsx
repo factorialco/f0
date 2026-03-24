@@ -1,11 +1,12 @@
 import { useCallback, useId, useMemo, useRef, useState } from "react"
 import { ControllerRenderProps, FieldValues } from "react-hook-form"
 
+import type { InputFieldStatusType } from "@/ui/InputField/types"
+
 import { F0Icon } from "@/components/F0Icon"
 import { Upload } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 import { cn, focusRing } from "@/lib/utils"
-import type { InputFieldStatusType } from "@/ui/InputField/types"
 
 import type { ResolvedField } from "../types"
 import type { F0FileField, FileEntry, InitialFile } from "./types"
@@ -441,7 +442,7 @@ export function FileFieldRenderer({
             <FileUploadItem
               key={entry.key}
               entry={entry}
-              useUpload={entry.file ? field.useUpload : undefined}
+              useUpload={entry.file ? context?.useUpload : undefined}
               onUploadComplete={(value) =>
                 handleUploadComplete(entry.key, value)
               }

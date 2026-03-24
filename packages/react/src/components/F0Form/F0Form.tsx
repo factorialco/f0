@@ -159,6 +159,7 @@ function F0FormPerSection<T extends F0PerSectionSchema>(
     initialFiles,
     renderCustomField,
     isLoading: isFormLoading,
+    useUpload,
   } = props
 
   const showSectionsSidepanel = styling?.showSectionsSidepanel ?? false
@@ -223,6 +224,7 @@ function F0FormPerSection<T extends F0PerSectionSchema>(
               initialFiles={initialFiles}
               renderCustomField={renderCustomField}
               isLoading={isFormLoading}
+              useUpload={useUpload}
             />
           </div>
         )
@@ -354,6 +356,8 @@ function F0FormFromDefinition(
     renderCustomField,
   } = props
 
+  const useUpload = "useUpload" in props ? props.useUpload : undefined
+
   if (formDefinition.isLoading) {
     if (formDefinition._brand === "single") {
       return (
@@ -366,6 +370,7 @@ function F0FormFromDefinition(
           formRef={formRef}
           initialFiles={initialFiles}
           renderCustomField={renderCustomField}
+          useUpload={useUpload}
           isLoading
         />
       )
@@ -380,6 +385,7 @@ function F0FormFromDefinition(
         formRef={formRef}
         initialFiles={initialFiles}
         renderCustomField={renderCustomField}
+        useUpload={useUpload}
         isLoading
       />
     )
@@ -396,6 +402,7 @@ function F0FormFromDefinition(
         formRef={formRef}
         initialFiles={initialFiles}
         renderCustomField={renderCustomField}
+        useUpload={useUpload}
       />
     )
   }
@@ -410,6 +417,7 @@ function F0FormFromDefinition(
       formRef={formRef}
       initialFiles={initialFiles}
       renderCustomField={renderCustomField}
+      useUpload={useUpload}
     />
   )
 }
@@ -421,6 +429,7 @@ function F0FormFromSingleDefinition<TSchema extends F0FormSchema>({
   formRef,
   initialFiles,
   renderCustomField,
+  useUpload,
   isLoading,
 }: F0FormPropsWithSingleSchemaDefinition<TSchema> & { isLoading?: boolean }) {
   const def = formDefinition as F0FormDefinitionSingleSchema<TSchema>
@@ -447,6 +456,7 @@ function F0FormFromSingleDefinition<TSchema extends F0FormSchema>({
       formRef={formRef}
       initialFiles={initialFiles}
       renderCustomField={renderCustomField}
+      useUpload={useUpload}
       isLoading={isLoading}
       defaultValuesParamsSchema={def.defaultValuesParamsSchema}
       defaultValuesFn={def.defaultValuesFn}
@@ -461,6 +471,7 @@ function F0FormFromPerSectionDefinition<T extends F0PerSectionSchema>({
   formRef,
   initialFiles,
   renderCustomField,
+  useUpload,
   isLoading,
 }: F0FormPropsWithPerSectionDefinition<T> & { isLoading?: boolean }) {
   const def = formDefinition as F0FormDefinitionPerSection<T>
@@ -506,6 +517,7 @@ function F0FormFromPerSectionDefinition<T extends F0PerSectionSchema>({
       formRef={formRef}
       initialFiles={initialFiles}
       renderCustomField={renderCustomField}
+      useUpload={useUpload}
       isLoading={isLoading}
     />
   )
@@ -532,6 +544,8 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
     defaultValuesParamsSchema,
     defaultValuesFn,
   } = props
+
+  const { useUpload } = props
 
   // Resolve styling configuration
   const showSectionsSidepanel = styling?.showSectionsSidepanel ?? false
@@ -873,8 +887,15 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
       initialFiles: props.initialFiles,
       renderCustomField: props.renderCustomField,
       isLoading: isFormLoading,
+      useUpload,
     }),
-    [name, props.initialFiles, props.renderCustomField, isFormLoading]
+    [
+      name,
+      props.initialFiles,
+      props.renderCustomField,
+      isFormLoading,
+      useUpload,
+    ]
   )
 
   // Form content component to avoid repetition

@@ -166,8 +166,6 @@ export interface F0FileConfig {
   multiple?: boolean
   /** Helper text shown in the dropzone area */
   description?: string
-  /** Consumer-provided hook that returns upload capabilities */
-  useUpload: UseFileUpload
 }
 
 /**
@@ -183,8 +181,6 @@ export type F0FileField = F0BaseField & {
   multiple?: boolean
   /** Dropzone description text */
   description?: string
-  /** Consumer-provided upload hook */
-  useUpload: UseFileUpload
   /** Conditional rendering */
   renderIf?: FileFieldRenderIf
 }

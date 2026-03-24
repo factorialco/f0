@@ -116,6 +116,8 @@ interface F0FormSectionProps<TSchema extends F0FormSchema> {
   initialFiles?: import("../fields/file/types").InitialFile[]
   formRef?: React.MutableRefObject<F0FormRef | null>
   renderCustomField?: RenderCustomFieldFunction
+  /** Upload hook shared by all file fields */
+  useUpload?: import("../fields/file/types").UseFileUpload
   /** Whether async defaultValues are still being resolved */
   isLoading?: boolean
 }
@@ -137,6 +139,7 @@ export function F0FormSection<TSchema extends F0FormSchema>({
   initialFiles,
   formRef,
   renderCustomField,
+  useUpload,
   isLoading: isFormLoading,
 }: F0FormSectionProps<TSchema>) {
   const i18n = useI18n()
@@ -290,8 +293,9 @@ export function F0FormSection<TSchema extends F0FormSchema>({
       initialFiles,
       renderCustomField,
       isLoading: isFormLoading,
+      useUpload,
     }),
-    [formName, initialFiles, renderCustomField, isFormLoading]
+    [formName, initialFiles, renderCustomField, isFormLoading, useUpload]
   )
 
   const title = sectionConfig?.title ?? sectionId

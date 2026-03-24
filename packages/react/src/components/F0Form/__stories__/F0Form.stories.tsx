@@ -1052,7 +1052,6 @@ export const FileFields: Story = {
         accept: ["image/jpeg", "image/png", "image/webp"],
         maxSizeMB: 5,
         description: "Upload a JPEG, PNG, or WebP image (max 5 MB)",
-        useUpload: useMockUpload,
       }),
       attachments: f0FormField(
         z.array(z.string()).min(1, "Upload at least one file"),
@@ -1062,7 +1061,6 @@ export const FileFields: Story = {
           multiple: true,
           accept: ["application/pdf", "image"],
           maxSizeMB: 50,
-          useUpload: useMockUpload,
         }
       ),
       notes: f0FormField(z.string().optional(), {
@@ -1090,7 +1088,7 @@ export const FileFields: Story = {
       submitConfig: { label: "Save Document" },
     })
 
-    return <F0Form formDefinition={formDefinition} />
+    return <F0Form formDefinition={formDefinition} useUpload={useMockUpload} />
   },
 }
 
@@ -1106,7 +1104,6 @@ export const FileFieldsWithInitialFiles: Story = {
         label: "Contract Document",
         fieldType: "file",
         accept: ["application/pdf"],
-        useUpload: useMockUpload,
       }),
       attachments: f0FormField(
         z.array(z.string()).min(1, "Upload at least one file"),
@@ -1116,7 +1113,6 @@ export const FileFieldsWithInitialFiles: Story = {
           multiple: true,
           accept: ["application/pdf", "image"],
           maxSizeMB: 50,
-          useUpload: useMockUpload,
         }
       ),
     })
@@ -1139,6 +1135,7 @@ export const FileFieldsWithInitialFiles: Story = {
     return (
       <F0Form
         formDefinition={formDefinition}
+        useUpload={useMockUpload}
         initialFiles={[
           {
             value: "signed_contract_2024.pdf",

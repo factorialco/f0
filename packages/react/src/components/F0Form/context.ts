@@ -1,6 +1,6 @@
 import { createContext, useContext } from "react"
 
-import type { InitialFile } from "./fields/file/types"
+import type { InitialFile, UseFileUpload } from "./fields/file/types"
 import type { RenderCustomFieldFunction } from "./types"
 
 interface F0FormContextValue {
@@ -12,6 +12,8 @@ interface F0FormContextValue {
   renderCustomField?: RenderCustomFieldFunction
   /** Whether async defaultValues are still being resolved */
   isLoading?: boolean
+  /** Default upload hook shared across all file fields */
+  useUpload?: UseFileUpload
 }
 
 export const F0FormContext = createContext<F0FormContextValue | null>(null)

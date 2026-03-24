@@ -3,6 +3,7 @@ import type { z, ZodRawShape, ZodEffects, ZodType } from "zod"
 import type { IconType } from "@/components/F0Icon"
 
 import type { CustomFieldRenderPropsBase } from "./fields/custom/types"
+import type { UseFileUpload } from "./fields/file/types"
 import type {
   F0Field,
   F0BaseFieldRenderIfFunction,
@@ -384,6 +385,11 @@ export interface F0FormPropsWithSingleSchema<TSchema extends F0FormSchema> {
    */
   initialFiles?: InitialFile[]
   /**
+   * Upload hook shared by all file fields in the form.
+   * Called once per file to obtain an independent upload instance.
+   */
+  useUpload?: UseFileUpload
+  /**
    * Callback that renders custom fields identified by `customFieldName`.
    * When a field has `customFieldName`, this function is called instead of the inline `render`.
    */
@@ -486,6 +492,10 @@ export interface F0FormPropsWithPerSectionSchema<T extends F0PerSectionSchema> {
    */
   initialFiles?: InitialFile[]
   /**
+   * Upload hook shared by all file fields in the form.
+   */
+  useUpload?: UseFileUpload
+  /**
    * Callback that renders custom fields identified by `customFieldName`.
    * When a field has `customFieldName`, this function is called instead of the inline `render`.
    */
@@ -511,6 +521,8 @@ export interface F0FormPropsWithSingleSchemaDefinition<
   styling?: F0FormStylingConfig
   formRef?: React.MutableRefObject<F0FormRef | null>
   initialFiles?: InitialFile[]
+  /** Upload hook shared by all file fields in the form. */
+  useUpload?: UseFileUpload
   /**
    * Callback that renders custom fields identified by `customFieldName`.
    * When a field has `customFieldName`, this function is called instead of the inline `render`.
@@ -531,6 +543,8 @@ export interface F0FormPropsWithPerSectionDefinition<
   styling?: F0FormStylingConfig
   formRef?: React.MutableRefObject<F0FormRef | null>
   initialFiles?: InitialFile[]
+  /** Upload hook shared by all file fields in the form. */
+  useUpload?: UseFileUpload
   /**
    * Callback that renders custom fields identified by `customFieldName`.
    * When a field has `customFieldName`, this function is called instead of the inline `render`.

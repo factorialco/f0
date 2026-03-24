@@ -669,11 +669,6 @@ export function inferFieldType(
     return config.fieldType
   }
 
-  // If useUpload is provided, it's a file field
-  if ("useUpload" in config && config.useUpload) {
-    return "file"
-  }
-
   // If options or source are provided, it's a select
   if (
     ("options" in config && config.options) ||
