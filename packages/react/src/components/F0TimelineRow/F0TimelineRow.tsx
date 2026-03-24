@@ -41,7 +41,7 @@ const CompletedIcon = () => (
 )
 
 const InProgressIcon = () => (
-  <ProgressClock width="28" height="28" color={STATUS_COLORS["in-progress"]} />
+  <ProgressClock width="20" height="20" color={STATUS_COLORS["in-progress"]} />
 )
 
 const NotStartedIcon = () => (
