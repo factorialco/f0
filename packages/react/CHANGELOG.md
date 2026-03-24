@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.418.0](https://github.com/factorialco/f0/compare/f0-react-v1.417.2...f0-react-v1.418.0) (2026-03-24)
+
+
+### Features
+
+* **metadata:** add progress-bar variant to ResourceHeader metadata ([#3730](https://github.com/factorialco/f0/issues/3730)) ([5281f90](https://github.com/factorialco/f0/commit/5281f903d35cd7f8feaf00584a8ff5477e09193b))
+
 ## [1.417.2](https://github.com/factorialco/f0/compare/f0-react-v1.417.1...f0-react-v1.417.2) (2026-03-24)
 
 
