@@ -215,6 +215,43 @@ export const Blank: Story = {
   },
 }
 
+const defaultAiTutorLabels = {
+  buttonLabel: "Ask tutor",
+  buttonTooltip: "Ask your AI tutor",
+}
+
+const trainingContent = `<h2 data-id="t1">Introduction to Performance Reviews</h2><p data-id="t2">Performance reviews are a systematic evaluation of an employee's job performance and overall contribution to the organization. They provide an opportunity for managers and employees to discuss achievements, identify areas for improvement, and set goals for future development.</p><p data-id="t3"></p><h3 data-id="t4">Key Concepts</h3><p data-id="t5"><strong>360-degree feedback</strong> is a method where employees receive confidential, anonymous feedback from the people who work around them. This typically includes the employee's manager, peers, and direct reports. The feedback covers a range of workplace competencies and behaviors.</p><p data-id="t6"></p><p data-id="t7"><strong>OKRs (Objectives and Key Results)</strong> is a goal-setting framework used by teams and individuals to define measurable goals and track their outcomes. The development of OKRs is generally attributed to Andy Grove who introduced the approach at Intel.</p><p data-id="t8"></p><h3 data-id="t9">Best Practices</h3><ul class="f1-bullet-list" data-id="t10"><li data-id="t11"><p data-id="t12">Provide specific, actionable feedback rather than vague generalizations</p></li><li data-id="t13"><p data-id="t14">Focus on behaviors and outcomes, not personality traits</p></li><li data-id="t15"><p data-id="t16">Use the SBI model (Situation, Behavior, Impact) for structured feedback</p></li></ul>`
+
+export const WithAITutor: Story = {
+  args: {
+    placeholder: "Start reading the training material...",
+    readonly: true,
+    titlePlaceholder: "Training module title",
+    onChange: (value) => {
+      console.log("Content changed:", value)
+    },
+    initialEditorState: {
+      content: trainingContent,
+      title: "Performance Review Training",
+    },
+    aiTutorConfig: {
+      labels: defaultAiTutorLabels,
+      chatConfig: {
+        runtimeUrl: "http://localhost:4111/copilotkit",
+        agent: "one-workflow",
+        greeting:
+          "Hello! I'm your AI tutor. Highlight any text in the training material and I'll help you understand it better.",
+      },
+      onAskAI: (selectedText) => {
+        console.log("AI Tutor asked about:", selectedText)
+      },
+      onGoDeeper: (messages) => {
+        console.log("Go deeper triggered with messages:", messages)
+      },
+    },
+  },
+}
+
 type SkeletonStory = StoryObj<typeof NotesTextEditorSkeleton>
 
 export const Skeleton: SkeletonStory = {

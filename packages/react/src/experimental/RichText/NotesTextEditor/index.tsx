@@ -18,6 +18,7 @@ import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Icon } from "@/components/F0Icon"
 import { EditorBubbleMenu } from "@/experimental/RichText/CoreEditor"
 import { Toolbar } from "@/experimental/RichText/CoreEditor"
+import { AiTutorConfig } from "@/experimental/RichText/CoreEditor/BubbleMenu/AskAITutorButton"
 import { Handle, Plus } from "@/icons/app"
 import { DataTestIdWrapper, WithDataTestIdProps } from "@/lib/data-testid"
 import { useI18n } from "@/lib/providers/i18n"
@@ -51,6 +52,7 @@ interface NotesTextEditorProps extends WithDataTestIdProps {
   readonly?: boolean
   aiBlockConfig?: AIBlockConfig
   imageUploadConfig?: ImageUploadConfig
+  aiTutorConfig?: AiTutorConfig
   onTitleChange?: (title: string) => void
   titlePlaceholder?: string
   primaryAction?: PrimaryActionButton | PrimaryDropdownAction<string>
@@ -72,6 +74,7 @@ const NotesTextEditorComponent = forwardRef<
     readonly = false,
     aiBlockConfig,
     imageUploadConfig,
+    aiTutorConfig,
     onTitleChange,
     primaryAction,
     secondaryActions,
@@ -354,6 +357,19 @@ const NotesTextEditorComponent = forwardRef<
             isToolbarOpen={!showBubbleMenu}
             isFullscreen={false}
             plainHtmlMode={false}
+            aiTutorConfig={aiTutorConfig}
+          />
+        )}
+        {readonly && aiTutorConfig && (
+          <EditorBubbleMenu
+            editorId={editorId}
+            editor={editor}
+            disableButtons={true}
+            isToolbarOpen={false}
+            isFullscreen={false}
+            plainHtmlMode={false}
+            aiTutorConfig={aiTutorConfig}
+            readonlyAiMode
           />
         )}
       </div>
@@ -438,6 +454,12 @@ export const NotesTextEditorSkeleton = ({
   )
 }
 
+export type { AiTutorLabels } from "../CoreEditor/BubbleMenu/AskAITutorDialog"
+export { AiTutorMessageInjector } from "../CoreEditor/BubbleMenu/AskAITutorDialog"
+export type {
+  AiTutorConfig,
+  AiTutorMessage,
+} from "../CoreEditor/BubbleMenu/AskAITutorButton"
 export type { Message, User } from "../CoreEditor/Extensions/Transcript"
 export type { ImageUploadConfig } from "./types"
 export const NotesTextEditor = NotesTextEditorComponent

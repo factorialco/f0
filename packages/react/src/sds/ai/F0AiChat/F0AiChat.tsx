@@ -6,7 +6,7 @@ import { experimentalComponent } from "@/lib/experimental"
 import { useRegisteredActions } from "./actions"
 import { ChatInput } from "./components/input/ChatInput"
 import { ChatHeader } from "./components/layout/ChatHeader"
-import { SidebarWindow } from "./components/layout/ChatWindow"
+import { FloatingWindow, SidebarWindow } from "./components/layout/ChatWindow"
 import { AssistantMessage } from "./components/messages/AssistantMessage"
 import { MessagesContainer } from "./components/messages/MessagesContainer"
 import { UserMessage } from "./components/messages/UserMessage"
@@ -79,7 +79,8 @@ const AiChatKitWrapper = ({
 }
 
 const F0AiChatComponent = () => {
-  const { enabled, open, setOpen, mode, VoiceMode } = useAiChat()
+  const { enabled, open, setOpen, mode, VoiceMode, visualizationMode } =
+    useAiChat()
 
   useRegisteredActions()
 
@@ -97,6 +98,9 @@ const F0AiChatComponent = () => {
     )
   }
 
+  const WindowComponent =
+    visualizationMode === "floating" ? FloatingWindow : SidebarWindow
+
   return (
     <CopilotSidebar
       className="h-full w-full"
@@ -104,7 +108,7 @@ const F0AiChatComponent = () => {
       onSetOpen={(isOpen) => {
         setOpen(isOpen)
       }}
-      Window={SidebarWindow}
+      Window={WindowComponent}
       Header={ChatHeader}
       Messages={MessagesContainer}
       Button={() => {

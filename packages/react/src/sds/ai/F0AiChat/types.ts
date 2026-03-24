@@ -91,7 +91,11 @@ export type AiChatMode = "chat" | "voice"
 /**
  * Visualization mode for the AI chat
  */
-export type VisualizationMode = "sidepanel" | "fullscreen" | "canvas"
+export type VisualizationMode =
+  | "sidepanel"
+  | "fullscreen"
+  | "canvas"
+  | "floating"
 
 /**
  * Tracking options for the AI chat
