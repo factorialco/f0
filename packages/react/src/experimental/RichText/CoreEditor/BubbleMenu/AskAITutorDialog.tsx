@@ -110,7 +110,7 @@ const AiTutorChatInner = ({
     if (!selectedText || hasSentRef.current || inProgress) return
 
     const timer = setTimeout(() => {
-      const prompt = `Please explain the following text in simpler terms, as if you were a tutor helping me understand it:\n\n"${selectedText}"`
+      const prompt = `<tool-context tool="ai-tutor">Please give a brief, concise explanation (3-4 sentences max) of the following text in simpler terms:</tool-context>${selectedText}`
       sendMessage(prompt)
       hasSentRef.current = true
     }, 500)
@@ -410,7 +410,7 @@ export const AiTutorMessageInjector = ({
 }: {
   messages: AiTutorMessage[]
 }) => {
-  const { setMessages } = useCopilotChatInternal()
+  const { setMessages, sendMessage } = useCopilotChatInternal()
   const { setOpen } = useAiChat()
   const injectedRef = useRef(false)
 
@@ -425,8 +425,18 @@ export const AiTutorMessageInjector = ({
       )
       setOpen(true)
       injectedRef.current = true
+
+      // After injecting history, send a follow-up message to trigger a deeper explanation
+      setTimeout(() => {
+        sendMessage({
+          id: randomId(),
+          role: "user",
+          content:
+            "Please go deeper into this topic. Provide a detailed explanation with examples, and include helpful resources like articles, videos, or documentation links.",
+        })
+      }, 500)
     }
-  }, [messages, setMessages, setOpen])
+  }, [messages, setMessages, setOpen, sendMessage])
 
   return null
 }
