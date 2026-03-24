@@ -1,5 +1,8 @@
 import type { F0FileField } from "@/components/F0Form/fields/types"
-import type { UseFileUpload } from "@/components/F0Form/fields/file/types"
+import type {
+  MimeType,
+  UseFileUpload,
+} from "@/components/F0Form/fields/file/types"
 
 import { F0FormField } from "@/components/F0FormField"
 import { useI18n } from "@/lib/providers/i18n"
@@ -21,7 +24,22 @@ export type FileQuestionProps = BaseQuestionPropsForOtherQuestionComponents & {
   type: "file"
   value?: File[] | null
   useUpload?: UseFileUpload
+  accept?: MimeType[]
+  maxSizeMB?: number
 }
+
+const DEFAULT_ACCEPT: MimeType[] = [
+  "image/*",
+  "application/pdf",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "application/vnd.ms-excel",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "application/vnd.ms-powerpoint",
+  "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+  "text/plain",
+  "text/csv",
+]
 
 const noopUpload: UseFileUpload = () => ({
   upload: async () => ({ type: "aborted" as const }),
@@ -33,6 +51,8 @@ const noopUpload: UseFileUpload = () => ({
 export const FileQuestion = ({
   value,
   useUpload,
+  accept,
+  maxSizeMB,
   ...baseQuestionComponentProps
 }: FileQuestionProps) => {
   const { onQuestionChange } = useSurveyFormBuilderContext()
@@ -46,6 +66,8 @@ export const FileQuestion = ({
     type: "file",
     label: t("surveyFormBuilder.answer.label"),
     multiple: true,
+    accept: accept ?? DEFAULT_ACCEPT,
+    maxSizeMB,
     useUpload: useUpload ?? noopUpload,
   }
 
