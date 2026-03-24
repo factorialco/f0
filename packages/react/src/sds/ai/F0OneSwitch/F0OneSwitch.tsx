@@ -18,8 +18,10 @@ import { F0OneSwitchProps } from "./types"
 export const F0OneSwitch = ({
   className,
   disabled,
+  onVisible,
   tooltip,
   autoOpen = false,
+  onToggle,
 }: F0OneSwitchProps) => {
   const { enabled, setOpen, open } = useAiChat()
   const translations = useI18n()
@@ -42,6 +44,10 @@ export const F0OneSwitch = ({
     const timer = setTimeout(() => setAutoTooltipVisible(false), 3000)
     return () => clearTimeout(timer)
   }, [autoOpen])
+
+  useEffect(() => {
+    onVisible?.()
+  }, [onVisible])
 
   if (!enabled) {
     return null
@@ -72,6 +78,7 @@ export const F0OneSwitch = ({
               <SwitchPrimitive.Root
                 onCheckedChange={(val) => {
                   setOpen(val)
+                  onToggle?.()
                 }}
                 checked={open}
                 aria-label={

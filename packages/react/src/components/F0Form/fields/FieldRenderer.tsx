@@ -1,10 +1,5 @@
 import { useEffect, useRef } from "react"
-import {
-  ControllerRenderProps,
-  FieldError,
-  FieldValues,
-  useFormContext,
-} from "react-hook-form"
+import { useFormContext } from "react-hook-form"
 
 import { F0Alert } from "@/components/F0Alert"
 import { F0Link } from "@/components/F0Link"
@@ -16,197 +11,115 @@ import {
   FormItem,
   FormMessage,
 } from "@/ui/form"
+import { InputMessages } from "@/ui/InputField/components/InputMessages"
+
+import type { RenderCustomFieldSelectConfig } from "../types"
+import type { F0Field } from "./types"
 
 import { generateAnchorId, useF0FormContext } from "../context"
+import { renderFieldInput } from "./renderFieldInput"
 import { isFieldRequired } from "./schema"
-import type { F0Field } from "./types"
-import {
-  evaluateDateConstraint,
-  evaluateDisabled,
-  evaluateRenderIf,
-} from "./utils"
+import { evaluateDisabled, evaluateRenderIf } from "./utils"
 
-// Import field renderers
-import { CheckboxFieldRenderer } from "./checkbox/CheckboxFieldRenderer"
-import { CustomFieldRenderer } from "./custom/CustomFieldRenderer"
-import { DateFieldRenderer } from "./date/DateFieldRenderer"
-import { TimeFieldRenderer } from "./date/TimeFieldRenderer"
-import { DateTimeFieldRenderer } from "./date/DateTimeFieldRenderer"
-import { DateRangeFieldRenderer } from "./daterange/DateRangeFieldRenderer"
-import { NumberFieldRenderer } from "./number/NumberFieldRenderer"
-import { RichTextFieldRenderer } from "./richtext/RichTextFieldRenderer"
-import { SelectFieldRenderer } from "./select/SelectFieldRenderer"
-import { SwitchFieldRenderer } from "./switch/SwitchFieldRenderer"
-import { TextFieldRenderer } from "./text/TextFieldRenderer"
-import { FileFieldRenderer } from "./file/FileFieldRenderer"
-import { TextareaFieldRenderer } from "./textarea/TextareaFieldRenderer"
-
-interface FieldRendererProps {
-  field: F0Field
-  /** Section ID when field is inside a section (for anchor links) */
-  sectionId?: string
-}
-
-interface FieldState {
-  error?: FieldError
-  isValidating: boolean
-}
-
-interface RenderFieldInputOptions {
-  field: F0Field
-  formField: ControllerRenderProps<FieldValues>
-  fieldState: FieldState
-  isSubmitting: boolean
-  isRequired?: boolean
-  values: Record<string, unknown>
+function isSelectConfig(
+  result: unknown
+): result is RenderCustomFieldSelectConfig {
+  return (
+    result != null &&
+    typeof result === "object" &&
+    "_type" in result &&
+    (result as Record<string, unknown>)._type === "select-config"
+  )
 }
 
 /**
- * Renders the appropriate input component based on field type
+ * Resolves the field input content, handling customFieldName dispatch for non-custom fields.
+ * If the field has a customFieldName and type !== "custom", calls renderCustomField:
+ * - If it returns a select config object, merges it into the field and delegates to renderFieldInput
+ * - If it returns a ReactNode, renders it directly
  */
-function renderFieldInput({
+function renderFieldContent({
   field,
   formField,
   fieldState,
   isSubmitting,
   isRequired,
   values,
-}: RenderFieldInputOptions): React.ReactNode {
-  const hasError = !!fieldState.error
-  const { isValidating } = fieldState
+  isFormLoading,
+  renderCustomField,
+}: {
+  field: F0Field
+  formField: import("react-hook-form").ControllerRenderProps<
+    import("react-hook-form").FieldValues
+  >
+  fieldState: import("./renderFieldInput").FieldState
+  isSubmitting: boolean
+  isRequired?: boolean
+  values: Record<string, unknown>
+  isFormLoading?: boolean
+  renderCustomField?: import("../types").RenderCustomFieldFunction
+}): React.ReactNode {
+  // For non-custom fields with customFieldName, call renderCustomField to get config or component
+  if (field.customFieldName && field.type !== "custom") {
+    if (!renderCustomField) {
+      throw new Error(
+        `Field "${field.id}" has customFieldName "${field.customFieldName}" but no renderCustomField prop was provided to F0Form.`
+      )
+    }
 
-  // Evaluate disabled (can be boolean or function) and combine with submitting state
-  const isDisabled = evaluateDisabled(field.disabled, values) || isSubmitting
+    const result = renderCustomField({
+      id: field.id,
+      label: field.label,
+      placeholder: field.placeholder,
+      value: formField.value,
+      onChange: formField.onChange,
+      onBlur: formField.onBlur,
+      error: undefined,
+      isValidating: fieldState.isValidating,
+      disabled:
+        typeof field.disabled === "boolean" ? field.disabled : undefined,
+      required: isRequired,
+      customFieldName: field.customFieldName,
+      config: undefined,
+      fieldType: field.type,
+    })
 
-  const errorAndLoadingProps = {
-    error: hasError,
-    loading: isValidating,
+    // If result is a select config object, merge into the field and render as a select
+    if (isSelectConfig(result)) {
+      const mergedField = { ...field, ...result, type: "select" } as F0Field
+      return renderFieldInput({
+        field: mergedField,
+        formField,
+        fieldState,
+        fieldStatus: field.status,
+        isSubmitting,
+        isRequired,
+        values,
+        isFormLoading,
+      })
+    }
+
+    // Otherwise treat as ReactNode
+    return <>{result}</>
   }
 
-  switch (field.type) {
-    case "text":
-      return (
-        <TextFieldRenderer
-          field={{ ...field, disabled: isDisabled }}
-          formField={formField}
-          {...errorAndLoadingProps}
-        />
-      )
-    case "number":
-      return (
-        <NumberFieldRenderer
-          field={{ ...field, disabled: isDisabled }}
-          formField={formField}
-          {...errorAndLoadingProps}
-        />
-      )
-    case "textarea":
-      return (
-        <TextareaFieldRenderer
-          field={{ ...field, disabled: isDisabled }}
-          formField={formField}
-          {...errorAndLoadingProps}
-        />
-      )
-    case "select":
-      return (
-        <SelectFieldRenderer
-          field={{ ...field, disabled: isDisabled }}
-          formField={formField}
-          {...errorAndLoadingProps}
-        />
-      )
-    case "checkbox":
-      return (
-        <CheckboxFieldRenderer
-          field={{ ...field, disabled: isDisabled }}
-          formField={formField}
-        />
-      )
-    case "switch":
-      return (
-        <SwitchFieldRenderer
-          field={{ ...field, disabled: isDisabled }}
-          formField={formField}
-        />
-      )
-    case "date":
-      return (
-        <DateFieldRenderer
-          field={{
-            ...field,
-            disabled: isDisabled,
-            // Evaluate dynamic date constraints
-            minDate: evaluateDateConstraint(field.minDate, values),
-            maxDate: evaluateDateConstraint(field.maxDate, values),
-          }}
-          formField={formField}
-          {...errorAndLoadingProps}
-        />
-      )
-    case "time":
-      return (
-        <TimeFieldRenderer
-          field={{
-            ...field,
-            disabled: isDisabled,
-            // Evaluate dynamic date constraints
-            minDate: evaluateDateConstraint(field.minDate, values),
-            maxDate: evaluateDateConstraint(field.maxDate, values),
-          }}
-          formField={formField}
-          {...errorAndLoadingProps}
-        />
-      )
-    case "datetime":
-      return (
-        <DateTimeFieldRenderer
-          field={{
-            ...field,
-            disabled: isDisabled,
-            // Evaluate dynamic date constraints
-            minDate: evaluateDateConstraint(field.minDate, values),
-            maxDate: evaluateDateConstraint(field.maxDate, values),
-          }}
-          formField={formField}
-          {...errorAndLoadingProps}
-        />
-      )
-    case "daterange":
-      return (
-        <DateRangeFieldRenderer
-          field={{ ...field, disabled: isDisabled }}
-          formField={formField}
-          {...errorAndLoadingProps}
-        />
-      )
-    case "richtext":
-      return (
-        <RichTextFieldRenderer
-          field={{ ...field, disabled: isDisabled }}
-          formField={formField}
-        />
-      )
-    case "file":
-      return (
-        <FileFieldRenderer
-          field={{ ...field, disabled: isDisabled }}
-          formField={formField}
-          error={hasError}
-        />
-      )
-    case "custom":
-      return (
-        <CustomFieldRenderer
-          field={{ ...field, disabled: isDisabled }}
-          formField={formField}
-          isValidating={isValidating}
-          required={isRequired}
-        />
-      )
-    default:
-      return null
-  }
+  // Default: delegate to renderFieldInput
+  return renderFieldInput({
+    field,
+    formField,
+    fieldState,
+    fieldStatus: field.status,
+    isSubmitting,
+    isRequired,
+    values,
+    isFormLoading,
+  })
+}
+
+interface FieldRendererProps {
+  field: F0Field
+  /** Section ID when field is inside a section (for anchor links) */
+  sectionId?: string
 }
 
 /**
@@ -224,7 +137,11 @@ export function FieldRenderer({ field, sectionId }: FieldRendererProps) {
   const form = useFormContext()
   const values = form.watch()
   const { isSubmitting } = form.formState
-  const { formName } = useF0FormContext()
+  const {
+    formName,
+    isLoading: isFormLoading,
+    renderCustomField,
+  } = useF0FormContext()
   const { forms } = useI18n()
 
   // Evaluate if field is currently disabled
@@ -251,6 +168,7 @@ export function FieldRenderer({ field, sectionId }: FieldRendererProps) {
 
   // For checkbox and custom fields, label is handled internally
   const showLabel = field.type !== "checkbox" && field.type !== "custom"
+  const showFormMessage = field.type !== "custom"
 
   // Determine if field is required based on validation schema
   const isRequired = field.validation && isFieldRequired(field.validation)
@@ -288,13 +206,15 @@ export function FieldRenderer({ field, sectionId }: FieldRendererProps) {
             </label>
           )}
           <FormControl>
-            {renderFieldInput({
+            {renderFieldContent({
               field,
               formField,
               fieldState,
               isSubmitting,
               isRequired,
               values,
+              isFormLoading,
+              renderCustomField,
             })}
           </FormControl>
           {field.helpText && (
@@ -320,13 +240,18 @@ export function FieldRenderer({ field, sectionId }: FieldRendererProps) {
               <F0Alert {...alertProps} variant={alertProps.variant ?? "info"} />
             )
           })()}
-          <FormMessage
-            fallback={
-              isRequired
-                ? forms.validation.required
-                : forms.validation.invalidType
-            }
-          />
+          {showFormMessage && !fieldState.error && (
+            <InputMessages status={field.status} />
+          )}
+          {showFormMessage && (
+            <FormMessage
+              fallback={
+                isRequired
+                  ? forms.validation.required
+                  : forms.validation.invalidType
+              }
+            />
+          )}
         </FormItem>
       )}
     />

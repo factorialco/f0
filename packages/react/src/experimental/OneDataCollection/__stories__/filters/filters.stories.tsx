@@ -1,6 +1,6 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
 
-import { ExampleComponent } from "../mockData"
+import { ExampleComponent, SubfiltersExampleComponent } from "../mockData"
 
 const meta = {
   title: "Data Collection/Filters",
@@ -58,6 +58,44 @@ export const WithSyncSearch: Story = {
                   enabled: true,
                   sync: true,
                   debounceTime: 300,
+              },
+              //...
+          })
+          `,
+      },
+    },
+  },
+}
+
+export const WithSubfilters: Story = {
+  render: () => <SubfiltersExampleComponent />,
+  parameters: {
+    docs: {
+      source: {
+        code: `
+           const source = useDataCollectionSource({
+              //...
+              filters: {
+                  office: {
+                      type: "in",
+                      label: "Office",
+                      options: {
+                          options: [
+                              {
+                                  value: "101", label: "Barcelona HQ",
+                                  children: {
+                                      filterKey: "space",
+                                      options: [
+                                          { value: "1", label: "Floor 1", children: { filterKey: "desk", options: [...] } },
+                                          { value: "2", label: "Floor 2" },
+                                      ],
+                                  },
+                              },
+                          ],
+                      },
+                  },
+                  space: { type: "in", label: "Space", hideSelector: true, options: { options: [...] } },
+                  desk: { type: "in", label: "Desk", hideSelector: true, options: { options: [...] } },
               },
               //...
           })

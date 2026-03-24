@@ -9,6 +9,14 @@ export type F0FormStateCallback = (state: {
 }) => void
 
 /**
+ * Options for setValue
+ */
+export interface F0FormSetValueOptions {
+  shouldValidate?: boolean
+  shouldDirty?: boolean
+}
+
+/**
  * Interface for the F0Form ref methods
  */
 export interface F0FormRef {
@@ -26,6 +34,38 @@ export interface F0FormRef {
    * Check if the form has unsaved changes
    */
   isDirty: () => boolean
+  /**
+   * Get the current form values (including unsaved changes)
+   */
+  getValues: () => Record<string, unknown>
+  /**
+   * Set a single field value programmatically
+   */
+  setValue: (
+    fieldName: string,
+    value: unknown,
+    options?: F0FormSetValueOptions
+  ) => void
+  /**
+   * Set multiple field values at once
+   */
+  setValues: (
+    values: Record<string, unknown>,
+    options?: F0FormSetValueOptions
+  ) => void
+  /**
+   * Manually trigger validation for a specific field or all fields
+   * @returns true if validation passes
+   */
+  trigger: (fieldName?: string) => Promise<boolean>
+  /**
+   * Get current validation errors as a map of field name to error message
+   */
+  getErrors: () => Record<string, string>
+  /**
+   * Get the list of field names in the form
+   */
+  getFieldNames: () => string[]
   /**
    * Internal: Set the state callback for reactive updates
    * @internal
@@ -55,6 +95,38 @@ export interface UseF0FormReturn {
    * Check if the form has unsaved changes
    */
   isDirty: () => boolean
+  /**
+   * Get the current form values (including unsaved changes)
+   */
+  getValues: () => Record<string, unknown>
+  /**
+   * Set a single field value programmatically
+   */
+  setValue: (
+    fieldName: string,
+    value: unknown,
+    options?: F0FormSetValueOptions
+  ) => void
+  /**
+   * Set multiple field values at once
+   */
+  setValues: (
+    values: Record<string, unknown>,
+    options?: F0FormSetValueOptions
+  ) => void
+  /**
+   * Manually trigger validation for a specific field or all fields
+   * @returns true if validation passes
+   */
+  trigger: (fieldName?: string) => Promise<boolean>
+  /**
+   * Get current validation errors as a map of field name to error message
+   */
+  getErrors: () => Record<string, string>
+  /**
+   * Get the list of field names in the form
+   */
+  getFieldNames: () => string[]
   /**
    * Whether the form is currently submitting
    */
@@ -148,9 +220,68 @@ export function useF0Form(): UseF0FormReturn {
 
   const isDirty = useCallback(() => {
     if (!customFormRef.current) {
+      console.warn("useF0Form: formRef is not attached to an F0Form component")
       return false
     }
     return customFormRef.current.isDirty()
+  }, [])
+
+  const getValues = useCallback(() => {
+    if (!customFormRef.current) {
+      console.warn("useF0Form: formRef is not attached to an F0Form component")
+      return {}
+    }
+    return customFormRef.current.getValues()
+  }, [])
+
+  const setValue = useCallback(
+    (fieldName: string, value: unknown, options?: F0FormSetValueOptions) => {
+      if (!customFormRef.current) {
+        console.warn(
+          "useF0Form: formRef is not attached to an F0Form component"
+        )
+        return
+      }
+      customFormRef.current.setValue(fieldName, value, options)
+    },
+    []
+  )
+
+  const setValues = useCallback(
+    (values: Record<string, unknown>, options?: F0FormSetValueOptions) => {
+      if (!customFormRef.current) {
+        console.warn(
+          "useF0Form: formRef is not attached to an F0Form component"
+        )
+        return
+      }
+      customFormRef.current.setValues(values, options)
+    },
+    []
+  )
+
+  const trigger = useCallback(async (fieldName?: string) => {
+    if (!customFormRef.current) {
+      console.warn("useF0Form: formRef is not attached to an F0Form component")
+      return false
+    }
+    return customFormRef.current.trigger(fieldName)
+  }, [])
+
+  const getErrors = useCallback(() => {
+    if (!customFormRef.current) {
+      console.warn("useF0Form: formRef is not attached to an F0Form component")
+      return {}
+    }
+    return customFormRef.current.getErrors()
+  }, [])
+
+  const getFieldNames = useCallback(() => {
+    if (!customFormRef.current) {
+      console.warn("useF0Form: formRef is not attached to an F0Form component")
+      return []
+    }
+    return customFormRef.current.getFieldNames()
   }, [])
 
   return {
@@ -158,6 +289,12 @@ export function useF0Form(): UseF0FormReturn {
     submit,
     reset,
     isDirty,
+    getValues,
+    setValue,
+    setValues,
+    trigger,
+    getErrors,
+    getFieldNames,
     isSubmitting,
     hasErrors,
   }

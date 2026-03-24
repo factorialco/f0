@@ -1,5 +1,7 @@
 import { ZodTypeAny } from "zod"
 
+import type { InputFieldStatus } from "@/ui/InputField/types"
+
 import type { F0FieldAlert } from "../f0Schema"
 
 // ============================================================================
@@ -52,12 +54,12 @@ export type F0BaseFieldRenderIfProp =
 // Field-Specific RenderIf Condition Types (imported from each field)
 // ============================================================================
 
-import type { TextRenderIfCondition } from "./text/types"
-import type { NumberRenderIfCondition } from "./number/types"
 import type { BooleanRenderIfCondition } from "./checkbox/types"
-import type { SelectRenderIfCondition } from "./select/types"
 import type { DateRenderIfCondition } from "./date/types"
 import type { DateRangeRenderIfCondition } from "./daterange/types"
+import type { NumberRenderIfCondition } from "./number/types"
+import type { SelectRenderIfCondition } from "./select/types"
+import type { TextRenderIfCondition } from "./text/types"
 
 // Re-export for convenience
 export type {
@@ -97,6 +99,8 @@ export interface F0BaseField {
   validation?: ZodTypeAny
   /** Helper text displayed below the field */
   helpText?: string
+  /** Optional non-validation field status (warning/info/error/default) */
+  status?: InputFieldStatus
   /** Placeholder text for the input */
   placeholder?: string
   /**
@@ -118,6 +122,11 @@ export interface F0BaseField {
   resetOnDisable?: boolean
   /** Alert displayed below the field (static props or conditional callback) */
   alert?: F0FieldAlert
+  /**
+   * Name identifying a reusable custom field type.
+   * Used with the form-level `renderCustomField` callback.
+   */
+  customFieldName?: string
 }
 
 /**
@@ -134,6 +143,7 @@ export type ResolvedField<T extends F0BaseField> = Omit<T, "disabled"> & {
 export type FieldType =
   | "text"
   | "number"
+  | "duration"
   | "textarea"
   | "select"
   | "checkbox"
@@ -152,6 +162,7 @@ export type FieldType =
 
 export type { F0TextConfig, F0TextField } from "./text/types"
 export type { F0NumberConfig, F0NumberField } from "./number/types"
+export type { F0DurationConfig, F0DurationField } from "./duration/types"
 export type { F0TextareaConfig, F0TextareaField } from "./textarea/types"
 export type { F0SelectConfig, F0SelectField } from "./select/types"
 export type { F0CheckboxConfig, F0CheckboxField } from "./checkbox/types"
@@ -194,18 +205,19 @@ export type {
   UseFileUpload,
 } from "./file/types"
 
-// Import for union type
-import type { F0TextField } from "./text/types"
-import type { F0NumberField } from "./number/types"
-import type { F0TextareaField } from "./textarea/types"
-import type { F0SelectField } from "./select/types"
 import type { F0CheckboxField } from "./checkbox/types"
-import type { F0SwitchField } from "./switch/types"
+import type { F0CustomField } from "./custom/types"
 import type { F0DateField, F0TimeField, F0DateTimeField } from "./date/types"
 import type { F0DateRangeField } from "./daterange/types"
-import type { F0RichTextField } from "./richtext/types"
-import type { F0CustomField } from "./custom/types"
+import type { F0DurationField } from "./duration/types"
 import type { F0FileField } from "./file/types"
+import type { F0NumberField } from "./number/types"
+import type { F0RichTextField } from "./richtext/types"
+import type { F0SelectField } from "./select/types"
+import type { F0SwitchField } from "./switch/types"
+// Import for union type
+import type { F0TextField } from "./text/types"
+import type { F0TextareaField } from "./textarea/types"
 
 /**
  * Union of all F0 field types used for rendering
@@ -213,6 +225,7 @@ import type { F0FileField } from "./file/types"
 export type F0Field =
   | F0TextField
   | F0NumberField
+  | F0DurationField
   | F0TextareaField
   | F0SelectField
   | F0CheckboxField

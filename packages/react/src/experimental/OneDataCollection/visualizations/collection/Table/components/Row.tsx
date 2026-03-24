@@ -1,5 +1,8 @@
 import { forwardRef } from "react"
 
+import type { IconType } from "@/components/F0Icon"
+import type { TableVisualizationType } from "@/experimental/OneDataCollection/types"
+
 import { FiltersDefinition } from "@/components/OneFilterPicker/types"
 import { ItemActionsMobile } from "@/experimental/OneDataCollection/components/itemActions/ItemActionsMobile/ItemActionsMobile"
 import { ItemActionsRowContainer } from "@/experimental/OneDataCollection/components/itemActions/ItemActionsRowContainer"
@@ -20,10 +23,17 @@ import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { Checkbox } from "@/ui/checkbox"
 
+import type {
+  CellRendererProps,
+  ReferenceType,
+  RowWrapperProps,
+  TableColumnDefinition,
+} from "../types"
+
 import { ItemActionsRow } from "../../../../components/itemActions/ItemActionsRow/ItemActionsRow"
-import { TableColumnDefinition } from "../types"
 import { useSticky } from "../useSticky"
 import { NestedRow } from "./NestedRow"
+import { groupBorderClass, HeaderGroupEntry } from "../hooks/useHeaderGroups"
 
 export type RowProps<
   R extends RecordType,
@@ -56,6 +66,30 @@ export type RowProps<
   tableWithChildren: boolean
   nestedRowProps?: NestedRowProps
   disableHover?: boolean
+  /** Optional predicate to mark a row as reference row with slanted background pattern. */
+  referenceRowType?: (item: R) => ReferenceType
+  /** Optional custom cell renderer. When provided, wraps each cell's content. */
+  cellRenderer?: React.ComponentType<
+    CellRendererProps<R, Sortings, Summaries> & { isLastColumn?: boolean }
+  >
+  /** Row wrapper passed through to NestedRow for wrapping child rows */
+  rowWrapper?: React.ComponentType<RowWrapperProps<R>>
+  fromVisualization?: TableVisualizationType
+  headerGroups: HeaderGroupEntry[] | null
+}
+
+export type AddRowAction = {
+  label: string
+  icon?: IconType
+  description?: string
+  onClick?: () => void | Promise<void>
+  loading?: boolean
+  disabled?: boolean
+}
+
+export type OnAddRowConfig = {
+  actions: AddRowAction[]
+  label?: string
 }
 
 export type NestedRowProps = {
@@ -68,6 +102,13 @@ export type NestedRowProps = {
   parentHasChildren?: boolean
   onExpand?: () => void
   onLoadMoreChildren?: () => void
+  onAddRow?: OnAddRowConfig
+}
+
+const referenceTypeClasses: Record<ReferenceType, string> = {
+  none: "",
+  striped:
+    "bg-[repeating-linear-gradient(45deg,transparent_0px,transparent_8px,hsl(var(--neutral-20))_8px,hsl(var(--neutral-20))_9px)] [background-size:100%_100px]",
 }
 
 const RowComponentInner = <
@@ -94,6 +135,11 @@ const RowComponentInner = <
     nestedRowProps,
     tableWithChildren,
     disableHover = false,
+    referenceRowType: referenceRowTypeFn,
+    cellRenderer: CellRenderer,
+    rowWrapper,
+    fromVisualization,
+    headerGroups,
   }: RowProps<
     R,
     Filters,
@@ -154,12 +200,25 @@ const RowComponentInner = <
         groupIndex={groupIndex}
         nestedRowProps={nestedRowProps}
         tableWithChildren={tableWithChildren}
+        referenceRowType={referenceRowTypeFn}
+        cellRenderer={CellRenderer}
+        rowWrapper={rowWrapper}
+        headerGroups={headerGroups}
         key={key}
+        fromVisualization={fromVisualization}
       />
     )
   }
 
   const isSelected = id !== undefined && selectedItems.has(id)
+  const referenceRowType = referenceRowTypeFn?.(item) ?? "none"
+
+  const cellRenderedClass = CellRenderer
+    ? cn(
+        "h-[48px] p-0 align-middle last:pr-0",
+        !tableWithChildren && "first:pl-0"
+      )
+    : undefined
 
   return (
     <TableRow
@@ -170,7 +229,8 @@ const RowComponentInner = <
         "after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-px after:w-full after:bg-f1-border-secondary after:content-['']",
         noBorder && "after:bg-white-100",
         disableHover && "hover:bg-transparent",
-        isSelected && "bg-f1-background-selected-secondary"
+        isSelected && "bg-f1-background-selected-secondary",
+        referenceTypeClasses[referenceRowType]
       )}
     >
       {source.selectable && (
@@ -178,9 +238,16 @@ const RowComponentInner = <
           width={checkColumnWidth}
           sticky={{ left: 0 }}
           loading={loading}
+          className={cn(
+            loading && tableWithChildren ? "first:pl-4" : "",
+            headerGroups && "[&>div:first-child]:hidden",
+            headerGroups && groupBorderClass,
+            cellRenderedClass
+          )}
+          referenceRowType={referenceRowType}
         >
           {id !== undefined && (
-            <div className="pointer-events-auto ml-1.5 flex items-center justify-start">
+            <div className="pointer-events-auto ml-1.5 flex h-full items-center justify-start">
               <Checkbox
                 checked={selectedItems.has(id)}
                 onCheckedChange={onCheckedChange}
@@ -192,21 +259,20 @@ const RowComponentInner = <
         </TableCell>
       )}
 
-      {columns.map((column, cellIndex) => (
-        <TableCell
-          key={`table-cell-${groupIndex}-${index}-${cellIndex}`}
-          firstCell={cellIndex === 0}
-          href={itemHref}
-          onClick={itemOnClick}
-          width={column.width}
-          sticky={getStickyPosition(cellIndex)}
-          loading={loading}
-          nestedRowProps={{
-            ...nestedRowProps,
-            rowWithChildren,
-            tableWithChildren,
-          }}
-        >
+      {columns.map((column, cellIndex) => {
+        const headerGroup = headerGroups?.find((group) => {
+          return (
+            group.type === "group" && group.columnIndices.includes(cellIndex)
+          )
+        })
+
+        const isLastInGroup =
+          !!headerGroups &&
+          (!headerGroup ||
+            headerGroup.columnIndices[headerGroup.columnIndices.length - 1] ===
+              cellIndex)
+
+        const defaultContent = (
           <div
             className={cn(
               column.align === "right" ? "justify-end" : "",
@@ -215,39 +281,78 @@ const RowComponentInner = <
           >
             {renderCell(item, column)}
           </div>
-        </TableCell>
-      ))}
+        )
 
-      {hasItemActions && !loading && !nestedRowProps?.onLoadMoreChildren && (
-        <>
-          {/** Desktop item actions adds a sticky column to the table to not overflow when the table is scrolled horizontally*/}
-          <td className="sticky right-0 top-0 z-10 hidden md:table-cell">
-            <ItemActionsRowContainer dropDownOpen={dropDownOpen}>
-              <ItemActionsRow
-                primaryItemActions={primaryItemActions}
-                dropdownItemActions={dropdownItemActions}
-                handleDropDownOpenChange={handleDropDownOpenChange}
-              />
-            </ItemActionsRowContainer>
-          </td>
-          {/** Mobile item actions */}
+        return (
           <TableCell
-            key={`table-cell-${groupIndex}-${index}-actions`}
-            width={68}
-            sticky={{
-              right: 0,
-            }}
+            key={`table-cell-${groupIndex}-${index}-${cellIndex}`}
+            firstCell={cellIndex === 0}
             href={itemHref}
-            className="table-cell md:hidden"
+            onClick={itemOnClick}
+            width={column.width}
+            sticky={getStickyPosition(cellIndex)}
             loading={loading}
+            nestedRowProps={{
+              ...nestedRowProps,
+              rowWithChildren,
+              tableWithChildren,
+              selectableRow: !!source.selectable,
+            }}
+            fromVisualization={fromVisualization}
+            referenceRowType={referenceRowType}
+            className={cn(cellRenderedClass, isLastInGroup && groupBorderClass)}
           >
-            <ItemActionsMobile
-              items={mobileDropdownItemActions}
-              onOpenChange={handleDropDownOpenChange}
-            />
+            {CellRenderer ? (
+              <CellRenderer
+                item={item}
+                isLastColumn={
+                  !hasItemActions && cellIndex === columns.length - 1
+                }
+                column={column}
+                cellIndex={cellIndex}
+              >
+                {defaultContent}
+              </CellRenderer>
+            ) : (
+              defaultContent
+            )}
           </TableCell>
-        </>
-      )}
+        )
+      })}
+
+      {hasItemActions &&
+        !loading &&
+        !nestedRowProps?.onLoadMoreChildren &&
+        !nestedRowProps?.onAddRow && (
+          <>
+            {/** Desktop item actions adds a sticky column to the table to not overflow when the table is scrolled horizontally*/}
+            <td className="sticky right-0 top-0 z-10 hidden md:table-cell">
+              <ItemActionsRowContainer dropDownOpen={dropDownOpen}>
+                <ItemActionsRow
+                  primaryItemActions={primaryItemActions}
+                  dropdownItemActions={dropdownItemActions}
+                  handleDropDownOpenChange={handleDropDownOpenChange}
+                />
+              </ItemActionsRowContainer>
+            </td>
+            {/** Mobile item actions */}
+            <TableCell
+              key={`table-cell-${groupIndex}-${index}-actions`}
+              width={68}
+              sticky={{
+                right: 0,
+              }}
+              href={itemHref}
+              className="table-cell md:hidden"
+              loading={loading}
+            >
+              <ItemActionsMobile
+                items={mobileDropdownItemActions}
+                onOpenChange={handleDropDownOpenChange}
+              />
+            </TableCell>
+          </>
+        )}
     </TableRow>
   )
 }
@@ -269,7 +374,10 @@ const Row = forwardRef(RowComponentInner) as <
     ItemActions,
     NavigationFilters,
     Grouping
-  > & { ref?: React.ForwardedRef<HTMLTableRowElement> }
+  > & {
+    ref?: React.ForwardedRef<HTMLTableRowElement>
+    fromVisualization?: TableVisualizationType
+  }
 ) => ReturnType<typeof RowComponentInner>
 
 export { Row }

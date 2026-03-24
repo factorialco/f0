@@ -1,12 +1,108 @@
 import { CopilotKitProps } from "@copilotkit/react-core"
-import { type AIMessage } from "@copilotkit/shared"
+import { type AIMessage, type Message } from "@copilotkit/shared"
 
 import { IconType } from "@/components/F0Icon"
+import { defaultTranslations } from "@/lib/providers/i18n/i18n-provider-defaults"
+
+import type { ChatDashboardConfig } from "./canvas/entities/dashboard/types"
+export type { PersonProfile } from "./components/markdownRenderers/entityRef/entities/person/types"
+export type { EntityResolvers } from "./components/markdownRenderers/entityRef/types"
+import type { EntityResolvers } from "./components/markdownRenderers/entityRef/types"
+
+/**
+ * Base shape shared by all canvas content types.
+ * Every entity adds its own fields on top of this.
+ */
+export type CanvasContentBase = {
+  type: string
+  title: string
+  toolCallId?: string
+}
+
+/**
+ * Dashboard canvas content — renders an analytics dashboard.
+ */
+export type DashboardCanvasContent = CanvasContentBase & {
+  type: "dashboard"
+  config: ChatDashboardConfig
+  apiConfig: { baseUrl: string; headers: Record<string, string> }
+}
+
+/**
+ * Discriminated union for canvas panel content.
+ * Add new entity types to this union as they are implemented.
+ */
+export type CanvasContent = DashboardCanvasContent
+
+/**
+ * A tool hint that can be activated to prepend invisible context to the user's
+ * message, telling the AI about the user's intent (e.g. "generate tables",
+ * "data analysis"). Similar to Gemini's tool selector UI.
+ *
+ * Only one tool hint can be active at a time. It persists across messages
+ * until the user explicitly removes it.
+ */
+export type AiChatToolHint = {
+  /** Unique identifier for this tool hint */
+  id: string
+  /** Display label shown in the selector and chip */
+  label: string
+  /** Optional icon shown in the selector and chip */
+  icon?: IconType
+  /**
+   * Prompt text injected as invisible context before the user's message.
+   * The AI receives this but the user never sees it in the chat.
+   */
+  prompt: string
+}
+
+/**
+ * Credits usage data returned by the host app
+ */
+export type CreditsUsage = {
+  used: number
+  total: number
+}
+
+/**
+ * Credits configuration for the AI chat.
+ * Groups all credits-related props into a single object.
+ *
+ * When provided, a credits button is shown in the chat header.
+ */
+export type AiChatCredits = {
+  /** Async function to fetch credits usage. Called each time the popover opens. */
+  fetchUsage: () => Promise<CreditsUsage>
+  /** URL to the plan upgrade page. When provided, a link is shown in the popover. */
+  upgradePlanUrl?: string
+  /** Company name displayed in the popover header. */
+  companyName?: string
+  /** Company logo URL displayed in the popover header. */
+  companyLogoUrl?: string
+  /** Plan name displayed below the company name (e.g. "Free plan", "Enterprise"). */
+  planName?: string
+}
+
+/**
+ * Interaction mode for the AI chat
+ */
+export type AiChatMode = "chat" | "voice"
 
 /**
  * Visualization mode for the AI chat
  */
-export type VisualizationMode = "sidepanel" | "fullscreen"
+export type VisualizationMode = "sidepanel" | "fullscreen" | "canvas"
+
+/**
+ * Tracking options for the AI chat
+ */
+export type AiChatTrackingOptions = {
+  onVisibility?: () => void
+  onClose?: () => void
+  onWelcomeSuggestionClick?: (suggestion: WelcomeScreenSuggestion) => void
+  onNewChat?: () => void
+  onMessage?: (message: Message) => void
+}
 
 /**
  * Props for the AiChatProvider component
@@ -34,9 +130,38 @@ export type AiChatProviderProps = {
    */
   lockVisualizationMode?: boolean
   /**
+   * Enable chat history UI (clickable header title + history dialog).
+   * When false (default), the header shows a simple "New Chat" button instead.
+   * Set to true only when the backend supports the /copilotkit/chat-history/threads route.
+   * @default false
+   */
+  historyEnabled?: boolean
+  /**
    * Optional footer content rendered below the textarea
    */
   footer?: React.ReactNode
+  /**
+   * Optional component rendered in place of the chat UI when voice mode is active.
+   */
+  VoiceMode?: React.ComponentType
+  /**
+   * Async resolver functions for entity references in markdown.
+   * Used to fetch profile data for inline entity mentions (hover cards).
+   * The consuming app provides these so the chat can resolve entity IDs
+   * (e.g. employee IDs) into rich profile data without knowing the API.
+   */
+  entityResolvers?: EntityResolvers
+  /**
+   * Available tool hints that the user can activate to provide intent context
+   * to the AI. Renders a selector button next to the send button.
+   * Only one tool hint can be active at a time.
+   */
+  toolHints?: AiChatToolHint[]
+  /**
+   * Credits configuration. When provided, a credits button is shown in the chat header.
+   * Groups fetchUsage, upgradePlanUrl, and company/plan display info.
+   */
+  credits?: AiChatCredits
   onThumbsUp?: (
     message: AIMessage,
     { threadId, feedback }: { threadId: string; feedback: string }
@@ -45,6 +170,7 @@ export type AiChatProviderProps = {
     message: AIMessage,
     { threadId, feedback }: { threadId: string; feedback: string }
   ) => void
+  tracking?: AiChatTrackingOptions
 } & Pick<
   CopilotKitProps,
   | "agent"
@@ -86,42 +212,11 @@ type TranslationShape<T> = {
 }
 
 /**
- * Default AI chat translations
+ * Default AI chat translations — derived from the global defaultTranslations
+ * to avoid manual duplication.
  */
 export const aiTranslations = {
-  ai: {
-    openChat: "Open Chat with One AI",
-    closeChat: "Close Chat with One AI",
-    startNewChat: "Start new chat",
-    scrollToBottom: "Scroll to bottom",
-    welcome: "Ask or create with One",
-    defaultInitialMessage: "How can I help you today?",
-    inputPlaceholder:
-      "Ask about time, people, or company info and a lot of other things...",
-    stopAnswerGeneration: "Stop generating",
-    responseStopped: "You stopped this response",
-    sendMessage: "Send message",
-    thoughtsGroupTitle: "Reflection",
-    resourcesGroupTitle: "Resources",
-    thinking: "Thinking...",
-    exportTable: "Download table",
-    generatedTableFilename: "OneGeneratedTable",
-    feedbackModal: {
-      positive: {
-        title: "What did you like about this response?",
-        label: "Your feedback helps us make Factorial AI better",
-        placeholder: "Share what worked well",
-      },
-      negative: {
-        title: "What could have been better?",
-        label: "Your feedback helps us improve future answers",
-        placeholder: "Share what didn't work",
-      },
-    },
-    expandChat: "Expand chat",
-    collapseChat: "Collapse chat",
-    ask: "Ask One",
-  },
+  ai: defaultTranslations.ai,
 }
 
 /**

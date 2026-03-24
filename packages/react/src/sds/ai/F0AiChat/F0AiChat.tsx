@@ -1,27 +1,17 @@
-import {
-  CopilotKit,
-  CopilotKitProps,
-  useCopilotChatInternal,
-  useCopilotContext,
-} from "@copilotkit/react-core"
-import { CopilotSidebar, InputProps } from "@copilotkit/react-ui"
-import { randomId } from "@copilotkit/shared"
-import { AnimatePresence, motion } from "motion/react"
-import { useEffect, useRef } from "react"
+import { CopilotKit, CopilotKitProps } from "@copilotkit/react-core"
+import { CopilotSidebar } from "@copilotkit/react-ui"
 
-import { OneEllipsis } from "@/components/OneEllipsis"
 import { experimentalComponent } from "@/lib/experimental"
-import { Link } from "@/lib/linkHandler"
-import { cn } from "@/lib/utils"
 
-import { AssistantMessage } from "./components/AssistantMessage"
-import { ChatHeader } from "./components/ChatHeader"
-import { ChatTextarea } from "./components/ChatTextarea"
-import { SidebarWindow } from "./components/ChatWindow"
-import { MessagesContainer } from "./components/MessagesContainer"
-import { UserMessage } from "./components/UserMessage"
-import { WelcomeScreenSuggestion } from "./components/WelcomeScreen"
-import { useDefaultCopilotActions } from "./copilotActions"
+import { useRegisteredActions } from "./actions"
+import { ChatInput } from "./components/input/ChatInput"
+import { ChatHeader } from "./components/layout/ChatHeader"
+import { SidebarWindow } from "./components/layout/ChatWindow"
+import { AssistantMessage } from "./components/messages/AssistantMessage"
+import { MessagesContainer } from "./components/messages/MessagesContainer"
+import { UserMessage } from "./components/messages/UserMessage"
+import { WelcomeScreenSuggestion } from "./components/messages/WelcomeScreen"
+import { CopilotFunctionBridge } from "./components/shared/CopilotFunctionBridge"
 import { F0AiFullscreenChatComponent } from "./F0AiFullscreenChat"
 import { AiChatStateProvider, useAiChat } from "./providers/AiChatStateProvider"
 import { AiChatProviderProps } from "./types"
@@ -35,11 +25,17 @@ const F0AiChatProviderComponent = ({
   resizable = false,
   defaultVisualizationMode,
   lockVisualizationMode,
+  historyEnabled,
   footer,
+  VoiceMode,
+  entityResolvers,
+  toolHints,
+  credits,
   onThumbsUp,
   onThumbsDown,
   children,
   agent,
+  tracking,
   ...copilotKitProps
 }: AiChatProviderProps) => {
   return (
@@ -55,7 +51,13 @@ const F0AiChatProviderComponent = ({
       resizable={resizable}
       defaultVisualizationMode={defaultVisualizationMode}
       lockVisualizationMode={lockVisualizationMode}
+      historyEnabled={historyEnabled}
       footer={footer}
+      VoiceMode={VoiceMode}
+      tracking={tracking}
+      entityResolvers={entityResolvers}
+      toolHints={toolHints}
+      credits={credits}
     >
       <AiChatKitWrapper {...copilotKitProps}>{children}</AiChatKitWrapper>
     </AiChatStateProvider>
@@ -70,132 +72,29 @@ const AiChatKitWrapper = ({
 
   return (
     <CopilotKit runtimeUrl="/copilotkit" agent={agent} {...copilotKitProps}>
-      <ResetFunctionInjector />
-      <SendMessageFunctionInjector />
+      <CopilotFunctionBridge />
       {children}
     </CopilotKit>
   )
 }
 
-const ResetFunctionInjector = () => {
-  const { setClearFunction } = useAiChat()
-  const { reset } = useCopilotChatInternal()
-  const { setThreadId } = useCopilotContext()
-
-  useEffect(() => {
-    const resetWithNewThread = () => {
-      reset()
-      setThreadId(randomId())
-    }
-    setClearFunction(resetWithNewThread)
-    return () => {
-      setClearFunction(null)
-    }
-  }, [setClearFunction, reset, setThreadId])
-
-  return null
-}
-
-const SendMessageFunctionInjector = () => {
-  const { setSendMessageFunction } = useAiChat()
-  const { sendMessage } = useCopilotChatInternal()
-
-  useEffect(() => {
-    if (sendMessage) {
-      setSendMessageFunction(sendMessage)
-    }
-    return () => {
-      setSendMessageFunction(null)
-    }
-  }, [setSendMessageFunction, sendMessage])
-
-  return null
-}
-
-const ChatInput = (props: InputProps) => {
-  const { disclaimer, footer, visualizationMode } = useAiChat()
-  const { messages } = useCopilotChatInternal()
-  const containerRef = useRef<HTMLDivElement>(null)
-  const isWelcomeScreen = messages.length === 0
-  const fullscreen = visualizationMode === "fullscreen"
-  const fullscreenWelcome = fullscreen && isWelcomeScreen
-
-  useEffect(() => {
-    const textarea = containerRef.current?.querySelector("textarea")
-    textarea?.focus()
-  }, [visualizationMode])
-
-  return (
-    <div
-      ref={containerRef}
-      className={cn(
-        "flex flex-col items-center gap-2 px-4 pb-4 pt-2",
-        fullscreenWelcome && "flex-1"
-      )}
-    >
-      <motion.div
-        layout="position"
-        className="w-full max-w-[712px]"
-        transition={{
-          layout: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] },
-        }}
-      >
-        <ChatTextarea {...props} />
-      </motion.div>
-      {disclaimer?.text && (
-        <motion.div
-          layout="position"
-          className="flex flex-row items-center gap-1 w-full justify-center max-w-[712px]"
-          transition={{
-            layout: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] },
-          }}
-        >
-          <OneEllipsis className="text-sm font-medium text-f1-foreground-tertiary">
-            {disclaimer.text}
-          </OneEllipsis>
-
-          {disclaimer.link && disclaimer.linkText && (
-            <Link
-              href={disclaimer.link}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex-shrink-0 text-sm font-medium text-f1-foreground-tertiary"
-            >
-              {disclaimer.linkText}
-            </Link>
-          )}
-        </motion.div>
-      )}
-      <AnimatePresence>
-        {footer && isWelcomeScreen && (
-          <motion.div
-            key="chat-footer"
-            className={cn(
-              "w-full py-4 mx-auto max-w-[712px]",
-              fullscreenWelcome && "mt-auto",
-              fullscreen && "flex justify-center"
-            )}
-            initial={{ opacity: 0, height: 0, overflow: "hidden" }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0, overflow: "hidden" }}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
-          >
-            {footer}
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  )
-}
-
 const F0AiChatComponent = () => {
-  const { enabled, open, setOpen } = useAiChat()
+  const { enabled, open, setOpen, mode, VoiceMode } = useAiChat()
 
-  // Register all default copilot actions
-  useDefaultCopilotActions()
+  useRegisteredActions()
 
   if (!enabled) {
     return null
+  }
+
+  if (mode === "voice" && VoiceMode) {
+    return (
+      <SidebarWindow clickOutsideToClose hitEscapeToClose shortcut="">
+        <div className="flex h-full w-full flex-col">
+          <VoiceMode />
+        </div>
+      </SidebarWindow>
+    )
   }
 
   return (

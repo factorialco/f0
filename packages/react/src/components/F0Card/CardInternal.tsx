@@ -39,6 +39,10 @@ export const cardImageSizes = ["xs", "sm", "md", "lg", "xl"] as const
 
 export type CardImageSize = (typeof cardImageSizes)[number]
 
+export const cardImageAspectRatios = ["default", "video"] as const
+
+export type CardImageAspectRatio = (typeof cardImageAspectRatios)[number]
+
 const imageSizeClassMap: Record<CardImageSize, string> = {
   xs: "h-24",
   sm: "h-32",
@@ -74,6 +78,13 @@ export interface CardInternalProps {
    * @default "sm"
    */
   imageSize?: CardImageSize
+
+  /**
+   * Constrain the image container to a fixed aspect ratio instead of a fixed height.
+   * When set, `imageSize` is ignored for height.
+   * @example "video"
+   */
+  imageAspectRatio?: CardImageAspectRatio
 
   /**
    * Whether to show a blurred background image when the image doesn't fill the container
@@ -182,6 +193,7 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
       image,
       imageFit = "fit-width",
       imageSize = "sm",
+      imageAspectRatio = "default",
       blurredBackground = true,
       title,
       description,
@@ -245,7 +257,9 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
           <div
             className={cn(
               "relative -mx-3 -mt-3 mb-4 rounded-md",
-              imageSizeClassMap[imageSize],
+              imageAspectRatio === "video"
+                ? "aspect-video"
+                : imageSizeClassMap[imageSize],
               compact && "-mx-2 -mt-2 mb-3",
               imageFit === "fit-height" &&
                 "flex items-center justify-center overflow-hidden",

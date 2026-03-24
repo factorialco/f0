@@ -1,9 +1,14 @@
+import userEvent from "@testing-library/user-event"
 import React from "react"
-import { zeroRender as render, screen, waitFor } from "@/testing/test-utils"
 import { describe, expect, it, vi } from "vitest"
 import { z } from "zod"
-import userEvent from "@testing-library/user-event"
 
+import { zeroRender as render, screen, waitFor } from "@/testing/test-utils"
+
+import type { F0SectionConfig } from "../types"
+
+import { createConditionalResolver } from "../conditionalResolver"
+import { generateAnchorId } from "../context"
 import { F0Form } from "../F0Form"
 import {
   f0FormField,
@@ -11,11 +16,9 @@ import {
   hasF0Config,
   inferFieldType,
 } from "../f0Schema"
-import type { F0SectionConfig } from "../types"
-import { getSchemaDefinition } from "../useSchemaDefinition"
 import { isFieldRequired, isOptionalOrNullable } from "../fields/schema"
 import { evaluateDisabled, evaluateRenderIf } from "../fields/utils"
-import { createConditionalResolver } from "../conditionalResolver"
+import { getSchemaDefinition } from "../useSchemaDefinition"
 
 describe("F0Form", () => {
   it("renders a basic form using schema prop", () => {
@@ -114,6 +117,198 @@ describe("F0Form", () => {
     expect(screen.getByLabelText("First Name")).toBeInTheDocument()
     expect(screen.getByLabelText("Last Name")).toBeInTheDocument()
   })
+
+  it("renders warning status configured in schema", () => {
+    const formSchema = z.object({
+      name: f0FormField(z.string(), {
+        label: "Name",
+        status: { type: "warning", message: "Check this value" },
+      }),
+    })
+
+    render(
+      <F0Form
+        name="schema-warning-status"
+        schema={formSchema}
+        defaultValues={{ name: "" }}
+        onSubmit={async () => ({ success: true })}
+      />
+    )
+
+    const message = screen.getByText("Check this value")
+    expect(message).toHaveClass("text-f1-foreground-warning")
+  })
+
+  it("hides schema status message when field validation has errors", async () => {
+    const formSchema = z.object({
+      name: f0FormField(z.string().min(2, "Too short"), {
+        label: "Name",
+        status: { type: "warning", message: "Check this value" },
+      }),
+    })
+
+    render(
+      <F0Form
+        name="schema-status-error-precedence"
+        schema={formSchema}
+        defaultValues={{ name: "" }}
+        onSubmit={async () => ({ success: true })}
+      />
+    )
+
+    expect(screen.getByText("Check this value")).toBeInTheDocument()
+
+    await userEvent.click(screen.getByText("Submit"))
+
+    await waitFor(() => {
+      expect(screen.queryByText("Check this value")).not.toBeInTheDocument()
+    })
+  })
+
+  it("applies FormControl aria attributes to duration segment inputs", async () => {
+    const formSchema = z.object({
+      duration: f0FormField(z.number().min(1, "Duration is required"), {
+        label: "Duration",
+        fieldType: "duration",
+        units: ["hours", "minutes"],
+        helpText: "Use hours and minutes",
+      }),
+    })
+
+    render(
+      <F0Form
+        name="duration-formcontrol-a11y"
+        schema={formSchema}
+        defaultValues={{ duration: 0 }}
+        onSubmit={async () => ({ success: true })}
+      />
+    )
+
+    const hoursInput = screen.getByLabelText("Hours")
+    const minutesInput = screen.getByLabelText("Minutes")
+    const helpText = screen.getByText("Use hours and minutes")
+    const helpTextId = helpText.getAttribute("id")
+    const resolvedHelpTextId = helpTextId ?? ""
+
+    expect(helpTextId).toBeTruthy()
+    expect(hoursInput).toHaveAttribute("aria-describedby")
+    expect(minutesInput).toHaveAttribute("aria-describedby")
+    expect(hoursInput).toHaveAttribute("aria-invalid", "false")
+    expect(minutesInput).toHaveAttribute("aria-invalid", "false")
+    expect(hoursInput.getAttribute("aria-describedby")).toContain(
+      resolvedHelpTextId
+    )
+    expect(minutesInput.getAttribute("aria-describedby")).toContain(
+      resolvedHelpTextId
+    )
+
+    await userEvent.click(screen.getByText("Submit"))
+
+    const errorMessage = await screen.findByText("Duration is required")
+    const errorContainerId = errorMessage.closest("div")?.getAttribute("id")
+    const resolvedErrorContainerId = errorContainerId ?? ""
+
+    expect(errorContainerId).toBeTruthy()
+    expect(hoursInput).toHaveAttribute("aria-invalid", "true")
+    expect(minutesInput).toHaveAttribute("aria-invalid", "true")
+    expect(hoursInput.getAttribute("aria-describedby")).toContain(
+      resolvedErrorContainerId
+    )
+    expect(minutesInput.getAttribute("aria-describedby")).toContain(
+      resolvedErrorContainerId
+    )
+  })
+
+  it("renders duration field wrapper used by error navigation highlight", () => {
+    const formSchema = z.object({
+      duration: f0FormField(z.number(), {
+        label: "Duration",
+        fieldType: "duration",
+      }),
+    })
+
+    render(
+      <F0Form
+        name="duration-error-navigation-highlight"
+        schema={formSchema}
+        defaultValues={{ duration: 0 }}
+        onSubmit={async () => ({ success: true })}
+      />
+    )
+
+    expect(screen.getByTestId("input-field-wrapper")).toBeInTheDocument()
+  })
+
+  it("applies shake highlight class to duration field on validation failure", async () => {
+    const formSchema = z.object({
+      duration: f0FormField(z.number().min(1, "Duration is required"), {
+        label: "Duration",
+        fieldType: "duration",
+      }),
+    })
+
+    render(
+      <F0Form
+        name="duration-validation-shake"
+        schema={formSchema}
+        defaultValues={{ duration: 0 }}
+        onSubmit={async () => ({ success: true })}
+      />
+    )
+
+    const durationAnchor = document.getElementById(
+      generateAnchorId("duration-validation-shake", undefined, "duration")
+    )
+    const durationWrapper = durationAnchor?.querySelector(
+      '[data-testid="input-field-wrapper"]'
+    )
+
+    // jsdom does not compute layout, so offsetParent is null by default.
+    // Force visibility semantics so useErrorNavigation highlights this anchor.
+    if (durationAnchor) {
+      Object.defineProperty(durationAnchor, "offsetParent", {
+        value: document.body,
+        writable: true,
+      })
+    }
+
+    expect(durationAnchor).toBeInTheDocument()
+    expect(durationWrapper).toBeInTheDocument()
+
+    await userEvent.click(screen.getByText("Submit"))
+    await screen.findByText("Duration is required")
+
+    await waitFor(() => {
+      expect(durationAnchor).toHaveClass("f0-form-error-navigate")
+    })
+  })
+
+  it("applies duration maxVisibleDigits from schema config", () => {
+    const formSchema = z.object({
+      duration: f0FormField(z.number(), {
+        label: "Duration",
+        fieldType: "duration",
+        units: ["hours"],
+        fields: {
+          hours: {
+            maxVisibleDigits: 4,
+          },
+        },
+      }),
+    })
+
+    render(
+      <F0Form
+        name="duration-max-visible-digits"
+        schema={formSchema}
+        defaultValues={{ duration: 3600 * 1234 }}
+        onSubmit={async () => ({ success: true })}
+      />
+    )
+
+    expect(screen.getByLabelText("Hours")).toHaveValue("1234")
+    expect(screen.getByLabelText("Hours")).toHaveStyle({ width: "4ch" })
+  })
 })
 
 describe("f0FormField function", () => {
@@ -145,6 +340,7 @@ describe("f0FormField function", () => {
       section: "section1",
       placeholder: "Enter text",
       helpText: "Help text",
+      status: { type: "info", message: "Info message" },
       disabled: true,
       row: "row1",
     })
@@ -154,6 +350,7 @@ describe("f0FormField function", () => {
     expect(config?.section).toBe("section1")
     expect(config?.placeholder).toBe("Enter text")
     expect(config?.helpText).toBe("Help text")
+    expect(config?.status).toEqual({ type: "info", message: "Info message" })
     expect(config?.disabled).toBe(true)
     expect(config?.row).toBe("row1")
   })
@@ -182,6 +379,12 @@ describe("inferFieldType", () => {
     const schema = z.number()
     const config = { label: "Test", fieldType: "number" } as const
     expect(inferFieldType(schema, config)).toBe("number")
+  })
+
+  it("infers duration type from explicit fieldType", () => {
+    const schema = z.number()
+    const config = { label: "Test", fieldType: "duration" } as const
+    expect(inferFieldType(schema, config)).toBe("duration")
   })
 
   it("infers switch type from ZodBoolean", () => {
@@ -231,6 +434,26 @@ describe("getSchemaDefinition", () => {
     expect(definition).toHaveLength(2)
     expect(definition[0].type).toBe("field")
     expect(definition[1].type).toBe("field")
+  })
+
+  it("maps field status from schema config", () => {
+    const formSchema = z.object({
+      name: f0FormField(z.string(), {
+        label: "Name",
+        status: { type: "info", message: "Additional context" },
+      }),
+    })
+
+    const definition = getSchemaDefinition(formSchema)
+    const fieldItem = definition[0] as {
+      type: "field"
+      field: { status?: { type: string; message?: string } }
+    }
+
+    expect(fieldItem.field.status).toEqual({
+      type: "info",
+      message: "Additional context",
+    })
   })
 
   it("groups fields by section", () => {
@@ -413,6 +636,40 @@ describe("isFieldRequired", () => {
       expect(isFieldRequired(z.boolean().optional())).toBe(false)
     })
   })
+
+  describe("object fields (rich text)", () => {
+    it("returns false for z.object({ value: z.string().nullable() })", () => {
+      expect(
+        isFieldRequired(
+          z.object({
+            value: z.string().nullable(),
+            mentionIds: z.array(z.number()).optional(),
+          })
+        )
+      ).toBe(false)
+    })
+
+    it("returns true for z.object({ value: z.string().min(1) })", () => {
+      expect(
+        isFieldRequired(
+          z.object({
+            value: z.string().min(1),
+            mentionIds: z.array(z.number()).optional(),
+          })
+        )
+      ).toBe(true)
+    })
+
+    it("returns false for z.object({ value: z.string() }) without constraints", () => {
+      expect(
+        isFieldRequired(
+          z.object({
+            value: z.string(),
+          })
+        )
+      ).toBe(false)
+    })
+  })
 })
 
 describe("getSchemaDefinition - field types", () => {
@@ -462,6 +719,28 @@ describe("getSchemaDefinition - field types", () => {
     }
 
     expect(fieldItem.field.type).toBe("datetime")
+  })
+
+  it("creates duration field from z.number() with fieldType duration", () => {
+    const formSchema = z.object({
+      duration: f0FormField(z.number(), {
+        label: "Duration",
+        fieldType: "duration",
+        units: ["hours", "minutes"],
+      }),
+    })
+
+    const definition = getSchemaDefinition(formSchema)
+    const fieldItem = definition[0] as {
+      type: "field"
+      field: {
+        type: string
+        units?: string[]
+      }
+    }
+
+    expect(fieldItem.field.type).toBe("duration")
+    expect(fieldItem.field.units).toEqual(["hours", "minutes"])
   })
 
   it("sets clearable true for optional fields", () => {
@@ -1860,6 +2139,233 @@ describe("F0Form per-section showSubmitWhenDirty", () => {
     await waitFor(() => {
       expect(screen.getByText("Save")).toBeInTheDocument()
     })
+  })
+})
+
+describe("F0Form with formDefinition (single schema)", () => {
+  const singleSchema = z.object({
+    firstName: f0FormField(z.string().min(1), {
+      label: "First Name",
+      section: "personal",
+    }),
+    email: f0FormField(z.string().email(), {
+      label: "Email",
+      section: "contact",
+    }),
+  })
+
+  it("renders fields from a single-schema formDefinition", () => {
+    const definition = {
+      _brand: "single" as const,
+      name: "def-single-render",
+      schema: singleSchema,
+      sections: {
+        personal: { title: "Personal" },
+        contact: { title: "Contact" },
+      },
+      defaultValues: { firstName: "", email: "" },
+      onSubmit: async () => ({ success: true as const }),
+    }
+
+    render(<F0Form formDefinition={definition} />)
+
+    expect(screen.getByText("Personal")).toBeInTheDocument()
+    expect(screen.getByText("Contact")).toBeInTheDocument()
+    expect(screen.getByLabelText("First Name")).toBeInTheDocument()
+    expect(screen.getByLabelText("Email")).toBeInTheDocument()
+  })
+
+  it("invokes onSubmit with { data } shape", async () => {
+    const user = userEvent.setup()
+    const onSubmit = vi.fn().mockResolvedValue({ success: true })
+
+    const definition = {
+      _brand: "single" as const,
+      name: "def-single-submit",
+      schema: singleSchema,
+      sections: {
+        personal: { title: "Personal" },
+        contact: { title: "Contact" },
+      },
+      defaultValues: { firstName: "", email: "" },
+      onSubmit,
+    }
+
+    render(<F0Form formDefinition={definition} />)
+
+    await user.type(screen.getByLabelText("First Name"), "Alice")
+    await user.type(screen.getByLabelText("Email"), "alice@example.com")
+
+    await user.click(screen.getByText("Submit"))
+
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalledTimes(1)
+      expect(onSubmit).toHaveBeenCalledWith({
+        data: { firstName: "Alice", email: "alice@example.com" },
+      })
+    })
+  })
+
+  it("renders default values from formDefinition", () => {
+    const definition = {
+      _brand: "single" as const,
+      name: "def-single-defaults",
+      schema: singleSchema,
+      sections: {
+        personal: { title: "Personal" },
+        contact: { title: "Contact" },
+      },
+      defaultValues: { firstName: "Bob", email: "bob@example.com" },
+      onSubmit: async () => ({ success: true as const }),
+    }
+
+    render(<F0Form formDefinition={definition} />)
+
+    expect(screen.getByLabelText("First Name")).toHaveValue("Bob")
+    expect(screen.getByLabelText("Email")).toHaveValue("bob@example.com")
+  })
+})
+
+describe("F0Form with formDefinition (per-section)", () => {
+  const perSectionSchema = {
+    personal: z.object({
+      firstName: f0FormField(z.string().min(1), { label: "First Name" }),
+    }),
+    contact: z.object({
+      email: f0FormField(z.string().email(), { label: "Email" }),
+    }),
+  }
+
+  it("renders fields from a per-section formDefinition", () => {
+    const definition = {
+      _brand: "per-section" as const,
+      name: "def-per-section-render",
+      schema: perSectionSchema,
+      sections: {
+        personal: { title: "Personal" },
+        contact: { title: "Contact" },
+      },
+      defaultValues: {
+        personal: { firstName: "" },
+        contact: { email: "" },
+      },
+      onSubmit: async () => ({ success: true as const }),
+    }
+
+    render(<F0Form formDefinition={definition} />)
+
+    expect(screen.getByText("Personal")).toBeInTheDocument()
+    expect(screen.getByText("Contact")).toBeInTheDocument()
+    expect(screen.getByLabelText("First Name")).toBeInTheDocument()
+    expect(screen.getByLabelText("Email")).toBeInTheDocument()
+  })
+
+  it("invokes onSubmit with { sectionId, data, fullData } shape", async () => {
+    const user = userEvent.setup()
+    const onSubmit = vi.fn().mockResolvedValue({ success: true })
+
+    const definition = {
+      _brand: "per-section" as const,
+      name: "def-per-section-submit",
+      schema: perSectionSchema,
+      sections: {
+        personal: { title: "Personal" },
+        contact: { title: "Contact" },
+      },
+      defaultValues: {
+        personal: { firstName: "" },
+        contact: { email: "" },
+      },
+      onSubmit,
+      submitConfig: { label: "Save" },
+    }
+
+    render(<F0Form formDefinition={definition} />)
+
+    await user.type(screen.getByLabelText("Email"), "test@example.com")
+
+    const saveButtons = screen.getAllByText("Save")
+    await user.click(saveButtons[1])
+
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalledTimes(1)
+      expect(onSubmit).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sectionId: "contact",
+          data: { email: "test@example.com" },
+        })
+      )
+      const arg = onSubmit.mock.calls[0][0]
+      expect(arg).toHaveProperty("fullData")
+      expect(arg.fullData).toHaveProperty("contact")
+    })
+  })
+
+  it("accumulates fullData across section submits", async () => {
+    const user = userEvent.setup()
+    const onSubmit = vi.fn().mockResolvedValue({ success: true })
+
+    const definition = {
+      _brand: "per-section" as const,
+      name: "def-per-section-fulldata",
+      schema: perSectionSchema,
+      sections: {
+        personal: { title: "Personal" },
+        contact: { title: "Contact" },
+      },
+      defaultValues: {
+        personal: { firstName: "" },
+        contact: { email: "" },
+      },
+      onSubmit,
+      submitConfig: { label: "Save" },
+    }
+
+    render(<F0Form formDefinition={definition} />)
+
+    await user.type(screen.getByLabelText("First Name"), "Alice")
+    const saveButtons = screen.getAllByText("Save")
+    await user.click(saveButtons[0])
+
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalledTimes(1)
+    })
+
+    await user.type(screen.getByLabelText("Email"), "alice@example.com")
+    const saveButtonsAfter = screen.getAllByText("Save")
+    await user.click(saveButtonsAfter[1])
+
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalledTimes(2)
+      const secondCall = onSubmit.mock.calls[1][0]
+      expect(secondCall.sectionId).toBe("contact")
+      expect(secondCall.fullData.personal).toEqual({ firstName: "Alice" })
+      expect(secondCall.fullData.contact).toEqual({
+        email: "alice@example.com",
+      })
+    })
+  })
+
+  it("renders default values from per-section formDefinition", () => {
+    const definition = {
+      _brand: "per-section" as const,
+      name: "def-per-section-defaults",
+      schema: perSectionSchema,
+      sections: {
+        personal: { title: "Personal" },
+        contact: { title: "Contact" },
+      },
+      defaultValues: {
+        personal: { firstName: "Carol" },
+        contact: { email: "carol@example.com" },
+      },
+      onSubmit: async () => ({ success: true as const }),
+    }
+
+    render(<F0Form formDefinition={definition} />)
+
+    expect(screen.getByLabelText("First Name")).toHaveValue("Carol")
+    expect(screen.getByLabelText("Email")).toHaveValue("carol@example.com")
   })
 })
 

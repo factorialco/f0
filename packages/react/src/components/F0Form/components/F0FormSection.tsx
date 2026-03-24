@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react"
+import { useCallback, useEffect, useMemo, useRef } from "react"
 import { DefaultValues, Path, useForm } from "react-hook-form"
 import { z } from "zod"
 
@@ -9,12 +9,6 @@ import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 import { cn } from "@/lib/utils"
 import { Form as FormProvider } from "@/ui/form"
 
-import { RowRenderer } from "./RowRenderer"
-import { SwitchGroupRenderer } from "./SwitchGroupRenderer"
-import { createConditionalResolver } from "../conditionalResolver"
-import { FIELD_GAP } from "../constants"
-import { F0FormContext } from "../context"
-import { FieldRenderer } from "../fields/FieldRenderer"
 import type { F0SwitchField } from "../fields/switch/types"
 import type {
   F0FormErrorTriggerMode,
@@ -25,9 +19,18 @@ import type {
   FieldItem,
   FormDefinitionItem,
   RowDefinition,
+  RenderCustomFieldFunction,
 } from "../types"
+import type { F0FormRef, F0FormStateCallback } from "../useF0Form"
+
+import { createConditionalResolver } from "../conditionalResolver"
+import { FIELD_GAP } from "../constants"
+import { F0FormContext } from "../context"
+import { FieldRenderer } from "../fields/FieldRenderer"
 import { useSchemaDefinition } from "../useSchemaDefinition"
 import { createZodErrorMap } from "../zodErrorMap"
+import { RowRenderer } from "./RowRenderer"
+import { SwitchGroupRenderer } from "./SwitchGroupRenderer"
 
 const ERROR_TRIGGER_MODE_MAP = {
   "on-blur": "onBlur",
@@ -39,6 +42,34 @@ type GroupedItem =
   | { type: "field"; item: FieldItem }
   | { type: "row"; item: RowDefinition; index: number }
   | { type: "switchGroup"; fields: F0SwitchField[] }
+
+/**
+ * Flatten RHF FieldErrors into a dot-path → message map.
+ * Handles nested errors (e.g. daterange `errors.range.from`).
+ */
+function flattenFormErrors(
+  errors: Record<string, unknown>
+): Record<string, string> {
+  const result: Record<string, string> = {}
+
+  function walk(obj: Record<string, unknown>, prefix: string) {
+    for (const [key, value] of Object.entries(obj)) {
+      if (key === "root") continue
+      const path = prefix ? `${prefix}.${key}` : key
+      if (value && typeof value === "object" && !Array.isArray(value)) {
+        const err = value as Record<string, unknown>
+        if ("message" in err && typeof err.message === "string") {
+          result[path] = err.message
+        } else {
+          walk(err, path)
+        }
+      }
+    }
+  }
+
+  walk(errors, "")
+  return result
+}
 
 function groupContiguousSwitches(
   definition: FormDefinitionItem[]
@@ -83,6 +114,10 @@ interface F0FormSectionProps<TSchema extends F0FormSchema> {
   errorTriggerMode: F0FormErrorTriggerMode
   className?: string
   initialFiles?: import("../fields/file/types").InitialFile[]
+  formRef?: React.MutableRefObject<F0FormRef | null>
+  renderCustomField?: RenderCustomFieldFunction
+  /** Whether async defaultValues are still being resolved */
+  isLoading?: boolean
 }
 
 /**
@@ -100,19 +135,21 @@ export function F0FormSection<TSchema extends F0FormSchema>({
   errorTriggerMode,
   className,
   initialFiles,
+  formRef,
+  renderCustomField,
+  isLoading: isFormLoading,
 }: F0FormSectionProps<TSchema>) {
   const i18n = useI18n()
 
   type TValues = z.infer<TSchema>
 
-  // Fields in per-section mode don't have a `section` property, so they
-  // are all root-level fields. We don't pass section config to useSchemaDefinition.
   const definition = useSchemaDefinition(schema)
 
   const submitLabel = submitConfig?.label ?? "Submit"
   const submitIcon =
     submitConfig?.icon === null ? undefined : (submitConfig?.icon ?? Save)
   const showSubmitWhenDirty = submitConfig?.showSubmitWhenDirty ?? false
+  const hideSubmitButton = submitConfig?.hideSubmitButton ?? false
 
   const errorMap = useMemo(() => createZodErrorMap(i18n), [i18n])
   const formMode = ERROR_TRIGGER_MODE_MAP[errorTriggerMode]
@@ -128,10 +165,21 @@ export function F0FormSection<TSchema extends F0FormSchema>({
     defaultValues: defaultValues as DefaultValues<TValues>,
   })
 
+  // When async defaultValues finish loading, reset the form with resolved values
+  const wasLoadingRef = useRef(isFormLoading)
+  useEffect(() => {
+    if (wasLoadingRef.current && !isFormLoading && defaultValues) {
+      form.reset(defaultValues as DefaultValues<TValues>)
+    }
+    wasLoadingRef.current = isFormLoading
+  }, [isFormLoading, defaultValues, form])
+
   const rootError = form.formState.errors.root
   const { isSubmitting, isDirty } = form.formState
   const hasErrors =
     Object.keys(form.formState.errors).filter((k) => k !== "root").length > 0
+
+  const stateCallbackRef = useRef<F0FormStateCallback | null>(null)
 
   const handleSubmit = useCallback(
     async (data: TValues) => {
@@ -159,11 +207,91 @@ export function F0FormSection<TSchema extends F0FormSchema>({
     [onSubmit, form]
   )
 
+  useEffect(() => {
+    if (formRef) {
+      const refMethods: F0FormRef = {
+        submit: () => {
+          return new Promise<void>((resolve, reject) => {
+            form.handleSubmit(
+              async (data) => {
+                await handleSubmit(data)
+                resolve()
+              },
+              () => {
+                reject(new Error("Form validation failed"))
+              }
+            )()
+          })
+        },
+        reset: () => form.reset(),
+        isDirty: () => form.formState.isDirty,
+        getValues: () => form.getValues() as Record<string, unknown>,
+        setValue: (fieldName, value, options) => {
+          form.setValue(
+            fieldName as Path<TValues>,
+            value as TValues[keyof TValues],
+            {
+              shouldValidate: options?.shouldValidate ?? true,
+              shouldDirty: options?.shouldDirty ?? true,
+            }
+          )
+        },
+        setValues: (values, options) => {
+          for (const [fieldName, value] of Object.entries(values)) {
+            form.setValue(
+              fieldName as Path<TValues>,
+              value as TValues[keyof TValues],
+              {
+                shouldValidate: false,
+                shouldDirty: options?.shouldDirty ?? true,
+              }
+            )
+          }
+          if (options?.shouldValidate !== false) {
+            void form.trigger()
+          }
+        },
+        trigger: async (fieldName) => {
+          if (fieldName) {
+            return form.trigger(fieldName as Path<TValues>)
+          }
+          return form.trigger()
+        },
+        getErrors: () =>
+          flattenFormErrors(form.formState.errors as Record<string, unknown>),
+        getFieldNames: () => {
+          return Object.keys(form.getValues() as Record<string, unknown>)
+        },
+        _setStateCallback: (callback: F0FormStateCallback) => {
+          stateCallbackRef.current = callback
+        },
+      }
+      formRef.current = refMethods
+    }
+
+    return () => {
+      if (formRef) {
+        formRef.current = null
+      }
+    }
+  }, [formRef, form, handleSubmit])
+
+  useEffect(() => {
+    if (stateCallbackRef.current) {
+      stateCallbackRef.current({ isSubmitting, hasErrors })
+    }
+  }, [isSubmitting, hasErrors])
+
   const groupedItems = groupContiguousSwitches(definition)
 
   const contextValue = useMemo(
-    () => ({ formName, initialFiles }),
-    [formName, initialFiles]
+    () => ({
+      formName,
+      initialFiles,
+      renderCustomField,
+      isLoading: isFormLoading,
+    }),
+    [formName, initialFiles, renderCustomField, isFormLoading]
   )
 
   const title = sectionConfig?.title ?? sectionId
@@ -234,14 +362,14 @@ export function F0FormSection<TSchema extends F0FormSchema>({
             </p>
           )}
 
-          {(!showSubmitWhenDirty || isDirty) && (
+          {!hideSubmitButton && (!showSubmitWhenDirty || isDirty) && (
             <div className="mt-4">
               <F0Button
                 type="submit"
                 label={submitLabel}
                 icon={submitIcon}
                 loading={isSubmitting}
-                disabled={hasErrors}
+                disabled={hasErrors || isFormLoading}
               />
             </div>
           )}

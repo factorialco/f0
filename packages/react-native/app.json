@@ -35,10 +35,10 @@
         {
           "fonts": [
             "./assets/fonts/factorial.ttf",
-            "./assets/fonts/Inter/InterNormal.ttf",
-            "./assets/fonts/Inter/InterMedium.ttf",
-            "./assets/fonts/Inter/InterSemiBold.ttf",
-            "./assets/fonts/Inter/InterBold.ttf",
+            "./assets/fonts/Inter/Inter-Regular.ttf",
+            "./assets/fonts/Inter/Inter-Medium.ttf",
+            "./assets/fonts/Inter/Inter-SemiBold.ttf",
+            "./assets/fonts/Inter/Inter-Bold.ttf",
             "./assets/fonts/OxaniumMedium.ttf"
           ]
         }

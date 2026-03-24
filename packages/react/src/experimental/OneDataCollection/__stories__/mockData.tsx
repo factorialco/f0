@@ -76,6 +76,100 @@ import {
 import { OnBulkActionCallback } from "../types"
 import { Visualization, VisualizationType } from "../visualizations/collection"
 
+// Mock data for nested subfilters (office → space → desk)
+const OFFICES = [
+  { id: 101, name: "Barcelona HQ" },
+  { id: 102, name: "Madrid Office" },
+  { id: 103, name: "London" },
+  { id: 104, name: "New York" },
+] as const
+
+const SPACES = [
+  { id: 1, name: "Floor 1", officeId: 101 },
+  { id: 2, name: "Floor 2", officeId: 101 },
+  { id: 3, name: "Rooftop Terrace", officeId: 101 },
+  { id: 4, name: "Floor 1", officeId: 102 },
+  { id: 5, name: "Floor 2", officeId: 102 },
+  { id: 6, name: "Ground Floor", officeId: 103 },
+  { id: 7, name: "Main Floor", officeId: 104 },
+] as const
+
+const DESKS = [
+  { id: 100, name: "Desk A1", spaceId: 1 },
+  { id: 101, name: "Desk A2", spaceId: 1 },
+  { id: 102, name: "Desk B1", spaceId: 2 },
+  { id: 103, name: "Desk B2", spaceId: 2 },
+  { id: 104, name: "Hot Desk 1", spaceId: 7 },
+] as const
+
+export const nestedFilters = {
+  office: {
+    type: "in" as const,
+    label: "Office",
+    options: {
+      options: OFFICES.map((office) => {
+        const officeSpaces = SPACES.filter((s) => s.officeId === office.id)
+        return {
+          value: String(office.id),
+          label: office.name,
+          ...(officeSpaces.length > 0 && {
+            children: {
+              filterKey: "space",
+              options: officeSpaces.map((space) => {
+                const spaceDesks = DESKS.filter((d) => d.spaceId === space.id)
+                return {
+                  value: String(space.id),
+                  label: space.name,
+                  ...(spaceDesks.length > 0 && {
+                    children: {
+                      filterKey: "desk",
+                      options: spaceDesks.map((desk) => ({
+                        value: String(desk.id),
+                        label: desk.name,
+                      })),
+                    },
+                  }),
+                }
+              }),
+            },
+          }),
+        }
+      }),
+    },
+  },
+  space: {
+    type: "in" as const,
+    label: "Space",
+    hideSelector: true,
+    options: {
+      options: SPACES.map((space) => ({
+        value: String(space.id),
+        label: space.name,
+      })),
+    },
+  },
+  desk: {
+    type: "in" as const,
+    label: "Desk",
+    hideSelector: true,
+    options: {
+      options: DESKS.map((desk) => ({
+        value: String(desk.id),
+        label: desk.name,
+      })),
+    },
+  },
+  department: {
+    type: "in" as const,
+    label: "Department",
+    options: {
+      options: DEPARTMENTS_MOCK.map((value) => ({ value, label: value })),
+    },
+  },
+} as const
+
+export type NestedFiltersType = typeof nestedFilters
+
 // Example filter definition
 export const filters = {
   search: {
@@ -217,6 +311,16 @@ export class MockDataCache<T extends MockUser> {
     return item
   }
 
+  /**
+   * Replace an item in the cache with a new version.
+   */
+  updateItem(updatedItem: T): T | null {
+    if (!this.dataMap.has(updatedItem.id)) return null
+    this.dataMap.set(updatedItem.id, updatedItem)
+    this.notify()
+    return updatedItem
+  }
+
   reset(newData: T[]) {
     this.dataMap = new Map(newData.map((item) => [item.id, item]))
     this.notify()
@@ -236,6 +340,8 @@ export const getMockVisualizations = (options?: {
     noSorting?: boolean
     nestedRecords?: boolean
     applyLongText?: boolean
+    longColumnLabels?: boolean
+    referenceRows?: boolean
   }
   cache?: MockDataCache<MockUser>
 }): Record<
@@ -258,6 +364,9 @@ export const getMockVisualizations = (options?: {
         allowColumnReordering: options?.table?.allowColumnReordering,
         frozenColumns:
           options?.table?.frozenColumns ?? options?.frozenColumns ?? 0,
+        referenceRowType: options?.table?.referenceRows
+          ? (item) => (item.status === "inactive" ? "striped" : "none")
+          : undefined,
         columns: [
           {
             label: "Name",
@@ -333,7 +442,9 @@ export const getMockVisualizations = (options?: {
           },
           {
             id: "role3",
-            label: "Role 3",
+            label: options?.table?.longColumnLabels
+              ? "Role (Field with a very long label to test the ellipsis)"
+              : "Role 3",
             render: (item) => item.role,
             sorting: options?.table?.noSorting ? undefined : "role",
           },
@@ -395,6 +506,129 @@ export const getMockVisualizations = (options?: {
       NavigationFiltersDefinition,
       GroupingDefinition<MockUser>
     >,
+    editableTable: {
+      type: "editableTable",
+      options: {
+        allowColumnHiding: options?.table?.allowColumnHiding,
+        allowColumnReordering: options?.table?.allowColumnReordering,
+        frozenColumns:
+          options?.table?.frozenColumns ?? options?.frozenColumns ?? 0,
+        columns: [
+          {
+            label: "Name",
+            width: options?.table?.nestedRecords ? 300 : 140,
+            render: (item) =>
+              !item.children && item.detailed
+                ? {
+                    type: "text",
+                    value: { placeholder: "N/A" },
+                  }
+                : {
+                    type: "person",
+                    value: {
+                      firstName: item.name.split(" ")[0],
+                      lastName: item.name.split(" ")[1],
+                    },
+                  },
+            id: "name",
+            editType: () => "display-only" as const,
+            sorting: options?.table?.noSorting ? undefined : "name",
+            order: options?.table?.allowColumnReordering ? 3 : undefined,
+          },
+          {
+            label: "Email",
+            editType: () => "text" as const,
+            render: (item) => item.email,
+            sorting: options?.table?.noSorting ? undefined : "email",
+            id: "email",
+          },
+          {
+            label: "Role",
+            editType: () => "text" as const,
+            render: (item) => item.role,
+            sorting: options?.table?.noSorting ? undefined : "role",
+            id: "role",
+            order: options?.table?.allowColumnReordering ? 2 : undefined,
+            noHiding: options?.table?.allowColumnHiding,
+          },
+          {
+            id: "department",
+            label: "Department",
+            editType: () => "select" as const,
+            selectConfig: {
+              options: DEPARTMENTS_MOCK.map((dept) => ({
+                value: dept,
+                label: dept,
+              })),
+              placeholder: "Select department",
+            },
+            render: (item) => item.department,
+            sorting: options?.table?.noSorting ? undefined : "department",
+            order: options?.table?.allowColumnReordering ? 4 : undefined,
+          },
+          {
+            id: "salary",
+            label: "Salary",
+            editType: () => "text" as const,
+            align: "right" as const,
+            render: (item) =>
+              item.salary !== undefined ? String(item.salary) : "",
+          },
+
+          ...((options?.table?.applyLongText ?? true)
+            ? [
+                {
+                  label: "Long",
+                  editType: () => "disabled" as const,
+                  render: () => ({
+                    type: "longText",
+                    value: {
+                      text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas facilisis eu elit in pharetra.",
+                      lines: 4,
+                    },
+                  }),
+                  id: "longText",
+                },
+              ]
+            : []),
+          {
+            label: "Permissions",
+            editType: () => "disabled" as const,
+            render: (item) =>
+              [
+                item.permissions?.read ? "Read" : "",
+                item.permissions?.write ? "Write" : "",
+                item.permissions?.delete ? "Delete" : "",
+              ]
+                .filter(Boolean)
+                .join(", "),
+            sorting: options?.table?.noSorting ? undefined : "permissions.read",
+            id: "permissions",
+            order: options?.table?.allowColumnReordering ? 4 : undefined,
+          },
+        ],
+        onCellChange: (() => {
+          if (options?.cache) {
+            return async (updatedItem: MockUser) => {
+              console.log("cache enabled: cell changed", updatedItem)
+              options.cache!.updateItem(updatedItem)
+            }
+          }
+          return async (_updatedItem: MockUser) => {
+            console.log("cache disabled: cell changed", _updatedItem)
+            // No-op handler when cache is not available
+          }
+        })(),
+      },
+    } as Visualization<
+      MockUser,
+      FiltersType,
+      typeof sortings,
+      SummariesDefinition,
+      ItemActionsDefinition<MockUser>,
+      NavigationFiltersDefinition,
+      GroupingDefinition<MockUser>
+    >,
     card: {
       type: "card",
       options: {
@@ -410,7 +644,6 @@ export const getMockVisualizations = (options?: {
           {
             label: "Email",
             icon: Envelope,
-            tooltip: "Email",
             render: (item) => item.email,
             hide: (item) => !item.email,
           },
@@ -635,23 +868,23 @@ export const getMockVisualizations = (options?: {
         metadata: (u) => [
           {
             icon: Envelope,
-            tooltip: "Email",
-            property: { type: "text", value: u.email },
+            property: { type: "text", label: "Email", value: u.email },
           },
           {
             icon: Building,
-            tooltip: "Department",
-            property: { type: "text", value: u.department },
+            property: {
+              type: "text",
+              label: "Department",
+              value: u.department,
+            },
           },
           {
             icon: Briefcase,
-            tooltip: "Role",
-            property: { type: "text", value: u.role },
+            property: { type: "text", label: "Role", value: u.role },
           },
           {
             icon: Star,
-            tooltip: "ID",
-            property: { type: "text", value: u.id },
+            property: { type: "text", label: "ID", value: u.id },
           },
         ],
         onMove: options?.cache
@@ -1275,8 +1508,8 @@ export const ExampleComponent = ({
         { id: "other", filters: { department: ["Marketing"] } },
       ],
     },
-    [cacheVersion]
-  ) // Pass cacheVersion as dependency to force refetch on cache changes
+    [cacheVersion, dataAdapterMemoized]
+  ) // Pass cacheVersion and dataAdapter as dependencies to force refetch on cache or data changes
 
   return (
     <div
@@ -1305,8 +1538,75 @@ export const ExampleComponent = ({
             mockVisualizations.card,
             mockVisualizations.list,
             mockVisualizations.kanban,
+            mockVisualizations.editableTable,
           ]
         }
+      />
+    </div>
+  )
+}
+
+export const SubfiltersExampleComponent = () => {
+  const dataAdapterMemoized = useMemo(
+    () => ({
+      fetchData: (
+        options: DataCollectionBaseFetchOptions<
+          NestedFiltersType,
+          NavigationFiltersDefinition
+        >
+      ) => {
+        const { filters: f, sortings: s, search } = options
+        return new Promise<BaseResponse<MockUser>>((resolve) => {
+          setTimeout(() => {
+            const filtered = filterUsers(
+              mockUsers,
+              f as FiltersState<FiltersType>,
+              s,
+              undefined,
+              search
+            )
+            resolve({ records: filtered })
+          }, 100)
+        })
+      },
+    }),
+    []
+  )
+
+  const dataSource = useDataCollectionSource(
+    {
+      filters: nestedFilters,
+      sortings,
+      itemOnClick: (item) => () => console.log(`Clicking ${item.name}`),
+      itemUrl: (item) => `/users/${item.id}`,
+      dataAdapter: dataAdapterMemoized,
+    },
+    []
+  )
+
+  const mockVisualizations = getMockVisualizations({}) as unknown as Record<
+    string,
+    Visualization<
+      MockUser,
+      NestedFiltersType,
+      typeof sortings,
+      SummariesDefinition,
+      ItemActionsDefinition<MockUser>,
+      NavigationFiltersDefinition,
+      GroupingDefinition<MockUser>
+    >
+  >
+
+  return (
+    <div className="space-y-4">
+      <OneDataCollection
+        dataTestId="one-data-collection-subfilters"
+        source={dataSource}
+        visualizations={[
+          mockVisualizations.table,
+          mockVisualizations.card,
+          mockVisualizations.list,
+        ]}
       />
     </div>
   )

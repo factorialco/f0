@@ -1,7 +1,8 @@
-import type { z, ZodRawShape, ZodEffects } from "zod"
+import type { z, ZodRawShape, ZodEffects, ZodType } from "zod"
 
 import type { IconType } from "@/components/F0Icon"
 
+import type { CustomFieldRenderPropsBase } from "./fields/custom/types"
 import type {
   F0Field,
   F0BaseFieldRenderIfFunction,
@@ -29,7 +30,11 @@ export {
 // Re-export useF0Form hook and types
 export { useF0Form } from "./useF0Form"
 import type { F0FormRef } from "./useF0Form"
-export type { F0FormRef, UseF0FormReturn } from "./useF0Form"
+export type {
+  F0FormRef,
+  F0FormSetValueOptions,
+  UseF0FormReturn,
+} from "./useF0Form"
 
 /**
  * Conditional rendering for sections - can be a condition object or a function
@@ -60,6 +65,8 @@ export interface F0SectionConfig {
   title: string
   /** Section description */
   description?: string
+  /** Applies default horizontal inset to the section header (title/subtitle/action row) */
+  withInset?: boolean
   /** Conditional rendering for the entire section */
   renderIf?: SectionRenderIf
   /** Optional action button for the section */
@@ -100,6 +107,8 @@ export interface SectionDefinition {
     title: string
     /** Section description */
     description?: string
+    /** Applies default horizontal inset to the section header (title/subtitle/action row) */
+    withInset?: boolean
     /** Conditional rendering for the entire section */
     renderIf?: SectionRenderIf
     /** Optional action button for the section */
@@ -141,6 +150,12 @@ interface F0FormSubmitConfigBase {
   icon?: IconType | null
   /** Label shown in the action bar while submitting (defaults to i18n "forms.actionBar.saving") */
   savingMessage?: string
+  /**
+   * Duration in ms before the success message auto-clears.
+   * - number: auto-clear after this many ms (default: 3000)
+   * - null: never auto-clear (caller is responsible for unmounting)
+   */
+  successMessageDuration?: number | null
 }
 
 /**
@@ -173,6 +188,12 @@ interface F0FormDefaultSubmitConfig extends F0FormSubmitConfigBase {
    * @default false
    */
   hideSubmitButton?: boolean
+  /**
+   * When true, hides the internal action bar (loading/success feedback).
+   * Useful when the parent component provides its own action bar.
+   * @default false
+   */
+  hideActionBar?: boolean
 }
 
 /**
@@ -228,6 +249,67 @@ export type F0FormSchema<T extends ZodRawShape = ZodRawShape> =
  * When used, each section gets independent validation and its own submit button.
  */
 export type F0PerSectionSchema = Record<string, F0FormSchema>
+
+// ============================================================================
+// renderCustomField types
+// ============================================================================
+
+/**
+ * Props passed to the form-level `renderCustomField` callback.
+ * Extends the base custom field render props with a required `customFieldName`.
+ */
+export interface RenderCustomFieldProps extends CustomFieldRenderPropsBase {
+  /** Name identifying this custom field type */
+  customFieldName: string
+  /** Custom configuration (if provided via fieldConfig) */
+  config: unknown
+  /** The field type this customFieldName is attached to (e.g. "select", "custom") */
+  fieldType: string
+}
+
+/**
+ * Select field configuration that `renderCustomField` can return
+ * for select fields with `customFieldName` (e.g. reusable entity selectors).
+ *
+ * Mirrors the select field config shape — either static `options` or dynamic `source`+`mapOptions`.
+ */
+export interface RenderCustomFieldSelectConfig {
+  _type: "select-config"
+  /** Data source for fetching options dynamically */
+  source?: unknown
+  /** Function to map data source items to select options */
+  mapOptions?: (item: never) => unknown
+  /** Static options array */
+  options?: unknown[]
+  /** Whether multiple selection is allowed */
+  multiple?: boolean
+  /** Whether to show the search box */
+  showSearchBox?: boolean
+  /** Placeholder for the search box */
+  searchBoxPlaceholder?: string
+}
+
+/**
+ * Return type for the `renderCustomField` callback.
+ * Can return either:
+ * - A React node (rendered directly as a custom component)
+ * - A select config object (merged into the select field props)
+ */
+export type RenderCustomFieldResult =
+  | React.ReactNode
+  | RenderCustomFieldSelectConfig
+
+/**
+ * Callback provided to F0Form / F0WizardForm that renders custom fields
+ * identified by `customFieldName` instead of an inline `render` function.
+ *
+ * For `fieldType: "custom"` — return a ReactNode (component) as before.
+ * For `fieldType: "select"` — return either a ReactNode or a `RenderCustomFieldSelectConfig`
+ * with `{ _type: "select-config", source, mapOptions }` to configure the select dynamically.
+ */
+export type RenderCustomFieldFunction = (
+  props: RenderCustomFieldProps
+) => RenderCustomFieldResult
 
 /**
  * Helper type to infer the combined values from a per-section schema record.
@@ -301,6 +383,29 @@ export interface F0FormPropsWithSingleSchema<TSchema extends F0FormSchema> {
    * `defaultValues` against `InitialFile.value`.
    */
   initialFiles?: InitialFile[]
+  /**
+   * Callback that renders custom fields identified by `customFieldName`.
+   * When a field has `customFieldName`, this function is called instead of the inline `render`.
+   */
+  renderCustomField?: RenderCustomFieldFunction
+  /**
+   * Whether async defaultValues are still being resolved.
+   * When true, the form renders with loading indicators inside each field
+   * instead of replacing the entire form with skeleton placeholders.
+   */
+  isLoading?: boolean
+  /**
+   * Zod schema describing params the AI can supply when calling presentForm.
+   * Passed through to the AI form registry.
+   */
+  defaultValuesParamsSchema?: ZodType
+  /**
+   * Raw defaultValues function for the AI registry to call with params.
+   * Set automatically when using `useF0FormDefinition` with a functional `defaultValues`.
+   */
+  defaultValuesFn?: (
+    params: Record<string, unknown>
+  ) => Promise<Record<string, unknown>>
 }
 
 /**
@@ -322,6 +427,12 @@ export interface F0PerSectionSubmitConfig {
    * @default false
    */
   showSubmitWhenDirty?: boolean
+  /**
+   * When true, hides the submit button.
+   * Useful when submission is controlled externally (e.g. inside F0WizardForm).
+   * @default false
+   */
+  hideSubmitButton?: boolean
 }
 
 /**
@@ -374,21 +485,82 @@ export interface F0FormPropsWithPerSectionSchema<T extends F0PerSectionSchema> {
    * `defaultValues` against `InitialFile.value`.
    */
   initialFiles?: InitialFile[]
+  /**
+   * Callback that renders custom fields identified by `customFieldName`.
+   * When a field has `customFieldName`, this function is called instead of the inline `render`.
+   */
+  renderCustomField?: RenderCustomFieldFunction
+  /**
+   * Whether async defaultValues are still being resolved.
+   * When true, the form renders with loading indicators inside each field
+   * instead of replacing the entire form with skeleton placeholders.
+   */
+  isLoading?: boolean
 }
 
 /**
- * Union of both F0Form prop variants.
+ * Props for F0Form using a formDefinition (single schema mode).
+ * Form-related props are extracted from the definition; only rendering/integration
+ * props are passed directly.
+ */
+export interface F0FormPropsWithSingleSchemaDefinition<
+  TSchema extends F0FormSchema,
+> {
+  formDefinition: import("@/components/F0WizardForm/types").F0FormDefinitionSingleSchema<TSchema>
+  className?: string
+  styling?: F0FormStylingConfig
+  formRef?: React.MutableRefObject<F0FormRef | null>
+  initialFiles?: InitialFile[]
+  /**
+   * Callback that renders custom fields identified by `customFieldName`.
+   * When a field has `customFieldName`, this function is called instead of the inline `render`.
+   */
+  renderCustomField?: RenderCustomFieldFunction
+}
+
+/**
+ * Props for F0Form using a formDefinition (per-section schema mode).
+ * Form-related props are extracted from the definition; only rendering/integration
+ * props are passed directly.
+ */
+export interface F0FormPropsWithPerSectionDefinition<
+  T extends F0PerSectionSchema,
+> {
+  formDefinition: import("@/components/F0WizardForm/types").F0FormDefinitionPerSection<T>
+  className?: string
+  styling?: F0FormStylingConfig
+  formRef?: React.MutableRefObject<F0FormRef | null>
+  initialFiles?: InitialFile[]
+  /**
+   * Callback that renders custom fields identified by `customFieldName`.
+   * When a field has `customFieldName`, this function is called instead of the inline `render`.
+   */
+  renderCustomField?: RenderCustomFieldFunction
+  /**
+   * Whether async defaultValues are still being resolved.
+   * When true, the form renders with loading indicators inside each field
+   * instead of replacing the entire form with skeleton placeholders.
+   */
+  isLoading?: boolean
+}
+
+/**
+ * Union of all F0Form prop variants.
  * The component detects the mode based on whether `schema` is a single Zod schema
- * or a record of schemas keyed by section ID.
+ * or a record of schemas keyed by section ID, or whether a `formDefinition` is provided.
  */
 export type F0FormProps<
   TSchema extends F0FormSchema | F0PerSectionSchema =
     | F0FormSchema
     | F0PerSectionSchema,
 > = TSchema extends F0FormSchema
-  ? F0FormPropsWithSingleSchema<TSchema>
+  ?
+      | F0FormPropsWithSingleSchema<TSchema>
+      | F0FormPropsWithSingleSchemaDefinition<TSchema>
   : TSchema extends F0PerSectionSchema
-    ? F0FormPropsWithPerSectionSchema<TSchema>
+    ?
+        | F0FormPropsWithPerSectionSchema<TSchema>
+        | F0FormPropsWithPerSectionDefinition<TSchema>
     : never
 
 /**

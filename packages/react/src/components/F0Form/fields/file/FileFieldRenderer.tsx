@@ -5,11 +5,12 @@ import { F0Icon } from "@/components/F0Icon"
 import { Upload } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 import { cn, focusRing } from "@/lib/utils"
+import type { InputFieldStatusType } from "@/ui/InputField/types"
 
-import { useF0FormContext } from "../../context"
 import type { ResolvedField } from "../types"
 import type { F0FileField, FileEntry, InitialFile } from "./types"
 
+import { useOptionalF0FormContext } from "../../context"
 import { FileUploadItem } from "./FileUploadItem"
 
 const BARE_CATEGORIES = new Set([
@@ -91,10 +92,40 @@ function formatAcceptedTypes(accept: string[] | undefined): string | undefined {
   return labels.length > 0 ? labels.join(", ") : undefined
 }
 
+function getDropzoneStatusClasses({
+  isDragOver,
+  hasCriticalStatus,
+  statusType,
+}: {
+  isDragOver: boolean
+  hasCriticalStatus: boolean
+  statusType?: InputFieldStatusType
+}): string {
+  if (isDragOver) {
+    return "border-f1-border-accent bg-f1-background-accent-bold/5"
+  }
+
+  if (hasCriticalStatus) {
+    return "border-f1-border-critical-bold bg-f1-background-critical bg-opacity-10"
+  }
+
+  if (statusType === "warning") {
+    return "border-f1-border-warning-bold bg-f1-background"
+  }
+
+  if (statusType === "info") {
+    return "border-f1-border-info-bold bg-f1-background"
+  }
+
+  return "border-f1-border bg-f1-background"
+}
+
 interface FileFieldRendererProps {
   field: ResolvedField<F0FileField>
   formField: ControllerRenderProps<FieldValues>
   error?: boolean
+  statusType?: InputFieldStatusType
+  initialFiles?: InitialFile[]
 }
 
 /**
@@ -134,9 +165,12 @@ export function FileFieldRenderer({
   field,
   formField,
   error,
+  statusType,
+  initialFiles,
 }: FileFieldRendererProps) {
   const { forms } = useI18n()
-  const { initialFiles: initialFilesPool } = useF0FormContext()
+  const context = useOptionalF0FormContext()
+  const initialFilesPool = initialFiles ?? context?.initialFiles
   const inputId = useId()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [isDragOver, setIsDragOver] = useState(false)
@@ -311,6 +345,9 @@ export function FileFieldRenderer({
       } else if (!isMultiple) {
         formField.onChange(undefined)
       }
+
+      // Trigger validation after removing a file
+      formField.onBlur()
     },
     [entries, isMultiple, formField]
   )
@@ -327,6 +364,16 @@ export function FileFieldRenderer({
     ? translations.dropzoneActive
     : (field.description ??
       (isMultiple ? translations.dropzoneMultiple : translations.dropzone))
+  const hasCriticalStatus = Boolean(
+    error || validationError || statusType === "error"
+  )
+  const hasDecorativeStatus =
+    hasCriticalStatus || statusType === "warning" || statusType === "info"
+  const dropzoneStatusClasses = getDropzoneStatusClasses({
+    isDragOver,
+    hasCriticalStatus,
+    statusType,
+  })
 
   return (
     <div className="flex flex-col gap-2">
@@ -342,13 +389,10 @@ export function FileFieldRenderer({
           aria-disabled={field.disabled}
           className={cn(
             "flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed px-4 py-6 transition-colors",
-            isDragOver
-              ? "border-f1-border-accent bg-f1-background-accent-bold/5"
-              : error || validationError
-                ? "border-f1-border-critical bg-f1-background"
-                : "border-f1-border bg-f1-background",
+            dropzoneStatusClasses,
             !field.disabled &&
               !isDragOver &&
+              !hasDecorativeStatus &&
               "hover:border-f1-border-hover hover:bg-f1-background-secondary",
             field.disabled && "cursor-not-allowed opacity-50",
             focusRing("rounded-lg")

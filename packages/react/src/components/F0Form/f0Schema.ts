@@ -1,27 +1,33 @@
 import { z, ZodTypeAny } from "zod"
 
 import type { AlertVariant } from "@/components/F0Alert/types"
-import type { IconType } from "@/components/F0Icon"
-
 import type {
-  F0BaseFieldDisabledProp,
-  F0BaseFieldRenderIfProp,
-} from "./fields/types"
-import type { F0TextConfig } from "./fields/text/types"
-import type { F0NumberConfig } from "./fields/number/types"
-import type { F0TextareaConfig } from "./fields/textarea/types"
-import type { F0SelectConfig } from "./fields/select/types"
+  DurationFieldConfig,
+  DurationInputSize,
+  DurationUnit,
+} from "@/components/F0DurationInput/types"
+import type { IconType } from "@/components/F0Icon"
+import type { InputFieldStatus } from "@/ui/InputField/types"
+
 import type { F0CheckboxConfig } from "./fields/checkbox/types"
-import type { F0SwitchConfig } from "./fields/switch/types"
+import type { F0CustomConfig } from "./fields/custom/types"
 import type {
   F0DateConfig,
   F0DateTimeConfig,
   F0TimeConfig,
 } from "./fields/date/types"
 import type { F0DateRangeConfig } from "./fields/daterange/types"
-import type { F0RichTextConfig } from "./fields/richtext/types"
-import type { F0CustomConfig } from "./fields/custom/types"
 import type { F0FileConfig } from "./fields/file/types"
+import type { F0NumberConfig } from "./fields/number/types"
+import type { F0RichTextConfig } from "./fields/richtext/types"
+import type { F0SelectConfig } from "./fields/select/types"
+import type { F0SwitchConfig } from "./fields/switch/types"
+import type { F0TextConfig } from "./fields/text/types"
+import type { F0TextareaConfig } from "./fields/textarea/types"
+import type {
+  F0BaseFieldDisabledProp,
+  F0BaseFieldRenderIfProp,
+} from "./fields/types"
 
 /**
  * Zod type names for type checking without instanceof
@@ -70,6 +76,7 @@ export function unwrapToZodObject<T extends z.ZodRawShape>(
 export type F0FieldType =
   | "text"
   | "number"
+  | "duration"
   | "textarea"
   | "select"
   | "checkbox"
@@ -141,6 +148,8 @@ export interface F0BaseConfig {
   placeholder?: string
   /** Helper text displayed below the field */
   helpText?: string
+  /** Optional non-validation field status (warning/info/error/default) */
+  status?: InputFieldStatus
   /**
    * Whether the field is disabled.
    * Can be a boolean or a function that receives form values.
@@ -185,6 +194,12 @@ export interface F0BaseConfig {
    *     : null
    */
   alert?: F0FieldAlert
+  /**
+   * Name identifying a reusable custom field type.
+   * When set, the form-level `renderCustomField` callback is invoked to provide
+   * field-specific configuration (e.g. data source, options) or a custom component.
+   */
+  customFieldName?: string
 }
 
 // Re-export field-specific config types
@@ -257,6 +272,17 @@ export type F0NumberInputConfig = F0BaseConfig &
   }
 
 /**
+ * Config for duration fields (stores total seconds as number)
+ */
+export type F0DurationFieldConfig = F0BaseConfig & {
+  fieldType: "duration"
+  units?: DurationUnit[]
+  fields?: Partial<Record<DurationUnit, DurationFieldConfig>>
+  readonly?: boolean
+  size?: DurationInputSize
+}
+
+/**
  * Config for number fields - select (for selecting numeric values)
  * @typeParam R - Record type for data source (when using source instead of options)
  */
@@ -273,7 +299,7 @@ export type F0NumberSelectConfig<
  */
 export type F0NumberFieldConfig<
   R extends Record<string, unknown> = Record<string, unknown>,
-> = F0NumberInputConfig | F0NumberSelectConfig<R>
+> = F0NumberInputConfig | F0NumberSelectConfig<R> | F0DurationFieldConfig
 
 /**
  * Config for boolean fields - checkbox
@@ -483,7 +509,7 @@ export function f0FormField<
 >(schema: T, config: F0StringConfig<z.infer<T>, TConfig, R>): T & F0ZodType<T>
 
 /**
- * Number field - number input or select
+ * Number field - number input, duration, or select
  * @typeParam R - Record type for data source (when using source instead of options)
  */
 export function f0FormField<

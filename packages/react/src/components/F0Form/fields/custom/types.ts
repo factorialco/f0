@@ -46,6 +46,8 @@ export interface CustomFieldRenderPropsBase {
   disabled?: boolean
   /** Whether the field is required (derived from Zod schema) */
   required?: boolean
+  /** Name identifying this custom field type (used with renderCustomField) */
+  customFieldName?: string
 }
 
 /**
@@ -77,6 +79,8 @@ export interface CustomFieldRenderProps<TValue = unknown, TConfig = undefined> {
   required?: boolean
   /** Custom configuration passed via fieldConfig */
   config: TConfig
+  /** Name identifying this custom field type (used with renderCustomField) */
+  customFieldName?: string
 }
 
 // ============================================================================
@@ -88,10 +92,17 @@ export interface CustomFieldRenderProps<TValue = unknown, TConfig = undefined> {
  *
  * @typeParam TValue - Type of the field value
  */
-export interface F0CustomConfigBase<TValue = unknown> {
-  /** Render function for the custom component */
-  render: (props: CustomFieldRenderProps<TValue, undefined>) => ReactNode
-}
+export type F0CustomConfigBase<TValue = unknown> =
+  | {
+      /** Render function for the custom component */
+      render: (props: CustomFieldRenderProps<TValue, undefined>) => ReactNode
+    }
+  | {
+      /** Name identifying this custom field type (resolved by renderCustomField on the form) */
+      customFieldName: string
+      /** Optional render function (overridden by form-level renderCustomField when customFieldName is set) */
+      render?: (props: CustomFieldRenderProps<TValue, undefined>) => ReactNode
+    }
 
 /**
  * Custom config with fieldConfig (render receives typed config)
@@ -99,15 +110,21 @@ export interface F0CustomConfigBase<TValue = unknown> {
  * @typeParam TValue - Type of the field value
  * @typeParam TConfig - Type of the fieldConfig object
  */
-export interface F0CustomConfigWithFieldConfig<
-  TValue = unknown,
-  TConfig = unknown,
-> {
-  /** Custom configuration to pass to the render function */
-  fieldConfig: TConfig
-  /** Render function for the custom component */
-  render: (props: CustomFieldRenderProps<TValue, TConfig>) => ReactNode
-}
+export type F0CustomConfigWithFieldConfig<TValue = unknown, TConfig = unknown> =
+  | {
+      /** Custom configuration to pass to the render function */
+      fieldConfig: TConfig
+      /** Render function for the custom component */
+      render: (props: CustomFieldRenderProps<TValue, TConfig>) => ReactNode
+    }
+  | {
+      /** Custom configuration to pass to the render function */
+      fieldConfig: TConfig
+      /** Name identifying this custom field type (resolved by renderCustomField on the form) */
+      customFieldName: string
+      /** Optional render function (overridden by form-level renderCustomField when customFieldName is set) */
+      render?: (props: CustomFieldRenderProps<TValue, TConfig>) => ReactNode
+    }
 
 /**
  * F0 config options specific to custom fields
@@ -164,9 +181,13 @@ export type F0CustomConfig<
 export type F0CustomField = F0BaseField & {
   type: "custom"
   /** Render function for the custom component */
-  render: (props: CustomFieldRenderPropsBase & { config: unknown }) => ReactNode
+  render?: (
+    props: CustomFieldRenderPropsBase & { config: unknown }
+  ) => ReactNode
   /** Custom configuration (if provided) */
   fieldConfig?: unknown
+  /** Name identifying this custom field type (resolved by renderCustomField on the form) */
+  customFieldName?: string
   /** Conditional rendering based on another field's value */
   renderIf?: CustomFieldRenderIf
 }

@@ -2,7 +2,7 @@ import { ReactNode } from "react"
 import { Text, View } from "react-native"
 
 import { cn } from "../../../lib/utils"
-import { PressableFeedback } from "../../PressableFeedback"
+import { PressableFeedback } from "../../primitives/PressableFeedback"
 
 type Props = {
   additionalAccesibleText?: string
@@ -48,7 +48,7 @@ export const BaseTag = ({
       {!!text && (
         <Text
           className={cn(
-            "line-clamp-1 text-base font-medium text-f1-foreground",
+            "line-clamp-1 text-base font-medium text-f0-foreground",
             classNameText
           )}
         >
@@ -56,7 +56,7 @@ export const BaseTag = ({
         </Text>
       )}
       {additionalAccesibleText && (
-        <Text className="sr-only text-base font-medium text-f1-foreground">
+        <Text className="sr-only text-base font-medium text-f0-foreground">
           {additionalAccesibleText}
         </Text>
       )}

@@ -23,6 +23,7 @@ import { TagCell } from "./types/tag"
 import { TagListCell } from "./types/tagList"
 import { TeamCell } from "./types/team"
 import { TextCell } from "./types/text"
+import { DeltaCell } from "./types/delta"
 
 // Re-export for backward compatibility
 export type { ValueDisplayRendererContext }
@@ -60,6 +61,7 @@ export const valueDisplayRenderers = {
   file: FileCell,
   folder: FolderCell,
   country: CountryCell,
+  delta: DeltaCell,
 } as const satisfies Record<string, ValueDisplayRenderer>
 
 /**

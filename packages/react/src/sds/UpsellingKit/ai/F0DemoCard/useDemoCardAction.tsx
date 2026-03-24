@@ -57,6 +57,7 @@ export const useDemoCardAction = () => {
       },
     ],
     available: "frontend",
+    followUp: false,
     render: (props) => {
       const args = props.args as DemoCardArgs
       const url = args.previewMediaUrl

@@ -2,7 +2,7 @@ import { ReactElement, ReactNode } from "react"
 import { View, Text } from "react-native"
 
 import { cn } from "../../../../lib/utils"
-import { Icon, IconType } from "../../../Icon"
+import { F0Icon, type IconType } from "../../../primitives/F0Icon"
 
 import { CopyAction } from "./actions/CopyAction"
 import { GenericAction } from "./actions/GenericAction"
@@ -25,7 +25,7 @@ export const ItemContainer = (props: ItemContainerProps) => {
   } = props
 
   return (
-    <View className="flex rounded font-medium text-f1-foreground *:flex-1">
+    <View className="flex rounded font-medium text-f0-foreground *:flex-1">
       <Action
         action={action}
         className={cn("flex flex-row items-center gap-1.5 p-1.5", className)}
@@ -34,9 +34,9 @@ export const ItemContainer = (props: ItemContainerProps) => {
           (typeof LeftIcon === "function" ? (
             LeftIcon({})
           ) : (
-            <Icon icon={LeftIcon} size="md" />
+            <F0Icon icon={LeftIcon} size="md" />
           ))}
-        <Text className="line-clamp-5 text-left text-f1-foreground">
+        <Text className="line-clamp-5 text-left text-f0-foreground">
           {text}
         </Text>
       </Action>

@@ -1,11 +1,13 @@
 import type { Preview, StoryFn, StoryContext } from "@storybook/react-vite"
 
+import { DARK_MODE_EVENT_NAME } from "@vueless/storybook-dark-mode"
 import isChromatic from "chromatic/isChromatic"
 import { MotionGlobalConfig } from "motion/react"
 // organize-imports-ignore
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import { action } from "storybook/actions"
 import { INITIAL_VIEWPORTS } from "storybook/viewport"
+import { addons } from "storybook/preview-api"
 
 import "../src/styles.css"
 import { aiTranslations } from "@/sds/ai/F0AiChat/types"
@@ -19,11 +21,20 @@ import { DocsContainer } from "./DocsContainer.tsx"
 
 MotionGlobalConfig.skipAnimations = isChromatic()
 
+const channel = addons.getChannel()
+
 export const withTheme = () => {
   // eslint-disable-next-line react/display-name
   return (Story: StoryFn) => {
+    const [isDark, setDark] = useState(false)
+
+    useEffect(() => {
+      channel.on(DARK_MODE_EVENT_NAME, setDark)
+      return () => channel.off(DARK_MODE_EVENT_NAME, setDark)
+    }, [])
+
     return (
-      <ThemeProvider theme="light">
+      <ThemeProvider theme={isDark ? "dark" : "light"}>
         <Story />
       </ThemeProvider>
     )
@@ -197,9 +208,9 @@ const preview: Preview = {
         return a.title.localeCompare(b.title)
       },
     },
-    // darkMode: {
-    //   stylePreview: true,
-    // },
+    darkMode: {
+      stylePreview: true,
+    },
   },
 
   tags: ["autodocs"],

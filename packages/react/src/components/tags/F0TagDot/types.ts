@@ -20,4 +20,8 @@ export type NewColor = Extract<BaseColor, (typeof tagDotColors)[number]>
 
 export type Props = {
   text: string
+  /**
+   * Info text to display an i icon and a tooltip next to the tag
+   */
+  info?: string
 } & ({ color: NewColor } | { customColor: string })

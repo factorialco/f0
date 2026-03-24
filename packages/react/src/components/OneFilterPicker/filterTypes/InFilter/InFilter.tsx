@@ -14,9 +14,17 @@ import { cn, focusRing } from "@/lib/utils"
 import { FilterTypeComponentProps } from "../types"
 import { InFilterFlatOption } from "./components/InFilterFlatOption"
 import { InFilterOptionRow } from "./components/InFilterOptionRow"
-import { optionMatchesSearch } from "./components/option-utils"
-import { InFilterOptions } from "./types"
-import { cacheLabel, getCacheKey, useLoadOptions } from "./useLoadOptions"
+import {
+  collectNestedFilterKeys,
+  optionMatchesSearch,
+} from "./components/option-utils"
+import { InFilterOptionItem, InFilterOptions } from "./types"
+import {
+  cacheLabel,
+  cacheNestedLabel,
+  getCacheKey,
+  useLoadOptions,
+} from "./useLoadOptions"
 
 /**
  * Props for the InFilter component.
@@ -100,6 +108,34 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
 
   const cacheKey = getCacheKey(schema)
 
+  // Pre-populate nested label cache for existing selections (e.g., after localStorage restore)
+  useEffect(() => {
+    if (!allFiltersValue || !options.length) return
+
+    const populateNestedCache = (parentOptions: InFilterOptionItem<T>[]) => {
+      for (const option of parentOptions) {
+        if (option.children) {
+          const { filterKey, options: childOptions } = option.children
+          const childValues = (allFiltersValue[filterKey] as T[]) ?? []
+
+          for (const child of childOptions) {
+            if (childValues.includes(child.value as T)) {
+              const contextualLabel = `${option.label} > ${child.label}`
+              cacheNestedLabel(filterKey, child.value, contextualLabel)
+              cacheLabel(cacheKey, child.value, child.label)
+            }
+            // Recurse for deeper nesting
+            if (child.children) {
+              populateNestedCache([child as InFilterOptionItem<T>])
+            }
+          }
+        }
+      }
+    }
+
+    populateNestedCache(options as InFilterOptionItem<T>[])
+  }, [options, allFiltersValue, cacheKey])
+
   useEffect(() => {
     let timeout: NodeJS.Timeout
     if (isLoading) {
@@ -130,6 +166,22 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
           ),
     [hasSource, options, searchTermLower]
   )
+
+  const nestedFilterKeys = useMemo(
+    () => collectNestedFilterKeys(schema.options),
+    [schema.options]
+  )
+
+  const nestedSelectionsCount = useMemo(
+    () =>
+      nestedFilterKeys.reduce((count, key) => {
+        const vals = allFiltersValue?.[key]
+        return count + (Array.isArray(vals) ? vals.length : 0)
+      }, 0),
+    [nestedFilterKeys, allFiltersValue]
+  )
+
+  const hasNestedSelections = nestedSelectionsCount > 0
 
   if (isLoading && !options.length) {
     return (
@@ -168,6 +220,12 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
 
   const showSearch = options.length > 0 || hasSource
 
+  const allFilteredSelected =
+    filteredOptions.length > 0 &&
+    filteredOptions.every((o) => value.includes(o.value))
+  const isIndeterminate =
+    (value.length > 0 || hasNestedSelections) && !allFilteredSelected
+
   const handleSelectAll = () => {
     const currentValues = value ?? []
     const newValues = [...currentValues]
@@ -182,11 +240,22 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
     onChange(newValues)
   }
 
+  const clearAllSelections = () => {
+    onChange([])
+    if (onFilterChange) {
+      nestedFilterKeys.forEach((key) => {
+        onFilterChange(key, [])
+      })
+    }
+  }
+
   const handleCheckSelectAll = (checked: boolean) => {
-    if (checked) {
+    if (isIndeterminate) {
+      clearAllSelections()
+    } else if (checked) {
       handleSelectAll()
     } else {
-      onChange([])
+      clearAllSelections()
     }
   }
 
@@ -207,8 +276,9 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
     )
   }
 
-  const selectedText = `${value.length} ${
-    value.length === 1
+  const totalSelected = value.length + nestedSelectionsCount
+  const selectedText = `${totalSelected} ${
+    totalSelected === 1
       ? i18n.status.selected.singular
       : i18n.status.selected.plural
   }`.toLowerCase()
@@ -225,7 +295,7 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
       aria-label={schema.label}
     >
       {showSearch && (
-        <div className="sticky left-0 right-0 top-0 rounded-tr-xl p-2 backdrop-blur-[8px]">
+        <div className="rounded-tr-xl p-2">
           <F1SearchBox
             placeholder={i18n.filters.inFilter.searchPlaceholder}
             value={searchTerm}
@@ -234,9 +304,28 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
           />
         </div>
       )}
-      {isCompactMode && (
-        <div className="mb-1 h-px border-0 border-t border-solid border-f1-border-secondary" />
-      )}
+      <div
+        className={cn(
+          "flex w-full items-center justify-between gap-1 pb-1",
+          isCompactMode ? "px-2" : "px-3.5"
+        )}
+      >
+        <span className="min-w-0 flex-1">
+          <OneEllipsis className="text-f1-foreground-secondary">
+            {selectedText}
+          </OneEllipsis>
+        </span>
+        <F0Checkbox
+          id="select-all"
+          title={i18n.actions.selectAll}
+          checked={isIndeterminate || allFilteredSelected}
+          indeterminate={isIndeterminate}
+          onCheckedChange={handleCheckSelectAll}
+          presentational
+          hideLabel
+        />
+      </div>
+
       <ScrollArea
         className={cn(
           "[&>div]:pb-2",
@@ -246,23 +335,6 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
         onScrollBottom={handleScrollBottom}
         scrollMargin={50}
       >
-        {isCompactMode && (
-          <div className="sticky left-0 right-0 top-0 z-10 flex w-full flex-1 items-center justify-between gap-1 rounded bg-f1-background/80 p-2 py-1 pr-1 backdrop-blur-[8px]">
-            <span className="min-w-0 flex-1">
-              <OneEllipsis className="text-f1-foreground-secondary">
-                {selectedText}
-              </OneEllipsis>
-            </span>
-            <F0Checkbox
-              id="select-all"
-              title={i18n.actions.selectAll}
-              checked={value.length === filteredOptions.length}
-              onCheckedChange={handleCheckSelectAll}
-              presentational
-              hideLabel
-            />
-          </div>
-        )}
         {filteredOptions.length === 0 && !isLoading && (
           <div className="flex w-full items-center justify-center py-4 text-sm text-f1-foreground-secondary">
             {i18n.select.noResults}

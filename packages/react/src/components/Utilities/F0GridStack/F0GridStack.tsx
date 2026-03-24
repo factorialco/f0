@@ -31,6 +31,12 @@ export interface F0GridStackProps {
   widgets: GridStackReactWidget[]
   onChange?: (widgets: GridStackReactWidget[]) => void
   className?: string
+  /** Toggle static mode imperatively via `gridStack.setStatic()`.
+   *  Unlike putting `staticGrid` in options, this does NOT recreate the grid. */
+  static?: boolean
+  /** Incrementing counter that forces all widget positions to match props.
+   *  Used to reset positions on layout discard. */
+  forcePositionSync?: number
 }
 
 export const F0GridStack = ({
@@ -38,6 +44,8 @@ export const F0GridStack = ({
   widgets,
   onChange,
   className,
+  static: isStatic,
+  forcePositionSync,
 }: F0GridStackProps) => {
   const widgetsSignature = useMemo(() => {
     return JSON.stringify(
@@ -115,6 +123,8 @@ export const F0GridStack = ({
       widgets={widgets}
       onResizeStop={onResizeStop}
       onChange={onChange}
+      static={isStatic}
+      forcePositionSync={forcePositionSync}
     >
       <GridStackRenderProvider>
         <GridStackRender />

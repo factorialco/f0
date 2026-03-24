@@ -1,8 +1,9 @@
 import { ChevronDown, ChevronRight } from "lucide-react"
 
 import { F0Button } from "@/components/F0Button"
+import { F0ButtonDropdown } from "@/components/F0ButtonDropdown"
 import { NestedRowProps } from "@/experimental/OneDataCollection/visualizations/collection/Table/components/Row"
-import { ArrowDown } from "@/icons/app"
+import { Add, ArrowDown } from "@/icons/app"
 import { cn } from "@/lib/utils"
 
 import {
@@ -54,6 +55,7 @@ export const NestedCell = ({
   const detailedVariant = isFirstCellDetailed(firstCell, nestedRowProps)
 
   const onLoadMoreChildren = nestedRowProps?.onLoadMoreChildren
+  const onAddRow = nestedRowProps?.onAddRow
   const depth = nestedRowProps?.depth ?? 0
 
   const marginLeft = firstCellWithDepth
@@ -62,15 +64,17 @@ export const NestedCell = ({
       })
     : undefined
 
+  const isActionRow = onLoadMoreChildren || onAddRow
+
   return (
     <div
       className={cn(
         width !== "auto" && "overflow-hidden",
-        "relative z-[1]",
+        "relative z-[1] h-full",
         firstCellWithChildren && "flex items-center gap-2"
       )}
       style={{
-        marginLeft: onLoadMoreChildren
+        marginLeft: isActionRow
           ? getNestedMarginLeftForLoadMore({
               depth: depth + (detailedVariant ? 0 : 1),
               isDetailedVariant: detailedVariant,
@@ -79,13 +83,73 @@ export const NestedCell = ({
       }}
       onClick={() => {
         // Force the link to be clicked even if the element pointer-events: auto
-        linkRef.current?.click()
-        onClick?.()
+        if (!isActionRow) {
+          linkRef.current?.click()
+          onClick?.()
+        }
       }}
     >
-      {onLoadMoreChildren ? (
+      {onAddRow ? (
+        <div
+          className={cn("pointer-events-auto flex items-center w-full h-full")}
+        >
+          {onAddRow.actions.length === 1 ? (
+            <F0Button
+              variant="outline"
+              size="sm"
+              icon={onAddRow.actions[0].icon ?? Add}
+              label={onAddRow.actions[0].label}
+              onClick={(e) => {
+                e.stopPropagation()
+                onAddRow.actions[0].onClick?.()
+              }}
+              loading={onAddRow.actions[0].loading}
+              disabled={onAddRow.actions[0].disabled}
+            />
+          ) : onAddRow.actions.some((a) => a.description !== undefined) ? (
+            <F0ButtonDropdown
+              mode="dropdown"
+              variant="outline"
+              size="sm"
+              trigger={onAddRow.label}
+              disabled={onAddRow.actions.every((a) => a.disabled)}
+              loading={onAddRow.actions.some((a) => a.loading)}
+              items={onAddRow.actions.map((action, index) => ({
+                value: index.toString(),
+                label: action.label,
+                icon: action.icon,
+                description: action.description,
+              }))}
+              onClick={(value) => {
+                const action = onAddRow.actions[Number(value)]
+                action?.onClick?.()
+              }}
+            />
+          ) : (
+            <F0ButtonDropdown
+              variant="outline"
+              size="sm"
+              disabled={onAddRow.actions.every((a) => a.disabled)}
+              loading={onAddRow.actions.some((a) => a.loading)}
+              items={onAddRow.actions.map((action, index) => ({
+                value: index.toString(),
+                label: action.label,
+                icon: action.icon,
+              }))}
+              onClick={(value) => {
+                const action = onAddRow.actions[Number(value)]
+                action?.onClick?.()
+              }}
+            />
+          )}
+        </div>
+      ) : onLoadMoreChildren ? (
         <>
-          <div className={cn("pointer-events-auto cursor-pointer")}>
+          <div
+            className={cn(
+              "pointer-events-auto cursor-pointer flex items-center w-full h-full border-0 border-r-[1px] border-solid border-f1-border-secondary"
+            )}
+          >
             <F0Button
               variant="ghost"
               size="md"
@@ -137,7 +201,7 @@ export const NestedCell = ({
           </div>
           <div
             className={cn(
-              firstCellWithChildren && "min-w-0",
+              firstCellWithChildren && "min-w-0 w-full",
               firstCellWithNoChildrenAndTableChildren &&
                 "pl-[var(--spacing-factor)]",
               "relative"

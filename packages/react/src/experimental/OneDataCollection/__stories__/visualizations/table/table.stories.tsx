@@ -28,6 +28,15 @@ export const BasicListVisualization: Story = {
   },
 }
 
+export const ReferenceRowsVisualization: Story = {
+  render: () => {
+    const mockVisualizations = getMockVisualizations({
+      table: { referenceRows: true },
+    })
+    return <ExampleComponent visualizations={[mockVisualizations.table]} />
+  },
+}
+
 export const TableFrozenCols: Story = {
   render: () => <ExampleComponent frozenColumns={2} />,
 }
@@ -82,6 +91,7 @@ export const TableWithNestedRecords: Story = {
     const mockVisualizations = getMockVisualizations({
       table: {
         noSorting: true,
+        referenceRows: true,
         allowColumnHiding: true,
         allowColumnReordering: true,
         nestedRecords: true,
@@ -155,6 +165,37 @@ export const TableWithMixedNestedRecords: Story = {
         id="employees/v1"
         nestedRecords
         nestedRecordsType="mixed"
+      />
+    )
+  },
+}
+
+export const TableWithSelectableNestedRecords: Story = {
+  render: () => {
+    const mockVisualizations = getMockVisualizations({
+      table: {
+        noSorting: true,
+        allowColumnHiding: true,
+        allowColumnReordering: true,
+        nestedRecords: true,
+        applyLongText: false,
+      },
+    })
+
+    return (
+      <ExampleComponent
+        frozenColumns={2}
+        tableAllowColumnReordering
+        tableAllowColumnHiding
+        noSorting
+        storage={false}
+        visualizations={[mockVisualizations.table]}
+        id="employees/v1"
+        nestedRecords
+        nestedRecordsType="mixed"
+        selectable={() => {
+          return ""
+        }}
       />
     )
   },
@@ -261,6 +302,82 @@ export const TableColumnOrderingAndHiddenWithColumnsChanges: Story = {
           id="employees/v1"
         />
       </div>
+    )
+  },
+}
+
+export const TableWithGroupedHeaders: Story = {
+  render: () => {
+    const mockVisualizations = getMockVisualizations({
+      table: { noSorting: true },
+    })
+    const baseOptions = (mockVisualizations.table as any)["options"]
+
+    return (
+      <ExampleComponent
+        noSorting
+        frozenColumns={2}
+        visualizations={[
+          {
+            ...mockVisualizations.table,
+            type: "table",
+            options: {
+              ...baseOptions,
+              headerGroupLabels: {
+                personal: "Personal Information",
+                employment: "Employment Details",
+              },
+              columns: [
+                {
+                  label: "Employee",
+                  render: (item: any) => ({
+                    type: "person",
+                    value: {
+                      firstName: item.name.split(" ")[0],
+                      lastName: item.name.split(" ")[1],
+                    },
+                  }),
+                  id: "name",
+                },
+                {
+                  label: "Email",
+                  align: "right",
+                  render: (item: any) => item.email,
+                  id: "email",
+                  headerGroupId: "personal",
+                },
+                {
+                  label: "Role",
+                  align: "right",
+                  render: (item: any) => item.role,
+                  id: "role",
+                  headerGroupId: "employment",
+                },
+                {
+                  label: "Department",
+                  align: "right",
+                  render: (item: any) => item.department,
+                  id: "department",
+                  headerGroupId: "employment",
+                },
+                {
+                  label: "Manager",
+                  align: "right",
+                  render: (item: any) => item.manager,
+                  id: "manager",
+                  headerGroupId: "employment",
+                },
+                {
+                  label: "Status",
+                  align: "right",
+                  render: (item: any) => item.status,
+                  id: "status",
+                },
+              ],
+            },
+          },
+        ]}
+      />
     )
   },
 }

@@ -3,8 +3,11 @@ import { Pressable, Text, View } from "react-native"
 import { tv, type VariantProps } from "tailwind-variants"
 
 import { cn } from "../../lib/utils"
-import { Icon, type IconType } from "../Icon"
+import { F0Icon, type IconColor, type IconType } from "../primitives/F0Icon"
 
+/**
+ * @deprecated Use `F0Button` from `../F0Button` instead.
+ */
 export const variants = [
   "default",
   "outline",
@@ -13,21 +16,32 @@ export const variants = [
   "ghost",
   "promote",
 ] as const
+
+/**
+ * @deprecated Use `F0ButtonVariant` from `../F0Button` instead.
+ */
 export type ButtonVariant = (typeof variants)[number]
 
+/**
+ * @deprecated Use `BUTTON_SIZES` from `../F0Button` instead.
+ */
 export const sizes = ["sm", "md", "lg"] as const
+
+/**
+ * @deprecated Use `F0ButtonSize` from `../F0Button` instead.
+ */
 export type ButtonSize = (typeof sizes)[number]
 
 const buttonVariants = tv({
   base: "flex-row items-center justify-center rounded border-none grow-0",
   variants: {
     variant: {
-      default: "bg-f1-background-accent-bold",
-      outline: "bg-f1-background-inverse-secondary border border-f1-border",
-      neutral: "bg-f1-background-secondary",
-      critical: "bg-f1-background-secondary border border-f1-border",
+      default: "bg-f0-background-accent-bold",
+      outline: "bg-f0-background-inverse-secondary border border-f0-border",
+      neutral: "bg-f0-background-secondary",
+      critical: "bg-f0-background-secondary border border-f0-border",
       ghost: "bg-transparent",
-      promote: "bg-f1-background-promote border border-f1-border-promote",
+      promote: "bg-f0-background-promote border border-f0-border-promote",
     },
     size: {
       sm: "h-6 rounded-sm",
@@ -55,12 +69,12 @@ const pressedVariants = tv({
   base: "",
   variants: {
     variant: {
-      default: "bg-f1-background-accent-bold-hover",
-      outline: "bg-f1-background-tertiary border-opacity-70",
-      neutral: "bg-f1-background-secondary-hover",
-      critical: "bg-f1-background-critical-bold border-transparent",
-      ghost: "bg-f1-background-secondary-hover",
-      promote: "bg-f1-background-promote-hover",
+      default: "bg-f0-background-accent-bold-hover",
+      outline: "bg-f0-background-tertiary border-opacity-70",
+      neutral: "bg-f0-background-secondary-hover",
+      critical: "bg-f0-background-critical-bold border-transparent",
+      ghost: "bg-f0-background-secondary-hover",
+      promote: "bg-f0-background-promote-hover",
     },
   },
   defaultVariants: {
@@ -68,47 +82,56 @@ const pressedVariants = tv({
   },
 })
 
-const getIconColor = (variant: ButtonVariant, isPressed: boolean) => {
+const getIconColor = (
+  variant: ButtonVariant,
+  isPressed: boolean
+): IconColor => {
   switch (variant) {
     case "default":
-      return "text-f1-icon-inverse"
+      return "inverse"
     case "critical":
-      return isPressed ? "text-f1-icon-inverse" : "text-f1-icon-critical-bold"
+      return isPressed ? "inverse" : "critical-bold"
     default:
-      return "text-f1-icon"
+      return "default"
   }
 }
 
-const getIconOnlyColor = (variant: ButtonVariant, isPressed: boolean) => {
+const getIconOnlyColor = (
+  variant: ButtonVariant,
+  isPressed: boolean
+): IconColor => {
   switch (variant) {
     case "critical":
-      return isPressed ? "text-f1-icon-inverse" : "text-f1-icon-critical-bold"
+      return isPressed ? "inverse" : "critical-bold"
     case "default":
-      return "text-f1-icon-inverse"
+      return "inverse"
     case "outline":
     case "neutral":
     case "ghost":
     case "promote":
     default:
-      return "text-f1-icon-bold"
+      return "bold"
   }
 }
 
 const getTextColorClass = (variant: ButtonVariant, isPressed: boolean) => {
   if (isPressed && variant === "critical") {
-    return "text-f1-foreground-inverse"
+    return "text-f0-foreground-inverse"
   }
 
   switch (variant) {
     case "default":
-      return "text-f1-foreground-inverse"
+      return "text-f0-foreground-inverse"
     case "critical":
-      return "text-f1-foreground-critical"
+      return "text-f0-foreground-critical"
     default:
-      return "text-f1-foreground"
+      return "text-f0-foreground"
   }
 }
 
+/**
+ * @deprecated Use `F0ButtonProps` from `../F0Button` instead.
+ */
 export interface ButtonProps extends VariantProps<typeof buttonVariants> {
   label: string
   onPress?: () => void | Promise<unknown>
@@ -123,6 +146,9 @@ export interface ButtonProps extends VariantProps<typeof buttonVariants> {
   fullWidth?: boolean
 }
 
+/**
+ * @deprecated Use `F0Button` from `../F0Button` instead.
+ */
 export const Button = forwardRef<View, ButtonProps>(function Button(
   {
     label,
@@ -165,7 +191,7 @@ export const Button = forwardRef<View, ButtonProps>(function Button(
   const shouldShowPressed = isPressed && !isDisabled
 
   return (
-    <View className={`flex ${fullWidth ? "flex-1" : "item-start"}`}>
+    <View className={`flex ${fullWidth ? "flex-1" : "items-start"}`}>
       <Pressable
         ref={ref}
         disabled={isDisabled}
@@ -191,15 +217,15 @@ export const Button = forwardRef<View, ButtonProps>(function Button(
         accessibilityHint={accessibilityHint}
       >
         {icon && (
-          <Icon
+          <F0Icon
             icon={icon}
             size={size === "sm" ? "sm" : "md"}
-            className={cn(
-              hideLabel && round ? undefined : "-ml-0.5",
+            color={
               hideLabel && round
                 ? getIconOnlyColor(variant, shouldShowPressed)
                 : getIconColor(variant, shouldShowPressed)
-            )}
+            }
+            className={hideLabel && round ? undefined : "-ml-0.5"}
           />
         )}
         {emoji && (
@@ -226,7 +252,7 @@ export const Button = forwardRef<View, ButtonProps>(function Button(
       {showBadge && variant === "outline" && (
         <View
           accessibilityLabel="Notification Badge"
-          className="absolute top-1.5 right-1.5 h-1.5 w-1.5 rounded-full bg-f1-icon-accent"
+          className="absolute top-1.5 right-1.5 h-1.5 w-1.5 rounded-full bg-f0-icon-accent"
         />
       )}
     </View>

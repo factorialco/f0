@@ -1,20 +1,8 @@
 import { useMemo } from "react"
 import { z, ZodRawShape, ZodTypeAny } from "zod"
 
-import {
-  F0FieldConfig,
-  F0FieldType,
-  getF0Config,
-  inferFieldType,
-  unwrapToZodObject,
-} from "./f0Schema"
-import type { F0FormSchema } from "./types"
 import type { F0Field } from "./fields/types"
-import { isFieldRequired } from "./fields/schema"
-import { extractNumberConstraints } from "./fields/number/schema"
-import { extractDateConstraints } from "./fields/date/schema"
-import { extractTextareaConstraints } from "./fields/textarea/schema"
-import { inferInputType } from "./fields/text/schema"
+import type { F0FormSchema } from "./types"
 import type {
   F0SectionConfig,
   FieldItem,
@@ -22,6 +10,19 @@ import type {
   RowDefinition,
   SectionDefinition,
 } from "./types"
+
+import {
+  F0FieldConfig,
+  F0FieldType,
+  getF0Config,
+  inferFieldType,
+  unwrapToZodObject,
+} from "./f0Schema"
+import { extractDateConstraints } from "./fields/date/schema"
+import { extractNumberConstraints } from "./fields/number/schema"
+import { isFieldRequired } from "./fields/schema"
+import { inferInputType } from "./fields/text/schema"
+import { extractTextareaConstraints } from "./fields/textarea/schema"
 
 /**
  * Internal representation of a parsed field with its schema and config
@@ -57,9 +58,12 @@ function configToF0Field(
     label: config.label,
     placeholder: config.placeholder,
     helpText: config.helpText,
+    status: config.status,
     disabled: config.disabled,
     resetOnDisable: config.resetOnDisable,
     alert: config.alert,
+    customFieldName:
+      "customFieldName" in config ? config.customFieldName : undefined,
     validation: schema,
   }
 
@@ -95,6 +99,17 @@ function configToF0Field(
         renderIf: config.renderIf,
       } as F0Field
     }
+
+    case "duration":
+      return {
+        ...baseProps,
+        type: "duration",
+        units: "units" in config ? config.units : undefined,
+        fields: "fields" in config ? config.fields : undefined,
+        readonly: "readonly" in config ? config.readonly : undefined,
+        size: "size" in config ? config.size : undefined,
+        renderIf: config.renderIf,
+      } as F0Field
 
     case "textarea": {
       const { maxLength } = extractTextareaConstraints(schema)
@@ -244,7 +259,7 @@ function configToF0Field(
       return {
         ...baseProps,
         type: "custom",
-        render: "render" in config ? config.render : () => null,
+        render: "render" in config ? config.render : undefined,
         fieldConfig: "fieldConfig" in config ? config.fieldConfig : undefined,
         renderIf: config.renderIf,
       } as F0Field
@@ -426,6 +441,7 @@ export function useSchemaDefinition(
         section: {
           title: sectionConfig?.title ?? sectionId,
           description: sectionConfig?.description,
+          withInset: sectionConfig?.withInset,
           renderIf: sectionConfig?.renderIf,
           action: sectionConfig?.action,
           fields: groupFieldsIntoRows(fields),
@@ -502,6 +518,7 @@ export function getSchemaDefinition(
       section: {
         title: sectionConfig?.title ?? sectionId,
         description: sectionConfig?.description,
+        withInset: sectionConfig?.withInset,
         renderIf: sectionConfig?.renderIf,
         action: sectionConfig?.action,
         fields: groupFieldsIntoRows(fields),

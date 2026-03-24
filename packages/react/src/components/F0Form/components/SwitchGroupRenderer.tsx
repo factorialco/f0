@@ -7,10 +7,18 @@ import {
   CardSelectableContainer,
   type CardSelectableItem,
 } from "@/experimental/Forms/CardSelectable"
+import { useI18n } from "@/lib/providers/i18n/i18n-provider"
+import {
+  FormField as FormFieldPrimitive,
+  FormItem,
+  FormMessage,
+} from "@/ui/form"
 
-import { isZodType, unwrapZodSchema } from "../f0Schema"
 import type { F0FieldAlertProps } from "../f0Schema"
 import type { F0SwitchField } from "../fields/switch/types"
+
+import { generateAnchorId, useF0FormContext } from "../context"
+import { isZodType, unwrapZodSchema } from "../f0Schema"
 import { evaluateDisabled, evaluateRenderIf } from "../fields/utils"
 
 /**
@@ -32,8 +40,12 @@ interface SwitchGroupRendererProps {
  * SwitchGroupRenderer renders multiple switch fields in a bordered container
  * using CardSelectableContainer with toggle indicators.
  */
-export function SwitchGroupRenderer({ fields }: SwitchGroupRendererProps) {
+export function SwitchGroupRenderer({
+  fields,
+  sectionId,
+}: SwitchGroupRendererProps) {
   const form = useFormContext()
+  const { formName } = useF0FormContext()
   const { watch, setValue } = form
   const { isSubmitting } = form.formState
   const values = watch()
@@ -142,19 +154,70 @@ export function SwitchGroupRenderer({ fields }: SwitchGroupRendererProps) {
     return result
   }, [visibleFields, values])
 
+  const { forms } = useI18n()
+
+  // Get error messages for required fields in the group
+  const groupErrors = visibleFields
+    .filter((field) => field.validation && isMustBeTrue(field.validation))
+    .map((field) => {
+      const error = form.formState.errors[field.id]
+      return error
+        ? { fieldId: field.id, label: field.label, message: error.message }
+        : null
+    })
+    .filter(
+      (
+        e
+      ): e is { fieldId: string; label: string; message: string | undefined } =>
+        e !== null
+    )
+
+  // Generate anchor IDs for error navigation
+  const fieldAnchorIds = useMemo(
+    () =>
+      visibleFields.map((field) => ({
+        fieldId: field.id,
+        anchorId: generateAnchorId(formName, sectionId, field.id),
+      })),
+    [visibleFields, formName, sectionId]
+  )
+
   return (
     <div className="flex flex-col gap-2">
-      <CardSelectableContainer
-        multiple
-        isToggle
-        grouped
-        items={items}
-        value={selectedIds}
-        onChange={handleChange}
-      />
-      {alerts.map(({ fieldId, props }) => (
-        <F0Alert key={fieldId} {...props} variant={props.variant ?? "info"} />
-      ))}
+      {/* First field's anchor wraps the container for wiggle animation */}
+      <div id={fieldAnchorIds[0]?.anchorId} className="scroll-mt-4">
+        {/* Additional field anchors so error navigation can find each field */}
+        {fieldAnchorIds.slice(1).map(({ fieldId, anchorId }) => (
+          <span key={fieldId} id={anchorId} className="hidden" />
+        ))}
+        <CardSelectableContainer
+          multiple
+          isToggle
+          grouped
+          items={items}
+          value={selectedIds}
+          onChange={handleChange}
+        />
+        {alerts.map(({ fieldId, props }) => (
+          <F0Alert key={fieldId} {...props} variant={props.variant ?? "info"} />
+        ))}
+      </div>
+      {groupErrors.length > 0 && (
+        <div className="flex flex-col gap-1">
+          {groupErrors.map((error) => (
+            <FormFieldPrimitive
+              key={error.fieldId}
+              control={form.control}
+              name={error.fieldId}
+              render={() => (
+                <FormItem>
+                  <FormMessage fallback={forms.validation.required} />
+                </FormItem>
+              )}
+            />
+          ))}
+        </div>
+      )}
     </div>
   )
 }

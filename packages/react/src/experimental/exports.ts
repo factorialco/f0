@@ -15,10 +15,6 @@ export * from "./AiPromotionChat/exports"
  */
 export * from "../sds/ai/Banners/exports"
 export * from "./Charts/exports"
-/**
- * @deprecated CoCreationForm has moved to @/sds/CoCreationForm. Import from there instead.
- */
-export * from "../sds/CoCreationForm/exports"
 export * from "./F0ActionBar"
 export * from "./F0VersionHistory"
 export * from "./Forms/exports"

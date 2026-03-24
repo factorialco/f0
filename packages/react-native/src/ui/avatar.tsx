@@ -4,10 +4,13 @@ import { tv } from "tailwind-variants"
 
 import { cn } from "../lib/utils"
 
+/** @deprecated Use F0Avatar from components/F0Avatar instead */
 export const sizes = ["xsmall", "small", "medium", "large", "xlarge"] as const
 
+/** @deprecated Use F0Avatar from components/F0Avatar instead */
 export const type = ["base", "rounded"] as const
 
+/** @deprecated Use F0Avatar from components/F0Avatar instead */
 export const color = [
   "viridian",
   "malibu",
@@ -106,9 +109,10 @@ const AvatarFallback = ({
   size?: (typeof sizes)[number]
 }) => (
   <Text
-    className={cn("text-f1-foreground-inverse/90", textSizes[size], className)}
+    className={cn("text-f0-foreground-inverse/90", textSizes[size], className)}
     {...props}
   />
 )
 
+/** @deprecated Use F0Avatar from components/F0Avatar instead */
 export { Avatar, AvatarFallback, AvatarImage }

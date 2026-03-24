@@ -5,28 +5,31 @@ import { z } from "zod"
 
 import { F0Button } from "@/components/F0Button"
 import { F0Dialog } from "@/components/F0Dialog"
+import { useF0FormDefinition } from "@/components/F0WizardForm"
 import { createDataSourceDefinition } from "@/hooks/datasource"
 import { ExternalLink, Plus, Settings } from "@/icons/app"
 
-import {
-  f0FormField,
-  F0Form,
-  F0SectionConfig,
-  CustomFieldRenderProps,
-  useF0Form,
-} from "../index"
 import type {
   FileUploadHookReturn,
   FileUploadResult,
   FileUploadStatus,
 } from "../fields/types"
+import type { RenderCustomFieldSelectConfig } from "../types"
+
+import {
+  f0FormField,
+  F0Form,
+  F0SectionConfig,
+  useF0Form,
+  RenderCustomFieldProps,
+} from "../index"
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
 const meta: Meta = {
-  title: "Experimental/F0Form",
+  title: "Forms/F0Form",
   component: F0Form,
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs"],
   parameters: { a11y: { skipCi: true } },
 }
 
@@ -34,9 +37,10 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 /**
- * Basic form with simple text fields using the schema-based API.
+ * Basic form with simple text fields.
+ * All form configuration is bundled into a `formDefinition` via `useF0FormDefinition`.
  * Field metadata (label, placeholder) is embedded directly in the Zod schema.
- * Position is derived from declaration order - no need to specify it.
+ * Position is derived from declaration order.
  */
 export const Default: Story = {
   render() {
@@ -58,19 +62,19 @@ export const Default: Story = {
       }),
     })
 
-    return (
-      <F0Form
-        name="basic"
-        schema={formSchema}
-        defaultValues={{ username: "", email: "", bio: "" }}
-        onSubmit={async (data) => {
-          await sleep(1000)
-          console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
-          return { success: true, message: "Account created successfully" }
-        }}
-        submitConfig={{ label: "Create Account" }}
-      />
-    )
+    const formDefinition = useF0FormDefinition({
+      name: "basic",
+      schema: formSchema,
+      defaultValues: { username: "", email: "", bio: "" },
+      onSubmit: async ({ data }) => {
+        await sleep(1000)
+        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+        return { success: true, message: "Account created successfully" }
+      },
+      submitConfig: { label: "Create Account" },
+    })
+
+    return <F0Form formDefinition={formDefinition} />
   },
 }
 
@@ -110,24 +114,133 @@ export const WithRows: Story = {
       }),
     })
 
-    return (
-      <F0Form
-        name="with-rows"
-        schema={formSchema}
-        defaultValues={{
-          fullName: "",
-          email: "",
-          phone: "",
-          city: "",
-          country: "",
-        }}
-        onSubmit={async (data) => {
-          await sleep(1000)
-          console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
-          return { success: true }
-        }}
-      />
-    )
+    const formDefinition = useF0FormDefinition({
+      name: "with-rows",
+      schema: formSchema,
+      defaultValues: {
+        fullName: "",
+        email: "",
+        phone: "",
+        city: "",
+        country: "",
+      },
+      onSubmit: async ({ data }) => {
+        await sleep(1000)
+        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+        return { success: true }
+      },
+    })
+
+    return <F0Form formDefinition={formDefinition} />
+  },
+}
+
+/**
+ * Form with rows where some fields have validation errors.
+ * Demonstrates that error messages appear directly under the field that
+ * triggered them, not displaced to adjacent fields in the same row.
+ *
+ * Click "Submit" to trigger validation — mandatory fields show errors
+ * only under their own labels, while optional fields remain clean.
+ */
+export const WithRowsAndValidation: Story = {
+  render() {
+    const formSchema = z.object({
+      title: f0FormField(z.string().min(1), {
+        label: "Job Title",
+        placeholder: "Enter job title",
+      }),
+      location: f0FormField(z.string().min(1), {
+        label: "Location",
+        row: "location-team",
+        options: [
+          { value: "madrid", label: "Madrid" },
+          { value: "barcelona", label: "Barcelona" },
+          { value: "london", label: "London" },
+        ],
+        placeholder: "Select location",
+      }),
+      team: f0FormField(z.string().optional(), {
+        label: "Team",
+        row: "location-team",
+        options: [
+          { value: "engineering", label: "Engineering" },
+          { value: "design", label: "Design" },
+          { value: "product", label: "Product" },
+        ],
+        placeholder: "Select team",
+      }),
+      vacancies: f0FormField(z.number().positive().optional(), {
+        label: "Number of Vacancies",
+        placeholder: "1",
+        fieldType: "number",
+        row: "vacancies-date",
+      }),
+      startDate: f0FormField(z.date().optional(), {
+        label: "Start Date",
+        placeholder: "Select a date",
+        row: "vacancies-date",
+      }),
+      legalEntity: f0FormField(z.string().min(1), {
+        label: "Legal Entity",
+        row: "legal-type",
+        options: [
+          { value: "acme-corp", label: "Acme Corp" },
+          { value: "acme-eu", label: "Acme EU" },
+        ],
+        placeholder: "Select legal entity",
+      }),
+      workplaceType: f0FormField(
+        z.enum(["onsite", "hybrid", "remote"], {
+          required_error: "Please select a workplace type",
+        }),
+        {
+          label: "Workplace Type",
+          row: "legal-type",
+          fieldType: "select",
+          placeholder: "Select type",
+          options: [
+            { value: "onsite", label: "On-site" },
+            { value: "hybrid", label: "Hybrid" },
+            { value: "remote", label: "Remote" },
+          ],
+        }
+      ),
+      allowReferral: f0FormField(z.boolean().default(false), {
+        label: "Allow referrals",
+        fieldType: "checkbox",
+        row: "checkboxes",
+      }),
+      allowInternal: f0FormField(z.boolean().default(false), {
+        label: "Allow internal applications",
+        fieldType: "checkbox",
+        row: "checkboxes",
+      }),
+    })
+
+    const formDefinition = useF0FormDefinition({
+      name: "rows-validation",
+      schema: formSchema,
+      defaultValues: {
+        title: "",
+        location: "",
+        team: undefined,
+        vacancies: undefined,
+        startDate: undefined,
+        legalEntity: "",
+        workplaceType: undefined,
+        allowReferral: false,
+        allowInternal: false,
+      },
+      errorTriggerMode: "on-submit",
+      onSubmit: async ({ data }) => {
+        await sleep(1000)
+        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+        return { success: true }
+      },
+    })
+
+    return <F0Form formDefinition={formDefinition} />
   },
 }
 
@@ -184,26 +297,26 @@ export const WithSections: Story = {
       },
     }
 
-    return (
-      <F0Form
-        name="with-sections"
-        schema={formSchema}
-        sections={sections}
-        defaultValues={{
-          firstName: "",
-          lastName: "",
-          age: undefined,
-          birthdate: undefined,
-          newsletter: false,
-          darkMode: false,
-        }}
-        onSubmit={async (data) => {
-          await sleep(1000)
-          console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
-          return { success: true, message: "Profile saved" }
-        }}
-      />
-    )
+    const formDefinition = useF0FormDefinition({
+      name: "with-sections",
+      schema: formSchema,
+      sections,
+      defaultValues: {
+        firstName: "",
+        lastName: "",
+        age: undefined,
+        birthdate: undefined,
+        newsletter: false,
+        darkMode: false,
+      },
+      onSubmit: async ({ data }) => {
+        await sleep(1000)
+        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+        return { success: true, message: "Profile saved" }
+      },
+    })
+
+    return <F0Form formDefinition={formDefinition} />
   },
 }
 
@@ -336,33 +449,34 @@ export const WithSectionsSidepanel: Story = {
       },
     }
 
+    const formDefinition = useF0FormDefinition({
+      name: "survey-settings",
+      schema: formSchema,
+      sections,
+      defaultValues: {
+        title: "Workplace climate survey",
+        description:
+          "This short workplace climate survey contains just 12 simple questions. It is designed to help measure employees' perceptions, experiences, and overall satisfaction within the workplace.",
+        participants: "",
+        publishOn: undefined,
+        endsAt: undefined,
+        recurrence: "none",
+        managerVisibility: false,
+        anonymousAnswers: false,
+        editors: "none",
+      },
+      onSubmit: async ({ data }) => {
+        await sleep(1000)
+        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+        return { success: true }
+      },
+      submitConfig: { label: "Save Survey" },
+    })
+
     return (
       <F0Form
-        name="survey-settings"
-        schema={formSchema}
-        sections={sections}
-        styling={{
-          showSectionsSidepanel: true,
-        }}
-        defaultValues={{
-          title: "Workplace climate survey",
-          description:
-            "This short workplace climate survey contains just 12 simple questions. It is designed to help measure employees' perceptions, experiences, and overall satisfaction within the workplace.",
-          participants: "",
-          publishOn: undefined,
-          endsAt: undefined,
-          recurrence: "none",
-          managerVisibility: false,
-          linkWorkflows: false,
-          anonymousAnswers: false,
-          editors: "none",
-        }}
-        onSubmit={async (data) => {
-          await sleep(1000)
-          console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
-          return { success: true }
-        }}
-        submitConfig={{ label: "Save Survey" }}
+        formDefinition={formDefinition}
+        styling={{ showSectionsSidepanel: true }}
       />
     )
   },
@@ -409,24 +523,24 @@ export const ConditionalRendering: Story = {
       }),
     })
 
-    return (
-      <F0Form
-        name="conditional-rendering"
-        schema={formSchema}
-        defaultValues={{
-          hasAccount: false,
-          accountId: "",
-          newUsername: "",
-          employeeCount: 1,
-          enterprisePlan: false,
-        }}
-        onSubmit={async (data) => {
-          await sleep(1000)
-          console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
-          return { success: true }
-        }}
-      />
-    )
+    const formDefinition = useF0FormDefinition({
+      name: "conditional-rendering",
+      schema: formSchema,
+      defaultValues: {
+        hasAccount: false,
+        accountId: "",
+        newUsername: "",
+        employeeCount: 1,
+        enterprisePlan: false,
+      },
+      onSubmit: async ({ data }) => {
+        await sleep(1000)
+        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+        return { success: true }
+      },
+    })
+
+    return <F0Form formDefinition={formDefinition} />
   },
 }
 
@@ -505,32 +619,32 @@ export const DynamicDisabled: Story = {
       }),
     })
 
-    return (
-      <F0Form
-        name="dynamic-disabled"
-        schema={formSchema}
-        defaultValues={{
-          status: "draft",
-          title: "",
-          content: "",
-          enableNotifications: true,
-          notifyOnComments: false,
-          notifyOnEdits: false,
-          employeeCount: 1,
-          bulkAction: undefined,
-        }}
-        onSubmit={async (data) => {
-          await sleep(1000)
-          console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
-          return { success: true }
-        }}
-      />
-    )
+    const formDefinition = useF0FormDefinition({
+      name: "dynamic-disabled",
+      schema: formSchema,
+      defaultValues: {
+        status: "draft",
+        title: "",
+        content: "",
+        enableNotifications: true,
+        notifyOnComments: false,
+        notifyOnEdits: false,
+        employeeCount: 1,
+        bulkAction: undefined,
+      },
+      onSubmit: async ({ data }) => {
+        await sleep(1000)
+        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+        return { success: true }
+      },
+    })
+
+    return <F0Form formDefinition={formDefinition} />
   },
 }
 
 /**
- * Form demonstrating all available field types
+ * Form demonstrating all available field types.
  */
 export const AllFieldTypes: Story = {
   render() {
@@ -564,7 +678,12 @@ export const AllFieldTypes: Story = {
               }
             : null,
       }),
-      textareaField: f0FormField(z.string().max(500), {
+      durationField: f0FormField(z.number().min(1, "Duration is required"), {
+        label: "Duration Field",
+        fieldType: "duration",
+        units: ["hours", "minutes", "seconds"],
+      }),
+      textareaField: f0FormField(z.string().min(1).max(500), {
         label: "Textarea Field",
         fieldType: "textarea",
         rows: 3,
@@ -626,12 +745,12 @@ export const AllFieldTypes: Story = {
         fieldType: "switch",
         helpText: "Toggle this switch",
       }),
-      dateField: f0FormField(z.date().optional(), {
+      dateField: f0FormField(z.date(), {
         label: "Date Field",
         placeholder: "Select a date",
         granularities: ["day"],
       }),
-      timeField: f0FormField(z.date().optional(), {
+      timeField: f0FormField(z.date(), {
         label: "Time Field",
         fieldType: "time",
         helpText: "Select a time (HH:mm)",
@@ -642,12 +761,10 @@ export const AllFieldTypes: Story = {
         helpText: "Select date and time",
       }),
       dateRangeField: f0FormField(
-        z
-          .object({
-            from: z.date(),
-            to: z.date(),
-          })
-          .optional(),
+        z.object({
+          from: z.date(),
+          to: z.date(),
+        }),
         {
           label: "Date Range Field",
           placeholder: "Select date range",
@@ -658,7 +775,7 @@ export const AllFieldTypes: Story = {
       ),
       richTextField: f0FormField(
         z.object({
-          value: z.string().nullable(),
+          value: z.string().min(1),
           mentionIds: z.array(z.number()).optional(),
         }),
         {
@@ -672,33 +789,37 @@ export const AllFieldTypes: Story = {
       ),
     })
 
-    return (
-      <F0Form
-        name="all-field-types"
-        schema={formSchema}
-        defaultValues={{
-          textField: "",
-          emailField: "",
-          passwordField: "",
-          numberField: 0,
-          textareaField: "",
-          selectField: "option1",
-          multiSelectField: [],
-          checkboxField: false,
-          switchField: false,
-          dateField: undefined,
-          timeField: undefined,
-          datetimeField: undefined,
-          dateRangeField: undefined,
-          richTextField: { value: null },
-        }}
-        onSubmit={async (data) => {
-          await sleep(1000)
-          console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
-          return { success: true }
-        }}
-      />
-    )
+    const formDefinition = useF0FormDefinition({
+      name: "all-field-types",
+      schema: formSchema,
+      defaultValues: {
+        textField: "",
+        emailField: "",
+        passwordField: "",
+        numberField: 0,
+        durationField: 0,
+        textareaField: "",
+        selectField: "option1",
+        multiSelectField: [],
+        checkboxField: false,
+        switchField: false,
+        dateField: undefined,
+        timeField: undefined,
+        datetimeField: undefined,
+        dateRangeField: undefined,
+        richTextField: { value: "" },
+      },
+      submitConfig: {
+        type: "action-bar",
+      },
+      onSubmit: async ({ data }) => {
+        await sleep(1000)
+        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+        return { success: true }
+      },
+    })
+
+    return <F0Form formDefinition={formDefinition} />
   },
 }
 
@@ -727,6 +848,12 @@ export const AllFieldTypesDisabled: Story = {
       numberField: f0FormField(z.number().min(0).max(100), {
         label: "Number Field",
         step: 1,
+        disabled: true,
+      }),
+      durationField: f0FormField(z.number().min(0), {
+        label: "Duration Field",
+        fieldType: "duration",
+        units: ["hours", "minutes", "seconds"],
         disabled: true,
       }),
       textareaField: f0FormField(z.string().max(500), {
@@ -822,7 +949,7 @@ export const AllFieldTypesDisabled: Story = {
       ),
       richTextField: f0FormField(
         z.object({
-          value: z.string().nullable(),
+          value: z.string(),
           mentionIds: z.array(z.number()).optional(),
         }),
         {
@@ -837,42 +964,43 @@ export const AllFieldTypesDisabled: Story = {
       ),
     })
 
-    return (
-      <F0Form
-        name="all-field-types-disabled"
-        schema={formSchema}
-        defaultValues={{
-          textField: "Sample text value",
-          emailField: "user@example.com",
-          passwordField: "secretpassword",
-          numberField: 42,
-          textareaField:
-            "This is a longer piece of text that demonstrates the textarea field in its disabled state.",
-          selectField: "option2",
-          multiSelectField: ["a", "b"],
-          urlField: "https://example.com",
-          checkboxField: true,
-          requiredCheckboxField: true,
-          switchField: true,
-          requiredSwitchField: true,
-          dateField: new Date("2024-06-15"),
-          timeField: new Date("2024-06-15T14:30:00"),
-          datetimeField: new Date("2024-06-15T14:30:00"),
-          dateRangeField: {
-            from: new Date("2024-01-01"),
-            to: new Date("2024-12-31"),
-          },
-          richTextField: {
-            value: "<p>This is <strong>rich text</strong> content.</p>",
-          },
-        }}
-        onSubmit={async (data) => {
-          await sleep(1000)
-          console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
-          return { success: true }
-        }}
-      />
-    )
+    const formDefinition = useF0FormDefinition({
+      name: "all-field-types-disabled",
+      schema: formSchema,
+      defaultValues: {
+        textField: "Sample text value",
+        emailField: "user@example.com",
+        passwordField: "secretpassword",
+        numberField: 42,
+        durationField: 3661,
+        textareaField:
+          "This is a longer piece of text that demonstrates the textarea field in its disabled state.",
+        selectField: "option2",
+        multiSelectField: ["a", "b"],
+        urlField: "https://example.com",
+        checkboxField: true,
+        requiredCheckboxField: true,
+        switchField: true,
+        requiredSwitchField: true,
+        dateField: new Date("2024-06-15"),
+        timeField: new Date("2024-06-15T14:30:00"),
+        datetimeField: new Date("2024-06-15T14:30:00"),
+        dateRangeField: {
+          from: new Date("2024-01-01"),
+          to: new Date("2024-12-31"),
+        },
+        richTextField: {
+          value: "<p>This is <strong>rich text</strong> content.</p>",
+        },
+      },
+      onSubmit: async ({ data }) => {
+        await sleep(1000)
+        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+        return { success: true }
+      },
+    })
+
+    return <F0Form formDefinition={formDefinition} />
   },
 }
 
@@ -945,24 +1073,24 @@ export const FileFields: Story = {
       }),
     })
 
-    return (
-      <F0Form
-        name="file-fields"
-        schema={formSchema}
-        defaultValues={{
-          title: "",
-          singleFile: "",
-          attachments: [],
-          notes: "",
-        }}
-        onSubmit={async (data) => {
-          await sleep(1000)
-          console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
-          return { success: true, message: "Document saved" }
-        }}
-        submitConfig={{ label: "Save Document" }}
-      />
-    )
+    const formDefinition = useF0FormDefinition({
+      name: "file-fields",
+      schema: formSchema,
+      defaultValues: {
+        title: "",
+        singleFile: "",
+        attachments: [],
+        notes: "",
+      },
+      onSubmit: async ({ data }) => {
+        await sleep(1000)
+        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+        return { success: true, message: "Document saved" }
+      },
+      submitConfig: { label: "Save Document" },
+    })
+
+    return <F0Form formDefinition={formDefinition} />
   },
 }
 
@@ -993,14 +1121,24 @@ export const FileFieldsWithInitialFiles: Story = {
       ),
     })
 
+    const formDefinition = useF0FormDefinition({
+      name: "file-initial",
+      schema: formSchema,
+      defaultValues: {
+        document: "signed_contract_2024.pdf",
+        attachments: ["signed_invoice.pdf", "signed_receipt.png"],
+      },
+      onSubmit: async ({ data }) => {
+        await sleep(1000)
+        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+        return { success: true, message: "Document updated" }
+      },
+      submitConfig: { label: "Update Document" },
+    })
+
     return (
       <F0Form
-        name="file-initial"
-        schema={formSchema}
-        defaultValues={{
-          document: "signed_contract_2024.pdf",
-          attachments: ["signed_invoice.pdf", "signed_receipt.png"],
-        }}
+        formDefinition={formDefinition}
         initialFiles={[
           {
             value: "signed_contract_2024.pdf",
@@ -1021,20 +1159,19 @@ export const FileFieldsWithInitialFiles: Story = {
             size: 850_000,
           },
         ]}
-        onSubmit={async (data) => {
-          await sleep(1000)
-          console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
-          return { success: true, message: "Document updated" }
-        }}
-        submitConfig={{ label: "Update Document" }}
       />
     )
   },
 }
 
 /**
- * Demonstrates custom field type for integrating external components.
- * Uses `fieldConfig` to pass typed configuration to the render function.
+ * Demonstrates the `renderCustomField` prop for integrating external
+ * components without inlining a `render` function in each field definition.
+ *
+ * Fields declare a `customFieldName` and optional `fieldConfig`; the form-level
+ * `renderCustomField` callback dispatches on the name and renders the right
+ * component. This keeps schema definitions declarative and lets consuming apps
+ * register their custom renderers in a single place.
  */
 export const CustomField: Story = {
   render() {
@@ -1081,6 +1218,57 @@ export const CustomField: Story = {
       </div>
     )
 
+    const PriorityPicker = ({
+      label,
+      value,
+      onChange,
+      error,
+      disabled,
+    }: {
+      label: string
+      value: string | undefined
+      onChange: (value: string | undefined) => void
+      error?: string
+      disabled?: boolean
+    }) => {
+      const priorities = [
+        { id: "low", label: "Low", color: "bg-blue-100 text-blue-800" },
+        {
+          id: "medium",
+          label: "Medium",
+          color: "bg-yellow-100 text-yellow-800",
+        },
+        { id: "high", label: "High", color: "bg-red-100 text-red-800" },
+      ]
+      return (
+        <div className="flex flex-col gap-1">
+          <label className="text-sm font-medium text-f1-foreground-secondary">
+            {label}
+          </label>
+          <div className="flex gap-2">
+            {priorities.map((p) => (
+              <button
+                key={p.id}
+                type="button"
+                disabled={disabled}
+                onClick={() => onChange(value === p.id ? undefined : p.id)}
+                className={`rounded-full px-3 py-1 text-xs font-medium transition-all ${
+                  value === p.id
+                    ? `${p.color} ring-2 ring-offset-1`
+                    : "bg-f1-background-tertiary text-f1-foreground-secondary"
+                } ${disabled ? "opacity-50" : "cursor-pointer"}`}
+              >
+                {p.label}
+              </button>
+            ))}
+          </div>
+          {error && (
+            <span className="text-sm text-f1-foreground-critical">{error}</span>
+          )}
+        </div>
+      )
+    }
+
     const employees = [
       { id: "1", name: "John Doe" },
       { id: "2", name: "Jane Smith" },
@@ -1092,48 +1280,18 @@ export const CustomField: Story = {
         label: "Task Title",
         placeholder: "Enter task title",
       }),
-      // Using fieldConfig to pass typed options to the custom renderer
+      // Declared with customFieldName — rendered by renderCustomField
       assignee: f0FormField(z.string().min(1, "Please select an assignee"), {
         label: "Assignee",
         fieldType: "custom",
-        fieldConfig: {
-          options: employees,
-        },
-        render: ({
-          label,
-          value,
-          onChange,
-          placeholder,
-          error,
-          disabled,
-          config,
-        }) => (
-          <ExternalSelector
-            label={label}
-            value={value || undefined}
-            onChange={(v) => onChange(v ?? "")}
-            error={error}
-            disabled={disabled}
-            options={config.options}
-            placeholder={placeholder}
-          />
-        ),
+        customFieldName: "employee-selector",
+        fieldConfig: { options: employees },
       }),
-      // Without fieldConfig - options passed directly
-      reviewer: f0FormField(z.string().optional(), {
-        label: "Reviewer (Optional)",
+      // Different customFieldName — same renderCustomField dispatches it
+      priority: f0FormField(z.string().optional(), {
+        label: "Priority",
         fieldType: "custom",
-        render: (props: CustomFieldRenderProps<string | undefined>) => (
-          <ExternalSelector
-            label={props.label}
-            value={props.value || undefined}
-            onChange={(v) => props.onChange(v)}
-            error={props.error}
-            disabled={props.disabled}
-            options={employees}
-            placeholder="Choose a reviewer..."
-          />
-        ),
+        customFieldName: "priority-picker",
       }),
       description: f0FormField(z.string().optional(), {
         label: "Description",
@@ -1142,29 +1300,182 @@ export const CustomField: Story = {
       }),
     })
 
+    const formDefinition = useF0FormDefinition({
+      name: "custom-field-example",
+      schema: formSchema,
+      defaultValues: {
+        title: "",
+        assignee: "",
+        priority: "",
+        description: "",
+      },
+      onSubmit: async ({ data }) => {
+        await sleep(1000)
+        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+        return { success: true }
+      },
+      submitConfig: { label: "Create Task", icon: null },
+    })
+
+    const renderCustomField = useCallback((props: RenderCustomFieldProps) => {
+      switch (props.customFieldName) {
+        case "employee-selector":
+          return (
+            <ExternalSelector
+              label={props.label}
+              value={(props.value as string) || undefined}
+              onChange={(v) => props.onChange(v ?? "")}
+              error={props.error}
+              disabled={props.disabled}
+              options={
+                (props.config as { options: { id: string; name: string }[] })
+                  .options
+              }
+              placeholder={props.placeholder}
+            />
+          )
+        case "priority-picker":
+          return (
+            <PriorityPicker
+              label={props.label}
+              value={(props.value as string) || undefined}
+              onChange={(v) => props.onChange(v ?? "")}
+              error={props.error}
+              disabled={props.disabled}
+            />
+          )
+        default:
+          return null
+      }
+    }, [])
+
     return (
       <F0Form
-        name="custom-field-example"
-        schema={formSchema}
-        defaultValues={{
-          title: "",
-          assignee: "",
-          reviewer: "",
-          description: "",
-        }}
-        onSubmit={async (data) => {
-          await sleep(1000)
-          console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
-          return { success: true }
-        }}
-        submitConfig={{ label: "Create Task", icon: null }}
+        formDefinition={formDefinition}
+        renderCustomField={renderCustomField}
       />
     )
   },
 }
 
 /**
- * Form with server-side validation errors
+ * Demonstrates `customFieldName` on a regular **select** field.
+ *
+ * Instead of using `fieldType: "custom"`, the field stays `fieldType: "select"`
+ * but adds `customFieldName`. The `renderCustomField` callback returns a
+ * `RenderCustomFieldSelectConfig` object with the `source` and `mapOptions`,
+ * which are merged into the field — so the native F0 Select component is rendered
+ * with dynamically-provided data.
+ */
+export const SelectWithCustomFieldName: Story = {
+  render() {
+    type Department = {
+      id: number
+      name: string
+      headcount: number
+    }
+
+    const departmentsData: Department[] = [
+      { id: 1, name: "Engineering", headcount: 42 },
+      { id: 2, name: "Design", headcount: 15 },
+      { id: 3, name: "Product", headcount: 8 },
+      { id: 4, name: "Marketing", headcount: 20 },
+      { id: 5, name: "Sales", headcount: 30 },
+      { id: 6, name: "Support", headcount: 25 },
+    ]
+
+    const departmentsSource = createDataSourceDefinition<Department>({
+      dataAdapter: {
+        fetchData: async ({ search }) => {
+          await sleep(200)
+          let results = departmentsData
+          if (search) {
+            const s = search.toLowerCase()
+            results = results.filter((d) => d.name.toLowerCase().includes(s))
+          }
+          return { records: results }
+        },
+      },
+    })
+
+    const mapDepartmentOption = (dept: Department) => ({
+      value: dept.id,
+      label: dept.name,
+      description: `${dept.headcount} people`,
+    })
+
+    const formSchema = z.object({
+      name: f0FormField(z.string().min(1, "Name is required"), {
+        label: "Employee Name",
+        placeholder: "Enter name",
+      }),
+      // Select field with customFieldName — source/mapOptions provided by renderCustomField
+      department: f0FormField(
+        z.number({ required_error: "Pick a department" }),
+        {
+          label: "Department",
+          fieldType: "select",
+          placeholder: "Select a department...",
+          showSearchBox: true,
+          customFieldName: "department-selector",
+        }
+      ),
+      // Multi-select field with customFieldName
+      secondaryDepartments: f0FormField(z.array(z.number()).optional(), {
+        label: "Secondary Departments",
+        fieldType: "select",
+        placeholder: "Select additional departments...",
+        showSearchBox: true,
+        multiple: true,
+        customFieldName: "department-selector",
+      }),
+    })
+
+    const formDefinition = useF0FormDefinition({
+      name: "select-custom-field-name",
+      schema: formSchema,
+      defaultValues: {
+        name: "",
+        department: undefined as unknown as number,
+        secondaryDepartments: [],
+      },
+      onSubmit: async ({ data }) => {
+        await sleep(1000)
+        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+        return { success: true }
+      },
+      submitConfig: { label: "Save", icon: null },
+    })
+
+    const renderCustomField = useCallback(
+      (props: RenderCustomFieldProps): RenderCustomFieldSelectConfig => {
+        // All fields with customFieldName "department-selector" share the same source
+        if (props.customFieldName === "department-selector") {
+          return {
+            _type: "select-config",
+            source: departmentsSource,
+            mapOptions: mapDepartmentOption,
+          }
+        }
+        // Fallback — should not happen in this example
+        return { _type: "select-config" }
+      },
+      []
+    )
+
+    return (
+      <div className="max-w-lg">
+        <F0Form
+          formDefinition={formDefinition}
+          renderCustomField={renderCustomField}
+        />
+      </div>
+    )
+  },
+}
+
+/**
+ * Form with server-side validation errors.
  */
 export const ServerValidation: Story = {
   render() {
@@ -1179,37 +1490,37 @@ export const ServerValidation: Story = {
       }),
     })
 
-    return (
-      <F0Form
-        name="server-validation"
-        schema={formSchema}
-        defaultValues={{ username: "", email: "" }}
-        onSubmit={async (data) => {
-          await sleep(1000)
+    const formDefinition = useF0FormDefinition({
+      name: "server-validation",
+      schema: formSchema,
+      defaultValues: { username: "", email: "" },
+      onSubmit: async ({ data }) => {
+        await sleep(1000)
 
-          const errors: Record<string, string> = {}
+        const errors: Record<string, string> = {}
 
-          if (data.username === "admin") {
-            errors.username = "This username is reserved"
+        if (data.username === "admin") {
+          errors.username = "This username is reserved"
+        }
+
+        if (data.email === "taken@example.com") {
+          errors.email = "This email is already registered"
+        }
+
+        if (Object.keys(errors).length > 0) {
+          return {
+            success: false,
+            rootMessage: "Please fix the errors below",
+            errors,
           }
+        }
 
-          if (data.email === "taken@example.com") {
-            errors.email = "This email is already registered"
-          }
+        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+        return { success: true }
+      },
+    })
 
-          if (Object.keys(errors).length > 0) {
-            return {
-              success: false,
-              rootMessage: "Please fix the errors below",
-              errors,
-            }
-          }
-
-          console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
-          return { success: true }
-        }}
-      />
-    )
+    return <F0Form formDefinition={formDefinition} />
   },
 }
 
@@ -1302,31 +1613,33 @@ export const VisualDesignExample: Story = {
       editors: { title: "Editors" },
     }
 
+    const formDefinition = useF0FormDefinition({
+      name: "visual-design-example",
+      schema: formSchema,
+      sections,
+      defaultValues: {
+        title: "Workplace climate survey",
+        description:
+          "This short workplace climate survey contains just 12 simple questions. It is designed to help measure employees' perceptions, experiences, and overall satisfaction within the workplace.",
+        participants: "",
+        publishOn: undefined,
+        endsAt: undefined,
+        recurrence: "none",
+        managerVisibility: false,
+        anonymousAnswers: false,
+        editors: "none",
+      },
+      onSubmit: async ({ data }) => {
+        await sleep(1000)
+        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+        return { success: true }
+      },
+      submitConfig: { label: "Create Survey", icon: null },
+    })
+
     return (
       <div className="max-w-lg">
-        <F0Form
-          name="visual-design-example"
-          schema={formSchema}
-          sections={sections}
-          defaultValues={{
-            title: "Workplace climate survey",
-            description:
-              "This short workplace climate survey contains just 12 simple questions. It is designed to help measure employees' perceptions, experiences, and overall satisfaction within the workplace.",
-            participants: "",
-            publishOn: undefined,
-            endsAt: undefined,
-            recurrence: "none",
-            managerVisibility: false,
-            anonymousAnswers: false,
-            editors: "none",
-          }}
-          onSubmit={async (data) => {
-            await sleep(1000)
-            console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
-            return { success: true }
-          }}
-          submitConfig={{ label: "Create Survey", icon: null }}
-        />
+        <F0Form formDefinition={formDefinition} />
       </div>
     )
   },
@@ -1358,27 +1671,29 @@ export const WithActionBar: Story = {
       }),
     })
 
+    const formDefinition = useF0FormDefinition({
+      name: "action-bar-example",
+      schema: formSchema,
+      submitConfig: {
+        type: "action-bar",
+        label: "Save Changes",
+      },
+      defaultValues: {
+        firstName: "John",
+        lastName: "Doe",
+        email: "john@example.com",
+        notifications: true,
+      },
+      onSubmit: async ({ data }) => {
+        await sleep(1000)
+        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+        return { success: true, message: "Settings saved successfully" }
+      },
+    })
+
     return (
       <div className="max-w-lg">
-        <F0Form
-          name="action-bar-example"
-          schema={formSchema}
-          submitConfig={{
-            type: "action-bar",
-            label: "Save Changes",
-          }}
-          defaultValues={{
-            firstName: "John",
-            lastName: "Doe",
-            email: "john@example.com",
-            notifications: true,
-          }}
-          onSubmit={async (data) => {
-            await sleep(1000)
-            console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
-            return { success: true, message: "Settings saved successfully" }
-          }}
-        />
+        <F0Form formDefinition={formDefinition} />
         <p className="mt-4 text-sm text-f1-foreground-secondary">
           Modify any field to see the action bar appear
         </p>
@@ -1418,29 +1733,31 @@ export const WithActionBarAndDiscard: Story = {
       }),
     })
 
+    const formDefinition = useF0FormDefinition({
+      name: "action-bar-discard-example",
+      schema: formSchema,
+      submitConfig: {
+        type: "action-bar",
+        label: "Save",
+        discardable: true,
+        discardConfig: { label: "Discard Changes" },
+      },
+      defaultValues: {
+        companyName: "Acme Corp",
+        industry: "tech",
+        employeeCount: 500,
+        publicCompany: false,
+      },
+      onSubmit: async ({ data }) => {
+        await sleep(1000)
+        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+        return { success: true, message: "Company details updated" }
+      },
+    })
+
     return (
       <div className="max-w-lg">
-        <F0Form
-          name="action-bar-discard-example"
-          schema={formSchema}
-          submitConfig={{
-            type: "action-bar",
-            label: "Save",
-            discardable: true,
-            discardConfig: { label: "Discard Changes" },
-          }}
-          defaultValues={{
-            companyName: "Acme Corp",
-            industry: "tech",
-            employeeCount: 500,
-            publicCompany: false,
-          }}
-          onSubmit={async (data) => {
-            await sleep(1000)
-            console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
-            return { success: true, message: "Company details updated" }
-          }}
-        />
+        <F0Form formDefinition={formDefinition} />
         <p className="mt-4 text-sm text-f1-foreground-secondary">
           Modify any field to see the action bar with Save and Discard buttons
         </p>
@@ -1472,6 +1789,35 @@ export const ErrorTriggerModes: Story = {
 
     const defaultValues = { name: "", email: "" }
 
+    const onSubmit = async () => {
+      await sleep(500)
+      return { success: true as const }
+    }
+
+    const blurDefinition = useF0FormDefinition({
+      name: "error-mode-blur",
+      schema: formSchema,
+      defaultValues,
+      errorTriggerMode: "on-blur",
+      onSubmit,
+    })
+
+    const changeDefinition = useF0FormDefinition({
+      name: "error-mode-change",
+      schema: formSchema,
+      defaultValues,
+      errorTriggerMode: "on-change",
+      onSubmit,
+    })
+
+    const submitDefinition = useF0FormDefinition({
+      name: "error-mode-submit",
+      schema: formSchema,
+      defaultValues,
+      errorTriggerMode: "on-submit",
+      onSubmit,
+    })
+
     return (
       <div className="grid max-w-4xl grid-cols-3 gap-8">
         <div>
@@ -1479,16 +1825,7 @@ export const ErrorTriggerModes: Story = {
           <p className="mb-4 text-sm text-f1-foreground-secondary">
             Errors appear when you leave a field
           </p>
-          <F0Form
-            name="error-mode-blur"
-            schema={formSchema}
-            defaultValues={defaultValues}
-            errorTriggerMode="on-blur"
-            onSubmit={async () => {
-              await sleep(500)
-              return { success: true }
-            }}
-          />
+          <F0Form formDefinition={blurDefinition} />
         </div>
 
         <div>
@@ -1496,16 +1833,7 @@ export const ErrorTriggerModes: Story = {
           <p className="mb-4 text-sm text-f1-foreground-secondary">
             Errors appear as you type
           </p>
-          <F0Form
-            name="error-mode-change"
-            schema={formSchema}
-            defaultValues={defaultValues}
-            errorTriggerMode="on-change"
-            onSubmit={async () => {
-              await sleep(500)
-              return { success: true }
-            }}
-          />
+          <F0Form formDefinition={changeDefinition} />
         </div>
 
         <div>
@@ -1513,16 +1841,7 @@ export const ErrorTriggerModes: Story = {
           <p className="mb-4 text-sm text-f1-foreground-secondary">
             Errors only appear after clicking submit
           </p>
-          <F0Form
-            name="error-mode-submit"
-            schema={formSchema}
-            defaultValues={defaultValues}
-            errorTriggerMode="on-submit"
-            onSubmit={async () => {
-              await sleep(500)
-              return { success: true }
-            }}
-          />
+          <F0Form formDefinition={submitDefinition} />
         </div>
       </div>
     )
@@ -1629,7 +1948,7 @@ const countriesPaginatedSource = createDataSourceDefinition<Country>({
   },
 })
 
-const defaultValues = {
+const selectDefaultValues = {
   country: 1,
   countryPaginated: 1,
   countries: [],
@@ -1679,25 +1998,27 @@ export const SelectWithDataSource: Story = {
       }),
     })
 
+    const formDefinition = useF0FormDefinition({
+      name: "select-datasource-example",
+      schema: formSchema,
+      defaultValues: selectDefaultValues,
+      onSubmit: async ({ data }) => {
+        await sleep(1000)
+        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+        return { success: true }
+      },
+    })
+
     return (
       <div className="max-w-lg">
-        <F0Form
-          name="select-datasource-example"
-          schema={formSchema}
-          defaultValues={defaultValues}
-          onSubmit={async (data) => {
-            await sleep(1000)
-            console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
-            return { success: true }
-          }}
-        />
+        <F0Form formDefinition={formDefinition} />
       </div>
     )
   },
 }
 
 /**
- * Form inside a Dialog using `useF0Form` hook.
+ * Form inside a Dialog using `useF0Form` hook for external control.
  *
  * The `useF0Form` hook provides:
  * - `formRef`: Pass to F0Form to enable external control
@@ -1738,6 +2059,23 @@ export const FormInDialog: Story = {
       }),
     })
 
+    const formDefinition = useF0FormDefinition({
+      name: "dialog-form",
+      schema: formSchema,
+      defaultValues: {
+        name: "",
+        email: "",
+        role: undefined,
+      },
+      submitConfig: { type: "default", hideSubmitButton: true },
+      onSubmit: async ({ data }) => {
+        await sleep(1000)
+        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+        setOpen(false)
+        return { success: true }
+      },
+    })
+
     return (
       <>
         <F0Button
@@ -1762,23 +2100,7 @@ export const FormInDialog: Story = {
             onClick: () => setOpen(false),
           }}
         >
-          <F0Form
-            formRef={formRef}
-            name="dialog-form"
-            schema={formSchema}
-            defaultValues={{
-              name: "",
-              email: "",
-              role: undefined,
-            }}
-            submitConfig={{ type: "default", hideSubmitButton: true }}
-            onSubmit={async (data) => {
-              await sleep(1000)
-              console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
-              setOpen(false)
-              return { success: true }
-            }}
-          />
+          <F0Form formDefinition={formDefinition} formRef={formRef} />
         </F0Dialog>
       </>
     )
@@ -1848,23 +2170,23 @@ export const DynamicDateConstraints: Story = {
         }
       })
 
-    return (
-      <F0Form
-        name="dynamic-date-constraints"
-        schema={formSchema}
-        defaultValues={{
-          projectName: "",
-          startDate: undefined,
-          endDate: undefined,
-          deadline: undefined,
-        }}
-        onSubmit={async (data) => {
-          await sleep(1000)
-          console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
-          return { success: true }
-        }}
-      />
-    )
+    const formDefinition = useF0FormDefinition({
+      name: "dynamic-date-constraints",
+      schema: formSchema,
+      defaultValues: {
+        projectName: "",
+        startDate: undefined,
+        endDate: undefined,
+        deadline: undefined,
+      },
+      onSubmit: async ({ data }) => {
+        await sleep(1000)
+        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+        return { success: true }
+      },
+    })
+
+    return <F0Form formDefinition={formDefinition} />
   },
 }
 
@@ -1872,8 +2194,8 @@ export const DynamicDateConstraints: Story = {
  * Form with per-section schema: each section has its own independent schema,
  * validation, and submit button. Submitting one section does not affect others.
  *
- * The `schema` prop receives a record where keys are section IDs and values
- * are Zod schemas. The `onSubmit` callback receives the section ID and its data.
+ * Uses `useF0FormDefinition` with a record of schemas. The `onSubmit`
+ * callback receives `{ sectionId, data, fullData }`.
  */
 export const PerSectionSubmit: Story = {
   render() {
@@ -1918,40 +2240,40 @@ export const PerSectionSubmit: Story = {
       }),
     }
 
-    return (
-      <F0Form
-        name="per-section"
-        schema={schema}
-        sections={{
-          personal: {
-            title: "Personal Information",
-            description: "Your basic profile details",
-          },
-          contact: {
-            title: "Contact Details",
-            description: "How we can reach you",
-          },
-          preferences: {
-            title: "Preferences",
-            description: "Customize your experience",
-            submitConfig: { label: "Save Preferences" },
-          },
-        }}
-        defaultValues={{
-          personal: { firstName: "", lastName: "", bio: "" },
-          contact: { email: "", phone: "" },
-          preferences: { theme: "system", notifications: true },
-        }}
-        onSubmit={async (sectionId, data) => {
-          await sleep(1000)
-          alert(
-            `Section "${sectionId}" submitted: ${JSON.stringify(data, null, 2)}`
-          )
-          return { success: true }
-        }}
-        submitConfig={{ label: "Save" }}
-      />
-    )
+    const formDefinition = useF0FormDefinition({
+      name: "per-section",
+      schema,
+      sections: {
+        personal: {
+          title: "Personal Information",
+          description: "Your basic profile details",
+        },
+        contact: {
+          title: "Contact Details",
+          description: "How we can reach you",
+        },
+        preferences: {
+          title: "Preferences",
+          description: "Customize your experience",
+          submitConfig: { label: "Save Preferences" },
+        },
+      },
+      defaultValues: {
+        personal: { firstName: "", lastName: "", bio: "" },
+        contact: { email: "", phone: "" },
+        preferences: { theme: "system", notifications: true },
+      },
+      onSubmit: async ({ sectionId, data }) => {
+        await sleep(1000)
+        alert(
+          `Section "${sectionId}" submitted: ${JSON.stringify(data, null, 2)}`
+        )
+        return { success: true }
+      },
+      submitConfig: { label: "Save" },
+    })
+
+    return <F0Form formDefinition={formDefinition} />
   },
 }
 
@@ -1993,35 +2315,37 @@ export const PerSectionWithSidebar: Story = {
       }),
     }
 
+    const formDefinition = useF0FormDefinition({
+      name: "per-section-sidebar",
+      schema,
+      sections: {
+        general: {
+          title: "General",
+          description: "Basic survey information",
+        },
+        settings: {
+          title: "Settings",
+          description: "Privacy and visibility",
+        },
+        schedule: { title: "Schedule", description: "When the survey runs" },
+      },
+      defaultValues: {
+        general: { title: "", description: "" },
+        settings: { anonymousAnswers: false, managerVisibility: false },
+        schedule: { publishOn: undefined, endsAt: undefined },
+      },
+      onSubmit: async ({ sectionId, data }) => {
+        await sleep(1000)
+        alert(`Section "${sectionId}" saved: ${JSON.stringify(data, null, 2)}`)
+        return { success: true }
+      },
+      submitConfig: { label: "Save" },
+    })
+
     return (
       <F0Form
-        name="per-section-sidebar"
-        schema={schema}
-        sections={{
-          general: {
-            title: "General",
-            description: "Basic survey information",
-          },
-          settings: {
-            title: "Settings",
-            description: "Privacy and visibility",
-          },
-          schedule: { title: "Schedule", description: "When the survey runs" },
-        }}
-        defaultValues={{
-          general: { title: "", description: "" },
-          settings: { anonymousAnswers: false, managerVisibility: false },
-          schedule: { publishOn: undefined, endsAt: undefined },
-        }}
-        onSubmit={async (sectionId, data) => {
-          await sleep(1000)
-          alert(
-            `Section "${sectionId}" saved: ${JSON.stringify(data, null, 2)}`
-          )
-          return { success: true }
-        }}
+        formDefinition={formDefinition}
         styling={{ showSectionsSidepanel: true }}
-        submitConfig={{ label: "Save" }}
       />
     )
   },
@@ -2072,44 +2396,259 @@ export const PerSectionShowSubmitWhenDirty: Story = {
       }),
     }
 
-    return (
-      <F0Form
-        name="per-section-dirty"
-        schema={schema}
-        sections={{
-          profile: {
-            title: "Profile",
-            description: "Your public profile information",
-            submitConfig: { showSubmitWhenDirty: true },
-          },
-          notifications: {
-            title: "Notifications",
-            description: "Choose how you want to be notified",
-            submitConfig: { showSubmitWhenDirty: true },
-          },
-          security: {
-            title: "Security",
-            description: "Update your password",
-            submitConfig: { label: "Change Password" },
-          },
-        }}
-        defaultValues={{
-          profile: { displayName: "Jane Doe", bio: "" },
-          notifications: {
-            emailNotifications: true,
-            pushNotifications: false,
-          },
-          security: { currentPassword: "", newPassword: "" },
-        }}
-        onSubmit={async (sectionId, data) => {
-          await sleep(1000)
-          alert(
-            `Section "${sectionId}" saved: ${JSON.stringify(data, null, 2)}`
-          )
-          return { success: true }
-        }}
-        submitConfig={{ label: "Save" }}
-      />
-    )
+    const formDefinition = useF0FormDefinition({
+      name: "per-section-dirty",
+      schema,
+      sections: {
+        profile: {
+          title: "Profile",
+          description: "Your public profile information",
+          submitConfig: { showSubmitWhenDirty: true },
+        },
+        notifications: {
+          title: "Notifications",
+          description: "Choose how you want to be notified",
+          submitConfig: { showSubmitWhenDirty: true },
+        },
+        security: {
+          title: "Security",
+          description: "Update your password",
+          submitConfig: { label: "Change Password" },
+        },
+      },
+      defaultValues: {
+        profile: { displayName: "Jane Doe", bio: "" },
+        notifications: {
+          emailNotifications: true,
+          pushNotifications: false,
+        },
+        security: { currentPassword: "", newPassword: "" },
+      },
+      onSubmit: async ({ sectionId, data }) => {
+        await sleep(1000)
+        alert(`Section "${sectionId}" saved: ${JSON.stringify(data, null, 2)}`)
+        return { success: true }
+      },
+      submitConfig: { label: "Save" },
+    })
+
+    return <F0Form formDefinition={formDefinition} />
+  },
+}
+
+/**
+ * Form with async `defaultValues` fetched from an external source.
+ * While loading, the form displays field-shaped skeleton placeholders
+ * that match the real form layout. Once resolved, the form appears
+ * pre-filled with the fetched values.
+ *
+ * Pass an async function to `defaultValues` that receives an `AbortSignal`
+ * for cancellation support (e.g. with `fetch()`).
+ */
+export const AsyncDefaultValues: Story = {
+  render() {
+    const formSchema = z.object({
+      firstName: f0FormField(z.string().min(1), {
+        label: "First Name",
+        placeholder: "Enter first name",
+      }),
+      lastName: f0FormField(z.string().min(1), {
+        label: "Last Name",
+        placeholder: "Enter last name",
+      }),
+      email: f0FormField(z.string().email(), {
+        label: "Email",
+        placeholder: "you@example.com",
+      }),
+      bio: f0FormField(z.string().max(500).optional(), {
+        label: "Biography",
+        fieldType: "textarea",
+        rows: 3,
+      }),
+      notifications: f0FormField(z.boolean(), {
+        label: "Enable notifications",
+        fieldType: "switch",
+      }),
+    })
+
+    const formDefinition = useF0FormDefinition({
+      name: "async-defaults",
+      schema: formSchema,
+      defaultValues: async (_signal: AbortSignal) => {
+        // Simulate fetching user profile from an API
+        await sleep(2000)
+        return {
+          firstName: "Jane",
+          lastName: "Smith",
+          email: "jane.smith@example.com",
+          bio: "Software engineer passionate about design systems.",
+          notifications: true,
+        }
+      },
+      onSubmit: async ({ data }) => {
+        await sleep(1000)
+        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+        return { success: true, message: "Profile updated" }
+      },
+      submitConfig: { label: "Save Profile" },
+    })
+
+    return <F0Form formDefinition={formDefinition} />
+  },
+}
+
+/**
+ * Per-section form with async `defaultValues`.
+ * Each section independently shows skeleton placeholders while
+ * the shared async function resolves. All sections populate
+ * once the promise completes.
+ */
+export const AsyncDefaultValuesPerSection: Story = {
+  render() {
+    const schema = {
+      personal: z.object({
+        firstName: f0FormField(z.string().min(1), {
+          label: "First Name",
+          placeholder: "Enter first name",
+        }),
+        lastName: f0FormField(z.string().min(1), {
+          label: "Last Name",
+          placeholder: "Enter last name",
+        }),
+      }),
+      contact: z.object({
+        email: f0FormField(z.string().email(), {
+          label: "Email",
+          placeholder: "you@example.com",
+        }),
+        phone: f0FormField(z.string().optional(), {
+          label: "Phone",
+          placeholder: "+1 (555) 000-0000",
+        }),
+      }),
+    }
+
+    const formDefinition = useF0FormDefinition({
+      name: "async-per-section",
+      schema,
+      sections: {
+        personal: {
+          title: "Personal Information",
+          description: "Your basic profile details",
+        },
+        contact: {
+          title: "Contact Details",
+          description: "How we can reach you",
+        },
+      },
+      defaultValues: async (_signal: AbortSignal) => {
+        // Simulate API call
+        await sleep(2000)
+        return {
+          personal: { firstName: "Jane", lastName: "Smith" },
+          contact: { email: "jane@example.com", phone: "+1 555 123 4567" },
+        }
+      },
+      onSubmit: async ({ sectionId, data }) => {
+        await sleep(1000)
+        console.info(
+          `Section "${sectionId}" submitted: ${JSON.stringify(data, null, 2)}`
+        )
+        return { success: true }
+      },
+      submitConfig: { label: "Save" },
+    })
+
+    return <F0Form formDefinition={formDefinition} />
+  },
+}
+
+/**
+ * Form definition with `defaultValuesParamsSchema`.
+ *
+ * The schema tells the AI what params it can supply when calling `presentForm`.
+ * When `defaultValuesParamsSchema` is provided, `defaultValues` can be a
+ * function that receives typed params — e.g. `async ({ employeeId }) => { ... }`.
+ *
+ * For rendered forms, `defaultValues` is resolved at mount time with empty
+ * params (`{}`). When the AI calls `presentForm` with params, the registry
+ * calls the same function with the actual params.
+ *
+ * In this example the AI can supply an `employeeId` when presenting the form,
+ * which causes the async `defaultValues` to fetch that employee's data.
+ */
+export const WithDefaultValuesParamsSchema: Story = {
+  render() {
+    const formSchema = z.object({
+      firstName: f0FormField(z.string().min(1), {
+        label: "First Name",
+        placeholder: "Enter first name",
+      }),
+      lastName: f0FormField(z.string().min(1), {
+        label: "Last Name",
+        placeholder: "Enter last name",
+      }),
+      email: f0FormField(z.string().email(), {
+        label: "Email",
+        placeholder: "you@example.com",
+      }),
+      role: f0FormField(z.string().optional(), {
+        label: "Role",
+        placeholder: "e.g. Engineer",
+      }),
+    })
+
+    // Mock employee database
+    const employees: Record<
+      string,
+      {
+        firstName: string
+        lastName: string
+        email: string
+        role: string
+      }
+    > = {
+      "emp-1": {
+        firstName: "Jane",
+        lastName: "Doe",
+        email: "jane.doe@factorial.co",
+        role: "Staff Engineer",
+      },
+      "emp-2": {
+        firstName: "John",
+        lastName: "Smith",
+        email: "john.smith@factorial.co",
+        role: "Product Manager",
+      },
+    }
+
+    const formDefinition = useF0FormDefinition({
+      name: "edit-employee",
+      schema: formSchema,
+      // TParams is inferred from defaultValuesParamsSchema
+      defaultValuesParamsSchema: z.object({
+        employeeId: z.string().describe("The ID of the employee to edit"),
+      }),
+      // defaultValues receives typed params — auto-inferred from defaultValuesParamsSchema
+      defaultValues: async ({ employeeId }) => {
+        await sleep(1500)
+        // At mount time params is {} so employeeId is undefined — return sensible defaults
+        const employee = employeeId ? employees[employeeId] : employees["emp-1"]
+        return {
+          firstName: employee?.firstName ?? "",
+          lastName: employee?.lastName ?? "",
+          email: employee?.email ?? "",
+          role: employee?.role ?? "",
+        }
+      },
+      onSubmit: async ({ data }) => {
+        await sleep(1000)
+        console.info(`Employee updated: ${JSON.stringify(data, null, 2)}`)
+        return { success: true, message: "Employee updated" }
+      },
+      submitConfig: { label: "Save Changes" },
+    })
+
+    return <F0Form formDefinition={formDefinition} />
   },
 }

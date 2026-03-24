@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest"
 import { UserPlatformProvider } from "@/lib/providers/user-platafform/UserPlatformProvider"
 import { zeroRender } from "@/testing/test-utils"
 
-import { withDataTestId } from "../index"
+import { WithDataTestIdPropsOf, withDataTestId } from "../index"
 
 const renderWithProviders = zeroRender
 
@@ -184,24 +184,129 @@ describe("withDataTestId", () => {
     expect(screen.getByText("Original")).toBeInTheDocument()
   })
 
-  it("should not render wrapper div when forwardRef component returns null", () => {
+  it("should render wrapper div even when forwardRef component returns null", () => {
     const TestComponent = forwardRef<HTMLDivElement, { show?: boolean }>(
       (_props, _ref) => null
     )
     TestComponent.displayName = "TestComponent"
     const WrappedComponent = withDataTestId(TestComponent)
 
-    renderWithProviders(<WrappedComponent dataTestId="should-not-appear" />)
+    renderWithProviders(<WrappedComponent dataTestId="null-forward-ref" />)
 
-    expect(screen.queryByTestId("should-not-appear")).not.toBeInTheDocument()
+    expect(screen.getByTestId("null-forward-ref")).toBeInTheDocument()
   })
 
-  it("should not render wrapper div when regular function component returns null", () => {
+  it("should render wrapper div even when regular function component returns null", () => {
     const TestComponent = (_props: { show?: boolean }) => null
     const WrappedComponent = withDataTestId(TestComponent)
 
-    renderWithProviders(<WrappedComponent dataTestId="should-not-appear" />)
+    renderWithProviders(<WrappedComponent dataTestId="null-regular" />)
 
-    expect(screen.queryByTestId("should-not-appear")).not.toBeInTheDocument()
+    expect(screen.getByTestId("null-regular")).toBeInTheDocument()
+  })
+
+  describe("type-level: onChange callback argument inference", () => {
+    // These are compile-time assertions — the it() bodies never actually run.
+    // If types regress, tsc --noEmit will fail on this file.
+
+    it("should infer onChange argument types from a simple two-argument callback", () => {
+      // A component with a typed two-argument onChange (mirrors F0DatePicker)
+      type DateValue = { year: number; month: number }
+      type Props = {
+        onChange?: (
+          value: DateValue | undefined,
+          label: string | undefined
+        ) => void
+        value?: DateValue
+      }
+      const DatePicker: React.FC<Props> = () => null
+      const Wrapped = withDataTestId(DatePicker)
+
+      // WithDataTestIdPropsOf must preserve both onChange parameter types.
+      type WrappedProps = WithDataTestIdPropsOf<typeof Wrapped>
+
+      const _goodProps: WrappedProps = {
+        onChange: (value: DateValue | undefined, label: string | undefined) => {
+          void value
+          void label
+        },
+        dataTestId: "test",
+      }
+      expect(_goodProps).toBeDefined()
+    })
+
+    it("should preserve each branch of a discriminated-union component's onChange", () => {
+      // Mirrors F0Select: multiple:false → onChange(string), multiple:true → onChange(string[])
+      type SingleProps = {
+        multiple?: false
+        value?: string
+        onChange?: (v: string) => void
+      }
+      type MultiProps = {
+        multiple: true
+        value?: string[]
+        onChange?: (v: string[]) => void
+      }
+      type UnionProps = SingleProps | MultiProps
+
+      const SelectComponent: React.FC<UnionProps> = () => null
+      const Wrapped = withDataTestId(SelectComponent)
+
+      type WrappedProps = WithDataTestIdPropsOf<typeof Wrapped>
+
+      // Single branch: multiple omitted, onChange receives string
+      const _goodSingle: WrappedProps = {
+        onChange: (_v: string) => {},
+        dataTestId: "test",
+      }
+
+      // Multi branch: multiple: true, onChange receives string[]
+      const _goodMulti: WrappedProps = {
+        multiple: true,
+        onChange: (_v: string[]) => {},
+        dataTestId: "test",
+      }
+
+      // @ts-expect-error — multiple:true requires onChange(string[]), not onChange(string)
+      const _badMulti: WrappedProps = {
+        multiple: true,
+        onChange: (_v: string) => {},
+      }
+
+      expect(_goodSingle).toBeDefined()
+      expect(_goodMulti).toBeDefined()
+      expect(_badMulti).toBeDefined()
+    })
+
+    it("should infer callback argument as boolean, not any (regression test)", () => {
+      // This test ensures that callback argument types are not widened to `any`
+      // when wrapped with withDataTestId. If they become `any`, the @ts-expect-error
+      // below would be satisfied (wrong), causing a compile error.
+      type Props = {
+        onCheckedChange?: (checked: boolean) => void
+      }
+
+      const Checkbox: React.FC<Props> = () => null
+      const Wrapped = withDataTestId(Checkbox)
+
+      type WrappedProps = React.ComponentProps<typeof Wrapped>
+
+      // Extract the callback parameter type
+      type OnChange = NonNullable<WrappedProps["onCheckedChange"]>
+      type CheckedParam = Parameters<OnChange>[0]
+
+      // IsAny<T> is `true` if T is `any`, `false` otherwise
+      type IsAny<T> = 0 extends 1 & T ? true : false
+      type CheckedIsAny = IsAny<CheckedParam>
+
+      // If CheckedParam is `any`, this @ts-expect-error is satisfied (bad!)
+      // If CheckedParam is `boolean`, this @ts-expect-error is unused → compile error (good!)
+      // We want this line to cause an "unused @ts-expect-error" error if types are correct.
+      //
+      // NOTE: The assertion below verifies CheckedIsAny is false (checked is NOT any).
+      // If this test fails with "unused @ts-expect-error", the fix is working!
+      const _checkedIsNotAny: CheckedIsAny = false
+      expect(_checkedIsNotAny).toBe(false)
+    })
   })
 })

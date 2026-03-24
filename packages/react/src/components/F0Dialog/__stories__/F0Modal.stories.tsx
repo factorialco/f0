@@ -4,8 +4,8 @@ import { ComponentProps, FC, useState } from "react"
 import { expect, within } from "storybook/test"
 
 import { F0Button } from "@/components/F0Button"
-import { ActivityItemList } from "@/sds/inbox/Activity/ActivityItemList"
-import { Default as ActivityItemListDefault } from "@/sds/inbox/Activity/ActivityItemList/index.stories"
+import { ApplicationFrame } from "@/examples/ApplicationFrame"
+import ApplicationFrameStoryMeta from "@/examples/ApplicationFrame/index.stories"
 import { ResourceHeader } from "@/experimental/Information/Headers/ResourceHeader"
 import { Default as ResourceHeaderDefault } from "@/experimental/Information/Headers/ResourceHeader/index.stories"
 import {
@@ -13,8 +13,6 @@ import {
   OnePersonListItemProps,
 } from "@/experimental/Lists/OnePersonListItem"
 import { Default as OnePersonListItemDefault } from "@/experimental/Lists/OnePersonListItem/index.stories"
-import { ApplicationFrame } from "@/examples/ApplicationFrame"
-import ApplicationFrameStoryMeta from "@/examples/ApplicationFrame/index.stories"
 import { Placeholder } from "@/icons/app"
 import CheckDoubleIcon from "@/icons/app/CheckDouble"
 import CrossIcon from "@/icons/app/Cross"
@@ -23,6 +21,8 @@ import PencilIcon from "@/icons/app/Pencil"
 import SaveIcon from "@/icons/app/Save"
 import ShareIcon from "@/icons/app/Share"
 import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
+import { ActivityItemList } from "@/sds/inbox/Activity/ActivityItemList"
+import { Default as ActivityItemListDefault } from "@/sds/inbox/Activity/ActivityItemList/index.stories"
 
 import { F0Dialog } from "../index"
 import { dialogPositions, dialogWidths } from "../types"
@@ -47,13 +47,13 @@ const meta: Meta<typeof F0Dialog> = {
     },
     width: {
       description:
-        "The width of the dialog. ⚠️ Only applies to center position",
+        "The width of the dialog. Applies to center and side panel positions (left/right)",
       control: {
         type: "select",
         options: dialogWidths,
       },
       table: {
-        type: { summary: "sm | md | lg" },
+        type: { summary: "sm | md | lg | xl" },
         defaultValue: { summary: "md" },
       },
     },
@@ -249,6 +249,13 @@ export const WithRightPosition: Story = {
   args: {
     ...Default.args,
     position: "right",
+  },
+}
+
+export const WithLeftPositionLgWidth: Story = {
+  args: {
+    ...WithLeftPosition.args,
+    width: "lg",
   },
 }
 

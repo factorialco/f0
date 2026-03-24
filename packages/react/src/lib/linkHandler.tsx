@@ -49,6 +49,29 @@ function stripTrailingSlash(path: string) {
   return path.endsWith("/") ? path.slice(0, -1) : path
 }
 
+function splitPathAndSearch(fullPath: string): [string, URLSearchParams] {
+  const queryIndex = fullPath.indexOf("?")
+  if (queryIndex === -1) return [fullPath, new URLSearchParams()]
+  return [
+    fullPath.slice(0, queryIndex),
+    new URLSearchParams(fullPath.slice(queryIndex)),
+  ]
+}
+
+function searchParamsMatch(
+  current: URLSearchParams,
+  target: URLSearchParams
+): boolean {
+  for (const [key, value] of target) {
+    if (current.get(key) !== value) return false
+  }
+  return true
+}
+
+function searchParamsEqual(a: URLSearchParams, b: URLSearchParams): boolean {
+  return searchParamsMatch(a, b) && searchParamsMatch(b, a)
+}
+
 export const useNavigation = () => {
   const { currentPath } = useLinkContext()
 
@@ -59,12 +82,29 @@ export const useNavigation = () => {
     ) => {
       if (currentPath === undefined || path === undefined) return false
 
-      if (exact)
-        return stripTrailingSlash(currentPath) === stripTrailingSlash(path)
+      const [currentPathname, currentSearch] = splitPathAndSearch(currentPath)
+      const [targetPathname, targetSearch] = splitPathAndSearch(path)
 
-      return `${stripTrailingSlash(currentPath)}/`.startsWith(
-        `${stripTrailingSlash(path)}/`
-      )
+      if (exact)
+        return (
+          stripTrailingSlash(currentPathname) ===
+            stripTrailingSlash(targetPathname) &&
+          searchParamsEqual(currentSearch, targetSearch)
+        )
+
+      const pathnameMatch =
+        `${stripTrailingSlash(currentPathname)}/`.startsWith(
+          `${stripTrailingSlash(targetPathname)}/`
+        )
+
+      if (!pathnameMatch) return false
+
+      // When the href has query params, verify they are all present in the current URL
+      if (targetSearch.size > 0) {
+        return searchParamsMatch(currentSearch, targetSearch)
+      }
+
+      return true
     },
     [currentPath]
   )

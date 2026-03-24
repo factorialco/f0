@@ -54,7 +54,7 @@ export type F0DialogInternalProps = {
   asBottomSheetInMobile?: boolean
   // The position of the dialog
   position?: DialogPosition
-  // The width of the dialog. Only applies to center position but we can NOT use narrowing as position undefined is valid
+  // The width of the dialog. Applies to center and side panel positions (left/right), but we can NOT use narrowing as position undefined is valid
   width?: DialogWidth
   // Actions to render in the footer
   primaryAction?: F0DialogPrimaryAction | F0DialogPrimaryActionItem[]
@@ -71,4 +71,6 @@ export type F0DialogInternalProps = {
   children: ReactNode
   // Disable the default padding from the dialog content area
   disableContentPadding?: boolean
+  // Override the DOM element the dialog is portaled into. Pass `null` to portal to `document.body` (useful to escape stacking contexts).
+  container?: HTMLElement | null
 } & Partial<Pick<TabsProps, "tabs" | "activeTabId" | "setActiveTabId">>

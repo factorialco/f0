@@ -2,11 +2,12 @@ import type { ReactElement } from "react"
 import { useContext, useEffect, useMemo, useRef, useState } from "react"
 
 import { useEventEmitter } from "@/experimental/OneDataCollection/useEventEmitter"
-import { withDataTestId, type WithDataTestIdProps } from "@/lib/data-testid"
+import { DataTestIdWrapper } from "@/lib/data-testid"
 import { cn } from "@/lib/utils"
 
 import type { FiltersDefinition, FiltersMode, FiltersState } from "./types"
 
+import { collectNestedFilterKeys } from "./filterTypes/InFilter/components/option-utils"
 import { FiltersChipsList as FiltersChipsListComponent } from "./components/FiltersChipsList"
 import { FiltersControls as FiltersControlsComponent } from "./components/FiltersControls"
 import { FiltersPresets as FiltersPresetsComponent } from "./components/FiltersPresets"
@@ -130,6 +131,16 @@ const FiltersRoot = <Definition extends FiltersDefinition>({
   const removeFilterValue = (key: keyof Definition) => {
     const newFilters = { ...localFiltersValue }
     delete newFilters[key]
+
+    // Also clear nested child filter keys to avoid orphaned values
+    const filterDef = filters?.[key]
+    if (filterDef?.type === "in" && filterDef.options) {
+      const nestedKeys = collectNestedFilterKeys(filterDef.options)
+      nestedKeys.forEach((nestedKey) => {
+        delete newFilters[nestedKey as keyof Definition]
+      })
+    }
+
     setLocalFiltersValue(newFilters as FiltersState<Definition>)
     props.onChange(newFilters as FiltersState<Definition>)
   }
@@ -276,45 +287,44 @@ FiltersChipsList.displayName = "OneFilterPicker.ChipsList"
  * OneFiltersPicker component to use as a single component
  */
 const _OneFilterPicker = <Definition extends FiltersDefinition>(
-  props: OneFilterPickerRootProps<Definition>
+  props: OneFilterPickerRootProps<Definition> & { dataTestId?: string }
 ) => {
+  const { dataTestId, ...rootProps } = props
   return (
-    <FiltersRoot {...props}>
-      <div
-        className={cn(
-          "flex items-center justify-between gap-4",
-          !props.filters && "justify-end"
+    <DataTestIdWrapper dataTestId={dataTestId}>
+      <FiltersRoot {...rootProps}>
+        <div
+          className={cn(
+            "flex items-center justify-between gap-4",
+            !rootProps.filters && "justify-end"
+          )}
+        >
+          {rootProps.filters && (
+            <div className="flex min-w-0 flex-1 gap-1">
+              <FiltersControls />
+              <FiltersPresets />
+            </div>
+          )}
+          {rootProps.children && (
+            <div className="flex shrink-0 items-center gap-2">
+              {rootProps.children}
+            </div>
+          )}
+        </div>
+        {(!rootProps.mode || rootProps.mode === "default") && (
+          <FiltersChipsList />
         )}
-      >
-        {props.filters && (
-          <div className="flex min-w-0 flex-1 gap-1">
-            <FiltersControls />
-            <FiltersPresets />
-          </div>
-        )}
-        {props.children && (
-          <div className="flex shrink-0 items-center gap-2">
-            {props.children}
-          </div>
-        )}
-      </div>
-      {(!props.mode || props.mode === "default") && <FiltersChipsList />}
-    </FiltersRoot>
+      </FiltersRoot>
+    </DataTestIdWrapper>
   )
 }
 _OneFilterPicker.displayName = "OneFilterPicker"
 
-/**
- * Generic component type so consumers can use <OneFilterPicker<Definition> />.
- * Preserves dataTestId and OneFilterPickerRootProps<Definition>.
- */
-type OneFilterPickerGeneric = <Definition extends FiltersDefinition>(
-  props: OneFilterPickerRootProps<Definition> & WithDataTestIdProps
+const OneFilterPicker = _OneFilterPicker as <
+  Definition extends FiltersDefinition,
+>(
+  props: OneFilterPickerRootProps<Definition> & { dataTestId?: string }
 ) => ReactElement | null
-
-const OneFilterPicker = withDataTestId(
-  _OneFilterPicker
-) as unknown as OneFilterPickerGeneric
 
 /**
  * Export the components as named exports to allow to customize the layout

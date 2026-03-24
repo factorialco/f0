@@ -4,6 +4,7 @@ import image from "@storybook-static/avatars/person04.jpg"
 import { useState } from "react"
 import { expect, fn, within } from "storybook/test"
 
+import { F0Link } from "@/components/F0Link"
 import {
   Add,
   Briefcase,
@@ -23,8 +24,6 @@ import { createAtlaskitDriver } from "@/lib/dnd/atlaskitDriver"
 import { DndProvider } from "@/lib/dnd/context"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { mockImage } from "@/testing/mocks/images"
-
-import { F0Link } from "@/components/F0Link"
 import { Switch } from "@/ui/switch"
 import { Text } from "@/ui/Text"
 
@@ -148,25 +147,25 @@ export const Default: Story = {
     metadata: [
       {
         icon: Briefcase,
-        tooltip: "Job title",
         property: {
           type: "text",
+          label: "Job title",
           value: "Design Engineer",
         },
       },
       {
         icon: CalendarArrowRight,
-        tooltip: "Date",
         property: {
           type: "text",
+          label: "Date",
           value: "3 years ago",
         },
       },
       {
         icon: Star,
-        tooltip: "Status",
         property: {
           type: "status",
+          label: "Status",
           value: {
             status: "positive",
             label: "Active",
@@ -175,9 +174,9 @@ export const Default: Story = {
       },
       {
         icon: Link,
-        tooltip: "Link",
         property: {
           type: "text",
+          label: "Link",
           value:
             "https://docs.google.com/spreadsheets/d/1jO1tPWhNe1y_ciSmNVYHugIPaOIEWOqrHR50Du2wvbc/edit",
         },
@@ -239,6 +238,7 @@ export const WithActions: Story = {
         icon: Office,
         property: {
           type: "tag",
+          label: "Location",
           value: {
             label: "Barcelona, Spain",
           },
@@ -248,6 +248,7 @@ export const WithActions: Story = {
         icon: Calendar,
         property: {
           type: "text",
+          label: "Start date",
           value: "10 months ago",
         },
       },
@@ -310,6 +311,15 @@ export const WithEmoji: Story = {
   },
 }
 
+export const WithAspectRatio16x9: Story = {
+  args: {
+    ...Default.args,
+    image: imageTypes.wide,
+    imageAspectRatio: "video",
+    imageFit: "cover",
+  },
+}
+
 export const WithIconAndImage: Story = {
   args: {
     ...Default.args,
@@ -367,17 +377,17 @@ export const WithProgressBar: Story = {
     metadata: [
       {
         icon: Calendar,
-        tooltip: "Due date",
         property: {
           type: "date",
+          label: "Due date",
           value: new Date(2025, 11, 31),
         },
       },
       {
         icon: ChartPie,
-        tooltip: "Completion",
         property: {
           type: "progressBar",
+          label: "Completion",
           value: {
             value: 75,
             max: 100,
@@ -387,9 +397,9 @@ export const WithProgressBar: Story = {
       },
       {
         icon: Star,
-        tooltip: "Status",
         property: {
           type: "status",
+          label: "Status",
           value: {
             status: "positive",
             label: "On track",
@@ -411,9 +421,9 @@ export const WithProgressBarCustomColor: Story = {
     metadata: [
       {
         icon: ChartPie,
-        tooltip: "Budget used",
         property: {
           type: "progressBar",
+          label: "Budget used",
           value: {
             value: 85,
             max: 100,

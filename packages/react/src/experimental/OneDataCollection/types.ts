@@ -65,6 +65,8 @@ export type OnLoadDataCallback<
   data: Record[]
 }) => void
 
+export type TableVisualizationType = "table" | "editableTable"
+
 export type OnLoadErrorCallback = (error: DataError) => void
 /**
  * Props for the Collection component.
@@ -104,4 +106,6 @@ export type CollectionProps<
    * Temporary prop to force the full width of the data collection (removes the X padding)
    */
   tmpFullWidth?: boolean
+  /** Indicates the source visualization type */
+  fromVisualization?: TableVisualizationType
 } & VisualizationOptions

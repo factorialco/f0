@@ -9,6 +9,7 @@ import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/ui/hover-card"
 import { F0TableOfContent } from "../../experimental/Navigation/F0TableOfContent"
 import { CollapsedBars } from "./components/CollapsedBars"
 import { F0TableOfContentPopoverProps } from "./internal-types"
+import { useDeferredClose } from "./useDeferredClose"
 
 const CLOSE_DELAY = 300
 const OPEN_DELAY = 0
@@ -37,23 +38,33 @@ export function F0TableOfContentPopover({
   className,
   activeItem,
   collapsible = false,
+  sortable,
+  onReorder,
   showChildrenCounter = false,
   barsAlign = "left",
   size = "md",
   variant = "light",
+  portalContainer,
 }: F0TableOfContentPopoverProps) {
   const [isOpen, setIsOpen] = useState(false)
   const shouldScrollRef = useRef(false)
+  const contentRef = useRef<HTMLDivElement | null>(null)
 
-  const handleOpenChange = (nextIsOpenStatus: boolean) => {
-    const isOpening = nextIsOpenStatus && !isOpen
-    if (isOpening) {
+  const { deferClose } = useDeferredClose(contentRef, () => setIsOpen(false))
+
+  const handleOpenChange = (nextOpen: boolean) => {
+    // When a nested dropdown is open, defer the close until the dropdown
+    // is dismissed or the pointer leaves both surfaces.
+    if (!nextOpen && deferClose()) return
+
+    if (nextOpen && !isOpen) {
       shouldScrollRef.current = true
     }
-    setIsOpen(nextIsOpenStatus)
+    setIsOpen(nextOpen)
   }
 
   const contentRefCallback = useCallback((container: HTMLDivElement | null) => {
+    contentRef.current = container
     if (!container || !shouldScrollRef.current) return
 
     shouldScrollRef.current = false
@@ -94,6 +105,7 @@ export function F0TableOfContentPopover({
         side={barsAlign === "left" ? "right" : "left"}
         align="center"
         sideOffset={-28}
+        container={portalContainer}
         className={cn(
           contentVariants({ size }),
           !title && "pt-2",
@@ -105,6 +117,8 @@ export function F0TableOfContentPopover({
           items={items}
           activeItem={activeItem}
           collapsible={collapsible}
+          sortable={sortable}
+          onReorder={onReorder}
           hideChildrenCounter={!showChildrenCounter}
           scrollable={false}
         />

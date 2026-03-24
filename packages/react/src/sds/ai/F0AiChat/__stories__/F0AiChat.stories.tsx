@@ -61,6 +61,23 @@ const meta = {
               link: "/permissions",
               linkText: "See more",
             }}
+            tracking={{
+              onVisibility: () => {
+                console.log("ai chat visibility")
+              },
+              onClose: () => {
+                console.log("ai chat close")
+              },
+              onWelcomeSuggestionClick: (suggestion) => {
+                console.log("ai chat welcome suggestion click", suggestion)
+              },
+              onNewChat: () => {
+                console.log("ai chat new chat")
+              },
+              onMessage: (message) => {
+                console.log("ai chat message", message)
+              },
+            }}
           >
             <AiChatWrapper>
               <Story />

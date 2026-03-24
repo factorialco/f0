@@ -1,6 +1,7 @@
 import { useCallback, useMemo } from "react"
 import { ControllerRenderProps, FieldValues } from "react-hook-form"
 
+import type { InputFieldStatus } from "@/ui/InputField/types"
 import type {
   ResolvedDateTimeField,
   ResolvedDateField,
@@ -15,6 +16,7 @@ interface DateTimeFieldRendererProps {
   formField: ControllerRenderProps<FieldValues>
   error?: boolean
   loading?: boolean
+  status?: InputFieldStatus
 }
 
 /**
@@ -26,6 +28,7 @@ export function DateTimeFieldRenderer({
   formField,
   error,
   loading,
+  status,
 }: DateTimeFieldRendererProps) {
   // Form value may be null (used to represent cleared state)
   const currentDate = (formField.value ?? undefined) as Date | undefined
@@ -129,6 +132,7 @@ export function DateTimeFieldRenderer({
           field={dateField}
           formField={dateFormField}
           error={error}
+          status={status}
           loading={loading}
         />
       </div>
@@ -137,6 +141,7 @@ export function DateTimeFieldRenderer({
           field={timeField}
           formField={timeFormField}
           error={error}
+          status={status}
           loading={loading}
         />
       </div>

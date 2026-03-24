@@ -1,4 +1,4 @@
-import { ComponentProps } from "react"
+import { ComponentProps, ComponentType, ReactNode } from "react"
 
 import { TableHead } from "@/experimental/OneTable"
 import {
@@ -55,6 +55,13 @@ export type TableColumnDefinition<
     summary?: SummaryKey<Summaries>
 
     /**
+     * Placeholder to display in this column's summary-row cell when no summary
+     * value is rendered. This also applies to columns without a `summary`
+     * definition. Takes precedence over the row-level `summaryPlaceholder`.
+     */
+    summaryPlaceholder?: string
+
+    /**
      * The id of the column (if not provided, the id will be the label of the column)
      */
     id?: ColId
@@ -72,7 +79,17 @@ export type TableColumnDefinition<
      * Avoid hiding the column by the user
      */
     noHiding?: boolean
+
+    /**
+     * Assigns this column to a header group. Columns with the same
+     * headerGroupId are visually grouped under a shared spanning header.
+     * The label for each group is provided via `headerGroupLabels` in
+     * the visualization options.
+     */
+    headerGroupId?: string
   }
+
+export type ReferenceType = "none" | "striped"
 
 export type TableVisualizationOptions<
   R extends RecordType,
@@ -84,6 +101,14 @@ export type TableVisualizationOptions<
    * The columns to display
    */
   columns: ReadonlyArray<TableColumnDefinition<R, Sortings, Summaries>>
+
+  /**
+   * Placeholder to display in summary-row cells when no summary value is
+   * rendered. This also applies to columns without a `summary` definition.
+   * Column-level `summaryPlaceholder` takes precedence.
+   * @default "-"
+   */
+  summaryPlaceholder?: string
   /**
    * The number of columns to freeze on the left
    */
@@ -96,6 +121,17 @@ export type TableVisualizationOptions<
    * Allow users to hide columns (you can define especifcally non hiddable columns in col props, also frozen columns are not hiddable)
    */
   allowColumnHiding?: boolean
+
+  /**
+   * Marks one or more rows as reference rows.
+   * Reference rows are rendered with a slanted background pattern across the full row.
+   */
+  referenceRowType?: (item: R) => ReferenceType
+  /**
+   * Labels for header groups. Keys are headerGroupId values used in column
+   * definitions, values are the display labels rendered in the spanning header row.
+   */
+  headerGroupLabels?: Record<string, string>
 }
 
 export type TableCollectionProps<
@@ -116,3 +152,50 @@ export type TableCollectionProps<
   Grouping,
   TableVisualizationOptions<R, Filters, Sortings, Summaries>
 >
+
+/**
+ * Props passed to a custom row wrapper component.
+ * The wrapper receives the row's item and index, and renders children (the Row component).
+ * Typically used as a context provider to inject editing state around each row.
+ */
+export type RowWrapperProps<R extends RecordType> = {
+  item: R
+  index: number
+  children: ReactNode
+}
+
+/**
+ * Props passed to a custom cell renderer component.
+ * Receives the item, column definition, cell index, and the default cell content as children.
+ * Return children to keep default rendering, or render a custom component (e.g. editable input).
+ */
+export type CellRendererProps<
+  R extends RecordType,
+  Sortings extends SortingsDefinition,
+  Summaries extends SummariesDefinition,
+> = {
+  item: R
+  column: TableColumnDefinition<R, Sortings, Summaries>
+  cellIndex: number
+  children: ReactNode
+}
+
+/**
+ * Internal customization props for TableCollection.
+ * Used by wrapper visualizations (e.g. EditableTable) to inject custom behavior
+ * without duplicating the table implementation.
+ */
+export type TableCustomizationProps<
+  R extends RecordType,
+  Sortings extends SortingsDefinition,
+  Summaries extends SummariesDefinition,
+> = {
+  /** Component that wraps each row, typically a context provider for editing state */
+  rowWrapper?: ComponentType<RowWrapperProps<R>>
+  /** Component that renders each cell's content, with default content as children */
+  cellRenderer?: ComponentType<CellRendererProps<R, Sortings, Summaries>>
+  /** Whether to show the item actions column. Defaults to true. */
+  showItemActions?: boolean
+  /** Override the visualization settings key (column order/visibility). If not provided, uses the "table" key. */
+  visualizationSettings?: TableVisualizationSettings
+}

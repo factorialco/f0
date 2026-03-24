@@ -3,6 +3,11 @@ import { ComponentProps, FC, forwardRef } from "react"
 import { withDataTestId } from "@/lib/data-testid"
 import { F0AvatarList } from "@/components/avatars/F0AvatarList"
 import { F0AvatarListProps } from "@/components/avatars/F0AvatarList/types"
+import { TagAlertProps } from "@/components/tags/F0TagAlert"
+import { TagBalanceProps } from "@/components/tags/F0TagBalance"
+import { TagListProps, TagType } from "@/components/tags/F0TagList"
+import { TagRawProps } from "@/components/tags/F0TagRaw"
+import { TagStatusProps } from "@/components/tags/F0TagStatus"
 import { Weekdays } from "@/experimental/Widgets/Content/Weekdays"
 import { experimentalComponent } from "@/lib/experimental"
 import { cn } from "@/lib/utils"
@@ -28,6 +33,24 @@ type Content =
   | (ComponentProps<typeof DataList.DotTagItem> & {
       type: "dot-tag"
     })
+  | (TagAlertProps & {
+      type: "alert-tag"
+    })
+  | (TagBalanceProps & {
+      type: "balance-tag"
+    })
+  | (TagStatusProps & {
+      type: "status-tag"
+    })
+  | (TagRawProps & {
+      type: "raw-tag"
+    })
+  | {
+      [T in TagType]: {
+        type: "tag-list"
+        tagList: TagListProps<T>
+      }
+    }[TagType]
   | {
       type: "avatar-list"
       avatarList: F0AvatarListProps
@@ -52,6 +75,13 @@ const ItemContent: FC<{ content: Content }> = ({ content }) => (
     {content.type === "team" && <DataList.TeamItem {...content} />}
     {content.type === "company" && <DataList.CompanyItem {...content} />}
     {content.type === "dot-tag" && <DataList.DotTagItem {...content} />}
+    {content.type === "alert-tag" && <DataList.AlertTagItem {...content} />}
+    {content.type === "balance-tag" && <DataList.BalanceTagItem {...content} />}
+    {content.type === "status-tag" && <DataList.StatusTagItem {...content} />}
+    {content.type === "raw-tag" && <DataList.RawTagItem {...content} />}
+    {content.type === "tag-list" && (
+      <DataList.TagListItem {...content.tagList} />
+    )}
     {content.type === "avatar-list" && (
       <li className="w-fit list-none px-1.5 py-1">
         <F0AvatarList {...content.avatarList} />
