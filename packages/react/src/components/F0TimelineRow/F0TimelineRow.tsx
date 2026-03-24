@@ -16,6 +16,7 @@ import Multitask from "@/icons/app/Multitask"
 import ProgressClock from "@/icons/app/ProgressClock"
 import { cn, focusRing } from "@/lib/utils"
 
+import { F0TimelineConnector } from "./components/F0TimelineConnector"
 import type {
   F0TimelineRowOtherAction,
   F0TimelineRowPrimaryAction,
@@ -73,19 +74,6 @@ const StatusIndicator = ({ status }: { status: TimelineRowStatus }) => {
 }
 
 const MultitaskIcon = () => <Multitask className="h-3.5 w-3.5" aria-hidden />
-
-const ConnectorLine = ({ status }: { status: TimelineRowStatus }) => (
-  <div
-    data-testid="timeline-connector"
-    className={cn(
-      "mt-1 w-0.5 min-h-2 flex-1",
-      status === "completed" && "bg-f1-icon-positive",
-      status === "in-progress" && "bg-f1-border-secondary",
-      status === "not-started" &&
-        "bg-[length:2px_6px] bg-repeat-y bg-[linear-gradient(to_bottom,_hsl(var(--neutral-20))_3px,_transparent_3px)]"
-    )}
-  />
-)
 
 const Actions = ({
   primaryAction,
@@ -164,7 +152,7 @@ export const F0TimelineRow = forwardRef<HTMLDivElement, F0TimelineRowProps>(
         {!hideStatus && (
           <div className="flex flex-col items-center">
             <StatusIndicator status={status} />
-            {!isLast && <ConnectorLine status={status} />}
+            {!isLast && <F0TimelineConnector status={status} />}
           </div>
         )}
 
