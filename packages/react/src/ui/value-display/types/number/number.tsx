@@ -8,25 +8,15 @@ import { tableDisplayClassNames } from "../../const"
 import { ValueDisplayRendererContext } from "../../renderers"
 import { isShowingPlaceholder, resolveValue } from "../../utils"
 import { WithPlaceholder } from "../types"
-import { FormattedNumberContent } from "./formattedContent"
-import { formatNumberParts } from "./format"
-import type { UnitsPosition } from "./format"
 
 interface NumberValue extends WithPlaceholder {
   number: number | undefined
   units?: string
-  unitsPosition?: UnitsPosition
+  unitsPosition?: "left" | "right"
   decimalPlaces?: number | undefined
 }
 
 export type NumberCellValue = number | undefined | NumberValue
-
-interface ResolvedNumberValue {
-  number: number | string | undefined
-  units: string
-  unitsPosition: UnitsPosition
-  decimalPlaces?: number
-}
 
 export const NumberCell = (
   args: NumberCellValue,
@@ -34,24 +24,19 @@ export const NumberCell = (
 ) => {
   const value = resolveValue<number>(args, "number")
   const shouldShowPlaceholderStyling = isShowingPlaceholder(args, "number")
-  const rawNumber =
-    typeof args === "object" && args !== null && "number" in args
+
+  const number = {
+    // defaults
+    unitsPosition: "right",
+    units: "",
+    // if args is an object, use the amount from args, otherwise use the value
+    ...(typeof args === "object" && "number" in args
       ? args
-      : undefined
-
-  const number: ResolvedNumberValue = {
-    number: rawNumber?.number ?? value,
-    decimalPlaces: rawNumber?.decimalPlaces,
-    units: rawNumber?.units ?? "",
-    unitsPosition: rawNumber?.unitsPosition ?? "right",
+      : {
+          decimalPlaces: undefined,
+          number: value,
+        }),
   }
-
-  const formattedNumber = formatNumberParts({
-    number: number.number,
-    decimalPlaces: number.decimalPlaces,
-    units: number.units,
-    unitsPosition: number.unitsPosition,
-  })
 
   return (
     <div
@@ -64,7 +49,19 @@ export const NumberCell = (
         shouldShowPlaceholderStyling && "text-f1-foreground-secondary"
       )}
     >
-      <FormattedNumberContent parts={formattedNumber} />
+      {number.unitsPosition === "left" && number.units && (
+        <Units units={number.units} />
+      )}
+      {number.decimalPlaces !== undefined
+        ? number.number?.toFixed(number.decimalPlaces)
+        : (number.number?.toString() ?? "")}
+      {number.unitsPosition === "right" && number.units && (
+        <Units units={number.units} />
+      )}
     </div>
   )
+}
+
+const Units = ({ units }: { units: string }) => {
+  return <span>{units.toString()}</span>
 }

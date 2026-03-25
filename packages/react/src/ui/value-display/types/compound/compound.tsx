@@ -5,12 +5,6 @@ import { cn } from "@/lib/utils"
 import { tableDisplayClassNames } from "../../const"
 import { ValueDisplayRendererContext } from "../../renderers"
 import type { CurrencyDef } from "../amount"
-import { FormattedNumberContent } from "../number/formattedContent"
-import {
-  formatNumberParts,
-  type FormattedNumberParts,
-  type UnitsPosition,
-} from "../number/format"
 import { WithPlaceholder } from "../types"
 
 export const compoundTones = [
@@ -24,6 +18,8 @@ export const compoundTones = [
 ] as const
 
 export type CompoundTone = (typeof compoundTones)[number]
+
+type UnitsPosition = "left" | "right"
 
 export interface CompoundTextSegment extends WithPlaceholder {
   type: "text"
@@ -93,6 +89,12 @@ const resolveCompoundTextValue = (
   return { kind: "text", text: defaultMissingValue, isMissing: true }
 }
 
+interface FormattedNumberParts {
+  value: string
+  units: string
+  unitsPosition: UnitsPosition
+}
+
 interface ResolvedTextSegment {
   kind: "text"
   text: string
@@ -106,6 +108,45 @@ interface ResolvedFormattedSegment {
 }
 
 type ResolvedSegment = ResolvedTextSegment | ResolvedFormattedSegment
+
+const formatNumberParts = ({
+  number,
+  units,
+  unitsPosition,
+  decimalPlaces,
+}: {
+  number: number | undefined
+  units?: string
+  unitsPosition?: UnitsPosition
+  decimalPlaces?: number
+}): FormattedNumberParts => {
+  const resolvedUnitsPosition = unitsPosition ?? "right"
+  const resolvedUnits = units ?? ""
+  const value =
+    decimalPlaces !== undefined
+      ? (number?.toFixed(decimalPlaces) ?? "")
+      : (number?.toString() ?? "")
+
+  return {
+    value,
+    units: resolvedUnits,
+    unitsPosition: resolvedUnitsPosition,
+  }
+}
+
+const FormattedNumberContent = ({ parts }: { parts: FormattedNumberParts }) => {
+  return (
+    <>
+      {parts.unitsPosition === "left" && parts.units && (
+        <span>{parts.units.toString()}</span>
+      )}
+      {parts.value}
+      {parts.unitsPosition === "right" && parts.units && (
+        <span>{parts.units.toString()}</span>
+      )}
+    </>
+  )
+}
 
 const resolveSegmentText = (segment: CompoundSegment): ResolvedSegment => {
   switch (segment.type) {
