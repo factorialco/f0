@@ -4,51 +4,20 @@ import CircleDashed from "@/icons/app/CircleDashed"
 import ProgressClock from "@/icons/app/ProgressClock"
 
 import type { TimelineRowStatus } from "../types"
+import { IconContainer } from "./IconContainer"
 
-const CompletedIcon = () => (
-  <F0Icon icon={CheckCircle} size="lg" color="positive" />
-)
-
-const InProgressIcon = () => (
-  <F0Icon icon={ProgressClock} size="md" color="warning" />
-)
-
-const NotStartedIcon = () => (
-  <F0Icon icon={CircleDashed} size="lg" color="secondary" />
-)
-
-export const StatusIndicator = ({ status }: { status: TimelineRowStatus }) => {
-  if (status === "completed") {
-    return (
-      <div
-        className="flex h-7 w-7 items-center justify-center"
-        aria-hidden
-        data-testid={`timeline-status-${status}`}
-      >
-        <CompletedIcon />
-      </div>
-    )
-  }
-
-  if (status === "in-progress") {
-    return (
-      <div
-        className="flex h-7 w-7 items-center justify-center"
-        aria-hidden
-        data-testid={`timeline-status-${status}`}
-      >
-        <InProgressIcon />
-      </div>
-    )
-  }
-
-  return (
-    <div
-      className="flex h-7 w-7 items-center justify-center"
-      aria-hidden
-      data-testid={`timeline-status-${status}`}
-    >
-      <NotStartedIcon />
-    </div>
-  )
+const statusIcons = {
+  completed: <F0Icon icon={CheckCircle} size="lg" color="positive" />,
+  "in-progress": <F0Icon icon={ProgressClock} size="md" color="warning" />,
+  "not-started": <F0Icon icon={CircleDashed} size="lg" color="secondary" />,
 }
+
+export const StatusIndicator = ({ status }: { status: TimelineRowStatus }) => (
+  <IconContainer
+    status={status}
+    aria-hidden
+    data-testid={`timeline-status-${status}`}
+  >
+    {statusIcons[status]}
+  </IconContainer>
+)

@@ -1,5 +1,4 @@
 import { F0AvatarList } from "@/components/avatars/F0AvatarList"
-import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
 import { F0Icon } from "@/components/F0Icon"
 import { FileItem } from "@/experimental/RichText/FileItem"
 import Check from "@/icons/app/Check"
@@ -50,42 +49,20 @@ export const TaskHeader = ({ props }: { props: F0TimelineRowTaskProps }) => {
                 ))}
               </div>
             )}
-            {assignees &&
-              assignees.length > 0 &&
-              (assignees.length <= 3 ? (
-                <div className="flex items-center gap-2">
-                  {assignees.map((assignee, index) => (
-                    <div
-                      key={`${assignee.firstName}-${assignee.lastName}-${index}`}
-                      className="flex items-center gap-1.5"
-                    >
-                      <F0AvatarPerson
-                        firstName={assignee.firstName}
-                        lastName={assignee.lastName}
-                        src={assignee.src}
-                        size="xs"
-                        badge={{ type: "positive", icon: Check }}
-                      />
-                      <span className="text-sm text-f1-foreground-secondary">
-                        {assignee.firstName} {assignee.lastName}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <F0AvatarList
-                  type="person"
-                  avatars={assignees.map((a) => ({
-                    ...a,
-                    badge: {
-                      type: "positive" as const,
-                      icon: Check,
-                    },
-                  }))}
-                  size="xs"
-                  max={3}
-                />
-              ))}
+            {assignees && assignees.length > 0 && (
+              <F0AvatarList
+                type="person"
+                avatars={assignees.map((a) => ({
+                  ...a,
+                  badge: {
+                    type: "positive" as const,
+                    icon: Check,
+                  },
+                }))}
+                size="xs"
+                max={3}
+              />
+            )}
           </div>
         )}
     </>

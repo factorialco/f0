@@ -129,14 +129,17 @@ describe("F0TimelineRow", () => {
     ).not.toBeInTheDocument()
   })
 
-  it("renders assignees with names when 3 or fewer", () => {
+  it("renders assignees as avatar list", () => {
     const assignees = [
       { firstName: "Alex", lastName: "Rashfold" },
       { firstName: "James", lastName: "Hopper" },
     ]
-    render(<F0TimelineRow {...defaultProps} assignees={assignees} />)
-    expect(screen.getByText("Alex Rashfold")).toBeInTheDocument()
-    expect(screen.getByText("James Hopper")).toBeInTheDocument()
+    const { container } = render(
+      <F0TimelineRow {...defaultProps} assignees={assignees} />
+    )
+    expect(
+      container.querySelector("[data-testid='overflow-visible-container']")
+    ).toBeInTheDocument()
   })
 
   it("does not render assignees when array is empty", () => {
