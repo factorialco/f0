@@ -59,35 +59,29 @@ export const NumberInputInternal = forwardRef<
   const handleChange = (value: string) => {
     const extractedData = extractNumber(value, { maxDecimals })
     if (!extractedData) {
-      setFieldValue("")
       return
     }
 
-    const { value: parsedValue } = extractedData
+    const { value: parsedValue, formattedValue } = extractedData
 
-    /**
-     * Apply min and max constraints
-     */
     if (parsedValue === null) {
-      setFieldValue("")
+      setFieldValue(formattedValue)
       onChange?.(null)
       return
     }
 
-    /**
-     * Reformat the number to the correct format
-     */
-    const finalValue = Math.max(
+    const clampedValue = Math.max(
       min ?? -Infinity,
       Math.min(max ?? Infinity, parsedValue)
     )
 
-    const finalExtractedData = extractNumber(finalValue.toString(), {
-      maxDecimals,
-    })
-    setFieldValue(finalExtractedData?.formattedValue ?? "")
+    if (clampedValue !== parsedValue) {
+      setFieldValue(formatValue(clampedValue, locale, maxDecimals))
+    } else {
+      setFieldValue(formattedValue)
+    }
 
-    onChange?.(finalExtractedData?.value ?? null)
+    onChange?.(clampedValue)
   }
 
   const handleStep = (type: "increase" | "decrease") => () => {
@@ -114,6 +108,20 @@ export const NumberInputInternal = forwardRef<
     setFieldValue(value ? formatValue(value, locale, maxDecimals) : "")
   }, [fieldValue, maxDecimals, value, locale])
 
+  const handleBeforeInput = (e: React.FormEvent<HTMLInputElement>) => {
+    const { data } = e.nativeEvent as InputEvent
+    if (!data) return
+
+    const input = e.currentTarget
+    const start = input.selectionStart ?? 0
+    const end = input.selectionEnd ?? 0
+    const newValue = input.value.slice(0, start) + data + input.value.slice(end)
+
+    if (!extractNumber(newValue, { maxDecimals })) {
+      e.preventDefault()
+    }
+  }
+
   return (
     <div className="group relative">
       <Input
@@ -123,6 +131,7 @@ export const NumberInputInternal = forwardRef<
         inputMode="decimal"
         onChange={handleChange}
         {...props}
+        onBeforeInput={handleBeforeInput}
         hint={localHint}
         appendTag={units}
         append={
