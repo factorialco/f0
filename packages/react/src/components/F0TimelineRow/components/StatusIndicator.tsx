@@ -15,6 +15,7 @@ const statusIcons = {
 export const StatusIndicator = ({ status }: { status: TimelineRowStatus }) => (
   <IconContainer
     status={status}
+    className="!border-0 !bg-transparent"
     aria-hidden
     data-testid={`timeline-status-${status}`}
   >
