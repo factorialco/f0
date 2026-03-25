@@ -17,7 +17,7 @@ export const IconContainer = ({
     className={cn(
       "flex h-7 w-7 shrink-0 items-center justify-center rounded",
       status === "completed"
-        ? "border border-f1-border-secondary bg-white"
+        ? "border border-f1-border-secondary bg-f1-background-primary"
         : "bg-f1-background-tertiary",
       className
     )}
