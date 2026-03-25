@@ -6,6 +6,17 @@ import { F0_AVATAR_SIZE_TO_INTERNAL_SIZE } from "./F0Avatar.constants"
 import { type F0AvatarPersonProps } from "./F0Avatar.types"
 import { BaseAvatar } from "./F0AvatarBase"
 
+/**
+ * F0AvatarPerson - Person avatar variant.
+ *
+ * Uses the shared rounded avatar primitive with random-color initials fallback,
+ * optional deactivated treatment, and badge overlay support.
+ *
+ * @example
+ * <F0AvatarPerson firstName="Alice" lastName="Smith" size="md" />
+ * <F0AvatarPerson firstName="Alice" lastName="Smith" deactivated />
+ * <F0AvatarPerson firstName="Alice" lastName="Smith" src={{ uri: avatarUrl }} size="lg" />
+ */
 export const F0AvatarPerson = React.memo(function F0AvatarPerson({
   firstName,
   lastName,

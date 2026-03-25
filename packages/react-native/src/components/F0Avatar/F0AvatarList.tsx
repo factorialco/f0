@@ -8,6 +8,20 @@ import { AvatarListCounter } from "./internal/list-counter"
 import { ClippedAvatar } from "./internal/list-svg"
 import { type AvatarRenderInput } from "./internal/list-types"
 
+/**
+ * F0AvatarList - Overlapping avatar list for homogeneous avatar collections.
+ *
+ * Renders clipped avatar stacks with an optional overflow counter while preserving
+ * size-specific geometry for each supported avatar family.
+ *
+ * @example
+ * <F0AvatarList
+ *   type="person"
+ *   size="md"
+ *   avatars={[{ firstName: "Alice", lastName: "Smith" }, { firstName: "Bob", lastName: "Jones" }]}
+ *   max={3}
+ * />
+ */
 export const F0AvatarList = React.memo(function F0AvatarList({
   avatars,
   size = "md",

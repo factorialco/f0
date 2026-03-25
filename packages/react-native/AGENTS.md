@@ -27,6 +27,10 @@ Prefer consistency with these components over introducing new patterns.
 - Every new or modified `F0*` component must include component-level JSDoc immediately above the component declaration.
 - If an existing `F0*` component lacks JSDoc and you touch it, add the missing JSDoc as part of the change.
 - Internal `F0*` primitives that only support a public component should also carry brief JSDoc marking them as internal.
+- Treat `F0Text` as the documentation quality bar for component JSDoc:
+  - start with a clear one-line summary
+  - add 1-3 lines describing behavioral or API constraints that matter to consumers
+  - include a short `@example` block when usage is not obvious from the component name alone
 - Keep component folders predictable:
   - implementation (`*.tsx`)
   - types/constants (`*.types.ts`)
