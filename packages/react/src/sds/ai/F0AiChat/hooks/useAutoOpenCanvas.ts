@@ -26,7 +26,6 @@ export function useAutoOpenCanvas(
   useEffect(() => {
     if (!toolCallId) return
     if (globalOpenedIds.has(toolCallId)) return
-    if (window.innerWidth <= 624) return
     globalOpenedIds.add(toolCallId)
     openRef.current()
   }, [toolCallId])
