@@ -21,6 +21,7 @@ import { F0ImageShowcase } from "../../components/F0ImageShowcase"
 import { F0LinkShowcase } from "../../components/F0LinkShowcase"
 import { F0PresetShowcase } from "../../components/F0PresetShowcase"
 import { F0ProgressShowcase } from "../../components/F0ProgressShowcase"
+import { F0StepShowcase } from "../../components/F0StepShowcase"
 import { F0TagShowcase } from "../../components/F0TagShowcase"
 import { F0TextShowcase } from "../../components/F0TextShowcase/F0TextShowcase"
 import { OneChipShowcase } from "../../components/OneChipShowcase"
@@ -50,6 +51,7 @@ type ComponentType =
   | "f0icon"
   | "f0link"
   | "f0progress"
+  | "f0step"
   | "f0preset"
   | "f0image"
   | "f0tag"
@@ -77,6 +79,7 @@ const componentOptions = [
   { value: "f0icon" as ComponentType, label: "F0Icon" },
   { value: "f0link" as ComponentType, label: "F0Link" },
   { value: "f0progress" as ComponentType, label: "F0Progress" },
+  { value: "f0step" as ComponentType, label: "F0Step" },
   { value: "f0preset" as ComponentType, label: "F0Preset" },
   { value: "f0image" as ComponentType, label: "F0Image" },
   { value: "f0tag" as ComponentType, label: "F0Tag" },
@@ -137,6 +140,8 @@ export default function ComponentsShowcase() {
         return <F0LinkShowcase />
       case "f0progress":
         return <F0ProgressShowcase />
+      case "f0step":
+        return <F0StepShowcase />
       case "f0preset":
         return <F0PresetShowcase />
       case "f0image":

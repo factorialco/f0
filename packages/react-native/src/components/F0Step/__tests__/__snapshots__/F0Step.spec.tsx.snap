@@ -1,0 +1,79 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`F0Step Snapshot - middle step active 1`] = `
+<View
+  accessibilityLabel="Flow progress"
+  accessibilityRole="progressbar"
+  accessibilityValue={
+    {
+      "max": 4,
+      "min": 0,
+      "now": 2,
+    }
+  }
+  accessible={true}
+  className="w-full flex-row items-center gap-2"
+  testID="f0-step"
+>
+  <View
+    className="flex-1 rounded-full"
+    testID="f0-step-segment-0"
+  >
+    <View
+      className="h-1 w-full overflow-hidden rounded-full bg-f0-background-selected-bold"
+    />
+  </View>
+  <View
+    className="flex-1 rounded-full"
+    testID="f0-step-segment-1"
+  >
+    <View
+      className="h-1 w-full overflow-hidden rounded-full bg-f0-background-bold"
+    />
+  </View>
+  <View
+    className="flex-1 rounded-full"
+    testID="f0-step-segment-2"
+  >
+    <View
+      className="h-1 w-full overflow-hidden rounded-full bg-f0-background-tertiary"
+    />
+  </View>
+  <View
+    className="flex-1 rounded-full"
+    testID="f0-step-segment-3"
+  >
+    <View
+      className="h-1 w-full overflow-hidden rounded-full bg-f0-background-tertiary"
+    />
+  </View>
+</View>
+`;
+
+exports[`F0StepSegment Snapshot - step states 1`] = `
+<View
+  className="w-40 flex-row gap-2"
+>
+  <View
+    className="flex-1 rounded-full"
+  >
+    <View
+      className="h-1 w-full overflow-hidden rounded-full bg-f0-background-bold"
+    />
+  </View>
+  <View
+    className="flex-1 rounded-full"
+  >
+    <View
+      className="h-1 w-full overflow-hidden rounded-full bg-f0-background-selected-bold"
+    />
+  </View>
+  <View
+    className="flex-1 rounded-full"
+  >
+    <View
+      className="h-1 w-full overflow-hidden rounded-full bg-f0-background-tertiary"
+    />
+  </View>
+</View>
+`;
