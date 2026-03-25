@@ -53,16 +53,19 @@ const noopUpload: UseFileUpload = () => ({
 
 export const FileQuestion = ({
   value,
-  useUpload,
+  useUpload: useUploadProp,
   accept,
   maxSizeMB,
   ...baseQuestionComponentProps
 }: FileQuestionProps) => {
-  const { onQuestionChange } = useSurveyFormBuilderContext()
+  const { onQuestionChange, useUpload: useUploadContext } =
+    useSurveyFormBuilderContext()
 
   const disabled = useQuestionDisabled(baseQuestionComponentProps)
 
   const { t } = useI18n()
+
+  const resolvedUpload = useUploadProp ?? useUploadContext
 
   const field: F0FileField = {
     id: baseQuestionComponentProps.id,
@@ -71,7 +74,7 @@ export const FileQuestion = ({
     multiple: true,
     accept: accept ?? DEFAULT_FILE_ACCEPT,
     maxSizeMB,
-    useUpload: useUpload ?? noopUpload,
+    useUpload: resolvedUpload ?? noopUpload,
   }
 
   return (

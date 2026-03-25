@@ -171,7 +171,6 @@ const sampleElements: SurveyFormBuilderElement[] = [
           description:
             "Attach any relevant files such as certificates or reports",
           type: "file" as const,
-          useUpload: useMockUpload,
         },
       ],
     },
@@ -313,6 +312,7 @@ const meta: Meta<typeof SurveyAnsweringFormStory> = {
       label: "Engagement",
       href: "#",
     },
+    useUpload: useMockUpload,
   },
   parameters: {
     layout: "fullscreen",

@@ -1,3 +1,5 @@
+import type { UseFileUpload } from "@/components/F0Form/fields/file/types"
+
 import { DateQuestionProps } from "./QuestionTypes/DateQuestion"
 import { DropdownSingleQuestionProps } from "./QuestionTypes/DropdownSingleQuestion/types"
 import { FileQuestionProps } from "./QuestionTypes/FileQuestion"
@@ -149,4 +151,5 @@ export type SurveyFormBuilderProps = {
   disallowOptionalQuestions?: boolean
   allowedQuestionTypes?: QuestionType[]
   applyingChanges?: boolean
+  useUpload?: UseFileUpload
 }

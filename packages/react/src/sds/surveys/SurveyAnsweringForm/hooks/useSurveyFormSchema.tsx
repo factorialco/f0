@@ -201,7 +201,8 @@ function buildFieldForQuestion(
   t: (key: TranslationKey) => string,
   sectionId?: string,
   previewMode = false,
-  disableFields = previewMode
+  disableFields = previewMode,
+  formUseUpload?: UseFileUpload
 ): ZodTypeAny {
   const label = q.title ?? ""
   const baseConfig = {
@@ -484,7 +485,7 @@ function buildFieldForQuestion(
         accept?: MimeType[]
         maxSizeMB?: number
       }
-      const hasUpload = !!fileQ.useUpload
+      const resolvedUpload = fileQ.useUpload ?? formUseUpload
       const field: F0FileField = {
         id: q.id,
         type: "file",
@@ -492,8 +493,8 @@ function buildFieldForQuestion(
         multiple: true,
         accept: fileQ.accept ?? DEFAULT_FILE_ACCEPT,
         maxSizeMB: fileQ.maxSizeMB,
-        useUpload: fileQ.useUpload ?? noopFileUpload,
-        disabled: disableFields || !hasUpload,
+        useUpload: resolvedUpload ?? noopFileUpload,
+        disabled: disableFields || !resolvedUpload,
       }
       return f0FormField(buildFileSchema(!!q.required, t), {
         ...baseConfig,
@@ -532,7 +533,8 @@ export function useSurveyFormSchema(
   currentQuestionId?: string,
   accumulatedValues?: Record<string, unknown>,
   previewMode = false,
-  disableFields = previewMode
+  disableFields = previewMode,
+  useUpload?: UseFileUpload
 ) {
   return useMemo(() => {
     const shape: Record<string, ZodTypeAny> = {}
@@ -564,7 +566,8 @@ export function useSurveyFormSchema(
             t,
             mode === "all-questions" ? sectionId : undefined,
             previewMode,
-            disableFields
+            disableFields,
+            useUpload
           )
           defaults[q.id] =
             accumulatedValues?.[q.id] ?? getDefaultValue(q, defaultValues)
@@ -580,7 +583,8 @@ export function useSurveyFormSchema(
           t,
           undefined,
           previewMode,
-          disableFields
+          disableFields,
+          useUpload
         )
         defaults[q.id] =
           accumulatedValues?.[q.id] ?? getDefaultValue(q, defaultValues)
