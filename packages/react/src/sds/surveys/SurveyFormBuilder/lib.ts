@@ -112,7 +112,6 @@ const DEFAULT_QUESTION_TYPES: QuestionType[] = [
   "numeric",
   "link",
   "date",
-  "file",
 ]
 
 export const getDefaultQuestionTypeToAdd = (
