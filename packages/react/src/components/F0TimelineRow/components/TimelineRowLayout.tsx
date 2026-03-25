@@ -27,7 +27,10 @@ export const TimelineRowLayout = ({
   <div className="flex gap-4">
     {!hideStatus && (
       <div className="flex flex-col items-center">
-        <div className="h-8 flex flex-col justify-center">
+        <div
+          className="h-8 flex flex-col justify-center"
+          data-testid={`timeline-status-${status}`}
+        >
           {statusIcons[status]}
         </div>
         {!isLast && <F0TimelineConnector status={status} />}
