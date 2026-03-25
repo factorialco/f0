@@ -21,8 +21,6 @@ export function NumberCell<R extends RecordType>({
   const parsed = trimmed !== "" && trimmed != null ? Number(trimmed) : NaN
   const numericValue: number | null = isFinite(parsed) ? parsed : 0
 
-  const isZero = numericValue === 0
-
   const handleChange = (newValue: number | null) => {
     const stringValue = String(newValue ?? 0)
     if (stringValue !== value) {
@@ -36,8 +34,7 @@ export function NumberCell<R extends RecordType>({
         className={cn(
           "flex h-full w-full min-w-0 cursor-text items-center",
           editableColumn.align === "right" && "[&_input]:text-right",
-          config?.units && "[&_input]:pr-1",
-          isZero && "[&_input]:text-f1-foreground-tertiary"
+          config?.units && "[&_input]:pr-1"
         )}
       >
         <NumberInput
@@ -55,12 +52,7 @@ export function NumberCell<R extends RecordType>({
           maxDecimals={config?.maxDecimals}
         />
         {config?.units && (
-          <span
-            className={cn(
-              "shrink-0 select-none pr-3 text-sm",
-              isZero ? "text-f1-foreground-tertiary" : "text-f1-foreground"
-            )}
-          >
+          <span className="shrink-0 select-none pr-3 text-sm text-f1-foreground">
             {config.units}
           </span>
         )}
