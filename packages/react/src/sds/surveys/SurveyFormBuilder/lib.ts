@@ -95,6 +95,11 @@ export const getDefaultParamsForQuestionType = (questionType: QuestionType) => {
       return {
         value: null,
       }
+    case "checkbox":
+      return {
+        value: null,
+        label: "",
+      }
     default:
       throw new Error(`Unsupported question type: ${questionType}`)
   }

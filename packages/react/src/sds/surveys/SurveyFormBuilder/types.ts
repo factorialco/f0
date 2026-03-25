@@ -1,5 +1,6 @@
 import type { UseFileUpload } from "@/components/F0Form/fields/file/types"
 
+import { CheckboxQuestionProps } from "./QuestionTypes/CheckboxQuestion"
 import { DateQuestionProps } from "./QuestionTypes/DateQuestion"
 import { DropdownSingleQuestionProps } from "./QuestionTypes/DropdownSingleQuestion/types"
 import { FileQuestionProps } from "./QuestionTypes/FileQuestion"
@@ -21,6 +22,7 @@ export type QuestionType =
   | "link"
   | "date"
   | "file"
+  | "checkbox"
 
 export type ElementType = QuestionType | "section"
 
@@ -50,6 +52,7 @@ export type QuestionElement =
   | Omit<LinkQuestionProps & { type: "link" }, QuestionPropsToOmit>
   | Omit<DateQuestionProps & { type: "date" }, QuestionPropsToOmit>
   | Omit<FileQuestionProps & { type: "file" }, QuestionPropsToOmit>
+  | Omit<CheckboxQuestionProps & { type: "checkbox" }, QuestionPropsToOmit>
 
 export type SurveyFormBuilderElement =
   | { type: "section"; section: SectionElement }
@@ -118,6 +121,11 @@ type OnChangeQuestionParams = BaseQuestionOnChangeParams &
     | {
         type: "file"
         value?: string[] | null
+      }
+    | {
+        type: "checkbox"
+        value?: boolean | null
+        label: string
       }
   )
 

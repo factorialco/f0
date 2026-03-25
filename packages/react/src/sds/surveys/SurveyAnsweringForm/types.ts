@@ -18,6 +18,7 @@ export type SurveyAnswerValue =
   | { type: "link"; value: string | null }
   | { type: "date"; value: Date | null }
   | { type: "file"; value: string[] | null }
+  | { type: "checkbox"; value: boolean | null }
 
 export type SurveyAnswers = Record<string, SurveyAnswerValue>
 

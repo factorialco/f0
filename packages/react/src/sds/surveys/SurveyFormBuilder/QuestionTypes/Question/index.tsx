@@ -1,4 +1,5 @@
 import { BaseQuestionPropsForOtherQuestionComponents } from "../BaseQuestion"
+import { CheckboxQuestion, CheckboxQuestionProps } from "../CheckboxQuestion"
 import { DateQuestion, DateQuestionProps } from "../DateQuestion"
 import { DropdownSingleQuestion } from "../DropdownSingleQuestion"
 import { DropdownSingleQuestionProps } from "../DropdownSingleQuestion/types"
@@ -20,6 +21,7 @@ export type QuestionProps = BaseQuestionPropsForOtherQuestionComponents &
     | (LinkQuestionProps & { type: "link" })
     | (DateQuestionProps & { type: "date" })
     | (FileQuestionProps & { type: "file" })
+    | (CheckboxQuestionProps & { type: "checkbox" })
   )
 
 export const Question = ({ ...props }: QuestionProps) => {
@@ -42,6 +44,8 @@ export const Question = ({ ...props }: QuestionProps) => {
       return <DateQuestion {...props} />
     case "file":
       return <FileQuestion {...props} />
+    case "checkbox":
+      return <CheckboxQuestion {...props} />
     default:
       throw new Error("Invalid question type provided")
   }
