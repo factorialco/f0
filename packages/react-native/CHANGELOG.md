@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.45.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.44.0...f0-react-native-v0.45.0) (2026-03-25)
+
+
+### Features
+
+* **step:** add F0Step component with showcase and documentation ([#3757](https://github.com/factorialco/f0/issues/3757)) ([3a1f361](https://github.com/factorialco/f0/commit/3a1f3610e16afff4bde7079eb03589306377834b))
+
 ## [0.44.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.43.0...f0-react-native-v0.44.0) (2026-03-25)
 
 
