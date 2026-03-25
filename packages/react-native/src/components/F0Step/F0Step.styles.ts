@@ -1,7 +1,5 @@
 import { tv } from "tailwind-variants"
 
-export const F0_STEP_DEFAULT_TEST_ID_PREFIX = "f0-step"
-
 export const f0StepGroupVariants = tv({
   base: "w-full flex-row items-center gap-2",
 })
