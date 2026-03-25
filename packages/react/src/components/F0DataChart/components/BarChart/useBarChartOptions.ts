@@ -235,6 +235,54 @@ export function useBarChartOptions(
     // Legend should only show the main series (not the target ghost bars)
     const legendData = series.map((s) => s.name)
 
+    // Build a lookup of targets per series/category for the tooltip
+    const targetMap = new Map<string, (number | undefined)[]>()
+    for (const s of series) {
+      const targets = s.data.map((d) => getTarget(d))
+      if (targets.some((t) => t !== undefined)) {
+        targetMap.set(s.name, targets)
+      }
+    }
+
+    const hasAnyTargets = targetMap.size > 0
+
+    const tooltipFormatter = hasAnyTargets
+      ? (params: unknown) => {
+          if (!Array.isArray(params)) return ""
+          const filtered = params.filter(
+            (p: { seriesName?: string }) =>
+              !String(p.seriesName ?? "").endsWith(" (target)")
+          )
+          if (filtered.length === 0) return ""
+
+          const header = `<div style="margin-bottom: 4px; font-weight: 500">${String(filtered[0].axisValueLabel ?? filtered[0].name ?? "")}</div>`
+          const items = filtered
+            .map(
+              (p: {
+                marker?: string
+                seriesName?: string
+                value?: number
+                dataIndex?: number
+              }) => {
+                const val = Number(p.value)
+                const formattedValue = valueFormatter
+                  ? valueFormatter(val)
+                  : String(val)
+                const targets = targetMap.get(String(p.seriesName ?? ""))
+                const target = targets?.[p.dataIndex ?? 0]
+                const targetHtml =
+                  target !== undefined
+                    ? ` <span style="opacity: 0.6">/ ${valueFormatter ? valueFormatter(target) : String(target)}</span>`
+                    : ""
+                return `<div>${String(p.marker ?? "")} ${String(p.seriesName ?? "")} <strong>${formattedValue}</strong>${targetHtml}</div>`
+              }
+            )
+            .join("")
+
+          return `${header}${items}`
+        }
+      : undefined
+
     const options = buildBaseChartOptions({
       categories,
       theme,
@@ -246,6 +294,7 @@ export function useBarChartOptions(
       valueFormatter,
       categoryFormatter,
       tooltipFilterSeries: (name) => name.endsWith(" (target)"),
+      tooltipFormatter,
       echartsOptions,
       containerWidth,
       containerHeight,

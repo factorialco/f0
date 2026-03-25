@@ -1,8 +1,9 @@
 import { ControllerRenderProps, FieldError, FieldValues } from "react-hook-form"
 
+import type { InputFieldStatus } from "@/ui/InputField/types"
+
 import type { InitialFile } from "./file/types"
 import type { F0Field } from "./types"
-import type { InputFieldStatus } from "@/ui/InputField/types"
 
 import { CheckboxFieldRenderer } from "./checkbox/CheckboxFieldRenderer"
 import { CustomFieldRenderer } from "./custom/CustomFieldRenderer"
@@ -34,6 +35,8 @@ export interface RenderFieldInputOptions {
   isRequired?: boolean
   values: Record<string, unknown>
   initialFiles?: InitialFile[]
+  /** Whether the form is loading async defaultValues */
+  isFormLoading?: boolean
 }
 
 /**
@@ -48,16 +51,18 @@ export function renderFieldInput({
   isRequired,
   values,
   initialFiles,
+  isFormLoading,
 }: RenderFieldInputOptions): React.ReactNode {
   const hasError = !!fieldState.error
   const { isValidating } = fieldState
 
-  // Evaluate disabled (can be boolean or function) and combine with submitting state
-  const isDisabled = evaluateDisabled(field.disabled, values) || isSubmitting
+  // Evaluate disabled (can be boolean or function) and combine with submitting/loading state
+  const isDisabled =
+    evaluateDisabled(field.disabled, values) || isSubmitting || !!isFormLoading
 
   const errorAndLoadingProps = {
     error: hasError,
-    loading: isValidating,
+    loading: isValidating || !!isFormLoading,
   }
 
   const visualStatus = hasError

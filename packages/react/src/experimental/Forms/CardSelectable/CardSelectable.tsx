@@ -5,8 +5,10 @@ import { F0AvatarEmoji } from "@/components/avatars/F0AvatarEmoji"
 import { F0AvatarFile } from "@/components/avatars/F0AvatarFile"
 import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon"
 import { F0Icon } from "@/components/F0Icon"
+import { F0Link } from "@/components/F0Link"
 import { Check } from "@/icons/app"
 import { withDataTestId, WithDataTestIdProps } from "@/lib/data-testid"
+import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 import { cn, focusRing } from "@/lib/utils"
 
 import type {
@@ -101,6 +103,7 @@ function _CardSelectable<T extends CardSelectableValue>({
   isToggle,
   grouped,
 }: CardSelectableProps<T>) {
+  const { forms } = useI18n()
   const isDisabled = disabled || item.disabled
 
   const handleClick = () => {
@@ -130,6 +133,11 @@ function _CardSelectable<T extends CardSelectableValue>({
       tabIndex={isDisabled ? -1 : 0}
       onClick={handleClick}
       onKeyDown={(e) => {
+        // Ignore key events from interactive descendants (e.g. links, buttons)
+        // to prevent toggling selection when activating nested controls
+        const target = e.target as HTMLElement
+        if (target.closest("a, button") && target !== e.currentTarget) return
+
         if ((e.key === "Enter" || e.key === " ") && !isDisabled) {
           e.preventDefault()
           handleClick()
@@ -153,22 +161,35 @@ function _CardSelectable<T extends CardSelectableValue>({
       )}
     >
       {item.avatar && <AvatarRender avatar={item.avatar} />}
-      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-        <span
-          className={cn(
-            "text-base text-f1-foreground",
-            grouped ? "font-medium" : "font-semibold"
-          )}
-        >
-          {item.title}
-          {item.required && (
-            <span className="ml-0.5 text-f1-foreground-critical">*</span>
-          )}
-        </span>
-        {item.description && (
-          <span className="text-base text-f1-foreground-secondary">
-            {item.description}
+      <div className="flex min-w-0 flex-1 flex-col gap-2">
+        <div className="flex flex-col gap-0.5">
+          <span
+            className={cn(
+              "text-base text-f1-foreground",
+              grouped ? "font-medium" : "font-semibold"
+            )}
+          >
+            {item.title}
+            {item.required && (
+              <span className="ml-0.5 text-f1-foreground-critical">*</span>
+            )}
           </span>
+          {item.description && (
+            <span className="text-base text-f1-foreground-secondary">
+              {item.description}
+            </span>
+          )}
+        </div>
+        {item.moreInfoLink && (
+          <F0Link
+            href={item.moreInfoLink.href}
+            target="_blank"
+            variant="link"
+            className="self-start"
+            stopPropagation
+          >
+            {item.moreInfoLink.label ?? forms.moreInformation}
+          </F0Link>
         )}
       </div>
       {renderIndicator()}

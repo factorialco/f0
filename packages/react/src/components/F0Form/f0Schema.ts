@@ -1,30 +1,32 @@
 import { z, ZodTypeAny } from "zod"
 
+import type { F0AlertProps } from "@/components/F0Alert/types"
 import type {
-  F0BaseFieldDisabledProp,
-  F0BaseFieldRenderIfProp,
-} from "./fields/types"
-import type { F0TextConfig } from "./fields/text/types"
-import type { F0NumberConfig } from "./fields/number/types"
-import type { F0TextareaConfig } from "./fields/textarea/types"
-import type { F0SelectConfig } from "./fields/select/types"
+  DurationFieldConfig,
+  DurationInputSize,
+  DurationUnit,
+} from "@/components/F0DurationInput/types"
+import type { InputFieldStatus } from "@/ui/InputField/types"
+
 import type { F0CheckboxConfig } from "./fields/checkbox/types"
-import type { F0SwitchConfig } from "./fields/switch/types"
+import type { F0CustomConfig } from "./fields/custom/types"
 import type {
   F0DateConfig,
   F0DateTimeConfig,
   F0TimeConfig,
 } from "./fields/date/types"
 import type { F0DateRangeConfig } from "./fields/daterange/types"
-import type { F0RichTextConfig } from "./fields/richtext/types"
-import type { F0CustomConfig } from "./fields/custom/types"
 import type { F0FileConfig } from "./fields/file/types"
-import type { InputFieldStatus } from "@/ui/InputField/types"
+import type { F0NumberConfig } from "./fields/number/types"
+import type { F0RichTextConfig } from "./fields/richtext/types"
+import type { F0SelectConfig } from "./fields/select/types"
+import type { F0SwitchConfig } from "./fields/switch/types"
+import type { F0TextConfig } from "./fields/text/types"
+import type { F0TextareaConfig } from "./fields/textarea/types"
 import type {
-  DurationFieldConfig,
-  DurationInputSize,
-  DurationUnit,
-} from "@/components/F0DurationInput/types"
+  F0BaseFieldDisabledProp,
+  F0BaseFieldRenderIfProp,
+} from "./fields/types"
 
 /**
  * Zod type names for type checking without instanceof
@@ -90,6 +92,40 @@ export type F0FieldType =
  * Base configuration shared across all field types.
  * Position is automatically derived from field declaration order in the schema.
  */
+/**
+ * Alert props returned by the field alert callback.
+ * Derived from F0AlertProps with `variant` defaulting to "info".
+ */
+export type F0FieldAlertProps = Omit<F0AlertProps, "variant"> & {
+  variant?: F0AlertProps["variant"]
+}
+
+/**
+ * Callback that evaluates whether to show an alert below the field.
+ * Receives the field's current value and all form values.
+ * Return alert props to show, or null/undefined to hide.
+ */
+export type F0FieldAlertFunction = (context: {
+  fieldValue: unknown
+  values: Record<string, unknown>
+}) => F0FieldAlertProps | null | undefined
+
+/**
+ * Alert configuration for a field.
+ * Can be static props (always shown) or a callback for conditional display.
+ */
+export type F0FieldAlert = F0FieldAlertProps | F0FieldAlertFunction
+
+/**
+ * Configuration for a "more info" link displayed below the help text.
+ */
+export interface F0MoreInfoLink {
+  /** URL the link points to */
+  href: string
+  /** Link label (defaults to "More information") */
+  label?: string
+}
+
 export interface F0BaseConfig {
   /** Label displayed above the field */
   label: string
@@ -131,6 +167,26 @@ export interface F0BaseConfig {
    * renderIf: ({ values }) => values.status === 'active'
    */
   renderIf?: F0BaseFieldRenderIfProp
+  /**
+   * Alert displayed below the field.
+   * Can be static props (always shown) or a callback for conditional display.
+   * @example
+   * // Static alert (always visible)
+   * alert: { title: "Note", description: "This field is important" }
+   *
+   * // Conditional alert based on field value
+   * alert: ({ fieldValue }) =>
+   *   fieldValue === 0
+   *     ? { title: "Heads up", description: "Value is zero", variant: "warning" }
+   *     : null
+   */
+  alert?: F0FieldAlert
+  /**
+   * Name identifying a reusable custom field type.
+   * When set, the form-level `renderCustomField` callback is invoked to provide
+   * field-specific configuration (e.g. data source, options) or a custom component.
+   */
+  customFieldName?: string
 }
 
 // Re-export field-specific config types

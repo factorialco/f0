@@ -16,7 +16,7 @@ echarts.use(AriaComponent)
 export function useEChartsInstance(
   ref: RefObject<HTMLDivElement | null>,
   options: echarts.EChartsOption
-) {
+): RefObject<echarts.ECharts | null> {
   const chart = useRef<echarts.ECharts | null>(null)
 
   useEffect(() => {
@@ -40,4 +40,6 @@ export function useEChartsInstance(
   useEffect(() => {
     chart.current?.setOption(options, true)
   }, [options])
+
+  return chart
 }

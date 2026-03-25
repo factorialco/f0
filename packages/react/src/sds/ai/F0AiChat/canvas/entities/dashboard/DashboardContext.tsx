@@ -10,12 +10,12 @@ import {
 
 import type { DashboardItemLayout } from "@/components/F0AnalyticsDashboard/types"
 
-import type { ChatDashboardConfig } from "../../../../F0ChatDashboard/types"
-import { useSaveDashboardConfig } from "../../../../F0ChatDashboard/useSaveDashboardConfig"
+import type { ChatDashboardConfig } from "./types"
+import { useSaveDashboardConfig } from "./useSaveDashboardConfig"
 import { useAiChat } from "../../../providers/AiChatStateProvider"
 
 import { savedDashboardConfigStore } from "./configStore"
-import type { DashboardCanvasContent } from "./types"
+import type { DashboardCanvasContent } from "../../../types"
 
 type DashboardCanvasContextValue = {
   editMode: boolean
@@ -23,6 +23,8 @@ type DashboardCanvasContextValue = {
   onLayoutChange: (layout: DashboardItemLayout[]) => void
   handleSave: () => Promise<void>
   handleDiscard: () => void
+  exportAsExcel?: () => Promise<void>
+  registerExport: (fn: (() => Promise<void>) | undefined) => void
 }
 
 const DashboardCanvasContext =
@@ -46,6 +48,15 @@ export function DashboardCanvasProvider({
   children: ReactNode
 }): ReactNode {
   const [editMode, setEditMode] = useState(false)
+  const [exportAsExcel, setExportAsExcel] = useState<
+    (() => Promise<void>) | undefined
+  >()
+  const registerExport = useCallback(
+    (fn: (() => Promise<void>) | undefined) => {
+      setExportAsExcel(() => fn)
+    },
+    []
+  )
   const pendingLayoutRef = useRef<DashboardItemLayout[] | null>(null)
   const { openCanvas } = useAiChat()
   const { threadId } = useCopilotContext()
@@ -119,6 +130,8 @@ export function DashboardCanvasProvider({
         onLayoutChange,
         handleSave,
         handleDiscard,
+        exportAsExcel,
+        registerExport,
       }}
     >
       {children}

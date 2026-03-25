@@ -4,19 +4,22 @@ import type {
   FiltersDefinition,
   FiltersState,
 } from "@/components/OneFilterPicker/types"
+import type { DropdownItem } from "@/experimental/Navigation/Dropdown"
 import type { RecordType } from "@/hooks/datasource"
 
 import { OneDataCollection } from "@/experimental/OneDataCollection"
 import { useDataCollectionSource } from "@/experimental/OneDataCollection/hooks/useDataCollectionSource"
+import { useData } from "@/hooks/datasource/useData"
 
 import type { DashboardCollectionItem } from "../../types"
 
+import { useCollectionDownloadActions } from "../../hooks/useCollectionDownloadActions"
 import { DashboardItem } from "../DashboardItem/DashboardItem"
 
 interface CollectionItemProps<Filters extends FiltersDefinition> {
   item: DashboardCollectionItem<Filters>
   filters: FiltersState<Filters>
-  actions?: import("@/experimental/Navigation/Dropdown").DropdownItem[]
+  actions?: DropdownItem[]
 }
 
 /**
@@ -49,12 +52,24 @@ export function CollectionItem<Filters extends FiltersDefinition>({
     filtersKey,
   ])
 
+  const { data } = useData(source)
+
+  const downloadActions = useCollectionDownloadActions({
+    records: data.records,
+    title: item.title,
+  })
+
+  const allActions: DropdownItem[] = useMemo(
+    () => [...(actions ?? []), ...downloadActions],
+    [actions, downloadActions]
+  )
+
   return (
     <DashboardItem
       title={item.title}
       description={item.description}
       isLoading={false}
-      actions={actions}
+      actions={allActions}
     >
       <OneDataCollection
         fullHeight

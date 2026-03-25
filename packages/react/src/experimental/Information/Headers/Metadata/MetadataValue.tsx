@@ -1,12 +1,14 @@
 import { F0Avatar } from "@/components/avatars/F0Avatar"
 import { F0AvatarList } from "@/components/avatars/F0AvatarList"
 import { F0AvatarListProps } from "@/components/avatars/F0AvatarList/types"
+import { getColor } from "@/components/Charts/utils/colors"
 import { F0Icon } from "@/components/F0Icon"
 import { F0TagDot } from "@/components/tags/F0TagDot"
 import { F0TagRaw } from "@/components/tags/F0TagRaw"
 import { F0TagStatus } from "@/components/tags/F0TagStatus"
 import { AlertCircle, Warning } from "@/icons/app"
 import { cn } from "@/lib/utils"
+import { Progress } from "@/ui/progress"
 
 import { MetadataItem } from "./index"
 
@@ -112,6 +114,32 @@ export function MetadataValue({
         <div className="flex items-center justify-center gap-0.5 font-medium">
           <F0Icon icon={icon} color={iconColor} />
           <span className={textColor}>{value.formattedDate}</span>
+        </div>
+      )
+    }
+    case "progress-bar": {
+      const barColor = value.color
+        ? getColor(value.color)
+        : getColor("categorical-1")
+      const safeMax = value.max && value.max > 0 ? value.max : 100
+      const clampedValue = Math.min(Math.max(0, value.value), safeMax)
+
+      return (
+        <div className="flex items-center gap-2">
+          <div className="min-w-16">
+            <Progress
+              color={barColor}
+              value={clampedValue}
+              max={safeMax}
+              aria-label={item.label}
+              aria-valuetext={value.label}
+            />
+          </div>
+          {value.label && (
+            <span className="whitespace-nowrap text-sm font-medium">
+              {value.label}
+            </span>
+          )}
         </div>
       )
     }

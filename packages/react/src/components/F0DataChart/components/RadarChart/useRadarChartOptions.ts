@@ -115,6 +115,7 @@ export function useRadarChartOptions(
         show: showLegend,
         data: legendData,
         theme,
+        containerWidth: size.width,
       }),
       tooltip: {
         trigger: "item",

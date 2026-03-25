@@ -1,8 +1,8 @@
 import React from "react"
 
 import { F0Icon } from "@/components/F0Icon"
-import { valueDisplayRenderers } from "@/ui/value-display"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
+import { valueDisplayRenderers } from "@/ui/value-display"
 
 import { CardMetadata as CardMetadataType } from "../types"
 
@@ -56,7 +56,7 @@ export function CardMetadata({ metadata }: CardMetadataProps) {
     <div className="flex h-8 items-center gap-1.5">
       {"icon" in metadata && (
         <div className="pointer-events-auto flex items-center">
-          <Tooltip label={metadata.tooltip}>
+          <Tooltip label={metadata.property.label}>
             <F0Icon icon={metadata.icon} color="default" size="md" />
           </Tooltip>
         </div>

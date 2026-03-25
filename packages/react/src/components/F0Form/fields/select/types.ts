@@ -100,11 +100,24 @@ interface F0SelectConfigWithSource<
 }
 
 /**
+ * Config for select fields whose options/source are provided at runtime
+ * via `customFieldName` and `renderCustomField`.
+ */
+interface F0SelectConfigWithCustomFieldName extends F0SelectConfigBase {
+  options?: never
+  source?: never
+  mapOptions?: never
+  /** Required: identifies the custom field provider */
+  customFieldName: string
+}
+
+/**
  * F0 config options specific to select fields
  *
  * Supports either:
  * - Static `options` array
  * - Dynamic `source` with `mapOptions` function
+ * - Runtime-provided via `customFieldName` (no options/source needed at definition time)
  *
  * @typeParam T - The value type (string or number)
  * @typeParam R - Record type from the data source
@@ -115,7 +128,10 @@ interface F0SelectConfigWithSource<
 export type F0SelectConfig<
   T extends SelectValueType = string,
   R extends RecordType = RecordType,
-> = F0SelectConfigWithOptions<T> | F0SelectConfigWithSource<T, R>
+> =
+  | F0SelectConfigWithOptions<T>
+  | F0SelectConfigWithSource<T, R>
+  | F0SelectConfigWithCustomFieldName
 
 /**
  * Select field with all properties for rendering

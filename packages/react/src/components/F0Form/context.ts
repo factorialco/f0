@@ -1,12 +1,17 @@
 import { createContext, useContext } from "react"
 
 import type { InitialFile } from "./fields/file/types"
+import type { RenderCustomFieldFunction } from "./types"
 
 interface F0FormContextValue {
   /** Form name used for anchor links */
   formName: string
   /** Shared pool of pre-existing file metadata for file fields */
   initialFiles?: InitialFile[]
+  /** Callback that renders custom fields identified by customFieldName */
+  renderCustomField?: RenderCustomFieldFunction
+  /** Whether async defaultValues are still being resolved */
+  isLoading?: boolean
 }
 
 export const F0FormContext = createContext<F0FormContextValue | null>(null)

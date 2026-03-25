@@ -13,9 +13,9 @@ import { F0FormSection } from "@/components/F0Form/components/F0FormSection"
 import { F0Form } from "@/components/F0Form/F0Form"
 import { getF0Config, unwrapToZodObject } from "@/components/F0Form/f0Schema"
 import { useF0Form } from "@/components/F0Form/useF0Form"
-import { F0Wizard } from "@/ui/F0Wizard/F0Wizard"
 import { F0ActionBar, type ActionBarStatus } from "@/experimental/F0ActionBar"
 import { useI18n } from "@/lib/providers/i18n/i18n-provider"
+import { F0Wizard } from "@/ui/F0Wizard/F0Wizard"
 
 import type {
   F0FormDefinitionPerSection,
@@ -215,6 +215,7 @@ function F0WizardFormPerSection<T extends F0PerSectionSchema>({
   autoCloseOnLastStepSubmit,
   linkAfterLastStepSubmit,
   autoSkipCompletedSteps = false,
+  renderCustomField,
 }: F0WizardFormPerSectionProps<T>) {
   const {
     name,
@@ -487,6 +488,8 @@ function F0WizardFormPerSection<T extends F0PerSectionSchema>({
                         return { ...prev, [sectionId]: hasErrors }
                       })
                     }}
+                    renderCustomField={renderCustomField}
+                    isLoading={formDefinition.isLoading}
                   />
                 )
               })}
@@ -514,6 +517,8 @@ function PerSectionFormWrapper<TSchema extends F0FormSchema>({
   errorTriggerMode,
   sectionForms,
   onErrorStateChange,
+  renderCustomField,
+  isLoading,
 }: {
   sectionId: string
   formName: string
@@ -525,6 +530,8 @@ function PerSectionFormWrapper<TSchema extends F0FormSchema>({
   errorTriggerMode: "on-blur" | "on-change" | "on-submit"
   sectionForms: Record<string, ReturnType<typeof useF0Form> | null>
   onErrorStateChange: (hasErrors: boolean) => void
+  renderCustomField?: import("@/components/F0Form/types").RenderCustomFieldFunction
+  isLoading?: boolean
 }) {
   const form = useF0Form()
 
@@ -556,6 +563,8 @@ function PerSectionFormWrapper<TSchema extends F0FormSchema>({
       }}
       errorTriggerMode={errorTriggerMode}
       formRef={form.formRef}
+      renderCustomField={renderCustomField}
+      isLoading={isLoading}
     />
   )
 }
@@ -579,6 +588,7 @@ function F0WizardFormSingleSchema<TSchema extends F0FormSchema>({
   autoCloseOnLastStepSubmit,
   linkAfterLastStepSubmit,
   autoSkipCompletedSteps = false,
+  renderCustomField,
 }: F0WizardFormSingleSchemaProps<TSchema>) {
   const {
     name,
@@ -767,6 +777,7 @@ function F0WizardFormSingleSchema<TSchema extends F0FormSchema>({
           <>
             <div className="pb-5">
               <F0Form
+                key={currentStep}
                 name={`${name}-step-${currentStep}`}
                 schema={stepSchema}
                 sections={stepSections}
@@ -783,6 +794,8 @@ function F0WizardFormSingleSchema<TSchema extends F0FormSchema>({
                 submitConfig={{ hideSubmitButton: true, hideActionBar: true }}
                 errorTriggerMode={errorTriggerMode}
                 formRef={form.formRef}
+                renderCustomField={renderCustomField}
+                isLoading={formDefinition.isLoading}
               />
             </div>
             {ActionBar}

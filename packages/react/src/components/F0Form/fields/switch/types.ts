@@ -1,3 +1,4 @@
+import type { F0MoreInfoLink } from "../../f0Schema"
 import type {
   F0BaseField,
   F0BaseFieldRenderIfFunction,
@@ -27,8 +28,12 @@ export type SwitchFieldRenderIf =
  * (switch has no additional options beyond base config)
  */
 export interface F0SwitchConfig {
-  // No additional options - using empty interface instead of Record<string, never>
-  // to avoid intersection type issues
+  /**
+   * Link displayed below the help text, typically pointing to external documentation.
+   * @example
+   * moreInfoLink: { href: "https://help.example.com/article", label: "Learn more" }
+   */
+  moreInfoLink?: F0MoreInfoLink
 }
 
 /**
@@ -36,6 +41,8 @@ export interface F0SwitchConfig {
  */
 export type F0SwitchField = F0BaseField & {
   type: "switch"
+  /** Link displayed below the help text, typically pointing to external documentation */
+  moreInfoLink?: F0MoreInfoLink
   /** Conditional rendering based on another field's value */
   renderIf?: SwitchFieldRenderIf
 }
