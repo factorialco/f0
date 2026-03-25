@@ -10,6 +10,7 @@ import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
 
+import { F0ActionItem } from "../../../F0ActionItem"
 import { useMessageScroll } from "../../hooks/useMessageScroll"
 import { useAiChat } from "../../providers/AiChatStateProvider"
 import {
@@ -99,6 +100,14 @@ const Messages = ({
     const { thinkingGroup, restMessages } = extractThinkingGroup(turnMessages)
     const isLastTurn = turnIndex === turns.length - 1
     const turnIsComplete = !(inProgress && isLastTurn)
+    const hasAssistantResponse =
+      !!thinkingGroup ||
+      restMessages.some(
+        (message) =>
+          !Array.isArray(message) && (message as Message).role === "assistant"
+      )
+    const showActivityIndicator =
+      isLastTurn && !turnIsComplete && !hasAssistantResponse
 
     const renderMessage = (message: Message, index: number) => {
       const isCurrentMessage = isLastTurn && index === restMessages.length - 1
@@ -221,6 +230,9 @@ const Messages = ({
               />
             )
           })()}
+        {showActivityIndicator && (
+          <F0ActionItem title={translations.ai.thinking} status="executing" />
+        )}
         {turnIsComplete && (
           <TurnFeedback messages={turnMessages} onCopy={onCopy} />
         )}

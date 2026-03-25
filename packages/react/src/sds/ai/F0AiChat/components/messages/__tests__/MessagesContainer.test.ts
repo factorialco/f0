@@ -6,6 +6,11 @@ import {
   extractThinkingGroup,
 } from "../../../utils/turnUtils"
 
+const nextId = (() => {
+  let count = 0
+  return () => `id-${++count}`
+})()
+
 describe("convertMessagesToTurn", () => {
   it("returns empty array when all messages are non-user (e.g. coagent placeholder)", () => {
     const messages: Message[] = [
@@ -358,7 +363,7 @@ describe("convertMessagesToTurn", () => {
         content: "There are 4 courses available",
         toolCalls: [
           {
-            id: crypto.randomUUID(),
+            id: nextId(),
             type: "function",
             function: {
               name: "orchestratorThinking",
@@ -366,7 +371,7 @@ describe("convertMessagesToTurn", () => {
             },
           },
           {
-            id: crypto.randomUUID(),
+            id: nextId(),
             type: "function",
             function: {
               name: "downloadData",
@@ -398,7 +403,7 @@ describe("convertMessagesToTurn", () => {
         content: "There are 3 available courses in the catalog",
         toolCalls: [
           {
-            id: crypto.randomUUID(),
+            id: nextId(),
             type: "function",
             function: {
               name: "orchestratorThinking",
@@ -470,12 +475,12 @@ const createToolCallMessage = (
   name: string | undefined = "toolName"
 ): Message => {
   return {
-    id: crypto.randomUUID(),
+    id: nextId(),
     role: "assistant",
     content: "",
     toolCalls: [
       {
-        id: crypto.randomUUID(),
+        id: nextId(),
         type: "function",
         function: {
           name,
@@ -486,15 +491,13 @@ const createToolCallMessage = (
   }
 }
 
-const createThinkingMessage = (
-  content: string = crypto.randomUUID()
-): Message => ({
-  id: crypto.randomUUID(),
+const createThinkingMessage = (content: string = nextId()): Message => ({
+  id: nextId(),
   role: "assistant",
   content,
   toolCalls: [
     {
-      id: crypto.randomUUID(),
+      id: nextId(),
       type: "function",
       function: {
         name: "orchestratorThinking",
@@ -509,12 +512,12 @@ const createThinkingMessage = (
  * content is undefined, preamble text lives in toolCalls arguments.
  */
 const createActionThinkingMessage = (preamble: string): Message => ({
-  id: crypto.randomUUID(),
+  id: nextId(),
   role: "assistant",
   content: undefined as unknown as string,
   toolCalls: [
     {
-      id: crypto.randomUUID(),
+      id: nextId(),
       type: "function",
       function: {
         name: "orchestratorThinking",

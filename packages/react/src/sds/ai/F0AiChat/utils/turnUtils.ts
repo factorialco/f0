@@ -117,7 +117,6 @@ function getThinkingKey(message: Message): string {
   const tc = (
     message.role === "assistant" ? message.toolCalls : undefined
   )?.find((c: ToolCall) => c.function.name === "orchestratorThinking")
-  const content =
-    typeof message.content === "string" ? message.content : undefined
+  const content = getTextContent(message.content).trim()
   return tc?.function.arguments || content || message.id
 }
