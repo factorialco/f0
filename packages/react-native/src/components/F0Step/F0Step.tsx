@@ -1,10 +1,7 @@
 import React, { useMemo } from "react"
 import { View } from "react-native"
 
-import {
-  F0_STEP_DEFAULT_TEST_ID_PREFIX,
-  f0StepGroupVariants,
-} from "./F0Step.styles"
+import { f0StepGroupVariants } from "./F0Step.styles"
 import {
   F0_STEP_STATES,
   type F0StepProps,

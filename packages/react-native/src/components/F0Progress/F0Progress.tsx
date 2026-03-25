@@ -102,6 +102,17 @@ function getCircularStrokeDashoffset(
   )
 }
 
+/**
+ * F0Progress - Determinate progress indicator with linear and circular presentations.
+ *
+ * Normalizes input values, exposes progressbar accessibility semantics, and animates
+ * transitions between values for both linear and circular variants.
+ *
+ * @example
+ * <F0Progress type="linear" value={60} />
+ * <F0Progress type="circular" value={3} max={5} status="positive" />
+ * <F0Progress type="linear" value={75} label="75%" status="warning" />
+ */
 const F0Progress = React.memo(
   forwardRef<View, F0ProgressProps>(function F0Progress(
     {
