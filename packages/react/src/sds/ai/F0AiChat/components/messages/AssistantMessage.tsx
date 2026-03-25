@@ -6,6 +6,7 @@ import { useI18n } from "@/lib/providers/i18n"
 
 import { F0ActionItem } from "../../../F0ActionItem"
 import { markdownRenderers } from "../markdownRenderers"
+import { isCoagentStateRenderMessage } from "../../internal-types"
 import { useAiChat } from "../../providers/AiChatStateProvider"
 import { getTextContent } from "../../utils/contentHelpers"
 
@@ -17,6 +18,8 @@ export const AssistantMessage = ({
 }: AssistantMessageProps) => {
   const content = getTextContent(message?.content)
   const hasVisibleContent = content.trim().length > 0
+  const isPending = isLoading || isGenerating
+  const isCoagentStateRender = !!message && isCoagentStateRenderMessage(message)
   const isThinkingTool =
     message?.role === "assistant" &&
     message.toolCalls?.find(
@@ -26,11 +29,17 @@ export const AssistantMessage = ({
     message?.generativeUI?.(
       isThinkingTool
         ? {
-            status: isLoading ? "executing" : "completed",
+            status: isPending ? "executing" : "completed",
           }
         : undefined
     ) ?? null
-  const shouldRenderSubComponent = !isThinkingTool || !hasVisibleContent
+  const shouldRenderSubComponent =
+    !isThinkingTool || !hasVisibleContent || isPending
+  const shouldRenderMarkdown = !(
+    isThinkingTool &&
+    hasVisibleContent &&
+    isPending
+  )
   const isEmptyMessage = !content && !subComponent
 
   const translations = useI18n()
@@ -46,12 +55,16 @@ export const AssistantMessage = ({
     return null
   }
 
+  if (isCoagentStateRender) {
+    return <F0ActionItem title={translations.ai.thinking} status="executing" />
+  }
+
   return (
     <div className="relative isolate flex w-full flex-col items-start justify-center">
-      {isLoading && !subComponent && (
+      {isLoading && !subComponent && !isThinkingTool && (
         <F0ActionItem title={translations.ai.thinking} status="executing" />
       )}
-      {message && (
+      {message && shouldRenderMarkdown && (
         <div className="w-fit max-w-full [&>div]:flex [&>div]:flex-col [&>div]:gap-1">
           <Markdown
             content={content}

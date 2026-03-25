@@ -189,3 +189,10 @@ export type AiChatProviderReturnValue = {
 export function isAgentStateMessage(message: Message): boolean {
   return message.role === "assistant" && message.agentName !== undefined
 }
+
+export function isCoagentStateRenderMessage(message: Message): boolean {
+  return (
+    message.role === "assistant" &&
+    (message as Message & { name?: string }).name === "coagent-state-render"
+  )
+}

@@ -23,12 +23,10 @@ export const useOrchestratorThinkingAction = () => {
     render: (props) => {
       const title: string = props.args.message ?? "thinking"
       const result: OrchestratorThinkingResult | undefined = props.result
+      const status = props.status === "complete" ? "completed" : "executing"
+
       return (
-        <F0ActionItem
-          title={title}
-          status={props.status === "complete" ? "completed" : props.status}
-          inGroup={result?.inGroup}
-        />
+        <F0ActionItem title={title} status={status} inGroup={result?.inGroup} />
       )
     },
   })

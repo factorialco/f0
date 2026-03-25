@@ -5,33 +5,6 @@ import { getTextContent } from "./contentHelpers"
 
 export type Turn = Array<Message | Array<Message>>
 
-export function analyzeTurn(
-  turnMessages: Turn,
-  turnIndex: number,
-  turnsCount: number,
-  inProgress: boolean
-) {
-  const isLastTurn = turnIndex === turnsCount - 1
-  const turnIsComplete = !(inProgress && isLastTurn)
-
-  const hasVisibleAssistantOutput = turnMessages.some(
-    (m) =>
-      !Array.isArray(m) &&
-      m.role === "assistant" &&
-      (!!m.content ||
-        m.toolCalls?.some(
-          (tc: ToolCall) => tc.function.name !== "orchestratorThinking"
-        ))
-  )
-
-  const showActivityIndicator =
-    !turnIsComplete &&
-    hasVisibleAssistantOutput &&
-    !Array.isArray(turnMessages[turnMessages.length - 1])
-
-  return { isLastTurn, turnIsComplete, showActivityIndicator }
-}
-
 export function convertMessagesToTurns(messages: Message[]): Turn[] {
   if (messages.length === 0) {
     return []
