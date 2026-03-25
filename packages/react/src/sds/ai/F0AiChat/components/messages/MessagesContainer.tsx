@@ -10,12 +10,10 @@ import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
 
-import { F0ActionItem } from "../../../F0ActionItem"
 import { useMessageScroll } from "../../hooks/useMessageScroll"
 import { useAiChat } from "../../providers/AiChatStateProvider"
 import {
   type Turn,
-  analyzeTurn,
   convertMessagesToTurns,
   extractThinkingGroup,
 } from "../../utils/turnUtils"
@@ -98,14 +96,9 @@ const Messages = ({
 
   // ─── Render a single turn's messages ───
   const renderTurnMessages = (turnMessages: Turn, turnIndex: number) => {
-    const { turnIsComplete, showActivityIndicator } = analyzeTurn(
-      turnMessages,
-      turnIndex,
-      turns.length,
-      inProgress
-    )
     const { thinkingGroup, restMessages } = extractThinkingGroup(turnMessages)
     const isLastTurn = turnIndex === turns.length - 1
+    const turnIsComplete = !(inProgress && isLastTurn)
 
     const renderMessage = (message: Message, index: number) => {
       const isCurrentMessage = isLastTurn && index === restMessages.length - 1
@@ -197,7 +190,6 @@ const Messages = ({
         {thinkingGroup &&
           isLastTurn &&
           !turnIsComplete &&
-          !showActivityIndicator &&
           (() => {
             const liveMessage = thinkingGroup[thinkingGroup.length - 1]
             const liveProps = {
@@ -229,7 +221,6 @@ const Messages = ({
               />
             )
           })()}
-        {showActivityIndicator && <F0ActionItem title="" status="executing" />}
         {turnIsComplete && (
           <TurnFeedback messages={turnMessages} onCopy={onCopy} />
         )}
