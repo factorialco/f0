@@ -75,7 +75,7 @@ export const Completed: Story = {
         },
       },
       {
-        label: "Assignees",
+        label: "",
         hideLabel: true,
         value: {
           type: "list",
@@ -124,7 +124,7 @@ export const WithAssignees: Story = {
     description: "Estimated on 24/07/2025",
     metadata: [
       {
-        label: "Assignees",
+        label: "",
         hideLabel: true,
         value: {
           type: "list",
@@ -210,7 +210,7 @@ export const Timeline: Story = {
         description="Completed on 20/2025"
         metadata={[
           {
-            label: "Assignees",
+            label: "",
             hideLabel: true,
             value: {
               type: "list",
@@ -234,7 +234,7 @@ export const Timeline: Story = {
         description="Completed on 20/2025"
         metadata={[
           {
-            label: "Assignees",
+            label: "",
             hideLabel: true,
             value: {
               type: "list",
@@ -264,7 +264,7 @@ export const Timeline: Story = {
         description="Estimated on 24/07/2025"
         metadata={[
           {
-            label: "Assignees",
+            label: "",
             hideLabel: true,
             value: {
               type: "list",
@@ -318,7 +318,7 @@ export const WithActions: Story = {
     description: "Estimated on 18/07/2025",
     metadata: [
       {
-        label: "Assignees",
+        label: "",
         hideLabel: true,
         value: {
           type: "list",
@@ -390,7 +390,7 @@ const MultitaskTimelineDemo = () => {
         description="Completed on 20/2025"
         metadata={[
           {
-            label: "Assignees",
+            label: "",
             hideLabel: true,
             value: {
               type: "list",
@@ -414,7 +414,7 @@ const MultitaskTimelineDemo = () => {
         description="Completed on 20/2025"
         metadata={[
           {
-            label: "Assignees",
+            label: "",
             hideLabel: true,
             value: {
               type: "list",
@@ -458,7 +458,7 @@ const MultitaskTimelineDemo = () => {
             description: "Estimated on 18/07/2025",
             metadata: [
               {
-                label: "Assignees",
+                label: "",
                 hideLabel: true,
                 value: {
                   type: "list",
@@ -582,7 +582,7 @@ const MultitaskDemo = () => {
             description: "Estimated on 03/23/2026",
             metadata: [
               {
-                label: "Assignees",
+                label: "",
                 hideLabel: true,
                 value: {
                   type: "list",
@@ -665,7 +665,7 @@ const MultitaskDemo = () => {
             description: "Estimated on 03/23/2026",
             metadata: [
               {
-                label: "Assignees",
+                label: "",
                 hideLabel: true,
                 value: {
                   type: "list",
@@ -706,7 +706,7 @@ const MultitaskDemo = () => {
             description: "Estimated on 03/23/2026",
             metadata: [
               {
-                label: "Assignees",
+                label: "",
                 hideLabel: true,
                 value: {
                   type: "list",
@@ -736,7 +736,7 @@ const MultitaskDemo = () => {
             description: "Estimated on 03/26/2026",
             metadata: [
               {
-                label: "Assignees",
+                label: "",
                 hideLabel: true,
                 value: {
                   type: "list",
@@ -793,7 +793,7 @@ export const Snapshot: Story = {
         description="Estimated on 24/07/2025"
         metadata={[
           {
-            label: "Assignees",
+            label: "",
             hideLabel: true,
             value: {
               type: "list",
