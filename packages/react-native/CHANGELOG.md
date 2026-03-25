@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.43.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.42.0...f0-react-native-v0.43.0) (2026-03-25)
+
+
+### Features
+
+* **progress:** add F0Progress component ([#3742](https://github.com/factorialco/f0/issues/3742)) ([401edd5](https://github.com/factorialco/f0/commit/401edd5ed005ecd3ec20014cbcd5938d2c0a2a3b))
+
 ## [0.42.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.41.0...f0-react-native-v0.42.0) (2026-03-18)
 
 
