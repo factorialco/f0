@@ -30,8 +30,8 @@ export const Actions = ({
           loading={action.loading}
         />
       ))}
-      {hasSecondary && primaryAction && (
-        <div className="h-6 w-px bg-f1-border-secondary" />
+      {primaryAction && (hasOther || hasSecondary) && (
+        <div className="mx-1 h-4 w-px bg-f1-background-secondary-hover" />
       )}
       {primaryAction && (
         <F0Button
