@@ -11,7 +11,7 @@ export const F0TimelineConnector = ({ status }: F0TimelineConnectorProps) => (
   <div
     data-testid="timeline-connector"
     className={cn(
-      "mt-1 w-0.5 min-h-2 flex-1",
+      "w-0.5 min-h-2 flex-1",
       status === "completed" && "bg-f1-icon-positive",
       status === "in-progress" && "bg-f1-border-secondary",
       status === "not-started" &&

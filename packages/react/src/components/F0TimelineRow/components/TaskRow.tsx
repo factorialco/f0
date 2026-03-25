@@ -9,7 +9,7 @@ export const TaskRow = ({ props }: { props: F0TimelineRowTaskProps }) => {
 
   return (
     <TimelineRowLayout status={status} isLast={isLast} hideStatus={hideStatus}>
-      <div className="flex min-h-7 items-center gap-2">
+      <div className="flex min-h-8 items-center gap-2">
         <TaskHeader props={props} />
       </div>
       {status !== "completed" && <TaskDetails props={props} />}

@@ -13,7 +13,7 @@ export const MultitaskRow = ({
 
   return (
     <TimelineRowLayout status={status} isLast={isLast} hideStatus={hideStatus}>
-      <div className="flex min-h-7 items-center gap-2">
+      <div className="flex min-h-8 items-center gap-2">
         <MultitaskHeader props={props} />
       </div>
       {expanded && (

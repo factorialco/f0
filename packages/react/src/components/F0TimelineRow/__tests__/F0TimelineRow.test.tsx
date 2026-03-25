@@ -69,23 +69,45 @@ describe("F0TimelineRow", () => {
     expect(screen.queryByText("Completed on 20/2025")).not.toBeInTheDocument()
   })
 
-  it("renders right content when provided", () => {
+  it("renders metadata items", () => {
     render(
       <F0TimelineRow
         {...defaultProps}
         status="in-progress"
-        right={<span>IT team</span>}
+        metadata={[
+          {
+            label: "Team",
+            value: { type: "text", content: "IT team" },
+          },
+        ]}
       />
     )
     expect(screen.getByText("IT team")).toBeInTheDocument()
   })
 
-  it("renders files when provided", () => {
-    const files = [
-      new File(["test"], "report.pdf", { type: "application/pdf" }),
-    ]
-    render(<F0TimelineRow {...defaultProps} files={files} />)
-    expect(screen.getByText("report.pdf")).toBeInTheDocument()
+  it("renders metadata with avatar list", () => {
+    const { container } = render(
+      <F0TimelineRow
+        {...defaultProps}
+        metadata={[
+          {
+            label: "Assignees",
+            hideLabel: true,
+            value: {
+              type: "list",
+              variant: "person",
+              avatars: [
+                { type: "person", firstName: "Alex", lastName: "Rashfold" },
+                { type: "person", firstName: "James", lastName: "Hopper" },
+              ],
+            },
+          },
+        ]}
+      />
+    )
+    expect(
+      container.querySelector("[data-testid='overflow-visible-container']")
+    ).toBeInTheDocument()
   })
 
   it("renders with completed status indicator", () => {
@@ -129,22 +151,34 @@ describe("F0TimelineRow", () => {
     ).not.toBeInTheDocument()
   })
 
-  it("renders assignees as avatar list", () => {
-    const assignees = [
-      { firstName: "Alex", lastName: "Rashfold" },
-      { firstName: "James", lastName: "Hopper" },
-    ]
+  it("renders metadata avatar list for completed rows inline", () => {
     const { container } = render(
-      <F0TimelineRow {...defaultProps} assignees={assignees} />
+      <F0TimelineRow
+        {...defaultProps}
+        metadata={[
+          {
+            label: "Assignees",
+            hideLabel: true,
+            value: {
+              type: "list",
+              variant: "person",
+              avatars: [
+                { type: "person", firstName: "Alex", lastName: "Rashfold" },
+                { type: "person", firstName: "James", lastName: "Hopper" },
+              ],
+            },
+          },
+        ]}
+      />
     )
     expect(
       container.querySelector("[data-testid='overflow-visible-container']")
     ).toBeInTheDocument()
   })
 
-  it("does not render assignees when array is empty", () => {
-    render(<F0TimelineRow {...defaultProps} assignees={[]} />)
-    expect(screen.queryByRole("img")).not.toBeInTheDocument()
+  it("does not render metadata when not provided", () => {
+    render(<F0TimelineRow {...defaultProps} />)
+    expect(screen.queryByText("IT team")).not.toBeInTheDocument()
   })
 
   describe("multitask", () => {

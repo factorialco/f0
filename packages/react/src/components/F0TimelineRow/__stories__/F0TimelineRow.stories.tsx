@@ -11,6 +11,7 @@ import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import { F0TimelineRow } from "../"
 import { timelineRowStatuses } from "../types"
+import { EyeVisible } from "@/icons/app"
 
 const meta = {
   component: F0TimelineRow,
@@ -21,7 +22,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "A single row in a timeline, representing a task or step with status, icon, title, description, assignees, and optional right-side content.",
+          "A single row in a timeline, representing a task or step with status, icon, title, description, metadata, and actions.",
       },
     },
   },
@@ -51,12 +52,50 @@ type Story = StoryObj<typeof meta>
 
 export const Completed: Story = {
   args: {
-    assignees: [
-      { firstName: "Alex", lastName: "Rashfold" },
-      { firstName: "James", lastName: "Hopper" },
-    ],
-    files: [
-      new File(["test"], "Climate Survey.pdf", { type: "application/pdf" }),
+    metadata: [
+      {
+        label: "",
+        actions: [
+          {
+            label: "Download",
+            icon: EyeVisible,
+            onClick: () => {},
+          },
+        ],
+        value: {
+          type: "avatar",
+          variant: {
+            type: "file",
+            file: {
+              name: "document.pdf",
+              type: "application/pdf",
+            },
+          },
+          text: "Document",
+        },
+      },
+      {
+        label: "Assignees",
+        hideLabel: true,
+        value: {
+          type: "list",
+          variant: "person",
+          avatars: [
+            {
+              type: "person",
+              badge: { type: "positive", icon: Check },
+              firstName: "Alex",
+              lastName: "Rashfold",
+            },
+            {
+              type: "person",
+              badge: { type: "positive", icon: Check },
+              firstName: "James",
+              lastName: "Hopper",
+            },
+          ],
+        },
+      },
     ],
   },
 }
@@ -83,29 +122,80 @@ export const WithAssignees: Story = {
     status: "in-progress",
     title: "Complete form",
     description: "Estimated on 24/07/2025",
-    assignees: [
-      { firstName: "Alex", lastName: "Rashfold" },
-      { firstName: "James", lastName: "Hopper" },
-      { firstName: "Sarah", lastName: "Connor" },
-      { firstName: "John", lastName: "Doe" },
+    metadata: [
+      {
+        label: "Assignees",
+        hideLabel: true,
+        value: {
+          type: "list",
+          variant: "person",
+          avatars: [
+            {
+              type: "person",
+              firstName: "Alex",
+              lastName: "Rashfold",
+              badge: { type: "positive", icon: Check },
+            },
+            {
+              type: "person",
+              firstName: "James",
+              lastName: "Hopper",
+              badge: { type: "positive", icon: Check },
+            },
+            {
+              type: "person",
+              firstName: "Sarah",
+              lastName: "Connor",
+              badge: { type: "positive", icon: Check },
+            },
+            {
+              type: "person",
+              firstName: "John",
+              lastName: "Doe",
+              badge: { type: "positive", icon: Check },
+            },
+          ],
+        },
+      },
     ],
   },
 }
 
-export const WithRightContent: Story = {
+export const WithMetadata: Story = {
   args: {
     status: "completed",
     title: "Submit payment",
     description: "Completed on 20/2025",
-    right: (
-      <div className="flex items-center gap-2">
-        <span className="rounded bg-f1-background-critical px-2 py-0.5 text-xs text-f1-foreground-critical">
-          IT team
-        </span>
-      </div>
-    ),
-    files: [
-      new File(["test"], "Climate Survey.pdf", { type: "application/pdf" }),
+    metadata: [
+      {
+        label: "",
+        actions: [
+          {
+            label: "Download",
+            icon: EyeVisible,
+            onClick: () => {},
+          },
+        ],
+        value: {
+          type: "avatar",
+          variant: {
+            type: "file",
+            file: {
+              name: "document.pdf",
+              type: "application/pdf",
+            },
+          },
+          text: "Climate Survey.pdf",
+        },
+      },
+      {
+        label: "Team",
+        value: {
+          type: "status",
+          label: "IT team",
+          variant: "critical",
+        },
+      },
     ],
   },
 }
@@ -118,16 +208,53 @@ export const Timeline: Story = {
         icon={Marker}
         title="Submit payment"
         description="Completed on 20/2025"
-        assignees={[{ firstName: "Alex", lastName: "Rashfold" }]}
+        metadata={[
+          {
+            label: "Assignees",
+            hideLabel: true,
+            value: {
+              type: "list",
+              variant: "person",
+              avatars: [
+                {
+                  type: "person",
+                  badge: { type: "positive", icon: Check },
+                  firstName: "Alex",
+                  lastName: "Rashfold",
+                },
+              ],
+            },
+          },
+        ]}
       />
       <F0TimelineRow
         status="completed"
         icon={Marker}
         title="Complete form"
         description="Completed on 20/2025"
-        assignees={[
-          { firstName: "James", lastName: "Hopper" },
-          { firstName: "Sarah", lastName: "Connor" },
+        metadata={[
+          {
+            label: "Assignees",
+            hideLabel: true,
+            value: {
+              type: "list",
+              variant: "person",
+              avatars: [
+                {
+                  type: "person",
+                  badge: { type: "positive", icon: Check },
+                  firstName: "James",
+                  lastName: "Hopper",
+                },
+                {
+                  type: "person",
+                  firstName: "Sarah",
+                  lastName: "Connor",
+                  badge: { type: "positive", icon: Check },
+                },
+              ],
+            },
+          },
         ]}
       />
       <F0TimelineRow
@@ -135,10 +262,35 @@ export const Timeline: Story = {
         icon={Marker}
         title="Complete form"
         description="Estimated on 24/07/2025"
-        assignees={[
-          { firstName: "Alex", lastName: "Rashfold" },
-          { firstName: "James", lastName: "Hopper" },
-          { firstName: "Sarah", lastName: "Connor" },
+        metadata={[
+          {
+            label: "Assignees",
+            hideLabel: true,
+            value: {
+              type: "list",
+              variant: "person",
+              avatars: [
+                {
+                  type: "person",
+                  badge: { type: "positive", icon: Check },
+                  firstName: "Alex",
+                  lastName: "Rashfold",
+                },
+                {
+                  type: "person",
+                  badge: { type: "positive", icon: Check },
+                  firstName: "James",
+                  lastName: "Hopper",
+                },
+                {
+                  type: "person",
+                  badge: { type: "positive", icon: Check },
+                  firstName: "Sarah",
+                  lastName: "Connor",
+                },
+              ],
+            },
+          },
         ]}
       />
       <F0TimelineRow
@@ -164,23 +316,48 @@ export const WithActions: Story = {
     icon: Marker,
     title: "Complete form",
     description: "Estimated on 18/07/2025",
-    assignees: [
-      { firstName: "Quigley", lastName: "Smitty" },
-      { firstName: "James", lastName: "Hopper" },
-      { firstName: "Sarah", lastName: "Connor" },
+    metadata: [
+      {
+        label: "Assignees",
+        hideLabel: true,
+        value: {
+          type: "list",
+          variant: "person",
+          avatars: [
+            {
+              type: "person",
+              firstName: "Quigley",
+              lastName: "Smitty",
+              badge: { type: "positive", icon: Check },
+            },
+            {
+              type: "person",
+              firstName: "James",
+              lastName: "Hopper",
+              badge: { type: "positive", icon: Check },
+            },
+            {
+              type: "person",
+              firstName: "Sarah",
+              lastName: "Connor",
+              badge: { type: "positive", icon: Check },
+            },
+          ],
+        },
+      },
+      {
+        label: "Team",
+        value: {
+          type: "status",
+          label: "IT team",
+          variant: "critical",
+        },
+      },
+      {
+        label: "Form",
+        value: { type: "text", content: "Vendor assessment form" },
+      },
     ],
-    right: (
-      <div className="flex items-center gap-1 text-sm text-f1-foreground-secondary">
-        <span className="inline-flex items-center gap-1 rounded bg-f1-background-critical px-1.5 py-0.5 text-xs text-f1-foreground-critical">
-          ★ IT team
-        </span>
-        <span>·</span>
-        <span className="inline-flex items-center gap-1 rounded bg-f1-background-secondary px-1.5 py-0.5 text-xs text-f1-foreground-secondary">
-          SY
-        </span>
-        <span>Vendor assessment form</span>
-      </div>
-    ),
     primaryAction: {
       label: "Approve",
       icon: Check,
@@ -211,16 +388,53 @@ const MultitaskTimelineDemo = () => {
         icon={Marker}
         title="Submit payment"
         description="Completed on 20/2025"
-        assignees={[{ firstName: "Alex", lastName: "Rashfold" }]}
+        metadata={[
+          {
+            label: "Assignees",
+            hideLabel: true,
+            value: {
+              type: "list",
+              variant: "person",
+              avatars: [
+                {
+                  type: "person",
+                  firstName: "Alex",
+                  badge: { type: "positive", icon: Check },
+                  lastName: "Rashfold",
+                },
+              ],
+            },
+          },
+        ]}
       />
       <F0TimelineRow
         status="completed"
         icon={Marker}
         title="Complete form"
         description="Completed on 20/2025"
-        assignees={[
-          { firstName: "James", lastName: "Hopper" },
-          { firstName: "Sarah", lastName: "Connor" },
+        metadata={[
+          {
+            label: "Assignees",
+            hideLabel: true,
+            value: {
+              type: "list",
+              variant: "person",
+              avatars: [
+                {
+                  type: "person",
+                  badge: { type: "positive", icon: Check },
+                  firstName: "James",
+                  lastName: "Hopper",
+                },
+                {
+                  type: "person",
+                  badge: { type: "positive", icon: Check },
+                  firstName: "Sarah",
+                  lastName: "Connor",
+                },
+              ],
+            },
+          },
         ]}
       />
       <F0TimelineRow
@@ -242,23 +456,51 @@ const MultitaskTimelineDemo = () => {
             icon: Marker,
             title: "Complete form",
             description: "Estimated on 18/07/2025",
-            assignees: [
-              { firstName: "Quigley", lastName: "Smitty" },
-              { firstName: "James", lastName: "Hopper" },
-              { firstName: "Sarah", lastName: "Connor" },
+            metadata: [
+              {
+                label: "Assignees",
+                hideLabel: true,
+                value: {
+                  type: "list",
+                  variant: "person",
+                  avatars: [
+                    {
+                      type: "person",
+                      firstName: "Quigley",
+                      lastName: "Smitty",
+                      badge: { type: "positive", icon: Check },
+                    },
+                    {
+                      type: "person",
+                      firstName: "James",
+                      lastName: "Hopper",
+                      badge: { type: "positive", icon: Check },
+                    },
+                    {
+                      type: "person",
+                      firstName: "Sarah",
+                      lastName: "Connor",
+                      badge: { type: "positive", icon: Check },
+                    },
+                  ],
+                },
+              },
+              {
+                label: "Team",
+                value: {
+                  type: "status",
+                  label: "IT team",
+                  variant: "critical",
+                },
+              },
+              {
+                label: "Form",
+                value: {
+                  type: "text",
+                  content: "Vendor assessment form",
+                },
+              },
             ],
-            right: (
-              <div className="flex items-center gap-1 text-sm text-f1-foreground-secondary">
-                <span className="inline-flex items-center gap-1 rounded bg-f1-background-critical px-1.5 py-0.5 text-xs text-f1-foreground-critical">
-                  ★ IT team
-                </span>
-                <span>·</span>
-                <span className="inline-flex items-center gap-1 rounded bg-f1-background-secondary px-1.5 py-0.5 text-xs text-f1-foreground-secondary">
-                  SY
-                </span>
-                <span>Vendor assessment form</span>
-              </div>
-            ),
             primaryAction: {
               label: "Approve",
               icon: Check,
@@ -338,17 +580,77 @@ const MultitaskDemo = () => {
             icon: Marker,
             title: "General task",
             description: "Estimated on 03/23/2026",
-            assignees: [
-              { firstName: "Quigley", lastName: "Smitty" },
-              { firstName: "James", lastName: "Hopper" },
-              { firstName: "Sarah", lastName: "Connor" },
-              { firstName: "John", lastName: "Doe" },
-              { firstName: "Jane", lastName: "Smith" },
-              { firstName: "Alex", lastName: "Rashfold" },
-              { firstName: "Emily", lastName: "Chen" },
-              { firstName: "Mike", lastName: "Ross" },
-              { firstName: "Rachel", lastName: "Green" },
-              { firstName: "Monica", lastName: "Geller" },
+            metadata: [
+              {
+                label: "Assignees",
+                hideLabel: true,
+                value: {
+                  type: "list",
+                  variant: "person",
+                  avatars: [
+                    {
+                      type: "person",
+                      firstName: "Quigley",
+                      lastName: "Smitty",
+                      badge: { type: "positive", icon: Check },
+                    },
+                    {
+                      type: "person",
+                      firstName: "James",
+                      lastName: "Hopper",
+                      badge: { type: "positive", icon: Check },
+                    },
+                    {
+                      type: "person",
+                      firstName: "Sarah",
+                      lastName: "Connor",
+                      badge: { type: "positive", icon: Check },
+                    },
+                    {
+                      type: "person",
+                      firstName: "John",
+                      lastName: "Doe",
+                      badge: { type: "positive", icon: Check },
+                    },
+                    {
+                      type: "person",
+                      firstName: "Jane",
+                      lastName: "Smith",
+                      badge: { type: "positive", icon: Check },
+                    },
+                    {
+                      type: "person",
+                      firstName: "Alex",
+                      lastName: "Rashfold",
+                      badge: { type: "positive", icon: Check },
+                    },
+                    {
+                      type: "person",
+                      firstName: "Emily",
+                      lastName: "Chen",
+                      badge: { type: "positive", icon: Check },
+                    },
+                    {
+                      type: "person",
+                      firstName: "Mike",
+                      lastName: "Ross",
+                      badge: { type: "positive", icon: Check },
+                    },
+                    {
+                      type: "person",
+                      firstName: "Rachel",
+                      badge: { type: "positive", icon: Check },
+                      lastName: "Green",
+                    },
+                    {
+                      type: "person",
+                      firstName: "Monica",
+                      lastName: "Geller",
+                      badge: { type: "positive", icon: Check },
+                    },
+                  ],
+                },
+              },
             ],
             primaryAction: {
               label: "Mark as done",
@@ -361,7 +663,24 @@ const MultitaskDemo = () => {
             icon: ThumbsUp,
             title: "Manual review",
             description: "Estimated on 03/23/2026",
-            assignees: [{ firstName: "Alex", lastName: "Rashfold" }],
+            metadata: [
+              {
+                label: "Assignees",
+                hideLabel: true,
+                value: {
+                  type: "list",
+                  variant: "person",
+                  avatars: [
+                    {
+                      type: "person",
+                      badge: { type: "positive", icon: Check },
+                      firstName: "Alex",
+                      lastName: "Rashfold",
+                    },
+                  ],
+                },
+              },
+            ],
             primaryAction: {
               label: "Approve",
               icon: Check,
@@ -385,7 +704,24 @@ const MultitaskDemo = () => {
             icon: Marker,
             title: "Upload document",
             description: "Estimated on 03/23/2026",
-            assignees: [{ firstName: "James", lastName: "Hopper" }],
+            metadata: [
+              {
+                label: "Assignees",
+                hideLabel: true,
+                value: {
+                  type: "list",
+                  variant: "person",
+                  avatars: [
+                    {
+                      type: "person",
+                      badge: { type: "positive", icon: Check },
+                      firstName: "James",
+                      lastName: "Hopper",
+                    },
+                  ],
+                },
+              },
+            ],
           },
           {
             status: "not-started",
@@ -398,9 +734,29 @@ const MultitaskDemo = () => {
             icon: Marker,
             title: "Sign contract",
             description: "Estimated on 03/26/2026",
-            assignees: [
-              { firstName: "Sarah", lastName: "Connor" },
-              { firstName: "John", lastName: "Doe" },
+            metadata: [
+              {
+                label: "Assignees",
+                hideLabel: true,
+                value: {
+                  type: "list",
+                  variant: "person",
+                  avatars: [
+                    {
+                      type: "person",
+                      badge: { type: "positive", icon: Check },
+                      firstName: "Sarah",
+                      lastName: "Connor",
+                    },
+                    {
+                      type: "person",
+                      badge: { type: "positive", icon: Check },
+                      firstName: "John",
+                      lastName: "Doe",
+                    },
+                  ],
+                },
+              },
             ],
           },
           {
@@ -435,9 +791,29 @@ export const Snapshot: Story = {
         icon={Marker}
         title="Complete form"
         description="Estimated on 24/07/2025"
-        assignees={[
-          { firstName: "Alex", lastName: "Rashfold" },
-          { firstName: "James", lastName: "Hopper" },
+        metadata={[
+          {
+            label: "Assignees",
+            hideLabel: true,
+            value: {
+              type: "list",
+              variant: "person",
+              avatars: [
+                {
+                  type: "person",
+                  badge: { type: "positive", icon: Check },
+                  firstName: "Alex",
+                  lastName: "Rashfold",
+                },
+                {
+                  type: "person",
+                  badge: { type: "positive", icon: Check },
+                  firstName: "James",
+                  lastName: "Hopper",
+                },
+              ],
+            },
+          },
         ]}
       />
       <F0TimelineRow

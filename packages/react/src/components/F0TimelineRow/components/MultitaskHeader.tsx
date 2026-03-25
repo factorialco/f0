@@ -1,15 +1,10 @@
-import { F0Icon } from "@/components/F0Icon"
 import Multitask from "@/icons/app/Multitask"
 import { GroupHeader } from "@/ui/GroupHeader/GroupHeader"
 
 import type { F0TimelineRowMultitaskProps } from "../types"
 
-import { IconContainer } from "./IconContainer"
 import { F0TagStatus } from "@/components/tags/F0TagStatus"
-
-const MultitaskIcon = () => (
-  <F0Icon icon={Multitask} size="sm" color="default" />
-)
+import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon/F0AvatarIcon"
 
 export const MultitaskHeader = ({
   props,
@@ -21,9 +16,7 @@ export const MultitaskHeader = ({
 
   return (
     <>
-      <IconContainer status={status}>
-        <MultitaskIcon />
-      </IconContainer>
+      <F0AvatarIcon icon={Multitask} size="sm" />
       <div className="flex flex-1 items-center justify-between">
         <GroupHeader
           label={`${taskCount} ${title}`}

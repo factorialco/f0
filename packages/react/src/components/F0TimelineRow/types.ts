@@ -1,7 +1,6 @@
-import { type ReactNode } from "react"
-
 import { type IconType } from "@/components/F0Icon"
 import { type DropdownItem } from "@/experimental/Navigation/Dropdown"
+import { type MetadataItem } from "@/experimental/Information/Headers/Metadata"
 
 export const timelineRowStatuses = [
   "completed",
@@ -10,12 +9,6 @@ export const timelineRowStatuses = [
 ] as const
 
 export type TimelineRowStatus = (typeof timelineRowStatuses)[number]
-
-export type F0TimelineRowAssignee = {
-  firstName: string
-  lastName: string
-  src?: string
-}
 
 export interface F0TimelineRowAction {
   /** Button label */
@@ -49,12 +42,8 @@ export interface F0TimelineRowTaskProps extends F0TimelineRowBaseProps {
   icon?: IconType
   /** Description text (e.g., "Completed on 20/2025") */
   description?: string
-  /** Assignees to display as avatars below the title */
-  assignees?: F0TimelineRowAssignee[]
-  /** Content to display on the right side (e.g., tags, badges) */
-  right?: ReactNode
-  /** Files attached to this timeline entry */
-  files?: File[]
+  /** Metadata items to display (assignees, tags, dates, etc.) using the same pattern as ResourceHeader */
+  metadata?: (MetadataItem | undefined | boolean)[]
   /** Primary action button (displayed on the right after a divider) */
   primaryAction?: F0TimelineRowAction
   /** Secondary action buttons (displayed on the left) */
