@@ -195,6 +195,7 @@ const preview: Preview = {
               "borders",
               "shadows",
               "icons",
+              "design-rules",
             ]
             const aFoundationIndex = foundationOrder.indexOf(aId.split("/")[1])
             const bFoundationIndex = foundationOrder.indexOf(bId.split("/")[1])

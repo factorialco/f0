@@ -1,0 +1,241 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+
+<Meta title="Foundations/Design rules" />
+
+# F0 Design Rules
+
+These rules govern how UI is built with the F0 design system. They apply to every
+component — whether it lives in F0 core or in a product codebase consuming F0.
+
+Violating these rules leads to visual inconsistency, broken dark mode, accessibility
+failures, and increased maintenance cost.
+
+---
+
+## 1. Color
+
+F0 uses **semantic color tokens** with the `f1-` prefix. Never use raw hex, rgb, or
+base color tokens directly in UI code.
+
+### Semantic categories
+
+| Category   | Example tokens                                                          | Purpose                         |
+| ---------- | ----------------------------------------------------------------------- | ------------------------------- |
+| Foreground | `f1-foreground`, `f1-foreground-secondary`, `f1-foreground-inverse`     | Text and icon color             |
+| Background | `f1-background`, `f1-background-hover`, `f1-background-secondary`       | Surface fills                   |
+| Border     | `f1-border`, `f1-border-hover`, `f1-border-secondary`                   | Strokes and dividers            |
+| Icon       | `f1-icon`, `f1-icon-secondary`, `f1-icon-inverse`                       | Standalone icon color           |
+| Status     | `f1-foreground-critical`, `f1-background-positive`, `f1-border-warning` | Semantic status feedback        |
+| Special    | `f1-special-ring`, `f1-special-page`, `f1-special-highlight`            | Focus ring, page bg, highlights |
+
+### Rules
+
+- Always use semantic tokens (`text-f1-foreground`, `bg-f1-background`, etc.)
+- Never hardcode `#hex` or `hsl()` values in components
+- Status colors (`critical`, `warning`, `positive`, `info`) have foreground, background, and border variants — use the right one for the context
+- Dark mode works automatically when you use semantic tokens — no manual overrides needed
+- Base colors (grey, red, orange, etc.) are for token definitions only, not direct use
+
+---
+
+## 2. Typography
+
+Typography is defined in the Tailwind config via the `fontSize` theme key. F0 uses a
+fixed type scale — do not create custom font sizes.
+
+### Available scale
+
+| Class       | Size             | Line height    | Tracking |
+| ----------- | ---------------- | -------------- | -------- |
+| `text-xs`   | 0.6875rem (11px) | 1rem (16px)    | —        |
+| `text-sm`   | 0.8125rem (13px) | 1.25rem (20px) | —        |
+| `text-base` | 0.875rem (14px)  | 1.25rem (20px) | —        |
+| `text-lg`   | 1rem (16px)      | 1.5rem (24px)  | —        |
+| `text-xl`   | 1.125rem (18px)  | 1.5rem (24px)  | -0.02em  |
+| `text-2xl`  | 1.5rem (24px)    | 2rem (32px)    | -0.02em  |
+
+### Rules
+
+- Use the existing type scale — do not add custom `fontSize` values
+- Pair text size with the correct semantic color (`f1-foreground`, `f1-foreground-secondary`)
+- Larger headings (`xl`, `2xl`) have negative letter-spacing baked in — do not override
+- Use `font-semibold` or `font-medium` for emphasis, not color alone (accessibility)
+
+---
+
+## 3. Spacing
+
+F0 spacing follows a **4px base grid** defined in `packages/core/src/tokens/spacing.ts`.
+
+### Spacing scale (abbreviated)
+
+| Token | Pixel value | Common use                |
+| ----- | ----------- | ------------------------- |
+| `0.5` | 2px         | Micro gaps                |
+| `1`   | 4px         | Tight internal padding    |
+| `1.5` | 6px         | Small icon gaps           |
+| `2`   | 8px         | Standard internal padding |
+| `3`   | 12px        | Card padding (compact)    |
+| `4`   | 16px        | Card padding (default)    |
+| `5`   | 20px        | Section spacing           |
+| `6`   | 24px        | Group spacing             |
+| `8`   | 32px        | Large section gaps        |
+
+### Between-element spacing (gap)
+
+| Token    | Value          | Use                    |
+| -------- | -------------- | ---------------------- |
+| `gap-sm` | 4px (0.25rem)  | Tight element groups   |
+| `gap-md` | 8px (0.5rem)   | Default element groups |
+| `gap-lg` | 12px (0.75rem) | Loose element groups   |
+| `gap-xl` | 16px (1rem)    | Wide element groups    |
+
+### Rules
+
+- Always use the spacing scale — no arbitrary pixel or rem values
+- Spacing uses **absolute units (px)** by default for padding/margin
+- Size properties (width, height) use **relative units (rem)** for better scaling
+- When in doubt, use the `gap-*` semantic scale for space between elements
+
+---
+
+## 4. Border Radius
+
+Defined in `packages/core/src/tokens/borderRadius.ts`.
+
+| Token          | Value           | Typical use              |
+| -------------- | --------------- | ------------------------ |
+| `rounded-none` | 0px             | No rounding              |
+| `rounded-2xs`  | 0.25rem (4px)   | Tags, small badges       |
+| `rounded-xs`   | 0.375rem (6px)  | Inputs, small cards      |
+| `rounded-sm`   | 0.5rem (8px)    | Buttons                  |
+| `rounded`      | 0.625rem (10px) | Default (cards, dialogs) |
+| `rounded-md`   | 0.75rem (12px)  | Larger cards             |
+| `rounded-lg`   | 0.875rem (14px) | Modals                   |
+| `rounded-xl`   | 1rem (16px)     | Large surfaces           |
+| `rounded-2xl`  | 1.5rem (24px)   | Hero sections            |
+| `rounded-full` | 9999px          | Avatars, pills           |
+
+### Rules
+
+- Use the token scale — no custom border-radius values
+- Nest radius: inner elements should use a smaller radius than their parent
+- `rounded-full` is only for circular/pill shapes (avatars, badges, toggles)
+
+---
+
+## 5. Shadows
+
+Defined in `packages/core/tailwind.ts`.
+
+| Token         | Effect                 | Use                          |
+| ------------- | ---------------------- | ---------------------------- |
+| `shadow`      | 2px blur, 4% opacity   | Subtle elevation (cards)     |
+| `shadow-md`   | 4px blur, 8% opacity   | Medium elevation (dropdowns) |
+| `shadow-lg`   | 8px blur, 12% opacity  | High elevation (modals)      |
+| `shadow-xl`   | 12px blur, 16% opacity | Maximum elevation (popovers) |
+| `shadow-none` | No shadow              | Flat elements                |
+
+### Rules
+
+- Shadows use the `--shadow` CSS variable — they adapt to light/dark mode automatically
+- Use shadows to communicate **elevation hierarchy**, not decoration
+- Higher-elevation elements (modals > dropdowns > cards) should use progressively stronger shadows
+
+---
+
+## 6. Accessibility
+
+F0 targets **WCAG 2.1 Level AA** compliance.
+
+### Requirements
+
+- **Focus ring**: Use `focusRing()` from `@/lib/utils` on every focusable element
+- **Reduced motion**: Use `useReducedMotion()` from `@/lib/a11y` — set `duration: 0` when true
+- **Screen readers**: Use `sr-only` class for visually hidden labels (e.g., icon-only buttons)
+- **Semantic HTML**: Use `<button>` for actions, `<a>` for navigation — never `<div onClick>`
+- **Color contrast**: Text must meet 4.5:1 ratio (3:1 for large text)
+- **Keyboard navigation**: All interactive elements must be reachable via Tab and operable via Enter/Space
+- **ARIA**: Use `aria-busy="true"` + `aria-live="polite"` on loading/skeleton states
+
+### Rules
+
+- Never rely on color alone to convey meaning — always pair with text, icon, or pattern
+- Complex interactive widgets (dialogs, selects, tooltips) must use Radix primitives via `@/ui/`
+- Every form input needs a visible label or `aria-label`
+
+---
+
+## 7. Composability
+
+F0 components are building blocks, not monolithic solutions.
+
+### Rules
+
+- Components should do one thing well — avoid "god components" with dozens of props
+- Use composition over configuration: prefer `children` and slots over boolean flags
+- Never expose `className` as a public prop — it breaks encapsulation
+- Internal subcomponents live in the `components/` subfolder and are not exported
+- Use the `withSkeleton` HOC to attach `.Skeleton` variants
+
+---
+
+## 8. Naming
+
+### Components
+
+- All public components use the `F0` prefix: `F0Button`, `F0Card`, `F0Select`
+- Old prefixes (`F1`, `One`, or no prefix) must be renamed when a component is touched
+- Subcomponents do not need the prefix
+
+### Props
+
+- Use clear, functional names: `onlyIcon` not `hideIcon` + `hideLabel`
+- Boolean props should read as affirmative: `isOpen`, `isDisabled`, `hasIcon`
+- Event handlers: `on` prefix for props (`onClick`), `handle` prefix for internal (`handleClick`)
+- Union types: define as `const` arrays and derive the type: `export const sizes = ["sm", "md", "lg"] as const`
+
+### Files
+
+- Implementation: `F0Example.tsx`
+- Types: `types.ts` (public), `internal-types.ts` (private)
+- Tests: `__tests__/F0Example.test.tsx` (never `.spec.ts`)
+- Stories: `__stories__/F0Example.stories.tsx`
+
+---
+
+## 9. Component Maturity
+
+F0 components go through maturity stages. See the
+[Components maturity](?path=/docs/components-maturity--docs) page for the full model.
+
+### Key points
+
+- **Experimental** → API may change, use at your own risk
+- **Stable** → API is locked, breaking changes go through deprecation
+- **Deprecated** → Migration path exists, will be removed
+
+### Rules
+
+- New components start as experimental (wrapped with `experimentalComponent()`)
+- Promotion to stable requires: full test coverage, documentation, a11y audit, and design sign-off
+- Deprecated components must have a migration guide before removal
+
+---
+
+## 10. Responsiveness
+
+F0 uses three breakpoints defined in `packages/core/src/tokens/breakpoints.ts`:
+
+| Breakpoint | Min width | Typical use            |
+| ---------- | --------- | ---------------------- |
+| `md`       | 900px     | Tablet / small desktop |
+| `lg`       | 1200px    | Standard desktop       |
+| `xl`       | 1440px    | Wide desktop           |
+
+### Rules
+
+- Design mobile-first — base styles target small screens, breakpoints add complexity
+- Use Tailwind responsive prefixes: `md:`, `lg:`, `xl:`
+- Prefer container queries (`@container`) for component-level responsiveness over viewport queries
+- Test layouts at all three breakpoints plus a mobile viewport (< 900px)
