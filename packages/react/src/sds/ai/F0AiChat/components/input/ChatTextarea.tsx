@@ -131,12 +131,6 @@ export const ChatTextarea = ({
       fontColor: "text-f1-foreground-info",
       formBorder: "[&_form]:border-f1-border-info",
     },
-    hard: {
-      text: translation.ai.creditWarning.hard,
-      bg: "bg-f1-background-warning",
-      fontColor: "text-f1-foreground-warning",
-      formBorder: "[&_form]:border-f1-border-warning",
-    },
   }
 
   const form = (

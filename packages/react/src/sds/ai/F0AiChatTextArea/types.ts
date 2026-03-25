@@ -57,9 +57,8 @@ export interface F0AiChatTextAreaProps {
   /**
    * Shows a credit warning banner above the input.
    * "soft" — user is running low on AI credits.
-   * "hard" — user has run out of AI credits.
    */
-  creditWarning?: "soft" | "hard"
+  creditWarning?: "soft"
   /**
    * Callback when the user dismisses the credit warning banner.
    * The consumer is responsible for persisting the dismissed state.
