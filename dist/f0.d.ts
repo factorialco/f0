@@ -1580,7 +1580,6 @@ declare interface CardInternalProps {
 
 declare type CardMetadata = {
     icon: IconType;
-    tooltip?: string;
     property: Exclude<CardMetadataProperty, {
         type: "file";
     }>;
@@ -1597,6 +1596,7 @@ declare type CardMetadata = {
 declare type CardMetadataProperty = {
     [K in CardPropertyType]: {
         type: K;
+        label: string;
         value: Parameters<(typeof valueDisplayRenderers)[K]>[0];
     };
 }[CardPropertyType];
@@ -1609,7 +1609,6 @@ declare interface CardPrimaryAction {
 
 declare type CardPropertyDefinition<T> = PropertyDefinition_2<T> & {
     icon?: IconType;
-    tooltip?: string;
 };
 
 declare const cardPropertyRenderers: {
@@ -3401,6 +3400,7 @@ export declare const defaultTranslations: {
             readonly fileTooLarge: "File exceeds {{maxSize}} MB limit";
             readonly invalidFileType: "File type not accepted. Accepted formats: {{types}}";
         };
+        readonly moreInformation: "More information";
         readonly validation: {
             readonly required: "This field is required";
             readonly invalidType: "Invalid value";
@@ -4242,10 +4242,6 @@ export declare type F0AvatarTeamProps = {
     badge?: AvatarBadge;
 } & Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">;
 
-/**
- * Base configuration shared across all field types.
- * Position is automatically derived from field declaration order in the schema.
- */
 export declare interface F0BaseConfig {
     /** Label displayed above the field */
     label: string;
@@ -4288,6 +4284,20 @@ export declare interface F0BaseConfig {
      */
     renderIf?: F0BaseFieldRenderIfProp;
     /**
+     * Alert displayed below the field.
+     * Can be static props (always shown) or a callback for conditional display.
+     * @example
+     * // Static alert (always visible)
+     * alert: { title: "Note", description: "This field is important" }
+     *
+     * // Conditional alert based on field value
+     * alert: ({ fieldValue }) =>
+     *   fieldValue === 0
+     *     ? { title: "Heads up", description: "Value is zero", variant: "warning" }
+     *     : null
+     */
+    alert?: F0FieldAlert;
+    /**
      * Name identifying a reusable custom field type.
      * When set, the form-level `renderCustomField` callback is invoked to provide
      * field-specific configuration (e.g. data source, options) or a custom component.
@@ -4328,6 +4338,8 @@ export declare interface F0BaseField {
      * @default false
      */
     resetOnDisable?: boolean;
+    /** Alert displayed below the field (static props or conditional callback) */
+    alert?: F0FieldAlert;
     /**
      * Name identifying a reusable custom field type.
      * Used with the form-level `renderCustomField` callback.
@@ -4550,9 +4562,14 @@ declare function _F0Checkbox({ title, onCheckedChange, id, disabled, indetermina
 
 /**
  * F0 config options specific to checkbox fields
- * (checkbox has no additional options beyond base config)
  */
 export declare interface F0CheckboxConfig {
+    /**
+     * Link displayed below the help text, typically pointing to external documentation.
+     * @example
+     * moreInfoLink: { href: "https://help.example.com/article", label: "Learn more" }
+     */
+    moreInfoLink?: F0MoreInfoLink;
 }
 
 /**
@@ -4560,6 +4577,8 @@ export declare interface F0CheckboxConfig {
  */
 export declare type F0CheckboxField = F0BaseField & {
     type: "checkbox";
+    /** Link displayed below the help text, typically pointing to external documentation */
+    moreInfoLink?: F0MoreInfoLink;
     /** Conditional rendering based on another field's value */
     renderIf?: CheckboxFieldRenderIf;
 };
@@ -5132,6 +5151,34 @@ export declare function F0EventCatcherProvider({ children, onEvent, enabled, cat
  * Union of all F0 field types used for rendering
  */
 export declare type F0Field = F0TextField | F0NumberField | F0DurationField | F0TextareaField | F0SelectField | F0CheckboxField | F0SwitchField | F0DateField | F0TimeField | F0DateTimeField | F0DateRangeField | F0RichTextField | F0FileField | F0CustomField;
+
+/**
+ * Alert configuration for a field.
+ * Can be static props (always shown) or a callback for conditional display.
+ */
+export declare type F0FieldAlert = F0FieldAlertProps | F0FieldAlertFunction;
+
+/**
+ * Callback that evaluates whether to show an alert below the field.
+ * Receives the field's current value and all form values.
+ * Return alert props to show, or null/undefined to hide.
+ */
+export declare type F0FieldAlertFunction = (context: {
+    fieldValue: unknown;
+    values: Record<string, unknown>;
+}) => F0FieldAlertProps | null | undefined;
+
+/**
+ * Base configuration shared across all field types.
+ * Position is automatically derived from field declaration order in the schema.
+ */
+/**
+ * Alert props returned by the field alert callback.
+ * Derived from F0AlertProps with `variant` defaulting to "info".
+ */
+export declare type F0FieldAlertProps = Omit<F0AlertProps, "variant"> & {
+    variant?: F0AlertProps["variant"];
+};
 
 /**
  * Complete F0 field configuration (union of all possible configs)
@@ -5836,6 +5883,16 @@ export declare type F0LinkProps = Omit<ActionLinkProps, "variant" | "href"> & {
 };
 
 /**
+ * Configuration for a "more info" link displayed below the help text.
+ */
+export declare interface F0MoreInfoLink {
+    /** URL the link points to */
+    href: string;
+    /** Link label (defaults to "More information") */
+    label?: string;
+}
+
+/**
  * F0 config options specific to number fields
  *
  * Note: `min` and `max` are derived from the Zod schema:
@@ -6296,6 +6353,12 @@ declare type F0StringTextConfig = F0BaseConfig & F0TextConfig & {
  * (switch has no additional options beyond base config)
  */
 export declare interface F0SwitchConfig {
+    /**
+     * Link displayed below the help text, typically pointing to external documentation.
+     * @example
+     * moreInfoLink: { href: "https://help.example.com/article", label: "Learn more" }
+     */
+    moreInfoLink?: F0MoreInfoLink;
 }
 
 /**
@@ -6303,6 +6366,8 @@ export declare interface F0SwitchConfig {
  */
 export declare type F0SwitchField = F0BaseField & {
     type: "switch";
+    /** Link displayed below the help text, typically pointing to external documentation */
+    moreInfoLink?: F0MoreInfoLink;
     /** Conditional rendering based on another field's value */
     renderIf?: SwitchFieldRenderIf;
 };
@@ -7744,6 +7809,12 @@ declare type MetadataItemValue = {
     type: "date";
     formattedDate: string;
     icon?: "warning" | "critical";
+} | {
+    type: "progress-bar";
+    value: number;
+    max?: number;
+    label?: string;
+    color?: string;
 };
 
 declare interface MetadataProps {
@@ -10623,11 +10694,6 @@ declare module "gridstack" {
 }
 
 
-declare namespace Calendar {
-    var displayName: string;
-}
-
-
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         aiBlock: {
@@ -10674,4 +10740,9 @@ declare module "@tiptap/core" {
             }) => ReturnType;
         };
     }
+}
+
+
+declare namespace Calendar {
+    var displayName: string;
 }
