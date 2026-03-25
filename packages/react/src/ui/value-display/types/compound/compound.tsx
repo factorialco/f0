@@ -7,6 +7,17 @@ import { ValueDisplayRendererContext } from "../../renderers"
 import type { CurrencyDef } from "../amount"
 import { WithPlaceholder } from "../types"
 
+/**
+ * Compound value-display renderer.
+ *
+ * Renders a sequence of heterogeneous segments (text, number, percentage,
+ * amount) as a single inline cell, optionally separated by a configurable
+ * separator. Each segment can define an optional `tone` from
+ * {@link compoundTones}, which controls its visual emphasis within the cell.
+ *
+ * Segment values use {@link WithPlaceholder} so that missing or undefined
+ * values are rendered consistently with other value-display types.
+ */
 export const compoundTones = [
   "neutral",
   "secondary",
