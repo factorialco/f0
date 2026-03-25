@@ -15,6 +15,7 @@ import { DetailsItemsListShowcase } from "../../components/DetailsItemsListShowc
 import { F0AvatarShowcase } from "../../components/F0AvatarShowcase"
 import { F0BadgeShowcase } from "../../components/F0BadgeShowcase"
 import { F0ButtonShowcase } from "../../components/F0ButtonShowcase"
+import { F0ChipShowcase } from "../../components/F0ChipShowcase"
 import { F0CounterShowcase } from "../../components/F0CounterShowcase"
 import { F0IconShowcase } from "../../components/F0IconShowcase"
 import { F0ImageShowcase } from "../../components/F0ImageShowcase"
@@ -46,6 +47,7 @@ type ComponentType =
   | "f0avatar"
   | "f0button"
   | "f0badge"
+  | "f0chip"
   | "f0counter"
   | "f0icon"
   | "f0link"
@@ -73,6 +75,7 @@ const componentOptions = [
   { value: "f0avatar" as ComponentType, label: "F0Avatar" },
   { value: "f0button" as ComponentType, label: "F0Button" },
   { value: "f0badge" as ComponentType, label: "F0Badge" },
+  { value: "f0chip" as ComponentType, label: "F0Chip" },
   { value: "f0counter" as ComponentType, label: "F0Counter" },
   { value: "f0icon" as ComponentType, label: "F0Icon" },
   { value: "f0link" as ComponentType, label: "F0Link" },
@@ -81,7 +84,7 @@ const componentOptions = [
   { value: "f0image" as ComponentType, label: "F0Image" },
   { value: "f0tag" as ComponentType, label: "F0Tag" },
   { value: "f0text" as ComponentType, label: "F0Text" },
-  { value: "onechip" as ComponentType, label: "OneChip" },
+  { value: "onechip" as ComponentType, label: "OneChip (deprecated)" },
   { value: "onepreset" as ComponentType, label: "OnePreset (deprecated)" },
   { value: "pageheader" as ComponentType, label: "PageHeader" },
   { value: "pressablefeedback" as ComponentType, label: "PressableFeedback" },
@@ -129,6 +132,8 @@ export default function ComponentsShowcase() {
         return <F0ButtonShowcase />
       case "f0badge":
         return <F0BadgeShowcase />
+      case "f0chip":
+        return <F0ChipShowcase />
       case "f0counter":
         return <F0CounterShowcase />
       case "f0icon":
