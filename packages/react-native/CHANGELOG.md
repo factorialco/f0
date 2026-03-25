@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.44.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.43.0...f0-react-native-v0.44.0) (2026-03-25)
+
+
+### Features
+
+* **chip:** introduce F0Chip component with showcase and styles ([#3755](https://github.com/factorialco/f0/issues/3755)) ([ad1738e](https://github.com/factorialco/f0/commit/ad1738e883df76f67d67bf4e24794a1f972e3c71))
+
 ## [0.43.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.42.0...f0-react-native-v0.43.0) (2026-03-25)
 
 
