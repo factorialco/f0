@@ -173,6 +173,17 @@ const CreditWarningExample = () => {
           </div>
         </div>
       )}
+      <ChatTextarea
+        inProgress={false}
+        onSend={async () => {
+          return {
+            id: "",
+            role: "assistant" as const,
+            content: "",
+          }
+        }}
+        onStop={() => undefined}
+      />
     </div>
   )
 }

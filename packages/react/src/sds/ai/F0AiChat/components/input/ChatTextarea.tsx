@@ -19,6 +19,9 @@ import { buildHighlightSegments } from "./utils"
 
 type ChatTextareaProps = InputProps & {
   submitLabel?: string
+  creditWarning?: "soft"
+  onDismissCreditWarning?: () => void
+  onGetCredits?: () => void
 }
 
 export const ChatTextarea = ({
@@ -26,6 +29,9 @@ export const ChatTextarea = ({
   inProgress,
   onSend,
   onStop,
+  creditWarning,
+  onDismissCreditWarning,
+  onGetCredits,
 }: ChatTextareaProps) => {
   const {
     placeholders,
