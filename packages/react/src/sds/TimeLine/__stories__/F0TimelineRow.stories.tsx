@@ -382,7 +382,7 @@ const MultitaskTimelineDemo = () => {
   const [expanded, setExpanded] = useState(true)
 
   return (
-    <div className="w-[600px]">
+    <div className="w-full">
       <F0TimelineRow
         status="completed"
         icon={Marker}
@@ -390,7 +390,7 @@ const MultitaskTimelineDemo = () => {
         description="Completed on 20/2025"
         metadata={[
           {
-            label: "",
+            label: "Done by",
             hideLabel: true,
             value: {
               type: "list",
@@ -398,11 +398,35 @@ const MultitaskTimelineDemo = () => {
               avatars: [
                 {
                   type: "person",
-                  firstName: "Alex",
-                  badge: { type: "positive", icon: Check },
-                  lastName: "Rashfold",
+                  firstName: "Quigley",
+                  lastName: "Smitty",
+                },
+                {
+                  type: "person",
+                  firstName: "James",
+                  lastName: "Hopper",
+                },
+                {
+                  type: "person",
+                  firstName: "Sarah",
+                  lastName: "Connor",
                 },
               ],
+            },
+          },
+          {
+            label: "Team",
+            value: {
+              type: "status",
+              label: "IT team",
+              variant: "critical",
+            },
+          },
+          {
+            label: "Form",
+            value: {
+              type: "text",
+              content: "Vendor assessment form",
             },
           },
         ]}
@@ -414,7 +438,7 @@ const MultitaskTimelineDemo = () => {
         description="Completed on 20/2025"
         metadata={[
           {
-            label: "",
+            label: "Done by",
             hideLabel: true,
             value: {
               type: "list",
@@ -458,7 +482,7 @@ const MultitaskTimelineDemo = () => {
             description: "Estimated on 18/07/2025",
             metadata: [
               {
-                label: "",
+                label: "Assignees",
                 hideLabel: true,
                 value: {
                   type: "list",
@@ -468,19 +492,16 @@ const MultitaskTimelineDemo = () => {
                       type: "person",
                       firstName: "Quigley",
                       lastName: "Smitty",
-                      badge: { type: "positive", icon: Check },
                     },
                     {
                       type: "person",
                       firstName: "James",
                       lastName: "Hopper",
-                      badge: { type: "positive", icon: Check },
                     },
                     {
                       type: "person",
                       firstName: "Sarah",
                       lastName: "Connor",
-                      badge: { type: "positive", icon: Check },
                     },
                   ],
                 },

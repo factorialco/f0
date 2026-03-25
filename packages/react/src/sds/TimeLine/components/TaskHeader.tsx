@@ -13,22 +13,24 @@ export const TaskHeader = ({ props }: { props: F0TimelineRowTaskProps }) => {
   const hasMetadata = metadata?.some(Boolean)
 
   return (
-    <>
-      <F0AvatarIcon icon={icon} size="sm" />
-      <h4
-        className={cn(
-          "text-base font-semibold text-f1-foreground",
-          status === "completed" && "line-through"
+    <div className="flex justify-between gap-3 w-full flex-wrap">
+      <div className="flex justify-start items-center gap-3 h-8">
+        <F0AvatarIcon icon={icon} size="sm" />
+        <h4
+          className={cn(
+            "text-base font-semibold text-f1-foreground",
+            status === "completed" && "line-through"
+          )}
+        >
+          {title}
+        </h4>
+        {description && <F0Text content={description} variant="description" />}
+      </div>
+      <div className="flex justify-end items-center gap-3 pl-9">
+        {status === "completed" && metadata && hasMetadata && (
+          <Metadata items={metadata} />
         )}
-      >
-        {title}
-      </h4>
-      {description && <F0Text content={description} variant="description" />}
-      {status === "completed" && metadata && hasMetadata && (
-        <div className="ml-auto flex shrink-0 items-center gap-3">
-          <Metadata items={metadata} collapse />
-        </div>
-      )}
-    </>
+      </div>
+    </div>
   )
 }

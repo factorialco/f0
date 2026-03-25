@@ -16,7 +16,7 @@ export const Actions = ({
   const hasOther = otherActions && otherActions.length > 0
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex flex-col gap-2 xs:flex-row xs:items-center [&>*]:w-full [&>*]:xs:w-auto">
       {hasOther && <Dropdown items={otherActions} size="md" />}
       {secondaryActions?.map((action, index) => (
         <F0Button
@@ -31,7 +31,7 @@ export const Actions = ({
         />
       ))}
       {primaryAction && (hasOther || hasSecondary) && (
-        <div className="mx-1 h-4 w-px bg-f1-background-secondary-hover" />
+        <div className="mx-1 hidden h-4 w-px bg-f1-background-secondary-hover xs:block" />
       )}
       {primaryAction && (
         <F0Button
