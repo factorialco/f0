@@ -133,7 +133,7 @@ const F0Step = React.memo(function F0Step(props: F0StepProps) {
       props.furthestReachedStep
     )
   }, [props])
-  const resolvedTestID = testID ?? F0_STEP_DEFAULT_TEST_ID_PREFIX
+  const resolvedTestID = testID
   const progressValue = useMemo(
     () => getProgressValue(resolvedStepStates),
     [resolvedStepStates]
@@ -156,7 +156,9 @@ const F0Step = React.memo(function F0Step(props: F0StepProps) {
         <F0StepSegment
           key={index}
           state={state}
-          testID={`${resolvedTestID}-segment-${index}`}
+          testID={
+            resolvedTestID ? `${resolvedTestID}-segment-${index}` : undefined
+          }
         />
       ))}
     </View>

@@ -62,6 +62,7 @@ interface F0StepExplicitProps extends F0StepBaseProps {
    */
   steps?: never
   currentStep?: never
+  furthestReachedStep?: never
 }
 
 export type F0StepProps = F0StepDerivedProps | F0StepExplicitProps
