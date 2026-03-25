@@ -151,7 +151,6 @@ export function F0ProgressShowcase() {
             />
           </View>
         </View>
-        <View className="items-start gap-1"></View>
       </View>
 
       <F0Text variant="heading-sm" className="mt-6 mb-4">
