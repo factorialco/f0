@@ -1,6 +1,7 @@
 import { type Message, type ToolCall } from "@copilotkit/shared"
 
 import { isAgentStateMessage } from "../internal-types"
+import { getTextContent } from "./contentHelpers"
 
 export type Turn = Array<Message | Array<Message>>
 
@@ -112,11 +113,22 @@ export function extractThinkingGroup(turnMessages: Turn): {
 }
 
 function isThinkingMessage(message: Message): boolean {
-  return (
-    message.role === "assistant" &&
-    message.toolCalls?.some(
+  const toolCalls = message.role === "assistant" ? message.toolCalls : undefined
+  const hasThinkingTool =
+    toolCalls?.some(
       (call: ToolCall) => call.function.name === "orchestratorThinking"
     ) === true
+  const hasNonThinkingTool =
+    toolCalls?.some(
+      (call: ToolCall) => call.function.name !== "orchestratorThinking"
+    ) === true
+  const hasVisibleContent = getTextContent(message.content).trim().length > 0
+
+  return (
+    message.role === "assistant" &&
+    hasThinkingTool &&
+    !hasNonThinkingTool &&
+    !hasVisibleContent
   )
 }
 

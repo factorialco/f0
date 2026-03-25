@@ -16,18 +16,21 @@ export const AssistantMessage = ({
   message,
 }: AssistantMessageProps) => {
   const content = getTextContent(message?.content)
+  const hasVisibleContent = content.trim().length > 0
   const isThinkingTool =
     message?.role === "assistant" &&
     message.toolCalls?.find(
       (tool: ToolCall) => tool.function.name === "orchestratorThinking"
     )
-  const subComponent = message?.generativeUI?.(
-    isThinkingTool
-      ? {
-          status: isLoading ? "executing" : "completed",
-        }
-      : undefined
-  )
+  const subComponent =
+    message?.generativeUI?.(
+      isThinkingTool
+        ? {
+            status: isLoading ? "executing" : "completed",
+          }
+        : undefined
+    ) ?? null
+  const shouldRenderSubComponent = !isThinkingTool || !hasVisibleContent
   const isEmptyMessage = !content && !subComponent
 
   const translations = useI18n()
@@ -56,7 +59,9 @@ export const AssistantMessage = ({
           />
         </div>
       )}
-      {!!subComponent && <div className="w-full">{subComponent}</div>}
+      {shouldRenderSubComponent && !!subComponent && (
+        <div className="w-full">{subComponent}</div>
+      )}
     </div>
   )
 }

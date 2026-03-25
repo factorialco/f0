@@ -111,9 +111,9 @@ describe("convertMessagesToTurn", () => {
         role: "assistant",
         content: "Hi there!",
       },
-      createThinkingMessage(),
-      createThinkingMessage(),
-      createThinkingMessage(),
+      createActionThinkingMessage("Thinking 1"),
+      createActionThinkingMessage("Thinking 2"),
+      createActionThinkingMessage("Thinking 3"),
       {
         id: "3",
         role: "user",
@@ -148,9 +148,9 @@ describe("convertMessagesToTurn", () => {
         role: "assistant",
         content: "Hi there!",
       },
-      createThinkingMessage(),
+      createActionThinkingMessage("Thinking 1"),
       { id: "5", role: "assistant", content: "What can I do for you?" },
-      createThinkingMessage(),
+      createActionThinkingMessage("Thinking 2"),
       {
         id: "3",
         role: "user",
@@ -221,19 +221,23 @@ describe("convertMessagesToTurn", () => {
         role: "user",
         content: "Hello!",
       },
-      createThinkingMessage("same thought"),
-      createThinkingMessage("same thought"),
-      createThinkingMessage("same thought"),
-      createThinkingMessage("different thought"),
-      createThinkingMessage("different thought"),
+      createActionThinkingMessage("same thought"),
+      createActionThinkingMessage("same thought"),
+      createActionThinkingMessage("same thought"),
+      createActionThinkingMessage("different thought"),
+      createActionThinkingMessage("different thought"),
     ]
     const turns = convertMessagesToTurns(messages)
     expect(turns[0]).toHaveLength(2)
 
     const thinkingGroup = turns[0][1] as Message[]
     expect(thinkingGroup).toHaveLength(2)
-    expect(thinkingGroup[0].content).toBe("same thought")
-    expect(thinkingGroup[1].content).toBe("different thought")
+    expect(thinkingGroup[0].toolCalls?.[0].function.arguments).toBe(
+      JSON.stringify({ message: "same thought" })
+    )
+    expect(thinkingGroup[1].toolCalls?.[0].function.arguments).toBe(
+      JSON.stringify({ message: "different thought" })
+    )
   })
 
   it("groups thinking messages with empty content but different arguments (real CopilotKit shape)", () => {
@@ -313,14 +317,14 @@ describe("convertMessagesToTurn", () => {
         role: "assistant",
         content: "Hi there!",
       },
-      createThinkingMessage(),
+      createActionThinkingMessage("Thinking 1"),
       {
         id: "6",
         agentName: "One",
         role: "assistant",
       },
-      createThinkingMessage(),
-      createThinkingMessage(),
+      createActionThinkingMessage("Thinking 2"),
+      createActionThinkingMessage("Thinking 3"),
       {
         id: "3",
         role: "user",
@@ -339,6 +343,78 @@ describe("convertMessagesToTurn", () => {
     expect(
       turns[1].map((m) => (Array.isArray(m) ? "array" : m.role))
     ).toStrictEqual(["user"])
+  })
+
+  it("keeps mixed assistant output in the main turn", () => {
+    const messages: Message[] = [
+      {
+        id: "1",
+        role: "user",
+        content: "What courses are available?",
+      },
+      {
+        id: "2",
+        role: "assistant",
+        content: "There are 4 courses available",
+        toolCalls: [
+          {
+            id: crypto.randomUUID(),
+            type: "function",
+            function: {
+              name: "orchestratorThinking",
+              arguments: JSON.stringify({ message: "Checking courses" }),
+            },
+          },
+          {
+            id: crypto.randomUUID(),
+            type: "function",
+            function: {
+              name: "downloadData",
+              arguments: JSON.stringify({ filename: "courses" }),
+            },
+          },
+        ],
+      },
+    ]
+
+    const turns = convertMessagesToTurns(messages)
+
+    expect(turns).toHaveLength(1)
+    expect(
+      turns[0].map((m) => (Array.isArray(m) ? "array" : m.role))
+    ).toStrictEqual(["user", "assistant"])
+  })
+
+  it("keeps visible assistant output with only orchestratorThinking in the main turn", () => {
+    const messages: Message[] = [
+      {
+        id: "1",
+        role: "user",
+        content: "What courses are available?",
+      },
+      {
+        id: "2",
+        role: "assistant",
+        content: "There are 3 available courses in the catalog",
+        toolCalls: [
+          {
+            id: crypto.randomUUID(),
+            type: "function",
+            function: {
+              name: "orchestratorThinking",
+              arguments: JSON.stringify({ message: "Checking courses" }),
+            },
+          },
+        ],
+      },
+    ]
+
+    const turns = convertMessagesToTurns(messages)
+
+    expect(turns).toHaveLength(1)
+    expect(
+      turns[0].map((m) => (Array.isArray(m) ? "array" : m.role))
+    ).toStrictEqual(["user", "assistant"])
   })
 })
 
