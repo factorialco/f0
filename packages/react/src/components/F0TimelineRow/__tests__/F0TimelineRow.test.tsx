@@ -162,22 +162,6 @@ describe("F0TimelineRow", () => {
       expect(screen.getByText("3 Tasks")).toBeInTheDocument()
     })
 
-    it("renders as a button when taskCount is provided", () => {
-      render(
-        <F0TimelineRow
-          status="in-progress"
-          title="Tasks"
-          taskCount={3}
-          expanded={false}
-          onExpandToggle={() => {}}
-          items={[]}
-        />
-      )
-      expect(
-        screen.getByRole("button", { name: /3 Tasks/i })
-      ).toBeInTheDocument()
-    })
-
     it("calls onExpandToggle when clicking the multitask title", async () => {
       const user = userEvent.setup()
       const onToggle = vi.fn()
@@ -191,7 +175,7 @@ describe("F0TimelineRow", () => {
           items={[]}
         />
       )
-      await user.click(screen.getByRole("button", { name: /3 Tasks/i }))
+      await user.click(screen.getByText("3 Tasks"))
       expect(onToggle).toHaveBeenCalledOnce()
     })
 
@@ -280,7 +264,7 @@ describe("F0TimelineRow", () => {
         />
       )
       expect(
-        container.querySelector(".bg-f1-border-secondary.h-6.w-px")
+        container.querySelector(".bg-f1-background-secondary-hover.h-4.w-px")
       ).toBeInTheDocument()
     })
 

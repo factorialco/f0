@@ -32,14 +32,21 @@ export interface F0TimelineRowAction {
 
 export type F0TimelineRowOtherAction = DropdownItem
 
-/** Props for a single-task timeline row */
-export interface F0TimelineRowTaskProps {
+export interface F0TimelineRowBaseProps {
   /** The current status of this timeline entry */
   status: TimelineRowStatus
+  /** The title of the timeline entry (e.g., "Tasks") */
+  title: string
+  /** Whether this is the last row in the timeline (hides the bottom connector line) */
+  isLast?: boolean
+  /** Hide the status indicator column (used for subtasks inside multitask rows) */
+  hideStatus?: boolean
+}
+
+/** Props for a single-task timeline row */
+export interface F0TimelineRowTaskProps extends F0TimelineRowBaseProps {
   /** The icon representing the task type (defaults to Marker) */
   icon?: IconType
-  /** The title of the timeline entry */
-  title: string
   /** Description text (e.g., "Completed on 20/2025") */
   description?: string
   /** Assignees to display as avatars below the title */
@@ -54,18 +61,10 @@ export interface F0TimelineRowTaskProps {
   secondaryActions?: F0TimelineRowAction[]
   /** Overflow menu items (displayed as a dropdown via ellipsis button) */
   otherActions?: F0TimelineRowOtherAction[]
-  /** Whether this is the last row in the timeline (hides the bottom connector line) */
-  isLast?: boolean
-  /** Hide the status indicator column (used for subtasks inside multitask rows) */
-  hideStatus?: boolean
 }
 
 /** Props for a multitask (collapsible group) timeline row */
-export interface F0TimelineRowMultitaskProps {
-  /** The current status of this timeline entry */
-  status: TimelineRowStatus
-  /** The title of the timeline entry (e.g., "Tasks") */
-  title: string
+export interface F0TimelineRowMultitaskProps extends F0TimelineRowBaseProps {
   /** Number of grouped tasks */
   taskCount: number
   /** Number of completed tasks in the group (shows a progress pill) */
@@ -76,10 +75,6 @@ export interface F0TimelineRowMultitaskProps {
   onExpandToggle: () => void
   /** The subtask items to render when expanded */
   items: F0TimelineRowTaskProps[]
-  /** Whether this is the last row in the timeline (hides the bottom connector line) */
-  isLast?: boolean
-  /** Hide the status indicator column */
-  hideStatus?: boolean
 }
 
 export type F0TimelineRowProps =
