@@ -211,10 +211,10 @@
     "vitest": "^4.0.15"
   },
   "peerDependencies": {
-    "@copilotkit/react-core": "^1.10.6",
-    "@copilotkit/react-ui": "^1.10.6",
-    "@copilotkit/runtime": "^1.10.6",
-    "@copilotkit/shared": "^1.10.6",
+    "@copilotkit/react-core": "^1.54.0",
+    "@copilotkit/react-ui": "^1.54.0",
+    "@copilotkit/runtime": "^1.54.0",
+    "@copilotkit/shared": "^1.54.0",
     "@hookform/resolvers": "^3.9.0",
     "@livekit/components-react": "^2.9.19",
     "@number-flow/react": "^0.5.10",

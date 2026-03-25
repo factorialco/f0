@@ -21,7 +21,6 @@ F0AiChat/
 │   ├── registry.ts                  # canvasEntities record (type → definition)
 │   ├── types.ts                     # CanvasEntityDefinition contract
 │   ├── index.ts                     # Barrel + re-exports
-│   ├── AutoOpenCanvas.tsx           # Auto-opens canvas on mount
 │   ├── CANVAS_ENTITIES.md           # Guide for canvas entities
 │   ├── components/                  # Shared canvas UI (CanvasCard, etc.)
 │   └── entities/                    # One folder per entity type

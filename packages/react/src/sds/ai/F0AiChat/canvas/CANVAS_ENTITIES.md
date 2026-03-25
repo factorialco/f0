@@ -67,6 +67,46 @@ import { CloseCanvasButton } from "../../components/CloseCanvasButton"
 ;<CloseCanvasButton onClick={onClose} />
 ```
 
+## Tool call ID & active state
+
+CopilotKit v1.51+ does not pass `toolCallId` in the action render callback props. Instead, `AssistantMessage` provides the tool call ID via a React context (`ToolCallIdContext`). Cards read it with:
+
+```tsx
+import { useToolCallId } from "../../../components/messages/AssistantMessage"
+
+const toolCallId = useToolCallId()
+```
+
+This is how cards detect whether they are the **active** card (currently shown in the canvas panel):
+
+```tsx
+const isActive =
+  canvasContent?.type === "survey" &&
+  canvasContent.toolCallId != null &&
+  canvasContent.toolCallId === toolCallId
+```
+
+When opening the canvas, include `toolCallId` in the `CanvasContent` so the round-trip works:
+
+```tsx
+openCanvas({ type: "survey", title, config, toolCallId })
+```
+
+## Auto-open
+
+Use the `useAutoOpenCanvas` hook inside your card component to auto-open the canvas the first time a card appears. The hook fires exactly once per `toolCallId` for the lifetime of the page — if the user closes the canvas, it won't re-open.
+
+```tsx
+import { useAutoOpenCanvas } from "../../../hooks/useAutoOpenCanvas"
+
+// Inside your card component:
+useAutoOpenCanvas(toolCallId, () =>
+  openCanvas({ type: "survey", title, config, toolCallId })
+)
+```
+
+See `DashboardCard.tsx` for a full example.
+
 ## How to add a new entity
 
 ### 1. Define the content type
@@ -99,35 +139,48 @@ canvas/entities/survey/
 
 ### 3. Implement the card
 
-The card renders **inline in the chat** when the copilot action completes. Use `CanvasCard` for the standard layout:
+The card renders **inline in the chat** when the copilot action completes. Use `CanvasCard` for the standard layout, `useToolCallId` for identity, and `useAutoOpenCanvas` for auto-open:
 
 ```tsx
 // SurveyCard.tsx
-import { CanvasCard } from "../../components/CanvasCard"
+import { useToolCallId } from "../../../components/messages/AssistantMessage"
+import { useAutoOpenCanvas } from "../../../hooks/useAutoOpenCanvas"
 import { useAiChat } from "../../../providers/AiChatStateProvider"
+import { CanvasCard } from "../../components/CanvasCard"
 
 export function SurveyCard({
-  title,
-  onOpen,
-  toolCallId,
+  config,
+  apiConfig,
 }: {
-  title: string
-  onOpen: () => void
-  toolCallId?: string
+  config: SurveyConfig
+  apiConfig: ApiConfig
 }) {
-  const { canvasContent, closeCanvas } = useAiChat()
+  const toolCallId = useToolCallId()
+  const { canvasContent, openCanvas, closeCanvas } = useAiChat()
 
   const isActive =
     canvasContent?.type === "survey" &&
     canvasContent.toolCallId != null &&
     canvasContent.toolCallId === toolCallId
 
+  const handleOpen = () =>
+    openCanvas({
+      type: "survey",
+      title: config.title,
+      config,
+      apiConfig,
+      toolCallId,
+    })
+
+  // Auto-open canvas the first time this card appears
+  useAutoOpenCanvas(toolCallId, handleOpen)
+
   return (
     <CanvasCard
       module="surveys"
-      title={title}
+      title={config.title}
       description="Survey"
-      onOpen={onOpen}
+      onOpen={handleOpen}
       onClose={() => closeCanvas()}
       isActive={isActive}
     />
@@ -229,7 +282,9 @@ const canvasEntities: Record<string, CanvasEntityDefinition<any>> = {
 In `actions/core/`, create `displaySurvey/useDisplaySurveyAction.tsx` that:
 
 - Calls `useCopilotAction` with the action definition
-- Renders `SurveyCard` + `AutoOpenCanvas` in the `render` callback
+- Renders `SurveyCard` in the `render` callback (auto-open is handled by the card itself)
+
+The render callback only needs to pass `config` and `apiConfig` — the card handles `toolCallId` (from `useToolCallId` context), active state detection, and auto-open internally.
 
 Then add the hook to the `copilotActions` array in `actions/registry.ts`.
 
@@ -245,7 +300,7 @@ canvas/entities/survey/
 │   └── SurveyContent.test.tsx
 ```
 
-Use vitest + testing-library. Test rendering, user interactions (open/close toggle, active state), and integration with canvas context. See `canvas/entities/dashboard/__tests__/` for reference.
+Use vitest + testing-library. Test rendering, user interactions (open/close toggle, active state), and integration with canvas context. Mock `useToolCallId` and `useAutoOpenCanvas` in card tests. See `canvas/entities/dashboard/__tests__/` for reference.
 
 ## Key principles
 
@@ -255,5 +310,6 @@ Use vitest + testing-library. Test rendering, user interactions (open/close togg
 4. **Use `CloseCanvasButton` for close.** Every header should use the shared `CloseCanvasButton` component for a consistent close affordance.
 5. **Declarative configuration.** Export the entity definition and add it to the record in `registry.ts`. No switch statements, no side-effects.
 6. **New entity = new folder.** Zero changes to `CanvasPanel.tsx` or the shared canvas infrastructure.
-7. **Auto-open on receive.** Use the `AutoOpenCanvas` component in your copilot action's render to open the canvas immediately when the agent produces content.
-8. **Write tests for every entity.** Each entity should have tests in a `__tests__/` subfolder covering rendering and interactions.
+7. **Auto-open via `useAutoOpenCanvas`.** Call inside your card component — the hook fires once per `toolCallId` and survives remounts. No wrapper components needed.
+8. **`toolCallId` via context.** Cards read their tool call ID from `useToolCallId()`, not from render callback props (CopilotKit v1.51+ doesn't pass it).
+9. **Write tests for every entity.** Each entity should have tests in a `__tests__/` subfolder covering rendering and interactions.

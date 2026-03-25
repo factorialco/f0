@@ -1,12 +1,13 @@
 import { useCopilotChatInternal } from "@copilotkit/react-core"
 import { InputProps } from "@copilotkit/react-ui"
 import { AnimatePresence, motion } from "motion/react"
-import { useEffect, useRef } from "react"
+import { useEffect, useMemo, useRef } from "react"
 
 import { OneEllipsis } from "@/components/OneEllipsis"
 import { Link } from "@/lib/linkHandler"
 import { cn } from "@/lib/utils"
 
+import { filterCoagentPlaceholders } from "../../internal-types"
 import { useAiChat } from "../../providers/AiChatStateProvider"
 import { ChatTextarea } from "./ChatTextarea"
 
@@ -14,7 +15,11 @@ export const ChatInput = (props: InputProps) => {
   const { disclaimer, footer, visualizationMode, isLoadingThread } = useAiChat()
   const { messages } = useCopilotChatInternal()
   const containerRef = useRef<HTMLDivElement>(null)
-  const isWelcomeScreen = messages.length === 0 && !isLoadingThread
+  const filteredMessages = useMemo(
+    () => filterCoagentPlaceholders(messages),
+    [messages]
+  )
+  const isWelcomeScreen = filteredMessages.length === 0 && !isLoadingThread
   const fullscreen = visualizationMode === "fullscreen"
   const fullscreenWelcome = fullscreen && isWelcomeScreen
 
