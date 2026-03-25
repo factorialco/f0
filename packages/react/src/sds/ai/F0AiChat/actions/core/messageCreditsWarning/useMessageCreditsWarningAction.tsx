@@ -6,7 +6,7 @@ import { F0MessageCreditsWarning } from "./F0MessageCreditsWarning"
  * Hook to register the credits warning copilot action.
  * Renders an AI credits warning card with an optional action URL.
  */
-export const useCreditsWarningAction = () => {
+export const useMessageCreditsWarningAction = () => {
   useCopilotAction({
     name: "AiWidgets.UpsellKit.F0MessageCreditsWarning",
     description:

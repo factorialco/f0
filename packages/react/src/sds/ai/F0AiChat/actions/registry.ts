@@ -7,6 +7,7 @@ import { useDataDownloadAction } from "./core/dataDownload/useDataDownloadAction
 import { useDisplayDashboardAction } from "./core/displayDashboard/useDisplayDashboardAction"
 import { useMessageSourcesAction } from "./core/messageSources/useMessageSourcesAction"
 import { useOrchestratorThinkingAction } from "./core/orchestratorThinking/useOrchestratorThinkingAction"
+import { useMessageCreditsWarningAction } from "./core/messageCreditsWarning/useMessageCreditsWarningAction"
 
 type ActionFactory = () => void
 
@@ -20,4 +21,5 @@ export const copilotActions: ActionFactory[] = [
   useQuestionCardAction,
   useModuleCardAction,
   useFAQCardAction,
+  useMessageCreditsWarningAction,
 ]

@@ -1,5 +1,4 @@
 import { useBookAMeetingCardAction } from "../../../UpsellingKit/ai/F0BookAMeetingCard/useBookAMeetingCardAction"
-import { useCreditsWarningAction } from "../../../UpsellingKit/ai/F0MessageCreditsWarning/useCreditsWarningAction"
 import { useDemoCardAction } from "../../../UpsellingKit/ai/F0DemoCard/useDemoCardAction"
 import { useFAQCardAction } from "../../../UpsellingKit/ai/F0FAQCard/useFAQCardAction"
 import { useModuleCardAction } from "../../../UpsellingKit/ai/F0ModuleCard/useModuleCardAction"
@@ -7,6 +6,7 @@ import { useQuestionCardAction } from "../../../UpsellingKit/ai/F0QuestionCard/u
 import { useDataDownloadAction } from "./useDataDownloadAction"
 import { useMessageSourcesAction } from "./useMessageSourcesAction"
 import { useOrchestratorThinkingAction } from "./useOrchestratorThinkingAction"
+import { useMessageCreditsWarningAction } from "../actions/core/messageCreditsWarning/useMessageCreditsWarningAction"
 
 /**
  * Hook to register all default copilot actions.
@@ -26,7 +26,7 @@ export const useDefaultCopilotActions = () => {
   useMessageSourcesAction()
   useDataDownloadAction()
   useDemoCardAction()
-  useCreditsWarningAction()
+  useMessageCreditsWarningAction()
   useBookAMeetingCardAction()
   useQuestionCardAction()
   useModuleCardAction()
