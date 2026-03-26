@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.48.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.47.0...f0-react-native-v0.48.0) (2026-03-26)
+
+
+### Features
+
+* **checkbox:** add F0Checkbox component with showcase ([#3776](https://github.com/factorialco/f0/issues/3776)) ([9b77789](https://github.com/factorialco/f0/commit/9b77789203053e74680583098332f3df5161c4ee))
+
 ## [0.47.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.46.0...f0-react-native-v0.47.0) (2026-03-26)
 
 
