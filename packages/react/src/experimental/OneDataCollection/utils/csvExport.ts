@@ -33,41 +33,197 @@ function escapeCSVCell(value: any): string {
   return stringValue
 }
 
-function extractDisplayValue(renderResult: any): string {
-  // Handle different render result types
+/**
+ * Extract a plain-text representation from a cell value returned by a column's
+ * `render` function.
+ *
+ * Column renderers in f0 return either:
+ *  - a primitive (string / number)
+ *  - a `{ type, value }` wrapper where `type` is one of the value-display cell
+ *    types and `value` is the type-specific payload
+ *  - a raw typed object (person, badge, date, …)
+ */
+function extractDisplayValue(renderResult: unknown): string {
   if (renderResult === null || renderResult === undefined) {
     return ""
   }
 
-  // Handle person objects from person render type
-  if (
-    typeof renderResult === "object" &&
-    "firstName" in renderResult &&
-    "lastName" in renderResult
-  ) {
-    return `${renderResult.firstName} ${renderResult.lastName}`.trim()
+  // Primitives
+  if (typeof renderResult !== "object") {
+    return String(renderResult)
   }
 
-  // Handle badge objects
-  if (typeof renderResult === "object" && "label" in renderResult) {
-    return renderResult.label
-  }
-
-  // Handle arrays (like multiple badges)
-  if (Array.isArray(renderResult)) {
-    return renderResult
-      .map((item) =>
-        typeof item === "object" && "label" in item ? item.label : String(item)
-      )
-      .join("; ")
-  }
-
-  // Handle date objects
+  // Date instances
   if (renderResult instanceof Date) {
     return renderResult.toISOString()
   }
 
-  return String(renderResult)
+  // Arrays (e.g. tagList tags, multiple badges)
+  if (Array.isArray(renderResult)) {
+    return renderResult
+      .map((item) => extractDisplayValue(item))
+      .filter(Boolean)
+      .join("; ")
+  }
+
+  const obj = renderResult as Record<string, unknown>
+
+  // ── { type, value } wrapper (most common pattern) ──────────────────
+  if ("type" in obj && "value" in obj && typeof obj.type === "string") {
+    return extractTypedCellValue(obj.type, obj.value)
+  }
+
+  // ── Raw typed objects (legacy / direct usage) ──────────────────────
+
+  // Person
+  if ("firstName" in obj && "lastName" in obj) {
+    return `${obj.firstName} ${obj.lastName}`.trim()
+  }
+
+  // Objects with a label (badge, tag, dotTag, status, statusTag, alertTag…)
+  if ("label" in obj && typeof obj.label === "string") {
+    return obj.label
+  }
+
+  // Objects with a text field (longText, text)
+  if (
+    "text" in obj &&
+    (typeof obj.text === "string" || typeof obj.text === "number")
+  ) {
+    return String(obj.text)
+  }
+
+  // Objects with a name field (company, team, folder, file)
+  if ("name" in obj && typeof obj.name === "string") {
+    return obj.name
+  }
+
+  // Fallback – avoid "[object Object]"
+  return ""
+}
+
+/**
+ * Given a cell `type` identifier and its unwrapped `value`, return a
+ * human-readable string suitable for CSV export.
+ *
+ * The types mirror those in `packages/react/src/components/value-display/types/`.
+ */
+function extractTypedCellValue(type: string, value: unknown): string {
+  if (value === null || value === undefined) {
+    return ""
+  }
+
+  const v = value as Record<string, unknown>
+
+  switch (type) {
+    // ── Identity / entity types ──────────────────────────────────────
+    case "person":
+      return `${v.firstName ?? ""} ${v.lastName ?? ""}`.trim()
+
+    case "company":
+    case "team":
+    case "folder":
+      return typeof v.name === "string" ? v.name : ""
+
+    case "file":
+      return typeof v.name === "string" ? v.name : ""
+
+    // ── Tag / status types ───────────────────────────────────────────
+    case "dotTag":
+    case "status":
+    case "statusTag":
+    case "alertTag":
+    case "tag":
+      return typeof v.label === "string" ? v.label : ""
+
+    case "tagList": {
+      const tags = v.tags
+      if (Array.isArray(tags)) {
+        return tags
+          .map((t: Record<string, unknown>) =>
+            typeof t.label === "string" ? t.label : String(t)
+          )
+          .join("; ")
+      }
+      return ""
+    }
+
+    // ── Numeric types ────────────────────────────────────────────────
+    case "number":
+      return v.number !== undefined ? String(v.number) : ""
+
+    case "amount": {
+      if (typeof value === "number") return String(value)
+      return v.amount !== undefined ? String(v.amount) : ""
+    }
+
+    case "percentage": {
+      if (typeof value === "number") return String(value)
+      return v.percentage !== undefined ? `${v.percentage}%` : ""
+    }
+
+    case "progressBar": {
+      if (typeof value === "number") return String(value)
+      const pctValue = v.value !== undefined ? v.value : ""
+      const pctLabel = typeof v.label === "string" ? v.label : ""
+      return pctLabel || String(pctValue)
+    }
+
+    // ── Text types ───────────────────────────────────────────────────
+    case "text":
+    case "longText":
+      if (typeof value === "string" || typeof value === "number") {
+        return String(value)
+      }
+      return v.text !== undefined ? String(v.text) : ""
+
+    // ── Date ─────────────────────────────────────────────────────────
+    case "date": {
+      if (value instanceof Date) return value.toISOString()
+      if (v.date instanceof Date) return v.date.toISOString()
+      return v.date !== undefined ? String(v.date) : ""
+    }
+
+    // ── Country ──────────────────────────────────────────────────────
+    case "country":
+      return typeof v.label === "string"
+        ? v.label
+        : typeof v.code === "string"
+          ? v.code
+          : ""
+
+    // ── Avatar list ──────────────────────────────────────────────────
+    case "avatarList": {
+      const list = v.avatarList
+      if (Array.isArray(list)) {
+        return list
+          .map((a: Record<string, unknown>) => {
+            if (
+              typeof a.firstName === "string" &&
+              typeof a.lastName === "string"
+            ) {
+              return `${a.firstName} ${a.lastName}`.trim()
+            }
+            return typeof a.name === "string" ? a.name : ""
+          })
+          .filter(Boolean)
+          .join("; ")
+      }
+      return ""
+    }
+
+    // ── Icon ─────────────────────────────────────────────────────────
+    case "icon":
+      return typeof v.label === "string" ? v.label : ""
+
+    // ── Sync status ──────────────────────────────────────────────────
+    case "syncStatus":
+      return typeof value === "string" ? value : ""
+
+    default:
+      // Unknown type – try common fields before giving up
+      return extractDisplayValue(value)
+  }
 }
 
 function getNestedValue(obj: any, path: string): any {
