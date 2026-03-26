@@ -1,6 +1,10 @@
 import { Meta, StoryObj } from "@storybook/react"
 
-import { ExampleComponent } from "./mockData"
+import {
+  ExampleComponent,
+  createDataAdapter,
+  generateMockUsers,
+} from "./mockData"
 
 const meta = {
   title: "Data Collection/Export Test",
@@ -47,6 +51,41 @@ export const ExportFunctionalityTest: Story = {
       />
     </div>
   ),
+}
+
+const paginatedMockUsers = generateMockUsers(150)
+
+export const ExportWithPagesPagination: Story = {
+  render: () => {
+    const adapter = createDataAdapter({
+      data: paginatedMockUsers,
+      delay: 100,
+      paginationType: "pages",
+      perPage: 25,
+    })
+
+    return (
+      <div className="space-y-4">
+        <div className="bg-amber-50 border-amber-200 rounded-md border p-4">
+          <h3 className="text-amber-800 mb-2 text-lg font-semibold">
+            Export with Pages Pagination (150 records, 25/page)
+          </h3>
+          <p className="text-amber-700">
+            This collection uses page-based pagination with 150 records at 25
+            per page (6 pages). Only one page is shown at a time. Exporting
+            should fetch ALL pages and produce a CSV with all 150 rows.
+          </p>
+        </div>
+
+        <ExampleComponent
+          searchBar={true}
+          id="export-pages-test"
+          dataAdapter={adapter}
+          csvExport={true}
+        />
+      </div>
+    )
+  },
 }
 
 export const ExportWithFilters: Story = {
