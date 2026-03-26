@@ -189,6 +189,7 @@ export const EditorBubbleMenu = ({
           chatConfig={aiTutorConfig.chatConfig}
           onClose={() => setIsAiDialogOpen(false)}
           onGoDeeper={aiTutorConfig.onGoDeeper}
+          onQuizMe={aiTutorConfig.onQuizMe}
           position={chatPosition}
         />
       )}

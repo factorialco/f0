@@ -14,6 +14,7 @@ export interface AiTutorConfig {
   chatConfig?: AiTutorChatConfig
   onAskAI?: (selectedText: string) => void
   onGoDeeper?: (messages: AiTutorMessage[]) => void
+  onQuizMe?: (messages: AiTutorMessage[]) => void
 }
 
 interface AskAITutorButtonProps {

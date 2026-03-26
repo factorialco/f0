@@ -248,6 +248,9 @@ export const WithAITutor: Story = {
       onGoDeeper: (messages) => {
         console.log("Go deeper triggered with messages:", messages)
       },
+      onQuizMe: (messages) => {
+        console.log("Quiz me triggered with messages:", messages)
+      },
     },
   },
 }

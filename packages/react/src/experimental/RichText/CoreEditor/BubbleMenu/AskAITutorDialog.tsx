@@ -6,7 +6,6 @@ import {
 import { randomId } from "@copilotkit/shared"
 
 import { F0AiChat, F0AiChatProvider, useAiChat } from "@/sds/ai/F0AiChat"
-import { F0HILActionConfirmation } from "@/sds/ai/F0HILActionConfirmation"
 import OneIcon from "@/experimental/AiPromotionChat/OneIcon"
 import { cn } from "@/lib/utils"
 
@@ -32,16 +31,20 @@ const AiTutorChatInner = ({
   selectedText,
   onClose,
   onGoDeeper,
+  onQuizMe,
 }: {
   selectedText: string
   onClose: () => void
   onGoDeeper?: (messages: AiTutorMessage[]) => void
+  onQuizMe?: (messages: AiTutorMessage[]) => void
 }) => {
   const { setOpen, open, sendMessage, inProgress } = useAiChat()
   const { messages } = useCopilotChatInternal()
   const hasSentRef = useRef(false)
   const onGoDeeperRef = useRef(onGoDeeper)
   onGoDeeperRef.current = onGoDeeper
+  const onQuizMeRef = useRef(onQuizMe)
+  onQuizMeRef.current = onQuizMe
   const onCloseRef = useRef(onClose)
   onCloseRef.current = onClose
   const messagesRef = useRef(messages)
@@ -57,38 +60,46 @@ const AiTutorChatInner = ({
       .filter((m) => m.content)
   }, [])
 
-  // Register "go_deeper" CopilotKit action — Mastra emits this via
-  // emitFrontendTool and CopilotKit renders the F0HILActionConfirmation
-  // inline in the chat messages.
+  // Register "tutor_next_step" CopilotKit action — Mastra emits this via
+  // emitFrontendTool and CopilotKit renders action buttons inline in the chat.
   useCopilotAction({
-    name: "go_deeper",
+    name: "tutor_next_step",
     description:
-      "Offer the user the option to explore the topic in more detail in a sidepanel.",
+      "Offer the user options to continue learning: go deeper or take a quiz.",
     parameters: [
       {
         name: "prompt",
         type: "string",
-        description: "Short text asking if the user wants to go deeper",
+        description: "Short text asking what the user wants to do next",
         required: false,
       },
     ],
-    available: onGoDeeper ? "frontend" : "disabled",
+    available: onGoDeeper || onQuizMe ? "frontend" : "disabled",
     render: (props) => {
       if (props.status === "inProgress") return <></>
       return (
-        <F0HILActionConfirmation
+        <AiTutorNextStepActions
           text={
-            (props.args.prompt as string) ??
-            "Would you like me to explain this in more detail?"
+            (props.args.prompt as string) ?? "What would you like to do next?"
           }
-          confirmationText="Go deeper"
-          cancelText="No, thanks"
-          onConfirm={() => {
-            const serialized = serializeMessages()
-            onGoDeeperRef.current?.(serialized)
-            onCloseRef.current()
-          }}
-          onCancel={() => {}}
+          onGoDeeper={
+            onGoDeeperRef.current
+              ? () => {
+                  const serialized = serializeMessages()
+                  onGoDeeperRef.current?.(serialized)
+                  onCloseRef.current()
+                }
+              : undefined
+          }
+          onQuizMe={
+            onQuizMeRef.current
+              ? () => {
+                  const serialized = serializeMessages()
+                  onQuizMeRef.current?.(serialized)
+                  onCloseRef.current()
+                }
+              : undefined
+          }
         />
       )
     },
@@ -126,6 +137,74 @@ const AiTutorChatInner = ({
 }
 
 // ---------------------------------------------------------------------------
+// Next step action buttons — rendered inline in the chat
+// ---------------------------------------------------------------------------
+
+const AiTutorNextStepActions = ({
+  text,
+  onGoDeeper,
+  onQuizMe,
+}: {
+  text: string
+  onGoDeeper?: () => void
+  onQuizMe?: () => void
+}) => (
+  <div className="flex flex-col gap-2 rounded-xl border border-solid border-f1-border-secondary bg-f1-background p-3">
+    <p className="text-sm text-f1-foreground-secondary">{text}</p>
+    <div className="flex gap-2">
+      {onGoDeeper && (
+        <button
+          type="button"
+          onClick={onGoDeeper}
+          className="flex items-center gap-1.5 rounded-lg border border-solid border-f1-border bg-f1-background px-3 py-2 text-sm font-medium text-f1-foreground transition-colors hover:bg-f1-background-secondary"
+        >
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 16 16"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M6 3H3v10h10v-3M10 2h4v4M9 7l5-5"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+          Go deeper
+        </button>
+      )}
+      {onQuizMe && (
+        <button
+          type="button"
+          onClick={onQuizMe}
+          className="flex items-center gap-1.5 rounded-lg border border-solid border-f1-border bg-f1-background px-3 py-2 text-sm font-medium text-f1-foreground transition-colors hover:bg-f1-background-secondary"
+        >
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 16 16"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M8 14A6 6 0 1 0 8 2a6 6 0 0 0 0 12ZM6.5 6a1.5 1.5 0 1 1 2.112 1.372.833.833 0 0 0-.529.628L8 8.5M8 11h.01"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+          Quiz me
+        </button>
+      )}
+    </div>
+  </div>
+)
+
+// ---------------------------------------------------------------------------
 // Mock mode: standalone chat UI with simulated responses
 // ---------------------------------------------------------------------------
 
@@ -152,10 +231,12 @@ const MockAiTutorChat = ({
   selectedText,
   greeting,
   onGoDeeper,
+  onQuizMe,
 }: {
   selectedText: string
   greeting?: string
   onGoDeeper?: (messages: AiTutorMessage[]) => void
+  onQuizMe?: (messages: AiTutorMessage[]) => void
 }) => {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [input, setInput] = useState("")
@@ -204,10 +285,15 @@ const MockAiTutorChat = ({
     onGoDeeper?.(messages)
   }, [messages, onGoDeeper])
 
-  // Show "Go deeper" after first assistant response
+  const handleQuizMe = useCallback(() => {
+    onQuizMe?.(messages)
+  }, [messages, onQuizMe])
+
+  // Show actions after first assistant response
   const hasAssistantResponse =
     messages.filter((m) => m.role === "assistant").length > 0
-  const showGoDeeper = onGoDeeper && hasAssistantResponse && !isLoading
+  const showActions =
+    (onGoDeeper || onQuizMe) && hasAssistantResponse && !isLoading
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -270,17 +356,13 @@ const MockAiTutorChat = ({
           </div>
         )}
 
-        {/* Go deeper action — inline in the messages area */}
-        {showGoDeeper && (
+        {/* Next step actions — inline in the messages area */}
+        {showActions && (
           <div className="mb-4">
-            <F0HILActionConfirmation
-              text="Would you like me to explain this in more detail?"
-              confirmationText="Go deeper"
-              cancelText="No, thanks"
-              onConfirm={handleGoDeeper}
-              onCancel={() => {
-                // Do nothing — user stays in floating chat
-              }}
+            <AiTutorNextStepActions
+              text="What would you like to do next?"
+              onGoDeeper={onGoDeeper ? handleGoDeeper : undefined}
+              onQuizMe={onQuizMe ? handleQuizMe : undefined}
             />
           </div>
         )}
@@ -337,6 +419,7 @@ interface AskAITutorChatProps {
   chatConfig?: AiTutorChatConfig
   onClose?: () => void
   onGoDeeper?: (messages: AiTutorMessage[]) => void
+  onQuizMe?: (messages: AiTutorMessage[]) => void
   position?: { top: number; left: number } | null
 }
 
@@ -346,6 +429,7 @@ export const AskAITutorChat = ({
   chatConfig,
   onClose,
   onGoDeeper,
+  onQuizMe,
   position,
 }: AskAITutorChatProps) => {
   if (!isOpen) return null
@@ -379,6 +463,7 @@ export const AskAITutorChat = ({
             selectedText={selectedText}
             onClose={handleClose}
             onGoDeeper={onGoDeeper}
+            onQuizMe={onQuizMe}
           />
         </F0AiChatProvider>
       </div>
@@ -395,6 +480,7 @@ export const AskAITutorChat = ({
         selectedText={selectedText}
         greeting={chatConfig?.greeting}
         onGoDeeper={onGoDeeper}
+        onQuizMe={onQuizMe}
       />
     </div>
   )
