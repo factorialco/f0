@@ -21,6 +21,12 @@ Prefer consistency with these components over introducing new patterns.
 - Use `F0Icon` and `PressableFeedback` for icon/interaction semantics.
 - Use raw React Native primitives only when there is no equivalent F0 primitive, or for non-visual structural wrappers.
 
+## Token Rule
+
+- New and existing `F0*` components must **only** use design tokens defined in the F0 theme (e.g. `f0-background`, `f0-border`, `f0-foreground-*`, `f0-icon-*`).
+- Never invent ad-hoc values for colors, borders, or spacing (no raw hex values, no `rgba(...)`, no arbitrary Tailwind values like `bg-[#abc123]`) when a semantic token exists.
+- If the required visual cannot be expressed with an existing token, **stop and document the gap** — do not introduce a one-off workaround.
+
 ## Component Architecture Conventions
 
 - Public component APIs should use named exports only (no default exports).
