@@ -70,7 +70,7 @@ describe("monthGranularity", () => {
 
     it("formats a single date correctly with long format", () => {
       const result = monthGranularity.toString(baseDate, i18n, "long")
-      expect(result).toBe("Jan 2024")
+      expect(result).toBe("January 2024")
     })
 
     it("formats a date range correctly", () => {
@@ -93,7 +93,7 @@ describe("monthGranularity", () => {
         i18n,
         "long"
       )
-      expect(result).toBe("Jan → Feb 2024")
+      expect(result).toBe("January → February 2024")
     })
 
     it("formats a month range across years correctly with long format", () => {
@@ -105,7 +105,7 @@ describe("monthGranularity", () => {
         i18n,
         "long"
       )
-      expect(result).toBe("Dec 2023 → Feb 2024")
+      expect(result).toBe("December 2023 → February 2024")
     })
 
     it("formats a long month range in same year correctly with long format", () => {
@@ -117,7 +117,7 @@ describe("monthGranularity", () => {
         i18n,
         "long"
       )
-      expect(result).toBe("Mar → Sep 2024")
+      expect(result).toBe("March → September 2024")
     })
 
     it("formats first month of year correctly with long format", () => {
@@ -126,7 +126,7 @@ describe("monthGranularity", () => {
         i18n,
         "long"
       ) // January 2024
-      expect(result).toBe("Jan 2024")
+      expect(result).toBe("January 2024")
     })
 
     it("formats last month of year correctly with long format", () => {
@@ -135,7 +135,7 @@ describe("monthGranularity", () => {
         i18n,
         "long"
       ) // December 2024
-      expect(result).toBe("Dec 2024")
+      expect(result).toBe("December 2024")
     })
 
     it("formats leap year February correctly with long format", () => {
@@ -144,7 +144,27 @@ describe("monthGranularity", () => {
         i18n,
         "long"
       ) // February 2024 (leap year)
-      expect(result).toBe("Feb 2024")
+      expect(result).toBe("February 2024")
+    })
+
+    it("formats a single date in French locale with long format", () => {
+      const result = monthGranularity.toString(
+        new Date(2025, 6, 30),
+        i18n,
+        "long",
+        "fr"
+      )
+      expect(result).toBe("juillet 2025")
+    })
+
+    it("formats a single date in Spanish locale with long format", () => {
+      const result = monthGranularity.toString(
+        new Date(2025, 6, 30),
+        i18n,
+        "long",
+        "es"
+      )
+      expect(result).toMatch(/julio/)
     })
   })
 

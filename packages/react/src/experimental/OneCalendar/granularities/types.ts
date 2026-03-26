@@ -46,7 +46,8 @@ export interface GranularityDefinition {
   toString: (
     date: Date | DateRange | undefined | null,
     i18n: TranslationsType,
-    format?: DateStringFormat
+    format?: DateStringFormat,
+    locale?: string
   ) => string
   // Calculate the maximum width of the string representation of the date
   toStringMaxWidth: () => number

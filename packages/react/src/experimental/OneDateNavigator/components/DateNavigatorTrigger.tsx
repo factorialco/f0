@@ -15,6 +15,7 @@ import {
 } from "@/experimental/OneCalendar/utils"
 import { ChevronLeft, ChevronRight } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
+import { useL10n } from "@/lib/providers/l10n"
 import { cn, focusRing } from "@/lib/utils"
 
 import { GranularityDefinitionKey } from "../../OneCalendar/granularities"
@@ -58,6 +59,7 @@ const DateNavigatorTrigger = forwardRef<
     ref
   ) => {
     const i18n = useI18n()
+    const l10n = useL10n()
 
     const currentLabel = useMemo(() => {
       if (!value || !value.value) {
@@ -75,8 +77,10 @@ const DateNavigatorTrigger = forwardRef<
         .filter((v) => v !== undefined)
         .sort((a, b) => a?.from.getTime() - b?.from.getTime())
 
-      return values.map((v) => granularityToUse.toString(v, i18n, "long"))
-    }, [value, i18n, compareToValue, granularity])
+      return values.map((v) =>
+        granularityToUse.toString(v, i18n, "long", l10n.locale)
+      )
+    }, [value, i18n, compareToValue, granularity, l10n.locale])
 
     const label = useMemo(() => {
       return Object.values(currentLabel).join(" ⸱ ")
