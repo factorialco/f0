@@ -249,8 +249,8 @@ export const createWeekGranularity = (
     navigateUIView: function (viewDate, direction) {
       return addMonths(viewDate, direction)
     },
-    label: function (viewDate) {
-      return new Intl.DateTimeFormat("en-US", {
+    label: function (viewDate, _i18n, locale = "en-US") {
+      return new Intl.DateTimeFormat(locale, {
         month: "long",
         year: "numeric",
       }).format(viewDate)

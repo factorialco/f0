@@ -127,8 +127,8 @@ export const dayGranularity: GranularityDefinition = {
   getViewDateFromDate: (date) => {
     return startOfMonth(date)
   },
-  label: (viewDate) => {
-    return new Intl.DateTimeFormat("en-US", {
+  label: (viewDate, _i18n, locale = "en-US") => {
+    return new Intl.DateTimeFormat(locale, {
       month: "long",
       year: "numeric",
     }).format(viewDate)
