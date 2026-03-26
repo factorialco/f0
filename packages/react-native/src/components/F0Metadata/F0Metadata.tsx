@@ -42,9 +42,9 @@ export const F0Metadata = React.memo(function F0Metadata({
 
   return (
     <View className={metadataContainerVariants({ orientation })}>
-      {resolvedItems.map((item) => (
+      {resolvedItems.map((item, index) => (
         <F0MetadataItem
-          key={item.label}
+          key={`${item.label}-${index}`}
           item={item}
           orientation={orientation}
         />

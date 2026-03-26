@@ -21,6 +21,7 @@ F0Metadata              — main component, filters items, drives layout
 
 ## Usage
 
+<!-- prettier-ignore -->
 ```tsx
 import { F0Metadata } from "@factorialco/f0-react-native"
 ;<F0Metadata
@@ -63,17 +64,17 @@ import { F0Metadata } from "@factorialco/f0-react-native"
 
 ## Value Types
 
-| Type           | Required fields                                                   | Rendered with                   |
-| -------------- | ----------------------------------------------------------------- | ------------------------------- |
-| `text`         | `content: string`                                                 | `F0Text`                        |
+| Type           | Required fields                                                                                                                                   | Rendered with                   |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------- |
+| `text`         | `content: string`                                                                                                                                 | `F0Text`                        |
 | `avatar`       | `avatarType: "person"`: `firstName: string`, `lastName: string`, `src?`, `deactivated?` / `avatarType: "team"\|"company"`: `name: string`, `src?` | `F0Avatar.*` + `F0Text`         |
-| `status`       | `label: string`, `variant: F0TagStatusVariant`                    | `F0Tag.Status`                  |
-| `list`         | `variant: "person"\|"team"\|"company"`, `avatars`                 | `F0AvatarList`                  |
-| `data-list`    | `data: string[]`                                                  | Multiple `F0Text` items stacked |
-| `tag-list`     | `tags: string[]`                                                  | `F0TagList` type="raw"          |
-| `dot-tag`      | `label: string`, `color: F0TagDotColor`                           | `F0Tag.Dot`                     |
-| `date`         | `formattedDate: string`, `icon?: "warning"\|"critical"`           | `F0Text` + optional `F0Icon`    |
-| `progress-bar` | `value: number`, `max?`, `label?`                                 | `F0Progress` (linear)           |
+| `status`       | `label: string`, `variant: F0TagStatusVariant`                                                                                                    | `F0Tag.Status`                  |
+| `list`         | `variant: "person"\|"team"\|"company"`, `avatars`                                                                                                 | `F0AvatarList`                  |
+| `data-list`    | `data: string[]`                                                                                                                                  | Multiple `F0Text` items stacked |
+| `tag-list`     | `tags: string[]`                                                                                                                                  | `F0TagList` type="raw"          |
+| `dot-tag`      | `label: string`, `color: F0TagDotColor`                                                                                                           | `F0Tag.Dot`                     |
+| `date`         | `formattedDate: string`, `icon?: "warning"\|"critical"`                                                                                           | `F0Text` + optional `F0Icon`    |
+| `progress-bar` | `value: number`, `max?`, `label?`                                                                                                                 | `F0Progress` (linear)           |
 
 ## Orientations
 

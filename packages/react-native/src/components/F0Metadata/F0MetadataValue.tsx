@@ -97,8 +97,8 @@ export function F0MetadataValue({ value }: { value: MetadataItemValue }) {
     case "data-list":
       return (
         <View className="flex-col gap-0.5">
-          {value.data.map((item) => (
-            <F0Text key={item} variant="body-sm-default">
+          {value.data.map((item, index) => (
+            <F0Text key={`${item}-${index}`} variant="body-sm-default">
               {item}
             </F0Text>
           ))}
@@ -137,5 +137,10 @@ export function F0MetadataValue({ value }: { value: MetadataItemValue }) {
           label={value.label}
         />
       )
+
+    default: {
+      const _exhaustiveCheck: never = value
+      return null
+    }
   }
 }
