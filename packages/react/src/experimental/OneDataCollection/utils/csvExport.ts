@@ -14,7 +14,7 @@ export interface ColumnDefinition<R extends RecordType = RecordType> {
   render?: (item: R) => string
 }
 
-function escapeCSVCell(value: unknown): string {
+export function escapeCSVCell(value: unknown): string {
   if (value === null || value === undefined) {
     return ""
   }
@@ -43,7 +43,7 @@ function escapeCSVCell(value: unknown): string {
  *    types and `value` is the type-specific payload
  *  - a raw typed object (person, badge, date, …)
  */
-function extractDisplayValue(renderResult: unknown): string {
+export function extractDisplayValue(renderResult: unknown): string {
   if (renderResult === null || renderResult === undefined) {
     return ""
   }
@@ -108,7 +108,7 @@ function extractDisplayValue(renderResult: unknown): string {
  *
  * The types mirror those in `packages/react/src/components/value-display/types/`.
  */
-function extractTypedCellValue(type: string, value: unknown): string {
+export function extractTypedCellValue(type: string, value: unknown): string {
   if (value === null || value === undefined) {
     return ""
   }
@@ -237,7 +237,7 @@ function getNestedValue(obj: Record<string, unknown>, path: string): unknown {
   }, obj)
 }
 
-function extractColumns<R extends RecordType>(
+export function extractColumns<R extends RecordType>(
   visualization: Visualization<R, any, any, any, any, any, any> | undefined
 ): ColumnDefinition<R>[] {
   if (!visualization) {
