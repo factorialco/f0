@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils"
 
 import { useRegisteredActions } from "./actions"
 import { ChatTextarea } from "./components/input/ChatTextarea"
+import { CanvasPanel } from "./components/layout/CanvasPanel"
 import { MessagesContainer } from "./components/messages/MessagesContainer"
 import { useAiChat } from "./providers/AiChatStateProvider"
 
@@ -32,7 +33,9 @@ const FullscreenChatInput = () => {
 }
 
 export const F0AiFullscreenChatComponent = () => {
-  const { enabled } = useAiChat()
+  const { enabled, canvasContent, visualizationMode } = useAiChat()
+
+  const isCanvasMode = visualizationMode === "canvas"
 
   useRegisteredActions()
 
@@ -64,6 +67,13 @@ export const F0AiFullscreenChatComponent = () => {
           flex-direction: column;
         }
       `}</style>
+
+      {isCanvasMode && canvasContent && (
+        <div className={cn("pointer-events-none")}>
+          <CanvasPanel />
+        </div>
+      )}
+
       <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
         <MessagesContainer />
       </div>

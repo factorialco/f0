@@ -126,7 +126,7 @@ export const WelcomeScreen = ({
             <motion.p
               className={cn(
                 "text-xl font-semibold leading-[24px] text-f1-foreground",
-                isFullscreen ? "text-3xl" : ""
+                isFullscreen && "text-3xl"
               )}
               key={message.id}
               initial={{ opacity: 0, filter: "blur(2px)", y: -8 }}
