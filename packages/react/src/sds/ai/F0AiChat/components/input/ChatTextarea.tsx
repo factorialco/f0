@@ -4,13 +4,13 @@ import { randomId } from "@copilotkit/shared"
 import { motion } from "motion/react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
+import { F0Button } from "@/components/F0Button"
 import { ButtonInternal } from "@/components/F0Button/internal"
-import { ArrowUp, SolidStop } from "@/icons/app"
+import { ArrowUp, Cross, SolidStop } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
 import { useAiChat } from "../../providers/AiChatStateProvider"
-
 import { MentionPopover } from "./MentionPopover"
 import { ToolHintSelector } from "./ToolHintSelector"
 import { TypewriterPlaceholder } from "./TypewriterPlaceholder"
@@ -19,6 +19,9 @@ import { buildHighlightSegments } from "./utils"
 
 type ChatTextareaProps = InputProps & {
   submitLabel?: string
+  creditWarning?: "soft"
+  onDismissCreditWarning?: () => void
+  onGetCredits?: () => void
 }
 
 export const ChatTextarea = ({
@@ -26,6 +29,9 @@ export const ChatTextarea = ({
   inProgress,
   onSend,
   onStop,
+  creditWarning,
+  onDismissCreditWarning,
+  onGetCredits,
 }: ChatTextareaProps) => {
   const {
     placeholders,
@@ -124,7 +130,16 @@ export const ChatTextarea = ({
   const hasOverlay =
     mentions.mentions.length > 0 || mentions.inlineCompletion !== null
 
-  return (
+  const creditWarningConfig = {
+    soft: {
+      text: translation.ai.creditWarning.soft,
+      bg: "bg-f1-background-info",
+      fontColor: "text-f1-foreground-info",
+      formBorder: "[&_form]:border-f1-border-info",
+    },
+  }
+
+  const form = (
     <motion.form
       aria-busy={inProgress}
       ref={formRef}
@@ -314,5 +329,45 @@ export const ChatTextarea = ({
         </div>
       </div>
     </motion.form>
+  )
+
+  if (!creditWarning) return form
+
+  const config = creditWarningConfig[creditWarning]
+
+  return (
+    <div
+      className={cn("flex flex-col rounded-xl", config.bg, config.formBorder)}
+    >
+      <div className="flex items-center justify-between gap-2 px-4 pb-1.5 pt-2">
+        <p
+          className={cn("min-w-0 flex-1 text-sm font-medium", config.fontColor)}
+        >
+          {config.text}
+        </p>
+        <div className="flex shrink-0 items-center gap-1">
+          {onGetCredits && (
+            <F0Button
+              label={translation.ai.creditWarning.getCredits}
+              size="sm"
+              variant="outline"
+              tooltip={translation.ai.creditWarning.getCredits}
+              onClick={onGetCredits}
+            />
+          )}
+          {onDismissCreditWarning && (
+            <F0Button
+              label={translation.ai.creditWarning.dismiss}
+              size="sm"
+              variant="ghost"
+              icon={Cross}
+              hideLabel
+              onClick={onDismissCreditWarning}
+            />
+          )}
+        </div>
+      </div>
+      {form}
+    </div>
   )
 }
