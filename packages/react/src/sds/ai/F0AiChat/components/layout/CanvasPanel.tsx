@@ -79,8 +79,9 @@ export function CanvasPanel(): ReactNode {
         >
           <motion.div
             className={cn(
-              "flex h-full w-full flex-col overflow-hidden rounded-lg border border-solid border-f1-border-secondary",
-              "bg-f1-special-page"
+              "flex h-full w-full flex-col overflow-hidden",
+              "bg-f1-special-page",
+              "md:rounded-lg md:border md:border-solid border-f1-border-secondary rounded-none border-none"
             )}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
