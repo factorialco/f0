@@ -12,8 +12,8 @@ import { Skeleton } from "@/ui/skeleton"
 
 import { F0ActionItem } from "../../../F0ActionItem"
 import { useMessageScroll } from "../../hooks/useMessageScroll"
-import { filterCoagentPlaceholders } from "../../internal-types"
 import { useAiChat } from "../../providers/AiChatStateProvider"
+import { preprocessMessages } from "../../utils/messageExpansion"
 import {
   type Turn,
   analyzeTurn,
@@ -86,58 +86,10 @@ const Messages = ({
     [initialMessage, translations.ai.defaultInitialMessage]
   )
 
-  // Filter coagent placeholders and expand multi-tool-call messages.
-  //
-  // CopilotKit v1.51+ AG-UI packs multiple tool calls into a single
-  // assistant message (e.g. 2× orchestratorThinking + 1× downloadData +
-  // text content).  The v1.10 format had one tool call per message.
-  //
-  // We expand each multi-tool-call message into individual messages so
-  // the turn/thinking pipeline (which expects one tool call per message)
-  // works correctly.  The actual rendering of tool call UIs is handled
-  // by AssistantMessage which looks up actions from CopilotKit context.
+  // Filter coagent placeholders and expand multi-tool-call messages
+  // so the turn/thinking pipeline sees one tool call per message.
   const filteredMessages = useMemo(
-    () =>
-      filterCoagentPlaceholders(messages).flatMap((msg) => {
-        if (msg.role !== "assistant") return [msg]
-
-        const toolCalls = msg.toolCalls as
-          | { id: string; function: { name: string; arguments: string } }[]
-          | undefined
-
-        // No tool calls — plain text message, pass through
-        if (!toolCalls || toolCalls.length === 0) return [msg]
-
-        // Single tool call, no text — pass through as-is
-        if (toolCalls.length === 1 && !msg.content) return [msg]
-
-        // Multiple tool calls and/or text content — expand into
-        // individual messages so thinking groups work correctly.
-        // Tool calls come first (they arrive before content during
-        // streaming), then text content.
-        const expanded: Message[] = []
-
-        // Each tool call becomes its own message
-        for (let i = 0; i < toolCalls.length; i++) {
-          expanded.push({
-            id: `${msg.id}_tc${i}`,
-            role: msg.role,
-            content: "",
-            toolCalls: [toolCalls[i]],
-          })
-        }
-
-        // Text content becomes its own message (after tool calls)
-        if (msg.content) {
-          expanded.push({
-            id: `${msg.id}_text`,
-            role: msg.role,
-            content: msg.content,
-          })
-        }
-
-        return expanded
-      }),
+    () => preprocessMessages(messages),
     [messages]
   )
 

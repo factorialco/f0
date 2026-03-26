@@ -1,5 +1,7 @@
 import { useEffect, useRef } from "react"
 
+import { SMALL_SCREEN_BREAKPOINT } from "../utils/constants"
+
 // Module-level set shared across all instances — survives remounts.
 const globalOpenedIds = new Set<string>()
 
@@ -26,7 +28,7 @@ export function useAutoOpenCanvas(
   useEffect(() => {
     if (!toolCallId) return
     if (globalOpenedIds.has(toolCallId)) return
-    if (window.innerWidth <= 624) return
+    if (window.innerWidth <= SMALL_SCREEN_BREAKPOINT) return
     globalOpenedIds.add(toolCallId)
     openRef.current()
   }, [toolCallId])

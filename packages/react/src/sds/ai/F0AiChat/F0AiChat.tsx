@@ -12,6 +12,7 @@ import { MessagesContainer } from "./components/messages/MessagesContainer"
 import { UserMessage } from "./components/messages/UserMessage"
 import { WelcomeScreenSuggestion } from "./components/messages/WelcomeScreen"
 import { CopilotFunctionBridge } from "./components/shared/CopilotFunctionBridge"
+import { CopilotToolRendererProvider } from "./providers/ToolRendererProvider"
 import { F0AiFullscreenChatComponent } from "./F0AiFullscreenChat"
 import { AiChatStateProvider, useAiChat } from "./providers/AiChatStateProvider"
 import { AiChatProviderProps } from "./types"
@@ -76,8 +77,10 @@ const AiChatKitWrapper = ({
 
   return (
     <CopilotKit runtimeUrl="/copilotkit" agent={agent} {...copilotKitProps}>
-      <CopilotFunctionBridge />
-      {children}
+      <CopilotToolRendererProvider>
+        <CopilotFunctionBridge />
+        {children}
+      </CopilotToolRendererProvider>
     </CopilotKit>
   )
 }

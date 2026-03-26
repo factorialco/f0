@@ -2,6 +2,7 @@ import Lightbulb from "@/icons/app/Lightbulb"
 import { useI18n } from "@/lib/providers/i18n"
 
 import { F0ActionItem } from "../../../F0ActionItem"
+import { ORCHESTRATOR_THINKING_ACTION } from "../../utils/constants"
 import { ThinkingProps } from "./types"
 import { AiCollapsibleMessage } from "../shared/AiCollapsibleMessage"
 
@@ -32,7 +33,7 @@ function collectThinkingTitles(messages: ThinkingProps["messages"]): string[] {
         toolCalls?: { function: { name: string; arguments: string } }[]
       }
     ).toolCalls ?? []) {
-      if (tc.function.name === "orchestratorThinking") {
+      if (tc.function.name === ORCHESTRATOR_THINKING_ACTION) {
         titles.push(parseThinkingTitle(tc.function.arguments))
       }
     }
