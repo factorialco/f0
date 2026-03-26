@@ -1,0 +1,1720 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`F0Metadata Snapshots — orientations Snapshot — horizontal orientation 1`] = `
+<View
+  className="flex flex-row flex-wrap gap-x-6 gap-y-3"
+>
+  <View
+    className="flex min-h-8 flex-row items-center gap-2"
+  >
+    <Text
+      className="w-28 shrink-0 no-underline normal-case tracking-normal text-[14px] leading-[20px] font-normal text-f0-foreground-secondary text-left"
+    >
+      Status
+    </Text>
+    <View
+      className="flex max-w-full min-w-0 shrink flex-row items-center justify-start gap-1"
+    >
+      <View
+        accessibilityState={
+          {
+            "busy": undefined,
+            "checked": undefined,
+            "disabled": true,
+            "expanded": undefined,
+            "selected": undefined,
+          }
+        }
+        accessibilityValue={
+          {
+            "max": undefined,
+            "min": undefined,
+            "now": undefined,
+            "text": undefined,
+          }
+        }
+        accessible={true}
+        className="flex max-w-full min-w-0 shrink flex-row items-center justify-start gap-1 overflow-hidden py-0.5 pr-2 pl-1 rounded-full bg-f0-background-positive text-f0-foreground-positive"
+        collapsable={false}
+        focusable={true}
+        onBlur={[Function]}
+        onClick={[Function]}
+        onFocus={[Function]}
+        onResponderGrant={[Function]}
+        onResponderMove={[Function]}
+        onResponderRelease={[Function]}
+        onResponderTerminate={[Function]}
+        onResponderTerminationRequest={[Function]}
+        onStartShouldSetResponder={[Function]}
+        style={
+          [
+            {
+              "transform": [
+                {
+                  "scale": 1,
+                },
+              ],
+            },
+            undefined,
+          ]
+        }
+      >
+        <View
+          aria-hidden={true}
+          className="m-1 aspect-square w-2 rounded-full bg-f0-icon-positive"
+        />
+        <Text
+          className="max-w-full shrink no-underline normal-case tracking-normal text-[16px] leading-[24px] font-medium text-f0-foreground-positive text-left"
+          ellipsizeMode="tail"
+          numberOfLines={1}
+        >
+          Active
+        </Text>
+      </View>
+    </View>
+  </View>
+  <View
+    className="flex min-h-8 flex-row items-center gap-2"
+  >
+    <Text
+      className="w-28 shrink-0 no-underline normal-case tracking-normal text-[14px] leading-[20px] font-normal text-f0-foreground-secondary text-left"
+    >
+      Department
+    </Text>
+    <Text
+      className="no-underline normal-case tracking-normal text-[14px] leading-[20px] font-normal text-f0-foreground text-left"
+    >
+      Engineering
+    </Text>
+  </View>
+</View>
+`;
+
+exports[`F0Metadata Snapshots — orientations Snapshot — vertical orientation (default) 1`] = `
+<View
+  className="flex flex-col gap-3"
+>
+  <View
+    className="flex flex-col gap-0.5"
+  >
+    <Text
+      className="no-underline normal-case tracking-normal text-[14px] leading-[20px] font-normal text-f0-foreground-secondary text-left"
+    >
+      Status
+    </Text>
+    <View
+      className="flex max-w-full min-w-0 shrink flex-row items-center justify-start gap-1"
+    >
+      <View
+        accessibilityState={
+          {
+            "busy": undefined,
+            "checked": undefined,
+            "disabled": true,
+            "expanded": undefined,
+            "selected": undefined,
+          }
+        }
+        accessibilityValue={
+          {
+            "max": undefined,
+            "min": undefined,
+            "now": undefined,
+            "text": undefined,
+          }
+        }
+        accessible={true}
+        className="flex max-w-full min-w-0 shrink flex-row items-center justify-start gap-1 overflow-hidden py-0.5 pr-2 pl-1 rounded-full bg-f0-background-positive text-f0-foreground-positive"
+        collapsable={false}
+        focusable={true}
+        onBlur={[Function]}
+        onClick={[Function]}
+        onFocus={[Function]}
+        onResponderGrant={[Function]}
+        onResponderMove={[Function]}
+        onResponderRelease={[Function]}
+        onResponderTerminate={[Function]}
+        onResponderTerminationRequest={[Function]}
+        onStartShouldSetResponder={[Function]}
+        style={
+          [
+            {
+              "transform": [
+                {
+                  "scale": 1,
+                },
+              ],
+            },
+            undefined,
+          ]
+        }
+      >
+        <View
+          aria-hidden={true}
+          className="m-1 aspect-square w-2 rounded-full bg-f0-icon-positive"
+        />
+        <Text
+          className="max-w-full shrink no-underline normal-case tracking-normal text-[16px] leading-[24px] font-medium text-f0-foreground-positive text-left"
+          ellipsizeMode="tail"
+          numberOfLines={1}
+        >
+          Active
+        </Text>
+      </View>
+    </View>
+  </View>
+  <View
+    className="flex flex-col gap-0.5"
+  >
+    <Text
+      className="no-underline normal-case tracking-normal text-[14px] leading-[20px] font-normal text-f0-foreground-secondary text-left"
+    >
+      Department
+    </Text>
+    <Text
+      className="no-underline normal-case tracking-normal text-[14px] leading-[20px] font-normal text-f0-foreground text-left"
+    >
+      Engineering
+    </Text>
+  </View>
+</View>
+`;
+
+exports[`F0Metadata Snapshots — value types Snapshot — avatar — company 1`] = `
+<View
+  className="flex flex-col gap-3"
+>
+  <View
+    className="flex flex-col gap-0.5"
+  >
+    <Text
+      className="no-underline normal-case tracking-normal text-[14px] leading-[20px] font-normal text-f0-foreground-secondary text-left"
+    >
+      Company
+    </Text>
+    <View
+      className="flex-row items-center gap-1.5"
+    >
+      <View
+        className="inline-flex"
+      >
+        <View
+          className="h-fit w-fit"
+        >
+          <View
+            aria-hidden={true}
+            className="flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold w-5 h-5 rounded-xs bg-[hsl(theme(colors.viridian-50))]"
+            data-a11y-color-contrast-ignore={true}
+            role="img"
+          >
+            <Text
+              className="no-underline normal-case tracking-normal text-[14px] leading-[20px] font-semibold text-f0-foreground-inverse text-left"
+              data-a11y-color-contrast-ignore={true}
+            >
+              F
+            </Text>
+          </View>
+        </View>
+      </View>
+      <Text
+        className="no-underline normal-case tracking-normal text-[14px] leading-[20px] font-normal text-f0-foreground text-left"
+      >
+        Factorial
+      </Text>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`F0Metadata Snapshots — value types Snapshot — avatar — person 1`] = `
+<View
+  className="flex flex-col gap-3"
+>
+  <View
+    className="flex flex-col gap-0.5"
+  >
+    <Text
+      className="no-underline normal-case tracking-normal text-[14px] leading-[20px] font-normal text-f0-foreground-secondary text-left"
+    >
+      Owner
+    </Text>
+    <View
+      className="flex-row items-center gap-1.5"
+    >
+      <View
+        className="inline-flex"
+      >
+        <View
+          className="h-fit w-fit"
+        >
+          <View
+            aria-hidden={true}
+            className="flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold w-5 h-5 rounded-full bg-[hsl(theme(colors.malibu-50))]"
+            data-a11y-color-contrast-ignore={true}
+            role="img"
+          >
+            <Text
+              className="no-underline normal-case tracking-normal text-[14px] leading-[20px] font-semibold text-f0-foreground-inverse text-left"
+              data-a11y-color-contrast-ignore={true}
+            >
+              A
+            </Text>
+          </View>
+        </View>
+      </View>
+      <Text
+        className="no-underline normal-case tracking-normal text-[14px] leading-[20px] font-normal text-f0-foreground text-left"
+      >
+        Alice Smith
+      </Text>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`F0Metadata Snapshots — value types Snapshot — avatar — person deactivated 1`] = `
+<View
+  className="flex flex-col gap-3"
+>
+  <View
+    className="flex flex-col gap-0.5"
+  >
+    <Text
+      className="no-underline normal-case tracking-normal text-[14px] leading-[20px] font-normal text-f0-foreground-secondary text-left"
+    >
+      Former owner
+    </Text>
+    <View
+      className="flex-row items-center gap-1.5"
+    >
+      <View
+        className="inline-flex"
+      >
+        <View
+          className="h-fit w-fit"
+        >
+          <View
+            aria-hidden={true}
+            className="flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold w-5 h-5 rounded-full bg-f0-background-secondary"
+            data-a11y-color-contrast-ignore={true}
+            role="img"
+          >
+            <RNSVGSvgView
+              align="xMidYMid"
+              bbHeight="100%"
+              bbWidth="100%"
+              className="shrink-0 w-3 h-3 stroke-xs text-f0-icon-secondary"
+              fill="none"
+              focusable={false}
+              meetOrSlice={0}
+              minX={0}
+              minY={0}
+              style={
+                [
+                  {
+                    "backgroundColor": "transparent",
+                    "borderWidth": 0,
+                  },
+                  [
+                    {},
+                  ],
+                  {
+                    "flex": 0,
+                    "height": "100%",
+                    "width": "100%",
+                  },
+                ]
+              }
+              vbHeight={24}
+              vbWidth={24}
+            >
+              <RNSVGGroup
+                fill={null}
+                propList={
+                  [
+                    "fill",
+                  ]
+                }
+              >
+                <RNSVGPath
+                  d="M10 5.535a4 4 0 0 1 5.254 5.791M7.8 11a4 4 0 0 0 1.887 1.89"
+                  fill={
+                    {
+                      "payload": 4278190080,
+                      "type": 0,
+                    }
+                  }
+                  propList={
+                    [
+                      "stroke",
+                      "strokeLinecap",
+                    ]
+                  }
+                  stroke={
+                    {
+                      "type": 2,
+                    }
+                  }
+                  strokeLinecap={1}
+                />
+                <RNSVGPath
+                  d="M7 18s1.5-2 5-2q.53 0 1 .057"
+                  fill={
+                    {
+                      "payload": 4278190080,
+                      "type": 0,
+                    }
+                  }
+                  propList={
+                    [
+                      "stroke",
+                      "strokeLinecap",
+                      "strokeLinejoin",
+                    ]
+                  }
+                  stroke={
+                    {
+                      "type": 2,
+                    }
+                  }
+                  strokeLinecap={1}
+                  strokeLinejoin={1}
+                />
+                <RNSVGPath
+                  d="m5 5 14 14"
+                  fill={
+                    {
+                      "payload": 4278190080,
+                      "type": 0,
+                    }
+                  }
+                  propList={
+                    [
+                      "stroke",
+                      "strokeLinecap",
+                    ]
+                  }
+                  stroke={
+                    {
+                      "type": 2,
+                    }
+                  }
+                  strokeLinecap={1}
+                />
+              </RNSVGGroup>
+            </RNSVGSvgView>
+          </View>
+        </View>
+      </View>
+      <Text
+        className="no-underline normal-case tracking-normal text-[14px] leading-[20px] font-normal text-f0-foreground-disabled text-left"
+      >
+        Bob Jones
+      </Text>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`F0Metadata Snapshots — value types Snapshot — avatar — team 1`] = `
+<View
+  className="flex flex-col gap-3"
+>
+  <View
+    className="flex flex-col gap-0.5"
+  >
+    <Text
+      className="no-underline normal-case tracking-normal text-[14px] leading-[20px] font-normal text-f0-foreground-secondary text-left"
+    >
+      Team
+    </Text>
+    <View
+      className="flex-row items-center gap-1.5"
+    >
+      <View
+        className="inline-flex"
+      >
+        <View
+          className="h-fit w-fit"
+        >
+          <View
+            aria-hidden={true}
+            className="flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold w-5 h-5 rounded-xs bg-[hsl(theme(colors.purple-50))]"
+            data-a11y-color-contrast-ignore={true}
+            role="img"
+          >
+            <Text
+              className="no-underline normal-case tracking-normal text-[14px] leading-[20px] font-semibold text-f0-foreground-inverse text-left"
+              data-a11y-color-contrast-ignore={true}
+            >
+              F
+            </Text>
+          </View>
+        </View>
+      </View>
+      <Text
+        className="no-underline normal-case tracking-normal text-[14px] leading-[20px] font-normal text-f0-foreground text-left"
+      >
+        Frontend
+      </Text>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`F0Metadata Snapshots — value types Snapshot — data-list 1`] = `
+<View
+  className="flex flex-col gap-3"
+>
+  <View
+    className="flex flex-col gap-0.5"
+  >
+    <Text
+      className="no-underline normal-case tracking-normal text-[14px] leading-[20px] font-normal text-f0-foreground-secondary text-left"
+    >
+      Tags
+    </Text>
+    <View
+      className="flex-col gap-0.5"
+    >
+      <Text
+        className="no-underline normal-case tracking-normal text-[14px] leading-[20px] font-normal text-f0-foreground text-left"
+      >
+        Remote
+      </Text>
+      <Text
+        className="no-underline normal-case tracking-normal text-[14px] leading-[20px] font-normal text-f0-foreground text-left"
+      >
+        Full-time
+      </Text>
+      <Text
+        className="no-underline normal-case tracking-normal text-[14px] leading-[20px] font-normal text-f0-foreground text-left"
+      >
+        Senior
+      </Text>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`F0Metadata Snapshots — value types Snapshot — date — critical icon 1`] = `
+<View
+  className="flex flex-col gap-3"
+>
+  <View
+    className="flex flex-col gap-0.5"
+  >
+    <Text
+      className="no-underline normal-case tracking-normal text-[14px] leading-[20px] font-normal text-f0-foreground-secondary text-left"
+    >
+      Deadline
+    </Text>
+    <View
+      className="flex-row items-center gap-0.5"
+    >
+      <RNSVGSvgView
+        align="xMidYMid"
+        bbHeight="100%"
+        bbWidth="100%"
+        className="shrink-0 w-4 h-4 stroke-sm text-f0-icon-critical"
+        fill="none"
+        focusable={false}
+        meetOrSlice={0}
+        minX={0}
+        minY={0}
+        style={
+          [
+            {
+              "backgroundColor": "transparent",
+              "borderWidth": 0,
+            },
+            [
+              {},
+            ],
+            {
+              "flex": 0,
+              "height": "100%",
+              "width": "100%",
+            },
+          ]
+        }
+        vbHeight={24}
+        vbWidth={24}
+      >
+        <RNSVGGroup
+          fill={null}
+          propList={
+            [
+              "fill",
+            ]
+          }
+        >
+          <RNSVGPath
+            d="M12 20a8 8 0 1 0 0-16 8 8 0 0 0 0 16m-.967-11.94a.97.97 0 1 1 1.935 0l-.303 3.9a.667.667 0 0 1-1.33 0zM13 15a1 1 0 1 1-2 0 1 1 0 0 1 2 0"
+            fill={
+              {
+                "type": 2,
+              }
+            }
+            propList={
+              [
+                "fill",
+              ]
+            }
+          />
+        </RNSVGGroup>
+      </RNSVGSvgView>
+      <Text
+        className="no-underline normal-case tracking-normal text-[14px] leading-[20px] font-normal text-f0-foreground-critical text-left"
+      >
+        Jan 1, 2026
+      </Text>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`F0Metadata Snapshots — value types Snapshot — date — no icon 1`] = `
+<View
+  className="flex flex-col gap-3"
+>
+  <View
+    className="flex flex-col gap-0.5"
+  >
+    <Text
+      className="no-underline normal-case tracking-normal text-[14px] leading-[20px] font-normal text-f0-foreground-secondary text-left"
+    >
+      Start date
+    </Text>
+    <Text
+      className="no-underline normal-case tracking-normal text-[14px] leading-[20px] font-normal text-f0-foreground text-left"
+    >
+      Mar 25, 2026
+    </Text>
+  </View>
+</View>
+`;
+
+exports[`F0Metadata Snapshots — value types Snapshot — date — warning icon 1`] = `
+<View
+  className="flex flex-col gap-3"
+>
+  <View
+    className="flex flex-col gap-0.5"
+  >
+    <Text
+      className="no-underline normal-case tracking-normal text-[14px] leading-[20px] font-normal text-f0-foreground-secondary text-left"
+    >
+      Due date
+    </Text>
+    <View
+      className="flex-row items-center gap-0.5"
+    >
+      <RNSVGSvgView
+        align="xMidYMid"
+        bbHeight="100%"
+        bbWidth="100%"
+        className="shrink-0 w-4 h-4 stroke-sm text-f0-icon-warning"
+        fill="none"
+        focusable={false}
+        meetOrSlice={0}
+        minX={0}
+        minY={0}
+        style={
+          [
+            {
+              "backgroundColor": "transparent",
+              "borderWidth": 0,
+            },
+            [
+              {},
+            ],
+            {
+              "flex": 0,
+              "height": "100%",
+              "width": "100%",
+            },
+          ]
+        }
+        vbHeight={24}
+        vbWidth={24}
+      >
+        <RNSVGGroup
+          fill={null}
+          propList={
+            [
+              "fill",
+            ]
+          }
+        >
+          <RNSVGPath
+            clipRule={0}
+            d="M5.399 19c-1.525 0-2.489-1.638-1.748-2.971l6.6-11.882c.763-1.372 2.735-1.372 3.497 0l6.601 11.882c.74 1.333-.223 2.971-1.748 2.971zM12 7.5a.97.97 0 0 0-.967 1.045l.302 3.9a.667.667 0 0 0 1.33 0l.303-3.9A.97.97 0 0 0 12 7.5m0 8.987a1 1 0 1 0 0-2 1 1 0 0 0 0 2"
+            fill={
+              {
+                "type": 2,
+              }
+            }
+            fillRule={0}
+            propList={
+              [
+                "fill",
+                "fillRule",
+              ]
+            }
+          />
+        </RNSVGGroup>
+      </RNSVGSvgView>
+      <Text
+        className="no-underline normal-case tracking-normal text-[14px] leading-[20px] font-normal text-f0-foreground-warning text-left"
+      >
+        Apr 1, 2026
+      </Text>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`F0Metadata Snapshots — value types Snapshot — dot-tag 1`] = `
+<View
+  className="flex flex-col gap-3"
+>
+  <View
+    className="flex flex-col gap-0.5"
+  >
+    <Text
+      className="no-underline normal-case tracking-normal text-[14px] leading-[20px] font-normal text-f0-foreground-secondary text-left"
+    >
+      Category
+    </Text>
+    <View
+      className="flex max-w-full min-w-0 shrink flex-row items-center justify-start gap-1"
+    >
+      <View
+        accessibilityState={
+          {
+            "busy": undefined,
+            "checked": undefined,
+            "disabled": true,
+            "expanded": undefined,
+            "selected": undefined,
+          }
+        }
+        accessibilityValue={
+          {
+            "max": undefined,
+            "min": undefined,
+            "now": undefined,
+            "text": undefined,
+          }
+        }
+        accessible={true}
+        className="flex max-w-full min-w-0 shrink flex-row items-center justify-start gap-1 overflow-hidden py-0.5 pr-2 text-f0-foreground pl-1 rounded-full border border-solid border-f0-border-secondary"
+        collapsable={false}
+        focusable={true}
+        onBlur={[Function]}
+        onClick={[Function]}
+        onFocus={[Function]}
+        onResponderGrant={[Function]}
+        onResponderMove={[Function]}
+        onResponderRelease={[Function]}
+        onResponderTerminate={[Function]}
+        onResponderTerminationRequest={[Function]}
+        onStartShouldSetResponder={[Function]}
+        style={
+          [
+            {
+              "transform": [
+                {
+                  "scale": 1,
+                },
+              ],
+            },
+            undefined,
+          ]
+        }
+      >
+        <View
+          aria-hidden={true}
+          className="m-1 aspect-square w-2 rounded-full"
+          style={
+            {
+              "backgroundColor": "hsl(258 88% 67%)",
+            }
+          }
+        />
+        <Text
+          className="max-w-full shrink no-underline normal-case tracking-normal text-[16px] leading-[24px] font-medium text-f0-foreground text-left"
+          ellipsizeMode="tail"
+          numberOfLines={1}
+        >
+          Design
+        </Text>
+      </View>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`F0Metadata Snapshots — value types Snapshot — list — company 1`] = `
+<View
+  className="flex flex-col gap-3"
+>
+  <View
+    className="flex flex-col gap-0.5"
+  >
+    <Text
+      className="no-underline normal-case tracking-normal text-[14px] leading-[20px] font-normal text-f0-foreground-secondary text-left"
+    >
+      Companies
+    </Text>
+    <View
+      className="flex-row items-center"
+    >
+      <View
+        style={
+          {
+            "marginLeft": 0,
+          }
+        }
+      >
+        <RNSVGSvgView
+          align="xMidYMid"
+          bbHeight={20}
+          bbWidth={20}
+          focusable={false}
+          height={20}
+          meetOrSlice={0}
+          minX={0}
+          minY={0}
+          style={
+            [
+              {
+                "backgroundColor": "transparent",
+                "borderWidth": 0,
+              },
+              {
+                "flex": 0,
+                "height": 20,
+                "width": 20,
+              },
+            ]
+          }
+          vbHeight={21}
+          vbWidth={21}
+          width={20}
+        >
+          <RNSVGGroup
+            fill={
+              {
+                "payload": 4278190080,
+                "type": 0,
+              }
+            }
+          >
+            <RNSVGDefs>
+              <RNSVGClipPath
+                fill={
+                  {
+                    "payload": 4278190080,
+                    "type": 0,
+                  }
+                }
+                name="«r2»-clip-0"
+              >
+                <RNSVGPath
+                  d="M0.653961 3.27606C0 4.55953 0 6.23969 0 9.6V11.4C0 14.7603 0 16.4405 0.653961 17.7239C1.2292 18.8529 2.14708 19.7708 3.27606 20.346C4.55953 21 6.23969 21 9.6 21H10.4C13.7603 21 15.4405 21 16.7239 20.346C17.188 20.1096 17.6164 19.8152 18 19.4721C17.4504 18.9805 16.9927 18.3889 16.654 17.7239C16 16.4405 16 14.7603 16 11.4V9.6C16 6.23969 16 4.55953 16.654 3.27606C16.9927 2.61115 17.4504 2.01946 18 1.52786C17.6164 1.18476 17.188 0.890414 16.7239 0.653961C15.4405 0 13.7603 0 10.4 0H9.6C6.23969 0 4.55953 0 3.27606 0.653961C2.14708 1.2292 1.2292 2.14708 0.653961 3.27606Z"
+                  fill={
+                    {
+                      "payload": 4278190080,
+                      "type": 0,
+                    }
+                  }
+                />
+              </RNSVGClipPath>
+            </RNSVGDefs>
+            <RNSVGGroup
+              clipPath="«r2»-clip-0"
+              fill={
+                {
+                  "payload": 4278190080,
+                  "type": 0,
+                }
+              }
+            >
+              <RNSVGRect
+                fill={
+                  {
+                    "payload": 4278689963,
+                    "type": 0,
+                  }
+                }
+                height={21}
+                propList={
+                  [
+                    "fill",
+                  ]
+                }
+                width={21}
+                x={0}
+                y={0}
+              />
+              <RNSVGText
+                content={null}
+                dx={[]}
+                dy={
+                  [
+                    4.8999999999999995,
+                  ]
+                }
+                fill={
+                  {
+                    "payload": 3875536895,
+                    "type": 0,
+                  }
+                }
+                font={
+                  {
+                    "fontSize": 14,
+                    "fontWeight": "600",
+                    "textAnchor": "middle",
+                  }
+                }
+                propList={
+                  [
+                    "fill",
+                  ]
+                }
+                rotate={[]}
+                x={
+                  [
+                    10.5,
+                  ]
+                }
+                y={
+                  [
+                    10.5,
+                  ]
+                }
+              >
+                <RNSVGTSpan
+                  content="A"
+                  dx={[]}
+                  dy={[]}
+                  fill={
+                    {
+                      "payload": 4278190080,
+                      "type": 0,
+                    }
+                  }
+                  font={{}}
+                  rotate={[]}
+                  x={[]}
+                  y={[]}
+                />
+              </RNSVGText>
+              <RNSVGRect
+                fill={null}
+                height={20}
+                propList={
+                  [
+                    "fill",
+                    "stroke",
+                    "strokeWidth",
+                  ]
+                }
+                rx={2}
+                stroke={
+                  {
+                    "payload": 251658240,
+                    "type": 0,
+                  }
+                }
+                strokeWidth={1}
+                width={20}
+                x={0.5}
+                y={0.5}
+              />
+            </RNSVGGroup>
+          </RNSVGGroup>
+        </RNSVGSvgView>
+      </View>
+      <View
+        style={
+          {
+            "marginLeft": -2,
+          }
+        }
+      >
+        <View
+          style={
+            {
+              "height": 20,
+              "width": 20,
+            }
+          }
+        >
+          <View
+            className="inline-flex"
+          >
+            <View
+              className="h-fit w-fit"
+            >
+              <View
+                aria-hidden={true}
+                className="flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold w-5 h-5 rounded-xs bg-[hsl(theme(colors.viridian-50))]"
+                data-a11y-color-contrast-ignore={true}
+                role="img"
+              >
+                <Text
+                  className="no-underline normal-case tracking-normal text-[14px] leading-[20px] font-semibold text-f0-foreground-inverse text-left"
+                  data-a11y-color-contrast-ignore={true}
+                >
+                  F
+                </Text>
+              </View>
+            </View>
+          </View>
+        </View>
+      </View>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`F0Metadata Snapshots — value types Snapshot — list — person 1`] = `
+<View
+  className="flex flex-col gap-3"
+>
+  <View
+    className="flex flex-col gap-0.5"
+  >
+    <Text
+      className="no-underline normal-case tracking-normal text-[14px] leading-[20px] font-normal text-f0-foreground-secondary text-left"
+    >
+      Members
+    </Text>
+    <View
+      className="flex-row items-center"
+    >
+      <View
+        style={
+          {
+            "marginLeft": 0,
+          }
+        }
+      >
+        <RNSVGSvgView
+          align="xMidYMid"
+          bbHeight={20}
+          bbWidth={20}
+          focusable={false}
+          height={20}
+          meetOrSlice={0}
+          minX={0}
+          minY={0}
+          style={
+            [
+              {
+                "backgroundColor": "transparent",
+                "borderWidth": 0,
+              },
+              {
+                "flex": 0,
+                "height": 20,
+                "width": 20,
+              },
+            ]
+          }
+          vbHeight={21}
+          vbWidth={21}
+          width={20}
+        >
+          <RNSVGGroup
+            fill={
+              {
+                "payload": 4278190080,
+                "type": 0,
+              }
+            }
+          >
+            <RNSVGDefs>
+              <RNSVGClipPath
+                fill={
+                  {
+                    "payload": 4278190080,
+                    "type": 0,
+                  }
+                }
+                name="«r0»-clip-0"
+              >
+                <RNSVGPath
+                  d="M18 4.19899C16.7442 5.95406 16 8.13577 16 10.5C16 12.8642 16.7442 15.0459 18 16.801C16.1755 19.3508 13.2712 21 10 21C4.47716 21 0 16.299 0 10.5C0 4.70102 4.47716 0 10 0C13.2712 0 16.1755 1.64923 18 4.19899Z"
+                  fill={
+                    {
+                      "payload": 4278190080,
+                      "type": 0,
+                    }
+                  }
+                />
+              </RNSVGClipPath>
+            </RNSVGDefs>
+            <RNSVGGroup
+              clipPath="«r0»-clip-0"
+              fill={
+                {
+                  "payload": 4278190080,
+                  "type": 0,
+                }
+              }
+            >
+              <RNSVGRect
+                fill={
+                  {
+                    "payload": 4283799286,
+                    "type": 0,
+                  }
+                }
+                height={21}
+                propList={
+                  [
+                    "fill",
+                  ]
+                }
+                width={21}
+                x={0}
+                y={0}
+              />
+              <RNSVGText
+                content={null}
+                dx={[]}
+                dy={
+                  [
+                    4.8999999999999995,
+                  ]
+                }
+                fill={
+                  {
+                    "payload": 3875536895,
+                    "type": 0,
+                  }
+                }
+                font={
+                  {
+                    "fontSize": 14,
+                    "fontWeight": "600",
+                    "textAnchor": "middle",
+                  }
+                }
+                propList={
+                  [
+                    "fill",
+                  ]
+                }
+                rotate={[]}
+                x={
+                  [
+                    10.5,
+                  ]
+                }
+                y={
+                  [
+                    10.5,
+                  ]
+                }
+              >
+                <RNSVGTSpan
+                  content="A"
+                  dx={[]}
+                  dy={[]}
+                  fill={
+                    {
+                      "payload": 4278190080,
+                      "type": 0,
+                    }
+                  }
+                  font={{}}
+                  rotate={[]}
+                  x={[]}
+                  y={[]}
+                />
+              </RNSVGText>
+              <RNSVGCircle
+                cx={10.5}
+                cy={10.5}
+                fill={null}
+                propList={
+                  [
+                    "fill",
+                    "stroke",
+                    "strokeWidth",
+                  ]
+                }
+                r={10}
+                stroke={
+                  {
+                    "payload": 251658240,
+                    "type": 0,
+                  }
+                }
+                strokeWidth={1}
+              />
+            </RNSVGGroup>
+          </RNSVGGroup>
+        </RNSVGSvgView>
+      </View>
+      <View
+        style={
+          {
+            "marginLeft": -2,
+          }
+        }
+      >
+        <View
+          style={
+            {
+              "height": 20,
+              "width": 20,
+            }
+          }
+        >
+          <View
+            className="inline-flex"
+          >
+            <View
+              className="h-fit w-fit"
+            >
+              <View
+                aria-hidden={true}
+                className="flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold w-5 h-5 rounded-full bg-[hsl(theme(colors.smoke-50))]"
+                data-a11y-color-contrast-ignore={true}
+                role="img"
+              >
+                <Text
+                  className="no-underline normal-case tracking-normal text-[14px] leading-[20px] font-semibold text-f0-foreground-inverse text-left"
+                  data-a11y-color-contrast-ignore={true}
+                >
+                  B
+                </Text>
+              </View>
+            </View>
+          </View>
+        </View>
+      </View>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`F0Metadata Snapshots — value types Snapshot — list — team 1`] = `
+<View
+  className="flex flex-col gap-3"
+>
+  <View
+    className="flex flex-col gap-0.5"
+  >
+    <Text
+      className="no-underline normal-case tracking-normal text-[14px] leading-[20px] font-normal text-f0-foreground-secondary text-left"
+    >
+      Teams
+    </Text>
+    <View
+      className="flex-row items-center"
+    >
+      <View
+        style={
+          {
+            "marginLeft": 0,
+          }
+        }
+      >
+        <RNSVGSvgView
+          align="xMidYMid"
+          bbHeight={20}
+          bbWidth={20}
+          focusable={false}
+          height={20}
+          meetOrSlice={0}
+          minX={0}
+          minY={0}
+          style={
+            [
+              {
+                "backgroundColor": "transparent",
+                "borderWidth": 0,
+              },
+              {
+                "flex": 0,
+                "height": 20,
+                "width": 20,
+              },
+            ]
+          }
+          vbHeight={21}
+          vbWidth={21}
+          width={20}
+        >
+          <RNSVGGroup
+            fill={
+              {
+                "payload": 4278190080,
+                "type": 0,
+              }
+            }
+          >
+            <RNSVGDefs>
+              <RNSVGClipPath
+                fill={
+                  {
+                    "payload": 4278190080,
+                    "type": 0,
+                  }
+                }
+                name="«r1»-clip-0"
+              >
+                <RNSVGPath
+                  d="M0.653961 3.27606C0 4.55953 0 6.23969 0 9.6V11.4C0 14.7603 0 16.4405 0.653961 17.7239C1.2292 18.8529 2.14708 19.7708 3.27606 20.346C4.55953 21 6.23969 21 9.6 21H10.4C13.7603 21 15.4405 21 16.7239 20.346C17.188 20.1096 17.6164 19.8152 18 19.4721C17.4504 18.9805 16.9927 18.3889 16.654 17.7239C16 16.4405 16 14.7603 16 11.4V9.6C16 6.23969 16 4.55953 16.654 3.27606C16.9927 2.61115 17.4504 2.01946 18 1.52786C17.6164 1.18476 17.188 0.890414 16.7239 0.653961C15.4405 0 13.7603 0 10.4 0H9.6C6.23969 0 4.55953 0 3.27606 0.653961C2.14708 1.2292 1.2292 2.14708 0.653961 3.27606Z"
+                  fill={
+                    {
+                      "payload": 4278190080,
+                      "type": 0,
+                    }
+                  }
+                />
+              </RNSVGClipPath>
+            </RNSVGDefs>
+            <RNSVGGroup
+              clipPath="«r1»-clip-0"
+              fill={
+                {
+                  "payload": 4278190080,
+                  "type": 0,
+                }
+              }
+            >
+              <RNSVGRect
+                fill={
+                  {
+                    "payload": 4287455733,
+                    "type": 0,
+                  }
+                }
+                height={21}
+                propList={
+                  [
+                    "fill",
+                  ]
+                }
+                width={21}
+                x={0}
+                y={0}
+              />
+              <RNSVGText
+                content={null}
+                dx={[]}
+                dy={
+                  [
+                    4.8999999999999995,
+                  ]
+                }
+                fill={
+                  {
+                    "payload": 3875536895,
+                    "type": 0,
+                  }
+                }
+                font={
+                  {
+                    "fontSize": 14,
+                    "fontWeight": "600",
+                    "textAnchor": "middle",
+                  }
+                }
+                propList={
+                  [
+                    "fill",
+                  ]
+                }
+                rotate={[]}
+                x={
+                  [
+                    10.5,
+                  ]
+                }
+                y={
+                  [
+                    10.5,
+                  ]
+                }
+              >
+                <RNSVGTSpan
+                  content="F"
+                  dx={[]}
+                  dy={[]}
+                  fill={
+                    {
+                      "payload": 4278190080,
+                      "type": 0,
+                    }
+                  }
+                  font={{}}
+                  rotate={[]}
+                  x={[]}
+                  y={[]}
+                />
+              </RNSVGText>
+              <RNSVGRect
+                fill={null}
+                height={20}
+                propList={
+                  [
+                    "fill",
+                    "stroke",
+                    "strokeWidth",
+                  ]
+                }
+                rx={2}
+                stroke={
+                  {
+                    "payload": 251658240,
+                    "type": 0,
+                  }
+                }
+                strokeWidth={1}
+                width={20}
+                x={0.5}
+                y={0.5}
+              />
+            </RNSVGGroup>
+          </RNSVGGroup>
+        </RNSVGSvgView>
+      </View>
+      <View
+        style={
+          {
+            "marginLeft": -2,
+          }
+        }
+      >
+        <View
+          style={
+            {
+              "height": 20,
+              "width": 20,
+            }
+          }
+        >
+          <View
+            className="inline-flex"
+          >
+            <View
+              className="h-fit w-fit"
+            >
+              <View
+                aria-hidden={true}
+                className="flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold w-5 h-5 rounded-xs bg-[hsl(theme(colors.smoke-50))]"
+                data-a11y-color-contrast-ignore={true}
+                role="img"
+              >
+                <Text
+                  className="no-underline normal-case tracking-normal text-[14px] leading-[20px] font-semibold text-f0-foreground-inverse text-left"
+                  data-a11y-color-contrast-ignore={true}
+                >
+                  M
+                </Text>
+              </View>
+            </View>
+          </View>
+        </View>
+      </View>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`F0Metadata Snapshots — value types Snapshot — progress-bar 1`] = `
+<View
+  className="flex flex-col gap-3"
+>
+  <View
+    className="flex flex-col gap-0.5"
+  >
+    <Text
+      className="no-underline normal-case tracking-normal text-[14px] leading-[20px] font-normal text-f0-foreground-secondary text-left"
+    >
+      Progress
+    </Text>
+    <View
+      accessibilityRole="progressbar"
+      accessibilityValue={
+        {
+          "max": 100,
+          "min": 0,
+          "now": 60,
+        }
+      }
+      accessible={true}
+      className="shrink-0 w-full flex-row items-center gap-2"
+    >
+      <View
+        className="w-full flex-1"
+      >
+        <View
+          className="h-1 w-full overflow-hidden rounded-full bg-f0-background-info"
+          testID="f0-progress-linear-track"
+        >
+          <View
+            className="h-full w-full rounded-full bg-f0-icon-info"
+            style={
+              {
+                "transform": [
+                  {
+                    "scaleX": 0.6,
+                  },
+                ],
+                "transformOrigin": "left center",
+              }
+            }
+            testID="f0-progress-linear-fill"
+          />
+        </View>
+      </View>
+      <Text
+        className="no-underline normal-case tracking-normal text-[14px] leading-[20px] font-normal text-f0-foreground text-left"
+        testID="f0-progress-label"
+      >
+        60%
+      </Text>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`F0Metadata Snapshots — value types Snapshot — status 1`] = `
+<View
+  className="flex flex-col gap-3"
+>
+  <View
+    className="flex flex-col gap-0.5"
+  >
+    <Text
+      className="no-underline normal-case tracking-normal text-[14px] leading-[20px] font-normal text-f0-foreground-secondary text-left"
+    >
+      Status
+    </Text>
+    <View
+      className="flex max-w-full min-w-0 shrink flex-row items-center justify-start gap-1"
+    >
+      <View
+        accessibilityState={
+          {
+            "busy": undefined,
+            "checked": undefined,
+            "disabled": true,
+            "expanded": undefined,
+            "selected": undefined,
+          }
+        }
+        accessibilityValue={
+          {
+            "max": undefined,
+            "min": undefined,
+            "now": undefined,
+            "text": undefined,
+          }
+        }
+        accessible={true}
+        className="flex max-w-full min-w-0 shrink flex-row items-center justify-start gap-1 overflow-hidden py-0.5 pr-2 pl-1 rounded-full bg-f0-background-positive text-f0-foreground-positive"
+        collapsable={false}
+        focusable={true}
+        onBlur={[Function]}
+        onClick={[Function]}
+        onFocus={[Function]}
+        onResponderGrant={[Function]}
+        onResponderMove={[Function]}
+        onResponderRelease={[Function]}
+        onResponderTerminate={[Function]}
+        onResponderTerminationRequest={[Function]}
+        onStartShouldSetResponder={[Function]}
+        style={
+          [
+            {
+              "transform": [
+                {
+                  "scale": 1,
+                },
+              ],
+            },
+            undefined,
+          ]
+        }
+      >
+        <View
+          aria-hidden={true}
+          className="m-1 aspect-square w-2 rounded-full bg-f0-icon-positive"
+        />
+        <Text
+          className="max-w-full shrink no-underline normal-case tracking-normal text-[16px] leading-[24px] font-medium text-f0-foreground-positive text-left"
+          ellipsizeMode="tail"
+          numberOfLines={1}
+        >
+          Active
+        </Text>
+      </View>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`F0Metadata Snapshots — value types Snapshot — tag-list 1`] = `
+<View
+  className="flex flex-col gap-3"
+>
+  <View
+    className="flex flex-col gap-0.5"
+  >
+    <Text
+      className="no-underline normal-case tracking-normal text-[14px] leading-[20px] font-normal text-f0-foreground-secondary text-left"
+    >
+      Skills
+    </Text>
+    <View
+      className="flex-row items-center gap-1"
+    >
+      <View
+        className="flex max-w-full min-w-0 shrink flex-row items-center justify-start gap-1"
+      >
+        <View
+          accessibilityState={
+            {
+              "busy": undefined,
+              "checked": undefined,
+              "disabled": true,
+              "expanded": undefined,
+              "selected": undefined,
+            }
+          }
+          accessibilityValue={
+            {
+              "max": undefined,
+              "min": undefined,
+              "now": undefined,
+              "text": undefined,
+            }
+          }
+          accessible={true}
+          className="flex max-w-full min-w-0 shrink flex-row items-center justify-start gap-1 overflow-hidden py-0.5 pr-2 text-f0-foreground pl-2 rounded-full border border-solid border-f0-border-secondary"
+          collapsable={false}
+          focusable={true}
+          onBlur={[Function]}
+          onClick={[Function]}
+          onFocus={[Function]}
+          onResponderGrant={[Function]}
+          onResponderMove={[Function]}
+          onResponderRelease={[Function]}
+          onResponderTerminate={[Function]}
+          onResponderTerminationRequest={[Function]}
+          onStartShouldSetResponder={[Function]}
+          style={
+            [
+              {
+                "transform": [
+                  {
+                    "scale": 1,
+                  },
+                ],
+              },
+              undefined,
+            ]
+          }
+        >
+          <Text
+            className="max-w-full shrink no-underline normal-case tracking-normal text-[16px] leading-[24px] font-medium text-f0-foreground text-left"
+            ellipsizeMode="tail"
+            numberOfLines={1}
+          >
+            TypeScript
+          </Text>
+        </View>
+      </View>
+      <View
+        className="flex max-w-full min-w-0 shrink flex-row items-center justify-start gap-1"
+      >
+        <View
+          accessibilityState={
+            {
+              "busy": undefined,
+              "checked": undefined,
+              "disabled": true,
+              "expanded": undefined,
+              "selected": undefined,
+            }
+          }
+          accessibilityValue={
+            {
+              "max": undefined,
+              "min": undefined,
+              "now": undefined,
+              "text": undefined,
+            }
+          }
+          accessible={true}
+          className="flex max-w-full min-w-0 shrink flex-row items-center justify-start gap-1 overflow-hidden py-0.5 pr-2 text-f0-foreground pl-2 rounded-full border border-solid border-f0-border-secondary"
+          collapsable={false}
+          focusable={true}
+          onBlur={[Function]}
+          onClick={[Function]}
+          onFocus={[Function]}
+          onResponderGrant={[Function]}
+          onResponderMove={[Function]}
+          onResponderRelease={[Function]}
+          onResponderTerminate={[Function]}
+          onResponderTerminationRequest={[Function]}
+          onStartShouldSetResponder={[Function]}
+          style={
+            [
+              {
+                "transform": [
+                  {
+                    "scale": 1,
+                  },
+                ],
+              },
+              undefined,
+            ]
+          }
+        >
+          <Text
+            className="max-w-full shrink no-underline normal-case tracking-normal text-[16px] leading-[24px] font-medium text-f0-foreground text-left"
+            ellipsizeMode="tail"
+            numberOfLines={1}
+          >
+            React Native
+          </Text>
+        </View>
+      </View>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`F0Metadata Snapshots — value types Snapshot — text 1`] = `
+<View
+  className="flex flex-col gap-3"
+>
+  <View
+    className="flex flex-col gap-0.5"
+  >
+    <Text
+      className="no-underline normal-case tracking-normal text-[14px] leading-[20px] font-normal text-f0-foreground-secondary text-left"
+    >
+      Department
+    </Text>
+    <Text
+      className="no-underline normal-case tracking-normal text-[14px] leading-[20px] font-normal text-f0-foreground text-left"
+    >
+      Engineering
+    </Text>
+  </View>
+</View>
+`;

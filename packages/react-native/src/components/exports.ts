@@ -23,6 +23,7 @@ export * from "./Tags/exports"
 export * from "./experimental/Lists/DataList"
 export * from "./experimental/Lists/DetailsItem"
 export * from "./experimental/Lists/DetailsItemsList"
+export * from "./F0Metadata"
 
 // Export primitives
 export * from "./primitives/F0Text"
