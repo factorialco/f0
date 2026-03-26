@@ -70,7 +70,7 @@ export const F0AiFullscreenChatComponent = () => {
       `}</style>
 
       {isCanvasMode && canvasContent && (
-        <div className={cn("pointer-events-none overflow-y-scroll")}>
+        <div className={cn("pointer-events-none")}>
           <CanvasPanel />
         </div>
       )}
