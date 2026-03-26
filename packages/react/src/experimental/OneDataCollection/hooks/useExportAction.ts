@@ -56,9 +56,9 @@ interface UseExportActionProps<
       >
     | undefined
   filename?: string
-  /** When false the hook short-circuits and returns a stable no-op action.
-   *  This avoids wasted work (state, callbacks, i18n) for collections that
-   *  don't use export.  Defaults to `true`. */
+  /** When false the hook returns a disabled no-op export action for
+   *  collections that don't use export. Due to the Rules of Hooks, internal
+   *  state, callbacks, and i18n are still initialized. Defaults to `true`. */
   enabled?: boolean
 }
 
