@@ -33,14 +33,18 @@ export const ExportFunctionalityTest: Story = {
           collection actions area.
         </p>
         <ul className="text-blue-700 list-inside list-disc space-y-1">
-          <li>Look for the "..." button in the toolbar</li>
+          <li>Look for the &quot;...&quot; button in the toolbar</li>
           <li>Click it to open the actions dropdown</li>
-          <li>Select "Export to CSV" to download the current data</li>
+          <li>Select &quot;Export to CSV&quot; to download the current data</li>
           <li>The export will respect current filters and sorting</li>
         </ul>
       </div>
 
-      <ExampleComponent searchBar={true} id="export-test-collection" />
+      <ExampleComponent
+        searchBar={true}
+        id="export-test-collection"
+        csvExport={true}
+      />
     </div>
   ),
 }
@@ -62,6 +66,7 @@ export const ExportWithFilters: Story = {
         searchBar={true}
         usePresets={true}
         id="export-filters-test-collection"
+        csvExport={{ filename: "filtered-export" }}
       />
     </div>
   ),
@@ -84,7 +89,26 @@ export const ExportWithSelectableItems: Story = {
         searchBar={true}
         selectable={(item) => item.id}
         id="export-selectable-test-collection"
+        csvExport={true}
       />
+    </div>
+  ),
+}
+
+export const ExportDisabled: Story = {
+  render: () => (
+    <div className="space-y-4">
+      <div className="bg-gray-50 border-gray-200 rounded-md border p-4">
+        <h3 className="text-gray-800 mb-2 text-lg font-semibold">
+          Export Disabled (default)
+        </h3>
+        <p className="text-gray-700">
+          This collection does not pass csvExport. The export action should NOT
+          appear in the actions menu.
+        </p>
+      </div>
+
+      <ExampleComponent searchBar={true} id="export-disabled-test-collection" />
     </div>
   ),
 }

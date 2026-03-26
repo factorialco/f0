@@ -145,6 +145,13 @@ export type OneDataCollectionProps<
    * @deprecated removes the horizontal padding from the data collection
    */
   tmpFullWidth?: boolean
+
+  /** Enable CSV export action in the collection actions menu.
+   * - `true` enables export with default settings
+   * - An object allows customizing the export filename
+   * - `false` or `undefined` disables the export action (default)
+   */
+  csvExport?: boolean | { filename?: string }
 }
 
 const OneDataCollectionComp = <
@@ -166,6 +173,7 @@ const OneDataCollectionComp = <
   storage,
   id,
   tmpFullWidth,
+  csvExport,
 }: OneDataCollectionProps<
   R,
   Filters,
@@ -266,11 +274,18 @@ const OneDataCollectionComp = <
     [secondaryActions]
   )
 
-  // Export action - always available
+  // Export action - only available when csvExport is enabled
+  const csvExportFilename =
+    csvExport && typeof csvExport === "object"
+      ? csvExport.filename
+      : id
+        ? `${id}_export`
+        : undefined
+
   const exportAction = useExportAction({
     source,
     currentVisualization: visualizations[currentVisualization],
-    filename: id ? `${id}_export` : undefined,
+    filename: csvExportFilename,
   })
 
   const expandedSecondaryActions = useMemo(
@@ -294,20 +309,21 @@ const OneDataCollectionComp = <
 
   // Remaining actions are in the secondaryActionsItems group (expanded) and filters the empty groups
   const otherActionsItems = useMemo(() => {
-    const exportActionGroup = {
-      items: [exportAction],
-    }
-
-    return [
+    const groups = [
       {
         ...allSecondaryActions[0],
         items:
           allSecondaryActions[0]?.items.slice(expandedSecondaryActions) || [],
       },
       ...allSecondaryActions.slice(1),
-      exportActionGroup,
-    ].filter((group) => group.items.length > 0)
-  }, [allSecondaryActions, expandedSecondaryActions, exportAction])
+    ]
+
+    if (csvExport) {
+      groups.push({ items: [exportAction] })
+    }
+
+    return groups.filter((group) => group.items.length > 0)
+  }, [allSecondaryActions, expandedSecondaryActions, csvExport, exportAction])
 
   const hasCollectionsActions =
     primaryActionItems?.length > 0 || allSecondaryActions?.length > 0
