@@ -12,135 +12,102 @@ failures, and increased maintenance cost.
 
 ---
 
+## Tokens — the golden rule
+
+> **Never create new tokens.** Token additions are a core F0 decision, not a product decision.
+
+If you think you need a new token, the answer is almost always one of:
+
+1. Use an existing token — check the sources of truth below first
+2. Propose it to the F0 core team via the contribution process
+
+Creating tokens outside of core introduces inconsistency, breaks theming, and
+creates maintenance debt that is very hard to clean up. If you are unsure, ask.
+
+### Sources of truth
+
+All token definitions live in `packages/core/src/tokens/`. These files are the
+**single source of truth** — always read them before using or questioning a token value:
+
+| Token type    | File                                       |
+| ------------- | ------------------------------------------ |
+| Colors        | `packages/core/src/tokens/colors.ts`       |
+| Spacing       | `packages/core/src/tokens/spacing.ts`      |
+| Border radius | `packages/core/src/tokens/borderRadius.ts` |
+| Breakpoints   | `packages/core/src/tokens/breakpoints.ts`  |
+| Shadows       | `packages/core/tailwind.ts`                |
+
+---
+
 ## 1. Color
 
-F0 uses **semantic color tokens** with the `f1-` prefix. Never use raw hex, rgb, or
-base color tokens directly in UI code.
-
-### Semantic categories
-
-| Category   | Example tokens                                                          | Purpose                         |
-| ---------- | ----------------------------------------------------------------------- | ------------------------------- |
-| Foreground | `f1-foreground`, `f1-foreground-secondary`, `f1-foreground-inverse`     | Text and icon color             |
-| Background | `f1-background`, `f1-background-hover`, `f1-background-secondary`       | Surface fills                   |
-| Border     | `f1-border`, `f1-border-hover`, `f1-border-secondary`                   | Strokes and dividers            |
-| Icon       | `f1-icon`, `f1-icon-secondary`, `f1-icon-inverse`                       | Standalone icon color           |
-| Status     | `f1-foreground-critical`, `f1-background-positive`, `f1-border-warning` | Semantic status feedback        |
-| Special    | `f1-special-ring`, `f1-special-page`, `f1-special-highlight`            | Focus ring, page bg, highlights |
+F0 uses **semantic color tokens** with the `f1-` prefix. The full list of available
+tokens is defined in `packages/core/src/tokens/colors.ts` — consult that file for
+all valid values.
 
 ### Rules
 
-- Always use semantic tokens (`text-f1-foreground`, `bg-f1-background`, etc.)
-- Never hardcode `#hex` or `hsl()` values in components
-- Status colors (`critical`, `warning`, `positive`, `info`) have foreground, background, and border variants — use the right one for the context
+- Always use semantic `f1-` tokens — never hardcode `#hex` or `hsl()` values
+- Never use base color tokens (grey, red, orange…) directly in UI — they are for token definitions only
+- Status colors (`critical`, `warning`, `positive`, `info`) come in foreground, background,
+  and border variants — use the right one for the context
 - Dark mode works automatically when you use semantic tokens — no manual overrides needed
-- Base colors (grey, red, orange, etc.) are for token definitions only, not direct use
+- **Do not create new color tokens** — if the palette feels incomplete, raise it with the F0 core team
 
 ---
 
 ## 2. Typography
 
-Typography is defined in the Tailwind config via the `fontSize` theme key. F0 uses a
-fixed type scale — do not create custom font sizes.
-
-### Available scale
-
-| Class       | Size             | Line height    | Tracking |
-| ----------- | ---------------- | -------------- | -------- |
-| `text-xs`   | 0.6875rem (11px) | 1rem (16px)    | —        |
-| `text-sm`   | 0.8125rem (13px) | 1.25rem (20px) | —        |
-| `text-base` | 0.875rem (14px)  | 1.25rem (20px) | —        |
-| `text-lg`   | 1rem (16px)      | 1.5rem (24px)  | —        |
-| `text-xl`   | 1.125rem (18px)  | 1.5rem (24px)  | -0.02em  |
-| `text-2xl`  | 1.5rem (24px)    | 2rem (32px)    | -0.02em  |
+F0 uses a fixed type scale. The full definition lives in the Tailwind config
+(`packages/core/tailwind.ts`). Do not create custom font sizes.
 
 ### Rules
 
-- Use the existing type scale — do not add custom `fontSize` values
-- Pair text size with the correct semantic color (`f1-foreground`, `f1-foreground-secondary`)
-- Larger headings (`xl`, `2xl`) have negative letter-spacing baked in — do not override
+- Use the existing type scale only — no custom `fontSize` values
+- Pair text size with the correct semantic color token
 - Use `font-semibold` or `font-medium` for emphasis, not color alone (accessibility)
+- **Do not create new typography tokens**
 
 ---
 
 ## 3. Spacing
 
-F0 spacing follows a **4px base grid** defined in `packages/core/src/tokens/spacing.ts`.
-
-### Spacing scale (abbreviated)
-
-| Token | Pixel value | Common use                |
-| ----- | ----------- | ------------------------- |
-| `0.5` | 2px         | Micro gaps                |
-| `1`   | 4px         | Tight internal padding    |
-| `1.5` | 6px         | Small icon gaps           |
-| `2`   | 8px         | Standard internal padding |
-| `3`   | 12px        | Card padding (compact)    |
-| `4`   | 16px        | Card padding (default)    |
-| `5`   | 20px        | Section spacing           |
-| `6`   | 24px        | Group spacing             |
-| `8`   | 32px        | Large section gaps        |
-
-### Between-element spacing (gap)
-
-| Token    | Value          | Use                    |
-| -------- | -------------- | ---------------------- |
-| `gap-sm` | 4px (0.25rem)  | Tight element groups   |
-| `gap-md` | 8px (0.5rem)   | Default element groups |
-| `gap-lg` | 12px (0.75rem) | Loose element groups   |
-| `gap-xl` | 16px (1rem)    | Wide element groups    |
+F0 spacing follows a **4px base grid**. The full scale is defined in
+`packages/core/src/tokens/spacing.ts`.
 
 ### Rules
 
 - Always use the spacing scale — no arbitrary pixel or rem values
 - Spacing uses **absolute units (px)** by default for padding/margin
 - Size properties (width, height) use **relative units (rem)** for better scaling
-- When in doubt, use the `gap-*` semantic scale for space between elements
+- **Do not create new spacing tokens** — if the grid feels too coarse, it is likely a
+  composability problem, not a spacing gap
 
 ---
 
 ## 4. Border Radius
 
-Defined in `packages/core/src/tokens/borderRadius.ts`.
-
-| Token          | Value           | Typical use              |
-| -------------- | --------------- | ------------------------ |
-| `rounded-none` | 0px             | No rounding              |
-| `rounded-2xs`  | 0.25rem (4px)   | Tags, small badges       |
-| `rounded-xs`   | 0.375rem (6px)  | Inputs, small cards      |
-| `rounded-sm`   | 0.5rem (8px)    | Buttons                  |
-| `rounded`      | 0.625rem (10px) | Default (cards, dialogs) |
-| `rounded-md`   | 0.75rem (12px)  | Larger cards             |
-| `rounded-lg`   | 0.875rem (14px) | Modals                   |
-| `rounded-xl`   | 1rem (16px)     | Large surfaces           |
-| `rounded-2xl`  | 1.5rem (24px)   | Hero sections            |
-| `rounded-full` | 9999px          | Avatars, pills           |
+The full scale is defined in `packages/core/src/tokens/borderRadius.ts`.
 
 ### Rules
 
-- Use the token scale — no custom border-radius values
+- Use the token scale only — no custom border-radius values
 - Nest radius: inner elements should use a smaller radius than their parent
 - `rounded-full` is only for circular/pill shapes (avatars, badges, toggles)
+- **Do not create new border radius tokens**
 
 ---
 
 ## 5. Shadows
 
-Defined in `packages/core/tailwind.ts`.
-
-| Token         | Effect                 | Use                          |
-| ------------- | ---------------------- | ---------------------------- |
-| `shadow`      | 2px blur, 4% opacity   | Subtle elevation (cards)     |
-| `shadow-md`   | 4px blur, 8% opacity   | Medium elevation (dropdowns) |
-| `shadow-lg`   | 8px blur, 12% opacity  | High elevation (modals)      |
-| `shadow-xl`   | 12px blur, 16% opacity | Maximum elevation (popovers) |
-| `shadow-none` | No shadow              | Flat elements                |
+Shadow definitions live in `packages/core/tailwind.ts`.
 
 ### Rules
 
-- Shadows use the `--shadow` CSS variable — they adapt to light/dark mode automatically
+- Shadows adapt to light/dark mode automatically — do not hardcode shadow values
 - Use shadows to communicate **elevation hierarchy**, not decoration
-- Higher-elevation elements (modals > dropdowns > cards) should use progressively stronger shadows
+- Higher-elevation elements (modals > dropdowns > cards) use progressively stronger shadows
+- **Do not create new shadow tokens**
 
 ---
 
@@ -225,13 +192,7 @@ F0 components go through maturity stages. See the
 
 ## 10. Responsiveness
 
-F0 uses three breakpoints defined in `packages/core/src/tokens/breakpoints.ts`:
-
-| Breakpoint | Min width | Typical use            |
-| ---------- | --------- | ---------------------- |
-| `md`       | 900px     | Tablet / small desktop |
-| `lg`       | 1200px    | Standard desktop       |
-| `xl`       | 1440px    | Wide desktop           |
+Breakpoints are defined in `packages/core/src/tokens/breakpoints.ts`.
 
 ### Rules
 
