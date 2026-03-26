@@ -6,7 +6,6 @@ Accessible checkbox primitive for the F0 React Native system.
 
 ```tsx
 import { F0Checkbox } from "@factorialco/f0-react-native"
-
 ;<F0Checkbox
   label="Accept terms"
   checked={accepted}
