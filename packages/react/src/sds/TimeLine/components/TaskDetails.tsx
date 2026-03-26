@@ -4,8 +4,8 @@ import type { F0TimelineRowTaskProps } from "../types"
 
 import { Actions } from "./Actions"
 
-export const TaskDetails = ({ metadata, primaryAction, secondaryActions, otherActions } { props: F0TimelineRowTaskProps }) => {
-
+export const TaskDetails = ({ props }: { props: F0TimelineRowTaskProps }) => {
+  const { metadata, primaryAction, secondaryActions, otherActions } = props
 
   const hasMetadata = metadata?.some(Boolean)
   const hasActions =
