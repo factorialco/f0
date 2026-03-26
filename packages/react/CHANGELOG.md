@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.422.1](https://github.com/factorialco/f0/compare/f0-react-v1.422.0...f0-react-v1.422.1) (2026-03-26)
+
+
+### Bug Fixes
+
+* add import instructions on the docs of each component ([#3771](https://github.com/factorialco/f0/issues/3771)) ([e347d31](https://github.com/factorialco/f0/commit/e347d31427e158bf1902a56c94bc3b570d21dd49))
+
 ## [1.422.0](https://github.com/factorialco/f0/compare/f0-react-v1.421.0...f0-react-v1.422.0) (2026-03-26)
 
 
