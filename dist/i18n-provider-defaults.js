@@ -159,22 +159,19 @@ const e = {
     other: "Other actions",
     toggle: "Toggle",
     toggleDropdownMenu: "Toggle dropdown menu",
-    selectAll: "Select all"
+    selectAll: "Select all",
+    selectAllItems: "Select all {{total}} items"
   },
   status: {
     selected: {
       singular: "Selected",
       plural: "Selected",
-      all: "All selected"
-    }
-  },
-  syncStatus: {
-    synced: "Sync completed successfully.",
-    syncing: "Sync in progress.",
-    pending: "Not yet started.",
-    partiallySynced: "All aggregated data was synced but at least 1 failed.",
-    outdated: "Data might need to be synced again.",
-    failed: "Sync failed."
+      all: "All selected",
+      allOnPage: "All {{count}} items on this page are selected",
+      selectAllItems: "Select all {{total}} items",
+      allItemsSelected: "All {{total}} items selected"
+    },
+    noItemsSelected: "No items selected"
   },
   filters: {
     searchPlaceholder: "Search filters...",
@@ -232,6 +229,7 @@ const e = {
     },
     visualizations: {
       table: "Table view",
+      editableTable: "Editable table view",
       card: "Card view",
       list: "List view",
       kanban: "Kanban view",
@@ -246,6 +244,12 @@ const e = {
         showAllColumns: "Show all",
         hideAllColumns: "Hide all"
       }
+    },
+    editableTable: {
+      errors: {
+        saveFailed: "Save failed"
+      },
+      addRow: "Add row"
     },
     itemsCount: "items",
     emptyStates: {
@@ -354,15 +358,21 @@ const e = {
     openChat: "Open Chat with One AI",
     closeChat: "Close Chat with One AI",
     startNewChat: "Start new chat",
+    settings: "Settings",
     scrollToBottom: "Scroll to bottom",
     welcome: "Ask or create with One",
     defaultInitialMessage: "How can I help you today?",
     inputPlaceholder: "Ask about time, people, or company info and a lot of other things...",
     stopAnswerGeneration: "Stop generating",
+    responseStopped: "You stopped this response",
     sendMessage: "Send message",
     thoughtsGroupTitle: "Reflection",
     resourcesGroupTitle: "Resources",
     thinking: "Thinking...",
+    closeDashboard: "Close dashboard",
+    unsavedChanges: "Unsaved changes",
+    saveChanges: "Save changes",
+    discardChanges: "Discard",
     exportTable: "Download table",
     generatedTableFilename: "OneGeneratedTable",
     feedbackModal: {
@@ -377,7 +387,72 @@ const e = {
         placeholder: "Share what didn’t work"
       }
     },
-    ask: "Ask One"
+    dataDownloadPreview: "Preview {{shown}} of {{total}} rows — download the Excel to see all data.",
+    expandChat: "Expand chat",
+    collapseChat: "Collapse chat",
+    chatHistory: "Chat history",
+    noPreviousChats: "No previous conversations",
+    newConversation: "New conversation",
+    today: "Today",
+    yesterday: "Yesterday",
+    thisMonth: "This month",
+    older: "Older",
+    searchChats: "Search conversations...",
+    pinnedChats: "Pinned",
+    threadOptions: "Thread options",
+    pinChat: "Pin chat",
+    unpinChat: "Unpin chat",
+    deleteChat: "Delete chat",
+    ask: "Ask One",
+    viewProfile: "View profile",
+    tools: "Tools",
+    credits: {
+      title: "Credits",
+      creditsLeft: "{{total}} left",
+      monthlyCredits: "Monthly credits",
+      creditsError: "Could not load credits",
+      upgradePlan: "Upgrade",
+      needMoreCredits: "Need more credits?"
+    },
+    reportCard: {
+      reportLabel: "Report",
+      openButton: "Open"
+    },
+    dataDownload: {
+      download: "Download {{format}}",
+      exportDashboard: "Export dashboard as {{format}}",
+      exporting: "Exporting..."
+    },
+    pong: {
+      title: "Pong",
+      youWin: "You win!",
+      youLose: "You lose!",
+      goal: "Goal",
+      controls: "← → to move",
+      escToExit: "Esc to exit"
+    },
+    growth: {
+      demoCard: {
+        title: "See {{moduleName}} in action",
+        actionLabel: "Start demo"
+      },
+      bookAMeetingCard: {
+        title: "Talk with an expert",
+        schedule: "Mon-Fri · 09:00-21:00 (CEST)",
+        actionLabel: "Book a meeting"
+      },
+      questionCard: {
+        actionLabel: "Next",
+        skipLabel: "Skip",
+        sendLabel: "Send"
+      },
+      moduleCard: {
+        actionLabel: "Learn more"
+      },
+      faqCard: {
+        title: "Questions before getting started"
+      }
+    }
   },
   select: {
     noResults: "No results found",
@@ -401,13 +476,15 @@ const e = {
       dismiss: "Dismiss"
     }
   },
-  coCreationForm: {
+  surveyFormBuilder: {
     actions: {
       actions: "Actions",
       duplicateQuestion: "Duplicate question",
       deleteQuestion: "Delete question",
       duplicateSection: "Duplicate section",
-      deleteSection: "Delete section"
+      deleteSection: "Delete section",
+      confirmMoveLastQuestion: "Move question",
+      cancelMoveLastQuestion: "Cancel"
     },
     questionTypes: {
       section: "Section",
@@ -418,7 +495,8 @@ const e = {
       longText: "Long text",
       numeric: "Numeric",
       link: "Link",
-      date: "Date"
+      date: "Date",
+      dropdownSingle: "Dropdown"
     },
     selectQuestion: {
       addOption: "Add option",
@@ -430,7 +508,11 @@ const e = {
     },
     answer: {
       label: "Answer",
-      placeholder: "Respondent's answer"
+      dropdownPlaceholder: "Pick an option",
+      textPlaceholder: "Type your answer",
+      numericPlaceholder: "Enter a number",
+      linkPlaceholder: "https://example.com",
+      invalidUrl: "Enter a valid URL"
     },
     labels: {
       applyingChanges: "Applying changes",
@@ -444,7 +526,26 @@ const e = {
       questionType: "Question type",
       questionOptions: "Question options",
       actions: "Actions",
-      sectionTitlePlaceholder: "Section title"
+      sectionTitlePlaceholder: "Section title",
+      lastQuestionDialogTitle: "Remove last question from section",
+      lastQuestionDialogDescription: "Moving this question will leave the section empty and it will be removed. Do you want to continue?"
+    }
+  },
+  surveyAnsweringForm: {
+    actions: {
+      submit: "Submit survey",
+      cancel: "Cancel",
+      next: "Next",
+      previous: "Previous",
+      expand: "Expand",
+      collapse: "Collapse"
+    },
+    labels: {
+      empty: {
+        title: "No questions to answer",
+        description: "This survey has no questions yet.",
+        emoji: "📝"
+      }
     }
   },
   richTextEditor: {
@@ -473,6 +574,9 @@ const e = {
     ordered: "Ordered",
     task: "Task",
     details: "Dropdown",
+    video: "Video",
+    videoUrlPrompt: "Enter a YouTube or Vimeo URL",
+    videoUrlInvalid: "Please enter a valid YouTube or Vimeo URL",
     link: "Link",
     linkPlaceholder: "Enter a link",
     groups: {
@@ -490,6 +594,66 @@ const e = {
       repeatButtonLabel: "Repeat",
       customPromptPlaceholder: "What do you want to do?"
     }
+  },
+  forms: {
+    actionBar: {
+      unsavedChanges: "You have changes pending to be saved",
+      saving: "Saving...",
+      saved: "Your changes have been saved",
+      discard: "Discard",
+      issues: {
+        one: "{{count}} issue",
+        other: "{{count}} issues"
+      }
+    },
+    file: {
+      dropzone: "Drag and drop a file, or click to select",
+      dropzoneActive: "Drop the file here",
+      dropzoneMultiple: "Drag and drop files, or click to select",
+      acceptedTypes: "Accepted formats: {{types}}",
+      remove: "Remove",
+      uploading: "Uploading…",
+      processing: "Processing…",
+      uploadFailed: "Upload failed",
+      fileTooLarge: "File exceeds {{maxSize}} MB limit",
+      invalidFileType: "File type not accepted. Accepted formats: {{types}}"
+    },
+    moreInformation: "More information",
+    validation: {
+      required: "This field is required",
+      invalidType: "Invalid value",
+      string: {
+        email: "Enter a valid email address",
+        url: "Enter a valid URL",
+        min: "Must be at least {{min}} characters",
+        max: "Must be at most {{max}} characters"
+      },
+      number: {
+        min: "Must be at least {{min}}",
+        max: "Must be at most {{max}}",
+        positive: "Must be a positive number",
+        negative: "Must be a negative number",
+        integer: "Must be a whole number"
+      },
+      date: {
+        min: "Date must be after {{min}}",
+        max: "Date must be before {{max}}",
+        invalid: "Enter a valid date"
+      },
+      array: {
+        min: "Select at least {{min}} option",
+        max: "Select at most {{max}} options"
+      },
+      checkbox: {
+        mustBeChecked: "This option must be selected"
+      }
+    }
+  },
+  wizard: {
+    previous: "Previous",
+    next: "Continue",
+    submit: "Submit",
+    stepOf: "Step {{current}} of {{total}}"
   }
 };
 export {
