@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.422.0](https://github.com/factorialco/f0/compare/f0-react-v1.421.0...f0-react-v1.422.0) (2026-03-26)
+
+
+### Features
+
+* **F0AiChatTextArea:** add credit warning banner with upsell actions ([#3608](https://github.com/factorialco/f0/issues/3608)) ([8937f90](https://github.com/factorialco/f0/commit/8937f9099edc5c70490562d514d05a4dcde13a9c))
+
 ## [1.421.0](https://github.com/factorialco/f0/compare/f0-react-v1.420.0...f0-react-v1.421.0) (2026-03-26)
 
 
