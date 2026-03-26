@@ -1,5 +1,6 @@
 import { DocsContext, Source } from "@storybook/addon-docs/blocks"
-import React, { useContext } from "react"
+import React, { useContext, useEffect, useRef, useState } from "react"
+import { createPortal } from "react-dom"
 
 import { F0Alert } from "@/components/F0Alert"
 
@@ -10,14 +11,46 @@ interface ImportBannerProps {
 }
 
 /**
+ * Finds the insertion point after the title + subtitle + description block
+ * in the Storybook docs page, and creates a container element for the portal.
+ */
+function usePortalTarget() {
+  const [target, setTarget] = useState<HTMLElement | null>(null)
+  const containerRef = useRef<HTMLElement | null>(null)
+
+  useEffect(() => {
+    const title = document.querySelector(".sbdocs-title")
+    if (!title) return
+
+    // Insert before the first .sb-anchor element
+    const anchor = document.querySelector(".sb-anchor")
+
+    if (!containerRef.current) {
+      containerRef.current = document.createElement("div")
+    }
+    const insertBefore = anchor ?? null
+    const parent = anchor?.parentElement ?? title.parentElement
+    parent?.insertBefore(containerRef.current, insertBefore)
+    setTarget(containerRef.current)
+
+    return () => {
+      containerRef.current?.remove()
+    }
+  }, [])
+
+  return target
+}
+
+/**
  * Renders a code block showing how to import the current component.
- * Placed inside the DocsContainer, it reads the primary story's fileName
- * and title from the DocsContext to resolve the correct npm import path.
+ * Uses a portal to position itself after the title/subtitle/description
+ * in the Storybook docs page.
  *
- * If the component is internal (no public export), nothing is rendered.
+ * If the component is internal (no public export), shows a warning instead.
  */
 export function ImportBanner({ isDark }: ImportBannerProps) {
   const context = useContext(DocsContext)
+  const portalTarget = usePortalTarget()
 
   let fileName: string | undefined
   let title: string | undefined
@@ -38,8 +71,8 @@ export function ImportBanner({ isDark }: ImportBannerProps) {
   const importPath = resolveImportPath(fileName)
   const componentName = extractComponentName(fileName, title)
 
-  if (!importPath || !componentName) {
-    return (
+  const content =
+    !importPath || !componentName ? (
       <div className="sb-unstyled" style={{ marginBottom: 24 }}>
         <F0Alert
           variant="warning"
@@ -47,17 +80,23 @@ export function ImportBanner({ isDark }: ImportBannerProps) {
           description="This component is not exported from the package and cannot be imported directly. It is used internally by other components."
         />
       </div>
+    ) : (
+      <div className="sb-unstyled" style={{ marginBottom: 24 }}>
+        <h3 className="mb-2 text-xl font-medium text-f1-foreground">
+          Importing this component
+        </h3>
+        <Source
+          code={`import { ${componentName} } from "${importPath}"`}
+          language="tsx"
+          dark={isDark}
+        />
+      </div>
     )
+
+  if (portalTarget) {
+    return createPortal(content, portalTarget)
   }
 
-  const code = `import { ${componentName} } from "${importPath}"`
-
-  return (
-    <div className="sb-unstyled" style={{ marginBottom: 24 }}>
-      <h3 className="mb-2 text-xl font-medium text-f1-foreground">
-        Importing this component
-      </h3>
-      <Source code={code} language="tsx" dark={isDark} />
-    </div>
-  )
+  // Fallback: render inline if portal target not found
+  return content
 }
