@@ -326,7 +326,9 @@ const OneDataCollectionComp = <
   }, [allSecondaryActions, expandedSecondaryActions, csvExport, exportAction])
 
   const hasCollectionsActions =
-    primaryActionItems?.length > 0 || allSecondaryActions?.length > 0
+    primaryActionItems?.length > 0 ||
+    allSecondaryActions?.length > 0 ||
+    !!csvExport
 
   /**
    * Clear selected items function
