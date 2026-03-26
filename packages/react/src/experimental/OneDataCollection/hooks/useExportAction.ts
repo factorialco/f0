@@ -9,6 +9,7 @@ import {
   PaginatedResponse,
 } from "@/hooks/datasource"
 import { Download } from "@/icons/app"
+import { useI18n } from "@/lib/providers/i18n"
 
 import type { Visualization } from "../visualizations/collection"
 
@@ -197,6 +198,7 @@ export function useExportAction<
   Grouping
 >): SecondaryActionItem {
   const [isExporting, setIsExporting] = useState(false)
+  const i18n = useI18n()
 
   const handleExport = useCallback(async () => {
     setIsExporting(true)
@@ -223,11 +225,11 @@ export function useExportAction<
   }, [source, currentVisualization, filename])
 
   return {
-    label: "Export to CSV",
+    label: i18n.collections.export.label,
     icon: Download,
     onClick: handleExport,
     loading: isExporting,
     disabled: isExporting || source.isLoading,
-    description: "Download all data as CSV file",
+    description: i18n.collections.export.description,
   }
 }

@@ -173,6 +173,11 @@ export const defaultTranslations = {
         sum: "sum",
       },
     },
+    export: {
+      label: "Export to CSV",
+      description: "Download all data as CSV file",
+      noData: "No data available for export",
+    },
   },
   shortcut: "Shortcut",
   date: {
