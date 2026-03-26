@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.421.0](https://github.com/factorialco/f0/compare/f0-react-v1.420.0...f0-react-v1.421.0) (2026-03-26)
+
+
+### Features
+
+* **value-display:** add compound renderer ([#3582](https://github.com/factorialco/f0/issues/3582)) ([35bddd9](https://github.com/factorialco/f0/commit/35bddd9f39a7afe7b06e6a0d196864002b6183ba))
+
 ## [1.420.0](https://github.com/factorialco/f0/compare/f0-react-v1.419.0...f0-react-v1.420.0) (2026-03-26)
 
 
