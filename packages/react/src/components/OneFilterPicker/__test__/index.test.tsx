@@ -8,6 +8,16 @@ import type { FiltersDefinition } from "../types"
 
 import { OneFilterPicker } from "../index"
 
+/**
+ * OverflowList renders items in both a hidden measurement container
+ * (aria-hidden="true") and a visible container, causing duplicate text nodes.
+ * This helper returns the visible instance, falling back to the first match.
+ */
+function getVisibleByText(text: string): HTMLElement {
+  const all = screen.getAllByText(text)
+  return all.find((el) => !el.closest('[aria-hidden="true"]')) ?? all[0]
+}
+
 const definition = {
   department: {
     type: "in",
@@ -208,8 +218,8 @@ describe("Presets", () => {
     )
 
     // Verify preset buttons are rendered
-    expect(screen.getByText("Engineering Only")).toBeInTheDocument()
-    expect(screen.getByText("Design Only")).toBeInTheDocument()
+    expect(getVisibleByText("Engineering Only")).toBeInTheDocument()
+    expect(getVisibleByText("Design Only")).toBeInTheDocument()
   })
 
   it("applies preset filters when a preset is clicked", async () => {
@@ -236,7 +246,7 @@ describe("Presets", () => {
     )
 
     // Click on a preset
-    const presetElement = screen.getByText("Engineering Only")
+    const presetElement = getVisibleByText("Engineering Only")
     await user.click(presetElement)
 
     // Verify the preset's filter was applied
@@ -267,10 +277,9 @@ describe("Presets", () => {
     )
 
     // Get the preset elements
-    const engineeringPreset = screen
-      .getByText("Engineering Only")
-      .closest("label")
-    const designPreset = screen.getByText("Design Only").closest("label")
+    const engineeringPreset =
+      getVisibleByText("Engineering Only").closest("label")
+    const designPreset = getVisibleByText("Design Only").closest("label")
 
     // Verify the Engineering preset has the selected class
     expect(engineeringPreset).toHaveClass("bg-f1-background-selected-secondary")
@@ -305,7 +314,7 @@ describe("Presets", () => {
     )
 
     // Click on the first preset
-    const engineeringPreset = screen.getByText("Engineering Only")
+    const engineeringPreset = getVisibleByText("Engineering Only")
     await user.click(engineeringPreset)
     expect(onChange).toHaveBeenCalledWith({ department: ["engineering"] })
 
@@ -323,7 +332,7 @@ describe("Presets", () => {
     onChange.mockReset()
 
     // Click on the second preset
-    const designPreset = screen.getByText("Design Only")
+    const designPreset = getVisibleByText("Design Only")
     await user.click(designPreset)
     expect(onChange).toHaveBeenCalledWith({ department: ["design"] })
   })
@@ -348,7 +357,7 @@ describe("Presets", () => {
     )
 
     // Apply a preset
-    const engineeringOnlyPreset = screen.getByText("Engineering Only")
+    const engineeringOnlyPreset = getVisibleByText("Engineering Only")
     await user.click(engineeringOnlyPreset)
     expect(onChange).toHaveBeenCalledWith({ department: ["engineering"] })
 
@@ -406,7 +415,7 @@ describe("Presets", () => {
     )
 
     // Click on the preset
-    const engineeringSearchPreset = screen.getByText("Engineering Search")
+    const engineeringSearchPreset = getVisibleByText("Engineering Search")
     await user.click(engineeringSearchPreset)
 
     // Verify both filters were applied
@@ -443,9 +452,8 @@ describe("Presets - Chip Visibility", () => {
     expect(screen.queryByText(/department:/i)).not.toBeInTheDocument()
 
     // Preset should be shown as selected
-    const engineeringPreset = screen
-      .getByText("Engineering Only")
-      .closest("label")
+    const engineeringPreset =
+      getVisibleByText("Engineering Only").closest("label")
     expect(engineeringPreset).toHaveClass("bg-f1-background-selected-secondary")
   })
 
@@ -477,9 +485,8 @@ describe("Presets - Chip Visibility", () => {
     expect(screen.queryByText(/department:/i)).not.toBeInTheDocument()
 
     // Preset should still be shown as selected
-    const engineeringPreset = screen
-      .getByText("Engineering Only")
-      .closest("label")
+    const engineeringPreset =
+      getVisibleByText("Engineering Only").closest("label")
     expect(engineeringPreset).toHaveClass("bg-f1-background-selected-secondary")
   })
 
@@ -509,9 +516,8 @@ describe("Presets - Chip Visibility", () => {
     })
 
     // Preset should NOT be shown as selected
-    const engineeringPreset = screen
-      .getByText("Engineering Only")
-      .closest("label")
+    const engineeringPreset =
+      getVisibleByText("Engineering Only").closest("label")
     expect(engineeringPreset).not.toHaveClass(
       "bg-f1-background-selected-secondary"
     )
@@ -547,7 +553,7 @@ describe("Presets - Chip Visibility", () => {
     })
 
     // Preset should NOT be shown as selected
-    const preset = screen.getByText("Engineering Search").closest("label")
+    const preset = getVisibleByText("Engineering Search").closest("label")
     expect(preset).not.toHaveClass("bg-f1-background-selected-secondary")
   })
 })

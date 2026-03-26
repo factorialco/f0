@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.422.2](https://github.com/factorialco/f0/compare/f0-react-v1.422.1...f0-react-v1.422.2) (2026-03-26)
+
+
+### Bug Fixes
+
+* **OverflowList:** prevent multi-item jumps and add custom overflow trigger for FiltersPresets ([#3753](https://github.com/factorialco/f0/issues/3753)) ([94ad025](https://github.com/factorialco/f0/commit/94ad0250cb169661e24a7edfca141aa6310837d1))
+
 ## [1.422.1](https://github.com/factorialco/f0/compare/f0-react-v1.422.0...f0-react-v1.422.1) (2026-03-26)
 
 

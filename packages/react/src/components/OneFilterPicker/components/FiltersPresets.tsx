@@ -1,9 +1,9 @@
 import { useMemo } from "react"
 
 import { Await } from "@/components/Utilities/Await"
+import { cn, focusRing } from "@/lib/utils"
 import { Counter } from "@/ui/Counter"
 import { Preset } from "@/ui/OnePreset"
-import { cn, focusRing } from "@/lib/utils"
 import { OverflowList } from "@/ui/OverflowList"
 import { Skeleton } from "@/ui/skeleton"
 
@@ -179,6 +179,7 @@ export const FiltersPresets = <Filters extends FiltersDefinition>({
         renderListItem={renderListPresetItem}
         renderDropdownItem={renderDropdownPresetItem}
         className="min-w-0 flex-1"
+        min={1}
       />
     )
   )

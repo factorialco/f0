@@ -1,4 +1,4 @@
-import React, { useCallback } from "react"
+import React, { useCallback, useState } from "react"
 import { View } from "react-native"
 
 import { Check, Minus } from "../../icons/app"
@@ -16,26 +16,37 @@ import type { F0CheckboxProps } from "./F0Checkbox.types"
  * visible label alongside the checkbox box, and always exposes an accessible
  * label for screen readers.
  *
+ * Can be used in **controlled** mode (pass `checked` + `onValueChange`) or
+ * **uncontrolled** mode (omit `checked` — internal state is managed automatically).
+ *
  * @example
+ * // Controlled
  * <F0Checkbox label="Accept terms" checked={accepted} onValueChange={setAccepted} />
+ * // Uncontrolled
+ * <F0Checkbox label="Accept terms" onValueChange={(v) => console.log(v)} />
  * <F0Checkbox label="Select all" indeterminate onValueChange={handleSelectAll} />
- * <F0Checkbox label="Disabled option" checked disabled />
  */
 export const F0Checkbox = React.memo(function F0Checkbox({
-  checked = false,
+  checked: checkedProp,
   indeterminate = false,
   onValueChange,
   disabled = false,
   label,
   hideLabel = false,
+  accessibilityLabel,
   testID,
 }: F0CheckboxProps) {
+  const isControlled = checkedProp !== undefined
+  const [internalChecked, setInternalChecked] = useState(false)
+  const checked = isControlled ? checkedProp : internalChecked
   const isChecked = indeterminate ? true : checked
 
   const handlePress = useCallback(() => {
     if (disabled) return
-    onValueChange?.(!checked)
-  }, [disabled, onValueChange, checked])
+    const next = !checked
+    if (!isControlled) setInternalChecked(next)
+    onValueChange?.(next)
+  }, [disabled, onValueChange, checked, isControlled])
 
   return (
     <PressableFeedback
@@ -46,7 +57,7 @@ export const F0Checkbox = React.memo(function F0Checkbox({
         checked: indeterminate ? "mixed" : checked,
         disabled,
       }}
-      accessibilityLabel={label}
+      accessibilityLabel={accessibilityLabel ?? label}
       testID={testID}
       variant="highlight"
     >

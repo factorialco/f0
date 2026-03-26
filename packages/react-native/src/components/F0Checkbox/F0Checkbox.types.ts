@@ -4,7 +4,12 @@
 export interface F0CheckboxProps {
   /**
    * Whether the checkbox is checked.
-   * @default false
+   *
+   * When provided, the component operates in **controlled** mode — the parent
+   * owns the state and must update this prop in response to `onValueChange`.
+   *
+   * When omitted, the component operates in **uncontrolled** mode and manages
+   * its own internal state (starts unchecked).
    */
   checked?: boolean
 
@@ -28,10 +33,16 @@ export interface F0CheckboxProps {
   disabled?: boolean
 
   /**
-   * Accessible label for the checkbox.
-   * Required for screen-reader support when `hideLabel` is true or no visible label is shown.
+   * Visible label text rendered next to the checkbox.
    */
   label?: string
+
+  /**
+   * Accessible name for screen readers.
+   * Required when `hideLabel` is true or no `label` is provided.
+   * Falls back to `label` when omitted.
+   */
+  accessibilityLabel?: string
 
   /**
    * When true, the label text is visually hidden but remains accessible to screen readers.
