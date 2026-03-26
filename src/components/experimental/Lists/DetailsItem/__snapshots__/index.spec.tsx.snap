@@ -1,14 +1,14 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`DetailsItem Snapshot type company 1`] = `
 <View
   className="flex gap-0.5"
 >
   <View
-    className="min-w-32 max-w-72"
+    className="max-w-72 min-w-32"
   >
     <Text
-      className="px-1.5 text-f1-foreground-secondary"
+      className="px-1.5 text-f0-foreground-secondary"
     >
       Company
     </Text>
@@ -16,7 +16,7 @@ exports[`DetailsItem Snapshot type company 1`] = `
       className="flex flex-shrink justify-center gap-0.5"
     >
       <View
-        className="flex rounded font-medium text-f1-foreground *:flex-1"
+        className="flex rounded font-medium text-f0-foreground *:flex-1"
       >
         <View
           accessibilityLabel="Copy factorial"
@@ -38,7 +38,7 @@ exports[`DetailsItem Snapshot type company 1`] = `
             }
           }
           accessible={true}
-          className="group flex flex-row justify-between gap-1.5 rounded p-1.5 transition-colors duration-300 active:bg-f1-background-secondary-hover"
+          className="group flex flex-row justify-between gap-1.5 rounded p-1.5 transition-colors duration-300 active:bg-f0-background-secondary-hover"
           collapsable={false}
           focusable={true}
           onBlur={[Function]}
@@ -62,7 +62,7 @@ exports[`DetailsItem Snapshot type company 1`] = `
               >
                 <View
                   aria-hidden={true}
-                  className="flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold w-5 h-5 rounded-xs dark:bg-f1-background-inverse-secondary bg-f1-background"
+                  className="flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold w-5 h-5 rounded-xs bg-f0-background dark:bg-f0-background-inverse-secondary"
                   data-a11y-color-contrast-ignore={true}
                   role="img"
                 >
@@ -88,7 +88,7 @@ exports[`DetailsItem Snapshot type company 1`] = `
               </View>
             </View>
             <Text
-              className="line-clamp-5 text-left text-f1-foreground"
+              className="line-clamp-5 text-left text-f0-foreground"
             >
               factorial
             </Text>
@@ -101,7 +101,7 @@ exports[`DetailsItem Snapshot type company 1`] = `
               aria-hidden={true}
               bbHeight="100%"
               bbWidth="100%"
-              className="shrink-0 w-5 h-5 stroke-md col-start-1 col-end-2 row-start-1 row-end-2 text-f1-icon-bold"
+              className="shrink-0 w-5 h-5 stroke-md text-f0-icon-bold col-start-1 col-end-2 row-start-1 row-end-2"
               fill="none"
               focusable={false}
               meetOrSlice={0}
@@ -113,6 +113,9 @@ exports[`DetailsItem Snapshot type company 1`] = `
                     "backgroundColor": "transparent",
                     "borderWidth": 0,
                   },
+                  [
+                    {},
+                  ],
                   {
                     "flex": 0,
                     "height": "100%",
@@ -190,10 +193,10 @@ exports[`DetailsItem Snapshot type dot-tag 1`] = `
   className="flex gap-0.5"
 >
   <View
-    className="min-w-32 max-w-72"
+    className="max-w-72 min-w-32"
   >
     <Text
-      className="px-1.5 text-f1-foreground-secondary"
+      className="px-1.5 text-f0-foreground-secondary"
     >
       Dot Tag
     </Text>
@@ -211,7 +214,7 @@ exports[`DetailsItem Snapshot type dot-tag 1`] = `
               {
                 "busy": undefined,
                 "checked": undefined,
-                "disabled": undefined,
+                "disabled": true,
                 "expanded": undefined,
                 "selected": undefined,
               }
@@ -225,7 +228,7 @@ exports[`DetailsItem Snapshot type dot-tag 1`] = `
               }
             }
             accessible={true}
-            className="flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f1-border-secondary"
+            className="overflow-hidden flex flex-row items-center justify-start gap-0.5 rounded-full py-0.5 pr-2 pl-1 border border-solid border-f0-border-secondary"
             collapsable={false}
             focusable={true}
             onBlur={[Function]}
@@ -237,6 +240,18 @@ exports[`DetailsItem Snapshot type dot-tag 1`] = `
             onResponderTerminate={[Function]}
             onResponderTerminationRequest={[Function]}
             onStartShouldSetResponder={[Function]}
+            style={
+              [
+                {
+                  "transform": [
+                    {
+                      "scale": 1,
+                    },
+                  ],
+                },
+                undefined,
+              ]
+            }
           >
             <View
               aria-hidden={true}
@@ -248,7 +263,7 @@ exports[`DetailsItem Snapshot type dot-tag 1`] = `
               }
             />
             <Text
-              className="line-clamp-1 text-base font-medium text-f1-foreground"
+              className="line-clamp-1 text-base font-medium text-f0-foreground"
             >
               Activity
             </Text>
@@ -265,10 +280,10 @@ exports[`DetailsItem Snapshot type item 1`] = `
   className="flex gap-0.5"
 >
   <View
-    className="min-w-32 max-w-72"
+    className="max-w-72 min-w-32"
   >
     <Text
-      className="px-1.5 text-f1-foreground-secondary"
+      className="px-1.5 text-f0-foreground-secondary"
     >
       Email
     </Text>
@@ -276,7 +291,7 @@ exports[`DetailsItem Snapshot type item 1`] = `
       className="flex flex-shrink justify-center gap-0.5"
     >
       <View
-        className="flex rounded font-medium text-f1-foreground *:flex-1"
+        className="flex rounded font-medium text-f0-foreground *:flex-1"
       >
         <View
           accessibilityLabel="Copy alicia.keys@factorial.co"
@@ -298,7 +313,7 @@ exports[`DetailsItem Snapshot type item 1`] = `
             }
           }
           accessible={true}
-          className="group flex flex-row justify-between gap-1.5 rounded p-1.5 transition-colors duration-300 active:bg-f1-background-secondary-hover"
+          className="group flex flex-row justify-between gap-1.5 rounded p-1.5 transition-colors duration-300 active:bg-f0-background-secondary-hover"
           collapsable={false}
           focusable={true}
           onBlur={[Function]}
@@ -315,7 +330,7 @@ exports[`DetailsItem Snapshot type item 1`] = `
             className="flex flex-row items-center gap-1.5"
           >
             <Text
-              className="line-clamp-5 text-left text-f1-foreground"
+              className="line-clamp-5 text-left text-f0-foreground"
             >
               alicia.keys@factorial.co
             </Text>
@@ -328,7 +343,7 @@ exports[`DetailsItem Snapshot type item 1`] = `
               aria-hidden={true}
               bbHeight="100%"
               bbWidth="100%"
-              className="shrink-0 w-5 h-5 stroke-md col-start-1 col-end-2 row-start-1 row-end-2 text-f1-icon-bold"
+              className="shrink-0 w-5 h-5 stroke-md text-f0-icon-bold col-start-1 col-end-2 row-start-1 row-end-2"
               fill="none"
               focusable={false}
               meetOrSlice={0}
@@ -340,6 +355,9 @@ exports[`DetailsItem Snapshot type item 1`] = `
                     "backgroundColor": "transparent",
                     "borderWidth": 0,
                   },
+                  [
+                    {},
+                  ],
                   {
                     "flex": 0,
                     "height": "100%",
@@ -417,10 +435,10 @@ exports[`DetailsItem Snapshot type person 1`] = `
   className="flex gap-0.5"
 >
   <View
-    className="min-w-32 max-w-72"
+    className="max-w-72 min-w-32"
   >
     <Text
-      className="px-1.5 text-f1-foreground-secondary"
+      className="px-1.5 text-f0-foreground-secondary"
     >
       Datos personales
     </Text>
@@ -428,7 +446,7 @@ exports[`DetailsItem Snapshot type person 1`] = `
       className="flex flex-shrink justify-center gap-0.5"
     >
       <View
-        className="flex rounded font-medium text-f1-foreground *:flex-1"
+        className="flex rounded font-medium text-f0-foreground *:flex-1"
       >
         <View
           accessibilityLabel="Copy Daniel Maza"
@@ -450,7 +468,7 @@ exports[`DetailsItem Snapshot type person 1`] = `
             }
           }
           accessible={true}
-          className="group flex flex-row justify-between gap-1.5 rounded p-1.5 transition-colors duration-300 active:bg-f1-background-secondary-hover"
+          className="group flex flex-row justify-between gap-1.5 rounded p-1.5 transition-colors duration-300 active:bg-f0-background-secondary-hover"
           collapsable={false}
           focusable={true}
           onBlur={[Function]}
@@ -474,12 +492,12 @@ exports[`DetailsItem Snapshot type person 1`] = `
               >
                 <View
                   aria-hidden={true}
-                  className="flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold w-5 h-5 rounded-full bg-[hsl(theme(colors.flubber.50))]"
+                  className="flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold w-5 h-5 rounded-full bg-[hsl(theme(colors.flubber-50))]"
                   data-a11y-color-contrast-ignore={true}
                   role="img"
                 >
                   <Text
-                    className="text-f1-foreground-inverse/90 text-sm"
+                    className="text-f0-foreground-inverse/90 text-sm"
                     data-a11y-color-contrast-ignore={true}
                   >
                     D
@@ -488,7 +506,7 @@ exports[`DetailsItem Snapshot type person 1`] = `
               </View>
             </View>
             <Text
-              className="line-clamp-5 text-left text-f1-foreground"
+              className="line-clamp-5 text-left text-f0-foreground"
             >
               Daniel Maza
             </Text>
@@ -501,7 +519,7 @@ exports[`DetailsItem Snapshot type person 1`] = `
               aria-hidden={true}
               bbHeight="100%"
               bbWidth="100%"
-              className="shrink-0 w-5 h-5 stroke-md col-start-1 col-end-2 row-start-1 row-end-2 text-f1-icon-bold"
+              className="shrink-0 w-5 h-5 stroke-md text-f0-icon-bold col-start-1 col-end-2 row-start-1 row-end-2"
               fill="none"
               focusable={false}
               meetOrSlice={0}
@@ -513,6 +531,9 @@ exports[`DetailsItem Snapshot type person 1`] = `
                     "backgroundColor": "transparent",
                     "borderWidth": 0,
                   },
+                  [
+                    {},
+                  ],
                   {
                     "flex": 0,
                     "height": "100%",
@@ -590,10 +611,10 @@ exports[`DetailsItem Snapshot type team 1`] = `
   className="flex gap-0.5"
 >
   <View
-    className="min-w-32 max-w-72"
+    className="max-w-72 min-w-32"
   >
     <Text
-      className="px-1.5 text-f1-foreground-secondary"
+      className="px-1.5 text-f0-foreground-secondary"
     >
       Team
     </Text>
@@ -601,7 +622,7 @@ exports[`DetailsItem Snapshot type team 1`] = `
       className="flex flex-shrink justify-center gap-0.5"
     >
       <View
-        className="flex rounded font-medium text-f1-foreground *:flex-1"
+        className="flex rounded font-medium text-f0-foreground *:flex-1"
       >
         <View
           accessibilityLabel="Copy factorial"
@@ -623,7 +644,7 @@ exports[`DetailsItem Snapshot type team 1`] = `
             }
           }
           accessible={true}
-          className="group flex flex-row justify-between gap-1.5 rounded p-1.5 transition-colors duration-300 active:bg-f1-background-secondary-hover"
+          className="group flex flex-row justify-between gap-1.5 rounded p-1.5 transition-colors duration-300 active:bg-f0-background-secondary-hover"
           collapsable={false}
           focusable={true}
           onBlur={[Function]}
@@ -647,12 +668,12 @@ exports[`DetailsItem Snapshot type team 1`] = `
               >
                 <View
                   aria-hidden={true}
-                  className="flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold w-5 h-5 rounded-xs bg-[hsl(theme(colors.purple.50))]"
+                  className="flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold w-5 h-5 rounded-xs bg-[hsl(theme(colors.purple-50))]"
                   data-a11y-color-contrast-ignore={true}
                   role="img"
                 >
                   <Text
-                    className="text-f1-foreground-inverse/90 text-sm"
+                    className="text-f0-foreground-inverse/90 text-sm"
                     data-a11y-color-contrast-ignore={true}
                   >
                     F
@@ -661,7 +682,7 @@ exports[`DetailsItem Snapshot type team 1`] = `
               </View>
             </View>
             <Text
-              className="line-clamp-5 text-left text-f1-foreground"
+              className="line-clamp-5 text-left text-f0-foreground"
             >
               factorial
             </Text>
@@ -674,7 +695,7 @@ exports[`DetailsItem Snapshot type team 1`] = `
               aria-hidden={true}
               bbHeight="100%"
               bbWidth="100%"
-              className="shrink-0 w-5 h-5 stroke-md col-start-1 col-end-2 row-start-1 row-end-2 text-f1-icon-bold"
+              className="shrink-0 w-5 h-5 stroke-md text-f0-icon-bold col-start-1 col-end-2 row-start-1 row-end-2"
               fill="none"
               focusable={false}
               meetOrSlice={0}
@@ -686,6 +707,9 @@ exports[`DetailsItem Snapshot type team 1`] = `
                     "backgroundColor": "transparent",
                     "borderWidth": 0,
                   },
+                  [
+                    {},
+                  ],
                   {
                     "flex": 0,
                     "height": "100%",

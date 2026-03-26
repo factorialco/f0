@@ -1,47 +1,46 @@
-import { cva, type VariantProps } from "cva";
-import { Icon, IconType } from "../Icon";
+import { F0Badge } from "../F0Badge"
+import type { IconType } from "../primitives/F0Icon"
 
-const badgeVariants = cva({
-  base: "flex shrink-0 items-center justify-center rounded-full",
-  variants: {
-    type: {
-      neutral: "bg-transparent text-f1-icon",
-      highlight: "text-f1-special-highlight",
-      positive: "bg-f1-background-positive-bold text-f1-foreground-inverse",
-      critical: "bg-f1-icon-critical text-f1-foreground-inverse",
-      warning: "bg-f1-background-warning-bold text-f1-foreground-inverse",
-    },
-    size: {
-      xs: "h-2.5 w-2.5",
-      sm: "h-3 w-3",
-      md: "h-5 w-5",
-      lg: "h-6 w-6",
-    },
-  },
-  defaultVariants: {
-    type: "neutral",
-    size: "md",
-  },
-});
+/**
+ * @deprecated Use `F0_BADGE_VARIANTS` from `../F0Badge` instead.
+ */
+export const BADGE_TYPES = [
+  "neutral",
+  "highlight",
+  "positive",
+  "critical",
+  "warning",
+] as const
 
-const iconSizes = {
-  xs: "xs",
-  sm: "xs",
-  md: "sm",
-  lg: "md",
-} as const;
+/**
+ * @deprecated Use `F0BadgeVariant` from `../F0Badge` instead.
+ */
+export type BadgeType = (typeof BADGE_TYPES)[number]
 
-export interface BadgeProps extends VariantProps<typeof badgeVariants> {
-  icon: IconType;
-  size?: keyof typeof iconSizes;
+/**
+ * @deprecated Use `F0BadgeSize` from `../F0Badge` instead.
+ */
+export const BADGE_SIZES = ["xs", "sm", "md", "lg"] as const
+
+/**
+ * @deprecated Use `F0BadgeSize` from `../F0Badge` instead.
+ */
+export type BadgeSize = (typeof BADGE_SIZES)[number]
+
+/**
+ * @deprecated Use `F0BadgeProps` from `../F0Badge` instead.
+ * Migration: replace `type` with `variant`.
+ */
+export interface BadgeProps {
+  icon: IconType
+  type?: BadgeType
+  size?: BadgeSize
 }
 
-export const Badge = ({ type, size = "md", icon }: BadgeProps) => {
-  return (
-    <Icon
-      className={badgeVariants({ type, size })}
-      icon={icon}
-      size={iconSizes[size]}
-    />
-  );
-};
+/**
+ * @deprecated Use `F0Badge` from `../F0Badge` instead.
+ * Migration: replace `type` with `variant`.
+ */
+export const Badge = ({ type = "neutral", size = "md", icon }: BadgeProps) => {
+  return <F0Badge icon={icon} variant={type} size={size} />
+}

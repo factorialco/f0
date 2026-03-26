@@ -1,6 +1,6 @@
-import Svg, { Rect, Path } from "react-native-svg";
-import type { SvgProps } from "react-native-svg";
-import { Ref, forwardRef } from "react";
+import { Ref, forwardRef } from "react"
+import Svg, { Rect, Path } from "react-native-svg"
+import type { SvgProps } from "react-native-svg"
 const SvgDollarBill = (props: SvgProps, ref: Ref<Svg>) => (
   <Svg
     fill="none"
@@ -17,6 +17,6 @@ const SvgDollarBill = (props: SvgProps, ref: Ref<Svg>) => (
     />
     <Path stroke="currentColor" strokeLinecap="round" d="M7 12v.1M17 12v.1" />
   </Svg>
-);
-const ForwardRef = forwardRef(SvgDollarBill);
-export default ForwardRef;
+)
+const ForwardRef = forwardRef(SvgDollarBill)
+export default ForwardRef

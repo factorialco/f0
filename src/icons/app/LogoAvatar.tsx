@@ -1,6 +1,6 @@
-import Svg, { Path } from "react-native-svg";
-import type { SvgProps } from "react-native-svg";
-import { Ref, forwardRef } from "react";
+import { Ref, forwardRef } from "react"
+import Svg, { Path } from "react-native-svg"
+import type { SvgProps } from "react-native-svg"
 const SvgLogoAvatar = (props: SvgProps, ref: Ref<Svg>) => (
   <Svg
     fill="none"
@@ -18,6 +18,6 @@ const SvgLogoAvatar = (props: SvgProps, ref: Ref<Svg>) => (
       d="M17.037 18.215A7.97 7.97 0 0 1 12 20a7.97 7.97 0 0 1-5.037-1.785A7.97 7.97 0 0 1 12 16.431c1.91 0 3.662.668 5.037 1.784M12 14.708A2.954 2.954 0 1 0 12 8.8a2.954 2.954 0 0 0 0 5.908"
     />
   </Svg>
-);
-const ForwardRef = forwardRef(SvgLogoAvatar);
-export default ForwardRef;
+)
+const ForwardRef = forwardRef(SvgLogoAvatar)
+export default ForwardRef

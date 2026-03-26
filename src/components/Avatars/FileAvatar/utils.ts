@@ -1,28 +1,28 @@
 type FileTypeInfo = {
-  type: string;
-  color: string;
-};
+  type: string
+  color: string
+}
 
 type FileLike = {
-  name: string;
-  type?: string;
-};
+  name: string
+  type?: string
+}
 
 const FILE_TYPE_MAP: Record<string, FileTypeInfo> = {
-  pdf: { type: "PDF", color: "text-f1-foreground-accent" },
-  image: { type: "IMG", color: "text-f1-foreground-info" },
-  doc: { type: "DOC", color: "text-f1-foreground-info" },
-  excel: { type: "XLS", color: "text-f1-foreground-positive" },
-  ppt: { type: "PPT", color: "text-f1-foreground-warning" },
-  txt: { type: "TXT", color: "text-f1-foreground-secondary" },
-  video: { type: "VID", color: "text-f1-foreground-info" },
-  audio: { type: "AUD", color: "text-f1-foreground-accent" },
-  archive: { type: "ZIP", color: "text-f1-foreground-warning" },
-  csv: { type: "CSV", color: "text-f1-foreground-positive" },
-  html: { type: "HTML", color: "text-f1-foreground-accent" },
-  markdown: { type: "MD", color: "text-f1-foreground-secondary" },
-  default: { type: "FILE", color: "text-f1-foreground" },
-};
+  pdf: { type: "PDF", color: "text-f0-foreground-accent" },
+  image: { type: "IMG", color: "text-f0-foreground-info" },
+  doc: { type: "DOC", color: "text-f0-foreground-info" },
+  excel: { type: "XLS", color: "text-f0-foreground-positive" },
+  ppt: { type: "PPT", color: "text-f0-foreground-warning" },
+  txt: { type: "TXT", color: "text-f0-foreground-secondary" },
+  video: { type: "VID", color: "text-f0-foreground-info" },
+  audio: { type: "AUD", color: "text-f0-foreground-accent" },
+  archive: { type: "ZIP", color: "text-f0-foreground-warning" },
+  csv: { type: "CSV", color: "text-f0-foreground-positive" },
+  html: { type: "HTML", color: "text-f0-foreground-accent" },
+  markdown: { type: "MD", color: "text-f0-foreground-secondary" },
+  default: { type: "FILE", color: "text-f0-foreground" },
+}
 
 const MIME_MATCH_MAP: Record<string, keyof typeof FILE_TYPE_MAP> = {
   pdf: "pdf",
@@ -42,7 +42,7 @@ const MIME_MATCH_MAP: Record<string, keyof typeof FILE_TYPE_MAP> = {
   tar: "archive",
   gz: "archive",
   "7z": "archive",
-};
+}
 
 const EXTENSION_MAP: Record<string, keyof typeof FILE_TYPE_MAP> = {
   pdf: "pdf",
@@ -77,27 +77,27 @@ const EXTENSION_MAP: Record<string, keyof typeof FILE_TYPE_MAP> = {
   htm: "html",
   md: "markdown",
   markdown: "markdown",
-};
+}
 
 const getFileTypeInfo = (file: FileLike): FileTypeInfo => {
-  const mimeType = file.type?.toLowerCase() ?? "";
+  const mimeType = file.type?.toLowerCase() ?? ""
 
   const matchedMimeKey = Object.keys(MIME_MATCH_MAP).find((key) =>
-    mimeType.includes(key),
-  );
+    mimeType.includes(key)
+  )
 
   if (matchedMimeKey) {
-    return FILE_TYPE_MAP[MIME_MATCH_MAP[matchedMimeKey]];
+    return FILE_TYPE_MAP[MIME_MATCH_MAP[matchedMimeKey]]
   }
 
-  const extension = file.name.toLowerCase().split(".").pop();
+  const extension = file.name.toLowerCase().split(".").pop()
 
   if (extension && EXTENSION_MAP[extension]) {
-    return FILE_TYPE_MAP[EXTENSION_MAP[extension]];
+    return FILE_TYPE_MAP[EXTENSION_MAP[extension]]
   }
 
-  return FILE_TYPE_MAP.default;
-};
+  return FILE_TYPE_MAP.default
+}
 
-export { getFileTypeInfo };
-export type { FileTypeInfo, FileLike };
+export { getFileTypeInfo }
+export type { FileTypeInfo, FileLike }

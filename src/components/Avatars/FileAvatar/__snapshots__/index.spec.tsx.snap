@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`FileAvatar Snapshot - different file types 1`] = `
 <View
@@ -8,10 +8,10 @@ exports[`FileAvatar Snapshot - different file types 1`] = `
     className="h-fit w-fit"
   >
     <View
-      className="flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold w-8 h-8 rounded border border-solid border-f1-border-secondary bg-f1-background"
+      className="flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold w-8 h-8 rounded border border-solid border-f0-border-secondary bg-f0-background"
     >
       <Text
-        className="font-semibold text-sm text-f1-foreground-accent"
+        className="font-semibold text-sm text-f0-foreground-accent"
       >
         PDF
       </Text>
@@ -28,10 +28,10 @@ exports[`FileAvatar Snapshot - different file types 2`] = `
     className="h-fit w-fit"
   >
     <View
-      className="flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold w-8 h-8 rounded border border-solid border-f1-border-secondary bg-f1-background"
+      className="flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold w-8 h-8 rounded border border-solid border-f0-border-secondary bg-f0-background"
     >
       <Text
-        className="font-semibold text-sm text-f1-foreground-info"
+        className="font-semibold text-sm text-f0-foreground-info"
       >
         IMG
       </Text>
@@ -48,10 +48,10 @@ exports[`FileAvatar Snapshot - different file types 3`] = `
     className="h-fit w-fit"
   >
     <View
-      className="flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold w-8 h-8 rounded border border-solid border-f1-border-secondary bg-f1-background"
+      className="flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold w-8 h-8 rounded border border-solid border-f0-border-secondary bg-f0-background"
     >
       <Text
-        className="font-semibold text-sm text-f1-foreground-info"
+        className="font-semibold text-sm text-f0-foreground-info"
       >
         DOC
       </Text>
@@ -68,10 +68,10 @@ exports[`FileAvatar Snapshot - different file types 4`] = `
     className="h-fit w-fit"
   >
     <View
-      className="flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold w-8 h-8 rounded border border-solid border-f1-border-secondary bg-f1-background"
+      className="flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold w-8 h-8 rounded border border-solid border-f0-border-secondary bg-f0-background"
     >
       <Text
-        className="font-semibold text-sm text-f1-foreground-positive"
+        className="font-semibold text-sm text-f0-foreground-positive"
       >
         XLS
       </Text>
@@ -88,10 +88,10 @@ exports[`FileAvatar Snapshot - different file types 5`] = `
     className="h-fit w-fit"
   >
     <View
-      className="flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold w-8 h-8 rounded border border-solid border-f1-border-secondary bg-f1-background"
+      className="flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold w-8 h-8 rounded border border-solid border-f0-border-secondary bg-f0-background"
     >
       <Text
-        className="font-semibold text-sm text-f1-foreground-warning"
+        className="font-semibold text-sm text-f0-foreground-warning"
       >
         PPT
       </Text>
@@ -108,10 +108,10 @@ exports[`FileAvatar Snapshot - different file types 6`] = `
     className="h-fit w-fit"
   >
     <View
-      className="flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold w-8 h-8 rounded border border-solid border-f1-border-secondary bg-f1-background"
+      className="flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold w-8 h-8 rounded border border-solid border-f0-border-secondary bg-f0-background"
     >
       <Text
-        className="font-semibold text-sm text-f1-foreground-secondary"
+        className="font-semibold text-sm text-f0-foreground-secondary"
       >
         TXT
       </Text>
@@ -128,10 +128,10 @@ exports[`FileAvatar Snapshot - different file types 7`] = `
     className="h-fit w-fit"
   >
     <View
-      className="flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold w-8 h-8 rounded border border-solid border-f1-border-secondary bg-f1-background"
+      className="flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold w-8 h-8 rounded border border-solid border-f0-border-secondary bg-f0-background"
     >
       <Text
-        className="font-semibold text-sm text-f1-foreground-info"
+        className="font-semibold text-sm text-f0-foreground-info"
       >
         VID
       </Text>
@@ -148,10 +148,10 @@ exports[`FileAvatar Snapshot - different file types 8`] = `
     className="h-fit w-fit"
   >
     <View
-      className="flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold w-8 h-8 rounded border border-solid border-f1-border-secondary bg-f1-background"
+      className="flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold w-8 h-8 rounded border border-solid border-f0-border-secondary bg-f0-background"
     >
       <Text
-        className="font-semibold text-sm text-f1-foreground-accent"
+        className="font-semibold text-sm text-f0-foreground-accent"
       >
         AUD
       </Text>
@@ -168,10 +168,10 @@ exports[`FileAvatar Snapshot - different file types 9`] = `
     className="h-fit w-fit"
   >
     <View
-      className="flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold w-8 h-8 rounded border border-solid border-f1-border-secondary bg-f1-background"
+      className="flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold w-8 h-8 rounded border border-solid border-f0-border-secondary bg-f0-background"
     >
       <Text
-        className="font-semibold text-sm text-f1-foreground-warning"
+        className="font-semibold text-sm text-f0-foreground-warning"
       >
         ZIP
       </Text>
@@ -188,10 +188,10 @@ exports[`FileAvatar Snapshot - different file types 10`] = `
     className="h-fit w-fit"
   >
     <View
-      className="flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold w-8 h-8 rounded border border-solid border-f1-border-secondary bg-f1-background"
+      className="flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold w-8 h-8 rounded border border-solid border-f0-border-secondary bg-f0-background"
     >
       <Text
-        className="font-semibold text-sm text-f1-foreground-positive"
+        className="font-semibold text-sm text-f0-foreground-positive"
       >
         CSV
       </Text>
@@ -208,10 +208,10 @@ exports[`FileAvatar Snapshot - different file types 11`] = `
     className="h-fit w-fit"
   >
     <View
-      className="flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold w-8 h-8 rounded border border-solid border-f1-border-secondary bg-f1-background"
+      className="flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold w-8 h-8 rounded border border-solid border-f0-border-secondary bg-f0-background"
     >
       <Text
-        className="font-semibold text-sm text-f1-foreground-accent"
+        className="font-semibold text-sm text-f0-foreground-accent"
       >
         HTM
       </Text>
@@ -228,10 +228,10 @@ exports[`FileAvatar Snapshot - different file types 12`] = `
     className="h-fit w-fit"
   >
     <View
-      className="flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold w-8 h-8 rounded border border-solid border-f1-border-secondary bg-f1-background"
+      className="flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold w-8 h-8 rounded border border-solid border-f0-border-secondary bg-f0-background"
     >
       <Text
-        className="font-semibold text-sm text-f1-foreground-secondary"
+        className="font-semibold text-sm text-f0-foreground-secondary"
       >
         MD
       </Text>
@@ -248,10 +248,10 @@ exports[`FileAvatar Snapshot - different file types 13`] = `
     className="h-fit w-fit"
   >
     <View
-      className="flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold w-8 h-8 rounded border border-solid border-f1-border-secondary bg-f1-background"
+      className="flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold w-8 h-8 rounded border border-solid border-f0-border-secondary bg-f0-background"
     >
       <Text
-        className="font-semibold text-sm text-f1-foreground"
+        className="font-semibold text-sm text-f0-foreground"
       >
         FIL
       </Text>

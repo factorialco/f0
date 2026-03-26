@@ -1,6 +1,6 @@
-import Svg, { Path } from "react-native-svg";
-import type { SvgProps } from "react-native-svg";
-import { Ref, forwardRef } from "react";
+import { Ref, forwardRef } from "react"
+import Svg, { Path } from "react-native-svg"
+import type { SvgProps } from "react-native-svg"
 const SvgSparkles = (props: SvgProps, ref: Ref<Svg>) => (
   <Svg
     fill="none"
@@ -20,6 +20,6 @@ const SvgSparkles = (props: SvgProps, ref: Ref<Svg>) => (
       d="M12 11v8M6 14c1 .333 3 2 3 5M18 14c-1 .333-3 2-3 5"
     />
   </Svg>
-);
-const ForwardRef = forwardRef(SvgSparkles);
-export default ForwardRef;
+)
+const ForwardRef = forwardRef(SvgSparkles)
+export default ForwardRef

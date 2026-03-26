@@ -1,0 +1,21 @@
+import { Ref, forwardRef } from "react"
+import Svg, { Path } from "react-native-svg"
+import type { SvgProps } from "react-native-svg"
+const SvgQuestionCircle = (props: SvgProps, ref: Ref<Svg>) => (
+  <Svg
+    fill="none"
+    viewBox="0 0 24 24"
+    className={props.className}
+    ref={ref}
+    {...props}
+  >
+    <Path
+      fill="currentColor"
+      fillRule="evenodd"
+      d="M12 4.65a7.35 7.35 0 1 0 0 14.7 7.35 7.35 0 0 0 0-14.7M3.35 12a8.65 8.65 0 1 1 17.3 0 8.65 8.65 0 0 1-17.3 0m7.9 3.75a.75.75 0 1 1 1.5 0 .75.75 0 0 1-1.5 0m-.6-5.25a1.35 1.35 0 1 1 2.7 0v.065c0 .71-.575 1.285-1.285 1.285a.715.715 0 0 0-.715.715v.935a.65.65 0 1 0 1.3 0v-.417a2.586 2.586 0 0 0 2-2.518V10.5a2.65 2.65 0 1 0-5.3 0 .65.65 0 1 0 1.3 0"
+      clipRule="evenodd"
+    />
+  </Svg>
+)
+const ForwardRef = forwardRef(SvgQuestionCircle)
+export default ForwardRef

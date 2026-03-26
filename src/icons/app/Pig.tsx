@@ -1,6 +1,6 @@
-import Svg, { Path, Rect } from "react-native-svg";
-import type { SvgProps } from "react-native-svg";
-import { Ref, forwardRef } from "react";
+import { Ref, forwardRef } from "react"
+import Svg, { Path, Rect } from "react-native-svg"
+import type { SvgProps } from "react-native-svg"
 const SvgPig = (props: SvgProps, ref: Ref<Svg>) => (
   <Svg
     fill="none"
@@ -36,6 +36,6 @@ const SvgPig = (props: SvgProps, ref: Ref<Svg>) => (
       rx={1.739}
     />
   </Svg>
-);
-const ForwardRef = forwardRef(SvgPig);
-export default ForwardRef;
+)
+const ForwardRef = forwardRef(SvgPig)
+export default ForwardRef

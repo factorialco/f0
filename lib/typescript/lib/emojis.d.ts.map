@@ -1,0 +1,1 @@
+{"version":3,"file":"emojis.d.ts","sourceRoot":"","sources":["../../../src/lib/emojis.tsx"],"names":[],"mappings":"AAaA,MAAM,WAAW,eAAe;IAC9B,IAAI,CAAC,EAAE;QAAE,IAAI,EAAE,MAAM,CAAC;QAAC,IAAI,EAAE,MAAM,CAAA;KAAE,CAAA;IACrC,SAAS,CAAC,EAAE,MAAM,CAAA;IAClB,KAAK,EAAE,MAAM,CAAA;CACd;AAED,wBAAgB,UAAU,CAAC,EAAE,KAAK,EAAE,IAAI,EAAE,SAAS,EAAE,EAAE,eAAe,+BAmBrE"}

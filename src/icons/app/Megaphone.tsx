@@ -1,6 +1,6 @@
-import Svg, { Path } from "react-native-svg";
-import type { SvgProps } from "react-native-svg";
-import { Ref, forwardRef } from "react";
+import { Ref, forwardRef } from "react"
+import Svg, { Path } from "react-native-svg"
+import type { SvgProps } from "react-native-svg"
 const SvgMegaphone = (props: SvgProps, ref: Ref<Svg>) => (
   <Svg
     fill="none"
@@ -16,6 +16,6 @@ const SvgMegaphone = (props: SvgProps, ref: Ref<Svg>) => (
     />
     <Path stroke="currentColor" strokeLinecap="round" d="M20 10v4" />
   </Svg>
-);
-const ForwardRef = forwardRef(SvgMegaphone);
-export default ForwardRef;
+)
+const ForwardRef = forwardRef(SvgMegaphone)
+export default ForwardRef

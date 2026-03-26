@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`OnePreset Snapshot 1`] = `
 <View
@@ -23,7 +23,7 @@ exports[`OnePreset Snapshot 1`] = `
       }
     }
     accessible={true}
-    className="flex grow-0 flex-row items-center gap-2 rounded border border-f1-border px-2.5 py-1.5 font-medium text-f1-foreground"
+    className="overflow-hidden flex grow-0 flex-row items-center gap-2 rounded border px-2.5 py-1.5 font-medium border-f0-border text-f0-foreground"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -35,9 +35,35 @@ exports[`OnePreset Snapshot 1`] = `
     onResponderTerminate={[Function]}
     onResponderTerminationRequest={[Function]}
     onStartShouldSetResponder={[Function]}
+    style={
+      [
+        {
+          "transform": [
+            {
+              "scale": 1,
+            },
+          ],
+        },
+        undefined,
+      ]
+    }
   >
+    <View
+      className="absolute inset-0"
+      pointerEvents="none"
+      style={
+        [
+          {
+            "opacity": 0,
+          },
+          {
+            "backgroundColor": "rgba(0, 0, 0, 1)",
+          },
+        ]
+      }
+    />
     <Text
-      className="whitespace-nowrap text-f1-foreground"
+      className="whitespace-nowrap text-f0-foreground"
     >
       label
     </Text>
@@ -68,7 +94,7 @@ exports[`OnePreset Snapshot with number 1`] = `
       }
     }
     accessible={true}
-    className="flex grow-0 flex-row items-center gap-2 rounded border border-f1-border px-2.5 py-1.5 font-medium text-f1-foreground pr-1.5"
+    className="overflow-hidden flex grow-0 flex-row items-center gap-2 rounded border px-2.5 py-1.5 font-medium pr-1.5 border-f0-border text-f0-foreground"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -80,9 +106,35 @@ exports[`OnePreset Snapshot with number 1`] = `
     onResponderTerminate={[Function]}
     onResponderTerminationRequest={[Function]}
     onStartShouldSetResponder={[Function]}
+    style={
+      [
+        {
+          "transform": [
+            {
+              "scale": 1,
+            },
+          ],
+        },
+        undefined,
+      ]
+    }
   >
+    <View
+      className="absolute inset-0"
+      pointerEvents="none"
+      style={
+        [
+          {
+            "opacity": 0,
+          },
+          {
+            "backgroundColor": "rgba(0, 0, 0, 1)",
+          },
+        ]
+      }
+    />
     <Text
-      className="whitespace-nowrap text-f1-foreground"
+      className="whitespace-nowrap text-f0-foreground"
     >
       label
     </Text>
@@ -90,10 +142,10 @@ exports[`OnePreset Snapshot with number 1`] = `
       className="flex items-start"
     >
       <View
-        className="flex items-center justify-center rounded-xs grow-0 px-0.5 min-w-5 h-5 bg-f1-background-secondary border border-f1-border"
+        className="flex items-center justify-center rounded-xs grow-0 px-0.5 min-w-5 h-5 bg-f0-background-secondary border border-f0-border"
       >
         <Text
-          className="text-center text-sm font-medium tabular-nums whitespace-nowrap text-f1-foreground"
+          className="text-center text-sm font-medium tabular-nums whitespace-nowrap text-f0-foreground"
         >
           42
         </Text>
@@ -126,7 +178,7 @@ exports[`OnePreset renders correctly with selected props 1`] = `
       }
     }
     accessible={true}
-    className="flex grow-0 flex-row items-center gap-2 rounded border px-2.5 py-1.5 font-medium border-f1-border-selected bg-f1-background-selected-secondary text-f1-foreground-selected"
+    className="overflow-hidden flex grow-0 flex-row items-center gap-2 rounded border px-2.5 py-1.5 font-medium border-f0-border-selected bg-f0-background-selected-secondary text-f0-foreground-selected"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -138,9 +190,35 @@ exports[`OnePreset renders correctly with selected props 1`] = `
     onResponderTerminate={[Function]}
     onResponderTerminationRequest={[Function]}
     onStartShouldSetResponder={[Function]}
+    style={
+      [
+        {
+          "transform": [
+            {
+              "scale": 1,
+            },
+          ],
+        },
+        undefined,
+      ]
+    }
   >
+    <View
+      className="absolute inset-0"
+      pointerEvents="none"
+      style={
+        [
+          {
+            "opacity": 0,
+          },
+          {
+            "backgroundColor": "rgba(0, 0, 0, 1)",
+          },
+        ]
+      }
+    />
     <Text
-      className="whitespace-nowrap text-f1-foreground"
+      className="whitespace-nowrap text-f0-foreground-selected"
     >
       label
     </Text>

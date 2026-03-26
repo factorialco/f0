@@ -1,15 +1,15 @@
-import { BaseTag } from "../BaseTag";
-import { useTextFormatEnforcer } from "../../../lib/text";
-import { Icon, IconType } from "../../Icon";
-import { cn } from "../../../lib/utils";
+import { useTextFormatEnforcer } from "../../../lib/text"
+import { cn } from "../../../lib/utils"
+import { F0Icon, type IconType } from "../../primitives/F0Icon"
+import { BaseTag } from "../BaseTag"
 
 export type RawTagProps = {
-  text?: string;
-  additionalAccesibleText?: string;
-  icon?: IconType;
-  noBorder?: boolean;
-  className?: string;
-};
+  text?: string
+  additionalAccesibleText?: string
+  icon?: IconType
+  noBorder?: boolean
+  className?: string
+}
 
 export const RawTag = ({
   text,
@@ -18,24 +18,24 @@ export const RawTag = ({
   noBorder,
   className,
 }: RawTagProps) => {
-  useTextFormatEnforcer(text, { disallowEmpty: true });
+  useTextFormatEnforcer(text, { disallowEmpty: true })
 
   return (
     <BaseTag
       classNameContainer={cn(
-        !noBorder && "border border-solid border-f1-border-secondary",
-        className,
+        !noBorder && "border border-solid border-f0-border-secondary",
+        className
       )}
-      classNameText="text-f1-foreground"
+      classNameText="text-f0-foreground"
       left={
         icon ? (
-          <Icon icon={icon} size="sm" className="text-f1-icon" aria-hidden />
+          <F0Icon icon={icon} size="sm" color="default" aria-hidden />
         ) : null
       }
       text={text}
       additionalAccesibleText={additionalAccesibleText}
     />
-  );
-};
+  )
+}
 
-RawTag.displayName = "RawTag";
+RawTag.displayName = "RawTag"

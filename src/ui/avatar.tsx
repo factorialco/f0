@@ -1,12 +1,16 @@
-import { cva } from "cva";
-import * as React from "react";
-import { cn } from "../lib/utils";
-import { View, Text, Image } from "react-native";
+import * as React from "react"
+import { View, Text, Image } from "react-native"
+import { tv } from "tailwind-variants"
 
-export const sizes = ["xsmall", "small", "medium", "large", "xlarge"] as const;
+import { cn } from "../lib/utils"
 
-export const type = ["base", "rounded"] as const;
+/** @deprecated Use F0Avatar from components/F0Avatar instead */
+export const sizes = ["xsmall", "small", "medium", "large", "xlarge"] as const
 
+/** @deprecated Use F0Avatar from components/F0Avatar instead */
+export const type = ["base", "rounded"] as const
+
+/** @deprecated Use F0Avatar from components/F0Avatar instead */
 export const color = [
   "viridian",
   "malibu",
@@ -19,7 +23,7 @@ export const color = [
   "flubber",
   "indigo",
   "camel",
-] as const;
+] as const
 
 const textSizes = {
   xsmall: "text-sm",
@@ -27,9 +31,9 @@ const textSizes = {
   medium: "text-md",
   large: "text-2xl",
   xlarge: "text-3xl",
-};
+}
 
-const avatarVariants = cva({
+const avatarVariants = tv({
   base: "flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold",
   variants: {
     size: {
@@ -44,17 +48,17 @@ const avatarVariants = cva({
       rounded: "rounded-full",
     } satisfies Record<(typeof type)[number], string>,
     color: {
-      viridian: "bg-[hsl(theme(colors.viridian.50))]",
-      malibu: "bg-[hsl(theme(colors.malibu.50))]",
-      yellow: "bg-[hsl(theme(colors.yellow.50))]",
-      purple: "bg-[hsl(theme(colors.purple.50))]",
-      lilac: "bg-[hsl(theme(colors.lilac.50))]",
-      barbie: "bg-[hsl(theme(colors.barbie.50))]",
-      smoke: "bg-[hsl(theme(colors.smoke.50))]",
-      army: "bg-[hsl(theme(colors.army.50))]",
-      flubber: "bg-[hsl(theme(colors.flubber.50))]",
-      indigo: "bg-[hsl(theme(colors.indigo.50))]",
-      camel: "bg-[hsl(theme(colors.camel.50))]",
+      viridian: "bg-[hsl(theme(colors.viridian-50))]",
+      malibu: "bg-[hsl(theme(colors.malibu-50))]",
+      yellow: "bg-[hsl(theme(colors.yellow-50))]",
+      purple: "bg-[hsl(theme(colors.purple-50))]",
+      lilac: "bg-[hsl(theme(colors.lilac-50))]",
+      barbie: "bg-[hsl(theme(colors.barbie-50))]",
+      smoke: "bg-[hsl(theme(colors.smoke-50))]",
+      army: "bg-[hsl(theme(colors.army-50))]",
+      flubber: "bg-[hsl(theme(colors.flubber-50))]",
+      indigo: "bg-[hsl(theme(colors.indigo-50))]",
+      camel: "bg-[hsl(theme(colors.camel-50))]",
     } satisfies Record<(typeof color)[number], string>,
   },
   defaultVariants: {
@@ -62,20 +66,20 @@ const avatarVariants = cva({
     type: "base",
     color: "viridian",
   },
-});
+})
 
 type AvatarProps = React.ComponentPropsWithoutRef<typeof View> & {
-  size?: (typeof sizes)[number];
-  type?: (typeof type)[number];
-  color?: (typeof color)[number];
-};
+  size?: (typeof sizes)[number]
+  type?: (typeof type)[number]
+  color?: (typeof color)[number]
+}
 
 const Avatar = ({ size, type, color, className, ...props }: AvatarProps) => (
   <View
-    className={cn(avatarVariants({ size, type, color, className }))}
+    className={cn(avatarVariants({ size, type, color }), className)}
     {...props}
   />
-);
+)
 
 const AvatarImage = ({
   className,
@@ -83,8 +87,8 @@ const AvatarImage = ({
   src,
   ...props
 }: React.ComponentPropsWithoutRef<typeof View> & {
-  src?: string;
-  alt: string;
+  src?: string
+  alt: string
 }) => (
   <View className={cn("aspect-square h-full w-full", className)} {...props}>
     <Image
@@ -95,19 +99,20 @@ const AvatarImage = ({
       aria-label={alt}
     />
   </View>
-);
+)
 
 const AvatarFallback = ({
   className,
   size = "medium",
   ...props
 }: React.ComponentPropsWithoutRef<typeof Text> & {
-  size?: (typeof sizes)[number];
+  size?: (typeof sizes)[number]
 }) => (
   <Text
-    className={cn("text-f1-foreground-inverse/90", textSizes[size], className)}
+    className={cn("text-f0-foreground-inverse/90", textSizes[size], className)}
     {...props}
   />
-);
+)
 
-export { Avatar, AvatarFallback, AvatarImage };
+/** @deprecated Use F0Avatar from components/F0Avatar instead */
+export { Avatar, AvatarFallback, AvatarImage }

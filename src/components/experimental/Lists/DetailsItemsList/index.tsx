@@ -1,13 +1,14 @@
-import React from "react";
-import { DetailsItem, DetailsItemType } from "../DetailsItem";
-import { cn } from "../../../../lib/utils";
-import { View, Text } from "react-native";
+import React from "react"
+import { Text, View } from "react-native"
+
+import { cn } from "../../../../lib/utils"
+import { DetailsItem, DetailsItemType } from "../DetailsItem"
 
 export interface DetailsItemsListProps {
-  title?: string;
-  tableView?: boolean;
-  isHorizontalItem?: boolean;
-  details: DetailsItemType[];
+  title?: string
+  tableView?: boolean
+  isHorizontalItem?: boolean
+  details: DetailsItemType[]
 }
 
 export const DetailsItemsList = function DetailsItemList({
@@ -19,7 +20,7 @@ export const DetailsItemsList = function DetailsItemList({
   return (
     <View className="flex gap-4">
       {!!title && (
-        <Text className="mb-1 pl-1.5 text-sm font-semibold text-f1-foreground-secondary">
+        <Text className="mb-1 pl-1.5 text-sm font-semibold text-f0-foreground-secondary">
           {title.toLocaleUpperCase()}
         </Text>
       )}
@@ -27,8 +28,8 @@ export const DetailsItemsList = function DetailsItemList({
         className={cn(
           "flex",
           tableView
-            ? "rounded-[16px] border border-solid border-f1-border-secondary"
-            : "gap-3",
+            ? "rounded-[16px] border border-solid border-f0-border-secondary"
+            : "gap-3"
         )}
       >
         {details?.map((item, index) => (
@@ -40,13 +41,14 @@ export const DetailsItemsList = function DetailsItemList({
               spacingAtTheBottom={item.spacingAtTheBottom}
               tableView={tableView}
               isHorizontalItem={isHorizontalItem}
+              fullWidth={item.fullWidth}
             />
             {tableView && index !== details.length - 1 && (
-              <View className="h-[1px] w-full bg-f1-border-secondary" />
+              <View className="h-[1px] w-full bg-f0-border-secondary" />
             )}
           </React.Fragment>
         ))}
       </View>
     </View>
-  );
-};
+  )
+}

@@ -1,31 +1,36 @@
-import { ComponentProps, FC } from "react";
-import { DataList } from "../DataList";
-import { cn } from "../../../../lib/utils";
-import { View } from "react-native";
+import { ComponentProps, FC } from "react"
+import { View } from "react-native"
+
+import { cn } from "../../../../lib/utils"
+import { DataList } from "../DataList"
 
 export type Content =
   | (ComponentProps<typeof DataList.Item> & {
-      type: "item";
+      type: "item"
     })
   | (ComponentProps<typeof DataList.PersonItem> & {
-      type: "person";
+      type: "person"
     })
   | (ComponentProps<typeof DataList.CompanyItem> & {
-      type: "company";
+      type: "company"
     })
   | (ComponentProps<typeof DataList.TeamItem> & {
-      type: "team";
+      type: "team"
     })
   | (ComponentProps<typeof DataList.DotTagItem> & {
-      type: "dot-tag";
-    });
+      type: "dot-tag"
+    })
+  | (ComponentProps<typeof DataList.CardItem> & {
+      type: "card"
+    })
 
 export interface DetailsItemType {
-  title: string;
-  content: Content | Content[];
-  spacingAtTheBottom?: boolean;
-  isHorizontalItem?: boolean;
-  tableView?: boolean;
+  title: string
+  content: Content | Content[]
+  spacingAtTheBottom?: boolean
+  isHorizontalItem?: boolean
+  tableView?: boolean
+  fullWidth?: boolean
 }
 
 const ItemContent: FC<{ content: Content }> = ({ content }) => (
@@ -35,34 +40,37 @@ const ItemContent: FC<{ content: Content }> = ({ content }) => (
     {content.type === "team" && <DataList.TeamItem {...content} />}
     {content.type === "company" && <DataList.CompanyItem {...content} />}
     {content.type === "dot-tag" && <DataList.DotTagItem {...content} />}
+    {content.type === "card" && <DataList.CardItem {...content} />}
   </>
-);
+)
 
 export const DetailsItem = ({
   title,
   content,
   isHorizontalItem = false,
   tableView = false,
+  fullWidth = false,
   spacingAtTheBottom,
 }: DetailsItemType) => {
-  const contentArray = Array.isArray(content) ? content : [content];
+  const contentArray = Array.isArray(content) ? content : [content]
 
   return (
     <View
       className={cn(
         "flex gap-0.5",
-        spacingAtTheBottom && !isHorizontalItem && "pb-3",
+        spacingAtTheBottom && !isHorizontalItem && "pb-3"
       )}
     >
       <DataList
         label={title}
         isHorizontalItem={isHorizontalItem}
         tableView={tableView}
+        fullWidth={fullWidth}
       >
         {contentArray.map((c, i) => (
           <ItemContent key={i} content={c} />
         ))}
       </DataList>
     </View>
-  );
-};
+  )
+}

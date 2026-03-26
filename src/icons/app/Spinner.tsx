@@ -1,6 +1,6 @@
-import Svg, { Path } from "react-native-svg";
-import type { SvgProps } from "react-native-svg";
-import { Ref, forwardRef } from "react";
+import { Ref, forwardRef } from "react"
+import Svg, { Path } from "react-native-svg"
+import type { SvgProps } from "react-native-svg"
 const SvgSpinner = (props: SvgProps, ref: Ref<Svg>) => (
   <Svg
     fill="none"
@@ -15,6 +15,6 @@ const SvgSpinner = (props: SvgProps, ref: Ref<Svg>) => (
       d="M19 12a7 7 0 1 1-7-7"
     />
   </Svg>
-);
-const ForwardRef = forwardRef(SvgSpinner);
-export default ForwardRef;
+)
+const ForwardRef = forwardRef(SvgSpinner)
+export default ForwardRef
