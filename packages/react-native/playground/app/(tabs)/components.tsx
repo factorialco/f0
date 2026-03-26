@@ -24,6 +24,7 @@ import { F0PresetShowcase } from "../../components/F0PresetShowcase"
 import { F0MetadataShowcase } from "../../components/F0MetadataShowcase"
 import { F0ProgressShowcase } from "../../components/F0ProgressShowcase"
 import { F0StepShowcase } from "../../components/F0StepShowcase"
+import { F0TabsShowcase } from "../../components/F0TabsShowcase"
 import { F0TagShowcase } from "../../components/F0TagShowcase"
 import { F0TextShowcase } from "../../components/F0TextShowcase/F0TextShowcase"
 import { OneChipShowcase } from "../../components/OneChipShowcase"
@@ -58,6 +59,7 @@ type ComponentType =
   | "f0preset"
   | "f0image"
   | "f0metadata"
+  | "f0tabs"
   | "f0tag"
   | "f0text"
   | "onechip"
@@ -88,6 +90,7 @@ const componentOptions = [
   { value: "f0preset" as ComponentType, label: "F0Preset" },
   { value: "f0image" as ComponentType, label: "F0Image" },
   { value: "f0metadata" as ComponentType, label: "F0Metadata" },
+  { value: "f0tabs" as ComponentType, label: "F0Tabs" },
   { value: "f0tag" as ComponentType, label: "F0Tag" },
   { value: "f0text" as ComponentType, label: "F0Text" },
   { value: "onechip" as ComponentType, label: "OneChip (deprecated)" },
@@ -156,6 +159,8 @@ export default function ComponentsShowcase() {
         return <F0ImageShowcase />
       case "f0metadata":
         return <F0MetadataShowcase />
+      case "f0tabs":
+        return <F0TabsShowcase />
       case "f0tag":
         return <F0TagShowcase />
       case "f0text":

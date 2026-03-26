@@ -1,5 +1,33 @@
 # Changelog
 
+## [1.422.1](https://github.com/factorialco/f0/compare/f0-react-v1.422.0...f0-react-v1.422.1) (2026-03-26)
+
+
+### Bug Fixes
+
+* add import instructions on the docs of each component ([#3771](https://github.com/factorialco/f0/issues/3771)) ([e347d31](https://github.com/factorialco/f0/commit/e347d31427e158bf1902a56c94bc3b570d21dd49))
+
+## [1.422.0](https://github.com/factorialco/f0/compare/f0-react-v1.421.0...f0-react-v1.422.0) (2026-03-26)
+
+
+### Features
+
+* **F0AiChatTextArea:** add credit warning banner with upsell actions ([#3608](https://github.com/factorialco/f0/issues/3608)) ([8937f90](https://github.com/factorialco/f0/commit/8937f9099edc5c70490562d514d05a4dcde13a9c))
+
+## [1.421.0](https://github.com/factorialco/f0/compare/f0-react-v1.420.0...f0-react-v1.421.0) (2026-03-26)
+
+
+### Features
+
+* **value-display:** add compound renderer ([#3582](https://github.com/factorialco/f0/issues/3582)) ([35bddd9](https://github.com/factorialco/f0/commit/35bddd9f39a7afe7b06e6a0d196864002b6183ba))
+
+## [1.420.0](https://github.com/factorialco/f0/compare/f0-react-v1.419.0...f0-react-v1.420.0) (2026-03-26)
+
+
+### Features
+
+* **react:** add F0TimelineRow component ([#3727](https://github.com/factorialco/f0/issues/3727)) ([eb5e1f4](https://github.com/factorialco/f0/commit/eb5e1f4b3d5db5dd1cbbcfc1fa6950dfdb8b4016))
+
 ## [1.419.0](https://github.com/factorialco/f0/compare/f0-react-v1.418.1...f0-react-v1.419.0) (2026-03-24)
 
 

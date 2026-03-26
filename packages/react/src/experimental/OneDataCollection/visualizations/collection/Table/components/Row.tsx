@@ -162,7 +162,9 @@ const RowComponentInner = <
     item: R,
     column: TableColumnDefinition<R, Sortings, Summaries>
   ) => {
-    return renderProperty(item, column, "table", i18n)
+    return renderProperty(item, column, "table", i18n, {
+      tableAlign: column.align ?? "left",
+    })
   }
 
   const key = `table-row-${groupIndex}-${index}`
