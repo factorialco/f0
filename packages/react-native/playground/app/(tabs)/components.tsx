@@ -14,6 +14,7 @@ import { DetailsItemShowcase } from "../../components/DetailsItemShowcase"
 import { DetailsItemsListShowcase } from "../../components/DetailsItemsListShowcase"
 import { F0AvatarShowcase } from "../../components/F0AvatarShowcase"
 import { F0BadgeShowcase } from "../../components/F0BadgeShowcase"
+import { F0BlurViewShowcase } from "../../components/F0BlurViewShowcase"
 import { F0ButtonShowcase } from "../../components/F0ButtonShowcase"
 import { F0CheckboxShowcase } from "../../components/F0CheckboxShowcase"
 import { F0ChipShowcase } from "../../components/F0ChipShowcase"
@@ -49,6 +50,7 @@ type ComponentType =
   | "detailsitem"
   | "detailsitemslist"
   | "f0avatar"
+  | "f0blurview"
   | "f0button"
   | "f0badge"
   | "f0checkbox"
@@ -81,6 +83,7 @@ const componentOptions = [
   { value: "detailsitem" as ComponentType, label: "DetailsItem" },
   { value: "detailsitemslist" as ComponentType, label: "DetailsItemsList" },
   { value: "f0avatar" as ComponentType, label: "F0Avatar" },
+  { value: "f0blurview" as ComponentType, label: "F0BlurView" },
   { value: "f0button" as ComponentType, label: "F0Button" },
   { value: "f0badge" as ComponentType, label: "F0Badge" },
   { value: "f0checkbox" as ComponentType, label: "F0Checkbox" },
@@ -140,6 +143,8 @@ export default function ComponentsShowcase() {
         return <DetailsItemsListShowcase />
       case "f0avatar":
         return <F0AvatarShowcase />
+      case "f0blurview":
+        return <F0BlurViewShowcase />
       case "f0button":
         return <F0ButtonShowcase />
       case "f0badge":
