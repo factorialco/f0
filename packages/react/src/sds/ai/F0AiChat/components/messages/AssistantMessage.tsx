@@ -1,8 +1,8 @@
-import { useLazyToolRenderer } from "@copilotkit/react-core"
 import { Markdown, type AssistantMessageProps } from "@copilotkit/react-ui"
 import { createContext, useContext, useEffect } from "react"
 
 import { useAiChat } from "../../providers/AiChatStateProvider"
+import { useToolRenderer } from "../../providers/ToolRendererProvider"
 import { markdownRenderers } from "../markdownRenderers"
 
 /**
@@ -24,20 +24,13 @@ export const AssistantMessage = ({
 }: AssistantMessageProps & { messages?: any[] }) => {
   const content = message?.content || ""
 
-  // Use CopilotKit's lazy tool renderer to look up registered render
-  // functions from copilotkit.renderToolCalls.  This handles actions
-  // registered with `available: "frontend"` (orchestratorThinking,
-  // downloadData, displayDashboard, etc.) whose render callbacks are
-  // NOT stored in context.actions but in the internal renderToolCalls
-  // registry.
-  //
+  // Resolve tool-call UI via the ToolRendererProvider.
   // After message expansion in MessagesContainer, each message has at
   // most one tool call, so toolCalls[0] is correct.
-  const lazyToolRendered = useLazyToolRenderer()
-  const toolCallRenderer = message
-    ? lazyToolRendered(message, messages ?? [])
+  const resolveToolCallUI = useToolRenderer()
+  const subComponent = message
+    ? resolveToolCallUI(message, messages ?? [])
     : null
-  const subComponent = toolCallRenderer?.() ?? message?.generativeUI?.() ?? null
 
   // Extract toolCallId from the message so action components can read it
   const toolCallId = (message?.toolCalls as { id: string }[] | undefined)?.[0]
