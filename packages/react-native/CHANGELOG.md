@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.47.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.46.0...f0-react-native-v0.47.0) (2026-03-26)
+
+
+### Features
+
+* add F0Metadata component ([#3766](https://github.com/factorialco/f0/issues/3766)) ([7d98d34](https://github.com/factorialco/f0/commit/7d98d34d58e533bb7af7a0e81449ad0aeafa4756))
+
 ## [0.46.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.45.0...f0-react-native-v0.46.0) (2026-03-26)
 
 
