@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.49.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.48.0...f0-react-native-v0.49.0) (2026-03-26)
+
+
+### Features
+
+* add `F0BlurView` primitive ([#3778](https://github.com/factorialco/f0/issues/3778)) ([20d8067](https://github.com/factorialco/f0/commit/20d8067a16602797e48ee57f7350a494bc7ccf97))
+
 ## [0.48.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.47.0...f0-react-native-v0.48.0) (2026-03-26)
 
 
