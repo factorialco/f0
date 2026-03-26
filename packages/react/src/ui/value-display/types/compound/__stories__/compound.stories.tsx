@@ -1,5 +1,7 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
 
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
+
 import { Cell, mockItem } from "../../../__stories__/shared"
 
 const meta = {
@@ -149,5 +151,132 @@ export const WithCustomSeparator: Story = {
         },
       }),
     },
+  },
+}
+
+export const Snapshot: Story = {
+  parameters: withSnapshot({}),
+  render: () => {
+    const variants = [
+      {
+        title: "Tones",
+        value: {
+          segments: [
+            {
+              type: "amount" as const,
+              value: 700,
+              currency: { symbol: "EUR", decimalPlaces: 0 },
+              tone: "critical" as const,
+            },
+            {
+              type: "amount" as const,
+              value: 500,
+              currency: { symbol: "EUR", decimalPlaces: 0 },
+            },
+          ],
+        },
+      },
+      {
+        title: "Mixed segments",
+        value: {
+          segments: [
+            {
+              type: "text" as const,
+              value: "Tracked",
+              tone: "secondary" as const,
+            },
+            {
+              type: "number" as const,
+              value: 20,
+              units: "h",
+            },
+            {
+              type: "percentage" as const,
+              value: -12.3,
+              decimalPlaces: 1,
+              tone: "critical" as const,
+            },
+            {
+              type: "amount" as const,
+              value: 2500,
+              currency: {
+                symbol: "$",
+                symbolPosition: "left",
+                decimalPlaces: 0,
+              },
+              tone: "positive" as const,
+            },
+          ],
+        },
+      },
+      {
+        title: "Placeholders and missing",
+        value: {
+          segments: [
+            {
+              type: "text" as const,
+              value: undefined,
+              placeholder: "N/A",
+            },
+            {
+              type: "amount" as const,
+              value: undefined,
+              currency: { symbol: "EUR", decimalPlaces: 0 },
+              placeholder: "-",
+            },
+            {
+              type: "percentage" as const,
+              value: undefined,
+              placeholder: "No margin",
+            },
+          ],
+        },
+      },
+      {
+        title: "Custom separator",
+        value: {
+          separator: " | ",
+          segments: [
+            {
+              type: "amount" as const,
+              value: 2800,
+              currency: { symbol: "EUR", decimalPlaces: 0 },
+            },
+            {
+              type: "amount" as const,
+              value: 2000,
+              currency: { symbol: "EUR", decimalPlaces: 0 },
+            },
+            {
+              type: "percentage" as const,
+              value: -40,
+              tone: "critical" as const,
+            },
+          ],
+        },
+      },
+    ]
+
+    return (
+      <div className="flex max-w-xl flex-col gap-4">
+        {variants.map((variant) => (
+          <div key={variant.title} className="flex flex-col gap-1">
+            <h4 className="text-sm font-semibold text-f1-foreground-secondary">
+              {variant.title}
+            </h4>
+            <Cell
+              item={mockItem}
+              property={{
+                label: variant.title,
+                render: () => ({
+                  type: "compound",
+                  value: variant.value,
+                }),
+              }}
+            />
+          </div>
+        ))}
+      </div>
+    )
   },
 }
