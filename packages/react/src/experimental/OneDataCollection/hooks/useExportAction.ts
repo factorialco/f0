@@ -15,10 +15,7 @@ import type { Visualization } from "../visualizations/collection"
 import { SecondaryActionItem } from "../actions"
 import { DataCollectionSource } from "../hooks/useDataCollectionSource/types"
 import { ItemActionsDefinition } from "../item-actions"
-import {
-  NavigationFiltersDefinition,
-  NavigationFiltersState,
-} from "../navigationFilters/types"
+import { NavigationFiltersDefinition } from "../navigationFilters/types"
 import { SummariesDefinition } from "../summary"
 import { downloadAsCSV } from "../utils/csvExport"
 
@@ -61,6 +58,21 @@ interface UseExportActionProps<
 }
 
 /**
+ * Minimal source shape needed by fetchAllRecords.
+ * Uses loose types to avoid fighting the DataCollectionDataAdapter union.
+ */
+interface ExportableSource {
+  dataAdapter: {
+    paginationType?: string
+    fetchData: (opts: Record<string, unknown>) => unknown
+  }
+  currentFilters: Record<string, unknown>
+  currentSortings: unknown
+  currentSearch: string | undefined
+  currentNavigationFilters: Record<string, unknown>
+}
+
+/**
  * Resolve a fetchData result that may be a plain value, a Promise, or an
  * Observable (zen-observable-ts). We only support the first two for export;
  * Observables are not expected in practice for paginated adapters.
@@ -78,33 +90,9 @@ async function resolveResult<T>(
  * Fetch *all* records from a data adapter, transparently handling both
  * non-paginated and paginated (pages / infinite-scroll) adapters.
  */
-async function fetchAllRecords<
-  R extends RecordType,
-  Filters extends FiltersDefinition,
-  NavigationFilters extends NavigationFiltersDefinition,
->(source: {
-  dataAdapter: DataCollectionSource<
-    R,
-    Filters,
-    SortingsDefinition,
-    SummariesDefinition,
-    ItemActionsDefinition<R>,
-    NavigationFilters,
-    GroupingDefinition<R>
-  >["dataAdapter"]
-  currentFilters: DataCollectionSource<
-    R,
-    Filters,
-    SortingsDefinition,
-    SummariesDefinition,
-    ItemActionsDefinition<R>,
-    NavigationFilters,
-    GroupingDefinition<R>
-  >["currentFilters"]
-  currentSortings: unknown
-  currentSearch: string | undefined
-  currentNavigationFilters: NavigationFiltersState<NavigationFilters>
-}): Promise<R[]> {
+async function fetchAllRecords<R extends RecordType>(
+  source: ExportableSource
+): Promise<R[]> {
   const { dataAdapter } = source
 
   const baseParams = {
@@ -116,11 +104,7 @@ async function fetchAllRecords<
 
   // ── Non-paginated adapter ────────────────────────────────────────
   if (!dataAdapter.paginationType) {
-    const result = await resolveResult(
-      dataAdapter.fetchData(
-        baseParams as Parameters<typeof dataAdapter.fetchData>[0]
-      )
-    )
+    const result = await resolveResult(dataAdapter.fetchData(baseParams))
     const response = result as BaseResponse<R>
     return response.records ?? []
   }
@@ -135,7 +119,7 @@ async function fetchAllRecords<
         dataAdapter.fetchData({
           ...baseParams,
           pagination: { currentPage, perPage: EXPORT_PAGE_SIZE },
-        } as Parameters<typeof dataAdapter.fetchData>[0])
+        })
       )
 
       const response = result as PaginatedResponse<R>
@@ -160,7 +144,7 @@ async function fetchAllRecords<
         dataAdapter.fetchData({
           ...baseParams,
           pagination: { cursor, perPage: EXPORT_PAGE_SIZE },
-        } as Parameters<typeof dataAdapter.fetchData>[0])
+        })
       )
 
       const response = result as PaginatedResponse<R>
@@ -185,7 +169,7 @@ async function fetchAllRecords<
     dataAdapter.fetchData({
       ...baseParams,
       pagination: { perPage: MAX_EXPORT_ROWS, currentPage: 1 },
-    } as Parameters<typeof dataAdapter.fetchData>[0])
+    })
   )
   const response = result as BaseResponse<R>
   return response.records ?? []
@@ -218,10 +202,8 @@ export function useExportAction<
     setIsExporting(true)
 
     try {
-      const allRecords = await fetchAllRecords<R, Filters, NavigationFilters>(
-        source as unknown as Parameters<
-          typeof fetchAllRecords<R, Filters, NavigationFilters>
-        >[0]
+      const allRecords = await fetchAllRecords<R>(
+        source as unknown as ExportableSource
       )
 
       await downloadAsCSV(

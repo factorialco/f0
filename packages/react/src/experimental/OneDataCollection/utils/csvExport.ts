@@ -8,13 +8,13 @@ export interface CSVExportOptions {
   encoding?: string
 }
 
-export interface ColumnDefinition {
+export interface ColumnDefinition<R extends RecordType = RecordType> {
   label: string
   field?: string
-  render?: (item: any) => any
+  render?: (item: R) => string
 }
 
-function escapeCSVCell(value: any): string {
+function escapeCSVCell(value: unknown): string {
   if (value === null || value === undefined) {
     return ""
   }
@@ -226,17 +226,20 @@ function extractTypedCellValue(type: string, value: unknown): string {
   }
 }
 
-function getNestedValue(obj: any, path: string): any {
+function getNestedValue(obj: Record<string, unknown>, path: string): unknown {
   if (!path) return obj
 
-  return path.split(".").reduce((current, key) => {
-    return current && current[key] !== undefined ? current[key] : ""
+  return path.split(".").reduce<unknown>((current, key) => {
+    if (current && typeof current === "object" && key in current) {
+      return (current as Record<string, unknown>)[key]
+    }
+    return ""
   }, obj)
 }
 
 function extractColumns<R extends RecordType>(
   visualization: Visualization<R, any, any, any, any, any, any> | undefined
-): ColumnDefinition[] {
+): ColumnDefinition<R>[] {
   if (!visualization) {
     return []
   }
@@ -261,7 +264,7 @@ function extractColumns<R extends RecordType>(
 
 function transformDataForCSV<R extends RecordType>(
   data: R[],
-  columns: ColumnDefinition[]
+  columns: ColumnDefinition<R>[]
 ): string[][] {
   return data.map((item) =>
     columns.map((column) => {
@@ -270,11 +273,14 @@ function transformDataForCSV<R extends RecordType>(
       }
 
       if (column.field) {
-        const value = getNestedValue(item, column.field)
+        const value = getNestedValue(
+          item as Record<string, unknown>,
+          column.field
+        )
         return extractDisplayValue(value)
       }
 
-      // Fallback: try to get any value from the item
+      // Fallback: try to get a value from the item
       return extractDisplayValue(item)
     })
   )
@@ -302,7 +308,7 @@ export async function downloadAsCSV<R extends RecordType>(
   // If no columns from visualization, try to infer from data structure
   if (columns.length === 0) {
     const firstItem = data[0]
-    const inferredColumns: ColumnDefinition[] = Object.keys(firstItem).map(
+    const inferredColumns: ColumnDefinition<R>[] = Object.keys(firstItem).map(
       (key) => ({
         label: key.charAt(0).toUpperCase() + key.slice(1),
         field: key,
