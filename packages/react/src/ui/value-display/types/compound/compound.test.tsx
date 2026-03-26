@@ -126,17 +126,31 @@ describe("CompoundCell", () => {
       segments: [
         { type: "text", value: undefined, placeholder: "N/A" },
         { type: "number", value: undefined },
-        { type: "percentage", value: undefined, placeholder: "No margin" },
+        { type: "percentage", value: 12, tone: "critical" },
       ],
     }
 
     render(CompoundCell(args, tableMeta))
 
     expect(screen.getByText("N/A")).toHaveClass("text-f1-foreground-secondary")
-    expect(screen.getByText("No margin")).toHaveClass(
-      "text-f1-foreground-secondary"
-    )
     expect(screen.getByText("–")).toHaveClass("text-f1-foreground-secondary")
+    expect(screen.getByText("12%")).toHaveClass("text-f1-foreground-critical")
+  })
+
+  it("collapses all-missing segments into a single placeholder", () => {
+    const args: CompoundCellValue = {
+      segments: [
+        { type: "text", value: undefined, placeholder: "N/A" },
+        { type: "amount", value: undefined, placeholder: "N/A" },
+      ],
+    }
+
+    const { container } = render(CompoundCell(args, tableMeta))
+    const wrapper = container.querySelector('[data-cell-type="compound"]')
+
+    expect(wrapper).toHaveTextContent("N/A")
+    expect(wrapper).not.toHaveTextContent("N/A / N/A")
+    expect(container.querySelectorAll(".whitespace-pre")).toHaveLength(0)
   })
 
   it("renders aligned fallback when there are no segments", () => {

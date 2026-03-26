@@ -3,6 +3,7 @@ import { Meta, StoryObj } from "@storybook/react-vite"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import { Cell, mockItem } from "../../../__stories__/shared"
+import { CompoundCellValue } from "../compound"
 
 const meta = {
   title: "Value Display/Compound",
@@ -156,8 +157,23 @@ export const WithCustomSeparator: Story = {
 
 export const Snapshot: Story = {
   parameters: withSnapshot({}),
+  args: {
+    item: mockItem,
+    property: {
+      label: "Compound",
+      render: () => ({
+        type: "compound",
+        value: {
+          segments: [{ type: "text", value: "Snapshot" }],
+        },
+      }),
+    },
+  },
   render: () => {
-    const variants = [
+    const variants: Array<{
+      title: string
+      value: CompoundCellValue
+    }> = [
       {
         title: "Tones",
         value: {

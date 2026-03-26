@@ -120,6 +120,20 @@ interface ResolvedFormattedSegment {
 
 type ResolvedSegment = ResolvedTextSegment | ResolvedFormattedSegment
 
+const resolveCollapsedMissingText = (
+  resolvedSegments: ResolvedSegment[]
+): string | null => {
+  if (
+    resolvedSegments.length === 0 ||
+    !resolvedSegments.every((segment) => segment.isMissing)
+  ) {
+    return null
+  }
+
+  const [firstSegment] = resolvedSegments
+  return firstSegment.kind === "text" ? firstSegment.text : defaultMissingValue
+}
+
 const formatNumberParts = ({
   number,
   units,
@@ -246,11 +260,25 @@ export const CompoundCell = (
   }
 
   const separator = args.separator ?? defaultSeparator
+  const resolvedSegments = args.segments.map((segment) =>
+    resolveSegmentText(segment)
+  )
+  const collapsedMissingText = resolveCollapsedMissingText(resolvedSegments)
+
+  if (collapsedMissingText !== null) {
+    return (
+      <div className={wrapperClassName} data-cell-type="compound">
+        <span className={toneClassByValue.secondary}>
+          {collapsedMissingText}
+        </span>
+      </div>
+    )
+  }
 
   return (
     <div className={wrapperClassName} data-cell-type="compound">
       {args.segments.map((segment, index) => {
-        const resolvedSegment = resolveSegmentText(segment)
+        const resolvedSegment = resolvedSegments[index]
         const tone = resolveTone(segment.tone, resolvedSegment.isMissing)
 
         return (
