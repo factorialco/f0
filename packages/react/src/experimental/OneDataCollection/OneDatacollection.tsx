@@ -334,6 +334,7 @@ const OneDataCollectionComp = <
     csvExport,
     exportAction.loading,
     exportAction.disabled,
+    exportAction.onClick,
   ])
 
   const hasCollectionsActions =
