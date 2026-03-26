@@ -175,8 +175,7 @@ export const defaultTranslations = {
     },
     export: {
       label: "Export to CSV",
-      description: "Download all data as CSV file",
-      noData: "No data available for export",
+      description: "Download all data as a CSV file",
     },
   },
   shortcut: "Shortcut",

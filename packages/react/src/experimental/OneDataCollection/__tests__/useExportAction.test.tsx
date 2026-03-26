@@ -147,7 +147,6 @@ describe("useExportAction", () => {
           export: {
             label: "Exportar a CSV",
             description: "Descargar todos los datos como archivo CSV",
-            noData: "No hay datos disponibles para exportar",
           },
         },
       }

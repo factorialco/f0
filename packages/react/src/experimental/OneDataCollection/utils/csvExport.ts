@@ -5,7 +5,6 @@ import type { Visualization } from "../visualizations/collection"
 export interface CSVExportOptions {
   filename?: string
   includeHeaders?: boolean
-  encoding?: string
 }
 
 export interface ColumnDefinition<R extends RecordType = RecordType> {
@@ -149,8 +148,10 @@ export function extractTypedCellValue(type: string, value: unknown): string {
     }
 
     // ── Numeric types ────────────────────────────────────────────────
-    case "number":
+    case "number": {
+      if (typeof value === "number") return String(value)
       return v.number !== undefined ? String(v.number) : ""
+    }
 
     case "amount": {
       if (typeof value === "number") return String(value)
@@ -323,7 +324,9 @@ export async function downloadAsCSV<R extends RecordType>(
     options?.includeHeaders !== false ? columns.map((col) => col.label) : []
 
   const csvContent = [
-    ...(headers.length > 0 ? [headers.join(",")] : []),
+    ...(headers.length > 0
+      ? [headers.map((header) => escapeCSVCell(header)).join(",")]
+      : []),
     ...transformedData.map((row) =>
       row.map((cell) => escapeCSVCell(cell)).join(",")
     ),
@@ -337,10 +340,11 @@ export async function downloadAsCSV<R extends RecordType>(
 
   // Create download link and trigger download
   const link = document.createElement("a")
-  link.href = URL.createObjectURL(blob)
+  const objectUrl = URL.createObjectURL(blob)
+  link.href = objectUrl
   link.download = filename
   document.body.appendChild(link)
   link.click()
   document.body.removeChild(link)
-  URL.revokeObjectURL(link.href)
+  URL.revokeObjectURL(objectUrl)
 }
