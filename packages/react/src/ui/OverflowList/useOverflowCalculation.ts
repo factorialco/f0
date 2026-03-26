@@ -113,26 +113,26 @@ export function useOverflowCalculation<T>(
     const itemWidths = measureItemWidths()
     const itemWidthsWithGap = itemWidths.map((width) => width + gap)
 
-    const availableWidthWithoutOverflow = currentContainerWidth
-    const visibleCountWithoutOverflow = calculateVisibleItemCount({
+    // Always reserve overflow button width upfront so items drop one at a time
+    const reservedWidth = currentContainerWidth - overflowButtonWidth - gap
+    let visibleCount = calculateVisibleItemCount({
       itemWidths: itemWidthsWithGap,
-      availableWidth: availableWidthWithoutOverflow,
+      availableWidth: reservedWidth,
     })
 
-    const fitsWithoutOverflow =
-      visibleCountWithoutOverflow >= items.length &&
+    // If all items fit even with the reserved space, show them all without the button
+    if (
+      visibleCount >= items.length &&
       (options?.max === undefined || items.length <= options.max)
+    ) {
+      visibleCount = calculateVisibleItemCount({
+        itemWidths: itemWidthsWithGap,
+        availableWidth: currentContainerWidth,
+      })
+    }
 
-    const effectiveWidth = fitsWithoutOverflow
-      ? currentContainerWidth
-      : currentContainerWidth - overflowButtonWidth - gap
-
-    let visibleCount = fitsWithoutOverflow
-      ? visibleCountWithoutOverflow
-      : calculateVisibleItemCount({
-          itemWidths: itemWidthsWithGap,
-          availableWidth: effectiveWidth,
-        })
+    const effectiveWidth =
+      visibleCount >= items.length ? currentContainerWidth : reservedWidth
 
     // Hysteresis: require extra margin before showing more items.
     // Absorbs ~17px oscillation from scrollbar appearing/disappearing.

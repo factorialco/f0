@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest"
 import "@testing-library/jest-dom/vitest"
-import { userEvent, zeroRender } from "@/testing/test-utils"
+import { screen, userEvent, zeroRender } from "@/testing/test-utils"
 
 import type {
   FiltersDefinition,
@@ -9,6 +9,16 @@ import type {
 } from "../types"
 
 import { FiltersPresets } from "./FiltersPresets"
+
+/**
+ * OverflowList renders items in both a hidden measurement container
+ * (aria-hidden="true") and a visible container, causing duplicate text nodes.
+ * This helper returns the visible instance, falling back to the first match.
+ */
+function getVisibleByText(text: string): HTMLElement {
+  const all = screen.getAllByText(text)
+  return all.find((el) => !el.closest('[aria-hidden="true"]')) ?? all[0]
+}
 
 const mockPresets: PresetsDefinition<FiltersDefinition> = [
   {
@@ -38,7 +48,7 @@ describe("FiltersPresets", () => {
     const mockOnPresetsChange = vi.fn()
     const initialFilters: FiltersState<FiltersDefinition> = {}
 
-    const { getByText } = zeroRender(
+    zeroRender(
       <FiltersPresets
         presets={mockPresets}
         value={initialFilters}
@@ -47,7 +57,7 @@ describe("FiltersPresets", () => {
     )
 
     // Click on the first preset
-    await user.click(getByText("Engineering Active"))
+    await user.click(getVisibleByText("Engineering Active"))
 
     // Should call onPresetsChange with the preset's filter merged with existing
     expect(mockOnPresetsChange).toHaveBeenCalledWith({
@@ -64,7 +74,7 @@ describe("FiltersPresets", () => {
       status: ["active"],
     }
 
-    const { getByText } = zeroRender(
+    zeroRender(
       <FiltersPresets
         presets={mockPresets}
         value={selectedFilters}
@@ -73,7 +83,7 @@ describe("FiltersPresets", () => {
     )
 
     // Click on the already selected preset
-    await user.click(getByText("Engineering Active"))
+    await user.click(getVisibleByText("Engineering Active"))
 
     // Should call onPresetsChange with only preset's keys removed
     expect(mockOnPresetsChange).toHaveBeenCalledWith({})
@@ -84,7 +94,7 @@ describe("FiltersPresets", () => {
     const mockOnPresetsChange = vi.fn()
     const initialFilters: FiltersState<FiltersDefinition> = {}
 
-    const { getByText } = zeroRender(
+    zeroRender(
       <FiltersPresets
         presets={mockPresets}
         value={initialFilters}
@@ -93,7 +103,7 @@ describe("FiltersPresets", () => {
     )
 
     // Click on first preset
-    await user.click(getByText("Engineering Active"))
+    await user.click(getVisibleByText("Engineering Active"))
     expect(mockOnPresetsChange).toHaveBeenCalledWith({
       department: ["engineering"],
       status: ["active"],
@@ -103,7 +113,7 @@ describe("FiltersPresets", () => {
     mockOnPresetsChange.mockClear()
 
     // Click on second preset - should merge with existing empty filters
-    await user.click(getByText("Marketing Only"))
+    await user.click(getVisibleByText("Marketing Only"))
     expect(mockOnPresetsChange).toHaveBeenCalledWith({
       department: ["marketing"],
     })
@@ -116,7 +126,7 @@ describe("FiltersPresets", () => {
       department: ["marketing"],
     }
 
-    const { getByText } = zeroRender(
+    zeroRender(
       <FiltersPresets
         presets={mockPresets}
         value={selectedFilters}
@@ -125,7 +135,7 @@ describe("FiltersPresets", () => {
     )
 
     // Click on the already selected preset in dropdown
-    await user.click(getByText("Marketing Only"))
+    await user.click(getVisibleByText("Marketing Only"))
 
     // Should remove only the preset's keys
     expect(mockOnPresetsChange).toHaveBeenCalledWith({})
@@ -176,7 +186,7 @@ describe("FiltersPresets - Merge Behavior", () => {
       department: ["engineering"],
     }
 
-    const { getByText } = zeroRender(
+    zeroRender(
       <FiltersPresets
         presets={mockStatusPresets}
         value={existingFilters}
@@ -185,7 +195,7 @@ describe("FiltersPresets - Merge Behavior", () => {
     )
 
     // Click on preset
-    await user.click(getByText("Status: Active"))
+    await user.click(getVisibleByText("Status: Active"))
 
     // Should merge with existing filters
     expect(mockOnPresetsChange).toHaveBeenCalledWith({
@@ -201,7 +211,7 @@ describe("FiltersPresets - Merge Behavior", () => {
       status: ["active"],
     }
 
-    const { getByText } = zeroRender(
+    zeroRender(
       <FiltersPresets
         presets={mockStatusPresets}
         value={filtersWithPreset}
@@ -210,7 +220,7 @@ describe("FiltersPresets - Merge Behavior", () => {
     )
 
     // The "Status: Active" preset should appear selected
-    const presetButton = getByText("Status: Active").closest("label")
+    const presetButton = getVisibleByText("Status: Active").closest("label")
     expect(presetButton).toHaveClass("bg-f1-background-selected-secondary")
   })
 
@@ -222,7 +232,7 @@ describe("FiltersPresets - Merge Behavior", () => {
       status: ["active"],
     }
 
-    const { getByText } = zeroRender(
+    zeroRender(
       <FiltersPresets
         presets={mockStatusPresets}
         value={filtersWithPreset}
@@ -231,7 +241,7 @@ describe("FiltersPresets - Merge Behavior", () => {
     )
 
     // Click on already selected preset to deselect
-    await user.click(getByText("Status: Active"))
+    await user.click(getVisibleByText("Status: Active"))
 
     // Should only remove the preset's keys, keeping other filters
     expect(mockOnPresetsChange).toHaveBeenCalledWith({
@@ -246,7 +256,7 @@ describe("FiltersPresets - Merge Behavior", () => {
       department: ["engineering"],
     }
 
-    const { getByText } = zeroRender(
+    zeroRender(
       <FiltersPresets
         presets={mockStatusPresets}
         value={existingFilters}
@@ -255,7 +265,7 @@ describe("FiltersPresets - Merge Behavior", () => {
     )
 
     // Click on first preset
-    await user.click(getByText("Status: Active"))
+    await user.click(getVisibleByText("Status: Active"))
 
     // Should merge with existing
     expect(mockOnPresetsChange).toHaveBeenCalledWith({
@@ -266,7 +276,7 @@ describe("FiltersPresets - Merge Behavior", () => {
     mockOnPresetsChange.mockClear()
 
     // Click on second preset
-    await user.click(getByText("Status: Inactive"))
+    await user.click(getVisibleByText("Status: Inactive"))
 
     // Should replace the status filter (since it's a new selection, not deselection)
     expect(mockOnPresetsChange).toHaveBeenCalledWith({
@@ -299,7 +309,7 @@ describe("FiltersPresets - Multiple Presets Selection", () => {
       department: ["engineering"],
     }
 
-    const { getByText } = zeroRender(
+    zeroRender(
       <FiltersPresets
         presets={multiplePresets}
         value={filtersWithBothPresets}
@@ -308,9 +318,10 @@ describe("FiltersPresets - Multiple Presets Selection", () => {
     )
 
     // Both presets should appear selected
-    const londonPreset = getByText("London Office").closest("label")
-    const engineeringPreset = getByText("Engineering Team").closest("label")
-    const activePreset = getByText("Active Status").closest("label")
+    const londonPreset = getVisibleByText("London Office").closest("label")
+    const engineeringPreset =
+      getVisibleByText("Engineering Team").closest("label")
+    const activePreset = getVisibleByText("Active Status").closest("label")
 
     expect(londonPreset).toHaveClass("bg-f1-background-selected-secondary")
     expect(engineeringPreset).toHaveClass("bg-f1-background-selected-secondary")
@@ -326,7 +337,7 @@ describe("FiltersPresets - Multiple Presets Selection", () => {
       location: ["london"],
     }
 
-    const { getByText } = zeroRender(
+    zeroRender(
       <FiltersPresets
         presets={multiplePresets}
         value={existingFilters}
@@ -335,7 +346,7 @@ describe("FiltersPresets - Multiple Presets Selection", () => {
     )
 
     // Click on second preset (different key)
-    await user.click(getByText("Engineering Team"))
+    await user.click(getVisibleByText("Engineering Team"))
 
     // Should merge both presets' filters
     expect(mockOnPresetsChange).toHaveBeenCalledWith({
@@ -352,7 +363,7 @@ describe("FiltersPresets - Multiple Presets Selection", () => {
       department: ["engineering"],
     }
 
-    const { getByText } = zeroRender(
+    zeroRender(
       <FiltersPresets
         presets={multiplePresets}
         value={filtersWithBothPresets}
@@ -361,7 +372,7 @@ describe("FiltersPresets - Multiple Presets Selection", () => {
     )
 
     // Click on London Office to deselect it
-    await user.click(getByText("London Office"))
+    await user.click(getVisibleByText("London Office"))
 
     // Should remove only location, keep department
     expect(mockOnPresetsChange).toHaveBeenCalledWith({
@@ -377,7 +388,7 @@ describe("FiltersPresets - Multiple Presets Selection", () => {
       status: ["active"],
     }
 
-    const { getByText } = zeroRender(
+    zeroRender(
       <FiltersPresets
         presets={multiplePresets}
         value={filtersWithAllPresets}
@@ -386,9 +397,10 @@ describe("FiltersPresets - Multiple Presets Selection", () => {
     )
 
     // All three presets should appear selected
-    const londonPreset = getByText("London Office").closest("label")
-    const engineeringPreset = getByText("Engineering Team").closest("label")
-    const activePreset = getByText("Active Status").closest("label")
+    const londonPreset = getVisibleByText("London Office").closest("label")
+    const engineeringPreset =
+      getVisibleByText("Engineering Team").closest("label")
+    const activePreset = getVisibleByText("Active Status").closest("label")
 
     expect(londonPreset).toHaveClass("bg-f1-background-selected-secondary")
     expect(engineeringPreset).toHaveClass("bg-f1-background-selected-secondary")
@@ -403,7 +415,7 @@ describe("FiltersPresets - Multiple Presets Selection", () => {
       department: ["engineering"],
     }
 
-    const { getByText } = zeroRender(
+    zeroRender(
       <FiltersPresets
         presets={multiplePresets}
         value={filtersWithTwoPresets}
@@ -412,7 +424,7 @@ describe("FiltersPresets - Multiple Presets Selection", () => {
     )
 
     // Click on Active Status to add it
-    await user.click(getByText("Active Status"))
+    await user.click(getVisibleByText("Active Status"))
 
     // Should merge all three presets' filters
     expect(mockOnPresetsChange).toHaveBeenCalledWith({
