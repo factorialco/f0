@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.46.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.45.0...f0-react-native-v0.46.0) (2026-03-26)
+
+
+### Features
+
+* **tabs:** add F0Tabs component with showcase, styles, and docs ([#3765](https://github.com/factorialco/f0/issues/3765)) ([97b0bd7](https://github.com/factorialco/f0/commit/97b0bd7b5c63099a88b65f2c603f559b559b0d06))
+
 ## [0.45.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.44.0...f0-react-native-v0.45.0) (2026-03-25)
 
 
