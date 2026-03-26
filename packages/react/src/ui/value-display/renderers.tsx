@@ -132,5 +132,6 @@ export const metadataRenderer: ValueDisplayRenderer = (
   return renderer(value, {
     visualization: context.visualization,
     i18n: context.i18n,
+    tableAlign: context.tableAlign,
   })
 }

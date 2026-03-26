@@ -8,6 +8,13 @@ import { CompoundCell, CompoundCellValue } from "./compound"
 const tableMeta: ValueDisplayRendererContext = {
   visualization: "table",
   i18n: defaultTranslations,
+  tableAlign: "right",
+}
+
+const tableLeftMeta: ValueDisplayRendererContext = {
+  visualization: "table",
+  i18n: defaultTranslations,
+  tableAlign: "left",
 }
 
 const listMeta: ValueDisplayRendererContext = {
@@ -146,7 +153,21 @@ describe("CompoundCell", () => {
     expect(wrapper).toHaveClass("justify-end")
   })
 
-  it("keeps table right alignment and list natural flow", () => {
+  it("respects left table alignment from renderer context", () => {
+    const args: CompoundCellValue = {
+      segments: [{ type: "text", value: "A" }],
+    }
+
+    const renderResult = render(CompoundCell(args, tableLeftMeta))
+    const wrapper = renderResult.container.querySelector(
+      '[data-cell-type="compound"]'
+    )
+
+    expect(wrapper).not.toHaveClass("justify-start")
+    expect(wrapper).not.toHaveClass("justify-end")
+  })
+
+  it("keeps default table right alignment and list natural flow", () => {
     const args: CompoundCellValue = {
       segments: [{ type: "text", value: "A" }],
     }

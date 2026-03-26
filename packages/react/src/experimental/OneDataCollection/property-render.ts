@@ -3,6 +3,7 @@ import { ReactNode } from "react"
 import {
   metadataRenderer,
   ValueDisplayRendererDefinition,
+  type ValueDisplayTableAlignment,
 } from "@/ui/value-display"
 import { RecordType } from "@/hooks/datasource"
 import { TranslationsType } from "@/lib/providers/i18n/i18n-provider-defaults"
@@ -56,7 +57,10 @@ export const renderProperty = <R extends RecordType>(
   item: R,
   property: PropertyDefinition<R>,
   visualization: VisualizationType,
-  i18n: TranslationsType
+  i18n: TranslationsType,
+  options?: {
+    tableAlign?: ValueDisplayTableAlignment
+  }
 ): ReactNode => {
   const renderDefinition = property.render(item)
 
@@ -70,6 +74,7 @@ export const renderProperty = <R extends RecordType>(
     {
       visualization,
       i18n,
+      tableAlign: options?.tableAlign,
     },
     undefinedValue
   )

@@ -230,7 +230,7 @@ export const CompoundCell = (
   const wrapperClassName = cn(
     "flex flex-1 items-center text-f1-foreground",
     meta.visualization === "table" && [
-      "justify-end",
+      meta.tableAlign === "right" && "justify-end",
       tableDisplayClassNames.text,
     ]
   )
