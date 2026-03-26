@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.48.0](https://github.com/factorialco/f0/compare/f0-core-v1.47.0...f0-core-v1.48.0) (2026-03-26)
+
+
+### Features
+
+* **react:** add F0TimelineRow component ([#3727](https://github.com/factorialco/f0/issues/3727)) ([eb5e1f4](https://github.com/factorialco/f0/commit/eb5e1f4b3d5db5dd1cbbcfc1fa6950dfdb8b4016))
+
 ## [1.47.0](https://github.com/factorialco/f0/compare/f0-core-v1.46.1...f0-core-v1.47.0) (2026-03-24)
 
 
