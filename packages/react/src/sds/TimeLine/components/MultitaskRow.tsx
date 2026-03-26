@@ -5,11 +5,11 @@ import { TaskRow } from "./TaskRow"
 import { TimelineRowLayout } from "./TimelineRowLayout"
 
 export const MultitaskRow = ({
-  props,
+status, isLast = false, hideStatus = false, expanded, items
 }: {
   props: F0TimelineRowMultitaskProps
 }) => {
-  const { status, isLast = false, hideStatus = false, expanded, items } = props
+
 
   return (
     <TimelineRowLayout status={status} isLast={isLast} hideStatus={hideStatus}>
