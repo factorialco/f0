@@ -1,10 +1,6 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
 
-import { CopilotKit } from "@copilotkit/react-core"
-
-import { F0AiChatProvider } from "../../.."
 import { AssistantMessage } from "../AssistantMessage"
-import { FeedbackModalProvider } from "../../feedback/FeedbackProvider"
 
 const meta = {
   title: "AI/F0AiChat/Messages/AssistantMessage",
@@ -15,15 +11,9 @@ const meta = {
   tags: ["autodocs"],
   decorators: [
     (Story) => (
-      <F0AiChatProvider>
-        <CopilotKit runtimeUrl="http://localhost:0/copilotkit">
-          <div className="w-96 bg-f1-background p-4">
-            <FeedbackModalProvider>
-              <Story />
-            </FeedbackModalProvider>
-          </div>
-        </CopilotKit>
-      </F0AiChatProvider>
+      <div className="w-96 bg-f1-background p-4">
+        <Story />
+      </div>
     ),
   ],
 } satisfies Meta<typeof AssistantMessage>
