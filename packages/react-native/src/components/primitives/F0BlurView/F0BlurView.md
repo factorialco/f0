@@ -1,16 +1,14 @@
 # F0BlurView
 
-Internal blur primitive for the F0 React Native system.
+Blur primitive for the F0 React Native system.
 
 Wraps [`expo-blur`](https://docs.expo.dev/versions/latest/sdk/blur-view/) with className support via UniWind. Used by F0 components that need blurred background layers (e.g. `F0Card` image backdrop).
-
-> **Internal:** `F0BlurView` is not exported from the public `exports.ts`. Use it only inside other F0 primitives and components.
 
 ## Usage
 
 <!-- prettier-ignore -->
 ```tsx
-import { F0BlurView } from "../primitives/F0BlurView"
+import { F0BlurView } from "@factorialco/f0-react-native"
 
 <F0BlurView intensity={40} tint="default" style={StyleSheet.absoluteFill} />
 ```
