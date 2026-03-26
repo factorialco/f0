@@ -4,7 +4,7 @@ import { randomId } from "@copilotkit/shared"
 import { motion } from "motion/react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
-import { F0Button } from "@/components/F0Button/F0Button"
+import { F0Button } from "@/components/F0Button"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { ArrowUp, Cross, SolidStop } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"

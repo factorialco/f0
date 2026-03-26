@@ -1,5 +1,5 @@
 /**
- * Props for the F0CreditsWarning component
+ * Props for the F0MessageCreditsWarning component
  */
 export interface F0MessageCreditsWarningProps {
   /**
