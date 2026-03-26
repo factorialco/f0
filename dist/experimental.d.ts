@@ -20,13 +20,14 @@ import { CompanyCellValue } from './types/company';
 import { CompanyCellValue as CompanyCellValue_2 } from './experimental';
 import { CompanyItemProps } from './types';
 import { ComponentProps } from 'react';
-import { ComponentType } from 'react';
+import { CompoundCellValue } from './types/compound';
 import { CopilotKitProps } from '@copilotkit/react-core';
 import { CountryCellValue } from './types/country';
 import { DateCellValue } from './types/date';
 import { DateCellValue as DateCellValue_2 } from './experimental';
 import { DateFilterOptions } from './DateFilter/DateFilter';
 import { default as default_2 } from 'react';
+import { DeltaCellValue } from './types/delta';
 import { Dispatch } from 'react';
 import { DotTagCellValue } from './types/dotTag';
 import { DotTagCellValue as DotTagCellValue_2 } from './experimental';
@@ -132,7 +133,7 @@ export declare type ActionBarGroup = {
     items: ActionBarItem[];
 };
 
-export declare type ActionBarItem = ActionType_2;
+export declare type ActionBarItem = ActionType;
 
 export declare type ActionBarStatus = "idle" | "loading" | "success";
 
@@ -318,7 +319,14 @@ declare type ActionSize = (typeof actionSizes)[number];
 
 declare const actionSizes: readonly ["sm", "md", "lg"];
 
-export declare type ActionType = "duplicate" | "delete";
+declare type ActionType = {
+    label: string;
+    icon?: IconType;
+    onClick?: () => void;
+    disabled?: boolean;
+    critical?: boolean;
+    description?: string;
+};
 
 export declare type actionType = {
     label: string;
@@ -326,15 +334,6 @@ export declare type actionType = {
     disabled?: boolean;
     variant: "default" | "outline" | "neutral" | undefined;
     icon?: IconType;
-};
-
-declare type ActionType_2 = {
-    label: string;
-    icon?: IconType;
-    onClick?: () => void;
-    disabled?: boolean;
-    critical?: boolean;
-    description?: string;
 };
 
 declare type ActionVariant = (typeof actionVariants)[number];
@@ -348,7 +347,7 @@ export declare const ActivityItemList: (({ items, loadingMoreItems, onClickItem,
     Skeleton: () => default_2.JSX.Element;
 };
 
-export declare type ActivityItemListProps = Pick<SectionProps_2, "items" | "onClickItem"> & {
+export declare type ActivityItemListProps = Pick<SectionProps, "items" | "onClickItem"> & {
     onEndReached?: () => void;
     onEndReachedItemsThreshold?: number;
     loadingMoreItems?: boolean;
@@ -367,6 +366,8 @@ declare type ActivityItemProps = {
     onClick: (id: string) => void;
     onVisible?: (id: string) => void;
 };
+
+declare type AddRowActionsResult = PrimaryActionItemDefinition | PrimaryActionItemDefinition[] | undefined;
 
 declare type AiBannerAction = {
     label: string;
@@ -398,6 +399,25 @@ declare type AIButton = {
     label: string;
     icon: IconType;
     editable?: boolean;
+};
+
+/**
+ * Credits configuration for the AI chat.
+ * Groups all credits-related props into a single object.
+ *
+ * When provided, a credits button is shown in the chat header.
+ */
+declare type AiChatCredits = {
+    /** Async function to fetch credits usage. Called each time the popover opens. */
+    fetchUsage: () => Promise<CreditsUsage>;
+    /** URL to the plan upgrade page. When provided, a link is shown in the popover. */
+    upgradePlanUrl?: string;
+    /** Company name displayed in the popover header. */
+    companyName?: string;
+    /** Company logo URL displayed in the popover header. */
+    companyLogoUrl?: string;
+    /** Plan name displayed below the company name (e.g. "Free plan", "Enterprise"). */
+    planName?: string;
 };
 
 /**
@@ -435,9 +455,20 @@ declare type AiChatProviderProps = {
      */
     lockVisualizationMode?: boolean;
     /**
+     * Enable chat history UI (clickable header title + history dialog).
+     * When false (default), the header shows a simple "New Chat" button instead.
+     * Set to true only when the backend supports the /copilotkit/chat-history/threads route.
+     * @default false
+     */
+    historyEnabled?: boolean;
+    /**
      * Optional footer content rendered below the textarea
      */
     footer?: React.ReactNode;
+    /**
+     * Optional component rendered in place of the chat UI when voice mode is active.
+     */
+    VoiceMode?: React.ComponentType;
     /**
      * Async resolver functions for entity references in markdown.
      * Used to fetch profile data for inline entity mentions (hover cards).
@@ -451,6 +482,11 @@ declare type AiChatProviderProps = {
      * Only one tool hint can be active at a time.
      */
     toolHints?: AiChatToolHint[];
+    /**
+     * Credits configuration. When provided, a credits button is shown in the chat header.
+     * Groups fetchUsage, upgradePlanUrl, and company/plan display info.
+     */
+    credits?: AiChatCredits;
     onThumbsUp?: (message: AIMessage, { threadId, feedback }: {
         threadId: string;
         feedback: string;
@@ -883,25 +919,6 @@ export declare type BasePaginatedResponse<R> = BaseResponse<R> & {
     perPage: number;
 };
 
-export declare type BaseQuestionOnChangeParams = {
-    id: string;
-    title?: string;
-    description?: string;
-    required?: boolean;
-};
-
-declare type BaseQuestionProps = {
-    id: string;
-    title: string;
-    description?: string;
-    type: QuestionType;
-    children: React.ReactNode;
-    required?: boolean;
-    locked?: boolean;
-};
-
-declare type BaseQuestionPropsForOtherQuestionComponents = Omit<BaseQuestionProps, "children" | "onChange">;
-
 /**
  * Base response type for collection data
  * @template R - The type of records in the collection
@@ -1256,6 +1273,10 @@ declare type CardAvatarVariant = AvatarVariant | {
  */
 declare type CardCollectionProps<Record extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<Record>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<Record>> = CollectionProps<Record, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping, CardVisualizationOptions<Record, Filters, Sortings>>;
 
+declare type CardImageAspectRatio = (typeof cardImageAspectRatios)[number];
+
+declare const cardImageAspectRatios: readonly ["default", "video"];
+
 declare type CardImageFit = (typeof cardImageFits)[number];
 
 declare const cardImageFits: readonly ["contain", "cover", "fit-width", "fit-height", "scale-down"];
@@ -1271,13 +1292,13 @@ declare const cardImageSizes: readonly ["xs", "sm", "md", "lg", "xl"];
 declare type CardMetadataProperty = {
     [K in CardPropertyType]: {
         type: K;
+        label: string;
         value: Parameters<(typeof valueDisplayRenderers)[K]>[0];
     };
 }[CardPropertyType];
 
 declare type CardPropertyDefinition<T> = PropertyDefinition_2<T> & {
     icon?: IconType;
-    tooltip?: string;
 };
 
 declare const cardPropertyRenderers: {
@@ -1331,6 +1352,11 @@ export declare interface CardSelectableItem<T extends CardSelectableValue> {
     disabled?: boolean;
     /** Whether this item is required (shows asterisk indicator) */
     required?: boolean;
+    /** Link displayed below the description, typically pointing to external documentation */
+    moreInfoLink?: {
+        href: string;
+        label?: string;
+    };
 }
 
 export declare interface CardSelectableMultipleProps<T extends CardSelectableValue> {
@@ -1385,6 +1411,7 @@ declare type CardVisualizationOptions<T, _Filters extends FiltersDefinition, _So
     image?: (record: T) => string;
     imageFit?: CardImageFit;
     imageSize?: CardImageSize;
+    imageAspectRatio?: CardImageAspectRatio;
     blurredBackground?: boolean;
     compact?: boolean;
 };
@@ -1579,32 +1606,6 @@ declare interface ClockInGraphProps {
 
 declare type ClockInStatus = "clocked-in" | "break" | "clocked-out";
 
-export declare const CoCreationForm: WithDataTestIdReturnType_4<({ elements: elementsProp, isEditMode, onChange, disallowOptionalQuestions, allowedQuestionTypes, applyingChanges, }: CoCreationFormProps) => JSX_2.Element>;
-
-export declare type CoCreationFormCallbacks = {
-    onQuestionChange?: (params: OnChangeQuestionParams) => void;
-    onSectionChange?: (params: OnChangeSectionParams) => void;
-    onAddNewElement?: (params: OnAddNewElementParams) => void;
-    onDuplicateElement?: (params: OnDuplicateElementParams) => void;
-};
-
-export declare type CoCreationFormElement = {
-    type: "section";
-    section: SectionElement;
-} | {
-    type: "question";
-    question: QuestionElement;
-};
-
-export declare type CoCreationFormProps = {
-    elements: CoCreationFormElement[];
-    onChange: (elements: CoCreationFormElement[]) => void;
-    isEditMode?: boolean;
-    disallowOptionalQuestions?: boolean;
-    allowedQuestionTypes?: QuestionType[];
-    applyingChanges?: boolean;
-};
-
 declare type ColId = string;
 
 /**
@@ -1627,6 +1628,8 @@ export declare type CollectionProps<Record extends RecordType, Filters extends F
      * Temporary prop to force the full width of the data collection (removes the X padding)
      */
     tmpFullWidth?: boolean;
+    /** Indicates the source visualization type */
+    fromVisualization?: TableVisualizationType;
 } & VisualizationOptions;
 
 declare type CollectionVisualizations<Record extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<Record>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<Record>> = {
@@ -1738,8 +1741,6 @@ declare type CompareToDef = {
 
 declare type CompareToDefKey = string;
 
-export declare function computeSectionEndIds(elements: CoCreationFormElement[]): Set<string>;
-
 declare type Content = (ComponentProps<typeof DataList.Item> & {
     type: "item";
 }) | (ComponentProps<typeof DataList.PersonItem> & {
@@ -1794,6 +1795,14 @@ declare const counterVariants: (props?: ({
 })) | undefined) => string;
 
 declare type CountryCode = keyof TranslationsType["countries"];
+
+/**
+ * Credits usage data returned by the host app
+ */
+declare type CreditsUsage = {
+    used: number;
+    total: number;
+};
 
 /**
  * Extracts the current filters type from filter options.
@@ -2176,10 +2185,6 @@ export declare interface DatePreset {
     value: DateRange | (() => DateRange);
 }
 
-declare type DateQuestionProps = BaseQuestionPropsForOtherQuestionComponents & {
-    value?: Date | null;
-};
-
 export declare type DateRange = {
     from: Date;
     to?: Date;
@@ -2491,6 +2496,7 @@ declare const defaultTranslations: {
             readonly errors: {
                 readonly saveFailed: "Save failed";
             };
+            readonly addRow: "Add row";
         };
         readonly itemsCount: "items";
         readonly emptyStates: {
@@ -2599,6 +2605,7 @@ declare const defaultTranslations: {
         readonly openChat: "Open Chat with One AI";
         readonly closeChat: "Close Chat with One AI";
         readonly startNewChat: "Start new chat";
+        readonly settings: "Settings";
         readonly scrollToBottom: "Scroll to bottom";
         readonly welcome: "Ask or create with One";
         readonly defaultInitialMessage: "How can I help you today?";
@@ -2609,6 +2616,10 @@ declare const defaultTranslations: {
         readonly thoughtsGroupTitle: "Reflection";
         readonly resourcesGroupTitle: "Resources";
         readonly thinking: "Thinking...";
+        readonly closeDashboard: "Close dashboard";
+        readonly unsavedChanges: "Unsaved changes";
+        readonly saveChanges: "Save changes";
+        readonly discardChanges: "Discard";
         readonly exportTable: "Download table";
         readonly generatedTableFilename: "OneGeneratedTable";
         readonly feedbackModal: {
@@ -2626,9 +2637,57 @@ declare const defaultTranslations: {
         readonly dataDownloadPreview: "Preview {{shown}} of {{total}} rows — download the Excel to see all data.";
         readonly expandChat: "Expand chat";
         readonly collapseChat: "Collapse chat";
+        readonly chatHistory: "Chat history";
+        readonly noPreviousChats: "No previous conversations";
+        readonly newConversation: "New conversation";
+        readonly today: "Today";
+        readonly yesterday: "Yesterday";
+        readonly thisMonth: "This month";
+        readonly older: "Older";
+        readonly searchChats: "Search conversations...";
+        readonly pinnedChats: "Pinned";
+        readonly threadOptions: "Thread options";
+        readonly pinChat: "Pin chat";
+        readonly unpinChat: "Unpin chat";
+        readonly deleteChat: "Delete chat";
         readonly ask: "Ask One";
         readonly viewProfile: "View profile";
         readonly tools: "Tools";
+        readonly credits: {
+            readonly title: "Credits";
+            readonly creditsLeft: "{{total}} left";
+            readonly monthlyCredits: "Monthly credits";
+            readonly creditsError: "Could not load credits";
+            readonly upgradePlan: "Upgrade";
+            readonly needMoreCredits: "Need more credits?";
+        };
+        readonly reportCard: {
+            readonly reportLabel: "Report";
+            readonly openButton: "Open";
+        };
+        readonly dataDownload: {
+            readonly download: "Download {{format}}";
+            readonly exportDashboard: "Export dashboard as {{format}}";
+            readonly exporting: "Exporting...";
+        };
+        readonly pong: {
+            readonly title: "Pong";
+            readonly youWin: "You win!";
+            readonly youLose: "You lose!";
+            readonly goal: "Goal";
+            readonly controls: "← → to move";
+            readonly escToExit: "Esc to exit";
+        };
+        readonly creditWarning: {
+            readonly soft: "You're running low on AI credits.";
+            readonly getCredits: "Get credits";
+            readonly dismiss: "Dismiss";
+            readonly messageBanner: {
+                readonly title: "This response requires credits";
+                readonly description: "Your company has run out of AI credits.";
+                readonly actionLabel: "Get credits";
+            };
+        };
         readonly growth: {
             readonly demoCard: {
                 readonly title: "See {{moduleName}} in action";
@@ -2674,7 +2733,7 @@ declare const defaultTranslations: {
             readonly dismiss: "Dismiss";
         };
     };
-    readonly coCreationForm: {
+    readonly surveyFormBuilder: {
         readonly actions: {
             readonly actions: "Actions";
             readonly duplicateQuestion: "Duplicate question";
@@ -2706,7 +2765,11 @@ declare const defaultTranslations: {
         };
         readonly answer: {
             readonly label: "Answer";
-            readonly placeholder: "Respondent's answer";
+            readonly dropdownPlaceholder: "Pick an option";
+            readonly textPlaceholder: "Type your answer";
+            readonly numericPlaceholder: "Enter a number";
+            readonly linkPlaceholder: "https://example.com";
+            readonly invalidUrl: "Enter a valid URL";
         };
         readonly labels: {
             readonly applyingChanges: "Applying changes";
@@ -2723,6 +2786,23 @@ declare const defaultTranslations: {
             readonly sectionTitlePlaceholder: "Section title";
             readonly lastQuestionDialogTitle: "Remove last question from section";
             readonly lastQuestionDialogDescription: "Moving this question will leave the section empty and it will be removed. Do you want to continue?";
+        };
+    };
+    readonly surveyAnsweringForm: {
+        readonly actions: {
+            readonly submit: "Submit survey";
+            readonly cancel: "Cancel";
+            readonly next: "Next";
+            readonly previous: "Previous";
+            readonly expand: "Expand";
+            readonly collapse: "Collapse";
+        };
+        readonly labels: {
+            readonly empty: {
+                readonly title: "No questions to answer";
+                readonly description: "This survey has no questions yet.";
+                readonly emoji: "📝";
+            };
         };
     };
     readonly richTextEditor: {
@@ -2795,6 +2875,7 @@ declare const defaultTranslations: {
             readonly fileTooLarge: "File exceeds {{maxSize}} MB limit";
             readonly invalidFileType: "File type not accepted. Accepted formats: {{types}}";
         };
+        readonly moreInformation: "More information";
         readonly validation: {
             readonly required: "This field is required";
             readonly invalidType: "Invalid value";
@@ -2937,14 +3018,8 @@ declare type DropdownProps = Omit<DropdownInternalProps, (typeof privateProps_4)
     onOpenChange?: (open: boolean) => void;
 } & WithDataTestIdProps;
 
-declare type DropdownSingleQuestionProps = BaseQuestionPropsForOtherQuestionComponents & {
-    type: "dropdown-single";
-    options: SelectQuestionOption[];
-    value?: string | null;
-};
-
-/** The edit mode for a column cell in the editable table. Derived from value-display editors. */
-declare type EditableTableCellEditType = EditableValueDisplayType;
+/** The edit mode for a column cell in the editable table. */
+declare type EditableTableCellEditType = "text" | "date" | "select" | "multiselect" | "display-only" | "disabled";
 
 declare type EditableTableCollectionProps<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<R>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<R>> = CollectionProps<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping, EditableTableVisualizationOptions<R, Filters, Sortings, Summaries>>;
 
@@ -2956,6 +3031,8 @@ declare type EditableTableCollectionProps<R extends RecordType, Filters extends 
  * back into the item passed to `onCellChange`.
  */
 declare type EditableTableColumnDefinition<R extends RecordType, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition> = TableColumnDefinition<R, Sortings, Summaries> & {
+    /** Optional placeholder passed to editable inputs (e.g. date cells). */
+    inputPlaceholder?: string;
     /**
      * Determines how the cell is rendered in edit mode.
      * Receives the current item and returns the cell type (e.g. `"text"`) or
@@ -2965,12 +3042,15 @@ declare type EditableTableColumnDefinition<R extends RecordType, Sortings extend
      */
     editType?: (item: R) => EditableTableCellEditType | undefined;
     /**
-     * Function that determines if the cell should be editable for a given item.
-     * The cell is only editable if both `editType` returns a value AND
-     * this function returns `true` for the given item.
-     * Return `true` for all items to make the column always editable.
+     * Configuration for `"select"` cells. Required when `editType` returns `"select"`.
+     * Accepts either static `options` or a `source` + `mapOptions` for async data.
+     *
+     * If `editType` returns `"select"` but `selectConfig` is missing, the cell
+     * falls back to a non-editable display with a `console.warn` at runtime.
+     * Type-level enforcement is not possible because `editType` is a per-row
+     * function whose return value isn't statically known.
      */
-    editable: (item: R) => boolean;
+    selectConfig?: SelectCellConfig<R>;
 };
 
 declare type EditableTableVisualizationOptions<R extends RecordType, _Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition> = Omit<TableVisualizationOptions<R, _Filters, Sortings, Summaries>, "columns"> & {
@@ -2981,18 +3061,34 @@ declare type EditableTableVisualizationOptions<R extends RecordType, _Filters ex
      * Rejection sets an error on the edited column.
      */
     onCellChange: (updatedItem: R) => Promise<void | Record<string, string>>;
+    /**
+     * When provided, renders action buttons at the bottom of the root-level table.
+     * Returns a single action, an array of actions, or undefined to hide the row.
+     */
+    addRowActions?: () => AddRowActionsResult;
+    /**
+     * Label for the dropdown trigger button when multiple root-level add-row
+     * actions are provided. Falls back to the first action's label if omitted.
+     */
+    addRowActionsLabel?: string;
+    /**
+     * When provided, renders action buttons at the bottom of each expanded nested row.
+     * Receives the parent item whose children the new row will be added to.
+     */
+    addNestedRowActions?: (parent: R) => AddRowActionsResult;
+    /**
+     * Label for the dropdown trigger button when multiple nested add-row
+     * actions are provided. Falls back to the first action's label if omitted.
+     */
+    addNestedRowActionsLabel?: string;
 };
 
 declare type EditableTableVisualizationSettings = TableVisualizationSettings;
-
-declare type EditableValueDisplayType = keyof typeof valueDisplayEditors;
 
 export declare type editorStateType = {
     html: string;
     json: JSONContent | null;
 };
-
-export declare type ElementType = QuestionType | "section";
 
 declare type EmptyState = {
     emoji?: string;
@@ -3822,20 +3918,6 @@ declare type FlagAvatarVariant = Extract<AvatarVariant, {
     type: "flag";
 }>;
 
-export declare type FlatFormItem = {
-    type: "section-header";
-    id: string;
-    section: SectionElement;
-} | {
-    type: "question";
-    id: string;
-    question: QuestionElement;
-} | {
-    type: "section-end";
-    id: string;
-    sectionId: string;
-};
-
 export declare type FlattenedItem = {
     parent: EntitySelectEntity | null;
     subItem: EntitySelectSubEntity & {
@@ -3843,8 +3925,6 @@ export declare type FlattenedItem = {
         subItems?: EntitySelectSubEntity[];
     };
 };
-
-export declare function flattenElements(elements: CoCreationFormElement[]): FlatFormItem[];
 
 declare type FontSize = (typeof fontSizes)[number];
 
@@ -4163,26 +4243,11 @@ export declare type InfiniteScrollPaginatedResponse<TRecord> = BasePaginatedResp
 };
 
 /**
- * Re-inject section-end markers into a flat list that has none.
- *
- * Uses `inSectionQuestionIds` (the set of question IDs that originally
- * belonged to *any* section) to determine where each section ends:
- * - Questions in the set stay inside the current section.
- * - Original standalone questions (NOT in the set) cause the section to close
- *   before them so they remain standalone.
- *
- * This allows cross-section moves (a question from section B placed after
- * section A's header joins section A) while keeping standalone questions
- * outside sections unless the user explicitly drags them between section items.
- */
-export declare function injectSectionEnds(items: FlatFormItem[], inSectionQuestionIds: Set<string>): FlatFormItem[];
-
-/**
  * @experimental This is an experimental component use it at your own risk
  */
 export declare const Input: <T extends string>(props: InputProps<T>) => JSX_2.Element;
 
-declare const Input_2: React_2.ForwardRefExoticComponent<Omit<React_2.InputHTMLAttributes<HTMLInputElement>, "onChange" | "size"> & Pick<InputFieldProps<string>, "label" | "onChange" | "size" | "icon" | "role" | "onFocus" | "onBlur" | "status" | "loading" | "disabled" | "maxLength" | "required" | "error" | "append" | "hideLabel" | "hint" | "labelIcon" | "onClickContent" | "readonly" | "clearable" | "autocomplete" | "onClear" | "isEmpty" | "emptyValue" | "hideMaxLength" | "appendTag" | "lengthProvider" | "buttonToggle"> & React_2.RefAttributes<HTMLInputElement>>;
+declare const Input_2: React_2.ForwardRefExoticComponent<Omit<React_2.InputHTMLAttributes<HTMLInputElement>, "onChange" | "size"> & Pick<InputFieldProps<string>, "label" | "onChange" | "size" | "icon" | "role" | "onFocus" | "onBlur" | "transparent" | "status" | "loading" | "disabled" | "maxLength" | "required" | "error" | "append" | "hideLabel" | "hint" | "labelIcon" | "onClickContent" | "readonly" | "clearable" | "autocomplete" | "onClear" | "isEmpty" | "emptyValue" | "hideMaxLength" | "appendTag" | "lengthProvider" | "buttonToggle"> & React_2.RefAttributes<HTMLInputElement>>;
 
 declare const INPUTFIELD_SIZES: readonly ["sm", "md"];
 
@@ -4255,13 +4320,14 @@ declare type InputFieldProps<T> = {
         disabled?: boolean;
         onChange: (selected: boolean) => void;
     };
+    transparent?: boolean;
 };
 
 declare type InputFieldSize = (typeof INPUTFIELD_SIZES)[number];
 
 declare type InputFieldStatus = {
     type: Exclude<InputFieldStatusType, "error">;
-    message: string;
+    message?: string;
 } | {
     type: "error";
     message?: string;
@@ -4271,7 +4337,7 @@ declare const inputFieldStatus: readonly ["default", "warning", "info", "error"]
 
 declare type InputFieldStatusType = (typeof inputFieldStatus)[number];
 
-declare type InputInternalProps<T extends string> = Pick<ComponentProps<typeof Input_2>, "ref"> & Pick<InputFieldProps<T>, "autoFocus" | "required" | "disabled" | "size" | "onChange" | "value" | "placeholder" | "clearable" | "maxLength" | "label" | "labelIcon" | "icon" | "hideLabel" | "name" | "error" | "status" | "hint" | "autocomplete" | "buttonToggle" | "hideMaxLength" | "loading"> & {
+declare type InputInternalProps<T extends string> = Pick<ComponentProps<typeof Input_2>, "ref"> & Pick<InputFieldProps<T>, "autoFocus" | "required" | "disabled" | "size" | "onChange" | "value" | "placeholder" | "clearable" | "maxLength" | "label" | "labelIcon" | "icon" | "hideLabel" | "name" | "error" | "status" | "hint" | "autocomplete" | "buttonToggle" | "hideMaxLength" | "loading" | "transparent"> & {
     type?: Exclude<HTMLInputTypeAttribute, "number">;
     onPressEnter?: () => void;
 };
@@ -4357,10 +4423,6 @@ chart: LineChartProps;
 declare type LinkProps = AnchorHTMLAttributes<HTMLAnchorElement> & {
     exactMatch?: boolean;
     disabled?: boolean;
-};
-
-declare type LinkQuestionProps = BaseQuestionPropsForOtherQuestionComponents & {
-    value?: string | null;
 };
 
 /**
@@ -4512,6 +4574,12 @@ declare type MetadataItemValue = {
     type: "date";
     formattedDate: string;
     icon?: "warning" | "critical";
+} | {
+    type: "progress-bar";
+    value: number;
+    max?: number;
+    label?: string;
+    color?: string;
 };
 
 declare interface MetadataProps {
@@ -4545,6 +4613,7 @@ export declare type ModuleId = keyof typeof modules;
 
 export declare const modules: {
     readonly "ai-reports": ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly ai_ticketing: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
     readonly analytics: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
     readonly ats: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
     readonly benefits: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
@@ -4578,6 +4647,7 @@ export declare const modules: {
     readonly hub: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
     readonly it_management: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
     readonly kudos: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly lms: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
     readonly meetings: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
     readonly my_benefits: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
     readonly my_documents: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
@@ -4858,10 +4928,6 @@ declare type NumericFormatterOptions = {
     useGrouping?: boolean;
 };
 
-declare type NumericQuestionProps = BaseQuestionPropsForOtherQuestionComponents & {
-    value?: number | null;
-};
-
 /**
  * Represents a numeric value that can be formatted with optional units.
  *
@@ -4935,60 +5001,10 @@ declare interface OmniButtonProps {
     hasNewUpdate?: boolean;
 }
 
-export declare type OnAddNewElementParams = {
-    type: ElementType;
-    afterId?: string;
-};
-
 export declare type OnBulkActionCallback<Record extends RecordType, Filters extends FiltersDefinition> = (...args: [
 action: BulkAction,
 ...Parameters<OnSelectItemsCallback<Record, Filters>>
 ]) => void;
-
-declare type OnChangeQuestionParams = BaseQuestionOnChangeParams & ({
-    type: "text" | "longText";
-    value?: string | null;
-} | {
-    type: "rating";
-    value: number;
-    options?: {
-        value: number;
-        label: string;
-    }[];
-} | {
-    type: "select";
-    value?: string | null;
-    options: SelectQuestionOption[];
-} | {
-    type: "multi-select";
-    value?: string[] | null;
-    options: SelectQuestionOption[];
-} | {
-    type: "dropdown-single";
-    value?: string | null;
-    options?: SelectQuestionOption[];
-} | {
-    type: "numeric";
-    value?: number | null;
-} | {
-    type: "link";
-    value?: string | null;
-} | {
-    type: "date";
-    value?: Date | null;
-});
-
-export declare type OnChangeSectionParams = {
-    id: string;
-    title: string;
-    description?: string;
-    questions?: QuestionElement[];
-};
-
-export declare type OnDuplicateElementParams = {
-    elementId: string;
-    type: ElementType;
-};
 
 /**
  * @experimental This is an experimental component use it at your own risk
@@ -5476,6 +5492,7 @@ declare interface PrimaryAction {
     disabled?: boolean;
     tooltip?: string;
     isVisible?: boolean;
+    loading?: boolean;
 }
 
 declare type PrimaryAction_2 = BaseAction & {
@@ -5705,30 +5722,6 @@ declare type Pulse = (typeof pulses)[number];
 
 declare const pulses: readonly ["superNegative", "negative", "neutral", "positive", "superPositive"];
 
-export declare type QuestionActionParams = {
-    questionId: string;
-    type: ActionType;
-    index: number;
-};
-
-export declare type QuestionElement = Omit<TextQuestionProps, QuestionPropsToOmit> | Omit<RatingQuestionProps & {
-    type: "rating";
-}, QuestionPropsToOmit> | Omit<SelectQuestionProps & {
-    type: "select" | "multi-select";
-}, QuestionPropsToOmit> | Omit<DropdownSingleQuestionProps & {
-    type: "dropdown-single";
-}, QuestionPropsToOmit> | Omit<NumericQuestionProps & {
-    type: "numeric";
-}, QuestionPropsToOmit> | Omit<LinkQuestionProps & {
-    type: "link";
-}, QuestionPropsToOmit> | Omit<DateQuestionProps & {
-    type: "date";
-}, QuestionPropsToOmit>;
-
-declare type QuestionPropsToOmit = "onAction" | "onChange" | "onAddNewElement";
-
-export declare type QuestionType = "rating" | "select" | "multi-select" | "dropdown-single" | "text" | "longText" | "numeric" | "link" | "date";
-
 export declare const RadarChart: RadarChartGeneric;
 
 export declare const _RadarChart: <K extends ChartConfig>({ data, dataConfig, scaleMin, scaleMax, aspect }: RadarChartProps<K>, ref: ForwardedRef<HTMLDivElement>) => JSX_2.Element;
@@ -5744,15 +5737,6 @@ export declare type RadarChartProps<K extends ChartConfig> = {
 };
 
 export declare const rangeSeparator = "\u2192";
-
-declare type RatingQuestionProps = BaseQuestionPropsForOtherQuestionComponents & {
-    value?: number;
-} & {
-    options: {
-        value: number;
-        label: string;
-    }[];
-};
 
 declare interface ReactionProps {
     emoji: string;
@@ -5772,8 +5756,6 @@ declare interface ReactionsProps {
         onClick: () => void;
     };
 }
-
-export declare function reconstructElements(flatItems: FlatFormItem[]): CoCreationFormElement[];
 
 /**
  * Utility type to get all possible paths through an object using dot notation
@@ -5796,6 +5778,8 @@ declare type RecordPathValue<T, P extends string> = P extends keyof T ? T[P] : P
  */
 export declare type RecordType = Record<string, unknown>;
 
+declare type ReferenceType = "none" | "striped";
+
 /**
  * A numeric value that can be formatted with an optional formatter and options.
  * This is a relaxed version of NumericWithFormatter that allows the numeric value to be a Numeric.
@@ -5812,6 +5796,8 @@ export declare type ResolvedRecordType<R> = R extends RecordType ? R : RecordTyp
  * @experimental This is an experimental component use it at your own risk
  */
 export declare const ResourceHeader: ({ avatar, title, description, primaryAction, secondaryActions, otherActions, status, metadata, deactivated, }: Props) => JSX_2.Element;
+
+export declare type ResourceHeaderProps = Props;
 
 declare type RestrictComponentProps = {
     identifier: string;
@@ -5854,6 +5840,7 @@ export declare interface RichTextEditorProps {
     secondaryAction?: secondaryActionsType;
     primaryAction?: primaryActionType;
     onChange: (result: resultType) => void;
+    onBlur?: () => void;
     maxCharacters?: number;
     placeholder: string;
     initialEditorState?: {
@@ -5867,6 +5854,10 @@ export declare interface RichTextEditorProps {
     onFullscreenChange?: (fullscreen: boolean) => void;
     /** Whether the editor is disabled */
     disabled?: boolean;
+    /** Whether the editor has an error state */
+    error?: boolean;
+    /** Whether the editor is in a loading state */
+    loading?: boolean;
     dataTestId?: string;
 }
 
@@ -5936,28 +5927,12 @@ export declare type secondaryActionType = (actionType | toggleActionType) & {
     type?: "button" | "switch";
 };
 
-export declare type SectionActionParams = {
-    sectionId: string;
-    type: ActionType;
-    index: number;
-};
-
-export declare type SectionElement = Omit<SectionProps, "onAction" | "onChange">;
-
 /**
  * @experimental This is an experimental component use it at your own risk
  */
 export declare const SectionHeader: ({ title, description, action, link, separator, }: Props_2) => JSX_2.Element;
 
 declare type SectionProps = {
-    id: string;
-    title: string;
-    description?: string;
-    locked?: boolean;
-    questions?: QuestionElement[];
-};
-
-declare type SectionProps_2 = {
     title: string;
     items: Omit<ActivityItemProps, "onClick">[];
     onClickItem: (id: string) => void;
@@ -5970,6 +5945,26 @@ declare type SectionProps_2 = {
 export declare const Select: <T extends string = string, R = unknown>(props: F0SelectProps_2<T, R> & {
     ref?: React.Ref<HTMLButtonElement>;
 }) => React.ReactElement;
+
+/**
+ * Configuration for select-type cells. Mirrors F0Select's two data modes:
+ * - Static `options` (array or per-row function)
+ * - Async `source` (DataSourceDefinition) with `mapOptions`
+ */
+declare type SelectCellConfig<R extends RecordType> = {
+    placeholder?: string;
+    clearable?: boolean;
+    showSearchBox?: boolean;
+    defaultItem?: (item: R) => F0SelectItemObject<string, RecordType> | undefined;
+} & ({
+    options: F0SelectItemProps<string>[] | ((item: R) => F0SelectItemProps<string>[]);
+    source?: never;
+    mapOptions?: never;
+} | {
+    source: Omit<DataSourceDefinition<RecordType, FiltersDefinition, SortingsDefinition, GroupingDefinition<RecordType>>, "selectable" | "grouping" | "defaultGrouping" | "currentGrouping" | "fetchChildren" | "itemsWithChildren" | "childrenCount">;
+    mapOptions: (record: RecordType) => F0SelectItemProps<string, RecordType>;
+    options?: never;
+});
 
 /**
  * Represents a collection of selected items.
@@ -6010,23 +6005,6 @@ export declare type SelectedState = {
 };
 
 export declare type SelectionId = number | string;
-
-export declare type SelectQuestionOption = {
-    id?: string;
-    value: string;
-    label: string;
-    correct?: boolean;
-};
-
-declare type SelectQuestionProps = BaseQuestionPropsForOtherQuestionComponents & {
-    options: SelectQuestionOption[];
-} & ({
-    type: "select";
-    value?: string | null;
-} | {
-    type: "multi-select";
-    value?: string[] | null;
-});
 
 export declare const selectSizes: readonly ["sm", "md"];
 
@@ -6317,6 +6295,12 @@ declare type TableColumnDefinition<R extends RecordType, Sortings extends Sortin
      */
     summary?: SummaryKey<Summaries>;
     /**
+     * Placeholder to display in this column's summary-row cell when no summary
+     * value is rendered. This also applies to columns without a `summary`
+     * definition. Takes precedence over the row-level `summaryPlaceholder`.
+     */
+    summaryPlaceholder?: string;
+    /**
      * The id of the column (if not provided, the id will be the label of the column)
      */
     id?: ColId;
@@ -6332,9 +6316,16 @@ declare type TableColumnDefinition<R extends RecordType, Sortings extends Sortin
      * Avoid hiding the column by the user
      */
     noHiding?: boolean;
+    /**
+     * Assigns this column to a header group. Columns with the same
+     * headerGroupId are visually grouped under a shared spanning header.
+     * The label for each group is provided via `headerGroupLabels` in
+     * the visualization options.
+     */
+    headerGroupId?: string;
 };
 
-declare function TableHead({ children, width, sortState, onSortClick, info, infoIcon, sticky, hidden, align, className, }: TableHeadProps): JSX_2.Element;
+declare function TableHead({ children, width, sortState, onSortClick, info, infoIcon, sticky, hidden, align, className, colSpan, }: TableHeadProps): JSX_2.Element;
 
 declare interface TableHeadProps {
     children: React.ReactNode;
@@ -6389,6 +6380,10 @@ declare interface TableHeadProps {
      * The class name of the header cell
      */
     className?: string;
+    /**
+     * The number of columns this header cell should span
+     */
+    colSpan?: number;
 }
 
 declare type TableVisualizationOptions<R extends RecordType, _Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition> = {
@@ -6396,6 +6391,13 @@ declare type TableVisualizationOptions<R extends RecordType, _Filters extends Fi
      * The columns to display
      */
     columns: ReadonlyArray<TableColumnDefinition<R, Sortings, Summaries>>;
+    /**
+     * Placeholder to display in summary-row cells when no summary value is
+     * rendered. This also applies to columns without a `summary` definition.
+     * Column-level `summaryPlaceholder` takes precedence.
+     * @default "-"
+     */
+    summaryPlaceholder?: string;
     /**
      * The number of columns to freeze on the left
      */
@@ -6408,12 +6410,24 @@ declare type TableVisualizationOptions<R extends RecordType, _Filters extends Fi
      * Allow users to hide columns (you can define especifcally non hiddable columns in col props, also frozen columns are not hiddable)
      */
     allowColumnHiding?: boolean;
+    /**
+     * Marks one or more rows as reference rows.
+     * Reference rows are rendered with a slanted background pattern across the full row.
+     */
+    referenceRowType?: (item: R) => ReferenceType;
+    /**
+     * Labels for header groups. Keys are headerGroupId values used in column
+     * definitions, values are the display labels rendered in the spanning header row.
+     */
+    headerGroupLabels?: Record<string, string>;
 };
 
 declare type TableVisualizationSettings = {
     order?: ColId[];
     hidden?: ColId[];
 };
+
+export declare type TableVisualizationType = "table" | "editableTable";
 
 /**
  * @experimental This is an experimental component use it at your own risk
@@ -6521,11 +6535,6 @@ declare const Textarea_2: React_2.ForwardRefExoticComponent<Omit<React_2.Textare
 } & Pick<InputFieldProps<string>, "label" | "value" | "onChange" | "size" | "icon" | "onFocus" | "onBlur" | "onKeyDown" | "status" | "loading" | "maxLength" | "placeholder" | "required" | "error" | "hideLabel" | "hint" | "labelIcon" | "clearable" | "onClear"> & React_2.RefAttributes<HTMLTextAreaElement>>;
 
 export declare type TextareaProps = Pick<ComponentProps<typeof Textarea_2>, "disabled" | "onChange" | "value" | "placeholder" | "rows" | "cols" | "label" | "labelIcon" | "icon" | "hideLabel" | "maxLength" | "clearable" | "onBlur" | "onFocus" | "name" | "status" | "hint" | "error" | "size" | "loading" | "required">;
-
-declare type TextQuestionProps = BaseQuestionPropsForOtherQuestionComponents & {
-    type: "text" | "longText";
-    value?: string | null;
-};
 
 declare const THEMES: {
     readonly light: "";
@@ -6807,44 +6816,10 @@ declare interface User_2 {
 
 export declare function useSidebar(): FrameContextType;
 
-/**
- * Props contract that every editable value-display component must implement.
- * The generic `V` allows type-specific editors (e.g. `string` for text, `Date` for date pickers).
- */
-declare type ValueDisplayEditorProps<V = string> = {
-    label: string;
-    value: V;
-    align?: "left" | "right";
-    error?: string;
-    loading?: boolean;
-    onChange: (value: V) => void;
-};
-
-/**
- * Registry that maps value-display types to their editable cell components.
- * Not every type needs an editor — only types with editing support are registered here.
- *
- * To add a new editable type:
- *  1. Add its value type to `ValueDisplayEditorValueMap` above
- *  2. Create the editor component in `types/<type>/<type>-editor.tsx`
- *  3. Export it from `types/<type>/index.tsx`
- *  4. Register it here
- */
-declare const valueDisplayEditors: {
-    [K in keyof ValueDisplayEditorValueMap]: ComponentType<ValueDisplayEditorProps<ValueDisplayEditorValueMap[K]>>;
-};
-
-/**
- * Maps each editable value-display type to the value type its editor operates on.
- * Extend this when adding a new editor (e.g. `date: Date`, `select: string`).
- */
-declare type ValueDisplayEditorValueMap = {
-    text: string;
-};
-
 declare type ValueDisplayRendererContext = {
     visualization: ValueDisplayVisualizationType;
     i18n: TranslationsType;
+    tableAlign?: ValueDisplayTableAlignment;
 };
 
 /**
@@ -6864,6 +6839,7 @@ declare const valueDisplayRenderers: {
     readonly number: (args: NumberCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;
     readonly date: (args: DateCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;
     readonly amount: (args: AmountCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;
+    readonly compound: (args: CompoundCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;
     readonly avatarList: (args: AvatarListCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;
     readonly status: (args: StatusCellValue) => JSX_2.Element;
     readonly alertTag: (args: AlertTagCellValue) => JSX_2.Element;
@@ -6881,7 +6857,10 @@ declare const valueDisplayRenderers: {
     readonly file: (args: FileCellValue) => JSX_2.Element;
     readonly folder: (args: FolderCellValue) => JSX_2.Element;
     readonly country: (args: CountryCellValue, context: ValueDisplayRendererContext) => JSX_2.Element;
+    readonly delta: (args: DeltaCellValue) => JSX_2.Element;
 };
+
+declare type ValueDisplayTableAlignment = "left" | "right";
 
 declare type ValueDisplayVisualizationType = "table" | "card" | "list" | (string & {});
 
@@ -7001,7 +6980,7 @@ export declare type VisualizationFilterOverrides<Filters extends FiltersDefiniti
 /**
  * Visualization mode for the AI chat
  */
-declare type VisualizationMode = "sidepanel" | "fullscreen";
+declare type VisualizationMode = "sidepanel" | "fullscreen" | "canvas";
 
 declare type VisualizationSettings = {
     [K in keyof typeof collectionVisualizations]: ExtractVisualizationSettings<(typeof collectionVisualizations)[K]>;

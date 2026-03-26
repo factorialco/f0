@@ -1,8 +1,6 @@
 {
   "name": "@factorialco/f0-react",
-  "version": "1.390.0",
-  "main": "dist/f0.js",
-  "typings": "dist/f0.d.ts",
+  "version": "1.422.2",
   "private": false,
   "files": [
     "assets",
@@ -17,6 +15,8 @@
   "sideEffects": [
     "**/*.css"
   ],
+  "main": "dist/f0.js",
+  "typings": "dist/f0.d.ts",
   "scripts": {
     "dev": "storybook dev -p 6006",
     "dev:docs": "DOCS_MODE=true pnpm run dev",
@@ -25,7 +25,7 @@
     "build:prepare": "pnpm run build:types && run-p build-icons",
     "start": "pnpm run dev",
     "size": "pnpm run build && size-limit",
-    "build": "tsc --project ./tsconfig-build.json && run-p build-icons && BUILD_TYPES=true vite build -- --tailwind",
+    "build": "tsc --project ./tsconfig-build.json && run-p build-icons && NODE_OPTIONS=--max-old-space-size=8192 BUILD_TYPES=true vite build -- --tailwind",
     "build:tsup": "tsup && pnpm run build:tailwind && run-p build-icons",
     "build-icons": "tsc --project ./tsconfig-build-icons.json",
     "build:tailwind": "NODE_ENV=production tailwindcss -i src/styles.css -o ./dist/styles.css --postcss --minify",
@@ -133,16 +133,17 @@
     "y-prosemirror": "^1.3.6",
     "y-protocols": "^1.0.6",
     "yjs": "^13.6.27",
-    "zen-observable-ts": "^1.1.0"
+    "zen-observable-ts": "^1.1.0",
+    "zod-to-json-schema": "^3.25.1"
   },
   "devDependencies": {
     "@chromatic-com/storybook": "^5.0.0",
     "@commitlint/cli": "^19.7.1",
     "@commitlint/config-conventional": "^19.7.1",
-    "@livekit/components-react": "^2.9.19",
     "@emoji-mart/data": "^1.2.1",
     "@emoji-mart/react": "^1.1.1",
     "@emotion/is-prop-valid": "^1.3.1",
+    "@livekit/components-react": "^2.9.19",
     "@mdx-js/react": "^3.1.1",
     "@microsoft/api-extractor": "7.52.8",
     "@playwright/test": "^1.57.0",

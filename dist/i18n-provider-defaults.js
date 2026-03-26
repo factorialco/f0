@@ -248,7 +248,8 @@ const e = {
     editableTable: {
       errors: {
         saveFailed: "Save failed"
-      }
+      },
+      addRow: "Add row"
     },
     itemsCount: "items",
     emptyStates: {
@@ -357,6 +358,7 @@ const e = {
     openChat: "Open Chat with One AI",
     closeChat: "Close Chat with One AI",
     startNewChat: "Start new chat",
+    settings: "Settings",
     scrollToBottom: "Scroll to bottom",
     welcome: "Ask or create with One",
     defaultInitialMessage: "How can I help you today?",
@@ -367,6 +369,10 @@ const e = {
     thoughtsGroupTitle: "Reflection",
     resourcesGroupTitle: "Resources",
     thinking: "Thinking...",
+    closeDashboard: "Close dashboard",
+    unsavedChanges: "Unsaved changes",
+    saveChanges: "Save changes",
+    discardChanges: "Discard",
     exportTable: "Download table",
     generatedTableFilename: "OneGeneratedTable",
     feedbackModal: {
@@ -384,9 +390,57 @@ const e = {
     dataDownloadPreview: "Preview {{shown}} of {{total}} rows — download the Excel to see all data.",
     expandChat: "Expand chat",
     collapseChat: "Collapse chat",
+    chatHistory: "Chat history",
+    noPreviousChats: "No previous conversations",
+    newConversation: "New conversation",
+    today: "Today",
+    yesterday: "Yesterday",
+    thisMonth: "This month",
+    older: "Older",
+    searchChats: "Search conversations...",
+    pinnedChats: "Pinned",
+    threadOptions: "Thread options",
+    pinChat: "Pin chat",
+    unpinChat: "Unpin chat",
+    deleteChat: "Delete chat",
     ask: "Ask One",
     viewProfile: "View profile",
     tools: "Tools",
+    credits: {
+      title: "Credits",
+      creditsLeft: "{{total}} left",
+      monthlyCredits: "Monthly credits",
+      creditsError: "Could not load credits",
+      upgradePlan: "Upgrade",
+      needMoreCredits: "Need more credits?"
+    },
+    reportCard: {
+      reportLabel: "Report",
+      openButton: "Open"
+    },
+    dataDownload: {
+      download: "Download {{format}}",
+      exportDashboard: "Export dashboard as {{format}}",
+      exporting: "Exporting..."
+    },
+    pong: {
+      title: "Pong",
+      youWin: "You win!",
+      youLose: "You lose!",
+      goal: "Goal",
+      controls: "← → to move",
+      escToExit: "Esc to exit"
+    },
+    creditWarning: {
+      soft: "You're running low on AI credits.",
+      getCredits: "Get credits",
+      dismiss: "Dismiss",
+      messageBanner: {
+        title: "This response requires credits",
+        description: "Your company has run out of AI credits.",
+        actionLabel: "Get credits"
+      }
+    },
     growth: {
       demoCard: {
         title: "See {{moduleName}} in action",
@@ -432,7 +486,7 @@ const e = {
       dismiss: "Dismiss"
     }
   },
-  coCreationForm: {
+  surveyFormBuilder: {
     actions: {
       actions: "Actions",
       duplicateQuestion: "Duplicate question",
@@ -464,7 +518,11 @@ const e = {
     },
     answer: {
       label: "Answer",
-      placeholder: "Respondent's answer"
+      dropdownPlaceholder: "Pick an option",
+      textPlaceholder: "Type your answer",
+      numericPlaceholder: "Enter a number",
+      linkPlaceholder: "https://example.com",
+      invalidUrl: "Enter a valid URL"
     },
     labels: {
       applyingChanges: "Applying changes",
@@ -481,6 +539,23 @@ const e = {
       sectionTitlePlaceholder: "Section title",
       lastQuestionDialogTitle: "Remove last question from section",
       lastQuestionDialogDescription: "Moving this question will leave the section empty and it will be removed. Do you want to continue?"
+    }
+  },
+  surveyAnsweringForm: {
+    actions: {
+      submit: "Submit survey",
+      cancel: "Cancel",
+      next: "Next",
+      previous: "Previous",
+      expand: "Expand",
+      collapse: "Collapse"
+    },
+    labels: {
+      empty: {
+        title: "No questions to answer",
+        description: "This survey has no questions yet.",
+        emoji: "📝"
+      }
     }
   },
   richTextEditor: {
@@ -553,6 +628,7 @@ const e = {
       fileTooLarge: "File exceeds {{maxSize}} MB limit",
       invalidFileType: "File type not accepted. Accepted formats: {{types}}"
     },
+    moreInformation: "More information",
     validation: {
       required: "This field is required",
       invalidType: "Invalid value",
