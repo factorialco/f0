@@ -333,12 +333,12 @@ export async function downloadAsCSV<R extends RecordType>(
     type: "text/csv;charset=utf-8",
   })
 
-  const filename = options?.filename || generateFilename("data_collection")
+  const filename = generateFilename(options?.filename || "data_collection")
 
   // Create download link and trigger download
   const link = document.createElement("a")
   link.href = URL.createObjectURL(blob)
-  link.download = filename.endsWith(".csv") ? filename : `${filename}.csv`
+  link.download = filename
   document.body.appendChild(link)
   link.click()
   document.body.removeChild(link)

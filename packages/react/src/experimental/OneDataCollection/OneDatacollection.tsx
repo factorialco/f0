@@ -286,6 +286,7 @@ const OneDataCollectionComp = <
     source,
     currentVisualization: visualizations[currentVisualization],
     filename: csvExportFilename,
+    enabled: !!csvExport,
   })
 
   const expandedSecondaryActions = useMemo(
@@ -323,7 +324,17 @@ const OneDataCollectionComp = <
     }
 
     return groups.filter((group) => group.items.length > 0)
-  }, [allSecondaryActions, expandedSecondaryActions, csvExport, exportAction])
+    // exportAction is an object rebuilt every render but its contents only
+    // change when the primitives below change. We track those instead of
+    // the object reference to avoid invalidating this memo every render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    allSecondaryActions,
+    expandedSecondaryActions,
+    csvExport,
+    exportAction.loading,
+    exportAction.disabled,
+  ])
 
   const hasCollectionsActions =
     primaryActionItems?.length > 0 ||

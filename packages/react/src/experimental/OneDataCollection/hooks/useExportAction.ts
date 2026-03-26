@@ -56,6 +56,10 @@ interface UseExportActionProps<
       >
     | undefined
   filename?: string
+  /** When false the hook short-circuits and returns a stable no-op action.
+   *  This avoids wasted work (state, callbacks, i18n) for collections that
+   *  don't use export.  Defaults to `true`. */
+  enabled?: boolean
 }
 
 /**
@@ -188,6 +192,7 @@ export function useExportAction<
   source,
   currentVisualization,
   filename,
+  enabled = true,
 }: UseExportActionProps<
   R,
   Filters,
@@ -201,6 +206,8 @@ export function useExportAction<
   const i18n = useI18n()
 
   const handleExport = useCallback(async () => {
+    if (!enabled) return
+
     setIsExporting(true)
 
     try {
@@ -222,14 +229,14 @@ export function useExportAction<
     } finally {
       setIsExporting(false)
     }
-  }, [source, currentVisualization, filename])
+  }, [enabled, source, currentVisualization, filename])
 
   return {
     label: i18n.collections.export.label,
     icon: Download,
     onClick: handleExport,
     loading: isExporting,
-    disabled: isExporting || source.isLoading,
+    disabled: !enabled || isExporting || source.isLoading,
     description: i18n.collections.export.description,
   }
 }
