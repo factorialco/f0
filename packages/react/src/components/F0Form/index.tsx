@@ -36,7 +36,11 @@ export {
 export type {
   F0BaseConfig,
   F0FieldConfig,
+  F0FieldAlertProps,
+  F0FieldAlertFunction,
+  F0FieldAlert,
   F0FieldType,
+  F0MoreInfoLink,
   F0ZodType,
   InferF0FormValues,
   // Field-specific config types

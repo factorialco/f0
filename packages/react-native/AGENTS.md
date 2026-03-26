@@ -24,6 +24,13 @@ Prefer consistency with these components over introducing new patterns.
 ## Component Architecture Conventions
 
 - Public component APIs should use named exports only (no default exports).
+- Every new or modified `F0*` component must include component-level JSDoc immediately above the component declaration.
+- If an existing `F0*` component lacks JSDoc and you touch it, add the missing JSDoc as part of the change.
+- Internal `F0*` primitives that only support a public component should also carry brief JSDoc marking them as internal.
+- Treat `F0Text` as the documentation quality bar for component JSDoc:
+  - start with a clear one-line summary
+  - add 1-3 lines describing behavioral or API constraints that matter to consumers
+  - include a short `@example` block when usage is not obvious from the component name alone
 - Keep component folders predictable:
   - implementation (`*.tsx`)
   - types/constants (`*.types.ts`)
@@ -34,6 +41,15 @@ Prefer consistency with these components over introducing new patterns.
 - Register public components in `src/components/exports.ts`.
 - Every new component must include a playground showcase in `playground/components/` and be registered in `playground/app/(tabs)/components.tsx`.
 - Keep TypeScript strict. Do not introduce `any`.
+
+## Playground Showcase Conventions
+
+- Treat showcases as examples of the recommended F0 usage, not as ad-hoc demos.
+- When building a new showcase, use F0 components and primitives for visible UI whenever an equivalent exists.
+- Use `F0Text` for visible semantic text in showcases instead of raw React Native `Text`.
+- Use raw React Native primitives only for structural layout wrappers such as `View` and `ScrollView`.
+- Do not style showcase UI by reading ad-hoc tokens, CSS variables, or raw hex values when the same result can be expressed with F0 components or semantic props.
+- If a showcase needs styling that is not expressible through existing F0 primitives, stop and document the gap instead of introducing a one-off token-based workaround.
 
 ## Multi-Variant Semantic Components (F0Tag / F0Avatar Pattern)
 

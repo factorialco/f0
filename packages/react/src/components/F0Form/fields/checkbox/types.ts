@@ -1,3 +1,4 @@
+import type { F0MoreInfoLink } from "../../f0Schema"
 import type {
   F0BaseField,
   F0BaseFieldRenderIfFunction,
@@ -35,11 +36,14 @@ export type CheckboxFieldRenderIf =
 
 /**
  * F0 config options specific to checkbox fields
- * (checkbox has no additional options beyond base config)
  */
 export interface F0CheckboxConfig {
-  // No additional options - using empty interface instead of Record<string, never>
-  // to avoid intersection type issues
+  /**
+   * Link displayed below the help text, typically pointing to external documentation.
+   * @example
+   * moreInfoLink: { href: "https://help.example.com/article", label: "Learn more" }
+   */
+  moreInfoLink?: F0MoreInfoLink
 }
 
 /**
@@ -47,6 +51,8 @@ export interface F0CheckboxConfig {
  */
 export type F0CheckboxField = F0BaseField & {
   type: "checkbox"
+  /** Link displayed below the help text, typically pointing to external documentation */
+  moreInfoLink?: F0MoreInfoLink
   /** Conditional rendering based on another field's value */
   renderIf?: CheckboxFieldRenderIf
 }

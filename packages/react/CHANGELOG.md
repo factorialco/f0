@@ -1,5 +1,54 @@
 # Changelog
 
+## [1.421.0](https://github.com/factorialco/f0/compare/f0-react-v1.420.0...f0-react-v1.421.0) (2026-03-26)
+
+
+### Features
+
+* **value-display:** add compound renderer ([#3582](https://github.com/factorialco/f0/issues/3582)) ([35bddd9](https://github.com/factorialco/f0/commit/35bddd9f39a7afe7b06e6a0d196864002b6183ba))
+
+## [1.420.0](https://github.com/factorialco/f0/compare/f0-react-v1.419.0...f0-react-v1.420.0) (2026-03-26)
+
+
+### Features
+
+* **react:** add F0TimelineRow component ([#3727](https://github.com/factorialco/f0/issues/3727)) ([eb5e1f4](https://github.com/factorialco/f0/commit/eb5e1f4b3d5db5dd1cbbcfc1fa6950dfdb8b4016))
+
+## [1.419.0](https://github.com/factorialco/f0/compare/f0-react-v1.418.1...f0-react-v1.419.0) (2026-03-24)
+
+
+### Features
+
+* add support for alert and more info link on f0form fields ([#3541](https://github.com/factorialco/f0/issues/3541)) ([0c25a26](https://github.com/factorialco/f0/commit/0c25a26c1d48c20a77de8c532e070b57dd675217))
+
+## [1.418.1](https://github.com/factorialco/f0/compare/f0-react-v1.418.0...f0-react-v1.418.1) (2026-03-24)
+
+
+### Bug Fixes
+
+* some fields not being marked properly as required ([#3747](https://github.com/factorialco/f0/issues/3747)) ([c8c16d6](https://github.com/factorialco/f0/commit/c8c16d60933e5609f96eb2f4dee3512483a99535))
+
+## [1.418.0](https://github.com/factorialco/f0/compare/f0-react-v1.417.2...f0-react-v1.418.0) (2026-03-24)
+
+
+### Features
+
+* **metadata:** add progress-bar variant to ResourceHeader metadata ([#3730](https://github.com/factorialco/f0/issues/3730)) ([5281f90](https://github.com/factorialco/f0/commit/5281f903d35cd7f8feaf00584a8ff5477e09193b))
+
+## [1.417.2](https://github.com/factorialco/f0/compare/f0-react-v1.417.1...f0-react-v1.417.2) (2026-03-24)
+
+
+### Bug Fixes
+
+* use label in data collection cards instead of tooltip ([#3744](https://github.com/factorialco/f0/issues/3744)) ([817d0e2](https://github.com/factorialco/f0/commit/817d0e22bc431c6fffeb90bea968fbc352fd314e))
+
+## [1.417.1](https://github.com/factorialco/f0/compare/f0-react-v1.417.0...f0-react-v1.417.1) (2026-03-24)
+
+
+### Bug Fixes
+
+* add hysteresis to OverflowList to prevent visible count oscillation ([#3740](https://github.com/factorialco/f0/issues/3740)) ([a2a4f42](https://github.com/factorialco/f0/commit/a2a4f42291c3b29292a6233604cf352e90630b2e))
+
 ## [1.417.0](https://github.com/factorialco/f0/compare/f0-react-v1.416.1...f0-react-v1.417.0) (2026-03-24)
 
 

@@ -115,6 +115,15 @@ export const Default: Story = {
           icon: "warning",
         },
       },
+      {
+        label: "Progress",
+        value: {
+          type: "progress-bar",
+          value: 75,
+          max: 100,
+          label: "75%",
+        },
+      },
     ],
   },
 }

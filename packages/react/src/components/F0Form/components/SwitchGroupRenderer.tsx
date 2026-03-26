@@ -2,20 +2,23 @@ import { useEffect, useMemo, useRef } from "react"
 import { useFormContext } from "react-hook-form"
 import { ZodTypeAny } from "zod"
 
+import { F0Alert } from "@/components/F0Alert"
 import {
   CardSelectableContainer,
   type CardSelectableItem,
 } from "@/experimental/Forms/CardSelectable"
+import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 import {
   FormField as FormFieldPrimitive,
   FormItem,
   FormMessage,
 } from "@/ui/form"
-import { useI18n } from "@/lib/providers/i18n/i18n-provider"
+
+import type { F0FieldAlertProps } from "../f0Schema"
+import type { F0SwitchField } from "../fields/switch/types"
 
 import { generateAnchorId, useF0FormContext } from "../context"
 import { isZodType, unwrapZodSchema } from "../f0Schema"
-import type { F0SwitchField } from "../fields/switch/types"
 import { evaluateDisabled, evaluateRenderIf } from "../fields/utils"
 
 /**
@@ -107,6 +110,7 @@ export function SwitchGroupRenderer({
         description: field.helpText,
         disabled: disabledStates[field.id] ?? false,
         required: !!(field.validation && isMustBeTrue(field.validation)),
+        moreInfoLink: field.moreInfoLink,
       })),
     [visibleFields, disabledStates]
   )
@@ -134,6 +138,21 @@ export function SwitchGroupRenderer({
       }
     }
   }
+
+  const alerts = useMemo(() => {
+    const result: { fieldId: string; props: F0FieldAlertProps }[] = []
+    for (const field of visibleFields) {
+      if (!field.alert) continue
+      const alertProps =
+        typeof field.alert === "function"
+          ? field.alert({ fieldValue: values[field.id], values })
+          : field.alert
+      if (alertProps) {
+        result.push({ fieldId: field.id, props: alertProps })
+      }
+    }
+    return result
+  }, [visibleFields, values])
 
   const { forms } = useI18n()
 
@@ -166,7 +185,10 @@ export function SwitchGroupRenderer({
   return (
     <div className="flex flex-col gap-2">
       {/* First field's anchor wraps the container for wiggle animation */}
-      <div id={fieldAnchorIds[0]?.anchorId} className="scroll-mt-4">
+      <div
+        id={fieldAnchorIds[0]?.anchorId}
+        className="flex scroll-mt-4 flex-col gap-4"
+      >
         {/* Additional field anchors so error navigation can find each field */}
         {fieldAnchorIds.slice(1).map(({ fieldId, anchorId }) => (
           <span key={fieldId} id={anchorId} className="hidden" />
@@ -179,6 +201,9 @@ export function SwitchGroupRenderer({
           value={selectedIds}
           onChange={handleChange}
         />
+        {alerts.map(({ fieldId, props }) => (
+          <F0Alert key={fieldId} {...props} variant={props.variant ?? "info"} />
+        ))}
       </div>
       {groupErrors.length > 0 && (
         <div className="flex flex-col gap-1">

@@ -2,6 +2,8 @@ import { ZodTypeAny } from "zod"
 
 import type { InputFieldStatus } from "@/ui/InputField/types"
 
+import type { F0FieldAlert } from "../f0Schema"
+
 // ============================================================================
 // Base RenderIf Condition Types
 // ============================================================================
@@ -118,6 +120,8 @@ export interface F0BaseField {
    * @default false
    */
   resetOnDisable?: boolean
+  /** Alert displayed below the field (static props or conditional callback) */
+  alert?: F0FieldAlert
   /**
    * Name identifying a reusable custom field type.
    * Used with the form-level `renderCustomField` callback.

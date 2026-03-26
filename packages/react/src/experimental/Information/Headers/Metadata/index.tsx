@@ -51,6 +51,13 @@ type MetadataItemValue =
   | { type: "tag-list"; tags: string[] }
   | { type: "dot-tag"; label: string; color: NewColor }
   | { type: "date"; formattedDate: string; icon?: "warning" | "critical" }
+  | {
+      type: "progress-bar"
+      value: number
+      max?: number
+      label?: string
+      color?: string
+    }
 
 type MetadataAction = {
   icon: IconType
@@ -139,6 +146,11 @@ function MetadataItem({ item }: { item: MetadataItem }) {
         return value.data.join(", ")
       case "list":
         return ""
+      case "progress-bar": {
+        const normalizedMax =
+          typeof value.max === "number" && value.max > 0 ? value.max : 100
+        return value.label ?? `${value.value}/${normalizedMax}`
+      }
       default:
         _exhaustiveCheck = value // Nice hack to ensure we covered all cases
         return _exhaustiveCheck

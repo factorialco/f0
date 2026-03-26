@@ -21,6 +21,15 @@ const emojiSizes = {
   lg: { icon: "w-6 h-6", text: "text-md" },
 } as const
 
+/**
+ * F0AvatarEmoji - Emoji avatar variant.
+ *
+ * Renders emoji content inside a bordered utility avatar container with size
+ * mappings tuned for the shared avatar system.
+ *
+ * @example
+ * <F0AvatarEmoji emoji="🎉" size="md" />
+ */
 export const F0AvatarEmoji = React.memo(function F0AvatarEmoji({
   emoji,
   size = "sm",
