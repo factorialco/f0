@@ -7,7 +7,7 @@ import type { Dispatch } from "react"
 export type F0TabItem = {
   id: string
   label: string
-  /** When `true` the tab is sorted first (mirrors web `index` prop). */
+  /** Accepted for API parity with web `index` prop; currently not used for sorting in React Native. */
   index?: boolean
   /** Visual variant for the tab label. Accepted for API parity; `"upsell"` is not visually distinct in v1. */
   variant?: "default" | "upsell"

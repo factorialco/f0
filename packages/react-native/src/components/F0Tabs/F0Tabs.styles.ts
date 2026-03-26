@@ -50,7 +50,7 @@ export const f0TabItemVariants = tv({
 
 /**
  * Underline shown only on primary tabs (secondary=false).
- * Renders as a 2px line pinned to the bottom of the container.
+ * Renders as a 1px line pinned to the bottom of the container.
  */
 export const f0TabUnderlineClass =
   "absolute bottom-0 h-px rounded-full bg-f0-foreground"
