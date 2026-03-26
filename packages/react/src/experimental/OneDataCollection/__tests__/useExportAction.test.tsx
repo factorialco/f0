@@ -1,5 +1,5 @@
 import { act } from "@testing-library/react"
-import { describe, expect, test, vi, beforeEach } from "vitest"
+import { afterEach, describe, expect, test, vi, beforeEach } from "vitest"
 
 import { defaultTranslations, I18nProvider } from "@/lib/providers/i18n"
 import { zeroRenderHook as renderHook } from "@/testing/test-utils"
