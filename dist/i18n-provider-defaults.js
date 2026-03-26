@@ -431,6 +431,16 @@ const e = {
       controls: "← → to move",
       escToExit: "Esc to exit"
     },
+    creditWarning: {
+      soft: "You're running low on AI credits.",
+      getCredits: "Get credits",
+      dismiss: "Dismiss",
+      messageBanner: {
+        title: "This response requires credits",
+        description: "Your company has run out of AI credits.",
+        actionLabel: "Get credits"
+      }
+    },
     growth: {
       demoCard: {
         title: "See {{moduleName}} in action",

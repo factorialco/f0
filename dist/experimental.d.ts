@@ -20,6 +20,7 @@ import { CompanyCellValue } from './types/company';
 import { CompanyCellValue as CompanyCellValue_2 } from './experimental';
 import { CompanyItemProps } from './types';
 import { ComponentProps } from 'react';
+import { CompoundCellValue } from './types/compound';
 import { CopilotKitProps } from '@copilotkit/react-core';
 import { CountryCellValue } from './types/country';
 import { DateCellValue } from './types/date';
@@ -2676,6 +2677,16 @@ declare const defaultTranslations: {
             readonly goal: "Goal";
             readonly controls: "← → to move";
             readonly escToExit: "Esc to exit";
+        };
+        readonly creditWarning: {
+            readonly soft: "You're running low on AI credits.";
+            readonly getCredits: "Get credits";
+            readonly dismiss: "Dismiss";
+            readonly messageBanner: {
+                readonly title: "This response requires credits";
+                readonly description: "Your company has run out of AI credits.";
+                readonly actionLabel: "Get credits";
+            };
         };
         readonly growth: {
             readonly demoCard: {
@@ -6808,6 +6819,7 @@ export declare function useSidebar(): FrameContextType;
 declare type ValueDisplayRendererContext = {
     visualization: ValueDisplayVisualizationType;
     i18n: TranslationsType;
+    tableAlign?: ValueDisplayTableAlignment;
 };
 
 /**
@@ -6827,6 +6839,7 @@ declare const valueDisplayRenderers: {
     readonly number: (args: NumberCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;
     readonly date: (args: DateCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;
     readonly amount: (args: AmountCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;
+    readonly compound: (args: CompoundCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;
     readonly avatarList: (args: AvatarListCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;
     readonly status: (args: StatusCellValue) => JSX_2.Element;
     readonly alertTag: (args: AlertTagCellValue) => JSX_2.Element;
@@ -6846,6 +6859,8 @@ declare const valueDisplayRenderers: {
     readonly country: (args: CountryCellValue, context: ValueDisplayRendererContext) => JSX_2.Element;
     readonly delta: (args: DeltaCellValue) => JSX_2.Element;
 };
+
+declare type ValueDisplayTableAlignment = "left" | "right";
 
 declare type ValueDisplayVisualizationType = "table" | "card" | "list" | (string & {});
 
@@ -7199,9 +7214,9 @@ declare namespace Calendar {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        aiBlock: {
-            insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
-            executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
@@ -7209,9 +7224,9 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
+        aiBlock: {
+            insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
+            executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
         };
     }
 }

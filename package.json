@@ -1,6 +1,6 @@
 {
   "name": "@factorialco/f0-react",
-  "version": "1.419.0",
+  "version": "1.422.2",
   "private": false,
   "files": [
     "assets",
@@ -137,7 +137,7 @@
     "zod-to-json-schema": "^3.25.1"
   },
   "devDependencies": {
-    "@chromatic-com/storybook": "^5.1.0",
+    "@chromatic-com/storybook": "^5.1.1",
     "@commitlint/cli": "^19.7.1",
     "@commitlint/config-conventional": "^19.7.1",
     "@emoji-mart/data": "^1.2.1",

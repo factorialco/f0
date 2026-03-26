@@ -431,6 +431,16 @@ export declare const defaultTranslations: {
             readonly controls: "← → to move";
             readonly escToExit: "Esc to exit";
         };
+        readonly creditWarning: {
+            readonly soft: "You're running low on AI credits.";
+            readonly getCredits: "Get credits";
+            readonly dismiss: "Dismiss";
+            readonly messageBanner: {
+                readonly title: "This response requires credits";
+                readonly description: "Your company has run out of AI credits.";
+                readonly actionLabel: "Get credits";
+            };
+        };
         readonly growth: {
             readonly demoCard: {
                 readonly title: "See {{moduleName}} in action";
@@ -718,9 +728,9 @@ declare namespace Calendar {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        aiBlock: {
-            insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
-            executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
@@ -728,9 +738,9 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
+        aiBlock: {
+            insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
+            executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
         };
     }
 }

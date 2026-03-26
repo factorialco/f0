@@ -27,6 +27,7 @@ import { CompanyCellValue } from './f0';
 import { CompanyCellValue as CompanyCellValue_2 } from './types/company';
 import { ComponentProps } from 'react';
 import { ComponentType } from 'react';
+import { CompoundCellValue } from './types/compound';
 import { Context } from 'react';
 import { CopilotKitProps } from '@copilotkit/react-core';
 import { CountryCellValue } from './types/country';
@@ -59,6 +60,7 @@ import { F0TagPersonProps as F0TagPersonProps_2 } from './types';
 import { F0TagRawProps } from './types';
 import { F0TagStatusProps } from './types';
 import { F0TagTeamProps } from './types';
+import { F0TimelineRowProps as F0TimelineRowProps_2 } from './types';
 import { f1Colors } from '@factorialco/f0-core';
 import { FC } from 'react';
 import { FileCellValue } from './f0';
@@ -676,6 +678,16 @@ export declare const aiTranslations: {
             readonly goal: "Goal";
             readonly controls: "← → to move";
             readonly escToExit: "Esc to exit";
+        };
+        readonly creditWarning: {
+            readonly soft: "You're running low on AI credits.";
+            readonly getCredits: "Get credits";
+            readonly dismiss: "Dismiss";
+            readonly messageBanner: {
+                readonly title: "This response requires credits";
+                readonly description: "Your company has run out of AI credits.";
+                readonly actionLabel: "Get credits";
+            };
         };
         readonly growth: {
             readonly demoCard: {
@@ -1836,6 +1848,9 @@ export declare const ChatSpinner: ForwardRefExoticComponent<Omit<SVGProps<SVGSVG
 
 declare type ChatTextareaProps = InputProps & {
     submitLabel?: string;
+    creditWarning?: "soft";
+    onDismissCreditWarning?: () => void;
+    onGetCredits?: () => void;
 };
 
 /**
@@ -3213,6 +3228,16 @@ export declare const defaultTranslations: {
             readonly controls: "← → to move";
             readonly escToExit: "Esc to exit";
         };
+        readonly creditWarning: {
+            readonly soft: "You're running low on AI credits.";
+            readonly getCredits: "Get credits";
+            readonly dismiss: "Dismiss";
+            readonly messageBanner: {
+                readonly title: "This response requires credits";
+                readonly description: "Your company has run out of AI credits.";
+                readonly actionLabel: "Get credits";
+            };
+        };
         readonly growth: {
             readonly demoCard: {
                 readonly title: "See {{moduleName}} in action";
@@ -3800,7 +3825,7 @@ export declare const F0AiChat: () => JSX_2.Element | null;
  */
 export declare const F0AiChatProvider: ({ enabled, greeting, initialMessage, welcomeScreenSuggestions, disclaimer, resizable, defaultVisualizationMode, lockVisualizationMode, historyEnabled, footer, VoiceMode, entityResolvers, toolHints, credits, onThumbsUp, onThumbsDown, children, agent, tracking, ...copilotKitProps }: AiChatProviderProps) => JSX_2.Element;
 
-export declare const F0AiChatTextArea: ({ submitLabel, inProgress, onSend, onStop, }: ChatTextareaProps) => JSX_2.Element;
+export declare const F0AiChatTextArea: ({ submitLabel, inProgress, onSend, onStop, creditWarning, onDismissCreditWarning, onGetCredits, }: ChatTextareaProps) => JSX_2.Element;
 
 /**
  * Entry in the AI form registry
@@ -6516,6 +6541,69 @@ export declare type F0TimeField = F0BaseField & F0TimeConfig & {
 declare type F0TimeFieldConfig = F0BaseConfig & F0TimeConfig & {
     fieldType: "time";
 };
+
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export declare const F0TimelineRow: WithDataTestIdReturnType_3<(props: F0TimelineRowProps_2) => JSX_2.Element>;
+
+export declare interface F0TimelineRowAction {
+    /** Button label */
+    label: string;
+    /** Optional icon for the button */
+    icon?: IconType;
+    /** Click handler */
+    onClick: () => void;
+    /** Whether the button is disabled */
+    disabled?: boolean;
+    /** Whether the button is in a loading state */
+    loading?: boolean;
+}
+
+declare interface F0TimelineRowBaseProps {
+    /** The current status of this timeline entry */
+    status: TimelineRowStatus;
+    /** The title of the timeline entry (e.g., "Tasks") */
+    title: string;
+    /** Whether this is the last row in the timeline (hides the bottom connector line) */
+    isLast?: boolean;
+    /** Hide the status indicator column (used for subtasks inside multitask rows) */
+    hideStatus?: boolean;
+}
+
+/** Props for a multitask (collapsible group) timeline row */
+export declare interface F0TimelineRowMultitaskProps extends F0TimelineRowBaseProps {
+    /** Number of grouped tasks */
+    taskCount: number;
+    /** Number of completed tasks in the group (shows a progress pill) */
+    completedCount?: number;
+    /** Whether the multitask row is expanded (controlled) */
+    expanded: boolean;
+    /** Callback when multitask row expand/collapse is toggled */
+    onExpandToggle: () => void;
+    /** The subtask items to render when expanded */
+    items: F0TimelineRowTaskProps[];
+}
+
+export declare type F0TimelineRowOtherAction = DropdownItem;
+
+export declare type F0TimelineRowProps = F0TimelineRowTaskProps | F0TimelineRowMultitaskProps;
+
+/** Props for a single-task timeline row */
+export declare interface F0TimelineRowTaskProps extends F0TimelineRowBaseProps {
+    /** The icon representing the task type (defaults to Marker) */
+    icon?: IconType;
+    /** Description text (e.g., "Completed on 20/2025") */
+    description?: string;
+    /** Metadata items to display (assignees, tags, dates, etc.) using the same pattern as ResourceHeader */
+    metadata?: (MetadataItem | undefined | boolean)[];
+    /** Primary action button (displayed on the right after a divider) */
+    primaryAction?: F0TimelineRowAction;
+    /** Secondary action buttons (displayed on the left) */
+    secondaryActions?: F0TimelineRowAction[];
+    /** Overflow menu items (displayed as a dropdown via ellipsis button) */
+    otherActions?: F0TimelineRowOtherAction[];
+}
 
 export declare const F0WizardForm: {
     <TSchema extends F0FormSchema_2>(props: F0WizardFormSingleSchemaProps<TSchema>): default_2.ReactElement;
@@ -9803,6 +9891,10 @@ declare const textVariants: (props?: ({
     className?: ClassValue;
 })) | undefined) => string;
 
+export declare type TimelineRowStatus = (typeof timelineRowStatuses)[number];
+
+export declare const timelineRowStatuses: readonly ["completed", "in-progress", "not-started"];
+
 declare type TOCItem<Depth extends 1 | 2 | 3 | 4 = 1> = BaseTOCItem & {
     children?: NextDepth<Depth> extends never ? never : TOCItem<NextDepth<Depth>>[];
 };
@@ -10508,6 +10600,7 @@ export declare const useXRay: () => {
 declare type ValueDisplayRendererContext_2 = {
     visualization: ValueDisplayVisualizationType;
     i18n: TranslationsType;
+    tableAlign?: ValueDisplayTableAlignment;
 };
 
 /**
@@ -10527,6 +10620,7 @@ declare const valueDisplayRenderers: {
     readonly number: (args: NumberCellValue_2, meta: ValueDisplayRendererContext_2) => JSX_2.Element;
     readonly date: (args: DateCellValue_2, meta: ValueDisplayRendererContext_2) => JSX_2.Element;
     readonly amount: (args: AmountCellValue_2, meta: ValueDisplayRendererContext_2) => JSX_2.Element;
+    readonly compound: (args: CompoundCellValue, meta: ValueDisplayRendererContext_2) => JSX_2.Element;
     readonly avatarList: (args: AvatarListCellValue_2, meta: ValueDisplayRendererContext_2) => JSX_2.Element;
     readonly status: (args: StatusCellValue_2) => JSX_2.Element;
     readonly alertTag: (args: AlertTagCellValue_2) => JSX_2.Element;
@@ -10546,6 +10640,8 @@ declare const valueDisplayRenderers: {
     readonly country: (args: CountryCellValue, context: ValueDisplayRendererContext_2) => JSX_2.Element;
     readonly delta: (args: DeltaCellValue) => JSX_2.Element;
 };
+
+declare type ValueDisplayTableAlignment = "left" | "right";
 
 declare type ValueDisplayVisualizationType = "table" | "card" | "list" | (string & {});
 
@@ -10701,9 +10797,9 @@ declare namespace Calendar {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        aiBlock: {
-            insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
-            executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
@@ -10711,9 +10807,9 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
+        aiBlock: {
+            insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
+            executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
         };
     }
 }

@@ -399,6 +399,16 @@ export declare const aiTranslations: {
             readonly controls: "← → to move";
             readonly escToExit: "Esc to exit";
         };
+        readonly creditWarning: {
+            readonly soft: "You're running low on AI credits.";
+            readonly getCredits: "Get credits";
+            readonly dismiss: "Dismiss";
+            readonly messageBanner: {
+                readonly title: "This response requires credits";
+                readonly description: "Your company has run out of AI credits.";
+                readonly actionLabel: "Get credits";
+            };
+        };
         readonly growth: {
             readonly demoCard: {
                 readonly title: "See {{moduleName}} in action";
@@ -632,6 +642,9 @@ export declare const ChatSpinner: ForwardRefExoticComponent<Omit<SVGProps<SVGSVG
 
 declare type ChatTextareaProps = InputProps & {
     submitLabel?: string;
+    creditWarning?: "soft";
+    onDismissCreditWarning?: () => void;
+    onGetCredits?: () => void;
 };
 
 declare interface CollectionComputation {
@@ -1109,6 +1122,16 @@ export declare const defaultTranslations: {
             readonly controls: "← → to move";
             readonly escToExit: "Esc to exit";
         };
+        readonly creditWarning: {
+            readonly soft: "You're running low on AI credits.";
+            readonly getCredits: "Get credits";
+            readonly dismiss: "Dismiss";
+            readonly messageBanner: {
+                readonly title: "This response requires credits";
+                readonly description: "Your company has run out of AI credits.";
+                readonly actionLabel: "Get credits";
+            };
+        };
         readonly growth: {
             readonly demoCard: {
                 readonly title: "See {{moduleName}} in action";
@@ -1381,7 +1404,7 @@ export declare const F0AiChat: () => JSX_2.Element | null;
  */
 export declare const F0AiChatProvider: ({ enabled, greeting, initialMessage, welcomeScreenSuggestions, disclaimer, resizable, defaultVisualizationMode, lockVisualizationMode, historyEnabled, footer, VoiceMode, entityResolvers, toolHints, credits, onThumbsUp, onThumbsDown, children, agent, tracking, ...copilotKitProps }: AiChatProviderProps) => JSX_2.Element;
 
-export declare const F0AiChatTextArea: ({ submitLabel, inProgress, onSend, onStop, }: ChatTextareaProps) => JSX_2.Element;
+export declare const F0AiChatTextArea: ({ submitLabel, inProgress, onSend, onStop, creditWarning, onDismissCreditWarning, onGetCredits, }: ChatTextareaProps) => JSX_2.Element;
 
 /**
  * @experimental This is an experimental component use it at your own risk
@@ -1769,9 +1792,9 @@ declare namespace Calendar {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        aiBlock: {
-            insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
-            executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
@@ -1779,9 +1802,9 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
+        aiBlock: {
+            insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
+            executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
         };
     }
 }
