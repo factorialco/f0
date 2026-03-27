@@ -12,11 +12,12 @@ import { useExportAction } from "../hooks/useExportAction"
 
 type MockRecord = { id: number; name: string; email: string }
 
-/** Read Blob content as text (jsdom Blob may not have .text()) */
+/** Read Blob content as text (jsdom Blob may not have .text()), stripping BOM */
 function readBlobAsText(blob: Blob): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
-    reader.onload = () => resolve(reader.result as string)
+    reader.onload = () =>
+      resolve((reader.result as string).replace(/^\uFEFF/, ""))
     reader.onerror = () => reject(reader.error)
     reader.readAsText(blob)
   })

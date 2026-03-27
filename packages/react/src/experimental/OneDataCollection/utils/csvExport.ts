@@ -409,7 +409,7 @@ export async function downloadAsCSV<
     ),
   ].join("\n")
 
-  const blob = new Blob([csvContent], {
+  const blob = new Blob(["\uFEFF" + csvContent], {
     type: "text/csv;charset=utf-8",
   })
 
