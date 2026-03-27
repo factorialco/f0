@@ -15,12 +15,14 @@ export function BaseCell({
   readonly = false,
   showRightBorder = true,
   cursor = "text",
+  isActive = false,
   error,
   children,
 }: {
   readonly?: boolean
   showRightBorder?: boolean
   cursor?: "text" | "pointer" | "default" | "not-allowed"
+  isActive?: boolean
   error?: string
   children: ReactNode
 }) {
@@ -28,13 +30,14 @@ export function BaseCell({
     <div
       className={cn(
         "flex w-full h-full min-w-0 min-h-12 border-solid",
+        "border-0 border-r-[1px] border-f1-border-secondary",
+        !showRightBorder && "border-r-0",
         cursorClass[cursor],
         error
-          ? "border-0 bg-f1-background-critical/10 outline outline-1 outline-[hsl(var(--critical-50))] -outline-offset-[0.5px]"
-          : cn(
-              "border-0 border-r-[1px] border-f1-border-secondary",
-              !showRightBorder && "border-r-0"
-            ),
+          ? "relative z-[1] border-r-0 bg-f1-background-critical/10 shadow-[inset_0_0_0_1px_hsl(var(--critical-50))]"
+          : isActive
+            ? "relative z-[1] border-r-0 bg-f1-background shadow-[inset_0_0_0_1px_hsl(var(--selected-50))]"
+            : "shadow-none [&:not(:focus-within)]:hover:shadow-[inset_0_0_0_1px_hsl(var(--neutral-30))] focus-within:relative focus-within:z-[1] focus-within:border-r-0 focus-within:bg-f1-background focus-within:shadow-[inset_0_0_0_1px_hsl(var(--selected-50))]",
         readonly && "bg-f1-background-secondary"
       )}
     >
