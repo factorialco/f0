@@ -32,7 +32,6 @@ export function escapeCSVCell(value: unknown): string {
 
   const stringValue = String(value)
 
-  // If the value contains comma, newline, or quotes, wrap in quotes and escape quotes
   if (
     stringValue.includes(",") ||
     stringValue.includes("\n") ||
@@ -59,17 +58,14 @@ export function extractDisplayValue(renderResult: unknown): string {
     return ""
   }
 
-  // Primitives
   if (typeof renderResult !== "object") {
     return String(renderResult)
   }
 
-  // Date instances
   if (renderResult instanceof Date) {
     return renderResult.toISOString()
   }
 
-  // Arrays (e.g. tagList tags, multiple badges)
   if (Array.isArray(renderResult)) {
     return renderResult
       .map((item) => extractDisplayValue(item))
@@ -79,24 +75,18 @@ export function extractDisplayValue(renderResult: unknown): string {
 
   const obj = renderResult as Record<string, unknown>
 
-  // ── { type, value } wrapper (most common pattern) ──────────────────
   if ("type" in obj && "value" in obj && typeof obj.type === "string") {
     return extractTypedCellValue(obj.type, obj.value)
   }
 
-  // ── Raw typed objects (legacy / direct usage) ──────────────────────
-
-  // Person
   if ("firstName" in obj && "lastName" in obj) {
     return `${obj.firstName} ${obj.lastName}`.trim()
   }
 
-  // Objects with a label (badge, tag, dotTag, status, statusTag, alertTag…)
   if ("label" in obj && typeof obj.label === "string") {
     return obj.label
   }
 
-  // Objects with a text field (longText, text)
   if (
     "text" in obj &&
     (typeof obj.text === "string" || typeof obj.text === "number")
@@ -104,12 +94,10 @@ export function extractDisplayValue(renderResult: unknown): string {
     return String(obj.text)
   }
 
-  // Objects with a name field (company, team, folder, file)
   if ("name" in obj && typeof obj.name === "string") {
     return obj.name
   }
 
-  // Fallback – avoid "[object Object]"
   return ""
 }
 
@@ -132,19 +120,15 @@ export function extractTypedCellValue(type: string, value: unknown): string {
   const v = value as Record<string, unknown>
 
   switch (type) {
-    // ── Identity / entity types ──────────────────────────────────────
     case "person":
       return `${v.firstName ?? ""} ${v.lastName ?? ""}`.trim()
 
     case "company":
     case "team":
     case "folder":
-      return typeof v.name === "string" ? v.name : ""
-
     case "file":
       return typeof v.name === "string" ? v.name : ""
 
-    // ── Tag / status types ───────────────────────────────────────────
     case "dotTag":
     case "status":
     case "statusTag":
@@ -164,7 +148,6 @@ export function extractTypedCellValue(type: string, value: unknown): string {
       return ""
     }
 
-    // ── Numeric types ────────────────────────────────────────────────
     case "number": {
       if (typeof value === "number") return String(value)
       return v.number !== undefined ? String(v.number) : ""
@@ -187,7 +170,6 @@ export function extractTypedCellValue(type: string, value: unknown): string {
       return pctLabel || String(pctValue)
     }
 
-    // ── Text types ───────────────────────────────────────────────────
     case "text":
     case "longText":
       if (typeof value === "string" || typeof value === "number") {
@@ -195,14 +177,12 @@ export function extractTypedCellValue(type: string, value: unknown): string {
       }
       return v.text !== undefined ? String(v.text) : ""
 
-    // ── Date ─────────────────────────────────────────────────────────
     case "date": {
       if (value instanceof Date) return value.toISOString()
       if (v.date instanceof Date) return v.date.toISOString()
       return v.date !== undefined ? String(v.date) : ""
     }
 
-    // ── Country ──────────────────────────────────────────────────────
     case "country":
       return typeof v.label === "string"
         ? v.label
@@ -210,7 +190,6 @@ export function extractTypedCellValue(type: string, value: unknown): string {
           ? v.code
           : ""
 
-    // ── Avatar list ──────────────────────────────────────────────────
     case "avatarList": {
       const list = v.avatarList
       if (Array.isArray(list)) {
@@ -230,16 +209,13 @@ export function extractTypedCellValue(type: string, value: unknown): string {
       return ""
     }
 
-    // ── Icon ─────────────────────────────────────────────────────────
     case "icon":
       return typeof v.label === "string" ? v.label : ""
 
-    // ── Sync status ──────────────────────────────────────────────────
     case "syncStatus":
       return typeof value === "string" ? value : ""
 
     default:
-      // Unknown type – try common fields before giving up
       return extractDisplayValue(value)
   }
 }
@@ -302,7 +278,6 @@ export function extractColumns<
             const bId = b.id ?? b.label ?? "column"
             const aIndex = columnOrder.indexOf(aId)
             const bIndex = columnOrder.indexOf(bId)
-            // Columns not in saved order appear at the end
             const aPos = aIndex === -1 ? columnOrder.length : aIndex
             const bPos = bIndex === -1 ? columnOrder.length : bIndex
             return aPos - bPos
@@ -324,8 +299,7 @@ export function extractColumns<
     }))
   }
 
-  // For non-table visualizations, we'll need to infer columns from data structure
-  // This is a fallback - in most cases, users will have a table view available
+  // For non-table visualizations, columns are inferred from data in downloadAsCSV
   return []
 }
 
@@ -347,7 +321,6 @@ function transformDataForCSV<R extends RecordType>(
         return extractDisplayValue(value)
       }
 
-      // Fallback: try to get a value from the item
       return extractDisplayValue(item)
     })
   )
@@ -394,7 +367,6 @@ export async function downloadAsCSV<
     options?.columnOrder
   )
 
-  // If no columns from visualization, try to infer from data structure
   if (columns.length === 0) {
     const firstItem = data[0]
     columns = Object.keys(firstItem).map((key) => ({
@@ -423,7 +395,6 @@ export async function downloadAsCSV<
 
   const filename = generateFilename(options?.filename || "data_collection")
 
-  // Create download link and trigger download
   const link = document.createElement("a")
   const objectUrl = URL.createObjectURL(blob)
   link.href = objectUrl
