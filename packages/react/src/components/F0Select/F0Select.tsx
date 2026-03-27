@@ -640,9 +640,10 @@ const F0SelectComponent = forwardRef(function Select<
 
         const isDisabled =
           mappedOption.disabled || disabledIdSet.has(String(mappedOption.value))
-        const itemWithDisabled = isDisabled
-          ? { ...mappedOption, disabled: true }
-          : mappedOption
+        const itemWithDisabled =
+          isDisabled && !mappedOption.disabled
+            ? { ...mappedOption, disabled: true }
+            : mappedOption
 
         return {
           height: mappedOption.description ? 64 : 32,
