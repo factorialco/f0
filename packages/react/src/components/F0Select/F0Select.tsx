@@ -469,11 +469,12 @@ const F0SelectComponent = forwardRef(function Select<
       hasUserInteracted.current = true
       handleSelectAllItems(checked)
 
-      // After select all, deselect disabled items
+      // After select all, deselect disabled items in a single batch
       if (checked && disabledIdSet.size > 0) {
-        for (const disabledId of disabledIdSet) {
-          handleSelectItemChange(disabledId, false)
-        }
+        handleSelectItemChange(
+          Array.from(disabledIdSet) as readonly string[],
+          false
+        )
       }
     },
     [handleSelectAllItems, handleSelectItemChange, disabledIdSet]
