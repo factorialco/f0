@@ -71,6 +71,12 @@ interface ExportableSource {
   dataAdapter: {
     paginationType?: string
     fetchData: (opts: Record<string, unknown>) => unknown
+    /**
+     * Optional standalone fetch for export that does NOT affect UI state.
+     * When provided, fetchAllRecords uses this instead of fetchData.
+     * This avoids side-effects on reactive adapters (e.g. Apollo watchQuery).
+     */
+    exportFetchData?: (opts: Record<string, unknown>) => unknown
   }
   currentFilters: Record<string, unknown>
   currentSortings: unknown
@@ -142,6 +148,7 @@ async function fetchAllRecords<R extends RecordType>(
   source: ExportableSource
 ): Promise<R[]> {
   const { dataAdapter } = source
+  const fetchFn = dataAdapter.exportFetchData ?? dataAdapter.fetchData
 
   const baseParams = {
     filters: source.currentFilters,
@@ -152,7 +159,7 @@ async function fetchAllRecords<R extends RecordType>(
 
   // ── Non-paginated adapter ────────────────────────────────────────
   if (!dataAdapter.paginationType) {
-    const result = await resolveResult(dataAdapter.fetchData(baseParams))
+    const result = await resolveResult(fetchFn(baseParams))
     const response = result as BaseResponse<R>
     return response.records ?? []
   }
@@ -164,7 +171,7 @@ async function fetchAllRecords<R extends RecordType>(
 
     while (allRecords.length < MAX_EXPORT_ROWS) {
       const result = await resolveResult(
-        dataAdapter.fetchData({
+        fetchFn({
           ...baseParams,
           pagination: { currentPage, perPage: EXPORT_PAGE_SIZE },
         })
@@ -189,7 +196,7 @@ async function fetchAllRecords<R extends RecordType>(
 
     while (allRecords.length < MAX_EXPORT_ROWS) {
       const result = await resolveResult(
-        dataAdapter.fetchData({
+        fetchFn({
           ...baseParams,
           pagination: { cursor, perPage: EXPORT_PAGE_SIZE },
         })
@@ -214,7 +221,7 @@ async function fetchAllRecords<R extends RecordType>(
   // ── no-pagination type ───────────────────────────────────────────
   // paginationType is "no-pagination" — treat like base adapter
   const result = await resolveResult(
-    dataAdapter.fetchData({
+    fetchFn({
       ...baseParams,
       pagination: { perPage: MAX_EXPORT_ROWS, currentPage: 1 },
     })
