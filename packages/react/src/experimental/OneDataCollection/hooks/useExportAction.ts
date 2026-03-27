@@ -18,6 +18,7 @@ import { SecondaryActionItem } from "../actions"
 import { DataCollectionSource } from "../hooks/useDataCollectionSource/types"
 import { ItemActionsDefinition } from "../item-actions"
 import { NavigationFiltersDefinition } from "../navigationFilters/types"
+import { useDataCollectionSettings } from "../Settings/SettingsProvider"
 import { SummariesDefinition } from "../summary"
 import { downloadAsCSV } from "../utils/csvExport"
 
@@ -254,6 +255,7 @@ export function useExportAction<
 >): SecondaryActionItem {
   const [isExporting, setIsExporting] = useState(false)
   const i18n = useI18n()
+  const { settings } = useDataCollectionSettings()
 
   const handleExport = useCallback(async () => {
     if (!enabled) return
@@ -265,6 +267,11 @@ export function useExportAction<
         source as unknown as ExportableSource
       )
 
+      // Respect column visibility — hidden columns are excluded from export
+      const hiddenColumnIds = settings.visualization?.table?.hidden
+        ? new Set(settings.visualization.table.hidden)
+        : undefined
+
       await downloadAsCSV(
         allRecords,
         currentVisualization as
@@ -272,6 +279,7 @@ export function useExportAction<
           | undefined,
         {
           filename: filename || "data_collection_export",
+          hiddenColumnIds,
         }
       )
     } catch (error) {
@@ -279,7 +287,7 @@ export function useExportAction<
     } finally {
       setIsExporting(false)
     }
-  }, [enabled, source, currentVisualization, filename])
+  }, [enabled, source, currentVisualization, filename, settings])
 
   return {
     label: i18n.collections?.export?.label ?? "Export to CSV",

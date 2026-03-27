@@ -5,6 +5,8 @@ import type { Visualization } from "../visualizations/collection"
 export interface CSVExportOptions {
   filename?: string
   includeHeaders?: boolean
+  /** Column IDs to exclude from export (respects column visibility settings) */
+  hiddenColumnIds?: Set<string>
 }
 
 export interface ColumnDefinition<R extends RecordType = RecordType> {
@@ -239,23 +241,30 @@ function getNestedValue(obj: Record<string, unknown>, path: string): unknown {
 }
 
 export function extractColumns<R extends RecordType>(
-  visualization: Visualization<R, any, any, any, any, any, any> | undefined
+  visualization: Visualization<R, any, any, any, any, any, any> | undefined,
+  hiddenColumnIds?: Set<string>
 ): ColumnDefinition<R>[] {
   if (!visualization) {
     return []
   }
 
   if (visualization.type === "table") {
-    return visualization.options.columns.map((col) => ({
-      label: col.label,
-      field: col.sorting || undefined,
-      render: col.render
-        ? (item: R) => {
-            const result = col.render!(item)
-            return extractDisplayValue(result)
-          }
-        : undefined,
-    }))
+    return visualization.options.columns
+      .filter((col) => {
+        if (!hiddenColumnIds || hiddenColumnIds.size === 0) return true
+        const colId = col.id ?? col.label ?? "column"
+        return !hiddenColumnIds.has(colId)
+      })
+      .map((col) => ({
+        label: col.label,
+        field: col.sorting || undefined,
+        render: col.render
+          ? (item: R) => {
+              const result = col.render!(item)
+              return extractDisplayValue(result)
+            }
+          : undefined,
+      }))
   }
 
   // For non-table visualizations, we'll need to infer columns from data structure
@@ -304,7 +313,7 @@ export async function downloadAsCSV<R extends RecordType>(
     throw new Error("No data available for export")
   }
 
-  const columns = extractColumns(visualization)
+  const columns = extractColumns(visualization, options?.hiddenColumnIds)
 
   // If no columns from visualization, try to infer from data structure
   if (columns.length === 0) {
