@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.48.1](https://github.com/factorialco/f0/compare/f0-core-v1.48.0...f0-core-v1.48.1) (2026-03-27)
+
+
+### Bug Fixes
+
+* **core:** align color tokens with Figma design system ([#3775](https://github.com/factorialco/f0/issues/3775)) ([c0f1420](https://github.com/factorialco/f0/commit/c0f1420b5cdd04ea49a0b7007b9a1b1ff0b5cd6f))
+
 ## [1.48.0](https://github.com/factorialco/f0/compare/f0-core-v1.47.0...f0-core-v1.48.0) (2026-03-26)
 
 
