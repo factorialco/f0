@@ -6,10 +6,6 @@ import { zeroRenderHook as renderHook } from "@/testing/test-utils"
 
 import { useExportAction } from "../hooks/useExportAction"
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
 type MockRecord = { id: number; name: string; email: string }
 
 /** Read Blob content as text (jsdom Blob may not have .text()), stripping BOM */
@@ -73,10 +69,6 @@ const TestWrapper = ({ children }: { children: React.ReactNode }) => (
   <I18nProvider translations={defaultTranslations}>{children}</I18nProvider>
 )
 
-// ---------------------------------------------------------------------------
-// DOM / URL mocks
-// ---------------------------------------------------------------------------
-
 let clickSpy: ReturnType<typeof vi.fn>
 let blobCapture: Blob | undefined
 
@@ -116,12 +108,7 @@ afterEach(() => {
   vi.unstubAllGlobals()
 })
 
-// ---------------------------------------------------------------------------
-// Tests
-// ---------------------------------------------------------------------------
-
 describe("useExportAction", () => {
-  // ── i18n labels ────────────────────────────────────────────────────
   describe("i18n labels", () => {
     test("uses default i18n translations for label and description", () => {
       const source = createMockSource({
@@ -183,7 +170,6 @@ describe("useExportAction", () => {
     })
   })
 
-  // ── State & disabled logic ─────────────────────────────────────────
   describe("state", () => {
     test("disabled when source is loading", () => {
       const source = createMockSource({
@@ -222,7 +208,6 @@ describe("useExportAction", () => {
     })
   })
 
-  // ── Non-paginated export ───────────────────────────────────────────
   describe("non-paginated export", () => {
     test("fetches all records and triggers CSV download", async () => {
       const records = mockRecords(5)
@@ -248,11 +233,9 @@ describe("useExportAction", () => {
       expect(clickSpy).toHaveBeenCalledOnce()
       expect(blobCapture).toBeInstanceOf(Blob)
 
-      // Verify CSV content
       const csvText = await readBlobAsText(blobCapture!)
       const lines = csvText.split("\n")
 
-      // Header + 5 data rows
       expect(lines).toHaveLength(6)
       expect(lines[0]).toBe("Name,Email")
       expect(lines[1]).toBe("User 1,user1@example.com")
@@ -272,7 +255,6 @@ describe("useExportAction", () => {
         { wrapper: TestWrapper }
       )
 
-      // downloadAsCSV throws when data is empty — the hook catches it
       await act(async () => {
         await result.current.onClick()
       })
@@ -282,7 +264,6 @@ describe("useExportAction", () => {
     })
   })
 
-  // ── Page-based pagination ──────────────────────────────────────────
   describe("page-based pagination", () => {
     test("fetches all pages and merges records", async () => {
       const allRecords = mockRecords(75)
@@ -324,7 +305,7 @@ describe("useExportAction", () => {
 
       const csvText = await readBlobAsText(blobCapture!)
       const lines = csvText.split("\n")
-      // Header + 75 data rows
+
       expect(lines).toHaveLength(76)
     })
 
@@ -362,17 +343,15 @@ describe("useExportAction", () => {
         await result.current.onClick()
       })
 
-      // 250 records / 100 per page = 3 pages
       expect(fetchData).toHaveBeenCalledTimes(3)
 
       const csvText = await readBlobAsText(blobCapture!)
       const lines = csvText.split("\n")
-      // Header + 250 data rows
+
       expect(lines).toHaveLength(251)
     })
   })
 
-  // ── Infinite-scroll pagination ─────────────────────────────────────
   describe("infinite-scroll pagination", () => {
     test("follows cursor until hasMore is false", async () => {
       const allRecords = mockRecords(250)
@@ -411,17 +390,15 @@ describe("useExportAction", () => {
         await result.current.onClick()
       })
 
-      // 250 records / 100 per fetch = 3 calls
       expect(fetchData).toHaveBeenCalledTimes(3)
 
       const csvText = await readBlobAsText(blobCapture!)
       const lines = csvText.split("\n")
-      // Header + 250 data rows
+
       expect(lines).toHaveLength(251)
     })
   })
 
-  // ── Passes current filters & sortings ──────────────────────────────
   describe("filter/sorting passthrough", () => {
     test("passes currentFilters and currentSortings to fetchData", async () => {
       const fetchData = vi.fn().mockResolvedValue({
@@ -460,7 +437,6 @@ describe("useExportAction", () => {
     })
   })
 
-  // ── Error handling ─────────────────────────────────────────────────
   describe("error handling", () => {
     test("catches fetch errors without crashing", async () => {
       const consoleError = vi
