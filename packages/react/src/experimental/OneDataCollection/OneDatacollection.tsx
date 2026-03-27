@@ -277,7 +277,7 @@ const OneDataCollectionComp = <
   // Export action - only available when csvExport is enabled
   const csvExportFilename =
     csvExport && typeof csvExport === "object"
-      ? csvExport.filename
+      ? (csvExport.filename ?? (id ? `${id}_export` : undefined))
       : id
         ? `${id}_export`
         : undefined
