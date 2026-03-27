@@ -243,6 +243,7 @@ describe("useExportAction", () => {
     })
 
     test("does not trigger download when no records returned", async () => {
+      const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {})
       const fetchData = vi.fn().mockResolvedValue({ records: [] })
       const source = createMockSource({ fetchData })
 
@@ -261,6 +262,7 @@ describe("useExportAction", () => {
 
       expect(fetchData).toHaveBeenCalledOnce()
       expect(clickSpy).not.toHaveBeenCalled()
+      errorSpy.mockRestore()
     })
   })
 

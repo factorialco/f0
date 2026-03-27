@@ -175,7 +175,7 @@ async function fetchAllRecords<
     const fetchFn = dataAdapter.exportFetchData ?? dataAdapter.fetchData
     const result = await resolveResult(fetchFn(baseParams))
     const response = result as BaseResponse<R>
-    return response.records ?? []
+    return (response.records ?? []).slice(0, MAX_EXPORT_ROWS)
   }
 
   const fetchFn = dataAdapter.exportFetchData ?? dataAdapter.fetchData
@@ -239,7 +239,7 @@ async function fetchAllRecords<
     })
   )
   const response = result as BaseResponse<R>
-  return response.records ?? []
+  return (response.records ?? []).slice(0, MAX_EXPORT_ROWS)
 }
 
 export function useExportAction<
