@@ -96,15 +96,14 @@ async function resolveResult<T>(
     return new Promise<T>((resolve, reject) => {
       const subscription = observable.subscribe({
         next(state: PromiseState<T>) {
-          if (!state.loading) {
-            subscription.unsubscribe()
-            if (state.error) {
-              reject(state.error)
-            } else if (state.data != null) {
-              resolve(state.data)
-            } else {
-              reject(new Error("Observable resolved with no data"))
-            }
+          if (state.loading) return
+          subscription?.unsubscribe()
+          if (state.error) {
+            reject(state.error)
+          } else if (state.data != null) {
+            resolve(state.data)
+          } else {
+            reject(new Error("Observable resolved with no data"))
           }
         },
         error(err: unknown) {
