@@ -239,11 +239,10 @@ async function fetchAllRecords<
   }
 
   // ── no-pagination type ───────────────────────────────────────────
-  // paginationType is "no-pagination" — treat like base adapter
   const result = await resolveResult(
     fetchFn({
       ...baseParams,
-      pagination: { perPage: MAX_EXPORT_ROWS, currentPage: 1 },
+      pagination: {},
     })
   )
   const response = result as BaseResponse<R>
