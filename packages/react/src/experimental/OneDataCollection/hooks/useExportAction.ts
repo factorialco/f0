@@ -285,13 +285,25 @@ export function useExportAction<
     try {
       const allRecords = await fetchAllRecords(source)
 
+      // Read settings for the active visualization type (table or editableTable)
+      const vizType = currentVisualization?.type ?? "table"
+      const vizSettings =
+        vizType === "table" || vizType === "editableTable"
+          ? (
+              settings.visualization as Record<
+                string,
+                { hidden?: string[]; order?: string[] }
+              >
+            )[vizType]
+          : undefined
+
       // Respect column visibility — hidden columns are excluded from export
-      const hiddenColumnIds = settings.visualization?.table?.hidden
-        ? new Set(settings.visualization.table.hidden)
+      const hiddenColumnIds = vizSettings?.hidden
+        ? new Set(vizSettings.hidden)
         : undefined
 
       // Respect column order — reordered columns appear in the user's order
-      const columnOrder = settings.visualization?.table?.order
+      const columnOrder = vizSettings?.order
 
       await downloadAsCSV(allRecords, currentVisualization, {
         filename: filename || "data_collection_export",

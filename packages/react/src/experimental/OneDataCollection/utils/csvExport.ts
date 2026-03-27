@@ -282,7 +282,10 @@ export function extractColumns<
     return []
   }
 
-  if (visualization.type === "table") {
+  if (
+    visualization.type === "table" ||
+    visualization.type === "editableTable"
+  ) {
     const filtered = visualization.options.columns.filter((col) => {
       if (!hiddenColumnIds || hiddenColumnIds.size === 0) return true
       const colId = col.id ?? col.label ?? "column"
