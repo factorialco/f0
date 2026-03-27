@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.422.3](https://github.com/factorialco/f0/compare/f0-react-v1.422.2...f0-react-v1.422.3) (2026-03-27)
+
+
+### Bug Fixes
+
+* **editable-table:** add active, hover states to the cells of the editable table ([#3733](https://github.com/factorialco/f0/issues/3733)) ([a39652f](https://github.com/factorialco/f0/commit/a39652f92a86a4a86a238d1c7e152b3f3ac1d672))
+
 ## [1.422.2](https://github.com/factorialco/f0/compare/f0-react-v1.422.1...f0-react-v1.422.2) (2026-03-26)
 
 
