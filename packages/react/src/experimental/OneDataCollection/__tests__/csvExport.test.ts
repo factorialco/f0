@@ -387,4 +387,38 @@ describe("extractColumns", () => {
     // The render function should return a string (extractDisplayValue applied)
     expect(columns[0].render!({} as never)).toBe("Jane Doe")
   })
+
+  test("frozen columns not in columnOrder keep their original position", () => {
+    const viz = {
+      type: "table" as const,
+      options: {
+        columns: [
+          { id: "supplier", label: "Supplier", order: 0 },
+          { id: "name", label: "Name", order: 1 },
+          { id: "email", label: "Email", order: 2 },
+          { id: "status", label: "Status", order: 3 },
+          { id: "amount", label: "Amount", order: 4 },
+        ],
+      },
+    }
+
+    // User moved "amount" from 5th to 2nd position.
+    // The frozen "supplier" column is NOT in the saved order because
+    // framer-motion's Reorder.Group only tracks Reorder.Item children.
+    const columnOrder = ["amount", "name", "email", "status"]
+
+    const columns = extractColumns(
+      viz as AnyVisualization,
+      undefined,
+      columnOrder
+    )
+
+    expect(columns.map((c) => c.label)).toEqual([
+      "Supplier",
+      "Amount",
+      "Name",
+      "Email",
+      "Status",
+    ])
+  })
 })

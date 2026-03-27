@@ -273,15 +273,20 @@ export function extractColumns<
     // 2. Fall back to column definition's `order` property
     const ordered =
       columnOrder && columnOrder.length > 0
-        ? [...filtered].sort((a, b) => {
-            const aId = a.id ?? a.label ?? "column"
-            const bId = b.id ?? b.label ?? "column"
-            const aIndex = columnOrder.indexOf(aId)
-            const bIndex = columnOrder.indexOf(bId)
-            const aPos = aIndex === -1 ? columnOrder.length : aIndex
-            const bPos = bIndex === -1 ? columnOrder.length : bIndex
-            return aPos - bPos
-          })
+        ? (() => {
+            const orderSet = new Set(columnOrder)
+            const notInOrder = filtered.filter(
+              (col) => !orderSet.has(col.id ?? col.label ?? "column")
+            )
+            const inOrder = [...filtered]
+              .filter((col) => orderSet.has(col.id ?? col.label ?? "column"))
+              .sort((a, b) => {
+                const aId = a.id ?? a.label ?? "column"
+                const bId = b.id ?? b.label ?? "column"
+                return columnOrder.indexOf(aId) - columnOrder.indexOf(bId)
+              })
+            return [...notInOrder, ...inOrder]
+          })()
         : [...filtered].sort(
             (a, b) =>
               (a.order ?? filtered.length) - (b.order ?? filtered.length)
