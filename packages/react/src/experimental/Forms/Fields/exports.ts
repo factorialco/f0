@@ -1,5 +1,6 @@
 export { F0Select as Select } from "../../../components/F0Select"
 export * from "../../../components/F0Select/types"
+export * from "./DurationInput"
 export * from "./F1SearchBox"
 export * from "./Input"
 export * from "./NumberInput"
