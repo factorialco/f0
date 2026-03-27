@@ -75,7 +75,6 @@ interface UseExportActionProps<
 async function resolveResult<T>(
   result: T | Promise<T> | { subscribe?: unknown }
 ): Promise<T> {
-  // Promise
   if (result && typeof (result as Promise<T>).then === "function") {
     return result as Promise<T>
   }
@@ -116,7 +115,6 @@ async function resolveResult<T>(
     })
   }
 
-  // Plain value
   return result as T
 }
 
@@ -173,7 +171,6 @@ async function fetchAllRecords<
     navigationFilters: source.currentNavigationFilters,
   }
 
-  // ── Non-paginated adapter ────────────────────────────────────────
   if (!dataAdapter.paginationType) {
     const fetchFn = dataAdapter.exportFetchData ?? dataAdapter.fetchData
     const result = await resolveResult(fetchFn(baseParams))
@@ -181,10 +178,8 @@ async function fetchAllRecords<
     return response.records ?? []
   }
 
-  // ── Paginated adapters ───────────────────────────────────────────
   const fetchFn = dataAdapter.exportFetchData ?? dataAdapter.fetchData
 
-  // ── Page-based pagination ────────────────────────────────────────
   if (dataAdapter.paginationType === "pages") {
     const allRecords: R[] = []
     let currentPage = 1
@@ -209,7 +204,6 @@ async function fetchAllRecords<
     return allRecords.slice(0, MAX_EXPORT_ROWS)
   }
 
-  // ── Infinite-scroll pagination ───────────────────────────────────
   if (dataAdapter.paginationType === "infinite-scroll") {
     const allRecords: R[] = []
     let cursor: string | null = null
@@ -238,7 +232,6 @@ async function fetchAllRecords<
     return allRecords.slice(0, MAX_EXPORT_ROWS)
   }
 
-  // ── no-pagination type ───────────────────────────────────────────
   const result = await resolveResult(
     fetchFn({
       ...baseParams,
@@ -283,7 +276,6 @@ export function useExportAction<
     try {
       const allRecords = await fetchAllRecords(source)
 
-      // Read column visibility/order settings for the active visualization
       const vizType = currentVisualization?.type ?? "table"
       const vizSettings = (
         settings.visualization as Record<
@@ -292,12 +284,10 @@ export function useExportAction<
         >
       )[vizType]
 
-      // Respect column visibility — hidden columns are excluded from export
       const hiddenColumnIds = vizSettings?.hidden
         ? new Set(vizSettings.hidden)
         : undefined
 
-      // Respect column order — reordered columns appear in the user's order
       const columnOrder = vizSettings?.order
 
       await downloadAsCSV(allRecords, currentVisualization, {
