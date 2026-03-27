@@ -10,6 +10,7 @@ import {
 } from "@/hooks/datasource"
 import { Download } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
+import { PromiseState } from "@/lib/promise-to-observable"
 
 import type { Visualization } from "../visualizations/collection"
 
@@ -79,15 +80,57 @@ interface ExportableSource {
 
 /**
  * Resolve a fetchData result that may be a plain value, a Promise, or an
- * Observable (zen-observable-ts). We only support the first two for export;
- * Observables are not expected in practice for paginated adapters.
+ * Observable (zen-observable-ts wrapping PromiseState).
+ *
+ * For Observables we subscribe and wait for the first emission where
+ * `loading` is `false`, then return its `data` payload.
  */
 async function resolveResult<T>(
   result: T | Promise<T> | { subscribe?: unknown }
 ): Promise<T> {
+  // Promise
   if (result && typeof (result as Promise<T>).then === "function") {
     return result as Promise<T>
   }
+
+  // Observable<PromiseState<T>> — duck-type via `subscribe`
+  if (
+    result &&
+    typeof (result as { subscribe?: unknown }).subscribe === "function"
+  ) {
+    const observable = result as {
+      subscribe: (observer: {
+        next: (value: PromiseState<T>) => void
+        error: (err: unknown) => void
+        complete: () => void
+      }) => { unsubscribe: () => void }
+    }
+
+    return new Promise<T>((resolve, reject) => {
+      const subscription = observable.subscribe({
+        next(state: PromiseState<T>) {
+          if (!state.loading) {
+            subscription.unsubscribe()
+            if (state.error) {
+              reject(state.error)
+            } else if (state.data != null) {
+              resolve(state.data)
+            } else {
+              reject(new Error("Observable resolved with no data"))
+            }
+          }
+        },
+        error(err: unknown) {
+          reject(err instanceof Error ? err : new Error(String(err)))
+        },
+        complete() {
+          reject(new Error("Observable completed without emitting data"))
+        },
+      })
+    })
+  }
+
+  // Plain value
   return result as T
 }
 
