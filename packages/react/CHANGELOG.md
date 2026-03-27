@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.424.0](https://github.com/factorialco/f0/compare/f0-react-v1.423.0...f0-react-v1.424.0) (2026-03-27)
+
+
+### Features
+
+* **EditableTable:** add NumberCell for editable numeric columns ([#3724](https://github.com/factorialco/f0/issues/3724)) ([0441735](https://github.com/factorialco/f0/commit/0441735153f9416446acfab9b03afe2eada6951a))
+
 ## [1.423.0](https://github.com/factorialco/f0/compare/f0-react-v1.422.3...f0-react-v1.423.0) (2026-03-27)
 
 
