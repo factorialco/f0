@@ -1,11 +1,25 @@
 import { describe, expect, test } from "vitest"
 
+import type { RecordType } from "@/hooks/datasource"
+
+import type { Visualization } from "../visualizations/collection"
+
 import {
   escapeCSVCell,
   extractDisplayValue,
   extractTypedCellValue,
   extractColumns,
 } from "../utils/csvExport"
+
+type AnyVisualization = Visualization<
+  RecordType,
+  Record<string, never>,
+  Record<string, never>,
+  Record<string, never>,
+  Record<string, never>,
+  Record<string, never>,
+  Record<string, never>
+>
 
 // ---------------------------------------------------------------------------
 // escapeCSVCell
@@ -322,8 +336,7 @@ describe("extractColumns", () => {
         render: () => null,
       },
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    expect(extractColumns(viz as any)).toEqual([])
+    expect(extractColumns(viz as AnyVisualization)).toEqual([])
   })
 
   test("extracts columns from table visualization", () => {
@@ -344,8 +357,7 @@ describe("extractColumns", () => {
       },
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const columns = extractColumns(viz as any)
+    const columns = extractColumns(viz as AnyVisualization)
 
     expect(columns).toHaveLength(3)
     expect(columns[0].label).toBe("Name")
@@ -370,8 +382,7 @@ describe("extractColumns", () => {
       },
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const columns = extractColumns(viz as any)
+    const columns = extractColumns(viz as AnyVisualization)
 
     // The render function should return a string (extractDisplayValue applied)
     expect(columns[0].render!({} as never)).toBe("Jane Doe")
