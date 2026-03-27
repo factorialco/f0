@@ -111,4 +111,19 @@ describe("DurationInput", () => {
       screen.getByRole("textbox", { name: "Duration minutes" })
     ).toHaveValue("15")
   })
+
+  test("supports uncontrolled usage without resetting typed values", async () => {
+    render(<DurationInput label="Duration" />)
+
+    const minutesInput = screen.getByRole("textbox", {
+      name: "Duration minutes",
+    })
+
+    await userEvent.type(minutesInput, "65")
+
+    expect(screen.getByRole("textbox", { name: "Duration hours" })).toHaveValue(
+      "1"
+    )
+    expect(minutesInput).toHaveValue("5")
+  })
 })

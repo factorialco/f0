@@ -6,7 +6,7 @@ import { InputFieldProps } from "@/ui/InputField"
 import { InputMessages } from "@/ui/InputField/components/InputMessages"
 import { Label } from "@/ui/InputField/components/Label"
 
-type DurationInputProps = Pick<
+interface DurationInputProps extends Pick<
   InputFieldProps<string>,
   | "label"
   | "labelIcon"
@@ -18,10 +18,9 @@ type DurationInputProps = Pick<
   | "required"
   | "readonly"
   | "size"
-  | "className"
   | "onFocus"
   | "onBlur"
-> & {
+> {
   value?: number | null
   onChange?: (value: number | null) => void
   hoursLabel?: string
@@ -31,6 +30,12 @@ type DurationInputProps = Pick<
   max?: number
   name?: string
 }
+
+interface DurationInputInternalProps extends DurationInputProps {
+  className?: string
+}
+
+const privateProps = ["className"] as const
 
 const splitDuration = (
   value: number | null | undefined,
@@ -110,7 +115,10 @@ const inputSizeClass = {
   md: "py-2 text-md",
 }
 
-const _DurationInput = forwardRef<HTMLInputElement, DurationInputProps>(
+const DurationInputBase = forwardRef<
+  HTMLInputElement,
+  DurationInputInternalProps
+>(
   (
     {
       label,
@@ -142,6 +150,10 @@ const _DurationInput = forwardRef<HTMLInputElement, DurationInputProps>(
     const [minutes, setMinutes] = useState("")
 
     useEffect(() => {
+      if (value === undefined) {
+        return
+      }
+
       if (value === getComparableMinutes(hours, minutes, hideMinutes)) {
         return
       }
@@ -304,6 +316,19 @@ const _DurationInput = forwardRef<HTMLInputElement, DurationInputProps>(
         <InputMessages status={localStatus} />
       </div>
     )
+  }
+)
+
+DurationInputBase.displayName = "DurationInputBase"
+
+const _DurationInput = forwardRef<HTMLInputElement, DurationInputProps>(
+  (props, ref) => {
+    const publicProps = privateProps.reduce((acc, key) => {
+      const { [key]: _, ...rest } = acc
+      return rest
+    }, props as DurationInputInternalProps)
+
+    return <DurationInputBase {...publicProps} ref={ref} />
   }
 )
 
