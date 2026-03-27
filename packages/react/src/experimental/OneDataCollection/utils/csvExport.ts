@@ -113,6 +113,11 @@ export function extractDisplayValue(renderResult: unknown): string {
   return ""
 }
 
+// TODO: Decouple cell-type-to-text extraction from this file.
+// Each value-display type (ui/value-display/types/) should co-locate a
+// `toPlainText` function next to its React renderer, registered in a parallel
+// map mirroring `valueDisplayRenderers` in ui/value-display/renderers.tsx.
+// This switch would then be replaced by a registry lookup.
 /**
  * Given a cell `type` identifier and its unwrapped `value`, return a
  * human-readable string suitable for CSV export.
