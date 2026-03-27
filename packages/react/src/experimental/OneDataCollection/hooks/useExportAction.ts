@@ -285,17 +285,14 @@ export function useExportAction<
     try {
       const allRecords = await fetchAllRecords(source)
 
-      // Read settings for the active visualization type (table or editableTable)
+      // Read column visibility/order settings for the active visualization
       const vizType = currentVisualization?.type ?? "table"
-      const vizSettings =
-        vizType === "table" || vizType === "editableTable"
-          ? (
-              settings.visualization as Record<
-                string,
-                { hidden?: string[]; order?: string[] }
-              >
-            )[vizType]
-          : undefined
+      const vizSettings = (
+        settings.visualization as Record<
+          string,
+          { hidden?: string[]; order?: string[] } | undefined
+        >
+      )[vizType]
 
       // Respect column visibility — hidden columns are excluded from export
       const hiddenColumnIds = vizSettings?.hidden
