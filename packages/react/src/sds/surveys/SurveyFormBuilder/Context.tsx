@@ -402,11 +402,14 @@ export function SurveyFormBuilderProvider({
 
   const isQuestionTypeAllowed = useCallback(
     (questionType: QuestionType) => {
+      if (questionType === "file" && !useUpload) {
+        return false
+      }
       return (
         !allowedQuestionTypes || allowedQuestionTypes.includes(questionType)
       )
     },
-    [allowedQuestionTypes]
+    [allowedQuestionTypes, useUpload]
   )
 
   const contextValue = useMemo(
