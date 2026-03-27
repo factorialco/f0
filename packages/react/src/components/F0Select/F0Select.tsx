@@ -244,9 +244,14 @@ const F0SelectComponent = forwardRef(function Select<
           return undefined
         }
         const mappedOption = optionMapper(item)
-        return mappedOption.type !== "separator"
-          ? String(mappedOption.value)
-          : undefined
+        if (mappedOption.type === "separator") {
+          return undefined
+        }
+        const value = String(mappedOption.value)
+        if (mappedOption.disabled || disabledIdSet.has(value)) {
+          return undefined
+        }
+        return value
       },
       search: showSearchBox
         ? {
@@ -255,7 +260,7 @@ const F0SelectComponent = forwardRef(function Select<
           }
         : undefined,
     },
-    [options]
+    [options, disabledIdSet]
   )
 
   /**
@@ -468,16 +473,8 @@ const F0SelectComponent = forwardRef(function Select<
     (checked: boolean) => {
       hasUserInteracted.current = true
       handleSelectAllItems(checked)
-
-      // After select all, deselect disabled items in a single batch
-      if (checked && disabledIdSet.size > 0) {
-        handleSelectItemChange(
-          Array.from(disabledIdSet) as readonly string[],
-          false
-        )
-      }
     },
-    [handleSelectAllItems, handleSelectItemChange, disabledIdSet]
+    [handleSelectAllItems]
   )
 
   /**
