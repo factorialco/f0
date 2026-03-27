@@ -421,6 +421,11 @@ const F0SelectComponent = forwardRef(function Select<
 
   const onItemCheckChange = useCallback(
     (value: string, checked: boolean) => {
+      // Prevent selection of disabled items
+      if (checked && disabledIdSet.has(value)) {
+        return
+      }
+
       // Prevent deselection in single select mode when not clearable
       if (!multiple && !clearable && !checked && localValue[0] === value) {
         return
@@ -449,6 +454,7 @@ const F0SelectComponent = forwardRef(function Select<
       multiple,
       clearable,
       localValue,
+      disabledIdSet,
     ]
   )
 
@@ -457,8 +463,15 @@ const F0SelectComponent = forwardRef(function Select<
     (checked: boolean) => {
       hasUserInteracted.current = true
       handleSelectAllItems(checked)
+
+      // After select all, deselect disabled items
+      if (checked && disabledIdSet.size > 0) {
+        for (const disabledId of disabledIdSet) {
+          handleSelectItemChange(disabledId, false)
+        }
+      }
     },
-    [handleSelectAllItems]
+    [handleSelectAllItems, handleSelectItemChange, disabledIdSet]
   )
 
   /**
