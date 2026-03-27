@@ -8,6 +8,8 @@ import React, {
   useRef,
 } from "react"
 
+import type { UseFileUpload } from "@/components/F0Form/fields/file/types"
+
 import {
   getDefaultParamsForQuestionType,
   getDefaultQuestionTypeToAdd,
@@ -35,6 +37,7 @@ type SurveyFormBuilderContextType = SurveyFormBuilderCallbacks & {
   isQuestionTypeAllowed: (questionType: QuestionType) => boolean
   errors?: Record<string, string>
   onFieldBlur?: (questionId: string) => void
+  useUpload?: UseFileUpload
 }
 
 const SurveyFormBuilderContext = createContext<
@@ -51,6 +54,7 @@ type SurveyFormBuilderProviderProps = {
   allowedQuestionTypes?: QuestionType[]
   errors?: Record<string, string>
   onFieldBlur?: (questionId: string) => void
+  useUpload?: UseFileUpload
 }
 
 export function SurveyFormBuilderProvider({
@@ -63,6 +67,7 @@ export function SurveyFormBuilderProvider({
   allowedQuestionTypes,
   errors,
   onFieldBlur,
+  useUpload,
 }: SurveyFormBuilderProviderProps) {
   const elementsRef = useRef(elements)
   elementsRef.current = elements
@@ -397,11 +402,14 @@ export function SurveyFormBuilderProvider({
 
   const isQuestionTypeAllowed = useCallback(
     (questionType: QuestionType) => {
+      if (questionType === "file" && !useUpload) {
+        return false
+      }
       return (
         !allowedQuestionTypes || allowedQuestionTypes.includes(questionType)
       )
     },
-    [allowedQuestionTypes]
+    [allowedQuestionTypes, useUpload]
   )
 
   const contextValue = useMemo(
@@ -421,6 +429,7 @@ export function SurveyFormBuilderProvider({
       isQuestionTypeAllowed,
       errors,
       onFieldBlur,
+      useUpload,
     }),
     [
       handleQuestionChange,
@@ -438,6 +447,7 @@ export function SurveyFormBuilderProvider({
       isQuestionTypeAllowed,
       errors,
       onFieldBlur,
+      useUpload,
     ]
   )
 

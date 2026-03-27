@@ -42,6 +42,15 @@ const makeSelectQuestion = (
   },
 })
 
+const makeFileQuestion = (
+  id: string,
+  title: string,
+  required = false
+): SurveyFormBuilderElement => ({
+  type: "question",
+  question: { id, title, type: "file" as const, required },
+})
+
 const defaultProps = {
   title: "Test Survey",
   isOpen: true,
@@ -336,6 +345,74 @@ describe("SurveyAnsweringForm", () => {
 
       expect(onSubmit).toHaveBeenCalledWith(
         expect.objectContaining({ q1: "a" })
+      )
+    })
+  })
+
+  describe("file question", () => {
+    it("does not call onSubmit when required file question has no files", async () => {
+      const onSubmit = vi.fn()
+
+      render(
+        <SurveyAnsweringForm
+          {...defaultProps}
+          elements={[makeFileQuestion("q1", "Upload docs", true)]}
+          onSubmit={onSubmit}
+        />
+      )
+
+      const submitButton = screen.getByRole("button", { name: /submit/i })
+      await userEvent.click(submitButton)
+
+      expect(onSubmit).not.toHaveBeenCalled()
+    })
+
+    it("calls onSubmit when optional file question has no files", async () => {
+      const onSubmit = vi.fn<
+        (answers: Record<string, unknown>) => SurveyFormSubmitResult
+      >(() => ({
+        success: true,
+      }))
+
+      render(
+        <SurveyAnsweringForm
+          {...defaultProps}
+          elements={[makeFileQuestion("q1", "Upload docs", false)]}
+          onSubmit={onSubmit}
+        />
+      )
+
+      const submitButton = screen.getByRole("button", { name: /submit/i })
+      await userEvent.click(submitButton)
+
+      expect(onSubmit).toHaveBeenCalled()
+    })
+
+    it("submits pre-filled file values as string[]", async () => {
+      const onSubmit = vi.fn<
+        (answers: Record<string, unknown>) => SurveyFormSubmitResult
+      >(() => ({
+        success: true,
+      }))
+
+      render(
+        <SurveyAnsweringForm
+          {...defaultProps}
+          elements={[makeFileQuestion("q1", "Upload docs", false)]}
+          defaultValues={{
+            q1: { type: "file", value: ["signed_doc1", "signed_doc2"] },
+          }}
+          onSubmit={onSubmit}
+        />
+      )
+
+      const submitButton = screen.getByRole("button", { name: /submit/i })
+      await userEvent.click(submitButton)
+
+      expect(onSubmit).toHaveBeenCalledWith(
+        expect.objectContaining({
+          q1: ["signed_doc1", "signed_doc2"],
+        })
       )
     })
   })

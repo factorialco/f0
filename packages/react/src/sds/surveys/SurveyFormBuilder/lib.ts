@@ -91,6 +91,10 @@ export const getDefaultParamsForQuestionType = (questionType: QuestionType) => {
       return {
         value: new Date(),
       }
+    case "file":
+      return {
+        value: null,
+      }
     default:
       throw new Error(`Unsupported question type: ${questionType}`)
   }
