@@ -334,7 +334,7 @@ function generateFilename(baseFilename?: string): string {
   return `${sanitized}_${timestamp}.csv`
 }
 
-export async function downloadAsCSV<
+export function generateCSVContent<
   R extends RecordType,
   Filters extends FiltersDefinition,
   Sortings extends SortingsDefinition,
@@ -356,7 +356,7 @@ export async function downloadAsCSV<
       >
     | undefined,
   options?: CSVExportOptions
-): Promise<void> {
+): string {
   if (!data || data.length === 0) {
     throw new Error("No data available for export")
   }
@@ -380,7 +380,7 @@ export async function downloadAsCSV<
   const headers =
     options?.includeHeaders !== false ? columns.map((col) => col.label) : []
 
-  const csvContent = [
+  return [
     ...(headers.length > 0
       ? [headers.map((header) => escapeCSVCell(header)).join(",")]
       : []),
@@ -388,12 +388,12 @@ export async function downloadAsCSV<
       row.map((cell) => escapeCSVCell(cell)).join(",")
     ),
   ].join("\n")
+}
 
-  const blob = new Blob(["\uFEFF" + csvContent], {
+function downloadBlob(content: string, filename: string): void {
+  const blob = new Blob(["\uFEFF" + content], {
     type: "text/csv;charset=utf-8",
   })
-
-  const filename = generateFilename(options?.filename || "data_collection")
 
   const link = document.createElement("a")
   const objectUrl = URL.createObjectURL(blob)
@@ -403,4 +403,32 @@ export async function downloadAsCSV<
   link.click()
   document.body.removeChild(link)
   URL.revokeObjectURL(objectUrl)
+}
+
+export async function downloadAsCSV<
+  R extends RecordType,
+  Filters extends FiltersDefinition,
+  Sortings extends SortingsDefinition,
+  Summaries extends SummariesDefinition,
+  ItemActions extends ItemActionsDefinition<R>,
+  NavigationFilters extends NavigationFiltersDefinition,
+  Grouping extends GroupingDefinition<R>,
+>(
+  data: R[],
+  visualization:
+    | Visualization<
+        R,
+        Filters,
+        Sortings,
+        Summaries,
+        ItemActions,
+        NavigationFilters,
+        Grouping
+      >
+    | undefined,
+  options?: CSVExportOptions
+): Promise<void> {
+  const csvContent = generateCSVContent(data, visualization, options)
+  const filename = generateFilename(options?.filename || "data_collection")
+  downloadBlob(csvContent, filename)
 }

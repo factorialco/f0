@@ -12,7 +12,7 @@ export * from "./hooks/useDataCollectionData"
 export * from "./hooks/useDataCollectionSource"
 export * from "./hooks/useInfiniteScrollPagination"
 export { useExportAction } from "./hooks/useExportAction"
-export { downloadAsCSV } from "./utils/csvExport"
+export { downloadAsCSV, generateCSVContent } from "./utils/csvExport"
 export type { CSVExportOptions } from "./utils/csvExport"
 export type {
   CustomVisualizationProps,
