@@ -258,7 +258,9 @@ export function extractColumns<R extends RecordType>(
       return !hiddenColumnIds.has(colId)
     })
 
-    // Apply saved column order if available
+    // Apply column ordering:
+    // 1. User-saved order from settings takes priority
+    // 2. Fall back to column definition's `order` property
     const ordered =
       columnOrder && columnOrder.length > 0
         ? [...filtered].sort((a, b) => {
@@ -271,7 +273,10 @@ export function extractColumns<R extends RecordType>(
             const bPos = bIndex === -1 ? columnOrder.length : bIndex
             return aPos - bPos
           })
-        : filtered
+        : [...filtered].sort(
+            (a, b) =>
+              (a.order ?? filtered.length) - (b.order ?? filtered.length)
+          )
 
     return ordered.map((col) => ({
       label: col.label,

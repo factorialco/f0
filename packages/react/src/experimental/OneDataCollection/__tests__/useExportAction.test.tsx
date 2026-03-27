@@ -453,7 +453,7 @@ describe("useExportAction", () => {
       expect(fetchData).toHaveBeenCalledWith(
         expect.objectContaining({
           filters: { status: "active" },
-          sortings: { field: "name", order: "asc" },
+          sortings: [{ field: "name", order: "asc" }],
         })
       )
     })

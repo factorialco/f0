@@ -80,9 +80,10 @@ interface ExportableSource {
     exportFetchData?: (opts: Record<string, unknown>) => unknown
   }
   currentFilters: Record<string, unknown>
-  currentSortings: unknown
+  currentSortings: { field: string; order: string } | null | undefined
   currentSearch: string | undefined
   currentNavigationFilters: Record<string, unknown>
+  currentGrouping?: { field: string; order?: string } | null | undefined
 }
 
 /**
@@ -151,9 +152,30 @@ async function fetchAllRecords<R extends RecordType>(
   const { dataAdapter } = source
   const fetchFn = dataAdapter.exportFetchData ?? dataAdapter.fetchData
 
+  // Build sortings array matching the format useData.ts passes to fetchData:
+  // combines currentSortings + currentGrouping into SortingsStateMultiple
+  const sortings = [
+    ...(source.currentSortings
+      ? [
+          {
+            field: source.currentSortings.field,
+            order: source.currentSortings.order,
+          },
+        ]
+      : []),
+    ...(source.currentGrouping
+      ? [
+          {
+            field: source.currentGrouping.field,
+            order: source.currentGrouping.order ?? "asc",
+          },
+        ]
+      : []),
+  ]
+
   const baseParams = {
     filters: source.currentFilters,
-    sortings: source.currentSortings,
+    sortings,
     search: source.currentSearch,
     navigationFilters: source.currentNavigationFilters,
   }
