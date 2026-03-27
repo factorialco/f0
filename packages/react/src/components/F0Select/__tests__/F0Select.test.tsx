@@ -362,6 +362,61 @@ describe("Select", () => {
     )
   })
 
+  it("renders disabled items from disabledIds as non-selectable", async () => {
+    const handleChange = vi.fn()
+    const user = userEvent.setup()
+
+    render(
+      <F0Select
+        {...defaultSelectProps}
+        options={mockOptions}
+        onChange={handleChange}
+        disabledIds={["option2"]}
+      />
+    )
+
+    await openSelect(user)
+
+    // The disabled option should be visible but have data-disabled attribute
+    const option2 = screen.getByText("Option 2").closest("[data-disabled]")
+    expect(option2).toBeInTheDocument()
+
+    // Clicking the disabled option should not trigger onChange
+    await user.click(screen.getByText("Option 2"))
+    expect(handleChange).not.toHaveBeenCalled()
+  })
+
+  it("Select All does not select items in disabledIds", async () => {
+    const handleChange = vi.fn()
+    const user = userEvent.setup()
+
+    render(
+      <F0Select
+        {...defaultSelectProps}
+        options={mockOptions}
+        onChange={handleChange}
+        multiple
+        disabledIds={["option2"]}
+      />
+    )
+
+    await openSelect(user)
+
+    // Click "Select all" checkbox
+    const selectAll = screen.getByTitle("Select all")
+    await user.click(selectAll)
+
+    // onChange should be called with option1 and option3, but NOT option2
+    await waitFor(() => {
+      expect(handleChange).toHaveBeenCalled()
+      const calledValues =
+        handleChange.mock.calls[handleChange.mock.calls.length - 1][0]
+      expect(calledValues).toContain("option1")
+      expect(calledValues).toContain("option3")
+      expect(calledValues).not.toContain("option2")
+    })
+  })
+
   it("clears value and selectedOption when clearable and clear button is clicked", async () => {
     const handleChange = vi.fn()
     const handleChangeSelectedOption = vi.fn()

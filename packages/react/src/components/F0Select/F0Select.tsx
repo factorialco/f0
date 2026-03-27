@@ -131,6 +131,11 @@ const F0SelectComponent = forwardRef(function Select<
 ) {
   const id = useId()
 
+  const disabledIdSet = useMemo(
+    () => new Set(disabledIds?.map(String) ?? []),
+    [disabledIds]
+  )
+
   // If inside a OneDialog and no portalContainer is provided, use the dialog's container
   // only for center/fullscreen dialogs (which have focus trap).
   // For side panels (left/right), render in body to prevent clipping.
@@ -618,11 +623,6 @@ const F0SelectComponent = forwardRef(function Select<
   const { openGroups, setGroupOpen } = useGroups(
     data?.type === "grouped" ? data.groups : [],
     defaultOpenGroups
-  )
-
-  const disabledIdSet = useMemo(
-    () => new Set(disabledIds?.map(String) ?? []),
-    [disabledIds]
   )
 
   const getItems = useCallback(
