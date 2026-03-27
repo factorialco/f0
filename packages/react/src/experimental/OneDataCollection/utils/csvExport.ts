@@ -1,5 +1,13 @@
-import { RecordType } from "@/hooks/datasource"
+import {
+  RecordType,
+  FiltersDefinition,
+  SortingsDefinition,
+  GroupingDefinition,
+} from "@/hooks/datasource"
 
+import { ItemActionsDefinition } from "../item-actions"
+import { NavigationFiltersDefinition } from "../navigationFilters/types"
+import { SummariesDefinition } from "../summary"
 import type { Visualization } from "../visualizations/collection"
 
 export interface CSVExportOptions {
@@ -242,8 +250,26 @@ function getNestedValue(obj: Record<string, unknown>, path: string): unknown {
   }, obj)
 }
 
-export function extractColumns<R extends RecordType>(
-  visualization: Visualization<R, any, any, any, any, any, any> | undefined,
+export function extractColumns<
+  R extends RecordType,
+  Filters extends FiltersDefinition,
+  Sortings extends SortingsDefinition,
+  Summaries extends SummariesDefinition,
+  ItemActions extends ItemActionsDefinition<R>,
+  NavigationFilters extends NavigationFiltersDefinition,
+  Grouping extends GroupingDefinition<R>,
+>(
+  visualization:
+    | Visualization<
+        R,
+        Filters,
+        Sortings,
+        Summaries,
+        ItemActions,
+        NavigationFilters,
+        Grouping
+      >
+    | undefined,
   hiddenColumnIds?: Set<string>,
   columnOrder?: string[]
 ): ColumnDefinition<R>[] {
@@ -327,16 +353,34 @@ function generateFilename(baseFilename?: string): string {
   return `${sanitized}_${timestamp}.csv`
 }
 
-export async function downloadAsCSV<R extends RecordType>(
+export async function downloadAsCSV<
+  R extends RecordType,
+  Filters extends FiltersDefinition,
+  Sortings extends SortingsDefinition,
+  Summaries extends SummariesDefinition,
+  ItemActions extends ItemActionsDefinition<R>,
+  NavigationFilters extends NavigationFiltersDefinition,
+  Grouping extends GroupingDefinition<R>,
+>(
   data: R[],
-  visualization: Visualization<R, any, any, any, any, any, any> | undefined,
+  visualization:
+    | Visualization<
+        R,
+        Filters,
+        Sortings,
+        Summaries,
+        ItemActions,
+        NavigationFilters,
+        Grouping
+      >
+    | undefined,
   options?: CSVExportOptions
 ): Promise<void> {
   if (!data || data.length === 0) {
     throw new Error("No data available for export")
   }
 
-  const columns = extractColumns(
+  let columns = extractColumns(
     visualization,
     options?.hiddenColumnIds,
     options?.columnOrder
@@ -345,13 +389,10 @@ export async function downloadAsCSV<R extends RecordType>(
   // If no columns from visualization, try to infer from data structure
   if (columns.length === 0) {
     const firstItem = data[0]
-    const inferredColumns: ColumnDefinition<R>[] = Object.keys(firstItem).map(
-      (key) => ({
-        label: key.charAt(0).toUpperCase() + key.slice(1),
-        field: key,
-      })
-    )
-    columns.push(...inferredColumns)
+    columns = Object.keys(firstItem).map((key) => ({
+      label: key.charAt(0).toUpperCase() + key.slice(1),
+      field: key,
+    }))
   }
 
   const transformedData = transformDataForCSV(data, columns)

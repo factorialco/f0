@@ -65,28 +65,6 @@ interface UseExportActionProps<
 }
 
 /**
- * Minimal source shape needed by fetchAllRecords.
- * Uses loose types to avoid fighting the DataCollectionDataAdapter union.
- */
-interface ExportableSource {
-  dataAdapter: {
-    paginationType?: string
-    fetchData: (opts: Record<string, unknown>) => unknown
-    /**
-     * Optional standalone fetch for export that does NOT affect UI state.
-     * When provided, fetchAllRecords uses this instead of fetchData.
-     * This avoids side-effects on reactive adapters (e.g. Apollo watchQuery).
-     */
-    exportFetchData?: (opts: Record<string, unknown>) => unknown
-  }
-  currentFilters: Record<string, unknown>
-  currentSortings: { field: string; order: string } | null | undefined
-  currentSearch: string | undefined
-  currentNavigationFilters: Record<string, unknown>
-  currentGrouping?: { field: string; order?: string } | null | undefined
-}
-
-/**
  * Resolve a fetchData result that may be a plain value, a Promise, or an
  * Observable (zen-observable-ts wrapping PromiseState).
  *
@@ -146,8 +124,24 @@ async function resolveResult<T>(
  * Fetch *all* records from a data adapter, transparently handling both
  * non-paginated and paginated (pages / infinite-scroll) adapters.
  */
-async function fetchAllRecords<R extends RecordType>(
-  source: ExportableSource
+async function fetchAllRecords<
+  R extends RecordType,
+  Filters extends FiltersDefinition,
+  Sortings extends SortingsDefinition,
+  Summaries extends SummariesDefinition,
+  ItemActions extends ItemActionsDefinition<R>,
+  NavigationFilters extends NavigationFiltersDefinition,
+  Grouping extends GroupingDefinition<R>,
+>(
+  source: DataCollectionSource<
+    R,
+    Filters,
+    Sortings,
+    Summaries,
+    ItemActions,
+    NavigationFilters,
+    Grouping
+  >
 ): Promise<R[]> {
   const { dataAdapter } = source
   const fetchFn = dataAdapter.exportFetchData ?? dataAdapter.fetchData
@@ -285,9 +279,7 @@ export function useExportAction<
     setIsExporting(true)
 
     try {
-      const allRecords = await fetchAllRecords<R>(
-        source as unknown as ExportableSource
-      )
+      const allRecords = await fetchAllRecords(source)
 
       // Respect column visibility — hidden columns are excluded from export
       const hiddenColumnIds = settings.visualization?.table?.hidden
@@ -297,17 +289,11 @@ export function useExportAction<
       // Respect column order — reordered columns appear in the user's order
       const columnOrder = settings.visualization?.table?.order
 
-      await downloadAsCSV(
-        allRecords,
-        currentVisualization as
-          | Visualization<R, any, any, any, any, any, any>
-          | undefined,
-        {
-          filename: filename || "data_collection_export",
-          hiddenColumnIds,
-          columnOrder,
-        }
-      )
+      await downloadAsCSV(allRecords, currentVisualization, {
+        filename: filename || "data_collection_export",
+        hiddenColumnIds,
+        columnOrder,
+      })
     } catch (error) {
       console.error("Export failed:", error)
     } finally {
