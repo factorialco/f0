@@ -4,6 +4,7 @@ import {
   RecordType,
   FiltersDefinition,
   SortingsDefinition,
+  SortingsStateMultiple,
   GroupingDefinition,
   BaseResponse,
   PaginatedResponse,
@@ -144,15 +145,14 @@ async function fetchAllRecords<
   >
 ): Promise<R[]> {
   const { dataAdapter } = source
-  const fetchFn = dataAdapter.exportFetchData ?? dataAdapter.fetchData
 
   // Build sortings array matching the format useData.ts passes to fetchData:
   // combines currentSortings + currentGrouping into SortingsStateMultiple
-  const sortings = [
+  const sortings: SortingsStateMultiple = [
     ...(source.currentSortings
       ? [
           {
-            field: source.currentSortings.field,
+            field: source.currentSortings.field as string,
             order: source.currentSortings.order,
           },
         ]
@@ -160,7 +160,7 @@ async function fetchAllRecords<
     ...(source.currentGrouping
       ? [
           {
-            field: source.currentGrouping.field,
+            field: source.currentGrouping.field as string,
             order: source.currentGrouping.order ?? "asc",
           },
         ]
@@ -176,10 +176,14 @@ async function fetchAllRecords<
 
   // ── Non-paginated adapter ────────────────────────────────────────
   if (!dataAdapter.paginationType) {
+    const fetchFn = dataAdapter.exportFetchData ?? dataAdapter.fetchData
     const result = await resolveResult(fetchFn(baseParams))
     const response = result as BaseResponse<R>
     return response.records ?? []
   }
+
+  // ── Paginated adapters ───────────────────────────────────────────
+  const fetchFn = dataAdapter.exportFetchData ?? dataAdapter.fetchData
 
   // ── Page-based pagination ────────────────────────────────────────
   if (dataAdapter.paginationType === "pages") {
