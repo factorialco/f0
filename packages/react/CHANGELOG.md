@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.423.0](https://github.com/factorialco/f0/compare/f0-react-v1.422.3...f0-react-v1.423.0) (2026-03-27)
+
+
+### Features
+
+* add file question type ([#3583](https://github.com/factorialco/f0/issues/3583)) ([62599da](https://github.com/factorialco/f0/commit/62599da2c0e0dfd1d43902066ffda3fe10659950))
+
 ## [1.422.3](https://github.com/factorialco/f0/compare/f0-react-v1.422.2...f0-react-v1.422.3) (2026-03-27)
 
 
