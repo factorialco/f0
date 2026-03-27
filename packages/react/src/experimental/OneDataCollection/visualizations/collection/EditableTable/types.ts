@@ -30,6 +30,15 @@ export type AddRowActionsResult =
 
 export type EditableTableVisualizationSettings = TableVisualizationSettings
 
+export type NumberCellConfig = {
+  min?: number
+  max?: number
+  step?: number
+  maxDecimals?: number
+  locale?: string
+  units?: string
+}
+
 /**
  * Configuration for select-type cells. Mirrors F0Select's two data modes:
  * - Static `options` (array or per-row function)
@@ -102,6 +111,12 @@ export type EditableTableColumnDefinition<
    * function whose return value isn't statically known.
    */
   selectConfig?: SelectCellConfig<R>
+  /**
+   * Configuration for `"number"` cells. Accepts constraints (`min`, `max`),
+   * stepping (`step`), formatting (`maxDecimals`, `locale`), and units.
+   * Falls back to sensible defaults when omitted.
+   */
+  numberConfig?: NumberCellConfig
 }
 
 export type EditableTableVisualizationOptions<

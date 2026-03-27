@@ -25,6 +25,7 @@ export type EditableCellProps<R extends RecordType> = {
 /** The edit mode for a column cell in the editable table. */
 export type EditableTableCellEditType =
   | "text"
+  | "number"
   | "date"
   | "select"
   | "multiselect"
