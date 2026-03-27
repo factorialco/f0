@@ -7,6 +7,8 @@ export interface CSVExportOptions {
   includeHeaders?: boolean
   /** Column IDs to exclude from export (respects column visibility settings) */
   hiddenColumnIds?: Set<string>
+  /** Column ID order to apply (respects column reordering settings) */
+  columnOrder?: string[]
 }
 
 export interface ColumnDefinition<R extends RecordType = RecordType> {
@@ -242,29 +244,45 @@ function getNestedValue(obj: Record<string, unknown>, path: string): unknown {
 
 export function extractColumns<R extends RecordType>(
   visualization: Visualization<R, any, any, any, any, any, any> | undefined,
-  hiddenColumnIds?: Set<string>
+  hiddenColumnIds?: Set<string>,
+  columnOrder?: string[]
 ): ColumnDefinition<R>[] {
   if (!visualization) {
     return []
   }
 
   if (visualization.type === "table") {
-    return visualization.options.columns
-      .filter((col) => {
-        if (!hiddenColumnIds || hiddenColumnIds.size === 0) return true
-        const colId = col.id ?? col.label ?? "column"
-        return !hiddenColumnIds.has(colId)
-      })
-      .map((col) => ({
-        label: col.label,
-        field: col.sorting || undefined,
-        render: col.render
-          ? (item: R) => {
-              const result = col.render!(item)
-              return extractDisplayValue(result)
-            }
-          : undefined,
-      }))
+    const filtered = visualization.options.columns.filter((col) => {
+      if (!hiddenColumnIds || hiddenColumnIds.size === 0) return true
+      const colId = col.id ?? col.label ?? "column"
+      return !hiddenColumnIds.has(colId)
+    })
+
+    // Apply saved column order if available
+    const ordered =
+      columnOrder && columnOrder.length > 0
+        ? [...filtered].sort((a, b) => {
+            const aId = a.id ?? a.label ?? "column"
+            const bId = b.id ?? b.label ?? "column"
+            const aIndex = columnOrder.indexOf(aId)
+            const bIndex = columnOrder.indexOf(bId)
+            // Columns not in saved order appear at the end
+            const aPos = aIndex === -1 ? columnOrder.length : aIndex
+            const bPos = bIndex === -1 ? columnOrder.length : bIndex
+            return aPos - bPos
+          })
+        : filtered
+
+    return ordered.map((col) => ({
+      label: col.label,
+      field: col.sorting || undefined,
+      render: col.render
+        ? (item: R) => {
+            const result = col.render!(item)
+            return extractDisplayValue(result)
+          }
+        : undefined,
+    }))
   }
 
   // For non-table visualizations, we'll need to infer columns from data structure
@@ -313,7 +331,11 @@ export async function downloadAsCSV<R extends RecordType>(
     throw new Error("No data available for export")
   }
 
-  const columns = extractColumns(visualization, options?.hiddenColumnIds)
+  const columns = extractColumns(
+    visualization,
+    options?.hiddenColumnIds,
+    options?.columnOrder
+  )
 
   // If no columns from visualization, try to infer from data structure
   if (columns.length === 0) {

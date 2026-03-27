@@ -272,6 +272,9 @@ export function useExportAction<
         ? new Set(settings.visualization.table.hidden)
         : undefined
 
+      // Respect column order — reordered columns appear in the user's order
+      const columnOrder = settings.visualization?.table?.order
+
       await downloadAsCSV(
         allRecords,
         currentVisualization as
@@ -280,6 +283,7 @@ export function useExportAction<
         {
           filename: filename || "data_collection_export",
           hiddenColumnIds,
+          columnOrder,
         }
       )
     } catch (error) {
