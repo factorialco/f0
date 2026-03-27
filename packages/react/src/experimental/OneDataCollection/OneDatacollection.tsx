@@ -283,7 +283,7 @@ const OneDataCollectionComp = <
         : undefined
 
   const exportAction = useExportAction({
-    source,
+    source: effectiveSource,
     currentVisualization: visualizations[currentVisualization],
     filename: csvExportFilename,
     enabled: !!csvExport,
@@ -310,11 +310,11 @@ const OneDataCollectionComp = <
 
   // Remaining actions are in the secondaryActionsItems group (expanded) and filters the empty groups
   const otherActionsItems = useMemo(() => {
+    const firstGroup = allSecondaryActions[0] ?? { items: [] }
     const groups = [
       {
-        ...allSecondaryActions[0],
-        items:
-          allSecondaryActions[0]?.items.slice(expandedSecondaryActions) || [],
+        ...firstGroup,
+        items: firstGroup.items?.slice(expandedSecondaryActions) || [],
       },
       ...allSecondaryActions.slice(1),
     ]
