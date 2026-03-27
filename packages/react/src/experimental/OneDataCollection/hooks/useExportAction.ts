@@ -232,11 +232,13 @@ export function useExportAction<
   }, [enabled, source, currentVisualization, filename])
 
   return {
-    label: i18n.collections.export.label,
+    label: i18n.collections?.export?.label ?? "Export to CSV",
     icon: Download,
     onClick: handleExport,
     loading: isExporting,
     disabled: !enabled || isExporting || source.isLoading,
-    description: i18n.collections.export.description,
+    description:
+      i18n.collections?.export?.description ??
+      "Download all data as a CSV file",
   }
 }
