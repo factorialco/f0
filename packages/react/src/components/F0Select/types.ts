@@ -56,6 +56,11 @@ type F0SelectBaseProps<T extends string, R = unknown> = {
    * @default false
    */
   showPreview?: boolean
+  /**
+   * IDs of items that should be shown but not selectable.
+   * Items with matching values will be rendered with disabled styling.
+   */
+  disabledIds?: T[]
 } & WithDataTestIdProps
 
 /**

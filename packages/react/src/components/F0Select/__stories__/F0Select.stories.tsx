@@ -373,6 +373,23 @@ export const WithDisabledOptions: Story = {
   },
 }
 
+export const WithDisabledIds: Story = {
+  args: {
+    label: "Select a theme",
+    placeholder: "Select a theme",
+    onChange: fn(),
+    disabledIds: ["dark"],
+    options: items.map((item) => ({
+      value: item.id,
+      label: item.name,
+      icon: icons[item.id],
+      description: item.description,
+      tag: item.tag,
+      item,
+    })),
+  },
+}
+
 export const WithDotTags: Story = {
   args: {
     label: "Select a status",

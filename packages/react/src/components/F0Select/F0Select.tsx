@@ -123,6 +123,7 @@ const F0SelectComponent = forwardRef(function Select<
     portalContainer,
     asList = false,
     showPreview = false,
+    disabledIds,
     dataTestId,
     ...props
   }: F0SelectProps<T, R>,
@@ -606,32 +607,45 @@ const F0SelectComponent = forwardRef(function Select<
     defaultOpenGroups
   )
 
+  const disabledIdSet = useMemo(
+    () => new Set(disabledIds?.map(String) ?? []),
+    [disabledIds]
+  )
+
   const getItems = useCallback(
     (
       records: WithGroupId<ActualRecordType>[] | ActualRecordType[]
     ): VirtualItem[] => {
       return records.map((option, index) => {
         const mappedOption = optionMapper(option)
-        return mappedOption.type === "separator"
-          ? {
-              height: 1,
-              item: <SelectSeparator key={`separator-${index}`} />,
-            }
-          : {
-              height: mappedOption.description ? 64 : 32,
-              item: (
-                <SelectItem
-                  key={String(mappedOption.value)}
-                  item={mappedOption}
-                />
-              ),
-              // Convert to string to ensure consistent comparison with selectedItemsValues
-              // which also converts to strings (line 623)
-              value: String(mappedOption.value),
-            }
+        if (mappedOption.type === "separator") {
+          return {
+            height: 1,
+            item: <SelectSeparator key={`separator-${index}`} />,
+          }
+        }
+
+        const isDisabled =
+          mappedOption.disabled || disabledIdSet.has(String(mappedOption.value))
+        const itemWithDisabled = isDisabled
+          ? { ...mappedOption, disabled: true }
+          : mappedOption
+
+        return {
+          height: mappedOption.description ? 64 : 32,
+          item: (
+            <SelectItem
+              key={String(mappedOption.value)}
+              item={itemWithDisabled}
+            />
+          ),
+          // Convert to string to ensure consistent comparison with selectedItemsValues
+          // which also converts to strings
+          value: String(mappedOption.value),
+        }
       })
     },
-    [optionMapper]
+    [optionMapper, disabledIdSet]
   )
 
   const items: VirtualItem[] = useMemo(() => {
