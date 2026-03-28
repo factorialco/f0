@@ -431,6 +431,16 @@ export declare const defaultTranslations: {
             readonly controls: "← → to move";
             readonly escToExit: "Esc to exit";
         };
+        readonly creditWarning: {
+            readonly soft: "You're running low on AI credits.";
+            readonly getCredits: "Get credits";
+            readonly dismiss: "Dismiss";
+            readonly messageBanner: {
+                readonly title: "This response requires credits";
+                readonly description: "Your company has run out of AI credits.";
+                readonly actionLabel: "Get credits";
+            };
+        };
         readonly growth: {
             readonly demoCard: {
                 readonly title: "See {{moduleName}} in action";
@@ -497,6 +507,7 @@ export declare const defaultTranslations: {
             readonly link: "Link";
             readonly date: "Date";
             readonly dropdownSingle: "Dropdown";
+            readonly file: "File upload";
         };
         readonly selectQuestion: {
             readonly addOption: "Add option";
@@ -505,6 +516,9 @@ export declare const defaultTranslations: {
             readonly remove: "Remove";
             readonly correct: "Correct";
             readonly optionPlaceholder: "Type anything you want here...";
+        };
+        readonly fileQuestion: {
+            readonly uploadButton: "Upload file";
         };
         readonly answer: {
             readonly label: "Answer";

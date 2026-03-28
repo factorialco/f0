@@ -20,6 +20,7 @@ import { CompanyCellValue } from './types/company';
 import { CompanyCellValue as CompanyCellValue_2 } from './experimental';
 import { CompanyItemProps } from './types';
 import { ComponentProps } from 'react';
+import { CompoundCellValue } from './types/compound';
 import { CopilotKitProps } from '@copilotkit/react-core';
 import { CountryCellValue } from './types/country';
 import { DateCellValue } from './types/date';
@@ -2677,6 +2678,16 @@ declare const defaultTranslations: {
             readonly controls: "← → to move";
             readonly escToExit: "Esc to exit";
         };
+        readonly creditWarning: {
+            readonly soft: "You're running low on AI credits.";
+            readonly getCredits: "Get credits";
+            readonly dismiss: "Dismiss";
+            readonly messageBanner: {
+                readonly title: "This response requires credits";
+                readonly description: "Your company has run out of AI credits.";
+                readonly actionLabel: "Get credits";
+            };
+        };
         readonly growth: {
             readonly demoCard: {
                 readonly title: "See {{moduleName}} in action";
@@ -2743,6 +2754,7 @@ declare const defaultTranslations: {
             readonly link: "Link";
             readonly date: "Date";
             readonly dropdownSingle: "Dropdown";
+            readonly file: "File upload";
         };
         readonly selectQuestion: {
             readonly addOption: "Add option";
@@ -2751,6 +2763,9 @@ declare const defaultTranslations: {
             readonly remove: "Remove";
             readonly correct: "Correct";
             readonly optionPlaceholder: "Type anything you want here...";
+        };
+        readonly fileQuestion: {
+            readonly uploadButton: "Upload file";
         };
         readonly answer: {
             readonly label: "Answer";
@@ -3008,7 +3023,7 @@ declare type DropdownProps = Omit<DropdownInternalProps, (typeof privateProps_4)
 } & WithDataTestIdProps;
 
 /** The edit mode for a column cell in the editable table. */
-declare type EditableTableCellEditType = "text" | "date" | "select" | "multiselect" | "display-only" | "disabled";
+declare type EditableTableCellEditType = "text" | "number" | "date" | "select" | "multiselect" | "display-only" | "disabled";
 
 declare type EditableTableCollectionProps<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<R>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<R>> = CollectionProps<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping, EditableTableVisualizationOptions<R, Filters, Sortings, Summaries>>;
 
@@ -3040,6 +3055,12 @@ declare type EditableTableColumnDefinition<R extends RecordType, Sortings extend
      * function whose return value isn't statically known.
      */
     selectConfig?: SelectCellConfig<R>;
+    /**
+     * Configuration for `"number"` cells. Accepts constraints (`min`, `max`),
+     * stepping (`step`), formatting (`maxDecimals`, `locale`), and units.
+     * Falls back to sensible defaults when omitted.
+     */
+    numberConfig?: NumberCellConfig;
 };
 
 declare type EditableTableVisualizationOptions<R extends RecordType, _Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition> = Omit<TableVisualizationOptions<R, _Filters, Sortings, Summaries>, "columns"> & {
@@ -4816,6 +4837,15 @@ export declare interface NotesTextEditorSkeletonProps {
     withTitle?: boolean;
     withToolbar?: boolean;
 }
+
+declare type NumberCellConfig = {
+    min?: number;
+    max?: number;
+    step?: number;
+    maxDecimals?: number;
+    locale?: string;
+    units?: string;
+};
 
 export declare type NumberFilterDefinition = BaseFilterDefinition<"number"> & {
     options?: NumberFilterOptions_2;
@@ -6808,6 +6838,7 @@ export declare function useSidebar(): FrameContextType;
 declare type ValueDisplayRendererContext = {
     visualization: ValueDisplayVisualizationType;
     i18n: TranslationsType;
+    tableAlign?: ValueDisplayTableAlignment;
 };
 
 /**
@@ -6827,6 +6858,7 @@ declare const valueDisplayRenderers: {
     readonly number: (args: NumberCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;
     readonly date: (args: DateCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;
     readonly amount: (args: AmountCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;
+    readonly compound: (args: CompoundCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;
     readonly avatarList: (args: AvatarListCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;
     readonly status: (args: StatusCellValue) => JSX_2.Element;
     readonly alertTag: (args: AlertTagCellValue) => JSX_2.Element;
@@ -6846,6 +6878,8 @@ declare const valueDisplayRenderers: {
     readonly country: (args: CountryCellValue, context: ValueDisplayRendererContext) => JSX_2.Element;
     readonly delta: (args: DeltaCellValue) => JSX_2.Element;
 };
+
+declare type ValueDisplayTableAlignment = "left" | "right";
 
 declare type ValueDisplayVisualizationType = "table" | "card" | "list" | (string & {});
 

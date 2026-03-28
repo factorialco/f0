@@ -27,6 +27,7 @@ import { CompanyCellValue } from './f0';
 import { CompanyCellValue as CompanyCellValue_2 } from './types/company';
 import { ComponentProps } from 'react';
 import { ComponentType } from 'react';
+import { CompoundCellValue } from './types/compound';
 import { Context } from 'react';
 import { CopilotKitProps } from '@copilotkit/react-core';
 import { CountryCellValue } from './types/country';
@@ -59,6 +60,7 @@ import { F0TagPersonProps as F0TagPersonProps_2 } from './types';
 import { F0TagRawProps } from './types';
 import { F0TagStatusProps } from './types';
 import { F0TagTeamProps } from './types';
+import { F0TimelineRowProps as F0TimelineRowProps_2 } from './types';
 import { f1Colors } from '@factorialco/f0-core';
 import { FC } from 'react';
 import { FileCellValue } from './f0';
@@ -676,6 +678,16 @@ export declare const aiTranslations: {
             readonly goal: "Goal";
             readonly controls: "← → to move";
             readonly escToExit: "Esc to exit";
+        };
+        readonly creditWarning: {
+            readonly soft: "You're running low on AI credits.";
+            readonly getCredits: "Get credits";
+            readonly dismiss: "Dismiss";
+            readonly messageBanner: {
+                readonly title: "This response requires credits";
+                readonly description: "Your company has run out of AI credits.";
+                readonly actionLabel: "Get credits";
+            };
         };
         readonly growth: {
             readonly demoCard: {
@@ -1836,6 +1848,9 @@ export declare const ChatSpinner: ForwardRefExoticComponent<Omit<SVGProps<SVGSVG
 
 declare type ChatTextareaProps = InputProps & {
     submitLabel?: string;
+    creditWarning?: "soft";
+    onDismissCreditWarning?: () => void;
+    onGetCredits?: () => void;
 };
 
 /**
@@ -3213,6 +3228,16 @@ export declare const defaultTranslations: {
             readonly controls: "← → to move";
             readonly escToExit: "Esc to exit";
         };
+        readonly creditWarning: {
+            readonly soft: "You're running low on AI credits.";
+            readonly getCredits: "Get credits";
+            readonly dismiss: "Dismiss";
+            readonly messageBanner: {
+                readonly title: "This response requires credits";
+                readonly description: "Your company has run out of AI credits.";
+                readonly actionLabel: "Get credits";
+            };
+        };
         readonly growth: {
             readonly demoCard: {
                 readonly title: "See {{moduleName}} in action";
@@ -3279,6 +3304,7 @@ export declare const defaultTranslations: {
             readonly link: "Link";
             readonly date: "Date";
             readonly dropdownSingle: "Dropdown";
+            readonly file: "File upload";
         };
         readonly selectQuestion: {
             readonly addOption: "Add option";
@@ -3287,6 +3313,9 @@ export declare const defaultTranslations: {
             readonly remove: "Remove";
             readonly correct: "Correct";
             readonly optionPlaceholder: "Type anything you want here...";
+        };
+        readonly fileQuestion: {
+            readonly uploadButton: "Upload file";
         };
         readonly answer: {
             readonly label: "Answer";
@@ -3599,7 +3628,7 @@ export declare type DurationUnit = (typeof durationUnits)[number];
 export declare const durationUnits: readonly ["days", "hours", "minutes", "seconds"];
 
 /** The edit mode for a column cell in the editable table. */
-declare type EditableTableCellEditType = "text" | "date" | "select" | "multiselect" | "display-only" | "disabled";
+declare type EditableTableCellEditType = "text" | "number" | "date" | "select" | "multiselect" | "display-only" | "disabled";
 
 declare type EditableTableCollectionProps<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<R>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<R>> = CollectionProps<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping, EditableTableVisualizationOptions<R, Filters, Sortings, Summaries>>;
 
@@ -3631,6 +3660,12 @@ declare type EditableTableColumnDefinition<R extends RecordType, Sortings extend
      * function whose return value isn't statically known.
      */
     selectConfig?: SelectCellConfig<R>;
+    /**
+     * Configuration for `"number"` cells. Accepts constraints (`min`, `max`),
+     * stepping (`step`), formatting (`maxDecimals`, `locale`), and units.
+     * Falls back to sensible defaults when omitted.
+     */
+    numberConfig?: NumberCellConfig;
 };
 
 declare type EditableTableVisualizationOptions<R extends RecordType, _Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition> = Omit<TableVisualizationOptions<R, _Filters, Sortings, Summaries>, "columns"> & {
@@ -3800,7 +3835,7 @@ export declare const F0AiChat: () => JSX_2.Element | null;
  */
 export declare const F0AiChatProvider: ({ enabled, greeting, initialMessage, welcomeScreenSuggestions, disclaimer, resizable, defaultVisualizationMode, lockVisualizationMode, historyEnabled, footer, VoiceMode, entityResolvers, toolHints, credits, onThumbsUp, onThumbsDown, children, agent, tracking, ...copilotKitProps }: AiChatProviderProps) => JSX_2.Element;
 
-export declare const F0AiChatTextArea: ({ submitLabel, inProgress, onSend, onStop, }: ChatTextareaProps) => JSX_2.Element;
+export declare const F0AiChatTextArea: ({ submitLabel, inProgress, onSend, onStop, creditWarning, onDismissCreditWarning, onGetCredits, }: ChatTextareaProps) => JSX_2.Element;
 
 /**
  * Entry in the AI form registry
@@ -6517,6 +6552,69 @@ declare type F0TimeFieldConfig = F0BaseConfig & F0TimeConfig & {
     fieldType: "time";
 };
 
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export declare const F0TimelineRow: WithDataTestIdReturnType_3<(props: F0TimelineRowProps_2) => JSX_2.Element>;
+
+export declare interface F0TimelineRowAction {
+    /** Button label */
+    label: string;
+    /** Optional icon for the button */
+    icon?: IconType;
+    /** Click handler */
+    onClick: () => void;
+    /** Whether the button is disabled */
+    disabled?: boolean;
+    /** Whether the button is in a loading state */
+    loading?: boolean;
+}
+
+declare interface F0TimelineRowBaseProps {
+    /** The current status of this timeline entry */
+    status: TimelineRowStatus;
+    /** The title of the timeline entry (e.g., "Tasks") */
+    title: string;
+    /** Whether this is the last row in the timeline (hides the bottom connector line) */
+    isLast?: boolean;
+    /** Hide the status indicator column (used for subtasks inside multitask rows) */
+    hideStatus?: boolean;
+}
+
+/** Props for a multitask (collapsible group) timeline row */
+export declare interface F0TimelineRowMultitaskProps extends F0TimelineRowBaseProps {
+    /** Number of grouped tasks */
+    taskCount: number;
+    /** Number of completed tasks in the group (shows a progress pill) */
+    completedCount?: number;
+    /** Whether the multitask row is expanded (controlled) */
+    expanded: boolean;
+    /** Callback when multitask row expand/collapse is toggled */
+    onExpandToggle: () => void;
+    /** The subtask items to render when expanded */
+    items: F0TimelineRowTaskProps[];
+}
+
+export declare type F0TimelineRowOtherAction = DropdownItem;
+
+export declare type F0TimelineRowProps = F0TimelineRowTaskProps | F0TimelineRowMultitaskProps;
+
+/** Props for a single-task timeline row */
+export declare interface F0TimelineRowTaskProps extends F0TimelineRowBaseProps {
+    /** The icon representing the task type (defaults to Marker) */
+    icon?: IconType;
+    /** Description text (e.g., "Completed on 20/2025") */
+    description?: string;
+    /** Metadata items to display (assignees, tags, dates, etc.) using the same pattern as ResourceHeader */
+    metadata?: (MetadataItem | undefined | boolean)[];
+    /** Primary action button (displayed on the right after a divider) */
+    primaryAction?: F0TimelineRowAction;
+    /** Secondary action buttons (displayed on the left) */
+    secondaryActions?: F0TimelineRowAction[];
+    /** Overflow menu items (displayed as a dropdown via ellipsis button) */
+    otherActions?: F0TimelineRowOtherAction[];
+}
+
 export declare const F0WizardForm: {
     <TSchema extends F0FormSchema_2>(props: F0WizardFormSingleSchemaProps<TSchema>): default_2.ReactElement;
     <T extends F0PerSectionSchema_2>(props: F0WizardFormPerSectionProps<T>): default_2.ReactElement;
@@ -6650,6 +6748,14 @@ declare type FileDef = {
  * All valid renderIf conditions for file fields
  */
 declare type FileFieldRenderIf = CommonRenderIfCondition | F0BaseFieldRenderIfFunction;
+
+declare type FileQuestionProps = BaseQuestionPropsForOtherQuestionComponents & {
+    type: "file";
+    value?: string[] | null;
+    useUpload?: UseFileUpload;
+    accept?: MimeType_2[];
+    maxSizeMB?: number;
+};
 
 /**
  * Return type of the consumer-provided upload hook
@@ -8011,6 +8117,15 @@ export declare interface NextStepsProps {
     items: StepItemProps[];
 }
 
+declare type NumberCellConfig = {
+    min?: number;
+    max?: number;
+    step?: number;
+    maxDecimals?: number;
+    locale?: string;
+    units?: string;
+};
+
 /**
  * All valid renderIf conditions for number fields
  */
@@ -8242,6 +8357,9 @@ declare type OnChangeQuestionParams = BaseQuestionOnChangeParams & ({
 } | {
     type: "date";
     value?: Date | null;
+} | {
+    type: "file";
+    value?: string[] | null;
 });
 
 export declare type OnChangeSectionParams = {
@@ -8747,11 +8865,13 @@ export declare type QuestionElement = Omit<TextQuestionProps, QuestionPropsToOmi
     type: "link";
 }, QuestionPropsToOmit> | Omit<DateQuestionProps & {
     type: "date";
+}, QuestionPropsToOmit> | Omit<FileQuestionProps & {
+    type: "file";
 }, QuestionPropsToOmit>;
 
 declare type QuestionPropsToOmit = "onAction" | "onChange" | "onAddNewElement";
 
-export declare type QuestionType = "rating" | "select" | "multi-select" | "dropdown-single" | "text" | "longText" | "numeric" | "link" | "date";
+export declare type QuestionType = "rating" | "select" | "multi-select" | "dropdown-single" | "text" | "longText" | "numeric" | "link" | "date" | "file";
 
 export declare interface RadarChartConfig {
     type: "radar";
@@ -9271,7 +9391,7 @@ declare type SummaryKey<Definition extends SummariesDefinition> = Definition ext
 
 declare type SummaryType = "sum";
 
-export declare function SurveyAnsweringForm({ elements, onSubmit: onSubmitProp, mode, title, description, resourceHeader, isOpen, onClose, position: positionProp, module, allowToChangeFullscreen, defaultValues, errorTriggerMode, loading, labels, preview, }: SurveyAnsweringFormProps): JSX_2.Element;
+export declare function SurveyAnsweringForm({ elements, onSubmit: onSubmitProp, mode, title, description, resourceHeader, isOpen, onClose, position: positionProp, module, allowToChangeFullscreen, defaultValues, errorTriggerMode, loading, labels, preview, useUpload, }: SurveyAnsweringFormProps): JSX_2.Element;
 
 declare interface SurveyAnsweringFormBaseProps {
     elements: SurveyFormBuilderElement[];
@@ -9287,6 +9407,7 @@ declare interface SurveyAnsweringFormBaseProps {
     defaultValues?: Partial<SurveyAnswers>;
     errorTriggerMode?: F0FormErrorTriggerMode;
     loading?: boolean;
+    useUpload?: UseFileUpload;
     labels?: {
         empty?: {
             title?: string;
@@ -9342,9 +9463,12 @@ export declare type SurveyAnswerValue = {
 } | {
     type: "date";
     value: Date | null;
+} | {
+    type: "file";
+    value: string[] | null;
 };
 
-export declare const SurveyFormBuilder: WithDataTestIdReturnType_7<({ elements: elementsProp, disabled, onChange, disallowOptionalQuestions, allowedQuestionTypes, applyingChanges, }: SurveyFormBuilderProps) => JSX_2.Element>;
+export declare const SurveyFormBuilder: WithDataTestIdReturnType_7<({ elements: elementsProp, disabled, onChange, disallowOptionalQuestions, allowedQuestionTypes, applyingChanges, useUpload, }: SurveyFormBuilderProps) => JSX_2.Element>;
 
 export declare type SurveyFormBuilderCallbacks = {
     onQuestionChange?: (params: OnChangeQuestionParams) => void;
@@ -9368,6 +9492,7 @@ export declare type SurveyFormBuilderProps = {
     disallowOptionalQuestions?: boolean;
     allowedQuestionTypes?: QuestionType[];
     applyingChanges?: boolean;
+    useUpload?: UseFileUpload;
 };
 
 export declare type SurveyFormSubmitResult = {
@@ -9802,6 +9927,10 @@ declare const textVariants: (props?: ({
     class?: never;
     className?: ClassValue;
 })) | undefined) => string;
+
+export declare type TimelineRowStatus = (typeof timelineRowStatuses)[number];
+
+export declare const timelineRowStatuses: readonly ["completed", "in-progress", "not-started"];
 
 declare type TOCItem<Depth extends 1 | 2 | 3 | 4 = 1> = BaseTOCItem & {
     children?: NextDepth<Depth> extends never ? never : TOCItem<NextDepth<Depth>>[];
@@ -10508,6 +10637,7 @@ export declare const useXRay: () => {
 declare type ValueDisplayRendererContext_2 = {
     visualization: ValueDisplayVisualizationType;
     i18n: TranslationsType;
+    tableAlign?: ValueDisplayTableAlignment;
 };
 
 /**
@@ -10527,6 +10657,7 @@ declare const valueDisplayRenderers: {
     readonly number: (args: NumberCellValue_2, meta: ValueDisplayRendererContext_2) => JSX_2.Element;
     readonly date: (args: DateCellValue_2, meta: ValueDisplayRendererContext_2) => JSX_2.Element;
     readonly amount: (args: AmountCellValue_2, meta: ValueDisplayRendererContext_2) => JSX_2.Element;
+    readonly compound: (args: CompoundCellValue, meta: ValueDisplayRendererContext_2) => JSX_2.Element;
     readonly avatarList: (args: AvatarListCellValue_2, meta: ValueDisplayRendererContext_2) => JSX_2.Element;
     readonly status: (args: StatusCellValue_2) => JSX_2.Element;
     readonly alertTag: (args: AlertTagCellValue_2) => JSX_2.Element;
@@ -10546,6 +10677,8 @@ declare const valueDisplayRenderers: {
     readonly country: (args: CountryCellValue, context: ValueDisplayRendererContext_2) => JSX_2.Element;
     readonly delta: (args: DeltaCellValue) => JSX_2.Element;
 };
+
+declare type ValueDisplayTableAlignment = "left" | "right";
 
 declare type ValueDisplayVisualizationType = "table" | "card" | "list" | (string & {});
 
