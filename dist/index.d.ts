@@ -171,6 +171,7 @@ declare const f1Colors: {
         readonly promote: {
             readonly DEFAULT: "hsl(var(--promote-50) / 0.3)";
             readonly hover: "hsl(var(--promote-50) / 0.4)";
+            readonly bold: "hsl(var(--promote-50))";
         };
         readonly critical: {
             readonly DEFAULT: "hsl(var(--critical-50) / 0.1)";

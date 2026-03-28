@@ -202,7 +202,8 @@ var f1Colors = {
     },
     promote: {
       DEFAULT: "hsl(var(--promote-50) / 0.3)",
-      hover: "hsl(var(--promote-50) / 0.4)"
+      hover: "hsl(var(--promote-50) / 0.4)",
+      bold: "hsl(var(--promote-50))"
     },
     critical: {
       DEFAULT: "hsl(var(--critical-50) / 0.1)",
