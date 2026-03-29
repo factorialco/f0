@@ -24,6 +24,7 @@ export const MixedDashboard: Story = {
       filters={dashboardFilters}
       presets={dashboardPresets}
       items={mixedItems}
+      editMode
     />
   ),
 }

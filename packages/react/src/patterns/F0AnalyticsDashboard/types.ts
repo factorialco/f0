@@ -373,4 +373,12 @@ export interface F0AnalyticsDashboardProps<
    */
   exportFilename?: string
   onExportReady?: (exportFn: (() => Promise<void>) | undefined) => void
+  /** Incrementing counter that forces the grid to reset to initial layout (used for discard). */
+  resetKey?: number
+  /** Called when a chart item's type is changed (e.g. bar → line) */
+  onTransformChart?: (
+    itemId: string,
+    newType: string,
+    orientation?: "vertical" | "horizontal"
+  ) => void
 }

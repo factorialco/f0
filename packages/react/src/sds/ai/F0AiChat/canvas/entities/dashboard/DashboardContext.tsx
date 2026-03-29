@@ -4,13 +4,12 @@ import {
   type ReactNode,
   useCallback,
   useContext,
-  useRef,
   useState,
 } from "react"
 
 import type { DashboardItemLayout } from "@/patterns/F0AnalyticsDashboard/types"
 
-import type { ChatDashboardConfig } from "./types"
+import type { ChatDashboardConfig, ChatDashboardItem } from "./types"
 import { useSaveDashboardConfig } from "./useSaveDashboardConfig"
 import { useAiChat } from "../../../providers/AiChatStateProvider"
 
@@ -18,12 +17,23 @@ import { savedDashboardConfigStore } from "./configStore"
 import type { DashboardCanvasContent } from "../../../types"
 
 type DashboardCanvasContextValue = {
-  editMode: boolean
-  setEditMode: (editMode: boolean) => void
+  /** Whether there are unsaved layout changes */
+  isDirty: boolean
+  /** Incrementing counter — changes when discard is called to reset the grid */
+  discardKey: number
+  /** Pending item transforms keyed by item id (chart type changes, etc.) */
+  itemTransforms: Map<string, Partial<ChatDashboardItem>>
+  /** Called by the grid when layout changes (drag/resize/delete) */
   onLayoutChange: (layout: DashboardItemLayout[]) => void
+  /** Persist current layout and update canvas */
   handleSave: () => Promise<void>
+  /** Discard pending layout changes */
   handleDiscard: () => void
+  /** Transform an item's config (e.g. change chart type). Marks dirty without refetch. */
+  transformItem: (itemId: string, patch: Partial<ChatDashboardItem>) => void
+  /** Export the dashboard as Excel */
   exportAsExcel?: () => Promise<void>
+  /** Register the export function from the dashboard component */
   registerExport: (fn: (() => Promise<void>) | undefined) => void
 }
 
@@ -47,7 +57,13 @@ export function DashboardCanvasProvider({
   content: DashboardCanvasContent
   children: ReactNode
 }): ReactNode {
-  const [editMode, setEditMode] = useState(false)
+  const [pendingLayout, setPendingLayout] = useState<
+    DashboardItemLayout[] | null
+  >(null)
+  const [itemTransforms, setItemTransforms] = useState<
+    Map<string, Partial<ChatDashboardItem>>
+  >(new Map())
+  const [discardKey, setDiscardKey] = useState(0)
   const [exportAsExcel, setExportAsExcel] = useState<
     (() => Promise<void>) | undefined
   >()
@@ -57,7 +73,6 @@ export function DashboardCanvasProvider({
     },
     []
   )
-  const pendingLayoutRef = useRef<DashboardItemLayout[] | null>(null)
   const { openCanvas } = useAiChat()
   const { threadId } = useCopilotContext()
 
@@ -88,48 +103,83 @@ export function DashboardCanvasProvider({
   )
 
   const onLayoutChange = useCallback((layout: DashboardItemLayout[]) => {
-    pendingLayoutRef.current = layout
+    setPendingLayout(layout)
   }, [])
 
-  const handleSave = async () => {
-    if (pendingLayoutRef.current) {
-      const updatedConfig = applyLayout(pendingLayoutRef.current)
-      if (!updatedConfig || !threadId) return
+  const transformItem = useCallback(
+    (itemId: string, patch: Partial<ChatDashboardItem>) => {
+      setItemTransforms((prev) => {
+        const next = new Map(prev)
+        next.set(itemId, patch)
+        return next
+      })
+    },
+    []
+  )
 
-      try {
-        await saveConfigFn(threadId, content.toolCallId, updatedConfig)
-
-        if (content.toolCallId) {
-          savedDashboardConfigStore.set(content.toolCallId, updatedConfig)
-        }
-
-        openCanvas({
-          ...content,
-          config: updatedConfig,
-        })
-
-        pendingLayoutRef.current = null
-      } catch {
-        return
+  /** Apply item transforms to a config, producing a new config with patched items. */
+  const applyTransforms = useCallback(
+    (config: ChatDashboardConfig): ChatDashboardConfig => {
+      if (itemTransforms.size === 0) return config
+      return {
+        ...config,
+        items: config.items.map((item) => {
+          const patch = itemTransforms.get(item.id)
+          return patch ? ({ ...item, ...patch } as typeof item) : item
+        }),
       }
-    }
+    },
+    [itemTransforms]
+  )
 
-    setEditMode(false)
+  const handleSave = async () => {
+    const hasPendingChanges = pendingLayout || itemTransforms.size > 0
+    if (!hasPendingChanges) return
+
+    // Start from current config, apply layout then transforms
+    let updatedConfig = pendingLayout
+      ? applyLayout(pendingLayout)
+      : { ...content.config }
+    if (!updatedConfig || !threadId) return
+
+    updatedConfig = applyTransforms(updatedConfig)
+
+    try {
+      await saveConfigFn(threadId, content.toolCallId, updatedConfig)
+
+      if (content.toolCallId) {
+        savedDashboardConfigStore.set(content.toolCallId, updatedConfig)
+      }
+
+      // Update canvas content without changing refreshKey (no data refetch)
+      openCanvas({
+        ...content,
+        config: updatedConfig,
+      })
+
+      setPendingLayout(null)
+      setItemTransforms(new Map())
+    } catch {
+      // Keep pending state on failure so user can retry
+    }
   }
 
   const handleDiscard = () => {
-    pendingLayoutRef.current = null
-    setEditMode(false)
+    setPendingLayout(null)
+    setItemTransforms(new Map())
+    setDiscardKey((k) => k + 1)
   }
 
   return (
     <DashboardCanvasContext.Provider
       value={{
-        editMode,
-        setEditMode,
+        isDirty: pendingLayout !== null || itemTransforms.size > 0,
+        discardKey,
+        itemTransforms,
         onLayoutChange,
         handleSave,
         handleDiscard,
+        transformItem,
         exportAsExcel,
         registerExport,
       }}

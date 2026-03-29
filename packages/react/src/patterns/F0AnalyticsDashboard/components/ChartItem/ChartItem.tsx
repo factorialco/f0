@@ -81,7 +81,30 @@ interface ChartItemProps<Filters extends FiltersDefinition> {
   item: DashboardChartItem<Filters>
   filters: FiltersState<Filters>
   actions?: DropdownItem[]
+  editMode?: boolean
+  handleDelete?: (itemId: string) => void
+  onTransformChart?: (
+    itemId: string,
+    newType: string,
+    orientation?: "vertical" | "horizontal"
+  ) => void
 }
+
+/** Chart types that share the axis-based computation model and can be converted between each other. */
+const AXIS_CHART_TYPES = ["bar", "line", "funnel"] as const
+
+type ChartTypeOption = {
+  label: string
+  type: DashboardChartConfig["type"]
+  orientation?: "vertical" | "horizontal"
+}
+
+const CHART_TYPE_OPTIONS: ChartTypeOption[] = [
+  { label: "Bar (vertical)", type: "bar", orientation: "vertical" },
+  { label: "Bar (horizontal)", type: "bar", orientation: "horizontal" },
+  { label: "Line", type: "line" },
+  { label: "Funnel", type: "funnel" },
+]
 
 /**
  * Build the full F0DataChart props by merging chart config with fetched data.
@@ -176,6 +199,9 @@ export function ChartItem<Filters extends FiltersDefinition>({
   item,
   filters,
   actions,
+  editMode,
+  handleDelete,
+  onTransformChart,
 }: ChartItemProps<Filters>) {
   const enabled = item.useDashboardFilters !== false
   const { data, isLoading, error, retry } = useDashboardItemData<
@@ -199,6 +225,25 @@ export function ChartItem<Filters extends FiltersDefinition>({
   const effectiveError =
     error ?? (!isLoading && !data ? new Error("No data available") : undefined)
 
+  // Build chart type transform options for axis-based charts
+  const isAxisChart = (AXIS_CHART_TYPES as readonly string[]).includes(
+    item.chart.type
+  )
+  const currentOrientation =
+    item.chart.type === "bar" && "orientation" in item.chart
+      ? (item.chart.orientation ?? "vertical")
+      : undefined
+  const chartTypeOptions =
+    isAxisChart && onTransformChart
+      ? CHART_TYPE_OPTIONS.map((opt) => ({
+          label: opt.label,
+          isActive:
+            item.chart.type === opt.type &&
+            (opt.type !== "bar" || currentOrientation === opt.orientation),
+          onSelect: () => onTransformChart(item.id, opt.type, opt.orientation),
+        }))
+      : undefined
+
   return (
     <DashboardItem
       title={item.title}
@@ -208,6 +253,10 @@ export function ChartItem<Filters extends FiltersDefinition>({
       onRetry={retry}
       skeleton={chartSkeleton(item.chart)}
       actions={allActions}
+      editMode={editMode}
+      handleDelete={handleDelete}
+      itemId={item.id}
+      chartTypeOptions={chartTypeOptions}
     >
       {data && (
         <div ref={chartContainerRef} className="h-full w-full px-4 py-3">

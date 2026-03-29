@@ -21,6 +21,8 @@ interface MetricItemProps<Filters extends FiltersDefinition> {
   item: DashboardMetricItem<Filters>
   filters: FiltersState<Filters>
   actions?: import("@/experimental/Navigation/Dropdown").DropdownItem[]
+  editMode?: boolean
+  handleDelete?: (itemId: string) => void
 }
 
 function formatValue(
@@ -82,6 +84,8 @@ export function MetricItem<Filters extends FiltersDefinition>({
   item,
   filters,
   actions,
+  editMode,
+  handleDelete,
 }: MetricItemProps<Filters>) {
   const enabled = item.useDashboardFilters !== false
   const { data, isLoading, error, retry } = useDashboardItemData<
@@ -100,6 +104,9 @@ export function MetricItem<Filters extends FiltersDefinition>({
       onRetry={retry}
       skeleton={<MetricSkeleton />}
       actions={actions}
+      editMode={editMode}
+      handleDelete={handleDelete}
+      itemId={item.id}
     >
       {data && (
         <div className="flex h-full min-h-0 items-end overflow-auto px-4 pb-4">
