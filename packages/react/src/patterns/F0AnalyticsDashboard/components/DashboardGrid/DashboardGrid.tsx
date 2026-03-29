@@ -1,4 +1,11 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type DragEvent,
+} from "react"
 
 import type {
   FiltersDefinition,
@@ -6,13 +13,9 @@ import type {
 } from "@/patterns/OneFilterPicker/types"
 import type { DropdownItem as DropdownItemType } from "@/experimental/Navigation/Dropdown"
 
-import { F0Button } from "@/components/F0Button"
-import {
-  F0GridStack,
-  type GridStackReactWidget,
-} from "@/lib/F0GridStack/F0GridStack"
-import { Minus } from "@/icons/app"
-import { useI18n } from "@/lib/providers/i18n"
+import { F0Icon } from "@/components/F0Icon"
+import Handle from "@/icons/app/Handle"
+import { cn } from "@/lib/utils"
 
 import type {
   DashboardItem as DashboardItemType,
@@ -24,42 +27,98 @@ import { CollectionItem } from "../CollectionItem/CollectionItem"
 import { DashboardItem } from "../DashboardItem/DashboardItem"
 import { MetricItem } from "../MetricItem/MetricItem"
 
-const GRID_GAP = 6
-const GRID_COLS = 12
-
-const CELL_HEIGHT = 48
-
-/** Container width below which items are forced to full-width (1 per row). */
+const GAP = 12
+const MAX_PER_ROW = 4
 const NARROW_THRESHOLD = 640
+
+/** Default row height in px, determined by the tallest item type. */
+const ROW_HEIGHTS: Record<string, number> = {
+  chart: 336,
+  metric: 144,
+  collection: 480,
+}
+const DEFAULT_ROW_HEIGHT = 336
+
+/** Minimum heights per item type to ensure content is always readable. */
+const MIN_ROW_HEIGHTS: Record<string, number> = {
+  chart: 240,
+  metric: 120,
+  collection: 300,
+}
+const DEFAULT_MIN_ROW_HEIGHT = 120
+
+// ─── Types ──────────────────────────────────────────────────────
+
+type Row = {
+  ids: string[]
+  height: number
+}
 
 interface DashboardGridProps<Filters extends FiltersDefinition> {
   items: DashboardItemType<Filters>[]
   filters: FiltersState<Filters>
   editMode?: boolean
   onLayoutChange?: (layout: DashboardItemLayout[]) => void
+  /** Incrementing counter that forces the grid to reset rows to initial layout. */
+  resetKey?: number
+  /** Called when a chart item's type is changed */
+  onTransformChart?: (
+    itemId: string,
+    newType: string,
+    orientation?: "vertical" | "horizontal"
+  ) => void
 }
 
+// ─── Component ──────────────────────────────────────────────────
+
 /**
- * Dashboard grid powered by GridStack via F0GridStack.
+ * Flex-row dashboard grid with drag-and-drop reordering and row resize.
  *
- * When `editMode` is true, items are draggable and resizable with a delete button.
- * When false, items are locked in place.
- *
- * When the container is narrower than NARROW_THRESHOLD, all items are forced to
- * 12 columns (one per row) regardless of their configured colSpan.
+ * All items in a row share equal width (`flex: 1`).
+ * In edit mode, items can be dragged between rows (max MAX_PER_ROW per row)
+ * and rows can be vertically resized via a bottom handle.
  */
 export function DashboardGrid<Filters extends FiltersDefinition>({
   items,
   filters,
   editMode,
   onLayoutChange,
+  resetKey,
+  onTransformChart,
 }: DashboardGridProps<Filters>) {
-  const [deletedIds, setDeletedIds] = useState<Set<string>>(new Set())
-  const [positionSyncKey, setPositionSyncKey] = useState(0)
   const containerRef = useRef<HTMLDivElement>(null)
   const [isNarrow, setIsNarrow] = useState(false)
 
-  // Measure container width to decide single-column layout
+  // Build item lookup
+  const itemMap = useMemo(() => {
+    const map = new Map<string, DashboardItemType<Filters>>()
+    for (const item of items) map.set(item.id, item)
+    return map
+  }, [items])
+
+  // ─── Rows state ─────────────────────────────────────────────
+  const [rows, setRows] = useState<Row[]>(() => buildInitialRows(items))
+
+  // Sync rows when items change from outside
+  const prevItemIdsRef = useRef(items.map((i) => i.id).join(","))
+  useEffect(() => {
+    const newIds = items.map((i) => i.id).join(",")
+    if (newIds !== prevItemIdsRef.current) {
+      prevItemIdsRef.current = newIds
+      setRows(buildInitialRows(items))
+    }
+  }, [items])
+
+  // Reset rows to initial layout when resetKey changes (discard)
+  const prevResetKeyRef = useRef(resetKey)
+  useEffect(() => {
+    if (resetKey !== undefined && resetKey !== prevResetKeyRef.current) {
+      prevResetKeyRef.current = resetKey
+      setRows(buildInitialRows(items))
+    }
+  }, [resetKey, items])
+
+  // ─── Narrow detection ───────────────────────────────────────
   useEffect(() => {
     const el = containerRef.current
     if (!el) return
@@ -72,199 +131,566 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
     return () => observer.disconnect()
   }, [])
 
-  // Reset deleted items and force position sync when exiting edit mode
-  const prevEditModeRef = useRef(editMode)
-  useEffect(() => {
-    if (prevEditModeRef.current && !editMode) {
-      setDeletedIds(new Set())
-      setPositionSyncKey((k) => k + 1)
-    }
-    prevEditModeRef.current = editMode
-  }, [editMode])
-
-  // Force position sync when switching between narrow/wide
-  const prevIsNarrowRef = useRef(isNarrow)
-  useEffect(() => {
-    if (prevIsNarrowRef.current !== isNarrow) {
-      setPositionSyncKey((k) => k + 1)
-    }
-    prevIsNarrowRef.current = isNarrow
-  }, [isNarrow])
-
-  const getEffectiveSpan = (item: DashboardItemType<Filters>): number => {
-    if (isNarrow) return 12
-    if (item.colSpan) return item.colSpan
-    if (item.type === "metric") return 3
-    if (item.type === "collection") return 12
-    return 6
-  }
-
-  const getEffectiveRowSpan = (item: DashboardItemType<Filters>): number => {
-    if (item.rowSpan) return item.rowSpan
-    if (item.type === "chart") return 7
-    if (item.type === "metric") return 3
-    return 10
-  }
-
-  const handleDelete = useCallback(
-    (itemId: string) => {
-      setDeletedIds((prev) => new Set(prev).add(itemId))
-      const remaining = items.filter((i) => i.id !== itemId)
-      const remainingPacked = packItems(
-        remaining,
-        getEffectiveSpan,
-        getEffectiveRowSpan
-      )
-      onLayoutChange?.(
-        remaining.map((item, i) => ({
-          id: item.id,
-          colSpan: getEffectiveSpan(item),
-          rowSpan: getEffectiveRowSpan(item),
-          x: remainingPacked[i].x,
-          y: remainingPacked[i].y,
-        }))
-      )
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [items, onLayoutChange, isNarrow]
-  )
-
-  const handleChange = useCallback(
-    (widgets: GridStackReactWidget[]) => {
-      const sorted = [...widgets].sort(
-        (a, b) => (a.y ?? 0) - (b.y ?? 0) || (a.x ?? 0) - (b.x ?? 0)
-      )
-      onLayoutChange?.(
-        sorted.map((w) => ({
-          id: w.id,
-          colSpan: Math.max(1, Math.min(12, w.w ?? 1)),
-          rowSpan: Math.max(1, Math.min(10, w.h ?? 1)),
-          x: w.x ?? 0,
-          y: w.y ?? 0,
-        }))
-      )
+  // ─── Emit layout changes ────────────────────────────────────
+  const emitLayout = useCallback(
+    (newRows: Row[]) => {
+      if (!onLayoutChange) return
+      const layout: DashboardItemLayout[] = []
+      let y = 0
+      for (const row of newRows) {
+        const colSpan = Math.floor(12 / Math.max(1, row.ids.length))
+        const rowSpan = Math.round(row.height / 48)
+        let x = 0
+        for (const id of row.ids) {
+          layout.push({ id, colSpan, rowSpan, x, y })
+          x += colSpan
+        }
+        y += rowSpan
+      }
+      onLayoutChange(layout)
     },
     [onLayoutChange]
   )
 
-  const visibleItems = items.filter((i) => !deletedIds.has(i.id))
-  const packed = packItems(visibleItems, getEffectiveSpan, getEffectiveRowSpan)
-
-  const allowedSizes: { w: number; h: number }[] = []
-  for (let w = 1; w <= 12; w++) {
-    for (let h = 1; h <= 10; h++) {
-      allowedSizes.push({ w, h })
-    }
-  }
-  const { t } = useI18n()
-
-  const widgets: GridStackReactWidget[] = visibleItems.map((item, i) => ({
-    id: item.id,
-    w: getEffectiveSpan(item),
-    h: getEffectiveRowSpan(item),
-    // In narrow mode, always use packed positions (ignore saved x/y)
-    x: isNarrow ? packed[i].x : (item.x ?? packed[i].x),
-    y: isNarrow ? packed[i].y : (item.y ?? packed[i].y),
-    allowedSizes,
-    content: (
-      <div className="relative h-full">
-        {editMode && (
-          <div
-            className="absolute -left-2 -top-2 z-20"
-            role="presentation"
-            onPointerDown={(e) => e.stopPropagation()}
-            onMouseDown={(e) => e.stopPropagation()}
-          >
-            <F0Button
-              variant="outline"
-              hideLabel
-              icon={Minus}
-              label={t("actions.delete")}
-              onClick={() => handleDelete(item.id)}
-              size="sm"
-            />
-          </div>
-        )}
-        <DashboardGridItem item={item} filters={filters} />
-      </div>
-    ),
-  }))
-
-  const gridOptions = useMemo(
-    () => ({
-      column: GRID_COLS,
-      cellHeight: CELL_HEIGHT,
-      cellHeightThrottle: 100,
-      margin: GRID_GAP,
-      float: false,
-      animate: true,
-    }),
-    []
+  // ─── Delete ─────────────────────────────────────────────────
+  const handleDelete = useCallback(
+    (itemId: string) => {
+      setRows((prev) => {
+        const next = prev
+          .map((row) => ({
+            ...row,
+            ids: row.ids.filter((id) => id !== itemId),
+          }))
+          .filter((row) => row.ids.length > 0)
+        emitLayout(next)
+        return next
+      })
+    },
+    [emitLayout]
   )
 
+  // ─── DnD state ──────────────────────────────────────────────
+  const [dragId, setDragId] = useState<string | null>(null)
+  const [dropTarget, setDropTarget] = useState<
+    | { type: "into-row"; rowIdx: number; position: number }
+    | { type: "new-row"; afterRowIdx: number }
+    | null
+  >(null)
+
+  const handleDragStart = useCallback((id: string) => {
+    setDragId(id)
+  }, [])
+
+  const handleDragEnd = useCallback(() => {
+    if (dragId && dropTarget) {
+      setRows((prev) => {
+        // Remove from source
+        let next = prev.map((row) => ({
+          ...row,
+          ids: row.ids.filter((id) => id !== dragId),
+        }))
+
+        const item = itemMap.get(dragId)
+        const newRowHeight = item
+          ? (ROW_HEIGHTS[item.type] ?? DEFAULT_ROW_HEIGHT)
+          : DEFAULT_ROW_HEIGHT
+
+        if (dropTarget.type === "new-row") {
+          // Insert a new row after afterRowIdx
+          const insertAt = dropTarget.afterRowIdx + 1
+          next.splice(insertAt, 0, {
+            ids: [dragId],
+            height: newRowHeight,
+          })
+        } else if (dropTarget.rowIdx >= next.length) {
+          // Drop at the very end
+          next.push({ ids: [dragId], height: newRowHeight })
+        } else {
+          // Insert into existing row
+          const adjPos = Math.min(
+            dropTarget.position,
+            next[dropTarget.rowIdx].ids.length
+          )
+          next[dropTarget.rowIdx].ids.splice(adjPos, 0, dragId)
+
+          // Expand row height if the new item needs more space
+          const minHeight = getMinRowHeight(next[dropTarget.rowIdx], itemMap)
+          if (next[dropTarget.rowIdx].height < minHeight) {
+            next[dropTarget.rowIdx] = {
+              ...next[dropTarget.rowIdx],
+              height: minHeight,
+            }
+          }
+        }
+
+        // Remove empty rows
+        next = next.filter((row) => row.ids.length > 0)
+        emitLayout(next)
+        return next
+      })
+    }
+
+    setDragId(null)
+    setDropTarget(null)
+  }, [dragId, dropTarget, emitLayout, itemMap])
+
+  const handleRowDragOver = useCallback(
+    (e: DragEvent, rowIdx: number) => {
+      e.preventDefault()
+      e.dataTransfer.dropEffect = "move"
+
+      if (rowIdx >= rows.length) {
+        setDropTarget({ type: "new-row", afterRowIdx: rows.length - 1 })
+        return
+      }
+
+      const row = rows[rowIdx]
+      const isFromThisRow = dragId ? row.ids.includes(dragId) : false
+      if (row.ids.length >= MAX_PER_ROW && !isFromThisRow) return
+
+      // If dragging the only item in this row over itself, don't set
+      // a drop target here — let the gap drop zones handle it instead.
+      if (isFromThisRow && row.ids.length === 1) {
+        setDropTarget(null)
+        return
+      }
+
+      // Find insert position based on mouse x
+      const rowEl = e.currentTarget as HTMLElement
+      const cards = rowEl.querySelectorAll("[data-card-id]")
+      let insertPos = row.ids.length
+      for (let i = 0; i < cards.length; i++) {
+        const rect = cards[i].getBoundingClientRect()
+        if (e.clientX < rect.left + rect.width / 2) {
+          insertPos = i
+          break
+        }
+      }
+
+      setDropTarget({ type: "into-row", rowIdx, position: insertPos })
+    },
+    [rows, dragId]
+  )
+
+  /** Handle drag over the gap between rows — creates a new row */
+  const handleGapDragOver = useCallback((e: DragEvent, afterRowIdx: number) => {
+    e.preventDefault()
+    e.dataTransfer.dropEffect = "move"
+    setDropTarget({ type: "new-row", afterRowIdx })
+  }, [])
+
+  // ─── Row resize ─────────────────────────────────────────────
+  const startResize = useCallback(
+    (rowIdx: number, startY: number) => {
+      const startHeight = rows[rowIdx].height
+      const minHeight = getMinRowHeight(rows[rowIdx], itemMap)
+      const onMove = (e: MouseEvent) => {
+        const newHeight = Math.max(minHeight, startHeight + e.clientY - startY)
+        setRows((prev) =>
+          prev.map((row, i) =>
+            i === rowIdx ? { ...row, height: newHeight } : row
+          )
+        )
+      }
+      const onUp = () => {
+        document.removeEventListener("mousemove", onMove)
+        document.removeEventListener("mouseup", onUp)
+        setRows((prev) => {
+          emitLayout(prev)
+          return prev
+        })
+      }
+      document.addEventListener("mousemove", onMove)
+      document.addEventListener("mouseup", onUp)
+    },
+    [rows, emitLayout]
+  )
+
+  // ─── Render ─────────────────────────────────────────────────
+  const displayRows = isNarrow
+    ? rows.flatMap((row) =>
+        row.ids.map((id) => ({
+          ids: [id],
+          height: row.height,
+        }))
+      )
+    : rows
+
+  const canDrag = !!editMode && !isNarrow
+  const isNewRowTarget = (afterIdx: number) =>
+    dragId &&
+    dropTarget?.type === "new-row" &&
+    dropTarget.afterRowIdx === afterIdx
+
   return (
-    <div ref={containerRef}>
-      <F0GridStack
-        options={gridOptions}
-        static={!editMode || isNarrow}
-        widgets={widgets}
-        onChange={editMode && !isNarrow ? handleChange : undefined}
-        forcePositionSync={positionSyncKey}
+    <div ref={containerRef} className="flex flex-col" style={{ gap: GAP }}>
+      {displayRows.map((row, ri) => {
+        const isDropRow =
+          dragId && dropTarget?.type === "into-row" && dropTarget.rowIdx === ri
+
+        return (
+          <div key={ri} className="relative">
+            {/* Gap drop zone BEFORE this row (between rows) */}
+            {canDrag && ri > 0 && (
+              <RowGapDropZone
+                active={!!isNewRowTarget(ri - 1)}
+                isDragging={!!dragId}
+                onDragOver={(e) => handleGapDragOver(e, ri - 1)}
+              />
+            )}
+            <div
+              className={cn(
+                "flex rounded-lg transition-colors duration-200",
+                isDropRow && "bg-f1-background-hover"
+              )}
+              style={{ gap: GAP, height: row.height }}
+              onDragOver={canDrag ? (e) => handleRowDragOver(e, ri) : undefined}
+              onDrop={canDrag ? () => {} : undefined}
+            >
+              {row.ids.map((id, ci) => {
+                const item = itemMap.get(id)
+                if (!item) return null
+                const isDragging = dragId === id
+                const showIndicatorBefore =
+                  isDropRow &&
+                  dropTarget?.type === "into-row" &&
+                  dropTarget.position === ci
+                const showIndicatorAfter =
+                  isDropRow &&
+                  dropTarget?.type === "into-row" &&
+                  dropTarget.position === row.ids.length &&
+                  ci === row.ids.length - 1
+
+                return (
+                  <RowItem
+                    key={id}
+                    id={id}
+                    isDragging={isDragging}
+                    showIndicatorBefore={!!showIndicatorBefore}
+                    showIndicatorAfter={!!showIndicatorAfter}
+                    draggable={canDrag}
+                    onDragStart={handleDragStart}
+                    onDragEnd={handleDragEnd}
+                  >
+                    <DashboardGridItem
+                      item={item}
+                      filters={filters}
+                      editMode={editMode}
+                      onDelete={handleDelete}
+                      onTransformChart={onTransformChart}
+                    />
+                  </RowItem>
+                )
+              })}
+            </div>
+            {/* Row resize handle — only in edit mode */}
+            {canDrag && (
+              <div
+                className="group/resize absolute -bottom-3.5 mx-auto flex h-3 w-full items-center justify-center hover:cursor-ns-resize"
+                onMouseDown={(e) => {
+                  e.preventDefault()
+                  startResize(ri, e.clientY)
+                }}
+              >
+                <div className="h-1 w-16 rounded-full bg-transparent transition-colors group-hover/resize:bg-f1-foreground-tertiary" />
+              </div>
+            )}
+          </div>
+        )
+      })}
+
+      {/* Drop zone after last row — creates a new row at the end */}
+      {canDrag && (
+        <RowGapDropZone
+          active={!!isNewRowTarget(displayRows.length - 1)}
+          isDragging={!!dragId}
+          onDragOver={(e) => handleGapDragOver(e, displayRows.length - 1)}
+        />
+      )}
+    </div>
+  )
+}
+
+// ─── RowItem ────────────────────────────────────────────────────
+
+function RowItem({
+  id,
+  isDragging,
+  showIndicatorBefore,
+  showIndicatorAfter,
+  draggable: canDrag,
+  onDragStart,
+  onDragEnd,
+  children,
+}: {
+  id: string
+  isDragging: boolean
+  showIndicatorBefore: boolean
+  showIndicatorAfter: boolean
+  draggable: boolean
+  onDragStart: (id: string) => void
+  onDragEnd: () => void
+  children: React.ReactNode
+}) {
+  // Track whether the drag started from the handle. If not, cancel it.
+  const fromHandleRef = useRef(false)
+
+  return (
+    <>
+      {showIndicatorBefore && <DropIndicator />}
+      <div
+        data-card-id={id}
+        draggable={canDrag}
+        onDragStart={
+          canDrag
+            ? (e) => {
+                if (!fromHandleRef.current) {
+                  e.preventDefault()
+                  return
+                }
+                e.dataTransfer.effectAllowed = "move"
+                e.dataTransfer.setData("text/plain", id)
+                onDragStart(id)
+              }
+            : undefined
+        }
+        onDragEnd={
+          canDrag
+            ? () => {
+                fromHandleRef.current = false
+                onDragEnd()
+              }
+            : undefined
+        }
+        className={cn(
+          "group/rowitem relative min-w-0 flex-1 transition-opacity duration-150",
+          isDragging && "opacity-40 scale-[0.97]"
+        )}
+      >
+        {canDrag && (
+          <div
+            className="shadow-sm absolute -left-3 top-2.5 z-20 flex cursor-grab items-center justify-center rounded bg-f1-background p-2 opacity-0 transition-opacity hover:bg-f1-background-hover active:cursor-grabbing group-hover/rowitem:opacity-100"
+            onMouseDown={() => {
+              fromHandleRef.current = true
+            }}
+            onMouseUp={() => {
+              fromHandleRef.current = false
+            }}
+            aria-label="Drag to reorder"
+          >
+            <F0Icon icon={Handle} size="xs" />
+          </div>
+        )}
+        {children}
+      </div>
+      {showIndicatorAfter && <DropIndicator />}
+    </>
+  )
+}
+
+function DropIndicator() {
+  return (
+    <div className="mx-[-2px] w-1 flex-shrink-0 self-stretch py-2">
+      <div className="h-full w-full rounded-full bg-f1-background-secondary-hover" />
+    </div>
+  )
+}
+
+/** Horizontal drop zone between rows — expands when dragging to make it easy to target. */
+function RowGapDropZone({
+  active,
+  isDragging,
+  onDragOver,
+}: {
+  active: boolean
+  /** Whether any drag is in progress (expands the hit area) */
+  isDragging: boolean
+  onDragOver: (e: DragEvent<HTMLDivElement>) => void
+}) {
+  return (
+    <div
+      className={cn(
+        "relative flex items-center justify-center transition-all",
+        isDragging ? "py-4" : ""
+      )}
+      style={{ minHeight: isDragging ? 32 : 0 }}
+      onDragOver={onDragOver}
+      onDrop={(e) => e.preventDefault()}
+    >
+      <div
+        className={cn(
+          "absolute inset-x-0 top-1/2 h-1 -translate-y-1/2 rounded-full transition-colors",
+          active ? "bg-f1-background-secondary-hover" : "bg-transparent"
+        )}
       />
     </div>
   )
 }
 
+// ─── Layout helpers ─────────────────────────────────────────────
+
 /**
- * Greedy left-to-right, top-to-bottom bin-packing to compute initial
- * (x, y) positions for each item, preserving array order.
+ * Build initial rows from items.
+ *
+ * If items have saved `y` coordinates (from a previous edit), groups
+ * them by `y` to preserve the saved row structure. Otherwise falls
+ * back to greedy packing by slot weight.
  */
-function packItems<T>(
-  items: T[],
-  getColSpan: (item: T) => number,
-  getRowSpan: (item: T) => number
-): { x: number; y: number }[] {
-  const heights = new Array(GRID_COLS).fill(0) as number[]
+function buildInitialRows<Filters extends FiltersDefinition>(
+  items: DashboardItemType<Filters>[]
+): Row[] {
+  // Check if items have saved positions
+  const hasSavedPositions = items.some((item) => item.y !== undefined)
 
-  return items.map((item) => {
-    const w = getColSpan(item)
-    const h = getRowSpan(item)
+  if (hasSavedPositions) {
+    return buildRowsFromPositions(items)
+  }
 
-    let bestX = 0
-    let bestY = Infinity
-
-    for (let x = 0; x <= GRID_COLS - w; x++) {
-      const maxH = Math.max(...heights.slice(x, x + w))
-      if (maxH < bestY) {
-        bestY = maxH
-        bestX = x
-      }
-    }
-
-    for (let c = bestX; c < bestX + w; c++) {
-      heights[c] = bestY + h
-    }
-
-    return { x: bestX, y: bestY }
-  })
+  return buildRowsGreedy(items)
 }
+
+/** Group items by saved `y` coordinate to reconstruct saved rows. */
+function buildRowsFromPositions<Filters extends FiltersDefinition>(
+  items: DashboardItemType<Filters>[]
+): Row[] {
+  // Sort by y then x to ensure correct row grouping
+  const sorted = [...items].sort(
+    (a, b) => (a.y ?? 0) - (b.y ?? 0) || (a.x ?? 0) - (b.x ?? 0)
+  )
+
+  const rowMap = new Map<number, { ids: string[]; maxHeight: number }>()
+
+  for (const item of sorted) {
+    const y = item.y ?? 0
+    const h = item.rowSpan
+      ? item.rowSpan * 48
+      : (ROW_HEIGHTS[item.type] ?? DEFAULT_ROW_HEIGHT)
+
+    let entry = rowMap.get(y)
+    if (!entry) {
+      entry = { ids: [], maxHeight: 0 }
+      rowMap.set(y, entry)
+    }
+    entry.ids.push(item.id)
+    if (h > entry.maxHeight) entry.maxHeight = h
+  }
+
+  // Convert map to sorted array of rows
+  return [...rowMap.entries()]
+    .sort(([a], [b]) => a - b)
+    .map(([, entry]) => ({ ids: entry.ids, height: entry.maxHeight }))
+}
+
+/** Greedy bin-packing for items without saved positions. */
+function buildRowsGreedy<Filters extends FiltersDefinition>(
+  items: DashboardItemType<Filters>[]
+): Row[] {
+  const rows: Row[] = []
+  let currentIds: string[] = []
+  let currentSlots = 0
+  let currentMaxHeight = 0
+
+  for (const item of items) {
+    const weight = getSlotWeight(item)
+    const h = item.rowSpan
+      ? item.rowSpan * 48
+      : (ROW_HEIGHTS[item.type] ?? DEFAULT_ROW_HEIGHT)
+
+    if (currentSlots + weight > MAX_PER_ROW && currentIds.length > 0) {
+      rows.push({ ids: currentIds, height: currentMaxHeight })
+      currentIds = []
+      currentSlots = 0
+      currentMaxHeight = 0
+    }
+
+    currentIds.push(item.id)
+    currentSlots += weight
+    if (h > currentMaxHeight) currentMaxHeight = h
+  }
+  if (currentIds.length > 0) {
+    rows.push({ ids: currentIds, height: currentMaxHeight })
+  }
+
+  return rows
+}
+
+/** Minimum height for a row based on the item types it contains. */
+function getMinRowHeight<Filters extends FiltersDefinition>(
+  row: Row,
+  itemMap: Map<string, DashboardItemType<Filters>>
+): number {
+  let min = DEFAULT_MIN_ROW_HEIGHT
+  for (const id of row.ids) {
+    const item = itemMap.get(id)
+    if (!item) continue
+    const h = MIN_ROW_HEIGHTS[item.type] ?? DEFAULT_MIN_ROW_HEIGHT
+    if (h > min) min = h
+  }
+  return min
+}
+
+function getSlotWeight<Filters extends FiltersDefinition>(
+  item: DashboardItemType<Filters>
+): number {
+  if (item.type === "metric") return 1
+  if (item.type === "chart") return 2
+  if (item.type === "collection") return MAX_PER_ROW
+  return 2
+}
+
+// ─── Item renderer ──────────────────────────────────────────────
 
 function DashboardGridItem<Filters extends FiltersDefinition>({
   item,
   filters,
   actions,
+  editMode,
+  onDelete,
+  onTransformChart,
 }: {
   item: DashboardItemType<Filters>
   filters: FiltersState<Filters>
   actions?: DropdownItemType[]
+  editMode?: boolean
+  onDelete?: (id: string) => void
+  onTransformChart?: (
+    itemId: string,
+    newType: string,
+    orientation?: "vertical" | "horizontal"
+  ) => void
 }) {
   switch (item.type) {
     case "chart":
-      return <ChartItem item={item} filters={filters} actions={actions} />
+      return (
+        <ChartItem
+          item={item}
+          filters={filters}
+          actions={actions}
+          editMode={editMode}
+          handleDelete={onDelete}
+          onTransformChart={onTransformChart}
+        />
+      )
     case "metric":
-      return <MetricItem item={item} filters={filters} actions={actions} />
+      return (
+        <MetricItem
+          item={item}
+          filters={filters}
+          actions={actions}
+          editMode={editMode}
+          handleDelete={onDelete}
+        />
+      )
     case "collection":
-      return <CollectionItem item={item} filters={filters} actions={actions} />
+      return (
+        <CollectionItem
+          item={item}
+          filters={filters}
+          actions={actions}
+          editMode={editMode}
+          handleDelete={onDelete}
+        />
+      )
     default: {
       const unknownItem = item as DashboardItemType<Filters>
       return (

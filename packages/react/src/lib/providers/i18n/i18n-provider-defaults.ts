@@ -325,6 +325,7 @@ export const defaultTranslations = {
       openButton: "Open",
     },
     dataDownload: {
+      title: "Download",
       download: "Download {{format}}",
       exportDashboard: "Export dashboard as {{format}}",
       exporting: "Exporting...",

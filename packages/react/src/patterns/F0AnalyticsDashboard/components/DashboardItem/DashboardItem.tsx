@@ -1,14 +1,27 @@
 import { useState, type ReactNode } from "react"
 
+import { F0Icon } from "@/components/F0Icon"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { OneEllipsis } from "@/lib/OneEllipsis"
 import {
-  Dropdown,
   type DropdownItem as DropdownItemType,
+  type DropdownItemObject,
 } from "@/experimental/Navigation/Dropdown"
-import { OneEmptyState } from "@/components/OneEmptyState"
-import { Ellipsis } from "@/icons/app"
+import { OneEmptyState } from "@/experimental/OneEmptyState"
+import { ChartLine, Delete, Download, Ellipsis } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
+import { cn } from "@/lib/utils"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuPortal,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+} from "@/ui/dropdown-menu"
 
 interface DashboardItemProps {
   title: string
@@ -19,8 +32,20 @@ interface DashboardItemProps {
   /** Content-area skeleton shown while loading. Each item type provides its own. */
   skeleton?: ReactNode
   children: ReactNode
-  /** Dropdown actions for edit capabilities (reorder, resize, delete) */
+  /** Download actions shown inside a "Download" submenu */
   actions?: DropdownItemType[]
+  /** When true, adds a "Delete" option to the dropdown menu */
+  editMode?: boolean
+  /** Called when the user clicks the delete action */
+  handleDelete?: (itemId: string) => void
+  /** Item ID — required when editMode is true for the delete callback */
+  itemId?: string
+  /** Chart type transform options — renders as "Chart type" submenu */
+  chartTypeOptions?: {
+    label: string
+    isActive: boolean
+    onSelect: () => void
+  }[]
 }
 
 /**
@@ -39,15 +64,30 @@ export function DashboardItem({
   onRetry,
   skeleton,
   children,
-  actions,
+  actions = [],
+  editMode,
+  handleDelete,
+  itemId,
+  chartTypeOptions,
 }: DashboardItemProps) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const translations = useI18n()
+
+  // Filter to only actionable items (not separators/labels)
+  const downloadActions = actions.filter(
+    (a): a is DropdownItemObject =>
+      !("type" in a) || a.type === "item" || a.type === undefined
+  )
+  const hasDownloads = downloadActions.length > 0
+  const hasDelete = editMode && handleDelete && itemId
+  const hasChartTypes = chartTypeOptions && chartTypeOptions.length > 0
+  const showMenu = hasDownloads || hasDelete || hasChartTypes
+
   if (error) {
     return (
       <div className="flex h-full flex-col overflow-hidden rounded-lg border border-solid border-f1-border-secondary">
         <div className="flex shrink-0 flex-col p-4">
-          <h3 className="text-lg font-semibold text-f1-foreground">{title}</h3>
+          <h3 className="text-base font-medium text-f1-foreground">{title}</h3>
           {description && (
             <p className="text-base text-f1-foreground-secondary">
               {description}
@@ -80,7 +120,7 @@ export function DashboardItem({
         <div className="flex min-w-0 flex-1 flex-col">
           <OneEllipsis
             tag="h3"
-            className="text-lg font-semibold text-f1-foreground"
+            className="text-base font-semibold text-f1-foreground"
           >
             {title}
           </OneEllipsis>
@@ -90,26 +130,104 @@ export function DashboardItem({
             </OneEllipsis>
           )}
         </div>
-        {actions && actions.length > 0 && (
+        {showMenu && (
           <div
             className={`flex-shrink-0 opacity-100 transition-opacity delay-150 duration-150 focus-within:delay-0 group-hover/dashitem:delay-0 sm:opacity-0 focus-within:sm:opacity-100 group-hover/dashitem:sm:opacity-100 ${isDropdownOpen ? "delay-0 sm:opacity-100" : ""}`}
           >
-            <Dropdown
-              items={actions}
+            <DropdownMenu
               open={isDropdownOpen}
               onOpenChange={setIsDropdownOpen}
             >
-              <ButtonInternal
-                label={translations.actions.other}
-                icon={Ellipsis}
-                variant="ghost"
-                size="md"
-                hideLabel
-                pressed={isDropdownOpen}
-                compact
-                onClick={(e: React.MouseEvent) => e.stopPropagation()}
-              />
-            </Dropdown>
+              <DropdownMenuTrigger asChild>
+                <ButtonInternal
+                  label={translations.actions.other}
+                  icon={Ellipsis}
+                  variant="ghost"
+                  size="md"
+                  hideLabel
+                  pressed={isDropdownOpen}
+                  compact
+                  onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="py-1">
+                {hasChartTypes && (
+                  <DropdownMenuGroup>
+                    <DropdownMenuSub>
+                      <DropdownMenuSubTrigger className="mx-1 rounded-sm px-2">
+                        <div className="flex w-full flex-row items-center gap-2 pr-2">
+                          <F0Icon icon={ChartLine} />
+                          <span className="flex-1 text-base font-medium">
+                            Chart type
+                          </span>
+                        </div>
+                      </DropdownMenuSubTrigger>
+                      <DropdownMenuPortal>
+                        <DropdownMenuSubContent>
+                          {chartTypeOptions!.map((opt) => (
+                            <DropdownMenuItem
+                              key={opt.label}
+                              onClick={opt.onSelect}
+                              className={cn(
+                                opt.isActive && "bg-f1-background-selected"
+                              )}
+                            >
+                              <div className="flex w-full flex-row items-center gap-2">
+                                <span className="flex-1">{opt.label}</span>
+                              </div>
+                            </DropdownMenuItem>
+                          ))}
+                        </DropdownMenuSubContent>
+                      </DropdownMenuPortal>
+                    </DropdownMenuSub>
+                  </DropdownMenuGroup>
+                )}
+                {hasDownloads && (
+                  <DropdownMenuGroup>
+                    <DropdownMenuSub>
+                      <DropdownMenuSubTrigger className="mx-1 rounded-sm px-2">
+                        <div className="flex w-full flex-row items-center gap-2 pr-2">
+                          <F0Icon icon={Download} />
+                          <span className="flex-1 text-base font-medium">
+                            {translations.ai.dataDownload.title}
+                          </span>
+                        </div>
+                      </DropdownMenuSubTrigger>
+                      <DropdownMenuPortal>
+                        <DropdownMenuSubContent>
+                          {downloadActions.map((action) => (
+                            <DropdownMenuItem
+                              key={action.label}
+                              onClick={action.onClick}
+                            >
+                              <div className="flex w-full flex-row items-center gap-2">
+                                {action.icon && <F0Icon icon={action.icon} />}
+                                <span className="flex-1">{action.label}</span>
+                              </div>
+                            </DropdownMenuItem>
+                          ))}
+                        </DropdownMenuSubContent>
+                      </DropdownMenuPortal>
+                    </DropdownMenuSub>
+                  </DropdownMenuGroup>
+                )}
+                {hasDelete && (
+                  <DropdownMenuGroup>
+                    <DropdownMenuItem
+                      onClick={() => handleDelete(itemId)}
+                      className={cn("text-f1-foreground-critical")}
+                    >
+                      <div className="flex w-full flex-row items-center gap-2">
+                        <F0Icon icon={Delete} />
+                        <span className="flex-1">
+                          {translations.actions.delete}
+                        </span>
+                      </div>
+                    </DropdownMenuItem>
+                  </DropdownMenuGroup>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         )}
       </div>

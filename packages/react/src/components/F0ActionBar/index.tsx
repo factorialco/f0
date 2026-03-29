@@ -18,7 +18,7 @@ import {
 import { F0Icon, IconType } from "@/components/F0Icon"
 import { Dropdown, MobileDropdown } from "@/experimental/Navigation/Dropdown"
 import CheckCircleAnimated from "@/icons/animated/CheckCircle"
-import { AlertCircle, AlertCircleLine } from "@/icons/app"
+import { AlertCircleLine } from "@/icons/app"
 import { withDataTestId } from "@/lib/data-testid"
 import { cn } from "@/lib/utils"
 import { Spinner } from "@/ui/Spinner"
@@ -344,45 +344,74 @@ const _F0ActionBar = forwardRef<F0ActionBarRef, F0ActionBarProps>(
     // Wrapper class for buttons - only apply dark theme wrapper for dark variant
     const buttonWrapperClass = isLight ? "" : "dark"
 
-    const actionBarContent = (
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            ref={containerRef}
-            data-variant={variant}
-            initial={{ opacity: 0, y: 32, filter: "blur(6px)" }}
-            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-            exit={{ opacity: 0, y: 32, filter: "blur(6px)" }}
-            transition={{ ease: [0.175, 0.885, 0.32, 1.275], duration: 0.3 }}
-            style={
-              contentRect
-                ? {
-                    left: contentRect.left,
-                    right:
-                      window.innerWidth - contentRect.left - contentRect.width,
-                  }
-                : undefined
-            }
-            className={cn(
-              "fixed bottom-2 left-2 right-2 z-50 flex h-fit flex-col items-center gap-2 rounded-xl p-2 shadow-lg backdrop-blur-sm sm:bottom-5 sm:h-12 sm:w-max sm:flex-row sm:gap-4 sm:min-w-[475px] sm:justify-between",
-              contentRect
-                ? "sm:left-auto sm:right-auto sm:mx-auto"
-                : "sm:left-2 sm:right-2 sm:mx-auto",
-              isLight
-                ? "border border-solid bg-f1-background text-f1-foreground"
-                : "bg-f1-background-inverse text-f1-foreground dark:bg-f1-background-inverse-secondary",
-              isLight && showErrorStyles
-                ? "border-f1-border-critical-bold bg-f1-background-critical/10"
-                : isLight
-                  ? "border-f1-border-secondary"
-                  : ""
-            )}
-          >
-            {leftContent}
-            {(!!label || (status && status !== "idle")) && (
-              <div className="ml-2 flex items-center gap-2">
-                {status && status !== "idle" && (
-                  <StatusIcon status={status} isLight={isLight} />
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          initial={{ opacity: 0, y: 32, filter: "blur(6px)" }}
+          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+          exit={{ opacity: 0, y: 32, filter: "blur(6px)" }}
+          transition={{ ease: [0.175, 0.885, 0.32, 1.275], duration: 0.3 }}
+          className={cn(
+            "fixed bottom-2 left-2 right-2 z-50 flex h-fit flex-col items-center gap-2 rounded-xl p-2 shadow-lg backdrop-blur-sm sm:bottom-5 sm:h-12 sm:w-max sm:flex-row sm:gap-5 sm:justify-between",
+            centerInFrameContent
+              ? "sm:left-[240px] sm:right-2 sm:mx-auto"
+              : "sm:left-2 sm:right-2 sm:mx-auto",
+            isLight
+              ? "border border-solid border-f1-border-secondary bg-f1-background text-f1-foreground"
+              : "bg-f1-background-inverse text-f1-foreground dark:bg-f1-background-inverse-secondary"
+          )}
+        >
+          {leftContent}
+          {(!!label || (status && status !== "idle")) && (
+            <div className="ml-2 flex items-center gap-2">
+              {status && status !== "idle" && (
+                <StatusIcon status={status} isLight={isLight} />
+              )}
+              {!!label && (
+                <span
+                  className={cn(
+                    "font-medium",
+                    isLight
+                      ? "text-f1-foreground"
+                      : "text-f1-foreground-inverse"
+                  )}
+                >
+                  {label}
+                </span>
+              )}
+            </div>
+          )}
+          <div>
+            <div
+              className={cn(
+                buttonWrapperClass,
+                "flex flex-col items-center gap-2 sm:hidden [&_button]:w-full [&_div]:w-full"
+              )}
+            >
+              <Fragment key="mobile-actions">
+                <MobileDropdown items={secondaryActions} />
+                {!singlePrimaryAction ? (
+                  <F0ButtonDropdown
+                    items={primaryActionsDropdownItems}
+                    onClick={(value) => {
+                      const action = getActionByValue(value)
+                      ;(action as ActionType)?.onClick?.()
+                    }}
+                    size="lg"
+                    disabled={isInteractionDisabled}
+                  />
+                ) : (
+                  <F0Button
+                    label={singlePrimaryAction.label}
+                    icon={singlePrimaryAction.icon}
+                    onClick={singlePrimaryAction.onClick}
+                    disabled={
+                      isInteractionDisabled || singlePrimaryAction.disabled
+                    }
+                    loading={status === "loading"}
+                    size="lg"
+                  />
                 )}
                 {!!label && (
                   <span

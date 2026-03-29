@@ -134,7 +134,15 @@ export interface ChatDashboardProps {
   config: ChatDashboardConfig
   apiConfig: { baseUrl: string; headers: Record<string, string> }
   refreshKey?: number
+  /** Incrementing counter that forces the grid to reset to initial layout */
+  resetKey?: number
   editMode?: boolean
+  /** Called when a chart item's type is changed (e.g. bar → line) */
+  onTransformChart?: (
+    itemId: string,
+    newType: string,
+    orientation?: "vertical" | "horizontal"
+  ) => void
   onLayoutChange?: (layout: DashboardItemLayout[]) => void
   onExportReady?: (exportFn: (() => Promise<void>) | undefined) => void
   exportFilename?: string
@@ -151,8 +159,10 @@ export function ChatDashboard({
   config,
   apiConfig,
   refreshKey = 0,
+  resetKey,
   editMode,
   onLayoutChange,
+  onTransformChart,
   onExportReady,
   exportFilename,
 }: ChatDashboardProps) {
@@ -268,8 +278,10 @@ export function ChatDashboard({
       items={items}
       editMode={editMode}
       onLayoutChange={onLayoutChange}
+      onTransformChart={onTransformChart}
       onExportReady={onExportReady}
       exportFilename={exportFilename}
+      resetKey={resetKey}
     />
   )
 }
@@ -279,6 +291,9 @@ ChatDashboard.displayName = "ChatDashboard"
 // ---------------------------------------------------------------------------
 // Canvas content wrapper — bridges canvas context to ChatDashboard props
 // ---------------------------------------------------------------------------
+
+import { F0ActionBar } from "@/experimental/F0ActionBar"
+import { useI18n } from "@/lib/providers/i18n"
 
 import type { DashboardCanvasContent } from "../../../types"
 
@@ -291,18 +306,74 @@ export function DashboardContent({
   content: DashboardCanvasContent
   refreshKey: number
 }): ReactNode {
-  const { editMode, onLayoutChange, registerExport } = useDashboardCanvas()
+  const {
+    isDirty,
+    discardKey,
+    itemTransforms,
+    onLayoutChange,
+    handleSave,
+    handleDiscard,
+    transformItem,
+    registerExport,
+  } = useDashboardCanvas()
+  const translations = useI18n()
+
+  // Apply pending item transforms (chart type changes) to the config
+  // without changing the base config reference — avoids data refetch.
+  const effectiveConfig = useMemo(() => {
+    if (itemTransforms.size === 0) return content.config
+    return {
+      ...content.config,
+      items: content.config.items.map((item) => {
+        const patch = itemTransforms.get(item.id)
+        return patch ? ({ ...item, ...patch } as typeof item) : item
+      }),
+    }
+  }, [content.config, itemTransforms])
 
   return (
-    <ChatDashboard
-      config={content.config}
-      apiConfig={content.apiConfig}
-      refreshKey={refreshKey}
-      editMode={editMode}
-      onLayoutChange={onLayoutChange}
-      onExportReady={registerExport}
-      exportFilename={content.title}
-    />
+    <>
+      <ChatDashboard
+        config={effectiveConfig}
+        apiConfig={content.apiConfig}
+        refreshKey={refreshKey}
+        resetKey={discardKey}
+        editMode
+        onLayoutChange={onLayoutChange}
+        onTransformChart={(itemId, newType, orientation) => {
+          const item = effectiveConfig.items.find((i) => i.id === itemId)
+          if (!item || item.type !== "chart") return
+          const updatedChart = {
+            ...item.chart,
+            type: newType,
+            ...(newType === "bar"
+              ? { orientation: orientation ?? "vertical" }
+              : {}),
+          } as typeof item.chart
+          transformItem(itemId, { chart: updatedChart } as Partial<
+            import("./types").ChatDashboardItem
+          >)
+        }}
+        onExportReady={registerExport}
+        exportFilename={content.title}
+      />
+      <F0ActionBar
+        label="Changes detected"
+        isOpen={isDirty}
+        primaryActions={[
+          {
+            label: translations.ai.saveChanges,
+            onClick: handleSave,
+          },
+        ]}
+        secondaryActions={[
+          {
+            label: translations.ai.discardChanges,
+            onClick: handleDiscard,
+          },
+        ]}
+      />
+    </>
   )
 }
 

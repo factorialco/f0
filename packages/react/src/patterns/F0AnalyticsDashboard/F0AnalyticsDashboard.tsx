@@ -34,6 +34,8 @@ export const F0AnalyticsDashboard = <
   enableExport,
   exportFilename,
   onExportReady,
+  resetKey,
+  onTransformChart,
 }: F0AnalyticsDashboardProps<Filters>) => {
   const [currentFilters, setCurrentFilters] = useState<FiltersState<Filters>>(
     () => defaultFilters ?? ({} as FiltersState<Filters>)
@@ -51,7 +53,7 @@ export const F0AnalyticsDashboard = <
   }, [exportAsExcel, onExportReady])
 
   return (
-    <div className="flex flex-col gap-3.5 py-4">
+    <div className="flex flex-col gap-5 py-4">
       {(filters || enableExport) && (
         <div className="flex items-center justify-between gap-4 px-5">
           <div className="w-full">
@@ -70,12 +72,14 @@ export const F0AnalyticsDashboard = <
           )}
         </div>
       )}
-      <div className="px-3.5">
+      <div className="px-5">
         <DashboardGrid
           items={items}
           filters={currentFilters}
           editMode={editMode}
           onLayoutChange={onLayoutChange}
+          onTransformChart={onTransformChart}
+          resetKey={resetKey}
         />
       </div>
     </div>
