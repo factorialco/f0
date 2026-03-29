@@ -1,16 +1,14 @@
 import { useState, type ReactNode } from "react"
 
+import { F0Icon } from "@/components/F0Icon"
 import { ButtonInternal } from "@/components/F0Button/internal"
-import { F0ButtonToggleGroup } from "@/components/F0ButtonToggleGroup"
-import { F0Icon, type IconType } from "@/components/F0Icon"
-import { OneEmptyState } from "@/components/OneEmptyState"
-import { RichTextDisplay } from "@/components/RichText/RichTextDisplay"
+import { OneEllipsis } from "@/lib/OneEllipsis"
 import {
   type DropdownItem as DropdownItemType,
   type DropdownItemObject,
 } from "@/experimental/Navigation/Dropdown"
-import { Delete, Download, Ellipsis, Ai } from "@/icons/app"
-import { OneEllipsis } from "@/lib/OneEllipsis"
+import { OneEmptyState } from "@/experimental/OneEmptyState"
+import { ChartLine, Delete, Download, Ellipsis } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import {
@@ -42,21 +40,12 @@ interface DashboardItemProps {
   handleDelete?: (itemId: string) => void
   /** Item ID — required when editMode is true for the delete callback */
   itemId?: string
-  /** Chart type transform options — rendered as a toggle group in the dropdown */
+  /** Chart type transform options — renders as "Chart type" submenu */
   chartTypeOptions?: {
     label: string
-    value: string
-    icon: IconType
     isActive: boolean
     onSelect: () => void
   }[]
-  /**
-   * Optional markdown explanation of how this item's data is calculated.
-   * When present, the dropdown menu shows a "Where does this data come from?"
-   * entry that opens a dialog rendering this content as markdown. Hidden
-   * entirely when omitted (backwards compatible).
-   */
-  explanation?: string
 }
 
 /**
@@ -80,24 +69,9 @@ export function DashboardItem({
   handleDelete,
   itemId,
   chartTypeOptions,
-  explanation,
 }: DashboardItemProps) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
-  /**
-   * When true, the dropdown menu's content is swapped from the action list
-   * to a markdown rendering of `explanation`. The dropdown trigger stays
-   * pressed and the menu stays open — the user dismisses by clicking the
-   * back arrow at the top of the explanation view, clicking outside, or
-   * pressing Esc. Resets to `false` whenever the dropdown closes so the
-   * next open always starts on the action list.
-   */
-  const [isExplanationView, setIsExplanationView] = useState(false)
   const translations = useI18n()
-
-  const handleDropdownOpenChange = (open: boolean) => {
-    setIsDropdownOpen(open)
-    if (!open) setIsExplanationView(false)
-  }
 
   // Filter to only actionable items (not separators/labels)
   const downloadActions = actions.filter(
@@ -107,8 +81,7 @@ export function DashboardItem({
   const hasDownloads = downloadActions.length > 0
   const hasDelete = editMode && handleDelete && itemId
   const hasChartTypes = chartTypeOptions && chartTypeOptions.length > 0
-  const hasExplanation = !!explanation && explanation.trim().length > 0
-  const showMenu = hasDownloads || hasDelete || hasChartTypes || hasExplanation
+  const showMenu = hasDownloads || hasDelete || hasChartTypes
 
   if (error) {
     return (
@@ -124,17 +97,11 @@ export function DashboardItem({
         <div className="min-h-0 flex-1 overflow-auto">
           <OneEmptyState
             variant="critical"
-            title={translations.ai.dashboardItem.errorTitle}
+            title="Error loading data"
             description={error.message}
             actions={
               onRetry
-                ? [
-                    {
-                      type: "default",
-                      label: translations.ai.dashboardItem.retry,
-                      onClick: onRetry,
-                    },
-                  ]
+                ? [{ type: "default", label: "Retry", onClick: onRetry }]
                 : []
             }
           />
@@ -169,7 +136,7 @@ export function DashboardItem({
           >
             <DropdownMenu
               open={isDropdownOpen}
-              onOpenChange={handleDropdownOpenChange}
+              onOpenChange={setIsDropdownOpen}
             >
               <DropdownMenuTrigger asChild>
                 <ButtonInternal
@@ -183,114 +150,81 @@ export function DashboardItem({
                   onClick={(e: React.MouseEvent) => e.stopPropagation()}
                 />
               </DropdownMenuTrigger>
-              <DropdownMenuContent
-                align="end"
-                className={cn("py-1", isExplanationView && "w-96 max-w-[90vw]")}
-              >
-                {isExplanationView && hasExplanation ? (
-                  <div className="px-3 py-2 text-base text-f1-foreground [&>div]:flex [&>div]:flex-col [&>div]:gap-2">
-                    <RichTextDisplay
-                      content={explanation as string}
-                      format="markdown"
-                    />
-                  </div>
-                ) : (
-                  <>
-                    {hasChartTypes && (
-                      <div className="flex flex-col items-start gap-2 border-0 border-b border-solid border-f1-border-secondary p-3">
-                        <OneEllipsis className="text-base font-medium text-f1-foreground-tertiary">
-                          {translations.ai.dashboardItem.chartType}
-                        </OneEllipsis>
-                        <F0ButtonToggleGroup
-                          items={chartTypeOptions!.map((opt) => ({
-                            value: opt.value,
-                            icon: opt.icon,
-                            label: opt.label,
-                          }))}
-                          value={
-                            chartTypeOptions!.find((opt) => opt.isActive)?.value
-                          }
-                          onChange={(value: string) => {
-                            chartTypeOptions!
-                              .find((opt) => opt.value === value)
-                              ?.onSelect()
-                          }}
-                          size="lg"
-                          required
-                          withBorder={false}
-                        />
+              <DropdownMenuContent align="end" className="py-1">
+                {hasChartTypes && (
+                  <DropdownMenuGroup>
+                    <DropdownMenuSub>
+                      <DropdownMenuSubTrigger className="mx-1 rounded-sm px-2">
+                        <div className="flex w-full flex-row items-center gap-2 pr-2">
+                          <F0Icon icon={ChartLine} />
+                          <span className="flex-1 text-base font-medium">
+                            Chart type
+                          </span>
+                        </div>
+                      </DropdownMenuSubTrigger>
+                      <DropdownMenuPortal>
+                        <DropdownMenuSubContent>
+                          {chartTypeOptions!.map((opt) => (
+                            <DropdownMenuItem
+                              key={opt.label}
+                              onClick={opt.onSelect}
+                              className={cn(
+                                opt.isActive && "bg-f1-background-selected"
+                              )}
+                            >
+                              <div className="flex w-full flex-row items-center gap-2">
+                                <span className="flex-1">{opt.label}</span>
+                              </div>
+                            </DropdownMenuItem>
+                          ))}
+                        </DropdownMenuSubContent>
+                      </DropdownMenuPortal>
+                    </DropdownMenuSub>
+                  </DropdownMenuGroup>
+                )}
+                {hasDownloads && (
+                  <DropdownMenuGroup>
+                    <DropdownMenuSub>
+                      <DropdownMenuSubTrigger className="mx-1 rounded-sm px-2">
+                        <div className="flex w-full flex-row items-center gap-2 pr-2">
+                          <F0Icon icon={Download} />
+                          <span className="flex-1 text-base font-medium">
+                            {translations.ai.dataDownload.title}
+                          </span>
+                        </div>
+                      </DropdownMenuSubTrigger>
+                      <DropdownMenuPortal>
+                        <DropdownMenuSubContent>
+                          {downloadActions.map((action) => (
+                            <DropdownMenuItem
+                              key={action.label}
+                              onClick={action.onClick}
+                            >
+                              <div className="flex w-full flex-row items-center gap-2">
+                                {action.icon && <F0Icon icon={action.icon} />}
+                                <span className="flex-1">{action.label}</span>
+                              </div>
+                            </DropdownMenuItem>
+                          ))}
+                        </DropdownMenuSubContent>
+                      </DropdownMenuPortal>
+                    </DropdownMenuSub>
+                  </DropdownMenuGroup>
+                )}
+                {hasDelete && (
+                  <DropdownMenuGroup>
+                    <DropdownMenuItem
+                      onClick={() => handleDelete(itemId)}
+                      className={cn("text-f1-foreground-critical")}
+                    >
+                      <div className="flex w-full flex-row items-center gap-2">
+                        <F0Icon icon={Delete} />
+                        <span className="flex-1">
+                          {translations.actions.delete}
+                        </span>
                       </div>
-                    )}
-                    {hasExplanation && (
-                      <DropdownMenuGroup>
-                        <DropdownMenuItem
-                          onSelect={(e) => {
-                            // Keep the dropdown open and just swap its
-                            // content to the explanation view. No popover,
-                            // no race conditions, the trigger stays pressed.
-                            e.preventDefault()
-                            setIsExplanationView(true)
-                          }}
-                        >
-                          <div className="flex w-full flex-row items-center gap-2">
-                            <F0Icon icon={Ai} />
-                            <span className="flex-1">
-                              {translations.ai.dashboardItem.dataExplanation}
-                            </span>
-                          </div>
-                        </DropdownMenuItem>
-                      </DropdownMenuGroup>
-                    )}
-
-                    {hasDownloads && (
-                      <DropdownMenuGroup>
-                        <DropdownMenuSub>
-                          <DropdownMenuSubTrigger className="mx-1 rounded-sm px-2">
-                            <div className="flex w-full flex-row items-center gap-2 pr-2">
-                              <F0Icon icon={Download} />
-                              <span className="flex-1 text-base font-medium">
-                                {translations.ai.dataDownload.title}
-                              </span>
-                            </div>
-                          </DropdownMenuSubTrigger>
-                          <DropdownMenuPortal>
-                            <DropdownMenuSubContent>
-                              {downloadActions.map((action) => (
-                                <DropdownMenuItem
-                                  key={action.label}
-                                  onClick={action.onClick}
-                                >
-                                  <div className="flex w-full flex-row items-center gap-2">
-                                    {action.icon && (
-                                      <F0Icon icon={action.icon} />
-                                    )}
-                                    <span className="flex-1">
-                                      {action.label}
-                                    </span>
-                                  </div>
-                                </DropdownMenuItem>
-                              ))}
-                            </DropdownMenuSubContent>
-                          </DropdownMenuPortal>
-                        </DropdownMenuSub>
-                      </DropdownMenuGroup>
-                    )}
-                    {hasDelete && (
-                      <DropdownMenuGroup>
-                        <DropdownMenuItem
-                          onClick={() => handleDelete(itemId)}
-                          className={cn("text-f1-foreground-critical")}
-                        >
-                          <div className="flex w-full flex-row items-center gap-2">
-                            <F0Icon icon={Delete} />
-                            <span className="flex-1">
-                              {translations.actions.delete}
-                            </span>
-                          </div>
-                        </DropdownMenuItem>
-                      </DropdownMenuGroup>
-                    )}
-                  </>
+                    </DropdownMenuItem>
+                  </DropdownMenuGroup>
                 )}
               </DropdownMenuContent>
             </DropdownMenu>

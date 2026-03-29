@@ -140,13 +140,9 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
       for (const row of newRows) {
         const colSpan = Math.floor(12 / Math.max(1, row.ids.length))
         const rowSpan = Math.round(row.height / 48)
-        // `itemHeight` carries the pixel-accurate row height so consumers
-        // can persist a real px value (resize handle is pixel-precise);
-        // `rowSpan` stays as a rounded fallback for legacy consumers.
-        const itemHeight = row.height
         let x = 0
         for (const id of row.ids) {
-          layout.push({ id, colSpan, rowSpan, itemHeight, x, y })
+          layout.push({ id, colSpan, rowSpan, x, y })
           x += colSpan
         }
         y += rowSpan
@@ -195,7 +191,9 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
         }))
 
         const item = itemMap.get(dragId)
-        const newRowHeight = item ? resolveItemHeight(item) : DEFAULT_ROW_HEIGHT
+        const newRowHeight = item
+          ? (ROW_HEIGHTS[item.type] ?? DEFAULT_ROW_HEIGHT)
+          : DEFAULT_ROW_HEIGHT
 
         if (dropTarget.type === "new-row") {
           // Insert a new row after afterRowIdx
@@ -564,7 +562,9 @@ function buildRowsFromPositions<Filters extends FiltersDefinition>(
 
   for (const item of sorted) {
     const y = item.y ?? 0
-    const h = resolveItemHeight(item)
+    const h = item.rowSpan
+      ? item.rowSpan * 48
+      : (ROW_HEIGHTS[item.type] ?? DEFAULT_ROW_HEIGHT)
 
     let entry = rowMap.get(y)
     if (!entry) {
@@ -592,7 +592,9 @@ function buildRowsGreedy<Filters extends FiltersDefinition>(
 
   for (const item of items) {
     const weight = getSlotWeight(item)
-    const h = resolveItemHeight(item)
+    const h = item.rowSpan
+      ? item.rowSpan * 48
+      : (ROW_HEIGHTS[item.type] ?? DEFAULT_ROW_HEIGHT)
 
     if (currentSlots + weight > MAX_PER_ROW && currentIds.length > 0) {
       rows.push({ ids: currentIds, height: currentMaxHeight })
@@ -634,24 +636,6 @@ function getSlotWeight<Filters extends FiltersDefinition>(
   if (item.type === "chart") return 2
   if (item.type === "collection") return MAX_PER_ROW
   return 2
-}
-
-/**
- * Resolve an item's height in pixels for grid row sizing.
- *
- * Precedence (highest to lowest):
- *   1. `itemHeight` (canonical, in pixels) — emitted by both the agent
- *      and the resize handle, supports pixel-accurate persistence.
- *   2. `rowSpan * 48` (legacy, in 48-unit increments) — kept so existing
- *      persisted layouts keep rendering at the same size.
- *   3. Type-specific default (`ROW_HEIGHTS[item.type]`).
- */
-function resolveItemHeight<Filters extends FiltersDefinition>(
-  item: DashboardItemType<Filters>
-): number {
-  if (item.itemHeight && item.itemHeight > 0) return item.itemHeight
-  if (item.rowSpan) return item.rowSpan * 48
-  return ROW_HEIGHTS[item.type] ?? DEFAULT_ROW_HEIGHT
 }
 
 // ─── Item renderer ──────────────────────────────────────────────
