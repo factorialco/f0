@@ -23,12 +23,18 @@ export const useOrchestratorThinkingAction = () => {
     render: (props) => {
       const title: string = props.args.message ?? "thinking"
       const result: OrchestratorThinkingResult | undefined = props.result
+      // In v1.51+ ToolCallRenderer always passes "inProgress" for frontend-only
+      // actions (no toolMessage, not in executingToolCallIds). Map it to
+      // "executing" to show the spinner, matching the original v1.10 behavior
+      // where AssistantMessage passed {status: "executing"} via generativeUI args.
+      const status =
+        props.status === "complete"
+          ? "completed"
+          : props.status === "inProgress"
+            ? "executing"
+            : props.status
       return (
-        <F0ActionItem
-          title={title}
-          status={props.status === "complete" ? "completed" : props.status}
-          inGroup={result?.inGroup}
-        />
+        <F0ActionItem title={title} status={status} inGroup={result?.inGroup} />
       )
     },
   })

@@ -24,8 +24,8 @@ import {
   AiChatProviderProps,
 } from "@/sds/ai/F0AiChat"
 import { CanvasPanel } from "@/sds/ai/F0AiChat/components/layout/CanvasPanel"
-import { DEFAULT_CHAT_WIDTH } from "@/sds/ai/F0AiChat/utils/constants"
 import { useAiChat } from "@/sds/ai/F0AiChat/providers/AiChatStateProvider"
+import { DEFAULT_CHAT_WIDTH } from "@/sds/ai/F0AiChat/utils/constants"
 
 import { FrameProvider, SidebarState, useSidebar } from "./FrameProvider"
 
@@ -331,7 +331,7 @@ function ApplicationFrameContent({
                   className={cn(
                     "pointer-events-none",
                     isSmallViewport
-                      ? "fixed inset-0 z-[25]"
+                      ? "fixed inset-0 z-[50]"
                       : "absolute bottom-0 left-0 top-0 z-[15]"
                   )}
                   style={

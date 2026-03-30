@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
 
 import { F0ActionItem } from "../../../F0ActionItem"
+import { filterCoagentPlaceholders } from "../../internal-types"
 import { useMessageScroll } from "../../hooks/useMessageScroll"
 import { useAiChat } from "../../providers/AiChatStateProvider"
 import {
@@ -31,7 +32,11 @@ import { Thinking } from "./Thinking"
 import { UserMessage as F0UserMessage } from "./UserMessage"
 import { WelcomeScreen } from "./WelcomeScreen"
 
-export const MessagesContainer = (props: Partial<MessagesProps>) => (
+type MessagesContainerProps = Partial<MessagesProps> & {
+  noShadows?: boolean
+}
+
+export const MessagesContainer = (props: MessagesContainerProps) => (
   <FeedbackModalProvider>
     <Messages {...props} />
   </FeedbackModalProvider>
@@ -46,7 +51,8 @@ const Messages = ({
   onRegenerate,
   onCopy,
   markdownTagRenderers,
-}: Partial<MessagesProps>) => {
+  noShadows = false,
+}: MessagesContainerProps) => {
   const { messages, interrupt, isLoading } = useCopilotChat()
   const { modal, handleSubmit, handleClose } = useFeedbackSubmit()
 
@@ -76,10 +82,69 @@ const Messages = ({
       ),
     [initialMessage, translations.ai.defaultInitialMessage]
   )
-  const showWelcomeBlock =
-    messages.length === 0 && (greeting || initialMessages.length > 0)
 
-  const turns = useMemo(() => convertMessagesToTurns(messages), [messages])
+  // Filter coagent placeholders and expand multi-tool-call messages.
+  //
+  // CopilotKit v1.51+ AG-UI packs multiple tool calls into a single
+  // assistant message (e.g. 2× orchestratorThinking + 1× downloadData +
+  // text content).  The v1.10 format had one tool call per message.
+  //
+  // We expand each multi-tool-call message into individual messages so
+  // the turn/thinking pipeline (which expects one tool call per message)
+  // works correctly.  The actual rendering of tool call UIs is handled
+  // by AssistantMessage which looks up actions from CopilotKit context.
+  const filteredMessages = useMemo(
+    () =>
+      filterCoagentPlaceholders(messages).flatMap((msg) => {
+        if (msg.role !== "assistant") return [msg]
+
+        const toolCalls = msg.toolCalls as
+          | { id: string; function: { name: string; arguments: string } }[]
+          | undefined
+
+        // No tool calls — plain text message, pass through
+        if (!toolCalls || toolCalls.length === 0) return [msg]
+
+        // Single tool call, no text — pass through as-is
+        if (toolCalls.length === 1 && !msg.content) return [msg]
+
+        // Multiple tool calls and/or text content — expand into
+        // individual messages so thinking groups work correctly.
+        // Tool calls come first (they arrive before content during
+        // streaming), then text content.
+        const expanded: Message[] = []
+
+        // Each tool call becomes its own message
+        for (let i = 0; i < toolCalls.length; i++) {
+          expanded.push({
+            id: `${msg.id}_tc${i}`,
+            role: msg.role,
+            content: "",
+            toolCalls: [toolCalls[i]],
+          })
+        }
+
+        // Text content becomes its own message (after tool calls)
+        if (msg.content) {
+          expanded.push({
+            id: `${msg.id}_text`,
+            role: msg.role,
+            content: msg.content,
+          })
+        }
+
+        return expanded
+      }),
+    [messages]
+  )
+
+  const showWelcomeBlock =
+    filteredMessages.length === 0 && (greeting || initialMessages.length > 0)
+
+  const turns = useMemo(
+    () => convertMessagesToTurns(filteredMessages),
+    [filteredMessages]
+  )
 
   // Scroll state
   const viewportRef = useRef<HTMLDivElement>(null)
@@ -120,6 +185,7 @@ const Messages = ({
 
       const messageProps = {
         message,
+        messages: filteredMessages,
         inProgress,
         index,
         isCurrentMessage,
@@ -193,6 +259,18 @@ const Messages = ({
         {restMessages.map((message, index) =>
           renderMessage(message as Message, index)
         )}
+        {/* Loading indicator while waiting for the first assistant
+            response.  Mirrors the official CopilotKit Messages
+            component behaviour (show activity icon when the last
+            message is from the user and the agent is running). */}
+        {inProgress &&
+          turnIndex === turns.length - 1 &&
+          turnMessages.length > 0 &&
+          !Array.isArray(turnMessages[turnMessages.length - 1]) &&
+          (turnMessages[turnMessages.length - 1] as Message).role ===
+            "user" && (
+            <F0ActionItem title={translations.ai.thinking} status="executing" />
+          )}
         {/* Live thinking: render last thinking message while streaming */}
         {thinkingGroup &&
           isLastTurn &&
@@ -309,8 +387,12 @@ const Messages = ({
           </div>
         </div>
 
-        <ScrollShadow position="top" key="shadow-top" />
-        <ScrollShadow position="bottom" key="shadow-bottom" />
+        {!noShadows && (
+          <>
+            <ScrollShadow position="top" key="shadow-top" />
+            <ScrollShadow position="bottom" key="shadow-bottom" />
+          </>
+        )}
       </div>
 
       {modal.isOpen && (

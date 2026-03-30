@@ -18,7 +18,10 @@ export function analyzeTurn(
       !Array.isArray(m) &&
       m.role === "assistant" &&
       (!!m.content ||
-        m.toolCalls?.some((tc) => tc.function.name !== "orchestratorThinking"))
+        m.toolCalls?.some(
+          (tc: { function: { name: string } }) =>
+            tc.function.name !== "orchestratorThinking"
+        ))
   )
 
   const showActivityIndicator =
@@ -34,11 +37,6 @@ export function convertMessagesToTurns(messages: Message[]): Turn[] {
     return []
   }
 
-  console.assert(
-    messages[0].role === "user",
-    "Invariant violation! Assistant message received before user message"
-  )
-
   const turns: Turn[] = []
   let thinkingGroup: Message[] | null = null
 
@@ -47,6 +45,14 @@ export function convertMessagesToTurns(messages: Message[]): Turn[] {
       turns.push([message])
       thinkingGroup = null
       continue
+    }
+
+    // Guard: if no user message has been seen yet, create an implicit turn.
+    // This can happen in v1.51+ when reset() does not abort the running agent
+    // and a stale assistant placeholder is the first message in the array.
+    if (turns.length === 0) {
+      turns.push([])
+      thinkingGroup = null
     }
 
     const currentTurn = turns[turns.length - 1]
@@ -104,10 +110,15 @@ export function extractThinkingGroup(turnMessages: Turn): {
 }
 
 function isThinkingMessage(message: Message): boolean {
+  // A thinking message is an assistant message with orchestratorThinking
+  // tool calls and no text content. Messages with both content and thinking
+  // toolCalls are treated as regular messages.
   return (
     message.role === "assistant" &&
+    !message.content &&
     message.toolCalls?.some(
-      (call) => call.function.name === "orchestratorThinking"
+      (call: { function: { name: string } }) =>
+        call.function.name === "orchestratorThinking"
     ) === true
   )
 }

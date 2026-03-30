@@ -188,36 +188,18 @@ render: (props) => {
 
 ### Canvas actions
 
-For actions that open a canvas panel, use the `AutoOpenCanvas` helper:
+For actions that open a canvas panel, render your entity card component. The card handles `toolCallId` (via `useToolCallId` context), active state detection, and auto-open internally via `useAutoOpenCanvas`:
 
 ```tsx
-import { AutoOpenCanvas } from "../../../canvas/AutoOpenCanvas"
-import { CanvasCard } from "../../../canvas/components/CanvasCard"
-
 render: (props) => {
-  // ... validate args ...
+  const args = props.args as Partial<MyEntityConfig>
+  if (!args.title) return <></>
 
-  const canvasContent: CanvasContent = {
-    type: "myEntity",
-    title: args.title,
-    // ... entity-specific fields
-  }
-
-  return (
-    <>
-      <AutoOpenCanvas content={canvasContent} />
-      <CanvasCard
-        module="analytics"
-        title={args.title}
-        description="..."
-        onOpen={() => openCanvas(canvasContent)}
-      />
-    </>
-  )
+  return <MyEntityCard config={args as MyEntityConfig} apiConfig={apiConfig} />
 }
 ```
 
-`AutoOpenCanvas` auto-opens the canvas once on mount (skipped on small screens). The `CanvasCard` stays in the chat for manual re-opening.
+See `canvas/CANVAS_ENTITIES.md` for the full pattern on implementing canvas entity cards.
 
 ## Testing
 
