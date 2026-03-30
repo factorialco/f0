@@ -506,7 +506,8 @@ const e = {
       numeric: "Numeric",
       link: "Link",
       date: "Date",
-      dropdownSingle: "Dropdown"
+      dropdownSingle: "Dropdown",
+      file: "File upload"
     },
     selectQuestion: {
       addOption: "Add option",
@@ -515,6 +516,9 @@ const e = {
       remove: "Remove",
       correct: "Correct",
       optionPlaceholder: "Type anything you want here..."
+    },
+    fileQuestion: {
+      uploadButton: "Upload file"
     },
     answer: {
       label: "Answer",
