@@ -46,7 +46,7 @@ export const F0AiFullscreenChatComponent = () => {
   return (
     <div
       className={cn(
-        "flex h-full w-full flex-col overflow-hidden overscroll-none bg-f1-background",
+        "flex h-full w-full flex-col overflow-hidden overscroll-none",
         "[scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
         "[&_*]:[-webkit-tap-highlight-color:transparent]"
       )}
