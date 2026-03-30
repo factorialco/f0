@@ -1,87 +1,68 @@
 #!/usr/bin/env bash
-# =============================================================================
-# Agentic Check — F0 Design System
 #
-# Runs a single AI-powered review agent against a PR diff using GitHub Copilot CLI.
-# Adapted from Factorial's agentic-check.sh for the F0 monorepo.
+# agentic-check.sh
+#
+# Runs an agentic check against a pull request using a prompt file.
+# The agent's verdict determines pass/fail, but this script always exits 0
+# (advisory mode — findings are posted as PR comments but never block CI).
+#
+# Adapted from Factorial's agentic-check.sh for the F0 design system monorepo.
 #
 # Required environment variables:
-#   PR_NUMBER             — Pull request number
-#   PROMPT_FILE           — Path to the agent prompt markdown file
-#   MODEL                 — Model identifier (e.g., claude-opus-4.6)
-#   GH_TOKEN              — GitHub token for API access
-#   COPILOT_GITHUB_TOKEN  — Token for Copilot CLI authentication
-#   GITHUB_REPOSITORY     — owner/repo (e.g., factorialco/f0)
+#   PR_NUMBER              - The pull request number
+#   PROMPT_FILE            - Path to the prompt markdown file (relative to repo root)
+#   MODEL                  - The model to use (e.g. claude-opus-4.6)
+#   GH_TOKEN               - GitHub token for API calls and PR comments
+#   COPILOT_GITHUB_TOKEN   - Token for Copilot CLI authentication
+#   GITHUB_REPOSITORY      - owner/repo (auto-set by GitHub Actions)
 #
 # Optional environment variables:
-#   CHECK_NAME            — Human-readable check name (default: "Agentic Check")
-#   CHECK_EMOJI           — Emoji prefix for the check (default: "")
-# =============================================================================
+#   CHECK_NAME             - Human-readable check name (e.g. "Code Review")
+#   CHECK_EMOJI            - Emoji for the check (e.g. "📋")
+#
 
 set -euo pipefail
 
-CHECK_NAME="${CHECK_NAME:-Agentic Check}"
-CHECK_EMOJI="${CHECK_EMOJI:-}"
+GITHUB_API="https://api.github.com"
 
-# -----------------------------------------------------------------------------
-# Helpers
-# -----------------------------------------------------------------------------
+# --- Helpers ---
 
+# Post a comment on the PR via the GitHub REST API.
 post_pr_comment() {
   local body="$1"
-  local comment_marker="<!-- agentic-check: ${CHECK_NAME} -->"
-
-  # Check if a comment with this marker already exists
-  local existing_comment_id
-  existing_comment_id=$(gh api \
-    "repos/${GITHUB_REPOSITORY}/issues/${PR_NUMBER}/comments" \
-    --jq ".[] | select(.body | contains(\"${comment_marker}\")) | .id" \
-    2>/dev/null | head -1 || true)
-
-  local full_body="${comment_marker}
-${body}"
-
-  if [[ -n "${existing_comment_id}" ]]; then
-    gh api \
-      "repos/${GITHUB_REPOSITORY}/issues/comments/${existing_comment_id}" \
-      -X PATCH \
-      -f body="${full_body}" > /dev/null
-    echo "Updated existing PR comment (id: ${existing_comment_id})"
-  else
-    gh api \
-      "repos/${GITHUB_REPOSITORY}/issues/${PR_NUMBER}/comments" \
-      -f body="${full_body}" > /dev/null
-    echo "Created new PR comment"
-  fi
+  local payload
+  payload=$(jq -n --arg body "${body}" '{"body": $body}')
+  curl -sS -X POST \
+    -H "Authorization: Bearer ${GH_TOKEN}" \
+    -H "Accept: application/vnd.github+json" \
+    -H "Content-Type: application/json" \
+    "${GITHUB_API}/repos/${GITHUB_REPOSITORY}/issues/${PR_NUMBER}/comments" \
+    -d "${payload}" > /dev/null
 }
 
+# Redact common secret patterns from output before posting to PR comments.
+# GitHub masks secrets in logs but not in API-posted comments.
 redact_secrets() {
   local text="$1"
-  # Strip GitHub tokens
-  text=$(echo "${text}" | sed -E 's/gh[pousr]_[A-Za-z0-9_]{36,}/**REDACTED**/g')
-  # Strip common API key patterns
-  text=$(echo "${text}" | sed -E 's/(Bearer|token|key|secret|password|credential)[= :]+[A-Za-z0-9_\-]{20,}/**REDACTED**/gi')
-  echo "${text}"
+  # Redact GitHub tokens
+  text=$(printf '%s' "${text}" | sed -E 's/ghp_[A-Za-z0-9]{36}/[REDACTED]/g')
+  text=$(printf '%s' "${text}" | sed -E 's/gho_[A-Za-z0-9]{36}/[REDACTED]/g')
+  text=$(printf '%s' "${text}" | sed -E 's/ghs_[A-Za-z0-9]{36}/[REDACTED]/g')
+  text=$(printf '%s' "${text}" | sed -E 's/github_pat_[A-Za-z0-9_]{80,}/[REDACTED]/g')
+  # Redact generic API key patterns (long hex/base64 strings after common key labels)
+  text=$(printf '%s' "${text}" | sed -E 's/(api[_-]?key|token|secret|password|credential)["\x27]?\s*[:=]\s*["\x27]?[A-Za-z0-9+\/\-_]{20,}/\1=[REDACTED]/gi')
+  printf '%s' "${text}"
 }
 
-# -----------------------------------------------------------------------------
-# Validation
-# -----------------------------------------------------------------------------
+# --- Validation ---
 
-missing_vars=()
-for var in PR_NUMBER PROMPT_FILE MODEL GH_TOKEN COPILOT_GITHUB_TOKEN GITHUB_REPOSITORY; do
-  if [[ -z "${!var:-}" ]]; then
-    missing_vars+=("${var}")
-  fi
-done
-
-if [[ ${#missing_vars[@]} -gt 0 ]]; then
-  echo "::error::Missing required environment variables: ${missing_vars[*]}"
+if [[ -z "${PR_NUMBER:-}" ]]; then
+  echo "::error::PR_NUMBER is required"
   exit 1
 fi
 
-if ! command -v copilot &>/dev/null; then
-  echo "::error::Copilot CLI not found. Install with: npm install -g @github/copilot"
+if [[ -z "${PROMPT_FILE:-}" ]]; then
+  echo "::error::PROMPT_FILE is required"
   exit 1
 fi
 
@@ -90,161 +71,232 @@ if [[ ! -f "${PROMPT_FILE}" ]]; then
   exit 1
 fi
 
-echo "=== ${CHECK_EMOJI} ${CHECK_NAME} ==="
-echo "PR: #${PR_NUMBER}"
-echo "Model: ${MODEL}"
-echo "Prompt: ${PROMPT_FILE}"
+if [[ -z "${MODEL:-}" ]]; then
+  echo "::error::MODEL is required"
+  exit 1
+fi
 
-# -----------------------------------------------------------------------------
-# Prepare the prompt
-# -----------------------------------------------------------------------------
+if [[ -z "${GH_TOKEN:-}" ]]; then
+  echo "::error::GH_TOKEN is required"
+  exit 1
+fi
 
-# Fetch PR metadata
-BASE_BRANCH=$(gh pr view "${PR_NUMBER}" --json baseRefName -q '.baseRefName')
-HEAD_BRANCH=$(gh pr view "${PR_NUMBER}" --json headRefName -q '.headRefName')
-REPO="${GITHUB_REPOSITORY}"
+if [[ -z "${COPILOT_GITHUB_TOKEN:-}" ]]; then
+  echo "::error::COPILOT_GITHUB_TOKEN is required"
+  exit 1
+fi
 
-echo "Base: ${BASE_BRANCH}"
-echo "Head: ${HEAD_BRANCH}"
+if [[ -z "${GITHUB_REPOSITORY:-}" ]]; then
+  echo "::error::GITHUB_REPOSITORY is required"
+  exit 1
+fi
 
-# Read the prompt and substitute placeholders
+# --- Verify Copilot CLI ---
+
+if ! command -v copilot &>/dev/null; then
+  echo "::error::Copilot CLI is not installed. Add an 'Install Copilot CLI' step before running this script."
+  exit 1
+fi
+
+# --- Prepare prompt ---
+
+echo "::group::Preparing prompt"
+
+# Fetch PR metadata for template substitution
+PR_JSON=$(curl -sS \
+  -H "Authorization: Bearer ${GH_TOKEN}" \
+  -H "Accept: application/vnd.github+json" \
+  "${GITHUB_API}/repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}" 2>/dev/null || echo '{}')
+BASE_BRANCH=$(echo "${PR_JSON}" | jq -r '.base.ref // "main"')
+HEAD_BRANCH=$(echo "${PR_JSON}" | jq -r '.head.ref // "unknown"')
+
+# Read prompt and substitute placeholders
 PROMPT=$(cat "${PROMPT_FILE}")
 PROMPT="${PROMPT//\{\{PR_NUMBER\}\}/${PR_NUMBER}}"
 PROMPT="${PROMPT//\{\{BASE_BRANCH\}\}/${BASE_BRANCH}}"
 PROMPT="${PROMPT//\{\{HEAD_BRANCH\}\}/${HEAD_BRANCH}}"
-PROMPT="${PROMPT//\{\{REPO\}\}/${REPO}}"
+PROMPT="${PROMPT//\{\{REPO\}\}/${GITHUB_REPOSITORY}}"
 
-# Write the prepared prompt to a temp file for the agent
-echo "${PROMPT}" > /tmp/prepared-prompt.md
+echo "Prompt file: ${PROMPT_FILE}"
+echo "PR: #${PR_NUMBER} (${HEAD_BRANCH} -> ${BASE_BRANCH})"
+echo "Model: ${MODEL}"
+echo ""
+echo "--- Prompt content ---"
+echo "${PROMPT}"
+echo "--- End prompt ---"
+echo "::endgroup::"
 
-# -----------------------------------------------------------------------------
-# Fetch PR diff
-# -----------------------------------------------------------------------------
+# --- Fetch PR diff ---
 
-echo "Fetching PR diff..."
-gh api \
-  "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}" \
+echo "::group::Fetching PR diff"
+DIFF_FILE="/tmp/pr.diff"
+HTTP_STATUS=$(curl -sS -w '%{http_code}' -o "${DIFF_FILE}" \
+  -H "Authorization: Bearer ${GH_TOKEN}" \
   -H "Accept: application/vnd.github.v3.diff" \
-  > /tmp/pr.diff
+  "${GITHUB_API}/repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}")
 
-DIFF_LINES=$(wc -l < /tmp/pr.diff | tr -d ' ')
-DIFF_FILES=$(grep -c '^diff --git' /tmp/pr.diff || true)
-DIFF_ADDITIONS=$(grep -c '^+[^+]' /tmp/pr.diff || true)
-DIFF_DELETIONS=$(grep -c '^-[^-]' /tmp/pr.diff || true)
-
-echo "Diff stats: ${DIFF_FILES} files, +${DIFF_ADDITIONS}/-${DIFF_DELETIONS}, ${DIFF_LINES} lines"
-
-if [[ "${DIFF_LINES}" -eq 0 ]]; then
-  echo "Empty diff — skipping check"
-  echo "### ${CHECK_EMOJI} ${CHECK_NAME}: Skipped (empty diff)" >> "${GITHUB_STEP_SUMMARY:-/dev/null}"
+if [[ "${HTTP_STATUS}" != "200" ]]; then
+  echo "::error::Failed to fetch PR diff (HTTP ${HTTP_STATUS})"
+  cat "${DIFF_FILE}" || true
+  rm -f "${DIFF_FILE}"
+  # Advisory mode: exit 0 even on infra errors
   exit 0
 fi
 
-# -----------------------------------------------------------------------------
-# Run the Copilot agent
-# -----------------------------------------------------------------------------
+DIFF_SIZE=$(wc -c < "${DIFF_FILE}" | tr -d ' ')
+DIFF_FILES=$(grep -c '^diff --git' "${DIFF_FILE}" || echo "0")
+DIFF_ADDITIONS=$(grep -c '^+[^+]' "${DIFF_FILE}" || echo "0")
+DIFF_DELETIONS=$(grep -c '^-[^-]' "${DIFF_FILE}" || echo "0")
+echo "PR diff fetched: ${DIFF_SIZE} bytes, ${DIFF_FILES} files changed, +${DIFF_ADDITIONS}/-${DIFF_DELETIONS} lines"
+echo "Files in diff:"
+grep '^diff --git' "${DIFF_FILE}" | sed 's|diff --git a/||;s| b/.*||' || true
+echo "::endgroup::"
 
-echo "Running Copilot agent..."
+# --- Run Copilot CLI ---
 
-AGENT_OUTPUT_FILE="/tmp/agent-output.txt"
+echo "::group::Running Copilot agent"
+echo "Command: copilot -p <prompt> --model \"${MODEL}\" --allow-all-tools --add-dir . --add-dir /tmp --no-ask-user"
+echo "Prompt length: ${#PROMPT} characters"
+echo ""
 
+OUTPUT_FILE=$(mktemp)
+EXIT_CODE=0
+
+# Stream output to both the log (via tee) and the file for later parsing.
+# This gives real-time visibility in the Actions log.
+# Temporarily disable errexit so we can capture the exit code from the pipeline.
+#
+# Permission model:
+#   --allow-all-tools : required for non-interactive (-p) mode; grants shell and tool access
+#   --add-dir .       : allow read access to the repo checkout
+#   --add-dir /tmp    : allow access to the PR diff file
+#   Note: the agent inherits env vars including secrets. Raw output must NOT be
+#   posted to PR comments — only to workflow logs where GitHub masks secrets.
 set +e
 copilot \
+  -p "${PROMPT}" \
   --model "${MODEL}" \
   --allow-all-tools \
   --add-dir . \
   --add-dir /tmp \
   --no-ask-user \
-  --prompt "$(cat /tmp/prepared-prompt.md)" \
-  2>&1 | tee "${AGENT_OUTPUT_FILE}"
-AGENT_EXIT_CODE=$?
+  2>&1 | tee "${OUTPUT_FILE}"
+EXIT_CODE=${PIPESTATUS[0]}
 set -e
 
-AGENT_OUTPUT=$(cat "${AGENT_OUTPUT_FILE}")
+echo ""
+echo "copilot exited with code: ${EXIT_CODE}"
+echo "Output size: $(wc -c < "${OUTPUT_FILE}" | tr -d ' ') bytes"
+echo "::endgroup::"
 
-if [[ ${AGENT_EXIT_CODE} -ne 0 ]]; then
-  echo "::warning::Copilot agent exited with code ${AGENT_EXIT_CODE}"
+if [[ ${EXIT_CODE} -ne 0 ]]; then
+  echo "::warning::copilot exited with code ${EXIT_CODE}"
+  # Security: Do not post raw agent output — only to workflow logs where GitHub masks secrets.
+  post_pr_comment "$(cat <<EOF
+## ⚠️ ${CHECK_EMOJI:-} ${CHECK_NAME:-Agentic Check}: Agent Error
 
-  SUMMARY="### ${CHECK_EMOJI} ${CHECK_NAME}: Agent Error
+The agent failed to run (exit code: ${EXIT_CODE}).
+This is an **advisory check** — it does not block the PR.
 
-The review agent encountered an error (exit code ${AGENT_EXIT_CODE}).
-This is an advisory check — it does not block the PR.
+> Full agent output is available in the [Actions log]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID) where secrets are automatically masked by GitHub.
 
-<details>
-<summary>Agent output</summary>
+**Prompt file**: \`${PROMPT_FILE}\` | **Model**: \`${MODEL}\`
+EOF
+)"
+  cat >> "${GITHUB_STEP_SUMMARY}" <<EOF
+## ⚠️ ${CHECK_EMOJI:-} ${CHECK_NAME:-Agentic Check}
 
-\`\`\`
-$(redact_secrets "${AGENT_OUTPUT}" | head -100)
-\`\`\`
+Agent failed to run (exit code: ${EXIT_CODE}).
 
-</details>"
-
-  echo "${SUMMARY}" >> "${GITHUB_STEP_SUMMARY:-/dev/null}"
+> Check the [Actions log]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID) for details.
+EOF
+  rm -f "${OUTPUT_FILE}"
   # Advisory mode: always exit 0
   exit 0
 fi
 
-# -----------------------------------------------------------------------------
-# Parse verdict
-# -----------------------------------------------------------------------------
+# --- Parse verdict ---
 
-VERDICT_LINE=$(grep -oP '<!-- VERDICT: \K.*?(?= -->)' "${AGENT_OUTPUT_FILE}" | tail -1 || true)
+echo "::group::Parsing verdict"
+
+AGENT_OUTPUT=$(cat "${OUTPUT_FILE}")
+rm -f "${OUTPUT_FILE}"
+
+# Extract the VERDICT JSON from the output (POSIX-compatible, no PCRE)
+VERDICT_LINE=$(printf '%s\n' "${AGENT_OUTPUT}" | sed -n 's/.*<!-- VERDICT:[[:space:]]*\({.*}\).*/\1/p' | head -n 1 || true)
 
 if [[ -z "${VERDICT_LINE}" ]]; then
-  echo "::warning::No VERDICT marker found in agent output"
+  echo "::warning::No VERDICT marker found in agent output. Defaulting to fail."
+  echo ""
+  echo "--- Agent output (searching for VERDICT) ---"
+  # Show last 100 lines to help debug why no verdict was produced
+  printf '%s\n' "${AGENT_OUTPUT}" | tail -100
+  echo "--- End agent output ---"
+  echo ""
+  echo "Expected format: <!-- VERDICT: {\"pass\": true/false, \"summary\": \"...\"} -->"
+  PASS="false"
+  SUMMARY="Agent did not produce a structured verdict. Review the output manually."
+elif ! echo "${VERDICT_LINE}" | jq empty >/dev/null 2>&1; then
+  echo "::warning::VERDICT JSON is invalid. Defaulting to fail."
+  echo "Raw verdict line: ${VERDICT_LINE}"
+  PASS="false"
+  SUMMARY="Agent produced invalid verdict JSON. Review the output manually."
+else
+  PASS=$(echo "${VERDICT_LINE}" | jq -r '.pass // false')
+  SUMMARY=$(echo "${VERDICT_LINE}" | jq -r '.summary // "No summary provided"')
+  echo "Verdict found: pass=${PASS}"
+  echo "Summary: ${SUMMARY}"
+fi
 
-  SUMMARY="### ${CHECK_EMOJI} ${CHECK_NAME}: No Verdict
+echo "::endgroup::"
 
-The agent completed but did not produce a structured verdict.
-This is an advisory check — it does not block the PR.
+# --- Write verdict to job summary and post comment on failure ---
 
-<details>
-<summary>Agent output (last 50 lines)</summary>
+# Redact the summary on both pass and fail paths — prompt injection could embed secrets
+# in the verdict JSON regardless of the pass/fail outcome.
+SAFE_SUMMARY=$(redact_secrets "${SUMMARY}")
 
-\`\`\`
-$(redact_secrets "${AGENT_OUTPUT}" | tail -50)
-\`\`\`
+if [[ "${PASS}" == "true" ]]; then
+  echo "Agent check passed. Skipping PR comment."
+  cat >> "${GITHUB_STEP_SUMMARY}" <<EOF
+## ✅ ${CHECK_EMOJI:-} ${CHECK_NAME:-Agentic Check}
 
-</details>"
-
-  echo "${SUMMARY}" >> "${GITHUB_STEP_SUMMARY:-/dev/null}"
+${SAFE_SUMMARY}
+EOF
   # Advisory mode: always exit 0
   exit 0
 fi
 
-echo "Verdict: ${VERDICT_LINE}"
+echo "::group::Posting PR comment"
 
-# Parse JSON fields
-PASS=$(echo "${VERDICT_LINE}" | python3 -c "import sys, json; print(json.loads(sys.stdin.read()).get('pass', False))" 2>/dev/null || echo "")
-VERDICT_SUMMARY=$(echo "${VERDICT_LINE}" | python3 -c "import sys, json; print(json.loads(sys.stdin.read()).get('summary', ''))" 2>/dev/null || echo "")
+# Security: Do NOT post raw agent output in PR comments.
+# The agent has shell access and inherits env vars (including secrets). Since the PR
+# diff is attacker-controlled, prompt injection could trick the agent into leaking
+# secrets. GitHub only auto-masks secrets in workflow logs, not in API-posted comments.
+COMMENT_BODY=$(cat <<EOF
+## ❌ ${CHECK_EMOJI:-} ${CHECK_NAME:-Agentic Check}: Issues Found
 
-if [[ "${PASS}" == "True" ]]; then
-  echo "PASSED"
+**Summary**: ${SAFE_SUMMARY}
 
-  SUMMARY="### ${CHECK_EMOJI} ${CHECK_NAME}: Passed
+> This is an **advisory check** — it does not block the PR. Full agent output is available in the [Actions log]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID) where secrets are automatically masked by GitHub.
 
-${VERDICT_SUMMARY}"
+---
+**Prompt file**: \`${PROMPT_FILE}\` | **Model**: \`${MODEL}\`
+EOF
+)
 
-  echo "${SUMMARY}" >> "${GITHUB_STEP_SUMMARY:-/dev/null}"
+post_pr_comment "${COMMENT_BODY}"
+echo "PR comment posted."
+echo "::endgroup::"
 
-  # Post a success comment to the PR (so reviewers can see it ran)
-  post_pr_comment "${SUMMARY}"
-else
-  echo "ISSUES FOUND"
+cat >> "${GITHUB_STEP_SUMMARY}" <<EOF
+## ❌ ${CHECK_EMOJI:-} ${CHECK_NAME:-Agentic Check}
 
-  REDACTED_SUMMARY=$(redact_secrets "${VERDICT_SUMMARY}")
+${SAFE_SUMMARY}
 
-  SUMMARY="### ${CHECK_EMOJI} ${CHECK_NAME}: Issues Found
+> Full agent output is available in the [Actions log]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID).
+EOF
 
-${REDACTED_SUMMARY}
-
-> This is an **advisory check** — it does not block the PR. Please review the findings above."
-
-  echo "${SUMMARY}" >> "${GITHUB_STEP_SUMMARY:-/dev/null}"
-
-  # Post findings as a PR comment
-  post_pr_comment "${SUMMARY}"
-fi
-
+echo "::warning::Agent check found issues: ${SAFE_SUMMARY}"
 # Advisory mode: always exit 0 regardless of pass/fail
 exit 0

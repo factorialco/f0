@@ -48,7 +48,6 @@ jobs:
             prompt: .github/agent-prompts/test-coverage-review.md
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      COPILOT_GITHUB_TOKEN: ${{ secrets.AGENTIC_CHECKS }}
       PR_NUMBER: ${{ github.event.pull_request.number }}
       PROMPT_FILE: ${{ matrix.prompt }}
       CHECK_NAME: ${{ matrix.name }}
@@ -57,6 +56,9 @@ jobs:
     steps:
       - name: Runner uptime
         run: uptime
+
+      - name: Repository last commit
+        run: which git && (git log -n 1 --pretty=format:"%h %s %an %ar" || true)
 
       - name: Runner disk space
         run: df -h
@@ -98,4 +100,6 @@ jobs:
 
       - name: Run Agentic Check
         if: steps.copy-trusted.outputs.trusted == 'true'
+        env:
+          COPILOT_GITHUB_TOKEN: ${{ secrets.AGENTIC_CHECKS }}
         run: bash .github/scripts/agentic-check.sh
