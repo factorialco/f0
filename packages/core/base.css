@@ -12,6 +12,7 @@
 
     --neutral-0: theme("colors.white.100");
     --neutral-2: theme("colors.grey.0");
+    --neutral-3: theme("colors.grey.2");
     --neutral-5: theme("colors.grey.5");
     --neutral-10: theme("colors.grey.10");
     --neutral-20: theme("colors.grey.20");
@@ -94,6 +95,7 @@
   :root .dark {
     --neutral-0: theme("colors.grey.100");
     --neutral-2: theme("colors.grey.0");
+    --neutral-3: theme("colors.grey.2");
     --neutral-5: theme("colors.white.5");
     --neutral-10: theme("colors.white.10");
     --neutral-20: theme("colors.white.20");
