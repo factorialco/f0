@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.425.0](https://github.com/factorialco/f0/compare/f0-react-v1.424.0...f0-react-v1.425.0) (2026-03-30)
+
+
+### Features
+
+* add checkbox question type ([#3759](https://github.com/factorialco/f0/issues/3759)) ([266a4e0](https://github.com/factorialco/f0/commit/266a4e07c21a3a596f5a2eb371f206f3a84bfae6))
+
 ## [1.424.0](https://github.com/factorialco/f0/compare/f0-react-v1.423.0...f0-react-v1.424.0) (2026-03-27)
 
 
