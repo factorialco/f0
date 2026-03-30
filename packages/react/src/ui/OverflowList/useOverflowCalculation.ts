@@ -103,7 +103,11 @@ export function useOverflowCalculation<T>(
 
   // Calculate which items should be visible and which should overflow
   const calculateVisibleItems = useCallback(() => {
-    if (!containerRef.current || items.length === 0) return
+    if (items.length === 0) {
+      setItemsState({ visibleItems: [], overflowItems: [] })
+      return
+    }
+    if (!containerRef.current) return
 
     const currentContainerWidth = containerRef.current.clientWidth
     const overflowButtonWidth =
