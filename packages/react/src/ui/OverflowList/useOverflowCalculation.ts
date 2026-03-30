@@ -110,6 +110,7 @@ export function useOverflowCalculation<T>(
         }
         return { visibleItems: [], overflowItems: [] }
       })
+      return
     }
 
     if (!containerRef.current) return
