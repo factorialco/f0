@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.425.3](https://github.com/factorialco/f0/compare/f0-react-v1.425.2...f0-react-v1.425.3) (2026-03-30)
+
+
+### Bug Fixes
+
+* do not show import banner on doc pages with no components ([#3792](https://github.com/factorialco/f0/issues/3792)) ([ec3ccf5](https://github.com/factorialco/f0/commit/ec3ccf542a0ee8a05229429d055eb6c42df44830))
+
 ## [1.425.2](https://github.com/factorialco/f0/compare/f0-react-v1.425.1...f0-react-v1.425.2) (2026-03-30)
 
 
