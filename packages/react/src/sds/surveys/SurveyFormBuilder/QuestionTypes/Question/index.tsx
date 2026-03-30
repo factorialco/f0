@@ -1,5 +1,7 @@
-import { BaseQuestionPropsForOtherQuestionComponents } from "../BaseQuestion"
-import { CheckboxQuestion, CheckboxQuestionProps } from "../CheckboxQuestion"
+import type { BaseQuestionPropsForOtherQuestionComponents } from "../BaseQuestion"
+import type { CheckboxQuestionProps } from "../CheckboxQuestion"
+
+import { CheckboxQuestion } from "../CheckboxQuestion"
 import { DateQuestion, DateQuestionProps } from "../DateQuestion"
 import { DropdownSingleQuestion } from "../DropdownSingleQuestion"
 import { DropdownSingleQuestionProps } from "../DropdownSingleQuestion/types"

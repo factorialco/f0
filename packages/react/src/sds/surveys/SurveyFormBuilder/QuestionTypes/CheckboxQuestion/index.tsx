@@ -2,8 +2,9 @@ import { F0Checkbox } from "@/components/F0Checkbox"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
+import type { BaseQuestionOnChangeParams } from "../../types"
+
 import { useSurveyFormBuilderContext } from "../../Context"
-import { BaseQuestionOnChangeParams } from "../../types"
 import {
   BaseQuestion,
   BaseQuestionPropsForOtherQuestionComponents,
@@ -71,6 +72,7 @@ export const CheckboxQuestion = ({
         <textarea
           value={labelProp}
           placeholder={t("surveyFormBuilder.checkboxQuestion.placeholder")}
+          aria-label={t("surveyFormBuilder.checkboxQuestion.placeholder")}
           onChange={(e) => {
             onQuestionChange?.({
               ...baseQuestionComponentProps,
