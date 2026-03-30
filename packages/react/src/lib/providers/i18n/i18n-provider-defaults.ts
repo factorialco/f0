@@ -330,6 +330,7 @@ export const defaultTranslations = {
       download: "Download {{format}}",
       exportDashboard: "Export dashboard as {{format}}",
       exporting: "Exporting...",
+      rows: "rows",
     },
     pong: {
       title: "Pong",

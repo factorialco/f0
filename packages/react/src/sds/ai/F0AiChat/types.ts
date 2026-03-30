@@ -5,6 +5,7 @@ import { IconType } from "@/components/F0Icon"
 import { defaultTranslations } from "@/lib/providers/i18n/i18n-provider-defaults"
 
 import type { ChatDashboardConfig } from "./canvas/entities/dashboard/types"
+import type { DataDownloadDataset } from "./actions/core/dataDownload/types"
 export type { PersonProfile } from "./components/markdownRenderers/entityRef/entities/person/types"
 export type { CandidateProfile } from "./components/markdownRenderers/entityRef/entities/candidate/types"
 export type { JobPostingProfile } from "./components/markdownRenderers/entityRef/entities/jobPosting/types"
@@ -35,10 +36,20 @@ export type DashboardCanvasContent = CanvasContentBase & {
 }
 
 /**
+ * Data download canvas content — renders a full data table with download options.
+ */
+export type DataDownloadCanvasContent = CanvasContentBase & {
+  type: "dataDownload"
+  dataset: DataDownloadDataset
+  filename?: string
+  markdown?: string
+}
+
+/**
  * Discriminated union for canvas panel content.
  * Add new entity types to this union as they are implemented.
  */
-export type CanvasContent = DashboardCanvasContent
+export type CanvasContent = DashboardCanvasContent | DataDownloadCanvasContent
 
 /**
  * A tool hint that can be activated to prepend invisible context to the user's
