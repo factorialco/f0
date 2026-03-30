@@ -80,7 +80,7 @@ export const CheckboxQuestion = ({
           }}
           disabled={!!inputDisabled}
           className={cn(
-            "w-full resize-none bg-transparent pl-2.5 text-f1-foreground-secondary outline-none placeholder:text-f1-foreground-tertiary",
+            "w-full resize-none bg-transparent pt-0.5 pl-2.5 text-f1-foreground-secondary outline-none placeholder:text-f1-foreground-tertiary",
             inputDisabled && "cursor-not-allowed opacity-50"
           )}
           style={TEXT_AREA_STYLE}
