@@ -1916,6 +1916,12 @@ declare interface CheckboxProps extends DataAttributes_2 {
     required?: boolean;
 }
 
+declare type CheckboxQuestionProps = BaseQuestionPropsForOtherQuestionComponents & {
+    type: "checkbox";
+    value?: boolean | null;
+    label: string;
+};
+
 declare type ChildrenPaginationInfo = {
     total: number;
     perPage: number;
@@ -3305,6 +3311,7 @@ export declare const defaultTranslations: {
             readonly date: "Date";
             readonly dropdownSingle: "Dropdown";
             readonly file: "File upload";
+            readonly checkbox: "Checkbox";
         };
         readonly selectQuestion: {
             readonly addOption: "Add option";
@@ -3316,6 +3323,9 @@ export declare const defaultTranslations: {
         };
         readonly fileQuestion: {
             readonly uploadButton: "Upload file";
+        };
+        readonly checkboxQuestion: {
+            readonly placeholder: "Provide a label for the checkbox";
         };
         readonly answer: {
             readonly label: "Answer";
@@ -7160,10 +7170,10 @@ declare interface GranularityDefinition {
     calendarMode?: CalendarMode;
     calendarView: CalendarView;
     weekStartsOn?: WeekStartsOn;
-    label: (viewDate: Date, i18n: TranslationsType) => ReactNode;
+    label: (viewDate: Date, i18n: TranslationsType, locale?: string) => ReactNode;
     toRangeString: (date: Date | DateRange | undefined | null, i18n: TranslationsType, format?: DateStringFormat) => DateRangeString;
     toRange: <T extends Date | DateRange | undefined | null>(date: T) => T extends Date | DateRange ? DateRangeComplete : T;
-    toString: (date: Date | DateRange | undefined | null, i18n: TranslationsType, format?: DateStringFormat) => string;
+    toString: (date: Date | DateRange | undefined | null, i18n: TranslationsType, format?: DateStringFormat, locale?: string) => string;
     toStringMaxWidth: () => number;
     placeholder: () => string;
     fromString: (dateStr: string | DateRangeString, i18n: TranslationsType) => DateRange | null;
@@ -8360,6 +8370,10 @@ declare type OnChangeQuestionParams = BaseQuestionOnChangeParams & ({
 } | {
     type: "file";
     value?: string[] | null;
+} | {
+    type: "checkbox";
+    value?: boolean | null;
+    label: string;
 });
 
 export declare type OnChangeSectionParams = {
@@ -8867,11 +8881,13 @@ export declare type QuestionElement = Omit<TextQuestionProps, QuestionPropsToOmi
     type: "date";
 }, QuestionPropsToOmit> | Omit<FileQuestionProps & {
     type: "file";
+}, QuestionPropsToOmit> | Omit<CheckboxQuestionProps & {
+    type: "checkbox";
 }, QuestionPropsToOmit>;
 
 declare type QuestionPropsToOmit = "onAction" | "onChange" | "onAddNewElement";
 
-export declare type QuestionType = "rating" | "select" | "multi-select" | "dropdown-single" | "text" | "longText" | "numeric" | "link" | "date" | "file";
+export declare type QuestionType = "rating" | "select" | "multi-select" | "dropdown-single" | "text" | "longText" | "numeric" | "link" | "date" | "file" | "checkbox";
 
 export declare interface RadarChartConfig {
     type: "radar";
@@ -9466,6 +9482,9 @@ export declare type SurveyAnswerValue = {
 } | {
     type: "file";
     value: string[] | null;
+} | {
+    type: "checkbox";
+    value: boolean | null;
 };
 
 export declare const SurveyFormBuilder: WithDataTestIdReturnType_7<({ elements: elementsProp, disabled, onChange, disallowOptionalQuestions, allowedQuestionTypes, applyingChanges, useUpload, }: SurveyFormBuilderProps) => JSX_2.Element>;
@@ -9503,7 +9522,7 @@ export declare type SurveyFormSubmitResult = {
     errors?: Record<string, string>;
 };
 
-export declare type SurveySubmitAnswers = Record<string, string | number | string[] | Date | null>;
+export declare type SurveySubmitAnswers = Record<string, string | number | boolean | string[] | Date | null>;
 
 /**
  * All valid renderIf conditions for switch fields
@@ -10863,10 +10882,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        videoEmbed: {
-            setVideoEmbed: (options: {
-                src: string;
-            }) => ReturnType;
+        transcript: {
+            insertTranscript: (data: TranscriptData) => ReturnType;
         };
     }
 }
@@ -10874,8 +10891,10 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        transcript: {
-            insertTranscript: (data: TranscriptData) => ReturnType;
+        videoEmbed: {
+            setVideoEmbed: (options: {
+                src: string;
+            }) => ReturnType;
         };
     }
 }
