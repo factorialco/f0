@@ -32,7 +32,11 @@ import { Thinking } from "./Thinking"
 import { UserMessage as F0UserMessage } from "./UserMessage"
 import { WelcomeScreen } from "./WelcomeScreen"
 
-export const MessagesContainer = (props: Partial<MessagesProps>) => (
+type MessagesContainerProps = Partial<MessagesProps> & {
+  noShadows?: boolean
+}
+
+export const MessagesContainer = (props: MessagesContainerProps) => (
   <FeedbackModalProvider>
     <Messages {...props} />
   </FeedbackModalProvider>
@@ -47,7 +51,8 @@ const Messages = ({
   onRegenerate,
   onCopy,
   markdownTagRenderers,
-}: Partial<MessagesProps>) => {
+  noShadows = false,
+}: MessagesContainerProps) => {
   const { messages, interrupt, isLoading } = useCopilotChat()
   const { modal, handleSubmit, handleClose } = useFeedbackSubmit()
 
@@ -382,8 +387,12 @@ const Messages = ({
           </div>
         </div>
 
-        <ScrollShadow position="top" key="shadow-top" />
-        <ScrollShadow position="bottom" key="shadow-bottom" />
+        {!noShadows && (
+          <>
+            <ScrollShadow position="top" key="shadow-top" />
+            <ScrollShadow position="bottom" key="shadow-bottom" />
+          </>
+        )}
       </div>
 
       {modal.isOpen && (

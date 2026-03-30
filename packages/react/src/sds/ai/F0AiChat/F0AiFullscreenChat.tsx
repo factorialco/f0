@@ -75,7 +75,7 @@ export const F0AiFullscreenChatComponent = () => {
       )}
 
       <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-        <MessagesContainer />
+        <MessagesContainer noShadows />
       </div>
 
       <div
