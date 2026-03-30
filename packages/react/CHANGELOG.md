@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.425.1](https://github.com/factorialco/f0/compare/f0-react-v1.425.0...f0-react-v1.425.1) (2026-03-30)
+
+
+### Bug Fixes
+
+* **OneDateNavigator:** use locale from l10n context in granularity label ([#3767](https://github.com/factorialco/f0/issues/3767)) ([d3bcc52](https://github.com/factorialco/f0/commit/d3bcc521c79402ef9865a5743bc1fa05be20c33c))
+
 ## [1.425.0](https://github.com/factorialco/f0/compare/f0-react-v1.424.0...f0-react-v1.425.0) (2026-03-30)
 
 
