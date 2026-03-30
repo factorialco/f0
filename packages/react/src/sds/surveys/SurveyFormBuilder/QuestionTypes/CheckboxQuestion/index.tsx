@@ -66,7 +66,7 @@ export const CheckboxQuestion = ({
 
   return (
     <BaseQuestion {...baseQuestionComponentProps}>
-      <div className="flex items-center px-0.5">
+      <div className="flex items-start px-0.5">
         <F0Checkbox checked={false} disabled hideLabel presentational />
         <textarea
           value={labelProp}
@@ -80,7 +80,7 @@ export const CheckboxQuestion = ({
           }}
           disabled={!!inputDisabled}
           className={cn(
-            "w-full resize-none bg-transparent pl-2.5 text-current outline-none placeholder:text-f1-foreground-tertiary",
+            "w-full resize-none bg-transparent pl-2.5 text-f1-foreground-secondary outline-none placeholder:text-f1-foreground-tertiary",
             inputDisabled && "cursor-not-allowed opacity-50"
           )}
           style={TEXT_AREA_STYLE}

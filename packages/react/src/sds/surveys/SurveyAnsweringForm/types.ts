@@ -24,7 +24,7 @@ export type SurveyAnswers = Record<string, SurveyAnswerValue>
 
 export type SurveySubmitAnswers = Record<
   string,
-  string | number | string[] | Date | null
+  string | number | boolean | string[] | Date | null
 >
 
 export type SurveyFormSubmitResult =

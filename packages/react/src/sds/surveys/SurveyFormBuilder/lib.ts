@@ -117,6 +117,8 @@ const DEFAULT_QUESTION_TYPES: QuestionType[] = [
   "numeric",
   "link",
   "date",
+  "file",
+  "checkbox",
 ]
 
 export const getDefaultQuestionTypeToAdd = (
