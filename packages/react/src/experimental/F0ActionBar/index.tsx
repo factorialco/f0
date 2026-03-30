@@ -3,6 +3,7 @@ import {
   forwardRef,
   Fragment,
   useCallback,
+  useEffect,
   useImperativeHandle,
   useMemo,
   useRef,
@@ -78,6 +79,7 @@ export interface F0ActionBarRef {
 }
 
 const errorNavigateClassName = "f0-action-bar-error-navigate"
+const WIGGLE_DURATION_MS = 600
 
 interface F0ActionBarProps {
   /**
@@ -181,6 +183,14 @@ const _F0ActionBar = forwardRef<F0ActionBarRef, F0ActionBarProps>(
     const containerRef = useRef<HTMLDivElement>(null)
     const wiggleTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
+    useEffect(() => {
+      return () => {
+        if (wiggleTimeoutRef.current) {
+          clearTimeout(wiggleTimeoutRef.current)
+        }
+      }
+    }, [])
+
     useImperativeHandle(ref, () => ({
       wiggle(options?: WiggleOptions) {
         const el = containerRef.current
@@ -200,7 +210,7 @@ const _F0ActionBar = forwardRef<F0ActionBarRef, F0ActionBarProps>(
         wiggleTimeoutRef.current = setTimeout(() => {
           el.classList.remove(className)
           wiggleTimeoutRef.current = null
-        }, 1200)
+        }, WIGGLE_DURATION_MS)
       },
     }))
     const visibleSecondaryActions = secondaryActions.slice(0, 2)
@@ -225,19 +235,17 @@ const _F0ActionBar = forwardRef<F0ActionBarRef, F0ActionBarProps>(
      * Each action group and its items are mapped to the expected dropdown item structure.
      */
     const primaryActionsDropdownItems = useMemo<ButtonDropdownGroup[]>(() => {
-      {
-        return primaryActions.map((group) => ({
-          ...group,
-          items: group.items.map((item) => ({
-            value: item.label,
-            label: item.label,
-            icon: item.icon,
-            critical: item.critical,
-            description: item.description,
-            disabled: item.disabled,
-          })),
-        }))
-      }
+      return primaryActions.map((group) => ({
+        ...group,
+        items: group.items.map((item) => ({
+          value: item.label,
+          label: item.label,
+          icon: item.icon,
+          critical: item.critical,
+          description: item.description,
+          disabled: item.disabled,
+        })),
+      }))
     }, [primaryActions])
 
     const singlePrimaryAction = useMemo(() => {
