@@ -1,6 +1,8 @@
 import { Markdown, type AssistantMessageProps } from "@copilotkit/react-ui"
 import { createContext, useContext, useEffect } from "react"
 
+import { F0ActionItem } from "../../../F0ActionItem"
+import { useI18n } from "@/lib/providers/i18n"
 import { useAiChat } from "../../providers/AiChatStateProvider"
 import { useToolRenderer } from "../../providers/ToolRendererProvider"
 import { markdownRenderers } from "../markdownRenderers"
@@ -28,8 +30,20 @@ export const AssistantMessage = ({
   // After message expansion in MessagesContainer, each message has at
   // most one tool call, so toolCalls[0] is correct.
   const resolveToolCallUI = useToolRenderer()
+  const isThinkingTool =
+    message?.role === "assistant" &&
+    message.toolCalls?.find(
+      (tool) => tool.function.name === "orchestratorThinking"
+    )
+  // For thinking tools, pass status so the render callback shows the
+  // correct spinner/completed state (v1.10.6 generativeUI receives
+  // these as render props).
   const subComponent = message
-    ? resolveToolCallUI(message, messages ?? [])
+    ? ((message as any)?.generativeUI?.(
+        isThinkingTool
+          ? { status: isLoading ? "executing" : "completed" }
+          : undefined
+      ) ?? resolveToolCallUI(message, messages ?? []))
     : null
 
   // Extract toolCallId from the message so action components can read it
@@ -38,6 +52,7 @@ export const AssistantMessage = ({
 
   const isEmptyMessage = !content && !subComponent
 
+  const translations = useI18n()
   const { tracking } = useAiChat()
 
   useEffect(() => {
@@ -53,6 +68,9 @@ export const AssistantMessage = ({
   return (
     <ToolCallIdContext.Provider value={toolCallId}>
       <div className="relative isolate flex w-full flex-col items-start justify-center">
+        {isLoading && !subComponent && (
+          <F0ActionItem title={translations.ai.thinking} status="executing" />
+        )}
         {message && content && (
           <div className="w-fit max-w-full [&>div]:flex [&>div]:flex-col [&>div]:gap-1">
             <Markdown
