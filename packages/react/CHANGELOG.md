@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.426.0](https://github.com/factorialco/f0/compare/f0-react-v1.425.4...f0-react-v1.426.0) (2026-03-30)
+
+
+### Features
+
+* **ai:** upgrade CopilotKit peer deps from ^1.10.6 to ^1.54.0 ([#3763](https://github.com/factorialco/f0/issues/3763)) ([7f672c8](https://github.com/factorialco/f0/commit/7f672c81d99863c5962576500bbb7b7c9e6b344c))
+
 ## [1.425.4](https://github.com/factorialco/f0/compare/f0-react-v1.425.3...f0-react-v1.425.4) (2026-03-30)
 
 
