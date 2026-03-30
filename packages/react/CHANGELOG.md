@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.425.4](https://github.com/factorialco/f0/compare/f0-react-v1.425.3...f0-react-v1.425.4) (2026-03-30)
+
+
+### Bug Fixes
+
+* clear visibleItems state when items becomes empty ([#3794](https://github.com/factorialco/f0/issues/3794)) ([a5f9a94](https://github.com/factorialco/f0/commit/a5f9a94f2155bd65c86beccb6ed80f027be6d565))
+
 ## [1.425.3](https://github.com/factorialco/f0/compare/f0-react-v1.425.2...f0-react-v1.425.3) (2026-03-30)
 
 
