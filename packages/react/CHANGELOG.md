@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.425.2](https://github.com/factorialco/f0/compare/f0-react-v1.425.1...f0-react-v1.425.2) (2026-03-30)
+
+
+### Bug Fixes
+
+* **editable-table:** fix disabled cell background color, add new color ([#3722](https://github.com/factorialco/f0/issues/3722)) ([7a93d73](https://github.com/factorialco/f0/commit/7a93d73ccddb7e93892b3f903e7b4f739288a479))
+
 ## [1.425.1](https://github.com/factorialco/f0/compare/f0-react-v1.425.0...f0-react-v1.425.1) (2026-03-30)
 
 
