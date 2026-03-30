@@ -95,6 +95,11 @@ export const getDefaultParamsForQuestionType = (questionType: QuestionType) => {
       return {
         value: null,
       }
+    case "checkbox":
+      return {
+        value: null,
+        label: "",
+      }
     default:
       throw new Error(`Unsupported question type: ${questionType}`)
   }
@@ -112,6 +117,8 @@ const DEFAULT_QUESTION_TYPES: QuestionType[] = [
   "numeric",
   "link",
   "date",
+  "file",
+  "checkbox",
 ]
 
 export const getDefaultQuestionTypeToAdd = (

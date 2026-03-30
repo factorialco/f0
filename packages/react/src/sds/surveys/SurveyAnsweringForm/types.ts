@@ -18,12 +18,13 @@ export type SurveyAnswerValue =
   | { type: "link"; value: string | null }
   | { type: "date"; value: Date | null }
   | { type: "file"; value: string[] | null }
+  | { type: "checkbox"; value: boolean | null }
 
 export type SurveyAnswers = Record<string, SurveyAnswerValue>
 
 export type SurveySubmitAnswers = Record<
   string,
-  string | number | string[] | Date | null
+  string | number | boolean | string[] | Date | null
 >
 
 export type SurveyFormSubmitResult =

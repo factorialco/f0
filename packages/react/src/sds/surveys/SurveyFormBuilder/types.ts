@@ -1,14 +1,15 @@
 import type { UseFileUpload } from "@/components/F0Form/fields/file/types"
 
-import { DateQuestionProps } from "./QuestionTypes/DateQuestion"
-import { DropdownSingleQuestionProps } from "./QuestionTypes/DropdownSingleQuestion/types"
-import { FileQuestionProps } from "./QuestionTypes/FileQuestion"
-import { LinkQuestionProps } from "./QuestionTypes/LinkQuestion"
-import { NumericQuestionProps } from "./QuestionTypes/NumericQuestion"
-import { RatingQuestionProps } from "./QuestionTypes/RatingQuestion"
-import { SectionProps } from "./Section/types"
-import { SelectQuestionProps } from "./QuestionTypes/SelectQuestion/types"
-import { TextQuestionProps } from "./QuestionTypes/TextQuestion"
+import type { CheckboxQuestionProps } from "./QuestionTypes/CheckboxQuestion"
+import type { DateQuestionProps } from "./QuestionTypes/DateQuestion"
+import type { DropdownSingleQuestionProps } from "./QuestionTypes/DropdownSingleQuestion/types"
+import type { FileQuestionProps } from "./QuestionTypes/FileQuestion"
+import type { LinkQuestionProps } from "./QuestionTypes/LinkQuestion"
+import type { NumericQuestionProps } from "./QuestionTypes/NumericQuestion"
+import type { RatingQuestionProps } from "./QuestionTypes/RatingQuestion"
+import type { SelectQuestionProps } from "./QuestionTypes/SelectQuestion/types"
+import type { TextQuestionProps } from "./QuestionTypes/TextQuestion"
+import type { SectionProps } from "./Section/types"
 
 export type QuestionType =
   | "rating"
@@ -21,6 +22,7 @@ export type QuestionType =
   | "link"
   | "date"
   | "file"
+  | "checkbox"
 
 export type ElementType = QuestionType | "section"
 
@@ -50,6 +52,7 @@ export type QuestionElement =
   | Omit<LinkQuestionProps & { type: "link" }, QuestionPropsToOmit>
   | Omit<DateQuestionProps & { type: "date" }, QuestionPropsToOmit>
   | Omit<FileQuestionProps & { type: "file" }, QuestionPropsToOmit>
+  | Omit<CheckboxQuestionProps & { type: "checkbox" }, QuestionPropsToOmit>
 
 export type SurveyFormBuilderElement =
   | { type: "section"; section: SectionElement }
@@ -118,6 +121,11 @@ type OnChangeQuestionParams = BaseQuestionOnChangeParams &
     | {
         type: "file"
         value?: string[] | null
+      }
+    | {
+        type: "checkbox"
+        value?: boolean | null
+        label: string
       }
   )
 

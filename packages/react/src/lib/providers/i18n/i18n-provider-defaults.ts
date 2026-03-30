@@ -410,6 +410,7 @@ export const defaultTranslations = {
       date: "Date",
       dropdownSingle: "Dropdown",
       file: "File upload",
+      checkbox: "Checkbox",
     },
     selectQuestion: {
       addOption: "Add option",
@@ -421,6 +422,9 @@ export const defaultTranslations = {
     },
     fileQuestion: {
       uploadButton: "Upload file",
+    },
+    checkboxQuestion: {
+      placeholder: "Provide a label for the checkbox",
     },
     answer: {
       label: "Answer",

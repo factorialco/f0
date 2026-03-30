@@ -1,11 +1,12 @@
 import { useMemo } from "react"
 import { z, type ZodTypeAny } from "zod"
 
-import type { F0Field, F0FileField } from "@/components/F0Form/fields/types"
+import type { F0CheckboxField } from "@/components/F0Form/fields/checkbox/types"
 import type {
   MimeType,
   UseFileUpload,
 } from "@/components/F0Form/fields/file/types"
+import type { F0Field, F0FileField } from "@/components/F0Form/fields/types"
 import type { F0SectionConfig } from "@/components/F0Form/types"
 import type { TranslationKey } from "@/lib/providers/i18n/i18n-provider-defaults"
 
@@ -147,6 +148,23 @@ function buildFileSchema(
     .optional()
     .superRefine((v, ctx) => {
       if (isRequired && (!v || v.length === 0)) {
+        ctx.addIssue({
+          code: "custom",
+          message: t("forms.validation.required"),
+        })
+      }
+    })
+}
+
+function buildCheckboxSchema(
+  isRequired: boolean,
+  t: (key: TranslationKey) => string
+) {
+  return z
+    .boolean()
+    .optional()
+    .superRefine((v, ctx) => {
+      if (isRequired && !v) {
         ctx.addIssue({
           code: "custom",
           message: t("forms.validation.required"),
@@ -516,6 +534,34 @@ function buildFieldForQuestion(
       })
     }
 
+    case "checkbox": {
+      const checkboxQ = q as QuestionElement & { label?: string }
+      const checkboxField: F0CheckboxField = {
+        id: q.id,
+        type: "checkbox",
+        label: checkboxQ.label || label,
+        disabled: disableFields,
+      }
+      return f0FormField(buildCheckboxSchema(!!q.required, t), {
+        ...baseConfig,
+        fieldType: "custom",
+        render: ({ value, onChange, onBlur, error }) => (
+          <BaseQuestion {...questionProps}>
+            <div className="px-0.5">
+              <F0FormField
+                field={checkboxField}
+                value={value ?? false}
+                onChange={onChange as (value: unknown) => void}
+                onBlur={onBlur}
+                error={!!error}
+                hideLabel
+              />
+            </div>
+          </BaseQuestion>
+        ),
+      })
+    }
+
     default:
       return f0FormField(z.unknown(), {
         ...baseConfig,
@@ -597,7 +643,6 @@ export function useSurveyFormSchema(
       flatQuestions,
       sections,
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     elements,
     mode,
@@ -606,5 +651,6 @@ export function useSurveyFormSchema(
     currentQuestionId,
     previewMode,
     disableFields,
+    useUpload,
   ])
 }

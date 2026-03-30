@@ -2,6 +2,7 @@ import { IconType } from "@/components/F0Icon/F0Icon"
 import {
   Calendar,
   Check,
+  CheckCircle,
   CheckDouble,
   ChevronDown,
   Link,
@@ -76,6 +77,11 @@ export const useQuestionTypes = () => {
       icon: Upload,
       questionType: "file",
     },
+    {
+      label: t("surveyFormBuilder.questionTypes.checkbox"),
+      icon: CheckCircle,
+      questionType: "checkbox",
+    },
   ]
 
   const filteredQuestionTypes = allQuestionTypes.filter((questionType) =>
@@ -101,4 +107,5 @@ export const questionTypeIconMap: Record<QuestionType, IconType> = {
   date: Calendar,
   "dropdown-single": ChevronDown,
   file: Upload,
+  checkbox: CheckCircle,
 }
