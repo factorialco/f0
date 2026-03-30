@@ -293,7 +293,27 @@ export const WithDefaultDate: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     // Ensure the default value is rendered
-    const trigger = canvas.getByText("Jul 2025")
+    const trigger = canvas.getByText(/july 2025/i)
+    expect(trigger).toBeInTheDocument()
+  },
+}
+
+export const WithDefaultDateFrench: Story = {
+  args: {
+    hideGoToCurrent: true,
+    defaultValue: {
+      value: { from: new Date(2025, 6, 30), to: new Date(2025, 6, 30) },
+      granularity: "month",
+    } as DatePickerValue,
+    granularities: ["month"],
+  },
+  parameters: {
+    l10n: { locale: "fr" },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    // Ensure the month label is rendered in French
+    const trigger = canvas.getByText(/juillet 2025/i)
     expect(trigger).toBeInTheDocument()
   },
 }

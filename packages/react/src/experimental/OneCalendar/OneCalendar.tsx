@@ -135,7 +135,7 @@ const OneCalendarInternal = ({
   }
 
   // Get header label
-  const getHeaderLabel = () => granularity.label(viewDate, i18n)
+  const getHeaderLabel = () => granularity.label(viewDate, i18n, l10n.locale)
 
   // Handle selection of a date
   const handleSelect = (date: Date | DateRange | null) => {
