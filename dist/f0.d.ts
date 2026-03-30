@@ -1916,6 +1916,12 @@ declare interface CheckboxProps extends DataAttributes_2 {
     required?: boolean;
 }
 
+declare type CheckboxQuestionProps = BaseQuestionPropsForOtherQuestionComponents & {
+    type: "checkbox";
+    value?: boolean | null;
+    label: string;
+};
+
 declare type ChildrenPaginationInfo = {
     total: number;
     perPage: number;
@@ -3304,6 +3310,8 @@ export declare const defaultTranslations: {
             readonly link: "Link";
             readonly date: "Date";
             readonly dropdownSingle: "Dropdown";
+            readonly file: "File upload";
+            readonly checkbox: "Checkbox";
         };
         readonly selectQuestion: {
             readonly addOption: "Add option";
@@ -3312,6 +3320,12 @@ export declare const defaultTranslations: {
             readonly remove: "Remove";
             readonly correct: "Correct";
             readonly optionPlaceholder: "Type anything you want here...";
+        };
+        readonly fileQuestion: {
+            readonly uploadButton: "Upload file";
+        };
+        readonly checkboxQuestion: {
+            readonly placeholder: "Provide a label for the checkbox";
         };
         readonly answer: {
             readonly label: "Answer";
@@ -3624,7 +3638,7 @@ export declare type DurationUnit = (typeof durationUnits)[number];
 export declare const durationUnits: readonly ["days", "hours", "minutes", "seconds"];
 
 /** The edit mode for a column cell in the editable table. */
-declare type EditableTableCellEditType = "text" | "date" | "select" | "multiselect" | "display-only" | "disabled";
+declare type EditableTableCellEditType = "text" | "number" | "date" | "select" | "multiselect" | "display-only" | "disabled";
 
 declare type EditableTableCollectionProps<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<R>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<R>> = CollectionProps<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping, EditableTableVisualizationOptions<R, Filters, Sortings, Summaries>>;
 
@@ -3656,6 +3670,12 @@ declare type EditableTableColumnDefinition<R extends RecordType, Sortings extend
      * function whose return value isn't statically known.
      */
     selectConfig?: SelectCellConfig<R>;
+    /**
+     * Configuration for `"number"` cells. Accepts constraints (`min`, `max`),
+     * stepping (`step`), formatting (`maxDecimals`, `locale`), and units.
+     * Falls back to sensible defaults when omitted.
+     */
+    numberConfig?: NumberCellConfig;
 };
 
 declare type EditableTableVisualizationOptions<R extends RecordType, _Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition> = Omit<TableVisualizationOptions<R, _Filters, Sortings, Summaries>, "columns"> & {
@@ -6739,6 +6759,14 @@ declare type FileDef = {
  */
 declare type FileFieldRenderIf = CommonRenderIfCondition | F0BaseFieldRenderIfFunction;
 
+declare type FileQuestionProps = BaseQuestionPropsForOtherQuestionComponents & {
+    type: "file";
+    value?: string[] | null;
+    useUpload?: UseFileUpload;
+    accept?: MimeType_2[];
+    maxSizeMB?: number;
+};
+
 /**
  * Return type of the consumer-provided upload hook
  */
@@ -7142,10 +7170,10 @@ declare interface GranularityDefinition {
     calendarMode?: CalendarMode;
     calendarView: CalendarView;
     weekStartsOn?: WeekStartsOn;
-    label: (viewDate: Date, i18n: TranslationsType) => ReactNode;
+    label: (viewDate: Date, i18n: TranslationsType, locale?: string) => ReactNode;
     toRangeString: (date: Date | DateRange | undefined | null, i18n: TranslationsType, format?: DateStringFormat) => DateRangeString;
     toRange: <T extends Date | DateRange | undefined | null>(date: T) => T extends Date | DateRange ? DateRangeComplete : T;
-    toString: (date: Date | DateRange | undefined | null, i18n: TranslationsType, format?: DateStringFormat) => string;
+    toString: (date: Date | DateRange | undefined | null, i18n: TranslationsType, format?: DateStringFormat, locale?: string) => string;
     toStringMaxWidth: () => number;
     placeholder: () => string;
     fromString: (dateStr: string | DateRangeString, i18n: TranslationsType) => DateRange | null;
@@ -8099,6 +8127,15 @@ export declare interface NextStepsProps {
     items: StepItemProps[];
 }
 
+declare type NumberCellConfig = {
+    min?: number;
+    max?: number;
+    step?: number;
+    maxDecimals?: number;
+    locale?: string;
+    units?: string;
+};
+
 /**
  * All valid renderIf conditions for number fields
  */
@@ -8330,6 +8367,13 @@ declare type OnChangeQuestionParams = BaseQuestionOnChangeParams & ({
 } | {
     type: "date";
     value?: Date | null;
+} | {
+    type: "file";
+    value?: string[] | null;
+} | {
+    type: "checkbox";
+    value?: boolean | null;
+    label: string;
 });
 
 export declare type OnChangeSectionParams = {
@@ -8835,11 +8879,15 @@ export declare type QuestionElement = Omit<TextQuestionProps, QuestionPropsToOmi
     type: "link";
 }, QuestionPropsToOmit> | Omit<DateQuestionProps & {
     type: "date";
+}, QuestionPropsToOmit> | Omit<FileQuestionProps & {
+    type: "file";
+}, QuestionPropsToOmit> | Omit<CheckboxQuestionProps & {
+    type: "checkbox";
 }, QuestionPropsToOmit>;
 
 declare type QuestionPropsToOmit = "onAction" | "onChange" | "onAddNewElement";
 
-export declare type QuestionType = "rating" | "select" | "multi-select" | "dropdown-single" | "text" | "longText" | "numeric" | "link" | "date";
+export declare type QuestionType = "rating" | "select" | "multi-select" | "dropdown-single" | "text" | "longText" | "numeric" | "link" | "date" | "file" | "checkbox";
 
 export declare interface RadarChartConfig {
     type: "radar";
@@ -9359,7 +9407,7 @@ declare type SummaryKey<Definition extends SummariesDefinition> = Definition ext
 
 declare type SummaryType = "sum";
 
-export declare function SurveyAnsweringForm({ elements, onSubmit: onSubmitProp, mode, title, description, resourceHeader, isOpen, onClose, position: positionProp, module, allowToChangeFullscreen, defaultValues, errorTriggerMode, loading, labels, preview, }: SurveyAnsweringFormProps): JSX_2.Element;
+export declare function SurveyAnsweringForm({ elements, onSubmit: onSubmitProp, mode, title, description, resourceHeader, isOpen, onClose, position: positionProp, module, allowToChangeFullscreen, defaultValues, errorTriggerMode, loading, labels, preview, useUpload, }: SurveyAnsweringFormProps): JSX_2.Element;
 
 declare interface SurveyAnsweringFormBaseProps {
     elements: SurveyFormBuilderElement[];
@@ -9375,6 +9423,7 @@ declare interface SurveyAnsweringFormBaseProps {
     defaultValues?: Partial<SurveyAnswers>;
     errorTriggerMode?: F0FormErrorTriggerMode;
     loading?: boolean;
+    useUpload?: UseFileUpload;
     labels?: {
         empty?: {
             title?: string;
@@ -9430,9 +9479,15 @@ export declare type SurveyAnswerValue = {
 } | {
     type: "date";
     value: Date | null;
+} | {
+    type: "file";
+    value: string[] | null;
+} | {
+    type: "checkbox";
+    value: boolean | null;
 };
 
-export declare const SurveyFormBuilder: WithDataTestIdReturnType_7<({ elements: elementsProp, disabled, onChange, disallowOptionalQuestions, allowedQuestionTypes, applyingChanges, }: SurveyFormBuilderProps) => JSX_2.Element>;
+export declare const SurveyFormBuilder: WithDataTestIdReturnType_7<({ elements: elementsProp, disabled, onChange, disallowOptionalQuestions, allowedQuestionTypes, applyingChanges, useUpload, }: SurveyFormBuilderProps) => JSX_2.Element>;
 
 export declare type SurveyFormBuilderCallbacks = {
     onQuestionChange?: (params: OnChangeQuestionParams) => void;
@@ -9456,6 +9511,7 @@ export declare type SurveyFormBuilderProps = {
     disallowOptionalQuestions?: boolean;
     allowedQuestionTypes?: QuestionType[];
     applyingChanges?: boolean;
+    useUpload?: UseFileUpload;
 };
 
 export declare type SurveyFormSubmitResult = {
@@ -9466,7 +9522,7 @@ export declare type SurveyFormSubmitResult = {
     errors?: Record<string, string>;
 };
 
-export declare type SurveySubmitAnswers = Record<string, string | number | string[] | Date | null>;
+export declare type SurveySubmitAnswers = Record<string, string | number | boolean | string[] | Date | null>;
 
 /**
  * All valid renderIf conditions for switch fields
