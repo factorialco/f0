@@ -1,7 +1,9 @@
 import { useCallback, useRef, useState } from "react"
 
-import { ExportDropdown } from "@/patterns/F0AnalyticsDashboard/components/ExportDropdown/ExportDropdown"
+import { ButtonInternal } from "@/components/F0Button/internal"
 import { OneEllipsis } from "@/lib/OneEllipsis"
+import { Download } from "@/icons/app"
+import { useI18n } from "@/lib/providers/i18n"
 
 import { CloseCanvasButton } from "../../components/CloseCanvasButton"
 import { useDashboardCanvas } from "./DashboardContext"
@@ -13,6 +15,7 @@ export function DashboardHeader({
   title: string
   onClose: () => void
 }) {
+  const { t } = useI18n()
   const { exportAsExcel } = useDashboardCanvas()
   const [isExporting, setIsExporting] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
@@ -37,9 +40,15 @@ export function DashboardHeader({
       </OneEllipsis>
       <div ref={ref} className="flex items-center gap-2">
         {exportAsExcel && (
-          <ExportDropdown
-            onExportExcel={handleExport}
-            isExporting={isExporting}
+          <ButtonInternal
+            variant="outline"
+            icon={Download}
+            onClick={handleExport}
+            label={
+              isExporting
+                ? t("ai.dataDownload.exporting")
+                : t("ai.dataDownload.exportDashboard", { format: "Excel" })
+            }
           />
         )}
       </div>
