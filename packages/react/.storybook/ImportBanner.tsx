@@ -57,12 +57,18 @@ export function ImportBanner({ isDark }: ImportBannerProps) {
 
   try {
     const stories = context.componentStories()
-    if (stories.length > 0) {
-      const primary = stories[0]
-      const storyContext = context.getStoryContext(primary)
-      fileName = storyContext.parameters?.fileName as string | undefined
-      title = primary.title
+    if (stories.length === 0) {
+      // Not a component page (e.g. Foundations, Introduction)
+      return null
     }
+    const primary = stories[0]
+    const storyContext = context.getStoryContext(primary)
+    if (!storyContext.component) {
+      // Story page without a component (e.g. hooks examples, utilities)
+      return null
+    }
+    fileName = storyContext.parameters?.fileName as string | undefined
+    title = primary.title
   } catch {
     // Context may not be ready yet on initial render
     return null
@@ -73,7 +79,7 @@ export function ImportBanner({ isDark }: ImportBannerProps) {
 
   const content =
     !importPath || !componentName ? (
-      <div className="sb-unstyled" style={{ marginBottom: 24 }}>
+      <div className="sb-unstyled my-4">
         <F0Alert
           variant="warning"
           title="Internal component"
@@ -81,7 +87,7 @@ export function ImportBanner({ isDark }: ImportBannerProps) {
         />
       </div>
     ) : (
-      <div className="sb-unstyled" style={{ marginBottom: 24 }}>
+      <div className="sb-unstyled">
         <h3 className="mb-2 text-xl font-medium text-f1-foreground">
           Importing this component
         </h3>
