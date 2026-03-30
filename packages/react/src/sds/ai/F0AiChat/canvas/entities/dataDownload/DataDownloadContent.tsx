@@ -2,8 +2,8 @@ import { useCallback, useMemo } from "react"
 
 import type { RecordType } from "@/hooks/datasource"
 
-import { OneDataCollection } from "@/patterns/OneDataCollection"
-import { useDataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource"
+import { OneDataCollection } from "@/experimental/OneDataCollection"
+import { useDataCollectionSource } from "@/experimental/OneDataCollection/hooks/useDataCollectionSource"
 
 import type { DataDownloadCanvasContent } from "../../../types"
 import { useDataDownloadView } from "./DataDownloadContext"

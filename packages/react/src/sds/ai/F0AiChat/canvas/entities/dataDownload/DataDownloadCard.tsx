@@ -3,21 +3,10 @@ import { useI18n } from "@/lib/providers/i18n"
 import type { DataDownloadDataset } from "../../../actions/core/dataDownload/types"
 import type { DataDownloadCanvasContent } from "../../../types"
 
-import {
-  Table,
-  Td,
-  Th,
-} from "../../../components/markdownRenderers/components/Table"
 import { useToolCallId } from "../../../components/messages/AssistantMessage"
 import { useAutoOpenCanvas } from "../../../hooks/useAutoOpenCanvas"
 import { useAiChat } from "../../../providers/AiChatStateProvider"
 import { CanvasCard } from "../../components/CanvasCard"
-
-/**
- * Below this row count we render the dataset inline as a markdown-style
- * table instead of opening the canvas. The threshold is exclusive.
- */
-const INLINE_TABLE_MAX_ROWS = 15
 
 export type DataDownloadCardProps = {
   title?: string
@@ -32,21 +21,11 @@ export function DataDownloadCard({
   filename,
   markdown,
 }: DataDownloadCardProps) {
-  const { t } = useI18n()
-
+  const translations = useI18n()
   const toolCallId = useToolCallId()
   const { canvasContent, openCanvas, closeCanvas } = useAiChat()
 
-  const cleanFilename = filename?.replaceAll("_", " ")
-
-  const title = titleProp || cleanFilename || t("ai.dataDownload.title")
-
-  // Render inline only when the rows we have represent the complete
-  // dataset and it's small enough to display in the chat thread.
-  const hasFullDataset =
-    dataset.totalCount == null || dataset.totalCount <= dataset.rows.length
-  const renderInline =
-    hasFullDataset && dataset.rows.length < INLINE_TABLE_MAX_ROWS
+  const title = titleProp || filename || translations.ai.dataDownload.title
 
   const isActive =
     canvasContent?.type === "dataDownload" &&
@@ -63,32 +42,7 @@ export function DataDownloadCard({
       toolCallId,
     } satisfies DataDownloadCanvasContent)
 
-  // Skip auto-opening the canvas when we render inline.
-  useAutoOpenCanvas(renderInline ? undefined : toolCallId, handleOpen)
-
-  if (renderInline) {
-    return (
-      <Table title={title}>
-        <thead>
-          <tr>
-            {dataset.columns.map((col) => (
-              <Th key={col}>{dataset.columnLabels?.[col] ?? col}</Th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {dataset.rows.map((row, rowIndex) => (
-            <tr key={rowIndex}>
-              {dataset.columns.map((col) => {
-                const value = row[col]
-                return <Td key={col}>{value == null ? "" : String(value)}</Td>
-              })}
-            </tr>
-          ))}
-        </tbody>
-      </Table>
-    )
-  }
+  useAutoOpenCanvas(toolCallId, handleOpen)
 
   return (
     <CanvasCard
@@ -96,8 +50,8 @@ export function DataDownloadCard({
       title={title}
       description={
         dataset.totalCount != null
-          ? t("ai.dataDownload.rows", { amount: dataset.totalCount })
-          : t("ai.dataDownload.title")
+          ? `${dataset.totalCount} ${translations.ai.dataDownload.rows}`
+          : translations.ai.dataDownload.title
       }
       onOpen={handleOpen}
       onClose={() => closeCanvas()}
