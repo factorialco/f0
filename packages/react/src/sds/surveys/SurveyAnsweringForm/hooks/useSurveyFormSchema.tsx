@@ -25,6 +25,7 @@ import type {
 } from "../types"
 
 import { BaseQuestion } from "../../SurveyFormBuilder/QuestionTypes/BaseQuestion"
+import { SEARCH_BOX_OPTIONS_THRESHOLD } from "../../SurveyFormBuilder/QuestionTypes/DropdownSingleQuestion/types"
 import { DEFAULT_FILE_ACCEPT } from "../../SurveyFormBuilder/QuestionTypes/FileQuestion"
 import {
   RatingQuestionField,
@@ -381,9 +382,12 @@ function buildFieldForQuestion(
     }
 
     case "dropdown-single": {
-      const options = (
-        q as QuestionElement & { options: SelectQuestionOption[] }
-      ).options.map((o) => ({ value: o.value, label: o.label }))
+      const options = q.options.map((o) => ({
+        value: o.value,
+        label: o.label,
+      }))
+      const showSearchBox =
+        q.showSearchBox ?? options.length > SEARCH_BOX_OPTIONS_THRESHOLD
       const field: F0Field = {
         id: q.id,
         type: "select",
@@ -393,6 +397,8 @@ function buildFieldForQuestion(
         clearable: !q.required,
         multiple: false,
         disabled: disableFields,
+        showSearchBox,
+        searchBoxPlaceholder: q.searchBoxPlaceholder,
       }
       return f0FormField(buildStringSchema(!!q.required, t), {
         ...baseConfig,

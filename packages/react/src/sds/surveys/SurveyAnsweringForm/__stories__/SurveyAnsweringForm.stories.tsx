@@ -2,13 +2,14 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { useCallback, useRef, useState } from "react"
 
-import { F0Button } from "@/components/F0Button"
 import type {
   FileUploadHookReturn,
   FileUploadResult,
   FileUploadStatus,
   UseFileUpload,
 } from "@/components/F0Form/fields/file/types"
+
+import { F0Button } from "@/components/F0Button"
 
 import type { SurveyAnsweringFormProps } from "../types"
 
@@ -156,6 +157,25 @@ const sampleElements: SurveyFormBuilderElement[] = [
             { value: "lateral-move", label: "Lateral move to new team" },
             { value: "specialise", label: "Deepen specialisation" },
             { value: "management", label: "Move into management" },
+          ],
+          required: true,
+        },
+        {
+          id: "q-department",
+          title: "Which department are you in?",
+          description: "Select your current department from the list",
+          type: "dropdown-single" as const,
+          options: [
+            { value: "engineering", label: "Engineering" },
+            { value: "design", label: "Design" },
+            { value: "marketing", label: "Marketing" },
+            { value: "sales", label: "Sales" },
+            { value: "finance", label: "Finance" },
+            { value: "hr", label: "Human Resources" },
+            { value: "legal", label: "Legal" },
+            { value: "operations", label: "Operations" },
+            { value: "customer-success", label: "Customer Success" },
+            { value: "product", label: "Product" },
           ],
           required: true,
         },
