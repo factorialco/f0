@@ -575,9 +575,6 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
   const actionBarSavingLabel =
     submitConfig?.savingMessage ?? forms.actionBar.saving
 
-  const centerActionBarInFrameContent =
-    isActionBar && !!submitConfig?.centerActionBarInFrameContent
-
   const successMessageDuration = submitConfig?.successMessageDuration
 
   // Infer the form values type from the schema
@@ -979,7 +976,6 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
             hasErrors={hasErrors}
             errorCount={errorCount}
             resolvedActionBarLabel={resolvedActionBarLabel}
-            centerActionBarInFrameContent={centerActionBarInFrameContent}
             submitLabel={submitLabel}
             submitIcon={submitIcon}
             discardableChanges={discardableChanges}

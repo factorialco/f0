@@ -211,12 +211,6 @@ interface F0FormActionBarSubmitConfig extends F0FormSubmitConfigBase {
   discardConfig?: F0FormDiscardConfig
   /** Label shown in the action bar (defaults to i18n "forms.actionBar.unsavedChanges") */
   actionBarLabel?: string
-  /**
-   * When true, centers the action bar relative to the ApplicationFrame content area
-   * (accounting for the sidebar width) instead of the full viewport.
-   * @default false
-   */
-  centerActionBarInFrameContent?: boolean
 }
 
 /**
