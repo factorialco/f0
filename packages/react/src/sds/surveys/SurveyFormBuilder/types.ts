@@ -105,6 +105,8 @@ type OnChangeQuestionParams = BaseQuestionOnChangeParams &
         type: "dropdown-single"
         value?: string | null
         options?: SelectQuestionOption[]
+        showSearchBox?: boolean
+        searchBoxPlaceholder?: string
       }
     | {
         type: "numeric"
