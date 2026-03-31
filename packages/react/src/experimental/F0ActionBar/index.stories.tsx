@@ -3,11 +3,6 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useEffect, useRef, useState } from "react"
 import { fn } from "storybook/test"
 
-import * as SidebarStories from "@/components/Navigation/Sidebar/index.stories"
-import { Sidebar } from "@/components/Navigation/Sidebar/Sidebar"
-import { ApplicationFrame } from "@/examples/ApplicationFrame"
-import { Page } from "@/experimental/Navigation/Page"
-import * as PageStories from "@/experimental/Navigation/Page/index.stories"
 import { Reset, Save } from "@/icons/app"
 
 import { F0ActionBar, ActionBarStatus, F0ActionBarRef } from "."
@@ -227,93 +222,6 @@ export const ErrorWiggle: Story = {
       description: {
         story:
           "Click the Save button to trigger the error wiggle animation, which highlights the action bar with a shake and red glow — matching the behavior of F0Form input validation errors.",
-      },
-    },
-  },
-}
-
-const WithApplicationFrameDemo = () => {
-  const actionBarRef = useRef<F0ActionBarRef>(null)
-  const [status, setStatus] = useState<ActionBarStatus>("idle")
-  const [label, setLabel] = useState("You have changes pending to be saved")
-
-  const handleSave = () => {
-    setStatus("loading")
-    setLabel("Saving...")
-    setTimeout(() => {
-      setStatus("success")
-      setLabel("Your changes have been saved")
-    }, 2000)
-  }
-
-  const handleDiscard = () => {
-    setStatus("idle")
-    setLabel("You have changes pending to be saved")
-  }
-
-  useEffect(() => {
-    if (status === "success") {
-      const timer = setTimeout(() => {
-        setStatus("idle")
-        setLabel("You have changes pending to be saved")
-      }, 3000)
-      return () => clearTimeout(timer)
-    }
-  }, [status])
-
-  return (
-    <ApplicationFrame
-      ai={{
-        runtimeUrl: "https://mastra.local.factorial.dev/copilotkit",
-        agent: "one-workflow",
-        credentials: "include",
-        showDevConsole: false,
-        enabled: true,
-        resizable: true,
-        greeting: "Hello, John",
-      }}
-      sidebar={<Sidebar {...SidebarStories.default.args} />}
-    >
-      <Page {...PageStories.Default.args} />
-      <F0ActionBar
-        ref={actionBarRef}
-        isOpen
-        variant="light"
-        status={status}
-        label={label}
-        primaryActions={[
-          {
-            label: "Save",
-            icon: Save,
-            onClick: () => {
-              if (status === "idle") {
-                actionBarRef.current?.wiggle({ errorHighlight: true })
-              } else {
-                handleSave()
-              }
-            },
-          },
-        ]}
-        secondaryActions={[
-          {
-            label: "Discard",
-            onClick: handleDiscard,
-          },
-        ]}
-      />
-    </ApplicationFrame>
-  )
-}
-
-export const WithApplicationFrame: Story = {
-  render: () => <WithApplicationFrameDemo />,
-  parameters: {
-    layout: "fullscreen",
-    docs: {
-      story: { inline: false, height: "700px" },
-      description: {
-        story:
-          "F0ActionBar inside an ApplicationFrame with sidebar and One chat. Click Save to trigger the error wiggle, then click again to start the save flow.",
       },
     },
   },

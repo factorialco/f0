@@ -1,7 +1,7 @@
 import { zeroRender as render, screen } from "@/testing/test-utils"
 import { createRef } from "react"
 import { act } from "react"
-import { describe, expect, it, vi } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { F0ActionBar, F0ActionBarRef } from "."
 
@@ -175,5 +175,102 @@ describe("F0ActionBar wiggle ref", () => {
 
     const bar = screen.getByText("Unsaved changes").closest("[class*='fixed']")
     expect(bar).not.toHaveClass("f0-action-bar-error-navigate")
+  })
+})
+
+describe("F0ActionBar auto-centering in #content", () => {
+  const defaultProps = {
+    isOpen: true,
+    variant: "light" as const,
+    primaryActions: [{ label: "Save", onClick: vi.fn() }],
+    label: "Unsaved changes",
+  }
+
+  let contentEl: HTMLElement
+
+  beforeEach(() => {
+    contentEl = document.createElement("main")
+    contentEl.id = "content"
+    contentEl.getBoundingClientRect = vi.fn().mockReturnValue({
+      left: 240,
+      width: 800,
+      top: 0,
+      right: 1040,
+      bottom: 900,
+      height: 900,
+      x: 240,
+      y: 0,
+      toJSON: vi.fn(),
+    })
+    document.body.appendChild(contentEl)
+
+    Object.defineProperty(window, "innerWidth", {
+      value: 1280,
+      writable: true,
+    })
+  })
+
+  afterEach(() => {
+    contentEl.remove()
+  })
+
+  it("applies inline left and right styles when #content is present", () => {
+    render(<F0ActionBar {...defaultProps} />)
+
+    const bar = screen.getByText("Unsaved changes").closest("[class*='fixed']")
+    expect(bar).toHaveStyle({ left: "240px", right: "240px" })
+  })
+
+  it("adds auto-centering classes when #content is present", () => {
+    render(<F0ActionBar {...defaultProps} />)
+
+    const bar = screen.getByText("Unsaved changes").closest("[class*='fixed']")
+    expect(bar?.className).toContain("sm:mx-auto")
+    expect(bar?.className).toContain("sm:left-auto")
+    expect(bar?.className).toContain("sm:right-auto")
+  })
+
+  it("does not apply inline styles when #content is absent", () => {
+    contentEl.remove()
+
+    render(<F0ActionBar {...defaultProps} />)
+
+    const bar = screen.getByText("Unsaved changes").closest("[class*='fixed']")
+    expect(bar).not.toHaveStyle({ left: "240px" })
+    expect(bar?.className).not.toContain("sm:left-auto")
+  })
+
+  it("observes #content with a ResizeObserver", () => {
+    const observeSpy = vi.fn()
+    vi.stubGlobal(
+      "ResizeObserver",
+      class {
+        observe = observeSpy
+        unobserve = vi.fn()
+        disconnect = vi.fn()
+      }
+    )
+
+    render(<F0ActionBar {...defaultProps} />)
+
+    expect(observeSpy).toHaveBeenCalledWith(contentEl)
+  })
+
+  it("disconnects the ResizeObserver on unmount", () => {
+    const disconnectSpy = vi.fn()
+    vi.stubGlobal(
+      "ResizeObserver",
+      class {
+        observe = vi.fn()
+        unobserve = vi.fn()
+        disconnect = disconnectSpy
+      }
+    )
+
+    const { unmount } = render(<F0ActionBar {...defaultProps} />)
+
+    unmount()
+
+    expect(disconnectSpy).toHaveBeenCalled()
   })
 })
