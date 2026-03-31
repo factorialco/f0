@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.427.1](https://github.com/factorialco/f0/compare/f0-react-v1.427.0...f0-react-v1.427.1) (2026-03-31)
+
+
+### Bug Fixes
+
+* survey-related UI fixes ([#3803](https://github.com/factorialco/f0/issues/3803)) ([5993be6](https://github.com/factorialco/f0/commit/5993be6fe68bf1b42e2b19d65bc045b490d6a6c4))
+
 ## [1.427.0](https://github.com/factorialco/f0/compare/f0-react-v1.426.0...f0-react-v1.427.0) (2026-03-31)
 
 
