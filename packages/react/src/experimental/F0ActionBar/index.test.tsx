@@ -1,7 +1,8 @@
-import { zeroRender as render, screen } from "@/testing/test-utils"
 import { createRef } from "react"
 import { act } from "react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+
+import { zeroRender as render, screen } from "@/testing/test-utils"
 
 import { F0ActionBar, F0ActionBarRef } from "."
 
@@ -187,6 +188,7 @@ describe("F0ActionBar auto-centering in #content", () => {
   }
 
   let contentEl: HTMLElement
+  let originalInnerWidth: number
 
   beforeEach(() => {
     contentEl = document.createElement("main")
@@ -204,14 +206,22 @@ describe("F0ActionBar auto-centering in #content", () => {
     })
     document.body.appendChild(contentEl)
 
+    originalInnerWidth = window.innerWidth
     Object.defineProperty(window, "innerWidth", {
       value: 1280,
       writable: true,
+      configurable: true,
     })
   })
 
   afterEach(() => {
     contentEl.remove()
+    Object.defineProperty(window, "innerWidth", {
+      value: originalInnerWidth,
+      writable: true,
+      configurable: true,
+    })
+    vi.restoreAllMocks()
   })
 
   it("applies inline left and right styles when #content is present", () => {
@@ -242,35 +252,35 @@ describe("F0ActionBar auto-centering in #content", () => {
 
   it("observes #content with a ResizeObserver", () => {
     const observeSpy = vi.fn()
-    vi.stubGlobal(
-      "ResizeObserver",
-      class {
-        observe = observeSpy
-        unobserve = vi.fn()
-        disconnect = vi.fn()
-      }
-    )
+    const OriginalResizeObserver = globalThis.ResizeObserver
+    globalThis.ResizeObserver = class {
+      observe = observeSpy
+      unobserve = vi.fn()
+      disconnect = vi.fn()
+    } as unknown as typeof ResizeObserver
 
     render(<F0ActionBar {...defaultProps} />)
 
     expect(observeSpy).toHaveBeenCalledWith(contentEl)
+
+    globalThis.ResizeObserver = OriginalResizeObserver
   })
 
   it("disconnects the ResizeObserver on unmount", () => {
     const disconnectSpy = vi.fn()
-    vi.stubGlobal(
-      "ResizeObserver",
-      class {
-        observe = vi.fn()
-        unobserve = vi.fn()
-        disconnect = disconnectSpy
-      }
-    )
+    const OriginalResizeObserver = globalThis.ResizeObserver
+    globalThis.ResizeObserver = class {
+      observe = vi.fn()
+      unobserve = vi.fn()
+      disconnect = disconnectSpy
+    } as unknown as typeof ResizeObserver
 
     const { unmount } = render(<F0ActionBar {...defaultProps} />)
 
     unmount()
 
     expect(disconnectSpy).toHaveBeenCalled()
+
+    globalThis.ResizeObserver = OriginalResizeObserver
   })
 })

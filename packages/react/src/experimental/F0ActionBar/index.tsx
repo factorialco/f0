@@ -186,7 +186,16 @@ const _F0ActionBar = forwardRef<F0ActionBarRef, F0ActionBarProps>(
 
       const update = () => {
         const rect = el.getBoundingClientRect()
-        setContentRect({ left: rect.left, width: rect.width })
+        const left = rect.left
+        const width = rect.width
+
+        setContentRect((prev) => {
+          if (prev && prev.left === left && prev.width === width) {
+            return prev
+          }
+
+          return { left, width }
+        })
       }
 
       update()

@@ -90,7 +90,7 @@ export const Section = ({
 
   useEffect(() => {
     titleRef.current?.focus({ preventScroll: true })
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [])
 
   return (
     <div

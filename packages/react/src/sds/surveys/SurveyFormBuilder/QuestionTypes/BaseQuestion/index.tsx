@@ -112,12 +112,13 @@ export const BaseQuestion = ({
   const isSingleQuestionInSection = getIsSingleQuestionInSection(id)
 
   const titleRef = useRef<HTMLTextAreaElement>(null)
+  const shouldFocusTitleOnMountRef = useRef(!isSingleQuestionInSection)
 
   useEffect(() => {
-    if (!isSingleQuestionInSection) {
+    if (shouldFocusTitleOnMountRef.current) {
       titleRef.current?.focus({ preventScroll: true })
     }
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [])
 
   const inputDisabled = disabled || locked || answering
 
