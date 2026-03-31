@@ -18,7 +18,7 @@ import {
 import { ActionBar } from "."
 
 const meta: Meta<typeof ActionBar> = {
-  title: "ActionBar",
+  title: "Data Collection/ActionBar",
   component: ActionBar,
   parameters: {
     layout: "fullscreen",
@@ -31,7 +31,7 @@ const meta: Meta<typeof ActionBar> = {
       skipCi: true,
     },
   },
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs", "internal"],
   argTypes: {
     isOpen: {
       control: "boolean",
