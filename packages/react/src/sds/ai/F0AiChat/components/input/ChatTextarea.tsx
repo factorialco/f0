@@ -132,7 +132,7 @@ export const ChatTextarea = ({
 
   const creditWarningConfig = {
     soft: {
-      text: translation.ai.creditWarning.soft,
+      text: translation.ai?.creditWarning?.soft,
       bg: "bg-f1-background-info",
       fontColor: "text-f1-foreground-info",
       formBorder: "[&_form]:border-f1-border-info",
@@ -348,16 +348,16 @@ export const ChatTextarea = ({
         <div className="flex shrink-0 items-center gap-1">
           {onGetCredits && (
             <F0Button
-              label={translation.ai.creditWarning.getCredits}
+              label={translation.ai?.creditWarning?.getCredits ?? ""}
               size="sm"
               variant="outline"
-              tooltip={translation.ai.creditWarning.getCredits}
+              tooltip={translation.ai?.creditWarning?.getCredits ?? ""}
               onClick={onGetCredits}
             />
           )}
           {onDismissCreditWarning && (
             <F0Button
-              label={translation.ai.creditWarning.dismiss}
+              label={translation.ai?.creditWarning?.dismiss ?? ""}
               size="sm"
               variant="ghost"
               icon={Cross}
