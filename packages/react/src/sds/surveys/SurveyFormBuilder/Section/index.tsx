@@ -1,5 +1,5 @@
 import { Reorder } from "motion/react"
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 
 import { F0Button } from "@/components/F0Button"
 import { Dropdown } from "@/experimental/Navigation/Dropdown"
@@ -86,6 +86,12 @@ export const Section = ({
 
   const inputDisabled = disabled || locked || answering
 
+  const titleRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    titleRef.current?.focus({ preventScroll: true })
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
   return (
     <div
       id={`co-creation-section-${id}`}
@@ -94,6 +100,7 @@ export const Section = ({
       <div className="py-1 pl-5 pr-3">
         <div className="flex flex-row">
           <input
+            ref={titleRef}
             type="text"
             aria-label={t("surveyFormBuilder.labels.title")}
             value={title}
@@ -104,7 +111,6 @@ export const Section = ({
               "w-full text-lg font-semibold disabled:text-f1-foreground [&::-webkit-search-cancel-button]:hidden",
               inputDisabled && "cursor-not-allowed"
             )}
-            autoFocus
           />
           {!disabled && !answering && !locked && (
             <div
