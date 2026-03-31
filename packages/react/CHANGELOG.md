@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.427.3](https://github.com/factorialco/f0/compare/f0-react-v1.427.2...f0-react-v1.427.3) (2026-03-31)
+
+
+### Bug Fixes
+
+* no dot allow sorting-through tabeofcontent when SurveyFormBuilder is disabled ([#3807](https://github.com/factorialco/f0/issues/3807)) ([ba57032](https://github.com/factorialco/f0/commit/ba57032ca06f10bb4d1d43a0d7aa2b70dcc23bd7))
+
 ## [1.427.2](https://github.com/factorialco/f0/compare/f0-react-v1.427.1...f0-react-v1.427.2) (2026-03-31)
 
 
