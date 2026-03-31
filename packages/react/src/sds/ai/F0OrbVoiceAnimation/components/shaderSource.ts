@@ -1,149 +1,137 @@
 export const shaderSource = `
-float hash(vec2 p) {
-  p = fract(p * vec2(123.34, 456.21));
-  p += dot(p, p + 23.45);
-  return fract(p.x * p.y);
-}
-
-mat2 rot(float a) {
-  float s = sin(a);
-  float c = cos(a);
-  return mat2(c, -s, s, c);
-}
-
-vec2 rotateAround(vec2 point, vec2 center, float angle) {
-  vec2 local = point - center;
-  local = rot(angle) * local;
-  return local + center;
-}
-
-vec3 orbPalette(float t) {
-  float wA = exp(-18.0 * pow(t - 0.1, 2.0));
-  float wB = exp(-16.0 * pow(t - 0.35, 2.0));
-  float wC = exp(-16.0 * pow(t - 0.62, 2.0));
-  float wD = exp(-18.0 * pow(t - 0.86, 2.0));
-  float sum = max(wA + wB + wC + wD, 0.0001);
-  return (uColorA * wA + uColorB * wB + uColorC * wC + uColorD * wD) / sum;
-}
-
-float luma(vec3 c) {
-  return dot(c, vec3(0.299, 0.587, 0.114));
-}
-
-vec3 boostSaturation(vec3 color, float amount) {
-  float gray = luma(color);
-  return mix(vec3(gray), color, amount);
-}
-
-float stateWeight(float center) {
-  return exp(-5.0 * pow(uStatePhase - center, 2.0));
-}
-
-float orbField(vec2 p, float t, float warp, float microSpeed) {
-  vec2 q = p;
-  q += 0.05 * vec2(
-    sin((q.y + 0.1) * 7.0 + t * 0.85),
-    cos((q.x - 0.07) * 6.5 - t * 0.72)
-  );
-
-  q = rotateAround(q, vec2(-0.15, 0.16), t * (0.55 + 0.3 * warp));
-  q = rotateAround(q, vec2(0.18, -0.08), -t * (0.78 + 0.22 * warp));
-  q = rotateAround(q, vec2(-0.02, -0.2), t * (0.36 + 0.18 * warp));
-
-  vec2 q2 = rotateAround(q, vec2(0.07, 0.05), -t * (0.44 + 0.16 * warp));
-  vec2 q3 = rotateAround(q, vec2(-0.08, 0.02), t * (0.62 + 0.1 * warp));
-
-  float flow1 = sin((q.x * 7.2 + q.y * 4.4) * (0.9 + warp) + t * 1.12);
-  float flow2 = sin((q2.x * 3.0 - q2.y * 8.8) * (1.1 + 0.8 * warp) - t * 0.96);
-  float flow3 = cos((q3.x * 11.8 + q3.y * 2.1) * (0.65 + 0.5 * warp) + t * 1.42);
-  float flow4 = sin(length(q2 * vec2(1.15, 0.9)) * 15.0 - t * (0.9 + 0.55 * warp));
-
-  // Fast micro-turbulence for more alive movement.
-  float jitter = sin((q.x * 18.0 + q.y * 14.0) + t * microSpeed);
-  float sparkle = cos((q.x * 22.0 - q.y * 16.0) - t * (microSpeed * 1.08));
-  float noise = hash(q * 14.0 + t * 0.07) - 0.5;
-
-  return
-    0.5 +
-    0.2 * flow1 +
-    0.16 * flow2 +
-    0.13 * flow3 +
-    0.12 * flow4 +
-    0.04 * jitter +
-    0.03 * sparkle +
-    0.06 * noise;
-}
+// ─── morphic gradient orb ─────────────────────────────────────────────────────
+//
+// Colours: colorC (lavender) → colorB (pink) → colorA (peach)
+//
+// Visual layers (back → front):
+//   1. Domain-warped colour anchors  — non-linear morphing blobs
+//   2. Ghost 4th anchor that pulses in/out — unexpected colour bursts
+//   3. Turbulent sine interference   — swirling brightness modulation
+//   4. Fast iridescent rings
+//   5. Soft diffuse + Fresnel edge lift
+//   6. Rim + audio glow + idle desaturation
 
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {
   vec2 uv = fragCoord / iResolution.xy;
-  vec2 p = uv - 0.5;
-  p.x *= iResolution.x / iResolution.y;
+  vec2 p  = uv - 0.5;
+  p.x    *= iResolution.x / iResolution.y;
 
-  float radius = length(p);
-  float orbRadius = 0.46;
-  float orbMask = 1.0 - smoothstep(orbRadius, orbRadius + 0.008, radius);
+  float orbR = 0.46;
+  vec2  pn   = p / orbR;
+  float r2   = dot(pn, pn);
 
-  if (orbMask <= 0.0) {
+  if (r2 > 1.0) {
     fragColor = vec4(0.0);
     return;
   }
 
-  float speaking = stateWeight(3.0);
-  float listening = stateWeight(1.0);
-  float thinking = stateWeight(2.0);
+  // ── View-space sphere normal ──────────────────────────────────────────────
+  float nz = sqrt(max(0.0, 1.0 - r2));
+  vec3  N  = vec3(pn, nz);
 
-  float t = iTime * (0.13 + uSpeed * 0.1 + speaking * 0.11 + thinking * 0.05);
-  float warp =
-    0.22 +
-    0.58 * uComplexity +
-    speaking * 0.2 +
-    thinking * 0.16 -
-    listening * 0.1;
-  float microSpeed = 6.0 + uSpeed * 2.5 + speaking * 7.0 + thinking * 3.5;
+  // ── Fast compound rotation → rN (object-space) ───────────────────────────
+  float t  = iTime * uSpeed * 0.30;
+  float cy = cos(t * 0.71), sy = sin(t * 0.71);
+  float cx = cos(t * 0.53), sx = sin(t * 0.53);
+  float rx = N.x * cy + N.z * sy;
+  float rz = -N.x * sy + N.z * cy;
+  vec3  rN = vec3(rx, N.y * cx - rz * sx, N.y * sx + rz * cx);
 
-  float field0 = orbField(p, t, warp, microSpeed);
-  float field1 = orbField(p + vec2(0.008, 0.0), t, warp, microSpeed);
-  float field2 = orbField(p + vec2(-0.008, 0.0), t, warp, microSpeed);
-  float field3 = orbField(p + vec2(0.0, 0.008), t, warp, microSpeed);
-  float field4 = orbField(p + vec2(0.0, -0.008), t, warp, microSpeed);
+  // ── Domain warp ──────────────────────────────────────────────────────────
+  // Twist the colour-lookup space with layered sines before computing anchor
+  // distances. This breaks the blobs out of smooth circular shapes into
+  // irregular morphing regions — gradients become non-linear and organic.
+  float tw = t * 0.85;
+  vec2 warp1 = vec2(
+    sin(rN.y * 4.5 + tw * 1.20) * 0.22 + sin(rN.x * 3.1 - tw * 0.75) * 0.14,
+    cos(rN.x * 3.8 + tw * 1.05) * 0.19 + cos(rN.y * 2.7 + tw * 1.50) * 0.13
+  );
+  // Second warp pass (fbm-style, but only 2 octaves in colour-space — not geometry)
+  vec2 warp2 = vec2(
+    sin(rN.y * 8.3 + warp1.x * 3.0 + tw * 0.60) * 0.09,
+    cos(rN.x * 7.6 + warp1.y * 3.0 - tw * 0.55) * 0.08
+  );
+  vec2 cN = rN.xy + warp1 + warp2; // warped coords used for colour lookup only
 
-  // 5-tap diffusion smooths hard gaps and creates a more liquid spread.
-  float field = (field0 * 0.4 + (field1 + field2 + field3 + field4) * 0.15);
-  field = smoothstep(-0.02, 0.93, field);
-  field = 0.12 + field * 0.82;
+  // ── 3 drifting colour anchors ─────────────────────────────────────────────
+  vec2 anchorC = vec2(sin(t * 0.83)        * 0.80, cos(t * 0.67)        * 0.75);
+  vec2 anchorB = vec2(sin(t * 0.57 + 2.10) * 0.75, cos(t * 0.43 + 1.40) * 0.80);
+  vec2 anchorA = vec2(sin(t * 0.71 + 4.30) * 0.78, cos(t * 0.91 + 0.80) * 0.70);
 
-  float radialShift = 0.5 + 0.5 * sin(t * 0.16 + p.x * 2.0 - p.y * 1.6);
-  float paletteT = clamp(field * 0.8 + radialShift * 0.2, 0.0, 1.0);
+  float dC = length(cN - anchorC);
+  float dB = length(cN - anchorB);
+  float dA = length(cN - anchorA);
 
-  vec3 color = orbPalette(paletteT);
+  // Falloff softness breathes over time — sometimes blobs blend softly,
+  // sometimes they pop with a sharper edge.
+  float softness = 0.07 + sin(t * 0.37) * 0.04 + sin(t * 0.61) * 0.02;
 
-  float lighting = smoothstep(orbRadius, 0.0, radius);
-  vec2 lightPos = vec2(-0.14, 0.22);
-  float specular = exp(-24.0 * pow(length(p - lightPos), 2.0));
-  float rim = smoothstep(orbRadius, orbRadius - 0.06, radius);
-  vec3 warmTint = normalize(uColorA + uColorB + vec3(0.001));
-  vec3 coolTint = normalize(uColorC + uColorD + vec3(0.001));
-  vec3 diffTint = normalize(mix(warmTint, coolTint, 0.48));
+  float wC = 1.0 / (dC * dC + softness);
+  float wB = 1.0 / (dB * dB + softness);
+  float wA = 1.0 / (dA * dA + softness);
 
-  float diffusion = 0.32 + uIntensity * 0.3 + listening * 0.08;
-  color *= 0.78 + lighting * (0.44 + diffusion * 0.22);
-  color += mix(coolTint, warmTint, 0.35) * rim * 0.2;
-  color += diffTint * specular * 0.08;
-  color += diffTint * (1.0 - smoothstep(0.18, orbRadius, radius)) * diffusion * 0.18;
+  // ── Ghost 4th anchor (pulses in and out) ──────────────────────────────────
+  // Alternates between a lavender echo and a pink echo, creating unexpected
+  // pockets of colour that swell up and then melt back into the blend.
+  float ghostLife = sin(t * 0.29) * 0.5 + 0.5;             // 0→1 slow pulse
+  vec2  anchorG   = vec2(sin(t * 0.47 + 1.57) * 0.60, cos(t * 0.38 + 3.14) * 0.65);
+  float dG        = length(cN - anchorG);
+  float wG        = (1.0 / (dG * dG + softness)) * ghostLife * 0.70;
+  // Ghost colour shifts between colorC and colorA over time
+  vec3  colorG    = mix(uColorC, uColorA, sin(t * 0.19) * 0.5 + 0.5);
 
-  float pulse =
-    0.88 +
-    uIntensity * 0.48 +
-    speaking * 0.08 +
-    listening * 0.03 +
-    thinking * 0.06;
-  color *= pulse;
+  float wSum = wC + wB + wA + wG;
+  vec3 col = (uColorC * wC + uColorB * wB + uColorA * wA + colorG * wG) / wSum;
 
-  // Gentle tonemap to avoid clip without the washed-out "filter" look.
-  color = color / (1.0 + color * 0.16);
-  color = boostSaturation(color, 1.14);
-  color = pow(clamp(color, 0.0, 1.0), vec3(0.95));
+  // ── Turbulent sine interference ───────────────────────────────────────────
+  float w1 = sin(rN.x * 6.5 + rN.y * 2.8 + t * 1.80) * 0.5 + 0.5;
+  float w2 = sin(rN.x * 4.1 - rN.y * 5.7 + t * 1.30) * 0.5 + 0.5;
+  float w3 = sin(rN.x * 2.9 + rN.y * 7.1 - t * 1.10) * 0.5 + 0.5;
+  float waves = w1 * 0.45 + w2 * 0.35 + w3 * 0.20;
 
-  float alpha = orbMask;
-  fragColor = vec4(clamp(color, 0.0, 1.0), alpha);
-}`
+  col = mix(col, col * (0.82 + waves * 0.28), N.z * 0.75);
+
+  // ── Drifting highlight blobs ──────────────────────────────────────────────
+  vec2  h1Focal = vec2(sin(t * 0.73) * 0.42, cos(t * 0.61) * 0.36);
+  float h1Dist  = length(rN.xy - h1Focal);
+  float h1Mask  = (1.0 - smoothstep(0.0, 0.52, h1Dist)) * smoothstep(0.15, 0.42, N.z);
+  col = mix(col, mix(col, vec3(1.0, 0.97, 1.0), 0.10), h1Mask * h1Mask);
+
+  vec2  h2Focal = vec2(sin(t * 0.51 + 1.80) * 0.35, cos(t * 0.44 + 0.90) * 0.44);
+  float h2Dist  = length(rN.xy - h2Focal);
+  float h2Mask  = (1.0 - smoothstep(0.0, 0.44, h2Dist)) * smoothstep(0.15, 0.42, N.z);
+  col = mix(col, mix(col, vec3(1.0, 0.95, 0.97), 0.07), h2Mask * h2Mask);
+
+
+
+  // ── Soft diffuse + Fresnel edge lift ──────────────────────────────────────
+  vec3  L    = normalize(vec3(-0.22, 0.52, 1.0));
+  vec3  V    = vec3(0.0, 0.0, 1.0);
+  float diff = max(dot(N, L), 0.0);
+  col  = col * (0.68 + diff * 0.38);
+  float fresnel = pow(1.0 - dot(N, V), 2.5);
+  col += vec3(1.0, 0.94, 0.96) * fresnel * 0.10;
+
+  // ── Rim ───────────────────────────────────────────────────────────────────
+  float rim = pow(1.0 - N.z, 4.0);
+  col += mix(uColorC, uColorB, 0.5) * 0.07 * rim;
+
+  // ── Audio glow ────────────────────────────────────────────────────────────
+  float glow = exp(-length(p) * 5.0);
+  col += uColorB * 0.18 * glow * uIntensity;
+
+  // ── Idle: desaturate + dim ────────────────────────────────────────────────
+  float idle = clamp(1.0 - uStatePhase, 0.0, 1.0);
+  float luma = dot(col, vec3(0.299, 0.587, 0.114));
+  col = mix(col, vec3(luma) * 0.72, idle * 0.52);
+
+  // ── Soft edge mask ────────────────────────────────────────────────────────
+  float mask = 1.0 - smoothstep(0.88, 1.0, r2);
+
+  // ── Tonemap + gamma ───────────────────────────────────────────────────────
+  col = col / (1.0 + col * 0.08);
+  col = pow(clamp(col, 0.0, 1.0), vec3(0.90));
+
+  fragColor = vec4(col * mask, mask);
+}
+`

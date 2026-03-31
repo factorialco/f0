@@ -46,7 +46,7 @@ export class F0AiMask {
     this.options = {
       width: options.width ?? 600,
       height: options.height ?? 600,
-      borderRadius: options.borderRadius ?? 20,
+      borderRadius: options.borderRadius ?? 0,
       ...options,
     }
 
