@@ -71,10 +71,6 @@ export const SelectQuestion = ({ options, ...props }: SelectQuestionProps) => {
       value: nanoid(),
     }))
 
-    if (newOptionsWithSameValue) {
-      onQuestionChange?.({ ...commonChangeParams, options: newOptions })
-    }
-
     onQuestionChange?.({ ...commonChangeParams, options: newOptions })
   }, [
     someOptionsWithSameValue,
@@ -146,11 +142,10 @@ export const SelectQuestion = ({ options, ...props }: SelectQuestionProps) => {
   }
 
   const handleAddOption = () => {
-    const optionsLength = options.length
-    const newOption = {
-      value: `new-option-${optionsLength + 1}`,
+    const newOption: SelectQuestionOption = {
+      value: nanoid(),
       label: t("surveyFormBuilder.selectQuestion.newOption", {
-        number: optionsLength + 1,
+        number: options.length + 1,
       }),
     }
     onQuestionChange?.({
