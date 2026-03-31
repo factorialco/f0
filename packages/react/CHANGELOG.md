@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.428.2](https://github.com/factorialco/f0/compare/f0-react-v1.428.1...f0-react-v1.428.2) (2026-03-31)
+
+
+### Bug Fixes
+
+* prevent answer selection in edit mode for SelectOption ([#3811](https://github.com/factorialco/f0/issues/3811)) ([c44102d](https://github.com/factorialco/f0/commit/c44102dcc7cee982a61001c18177d76448351510))
+
 ## [1.428.1](https://github.com/factorialco/f0/compare/f0-react-v1.428.0...f0-react-v1.428.1) (2026-03-31)
 
 
