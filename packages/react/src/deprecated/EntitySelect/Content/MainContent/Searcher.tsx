@@ -1,6 +1,6 @@
-import { Search } from "lucide-react";
+import { Search } from "lucide-react"
 
-import { CrossedCircle } from "@/icons/app";
+import { CrossedCircle } from "@/icons/app"
 
 import { F0Icon } from "@/components/F0Icon"
 import { focusNextFocusable, focusPreviousFocusable } from "../../ListItem"
@@ -13,27 +13,27 @@ export const Searcher = ({
   goToFirst,
   goToLast,
 }: {
-  search: string;
-  onSearch: (search: string) => void;
-  searchPlaceholder?: string;
-  disabled?: boolean;
-  goToFirst?: () => void;
-  goToLast?: () => void;
+  search: string
+  onSearch: (search: string) => void
+  searchPlaceholder?: string
+  disabled?: boolean
+  goToFirst?: () => void
+  goToLast?: () => void
 }) => {
   const handleKeyDown = (ev: React.KeyboardEvent<HTMLInputElement>) => {
     if (ev.key === "ArrowDown") {
-      ev.preventDefault();
-      ev.stopPropagation();
-      focusNextFocusable(ev.currentTarget, goToFirst);
+      ev.preventDefault()
+      ev.stopPropagation()
+      focusNextFocusable(ev.currentTarget, goToFirst)
     } else if (ev.key === "ArrowUp") {
-      ev.preventDefault();
-      ev.stopPropagation();
-      focusPreviousFocusable(ev.currentTarget, goToLast);
+      ev.preventDefault()
+      ev.stopPropagation()
+      focusPreviousFocusable(ev.currentTarget, goToLast)
     } else if (ev.key === "Enter") {
-      ev.preventDefault();
-      ev.stopPropagation();
+      ev.preventDefault()
+      ev.stopPropagation()
     }
-  };
+  }
 
   return (
     <div className="flex justify-between gap-1 rounded border-[1px] border-solid border-f1-border px-2 py-[3px] transition-all focus-within:border-f1-border-hover hover:border-f1-border-hover">
@@ -56,5 +56,5 @@ export const Searcher = ({
         />
       )}
     </div>
-  );
-};
+  )
+}

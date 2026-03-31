@@ -1,10 +1,10 @@
-import { cva } from "cva";
+import { cva } from "cva"
 
-import Check from "@/icons/app/Check";
-import { cn, focusRing } from "@/lib/utils";
-import { Counter } from "@/ui/Counter";
+import Check from "@/icons/app/Check"
+import { cn, focusRing } from "@/lib/utils"
+import { Counter } from "@/ui/Counter"
 
-import { useF0Wizard } from "./WizardProvider";
+import { useF0Wizard } from "./WizardProvider"
 
 const stepLabelVariants = cva({
   base: "flex-1 text-base font-medium leading-5 tracking-[-0.005em]",
@@ -15,18 +15,18 @@ const stepLabelVariants = cva({
       upcoming: "text-f1-foreground",
     },
   },
-});
+})
 
-type StepState = "active" | "completed" | "upcoming";
+type StepState = "active" | "completed" | "upcoming"
 
 function getStepState(
   index: number,
   currentStep: number,
-  isCompleted: boolean,
+  isCompleted: boolean
 ): StepState {
-  if (index === currentStep) return "active";
-  if (isCompleted) return "completed";
-  return "upcoming";
+  if (index === currentStep) return "active"
+  if (isCompleted) return "completed"
+  return "upcoming"
 }
 
 function StepIndicator({ state, index }: { state: StepState; index: number }) {
@@ -35,7 +35,7 @@ function StepIndicator({ state, index }: { state: StepState; index: number }) {
       <span className="flex h-5 w-5 min-w-5 shrink-0 items-center justify-center rounded-xs bg-f1-background-secondary text-f1-foreground-secondary">
         <Check className="h-3 w-3" />
       </span>
-    );
+    )
   }
 
   return (
@@ -44,47 +44,46 @@ function StepIndicator({ state, index }: { state: StepState; index: number }) {
       type={state === "active" ? "selected" : "default"}
       size="md"
     />
-  );
+  )
 }
 
 export function WizardSteps() {
-  const { steps, currentStep, goToStep, allowStepSkipping } = useF0Wizard();
+  const { steps, currentStep, goToStep, allowStepSkipping } = useF0Wizard()
 
   return (
     <nav aria-label="Wizard steps" className="flex flex-col gap-1.5 p-1">
       {steps.map((step, index) => {
-        const isCompleted =
-          index < currentStep || step.isCompleted?.() === true;
-        const state = getStepState(index, currentStep, isCompleted);
+        const isCompleted = index < currentStep || step.isCompleted?.() === true
+        const state = getStepState(index, currentStep, isCompleted)
 
-        const currentStepHasErrors = steps[currentStep]?.hasErrors?.() === true;
+        const currentStepHasErrors = steps[currentStep]?.hasErrors?.() === true
 
         const intermediateHasErrors =
           index > currentStep &&
-          steps.slice(currentStep, index).some((s) => s.hasErrors?.() === true);
+          steps.slice(currentStep, index).some((s) => s.hasErrors?.() === true)
 
         let canNavigate =
           index !== currentStep &&
           !currentStepHasErrors &&
           !intermediateHasErrors &&
-          steps.slice(0, index).every((s) => s.isCompleted?.() !== false);
+          steps.slice(0, index).every((s) => s.isCompleted?.() !== false)
 
         if (canNavigate && !allowStepSkipping && index > currentStep + 1) {
-          canNavigate = false;
+          canNavigate = false
         }
 
         const handleClick = () => {
           if (canNavigate) {
-            void goToStep(index);
+            void goToStep(index)
           }
-        };
+        }
 
         const handleKeyDown = (e: React.KeyboardEvent) => {
           if ((e.key === "Enter" || e.key === " ") && canNavigate) {
-            e.preventDefault();
-            void goToStep(index);
+            e.preventDefault()
+            void goToStep(index)
           }
-        };
+        }
 
         return (
           <button
@@ -101,14 +100,14 @@ export function WizardSteps() {
               canNavigate && "hover:bg-f1-background-secondary-hover",
               !canNavigate &&
                 index !== currentStep &&
-                "cursor-default opacity-70",
+                "cursor-default opacity-70"
             )}
           >
             <StepIndicator state={state} index={index} />
             <span className={stepLabelVariants({ state })}>{step.title}</span>
           </button>
-        );
+        )
       })}
     </nav>
-  );
+  )
 }

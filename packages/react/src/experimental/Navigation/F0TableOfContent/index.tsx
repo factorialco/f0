@@ -5,24 +5,24 @@ import {
   useMemo,
   useRef,
   useState,
-} from "react";
+} from "react"
 
 import { OneEllipsis } from "@/lib/OneEllipsis/OneEllipsis"
 import { F1SearchBox } from "@/experimental/Forms/Fields/F1SearchBox"
 import { dropTargetForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter"
 
-import { createAtlaskitDriver } from "@/lib/dnd/atlaskitDriver";
-import { DndProvider } from "@/lib/dnd/context";
-import { useDndEvents } from "@/lib/dnd/hooks";
-import { withDataTestId } from "@/lib/data-testid";
-import { experimentalComponent } from "@/lib/experimental";
-import { useI18n } from "@/lib/providers/i18n";
-import { cn } from "@/lib/utils";
-import { ScrollArea } from "@/ui/scrollarea";
+import { createAtlaskitDriver } from "@/lib/dnd/atlaskitDriver"
+import { DndProvider } from "@/lib/dnd/context"
+import { useDndEvents } from "@/lib/dnd/hooks"
+import { withDataTestId } from "@/lib/data-testid"
+import { experimentalComponent } from "@/lib/experimental"
+import { useI18n } from "@/lib/providers/i18n"
+import { cn } from "@/lib/utils"
+import { ScrollArea } from "@/ui/scrollarea"
 
-import { Item } from "./Item";
-import { ItemSectionHeader } from "./ItemSectionHeader";
-import { TOCItem, TOCItemAction, TOCProps } from "./types";
+import { Item } from "./Item"
+import { ItemSectionHeader } from "./ItemSectionHeader"
+import { TOCItem, TOCItemAction, TOCProps } from "./types"
 import {
   calculateAdjustedIndex,
   convertToIds,
@@ -33,7 +33,7 @@ import {
   removeItemFromTree,
   updateItemInTree,
   wouldCreateCycle,
-} from "./utils";
+} from "./utils"
 
 function renderTOCItem(
   item: TOCItem,
@@ -47,7 +47,7 @@ function renderTOCItem(
   onMoveItem?: (
     itemId: string,
     targetParentId: string | null,
-    targetIndex: number,
+    targetIndex: number
   ) => void,
   allItems?: TOCItem[],
   draggedItemId?: string | null,
@@ -57,49 +57,49 @@ function renderTOCItem(
   currentParentId?: string | null,
   onDragOver?: (
     itemId: string,
-    position: "before" | "after" | "inside",
+    position: "before" | "after" | "inside"
   ) => void,
   onDragLeave?: () => void,
   onDrop?: (itemId: string, position: "before" | "after" | "inside") => void,
-  justDroppedItemId?: string | null,
+  justDroppedItemId?: string | null
 ): ReactElement {
-  const Component = item.children ? ItemSectionHeader : Item;
-  const isExpanded = expandedItems?.has(item.id) ?? true;
+  const Component = item.children ? ItemSectionHeader : Item
+  const isExpanded = expandedItems?.has(item.id) ?? true
 
-  const isDragOver = dragOverItemId === item.id;
+  const isDragOver = dragOverItemId === item.id
   // Only allow dropping inside if the item has children (is a section header)
   const canDropInside = Boolean(
     draggedItemId &&
-      draggedItemId !== item.id &&
-      allItems &&
-      item.children !== undefined && // Item must have children property (is a section)
-      !wouldCreateCycle(allItems, draggedItemId, item.id),
-  );
+    draggedItemId !== item.id &&
+    allItems &&
+    item.children !== undefined && // Item must have children property (is a section)
+    !wouldCreateCycle(allItems, draggedItemId, item.id)
+  )
 
   // Show placeholder for both same-level and cross-level moves
   // This creates a visual gap similar to motion/react's automatic placeholder
   const showPlaceholderBefore = Boolean(
     draggedItemId &&
-      draggedItemId !== item.id &&
-      isDragOver &&
-      dragOverPosition === "before",
-  );
+    draggedItemId !== item.id &&
+    isDragOver &&
+    dragOverPosition === "before"
+  )
   const showPlaceholderAfter = Boolean(
     draggedItemId &&
-      draggedItemId !== item.id &&
-      isDragOver &&
-      dragOverPosition === "after",
-  );
+    draggedItemId !== item.id &&
+    isDragOver &&
+    dragOverPosition === "after"
+  )
 
   // Check if this is the first item in its parent (for adjusting placeholder margins)
   const isFirstItem = (() => {
     if (currentParentId === null) {
-      return allItems?.[0]?.id === item.id;
+      return allItems?.[0]?.id === item.id
     }
-    if (!allItems || !currentParentId) return false;
-    const parent = findItemInTree(allItems, currentParentId);
-    return parent?.item.children?.[0]?.id === item.id;
-  })();
+    if (!allItems || !currentParentId) return false
+    const parent = findItemInTree(allItems, currentParentId)
+    return parent?.item.children?.[0]?.id === item.id
+  })()
 
   return (
     <>
@@ -109,7 +109,7 @@ function renderTOCItem(
           className={cn(
             "pointer-events-none h-10 rounded border-2 border-dashed border-f1-border-secondary bg-f1-background-hover/40",
             isFirstItem ? "mt-0" : "mt-0.5",
-            "mb-0.5",
+            "mb-0.5"
           )}
         />
       )}
@@ -157,7 +157,7 @@ function renderTOCItem(
                 isDragOver &&
                   dragOverPosition === "inside" &&
                   canDropInside &&
-                  "rounded-md bg-f1-background-hover/20 p-1",
+                  "rounded-md bg-f1-background-hover/20 p-1"
               )}
             >
               {item.children.map((child) => {
@@ -180,8 +180,8 @@ function renderTOCItem(
                   onDragOver,
                   onDragLeave,
                   onDrop,
-                  justDroppedItemId,
-                );
+                  justDroppedItemId
+                )
               })}
               {/* Placeholder when dragging inside and section is empty or collapsed */}
               {isDragOver &&
@@ -201,7 +201,7 @@ function renderTOCItem(
         <div className="pointer-events-none my-0.5 h-10 rounded border-2 border-dashed border-f1-border-secondary bg-f1-background-hover/40" />
       )}
     </>
-  );
+  )
 }
 
 /**
@@ -216,48 +216,48 @@ function EdgeDropZone({
   onDrop,
   visible,
 }: {
-  targetItemId: string;
-  position: "before" | "after";
-  onDragOver: (itemId: string, position: "before" | "after" | "inside") => void;
-  onDragLeave: () => void;
-  onDrop: (itemId: string, position: "before" | "after" | "inside") => void;
-  visible: boolean;
+  targetItemId: string
+  position: "before" | "after"
+  onDragOver: (itemId: string, position: "before" | "after" | "inside") => void
+  onDragLeave: () => void
+  onDrop: (itemId: string, position: "before" | "after" | "inside") => void
+  visible: boolean
 }) {
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (!ref.current) return;
+    if (!ref.current) return
 
     return dropTargetForElements({
       element: ref.current,
       canDrop: ({ source }) => {
-        const sourceData = source.data as { kind?: string; id?: string };
-        return sourceData.kind === "toc-item" && sourceData.id !== targetItemId;
+        const sourceData = source.data as { kind?: string; id?: string }
+        return sourceData.kind === "toc-item" && sourceData.id !== targetItemId
       },
       onDragEnter: () => {
-        onDragOver(targetItemId, position);
+        onDragOver(targetItemId, position)
       },
       onDrag: () => {
-        onDragOver(targetItemId, position);
+        onDragOver(targetItemId, position)
       },
       onDragLeave: () => {
-        onDragLeave();
+        onDragLeave()
       },
       onDrop: () => {
-        onDrop(targetItemId, position);
+        onDrop(targetItemId, position)
       },
-    });
-  }, [targetItemId, position, onDragOver, onDragLeave, onDrop]);
+    })
+  }, [targetItemId, position, onDragOver, onDragLeave, onDrop])
 
   return (
     <div
       ref={ref}
       className={cn(
         "w-full shrink-0 transition-[height]",
-        visible ? "h-5" : "h-1",
+        visible ? "h-5" : "h-1"
       )}
     />
-  );
+  )
 }
 
 function TOCContent({
@@ -273,227 +273,225 @@ function TOCContent({
   hideChildrenCounter = false,
   scrollable = true,
 }: TOCProps) {
-  const i18n = useI18n();
+  const i18n = useI18n()
 
-  const [searchValue, setSearchValue] = useState("");
+  const [searchValue, setSearchValue] = useState("")
 
   const handleSearchChange = (value: string) => {
-    setSearchValue(value);
-  };
+    setSearchValue(value)
+  }
 
   const filteredItems = useMemo(() => {
-    return filterTree(items, searchValue);
-  }, [items, searchValue]);
+    return filterTree(items, searchValue)
+  }, [items, searchValue])
 
   const [expandedItems, setExpandedItems] = useState<Set<string>>(
-    findExpandedPath(items, activeItem),
-  );
-  const [sortableItems, setSortableItems] = useState<TOCItem[]>(items);
+    findExpandedPath(items, activeItem)
+  )
+  const [sortableItems, setSortableItems] = useState<TOCItem[]>(items)
 
   useEffect(() => {
-    setSortableItems(items);
-  }, [items]);
+    setSortableItems(items)
+  }, [items])
 
-  const containerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null)
 
   const handleToggleExpanded = useCallback(
     (id: string) => {
       setExpandedItems((prev) => {
-        const newSet = new Set(prev);
+        const newSet = new Set(prev)
         if (newSet.has(id)) {
-          newSet.delete(id);
+          newSet.delete(id)
         } else {
-          newSet.add(id);
+          newSet.add(id)
         }
-        return newSet;
-      });
+        return newSet
+      })
     },
-    [setExpandedItems],
-  );
+    [setExpandedItems]
+  )
 
   const handleUpdateItem = useCallback(
     (itemId: string, updatedItem: TOCItem) => {
-      const updatedItems = updateItemInTree(sortableItems, itemId, updatedItem);
-      setSortableItems(updatedItems);
+      const updatedItems = updateItemInTree(sortableItems, itemId, updatedItem)
+      setSortableItems(updatedItems)
 
       // Notify parent with hierarchical IDs structure
       if (onReorder) {
-        onReorder(convertToIds(updatedItems));
+        onReorder(convertToIds(updatedItems))
       }
     },
-    [sortableItems, onReorder],
-  );
+    [sortableItems, onReorder]
+  )
 
   const handleChildrenReorder = useCallback(
     (parentId: string) => (newOrder: TOCItem[]) => {
       // Update the parent item with the new order
-      const parentItem = findItemInTree(sortableItems, parentId);
+      const parentItem = findItemInTree(sortableItems, parentId)
       if (parentItem) {
-        const updatedItem = { ...parentItem.item, children: newOrder };
-        handleUpdateItem(parentId, updatedItem);
+        const updatedItem = { ...parentItem.item, children: newOrder }
+        handleUpdateItem(parentId, updatedItem)
       } else {
         // If parentId is null, it means we're reordering root items
         if (parentId === null || parentId === undefined) {
-          setSortableItems(newOrder);
+          setSortableItems(newOrder)
           if (onReorder) {
-            onReorder(convertToIds(newOrder));
+            onReorder(convertToIds(newOrder))
           }
         }
       }
     },
-    [sortableItems, handleUpdateItem, onReorder, convertToIds],
-  );
+    [sortableItems, handleUpdateItem, onReorder, convertToIds]
+  )
 
   const handleMoveItem = useCallback(
     (itemId: string, targetParentId: string | null, targetIndex: number) => {
       // Prevent cycles
       if (wouldCreateCycle(sortableItems, itemId, targetParentId)) {
-        return;
+        return
       }
 
       // Find the item to move
-      const itemData = findItemInTree(sortableItems, itemId);
-      if (!itemData) return;
+      const itemData = findItemInTree(sortableItems, itemId)
+      if (!itemData) return
 
-      const itemToMove = itemData.item;
+      const itemToMove = itemData.item
 
       // Remove item from current location
-      let updatedItems = removeItemFromTree(sortableItems, itemId);
+      let updatedItems = removeItemFromTree(sortableItems, itemId)
 
       // Calculate the correct index after removal
       const adjustedIndex = calculateAdjustedIndex(
         sortableItems,
         itemId,
         targetParentId,
-        targetIndex,
-      );
+        targetIndex
+      )
 
       // Insert item at new location
       updatedItems = insertItemInTree(
         updatedItems,
         itemToMove,
         targetParentId,
-        adjustedIndex,
-      );
+        adjustedIndex
+      )
 
-      setSortableItems(updatedItems);
+      setSortableItems(updatedItems)
 
       // Expand target parent if moving into it
       if (targetParentId !== null) {
         setExpandedItems((prev) => {
-          const newSet = new Set(prev);
-          newSet.add(targetParentId);
-          return newSet;
-        });
+          const newSet = new Set(prev)
+          newSet.add(targetParentId)
+          return newSet
+        })
       }
 
       // Notify parent with hierarchical IDs structure
       if (onReorder) {
-        onReorder(convertToIds(updatedItems));
+        onReorder(convertToIds(updatedItems))
       }
     },
-    [sortableItems, onReorder, convertToIds],
-  );
+    [sortableItems, onReorder, convertToIds]
+  )
 
   const filteredSortableItems = useMemo(() => {
-    return filterTree(sortableItems, searchValue);
-  }, [sortableItems, searchValue]);
+    return filterTree(sortableItems, searchValue)
+  }, [sortableItems, searchValue])
 
   // State for drag and drop
-  const [draggedItemId, setDraggedItemId] = useState<string | null>(null);
-  const [dragOverItemId, setDragOverItemId] = useState<string | null>(null);
+  const [draggedItemId, setDraggedItemId] = useState<string | null>(null)
+  const [dragOverItemId, setDragOverItemId] = useState<string | null>(null)
   const [dragOverPosition, setDragOverPosition] = useState<
     "before" | "after" | "inside" | null
-  >(null);
+  >(null)
   const [justDroppedItemId, setJustDroppedItemId] = useState<string | null>(
-    null,
-  );
+    null
+  )
 
   // Use ref to store draggedItemId so handleDrop can access it even after state is cleared
-  const draggedItemIdRef = useRef<string | null>(null);
+  const draggedItemIdRef = useRef<string | null>(null)
   // Flag to track if handleDrop has been called (to prevent safety timeout from clearing state)
-  const handleDropCalledRef = useRef<boolean>(false);
+  const handleDropCalledRef = useRef<boolean>(false)
   // Use refs to access current dragOver state in useDndEvents callback
-  const dragOverItemIdRef = useRef<string | null>(null);
-  const dragOverPositionRef = useRef<"before" | "after" | "inside" | null>(
-    null,
-  );
+  const dragOverItemIdRef = useRef<string | null>(null)
+  const dragOverPositionRef = useRef<"before" | "after" | "inside" | null>(null)
 
   // Use refs to stabilize drag over updates and prevent flickering
-  const dragOverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const dragOverTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const lastDragOverRef = useRef<{
-    itemId: string;
-    position: "before" | "after" | "inside";
-  } | null>(null);
-  const lastItemIndexRef = useRef<number | null>(null);
+    itemId: string
+    position: "before" | "after" | "inside"
+  } | null>(null)
+  const lastItemIndexRef = useRef<number | null>(null)
   // Track when the current state was set to add persistence
-  const currentStateSetTimeRef = useRef<number>(0);
+  const currentStateSetTimeRef = useRef<number>(0)
   // Track last time handleDragOver was called to detect active dragging
-  const lastDragOverCallTimeRef = useRef<number>(0);
+  const lastDragOverCallTimeRef = useRef<number>(0)
   // Track if placeholder is "locked" for first item (should not disappear)
-  const isPlaceholderLockedRef = useRef<boolean>(false);
+  const isPlaceholderLockedRef = useRef<boolean>(false)
   // Store safety timeout ID so we can cancel it when handleDrop fires
-  const safetyTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const safetyTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   // Handle drag over from Item component with debounce
   const handleDragOver = useCallback(
     (itemId: string, position: "before" | "after" | "inside") => {
       // Cancel any pending timeout
       if (dragOverTimeoutRef.current) {
-        clearTimeout(dragOverTimeoutRef.current);
-        dragOverTimeoutRef.current = null;
+        clearTimeout(dragOverTimeoutRef.current)
+        dragOverTimeoutRef.current = null
       }
 
       // Find the index of the current item to detect drag direction
-      const items = sortable ? filteredSortableItems : filteredItems;
-      const currentItemIndex = items.findIndex((item) => item.id === itemId);
+      const items = sortable ? filteredSortableItems : filteredItems
+      const currentItemIndex = items.findIndex((item) => item.id === itemId)
       const isMovingUp =
         lastItemIndexRef.current !== null &&
-        currentItemIndex < lastItemIndexRef.current;
-      lastItemIndexRef.current = currentItemIndex;
+        currentItemIndex < lastItemIndexRef.current
+      lastItemIndexRef.current = currentItemIndex
 
       // Create a key for this drag over state
-      const dragOverKey = `${itemId}-${position}`;
+      const dragOverKey = `${itemId}-${position}`
       const currentStateKey =
         dragOverItemId && dragOverPosition
           ? `${dragOverItemId}-${dragOverPosition}`
-          : null;
+          : null
 
       // Skip if same as current state
       if (dragOverKey === currentStateKey) {
-        return;
+        return
       }
 
       // Store the pending update
-      lastDragOverRef.current = { itemId, position };
+      lastDragOverRef.current = { itemId, position }
 
       // Debounce delay - shorter when moving up to prevent glitchy behavior
-      const debounceDelay = isMovingUp ? 50 : 30;
+      const debounceDelay = isMovingUp ? 50 : 30
 
       // Debounce the update to prevent rapid state changes
       dragOverTimeoutRef.current = setTimeout(() => {
-        const pending = lastDragOverRef.current;
+        const pending = lastDragOverRef.current
         if (pending) {
-          setDragOverItemId(pending.itemId);
-          setDragOverPosition(pending.position);
-          dragOverItemIdRef.current = pending.itemId;
-          dragOverPositionRef.current = pending.position;
-          const now = Date.now();
-          currentStateSetTimeRef.current = now;
-          lastDragOverCallTimeRef.current = now;
+          setDragOverItemId(pending.itemId)
+          setDragOverPosition(pending.position)
+          dragOverItemIdRef.current = pending.itemId
+          dragOverPositionRef.current = pending.position
+          const now = Date.now()
+          currentStateSetTimeRef.current = now
+          lastDragOverCallTimeRef.current = now
 
           // Lock placeholder if this is the first item with "before" position
-          const items = sortable ? filteredSortableItems : filteredItems;
-          const firstItem = items[0];
+          const items = sortable ? filteredSortableItems : filteredItems
+          const firstItem = items[0]
           if (
             pending.itemId === firstItem?.id &&
             pending.position === "before"
           ) {
-            isPlaceholderLockedRef.current = true;
+            isPlaceholderLockedRef.current = true
           }
         }
-        dragOverTimeoutRef.current = null;
-      }, debounceDelay);
+        dragOverTimeoutRef.current = null
+      }, debounceDelay)
     },
     [
       dragOverItemId,
@@ -501,73 +499,73 @@ function TOCContent({
       sortable,
       filteredSortableItems,
       filteredItems,
-    ],
-  );
+    ]
+  )
 
   // Cleanup timeout on unmount
   useEffect(() => {
     return () => {
       if (dragOverTimeoutRef.current) {
-        clearTimeout(dragOverTimeoutRef.current);
+        clearTimeout(dragOverTimeoutRef.current)
       }
-    };
-  }, []);
+    }
+  }, [])
 
   // Handle drag leave with debounce to prevent premature clearing
   const handleDragLeave = useCallback(() => {
     // Don't clear if handleDrop has been called or is about to be called
     // This prevents clearing state during the drop process
     if (handleDropCalledRef.current) {
-      return;
+      return
     }
 
     // Don't clear immediately - wait a bit to see if drag over fires again
     // This prevents flickering when cursor is at edge boundaries
     // Use a longer timeout to give onDrop time to execute
     if (dragOverTimeoutRef.current) {
-      clearTimeout(dragOverTimeoutRef.current);
+      clearTimeout(dragOverTimeoutRef.current)
     }
 
     // Use a longer timeout to give onDrop time to execute
     // onDrop typically fires within 100-200ms of the drop event
     // Use even longer timeout when placeholder is locked (first item) to ensure drop can execute
     // But also use a reasonable timeout for all positions to prevent premature clearing
-    const leaveTimeout = isPlaceholderLockedRef.current ? 1000 : 800;
+    const leaveTimeout = isPlaceholderLockedRef.current ? 1000 : 800
     dragOverTimeoutRef.current = setTimeout(() => {
       // Check again if handleDrop was called during the timeout
       if (handleDropCalledRef.current) {
-        dragOverTimeoutRef.current = null;
-        return;
+        dragOverTimeoutRef.current = null
+        return
       }
 
-      const now = Date.now();
-      const timeSinceLastState = now - currentStateSetTimeRef.current;
-      const timeSinceLastDragOverCall = now - lastDragOverCallTimeRef.current;
+      const now = Date.now()
+      const timeSinceLastState = now - currentStateSetTimeRef.current
+      const timeSinceLastDragOverCall = now - lastDragOverCallTimeRef.current
 
       // Check if handleDragOver was called recently
       // Use longer timeout when placeholder is locked to give more time for drop
       // But also use reasonable timeout for all positions
-      const minTimeSinceLastCall = isPlaceholderLockedRef.current ? 800 : 500;
+      const minTimeSinceLastCall = isPlaceholderLockedRef.current ? 800 : 500
       if (timeSinceLastDragOverCall < minTimeSinceLastCall) {
         // Cancelled (handleDragOver called recently - still dragging over)
-        dragOverTimeoutRef.current = null;
-        return;
+        dragOverTimeoutRef.current = null
+        return
       }
 
       // Also check if state was set recently
-      const minTimeSinceLastState = isPlaceholderLockedRef.current ? 800 : 500;
+      const minTimeSinceLastState = isPlaceholderLockedRef.current ? 800 : 500
       if (timeSinceLastState < minTimeSinceLastState) {
         // Cancelled (state updated recently)
-        dragOverTimeoutRef.current = null;
-        return;
+        dragOverTimeoutRef.current = null
+        return
       }
 
       // Check if placeholder is locked (first item) - don't clear if locked
       if (isPlaceholderLockedRef.current) {
-        const items = sortable ? filteredSortableItems : filteredItems;
-        const firstItem = items[0];
+        const items = sortable ? filteredSortableItems : filteredItems
+        const firstItem = items[0]
         const isFirstItem =
-          dragOverItemId === firstItem?.id && dragOverPosition === "before";
+          dragOverItemId === firstItem?.id && dragOverPosition === "before"
 
         if (isFirstItem) {
           // For locked first item placeholder, be very persistent
@@ -575,119 +573,119 @@ function TOCContent({
           // This ensures the placeholder stays visible even if onDrag doesn't fire for a moment
           if (timeSinceLastDragOverCall < 2000) {
             // Cancelled (first item placeholder locked)
-            dragOverTimeoutRef.current = null;
-            return;
+            dragOverTimeoutRef.current = null
+            return
           }
           // Only unlock if we really left (no drag over calls for 2 seconds)
-          isPlaceholderLockedRef.current = false;
+          isPlaceholderLockedRef.current = false
         } else {
           // If we moved to a different item, unlock and allow clearing
           // Unlocking (moved to different item)
-          isPlaceholderLockedRef.current = false;
+          isPlaceholderLockedRef.current = false
         }
       }
 
       // Normal clearing
       // DON'T clear lastDragOverRef here - keep it for potential fallback in drop
       // It will be cleared when a new drag starts
-      lastItemIndexRef.current = null;
-      currentStateSetTimeRef.current = 0;
-      setDragOverItemId(null);
-      setDragOverPosition(null);
-      dragOverItemIdRef.current = null;
-      dragOverPositionRef.current = null;
-      dragOverTimeoutRef.current = null;
-    }, leaveTimeout); // Use longer timeout when placeholder is locked to give drop time to execute
+      lastItemIndexRef.current = null
+      currentStateSetTimeRef.current = 0
+      setDragOverItemId(null)
+      setDragOverPosition(null)
+      dragOverItemIdRef.current = null
+      dragOverPositionRef.current = null
+      dragOverTimeoutRef.current = null
+    }, leaveTimeout) // Use longer timeout when placeholder is locked to give drop time to execute
   }, [
     dragOverItemId,
     dragOverPosition,
     sortable,
     filteredSortableItems,
     filteredItems,
-  ]);
+  ])
 
   // Handle drop from Item component
   const handleDrop = useCallback(
     (targetItemId: string, position: "before" | "after" | "inside") => {
       // Mark that handleDrop has been called to prevent safety timeout from clearing state
-      handleDropCalledRef.current = true;
+      handleDropCalledRef.current = true
 
       // Use ref to get draggedItemId in case state was already cleared
-      const currentDraggedItemId = draggedItemIdRef.current;
+      const currentDraggedItemId = draggedItemIdRef.current
 
       // Always unlock placeholder on drop
-      isPlaceholderLockedRef.current = false;
+      isPlaceholderLockedRef.current = false
 
       // IMMEDIATELY clear drag over state to remove placeholder
-      setDragOverItemId(null);
-      setDragOverPosition(null);
-      dragOverItemIdRef.current = null;
-      dragOverPositionRef.current = null;
+      setDragOverItemId(null)
+      setDragOverPosition(null)
+      dragOverItemIdRef.current = null
+      dragOverPositionRef.current = null
 
       // Cancel any pending drag over timeout
       if (dragOverTimeoutRef.current) {
-        clearTimeout(dragOverTimeoutRef.current);
-        dragOverTimeoutRef.current = null;
+        clearTimeout(dragOverTimeoutRef.current)
+        dragOverTimeoutRef.current = null
       }
 
       if (!currentDraggedItemId || currentDraggedItemId === targetItemId) {
-        draggedItemIdRef.current = null;
-        setDraggedItemId(null);
-        setDragOverItemId(null);
-        setDragOverPosition(null);
-        return;
+        draggedItemIdRef.current = null
+        setDraggedItemId(null)
+        setDragOverItemId(null)
+        setDragOverPosition(null)
+        return
       }
 
       // Calculate target index and parent
-      const targetItem = findItemInTree(sortableItems, targetItemId);
-      const draggedItem = findItemInTree(sortableItems, currentDraggedItemId);
+      const targetItem = findItemInTree(sortableItems, targetItemId)
+      const draggedItem = findItemInTree(sortableItems, currentDraggedItemId)
 
       if (targetItem && draggedItem) {
-        let targetParentId: string | null = null;
-        let targetIndex = 0;
+        let targetParentId: string | null = null
+        let targetIndex = 0
 
         if (position === "inside") {
           // Moving inside the target item (as a child)
-          targetParentId = targetItemId;
-          targetIndex = targetItem.item.children?.length ?? 0;
+          targetParentId = targetItemId
+          targetIndex = targetItem.item.children?.length ?? 0
         } else if (position === "before") {
           // Moving before the target item
           if (targetItem.parentPath.length > 0) {
             targetParentId =
-              targetItem.parentPath[targetItem.parentPath.length - 1];
+              targetItem.parentPath[targetItem.parentPath.length - 1]
           } else {
-            targetParentId = null; // Root level
+            targetParentId = null // Root level
           }
           // Find the index of the target item in its parent
           if (targetParentId === null) {
-            targetIndex = sortableItems.findIndex((i) => i.id === targetItemId);
+            targetIndex = sortableItems.findIndex((i) => i.id === targetItemId)
           } else {
-            const parent = findItemInTree(sortableItems, targetParentId);
+            const parent = findItemInTree(sortableItems, targetParentId)
             if (parent) {
               targetIndex =
                 parent.item.children?.findIndex((c) => c.id === targetItemId) ??
-                0;
+                0
             }
           }
         } else if (position === "after") {
           // Moving after the target item
           if (targetItem.parentPath.length > 0) {
             targetParentId =
-              targetItem.parentPath[targetItem.parentPath.length - 1];
+              targetItem.parentPath[targetItem.parentPath.length - 1]
           } else {
-            targetParentId = null; // Root level
+            targetParentId = null // Root level
           }
           // Find the index of the target item in its parent and add 1
           if (targetParentId === null) {
             targetIndex =
-              sortableItems.findIndex((i) => i.id === targetItemId) + 1;
+              sortableItems.findIndex((i) => i.id === targetItemId) + 1
           } else {
-            const parent = findItemInTree(sortableItems, targetParentId);
+            const parent = findItemInTree(sortableItems, targetParentId)
             if (parent) {
               targetIndex =
                 (parent.item.children?.findIndex(
-                  (c) => c.id === targetItemId,
-                ) ?? 0) + 1;
+                  (c) => c.id === targetItemId
+                ) ?? 0) + 1
             }
           }
         }
@@ -696,21 +694,21 @@ function TOCContent({
         const draggedParentId =
           draggedItem.parentPath.length > 0
             ? draggedItem.parentPath[draggedItem.parentPath.length - 1]
-            : null;
+            : null
 
         // Calculate current index of dragged item
-        let currentIndex = -1;
+        let currentIndex = -1
         if (draggedParentId === null) {
           currentIndex = sortableItems.findIndex(
-            (i) => i.id === currentDraggedItemId,
-          );
+            (i) => i.id === currentDraggedItemId
+          )
         } else {
-          const draggedParent = findItemInTree(sortableItems, draggedParentId);
+          const draggedParent = findItemInTree(sortableItems, draggedParentId)
           if (draggedParent) {
             currentIndex =
               draggedParent.item.children?.findIndex(
-                (c) => c.id === currentDraggedItemId,
-              ) ?? -1;
+                (c) => c.id === currentDraggedItemId
+              ) ?? -1
           }
         }
 
@@ -721,90 +719,90 @@ function TOCContent({
         ) {
           // Trigger drop animation effect IMMEDIATELY before moving
           // This ensures the animation starts right away
-          setJustDroppedItemId(currentDraggedItemId);
+          setJustDroppedItemId(currentDraggedItemId)
 
-          handleMoveItem(currentDraggedItemId, targetParentId, targetIndex);
+          handleMoveItem(currentDraggedItemId, targetParentId, targetIndex)
 
           // Clear highlight shortly after drop
           setTimeout(() => {
-            setJustDroppedItemId(null);
-          }, 300);
+            setJustDroppedItemId(null)
+          }, 300)
         }
       }
 
       // Clear drag state - always unlock and clear
-      isPlaceholderLockedRef.current = false;
-      draggedItemIdRef.current = null;
-      handleDropCalledRef.current = true; // Mark as called BEFORE clearing state
+      isPlaceholderLockedRef.current = false
+      draggedItemIdRef.current = null
+      handleDropCalledRef.current = true // Mark as called BEFORE clearing state
       // DON'T clear lastDragOverRef here - keep it for potential fallback in next drag
       // It will be cleared when a new drag starts
-      lastItemIndexRef.current = null;
-      currentStateSetTimeRef.current = 0;
-      lastDragOverCallTimeRef.current = 0;
+      lastItemIndexRef.current = null
+      currentStateSetTimeRef.current = 0
+      lastDragOverCallTimeRef.current = 0
 
       // Cancel safety timeout since handleDrop has fired
       if (safetyTimeoutRef.current) {
-        clearTimeout(safetyTimeoutRef.current);
-        safetyTimeoutRef.current = null;
+        clearTimeout(safetyTimeoutRef.current)
+        safetyTimeoutRef.current = null
       }
 
       // Clear dragged item state
-      setDraggedItemId(null);
+      setDraggedItemId(null)
 
       // Reset flag after safety timeout duration to ensure it's checked
       // Safety timeout is 500ms, so reset after 600ms to be safe
       setTimeout(() => {
-        handleDropCalledRef.current = false;
-      }, 600);
+        handleDropCalledRef.current = false
+      }, 600)
     },
-    [sortableItems, handleMoveItem],
-  );
+    [sortableItems, handleMoveItem]
+  )
 
   // Monitor drag start/end using useDndEvents
   useDndEvents(
     useCallback(
       (e: {
-        phase: "start" | "over" | "drop" | "cancel";
-        source: { kind: string; id: string; data?: unknown };
+        phase: "start" | "over" | "drop" | "cancel"
+        source: { kind: string; id: string; data?: unknown }
       }) => {
         if (e.phase === "start" && e.source.kind === "toc-item") {
           // Cancel any pending timeouts from previous drag
           if (dragOverTimeoutRef.current) {
-            clearTimeout(dragOverTimeoutRef.current);
-            dragOverTimeoutRef.current = null;
+            clearTimeout(dragOverTimeoutRef.current)
+            dragOverTimeoutRef.current = null
           }
           if (safetyTimeoutRef.current) {
-            clearTimeout(safetyTimeoutRef.current);
-            safetyTimeoutRef.current = null;
+            clearTimeout(safetyTimeoutRef.current)
+            safetyTimeoutRef.current = null
           }
 
-          draggedItemIdRef.current = e.source.id;
-          handleDropCalledRef.current = false; // Reset flag for new drag
+          draggedItemIdRef.current = e.source.id
+          handleDropCalledRef.current = false // Reset flag for new drag
           // Clear lastDragOverRef when starting a new drag
-          lastDragOverRef.current = null;
-          setDraggedItemId(e.source.id);
+          lastDragOverRef.current = null
+          setDraggedItemId(e.source.id)
         } else if (e.phase === "cancel") {
           // For cancel, clear everything immediately
-          isPlaceholderLockedRef.current = false;
-          handleDropCalledRef.current = false;
-          lastDragOverRef.current = null;
-          lastItemIndexRef.current = null;
-          currentStateSetTimeRef.current = 0;
-          lastDragOverCallTimeRef.current = 0;
+          isPlaceholderLockedRef.current = false
+          handleDropCalledRef.current = false
+          lastDragOverRef.current = null
+          lastItemIndexRef.current = null
+          currentStateSetTimeRef.current = 0
+          lastDragOverCallTimeRef.current = 0
           if (dragOverTimeoutRef.current) {
-            clearTimeout(dragOverTimeoutRef.current);
-            dragOverTimeoutRef.current = null;
+            clearTimeout(dragOverTimeoutRef.current)
+            dragOverTimeoutRef.current = null
           }
           if (safetyTimeoutRef.current) {
-            clearTimeout(safetyTimeoutRef.current);
-            safetyTimeoutRef.current = null;
+            clearTimeout(safetyTimeoutRef.current)
+            safetyTimeoutRef.current = null
           }
-          setDragOverItemId(null);
-          setDragOverPosition(null);
-          dragOverItemIdRef.current = null;
-          dragOverPositionRef.current = null;
-          setDraggedItemId(null);
-          draggedItemIdRef.current = null;
+          setDragOverItemId(null)
+          setDragOverPosition(null)
+          dragOverItemIdRef.current = null
+          dragOverPositionRef.current = null
+          setDraggedItemId(null)
+          draggedItemIdRef.current = null
         } else if (e.phase === "drop") {
           // For drop, DON'T clear visual state immediately
           // The dropTargetForElements onDrop handler needs the state to process the drop
@@ -813,21 +811,21 @@ function TOCContent({
           // CRITICAL: Cancel any pending handleDragLeave timeout
           // This prevents handleDragLeave from clearing state before onDrop executes
           if (dragOverTimeoutRef.current) {
-            clearTimeout(dragOverTimeoutRef.current);
-            dragOverTimeoutRef.current = null;
+            clearTimeout(dragOverTimeoutRef.current)
+            dragOverTimeoutRef.current = null
           }
 
           // Only clear timeouts and refs, but keep visual state for handleDrop
-          isPlaceholderLockedRef.current = false;
+          isPlaceholderLockedRef.current = false
 
           // If we have a valid dragOverItemId and dragOverPosition, and handleDrop hasn't been called yet,
           // try to execute handleDrop directly in case the drop was on the placeholder
           // This is a fallback in case onDrop from Item doesn't fire (e.g., drop on placeholder)
           // Also check lastDragOverRef as fallback in case handleDragLeave cleared the state
           const currentDragOverItemId =
-            dragOverItemIdRef.current || lastDragOverRef.current?.itemId;
+            dragOverItemIdRef.current || lastDragOverRef.current?.itemId
           const currentDragOverPosition =
-            dragOverPositionRef.current || lastDragOverRef.current?.position;
+            dragOverPositionRef.current || lastDragOverRef.current?.position
           if (
             !handleDropCalledRef.current &&
             currentDragOverItemId &&
@@ -842,17 +840,16 @@ function TOCContent({
                 if (!handleDropCalledRef.current) {
                   // Check refs first, then lastDragOverRef as fallback
                   const finalItemId =
-                    dragOverItemIdRef.current ||
-                    lastDragOverRef.current?.itemId;
+                    dragOverItemIdRef.current || lastDragOverRef.current?.itemId
                   const finalPosition =
                     dragOverPositionRef.current ||
-                    lastDragOverRef.current?.position;
+                    lastDragOverRef.current?.position
                   if (finalItemId && finalPosition) {
-                    handleDrop(finalItemId, finalPosition);
+                    handleDrop(finalItemId, finalPosition)
                   }
                 }
-              });
-            });
+              })
+            })
           }
 
           // DON'T reset the flag here - handleDrop will set it to true when it executes
@@ -860,8 +857,8 @@ function TOCContent({
 
           // Cancel any existing safety timeout
           if (safetyTimeoutRef.current) {
-            clearTimeout(safetyTimeoutRef.current);
-            safetyTimeoutRef.current = null;
+            clearTimeout(safetyTimeoutRef.current)
+            safetyTimeoutRef.current = null
           }
 
           // Set a safety timeout to clear state if handleDrop doesn't fire
@@ -870,28 +867,28 @@ function TOCContent({
           const timeoutId = setTimeout(() => {
             // Double-check the flag - handleDrop may have executed between scheduling and execution
             if (!handleDropCalledRef.current) {
-              lastDragOverRef.current = null;
-              lastItemIndexRef.current = null;
-              currentStateSetTimeRef.current = 0;
-              lastDragOverCallTimeRef.current = 0;
-              setDragOverItemId(null);
-              setDragOverPosition(null);
-              dragOverItemIdRef.current = null;
-              dragOverPositionRef.current = null;
-              setDraggedItemId(null);
-              draggedItemIdRef.current = null;
+              lastDragOverRef.current = null
+              lastItemIndexRef.current = null
+              currentStateSetTimeRef.current = 0
+              lastDragOverCallTimeRef.current = 0
+              setDragOverItemId(null)
+              setDragOverPosition(null)
+              dragOverItemIdRef.current = null
+              dragOverPositionRef.current = null
+              setDraggedItemId(null)
+              draggedItemIdRef.current = null
             }
             // Only clear the ref if this is still the active timeout
             if (safetyTimeoutRef.current === timeoutId) {
-              safetyTimeoutRef.current = null;
+              safetyTimeoutRef.current = null
             }
-          }, 500); // 500ms should be enough for handleDrop to fire
-          safetyTimeoutRef.current = timeoutId;
+          }, 500) // 500ms should be enough for handleDrop to fire
+          safetyTimeoutRef.current = timeoutId
         }
       },
-      [handleDrop],
-    ),
-  );
+      [handleDrop]
+    )
+  )
 
   return (
     <nav
@@ -924,10 +921,10 @@ function TOCContent({
         </div>
       )}
       {(() => {
-        const displayItems = sortable ? filteredSortableItems : filteredItems;
-        const firstItem = displayItems[0];
-        const lastItem = displayItems[displayItems.length - 1];
-        const hasDrag = Boolean(draggedItemId);
+        const displayItems = sortable ? filteredSortableItems : filteredItems
+        const firstItem = displayItems[0]
+        const lastItem = displayItems[displayItems.length - 1]
+        const hasDrag = Boolean(draggedItemId)
 
         const listContent = (
           <>
@@ -961,8 +958,8 @@ function TOCContent({
                 handleDragOver,
                 handleDragLeave,
                 handleDrop,
-                justDroppedItemId,
-              ),
+                justDroppedItemId
+              )
             )}
             {sortable && lastItem && (
               <EdgeDropZone
@@ -975,7 +972,7 @@ function TOCContent({
               />
             )}
           </>
-        );
+        )
 
         return scrollable ? (
           <ScrollArea className="min-h-0 flex-1">
@@ -987,32 +984,32 @@ function TOCContent({
           <div className="min-h-0 flex-1 overflow-hidden px-2 pb-2">
             <div className="flex flex-col gap-0.5">{listContent}</div>
           </div>
-        );
+        )
       })()}
     </nav>
-  );
+  )
 }
 
 function _F0TableOfContent(props: TOCProps) {
   // Create a unique instance ID for each component instance
-  const instanceIdRef = useRef(Symbol("f0-table-of-contents"));
+  const instanceIdRef = useRef(Symbol("f0-table-of-contents"))
   const driver = useMemo(() => {
-    return createAtlaskitDriver(instanceIdRef.current);
-  }, []);
+    return createAtlaskitDriver(instanceIdRef.current)
+  }, [])
 
   return (
     <DndProvider driver={driver}>
       <TOCContent {...props} />
     </DndProvider>
-  );
+  )
 }
 
 /**
  * @experimental This is an experimental component use it at your own risk
  */
 export const F0TableOfContent = withDataTestId(
-  experimentalComponent("F0TableOfContent", _F0TableOfContent),
-);
+  experimentalComponent("F0TableOfContent", _F0TableOfContent)
+)
 
-export { Item, ItemSectionHeader };
-export type { TOCItem, TOCItemAction, TOCProps };
+export { Item, ItemSectionHeader }
+export type { TOCItem, TOCItemAction, TOCProps }

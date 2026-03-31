@@ -1,8 +1,8 @@
-import { F0Button } from "@/components/F0Button";
-import { Plus } from "@/icons/app";
-import { cn } from "@/lib/utils";
+import { F0Button } from "@/components/F0Button"
+import { Plus } from "@/icons/app"
+import { cn } from "@/lib/utils"
 
-import { focusNextFocusable, focusPreviousFocusable } from "../ListItem";
+import { focusNextFocusable, focusPreviousFocusable } from "../ListItem"
 
 export const CreateItem = ({
   label,
@@ -10,18 +10,18 @@ export const CreateItem = ({
   goToFirst,
   goToLast,
 }: {
-  label: string;
-  onCreate: () => void;
-  goToFirst?: () => void;
-  goToLast?: () => void;
+  label: string
+  onCreate: () => void
+  goToFirst?: () => void
+  goToLast?: () => void
 }) => {
   const handleKeyDown = (ev: React.KeyboardEvent<HTMLDivElement>) => {
     if (ev.key === "ArrowDown" || ev.key === "Tab") {
-      focusNextFocusable(ev.currentTarget, goToFirst);
+      focusNextFocusable(ev.currentTarget, goToFirst)
     } else if (ev.key === "ArrowUp") {
-      focusPreviousFocusable(ev.currentTarget, goToLast);
+      focusPreviousFocusable(ev.currentTarget, goToLast)
     }
-  };
+  }
 
   return (
     <div className="w-full pl-1 pr-1" onKeyDown={handleKeyDown}>
@@ -30,7 +30,7 @@ export const CreateItem = ({
         className={cn(
           "flex flex-row flex-wrap items-center gap-1.5 rounded border px-1.5 py-1.5 hover:cursor-pointer",
           "focus-within:outline focus-within:outline-1 focus-within:-outline-offset-1 focus-within:outline-f1-border-selected-bold hover:bg-f1-background-hover",
-          "select-none",
+          "select-none"
         )}
       >
         <F0Button
@@ -49,5 +49,5 @@ export const CreateItem = ({
         </div>
       </label>
     </div>
-  );
-};
+  )
+}
