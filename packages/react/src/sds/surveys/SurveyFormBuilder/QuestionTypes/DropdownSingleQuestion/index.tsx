@@ -10,8 +10,12 @@ import { useSurveyFormBuilderContext } from "../../Context"
 import { BaseQuestion, useQuestionDisabled } from "../BaseQuestion"
 import { DropdownSingleQuestionProps } from "./types"
 
+const SEARCH_BOX_OPTIONS_THRESHOLD = 8
+
 export const DropdownSingleQuestion = ({
   options,
+  showSearchBox: showSearchBoxProp,
+  searchBoxPlaceholder,
   ...props
 }: DropdownSingleQuestionProps) => {
   const { onQuestionChange, answering } = useSurveyFormBuilderContext()
@@ -28,6 +32,9 @@ export const DropdownSingleQuestion = ({
 
   const placeholder = t("surveyFormBuilder.answer.dropdownPlaceholder")
 
+  const showSearchBox =
+    showSearchBoxProp ?? selectOptions.length > SEARCH_BOX_OPTIONS_THRESHOLD
+
   const field: F0Field = useMemo(
     () => ({
       id: props.id,
@@ -37,8 +44,17 @@ export const DropdownSingleQuestion = ({
       options: selectOptions,
       clearable: !props.required,
       multiple: false,
+      showSearchBox,
+      searchBoxPlaceholder,
     }),
-    [props.id, props.required, selectOptions, t]
+    [
+      props.id,
+      props.required,
+      selectOptions,
+      t,
+      showSearchBox,
+      searchBoxPlaceholder,
+    ]
   )
 
   return (

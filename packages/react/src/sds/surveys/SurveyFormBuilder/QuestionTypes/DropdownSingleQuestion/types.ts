@@ -13,4 +13,6 @@ export type DropdownSingleQuestionProps =
     type: "dropdown-single"
     options: SelectQuestionOption[]
     value?: string | null
+    showSearchBox?: boolean
+    searchBoxPlaceholder?: string
   }
