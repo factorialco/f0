@@ -382,18 +382,12 @@ function buildFieldForQuestion(
     }
 
     case "dropdown-single": {
-      const dropdownQuestion = q as QuestionElement & {
-        options: SelectQuestionOption[]
-        showSearchBox?: boolean
-        searchBoxPlaceholder?: string
-      }
-      const options = dropdownQuestion.options.map((o) => ({
+      const options = q.options.map((o) => ({
         value: o.value,
         label: o.label,
       }))
       const showSearchBox =
-        dropdownQuestion.showSearchBox ??
-        options.length > SEARCH_BOX_OPTIONS_THRESHOLD
+        q.showSearchBox ?? options.length > SEARCH_BOX_OPTIONS_THRESHOLD
       const field: F0Field = {
         id: q.id,
         type: "select",
@@ -404,7 +398,7 @@ function buildFieldForQuestion(
         multiple: false,
         disabled: disableFields,
         showSearchBox,
-        searchBoxPlaceholder: dropdownQuestion.searchBoxPlaceholder,
+        searchBoxPlaceholder: q.searchBoxPlaceholder,
       }
       return f0FormField(buildStringSchema(!!q.required, t), {
         ...baseConfig,
