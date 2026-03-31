@@ -18,7 +18,7 @@ import {
 import { F0Icon, IconType } from "@/components/F0Icon"
 import { Dropdown, MobileDropdown } from "@/experimental/Navigation/Dropdown"
 import CheckCircleAnimated from "@/icons/animated/CheckCircle"
-import { AlertCircleLine } from "@/icons/app"
+import { AlertCircle, AlertCircleLine } from "@/icons/app"
 import { withDataTestId } from "@/lib/data-testid"
 import { cn } from "@/lib/utils"
 import { Spinner } from "@/ui/Spinner"
@@ -69,7 +69,14 @@ const normalizeItems = (
   }
 }
 
-export type ActionBarStatus = "idle" | "loading" | "success"
+export const actionBarStatuses = [
+  "idle",
+  "loading",
+  "success",
+  "error",
+] as const
+
+export type ActionBarStatus = (typeof actionBarStatuses)[number]
 
 interface WiggleOptions {
   errorHighlight?: boolean
@@ -121,6 +128,7 @@ interface F0ActionBarProps {
    * - "idle": Default state, shows an alert icon (pending changes)
    * - "loading": Shows a spinner and disables all actions
    * - "success": Shows a checkmark icon and disables all actions
+   * - "error": Shows an error icon with persistent error styling
    * @default "idle"
    */
   status?: ActionBarStatus
@@ -147,6 +155,16 @@ const StatusIcon = ({
       <CheckCircleAnimated
         animate="animate"
         className="h-5 w-5 text-f1-icon-positive"
+      />
+    )
+  }
+
+  if (status === "error") {
+    return (
+      <F0Icon
+        icon={AlertCircle}
+        size="md"
+        color={isLight ? "critical" : "inverse"}
       />
     )
   }
@@ -236,6 +254,38 @@ const _F0ActionBar = forwardRef<F0ActionBarRef, F0ActionBarProps>(
         }, WIGGLE_DURATION_MS)
       },
     }))
+
+    const [showErrorStyles, setShowErrorStyles] = useState(false)
+
+    useEffect(() => {
+      if (status === "error") {
+        const el = containerRef.current
+        if (!el) return
+
+        if (wiggleTimeoutRef.current) {
+          clearTimeout(wiggleTimeoutRef.current)
+        }
+
+        setShowErrorStyles(false)
+        el.classList.remove(errorNavigateClassName)
+        void el.offsetWidth
+        el.classList.add(errorNavigateClassName)
+
+        wiggleTimeoutRef.current = setTimeout(() => {
+          el.classList.remove(errorNavigateClassName)
+          wiggleTimeoutRef.current = null
+          setShowErrorStyles(true)
+        }, WIGGLE_DURATION_MS)
+      } else {
+        setShowErrorStyles(false)
+        if (wiggleTimeoutRef.current) {
+          clearTimeout(wiggleTimeoutRef.current)
+          wiggleTimeoutRef.current = null
+        }
+        containerRef.current?.classList.remove(errorNavigateClassName)
+      }
+    }, [status])
+
     const visibleSecondaryActions = secondaryActions.slice(0, 2)
     const dropdownActions = secondaryActions.slice(2).map((action) => ({
       ...action,
@@ -314,8 +364,13 @@ const _F0ActionBar = forwardRef<F0ActionBarRef, F0ActionBarProps>(
                 ? "sm:left-auto sm:right-auto sm:mx-auto"
                 : "sm:left-2 sm:right-2 sm:mx-auto",
               isLight
-                ? "border border-solid border-f1-border-secondary bg-f1-background text-f1-foreground"
-                : "bg-f1-background-inverse text-f1-foreground dark:bg-f1-background-inverse-secondary"
+                ? "border border-solid bg-f1-background text-f1-foreground"
+                : "bg-f1-background-inverse text-f1-foreground dark:bg-f1-background-inverse-secondary",
+              isLight && showErrorStyles
+                ? "border-f1-border-critical-bold bg-f1-background-critical/10"
+                : isLight
+                  ? "border-f1-border-secondary"
+                  : ""
             )}
           >
             {leftContent}
