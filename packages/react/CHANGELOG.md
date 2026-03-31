@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.427.2](https://github.com/factorialco/f0/compare/f0-react-v1.427.1...f0-react-v1.427.2) (2026-03-31)
+
+
+### Bug Fixes
+
+* add error status to f0 action bar ([#3806](https://github.com/factorialco/f0/issues/3806)) ([507053f](https://github.com/factorialco/f0/commit/507053f3f0cfab0b8307e7cf5f309773f5fd4d27))
+
 ## [1.427.1](https://github.com/factorialco/f0/compare/f0-react-v1.427.0...f0-react-v1.427.1) (2026-03-31)
 
 
