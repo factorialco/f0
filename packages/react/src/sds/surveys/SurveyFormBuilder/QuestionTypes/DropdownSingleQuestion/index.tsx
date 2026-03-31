@@ -8,9 +8,10 @@ import { useI18n } from "@/lib/providers/i18n"
 
 import { useSurveyFormBuilderContext } from "../../Context"
 import { BaseQuestion, useQuestionDisabled } from "../BaseQuestion"
-import { DropdownSingleQuestionProps } from "./types"
-
-const SEARCH_BOX_OPTIONS_THRESHOLD = 8
+import {
+  DropdownSingleQuestionProps,
+  SEARCH_BOX_OPTIONS_THRESHOLD,
+} from "./types"
 
 export const DropdownSingleQuestion = ({
   options,
@@ -30,8 +31,6 @@ export const DropdownSingleQuestion = ({
     [options]
   )
 
-  const placeholder = t("surveyFormBuilder.answer.dropdownPlaceholder")
-
   const showSearchBox =
     showSearchBoxProp ?? selectOptions.length > SEARCH_BOX_OPTIONS_THRESHOLD
 
@@ -40,7 +39,7 @@ export const DropdownSingleQuestion = ({
       id: props.id,
       type: "select" as const,
       label: t("surveyFormBuilder.answer.label"),
-      placeholder,
+      placeholder: t("surveyFormBuilder.answer.dropdownPlaceholder"),
       options: selectOptions,
       clearable: !props.required,
       multiple: false,
@@ -78,7 +77,7 @@ export const DropdownSingleQuestion = ({
           <Input
             type="text"
             size="md"
-            value={placeholder}
+            value={t("surveyFormBuilder.answer.dropdownPlaceholder")}
             onChange={() => {}}
             disabled
             label={t("surveyFormBuilder.answer.label")}

@@ -25,6 +25,7 @@ import type {
 } from "../types"
 
 import { BaseQuestion } from "../../SurveyFormBuilder/QuestionTypes/BaseQuestion"
+import { SEARCH_BOX_OPTIONS_THRESHOLD } from "../../SurveyFormBuilder/QuestionTypes/DropdownSingleQuestion/types"
 import { DEFAULT_FILE_ACCEPT } from "../../SurveyFormBuilder/QuestionTypes/FileQuestion"
 import {
   RatingQuestionField,
@@ -390,7 +391,9 @@ function buildFieldForQuestion(
         value: o.value,
         label: o.label,
       }))
-      const showSearchBox = dropdownQuestion.showSearchBox ?? options.length > 8
+      const showSearchBox =
+        dropdownQuestion.showSearchBox ??
+        options.length > SEARCH_BOX_OPTIONS_THRESHOLD
       const field: F0Field = {
         id: q.id,
         type: "select",
