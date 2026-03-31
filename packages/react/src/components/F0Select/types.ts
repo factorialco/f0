@@ -188,5 +188,6 @@ export type F0SelectItemObject<T, R = unknown> = {
 export type F0SelectItemProps<T, R = unknown> =
   | F0SelectItemObject<T, R>
   | { type: "separator" }
+  | { type: "group-header"; label: string }
 
 export const selectSizes = INPUTFIELD_SIZES
