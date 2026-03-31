@@ -615,7 +615,12 @@ const F0SelectComponent = forwardRef(function Select<
         return mappedOption.type === "separator"
           ? {
               height: 1,
-              item: <SelectSeparator key={`separator-${index}`} />,
+              item: (
+                <SelectSeparator
+                  key={`separator-${index}`}
+                  className="mb-1 mt-2"
+                />
+              ),
             }
           : {
               height: mappedOption.description ? 64 : 32,

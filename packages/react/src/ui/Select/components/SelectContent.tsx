@@ -314,7 +314,7 @@ const SelectContent = forwardRef<
                 viewportRef={parentRef}
                 className={cn(
                   "flex h-full flex-col",
-                  isEmpty && "justify-center",
+                  isEmpty ? "justify-center" : "pb-1",
                   loadingNewContent &&
                     "select-none opacity-10 transition-opacity"
                 )}
