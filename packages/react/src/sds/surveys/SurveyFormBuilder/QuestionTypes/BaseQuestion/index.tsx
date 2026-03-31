@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 
 import { Dropdown } from "@/experimental/Navigation/Dropdown"
 import { DropdownInternalProps } from "@/experimental/Navigation/Dropdown/internal"
@@ -111,6 +111,15 @@ export const BaseQuestion = ({
 
   const isSingleQuestionInSection = getIsSingleQuestionInSection(id)
 
+  const titleRef = useRef<HTMLTextAreaElement>(null)
+  const shouldFocusTitleOnMountRef = useRef(!isSingleQuestionInSection)
+
+  useEffect(() => {
+    if (shouldFocusTitleOnMountRef.current) {
+      titleRef.current?.focus({ preventScroll: true })
+    }
+  }, [])
+
   const inputDisabled = disabled || locked || answering
 
   const showCursorNotAllowed = !answering && inputDisabled
@@ -137,6 +146,7 @@ export const BaseQuestion = ({
             ) : (
               <>
                 <textarea
+                  ref={titleRef}
                   value={title}
                   aria-label={t("surveyFormBuilder.labels.title")}
                   placeholder={t("surveyFormBuilder.labels.titlePlaceholder")}
@@ -147,7 +157,6 @@ export const BaseQuestion = ({
                     showCursorNotAllowed && "cursor-not-allowed"
                   )}
                   style={TEXT_AREA_STYLE}
-                  autoFocus={!isSingleQuestionInSection}
                 />
                 <div className="textarea-overlay pointer-events-none absolute left-0 top-0 h-full w-full whitespace-pre-wrap break-words px-2 py-1 text-lg font-semibold">
                   <span className="opacity-0">

@@ -7,6 +7,7 @@ import {
   useImperativeHandle,
   useMemo,
   useRef,
+  useState,
 } from "react"
 
 import { F0Button } from "@/components/F0Button"
@@ -116,13 +117,6 @@ interface F0ActionBarProps {
   leftContent?: React.ReactNode
 
   /**
-   * When true, centers the action bar relative to the ApplicationFrame content area
-   * (accounting for the sidebar width) instead of the full viewport.
-   * @default false
-   */
-  centerInFrameContent?: boolean
-
-  /**
    * The current status of the action bar.
    * - "idle": Default state, shows an alert icon (pending changes)
    * - "loading": Shows a spinner and disables all actions
@@ -174,7 +168,6 @@ const _F0ActionBar = forwardRef<F0ActionBarRef, F0ActionBarProps>(
       label,
       variant = "dark",
       leftContent,
-      centerInFrameContent = false,
       status = "idle",
       ...props
     },
@@ -182,6 +175,36 @@ const _F0ActionBar = forwardRef<F0ActionBarRef, F0ActionBarProps>(
   ) => {
     const containerRef = useRef<HTMLDivElement>(null)
     const wiggleTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+    const [contentRect, setContentRect] = useState<{
+      left: number
+      width: number
+    } | null>(null)
+
+    useEffect(() => {
+      const el = document.getElementById("content")
+      if (!el) return
+
+      const update = () => {
+        const rect = el.getBoundingClientRect()
+        const left = rect.left
+        const width = rect.width
+
+        setContentRect((prev) => {
+          if (prev && prev.left === left && prev.width === width) {
+            return prev
+          }
+
+          return { left, width }
+        })
+      }
+
+      update()
+
+      const observer = new ResizeObserver(update)
+      observer.observe(el)
+
+      return () => observer.disconnect()
+    }, [])
 
     useEffect(() => {
       return () => {
@@ -266,7 +289,7 @@ const _F0ActionBar = forwardRef<F0ActionBarRef, F0ActionBarProps>(
     // Wrapper class for buttons - only apply dark theme wrapper for dark variant
     const buttonWrapperClass = isLight ? "" : "dark"
 
-    return (
+    const actionBarContent = (
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -276,10 +299,19 @@ const _F0ActionBar = forwardRef<F0ActionBarRef, F0ActionBarProps>(
             animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
             exit={{ opacity: 0, y: 32, filter: "blur(6px)" }}
             transition={{ ease: [0.175, 0.885, 0.32, 1.275], duration: 0.3 }}
+            style={
+              contentRect
+                ? {
+                    left: contentRect.left,
+                    right:
+                      window.innerWidth - contentRect.left - contentRect.width,
+                  }
+                : undefined
+            }
             className={cn(
               "fixed bottom-2 left-2 right-2 z-50 flex h-fit flex-col items-center gap-2 rounded-xl p-2 shadow-lg backdrop-blur-sm sm:bottom-5 sm:h-12 sm:w-max sm:flex-row sm:gap-4 sm:min-w-[475px] sm:justify-between",
-              centerInFrameContent
-                ? "sm:left-[240px] sm:right-2 sm:mx-auto"
+              contentRect
+                ? "sm:left-auto sm:right-auto sm:mx-auto"
                 : "sm:left-2 sm:right-2 sm:mx-auto",
               isLight
                 ? "border border-solid border-f1-border-secondary bg-f1-background text-f1-foreground"
@@ -391,6 +423,8 @@ const _F0ActionBar = forwardRef<F0ActionBarRef, F0ActionBarProps>(
         )}
       </AnimatePresence>
     )
+
+    return actionBarContent
   }
 )
 

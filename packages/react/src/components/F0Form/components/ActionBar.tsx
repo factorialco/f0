@@ -10,7 +10,6 @@ interface FormActionBarProps {
   hasErrors: boolean
   errorCount: number
   resolvedActionBarLabel: string | undefined
-  centerActionBarInFrameContent: boolean
   submitLabel: string
   submitIcon: IconType | undefined
   discardableChanges: boolean | "" | undefined
@@ -31,7 +30,6 @@ export function FormActionBar({
   hasErrors,
   errorCount,
   resolvedActionBarLabel,
-  centerActionBarInFrameContent,
   submitLabel,
   submitIcon,
   discardableChanges,
@@ -54,7 +52,6 @@ export function FormActionBar({
         }
         variant="light"
         status={hasErrors ? undefined : actionBarStatus}
-        centerInFrameContent={centerActionBarInFrameContent}
         label={resolvedActionBarLabel}
         leftContent={
           hasErrors ? (
