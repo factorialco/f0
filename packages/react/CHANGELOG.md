@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.427.0](https://github.com/factorialco/f0/compare/f0-react-v1.426.0...f0-react-v1.427.0) (2026-03-31)
+
+
+### Features
+
+* add wiggle and error highlight to F0ActionBar ([#3795](https://github.com/factorialco/f0/issues/3795)) ([7086b14](https://github.com/factorialco/f0/commit/7086b14592c2454aacfc9a1e7fe8d25cefea54bb))
+
 ## [1.426.0](https://github.com/factorialco/f0/compare/f0-react-v1.425.4...f0-react-v1.426.0) (2026-03-30)
 
 
