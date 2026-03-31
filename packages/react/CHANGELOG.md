@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.428.1](https://github.com/factorialco/f0/compare/f0-react-v1.428.0...f0-react-v1.428.1) (2026-03-31)
+
+
+### Bug Fixes
+
+* set proper F0Select spacing ([#3813](https://github.com/factorialco/f0/issues/3813)) ([f399581](https://github.com/factorialco/f0/commit/f399581def34b02658fcaa78308612f91e56cc84))
+
 ## [1.428.0](https://github.com/factorialco/f0/compare/f0-react-v1.427.3...f0-react-v1.428.0) (2026-03-31)
 
 
