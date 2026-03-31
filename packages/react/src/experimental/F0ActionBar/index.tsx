@@ -248,6 +248,8 @@ const _F0ActionBar = forwardRef<F0ActionBarRef, F0ActionBarProps>(
       },
     }))
 
+    const [showErrorStyles, setShowErrorStyles] = useState(false)
+
     useEffect(() => {
       if (status === "error") {
         const el = containerRef.current
@@ -257,6 +259,7 @@ const _F0ActionBar = forwardRef<F0ActionBarRef, F0ActionBarProps>(
           clearTimeout(wiggleTimeoutRef.current)
         }
 
+        setShowErrorStyles(false)
         el.classList.remove(errorNavigateClassName)
         void el.offsetWidth
         el.classList.add(errorNavigateClassName)
@@ -264,7 +267,10 @@ const _F0ActionBar = forwardRef<F0ActionBarRef, F0ActionBarProps>(
         wiggleTimeoutRef.current = setTimeout(() => {
           el.classList.remove(errorNavigateClassName)
           wiggleTimeoutRef.current = null
+          setShowErrorStyles(true)
         }, WIGGLE_DURATION_MS)
+      } else {
+        setShowErrorStyles(false)
       }
     }, [status])
 
@@ -275,7 +281,6 @@ const _F0ActionBar = forwardRef<F0ActionBarRef, F0ActionBarProps>(
     }))
 
     const isLight = variant === "light"
-    const isError = status === "error"
     const isInteractionDisabled = status === "loading" || status === "success"
 
     /**
@@ -349,7 +354,7 @@ const _F0ActionBar = forwardRef<F0ActionBarRef, F0ActionBarProps>(
               isLight
                 ? "border border-solid bg-f1-background text-f1-foreground"
                 : "bg-f1-background-inverse text-f1-foreground dark:bg-f1-background-inverse-secondary",
-              isLight && isError
+              isLight && showErrorStyles
                 ? "border-f1-border-critical-bold bg-f1-background-critical/10"
                 : isLight
                   ? "border-f1-border-secondary"

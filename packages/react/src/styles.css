@@ -119,6 +119,42 @@ div[role="dialog"] {
   animation: f0-form-error-shake 0.6s ease-in-out;
 }
 
+.f0-action-bar-error-navigate[data-variant="light"] {
+  animation:
+    f0-form-error-shake 0.6s ease-in-out,
+    f0-action-bar-glow 0.6s ease-in-out,
+    f0-action-bar-bg-flash 0.6s ease-in-out;
+}
+
+@keyframes f0-action-bar-glow {
+  0% {
+    box-shadow: 0 8px 30px 0 hsl(var(--shadow) / 0.12);
+    border-color: hsl(var(--critical-50));
+  }
+  50% {
+    box-shadow:
+      0 8px 30px 0 hsl(var(--shadow) / 0.12),
+      0 0 8px 0px hsl(var(--critical-50));
+    border-color: hsl(var(--critical-50));
+  }
+  100% {
+    box-shadow: 0 8px 30px 0 hsl(var(--shadow) / 0.12);
+    border-color: hsl(var(--critical-50));
+  }
+}
+
+@keyframes f0-action-bar-bg-flash {
+  0% {
+    background-color: hsl(var(--neutral-0));
+  }
+  50% {
+    background-color: hsl(var(--critical-50) / 0.2);
+  }
+  100% {
+    background-color: hsl(var(--critical-50) / 0.1);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .f0-action-bar-error-navigate {
     animation: none;
