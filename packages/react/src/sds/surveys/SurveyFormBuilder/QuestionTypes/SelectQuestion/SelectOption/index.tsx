@@ -59,7 +59,7 @@ export const SelectOption = ({
   const isDraggingThisItem = isDragging && draggedItemId === value
 
   const handleClick = () => {
-    if (disabled && !answering) return
+    if (!disabled && !answering) return // edit mode — do not select answer
     onClick(value)
   }
 
@@ -67,11 +67,13 @@ export const SelectOption = ({
     onClickAction({ value, index, action })
   }
 
-  const handleClickMarkAsCorrect = () => {
+  const handleClickMarkAsCorrect = (event: React.MouseEvent<HTMLElement>) => {
+    event.stopPropagation()
     handleClickAction("mark-as-correct")
   }
 
-  const handleClickRemove = () => {
+  const handleClickRemove = (event: React.MouseEvent<HTMLElement>) => {
+    event.stopPropagation()
     handleClickAction("remove")
   }
 
