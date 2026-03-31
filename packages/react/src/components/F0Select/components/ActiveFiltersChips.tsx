@@ -1,7 +1,7 @@
 import { AnimatePresence, motion } from "motion/react"
 import { useEffect, useState } from "react"
 
-import { Chip } from "@/experimental/OneChip"
+import { F0Chip as Chip } from "@/components/F0Chip"
 import { FiltersDefinition, FiltersState } from "@/hooks/datasource"
 import { useI18n } from "@/lib/providers/i18n"
 import { ScrollArea } from "@/ui/scrollarea"

@@ -4,7 +4,10 @@ import { focusRing } from "@/lib/utils"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
 import { ScrollArea, ScrollBar } from "@/ui/scrollarea"
 
-import { Chip, type ChipProps } from "../../experimental/OneChip"
+import {
+  F0Chip as Chip,
+  type F0ChipProps as ChipProps,
+} from "@/components/F0Chip"
 
 type Props = {
   count: number

@@ -3,7 +3,7 @@
 import { motion } from "motion/react"
 import { ReactElement, useEffect, useState } from "react"
 
-import { Chip } from "@/experimental/OneChip"
+import { F0Chip as Chip } from "@/components/F0Chip"
 import { I18nContextType, useI18n } from "@/lib/providers/i18n"
 import { Skeleton } from "@/ui/skeleton"
 

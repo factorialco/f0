@@ -27,6 +27,10 @@ export * from "./Navigation/exports"
  * @deprecated OneApprovalHistory has moved to @/sds/inbox/OneApprovalHistory. Import from there instead.
  */
 export * from "../sds/inbox/OneApprovalHistory"
+/**
+ * @deprecated Chip has moved to @factorialco/f0-react as F0Chip. Import from there instead.
+ */
+export * from "./OneChip"
 export * from "./OneCalendar"
 export * from "./OneDataCollection/exports"
 export * from "./OneDateNavigator"
