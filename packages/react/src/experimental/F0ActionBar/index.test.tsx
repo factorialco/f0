@@ -1,7 +1,9 @@
 import { zeroRender as render, screen } from "@/testing/test-utils"
+import { createRef } from "react"
+import { act } from "react"
 import { describe, expect, it, vi } from "vitest"
 
-import { F0ActionBar } from "."
+import { F0ActionBar, F0ActionBarRef } from "."
 
 describe("F0ActionBar status prop", () => {
   const defaultProps = {
@@ -120,5 +122,58 @@ describe("F0ActionBar status prop", () => {
 
       expect(screen.queryByText("Unsaved changes")).not.toBeInTheDocument()
     })
+  })
+})
+
+describe("F0ActionBar wiggle ref", () => {
+  const defaultProps = {
+    isOpen: true,
+    variant: "light" as const,
+    primaryActions: [{ label: "Save", onClick: vi.fn() }],
+    label: "Unsaved changes",
+  }
+
+  it("applies f0-action-bar-error-navigate class when wiggle is called with errorHighlight", () => {
+    const ref = createRef<F0ActionBarRef>()
+    render(<F0ActionBar {...defaultProps} ref={ref} />)
+
+    act(() => {
+      ref.current?.wiggle({ errorHighlight: true })
+    })
+
+    const bar = screen.getByText("Unsaved changes").closest("[class*='fixed']")
+    expect(bar).toHaveClass("f0-action-bar-error-navigate")
+  })
+
+  it("removes f0-action-bar-error-navigate class after 600ms", () => {
+    vi.useFakeTimers()
+    const ref = createRef<F0ActionBarRef>()
+    render(<F0ActionBar {...defaultProps} ref={ref} />)
+
+    act(() => {
+      ref.current?.wiggle({ errorHighlight: true })
+    })
+
+    const bar = screen.getByText("Unsaved changes").closest("[class*='fixed']")
+    expect(bar).toHaveClass("f0-action-bar-error-navigate")
+
+    act(() => {
+      vi.advanceTimersByTime(600)
+    })
+
+    expect(bar).not.toHaveClass("f0-action-bar-error-navigate")
+    vi.useRealTimers()
+  })
+
+  it("does nothing when wiggle is called without errorHighlight", () => {
+    const ref = createRef<F0ActionBarRef>()
+    render(<F0ActionBar {...defaultProps} ref={ref} />)
+
+    act(() => {
+      ref.current?.wiggle()
+    })
+
+    const bar = screen.getByText("Unsaved changes").closest("[class*='fixed']")
+    expect(bar).not.toHaveClass("f0-action-bar-error-navigate")
   })
 })
