@@ -39,7 +39,7 @@ const meta: Meta<typeof F0ActionBar> = {
     },
     status: {
       control: "select",
-      options: ["idle", "loading", "success"],
+      options: ["idle", "loading", "success", "error"],
       description: "The current status of the action bar",
     },
   },
@@ -222,6 +222,61 @@ export const ErrorWiggle: Story = {
       description: {
         story:
           "Click the Save button to trigger the error wiggle animation, which highlights the action bar with a shake and red glow — matching the behavior of F0Form input validation errors.",
+      },
+    },
+  },
+}
+
+const ErrorStatusFlowDemo = () => {
+  const actionBarRef = useRef<F0ActionBarRef>(null)
+  const [status, setStatus] = useState<ActionBarStatus>("idle")
+  const [label, setLabel] = useState("You have changes pending to be saved")
+
+  const handleSave = () => {
+    setStatus("loading")
+    setLabel("Saving...")
+    setTimeout(() => {
+      setStatus("error")
+      setLabel("There was an error saving your changes")
+    }, 2000)
+  }
+
+  const handleDiscard = () => {
+    setStatus("idle")
+    setLabel("You have changes pending to be saved")
+  }
+
+  return (
+    <F0ActionBar
+      ref={actionBarRef}
+      isOpen
+      variant="light"
+      status={status}
+      label={label}
+      primaryActions={[
+        {
+          label: "Save",
+          icon: Save,
+          onClick: handleSave,
+        },
+      ]}
+      secondaryActions={[
+        {
+          label: "Discard",
+          onClick: handleDiscard,
+        },
+      ]}
+    />
+  )
+}
+
+export const ErrorStatusFlow: Story = {
+  render: () => <ErrorStatusFlowDemo />,
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Click Save to simulate a failed save: the bar shows a loading state, then returns to idle with an error wiggle animation.",
       },
     },
   },
