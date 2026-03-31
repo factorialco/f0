@@ -1,12 +1,11 @@
-import { useEffect, useState } from "react"
-
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
+import { useEffect, useRef, useState } from "react"
 import { fn } from "storybook/test"
 
 import { Reset, Save } from "@/icons/app"
 
-import { F0ActionBar, ActionBarStatus } from "."
+import { F0ActionBar, ActionBarStatus, F0ActionBarRef } from "."
 
 const meta: Meta<typeof F0ActionBar> = {
   title: "Experimental/F0ActionBar",
@@ -185,4 +184,45 @@ const StatusFlowDemo = () => {
 
 export const StatusFlow: Story = {
   render: () => <StatusFlowDemo />,
+}
+
+const ErrorWiggleDemo = () => {
+  const actionBarRef = useRef<F0ActionBarRef>(null)
+
+  return (
+    <F0ActionBar
+      ref={actionBarRef}
+      isOpen
+      variant="light"
+      status="idle"
+      label="You have changes pending to be saved"
+      primaryActions={[
+        {
+          label: "Save",
+          icon: Save,
+          onClick: () => {
+            actionBarRef.current?.wiggle({ errorHighlight: true })
+          },
+        },
+      ]}
+      secondaryActions={[
+        {
+          label: "Discard",
+          onClick: fn(),
+        },
+      ]}
+    />
+  )
+}
+
+export const ErrorWiggle: Story = {
+  render: () => <ErrorWiggleDemo />,
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Click the Save button to trigger the error wiggle animation, which highlights the action bar with a shake and red glow — matching the behavior of F0Form input validation errors.",
+      },
+    },
+  },
 }
