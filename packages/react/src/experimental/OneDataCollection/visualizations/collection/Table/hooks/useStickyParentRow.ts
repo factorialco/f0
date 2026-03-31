@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useLayoutEffect, useState } from "react"
 
 import { TABLE_ROW_STICKY_TOP_OFFSET } from "@/experimental/OneTable/TableRow"
 
@@ -39,7 +39,7 @@ export const useStickyParentRow = (
   const stickyTopOffset =
     options?.stickyTopOffset ?? TABLE_ROW_STICKY_TOP_OFFSET
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!open) {
       setIsSticky(false)
       return
