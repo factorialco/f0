@@ -50,7 +50,7 @@ export function PersonEntityRef({ id, label }: { id: string; label: string }) {
         title: `${profile.firstName} ${profile.lastName}`,
         description: profile.jobTitle,
         secondaryActions: {
-          label: i18n.t("ai.viewProfile"),
+          label: i18n.t("ai.view"),
           href: employeeUrl,
         },
       }),
@@ -61,7 +61,7 @@ export function PersonEntityRef({ id, label }: { id: string; label: string }) {
     (): F0CardProps => ({
       title: label,
       secondaryActions: {
-        label: i18n.t("ai.viewProfile"),
+        label: i18n.t("ai.view"),
         href: employeeUrl,
       },
     }),

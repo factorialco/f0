@@ -21,7 +21,7 @@ const CandidateTrigger = forwardRef<HTMLButtonElement, { label: string }>(
       )}
       {...props}
     >
-      @{label}
+      {label}
     </button>
   )
 )
@@ -30,7 +30,7 @@ CandidateTrigger.displayName = "CandidateTrigger"
 /**
  * Inline candidate entity reference with a hover card showing profile details.
  *
- * Renders the trigger as a styled @mention. On hover, lazily fetches
+ * Renders the trigger as a styled link. On hover, lazily fetches
  * the candidate profile via `entityResolvers.candidate` and displays
  * avatar, name, source, and a link to the candidate page.
  */
@@ -59,7 +59,7 @@ export function CandidateEntityRef({
         title: `${profile.firstName} ${profile.lastName}`,
         description: profile.source,
         secondaryActions: {
-          label: i18n.t("ai.viewCandidate"),
+          label: i18n.t("ai.view"),
           href: candidateUrl,
         },
       }),
@@ -70,7 +70,7 @@ export function CandidateEntityRef({
     (): F0CardProps => ({
       title: label,
       secondaryActions: {
-        label: i18n.t("ai.viewCandidate"),
+        label: i18n.t("ai.view"),
         href: candidateUrl,
       },
     }),

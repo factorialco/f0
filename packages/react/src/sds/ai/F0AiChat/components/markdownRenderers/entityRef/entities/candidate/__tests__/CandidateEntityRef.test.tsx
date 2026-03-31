@@ -36,9 +36,11 @@ describe("CandidateEntityRef", () => {
     mockEntityResolvers = { candidate: mockResolver }
   })
 
-  it("renders the @mention trigger button", () => {
+  it("renders the trigger button without @ prefix", () => {
     render(<CandidateEntityRef id="77" label="Maria Lopez" />)
-    expect(screen.getByRole("button")).toHaveTextContent("@Maria Lopez")
+    const button = screen.getByRole("button")
+    expect(button).toHaveTextContent("Maria Lopez")
+    expect(button.textContent).not.toMatch(/^@/)
   })
 
   it("renders label as plain text when no resolver is available", () => {
@@ -60,7 +62,8 @@ describe("CandidateEntityRef", () => {
     await user.hover(screen.getByRole("button"))
 
     await waitFor(() => {
-      expect(screen.getByText("Maria Lopez")).toBeInTheDocument()
+      // Title appears both in the trigger and the card heading
+      expect(screen.getAllByText("Maria Lopez")).toHaveLength(2)
       expect(screen.getByText("LinkedIn")).toBeInTheDocument()
     })
   })
@@ -71,7 +74,7 @@ describe("CandidateEntityRef", () => {
 
     render(<CandidateEntityRef id="77" label="Maria Lopez" />)
 
-    const trigger = screen.getByText("@Maria Lopez")
+    const trigger = screen.getByText("Maria Lopez")
 
     await user.hover(trigger)
     await waitFor(() => {

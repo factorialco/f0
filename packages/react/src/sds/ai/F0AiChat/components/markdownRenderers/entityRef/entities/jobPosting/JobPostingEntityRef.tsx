@@ -55,7 +55,7 @@ export function JobPostingEntityRef({
           .filter(Boolean)
           .join(" · "),
         secondaryActions: {
-          label: i18n.t("ai.viewJobPosting"),
+          label: i18n.t("ai.view"),
           href: jobPostingUrl,
         },
       }),
@@ -66,7 +66,7 @@ export function JobPostingEntityRef({
     (): F0CardProps => ({
       title: label,
       secondaryActions: {
-        label: i18n.t("ai.viewJobPosting"),
+        label: i18n.t("ai.view"),
         href: jobPostingUrl,
       },
     }),
