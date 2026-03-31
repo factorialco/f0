@@ -1,5 +1,7 @@
+import { userEvent } from "@testing-library/user-event"
 import { describe, expect, it, vi } from "vitest"
-import { zeroRender as render, screen } from "@/testing/test-utils"
+
+import { zeroRender as render, screen, waitFor } from "@/testing/test-utils"
 
 import { SurveyFormBuilderElement } from "../../types"
 import { SurveyFormBuilder } from "../index"
@@ -194,5 +196,29 @@ describe("SurveyFormBuilder", () => {
     // Should have the add button since last element is a section
     const buttons = screen.getAllByRole("button")
     expect(buttons.length).toBeGreaterThan(0)
+  })
+
+  it("does not make the table of content sortable when disabled", async () => {
+    const elements: SurveyFormBuilderElement[] = [
+      makeQuestion("q1", "Question 1"),
+      makeQuestion("q2", "Question 2"),
+    ]
+
+    render(
+      <SurveyFormBuilder elements={elements} onChange={vi.fn()} disabled />
+    )
+
+    // Open the table of content popover by clicking the trigger
+    const tocTrigger = screen.getByLabelText("Menu")
+    await userEvent.click(tocTrigger)
+
+    // Verify the popover opened and ToC items are visible
+    await waitFor(() => {
+      expect(screen.getAllByText("Question 1").length).toBeGreaterThan(1)
+    })
+
+    // When disabled, items should not be draggable
+    const draggableItems = document.querySelectorAll("[draggable='true']")
+    expect(draggableItems).toHaveLength(0)
   })
 })
