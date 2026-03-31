@@ -39,3 +39,39 @@ f0/
 
 For `packages/react/` conventions, see `packages/react/AGENTS.md`.
 For `packages/react-native/` conventions, see `packages/react-native/AGENTS.md`.
+
+## Storybook MCP Server
+
+The F0 Storybook exposes an MCP (Model Context Protocol) server that gives AI agents access to component documentation, stories, and testing tools.
+
+### Available Toolsets
+
+| Toolset  | Local dev | Published (Azure) | What it does                                                                 |
+| -------- | --------- | ----------------- | ---------------------------------------------------------------------------- |
+| **docs** | Yes       | Yes               | `list-all-documentation`, `get-documentation`, `get-documentation-for-story` |
+| **dev**  | Yes       | No                | `get-storybook-story-instructions`, `preview-stories`                        |
+| **test** | Yes       | No                | `run-story-tests`                                                            |
+
+### Using the MCP tools
+
+When working on UI components, use the Storybook MCP tools to access component knowledge before writing or modifying code:
+
+- **Never hallucinate component properties.** Before using any prop on an F0 component, query `get-documentation` to check if the property exists.
+- Query `list-all-documentation` to discover available components.
+- Query `get-documentation` for a specific component to see all available props and example stories.
+- Only use properties that are explicitly documented or shown in example stories.
+- Use `get-storybook-story-instructions` to fetch current conventions for writing stories (local dev only).
+- Check your work by running `run-story-tests` (local dev only).
+
+### Connecting to the MCP Server
+
+The repo includes a `.mcp.json` at the root that configures the local Storybook MCP server (`http://localhost:6006/mcp`). Most AI agents/editors that support MCP will auto-discover it.
+
+**Local development** (all toolsets — docs, dev, test):
+
+1. Start Storybook: `pnpm storybook dev` from `packages/react/`
+2. The MCP endpoint is available at `http://localhost:6006/mcp`
+
+**Remote / published** (docs toolset only):
+
+The Azure Static Web Apps deployment also exposes `/mcp` with the docs toolset enabled. Use the published URL for read-only component documentation access without a local dev server.

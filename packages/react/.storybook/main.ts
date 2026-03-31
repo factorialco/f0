@@ -82,6 +82,15 @@ const config: StorybookConfig = {
     },
     getAbsolutePath("@storybook/addon-designs"),
     getAbsolutePath("@storybook/addon-vitest"),
+    // MCP server: exposes component docs/stories to AI agents via the MCP protocol.
+    // In public (static) builds only the docs toolset is useful; dev and test require
+    // a running Storybook server.
+    {
+      name: getAbsolutePath("@storybook/addon-mcp"),
+      options: process.env.STORYBOOK_PUBLIC_BUILD
+        ? { toolsets: { dev: false, test: false, docs: true } }
+        : {},
+    },
   ].filter(Boolean) as Preset[],
   framework: {
     name: getAbsolutePath("@storybook/react-vite"),
