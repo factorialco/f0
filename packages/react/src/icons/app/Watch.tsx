@@ -18,6 +18,7 @@ const SvgWatch = (props: SVGProps<SVGSVGElement>, ref: Ref<SVGSVGElement>) => (
       strokeWidth="1.3"
       strokeLinecap="round"
       strokeLinejoin="round"
+      vectorEffect="non-scaling-stroke"
     />
   </svg>
 )
