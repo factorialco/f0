@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.428.0](https://github.com/factorialco/f0/compare/f0-react-v1.427.3...f0-react-v1.428.0) (2026-03-31)
+
+
+### Features
+
+* add search box functionality to dropdown single question ([#3810](https://github.com/factorialco/f0/issues/3810)) ([5493c45](https://github.com/factorialco/f0/commit/5493c457a1e8848bdd531168a1f83655f6edb48b))
+
 ## [1.427.3](https://github.com/factorialco/f0/compare/f0-react-v1.427.2...f0-react-v1.427.3) (2026-03-31)
 
 
