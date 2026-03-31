@@ -311,6 +311,8 @@ export const defaultTranslations = {
     deleteChat: "Delete chat",
     ask: "Ask One",
     viewProfile: "View profile",
+    viewCandidate: "View candidate",
+    viewJobPosting: "View job posting",
     tools: "Tools",
     credits: {
       title: "Credits",
