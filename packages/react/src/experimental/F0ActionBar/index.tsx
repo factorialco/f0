@@ -69,7 +69,14 @@ const normalizeItems = (
   }
 }
 
-export type ActionBarStatus = "idle" | "loading" | "success" | "error"
+export const actionBarStatuses = [
+  "idle",
+  "loading",
+  "success",
+  "error",
+] as const
+
+export type ActionBarStatus = (typeof actionBarStatuses)[number]
 
 interface WiggleOptions {
   errorHighlight?: boolean
@@ -271,6 +278,11 @@ const _F0ActionBar = forwardRef<F0ActionBarRef, F0ActionBarProps>(
         }, WIGGLE_DURATION_MS)
       } else {
         setShowErrorStyles(false)
+        if (wiggleTimeoutRef.current) {
+          clearTimeout(wiggleTimeoutRef.current)
+          wiggleTimeoutRef.current = null
+        }
+        containerRef.current?.classList.remove(errorNavigateClassName)
       }
     }, [status])
 

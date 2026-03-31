@@ -5,7 +5,12 @@ import { fn } from "storybook/test"
 
 import { Reset, Save } from "@/icons/app"
 
-import { F0ActionBar, ActionBarStatus, F0ActionBarRef } from "."
+import {
+  ActionBarStatus,
+  F0ActionBar,
+  F0ActionBarRef,
+  actionBarStatuses,
+} from "."
 
 const meta: Meta<typeof F0ActionBar> = {
   title: "Experimental/F0ActionBar",
@@ -39,7 +44,7 @@ const meta: Meta<typeof F0ActionBar> = {
     },
     status: {
       control: "select",
-      options: ["idle", "loading", "success", "error"],
+      options: [...actionBarStatuses],
       description: "The current status of the action bar",
     },
   },
@@ -220,8 +225,7 @@ export const ErrorWiggle: Story = {
   parameters: {
     docs: {
       description: {
-        story:
-          "Click the Save button to trigger the error wiggle animation, which highlights the action bar with a shake and red glow — matching the behavior of F0Form input validation errors.",
+        story: "Click the Save button to trigger the error shake animation.",
       },
     },
   },
@@ -231,17 +235,37 @@ const ErrorStatusFlowDemo = () => {
   const actionBarRef = useRef<F0ActionBarRef>(null)
   const [status, setStatus] = useState<ActionBarStatus>("idle")
   const [label, setLabel] = useState("You have changes pending to be saved")
+  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (saveTimeoutRef.current !== null) {
+        clearTimeout(saveTimeoutRef.current)
+      }
+    }
+  }, [])
 
   const handleSave = () => {
+    if (saveTimeoutRef.current !== null) {
+      clearTimeout(saveTimeoutRef.current)
+    }
+
     setStatus("loading")
     setLabel("Saving...")
-    setTimeout(() => {
+
+    saveTimeoutRef.current = setTimeout(() => {
       setStatus("error")
       setLabel("There was an error saving your changes")
+      saveTimeoutRef.current = null
     }, 2000)
   }
 
   const handleDiscard = () => {
+    if (saveTimeoutRef.current !== null) {
+      clearTimeout(saveTimeoutRef.current)
+      saveTimeoutRef.current = null
+    }
+
     setStatus("idle")
     setLabel("You have changes pending to be saved")
   }
@@ -276,7 +300,7 @@ export const ErrorStatusFlow: Story = {
     docs: {
       description: {
         story:
-          "Click Save to simulate a failed save: the bar shows a loading state, then returns to idle with an error wiggle animation.",
+          "Click Save to simulate a failed save: the bar shows a loading state, then transitions to error with a shake animation and persistent error styling.",
       },
     },
   },
