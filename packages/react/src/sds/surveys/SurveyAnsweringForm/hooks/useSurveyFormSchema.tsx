@@ -1,7 +1,12 @@
 import { useMemo } from "react"
 import { z, type ZodTypeAny } from "zod"
 
-import type { F0Field } from "@/components/F0Form/fields/types"
+import type { F0CheckboxField } from "@/components/F0Form/fields/checkbox/types"
+import type {
+  MimeType,
+  UseFileUpload,
+} from "@/components/F0Form/fields/file/types"
+import type { F0Field, F0FileField } from "@/components/F0Form/fields/types"
 import type { F0SectionConfig } from "@/components/F0Form/types"
 import type { TranslationKey } from "@/lib/providers/i18n/i18n-provider-defaults"
 
@@ -20,6 +25,7 @@ import type {
 } from "../types"
 
 import { BaseQuestion } from "../../SurveyFormBuilder/QuestionTypes/BaseQuestion"
+import { DEFAULT_FILE_ACCEPT } from "../../SurveyFormBuilder/QuestionTypes/FileQuestion"
 import {
   RatingQuestionField,
   type RatingFieldConfig,
@@ -30,6 +36,16 @@ import {
 } from "../components/SelectQuestionField"
 
 const URL_PATTERN = /^(https?:\/\/)?[\w.-]+\.[a-z]{2,}(:\d+)?(\/[^\s]*)?$/i
+
+const noopFileUpload: UseFileUpload = () => ({
+  upload: async (file: File) => ({
+    type: "success" as const,
+    value: `local-${file.name}-${Date.now()}`,
+  }),
+  cancelUpload: () => {},
+  progress: 0,
+  status: "idle" as const,
+})
 
 function buildStringSchema(
   isRequired: boolean,
@@ -123,6 +139,40 @@ function buildDateSchema(
     })
 }
 
+function buildFileSchema(
+  isRequired: boolean,
+  t: (key: TranslationKey) => string
+) {
+  return z
+    .array(z.string())
+    .optional()
+    .superRefine((v, ctx) => {
+      if (isRequired && (!v || v.length === 0)) {
+        ctx.addIssue({
+          code: "custom",
+          message: t("forms.validation.required"),
+        })
+      }
+    })
+}
+
+function buildCheckboxSchema(
+  isRequired: boolean,
+  t: (key: TranslationKey) => string
+) {
+  return z
+    .boolean()
+    .optional()
+    .superRefine((v, ctx) => {
+      if (isRequired && !v) {
+        ctx.addIssue({
+          code: "custom",
+          message: t("forms.validation.required"),
+        })
+      }
+    })
+}
+
 function getDefaultValue(
   question: QuestionElement,
   defaultValues?: Partial<SurveyAnswers>
@@ -169,7 +219,8 @@ function buildFieldForQuestion(
   t: (key: TranslationKey) => string,
   sectionId?: string,
   previewMode = false,
-  disableFields = previewMode
+  disableFields = previewMode,
+  formUseUpload?: UseFileUpload
 ): ZodTypeAny {
   const label = q.title ?? ""
   const baseConfig = {
@@ -446,6 +497,71 @@ function buildFieldForQuestion(
       })
     }
 
+    case "file": {
+      const fileQ = q as QuestionElement & {
+        useUpload?: UseFileUpload
+        accept?: MimeType[]
+        maxSizeMB?: number
+      }
+      const resolvedUpload = fileQ.useUpload ?? formUseUpload
+      const field: F0FileField = {
+        id: q.id,
+        type: "file",
+        label,
+        multiple: true,
+        accept: fileQ.accept ?? DEFAULT_FILE_ACCEPT,
+        maxSizeMB: fileQ.maxSizeMB,
+        useUpload: resolvedUpload ?? noopFileUpload,
+        disabled: disableFields || !resolvedUpload,
+      }
+      return f0FormField(buildFileSchema(!!q.required, t), {
+        ...baseConfig,
+        fieldType: "custom",
+        render: ({ value, onChange, onBlur, error }) => (
+          <BaseQuestion {...questionProps}>
+            <div className="px-0.5">
+              <F0FormField
+                field={field}
+                value={value ?? []}
+                onChange={onChange as (value: unknown) => void}
+                onBlur={onBlur}
+                error={!!error}
+                hideLabel
+              />
+            </div>
+          </BaseQuestion>
+        ),
+      })
+    }
+
+    case "checkbox": {
+      const checkboxQ = q as QuestionElement & { label?: string }
+      const checkboxField: F0CheckboxField = {
+        id: q.id,
+        type: "checkbox",
+        label: checkboxQ.label || label,
+        disabled: disableFields,
+      }
+      return f0FormField(buildCheckboxSchema(!!q.required, t), {
+        ...baseConfig,
+        fieldType: "custom",
+        render: ({ value, onChange, onBlur, error }) => (
+          <BaseQuestion {...questionProps}>
+            <div className="px-0.5">
+              <F0FormField
+                field={checkboxField}
+                value={value ?? false}
+                onChange={onChange as (value: unknown) => void}
+                onBlur={onBlur}
+                error={!!error}
+                hideLabel
+              />
+            </div>
+          </BaseQuestion>
+        ),
+      })
+    }
+
     default:
       return f0FormField(z.unknown(), {
         ...baseConfig,
@@ -463,7 +579,8 @@ export function useSurveyFormSchema(
   currentQuestionId?: string,
   accumulatedValues?: Record<string, unknown>,
   previewMode = false,
-  disableFields = previewMode
+  disableFields = previewMode,
+  useUpload?: UseFileUpload
 ) {
   return useMemo(() => {
     const shape: Record<string, ZodTypeAny> = {}
@@ -495,7 +612,8 @@ export function useSurveyFormSchema(
             t,
             mode === "all-questions" ? sectionId : undefined,
             previewMode,
-            disableFields
+            disableFields,
+            useUpload
           )
           defaults[q.id] =
             accumulatedValues?.[q.id] ?? getDefaultValue(q, defaultValues)
@@ -511,7 +629,8 @@ export function useSurveyFormSchema(
           t,
           undefined,
           previewMode,
-          disableFields
+          disableFields,
+          useUpload
         )
         defaults[q.id] =
           accumulatedValues?.[q.id] ?? getDefaultValue(q, defaultValues)
@@ -524,7 +643,6 @@ export function useSurveyFormSchema(
       flatQuestions,
       sections,
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     elements,
     mode,
@@ -533,5 +651,6 @@ export function useSurveyFormSchema(
     currentQuestionId,
     previewMode,
     disableFields,
+    useUpload,
   ])
 }

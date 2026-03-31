@@ -1,5 +1,40 @@
 # Changelog
 
+## [1.48.2](https://github.com/factorialco/f0/compare/f0-core-v1.48.1...f0-core-v1.48.2) (2026-03-30)
+
+
+### Bug Fixes
+
+* **editable-table:** fix disabled cell background color, add new color ([#3722](https://github.com/factorialco/f0/issues/3722)) ([7a93d73](https://github.com/factorialco/f0/commit/7a93d73ccddb7e93892b3f903e7b4f739288a479))
+
+## [1.48.1](https://github.com/factorialco/f0/compare/f0-core-v1.48.0...f0-core-v1.48.1) (2026-03-27)
+
+
+### Bug Fixes
+
+* **core:** align color tokens with Figma design system ([#3775](https://github.com/factorialco/f0/issues/3775)) ([c0f1420](https://github.com/factorialco/f0/commit/c0f1420b5cdd04ea49a0b7007b9a1b1ff0b5cd6f))
+
+## [1.48.0](https://github.com/factorialco/f0/compare/f0-core-v1.47.0...f0-core-v1.48.0) (2026-03-26)
+
+
+### Features
+
+* **react:** add F0TimelineRow component ([#3727](https://github.com/factorialco/f0/issues/3727)) ([eb5e1f4](https://github.com/factorialco/f0/commit/eb5e1f4b3d5db5dd1cbbcfc1fa6950dfdb8b4016))
+
+## [1.47.0](https://github.com/factorialco/f0/compare/f0-core-v1.46.1...f0-core-v1.47.0) (2026-03-24)
+
+
+### Features
+
+* 7 new icons ([#3741](https://github.com/factorialco/f0/issues/3741)) ([8802553](https://github.com/factorialco/f0/commit/8802553d91e9b9b8be245f7d486357fa8303ddf9))
+
+## [1.46.1](https://github.com/factorialco/f0/compare/f0-core-v1.46.0...f0-core-v1.46.1) (2026-03-19)
+
+
+### Bug Fixes
+
+* add lms icon to modules ([#3699](https://github.com/factorialco/f0/issues/3699)) ([b3652bf](https://github.com/factorialco/f0/commit/b3652bfa8f2dc3ff5b5d5b29a1c7bdcb6ec4be69))
+
 ## [1.46.0](https://github.com/factorialco/f0/compare/f0-core-v1.45.0...f0-core-v1.46.0) (2026-02-26)
 
 

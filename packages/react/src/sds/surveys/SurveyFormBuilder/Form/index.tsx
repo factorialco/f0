@@ -46,6 +46,7 @@ const _SurveyFormBuilder = ({
   disallowOptionalQuestions,
   allowedQuestionTypes,
   applyingChanges,
+  useUpload,
 }: SurveyFormBuilderProps) => {
   const shouldShowAddButton = !disabled
 
@@ -137,6 +138,7 @@ const _SurveyFormBuilder = ({
       onChange={onChange}
       disallowOptionalQuestions={disallowOptionalQuestions}
       allowedQuestionTypes={allowedQuestionTypes}
+      useUpload={useUpload}
     >
       <DragProvider>
         <DragSelectGuard>

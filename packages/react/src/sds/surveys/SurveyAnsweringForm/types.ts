@@ -1,5 +1,6 @@
 import type { ModuleId } from "@/components/avatars/F0AvatarModule"
 import type { DialogPosition } from "@/components/F0Dialog/types"
+import type { UseFileUpload } from "@/components/F0Form/fields/file/types"
 import type { F0FormErrorTriggerMode } from "@/components/F0Form/types"
 import type { ResourceHeaderProps } from "@/experimental/Information/Headers/ResourceHeader"
 
@@ -16,12 +17,14 @@ export type SurveyAnswerValue =
   | { type: "numeric"; value: number | null }
   | { type: "link"; value: string | null }
   | { type: "date"; value: Date | null }
+  | { type: "file"; value: string[] | null }
+  | { type: "checkbox"; value: boolean | null }
 
 export type SurveyAnswers = Record<string, SurveyAnswerValue>
 
 export type SurveySubmitAnswers = Record<
   string,
-  string | number | string[] | Date | null
+  string | number | boolean | string[] | Date | null
 >
 
 export type SurveyFormSubmitResult =
@@ -50,6 +53,7 @@ interface SurveyAnsweringFormBaseProps {
   defaultValues?: Partial<SurveyAnswers>
   errorTriggerMode?: F0FormErrorTriggerMode
   loading?: boolean
+  useUpload?: UseFileUpload
   labels?: {
     empty?: {
       title?: string

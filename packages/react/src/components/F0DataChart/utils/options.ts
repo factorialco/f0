@@ -10,8 +10,8 @@ interface CategoryAxisOptions {
   data: string[]
   theme: ChartTheme
   formatter?: (value: string) => string
-  /** Container width in pixels — used to auto-compute label interval */
-  containerWidth?: number
+  /** Axis length in pixels — used to auto-compute label interval */
+  axisLength?: number
   /**
    * Whether to leave space at the edges of the category axis.
    * - `true` (default for ECharts) — centres categories with padding at edges.
@@ -20,6 +20,8 @@ interface CategoryAxisOptions {
    *   Appropriate for line charts.
    */
   boundaryGap?: boolean
+  /** Max label width in pixels — when set, labels are truncated with ellipsis */
+  maxLabelWidth?: number
 }
 
 /**
@@ -33,7 +35,7 @@ const MIN_LABEL_WIDTH = 60
  * Returns 0 (show every label) when there's enough room, or N to
  * show every (N+1)th label.
  */
-function computeLabelInterval(
+export function computeLabelInterval(
   categoryCount: number,
   containerWidth: number | undefined
 ): number | undefined {
@@ -51,10 +53,11 @@ export function buildCategoryAxis({
   data,
   theme,
   formatter,
-  containerWidth,
+  axisLength,
   boundaryGap,
+  maxLabelWidth,
 }: CategoryAxisOptions) {
-  const interval = computeLabelInterval(data.length, containerWidth)
+  const interval = computeLabelInterval(data.length, axisLength)
 
   return {
     type: "category" as const,
@@ -72,13 +75,22 @@ export function buildCategoryAxis({
       fontSize: theme.textStyle.fontSize,
       fontWeight: theme.textStyle.fontWeight,
       color: theme.colors.foregroundTertiary,
+      hideOverlap: true,
       ...(interval !== undefined ? { interval } : {}),
       ...(formatter
         ? {
             formatter: (_value: string | number) => formatter(String(_value)),
           }
         : {}),
+      ...(maxLabelWidth !== undefined
+        ? {
+            width: maxLabelWidth,
+            overflow: "truncate" as const,
+            ellipsis: "...",
+          }
+        : {}),
     },
+    ...(maxLabelWidth !== undefined ? { triggerEvent: true } : {}),
   }
 }
 
@@ -90,6 +102,8 @@ interface ValueAxisOptions {
   theme: ChartTheme
   showGrid: boolean
   formatter?: (value: number) => string
+  /** Max label width in pixels — when set, labels are truncated with ellipsis */
+  maxLabelWidth?: number
 }
 
 /** Build a styled value axis with optional solid grid lines */
@@ -97,6 +111,7 @@ export function buildValueAxis({
   theme,
   showGrid,
   formatter,
+  maxLabelWidth,
 }: ValueAxisOptions) {
   return {
     type: "value" as const,
@@ -110,12 +125,21 @@ export function buildValueAxis({
       fontSize: theme.textStyle.fontSize,
       fontWeight: theme.textStyle.fontWeight,
       color: theme.colors.foregroundTertiary,
+      hideOverlap: true,
       ...(formatter
         ? {
             formatter: (_value: string | number) => formatter(Number(_value)),
           }
         : {}),
+      ...(maxLabelWidth !== undefined
+        ? {
+            width: maxLabelWidth,
+            overflow: "truncate" as const,
+            ellipsis: "...",
+          }
+        : {}),
     },
+    ...(maxLabelWidth !== undefined ? { triggerEvent: true } : {}),
     splitLine: {
       show: showGrid,
       lineStyle: {
@@ -134,6 +158,8 @@ interface LegendOptions {
   show: boolean
   data: string[]
   theme: ChartTheme
+  /** Container width in pixels — used to compute max label width */
+  containerWidth?: number
 }
 
 /**
@@ -144,8 +170,11 @@ export function buildLegend({
   show,
   data,
   theme,
+  containerWidth,
 }: LegendOptions): echarts.EChartsOption["legend"] {
   if (!show) return undefined
+
+  const maxTextWidth = Math.max(80, (containerWidth ?? 600) * 0.25)
 
   return {
     show: true,
@@ -155,10 +184,13 @@ export function buildLegend({
     icon: "circle",
     itemWidth: 10,
     itemHeight: 10,
-    selectedMode: false,
+    selectedMode: true,
     textStyle: {
       fontWeight: theme.textStyle.fontWeight,
       color: theme.colors.foregroundSecondary,
+      width: maxTextWidth,
+      overflow: "truncate",
+      ellipsis: "...",
     },
   } as echarts.EChartsOption["legend"]
 }
@@ -208,6 +240,8 @@ interface TooltipOptions {
   /** Filter out series whose name matches this predicate */
   filterSeries?: (seriesName: string) => boolean
   valueFormatter?: (value: number) => string
+  /** Custom formatter — replaces the default one entirely */
+  customFormatter?: (params: unknown) => string
 }
 
 /**
@@ -225,6 +259,7 @@ export function buildTooltip({
   theme,
   filterSeries,
   valueFormatter,
+  customFormatter,
 }: TooltipOptions): echarts.EChartsOption["tooltip"] {
   const { tooltip, axisPointer, colors } = theme
 
@@ -268,30 +303,34 @@ export function buildTooltip({
       `-webkit-backdrop-filter: blur(30px)`,
       `background: ${tooltip.background}`,
     ].join("; "),
-    formatter: (params: unknown) => {
-      if (!Array.isArray(params)) return ""
+    formatter:
+      customFormatter ??
+      ((params: unknown) => {
+        if (!Array.isArray(params)) return ""
 
-      const filtered = filterSeries
-        ? params.filter(
-            (p: { seriesName?: string }) =>
-              !filterSeries(String(p.seriesName ?? ""))
+        const filtered = filterSeries
+          ? params.filter(
+              (p: { seriesName?: string }) =>
+                !filterSeries(String(p.seriesName ?? ""))
+            )
+          : params
+
+        if (filtered.length === 0) return ""
+
+        const header = `<div style="margin-bottom: 4px; font-weight: 500">${String(filtered[0].axisValueLabel ?? filtered[0].name ?? "")}</div>`
+        const items = filtered
+          .map(
+            (p: { marker?: string; seriesName?: string; value?: number }) => {
+              const formattedValue = valueFormatter
+                ? valueFormatter(Number(p.value))
+                : String(p.value)
+              return `<div>${String(p.marker ?? "")} ${String(p.seriesName ?? "")} <strong>${formattedValue}</strong></div>`
+            }
           )
-        : params
+          .join("")
 
-      if (filtered.length === 0) return ""
-
-      const header = `<div style="margin-bottom: 4px; font-weight: 500">${String(filtered[0].axisValueLabel ?? filtered[0].name ?? "")}</div>`
-      const items = filtered
-        .map((p: { marker?: string; seriesName?: string; value?: number }) => {
-          const formattedValue = valueFormatter
-            ? valueFormatter(Number(p.value))
-            : String(p.value)
-          return `<div>${String(p.marker ?? "")} ${String(p.seriesName ?? "")} <strong>${formattedValue}</strong></div>`
-        })
-        .join("")
-
-      return `${header}${items}`
-    },
+        return `${header}${items}`
+      }),
   } as echarts.EChartsOption["tooltip"]
 }
 
@@ -353,6 +392,7 @@ export function buildAxes({
   valueFormatter,
   categoryFormatter,
   containerWidth,
+  containerHeight,
   boundaryGap,
 }: {
   isVertical: boolean
@@ -362,20 +402,25 @@ export function buildAxes({
   valueFormatter?: (value: number) => string
   categoryFormatter?: (value: string) => string
   containerWidth?: number
+  containerHeight?: number
   boundaryGap?: boolean
 }) {
+  const yAxisMaxLabelWidth = Math.min(80, (containerWidth ?? 600) * 0.2)
+
   const categoryAxis = buildCategoryAxis({
     data: categories,
     theme,
     formatter: categoryFormatter,
-    containerWidth,
+    axisLength: isVertical ? containerWidth : containerHeight,
     boundaryGap,
+    ...(!isVertical ? { maxLabelWidth: yAxisMaxLabelWidth } : {}),
   })
 
   const valueAxis = buildValueAxis({
     theme,
     showGrid,
     formatter: valueFormatter,
+    ...(isVertical ? { maxLabelWidth: yAxisMaxLabelWidth } : {}),
   })
 
   return {
@@ -413,10 +458,14 @@ interface BaseChartOptionsParams {
   categoryFormatter?: (value: string) => string
   /** Predicate to filter series out of the tooltip (e.g. target ghost bars) */
   tooltipFilterSeries?: (seriesName: string) => boolean
+  /** Custom tooltip formatter — when provided, replaces the default one */
+  tooltipFormatter?: (params: unknown) => string
   /** User-provided ECharts overrides (shallow-merged on top) */
   echartsOptions?: Partial<echarts.EChartsOption>
   /** Container width in pixels — used to auto-compute category label interval */
   containerWidth?: number
+  /** Container height in pixels — used for horizontal orientation label interval */
+  containerHeight?: number
   /** Whether to leave space at the edges of the category axis */
   boundaryGap?: boolean
 }
@@ -439,8 +488,10 @@ export function buildBaseChartOptions({
   valueFormatter,
   categoryFormatter,
   tooltipFilterSeries,
+  tooltipFormatter,
   echartsOptions,
   containerWidth,
+  containerHeight,
   boundaryGap,
 }: BaseChartOptionsParams): echarts.EChartsOption {
   const { xAxis, yAxis } = buildAxes({
@@ -451,6 +502,7 @@ export function buildBaseChartOptions({
     valueFormatter,
     categoryFormatter,
     containerWidth,
+    containerHeight,
     boundaryGap,
   })
 
@@ -463,16 +515,19 @@ export function buildBaseChartOptions({
     xAxis,
     yAxis,
     series,
+    labelLayout: { hideOverlap: true },
     legend: buildLegend({
       show: showLegend,
       data: legendData,
       theme,
+      containerWidth,
     }),
     grid: buildGrid({ showLegend }),
     tooltip: buildTooltip({
       theme,
       filterSeries: tooltipFilterSeries,
       valueFormatter,
+      customFormatter: tooltipFormatter,
     }),
     emphasis: DEFAULT_EMPHASIS,
   }

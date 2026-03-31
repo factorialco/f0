@@ -1,13 +1,58 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { useState } from "react"
+import { useCallback, useRef, useState } from "react"
 
 import { F0Button } from "@/components/F0Button"
+import type {
+  FileUploadHookReturn,
+  FileUploadResult,
+  FileUploadStatus,
+  UseFileUpload,
+} from "@/components/F0Form/fields/file/types"
 
 import type { SurveyAnsweringFormProps } from "../types"
 
 import { SurveyFormBuilderElement } from "../../SurveyFormBuilder/types"
 import { SurveyAnsweringForm } from "../SurveyAnsweringForm"
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+
+const useMockUpload: UseFileUpload = (): FileUploadHookReturn => {
+  const [progress, setProgress] = useState(0)
+  const [status, setStatus] = useState<FileUploadStatus>("idle")
+  const abortRef = useRef(false)
+
+  const upload = useCallback(async (file: File): Promise<FileUploadResult> => {
+    abortRef.current = false
+    setStatus("processing")
+    setProgress(0)
+
+    await sleep(500)
+    if (abortRef.current) return { type: "aborted" }
+
+    setStatus("uploading")
+
+    for (let i = 1; i <= 10; i++) {
+      await sleep(150)
+      if (abortRef.current) return { type: "aborted" }
+      setProgress(i / 10)
+    }
+
+    setStatus("success")
+    return {
+      type: "success",
+      value: `signed_${file.name}_${globalThis.Date.now()}`,
+    }
+  }, [])
+
+  const cancelUpload = useCallback(() => {
+    abortRef.current = true
+    setStatus("idle")
+    setProgress(0)
+  }, [])
+
+  return { upload, cancelUpload, progress, status }
+}
 
 const sampleElements: SurveyFormBuilderElement[] = [
   {
@@ -119,6 +164,21 @@ const sampleElements: SurveyFormBuilderElement[] = [
           title: "Link to your personal development plan",
           description: "Paste the URL to your development plan document",
           type: "link" as const,
+        },
+        {
+          id: "q-supporting-docs",
+          title: "Upload supporting documents",
+          description:
+            "Attach any relevant files such as certificates or reports",
+          type: "file" as const,
+        },
+        {
+          id: "q-terms",
+          title: "Acknowledgement",
+          description: "Please confirm before submitting",
+          type: "checkbox" as const,
+          label: "I confirm this information is accurate and complete",
+          required: true,
         },
       ],
     },
@@ -260,6 +320,7 @@ const meta: Meta<typeof SurveyAnsweringFormStory> = {
       label: "Engagement",
       href: "#",
     },
+    useUpload: useMockUpload,
   },
   parameters: {
     layout: "fullscreen",

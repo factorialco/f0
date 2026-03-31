@@ -1,7 +1,8 @@
-import type { z, ZodRawShape, ZodEffects } from "zod"
+import type { z, ZodRawShape, ZodEffects, ZodType } from "zod"
 
 import type { IconType } from "@/components/F0Icon"
 
+import type { CustomFieldRenderPropsBase } from "./fields/custom/types"
 import type {
   F0Field,
   F0BaseFieldRenderIfFunction,
@@ -10,7 +11,15 @@ import type {
 } from "./fields/types"
 
 // Re-export F0 schema types
-export type { F0FieldConfig, F0FieldType, F0ZodType } from "./f0Schema"
+export type {
+  F0FieldConfig,
+  F0FieldType,
+  F0MoreInfoLink,
+  F0FieldAlertProps,
+  F0FieldAlertFunction,
+  F0FieldAlert,
+  F0ZodType,
+} from "./f0Schema"
 export {
   f0FormField,
   getF0Config,
@@ -21,7 +30,11 @@ export {
 // Re-export useF0Form hook and types
 export { useF0Form } from "./useF0Form"
 import type { F0FormRef } from "./useF0Form"
-export type { F0FormRef, UseF0FormReturn } from "./useF0Form"
+export type {
+  F0FormRef,
+  F0FormSetValueOptions,
+  UseF0FormReturn,
+} from "./useF0Form"
 
 /**
  * Conditional rendering for sections - can be a condition object or a function
@@ -237,6 +250,67 @@ export type F0FormSchema<T extends ZodRawShape = ZodRawShape> =
  */
 export type F0PerSectionSchema = Record<string, F0FormSchema>
 
+// ============================================================================
+// renderCustomField types
+// ============================================================================
+
+/**
+ * Props passed to the form-level `renderCustomField` callback.
+ * Extends the base custom field render props with a required `customFieldName`.
+ */
+export interface RenderCustomFieldProps extends CustomFieldRenderPropsBase {
+  /** Name identifying this custom field type */
+  customFieldName: string
+  /** Custom configuration (if provided via fieldConfig) */
+  config: unknown
+  /** The field type this customFieldName is attached to (e.g. "select", "custom") */
+  fieldType: string
+}
+
+/**
+ * Select field configuration that `renderCustomField` can return
+ * for select fields with `customFieldName` (e.g. reusable entity selectors).
+ *
+ * Mirrors the select field config shape — either static `options` or dynamic `source`+`mapOptions`.
+ */
+export interface RenderCustomFieldSelectConfig {
+  _type: "select-config"
+  /** Data source for fetching options dynamically */
+  source?: unknown
+  /** Function to map data source items to select options */
+  mapOptions?: (item: never) => unknown
+  /** Static options array */
+  options?: unknown[]
+  /** Whether multiple selection is allowed */
+  multiple?: boolean
+  /** Whether to show the search box */
+  showSearchBox?: boolean
+  /** Placeholder for the search box */
+  searchBoxPlaceholder?: string
+}
+
+/**
+ * Return type for the `renderCustomField` callback.
+ * Can return either:
+ * - A React node (rendered directly as a custom component)
+ * - A select config object (merged into the select field props)
+ */
+export type RenderCustomFieldResult =
+  | React.ReactNode
+  | RenderCustomFieldSelectConfig
+
+/**
+ * Callback provided to F0Form / F0WizardForm that renders custom fields
+ * identified by `customFieldName` instead of an inline `render` function.
+ *
+ * For `fieldType: "custom"` — return a ReactNode (component) as before.
+ * For `fieldType: "select"` — return either a ReactNode or a `RenderCustomFieldSelectConfig`
+ * with `{ _type: "select-config", source, mapOptions }` to configure the select dynamically.
+ */
+export type RenderCustomFieldFunction = (
+  props: RenderCustomFieldProps
+) => RenderCustomFieldResult
+
 /**
  * Helper type to infer the combined values from a per-section schema record.
  * Merges all section schemas into a single type.
@@ -309,6 +383,29 @@ export interface F0FormPropsWithSingleSchema<TSchema extends F0FormSchema> {
    * `defaultValues` against `InitialFile.value`.
    */
   initialFiles?: InitialFile[]
+  /**
+   * Callback that renders custom fields identified by `customFieldName`.
+   * When a field has `customFieldName`, this function is called instead of the inline `render`.
+   */
+  renderCustomField?: RenderCustomFieldFunction
+  /**
+   * Whether async defaultValues are still being resolved.
+   * When true, the form renders with loading indicators inside each field
+   * instead of replacing the entire form with skeleton placeholders.
+   */
+  isLoading?: boolean
+  /**
+   * Zod schema describing params the AI can supply when calling presentForm.
+   * Passed through to the AI form registry.
+   */
+  defaultValuesParamsSchema?: ZodType
+  /**
+   * Raw defaultValues function for the AI registry to call with params.
+   * Set automatically when using `useF0FormDefinition` with a functional `defaultValues`.
+   */
+  defaultValuesFn?: (
+    params: Record<string, unknown>
+  ) => Promise<Record<string, unknown>>
 }
 
 /**
@@ -388,6 +485,17 @@ export interface F0FormPropsWithPerSectionSchema<T extends F0PerSectionSchema> {
    * `defaultValues` against `InitialFile.value`.
    */
   initialFiles?: InitialFile[]
+  /**
+   * Callback that renders custom fields identified by `customFieldName`.
+   * When a field has `customFieldName`, this function is called instead of the inline `render`.
+   */
+  renderCustomField?: RenderCustomFieldFunction
+  /**
+   * Whether async defaultValues are still being resolved.
+   * When true, the form renders with loading indicators inside each field
+   * instead of replacing the entire form with skeleton placeholders.
+   */
+  isLoading?: boolean
 }
 
 /**
@@ -403,6 +511,11 @@ export interface F0FormPropsWithSingleSchemaDefinition<
   styling?: F0FormStylingConfig
   formRef?: React.MutableRefObject<F0FormRef | null>
   initialFiles?: InitialFile[]
+  /**
+   * Callback that renders custom fields identified by `customFieldName`.
+   * When a field has `customFieldName`, this function is called instead of the inline `render`.
+   */
+  renderCustomField?: RenderCustomFieldFunction
 }
 
 /**
@@ -418,6 +531,17 @@ export interface F0FormPropsWithPerSectionDefinition<
   styling?: F0FormStylingConfig
   formRef?: React.MutableRefObject<F0FormRef | null>
   initialFiles?: InitialFile[]
+  /**
+   * Callback that renders custom fields identified by `customFieldName`.
+   * When a field has `customFieldName`, this function is called instead of the inline `render`.
+   */
+  renderCustomField?: RenderCustomFieldFunction
+  /**
+   * Whether async defaultValues are still being resolved.
+   * When true, the form renders with loading indicators inside each field
+   * instead of replacing the entire form with skeleton placeholders.
+   */
+  isLoading?: boolean
 }
 
 /**

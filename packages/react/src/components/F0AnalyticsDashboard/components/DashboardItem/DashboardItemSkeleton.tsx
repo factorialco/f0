@@ -7,7 +7,7 @@ import { Skeleton } from "@/ui/skeleton"
  */
 export function MetricSkeleton() {
   return (
-    <div className="flex items-baseline gap-3 px-4 pb-4">
+    <div className="flex h-full items-end gap-3 px-4 pb-4">
       <Skeleton className="h-10 w-36 rounded" />
       <Skeleton className="h-4 w-16 rounded" />
     </div>

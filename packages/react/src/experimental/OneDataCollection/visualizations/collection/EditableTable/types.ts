@@ -16,13 +16,28 @@ import type {
   TableVisualizationSettings,
 } from "../Table/types"
 
+import { PrimaryActionItemDefinition } from "../../../actions"
 import { ItemActionsDefinition } from "../../../item-actions"
 import { NavigationFiltersDefinition } from "../../../navigationFilters/types"
 import { SummariesDefinition } from "../../../summary"
 import { CollectionProps } from "../../../types"
 import { EditableTableCellEditType } from "./components/cells"
 
+export type AddRowActionsResult =
+  | PrimaryActionItemDefinition
+  | PrimaryActionItemDefinition[]
+  | undefined
+
 export type EditableTableVisualizationSettings = TableVisualizationSettings
+
+export type NumberCellConfig = {
+  min?: number
+  max?: number
+  step?: number
+  maxDecimals?: number
+  locale?: string
+  units?: string
+}
 
 /**
  * Configuration for select-type cells. Mirrors F0Select's two data modes:
@@ -96,6 +111,12 @@ export type EditableTableColumnDefinition<
    * function whose return value isn't statically known.
    */
   selectConfig?: SelectCellConfig<R>
+  /**
+   * Configuration for `"number"` cells. Accepts constraints (`min`, `max`),
+   * stepping (`step`), formatting (`maxDecimals`, `locale`), and units.
+   * Falls back to sensible defaults when omitted.
+   */
+  numberConfig?: NumberCellConfig
 }
 
 export type EditableTableVisualizationOptions<
@@ -114,12 +135,26 @@ export type EditableTableVisualizationOptions<
    * Rejection sets an error on the edited column.
    */
   onCellChange: (updatedItem: R) => Promise<void | Record<string, string>>
-  /** When provided, renders an "Add" button row at the bottom of the table and nested rows. Receives the parent item when triggered from a nested row. Supports async functions for loading state. */
-  onAddRow?: (parentItem?: R) => void | Promise<void>
-  /** Custom label for the root-level "Add row" button. Falls back to the default i18n translation. */
-  addRowButtonLabel?: string
-  /** Custom label for the nested-row "Add row" button. Falls back to the default i18n translation. */
-  nestedAddRowButtonLabel?: string
+  /**
+   * When provided, renders action buttons at the bottom of the root-level table.
+   * Returns a single action, an array of actions, or undefined to hide the row.
+   */
+  addRowActions?: () => AddRowActionsResult
+  /**
+   * Label for the dropdown trigger button when multiple root-level add-row
+   * actions are provided. Falls back to the first action's label if omitted.
+   */
+  addRowActionsLabel?: string
+  /**
+   * When provided, renders action buttons at the bottom of each expanded nested row.
+   * Receives the parent item whose children the new row will be added to.
+   */
+  addNestedRowActions?: (parent: R) => AddRowActionsResult
+  /**
+   * Label for the dropdown trigger button when multiple nested add-row
+   * actions are provided. Falls back to the first action's label if omitted.
+   */
+  addNestedRowActionsLabel?: string
 }
 
 export type EditableTableCollectionProps<

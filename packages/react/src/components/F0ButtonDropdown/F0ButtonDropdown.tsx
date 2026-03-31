@@ -288,9 +288,6 @@ const DropdownMode = ({
         }
         pressed={isOpen && !disabled}
         tooltip={tooltip}
-        onClick={() => {
-          if (!disabled) setIsOpen(!isOpen)
-        }}
       >
         {triggerLabel}
       </Action>

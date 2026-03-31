@@ -174,8 +174,14 @@ export interface DashboardItemBase {
   title: string
   /** Optional description below the title */
   description?: string
-  /** Number of grid columns this item spans (1–3). @default 1 */
-  colSpan?: 1 | 2 | 3
+  /** Number of grid columns this item spans (1–12). */
+  colSpan?: number
+  /** Number of grid rows this item spans. */
+  rowSpan?: number
+  /** Grid column position (0-based). When set, skip auto-packing. */
+  x?: number
+  /** Grid row position (0-based). When set, skip auto-packing. */
+  y?: number
   /**
    * Whether this item receives dashboard-level filters in its fetchData.
    * When false, fetchData receives an empty object.
@@ -290,6 +296,23 @@ export type DashboardItem<
   | DashboardCollectionItem<Filters>
 
 // ---------------------------------------------------------------------------
+// Layout change descriptor — emitted by edit mode callbacks
+// ---------------------------------------------------------------------------
+
+/**
+ * Minimal descriptor of a dashboard item's position and size.
+ * Used by `onLayoutChange` so the consumer can reconcile layout
+ * edits against its own source-of-truth config items.
+ */
+export type DashboardItemLayout = {
+  id: string
+  colSpan: number
+  rowSpan: number
+  x: number
+  y: number
+}
+
+// ---------------------------------------------------------------------------
 // Root component props
 // ---------------------------------------------------------------------------
 
@@ -324,4 +347,30 @@ export interface F0AnalyticsDashboardProps<
    * Each item declares its type, visual config, grid span, and data fetcher.
    */
   items: DashboardItem<Filters>[]
+  /**
+   * When true, enables drag-and-drop reordering, resize, and delete controls.
+   */
+  editMode?: boolean
+  /**
+   * Called when items are reordered, resized, or deleted in edit mode.
+   * Receives a layout descriptor (ordered list of { id, colSpan }) so
+   * the consumer can reconcile against the original config items.
+   */
+  onLayoutChange?: (layout: DashboardItemLayout[]) => void
+  /**
+   * Show a dashboard-level export button (PDF/Excel).
+   * @default false
+   */
+  enableExport?: boolean
+  /**
+   * Called when the export function becomes available (or undefined on unmount).
+   * Allows a parent to trigger export imperatively without rendering the
+   * built-in ExportDropdown.
+   */
+  /**
+   * Custom filename for the exported Excel file (without extension).
+   * @default "dashboard"
+   */
+  exportFilename?: string
+  onExportReady?: (exportFn: (() => Promise<void>) | undefined) => void
 }

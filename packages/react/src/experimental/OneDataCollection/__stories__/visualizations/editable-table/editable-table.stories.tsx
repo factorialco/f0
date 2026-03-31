@@ -497,7 +497,7 @@ export const EditableTableWithNestedRecordsAndAddRow: Story = {
     docs: {
       description: {
         story:
-          "Editable table with nested records and an Add button at the bottom of each expanded parent row. The `onAddRow` callback receives the parent item when triggered from a nested row.",
+          "Editable table with nested records and add-row actions. Uses `addRowActions` for root-level and `addNestedRowActions` for nested rows.",
       },
     },
   },
@@ -529,13 +529,90 @@ export const EditableTableWithNestedRecordsAndAddRow: Story = {
                 >
               ).options,
               onCellChange,
-              onAddRow: action("onAddRow"),
-              addRowButtonLabel: "Add row",
-              nestedAddRowButtonLabel: "Add child row",
+              addRowActionsLabel: "Add item",
+              addRowActions: () => ({
+                label: "Add row",
+                onClick: () => action("onAddRow")(),
+              }),
+              addNestedRowActionsLabel: "Add item",
+              addNestedRowActions: (parentItem) => ({
+                label: "Add child row",
+                onClick: () => action("onAddChildRow")(parentItem),
+              }),
             },
           },
         ]}
         id="editable-table-nested-add-row/v1"
+        nestedRecords
+      />
+    )
+  },
+}
+
+export const EditableTableWithMultipleAddRowActions: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Editable table with multiple add-row actions at both root and nested levels. When any action has a `description`, a dropdown button is used (all items shown in a menu). Otherwise, a split button is used where the first action is the primary click target. This story includes descriptions to demonstrate dropdown mode.",
+      },
+    },
+  },
+  render: () => {
+    const mockVisualizations = getMockVisualizations({
+      table: { noSorting: true, nestedRecords: true, applyLongText: false },
+    })
+
+    const onCellChange = async (updatedItem: MockUser) => {
+      action("onCellChange")(updatedItem)
+    }
+
+    return (
+      <ExampleComponent
+        noSorting
+        storage={false}
+        visualizations={[
+          {
+            type: "editableTable" as const,
+            options: {
+              ...(
+                mockVisualizations.editableTable as Extract<
+                  typeof mockVisualizations.editableTable,
+                  { type: "editableTable" }
+                >
+              ).options,
+              onCellChange,
+              addRowActionsLabel: "Add row",
+              addRowActions: () => [
+                {
+                  label: "Add row1",
+                  description: "Add a row of type 1 to the table",
+                  onClick: () => action("onAddRow")(),
+                },
+                {
+                  label: "Add row2",
+                  description: "Add a row of type 2 to the table",
+                  onClick: () => action("onAddSecondOption")(),
+                },
+              ],
+              addNestedRowActionsLabel: "Add nested row",
+              addNestedRowActions: (parentItem) => [
+                {
+                  label: "Add nested row 1",
+                  description: "Add a nested child row of type 1",
+                  onClick: () => action("onAddChildrenItem")(parentItem),
+                },
+                {
+                  label: "Add nested row 2",
+                  description: "Add a nested child row of type 2",
+                  onClick: () =>
+                    action("onAddSecondaryChildrenItem")(parentItem),
+                },
+              ],
+            },
+          },
+        ]}
+        id="editable-table-multi-add-row/v1"
         nestedRecords
       />
     )
@@ -597,8 +674,10 @@ export const EditableTableWithAddRow: Story = {
                 >
               ).options,
               onCellChange,
-              onAddRow,
-              addRowButtonLabel: "Add row",
+              addRowActions: () => ({
+                label: "Add row",
+                onClick: onAddRow,
+              }),
             },
           },
         ]}
@@ -743,8 +822,10 @@ export const EditableTableWithSummaryRowAndAddRow: Story = {
                 },
               ],
               onCellChange,
-              onAddRow,
-              addRowButtonLabel: "Add row",
+              addRowActions: () => ({
+                label: "Add row",
+                onClick: onAddRow,
+              }),
             },
           },
         ]}

@@ -14,12 +14,19 @@ import { DetailsItemShowcase } from "../../components/DetailsItemShowcase"
 import { DetailsItemsListShowcase } from "../../components/DetailsItemsListShowcase"
 import { F0AvatarShowcase } from "../../components/F0AvatarShowcase"
 import { F0BadgeShowcase } from "../../components/F0BadgeShowcase"
+import { F0BlurViewShowcase } from "../../components/F0BlurViewShowcase"
 import { F0ButtonShowcase } from "../../components/F0ButtonShowcase"
+import { F0CheckboxShowcase } from "../../components/F0CheckboxShowcase"
+import { F0ChipShowcase } from "../../components/F0ChipShowcase"
 import { F0CounterShowcase } from "../../components/F0CounterShowcase"
 import { F0IconShowcase } from "../../components/F0IconShowcase"
 import { F0ImageShowcase } from "../../components/F0ImageShowcase"
 import { F0LinkShowcase } from "../../components/F0LinkShowcase"
 import { F0PresetShowcase } from "../../components/F0PresetShowcase"
+import { F0MetadataShowcase } from "../../components/F0MetadataShowcase"
+import { F0ProgressShowcase } from "../../components/F0ProgressShowcase"
+import { F0StepShowcase } from "../../components/F0StepShowcase"
+import { F0TabsShowcase } from "../../components/F0TabsShowcase"
 import { F0TagShowcase } from "../../components/F0TagShowcase"
 import { F0TextShowcase } from "../../components/F0TextShowcase/F0TextShowcase"
 import { OneChipShowcase } from "../../components/OneChipShowcase"
@@ -43,13 +50,20 @@ type ComponentType =
   | "detailsitem"
   | "detailsitemslist"
   | "f0avatar"
+  | "f0blurview"
   | "f0button"
   | "f0badge"
+  | "f0checkbox"
+  | "f0chip"
   | "f0counter"
   | "f0icon"
   | "f0link"
+  | "f0progress"
+  | "f0step"
   | "f0preset"
   | "f0image"
+  | "f0metadata"
+  | "f0tabs"
   | "f0tag"
   | "f0text"
   | "onechip"
@@ -69,16 +83,23 @@ const componentOptions = [
   { value: "detailsitem" as ComponentType, label: "DetailsItem" },
   { value: "detailsitemslist" as ComponentType, label: "DetailsItemsList" },
   { value: "f0avatar" as ComponentType, label: "F0Avatar" },
+  { value: "f0blurview" as ComponentType, label: "F0BlurView" },
   { value: "f0button" as ComponentType, label: "F0Button" },
   { value: "f0badge" as ComponentType, label: "F0Badge" },
+  { value: "f0checkbox" as ComponentType, label: "F0Checkbox" },
+  { value: "f0chip" as ComponentType, label: "F0Chip" },
   { value: "f0counter" as ComponentType, label: "F0Counter" },
   { value: "f0icon" as ComponentType, label: "F0Icon" },
   { value: "f0link" as ComponentType, label: "F0Link" },
+  { value: "f0progress" as ComponentType, label: "F0Progress" },
+  { value: "f0step" as ComponentType, label: "F0Step" },
   { value: "f0preset" as ComponentType, label: "F0Preset" },
   { value: "f0image" as ComponentType, label: "F0Image" },
+  { value: "f0metadata" as ComponentType, label: "F0Metadata" },
+  { value: "f0tabs" as ComponentType, label: "F0Tabs" },
   { value: "f0tag" as ComponentType, label: "F0Tag" },
   { value: "f0text" as ComponentType, label: "F0Text" },
-  { value: "onechip" as ComponentType, label: "OneChip" },
+  { value: "onechip" as ComponentType, label: "OneChip (deprecated)" },
   { value: "onepreset" as ComponentType, label: "OnePreset (deprecated)" },
   { value: "pageheader" as ComponentType, label: "PageHeader" },
   { value: "pressablefeedback" as ComponentType, label: "PressableFeedback" },
@@ -122,20 +143,34 @@ export default function ComponentsShowcase() {
         return <DetailsItemsListShowcase />
       case "f0avatar":
         return <F0AvatarShowcase />
+      case "f0blurview":
+        return <F0BlurViewShowcase />
       case "f0button":
         return <F0ButtonShowcase />
       case "f0badge":
         return <F0BadgeShowcase />
+      case "f0checkbox":
+        return <F0CheckboxShowcase />
+      case "f0chip":
+        return <F0ChipShowcase />
       case "f0counter":
         return <F0CounterShowcase />
       case "f0icon":
         return <F0IconShowcase />
       case "f0link":
         return <F0LinkShowcase />
+      case "f0progress":
+        return <F0ProgressShowcase />
+      case "f0step":
+        return <F0StepShowcase />
       case "f0preset":
         return <F0PresetShowcase />
       case "f0image":
         return <F0ImageShowcase />
+      case "f0metadata":
+        return <F0MetadataShowcase />
+      case "f0tabs":
+        return <F0TabsShowcase />
       case "f0tag":
         return <F0TagShowcase />
       case "f0text":

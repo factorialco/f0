@@ -1,5 +1,8 @@
 import { ZodTypeAny } from "zod"
+
 import type { InputFieldStatus } from "@/ui/InputField/types"
+
+import type { F0FieldAlert } from "../f0Schema"
 
 // ============================================================================
 // Base RenderIf Condition Types
@@ -51,12 +54,12 @@ export type F0BaseFieldRenderIfProp =
 // Field-Specific RenderIf Condition Types (imported from each field)
 // ============================================================================
 
-import type { TextRenderIfCondition } from "./text/types"
-import type { NumberRenderIfCondition } from "./number/types"
 import type { BooleanRenderIfCondition } from "./checkbox/types"
-import type { SelectRenderIfCondition } from "./select/types"
 import type { DateRenderIfCondition } from "./date/types"
 import type { DateRangeRenderIfCondition } from "./daterange/types"
+import type { NumberRenderIfCondition } from "./number/types"
+import type { SelectRenderIfCondition } from "./select/types"
+import type { TextRenderIfCondition } from "./text/types"
 
 // Re-export for convenience
 export type {
@@ -117,6 +120,13 @@ export interface F0BaseField {
    * @default false
    */
   resetOnDisable?: boolean
+  /** Alert displayed below the field (static props or conditional callback) */
+  alert?: F0FieldAlert
+  /**
+   * Name identifying a reusable custom field type.
+   * Used with the form-level `renderCustomField` callback.
+   */
+  customFieldName?: string
 }
 
 /**
@@ -195,19 +205,19 @@ export type {
   UseFileUpload,
 } from "./file/types"
 
-// Import for union type
-import type { F0TextField } from "./text/types"
-import type { F0NumberField } from "./number/types"
-import type { F0DurationField } from "./duration/types"
-import type { F0TextareaField } from "./textarea/types"
-import type { F0SelectField } from "./select/types"
 import type { F0CheckboxField } from "./checkbox/types"
-import type { F0SwitchField } from "./switch/types"
+import type { F0CustomField } from "./custom/types"
 import type { F0DateField, F0TimeField, F0DateTimeField } from "./date/types"
 import type { F0DateRangeField } from "./daterange/types"
-import type { F0RichTextField } from "./richtext/types"
-import type { F0CustomField } from "./custom/types"
+import type { F0DurationField } from "./duration/types"
 import type { F0FileField } from "./file/types"
+import type { F0NumberField } from "./number/types"
+import type { F0RichTextField } from "./richtext/types"
+import type { F0SelectField } from "./select/types"
+import type { F0SwitchField } from "./switch/types"
+// Import for union type
+import type { F0TextField } from "./text/types"
+import type { F0TextareaField } from "./textarea/types"
 
 /**
  * Union of all F0 field types used for rendering

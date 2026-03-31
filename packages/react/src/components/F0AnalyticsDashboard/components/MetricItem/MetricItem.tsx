@@ -20,6 +20,7 @@ import { MetricSkeleton } from "../DashboardItem/DashboardItemSkeleton"
 interface MetricItemProps<Filters extends FiltersDefinition> {
   item: DashboardMetricItem<Filters>
   filters: FiltersState<Filters>
+  actions?: import("@/experimental/Navigation/Dropdown").DropdownItem[]
 }
 
 function formatValue(
@@ -80,6 +81,7 @@ function computeTrend(
 export function MetricItem<Filters extends FiltersDefinition>({
   item,
   filters,
+  actions,
 }: MetricItemProps<Filters>) {
   const enabled = item.useDashboardFilters !== false
   const { data, isLoading, error, retry } = useDashboardItemData<
@@ -97,31 +99,34 @@ export function MetricItem<Filters extends FiltersDefinition>({
       error={error}
       onRetry={retry}
       skeleton={<MetricSkeleton />}
+      actions={actions}
     >
       {data && (
-        <div className="flex items-end gap-3 px-4 pb-4">
-          <span className="text-4xl font-semibold leading-none tracking-tight text-f1-foreground">
-            {formatValue(data.value, item.format, item.decimals)}
-          </span>
-          {trend && trend.direction !== "flat" && (
-            <div className="flex h-fit">
-              {trend.direction === "up" ? (
-                <F0Icon icon={ArrowUp} color="positive" size="sm" />
-              ) : (
-                <F0Icon icon={ArrowDown} color="critical" size="sm" />
-              )}
-              <span
-                className={cn(
-                  "text-base font-medium",
-                  trend.direction === "up"
-                    ? "text-f1-foreground-positive"
-                    : "text-f1-foreground-critical"
+        <div className="flex h-full min-h-0 items-end overflow-auto px-4 pb-4">
+          <div className="flex items-baseline gap-3">
+            <span className="whitespace-nowrap text-4xl font-semibold leading-none tracking-tight text-f1-foreground">
+              {formatValue(data.value, item.format, item.decimals)}
+            </span>
+            {trend && trend.direction !== "flat" && (
+              <div className="flex shrink-0 items-center">
+                {trend.direction === "up" ? (
+                  <F0Icon icon={ArrowUp} color="positive" size="sm" />
+                ) : (
+                  <F0Icon icon={ArrowDown} color="critical" size="sm" />
                 )}
-              >
-                {trend.percent.toFixed(1)}%
-              </span>
-            </div>
-          )}
+                <span
+                  className={cn(
+                    "whitespace-nowrap text-base font-medium",
+                    trend.direction === "up"
+                      ? "text-f1-foreground-positive"
+                      : "text-f1-foreground-critical"
+                  )}
+                >
+                  {trend.percent.toFixed(1)}%
+                </span>
+              </div>
+            )}
+          </div>
         </div>
       )}
     </DashboardItem>

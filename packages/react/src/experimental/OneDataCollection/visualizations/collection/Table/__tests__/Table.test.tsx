@@ -18,7 +18,6 @@ import { zeroRender as render, zeroRenderHook } from "@/testing/test-utils"
 
 import { ItemActionsDefinition } from "../../../../item-actions"
 import { SummariesDefinition } from "../../../../summary"
-import { AddRowProvider } from "../../EditableTable/context/AddRowContext"
 import { TableCollection } from "../index"
 import type { TableColumnDefinition } from "../types"
 
@@ -1425,131 +1424,31 @@ describe("TableCollection", () => {
     })
   })
 
-  describe("onAddRow", () => {
-    it("does not render add-row button when onAddRow is not provided", async () => {
-      render(
-        <TableCollection<
-          Person,
-          TestFilters,
-          SortingsDefinition,
-          SummariesDefinition,
-          ItemActionsDefinition<Person>,
-          TestNavigationFilters,
-          GroupingDefinition<Person>
-        >
-          columns={testColumns}
-          source={createTestSource()}
-          onSelectItems={vi.fn()}
-          onLoadData={vi.fn()}
-          onLoadError={vi.fn()}
-        />
-      )
+  it("does not render add-row button when no AddRowProvider wraps the table", async () => {
+    render(
+      <TableCollection<
+        Person,
+        TestFilters,
+        SortingsDefinition,
+        SummariesDefinition,
+        ItemActionsDefinition<Person>,
+        TestNavigationFilters,
+        GroupingDefinition<Person>
+      >
+        columns={testColumns}
+        source={createTestSource()}
+        onSelectItems={vi.fn()}
+        onLoadData={vi.fn()}
+        onLoadError={vi.fn()}
+      />
+    )
 
-      await waitFor(() => {
-        expect(screen.getByText(testData[0].name)).toBeInTheDocument()
-      })
-
-      expect(
-        screen.queryByRole("button", { name: /add row/i })
-      ).not.toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByText(testData[0].name)).toBeInTheDocument()
     })
 
-    it("renders an add-row button in the table footer when onAddRow is provided", async () => {
-      render(
-        <AddRowProvider onAddRow={vi.fn()}>
-          <TableCollection<
-            Person,
-            TestFilters,
-            SortingsDefinition,
-            SummariesDefinition,
-            ItemActionsDefinition<Person>,
-            TestNavigationFilters,
-            GroupingDefinition<Person>
-          >
-            columns={testColumns}
-            source={createTestSource()}
-            onSelectItems={vi.fn()}
-            onLoadData={vi.fn()}
-            onLoadError={vi.fn()}
-          />
-        </AddRowProvider>
-      )
-
-      await waitFor(() => {
-        expect(screen.getByText(testData[0].name)).toBeInTheDocument()
-      })
-
-      expect(
-        screen.getByRole("button", { name: /add row/i })
-      ).toBeInTheDocument()
-    })
-
-    it("renders custom addRowButtonLabel when provided", async () => {
-      render(
-        <AddRowProvider onAddRow={vi.fn()} addRowButtonLabel="Add phase">
-          <TableCollection<
-            Person,
-            TestFilters,
-            SortingsDefinition,
-            SummariesDefinition,
-            ItemActionsDefinition<Person>,
-            TestNavigationFilters,
-            GroupingDefinition<Person>
-          >
-            columns={testColumns}
-            source={createTestSource()}
-            onSelectItems={vi.fn()}
-            onLoadData={vi.fn()}
-            onLoadError={vi.fn()}
-          />
-        </AddRowProvider>
-      )
-
-      await waitFor(() => {
-        expect(screen.getByText(testData[0].name)).toBeInTheDocument()
-      })
-
-      expect(
-        screen.getByRole("button", { name: /add phase/i })
-      ).toBeInTheDocument()
-      expect(
-        screen.queryByRole("button", { name: /^add row$/i })
-      ).not.toBeInTheDocument()
-    })
-
-    it("calls onAddRow with no arguments when the footer button is clicked", async () => {
-      const user = userEvent.setup()
-      const onAddRowMock = vi.fn()
-
-      render(
-        <AddRowProvider onAddRow={onAddRowMock}>
-          <TableCollection<
-            Person,
-            TestFilters,
-            SortingsDefinition,
-            SummariesDefinition,
-            ItemActionsDefinition<Person>,
-            TestNavigationFilters,
-            GroupingDefinition<Person>
-          >
-            columns={testColumns}
-            source={createTestSource()}
-            onSelectItems={vi.fn()}
-            onLoadData={vi.fn()}
-            onLoadError={vi.fn()}
-          />
-        </AddRowProvider>
-      )
-
-      await waitFor(() => {
-        expect(screen.getByText(testData[0].name)).toBeInTheDocument()
-      })
-
-      const addRowButton = screen.getByRole("button", { name: /add row/i })
-      await user.click(addRowButton)
-
-      expect(onAddRowMock).toHaveBeenCalledTimes(1)
-      expect(onAddRowMock).toHaveBeenCalledWith()
-    })
+    expect(
+      screen.queryByRole("button", { name: /add row/i })
+    ).not.toBeInTheDocument()
   })
 })

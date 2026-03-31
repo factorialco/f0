@@ -1,5 +1,6 @@
 import { forwardRef } from "react"
 
+import type { IconType } from "@/components/F0Icon"
 import type { TableVisualizationType } from "@/experimental/OneDataCollection/types"
 
 import { FiltersDefinition } from "@/components/OneFilterPicker/types"
@@ -30,9 +31,9 @@ import type {
 } from "../types"
 
 import { ItemActionsRow } from "../../../../components/itemActions/ItemActionsRow/ItemActionsRow"
+import { groupBorderClass, HeaderGroupEntry } from "../hooks/useHeaderGroups"
 import { useSticky } from "../useSticky"
 import { NestedRow } from "./NestedRow"
-import { groupBorderClass, HeaderGroupEntry } from "../hooks/useHeaderGroups"
 
 export type RowProps<
   R extends RecordType,
@@ -77,6 +78,20 @@ export type RowProps<
   headerGroups: HeaderGroupEntry[] | null
 }
 
+export type AddRowAction = {
+  label: string
+  icon?: IconType
+  description?: string
+  onClick?: () => void | Promise<void>
+  loading?: boolean
+  disabled?: boolean
+}
+
+export type OnAddRowConfig = {
+  actions: AddRowAction[]
+  label?: string
+}
+
 export type NestedRowProps = {
   connectorHeight?: number
   depth?: number
@@ -87,6 +102,7 @@ export type NestedRowProps = {
   parentHasChildren?: boolean
   onExpand?: () => void
   onLoadMoreChildren?: () => void
+  onAddRow?: OnAddRowConfig
 }
 
 const referenceTypeClasses: Record<ReferenceType, string> = {
@@ -146,7 +162,9 @@ const RowComponentInner = <
     item: R,
     column: TableColumnDefinition<R, Sortings, Summaries>
   ) => {
-    return renderProperty(item, column, "table", i18n)
+    return renderProperty(item, column, "table", i18n, {
+      tableAlign: column.align ?? "left",
+    })
   }
 
   const key = `table-row-${groupIndex}-${index}`
@@ -304,36 +322,39 @@ const RowComponentInner = <
         )
       })}
 
-      {hasItemActions && !loading && !nestedRowProps?.onLoadMoreChildren && (
-        <>
-          {/** Desktop item actions adds a sticky column to the table to not overflow when the table is scrolled horizontally*/}
-          <td className="sticky right-0 top-0 z-10 hidden md:table-cell">
-            <ItemActionsRowContainer dropDownOpen={dropDownOpen}>
-              <ItemActionsRow
-                primaryItemActions={primaryItemActions}
-                dropdownItemActions={dropdownItemActions}
-                handleDropDownOpenChange={handleDropDownOpenChange}
+      {hasItemActions &&
+        !loading &&
+        !nestedRowProps?.onLoadMoreChildren &&
+        !nestedRowProps?.onAddRow && (
+          <>
+            {/** Desktop item actions adds a sticky column to the table to not overflow when the table is scrolled horizontally*/}
+            <td className="sticky right-0 top-0 z-10 hidden md:table-cell">
+              <ItemActionsRowContainer dropDownOpen={dropDownOpen}>
+                <ItemActionsRow
+                  primaryItemActions={primaryItemActions}
+                  dropdownItemActions={dropdownItemActions}
+                  handleDropDownOpenChange={handleDropDownOpenChange}
+                />
+              </ItemActionsRowContainer>
+            </td>
+            {/** Mobile item actions */}
+            <TableCell
+              key={`table-cell-${groupIndex}-${index}-actions`}
+              width={68}
+              sticky={{
+                right: 0,
+              }}
+              href={itemHref}
+              className="table-cell md:hidden"
+              loading={loading}
+            >
+              <ItemActionsMobile
+                items={mobileDropdownItemActions}
+                onOpenChange={handleDropDownOpenChange}
               />
-            </ItemActionsRowContainer>
-          </td>
-          {/** Mobile item actions */}
-          <TableCell
-            key={`table-cell-${groupIndex}-${index}-actions`}
-            width={68}
-            sticky={{
-              right: 0,
-            }}
-            href={itemHref}
-            className="table-cell md:hidden"
-            loading={loading}
-          >
-            <ItemActionsMobile
-              items={mobileDropdownItemActions}
-              onOpenChange={handleDropDownOpenChange}
-            />
-          </TableCell>
-        </>
-      )}
+            </TableCell>
+          </>
+        )}
     </TableRow>
   )
 }

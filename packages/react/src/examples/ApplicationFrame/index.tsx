@@ -18,10 +18,14 @@ import { useReducedMotion } from "@/lib/a11y"
 import { experimentalComponent } from "@/lib/experimental"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
-import { DEFAULT_CHAT_WIDTH } from "@/sds/ai/F0AiChat/constants"
-import { F0AiChat, F0AiChatProvider } from "@/sds/ai/F0AiChat/F0AiChat"
+import {
+  F0AiChat,
+  F0AiChatProvider,
+  AiChatProviderProps,
+} from "@/sds/ai/F0AiChat"
+import { CanvasPanel } from "@/sds/ai/F0AiChat/components/layout/CanvasPanel"
 import { useAiChat } from "@/sds/ai/F0AiChat/providers/AiChatStateProvider"
-import { AiChatProviderProps } from "@/sds/ai/F0AiChat/types"
+import { DEFAULT_CHAT_WIDTH } from "@/sds/ai/F0AiChat/utils/constants"
 
 import { FrameProvider, SidebarState, useSidebar } from "./FrameProvider"
 
@@ -159,9 +163,11 @@ function useAutoCloseSidebar(
 
 /**
  * Z-index layers (within the isolate stacking context):
- *   z-5  Sidebar ()
- *   z-20  Sidebar backdrop / Chat (fullscreen)
+ *   z-5   Sidebar
  *   z-10  Main content
+ *   z-15  Canvas dashboard panel
+ *   z-20  Sidebar backdrop / Chat (fullscreen)
+ *   z-30  Sidebar (unlocked/floating)
  *   z-0   Chat (normal)
  */
 function ApplicationFrameContent({
@@ -177,10 +183,12 @@ function ApplicationFrameContent({
   const {
     open: isAiChatOpen,
     visualizationMode,
+    canvasContent,
     chatWidth,
     resizable,
   } = useAiChat()
   const isAiChatFullscreen = visualizationMode === "fullscreen"
+  const isCanvasMode = visualizationMode === "canvas"
   const { open: isAiPromotionChatOpen } = useAiPromotionChat()
   const reservedChatWidth = resizable ? chatWidth : DEFAULT_CHAT_WIDTH
 
@@ -217,6 +225,10 @@ function ApplicationFrameContent({
     `(max-width: ${breakpoints.xl}px)`,
     { initializeWithValue: true }
   )
+
+  const isSmallViewport = useMediaQuery(`(max-width: ${breakpoints.md}px)`, {
+    initializeWithValue: true,
+  })
 
   useEffect(() => {
     setForceFloat(isAiChatOpen)
@@ -280,7 +292,8 @@ function ApplicationFrameContent({
             <motion.div
               className="relative min-w-0 flex-1"
               animate={{
-                paddingRight: isAiChatOpen ? reservedChatWidth : 0,
+                paddingRight:
+                  isAiChatOpen && !isSmallViewport ? reservedChatWidth : 0,
               }}
               transition={{ paddingRight: CONTENT_TRANSITION }}
             >
@@ -312,18 +325,43 @@ function ApplicationFrameContent({
               </motion.main>
 
               {/* Chat */}
+              {/* Canvas dashboard panel */}
+              {ai?.enabled && isCanvasMode && canvasContent && (
+                <div
+                  className={cn(
+                    "pointer-events-none",
+                    isSmallViewport
+                      ? "fixed inset-0 z-[50]"
+                      : "absolute bottom-0 left-0 top-0 z-[15]"
+                  )}
+                  style={
+                    isSmallViewport ? undefined : { right: reservedChatWidth }
+                  }
+                >
+                  <CanvasPanel />
+                </div>
+              )}
+
               {ai?.enabled && (
                 <motion.div
                   className={cn(
-                    "pointer-events-none absolute right-0 top-0 bottom-0",
+                    "pointer-events-none",
                     "[&_.copilotKitSidebarContentWrapper]:relative [&_.copilotKitSidebarContentWrapper]:h-full [&_.copilotKitSidebarContentWrapper]:w-full",
-                    isInFullscreenTransition ? "z-20" : "z-0",
-                    sidebarState === "hidden" && isInFullscreenTransition
-                      ? "pl-1"
-                      : "pl-0"
+                    isSmallViewport
+                      ? "fixed inset-0 z-[30]"
+                      : cn(
+                          "absolute right-0 top-0 bottom-0",
+                          isInFullscreenTransition ? "z-20" : "z-0",
+                          sidebarState === "hidden" && isInFullscreenTransition
+                            ? "pl-1"
+                            : "pl-0"
+                        )
                   )}
                   animate={{
-                    width: isAiChatFullscreen ? "100%" : reservedChatWidth,
+                    width:
+                      isSmallViewport || isAiChatFullscreen
+                        ? "100%"
+                        : reservedChatWidth,
                   }}
                   transition={chatContainerTransition}
                   onAnimationComplete={() => {

@@ -10,6 +10,7 @@ import { CardPropertyType } from "./components/CardMetadata"
 export type CardMetadataProperty = {
   [K in CardPropertyType]: {
     type: K
+    label: string
     value: Parameters<(typeof valueDisplayRenderers)[K]>[0]
   }
 }[CardPropertyType]
@@ -17,7 +18,6 @@ export type CardMetadataProperty = {
 export type CardMetadata =
   | {
       icon: IconType
-      tooltip?: string
       property: Exclude<CardMetadataProperty, { type: "file" }>
     }
   | {

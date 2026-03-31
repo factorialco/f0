@@ -1,7 +1,7 @@
 import { computeBorderGeometry } from "./gl/geometry"
 import { createProgram } from "./gl/program"
-import fragmentShaderSource from "./gl/shaders/fragment.glsl?raw"
-import vertexShaderSource from "./gl/shaders/vertex.glsl?raw"
+import fragmentShaderSource from "./gl/shaders/fragment"
+import vertexShaderSource from "./gl/shaders/vertex"
 
 /**
  * CSS RGB color string type

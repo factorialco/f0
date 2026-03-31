@@ -1,6 +1,5 @@
-import { z, ZodRawShape, ZodEffects } from "zod"
+import { z, ZodRawShape, ZodEffects, type ZodType } from "zod"
 
-import { DialogWidth } from "@/components/F0Dialog"
 import type {
   F0FormErrorTriggerMode,
   F0FormSubmitConfig,
@@ -9,6 +8,9 @@ import type {
   F0SectionConfig,
   F0PerSectionSectionConfig,
 } from "@/components/F0Form/types"
+import type { RenderCustomFieldFunction } from "@/components/F0Form/types"
+
+import { DialogWidth } from "@/components/F0Dialog"
 
 export type F0FormSchema<T extends ZodRawShape = ZodRawShape> =
   | z.ZodObject<T>
@@ -68,6 +70,14 @@ export interface F0FormDefinitionSingleSchema<TSchema extends F0FormSchema> {
   ) => Promise<F0FormSubmitResult> | F0FormSubmitResult
   submitConfig?: F0FormSubmitConfig
   errorTriggerMode?: F0FormErrorTriggerMode
+  /** Whether async defaultValues are still being resolved */
+  isLoading?: boolean
+  /** Zod schema describing params the AI can supply when calling presentForm */
+  defaultValuesParamsSchema?: ZodType
+  /** Raw defaultValues function for AI registry use when params are involved */
+  defaultValuesFn?: (
+    params: Record<string, unknown>
+  ) => Promise<Partial<z.infer<TSchema>>>
 }
 
 export interface F0FormDefinitionPerSection<T extends F0PerSectionSchema> {
@@ -82,6 +92,14 @@ export interface F0FormDefinitionPerSection<T extends F0PerSectionSchema> {
   ) => Promise<F0FormSubmitResult> | F0FormSubmitResult
   submitConfig?: F0PerSectionSubmitConfig
   errorTriggerMode?: F0FormErrorTriggerMode
+  /** Whether async defaultValues are still being resolved */
+  isLoading?: boolean
+  /** Zod schema describing params the AI can supply when calling presentForm */
+  defaultValuesParamsSchema?: ZodType
+  /** Raw defaultValues function for AI registry use when params are involved */
+  defaultValuesFn?: (
+    params: Record<string, unknown>
+  ) => Promise<{ [K in keyof T]?: Partial<z.infer<T[K]>> }>
 }
 
 export type F0FormDefinition<
@@ -131,6 +149,11 @@ interface F0WizardFormBaseProps {
    * @default false
    */
   autoSkipCompletedSteps?: boolean
+  /**
+   * Callback that renders custom fields identified by `customFieldName`.
+   * When a field has `customFieldName`, this function is called instead of the inline `render`.
+   */
+  renderCustomField?: RenderCustomFieldFunction
 }
 
 export interface F0WizardFormSingleSchemaProps<

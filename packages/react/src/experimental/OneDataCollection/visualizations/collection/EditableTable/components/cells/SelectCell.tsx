@@ -1,3 +1,5 @@
+import { useState } from "react"
+
 import { F0Select } from "@/components/F0Select"
 import { renderProperty } from "@/experimental/OneDataCollection/property-render"
 import { RecordType } from "@/hooks/datasource/types/records.typings"
@@ -18,6 +20,7 @@ export function SelectCell<R extends RecordType>({
   item,
 }: EditableCellProps<R>) {
   const i18n = useI18n()
+  const [isOpen, setIsOpen] = useState(false)
   const config = editableColumn.selectConfig
   if (!config) {
     if (!warnedColumns.has(editableColumn.label)) {
@@ -43,13 +46,13 @@ export function SelectCell<R extends RecordType>({
         onChange(newVal)
       }
     },
-    error,
     loading,
     size: "sm" as const,
     placeholder: config.placeholder,
     showSearchBox: config.showSearchBox,
     defaultItem: config.defaultItem?.(item),
     multiple: false as const,
+    onOpenChange: setIsOpen,
   }
 
   const clearableProps = config.clearable
@@ -57,7 +60,7 @@ export function SelectCell<R extends RecordType>({
     : ({} as const)
 
   return (
-    <BaseCell>
+    <BaseCell error={error} isActive={isOpen}>
       <div
         className={cn(
           "flex w-full min-w-0 h-full",

@@ -520,6 +520,15 @@ const groupedToggleItems: CardSelectableItem<string>[] = [
       "Grant access to managers and team leads. Even if they are not survey editors, they will be able to view the results of their own teams once responses are available",
   },
   {
+    value: "workflows",
+    title: "Link this course with Workflows",
+    description:
+      "Use our Workflows solution to automate actions such as generating course certificates or sending questionnaires.",
+    moreInfoLink: {
+      href: "https://help.factorial.co/workflows",
+    },
+  },
+  {
     value: "anonymous",
     title: "Anonymous answers",
   },

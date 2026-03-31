@@ -8,6 +8,9 @@ import type {
   FiltersDefinition,
   FiltersState,
 } from "@/components/OneFilterPicker/types"
+import type { DropdownItem } from "@/experimental/Navigation/Dropdown"
+
+import { useMemo, useRef } from "react"
 
 import { F0DataChart } from "@/components/F0DataChart"
 import {
@@ -26,6 +29,7 @@ import type {
   DashboardChartItem,
 } from "../../types"
 
+import { useChartDownloadActions } from "../../hooks/useChartDownloadActions"
 import { useDashboardItemData } from "../../hooks/useDashboardItemData"
 import { DashboardItem } from "../DashboardItem/DashboardItem"
 
@@ -76,6 +80,7 @@ function chartSkeleton(config: DashboardChartConfig) {
 interface ChartItemProps<Filters extends FiltersDefinition> {
   item: DashboardChartItem<Filters>
   filters: FiltersState<Filters>
+  actions?: DropdownItem[]
 }
 
 /**
@@ -170,12 +175,26 @@ function buildChartProps(
 export function ChartItem<Filters extends FiltersDefinition>({
   item,
   filters,
+  actions,
 }: ChartItemProps<Filters>) {
   const enabled = item.useDashboardFilters !== false
   const { data, isLoading, error, retry } = useDashboardItemData<
     Filters,
     DashboardChartData
   >(item.fetchData, filters, enabled)
+  const chartContainerRef = useRef<HTMLDivElement>(null)
+
+  const downloadActions = useChartDownloadActions({
+    chartContainerRef,
+    chartConfig: item.chart,
+    data,
+    title: item.title,
+  })
+
+  const allActions: DropdownItem[] = useMemo(
+    () => [...(actions ?? []), ...downloadActions],
+    [actions, downloadActions]
+  )
 
   const effectiveError =
     error ?? (!isLoading && !data ? new Error("No data available") : undefined)
@@ -188,9 +207,10 @@ export function ChartItem<Filters extends FiltersDefinition>({
       error={effectiveError}
       onRetry={retry}
       skeleton={chartSkeleton(item.chart)}
+      actions={allActions}
     >
       {data && (
-        <div className="h-full w-full px-4 py-3">
+        <div ref={chartContainerRef} className="h-full w-full px-4 py-3">
           <F0DataChart {...buildChartProps(item as DashboardChartItem, data)} />
         </div>
       )}

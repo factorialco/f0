@@ -4,8 +4,9 @@ import { type RefObject, useMemo } from "react"
 
 import type { F0DataChartHeatmapProps } from "../../types"
 
-import { buildGrid } from "../../utils/options"
+import { buildGrid, computeLabelInterval } from "../../utils/options"
 import { useChartTheme } from "../../utils/useChartTheme"
+import { useContainerSize } from "../../utils/useContainerSize"
 
 export function useHeatmapChartOptions(
   containerRef: RefObject<HTMLDivElement | null>,
@@ -22,6 +23,7 @@ export function useHeatmapChartOptions(
   }: F0DataChartHeatmapProps
 ): echarts.EChartsOption {
   const theme = useChartTheme(containerRef)
+  const { width, height } = useContainerSize(containerRef)
 
   return useMemo(() => {
     // Auto-compute min/max from data if not provided
@@ -35,6 +37,9 @@ export function useHeatmapChartOptions(
     const baseColor = theme.palette[0] ?? "#0aa69b"
 
     const { tooltip, colors } = theme
+
+    const xInterval = computeLabelInterval(xCategories.length, width)
+    const yInterval = computeLabelInterval(yCategories.length, height)
 
     const baseOptions: echarts.EChartsOption = {
       animation: false,
@@ -53,6 +58,8 @@ export function useHeatmapChartOptions(
           fontSize: theme.textStyle.fontSize,
           fontWeight: theme.textStyle.fontWeight,
           color: colors.foregroundTertiary,
+          hideOverlap: true,
+          ...(xInterval !== undefined ? { interval: xInterval } : {}),
         },
       },
       yAxis: {
@@ -67,6 +74,8 @@ export function useHeatmapChartOptions(
           fontSize: theme.textStyle.fontSize,
           fontWeight: theme.textStyle.fontWeight,
           color: colors.foregroundTertiary,
+          hideOverlap: true,
+          ...(yInterval !== undefined ? { interval: yInterval } : {}),
         },
       },
       visualMap: {
@@ -74,9 +83,9 @@ export function useHeatmapChartOptions(
         max,
         calculable: false,
         orient: "horizontal",
-        bottom: 0,
+        bottom: 10,
         left: "center",
-        show: showVisualMap,
+        show: false,
         inRange: {
           color: [colors.borderSecondary, baseColor],
         },
@@ -171,5 +180,7 @@ export function useHeatmapChartOptions(
     valueFormatter,
     echartsOptions,
     theme,
+    width,
+    height,
   ])
 }

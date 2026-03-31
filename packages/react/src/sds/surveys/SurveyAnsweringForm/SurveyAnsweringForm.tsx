@@ -47,6 +47,7 @@ export function SurveyAnsweringForm({
   loading = false,
   labels,
   preview = false,
+  useUpload,
 }: SurveyAnsweringFormProps) {
   const { t } = useI18n()
   const initialIsFullscreen = positionProp === "fullscreen"
@@ -93,7 +94,8 @@ export function SurveyAnsweringForm({
     currentQuestionId,
     isStepped ? accumulatedValuesRef.current : undefined,
     preview,
-    isReadonlyPreview
+    isReadonlyPreview,
+    useUpload
   )
 
   const position: DialogPosition = isFullscreen

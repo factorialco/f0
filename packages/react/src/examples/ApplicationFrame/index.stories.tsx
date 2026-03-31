@@ -130,6 +130,14 @@ const mockToolHints: AiChatToolHint[] = [
   },
 ]
 
+/**
+ * Mock fetchCreditsUsage — simulates a 500ms API call returning usage data.
+ */
+const mockFetchCreditsUsage = () =>
+  new Promise<{ used: number; total: number }>((resolve) => {
+    setTimeout(() => resolve({ used: 750, total: 1000 }), 500)
+  })
+
 const meta: Meta<typeof ApplicationFrame> = {
   title: "ApplicationFrame",
   component: ApplicationFrame,
@@ -139,6 +147,7 @@ const meta: Meta<typeof ApplicationFrame> = {
   },
   args: {
     ai: {
+      historyEnabled: true,
       runtimeUrl: "https://mastra.local.factorial.dev/copilotkit",
       agent: "one-workflow",
       credentials: "include",
@@ -151,6 +160,13 @@ const meta: Meta<typeof ApplicationFrame> = {
         searchPersons: mockSearchPersons,
       },
       toolHints: mockToolHints,
+      credits: {
+        fetchUsage: mockFetchCreditsUsage,
+        upgradePlanUrl: "https://example.com/upgrade",
+        companyName: "Factorial",
+        companyLogoUrl: "/avatars/factorial.png",
+        planName: "Free plan",
+      },
       disclaimer: {
         text: "One works within your permissions.",
         link: "/permissions",
@@ -365,6 +381,13 @@ export const FullscreenWithActions: Story = {
         searchPersons: mockSearchPersons,
       },
       toolHints: mockToolHints,
+      credits: {
+        fetchUsage: mockFetchCreditsUsage,
+        upgradePlanUrl: "https://example.com/upgrade",
+        companyName: "Factorial",
+        companyLogoUrl: "/avatars/factorial.png",
+        planName: "Free plan",
+      },
       disclaimer: {
         text: "One works within your permissions.",
         link: "/permissions",

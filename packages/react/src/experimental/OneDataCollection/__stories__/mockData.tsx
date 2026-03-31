@@ -566,6 +566,18 @@ export const getMockVisualizations = (options?: {
             sorting: options?.table?.noSorting ? undefined : "department",
             order: options?.table?.allowColumnReordering ? 4 : undefined,
           },
+          {
+            id: "salary",
+            label: "Salary",
+            editType: () => "number" as const,
+            align: "right" as const,
+            numberConfig: {
+              min: 0,
+              units: "€",
+            },
+            render: (item) =>
+              item.salary !== undefined ? String(item.salary) : "",
+          },
 
           ...((options?.table?.applyLongText ?? true)
             ? [
@@ -636,7 +648,6 @@ export const getMockVisualizations = (options?: {
           {
             label: "Email",
             icon: Envelope,
-            tooltip: "Email",
             render: (item) => item.email,
             hide: (item) => !item.email,
           },
@@ -861,23 +872,23 @@ export const getMockVisualizations = (options?: {
         metadata: (u) => [
           {
             icon: Envelope,
-            tooltip: "Email",
-            property: { type: "text", value: u.email },
+            property: { type: "text", label: "Email", value: u.email },
           },
           {
             icon: Building,
-            tooltip: "Department",
-            property: { type: "text", value: u.department },
+            property: {
+              type: "text",
+              label: "Department",
+              value: u.department,
+            },
           },
           {
             icon: Briefcase,
-            tooltip: "Role",
-            property: { type: "text", value: u.role },
+            property: { type: "text", label: "Role", value: u.role },
           },
           {
             icon: Star,
-            tooltip: "ID",
-            property: { type: "text", value: u.id },
+            property: { type: "text", label: "ID", value: u.id },
           },
         ],
         onMove: options?.cache

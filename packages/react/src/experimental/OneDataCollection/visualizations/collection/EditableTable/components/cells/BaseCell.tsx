@@ -2,6 +2,8 @@ import { ReactNode } from "react"
 
 import { cn } from "@/lib/utils"
 
+import { ErrorTooltip } from "./ErrorTooltip"
+
 const cursorClass = {
   text: "cursor-text",
   pointer: "cursor-pointer",
@@ -13,23 +15,37 @@ export function BaseCell({
   readonly = false,
   showRightBorder = true,
   cursor = "text",
+  isActive = false,
+  error,
   children,
 }: {
   readonly?: boolean
   showRightBorder?: boolean
   cursor?: "text" | "pointer" | "default" | "not-allowed"
+  isActive?: boolean
+  error?: string
   children: ReactNode
 }) {
   return (
     <div
       className={cn(
-        "flex w-full h-full min-w-0 min-h-12 border-0 border-r-[1px] border-solid border-f1-border-secondary",
-        cursorClass[cursor],
+        "flex w-full h-full min-w-0 min-h-12 border-solid",
+        "border-0 border-r-[1px] border-f1-border-secondary",
         !showRightBorder && "border-r-0",
+        cursorClass[cursor],
+        error
+          ? "relative z-[1] border-r-0 bg-f1-background-critical/10 shadow-[inset_0_0_0_1px_hsl(var(--critical-50))]"
+          : isActive
+            ? "relative z-[1] border-r-0 bg-f1-background shadow-[inset_0_0_0_1px_hsl(var(--selected-50))]"
+            : "shadow-none [&:not(:focus-within)]:hover:shadow-[inset_0_0_0_1px_hsl(var(--neutral-30))] focus-within:relative focus-within:z-[1] focus-within:border-r-0 focus-within:bg-f1-background focus-within:shadow-[inset_0_0_0_1px_hsl(var(--selected-50))]",
         readonly && "bg-f1-background-secondary"
       )}
     >
-      {children}
+      {error ? (
+        <ErrorTooltip message={error}>{children}</ErrorTooltip>
+      ) : (
+        children
+      )}
     </div>
   )
 }

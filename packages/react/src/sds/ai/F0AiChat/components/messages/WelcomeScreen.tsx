@@ -1,0 +1,179 @@
+import { useCopilotChatInternal } from "@copilotkit/react-core"
+import { Message, randomId } from "@copilotkit/shared"
+import { AnimatePresence, motion } from "motion/react"
+import { useCallback, useMemo, useRef, useState } from "react"
+
+import { useAiChat } from "@/ai"
+import { ButtonInternal } from "@/components/F0Button/internal"
+import { cn } from "@/lib/utils"
+
+import { F0OneIcon } from "../../../F0OneIcon"
+import { WelcomeScreenSuggestion } from "../../types"
+import { PongGame } from "../PongGame"
+import { PongBall } from "../shared/PongBall"
+
+export type { WelcomeScreenSuggestion }
+
+const MAX_SUGGESTIONS = 3
+
+function pickRandomSuggestions(
+  list: WelcomeScreenSuggestion[],
+  amount: number = MAX_SUGGESTIONS
+): WelcomeScreenSuggestion[] {
+  const shuffled = [...list].sort(() => 0.5 - Math.random())
+  return shuffled.slice(0, amount)
+}
+
+export const WelcomeScreen = ({
+  greeting,
+  initialMessages = [],
+  suggestions = [],
+}: {
+  greeting?: string
+  // todo make it string
+  initialMessages?: Message[]
+  suggestions?: WelcomeScreenSuggestion[]
+}) => {
+  const [showPong, setShowPong] = useState(false)
+  const [isHovered, setIsHovered] = useState(false)
+  const hoverTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const handleMouseEnter = useCallback(() => {
+    hoverTimeout.current = setTimeout(() => setIsHovered(true), 80)
+  }, [])
+
+  const handleMouseLeave = useCallback(() => {
+    if (hoverTimeout.current) clearTimeout(hoverTimeout.current)
+    setIsHovered(false)
+  }, [])
+
+  const { sendMessage } = useCopilotChatInternal()
+
+  const { visualizationMode, tracking } = useAiChat()
+
+  const isFullscreen = visualizationMode === "fullscreen"
+
+  const pickedSuggestions = useMemo(
+    () => pickRandomSuggestions(suggestions),
+    [suggestions]
+  )
+
+  if (showPong) {
+    return <PongGame onClose={() => setShowPong(false)} />
+  }
+
+  return (
+    <AnimatePresence mode="popLayout">
+      <motion.div
+        key="welcome"
+        className="flex w-full flex-1 flex-col justify-end gap-6 sm:gap-4"
+        initial={{ opacity: 1 }}
+      >
+        <div className={!isFullscreen ? "pl-3" : ""}>
+          <motion.div
+            className="flex w-fit justify-center"
+            initial={{ opacity: 0, scale: 0.8, filter: "blur(6px)" }}
+            animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+            transition={{
+              duration: 0.3,
+              ease: "easeOut",
+              delay: 0.4,
+            }}
+          >
+            <div
+              className="relative cursor-pointer"
+              onClick={() => setShowPong(true)}
+              onMouseEnter={handleMouseEnter}
+              onMouseLeave={handleMouseLeave}
+            >
+              <motion.div
+                animate={{
+                  opacity: isHovered ? 0 : 1,
+                  scale: isHovered ? 0.6 : 1,
+                }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
+              >
+                <F0OneIcon spin size="lg" className="my-4" />
+              </motion.div>
+              <motion.div
+                className="absolute inset-0 flex items-center justify-center"
+                initial={{ opacity: 0, scale: 0.4 }}
+                animate={{
+                  opacity: isHovered ? 1 : 0,
+                  scale: isHovered ? 1 : 0.4,
+                }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
+              >
+                <PongBall size={40} className="shadow-lg" />
+              </motion.div>
+            </div>
+          </motion.div>
+          {greeting && !isFullscreen && (
+            <motion.p
+              className="text-lg font-semibold leading-[24px] text-f1-foreground-secondary"
+              initial={{ opacity: 0, filter: "blur(2px)", y: -8 }}
+              animate={{ opacity: 1, filter: "blur(0px)", y: 0 }}
+              transition={{
+                duration: 0.2,
+                ease: "easeOut",
+                delay: 0.5,
+              }}
+            >
+              {greeting}
+            </motion.p>
+          )}
+          {initialMessages.map((message) => (
+            <motion.p
+              className={cn(
+                "text-xl font-semibold leading-[24px] text-f1-foreground",
+                isFullscreen && "text-3xl"
+              )}
+              key={message.id}
+              initial={{ opacity: 0, filter: "blur(2px)", y: -8 }}
+              animate={{ opacity: 1, filter: "blur(0px)", y: 0 }}
+              transition={{
+                duration: 0.2,
+                ease: "easeOut",
+                delay: 0.7,
+              }}
+            >
+              {typeof message.content === "string" ? message.content : ""}
+            </motion.p>
+          ))}
+        </div>
+        {!!pickedSuggestions.length && (
+          <div className="flex flex-col items-start gap-[6px]">
+            {pickedSuggestions.map((suggestion, index) => (
+              <motion.div
+                className="w-full"
+                key={index}
+                initial={{ opacity: 0, filter: "blur(2px)", y: -8 }}
+                animate={{ opacity: 1, filter: "blur(0px)", y: 0 }}
+                transition={{
+                  duration: 0.1,
+                  ease: "easeOut",
+                  delay: 0.9 + index * 0.1,
+                }}
+              >
+                <ButtonInternal
+                  variant="ghost"
+                  className="border border-solid border-f1-border-secondary shadow sm:border-none sm:shadow-none"
+                  label={suggestion.message}
+                  icon={suggestion.icon}
+                  onClick={() => {
+                    tracking?.onWelcomeSuggestionClick?.(suggestion)
+                    sendMessage({
+                      id: randomId(),
+                      role: "user",
+                      content: suggestion.prompt || suggestion.message,
+                    })
+                  }}
+                />
+              </motion.div>
+            ))}
+          </div>
+        )}
+      </motion.div>
+    </AnimatePresence>
+  )
+}

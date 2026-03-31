@@ -1,5 +1,61 @@
 # Changelog
 
+## [0.49.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.48.0...f0-react-native-v0.49.0) (2026-03-26)
+
+
+### Features
+
+* add `F0BlurView` primitive ([#3778](https://github.com/factorialco/f0/issues/3778)) ([20d8067](https://github.com/factorialco/f0/commit/20d8067a16602797e48ee57f7350a494bc7ccf97))
+
+## [0.48.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.47.0...f0-react-native-v0.48.0) (2026-03-26)
+
+
+### Features
+
+* **checkbox:** add F0Checkbox component with showcase ([#3776](https://github.com/factorialco/f0/issues/3776)) ([9b77789](https://github.com/factorialco/f0/commit/9b77789203053e74680583098332f3df5161c4ee))
+
+## [0.47.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.46.0...f0-react-native-v0.47.0) (2026-03-26)
+
+
+### Features
+
+* add F0Metadata component ([#3766](https://github.com/factorialco/f0/issues/3766)) ([7d98d34](https://github.com/factorialco/f0/commit/7d98d34d58e533bb7af7a0e81449ad0aeafa4756))
+
+## [0.46.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.45.0...f0-react-native-v0.46.0) (2026-03-26)
+
+
+### Features
+
+* **tabs:** add F0Tabs component with showcase, styles, and docs ([#3765](https://github.com/factorialco/f0/issues/3765)) ([97b0bd7](https://github.com/factorialco/f0/commit/97b0bd7b5c63099a88b65f2c603f559b559b0d06))
+
+## [0.45.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.44.0...f0-react-native-v0.45.0) (2026-03-25)
+
+
+### Features
+
+* **step:** add F0Step component with showcase and documentation ([#3757](https://github.com/factorialco/f0/issues/3757)) ([3a1f361](https://github.com/factorialco/f0/commit/3a1f3610e16afff4bde7079eb03589306377834b))
+
+## [0.44.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.43.0...f0-react-native-v0.44.0) (2026-03-25)
+
+
+### Features
+
+* **chip:** introduce F0Chip component with showcase and styles ([#3755](https://github.com/factorialco/f0/issues/3755)) ([ad1738e](https://github.com/factorialco/f0/commit/ad1738e883df76f67d67bf4e24794a1f972e3c71))
+
+## [0.43.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.42.0...f0-react-native-v0.43.0) (2026-03-25)
+
+
+### Features
+
+* **progress:** add F0Progress component ([#3742](https://github.com/factorialco/f0/issues/3742)) ([401edd5](https://github.com/factorialco/f0/commit/401edd5ed005ecd3ec20014cbcd5938d2c0a2a3b))
+
+## [0.42.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.41.0...f0-react-native-v0.42.0) (2026-03-18)
+
+
+### Features
+
+* new item to datalist ([#3532](https://github.com/factorialco/f0/issues/3532)) ([0eebb0a](https://github.com/factorialco/f0/commit/0eebb0a13aa3222e1d684c98f136c9ddffa138bb))
+
 ## [0.41.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.40.0...f0-react-native-v0.41.0) (2026-03-17)
 
 

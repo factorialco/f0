@@ -1,6 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 import { useResizeObserver } from "usehooks-ts"
 
+// Hysteresis margin (px): once items overflow, require this much extra space
+// before re-showing them. Prevents scrollbar-induced layout oscillation.
+const HYSTERESIS_PX = 20
+
 type CalculateVisibleItemCountParams = {
   itemWidths: number[]
   availableWidth: number
@@ -28,6 +32,7 @@ export function useOverflowCalculation<T>(
   const overflowButtonRef = useRef<HTMLButtonElement>(null)
   const customOverflowIndicatorRef = useRef<HTMLDivElement>(null)
   const measurementContainerRef = useRef<HTMLDivElement>(null)
+  const prevVisibleCountRef = useRef<number | null>(null)
 
   // Combined state for visible and overflow items
   const [itemsState, setItemsState] = useState<{
@@ -98,7 +103,17 @@ export function useOverflowCalculation<T>(
 
   // Calculate which items should be visible and which should overflow
   const calculateVisibleItems = useCallback(() => {
-    if (!containerRef.current || items.length === 0) return
+    if (items.length === 0) {
+      setItemsState((prev) => {
+        if (prev.visibleItems.length === 0 && prev.overflowItems.length === 0) {
+          return prev
+        }
+        return { visibleItems: [], overflowItems: [] }
+      })
+      return
+    }
+
+    if (!containerRef.current) return
 
     const currentContainerWidth = containerRef.current.clientWidth
     const overflowButtonWidth =
@@ -108,22 +123,40 @@ export function useOverflowCalculation<T>(
     const itemWidths = measureItemWidths()
     const itemWidthsWithGap = itemWidths.map((width) => width + gap)
 
-    const availableWidthWithoutOverflow = currentContainerWidth
-    const visibleCountWithoutOverflow = calculateVisibleItemCount({
+    // Always reserve overflow button width upfront so items drop one at a time
+    const reservedWidth = currentContainerWidth - overflowButtonWidth - gap
+    let visibleCount = calculateVisibleItemCount({
       itemWidths: itemWidthsWithGap,
-      availableWidth: availableWidthWithoutOverflow,
+      availableWidth: reservedWidth,
     })
 
-    const fitsWithoutOverflow =
-      visibleCountWithoutOverflow >= items.length &&
+    // If all items fit even with the reserved space, show them all without the button
+    if (
+      visibleCount >= items.length &&
       (options?.max === undefined || items.length <= options.max)
+    ) {
+      visibleCount = calculateVisibleItemCount({
+        itemWidths: itemWidthsWithGap,
+        availableWidth: currentContainerWidth,
+      })
+    }
 
-    const visibleCount = fitsWithoutOverflow
-      ? visibleCountWithoutOverflow
-      : calculateVisibleItemCount({
-          itemWidths: itemWidthsWithGap,
-          availableWidth: currentContainerWidth - overflowButtonWidth - gap,
-        })
+    const effectiveWidth =
+      visibleCount >= items.length ? currentContainerWidth : reservedWidth
+
+    // Hysteresis: require extra margin before showing more items.
+    // Absorbs ~17px oscillation from scrollbar appearing/disappearing.
+    const prev = prevVisibleCountRef.current
+    if (prev !== null && visibleCount > prev) {
+      const countWithMargin = calculateVisibleItemCount({
+        itemWidths: itemWidthsWithGap,
+        availableWidth: effectiveWidth - HYSTERESIS_PX,
+      })
+      if (countWithMargin < visibleCount) {
+        visibleCount = Math.max(countWithMargin, prev)
+      }
+    }
+    prevVisibleCountRef.current = visibleCount
 
     let visibleItems = visibleCount === 0 ? [] : items.slice(0, visibleCount)
     let overflowItems = visibleCount === 0 ? items : items.slice(visibleCount)
@@ -131,7 +164,8 @@ export function useOverflowCalculation<T>(
     if (
       overflowItems.length === 1 &&
       !!visibleItems.length &&
-      overflowButtonWidth === itemWidths?.[-1] - gap
+      itemWidths.length > 0 &&
+      overflowButtonWidth === itemWidths[itemWidths.length - 1] - gap
     ) {
       visibleItems = items
       overflowItems = []
@@ -142,6 +176,11 @@ export function useOverflowCalculation<T>(
       overflowItems,
     })
   }, [items, gap, measureItemWidths, calculateVisibleItemCount, options?.max])
+
+  // Reset hysteresis when the number of items changes
+  useEffect(() => {
+    prevVisibleCountRef.current = null
+  }, [items.length])
 
   // Initial calculation and initialization
   useEffect(() => {

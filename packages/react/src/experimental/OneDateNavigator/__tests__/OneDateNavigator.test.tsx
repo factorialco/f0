@@ -39,7 +39,7 @@ describe("OneDateNavigator", () => {
 
     render(<OneDateNavigator onSelect={onSelect} defaultValue={defaultValue} />)
 
-    const trigger = await screen.getByRole("button", { name: "Jan 2023" })
+    const trigger = await screen.getByRole("button", { name: "January 2023" })
     expect(trigger).toBeDefined()
   })
 

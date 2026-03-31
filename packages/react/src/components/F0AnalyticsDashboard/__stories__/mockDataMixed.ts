@@ -623,12 +623,20 @@ const metricItems: DashboardMetricItem<DashboardFiltersType>[] = [
     id: "total-headcount",
     title: "Total Headcount",
     type: "metric",
+    colSpan: 4,
+    x: 0,
+    y: 0,
+    rowSpan: 3,
     fetchData: fetchTotalHeadcount,
   },
   {
     id: "avg-salary",
     title: "Avg. Salary",
     type: "metric",
+    colSpan: 4,
+    x: 4,
+    y: 0,
+    rowSpan: 3,
     format: { type: "currency", currency: "EUR" },
     fetchData: fetchAvgSalary,
   },
@@ -636,6 +644,10 @@ const metricItems: DashboardMetricItem<DashboardFiltersType>[] = [
     id: "attrition-rate",
     title: "Attrition Rate",
     type: "metric",
+    colSpan: 4,
+    x: 8,
+    y: 0,
+    rowSpan: 3,
     format: { type: "percent" },
     decimals: 1,
     fetchData: fetchAttritionMetric,
@@ -647,7 +659,10 @@ const collectionItem: DashboardCollectionItem<DashboardFiltersType> = {
   title: "Employee Directory",
   description: "Paginated list of employees filtered by dashboard filters",
   type: "collection",
-  colSpan: 3,
+  colSpan: 12,
+  x: 0,
+  y: 38,
+  rowSpan: 10,
   createSource: createEmployeeSource,
   visualizations: [employeeTableVisualization],
 }
@@ -657,15 +672,18 @@ const collectionItem: DashboardCollectionItem<DashboardFiltersType> = {
 // ---------------------------------------------------------------------------
 
 export const mixedItems: DashboardItem<DashboardFiltersType>[] = [
-  // Row 1 — KPI metrics
+  // Row 0 — KPI metrics (3×1×1)
   ...metricItems,
-  // Row 2 — overview charts
+  // Row 1 — bar (4col) + line (8col)
   {
     id: "headcount",
     title: "Headcount by Department",
     description: "Current headcount and open positions",
     type: "chart",
-    colSpan: 1,
+    colSpan: 4,
+    x: 0,
+    y: 3,
+    rowSpan: 7,
     chart: { type: "bar" },
     fetchData: fetchHeadcountByDepartment,
   },
@@ -674,7 +692,10 @@ export const mixedItems: DashboardItem<DashboardFiltersType>[] = [
     title: "Revenue Trend",
     description: "Monthly revenue vs target (H1)",
     type: "chart",
-    colSpan: 2,
+    colSpan: 8,
+    x: 4,
+    y: 3,
+    rowSpan: 7,
     chart: {
       type: "line",
       showArea: true,
@@ -686,13 +707,16 @@ export const mixedItems: DashboardItem<DashboardFiltersType>[] = [
     },
     fetchData: fetchRevenueTrend,
   },
-  // Row 3 — costs + satisfaction
+  // Row 2 — stacked bar (6col) + horizontal bar (6col)
   {
     id: "cost-breakdown",
     title: "Cost Breakdown",
     description: "Quarterly cost by department",
     type: "chart",
-    colSpan: 2,
+    colSpan: 6,
+    x: 0,
+    y: 10,
+    rowSpan: 7,
     chart: {
       type: "bar",
       stacked: true,
@@ -705,20 +729,26 @@ export const mixedItems: DashboardItem<DashboardFiltersType>[] = [
     title: "Satisfaction Scores",
     description: "Average score by department (1-5)",
     type: "chart",
-    colSpan: 1,
+    colSpan: 6,
+    x: 6,
+    y: 10,
+    rowSpan: 7,
     chart: {
       type: "bar",
       orientation: "horizontal",
     },
     fetchData: fetchSatisfactionScores,
   },
-  // Row 4 — pie + radar + gauge
+  // Row 3 — pie + radar + gauge (4col each)
   {
     id: "headcount-pie",
     title: "Headcount Distribution",
     description: "Donut chart of headcount by department",
     type: "chart",
-    colSpan: 1,
+    colSpan: 4,
+    x: 0,
+    y: 17,
+    rowSpan: 7,
     chart: { type: "pie", innerRadius: 60, showPercentage: true },
     fetchData: fetchHeadcountPie,
   },
@@ -727,7 +757,10 @@ export const mixedItems: DashboardItem<DashboardFiltersType>[] = [
     title: "Team Metrics",
     description: "Radar comparison across departments",
     type: "chart",
-    colSpan: 1,
+    colSpan: 4,
+    x: 4,
+    y: 17,
+    rowSpan: 7,
     chart: { type: "radar", showArea: true },
     fetchData: fetchTeamRadar,
   },
@@ -736,29 +769,38 @@ export const mixedItems: DashboardItem<DashboardFiltersType>[] = [
     title: "Hiring Goal",
     description: "Progress toward quarterly hiring target",
     type: "chart",
-    colSpan: 1,
+    colSpan: 4,
+    x: 8,
+    y: 17,
+    rowSpan: 7,
     chart: { type: "gauge" },
     fetchData: fetchHiringGoalGauge,
   },
-  // Row 5 — heatmap
+  // Row 4 — heatmap (full width)
   {
     id: "office-activity",
     title: "Office Activity",
     description: "Hourly activity heatmap across the week",
     type: "chart",
-    colSpan: 3,
+    colSpan: 12,
+    x: 0,
+    y: 24,
+    rowSpan: 7,
     chart: { type: "heatmap", showLabels: true },
     fetchData: fetchActivityHeatmap,
   },
-  // Row 6 — employee table
+  // Row 5 — employee table (full width)
   collectionItem,
-  // Row 7 — hiring funnel
+  // Row 6 — hiring funnel (full width)
   {
     id: "hiring-funnel",
     title: "Hiring Funnel",
     description: "Conversion through hiring stages",
     type: "chart",
-    colSpan: 3,
+    colSpan: 12,
+    x: 0,
+    y: 48,
+    rowSpan: 7,
     chart: {
       type: "funnel",
       valueFormatter: (v: number) => `${v} candidates`,
