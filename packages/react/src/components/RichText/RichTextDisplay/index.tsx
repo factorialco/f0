@@ -40,16 +40,7 @@ const _RichTextDisplay = forwardRef<
           : content,
         {
           ADD_ATTR: ["target"],
-          ADD_TAGS: ["input"],
-          ALLOWED_ATTR: [
-            "href",
-            "target",
-            "rel",
-            "class",
-            "type",
-            "checked",
-            "disabled",
-          ],
+          ALLOWED_ATTR: ["href", "target", "rel", "class"],
         }
       ),
     [format, content]
