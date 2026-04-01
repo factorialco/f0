@@ -31,8 +31,8 @@ JobPostingTrigger.displayName = "JobPostingTrigger"
  * Inline job posting entity reference with a hover card showing posting details.
  *
  * Renders the trigger as a styled link. On hover, lazily fetches
- * the job posting data via `entityResolvers.jobPosting` and displays
- * title, status, location, and a link to the posting page.
+ * the job posting data via `entityRefs.resolvers.jobPosting` and displays
+ * title, status, and location. Optionally links via `entityRefs.urls.jobPosting`.
  */
 export function JobPostingEntityRef({
   id,
@@ -41,11 +41,11 @@ export function JobPostingEntityRef({
   id: string
   label: string
 }) {
-  const { entityResolvers } = useAiChat()
-  const resolver = entityResolvers?.jobPosting
+  const { entityRefs } = useAiChat()
+  const resolver = entityRefs?.resolvers?.jobPosting
   const i18n = useI18n()
 
-  const jobPostingUrl = `/recruitment/jobs/${id}/applications`
+  const jobPostingUrl = entityRefs?.urls?.jobPosting?.(id)
 
   const mapToCard = useMemo(
     () =>
@@ -54,10 +54,12 @@ export function JobPostingEntityRef({
         description: [profile.status, profile.location]
           .filter(Boolean)
           .join(" · "),
-        secondaryActions: {
-          label: i18n.t("ai.view"),
-          href: jobPostingUrl,
-        },
+        ...(jobPostingUrl && {
+          secondaryActions: {
+            label: i18n.t("ai.view"),
+            href: jobPostingUrl,
+          },
+        }),
       }),
     [i18n, jobPostingUrl]
   )
@@ -65,10 +67,12 @@ export function JobPostingEntityRef({
   const fallbackCard = useMemo(
     (): F0CardProps => ({
       title: label,
-      secondaryActions: {
-        label: i18n.t("ai.view"),
-        href: jobPostingUrl,
-      },
+      ...(jobPostingUrl && {
+        secondaryActions: {
+          label: i18n.t("ai.view"),
+          href: jobPostingUrl,
+        },
+      }),
     }),
     [label, i18n, jobPostingUrl]
   )

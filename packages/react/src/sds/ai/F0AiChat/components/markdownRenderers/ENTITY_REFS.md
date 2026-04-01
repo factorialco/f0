@@ -69,9 +69,15 @@ the renderer in the registry, and renders it — or falls back to a `<span>`.
 
 ### `entityRef/types.ts`
 
-Contains `EntityResolvers` — the map of async resolver functions keyed by
-entity type. Each resolver entry imports its profile type from the
-corresponding entity folder.
+Contains:
+
+- `EntityResolvers` — the map of async resolver functions keyed by entity type.
+  Each resolver entry imports its profile type from the corresponding entity folder.
+- `EntityUrlBuilders` — the map of URL builder functions keyed by entity type.
+  Each builder takes an entity ID and returns the URL to navigate to.
+  When not provided, the hover card omits the navigation action.
+- `EntityRefs` — groups `resolvers` (EntityResolvers) and `urls` (EntityUrlBuilders)
+  into a single configuration object passed via the `entityRefs` prop.
 
 ## How to add a new entity ref
 
@@ -90,7 +96,7 @@ export type TeamProfile = {
 }
 ```
 
-### Step 2 — Add the resolver to `entityRef/types.ts`
+### Step 2 — Add the resolver and URL builder to `entityRef/types.ts`
 
 ```ts
 import type { TeamProfile } from "./entities/team/types"
@@ -98,6 +104,11 @@ import type { TeamProfile } from "./entities/team/types"
 export type EntityResolvers = {
   person?: (id: string) => Promise<PersonProfile>
   team?: (id: string) => Promise<TeamProfile>
+}
+
+export type EntityUrlBuilders = {
+  person?: (id: string) => string
+  team?: (id: string) => string
 }
 ```
 
@@ -110,6 +121,7 @@ reimplement fetching, caching, or hover card logic:
 import { forwardRef, useMemo } from "react"
 
 import type { F0CardProps } from "@/components/F0Card"
+import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 
 import { useAiChat } from "../../../../../providers/AiChatStateProvider"
@@ -134,16 +146,25 @@ const TeamTrigger = forwardRef<HTMLButtonElement, { label: string }>(
 )
 
 export function TeamEntityRef({ id, label }: { id: string; label: string }) {
-  const { entityResolvers } = useAiChat()
-  const resolver = entityResolvers?.team
+  const { entityRefs } = useAiChat()
+  const resolver = entityRefs?.resolvers?.team
+  const i18n = useI18n()
+
+  const teamUrl = entityRefs?.urls?.team?.(id)
 
   const mapToCard = useMemo(
     () =>
       (profile: TeamProfile): F0CardProps => ({
         title: profile.name,
         description: `${profile.memberCount} members`,
+        ...(teamUrl && {
+          secondaryActions: {
+            label: i18n.t("ai.view"),
+            href: teamUrl,
+          },
+        }),
       }),
-    []
+    [i18n, teamUrl]
   )
 
   const fallbackCard = useMemo((): F0CardProps => ({ title: label }), [label])
@@ -186,6 +207,14 @@ Create `entities/team/__tests__/TeamEntityRef.test.tsx` covering:
 - Shows skeleton while loading
 - Shows fallback card on error
 
+## Testing in Storybook
+
+To visually test entity refs, use the **ApplicationFrame** story
+(`packages/react/src/examples/ApplicationFrame/index.stories.tsx`).
+It configures `entityRefs` with mock resolvers and URL builders for all
+entity types. Run Storybook and interact with the AI chat to verify
+hover cards, navigation links, and @mention autocomplete.
+
 ## Key principles
 
 1. **Always use `EntityRefHoverCard`** — never reimplement fetching, caching,
@@ -200,3 +229,6 @@ Create `entities/team/__tests__/TeamEntityRef.test.tsx` covering:
    children as a `<span>`, so the chat never breaks.
 5. **Lazy data fetching** — profile data is fetched on hover, not on mount,
    to keep the initial render fast.
+6. **URL builders are optional** — when `entityRefs.urls.<type>` is not
+   provided, the hover card simply omits the navigation action. Never
+   hardcode URLs inside entity ref components.

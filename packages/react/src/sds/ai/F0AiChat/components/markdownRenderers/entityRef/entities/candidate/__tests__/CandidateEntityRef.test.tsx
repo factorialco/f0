@@ -10,13 +10,16 @@ import {
 import type { CandidateProfile } from "../types"
 
 const mockResolver = vi.fn<(id: string) => Promise<CandidateProfile>>()
-let mockEntityResolvers: { candidate?: typeof mockResolver } = {
-  candidate: mockResolver,
+let mockEntityRefs: {
+  resolvers?: { candidate?: typeof mockResolver }
+  urls?: { candidate?: (id: string) => string }
+} = {
+  resolvers: { candidate: mockResolver },
 }
 
 vi.mock("../../../../../../providers/AiChatStateProvider", () => ({
   useAiChat: () => ({
-    entityResolvers: mockEntityResolvers,
+    entityRefs: mockEntityRefs,
   }),
 }))
 
@@ -33,7 +36,7 @@ const profile: CandidateProfile = {
 describe("CandidateEntityRef", () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mockEntityResolvers = { candidate: mockResolver }
+    mockEntityRefs = { resolvers: { candidate: mockResolver } }
   })
 
   it("renders the trigger button without @ prefix", () => {
@@ -44,7 +47,7 @@ describe("CandidateEntityRef", () => {
   })
 
   it("renders label as plain text when no resolver is available", () => {
-    mockEntityResolvers = {}
+    mockEntityRefs = {}
 
     const { container } = render(
       <CandidateEntityRef id="77" label="Maria Lopez" />

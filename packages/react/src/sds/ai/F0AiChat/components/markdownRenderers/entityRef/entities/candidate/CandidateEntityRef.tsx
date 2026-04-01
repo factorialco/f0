@@ -31,8 +31,8 @@ CandidateTrigger.displayName = "CandidateTrigger"
  * Inline candidate entity reference with a hover card showing profile details.
  *
  * Renders the trigger as a styled link. On hover, lazily fetches
- * the candidate profile via `entityResolvers.candidate` and displays
- * avatar, name, source, and a link to the candidate page.
+ * the candidate profile via `entityRefs.resolvers.candidate` and displays
+ * avatar, name, and source. Optionally links via `entityRefs.urls.candidate`.
  */
 export function CandidateEntityRef({
   id,
@@ -41,11 +41,11 @@ export function CandidateEntityRef({
   id: string
   label: string
 }) {
-  const { entityResolvers } = useAiChat()
-  const resolver = entityResolvers?.candidate
+  const { entityRefs } = useAiChat()
+  const resolver = entityRefs?.resolvers?.candidate
   const i18n = useI18n()
 
-  const candidateUrl = `/recruitment/candidates/${id}/applications`
+  const candidateUrl = entityRefs?.urls?.candidate?.(id)
 
   const mapToCard = useMemo(
     () =>
@@ -58,10 +58,12 @@ export function CandidateEntityRef({
         },
         title: `${profile.firstName} ${profile.lastName}`,
         description: profile.source,
-        secondaryActions: {
-          label: i18n.t("ai.view"),
-          href: candidateUrl,
-        },
+        ...(candidateUrl && {
+          secondaryActions: {
+            label: i18n.t("ai.view"),
+            href: candidateUrl,
+          },
+        }),
       }),
     [i18n, candidateUrl]
   )
@@ -69,10 +71,12 @@ export function CandidateEntityRef({
   const fallbackCard = useMemo(
     (): F0CardProps => ({
       title: label,
-      secondaryActions: {
-        label: i18n.t("ai.view"),
-        href: candidateUrl,
-      },
+      ...(candidateUrl && {
+        secondaryActions: {
+          label: i18n.t("ai.view"),
+          href: candidateUrl,
+        },
+      }),
     }),
     [label, i18n, candidateUrl]
   )

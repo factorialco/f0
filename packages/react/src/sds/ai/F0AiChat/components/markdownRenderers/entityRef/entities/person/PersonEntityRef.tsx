@@ -1,12 +1,14 @@
 import { forwardRef, useMemo } from "react"
 
 import type { F0CardProps } from "@/components/F0Card"
+
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 
+import type { PersonProfile } from "./types"
+
 import { useAiChat } from "../../../../../providers/AiChatStateProvider"
 import { EntityRefHoverCard } from "../../components/EntityRefHoverCard"
-import type { PersonProfile } from "./types"
 
 const PersonTrigger = forwardRef<HTMLButtonElement, { label: string }>(
   ({ label, ...props }, ref) => (
@@ -23,20 +25,21 @@ const PersonTrigger = forwardRef<HTMLButtonElement, { label: string }>(
     </button>
   )
 )
+PersonTrigger.displayName = "PersonTrigger"
 
 /**
  * Inline person entity reference with a hover card showing profile details.
  *
  * Renders the trigger as a styled @mention. On hover, lazily fetches
- * the employee profile via `entityResolvers.person` and displays
- * avatar, name, job title, and a link to `/employees/:id`.
+ * the employee profile via `entityRefs.resolvers.person` and displays
+ * avatar, name, and job title. Optionally links via `entityRefs.urls.person`.
  */
 export function PersonEntityRef({ id, label }: { id: string; label: string }) {
-  const { entityResolvers } = useAiChat()
-  const resolver = entityResolvers?.person
+  const { entityRefs } = useAiChat()
+  const resolver = entityRefs?.resolvers?.person
   const i18n = useI18n()
 
-  const employeeUrl = `/employees/${id}`
+  const personUrl = entityRefs?.urls?.person?.(id)
 
   const mapToCard = useMemo(
     () =>
@@ -49,23 +52,27 @@ export function PersonEntityRef({ id, label }: { id: string; label: string }) {
         },
         title: `${profile.firstName} ${profile.lastName}`,
         description: profile.jobTitle,
-        secondaryActions: {
-          label: i18n.t("ai.view"),
-          href: employeeUrl,
-        },
+        ...(personUrl && {
+          secondaryActions: {
+            label: i18n.t("ai.view"),
+            href: personUrl,
+          },
+        }),
       }),
-    [i18n, employeeUrl]
+    [i18n, personUrl]
   )
 
   const fallbackCard = useMemo(
     (): F0CardProps => ({
       title: label,
-      secondaryActions: {
-        label: i18n.t("ai.view"),
-        href: employeeUrl,
-      },
+      ...(personUrl && {
+        secondaryActions: {
+          label: i18n.t("ai.view"),
+          href: personUrl,
+        },
+      }),
     }),
-    [label, i18n, employeeUrl]
+    [label, i18n, personUrl]
   )
 
   if (!resolver) {

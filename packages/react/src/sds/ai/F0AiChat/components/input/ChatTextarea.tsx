@@ -35,7 +35,7 @@ export const ChatTextarea = ({
 }: ChatTextareaProps) => {
   const {
     placeholders,
-    entityResolvers,
+    entityRefs,
     toolHints,
     activeToolHint,
     setActiveToolHint,
@@ -55,7 +55,7 @@ export const ChatTextarea = ({
     inputValue,
     setInputValue,
     cursorPosition,
-    entityResolvers,
+    searchPersons: entityRefs?.resolvers?.searchPersons,
     textareaRef,
   })
 

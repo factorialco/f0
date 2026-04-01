@@ -11,13 +11,16 @@ import {
 import type { PersonProfile } from "../types"
 
 const mockResolver = vi.fn<(id: string) => Promise<PersonProfile>>()
-let mockEntityResolvers: { person?: typeof mockResolver } = {
-  person: mockResolver,
+let mockEntityRefs: {
+  resolvers?: { person?: typeof mockResolver }
+  urls?: { person?: (id: string) => string }
+} = {
+  resolvers: { person: mockResolver },
 }
 
 vi.mock("../../../../../../providers/AiChatStateProvider", () => ({
   useAiChat: () => ({
-    entityResolvers: mockEntityResolvers,
+    entityRefs: mockEntityRefs,
   }),
 }))
 
@@ -34,7 +37,7 @@ const profile: PersonProfile = {
 describe("PersonEntityRef", () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mockEntityResolvers = { person: mockResolver }
+    mockEntityRefs = { resolvers: { person: mockResolver } }
   })
 
   it("renders the @mention trigger button", () => {
@@ -43,7 +46,7 @@ describe("PersonEntityRef", () => {
   })
 
   it("renders label as plain text when no resolver is available", () => {
-    mockEntityResolvers = {}
+    mockEntityRefs = {}
 
     const { container } = render(<PersonEntityRef id="42" label="Ana García" />)
     expect(container.querySelector("span")).toHaveTextContent("Ana García")

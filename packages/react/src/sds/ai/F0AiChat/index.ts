@@ -12,6 +12,8 @@ export type {
   CreditsUsage,
   DashboardCanvasContent,
   EntityResolvers,
+  EntityUrlBuilders,
+  EntityRefs,
   PersonProfile,
   VisualizationMode,
   WelcomeScreenSuggestion,

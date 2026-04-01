@@ -19,3 +19,25 @@ export type EntityResolvers = {
    */
   searchPersons?: (query: string) => Promise<PersonProfile[]>
 }
+
+/**
+ * Map of URL builder functions keyed by entity type.
+ * Each builder takes an entity ID and returns the URL to navigate to.
+ *
+ * When a URL builder is not provided for an entity type, the hover card
+ * will not show a navigation action.
+ */
+export type EntityUrlBuilders = {
+  person?: (id: string) => string
+  candidate?: (id: string) => string
+  jobPosting?: (id: string) => string
+}
+
+/**
+ * Grouped configuration for entity references in the AI chat.
+ * Combines resolver functions (data fetching) with URL builders (navigation).
+ */
+export type EntityRefs = {
+  resolvers?: EntityResolvers
+  urls?: EntityUrlBuilders
+}

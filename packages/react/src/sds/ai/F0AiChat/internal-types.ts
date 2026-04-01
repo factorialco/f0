@@ -7,7 +7,7 @@ import {
   type AiChatToolHint,
   type CanvasContent,
   type AiChatCredits,
-  type EntityResolvers,
+  type EntityRefs,
   type VisualizationMode,
   WelcomeScreenSuggestion,
 } from "./types"
@@ -28,7 +28,7 @@ export interface AiChatState {
   historyEnabled?: boolean
   footer?: React.ReactNode
   VoiceMode?: React.ComponentType
-  entityResolvers?: EntityResolvers
+  entityRefs?: EntityRefs
   toolHints?: AiChatToolHint[]
   credits?: AiChatCredits
   placeholders?: string[]
@@ -165,7 +165,7 @@ export type AiChatProviderReturnValue = {
   | "agent"
   | "disclaimer"
   | "resizable"
-  | "entityResolvers"
+  | "entityRefs"
   | "toolHints"
   | "credits"
 > & {

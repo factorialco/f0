@@ -241,11 +241,18 @@ const meta: Meta<typeof ApplicationFrame> = {
       enabled: true,
       resizable: true,
       greeting: "Hello, John",
-      entityResolvers: {
-        person: mockPersonResolver,
-        candidate: mockCandidateResolver,
-        jobPosting: mockJobPostingResolver,
-        searchPersons: mockSearchPersons,
+      entityRefs: {
+        resolvers: {
+          person: mockPersonResolver,
+          candidate: mockCandidateResolver,
+          jobPosting: mockJobPostingResolver,
+          searchPersons: mockSearchPersons,
+        },
+        urls: {
+          person: (id) => `/employees/${id}`,
+          candidate: (id) => `/recruitment/candidates/${id}/applications`,
+          jobPosting: (id) => `/recruitment/jobs/${id}/applications`,
+        },
       },
       toolHints: mockToolHints,
       credits: {
@@ -464,11 +471,18 @@ export const FullscreenWithActions: Story = {
       defaultVisualizationMode: "fullscreen",
       lockVisualizationMode: true,
       footer: <QuickActions />,
-      entityResolvers: {
-        person: mockPersonResolver,
-        candidate: mockCandidateResolver,
-        jobPosting: mockJobPostingResolver,
-        searchPersons: mockSearchPersons,
+      entityRefs: {
+        resolvers: {
+          person: mockPersonResolver,
+          candidate: mockCandidateResolver,
+          jobPosting: mockJobPostingResolver,
+          searchPersons: mockSearchPersons,
+        },
+        urls: {
+          person: (id) => `/employees/${id}`,
+          candidate: (id) => `/recruitment/candidates/${id}/applications`,
+          jobPosting: (id) => `/recruitment/jobs/${id}/applications`,
+        },
       },
       toolHints: mockToolHints,
       credits: {
