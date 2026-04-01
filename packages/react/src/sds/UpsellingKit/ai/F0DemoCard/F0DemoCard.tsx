@@ -25,7 +25,7 @@ export const F0DemoCard = ({
         <div
           className={cn(
             "overflow-hidden rounded-lg border border-f1-border",
-            "ring-1 ring-f1-border/50 bg-f1-background-inverse-secondary"
+            "ring-1 ring-f1-border/50 bg-f1-background-inverse-secondary dark:bg-f1-background-tertiary"
           )}
         >
           {preview}

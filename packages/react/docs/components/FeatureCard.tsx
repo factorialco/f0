@@ -1,4 +1,5 @@
 import { useState } from "react"
+
 import { F0Icon, IconType } from "../../src/components/F0Icon"
 
 export interface FeatureCardProps {
@@ -24,7 +25,7 @@ export function FeatureCard({
     >
       <a href={href} className="block h-full p-6 no-underline">
         <div className="mb-4">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-f1-background-secondary dark:bg-f1-background-secondary">
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-f1-background-secondary dark:bg-f1-background-tertiary">
             <F0Icon
               icon={icon}
               state={isHovered ? "animate" : "normal"}
