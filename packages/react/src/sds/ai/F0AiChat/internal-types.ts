@@ -3,6 +3,7 @@ import { type AIMessage, type Message } from "@copilotkit/shared"
 import {
   type AiChatDisclaimer,
   type AiChatMode,
+  type AiChatFileAttachmentConfig,
   type AiChatTrackingOptions,
   type AiChatToolHint,
   type CanvasContent,
@@ -31,6 +32,7 @@ export interface AiChatState {
   entityResolvers?: EntityResolvers
   toolHints?: AiChatToolHint[]
   credits?: AiChatCredits
+  fileAttachments?: AiChatFileAttachmentConfig
   placeholders?: string[]
   setPlaceholders?: React.Dispatch<React.SetStateAction<string[]>>
   onThumbsUp?: (
@@ -168,6 +170,7 @@ export type AiChatProviderReturnValue = {
   | "entityResolvers"
   | "toolHints"
   | "credits"
+  | "fileAttachments"
 > & {
     /** The current canvas content, or null when canvas is closed */
     canvasContent: CanvasContent | null

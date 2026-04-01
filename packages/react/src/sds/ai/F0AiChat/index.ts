@@ -5,6 +5,7 @@ export { F0AiChat, F0AiChatProvider, F0AiFullscreenChat } from "./F0AiChat"
 export type {
   AiChatCredits,
   AiChatMode,
+  AiChatFileAttachmentConfig,
   AiChatProviderProps,
   AiChatToolHint,
   CanvasContent,
@@ -13,6 +14,7 @@ export type {
   DashboardCanvasContent,
   EntityResolvers,
   PersonProfile,
+  UploadedFile,
   VisualizationMode,
   WelcomeScreenSuggestion,
   AiChatTranslations,

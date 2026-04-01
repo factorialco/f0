@@ -18,7 +18,11 @@ import Marketplace from "@/icons/app/Marketplace"
 import People from "@/icons/app/People"
 import Table from "@/icons/app/Table"
 import { useAiChat } from "@/sds/ai/F0AiChat"
-import { type AiChatToolHint, PersonProfile } from "@/sds/ai/F0AiChat/types"
+import {
+  type AiChatToolHint,
+  type PersonProfile,
+  type UploadedFile,
+} from "@/sds/ai/F0AiChat/types"
 import { Action } from "@/ui/Action"
 
 import { ApplicationFrame } from "./index"
@@ -138,6 +142,23 @@ const mockFetchCreditsUsage = () =>
     setTimeout(() => resolve({ used: 750, total: 1000 }), 500)
   })
 
+/**
+ * Mock file upload handler for Storybook.
+ * Simulates a 1-second upload and returns metadata with a fake URL.
+ */
+const mockUploadFiles = (files: File[]): Promise<UploadedFile[]> =>
+  new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(
+        files.map((f) => ({
+          url: `https://example.com/uploads/${f.name}`,
+          filename: f.name,
+          mimetype: f.type,
+        }))
+      )
+    }, 1000)
+  })
+
 const meta: Meta<typeof ApplicationFrame> = {
   title: "ApplicationFrame",
   component: ApplicationFrame,
@@ -166,6 +187,9 @@ const meta: Meta<typeof ApplicationFrame> = {
         companyName: "Factorial",
         companyLogoUrl: "/avatars/factorial.png",
         planName: "Free plan",
+      },
+      fileAttachments: {
+        onUploadFiles: mockUploadFiles,
       },
       disclaimer: {
         text: "One works within your permissions.",
@@ -387,6 +411,9 @@ export const FullscreenWithActions: Story = {
         companyName: "Factorial",
         companyLogoUrl: "/avatars/factorial.png",
         planName: "Free plan",
+      },
+      fileAttachments: {
+        onUploadFiles: mockUploadFiles,
       },
       disclaimer: {
         text: "One works within your permissions.",
