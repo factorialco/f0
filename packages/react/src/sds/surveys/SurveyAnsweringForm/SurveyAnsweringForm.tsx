@@ -48,6 +48,7 @@ export function SurveyAnsweringForm({
   labels,
   preview = false,
   useUpload,
+  datasets,
 }: SurveyAnsweringFormProps) {
   const { t } = useI18n()
   const initialIsFullscreen = positionProp === "fullscreen"
@@ -95,7 +96,8 @@ export function SurveyAnsweringForm({
     isStepped ? accumulatedValuesRef.current : undefined,
     preview,
     isReadonlyPreview,
-    useUpload
+    useUpload,
+    datasets
   )
 
   const position: DialogPosition = isFullscreen
@@ -280,7 +282,12 @@ export function SurveyAnsweringForm({
       otherActions={otherActions}
       disableContentPadding={disableContentPadding}
     >
-      <SurveyFormBuilderProvider answering elements={elements} onChange={noop}>
+      <SurveyFormBuilderProvider
+        answering
+        elements={elements}
+        onChange={noop}
+        datasets={datasets}
+      >
         <div
           className={cn(
             "relative flex min-h-full flex-col @container",

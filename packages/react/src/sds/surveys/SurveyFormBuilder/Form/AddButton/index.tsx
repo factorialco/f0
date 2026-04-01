@@ -8,15 +8,17 @@ import { useSurveyFormBuilderContext } from "../../Context"
 import { QuestionType } from "../../types"
 
 export const AddButton = () => {
-  const { disabled, answering, onAddNewElement } = useSurveyFormBuilderContext()
+  const { disabled, answering, onAddNewElement, datasets } =
+    useSurveyFormBuilderContext()
 
   const questionTypes = useQuestionTypes()
 
   const { t } = useI18n()
 
-  const handleAddNewQuestion = (type: QuestionType) => {
+  const handleAddNewQuestion = (type: QuestionType, datasetKey?: string) => {
     onAddNewElement?.({
       type,
+      datasetKey,
     })
   }
 
@@ -35,10 +37,27 @@ export const AddButton = () => {
     {
       type: "separator" as const,
     },
-    ...questionTypes.map((questionType) => ({
-      ...questionType,
-      onClick: () => handleAddNewQuestion(questionType.questionType),
-    })),
+    ...questionTypes
+      .filter((questionType) => !questionType.datasetKey)
+      .map((questionType) => ({
+        ...questionType,
+        onClick: () => handleAddNewQuestion(questionType.questionType),
+      })),
+    ...(datasets && Object.keys(datasets).length
+      ? [
+          { type: "separator" as const },
+          ...questionTypes
+            .filter((questionType) => !!questionType.datasetKey)
+            .map((questionType) => ({
+              ...questionType,
+              onClick: () =>
+                handleAddNewQuestion(
+                  "dropdown-single",
+                  questionType.datasetKey
+                ),
+            })),
+        ]
+      : []),
   ]
 
   if (disabled || answering) return null

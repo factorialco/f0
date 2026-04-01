@@ -21,6 +21,7 @@ import {
   QuestionElement,
   QuestionType,
   SectionElement,
+  SurveyDatasets,
 } from "./types"
 
 type SurveyFormBuilderContextType = SurveyFormBuilderCallbacks & {
@@ -38,6 +39,7 @@ type SurveyFormBuilderContextType = SurveyFormBuilderCallbacks & {
   errors?: Record<string, string>
   onFieldBlur?: (questionId: string) => void
   useUpload?: UseFileUpload
+  datasets?: SurveyDatasets
 }
 
 const SurveyFormBuilderContext = createContext<
@@ -55,6 +57,7 @@ type SurveyFormBuilderProviderProps = {
   errors?: Record<string, string>
   onFieldBlur?: (questionId: string) => void
   useUpload?: UseFileUpload
+  datasets?: SurveyDatasets
 }
 
 export function SurveyFormBuilderProvider({
@@ -68,6 +71,7 @@ export function SurveyFormBuilderProvider({
   errors,
   onFieldBlur,
   useUpload,
+  datasets,
 }: SurveyFormBuilderProviderProps) {
   const elementsRef = useRef(elements)
   elementsRef.current = elements
@@ -224,7 +228,13 @@ export function SurveyFormBuilderProvider({
   const handleAddNewElement: NonNullable<
     SurveyFormBuilderCallbacks["onAddNewElement"]
   > = useCallback(
-    ({ type, afterId }) => {
+    ({ type, afterId, datasetKey }) => {
+      if (
+        (type === "dropdown-single" || type === "dropdown-multi") &&
+        !datasetKey
+      ) {
+        throw new Error(`${type} questions require a datasetKey`)
+      }
       const newElementId = getNewElementId(
         type === "section" ? "section" : "question"
       )
@@ -262,6 +272,7 @@ export function SurveyFormBuilderProvider({
                 type,
                 required: true,
                 ...getDefaultParamsForQuestionType(type),
+                ...(datasetKey ? { datasetKey } : {}),
               } as QuestionElement,
             }
 
@@ -430,6 +441,7 @@ export function SurveyFormBuilderProvider({
       errors,
       onFieldBlur,
       useUpload,
+      datasets,
     }),
     [
       handleQuestionChange,
@@ -448,6 +460,7 @@ export function SurveyFormBuilderProvider({
       errors,
       onFieldBlur,
       useUpload,
+      datasets,
     ]
   )
 

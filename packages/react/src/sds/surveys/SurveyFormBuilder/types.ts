@@ -1,8 +1,12 @@
 import type { UseFileUpload } from "@/components/F0Form/fields/file/types"
+import type { IconType } from "@/components/F0Icon/F0Icon"
+import type { F0SelectItemProps } from "@/components/F0Select/types"
+import type { DataSourceDefinition, RecordType } from "@/hooks/datasource"
 
 import type { CheckboxQuestionProps } from "./QuestionTypes/CheckboxQuestion"
 import type { DateQuestionProps } from "./QuestionTypes/DateQuestion"
 import type { DropdownSingleQuestionProps } from "./QuestionTypes/DropdownSingleQuestion/types"
+import type { DropdownMultiQuestionProps } from "./QuestionTypes/DropdownMultiQuestion/types"
 import type { FileQuestionProps } from "./QuestionTypes/FileQuestion"
 import type { LinkQuestionProps } from "./QuestionTypes/LinkQuestion"
 import type { NumericQuestionProps } from "./QuestionTypes/NumericQuestion"
@@ -16,6 +20,7 @@ export type QuestionType =
   | "select"
   | "multi-select"
   | "dropdown-single"
+  | "dropdown-multi"
   | "text"
   | "longText"
   | "numeric"
@@ -46,6 +51,10 @@ export type QuestionElement =
     >
   | Omit<
       DropdownSingleQuestionProps & { type: "dropdown-single" },
+      QuestionPropsToOmit
+    >
+  | Omit<
+      DropdownMultiQuestionProps & { type: "dropdown-multi" },
       QuestionPropsToOmit
     >
   | Omit<NumericQuestionProps & { type: "numeric" }, QuestionPropsToOmit>
@@ -80,6 +89,15 @@ export type SelectQuestionOption = {
   correct?: boolean
 }
 
+export type SurveyDataset = {
+  title: string
+  icon?: IconType
+  dataSource: DataSourceDefinition
+  mapOptions: (item: RecordType) => F0SelectItemProps<string, RecordType>
+}
+
+export type SurveyDatasets = Record<string, SurveyDataset>
+
 type OnChangeQuestionParams = BaseQuestionOnChangeParams &
   (
     | {
@@ -104,7 +122,14 @@ type OnChangeQuestionParams = BaseQuestionOnChangeParams &
     | {
         type: "dropdown-single"
         value?: string | null
-        options?: SelectQuestionOption[]
+        datasetKey?: string
+        showSearchBox?: boolean
+        searchBoxPlaceholder?: string
+      }
+    | {
+        type: "dropdown-multi"
+        value?: string[] | null
+        datasetKey?: string
         showSearchBox?: boolean
         searchBoxPlaceholder?: string
       }
@@ -140,6 +165,7 @@ export type QuestionActionParams = {
 export type OnAddNewElementParams = {
   type: ElementType
   afterId?: string
+  datasetKey?: string
 }
 
 export type OnDuplicateElementParams = {
@@ -162,4 +188,5 @@ export type SurveyFormBuilderProps = {
   allowedQuestionTypes?: QuestionType[]
   applyingChanges?: boolean
   useUpload?: UseFileUpload
+  datasets?: SurveyDatasets
 }

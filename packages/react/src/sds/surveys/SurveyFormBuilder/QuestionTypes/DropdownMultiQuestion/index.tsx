@@ -6,24 +6,22 @@ import { useI18n } from "@/lib/providers/i18n"
 
 import { useSurveyFormBuilderContext } from "../../Context"
 import { BaseQuestion, useQuestionDisabled } from "../BaseQuestion"
-import { DropdownSingleQuestionProps } from "./types"
+import { DropdownMultiQuestionProps } from "./types"
 
-export const DropdownSingleQuestion = ({
+export const DropdownMultiQuestion = ({
   datasetKey,
   showSearchBox: showSearchBoxProp,
   searchBoxPlaceholder,
   ...props
-}: DropdownSingleQuestionProps) => {
+}: DropdownMultiQuestionProps) => {
   const { onQuestionChange, answering, datasets } =
     useSurveyFormBuilderContext()
-
   const disabled = useQuestionDisabled(props)
-
   const { t } = useI18n()
 
   const dataset = datasets?.[datasetKey]
   if (!dataset) {
-    throw new Error(`Dataset "${datasetKey}" not found for dropdown-single`)
+    throw new Error(`Dataset "${datasetKey}" not found for dropdown-multi`)
   }
 
   const showSearchBox = showSearchBoxProp ?? true
@@ -36,7 +34,7 @@ export const DropdownSingleQuestion = ({
     source: dataset.dataSource,
     mapOptions: dataset.mapOptions,
     clearable: !props.required,
-    multiple: false,
+    multiple: true,
     showSearchBox,
     searchBoxPlaceholder,
   }
@@ -47,12 +45,12 @@ export const DropdownSingleQuestion = ({
         {answering ? (
           <F0FormField
             field={field}
-            value={props.value ?? ""}
+            value={props.value ?? []}
             onChange={(value) => {
               onQuestionChange?.({
                 id: props.id,
-                type: "dropdown-single",
-                value: value as string,
+                type: "dropdown-multi",
+                value: value as string[],
               })
             }}
             disabled={disabled}

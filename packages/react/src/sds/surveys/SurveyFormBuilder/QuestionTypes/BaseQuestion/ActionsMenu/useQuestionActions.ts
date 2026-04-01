@@ -61,6 +61,13 @@ export function shouldResetParamsOnTypeChange(
     return false
   }
 
+  if (
+    (newType === "dropdown-single" || newType === "dropdown-multi") &&
+    (currentType === "dropdown-single" || currentType === "dropdown-multi")
+  ) {
+    return false
+  }
+
   return true
 }
 
@@ -102,6 +109,30 @@ export function useQuestionActionsFactory() {
       canDelete: boolean
     ): QuestionActions => {
       const question = getQuestionById(questionId)
+      const hasDatasetKey =
+        !!question &&
+        "datasetKey" in question &&
+        typeof question.datasetKey === "string"
+      const filteredQuestionTypes = hasDatasetKey
+        ? (() => {
+            const datasetOption = questionTypes.find(
+              (item) =>
+                item.questionType === "dropdown-single" &&
+                item.datasetKey === question?.datasetKey
+            )
+            if (!datasetOption) {
+              return []
+            }
+            return [
+              datasetOption,
+              {
+                ...datasetOption,
+                questionType: "dropdown-multi" as const,
+                label: `${datasetOption.label} (multiple)`,
+              },
+            ]
+          })()
+        : questionTypes.filter((item) => !item.datasetKey)
       const currentRatingType = getCurrentRatingType(questionType, question)
 
       const handleChangeRequired = (checked: boolean) => {
@@ -115,6 +146,9 @@ export function useQuestionActionsFactory() {
       }
 
       const handleSelectQuestionType = (newType: QuestionType) => {
+        const shouldKeepDatasetKey =
+          hasDatasetKey &&
+          (newType === "dropdown-single" || newType === "dropdown-multi")
         const resetParams = shouldResetParamsOnTypeChange(
           newType,
           questionType,
@@ -123,6 +157,7 @@ export function useQuestionActionsFactory() {
         onQuestionChange?.({
           id: questionId,
           type: newType,
+          ...(shouldKeepDatasetKey ? { datasetKey: question?.datasetKey } : {}),
           ...(resetParams && {
             ...getDefaultParamsForQuestionType(newType),
           }),
@@ -152,7 +187,7 @@ export function useQuestionActionsFactory() {
 
       return {
         question,
-        questionTypes,
+        questionTypes: filteredQuestionTypes,
         currentRatingType,
         disallowOptionalQuestions,
         canDelete,
