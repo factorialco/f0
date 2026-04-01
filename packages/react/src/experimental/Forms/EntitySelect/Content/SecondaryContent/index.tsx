@@ -1,16 +1,16 @@
-import { useMemo, useRef, useState } from "react"
-import { useResizeObserver } from "usehooks-ts"
+import { useMemo } from "react";
 
-import { VirtualList } from "../../../../Navigation/VirtualList"
-import { ListTag } from "../../ListTag"
+import { VirtualList } from "../../../../Navigation/VirtualList";
+import { ListTag } from "../../ListTag";
+import { useMeasuredHeight } from "../../hooks/useMeasuredHeight";
 import {
   EntityId,
   EntitySelectEntity,
   EntitySelectSubEntity,
   FlattenedItem,
-} from "../../types"
+} from "../../types";
 
-const DEFAULT_LIST_HEIGHT = 425
+const DEFAULT_LIST_HEIGHT = 425;
 
 export const SecondaryContent = ({
   groupView,
@@ -21,26 +21,19 @@ export const SecondaryContent = ({
   disabled = false,
   hiddenAvatar = false,
 }: {
-  groupView: boolean
-  onRemove: (entity: EntitySelectEntity) => void
+  groupView: boolean;
+  onRemove: (entity: EntitySelectEntity) => void;
   onSubItemRemove: (
     parentEntity: EntitySelectEntity,
-    entity: EntitySelectSubEntity
-  ) => void
-  selectedEntities: EntitySelectEntity[]
-  selectedLabel?: string
-  disabled?: boolean
-  hiddenAvatar?: boolean
+    entity: EntitySelectSubEntity,
+  ) => void;
+  selectedEntities: EntitySelectEntity[];
+  selectedLabel?: string;
+  disabled?: boolean;
+  hiddenAvatar?: boolean;
 }) => {
-  const listContainerRef = useRef<HTMLDivElement>(null)
-  const [listHeight, setListHeight] = useState(DEFAULT_LIST_HEIGHT)
-
-  useResizeObserver({
-    ref: listContainerRef,
-    onResize: ({ height }) => {
-      if (height) setListHeight(height)
-    },
-  })
+  const { ref: listContainerRef, height: listHeight } =
+    useMeasuredHeight(DEFAULT_LIST_HEIGHT);
 
   const flattenedList = useMemo<FlattenedItem[]>(() => {
     const rawFlattened = !groupView
@@ -57,21 +50,21 @@ export const SecondaryContent = ({
           (entity.subItems ?? []).map((subItem) => ({
             parent: entity,
             subItem,
-          }))
-        )
+          })),
+        );
 
-    const seenIds = new Set<EntityId>()
+    const seenIds = new Set<EntityId>();
     return rawFlattened.filter((item) => {
-      const key = item.subItem.subId
+      const key = item.subItem.subId;
       if (seenIds.has(key)) {
-        return false
+        return false;
       }
-      seenIds.add(key)
-      return true
-    })
-  }, [groupView, selectedEntities])
+      seenIds.add(key);
+      return true;
+    });
+  }, [groupView, selectedEntities]);
 
-  const totalSelectedSubItems = flattenedList.length
+  const totalSelectedSubItems = flattenedList.length;
 
   return (
     <div className="flex h-full w-full flex-col rounded-r-xl">
@@ -92,9 +85,9 @@ export const SecondaryContent = ({
           itemSize={30}
           className="overflow-x-hidden"
           renderer={(vi) => {
-            const current = flattenedList[vi.index]
+            const current = flattenedList[vi.index];
             if (!current) {
-              return <></>
+              return <></>;
             }
             return (
               <ListTag
@@ -112,10 +105,10 @@ export const SecondaryContent = ({
                       })
                 }
               />
-            )
+            );
           }}
         />
       </div>
     </div>
-  )
-}
+  );
+};

@@ -1,67 +1,68 @@
-import { VirtualItem } from "@tanstack/react-virtual"
-import React, { useCallback, useMemo, useState } from "react"
-import { useResizeObserver } from "usehooks-ts"
+import { VirtualItem } from "@tanstack/react-virtual";
+import React, { useCallback, useMemo } from "react";
 
-import { F0Select } from "@/components/F0Select"
+import { F0Select } from "@/components/F0Select";
 
-import { Action } from "../../../../../components/F0Select/components/SelectBottomActions"
-import { cn } from "../../../../../lib/utils"
-import { Spinner } from "@/ui/Spinner"
-import { VirtualList } from "../../../../Navigation/VirtualList"
-import { CreateItem } from "../../CreateItem"
-import { EntitySelectListItem } from "../../ListItem"
+import { useMeasuredHeight } from "../../hooks/useMeasuredHeight";
+
+import { Action } from "../../../../../components/F0Select/components/SelectBottomActions";
+import { cn } from "../../../../../lib/utils";
+import { Spinner } from "@/ui/Spinner";
+import { VirtualList } from "../../../../Navigation/VirtualList";
+import { CreateItem } from "../../CreateItem";
+import { EntitySelectListItem } from "../../ListItem";
 import {
   EntityId,
   EntitySelectEntity,
   EntitySelectNamedGroup,
   EntitySelectSubEntity,
   FlattenedItem,
-} from "../../types"
-import { Footer } from "./Footer"
-import { Searcher } from "./Searcher"
+} from "../../types";
+import { Footer } from "./Footer";
+import { Searcher } from "./Searcher";
 
-const VIRTUAL_LIST_HEIGHT = 384
-const ITEM_SIZE_DEFAULT = 36
-const ITEM_SIZE_PARENT = 37
-const SCROLL_TIMEOUT_SHORT = 1
-const FOCUS_TIMEOUT = 200
-const FOCUSABLE_SELECTOR = '[data-avatarname-navigator-element="true"]'
+const VIRTUAL_LIST_HEIGHT = 384;
+const ITEM_SIZE_DEFAULT = 36;
+const ITEM_SIZE_PARENT = 37;
+const SCROLL_TIMEOUT_SHORT = 1;
+const FOCUS_TIMEOUT = 200;
+const FOCUSABLE_SELECTOR = '[data-avatarname-navigator-element="true"]';
 
 interface MainContentProps {
-  groupView: boolean
-  entities: EntitySelectEntity[]
-  groups: EntitySelectNamedGroup[]
-  selectedGroup: string
-  search: string
-  onSelect: (entity: EntitySelectEntity) => void
-  onRemove: (entity: EntitySelectEntity) => void
+  groupView: boolean;
+  entities: EntitySelectEntity[];
+  groups: EntitySelectNamedGroup[];
+  selectedGroup: string;
+  search: string;
+  onSelect: (entity: EntitySelectEntity) => void;
+  onRemove: (entity: EntitySelectEntity) => void;
   onSubItemRemove: (
     parentEntity: EntitySelectEntity,
-    entity: EntitySelectSubEntity
-  ) => void
+    entity: EntitySelectSubEntity,
+  ) => void;
   onSubItemSelect: (
     parentEntity: EntitySelectEntity,
-    entity: EntitySelectSubEntity
-  ) => void
-  onClear: () => void
-  onSelectAll: () => void
-  onSearch: (search: string) => void
-  selectedEntities?: EntitySelectEntity[]
-  onGroupChange: (key: string | null) => void
-  onToggleExpand: (entity: EntitySelectEntity, expanded: boolean) => void
-  notFoundTitle: string
-  notFoundSubtitle: string
-  className?: string
-  searchPlaceholder?: string
-  selectAllLabel?: string
-  clearLabel?: string
-  singleSelector?: boolean
-  loading?: boolean
-  disabled?: boolean
-  hiddenAvatar?: boolean
-  actions?: Action[]
-  onCreate?: (partialName: string) => void
-  onCreateLabel?: string
+    entity: EntitySelectSubEntity,
+  ) => void;
+  onClear: () => void;
+  onSelectAll: () => void;
+  onSearch: (search: string) => void;
+  selectedEntities?: EntitySelectEntity[];
+  onGroupChange: (key: string | null) => void;
+  onToggleExpand: (entity: EntitySelectEntity, expanded: boolean) => void;
+  notFoundTitle: string;
+  notFoundSubtitle: string;
+  className?: string;
+  searchPlaceholder?: string;
+  selectAllLabel?: string;
+  clearLabel?: string;
+  singleSelector?: boolean;
+  loading?: boolean;
+  disabled?: boolean;
+  hiddenAvatar?: boolean;
+  actions?: Action[];
+  onCreate?: (partialName: string) => void;
+  onCreateLabel?: string;
 }
 
 export const MainContent: React.FC<MainContentProps> = ({
@@ -94,82 +95,75 @@ export const MainContent: React.FC<MainContentProps> = ({
   disabled = false,
   hiddenAvatar = false,
 }) => {
-  const ref = React.useRef<HTMLDivElement | null>(null)
-  const sectionRef = React.useRef<HTMLDivElement>(null)
-  const [listHeight, setListHeight] = useState(VIRTUAL_LIST_HEIGHT)
-
-  useResizeObserver({
-    ref: sectionRef,
-    onResize: ({ height }) => {
-      if (height) setListHeight(height)
-    },
-  })
+  const ref = React.useRef<HTMLDivElement | null>(null);
+  const { ref: sectionRef, height: listHeight } =
+    useMeasuredHeight(VIRTUAL_LIST_HEIGHT);
 
   const totalFilteredEntities = useMemo(
     () =>
       groupView
         ? entities.reduce(
             (acc, entity) => acc + (entity.subItems?.length ?? 0),
-            0
+            0,
           )
         : entities.length,
-    [entities, groupView]
-  )
+    [entities, groupView],
+  );
 
   const goToFirst = useCallback(() => {
     setTimeout(() => {
-      ref.current?.scrollTo({ top: 0 })
-    }, SCROLL_TIMEOUT_SHORT)
+      ref.current?.scrollTo({ top: 0 });
+    }, SCROLL_TIMEOUT_SHORT);
     setTimeout(() => {
       const allFocusable = Array.from(
-        document.querySelectorAll(FOCUSABLE_SELECTOR)
-      ) as HTMLElement[]
-      allFocusable[0]?.focus()
-    }, FOCUS_TIMEOUT)
-  }, [])
+        document.querySelectorAll(FOCUSABLE_SELECTOR),
+      ) as HTMLElement[];
+      allFocusable[0]?.focus();
+    }, FOCUS_TIMEOUT);
+  }, []);
 
   const goToLast = useCallback(() => {
     setTimeout(() => {
-      ref.current?.scrollTo({ top: ref.current?.scrollHeight })
-    }, SCROLL_TIMEOUT_SHORT)
+      ref.current?.scrollTo({ top: ref.current?.scrollHeight });
+    }, SCROLL_TIMEOUT_SHORT);
     setTimeout(() => {
       const allFocusable = Array.from(
-        document.querySelectorAll(FOCUSABLE_SELECTOR)
-      ) as HTMLElement[]
-      allFocusable[allFocusable.length - 1]?.focus()
-    }, FOCUS_TIMEOUT)
-  }, [])
+        document.querySelectorAll(FOCUSABLE_SELECTOR),
+      ) as HTMLElement[];
+      allFocusable[allFocusable.length - 1]?.focus();
+    }, FOCUS_TIMEOUT);
+  }, []);
 
   const selectedEntitiesMap = useMemo(
     () => new Map(selectedEntities.map((entity) => [entity.id, entity])),
-    [selectedEntities]
-  )
+    [selectedEntities],
+  );
 
   const getSelectionState = useCallback(
     (entity: EntitySelectEntity) => {
-      const selectedEntity = selectedEntitiesMap.get(entity.id)
+      const selectedEntity = selectedEntitiesMap.get(entity.id);
 
       if (!groupView) {
         return {
           selected: !!selectedEntity,
           partialSelected: !!selectedEntity,
-        }
+        };
       }
 
       const selectedSubItems = (entity.subItems ?? []).filter((subItem) =>
         selectedEntity?.subItems?.some(
-          (selectedSubItem) => selectedSubItem.subId === subItem.subId
-        )
-      )
+          (selectedSubItem) => selectedSubItem.subId === subItem.subId,
+        ),
+      );
 
       const selected =
-        (entity.subItems?.length ?? 0) === selectedSubItems.length
-      const partialSelected = !selected && selectedSubItems.length > 0
+        (entity.subItems?.length ?? 0) === selectedSubItems.length;
+      const partialSelected = !selected && selectedSubItems.length > 0;
 
-      return { selected, partialSelected }
+      return { selected, partialSelected };
     },
-    [groupView, selectedEntitiesMap]
-  )
+    [groupView, selectedEntitiesMap],
+  );
 
   const itemRenderer = useCallback(
     (vi: VirtualItem) => {
@@ -181,12 +175,12 @@ export const MainContent: React.FC<MainContentProps> = ({
             goToFirst={goToFirst}
             goToLast={goToLast}
           />
-        )
+        );
       }
 
-      const index = onCreate ? vi.index - 1 : vi.index
-      const entity = entities[index]
-      const { selected, partialSelected } = getSelectionState(entity)
+      const index = onCreate ? vi.index - 1 : vi.index;
+      const entity = entities[index];
+      const { selected, partialSelected } = getSelectionState(entity);
 
       return (
         <EntitySelectListItem
@@ -207,7 +201,7 @@ export const MainContent: React.FC<MainContentProps> = ({
           disabled={disabled}
           hiddenAvatar={hiddenAvatar}
         />
-      )
+      );
     },
     [
       onCreate,
@@ -226,8 +220,8 @@ export const MainContent: React.FC<MainContentProps> = ({
       search,
       selectedGroup,
       singleSelector,
-    ]
-  )
+    ],
+  );
 
   const flattenedList = useMemo<FlattenedItem[]>(() => {
     return !groupView
@@ -244,8 +238,8 @@ export const MainContent: React.FC<MainContentProps> = ({
           .flatMap((entity) => {
             const foundSelected = findSelectedEntity(
               selectedEntities ?? [],
-              entity.id
-            )
+              entity.id,
+            );
             return [
               {
                 parent: null,
@@ -265,15 +259,15 @@ export const MainContent: React.FC<MainContentProps> = ({
                 },
                 subItem,
               })),
-            ]
+            ];
           })
           .filter(
             (el) =>
               (!el.parent || el.parent.expanded) &&
               (!!el.parent ||
-                (!!el.subItem.subItems && el.subItem.subItems.length > 0))
-          )
-  }, [groupView, entities, selectedEntities])
+                (!!el.subItem.subItems && el.subItem.subItems.length > 0)),
+          );
+  }, [groupView, entities, selectedEntities]);
 
   const itemFlattenedRenderer = useCallback(
     (vi: VirtualItem) => {
@@ -285,12 +279,12 @@ export const MainContent: React.FC<MainContentProps> = ({
             goToFirst={goToFirst}
             goToLast={goToLast}
           />
-        )
+        );
       }
 
-      const index = onCreate ? vi.index - 1 : vi.index
-      const parent = flattenedList[index].parent
-      const subItem = flattenedList[index].subItem
+      const index = onCreate ? vi.index - 1 : vi.index;
+      const parent = flattenedList[index].parent;
+      const subItem = flattenedList[index].subItem;
       if (!parent) {
         const recoveredEntity: EntitySelectEntity = {
           id: subItem.subId,
@@ -299,20 +293,20 @@ export const MainContent: React.FC<MainContentProps> = ({
           subItems: subItem.subItems,
           expanded: subItem.expanded,
           searchKeys: subItem.subSearchKeys,
-        }
+        };
         const selectedEntity = findSelectedEntity(
           selectedEntities,
-          recoveredEntity.id
-        )
+          recoveredEntity.id,
+        );
         const selectedSubItems = (recoveredEntity?.subItems ?? []).filter(
           (subItem) =>
             selectedEntity?.subItems?.some(
-              (selectedSubItem) => selectedSubItem.subId === subItem.subId
-            )
-        )
+              (selectedSubItem) => selectedSubItem.subId === subItem.subId,
+            ),
+        );
         const selected =
-          (recoveredEntity.subItems?.length ?? 0) === selectedSubItems.length
-        const partialSelected = !selected && selectedSubItems.length > 0
+          (recoveredEntity.subItems?.length ?? 0) === selectedSubItems.length;
+        const partialSelected = !selected && selectedSubItems.length > 0;
 
         return (
           <EntitySelectListItem
@@ -336,21 +330,21 @@ export const MainContent: React.FC<MainContentProps> = ({
             disabled={disabled}
             hiddenAvatar={hiddenAvatar}
           />
-        )
+        );
       }
 
-      let selected = !!findSelectedEntity(selectedEntities, subItem.subId)
+      let selected = !!findSelectedEntity(selectedEntities, subItem.subId);
       if (!selected) {
         const selectedParentEntity = findSelectedEntity(
           selectedEntities,
-          parent.id
-        )
+          parent.id,
+        );
         const selectedSubItems = (parent?.subItems ?? []).filter((subItem) =>
           selectedParentEntity?.subItems?.some(
-            (selectedSubItem) => selectedSubItem.subId === subItem.subId
-          )
-        )
-        selected = !!selectedSubItems.find((el) => el.subId === subItem.subId)
+            (selectedSubItem) => selectedSubItem.subId === subItem.subId,
+          ),
+        );
+        selected = !!selectedSubItems.find((el) => el.subId === subItem.subId);
       }
 
       return (
@@ -366,7 +360,7 @@ export const MainContent: React.FC<MainContentProps> = ({
             searchKeys: subItem.subSearchKeys,
           }}
           onSelect={() => {
-            onSubItemSelect(parent, subItem)
+            onSubItemSelect(parent, subItem);
           }}
           onRemove={() => onSubItemRemove(parent, subItem)}
           selected={!!selected}
@@ -377,7 +371,7 @@ export const MainContent: React.FC<MainContentProps> = ({
           isChild
           hiddenAvatar={hiddenAvatar}
         />
-      )
+      );
     },
     [
       flattenedList,
@@ -397,67 +391,67 @@ export const MainContent: React.FC<MainContentProps> = ({
       hiddenAvatar,
       onCreate,
       onCreateLabel,
-    ]
-  )
+    ],
+  );
 
   const [allVisibleSelected, anyVisibleSelected] = useMemo(() => {
     if (!entities.length) {
-      return [false, false]
+      return [false, false];
     }
 
-    let visibleCount = 0
-    let selectedVisibleCount = 0
+    let visibleCount = 0;
+    let selectedVisibleCount = 0;
 
     if (!groupView) {
-      visibleCount = entities.length
+      visibleCount = entities.length;
       selectedVisibleCount = entities.reduce(
         (acc, { id }) => acc + (selectedEntitiesMap.has(id) ? 1 : 0),
-        0
-      )
+        0,
+      );
     } else {
       const selectedSubIds = new Set(
         [...selectedEntitiesMap.values()].flatMap(
           (selParent) =>
-            selParent.subItems?.map((selectedSub) => selectedSub.subId) ?? []
-        )
-      )
+            selParent.subItems?.map((selectedSub) => selectedSub.subId) ?? [],
+        ),
+      );
 
       entities.forEach((fe) => {
-        const subItems = fe.subItems ?? []
-        visibleCount += subItems.length
+        const subItems = fe.subItems ?? [];
+        visibleCount += subItems.length;
         selectedVisibleCount += subItems.filter((sub) =>
-          selectedSubIds.has(sub.subId)
-        ).length
-      })
+          selectedSubIds.has(sub.subId),
+        ).length;
+      });
     }
 
     const allSelected =
-      visibleCount > 0 && selectedVisibleCount === visibleCount
-    const anySelected = selectedVisibleCount > 0
+      visibleCount > 0 && selectedVisibleCount === visibleCount;
+    const anySelected = selectedVisibleCount > 0;
 
-    return [allSelected, anySelected]
-  }, [entities, selectedEntitiesMap, groupView])
+    return [allSelected, anySelected];
+  }, [entities, selectedEntitiesMap, groupView]);
 
-  const totalFlattenedItems = flattenedList.length
+  const totalFlattenedItems = flattenedList.length;
 
   const anySelectOrClearAction =
-    !singleSelector && (selectAllLabel || clearLabel)
-  const anyAction = actions && actions.length > 0
+    !singleSelector && (selectAllLabel || clearLabel);
+  const anyAction = actions && actions.length > 0;
   const showFooter =
-    !loading && ((!singleSelector && anySelectOrClearAction) || anyAction)
+    !loading && ((!singleSelector && anySelectOrClearAction) || anyAction);
 
   return (
     <div
       className={cn(
         "flex h-full w-full flex-col rounded-l-xl border-0",
         singleSelector || loading ? "rounded-r-xl" : "",
-        className
+        className,
       )}
     >
       <header
         className={cn(
           "flex h-[48px] justify-between gap-2 rounded-tl-xl border-0 border-b-[1px] border-r-[1px] border-solid border-f1-border-secondary bg-f1-background/30 p-2 backdrop-blur-2xl",
-          singleSelector || loading ? "rounded-t-xl border-r-0" : ""
+          singleSelector || loading ? "rounded-t-xl border-r-0" : "",
         )}
       >
         <div className="flex-1">
@@ -480,7 +474,7 @@ export const MainContent: React.FC<MainContentProps> = ({
               value={selectedGroup}
               className={cn(
                 "h-8 rounded-[10px] bg-transparent py-[5px]",
-                selectedGroup === "all" ? "text-f1-foreground-secondary" : ""
+                selectedGroup === "all" ? "text-f1-foreground-secondary" : "",
               )}
             />
           </div>
@@ -490,7 +484,7 @@ export const MainContent: React.FC<MainContentProps> = ({
         ref={sectionRef}
         className={cn(
           "flex min-h-0 flex-1 flex-col justify-start gap-1 border-0 border-r-[1px] border-solid border-f1-border-secondary bg-f1-background",
-          !showFooter ? "rounded-b-xl border-r-0" : ""
+          !showFooter ? "rounded-b-xl border-r-0" : "",
         )}
       >
         {loading && (
@@ -526,11 +520,11 @@ export const MainContent: React.FC<MainContentProps> = ({
                 height={listHeight}
                 itemCount={totalFlattenedItems + (onCreate ? 1 : 0)}
                 itemSize={(index) => {
-                  if (index === 0 && onCreate) return ITEM_SIZE_DEFAULT
-                  const adjustedIndex = onCreate ? index - 1 : index
+                  if (index === 0 && onCreate) return ITEM_SIZE_DEFAULT;
+                  const adjustedIndex = onCreate ? index - 1 : index;
                   return flattenedList[adjustedIndex]?.parent === null
                     ? ITEM_SIZE_PARENT
-                    : ITEM_SIZE_DEFAULT
+                    : ITEM_SIZE_DEFAULT;
                 }}
                 renderer={itemFlattenedRenderer}
                 ref={ref}
@@ -552,16 +546,16 @@ export const MainContent: React.FC<MainContentProps> = ({
         actions={actions}
       />
     </div>
-  )
-}
+  );
+};
 
 const findSelectedEntity = (entities: EntitySelectEntity[], id: EntityId) => {
-  return entities.find((el) => el.id === id)
-}
+  return entities.find((el) => el.id === id);
+};
 
 const isTeamGroup = (
   groups: EntitySelectNamedGroup[],
-  selectedGroup: string
+  selectedGroup: string,
 ) => {
-  return groups.find((el) => el.value === selectedGroup)?.groupType === "team"
-}
+  return groups.find((el) => el.value === selectedGroup)?.groupType === "team";
+};

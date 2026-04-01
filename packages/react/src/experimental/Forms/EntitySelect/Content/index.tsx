@@ -1,15 +1,15 @@
-import { Action } from "../../../../components/F0Select/components/SelectBottomActions"
+import { Action } from "../../../../components/F0Select/components/SelectBottomActions";
 import {
   EntitySelectEntity,
   EntitySelectNamedGroup,
   EntitySelectSubEntity,
-} from "../types"
-import { MainContent } from "./MainContent"
-import { SecondaryContent } from "./SecondaryContent"
+} from "../types";
+import { MainContent } from "./MainContent";
+import { SecondaryContent } from "./SecondaryContent";
 
-const breakpointToShowEmployeeList = 500
-const totalDefaultWidth = 520
-const asideWidth = 210
+const breakpointToShowEmployeeList = 500;
+const totalDefaultWidth = 520;
+const asideWidth = 210;
 
 export const Content = ({
   groupView,
@@ -26,77 +26,61 @@ export const Content = ({
   onCreateLabel,
   ...props
 }: {
-  groupView: boolean
-  entities: EntitySelectEntity[]
-  groups: EntitySelectNamedGroup[]
-  selectedGroup: string
-  search: string
-  onSelect: (entity: EntitySelectEntity) => void
-  onRemove: (entity: EntitySelectEntity) => void
+  groupView: boolean;
+  entities: EntitySelectEntity[];
+  groups: EntitySelectNamedGroup[];
+  selectedGroup: string;
+  search: string;
+  onSelect: (entity: EntitySelectEntity) => void;
+  onRemove: (entity: EntitySelectEntity) => void;
   onSubItemRemove: (
     parentEntity: EntitySelectEntity,
-    entity: EntitySelectSubEntity
-  ) => void
+    entity: EntitySelectSubEntity,
+  ) => void;
   onSubItemSelect: (
     parentEntity: EntitySelectEntity,
-    entity: EntitySelectSubEntity
-  ) => void
-  onClear: () => void
-  onSelectAll: () => void
-  onSearch: (search: string) => void
-  selectedEntities: EntitySelectEntity[]
-  onGroupChange: (key: string | null) => void
-  onToggleExpand: (entity: EntitySelectEntity, expanded: boolean) => void
-  notFoundTitle: string
-  notFoundSubtitle: string
-  width?: number
-  searchPlaceholder?: string
-  selectAllLabel?: string
-  clearLabel?: string
-  selectedLabel?: string
-  singleSelector?: boolean
-  loading?: boolean
-  disabled?: boolean
-  hiddenAvatar?: boolean
-  actions?: Action[]
-  onCreate?: (partialName: string) => void
-  onCreateLabel?: string
+    entity: EntitySelectSubEntity,
+  ) => void;
+  onClear: () => void;
+  onSelectAll: () => void;
+  onSearch: (search: string) => void;
+  selectedEntities: EntitySelectEntity[];
+  onGroupChange: (key: string | null) => void;
+  onToggleExpand: (entity: EntitySelectEntity, expanded: boolean) => void;
+  notFoundTitle: string;
+  notFoundSubtitle: string;
+  width?: number;
+  searchPlaceholder?: string;
+  selectAllLabel?: string;
+  clearLabel?: string;
+  selectedLabel?: string;
+  singleSelector?: boolean;
+  loading?: boolean;
+  disabled?: boolean;
+  hiddenAvatar?: boolean;
+  actions?: Action[];
+  onCreate?: (partialName: string) => void;
+  onCreateLabel?: string;
 }) => {
   const blockSecondaryContent =
-    (width ?? totalDefaultWidth) < breakpointToShowEmployeeList
-  const isExpanded = !loading && !singleSelector && !blockSecondaryContent
-  const defaultWidth = width ?? totalDefaultWidth
-  const finalWidthMain = isExpanded ? defaultWidth - asideWidth : defaultWidth
+    (width ?? totalDefaultWidth) < breakpointToShowEmployeeList;
+  const isExpanded = !loading && !singleSelector && !blockSecondaryContent;
+  const defaultWidth = width ?? totalDefaultWidth;
+  const finalWidthMain = isExpanded ? defaultWidth - asideWidth : defaultWidth;
+
+  const maxHeight =
+    singleSelector && (!actions || actions.length === 0) ? 435 : 473;
 
   return (
     <div
-      className="relative overflow-hidden"
+      className="flex overflow-hidden"
       style={{
-        height:
-          singleSelector && (!actions || actions.length === 0)
-            ? "435px"
-            : "473px",
+        maxHeight: maxHeight + "px",
         width: defaultWidth,
       }}
     >
       <div
-        className="absolute right-0 top-0 h-full"
-        style={{
-          width: asideWidth + "px",
-        }}
-      >
-        <SecondaryContent
-          groupView={groupView}
-          onRemove={onRemove}
-          onSubItemRemove={onSubItemRemove}
-          selectedEntities={selectedEntities ?? []}
-          selectedLabel={selectedLabel}
-          disabled={props.disabled}
-          hiddenAvatar={hiddenAvatar}
-        />
-      </div>
-      <div
-        className="absolute left-0 h-full"
+        className="min-h-0 flex-1"
         style={{ width: finalWidthMain + 1 + "px" }}
       >
         <MainContent
@@ -114,6 +98,24 @@ export const Content = ({
           onCreateLabel={onCreateLabel}
         />
       </div>
+      {isExpanded && (
+        <div
+          className="min-h-0"
+          style={{
+            width: asideWidth + "px",
+          }}
+        >
+          <SecondaryContent
+            groupView={groupView}
+            onRemove={onRemove}
+            onSubItemRemove={onSubItemRemove}
+            selectedEntities={selectedEntities ?? []}
+            selectedLabel={selectedLabel}
+            disabled={props.disabled}
+            hiddenAvatar={hiddenAvatar}
+          />
+        </div>
+      )}
     </div>
-  )
-}
+  );
+};
