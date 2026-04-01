@@ -98,11 +98,13 @@ export type NestedRowProps = {
   expanded?: boolean
   hasLoadedChildren?: boolean
   isLastChild?: boolean
+  isLastSibling?: boolean
   nestedVariant?: NestedVariant
   parentHasChildren?: boolean
   onExpand?: () => void
   onLoadMoreChildren?: () => void
   onAddRow?: OnAddRowConfig
+  stickyRow?: boolean
 }
 
 const referenceTypeClasses: Record<ReferenceType, string> = {
@@ -226,6 +228,7 @@ const RowComponentInner = <
     <TableRow
       ref={ref}
       key={key}
+      sticky={nestedRowProps?.stickyRow}
       className={cn(
         "group transition-colors hover:bg-f1-background-hover",
         "after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-px after:w-full after:bg-f1-border-secondary after:content-['']",

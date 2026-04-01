@@ -90,12 +90,22 @@ export const connectorVariables = (
   }
 }
 
-export const verticalConnectorStyles =
+export const childVerticalConnectorStyles =
   "h-full overflow-visible " +
   "before:absolute " +
-  "before:-left-[var(--line-left)] " +
-  "before:top-[var(--starting-y)] " +
-  "before:h-[var(--line-height)] " +
+  "before:left-[var(--horizontal-left)] " +
+  "before:top-0 " +
+  "before:bottom-0 " +
+  "before:w-[var(--line-width)] " +
+  "before:bg-f1-foreground-disabled " +
+  "before:content-['']"
+
+export const childVerticalConnectorLastStyles =
+  "h-full overflow-visible " +
+  "before:absolute " +
+  "before:left-[var(--horizontal-left)] " +
+  "before:top-0 " +
+  "before:h-[var(--horizontal-offset)] " +
   "before:w-[var(--line-width)] " +
   "before:bg-f1-foreground-disabled " +
   "before:content-['']"
@@ -131,6 +141,8 @@ export const TreeConnector = ({
   const detailedWithActionRow =
     typeDetailed &&
     (nestedRowProps?.onLoadMoreChildren || nestedRowProps?.onAddRow)
+  const isLastChild = nestedRowProps?.isLastChild ?? false
+  const isLastSibling = nestedRowProps?.isLastSibling ?? isLastChild
 
   const marginLeft = firstCellWithDepth
     ? getNestedMarginLeft({
@@ -153,8 +165,10 @@ export const TreeConnector = ({
       className={cn(
         "absolute inset-0 h-full",
         nestedRowProps?.parentHasChildren &&
-          firstCellExpanded &&
-          verticalConnectorStyles,
+          firstCellWithDepth &&
+          (isLastSibling
+            ? childVerticalConnectorLastStyles
+            : childVerticalConnectorStyles),
         nestedRowProps?.parentHasChildren &&
           firstCellWithDepth &&
           basicOrWithChildren &&

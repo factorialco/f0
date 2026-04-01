@@ -393,6 +393,61 @@ export const EditableTableWithNestedRecords: Story = {
   },
 }
 
+export const EditableTableWithStickyNestedRecords: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Editable table with sticky parent rows. When a parent row is expanded, it sticks to the top of the scroll container while scrolling through its children. Uses fullHeight inside a constrained container to simulate the real app layout where the table lives inside a height-constrained panel. Expand a parent row and scroll to see the sticky behavior.",
+      },
+    },
+  },
+  decorators: [
+    (Story) => (
+      <div className="flex h-[500px] w-full overflow-auto">
+        <Story />
+      </div>
+    ),
+  ],
+  render: () => {
+    const mockVisualizations = getMockVisualizations({
+      table: {
+        noSorting: true,
+        nestedRecords: true,
+        applyLongText: false,
+      },
+    })
+
+    const onCellChange = async (updatedItem: MockUser) => {
+      action("onCellChange")(updatedItem)
+    }
+
+    return (
+      <ExampleComponent
+        noSorting
+        storage={false}
+        fullHeight
+        visualizations={[
+          {
+            type: "editableTable" as const,
+            options: {
+              ...(
+                mockVisualizations.editableTable as Extract<
+                  typeof mockVisualizations.editableTable,
+                  { type: "editableTable" }
+                >
+              ).options,
+              onCellChange,
+            },
+          },
+        ]}
+        id="editable-table-sticky-nested/v1"
+        nestedRecords
+      />
+    )
+  },
+}
+
 export const EditableTableWithNestedRecordsDetailed: Story = {
   parameters: {
     docs: {
