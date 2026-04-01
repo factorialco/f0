@@ -21,6 +21,8 @@ export function useAxisLabelTooltip(
     if (!chart || !container) return
 
     let overlay: HTMLDivElement | null = null
+    // Save the prior inline position so we can restore it on cleanup
+    const prevContainerPosition = container.style.position
 
     function getOverlay(): HTMLDivElement {
       if (overlay) return overlay
@@ -47,7 +49,10 @@ export function useAxisLabelTooltip(
         "overflow: hidden",
         "text-overflow: ellipsis",
       ].join("; ")
-      container!.style.position = "relative"
+      // Only set positioning context if the container doesn't already have one
+      if (!container!.style.position) {
+        container!.style.position = "relative"
+      }
       container!.appendChild(overlay)
       return overlay
     }
@@ -103,6 +108,8 @@ export function useAxisLabelTooltip(
       if (overlay && container.contains(overlay)) {
         container.removeChild(overlay)
       }
+      // Restore the container's original position value
+      container.style.position = prevContainerPosition
     }
   }, [chartRef, containerRef, theme])
 }

@@ -26,6 +26,10 @@ const _CategoryBarChart = (
 ) => {
   const total = data.reduce((sum, category) => sum + category.value, 0)
 
+  if (total <= 0) {
+    return null
+  }
+
   return (
     <TooltipProvider>
       <div className="w-full" ref={ref}>

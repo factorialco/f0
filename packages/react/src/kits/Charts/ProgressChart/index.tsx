@@ -19,7 +19,10 @@ const _ProgressBar = <K extends ChartConfig>(
   _ref: ForwardedRef<HTMLDivElement>
 ) => {
   const barColor = color ? getColor(color) : getColor("categorical-1")
-  const percentage = (value / max) * 100
+  // Guard against max <= 0 and clamp to [0, 100] so Progress never gets
+  // a non-finite or out-of-range value
+  const safeMax = max > 0 ? max : 1
+  const percentage = Math.min(100, Math.max(0, (value / safeMax) * 100))
 
   return (
     <div className="flex items-center space-x-2" aria-live="polite">

@@ -17,6 +17,8 @@ export function useLegendInteraction(
 ) {
   // Track the previous selected state so we know what changed
   const prevSelectedRef = useRef<Record<string, boolean> | null>(null)
+  // Guard against re-entrant handler calls caused by our own dispatchAction calls
+  const isProgrammaticRef = useRef(false)
 
   useEffect(() => {
     const chart = chartRef.current
@@ -26,6 +28,9 @@ export function useLegendInteraction(
       name: string
       selected: Record<string, boolean>
     }) {
+      // Ignore events that we ourselves triggered via dispatchAction
+      if (isProgrammaticRef.current) return
+
       const clickedName = params.name as string
       // `selected` contains the state AFTER ECharts' default toggle
       const echartsSelected = params.selected as Record<string, boolean>
@@ -47,11 +52,16 @@ export function useLegendInteraction(
           next[name] = name === clickedName
         }
         prevSelectedRef.current = next
-        chart!.dispatchAction({ type: "legendSelect", name: clickedName })
-        for (const name of allNames) {
-          if (name !== clickedName) {
-            chart!.dispatchAction({ type: "legendUnSelect", name })
+        isProgrammaticRef.current = true
+        try {
+          chart!.dispatchAction({ type: "legendSelect", name: clickedName })
+          for (const name of allNames) {
+            if (name !== clickedName) {
+              chart!.dispatchAction({ type: "legendUnSelect", name })
+            }
           }
+        } finally {
+          isProgrammaticRef.current = false
         }
         return
       }
@@ -61,9 +71,16 @@ export function useLegendInteraction(
         const next: Record<string, boolean> = {}
         for (const name of allNames) {
           next[name] = true
-          chart!.dispatchAction({ type: "legendSelect", name })
         }
         prevSelectedRef.current = next
+        isProgrammaticRef.current = true
+        try {
+          for (const name of allNames) {
+            chart!.dispatchAction({ type: "legendSelect", name })
+          }
+        } finally {
+          isProgrammaticRef.current = false
+        }
         return
       }
 

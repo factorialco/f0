@@ -38,9 +38,9 @@ export const _PieChart = (
       : getCategoricalColor(index),
   }))
   const values = data.map((item) => item.value)
-  const sum = values.reduce((acc, value) => {
-    return acc + value
-  })
+  const sum = values.reduce((acc, value) => acc + value, 0)
+  // Use a safe denominator to avoid division by zero in percentage labels
+  const safeSum = sum === 0 ? 1 : sum
 
   if (sum === 0) {
     preparedData.push({
@@ -83,7 +83,7 @@ export const _PieChart = (
               <Cell
                 key={`cell-${index}`}
                 fill={entry.fill}
-                aria-label={`${entry.label}: ${value} (${((entry.value / sum) * 100).toFixed(0)}%)`}
+                aria-label={`${entry.label}: ${value} (${((entry.value / safeSum) * 100).toFixed(0)}%)`}
               />
             )
           })}
