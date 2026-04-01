@@ -147,7 +147,7 @@ const sampleElements: SurveyFormBuilderElement[] = [
         {
           id: "q-career-goal",
           title: "What is your primary career goal for next year?",
-          type: "dropdown-single" as const,
+          type: "select" as const,
           options: [
             { value: "promotion", label: "Get promoted" },
             { value: "lateral-move", label: "Lateral move to new team" },
