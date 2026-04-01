@@ -395,9 +395,12 @@ function buildFieldForQuestion(
         id: q.id,
         type: "select",
         label,
-        placeholder: t("surveyFormBuilder.answer.dropdownPlaceholder"),
+        placeholder:
+          dataset.placeholder ??
+          t("surveyFormBuilder.answer.dropdownPlaceholder"),
         source: dataset.dataSource,
         mapOptions: dataset.mapOptions,
+        icon: dataset.icon,
         clearable: !q.required,
         multiple: false,
         disabled: disableFields,
@@ -436,9 +439,12 @@ function buildFieldForQuestion(
         id: q.id,
         type: "select",
         label,
-        placeholder: t("surveyFormBuilder.answer.dropdownPlaceholder"),
+        placeholder:
+          dataset.placeholder ??
+          t("surveyFormBuilder.answer.dropdownPlaceholder"),
         source: dataset.dataSource,
         mapOptions: dataset.mapOptions,
+        icon: dataset.icon,
         clearable: !q.required,
         multiple: true,
         disabled: disableFields,

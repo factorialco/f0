@@ -443,6 +443,7 @@ export const defaultTranslations = {
       questionDescriptionPlaceholder: "Describe the question in a few words",
       sectionDescriptionPlaceholder: "Describe the section in a few words",
       required: "Required",
+      allowMultiSelection: "Allow multi-selection",
       questionType: "Question type",
       questionOptions: "Question options",
       actions: "Actions",

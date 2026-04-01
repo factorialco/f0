@@ -6,6 +6,7 @@ import { Switch } from "@/experimental/Forms/Fields/Switch"
 import {
   AlertCircleLine,
   Check,
+  CheckDouble,
   Delete,
   Ellipsis,
   Hub,
@@ -65,6 +66,7 @@ const ToggleItem = ({
 const QuestionTypeMenuItem = ({
   label,
   value,
+  currentDatasetKey,
   questionTypes,
   currentRatingType,
   onSelectQuestionType,
@@ -72,14 +74,29 @@ const QuestionTypeMenuItem = ({
 }: {
   label: string
   value: QuestionType
-  questionTypes: { label: string; questionType: QuestionType; icon: IconType }[]
+  currentDatasetKey?: string
+  questionTypes: {
+    label: string
+    questionType: QuestionType
+    icon: IconType
+    datasetKey?: string
+  }[]
   currentRatingType: RatingOptionType | null
-  onSelectQuestionType: (type: QuestionType) => void
+  onSelectQuestionType: (type: QuestionType, datasetKey?: string) => void
   onSelectRatingType: (type: RatingOptionType) => void
 }) => {
-  const selectedOptionLabel = questionTypes.find(
-    (option) => option.questionType === value
-  )?.label
+  const regularTypes = questionTypes.filter((item) => !item.datasetKey)
+  const datasetTypes = questionTypes.filter((item) => !!item.datasetKey)
+
+  const selectedOptionLabel = currentDatasetKey
+    ? (questionTypes.find(
+        (option) =>
+          option.questionType === value &&
+          option.datasetKey === currentDatasetKey
+      )?.label ?? undefined)
+    : (questionTypes.find(
+        (option) => option.questionType === value && !option.datasetKey
+      )?.label ?? undefined)
 
   return (
     <DropdownMenuSub>
@@ -96,9 +113,10 @@ const QuestionTypeMenuItem = ({
       </DropdownMenuSubTrigger>
       <DropdownMenuPortal>
         <DropdownMenuSubContent>
-          {questionTypes.map((questionType) => {
+          {regularTypes.map((questionType) => {
             const isRating = questionType.questionType === "rating"
-            const isSelected = value === questionType.questionType
+            const isSelected =
+              value === questionType.questionType && !currentDatasetKey
 
             if (isRating) {
               return (
@@ -152,6 +170,33 @@ const QuestionTypeMenuItem = ({
               </DropdownMenuItem>
             )
           })}
+          {datasetTypes.length > 0 && (
+            <>
+              <DropdownMenuSeparator />
+              {datasetTypes.map((datasetType) => {
+                const isSelected =
+                  value === datasetType.questionType &&
+                  currentDatasetKey === datasetType.datasetKey
+                return (
+                  <DropdownMenuItem
+                    key={`${datasetType.questionType}-${datasetType.datasetKey}`}
+                    onClick={() =>
+                      onSelectQuestionType(
+                        datasetType.questionType,
+                        datasetType.datasetKey
+                      )
+                    }
+                  >
+                    <div className="flex w-full flex-row items-center gap-2">
+                      <F0Icon icon={datasetType.icon} color="default" />
+                      <span className="flex-1">{datasetType.label}</span>
+                      {isSelected && <F0Icon icon={Check} color="default" />}
+                    </div>
+                  </DropdownMenuItem>
+                )
+              })}
+            </>
+          )}
         </DropdownMenuSubContent>
       </DropdownMenuPortal>
     </DropdownMenuSub>
@@ -201,10 +246,13 @@ export function ActionsMenu({
     question,
     questionTypes,
     currentRatingType,
+    currentDatasetKey,
+    isMultiSelectEnabled,
     disallowOptionalQuestions,
     handleChangeRequired,
     handleSelectQuestionType,
     handleSelectRatingType,
+    handleToggleMultiSelect,
     handleDuplicate,
     handleDelete,
   } = useQuestionActions({
@@ -239,10 +287,21 @@ export function ActionsMenu({
             />
           </DropdownMenuGroup>
         )}
+        {!!currentDatasetKey && (
+          <DropdownMenuGroup>
+            <ToggleItem
+              label={t("surveyFormBuilder.labels.allowMultiSelection")}
+              icon={CheckDouble}
+              checked={isMultiSelectEnabled}
+              onChange={handleToggleMultiSelect}
+            />
+          </DropdownMenuGroup>
+        )}
         <DropdownMenuGroup>
           <QuestionTypeMenuItem
             label={t("surveyFormBuilder.labels.questionType")}
             value={questionType}
+            currentDatasetKey={currentDatasetKey}
             questionTypes={questionTypes}
             currentRatingType={currentRatingType}
             onSelectQuestionType={handleSelectQuestionType}

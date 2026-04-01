@@ -77,11 +77,14 @@ export type QuestionActions = {
   >
   questionTypes: ReturnType<typeof useQuestionTypes>
   currentRatingType: RatingOptionType | null
+  currentDatasetKey: string | undefined
+  isMultiSelectEnabled: boolean
   disallowOptionalQuestions: boolean | undefined
   canDelete: boolean
   handleChangeRequired: (checked: boolean) => void
-  handleSelectQuestionType: (type: QuestionType) => void
+  handleSelectQuestionType: (type: QuestionType, datasetKey?: string) => void
   handleSelectRatingType: (type: RatingOptionType) => void
+  handleToggleMultiSelect: (enabled: boolean) => void
   handleDuplicate: () => void
   handleDelete: () => void
 }
@@ -113,26 +116,11 @@ export function useQuestionActionsFactory() {
         !!question &&
         "datasetKey" in question &&
         typeof question.datasetKey === "string"
-      const filteredQuestionTypes = hasDatasetKey
-        ? (() => {
-            const datasetOption = questionTypes.find(
-              (item) =>
-                item.questionType === "dropdown-single" &&
-                item.datasetKey === question?.datasetKey
-            )
-            if (!datasetOption) {
-              return []
-            }
-            return [
-              datasetOption,
-              {
-                ...datasetOption,
-                questionType: "dropdown-multi" as const,
-                label: `${datasetOption.label} (multiple)`,
-              },
-            ]
-          })()
-        : questionTypes.filter((item) => !item.datasetKey)
+      const currentDatasetKey = hasDatasetKey
+        ? (question as { datasetKey: string }).datasetKey
+        : undefined
+      const isMultiSelectEnabled =
+        questionType === "dropdown-multi" && hasDatasetKey
       const currentRatingType = getCurrentRatingType(questionType, question)
 
       const handleChangeRequired = (checked: boolean) => {
@@ -145,19 +133,32 @@ export function useQuestionActionsFactory() {
         >[0])
       }
 
-      const handleSelectQuestionType = (newType: QuestionType) => {
-        const shouldKeepDatasetKey =
-          hasDatasetKey &&
-          (newType === "dropdown-single" || newType === "dropdown-multi")
+      const handleToggleMultiSelect = (enabled: boolean) => {
+        const newType = enabled ? "dropdown-multi" : "dropdown-single"
+        onQuestionChange?.({
+          id: questionId,
+          type: newType,
+          datasetKey: currentDatasetKey,
+        } as Parameters<
+          NonNullable<SurveyFormBuilderCallbacks["onQuestionChange"]>
+        >[0])
+      }
+
+      const handleSelectQuestionType = (
+        newType: QuestionType,
+        newDatasetKey?: string
+      ) => {
         const resetParams = shouldResetParamsOnTypeChange(
           newType,
           questionType,
           question as { options?: unknown } | undefined
         )
+        const isDropdown =
+          newType === "dropdown-single" || newType === "dropdown-multi"
         onQuestionChange?.({
           id: questionId,
           type: newType,
-          ...(shouldKeepDatasetKey ? { datasetKey: question?.datasetKey } : {}),
+          ...(isDropdown ? { datasetKey: newDatasetKey } : {}),
           ...(resetParams && {
             ...getDefaultParamsForQuestionType(newType),
           }),
@@ -187,13 +188,16 @@ export function useQuestionActionsFactory() {
 
       return {
         question,
-        questionTypes: filteredQuestionTypes,
+        questionTypes,
         currentRatingType,
+        currentDatasetKey,
+        isMultiSelectEnabled,
         disallowOptionalQuestions,
         canDelete,
         handleChangeRequired,
         handleSelectQuestionType,
         handleSelectRatingType,
+        handleToggleMultiSelect,
         handleDuplicate,
         handleDelete,
       }

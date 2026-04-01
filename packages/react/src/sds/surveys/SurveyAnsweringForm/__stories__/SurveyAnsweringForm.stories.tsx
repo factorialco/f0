@@ -10,16 +10,11 @@ import type {
 } from "@/components/F0Form/fields/file/types"
 
 import { F0Button } from "@/components/F0Button"
-import { Check } from "@/icons/app"
-import { createDataSourceDefinition } from "@/hooks/datasource"
-import type { RecordType } from "@/hooks/datasource"
 
 import type { SurveyAnsweringFormProps } from "../types"
 
-import {
-  SurveyDatasets,
-  SurveyFormBuilderElement,
-} from "../../SurveyFormBuilder/types"
+import { SurveyFormBuilderElement } from "../../SurveyFormBuilder/types"
+import { mockDatasets } from "../../__stories__/mocks"
 import { SurveyAnsweringForm } from "../SurveyAnsweringForm"
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
@@ -114,13 +109,8 @@ const sampleElements: SurveyFormBuilderElement[] = [
           id: "q-department",
           title: "Which department are you in?",
           description: "Select the department you currently belong to",
-          type: "select" as const,
-          options: [
-            { value: "engineering", label: "Engineering" },
-            { value: "design", label: "Design" },
-            { value: "product", label: "Product" },
-            { value: "marketing", label: "Marketing" },
-          ],
+          type: "dropdown-single" as const,
+          datasetKey: "teams",
           required: true,
         },
         {
@@ -158,21 +148,18 @@ const sampleElements: SurveyFormBuilderElement[] = [
           id: "q-career-goal",
           title: "What is your primary career goal for next year?",
           type: "dropdown-single" as const,
-          datasetKey: "employees",
+          options: [
+            { value: "promotion", label: "Get promoted" },
+            { value: "lateral-move", label: "Lateral move to new team" },
+            { value: "specialise", label: "Deepen specialisation" },
+            { value: "management", label: "Move into management" },
+          ],
           required: true,
         },
         {
           id: "q-collaborators",
           title: "Who did you collaborate with recently?",
           type: "dropdown-multi" as const,
-          datasetKey: "employees",
-          required: true,
-        },
-        {
-          id: "q-department",
-          title: "Which department are you in?",
-          description: "Select your current department from the list",
-          type: "dropdown-single" as const,
           datasetKey: "employees",
           required: true,
         },
@@ -201,46 +188,6 @@ const sampleElements: SurveyFormBuilderElement[] = [
     },
   },
 ]
-
-const EMPLOYEE_TOTAL = 1000
-const EMPLOYEE_RECORDS = Array.from({ length: EMPLOYEE_TOTAL }, (_, index) => ({
-  id: String(index + 1),
-  name: `Employee ${String(index + 1).padStart(4, "0")}`,
-}))
-
-const mockDatasets: SurveyDatasets = {
-  employees: {
-    title: "Employee dataset",
-    icon: Check,
-    dataSource: createDataSourceDefinition({
-      dataAdapter: {
-        paginationType: "infinite-scroll",
-        fetchData: ({ search, pagination }) => {
-          const filteredRecords = EMPLOYEE_RECORDS.filter((item) =>
-            search
-              ? item.name.toLowerCase().includes(search.toLowerCase())
-              : true
-          )
-          const perPage = pagination.perPage ?? 50
-          const cursor = "cursor" in pagination ? Number(pagination.cursor) : 0
-          const nextCursor = cursor + perPage
-          return Promise.resolve({
-            type: "infinite-scroll" as const,
-            cursor: String(nextCursor),
-            perPage,
-            hasMore: nextCursor < filteredRecords.length,
-            records: filteredRecords.slice(cursor, nextCursor),
-            total: filteredRecords.length,
-          })
-        },
-      },
-    }) as SurveyDatasets[string]["dataSource"],
-    mapOptions: (item: RecordType) => ({
-      value: String(item.id),
-      label: String(item.name),
-    }),
-  },
-}
 
 const quizElements: SurveyFormBuilderElement[] = [
   {
@@ -440,7 +387,7 @@ export const WithDefaultValues: Story = {
     defaultValues: {
       "q-name": { type: "text", value: "Jane Doe" },
       "q-perf-rating": { type: "rating", value: 4 },
-      "q-department": { type: "select", value: "engineering" },
+      "q-department": { type: "dropdown-single", value: "engineering" },
     },
   },
 }
@@ -489,7 +436,7 @@ export const PreviewWithDefaultValues: Story = {
     defaultValues: {
       "q-name": { type: "text", value: "Jane Doe" },
       "q-perf-rating": { type: "rating", value: 4 },
-      "q-department": { type: "select", value: "engineering" },
+      "q-department": { type: "dropdown-single", value: "engineering" },
     },
   },
 }

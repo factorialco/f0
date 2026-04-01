@@ -37,6 +37,7 @@ export const BaseQuestion = ({
     answering,
     getIsSingleQuestionInSection,
     getSectionContainingQuestion,
+    datasets,
   } = useSurveyFormBuilderContext()
 
   const containingSection = getSectionContainingQuestion(id)
@@ -74,10 +75,11 @@ export const BaseQuestion = ({
     >[0])
   }
 
-  const handleAddNewQuestion = (type: QuestionType) => {
+  const handleAddNewQuestion = (type: QuestionType, datasetKey?: string) => {
     onAddNewElement?.({
       type,
       afterId: id,
+      datasetKey,
     })
   }
 
@@ -103,10 +105,27 @@ export const BaseQuestion = ({
           },
         ]
       : []),
-    ...questionTypes.map((questionType) => ({
-      ...questionType,
-      onClick: () => handleAddNewQuestion(questionType.questionType),
-    })),
+    ...questionTypes
+      .filter((qt) => !qt.datasetKey)
+      .map((questionType) => ({
+        ...questionType,
+        onClick: () => handleAddNewQuestion(questionType.questionType),
+      })),
+    ...(datasets && Object.keys(datasets).length
+      ? [
+          { type: "separator" as const },
+          ...questionTypes
+            .filter((qt) => !!qt.datasetKey)
+            .map((questionType) => ({
+              ...questionType,
+              onClick: () =>
+                handleAddNewQuestion(
+                  "dropdown-single",
+                  questionType.datasetKey
+                ),
+            })),
+        ]
+      : []),
   ]
 
   const isSingleQuestionInSection = getIsSingleQuestionInSection(id)

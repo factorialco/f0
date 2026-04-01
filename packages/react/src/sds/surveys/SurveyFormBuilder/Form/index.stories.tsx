@@ -2,53 +2,11 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { useState } from "react"
 
-import { Check } from "@/icons/app"
-import { createDataSourceDefinition } from "@/hooks/datasource"
-import type { RecordType } from "@/hooks/datasource"
 import { withSkipA11y } from "@/lib/storybook-utils/parameters"
 
 import { SurveyFormBuilder } from "."
-import { SurveyDatasets, SurveyFormBuilderElement } from "../types"
-
-const EMPLOYEE_TOTAL = 1000
-const EMPLOYEE_RECORDS = Array.from({ length: EMPLOYEE_TOTAL }, (_, index) => ({
-  id: String(index + 1),
-  name: `Employee ${String(index + 1).padStart(4, "0")}`,
-}))
-
-const mockDatasets: SurveyDatasets = {
-  employees: {
-    title: "Employee dataset",
-    icon: Check,
-    dataSource: createDataSourceDefinition({
-      dataAdapter: {
-        paginationType: "infinite-scroll",
-        fetchData: ({ search, pagination }) => {
-          const filteredRecords = EMPLOYEE_RECORDS.filter((item) =>
-            search
-              ? item.name.toLowerCase().includes(search.toLowerCase())
-              : true
-          )
-          const perPage = pagination.perPage ?? 50
-          const cursor = "cursor" in pagination ? Number(pagination.cursor) : 0
-          const nextCursor = cursor + perPage
-          return Promise.resolve({
-            type: "infinite-scroll" as const,
-            cursor: String(nextCursor),
-            perPage,
-            hasMore: nextCursor < filteredRecords.length,
-            records: filteredRecords.slice(cursor, nextCursor),
-            total: filteredRecords.length,
-          })
-        },
-      },
-    }) as SurveyDatasets[string]["dataSource"],
-    mapOptions: (item: RecordType) => ({
-      value: String(item.id),
-      label: String(item.name),
-    }),
-  },
-}
+import { SurveyFormBuilderElement } from "../types"
+import { mockDatasets } from "../../__stories__/mocks"
 
 const meta: Meta<typeof SurveyFormBuilder> = {
   title: "Surveys/SurveyFormBuilder",
@@ -161,6 +119,7 @@ export const WithQuestionWithDuplicateOptions: Story = {
 
 export const WithMultipleSections: Story = {
   args: {
+    datasets: mockDatasets,
     elements: [
       {
         type: "question",

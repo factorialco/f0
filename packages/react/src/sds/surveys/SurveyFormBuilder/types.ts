@@ -92,6 +92,7 @@ export type SelectQuestionOption = {
 export type SurveyDataset = {
   title: string
   icon?: IconType
+  placeholder?: string
   dataSource: DataSourceDefinition
   mapOptions: (item: RecordType) => F0SelectItemProps<string, RecordType>
 }
