@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.430.0](https://github.com/factorialco/f0/compare/f0-react-v1.429.0...f0-react-v1.430.0) (2026-04-01)
+
+
+### Features
+
+* wip add sentinel-based sticky parent rows for nested table hierarchies ([#3685](https://github.com/factorialco/f0/issues/3685)) ([4375423](https://github.com/factorialco/f0/commit/437542350c6f5a4e27cb6a74e16f26b771301e9f))
+
 ## [1.429.0](https://github.com/factorialco/f0/compare/f0-react-v1.428.2...f0-react-v1.429.0) (2026-04-01)
 
 
