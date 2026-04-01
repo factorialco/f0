@@ -4,7 +4,7 @@ import { WidgetDecorator } from "../../storybook-utils"
 import { SummariesWidget } from "../index"
 
 const meta = {
-  title: "Widgets/Charts/SummariesWidget",
+  title: "Widget/Charts/SummariesWidget",
   component: SummariesWidget,
   parameters: {
     layout: "centered",

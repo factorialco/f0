@@ -4,7 +4,7 @@ import { WidgetDecorator } from "../../storybook-utils"
 import { RadialProgressWidget } from "../index"
 
 const meta = {
-  title: "Widgets/Charts/RadialProgressWidget",
+  title: "Widget/Charts/RadialProgressWidget",
   component: RadialProgressWidget,
   parameters: {
     layout: "centered",
