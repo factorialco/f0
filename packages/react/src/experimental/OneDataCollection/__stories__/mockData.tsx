@@ -1316,6 +1316,7 @@ export const ExampleComponent = ({
   tmpFullWidth,
   nestedRecords = false,
   nestedRecordsType = "basic",
+  csvExport,
 }: {
   useObservable?: boolean
   usePresets?: boolean
@@ -1371,6 +1372,7 @@ export const ExampleComponent = ({
   tmpFullWidth?: boolean
   nestedRecords?: boolean
   nestedRecordsType?: "basic" | "detailed" | "mixed"
+  csvExport?: boolean | { filename?: string }
 }) => {
   // Create a cache instance to simulate Apollo cache behavior
   const cache = useMemo(() => {
@@ -1526,6 +1528,7 @@ export const ExampleComponent = ({
         storage={storage}
         fullHeight={fullHeight}
         source={dataSource}
+        csvExport={csvExport}
         onStateChange={(state) => {
           console.log("State changed", "->", state)
           onStateChange?.(state)

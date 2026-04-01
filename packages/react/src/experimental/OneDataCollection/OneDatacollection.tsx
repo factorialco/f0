@@ -49,6 +49,7 @@ import { useDataCollectionStorage } from "./hooks/useDataColectionStorage/useDat
 import { DataCollectionSource } from "./hooks/useDataCollectionSource"
 import { usePerVisualizationFilters } from "./hooks/usePerVisualizationFilters"
 import { CustomEmptyStates, useEmptyState } from "./hooks/useEmptyState"
+import { useExportAction } from "./hooks/useExportAction"
 import { ItemActionsDefinition } from "./item-actions"
 import { NavigationFiltersDefinition } from "./navigationFilters/types"
 import { Settings } from "./Settings"
@@ -144,6 +145,13 @@ export type OneDataCollectionProps<
    * @deprecated removes the horizontal padding from the data collection
    */
   tmpFullWidth?: boolean
+
+  /** Enable CSV export action in the collection actions menu.
+   * - `true` enables export with default settings
+   * - An object allows customizing the export filename
+   * - `false` or `undefined` disables the export action (default)
+   */
+  csvExport?: boolean | { filename?: string }
 }
 
 const OneDataCollectionComp = <
@@ -165,6 +173,7 @@ const OneDataCollectionComp = <
   storage,
   id,
   tmpFullWidth,
+  csvExport,
 }: OneDataCollectionProps<
   R,
   Filters,
@@ -265,6 +274,21 @@ const OneDataCollectionComp = <
     [secondaryActions]
   )
 
+  // Export action - only available when csvExport is enabled
+  const csvExportFilename =
+    csvExport && typeof csvExport === "object"
+      ? csvExport.filename
+      : id
+        ? `${id}_export`
+        : undefined
+
+  const exportAction = useExportAction({
+    source: effectiveSource,
+    currentVisualization: visualizations[currentVisualization],
+    filename: csvExportFilename,
+    enabled: !!csvExport,
+  })
+
   const expandedSecondaryActions = useMemo(
     () =>
       Math.min(
@@ -286,18 +310,37 @@ const OneDataCollectionComp = <
 
   // Remaining actions are in the secondaryActionsItems group (expanded) and filters the empty groups
   const otherActionsItems = useMemo(() => {
-    return [
+    const firstGroup = allSecondaryActions[0] ?? { items: [] }
+    const groups = [
       {
-        ...allSecondaryActions[0],
-        items:
-          allSecondaryActions[0]?.items.slice(expandedSecondaryActions) || [],
+        ...firstGroup,
+        items: firstGroup.items?.slice(expandedSecondaryActions) || [],
       },
       ...allSecondaryActions.slice(1),
-    ].filter((group) => group.items.length > 0)
-  }, [allSecondaryActions, expandedSecondaryActions])
+    ]
+
+    if (csvExport) {
+      groups.push({ items: [exportAction] })
+    }
+
+    return groups.filter((group) => group.items.length > 0)
+    // exportAction is an object rebuilt every render but its contents only
+    // change when the primitives below change. We track those instead of
+    // the object reference to avoid invalidating this memo every render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    allSecondaryActions,
+    expandedSecondaryActions,
+    csvExport,
+    exportAction.loading,
+    exportAction.disabled,
+    exportAction.onClick,
+  ])
 
   const hasCollectionsActions =
-    primaryActionItems?.length > 0 || allSecondaryActions?.length > 0
+    primaryActionItems?.length > 0 ||
+    allSecondaryActions?.length > 0 ||
+    !!csvExport
 
   /**
    * Clear selected items function
