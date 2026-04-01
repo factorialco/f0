@@ -272,6 +272,10 @@ const e = {
       types: {
         sum: "sum"
       }
+    },
+    export: {
+      label: "Export to CSV",
+      description: "Download all data as a CSV file"
     }
   },
   shortcut: "Shortcut",

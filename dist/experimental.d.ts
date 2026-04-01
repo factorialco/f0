@@ -850,6 +850,12 @@ export declare type BaseDataAdapter<R extends RecordType, Filters extends Filter
      * @returns Array of records, promise of records, or observable of records
      */
     fetchData: (options: Options) => FetchReturn | Promise<FetchReturn> | Observable<PromiseState<FetchReturn>>;
+    /**
+     * Optional standalone fetch for CSV export that does NOT affect UI state.
+     * When provided, the export action uses this instead of fetchData to avoid
+     * side-effects on reactive adapters (e.g. Apollo watchQuery).
+     */
+    exportFetchData?: (options: Options) => FetchReturn | Promise<FetchReturn>;
 };
 
 /**
@@ -1806,6 +1812,15 @@ declare type CreditsUsage = {
     total: number;
 };
 
+export declare interface CSVExportOptions {
+    filename?: string;
+    includeHeaders?: boolean;
+    /** Column IDs to exclude from export (respects column visibility settings) */
+    hiddenColumnIds?: Set<string>;
+    /** Column ID order to apply (respects column reordering settings) */
+    columnOrder?: string[];
+}
+
 /**
  * Extracts the current filters type from filter options.
  * Creates a type mapping filter keys to their respective value types.
@@ -2522,6 +2537,10 @@ declare const defaultTranslations: {
                 readonly sum: "sum";
             };
         };
+        readonly export: {
+            readonly label: "Export to CSV";
+            readonly description: "Download all data as a CSV file";
+        };
     };
     readonly shortcut: "Shortcut";
     readonly date: {
@@ -2978,6 +2997,8 @@ declare type DialogProps = {
  * // { age: number } | { height: number }
  */
 declare type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never;
+
+export declare function downloadAsCSV<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<R>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<R>>(data: R[], visualization: Visualization<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping> | undefined, options?: CSVExportOptions): Promise<void>;
 
 /**
  * @experimental This is an experimental component use it at your own risk
@@ -3955,6 +3976,8 @@ declare interface FrameContextType {
     }) => void;
     setForceFloat: (force: boolean) => void;
 }
+
+export declare function generateCSVContent<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<R>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<R>>(data: R[], visualization: Visualization<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping> | undefined, options?: CSVExportOptions): string;
 
 export declare const getGranularityDefinition: (granularityKey: GranularityDefinitionKey) => GranularityDefinition;
 
@@ -5127,6 +5150,14 @@ declare type OneDataCollectionProps<R extends RecordType, Filters extends Filter
      * @deprecated removes the horizontal padding from the data collection
      */
     tmpFullWidth?: boolean;
+    /** Enable CSV export action in the collection actions menu.
+     * - `true` enables export with default settings
+     * - An object allows customizing the export filename
+     * - `false` or `undefined` disables the export action (default)
+     */
+    csvExport?: boolean | {
+        filename?: string;
+    };
 };
 
 export declare const OneDateNavigator: typeof _OneDateNavigator;
@@ -5413,6 +5444,12 @@ export declare type PaginatedDataAdapter<R extends RecordType, Filters extends F
      * @returns Paginated response with records and pagination info
      */
     fetchData: (options: Options) => FetchReturn | Promise<FetchReturn> | Observable<PromiseState<FetchReturn>>;
+    /**
+     * Optional standalone fetch for CSV export that does NOT affect UI state.
+     * When provided, the export action uses this instead of fetchData to avoid
+     * side-effects on reactive adapters (e.g. Apollo watchQuery).
+     */
+    exportFetchData?: (options: Options) => FetchReturn | Promise<FetchReturn>;
 };
 
 export declare type PaginatedFetchOptions<Filters extends FiltersDefinition> = BaseFetchOptions<Filters> & {
@@ -6824,6 +6861,18 @@ declare interface UseDataReturn<R extends RecordType> {
     mergedFilters: FiltersState<FiltersDefinition>;
 }
 
+export declare function useExportAction<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<R>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<R>>({ source, currentVisualization, filename, enabled, }: UseExportActionProps<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>): SecondaryActionItem;
+
+declare interface UseExportActionProps<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<R>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<R>> {
+    source: DataCollectionSource<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>;
+    currentVisualization: Visualization<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping> | undefined;
+    filename?: string;
+    /** When false the hook returns a disabled no-op export action for
+     *  collections that don't use export. Due to the Rules of Hooks, internal
+     *  state, callbacks, and i18n are still initialized. Defaults to `true`. */
+    enabled?: boolean;
+}
+
 export declare const useInfiniteScrollPagination: (paginationInfo: PaginationInfo | null, isLoading: boolean, isLoadingMore: boolean, loadMore: () => void) => {
     loadingIndicatorRef: RefObject<HTMLTableCellElement>;
 };
@@ -7235,11 +7284,6 @@ declare module "gridstack" {
 }
 
 
-declare namespace Calendar {
-    var displayName: string;
-}
-
-
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         aiBlock: {
@@ -7286,4 +7330,9 @@ declare module "@tiptap/core" {
             }) => ReturnType;
         };
     }
+}
+
+
+declare namespace Calendar {
+    var displayName: string;
 }

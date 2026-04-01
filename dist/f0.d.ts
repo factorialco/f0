@@ -1003,6 +1003,12 @@ export declare type BaseDataAdapter<R extends RecordType, Filters extends Filter
      * @returns Array of records, promise of records, or observable of records
      */
     fetchData: (options: Options) => FetchReturn | Promise<FetchReturn> | Observable<PromiseState<FetchReturn>>;
+    /**
+     * Optional standalone fetch for CSV export that does NOT affect UI state.
+     * When provided, the export action uses this instead of fetchData to avoid
+     * side-effects on reactive adapters (e.g. Apollo watchQuery).
+     */
+    exportFetchData?: (options: Options) => FetchReturn | Promise<FetchReturn>;
 };
 
 /**
@@ -3075,6 +3081,10 @@ export declare const defaultTranslations: {
             readonly types: {
                 readonly sum: "sum";
             };
+        };
+        readonly export: {
+            readonly label: "Export to CSV";
+            readonly description: "Download all data as a CSV file";
         };
     };
     readonly shortcut: "Shortcut";
@@ -8487,6 +8497,12 @@ export declare type PaginatedDataAdapter<R extends RecordType, Filters extends F
      * @returns Paginated response with records and pagination info
      */
     fetchData: (options: Options) => FetchReturn | Promise<FetchReturn> | Observable<PromiseState<FetchReturn>>;
+    /**
+     * Optional standalone fetch for CSV export that does NOT affect UI state.
+     * When provided, the export action uses this instead of fetchData to avoid
+     * side-effects on reactive adapters (e.g. Apollo watchQuery).
+     */
+    exportFetchData?: (options: Options) => FetchReturn | Promise<FetchReturn>;
 };
 
 export declare type PaginatedFetchOptions<Filters extends FiltersDefinition> = BaseFetchOptions<Filters> & {
@@ -10844,11 +10860,6 @@ declare module "gridstack" {
 }
 
 
-declare namespace Calendar {
-    var displayName: string;
-}
-
-
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         aiBlock: {
@@ -10895,4 +10906,9 @@ declare module "@tiptap/core" {
             }) => ReturnType;
         };
     }
+}
+
+
+declare namespace Calendar {
+    var displayName: string;
 }
