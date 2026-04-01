@@ -38,6 +38,7 @@ declare const baseColors: {
     readonly transparent: "transparent";
     readonly grey: {
         readonly 0: "210 91% 22% / 0.02";
+        readonly 2: "219 88% 17% / 0.02";
         readonly 5: "220 88% 17% / 0.04";
         readonly 10: "216 89% 18% / 0.06";
         readonly 20: "214 70% 20% / 0.1";
@@ -151,6 +152,7 @@ declare const f1Colors: {
     readonly background: {
         readonly DEFAULT: "hsl(var(--neutral-0))";
         readonly hover: "hsl(var(--neutral-5))";
+        readonly disabled: "hsl(var(--neutral-3))";
         readonly secondary: {
             readonly DEFAULT: "hsl(var(--neutral-10))";
             readonly hover: "hsl(var(--neutral-20))";

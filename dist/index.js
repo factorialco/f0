@@ -71,6 +71,7 @@ var baseColors = {
   transparent: "transparent",
   grey: {
     0: "210 91% 22% / 0.02",
+    2: "219 88% 17% / 0.02",
     5: "220 88% 17% / 0.04",
     10: "216 89% 18% / 0.06",
     20: "214 70% 20% / 0.1",
@@ -183,6 +184,7 @@ var f1Colors = {
   background: {
     DEFAULT: "hsl(var(--neutral-0))",
     hover: "hsl(var(--neutral-5))",
+    disabled: "hsl(var(--neutral-3))",
     secondary: {
       DEFAULT: "hsl(var(--neutral-10))",
       hover: "hsl(var(--neutral-20))"
