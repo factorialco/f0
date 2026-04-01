@@ -1,7 +1,6 @@
 import { type Message } from "@copilotkit/shared"
 
 import { isAgentStateMessage } from "../internal-types"
-import { ORCHESTRATOR_THINKING_ACTION } from "./constants"
 
 export type Turn = Array<Message | Array<Message>>
 
@@ -21,7 +20,7 @@ export function analyzeTurn(
       (!!m.content ||
         m.toolCalls?.some(
           (tc: { function: { name: string } }) =>
-            tc.function.name !== ORCHESTRATOR_THINKING_ACTION
+            tc.function.name !== "orchestratorThinking"
         ))
   )
 
@@ -119,7 +118,7 @@ function isThinkingMessage(message: Message): boolean {
     !message.content &&
     message.toolCalls?.some(
       (call: { function: { name: string } }) =>
-        call.function.name === ORCHESTRATOR_THINKING_ACTION
+        call.function.name === "orchestratorThinking"
     ) === true
   )
 }
@@ -137,6 +136,6 @@ function getThinkingKey(message: Message): string {
     message as {
       toolCalls?: { function: { name: string; arguments: string } }[]
     }
-  ).toolCalls?.find((c) => c.function.name === ORCHESTRATOR_THINKING_ACTION)
+  ).toolCalls?.find((c) => c.function.name === "orchestratorThinking")
   return tc?.function.arguments || message.content || message.id
 }
