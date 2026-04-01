@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from "vitest"
 
 import { zeroRender as render, screen, waitFor } from "@/testing/test-utils"
 
-import { SurveyFormBuilderElement } from "../../types"
+import { SurveyDatasets, SurveyFormBuilderElement } from "../../types"
 import { SurveyFormBuilder } from "../index"
 
 // --- Test fixtures ---
@@ -220,5 +220,130 @@ describe("SurveyFormBuilder", () => {
     // When disabled, items should not be draggable
     const draggableItems = document.querySelectorAll("[draggable='true']")
     expect(draggableItems).toHaveLength(0)
+  })
+})
+
+// --- Dataset question tests ---
+
+const mockDataSource = {
+  dataAdapter: {
+    fetchData: async () => ({ records: [] }),
+  },
+}
+
+const mockDatasets: SurveyDatasets = {
+  employees: {
+    title: "Employees",
+    placeholder: "Select an employee",
+    dataSource: mockDataSource,
+    mapOptions: (item) => ({
+      value: String(item["id"]),
+      label: String(item["name"]),
+    }),
+  },
+}
+
+const makeDropdownDatasetQuestion = (
+  id: string,
+  title: string,
+  type: "dropdown-single" | "dropdown-multi" = "dropdown-single",
+  datasetKey = "employees"
+): SurveyFormBuilderElement => ({
+  type: "question",
+  question: { id, title, type, options: [], datasetKey },
+})
+
+describe("SurveyFormBuilder — dataset questions", () => {
+  it("renders dropdown-single dataset question with a combobox", () => {
+    render(
+      <SurveyFormBuilder
+        elements={[makeDropdownDatasetQuestion("q1", "Who is your manager?")]}
+        onChange={vi.fn()}
+        datasets={mockDatasets}
+      />
+    )
+
+    expect(screen.getByRole("combobox")).toBeInTheDocument()
+  })
+
+  it("renders dropdown-multi dataset question with a combobox", () => {
+    render(
+      <SurveyFormBuilder
+        elements={[
+          makeDropdownDatasetQuestion(
+            "q1",
+            "Select teammates",
+            "dropdown-multi"
+          ),
+        ]}
+        onChange={vi.fn()}
+        datasets={mockDatasets}
+      />
+    )
+
+    expect(screen.getByRole("combobox")).toBeInTheDocument()
+  })
+
+  it("shows dataset placeholder in the select", () => {
+    render(
+      <SurveyFormBuilder
+        elements={[makeDropdownDatasetQuestion("q1", "Who is your manager?")]}
+        onChange={vi.fn()}
+        datasets={mockDatasets}
+      />
+    )
+
+    expect(screen.getByText("Select an employee")).toBeInTheDocument()
+  })
+
+  it("shows dataset entries in add-button dropdown when datasets are provided", async () => {
+    const user = userEvent.setup()
+
+    render(
+      <SurveyFormBuilder
+        elements={[makeQuestion("q1", "Existing question")]}
+        onChange={vi.fn()}
+        datasets={mockDatasets}
+      />
+    )
+
+    // The bottom add button is the last button in the document
+    const buttons = screen.getAllByRole("button")
+    await user.click(buttons[buttons.length - 1])
+
+    await waitFor(() => {
+      expect(screen.getByText("Employees")).toBeInTheDocument()
+    })
+  })
+
+  it("adds a question with the correct datasetKey when selecting from add-button", async () => {
+    const onChange = vi.fn()
+    const user = userEvent.setup()
+
+    render(
+      <SurveyFormBuilder
+        elements={[makeQuestion("q1", "Existing question")]}
+        onChange={onChange}
+        datasets={mockDatasets}
+      />
+    )
+
+    const buttons = screen.getAllByRole("button")
+    await user.click(buttons[buttons.length - 1])
+
+    await waitFor(() =>
+      expect(screen.getByText("Employees")).toBeInTheDocument()
+    )
+    await user.click(screen.getByText("Employees"))
+
+    await waitFor(() => {
+      expect(onChange).toHaveBeenCalled()
+      const lastElements =
+        onChange.mock.calls[onChange.mock.calls.length - 1][0]
+      const addedQuestion = lastElements[lastElements.length - 1]
+      expect(addedQuestion.type).toBe("question")
+      expect(addedQuestion.question.type).toBe("dropdown-single")
+      expect(addedQuestion.question.datasetKey).toBe("employees")
+    })
   })
 })

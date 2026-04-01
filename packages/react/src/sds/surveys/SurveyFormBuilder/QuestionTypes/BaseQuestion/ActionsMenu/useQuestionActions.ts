@@ -112,15 +112,12 @@ export function useQuestionActionsFactory() {
       canDelete: boolean
     ): QuestionActions => {
       const question = getQuestionById(questionId)
-      const hasDatasetKey =
-        !!question &&
+      const currentDatasetKey =
+        question &&
         "datasetKey" in question &&
         typeof question.datasetKey === "string"
-      const currentDatasetKey = hasDatasetKey
-        ? (question as { datasetKey: string }).datasetKey
-        : undefined
-      const isMultiSelectEnabled =
-        questionType === "dropdown-multi" && hasDatasetKey
+          ? (question as { datasetKey: string }).datasetKey
+          : undefined
       const currentRatingType = getCurrentRatingType(questionType, question)
 
       const handleChangeRequired = (checked: boolean) => {
@@ -128,17 +125,6 @@ export function useQuestionActionsFactory() {
           id: questionId,
           type: questionType,
           required: checked,
-        } as Parameters<
-          NonNullable<SurveyFormBuilderCallbacks["onQuestionChange"]>
-        >[0])
-      }
-
-      const handleToggleMultiSelect = (enabled: boolean) => {
-        const newType = enabled ? "dropdown-multi" : "dropdown-single"
-        onQuestionChange?.({
-          id: questionId,
-          type: newType,
-          datasetKey: currentDatasetKey,
         } as Parameters<
           NonNullable<SurveyFormBuilderCallbacks["onQuestionChange"]>
         >[0])
@@ -155,10 +141,20 @@ export function useQuestionActionsFactory() {
         )
         const isDropdown =
           newType === "dropdown-single" || newType === "dropdown-multi"
+        const isSwitchingDropdownMode =
+          isDropdown &&
+          (questionType === "dropdown-single" ||
+            questionType === "dropdown-multi") &&
+          newType !== questionType
         onQuestionChange?.({
           id: questionId,
           type: newType,
           ...(isDropdown ? { datasetKey: newDatasetKey } : {}),
+          // Reset value when switching between single and multi to avoid
+          // a string value bleeding into multi-select (showing "1 selected")
+          ...(isSwitchingDropdownMode
+            ? { value: newType === "dropdown-multi" ? [] : null }
+            : {}),
           ...(resetParams && {
             ...getDefaultParamsForQuestionType(newType),
           }),
@@ -173,6 +169,22 @@ export function useQuestionActionsFactory() {
           type: "rating",
           value: 0,
           options: getRatingOptions(ratingType),
+        } as Parameters<
+          NonNullable<SurveyFormBuilderCallbacks["onQuestionChange"]>
+        >[0])
+      }
+
+      const isMultiSelectEnabled =
+        questionType === "dropdown-multi" && !!currentDatasetKey
+
+      const handleToggleMultiSelect = (enabled: boolean) => {
+        if (!currentDatasetKey) return
+        const newType = enabled ? "dropdown-multi" : "dropdown-single"
+        onQuestionChange?.({
+          id: questionId,
+          type: newType,
+          datasetKey: currentDatasetKey,
+          value: enabled ? [] : null,
         } as Parameters<
           NonNullable<SurveyFormBuilderCallbacks["onQuestionChange"]>
         >[0])

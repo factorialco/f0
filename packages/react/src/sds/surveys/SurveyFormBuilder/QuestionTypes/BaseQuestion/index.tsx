@@ -1,10 +1,21 @@
 import { useEffect, useRef, useState } from "react"
 
-import { Dropdown } from "@/experimental/Navigation/Dropdown"
-import { DropdownInternalProps } from "@/experimental/Navigation/Dropdown/internal"
+import { F0Button } from "@/components/F0Button"
+import { F0Icon } from "@/components/F0Icon"
 import { AcademicCap, Add } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuPortal,
+  DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+} from "@/ui/dropdown-menu"
 import { FormMessage } from "@/ui/form"
 
 import { useQuestionTypes } from "../../constants"
@@ -37,7 +48,6 @@ export const BaseQuestion = ({
     answering,
     getIsSingleQuestionInSection,
     getSectionContainingQuestion,
-    datasets,
   } = useSurveyFormBuilderContext()
 
   const containingSection = getSectionContainingQuestion(id)
@@ -91,42 +101,14 @@ export const BaseQuestion = ({
   }
 
   const questionTypes = useQuestionTypes()
-
-  const newQuestionDropdownItems: DropdownInternalProps["items"] = [
-    ...(!isWithinSection
-      ? [
-          {
-            label: t("surveyFormBuilder.questionTypes.section"),
-            icon: AcademicCap,
-            onClick: handleAddNewSection,
-          },
-          {
-            type: "separator" as const,
-          },
-        ]
-      : []),
-    ...questionTypes
-      .filter((qt) => !qt.datasetKey)
-      .map((questionType) => ({
-        ...questionType,
-        onClick: () => handleAddNewQuestion(questionType.questionType),
-      })),
-    ...(datasets && Object.keys(datasets).length
-      ? [
-          { type: "separator" as const },
-          ...questionTypes
-            .filter((qt) => !!qt.datasetKey)
-            .map((questionType) => ({
-              ...questionType,
-              onClick: () =>
-                handleAddNewQuestion(
-                  "dropdown-single",
-                  questionType.datasetKey
-                ),
-            })),
-        ]
-      : []),
-  ]
+  const regularTypes = questionTypes.filter((qt) => !qt.datasetKey)
+  const datasetKeys = Array.from(
+    new Set(
+      questionTypes
+        .filter((qt) => !!qt.datasetKey)
+        .map((qt) => qt.datasetKey as string)
+    )
+  )
 
   const isSingleQuestionInSection = getIsSingleQuestionInSection(id)
 
@@ -256,14 +238,102 @@ export const BaseQuestion = ({
             isNewQuestionDropdownOpen && "opacity-100"
           )}
         >
-          <Dropdown
-            items={newQuestionDropdownItems}
-            icon={Add}
-            size="sm"
+          <DropdownMenu
             open={isNewQuestionDropdownOpen}
             onOpenChange={setIsNewQuestionDropdownOpen}
-            align="center"
-          />
+          >
+            <DropdownMenuTrigger asChild>
+              <F0Button
+                icon={Add}
+                label={t("surveyFormBuilder.actions.addQuestion")}
+                size="sm"
+                variant="outline"
+                hideLabel
+              />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="center" className="w-80">
+              {!isWithinSection && (
+                <>
+                  <DropdownMenuItem onClick={handleAddNewSection}>
+                    <div className="flex w-full flex-row items-center gap-2">
+                      <F0Icon icon={AcademicCap} color="default" />
+                      <span className="flex-1 text-base font-medium">
+                        {t("surveyFormBuilder.questionTypes.section")}
+                      </span>
+                    </div>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                </>
+              )}
+              {regularTypes.map((qt) => (
+                <DropdownMenuItem
+                  key={qt.questionType}
+                  onClick={() => handleAddNewQuestion(qt.questionType)}
+                >
+                  <div className="flex w-full flex-row items-center gap-2">
+                    <F0Icon icon={qt.icon} color="default" />
+                    <span className="flex-1 text-base font-medium">
+                      {qt.label}
+                    </span>
+                  </div>
+                </DropdownMenuItem>
+              ))}
+              {datasetKeys.length > 0 && (
+                <>
+                  <DropdownMenuSeparator />
+                  {datasetKeys.map((dk) => {
+                    const entry = questionTypes.find(
+                      (qt) =>
+                        qt.datasetKey === dk &&
+                        qt.questionType === "dropdown-single"
+                    )
+                    return (
+                      <DropdownMenuSub key={dk}>
+                        <DropdownMenuSubTrigger className="mx-1 px-2 data-[state=open]:rounded-sm data-[state=closed]:bg-transparent data-[state=open]:bg-f1-background-hover">
+                          <div className="flex w-full flex-row items-center gap-2">
+                            {entry && (
+                              <F0Icon icon={entry.icon} color="default" />
+                            )}
+                            <span className="flex-1 text-base font-medium">
+                              {entry?.label ?? dk}
+                            </span>
+                          </div>
+                        </DropdownMenuSubTrigger>
+                        <DropdownMenuPortal>
+                          <DropdownMenuSubContent>
+                            <DropdownMenuItem
+                              onClick={() =>
+                                handleAddNewQuestion("dropdown-single", dk)
+                              }
+                            >
+                              <div className="flex w-full flex-row items-center gap-2">
+                                <span className="flex-1">
+                                  {t(
+                                    "surveyFormBuilder.labels.singleSelection"
+                                  )}
+                                </span>
+                              </div>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() =>
+                                handleAddNewQuestion("dropdown-multi", dk)
+                              }
+                            >
+                              <div className="flex w-full flex-row items-center gap-2">
+                                <span className="flex-1">
+                                  {t("surveyFormBuilder.labels.multiSelection")}
+                                </span>
+                              </div>
+                            </DropdownMenuItem>
+                          </DropdownMenuSubContent>
+                        </DropdownMenuPortal>
+                      </DropdownMenuSub>
+                    )
+                  })}
+                </>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       )}
     </div>

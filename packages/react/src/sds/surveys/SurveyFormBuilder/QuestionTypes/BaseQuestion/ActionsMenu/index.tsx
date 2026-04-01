@@ -85,8 +85,16 @@ const QuestionTypeMenuItem = ({
   onSelectQuestionType: (type: QuestionType, datasetKey?: string) => void
   onSelectRatingType: (type: RatingOptionType) => void
 }) => {
+  const { t } = useI18n()
   const regularTypes = questionTypes.filter((item) => !item.datasetKey)
-  const datasetTypes = questionTypes.filter((item) => !!item.datasetKey)
+  // Group dataset types by datasetKey so each dataset gets one sub-submenu
+  const datasetKeys = Array.from(
+    new Set(
+      questionTypes
+        .filter((item) => !!item.datasetKey)
+        .map((item) => item.datasetKey as string)
+    )
+  )
 
   const selectedOptionLabel = currentDatasetKey
     ? (questionTypes.find(
@@ -170,29 +178,66 @@ const QuestionTypeMenuItem = ({
               </DropdownMenuItem>
             )
           })}
-          {datasetTypes.length > 0 && (
+          {datasetKeys.length > 0 && (
             <>
               <DropdownMenuSeparator />
-              {datasetTypes.map((datasetType) => {
-                const isSelected =
-                  value === datasetType.questionType &&
-                  currentDatasetKey === datasetType.datasetKey
+              {datasetKeys.map((dk) => {
+                // Find the single-select entry for this dataset (for icon/label)
+                const singleEntry = questionTypes.find(
+                  (item) =>
+                    item.datasetKey === dk &&
+                    item.questionType === "dropdown-single"
+                )
                 return (
-                  <DropdownMenuItem
-                    key={`${datasetType.questionType}-${datasetType.datasetKey}`}
-                    onClick={() =>
-                      onSelectQuestionType(
-                        datasetType.questionType,
-                        datasetType.datasetKey
-                      )
-                    }
-                  >
-                    <div className="flex w-full flex-row items-center gap-2">
-                      <F0Icon icon={datasetType.icon} color="default" />
-                      <span className="flex-1">{datasetType.label}</span>
-                      {isSelected && <F0Icon icon={Check} color="default" />}
-                    </div>
-                  </DropdownMenuItem>
+                  <DropdownMenuSub key={dk}>
+                    <DropdownMenuSubTrigger className="mx-1 px-2 data-[state=open]:rounded-sm data-[state=closed]:bg-transparent data-[state=open]:bg-f1-background-hover">
+                      <div className="flex w-full flex-row items-center gap-2">
+                        {singleEntry && (
+                          <F0Icon icon={singleEntry.icon} color="default" />
+                        )}
+                        <span className="flex-1 text-base font-medium">
+                          {singleEntry?.label ?? dk}
+                        </span>
+                        {currentDatasetKey === dk && (
+                          <F0Icon icon={Check} color="default" />
+                        )}
+                      </div>
+                    </DropdownMenuSubTrigger>
+                    <DropdownMenuPortal>
+                      <DropdownMenuSubContent>
+                        <DropdownMenuItem
+                          onClick={() =>
+                            onSelectQuestionType("dropdown-single", dk)
+                          }
+                        >
+                          <div className="flex w-full flex-row items-center gap-2">
+                            <span className="flex-1">
+                              {t("surveyFormBuilder.labels.singleSelection")}
+                            </span>
+                            {currentDatasetKey === dk &&
+                              value === "dropdown-single" && (
+                                <F0Icon icon={Check} color="default" />
+                              )}
+                          </div>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() =>
+                            onSelectQuestionType("dropdown-multi", dk)
+                          }
+                        >
+                          <div className="flex w-full flex-row items-center gap-2">
+                            <span className="flex-1">
+                              {t("surveyFormBuilder.labels.multiSelection")}
+                            </span>
+                            {currentDatasetKey === dk &&
+                              value === "dropdown-multi" && (
+                                <F0Icon icon={Check} color="default" />
+                              )}
+                          </div>
+                        </DropdownMenuItem>
+                      </DropdownMenuSubContent>
+                    </DropdownMenuPortal>
+                  </DropdownMenuSub>
                 )
               })}
             </>
