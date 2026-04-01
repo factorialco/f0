@@ -74,6 +74,46 @@ function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
+/**
+ * Derives a stable week-seed from the navigation filter's date value.
+ * Returns the ISO week number (1-53) so each week produces different but
+ * deterministic data. Falls back to the current week when no date filter
+ * is active.
+ */
+function weekSeed(filters: Filters): number {
+  const dateNav = filters.date as
+    | { value?: { from?: Date | string } }
+    | undefined
+  const raw = dateNav?.value?.from
+  const d = raw ? new Date(raw) : new Date()
+  // ISO week number
+  const jan1 = new Date(d.getFullYear(), 0, 1)
+  const days = Math.floor(
+    (d.getTime() - jan1.getTime()) / (24 * 60 * 60 * 1000)
+  )
+  return Math.floor((days + jan1.getDay() + 1) / 7) + 1
+}
+
+/**
+ * Simple seeded pseudo-random that produces repeatable values per week.
+ * `salt` differentiates charts that share the same week.
+ */
+function seeded(week: number, salt: number): number {
+  const x = Math.sin(week * 9301 + salt * 4973) * 49297
+  return x - Math.floor(x) // 0..1
+}
+
+/** Returns a deterministic multiplier between `lo` and `hi` for the given week + salt. */
+function weekFactor(
+  filters: Filters,
+  salt: number,
+  lo = 0.6,
+  hi = 1.4
+): number {
+  const w = weekSeed(filters)
+  return lo + seeded(w, salt) * (hi - lo)
+}
+
 function departmentMultiplier(filters: Filters): Record<string, number> {
   const selected =
     Array.isArray(filters.department) && filters.department.length > 0
@@ -101,7 +141,30 @@ function statusMultiplier(filters: Filters): number {
 }
 
 // ---------------------------------------------------------------------------
-// Chart fetch functions (filter-reactive)
+// Week label helper — generates 7 day labels for the selected week
+// ---------------------------------------------------------------------------
+
+function weekDayLabels(filters: Filters): string[] {
+  const dateNav = filters.date as
+    | { value?: { from?: Date | string } }
+    | undefined
+  const raw = dateNav?.value?.from
+  const start = raw ? new Date(raw) : new Date()
+  // Snap to Monday
+  const day = start.getDay()
+  const diff = day === 0 ? -6 : 1 - day
+  const monday = new Date(start)
+  monday.setDate(start.getDate() + diff)
+
+  return Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(monday)
+    d.setDate(monday.getDate() + i)
+    return d.toLocaleDateString("en-US", { weekday: "short", day: "numeric" })
+  })
+}
+
+// ---------------------------------------------------------------------------
+// Chart fetch functions (filter-reactive + week-reactive)
 // ---------------------------------------------------------------------------
 
 function fetchHeadcountByDepartment(
@@ -109,6 +172,7 @@ function fetchHeadcountByDepartment(
 ): Promise<DashboardChartData> {
   const dm = departmentMultiplier(filters)
   const sm = statusMultiplier(filters)
+  const wf = weekFactor(filters, 1)
   return delay(800).then(() => ({
     categories: ["Engineering", "Product", "Design", "Marketing"],
     series: [
@@ -116,19 +180,19 @@ function fetchHeadcountByDepartment(
         name: "Headcount",
         data: [
           {
-            value: Math.round(145 * dm.Engineering * sm),
+            value: Math.round(145 * dm.Engineering * sm * wf),
             target: Math.round(160 * dm.Engineering),
           },
           {
-            value: Math.round(89 * dm.Product * sm),
+            value: Math.round(89 * dm.Product * sm * wf),
             target: Math.round(100 * dm.Product),
           },
           {
-            value: Math.round(67 * dm.Design * sm),
+            value: Math.round(67 * dm.Design * sm * wf),
             target: Math.round(80 * dm.Design),
           },
           {
-            value: Math.round(42 * dm.Marketing * sm),
+            value: Math.round(42 * dm.Marketing * sm * wf),
             target: Math.round(50 * dm.Marketing),
           },
         ],
@@ -136,10 +200,10 @@ function fetchHeadcountByDepartment(
       {
         name: "Open Positions",
         data: [
-          Math.round(12 * dm.Engineering),
-          Math.round(8 * dm.Product),
-          Math.round(5 * dm.Design),
-          Math.round(3 * dm.Marketing),
+          Math.round(12 * dm.Engineering * weekFactor(filters, 10, 0.3, 1.8)),
+          Math.round(8 * dm.Product * weekFactor(filters, 11, 0.3, 1.8)),
+          Math.round(5 * dm.Design * weekFactor(filters, 12, 0.3, 1.8)),
+          Math.round(3 * dm.Marketing * weekFactor(filters, 13, 0.3, 1.8)),
         ],
       },
     ],
@@ -148,25 +212,21 @@ function fetchHeadcountByDepartment(
 
 function fetchRevenueTrend(filters: Filters): Promise<DashboardChartData> {
   const sm = statusMultiplier(filters)
+  const days = weekDayLabels(filters)
   return delay(600).then(() => ({
-    categories: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+    categories: days,
     series: [
       {
         name: "Revenue",
-        data: [
-          Math.round(4_200_000 * sm),
-          Math.round(5_100_000 * sm),
-          Math.round(4_800_000 * sm),
-          Math.round(6_300_000 * sm),
-          Math.round(7_100_000 * sm),
-          Math.round(6_900_000 * sm),
-        ],
+        data: days.map((_, i) =>
+          Math.round(
+            (600_000 + 200_000 * seeded(weekSeed(filters), 20 + i)) * sm
+          )
+        ),
       },
       {
         name: "Target",
-        data: [
-          5_000_000, 5_000_000, 5_000_000, 6_000_000, 6_000_000, 6_000_000,
-        ],
+        data: days.map(() => 700_000),
       },
     ],
   }))
@@ -174,44 +234,39 @@ function fetchRevenueTrend(filters: Filters): Promise<DashboardChartData> {
 
 function fetchCostBreakdown(filters: Filters): Promise<DashboardChartData> {
   const dm = departmentMultiplier(filters)
+  const days = weekDayLabels(filters)
   return delay(700).then(() => ({
-    categories: ["Q1", "Q2", "Q3", "Q4"],
+    categories: days,
     series: [
       {
         name: "Engineering",
-        data: [
-          Math.round(320_000 * dm.Engineering),
-          Math.round(340_000 * dm.Engineering),
-          Math.round(310_000 * dm.Engineering),
-          Math.round(350_000 * dm.Engineering),
-        ],
+        data: days.map((_, i) =>
+          Math.round(
+            45_000 * dm.Engineering * weekFactor(filters, 30 + i, 0.7, 1.3)
+          )
+        ),
       },
       {
         name: "Product",
-        data: [
-          Math.round(180_000 * dm.Product),
-          Math.round(190_000 * dm.Product),
-          Math.round(175_000 * dm.Product),
-          Math.round(195_000 * dm.Product),
-        ],
+        data: days.map((_, i) =>
+          Math.round(
+            25_000 * dm.Product * weekFactor(filters, 40 + i, 0.7, 1.3)
+          )
+        ),
       },
       {
         name: "Design",
-        data: [
-          Math.round(120_000 * dm.Design),
-          Math.round(130_000 * dm.Design),
-          Math.round(125_000 * dm.Design),
-          Math.round(135_000 * dm.Design),
-        ],
+        data: days.map((_, i) =>
+          Math.round(18_000 * dm.Design * weekFactor(filters, 50 + i, 0.7, 1.3))
+        ),
       },
       {
         name: "Marketing",
-        data: [
-          Math.round(95_000 * dm.Marketing),
-          Math.round(100_000 * dm.Marketing),
-          Math.round(92_000 * dm.Marketing),
-          Math.round(105_000 * dm.Marketing),
-        ],
+        data: days.map((_, i) =>
+          Math.round(
+            14_000 * dm.Marketing * weekFactor(filters, 60 + i, 0.7, 1.3)
+          )
+        ),
       },
     ],
   }))
@@ -219,8 +274,13 @@ function fetchCostBreakdown(filters: Filters): Promise<DashboardChartData> {
 
 function fetchHiringFunnel(filters: Filters): Promise<DashboardChartData> {
   const dm = departmentMultiplier(filters)
+  const wf = weekFactor(filters, 5)
   const total =
-    240 * dm.Engineering + 120 * dm.Product + 80 * dm.Design + 60 * dm.Marketing
+    (240 * dm.Engineering +
+      120 * dm.Product +
+      80 * dm.Design +
+      60 * dm.Marketing) *
+    wf
   return delay(900).then(() => ({
     series: {
       name: "Hiring Pipeline",
@@ -246,10 +306,18 @@ function fetchSatisfactionScores(
       {
         name: "Score",
         data: [
-          dm.Engineering ? 4.2 : 0,
-          dm.Product ? 3.8 : 0,
-          dm.Design ? 4.5 : 0,
-          dm.Marketing ? 3.9 : 0,
+          dm.Engineering
+            ? Math.round(10 * (3.5 + 1.2 * seeded(weekSeed(filters), 70))) / 10
+            : 0,
+          dm.Product
+            ? Math.round(10 * (3.5 + 1.2 * seeded(weekSeed(filters), 71))) / 10
+            : 0,
+          dm.Design
+            ? Math.round(10 * (3.5 + 1.2 * seeded(weekSeed(filters), 72))) / 10
+            : 0,
+          dm.Marketing
+            ? Math.round(10 * (3.5 + 1.2 * seeded(weekSeed(filters), 73))) / 10
+            : 0,
         ],
       },
     ],
@@ -257,40 +325,45 @@ function fetchSatisfactionScores(
 }
 
 // ---------------------------------------------------------------------------
-// Metric fetch functions (filter-reactive)
+// Metric fetch functions (filter-reactive + week-reactive)
 // ---------------------------------------------------------------------------
 
 function fetchTotalHeadcount(filters: Filters): Promise<DashboardMetricData> {
   const dm = departmentMultiplier(filters)
   const sm = statusMultiplier(filters)
+  const wf = weekFactor(filters, 2)
   const current = Math.round(
     (145 * dm.Engineering +
       89 * dm.Product +
       67 * dm.Design +
       42 * dm.Marketing) *
-      sm
+      sm *
+      wf
   )
   const previous = Math.round(
     (130 * dm.Engineering +
       82 * dm.Product +
       60 * dm.Design +
       38 * dm.Marketing) *
-      sm
+      sm *
+      wf
   )
   return delay(400).then(() => ({ value: current, previousValue: previous }))
 }
 
 function fetchAvgSalary(filters: Filters): Promise<DashboardMetricData> {
   const sm = statusMultiplier(filters)
-  const current = Math.round(72_400 * sm)
-  const previous = Math.round(68_900 * sm)
+  const wf = weekFactor(filters, 3, 0.92, 1.08)
+  const current = Math.round(72_400 * sm * wf)
+  const previous = Math.round(68_900 * sm * wf)
   return delay(400).then(() => ({ value: current, previousValue: previous }))
 }
 
 function fetchAttritionMetric(filters: Filters): Promise<DashboardMetricData> {
   const sm = statusMultiplier(filters)
-  const current = Math.round(4.2 * sm * 10) / 10
-  const previous = Math.round(5.1 * sm * 10) / 10
+  const wf = weekFactor(filters, 4, 0.5, 1.5)
+  const current = Math.round(4.2 * sm * wf * 10) / 10
+  const previous = Math.round(5.1 * sm * wf * 10) / 10
   return delay(400).then(() => ({ value: current, previousValue: previous }))
 }
 
@@ -301,14 +374,21 @@ function fetchAttritionMetric(filters: Filters): Promise<DashboardMetricData> {
 function fetchHeadcountPie(filters: Filters): Promise<DashboardChartData> {
   const dm = departmentMultiplier(filters)
   const sm = statusMultiplier(filters)
+  const wf = weekFactor(filters, 6)
   return delay(500).then(() => ({
     series: {
       name: "Headcount by Department",
       data: [
-        { value: Math.round(145 * dm.Engineering * sm), name: "Engineering" },
-        { value: Math.round(89 * dm.Product * sm), name: "Product" },
-        { value: Math.round(67 * dm.Design * sm), name: "Design" },
-        { value: Math.round(42 * dm.Marketing * sm), name: "Marketing" },
+        {
+          value: Math.round(145 * dm.Engineering * sm * wf),
+          name: "Engineering",
+        },
+        { value: Math.round(89 * dm.Product * sm * wf), name: "Product" },
+        { value: Math.round(67 * dm.Design * sm * wf), name: "Design" },
+        {
+          value: Math.round(42 * dm.Marketing * sm * wf),
+          name: "Marketing",
+        },
       ],
     } as F0DataChartPieSeries,
   }))
@@ -320,6 +400,9 @@ function fetchHeadcountPie(filters: Filters): Promise<DashboardChartData> {
 
 function fetchTeamRadar(filters: Filters): Promise<DashboardChartData> {
   const dm = departmentMultiplier(filters)
+  const w = weekSeed(filters)
+  const r = (base: number, salt: number) =>
+    Math.round(base * (0.7 + 0.6 * seeded(w, salt)))
   return delay(600).then(() => ({
     indicators: [
       { name: "Performance", max: 100 },
@@ -330,12 +413,36 @@ function fetchTeamRadar(filters: Filters): Promise<DashboardChartData> {
     ],
     series: [
       ...(dm.Engineering
-        ? [{ name: "Engineering", data: [85, 72, 90, 65, 78] }]
+        ? [
+            {
+              name: "Engineering",
+              data: [r(85, 80), r(72, 81), r(90, 82), r(65, 83), r(78, 84)],
+            },
+          ]
         : []),
-      ...(dm.Product ? [{ name: "Product", data: [70, 88, 75, 80, 82] }] : []),
-      ...(dm.Design ? [{ name: "Design", data: [78, 80, 82, 75, 88] }] : []),
+      ...(dm.Product
+        ? [
+            {
+              name: "Product",
+              data: [r(70, 85), r(88, 86), r(75, 87), r(80, 88), r(82, 89)],
+            },
+          ]
+        : []),
+      ...(dm.Design
+        ? [
+            {
+              name: "Design",
+              data: [r(78, 90), r(80, 91), r(82, 92), r(75, 93), r(88, 94)],
+            },
+          ]
+        : []),
       ...(dm.Marketing
-        ? [{ name: "Marketing", data: [65, 85, 70, 90, 76] }]
+        ? [
+            {
+              name: "Marketing",
+              data: [r(65, 95), r(85, 96), r(70, 97), r(90, 98), r(76, 99)],
+            },
+          ]
         : []),
     ],
   }))
@@ -345,9 +452,10 @@ function fetchTeamRadar(filters: Filters): Promise<DashboardChartData> {
 // Gauge fetch function
 // ---------------------------------------------------------------------------
 
-function fetchHiringGoalGauge(_filters: Filters): Promise<DashboardChartData> {
+function fetchHiringGoalGauge(filters: Filters): Promise<DashboardChartData> {
+  const progress = Math.round(40 + 50 * seeded(weekSeed(filters), 100))
   return delay(400).then(() => ({
-    series: { value: 72, name: "Hiring Goal" },
+    series: { value: progress, name: "Hiring Goal" },
   }))
 }
 
@@ -355,7 +463,8 @@ function fetchHiringGoalGauge(_filters: Filters): Promise<DashboardChartData> {
 // Heatmap fetch function
 // ---------------------------------------------------------------------------
 
-function fetchActivityHeatmap(_filters: Filters): Promise<DashboardChartData> {
+function fetchActivityHeatmap(filters: Filters): Promise<DashboardChartData> {
+  const w = weekSeed(filters)
   return delay(700).then(() => ({
     xCategories: [
       "9am",
@@ -369,53 +478,21 @@ function fetchActivityHeatmap(_filters: Filters): Promise<DashboardChartData> {
       "5pm",
     ],
     yCategories: ["Mon", "Tue", "Wed", "Thu", "Fri"],
-    data: [
-      [0, 0, 5],
-      [1, 0, 12],
-      [2, 0, 18],
-      [3, 0, 15],
-      [4, 0, 8],
-      [5, 0, 20],
-      [6, 0, 22],
-      [7, 0, 14],
-      [8, 0, 6],
-      [0, 1, 8],
-      [1, 1, 15],
-      [2, 1, 25],
-      [3, 1, 20],
-      [4, 1, 10],
-      [5, 1, 18],
-      [6, 1, 24],
-      [7, 1, 16],
-      [8, 1, 9],
-      [0, 2, 6],
-      [1, 2, 10],
-      [2, 2, 20],
-      [3, 2, 18],
-      [4, 2, 12],
-      [5, 2, 22],
-      [6, 2, 19],
-      [7, 2, 11],
-      [8, 2, 4],
-      [0, 3, 9],
-      [1, 3, 14],
-      [2, 3, 22],
-      [3, 3, 16],
-      [4, 3, 7],
-      [5, 3, 15],
-      [6, 3, 20],
-      [7, 3, 13],
-      [8, 3, 5],
-      [0, 4, 3],
-      [1, 4, 8],
-      [2, 4, 14],
-      [3, 4, 12],
-      [4, 4, 6],
-      [5, 4, 10],
-      [6, 4, 12],
-      [7, 4, 7],
-      [8, 4, 2],
-    ] as [number, number, number][],
+    data: Array.from({ length: 9 * 5 }, (_, idx) => {
+      const x = idx % 9
+      const y = Math.floor(idx / 9)
+      // Bell-curve-ish: higher activity in mid-morning and mid-afternoon
+      const timeBias =
+        x <= 2
+          ? 0.6 + x * 0.15
+          : x <= 5
+            ? 1.0 - (x - 3) * 0.05
+            : 0.7 - (x - 5) * 0.1
+      const value = Math.round(
+        25 * timeBias * (0.4 + 1.2 * seeded(w, 200 + idx))
+      )
+      return [x, y, value] as [number, number, number]
+    }),
   }))
 }
 
@@ -690,7 +767,7 @@ export const mixedItems: DashboardItem<DashboardFiltersType>[] = [
   {
     id: "revenue",
     title: "Revenue Trend",
-    description: "Monthly revenue vs target (H1)",
+    description: "Daily revenue vs target for selected week",
     type: "chart",
     colSpan: 8,
     x: 4,
@@ -711,7 +788,7 @@ export const mixedItems: DashboardItem<DashboardFiltersType>[] = [
   {
     id: "cost-breakdown",
     title: "Cost Breakdown",
-    description: "Quarterly cost by department",
+    description: "Daily cost by department for selected week",
     type: "chart",
     colSpan: 6,
     x: 0,
@@ -767,7 +844,7 @@ export const mixedItems: DashboardItem<DashboardFiltersType>[] = [
   {
     id: "hiring-goal-gauge",
     title: "Hiring Goal",
-    description: "Progress toward quarterly hiring target",
+    description: "Progress toward weekly hiring target",
     type: "chart",
     colSpan: 4,
     x: 8,

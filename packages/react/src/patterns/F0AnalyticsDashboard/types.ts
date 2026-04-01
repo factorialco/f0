@@ -3,6 +3,7 @@ import type {
   FiltersState,
   PresetsDefinition,
 } from "@/patterns/OneFilterPicker/types"
+import type { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
 
 import type {
   ChartColorToken,
@@ -381,4 +382,9 @@ export interface F0AnalyticsDashboardProps<
     newType: string,
     orientation?: "vertical" | "horizontal"
   ) => void
+  /**
+   * Navigation filter definitions (e.g. date-navigator).
+   * Rendered above the grid alongside the regular filter bar.
+   */
+  navigationFilters?: NavigationFiltersDefinition
 }
