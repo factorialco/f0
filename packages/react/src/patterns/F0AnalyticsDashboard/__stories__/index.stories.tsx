@@ -1,8 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
+import { useState } from "react"
 
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import { F0AnalyticsDashboard } from "../index"
+import type { DashboardItem } from "../types"
 import { dashboardFilters, dashboardPresets, mixedItems } from "./mockDataMixed"
 
 const meta = {
@@ -14,19 +16,49 @@ const meta = {
 export default meta
 type Story = StoryObj
 
+const InteractiveDashboard = ({ editMode }: { editMode?: boolean }) => {
+  const [items, setItems] = useState<DashboardItem[]>(mixedItems)
+
+  return (
+    <F0AnalyticsDashboard
+      navigationFilters={{
+        date: {
+          type: "date-navigator",
+          defaultValue: new Date(),
+          granularity: "week",
+        },
+      }}
+      filters={dashboardFilters}
+      presets={dashboardPresets}
+      items={items}
+      editMode={editMode}
+      onTransformChart={(itemId, newType, orientation) => {
+        setItems((prev) =>
+          prev.map((item) => {
+            if (item.id !== itemId || item.type !== "chart") return item
+            return {
+              ...item,
+              chart: {
+                ...item.chart,
+                type: newType,
+                ...(newType === "bar"
+                  ? { orientation: orientation ?? "vertical" }
+                  : {}),
+              },
+            } as typeof item
+          })
+        )
+      }}
+    />
+  )
+}
+
 /**
  * Full dashboard with metrics, charts (bar, line, pie, radar, gauge, heatmap,
  * funnel), and a paginated collection — all wired to shared filters.
  */
 export const MixedDashboard: Story = {
-  render: () => (
-    <F0AnalyticsDashboard
-      filters={dashboardFilters}
-      presets={dashboardPresets}
-      items={mixedItems}
-      editMode
-    />
-  ),
+  render: () => <InteractiveDashboard editMode />,
 }
 
 /**
