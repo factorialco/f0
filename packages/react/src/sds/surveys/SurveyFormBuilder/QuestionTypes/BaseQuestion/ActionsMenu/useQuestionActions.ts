@@ -141,18 +141,22 @@ export function useQuestionActionsFactory() {
         )
         const isDropdown =
           newType === "dropdown-single" || newType === "dropdown-multi"
+        const wasDropdown =
+          questionType === "dropdown-single" ||
+          questionType === "dropdown-multi"
         const isSwitchingDropdownMode =
-          isDropdown &&
-          (questionType === "dropdown-single" ||
-            questionType === "dropdown-multi") &&
-          newType !== questionType
+          isDropdown && wasDropdown && newType !== questionType
+        const isSwitchingIntoDropdown = isDropdown && !wasDropdown
         onQuestionChange?.({
           id: questionId,
           type: newType,
-          ...(isDropdown ? { datasetKey: newDatasetKey } : {}),
-          // Reset value when switching between single and multi to avoid
-          // a string value bleeding into multi-select (showing "1 selected")
-          ...(isSwitchingDropdownMode
+          // Set datasetKey for dropdown types, clear it for non-dropdown types
+          ...(isDropdown
+            ? { datasetKey: newDatasetKey }
+            : { datasetKey: undefined }),
+          // Reset value when switching between single/multi or switching into
+          // a dropdown type from a different type to avoid incompatible values
+          ...(isSwitchingDropdownMode || isSwitchingIntoDropdown
             ? { value: newType === "dropdown-multi" ? [] : null }
             : {}),
           ...(resetParams && {

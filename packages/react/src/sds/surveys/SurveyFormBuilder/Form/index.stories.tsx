@@ -5,8 +5,8 @@ import { useState } from "react"
 import { withSkipA11y } from "@/lib/storybook-utils/parameters"
 
 import { SurveyFormBuilder } from "."
-import { SurveyFormBuilderElement } from "../types"
 import { mockDatasets } from "../../__stories__/mocks"
+import { SurveyFormBuilderElement } from "../types"
 
 const meta: Meta<typeof SurveyFormBuilder> = {
   title: "Surveys/SurveyFormBuilder",

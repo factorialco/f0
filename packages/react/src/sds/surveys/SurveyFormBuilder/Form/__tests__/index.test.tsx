@@ -343,7 +343,6 @@ describe("SurveyFormBuilder — dataset questions", () => {
         type: "dropdown-single" as const,
         required: true,
         datasetKey: "employees",
-        options: [],
       },
     }
     onChange.mockClear()

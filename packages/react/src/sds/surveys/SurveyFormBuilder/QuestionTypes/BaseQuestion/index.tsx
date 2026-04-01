@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react"
 
 import { F0Button } from "@/components/F0Button"
 import { F0Icon } from "@/components/F0Icon"
-import { AcademicCap, Add } from "@/icons/app"
+import { AcademicCap, Add, Check, CheckDouble } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import {
@@ -48,6 +48,7 @@ export const BaseQuestion = ({
     answering,
     getIsSingleQuestionInSection,
     getSectionContainingQuestion,
+    isQuestionTypeAllowed,
   } = useSurveyFormBuilderContext()
 
   const containingSection = getSectionContainingQuestion(id)
@@ -301,30 +302,38 @@ export const BaseQuestion = ({
                         </DropdownMenuSubTrigger>
                         <DropdownMenuPortal>
                           <DropdownMenuSubContent>
-                            <DropdownMenuItem
-                              onClick={() =>
-                                handleAddNewQuestion("dropdown-single", dk)
-                              }
-                            >
-                              <div className="flex w-full flex-row items-center gap-2">
-                                <span className="flex-1">
-                                  {t(
-                                    "surveyFormBuilder.labels.singleSelection"
-                                  )}
-                                </span>
-                              </div>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() =>
-                                handleAddNewQuestion("dropdown-multi", dk)
-                              }
-                            >
-                              <div className="flex w-full flex-row items-center gap-2">
-                                <span className="flex-1">
-                                  {t("surveyFormBuilder.labels.multiSelection")}
-                                </span>
-                              </div>
-                            </DropdownMenuItem>
+                            {isQuestionTypeAllowed("dropdown-single") && (
+                              <DropdownMenuItem
+                                onClick={() =>
+                                  handleAddNewQuestion("dropdown-single", dk)
+                                }
+                              >
+                                <div className="flex w-full flex-row items-center gap-2">
+                                  <F0Icon icon={Check} color="default" />
+                                  <span className="flex-1">
+                                    {t(
+                                      "surveyFormBuilder.labels.singleSelection"
+                                    )}
+                                  </span>
+                                </div>
+                              </DropdownMenuItem>
+                            )}
+                            {isQuestionTypeAllowed("dropdown-multi") && (
+                              <DropdownMenuItem
+                                onClick={() =>
+                                  handleAddNewQuestion("dropdown-multi", dk)
+                                }
+                              >
+                                <div className="flex w-full flex-row items-center gap-2">
+                                  <F0Icon icon={CheckDouble} color="default" />
+                                  <span className="flex-1">
+                                    {t(
+                                      "surveyFormBuilder.labels.multiSelection"
+                                    )}
+                                  </span>
+                                </div>
+                              </DropdownMenuItem>
+                            )}
                           </DropdownMenuSubContent>
                         </DropdownMenuPortal>
                       </DropdownMenuSub>

@@ -1,10 +1,12 @@
 import { ControllerRenderProps, FieldValues } from "react-hook-form"
 
-import { F0Select } from "@/components/F0Select"
 import type { InputFieldStatus } from "@/ui/InputField/types"
 
-import type { F0SelectField } from "./types"
+import { F0Select } from "@/components/F0Select"
+
 import type { ResolvedField } from "../types"
+import type { F0SelectField } from "./types"
+
 import { FORM_SIZE } from "../../constants"
 
 interface SelectFieldRendererProps {

@@ -28,6 +28,7 @@ import {
   DropdownMenuTrigger,
 } from "@/ui/dropdown-menu"
 
+import { useSurveyFormBuilderContext } from "../../../Context"
 import { RatingOptionType } from "../../../lib"
 import { QuestionType } from "../../../types"
 import { RATING_OPTIONS, useQuestionActions } from "./useQuestionActions"
@@ -69,6 +70,7 @@ const QuestionTypeMenuItem = ({
   currentDatasetKey,
   questionTypes,
   currentRatingType,
+  isQuestionTypeAllowed,
   onSelectQuestionType,
   onSelectRatingType,
 }: {
@@ -82,6 +84,7 @@ const QuestionTypeMenuItem = ({
     datasetKey?: string
   }[]
   currentRatingType: RatingOptionType | null
+  isQuestionTypeAllowed: (type: QuestionType) => boolean
   onSelectQuestionType: (type: QuestionType, datasetKey?: string) => void
   onSelectRatingType: (type: RatingOptionType) => void
 }) => {
@@ -205,36 +208,42 @@ const QuestionTypeMenuItem = ({
                     </DropdownMenuSubTrigger>
                     <DropdownMenuPortal>
                       <DropdownMenuSubContent>
-                        <DropdownMenuItem
-                          onClick={() =>
-                            onSelectQuestionType("dropdown-single", dk)
-                          }
-                        >
-                          <div className="flex w-full flex-row items-center gap-2">
-                            <span className="flex-1">
-                              {t("surveyFormBuilder.labels.singleSelection")}
-                            </span>
-                            {currentDatasetKey === dk &&
-                              value === "dropdown-single" && (
-                                <F0Icon icon={Check} color="default" />
-                              )}
-                          </div>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() =>
-                            onSelectQuestionType("dropdown-multi", dk)
-                          }
-                        >
-                          <div className="flex w-full flex-row items-center gap-2">
-                            <span className="flex-1">
-                              {t("surveyFormBuilder.labels.multiSelection")}
-                            </span>
-                            {currentDatasetKey === dk &&
-                              value === "dropdown-multi" && (
-                                <F0Icon icon={Check} color="default" />
-                              )}
-                          </div>
-                        </DropdownMenuItem>
+                        {isQuestionTypeAllowed("dropdown-single") && (
+                          <DropdownMenuItem
+                            onClick={() =>
+                              onSelectQuestionType("dropdown-single", dk)
+                            }
+                          >
+                            <div className="flex w-full flex-row items-center gap-2">
+                              <F0Icon icon={Check} color="default" />
+                              <span className="flex-1">
+                                {t("surveyFormBuilder.labels.singleSelection")}
+                              </span>
+                              {currentDatasetKey === dk &&
+                                value === "dropdown-single" && (
+                                  <F0Icon icon={Check} color="default" />
+                                )}
+                            </div>
+                          </DropdownMenuItem>
+                        )}
+                        {isQuestionTypeAllowed("dropdown-multi") && (
+                          <DropdownMenuItem
+                            onClick={() =>
+                              onSelectQuestionType("dropdown-multi", dk)
+                            }
+                          >
+                            <div className="flex w-full flex-row items-center gap-2">
+                              <F0Icon icon={CheckDouble} color="default" />
+                              <span className="flex-1">
+                                {t("surveyFormBuilder.labels.multiSelection")}
+                              </span>
+                              {currentDatasetKey === dk &&
+                                value === "dropdown-multi" && (
+                                  <F0Icon icon={Check} color="default" />
+                                )}
+                            </div>
+                          </DropdownMenuItem>
+                        )}
                       </DropdownMenuSubContent>
                     </DropdownMenuPortal>
                   </DropdownMenuSub>
@@ -286,6 +295,8 @@ export function ActionsMenu({
   canDeleteQuestion = true,
 }: ActionsMenuProps) {
   const { t } = useI18n()
+
+  const { isQuestionTypeAllowed } = useSurveyFormBuilderContext()
 
   const {
     question,
@@ -349,6 +360,7 @@ export function ActionsMenu({
             currentDatasetKey={currentDatasetKey}
             questionTypes={questionTypes}
             currentRatingType={currentRatingType}
+            isQuestionTypeAllowed={isQuestionTypeAllowed}
             onSelectQuestionType={handleSelectQuestionType}
             onSelectRatingType={handleSelectRatingType}
           />
