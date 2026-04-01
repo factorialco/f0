@@ -239,7 +239,7 @@ declare interface ActionCommonProps {
     onMouseLeave?: React.MouseEventHandler<HTMLElement>;
 }
 
-export declare type ActionDefinition = DropdownItemSeparator | (Pick<DropdownItemObject, "label" | "icon" | "description" | "critical"> & {
+export declare type ActionDefinition = DropdownItemSeparator_2 | (Pick<DropdownItemObject, "label" | "icon" | "description" | "critical"> & {
     onClick: () => void;
     enabled?: boolean;
     type?: "primary" | "secondary" | "other";
@@ -851,6 +851,12 @@ export declare type BaseDataAdapter<R extends RecordType, Filters extends Filter
      * @returns Array of records, promise of records, or observable of records
      */
     fetchData: (options: Options) => FetchReturn | Promise<FetchReturn> | Observable<PromiseState<FetchReturn>>;
+    /**
+     * Optional standalone fetch for CSV export that does NOT affect UI state.
+     * When provided, the export action uses this instead of fetchData to avoid
+     * side-effects on reactive adapters (e.g. Apollo watchQuery).
+     */
+    exportFetchData?: (options: Options) => FetchReturn | Promise<FetchReturn>;
 };
 
 /**
@@ -894,7 +900,7 @@ declare interface BaseHeaderProps_2 {
     description?: string;
     primaryAction?: PrimaryActionButton | PrimaryDropdownAction<string>;
     secondaryActions?: HeaderSecondaryAction[];
-    otherActions?: (DropdownItem & {
+    otherActions?: (DropdownItem_2 & {
         isVisible?: boolean;
     })[];
     status?: {
@@ -949,7 +955,7 @@ declare interface BaseTOCItem {
     otherActions?: TOCItemAction[];
 }
 
-declare type BreadcrumbBaseItemType = NavigationItem & {
+declare type BreadcrumbBaseItemType = NavigationItem_2 & {
     id: string;
     loading?: boolean;
     label: string;
@@ -1695,7 +1701,7 @@ export declare type CommunityPostProps = {
     noVideoPreload?: boolean;
     onClick: (id: string) => void;
     noReactionsButton?: boolean;
-    dropdownItems?: DropdownItem[];
+    dropdownItems?: DropdownItem_2[];
 };
 
 export declare const CommunityPostSkeleton: ({ withEvent, withImage, }: CommunityPostSkeletonProps) => JSX_2.Element;
@@ -1806,6 +1812,15 @@ declare type CreditsUsage = {
     used: number;
     total: number;
 };
+
+export declare interface CSVExportOptions {
+    filename?: string;
+    includeHeaders?: boolean;
+    /** Column IDs to exclude from export (respects column visibility settings) */
+    hiddenColumnIds?: Set<string>;
+    /** Column ID order to apply (respects column reordering settings) */
+    columnOrder?: string[];
+}
 
 /**
  * Extracts the current filters type from filter options.
@@ -2523,6 +2538,10 @@ declare const defaultTranslations: {
                 readonly sum: "sum";
             };
         };
+        readonly export: {
+            readonly label: "Export to CSV";
+            readonly description: "Download all data as a CSV file";
+        };
     };
     readonly shortcut: "Shortcut";
     readonly date: {
@@ -2980,6 +2999,8 @@ declare type DialogProps = {
  */
 declare type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never;
 
+export declare function downloadAsCSV<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<R>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<R>>(data: R[], visualization: Visualization<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping> | undefined, options?: CSVExportOptions): Promise<void>;
+
 /**
  * @experimental This is an experimental component use it at your own risk
  */
@@ -2996,14 +3017,30 @@ declare type DropdownInternalProps = {
     label?: string;
 } & DataAttributes_2;
 
-export declare type DropdownItem = DropdownItemObject | DropdownItemSeparator | DropdownItemLabel;
+export declare type DropdownItem = DropdownItemObject | DropdownItemSeparator_2 | DropdownItemLabel;
+
+declare type DropdownItem_2 = DropdownItemObject_2 | DropdownItemSeparator | DropdownItemLabel_2;
 
 export declare type DropdownItemLabel = {
     type: "label";
     text: string;
 };
 
-export declare type DropdownItemObject = Pick<NavigationItem, "label" | "href"> & {
+declare type DropdownItemLabel_2 = {
+    type: "label";
+    text: string;
+};
+
+export declare type DropdownItemObject = Pick<NavigationItem_2, "label" | "href"> & {
+    type?: "item";
+    onClick?: () => void;
+    icon?: IconType;
+    description?: string;
+    critical?: boolean;
+    avatar?: AvatarVariant;
+};
+
+declare type DropdownItemObject_2 = Pick<NavigationItem, "label" | "href"> & {
     type?: "item";
     onClick?: () => void;
     icon?: IconType;
@@ -3013,6 +3050,10 @@ export declare type DropdownItemObject = Pick<NavigationItem, "label" | "href"> 
 };
 
 declare type DropdownItemSeparator = {
+    type: "separator";
+};
+
+declare type DropdownItemSeparator_2 = {
     type: "separator";
 };
 
@@ -3957,6 +3998,8 @@ declare interface FrameContextType {
     setForceFloat: (force: boolean) => void;
 }
 
+export declare function generateCSVContent<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<R>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<R>>(data: R[], visualization: Visualization<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping> | undefined, options?: CSVExportOptions): string;
+
 export declare const getGranularityDefinition: (granularityKey: GranularityDefinitionKey) => GranularityDefinition;
 
 /**
@@ -4756,6 +4799,10 @@ declare type NavigationItem = Pick<LinkProps, "href" | "exactMatch" | "onClick">
     label: string;
 } & DataAttributes_2;
 
+declare type NavigationItem_2 = Pick<LinkProps, "href" | "exactMatch" | "onClick"> & {
+    label: string;
+} & DataAttributes_2;
+
 declare type NavigationProps = {
     previous?: {
         url: string;
@@ -4830,7 +4877,7 @@ export declare interface NotesTextEditorProps extends WithDataTestIdProps {
     titlePlaceholder?: string;
     primaryAction?: PrimaryActionButton | PrimaryDropdownAction<string>;
     secondaryActions?: HeaderSecondaryAction[];
-    otherActions?: DropdownItem[];
+    otherActions?: DropdownItem_2[];
     metadata?: MetadataItem[];
     banner?: BannerProps;
     showBubbleMenu?: boolean;
@@ -5414,6 +5461,12 @@ export declare type PaginatedDataAdapter<R extends RecordType, Filters extends F
      * @returns Paginated response with records and pagination info
      */
     fetchData: (options: Options) => FetchReturn | Promise<FetchReturn> | Observable<PromiseState<FetchReturn>>;
+    /**
+     * Optional standalone fetch for CSV export that does NOT affect UI state.
+     * When provided, the export action uses this instead of fetchData to avoid
+     * side-effects on reactive adapters (e.g. Apollo watchQuery).
+     */
+    exportFetchData?: (options: Options) => FetchReturn | Promise<FetchReturn>;
 };
 
 export declare type PaginatedFetchOptions<Filters extends FiltersDefinition> = BaseFetchOptions<Filters> & {
@@ -6077,7 +6130,7 @@ declare interface SidebarFooterProps {
     activityButtonShortcut?: string[];
     onActivityButtonClick?: () => void;
     onDropdownClick?: () => void;
-    options: DropdownItem[];
+    options: DropdownItem_2[];
 }
 
 export declare function SidebarHeader({ companies, selected, onChange, withNotification, additionalOptions, isLoading, }: SidebarHeaderProps): JSX_2.Element;
@@ -6831,6 +6884,18 @@ declare interface UseDataReturn<R extends RecordType> {
     mergedFilters: FiltersState<FiltersDefinition>;
 }
 
+export declare function useExportAction<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<R>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<R>>({ source, currentVisualization, filename, enabled, }: UseExportActionProps<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>): SecondaryActionItem;
+
+declare interface UseExportActionProps<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<R>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<R>> {
+    source: DataCollectionSource<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>;
+    currentVisualization: Visualization<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping> | undefined;
+    filename?: string;
+    /** When false the hook returns a disabled no-op export action for
+     *  collections that don't use export. Due to the Rules of Hooks, internal
+     *  state, callbacks, and i18n are still initialized. Defaults to `true`. */
+    enabled?: boolean;
+}
+
 export declare const useInfiniteScrollPagination: (paginationInfo: PaginationInfo | null, isLoading: boolean, isLoadingMore: boolean, loadMore: () => void) => {
     loadingIndicatorRef: RefObject<HTMLTableCellElement>;
 };
@@ -7292,5 +7357,15 @@ declare module "@tiptap/core" {
 
 
 declare namespace Calendar {
+    var displayName: string;
+}
+
+
+declare namespace _DaytimePage {
+    var displayName: string;
+}
+
+
+declare namespace _Page {
     var displayName: string;
 }

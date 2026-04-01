@@ -964,6 +964,10 @@ export declare const defaultTranslations: {
                 readonly sum: "sum";
             };
         };
+        readonly export: {
+            readonly label: "Export to CSV";
+            readonly description: "Download all data as a CSV file";
+        };
     };
     readonly shortcut: "Shortcut";
     readonly date: {
@@ -1843,5 +1847,15 @@ declare module "@tiptap/core" {
 
 
 declare namespace Calendar {
+    var displayName: string;
+}
+
+
+declare namespace _DaytimePage {
+    var displayName: string;
+}
+
+
+declare namespace _Page {
     var displayName: string;
 }
