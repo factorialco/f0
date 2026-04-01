@@ -13,7 +13,7 @@ import {
 } from "../mockData"
 
 const meta = {
-  title: "Patterns/Data Collection/Filters/Per Visualization",
+  title: "Data Collection/Filters/Per Visualization",
   parameters: {
     layout: "padded",
   },

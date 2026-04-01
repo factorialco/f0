@@ -3,7 +3,7 @@ import { Meta, StoryObj } from "@storybook/react-vite"
 import { ExampleComponent, SubfiltersExampleComponent } from "../mockData"
 
 const meta = {
-  title: "Patterns/Data Collection/Filters",
+  title: "Data Collection/Filters",
   parameters: {
     layout: "padded",
   },

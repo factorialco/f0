@@ -8,7 +8,7 @@ import {
 } from "./mockData"
 
 const meta = {
-  title: "Patterns/Data Collection/Full height",
+  title: "Data Collection/Full height",
   component: ExampleComponent,
   parameters: {
     layout: "padded",

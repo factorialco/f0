@@ -14,7 +14,7 @@ import { Sidebar } from "@/components/Navigation/Sidebar/Sidebar"
 import { ApplicationFrame } from "./index"
 
 const meta: Meta<typeof ApplicationFrame> = {
-  title: "Patterns/Navigation/ApplicationFrame",
+  title: "Navigation/ApplicationFrame",
   component: ApplicationFrame,
   tags: ["autodocs", "experimental"],
   parameters: {

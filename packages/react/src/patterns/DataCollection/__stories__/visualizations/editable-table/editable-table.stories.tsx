@@ -17,7 +17,7 @@ import {
 } from "../../mockData"
 
 const meta = {
-  title: "Patterns/Data Collection/Visualizations/Editable Table",
+  title: "Data Collection/Visualizations/Editable Table",
   parameters: {
     layout: "padded",
     docs: {

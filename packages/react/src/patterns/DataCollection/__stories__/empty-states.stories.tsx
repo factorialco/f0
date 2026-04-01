@@ -20,7 +20,7 @@ import {
 } from "./mockData"
 
 const meta = {
-  title: "Patterns/Data Collection/Empty State",
+  title: "Data Collection/Empty State",
   parameters: {
     layout: "padded",
   },

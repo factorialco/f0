@@ -18,7 +18,7 @@ import {
 import { ActionBar } from "."
 
 const meta: Meta<typeof ActionBar> = {
-  title: "Patterns/Data Collection/ActionBar",
+  title: "Data Collection/ActionBar",
   component: ActionBar,
   parameters: {
     layout: "fullscreen",

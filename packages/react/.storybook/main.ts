@@ -28,10 +28,9 @@ const config: StorybookConfig = {
       directory: "../src/kits",
       titlePrefix: "",
     },
-    // Patterns: all stories in src/patterns use their title field as-is (no prefix)
     {
       directory: "../src/patterns",
-      titlePrefix: "",
+      titlePrefix: "Patterns",
     },
     {
       directory: "../src/components",

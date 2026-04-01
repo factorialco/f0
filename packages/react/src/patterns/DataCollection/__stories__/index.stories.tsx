@@ -62,7 +62,7 @@ import {
 } from "./mockData"
 
 const meta = {
-  title: "Patterns/Data Collection/Miscellaneous",
+  title: "Data Collection/Miscellaneous",
   component: ExampleComponent,
   parameters: {
     layout: "padded",

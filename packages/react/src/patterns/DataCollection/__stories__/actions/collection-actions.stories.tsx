@@ -17,7 +17,7 @@ import { Visualization } from "../../visualizations/collection/types"
 import { buildSecondaryActions } from "../mockData"
 
 const meta = {
-  title: "Patterns/Data Collection/Collection Actions",
+  title: "Data Collection/Collection Actions",
   parameters: {
     layout: "padded",
   },

@@ -3,7 +3,7 @@ import { Meta, StoryObj } from "@storybook/react-vite"
 import { ExampleComponent } from "../mockData"
 
 const meta = {
-  title: "Patterns/Data Collection/Callbacks",
+  title: "Data Collection/Callbacks",
   component: ExampleComponent,
   parameters: {
     layout: "padded",

@@ -4,7 +4,7 @@ import { SortAndHideList } from "../SortAndHideList"
 
 const meta = {
   component: SortAndHideList,
-  title: "Patterns/Data Collection/Internal/SortAndHideList",
+  title: "Data Collection/Internal/SortAndHideList",
   parameters: {
     layout: "centered",
     docs: {

@@ -12,7 +12,7 @@ import { useDataCollectionSource } from "../../../hooks/useDataCollectionSource"
 import { OneDataCollection } from "../../../index"
 
 const meta = {
-  title: "Patterns/Data Collection/Visualizations/Table",
+  title: "Data Collection/Visualizations/Table",
   parameters: {
     layout: "padded",
     docs: {
