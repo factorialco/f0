@@ -143,7 +143,7 @@ export const SelectQuestion = ({ options, ...props }: SelectQuestionProps) => {
 
   const handleAddOption = () => {
     const newOption: SelectQuestionOption = {
-      value: nanoid(),
+      value: `new-option-${nanoid()}`,
       label: t("surveyFormBuilder.selectQuestion.newOption", {
         number: options.length + 1,
       }),
