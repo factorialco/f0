@@ -17,7 +17,7 @@ const dataConfig = {
 }
 
 const meta: Meta<RadarChartProps<typeof dataConfig> & WithDataTestIdProps> = {
-  title: "Kits/Charts/RadarChart",
+  title: "Charts/RadarChart",
   component: RadarChart as unknown as ComponentType<
     RadarChartProps<typeof dataConfig> & WithDataTestIdProps
   >,

@@ -1,16 +1,16 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { AreaChartWidget } from "@/experimental/Widgets/Charts/AreaChartWidget"
-import AreaChartWidgetStoriesMeta from "@/experimental/Widgets/Charts/AreaChartWidget/index.stories"
+import AreaChartWidgetStoriesMeta from "@/kits/WidgetCharts/AreaChartWidget/__stories__/AreaChartWidget.stories"
 import { BarChartWidget } from "@/experimental/Widgets/Charts/BarChartWidget"
-import BarChartWidgetStoriesMeta from "@/experimental/Widgets/Charts/BarChartWidget/index.stories"
+import BarChartWidgetStoriesMeta from "@/kits/WidgetCharts/BarChartWidget/__stories__/BarChartWidget.stories"
 import { ComposeChartContainerProps } from "@/experimental/Widgets/Charts/ChartContainer"
 import { LineChartWidget } from "@/experimental/Widgets/Charts/LineChartWidget"
-import LineChartWidgetStoriesMeta from "@/experimental/Widgets/Charts/LineChartWidget/index.stories"
+import LineChartWidgetStoriesMeta from "@/kits/WidgetCharts/LineChartWidget/__stories__/LineChartWidget.stories"
 import { RadialProgressWidget } from "@/experimental/Widgets/Charts/RadialProgressWidget"
-import RadialProgressWidgetStoriesMeta from "@/experimental/Widgets/Charts/RadialProgressWidget/index.stories"
+import RadialProgressWidgetStoriesMeta from "@/kits/WidgetCharts/RadialProgressWidget/__stories__/RadialProgressWidget.stories"
 import { VerticalBarChartWidget } from "@/experimental/Widgets/Charts/VerticalBarChartWidget"
-import VerticalBarChartWidgetStoriesMeta from "@/experimental/Widgets/Charts/VerticalBarChartWidget/index.stories"
+import VerticalBarChartWidgetStoriesMeta from "@/kits/WidgetCharts/VerticalBarChartWidget/__stories__/VerticalBarChartWidget.stories"
 import {
   WidgetInboxList,
   WidgetInboxListProps,

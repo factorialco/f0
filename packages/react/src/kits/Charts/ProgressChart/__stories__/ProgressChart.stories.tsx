@@ -3,7 +3,7 @@ import type { Meta } from "@storybook/react-vite"
 import { ProgressBar } from "../index"
 
 const meta: Meta<typeof ProgressBar> = {
-  title: "Kits/Charts/ProgressChart",
+  title: "Charts/ProgressChart",
   component: ProgressBar,
   tags: ["autodocs"],
   args: {

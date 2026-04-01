@@ -5,7 +5,7 @@ import { ChartDecorator } from "./decorators"
 
 const meta = {
   component: F0DataChart,
-  title: "Kits/F0DataChart/Bar",
+  title: "F0DataChart/Bar",
   tags: ["autodocs", "experimental"],
   decorators: [ChartDecorator],
 } satisfies Meta<typeof F0DataChart>

@@ -2,7 +2,7 @@ import { Meta, StoryObj } from "@storybook/react-vite"
 import { expect, within } from "storybook/test"
 
 import { BarChartProps } from "../../../components/Charts/BarChart"
-import { Default as BarChartStory } from "../../../components/Charts/BarChart/index.stories"
+import { Default as BarChartStory } from "@/kits/Charts/BarChart/__stories__/BarChart.stories"
 import { Placeholder } from "../../../lib/storybook-utils/placeholder"
 import { BarChartWidget } from "@/experimental/Widgets/Charts/BarChartWidget"
 import { Carousel } from "./index"

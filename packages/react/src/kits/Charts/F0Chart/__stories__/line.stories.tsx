@@ -4,7 +4,7 @@ import { F0Chart } from "../index"
 import { ChartDecorator } from "./decorators"
 const meta = {
   component: F0Chart,
-  title: "Kits/Charts/F0Chart/Line",
+  title: "Charts/F0Chart/Line",
   tags: ["autodocs", "experimental"],
   decorators: [ChartDecorator],
 } satisfies Meta<typeof F0Chart>

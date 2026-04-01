@@ -4,7 +4,7 @@ import { PieChart } from "../index"
 
 const meta: Meta<typeof PieChart> = {
   component: PieChart,
-  title: "Kits/Charts/PieChart",
+  title: "Charts/PieChart",
   parameters: {
     a11y: {
       config: {

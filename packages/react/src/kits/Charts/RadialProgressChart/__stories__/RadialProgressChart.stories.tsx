@@ -3,7 +3,7 @@ import type { Meta } from "@storybook/react-vite"
 import { RadialProgressChart } from "../index"
 
 const meta: Meta<typeof RadialProgressChart> = {
-  title: "Kits/Charts/RadialProgressChart",
+  title: "Charts/RadialProgressChart",
   component: RadialProgressChart,
   tags: ["autodocs"],
   args: {

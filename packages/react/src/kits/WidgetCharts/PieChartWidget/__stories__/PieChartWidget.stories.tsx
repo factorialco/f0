@@ -6,7 +6,7 @@ import { containerStoryArgs, WidgetDecorator } from "../../storybook-utils"
 import { PieChartWidget } from "../index"
 
 const meta = {
-  title: "Kits/Widgets/Charts/PieChartWidget",
+  title: "Widgets/Charts/PieChartWidget",
   component: PieChartWidget,
   parameters: {
     layout: "centered",

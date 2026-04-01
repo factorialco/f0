@@ -3,7 +3,7 @@ import { Meta } from "@storybook/react-vite"
 import { ComboChart } from "../index"
 
 const meta: Meta = {
-  title: "Kits/Charts/ComboChart",
+  title: "Charts/ComboChart",
   component: ComboChart,
   tags: ["autodocs"],
   decorators: [
