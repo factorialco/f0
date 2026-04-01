@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.431.0](https://github.com/factorialco/f0/compare/f0-react-v1.430.0...f0-react-v1.431.0) (2026-04-01)
+
+
+### Features
+
+* add CSV export functionality to OneDataCollection ([#3338](https://github.com/factorialco/f0/issues/3338)) ([7149cce](https://github.com/factorialco/f0/commit/7149cce207c4d94d3e3b1ea0a3551887a82023c6))
+
 ## [1.430.0](https://github.com/factorialco/f0/compare/f0-react-v1.429.0...f0-react-v1.430.0) (2026-04-01)
 
 
