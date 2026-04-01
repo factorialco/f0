@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.432.0](https://github.com/factorialco/f0/compare/f0-react-v1.431.0...f0-react-v1.432.0) (2026-04-01)
+
+
+### Features
+
+* add support for datasets in dropdown single and multi questions ([#3823](https://github.com/factorialco/f0/issues/3823)) ([0fdc445](https://github.com/factorialco/f0/commit/0fdc445e441b1f1c618df4906a967880bc44225f))
+
 ## [1.431.0](https://github.com/factorialco/f0/compare/f0-react-v1.430.0...f0-react-v1.431.0) (2026-04-01)
 
 
