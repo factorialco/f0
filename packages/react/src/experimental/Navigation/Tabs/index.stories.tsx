@@ -27,7 +27,7 @@ const primaryTabItemsWithVariants: TabItem[] = [
 ]
 
 const meta: Meta<typeof Tabs> = {
-  title: "Navigation/Tabs",
+  title: "Patterns/Navigation/Tabs",
   component: Tabs,
   tags: ["autodocs", "experimental"],
   argTypes: {

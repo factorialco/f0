@@ -17,7 +17,7 @@ import {
 import { Breadcrumbs, BreadcrumbsProps } from "./index"
 
 const meta: Meta<typeof Breadcrumbs> = {
-  title: "Navigation/Breadcrumbs",
+  title: "Patterns/Navigation/Breadcrumbs",
   component: Breadcrumbs,
   tags: ["autodocs", "experimental"],
 }

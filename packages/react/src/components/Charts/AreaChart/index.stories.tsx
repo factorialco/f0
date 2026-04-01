@@ -3,7 +3,7 @@ import type { Meta } from "@storybook/react-vite"
 import { AreaChart } from "./index"
 
 const meta: Meta = {
-  title: "Charts/AreaChart",
+  title: "Kits/Charts/AreaChart",
   component: AreaChart,
   tags: ["autodocs"],
   argTypes: {

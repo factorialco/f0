@@ -23,9 +23,8 @@ MotionGlobalConfig.skipAnimations = isChromatic()
 
 const channel = addons.getChannel()
 
-export const withTheme = () => {
-  // eslint-disable-next-line react/display-name
-  return (Story: StoryFn) => {
+export function withTheme() {
+  function ThemeWrapper({ Story }: { Story: StoryFn }) {
     const [isDark, setDark] = useState(false)
 
     useEffect(() => {
@@ -39,6 +38,7 @@ export const withTheme = () => {
       </ThemeProvider>
     )
   }
+  return (Story: StoryFn) => <ThemeWrapper Story={Story} />
 }
 
 export const F0 = (Story: StoryFn, { parameters }: StoryContext) => {
@@ -168,6 +168,10 @@ const preview: Preview = {
           "how-to-contribute",
           "ai-configuration",
           "foundations",
+          "components",
+          "experimental",
+          "patterns",
+          "kits",
           "library",
           "data-testid",
           "hooks",

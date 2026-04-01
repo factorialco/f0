@@ -8,7 +8,7 @@ import * as Icons from "@/icons/app"
 import { Dropdown, MobileDropdown as MobileDropdownComponent } from "./index"
 
 const meta: Meta<typeof Dropdown> = {
-  title: "Dropdown",
+  title: "Patterns/Navigation/Dropdown",
   component: Dropdown,
   tags: ["autodocs", "experimental"],
 }

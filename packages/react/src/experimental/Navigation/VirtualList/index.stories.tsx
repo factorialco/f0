@@ -5,7 +5,7 @@ import { VirtualItem } from "@tanstack/react-virtual"
 import { VirtualList } from "./index"
 
 const meta: Meta<typeof VirtualList> = {
-  title: "VirtualList",
+  title: "Patterns/Navigation/VirtualList",
   component: VirtualList,
   tags: ["autodocs", "experimental"],
   argTypes: {
