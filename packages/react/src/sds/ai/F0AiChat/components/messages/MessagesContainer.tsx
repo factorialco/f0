@@ -14,7 +14,6 @@ import { F0ActionItem } from "../../../F0ActionItem"
 import { filterCoagentPlaceholders } from "../../internal-types"
 import { useMessageScroll } from "../../hooks/useMessageScroll"
 import { useAiChat } from "../../providers/AiChatStateProvider"
-import { preprocessMessages } from "../../utils/messageExpansion"
 import {
   type Turn,
   analyzeTurn,
