@@ -3592,6 +3592,8 @@ declare type DropdownSingleQuestionProps = BaseQuestionPropsForOtherQuestionComp
     type: "dropdown-single";
     options: SelectQuestionOption[];
     value?: string | null;
+    showSearchBox?: boolean;
+    searchBoxPlaceholder?: string;
 };
 
 export declare type DropIntent = {
@@ -5339,12 +5341,6 @@ declare interface F0FormActionBarSubmitConfig extends F0FormSubmitConfigBase {
     discardConfig?: F0FormDiscardConfig;
     /** Label shown in the action bar (defaults to i18n "forms.actionBar.unsavedChanges") */
     actionBarLabel?: string;
-    /**
-     * When true, centers the action bar relative to the ApplicationFrame content area
-     * (accounting for the sidebar width) instead of the full viewport.
-     * @default false
-     */
-    centerActionBarInFrameContent?: boolean;
 }
 
 /**
@@ -8358,6 +8354,8 @@ declare type OnChangeQuestionParams = BaseQuestionOnChangeParams & ({
     type: "dropdown-single";
     value?: string | null;
     options?: SelectQuestionOption[];
+    showSearchBox?: boolean;
+    searchBoxPlaceholder?: string;
 } | {
     type: "numeric";
     value?: number | null;
@@ -10846,11 +10844,6 @@ declare module "gridstack" {
 }
 
 
-declare namespace Calendar {
-    var displayName: string;
-}
-
-
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         aiBlock: {
@@ -10863,9 +10856,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
+        moodTracker: {
+            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
         };
     }
 }
@@ -10873,8 +10865,9 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        moodTracker: {
-            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
@@ -10897,4 +10890,9 @@ declare module "@tiptap/core" {
             }) => ReturnType;
         };
     }
+}
+
+
+declare namespace Calendar {
+    var displayName: string;
 }

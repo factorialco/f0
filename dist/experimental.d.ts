@@ -135,7 +135,9 @@ export declare type ActionBarGroup = {
 
 export declare type ActionBarItem = ActionType;
 
-export declare type ActionBarStatus = "idle" | "loading" | "success";
+export declare type ActionBarStatus = (typeof actionBarStatuses)[number];
+
+export declare const actionBarStatuses: readonly ["idle", "loading", "success", "error"];
 
 declare type ActionBaseProps = ActionCommonProps & DataAttributes;
 
@@ -3244,7 +3246,7 @@ declare type ExtractVisualizationSettings<T> = T extends {
     };
 } ? S : never;
 
-export declare const F0ActionBar: WithDataTestIdReturnType_2<({ isOpen, secondaryActions, label, variant, leftContent, centerInFrameContent, status, ...props }: F0ActionBarProps) => JSX_2.Element>;
+export declare const F0ActionBar: WithDataTestIdReturnType_2<ForwardRefExoticComponent<F0ActionBarProps & RefAttributes<F0ActionBarRef>>>;
 
 declare interface F0ActionBarProps {
     /**
@@ -3275,19 +3277,18 @@ declare interface F0ActionBarProps {
      */
     leftContent?: React.ReactNode;
     /**
-     * When true, centers the action bar relative to the ApplicationFrame content area
-     * (accounting for the sidebar width) instead of the full viewport.
-     * @default false
-     */
-    centerInFrameContent?: boolean;
-    /**
      * The current status of the action bar.
      * - "idle": Default state, shows an alert icon (pending changes)
      * - "loading": Shows a spinner and disables all actions
      * - "success": Shows a checkmark icon and disables all actions
+     * - "error": Shows an error icon with persistent error styling
      * @default "idle"
      */
     status?: ActionBarStatus;
+}
+
+export declare interface F0ActionBarRef {
+    wiggle: (options?: WiggleOptions) => void;
 }
 
 export declare const F0AiBanner: ForwardRefExoticComponent<Omit<AiBannerInternalProps & RefAttributes<HTMLDivElement> & WithDataTestIdProps_2, "ref"> & RefAttributes<HTMLDivElement>> & Pick<ForwardRefExoticComponent<AiBannerInternalProps & RefAttributes<HTMLDivElement>>, never> & {
@@ -7159,6 +7160,10 @@ export declare const WidgetStrip: ForwardRefExoticComponent<DashboardProps_2 & R
 
 declare type WidgetWidth = "sm" | "md" | "lg";
 
+declare interface WiggleOptions {
+    errorHighlight?: boolean;
+}
+
 declare type WithDataTestIdProps = {
     dataTestId?: string;
 };
@@ -7230,11 +7235,6 @@ declare module "gridstack" {
 }
 
 
-declare namespace Calendar {
-    var displayName: string;
-}
-
-
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         aiBlock: {
@@ -7247,9 +7247,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
+        moodTracker: {
+            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
         };
     }
 }
@@ -7257,8 +7256,9 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        moodTracker: {
-            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
@@ -7281,4 +7281,9 @@ declare module "@tiptap/core" {
             }) => ReturnType;
         };
     }
+}
+
+
+declare namespace Calendar {
+    var displayName: string;
 }
