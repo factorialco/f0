@@ -3302,6 +3302,7 @@ export declare const defaultTranslations: {
     readonly surveyFormBuilder: {
         readonly actions: {
             readonly actions: "Actions";
+            readonly addQuestion: "Add question";
             readonly duplicateQuestion: "Duplicate question";
             readonly deleteQuestion: "Delete question";
             readonly duplicateSection: "Duplicate section";
@@ -3354,6 +3355,9 @@ export declare const defaultTranslations: {
             readonly questionDescriptionPlaceholder: "Describe the question in a few words";
             readonly sectionDescriptionPlaceholder: "Describe the section in a few words";
             readonly required: "Required";
+            readonly allowMultiSelection: "Allow multi-selection";
+            readonly singleSelection: "Single selection";
+            readonly multiSelection: "Multi selection";
             readonly questionType: "Question type";
             readonly questionOptions: "Question options";
             readonly actions: "Actions";
@@ -3598,9 +3602,17 @@ declare type DropdownItemSeparator = {
     type: "separator";
 };
 
+declare type DropdownMultiQuestionProps = BaseQuestionPropsForOtherQuestionComponents & {
+    type: "dropdown-multi";
+    datasetKey: string;
+    value?: string[] | null;
+    showSearchBox?: boolean;
+    searchBoxPlaceholder?: string;
+};
+
 declare type DropdownSingleQuestionProps = BaseQuestionPropsForOtherQuestionComponents & {
     type: "dropdown-single";
-    options: SelectQuestionOption[];
+    datasetKey: string;
     value?: string | null;
     showSearchBox?: boolean;
     searchBoxPlaceholder?: string;
@@ -6228,6 +6240,8 @@ declare interface F0SelectConfigBase {
     showSearchBox?: boolean;
     /** Placeholder for the search box */
     searchBoxPlaceholder?: string;
+    /** Icon displayed on the left side of the select input */
+    icon?: IconType;
 }
 
 /**
@@ -8335,6 +8349,7 @@ declare type NumericWithFormatter = {
 export declare type OnAddNewElementParams = {
     type: ElementType;
     afterId?: string;
+    datasetKey?: string;
 };
 
 declare type OnBulkActionCallback<Record extends RecordType, Filters extends FiltersDefinition> = (...args: [
@@ -8363,7 +8378,13 @@ declare type OnChangeQuestionParams = BaseQuestionOnChangeParams & ({
 } | {
     type: "dropdown-single";
     value?: string | null;
-    options?: SelectQuestionOption[];
+    datasetKey?: string;
+    showSearchBox?: boolean;
+    searchBoxPlaceholder?: string;
+} | {
+    type: "dropdown-multi";
+    value?: string[] | null;
+    datasetKey?: string;
     showSearchBox?: boolean;
     searchBoxPlaceholder?: string;
 } | {
@@ -8887,6 +8908,8 @@ export declare type QuestionElement = Omit<TextQuestionProps, QuestionPropsToOmi
     type: "select" | "multi-select";
 }, QuestionPropsToOmit> | Omit<DropdownSingleQuestionProps & {
     type: "dropdown-single";
+}, QuestionPropsToOmit> | Omit<DropdownMultiQuestionProps & {
+    type: "dropdown-multi";
 }, QuestionPropsToOmit> | Omit<NumericQuestionProps & {
     type: "numeric";
 }, QuestionPropsToOmit> | Omit<LinkQuestionProps & {
@@ -8901,7 +8924,7 @@ export declare type QuestionElement = Omit<TextQuestionProps, QuestionPropsToOmi
 
 declare type QuestionPropsToOmit = "onAction" | "onChange" | "onAddNewElement";
 
-export declare type QuestionType = "rating" | "select" | "multi-select" | "dropdown-single" | "text" | "longText" | "numeric" | "link" | "date" | "file" | "checkbox";
+export declare type QuestionType = "rating" | "select" | "multi-select" | "dropdown-single" | "dropdown-multi" | "text" | "longText" | "numeric" | "link" | "date" | "file" | "checkbox";
 
 export declare interface RadarChartConfig {
     type: "radar";
@@ -9421,7 +9444,7 @@ declare type SummaryKey<Definition extends SummariesDefinition> = Definition ext
 
 declare type SummaryType = "sum";
 
-export declare function SurveyAnsweringForm({ elements, onSubmit: onSubmitProp, mode, title, description, resourceHeader, isOpen, onClose, position: positionProp, module, allowToChangeFullscreen, defaultValues, errorTriggerMode, loading, labels, preview, useUpload, }: SurveyAnsweringFormProps): JSX_2.Element;
+export declare function SurveyAnsweringForm({ elements, onSubmit: onSubmitProp, mode, title, description, resourceHeader, isOpen, onClose, position: positionProp, module, allowToChangeFullscreen, defaultValues, errorTriggerMode, loading, labels, preview, useUpload, datasets, }: SurveyAnsweringFormProps): JSX_2.Element;
 
 declare interface SurveyAnsweringFormBaseProps {
     elements: SurveyFormBuilderElement[];
@@ -9438,6 +9461,7 @@ declare interface SurveyAnsweringFormBaseProps {
     errorTriggerMode?: F0FormErrorTriggerMode;
     loading?: boolean;
     useUpload?: UseFileUpload;
+    datasets?: SurveyDatasets;
     labels?: {
         empty?: {
             title?: string;
@@ -9485,6 +9509,9 @@ export declare type SurveyAnswerValue = {
     type: "dropdown-single";
     value: string | null;
 } | {
+    type: "dropdown-multi";
+    value: string[] | null;
+} | {
     type: "numeric";
     value: number | null;
 } | {
@@ -9501,7 +9528,17 @@ export declare type SurveyAnswerValue = {
     value: boolean | null;
 };
 
-export declare const SurveyFormBuilder: WithDataTestIdReturnType_7<({ elements: elementsProp, disabled, onChange, disallowOptionalQuestions, allowedQuestionTypes, applyingChanges, useUpload, }: SurveyFormBuilderProps) => JSX_2.Element>;
+export declare type SurveyDataset = {
+    title: string;
+    icon?: IconType;
+    placeholder?: string;
+    dataSource: DataSourceDefinition;
+    mapOptions: (item: RecordType) => F0SelectItemProps<string, RecordType>;
+};
+
+export declare type SurveyDatasets = Record<string, SurveyDataset>;
+
+export declare const SurveyFormBuilder: WithDataTestIdReturnType_7<({ elements: elementsProp, disabled, onChange, disallowOptionalQuestions, allowedQuestionTypes, applyingChanges, useUpload, datasets, }: SurveyFormBuilderProps) => JSX_2.Element>;
 
 export declare type SurveyFormBuilderCallbacks = {
     onQuestionChange?: (params: OnChangeQuestionParams) => void;
@@ -9526,6 +9563,7 @@ export declare type SurveyFormBuilderProps = {
     allowedQuestionTypes?: QuestionType[];
     applyingChanges?: boolean;
     useUpload?: UseFileUpload;
+    datasets?: SurveyDatasets;
 };
 
 export declare type SurveyFormSubmitResult = {
@@ -10860,11 +10898,6 @@ declare module "gridstack" {
 }
 
 
-declare namespace Calendar {
-    var displayName: string;
-}
-
-
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         aiBlock: {
@@ -10877,9 +10910,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
+        moodTracker: {
+            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
         };
     }
 }
@@ -10887,8 +10919,9 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        moodTracker: {
-            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
@@ -10911,4 +10944,9 @@ declare module "@tiptap/core" {
             }) => ReturnType;
         };
     }
+}
+
+
+declare namespace Calendar {
+    var displayName: string;
 }

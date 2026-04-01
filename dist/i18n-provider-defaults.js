@@ -493,6 +493,7 @@ const e = {
   surveyFormBuilder: {
     actions: {
       actions: "Actions",
+      addQuestion: "Add question",
       duplicateQuestion: "Duplicate question",
       deleteQuestion: "Delete question",
       duplicateSection: "Duplicate section",
@@ -545,6 +546,9 @@ const e = {
       questionDescriptionPlaceholder: "Describe the question in a few words",
       sectionDescriptionPlaceholder: "Describe the section in a few words",
       required: "Required",
+      allowMultiSelection: "Allow multi-selection",
+      singleSelection: "Single selection",
+      multiSelection: "Multi selection",
       questionType: "Question type",
       questionOptions: "Question options",
       actions: "Actions",
