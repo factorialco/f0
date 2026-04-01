@@ -1003,6 +1003,12 @@ export declare type BaseDataAdapter<R extends RecordType, Filters extends Filter
      * @returns Array of records, promise of records, or observable of records
      */
     fetchData: (options: Options) => FetchReturn | Promise<FetchReturn> | Observable<PromiseState<FetchReturn>>;
+    /**
+     * Optional standalone fetch for CSV export that does NOT affect UI state.
+     * When provided, the export action uses this instead of fetchData to avoid
+     * side-effects on reactive adapters (e.g. Apollo watchQuery).
+     */
+    exportFetchData?: (options: Options) => FetchReturn | Promise<FetchReturn>;
 };
 
 /**
@@ -1915,6 +1921,12 @@ declare interface CheckboxProps extends DataAttributes_2 {
      */
     required?: boolean;
 }
+
+declare type CheckboxQuestionProps = BaseQuestionPropsForOtherQuestionComponents & {
+    type: "checkbox";
+    value?: boolean | null;
+    label: string;
+};
 
 declare type ChildrenPaginationInfo = {
     total: number;
@@ -3070,6 +3082,10 @@ export declare const defaultTranslations: {
                 readonly sum: "sum";
             };
         };
+        readonly export: {
+            readonly label: "Export to CSV";
+            readonly description: "Download all data as a CSV file";
+        };
     };
     readonly shortcut: "Shortcut";
     readonly date: {
@@ -3305,6 +3321,7 @@ export declare const defaultTranslations: {
             readonly date: "Date";
             readonly dropdownSingle: "Dropdown";
             readonly file: "File upload";
+            readonly checkbox: "Checkbox";
         };
         readonly selectQuestion: {
             readonly addOption: "Add option";
@@ -3316,6 +3333,9 @@ export declare const defaultTranslations: {
         };
         readonly fileQuestion: {
             readonly uploadButton: "Upload file";
+        };
+        readonly checkboxQuestion: {
+            readonly placeholder: "Provide a label for the checkbox";
         };
         readonly answer: {
             readonly label: "Answer";
@@ -3582,6 +3602,8 @@ declare type DropdownSingleQuestionProps = BaseQuestionPropsForOtherQuestionComp
     type: "dropdown-single";
     options: SelectQuestionOption[];
     value?: string | null;
+    showSearchBox?: boolean;
+    searchBoxPlaceholder?: string;
 };
 
 export declare type DropIntent = {
@@ -5329,12 +5351,6 @@ declare interface F0FormActionBarSubmitConfig extends F0FormSubmitConfigBase {
     discardConfig?: F0FormDiscardConfig;
     /** Label shown in the action bar (defaults to i18n "forms.actionBar.unsavedChanges") */
     actionBarLabel?: string;
-    /**
-     * When true, centers the action bar relative to the ApplicationFrame content area
-     * (accounting for the sidebar width) instead of the full viewport.
-     * @default false
-     */
-    centerActionBarInFrameContent?: boolean;
 }
 
 /**
@@ -7160,10 +7176,10 @@ declare interface GranularityDefinition {
     calendarMode?: CalendarMode;
     calendarView: CalendarView;
     weekStartsOn?: WeekStartsOn;
-    label: (viewDate: Date, i18n: TranslationsType) => ReactNode;
+    label: (viewDate: Date, i18n: TranslationsType, locale?: string) => ReactNode;
     toRangeString: (date: Date | DateRange | undefined | null, i18n: TranslationsType, format?: DateStringFormat) => DateRangeString;
     toRange: <T extends Date | DateRange | undefined | null>(date: T) => T extends Date | DateRange ? DateRangeComplete : T;
-    toString: (date: Date | DateRange | undefined | null, i18n: TranslationsType, format?: DateStringFormat) => string;
+    toString: (date: Date | DateRange | undefined | null, i18n: TranslationsType, format?: DateStringFormat, locale?: string) => string;
     toStringMaxWidth: () => number;
     placeholder: () => string;
     fromString: (dateStr: string | DateRangeString, i18n: TranslationsType) => DateRange | null;
@@ -8348,6 +8364,8 @@ declare type OnChangeQuestionParams = BaseQuestionOnChangeParams & ({
     type: "dropdown-single";
     value?: string | null;
     options?: SelectQuestionOption[];
+    showSearchBox?: boolean;
+    searchBoxPlaceholder?: string;
 } | {
     type: "numeric";
     value?: number | null;
@@ -8360,6 +8378,10 @@ declare type OnChangeQuestionParams = BaseQuestionOnChangeParams & ({
 } | {
     type: "file";
     value?: string[] | null;
+} | {
+    type: "checkbox";
+    value?: boolean | null;
+    label: string;
 });
 
 export declare type OnChangeSectionParams = {
@@ -8475,6 +8497,12 @@ export declare type PaginatedDataAdapter<R extends RecordType, Filters extends F
      * @returns Paginated response with records and pagination info
      */
     fetchData: (options: Options) => FetchReturn | Promise<FetchReturn> | Observable<PromiseState<FetchReturn>>;
+    /**
+     * Optional standalone fetch for CSV export that does NOT affect UI state.
+     * When provided, the export action uses this instead of fetchData to avoid
+     * side-effects on reactive adapters (e.g. Apollo watchQuery).
+     */
+    exportFetchData?: (options: Options) => FetchReturn | Promise<FetchReturn>;
 };
 
 export declare type PaginatedFetchOptions<Filters extends FiltersDefinition> = BaseFetchOptions<Filters> & {
@@ -8867,11 +8895,13 @@ export declare type QuestionElement = Omit<TextQuestionProps, QuestionPropsToOmi
     type: "date";
 }, QuestionPropsToOmit> | Omit<FileQuestionProps & {
     type: "file";
+}, QuestionPropsToOmit> | Omit<CheckboxQuestionProps & {
+    type: "checkbox";
 }, QuestionPropsToOmit>;
 
 declare type QuestionPropsToOmit = "onAction" | "onChange" | "onAddNewElement";
 
-export declare type QuestionType = "rating" | "select" | "multi-select" | "dropdown-single" | "text" | "longText" | "numeric" | "link" | "date" | "file";
+export declare type QuestionType = "rating" | "select" | "multi-select" | "dropdown-single" | "text" | "longText" | "numeric" | "link" | "date" | "file" | "checkbox";
 
 export declare interface RadarChartConfig {
     type: "radar";
@@ -9466,6 +9496,9 @@ export declare type SurveyAnswerValue = {
 } | {
     type: "file";
     value: string[] | null;
+} | {
+    type: "checkbox";
+    value: boolean | null;
 };
 
 export declare const SurveyFormBuilder: WithDataTestIdReturnType_7<({ elements: elementsProp, disabled, onChange, disallowOptionalQuestions, allowedQuestionTypes, applyingChanges, useUpload, }: SurveyFormBuilderProps) => JSX_2.Element>;
@@ -9503,7 +9536,7 @@ export declare type SurveyFormSubmitResult = {
     errors?: Record<string, string>;
 };
 
-export declare type SurveySubmitAnswers = Record<string, string | number | string[] | Date | null>;
+export declare type SurveySubmitAnswers = Record<string, string | number | boolean | string[] | Date | null>;
 
 /**
  * All valid renderIf conditions for switch fields
@@ -10827,6 +10860,11 @@ declare module "gridstack" {
 }
 
 
+declare namespace Calendar {
+    var displayName: string;
+}
+
+
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         aiBlock: {
@@ -10873,9 +10911,4 @@ declare module "@tiptap/core" {
             }) => ReturnType;
         };
     }
-}
-
-
-declare namespace Calendar {
-    var displayName: string;
 }

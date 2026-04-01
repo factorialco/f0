@@ -135,7 +135,9 @@ export declare type ActionBarGroup = {
 
 export declare type ActionBarItem = ActionType;
 
-export declare type ActionBarStatus = "idle" | "loading" | "success";
+export declare type ActionBarStatus = (typeof actionBarStatuses)[number];
+
+export declare const actionBarStatuses: readonly ["idle", "loading", "success", "error"];
 
 declare type ActionBaseProps = ActionCommonProps & DataAttributes;
 
@@ -848,6 +850,12 @@ export declare type BaseDataAdapter<R extends RecordType, Filters extends Filter
      * @returns Array of records, promise of records, or observable of records
      */
     fetchData: (options: Options) => FetchReturn | Promise<FetchReturn> | Observable<PromiseState<FetchReturn>>;
+    /**
+     * Optional standalone fetch for CSV export that does NOT affect UI state.
+     * When provided, the export action uses this instead of fetchData to avoid
+     * side-effects on reactive adapters (e.g. Apollo watchQuery).
+     */
+    exportFetchData?: (options: Options) => FetchReturn | Promise<FetchReturn>;
 };
 
 /**
@@ -1804,6 +1812,15 @@ declare type CreditsUsage = {
     total: number;
 };
 
+export declare interface CSVExportOptions {
+    filename?: string;
+    includeHeaders?: boolean;
+    /** Column IDs to exclude from export (respects column visibility settings) */
+    hiddenColumnIds?: Set<string>;
+    /** Column ID order to apply (respects column reordering settings) */
+    columnOrder?: string[];
+}
+
 /**
  * Extracts the current filters type from filter options.
  * Creates a type mapping filter keys to their respective value types.
@@ -2520,6 +2537,10 @@ declare const defaultTranslations: {
                 readonly sum: "sum";
             };
         };
+        readonly export: {
+            readonly label: "Export to CSV";
+            readonly description: "Download all data as a CSV file";
+        };
     };
     readonly shortcut: "Shortcut";
     readonly date: {
@@ -2755,6 +2776,7 @@ declare const defaultTranslations: {
             readonly date: "Date";
             readonly dropdownSingle: "Dropdown";
             readonly file: "File upload";
+            readonly checkbox: "Checkbox";
         };
         readonly selectQuestion: {
             readonly addOption: "Add option";
@@ -2766,6 +2788,9 @@ declare const defaultTranslations: {
         };
         readonly fileQuestion: {
             readonly uploadButton: "Upload file";
+        };
+        readonly checkboxQuestion: {
+            readonly placeholder: "Provide a label for the checkbox";
         };
         readonly answer: {
             readonly label: "Answer";
@@ -2972,6 +2997,8 @@ declare type DialogProps = {
  * // { age: number } | { height: number }
  */
 declare type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never;
+
+export declare function downloadAsCSV<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<R>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<R>>(data: R[], visualization: Visualization<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping> | undefined, options?: CSVExportOptions): Promise<void>;
 
 /**
  * @experimental This is an experimental component use it at your own risk
@@ -3240,7 +3267,7 @@ declare type ExtractVisualizationSettings<T> = T extends {
     };
 } ? S : never;
 
-export declare const F0ActionBar: WithDataTestIdReturnType_2<({ isOpen, secondaryActions, label, variant, leftContent, centerInFrameContent, status, ...props }: F0ActionBarProps) => JSX_2.Element>;
+export declare const F0ActionBar: WithDataTestIdReturnType_2<ForwardRefExoticComponent<F0ActionBarProps & RefAttributes<F0ActionBarRef>>>;
 
 declare interface F0ActionBarProps {
     /**
@@ -3271,19 +3298,18 @@ declare interface F0ActionBarProps {
      */
     leftContent?: React.ReactNode;
     /**
-     * When true, centers the action bar relative to the ApplicationFrame content area
-     * (accounting for the sidebar width) instead of the full viewport.
-     * @default false
-     */
-    centerInFrameContent?: boolean;
-    /**
      * The current status of the action bar.
      * - "idle": Default state, shows an alert icon (pending changes)
      * - "loading": Shows a spinner and disables all actions
      * - "success": Shows a checkmark icon and disables all actions
+     * - "error": Shows an error icon with persistent error styling
      * @default "idle"
      */
     status?: ActionBarStatus;
+}
+
+export declare interface F0ActionBarRef {
+    wiggle: (options?: WiggleOptions) => void;
 }
 
 export declare const F0AiBanner: ForwardRefExoticComponent<Omit<AiBannerInternalProps & RefAttributes<HTMLDivElement> & WithDataTestIdProps_2, "ref"> & RefAttributes<HTMLDivElement>> & Pick<ForwardRefExoticComponent<AiBannerInternalProps & RefAttributes<HTMLDivElement>>, never> & {
@@ -3951,6 +3977,8 @@ declare interface FrameContextType {
     setForceFloat: (force: boolean) => void;
 }
 
+export declare function generateCSVContent<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<R>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<R>>(data: R[], visualization: Visualization<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping> | undefined, options?: CSVExportOptions): string;
+
 export declare const getGranularityDefinition: (granularityKey: GranularityDefinitionKey) => GranularityDefinition;
 
 /**
@@ -3975,10 +4003,10 @@ export declare interface GranularityDefinition {
     calendarMode?: CalendarMode;
     calendarView: CalendarView;
     weekStartsOn?: WeekStartsOn;
-    label: (viewDate: Date, i18n: TranslationsType) => ReactNode;
+    label: (viewDate: Date, i18n: TranslationsType, locale?: string) => ReactNode;
     toRangeString: (date: Date | DateRange | undefined | null, i18n: TranslationsType, format?: DateStringFormat) => DateRangeString;
     toRange: <T extends Date | DateRange | undefined | null>(date: T) => T extends Date | DateRange ? DateRangeComplete : T;
-    toString: (date: Date | DateRange | undefined | null, i18n: TranslationsType, format?: DateStringFormat) => string;
+    toString: (date: Date | DateRange | undefined | null, i18n: TranslationsType, format?: DateStringFormat, locale?: string) => string;
     toStringMaxWidth: () => number;
     placeholder: () => string;
     fromString: (dateStr: string | DateRangeString, i18n: TranslationsType) => DateRange | null;
@@ -5122,6 +5150,14 @@ declare type OneDataCollectionProps<R extends RecordType, Filters extends Filter
      * @deprecated removes the horizontal padding from the data collection
      */
     tmpFullWidth?: boolean;
+    /** Enable CSV export action in the collection actions menu.
+     * - `true` enables export with default settings
+     * - An object allows customizing the export filename
+     * - `false` or `undefined` disables the export action (default)
+     */
+    csvExport?: boolean | {
+        filename?: string;
+    };
 };
 
 export declare const OneDateNavigator: typeof _OneDateNavigator;
@@ -5408,6 +5444,12 @@ export declare type PaginatedDataAdapter<R extends RecordType, Filters extends F
      * @returns Paginated response with records and pagination info
      */
     fetchData: (options: Options) => FetchReturn | Promise<FetchReturn> | Observable<PromiseState<FetchReturn>>;
+    /**
+     * Optional standalone fetch for CSV export that does NOT affect UI state.
+     * When provided, the export action uses this instead of fetchData to avoid
+     * side-effects on reactive adapters (e.g. Apollo watchQuery).
+     */
+    exportFetchData?: (options: Options) => FetchReturn | Promise<FetchReturn>;
 };
 
 export declare type PaginatedFetchOptions<Filters extends FiltersDefinition> = BaseFetchOptions<Filters> & {
@@ -6819,6 +6861,18 @@ declare interface UseDataReturn<R extends RecordType> {
     mergedFilters: FiltersState<FiltersDefinition>;
 }
 
+export declare function useExportAction<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<R>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<R>>({ source, currentVisualization, filename, enabled, }: UseExportActionProps<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>): SecondaryActionItem;
+
+declare interface UseExportActionProps<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<R>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<R>> {
+    source: DataCollectionSource<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>;
+    currentVisualization: Visualization<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping> | undefined;
+    filename?: string;
+    /** When false the hook returns a disabled no-op export action for
+     *  collections that don't use export. Due to the Rules of Hooks, internal
+     *  state, callbacks, and i18n are still initialized. Defaults to `true`. */
+    enabled?: boolean;
+}
+
 export declare const useInfiniteScrollPagination: (paginationInfo: PaginationInfo | null, isLoading: boolean, isLoadingMore: boolean, loadMore: () => void) => {
     loadingIndicatorRef: RefObject<HTMLTableCellElement>;
 };
@@ -7155,6 +7209,10 @@ export declare const WidgetStrip: ForwardRefExoticComponent<DashboardProps_2 & R
 
 declare type WidgetWidth = "sm" | "md" | "lg";
 
+declare interface WiggleOptions {
+    errorHighlight?: boolean;
+}
+
 declare type WithDataTestIdProps = {
     dataTestId?: string;
 };
@@ -7226,6 +7284,11 @@ declare module "gridstack" {
 }
 
 
+declare namespace Calendar {
+    var displayName: string;
+}
+
+
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         aiBlock: {
@@ -7272,9 +7335,4 @@ declare module "@tiptap/core" {
             }) => ReturnType;
         };
     }
-}
-
-
-declare namespace Calendar {
-    var displayName: string;
 }

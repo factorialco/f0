@@ -964,6 +964,10 @@ export declare const defaultTranslations: {
                 readonly sum: "sum";
             };
         };
+        readonly export: {
+            readonly label: "Export to CSV";
+            readonly description: "Download all data as a CSV file";
+        };
     };
     readonly shortcut: "Shortcut";
     readonly date: {
@@ -1199,6 +1203,7 @@ export declare const defaultTranslations: {
             readonly date: "Date";
             readonly dropdownSingle: "Dropdown";
             readonly file: "File upload";
+            readonly checkbox: "Checkbox";
         };
         readonly selectQuestion: {
             readonly addOption: "Add option";
@@ -1210,6 +1215,9 @@ export declare const defaultTranslations: {
         };
         readonly fileQuestion: {
             readonly uploadButton: "Upload file";
+        };
+        readonly checkboxQuestion: {
+            readonly placeholder: "Provide a label for the checkbox";
         };
         readonly answer: {
             readonly label: "Answer";
@@ -1789,6 +1797,11 @@ declare module "gridstack" {
 }
 
 
+declare namespace Calendar {
+    var displayName: string;
+}
+
+
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         aiBlock: {
@@ -1835,9 +1848,4 @@ declare module "@tiptap/core" {
             }) => ReturnType;
         };
     }
-}
-
-
-declare namespace Calendar {
-    var displayName: string;
 }

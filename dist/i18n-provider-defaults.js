@@ -272,6 +272,10 @@ const e = {
       types: {
         sum: "sum"
       }
+    },
+    export: {
+      label: "Export to CSV",
+      description: "Download all data as a CSV file"
     }
   },
   shortcut: "Shortcut",
@@ -507,7 +511,8 @@ const e = {
       link: "Link",
       date: "Date",
       dropdownSingle: "Dropdown",
-      file: "File upload"
+      file: "File upload",
+      checkbox: "Checkbox"
     },
     selectQuestion: {
       addOption: "Add option",
@@ -519,6 +524,9 @@ const e = {
     },
     fileQuestion: {
       uploadButton: "Upload file"
+    },
+    checkboxQuestion: {
+      placeholder: "Provide a label for the checkbox"
     },
     answer: {
       label: "Answer",
