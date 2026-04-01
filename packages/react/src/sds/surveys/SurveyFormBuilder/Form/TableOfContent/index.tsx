@@ -102,6 +102,8 @@ export const TableOfContent = ({
     questionOptionsLabel: t("surveyFormBuilder.labels.questionOptions"),
     requiredLabel: t("surveyFormBuilder.labels.required"),
     questionTypeLabel: t("surveyFormBuilder.labels.questionType"),
+    singleSelectionLabel: t("surveyFormBuilder.labels.singleSelection"),
+    multiSelectionLabel: t("surveyFormBuilder.labels.multiSelection"),
   })
 
   const handleReorder = useCallback(

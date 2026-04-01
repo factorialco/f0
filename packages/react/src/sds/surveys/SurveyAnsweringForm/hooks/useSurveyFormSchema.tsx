@@ -17,6 +17,7 @@ import type {
   SurveyFormBuilderElement,
   QuestionElement,
   SelectQuestionOption,
+  SurveyDatasets,
 } from "../../SurveyFormBuilder/types"
 import type {
   FlatQuestion,
@@ -25,7 +26,6 @@ import type {
 } from "../types"
 
 import { BaseQuestion } from "../../SurveyFormBuilder/QuestionTypes/BaseQuestion"
-import { SEARCH_BOX_OPTIONS_THRESHOLD } from "../../SurveyFormBuilder/QuestionTypes/DropdownSingleQuestion/types"
 import { DEFAULT_FILE_ACCEPT } from "../../SurveyFormBuilder/QuestionTypes/FileQuestion"
 import {
   RatingQuestionField,
@@ -181,7 +181,8 @@ function getDefaultValue(
   const dv = defaultValues?.[question.id]
   if (dv) return dv.value
 
-  if (question.type === "multi-select") return []
+  if (question.type === "multi-select" || question.type === "dropdown-multi")
+    return []
 
   const q = question as QuestionElement & { value?: unknown }
   if (q.value !== undefined && q.value !== null) return q.value
@@ -221,7 +222,8 @@ function buildFieldForQuestion(
   sectionId?: string,
   previewMode = false,
   disableFields = previewMode,
-  formUseUpload?: UseFileUpload
+  formUseUpload?: UseFileUpload,
+  datasets?: SurveyDatasets
 ): ZodTypeAny {
   const label = q.title ?? ""
   const baseConfig = {
@@ -382,18 +384,23 @@ function buildFieldForQuestion(
     }
 
     case "dropdown-single": {
-      const options = q.options.map((o) => ({
-        value: o.value,
-        label: o.label,
-      }))
-      const showSearchBox =
-        q.showSearchBox ?? options.length > SEARCH_BOX_OPTIONS_THRESHOLD
+      const dataset = datasets?.[q.datasetKey]
+      if (!dataset) {
+        throw new Error(
+          `Dataset "${q.datasetKey}" not found for dropdown-single`
+        )
+      }
+      const showSearchBox = q.showSearchBox ?? true
       const field: F0Field = {
         id: q.id,
         type: "select",
         label,
-        placeholder: t("surveyFormBuilder.answer.dropdownPlaceholder"),
-        options,
+        placeholder:
+          dataset.placeholder ??
+          t("surveyFormBuilder.answer.dropdownPlaceholder"),
+        source: dataset.dataSource,
+        mapOptions: dataset.mapOptions,
+        icon: dataset.icon,
         clearable: !q.required,
         multiple: false,
         disabled: disableFields,
@@ -409,6 +416,50 @@ function buildFieldForQuestion(
               <F0FormField
                 field={field}
                 value={value ?? ""}
+                onChange={onChange as (value: unknown) => void}
+                onBlur={onBlur}
+                error={!!error}
+                hideLabel
+              />
+            </div>
+          </BaseQuestion>
+        ),
+      })
+    }
+
+    case "dropdown-multi": {
+      const dataset = datasets?.[q.datasetKey]
+      if (!dataset) {
+        throw new Error(
+          `Dataset "${q.datasetKey}" not found for dropdown-multi`
+        )
+      }
+      const showSearchBox = q.showSearchBox ?? true
+      const field: F0Field = {
+        id: q.id,
+        type: "select",
+        label,
+        placeholder:
+          dataset.placeholder ??
+          t("surveyFormBuilder.answer.dropdownPlaceholder"),
+        source: dataset.dataSource,
+        mapOptions: dataset.mapOptions,
+        icon: dataset.icon,
+        clearable: !q.required,
+        multiple: true,
+        disabled: disableFields,
+        showSearchBox,
+        searchBoxPlaceholder: q.searchBoxPlaceholder,
+      }
+      return f0FormField(buildMultiSelectSchema(!!q.required, t), {
+        ...baseConfig,
+        fieldType: "custom",
+        render: ({ value, onChange, onBlur, error }) => (
+          <BaseQuestion {...questionProps}>
+            <div className="flex flex-col items-start px-0.5 [&>div]:w-full">
+              <F0FormField
+                field={field}
+                value={value ?? []}
                 onChange={onChange as (value: unknown) => void}
                 onBlur={onBlur}
                 error={!!error}
@@ -586,7 +637,8 @@ export function useSurveyFormSchema(
   accumulatedValues?: Record<string, unknown>,
   previewMode = false,
   disableFields = previewMode,
-  useUpload?: UseFileUpload
+  useUpload?: UseFileUpload,
+  datasets?: SurveyDatasets
 ) {
   return useMemo(() => {
     const shape: Record<string, ZodTypeAny> = {}
@@ -619,7 +671,8 @@ export function useSurveyFormSchema(
             mode === "all-questions" ? sectionId : undefined,
             previewMode,
             disableFields,
-            useUpload
+            useUpload,
+            datasets
           )
           defaults[q.id] =
             accumulatedValues?.[q.id] ?? getDefaultValue(q, defaultValues)
@@ -636,7 +689,8 @@ export function useSurveyFormSchema(
           undefined,
           previewMode,
           disableFields,
-          useUpload
+          useUpload,
+          datasets
         )
         defaults[q.id] =
           accumulatedValues?.[q.id] ?? getDefaultValue(q, defaultValues)
@@ -658,5 +712,6 @@ export function useSurveyFormSchema(
     previewMode,
     disableFields,
     useUpload,
+    datasets,
   ])
 }

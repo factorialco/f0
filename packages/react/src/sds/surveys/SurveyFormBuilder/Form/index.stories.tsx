@@ -5,6 +5,7 @@ import { useState } from "react"
 import { withSkipA11y } from "@/lib/storybook-utils/parameters"
 
 import { SurveyFormBuilder } from "."
+import { mockDatasets } from "../../__stories__/mocks"
 import { SurveyFormBuilderElement } from "../types"
 
 const meta: Meta<typeof SurveyFormBuilder> = {
@@ -34,6 +35,7 @@ type Story = StoryObj<typeof SurveyFormBuilder>
 
 export const Default: Story = {
   args: {
+    datasets: mockDatasets,
     elements: [
       {
         type: "question",
@@ -67,6 +69,12 @@ export const Default: Story = {
                 { value: "option-3", label: "Option 3" },
                 { value: "option-4", label: "Option 4" },
               ],
+            },
+            {
+              id: "question-4",
+              title: "Select your reviewer",
+              type: "dropdown-single" as const,
+              datasetKey: "employees",
             },
           ],
         },
@@ -111,6 +119,7 @@ export const WithQuestionWithDuplicateOptions: Story = {
 
 export const WithMultipleSections: Story = {
   args: {
+    datasets: mockDatasets,
     elements: [
       {
         type: "question",
@@ -203,13 +212,19 @@ export const WithMultipleSections: Story = {
               id: "q-growth-1",
               title: "What is your primary career goal for next year?",
               type: "dropdown-single" as const,
-              options: [
-                { value: "promotion", label: "Get promoted" },
-                { value: "lateral-move", label: "Lateral move to new team" },
-                { value: "specialise", label: "Deepen specialisation" },
-                { value: "management", label: "Move into management" },
-                { value: "other", label: "Other" },
-              ],
+              datasetKey: "employees",
+            },
+            {
+              id: "q-growth-dataset-single",
+              title: "Who is your manager?",
+              type: "dropdown-single" as const,
+              datasetKey: "employees",
+            },
+            {
+              id: "q-growth-dataset-multi",
+              title: "Who did you collaborate with?",
+              type: "dropdown-multi" as const,
+              datasetKey: "employees",
             },
             {
               id: "q-growth-2",

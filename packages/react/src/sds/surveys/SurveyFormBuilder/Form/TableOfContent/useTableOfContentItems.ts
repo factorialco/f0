@@ -2,23 +2,25 @@ import { useCallback, useMemo } from "react"
 
 import { IconType } from "@/components/F0Icon/F0Icon"
 import {
+  TOCItem,
+  TOCItemAction,
+} from "@/experimental/Navigation/F0TableOfContent"
+import {
   AcademicCap,
   AlertCircleLine,
+  Check,
+  CheckDouble,
   Delete,
   Hub,
   LayersFront,
 } from "@/icons/app"
-import {
-  TOCItem,
-  TOCItemAction,
-} from "@/experimental/Navigation/F0TableOfContent"
 
+import { questionTypeIconMap } from "../../constants"
+import { useSurveyFormBuilderContext } from "../../Context"
 import {
   RATING_OPTIONS,
   useQuestionActionsFactory,
 } from "../../QuestionTypes/BaseQuestion/ActionsMenu/useQuestionActions"
-import { questionTypeIconMap } from "../../constants"
-import { useSurveyFormBuilderContext } from "../../Context"
 import {
   SurveyFormBuilderElement,
   QuestionElement,
@@ -45,6 +47,8 @@ type UseTableOfContentItemsOptions = {
   questionOptionsLabel: string
   requiredLabel: string
   questionTypeLabel: string
+  singleSelectionLabel: string
+  multiSelectionLabel: string
 }
 
 export const useTableOfContentItems = (
@@ -61,6 +65,8 @@ export const useTableOfContentItems = (
     questionOptionsLabel,
     requiredLabel,
     questionTypeLabel,
+    singleSelectionLabel,
+    multiSelectionLabel,
   } = options
 
   const { deleteElement, onDuplicateElement, disabled, answering } =
@@ -81,6 +87,7 @@ export const useTableOfContentItems = (
       const {
         question,
         currentRatingType,
+        currentDatasetKey,
         disallowOptionalQuestions,
         handleChangeRequired,
         handleSelectQuestionType,
@@ -103,8 +110,12 @@ export const useTableOfContentItems = (
         })
       }
 
-      // Question type submenu
-      const typeChildren: TOCItemAction[] = questionTypes.map((qt) => {
+      // Split question types into regular and dataset types
+      const regularTypes = questionTypes.filter((qt) => !qt.datasetKey)
+      const datasetTypes = questionTypes.filter((qt) => !!qt.datasetKey)
+
+      // Build type children: regular types + dataset sub-menus
+      const typeChildren: TOCItemAction[] = regularTypes.map((qt) => {
         if (qt.questionType === "rating") {
           const ratingChildren: TOCItemAction[] = RATING_OPTIONS.map((ro) => ({
             label: ro.label,
@@ -125,13 +136,71 @@ export const useTableOfContentItems = (
           label: qt.label,
           icon: qt.icon,
           onClick: () => handleSelectQuestionType(qt.questionType),
-          selected: questionType === qt.questionType,
+          selected: questionType === qt.questionType && !currentDatasetKey,
         }
       })
 
-      const selectedTypeLabel = questionTypes.find(
-        (qt) => qt.questionType === questionType
-      )?.label
+      // Group dataset types by datasetKey to avoid duplicates
+      const uniqueDatasets = new Map<
+        string,
+        { label: string; icon: IconType; datasetKey: string }
+      >()
+      for (const dt of datasetTypes) {
+        if (dt.datasetKey && !uniqueDatasets.has(dt.datasetKey)) {
+          uniqueDatasets.set(dt.datasetKey, {
+            label: dt.label,
+            icon: dt.icon,
+            datasetKey: dt.datasetKey,
+          })
+        }
+      }
+
+      if (uniqueDatasets.size > 0) {
+        typeChildren.push({ type: "separator" })
+        for (const [dk, ds] of uniqueDatasets) {
+          typeChildren.push({
+            type: "submenu" as const,
+            label: ds.label,
+            icon: ds.icon,
+            selectedLabel:
+              currentDatasetKey === dk
+                ? questionType === "dropdown-multi"
+                  ? multiSelectionLabel
+                  : singleSelectionLabel
+                : undefined,
+            children: [
+              {
+                label: singleSelectionLabel,
+                icon: Check,
+                onClick: () => handleSelectQuestionType("dropdown-single", dk),
+                selected:
+                  currentDatasetKey === dk &&
+                  questionType === "dropdown-single",
+              },
+              {
+                label: multiSelectionLabel,
+                icon: CheckDouble,
+                onClick: () => handleSelectQuestionType("dropdown-multi", dk),
+                selected:
+                  currentDatasetKey === dk && questionType === "dropdown-multi",
+              },
+            ],
+          })
+        }
+      }
+
+      // Find selected type label (accounts for dataset questions)
+      let selectedTypeLabel: string | undefined
+      if (currentDatasetKey) {
+        const ds = uniqueDatasets.get(currentDatasetKey)
+        if (ds) {
+          selectedTypeLabel = ds.label
+        }
+      } else {
+        selectedTypeLabel = regularTypes.find(
+          (qt) => qt.questionType === questionType
+        )?.label
+      }
 
       actions.push({
         type: "submenu",
@@ -166,6 +235,8 @@ export const useTableOfContentItems = (
       questionOptionsLabel,
       requiredLabel,
       questionTypeLabel,
+      singleSelectionLabel,
+      multiSelectionLabel,
       duplicateQuestionLabel,
       deleteQuestionLabel,
     ]

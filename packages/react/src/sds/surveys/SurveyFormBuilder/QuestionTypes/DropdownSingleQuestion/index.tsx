@@ -1,89 +1,80 @@
-import { useMemo } from "react"
-
-import type { F0Field } from "@/components/F0Form/fields/types"
+import type { F0SelectField } from "@/components/F0Form/fields/select/types"
 
 import { F0FormField } from "@/components/F0FormField"
-import { Input } from "@/experimental/Forms/Fields/Input"
 import { useI18n } from "@/lib/providers/i18n"
+
+import type { DropdownMultiQuestionProps } from "../DropdownMultiQuestion/types"
+import type { DropdownSingleQuestionProps } from "./types"
 
 import { useSurveyFormBuilderContext } from "../../Context"
 import { BaseQuestion, useQuestionDisabled } from "../BaseQuestion"
-import {
-  DropdownSingleQuestionProps,
-  SEARCH_BOX_OPTIONS_THRESHOLD,
-} from "./types"
 
+/**
+ * Unified component for both `dropdown-single` and `dropdown-multi` question
+ * types. Keeping both types in a single component ensures React reconciles
+ * in-place when toggling "Allow multi-selection" in the ActionsMenu, so the
+ * menu stays open and no state is lost.
+ */
 export const DropdownSingleQuestion = ({
-  options,
+  datasetKey,
   showSearchBox: showSearchBoxProp,
   searchBoxPlaceholder,
   ...props
-}: DropdownSingleQuestionProps) => {
-  const { onQuestionChange, answering } = useSurveyFormBuilderContext()
+}: DropdownSingleQuestionProps | DropdownMultiQuestionProps) => {
+  const { onQuestionChange, answering, datasets } =
+    useSurveyFormBuilderContext()
 
   const disabled = useQuestionDisabled(props)
 
   const { t } = useI18n()
 
-  const selectOptions = useMemo(
-    () =>
-      options.map((option) => ({ value: option.value, label: option.label })),
-    [options]
-  )
+  const dataset = datasets?.[datasetKey]
+  if (!dataset) {
+    throw new Error(`Dataset "${datasetKey}" not found for ${props.type}`)
+  }
 
-  const showSearchBox =
-    showSearchBoxProp ?? selectOptions.length > SEARCH_BOX_OPTIONS_THRESHOLD
+  const isMulti = props.type === "dropdown-multi"
+  const showSearchBox = showSearchBoxProp ?? true
 
-  const field: F0Field = useMemo(
-    () => ({
-      id: props.id,
-      type: "select" as const,
-      label: t("surveyFormBuilder.answer.label"),
-      placeholder: t("surveyFormBuilder.answer.dropdownPlaceholder"),
-      options: selectOptions,
-      clearable: !props.required,
-      multiple: false,
-      showSearchBox,
-      searchBoxPlaceholder,
-    }),
-    [
-      props.id,
-      props.required,
-      selectOptions,
-      t,
-      showSearchBox,
-      searchBoxPlaceholder,
-    ]
-  )
+  const field: F0SelectField = {
+    id: props.id,
+    type: "select",
+    label: t("surveyFormBuilder.answer.label"),
+    placeholder:
+      dataset.placeholder ?? t("surveyFormBuilder.answer.dropdownPlaceholder"),
+    source: dataset.dataSource,
+    mapOptions: dataset.mapOptions,
+    icon: dataset.icon,
+    clearable: !props.required,
+    multiple: isMulti,
+    showSearchBox,
+    searchBoxPlaceholder,
+  }
 
   return (
     <BaseQuestion {...props}>
       <div className="flex flex-col items-start px-0.5 [&>div]:w-full">
-        {answering ? (
-          <F0FormField
-            field={field}
-            value={props.value ?? ""}
-            onChange={(value) => {
+        <F0FormField
+          field={field}
+          value={isMulti ? (props.value ?? []) : (props.value ?? "")}
+          onChange={(value) => {
+            if (isMulti) {
+              onQuestionChange?.({
+                id: props.id,
+                type: "dropdown-multi",
+                value: value as string[],
+              })
+            } else {
               onQuestionChange?.({
                 id: props.id,
                 type: "dropdown-single",
                 value: value as string,
               })
-            }}
-            disabled={disabled}
-            hideLabel
-          />
-        ) : (
-          <Input
-            type="text"
-            size="md"
-            value={t("surveyFormBuilder.answer.dropdownPlaceholder")}
-            onChange={() => {}}
-            disabled
-            label={t("surveyFormBuilder.answer.label")}
-            hideLabel={true}
-          />
-        )}
+            }
+          }}
+          disabled={!answering || disabled}
+          hideLabel
+        />
       </div>
     </BaseQuestion>
   )

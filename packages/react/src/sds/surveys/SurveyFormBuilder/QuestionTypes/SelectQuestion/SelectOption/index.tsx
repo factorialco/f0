@@ -147,7 +147,12 @@ export const SelectOption = ({
             !dragEnabled && "cursor-not-allowed"
           )}
         >
-          <div className="flex aspect-square w-6 scale-90 items-center justify-center">
+          <div
+            className={cn(
+              "flex aspect-square scale-90 items-center justify-center",
+              type === "multi-select" ? "w-6" : "w-5"
+            )}
+          >
             <F0Icon icon={Handle} size="sm" />
           </div>
         </div>

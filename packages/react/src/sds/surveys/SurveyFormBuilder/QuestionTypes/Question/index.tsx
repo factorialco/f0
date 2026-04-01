@@ -3,6 +3,7 @@ import type { CheckboxQuestionProps } from "../CheckboxQuestion"
 
 import { CheckboxQuestion } from "../CheckboxQuestion"
 import { DateQuestion, DateQuestionProps } from "../DateQuestion"
+import { DropdownMultiQuestionProps } from "../DropdownMultiQuestion/types"
 import { DropdownSingleQuestion } from "../DropdownSingleQuestion"
 import { DropdownSingleQuestionProps } from "../DropdownSingleQuestion/types"
 import { FileQuestion, FileQuestionProps } from "../FileQuestion"
@@ -19,6 +20,7 @@ export type QuestionProps = BaseQuestionPropsForOtherQuestionComponents &
     | (RatingQuestionProps & { type: "rating" })
     | (SelectQuestionProps & { type: "select" | "multi-select" })
     | (DropdownSingleQuestionProps & { type: "dropdown-single" })
+    | (DropdownMultiQuestionProps & { type: "dropdown-multi" })
     | (NumericQuestionProps & { type: "numeric" })
     | (LinkQuestionProps & { type: "link" })
     | (DateQuestionProps & { type: "date" })
@@ -37,6 +39,7 @@ export const Question = ({ ...props }: QuestionProps) => {
     case "multi-select":
       return <SelectQuestion {...props} />
     case "dropdown-single":
+    case "dropdown-multi":
       return <DropdownSingleQuestion {...props} />
     case "numeric":
       return <NumericQuestion {...props} />

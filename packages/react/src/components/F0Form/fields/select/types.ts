@@ -1,3 +1,4 @@
+import type { IconType } from "@/components/F0Icon"
 import type { F0SelectItemProps } from "@/components/F0Select/types"
 import type {
   DataSourceDefinition,
@@ -63,6 +64,8 @@ interface F0SelectConfigBase {
   showSearchBox?: boolean
   /** Placeholder for the search box */
   searchBoxPlaceholder?: string
+  /** Icon displayed on the left side of the select input */
+  icon?: IconType
 }
 
 /**
