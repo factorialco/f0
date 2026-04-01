@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.429.0](https://github.com/factorialco/f0/compare/f0-react-v1.428.2...f0-react-v1.429.0) (2026-04-01)
+
+
+### Features
+
+* add Storybook MCP server for AI agent access ([#3814](https://github.com/factorialco/f0/issues/3814)) ([7843cc7](https://github.com/factorialco/f0/commit/7843cc72aa02fbedbb075a9b5aa61cb80f3e5ad4))
+
 ## [1.428.2](https://github.com/factorialco/f0/compare/f0-react-v1.428.1...f0-react-v1.428.2) (2026-03-31)
 
 
