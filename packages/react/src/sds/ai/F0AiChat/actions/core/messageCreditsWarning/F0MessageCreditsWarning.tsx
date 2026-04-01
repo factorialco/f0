@@ -10,13 +10,13 @@ export const F0MessageCreditsWarning = ({
 
   return (
     <F0Alert
-      title={translations?.ai?.creditWarning?.messageBanner?.title}
+      title={translations?.ai?.creditWarning.messageBanner?.title}
       variant="warning"
-      description={translations?.ai?.creditWarning?.messageBanner?.description}
+      description={translations?.ai?.creditWarning.messageBanner?.description}
       action={
         actionHref
           ? {
-              label: translations?.ai?.creditWarning?.messageBanner?.actionLabel,
+              label: translations?.ai?.creditWarning.messageBanner?.actionLabel,
               onClick: () => {
                 window.location.href = actionHref
               },
