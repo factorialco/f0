@@ -86,14 +86,15 @@ export const useQuestionTypes = () => {
     isQuestionTypeAllowed(questionType.questionType)
   )
 
-  const datasetQuestionTypes: SurveyQuestionTypeOption[] = Object.entries(
-    datasets ?? {}
-  ).map(([datasetKey, dataset]) => ({
-    label: dataset.title,
-    icon: dataset.icon ?? ChevronDown,
-    questionType: "dropdown-single",
-    datasetKey,
-  }))
+  const datasetQuestionTypes: SurveyQuestionTypeOption[] =
+    isQuestionTypeAllowed("dropdown-single")
+      ? Object.entries(datasets ?? {}).map(([datasetKey, dataset]) => ({
+          label: dataset.title,
+          icon: dataset.icon ?? ChevronDown,
+          questionType: "dropdown-single",
+          datasetKey,
+        }))
+      : []
 
   return [...filteredQuestionTypes, ...datasetQuestionTypes]
 }

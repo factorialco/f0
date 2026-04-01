@@ -13,8 +13,8 @@ import { F0Button } from "@/components/F0Button"
 
 import type { SurveyAnsweringFormProps } from "../types"
 
-import { SurveyFormBuilderElement } from "../../SurveyFormBuilder/types"
 import { mockDatasets } from "../../__stories__/mocks"
+import { SurveyFormBuilderElement } from "../../SurveyFormBuilder/types"
 import { SurveyAnsweringForm } from "../SurveyAnsweringForm"
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))

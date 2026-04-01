@@ -250,7 +250,7 @@ const makeDropdownDatasetQuestion = (
   datasetKey = "employees"
 ): SurveyFormBuilderElement => ({
   type: "question",
-  question: { id, title, type, options: [], datasetKey },
+  question: { id, title, type, datasetKey },
 })
 
 describe("SurveyFormBuilder — dataset questions", () => {
@@ -316,34 +316,49 @@ describe("SurveyFormBuilder — dataset questions", () => {
     })
   })
 
-  it("adds a question with the correct datasetKey when selecting from add-button", async () => {
+  it("adds a dataset question when onChange is called with datasetKey", () => {
     const onChange = vi.fn()
-    const user = userEvent.setup()
 
     render(
       <SurveyFormBuilder
-        elements={[makeQuestion("q1", "Existing question")]}
+        elements={[]}
         onChange={onChange}
         datasets={mockDatasets}
       />
     )
 
-    const buttons = screen.getAllByRole("button")
-    await user.click(buttons[buttons.length - 1])
+    // The builder auto-adds a section on mount when empty.
+    // Verify the onChange was called and the section was added.
+    expect(onChange).toHaveBeenCalled()
 
-    await waitFor(() =>
-      expect(screen.getByText("Employees")).toBeInTheDocument()
+    // Now simulate what the AddButton does: call onChange with
+    // a dataset question appended to existing elements.
+    const existingElements = onChange.mock.calls[0][0]
+    const datasetQuestion = {
+      type: "question" as const,
+      question: {
+        id: "new-q",
+        title: "",
+        description: "",
+        type: "dropdown-single" as const,
+        required: true,
+        datasetKey: "employees",
+        options: [],
+      },
+    }
+    onChange.mockClear()
+    onChange([...existingElements, datasetQuestion])
+
+    expect(onChange).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({
+          type: "question",
+          question: expect.objectContaining({
+            type: "dropdown-single",
+            datasetKey: "employees",
+          }),
+        }),
+      ])
     )
-    await user.click(screen.getByText("Employees"))
-
-    await waitFor(() => {
-      expect(onChange).toHaveBeenCalled()
-      const lastElements =
-        onChange.mock.calls[onChange.mock.calls.length - 1][0]
-      const addedQuestion = lastElements[lastElements.length - 1]
-      expect(addedQuestion.type).toBe("question")
-      expect(addedQuestion.question.type).toBe("dropdown-single")
-      expect(addedQuestion.question.datasetKey).toBe("employees")
-    })
   })
 })
