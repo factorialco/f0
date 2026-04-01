@@ -6,7 +6,7 @@ import { granularityDefinitions } from "@/experimental/OneCalendar/granularities
 import { ExampleComponent } from "../mockData"
 
 const meta = {
-  title: "Data Collection/Navigation Filters",
+  title: "Patterns/Data Collection/Navigation Filters",
   component: ExampleComponent,
   parameters: {
     layout: "padded",

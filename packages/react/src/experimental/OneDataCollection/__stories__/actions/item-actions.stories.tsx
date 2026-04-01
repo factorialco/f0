@@ -7,7 +7,7 @@ import { useDataCollectionSource } from "../../hooks/useDataCollectionSource"
 import { ItemActionsDefinition } from "../../item-actions"
 
 const meta = {
-  title: "Data Collection/Item Actions",
+  title: "Patterns/Data Collection/Item Actions",
   tags: ["no-sidebar", "internal"],
   parameters: {
     layout: "padded",

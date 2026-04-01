@@ -9,7 +9,7 @@ import {
 } from "../../mockData"
 
 const meta = {
-  title: "Data Collection/Visualizations/List",
+  title: "Patterns/Data Collection/Visualizations/List",
   parameters: {
     layout: "padded",
     docs: {

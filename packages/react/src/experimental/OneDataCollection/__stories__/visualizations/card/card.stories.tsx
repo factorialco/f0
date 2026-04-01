@@ -8,7 +8,7 @@ import { mockImage } from "@/testing/mocks/images"
 import { ExampleComponent, getMockVisualizations } from "../../mockData"
 
 const meta = {
-  title: "Data Collection/Visualizations/Card",
+  title: "Patterns/Data Collection/Visualizations/Card",
   parameters: {
     layout: "fullscreen",
     a11y: {

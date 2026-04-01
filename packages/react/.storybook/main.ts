@@ -23,13 +23,18 @@ const config: StorybookConfig = {
   stories: [
     "../docs/Introduction.mdx",
     "../docs/**/*.mdx",
+    // Kits: all stories in src/kits use their title field as-is (no prefix)
+    {
+      directory: "../src/kits",
+      titlePrefix: "",
+    },
     {
       directory: "../src/components",
       titlePrefix: "Components",
     },
     {
       directory: "../src/experimental",
-      titlePrefix: "Components",
+      titlePrefix: "Experimental",
     },
     {
       directory: "../src/ai",

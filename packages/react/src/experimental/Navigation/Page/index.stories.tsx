@@ -16,7 +16,7 @@ import { Page } from "./index"
 type TabsProps = ComponentProps<typeof Tabs>
 
 const meta: Meta<typeof Page> = {
-  title: "Navigation/Page",
+  title: "Patterns/Navigation/Page",
   component: Page,
   tags: ["autodocs", "experimental"],
   parameters: {
