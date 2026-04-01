@@ -1,3 +1,4 @@
-export * from "./OneDateNavigator"
-export * from "./presets"
-export * from "./types"
+/**
+ * @deprecated OneDateNavigator has moved to @/patterns/DateNavigator. Import from there instead.
+ */
+export * from "@/patterns/DateNavigator/index"

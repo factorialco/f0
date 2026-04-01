@@ -1,0 +1,78 @@
+import {
+  Canvas,
+  Meta,
+  Controls,
+  Unstyled,
+  Story,
+} from "@storybook/addon-docs/blocks"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+
+import * as DataCollectionStories from "../index.stories"
+
+<Meta title="Data collection/Pagination" />
+
+# Data collection / Pagination
+
+The pagination automatically divides datasets into pages after reaching a
+predefined number of rows, we recommend 20 items per page. This mechanism
+improves performance and usability when working with large volumes of
+information.
+
+## Behaviour
+
+When the total number of items exceeds the page limit, the system generates
+multiple navigable pages. However, when all the items fit on a single page, the
+pagination interface remains visible but adopts a disabled state.
+
+## Pages
+
+This is the default pagination method. It divides data into discrete pages
+(e.g., 20 items per page) and provides navigation controls to jump between them.
+It’s ideal for datasets where clear segmentation and predictable performance are
+needed. The pagination bar remains visible even when all items fit in a single
+page (but appears disabled).
+
+<Canvas
+  of={DataCollectionStories.WithPagesPagination}
+  meta={DataCollectionStories}
+/>
+
+## Infinite scroll
+
+Infinite scroll loads additional data automatically as the user scrolls down.
+This creates a continuous, fluid browsing experience without explicit page
+navigation. It’s especially useful for large datasets and scenarios where the
+user is expected to consume data in a linear, exploratory manner. A skeleton
+loader or spinner appears near the bottom to indicate loading progress.
+
+> Important: Infinite scroll requires the table (or main visualization wrapper)
+> to be rendered inside a container with a fixed height and overflow: auto. This
+> is essential to detect scroll events or trigger the intersection observer used
+> for loading more data.
+
+> Important: Required to provide an `idProvider` to the `source` prop if the
+> record type does not have an `id` property (default behavior). This is
+> required to avoid duplicate items when appending data.
+>
+> Example:
+>
+> ```tsx
+> const dataSource: DataSource = {
+>   idProvider: (item, index) => item.myId,
+>   ...
+> }
+> ```
+
+```tsx
+<div style={{ height: '900px', overflow: 'auto' }}>
+  <OneDataCollection
+    source={dataSource}
+    visualizations={[{ type: 'table', options: { columns: [...] } }]}
+  />
+</div>
+```
+
+<Canvas
+  of={DataCollectionStories.WithInfiniteScrollPagination}
+  meta={DataCollectionStories}
+/>

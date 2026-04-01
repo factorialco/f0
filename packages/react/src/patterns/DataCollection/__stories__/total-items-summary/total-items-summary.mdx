@@ -1,0 +1,60 @@
+import {
+  Canvas,
+  Meta,
+  Controls,
+  Unstyled,
+  Story,
+} from "@storybook/addon-docs/blocks"
+import LinkTo from "@storybook/addon-links/react"
+import * as TotalItemsSummaryStories from "./total-items-summary.stories"
+
+<Meta of={TotalItemsSummaryStories} />
+
+# Total Items Summary
+
+## Introduction
+
+The Total Items Summary is a component that displays the total number of items
+in the data collection. It is displayed in the top right of the data collection.
+
+## Setting Up Total Items Summary
+
+To enable the Total Items Summary in your data collection component, provide the
+`totalItemSummary` property to the `useDataCollectionSource` hook.
+
+```tsx
+const source = useDataCollectionSource({
+  totalItemSummary: true,
+})
+```
+
+This will display the total number of items in the data collection with the
+default text.
+
+### Example
+
+<Canvas of={TotalItemsSummaryStories.TotalItemsSummary} />
+
+## Customizing the Total Items Summary
+
+You can customize the Total Items Summary by providing a function that takes the
+total number of items as a parameter and returns a string to be displayed.
+
+```tsx
+const source = useDataCollectionSource({
+  totalItemSummary: (totalItems) => `Total items: ${totalItems}`,
+  ...
+})
+```
+
+### Example
+
+<Canvas of={TotalItemsSummaryStories.TotalItemsSummaryCustom} />
+
+## Position of the Total Items Summary
+
+The Total Items Summary is displayed in the top right of the data collection. If
+you have filters, it will be displayed over the filters, in the same row as the
+navigation filters. If not, it will be displayed in the place of the filters.
+
+<Canvas of={TotalItemsSummaryStories.TotalItemsSummaryWithFilters} />

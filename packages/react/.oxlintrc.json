@@ -97,7 +97,8 @@
         "**/f0.ts",
         "**/experimental.ts",
         "**/ai.ts",
-        "**/kits.ts"
+        "**/kits.ts",
+        "**/patterns.ts"
       ],
       "rules": {
         "no-restricted-imports": [

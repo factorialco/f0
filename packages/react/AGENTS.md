@@ -24,6 +24,7 @@ Load the relevant skill before starting work:
 - **f0-storybook-stories** — `.stories.tsx` file patterns. Load when adding or updating stories.
 - **f0-storybook-testing** — play function and axe-playwright a11y test patterns. Load when writing interaction or a11y tests.
 - **f0-experimental-component-migration** — Promoting components from `experimental/` to stable. Load when migrating.
+- **f0-move-component** — Moving components between `src/` category folders (components, experimental, kits, sds, ui…). Load when reorganizing folder structure, given a Markdown table of moves.
 - **f0-pr** — Create PRs with correct title format, PR template body, and gh CLI workflow. Load when opening a pull request.
 - **f0-ai-config-hygiene** — Audits AI config files for instruction duplication. Load when modifying `AGENTS.md`, `copilot-instructions.md`, or any skill file.
 
