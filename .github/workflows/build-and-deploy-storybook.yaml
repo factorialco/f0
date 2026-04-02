@@ -37,9 +37,7 @@ jobs:
         uses: ./.github/actions/setup-node-pnpm
 
       - name: Install dependencies
-        run: |
-          sed -i 's/"workspace:\*"/"latest"/g' packages/react/package.json
-          pnpm install --no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Build Core
         run: pnpm --filter @factorialco/f0-core build
