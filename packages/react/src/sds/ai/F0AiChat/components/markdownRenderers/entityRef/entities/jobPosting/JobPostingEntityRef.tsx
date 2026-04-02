@@ -5,12 +5,12 @@ import type { F0CardProps } from "@/components/F0Card"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 
-import type { PersonProfile } from "./types"
+import type { JobPostingProfile } from "./types"
 
 import { useAiChat } from "../../../../../providers/AiChatStateProvider"
 import { EntityRefHoverCard } from "../../components/EntityRefHoverCard"
 
-const PersonTrigger = forwardRef<HTMLButtonElement, { label: string }>(
+const JobPostingTrigger = forwardRef<HTMLButtonElement, { label: string }>(
   ({ label, ...props }, ref) => (
     <button
       ref={ref}
@@ -21,58 +21,60 @@ const PersonTrigger = forwardRef<HTMLButtonElement, { label: string }>(
       )}
       {...props}
     >
-      @{label}
+      {label}
     </button>
   )
 )
-PersonTrigger.displayName = "PersonTrigger"
+JobPostingTrigger.displayName = "JobPostingTrigger"
 
 /**
- * Inline person entity reference with a hover card showing profile details.
+ * Inline job posting entity reference with a hover card showing posting details.
  *
- * Renders the trigger as a styled @mention. On hover, lazily fetches
- * the employee profile via `entityRefs.resolvers.person` and displays
- * avatar, name, and job title. Optionally links via `entityRefs.urls.person`.
+ * Renders the trigger as a styled link. On hover, lazily fetches
+ * the job posting data via `entityRefs.resolvers.jobPosting` and displays
+ * title, status, and location. Optionally links via `entityRefs.urls.jobPosting`.
  */
-export function PersonEntityRef({ id, label }: { id: string; label: string }) {
+export function JobPostingEntityRef({
+  id,
+  label,
+}: {
+  id: string
+  label: string
+}) {
   const { entityRefs } = useAiChat()
-  const resolver = entityRefs?.resolvers?.person
+  const resolver = entityRefs?.resolvers?.jobPosting
   const i18n = useI18n()
 
-  const personUrl = entityRefs?.urls?.person?.(id)
+  const jobPostingUrl = entityRefs?.urls?.jobPosting?.(id)
 
   const mapToCard = useMemo(
     () =>
-      (profile: PersonProfile): F0CardProps => ({
-        avatar: {
-          type: "person",
-          firstName: profile.firstName,
-          lastName: profile.lastName,
-          src: profile.avatarUrl,
-        },
-        title: `${profile.firstName} ${profile.lastName}`,
-        description: profile.jobTitle,
-        ...(personUrl && {
+      (profile: JobPostingProfile): F0CardProps => ({
+        title: profile.title,
+        description: [profile.status, profile.location]
+          .filter(Boolean)
+          .join(" · "),
+        ...(jobPostingUrl && {
           secondaryActions: {
             label: i18n.t("ai.view"),
-            href: personUrl,
+            href: jobPostingUrl,
           },
         }),
       }),
-    [i18n, personUrl]
+    [i18n, jobPostingUrl]
   )
 
   const fallbackCard = useMemo(
     (): F0CardProps => ({
       title: label,
-      ...(personUrl && {
+      ...(jobPostingUrl && {
         secondaryActions: {
           label: i18n.t("ai.view"),
-          href: personUrl,
+          href: jobPostingUrl,
         },
       }),
     }),
-    [label, i18n, personUrl]
+    [label, i18n, jobPostingUrl]
   )
 
   if (!resolver) {
@@ -82,7 +84,7 @@ export function PersonEntityRef({ id, label }: { id: string; label: string }) {
   return (
     <EntityRefHoverCard
       id={id}
-      trigger={<PersonTrigger label={label} />}
+      trigger={<JobPostingTrigger label={label} />}
       resolver={resolver}
       mapToCard={mapToCard}
       fallbackCard={fallbackCard}

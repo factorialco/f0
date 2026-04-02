@@ -35,7 +35,7 @@ export const ChatTextarea = ({
 }: ChatTextareaProps) => {
   const {
     placeholders,
-    entityResolvers,
+    entityRefs,
     toolHints,
     activeToolHint,
     setActiveToolHint,
@@ -55,7 +55,7 @@ export const ChatTextarea = ({
     inputValue,
     setInputValue,
     cursorPosition,
-    entityResolvers,
+    searchPersons: entityRefs?.resolvers?.searchPersons,
     textareaRef,
   })
 
@@ -348,16 +348,16 @@ export const ChatTextarea = ({
         <div className="flex shrink-0 items-center gap-1">
           {onGetCredits && (
             <F0Button
-              label={translation.ai.creditWarning.getCredits}
+              label={translation.ai.creditWarning.getCredits ?? ""}
               size="sm"
               variant="outline"
-              tooltip={translation.ai.creditWarning.getCredits}
+              tooltip={translation.ai.creditWarning.getCredits ?? ""}
               onClick={onGetCredits}
             />
           )}
           {onDismissCreditWarning && (
             <F0Button
-              label={translation.ai.creditWarning.dismiss}
+              label={translation.ai.creditWarning.dismiss ?? ""}
               size="sm"
               variant="ghost"
               icon={Cross}

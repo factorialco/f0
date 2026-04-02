@@ -1,6 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from "vitest"
 import "@testing-library/jest-dom/vitest"
-
 import {
   zeroRender as render,
   screen,
@@ -8,14 +7,14 @@ import {
   waitFor,
 } from "@/testing/test-utils"
 
-import type { PersonProfile } from "../types"
+import type { CandidateProfile } from "../types"
 
-const mockResolver = vi.fn<(id: string) => Promise<PersonProfile>>()
+const mockResolver = vi.fn<(id: string) => Promise<CandidateProfile>>()
 let mockEntityRefs: {
-  resolvers?: { person?: typeof mockResolver }
-  urls?: { person?: (id: string) => string }
+  resolvers?: { candidate?: typeof mockResolver }
+  urls?: { candidate?: (id: string) => string }
 } = {
-  resolvers: { person: mockResolver },
+  resolvers: { candidate: mockResolver },
 }
 
 vi.mock("../../../../../../providers/AiChatStateProvider", () => ({
@@ -24,32 +23,36 @@ vi.mock("../../../../../../providers/AiChatStateProvider", () => ({
   }),
 }))
 
-import { PersonEntityRef } from "../PersonEntityRef"
+import { CandidateEntityRef } from "../CandidateEntityRef"
 
-const profile: PersonProfile = {
-  id: "42",
-  firstName: "Ana",
-  lastName: "García",
+const profile: CandidateProfile = {
+  id: "77",
+  firstName: "Maria",
+  lastName: "Lopez",
   avatarUrl: "https://example.com/avatar.jpg",
-  jobTitle: "Engineer",
+  source: "LinkedIn",
 }
 
-describe("PersonEntityRef", () => {
+describe("CandidateEntityRef", () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mockEntityRefs = { resolvers: { person: mockResolver } }
+    mockEntityRefs = { resolvers: { candidate: mockResolver } }
   })
 
-  it("renders the @mention trigger button", () => {
-    render(<PersonEntityRef id="42" label="Ana García" />)
-    expect(screen.getByRole("button")).toHaveTextContent("@Ana García")
+  it("renders the trigger button without @ prefix", () => {
+    render(<CandidateEntityRef id="77" label="Maria Lopez" />)
+    const button = screen.getByRole("button")
+    expect(button).toHaveTextContent("Maria Lopez")
+    expect(button.textContent).not.toMatch(/^@/)
   })
 
   it("renders label as plain text when no resolver is available", () => {
     mockEntityRefs = {}
 
-    const { container } = render(<PersonEntityRef id="42" label="Ana García" />)
-    expect(container.querySelector("span")).toHaveTextContent("Ana García")
+    const { container } = render(
+      <CandidateEntityRef id="77" label="Maria Lopez" />
+    )
+    expect(container.querySelector("span")).toHaveTextContent("Maria Lopez")
     expect(screen.queryByRole("button")).not.toBeInTheDocument()
   })
 
@@ -57,13 +60,14 @@ describe("PersonEntityRef", () => {
     const user = userEvent.setup()
     mockResolver.mockResolvedValue(profile)
 
-    render(<PersonEntityRef id="42" label="Ana García" />)
+    render(<CandidateEntityRef id="77" label="Maria Lopez" />)
 
     await user.hover(screen.getByRole("button"))
 
     await waitFor(() => {
-      expect(screen.getByText("Ana García")).toBeInTheDocument()
-      expect(screen.getByText("Engineer")).toBeInTheDocument()
+      // Title appears both in the trigger and the card heading
+      expect(screen.getAllByText("Maria Lopez")).toHaveLength(2)
+      expect(screen.getByText("LinkedIn")).toBeInTheDocument()
     })
   })
 
@@ -71,9 +75,9 @@ describe("PersonEntityRef", () => {
     const user = userEvent.setup()
     mockResolver.mockResolvedValue(profile)
 
-    render(<PersonEntityRef id="42" label="Ana García" />)
+    render(<CandidateEntityRef id="77" label="Maria Lopez" />)
 
-    const trigger = screen.getByText("@Ana García")
+    const trigger = screen.getByText("Maria Lopez")
 
     await user.hover(trigger)
     await waitFor(() => {
@@ -90,7 +94,7 @@ describe("PersonEntityRef", () => {
     const user = userEvent.setup()
     mockResolver.mockReturnValue(new Promise(() => {}))
 
-    render(<PersonEntityRef id="42" label="Ana García" />)
+    render(<CandidateEntityRef id="77" label="Maria Lopez" />)
 
     await user.hover(screen.getByRole("button"))
 
@@ -103,12 +107,12 @@ describe("PersonEntityRef", () => {
     const user = userEvent.setup()
     mockResolver.mockRejectedValue(new Error("Network error"))
 
-    render(<PersonEntityRef id="42" label="Ana García" />)
+    render(<CandidateEntityRef id="77" label="Maria Lopez" />)
 
     await user.hover(screen.getByRole("button"))
 
     await waitFor(() => {
-      expect(screen.getByText("Ana García")).toBeInTheDocument()
+      expect(screen.getByText("Maria Lopez")).toBeInTheDocument()
     })
   })
 })
