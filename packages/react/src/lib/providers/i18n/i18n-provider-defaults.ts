@@ -356,6 +356,7 @@ export const defaultTranslations = {
       typeYourAnswer: "Type your answer…",
       stepOf: "{{current}} of {{total}}",
       custom: "own answer",
+      skipped: "skipped",
     },
     growth: {
       demoCard: {

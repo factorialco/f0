@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react"
 
 import { useI18n } from "@/lib/providers/i18n"
 
+import { buildSummaryMessage } from "./buildSummaryMessage"
 import type {
   ClarifyingQuestionState,
   ClarifyingSelectionMode,
@@ -143,32 +144,27 @@ function ClarifyingQuestionController({
     const isLastStep = stepIndex >= steps.length - 1
 
     if (isLastStep) {
-      // Build structured user message with all answers
-      const parts: string[] = []
-      for (const s of steps) {
-        const inter = getInteraction(interactions, s.question)
-        const labels = s.options
-          .filter((o) => inter.selectedIds.includes(o.id))
-          .map((o) => o.label)
-
-        const isSingle = (s.selectionMode ?? "single") === "single"
-        const includeCustom = isSingle
-          ? inter.selectedIds.length === 0 && inter.customText.trim().length > 0
-          : inter.isCustomActive && inter.customText.trim().length > 0
-
-        if (includeCustom) {
-          labels.push(
-            `(${translation.ai.clarifyingQuestion.custom}) ${inter.customText.trim()}`
-          )
+      const message = buildSummaryMessage(
+        steps.map((s) => {
+          const inter = getInteraction(interactions, s.question)
+          return {
+            question: s.question,
+            options: s.options,
+            selectionMode: s.selectionMode,
+            selectedIds: inter.selectedIds,
+            customText: inter.customText,
+            isCustomActive: inter.isCustomActive,
+          }
+        }),
+        {
+          custom: translation.ai.clarifyingQuestion.custom,
+          skipped: translation.ai.clarifyingQuestion.skipped,
         }
-
-        const answer = labels.length > 0 ? labels.join(", ") : "(skipped)"
-        parts.push(`${s.question} → ${answer}`)
-      }
+      )
 
       dismissedRef.current = true
       setClarifyingQuestion(null)
-      sendMessage(parts.join("\n"))
+      sendMessage(message)
     } else {
       setStepIndex((i) => i + 1)
     }

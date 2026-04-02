@@ -1,6 +1,7 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
 import { useCallback, useEffect, useMemo, useState } from "react"
 
+import { buildSummaryMessage } from "../../../actions/core/clarifyingQuestion/buildSummaryMessage"
 import type {
   ClarifyingQuestionState,
   ClarifyingSelectionMode,
@@ -149,21 +150,21 @@ function useClarifyingQuestionStory(steps: StoryStep[]) {
       setStepIndex(stepIndex + 1)
     } else {
       // Final step — build summary and reset
-      const summaryLines = steps.map((step) => {
-        const inter = getInteraction(interactions, step.question)
-        const labels = step.options
-          .filter((o) => inter.selectedIds.includes(o.id))
-          .map((o) => o.label)
-        const isSingle = step.selectionMode === "single"
-        const includeCustom = isSingle
-          ? inter.selectedIds.length === 0 && !!inter.customText
-          : inter.isCustomActive && !!inter.customText
-        if (includeCustom) {
-          labels.push(`(custom) ${inter.customText}`)
-        }
-        return `${step.question} → ${labels.length > 0 ? labels.join(", ") : "(skipped)"}`
-      })
-      setMessages((prev) => [...prev, ...summaryLines])
+      const message = buildSummaryMessage(
+        steps.map((step) => {
+          const inter = getInteraction(interactions, step.question)
+          return {
+            question: step.question,
+            options: step.options,
+            selectionMode: step.selectionMode,
+            selectedIds: inter.selectedIds,
+            customText: inter.customText,
+            isCustomActive: inter.isCustomActive,
+          }
+        }),
+        { custom: "custom", skipped: "skipped" }
+      )
+      setMessages((prev) => [...prev, message])
       setClarifyingQuestion(null)
       setStepIndex(0)
       setInteractions({})
