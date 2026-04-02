@@ -97,7 +97,9 @@ export * from "../kits/F0Button"
 
 ### Step 4 — Update all imports across the codebase
 
-Replace every occurrence of the old import path with the new canonical path.
+#### 4a — Update `@/` alias imports
+
+Replace every occurrence of the old `@/` alias import path with the new canonical path.
 
 **Dry-run first** (lists affected files without modifying them):
 
@@ -128,6 +130,38 @@ find packages/react/src -type f \( -name "*.ts" -o -name "*.tsx" \) \
 
 ---
 
+#### 4b — Check and fix relative imports inside the moved component
+
+Files inside the moved component may use relative imports that point to sibling folders
+that stayed behind (e.g., `../../../components/Charts/utils/colors`). These break silently
+because `sed` on `@/` paths does not touch relative paths.
+
+**Find broken relative imports inside the moved component:**
+
+```bash
+grep -r "\.\." packages/react/src/<destination>/<ComponentName> \
+  --include="*.ts" --include="*.tsx" | grep "<source>"
+```
+
+**Also check files that were NOT moved but imported FROM the moved component using relative paths:**
+
+```bash
+grep -r "<source>/<ComponentName>" packages/react/src \
+  --include="*.ts" --include="*.tsx" | grep "\.\."
+```
+
+**Fix by converting broken relative paths to `@/` alias paths:**
+
+```bash
+# Example: inside the moved component, relative refs to a sibling that stayed behind
+find packages/react/src/<destination>/<ComponentName> -type f \( -name "*.ts" -o -name "*.tsx" \) \
+  -exec sed -i '' 's|\.\./\.\./\.\./\.<source>/SiblingFolder|@/<source>/SiblingFolder|g' {} +
+```
+
+> **Rule of thumb**: after moving, all cross-component imports inside the destination folder should use `@/` alias paths, never relative paths that cross folder boundaries outside the component itself.
+
+---
+
 ### Step 5 — Verify
 
 Run all checks from `packages/react/`:
@@ -151,6 +185,7 @@ Use this before opening a PR:
 - [ ] `@deprecated` re-export added to `src/<source>/exports.ts`
 - [ ] Re-export uses `export * from "../<destination>/<ComponentName>"`
 - [ ] All `@/<source>/<ComponentName>` imports updated to `@/<destination>/<ComponentName>`
+- [ ] Relative imports inside the moved component inspected — broken cross-boundary relative paths converted to `@/` alias paths
 - [ ] `pnpm tsc` passes with no errors
 - [ ] `pnpm lint` passes with no errors
 - [ ] `pnpm vitest:ci` passes
