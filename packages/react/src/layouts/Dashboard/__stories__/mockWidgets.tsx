@@ -4,7 +4,7 @@ import { F0Chart } from "@/components/Charts/F0Chart"
 import {
   getMockVisualizations,
   ExampleComponent as OneDataCollectionExampleComponent,
-} from "@/experimental/OneDataCollection/__stories__/mockData"
+} from "@/patterns/OneDataCollection/__stories__/mockData"
 
 type ChartOptions = Partial<Omit<EChartsOption, "grid" | "emphasis">>
 

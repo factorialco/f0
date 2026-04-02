@@ -28,24 +28,28 @@ const config: StorybookConfig = {
       titlePrefix: "Components",
     },
     {
+      directory: "../src/patterns",
+      titlePrefix: "Patterns",
+    },
+    {
       directory: "../src/experimental",
-      titlePrefix: "Components",
+      titlePrefix: "Experimental",
     },
     {
-      directory: "../src/ai",
-      titlePrefix: "Components",
-    },
-    {
-      directory: "../src/lib",
-      titlePrefix: "Library",
+      directory: "../src/kits",
+      titlePrefix: "Kits",
     },
     {
       directory: "../src/layouts",
       titlePrefix: "Layouts",
     },
     {
+      directory: "../src/lib",
+      titlePrefix: "Library",
+    },
+    {
       directory: "../src/hooks",
-      titlePrefix: "Hooks",
+      titlePrefix: "Library",
     },
     {
       directory: "../src/sds",

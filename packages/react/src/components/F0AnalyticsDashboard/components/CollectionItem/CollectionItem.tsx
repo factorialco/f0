@@ -7,8 +7,8 @@ import type {
 import type { DropdownItem } from "@/experimental/Navigation/Dropdown"
 import type { RecordType } from "@/hooks/datasource"
 
-import { OneDataCollection } from "@/experimental/OneDataCollection"
-import { useDataCollectionSource } from "@/experimental/OneDataCollection/hooks/useDataCollectionSource"
+import { OneDataCollection } from "@/patterns/OneDataCollection"
+import { useDataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource"
 import { useData } from "@/hooks/datasource/useData"
 
 import type { DashboardCollectionItem } from "../../types"

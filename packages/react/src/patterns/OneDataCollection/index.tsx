@@ -1,0 +1,75 @@
+import { ReactElement } from "react"
+
+import {
+  FiltersDefinition,
+  RecordType,
+  SortingsDefinition,
+} from "@/hooks/datasource"
+import { withDataTestId, WithDataTestIdProps } from "@/lib/data-testid"
+
+import { ItemActionsDefinition } from "./item-actions"
+import { NavigationFiltersDefinition } from "./navigationFilters/types"
+import {
+  OneDataCollectionComp,
+  OneDataCollectionProps,
+} from "./OneDatacollection"
+import { DataCollectionSettingsProvider } from "./Settings/SettingsProvider"
+import { SummariesDefinition } from "./summary"
+import { GroupingDefinition } from "./types"
+
+export * from "./navigationFilters/types"
+export * from "./OneDatacollection"
+
+const DataCollection = <
+  R extends RecordType,
+  Filters extends FiltersDefinition,
+  Sortings extends SortingsDefinition,
+  Summaries extends SummariesDefinition,
+  ItemActions extends ItemActionsDefinition<R>,
+  NavigationFilters extends NavigationFiltersDefinition,
+  Grouping extends GroupingDefinition<R>,
+>(
+  props: OneDataCollectionProps<
+    R,
+    Filters,
+    Sortings,
+    Summaries,
+    ItemActions,
+    NavigationFilters,
+    Grouping
+  >
+) => (
+  <DataCollectionSettingsProvider>
+    <OneDataCollectionComp {...props} />
+  </DataCollectionSettingsProvider>
+)
+
+/**
+ * Generic component type so consumers can use <OneDataCollection<T, R> />.
+ * Preserves dataTestId and OneDataCollection
+ */
+type OneDataCollectionGeneric = <
+  R extends RecordType,
+  Filters extends FiltersDefinition,
+  Sortings extends SortingsDefinition,
+  Summaries extends SummariesDefinition,
+  ItemActions extends ItemActionsDefinition<R>,
+  NavigationFilters extends NavigationFiltersDefinition,
+  Grouping extends GroupingDefinition<R>,
+>(
+  props: OneDataCollectionProps<
+    R,
+    Filters,
+    Sortings,
+    Summaries,
+    ItemActions,
+    NavigationFilters,
+    Grouping
+  > &
+    WithDataTestIdProps
+) => ReactElement | null
+
+const OneDataCollectionWrapped = withDataTestId(DataCollection)
+
+export const OneDataCollection =
+  OneDataCollectionWrapped as unknown as OneDataCollectionGeneric

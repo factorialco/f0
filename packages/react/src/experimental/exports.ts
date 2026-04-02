@@ -28,7 +28,10 @@ export * from "./Navigation/exports"
  */
 export * from "../sds/inbox/OneApprovalHistory"
 export * from "./OneCalendar"
-export * from "./OneDataCollection/exports"
+/**
+ * @deprecated OneDataCollection has moved to @/patterns/OneDataCollection. Import from there instead.
+ */
+export * from "../patterns/OneDataCollection/exports"
 export * from "./OneDateNavigator"
 export * from "./OneEmptyState"
 /**

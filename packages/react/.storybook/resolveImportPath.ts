@@ -25,6 +25,8 @@ const MAIN_ENTRY_PREFIXES = [
   "src/ai/",
   "src/hooks/",
   "src/lib/",
+  "src/kits/",
+  "src/patterns/",
   "src/layouts/",
   "src/sds/surveys/",
   "src/sds/TimeLine/",
