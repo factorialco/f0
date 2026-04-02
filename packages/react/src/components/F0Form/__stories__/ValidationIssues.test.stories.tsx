@@ -8,7 +8,7 @@ import { f0FormField, F0Form } from "../index"
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
 const meta: Meta = {
-  title: "Experimental/F0Form/ValidationIssues",
+  title: "Forms/ValidationIssues",
   component: F0Form,
   tags: ["autodocs", "experimental"],
   parameters: { a11y: { skipCi: true } },

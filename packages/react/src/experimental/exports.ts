@@ -18,7 +18,10 @@ export * from "../sds/ai/Banners/exports"
  * @deprecated Charts has moved to @/kits/Charts. Import from there instead.
  */
 export * from "../kits/Charts/exports"
-export * from "./F0ActionBar"
+/**
+ * @deprecated F0ActionBar has moved to @/components/F0ActionBar. Import from there instead.
+ */
+export * from "../components/F0ActionBar"
 export * from "./F0VersionHistory"
 export * from "./Forms/exports"
 export * from "./Information/exports"
@@ -39,7 +42,10 @@ export * from "../components/OneChip"
  * @deprecated OneDataCollection has moved to @/patterns/OneDataCollection. Import from there instead.
  */
 export * from "../patterns/OneDataCollection/exports"
-export * from "./OneDateNavigator"
+/**
+ * @deprecated OneDateNavigator has moved to @/patterns/OneDateNavigator. Import from there instead.
+ */
+export * from "../patterns/OneDateNavigator"
 export * from "./OneEmptyState"
 /**
  * @deprecated OnePagination has moved to @/ui/OnePagination. Import from there instead.

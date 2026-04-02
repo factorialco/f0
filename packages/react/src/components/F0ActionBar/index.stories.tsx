@@ -13,7 +13,7 @@ import {
 } from "."
 
 const meta: Meta<typeof F0ActionBar> = {
-  title: "Experimental/F0ActionBar",
+  title: "ActionBar",
   component: F0ActionBar,
   parameters: {
     layout: "fullscreen",

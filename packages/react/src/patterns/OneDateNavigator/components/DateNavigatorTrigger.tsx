@@ -18,7 +18,7 @@ import { useI18n } from "@/lib/providers/i18n"
 import { useL10n } from "@/lib/providers/l10n"
 import { cn, focusRing } from "@/lib/utils"
 
-import { GranularityDefinitionKey } from "../../OneCalendar/granularities"
+import { GranularityDefinitionKey } from "@/experimental/OneCalendar/granularities"
 import { DatePickerValue } from "../types"
 
 type DateNavigatorTriggerProps = {

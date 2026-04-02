@@ -6,8 +6,8 @@ import { expect, within } from "storybook/test"
 import { F0Button } from "@/components/F0Button"
 import { ApplicationFrame } from "@/patterns/ApplicationFrame"
 import ApplicationFrameStoryMeta from "@/patterns/ApplicationFrame/index.stories"
-import { ResourceHeader } from "@/experimental/Information/Headers/ResourceHeader"
-import { Default as ResourceHeaderDefault } from "@/experimental/Information/Headers/ResourceHeader/index.stories"
+import { ResourceHeader } from "@/patterns/ResourceHeader"
+import { Default as ResourceHeaderDefault } from "@/patterns/ResourceHeader/index.stories"
 import {
   OnePersonListItem,
   OnePersonListItemProps,

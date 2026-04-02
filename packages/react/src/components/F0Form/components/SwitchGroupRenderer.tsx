@@ -6,7 +6,7 @@ import { F0Alert } from "@/components/F0Alert"
 import {
   CardSelectableContainer,
   type CardSelectableItem,
-} from "@/experimental/Forms/CardSelectable"
+} from "@/components/CardSelectable"
 import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 import {
   FormField as FormFieldPrimitive,

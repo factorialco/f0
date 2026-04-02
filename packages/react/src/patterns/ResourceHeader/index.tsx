@@ -2,7 +2,7 @@ import { ComponentProps } from "react"
 
 import { experimentalComponent } from "@/lib/experimental"
 
-import { BaseHeader } from "../BaseHeader"
+import { BaseHeader } from "@/experimental/Information/Headers/BaseHeader"
 
 type BaseHeaderProps = ComponentProps<typeof BaseHeader>
 

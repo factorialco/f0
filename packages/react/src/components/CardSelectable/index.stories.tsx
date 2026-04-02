@@ -11,7 +11,7 @@ import { CardSelectableContainer } from "./index"
 
 // Use single selection props for the meta type - stories can override for multiple
 const meta: Meta<CardSelectableSingleProps<string>> = {
-  title: "Experimental/Forms/CardSelectable",
+  title: "CardSelectable",
   component: CardSelectableContainer,
   tags: ["autodocs", "experimental"],
   parameters: {

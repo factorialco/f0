@@ -5,15 +5,9 @@ import { fn } from "storybook/test"
 
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
-import * as Icon from "../../../../icons/app"
-import {
-  Archive,
-  Comment,
-  Download,
-  ExternalLink,
-  Pencil,
-} from "../../../../icons/app"
-import { PrimaryDropdownAction } from "../../utils"
+import * as Icon from "@/icons/app"
+import { Archive, Comment, Download, ExternalLink, Pencil } from "@/icons/app"
+import { PrimaryDropdownAction } from "@/experimental/Information/utils"
 import { ResourceHeader } from "./index"
 
 const meta: Meta<typeof ResourceHeader> = {
@@ -57,6 +51,7 @@ export default meta
 type Story = StoryObj<typeof ResourceHeader>
 
 export const Default: Story = {
+  tags: ["!dev"],
   args: {
     title: "Senior Product Designer",
     description:
@@ -139,6 +134,7 @@ export const Default: Story = {
 }
 
 export const Simple: Story = {
+  tags: ["!dev"],
   args: {
     ...Default.args,
     status: undefined,
@@ -146,6 +142,7 @@ export const Simple: Story = {
 }
 
 export const Metadata: Story = {
+  tags: ["!dev"],
   args: {
     ...Default.args,
     primaryAction: undefined,
@@ -213,6 +210,7 @@ export const Metadata: Story = {
 }
 
 export const WithOtherActions: Story = {
+  tags: ["!dev"],
   args: {
     ...Default.args,
     secondaryActions: [
@@ -246,6 +244,7 @@ export const WithOtherActions: Story = {
 }
 
 export const WithDropdownAction: Story = {
+  tags: ["!dev"],
   args: {
     ...Default.args,
     primaryAction: {
@@ -286,6 +285,7 @@ export const WithDropdownAction: Story = {
 }
 
 export const CompanyHeader: Story = {
+  tags: ["!dev"],
   args: {
     title: "Factorial",
     description: "HR Software to Empower Your Team",
@@ -332,6 +332,7 @@ export const CompanyHeader: Story = {
 }
 
 export const PersonHeader: Story = {
+  tags: ["!dev"],
   args: {
     title: "René Galindo",
     description: "Product Design Lead",
@@ -386,6 +387,7 @@ export const PersonHeader: Story = {
 }
 
 export const EmojiHeader: Story = {
+  tags: ["!dev"],
   args: {
     title: "Summer Party 2024",
     description: "Annual company summer celebration event",
@@ -431,6 +433,7 @@ export const EmojiHeader: Story = {
 }
 
 export const TeamHeader: Story = {
+  tags: ["!dev"],
   args: {
     title: "Product designers",
     description: "Rectangle drawers and post-it stickers",
@@ -504,6 +507,7 @@ export const TeamHeader: Story = {
 }
 
 export const WithLongDescription: Story = {
+  tags: ["!dev"],
   args: {
     ...Default.args,
     description:
@@ -512,6 +516,7 @@ export const WithLongDescription: Story = {
 }
 
 export const NoDescription: Story = {
+  tags: ["!dev"],
   args: {
     title: "Product designers",
     avatar: {
@@ -565,6 +570,7 @@ export const NoDescription: Story = {
 }
 
 export const DeactivatedEmployee: Story = {
+  tags: ["!dev"],
   args: {
     ...PersonHeader.args,
     title: "John Doe",
@@ -582,6 +588,7 @@ export const DeactivatedEmployee: Story = {
 type ResourceHeaderProps = ComponentProps<typeof ResourceHeader>
 
 export const Snapshot: Story = {
+  tags: ["!dev"],
   parameters: withSnapshot({}),
   render: () => {
     return (

@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { ProgressBarDuo } from "./index"
 
 const meta: Meta<typeof ProgressBarDuo> = {
-  title: "Charts/ProgressBarDuo",
+  title: "Widgets/Charts/ProgressBarDuo",
   component: ProgressBarDuo,
   tags: ["autodocs", "experimental"],
   args: {
