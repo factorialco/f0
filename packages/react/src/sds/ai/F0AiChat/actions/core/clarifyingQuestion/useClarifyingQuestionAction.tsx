@@ -3,7 +3,6 @@ import { useEffect, useRef, useState } from "react"
 
 import { useI18n } from "@/lib/providers/i18n"
 
-import { buildSummaryMessage } from "./buildSummaryMessage"
 import type {
   ClarifyingQuestionState,
   ClarifyingSelectionMode,
@@ -11,6 +10,7 @@ import type {
 } from "./types"
 
 import { useAiChat } from "../../../providers/AiChatStateProvider"
+import { buildSummaryMessage } from "./buildSummaryMessage"
 
 // ---------------------------------------------------------------------------
 // Normalize raw args from the AI backend

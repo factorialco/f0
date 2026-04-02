@@ -1,13 +1,15 @@
+import { Markdown } from "@copilotkit/react-ui"
 import { Meta, StoryObj } from "@storybook/react-vite"
 import { useCallback, useEffect, useMemo, useState } from "react"
 
-import { buildSummaryMessage } from "../../../actions/core/clarifyingQuestion/buildSummaryMessage"
 import type {
   ClarifyingQuestionState,
   ClarifyingSelectionMode,
 } from "../../../actions/core/clarifyingQuestion/types"
 
 import { F0AiChatProvider, useAiChat } from "../../.."
+import { buildSummaryMessage } from "../../../actions/core/clarifyingQuestion/buildSummaryMessage"
+import { markdownRenderers } from "../../markdownRenderers"
 import { ChatTextarea } from "../ChatTextarea"
 
 // ---------------------------------------------------------------------------
@@ -229,17 +231,14 @@ const StoryShell = ({
   messages: string[]
 }) => (
   <div className="w-[360px] space-y-4">
-    <div className="bg-gray-50 h-32 overflow-y-auto rounded-lg border p-4">
+    <div className="overflow-y-auto rounded-lg border p-4">
       {messages.length === 0 ? (
-        <p className="text-gray-500 text-sm">{description}</p>
+        <Markdown content={description} components={markdownRenderers} />
       ) : (
-        <div className="space-y-2">
-          {messages.map((msg, index) => (
-            <div key={index} className="text-sm font-medium">
-              {msg}
-            </div>
-          ))}
-        </div>
+        <Markdown
+          content={messages.map((msg) => msg).join(" ")}
+          components={markdownRenderers}
+        />
       )}
     </div>
     <ChatTextarea
