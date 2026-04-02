@@ -24,7 +24,7 @@ import {
   TextStyleExtension,
   TypographyExtension,
   UnderlineExtension,
-} from "@/experimental/RichText/CoreEditor"
+} from "@/components/RichText/CoreEditor"
 import { Skeleton } from "@/ui/skeleton"
 
 export type AIButton = {

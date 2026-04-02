@@ -16,7 +16,7 @@ import {
   MentionedUser,
   MentionsConfig,
   Toolbar,
-} from "@/experimental/RichText/CoreEditor"
+} from "@/components/RichText/CoreEditor"
 
 import { DataTestIdWrapper } from "@/lib/data-testid"
 

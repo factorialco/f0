@@ -79,10 +79,14 @@ export * from "./tags/exports"
  * @deprecated Await has moved to @/lib/Await. Import from there instead.
  */
 export * from "../lib/Await"
-export * from "./Utilities/F0GridStack"
+/**
+ * @deprecated F0GridStack has moved to @/lib/F0GridStack. Import from there instead.
+ */
+export * from "../lib/F0GridStack"
 export * from "./F0TableOfContentPopover"
 export * from "./OneCalendar"
 export * from "./OneEmptyState"
+export * from "./RichText/exports"
 export * from "../sds/surveys/exports"
 /**
  * @deprecated UpsellingKit has moved to @/sds/UpsellingKit. Import from there instead.

@@ -14,7 +14,7 @@ import {
   TextStyleExtension,
   TypographyExtension,
   UnderlineExtension,
-} from "@/experimental/RichText/CoreEditor"
+} from "@/components/RichText/CoreEditor"
 
 export const createAIBlockEditorExtensions = () => {
   return [

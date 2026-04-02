@@ -17,7 +17,7 @@ import {
   createCharacterCountExtension,
   createMentionExtensions,
   createPlaceholderExtension,
-} from "@/experimental/RichText/CoreEditor"
+} from "@/components/RichText/CoreEditor"
 
 interface ExtensionsConfigurationProps {
   mentionsConfig?: MentionsConfig
