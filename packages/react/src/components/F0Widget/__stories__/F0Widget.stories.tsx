@@ -10,7 +10,7 @@ import { F0Widget } from "../"
 
 const meta: Meta<typeof F0Widget> = {
   component: F0Widget,
-  title: "Widget",
+  title: "Kits/Widgets/Widget",
   parameters: {
     layout: "centered",
   },

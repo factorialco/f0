@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { SearchFilter } from "../SearchFilter"
 
 const meta = {
-  title: "FilterPicker/Filters/SearchFilter",
+  title: "Patterns/Filters/FilterPicker/Filters/SearchFilter",
   component: SearchFilter,
   parameters: {
     layout: "centered",

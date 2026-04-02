@@ -6,7 +6,7 @@ import * as Icons from "../../../../icons/app"
 import { Menu } from "./index"
 
 const meta = {
-  title: "Sidebar/Menu",
+  title: "Patterns/Navigation/Sidebar/Menu",
   component: Menu,
   parameters: {
     layout: "centered",

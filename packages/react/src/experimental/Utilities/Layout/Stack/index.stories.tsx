@@ -4,7 +4,7 @@ import { Placeholder } from "../../../../lib/storybook-utils/placeholder"
 import { Stack } from "./index"
 
 const meta = {
-  title: "Layout/Blocks/Stack",
+  title: "Patterns/Layout/Stack",
   component: Stack,
   tags: ["autodocs", "experimental"],
   render: (args) => (

@@ -8,7 +8,7 @@ import {
 import { WidgetInboxList, WidgetInboxListProps } from "./index"
 
 const meta: Meta<WidgetInboxListProps> = {
-  title: "Widgets/WidgetInboxList",
+  title: "Kits/Widgets/WidgetInboxList",
   component: WidgetInboxList,
   tags: ["autodocs", "experimental"],
   parameters: {

@@ -9,7 +9,7 @@ import { DashboardWidget } from "../typings"
 const _ = React
 
 // Mock F0GridStack - must be inside vi.mock factory due to hoisting
-vi.mock("@/components/Utilities/F0GridStack/F0GridStack", () => {
+vi.mock("@/patterns/GridStack/F0GridStack", () => {
   const mockF0GridStackFn = vi.fn(({ options, widgets }) => {
     return (
       <div
@@ -54,8 +54,7 @@ describe("Dashboard", () => {
 
   beforeEach(async () => {
     vi.clearAllMocks()
-    const module =
-      await import("../../../components/Utilities/F0GridStack/F0GridStack")
+    const module = await import("@/patterns/GridStack/F0GridStack")
     mockF0GridStack = vi.mocked(module.F0GridStack)
   })
 

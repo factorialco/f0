@@ -12,7 +12,7 @@ import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { F0WizardForm, useF0FormDefinition } from "../index"
 
 const meta: Meta<typeof F0WizardForm> = {
-  title: "Forms/F0WizardForm",
+  title: "Patterns/Forms/F0WizardForm",
   component: F0WizardForm,
   parameters: {
     layout: "fullscreen",

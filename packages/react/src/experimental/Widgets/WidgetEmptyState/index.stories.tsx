@@ -6,7 +6,7 @@ import { Placeholder as PlaceholderIcon } from "../../../icons/app"
 import { WidgetEmptyState } from "./index"
 
 const meta: Meta<typeof WidgetEmptyState> = {
-  title: "Widgets/WidgetEmptyState",
+  title: "Kits/Widgets/WidgetEmptyState",
   component: WidgetEmptyState,
   tags: ["autodocs", "experimental"],
 }

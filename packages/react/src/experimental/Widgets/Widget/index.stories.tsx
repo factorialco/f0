@@ -9,7 +9,7 @@ import { Placeholder } from "@/lib/storybook-utils/placeholder"
 import { Widget } from "./index"
 
 const meta: Meta = {
-  title: "Widgets/Widget",
+  title: "Kits/Widgets/Widget",
   component: Widget,
   parameters: {
     layout: "centered",

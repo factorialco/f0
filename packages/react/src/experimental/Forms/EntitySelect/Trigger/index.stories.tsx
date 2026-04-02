@@ -8,7 +8,7 @@ import { Trigger } from "./index"
 
 const meta: Meta = {
   component: Trigger,
-  title: "EntitySelect/Trigger",
+  title: "Deprecated/EntitySelect/Trigger",
   parameters: {
     layout: "centered",
   },

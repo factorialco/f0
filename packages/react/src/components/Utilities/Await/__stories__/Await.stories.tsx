@@ -40,7 +40,7 @@ const ExampleComponent = (args: Story["args"]) => {
 }
 
 const meta = {
-  title: "Await",
+  title: "Library/Await",
   component: Await,
   argTypes: {
     fallback: {

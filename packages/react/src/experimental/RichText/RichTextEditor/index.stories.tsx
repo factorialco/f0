@@ -6,7 +6,7 @@ import { EnhancementOption, FILE_TYPES, resultType, RichTextEditor } from "."
 
 const meta = {
   component: RichTextEditor,
-  title: "Rich text/RichTextEditor",
+  title: "Components/TextEditor/RichTextEditor",
   tags: ["experimental"],
   argTypes: {
     title: {

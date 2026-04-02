@@ -17,7 +17,7 @@ import { PrimaryDropdownAction } from "../../utils"
 import { ResourceHeader } from "./index"
 
 const meta: Meta<typeof ResourceHeader> = {
-  title: "Resource header",
+  title: "Patterns/ResourceHeader",
   component: ResourceHeader,
   tags: ["stable"],
   parameters: {

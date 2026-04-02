@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { SidebarIcon } from "./index"
 
 const meta: Meta<typeof SidebarIcon> = {
-  title: "Sidebar/Icon",
+  title: "Patterns/Navigation/Sidebar/Icon",
   component: SidebarIcon,
   tags: ["autodocs", "experimental", "no-sidebar"],
 }

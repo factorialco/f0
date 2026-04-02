@@ -11,7 +11,7 @@ import { navTargets } from "@/ui/Action"
 import { F0Button } from "../F0Button"
 
 const meta = {
-  title: "Button",
+  title: "Components/Button",
   component: F0Button,
   parameters: {
     layout: "centered",

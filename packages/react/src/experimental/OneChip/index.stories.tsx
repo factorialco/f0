@@ -7,7 +7,7 @@ import { Chip } from "./index"
 
 const meta = {
   component: Chip,
-  title: "Chip",
+  title: "Components/Chip",
   parameters: {
     layout: "centered",
   },

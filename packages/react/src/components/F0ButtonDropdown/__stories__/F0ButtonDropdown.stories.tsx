@@ -14,7 +14,7 @@ import {
 } from "../types.ts"
 
 const meta = {
-  title: "ButtonDropdown",
+  title: "Components/Button/ButtonDropdown",
   component: F0ButtonDropdown,
   parameters: {
     layout: "centered",

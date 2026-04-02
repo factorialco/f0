@@ -4,7 +4,7 @@ import { useState, useCallback, useRef } from "react"
 import { z } from "zod"
 
 import { F0Button } from "@/components/F0Button"
-import { F0Dialog } from "@/components/F0Dialog"
+import { F0Dialog } from "@/patterns/Dialog/F0Dialog"
 import { useF0FormDefinition } from "@/components/F0WizardForm"
 import { createDataSourceDefinition } from "@/hooks/datasource"
 import { ExternalLink, Plus, Settings } from "@/icons/app"
@@ -27,7 +27,7 @@ import {
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
 const meta: Meta = {
-  title: "Forms/F0Form",
+  title: "Patterns/Forms/F0Form",
   component: F0Form,
   tags: ["autodocs"],
   parameters: { a11y: { skipCi: true } },

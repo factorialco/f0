@@ -56,7 +56,7 @@ const defaultArgs: EntitySelectProps<string> = {
 
 const meta: Meta<typeof EntitySelect> = {
   component: EntitySelect,
-  title: "EntitySelect/EntitySelect",
+  title: "Deprecated/EntitySelect/EntitySelect",
   parameters: {
     layout: "centered",
   },

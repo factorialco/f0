@@ -14,7 +14,7 @@ import type { InFilterOptionItem, InFilterOptions } from "../types"
 import { InFilter } from "../InFilter"
 
 const meta = {
-  title: "FilterPicker/Filters/InFilter",
+  title: "Patterns/Filters/FilterPicker/Filters/InFilter",
   component: InFilter,
   parameters: {
     layout: "centered",

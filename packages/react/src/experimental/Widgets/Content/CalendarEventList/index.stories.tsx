@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { CalendarEventList } from "./index"
 
 const meta: Meta = {
-  title: "Widgets/Content/CalendarEventList",
+  title: "Kits/Widgets/Content/CalendarEventList",
   component: CalendarEventList,
   tags: ["autodocs", "experimental"],
   parameters: {

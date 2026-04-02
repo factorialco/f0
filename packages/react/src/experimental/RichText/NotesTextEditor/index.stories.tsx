@@ -8,7 +8,7 @@ import { AcademicCap, List, Pencil, Placeholder } from "@/icons/app"
 import { NotesTextEditor, NotesTextEditorSkeleton } from "./index"
 
 const meta: Meta<typeof NotesTextEditor> = {
-  title: "Rich text/NotesTextEditor",
+  title: "Patterns/NotesTextEditor",
   component: NotesTextEditor,
   tags: ["experimental"],
 }

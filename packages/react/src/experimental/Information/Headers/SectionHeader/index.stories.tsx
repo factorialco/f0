@@ -11,7 +11,7 @@ import { SectionHeader } from "./index"
 
 const meta: Meta<typeof SectionHeader> = {
   component: SectionHeader,
-  title: "Section header",
+  title: "Patterns/SectionHeader",
   tags: ["experimental"],
   parameters: {
     layout: "padded",

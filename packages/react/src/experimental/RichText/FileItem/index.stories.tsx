@@ -8,7 +8,7 @@ import { FileItem } from "."
 
 const meta = {
   component: FileItem,
-  title: "Rich text/FileItem",
+  title: "Deprecated/RichText/FileItem",
 } satisfies Meta<typeof FileItem>
 
 export default meta

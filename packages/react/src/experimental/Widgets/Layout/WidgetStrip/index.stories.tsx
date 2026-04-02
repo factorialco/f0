@@ -31,7 +31,7 @@ const widgets = [
 /* eslint-enable react/jsx-key */
 
 const meta = {
-  title: "Widgets/Layout/WidgetStrip",
+  title: "Kits/Widgets/Layout/WidgetStrip",
   component: WidgetStrip,
   tags: ["autodocs", "experimental"],
   args: {

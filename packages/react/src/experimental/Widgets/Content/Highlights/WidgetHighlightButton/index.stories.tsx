@@ -4,7 +4,7 @@ import { InfoCircle as InfoCircleIcon } from "../../../../../icons/app"
 import { WidgetHighlightButton, WidgetHighlightButtonProps } from "./index"
 
 const meta: Meta<WidgetHighlightButtonProps> = {
-  title: "Widgets/WidgetHighlightButton",
+  title: "Kits/Widgets/WidgetHighlightButton",
   component: WidgetHighlightButton,
   tags: ["autodocs", "experimental"],
   parameters: {

@@ -4,7 +4,7 @@ import { ProgressBarDuo } from "../ProgressBarDuo"
 import { TwoColumnsList } from "./index"
 
 const meta: Meta = {
-  title: "Widgets/Content/TwoColumnsList",
+  title: "Kits/Widgets/Content/TwoColumnsList",
   component: TwoColumnsList,
   tags: ["autodocs", "experimental"],
   parameters: {

@@ -4,7 +4,7 @@ import { Placeholder } from "../../../../../icons/app"
 import { WidgetSimpleListItem, WidgetSimpleListItemProps } from "./index"
 
 const meta: Meta<WidgetSimpleListItemProps> = {
-  title: "Widgets/WidgetSimpleListItem",
+  title: "Kits/Widgets/WidgetSimpleListItem",
   component: WidgetSimpleListItem,
   tags: ["autodocs", "experimental"],
   parameters: {

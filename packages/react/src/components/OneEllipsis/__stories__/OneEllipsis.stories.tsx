@@ -5,7 +5,7 @@ import { useId, useState } from "react"
 import { OneEllipsis, Tag, tags } from "../OneEllipsis"
 
 const meta = {
-  title: "Ellipsis",
+  title: "Library/Ellipsis",
   component: OneEllipsis,
   tags: ["autodocs", "experimental"],
   parameters: {

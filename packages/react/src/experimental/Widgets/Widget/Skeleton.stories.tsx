@@ -5,7 +5,7 @@ import { ComponentProps } from "react"
 import { Widget } from "./index"
 
 const meta: Meta<ComponentProps<typeof Widget.Skeleton>> = {
-  title: "Widgets/Widget/Skeleton",
+  title: "Kits/Widgets/Widget/Skeleton",
   component: Widget.Skeleton,
   tags: ["autodocs", "experimental"],
   parameters: {

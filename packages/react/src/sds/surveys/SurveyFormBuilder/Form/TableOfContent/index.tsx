@@ -1,6 +1,6 @@
 import { useCallback, useContext } from "react"
 
-import { F0DialogContext } from "@/components/F0Dialog/components/F0DialogProvider"
+import { F0DialogContext } from "@/patterns/Dialog/F0Dialog/components/F0DialogProvider"
 import { F0TableOfContentPopover } from "@/components/F0TableOfContentPopover/F0TableOfContentPopover"
 import { IdStructure } from "@/experimental/Navigation/F0TableOfContent/types"
 import { useI18n } from "@/lib/providers/i18n"

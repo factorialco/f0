@@ -14,7 +14,7 @@ const defaultArgs = {
 
 const meta: Meta = {
   component: ListTag,
-  title: "EntitySelect/ListTag",
+  title: "Deprecated/EntitySelect/ListTag",
   parameters: {
     layout: "centered",
   },

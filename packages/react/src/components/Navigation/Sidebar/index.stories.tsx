@@ -40,7 +40,7 @@ const Header = ({
 }
 
 const meta: Meta<typeof Sidebar> = {
-  title: "Navigation/Sidebar",
+  title: "Patterns/Navigation/Sidebar",
   component: Sidebar,
   tags: ["autodocs", "experimental", "internal"],
   parameters: {

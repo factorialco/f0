@@ -16,7 +16,7 @@ import { predefinedPresets } from "../presets"
 import { DatePickerValue } from "../types"
 
 const meta = {
-  title: "DateNavigator",
+  title: "Patterns/DateNavigator",
   component: OneDateNavigator,
   parameters: {
     docs: {

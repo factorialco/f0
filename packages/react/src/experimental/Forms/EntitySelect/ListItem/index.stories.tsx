@@ -9,7 +9,7 @@ import { EntitySelectListItem } from "./index"
 
 const meta: Meta = {
   component: EntitySelectListItem,
-  title: "EntitySelect/ListItem",
+  title: "Deprecated/EntitySelect/ListItem",
   parameters: {
     layout: "centered",
   },

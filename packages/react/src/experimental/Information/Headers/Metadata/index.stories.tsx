@@ -6,7 +6,7 @@ import * as Icon from "../../../../icons/app"
 import { Metadata } from "./index"
 
 const meta: Meta<typeof Metadata> = {
-  title: "Resource header/Metadata",
+  title: "Patterns/ResourceHeader/Metadata",
   component: Metadata,
   parameters: {
     layout: "padded",

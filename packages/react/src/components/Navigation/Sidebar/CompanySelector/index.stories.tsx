@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { CompanySelector } from "./index"
 
 const meta: Meta<typeof CompanySelector> = {
-  title: "Sidebar/CompanySelector",
+  title: "Patterns/Navigation/Sidebar/CompanySelector",
   component: CompanySelector,
   tags: ["autodocs", "experimental", "no-sidebar"],
   decorators: [

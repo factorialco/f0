@@ -7,7 +7,7 @@ import F0ButtonToggleStories from "./F0ButtonToggle.stories"
 
 const meta = {
   ...F0ButtonToggleStories,
-  title: "ButtonToggle/Internal",
+  title: "Components/Button/ButtonToggle/Internal",
   component: F0ButtonToggleInternal,
   tags: ["autodocs", "internal"],
   parameters: {

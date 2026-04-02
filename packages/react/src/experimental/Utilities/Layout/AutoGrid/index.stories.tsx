@@ -4,7 +4,7 @@ import { Placeholder } from "../../../../lib/storybook-utils/placeholder"
 import { AutoGrid } from "./index"
 
 const meta = {
-  title: "Layout/Blocks/AutoGrid",
+  title: "Patterns/Layout/AutoGrid",
   component: AutoGrid,
   tags: ["autodocs", "experimental"],
   args: {

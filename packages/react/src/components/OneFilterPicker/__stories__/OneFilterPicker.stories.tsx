@@ -34,7 +34,7 @@ import {
 } from "./mockData"
 
 const meta = {
-  title: "FilterPicker",
+  title: "Patterns/Filters/FilterPicker",
   component: (props: OneFilterPickerRootProps<FiltersDefinition>) => {
     return <OneFilterPickerComponent {...props} />
   },

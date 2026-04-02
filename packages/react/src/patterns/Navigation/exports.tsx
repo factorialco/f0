@@ -4,7 +4,7 @@
 export * from "../../examples/ApplicationFrame"
 export { useSidebar } from "../../examples/ApplicationFrame/FrameProvider"
 export * from "./Carousel"
-export * from "./DaytimePage"
+export * from "../../sds/Home/DaytimePage"
 export * from "./Dropdown"
 export * from "./F0TableOfContent"
 export * from "./Header"

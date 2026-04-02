@@ -6,7 +6,7 @@ import { Placeholder } from "../../../lib/storybook-utils/placeholder"
 import { WidgetSection } from "./index"
 
 const meta: Meta = {
-  title: "Widgets/WidgetSection",
+  title: "Kits/Widgets/WidgetSection",
   component: WidgetSection,
   tags: ["autodocs", "experimental"],
   parameters: {

@@ -10,7 +10,7 @@ import type {
 } from "@/components/F0Form/types"
 import type { RenderCustomFieldFunction } from "@/components/F0Form/types"
 
-import { DialogWidth } from "@/components/F0Dialog"
+import { DialogWidth } from "@/patterns/Dialog/F0Dialog"
 
 export type F0FormSchema<T extends ZodRawShape = ZodRawShape> =
   | z.ZodObject<T>

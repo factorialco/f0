@@ -7,7 +7,7 @@ import { BarChartWidget } from "@/experimental/Widgets/Charts/BarChartWidget"
 import { DynamicCarousel } from "./index"
 
 const meta: Meta<typeof DynamicCarousel> = {
-  title: "Navigation/Carousel/DynamicCarousel",
+  title: "Patterns/Navigation/Carousel/DynamicCarousel",
   component: DynamicCarousel,
   tags: ["autodocs", "experimental"],
 }

@@ -14,7 +14,7 @@ import {
 import { Search } from "../../../../../../icons/app"
 import { BreadcrumbSelect } from "./index"
 const meta: Meta<typeof BreadcrumbSelect> = {
-  title: "Navigation/BreadcrumbSelect",
+  title: "Patterns/Navigation/BreadcrumbSelect",
   component: BreadcrumbSelect,
   tags: ["autodocs", "internal"],
   parameters: {

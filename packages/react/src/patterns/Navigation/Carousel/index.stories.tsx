@@ -8,7 +8,7 @@ import { BarChartWidget } from "@/experimental/Widgets/Charts/BarChartWidget"
 import { Carousel } from "./index"
 
 const meta: Meta<typeof Carousel> = {
-  title: "Navigation/Carousel/Carousel",
+  title: "Patterns/Navigation/Carousel/Carousel",
   component: Carousel,
   argTypes: {
     autoplay: { control: "boolean" },

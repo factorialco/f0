@@ -53,7 +53,7 @@ function useMockUpload(): FileUploadHookReturn {
 }
 
 const meta: Meta<typeof F0FormField> = {
-  title: "Forms/F0FormField",
+  title: "Patterns/Forms/F0FormField",
   component: F0FormField,
   tags: ["autodocs"],
   parameters: { a11y: { skipCi: true } },

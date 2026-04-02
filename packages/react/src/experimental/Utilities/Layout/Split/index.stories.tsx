@@ -4,7 +4,7 @@ import { Placeholder } from "../../../../lib/storybook-utils/placeholder"
 import { Split } from "./index"
 
 const meta = {
-  title: "Layout/Blocks/Split",
+  title: "Patterns/Layout/Split",
   component: Split,
   tags: ["autodocs", "experimental"],
   args: {

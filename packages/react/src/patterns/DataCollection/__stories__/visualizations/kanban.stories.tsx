@@ -14,7 +14,7 @@ import {
 } from "../mockData"
 
 const meta = {
-  title: "Data Collection/Visualizations/Kanban",
+  title: "Patterns/DataCollection/Visualizations/Kanban",
   parameters: {
     layout: "padded",
     docs: {

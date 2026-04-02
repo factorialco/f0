@@ -6,7 +6,7 @@ import { RichTextDisplay } from "."
 
 const meta = {
   component: RichTextDisplay,
-  title: "Rich text/RichTextDisplay",
+  title: "Components/TextEditor/RichTextDisplay",
 } satisfies Meta<typeof RichTextDisplay>
 
 export default meta

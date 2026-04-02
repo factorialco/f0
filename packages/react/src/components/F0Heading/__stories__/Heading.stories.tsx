@@ -9,7 +9,7 @@ import { F0Heading } from "../index"
 
 const meta = {
   component: F0Heading,
-  title: "Heading",
+  title: "Experimental/Heading",
   tags: ["autodocs", "experimental"],
   argTypes: {
     variant: {

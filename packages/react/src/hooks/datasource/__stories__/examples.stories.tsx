@@ -11,7 +11,7 @@ import {
 } from "../index"
 
 const meta: Meta = {
-  title: "Datasource/Examples",
+  title: "Library/Datasource",
   parameters: {
     a11y: {
       skipCi: true,

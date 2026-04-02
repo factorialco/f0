@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { WidgetAvatarsListItem, WidgetAvatarsListItemProps } from "./index"
 
 const meta: Meta<WidgetAvatarsListItemProps> = {
-  title: "Widgets/WidgetAvatarsListItem",
+  title: "Kits/Widgets/WidgetAvatarsListItem",
   component: WidgetAvatarsListItem,
   tags: ["autodocs", "experimental"],
   parameters: {

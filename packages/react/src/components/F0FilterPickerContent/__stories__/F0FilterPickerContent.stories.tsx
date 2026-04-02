@@ -46,7 +46,7 @@ const simpleFilterDefinition = {
 } as const satisfies FiltersDefinition
 
 const meta = {
-  title: "FilterPickerContent",
+  title: "Patterns/Filters/FilterPickerContent",
   component: F0FilterPickerContent,
   tags: ["autodocs"],
   parameters: {

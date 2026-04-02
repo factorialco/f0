@@ -2,7 +2,7 @@ import { useMemo } from "react"
 
 import type { F0FormDefinitionSingleSchema } from "@/components/F0WizardForm/types"
 
-import { F0Dialog } from "@/components/F0Dialog"
+import { F0Dialog } from "@/patterns/Dialog/F0Dialog"
 import { F0WizardForm } from "@/components/F0WizardForm"
 import { useF0FormDefinition } from "@/components/F0WizardForm/useF0FormDefinition"
 

@@ -8,7 +8,7 @@ import { EllipsisHorizontal, Settings } from "../../../../icons/app"
 import { PageHeader } from "./index"
 
 const meta = {
-  title: "Navigation/PageHeader",
+  title: "Patterns/Navigation/PageHeader",
   component: PageHeader,
   tags: ["autodocs", "experimental"],
   parameters: {

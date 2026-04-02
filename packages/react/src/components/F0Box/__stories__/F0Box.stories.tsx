@@ -193,7 +193,7 @@ const positionOptions = [
 // ─── Meta ────────────────────────────────────────────────────────
 
 const meta = {
-  title: "Box",
+  title: "Library/Box",
   component: F0Box,
   argTypes: {
     // Display & Position

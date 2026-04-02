@@ -6,7 +6,7 @@ import { Image } from "../../../../icons/app"
 import { SidebarHeader } from "./index"
 
 const meta = {
-  title: "Sidebar/Header",
+  title: "Patterns/Navigation/Sidebar/Header",
   component: SidebarHeader,
   tags: ["autodocs", "experimental", "no-sidebar"],
   decorators: [

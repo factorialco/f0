@@ -11,7 +11,7 @@ const children: React.ReactNode = (
 )
 
 const meta = {
-  title: "ToggleGroup",
+  title: "Deprecated/ToggleGroup",
   component: ToggleGroup,
   tags: ["autodocs", "experimental"],
   args: {

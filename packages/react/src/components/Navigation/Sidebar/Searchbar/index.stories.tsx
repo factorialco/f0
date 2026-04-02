@@ -5,7 +5,7 @@ import { action } from "storybook/actions"
 import { SearchBar } from "./index"
 
 const meta = {
-  title: "Sidebar/SearchBar",
+  title: "Patterns/Navigation/Sidebar/SearchBar",
   component: SearchBar,
   parameters: {
     layout: "centered",

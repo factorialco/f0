@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { Weekdays } from "./index"
 
 const meta: Meta = {
-  title: "Widgets/Content/Weekdays",
+  title: "Kits/Widgets/Content/Weekdays",
   component: Weekdays,
   tags: ["autodocs", "experimental"],
   parameters: {

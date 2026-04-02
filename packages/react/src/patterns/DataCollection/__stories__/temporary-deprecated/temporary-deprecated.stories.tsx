@@ -3,7 +3,7 @@ import { Meta, StoryObj } from "@storybook/react-vite"
 import { ExampleComponent } from "../mockData"
 
 const meta = {
-  title: "Data Collection/Temporary or Deprecated features",
+  title: "Patterns/DataCollection/Temporary or Deprecated features",
   component: ExampleComponent,
   tags: ["autodocs", "experimental"],
   decorators: [

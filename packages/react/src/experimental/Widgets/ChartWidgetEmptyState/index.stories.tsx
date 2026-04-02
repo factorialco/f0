@@ -6,7 +6,7 @@ import { Add } from "../../../icons/app"
 import { ChartWidgetEmptyState } from "./index"
 
 const meta: Meta<typeof ChartWidgetEmptyState> = {
-  title: "Widgets/EmptyState",
+  title: "Kits/Widgets/EmptyState",
   component: ChartWidgetEmptyState,
   tags: ["autodocs", "experimental"],
   args: {

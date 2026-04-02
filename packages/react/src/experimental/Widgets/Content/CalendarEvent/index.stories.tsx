@@ -4,7 +4,7 @@ import { Building, Coffee, Comment, Pin, Replace } from "../../../../icons/app"
 import { CalendarEvent } from "./index"
 
 const meta: Meta = {
-  title: "Widgets/Content/CalendarEvent",
+  title: "Kits/Widgets/Content/CalendarEvent",
   component: CalendarEvent,
   tags: ["autodocs", "experimental"],
   parameters: {

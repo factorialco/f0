@@ -3,7 +3,7 @@ import { Meta, StoryObj } from "@storybook/react-vite"
 import { ExampleComponent } from "../mockData"
 
 const meta = {
-  title: "Data Collection/Total Items Summary",
+  title: "Patterns/DataCollection/Total Items Summary",
   component: ExampleComponent,
   tags: ["autodocs", "experimental"],
 } satisfies Meta<typeof ExampleComponent>

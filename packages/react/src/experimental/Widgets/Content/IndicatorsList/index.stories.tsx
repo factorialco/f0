@@ -21,7 +21,7 @@ const taskCategories = [
 ]
 
 const meta = {
-  title: "Widgets/Content/IndicatorsList",
+  title: "Kits/Widgets/Content/IndicatorsList",
   component: IndicatorsList,
   parameters: {
     layout: "centered",
