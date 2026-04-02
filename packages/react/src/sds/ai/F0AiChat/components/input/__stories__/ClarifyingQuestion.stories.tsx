@@ -164,7 +164,7 @@ function useClarifyingQuestionStory(steps: StoryStep[]) {
             isCustomActive: inter.isCustomActive,
           }
         }),
-        { custom: "custom", skipped: "skipped" }
+        { custom: "own response", skipped: "skipped" }
       )
       setMessages((prev) => [...prev, message])
       setClarifyingQuestion(null)
@@ -231,7 +231,7 @@ const StoryShell = ({
   messages: string[]
 }) => (
   <div className="w-[360px] space-y-4">
-    <div className="overflow-y-auto rounded-lg border p-4">
+    <div className="overflow-y-auto whitespace-pre-wrap rounded-lg border p-4">
       {messages.length === 0 ? (
         <Markdown content={description} components={markdownRenderers} />
       ) : (

@@ -22,8 +22,8 @@ export const buildSummaryMessage = (
 
   for (const step of steps) {
     const labels = step.options
-      .filter((o) => step.selectedIds.includes(o.id))
-      .map((o) => o.label)
+      .filter(({ id }) => step.selectedIds.includes(id))
+      .map(({ label }) => label)
 
     const isSingle = (step.selectionMode ?? "single") === "single"
     const includeCustom = isSingle
@@ -35,10 +35,10 @@ export const buildSummaryMessage = (
     }
 
     if (labels.length > 0) {
-      const answers = labels.map((l) => `- ${l}`).join("\n")
-      parts.push(`${step.question}:\n${answers}`)
+      const answers = labels.map((l) => `${l}`).join("\n")
+      parts.push(`**${step.question}** \n ${answers}`)
     } else {
-      parts.push(`${step.question}:\n- (${translations.skipped})`)
+      parts.push(`**${step.question}** \n (${translations.skipped})`)
     }
   }
 
