@@ -1,6 +1,5 @@
 import { DataAttributes } from "@/global.types"
 import { withDataTestId } from "@/lib/data-testid"
-import { experimentalComponent } from "@/lib/experimental"
 import { Checkbox as CheckboxRoot } from "@/ui/checkbox"
 
 interface CheckboxProps extends DataAttributes {
@@ -106,9 +105,4 @@ function _F0Checkbox({
   )
 }
 
-/**
- * @experimental This is an experimental component use it at your own risk
- */
-export const F0Checkbox = withDataTestId(
-  experimentalComponent<typeof _F0Checkbox>("F0Checkbox", _F0Checkbox)
-)
+export const F0Checkbox = withDataTestId(_F0Checkbox)
