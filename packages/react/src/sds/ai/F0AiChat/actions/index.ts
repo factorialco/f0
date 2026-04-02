@@ -9,3 +9,4 @@ export { useOrchestratorThinkingAction } from "./core/orchestratorThinking/useOr
 export { useMessageSourcesAction } from "./core/messageSources/useMessageSourcesAction"
 export { useDataDownloadAction } from "./core/dataDownload/useDataDownloadAction"
 export { useDisplayDashboardAction } from "./core/displayDashboard/useDisplayDashboardAction"
+export { useClarifyingQuestionAction } from "./core/clarifyingQuestion/useClarifyingQuestionAction"

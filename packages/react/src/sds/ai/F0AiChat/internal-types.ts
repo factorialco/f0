@@ -1,5 +1,6 @@
 import { type AIMessage, type Message } from "@copilotkit/shared"
 
+import { type ClarifyingQuestionState } from "./actions/core/clarifyingQuestion/types"
 import {
   type AiChatDisclaimer,
   type AiChatMode,
@@ -161,6 +162,12 @@ export type AiChatProviderReturnValue = {
   inProgress: boolean
   /** Set the in-progress state (synced from CopilotKit's isLoading) */
   setInProgress: (value: boolean) => void
+  /** The current clarifying question shown in the textarea, or null if none */
+  clarifyingQuestion: ClarifyingQuestionState | null
+  /** Set the current clarifying question (or null to dismiss) */
+  setClarifyingQuestion: React.Dispatch<
+    React.SetStateAction<ClarifyingQuestionState | null>
+  >
 } & Pick<
   AiChatState,
   | "greeting"

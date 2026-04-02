@@ -210,9 +210,18 @@ See `canvas/CANVAS_ENTITIES.md` for the full pattern on implementing canvas enti
 
 ## Reference table
 
-| Pattern                     | Example                | Key file                            |
-| --------------------------- | ---------------------- | ----------------------------------- |
-| Simple render               | `messageSources`       | `useMessageSourcesAction.tsx`       |
-| Render with streaming guard | `dataDownload`         | `useDataDownloadAction.tsx`         |
-| Canvas + inline card        | `displayDashboard`     | `useDisplayDashboardAction.tsx`     |
-| Non-blocking status         | `orchestratorThinking` | `useOrchestratorThinkingAction.tsx` |
+| Pattern                        | Example                 | Key file                             |
+| ------------------------------ | ----------------------- | ------------------------------------ |
+| Simple render                  | `messageSources`        | `useMessageSourcesAction.tsx`        |
+| Render with streaming guard    | `dataDownload`          | `useDataDownloadAction.tsx`          |
+| Canvas + inline card           | `displayDashboard`      | `useDisplayDashboardAction.tsx`      |
+| Non-blocking status            | `orchestratorThinking`  | `useOrchestratorThinkingAction.tsx`  |
+| Textarea-replacing interaction | `clarifyingQuestion`    | `useClarifyingQuestionAction.tsx`    |
+| Growth card (upselling)        | `demoCard`              | `useDemoCardAction.tsx`              |
+| Growth card (upselling)        | `bookAMeetingCard`      | `useBookAMeetingCardAction.tsx`      |
+| Growth card (upselling)        | `questionCard`          | `useQuestionCardAction.tsx`          |
+| Growth card (upselling)        | `moduleCard`            | `useModuleCardAction.tsx`            |
+| Growth card (upselling)        | `faqCard`               | `useFAQCardAction.tsx`               |
+| Credit warning banner          | `messageCreditsWarning` | `useMessageCreditsWarningAction.tsx` |
+
+See `documentation/CLARIFYING_QUESTIONS.md` for the full clarifying questions guide.

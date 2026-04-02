@@ -349,6 +349,15 @@ export const defaultTranslations = {
     },
     attachFile: "Attach file",
     removeFile: "Remove",
+    clarifyingQuestion: {
+      submit: "Submit",
+      next: "Next",
+      back: "Back",
+      typeYourAnswer: "Type your answer…",
+      stepOf: "{{current}} of {{total}}",
+      custom: "own answer",
+      skipped: "skipped",
+    },
     growth: {
       demoCard: {
         title: "See {{moduleName}} in action",
