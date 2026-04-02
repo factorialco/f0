@@ -15,9 +15,9 @@ import {
   SolidStop,
 } from "@/icons/app"
 import { useReducedMotion } from "@/lib/a11y"
-import { Skeleton } from "@/ui/skeleton"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
+import { Skeleton } from "@/ui/skeleton"
 
 import { useAiChat } from "../../providers/AiChatStateProvider"
 import { ClarifyingQuestionPanel } from "./ClarifyingQuestionPanel"
@@ -570,7 +570,9 @@ export const ChatTextarea = ({
                   <ButtonInternal
                     type="submit"
                     disabled={!hasDataToSend || isUploading}
-                    variant={hasDataToSend && !isUploading ? "default" : "neutral"}
+                    variant={
+                      hasDataToSend && !isUploading ? "default" : "neutral"
+                    }
                     label={submitLabel || translation.ai.sendMessage}
                     icon={submitLabel ? undefined : ArrowUp}
                     hideLabel={!submitLabel}
