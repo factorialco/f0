@@ -1,7 +1,7 @@
 import { Editor } from "@tiptap/react"
 
 import { F0Button } from "@/components/F0Button"
-import { lastIntentType } from "@/experimental/RichText/RichTextEditor/utils/types"
+import { lastIntentType } from "@/components/RichText/RichTextEditor/utils/types"
 import { Check, Cross, Reset } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 

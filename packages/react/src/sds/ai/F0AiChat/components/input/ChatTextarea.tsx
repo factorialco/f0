@@ -6,7 +6,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
 import { F0Button } from "@/components/F0Button"
 import { ButtonInternal } from "@/components/F0Button/internal"
-import { FileItem } from "@/experimental/RichText/FileItem"
+import { FileItem } from "@/components/RichText/FileItem"
 import {
   ArrowUp,
   Cross,

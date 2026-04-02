@@ -1,7 +1,7 @@
 import { Markdown, type UserMessageProps } from "@copilotkit/react-ui"
 import { useEffect, useRef } from "react"
 
-import { FileItem } from "@/experimental/RichText/FileItem"
+import { FileItem } from "@/components/RichText/FileItem"
 
 import { markdownRenderers } from "../markdownRenderers"
 import { useAiChat } from "../../providers/AiChatStateProvider"

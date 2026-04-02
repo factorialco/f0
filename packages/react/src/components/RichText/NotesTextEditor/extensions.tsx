@@ -25,7 +25,7 @@ import {
   ImageUploadConfig,
   VideoEmbedExtension,
   createFileHandlerExtension,
-} from "@/experimental/RichText/CoreEditor"
+} from "@/components/RichText/CoreEditor"
 import { I18nContextType } from "@/lib/providers/i18n"
 
 interface CreateNotesTextEditorExtensionsProps {

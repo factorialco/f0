@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react"
 
 import { F0Button } from "@/components/F0Button"
 import { cn } from "@/lib/utils"
-import { Toolbar } from "@/experimental/RichText/CoreEditor"
+import { Toolbar } from "@/components/RichText/CoreEditor"
 import { Paperclip, TextSize } from "@/icons/app"
 
 import { EnhanceActivator } from "../Enhance"

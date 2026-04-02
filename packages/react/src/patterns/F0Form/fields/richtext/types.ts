@@ -1,5 +1,5 @@
-import type { MentionsConfig } from "@/experimental/RichText/CoreEditor"
-import type { heightType } from "@/experimental/RichText/RichTextEditor"
+import type { MentionsConfig } from "@/components/RichText/CoreEditor"
+import type { heightType } from "@/components/RichText/RichTextEditor"
 
 import type {
   F0BaseField,

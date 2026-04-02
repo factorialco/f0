@@ -10,7 +10,7 @@ import { F0Button } from "@/components/F0Button"
 import {
   F0GridStack,
   type GridStackReactWidget,
-} from "@/components/Utilities/F0GridStack/F0GridStack"
+} from "@/lib/F0GridStack/F0GridStack"
 import { Minus } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 

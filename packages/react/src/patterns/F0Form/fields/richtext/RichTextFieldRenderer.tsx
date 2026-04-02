@@ -1,6 +1,6 @@
 import { ControllerRenderProps, FieldValues } from "react-hook-form"
 
-import { RichTextEditor } from "@/experimental/RichText/RichTextEditor"
+import { RichTextEditor } from "@/components/RichText/RichTextEditor"
 
 import type { F0RichTextField, RichTextValue } from "./types"
 import type { ResolvedField } from "../types"
