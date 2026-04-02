@@ -2,7 +2,7 @@ import { Meta, StoryObj } from "@storybook/react-vite"
 import { useCallback, useEffect, useMemo, useState } from "react"
 
 import type {
-  ClarifyingQuestion,
+  ClarifyingQuestionState,
   ClarifyingSelectionMode,
 } from "../../../../actions/core/clarifyingQuestion/types"
 import { F0AiChatProvider, useAiChat } from "../../../.."
@@ -12,7 +12,7 @@ import { ChatTextarea } from "../../ChatTextarea"
 // Shared option sets
 // ---------------------------------------------------------------------------
 
-const CHECKBOX_OPTIONS = [
+const MULTIPLE_OPTIONS = [
   { id: "vacation", label: "Vacation days" },
   { id: "sick", label: "Sick leave" },
   { id: "personal", label: "Personal days" },
@@ -20,7 +20,7 @@ const CHECKBOX_OPTIONS = [
   { id: "bereavement", label: "Bereavement leave" },
 ]
 
-const RADIO_OPTIONS = [
+const SINGLE_OPTIONS = [
   { id: "this-month", label: "This month" },
   { id: "last-month", label: "Last month" },
   { id: "this-quarter", label: "This quarter" },
@@ -46,6 +46,29 @@ interface StoryStep {
 }
 
 // ---------------------------------------------------------------------------
+// Per-step interaction state
+// ---------------------------------------------------------------------------
+
+interface StepInteraction {
+  selectedIds: string[]
+  customText: string
+  isCustomActive: boolean
+}
+
+const EMPTY_INTERACTION: StepInteraction = {
+  selectedIds: [],
+  customText: "",
+  isCustomActive: false,
+}
+
+function getInteraction(
+  map: Record<string, StepInteraction>,
+  question: string
+): StepInteraction {
+  return map[question] ?? EMPTY_INTERACTION
+}
+
+// ---------------------------------------------------------------------------
 // Shared hook: encapsulates all clarifying-question state management
 // so individual story examples stay minimal.
 // ---------------------------------------------------------------------------
@@ -54,181 +77,138 @@ function useClarifyingQuestionStory(steps: StoryStep[]) {
   const { setClarifyingQuestion } = useAiChat()
   const [messages, setMessages] = useState<string[]>([])
   const [stepIndex, setStepIndex] = useState(0)
-  const [selectedIds, setSelectedIds] = useState<string[]>([])
-  const [customText, setCustomText] = useState("")
-  const [isCustomActive, setIsCustomActive] = useState(false)
-  const [allSelections, setAllSelections] = useState<Record<string, string[]>>(
-    {}
-  )
-  const [allCustomTexts, setAllCustomTexts] = useState<Record<string, string>>(
-    {}
-  )
-  const [allCustomActives, setAllCustomActives] = useState<
-    Record<string, boolean>
+  const [interactions, setInteractions] = useState<
+    Record<string, StepInteraction>
   >({})
 
   const currentStep = steps[stepIndex]
+  const interaction = getInteraction(interactions, currentStep.question)
+  const mode = currentStep.selectionMode
+
+  const updateInteraction = useCallback(
+    (patch: Partial<StepInteraction>) => {
+      setInteractions((prev) => ({
+        ...prev,
+        [currentStep.question]: {
+          ...getInteraction(prev, currentStep.question),
+          ...patch,
+        },
+      }))
+    },
+    [currentStep.question]
+  )
 
   const toggleOption = useCallback(
     (optionId: string) => {
-      if (currentStep.selectionMode === "radio") {
-        setSelectedIds([optionId])
+      if (mode === "single") {
+        updateInteraction({ selectedIds: [optionId] })
       } else {
-        setSelectedIds((prev) =>
-          prev.includes(optionId)
-            ? prev.filter((id) => id !== optionId)
-            : [...prev, optionId]
-        )
+        setInteractions((prev) => {
+          const current = getInteraction(prev, currentStep.question).selectedIds
+          const next = current.includes(optionId)
+            ? current.filter((id) => id !== optionId)
+            : [...current, optionId]
+          return {
+            ...prev,
+            [currentStep.question]: {
+              ...getInteraction(prev, currentStep.question),
+              selectedIds: next,
+            },
+          }
+        })
       }
     },
-    [currentStep.selectionMode]
+    [mode, currentStep.question, updateInteraction]
   )
 
-  const setCustomAnswerText = useCallback((text: string) => {
-    setCustomText(text)
-  }, [])
+  const setCustomAnswerText = useCallback(
+    (text: string) => {
+      updateInteraction({ customText: text })
+    },
+    [updateInteraction]
+  )
+
+  const setCustomAnswerActive = useCallback(
+    (active: boolean) => {
+      updateInteraction({ isCustomActive: active })
+    },
+    [updateInteraction]
+  )
 
   const activateCustomAnswer = useCallback(() => {
-    if (currentStep.selectionMode === "radio") {
-      setSelectedIds([])
+    const patch: Partial<StepInteraction> = { isCustomActive: true }
+    if (mode === "single") {
+      patch.selectedIds = []
     }
-    setIsCustomActive(true)
-  }, [currentStep.selectionMode])
+    updateInteraction(patch)
+  }, [mode, updateInteraction])
 
   const confirm = useCallback(() => {
-    const updatedSelections = {
-      ...allSelections,
-      [currentStep.question]: selectedIds,
-    }
-    const updatedCustomTexts = {
-      ...allCustomTexts,
-      [currentStep.question]: customText,
-    }
-    const updatedCustomActives = {
-      ...allCustomActives,
-      [currentStep.question]: isCustomActive,
-    }
-    setAllSelections(updatedSelections)
-    setAllCustomTexts(updatedCustomTexts)
-    setAllCustomActives(updatedCustomActives)
-
     if (stepIndex < steps.length - 1) {
-      const nextStep = steps[stepIndex + 1]
       setStepIndex(stepIndex + 1)
-      setSelectedIds(updatedSelections[nextStep.question] ?? [])
-      setCustomText(updatedCustomTexts[nextStep.question] ?? "")
-      setIsCustomActive(updatedCustomActives[nextStep.question] ?? false)
     } else {
       // Final step — build summary and reset
       const summaryLines = steps.map((step) => {
-        const stepSelections = updatedSelections[step.question] ?? []
-        const stepCustom = updatedCustomTexts[step.question] ?? ""
-        const stepCustomActive = updatedCustomActives[step.question] ?? false
+        const inter = getInteraction(interactions, step.question)
         const labels = step.options
-          .filter((o) => stepSelections.includes(o.id))
+          .filter((o) => inter.selectedIds.includes(o.id))
           .map((o) => o.label)
-        const isRadio = step.selectionMode === "radio"
-        const includeCustom = isRadio
-          ? stepSelections.length === 0 && !!stepCustom
-          : stepCustomActive && !!stepCustom
+        const isSingle = step.selectionMode === "single"
+        const includeCustom = isSingle
+          ? inter.selectedIds.length === 0 && !!inter.customText
+          : inter.isCustomActive && !!inter.customText
         if (includeCustom) {
-          labels.push(`(custom) ${stepCustom}`)
+          labels.push(`(custom) ${inter.customText}`)
         }
         return `${step.question} → ${labels.length > 0 ? labels.join(", ") : "(skipped)"}`
       })
       setMessages((prev) => [...prev, ...summaryLines])
       setClarifyingQuestion(null)
       setStepIndex(0)
-      setSelectedIds([])
-      setCustomText("")
-      setIsCustomActive(false)
-      setAllSelections({})
-      setAllCustomTexts({})
-      setAllCustomActives({})
+      setInteractions({})
     }
-  }, [
-    stepIndex,
-    steps,
-    currentStep,
-    selectedIds,
-    customText,
-    isCustomActive,
-    allSelections,
-    allCustomTexts,
-    allCustomActives,
-    setClarifyingQuestion,
-  ])
+  }, [stepIndex, steps, interactions, setClarifyingQuestion])
 
   const back = useCallback(() => {
     if (stepIndex > 0) {
-      const updatedSelections = {
-        ...allSelections,
-        [currentStep.question]: selectedIds,
-      }
-      const updatedCustomTexts = {
-        ...allCustomTexts,
-        [currentStep.question]: customText,
-      }
-      const updatedCustomActives = {
-        ...allCustomActives,
-        [currentStep.question]: isCustomActive,
-      }
-      setAllSelections(updatedSelections)
-      setAllCustomTexts(updatedCustomTexts)
-      setAllCustomActives(updatedCustomActives)
-
-      const prevStep = steps[stepIndex - 1]
       setStepIndex(stepIndex - 1)
-      setSelectedIds(updatedSelections[prevStep.question] ?? [])
-      setCustomText(updatedCustomTexts[prevStep.question] ?? "")
-      setIsCustomActive(updatedCustomActives[prevStep.question] ?? false)
     }
-  }, [
-    stepIndex,
-    steps,
-    currentStep,
-    selectedIds,
-    customText,
-    isCustomActive,
-    allSelections,
-    allCustomTexts,
-    allCustomActives,
-  ])
+  }, [stepIndex])
 
   // Sync clarifying question state into the AiChat context
   useEffect(() => {
-    const question: ClarifyingQuestion = {
-      question: currentStep.question,
-      options: currentStep.options,
-      selectedOptionIds: selectedIds,
-      loading: false,
-      selectionMode: currentStep.selectionMode,
-      optional: currentStep.optional,
-      allowCustomAnswer: currentStep.allowCustomAnswer,
+    const state: ClarifyingQuestionState = {
+      currentStep: {
+        question: currentStep.question,
+        options: currentStep.options,
+        selectionMode: currentStep.selectionMode,
+        optional: currentStep.optional,
+        allowCustomAnswer: currentStep.allowCustomAnswer,
+        selectedOptionIds: interaction.selectedIds,
+        customAnswerText: interaction.customText || undefined,
+        isCustomAnswerActive: interaction.isCustomActive,
+      },
       currentStepIndex: stepIndex,
       totalSteps: steps.length,
-      customAnswerText: customText,
-      isCustomAnswerActive: isCustomActive,
-      setCustomAnswerText,
-      setCustomAnswerActive: setIsCustomActive,
-      activateCustomAnswer,
       toggleOption,
       confirm,
       back,
+      setCustomAnswerText,
+      setCustomAnswerActive,
+      activateCustomAnswer,
     }
-    setClarifyingQuestion(question)
+    setClarifyingQuestion(state)
   }, [
     currentStep,
-    selectedIds,
-    customText,
-    isCustomActive,
+    interaction,
     stepIndex,
     steps.length,
     toggleOption,
-    setCustomAnswerText,
-    activateCustomAnswer,
     confirm,
     back,
+    setCustomAnswerText,
+    setCustomAnswerActive,
+    activateCustomAnswer,
     setClarifyingQuestion,
   ])
 
@@ -276,13 +256,13 @@ const StoryShell = ({
 // Story examples
 // ---------------------------------------------------------------------------
 
-const ClarifyingCheckboxExample = () => {
+const ClarifyingMultipleExample = () => {
   const steps = useMemo<StoryStep[]>(
     () => [
       {
         question: "Which leave types would you like to include in the report?",
-        options: CHECKBOX_OPTIONS,
-        selectionMode: "checkbox",
+        options: MULTIPLE_OPTIONS,
+        selectionMode: "multiple",
       },
     ],
     []
@@ -296,13 +276,13 @@ const ClarifyingCheckboxExample = () => {
   )
 }
 
-const ClarifyingRadioExample = () => {
+const ClarifyingSingleExample = () => {
   const steps = useMemo<StoryStep[]>(
     () => [
       {
         question: "What time period should the report cover?",
-        options: RADIO_OPTIONS,
-        selectionMode: "radio",
+        options: SINGLE_OPTIONS,
+        selectionMode: "single",
       },
     ],
     []
@@ -310,7 +290,7 @@ const ClarifyingRadioExample = () => {
   const { messages } = useClarifyingQuestionStory(steps)
   return (
     <StoryShell
-      description="Radio-style clarifying question. Only one option can be selected."
+      description="Single-select clarifying question. Only one option can be selected."
       messages={messages}
     />
   )
@@ -321,20 +301,20 @@ const ClarifyingMultiStepExample = () => {
     () => [
       {
         question: "Which leave types would you like to include in the report?",
-        options: CHECKBOX_OPTIONS,
-        selectionMode: "checkbox",
+        options: MULTIPLE_OPTIONS,
+        selectionMode: "multiple",
       },
       {
         question: "What time period should the report cover?",
-        options: RADIO_OPTIONS,
-        selectionMode: "radio",
+        options: SINGLE_OPTIONS,
+        selectionMode: "single",
         optional: true,
         allowCustomAnswer: true,
       },
       {
         question: "What format do you want for the export?",
         options: FORMAT_OPTIONS,
-        selectionMode: "radio",
+        selectionMode: "single",
       },
     ],
     []
@@ -342,19 +322,19 @@ const ClarifyingMultiStepExample = () => {
   const { messages } = useClarifyingQuestionStory(steps)
   return (
     <StoryShell
-      description="Multi-step clarifying question. Step 1 (required, checkbox), step 2 (optional, radio, custom answer enabled), step 3 (required, radio)."
+      description="Multi-step clarifying question. Step 1 (required, multiple), step 2 (optional, single, custom answer enabled), step 3 (required, single)."
       messages={messages}
     />
   )
 }
 
-const ClarifyingCustomAnswerRadioExample = () => {
+const ClarifyingCustomAnswerSingleExample = () => {
   const steps = useMemo<StoryStep[]>(
     () => [
       {
         question: "What time period should the report cover?",
-        options: RADIO_OPTIONS,
-        selectionMode: "radio",
+        options: SINGLE_OPTIONS,
+        selectionMode: "single",
         allowCustomAnswer: true,
       },
     ],
@@ -363,19 +343,19 @@ const ClarifyingCustomAnswerRadioExample = () => {
   const { messages } = useClarifyingQuestionStory(steps)
   return (
     <StoryShell
-      description='Radio mode with custom answer. Selecting "Something else" clears the predefined option. Selecting a predefined option preserves custom text for reuse.'
+      description='Single mode with custom answer. Selecting "Something else" clears the predefined option. Selecting a predefined option preserves custom text for reuse.'
       messages={messages}
     />
   )
 }
 
-const ClarifyingCustomAnswerCheckboxExample = () => {
+const ClarifyingCustomAnswerMultipleExample = () => {
   const steps = useMemo<StoryStep[]>(
     () => [
       {
         question: "Which leave types would you like to include in the report?",
-        options: CHECKBOX_OPTIONS,
-        selectionMode: "checkbox",
+        options: MULTIPLE_OPTIONS,
+        selectionMode: "multiple",
         allowCustomAnswer: true,
       },
     ],
@@ -384,7 +364,7 @@ const ClarifyingCustomAnswerCheckboxExample = () => {
   const { messages } = useClarifyingQuestionStory(steps)
   return (
     <StoryShell
-      description="Checkbox mode with custom answer. Custom text coexists with checkbox selections — user can check options AND type a custom answer."
+      description="Multiple mode with custom answer. Custom text coexists with checkbox selections — user can check options AND type a custom answer."
       messages={messages}
     />
   )
@@ -411,14 +391,14 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-export const Checkbox: Story = {
-  name: "Checkbox",
-  render: () => <ClarifyingCheckboxExample />,
+export const Multiple: Story = {
+  name: "Multiple",
+  render: () => <ClarifyingMultipleExample />,
 }
 
-export const Radio: Story = {
-  name: "Radio",
-  render: () => <ClarifyingRadioExample />,
+export const Single: Story = {
+  name: "Single",
+  render: () => <ClarifyingSingleExample />,
 }
 
 export const MultiStep: Story = {
@@ -426,12 +406,12 @@ export const MultiStep: Story = {
   render: () => <ClarifyingMultiStepExample />,
 }
 
-export const CustomAnswerRadio: Story = {
-  name: "Custom Answer — Radio",
-  render: () => <ClarifyingCustomAnswerRadioExample />,
+export const CustomAnswerSingle: Story = {
+  name: "Custom Answer — Single",
+  render: () => <ClarifyingCustomAnswerSingleExample />,
 }
 
-export const CustomAnswerCheckbox: Story = {
-  name: "Custom Answer — Checkbox",
-  render: () => <ClarifyingCustomAnswerCheckboxExample />,
+export const CustomAnswerMultiple: Story = {
+  name: "Custom Answer — Multiple",
+  render: () => <ClarifyingCustomAnswerMultipleExample />,
 }

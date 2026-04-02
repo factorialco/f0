@@ -18,7 +18,7 @@ import { useI18n } from "@/lib/providers/i18n"
 
 import { DEFAULT_CHAT_WIDTH } from "../utils/constants"
 import { AiChatProviderReturnValue, AiChatState } from "../internal-types"
-import type { ClarifyingQuestion } from "../actions/core/clarifyingQuestion/types"
+import type { ClarifyingQuestionState } from "../actions/core/clarifyingQuestion/types"
 import {
   type AiChatMode,
   type CanvasContent,
@@ -113,7 +113,7 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   )
 
   const [clarifyingQuestion, setClarifyingQuestion] =
-    useState<ClarifyingQuestion | null>(null)
+    useState<ClarifyingQuestionState | null>(null)
 
   // Persist chat width to localStorage
   useEffect(() => {

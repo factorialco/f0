@@ -1,265 +1,209 @@
 import { useCopilotAction } from "@copilotkit/react-core"
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
+
+import type {
+  ClarifyingQuestionState,
+  ClarifyingSelectionMode,
+  ClarifyingStepData,
+} from "./types"
 
 import { useAiChat } from "../../../providers/AiChatStateProvider"
-import type { ClarifyingQuestion, ClarifyingSelectionMode } from "./types"
 
-/**
- * Shape of a single step as provided by the AI backend via CopilotKit action args.
- */
+// ---------------------------------------------------------------------------
+// Normalize raw args from the AI backend
+// ---------------------------------------------------------------------------
+
 interface RawStep {
   question: string
   options: Array<{ id: string; label: string }>
-  selectionMode?: ClarifyingSelectionMode
+  selectionMode?: string
   optional?: boolean
   allowCustomAnswer?: boolean
 }
 
-/**
- * Internal component rendered by CopilotKit's `render` prop.
- * Renders nothing visible — it exists solely to manage multi-step state
- * and push the current `ClarifyingQuestion` into the AiChat context.
- *
- * Uses refs to stabilize callbacks and avoid infinite render loops
- * caused by CopilotKit re-rendering the `render` prop on every state change.
- */
-function ClarifyingQuestionController({ steps }: { steps: RawStep[] }) {
+function normalizeSelectionMode(
+  raw?: string
+): ClarifyingSelectionMode | undefined {
+  if (raw === "single" || raw === "radio") return "single"
+  if (raw === "multiple" || raw === "checkbox") return "multiple"
+  return undefined
+}
+
+function normalizeSteps(raw: RawStep[]): ClarifyingStepData[] {
+  return raw.map((step) => ({
+    question: step.question,
+    options: step.options,
+    selectionMode: normalizeSelectionMode(step.selectionMode),
+    optional: step.optional ?? false,
+    allowCustomAnswer: step.allowCustomAnswer ?? false,
+  }))
+}
+
+// ---------------------------------------------------------------------------
+// Per-step interaction state
+// ---------------------------------------------------------------------------
+
+interface StepInteraction {
+  selectedIds: string[]
+  customText: string
+  isCustomActive: boolean
+}
+
+const EMPTY_INTERACTION: StepInteraction = {
+  selectedIds: [],
+  customText: "",
+  isCustomActive: false,
+}
+
+function getInteraction(
+  map: Record<string, StepInteraction>,
+  question: string
+): StepInteraction {
+  return map[question] ?? EMPTY_INTERACTION
+}
+
+// ---------------------------------------------------------------------------
+// Controller: manages multi-step state and pushes to AiChat context
+// ---------------------------------------------------------------------------
+
+function ClarifyingQuestionController({
+  steps,
+}: {
+  steps: ClarifyingStepData[]
+}) {
   const { sendMessage, setClarifyingQuestion } = useAiChat()
-  const [currentStepIndex, setCurrentStepIndex] = useState(0)
-  const [selectedIds, setSelectedIds] = useState<string[]>([])
-  const [customAnswerText, setCustomAnswerTextState] = useState("")
-  const [isCustomAnswerActive, setIsCustomAnswerActive] = useState(false)
-  const [allSelections, setAllSelections] = useState<Record<string, string[]>>(
-    {}
-  )
-  const [allCustomTexts, setAllCustomTexts] = useState<Record<string, string>>(
-    {}
-  )
-  const [allCustomActives, setAllCustomActives] = useState<
-    Record<string, boolean>
+
+  const [stepIndex, setStepIndex] = useState(0)
+  const [interactions, setInteractions] = useState<
+    Record<string, StepInteraction>
   >({})
 
-  // Refs to stabilize callbacks across CopilotKit re-renders
-  const currentStepIndexRef = useRef(currentStepIndex)
-  currentStepIndexRef.current = currentStepIndex
-  const selectedIdsRef = useRef(selectedIds)
-  selectedIdsRef.current = selectedIds
-  const customAnswerTextRef = useRef(customAnswerText)
-  customAnswerTextRef.current = customAnswerText
-  const isCustomAnswerActiveRef = useRef(isCustomAnswerActive)
-  isCustomAnswerActiveRef.current = isCustomAnswerActive
-  const allSelectionsRef = useRef(allSelections)
-  allSelectionsRef.current = allSelections
-  const allCustomTextsRef = useRef(allCustomTexts)
-  allCustomTextsRef.current = allCustomTexts
-  const allCustomActivesRef = useRef(allCustomActives)
-  allCustomActivesRef.current = allCustomActives
-  const stepsRef = useRef(steps)
-  stepsRef.current = steps
+  // Once the user confirms the final step, stop pushing updates to context
+  const dismissedRef = useRef(false)
 
-  // Track previous steps JSON to reset state when AI sends new steps
-  const prevStepsJsonRef = useRef<string>("")
-
-  // Reset when AI sends a completely new set of steps
+  // Reset when AI sends different steps
+  const prevStepsJsonRef = useRef("")
   useEffect(() => {
     const json = JSON.stringify(steps)
     if (json !== prevStepsJsonRef.current) {
       prevStepsJsonRef.current = json
-      setCurrentStepIndex(0)
-      setSelectedIds([])
-      setCustomAnswerTextState("")
-      setIsCustomAnswerActive(false)
-      setAllSelections({})
-      setAllCustomTexts({})
-      setAllCustomActives({})
+      dismissedRef.current = false
+      setStepIndex(0)
+      setInteractions({})
     }
   }, [steps])
 
-  const toggleOption = useCallback((optionId: string) => {
-    const currentStep = stepsRef.current[currentStepIndexRef.current]
-    const mode = currentStep?.selectionMode ?? "checkbox"
+  const step = steps[stepIndex]
+  if (!step) return null
 
-    if (mode === "radio") {
-      // Radio: replace selection entirely (custom text is preserved for reuse)
-      setSelectedIds([optionId])
+  const mode = step.selectionMode ?? "single"
+
+  // --- Helpers to update the current step's interaction ---
+
+  const updateInteraction = (patch: Partial<StepInteraction>) => {
+    setInteractions((prev) => ({
+      ...prev,
+      [step.question]: { ...getInteraction(prev, step.question), ...patch },
+    }))
+  }
+
+  const toggleOption = (optionId: string) => {
+    if (mode === "single") {
+      updateInteraction({ selectedIds: [optionId] })
     } else {
-      // Checkbox: toggle
-      setSelectedIds((prev) =>
-        prev.includes(optionId)
-          ? prev.filter((id) => id !== optionId)
-          : [...prev, optionId]
-      )
+      const current = getInteraction(interactions, step.question).selectedIds
+      const next = current.includes(optionId)
+        ? current.filter((id) => id !== optionId)
+        : [...current, optionId]
+      updateInteraction({ selectedIds: next })
     }
-  }, [])
+  }
 
-  const setCustomAnswerText = useCallback((text: string) => {
-    setCustomAnswerTextState(text)
-  }, [])
+  const setCustomAnswerText = (text: string) => {
+    updateInteraction({ customText: text })
+  }
 
-  /**
-   * Explicitly activates the custom answer input.
-   * In radio mode, this clears predefined selections (mutual exclusivity).
-   * In checkbox mode, this is a no-op for selections since custom text coexists.
-   * Always marks the custom answer as active (included in submission).
-   */
-  const activateCustomAnswer = useCallback(() => {
-    const currentStep = stepsRef.current[currentStepIndexRef.current]
-    if ((currentStep?.selectionMode ?? "checkbox") === "radio") {
-      setSelectedIds([])
+  const setCustomAnswerActive = (active: boolean) => {
+    updateInteraction({ isCustomActive: active })
+  }
+
+  const activateCustomAnswer = () => {
+    const patch: Partial<StepInteraction> = { isCustomActive: true }
+    if (mode === "single") {
+      patch.selectedIds = []
     }
-    setIsCustomAnswerActive(true)
-  }, [])
+    updateInteraction(patch)
+  }
 
-  const confirm = useCallback(() => {
-    const idx = currentStepIndexRef.current
-    const currentStep = stepsRef.current[idx]
-    const selected = selectedIdsRef.current
-    const currentCustomText = customAnswerTextRef.current
-    const currentCustomActive = isCustomAnswerActiveRef.current
-
-    // Save selections, custom text, and custom active state for current step
-    const updatedSelections = {
-      ...allSelectionsRef.current,
-      [currentStep.question]: selected,
-    }
-    setAllSelections(updatedSelections)
-
-    const updatedCustomTexts = {
-      ...allCustomTextsRef.current,
-      [currentStep.question]: currentCustomText,
-    }
-    setAllCustomTexts(updatedCustomTexts)
-
-    const updatedCustomActives = {
-      ...allCustomActivesRef.current,
-      [currentStep.question]: currentCustomActive,
-    }
-    setAllCustomActives(updatedCustomActives)
-
-    const isLastStep = idx >= stepsRef.current.length - 1
+  const confirm = () => {
+    const isLastStep = stepIndex >= steps.length - 1
 
     if (isLastStep) {
-      // Build a structured user message so the AI knows each answer per question
+      // Build structured user message with all answers
       const parts: string[] = []
-      for (const step of stepsRef.current) {
-        const stepSelected = updatedSelections[step.question] ?? []
-        const stepCustom = updatedCustomTexts[step.question] ?? ""
-        const stepCustomActive = updatedCustomActives[step.question] ?? false
-        const labels = step.options
-          .filter((o) => stepSelected.includes(o.id))
+      for (const s of steps) {
+        const inter = getInteraction(interactions, s.question)
+        const labels = s.options
+          .filter((o) => inter.selectedIds.includes(o.id))
           .map((o) => o.label)
 
-        // In radio mode, custom text is mutually exclusive with predefined options.
-        // Only include custom text when no predefined option is selected.
-        // In checkbox mode, include custom text only when explicitly activated.
-        const isRadio = (step.selectionMode ?? "checkbox") === "radio"
-        const includeCustom = isRadio
-          ? stepSelected.length === 0 && stepCustom.trim().length > 0
-          : stepCustomActive && stepCustom.trim().length > 0
+        const isSingle = (s.selectionMode ?? "single") === "single"
+        const includeCustom = isSingle
+          ? inter.selectedIds.length === 0 && inter.customText.trim().length > 0
+          : inter.isCustomActive && inter.customText.trim().length > 0
 
         if (includeCustom) {
-          labels.push(`(custom) ${stepCustom.trim()}`)
+          labels.push(`(custom) ${inter.customText.trim()}`)
         }
 
         const answer = labels.length > 0 ? labels.join(", ") : "(skipped)"
-        parts.push(`${step.question} → ${answer}`)
+        parts.push(`${s.question} → ${answer}`)
       }
-      const message = parts.join("\n")
-      sendMessage(message)
+
+      dismissedRef.current = true
+      setClarifyingQuestion(null)
+      sendMessage(parts.join("\n"))
     } else {
-      // Move to next step — restore previous selections, custom text, and active state if revisiting
-      const nextStep = stepsRef.current[idx + 1]
-      const nextSaved = updatedSelections[nextStep.question] ?? []
-      const nextCustom = updatedCustomTexts[nextStep.question] ?? ""
-      const nextCustomActive = updatedCustomActives[nextStep.question] ?? false
-      setCurrentStepIndex(idx + 1)
-      setSelectedIds(nextSaved)
-      setCustomAnswerTextState(nextCustom)
-      setIsCustomAnswerActive(nextCustomActive)
+      setStepIndex((i) => i + 1)
     }
-  }, [sendMessage])
+  }
 
-  const back = useCallback(() => {
-    const idx = currentStepIndexRef.current
-    if (idx > 0) {
-      const currentStep = stepsRef.current[idx]
+  const back = () => {
+    setStepIndex((i) => Math.max(0, i - 1))
+  }
 
-      // Save current step state before navigating back
-      const updatedSelections = {
-        ...allSelectionsRef.current,
-        [currentStep.question]: selectedIdsRef.current,
-      }
-      setAllSelections(updatedSelections)
-
-      const updatedCustomTexts = {
-        ...allCustomTextsRef.current,
-        [currentStep.question]: customAnswerTextRef.current,
-      }
-      setAllCustomTexts(updatedCustomTexts)
-
-      const updatedCustomActives = {
-        ...allCustomActivesRef.current,
-        [currentStep.question]: isCustomAnswerActiveRef.current,
-      }
-      setAllCustomActives(updatedCustomActives)
-
-      // Restore previous step state
-      const prevStep = stepsRef.current[idx - 1]
-      const prevSelected = updatedSelections[prevStep.question] ?? []
-      const prevCustom = updatedCustomTexts[prevStep.question] ?? ""
-      const prevCustomActive = updatedCustomActives[prevStep.question] ?? false
-      setCurrentStepIndex(idx - 1)
-      setSelectedIds(prevSelected)
-      setCustomAnswerTextState(prevCustom)
-      setIsCustomAnswerActive(prevCustomActive)
-    }
-  }, [])
-
-  // Push the current clarifying question state into context
-  const currentStep = steps[currentStepIndex]
+  // --- Push state to context ---
 
   useEffect(() => {
+    if (dismissedRef.current) return
+
+    const currentStep = steps[stepIndex]
     if (!currentStep) {
       setClarifyingQuestion(null)
       return
     }
 
-    const question: ClarifyingQuestion = {
-      question: currentStep.question,
-      options: currentStep.options,
-      selectedOptionIds: selectedIds,
-      loading: false,
-      selectionMode: currentStep.selectionMode ?? "checkbox",
-      optional: currentStep.optional ?? false,
-      allowCustomAnswer: currentStep.allowCustomAnswer ?? false,
-      customAnswerText,
-      isCustomAnswerActive,
-      setCustomAnswerText,
-      setCustomAnswerActive: setIsCustomAnswerActive,
-      activateCustomAnswer,
-      currentStepIndex,
+    const inter = getInteraction(interactions, currentStep.question)
+
+    const state: ClarifyingQuestionState = {
+      currentStep: {
+        ...currentStep,
+        selectedOptionIds: inter.selectedIds,
+        customAnswerText: inter.customText || undefined,
+        isCustomAnswerActive: inter.isCustomActive,
+      },
+      currentStepIndex: stepIndex,
       totalSteps: steps.length,
-      confirmLabel: undefined,
       toggleOption,
       confirm,
       back,
+      setCustomAnswerText,
+      setCustomAnswerActive,
+      activateCustomAnswer,
     }
 
-    setClarifyingQuestion(question)
-  }, [
-    currentStep,
-    selectedIds,
-    customAnswerText,
-    isCustomAnswerActive,
-    currentStepIndex,
-    steps.length,
-    toggleOption,
-    setCustomAnswerText,
-    activateCustomAnswer,
-    confirm,
-    back,
-    setClarifyingQuestion,
-  ])
+    setClarifyingQuestion(state)
+  })
 
   // Clean up on unmount
   useEffect(() => {
@@ -271,17 +215,45 @@ function ClarifyingQuestionController({ steps }: { steps: RawStep[] }) {
   return null
 }
 
+// ---------------------------------------------------------------------------
+// Render component for CopilotKit action
+// ---------------------------------------------------------------------------
+
 /**
- * Hook that registers the "clarifyingQuestion" CopilotKit action.
+ * Stable render component for the CopilotKit action.
+ *
+ * Defined as a named component outside the hook so that its reference
+ * identity is stable across re-renders. CopilotKit uses React.memo with
+ * reference equality on RenderComponent — an inline arrow would cause
+ * unmount/remount and destroy selection state.
+ */
+function ClarifyingQuestionRender(props: {
+  args: Record<string, unknown>
+  status: string
+}) {
+  const rawSteps = (props.args.steps ?? []) as RawStep[]
+
+  if (rawSteps.length === 0) return <></>
+
+  const steps = normalizeSteps(rawSteps)
+  return <ClarifyingQuestionController steps={steps} />
+}
+
+// ---------------------------------------------------------------------------
+// Hook: registers the CopilotKit action
+// ---------------------------------------------------------------------------
+
+/**
+ * Hook that registers the "ClarifyingQuestion" CopilotKit action.
  * When the AI backend invokes this action, it triggers a multi-step
  * question panel in the chat textarea for structured user input.
  */
 export const useClarifyingQuestionAction = () => {
   useCopilotAction({
-    name: "AiWidgets.F0ClarifyingQuestion",
+    name: "ClarifyingQuestion",
     description:
       "Present a clarifying question to the user with selectable options. " +
-      "Supports multi-step flows with checkbox (multi-select) or radio (single-select) modes.",
+      "Supports multi-step flows with single-select or multiple-select modes.",
     parameters: [
       {
         name: "steps",
@@ -300,7 +272,7 @@ export const useClarifyingQuestionAction = () => {
             name: "selectionMode",
             type: "string",
             description:
-              'Selection mode: "checkbox" for multi-select, "radio" for single-select. Defaults to "checkbox".',
+              'Selection mode: "single" for single-select, "multiple" for multi-select. Defaults to "single".',
             required: false,
           },
           {
@@ -340,26 +312,10 @@ export const useClarifyingQuestionAction = () => {
         ],
       },
     ],
-    available: "frontend",
-    render: (props) => {
-      const steps = (props.args.steps ?? []) as Array<{
-        question: string
-        options: Array<{ id: string; label: string }>
-        selectionMode?: string
-        optional?: boolean
-        allowCustomAnswer?: boolean
-      }>
-
-      const rawSteps: RawStep[] = steps.map((step) => ({
-        ...step,
-        selectionMode: step.selectionMode === "radio" ? "radio" : "checkbox",
-        optional: step.optional ?? false,
-        allowCustomAnswer: step.allowCustomAnswer ?? false,
-      }))
-
-      if (rawSteps.length === 0) return <></>
-
-      return <ClarifyingQuestionController steps={rawSteps} />
+    handler: async () => {
+      /* no-op — the action is dispatched from the backend via emitFrontendTool */
     },
+    followUp: false,
+    render: ClarifyingQuestionRender,
   })
 }
