@@ -1,20 +1,20 @@
-import type { Meta, StoryObj } from "@storybook/react-vite"
+import type { Meta, StoryObj } from "@storybook/react-vite";
 
-import { expect, within } from "storybook/test"
+import { expect, within } from "storybook/test";
 
-import { Add, Delete, Pencil, Replace, Save } from "@/icons/app/index.ts"
-import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
-import { withSnapshot } from "@/lib/storybook-utils/parameters.ts"
+import { Add, Delete, Pencil, Replace, Save } from "@/icons/app/index.ts";
+import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args";
+import { withSnapshot } from "@/lib/storybook-utils/parameters.ts";
 
-import { F0ButtonDropdown } from "../index"
+import { F0ButtonDropdown } from "../index";
 import {
   buttonDropdownModes,
   buttonDropdownSizes,
   buttonDropdownVariants,
-} from "../types.ts"
+} from "../types.ts";
 
 const meta = {
-  title: "Components/Button/ButtonDropdown",
+  title: "Button/ButtonDropdown",
   component: F0ButtonDropdown,
   parameters: {
     layout: "centered",
@@ -34,7 +34,7 @@ const meta = {
   args: {
     variant: "default",
     onClick: (value, item) => {
-      console.log("DropdownButton clicked => value:", value, "item:", item)
+      console.log("DropdownButton clicked => value:", value, "item:", item);
     },
   },
   argTypes: {
@@ -68,11 +68,11 @@ const meta = {
       table: {
         type: {
           summary: "ButtonDropdownItem[]",
-          detail: `type ButtonDropdownItem = { 
-  value: string; 
-  label: string; 
-  icon?: IconType; 
-  critical?: boolean 
+          detail: `type ButtonDropdownItem = {
+  value: string;
+  label: string;
+  icon?: IconType;
+  critical?: boolean
 }`,
         },
       },
@@ -93,10 +93,10 @@ const meta = {
     },
     ...dataTestIdArgs,
   },
-} satisfies Meta<typeof F0ButtonDropdown>
+} satisfies Meta<typeof F0ButtonDropdown>;
 
-export default meta
-type Story = StoryObj<typeof meta>
+export default meta;
+type Story = StoryObj<typeof meta>;
 
 // Basic Variants
 export const Default: Story = {
@@ -119,7 +119,7 @@ export const Default: Story = {
       },
     ],
   },
-}
+};
 
 export const WithDataTestId: Story = {
   args: {
@@ -139,12 +139,12 @@ export const WithDataTestId: Story = {
     ],
   },
   play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
+    const canvas = within(canvasElement);
     await expect(
-      canvas.getByTestId("my-test-button-dropdown")
-    ).toBeInTheDocument()
+      canvas.getByTestId("my-test-button-dropdown"),
+    ).toBeInTheDocument();
   },
-}
+};
 
 // Basic Variants
 export const WithTooltip: Story = {
@@ -168,7 +168,7 @@ export const WithTooltip: Story = {
       },
     ],
   },
-}
+};
 
 export const WithDescription: Story = {
   args: {
@@ -200,7 +200,7 @@ export const WithDescription: Story = {
       },
     ],
   },
-}
+};
 
 export const WithGroups: Story = {
   args: {
@@ -235,7 +235,7 @@ export const WithGroups: Story = {
       },
     ],
   },
-}
+};
 
 // Dropdown mode stories
 export const DropdownMode: Story = {
@@ -269,7 +269,7 @@ export const DropdownMode: Story = {
       },
     ],
   },
-}
+};
 
 export const DropdownModeWithTrigger: Story = {
   args: {
@@ -296,7 +296,7 @@ export const DropdownModeWithTrigger: Story = {
       },
     ],
   },
-}
+};
 
 export const DropdownModeWithGroups: Story = {
   args: {
@@ -333,7 +333,7 @@ export const DropdownModeWithGroups: Story = {
       },
     ],
   },
-}
+};
 
 export const Snapshot: Story = {
   parameters: withSnapshot({}),
@@ -357,4 +357,4 @@ export const Snapshot: Story = {
     ],
   },
   render: (args) => <F0ButtonDropdown {...args} />,
-}
+};

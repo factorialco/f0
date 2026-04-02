@@ -1,4 +1,4 @@
-import { Meta, StoryObj } from "@storybook/react-vite"
+import { Meta, StoryObj } from "@storybook/react-vite";
 
 import {
   createDataAdapter,
@@ -6,10 +6,10 @@ import {
   generateMockUsers,
   getMockVisualizations,
   mockUsers,
-} from "../../mockData"
+} from "../../mockData";
 
 const meta = {
-  title: "Patterns/DataCollection/Visualizations/List",
+  title: "Data Collection/Visualizations/List",
   parameters: {
     layout: "padded",
     docs: {
@@ -19,21 +19,21 @@ const meta = {
       },
     },
   },
-} satisfies Meta
+} satisfies Meta;
 
-export default meta
-type Story = StoryObj<typeof meta>
+export default meta;
+type Story = StoryObj<typeof meta>;
 
 export const BasicListVisualization: Story = {
   render: () => {
-    const mockVisualizations = getMockVisualizations()
-    return <ExampleComponent visualizations={[mockVisualizations.list]} />
+    const mockVisualizations = getMockVisualizations();
+    return <ExampleComponent visualizations={[mockVisualizations.list]} />;
   },
-}
+};
 
 export const ListVisualizationWithGrouping: Story = {
   render: () => {
-    const mockVisualizations = getMockVisualizations()
+    const mockVisualizations = getMockVisualizations();
     return (
       <ExampleComponent
         visualizations={[mockVisualizations.list]}
@@ -45,21 +45,21 @@ export const ListVisualizationWithGrouping: Story = {
               name: "Department",
               label: (groupId) => groupId,
               itemCount: async (groupId) => {
-                await new Promise((resolve) => setTimeout(resolve, 1000))
+                await new Promise((resolve) => setTimeout(resolve, 1000));
                 return mockUsers.filter((user) => user.department === groupId)
-                  .length
+                  .length;
               },
             },
           },
         }}
       />
-    )
+    );
   },
-}
+};
 
 export const ListVisualizationWithGroupingAndAllGroupsOpenByDefault: Story = {
   render: () => {
-    const mockVisualizations = getMockVisualizations()
+    const mockVisualizations = getMockVisualizations();
     return (
       <ExampleComponent
         visualizations={[mockVisualizations.list]}
@@ -72,21 +72,21 @@ export const ListVisualizationWithGroupingAndAllGroupsOpenByDefault: Story = {
               name: "Department",
               label: (groupId) => groupId,
               itemCount: async (groupId) => {
-                await new Promise((resolve) => setTimeout(resolve, 1000))
+                await new Promise((resolve) => setTimeout(resolve, 1000));
                 return mockUsers.filter((user) => user.department === groupId)
-                  .length
+                  .length;
               },
             },
           },
         }}
       />
-    )
+    );
   },
-}
+};
 
 export const ListVisualizationWithInfiniteScrollPagination: Story = {
   render: () => {
-    const mockVisualizations = getMockVisualizations()
+    const mockVisualizations = getMockVisualizations();
     return (
       <ExampleComponent
         visualizations={[mockVisualizations.list]}
@@ -97,13 +97,13 @@ export const ListVisualizationWithInfiniteScrollPagination: Story = {
         totalItemSummary={(totalItems) => `Total items: ${totalItems}`}
         fullHeight
       />
-    )
+    );
   },
-}
+};
 
 export const ListVisualizationWithRegularPagination: Story = {
   render: () => {
-    const mockVisualizations = getMockVisualizations()
+    const mockVisualizations = getMockVisualizations();
     return (
       <ExampleComponent
         visualizations={[mockVisualizations.list]}
@@ -114,6 +114,6 @@ export const ListVisualizationWithRegularPagination: Story = {
         totalItemSummary={(totalItems) => `Total items: ${totalItems}`}
         fullHeight
       />
-    )
+    );
   },
-}
+};

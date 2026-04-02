@@ -1,20 +1,20 @@
-import type { Meta, StoryObj } from "@storybook/react-vite"
+import type { Meta, StoryObj } from "@storybook/react-vite";
 
 import {
   FIRST_NAMES_MOCK,
   MOCK_ICONS,
   SURNAMES_MOCK,
   getMockValue,
-} from "@/mocks"
+} from "@/mocks";
 
 import {
   F0SelectItemObject,
   F0SelectItemProps,
-} from "../../../../../../components/F0Select"
-import { Search } from "../../../../../../icons/app"
-import { BreadcrumbSelect } from "./index"
+} from "../../../../../../components/F0Select";
+import { Search } from "../../../../../../icons/app";
+import { BreadcrumbSelect } from "./index";
 const meta: Meta<typeof BreadcrumbSelect> = {
-  title: "Patterns/Navigation/BreadcrumbSelect",
+  title: "Navigation/BreadcrumbSelect",
   component: BreadcrumbSelect,
   tags: ["autodocs", "internal"],
   parameters: {
@@ -22,17 +22,17 @@ const meta: Meta<typeof BreadcrumbSelect> = {
       skipCi: true,
     },
   },
-}
+};
 
-export default meta
+export default meta;
 
-type Story = StoryObj<typeof BreadcrumbSelect<string>>
+type Story = StoryObj<typeof BreadcrumbSelect<string>>;
 
 export const Default: Story = {
   args: {
     value: "recruitment",
     onChange: (value: string) => {
-      console.log("onChange BreadcrumbSelect", value)
+      console.log("onChange BreadcrumbSelect", value);
     },
     options: [
       {
@@ -56,7 +56,7 @@ export const Default: Story = {
       },
     },
   },
-}
+};
 
 export const WithSearchbox: Story = {
   args: {
@@ -64,9 +64,9 @@ export const WithSearchbox: Story = {
     onChange: (
       value: string,
       item?: unknown,
-      option?: F0SelectItemObject<string, unknown>
+      option?: F0SelectItemObject<string, unknown>,
     ) => {
-      console.log("onChange BreadcrumbSelect", value, item, option)
+      console.log("onChange BreadcrumbSelect", value, item, option);
     },
     searchBoxPlaceholder: "Search",
     showSearchBox: true,
@@ -90,16 +90,16 @@ export const WithSearchbox: Story = {
       },
     },
   },
-}
+};
 
 const mockItems = Array.from({ length: 30 }, (_, i) => ({
   value: `option-${i}`,
   label: `${getMockValue(FIRST_NAMES_MOCK, i)} ${getMockValue(SURNAMES_MOCK, i)}`,
   icon: getMockValue(MOCK_ICONS, i),
   description: `Description for option ${i}`,
-}))
+}));
 
-type MockItem = (typeof mockItems)[number]
+type MockItem = (typeof mockItems)[number];
 
 export const AsyncData: StoryObj<typeof BreadcrumbSelect<string, MockItem>> = {
   args: {
@@ -107,21 +107,21 @@ export const AsyncData: StoryObj<typeof BreadcrumbSelect<string, MockItem>> = {
     source: {
       dataAdapter: {
         fetchData: async (options) => {
-          const { search } = options
+          const { search } = options;
           return new Promise((resolve) => {
             setTimeout(() => {
               const results = mockItems.filter(
                 (item) =>
                   !search ||
-                  item.label.toLowerCase().includes(search.toLowerCase())
-              )
+                  item.label.toLowerCase().includes(search.toLowerCase()),
+              );
 
               const res = {
                 records: results,
-              }
-              resolve(res)
-            }, 100)
-          })
+              };
+              resolve(res);
+            }, 100);
+          });
         },
       },
     },
@@ -131,7 +131,7 @@ export const AsyncData: StoryObj<typeof BreadcrumbSelect<string, MockItem>> = {
       icon: item.icon,
     }),
     onChange: (value: string) => {
-      console.log("onChange BreadcrumbSelect", value)
+      console.log("onChange BreadcrumbSelect", value);
     },
   },
   parameters: {
@@ -142,16 +142,16 @@ export const AsyncData: StoryObj<typeof BreadcrumbSelect<string, MockItem>> = {
       },
     },
   },
-}
+};
 
 const mockItemsLargeDataset = Array.from({ length: 10000 }, (_, i) => ({
   value: `option-${i}`,
   label: `${getMockValue(FIRST_NAMES_MOCK, i)} ${getMockValue(SURNAMES_MOCK, i)}`,
   icon: getMockValue(MOCK_ICONS, i),
   description: `Description for option ${i}`,
-}))
+}));
 
-type MockItemLargeDataSet = (typeof mockItemsLargeDataset)[number]
+type MockItemLargeDataSet = (typeof mockItemsLargeDataset)[number];
 
 export const AsyncDataWithLargeDataset: StoryObj<
   typeof BreadcrumbSelect<string, (typeof mockItems)[number]>
@@ -166,23 +166,23 @@ export const AsyncDataWithLargeDataset: StoryObj<
       dataAdapter: {
         paginationType: "infinite-scroll",
         fetchData: (options) => {
-          const { search, pagination } = options
+          const { search, pagination } = options;
           return new Promise((resolve) => {
             setTimeout(() => {
-              const pageSize = pagination.perPage ?? 10
-              const cursor = "cursor" in pagination ? pagination.cursor : null
-              const nextCursor = cursor ? Number(cursor) + pageSize : pageSize
+              const pageSize = pagination.perPage ?? 10;
+              const cursor = "cursor" in pagination ? pagination.cursor : null;
+              const nextCursor = cursor ? Number(cursor) + pageSize : pageSize;
 
               const results = mockItemsLargeDataset.filter(
                 (item) =>
                   !search ||
-                  item.label.toLowerCase().includes(search.toLowerCase())
-              )
+                  item.label.toLowerCase().includes(search.toLowerCase()),
+              );
 
               const paginatedResults = results.slice(
                 cursor ? Number(cursor) : 0,
-                nextCursor
-              )
+                nextCursor,
+              );
 
               const res = {
                 type: "infinite-scroll" as const,
@@ -191,15 +191,15 @@ export const AsyncDataWithLargeDataset: StoryObj<
                 hasMore: nextCursor < results.length,
                 records: paginatedResults,
                 total: results.length,
-              }
-              resolve(res)
-            }, 100)
-          })
+              };
+              resolve(res);
+            }, 100);
+          });
         },
       },
     },
     mapOptions: (
-      item: MockItemLargeDataSet
+      item: MockItemLargeDataSet,
     ): F0SelectItemProps<string, MockItemLargeDataSet> => ({
       value: item.value,
       label: item.label,
@@ -207,7 +207,7 @@ export const AsyncDataWithLargeDataset: StoryObj<
     }),
     showSearchBox: true,
     onChange: (value: string) => {
-      console.log("onChange BreadcrumbSelect", value)
+      console.log("onChange BreadcrumbSelect", value);
     },
   },
   parameters: {
@@ -218,4 +218,4 @@ export const AsyncDataWithLargeDataset: StoryObj<
       },
     },
   },
-}
+};

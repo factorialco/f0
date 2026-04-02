@@ -5,7 +5,7 @@ import { F0Icon, IconType } from "@/components/F0Icon"
 import {
   DropdownInternal,
   DropdownItem,
-} from "@/experimental/Navigation/Dropdown/internal"
+} from "@/patterns/Navigation/Dropdown/internal"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { CrossedCircle, Ellipsis } from "@/icons/app"
 import { withDataTestId } from "@/lib/data-testid"

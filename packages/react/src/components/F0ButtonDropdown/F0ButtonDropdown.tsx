@@ -4,7 +4,7 @@ import { F0Icon } from "@/components/F0Icon"
 import {
   DropdownInternal,
   DropdownItem,
-} from "@/experimental/Navigation/Dropdown/internal.tsx"
+} from "@/patterns/Navigation/Dropdown/internal.tsx"
 import { ChevronDown } from "@/icons/app/index.ts"
 import { withDataTestId } from "@/lib/data-testid/index.tsx"
 import { useI18n } from "@/lib/providers/i18n"

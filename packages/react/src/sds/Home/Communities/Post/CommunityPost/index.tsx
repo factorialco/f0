@@ -4,7 +4,7 @@ import { F0Button } from "@/components/F0Button"
 import { IconType } from "@/components/F0Icon"
 import { F0Link } from "@/components/F0Link"
 import { Reactions, ReactionsProps } from "@/experimental/Information/Reactions"
-import { Dropdown, DropdownItem } from "@/experimental/Navigation/Dropdown"
+import { Dropdown, DropdownItem } from "@/patterns/Navigation/Dropdown"
 import {
   Comment as CommentIcon,
   EllipsisHorizontal,

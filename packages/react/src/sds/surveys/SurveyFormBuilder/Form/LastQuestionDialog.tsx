@@ -1,18 +1,18 @@
-import { Dialog } from "@/patterns/Dialog/Overlays"
-import { useI18n } from "@/lib/providers/i18n"
+import { Dialog } from "@/experimental/Overlays/Dialog";
+import { useI18n } from "@/lib/providers/i18n";
 
 type LastQuestionDialogProps = {
-  open: boolean
-  onConfirm: () => void
-  onCancel: () => void
-}
+  open: boolean;
+  onConfirm: () => void;
+  onCancel: () => void;
+};
 
 export const LastQuestionDialog = ({
   open,
   onConfirm,
   onCancel,
 }: LastQuestionDialogProps) => {
-  const { t } = useI18n()
+  const { t } = useI18n();
 
   return (
     <Dialog
@@ -22,7 +22,7 @@ export const LastQuestionDialog = ({
         type: "warning",
         title: t("surveyFormBuilder.labels.lastQuestionDialogTitle"),
         description: t(
-          "surveyFormBuilder.labels.lastQuestionDialogDescription"
+          "surveyFormBuilder.labels.lastQuestionDialogDescription",
         ),
       }}
       actions={{
@@ -36,5 +36,5 @@ export const LastQuestionDialog = ({
         },
       }}
     />
-  )
-}
+  );
+};

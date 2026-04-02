@@ -28,7 +28,7 @@ vi.mock("@/components/F0Icon", () => ({
   ),
 }))
 
-vi.mock("@/experimental/Navigation/Dropdown/internal", () => ({
+vi.mock("@/patterns/Navigation/Dropdown/internal", () => ({
   DropdownInternal: ({ children }: { children: React.ReactNode }) => (
     <div data-testid="dropdown-internal">{children}</div>
   ),

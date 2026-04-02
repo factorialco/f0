@@ -1,17 +1,17 @@
-import type { Meta, StoryObj } from "@storybook/react-vite"
+import type { Meta, StoryObj } from "@storybook/react-vite";
 
-import avatar01 from "@storybook-static/avatars/person01.jpg"
-import avatar02 from "@storybook-static/avatars/person02.jpg"
-import avatar03 from "@storybook-static/avatars/person03.jpg"
-import { expect, within } from "storybook/test"
+import avatar01 from "@storybook-static/avatars/person01.jpg";
+import avatar02 from "@storybook-static/avatars/person02.jpg";
+import avatar03 from "@storybook-static/avatars/person03.jpg";
+import { expect, within } from "storybook/test";
 
-import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
+import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args";
 
-import { F0ChipList } from "./index"
+import { F0ChipList } from "./index";
 
 const meta = {
   component: F0ChipList,
-  title: "Components/Chip/ChipList",
+  title: "Chip/ChipList",
   parameters: {
     layout: "centered",
   },
@@ -19,10 +19,10 @@ const meta = {
   argTypes: {
     ...dataTestIdArgs,
   },
-} satisfies Meta<typeof F0ChipList>
+} satisfies Meta<typeof F0ChipList>;
 
-export default meta
-type Story = StoryObj<typeof meta>
+export default meta;
+type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
@@ -58,7 +58,7 @@ export const Default: Story = {
       },
     ],
   },
-}
+};
 
 export const WithDataTestId: Story = {
   args: {
@@ -77,10 +77,10 @@ export const WithDataTestId: Story = {
     ],
   },
   play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    await expect(canvas.getByTestId("my-test-chip-list")).toBeInTheDocument()
+    const canvas = within(canvasElement);
+    await expect(canvas.getByTestId("my-test-chip-list")).toBeInTheDocument();
   },
-}
+};
 
 export const WithClose: Story = {
   args: {
@@ -90,7 +90,7 @@ export const WithClose: Story = {
       onClose: () => {},
     })),
   },
-}
+};
 
 export const WithFillLayout: Story = {
   args: {
@@ -100,4 +100,4 @@ export const WithFillLayout: Story = {
   parameters: {
     layout: "padded",
   },
-}
+};

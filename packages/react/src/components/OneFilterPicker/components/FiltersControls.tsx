@@ -1,36 +1,36 @@
-import { useControllableState } from "@radix-ui/react-use-controllable-state"
-import { AnimatePresence, motion } from "motion/react"
-import { useContext, useEffect, useId, useMemo, useRef, useState } from "react"
+import { useControllableState } from "@radix-ui/react-use-controllable-state";
+import { AnimatePresence, motion } from "motion/react";
+import { useContext, useEffect, useId, useMemo, useRef, useState } from "react";
 
-import { F0Button } from "@/components/F0Button"
-import { ButtonInternal } from "@/components/F0Button/internal"
-import { F0DialogContext } from "@/patterns/Dialog/F0Dialog"
-import { FilterPickerInternal } from "@/components/F0FilterPickerContent/internal"
-import { Filter } from "@/icons/app"
-import { useI18n } from "@/lib/providers/i18n"
-import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
+import { F0Button } from "@/components/F0Button";
+import { ButtonInternal } from "@/components/F0Button/internal";
+import { F0DialogContext } from "@/components/F0Dialog";
+import { FilterPickerInternal } from "@/components/F0FilterPickerContent/internal";
+import { Filter } from "@/icons/app";
+import { useI18n } from "@/lib/providers/i18n";
+import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover";
 
-import type { FiltersDefinition, FiltersMode, FiltersState } from "../types"
+import type { FiltersDefinition, FiltersMode, FiltersState } from "../types";
 
-import { ArrowLeft } from "../../../icons/app"
-import { getFilterType } from "../filterTypes"
-import { FilterTypeContext, FilterTypeSchema } from "../filterTypes/types"
-import { getActiveFilterKeys } from "../internal/getActiveFilterKeys"
-import { FilterContent } from "./FilterContent"
-import { FilterList } from "./FilterList"
+import { ArrowLeft } from "../../../icons/app";
+import { getFilterType } from "../filterTypes";
+import { FilterTypeContext, FilterTypeSchema } from "../filterTypes/types";
+import { getActiveFilterKeys } from "../internal/getActiveFilterKeys";
+import { FilterContent } from "./FilterContent";
+import { FilterList } from "./FilterList";
 
 interface FiltersControlsProps<Filters extends FiltersDefinition> {
-  filters: Filters
-  value: FiltersState<Filters>
-  onChange: (value: FiltersState<Filters>) => void
-  isOpen?: boolean
-  onOpenChange?: (open: boolean) => void
-  hideLabel?: boolean
-  mode?: FiltersMode
-  displayCounter?: boolean
+  filters: Filters;
+  value: FiltersState<Filters>;
+  onChange: (value: FiltersState<Filters>) => void;
+  isOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  hideLabel?: boolean;
+  mode?: FiltersMode;
+  displayCounter?: boolean;
 }
 
-const DEFAULT_FORM_HEIGHT = 388
+const DEFAULT_FORM_HEIGHT = 388;
 
 export function FiltersControls<Filters extends FiltersDefinition>({
   filters,
@@ -42,158 +42,158 @@ export function FiltersControls<Filters extends FiltersDefinition>({
   mode = "default",
   displayCounter = false,
 }: FiltersControlsProps<Filters>) {
-  const firstFilterKey = (Object.keys(filters)[0] as keyof Filters) ?? null
+  const firstFilterKey = (Object.keys(filters)[0] as keyof Filters) ?? null;
   const [selectedFilterKey, setSelectedFilterKey] = useState<
     keyof Filters | null
-  >(mode === "compact" ? null : firstFilterKey)
-  const i18n = useI18n()
+  >(mode === "compact" ? null : firstFilterKey);
+  const i18n = useI18n();
 
   // Auto-detect if we're inside a dialog and use its portal container
-  const dialogContext = useContext(F0DialogContext)
+  const dialogContext = useContext(F0DialogContext);
   const shouldUseDialogContainer =
     dialogContext.portalContainer &&
     (dialogContext.position === "center" ||
-      dialogContext.position === "fullscreen")
+      dialogContext.position === "fullscreen");
   const portalContainer = shouldUseDialogContainer
     ? dialogContext.portalContainer
-    : undefined
+    : undefined;
 
   const [isOpen, setIsOpen] = useControllableState({
     prop: controlledIsOpen,
     defaultProp: false,
     onChange: controlledOnOpenChange,
-  })
+  });
 
-  const isOpenRef = useRef(isOpen)
+  const isOpenRef = useRef(isOpen);
   useEffect(() => {
-    isOpenRef.current = isOpen
-  }, [isOpen])
+    isOpenRef.current = isOpen;
+  }, [isOpen]);
 
-  const isClosingRef = useRef(false)
+  const isClosingRef = useRef(false);
   const handleOpenChange = (open: boolean) => {
-    const currentIsOpen = isOpenRef.current
+    const currentIsOpen = isOpenRef.current;
 
     if (isClosingRef.current) {
-      return
+      return;
     }
 
     if (currentIsOpen) {
-      isClosingRef.current = true
-      setIsOpen(false)
+      isClosingRef.current = true;
+      setIsOpen(false);
 
       setTimeout(() => {
-        isClosingRef.current = false
-      }, 150)
+        isClosingRef.current = false;
+      }, 150);
 
-      return
+      return;
     }
 
-    setIsOpen(open)
-  }
+    setIsOpen(open);
+  };
 
-  const onOpenChange = handleOpenChange
+  const onOpenChange = handleOpenChange;
 
-  const [localFiltersValue, setLocalFiltersValue] = useState(value)
+  const [localFiltersValue, setLocalFiltersValue] = useState(value);
   useEffect(() => {
-    setLocalFiltersValue(value)
-  }, [value])
+    setLocalFiltersValue(value);
+  }, [value]);
 
   const updateFilterValue = (key: keyof Filters, newValue: unknown): void => {
     setLocalFiltersValue((prev) => ({
       ...prev,
       [key]: newValue,
-    }))
-  }
+    }));
+  };
 
   const handleApplyFilters = () => {
-    onChange(localFiltersValue)
-    onOpenChange(false)
-  }
+    onChange(localFiltersValue);
+    onOpenChange(false);
+  };
 
   const handleGoBack = () => {
     if (selectedFilterKey) {
-      setSelectedFilterKey(null)
+      setSelectedFilterKey(null);
     } else {
-      onChange(localFiltersValue)
-      onOpenChange(false)
+      onChange(localFiltersValue);
+      onOpenChange(false);
     }
-  }
+  };
 
   const handleCancelFilters = () => {
-    setLocalFiltersValue(value)
-    onOpenChange(false)
-  }
+    setLocalFiltersValue(value);
+    onOpenChange(false);
+  };
 
   const handleApplyFiltersSelection = () => {
-    handleGoBack()
-  }
+    handleGoBack();
+  };
 
   useEffect(() => {
     const getFirstFilterNotEmpty = () => {
       return Object.entries(localFiltersValue || {}).find(([key, value]) => {
-        if (!filters[key]) return false
+        if (!filters[key]) return false;
         // TODO: Make this type better
         const filterType = getFilterType(filters[key].type) as unknown as {
-          isEmpty: (value: unknown, context: FilterTypeContext) => boolean
-        }
+          isEmpty: (value: unknown, context: FilterTypeContext) => boolean;
+        };
 
         return !filterType.isEmpty(value, {
           schema: filters[key] as unknown as FilterTypeSchema,
           i18n,
-        })
-      })
-    }
+        });
+      });
+    };
 
     if (isOpen && mode === "default") {
-      const firstFilterWithValue = getFirstFilterNotEmpty()
+      const firstFilterWithValue = getFirstFilterNotEmpty();
       if (firstFilterWithValue) {
-        setSelectedFilterKey(firstFilterWithValue[0] as keyof Filters)
+        setSelectedFilterKey(firstFilterWithValue[0] as keyof Filters);
       } else {
-        const firstFilterKey = Object.keys(filters)[0] as keyof Filters
-        setSelectedFilterKey(firstFilterKey)
+        const firstFilterKey = Object.keys(filters)[0] as keyof Filters;
+        setSelectedFilterKey(firstFilterKey);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- We only want to run this when the popover is opened
-  }, [isOpen])
+  }, [isOpen]);
 
   // gets the form height
   const formHeight = useMemo(() => {
     const maxHeight = Object.entries(filters).reduce((max, [_, value]) => {
-      const filterType = getFilterType(value.type)
-      return Math.max(max, filterType?.formHeight || DEFAULT_FORM_HEIGHT)
-    }, 0)
+      const filterType = getFilterType(value.type);
+      return Math.max(max, filterType?.formHeight || DEFAULT_FORM_HEIGHT);
+    }, 0);
 
-    return maxHeight
-  }, [filters])
-  const id = useId()
+    return maxHeight;
+  }, [filters]);
+  const id = useId();
 
   const activeFilters = useMemo(
     () => getActiveFilterKeys(filters, localFiltersValue, i18n),
-    [filters, localFiltersValue, i18n]
-  )
+    [filters, localFiltersValue, i18n],
+  );
 
   const appliedFiltersCount = useMemo(() => {
-    const count = getActiveFilterKeys(filters, value, i18n).length
-    if (count === 0) return undefined
-    return count
-  }, [filters, value, i18n])
+    const count = getActiveFilterKeys(filters, value, i18n).length;
+    if (count === 0) return undefined;
+    return count;
+  }, [filters, value, i18n]);
 
   const activeFiltersTooltip = useMemo(() => {
     return activeFilters.length > 0
       ? i18n.t("filters.activeFilters", {
           filters: activeFilters
             .map((key) => {
-              return filters[key].label
+              return filters[key].label;
             })
             .join(", "),
         })
-      : undefined
+      : undefined;
     // eslint-disable-next-line react-hooks/exhaustive-deps -- We only want to run this when the active filters change
-  }, [activeFilters, filters])
+  }, [activeFilters, filters]);
 
   // Inline mode: dual-pane layout (filter list + content) as an overlay
   if (mode === "inline") {
-    const hasFiltersApplied = !!Object.values(localFiltersValue).length
+    const hasFiltersApplied = !!Object.values(localFiltersValue).length;
 
     return (
       <div className="flex items-center gap-2">
@@ -268,18 +268,18 @@ export function FiltersControls<Filters extends FiltersDefinition>({
           )}
         </AnimatePresence>
       </div>
-    )
+    );
   }
 
   // Compact mode has its own UI with animations
   if (mode === "compact") {
-    const hasFiltersApplied = !!Object.values(localFiltersValue).length
+    const hasFiltersApplied = !!Object.values(localFiltersValue).length;
 
     const navHeaderTitle = selectedFilterKey
       ? i18n.t("filters.filteringBy", {
           label: filters[selectedFilterKey].label,
         })
-      : i18n.t("filters.availableFilters")
+      : i18n.t("filters.availableFilters");
 
     const NavHeader = (
       <div className="flex items-center gap-2 pl-1.5 py-1.5">
@@ -293,7 +293,7 @@ export function FiltersControls<Filters extends FiltersDefinition>({
         />
         {navHeaderTitle}
       </div>
-    )
+    );
 
     const ApplySelectionButton = (
       <>
@@ -306,7 +306,7 @@ export function FiltersControls<Filters extends FiltersDefinition>({
           </div>
         )}
       </>
-    )
+    );
 
     return (
       <div className="flex items-center gap-2">
@@ -383,7 +383,7 @@ export function FiltersControls<Filters extends FiltersDefinition>({
           )}
         </AnimatePresence>
       </div>
-    )
+    );
   }
 
   // Default mode uses FilterPickerInner for the content
@@ -420,5 +420,5 @@ export function FiltersControls<Filters extends FiltersDefinition>({
         </PopoverContent>
       </Popover>
     </div>
-  )
+  );
 }

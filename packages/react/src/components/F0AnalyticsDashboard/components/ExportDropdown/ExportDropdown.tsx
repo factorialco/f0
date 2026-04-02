@@ -1,4 +1,4 @@
-import { Dropdown } from "@/experimental/Navigation/Dropdown"
+import { Dropdown } from "@/patterns/Navigation/Dropdown"
 import { Download, Ellipsis } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 

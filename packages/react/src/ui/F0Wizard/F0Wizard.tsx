@@ -1,22 +1,22 @@
-import { FC, useMemo } from "react"
+import { FC, useMemo } from "react";
 
 import type {
   F0DialogPrimaryAction,
   F0DialogSecondaryAction,
-} from "@/patterns/Dialog/F0Dialog/types"
+} from "@/components/F0Dialog/types";
 
-import { F0DialogInternal as F0Dialog } from "@/patterns/Dialog/F0Dialog/F0DialogInternal"
-import ArrowLeft from "@/icons/app/ArrowLeft"
-import ArrowRight from "@/icons/app/ArrowRight"
-import { useI18n } from "@/lib/providers/i18n/i18n-provider"
+import { F0DialogInternal as F0Dialog } from "@/components/F0Dialog/F0DialogInternal";
+import ArrowLeft from "@/icons/app/ArrowLeft";
+import ArrowRight from "@/icons/app/ArrowRight";
+import { useI18n } from "@/lib/providers/i18n/i18n-provider";
 
-import type { F0WizardProps } from "./types"
+import type { F0WizardProps } from "./types";
 
-import { WizardProvider } from "./components/WizardProvider"
-import { WizardSteps } from "./components/WizardSteps"
-import { useWizardNavigation } from "./hooks/useWizardNavigation"
+import { WizardProvider } from "./components/WizardProvider";
+import { WizardSteps } from "./components/WizardSteps";
+import { useWizardNavigation } from "./hooks/useWizardNavigation";
 
-const noop = () => {}
+const noop = () => {};
 
 /**
  * @internal This component is not exported from the package.
@@ -42,13 +42,13 @@ export const F0Wizard: FC<F0WizardProps> = ({
   autoSkipCompletedSteps = false,
 }) => {
   const effectiveDefaultStepIndex = useMemo(() => {
-    if (defaultStepIndex !== undefined) return defaultStepIndex
-    if (!autoSkipCompletedSteps) return 0
+    if (defaultStepIndex !== undefined) return defaultStepIndex;
+    if (!autoSkipCompletedSteps) return 0;
     const firstIncomplete = steps.findIndex(
-      (step) => step.isCompleted?.() !== true
-    )
-    return firstIncomplete === -1 ? steps.length - 1 : firstIncomplete
-  }, [defaultStepIndex, autoSkipCompletedSteps, steps])
+      (step) => step.isCompleted?.() !== true,
+    );
+    return firstIncomplete === -1 ? steps.length - 1 : firstIncomplete;
+  }, [defaultStepIndex, autoSkipCompletedSteps, steps]);
 
   const navigation = useWizardNavigation({
     steps,
@@ -58,20 +58,20 @@ export const F0Wizard: FC<F0WizardProps> = ({
     allowStepSkipping,
     autoCloseOnLastStepSubmit,
     onClose,
-  })
+  });
 
-  const i18n = useI18n()
+  const i18n = useI18n();
 
-  const currentStepDef = steps[navigation.currentStep]
-  const isFirstStep = navigation.currentStep === 0
-  const isLastStep = navigation.currentStep === steps.length - 1
+  const currentStepDef = steps[navigation.currentStep];
+  const isFirstStep = navigation.currentStep === 0;
+  const isLastStep = navigation.currentStep === steps.length - 1;
 
   const resolvedNextLabel = isLastStep
     ? (currentStepDef?.nextLabel ?? submitLabel ?? i18n.wizard.submit)
-    : (currentStepDef?.nextLabel ?? nextLabel ?? i18n.wizard.next)
+    : (currentStepDef?.nextLabel ?? nextLabel ?? i18n.wizard.next);
 
   const resolvedPreviousLabel =
-    currentStepDef?.previousLabel ?? previousLabel ?? i18n.wizard.previous
+    currentStepDef?.previousLabel ?? previousLabel ?? i18n.wizard.previous;
 
   const primaryAction = useMemo<F0DialogPrimaryAction>(
     () => ({
@@ -83,8 +83,8 @@ export const F0Wizard: FC<F0WizardProps> = ({
         currentStepDef?.hasErrors?.() === true,
       loading: navigation.loading,
     }),
-    [resolvedNextLabel, isLastStep, navigation, currentStepDef]
-  )
+    [resolvedNextLabel, isLastStep, navigation, currentStepDef],
+  );
 
   const secondaryAction = useMemo<F0DialogSecondaryAction | undefined>(
     () =>
@@ -96,8 +96,8 @@ export const F0Wizard: FC<F0WizardProps> = ({
             onClick: navigation.goPrevious,
             disabled: navigation.loading,
           },
-    [isFirstStep, resolvedPreviousLabel, navigation]
-  )
+    [isFirstStep, resolvedPreviousLabel, navigation],
+  );
 
   return (
     <F0Dialog
@@ -132,7 +132,7 @@ export const F0Wizard: FC<F0WizardProps> = ({
         </div>
       </WizardProvider>
     </F0Dialog>
-  )
-}
+  );
+};
 
-F0Wizard.displayName = "F0Wizard"
+F0Wizard.displayName = "F0Wizard";

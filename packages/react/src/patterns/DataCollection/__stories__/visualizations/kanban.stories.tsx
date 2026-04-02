@@ -1,9 +1,9 @@
-import { Meta, StoryObj } from "@storybook/react-vite"
-import { useMemo, useRef, useState } from "react"
-import { fn } from "storybook/test"
+import { Meta, StoryObj } from "@storybook/react-vite";
+import { useMemo, useRef, useState } from "react";
+import { fn } from "storybook/test";
 
-import { granularityDefinitions } from "@/experimental/OneCalendar/granularities"
-import { Delete, Pencil, Plus } from "@/icons/app"
+import { granularityDefinitions } from "@/experimental/OneCalendar/granularities";
+import { Delete, Pencil, Plus } from "@/icons/app";
 
 import {
   createDataAdapter,
@@ -11,10 +11,10 @@ import {
   generateMockUsers,
   getMockVisualizations,
   type MockUser,
-} from "../mockData"
+} from "../mockData";
 
 const meta = {
-  title: "Patterns/DataCollection/Visualizations/Kanban",
+  title: "Data Collection/Visualizations/Kanban",
   parameters: {
     layout: "padded",
     docs: {
@@ -24,10 +24,10 @@ const meta = {
       },
     },
   },
-} satisfies Meta
+} satisfies Meta;
 
-export default meta
-type Story = StoryObj<typeof meta>
+export default meta;
+type Story = StoryObj<typeof meta>;
 
 export const BasicKanbanVisualization: Story = {
   parameters: {
@@ -35,14 +35,14 @@ export const BasicKanbanVisualization: Story = {
   },
   render: () => {
     // Increase dataset to demonstrate per-lane infinite scroll
-    const [items] = useState<MockUser[]>(() => generateMockUsers(90))
+    const [items] = useState<MockUser[]>(() => generateMockUsers(90));
     const mockVisualizations = getMockVisualizations({
       frozenColumns: 0,
-    })
+    });
 
     // Create a ref to always have access to current items
-    const itemsRef = useRef(items)
-    itemsRef.current = items
+    const itemsRef = useRef(items);
+    itemsRef.current = items;
 
     // Create a dataAdapter that always uses current items via ref
     const dataAdapter = useMemo(() => {
@@ -52,7 +52,7 @@ export const BasicKanbanVisualization: Story = {
         paginationType: "infinite-scroll",
         perPage: 10,
         search: "",
-      })
+      });
 
       // Override fetchData to always use the most current data
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -63,13 +63,13 @@ export const BasicKanbanVisualization: Story = {
           paginationType: "infinite-scroll",
           perPage: 10,
           search: options.search,
-        })
+        });
 
-        return currentAdapter.fetchData(options)
-      }
+        return currentAdapter.fetchData(options);
+      };
 
-      return adapter
-    }, [items])
+      return adapter;
+    }, [items]);
 
     return (
       <ExampleComponent
@@ -117,7 +117,7 @@ export const BasicKanbanVisualization: Story = {
           items: new Map(
             items
               .slice(0, 3)
-              .map((item) => [item.id, { id: item.id, checked: true }])
+              .map((item) => [item.id, { id: item.id, checked: true }]),
           ),
           groups: new Map(),
         }}
@@ -145,42 +145,42 @@ export const BasicKanbanVisualization: Story = {
         totalItemSummary={(total) => `Total items: ${total}`}
         searchBar
       />
-    )
+    );
   },
-}
+};
 
 export const KanbanWithCreateActions: Story = {
   parameters: {
     chromatic: { disableSnapshot: true },
   },
   render: () => {
-    const [items] = useState<MockUser[]>(() => generateMockUsers(24))
-    const mockVisualizations = getMockVisualizations({})
+    const [items] = useState<MockUser[]>(() => generateMockUsers(24));
+    const mockVisualizations = getMockVisualizations({});
 
     const handleCreate = (laneId: string) => {
-      console.log("Creating item on lane", laneId)
-      fn()
-    }
+      console.log("Creating item on lane", laneId);
+      fn();
+    };
 
     const dataAdapter = useMemo(() => {
       const adapter = createDataAdapter({
         data: items,
         paginationType: "infinite-scroll",
         perPage: 10,
-      })
+      });
 
       adapter.fetchData = (options: unknown) => {
         const currentAdapter = createDataAdapter({
           data: items,
           paginationType: "infinite-scroll",
           perPage: 10,
-        })
+        });
 
-        return currentAdapter.fetchData(options as never)
-      }
+        return currentAdapter.fetchData(options as never);
+      };
 
-      return adapter
-    }, [items])
+      return adapter;
+    }, [items]);
 
     return (
       <ExampleComponent
@@ -202,6 +202,6 @@ export const KanbanWithCreateActions: Story = {
         fullHeight
         searchBar
       />
-    )
+    );
   },
-}
+};

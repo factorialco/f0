@@ -1,21 +1,21 @@
-import type { Meta, StoryObj } from "@storybook/react-vite"
+import type { Meta, StoryObj } from "@storybook/react-vite";
 
-import { expect, userEvent, within } from "storybook/test"
+import { expect, userEvent, within } from "storybook/test";
 
-import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
-import * as Icons from "@/icons/app"
+import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson";
+import * as Icons from "@/icons/app";
 
-import { Dropdown, MobileDropdown as MobileDropdownComponent } from "./index"
+import { Dropdown, MobileDropdown as MobileDropdownComponent } from "./index";
 
 const meta: Meta<typeof Dropdown> = {
-  title: "Patterns/Navigation/Dropdown",
+  title: "Navigation/Dropdown",
   component: Dropdown,
   tags: ["autodocs", "experimental"],
-}
+};
 
-export default meta
+export default meta;
 
-type Story = StoryObj<typeof Dropdown>
+type Story = StoryObj<typeof Dropdown>;
 
 export const Default: Story = {
   args: {
@@ -47,7 +47,7 @@ export const Default: Story = {
       },
     ],
   },
-}
+};
 
 export const PlayTest: Story = {
   parameters: {
@@ -87,20 +87,20 @@ export const PlayTest: Story = {
     ],
   },
   play: async ({ canvasElement }) => {
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+    await new Promise((resolve) => setTimeout(resolve, 1000));
     // Search the full page because the popup is rendered in a portal, outside the story canvas
-    const page = within(canvasElement.closest("body")!)
+    const page = within(canvasElement.closest("body")!);
 
-    const openButton = page.getByRole("button")
-    await userEvent.click(openButton)
-    console.log(page.getByText("Create"))
+    const openButton = page.getByRole("button");
+    await userEvent.click(openButton);
+    console.log(page.getByText("Create"));
 
-    const itemWithDataset = page.getByText("Create")
+    const itemWithDataset = page.getByText("Create");
 
-    await expect(itemWithDataset).toBeInTheDocument()
-    await userEvent.click(itemWithDataset)
+    await expect(itemWithDataset).toBeInTheDocument();
+    await userEvent.click(itemWithDataset);
   },
-}
+};
 
 export const WithCustomTrigger: Story = {
   args: {
@@ -135,7 +135,7 @@ export const WithCustomTrigger: Story = {
       },
     },
   },
-}
+};
 
 export const WithLinks: Story = {
   args: {
@@ -160,7 +160,7 @@ export const WithLinks: Story = {
       },
     ],
   },
-}
+};
 
 export const WithAvatars: Story = {
   args: {
@@ -197,7 +197,7 @@ export const WithAvatars: Story = {
       },
     ],
   },
-}
+};
 
 export const WithLabels: Story = {
   args: {
@@ -223,7 +223,7 @@ export const WithLabels: Story = {
       },
     ],
   },
-}
+};
 
 export const MobileDropdown: Story = {
   args: {
@@ -257,7 +257,7 @@ export const MobileDropdown: Story = {
     ],
   },
   render: (args) => <MobileDropdownComponent {...args} />,
-}
+};
 
 export const WithDataTestId: Story = {
   args: {
@@ -277,7 +277,7 @@ export const WithDataTestId: Story = {
     </Dropdown>
   ),
   play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    await expect(canvas.getByTestId("dropdown-test-id")).toBeInTheDocument()
+    const canvas = within(canvasElement);
+    await expect(canvas.getByTestId("dropdown-test-id")).toBeInTheDocument();
   },
-}
+};

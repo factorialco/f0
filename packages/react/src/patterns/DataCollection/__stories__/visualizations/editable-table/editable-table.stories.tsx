@@ -1,23 +1,23 @@
-import { Meta, StoryObj } from "@storybook/react-vite"
-import { format } from "date-fns"
-import { useMemo, useRef, useState } from "react"
-import { action } from "storybook/actions"
+import { Meta, StoryObj } from "@storybook/react-vite";
+import { format } from "date-fns";
+import { useMemo, useRef, useState } from "react";
+import { action } from "storybook/actions";
 
-import { createDataSourceDefinition, RecordType } from "@/hooks/datasource"
-import { ROLES_MOCK } from "@/mocks"
+import { createDataSourceDefinition, RecordType } from "@/hooks/datasource";
+import { ROLES_MOCK } from "@/mocks";
 
-import { OneDataCollection } from "../../.."
-import { useDataCollectionSource } from "../../../hooks/useDataCollectionSource"
+import { OneDataCollection } from "../../..";
+import { useDataCollectionSource } from "../../../hooks/useDataCollectionSource";
 import {
   createDataAdapter,
   ExampleComponent,
   generateMockUsers,
   getMockVisualizations,
   type MockUser,
-} from "../../mockData"
+} from "../../mockData";
 
 const meta = {
-  title: "Patterns/DataCollection/Visualizations/Editable Table",
+  title: "Data Collection/Visualizations/Editable Table",
   parameters: {
     layout: "padded",
     docs: {
@@ -27,45 +27,45 @@ const meta = {
       },
     },
   },
-} satisfies Meta
+} satisfies Meta;
 
-export default meta
-type Story = StoryObj<typeof meta>
+export default meta;
+type Story = StoryObj<typeof meta>;
 
 function useEditableTableData(
   initialItems: MockUser[] = generateMockUsers(10),
-  options?: { perPage?: number }
+  options?: { perPage?: number },
 ) {
-  const perPage = options?.perPage ?? 10
-  const [items, setItems] = useState<MockUser[]>(initialItems)
-  const itemsRef = useRef(items)
-  itemsRef.current = items
+  const perPage = options?.perPage ?? 10;
+  const [items, setItems] = useState<MockUser[]>(initialItems);
+  const itemsRef = useRef(items);
+  itemsRef.current = items;
 
   const onCellChange = async (updatedItem: MockUser) => {
-    action("onCellChange")(updatedItem)
+    action("onCellChange")(updatedItem);
     setItems((prev) =>
-      prev.map((i) => (i.id === updatedItem.id ? updatedItem : i))
-    )
-  }
+      prev.map((i) => (i.id === updatedItem.id ? updatedItem : i)),
+    );
+  };
 
   const dataAdapter = useMemo(() => {
     const adapter = createDataAdapter({
       data: items,
       paginationType: "pages",
       perPage,
-    })
+    });
     adapter.fetchData = (fetchOptions: unknown) => {
       const currentAdapter = createDataAdapter({
         data: itemsRef.current,
         paginationType: "pages",
         perPage,
-      })
-      return currentAdapter.fetchData(fetchOptions as never)
-    }
-    return adapter
-  }, [items, perPage])
+      });
+      return currentAdapter.fetchData(fetchOptions as never);
+    };
+    return adapter;
+  }, [items, perPage]);
 
-  return { items, setItems, dataAdapter, onCellChange }
+  return { items, setItems, dataAdapter, onCellChange };
 }
 
 export const BasicEditableTable: Story = {
@@ -74,8 +74,8 @@ export const BasicEditableTable: Story = {
       table: {
         nestedRecords: true,
       },
-    })
-    const { dataAdapter, onCellChange } = useEditableTableData()
+    });
+    const { dataAdapter, onCellChange } = useEditableTableData();
     return (
       <ExampleComponent
         visualizations={[
@@ -95,9 +95,9 @@ export const BasicEditableTable: Story = {
         dataAdapter={dataAdapter}
         id="editable-table-basic/v1"
       />
-    )
+    );
   },
-}
+};
 
 export const EditableTableWithColumnSettings: Story = {
   render: () => {
@@ -106,8 +106,8 @@ export const EditableTableWithColumnSettings: Story = {
         allowColumnHiding: true,
         allowColumnReordering: true,
       },
-    })
-    const { dataAdapter, onCellChange } = useEditableTableData()
+    });
+    const { dataAdapter, onCellChange } = useEditableTableData();
     return (
       <ExampleComponent
         tableAllowColumnReordering
@@ -129,9 +129,9 @@ export const EditableTableWithColumnSettings: Story = {
         dataAdapter={dataAdapter}
         id="editable-table-settings/v1"
       />
-    )
+    );
   },
-}
+};
 
 export const EditableTableWithErrors: Story = {
   parameters: {
@@ -143,15 +143,15 @@ export const EditableTableWithErrors: Story = {
     },
   },
   render: () => {
-    const mockVisualizations = getMockVisualizations()
-    const { dataAdapter } = useEditableTableData()
+    const mockVisualizations = getMockVisualizations();
+    const { dataAdapter } = useEditableTableData();
 
     const onCellChange = async (updatedItem: MockUser) => {
-      action("onCellChange")(updatedItem)
+      action("onCellChange")(updatedItem);
       // Simulate an API call that always fails
-      await new Promise((resolve) => setTimeout(resolve, 300))
-      throw new Error("Invalid value")
-    }
+      await new Promise((resolve) => setTimeout(resolve, 300));
+      throw new Error("Invalid value");
+    };
 
     return (
       <ExampleComponent
@@ -172,9 +172,9 @@ export const EditableTableWithErrors: Story = {
         dataAdapter={dataAdapter}
         id="editable-table-errors/v1"
       />
-    )
+    );
   },
-}
+};
 
 export const EditableTableWithEditableCallback: Story = {
   parameters: {
@@ -186,15 +186,15 @@ export const EditableTableWithEditableCallback: Story = {
     },
   },
   render: () => {
-    const mockVisualizations = getMockVisualizations()
-    const { dataAdapter, onCellChange } = useEditableTableData()
+    const mockVisualizations = getMockVisualizations();
+    const { dataAdapter, onCellChange } = useEditableTableData();
 
     const baseOptions = (
       mockVisualizations.editableTable as Extract<
         typeof mockVisualizations.editableTable,
         { type: "editableTable" }
       >
-    ).options
+    ).options;
 
     return (
       <ExampleComponent
@@ -212,9 +212,9 @@ export const EditableTableWithEditableCallback: Story = {
                     ...col,
                     editType: (item: MockUser) =>
                       item.role === "Designer" ? "text" : "display-only",
-                  }
+                  };
                 }
-                return col
+                return col;
               }),
               onCellChange,
             },
@@ -223,9 +223,9 @@ export const EditableTableWithEditableCallback: Story = {
         dataAdapter={dataAdapter}
         id="editable-table-editable-callback/v1"
       />
-    )
+    );
   },
-}
+};
 
 export const EditableTableWithColumnReordering: Story = {
   parameters: {
@@ -241,8 +241,8 @@ export const EditableTableWithColumnReordering: Story = {
       table: {
         allowColumnReordering: true,
       },
-    })
-    const { dataAdapter, onCellChange } = useEditableTableData()
+    });
+    const { dataAdapter, onCellChange } = useEditableTableData();
 
     return (
       <ExampleComponent
@@ -264,9 +264,9 @@ export const EditableTableWithColumnReordering: Story = {
         dataAdapter={dataAdapter}
         id="editable-table-column-reordering/v1"
       />
-    )
+    );
   },
-}
+};
 
 export const EditableTableWithColumnHiding: Story = {
   parameters: {
@@ -282,8 +282,8 @@ export const EditableTableWithColumnHiding: Story = {
       table: {
         allowColumnHiding: true,
       },
-    })
-    const { dataAdapter, onCellChange } = useEditableTableData()
+    });
+    const { dataAdapter, onCellChange } = useEditableTableData();
 
     return (
       <ExampleComponent
@@ -305,9 +305,9 @@ export const EditableTableWithColumnHiding: Story = {
         dataAdapter={dataAdapter}
         id="editable-table-column-hiding/v1"
       />
-    )
+    );
   },
-}
+};
 
 export const EditableTableWithFrozenColumns: Story = {
   parameters: {
@@ -319,8 +319,8 @@ export const EditableTableWithFrozenColumns: Story = {
     },
   },
   render: () => {
-    const mockVisualizations = getMockVisualizations()
-    const { dataAdapter, onCellChange } = useEditableTableData()
+    const mockVisualizations = getMockVisualizations();
+    const { dataAdapter, onCellChange } = useEditableTableData();
 
     return (
       <ExampleComponent
@@ -342,9 +342,9 @@ export const EditableTableWithFrozenColumns: Story = {
         dataAdapter={dataAdapter}
         id="editable-table-frozen-columns/v1"
       />
-    )
+    );
   },
-}
+};
 
 export const EditableTableWithNestedRecords: Story = {
   parameters: {
@@ -362,11 +362,11 @@ export const EditableTableWithNestedRecords: Story = {
         nestedRecords: true,
         applyLongText: false,
       },
-    })
+    });
 
     const onCellChange = async (updatedItem: MockUser) => {
-      action("onCellChange")(updatedItem)
-    }
+      action("onCellChange")(updatedItem);
+    };
 
     return (
       <ExampleComponent
@@ -389,9 +389,9 @@ export const EditableTableWithNestedRecords: Story = {
         id="editable-table-nested/v1"
         nestedRecords
       />
-    )
+    );
   },
-}
+};
 
 export const EditableTableWithStickyNestedRecords: Story = {
   parameters: {
@@ -416,11 +416,11 @@ export const EditableTableWithStickyNestedRecords: Story = {
         nestedRecords: true,
         applyLongText: false,
       },
-    })
+    });
 
     const onCellChange = async (updatedItem: MockUser) => {
-      action("onCellChange")(updatedItem)
-    }
+      action("onCellChange")(updatedItem);
+    };
 
     return (
       <ExampleComponent
@@ -444,9 +444,9 @@ export const EditableTableWithStickyNestedRecords: Story = {
         id="editable-table-sticky-nested/v1"
         nestedRecords
       />
-    )
+    );
   },
-}
+};
 
 export const EditableTableWithNestedRecordsDetailed: Story = {
   parameters: {
@@ -464,11 +464,11 @@ export const EditableTableWithNestedRecordsDetailed: Story = {
         nestedRecords: true,
         applyLongText: false,
       },
-    })
+    });
 
     const onCellChange = async (updatedItem: MockUser) => {
-      action("onCellChange")(updatedItem)
-    }
+      action("onCellChange")(updatedItem);
+    };
 
     return (
       <ExampleComponent
@@ -492,9 +492,9 @@ export const EditableTableWithNestedRecordsDetailed: Story = {
         nestedRecords
         nestedRecordsType="detailed"
       />
-    )
+    );
   },
-}
+};
 
 export const EditableTableWithSelectableNestedRecordsDetailed: Story = {
   parameters: {
@@ -512,18 +512,18 @@ export const EditableTableWithSelectableNestedRecordsDetailed: Story = {
         nestedRecords: true,
         applyLongText: false,
       },
-    })
+    });
 
     const onCellChange = async (updatedItem: MockUser) => {
-      action("onCellChange")(updatedItem)
-    }
+      action("onCellChange")(updatedItem);
+    };
 
     return (
       <ExampleComponent
         noSorting
         storage={false}
         selectable={() => {
-          return ""
+          return "";
         }}
         visualizations={[
           {
@@ -543,9 +543,9 @@ export const EditableTableWithSelectableNestedRecordsDetailed: Story = {
         nestedRecords
         nestedRecordsType="detailed"
       />
-    )
+    );
   },
-}
+};
 
 export const EditableTableWithNestedRecordsAndAddRow: Story = {
   parameters: {
@@ -563,11 +563,11 @@ export const EditableTableWithNestedRecordsAndAddRow: Story = {
         nestedRecords: true,
         applyLongText: false,
       },
-    })
+    });
 
     const onCellChange = async (updatedItem: MockUser) => {
-      action("onCellChange")(updatedItem)
-    }
+      action("onCellChange")(updatedItem);
+    };
 
     return (
       <ExampleComponent
@@ -600,9 +600,9 @@ export const EditableTableWithNestedRecordsAndAddRow: Story = {
         id="editable-table-nested-add-row/v1"
         nestedRecords
       />
-    )
+    );
   },
-}
+};
 
 export const EditableTableWithMultipleAddRowActions: Story = {
   parameters: {
@@ -616,11 +616,11 @@ export const EditableTableWithMultipleAddRowActions: Story = {
   render: () => {
     const mockVisualizations = getMockVisualizations({
       table: { noSorting: true, nestedRecords: true, applyLongText: false },
-    })
+    });
 
     const onCellChange = async (updatedItem: MockUser) => {
-      action("onCellChange")(updatedItem)
-    }
+      action("onCellChange")(updatedItem);
+    };
 
     return (
       <ExampleComponent
@@ -670,9 +670,9 @@ export const EditableTableWithMultipleAddRowActions: Story = {
         id="editable-table-multi-add-row/v1"
         nestedRecords
       />
-    )
+    );
   },
-}
+};
 
 export const EditableTableWithAddRow: Story = {
   parameters: {
@@ -684,17 +684,17 @@ export const EditableTableWithAddRow: Story = {
     },
   },
   render: () => {
-    const mockVisualizations = getMockVisualizations()
+    const mockVisualizations = getMockVisualizations();
     const { dataAdapter, onCellChange, setItems } = useEditableTableData(
       generateMockUsers(10),
-      { perPage: 100 }
-    )
-    const counter = useRef(0)
+      { perPage: 100 },
+    );
+    const counter = useRef(0);
 
     const onAddRow = async () => {
-      counter.current += 1
-      const id = `new-${counter.current}`
-      action("onAddRow")()
+      counter.current += 1;
+      const id = `new-${counter.current}`;
+      action("onAddRow")();
       setItems((prev) => [
         ...prev,
         {
@@ -713,8 +713,8 @@ export const EditableTableWithAddRow: Story = {
           canBeSelected: true,
           permissions: { read: true, write: true, delete: false },
         },
-      ])
-    }
+      ]);
+    };
 
     return (
       <ExampleComponent
@@ -739,9 +739,9 @@ export const EditableTableWithAddRow: Story = {
         dataAdapter={dataAdapter}
         id="editable-table-add-row/v1"
       />
-    )
+    );
   },
-}
+};
 
 export const EditableTableWithSummaryRowAndAddRow: Story = {
   parameters: {
@@ -753,11 +753,11 @@ export const EditableTableWithSummaryRowAndAddRow: Story = {
     },
   },
   render: () => {
-    const initialItems = generateMockUsers(10)
-    const [items, setItems] = useState<MockUser[]>(initialItems)
-    const itemsRef = useRef(items)
-    itemsRef.current = items
-    const counter = useRef(0)
+    const initialItems = generateMockUsers(10);
+    const [items, setItems] = useState<MockUser[]>(initialItems);
+    const itemsRef = useRef(items);
+    itemsRef.current = items;
+    const counter = useRef(0);
 
     const onCellChange = async (updatedItem: MockUser) => {
       const normalized: MockUser = {
@@ -768,29 +768,29 @@ export const EditableTableWithSummaryRowAndAddRow: Story = {
           (typeof updatedItem.salary === "string" && updatedItem.salary === "")
             ? undefined
             : Number(updatedItem.salary),
-      }
-      action("onCellChange")(normalized)
+      };
+      action("onCellChange")(normalized);
       setItems((prev) =>
-        prev.map((i) => (i.id === normalized.id ? normalized : i))
-      )
-    }
+        prev.map((i) => (i.id === normalized.id ? normalized : i)),
+      );
+    };
 
     const dataAdapter = useMemo(() => {
       const adapter = createDataAdapter({
         data: items,
         paginationType: "pages",
         perPage: 100,
-      })
+      });
       adapter.fetchData = (fetchOptions: unknown) => {
         const currentAdapter = createDataAdapter({
           data: itemsRef.current,
           paginationType: "pages",
           perPage: 100,
-        })
-        return currentAdapter.fetchData(fetchOptions as never)
-      }
-      return adapter
-    }, [items])
+        });
+        return currentAdapter.fetchData(fetchOptions as never);
+      };
+      return adapter;
+    }, [items]);
 
     const dataSource = useDataCollectionSource(
       {
@@ -801,13 +801,13 @@ export const EditableTableWithSummaryRowAndAddRow: Story = {
         },
         dataAdapter,
       },
-      [dataAdapter]
-    )
+      [dataAdapter],
+    );
 
     const onAddRow = async () => {
-      counter.current += 1
-      const id = `new-${counter.current}`
-      action("onAddRow")()
+      counter.current += 1;
+      const id = `new-${counter.current}`;
+      action("onAddRow")();
       setItems((prev) => [
         ...prev,
         {
@@ -826,8 +826,8 @@ export const EditableTableWithSummaryRowAndAddRow: Story = {
           canBeSelected: true,
           permissions: { read: true, write: true, delete: false },
         },
-      ])
-    }
+      ]);
+    };
 
     return (
       <OneDataCollection
@@ -885,28 +885,28 @@ export const EditableTableWithSummaryRowAndAddRow: Story = {
           },
         ]}
       />
-    )
+    );
   },
-}
+};
 
-type RoleRecord = { value: string; label: string }
+type RoleRecord = { value: string; label: string };
 
 const roleNonPaginatedSource = createDataSourceDefinition<RoleRecord>({
   dataAdapter: {
     fetchData: async ({ search }) => {
-      await new Promise((resolve) => setTimeout(resolve, 150))
+      await new Promise((resolve) => setTimeout(resolve, 150));
 
-      let results = ROLES_MOCK.map((role) => ({ value: role, label: role }))
+      let results = ROLES_MOCK.map((role) => ({ value: role, label: role }));
 
       if (search) {
-        const q = search.toLowerCase()
-        results = results.filter((r) => r.label.toLowerCase().includes(q))
+        const q = search.toLowerCase();
+        results = results.filter((r) => r.label.toLowerCase().includes(q));
       }
 
-      return { records: results }
+      return { records: results };
     },
   },
-})
+});
 
 export const EditableTableWithDataSourceSelect: Story = {
   parameters: {
@@ -918,18 +918,18 @@ export const EditableTableWithDataSourceSelect: Story = {
     },
   },
   render: () => {
-    const mockVisualizations = getMockVisualizations()
+    const mockVisualizations = getMockVisualizations();
     const initialItems = generateMockUsers(10).map((user, i) =>
-      i % 2 === 0 ? { ...user, role: "" } : user
-    )
-    const { dataAdapter, onCellChange } = useEditableTableData(initialItems)
+      i % 2 === 0 ? { ...user, role: "" } : user,
+    );
+    const { dataAdapter, onCellChange } = useEditableTableData(initialItems);
 
     const baseOptions = (
       mockVisualizations.editableTable as Extract<
         typeof mockVisualizations.editableTable,
         { type: "editableTable" }
       >
-    ).options
+    ).options;
 
     return (
       <ExampleComponent
@@ -953,13 +953,13 @@ export const EditableTableWithDataSourceSelect: Story = {
                       placeholder: "Select role",
                       showSearchBox: true,
                       defaultItem: (item: MockUser) => {
-                        if (!item.role) return undefined
-                        return { value: item.role, label: item.role }
+                        if (!item.role) return undefined;
+                        return { value: item.role, label: item.role };
                       },
                     },
-                  }
+                  };
                 }
-                return col
+                return col;
               }),
               onCellChange,
             },
@@ -968,9 +968,9 @@ export const EditableTableWithDataSourceSelect: Story = {
         dataAdapter={dataAdapter}
         id="editable-table-datasource-select-partial/v1"
       />
-    )
+    );
   },
-}
+};
 
 export const EditableTableWithDateCell: Story = {
   parameters: {
@@ -982,14 +982,14 @@ export const EditableTableWithDateCell: Story = {
     },
   },
   render: () => {
-    const { dataAdapter, onCellChange } = useEditableTableData()
+    const { dataAdapter, onCellChange } = useEditableTableData();
 
     const baseOptions = (
       getMockVisualizations().editableTable as Extract<
         ReturnType<typeof getMockVisualizations>["editableTable"],
         { type: "editableTable" }
       >
-    ).options
+    ).options;
 
     return (
       <ExampleComponent
@@ -1032,9 +1032,9 @@ export const EditableTableWithDateCell: Story = {
         dataAdapter={dataAdapter}
         id="editable-table-date/v1"
       />
-    )
+    );
   },
-}
+};
 
 export const TableAndEditableTable: Story = {
   parameters: {
@@ -1051,8 +1051,8 @@ export const TableAndEditableTable: Story = {
         allowColumnHiding: true,
         allowColumnReordering: true,
       },
-    })
-    const { dataAdapter, onCellChange } = useEditableTableData()
+    });
+    const { dataAdapter, onCellChange } = useEditableTableData();
 
     return (
       <ExampleComponent
@@ -1076,6 +1076,6 @@ export const TableAndEditableTable: Story = {
         dataAdapter={dataAdapter}
         id="table-and-editable/v1"
       />
-    )
+    );
   },
-}
+};

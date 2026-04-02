@@ -1,19 +1,19 @@
-import type { Meta, StoryObj } from "@storybook/react-vite"
+import type { Meta, StoryObj } from "@storybook/react-vite";
 
-import { useEffect, useRef, useState } from "react"
-import { fn } from "storybook/test"
+import { useEffect, useRef, useState } from "react";
+import { fn } from "storybook/test";
 
-import { Reset, Save } from "@/icons/app"
+import { Reset, Save } from "@/icons/app";
 
 import {
   ActionBarStatus,
   F0ActionBar,
   F0ActionBarRef,
   actionBarStatuses,
-} from "."
+} from ".";
 
 const meta: Meta<typeof F0ActionBar> = {
-  title: "Components/F0ActionBar",
+  title: "F0ActionBar",
   component: F0ActionBar,
   parameters: {
     layout: "fullscreen",
@@ -48,10 +48,10 @@ const meta: Meta<typeof F0ActionBar> = {
       description: "The current status of the action bar",
     },
   },
-}
+};
 
-export default meta
-type Story = StoryObj<typeof F0ActionBar>
+export default meta;
+type Story = StoryObj<typeof F0ActionBar>;
 
 export const Default: Story = {
   args: {
@@ -72,7 +72,7 @@ export const Default: Story = {
     ],
     label: "Unsaved changes",
   },
-}
+};
 
 export const Idle: Story = {
   args: {
@@ -94,7 +94,7 @@ export const Idle: Story = {
     ],
     label: "You have changes pending to be saved",
   },
-}
+};
 
 export const Loading: Story = {
   args: {
@@ -114,7 +114,7 @@ export const Loading: Story = {
     ],
     label: "Saving...",
   },
-}
+};
 
 export const Success: Story = {
   args: {
@@ -134,35 +134,35 @@ export const Success: Story = {
     ],
     label: "Your changes have been saved",
   },
-}
+};
 
 const StatusFlowDemo = () => {
-  const [status, setStatus] = useState<ActionBarStatus>("idle")
-  const [label, setLabel] = useState("You have changes pending to be saved")
+  const [status, setStatus] = useState<ActionBarStatus>("idle");
+  const [label, setLabel] = useState("You have changes pending to be saved");
 
   const handleSave = () => {
-    setStatus("loading")
-    setLabel("Saving...")
+    setStatus("loading");
+    setLabel("Saving...");
     setTimeout(() => {
-      setStatus("success")
-      setLabel("Your changes have been saved")
-    }, 2000)
-  }
+      setStatus("success");
+      setLabel("Your changes have been saved");
+    }, 2000);
+  };
 
   const handleDiscard = () => {
-    setStatus("idle")
-    setLabel("You have changes pending to be saved")
-  }
+    setStatus("idle");
+    setLabel("You have changes pending to be saved");
+  };
 
   useEffect(() => {
     if (status === "success") {
       const timer = setTimeout(() => {
-        setStatus("idle")
-        setLabel("You have changes pending to be saved")
-      }, 3000)
-      return () => clearTimeout(timer)
+        setStatus("idle");
+        setLabel("You have changes pending to be saved");
+      }, 3000);
+      return () => clearTimeout(timer);
     }
-  }, [status])
+  }, [status]);
 
   return (
     <F0ActionBar
@@ -184,15 +184,15 @@ const StatusFlowDemo = () => {
         },
       ]}
     />
-  )
-}
+  );
+};
 
 export const StatusFlow: Story = {
   render: () => <StatusFlowDemo />,
-}
+};
 
 const ErrorWiggleDemo = () => {
-  const actionBarRef = useRef<F0ActionBarRef>(null)
+  const actionBarRef = useRef<F0ActionBarRef>(null);
 
   return (
     <F0ActionBar
@@ -206,7 +206,7 @@ const ErrorWiggleDemo = () => {
           label: "Save",
           icon: Save,
           onClick: () => {
-            actionBarRef.current?.wiggle({ errorHighlight: true })
+            actionBarRef.current?.wiggle({ errorHighlight: true });
           },
         },
       ]}
@@ -217,8 +217,8 @@ const ErrorWiggleDemo = () => {
         },
       ]}
     />
-  )
-}
+  );
+};
 
 export const ErrorWiggle: Story = {
   render: () => <ErrorWiggleDemo />,
@@ -229,46 +229,46 @@ export const ErrorWiggle: Story = {
       },
     },
   },
-}
+};
 
 const ErrorStatusFlowDemo = () => {
-  const actionBarRef = useRef<F0ActionBarRef>(null)
-  const [status, setStatus] = useState<ActionBarStatus>("idle")
-  const [label, setLabel] = useState("You have changes pending to be saved")
-  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const actionBarRef = useRef<F0ActionBarRef>(null);
+  const [status, setStatus] = useState<ActionBarStatus>("idle");
+  const [label, setLabel] = useState("You have changes pending to be saved");
+  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     return () => {
       if (saveTimeoutRef.current !== null) {
-        clearTimeout(saveTimeoutRef.current)
+        clearTimeout(saveTimeoutRef.current);
       }
-    }
-  }, [])
+    };
+  }, []);
 
   const handleSave = () => {
     if (saveTimeoutRef.current !== null) {
-      clearTimeout(saveTimeoutRef.current)
+      clearTimeout(saveTimeoutRef.current);
     }
 
-    setStatus("loading")
-    setLabel("Saving...")
+    setStatus("loading");
+    setLabel("Saving...");
 
     saveTimeoutRef.current = setTimeout(() => {
-      setStatus("error")
-      setLabel("There was an error saving your changes")
-      saveTimeoutRef.current = null
-    }, 2000)
-  }
+      setStatus("error");
+      setLabel("There was an error saving your changes");
+      saveTimeoutRef.current = null;
+    }, 2000);
+  };
 
   const handleDiscard = () => {
     if (saveTimeoutRef.current !== null) {
-      clearTimeout(saveTimeoutRef.current)
-      saveTimeoutRef.current = null
+      clearTimeout(saveTimeoutRef.current);
+      saveTimeoutRef.current = null;
     }
 
-    setStatus("idle")
-    setLabel("You have changes pending to be saved")
-  }
+    setStatus("idle");
+    setLabel("You have changes pending to be saved");
+  };
 
   return (
     <F0ActionBar
@@ -291,8 +291,8 @@ const ErrorStatusFlowDemo = () => {
         },
       ]}
     />
-  )
-}
+  );
+};
 
 export const ErrorStatusFlow: Story = {
   render: () => <ErrorStatusFlowDemo />,
@@ -304,4 +304,4 @@ export const ErrorStatusFlow: Story = {
       },
     },
   },
-}
+};

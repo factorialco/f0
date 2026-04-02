@@ -6,7 +6,7 @@ import { F1SearchBox } from "@/experimental/Forms/Fields/F1SearchBox"
 import {
   generateMockUsers,
   MockUser,
-} from "@/experimental/OneDataCollection/__stories__/mockData"
+} from "@/patterns/DataCollection/__stories__/mockData"
 import { createDataSourceDefinition } from "@/hooks/datasource"
 
 import type { InFilterOptionItem, InFilterOptions } from "../types"

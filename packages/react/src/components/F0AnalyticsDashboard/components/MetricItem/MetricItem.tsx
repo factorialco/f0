@@ -20,7 +20,7 @@ import { MetricSkeleton } from "../DashboardItem/DashboardItemSkeleton"
 interface MetricItemProps<Filters extends FiltersDefinition> {
   item: DashboardMetricItem<Filters>
   filters: FiltersState<Filters>
-  actions?: import("@/experimental/Navigation/Dropdown").DropdownItem[]
+  actions?: import("@/patterns/Navigation/Dropdown").DropdownItem[]
 }
 
 function formatValue(

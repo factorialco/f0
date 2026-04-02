@@ -1,17 +1,17 @@
-import type { Meta, StoryObj } from "@storybook/react-vite"
+import type { Meta, StoryObj } from "@storybook/react-vite";
 
-import { useState } from "react"
-import { expect, within } from "storybook/test"
+import { useState } from "react";
+import { expect, within } from "storybook/test";
 
-import { Microphone, MicrophoneNegative } from "@/icons/app"
-import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
-import { withSkipA11y, withSnapshot } from "@/lib/storybook-utils/parameters"
+import { Microphone, MicrophoneNegative } from "@/icons/app";
+import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args";
+import { withSkipA11y, withSnapshot } from "@/lib/storybook-utils/parameters";
 
-import { buttonToggleSizes, buttonToggleVariants } from "../"
-import { F0ButtonToggle } from "../F0ButtonToggle"
+import { buttonToggleSizes, buttonToggleVariants } from "../";
+import { F0ButtonToggle } from "../F0ButtonToggle";
 
 const meta = {
-  title: "Components/Button/ButtonToggle",
+  title: "Button/ButtonToggle",
   component: F0ButtonToggle,
   parameters: {
     layout: "centered",
@@ -90,10 +90,10 @@ const meta = {
     },
     ...dataTestIdArgs,
   },
-} satisfies Meta<typeof F0ButtonToggle>
+} satisfies Meta<typeof F0ButtonToggle>;
 
-export default meta
-type Story = StoryObj<typeof meta>
+export default meta;
+type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
@@ -102,7 +102,7 @@ export const Default: Story = {
     selected: undefined,
     onSelectedChange: undefined,
   },
-}
+};
 
 export const WithDataTestId: Story = {
   args: {
@@ -111,19 +111,19 @@ export const WithDataTestId: Story = {
     dataTestId: "my-test-button-toggle",
   },
   play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
+    const canvas = within(canvasElement);
     await expect(
-      canvas.getByTestId("my-test-button-toggle")
-    ).toBeInTheDocument()
+      canvas.getByTestId("my-test-button-toggle"),
+    ).toBeInTheDocument();
   },
-}
+};
 
 export const SingleIcon: Story = {
   args: {
     label: "Single Icon Toggle",
     icon: Microphone,
   },
-}
+};
 
 export const VariantExpanded: Story = {
   args: {
@@ -131,7 +131,7 @@ export const VariantExpanded: Story = {
     icon: [MicrophoneNegative, Microphone],
     variant: "expanded",
   },
-}
+};
 
 export const Controlled: Story = {
   args: {
@@ -140,7 +140,7 @@ export const Controlled: Story = {
     selected: true,
   },
   render: (args) => {
-    const [selected, setSelected] = useState(args.selected)
+    const [selected, setSelected] = useState(args.selected);
     return (
       <>
         <F0ButtonToggle
@@ -152,9 +152,9 @@ export const Controlled: Story = {
           Selected: {selected ? "true" : "false"}
         </p>
       </>
-    )
+    );
   },
-}
+};
 
 export const UncontrolledWithDefaultSelected: Story = {
   args: {
@@ -162,7 +162,7 @@ export const UncontrolledWithDefaultSelected: Story = {
     icon: Microphone,
     defaultSelected: true,
   },
-}
+};
 
 export const Snapshot: Story = {
   parameters: withSkipA11y(withSnapshot({})),
@@ -200,4 +200,4 @@ export const Snapshot: Story = {
       ))}
     </div>
   ),
-}
+};

@@ -1,7 +1,7 @@
 import {
   TOCItem,
   TOCProps,
-} from "../../experimental/Navigation/F0TableOfContent"
+} from "@/patterns/Navigation/F0TableOfContent"
 
 export type PopupSize = "sm" | "md" | "lg"
 export type TableOfContentPopoverVariant = "dark" | "light"

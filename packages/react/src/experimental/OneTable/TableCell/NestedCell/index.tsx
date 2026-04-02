@@ -2,7 +2,7 @@ import { ChevronDown, ChevronRight } from "lucide-react"
 
 import { F0Button } from "@/components/F0Button"
 import { F0ButtonDropdown } from "@/components/F0ButtonDropdown"
-import { NestedRowProps } from "@/experimental/OneDataCollection/visualizations/collection/Table/components/Row"
+import { NestedRowProps } from "@/patterns/DataCollection/visualizations/collection/Table/components/Row"
 import { Add, ArrowDown } from "@/icons/app"
 import { cn } from "@/lib/utils"
 

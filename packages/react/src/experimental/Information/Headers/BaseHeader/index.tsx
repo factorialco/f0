@@ -20,7 +20,7 @@ import {
   Dropdown,
   DropdownItem,
   MobileDropdown,
-} from "@/experimental/Navigation/Dropdown"
+} from "@/patterns/Navigation/Dropdown"
 import { cn } from "@/lib/utils"
 
 export type HeaderSecondaryAction = SecondaryAction & {

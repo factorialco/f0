@@ -7,7 +7,7 @@ import { Bell as BellIcon, Circle as CircleIcon } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 
-import { Dropdown, DropdownItem } from "@/experimental/Navigation/Dropdown"
+import { Dropdown, DropdownItem } from "@/patterns/Navigation/Dropdown"
 
 interface SidebarFooterProps {
   user: {

@@ -2,7 +2,7 @@ import { type ReactNode, forwardRef, useRef } from "react"
 
 import { F0Link } from "@/components/F0Link"
 import { Image } from "@/components/Utilities/Image"
-import { DropdownItem } from "@/experimental/Navigation/Dropdown"
+import { DropdownItem } from "@/patterns/Navigation/Dropdown"
 import { cn, focusRing } from "@/lib/utils"
 import {
   Card,

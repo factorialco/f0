@@ -1,9 +1,9 @@
-import type { Meta, StoryObj } from "@storybook/react-vite"
+import type { Meta, StoryObj } from "@storybook/react-vite";
 
-import { useState } from "react"
+import { useState } from "react";
 
-import { F0VersionHistory } from "../index"
-import { Version } from "../types"
+import { F0VersionHistory } from "../index";
+import { Version } from "../types";
 
 const mockVersions: Version[] = [
   {
@@ -42,10 +42,10 @@ const mockVersions: Version[] = [
     },
     timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000), // Yesterday
   },
-]
+];
 
 const meta: Meta<typeof F0VersionHistory> = {
-  title: "Experimental/F0VersionHistory",
+  title: "F0VersionHistory",
   component: F0VersionHistory,
   parameters: {
     layout: "centered",
@@ -87,22 +87,22 @@ const meta: Meta<typeof F0VersionHistory> = {
       </div>
     ),
   ],
-}
+};
 
-export default meta
-type Story = StoryObj<typeof meta>
+export default meta;
+type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   render: () => {
-    const [activeId, setActiveId] = useState<string | "current">("current")
+    const [activeId, setActiveId] = useState<string | "current">("current");
 
     const versionsWithHandlers = mockVersions.map((version) => ({
       ...version,
       onClick: () => {
-        setActiveId(version.id)
-        console.log(`Version ${version.id} clicked!`)
+        setActiveId(version.id);
+        console.log(`Version ${version.id} clicked!`);
       },
-    }))
+    }));
 
     return (
       <F0VersionHistory
@@ -110,16 +110,16 @@ export const Default: Story = {
         currentVersion={{
           title: "Current version",
           onClick: () => {
-            setActiveId("current")
-            console.log("Current version clicked!")
+            setActiveId("current");
+            console.log("Current version clicked!");
           },
         }}
         versions={versionsWithHandlers.reverse()}
         activeVersionId={activeId}
       />
-    )
+    );
   },
-}
+};
 
 export const WithClickableCurrentVersion: Story = {
   args: {
@@ -142,7 +142,7 @@ export const WithClickableCurrentVersion: Story = {
       },
     },
   },
-}
+};
 
 export const WithoutCurrentVersion: Story = {
   args: {
@@ -158,4 +158,4 @@ export const WithoutCurrentVersion: Story = {
       },
     },
   },
-}
+};

@@ -1,10 +1,10 @@
-import type { Meta, StoryObj } from "@storybook/react-vite"
+import type { Meta, StoryObj } from "@storybook/react-vite";
 
-import { useState } from "react"
-import { fn } from "storybook/test"
+import { useState } from "react";
+import { fn } from "storybook/test";
 
-import { F0Button } from "@/components/F0Button"
-import { F0Checkbox } from "@/components/F0Checkbox"
+import { F0Button } from "@/components/F0Button";
+import { F0Checkbox } from "@/components/F0Checkbox";
 import {
   Delete,
   EyeInvisible,
@@ -13,12 +13,12 @@ import {
   Settings,
   Share,
   Upload,
-} from "@/icons/app"
+} from "@/icons/app";
 
-import { ActionBar } from "."
+import { ActionBar } from ".";
 
 const meta: Meta<typeof ActionBar> = {
-  title: "Patterns/DataCollection/ActionBar",
+  title: "Data Collection/ActionBar",
   component: ActionBar,
   parameters: {
     layout: "fullscreen",
@@ -55,15 +55,15 @@ const meta: Meta<typeof ActionBar> = {
       description: "The function to unselect the items",
     },
   },
-}
+};
 
-export default meta
-type Story = StoryObj<typeof ActionBar>
+export default meta;
+type Story = StoryObj<typeof ActionBar>;
 
 interface Item {
-  id: string
-  name: string
-  selected: boolean
+  id: string;
+  name: string;
+  selected: boolean;
 }
 
 export const Default: Story = {
@@ -109,22 +109,22 @@ export const Default: Story = {
       { id: "3", name: "Contract", selected: false },
       { id: "4", name: "Employee expenses", selected: false },
       { id: "5", name: "ID card", selected: false },
-    ])
+    ]);
 
-    const selectedItems = items.filter((item) => item.selected)
-    const hasSelectedItems = selectedItems.length > 0
+    const selectedItems = items.filter((item) => item.selected);
+    const hasSelectedItems = selectedItems.length > 0;
 
     const toggleItem = (id: string) => {
       setItems(
         items.map((item) =>
-          item.id === id ? { ...item, selected: !item.selected } : item
-        )
-      )
-    }
+          item.id === id ? { ...item, selected: !item.selected } : item,
+        ),
+      );
+    };
 
     const handleUnselect = () => {
-      setItems(items.map((item) => ({ ...item, selected: false })))
-    }
+      setItems(items.map((item) => ({ ...item, selected: false })));
+    };
 
     return (
       <div className="relative flex h-full w-full items-center justify-center">
@@ -153,9 +153,9 @@ export const Default: Story = {
           onUnselect={handleUnselect}
         />
       </div>
-    )
+    );
   },
-}
+};
 
 export const NoSelectedItems: Story = {
   args: {
@@ -176,7 +176,7 @@ export const NoSelectedItems: Story = {
     selectedNumber: undefined,
   },
   render: (args) => {
-    const [open, setOpen] = useState(true)
+    const [open, setOpen] = useState(true);
 
     return (
       <div className="relative flex h-full w-full items-center justify-center">
@@ -188,9 +188,9 @@ export const NoSelectedItems: Story = {
         />
         <ActionBar {...args} isOpen={open} />
       </div>
-    )
+    );
   },
-}
+};
 
 export const MultiplePrimaryActions: Story = {
   args: {
@@ -213,11 +213,11 @@ export const MultiplePrimaryActions: Story = {
       },
     ],
   },
-}
+};
 
 const clickMock = (value: string) => {
-  console.log("clicked", value)
-}
+  console.log("clicked", value);
+};
 export const WithGroupsAndDescription: Story = {
   args: {
     ...Default.args,
@@ -289,4 +289,4 @@ export const WithGroupsAndDescription: Story = {
       },
     ],
   },
-}
+};

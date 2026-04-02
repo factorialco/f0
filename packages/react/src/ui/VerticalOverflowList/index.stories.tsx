@@ -1,11 +1,11 @@
-import type { Meta, StoryObj } from "@storybook/react-vite"
+import type { Meta, StoryObj } from "@storybook/react-vite";
 
-import { useState } from "react"
+import { useState } from "react";
 
-import { VerticalOverflowList } from "./index"
+import { VerticalOverflowList } from "./index";
 
 const meta = {
-  title: "Components/VerticalOverflowList",
+  title: "VerticalOverflowList",
   component: VerticalOverflowList,
   tags: ["autodocs", "internal"],
   argTypes: {
@@ -25,7 +25,7 @@ const meta = {
   },
   decorators: [
     (Story) => {
-      const [containerSize, setContainerSize] = useState(220)
+      const [containerSize, setContainerSize] = useState(220);
       return (
         <>
           <div className="w-[320px] gap-4">
@@ -53,20 +53,20 @@ const meta = {
             />
           </div>
         </>
-      )
+      );
     },
   ],
-} satisfies Meta<typeof VerticalOverflowList>
+} satisfies Meta<typeof VerticalOverflowList>;
 
-export default meta
-type Story = StoryObj<typeof meta>
+export default meta;
+type Story = StoryObj<typeof meta>;
 
 // Define the task type
 interface Task {
-  id: number
-  name: string
-  status: string
-  dueDate: string
+  id: number;
+  name: string;
+  status: string;
+  dueDate: string;
 }
 
 export const Default: Story = {
@@ -117,15 +117,15 @@ export const Default: Story = {
     ],
     minSize: 20,
     renderListItem: (item) => {
-      const task = item as Task
+      const task = item as Task;
       return (
         <div className="flex items-center gap-2 overflow-hidden whitespace-nowrap px-2 py-1">
           <span className="truncate font-medium">{task.name}</span>
         </div>
-      )
+      );
     },
   },
   render: (args) => {
-    return <VerticalOverflowList {...args} />
+    return <VerticalOverflowList {...args} />;
   },
-}
+};

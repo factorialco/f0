@@ -34,7 +34,7 @@ vi.mock("@/ui/Action", () => ({
   ),
 }))
 
-vi.mock("@/experimental/Navigation/Dropdown/internal.tsx", () => ({
+vi.mock("@/patterns/Navigation/Dropdown/internal.tsx", () => ({
   DropdownInternal: ({ children, items, open, onOpenChange }) => (
     <div
       data-testid="dropdown"

@@ -1,15 +1,15 @@
-import { Meta, StoryObj } from "@storybook/react-vite"
+import { Meta, StoryObj } from "@storybook/react-vite";
 
-import { ExampleComponent } from "../mockData"
+import { ExampleComponent } from "../mockData";
 
 const meta = {
-  title: "Patterns/DataCollection/Total Items Summary",
+  title: "Data Collection/Total Items Summary",
   component: ExampleComponent,
   tags: ["autodocs", "experimental"],
-} satisfies Meta<typeof ExampleComponent>
+} satisfies Meta<typeof ExampleComponent>;
 
-export default meta
-type Story = StoryObj<typeof meta>
+export default meta;
+type Story = StoryObj<typeof meta>;
 
 export const TotalItemsSummary: Story = {
   parameters: {
@@ -30,7 +30,7 @@ export const TotalItemsSummary: Story = {
     },
   },
   render: () => <ExampleComponent totalItemSummary={true} />,
-}
+};
 
 export const TotalItemsSummaryCustom: Story = {
   parameters: {
@@ -54,7 +54,7 @@ export const TotalItemsSummaryCustom: Story = {
       }
     />
   ),
-}
+};
 
 export const TotalItemsSummaryWithFilters: Story = {
   parameters: {
@@ -79,4 +79,4 @@ export const TotalItemsSummaryWithFilters: Story = {
       }
     />
   ),
-}
+};

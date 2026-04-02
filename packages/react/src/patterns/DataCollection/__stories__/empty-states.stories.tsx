@@ -1,15 +1,15 @@
-import { Meta, StoryObj } from "@storybook/react-vite"
-import { Observable } from "zen-observable-ts"
+import { Meta, StoryObj } from "@storybook/react-vite";
+import { Observable } from "zen-observable-ts";
 
-import { FiltersState } from "@/components/OneFilterPicker/types"
-import { useDataCollectionSource } from "@/patterns/DataCollection/hooks/useDataCollectionSource"
-import { DataCollectionDataAdapter } from "@/patterns/DataCollection/hooks/useDataCollectionSource/types"
-import { BaseResponse } from "@/hooks/datasource/types"
-import { PromiseState } from "@/lib/promise-to-observable"
+import { FiltersState } from "@/components/OneFilterPicker/types";
+import { useDataCollectionSource } from "@/patterns/DataCollection/hooks/useDataCollectionSource";
+import { DataCollectionDataAdapter } from "@/patterns/DataCollection/hooks/useDataCollectionSource/types";
+import { BaseResponse } from "@/hooks/datasource/types";
+import { PromiseState } from "@/lib/promise-to-observable";
 
-import { CustomEmptyStates } from "../hooks/useEmptyState"
-import { OneDataCollection } from "../index"
-import { NavigationFiltersDefinition } from "../navigationFilters/types"
+import { CustomEmptyStates } from "../hooks/useEmptyState";
+import { OneDataCollection } from "../index";
+import { NavigationFiltersDefinition } from "../navigationFilters/types";
 import {
   createPromiseDataFetch,
   filters,
@@ -17,18 +17,18 @@ import {
   MockUser,
   mockUsers,
   sortings,
-} from "./mockData"
+} from "./mockData";
 
 const meta = {
-  title: "Patterns/DataCollection/Empty State",
+  title: "Data Collection/Empty State",
   parameters: {
     layout: "padded",
   },
   tags: ["internal"],
-} satisfies Meta
+} satisfies Meta;
 
-export default meta
-type Story = StoryObj<typeof meta>
+export default meta;
+type Story = StoryObj<typeof meta>;
 
 const BaseExampleComponent = ({
   dataAdapter,
@@ -39,9 +39,9 @@ const BaseExampleComponent = ({
     MockUser,
     typeof filters,
     NavigationFiltersDefinition
-  >
-  currentFilters?: FiltersState<typeof filters>
-  emptyStates?: CustomEmptyStates
+  >;
+  currentFilters?: FiltersState<typeof filters>;
+  emptyStates?: CustomEmptyStates;
 }) => {
   const dataSource = useDataCollectionSource({
     filters,
@@ -52,9 +52,9 @@ const BaseExampleComponent = ({
       enabled: true,
       sync: true,
     },
-  })
+  });
 
-  const mockVisualizations = getMockVisualizations()
+  const mockVisualizations = getMockVisualizations();
 
   return (
     <OneDataCollection
@@ -62,8 +62,8 @@ const BaseExampleComponent = ({
       visualizations={[mockVisualizations.table]}
       emptyStates={emptyStates}
     />
-  )
-}
+  );
+};
 
 // Basic story showing all action types
 export const NoDataExample: Story = {
@@ -74,42 +74,42 @@ export const NoDataExample: Story = {
           subscriber.next({
             loading: false,
             data: { records: [] },
-          })
+          });
         }),
-    }
+    };
 
-    return <BaseExampleComponent dataAdapter={dataAdapter} />
+    return <BaseExampleComponent dataAdapter={dataAdapter} />;
   },
-}
+};
 
 export const NoResultsExample: Story = {
   render: () => {
     const dataAdapter = {
       fetchData: createPromiseDataFetch(),
-    }
+    };
     return (
       <BaseExampleComponent
         dataAdapter={dataAdapter}
         currentFilters={{ search: "Joey Tribbiani" }}
       />
-    )
+    );
   },
-}
+};
 
 export const ErrorExample: Story = {
   render: () => {
     const dataAdapter = {
       fetchData: () => Promise.reject(new Error("Error loading the users")),
-    }
-    return <BaseExampleComponent dataAdapter={dataAdapter} />
+    };
+    return <BaseExampleComponent dataAdapter={dataAdapter} />;
   },
-}
+};
 
 export const CustomMessagesAndActions: Story = {
   render: () => {
     const dataAdapter = {
       fetchData: createPromiseDataFetch(),
-    }
+    };
 
     const emptyStates: CustomEmptyStates = {
       "no-data": {
@@ -125,13 +125,13 @@ export const CustomMessagesAndActions: Story = {
             label: "Go to main page",
             variant: "outline" as const,
             onClick: () => {
-              console.log("clicked")
+              console.log("clicked");
             },
           },
           {
             label: "Clear filters",
             onClick: () => {
-              console.log("clicked")
+              console.log("clicked");
             },
           },
         ],
@@ -139,7 +139,7 @@ export const CustomMessagesAndActions: Story = {
       error: {
         description: "This is a error custom message",
       },
-    }
+    };
 
     return (
       <BaseExampleComponent
@@ -147,41 +147,41 @@ export const CustomMessagesAndActions: Story = {
         currentFilters={{ search: "Joey Tribbiani" }}
         emptyStates={emptyStates}
       />
-    )
+    );
   },
-}
+};
 
 const intervalObservable = new Observable<PromiseState<BaseResponse<MockUser>>>(
   (observer) => {
-    let count = 0
+    let count = 0;
     const intervalId = setInterval(() => {
       observer.next({
         loading: false,
         data: { records: mockUsers.slice(0, count) },
-      })
-      count++
+      });
+      count++;
       if (count > 5) {
-        observer.complete()
+        observer.complete();
       }
-    }, 2000)
+    }, 2000);
 
     // Teardown logic
-    return () => clearInterval(intervalId)
-  }
-)
+    return () => clearInterval(intervalId);
+  },
+);
 
 // Example: subscribe and log emitted values
 intervalObservable.subscribe({
   next(value) {
-    console.log("Emitted:", value)
+    console.log("Emitted:", value);
   },
   error(err) {
-    console.error("Error:", err)
+    console.error("Error:", err);
   },
   complete() {
-    console.log("Completed!")
+    console.log("Completed!");
   },
-})
+});
 
 export const EmptyToDataExample: Story = {
   parameters: {
@@ -192,8 +192,8 @@ export const EmptyToDataExample: Story = {
   render: () => {
     const dataAdapter = {
       fetchData: () => intervalObservable,
-    }
+    };
 
-    return <BaseExampleComponent dataAdapter={dataAdapter} />
+    return <BaseExampleComponent dataAdapter={dataAdapter} />;
   },
-}
+};

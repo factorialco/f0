@@ -1,17 +1,17 @@
-import type { Meta, StoryObj } from "@storybook/react-vite"
+import type { Meta, StoryObj } from "@storybook/react-vite";
 
-import { subDays } from "date-fns"
-import { useState } from "react"
+import { subDays } from "date-fns";
+import { useState } from "react";
 
-import { CalendarView, DateRange } from "@/experimental/OneCalendar/types"
+import { CalendarView, DateRange } from "@/experimental/OneCalendar/types";
 
-import { DatePickerPopup, DatePickerPopupProps } from "../DatePickerPopup"
-import { predefinedPresets } from "../presets"
-import { DatePickerValue } from "../types"
+import { DatePickerPopup, DatePickerPopupProps } from "../DatePickerPopup";
+import { predefinedPresets } from "../presets";
+import { DatePickerValue } from "../types";
 
 const ExampleComponent = (props: Omit<DatePickerPopupProps, "children">) => {
-  const [value, setValue] = useState<DatePickerValue | undefined>(undefined)
-  const [open, setOpen] = useState(false)
+  const [value, setValue] = useState<DatePickerValue | undefined>(undefined);
+  const [open, setOpen] = useState(false);
 
   return (
     <DatePickerPopup
@@ -23,11 +23,11 @@ const ExampleComponent = (props: Omit<DatePickerPopupProps, "children">) => {
     >
       Click me {JSON.stringify(value)}
     </DatePickerPopup>
-  )
-}
+  );
+};
 
 const meta = {
-  title: "Components/DatePickerPopup",
+  title: "DatePickerPopup",
   component: ExampleComponent,
   parameters: {
     docs: {
@@ -44,12 +44,12 @@ const meta = {
     },
   },
   tags: ["autodocs", "internal"],
-} satisfies Meta<typeof ExampleComponent>
+} satisfies Meta<typeof ExampleComponent>;
 
-export default meta
-type Story = StoryObj<typeof meta>
+export default meta;
+type Story = StoryObj<typeof meta>;
 
-const today = new Date(2025, 6, 30)
+const today = new Date(2025, 6, 30);
 const presets = [
   predefinedPresets.today,
   predefinedPresets.lastWeek,
@@ -65,7 +65,7 @@ const presets = [
       to: today,
     } as DateRange,
   },
-]
+];
 
 export const Simple: Story = {
   args: {
@@ -74,7 +74,7 @@ export const Simple: Story = {
     } as DatePickerValue,
     // granularities: ["day", "week", "month"],
   },
-}
+};
 
 export const MonthGranularity: Story = {
   args: {
@@ -83,7 +83,7 @@ export const MonthGranularity: Story = {
     } as DatePickerValue,
     granularities: ["month"],
   },
-}
+};
 
 export const MultipleGranularities: Story = {
   args: {
@@ -92,7 +92,7 @@ export const MultipleGranularities: Story = {
     } as DatePickerValue,
     granularities: ["day", "week", "month", "quarter", "halfyear", "year"],
   },
-}
+};
 
 export const WithCustomRange: Story = {
   args: {
@@ -109,13 +109,13 @@ export const WithCustomRange: Story = {
       "range",
     ],
   },
-}
+};
 
 export const HideGoToCurrent: Story = {
   args: {
     hideGoToCurrent: true,
   },
-}
+};
 
 export const WithDefaultDate: Story = {
   args: {
@@ -126,7 +126,7 @@ export const WithDefaultDate: Story = {
     } as DatePickerValue,
     granularities: ["month"],
   },
-}
+};
 
 export const WithPresets: Story = {
   args: {
@@ -136,7 +136,7 @@ export const WithPresets: Story = {
     granularities: ["day", "week", "month", "quarter"],
     presets,
   },
-}
+};
 
 export const WeekView: Story = {
   args: {
@@ -145,7 +145,7 @@ export const WeekView: Story = {
     } as DatePickerValue,
     granularities: ["week"],
   },
-}
+};
 
 export const QuarterView: Story = {
   args: {
@@ -154,7 +154,7 @@ export const QuarterView: Story = {
     } as DatePickerValue,
     granularities: ["quarter"],
   },
-}
+};
 
 export const HalfYearView: Story = {
   args: {
@@ -163,7 +163,7 @@ export const HalfYearView: Story = {
     } as DatePickerValue,
     granularities: ["halfyear"],
   },
-}
+};
 
 export const YearView: Story = {
   args: {
@@ -172,7 +172,7 @@ export const YearView: Story = {
     } as DatePickerValue,
     granularities: ["year"],
   },
-}
+};
 
 export const WithMinMaxDates: Story = {
   args: {
@@ -183,4 +183,4 @@ export const WithMinMaxDates: Story = {
     minDate: subDays(today, 30), // Can't select dates before 30 days ago
     maxDate: today, // Can't select dates after today
   },
-}
+};

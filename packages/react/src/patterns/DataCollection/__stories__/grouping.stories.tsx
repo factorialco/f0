@@ -1,10 +1,10 @@
-import { Meta, StoryObj } from "@storybook/react-vite"
+import { Meta, StoryObj } from "@storybook/react-vite";
 
-import { useDataCollectionSource } from "@/patterns/DataCollection/hooks/useDataCollectionSource"
-import { GroupingDefinition } from "@/hooks/datasource"
-import { Delete, Download, Pencil, Star } from "@/icons/app"
+import { useDataCollectionSource } from "@/patterns/DataCollection/hooks/useDataCollectionSource";
+import { GroupingDefinition } from "@/hooks/datasource";
+import { Delete, Download, Pencil, Star } from "@/icons/app";
 
-import { OneDataCollection } from ".."
+import { OneDataCollection } from "..";
 import {
   createDataAdapter,
   ExampleComponent,
@@ -14,10 +14,10 @@ import {
   MockUser,
   mockUsers,
   sortings,
-} from "./mockData"
+} from "./mockData";
 
 const meta = {
-  title: "Patterns/DataCollection/Grouping",
+  title: "Data Collection/Grouping",
   component: ExampleComponent,
   parameters: {
     layout: "padded",
@@ -50,11 +50,11 @@ const meta = {
     },
   },
   tags: ["autodocs", "experimental"],
-} satisfies Meta<typeof ExampleComponent>
+} satisfies Meta<typeof ExampleComponent>;
 
-export default meta
+export default meta;
 
-type Story = StoryObj<typeof meta>
+type Story = StoryObj<typeof meta>;
 
 // Examples with multiple visualizations
 export const WithGrouping: Story = {
@@ -72,16 +72,16 @@ export const WithGrouping: Story = {
             name: "Department",
             label: (groupId) => groupId,
             itemCount: async (groupId) => {
-              await new Promise((resolve) => setTimeout(resolve, 1000))
+              await new Promise((resolve) => setTimeout(resolve, 1000));
               return mockUsers.filter((user) => user.department === groupId)
-                .length
+                .length;
             },
           },
           role: {
             name: "Role",
             label: (groupId) => groupId,
             itemCount: (groupId) => {
-              return mockUsers.filter((user) => user.role === groupId).length
+              return mockUsers.filter((user) => user.role === groupId).length;
             },
           },
           "permissions.read": {
@@ -89,8 +89,8 @@ export const WithGrouping: Story = {
             label: (groupId) => (groupId ? "Read Access" : "No Access"),
             itemCount: (groupId) => {
               return mockUsers.filter(
-                (user) => user.permissions?.read === groupId
-              ).length
+                (user) => user.permissions?.read === groupId,
+              ).length;
             },
           },
           "permissions.write": {
@@ -98,15 +98,15 @@ export const WithGrouping: Story = {
             label: (groupId) => (groupId ? "Write Access" : "No Write Access"),
             itemCount: (groupId) => {
               return mockUsers.filter(
-                (user) => user.permissions?.read === groupId
-              ).length
+                (user) => user.permissions?.read === groupId,
+              ).length;
             },
           },
         },
       }}
     />
   ),
-}
+};
 
 export const WithOptionalGrouping: Story = {
   render: () => (
@@ -118,16 +118,16 @@ export const WithOptionalGrouping: Story = {
             name: "Department",
             label: (groupId) => groupId,
             itemCount: async (groupId) => {
-              await new Promise((resolve) => setTimeout(resolve, 1000))
+              await new Promise((resolve) => setTimeout(resolve, 1000));
               return mockUsers.filter((user) => user.department === groupId)
-                .length
+                .length;
             },
           },
         },
       }}
     />
   ),
-}
+};
 
 export const CollapsibleGrouping: Story = {
   render: () => (
@@ -141,21 +141,21 @@ export const CollapsibleGrouping: Story = {
             name: "Department",
             label: (groupId) => groupId,
             itemCount: async (groupId) => {
-              await new Promise((resolve) => setTimeout(resolve, 1000))
+              await new Promise((resolve) => setTimeout(resolve, 1000));
               return mockUsers.filter((user) => user.department === groupId)
-                .length
+                .length;
             },
           },
         },
       }}
     />
   ),
-}
+};
 
 export const CollapsibleGroupingWithDefaultOpenGroups: Story = {
   render: () => {
     // Create a fixed set of paginated users so we're not regenerating them on every render
-    const paginatedMockUsers = generateMockUsers(50)
+    const paginatedMockUsers = generateMockUsers(50);
 
     const grouping: GroupingDefinition<MockUser> = {
       mandatory: true,
@@ -164,14 +164,14 @@ export const CollapsibleGroupingWithDefaultOpenGroups: Story = {
         department: {
           name: "Department",
           label: async (groupId) => {
-            await new Promise((resolve) => setTimeout(resolve, 1000))
-            return groupId
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+            return groupId;
           },
           itemCount: async (groupId) => {
-            await new Promise((resolve) => setTimeout(resolve, 1500))
+            await new Promise((resolve) => setTimeout(resolve, 1500));
             return paginatedMockUsers.filter(
-              (user) => user.department === groupId
-            ).length
+              (user) => user.department === groupId,
+            ).length;
           },
         },
         role: {
@@ -179,11 +179,11 @@ export const CollapsibleGroupingWithDefaultOpenGroups: Story = {
           label: (groupId) => groupId,
           itemCount: (groupId) => {
             return paginatedMockUsers.filter((user) => user.role === groupId)
-              .length
+              .length;
           },
         },
       },
-    }
+    };
 
     const source = useDataCollectionSource({
       selectable: (item) => item.id,
@@ -204,23 +204,23 @@ export const CollapsibleGroupingWithDefaultOpenGroups: Story = {
               id: "delete-all",
             },
           ],
-        }
+        };
       },
       dataAdapter: createDataAdapter({
         data: paginatedMockUsers,
         delay: 500,
         paginationType: "pages",
       }),
-    })
+    });
 
     return (
       <OneDataCollection
         source={source}
         onSelectItems={(selectedItems) => {
-          console.log("Selected items", "->", selectedItems)
+          console.log("Selected items", "->", selectedItems);
         }}
         onBulkAction={(action, selectedItems) => {
-          console.log(`Bulk action: ${action}`, "->", selectedItems)
+          console.log(`Bulk action: ${action}`, "->", selectedItems);
         }}
         visualizations={[
           {
@@ -275,14 +275,14 @@ export const CollapsibleGroupingWithDefaultOpenGroups: Story = {
           },
         ]}
       />
-    )
+    );
   },
-}
+};
 
 export const WithPaginationAndGrouping: Story = {
   render: () => {
     // Create a fixed set of paginated users so we're not regenerating them on every render
-    const paginatedMockUsers = generateMockUsers(50)
+    const paginatedMockUsers = generateMockUsers(50);
 
     const grouping: GroupingDefinition<(typeof mockUsers)[number]> = {
       mandatory: true,
@@ -291,14 +291,14 @@ export const WithPaginationAndGrouping: Story = {
         department: {
           name: "Department",
           label: async (groupId) => {
-            await new Promise((resolve) => setTimeout(resolve, 1000))
-            return groupId
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+            return groupId;
           },
           itemCount: async (groupId) => {
-            await new Promise((resolve) => setTimeout(resolve, 1500))
+            await new Promise((resolve) => setTimeout(resolve, 1500));
             return paginatedMockUsers.filter(
-              (user) => user.department === groupId
-            ).length
+              (user) => user.department === groupId,
+            ).length;
           },
         },
         role: {
@@ -306,17 +306,17 @@ export const WithPaginationAndGrouping: Story = {
           label: (groupId) => groupId,
           itemCount: (groupId) => {
             return paginatedMockUsers.filter((user) => user.role === groupId)
-              .length
+              .length;
           },
         },
       },
-    }
+    };
 
     const dataAdapter = createDataAdapter({
       data: paginatedMockUsers,
       delay: 500,
       paginationType: "pages",
-    })
+    });
 
     const source = useDataCollectionSource({
       selectable: (item) => item.id,
@@ -337,19 +337,19 @@ export const WithPaginationAndGrouping: Story = {
               id: "delete-all",
             },
           ],
-        }
+        };
       },
       dataAdapter,
-    })
+    });
 
     return (
       <OneDataCollection
         source={source}
         onSelectItems={(selectedItems) => {
-          console.log("Selected items", "->", selectedItems)
+          console.log("Selected items", "->", selectedItems);
         }}
         onBulkAction={(action, selectedItems) => {
-          console.log(`Bulk action: ${action}`, "->", selectedItems)
+          console.log(`Bulk action: ${action}`, "->", selectedItems);
         }}
         visualizations={[
           {
@@ -392,9 +392,9 @@ export const WithPaginationAndGrouping: Story = {
           },
         ]}
       />
-    )
+    );
   },
-}
+};
 
 export const WithInfiniteScrollPaginationAndGrouping: Story = {
   parameters: {
@@ -404,7 +404,7 @@ export const WithInfiniteScrollPaginationAndGrouping: Story = {
   },
   render: () => {
     // Create a fixed set of paginated users so we're not regenerating them on every render
-    const paginatedMockUsers = generateMockUsers(50)
+    const paginatedMockUsers = generateMockUsers(50);
 
     const grouping: GroupingDefinition<(typeof mockUsers)[number]> = {
       mandatory: true,
@@ -413,14 +413,14 @@ export const WithInfiniteScrollPaginationAndGrouping: Story = {
         department: {
           name: "Department",
           label: async (groupId) => {
-            await new Promise((resolve) => setTimeout(resolve, 1000))
-            return groupId
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+            return groupId;
           },
           itemCount: async (groupId) => {
-            await new Promise((resolve) => setTimeout(resolve, 1500))
+            await new Promise((resolve) => setTimeout(resolve, 1500));
             return paginatedMockUsers.filter(
-              (user) => user.department === groupId
-            ).length
+              (user) => user.department === groupId,
+            ).length;
           },
         },
         role: {
@@ -428,11 +428,11 @@ export const WithInfiniteScrollPaginationAndGrouping: Story = {
           label: (groupId) => groupId,
           itemCount: (groupId) => {
             return paginatedMockUsers.filter((user) => user.role === groupId)
-              .length
+              .length;
           },
         },
       },
-    }
+    };
 
     const source = useDataCollectionSource({
       selectable: (item) => item.id,
@@ -456,23 +456,23 @@ export const WithInfiniteScrollPaginationAndGrouping: Story = {
               id: "delete-all",
             },
           ],
-        }
+        };
       },
       dataAdapter: createDataAdapter({
         data: paginatedMockUsers,
         delay: 500,
         paginationType: "infinite-scroll",
       }),
-    })
+    });
 
     return (
       <OneDataCollection
         source={source}
         onSelectItems={(selectedItems) => {
-          console.log("Selected items", "->", selectedItems)
+          console.log("Selected items", "->", selectedItems);
         }}
         onBulkAction={(action, selectedItems) => {
-          console.log(`Bulk action: ${action}`, "->", selectedItems)
+          console.log(`Bulk action: ${action}`, "->", selectedItems);
         }}
         visualizations={[
           {
@@ -515,9 +515,9 @@ export const WithInfiniteScrollPaginationAndGrouping: Story = {
           },
         ]}
       />
-    )
+    );
   },
-}
+};
 
 export const SelectableGrouping: Story = {
   render: () => (
@@ -533,16 +533,16 @@ export const SelectableGrouping: Story = {
             name: "Department",
             label: (groupId) => groupId,
             itemCount: async (groupId) => {
-              await new Promise((resolve) => setTimeout(resolve, 1000))
+              await new Promise((resolve) => setTimeout(resolve, 1000));
               return mockUsers.filter((user) => user.department === groupId)
-                .length
+                .length;
             },
           },
         },
       }}
     />
   ),
-}
+};
 
 export const SelectableGroupingAndActions: Story = {
   render: () => (
@@ -600,7 +600,7 @@ export const SelectableGroupingAndActions: Story = {
                 ]
               : []),
           ],
-        }
+        };
       }}
       grouping={{
         mandatory: true,
@@ -611,13 +611,13 @@ export const SelectableGroupingAndActions: Story = {
             name: "Department",
             label: (groupId) => groupId,
             itemCount: async (groupId) => {
-              await new Promise((resolve) => setTimeout(resolve, 1000))
+              await new Promise((resolve) => setTimeout(resolve, 1000));
               return mockUsers.filter((user) => user.department === groupId)
-                .length
+                .length;
             },
           },
         },
       }}
     />
   ),
-}
+};

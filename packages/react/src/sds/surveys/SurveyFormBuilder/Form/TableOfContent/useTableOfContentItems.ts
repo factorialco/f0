@@ -11,7 +11,7 @@ import {
 import {
   TOCItem,
   TOCItemAction,
-} from "@/experimental/Navigation/F0TableOfContent"
+} from "@/patterns/Navigation/F0TableOfContent"
 
 import {
   RATING_OPTIONS,

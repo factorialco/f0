@@ -1,18 +1,22 @@
-import type { Meta, StoryObj } from "@storybook/react-vite"
+import type { Meta, StoryObj } from "@storybook/react-vite";
 
-import { withSnapshot } from "@/lib/storybook-utils/parameters"
+import { withSnapshot } from "@/lib/storybook-utils/parameters";
 
-import { F0AnalyticsDashboard } from "../index"
-import { dashboardFilters, dashboardPresets, mixedItems } from "./mockDataMixed"
+import { F0AnalyticsDashboard } from "../index";
+import {
+  dashboardFilters,
+  dashboardPresets,
+  mixedItems,
+} from "./mockDataMixed";
 
 const meta = {
   component: F0AnalyticsDashboard,
-  title: "Patterns/F0AnalyticsDashboard",
+  title: "F0AnalyticsDashboard",
   tags: ["autodocs", "experimental"],
-} satisfies Meta<typeof F0AnalyticsDashboard>
+} satisfies Meta<typeof F0AnalyticsDashboard>;
 
-export default meta
-type Story = StoryObj
+export default meta;
+type Story = StoryObj;
 
 /**
  * Full dashboard with metrics, charts (bar, line, pie, radar, gauge, heatmap,
@@ -26,7 +30,7 @@ export const MixedDashboard: Story = {
       items={mixedItems}
     />
   ),
-}
+};
 
 /**
  * Dashboard with the global export button enabled (PDF / Excel).
@@ -40,7 +44,7 @@ export const WithExport: Story = {
       enableExport
     />
   ),
-}
+};
 
 export const Snapshot: Story = {
   parameters: withSnapshot({}),
@@ -51,4 +55,4 @@ export const Snapshot: Story = {
       items={mixedItems}
     />
   ),
-}
+};

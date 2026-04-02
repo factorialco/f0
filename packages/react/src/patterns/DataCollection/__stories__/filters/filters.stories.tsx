@@ -1,17 +1,17 @@
-import { Meta, StoryObj } from "@storybook/react-vite"
+import { Meta, StoryObj } from "@storybook/react-vite";
 
-import { ExampleComponent, SubfiltersExampleComponent } from "../mockData"
+import { ExampleComponent, SubfiltersExampleComponent } from "../mockData";
 
 const meta = {
-  title: "Patterns/DataCollection/Filters",
+  title: "Data Collection/Filters",
   parameters: {
     layout: "padded",
   },
   tags: ["internal"],
-} satisfies Meta
+} satisfies Meta;
 
-export default meta
-type Story = StoryObj<typeof meta>
+export default meta;
+type Story = StoryObj<typeof meta>;
 
 // Example with async search functionality
 export const WithAsyncSearch: Story = {
@@ -33,7 +33,7 @@ export const WithAsyncSearch: Story = {
       },
     },
   },
-}
+};
 
 // Search functionality demonstration
 export const WithSyncSearch: Story = {
@@ -65,7 +65,7 @@ export const WithSyncSearch: Story = {
       },
     },
   },
-}
+};
 
 export const WithSubfilters: Story = {
   render: () => <SubfiltersExampleComponent />,
@@ -103,7 +103,7 @@ export const WithSubfilters: Story = {
       },
     },
   },
-}
+};
 
 export const PresetsExample: Story = {
   render: () => <ExampleComponent usePresets />,
@@ -139,4 +139,4 @@ export const PresetsExample: Story = {
       },
     },
   },
-}
+};

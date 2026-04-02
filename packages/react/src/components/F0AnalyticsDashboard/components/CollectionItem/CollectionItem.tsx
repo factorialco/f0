@@ -1,25 +1,25 @@
-import { useMemo } from "react"
+import { useMemo } from "react";
 
 import type {
   FiltersDefinition,
   FiltersState,
-} from "@/components/OneFilterPicker/types"
-import type { DropdownItem } from "@/experimental/Navigation/Dropdown"
-import type { RecordType } from "@/hooks/datasource"
+} from "@/components/OneFilterPicker/types";
+import type { DropdownItem } from "@/patterns/Navigation/Dropdown";
+import type { RecordType } from "@/hooks/datasource";
 
-import { OneDataCollection } from "@/experimental/OneDataCollection"
-import { useDataCollectionSource } from "@/experimental/OneDataCollection/hooks/useDataCollectionSource"
-import { useData } from "@/hooks/datasource/useData"
+import { OneDataCollection } from "@/patterns/DataCollection";
+import { useDataCollectionSource } from "@/patterns/DataCollection/hooks/useDataCollectionSource";
+import { useData } from "@/hooks/datasource/useData";
 
-import type { DashboardCollectionItem } from "../../types"
+import type { DashboardCollectionItem } from "../../types";
 
-import { useCollectionDownloadActions } from "../../hooks/useCollectionDownloadActions"
-import { DashboardItem } from "../DashboardItem/DashboardItem"
+import { useCollectionDownloadActions } from "../../hooks/useCollectionDownloadActions";
+import { DashboardItem } from "../DashboardItem/DashboardItem";
 
 interface CollectionItemProps<Filters extends FiltersDefinition> {
-  item: DashboardCollectionItem<Filters>
-  filters: FiltersState<Filters>
-  actions?: DropdownItem[]
+  item: DashboardCollectionItem<Filters>;
+  filters: FiltersState<Filters>;
+  actions?: DropdownItem[];
 }
 
 /**
@@ -35,34 +35,34 @@ export function CollectionItem<Filters extends FiltersDefinition>({
   filters,
   actions,
 }: CollectionItemProps<Filters>) {
-  const enabled = item.useDashboardFilters !== false
-  const effectiveFilters = enabled ? filters : ({} as FiltersState<Filters>)
+  const enabled = item.useDashboardFilters !== false;
+  const effectiveFilters = enabled ? filters : ({} as FiltersState<Filters>);
 
   // Memoize the source definition to avoid re-creating on every render.
   // Re-creates when filters change (JSON key).
-  const filtersKey = JSON.stringify(effectiveFilters)
+  const filtersKey = JSON.stringify(effectiveFilters);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const sourceDefinition = useMemo(
     () => item.createSource(effectiveFilters),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [filtersKey]
-  )
+    [filtersKey],
+  );
 
   const source = useDataCollectionSource<RecordType>(sourceDefinition, [
     filtersKey,
-  ])
+  ]);
 
-  const { data } = useData(source)
+  const { data } = useData(source);
 
   const downloadActions = useCollectionDownloadActions({
     records: data.records,
     title: item.title,
-  })
+  });
 
   const allActions: DropdownItem[] = useMemo(
     () => [...(actions ?? []), ...downloadActions],
-    [actions, downloadActions]
-  )
+    [actions, downloadActions],
+  );
 
   return (
     <DashboardItem
@@ -77,5 +77,5 @@ export function CollectionItem<Filters extends FiltersDefinition>({
         visualizations={item.visualizations}
       />
     </DashboardItem>
-  )
+  );
 }

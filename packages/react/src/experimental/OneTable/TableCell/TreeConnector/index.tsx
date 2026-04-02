@@ -1,6 +1,6 @@
-import type { TableVisualizationType } from "@/experimental/OneDataCollection/types"
+import type { TableVisualizationType } from "@/patterns/DataCollection/types"
 
-import { NestedRowProps } from "@/experimental/OneDataCollection/visualizations/collection/Table/components/Row"
+import { NestedRowProps } from "@/patterns/DataCollection/visualizations/collection/Table/components/Row"
 import { cn } from "@/lib/utils"
 
 import {

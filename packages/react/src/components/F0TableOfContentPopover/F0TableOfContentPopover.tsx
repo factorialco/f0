@@ -6,7 +6,7 @@ import { useCallback, useRef, useState } from "react"
 import { cn, focusRing } from "@/lib/utils"
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/ui/hover-card"
 
-import { F0TableOfContent } from "../../experimental/Navigation/F0TableOfContent"
+import { F0TableOfContent } from "@/patterns/Navigation/F0TableOfContent"
 import { CollapsedBars } from "./components/CollapsedBars"
 import { F0TableOfContentPopoverProps } from "./internal-types"
 import { useDeferredClose } from "./useDeferredClose"

@@ -1,30 +1,30 @@
-import type { Meta, StoryObj } from "@storybook/react-vite"
+import type { Meta, StoryObj } from "@storybook/react-vite";
 
-import { useState } from "react"
+import { useState } from "react";
 
-import { F0Button } from "@/components/F0Button"
-import { IconType } from "@/components/F0Icon"
-import { F0SelectItemProps } from "@/components/F0Select/types"
-import { FiltersDefinition } from "@/components/OneFilterPicker"
-import { PaginatedFetchOptions } from "@/hooks/datasource"
+import { F0Button } from "@/components/F0Button";
+import { IconType } from "@/components/F0Icon";
+import { F0SelectItemProps } from "@/components/F0Select/types";
+import { FiltersDefinition } from "@/components/OneFilterPicker";
+import { PaginatedFetchOptions } from "@/hooks/datasource";
 import {
   FIRST_NAMES_MOCK,
   getMockValue,
   MOCK_ICONS,
   SURNAMES_MOCK,
-} from "@/mocks"
+} from "@/mocks";
 
-import { Breadcrumbs, BreadcrumbsProps } from "./index"
+import { Breadcrumbs, BreadcrumbsProps } from "./index";
 
 const meta: Meta<typeof Breadcrumbs> = {
-  title: "Patterns/Navigation/Breadcrumbs",
+  title: "Navigation/Breadcrumbs",
   component: Breadcrumbs,
   tags: ["autodocs", "experimental"],
-}
+};
 
-export default meta
+export default meta;
 
-type Story = StoryObj<typeof Breadcrumbs>
+type Story = StoryObj<typeof Breadcrumbs>;
 
 export const Default: Story = {
   args: {
@@ -43,7 +43,7 @@ export const Default: Story = {
       { id: "dani-moreno", label: "Dani Moreno" },
     ],
   },
-}
+};
 
 export const LoadingLastItem: Story = {
   args: {
@@ -62,7 +62,7 @@ export const LoadingLastItem: Story = {
       { id: "loading", label: "Loading", loading: true },
     ],
   },
-}
+};
 
 export const LoadingLastTwoItems: Story = {
   args: {
@@ -77,7 +77,7 @@ export const LoadingLastTwoItems: Story = {
       { id: "loading-2", label: "Loading", loading: true },
     ],
   },
-}
+};
 
 export const WithSelectBreadcrumb: Story = {
   args: {
@@ -104,20 +104,20 @@ export const WithSelectBreadcrumb: Story = {
         label: `Offer 1`,
         value: "1",
         onChange: (value) => {
-          console.log("WithSelectBreadcrumb value", value)
+          console.log("WithSelectBreadcrumb value", value);
         },
       },
     ],
   },
-}
+};
 
 const mockItemsLargeDataset = Array.from({ length: 10000 }, (_, i) => ({
   value: `option-${i}`,
   label: `${getMockValue(FIRST_NAMES_MOCK, i)} ${getMockValue(SURNAMES_MOCK, i)}`,
   icon: getMockValue(MOCK_ICONS, i),
   description: `Description for option ${i}`,
-}))
-type MockItemLargeDataset = (typeof mockItemsLargeDataset)[number]
+}));
+type MockItemLargeDataset = (typeof mockItemsLargeDataset)[number];
 
 export const WithSelectBreadcrumbWithDatasource: Story = {
   render: () => {
@@ -125,23 +125,23 @@ export const WithSelectBreadcrumbWithDatasource: Story = {
       dataAdapter: {
         paginationType: "infinite-scroll",
         fetchData: (options: PaginatedFetchOptions<FiltersDefinition>) => {
-          const { search, pagination } = options
+          const { search, pagination } = options;
           return new Promise((resolve) => {
             setTimeout(() => {
-              const pageSize = pagination.perPage ?? 10
-              const cursor = "cursor" in pagination ? pagination.cursor : null
-              const nextCursor = cursor ? Number(cursor) + pageSize : pageSize
+              const pageSize = pagination.perPage ?? 10;
+              const cursor = "cursor" in pagination ? pagination.cursor : null;
+              const nextCursor = cursor ? Number(cursor) + pageSize : pageSize;
 
               const results = mockItemsLargeDataset.filter(
                 (item) =>
                   !search ||
-                  item.label.toLowerCase().includes(search.toLowerCase())
-              )
+                  item.label.toLowerCase().includes(search.toLowerCase()),
+              );
 
               const paginatedResults = results.slice(
                 cursor ? Number(cursor) : 0,
-                nextCursor
-              )
+                nextCursor,
+              );
 
               const res = {
                 type: "infinite-scroll" as const,
@@ -150,13 +150,13 @@ export const WithSelectBreadcrumbWithDatasource: Story = {
                 hasMore: nextCursor < results.length,
                 records: paginatedResults,
                 total: results.length,
-              }
-              resolve(res)
-            }, 100)
-          })
+              };
+              resolve(res);
+            }, 100);
+          });
         },
       },
-    }
+    };
 
     return (
       <Breadcrumbs
@@ -179,7 +179,7 @@ export const WithSelectBreadcrumbWithDatasource: Story = {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             source: source as any,
             mapOptions: (
-              item
+              item,
             ): F0SelectItemProps<string, MockItemLargeDataset> => ({
               value: item.value as string,
               label: item.label as string,
@@ -189,15 +189,15 @@ export const WithSelectBreadcrumbWithDatasource: Story = {
             label: `Offer 1`,
             value: "option-1",
             onChange: (value) => {
-              console.log("WithSelectBreadcrumb value", value)
+              console.log("WithSelectBreadcrumb value", value);
             },
           },
         ]}
       />
-    )
+    );
   },
   args: {},
-}
+};
 
 export const LongBreadcrumbs: Story = {
   args: {
@@ -240,7 +240,7 @@ export const LongBreadcrumbs: Story = {
       },
     ],
   },
-}
+};
 
 export const Interactive: Story = {
   render: () => {
@@ -266,7 +266,7 @@ export const Interactive: Story = {
         label: "Applications",
         href: "/recruitment/candidates/dani-moreno/applications",
       },
-    ]
+    ];
 
     const documentsBreadcrumbs: BreadcrumbsProps["breadcrumbs"] = [
       {
@@ -290,39 +290,39 @@ export const Interactive: Story = {
         label: "Templates",
         href: "/documents/employee/contracts/templates",
       },
-    ]
+    ];
 
     const [currentSection, setCurrentSection] = useState<
       "recruitment" | "documents"
-    >("recruitment")
+    >("recruitment");
     const [breadcrumbs, setBreadcrumbs] = useState<
       BreadcrumbsProps["breadcrumbs"]
-    >(recruitmentBreadcrumbs)
+    >(recruitmentBreadcrumbs);
 
     const handleAdd = () => {
       const sourceBreadcrumbs =
         currentSection === "recruitment"
           ? recruitmentBreadcrumbs
-          : documentsBreadcrumbs
+          : documentsBreadcrumbs;
       if (breadcrumbs.length < sourceBreadcrumbs.length) {
-        setBreadcrumbs((prev) => [...prev, sourceBreadcrumbs[prev.length]])
+        setBreadcrumbs((prev) => [...prev, sourceBreadcrumbs[prev.length]]);
       }
-    }
+    };
 
     const handleRemove = () => {
-      setBreadcrumbs((prev) => prev.slice(0, -1))
-    }
+      setBreadcrumbs((prev) => prev.slice(0, -1));
+    };
 
     const handleSwitch = () => {
       const newSection =
-        currentSection === "recruitment" ? "documents" : "recruitment"
-      setCurrentSection(newSection)
+        currentSection === "recruitment" ? "documents" : "recruitment";
+      setCurrentSection(newSection);
       setBreadcrumbs(
         newSection === "recruitment"
           ? recruitmentBreadcrumbs
-          : documentsBreadcrumbs
-      )
-    }
+          : documentsBreadcrumbs,
+      );
+    };
 
     return (
       <div className="space-y-4">
@@ -357,6 +357,6 @@ export const Interactive: Story = {
           <Breadcrumbs key={currentSection} breadcrumbs={breadcrumbs} />
         </div>
       </div>
-    )
+    );
   },
-}
+};

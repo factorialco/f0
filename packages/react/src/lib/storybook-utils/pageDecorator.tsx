@@ -1,4 +1,4 @@
-import { Page } from "../../experimental/Navigation/Page"
+import { Page } from "@/patterns/Navigation/Page"
 import * as PageStories from "../../patterns/Navigation/Page/index.stories"
 
 export const PageDecorator = (Story: React.ComponentType) => (

@@ -1,13 +1,13 @@
-import type { Meta, StoryObj } from "@storybook/react-vite"
+import type { Meta, StoryObj } from "@storybook/react-vite";
 
-import * as icons from "@/icons/app"
-import { Placeholder, Search } from "@/icons/app"
-import { withSkipA11y, withSnapshot } from "@/lib/storybook-utils/parameters"
+import * as icons from "@/icons/app";
+import { Placeholder, Search } from "@/icons/app";
+import { withSkipA11y, withSnapshot } from "@/lib/storybook-utils/parameters";
 
-import { InputField, INPUTFIELD_SIZES } from "../"
+import { InputField, INPUTFIELD_SIZES } from "../";
 
 const meta = {
-  title: "Components/InputField",
+  title: "InputField",
   component: InputField,
   parameters: {
     docs: {
@@ -104,10 +104,10 @@ const meta = {
     },
   },
   tags: ["autodocs", "internal"],
-} satisfies Meta<typeof InputField>
+} satisfies Meta<typeof InputField>;
 
-export default meta
-type Story = StoryObj<typeof meta>
+export default meta;
+type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
@@ -117,7 +117,7 @@ export const Default: Story = {
     onChange: () => {},
     children: <input type="text" className="w-full" />,
   },
-}
+};
 
 export const WithATextarea: Story = {
   args: {
@@ -131,28 +131,28 @@ export const WithATextarea: Story = {
     clearable: true,
     maxLength: 100,
   },
-}
+};
 
 export const SizeSm: Story = {
   args: {
     ...Default.args,
     size: "sm",
   },
-}
+};
 
 export const Loading: Story = {
   args: {
     ...Default.args,
     loading: true,
   },
-}
+};
 
 export const IconLabel: Story = {
   args: {
     ...Default.args,
     labelIcon: icons.Archive,
   },
-}
+};
 
 export const LongLabel: Story = {
   args: {
@@ -161,7 +161,7 @@ export const LongLabel: Story = {
     label:
       "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua",
   },
-}
+};
 
 export const WithMaxLength: Story = {
   args: {
@@ -170,14 +170,14 @@ export const WithMaxLength: Story = {
     hideMaxLength: false,
     value: "long text should be truncated",
   },
-}
+};
 
 export const WithIcon: Story = {
   args: {
     ...Default.args,
     icon: Search,
   },
-}
+};
 
 export const Clearable: Story = {
   args: {
@@ -185,7 +185,7 @@ export const Clearable: Story = {
     icon: Search,
     clearable: true,
   },
-}
+};
 
 export const Disabled: Story = {
   args: {
@@ -194,7 +194,7 @@ export const Disabled: Story = {
     clearable: true,
     disabled: true,
   },
-}
+};
 
 export const Readonly: Story = {
   args: {
@@ -203,7 +203,7 @@ export const Readonly: Story = {
     clearable: true,
     readonly: true,
   },
-}
+};
 
 export const Error: Story = {
   args: {
@@ -212,7 +212,7 @@ export const Error: Story = {
     clearable: true,
     error: true,
   },
-}
+};
 
 export const ErrorMessage: Story = {
   args: {
@@ -221,7 +221,7 @@ export const ErrorMessage: Story = {
     clearable: true,
     error: "This is the error message",
   },
-}
+};
 
 export const InfoMessage: Story = {
   args: {
@@ -233,7 +233,7 @@ export const InfoMessage: Story = {
       message: "This is the info message",
     },
   },
-}
+};
 
 export const WarningMessage: Story = {
   args: {
@@ -245,7 +245,7 @@ export const WarningMessage: Story = {
       message: "This is the warning message",
     },
   },
-}
+};
 
 export const HintMessage: Story = {
   args: {
@@ -254,7 +254,7 @@ export const HintMessage: Story = {
     clearable: true,
     hint: "This is the hint message",
   },
-}
+};
 
 export const Required: Story = {
   args: {
@@ -263,7 +263,7 @@ export const Required: Story = {
     clearable: true,
     required: true,
   },
-}
+};
 
 export const HideLabel: Story = {
   args: {
@@ -273,7 +273,7 @@ export const HideLabel: Story = {
     hideLabel: true,
     required: true,
   },
-}
+};
 
 export const WithAppend: Story = {
   args: {
@@ -285,7 +285,7 @@ export const WithAppend: Story = {
       </div>
     ),
   },
-}
+};
 
 export const WithAppendTag: Story = {
   args: {
@@ -293,7 +293,7 @@ export const WithAppendTag: Story = {
     clearable: true,
     appendTag: "Label",
   },
-}
+};
 
 export const LongPlaceholder: Story = {
   decorators: [
@@ -308,7 +308,7 @@ export const LongPlaceholder: Story = {
     placeholder:
       "This is a very long placeholder that should be truncated and show an ellipsis",
   },
-}
+};
 
 export const Snapshot: Story = {
   parameters: withSkipA11y(withSnapshot({})),
@@ -320,7 +320,7 @@ export const Snapshot: Story = {
       labelIcon: Placeholder,
       label: "Label text here",
       children: <input type="text" className="w-full" />,
-    }
+    };
     const snapshotVariants = [
       { ...base },
       { ...base, value: "Value" },
@@ -356,7 +356,7 @@ export const Snapshot: Story = {
         ),
       },
       { ...base },
-    ]
+    ];
     return (
       <div className="flex flex-col gap-4">
         {INPUTFIELD_SIZES.map((size) => (
@@ -375,6 +375,6 @@ export const Snapshot: Story = {
           </section>
         ))}
       </div>
-    )
+    );
   },
-}
+};

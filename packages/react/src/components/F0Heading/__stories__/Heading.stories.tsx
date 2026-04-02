@@ -1,15 +1,15 @@
-import type { Meta, StoryObj } from "@storybook/react-vite"
+import type { Meta, StoryObj } from "@storybook/react-vite";
 
-import { expect, within } from "storybook/test"
+import { expect, within } from "storybook/test";
 
-import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
-import { withSnapshot } from "@/lib/storybook-utils/parameters"
+import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args";
+import { withSnapshot } from "@/lib/storybook-utils/parameters";
 
-import { F0Heading } from "../index"
+import { F0Heading } from "../index";
 
 const meta = {
   component: F0Heading,
-  title: "Experimental/Heading",
+  title: "Heading",
   tags: ["autodocs", "experimental"],
   argTypes: {
     variant: {
@@ -48,17 +48,17 @@ const meta = {
       </div>
     ),
   ],
-} satisfies Meta<typeof F0Heading>
+} satisfies Meta<typeof F0Heading>;
 
-export default meta
-type Story = StoryObj<typeof meta>
+export default meta;
+type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
     variant: "heading",
     content: "This is a heading",
   },
-}
+};
 
 export const WithDataTestId: Story = {
   args: {
@@ -67,10 +67,10 @@ export const WithDataTestId: Story = {
     dataTestId: "my-test-heading",
   },
   play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    await expect(canvas.getByTestId("my-test-heading")).toBeInTheDocument()
+    const canvas = within(canvasElement);
+    await expect(canvas.getByTestId("my-test-heading")).toBeInTheDocument();
   },
-}
+};
 
 export const Variants: Story = {
   args: {
@@ -82,7 +82,7 @@ export const Variants: Story = {
       <F0Heading variant="heading" content="Heading" />
     </div>
   ),
-}
+};
 
 export const HeadingAlignment: Story = {
   parameters: {
@@ -99,7 +99,7 @@ export const HeadingAlignment: Story = {
       <F0Heading {...args} align="right" />
     </div>
   ),
-}
+};
 
 export const HeadingEllipsis: Story = {
   parameters: {
@@ -118,7 +118,7 @@ export const HeadingEllipsis: Story = {
       </div>
     ),
   ],
-}
+};
 
 export const Snapshot: Story = {
   parameters: withSnapshot({}),
@@ -170,4 +170,4 @@ export const Snapshot: Story = {
       </section>
     </div>
   ),
-}
+};

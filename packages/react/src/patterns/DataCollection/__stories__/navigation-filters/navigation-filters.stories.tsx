@@ -1,12 +1,12 @@
-import { Meta, StoryObj } from "@storybook/react-vite"
-import { addDays } from "date-fns"
+import { Meta, StoryObj } from "@storybook/react-vite";
+import { addDays } from "date-fns";
 
-import { granularityDefinitions } from "@/experimental/OneCalendar/granularities/index"
+import { granularityDefinitions } from "@/experimental/OneCalendar/granularities/index";
 
-import { ExampleComponent } from "../mockData"
+import { ExampleComponent } from "../mockData";
 
 const meta = {
-  title: "Patterns/DataCollection/Navigation Filters",
+  title: "Data Collection/Navigation Filters",
   component: ExampleComponent,
   parameters: {
     layout: "padded",
@@ -18,10 +18,10 @@ const meta = {
     },
   },
   tags: ["autodocs", "experimental"],
-} satisfies Meta<typeof ExampleComponent>
+} satisfies Meta<typeof ExampleComponent>;
 
-export default meta
-type Story = StoryObj<typeof meta>
+export default meta;
+type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
@@ -35,7 +35,7 @@ export const Default: Story = {
       },
     },
   },
-}
+};
 
 export const WeekGranularity: Story = {
   args: {
@@ -49,7 +49,7 @@ export const WeekGranularity: Story = {
       },
     },
   },
-}
+};
 
 export const MonthGranularity: Story = {
   args: {
@@ -63,7 +63,7 @@ export const MonthGranularity: Story = {
       },
     },
   },
-}
+};
 
 export const YearGranularity: Story = {
   args: {
@@ -77,7 +77,7 @@ export const YearGranularity: Story = {
       },
     },
   },
-}
+};
 
 export const RangeGranularity: Story = {
   args: {
@@ -95,7 +95,7 @@ export const RangeGranularity: Story = {
       },
     },
   },
-}
+};
 
 export const NoGoToCurrent: Story = {
   args: {
@@ -110,7 +110,7 @@ export const NoGoToCurrent: Story = {
       },
     },
   },
-}
+};
 
 export const MultipleGranularities: Story = {
   args: {
@@ -125,7 +125,7 @@ export const MultipleGranularities: Story = {
       },
     },
   },
-}
+};
 
 export const WithPresets: Story = {
   args: {
@@ -147,11 +147,11 @@ export const WithPresets: Story = {
             label: "Yesterday",
             granularity: "day",
             value: granularityDefinitions.day.toRange(
-              addDays(new Date(2025, 6, 30), -1)
+              addDays(new Date(2025, 6, 30), -1),
             ),
           },
         ],
       },
     },
   },
-}
+};

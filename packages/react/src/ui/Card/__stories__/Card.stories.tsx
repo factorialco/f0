@@ -1,6 +1,6 @@
-import type { Meta, StoryObj } from "@storybook/react-vite"
+import type { Meta, StoryObj } from "@storybook/react-vite";
 
-import ChevronRight from "@/icons/app/ChevronRight"
+import ChevronRight from "@/icons/app/ChevronRight";
 
 import {
   Card,
@@ -12,16 +12,16 @@ import {
   CardLink,
   CardSubtitle,
   CardTitle,
-} from "../Card"
+} from "../Card";
 
 const meta: Meta<typeof Card> = {
-  title: "Components/Card",
+  title: "Card",
   component: Card,
   tags: ["autodocs"],
-}
+};
 
-export default meta
-type Story = StoryObj<typeof Card>
+export default meta;
+type Story = StoryObj<typeof Card>;
 
 export const Basic: Story = {
   render: () => (
@@ -34,7 +34,7 @@ export const Basic: Story = {
       </CardContent>
     </Card>
   ),
-}
+};
 
 export const WithSubtitle: Story = {
   render: () => (
@@ -48,7 +48,7 @@ export const WithSubtitle: Story = {
       </CardContent>
     </Card>
   ),
-}
+};
 
 export const WithInfo: Story = {
   render: () => (
@@ -62,7 +62,7 @@ export const WithInfo: Story = {
       </CardContent>
     </Card>
   ),
-}
+};
 
 export const WithFooter: Story = {
   render: () => (
@@ -78,7 +78,7 @@ export const WithFooter: Story = {
       </CardFooter>
     </Card>
   ),
-}
+};
 
 export const WithComment: Story = {
   render: () => (
@@ -92,7 +92,7 @@ export const WithComment: Story = {
       <CardComment>42</CardComment>
     </Card>
   ),
-}
+};
 
 export const Clickable: Story = {
   render: () => (
@@ -105,7 +105,7 @@ export const Clickable: Story = {
       </CardContent>
     </Card>
   ),
-}
+};
 
 export const Disabled: Story = {
   render: () => (
@@ -118,7 +118,7 @@ export const Disabled: Story = {
       </CardContent>
     </Card>
   ),
-}
+};
 
 export const Complete: Story = {
   render: () => (
@@ -137,7 +137,7 @@ export const Complete: Story = {
       <CardComment>99+</CardComment>
     </Card>
   ),
-}
+};
 
 export const WithHrefLink: Story = {
   render: () => (
@@ -160,7 +160,7 @@ export const WithHrefLink: Story = {
       </CardFooter>
     </Card>
   ),
-}
+};
 
 export const WithClickableLink: Story = {
   render: () => (
@@ -183,4 +183,4 @@ export const WithClickableLink: Story = {
       </CardFooter>
     </Card>
   ),
-}
+};

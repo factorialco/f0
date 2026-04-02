@@ -1,31 +1,31 @@
-import { Meta, StoryObj } from "@storybook/react-vite"
+import { Meta, StoryObj } from "@storybook/react-vite";
 
-import { FiltersDefinition } from "@/components/OneFilterPicker/types"
-import { SummariesDefinition } from "@/patterns/DataCollection/summary.ts"
-import { SortingsDefinition } from "@/hooks/datasource/types/sortings.typings"
-import { Ai, Delete, Download, Pencil, Person, Upload } from "@/icons/app"
+import { FiltersDefinition } from "@/components/OneFilterPicker/types";
+import { SummariesDefinition } from "@/patterns/DataCollection/summary.ts";
+import { SortingsDefinition } from "@/hooks/datasource/types/sortings.typings";
+import { Ai, Delete, Download, Pencil, Person, Upload } from "@/icons/app";
 
 import {
   DataCollectionSource,
   useDataCollectionSource,
-} from "../../hooks/useDataCollectionSource"
-import { OneDataCollection } from "../../index"
-import { ItemActionsDefinition } from "../../item-actions"
-import { NavigationFiltersDefinition } from "../../navigationFilters/types"
-import { GroupingDefinition } from "../../types"
-import { Visualization } from "../../visualizations/collection/types"
-import { buildSecondaryActions } from "../mockData"
+} from "../../hooks/useDataCollectionSource";
+import { OneDataCollection } from "../../index";
+import { ItemActionsDefinition } from "../../item-actions";
+import { NavigationFiltersDefinition } from "../../navigationFilters/types";
+import { GroupingDefinition } from "../../types";
+import { Visualization } from "../../visualizations/collection/types";
+import { buildSecondaryActions } from "../mockData";
 
 const meta = {
-  title: "Patterns/DataCollection/Collection Actions",
+  title: "Data Collection/Collection Actions",
   parameters: {
     layout: "padded",
   },
   tags: ["internal"],
-} satisfies Meta
+} satisfies Meta;
 
-export default meta
-type Story = StoryObj<typeof meta>
+export default meta;
+type Story = StoryObj<typeof meta>;
 
 // Mock data with various states to demonstrate conditional actions
 const mockUsers = [
@@ -85,7 +85,7 @@ const mockUsers = [
       canShare: false,
     },
   },
-]
+];
 
 const buildPrimaryActionsWithDescriptions = () => [
   {
@@ -106,7 +106,7 @@ const buildPrimaryActionsWithDescriptions = () => [
     description: "Upload a spreadsheet to create multiple employees at once",
     onClick: () => console.log("Importing employees"),
   },
-]
+];
 
 function BaseStory<
   Filters extends FiltersDefinition,
@@ -126,7 +126,7 @@ function BaseStory<
     ItemActions,
     NavigationFilters,
     GroupingDefinition<(typeof mockUsers)[number]>
-  >
+  >;
   visualizations?: ReadonlyArray<
     Visualization<
       (typeof mockUsers)[number],
@@ -137,7 +137,7 @@ function BaseStory<
       NavigationFilters,
       GroupingDefinition<(typeof mockUsers)[number]>
     >
-  >
+  >;
 }) {
   return (
     <div className="space-y-8">
@@ -171,7 +171,7 @@ function BaseStory<
         }
       />
     </div>
-  )
+  );
 }
 
 // Basic story showing all action types
@@ -186,18 +186,18 @@ export const BasicActionsExample: Story = {
         icon: Ai,
         onClick: () =>
           new Promise((resolve) => setTimeout(resolve, 1000)).then(() =>
-            console.log(`Creating a user`)
+            console.log(`Creating a user`),
           ),
       }),
       secondaryActions: {
         expanded: 0,
         actions: buildSecondaryActions,
       },
-    })
+    });
 
-    return <BaseStory dataSource={dataSource} />
+    return <BaseStory dataSource={dataSource} />;
   },
-}
+};
 
 // Basic story showing all action types
 export const MultiplePrimaryActionsExample: Story = {
@@ -223,11 +223,11 @@ export const MultiplePrimaryActionsExample: Story = {
         expanded: 0,
         actions: buildSecondaryActions,
       },
-    })
+    });
 
-    return <BaseStory dataSource={dataSource} />
+    return <BaseStory dataSource={dataSource} />;
   },
-}
+};
 
 export const MultiplePrimaryActionsWithDescriptionsExample: Story = {
   render: () => {
@@ -241,11 +241,11 @@ export const MultiplePrimaryActionsWithDescriptionsExample: Story = {
         expanded: 0,
         actions: buildSecondaryActions,
       },
-    })
+    });
 
-    return <BaseStory dataSource={dataSource} />
+    return <BaseStory dataSource={dataSource} />;
   },
-}
+};
 
 // Basic story showing all action types
 export const WithExpandedActionsExample: Story = {
@@ -267,7 +267,7 @@ export const WithExpandedActionsExample: Story = {
         fetchData: ({ filters }) =>
           Promise.resolve({
             records: mockUsers.filter((user) =>
-              filters.status?.includes(user.status)
+              filters.status?.includes(user.status),
             ),
           }),
       },
@@ -280,15 +280,15 @@ export const WithExpandedActionsExample: Story = {
         expanded: 1,
         actions: buildSecondaryActions,
       },
-    })
+    });
 
     dataSource.setCurrentFilters({
       status: ["active"],
-    })
+    });
 
-    return <BaseStory dataSource={dataSource} />
+    return <BaseStory dataSource={dataSource} />;
   },
-}
+};
 
 // Basic story showing all action types
 export const WithGroupedExpandedActionsExample: Story = {
@@ -310,7 +310,7 @@ export const WithGroupedExpandedActionsExample: Story = {
         fetchData: ({ filters }) =>
           Promise.resolve({
             records: mockUsers.filter((user) =>
-              filters.status?.includes(user.status)
+              filters.status?.includes(user.status),
             ),
           }),
       },
@@ -353,15 +353,15 @@ export const WithGroupedExpandedActionsExample: Story = {
           ],
         ],
       },
-    })
+    });
 
     dataSource.setCurrentFilters({
       status: ["active"],
-    })
+    });
 
-    return <BaseStory dataSource={dataSource} />
+    return <BaseStory dataSource={dataSource} />;
   },
-}
+};
 
 // Basic story showing all action types
 export const HiddenLabelExpandedActionsExample: Story = {
@@ -378,18 +378,18 @@ export const HiddenLabelExpandedActionsExample: Story = {
       secondaryActions: {
         expanded: 1,
         actions: () => {
-          const actions = buildSecondaryActions()
+          const actions = buildSecondaryActions();
           actions.forEach((action) => {
-            action.hideLabelWhenExpanded = true
-          })
-          return actions
+            action.hideLabelWhenExpanded = true;
+          });
+          return actions;
         },
       },
-    })
+    });
 
-    return <BaseStory dataSource={dataSource} />
+    return <BaseStory dataSource={dataSource} />;
   },
-}
+};
 
 // Example showing how actions can be used with card visualization
 export const CardActionsExample: Story = {
@@ -411,14 +411,14 @@ export const CardActionsExample: Story = {
       secondaryActions: {
         expanded: 1,
         actions: () => {
-          const actions = buildSecondaryActions()
+          const actions = buildSecondaryActions();
           actions.forEach((action) => {
-            action.hideLabelWhenExpanded = true
-          })
-          return actions
+            action.hideLabelWhenExpanded = true;
+          });
+          return actions;
         },
       },
-    })
+    });
 
     return (
       <BaseStory
@@ -439,6 +439,6 @@ export const CardActionsExample: Story = {
           },
         ]}
       />
-    )
+    );
   },
-}
+};

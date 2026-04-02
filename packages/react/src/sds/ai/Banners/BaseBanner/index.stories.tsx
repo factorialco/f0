@@ -1,22 +1,22 @@
-import type { Meta, StoryObj } from "@storybook/react-vite"
+import type { Meta, StoryObj } from "@storybook/react-vite";
 
-import { expect, within } from "storybook/test"
+import { expect, within } from "storybook/test";
 
-import { Download, Upsell } from "@/icons/app"
+import { Download, Upsell } from "@/icons/app";
 
-import { BaseBanner } from "./index"
+import { BaseBanner } from "./index";
 
 const meta = {
-  title: "Experimental/Banners/BaseBanner",
+  title: "Banners/BaseBanner",
   component: BaseBanner,
   parameters: {
     layout: "padded",
   },
   tags: ["autodocs"],
-} satisfies Meta<typeof BaseBanner>
+} satisfies Meta<typeof BaseBanner>;
 
-export default meta
-type Story = StoryObj<typeof meta>
+export default meta;
+type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
@@ -34,7 +34,7 @@ export const Default: Story = {
     },
     onClose: () => alert("Banner closed"),
   },
-}
+};
 
 export const WithVideo: Story = {
   args: {
@@ -49,7 +49,7 @@ export const WithVideo: Story = {
     },
     onClose: () => alert("Banner closed"),
   },
-}
+};
 
 export const NoActions: Story = {
   args: {
@@ -60,7 +60,7 @@ export const NoActions: Story = {
       "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2071&q=80",
     onClose: () => alert("Banner closed"),
   },
-}
+};
 
 export const WithCustomActions: Story = {
   args: {
@@ -80,7 +80,7 @@ export const WithCustomActions: Story = {
     },
     onClose: () => alert("Banner closed"),
   },
-}
+};
 
 export const Loading: Story = {
   args: {
@@ -90,7 +90,7 @@ export const Loading: Story = {
       "https://images.unsplash.com/photo-1551434678-e076c223a692?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
     isLoading: true,
   },
-}
+};
 
 export const WithIcons: Story = {
   args: {
@@ -112,7 +112,7 @@ export const WithIcons: Story = {
     },
     onClose: () => alert("Banner closed"),
   },
-}
+};
 
 export const FullWidthText: Story = {
   args: {
@@ -132,7 +132,7 @@ export const FullWidthText: Story = {
     },
     onClose: () => alert("Banner closed"),
   },
-}
+};
 
 export const WithDataTestId: Story = {
   args: {
@@ -140,7 +140,7 @@ export const WithDataTestId: Story = {
     dataTestId: "banner-test-id",
   },
   play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    await expect(canvas.getByTestId("banner-test-id")).toBeInTheDocument()
+    const canvas = within(canvasElement);
+    await expect(canvas.getByTestId("banner-test-id")).toBeInTheDocument();
   },
-}
+};

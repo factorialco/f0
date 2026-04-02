@@ -1,7 +1,7 @@
 import type { Meta } from "@storybook/react-vite"
 
-import { VerticalBarChartProps } from "../../../Charts/VerticalBarChart"
-import { Default as VerticalBarChartDefault } from "../../../Charts/VerticalBarChart/__stories__/VerticalBarChart.stories"
+import { VerticalBarChartProps } from "@/kits/Charts/VerticalBarChart"
+import { Default as VerticalBarChartDefault } from "@/kits/Charts/VerticalBarChart/__stories__/VerticalBarChart.stories"
 import { containerStoryArgs, WidgetDecorator } from "../../storybook-utils"
 import { VerticalBarChartWidget } from "../index"
 

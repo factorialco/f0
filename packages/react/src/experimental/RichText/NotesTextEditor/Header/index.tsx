@@ -14,7 +14,7 @@ import {
   PrimaryActionButton,
   PrimaryDropdownAction,
 } from "@/experimental/Information/utils"
-import { Dropdown, DropdownItem } from "@/experimental/Navigation/Dropdown"
+import { Dropdown, DropdownItem } from "@/patterns/Navigation/Dropdown"
 
 type BannerVariant = "info" | "warning" | "critical" | "neutral" | "positive"
 

@@ -1,5 +1,5 @@
 import { F0Widget } from "@/components/F0Widget"
-import { DropdownItem } from "@/experimental/Navigation/Dropdown"
+import { DropdownItem } from "@/patterns/Navigation/Dropdown"
 
 export interface DashboardWidgetProps {
   children: React.ReactNode

@@ -13,8 +13,8 @@ import type {
 
 import { F0Button } from "@/components/F0Button"
 import { ActionBarStatus } from "@/experimental/F0ActionBar"
-import { F0TableOfContent } from "@/experimental/Navigation/F0TableOfContent"
-import { TOCItem } from "@/experimental/Navigation/F0TableOfContent/types"
+import { F0TableOfContent } from "@/patterns/Navigation/F0TableOfContent"
+import { TOCItem } from "@/patterns/Navigation/F0TableOfContent/types"
 import { Delete, Save } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 import { cn } from "@/lib/utils"

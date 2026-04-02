@@ -1,2 +1,2 @@
-export { Dialog } from "@/patterns/Dialog/Overlays"
-export { Tooltip, type TooltipProps } from "./Tooltip"
+export { Dialog } from "@/experimental/Overlays/Dialog";
+export { Tooltip, type TooltipProps } from "./Tooltip";

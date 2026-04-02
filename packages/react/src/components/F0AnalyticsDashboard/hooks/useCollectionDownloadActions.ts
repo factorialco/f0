@@ -1,4 +1,4 @@
-import type { DropdownItem } from "@/experimental/Navigation/Dropdown"
+import type { DropdownItem } from "@/patterns/Navigation/Dropdown"
 
 import { useCallback, useMemo } from "react"
 

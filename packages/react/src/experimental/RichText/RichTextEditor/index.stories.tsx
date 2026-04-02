@@ -1,12 +1,12 @@
-import type { Meta, StoryObj } from "@storybook/react-vite"
+import type { Meta, StoryObj } from "@storybook/react-vite";
 
-import { expect, within } from "storybook/test"
+import { expect, within } from "storybook/test";
 
-import { EnhancementOption, FILE_TYPES, resultType, RichTextEditor } from "."
+import { EnhancementOption, FILE_TYPES, resultType, RichTextEditor } from ".";
 
 const meta = {
   component: RichTextEditor,
-  title: "Components/TextEditor/RichTextEditor",
+  title: "TextEditor/RichTextEditor",
   tags: ["experimental"],
   argTypes: {
     title: {
@@ -83,10 +83,10 @@ const meta = {
       defaultValue: false,
     },
   },
-} satisfies Meta<typeof RichTextEditor>
+} satisfies Meta<typeof RichTextEditor>;
 
-export default meta
-type Story = StoryObj<typeof meta>
+export default meta;
+type Story = StoryObj<typeof meta>;
 
 const enhancementOptions: EnhancementOption[] = [
   {
@@ -145,7 +145,7 @@ const enhancementOptions: EnhancementOption[] = [
       },
     ],
   },
-]
+];
 
 const users = [
   {
@@ -163,24 +163,24 @@ const users = [
     label: "Xavier Val Parejo",
     href: "/avatars/person03.jpg",
   },
-]
+];
 
 export const Default: Story = {
   tags: ["experimental"],
   args: {
     title: "Ode to My Text Editor",
     onChange: (result: resultType) => {
-      console.log(result)
+      console.log(result);
     },
     placeholder:
       "Write something here to test our Write something here to test our Write something here to test our Write something here to test our Write something here to test our Write something here to test our ",
     mentionsConfig: { users: users },
     enhanceConfig: {
       onEnhanceText: (params: {
-        text: string
-        selectedIntent?: string
-        customIntent?: string
-        context?: string
+        text: string;
+        selectedIntent?: string;
+        customIntent?: string;
+        context?: string;
       }) =>
         new Promise((resolve) => {
           setTimeout(() => {
@@ -188,8 +188,8 @@ export const Default: Story = {
               success: !(params.selectedIntent === "error"),
               error: "Error from AI, Jacob didn't finish his work",
               text: `<b>Just imagine this is an AI response from our friend Jacob</b>`,
-            })
-          }, 2000)
+            });
+          }, 2000);
         }),
       enhancementOptions: enhancementOptions,
     },
@@ -237,7 +237,7 @@ export const Default: Story = {
     },
     height: "auto",
   },
-}
+};
 
 export const Blank: Story = {
   args: {
@@ -251,14 +251,14 @@ export const Blank: Story = {
     maxCharacters: undefined,
     plainHtmlMode: true,
   },
-}
+};
 
-type SkeletonStory = StoryObj<typeof RichTextEditor.Skeleton>
+type SkeletonStory = StoryObj<typeof RichTextEditor.Skeleton>;
 
 export const Skeleton: SkeletonStory = {
   tags: ["experimental"],
   render: () => <RichTextEditor.Skeleton />,
-}
+};
 
 export const WithDataTestId: Story = {
   args: {
@@ -266,9 +266,9 @@ export const WithDataTestId: Story = {
     dataTestId: "rich-text-editor-test-id",
   },
   play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
+    const canvas = within(canvasElement);
     await expect(
-      canvas.getByTestId("rich-text-editor-test-id")
-    ).toBeInTheDocument()
+      canvas.getByTestId("rich-text-editor-test-id"),
+    ).toBeInTheDocument();
   },
-}
+};

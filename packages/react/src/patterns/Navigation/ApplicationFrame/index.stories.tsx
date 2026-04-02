@@ -1,20 +1,20 @@
-import type { Meta, StoryObj } from "@storybook/react-vite"
+import type { Meta, StoryObj } from "@storybook/react-vite";
 
-import { ComponentProps } from "react"
-import { expect, within } from "storybook/test"
+import { ComponentProps } from "react";
+import { expect, within } from "storybook/test";
 
-import { Lightbulb } from "@/icons/app"
-import ExternalLink from "@/icons/app/ExternalLink"
-import PalmTree from "@/icons/app/PalmTree"
+import { Lightbulb } from "@/icons/app";
+import ExternalLink from "@/icons/app/ExternalLink";
+import PalmTree from "@/icons/app/PalmTree";
 
-import { Page } from "../Page"
-import * as PageStories from "../Page/index.stories"
-import * as SidebarStories from "@/components/Navigation/Sidebar/index.stories"
-import { Sidebar } from "@/components/Navigation/Sidebar/Sidebar"
-import { ApplicationFrame } from "./index"
+import { Page } from "../Page";
+import * as PageStories from "../Page/index.stories";
+import * as SidebarStories from "@/components/Navigation/Sidebar/index.stories";
+import { Sidebar } from "@/components/Navigation/Sidebar/Sidebar";
+import { ApplicationFrame } from "./index";
 
 const meta: Meta<typeof ApplicationFrame> = {
-  title: "Patterns/Navigation/ApplicationFrame",
+  title: "Navigation/ApplicationFrame",
   component: ApplicationFrame,
   tags: ["autodocs", "experimental"],
   parameters: {
@@ -89,14 +89,14 @@ const meta: Meta<typeof ApplicationFrame> = {
     sidebar: <Sidebar {...SidebarStories.default.args} />,
     children: <Page {...PageStories.Default.args} />,
   } satisfies ComponentProps<typeof ApplicationFrame>,
-}
+};
 
-export default meta
+export default meta;
 
-type Story = StoryObj<typeof ApplicationFrame>
+type Story = StoryObj<typeof ApplicationFrame>;
 
 const DefaultStoryComponent = (
-  args: ComponentProps<typeof ApplicationFrame>
+  args: ComponentProps<typeof ApplicationFrame>,
 ) => {
   return (
     <ApplicationFrame
@@ -108,15 +108,15 @@ const DefaultStoryComponent = (
     >
       <Page {...PageStories.Default.args} />
     </ApplicationFrame>
-  )
-}
+  );
+};
 
 export const Default: Story = {
   render: (args) => <DefaultStoryComponent {...args} />,
   play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
+    const canvas = within(canvasElement);
 
-    const link = canvas.getByRole("link", { name: /inbox/i })
-    await expect(link.dataset.test).toBe("foo")
+    const link = canvas.getByRole("link", { name: /inbox/i });
+    await expect(link.dataset.test).toBe("foo");
   },
-}
+};

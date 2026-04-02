@@ -1,22 +1,22 @@
-import type { Meta, StoryObj } from "@storybook/react-vite"
+import type { Meta, StoryObj } from "@storybook/react-vite";
 
-import { subDays } from "date-fns"
-import { useState } from "react"
-import { expect, within } from "storybook/test"
+import { subDays } from "date-fns";
+import { useState } from "react";
+import { expect, within } from "storybook/test";
 
-import { granularityDefinitions } from "@/experimental/OneCalendar"
+import { granularityDefinitions } from "@/experimental/OneCalendar";
 
 import {
   CalendarView,
   DateRange,
   WeekStartDay,
-} from "@/experimental/OneCalendar/types"
-import { OneDateNavigator } from "../OneDateNavigator"
-import { predefinedPresets } from "../presets"
-import { DatePickerValue } from "../types"
+} from "@/experimental/OneCalendar/types";
+import { OneDateNavigator } from "../OneDateNavigator";
+import { predefinedPresets } from "../presets";
+import { DatePickerValue } from "../types";
 
 const meta = {
-  title: "Patterns/DateNavigator",
+  title: "DateNavigator",
   component: OneDateNavigator,
   parameters: {
     docs: {
@@ -211,12 +211,12 @@ const meta = {
     },
   },
   tags: ["autodocs", "experimental"],
-} satisfies Meta<typeof OneDateNavigator>
+} satisfies Meta<typeof OneDateNavigator>;
 
-export default meta
-type Story = StoryObj<typeof meta>
+export default meta;
+type Story = StoryObj<typeof meta>;
 
-const today = new Date(2025, 6, 30)
+const today = new Date(2025, 6, 30);
 const presets = [
   predefinedPresets.today,
   predefinedPresets.lastWeek,
@@ -232,7 +232,7 @@ const presets = [
       to: today,
     } as DateRange,
   },
-]
+];
 
 export const Simple: Story = {
   args: {
@@ -242,7 +242,7 @@ export const Simple: Story = {
     weekStartsOn: WeekStartDay.Monday,
     // granularities: ["day", "week", "month"],
   },
-}
+};
 
 export const MonthGranularity: Story = {
   args: {
@@ -251,7 +251,7 @@ export const MonthGranularity: Story = {
     } as DatePickerValue,
     granularities: ["month"],
   },
-}
+};
 
 export const MultipleGranularities: Story = {
   args: {
@@ -260,7 +260,7 @@ export const MultipleGranularities: Story = {
     } as DatePickerValue,
     granularities: ["day", "week", "month", "quarter", "halfyear", "year"],
   },
-}
+};
 
 export const WithCustomRange: Story = {
   args: {
@@ -277,13 +277,13 @@ export const WithCustomRange: Story = {
       "range",
     ],
   },
-}
+};
 
 export const HideGoToCurrent: Story = {
   args: {
     hideGoToCurrent: true,
   },
-}
+};
 
 export const WithDefaultDate: Story = {
   args: {
@@ -295,12 +295,12 @@ export const WithDefaultDate: Story = {
     granularities: ["month"],
   },
   play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
+    const canvas = within(canvasElement);
     // Ensure the default value is rendered
-    const trigger = canvas.getByText(/july 2025/i)
-    expect(trigger).toBeInTheDocument()
+    const trigger = canvas.getByText(/july 2025/i);
+    expect(trigger).toBeInTheDocument();
   },
-}
+};
 
 export const WithDefaultDateFrench: Story = {
   args: {
@@ -315,12 +315,12 @@ export const WithDefaultDateFrench: Story = {
     l10n: { locale: "fr" },
   },
   play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
+    const canvas = within(canvasElement);
     // Ensure the month label is rendered in French
-    const trigger = canvas.getByText(/juillet 2025/i)
-    expect(trigger).toBeInTheDocument()
+    const trigger = canvas.getByText(/juillet 2025/i);
+    expect(trigger).toBeInTheDocument();
   },
-}
+};
 
 export const WithPresets: Story = {
   args: {
@@ -330,7 +330,7 @@ export const WithPresets: Story = {
     granularities: ["day", "week", "month", "quarter"],
     presets,
   },
-}
+};
 
 export const WithPresetsHideNavigation: Story = {
   args: {
@@ -341,7 +341,7 @@ export const WithPresetsHideNavigation: Story = {
     presets,
     hideNavigation: true,
   },
-}
+};
 
 export const WeekView: Story = {
   args: {
@@ -350,7 +350,7 @@ export const WeekView: Story = {
     } as DatePickerValue,
     granularities: ["week"],
   },
-}
+};
 
 export const WeekViewSundayStart: Story = {
   args: {
@@ -360,7 +360,7 @@ export const WeekViewSundayStart: Story = {
     granularities: ["week"],
     weekStartsOn: WeekStartDay.Sunday,
   },
-}
+};
 
 export const QuarterView: Story = {
   args: {
@@ -369,7 +369,7 @@ export const QuarterView: Story = {
     } as DatePickerValue,
     granularities: ["quarter"],
   },
-}
+};
 
 export const HalfYearView: Story = {
   args: {
@@ -378,7 +378,7 @@ export const HalfYearView: Story = {
     } as DatePickerValue,
     granularities: ["halfyear"],
   },
-}
+};
 
 export const YearView: Story = {
   args: {
@@ -387,7 +387,7 @@ export const YearView: Story = {
     } as DatePickerValue,
     granularities: ["year"],
   },
-}
+};
 
 export const WithMinMaxDates: Story = {
   args: {
@@ -398,7 +398,7 @@ export const WithMinMaxDates: Story = {
     minDate: subDays(today, 30), // Can't select dates before 30 days ago
     maxDate: today, // Can't select dates after today
   },
-}
+};
 
 export const WithCompareTo: Story = {
   args: {
@@ -410,7 +410,7 @@ export const WithCompareTo: Story = {
     minDate: subDays(today, 30), // Can't select dates before 30 days ago
     //maxDate: today, // Can't select dates after today
     onCompareToChange(compareTo) {
-      console.log("compareTo:", compareTo)
+      console.log("compareTo:", compareTo);
     },
     compareTo: {
       day: [
@@ -419,7 +419,7 @@ export const WithCompareTo: Story = {
           value: () =>
             granularityDefinitions.day.add(
               granularityDefinitions.day.toRange(new Date()),
-              -1
+              -1,
             ),
         },
         {
@@ -441,11 +441,11 @@ export const WithCompareTo: Story = {
           value: (value) => [
             granularityDefinitions.week.add(
               granularityDefinitions.week.toRange(value),
-              -2
+              -2,
             ),
             granularityDefinitions.week.add(
               granularityDefinitions.week.toRange(value),
-              -1
+              -1,
             ),
           ],
         },
@@ -458,7 +458,7 @@ export const WithCompareTo: Story = {
       ],
     },
   },
-}
+};
 
 export const ChangeValueFromOutside: Story = {
   args: {
@@ -469,8 +469,8 @@ export const ChangeValueFromOutside: Story = {
   },
   render: (args) => {
     const [value, setValue] = useState<DatePickerValue | undefined>(
-      args.defaultValue
-    )
+      args.defaultValue,
+    );
     return (
       <>
         <OneDateNavigator
@@ -502,13 +502,13 @@ export const ChangeValueFromOutside: Story = {
           </button>
         </div>
       </>
-    )
+    );
   },
-}
+};
 
 export const WithDefaultCompareTo: Story = {
   args: {
     ...WithCompareTo.args,
     defaultCompareTo: "1",
   },
-}
+};

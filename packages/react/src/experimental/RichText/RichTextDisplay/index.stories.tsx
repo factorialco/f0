@@ -1,16 +1,16 @@
-import type { Meta, StoryObj } from "@storybook/react-vite"
+import type { Meta, StoryObj } from "@storybook/react-vite";
 
-import { expect, within } from "storybook/test"
+import { expect, within } from "storybook/test";
 
-import { RichTextDisplay } from "."
+import { RichTextDisplay } from ".";
 
 const meta = {
   component: RichTextDisplay,
-  title: "Components/TextEditor/RichTextDisplay",
-} satisfies Meta<typeof RichTextDisplay>
+  title: "TextEditor/RichTextDisplay",
+} satisfies Meta<typeof RichTextDisplay>;
 
-export default meta
-type Story = StoryObj<typeof meta>
+export default meta;
+type Story = StoryObj<typeof meta>;
 
 const htmlContent = `<p>
   <a href="https://cdn.memegenerator.es/imagenes/memes/full/32/48/32486607.jpg" class="mention" data-id="3" rel="noopener noreferrer" target="_blank">
@@ -68,7 +68,7 @@ const htmlContent = `<p>
 <pre>
   <code>Good luck guys </code>
 </pre>
-`
+`;
 
 const markdownContent = `
 ## Markdown support
@@ -96,14 +96,14 @@ This component supports **GitHub Flavored Markdown content**. You can use it by 
 | Header 1 | Header 2 |
 | - | - |
 | c | d |
-`
+`;
 
 export const Default: Story = {
   tags: ["experimental"],
   args: {
     content: htmlContent,
   },
-}
+};
 
 export const Markdown: Story = {
   parameters: { a11y: { skipCi: true } },
@@ -112,7 +112,7 @@ export const Markdown: Story = {
     content: markdownContent,
     format: "markdown",
   },
-}
+};
 
 export const WithDataTestId: Story = {
   args: {
@@ -120,9 +120,9 @@ export const WithDataTestId: Story = {
     dataTestId: "rich-text-display-test-id",
   },
   play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
+    const canvas = within(canvasElement);
     await expect(
-      canvas.getByTestId("rich-text-display-test-id")
-    ).toBeInTheDocument()
+      canvas.getByTestId("rich-text-display-test-id"),
+    ).toBeInTheDocument();
   },
-}
+};

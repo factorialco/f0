@@ -1,21 +1,21 @@
-import type { Meta, StoryObj } from "@storybook/react-vite"
+import type { Meta, StoryObj } from "@storybook/react-vite";
 
-import { useState } from "react"
-import { expect, within } from "storybook/test"
+import { useState } from "react";
+import { expect, within } from "storybook/test";
 
-import { buttonToggleVariants } from "@/components/F0ButtonToggle"
-import { Archive, Delete, Microphone, MicrophoneNegative } from "@/icons/app"
-import { withSnapshot } from "@/lib/storybook-utils/parameters"
+import { buttonToggleVariants } from "@/components/F0ButtonToggle";
+import { Archive, Delete, Microphone, MicrophoneNegative } from "@/icons/app";
+import { withSnapshot } from "@/lib/storybook-utils/parameters";
 
 import type {
   F0ButtonToggleGroupItem,
   F0ButtonToggleGroupProps,
-} from "../types"
+} from "../types";
 
-import { buttonToggleGroupSizes, F0ButtonToggleGroup } from "../index"
+import { buttonToggleGroupSizes, F0ButtonToggleGroup } from "../index";
 
 const meta = {
-  title: "Components/Button/ButtonToggleGroup",
+  title: "Button/ButtonToggleGroup",
   component: F0ButtonToggleGroup,
   parameters: {
     layout: "centered",
@@ -71,12 +71,12 @@ const meta = {
   },
   decorators: [
     (Story, { args }) => {
-      const [singleValue, setSingleValue] = useState<string>("")
-      const [multipleValue, setMultipleValue] = useState<string[]>([])
+      const [singleValue, setSingleValue] = useState<string>("");
+      const [multipleValue, setMultipleValue] = useState<string[]>([]);
 
       const displayValue = args.multiple
         ? multipleValue.join(", ") || "(none)"
-        : singleValue || "(none)"
+        : singleValue || "(none)";
 
       const storyArgs = args.multiple
         ? ({
@@ -88,7 +88,7 @@ const meta = {
             ...args,
             value: singleValue,
             onChange: setSingleValue,
-          } as const)
+          } as const);
 
       return (
         <div className="flex flex-col gap-4">
@@ -97,26 +97,26 @@ const meta = {
             Value: {displayValue}
           </div>
         </div>
-      )
+      );
     },
   ],
-} satisfies Meta<F0ButtonToggleGroupProps>
+} satisfies Meta<F0ButtonToggleGroupProps>;
 
-export default meta
+export default meta;
 
 // Story args type - base props only, excluding the discriminated union (value/onChange/multiple)
 type StoryArgs = {
-  items: F0ButtonToggleGroupProps["items"]
-  size: F0ButtonToggleGroupProps["size"]
-  variant?: F0ButtonToggleGroupProps["variant"]
-  required?: boolean
-  disabled?: boolean
-  multiple?: boolean
-}
+  items: F0ButtonToggleGroupProps["items"];
+  size: F0ButtonToggleGroupProps["size"];
+  variant?: F0ButtonToggleGroupProps["variant"];
+  required?: boolean;
+  disabled?: boolean;
+  multiple?: boolean;
+};
 
 type Story = Omit<StoryObj<typeof meta>, "args"> & {
-  args?: Partial<StoryArgs>
-}
+  args?: Partial<StoryArgs>;
+};
 
 const mockItems = [
   {
@@ -130,7 +130,7 @@ const mockItems = [
     value: "delete",
   },
   { label: "Option 3", icon: Archive, value: "archive" },
-] satisfies F0ButtonToggleGroupItem[]
+] satisfies F0ButtonToggleGroupItem[];
 
 // Basic single selection
 const defaultArgs: Partial<StoryArgs> = {
@@ -138,18 +138,18 @@ const defaultArgs: Partial<StoryArgs> = {
   size: "md",
   multiple: false,
   required: false,
-}
+};
 
 export const Default: Story = {
   args: defaultArgs,
-}
+};
 
 export const Single: Story = {
   args: {
     ...defaultArgs,
     multiple: false,
   },
-}
+};
 
 // Required selection
 export const SingleRequired: Story = {
@@ -165,11 +165,11 @@ export const SingleRequired: Story = {
     ...Default.args,
     required: true,
   },
-}
+};
 
 export const VariantExpanded: Story = {
   args: { ...Default.args, variant: "expanded" },
-}
+};
 // Multiple selection
 export const Multiple: Story = {
   parameters: {
@@ -185,7 +185,7 @@ export const Multiple: Story = {
     multiple: true,
     required: false,
   },
-}
+};
 
 export const MultipleRequired: Story = {
   parameters: {
@@ -201,7 +201,7 @@ export const MultipleRequired: Story = {
     multiple: true,
     required: true,
   },
-}
+};
 // Size variants
 export const Sizes: Story = {
   args: {
@@ -209,8 +209,8 @@ export const Sizes: Story = {
   },
   parameters: withSnapshot({}),
   render: () => {
-    const [valueSm, setValueSm] = useState<string>("")
-    const [valueMd, setValueMd] = useState<string>("")
+    const [valueSm, setValueSm] = useState<string>("");
+    const [valueMd, setValueMd] = useState<string>("");
 
     return (
       <div className="flex flex-col items-center gap-6">
@@ -237,9 +237,9 @@ export const Sizes: Story = {
           />
         </div>
       </div>
-    )
+    );
   },
-}
+};
 
 // With disabled items
 export const WithDisabledItem: Story = {
@@ -258,7 +258,7 @@ export const WithDisabledItem: Story = {
       disabled: index === 1,
     })),
   },
-}
+};
 
 // With disabled all items
 export const Disabled: Story = {
@@ -273,7 +273,7 @@ export const Disabled: Story = {
     ...Default.args,
     disabled: true,
   },
-}
+};
 
 // Wrap
 export const Flow: Story = {
@@ -293,7 +293,7 @@ export const Flow: Story = {
       value: `option-${index + 1}`,
     })),
   },
-}
+};
 
 // Snapshot with all variants
 export const Snapshot: Story = {
@@ -322,8 +322,8 @@ export const Snapshot: Story = {
                   required={false}
                 />
               </section>
-            )
-          })
+            );
+          });
         })}
 
         <section>
@@ -341,9 +341,9 @@ export const Snapshot: Story = {
           />
         </section>
       </div>
-    )
+    );
   },
-}
+};
 
 export const WithDataTestId: Story = {
   args: {
@@ -352,7 +352,7 @@ export const WithDataTestId: Story = {
     dataTestId: "group-test-id",
   },
   play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    await expect(canvas.getByTestId("group-test-id")).toBeInTheDocument()
+    const canvas = within(canvasElement);
+    await expect(canvas.getByTestId("group-test-id")).toBeInTheDocument();
   },
-}
+};

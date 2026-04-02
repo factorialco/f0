@@ -1,17 +1,17 @@
-import { type AIMessage } from "@copilotkit/shared"
-import { useCallback, useEffect, useState } from "react"
+import { type AIMessage } from "@copilotkit/shared";
+import { useCallback, useEffect, useState } from "react";
 
-import { F0Dialog } from "@/patterns/Dialog/F0Dialog"
-import { Input } from "@/experimental/Forms/Fields/Input"
-import { useI18n } from "@/lib/providers/i18n"
+import { F0Dialog } from "@/components/F0Dialog";
+import { Input } from "@/experimental/Forms/Fields/Input";
+import { useI18n } from "@/lib/providers/i18n";
 
-import { UserReaction } from "./FeedbackProvider"
+import { UserReaction } from "./FeedbackProvider";
 
 interface ReactionModalProps {
-  onClose: (message: AIMessage) => void
-  onSubmit: (message: AIMessage, feedback: string) => void
-  reactionType: UserReaction
-  message: AIMessage
+  onClose: (message: AIMessage) => void;
+  onSubmit: (message: AIMessage, feedback: string) => void;
+  reactionType: UserReaction;
+  message: AIMessage;
 }
 
 export const FeedbackModal = ({
@@ -20,35 +20,35 @@ export const FeedbackModal = ({
   reactionType,
   message,
 }: ReactionModalProps) => {
-  const [text, setText] = useState("")
-  const translation = useI18n()
+  const [text, setText] = useState("");
+  const translation = useI18n();
   const { title, label, placeholder } =
     reactionType === "like"
       ? translation.ai.feedbackModal.positive
-      : translation.ai.feedbackModal.negative
+      : translation.ai.feedbackModal.negative;
   const handleSubmit = useCallback(() => {
-    onSubmit(message, text)
-  }, [text, message, onSubmit])
+    onSubmit(message, text);
+  }, [text, message, onSubmit]);
   const handleClose = () => {
-    onClose(message)
-  }
+    onClose(message);
+  };
 
   // handle keyboard submit manually because using built-in <form> fails
   // due to unmount of the dialog before the form is processed
   useEffect(() => {
     const handleKeyboard = (event: KeyboardEvent) => {
       if (event.key === "Enter") {
-        event.preventDefault()
-        handleSubmit()
+        event.preventDefault();
+        handleSubmit();
       }
-    }
+    };
 
-    document.addEventListener("keydown", handleKeyboard)
+    document.addEventListener("keydown", handleKeyboard);
 
     return () => {
-      document.removeEventListener("keydown", handleKeyboard)
-    }
-  }, [handleSubmit])
+      document.removeEventListener("keydown", handleKeyboard);
+    };
+  }, [handleSubmit]);
 
   return (
     <F0Dialog
@@ -79,5 +79,5 @@ export const FeedbackModal = ({
         />
       </div>
     </F0Dialog>
-  )
-}
+  );
+};

@@ -1,9 +1,9 @@
-import { Meta, StoryObj } from "@storybook/react-vite"
+import { Meta, StoryObj } from "@storybook/react-vite";
 
-import { ExampleComponent } from "../mockData"
+import { ExampleComponent } from "../mockData";
 
 const meta = {
-  title: "Patterns/DataCollection/Callbacks",
+  title: "Data Collection/Callbacks",
   component: ExampleComponent,
   parameters: {
     layout: "padded",
@@ -15,19 +15,19 @@ const meta = {
     },
   },
   tags: ["autodocs", "experimental"],
-} satisfies Meta<typeof ExampleComponent>
+} satisfies Meta<typeof ExampleComponent>;
 
-export default meta
-type Story = StoryObj<typeof meta>
+export default meta;
+type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
     onStateChange: (state) => {
-      console.log("State changed", "->", state)
+      console.log("State changed", "->", state);
 
-      console.log(state.filters?.department)
+      console.log(state.filters?.department);
 
-      alert(JSON.stringify(state, null, 2))
+      alert(JSON.stringify(state, null, 2));
     },
   },
-}
+};

@@ -1,6 +1,6 @@
-import { useDeepCompareEffect } from "@reactuses/core"
-import { cva } from "cva"
-import { isEqual } from "lodash"
+import { useDeepCompareEffect } from "@reactuses/core";
+import { cva } from "cva";
+import { isEqual } from "lodash";
 import {
   forwardRef,
   useCallback,
@@ -10,10 +10,10 @@ import {
   useMemo,
   useRef,
   useState,
-} from "react"
-import { useDebounceCallback } from "usehooks-ts"
+} from "react";
+import { useDebounceCallback } from "usehooks-ts";
 
-import { F0DialogContext } from "@/patterns/Dialog/F0Dialog"
+import { F0DialogContext } from "@/components/F0Dialog";
 import {
   BaseFetchOptions,
   BaseResponse,
@@ -27,49 +27,49 @@ import {
   useGroups,
   useSelectable,
   WithGroupId,
-} from "@/hooks/datasource"
-import { DataTestIdWrapper } from "@/lib/data-testid"
-import { useI18n } from "@/lib/providers/i18n"
-import { toArray } from "@/lib/toArray"
-import { cn } from "@/lib/utils"
-import { GroupHeader } from "@/ui/GroupHeader/index"
-import { InputField } from "@/ui/InputField"
-import { InputMessages } from "@/ui/InputField/components/InputMessages"
-import { Label } from "@/ui/InputField/components/Label"
+} from "@/hooks/datasource";
+import { DataTestIdWrapper } from "@/lib/data-testid";
+import { useI18n } from "@/lib/providers/i18n";
+import { toArray } from "@/lib/toArray";
+import { cn } from "@/lib/utils";
+import { GroupHeader } from "@/ui/GroupHeader/index";
+import { InputField } from "@/ui/InputField";
+import { InputMessages } from "@/ui/InputField/components/InputMessages";
+import { Label } from "@/ui/InputField/components/Label";
 import {
   SelectContent,
   Select as SelectPrimitive,
   SelectSeparator,
   SelectTrigger,
   VirtualItem,
-} from "@/ui/Select"
+} from "@/ui/Select";
 
 import type {
   F0SelectItemObject,
   F0SelectItemProps,
   F0SelectProps,
   ResolvedRecordType,
-} from "./types"
+} from "./types";
 
-import { Arrow } from "./components/Arrow"
-import { SelectAll } from "./components/SelectAll"
-import { SelectBottomActions } from "./components/SelectBottomActions"
-import { SelectedItems } from "./components/SelectedItems"
-import { SelectionPreview } from "./components/SelectionPreview"
-import { SelectItem } from "./components/SelectItem"
-import { SelectTopActions } from "./components/SelectTopActions"
-export * from "./types"
+import { Arrow } from "./components/Arrow";
+import { SelectAll } from "./components/SelectAll";
+import { SelectBottomActions } from "./components/SelectBottomActions";
+import { SelectedItems } from "./components/SelectedItems";
+import { SelectionPreview } from "./components/SelectionPreview";
+import { SelectItem } from "./components/SelectItem";
+import { SelectTopActions } from "./components/SelectTopActions";
+export * from "./types";
 
 const defaultSearchFn = (
   option: F0SelectItemProps<string>,
-  search?: string
+  search?: string,
 ) => {
   return (
     option.type === "separator" ||
     !search ||
     option.label.toLowerCase().includes(search.toLowerCase())
-  )
-}
+  );
+};
 
 const asListContainerVariants = cva({
   base: "flex flex-col rounded-md border border-solid bg-f1-background max-h-full",
@@ -84,7 +84,7 @@ const asListContainerVariants = cva({
   defaultVariants: {
     status: "default",
   },
-})
+});
 
 const F0SelectComponent = forwardRef(function Select<
   T extends string,
@@ -126,76 +126,76 @@ const F0SelectComponent = forwardRef(function Select<
     dataTestId,
     ...props
   }: F0SelectProps<T, R>,
-  ref: React.ForwardedRef<HTMLButtonElement>
+  ref: React.ForwardedRef<HTMLButtonElement>,
 ) {
-  const id = useId()
+  const id = useId();
 
   // If inside a OneDialog and no portalContainer is provided, use the dialog's container
   // only for center/fullscreen dialogs (which have focus trap).
   // For side panels (left/right), render in body to prevent clipping.
-  const dialogContext = useContext(F0DialogContext)
+  const dialogContext = useContext(F0DialogContext);
   const shouldUseDialogContainer =
     dialogContext.portalContainer &&
     (dialogContext.position === "center" ||
-      dialogContext.position === "fullscreen")
+      dialogContext.position === "fullscreen");
 
   const effectivePortalContainer =
     portalContainer !== undefined
       ? portalContainer
       : shouldUseDialogContainer
         ? dialogContext.portalContainer
-        : undefined
+        : undefined;
 
   // Extract onSelectItems and disableSelectAll from props for multiple selection
   const onSelectItems =
-    "onSelectItems" in props ? props.onSelectItems : undefined
+    "onSelectItems" in props ? props.onSelectItems : undefined;
   const disableSelectAll =
-    "disableSelectAll" in props ? props.disableSelectAll : false
-  type ActualRecordType = ResolvedRecordType<R>
+    "disableSelectAll" in props ? props.disableSelectAll : false;
+  type ActualRecordType = ResolvedRecordType<R>;
 
-  const [openLocal, setOpenLocal] = useState(open)
+  const [openLocal, setOpenLocal] = useState(open);
 
   const defaultItems = useMemo(
     () =>
       toArray(props.defaultItem).filter(
         (item): item is F0SelectItemObject<T, ResolvedRecordType<R>> =>
-          item !== undefined
+          item !== undefined,
       ),
-    [props.defaultItem]
-  )
+    [props.defaultItem],
+  );
 
   const defaultValues = useMemo(
     // Convert to strings for consistent handling
     () => defaultItems.map((item) => String(item.value)),
-    [defaultItems]
-  )
+    [defaultItems],
+  );
 
   // Always store localValue as strings for consistent comparison
   const [localValue, setLocalValue] = useState(() => {
-    const initial = toArray(value) ?? defaultValues ?? []
-    return initial.map(String)
-  })
+    const initial = toArray(value) ?? defaultValues ?? [];
+    return initial.map(String);
+  });
 
   useEffect(() => {
-    const incomingValues = (toArray(value) ?? []).map(String)
+    const incomingValues = (toArray(value) ?? []).map(String);
     if (!isEqual(incomingValues, localValue ?? [])) {
-      const newValue = toArray(value) ?? defaultValues ?? []
+      const newValue = toArray(value) ?? defaultValues ?? [];
       // Ensure unique values and convert to strings
-      setLocalValue(Array.from(new Set(newValue.map(String))))
+      setLocalValue(Array.from(new Set(newValue.map(String))));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [value])
+  }, [value]);
 
   const dataSource = useMemo(() => {
     if (
       source &&
       !["infinite-scroll", "no-pagination"].includes(
-        getDataSourcePaginationType(source.dataAdapter)
+        getDataSourcePaginationType(source.dataAdapter),
       )
     ) {
       throw new Error(
-        "Select component only supports `infinite-scroll` or `no-pagination` pagination types"
-      )
+        "Select component only supports `infinite-scroll` or `no-pagination` pagination types",
+      );
     }
 
     return {
@@ -215,18 +215,18 @@ const F0SelectComponent = forwardRef(function Select<
               const searchFn =
                 "searchFn" in props && props.searchFn
                   ? props.searchFn
-                  : defaultSearchFn
+                  : defaultSearchFn;
 
               return {
                 records: options.filter(
-                  (option) => searchFn(option, search) ?? true
+                  (option) => searchFn(option, search) ?? true,
                 ) as unknown as ActualRecordType[],
-              }
+              };
             },
           },
-    }
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [options, source, "searchFn" in props && props.searchFn])
+  }, [options, source, "searchFn" in props && props.searchFn]);
 
   const localSource = useDataSource(
     {
@@ -235,12 +235,12 @@ const F0SelectComponent = forwardRef(function Select<
       // This ensures numeric values like 1 match with string IDs like "1"
       selectable: (item) => {
         if (!item) {
-          return undefined
+          return undefined;
         }
-        const mappedOption = optionMapper(item)
+        const mappedOption = optionMapper(item);
         return mappedOption.type !== "separator"
           ? String(mappedOption.value)
-          : undefined
+          : undefined;
       },
       search: showSearchBox
         ? {
@@ -249,8 +249,8 @@ const F0SelectComponent = forwardRef(function Select<
           }
         : undefined,
     },
-    [options]
-  )
+    [options],
+  );
 
   /**
    * Maps an item to a SelectItemProps<T, ActualRecordType>
@@ -259,15 +259,15 @@ const F0SelectComponent = forwardRef(function Select<
     (item: ActualRecordType): F0SelectItemProps<T, ActualRecordType> => {
       if (source) {
         if (!mapOptions) {
-          throw new Error("mapOptions is required when using a source")
+          throw new Error("mapOptions is required when using a source");
         }
-        return mapOptions(item)
+        return mapOptions(item);
       }
       // At this point, we are sure that options is an array of SelectItemProps<T, ActualRecordType>
-      return item as unknown as F0SelectItemProps<T, ActualRecordType>
+      return item as unknown as F0SelectItemProps<T, ActualRecordType>;
     },
-    [mapOptions, source]
-  )
+    [mapOptions, source],
+  );
 
   const {
     data,
@@ -276,14 +276,14 @@ const F0SelectComponent = forwardRef(function Select<
     isLoadingMore,
     isLoading,
     paginationInfo,
-  } = useData<ActualRecordType>(localSource)
+  } = useData<ActualRecordType>(localSource);
 
-  const { currentSearch, setCurrentSearch } = localSource
+  const { currentSearch, setCurrentSearch } = localSource;
 
   // Cache selected items so we can display them even when they're not in current data
   const selectedItemsCache = useRef<
     Map<string, F0SelectItemObject<T, ResolvedRecordType<R>>>
-  >(new Map())
+  >(new Map());
 
   /**
    * Map of items from paginated data by their value (as string).
@@ -295,25 +295,25 @@ const F0SelectComponent = forwardRef(function Select<
     const entries: [
       string,
       {
-        item: ActualRecordType
-        option: F0SelectItemObject<T, ActualRecordType>
+        item: ActualRecordType;
+        option: F0SelectItemObject<T, ActualRecordType>;
       },
-    ][] = []
+    ][] = [];
 
     // Only add items from paginated data (NOT fetchedItems)
     for (const record of data.records) {
-      const mappedOption = optionMapper(record)
+      const mappedOption = optionMapper(record);
       if (mappedOption.type !== "separator") {
         // Always use string keys for consistent lookups
         entries.push([
           String(mappedOption.value),
           { item: record, option: mappedOption },
-        ])
+        ]);
       }
     }
 
-    return Object.fromEntries(entries)
-  }, [data, optionMapper])
+    return Object.fromEntries(entries);
+  }, [data, optionMapper]);
 
   /**
    * Initialize selection state from the value prop.
@@ -322,32 +322,32 @@ const F0SelectComponent = forwardRef(function Select<
   const initialSelectedState = useMemo(():
     | SelectedItemsState<ActualRecordType>
     | undefined => {
-    const values = toArray(value) ?? defaultValues ?? []
+    const values = toArray(value) ?? defaultValues ?? [];
     if (values.length === 0) {
-      return undefined
+      return undefined;
     }
 
-    const items = new Map() as SelectedItemsState<ActualRecordType>["items"]
+    const items = new Map() as SelectedItemsState<ActualRecordType>["items"];
 
     // Use Set to ensure unique values and prevent duplicates
-    const uniqueValues = Array.from(new Set(values))
+    const uniqueValues = Array.from(new Set(values));
 
     for (const val of uniqueValues) {
       // Use string key for consistent lookup
-      const itemData = itemsByValue[String(val)]
+      const itemData = itemsByValue[String(val)];
       items.set(String(val), {
         id: String(val),
         checked: true,
         item: itemData?.item as WithGroupId<ActualRecordType> | undefined,
-      })
+      });
     }
 
     return {
       allSelected: false,
       items,
       groups: new Map(),
-    }
-  }, [value, defaultValues, itemsByValue])
+    };
+  }, [value, defaultValues, itemsByValue]);
 
   const {
     handleSelectAllItems,
@@ -366,7 +366,7 @@ const F0SelectComponent = forwardRef(function Select<
     isSearchActive: !!currentSearch,
     allPagesSelection: true,
     resetOnPageChange: false,
-  })
+  });
 
   /**
    * Get display items for the selection preview.
@@ -374,71 +374,71 @@ const F0SelectComponent = forwardRef(function Select<
    * Looks up items from paginated data, cache, or defaultItems.
    */
   const getDisplayItemsForSelection = useMemo(() => {
-    const result: F0SelectItemObject<T, ResolvedRecordType<R>>[] = []
+    const result: F0SelectItemObject<T, ResolvedRecordType<R>>[] = [];
 
     for (const valueId of localValue) {
-      const stringValueId = String(valueId)
+      const stringValueId = String(valueId);
       // Try to get from paginated data first
-      const fromData = itemsByValue[stringValueId]
+      const fromData = itemsByValue[stringValueId];
       if (fromData) {
         // Update cache with latest data
-        selectedItemsCache.current.set(stringValueId, fromData.option)
-        result.push(fromData.option)
-        continue
+        selectedItemsCache.current.set(stringValueId, fromData.option);
+        result.push(fromData.option);
+        continue;
       }
 
       // Try from cache (items selected but not in current data)
-      const fromCache = selectedItemsCache.current.get(stringValueId)
+      const fromCache = selectedItemsCache.current.get(stringValueId);
       if (fromCache) {
-        result.push(fromCache)
-        continue
+        result.push(fromCache);
+        continue;
       }
 
       // Try defaultItems (pre-selected values provided by parent)
       // Compare as strings to handle both string and number values
       const fromDefault = defaultItems.find(
-        (item) => String(item.value) === stringValueId
-      )
+        (item) => String(item.value) === stringValueId,
+      );
       if (fromDefault) {
         // Add to cache for future use
-        selectedItemsCache.current.set(stringValueId, fromDefault)
-        result.push(fromDefault)
+        selectedItemsCache.current.set(stringValueId, fromDefault);
+        result.push(fromDefault);
       }
     }
 
-    return result
-  }, [localValue, itemsByValue, defaultItems])
+    return result;
+  }, [localValue, itemsByValue, defaultItems]);
 
   const onSearchChangeLocal = (value: string) => {
-    setCurrentSearch(value)
-    onSearchChange?.(value)
-  }
+    setCurrentSearch(value);
+    onSearchChange?.(value);
+  };
 
   // Track whether the user has interacted with the selection
-  const hasUserInteracted = useRef(false)
-  const isFirstRender = useRef(true)
+  const hasUserInteracted = useRef(false);
+  const isFirstRender = useRef(true);
 
   const onItemCheckChange = useCallback(
     (value: string, checked: boolean) => {
       // Prevent deselection in single select mode when not clearable
       if (!multiple && !clearable && !checked && localValue[0] === value) {
-        return
+        return;
       }
 
-      hasUserInteracted.current = true
-      handleSelectItemChange(value, checked)
+      hasUserInteracted.current = true;
+      handleSelectItemChange(value, checked);
 
       // Only call onChangeSelectedOption if we have the item data
       // Use string key for consistent lookup
-      const item = itemsByValue[String(value)]
+      const item = itemsByValue[String(value)];
       if (item) {
         // Cache the item for future display
         if (checked) {
-          selectedItemsCache.current.set(String(value), item.option)
+          selectedItemsCache.current.set(String(value), item.option);
         } else {
-          selectedItemsCache.current.delete(String(value))
+          selectedItemsCache.current.delete(String(value));
         }
-        onChangeSelectedOption?.(item.option, checked)
+        onChangeSelectedOption?.(item.option, checked);
       }
     },
     [
@@ -448,17 +448,17 @@ const F0SelectComponent = forwardRef(function Select<
       multiple,
       clearable,
       localValue,
-    ]
-  )
+    ],
+  );
 
   // Mark user interaction when select all is used
   const handleSelectAllWithTracking = useCallback(
     (checked: boolean) => {
-      hasUserInteracted.current = true
-      handleSelectAllItems(checked)
+      hasUserInteracted.current = true;
+      handleSelectAllItems(checked);
     },
-    [handleSelectAllItems]
-  )
+    [handleSelectAllItems],
+  );
 
   /**
    * Emit the value change. The type depends on the multiple prop and selectionMode.
@@ -470,39 +470,39 @@ const F0SelectComponent = forwardRef(function Select<
     if (!hasUserInteracted.current) {
       // Mark first render as complete
       if (isFirstRender.current) {
-        isFirstRender.current = false
+        isFirstRender.current = false;
       }
-      return
+      return;
     }
 
     // Only reset search in single select mode when dropdown is closed
     // Don't clear while user is still typing/searching with dropdown open
     if (!multiple && !openLocal) {
-      setCurrentSearch(undefined)
+      setCurrentSearch(undefined);
     }
 
     const checkedItems = Array.from(selectedState.items.values() || []).filter(
-      (item) => item.checked
-    )
+      (item) => item.checked,
+    );
 
     // Helper to extract the original item from a record
     // For static options: the record IS the option, and option.item contains the original data
     // For datasource: the record is the original data, optionMapper creates the option
     const extractOriginalItem = (
-      record: ActualRecordType | undefined
+      record: ActualRecordType | undefined,
     ): ResolvedRecordType<R> | undefined => {
-      if (!record) return undefined
+      if (!record) return undefined;
       if (source) {
         // For datasource, the record itself is the original item
-        return record as unknown as ResolvedRecordType<R>
+        return record as unknown as ResolvedRecordType<R>;
       }
       // For static options, extract the 'item' property from the option
       const option = record as unknown as F0SelectItemObject<
         T,
         ResolvedRecordType<R>
-      >
-      return option.item
-    }
+      >;
+      return option.item;
+    };
 
     // TypeScript cannot infer the type of the onChange callback when it has generics,
     // so we need to cast it to the correct type
@@ -511,107 +511,107 @@ const F0SelectComponent = forwardRef(function Select<
         .map((item) => item.item)
         .filter(
           (item): item is WithGroupId<ResolvedRecordType<R>> =>
-            item !== undefined
-        )
+            item !== undefined,
+        );
       const originalItems = records
         .map(extractOriginalItem)
-        .filter((item): item is ResolvedRecordType<R> => item !== undefined)
+        .filter((item): item is ResolvedRecordType<R> => item !== undefined);
       const options = records.map((item) => {
         return optionMapper(item) as F0SelectItemObject<
           T,
           ResolvedRecordType<R>
-        >
-      })
+        >;
+      });
 
       // Use original option values to preserve the type (number vs string)
       // Only use stringified id as fallback if option is not available
       const values = checkedItems.map((item) => {
         if (item.item) {
-          const option = optionMapper(item.item as ActualRecordType)
+          const option = optionMapper(item.item as ActualRecordType);
           return option.type !== "separator"
             ? (option.value as T)
-            : (String(item.id) as T)
+            : (String(item.id) as T);
         }
-        return String(item.id) as T
-      })
+        return String(item.id) as T;
+      });
 
       // Sync localValue with actual selection state (as strings for internal comparison)
       // This ensures the preview shows correct items after deselection
       // Use Set to ensure unique values and prevent duplicates
-      setLocalValue(Array.from(new Set(values.map(String))))
+      setLocalValue(Array.from(new Set(values.map(String))));
 
-      onChange?.(values, originalItems, options)
+      onChange?.(values, originalItems, options);
     } else {
-      const selectedItem = checkedItems[0]
-      const record = selectedItem?.item as ActualRecordType | undefined
-      const originalItem = extractOriginalItem(record)
+      const selectedItem = checkedItems[0];
+      const record = selectedItem?.item as ActualRecordType | undefined;
+      const originalItem = extractOriginalItem(record);
       const option = record
         ? (optionMapper(record) as F0SelectItemObject<T, ResolvedRecordType<R>>)
-        : undefined
+        : undefined;
 
       // Use original option value to preserve the type (number vs string)
       const value = option
         ? (option.value as T)
         : selectedItem
           ? (String(selectedItem.id) as T)
-          : undefined
+          : undefined;
 
       // Sync localValue with actual selection state (as string for internal comparison)
-      setLocalValue(value !== undefined ? [String(value)] : [])
+      setLocalValue(value !== undefined ? [String(value)] : []);
 
-      onChange?.(value as T, originalItem, option)
+      onChange?.(value as T, originalItem, option);
     }
-  }, [selectedState])
+  }, [selectedState]);
 
   const debouncedHandleChangeOpenLocal = useDebounceCallback(
     (open: boolean) => {
-      onOpenChange?.(open)
-      setOpenLocal(open)
+      onOpenChange?.(open);
+      setOpenLocal(open);
     },
-    100
-  )
+    100,
+  );
 
   const handleChangeOpenLocal = (open: boolean) => {
-    debouncedHandleChangeOpenLocal(open)
-  }
+    debouncedHandleChangeOpenLocal(open);
+  };
 
   // Show apply button when in multiple selection, and not rendered as a list
-  const showApplyButton = multiple && !asList
+  const showApplyButton = multiple && !asList;
 
   const handleApply = useCallback(() => {
-    handleChangeOpenLocal(false)
-  }, [])
+    handleChangeOpenLocal(false);
+  }, []);
 
   // Track when filters panel is open to hide bottom actions
-  const [isFiltersOpen, setIsFiltersOpen] = useState(false)
+  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
 
   // Clear selection cache and local value when filters change
-  const previousFiltersRef = useRef(localSource.currentFilters)
+  const previousFiltersRef = useRef(localSource.currentFilters);
   useEffect(() => {
-    const prev = JSON.stringify(previousFiltersRef.current)
-    const curr = JSON.stringify(localSource.currentFilters)
+    const prev = JSON.stringify(previousFiltersRef.current);
+    const curr = JSON.stringify(localSource.currentFilters);
     if (prev !== curr) {
-      previousFiltersRef.current = localSource.currentFilters
+      previousFiltersRef.current = localSource.currentFilters;
       if (!disableSelectAll) {
-        selectedItemsCache.current.clear()
-        setLocalValue([])
-        hasUserInteracted.current = true
+        selectedItemsCache.current.clear();
+        setLocalValue([]);
+        hasUserInteracted.current = true;
       }
     }
-  }, [localSource.currentFilters, disableSelectAll])
+  }, [localSource.currentFilters, disableSelectAll]);
 
-  const defaultOpenGroups = localSource.grouping?.defaultOpenGroups
+  const defaultOpenGroups = localSource.grouping?.defaultOpenGroups;
   const { openGroups, setGroupOpen } = useGroups(
     data?.type === "grouped" ? data.groups : [],
-    defaultOpenGroups
-  )
+    defaultOpenGroups,
+  );
 
   const getItems = useCallback(
     (
-      records: WithGroupId<ActualRecordType>[] | ActualRecordType[]
+      records: WithGroupId<ActualRecordType>[] | ActualRecordType[],
     ): VirtualItem[] => {
       return records.map((option, index) => {
-        const mappedOption = optionMapper(option)
+        const mappedOption = optionMapper(option);
         return mappedOption.type === "separator"
           ? {
               height: 1,
@@ -633,15 +633,15 @@ const F0SelectComponent = forwardRef(function Select<
               // Convert to string to ensure consistent comparison with selectedItemsValues
               // which also converts to strings (line 623)
               value: String(mappedOption.value),
-            }
-      })
+            };
+      });
     },
-    [optionMapper]
-  )
+    [optionMapper],
+  );
 
   const items: VirtualItem[] = useMemo(() => {
     if (data.type === "grouped") {
-      const items: VirtualItem[] = []
+      const items: VirtualItem[] = [];
       data.groups.map((group) => {
         items.push({
           height: 30,
@@ -653,18 +653,25 @@ const F0SelectComponent = forwardRef(function Select<
               open={openGroups[group.key]}
             />
           ),
-        })
-        items.push(...getItems(group.records))
-      })
-      return items
+        });
+        items.push(...getItems(group.records));
+      });
+      return items;
     }
-    return getItems(data.records)
-  }, [data.records, data.type, data.groups, getItems, openGroups, setGroupOpen])
+    return getItems(data.records);
+  }, [
+    data.records,
+    data.type,
+    data.groups,
+    getItems,
+    openGroups,
+    setGroupOpen,
+  ]);
 
   const handleScrollBottom = () => {
-    loadMore()
-  }
-  const i18n = useI18n()
+    loadMore();
+  };
+  const i18n = useI18n();
 
   /**
    * Get the values of the selected items from the state to pass to the select primitive
@@ -672,8 +679,8 @@ const F0SelectComponent = forwardRef(function Select<
   const selectedItemsValues = useMemo(() => {
     return Array.from(selectedState.items.values())
       .filter((item) => item.checked)
-      .map((item) => String(item.id))
-  }, [selectedState.items])
+      .map((item) => String(item.id));
+  }, [selectedState.items]);
 
   /**
    * Common props for the select primitive
@@ -684,7 +691,7 @@ const F0SelectComponent = forwardRef(function Select<
     disabled,
     open: openLocal,
     onOpenChange: handleChangeOpenLocal,
-  }
+  };
 
   const selectPrimitiveProps = multiple
     ? ({
@@ -699,7 +706,7 @@ const F0SelectComponent = forwardRef(function Select<
         value: selectedItemsValues[0] ?? "",
         multiple: false as const,
         as: asList ? ("list" as const) : undefined,
-      } as const)
+      } as const);
 
   const selectContent = (
     <SelectContent
@@ -768,7 +775,7 @@ const F0SelectComponent = forwardRef(function Select<
       showLoadingIndicator={!!children}
       portalContainer={effectivePortalContainer}
     />
-  )
+  );
 
   if (asList) {
     return (
@@ -776,7 +783,7 @@ const F0SelectComponent = forwardRef(function Select<
         <div
           className={cn(
             "flex w-full max-h-full flex-col gap-2",
-            disabled && "cursor-not-allowed opacity-50"
+            disabled && "cursor-not-allowed opacity-50",
           )}
         >
           {label && !hideLabel && (
@@ -798,7 +805,7 @@ const F0SelectComponent = forwardRef(function Select<
                   : status?.type
                     ? status?.type
                     : "default",
-              })
+              }),
             )}
           >
             <SelectPrimitive {...selectPrimitiveProps}>
@@ -809,7 +816,7 @@ const F0SelectComponent = forwardRef(function Select<
           <InputMessages status={status} />
         </div>
       </DataTestIdWrapper>
-    )
+    );
   }
 
   return (
@@ -838,7 +845,7 @@ const F0SelectComponent = forwardRef(function Select<
                   ? // For multiple: use count of selected items
                     Math.max(
                       localValue.length,
-                      selectionMeta.selectedItemsCount
+                      selectionMeta.selectedItemsCount,
                     ).toString()
                   : // For single: use the selected value directly
                     (localValue[0] ?? undefined)
@@ -847,17 +854,17 @@ const F0SelectComponent = forwardRef(function Select<
                 multiple ? !value || +(value ?? 0) === 0 : !value
               }
               onClear={() => {
-                hasUserInteracted.current = true
-                clearSelection()
+                hasUserInteracted.current = true;
+                clearSelection();
                 // Clear the cache when clearing selection
-                selectedItemsCache.current.clear()
+                selectedItemsCache.current.clear();
                 // Call with undefined to indicate no item is selected
-                ;(
+                (
                   onChangeSelectedOption as (
                     option: undefined,
-                    checked: boolean
+                    checked: boolean,
                   ) => void
-                )?.(undefined, false)
+                )?.(undefined, false);
               }}
               placeholder={placeholder || ""}
               disabled={disabled}
@@ -870,7 +877,7 @@ const F0SelectComponent = forwardRef(function Select<
               loading={isInitialLoading || loading || isLoading}
               name={name}
               onClickContent={() => {
-                handleChangeOpenLocal(!openLocal)
+                handleChangeOpenLocal(!openLocal);
               }}
               append={
                 <Arrow open={openLocal} disabled={disabled} size={size} />
@@ -880,7 +887,7 @@ const F0SelectComponent = forwardRef(function Select<
                 className="flex w-full items-center justify-between"
                 aria-label={label || placeholder}
                 onClick={(e) => {
-                  e.preventDefault()
+                  e.preventDefault();
                 }}
               >
                 {(multiple
@@ -893,7 +900,7 @@ const F0SelectComponent = forwardRef(function Select<
                       multiple
                         ? Math.max(
                             localValue.length,
-                            selectionMeta.selectedItemsCount
+                            selectionMeta.selectedItemsCount,
                           )
                         : localValue[0]
                           ? 1
@@ -910,14 +917,14 @@ const F0SelectComponent = forwardRef(function Select<
         {openLocal && selectContent}
       </SelectPrimitive>
     </DataTestIdWrapper>
-  )
-})
+  );
+});
 
 export const F0Select = F0SelectComponent as <
   T extends string = string,
   R = unknown,
 >(
   props: F0SelectProps<T, R> & {
-    ref?: React.Ref<HTMLButtonElement>
-  }
-) => React.ReactElement
+    ref?: React.Ref<HTMLButtonElement>;
+  },
+) => React.ReactElement;

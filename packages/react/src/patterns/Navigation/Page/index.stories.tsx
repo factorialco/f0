@@ -1,22 +1,22 @@
-import type { Meta, StoryObj } from "@storybook/react-vite"
+import type { Meta, StoryObj } from "@storybook/react-vite";
 
-import { ComponentProps } from "react"
-import { expect, within } from "storybook/test"
+import { ComponentProps } from "react";
+import { expect, within } from "storybook/test";
 
-import { StandardLayout } from "@/layouts/StandardLayout"
+import { StandardLayout } from "@/layouts/StandardLayout";
 
-import { Placeholder } from "../../../lib/storybook-utils/placeholder"
-import { ApplicationFrame } from "@/examples/ApplicationFrame"
-import { PageHeader } from "../Header/PageHeader"
-import * as HeaderStories from "../Header/PageHeader/index.stories"
-import { Tabs } from "../Tabs"
-import * as TabsStories from "../Tabs/index.stories"
-import { Page } from "./index"
+import { Placeholder } from "../../../lib/storybook-utils/placeholder";
+import { ApplicationFrame } from "@/examples/ApplicationFrame";
+import { PageHeader } from "../Header/PageHeader";
+import * as HeaderStories from "../Header/PageHeader/index.stories";
+import { Tabs } from "../Tabs";
+import * as TabsStories from "../Tabs/index.stories";
+import { Page } from "./index";
 
-type TabsProps = ComponentProps<typeof Tabs>
+type TabsProps = ComponentProps<typeof Tabs>;
 
 const meta: Meta<typeof Page> = {
-  title: "Patterns/Navigation/Page",
+  title: "Navigation/Page",
   component: Page,
   tags: ["autodocs", "experimental"],
   parameters: {
@@ -29,16 +29,16 @@ const meta: Meta<typeof Page> = {
       </ApplicationFrame>
     ),
   ],
-}
+};
 
-export default meta
-type Story = StoryObj<ComponentProps<typeof Page>>
+export default meta;
+type Story = StoryObj<ComponentProps<typeof Page>>;
 
 const defaultModule = {
   name: "Time Tracking",
   href: "/time-tracking",
   id: "time-tracking" as const,
-}
+};
 
 // Common real-world combinations
 export const Default: Story = {
@@ -62,7 +62,7 @@ export const Default: Story = {
       </StandardLayout>
     ),
   },
-}
+};
 
 export const WithBreadcrumbs: Story = {
   args: {
@@ -93,7 +93,7 @@ export const WithBreadcrumbs: Story = {
       </StandardLayout>
     ),
   },
-}
+};
 
 export const WithBreadcrumbsAndStatus: Story = {
   args: {
@@ -129,7 +129,7 @@ export const WithBreadcrumbsAndStatus: Story = {
       </StandardLayout>
     ),
   },
-}
+};
 
 export const WithNavigation: Story = {
   args: {
@@ -166,7 +166,7 @@ export const WithNavigation: Story = {
       </StandardLayout>
     ),
   },
-}
+};
 
 export const WithNavigationAndStatus: Story = {
   args: {
@@ -208,7 +208,7 @@ export const WithNavigationAndStatus: Story = {
       </StandardLayout>
     ),
   },
-}
+};
 
 export const Embedded: Story = {
   args: {
@@ -244,7 +244,7 @@ export const Embedded: Story = {
       </StandardLayout>
     ),
   },
-}
+};
 
 export const WithDataTestId: Story = {
   args: {
@@ -252,7 +252,7 @@ export const WithDataTestId: Story = {
     dataTestId: "page-test-id",
   },
   play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    await expect(canvas.getByTestId("page-test-id")).toBeInTheDocument()
+    const canvas = within(canvasElement);
+    await expect(canvas.getByTestId("page-test-id")).toBeInTheDocument();
   },
-}
+};

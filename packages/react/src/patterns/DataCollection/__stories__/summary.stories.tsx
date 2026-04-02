@@ -1,17 +1,17 @@
-import { Meta, StoryObj } from "@storybook/react-vite"
+import { Meta, StoryObj } from "@storybook/react-vite";
 
-import { OneDataCollection } from ".."
-import { useDataCollectionSource } from "../hooks/useDataCollectionSource"
+import { OneDataCollection } from "..";
+import { useDataCollectionSource } from "../hooks/useDataCollectionSource";
 import {
   createDataAdapter,
   createPromiseDataFetch,
   ExampleComponent,
   generateMockUsers,
   sortings,
-} from "./mockData"
+} from "./mockData";
 
 const meta = {
-  title: "Patterns/DataCollection/Summary",
+  title: "Data Collection/Summary",
   component: ExampleComponent,
   parameters: {
     layout: "padded",
@@ -34,10 +34,10 @@ const meta = {
     },
   },
   tags: ["autodocs", "experimental"],
-} satisfies Meta<typeof ExampleComponent>
+} satisfies Meta<typeof ExampleComponent>;
 
-export default meta
-type Story = StoryObj<typeof meta>
+export default meta;
+type Story = StoryObj<typeof meta>;
 
 export const BasicSummaryRow: Story = {
   parameters: { a11y: { skipCi: true } },
@@ -51,7 +51,7 @@ export const BasicSummaryRow: Story = {
           type: "sum",
         },
       },
-    })
+    });
 
     return (
       <OneDataCollection
@@ -77,14 +77,14 @@ export const BasicSummaryRow: Story = {
           },
         ]}
       />
-    )
+    );
   },
-}
+};
 
 export const WithInfiniteScrollSummarySticky: Story = {
   parameters: { a11y: { skipCi: true } },
   render: () => {
-    const paginatedMockUsers = generateMockUsers(50)
+    const paginatedMockUsers = generateMockUsers(50);
     const dataSource = useDataCollectionSource({
       sortings,
       summaries: {
@@ -100,7 +100,7 @@ export const WithInfiniteScrollSummarySticky: Story = {
         perPage: 10,
         useObservable: true,
       }),
-    })
+    });
 
     return (
       <div style={{ height: 500 }}>
@@ -128,14 +128,14 @@ export const WithInfiniteScrollSummarySticky: Story = {
           ]}
         />
       </div>
-    )
+    );
   },
-}
+};
 
 export const WithInfiniteScrollSummaryStickyFrozenColumns: Story = {
   parameters: { a11y: { skipCi: true } },
   render: () => {
-    const paginatedMockUsers = generateMockUsers(50)
+    const paginatedMockUsers = generateMockUsers(50);
     const dataSource = useDataCollectionSource({
       sortings,
       summaries: {
@@ -151,7 +151,7 @@ export const WithInfiniteScrollSummaryStickyFrozenColumns: Story = {
         perPage: 10,
         useObservable: true,
       }),
-    })
+    });
 
     return (
       <div style={{ height: 500 }}>
@@ -182,9 +182,9 @@ export const WithInfiniteScrollSummaryStickyFrozenColumns: Story = {
           ]}
         />
       </div>
-    )
+    );
   },
-}
+};
 
 export const WithSummaryPlaceholders: Story = {
   parameters: { a11y: { skipCi: true } },
@@ -192,7 +192,7 @@ export const WithSummaryPlaceholders: Story = {
     const users = generateMockUsers(6).map((user) => ({
       ...user,
       estimatedMargin: Math.round((user.salary ?? 0) * 0.2),
-    }))
+    }));
 
     const dataSource = useDataCollectionSource({
       dataAdapter: {
@@ -202,7 +202,7 @@ export const WithSummaryPlaceholders: Story = {
             ...users[0],
             salary: undefined,
             estimatedMargin: users.reduce((total, user) => {
-              return total + user.estimatedMargin
+              return total + user.estimatedMargin;
             }, 0),
           },
         }),
@@ -215,7 +215,7 @@ export const WithSummaryPlaceholders: Story = {
           type: "sum",
         },
       },
-    })
+    });
 
     return (
       <OneDataCollection
@@ -251,6 +251,6 @@ export const WithSummaryPlaceholders: Story = {
           },
         ]}
       />
-    )
+    );
   },
-}
+};

@@ -1,5 +1,5 @@
 import { type IconType } from "@/components/F0Icon"
-import { type DropdownItem } from "@/experimental/Navigation/Dropdown"
+import { type DropdownItem } from "@/patterns/Navigation/Dropdown"
 import { type MetadataItem } from "@/experimental/Information/Headers/Metadata"
 
 export const timelineRowStatuses = [

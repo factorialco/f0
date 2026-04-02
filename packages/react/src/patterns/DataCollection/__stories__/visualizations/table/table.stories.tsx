@@ -1,18 +1,18 @@
-import { Meta, StoryObj } from "@storybook/react-vite"
-import { useState, useMemo } from "react"
+import { Meta, StoryObj } from "@storybook/react-vite";
+import { useState, useMemo } from "react";
 
-import { F0Button } from "@/components/F0Button"
+import { F0Button } from "@/components/F0Button";
 import {
   CompoundCellValue,
   CompoundTone,
-} from "@/ui/value-display/types/compound"
+} from "@/ui/value-display/types/compound";
 
-import { ExampleComponent, getMockVisualizations } from "../../mockData"
-import { useDataCollectionSource } from "../../../hooks/useDataCollectionSource"
-import { OneDataCollection } from "../../../index"
+import { ExampleComponent, getMockVisualizations } from "../../mockData";
+import { useDataCollectionSource } from "../../../hooks/useDataCollectionSource";
+import { OneDataCollection } from "../../../index";
 
 const meta = {
-  title: "Patterns/DataCollection/Visualizations/Table",
+  title: "Data Collection/Visualizations/Table",
   parameters: {
     layout: "padded",
     docs: {
@@ -22,30 +22,30 @@ const meta = {
       },
     },
   },
-} satisfies Meta
+} satisfies Meta;
 
-export default meta
-type Story = StoryObj<typeof meta>
+export default meta;
+type Story = StoryObj<typeof meta>;
 
 export const BasicListVisualization: Story = {
   render: () => {
-    const mockVisualizations = getMockVisualizations()
-    return <ExampleComponent visualizations={[mockVisualizations.table]} />
+    const mockVisualizations = getMockVisualizations();
+    return <ExampleComponent visualizations={[mockVisualizations.table]} />;
   },
-}
+};
 
 export const ReferenceRowsVisualization: Story = {
   render: () => {
     const mockVisualizations = getMockVisualizations({
       table: { referenceRows: true },
-    })
-    return <ExampleComponent visualizations={[mockVisualizations.table]} />
+    });
+    return <ExampleComponent visualizations={[mockVisualizations.table]} />;
   },
-}
+};
 
 export const TableFrozenCols: Story = {
   render: () => <ExampleComponent frozenColumns={2} />,
-}
+};
 
 export const TableColumnOrderingAndHidden: Story = {
   render: () => {
@@ -55,7 +55,7 @@ export const TableColumnOrderingAndHidden: Story = {
         allowColumnHiding: true,
         allowColumnReordering: true,
       },
-    })
+    });
     return (
       <ExampleComponent
         frozenColumns={2}
@@ -65,9 +65,9 @@ export const TableColumnOrderingAndHidden: Story = {
         visualizations={[mockVisualizations.table]}
         id="employees/v1"
       />
-    )
+    );
   },
-}
+};
 
 export const TableColumnOrderingAndHiddenNoPersistentStorage: Story = {
   render: () => {
@@ -77,7 +77,7 @@ export const TableColumnOrderingAndHiddenNoPersistentStorage: Story = {
         allowColumnHiding: true,
         allowColumnReordering: true,
       },
-    })
+    });
     return (
       <ExampleComponent
         frozenColumns={2}
@@ -88,9 +88,9 @@ export const TableColumnOrderingAndHiddenNoPersistentStorage: Story = {
         visualizations={[mockVisualizations.table]}
         id="employees/v1"
       />
-    )
+    );
   },
-}
+};
 
 export const TableWithNestedRecords: Story = {
   render: () => {
@@ -103,7 +103,7 @@ export const TableWithNestedRecords: Story = {
         nestedRecords: true,
         applyLongText: false,
       },
-    })
+    });
 
     return (
       <ExampleComponent
@@ -116,9 +116,9 @@ export const TableWithNestedRecords: Story = {
         id="employees/v1"
         nestedRecords
       />
-    )
+    );
   },
-}
+};
 
 export const TableWithNestedRecordsDetailed: Story = {
   render: () => {
@@ -130,7 +130,7 @@ export const TableWithNestedRecordsDetailed: Story = {
         nestedRecords: true,
         applyLongText: false,
       },
-    })
+    });
 
     return (
       <ExampleComponent
@@ -144,9 +144,9 @@ export const TableWithNestedRecordsDetailed: Story = {
         nestedRecords
         nestedRecordsType="detailed"
       />
-    )
+    );
   },
-}
+};
 
 export const TableWithMixedNestedRecords: Story = {
   render: () => {
@@ -158,7 +158,7 @@ export const TableWithMixedNestedRecords: Story = {
         nestedRecords: true,
         applyLongText: false,
       },
-    })
+    });
 
     return (
       <ExampleComponent
@@ -172,9 +172,9 @@ export const TableWithMixedNestedRecords: Story = {
         nestedRecords
         nestedRecordsType="mixed"
       />
-    )
+    );
   },
-}
+};
 
 export const TableWithSelectableNestedRecords: Story = {
   render: () => {
@@ -186,7 +186,7 @@ export const TableWithSelectableNestedRecords: Story = {
         nestedRecords: true,
         applyLongText: false,
       },
-    })
+    });
 
     return (
       <ExampleComponent
@@ -200,56 +200,56 @@ export const TableWithSelectableNestedRecords: Story = {
         nestedRecords
         nestedRecordsType="mixed"
         selectable={() => {
-          return ""
+          return "";
         }}
       />
-    )
+    );
   },
-}
+};
 
 type KpiTableRow = {
-  id: string
-  usedVsBudgetCap: CompoundCellValue
-  costToDateVsEstCost: CompoundCellValue
-  currentVsEstProfit: CompoundCellValue
-  currentVsEstMargin: CompoundCellValue
-}
+  id: string;
+  usedVsBudgetCap: CompoundCellValue;
+  costToDateVsEstCost: CompoundCellValue;
+  currentVsEstProfit: CompoundCellValue;
+  currentVsEstMargin: CompoundCellValue;
+};
 
 const makeAmountSegment = (
   value: number | undefined,
   tone: CompoundTone = "neutral",
   currency: {
-    symbol: string
-    symbolPosition?: "left" | "right"
-    decimalPlaces: number
+    symbol: string;
+    symbolPosition?: "left" | "right";
+    decimalPlaces: number;
   } = {
     symbol: "EUR",
     decimalPlaces: 0,
-  }
+  },
 ) => ({
   type: "amount" as const,
   value,
   currency,
   tone,
-})
+});
 
 const makePercentageSegment = (
   value: number | undefined,
   tone: CompoundTone = "neutral",
-  decimalPlaces = 0
+  decimalPlaces = 0,
 ) => ({
   type: "percentage" as const,
   value,
   decimalPlaces,
   tone,
-})
+});
 
 const makeMissingSegment = () => ({
   type: "text" as const,
   value: undefined,
   placeholder: "-",
   tone: "secondary" as const,
-})
+});
 
 const kpiRows: KpiTableRow[] = [
   {
@@ -359,7 +359,7 @@ const kpiRows: KpiTableRow[] = [
       ],
     },
   },
-]
+];
 
 export const TableKpiCompoundValues: Story = {
   parameters: {
@@ -375,7 +375,7 @@ export const TableKpiCompoundValues: Story = {
       dataAdapter: {
         fetchData: () => Promise.resolve({ records: kpiRows }),
       },
-    })
+    });
 
     return (
       <OneDataCollection
@@ -426,9 +426,9 @@ export const TableKpiCompoundValues: Story = {
           },
         ]}
       />
-    )
+    );
   },
-}
+};
 
 export const TableColumnOrdering: Story = {
   render: () => {
@@ -436,7 +436,7 @@ export const TableColumnOrdering: Story = {
       table: {
         allowColumnReordering: true,
       },
-    })
+    });
     return (
       <ExampleComponent
         frozenColumns={2}
@@ -444,9 +444,9 @@ export const TableColumnOrdering: Story = {
         visualizations={[mockVisualizations.table]}
         id="table-column-ordering/v1"
       />
-    )
+    );
   },
-}
+};
 
 export const TableColumnHidden: Story = {
   render: () => {
@@ -454,7 +454,7 @@ export const TableColumnHidden: Story = {
       table: {
         allowColumnHiding: true,
       },
-    })
+    });
     return (
       <ExampleComponent
         frozenColumns={2}
@@ -462,9 +462,9 @@ export const TableColumnHidden: Story = {
         visualizations={[mockVisualizations.table]}
         id="table-column-hidden/v1"
       />
-    )
+    );
   },
-}
+};
 
 export const TableColumnOrderingAndHiddenWithColumnsChanges: Story = {
   parameters: {
@@ -476,7 +476,7 @@ export const TableColumnOrderingAndHiddenWithColumnsChanges: Story = {
     },
   },
   render: () => {
-    const [index, setIndex] = useState<number>(0)
+    const [index, setIndex] = useState<number>(0);
 
     const mockVisualizations = useMemo(
       () =>
@@ -487,18 +487,18 @@ export const TableColumnOrderingAndHiddenWithColumnsChanges: Story = {
             allowColumnReordering: true,
           },
         }),
-      []
-    )
+      [],
+    );
 
     const tableDef: ReturnType<typeof getMockVisualizations>["table"] = {
       ...mockVisualizations.table,
-    }
+    };
 
     const columns = useMemo(() => {
       return [
         ...((tableDef as any)["options"]?.["columns"]?.slice(0, index) ?? []),
-      ]
-    }, [index, tableDef])
+      ];
+    }, [index, tableDef]);
 
     return (
       <div className="flex flex-col gap-4">
@@ -531,16 +531,16 @@ export const TableColumnOrderingAndHiddenWithColumnsChanges: Story = {
           id="employees/v1"
         />
       </div>
-    )
+    );
   },
-}
+};
 
 export const TableWithGroupedHeaders: Story = {
   render: () => {
     const mockVisualizations = getMockVisualizations({
       table: { noSorting: true },
-    })
-    const baseOptions = (mockVisualizations.table as any)["options"]
+    });
+    const baseOptions = (mockVisualizations.table as any)["options"];
 
     return (
       <ExampleComponent
@@ -607,6 +607,6 @@ export const TableWithGroupedHeaders: Story = {
           },
         ]}
       />
-    )
+    );
   },
-}
+};

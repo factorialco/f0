@@ -1,15 +1,15 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { AreaChartWidget } from "@/experimental/Widgets/Charts/AreaChartWidget"
+import { AreaChartWidget } from "@/kits/WidgetCharts/AreaChartWidget"
 import AreaChartWidgetStoriesMeta from "@/kits/WidgetCharts/AreaChartWidget/__stories__/AreaChartWidget.stories"
-import { BarChartWidget } from "@/experimental/Widgets/Charts/BarChartWidget"
+import { BarChartWidget } from "@/kits/WidgetCharts/BarChartWidget"
 import BarChartWidgetStoriesMeta from "@/kits/WidgetCharts/BarChartWidget/__stories__/BarChartWidget.stories"
-import { ComposeChartContainerProps } from "@/experimental/Widgets/Charts/ChartContainer"
-import { LineChartWidget } from "@/experimental/Widgets/Charts/LineChartWidget"
+import { ComposeChartContainerProps } from "@/kits/WidgetCharts/ChartContainer"
+import { LineChartWidget } from "@/kits/WidgetCharts/LineChartWidget"
 import LineChartWidgetStoriesMeta from "@/kits/WidgetCharts/LineChartWidget/__stories__/LineChartWidget.stories"
-import { RadialProgressWidget } from "@/experimental/Widgets/Charts/RadialProgressWidget"
+import { RadialProgressWidget } from "@/kits/WidgetCharts/RadialProgressWidget"
 import RadialProgressWidgetStoriesMeta from "@/kits/WidgetCharts/RadialProgressWidget/__stories__/RadialProgressWidget.stories"
-import { VerticalBarChartWidget } from "@/experimental/Widgets/Charts/VerticalBarChartWidget"
+import { VerticalBarChartWidget } from "@/kits/WidgetCharts/VerticalBarChartWidget"
 import VerticalBarChartWidgetStoriesMeta from "@/kits/WidgetCharts/VerticalBarChartWidget/__stories__/VerticalBarChartWidget.stories"
 import {
   WidgetInboxList,
@@ -19,7 +19,7 @@ import { Default as WidgetInboxListDefaultStory } from "@/experimental/Widgets/C
 import { Widget } from "@/experimental/Widgets/Widget"
 import { Placeholder } from "@/lib/storybook-utils/placeholder"
 
-import { AreaChartProps } from "../../components/Charts/AreaChart"
+import { AreaChartProps } from "@/kits/Charts/AreaChart"
 import { HomeLayout } from "./index"
 
 const widgets = [

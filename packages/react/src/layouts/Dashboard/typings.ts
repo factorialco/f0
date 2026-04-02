@@ -1,4 +1,4 @@
-import { DropdownItem } from "@/experimental/Navigation/Dropdown/internal"
+import { DropdownItem } from "@/patterns/Navigation/Dropdown/internal"
 
 import { GroupGridWidget } from "../Layout/groups/GroupGrid/typings"
 

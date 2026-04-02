@@ -1,6 +1,6 @@
 import { useMemo } from "react"
 
-import { VirtualList } from "../../../../Navigation/VirtualList"
+import { VirtualList } from "@/patterns/Navigation/VirtualList"
 import { ListTag } from "../../ListTag"
 import {
   EntityId,

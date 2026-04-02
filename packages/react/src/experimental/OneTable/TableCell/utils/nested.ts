@@ -1,4 +1,4 @@
-import { NestedRowProps } from "@/experimental/OneDataCollection/visualizations/collection/Table/components/Row"
+import { NestedRowProps } from "@/patterns/DataCollection/visualizations/collection/Table/components/Row"
 
 export const SPACING_FACTOR = 32
 export const CHEVRON_PARENT_SIZE = 24

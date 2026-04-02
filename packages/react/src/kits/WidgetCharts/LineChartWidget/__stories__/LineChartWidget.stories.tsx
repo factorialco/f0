@@ -1,7 +1,7 @@
 import type { Meta } from "@storybook/react-vite"
 
-import { LineChartProps } from "../../../Charts/LineChart"
-import { Default as LineChartDefault } from "../../../Charts/LineChart/__stories__/LineChart.stories"
+import { LineChartProps } from "@/kits/Charts/LineChart"
+import { Default as LineChartDefault } from "@/kits/Charts/LineChart/__stories__/LineChart.stories"
 import { containerStoryArgs, WidgetDecorator } from "../../storybook-utils"
 import { LineChartWidget } from "../index"
 

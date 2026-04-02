@@ -7,7 +7,7 @@ import * as React from "react"
 
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { ButtonInternalProps } from "@/components/F0Button/internal-types"
-import { SPACE_FOR_WIDGET_SHADOW } from "@/experimental/Navigation/Carousel/DynamicCarousel"
+import { SPACE_FOR_WIDGET_SHADOW } from "@/patterns/Navigation/Carousel/DynamicCarousel"
 import { ArrowLeft, ArrowRight } from "@/icons/app"
 import { cn } from "@/lib/utils"
 

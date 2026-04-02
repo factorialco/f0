@@ -2,7 +2,7 @@ import { NewColor } from "@/components/tags/F0TagDot"
 import {
   PropertyDefinition,
   renderProperty,
-} from "@/experimental/OneDataCollection/property-render"
+} from "@/patterns/DataCollection/property-render"
 import { useI18n } from "@/lib/providers/i18n"
 
 export const mockItem = {

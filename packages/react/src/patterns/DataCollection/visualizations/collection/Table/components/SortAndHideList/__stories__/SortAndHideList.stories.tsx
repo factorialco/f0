@@ -1,10 +1,10 @@
-import type { Meta, StoryObj } from "@storybook/react-vite"
+import type { Meta, StoryObj } from "@storybook/react-vite";
 
-import { SortAndHideList } from "../SortAndHideList"
+import { SortAndHideList } from "../SortAndHideList";
 
 const meta = {
   component: SortAndHideList,
-  title: "Patterns/DataCollection/Internal/SortAndHideList",
+  title: "Internal/SortAndHideList",
   parameters: {
     layout: "centered",
     docs: {
@@ -21,10 +21,10 @@ const meta = {
       control: false,
     },
   },
-} satisfies Meta<typeof SortAndHideList>
+} satisfies Meta<typeof SortAndHideList>;
 
-export default meta
-type Story = StoryObj<typeof meta>
+export default meta;
+type Story = StoryObj<typeof meta>;
 
 // Mock data for stories
 const defaultItems = [
@@ -68,7 +68,7 @@ const defaultItems = [
     visible: true,
     order: 5,
   },
-]
+];
 
 export const Default: Story = {
   args: {
@@ -76,7 +76,7 @@ export const Default: Story = {
     allowSorting: true,
     allowHiding: true,
   },
-}
+};
 
 export const WithAllItemsVisible: Story = {
   args: {
@@ -109,7 +109,7 @@ export const WithAllItemsVisible: Story = {
       },
     ],
   },
-}
+};
 
 export const WithAllItemsHidden: Story = {
   args: {
@@ -142,7 +142,7 @@ export const WithAllItemsHidden: Story = {
       },
     ],
   },
-}
+};
 
 export const WithMixedStates: Story = {
   args: {
@@ -183,7 +183,7 @@ export const WithMixedStates: Story = {
       },
     ],
   },
-}
+};
 
 export const EmptyList: Story = {
   args: {
@@ -191,7 +191,7 @@ export const EmptyList: Story = {
     allowSorting: true,
     allowHiding: true,
   },
-}
+};
 
 export const SingleItem: Story = {
   args: {
@@ -208,7 +208,7 @@ export const SingleItem: Story = {
       },
     ],
   },
-}
+};
 
 export const LongLabels: Story = {
   args: {
@@ -243,4 +243,4 @@ export const LongLabels: Story = {
       },
     ],
   },
-}
+};

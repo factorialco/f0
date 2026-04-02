@@ -13,8 +13,8 @@ import { AvatarVariant, F0Avatar } from "@/components/avatars/F0Avatar"
 import { F0Icon, IconType } from "@/components/F0Icon"
 import { OneEllipsis } from "@/components/OneEllipsis"
 import { Counter } from "@/ui/Counter"
-import { Dropdown, DropdownItem } from "@/experimental/Navigation/Dropdown"
-import { NavigationItem } from "@/experimental/Navigation/utils"
+import { Dropdown, DropdownItem } from "@/patterns/Navigation/Dropdown"
+import { NavigationItem } from "@/patterns/Navigation/utils"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import {
   ChevronDown,

@@ -1,13 +1,13 @@
-import type { Meta, StoryObj } from "@storybook/react-vite"
+import type { Meta, StoryObj } from "@storybook/react-vite";
 
-import { Microphone, MicrophoneNegative } from "@/icons/app"
+import { Microphone, MicrophoneNegative } from "@/icons/app";
 
-import { F0ButtonToggleInternal } from "../internal/F0ButtonToggle.internal"
-import F0ButtonToggleStories from "./F0ButtonToggle.stories"
+import { F0ButtonToggleInternal } from "../internal/F0ButtonToggle.internal";
+import F0ButtonToggleStories from "./F0ButtonToggle.stories";
 
 const meta = {
   ...F0ButtonToggleStories,
-  title: "Components/Button/ButtonToggle/Internal",
+  title: "Button/ButtonToggle/Internal",
   component: F0ButtonToggleInternal,
   tags: ["autodocs", "internal"],
   parameters: {
@@ -26,10 +26,10 @@ const meta = {
       control: "boolean",
     },
   },
-} satisfies Meta<typeof F0ButtonToggleInternal>
+} satisfies Meta<typeof F0ButtonToggleInternal>;
 
-export default meta
-type Story = StoryObj<typeof meta>
+export default meta;
+type Story = StoryObj<typeof meta>;
 
 export const WithBorder: Story = {
   args: {
@@ -37,4 +37,4 @@ export const WithBorder: Story = {
     label: "Default Toggle with a long label that should be truncated",
     icon: [MicrophoneNegative, Microphone],
   },
-}
+};

@@ -1,8 +1,8 @@
-import { Meta, StoryObj } from "@storybook/react-vite"
-import { useEffect, useState } from "react"
+import { Meta, StoryObj } from "@storybook/react-vite";
+import { useEffect, useState } from "react";
 
-import { SummariesDefinition } from "@/patterns/DataCollection/summary.ts"
-import { GroupingDefinition } from "@/hooks/datasource"
+import { SummariesDefinition } from "@/patterns/DataCollection/summary.ts";
+import { GroupingDefinition } from "@/hooks/datasource";
 import {
   Add,
   Ai,
@@ -24,8 +24,8 @@ import {
   Star,
   Target,
   Upload,
-} from "@/icons/app"
-import { withSnapshot } from "@/lib/storybook-utils/parameters"
+} from "@/icons/app";
+import { withSnapshot } from "@/lib/storybook-utils/parameters";
 import {
   CERTIFICATIONS_MOCK,
   DOT_TAG_COLORS_MOCK,
@@ -37,16 +37,16 @@ import {
   START_DATE_MOCK,
   TEAMS_MOCK,
   YEARS_OF_EXPERIENCIE_MOCK,
-} from "@/mocks"
-import { mockImage } from "@/testing/mocks/images"
+} from "@/mocks";
+import { mockImage } from "@/testing/mocks/images";
 
-import type { CustomVisualizationProps } from "../visualizations/collection"
+import type { CustomVisualizationProps } from "../visualizations/collection";
 
-import { useDataCollectionData } from "../hooks/useDataCollectionData/useDataCollectionData"
-import { useDataCollectionSource } from "../hooks/useDataCollectionSource"
-import { OneDataCollection } from "../index"
-import { ItemActionsDefinition } from "../item-actions"
-import { NavigationFiltersDefinition } from "../navigationFilters/types"
+import { useDataCollectionData } from "../hooks/useDataCollectionData/useDataCollectionData";
+import { useDataCollectionSource } from "../hooks/useDataCollectionSource";
+import { OneDataCollection } from "../index";
+import { ItemActionsDefinition } from "../item-actions";
+import { NavigationFiltersDefinition } from "../navigationFilters/types";
 import {
   createDataAdapter,
   createPromiseDataFetch,
@@ -59,10 +59,10 @@ import {
   MockUser,
   mockUsers,
   sortings,
-} from "./mockData"
+} from "./mockData";
 
 const meta = {
-  title: "Patterns/DataCollection/Miscellaneous",
+  title: "Data Collection/Miscellaneous",
   component: ExampleComponent,
   parameters: {
     layout: "padded",
@@ -100,10 +100,10 @@ const meta = {
     },
   },
   tags: ["autodocs", "experimental", "internal"],
-} satisfies Meta<typeof ExampleComponent>
+} satisfies Meta<typeof ExampleComponent>;
 
-export default meta
-type Story = StoryObj<typeof meta>
+export default meta;
+type Story = StoryObj<typeof meta>;
 
 export const Simplest: Story = {
   render: () => {
@@ -115,10 +115,10 @@ export const Simplest: Story = {
             sortings,
             search,
             navigationFilters: {},
-          })
+          });
         },
       },
-    })
+    });
 
     return (
       <div className="space-y-4">
@@ -171,9 +171,9 @@ export const Simplest: Story = {
           ]}
         />
       </div>
-    )
+    );
   },
-}
+};
 
 // Basic examples with single visualization
 export const BasicTableView: Story = {
@@ -203,16 +203,16 @@ export const BasicTableView: Story = {
       },
       dataAdapter: {
         fetchData: ({ filters, sortings, search }) => {
-          console.log("filters", filters)
+          console.log("filters", filters);
           filters.department?.map((department) => {
-            console.log("department", department)
-          })
+            console.log("department", department);
+          });
           return createPromiseDataFetch()({
             filters,
             sortings,
             search,
             navigationFilters: {},
-          })
+          });
         },
       },
       itemActions: (item) => [
@@ -263,7 +263,7 @@ export const BasicTableView: Story = {
           onClick: () => console.log(`Import`),
         },
       ],
-    })
+    });
 
     return (
       <div className="space-y-4">
@@ -316,9 +316,9 @@ export const BasicTableView: Story = {
           ]}
         />
       </div>
-    )
+    );
   },
-}
+};
 
 // Basic examples with single visualization
 export const WithLinkedItems: Story = {
@@ -327,8 +327,8 @@ export const WithLinkedItems: Story = {
       filters,
       presets: filterPresets,
       itemUrl: (item) => {
-        if (item.id === "user-1") return undefined
-        return `/users/${item.id}`
+        if (item.id === "user-1") return undefined;
+        return `/users/${item.id}`;
       },
       sortings: {
         name: {
@@ -384,7 +384,7 @@ export const WithLinkedItems: Story = {
             item.department === "Engineering" && item.status === "active",
         },
       ],
-    })
+    });
 
     return (
       <div className="space-y-4">
@@ -467,9 +467,9 @@ export const WithLinkedItems: Story = {
           ]}
         />
       </div>
-    )
+    );
   },
-}
+};
 
 export const BasicCardView: Story = {
   parameters: {
@@ -480,7 +480,7 @@ export const BasicCardView: Story = {
   render: () => {
     const mockVisualizations = getMockVisualizations({
       frozenColumns: 0,
-    })
+    });
 
     const dataSource = useDataCollectionSource({
       filters,
@@ -514,16 +514,16 @@ export const BasicCardView: Story = {
           onClick: () => console.log(`Export`),
         },
       ],
-    })
+    });
 
     return (
       <OneDataCollection
         source={dataSource}
         visualizations={[mockVisualizations.card]}
       />
-    )
+    );
   },
-}
+};
 
 // Examples with different property renderers
 export const RendererTypes: Story = {
@@ -539,9 +539,9 @@ export const RendererTypes: Story = {
       search: {
         enabled: true,
       },
-    })
+    });
 
-    let i = 0
+    let i = 0;
 
     return (
       <OneDataCollection
@@ -587,7 +587,7 @@ export const RendererTypes: Story = {
                       value: {
                         text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
                       },
-                    }
+                    };
                   },
                 },
                 {
@@ -599,7 +599,7 @@ export const RendererTypes: Story = {
                         icon: Inbox,
                         label: "Inbox",
                       },
-                    }
+                    };
                   },
                 },
                 {
@@ -720,9 +720,9 @@ export const RendererTypes: Story = {
           },
         ]}
       />
-    )
+    );
   },
-}
+};
 
 export const CustomCardProperties: Story = {
   parameters: {
@@ -738,7 +738,7 @@ export const CustomCardProperties: Story = {
       dataAdapter: {
         fetchData: createPromiseDataFetch(),
       },
-    })
+    });
 
     return (
       <OneDataCollection
@@ -802,14 +802,14 @@ export const CustomCardProperties: Story = {
           },
         ]}
       />
-    )
+    );
   },
-}
+};
 
 // Examples with multiple visualizations
 export const SwitchableVisualizations: Story = {
   render: () => <ExampleComponent />,
-}
+};
 
 export const WithSelectableAndBulkActions: Story = {
   render: () => (
@@ -819,7 +819,7 @@ export const WithSelectableAndBulkActions: Story = {
         if (selectedCount === 2) {
           return {
             warningMessage: "Selected items have different action options",
-          }
+          };
         }
 
         return {
@@ -873,15 +873,15 @@ export const WithSelectableAndBulkActions: Story = {
                 ]
               : []),
           ],
-        }
+        };
       }}
     />
   ),
-}
+};
 
 export const WithPageOnlySelection: Story = {
   render: () => {
-    const paginatedMockUsers = generateMockUsers(50)
+    const paginatedMockUsers = generateMockUsers(50);
 
     return (
       <ExampleComponent
@@ -903,13 +903,13 @@ export const WithPageOnlySelection: Story = {
           ],
         })}
       />
-    )
+    );
   },
-}
+};
 
 export const WithCrossPageSelection: Story = {
   render: () => {
-    const paginatedMockUsers = generateMockUsers(50)
+    const paginatedMockUsers = generateMockUsers(50);
 
     return (
       <ExampleComponent
@@ -933,9 +933,9 @@ export const WithCrossPageSelection: Story = {
           ],
         })}
       />
-    )
+    );
   },
-}
+};
 
 export const WithSelectableAndDefaultSelectedItems: Story = {
   render: () => (
@@ -952,7 +952,7 @@ export const WithSelectableAndDefaultSelectedItems: Story = {
       }}
     />
   ),
-}
+};
 export const WithSelectableAndDefaultSelectedGroups: Story = {
   render: () => (
     <ExampleComponent
@@ -978,7 +978,7 @@ export const WithSelectableAndDefaultSelectedGroups: Story = {
       }}
     />
   ),
-}
+};
 
 const useJsonDataSource = () =>
   useDataCollectionSource({
@@ -996,35 +996,35 @@ const useJsonDataSource = () =>
     dataAdapter: {
       fetchData: createPromiseDataFetch(),
     },
-  })
+  });
 
 const JsonVisualization = ({
   source,
 }: CustomVisualizationProps<ReturnType<typeof useJsonDataSource>>) => {
-  const { data, isLoading } = useDataCollectionData(source)
+  const { data, isLoading } = useDataCollectionData(source);
 
   if (isLoading) {
     return (
       <pre className="bg-muted overflow-auto rounded-lg p-4">
         <code>Loading...</code>
       </pre>
-    )
+    );
   }
 
   return (
     <pre className="overflow-auto rounded-lg bg-f1-background-info p-4">
       <code>{JSON.stringify(data, null, 2)}</code>
     </pre>
-  )
-}
+  );
+};
 
 export const WithCustomJsonView: Story = {
   render: () => {
-    const jsonDataSource = useJsonDataSource()
+    const jsonDataSource = useJsonDataSource();
 
     const mockVisualizations = getMockVisualizations({
       frozenColumns: 0,
-    })
+    });
 
     return (
       <OneDataCollection
@@ -1041,9 +1041,9 @@ export const WithCustomJsonView: Story = {
           mockVisualizations.list,
         ]}
       />
-    )
+    );
   },
-}
+};
 
 // Example usage with table visualization
 export const WithTableVisualization: Story = {
@@ -1059,7 +1059,7 @@ export const WithTableVisualization: Story = {
         data: mockUsers,
         delay: 500,
       }),
-    })
+    });
 
     return (
       <OneDataCollection
@@ -1094,16 +1094,16 @@ export const WithTableVisualization: Story = {
           },
         ]}
       />
-    )
+    );
   },
-}
+};
 
 // Example usage with card visualization
 export const WithCardVisualization: Story = {
   render: () => {
     const mockVisualizations = getMockVisualizations({
       frozenColumns: 0,
-    })
+    });
 
     const source = useDataCollectionSource({
       filters,
@@ -1114,16 +1114,16 @@ export const WithCardVisualization: Story = {
         delay: 1000,
         useObservable: true,
       }),
-    })
+    });
 
     return (
       <OneDataCollection
         source={source}
         visualizations={[mockVisualizations.card]}
       />
-    )
+    );
   },
-}
+};
 
 // Example usage with multiple visualizations
 export const WithMultipleVisualizations: Story = {
@@ -1141,26 +1141,28 @@ export const WithMultipleVisualizations: Story = {
         { id: "design", filters: { department: ["Design"] } },
         { id: "other", filters: { department: ["Marketing"] } },
       ],
-    })
+    });
 
     const visualizations = Object.values(
       getMockVisualizations({
         frozenColumns: 0,
-      })
-    )
+      }),
+    );
 
-    return <OneDataCollection source={source} visualizations={visualizations} />
+    return (
+      <OneDataCollection source={source} visualizations={visualizations} />
+    );
   },
-}
+};
 
 export const WithPagesPagination: Story = {
   render: () => {
     // Create a fixed set of paginated users so we're not regenerating them on every render
-    const paginatedMockUsers = generateMockUsers(50)
+    const paginatedMockUsers = generateMockUsers(50);
 
     const mockVisualizations = getMockVisualizations({
       frozenColumns: 0,
-    })
+    });
 
     const source = useDataCollectionSource({
       filters,
@@ -1176,23 +1178,23 @@ export const WithPagesPagination: Story = {
               id: "delete-all",
             },
           ],
-        }
+        };
       },
       dataAdapter: createDataAdapter({
         data: paginatedMockUsers,
         delay: 500,
         paginationType: "pages",
       }),
-    })
+    });
 
     return (
       <OneDataCollection
         source={source}
         onSelectItems={(selectedItems) => {
-          console.log("Selected items", "->", selectedItems)
+          console.log("Selected items", "->", selectedItems);
         }}
         onBulkAction={(action, selectedItems) => {
-          console.log(`Bulk action: ${action}`, "->", selectedItems)
+          console.log(`Bulk action: ${action}`, "->", selectedItems);
         }}
         visualizations={[
           mockVisualizations.table,
@@ -1200,18 +1202,18 @@ export const WithPagesPagination: Story = {
           mockVisualizations.list,
         ]}
       />
-    )
+    );
   },
-}
+};
 
 export const WithInfiniteScrollPagination: Story = {
   render: () => {
     // Create a fixed set of paginated users so we're not regenerating them on every render
-    const paginatedMockUsers = generateMockUsers(50)
+    const paginatedMockUsers = generateMockUsers(50);
 
     const mockVisualizations = getMockVisualizations({
       frozenColumns: 0,
-    })
+    });
 
     const source = useDataCollectionSource({
       filters,
@@ -1227,7 +1229,7 @@ export const WithInfiniteScrollPagination: Story = {
               id: "delete-all",
             },
           ],
-        }
+        };
       },
       dataAdapter: createDataAdapter({
         data: paginatedMockUsers,
@@ -1235,17 +1237,17 @@ export const WithInfiniteScrollPagination: Story = {
         paginationType: "infinite-scroll",
         perPage: 10,
       }),
-    })
+    });
 
     return (
       <div className="space-y-4" style={{ height: "500px", overflow: "auto" }}>
         <OneDataCollection
           source={source}
           onSelectItems={(selectedItems) => {
-            console.log("Selected items", "->", selectedItems)
+            console.log("Selected items", "->", selectedItems);
           }}
           onBulkAction={(action, selectedItems) => {
-            console.log(`Bulk action: ${action}`, "->", selectedItems)
+            console.log(`Bulk action: ${action}`, "->", selectedItems);
           }}
           visualizations={[
             mockVisualizations.table,
@@ -1254,27 +1256,27 @@ export const WithInfiniteScrollPagination: Story = {
           ]}
         />
       </div>
-    )
+    );
   },
-}
+};
 
 // This is a test to see if the table visualization works with one column
 export const WithInfiniteScrollPaginationOneCol: Story = {
   render: () => {
-    const [presetsLoading, setPresetsLoading] = useState(true)
+    const [presetsLoading, setPresetsLoading] = useState(true);
 
     useEffect(() => {
       setTimeout(() => {
-        setPresetsLoading(false)
-      }, 2000)
-    }, [])
+        setPresetsLoading(false);
+      }, 2000);
+    }, []);
 
     // Create a fixed set of paginated users so we're not regenerating them on every render
-    const paginatedMockUsers = generateMockUsers(50)
+    const paginatedMockUsers = generateMockUsers(50);
 
     const mockVisualizations = getMockVisualizations({
       frozenColumns: 0,
-    })
+    });
 
     const source = useDataCollectionSource({
       filters,
@@ -1291,7 +1293,7 @@ export const WithInfiniteScrollPaginationOneCol: Story = {
               id: "delete-all",
             },
           ],
-        }
+        };
       },
       dataAdapter: createDataAdapter({
         data: paginatedMockUsers,
@@ -1299,17 +1301,17 @@ export const WithInfiniteScrollPaginationOneCol: Story = {
         paginationType: "infinite-scroll",
         perPage: 10,
       }),
-    })
+    });
 
     return (
       <div className="space-y-4" style={{ height: "500px", overflow: "auto" }}>
         <OneDataCollection
           source={source}
           onSelectItems={(selectedItems) => {
-            console.log("Selected items", "->", selectedItems)
+            console.log("Selected items", "->", selectedItems);
           }}
           onBulkAction={(action, selectedItems) => {
-            console.log(`Bulk action: ${action}`, "->", selectedItems)
+            console.log(`Bulk action: ${action}`, "->", selectedItems);
           }}
           visualizations={[
             {
@@ -1323,15 +1325,15 @@ export const WithInfiniteScrollPaginationOneCol: Story = {
           ]}
         />
       </div>
-    )
+    );
   },
-}
+};
 
 export const WithSynchronousData: Story = {
   render: () => {
     const mockVisualizations = getMockVisualizations({
       frozenColumns: 0,
-    })
+    });
 
     const source = useDataCollectionSource<
       MockUser,
@@ -1353,12 +1355,12 @@ export const WithSynchronousData: Story = {
               mockUsers,
               filters,
               sortings,
-              navigationFilters
+              navigationFilters,
             ),
-          }
+          };
         },
       },
-    })
+    });
 
     return (
       <OneDataCollection
@@ -1369,9 +1371,9 @@ export const WithSynchronousData: Story = {
           mockVisualizations.card,
         ]}
       />
-    )
+    );
   },
-}
+};
 
 export const WithAdvancedActions: Story = {
   render: () => {
@@ -1427,7 +1429,7 @@ export const WithAdvancedActions: Story = {
           icon: Delete,
           onClick: () => {
             if (confirm(`Are you sure you want to delete ${item.name}?`)) {
-              console.log(`Deleting ${item.name}`)
+              console.log(`Deleting ${item.name}`);
             }
           },
           critical: true,
@@ -1451,7 +1453,7 @@ export const WithAdvancedActions: Story = {
           description: "Create a copy of this user",
         },
       ],
-    })
+    });
 
     return (
       <OneDataCollection
@@ -1487,9 +1489,9 @@ export const WithAdvancedActions: Story = {
           },
         ]}
       />
-    )
+    );
   },
-}
+};
 
 // Example showcasing table column properties (width, info, sticky, hidden)
 export const TableColumnProperties: Story = {
@@ -1519,7 +1521,7 @@ export const TableColumnProperties: Story = {
       nextReview: new Date(2024, index % 12, 1 + (index % 28))
         .toISOString()
         .split("T")[0],
-    }))
+    }));
 
     // Define extended sortings for the example
     const extendedSortings = {
@@ -1540,7 +1542,7 @@ export const TableColumnProperties: Story = {
       performanceScore: { label: "Score" },
       lastReview: { label: "Last Review" },
       nextReview: { label: "Next Review" },
-    } as const
+    } as const;
 
     // Create a custom data adapter for the extended data structure
     const dataAdapter = createDataAdapter<
@@ -1550,14 +1552,14 @@ export const TableColumnProperties: Story = {
     >({
       data: extendedMockUsers,
       delay: 300,
-    })
+    });
 
     const dataSource = useDataCollectionSource({
       filters,
       presets: filterPresets,
       sortings: extendedSortings,
       dataAdapter,
-    })
+    });
 
     return (
       <OneDataCollection
@@ -1678,9 +1680,9 @@ export const TableColumnProperties: Story = {
           },
         ]}
       />
-    )
+    );
   },
-}
+};
 
 export const TableWithNoFiltersAndSearch: Story = {
   render: () => {
@@ -1723,7 +1725,7 @@ export const TableWithNoFiltersAndSearch: Story = {
       dataAdapter: {
         fetchData: () => Promise.resolve({ records: mockUsers }),
       },
-    })
+    });
 
     return (
       <OneDataCollection
@@ -1764,9 +1766,9 @@ export const TableWithNoFiltersAndSearch: Story = {
           },
         ]}
       />
-    )
+    );
   },
-}
+};
 
 export const TableWithNoFilters: Story = {
   render: () => {
@@ -1813,23 +1815,23 @@ export const TableWithNoFilters: Story = {
       ],
       dataAdapter: {
         fetchData: ({ search }) => {
-          let filteredUsers = [...mockUsers]
+          let filteredUsers = [...mockUsers];
 
           if (search) {
-            const searchLower = search.toLowerCase()
+            const searchLower = search.toLowerCase();
             filteredUsers = filteredUsers.filter(
               (user) =>
                 user.name.toLowerCase().includes(searchLower) ||
                 user.email.toLowerCase().includes(searchLower) ||
                 user.role.toLowerCase().includes(searchLower) ||
-                user.department.toLowerCase().includes(searchLower)
-            )
+                user.department.toLowerCase().includes(searchLower),
+            );
           }
 
-          return Promise.resolve({ records: filteredUsers })
+          return Promise.resolve({ records: filteredUsers });
         },
       },
-    })
+    });
 
     return (
       <OneDataCollection
@@ -1870,9 +1872,9 @@ export const TableWithNoFilters: Story = {
           },
         ]}
       />
-    )
+    );
   },
-}
+};
 
 export const TableWithSecondaryActions: Story = {
   render: () => {
@@ -1892,23 +1894,23 @@ export const TableWithSecondaryActions: Story = {
       ],
       dataAdapter: {
         fetchData: ({ search }) => {
-          let filteredUsers = [...mockUsers]
+          let filteredUsers = [...mockUsers];
 
           if (search) {
-            const searchLower = search.toLowerCase()
+            const searchLower = search.toLowerCase();
             filteredUsers = filteredUsers.filter(
               (user) =>
                 user.name.toLowerCase().includes(searchLower) ||
                 user.email.toLowerCase().includes(searchLower) ||
                 user.role.toLowerCase().includes(searchLower) ||
-                user.department.toLowerCase().includes(searchLower)
-            )
+                user.department.toLowerCase().includes(searchLower),
+            );
           }
 
-          return Promise.resolve({ records: filteredUsers })
+          return Promise.resolve({ records: filteredUsers });
         },
       },
-    })
+    });
 
     return (
       <OneDataCollection
@@ -1949,9 +1951,9 @@ export const TableWithSecondaryActions: Story = {
           },
         ]}
       />
-    )
+    );
   },
-}
+};
 
 // Example showcasing progressBar in different visualizations (Training Module style)
 export const WithProgressBar: Story = {
@@ -1998,7 +2000,7 @@ export const WithProgressBar: Story = {
         status: "In progress",
         workMode: "Remote",
       },
-    ]
+    ];
 
     const dataSource = useDataCollectionSource({
       dataAdapter: {
@@ -2015,7 +2017,7 @@ export const WithProgressBar: Story = {
           type: "primary",
         },
       ],
-    })
+    });
 
     return (
       <OneDataCollection
@@ -2155,6 +2157,6 @@ export const WithProgressBar: Story = {
           },
         ]}
       />
-    )
+    );
   },
-}
+};

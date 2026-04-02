@@ -1,13 +1,13 @@
-import type { Meta, StoryObj } from "@storybook/react-vite"
+import type { Meta, StoryObj } from "@storybook/react-vite";
 
-import { F0Icon } from "@/components/F0Icon"
-import { Placeholder } from "@/icons/app"
+import { F0Icon } from "@/components/F0Icon";
+import { Placeholder } from "@/icons/app";
 
-import { Action } from "../Action"
-import { actionSizes } from "../types"
+import { Action } from "../Action";
+import { actionSizes } from "../types";
 
 const meta: Meta<typeof Action> = {
-  title: "Components/Action",
+  title: "Action",
   component: Action,
   tags: ["autodocs"],
   argTypes: {
@@ -52,17 +52,17 @@ const meta: Meta<typeof Action> = {
     children: "Action Button",
     size: "md",
   },
-}
+};
 
-export default meta
-type Story = StoryObj<typeof Action>
+export default meta;
+type Story = StoryObj<typeof Action>;
 
 export const Basic: Story = {
   args: {
     children: "Basic Action",
     "aria-label": "Basic Action",
   },
-}
+};
 
 export const AsLink: Story = {
   args: {
@@ -72,7 +72,7 @@ export const AsLink: Story = {
     append: <F0Icon icon={Placeholder} size="sm" />,
     "aria-label": "Link Action",
   },
-}
+};
 
 export const AsLinkWithButtonVariant: Story = {
   args: {
@@ -82,7 +82,7 @@ export const AsLinkWithButtonVariant: Story = {
     variant: "default",
     "aria-label": "Link with Button Style",
   },
-}
+};
 
 export const AsButtonWithLinkVariant: Story = {
   args: {
@@ -90,7 +90,7 @@ export const AsButtonWithLinkVariant: Story = {
     variant: "link",
     "aria-label": "Button with Link Style",
   },
-}
+};
 
 export const Disabled: Story = {
   args: {
@@ -98,7 +98,7 @@ export const Disabled: Story = {
     disabled: true,
     "aria-label": "Disabled Action",
   },
-}
+};
 
 export const WithPrepend: Story = {
   args: {
@@ -106,7 +106,7 @@ export const WithPrepend: Story = {
     prepend: <F0Icon icon={Placeholder} />,
     "aria-label": "Action with Prepend",
   },
-}
+};
 
 export const WithAppendOutside: Story = {
   args: {
@@ -115,7 +115,7 @@ export const WithAppendOutside: Story = {
     appendOutside: true,
     "aria-label": "Action with Append",
   },
-}
+};
 
 export const LinkDisabled: Story = {
   args: {
@@ -125,7 +125,7 @@ export const LinkDisabled: Story = {
     disabled: true,
     "aria-label": "Link Disabled",
   },
-}
+};
 
 export const AllVariants: Story = {
   render: (args) => (
@@ -162,7 +162,7 @@ export const AllVariants: Story = {
       </Action>
     </div>
   ),
-}
+};
 
 export const AllSizes: Story = {
   render: () => (
@@ -178,7 +178,7 @@ export const AllSizes: Story = {
       </Action>
     </div>
   ),
-}
+};
 
 export const AllCompact: Story = {
   render: () => (
@@ -190,4 +190,4 @@ export const AllCompact: Story = {
       ))}
     </div>
   ),
-}
+};

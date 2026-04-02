@@ -1,34 +1,34 @@
-import { useCallback, useRef, useState, useMemo } from "react"
+import { useCallback, useRef, useState, useMemo } from "react";
 
-import type { DialogPosition } from "@/patterns/Dialog/F0Dialog/types"
-import type { F0FormSubmitResult } from "@/components/F0Form/types"
+import type { DialogPosition } from "@/components/F0Dialog/types";
+import type { F0FormSubmitResult } from "@/components/F0Form/types";
 
-import { F0Box } from "@/components/F0Box"
-import { F0Dialog } from "@/patterns/Dialog/F0Dialog"
-import { F0Form } from "@/components/F0Form/F0Form"
-import { useF0Form } from "@/components/F0Form/useF0Form"
-import { ResourceHeader } from "@/experimental/Information/Headers/ResourceHeader"
-import { OneEmptyState } from "@/experimental/OneEmptyState"
-import { ArrowLeft, ArrowRight, Maximize, Minimize } from "@/icons/app"
-import { useI18n } from "@/lib/providers/i18n"
-import { cn } from "@/lib/utils"
-import { ProgressBarCell } from "@/ui/value-display/types/progressBar"
+import { F0Box } from "@/components/F0Box";
+import { F0Dialog } from "@/components/F0Dialog";
+import { F0Form } from "@/components/F0Form/F0Form";
+import { useF0Form } from "@/components/F0Form/useF0Form";
+import { ResourceHeader } from "@/experimental/Information/Headers/ResourceHeader";
+import { OneEmptyState } from "@/experimental/OneEmptyState";
+import { ArrowLeft, ArrowRight, Maximize, Minimize } from "@/icons/app";
+import { useI18n } from "@/lib/providers/i18n";
+import { cn } from "@/lib/utils";
+import { ProgressBarCell } from "@/ui/value-display/types/progressBar";
 
-import type { SurveyAnsweringFormProps, SurveySubmitAnswers } from "./types"
+import type { SurveyAnsweringFormProps, SurveySubmitAnswers } from "./types";
 
-import { SurveyFormBuilderProvider } from "../SurveyFormBuilder/Context"
-import { TableOfContent } from "../SurveyFormBuilder/Form/TableOfContent"
+import { SurveyFormBuilderProvider } from "../SurveyFormBuilder/Context";
+import { TableOfContent } from "../SurveyFormBuilder/Form/TableOfContent";
 import {
   SurveyAllQuestionsLoadingSkeleton,
   SurveySteppedLoadingSkeleton,
-} from "./components/skeletons/SurveyAnsweringFormLoadingSkeletons"
-import { useStepper } from "./hooks/useStepper"
+} from "./components/skeletons/SurveyAnsweringFormLoadingSkeletons";
+import { useStepper } from "./hooks/useStepper";
 import {
   extractFlatQuestions,
   useSurveyFormSchema,
-} from "./hooks/useSurveyFormSchema"
+} from "./hooks/useSurveyFormSchema";
 
-const noop = () => {}
+const noop = () => {};
 
 export function SurveyAnsweringForm({
   elements,
@@ -49,23 +49,23 @@ export function SurveyAnsweringForm({
   preview = false,
   useUpload,
 }: SurveyAnsweringFormProps) {
-  const { t } = useI18n()
-  const initialIsFullscreen = positionProp === "fullscreen"
+  const { t } = useI18n();
+  const initialIsFullscreen = positionProp === "fullscreen";
   const nonFullscreenPosition =
-    positionProp === "fullscreen" ? "center" : positionProp
-  const [isFullscreen, setIsFullscreen] = useState(initialIsFullscreen)
+    positionProp === "fullscreen" ? "center" : positionProp;
+  const [isFullscreen, setIsFullscreen] = useState(initialIsFullscreen);
 
-  const { formRef, submit, isSubmitting, hasErrors } = useF0Form()
+  const { formRef, submit, isSubmitting, hasErrors } = useF0Form();
 
-  const accumulatedValuesRef = useRef<Record<string, unknown>>({})
+  const accumulatedValuesRef = useRef<Record<string, unknown>>({});
 
   const flatQuestions = useMemo(
     () => extractFlatQuestions(elements),
-    [elements]
-  )
+    [elements],
+  );
 
-  const stepper = useStepper(flatQuestions)
-  const hasQuestions = flatQuestions.length > 0
+  const stepper = useStepper(flatQuestions);
+  const hasQuestions = flatQuestions.length > 0;
 
   const emptyLabels = {
     title: labels?.empty?.title ?? t("surveyAnsweringForm.labels.empty.title"),
@@ -73,14 +73,14 @@ export function SurveyAnsweringForm({
       labels?.empty?.description ??
       t("surveyAnsweringForm.labels.empty.description"),
     emoji: labels?.empty?.emoji ?? t("surveyAnsweringForm.labels.empty.emoji"),
-  }
+  };
 
-  const isStepped = mode === "stepped"
+  const isStepped = mode === "stepped";
   const hasPreviewDefaultValues =
-    preview && !!defaultValues && Object.keys(defaultValues).length > 0
-  const isReadonlyPreview = hasPreviewDefaultValues
-  const isEditablePreview = preview && !isReadonlyPreview
-  const currentQuestionId = isStepped ? stepper.currentQuestion?.id : undefined
+    preview && !!defaultValues && Object.keys(defaultValues).length > 0;
+  const isReadonlyPreview = hasPreviewDefaultValues;
+  const isEditablePreview = preview && !isReadonlyPreview;
+  const currentQuestionId = isStepped ? stepper.currentQuestion?.id : undefined;
 
   const {
     schema,
@@ -95,78 +95,78 @@ export function SurveyAnsweringForm({
     isStepped ? accumulatedValuesRef.current : undefined,
     preview,
     isReadonlyPreview,
-    useUpload
-  )
+    useUpload,
+  );
 
   const position: DialogPosition = isFullscreen
     ? "fullscreen"
-    : nonFullscreenPosition
-  const dialogWidth = position === "center" ? "xl" : undefined
+    : nonFullscreenPosition;
+  const dialogWidth = position === "center" ? "xl" : undefined;
 
-  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const scheduleClose = useCallback(
     (delay: number) => {
-      if (closeTimerRef.current) clearTimeout(closeTimerRef.current)
+      if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
       closeTimerRef.current = setTimeout(() => {
-        closeTimerRef.current = null
-        onClose()
-      }, delay)
+        closeTimerRef.current = null;
+        onClose();
+      }, delay);
     },
-    [onClose]
-  )
+    [onClose],
+  );
 
   const handleF0Submit = useCallback(
     async (data: Record<string, unknown>): Promise<F0FormSubmitResult> => {
       if (preview) {
-        return { success: true }
+        return { success: true };
       }
       if (!onSubmitProp) {
-        throw new Error("onSubmit is required when preview is false")
+        throw new Error("onSubmit is required when preview is false");
       }
 
       if (isStepped && !stepper.isLastStep) {
         accumulatedValuesRef.current = {
           ...accumulatedValuesRef.current,
           ...data,
-        }
-        stepper.goToNext()
-        return { success: true }
+        };
+        stepper.goToNext();
+        return { success: true };
       }
 
       const allData = isStepped
         ? { ...accumulatedValuesRef.current, ...data }
-        : data
+        : data;
 
-      const submitData: SurveySubmitAnswers = {}
+      const submitData: SurveySubmitAnswers = {};
       for (const [key, val] of Object.entries(allData)) {
         submitData[key] = (val === undefined ? null : val) as
           | string
           | number
           | string[]
           | Date
-          | null
+          | null;
       }
       if (isStepped) {
-        stepper.setProgress(100)
+        stepper.setProgress(100);
         const [result] = await Promise.all([
           onSubmitProp(submitData),
           new Promise((r) => setTimeout(r, 1000)),
-        ])
+        ]);
         if (result.success) {
-          scheduleClose(result.message ? 1000 : 0)
-          return { success: true, message: result.message }
+          scheduleClose(result.message ? 1000 : 0);
+          return { success: true, message: result.message };
         }
-        stepper.setProgress(null)
-        return { success: false, errors: result.errors }
+        stepper.setProgress(null);
+        return { success: false, errors: result.errors };
       }
 
-      const result = await onSubmitProp(submitData)
+      const result = await onSubmitProp(submitData);
       if (result.success) {
-        scheduleClose(result.message ? 1000 : 0)
-        return { success: true, message: result.message }
+        scheduleClose(result.message ? 1000 : 0);
+        return { success: true, message: result.message };
       }
-      return { success: false, errors: result.errors }
+      return { success: false, errors: result.errors };
     },
     [
       onSubmitProp,
@@ -176,25 +176,25 @@ export function SurveyAnsweringForm({
       stepper.isLastStep,
       stepper.goToNext,
       stepper.setProgress,
-    ]
-  )
+    ],
+  );
 
   const handleSubmit = useCallback(async () => {
     try {
-      await submit()
+      await submit();
     } catch {
       // Validation failed — F0Form shows errors
     }
-  }, [submit])
+  }, [submit]);
 
   const handlePrevious = useCallback(() => {
-    const values = formRef.current?.getValues() ?? {}
+    const values = formRef.current?.getValues() ?? {};
     accumulatedValuesRef.current = {
       ...accumulatedValuesRef.current,
       ...values,
-    }
-    stepper.goToPrevious()
-  }, [formRef, stepper.goToPrevious])
+    };
+    stepper.goToPrevious();
+  }, [formRef, stepper.goToPrevious]);
 
   const otherActions =
     allowToChangeFullscreen && !loading
@@ -207,7 +207,7 @@ export function SurveyAnsweringForm({
             onClick: () => setIsFullscreen((prev) => !prev),
           },
         ]
-      : undefined
+      : undefined;
 
   const primaryAction = hasQuestions
     ? loading
@@ -238,7 +238,7 @@ export function SurveyAnsweringForm({
                 disabled: isSubmitting || hasErrors,
                 loading: isSubmitting,
               }
-    : undefined
+    : undefined;
 
   const secondaryAction = hasQuestions
     ? loading
@@ -252,20 +252,20 @@ export function SurveyAnsweringForm({
               icon: ArrowLeft,
             }
           : undefined
-    : undefined
+    : undefined;
 
   const showTableOfContent =
-    mode === "all-questions" && hasQuestions && !loading
+    mode === "all-questions" && hasQuestions && !loading;
 
-  const showStepperProgress = isStepped && hasQuestions && !loading
+  const showStepperProgress = isStepped && hasQuestions && !loading;
 
   const showSectionHeader =
-    isStepped && !!stepper.currentQuestion?.sectionTitle && !loading
+    isStepped && !!stepper.currentQuestion?.sectionTitle && !loading;
 
-  const shouldCenterContent = (!hasQuestions && !loading) || isStepped
+  const shouldCenterContent = (!hasQuestions && !loading) || isStepped;
 
   const disableContentPadding =
-    position === "center" || position === "fullscreen"
+    position === "center" || position === "fullscreen";
 
   return (
     <F0Dialog
@@ -285,7 +285,7 @@ export function SurveyAnsweringForm({
           className={cn(
             "relative flex min-h-full flex-col @container",
             isStepped && !isFullscreen && "min-h-[600px]",
-            shouldCenterContent && "h-full"
+            shouldCenterContent && "h-full",
           )}
         >
           {showTableOfContent && (
@@ -306,7 +306,7 @@ export function SurveyAnsweringForm({
               mode === "all-questions" && !shouldCenterContent
                 ? "justify-start"
                 : "flex-1 justify-center",
-              disableContentPadding && "px-4 py-12"
+              disableContentPadding && "px-4 py-12",
             )}
           >
             <div className="mb-6">
@@ -369,5 +369,5 @@ export function SurveyAnsweringForm({
         </div>
       </SurveyFormBuilderProvider>
     </F0Dialog>
-  )
+  );
 }

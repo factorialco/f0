@@ -16,7 +16,7 @@ import {
   F0ButtonDropdown,
 } from "@/components/F0ButtonDropdown"
 import { F0Icon, IconType } from "@/components/F0Icon"
-import { Dropdown, MobileDropdown } from "@/experimental/Navigation/Dropdown"
+import { Dropdown, MobileDropdown } from "@/patterns/Navigation/Dropdown"
 import CheckCircleAnimated from "@/icons/animated/CheckCircle"
 import { AlertCircle, AlertCircleLine } from "@/icons/app"
 import { withDataTestId } from "@/lib/data-testid"

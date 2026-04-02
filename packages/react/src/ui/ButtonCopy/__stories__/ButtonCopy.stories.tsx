@@ -1,15 +1,15 @@
-import type { Meta, StoryObj } from "@storybook/react-vite"
+import type { Meta, StoryObj } from "@storybook/react-vite";
 
-import React, { useEffect } from "react"
-import { expect, userEvent, within } from "storybook/test"
+import React, { useEffect } from "react";
+import { expect, userEvent, within } from "storybook/test";
 
-import { withSnapshot } from "@/lib/storybook-utils/parameters"
+import { withSnapshot } from "@/lib/storybook-utils/parameters";
 
-import { ButtonCopy } from "../ButtonCopy"
-import { buttonCopySizes } from "../types"
+import { ButtonCopy } from "../ButtonCopy";
+import { buttonCopySizes } from "../types";
 
 const meta = {
-  title: "Components/ButtonCopy",
+  title: "ButtonCopy",
   component: ButtonCopy,
   parameters: {
     layout: "centered",
@@ -65,10 +65,10 @@ const meta = {
       description: "Callback fired when the copy action is performed.",
     },
   },
-} satisfies Meta<typeof ButtonCopy>
+} satisfies Meta<typeof ButtonCopy>;
 
-export default meta
-type Story = StoryObj<typeof meta>
+export default meta;
+type Story = StoryObj<typeof meta>;
 
 // Basic Stories
 export const Default: Story = {
@@ -76,34 +76,34 @@ export const Default: Story = {
     valueToCopy: "This text will be copied!",
   },
   play: async ({ canvasElement, step, args }) => {
-    const canvas = within(canvasElement)
+    const canvas = within(canvasElement);
 
-    let clipboard = ""
+    let clipboard = "";
     navigator.clipboard.writeText = (text: string) => {
-      clipboard = text
-      return Promise.resolve()
-    }
+      clipboard = text;
+      return Promise.resolve();
+    };
 
     await step("Verify initial state", async () => {
-      const button = canvas.getByRole("button")
-      expect(button).toBeInTheDocument()
-      expect(button.getAttribute("aria-label")).toBe("Copy")
-      expect(button.getAttribute("title")).toBe("Copy")
-    })
+      const button = canvas.getByRole("button");
+      expect(button).toBeInTheDocument();
+      expect(button.getAttribute("aria-label")).toBe("Copy");
+      expect(button.getAttribute("title")).toBe("Copy");
+    });
 
     await step("Click copy button", async () => {
-      const button = canvas.getByRole("button")
-      await userEvent.click(button)
-    })
+      const button = canvas.getByRole("button");
+      await userEvent.click(button);
+    });
 
     await step("Verify copied state", async () => {
-      const button = canvas.getByRole("button")
-      expect(button.getAttribute("aria-label")).toBe("Copied")
-      expect(button.getAttribute("title")).toBe("Copied")
-      expect(clipboard).toBe(args.valueToCopy)
-    })
+      const button = canvas.getByRole("button");
+      expect(button.getAttribute("aria-label")).toBe("Copied");
+      expect(button.getAttribute("title")).toBe("Copied");
+      expect(clipboard).toBe(args.valueToCopy);
+    });
   },
-}
+};
 
 export const Variants: Story = {
   parameters: withSnapshot({}),
@@ -117,7 +117,7 @@ export const Variants: Story = {
       <ButtonCopy {...args} variant="promote" valueToCopy="Promote copy" />
     </div>
   ),
-}
+};
 
 export const Sizes: Story = {
   parameters: withSnapshot({}),
@@ -128,7 +128,7 @@ export const Sizes: Story = {
       <ButtonCopy {...args} size="sm" valueToCopy="Small button copy" />
     </div>
   ),
-}
+};
 
 export const CustomLabels: Story = {
   args: {
@@ -137,22 +137,22 @@ export const CustomLabels: Story = {
     copiedTooltipLabel: "Text copied successfully!",
   },
   play: async ({ canvasElement, step }) => {
-    const canvas = within(canvasElement)
+    const canvas = within(canvasElement);
 
     await step("Verify custom copy label", async () => {
-      const button = canvas.getByRole("button")
-      expect(button.getAttribute("aria-label")).toBe("Click to copy text")
-    })
+      const button = canvas.getByRole("button");
+      expect(button.getAttribute("aria-label")).toBe("Click to copy text");
+    });
 
     await step("Click and verify custom copied label", async () => {
-      const button = canvas.getByRole("button")
-      await userEvent.click(button)
+      const button = canvas.getByRole("button");
+      await userEvent.click(button);
       expect(button.getAttribute("aria-label")).toBe(
-        "Text copied successfully!"
-      )
-    })
+        "Text copied successfully!",
+      );
+    });
   },
-}
+};
 
 export const DifferentValues: Story = {
   parameters: withSnapshot({}),
@@ -192,7 +192,7 @@ export const DifferentValues: Story = {
       </div>
     </div>
   ),
-}
+};
 
 export const States: Story = {
   parameters: withSnapshot({}),
@@ -202,15 +202,15 @@ export const States: Story = {
       <ButtonCopy {...args} valueToCopy="Disabled state" disabled />
     </div>
   ),
-}
+};
 
 export const InteractiveCopyTest: Story = {
   render: (args) => {
-    const [copyCount, setCopyCount] = React.useState(0)
+    const [copyCount, setCopyCount] = React.useState(0);
 
     const handleCopy = () => {
-      setCopyCount((prev) => prev + 1)
-    }
+      setCopyCount((prev) => prev + 1);
+    };
 
     return (
       <div className="flex flex-col items-center gap-4">
@@ -221,44 +221,44 @@ export const InteractiveCopyTest: Story = {
         />
         <p className="text-gray-600 text-sm">Copied {copyCount} times</p>
       </div>
-    )
+    );
   },
   play: async ({ canvasElement, step }) => {
-    const canvas = within(canvasElement)
+    const canvas = within(canvasElement);
 
     await step("Test multiple copy interactions", async () => {
-      const button = canvas.getByRole("button")
-      const counter = canvas.getByText(/Copied \d+ times/)
+      const button = canvas.getByRole("button");
+      const counter = canvas.getByText(/Copied \d+ times/);
 
       // Initial state
-      expect(counter).toHaveTextContent("Copied 0 times")
+      expect(counter).toHaveTextContent("Copied 0 times");
 
       // First copy
-      await userEvent.click(button)
-      expect(counter).toHaveTextContent("Copied 1 times")
+      await userEvent.click(button);
+      expect(counter).toHaveTextContent("Copied 1 times");
 
       // Wait for animation to complete before next click
-      await new Promise((resolve) => setTimeout(resolve, 1100))
+      await new Promise((resolve) => setTimeout(resolve, 1100));
 
       // Second copy
-      await userEvent.click(button)
-      expect(counter).toHaveTextContent("Copied 2 times")
-    })
+      await userEvent.click(button);
+      expect(counter).toHaveTextContent("Copied 2 times");
+    });
   },
-}
+};
 
 export const AnimationStates: Story = {
   render: (args) => {
-    const [showCopied, setShowCopied] = React.useState(false)
+    const [showCopied, setShowCopied] = React.useState(false);
 
     const triggerCopy = () => {
-      setShowCopied(true)
-      setTimeout(() => setShowCopied(false), 1000)
-    }
+      setShowCopied(true);
+      setTimeout(() => setShowCopied(false), 1000);
+    };
 
     useEffect(() => {
-      console.log("showCopied", showCopied)
-    }, [showCopied])
+      console.log("showCopied", showCopied);
+    }, [showCopied]);
 
     return (
       <div className="flex flex-col items-center gap-4">
@@ -275,9 +275,9 @@ export const AnimationStates: Story = {
           Click either button to see the copy → check animation
         </p>
       </div>
-    )
+    );
   },
-}
+};
 
 export const InContext: Story = {
   parameters: withSnapshot({}),
@@ -297,4 +297,4 @@ export const InContext: Story = {
       </div>
     </div>
   ),
-}
+};

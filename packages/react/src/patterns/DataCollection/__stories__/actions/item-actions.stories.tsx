@@ -1,13 +1,13 @@
-import { Meta, StoryObj } from "@storybook/react-vite"
+import { Meta, StoryObj } from "@storybook/react-vite";
 
-import { Ai, Download, Pencil, Upload } from "@/icons/app"
+import { Ai, Download, Pencil, Upload } from "@/icons/app";
 
-import { OneDataCollection } from "../.."
-import { useDataCollectionSource } from "../../hooks/useDataCollectionSource"
-import { ItemActionsDefinition } from "../../item-actions"
+import { OneDataCollection } from "../..";
+import { useDataCollectionSource } from "../../hooks/useDataCollectionSource";
+import { ItemActionsDefinition } from "../../item-actions";
 
 const meta = {
-  title: "Patterns/DataCollection/Item Actions",
+  title: "Data Collection/Item Actions",
   tags: ["no-sidebar", "internal"],
   parameters: {
     layout: "padded",
@@ -23,10 +23,10 @@ const meta = {
       },
     },
   },
-} satisfies Meta
+} satisfies Meta;
 
-export default meta
-type Story = StoryObj<typeof meta>
+export default meta;
+type Story = StoryObj<typeof meta>;
 
 // Mock data with various states to demonstrate conditional actions
 const mockUsers = [
@@ -86,14 +86,14 @@ const mockUsers = [
       canShare: false,
     },
   },
-]
+];
 
 const createUserActions = (): ItemActionsDefinition<
   (typeof mockUsers)[number]
 > => {
   return (user: (typeof mockUsers)[number]) => {
     if (user.id === "user-1") {
-      return undefined
+      return undefined;
     }
     return [
       // Basic action with icon
@@ -126,9 +126,9 @@ const createUserActions = (): ItemActionsDefinition<
         onClick: () => console.log(`Importing users`),
         description: "Import users",
       },
-    ]
-  }
-}
+    ];
+  };
+};
 
 // Basic story showing all action types
 export const BasicActionsExample: Story = {
@@ -138,7 +138,7 @@ export const BasicActionsExample: Story = {
         fetchData: () => Promise.resolve({ records: mockUsers }),
       },
       itemActions: createUserActions(),
-    })
+    });
 
     return (
       <div className="space-y-8">
@@ -180,9 +180,9 @@ export const BasicActionsExample: Story = {
           ]}
         />
       </div>
-    )
+    );
   },
-}
+};
 
 // Example showing how actions can be used with card visualization
 export const CardActionsExample: Story = {
@@ -200,7 +200,7 @@ export const CardActionsExample: Story = {
         fetchData: () => Promise.resolve({ records: mockUsers }),
       },
       itemActions: createUserActions(),
-    })
+    });
 
     return (
       <div className="space-y-8">
@@ -241,6 +241,6 @@ export const CardActionsExample: Story = {
           ]}
         />
       </div>
-    )
+    );
   },
-}
+};

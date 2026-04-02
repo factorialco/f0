@@ -6,7 +6,7 @@ import {
   useRef,
 } from "react"
 
-import { Carousel } from "@/experimental/Navigation/Carousel"
+import { Carousel } from "@/patterns/Navigation/Carousel"
 
 import { LayoutProvider } from "../LayoutProvider"
 

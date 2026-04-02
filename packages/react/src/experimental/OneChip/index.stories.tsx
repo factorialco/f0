@@ -1,13 +1,13 @@
-import type { Meta, StoryObj } from "@storybook/react-vite"
+import type { Meta, StoryObj } from "@storybook/react-vite";
 
-import { useState } from "react"
+import { useState } from "react";
 
-import * as Icons from "../../icons/app"
-import { Chip } from "./index"
+import * as Icons from "../../icons/app";
+import { Chip } from "./index";
 
 const meta = {
   component: Chip,
-  title: "Components/Chip",
+  title: "Chip",
   parameters: {
     layout: "centered",
   },
@@ -35,17 +35,17 @@ const meta = {
         "If defined, the close icon will be displayed and the chip will be clickable",
     },
   },
-} satisfies Meta<typeof Chip>
+} satisfies Meta<typeof Chip>;
 
-export default meta
-type Story = StoryObj<typeof meta>
+export default meta;
+type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
     label: "Label",
     variant: "default",
   },
-}
+};
 
 export const WithClose: Story = {
   args: {
@@ -57,11 +57,11 @@ export const WithClose: Story = {
       { id: 1, label: "First Chip" },
       { id: 2, label: "Second Chip" },
       { id: 3, label: "Third Chip" },
-    ])
+    ]);
 
     const handleClose = (id: number) => {
-      setChips((prevChips) => prevChips.filter((chip) => chip.id !== id))
-    }
+      setChips((prevChips) => prevChips.filter((chip) => chip.id !== id));
+    };
 
     return (
       <div className="flex flex-wrap gap-2">
@@ -74,9 +74,9 @@ export const WithClose: Story = {
           />
         ))}
       </div>
-    )
+    );
   },
-}
+};
 
 export const WithAvatar: Story = {
   args: {
@@ -111,7 +111,7 @@ export const WithAvatar: Story = {
       />
     </div>
   ),
-}
+};
 
 export const WithDeactivatedAvatarAndLabel: Story = {
   args: {
@@ -131,14 +131,14 @@ export const WithDeactivatedAvatarAndLabel: Story = {
       <Chip {...args} />
     </div>
   ),
-}
+};
 
 export const WithIcon: Story = {
   args: {
     label: "Label",
     icon: Icons.Placeholder,
   },
-}
+};
 
 export const SelectedWithClose: Story = {
   args: {
@@ -150,11 +150,11 @@ export const SelectedWithClose: Story = {
       { id: 1, label: "First Chip" },
       { id: 2, label: "Second Chip" },
       { id: 3, label: "Third Chip" },
-    ])
+    ]);
 
     const handleClose = (id: number) => {
-      setChips((prevChips) => prevChips.filter((chip) => chip.id !== id))
-    }
+      setChips((prevChips) => prevChips.filter((chip) => chip.id !== id));
+    };
 
     return (
       <div className="flex flex-wrap gap-2">
@@ -167,6 +167,6 @@ export const SelectedWithClose: Story = {
           />
         ))}
       </div>
-    )
+    );
   },
-}
+};

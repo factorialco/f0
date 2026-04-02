@@ -1,20 +1,20 @@
-import type { Meta, StoryObj } from "@storybook/react-vite"
+import type { Meta, StoryObj } from "@storybook/react-vite";
 
-import { useState, useCallback, useRef } from "react"
-import { z } from "zod"
+import { useState, useCallback, useRef } from "react";
+import { z } from "zod";
 
-import { F0Button } from "@/components/F0Button"
-import { F0Dialog } from "@/patterns/Dialog/F0Dialog"
-import { useF0FormDefinition } from "@/components/F0WizardForm"
-import { createDataSourceDefinition } from "@/hooks/datasource"
-import { ExternalLink, Plus, Settings } from "@/icons/app"
+import { F0Button } from "@/components/F0Button";
+import { F0Dialog } from "@/components/F0Dialog";
+import { useF0FormDefinition } from "@/components/F0WizardForm";
+import { createDataSourceDefinition } from "@/hooks/datasource";
+import { ExternalLink, Plus, Settings } from "@/icons/app";
 
 import type {
   FileUploadHookReturn,
   FileUploadResult,
   FileUploadStatus,
-} from "../fields/types"
-import type { RenderCustomFieldSelectConfig } from "../types"
+} from "../fields/types";
+import type { RenderCustomFieldSelectConfig } from "../types";
 
 import {
   f0FormField,
@@ -22,19 +22,19 @@ import {
   F0SectionConfig,
   useF0Form,
   RenderCustomFieldProps,
-} from "../index"
+} from "../index";
 
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const meta: Meta = {
   title: "Patterns/Forms/F0Form",
   component: F0Form,
   tags: ["autodocs"],
   parameters: { a11y: { skipCi: true } },
-}
+};
 
-export default meta
-type Story = StoryObj<typeof meta>
+export default meta;
+type Story = StoryObj<typeof meta>;
 
 /**
  * Basic form with simple text fields.
@@ -60,23 +60,23 @@ export const Default: Story = {
         fieldType: "textarea",
         rows: 4,
       }),
-    })
+    });
 
     const formDefinition = useF0FormDefinition({
       name: "basic",
       schema: formSchema,
       defaultValues: { username: "", email: "", bio: "" },
       onSubmit: async ({ data }) => {
-        await sleep(1000)
-        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
-        return { success: true, message: "Account created successfully" }
+        await sleep(1000);
+        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`);
+        return { success: true, message: "Account created successfully" };
       },
       submitConfig: { label: "Create Account" },
-    })
+    });
 
-    return <F0Form formDefinition={formDefinition} />
+    return <F0Form formDefinition={formDefinition} />;
   },
-}
+};
 
 /**
  * Form with fields arranged in rows using the `row` property.
@@ -112,7 +112,7 @@ export const WithRows: Story = {
         ],
         placeholder: "Select country",
       }),
-    })
+    });
 
     const formDefinition = useF0FormDefinition({
       name: "with-rows",
@@ -125,15 +125,15 @@ export const WithRows: Story = {
         country: "",
       },
       onSubmit: async ({ data }) => {
-        await sleep(1000)
-        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
-        return { success: true }
+        await sleep(1000);
+        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`);
+        return { success: true };
       },
-    })
+    });
 
-    return <F0Form formDefinition={formDefinition} />
+    return <F0Form formDefinition={formDefinition} />;
   },
-}
+};
 
 /**
  * Form with rows where some fields have validation errors.
@@ -204,7 +204,7 @@ export const WithRowsAndValidation: Story = {
             { value: "hybrid", label: "Hybrid" },
             { value: "remote", label: "Remote" },
           ],
-        }
+        },
       ),
       allowReferral: f0FormField(z.boolean().default(false), {
         label: "Allow referrals",
@@ -216,7 +216,7 @@ export const WithRowsAndValidation: Story = {
         fieldType: "checkbox",
         row: "checkboxes",
       }),
-    })
+    });
 
     const formDefinition = useF0FormDefinition({
       name: "rows-validation",
@@ -234,15 +234,15 @@ export const WithRowsAndValidation: Story = {
       },
       errorTriggerMode: "on-submit",
       onSubmit: async ({ data }) => {
-        await sleep(1000)
-        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
-        return { success: true }
+        await sleep(1000);
+        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`);
+        return { success: true };
       },
-    })
+    });
 
-    return <F0Form formDefinition={formDefinition} />
+    return <F0Form formDefinition={formDefinition} />;
   },
-}
+};
 
 /**
  * Form with sections for organizing related fields.
@@ -279,7 +279,7 @@ export const WithSections: Story = {
         section: "preferences",
         fieldType: "switch",
       }),
-    })
+    });
 
     const sections: Record<string, F0SectionConfig> = {
       personal: {
@@ -295,7 +295,7 @@ export const WithSections: Story = {
           href: "#settings",
         },
       },
-    }
+    };
 
     const formDefinition = useF0FormDefinition({
       name: "with-sections",
@@ -310,15 +310,15 @@ export const WithSections: Story = {
         darkMode: false,
       },
       onSubmit: async ({ data }) => {
-        await sleep(1000)
-        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
-        return { success: true, message: "Profile saved" }
+        await sleep(1000);
+        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`);
+        return { success: true, message: "Profile saved" };
       },
-    })
+    });
 
-    return <F0Form formDefinition={formDefinition} />
+    return <F0Form formDefinition={formDefinition} />;
   },
-}
+};
 
 /**
  * Form with a sections sidebar.
@@ -414,7 +414,7 @@ export const WithSectionsSidepanel: Story = {
         ],
         placeholder: "Select editors",
       }),
-    })
+    });
 
     const sections: Record<string, F0SectionConfig> = {
       basic: {
@@ -440,14 +440,14 @@ export const WithSectionsSidepanel: Story = {
           label: "Privacy settings",
           icon: Settings,
           onClick: () => {
-            console.info("Opening privacy settings...")
+            console.info("Opening privacy settings...");
           },
         },
       },
       editors: {
         title: "Editors",
       },
-    }
+    };
 
     const formDefinition = useF0FormDefinition({
       name: "survey-settings",
@@ -466,21 +466,21 @@ export const WithSectionsSidepanel: Story = {
         editors: "none",
       },
       onSubmit: async ({ data }) => {
-        await sleep(1000)
-        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
-        return { success: true }
+        await sleep(1000);
+        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`);
+        return { success: true };
       },
       submitConfig: { label: "Save Survey" },
-    })
+    });
 
     return (
       <F0Form
         formDefinition={formDefinition}
         styling={{ showSectionsSidepanel: true }}
       />
-    )
+    );
   },
-}
+};
 
 /**
  * Form with conditional field rendering based on other field values.
@@ -521,7 +521,7 @@ export const ConditionalRendering: Story = {
           typeof values.employeeCount === "number" &&
           values.employeeCount >= 50,
       }),
-    })
+    });
 
     const formDefinition = useF0FormDefinition({
       name: "conditional-rendering",
@@ -534,15 +534,15 @@ export const ConditionalRendering: Story = {
         enterprisePlan: false,
       },
       onSubmit: async ({ data }) => {
-        await sleep(1000)
-        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
-        return { success: true }
+        await sleep(1000);
+        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`);
+        return { success: true };
       },
-    })
+    });
 
-    return <F0Form formDefinition={formDefinition} />
+    return <F0Form formDefinition={formDefinition} />;
   },
-}
+};
 
 /**
  * Form with dynamic disabled fields based on other field values.
@@ -617,7 +617,7 @@ export const DynamicDisabled: Story = {
           typeof values.employeeCount !== "number" || values.employeeCount < 10,
         resetOnDisable: true,
       }),
-    })
+    });
 
     const formDefinition = useF0FormDefinition({
       name: "dynamic-disabled",
@@ -633,15 +633,15 @@ export const DynamicDisabled: Story = {
         bulkAction: undefined,
       },
       onSubmit: async ({ data }) => {
-        await sleep(1000)
-        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
-        return { success: true }
+        await sleep(1000);
+        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`);
+        return { success: true };
       },
-    })
+    });
 
-    return <F0Form formDefinition={formDefinition} />
+    return <F0Form formDefinition={formDefinition} />;
   },
-}
+};
 
 /**
  * Form demonstrating all available field types.
@@ -771,7 +771,7 @@ export const AllFieldTypes: Story = {
           fieldType: "daterange",
           fromLabel: "Start",
           toLabel: "End",
-        }
+        },
       ),
       richTextField: f0FormField(
         z.object({
@@ -785,9 +785,9 @@ export const AllFieldTypes: Story = {
           maxCharacters: 1000,
           height: "sm",
           plainHtmlMode: true,
-        }
+        },
       ),
-    })
+    });
 
     const formDefinition = useF0FormDefinition({
       name: "all-field-types",
@@ -813,15 +813,15 @@ export const AllFieldTypes: Story = {
         type: "action-bar",
       },
       onSubmit: async ({ data }) => {
-        await sleep(1000)
-        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
-        return { success: true }
+        await sleep(1000);
+        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`);
+        return { success: true };
       },
-    })
+    });
 
-    return <F0Form formDefinition={formDefinition} />
+    return <F0Form formDefinition={formDefinition} />;
   },
-}
+};
 
 /**
  * Form demonstrating all available field types in disabled state.
@@ -945,7 +945,7 @@ export const AllFieldTypesDisabled: Story = {
           fromLabel: "Start",
           toLabel: "End",
           disabled: true,
-        }
+        },
       ),
       richTextField: f0FormField(
         z.object({
@@ -960,9 +960,9 @@ export const AllFieldTypesDisabled: Story = {
           height: "sm",
           plainHtmlMode: true,
           disabled: true,
-        }
+        },
       ),
-    })
+    });
 
     const formDefinition = useF0FormDefinition({
       name: "all-field-types-disabled",
@@ -994,44 +994,44 @@ export const AllFieldTypesDisabled: Story = {
         },
       },
       onSubmit: async ({ data }) => {
-        await sleep(1000)
-        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
-        return { success: true }
+        await sleep(1000);
+        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`);
+        return { success: true };
       },
-    })
+    });
 
-    return <F0Form formDefinition={formDefinition} />
+    return <F0Form formDefinition={formDefinition} />;
   },
-}
+};
 
 function useMockUpload(): FileUploadHookReturn {
-  const [progress, setProgress] = useState(0)
-  const [status, setStatus] = useState<FileUploadStatus>("idle")
-  const abortRef = useRef(false)
+  const [progress, setProgress] = useState(0);
+  const [status, setStatus] = useState<FileUploadStatus>("idle");
+  const abortRef = useRef(false);
 
   const upload = useCallback(async (file: File): Promise<FileUploadResult> => {
-    abortRef.current = false
-    setStatus("processing")
-    setProgress(0)
-    await sleep(500)
-    if (abortRef.current) return { type: "aborted" }
-    setStatus("uploading")
+    abortRef.current = false;
+    setStatus("processing");
+    setProgress(0);
+    await sleep(500);
+    if (abortRef.current) return { type: "aborted" };
+    setStatus("uploading");
     for (let i = 1; i <= 10; i++) {
-      await sleep(200)
-      if (abortRef.current) return { type: "aborted" }
-      setProgress(i / 10)
+      await sleep(200);
+      if (abortRef.current) return { type: "aborted" };
+      setProgress(i / 10);
     }
-    setStatus("success")
-    return { type: "success", value: `signed_${file.name}_${Date.now()}` }
-  }, [])
+    setStatus("success");
+    return { type: "success", value: `signed_${file.name}_${Date.now()}` };
+  }, []);
 
   const cancelUpload = useCallback(() => {
-    abortRef.current = true
-    setStatus("idle")
-    setProgress(0)
-  }, [])
+    abortRef.current = true;
+    setStatus("idle");
+    setProgress(0);
+  }, []);
 
-  return { upload, cancelUpload, progress, status }
+  return { upload, cancelUpload, progress, status };
 }
 
 /**
@@ -1063,7 +1063,7 @@ export const FileFields: Story = {
           accept: ["application/pdf", "image"],
           maxSizeMB: 50,
           useUpload: useMockUpload,
-        }
+        },
       ),
       notes: f0FormField(z.string().optional(), {
         label: "Notes",
@@ -1071,7 +1071,7 @@ export const FileFields: Story = {
         rows: 3,
         placeholder: "Any additional notes...",
       }),
-    })
+    });
 
     const formDefinition = useF0FormDefinition({
       name: "file-fields",
@@ -1083,16 +1083,16 @@ export const FileFields: Story = {
         notes: "",
       },
       onSubmit: async ({ data }) => {
-        await sleep(1000)
-        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
-        return { success: true, message: "Document saved" }
+        await sleep(1000);
+        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`);
+        return { success: true, message: "Document saved" };
       },
       submitConfig: { label: "Save Document" },
-    })
+    });
 
-    return <F0Form formDefinition={formDefinition} />
+    return <F0Form formDefinition={formDefinition} />;
   },
-}
+};
 
 /**
  * File field with pre-existing files loaded via `initialFiles` on F0Form.
@@ -1117,9 +1117,9 @@ export const FileFieldsWithInitialFiles: Story = {
           accept: ["application/pdf", "image"],
           maxSizeMB: 50,
           useUpload: useMockUpload,
-        }
+        },
       ),
-    })
+    });
 
     const formDefinition = useF0FormDefinition({
       name: "file-initial",
@@ -1129,12 +1129,12 @@ export const FileFieldsWithInitialFiles: Story = {
         attachments: ["signed_invoice.pdf", "signed_receipt.png"],
       },
       onSubmit: async ({ data }) => {
-        await sleep(1000)
-        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
-        return { success: true, message: "Document updated" }
+        await sleep(1000);
+        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`);
+        return { success: true, message: "Document updated" };
       },
       submitConfig: { label: "Update Document" },
-    })
+    });
 
     return (
       <F0Form
@@ -1160,9 +1160,9 @@ export const FileFieldsWithInitialFiles: Story = {
           },
         ]}
       />
-    )
+    );
   },
-}
+};
 
 /**
  * Demonstrates the `renderCustomField` prop for integrating external
@@ -1185,13 +1185,13 @@ export const CustomField: Story = {
       options,
       placeholder,
     }: {
-      label: string
-      value: string | undefined
-      onChange: (value: string | undefined) => void
-      error?: string
-      disabled?: boolean
-      options: { id: string; name: string }[]
-      placeholder?: string
+      label: string;
+      value: string | undefined;
+      onChange: (value: string | undefined) => void;
+      error?: string;
+      disabled?: boolean;
+      options: { id: string; name: string }[];
+      placeholder?: string;
     }) => (
       <div className="flex flex-col gap-1">
         <label className="text-sm font-medium text-f1-foreground-secondary">
@@ -1216,7 +1216,7 @@ export const CustomField: Story = {
           <span className="text-sm text-f1-foreground-critical">{error}</span>
         )}
       </div>
-    )
+    );
 
     const PriorityPicker = ({
       label,
@@ -1225,11 +1225,11 @@ export const CustomField: Story = {
       error,
       disabled,
     }: {
-      label: string
-      value: string | undefined
-      onChange: (value: string | undefined) => void
-      error?: string
-      disabled?: boolean
+      label: string;
+      value: string | undefined;
+      onChange: (value: string | undefined) => void;
+      error?: string;
+      disabled?: boolean;
     }) => {
       const priorities = [
         { id: "low", label: "Low", color: "bg-blue-100 text-blue-800" },
@@ -1239,7 +1239,7 @@ export const CustomField: Story = {
           color: "bg-yellow-100 text-yellow-800",
         },
         { id: "high", label: "High", color: "bg-red-100 text-red-800" },
-      ]
+      ];
       return (
         <div className="flex flex-col gap-1">
           <label className="text-sm font-medium text-f1-foreground-secondary">
@@ -1266,14 +1266,14 @@ export const CustomField: Story = {
             <span className="text-sm text-f1-foreground-critical">{error}</span>
           )}
         </div>
-      )
-    }
+      );
+    };
 
     const employees = [
       { id: "1", name: "John Doe" },
       { id: "2", name: "Jane Smith" },
       { id: "3", name: "Bob Johnson" },
-    ]
+    ];
 
     const formSchema = z.object({
       title: f0FormField(z.string().min(1, "Title is required"), {
@@ -1298,7 +1298,7 @@ export const CustomField: Story = {
         fieldType: "textarea",
         rows: 3,
       }),
-    })
+    });
 
     const formDefinition = useF0FormDefinition({
       name: "custom-field-example",
@@ -1310,12 +1310,12 @@ export const CustomField: Story = {
         description: "",
       },
       onSubmit: async ({ data }) => {
-        await sleep(1000)
-        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
-        return { success: true }
+        await sleep(1000);
+        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`);
+        return { success: true };
       },
       submitConfig: { label: "Create Task", icon: null },
-    })
+    });
 
     const renderCustomField = useCallback((props: RenderCustomFieldProps) => {
       switch (props.customFieldName) {
@@ -1333,7 +1333,7 @@ export const CustomField: Story = {
               }
               placeholder={props.placeholder}
             />
-          )
+          );
         case "priority-picker":
           return (
             <PriorityPicker
@@ -1343,20 +1343,20 @@ export const CustomField: Story = {
               error={props.error}
               disabled={props.disabled}
             />
-          )
+          );
         default:
-          return null
+          return null;
       }
-    }, [])
+    }, []);
 
     return (
       <F0Form
         formDefinition={formDefinition}
         renderCustomField={renderCustomField}
       />
-    )
+    );
   },
-}
+};
 
 /**
  * Demonstrates `customFieldName` on a regular **select** field.
@@ -1370,10 +1370,10 @@ export const CustomField: Story = {
 export const SelectWithCustomFieldName: Story = {
   render() {
     type Department = {
-      id: number
-      name: string
-      headcount: number
-    }
+      id: number;
+      name: string;
+      headcount: number;
+    };
 
     const departmentsData: Department[] = [
       { id: 1, name: "Engineering", headcount: 42 },
@@ -1382,27 +1382,27 @@ export const SelectWithCustomFieldName: Story = {
       { id: 4, name: "Marketing", headcount: 20 },
       { id: 5, name: "Sales", headcount: 30 },
       { id: 6, name: "Support", headcount: 25 },
-    ]
+    ];
 
     const departmentsSource = createDataSourceDefinition<Department>({
       dataAdapter: {
         fetchData: async ({ search }) => {
-          await sleep(200)
-          let results = departmentsData
+          await sleep(200);
+          let results = departmentsData;
           if (search) {
-            const s = search.toLowerCase()
-            results = results.filter((d) => d.name.toLowerCase().includes(s))
+            const s = search.toLowerCase();
+            results = results.filter((d) => d.name.toLowerCase().includes(s));
           }
-          return { records: results }
+          return { records: results };
         },
       },
-    })
+    });
 
     const mapDepartmentOption = (dept: Department) => ({
       value: dept.id,
       label: dept.name,
       description: `${dept.headcount} people`,
-    })
+    });
 
     const formSchema = z.object({
       name: f0FormField(z.string().min(1, "Name is required"), {
@@ -1418,7 +1418,7 @@ export const SelectWithCustomFieldName: Story = {
           placeholder: "Select a department...",
           showSearchBox: true,
           customFieldName: "department-selector",
-        }
+        },
       ),
       // Multi-select field with customFieldName
       secondaryDepartments: f0FormField(z.array(z.number()).optional(), {
@@ -1429,7 +1429,7 @@ export const SelectWithCustomFieldName: Story = {
         multiple: true,
         customFieldName: "department-selector",
       }),
-    })
+    });
 
     const formDefinition = useF0FormDefinition({
       name: "select-custom-field-name",
@@ -1440,12 +1440,12 @@ export const SelectWithCustomFieldName: Story = {
         secondaryDepartments: [],
       },
       onSubmit: async ({ data }) => {
-        await sleep(1000)
-        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
-        return { success: true }
+        await sleep(1000);
+        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`);
+        return { success: true };
       },
       submitConfig: { label: "Save", icon: null },
-    })
+    });
 
     const renderCustomField = useCallback(
       (props: RenderCustomFieldProps): RenderCustomFieldSelectConfig => {
@@ -1455,13 +1455,13 @@ export const SelectWithCustomFieldName: Story = {
             _type: "select-config",
             source: departmentsSource,
             mapOptions: mapDepartmentOption,
-          }
+          };
         }
         // Fallback — should not happen in this example
-        return { _type: "select-config" }
+        return { _type: "select-config" };
       },
-      []
-    )
+      [],
+    );
 
     return (
       <div className="max-w-lg">
@@ -1470,9 +1470,9 @@ export const SelectWithCustomFieldName: Story = {
           renderCustomField={renderCustomField}
         />
       </div>
-    )
+    );
   },
-}
+};
 
 /**
  * Form with server-side validation errors.
@@ -1488,23 +1488,23 @@ export const ServerValidation: Story = {
         label: "Email",
         helpText: "Try 'taken@example.com' to see server validation error",
       }),
-    })
+    });
 
     const formDefinition = useF0FormDefinition({
       name: "server-validation",
       schema: formSchema,
       defaultValues: { username: "", email: "" },
       onSubmit: async ({ data }) => {
-        await sleep(1000)
+        await sleep(1000);
 
-        const errors: Record<string, string> = {}
+        const errors: Record<string, string> = {};
 
         if (data.username === "admin") {
-          errors.username = "This username is reserved"
+          errors.username = "This username is reserved";
         }
 
         if (data.email === "taken@example.com") {
-          errors.email = "This email is already registered"
+          errors.email = "This email is already registered";
         }
 
         if (Object.keys(errors).length > 0) {
@@ -1512,17 +1512,17 @@ export const ServerValidation: Story = {
             success: false,
             rootMessage: "Please fix the errors below",
             errors,
-          }
+          };
         }
 
-        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
-        return { success: true }
+        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`);
+        return { success: true };
       },
-    })
+    });
 
-    return <F0Form formDefinition={formDefinition} />
+    return <F0Form formDefinition={formDefinition} />;
   },
-}
+};
 
 /**
  * Complete form matching the visual design example.
@@ -1603,7 +1603,7 @@ export const VisualDesignExample: Story = {
         ],
         placeholder: "None",
       }),
-    })
+    });
 
     const sections: Record<string, F0SectionConfig> = {
       "basic-info": { title: "Basic Information" },
@@ -1611,7 +1611,7 @@ export const VisualDesignExample: Story = {
       schedule: { title: "Schedule" },
       visibility: { title: "Visibility & Privacy" },
       editors: { title: "Editors" },
-    }
+    };
 
     const formDefinition = useF0FormDefinition({
       name: "visual-design-example",
@@ -1630,20 +1630,20 @@ export const VisualDesignExample: Story = {
         editors: "none",
       },
       onSubmit: async ({ data }) => {
-        await sleep(1000)
-        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
-        return { success: true }
+        await sleep(1000);
+        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`);
+        return { success: true };
       },
       submitConfig: { label: "Create Survey", icon: null },
-    })
+    });
 
     return (
       <div className="max-w-lg">
         <F0Form formDefinition={formDefinition} />
       </div>
-    )
+    );
   },
-}
+};
 
 /**
  * Form with action bar submit type.
@@ -1669,7 +1669,7 @@ export const WithActionBar: Story = {
         fieldType: "switch",
         helpText: "Receive email notifications about updates",
       }),
-    })
+    });
 
     const formDefinition = useF0FormDefinition({
       name: "action-bar-example",
@@ -1685,11 +1685,11 @@ export const WithActionBar: Story = {
         notifications: true,
       },
       onSubmit: async ({ data }) => {
-        await sleep(1000)
-        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
-        return { success: true, message: "Settings saved successfully" }
+        await sleep(1000);
+        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`);
+        return { success: true, message: "Settings saved successfully" };
       },
-    })
+    });
 
     return (
       <div className="max-w-lg">
@@ -1698,9 +1698,9 @@ export const WithActionBar: Story = {
           Modify any field to see the action bar appear
         </p>
       </div>
-    )
+    );
   },
-}
+};
 
 /**
  * Form with action bar and discard button.
@@ -1731,7 +1731,7 @@ export const WithActionBarAndDiscard: Story = {
         label: "Publicly traded company",
         fieldType: "checkbox",
       }),
-    })
+    });
 
     const formDefinition = useF0FormDefinition({
       name: "action-bar-discard-example",
@@ -1749,11 +1749,11 @@ export const WithActionBarAndDiscard: Story = {
         publicCompany: false,
       },
       onSubmit: async ({ data }) => {
-        await sleep(1000)
-        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
-        return { success: true, message: "Company details updated" }
+        await sleep(1000);
+        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`);
+        return { success: true, message: "Company details updated" };
       },
-    })
+    });
 
     return (
       <div className="max-w-lg">
@@ -1762,9 +1762,9 @@ export const WithActionBarAndDiscard: Story = {
           Modify any field to see the action bar with Save and Discard buttons
         </p>
       </div>
-    )
+    );
   },
-}
+};
 
 /**
  * Demonstrates the different error trigger modes:
@@ -1780,19 +1780,19 @@ export const ErrorTriggerModes: Story = {
         {
           label: "Name",
           placeholder: "Enter your name",
-        }
+        },
       ),
       email: f0FormField(z.string().email(), {
         label: "Email",
       }),
-    })
+    });
 
-    const defaultValues = { name: "", email: "" }
+    const defaultValues = { name: "", email: "" };
 
     const onSubmit = async () => {
-      await sleep(500)
-      return { success: true as const }
-    }
+      await sleep(500);
+      return { success: true as const };
+    };
 
     const blurDefinition = useF0FormDefinition({
       name: "error-mode-blur",
@@ -1800,7 +1800,7 @@ export const ErrorTriggerModes: Story = {
       defaultValues,
       errorTriggerMode: "on-blur",
       onSubmit,
-    })
+    });
 
     const changeDefinition = useF0FormDefinition({
       name: "error-mode-change",
@@ -1808,7 +1808,7 @@ export const ErrorTriggerModes: Story = {
       defaultValues,
       errorTriggerMode: "on-change",
       onSubmit,
-    })
+    });
 
     const submitDefinition = useF0FormDefinition({
       name: "error-mode-submit",
@@ -1816,7 +1816,7 @@ export const ErrorTriggerModes: Story = {
       defaultValues,
       errorTriggerMode: "on-submit",
       onSubmit,
-    })
+    });
 
     return (
       <div className="grid max-w-4xl grid-cols-3 gap-8">
@@ -1844,17 +1844,17 @@ export const ErrorTriggerModes: Story = {
           <F0Form formDefinition={submitDefinition} />
         </div>
       </div>
-    )
+    );
   },
-}
+};
 
 // Mock data for data source example
 type Country = {
-  id: number
-  name: string
-  code: string
-  continent: string
-}
+  id: number;
+  name: string;
+  code: string;
+  continent: string;
+};
 
 const countriesData: Country[] = [
   { id: "1", name: "United States", code: "US", continent: "North America" },
@@ -1887,29 +1887,29 @@ const countriesData: Country[] = [
   { id: "28", name: "Singapore", code: "SG", continent: "Asia" },
   { id: "29", name: "Thailand", code: "TH", continent: "Asia" },
   { id: "30", name: "Vietnam", code: "VN", continent: "Asia" },
-].map((country, index) => ({ ...country, id: index + 1, value: index + 1 }))
+].map((country, index) => ({ ...country, id: index + 1, value: index + 1 }));
 
 /** Non-paginated data source - loads all results at once */
 const countriesSource = createDataSourceDefinition<Country>({
   dataAdapter: {
     fetchData: async ({ search }) => {
       // Simulate network latency
-      await sleep(200)
+      await sleep(200);
 
-      let results = countriesData
+      let results = countriesData;
       if (search) {
-        const searchLower = search.toLowerCase()
+        const searchLower = search.toLowerCase();
         results = results.filter(
           (country) =>
             country.name.toLowerCase().includes(searchLower) ||
-            country.code.toLowerCase().includes(searchLower)
-        )
+            country.code.toLowerCase().includes(searchLower),
+        );
       }
 
-      return { records: results }
+      return { records: results };
     },
   },
-})
+});
 
 /** Paginated data source - loads results in chunks with infinite scroll */
 const countriesPaginatedSource = createDataSourceDefinition<Country>({
@@ -1917,24 +1917,24 @@ const countriesPaginatedSource = createDataSourceDefinition<Country>({
     paginationType: "infinite-scroll",
     fetchData: async ({ search, pagination }) => {
       // Simulate network latency
-      await sleep(300)
+      await sleep(300);
 
-      const pageSize = pagination.perPage ?? 10
-      const cursor = "cursor" in pagination ? pagination.cursor : null
-      const offset = cursor ? Number(cursor) : 0
+      const pageSize = pagination.perPage ?? 10;
+      const cursor = "cursor" in pagination ? pagination.cursor : null;
+      const offset = cursor ? Number(cursor) : 0;
 
-      let results = countriesData
+      let results = countriesData;
       if (search) {
-        const searchLower = search.toLowerCase()
+        const searchLower = search.toLowerCase();
         results = results.filter(
           (country) =>
             country.name.toLowerCase().includes(searchLower) ||
-            country.code.toLowerCase().includes(searchLower)
-        )
+            country.code.toLowerCase().includes(searchLower),
+        );
       }
 
-      const paginatedResults = results.slice(offset, offset + pageSize)
-      const nextOffset = offset + pageSize
+      const paginatedResults = results.slice(offset, offset + pageSize);
+      const nextOffset = offset + pageSize;
 
       return {
         type: "infinite-scroll" as const,
@@ -1943,22 +1943,22 @@ const countriesPaginatedSource = createDataSourceDefinition<Country>({
         hasMore: nextOffset < results.length,
         records: paginatedResults,
         total: results.length,
-      }
+      };
     },
   },
-})
+});
 
 const selectDefaultValues = {
   country: 1,
   countryPaginated: 1,
   countries: [],
-}
+};
 
 const mapCountryOptions = (country: Country) => ({
   value: country.id,
   label: country.name,
   description: country.continent,
-})
+});
 
 /**
  * Select fields can use a data source for dynamic options.
@@ -1996,26 +1996,26 @@ export const SelectWithDataSource: Story = {
         source: countriesPaginatedSource,
         mapOptions: mapCountryOptions,
       }),
-    })
+    });
 
     const formDefinition = useF0FormDefinition({
       name: "select-datasource-example",
       schema: formSchema,
       defaultValues: selectDefaultValues,
       onSubmit: async ({ data }) => {
-        await sleep(1000)
-        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
-        return { success: true }
+        await sleep(1000);
+        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`);
+        return { success: true };
       },
-    })
+    });
 
     return (
       <div className="max-w-lg">
         <F0Form formDefinition={formDefinition} />
       </div>
-    )
+    );
   },
-}
+};
 
 /**
  * Form inside a Dialog using `useF0Form` hook for external control.
@@ -2033,8 +2033,8 @@ export const SelectWithDataSource: Story = {
  */
 export const FormInDialog: Story = {
   render() {
-    const [open, setOpen] = useState(false)
-    const { formRef, submit, isSubmitting, hasErrors } = useF0Form()
+    const [open, setOpen] = useState(false);
+    const { formRef, submit, isSubmitting, hasErrors } = useF0Form();
 
     const formSchema = z.object({
       name: f0FormField(
@@ -2042,7 +2042,7 @@ export const FormInDialog: Story = {
         {
           label: "Name",
           placeholder: "Enter name",
-        }
+        },
       ),
       email: f0FormField(z.string().email("Please enter a valid email"), {
         label: "Email",
@@ -2057,7 +2057,7 @@ export const FormInDialog: Story = {
         ],
         placeholder: "Select a role",
       }),
-    })
+    });
 
     const formDefinition = useF0FormDefinition({
       name: "dialog-form",
@@ -2069,12 +2069,12 @@ export const FormInDialog: Story = {
       },
       submitConfig: { type: "default", hideSubmitButton: true },
       onSubmit: async ({ data }) => {
-        await sleep(1000)
-        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
-        setOpen(false)
-        return { success: true }
+        await sleep(1000);
+        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`);
+        setOpen(false);
+        return { success: true };
       },
-    })
+    });
 
     return (
       <>
@@ -2103,9 +2103,9 @@ export const FormInDialog: Story = {
           <F0Form formDefinition={formDefinition} formRef={formRef} />
         </F0Dialog>
       </>
-    )
+    );
   },
-}
+};
 
 /**
  * Form with dynamic date constraints.
@@ -2125,7 +2125,7 @@ export const DynamicDateConstraints: Story = {
           {
             label: "Project Name",
             placeholder: "Enter project name",
-          }
+          },
         ),
         startDate: f0FormField(
           z.date().min(new Date(), "Start date must be in the future"),
@@ -2133,7 +2133,7 @@ export const DynamicDateConstraints: Story = {
             label: "Start Date",
             placeholder: "Select start date",
             helpText: "When does the project begin?",
-          }
+          },
         ),
         endDate: f0FormField(z.date(), {
           label: "End Date",
@@ -2158,7 +2158,7 @@ export const DynamicDateConstraints: Story = {
             code: z.ZodIssueCode.custom,
             message: "End date must be on or after start date",
             path: ["endDate"],
-          })
+          });
         }
         // Validate deadline is on or after end date
         if (data.endDate && data.deadline && data.deadline < data.endDate) {
@@ -2166,9 +2166,9 @@ export const DynamicDateConstraints: Story = {
             code: z.ZodIssueCode.custom,
             message: "Deadline must be on or after end date",
             path: ["deadline"],
-          })
+          });
         }
-      })
+      });
 
     const formDefinition = useF0FormDefinition({
       name: "dynamic-date-constraints",
@@ -2180,15 +2180,15 @@ export const DynamicDateConstraints: Story = {
         deadline: undefined,
       },
       onSubmit: async ({ data }) => {
-        await sleep(1000)
-        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
-        return { success: true }
+        await sleep(1000);
+        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`);
+        return { success: true };
       },
-    })
+    });
 
-    return <F0Form formDefinition={formDefinition} />
+    return <F0Form formDefinition={formDefinition} />;
   },
-}
+};
 
 /**
  * Form with per-section schema: each section has its own independent schema,
@@ -2238,7 +2238,7 @@ export const PerSectionSubmit: Story = {
           label: "Enable notifications",
         }),
       }),
-    }
+    };
 
     const formDefinition = useF0FormDefinition({
       name: "per-section",
@@ -2264,18 +2264,18 @@ export const PerSectionSubmit: Story = {
         preferences: { theme: "system", notifications: true },
       },
       onSubmit: async ({ sectionId, data }) => {
-        await sleep(1000)
+        await sleep(1000);
         alert(
-          `Section "${sectionId}" submitted: ${JSON.stringify(data, null, 2)}`
-        )
-        return { success: true }
+          `Section "${sectionId}" submitted: ${JSON.stringify(data, null, 2)}`,
+        );
+        return { success: true };
       },
       submitConfig: { label: "Save" },
-    })
+    });
 
-    return <F0Form formDefinition={formDefinition} />
+    return <F0Form formDefinition={formDefinition} />;
   },
-}
+};
 
 /**
  * Per-section schema with sections sidebar navigation.
@@ -2313,7 +2313,7 @@ export const PerSectionWithSidebar: Story = {
           label: "End date",
         }),
       }),
-    }
+    };
 
     const formDefinition = useF0FormDefinition({
       name: "per-section-sidebar",
@@ -2335,21 +2335,21 @@ export const PerSectionWithSidebar: Story = {
         schedule: { publishOn: undefined, endsAt: undefined },
       },
       onSubmit: async ({ sectionId, data }) => {
-        await sleep(1000)
-        alert(`Section "${sectionId}" saved: ${JSON.stringify(data, null, 2)}`)
-        return { success: true }
+        await sleep(1000);
+        alert(`Section "${sectionId}" saved: ${JSON.stringify(data, null, 2)}`);
+        return { success: true };
       },
       submitConfig: { label: "Save" },
-    })
+    });
 
     return (
       <F0Form
         formDefinition={formDefinition}
         styling={{ showSectionsSidepanel: true }}
       />
-    )
+    );
   },
-}
+};
 
 /**
  * Per-section schema with `showSubmitWhenDirty` enabled.
@@ -2394,7 +2394,7 @@ export const PerSectionShowSubmitWhenDirty: Story = {
           placeholder: "Enter new password",
         }),
       }),
-    }
+    };
 
     const formDefinition = useF0FormDefinition({
       name: "per-section-dirty",
@@ -2425,16 +2425,16 @@ export const PerSectionShowSubmitWhenDirty: Story = {
         security: { currentPassword: "", newPassword: "" },
       },
       onSubmit: async ({ sectionId, data }) => {
-        await sleep(1000)
-        alert(`Section "${sectionId}" saved: ${JSON.stringify(data, null, 2)}`)
-        return { success: true }
+        await sleep(1000);
+        alert(`Section "${sectionId}" saved: ${JSON.stringify(data, null, 2)}`);
+        return { success: true };
       },
       submitConfig: { label: "Save" },
-    })
+    });
 
-    return <F0Form formDefinition={formDefinition} />
+    return <F0Form formDefinition={formDefinition} />;
   },
-}
+};
 
 /**
  * Form with async `defaultValues` fetched from an external source.
@@ -2469,33 +2469,33 @@ export const AsyncDefaultValues: Story = {
         label: "Enable notifications",
         fieldType: "switch",
       }),
-    })
+    });
 
     const formDefinition = useF0FormDefinition({
       name: "async-defaults",
       schema: formSchema,
       defaultValues: async (_signal: AbortSignal) => {
         // Simulate fetching user profile from an API
-        await sleep(2000)
+        await sleep(2000);
         return {
           firstName: "Jane",
           lastName: "Smith",
           email: "jane.smith@example.com",
           bio: "Software engineer passionate about design systems.",
           notifications: true,
-        }
+        };
       },
       onSubmit: async ({ data }) => {
-        await sleep(1000)
-        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
-        return { success: true, message: "Profile updated" }
+        await sleep(1000);
+        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`);
+        return { success: true, message: "Profile updated" };
       },
       submitConfig: { label: "Save Profile" },
-    })
+    });
 
-    return <F0Form formDefinition={formDefinition} />
+    return <F0Form formDefinition={formDefinition} />;
   },
-}
+};
 
 /**
  * Per-section form with async `defaultValues`.
@@ -2526,7 +2526,7 @@ export const AsyncDefaultValuesPerSection: Story = {
           placeholder: "+1 (555) 000-0000",
         }),
       }),
-    }
+    };
 
     const formDefinition = useF0FormDefinition({
       name: "async-per-section",
@@ -2543,25 +2543,25 @@ export const AsyncDefaultValuesPerSection: Story = {
       },
       defaultValues: async (_signal: AbortSignal) => {
         // Simulate API call
-        await sleep(2000)
+        await sleep(2000);
         return {
           personal: { firstName: "Jane", lastName: "Smith" },
           contact: { email: "jane@example.com", phone: "+1 555 123 4567" },
-        }
+        };
       },
       onSubmit: async ({ sectionId, data }) => {
-        await sleep(1000)
+        await sleep(1000);
         console.info(
-          `Section "${sectionId}" submitted: ${JSON.stringify(data, null, 2)}`
-        )
-        return { success: true }
+          `Section "${sectionId}" submitted: ${JSON.stringify(data, null, 2)}`,
+        );
+        return { success: true };
       },
       submitConfig: { label: "Save" },
-    })
+    });
 
-    return <F0Form formDefinition={formDefinition} />
+    return <F0Form formDefinition={formDefinition} />;
   },
-}
+};
 
 /**
  * Form definition with `defaultValuesParamsSchema`.
@@ -2596,16 +2596,16 @@ export const WithDefaultValuesParamsSchema: Story = {
         label: "Role",
         placeholder: "e.g. Engineer",
       }),
-    })
+    });
 
     // Mock employee database
     const employees: Record<
       string,
       {
-        firstName: string
-        lastName: string
-        email: string
-        role: string
+        firstName: string;
+        lastName: string;
+        email: string;
+        role: string;
       }
     > = {
       "emp-1": {
@@ -2620,7 +2620,7 @@ export const WithDefaultValuesParamsSchema: Story = {
         email: "john.smith@factorial.co",
         role: "Product Manager",
       },
-    }
+    };
 
     const formDefinition = useF0FormDefinition({
       name: "edit-employee",
@@ -2631,24 +2631,26 @@ export const WithDefaultValuesParamsSchema: Story = {
       }),
       // defaultValues receives typed params — auto-inferred from defaultValuesParamsSchema
       defaultValues: async ({ employeeId }) => {
-        await sleep(1500)
+        await sleep(1500);
         // At mount time params is {} so employeeId is undefined — return sensible defaults
-        const employee = employeeId ? employees[employeeId] : employees["emp-1"]
+        const employee = employeeId
+          ? employees[employeeId]
+          : employees["emp-1"];
         return {
           firstName: employee?.firstName ?? "",
           lastName: employee?.lastName ?? "",
           email: employee?.email ?? "",
           role: employee?.role ?? "",
-        }
+        };
       },
       onSubmit: async ({ data }) => {
-        await sleep(1000)
-        console.info(`Employee updated: ${JSON.stringify(data, null, 2)}`)
-        return { success: true, message: "Employee updated" }
+        await sleep(1000);
+        console.info(`Employee updated: ${JSON.stringify(data, null, 2)}`);
+        return { success: true, message: "Employee updated" };
       },
       submitConfig: { label: "Save Changes" },
-    })
+    });
 
-    return <F0Form formDefinition={formDefinition} />
+    return <F0Form formDefinition={formDefinition} />;
   },
-}
+};

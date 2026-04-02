@@ -7,7 +7,7 @@ import { F0Text } from "@/components/F0Text"
 import {
   DropdownInternal,
   DropdownItem,
-} from "@/experimental/Navigation/Dropdown/internal.tsx"
+} from "@/patterns/Navigation/Dropdown/internal.tsx"
 import { One as OneIcon } from "@/icons/ai"
 import { Ellipsis, Handle } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"

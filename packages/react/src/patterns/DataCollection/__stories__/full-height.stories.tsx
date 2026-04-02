@@ -1,14 +1,14 @@
-import { Meta, StoryObj } from "@storybook/react-vite"
+import { Meta, StoryObj } from "@storybook/react-vite";
 
 import {
   buildSecondaryActions,
   createDataAdapter,
   ExampleComponent,
   generateMockUsers,
-} from "./mockData"
+} from "./mockData";
 
 const meta = {
-  title: "Patterns/DataCollection/Full height",
+  title: "Data Collection/Full height",
   component: ExampleComponent,
   parameters: {
     layout: "padded",
@@ -28,10 +28,10 @@ const meta = {
       </div>
     ),
   ],
-} satisfies Meta<typeof ExampleComponent>
+} satisfies Meta<typeof ExampleComponent>;
 
-export default meta
-type Story = StoryObj<typeof meta>
+export default meta;
+type Story = StoryObj<typeof meta>;
 
 export const Basic: Story = {
   render: () => (
@@ -45,17 +45,17 @@ export const Basic: Story = {
       }}
     />
   ),
-}
+};
 
 export const WithPagination: Story = {
   ...Basic,
   render: () => {
-    const paginatedMockUsers = generateMockUsers(50)
+    const paginatedMockUsers = generateMockUsers(50);
     const dataAdapter = createDataAdapter({
       data: paginatedMockUsers,
       delay: 500,
       paginationType: "pages",
-    })
+    });
 
     return (
       <ExampleComponent
@@ -63,9 +63,9 @@ export const WithPagination: Story = {
         fullHeight
         dataAdapter={dataAdapter}
       />
-    )
+    );
   },
-}
+};
 
 export const WithPaginationAndGrouping: Story = {
   ...WithPagination,
@@ -73,12 +73,12 @@ export const WithPaginationAndGrouping: Story = {
     chromatic: { disableSnapshot: false },
   },
   render: () => {
-    const paginatedMockUsers = generateMockUsers(50)
+    const paginatedMockUsers = generateMockUsers(50);
     const dataAdapter = createDataAdapter({
       data: paginatedMockUsers,
       delay: 500,
       paginationType: "pages",
-    })
+    });
 
     return (
       <ExampleComponent
@@ -97,6 +97,6 @@ export const WithPaginationAndGrouping: Story = {
         }}
         dataAdapter={dataAdapter}
       />
-    )
+    );
   },
-}
+};

@@ -1,27 +1,27 @@
-import { Meta, StoryObj } from "@storybook/react-vite"
+import { Meta, StoryObj } from "@storybook/react-vite";
 
-import { Briefcase, Building, Envelope } from "@/icons/app"
+import { Briefcase, Building, Envelope } from "@/icons/app";
 
-import { useDataCollectionSource } from "../../hooks/useDataCollectionSource"
-import { OneDataCollection } from "../../index"
+import { useDataCollectionSource } from "../../hooks/useDataCollectionSource";
+import { OneDataCollection } from "../../index";
 import {
   createPromiseDataFetch,
   filterPresets,
   filters,
   MockUser,
   sortings,
-} from "../mockData"
+} from "../mockData";
 
 const meta = {
-  title: "Patterns/DataCollection/Filters/Per Visualization",
+  title: "Data Collection/Filters/Per Visualization",
   parameters: {
     layout: "padded",
   },
   tags: ["experimental", "internal"],
-} satisfies Meta
+} satisfies Meta;
 
-export default meta
-type Story = StoryObj<typeof meta>
+export default meta;
+type Story = StoryObj<typeof meta>;
 
 export const FiltersPerVisualization: Story = {
   render: () => {
@@ -32,7 +32,7 @@ export const FiltersPerVisualization: Story = {
       dataAdapter: {
         fetchData: createPromiseDataFetch(),
       },
-    })
+    });
 
     return (
       <OneDataCollection
@@ -110,7 +110,7 @@ export const FiltersPerVisualization: Story = {
           },
         ]}
       />
-    )
+    );
   },
   parameters: {
     docs: {
@@ -144,7 +144,7 @@ const source = useDataCollectionSource({
       },
     },
   },
-}
+};
 
 export const MixedGlobalAndPerViewFilters: Story = {
   render: () => {
@@ -155,7 +155,7 @@ export const MixedGlobalAndPerViewFilters: Story = {
       dataAdapter: {
         fetchData: createPromiseDataFetch(),
       },
-    })
+    });
 
     return (
       <OneDataCollection
@@ -207,7 +207,7 @@ export const MixedGlobalAndPerViewFilters: Story = {
           },
         ]}
       />
-    )
+    );
   },
   parameters: {
     docs: {
@@ -240,7 +240,7 @@ const source = useDataCollectionSource({
       },
     },
   },
-}
+};
 
 export const PerViewPresetsOnly: Story = {
   render: () => {
@@ -251,7 +251,7 @@ export const PerViewPresetsOnly: Story = {
       dataAdapter: {
         fetchData: createPromiseDataFetch(),
       },
-    })
+    });
 
     return (
       <OneDataCollection
@@ -329,7 +329,7 @@ export const PerViewPresetsOnly: Story = {
           },
         ]}
       />
-    )
+    );
   },
   parameters: {
     docs: {
@@ -362,4 +362,4 @@ const source = useDataCollectionSource({
       },
     },
   },
-}
+};

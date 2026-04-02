@@ -1,14 +1,14 @@
-import { Meta, StoryObj } from "@storybook/react-vite"
-import { expect, within } from "storybook/test"
+import { Meta, StoryObj } from "@storybook/react-vite";
+import { expect, within } from "storybook/test";
 
-import { BarChartProps } from "../../../components/Charts/BarChart"
-import { Default as BarChartStory } from "@/kits/Charts/BarChart/__stories__/BarChart.stories"
-import { Placeholder } from "../../../lib/storybook-utils/placeholder"
-import { BarChartWidget } from "@/experimental/Widgets/Charts/BarChartWidget"
-import { Carousel } from "./index"
+import { BarChartProps } from "@/kits/Charts/BarChart";
+import { Default as BarChartStory } from "@/kits/Charts/BarChart/__stories__/BarChart.stories";
+import { Placeholder } from "../../../lib/storybook-utils/placeholder";
+import { BarChartWidget } from "@/kits/WidgetCharts/BarChartWidget";
+import { Carousel } from "./index";
 
 const meta: Meta<typeof Carousel> = {
-  title: "Patterns/Navigation/Carousel/Carousel",
+  title: "Navigation/Carousel/Carousel",
   component: Carousel,
   argTypes: {
     autoplay: { control: "boolean" },
@@ -17,17 +17,17 @@ const meta: Meta<typeof Carousel> = {
     showPeek: { control: "boolean" },
   },
   tags: ["autodocs", "experimental"],
-}
+};
 
-export default meta
+export default meta;
 
-type Story = StoryObj<typeof Carousel>
+type Story = StoryObj<typeof Carousel>;
 
 const SLIDES = Array.from({ length: 15 }, (_, i) => (
   <Placeholder key={i + 1} className="h-32 min-w-40">
     Slide {i + 1}
   </Placeholder>
-))
+));
 
 export const Default: Story = {
   decorators: [
@@ -51,7 +51,7 @@ export const Default: Story = {
     children: SLIDES,
     columns: { default: 1 },
   },
-}
+};
 
 /**
  * `columns`: An object specifying the number of columns to display at different breakpoints:
@@ -87,7 +87,7 @@ export const CustomColumns: Story = {
       xl: 6,
     },
   },
-}
+};
 
 export const DoubleColumns: Story = {
   args: {
@@ -103,7 +103,7 @@ export const DoubleColumns: Story = {
       },
     ],
   },
-}
+};
 
 /**
  * `autoplay`: Whether to automatically scroll through the slides. Default is `false`.
@@ -128,7 +128,7 @@ export const AutoScroll: Story = {
     children: SLIDES,
     columns: { default: 1 },
   },
-}
+};
 
 /**
  * `sneakPeek`: Whether to show a peek of the next slide. Default is `false`.
@@ -153,7 +153,7 @@ export const SneakPeek: Story = {
     showPeek: true,
     columns: { default: 1 },
   },
-}
+};
 
 export const NoColumns: Story = {
   decorators: [
@@ -168,9 +168,9 @@ export const NoColumns: Story = {
     children: SLIDES,
     showPeek: true,
   },
-}
+};
 
-const randomClasses = ["h-64", "h-full", "h-32", "w-32", "w-full", "w-64"]
+const randomClasses = ["h-64", "h-full", "h-32", "w-32", "w-full", "w-64"];
 
 const SLIDES_RANDOM = [
   <BarChartWidget
@@ -179,15 +179,15 @@ const SLIDES_RANDOM = [
     fullHeight
   />,
   ...Array.from({ length: 6 }, (_, i) => {
-    const randomHeight = randomClasses[Math.floor(i / 2)]
-    const randomWidth = randomClasses[Math.floor(i / 2) + 3]
+    const randomHeight = randomClasses[Math.floor(i / 2)];
+    const randomWidth = randomClasses[Math.floor(i / 2) + 3];
     return (
       <Placeholder key={i + 1} className={`${randomHeight} ${randomWidth}`}>
         Slide {i + 1} ({randomHeight} {randomWidth})
       </Placeholder>
-    )
+    );
   }),
-]
+];
 
 /**
  * Care using this component for distinct size widgets.
@@ -212,7 +212,7 @@ export const MultipleWidths: Story = {
     showPeek: true,
     showDots: false,
   },
-}
+};
 
 export const RandomWithColumns: Story = {
   decorators: [
@@ -241,14 +241,14 @@ export const RandomWithColumns: Story = {
       lg: 3,
     },
   },
-}
+};
 
 export const FewItemsWithColumns: Story = {
   args: {
     ...CustomColumns.args,
     children: SLIDES.slice(0, 2),
   },
-}
+};
 
 export const WithDataTestId: Story = {
   decorators: [
@@ -263,7 +263,7 @@ export const WithDataTestId: Story = {
     dataTestId: "carousel-test-id",
   },
   play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    await expect(canvas.getByTestId("carousel-test-id")).toBeInTheDocument()
+    const canvas = within(canvasElement);
+    await expect(canvas.getByTestId("carousel-test-id")).toBeInTheDocument();
   },
-}
+};

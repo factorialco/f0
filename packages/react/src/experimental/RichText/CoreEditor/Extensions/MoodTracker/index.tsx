@@ -14,7 +14,7 @@ import {
 } from "@/components/avatars/F0AvatarPulse"
 import { F0Button } from "@/components/F0Button"
 import { F0Icon } from "@/components/F0Icon"
-import { Dropdown } from "@/experimental/Navigation/Dropdown"
+import { Dropdown } from "@/patterns/Navigation/Dropdown"
 import { ChevronDown, ChevronUp, Delete } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 

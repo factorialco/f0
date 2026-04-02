@@ -1,14 +1,14 @@
-import { Meta, StoryObj } from "@storybook/react-vite"
+import { Meta, StoryObj } from "@storybook/react-vite";
 
-import type { CardImageFit, CardImageSize } from "@/components/F0Card"
+import type { CardImageFit, CardImageSize } from "@/components/F0Card";
 
-import { cardImageFits, cardImageSizes } from "@/components/F0Card"
-import { mockImage } from "@/testing/mocks/images"
+import { cardImageFits, cardImageSizes } from "@/components/F0Card";
+import { mockImage } from "@/testing/mocks/images";
 
-import { ExampleComponent, getMockVisualizations } from "../../mockData"
+import { ExampleComponent, getMockVisualizations } from "../../mockData";
 
 const meta = {
-  title: "Patterns/DataCollection/Visualizations/Card",
+  title: "Data Collection/Visualizations/Card",
   parameters: {
     layout: "fullscreen",
     a11y: {
@@ -53,30 +53,30 @@ const meta = {
     imageSize: "sm",
     imageType: "wide",
   },
-} satisfies Meta
+} satisfies Meta;
 
-export default meta
+export default meta;
 type Story = StoryObj<
   typeof meta & {
-    imageFit?: CardImageFit
-    imageSize?: CardImageSize
-    imageType?: "squared" | "small" | "wide" | "vertical"
+    imageFit?: CardImageFit;
+    imageSize?: CardImageSize;
+    imageType?: "squared" | "small" | "wide" | "vertical";
   }
->
+>;
 
 const imageTypes = {
   squared: mockImage("card", 0), // /cards/squared.jpg
   small: mockImage("card", 1), // /cards/small.jpg
   wide: mockImage("card", 2), // /cards/wide.jpg
   vertical: mockImage("card", 3), // /cards/vertical.jpg
-} as const
+} as const;
 
 export const BasicCardVisualization: Story = {
   render: () => {
-    const mockVisualizations = getMockVisualizations()
-    return <ExampleComponent visualizations={[mockVisualizations.card]} />
+    const mockVisualizations = getMockVisualizations();
+    return <ExampleComponent visualizations={[mockVisualizations.card]} />;
   },
-}
+};
 
 export const ImageFitOptions: Story = {
   parameters: {
@@ -88,20 +88,21 @@ export const ImageFitOptions: Story = {
     imageType: "wide",
   },
   render: (args) => {
-    const baseCard = getMockVisualizations().card
+    const baseCard = getMockVisualizations().card;
 
     const typedArgs = args as {
-      imageFit?: CardImageFit
-      imageSize?: CardImageSize
-      imageType?: keyof typeof imageTypes
-    }
-    const imageFit = (typedArgs.imageFit || "fit-width") as CardImageFit
-    const imageSize = typedArgs.imageSize || "sm"
-    const imageType = (typedArgs.imageType || "wide") as keyof typeof imageTypes
-    const selectedImage = imageTypes[imageType]
+      imageFit?: CardImageFit;
+      imageSize?: CardImageSize;
+      imageType?: keyof typeof imageTypes;
+    };
+    const imageFit = (typedArgs.imageFit || "fit-width") as CardImageFit;
+    const imageSize = typedArgs.imageSize || "sm";
+    const imageType = (typedArgs.imageType ||
+      "wide") as keyof typeof imageTypes;
+    const selectedImage = imageTypes[imageType];
 
     const baseOptions =
-      (baseCard as { options?: Record<string, unknown> }).options || {}
+      (baseCard as { options?: Record<string, unknown> }).options || {};
 
     const visualization = {
       ...baseCard,
@@ -111,7 +112,7 @@ export const ImageFitOptions: Story = {
         imageSize,
         image: () => selectedImage,
       },
-    } as unknown as typeof baseCard
+    } as unknown as typeof baseCard;
 
     return (
       <div className="w-full space-y-4">
@@ -122,6 +123,6 @@ export const ImageFitOptions: Story = {
           noSorting={true}
         />
       </div>
-    )
+    );
   },
-}
+};

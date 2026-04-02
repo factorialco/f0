@@ -1,29 +1,29 @@
-import { Meta, StoryObj } from "@storybook/react-vite"
+import { Meta, StoryObj } from "@storybook/react-vite";
 
-import { BarChartProps } from "../../../../components/Charts/BarChart"
-import { Default as BarChartStory } from "@/kits/Charts/BarChart/__stories__/BarChart.stories"
-import { Placeholder } from "../../../../lib/storybook-utils/placeholder"
-import { BarChartWidget } from "@/experimental/Widgets/Charts/BarChartWidget"
-import { DynamicCarousel } from "./index"
+import { BarChartProps } from "@/kits/Charts/BarChart";
+import { Default as BarChartStory } from "@/kits/Charts/BarChart/__stories__/BarChart.stories";
+import { Placeholder } from "../../../../lib/storybook-utils/placeholder";
+import { BarChartWidget } from "@/kits/WidgetCharts/BarChartWidget";
+import { DynamicCarousel } from "./index";
 
 const meta: Meta<typeof DynamicCarousel> = {
-  title: "Patterns/Navigation/Carousel/DynamicCarousel",
+  title: "Navigation/Carousel/DynamicCarousel",
   component: DynamicCarousel,
   tags: ["autodocs", "experimental"],
-}
+};
 
-export default meta
+export default meta;
 
-type Story = StoryObj<typeof DynamicCarousel>
+type Story = StoryObj<typeof DynamicCarousel>;
 
-const randomClasses = ["h-full", "h-64", "h-32", "w-32", "w-full", "w-64"]
+const randomClasses = ["h-full", "h-64", "h-32", "w-32", "w-full", "w-64"];
 
 const SLIDES_RANDOM = [
   <BarChartWidget key="widget" chart={BarChartStory.args as BarChartProps} />,
   <BarChartWidget key="widget2" chart={BarChartStory.args as BarChartProps} />,
   ...Array.from({ length: 6 }, (_, i) => {
-    const randomHeight = randomClasses[Math.floor(i / 2)]
-    const randomWidth = randomClasses[Math.floor(i / 2) + 3]
+    const randomHeight = randomClasses[Math.floor(i / 2)];
+    const randomWidth = randomClasses[Math.floor(i / 2) + 3];
     return (
       <Placeholder
         key={`widget${i + 2}`}
@@ -31,9 +31,9 @@ const SLIDES_RANDOM = [
       >
         Slide {i + 1} ({randomHeight} {randomWidth})
       </Placeholder>
-    )
+    );
   }),
-]
+];
 
 export const Default: Story = {
   decorators: [
@@ -46,4 +46,4 @@ export const Default: Story = {
   args: {
     children: SLIDES_RANDOM,
   },
-}
+};

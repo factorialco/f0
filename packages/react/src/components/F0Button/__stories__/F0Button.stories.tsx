@@ -1,17 +1,17 @@
-import type { Meta, StoryObj } from "@storybook/react-vite"
+import type { Meta, StoryObj } from "@storybook/react-vite";
 
-import React from "react"
-import { expect, within } from "storybook/test"
+import React from "react";
+import { expect, within } from "storybook/test";
 
-import { Add, Archive, Delete, Save } from "@/icons/app"
-import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
-import { withSnapshot } from "@/lib/storybook-utils/parameters"
-import { navTargets } from "@/ui/Action"
+import { Add, Archive, Delete, Save } from "@/icons/app";
+import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args";
+import { withSnapshot } from "@/lib/storybook-utils/parameters";
+import { navTargets } from "@/ui/Action";
 
-import { F0Button } from "../F0Button"
+import { F0Button } from "../F0Button";
 
 const meta = {
-  title: "Components/Button",
+  title: "Button/Button",
   component: F0Button,
   parameters: {
     layout: "centered",
@@ -34,7 +34,7 @@ const meta = {
   args: {
     variant: "default",
     onClick: () => {
-      console.log("Button clicked")
+      console.log("Button clicked");
       //fn()
     },
     label: "Click me",
@@ -113,10 +113,10 @@ const meta = {
     },
     ...dataTestIdArgs,
   },
-} satisfies Meta<typeof F0Button>
+} satisfies Meta<typeof F0Button>;
 
-export default meta
-type Story = StoryObj<typeof meta>
+export default meta;
+type Story = StoryObj<typeof meta>;
 
 // Basic Variants
 export const Default: Story = {
@@ -126,12 +126,12 @@ export const Default: Story = {
     "data-test": "data",
   },
   play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
+    const canvas = within(canvasElement);
 
-    const button = canvas.getByRole("button")
-    await expect(button.dataset.test).toBe("data")
+    const button = canvas.getByRole("button");
+    await expect(button.dataset.test).toBe("data");
   },
-}
+};
 
 // Basic Variants
 export const WithHref: Story = {
@@ -150,12 +150,12 @@ export const WithHref: Story = {
     "data-test": "data",
   },
   play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
+    const canvas = within(canvasElement);
 
-    const button = canvas.getByRole("link")
-    await expect(button.dataset.test).toBe("data")
+    const button = canvas.getByRole("link");
+    await expect(button.dataset.test).toBe("data");
   },
-}
+};
 
 export const Variants: Story = {
   parameters: withSnapshot({}),
@@ -169,7 +169,7 @@ export const Variants: Story = {
       <F0Button {...args} variant="promote" label="Promote" />
     </div>
   ),
-}
+};
 
 export const IconVariants: Story = {
   parameters: withSnapshot({}),
@@ -251,7 +251,7 @@ export const IconVariants: Story = {
       </div>
     </div>
   ),
-}
+};
 
 // Size Variants
 export const Sizes: Story = {
@@ -263,7 +263,7 @@ export const Sizes: Story = {
       <F0Button {...args} size="sm" label="Small" tooltip="Small button" />
     </div>
   ),
-}
+};
 
 export const Ellipsis: Story = {
   parameters: withSnapshot({
@@ -335,21 +335,21 @@ export const Ellipsis: Story = {
       />
     </div>
   ),
-}
+};
 
 export const Disabled: Story = {
   args: {
     disabled: true,
     label: "Disabled Button",
   },
-}
+};
 
 export const Loading: Story = {
   args: {
     loading: true,
     label: "Processing...",
   },
-}
+};
 
 // Interactive Examples
 export const AsyncAction: Story = {
@@ -359,13 +359,13 @@ export const AsyncAction: Story = {
   },
   render: (args) => {
     const onClick = async () => {
-      await new Promise((resolve) => setTimeout(resolve, 2000))
-      alert("Changes saved!")
-    }
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      alert("Changes saved!");
+    };
 
-    return <F0Button {...args} onClick={onClick} />
+    return <F0Button {...args} onClick={onClick} />;
   },
-}
+};
 
 export const IconButtonGroup: Story = {
   parameters: withSnapshot({}),
@@ -376,7 +376,7 @@ export const IconButtonGroup: Story = {
       <F0Button variant="ghost" icon={Delete} hideLabel label="Delete" />
     </div>
   ),
-}
+};
 
 export const OnlyEmoji: Story = {
   args: {
@@ -385,12 +385,12 @@ export const OnlyEmoji: Story = {
     variant: "neutral",
     hideLabel: true,
   },
-}
+};
 
 export const States: Story = {
   parameters: withSnapshot({}),
   render: (args) => {
-    const [asyncLoading, setAsyncLoading] = React.useState(false)
+    const [asyncLoading, setAsyncLoading] = React.useState(false);
     return (
       <div className="flex gap-2">
         <F0Button {...args} label="Disabled" disabled />
@@ -400,35 +400,35 @@ export const States: Story = {
           label={asyncLoading ? "Saving..." : "Async Loading"}
           loading={asyncLoading}
           onClick={async () => {
-            setAsyncLoading(true)
-            await new Promise((resolve) => setTimeout(resolve, 1500))
-            setAsyncLoading(false)
-            alert("Async action completed!")
+            setAsyncLoading(true);
+            await new Promise((resolve) => setTimeout(resolve, 1500));
+            setAsyncLoading(false);
+            alert("Async action completed!");
           }}
         />
       </div>
-    )
+    );
   },
-}
+};
 
 export const AsyncLoading: Story = {
   render: (args) => {
-    const [asyncLoading, setAsyncLoading] = React.useState(false)
+    const [asyncLoading, setAsyncLoading] = React.useState(false);
     return (
       <F0Button
         {...args}
         label={asyncLoading ? "Saving..." : "Async Loading"}
         loading={asyncLoading}
         onClick={async () => {
-          setAsyncLoading(true)
-          await new Promise((resolve) => setTimeout(resolve, 1500))
-          setAsyncLoading(false)
-          alert("Async action completed!")
+          setAsyncLoading(true);
+          await new Promise((resolve) => setTimeout(resolve, 1500));
+          setAsyncLoading(false);
+          alert("Async action completed!");
         }}
       />
-    )
+    );
   },
-}
+};
 
 export const WithDataTestId: Story = {
   args: {
@@ -436,7 +436,7 @@ export const WithDataTestId: Story = {
     label: "Button with Test ID",
   },
   play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    await expect(canvas.getByTestId("my-test-button")).toBeInTheDocument()
+    const canvas = within(canvasElement);
+    await expect(canvas.getByTestId("my-test-button")).toBeInTheDocument();
   },
-}
+};

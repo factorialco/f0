@@ -1,12 +1,12 @@
-import type { Meta, StoryObj } from "@storybook/react-vite"
+import type { Meta, StoryObj } from "@storybook/react-vite";
 
-import { useState } from "react"
-import { expect, fn, within } from "storybook/test"
+import { useState } from "react";
+import { expect, fn, within } from "storybook/test";
 
-import { Placeholder } from "@/icons/app"
+import { Placeholder } from "@/icons/app";
 
-import { F0TableOfContent } from "../index"
-import { TOCItem, TOCItemAction } from "../types"
+import { F0TableOfContent } from "../index";
+import { TOCItem, TOCItemAction } from "../types";
 
 const mockOtherActions: TOCItemAction[] = [
   {
@@ -22,7 +22,7 @@ const mockOtherActions: TOCItemAction[] = [
     onClick: fn(),
     icon: Placeholder,
   },
-]
+];
 
 const mockTOCData = (setActiveItem: (id: string) => void): TOCItem[] => [
   {
@@ -85,10 +85,10 @@ const mockTOCData = (setActiveItem: (id: string) => void): TOCItem[] => [
       },
     ],
   },
-]
+];
 
 const meta: Meta<typeof F0TableOfContent> = {
-  title: "Patterns/Navigation/TableOfContent",
+  title: "Navigation/TableOfContent",
   component: F0TableOfContent,
   parameters: {
     layout: "centered",
@@ -114,7 +114,7 @@ const meta: Meta<typeof F0TableOfContent> = {
         - onClick: Callback when item is clicked
         - otherActions: Array of dropdown actions
         - children: Nested items (max 4 levels deep)
-        
+
         The component automatically determines item types based on presence of children.`,
     },
     activeItem: {
@@ -151,7 +151,7 @@ const meta: Meta<typeof F0TableOfContent> = {
     ),
   ],
   render: (args) => {
-    const [activeItem, setActiveItem] = useState("nested-child-1")
+    const [activeItem, setActiveItem] = useState("nested-child-1");
 
     return (
       <F0TableOfContent
@@ -160,20 +160,20 @@ const meta: Meta<typeof F0TableOfContent> = {
         activeItem={activeItem}
         className="h-full"
         onReorder={(order) => {
-          console.log("Items reordered:", order)
+          console.log("Items reordered:", order);
         }}
       />
-    )
+    );
   },
   args: {
     title: "Table of Contents",
   },
-}
+};
 
-export default meta
-type Story = StoryObj<typeof meta>
+export default meta;
+type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {}
+export const Default: Story = {};
 
 export const Collapsible: Story = {
   args: {
@@ -186,7 +186,7 @@ export const Collapsible: Story = {
       },
     },
   },
-}
+};
 
 export const Sortable: Story = {
   args: {
@@ -199,7 +199,7 @@ export const Sortable: Story = {
       },
     },
   },
-}
+};
 
 export const WithSearchBox: Story = {
   args: {
@@ -213,7 +213,7 @@ export const WithSearchBox: Story = {
       },
     },
   },
-}
+};
 
 export const SortableWithSearchBox: Story = {
   args: {
@@ -227,7 +227,7 @@ export const SortableWithSearchBox: Story = {
       },
     },
   },
-}
+};
 
 export const HideChildrenCounter: Story = {
   args: {
@@ -241,11 +241,11 @@ export const HideChildrenCounter: Story = {
       },
     },
   },
-}
+};
 
 export const WithDataTestId: Story = {
   render: (args) => {
-    const [activeItem, setActiveItem] = useState("nested-child-1")
+    const [activeItem, setActiveItem] = useState("nested-child-1");
 
     return (
       <F0TableOfContent
@@ -255,13 +255,13 @@ export const WithDataTestId: Story = {
         activeItem={activeItem}
         className="h-full"
         onReorder={(order) => {
-          console.log("Items reordered:", order)
+          console.log("Items reordered:", order);
         }}
       />
-    )
+    );
   },
   play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    await expect(canvas.getByTestId("toc-test-id")).toBeInTheDocument()
+    const canvas = within(canvasElement);
+    await expect(canvas.getByTestId("toc-test-id")).toBeInTheDocument();
   },
-}
+};

@@ -1,8 +1,8 @@
-import type { Meta, StoryObj } from "@storybook/react-vite"
+import type { Meta, StoryObj } from "@storybook/react-vite";
 
-import { useState } from "react"
+import { useState } from "react";
 
-import { F0Button } from "@/components/F0Button"
+import { F0Button } from "@/components/F0Button";
 
 import {
   Dialog,
@@ -13,15 +13,15 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "../dialog"
+} from "../dialog";
 
 const ExampleComponent = (props: {
-  open?: boolean
-  onOpenChange?: (open: boolean) => void
-  withTranslateAnimation?: boolean
-  container?: HTMLElement | null
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  withTranslateAnimation?: boolean;
+  container?: HTMLElement | null;
 }) => {
-  const [open, setOpen] = useState(props.open ?? false)
+  const [open, setOpen] = useState(props.open ?? false);
 
   return (
     <Dialog open={open} onOpenChange={props.onOpenChange ?? setOpen}>
@@ -50,11 +50,11 @@ const ExampleComponent = (props: {
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
-}
+  );
+};
 
 const meta = {
-  title: "Components/Dialog",
+  title: "Dialog",
   component: ExampleComponent,
   parameters: {
     docs: {
@@ -70,14 +70,14 @@ const meta = {
     },
   },
   tags: ["autodocs", "internal"],
-} satisfies Meta<typeof ExampleComponent>
+} satisfies Meta<typeof ExampleComponent>;
 
-export default meta
-type Story = StoryObj<typeof meta>
+export default meta;
+type Story = StoryObj<typeof meta>;
 
 export const Simple: Story = {
   render: () => {
-    const [open, setOpen] = useState(false)
+    const [open, setOpen] = useState(false);
 
     return (
       <Dialog open={open} onOpenChange={setOpen}>
@@ -101,13 +101,13 @@ export const Simple: Story = {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    )
+    );
   },
-}
+};
 
 export const WithHeaderAndFooter: Story = {
   render: () => {
-    const [open, setOpen] = useState(false)
+    const [open, setOpen] = useState(false);
 
     return (
       <Dialog open={open} onOpenChange={setOpen}>
@@ -136,13 +136,13 @@ export const WithHeaderAndFooter: Story = {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    )
+    );
   },
-}
+};
 
 export const CustomContent: Story = {
   render: () => {
-    const [open, setOpen] = useState(false)
+    const [open, setOpen] = useState(false);
 
     return (
       <Dialog open={open} onOpenChange={setOpen}>
@@ -164,13 +164,13 @@ export const CustomContent: Story = {
           </div>
         </DialogContent>
       </Dialog>
-    )
+    );
   },
-}
+};
 
 export const WithoutAnimation: Story = {
   render: () => {
-    const [open, setOpen] = useState(false)
+    const [open, setOpen] = useState(false);
 
     return (
       <Dialog open={open} onOpenChange={setOpen}>
@@ -194,13 +194,13 @@ export const WithoutAnimation: Story = {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    )
+    );
   },
-}
+};
 
 export const LargeContent: Story = {
   render: () => {
-    const [open, setOpen] = useState(false)
+    const [open, setOpen] = useState(false);
 
     return (
       <Dialog open={open} onOpenChange={setOpen}>
@@ -297,6 +297,6 @@ export const LargeContent: Story = {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    )
+    );
   },
-}
+};

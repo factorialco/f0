@@ -1,9 +1,9 @@
-import { Meta, StoryObj } from "@storybook/react-vite"
+import { Meta, StoryObj } from "@storybook/react-vite";
 
-import { ExampleComponent } from "../mockData"
+import { ExampleComponent } from "../mockData";
 
 const meta = {
-  title: "Patterns/DataCollection/Temporary or Deprecated features",
+  title: "Data Collection/Temporary or Deprecated features",
   component: ExampleComponent,
   tags: ["autodocs", "experimental"],
   decorators: [
@@ -13,10 +13,10 @@ const meta = {
       </div>
     ),
   ],
-} satisfies Meta<typeof ExampleComponent>
+} satisfies Meta<typeof ExampleComponent>;
 
-export default meta
-type Story = StoryObj<typeof meta>
+export default meta;
+type Story = StoryObj<typeof meta>;
 
 export const TmpFullWidth: Story = {
   parameters: {
@@ -37,4 +37,4 @@ export const TmpFullWidth: Story = {
       }
     />
   ),
-}
+};

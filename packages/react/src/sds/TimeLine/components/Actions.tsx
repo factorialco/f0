@@ -1,5 +1,5 @@
 import { F0Button } from "@/components/F0Button"
-import { Dropdown } from "@/experimental/Navigation/Dropdown"
+import { Dropdown } from "@/patterns/Navigation/Dropdown"
 
 import type { F0TimelineRowAction, F0TimelineRowOtherAction } from "../types"
 

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react"
 
-import { Dropdown } from "@/experimental/Navigation/Dropdown"
-import { DropdownInternalProps } from "@/experimental/Navigation/Dropdown/internal"
+import { Dropdown } from "@/patterns/Navigation/Dropdown"
+import { DropdownInternalProps } from "@/patterns/Navigation/Dropdown/internal"
 import { AcademicCap, Add } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"

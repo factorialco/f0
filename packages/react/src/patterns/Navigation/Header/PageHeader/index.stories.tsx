@@ -1,14 +1,14 @@
-import type { Meta, StoryObj } from "@storybook/react-vite"
+import type { Meta, StoryObj } from "@storybook/react-vite";
 
-import { useState } from "react"
+import { useState } from "react";
 
-import { F0AiChatProvider } from "@/sds/ai/F0AiChat"
+import { F0AiChatProvider } from "@/sds/ai/F0AiChat";
 
-import { EllipsisHorizontal, Settings } from "../../../../icons/app"
-import { PageHeader } from "./index"
+import { EllipsisHorizontal, Settings } from "../../../../icons/app";
+import { PageHeader } from "./index";
 
 const meta = {
-  title: "Patterns/Navigation/PageHeader",
+  title: "Navigation/PageHeader",
   component: PageHeader,
   tags: ["autodocs", "experimental"],
   parameters: {
@@ -23,16 +23,16 @@ const meta = {
       </F0AiChatProvider>
     ),
   ],
-} satisfies Meta<typeof PageHeader>
+} satisfies Meta<typeof PageHeader>;
 
-export default meta
-type Story = StoryObj<typeof PageHeader>
+export default meta;
+type Story = StoryObj<typeof PageHeader>;
 
 const defaultModule = {
   name: "Time Tracking",
   href: "/time-tracking",
   id: "time-tracking" as const,
-}
+};
 
 const defaultActions = [
   {
@@ -54,7 +54,7 @@ const defaultActions = [
       },
     ],
   },
-]
+];
 
 const defaultNavigation = {
   previous: {
@@ -69,20 +69,20 @@ const defaultNavigation = {
     current: 1,
     total: 30,
   },
-}
+};
 
 export const Default: Story = {
   args: {
     module: defaultModule,
   },
-}
+};
 
 export const WithActions: Story = {
   args: {
     module: defaultModule,
     actions: defaultActions,
   },
-}
+};
 
 export const WithStatus: Story = {
   args: {
@@ -92,7 +92,7 @@ export const WithStatus: Story = {
       variant: "positive",
     },
   },
-}
+};
 
 export const WithStatusVariants: Story = {
   args: {
@@ -103,14 +103,14 @@ export const WithStatusVariants: Story = {
       tooltip: "This document is not yet published",
     },
   },
-}
+};
 
 export const WithNavigation: Story = {
   args: {
     module: defaultModule,
     navigation: defaultNavigation,
   },
-}
+};
 
 export const WithNavigationDisabled: Story = {
   args: {
@@ -126,7 +126,7 @@ export const WithNavigationDisabled: Story = {
       },
     },
   },
-}
+};
 
 export const WithBreadcrumbs: Story = {
   args: {
@@ -137,7 +137,7 @@ export const WithBreadcrumbs: Story = {
       { id: "employee", label: "Ainhoa Aznar Lago", href: "/employees/123" },
     ],
   },
-}
+};
 
 export const WithSelectBreadcrumb: Story = {
   args: {
@@ -155,12 +155,12 @@ export const WithSelectBreadcrumb: Story = {
         })),
         value: "1",
         onChange: (value) => {
-          console.log("WithSelectBreadcrumb value", value)
+          console.log("WithSelectBreadcrumb value", value);
         },
       },
     ],
   },
-}
+};
 
 export const WithEverything: Story = {
   args: {
@@ -177,7 +177,7 @@ export const WithEverything: Story = {
     },
     actions: defaultActions,
   },
-}
+};
 
 export const WithProductUpdate: Story = {
   args: {
@@ -257,23 +257,23 @@ export const WithProductUpdate: Story = {
                   href: "https://factorialmakers.atlassian.net/browse/FCT-24580",
                 },
               ]),
-            1000
-          )
-        })
+            1000,
+          );
+        });
       },
 
       onItemClick: () => {
-        alert("onItemClick")
+        alert("onItemClick");
       },
       onHeaderClick: () => {
-        alert("onHeaderClick")
+        alert("onHeaderClick");
       },
       currentModule: defaultModule.name,
       crossSelling: {
         isVisible: true,
         sectionTitle: "Discover other products",
         onClose: () => {
-          alert("onClose")
+          alert("onClose");
         },
         products: [
           {
@@ -281,14 +281,14 @@ export const WithProductUpdate: Story = {
             description:
               "Join the event to discover ONE, our most important launch yet. Live on 7 Oct at 16:30 (Spain)",
             onClick: () => {
-              alert("onClick")
+              alert("onClick");
             },
             onClose: () => {
-              alert("onClose")
+              alert("onClose");
             },
             dismissable: false,
             trackVisibility: (open) => {
-              console.log("trackOpenChange", open)
+              console.log("trackOpenChange", open);
             },
             type: "one-campaign",
           },
@@ -297,37 +297,37 @@ export const WithProductUpdate: Story = {
             description:
               "Improve your team’s salary without impacting your budget through flexible compensation.",
             onClick: () => {
-              alert("onClick")
+              alert("onClick");
             },
             onClose: () => {
-              alert("onClose")
+              alert("onClose");
             },
             module: "project_management",
             dismissable: false,
             trackVisibility: (open) => {
-              console.log("trackOpenChange", open)
+              console.log("trackOpenChange", open);
             },
           },
           {
             title: "Projects",
             description: "Improve your.",
             onClick: () => {
-              alert("onClick")
+              alert("onClick");
             },
             onClose: () => {
-              alert("onClose")
+              alert("onClose");
             },
             module: "project_management",
             dismissable: false,
             trackVisibility: (open) => {
-              console.log("trackOpenChange", open)
+              console.log("trackOpenChange", open);
             },
           },
         ],
       },
     },
   },
-}
+};
 
 export const WithFavorites: Story = {
   args: {
@@ -344,7 +344,7 @@ export const WithFavorites: Story = {
     actions: defaultActions,
   },
   render: (props) => {
-    const [isMarked, setIsMarked] = useState(false)
+    const [isMarked, setIsMarked] = useState(false);
 
     return (
       <PageHeader
@@ -355,9 +355,9 @@ export const WithFavorites: Story = {
           onChange: () => setIsMarked((current) => !current),
         }}
       />
-    )
+    );
   },
-}
+};
 
 export const Embedded: Story = {
   args: {
@@ -368,7 +368,7 @@ export const Embedded: Story = {
       { id: "employee", label: "Ainhoa Aznar Lago", href: "/employees/123" },
     ],
   },
-}
+};
 
 export const EmbeddedWithLoading: Story = {
   args: {
@@ -379,7 +379,7 @@ export const EmbeddedWithLoading: Story = {
       { id: "loading", loading: true },
     ],
   },
-}
+};
 
 export const WithOneSwitchCustomTooltip: Story = {
   args: {
@@ -388,7 +388,7 @@ export const WithOneSwitchCustomTooltip: Story = {
       whenEnabled: "This is a custom tooltip",
     },
   },
-}
+};
 
 export const WithOneSwitchTooltipAlwaysVisible: Story = {
   args: {
@@ -396,4 +396,4 @@ export const WithOneSwitchTooltipAlwaysVisible: Story = {
     oneSwitchTooltip: { whenEnabled: "Ask me anything" },
     oneSwitchAutoOpen: true,
   },
-}
+};

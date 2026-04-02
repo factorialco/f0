@@ -10,7 +10,7 @@ export type {
   PrimaryActionButton,
   PrimaryDropdownAction,
 } from "@/experimental/Information/utils"
-export type { DropdownItem } from "@/experimental/Navigation/Dropdown"
+export type { DropdownItem } from "@/patterns/Navigation/Dropdown"
 export type { BannerProps, BannerVariant } from "./Header"
 
 type NotesTextEditorHandle = {

@@ -3,7 +3,7 @@ import { BookOpen, File, Placeholder, Question, Video } from "@/icons/app"
 import {
   TOCItem,
   TOCItemAction,
-} from "../../../experimental/Navigation/F0TableOfContent"
+} from "@/patterns/Navigation/F0TableOfContent"
 
 export const mockOtherActions: TOCItemAction[] = [
   {

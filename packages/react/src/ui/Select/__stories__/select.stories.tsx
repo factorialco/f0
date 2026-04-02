@@ -1,8 +1,8 @@
-import type { Meta, StoryObj } from "@storybook/react-vite"
+import type { Meta, StoryObj } from "@storybook/react-vite";
 
-import { useMemo, useState } from "react"
+import { useMemo, useState } from "react";
 
-import { Circle, Desktop } from "../../../icons/app"
+import { Circle, Desktop } from "../../../icons/app";
 import {
   Select,
   SelectContent,
@@ -10,7 +10,7 @@ import {
   SelectProps,
   SelectTrigger,
   SelectValue,
-} from "../index"
+} from "../index";
 
 const SelectWithHooks = ({
   options,
@@ -18,43 +18,43 @@ const SelectWithHooks = ({
   as,
   ...props
 }: SelectProps) => {
-  const { value, multiple } = props
+  const { value, multiple } = props;
   const [localValue, setLocalValue] = useState<string | string[] | undefined>(
-    value
-  )
+    value,
+  );
 
   const RenderSelect = (
     props: Omit<SelectProps, "value"> & {
-      children: React.ReactNode
-      value: string | string[] | undefined
-      onValueChange: (value: string | string[]) => void
-    }
+      children: React.ReactNode;
+      value: string | string[] | undefined;
+      onValueChange: (value: string | string[]) => void;
+    },
   ) => {
-    const { value: initialValue, defaultValue: _, multiple, ...rest } = props
+    const { value: initialValue, defaultValue: _, multiple, ...rest } = props;
 
     if (multiple) {
       const [value, setValue] = useState<string[] | undefined>(
-        initialValue as string[] | undefined
-      )
+        initialValue as string[] | undefined,
+      );
       const handleChange = (value: string[]) => {
-        console.log("value", value)
-        setValue(value)
-        props.onValueChange(value)
-      }
+        console.log("value", value);
+        setValue(value);
+        props.onValueChange(value);
+      };
       return (
         <Select {...rest} value={value} onValueChange={handleChange} multiple>
           {props.children}
         </Select>
-      )
+      );
     } else {
       const [value, setValue] = useState<string | undefined>(
-        props.value as string | undefined
-      )
+        props.value as string | undefined,
+      );
       const handleChange = (value: string) => {
-        console.log("value", value)
-        setValue(value)
-        props.onValueChange(value)
-      }
+        console.log("value", value);
+        setValue(value);
+        props.onValueChange(value);
+      };
 
       return (
         <Select
@@ -63,9 +63,9 @@ const SelectWithHooks = ({
           onValueChange={handleChange}
           multiple={false}
         />
-      )
+      );
     }
-  }
+  };
 
   const items = useMemo(
     () =>
@@ -74,12 +74,12 @@ const SelectWithHooks = ({
         height: 40,
         item: <SelectItem value={option.value}>{option.label}</SelectItem>,
       })),
-    [options]
-  )
+    [options],
+  );
 
   const handleValueChange = (value: string | string[]) => {
-    setLocalValue(value)
-  }
+    setLocalValue(value);
+  };
 
   return (
     <>
@@ -98,11 +98,11 @@ const SelectWithHooks = ({
       </RenderSelect>
       <div className="mt-20">Selected: {JSON.stringify(localValue)}</div>
     </>
-  )
-}
+  );
+};
 
 const meta = {
-  title: "Components/Select",
+  title: "Select",
   component: SelectWithHooks,
   parameters: {
     a11y: {
@@ -135,12 +135,12 @@ const meta = {
     ],
   },
   tags: ["autodocs", "internal"],
-} satisfies Meta<typeof SelectWithHooks>
+} satisfies Meta<typeof SelectWithHooks>;
 
-export default meta
-type Story = StoryObj<typeof meta>
+export default meta;
+type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {}
+export const Default: Story = {};
 
 export const AsList: Story = {
   args: {
@@ -154,7 +154,7 @@ export const AsList: Story = {
       },
     },
   },
-}
+};
 
 export const Multiple: Story = {
   args: {
@@ -162,7 +162,7 @@ export const Multiple: Story = {
     multiple: true,
   },
   render: ({ options, placeholder }) => {
-    const [value, setValue] = useState<string[]>([])
+    const [value, setValue] = useState<string[]>([]);
 
     return (
       <Select value={value} onValueChange={setValue} multiple>
@@ -177,13 +177,13 @@ export const Multiple: Story = {
           ))}
         </SelectContent>
       </Select>
-    )
+    );
   },
-}
+};
 
 export const WithTopContent: Story = {
   render: ({ options, placeholder }) => {
-    const [value, setValue] = useState("")
+    const [value, setValue] = useState("");
 
     return (
       <Select value={value} onValueChange={setValue}>
@@ -200,13 +200,13 @@ export const WithTopContent: Story = {
           ))}
         </SelectContent>
       </Select>
-    )
+    );
   },
-}
+};
 
 export const WithBottomContent: Story = {
   render: ({ options, placeholder }) => {
-    const [value, setValue] = useState("")
+    const [value, setValue] = useState("");
 
     return (
       <Select value={value} onValueChange={setValue}>
@@ -225,13 +225,13 @@ export const WithBottomContent: Story = {
           ))}
         </SelectContent>
       </Select>
-    )
+    );
   },
-}
+};
 
 export const WithBothTopAndBottom: Story = {
   render: ({ options, placeholder }) => {
-    const [value, setValue] = useState("")
+    const [value, setValue] = useState("");
 
     return (
       <Select value={value} onValueChange={setValue}>
@@ -259,14 +259,14 @@ export const WithBothTopAndBottom: Story = {
           ))}
         </SelectContent>
       </Select>
-    )
+    );
   },
-}
+};
 
 const words =
   "lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua".split(
-    " "
-  )
+    " ",
+  );
 
 export const VirtualizedItems: Story = {
   args: {
@@ -275,11 +275,11 @@ export const VirtualizedItems: Story = {
       label: `Option ${words[i % words.length]} ${i}`,
     })),
   },
-}
+};
 
 export const WithCustomTrigger: Story = {
   render: ({ options }) => {
-    const [value, setValue] = useState("")
+    const [value, setValue] = useState("");
 
     return (
       <Select value={value} onValueChange={setValue}>
@@ -300,6 +300,6 @@ export const WithCustomTrigger: Story = {
           ))}
         </SelectContent>
       </Select>
-    )
+    );
   },
-}
+};
