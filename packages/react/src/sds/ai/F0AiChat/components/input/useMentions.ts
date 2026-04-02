@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
-import type { EntityResolvers, PersonProfile } from "../../types"
+import type { PersonProfile } from "../../types"
 import { escapeXml } from "./utils"
 
 /**
@@ -20,8 +20,8 @@ export type UseMentionsOptions = {
   setInputValue: (value: string) => void
   /** Cursor position (selectionStart) in the textarea */
   cursorPosition: number
-  /** Entity resolvers from context — must include searchPersons */
-  entityResolvers?: EntityResolvers
+  /** Search function for person mentions (@mention autocomplete) */
+  searchPersons?: (query: string) => Promise<PersonProfile[]>
   /** Ref to the textarea element for reading selection */
   textareaRef: React.RefObject<HTMLTextAreaElement | null>
 }
@@ -203,7 +203,7 @@ export function useMentions({
   inputValue,
   setInputValue,
   cursorPosition,
-  entityResolvers,
+  searchPersons,
   textareaRef,
 }: UseMentionsOptions): UseMentionsReturn {
   const [isOpen, setIsOpen] = useState(false)
@@ -220,8 +220,6 @@ export function useMentions({
   // Track @ positions dismissed due to empty results, so we don't
   // reopen the popover while the user keeps typing at the same trigger.
   const dismissedAtIndexRef = useRef<number>(-1)
-
-  const searchPersons = entityResolvers?.searchPersons
 
   // Detect @ trigger on every input/cursor change
   useEffect(() => {

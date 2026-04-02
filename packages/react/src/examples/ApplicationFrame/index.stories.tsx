@@ -20,6 +20,8 @@ import Table from "@/icons/app/Table"
 import { useAiChat } from "@/sds/ai/F0AiChat"
 import {
   type AiChatToolHint,
+  type CandidateProfile,
+  type JobPostingProfile,
   type PersonProfile,
   type UploadedFile,
 } from "@/sds/ai/F0AiChat/types"
@@ -107,6 +109,87 @@ const mockSearchPersons = (query: string): Promise<PersonProfile[]> =>
   })
 
 /**
+ * Mock candidates database for entity-ref hover cards in Storybook.
+ */
+const mockCandidates: CandidateProfile[] = [
+  {
+    id: "101",
+    firstName: "Alice",
+    lastName: "Martinez",
+    source: "LinkedIn",
+  },
+  {
+    id: "102",
+    firstName: "Bob",
+    lastName: "Chen",
+    source: "Referral",
+  },
+  {
+    id: "103",
+    firstName: "Clara",
+    lastName: "Nguyen",
+    source: "Job Board",
+  },
+]
+
+/**
+ * Mock candidate resolver — looks up from mockCandidates, falls back to generic profile.
+ */
+const mockCandidateResolver = (id: string): Promise<CandidateProfile> =>
+  new Promise((resolve) => {
+    setTimeout(() => {
+      const candidate = mockCandidates.find((c) => String(c.id) === id)
+      resolve(
+        candidate ?? {
+          id,
+          firstName: "Candidate",
+          lastName: `#${id}`,
+        }
+      )
+    }, 600)
+  })
+
+/**
+ * Mock job postings database for entity-ref hover cards in Storybook.
+ */
+const mockJobPostings: JobPostingProfile[] = [
+  {
+    id: "201",
+    title: "Senior Frontend Engineer",
+    status: "Open",
+    location: "Barcelona, Spain",
+  },
+  {
+    id: "202",
+    title: "Product Designer",
+    status: "Open",
+    location: "Remote",
+  },
+  {
+    id: "203",
+    title: "Backend Engineer",
+    status: "Closed",
+    location: "São Paulo, Brazil",
+  },
+]
+
+/**
+ * Mock job posting resolver — looks up from mockJobPostings, falls back to generic profile.
+ */
+const mockJobPostingResolver = (id: string): Promise<JobPostingProfile> =>
+  new Promise((resolve) => {
+    setTimeout(() => {
+      const posting = mockJobPostings.find((jp) => String(jp.id) === id)
+      resolve(
+        posting ?? {
+          id,
+          title: `Job Posting #${id}`,
+        }
+      )
+    }, 600)
+  })
+
+/**
  * Example tool hints for Storybook — these tell the AI the user's intent
  * without the user seeing the prompt in the chat.
  */
@@ -176,9 +259,18 @@ const meta: Meta<typeof ApplicationFrame> = {
       enabled: true,
       resizable: true,
       greeting: "Hello, John",
-      entityResolvers: {
-        person: mockPersonResolver,
-        searchPersons: mockSearchPersons,
+      entityRefs: {
+        resolvers: {
+          person: mockPersonResolver,
+          candidate: mockCandidateResolver,
+          jobPosting: mockJobPostingResolver,
+          searchPersons: mockSearchPersons,
+        },
+        urls: {
+          person: (id) => `/employees/${id}`,
+          candidate: (id) => `/recruitment/candidates/${id}/applications`,
+          jobPosting: (id) => `/recruitment/jobs/${id}/applications`,
+        },
       },
       toolHints: mockToolHints,
       credits: {
@@ -400,9 +492,18 @@ export const FullscreenWithActions: Story = {
       defaultVisualizationMode: "fullscreen",
       lockVisualizationMode: true,
       footer: <QuickActions />,
-      entityResolvers: {
-        person: mockPersonResolver,
-        searchPersons: mockSearchPersons,
+      entityRefs: {
+        resolvers: {
+          person: mockPersonResolver,
+          candidate: mockCandidateResolver,
+          jobPosting: mockJobPostingResolver,
+          searchPersons: mockSearchPersons,
+        },
+        urls: {
+          person: (id) => `/employees/${id}`,
+          candidate: (id) => `/recruitment/candidates/${id}/applications`,
+          jobPosting: (id) => `/recruitment/jobs/${id}/applications`,
+        },
       },
       toolHints: mockToolHints,
       credits: {

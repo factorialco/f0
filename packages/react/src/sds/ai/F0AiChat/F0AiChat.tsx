@@ -28,7 +28,7 @@ const F0AiChatProviderComponent = ({
   historyEnabled,
   footer,
   VoiceMode,
-  entityResolvers,
+  entityRefs,
   toolHints,
   credits,
   fileAttachments,
@@ -56,7 +56,7 @@ const F0AiChatProviderComponent = ({
       footer={footer}
       VoiceMode={VoiceMode}
       tracking={tracking}
-      entityResolvers={entityResolvers}
+      entityRefs={entityRefs}
       toolHints={toolHints}
       credits={credits}
       fileAttachments={fileAttachments}

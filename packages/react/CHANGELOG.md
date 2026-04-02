@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.433.0](https://github.com/factorialco/f0/compare/f0-react-v1.432.0...f0-react-v1.433.0) (2026-04-02)
+
+
+### Features
+
+* **one:** add candidate and job-posting entity-ref renderers ([#3800](https://github.com/factorialco/f0/issues/3800)) ([2f54690](https://github.com/factorialco/f0/commit/2f54690f5860a2f872f9091100e323fd7b726933))
+
 ## [1.432.0](https://github.com/factorialco/f0/compare/f0-react-v1.431.0...f0-react-v1.432.0) (2026-04-01)
 
 

@@ -1,9 +1,22 @@
-import { AnimatePresence, motion } from "motion/react"
 import { useMemo, useState } from "react"
+
+import { F0AvatarIcon } from "../../src/components/avatars/F0AvatarIcon"
+import { F0AvatarModule } from "../../src/components/avatars/F0AvatarModule"
+import {
+  ModuleId,
+  modules,
+} from "../../src/components/avatars/F0AvatarModule/modules"
 import { F0Icon as IconComponent, IconType } from "../../src/components/F0Icon"
-import { OneEllipsis } from "../../src/components/OneEllipsis"
+import * as AnimatedIcons from "../../src/icons/animated"
 import * as Icons from "../../src/icons/app"
+import * as ModuleIcons from "../../src/icons/modules"
 import { cn, focusRing } from "../../src/lib/utils.ts"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "../../src/ui/tooltip"
 
 type IconEntry = {
   name: string
@@ -15,82 +28,160 @@ const iconList: IconEntry[] = Object.entries(Icons).map(([name, icon]) => ({
   icon,
 }))
 
-function IconCard({ name, icon: Icon }: IconEntry) {
+const moduleIconList: IconEntry[] = Object.entries(ModuleIcons).map(
+  ([name, icon]) => ({ name, icon })
+)
+
+const animatedIconList: IconEntry[] = Object.entries(AnimatedIcons).map(
+  ([name, icon]) => ({ name, icon })
+)
+
+function IconCard({
+  name,
+  icon,
+  animated = false,
+}: IconEntry & { animated?: boolean }) {
   const [isCopied, setIsCopied] = useState(false)
+  const [isHovered, setIsHovered] = useState(false)
 
   const copyToClipboard = () => {
-    navigator.clipboard.writeText(name)
-    setIsCopied(true)
-    setTimeout(() => {
-      setIsCopied(false)
-    }, 500)
+    void navigator.clipboard
+      .writeText(`<F0AvatarIcon icon={${name}} />`)
+      .then(() => {
+        setIsCopied(true)
+        setTimeout(() => setIsCopied(false), 1000)
+      })
+      .catch(() => {})
   }
 
   return (
-    <motion.div
-      key={name}
-      className="group relative flex aspect-square flex-col items-center justify-center gap-3 rounded-lg border border-solid border-f1-border-secondary p-4 transition-all hover:border-f1-border hover:shadow"
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.95 }}
-      transition={{ duration: 0.1 }}
-    >
-      <IconComponent icon={Icon} size="lg" color="bold" />
-      <div className="w-full text-center text-f1-foreground-secondary">
-        <OneEllipsis tag="span" className="!text-sm">
-          {name}
-        </OneEllipsis>
-      </div>
-      <motion.button
-        onClick={copyToClipboard}
-        className={cn(
-          "absolute right-2 top-2 h-7 w-7 rounded bg-f1-background p-1 text-f1-foreground-secondary opacity-0 transition-all hover:bg-f1-background-secondary group-hover:opacity-100",
-          isCopied &&
-            "bg-f1-background-positive hover:bg-f1-background-positive"
+    <TooltipProvider delayDuration={500} disableHoverableContent>
+      <Tooltip open={isCopied ? true : undefined}>
+        <TooltipTrigger asChild>
+          <button
+            onClick={copyToClipboard}
+            aria-label={`Copy ${name}`}
+            className={cn("block rounded-sm", focusRing())}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+          >
+            <F0AvatarIcon
+              icon={icon}
+              size="lg"
+              state={animated && isHovered ? "animate" : "normal"}
+            />
+          </button>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>{isCopied ? "Copied!" : name}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  )
+}
+
+function IconSection({
+  title,
+  description,
+  icons,
+  searchTerm,
+  animated = false,
+}: {
+  title: string
+  description?: string
+  icons: IconEntry[]
+  searchTerm: string
+  animated?: boolean
+}) {
+  const filtered = useMemo(
+    () =>
+      icons.filter((icon) =>
+        icon.name.toLowerCase().includes(searchTerm.toLowerCase())
+      ),
+    [icons, searchTerm]
+  )
+
+  if (filtered.length === 0) return null
+
+  return (
+    <div className="flex flex-col gap-2">
+      <div>
+        <h3 className="text-base font-semibold text-f1-foreground">{title}</h3>
+        {description && (
+          <p className="text-sm text-f1-foreground-secondary">{description}</p>
         )}
-        whileTap={{ scale: 0.8 }}
-        transition={{ duration: 0.1, ease: "easeOut" }}
-      >
-        <AnimatePresence mode="wait">
-          {isCopied ? (
-            <motion.div
-              key="check"
-              initial={{ opacity: 0, scale: 0.6 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.6 }}
-              transition={{ duration: 0.1 }}
-              className="text-f1-icon-positive"
-            >
-              <IconComponent icon={Icons.Check} />
-            </motion.div>
-          ) : (
-            <motion.div
-              key="layers"
-              initial={{ opacity: 0, scale: 0.6 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.6 }}
-              transition={{ duration: 0.1 }}
-            >
-              <IconComponent icon={Icons.LayersFront} />
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.button>
-    </motion.div>
+      </div>
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(44px,1fr))] gap-4">
+        {filtered.map((iconEntry) => (
+          <IconCard key={iconEntry.name} {...iconEntry} animated={animated} />
+        ))}
+      </div>
+    </div>
+  )
+}
+
+const moduleIdList: ModuleId[] = Object.keys(modules) as ModuleId[]
+
+function ModuleAvatarCard({ moduleId }: { moduleId: ModuleId }) {
+  const [isCopied, setIsCopied] = useState(false)
+
+  const copyToClipboard = () => {
+    void navigator.clipboard
+      .writeText(`<F0AvatarModule module="${moduleId}" />`)
+      .then(() => {
+        setIsCopied(true)
+        setTimeout(() => {
+          setIsCopied(false)
+        }, 1000)
+      })
+      .catch(() => {})
+  }
+
+  return (
+    <TooltipProvider delayDuration={500} disableHoverableContent>
+      <Tooltip open={isCopied ? true : undefined}>
+        <TooltipTrigger asChild>
+          <button
+            onClick={copyToClipboard}
+            aria-label={`Copy usage for module ${moduleId}`}
+            className={cn("block rounded-sm", focusRing())}
+          >
+            <F0AvatarModule module={moduleId} size="lg" />
+          </button>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>{isCopied ? "Copied!" : moduleId}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   )
 }
 
 export function IconGrid() {
   const [searchTerm, setSearchTerm] = useState("")
 
-  const filteredIcons = useMemo(() => {
-    return iconList.filter((icon) =>
-      icon.name.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-  }, [searchTerm])
+  const filteredModuleIds = useMemo(
+    () =>
+      moduleIdList.filter((id) =>
+        id.toLowerCase().includes(searchTerm.toLowerCase())
+      ),
+    [searchTerm]
+  )
+
+  const hasResults =
+    iconList.some((i) =>
+      i.name.toLowerCase().includes(searchTerm.toLowerCase())
+    ) ||
+    moduleIconList.some((i) =>
+      i.name.toLowerCase().includes(searchTerm.toLowerCase())
+    ) ||
+    animatedIconList.some((i) =>
+      i.name.toLowerCase().includes(searchTerm.toLowerCase())
+    ) ||
+    filteredModuleIds.length > 0
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-6">
       <div className="relative w-full">
         <input
           type="text"
@@ -107,19 +198,51 @@ export function IconGrid() {
           <IconComponent icon={Icons.Search} color="secondary" />
         </div>
       </div>
-      <AnimatePresence>
-        {filteredIcons.length > 0 ? (
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-            {filteredIcons.map((iconEntry) => (
-              <IconCard key={iconEntry.name} {...iconEntry} />
-            ))}
-          </div>
-        ) : (
-          <p className="text-center text-f1-foreground-secondary">
-            No icons found matching your search.
-          </p>
-        )}
-      </AnimatePresence>
+
+      {!hasResults ? (
+        <p className="text-center text-f1-foreground-secondary">
+          No icons found matching your search.
+        </p>
+      ) : (
+        <>
+          <IconSection
+            title="App icons"
+            icons={iconList}
+            searchTerm={searchTerm}
+          />
+          <IconSection
+            title="Module icons"
+            description="Raw SVG icons for product modules. For UI usage, prefer F0AvatarModule below."
+            icons={moduleIconList}
+            searchTerm={searchTerm}
+          />
+          {filteredModuleIds.length > 0 && (
+            <div className="flex flex-col gap-2">
+              <div>
+                <h3 className="text-base font-semibold text-f1-foreground">
+                  F0AvatarModule
+                </h3>
+                <p className="text-sm text-f1-foreground-secondary">
+                  The intended way to render module icons in the UI. Click to
+                  copy the component usage.
+                </p>
+              </div>
+              <div className="grid grid-cols-[repeat(auto-fill,minmax(44px,1fr))] gap-4">
+                {filteredModuleIds.map((id) => (
+                  <ModuleAvatarCard key={id} moduleId={id} />
+                ))}
+              </div>
+            </div>
+          )}
+          <IconSection
+            title="Animated icons"
+            description="Hover over an icon to preview its animation."
+            icons={animatedIconList}
+            searchTerm={searchTerm}
+            animated
+          />
+        </>
+      )}
     </div>
   )
 }

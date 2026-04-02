@@ -1,4 +1,4 @@
-import { F0Icon, IconType } from "@/components/F0Icon"
+import { F0Icon, F0IconProps, IconType } from "@/components/F0Icon"
 import { cn } from "@/lib/utils"
 
 import { BaseAvatarProps } from "../internal/BaseAvatar"
@@ -8,6 +8,7 @@ export const avatarIconSizes = ["sm", "md", "lg"] as const
 export type F0AvatarIconProps = {
   icon: IconType
   size?: (typeof avatarIconSizes)[number]
+  state?: F0IconProps["state"]
 } & Partial<Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">>
 
 const sizes = {
@@ -19,6 +20,7 @@ const sizes = {
 export const F0AvatarIcon = ({
   icon,
   size = "md",
+  state,
   "aria-label": ariaLabel,
   "aria-labelledby": ariaLabelledby,
 }: F0AvatarIconProps) => {
@@ -31,11 +33,7 @@ export const F0AvatarIcon = ({
       aria-label={ariaLabel}
       aria-labelledby={ariaLabelledby}
     >
-      <F0Icon
-        icon={icon}
-        size={size}
-        className="text-f1-foreground-secondary"
-      />
+      <F0Icon icon={icon} size={size} state={state} color="bold" />
     </div>
   )
 }

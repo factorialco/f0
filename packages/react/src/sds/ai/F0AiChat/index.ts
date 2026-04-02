@@ -13,6 +13,8 @@ export type {
   CreditsUsage,
   DashboardCanvasContent,
   EntityResolvers,
+  EntityUrlBuilders,
+  EntityRefs,
   PersonProfile,
   UploadedFile,
   VisualizationMode,

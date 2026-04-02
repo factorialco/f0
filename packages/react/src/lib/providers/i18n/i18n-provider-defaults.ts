@@ -310,7 +310,7 @@ export const defaultTranslations = {
     unpinChat: "Unpin chat",
     deleteChat: "Delete chat",
     ask: "Ask One",
-    viewProfile: "View profile",
+    view: "View",
     tools: "Tools",
     credits: {
       title: "Credits",
