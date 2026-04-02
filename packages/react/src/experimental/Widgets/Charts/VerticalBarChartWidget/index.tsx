@@ -5,7 +5,7 @@ import { experimentalComponent } from "@/lib/experimental"
 import {
   VerticalBarChart,
   VerticalBarChartProps,
-} from "../../../../components/Charts/VerticalBarChart"
+} from "@/kits/Charts/VerticalBarChart"
 import { withSkeleton } from "../../../../lib/skeleton"
 import { ChartContainer, ComposeChartContainerProps } from "../ChartContainer"
 

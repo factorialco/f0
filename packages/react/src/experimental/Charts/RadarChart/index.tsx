@@ -17,12 +17,9 @@ import {
   ChartTooltipContent,
 } from "@/ui/chart"
 
-import {
-  getCategoricalColor,
-  getColor,
-} from "../../../components/Charts/utils/colors"
-import { fixedForwardRef } from "../../../components/Charts/utils/forwardRef"
-import { ChartConfig, ChartItem } from "../../../components/Charts/utils/types"
+import { getCategoricalColor, getColor } from "@/kits/Charts/utils/colors"
+import { fixedForwardRef } from "@/kits/Charts/utils/forwardRef"
+import { ChartConfig, ChartItem } from "@/kits/Charts/utils/types"
 
 export type RadarChartProps<K extends ChartConfig> = {
   dataConfig: K

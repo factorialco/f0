@@ -12,7 +12,7 @@ import type {
   F0DataChartPieSeries,
   F0DataChartRadarIndicator,
   F0DataChartRadarSeries,
-} from "../F0DataChart"
+} from "@/kits/F0DataChart"
 
 // ---------------------------------------------------------------------------
 // Chart config — the "visual" half of a chart item (no data)

@@ -5,7 +5,7 @@ import type { PageBasedPaginatedResponse } from "@/hooks/datasource/types"
 import type {
   F0DataChartFunnelSeries,
   F0DataChartPieSeries,
-} from "../../F0DataChart"
+} from "@/kits/F0DataChart"
 import type {
   DashboardChartData,
   DashboardCollectionItem,

@@ -5,7 +5,7 @@ import { experimentalComponent } from "@/lib/experimental"
 import {
   RadialProgressChart,
   RadialProgressProps,
-} from "../../../../components/Charts/RadialProgressChart"
+} from "@/kits/Charts/RadialProgressChart"
 import { withSkeleton } from "../../../../lib/skeleton"
 import { Widget } from "../../Widget"
 

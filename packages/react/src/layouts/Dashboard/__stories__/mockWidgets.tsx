@@ -1,6 +1,6 @@
 import type { EChartsOption } from "echarts"
 
-import { F0Chart } from "@/components/Charts/F0Chart"
+import { F0Chart } from "@/kits/Charts/F0Chart"
 import {
   getMockVisualizations,
   ExampleComponent as OneDataCollectionExampleComponent,

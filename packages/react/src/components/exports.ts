@@ -1,6 +1,13 @@
 export * from "../layouts/exports"
 export * from "./avatars/exports"
-export * from "./Charts/exports"
+/**
+ * @deprecated Charts has moved to @/kits/Charts. Import from there instead.
+ */
+export * from "../kits/Charts/exports"
+/**
+ * @deprecated F0DataChart has moved to @/kits/F0DataChart. Import from there instead.
+ */
+export * from "../kits/F0DataChart"
 export * from "./F0BigNumber"
 export * from "./F0Box"
 export * from "./F0Button"

@@ -4,7 +4,7 @@ import type {
   F0DataChartLineSeries,
   F0DataChartPieSeries,
   F0DataChartRadarSeries,
-} from "@/components/F0DataChart"
+} from "@/kits/F0DataChart"
 
 import type { DashboardChartConfig, DashboardChartData } from "../types"
 

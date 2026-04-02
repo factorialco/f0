@@ -14,7 +14,10 @@ export * from "./AiPromotionChat/exports"
  * @deprecated Banners has moved to @/sds/ai/Banners. Import from there instead.
  */
 export * from "../sds/ai/Banners/exports"
-export * from "./Charts/exports"
+/**
+ * @deprecated Charts has moved to @/kits/Charts. Import from there instead.
+ */
+export * from "../kits/Charts/exports"
 export * from "./F0ActionBar"
 export * from "./F0VersionHistory"
 export * from "./Forms/exports"

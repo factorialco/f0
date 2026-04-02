@@ -1,7 +1,7 @@
 import type { Meta } from "@storybook/react-vite"
 
-import { PieChartProps } from "../../../../components/Charts/PieChart"
-import { Default as PieChartDefault } from "../../../../components/Charts/PieChart/index.stories"
+import { PieChartProps } from "@/kits/Charts/PieChart"
+import { Default as PieChartDefault } from "@/kits/Charts/PieChart/index.stories"
 import { containerStoryArgs, WidgetDecorator } from "../storybook-utils"
 import { PieChartWidget } from "./index"
 

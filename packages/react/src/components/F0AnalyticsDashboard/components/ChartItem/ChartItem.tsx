@@ -3,7 +3,7 @@ import type {
   F0DataChartPieSeries,
   F0DataChartProps,
   F0DataChartRadarSeries,
-} from "@/components/F0DataChart"
+} from "@/kits/F0DataChart"
 import type {
   FiltersDefinition,
   FiltersState,
@@ -12,7 +12,7 @@ import type { DropdownItem } from "@/experimental/Navigation/Dropdown"
 
 import { useMemo, useRef } from "react"
 
-import { F0DataChart } from "@/components/F0DataChart"
+import { F0DataChart } from "@/kits/F0DataChart"
 import {
   BarChartSkeleton,
   FunnelChartSkeleton,
@@ -21,7 +21,7 @@ import {
   LineChartSkeleton,
   PieChartSkeleton,
   RadarChartSkeleton,
-} from "@/components/F0DataChart"
+} from "@/kits/F0DataChart"
 
 import type {
   DashboardChartConfig,

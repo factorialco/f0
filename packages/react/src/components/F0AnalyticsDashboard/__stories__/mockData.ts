@@ -1,7 +1,7 @@
 import type {
   F0DataChartFunnelSeries,
   F0DataChartPieSeries,
-} from "../../F0DataChart"
+} from "@/kits/F0DataChart"
 import type { DashboardChartData, DashboardMetricData } from "../types"
 
 // ---------------------------------------------------------------------------
