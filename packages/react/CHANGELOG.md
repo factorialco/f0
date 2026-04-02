@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.436.0](https://github.com/factorialco/f0/compare/f0-react-v1.435.0...f0-react-v1.436.0) (2026-04-02)
+
+
+### Features
+
+* add clarifying questions to ai chat ([#3825](https://github.com/factorialco/f0/issues/3825)) ([209c19a](https://github.com/factorialco/f0/commit/209c19a7c41dfe13573fcff57ed3f90a1d40c11f))
+
 ## [1.435.0](https://github.com/factorialco/f0/compare/f0-react-v1.434.0...f0-react-v1.435.0) (2026-04-02)
 
 
