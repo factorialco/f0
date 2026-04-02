@@ -376,12 +376,14 @@ export const ChatTextarea = ({
             key="input"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{
-              duration: shouldReduceMotion ? 0 : 0.15,
+            exit={{
+              opacity: 0,
               // Exit instantly to avoid a visible empty-form gap (white line)
               // before the clarifying panel begins its height animation.
-              exit: { duration: 0 },
+              transition: { duration: 0 },
+            }}
+            transition={{
+              duration: shouldReduceMotion ? 0 : 0.15,
             }}
           >
             {attachedFiles.length > 0 && (

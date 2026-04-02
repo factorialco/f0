@@ -83,9 +83,10 @@ const ClarifyingQuestionContent = ({
   const isFirstStep = currentStepIndex === 0
   const isFinalStep = currentStepIndex === totalSteps - 1
   const stepLabel = isMultiStep
-    ? translation.ai.clarifyingQuestion.stepOf
-        .replace("{{current}}", String(currentStepIndex + 1))
-        .replace("{{total}}", String(totalSteps))
+    ? translation.t("ai.clarifyingQuestion.stepOf", {
+        current: String(currentStepIndex + 1),
+        total: String(totalSteps),
+      })
     : undefined
 
   const hasSelection = selectedOptionIds.length > 0
