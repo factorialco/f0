@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils"
 import { Form as FormProvider } from "@/ui/form"
 
 import type { F0SwitchField } from "../fields/switch/types"
+import type { F0Field } from "../fields/types"
 import type {
   F0FormErrorTriggerMode,
   F0FormSchema,
@@ -41,7 +42,15 @@ const ERROR_TRIGGER_MODE_MAP = {
 type GroupedItem =
   | { type: "field"; item: FieldItem }
   | { type: "row"; item: RowDefinition; index: number }
-  | { type: "switchGroup"; fields: F0SwitchField[] }
+  | {
+      type: "switchGroup"
+      fields: F0SwitchField[]
+      dependentFields?: Map<string, (F0Field | RowDefinition)[]>
+      cardSelectDependentFields?: Map<
+        string,
+        Map<string, (F0Field | RowDefinition)[]>
+      >
+    }
 
 /**
  * Flatten RHF FieldErrors into a dot-path → message map.
@@ -71,33 +80,170 @@ function flattenFormErrors(
   return result
 }
 
+/**
+ * Checks if a field has an object-form renderIf that targets a specific switch
+ * being true.
+ */
+function isDependentOnSwitch(
+  field: F0Field,
+  switchIds: Set<string>
+): string | null {
+  const renderIf = field.renderIf
+  if (!renderIf || typeof renderIf === "function") return null
+  if (
+    "fieldId" in renderIf &&
+    "equalsTo" in renderIf &&
+    renderIf.equalsTo === true &&
+    switchIds.has(renderIf.fieldId)
+  ) {
+    return renderIf.fieldId
+  }
+  return null
+}
+
+/**
+ * Checks if a field has an object-form renderIf that targets a specific
+ * cardSelect field with a string equalsTo value.
+ */
+function isDependentOnCardSelect(
+  field: F0Field,
+  cardSelectIds: Set<string>
+): { fieldId: string; equalsTo: string } | null {
+  const renderIf = field.renderIf
+  if (!renderIf || typeof renderIf === "function") return null
+  if (
+    "fieldId" in renderIf &&
+    "equalsTo" in renderIf &&
+    typeof renderIf.equalsTo === "string" &&
+    cardSelectIds.has(renderIf.fieldId)
+  ) {
+    return { fieldId: renderIf.fieldId, equalsTo: renderIf.equalsTo }
+  }
+  return null
+}
+
 function groupContiguousSwitches(
   definition: FormDefinitionItem[]
 ): GroupedItem[] {
   const result: GroupedItem[] = []
-  let currentSwitchGroup: F0SwitchField[] = []
+  let i = 0
 
-  const flushSwitchGroup = () => {
-    if (currentSwitchGroup.length > 0) {
-      result.push({ type: "switchGroup", fields: [...currentSwitchGroup] })
-      currentSwitchGroup = []
-    }
-  }
+  while (i < definition.length) {
+    const item = definition[i]
 
-  definition.forEach((item, index) => {
     if (item.type === "field" && item.field.type === "switch") {
-      currentSwitchGroup.push(item.field as F0SwitchField)
+      const switchGroup: F0SwitchField[] = []
+      while (
+        i < definition.length &&
+        definition[i].type === "field" &&
+        (definition[i] as FieldItem).field.type === "switch"
+      ) {
+        switchGroup.push((definition[i] as FieldItem).field as F0SwitchField)
+        i++
+      }
+
+      const switchIds = new Set(switchGroup.map((f) => f.id))
+      const dependentFields = new Map<string, (F0Field | RowDefinition)[]>()
+      const cardSelectIds = new Set<string>()
+      const cardSelectDependentFields = new Map<
+        string,
+        Map<string, (F0Field | RowDefinition)[]>
+      >()
+
+      while (i < definition.length) {
+        const next = definition[i]
+        if (next.type === "field" && next.field.type !== "switch") {
+          const parentSwitchId = isDependentOnSwitch(next.field, switchIds)
+          if (parentSwitchId) {
+            if (next.field.type === "cardSelect") {
+              cardSelectIds.add(next.field.id)
+            }
+            const existing = dependentFields.get(parentSwitchId) ?? []
+            existing.push(next.field)
+            dependentFields.set(parentSwitchId, existing)
+            i++
+            continue
+          }
+          const cardSelectDep = isDependentOnCardSelect(
+            next.field,
+            cardSelectIds
+          )
+          if (cardSelectDep) {
+            if (!cardSelectDependentFields.has(cardSelectDep.fieldId)) {
+              cardSelectDependentFields.set(cardSelectDep.fieldId, new Map())
+            }
+            const valueMap = cardSelectDependentFields.get(
+              cardSelectDep.fieldId
+            )!
+            const existing = valueMap.get(cardSelectDep.equalsTo) ?? []
+            existing.push(next.field)
+            valueMap.set(cardSelectDep.equalsTo, existing)
+            i++
+            continue
+          }
+          break
+        } else if (next.type === "row") {
+          const rowParents = next.fields.map((f) =>
+            isDependentOnSwitch(f, switchIds)
+          )
+          const firstParent = rowParents[0]
+          if (firstParent && rowParents.every((p) => p === firstParent)) {
+            const existing = dependentFields.get(firstParent) ?? []
+            existing.push(next)
+            dependentFields.set(firstParent, existing)
+            i++
+            continue
+          }
+          const rowCardDeps = next.fields.map((f) =>
+            isDependentOnCardSelect(f, cardSelectIds)
+          )
+          const firstCardDep = rowCardDeps[0]
+          if (
+            firstCardDep &&
+            rowCardDeps.every(
+              (d) =>
+                d &&
+                d.fieldId === firstCardDep.fieldId &&
+                d.equalsTo === firstCardDep.equalsTo
+            )
+          ) {
+            if (!cardSelectDependentFields.has(firstCardDep.fieldId)) {
+              cardSelectDependentFields.set(firstCardDep.fieldId, new Map())
+            }
+            const valueMap = cardSelectDependentFields.get(
+              firstCardDep.fieldId
+            )!
+            const existing = valueMap.get(firstCardDep.equalsTo) ?? []
+            existing.push(next)
+            valueMap.set(firstCardDep.equalsTo, existing)
+            i++
+            continue
+          }
+          break
+        } else {
+          break
+        }
+      }
+
+      result.push({
+        type: "switchGroup",
+        fields: switchGroup,
+        dependentFields: dependentFields.size > 0 ? dependentFields : undefined,
+        cardSelectDependentFields:
+          cardSelectDependentFields.size > 0
+            ? cardSelectDependentFields
+            : undefined,
+      })
     } else {
-      flushSwitchGroup()
       if (item.type === "field") {
         result.push({ type: "field", item })
       } else if (item.type === "row") {
-        result.push({ type: "row", item, index })
+        result.push({ type: "row", item, index: i })
       }
+      i++
     }
-  })
+  }
 
-  flushSwitchGroup()
   return result
 }
 
@@ -331,6 +477,10 @@ export function F0FormSection<TSchema extends F0FormSchema>({
                     <SwitchGroupRenderer
                       key={`switch-group-${index}`}
                       fields={groupedItem.fields}
+                      dependentFields={groupedItem.dependentFields}
+                      cardSelectDependentFields={
+                        groupedItem.cardSelectDependentFields
+                      }
                       sectionId={sectionId}
                     />
                   )

@@ -612,3 +612,139 @@ export const GroupedCheckboxes: Story = {
     )
   },
 }
+
+/**
+ * Cards with custom content revealed when selected.
+ * The content area animates in and stops click propagation
+ * so interactive elements inside won't toggle the card.
+ */
+export const WithSelectedContent: Story = {
+  render: function Render() {
+    const [value, setValue] = useState<string | undefined>("new")
+
+    const items: CardSelectableItem<string>[] = [
+      {
+        value: "new",
+        title: "Create a new bulk payment",
+        description: "Pay all the payments requests in a single click",
+        selectedContent: (
+          <>
+            <label className="text-sm font-medium text-f1-foreground-secondary">
+              Payment name
+            </label>
+            <input
+              type="text"
+              placeholder="Enter a name…"
+              className="rounded-md border border-solid border-f1-border bg-f1-background px-3 py-2 text-sm text-f1-foreground outline-none"
+            />
+          </>
+        ),
+      },
+      {
+        value: "existing",
+        title: "Add to existing bulk payment",
+        description:
+          "Include the selected payment requests in an existing bulk payment",
+        selectedContent: (
+          <p className="text-sm text-f1-foreground-secondary">
+            You will be able to select from your existing bulk payments in the
+            next step.
+          </p>
+        ),
+      },
+    ]
+
+    return (
+      <CardSelectableContainer
+        items={items}
+        value={value}
+        onChange={setValue}
+        label="Payment type selection"
+      />
+    )
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement)
+
+    await step(
+      "Selected card shows its content, unselected hides it",
+      async () => {
+        const radios = canvas.getAllByRole("radio")
+        expect(radios[0]).toHaveAttribute("aria-checked", "true")
+
+        // The input in the first card's selectedContent should be visible
+        const input = canvas.getByPlaceholderText("Enter a name…")
+        expect(input).toBeVisible()
+
+        // Switch to second card
+        await userEvent.click(radios[1])
+        expect(radios[1]).toHaveAttribute("aria-checked", "true")
+
+        // The second card's content should now be visible
+        expect(canvas.getByText(/existing bulk payments/)).toBeVisible()
+      }
+    )
+
+    await step(
+      "Clicking inside selectedContent does not toggle the card",
+      async () => {
+        const radios = canvas.getAllByRole("radio")
+        // Second card is selected; click its text content
+        const contentText = canvas.getByText(/existing bulk payments/)
+        await userEvent.click(contentText)
+
+        // Card should still be selected (click was stopped)
+        expect(radios[1]).toHaveAttribute("aria-checked", "true")
+      }
+    )
+  },
+}
+
+/**
+ * Grouped toggle cards with custom content revealed on selection.
+ */
+export const GroupedWithSelectedContent: Story = {
+  render: function Render() {
+    const [value, setValue] = useState<string[]>(["notifications"])
+
+    const items: CardSelectableItem<string>[] = [
+      {
+        value: "notifications",
+        title: "Email notifications",
+        description: "Receive updates about your account",
+        selectedContent: (
+          <span className="text-sm text-f1-foreground-secondary">
+            Notifications will be sent to your primary email address.
+          </span>
+        ),
+      },
+      {
+        value: "marketing",
+        title: "Marketing emails",
+        description: "Receive news and offers",
+      },
+      {
+        value: "reports",
+        title: "Weekly reports",
+        description: "Get a summary of your activity every week",
+        selectedContent: (
+          <span className="text-sm text-f1-foreground-secondary">
+            Reports are generated every Monday at 9:00 AM.
+          </span>
+        ),
+      },
+    ]
+
+    return (
+      <CardSelectableContainer
+        multiple
+        isToggle
+        grouped
+        items={items}
+        value={value}
+        onChange={setValue}
+        label="Email preferences"
+      />
+    )
+  },
+}

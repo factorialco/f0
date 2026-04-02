@@ -1,3 +1,5 @@
+import type { ReactNode } from "react"
+
 import type { AvatarVariant } from "@/components/avatars/F0Avatar"
 import type { IconType } from "@/components/F0Icon"
 
@@ -24,6 +26,8 @@ export interface CardSelectableItem<T extends CardSelectableValue> {
   required?: boolean
   /** Link displayed below the description, typically pointing to external documentation */
   moreInfoLink?: { href: string; label?: string }
+  /** Custom content rendered inside the card when it is selected, with an expand/collapse animation */
+  selectedContent?: ReactNode
 }
 
 export interface CardSelectableSingleProps<T extends CardSelectableValue> {

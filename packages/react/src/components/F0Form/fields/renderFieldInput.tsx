@@ -5,6 +5,7 @@ import type { InputFieldStatus } from "@/ui/InputField/types"
 import type { InitialFile } from "./file/types"
 import type { F0Field } from "./types"
 
+import { CardSelectFieldRenderer } from "./cardSelect/CardSelectFieldRenderer"
 import { CheckboxFieldRenderer } from "./checkbox/CheckboxFieldRenderer"
 import { CustomFieldRenderer } from "./custom/CustomFieldRenderer"
 import { DateFieldRenderer } from "./date/DateFieldRenderer"
@@ -201,6 +202,13 @@ export function renderFieldInput({
           error={hasError}
           statusType={visualStatus?.type}
           initialFiles={initialFiles}
+        />
+      )
+    case "cardSelect":
+      return (
+        <CardSelectFieldRenderer
+          field={{ ...field, disabled: isDisabled }}
+          formField={formField}
         />
       )
     case "custom":

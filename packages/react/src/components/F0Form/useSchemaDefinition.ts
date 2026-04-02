@@ -256,7 +256,14 @@ function configToF0Field(
         useUpload: "useUpload" in config ? config.useUpload : undefined,
         renderIf: config.renderIf,
       } as F0Field
-
+    case "cardSelect":
+      return {
+        ...baseProps,
+        type: "cardSelect",
+        options: "options" in config ? config.options : [],
+        hideLabel: "hideLabel" in config ? config.hideLabel : undefined,
+        renderIf: config.renderIf,
+      } as F0Field
     case "custom":
       return {
         ...baseProps,

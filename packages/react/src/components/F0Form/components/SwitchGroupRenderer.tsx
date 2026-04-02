@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from "react"
+import React, { useEffect, useMemo, useRef } from "react"
 import { useFormContext } from "react-hook-form"
 import { ZodTypeAny } from "zod"
 
@@ -16,10 +16,15 @@ import {
 
 import type { F0FieldAlertProps } from "../f0Schema"
 import type { F0SwitchField } from "../fields/switch/types"
+import type { F0Field } from "../fields/types"
+import type { RowDefinition } from "../types"
 
 import { generateAnchorId, useF0FormContext } from "../context"
 import { isZodType, unwrapZodSchema } from "../f0Schema"
+import { CardSelectDepsContext } from "../fields/cardSelect/CardSelectDepsContext"
+import { FieldRenderer } from "../fields/FieldRenderer"
 import { evaluateDisabled, evaluateRenderIf } from "../fields/utils"
+import { RowRenderer } from "./RowRenderer"
 
 /**
  * Check if a switch schema requires the value to be `true`.
@@ -32,6 +37,13 @@ function isMustBeTrue(schema: ZodTypeAny): boolean {
 
 interface SwitchGroupRendererProps {
   fields: F0SwitchField[]
+  /** Fields that depend on a switch in this group (renders inside the card) */
+  dependentFields?: Map<string, (F0Field | RowDefinition)[]>
+  /** Fields that depend on a cardSelect within this group, keyed by cardSelect ID then equalsTo value */
+  cardSelectDependentFields?: Map<
+    string,
+    Map<string, (F0Field | RowDefinition)[]>
+  >
   /** Section ID when group is inside a section (for anchor links) */
   sectionId?: string
 }
@@ -42,6 +54,8 @@ interface SwitchGroupRendererProps {
  */
 export function SwitchGroupRenderer({
   fields,
+  dependentFields,
+  cardSelectDependentFields,
   sectionId,
 }: SwitchGroupRendererProps) {
   const form = useFormContext()
@@ -111,8 +125,68 @@ export function SwitchGroupRenderer({
         disabled: disabledStates[field.id] ?? false,
         required: !!(field.validation && isMustBeTrue(field.validation)),
         moreInfoLink: field.moreInfoLink,
+        selectedContent: dependentFields?.has(field.id) ? (
+          <div className="flex flex-col gap-4">
+            {dependentFields.get(field.id)!.map((dep) => {
+              if ("type" in dep && dep.type === "row") {
+                return (
+                  <RowRenderer
+                    key={dep.fields.map((f) => f.id).join("-")}
+                    row={dep}
+                    sectionId={sectionId}
+                  />
+                )
+              }
+              const f = dep as F0Field
+              // Wrap cardSelect fields with pre-rendered dependent content via context
+              if (
+                f.type === "cardSelect" &&
+                cardSelectDependentFields?.has(f.id)
+              ) {
+                const valueMap = cardSelectDependentFields.get(f.id)!
+                const contentMap = new Map<string, React.ReactNode>()
+                for (const [equalsTo, deps] of valueMap) {
+                  contentMap.set(
+                    equalsTo,
+                    <div key={equalsTo} className="flex flex-col gap-4">
+                      {deps.map((innerDep) =>
+                        "type" in innerDep && innerDep.type === "row" ? (
+                          <RowRenderer
+                            key={innerDep.fields.map((fd) => fd.id).join("-")}
+                            row={innerDep}
+                            sectionId={sectionId}
+                          />
+                        ) : (
+                          <FieldRenderer
+                            key={(innerDep as F0Field).id}
+                            field={innerDep as F0Field}
+                            sectionId={sectionId}
+                          />
+                        )
+                      )}
+                    </div>
+                  )
+                }
+                return (
+                  <CardSelectDepsContext.Provider key={f.id} value={contentMap}>
+                    <FieldRenderer field={f} sectionId={sectionId} />
+                  </CardSelectDepsContext.Provider>
+                )
+              }
+              return (
+                <FieldRenderer key={f.id} field={f} sectionId={sectionId} />
+              )
+            })}
+          </div>
+        ) : undefined,
       })),
-    [visibleFields, disabledStates]
+    [
+      visibleFields,
+      disabledStates,
+      dependentFields,
+      cardSelectDependentFields,
+      sectionId,
+    ]
   )
 
   // Get currently selected field IDs (fields with true value)

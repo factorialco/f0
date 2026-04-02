@@ -545,6 +545,148 @@ export const ConditionalRendering: Story = {
 }
 
 /**
+ * Three switch toggles grouped together, with dependent fields auto-nested inside
+ * the second and third toggles. Fields using `renderIf: { fieldId, equalsTo: true }`
+ * pointing at a switch are automatically rendered as expandable content inside
+ * that switch card.
+ */
+export const SwitchGroupWithDependentFields: Story = {
+  render() {
+    const formSchema = z.object({
+      enableRemoteWork: f0FormField(z.boolean(), {
+        label: "Enable remote work",
+        helpText: "Allow employees to work from home",
+        fieldType: "switch",
+      }),
+      enableFlexHours: f0FormField(z.boolean(), {
+        label: "Enable flexible hours",
+        helpText: "Let employees choose their own start and end times",
+        fieldType: "switch",
+      }),
+      enableOvertime: f0FormField(z.boolean(), {
+        label: "Enable overtime",
+        helpText: "Allow employees to log overtime hours",
+        fieldType: "switch",
+      }),
+      flexStartTime: f0FormField(z.string().optional(), {
+        label: "Earliest start time",
+        placeholder: "e.g. 07:00",
+        row: "flex-hours-row",
+        renderIf: { fieldId: "enableFlexHours", equalsTo: true },
+      }),
+      flexEndTime: f0FormField(z.string().optional(), {
+        label: "Latest end time",
+        placeholder: "e.g. 20:00",
+        row: "flex-hours-row",
+        renderIf: { fieldId: "enableFlexHours", equalsTo: true },
+      }),
+      overtimeRate: f0FormField(z.string(), {
+        label: "Overtime rate multiplier",
+        helpText: "Rate applied to overtime hours (e.g. 1.5x)",
+        options: [
+          { value: "1.25", label: "1.25x" },
+          { value: "1.5", label: "1.5x" },
+          { value: "2.0", label: "2.0x" },
+        ],
+        placeholder: "Select rate",
+        renderIf: { fieldId: "enableOvertime", equalsTo: true },
+      }),
+      overtimeCapHours: f0FormField(z.number().min(1).optional(), {
+        label: "Monthly overtime cap (hours)",
+        helpText: "Maximum overtime hours allowed per month",
+        renderIf: { fieldId: "enableOvertime", equalsTo: true },
+      }),
+      overtimeCompensation: f0FormField(
+        z.enum(["monetary", "timeOff", "mixed"]),
+        {
+          label: "Compensation model",
+          fieldType: "cardSelect",
+          hideLabel: true,
+          options: [
+            {
+              value: "monetary",
+              label: "Monetary",
+              description: "Pay extra hours at the selected rate",
+            },
+            {
+              value: "timeOff",
+              label: "Time off",
+              description: "Compensate with equivalent time off",
+            },
+            {
+              value: "mixed",
+              label: "Mixed",
+              description: "Combine monetary and time off compensation",
+            },
+          ],
+        }
+      ),
+      monetaryBonusPercent: f0FormField(z.number().min(0).max(100).optional(), {
+        label: "Bonus percentage",
+        helpText: "Additional bonus on top of the overtime rate",
+        renderIf: {
+          fieldId: "overtimeCompensation",
+          equalsTo: "monetary",
+        },
+      }),
+      timeOffDaysPerHour: f0FormField(z.number().min(0).optional(), {
+        label: "Time off days per overtime hour",
+        helpText: "How many days off the employee earns per overtime hour",
+        renderIf: {
+          fieldId: "overtimeCompensation",
+          equalsTo: "timeOff",
+        },
+      }),
+      mixedMonetaryPercent: f0FormField(z.number().min(0).max(100).optional(), {
+        label: "Monetary share (%)",
+        helpText:
+          "Percentage of overtime compensated monetarily (rest is time off)",
+        row: "mixed-row",
+        renderIf: {
+          fieldId: "overtimeCompensation",
+          equalsTo: "mixed",
+        },
+      }),
+      mixedTimeOffPercent: f0FormField(z.number().min(0).max(100).optional(), {
+        label: "Time off share (%)",
+        helpText: "Percentage of overtime compensated with time off",
+        row: "mixed-row",
+        renderIf: {
+          fieldId: "overtimeCompensation",
+          equalsTo: "mixed",
+        },
+      }),
+    })
+
+    const formDefinition = useF0FormDefinition({
+      name: "switch-group-dependent-fields",
+      schema: formSchema,
+      defaultValues: {
+        enableRemoteWork: false,
+        enableFlexHours: false,
+        flexStartTime: "",
+        flexEndTime: "",
+        enableOvertime: false,
+        overtimeRate: "",
+        overtimeCapHours: undefined,
+        overtimeCompensation: "monetary",
+        monetaryBonusPercent: undefined,
+        timeOffDaysPerHour: undefined,
+        mixedMonetaryPercent: undefined,
+        mixedTimeOffPercent: undefined,
+      },
+      onSubmit: async ({ data }) => {
+        await sleep(1000)
+        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+        return { success: true }
+      },
+    })
+
+    return <F0Form formDefinition={formDefinition} />
+  },
+}
+
+/**
  * Form with dynamic disabled fields based on other field values.
  * Fields can use `disabled` as a function that receives form values
  * to conditionally enable/disable based on other field values.

@@ -8,6 +8,7 @@ import type {
 } from "@/components/F0DurationInput/types"
 import type { InputFieldStatus } from "@/ui/InputField/types"
 
+import type { F0CardSelectConfig } from "./fields/cardSelect/types"
 import type { F0CheckboxConfig } from "./fields/checkbox/types"
 import type { F0CustomConfig } from "./fields/custom/types"
 import type {
@@ -86,6 +87,7 @@ export type F0FieldType =
   | "daterange"
   | "richtext"
   | "file"
+  | "cardSelect"
   | "custom"
 
 /**
@@ -195,6 +197,7 @@ export type {
   F0NumberConfig,
   F0TextareaConfig,
   F0SelectConfig,
+  F0CardSelectConfig,
   F0CheckboxConfig,
   F0SwitchConfig,
   F0DateConfig,
@@ -233,6 +236,14 @@ export type F0StringSelectConfig<
   }
 
 /**
+ * Config for string fields rendered as grouped radio cards
+ */
+export type F0StringCardSelectConfig = F0BaseConfig &
+  F0CardSelectConfig & {
+    fieldType: "cardSelect"
+  }
+
+/**
  * Union of all string field configs
  *
  * @typeParam TValue - Type of the field value (for custom fields)
@@ -247,6 +258,7 @@ export type F0StringConfig<
   | F0StringTextConfig
   | F0StringTextareaConfig
   | F0StringSelectConfig<R>
+  | F0StringCardSelectConfig
   | F0StringFileConfig
   | F0CustomFieldConfig<TValue, TConfig>
 
@@ -469,6 +481,7 @@ export type F0FieldConfig<
   | F0ArrayConfig<T, R>
   | F0FileFieldConfig
   | F0ObjectConfig
+  | F0StringCardSelectConfig
 
 /**
  * Extended Zod type with F0 metadata
@@ -527,7 +540,10 @@ export function f0FormField<T extends z.ZodDate>(
 export function f0FormField<
   T extends z.ZodEnum<[string, ...string[]]>,
   R extends Record<string, unknown> = Record<string, unknown>,
->(schema: T, config: F0StringSelectConfig<R>): T & F0ZodType<T>
+>(
+  schema: T,
+  config: F0StringSelectConfig<R> | F0StringCardSelectConfig
+): T & F0ZodType<T>
 
 /**
  * Array field - multi-select
