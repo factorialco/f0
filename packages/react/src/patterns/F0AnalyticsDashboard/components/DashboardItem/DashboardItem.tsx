@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from "react"
 
 import { ButtonInternal } from "@/components/F0Button/internal"
-import { OneEllipsis } from "@/components/OneEllipsis"
+import { OneEllipsis } from "@/lib/OneEllipsis"
 import {
   Dropdown,
   type DropdownItem as DropdownItemType,

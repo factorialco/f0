@@ -2,7 +2,7 @@ import React from "react"
 import { useFormContext } from "react-hook-form"
 
 import { F0Button } from "@/components/F0Button"
-import { SectionHeader } from "@/experimental/Information/Headers/SectionHeader"
+import { SectionHeader } from "@/patterns/SectionHeader"
 import { cn } from "@/lib/utils"
 
 import type { SectionDefinition } from "../types"

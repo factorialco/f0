@@ -1,7 +1,7 @@
 import { forwardRef } from "react"
 
 import { F0Button } from "@/components/F0Button"
-import { OneEllipsis } from "@/components/OneEllipsis"
+import { OneEllipsis } from "@/lib/OneEllipsis"
 import { RichTextDisplay } from "@/experimental/RichText/RichTextDisplay"
 import { Cross } from "@/icons/app"
 import { cn } from "@/lib/utils"

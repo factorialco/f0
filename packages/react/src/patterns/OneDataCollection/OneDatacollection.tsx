@@ -19,7 +19,7 @@ import { cn } from "@/lib/utils"
 import type {
   FiltersDefinition,
   FiltersState,
-} from "../../components/OneFilterPicker/types"
+} from "@/patterns/OneFilterPicker/types"
 import type {
   BulkActionDefinition,
   GroupingState,
@@ -29,7 +29,7 @@ import type {
 } from "./types"
 import type { Visualization } from "./visualizations/collection"
 
-import { OneFilterPicker } from "../../components/OneFilterPicker"
+import { OneFilterPicker } from "@/patterns/OneFilterPicker"
 import {
   filterActions,
   getPrimaryActions,

@@ -1,6 +1,6 @@
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
 import { F0Button } from "@/components/F0Button"
-import { OneEllipsis } from "@/components/OneEllipsis"
+import { OneEllipsis } from "@/lib/OneEllipsis"
 import { Badge } from "@/ui/IconBadge"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { Bell as BellIcon, Circle as CircleIcon } from "@/icons/app"

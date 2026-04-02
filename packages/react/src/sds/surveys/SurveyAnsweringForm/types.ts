@@ -1,5 +1,5 @@
 import type { ModuleId } from "@/components/avatars/F0AvatarModule"
-import type { DialogPosition } from "@/components/F0Dialog/types"
+import type { DialogPosition } from "@/patterns/F0Dialog/types"
 import type { UseFileUpload } from "@/components/F0Form/fields/file/types"
 import type { F0FormErrorTriggerMode } from "@/components/F0Form/types"
 import type { ResourceHeaderProps } from "@/patterns/ResourceHeader"

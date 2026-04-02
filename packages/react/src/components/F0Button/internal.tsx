@@ -7,7 +7,7 @@ import { useTextFormatEnforcer } from "@/lib/text"
 import { cn } from "@/lib/utils"
 import { Action } from "@/ui/Action"
 
-import { OneEllipsis } from "../OneEllipsis"
+import { OneEllipsis } from "@/lib/OneEllipsis"
 import { ButtonInternalProps } from "./internal-types"
 import { fontSizeVariants } from "./variants"
 import { Counter } from "@/ui/Counter"

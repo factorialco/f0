@@ -16,6 +16,10 @@ export * from "./OneChip"
  * @deprecated F0Box has moved to @/lib/F0Box. Import from there instead.
  */
 export * from "../lib/F0Box"
+/**
+ * @deprecated OneEllipsis has moved to @/lib/OneEllipsis. Import from there instead.
+ */
+export { OneEllipsis } from "../lib/OneEllipsis"
 export * from "./F0Button"
 export * from "./F0ButtonDropdown"
 export * from "./F0ButtonToggle"
@@ -24,9 +28,15 @@ export * from "./F0Checkbox"
 export * from "./F0ChipList"
 export * from "./F0DatePicker"
 export * from "./F0Alert"
-export * from "./F0Dialog"
+/**
+ * @deprecated F0Dialog has moved to @/patterns/F0Dialog. Import from there instead.
+ */
+export * from "../patterns/F0Dialog"
 export * from "./F0DurationInput"
-export * from "./F0FilterPickerContent"
+/**
+ * @deprecated F0FilterPickerContent has moved to @/patterns/F0FilterPickerContent. Import from there instead.
+ */
+export * from "../patterns/F0FilterPickerContent"
 export * from "./F0Form"
 export * from "./F0FormField"
 export * from "./F0WizardForm"
@@ -36,7 +46,25 @@ export * from "./F0Link"
 export * from "./F0Select"
 export * from "./F0Text"
 export * from "../sds/TimeLine"
-export * from "./OneFilterPicker/exports"
+/**
+ * @deprecated OneFilterPicker has moved to @/patterns/OneFilterPicker. Import from there instead.
+ */
+export { OneFilterPicker } from "../patterns/OneFilterPicker/OneFilterPicker"
+export type {
+  DateFilterDefinition,
+  FilterDefinition,
+  FilterValue,
+  InFilterDefinition,
+  NumberFilterDefinition,
+  SearchFilterDefinition,
+  FilterValueByKey,
+  FiltersMode,
+  FiltersDefinition,
+  FilterOptions,
+  CurrentFilters,
+  PresetDefinition,
+  PresetsDefinition,
+} from "../patterns/OneFilterPicker/types"
 export * from "./tags/exports"
 /**
  * @deprecated Await has moved to @/lib/Await. Import from there instead.

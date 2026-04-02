@@ -3,7 +3,7 @@ import { DefaultValues, Path, useForm } from "react-hook-form"
 import { z } from "zod"
 
 import { F0Button } from "@/components/F0Button"
-import { SectionHeader } from "@/experimental/Information/Headers/SectionHeader"
+import { SectionHeader } from "@/patterns/SectionHeader"
 import { Save } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 import { cn } from "@/lib/utils"

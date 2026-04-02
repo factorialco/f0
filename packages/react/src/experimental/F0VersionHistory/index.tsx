@@ -1,6 +1,6 @@
 "use client"
 
-import { OneEllipsis } from "@/components/OneEllipsis/OneEllipsis"
+import { OneEllipsis } from "@/lib/OneEllipsis/OneEllipsis"
 import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
 import { ScrollArea } from "@/ui/scrollarea"

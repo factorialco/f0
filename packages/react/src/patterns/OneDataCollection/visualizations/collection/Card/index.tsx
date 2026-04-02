@@ -24,7 +24,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/ui/Card"
 import { GroupHeader } from "@/ui/GroupHeader/GroupHeader"
 import { Skeleton } from "@/ui/skeleton"
 
-import type { FiltersDefinition } from "../../../../../components/OneFilterPicker/types"
+import type { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
 
 import { PagesPagination } from "../../../components/PagesPagination"
 import { ItemActionsDefinition } from "../../../item-actions"

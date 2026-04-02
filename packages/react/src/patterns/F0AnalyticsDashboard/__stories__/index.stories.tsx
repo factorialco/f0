@@ -7,7 +7,7 @@ import { dashboardFilters, dashboardPresets, mixedItems } from "./mockDataMixed"
 
 const meta = {
   component: F0AnalyticsDashboard,
-  title: "F0AnalyticsDashboard",
+  title: "AnalyticsDashboard",
   tags: ["autodocs", "experimental"],
 } satisfies Meta<typeof F0AnalyticsDashboard>
 
