@@ -13,7 +13,7 @@ import { CardSelectableContainer } from "./index"
 const meta: Meta<CardSelectableSingleProps<string>> = {
   title: "CardSelectable",
   component: CardSelectableContainer,
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs", "stable"],
   parameters: {
     layout: "padded",
   },
