@@ -105,6 +105,7 @@ export const F0Avatar = ({
         <F0AvatarIcon
           icon={avatar.icon}
           size={size as ComponentProps<typeof F0AvatarIcon>["size"]}
+          state={avatar.state}
           aria-label={avatar["aria-label"]}
           aria-labelledby={avatar["aria-labelledby"]}
           dataTestId={dataTestId}
