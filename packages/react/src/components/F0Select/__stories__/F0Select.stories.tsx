@@ -162,16 +162,26 @@ const meta: Meta = {
       description:
         "<p>Array of options to show in the select. Each option can its an object of type `SelectItemObject` or `'separator'`" +
         " to render a separator line</p>" +
-        "```typescript\n" +
-        "type SelectItemObject<T> = {\n" +
-        "  value: T\n" +
-        "  label: string\n" +
-        "  description?: string\n" +
-        "  avatar?: AvatarVariant\n" +
-        "  tag?: string | { type: 'dot'; text: string; color: NewColor } | { type: 'person'; name: string; src?: string }\n" +
-        "  icon?: IconType\n" +
-        "  item?: unknown\n" +
-        "  disabled?: boolean\n" +
+        "```typescript
+" +
+        "type SelectItemObject<T> = {
+" +
+        "  value: T
+" +
+        "  label: string
+" +
+        "  description?: string
+" +
+        "  avatar?: AvatarVariant
+" +
+        "  tag?: string | { type: 'dot'; text: string; color: NewColor } | { type: 'person'; name: string; src?: string }
+" +
+        "  icon?: IconType
+" +
+        "  item?: unknown
+" +
+        "  disabled?: boolean
+" +
         "}```",
     },
     onChange: {
@@ -181,12 +191,18 @@ const meta: Meta = {
     actions: {
       description:
         "<p>List of action buttons that will be displayed at the bottom of the select dropdown. Each action should have a label, onClick handler, optional icon, and variant.</p>" +
-        "```typescript\n" +
-        "type Action = {\n" +
-        "  label: string\n" +
-        "  onClick: () => void\n" +
-        "  icon?: IconType\n" +
-        "  variant?: 'ghost' | 'critical'\n" +
+        "```typescript
+" +
+        "type Action = {
+" +
+        "  label: string
+" +
+        "  onClick: () => void
+" +
+        "  icon?: IconType
+" +
+        "  variant?: 'ghost' | 'critical'
+" +
         "}```",
     },
     loading: {
@@ -320,7 +336,7 @@ const meta: Meta = {
       </div>
     ),
   ],
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs", "stable"],
 } satisfies Meta<typeof F0Select>
 
 export default meta
