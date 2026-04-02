@@ -14,8 +14,8 @@ import {
 import { useF0FormDefinition } from "@/components/F0WizardForm"
 import * as SidebarStories from "@/components/Navigation/Sidebar/index.stories"
 import { Sidebar } from "@/components/Navigation/Sidebar/Sidebar"
-import { ApplicationFrame } from "@/examples/ApplicationFrame"
-import ApplicationFrameStoryMeta from "@/examples/ApplicationFrame/index.stories"
+import { ApplicationFrame } from "@/patterns/ApplicationFrame"
+import ApplicationFrameStoryMeta from "@/patterns/ApplicationFrame/index.stories"
 import { PageHeader } from "@/experimental/Navigation/Header/PageHeader"
 import { Page } from "@/experimental/Navigation/Page"
 

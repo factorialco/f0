@@ -12,7 +12,7 @@ import {
   FrameProvider,
   SidebarState,
   useSidebar,
-} from "@/examples/ApplicationFrame/FrameProvider"
+} from "@/patterns/ApplicationFrame/FrameProvider"
 import {
   AiPromotionChat,
   AiPromotionChatProvider,
