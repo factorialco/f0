@@ -11,7 +11,7 @@ import { Check } from "@/icons/app"
 import { useReducedMotion } from "@/lib/a11y"
 import { withDataTestId, WithDataTestIdProps } from "@/lib/data-testid"
 import { useI18n } from "@/lib/providers/i18n/i18n-provider"
-import { cn, focusRing } from "@/lib/utils"
+import { cn } from "@/lib/utils"
 
 import type {
   CardSelectableAvatarVariant,
@@ -165,7 +165,7 @@ function _CardSelectable<T extends CardSelectableValue>({
         }}
         className={cn(
           "flex cursor-pointer items-center gap-3",
-          focusRing(),
+          "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-f1-special-ring",
           grouped ? "px-4 py-3" : "p-4"
         )}
       >

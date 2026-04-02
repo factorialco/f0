@@ -52,7 +52,8 @@ describe("CardSelectable selectedContent", () => {
 
     // Content B exists in DOM (always mounted for animation) but is hidden
     const contentB = screen.getByTestId("content-b")
-    expect(contentB.closest("[style]")).toBeTruthy()
+    expect(contentB).toBeInTheDocument()
+    expect(contentB).not.toBeVisible()
   })
 
   it("does not render animation wrapper when item has no selectedContent", () => {
