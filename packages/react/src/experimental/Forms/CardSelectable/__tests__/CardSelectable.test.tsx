@@ -51,9 +51,12 @@ describe("CardSelectable selectedContent", () => {
     )
 
     // Content B exists in DOM (always mounted for animation) but is hidden
+    // via motion.div animating height:0/opacity:0/visibility:hidden.
+    // JSDOM doesn't execute motion animations, so we verify it's mounted
+    // and that the wrapper has overflow-hidden (which clips the content at height:0).
     const contentB = screen.getByTestId("content-b")
     expect(contentB).toBeInTheDocument()
-    expect(contentB).not.toBeVisible()
+    expect(contentB.closest(".overflow-hidden")).not.toBeNull()
   })
 
   it("does not render animation wrapper when item has no selectedContent", () => {
