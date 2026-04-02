@@ -46,3 +46,5 @@ export const ProgressBarChart = withDataTestId(
 export const ComboChart = withDataTestId(
   Component({ name: "ComboChart", type: "info" }, ComboChartComponent)
 )
+
+export * from "./RadarChart"
