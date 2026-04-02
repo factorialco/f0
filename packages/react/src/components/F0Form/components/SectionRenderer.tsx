@@ -95,13 +95,19 @@ function groupContiguousSwitches(
 
     if (item.type === "field" && item.field.type === "switch") {
       const switchGroup: F0SwitchField[] = []
-      while (
-        i < fields.length &&
-        fields[i].type === "field" &&
-        (fields[i] as FieldItem).field.type === "switch"
-      ) {
-        switchGroup.push((fields[i] as FieldItem).field as F0SwitchField)
+      if (item.field.grouped === false) {
+        switchGroup.push(item.field as F0SwitchField)
         i++
+      } else {
+        while (
+          i < fields.length &&
+          fields[i].type === "field" &&
+          (fields[i] as FieldItem).field.type === "switch" &&
+          ((fields[i] as FieldItem).field as F0SwitchField).grouped !== false
+        ) {
+          switchGroup.push((fields[i] as FieldItem).field as F0SwitchField)
+          i++
+        }
       }
 
       const switchIds = new Set(switchGroup.map((f) => f.id))

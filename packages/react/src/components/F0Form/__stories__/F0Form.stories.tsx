@@ -591,7 +591,7 @@ export const SwitchGroupWithDependentFields: Story = {
         placeholder: "Select rate",
         renderIf: { fieldId: "enableOvertime", equalsTo: true },
       }),
-      overtimeCapHours: f0FormField(z.number().min(1).optional(), {
+      overtimeCapHours: f0FormField(z.number().min(1), {
         label: "Monthly overtime cap (hours)",
         helpText: "Maximum overtime hours allowed per month",
         renderIf: { fieldId: "enableOvertime", equalsTo: true },
@@ -674,6 +674,81 @@ export const SwitchGroupWithDependentFields: Story = {
         timeOffDaysPerHour: undefined,
         mixedMonetaryPercent: undefined,
         mixedTimeOffPercent: undefined,
+      },
+      onSubmit: async ({ data }) => {
+        await sleep(1000)
+        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+        return { success: true }
+      },
+    })
+
+    return <F0Form formDefinition={formDefinition} />
+  },
+}
+
+/**
+ * Demonstrates `grouped: false` on both switches and cardSelect fields.
+ * - Switches with `grouped: false` render as standalone toggles instead of
+ *   being merged into a single bordered container with adjacent switches.
+ * - CardSelect with `grouped: false` renders each option as a separate bordered
+ *   card instead of a single container with dividers.
+ */
+export const UngroupedFields: Story = {
+  render() {
+    const formSchema = z.object({
+      enableNotifications: f0FormField(z.boolean(), {
+        label: "Enable notifications",
+        helpText: "Receive push notifications",
+        fieldType: "switch",
+      }),
+      enableAnalytics: f0FormField(z.boolean(), {
+        label: "Enable analytics",
+        helpText: "This switch is ungrouped from the others",
+        fieldType: "switch",
+        grouped: false,
+      }),
+      enableDarkMode: f0FormField(z.boolean(), {
+        label: "Enable dark mode",
+        helpText: "Back to a grouped switch",
+        fieldType: "switch",
+      }),
+      enableExperimental: f0FormField(z.boolean(), {
+        label: "Enable experimental features",
+        fieldType: "switch",
+      }),
+      billingCycle: f0FormField(z.string(), {
+        label: "Billing cycle",
+        fieldType: "cardSelect",
+        grouped: false,
+        options: [
+          {
+            value: "monthly",
+            label: "Monthly",
+            description: "Pay month by month",
+          },
+          {
+            value: "annual",
+            label: "Annual",
+            description: "Save 20% with yearly billing",
+          },
+          {
+            value: "lifetime",
+            label: "Lifetime",
+            description: "One-time payment, forever access",
+          },
+        ],
+      }),
+    })
+
+    const formDefinition = useF0FormDefinition({
+      name: "ungrouped-fields",
+      schema: formSchema,
+      defaultValues: {
+        enableNotifications: false,
+        enableAnalytics: false,
+        enableDarkMode: false,
+        enableExperimental: false,
+        billingCycle: "",
       },
       onSubmit: async ({ data }) => {
         await sleep(1000)

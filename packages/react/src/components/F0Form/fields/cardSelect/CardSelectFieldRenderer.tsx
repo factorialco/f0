@@ -31,7 +31,7 @@ export function CardSelectFieldRenderer({
 
   return (
     <CardSelectableContainer
-      grouped
+      grouped={field.grouped !== false}
       items={items}
       value={formField.value as string | undefined}
       onChange={(val) => formField.onChange(val)}

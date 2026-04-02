@@ -157,15 +157,23 @@ function groupContiguousSwitches(
     const item = definition[i]
 
     if (item.type === "field" && item.field.type === "switch") {
-      // Collect contiguous switches
+      // Collect contiguous switches (grouped: false breaks the chain into solo groups)
       const switchGroup: F0SwitchField[] = []
-      while (
-        i < definition.length &&
-        definition[i].type === "field" &&
-        (definition[i] as FieldItem).field.type === "switch"
-      ) {
-        switchGroup.push((definition[i] as FieldItem).field as F0SwitchField)
+      if (item.field.grouped === false) {
+        // Solo switch — don't merge with neighbors
+        switchGroup.push(item.field as F0SwitchField)
         i++
+      } else {
+        while (
+          i < definition.length &&
+          definition[i].type === "field" &&
+          (definition[i] as FieldItem).field.type === "switch" &&
+          ((definition[i] as FieldItem).field as F0SwitchField).grouped !==
+            false
+        ) {
+          switchGroup.push((definition[i] as FieldItem).field as F0SwitchField)
+          i++
+        }
       }
 
       const switchIds = new Set(switchGroup.map((f) => f.id))
