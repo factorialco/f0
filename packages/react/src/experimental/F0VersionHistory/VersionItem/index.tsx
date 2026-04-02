@@ -2,7 +2,7 @@ import { format } from "date-fns"
 
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
 import { OneEllipsis } from "@/lib/OneEllipsis/OneEllipsis"
-import { getLocale } from "@/experimental/OneCalendar/utils"
+import { getLocale } from "@/components/OneCalendar/utils"
 import { useL10n } from "@/lib/providers/l10n"
 import { cn, focusRing } from "@/lib/utils"
 

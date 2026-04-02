@@ -1,6 +1,6 @@
 import { subDays, subMonths, subYears } from "date-fns"
 
-import { granularityDefinitions } from "@/experimental/OneCalendar/granularities"
+import { granularityDefinitions } from "@/components/OneCalendar/granularities"
 
 import { DatePreset } from "./types"
 

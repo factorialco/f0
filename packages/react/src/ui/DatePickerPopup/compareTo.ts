@@ -1,8 +1,8 @@
 import {
   GranularityDefinitionKey,
   granularityDefinitions,
-} from "@/experimental/OneCalendar/granularities"
-import { DateRangeComplete } from "@/experimental/OneCalendar/types"
+} from "@/components/OneCalendar/granularities"
+import { DateRangeComplete } from "@/components/OneCalendar/types"
 
 export const getCompareToValue = (
   currentValue: DateRangeComplete,

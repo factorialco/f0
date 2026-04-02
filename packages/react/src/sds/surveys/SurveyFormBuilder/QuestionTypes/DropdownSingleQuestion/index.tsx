@@ -1,6 +1,6 @@
-import type { F0SelectField } from "@/components/F0Form/fields/select/types"
+import type { F0SelectField } from "@/patterns/F0Form/fields/select/types"
 
-import { F0FormField } from "@/components/F0FormField"
+import { F0FormField } from "@/patterns/F0FormField"
 import { useI18n } from "@/lib/providers/i18n"
 
 import type { DropdownMultiQuestionProps } from "../DropdownMultiQuestion/types"

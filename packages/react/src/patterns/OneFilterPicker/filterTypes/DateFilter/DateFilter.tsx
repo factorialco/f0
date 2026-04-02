@@ -1,12 +1,12 @@
 "use client"
 
 import { F0Button } from "@/components/F0Button"
-import { OneCalendarInternal } from "@/experimental/OneCalendar"
+import { OneCalendarInternal } from "@/components/OneCalendar"
 import {
   CalendarMode,
   CalendarView,
   DateRange,
-} from "@/experimental/OneCalendar/types"
+} from "@/components/OneCalendar/types"
 
 import { FilterTypeComponentProps } from "../types"
 

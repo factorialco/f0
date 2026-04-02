@@ -4,21 +4,18 @@ import type {
   DateRange,
   DateRangeComplete,
   GranularityDefinition,
-} from "@/experimental/OneCalendar"
+} from "@/components/OneCalendar"
 
 import { F0Button } from "@/components/F0Button"
 import { ButtonInternal } from "@/components/F0Button/internal"
-import { granularityDefinitions } from "@/experimental/OneCalendar/granularities"
-import {
-  isAfterOrEqual,
-  isBeforeOrEqual,
-} from "@/experimental/OneCalendar/utils"
+import { granularityDefinitions } from "@/components/OneCalendar/granularities"
+import { isAfterOrEqual, isBeforeOrEqual } from "@/components/OneCalendar/utils"
 import { ChevronLeft, ChevronRight } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { useL10n } from "@/lib/providers/l10n"
 import { cn, focusRing } from "@/lib/utils"
 
-import { GranularityDefinitionKey } from "@/experimental/OneCalendar/granularities"
+import { GranularityDefinitionKey } from "@/components/OneCalendar/granularities"
 import { DatePickerValue } from "../types"
 
 type DateNavigatorTriggerProps = {

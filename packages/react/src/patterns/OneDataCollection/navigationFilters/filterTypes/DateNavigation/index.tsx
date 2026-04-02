@@ -1,4 +1,4 @@
-import { DateRange, granularityDefinitions } from "@/experimental/OneCalendar"
+import { DateRange, granularityDefinitions } from "@/components/OneCalendar"
 import { TranslationsType } from "@/lib/providers/i18n"
 
 import { NavigationFilter, NavigationFilterComponentProps } from "../../types"

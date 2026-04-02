@@ -2,7 +2,7 @@ import { Meta, StoryObj } from "@storybook/react-vite"
 import { useMemo, useRef, useState } from "react"
 import { fn } from "storybook/test"
 
-import { granularityDefinitions } from "@/experimental/OneCalendar/granularities"
+import { granularityDefinitions } from "@/components/OneCalendar/granularities"
 import { Delete, Pencil, Plus } from "@/icons/app"
 
 import {

@@ -1,10 +1,10 @@
-import type { F0FileField } from "@/components/F0Form/fields/types"
+import type { F0FileField } from "@/patterns/F0Form/fields/types"
 import type {
   MimeType,
   UseFileUpload,
-} from "@/components/F0Form/fields/file/types"
+} from "@/patterns/F0Form/fields/file/types"
 
-import { F0FormField } from "@/components/F0FormField"
+import { F0FormField } from "@/patterns/F0FormField"
 import { useI18n } from "@/lib/providers/i18n"
 
 import { useSurveyFormBuilderContext } from "../../Context"

@@ -2,7 +2,7 @@ import { ReactNode } from "react"
 
 import { ModuleId } from "@/components/avatars/F0AvatarModule"
 import { DropdownInternalProps } from "@/experimental/Navigation/Dropdown/internal"
-import { TabsProps } from "@/experimental/Navigation/Tabs"
+import { TabsProps } from "@/patterns/Navigation/Tabs"
 
 import {
   DialogPosition,

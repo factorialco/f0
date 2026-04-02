@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import {
   GranularityDefinitionKey,
   granularityDefinitions,
-} from "@/experimental/OneCalendar"
+} from "@/components/OneCalendar"
 import { useI18n } from "@/lib/providers/i18n"
 import { DatePickerPopup, isSameDatePickerValue } from "@/ui/DatePickerPopup"
 

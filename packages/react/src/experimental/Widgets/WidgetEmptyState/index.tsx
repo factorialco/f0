@@ -2,7 +2,7 @@ import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
 
 import { IconType } from "../../../components/F0Icon"
-import { OneEmptyState } from "../../OneEmptyState/OneEmptyState"
+import { OneEmptyState } from "@/components/OneEmptyState/OneEmptyState"
 
 type Action = {
   label: string

@@ -4,13 +4,13 @@ import { subDays } from "date-fns"
 import { useState } from "react"
 import { expect, within } from "storybook/test"
 
-import { granularityDefinitions } from "@/experimental/OneCalendar"
+import { granularityDefinitions } from "@/components/OneCalendar"
 
 import {
   CalendarView,
   DateRange,
   WeekStartDay,
-} from "@/experimental/OneCalendar/types"
+} from "@/components/OneCalendar/types"
 import { OneDateNavigator } from "../OneDateNavigator"
 import { predefinedPresets } from "../presets"
 import { DatePickerValue } from "../types"

@@ -33,7 +33,10 @@ export * from "./Navigation/exports"
  * @deprecated OneApprovalHistory has moved to @/sds/inbox/OneApprovalHistory. Import from there instead.
  */
 export * from "../sds/inbox/OneApprovalHistory"
-export * from "./OneCalendar"
+/**
+ * @deprecated OneCalendar has moved to @/components/OneCalendar. Import from there instead.
+ */
+export * from "../components/OneCalendar"
 /**
  * @deprecated OneChip has moved to @/components/OneChip. Import from there instead.
  */
@@ -46,7 +49,10 @@ export * from "../patterns/OneDataCollection/exports"
  * @deprecated OneDateNavigator has moved to @/patterns/OneDateNavigator. Import from there instead.
  */
 export * from "../patterns/OneDateNavigator"
-export * from "./OneEmptyState"
+/**
+ * @deprecated OneEmptyState has moved to @/components/OneEmptyState. Import from there instead.
+ */
+export * from "../components/OneEmptyState"
 /**
  * @deprecated OnePagination has moved to @/ui/OnePagination. Import from there instead.
  */

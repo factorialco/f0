@@ -3,10 +3,10 @@ import { forwardRef, useEffect, useState } from "react"
 import type {
   GranularityDefinition,
   GranularityDefinitionKey,
-} from "@/experimental/OneCalendar"
+} from "@/components/OneCalendar"
 
-import { DateStringFormat } from "@/experimental/OneCalendar/granularities/types"
-import { isActiveDate } from "@/experimental/OneCalendar/utils"
+import { DateStringFormat } from "@/components/OneCalendar/granularities/types"
+import { isActiveDate } from "@/components/OneCalendar/utils"
 import { Calendar } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { Input } from "@/ui/input"

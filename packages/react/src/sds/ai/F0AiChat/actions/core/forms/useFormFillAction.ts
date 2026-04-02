@@ -1,9 +1,9 @@
 import { useFrontendTool } from "@copilotkit/react-core"
 import { type ZodTypeAny } from "zod"
 
-import type { F0FormSchema } from "@/components/F0Form/types"
+import type { F0FormSchema } from "@/patterns/F0Form/types"
 
-import { useF0AiFormRegistry } from "@/components/F0Form/F0AiFormRegistry"
+import { useF0AiFormRegistry } from "@/patterns/F0Form/F0AiFormRegistry"
 
 /**
  * Unwrap Zod wrappers (optional, nullable, default, effects, branded, etc.)

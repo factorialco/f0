@@ -1,5 +1,5 @@
-import { GranularityDefinitionKey } from "@/experimental/OneCalendar/granularities"
-import { DateRange, DateRangeComplete } from "@/experimental/OneCalendar/types"
+import { GranularityDefinitionKey } from "@/components/OneCalendar/granularities"
+import { DateRange, DateRangeComplete } from "@/components/OneCalendar/types"
 
 export interface DatePreset {
   label: string

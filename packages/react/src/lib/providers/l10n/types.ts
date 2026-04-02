@@ -1,4 +1,4 @@
-import { WeekStartsOn } from "@/experimental/OneCalendar/types"
+import { WeekStartsOn } from "@/components/OneCalendar/types"
 
 export type L10nContextValue = {
   locale: string

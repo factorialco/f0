@@ -2,17 +2,14 @@ import { useEffect, useMemo, useState } from "react"
 
 import { F0Button } from "@/components/F0Button"
 import { F0Select } from "@/components/F0Select"
-import {
-  GranularityDefinitionKey,
-  OneCalendar,
-} from "@/experimental/OneCalendar"
-import { getGranularityDefinitions } from "@/experimental/OneCalendar/granularities"
+import { GranularityDefinitionKey, OneCalendar } from "@/components/OneCalendar"
+import { getGranularityDefinitions } from "@/components/OneCalendar/granularities"
 import {
   DateRange,
   DateRangeComplete,
   WeekStartDay,
   WeekStartsOn,
-} from "@/experimental/OneCalendar/types"
+} from "@/components/OneCalendar/types"
 import { ChevronLeft } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { useL10n } from "@/lib/providers/l10n"

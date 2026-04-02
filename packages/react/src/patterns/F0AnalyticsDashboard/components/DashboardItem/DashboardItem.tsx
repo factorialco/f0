@@ -6,7 +6,7 @@ import {
   Dropdown,
   type DropdownItem as DropdownItemType,
 } from "@/experimental/Navigation/Dropdown"
-import { OneEmptyState } from "@/experimental/OneEmptyState"
+import { OneEmptyState } from "@/components/OneEmptyState"
 import { Ellipsis } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 

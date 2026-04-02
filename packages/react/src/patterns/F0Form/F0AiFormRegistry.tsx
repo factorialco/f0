@@ -10,7 +10,7 @@ import {
 } from "react"
 import { zodToJsonSchema } from "zod-to-json-schema"
 
-import type { F0WizardFormStep } from "../F0WizardForm/types"
+import type { F0WizardFormStep } from "@/patterns/F0WizardForm/types"
 import type { F0FormSchema, F0SectionConfig } from "./types"
 import type { F0FormRef, F0FormSetValueOptions } from "./useF0Form"
 

@@ -1,17 +1,17 @@
 import { useMemo } from "react"
 import { z, type ZodTypeAny } from "zod"
 
-import type { F0CheckboxField } from "@/components/F0Form/fields/checkbox/types"
+import type { F0CheckboxField } from "@/patterns/F0Form/fields/checkbox/types"
 import type {
   MimeType,
   UseFileUpload,
-} from "@/components/F0Form/fields/file/types"
-import type { F0Field, F0FileField } from "@/components/F0Form/fields/types"
-import type { F0SectionConfig } from "@/components/F0Form/types"
+} from "@/patterns/F0Form/fields/file/types"
+import type { F0Field, F0FileField } from "@/patterns/F0Form/fields/types"
+import type { F0SectionConfig } from "@/patterns/F0Form/types"
 import type { TranslationKey } from "@/lib/providers/i18n/i18n-provider-defaults"
 
-import { f0FormField } from "@/components/F0Form/f0Schema"
-import { F0FormField } from "@/components/F0FormField"
+import { f0FormField } from "@/patterns/F0Form/f0Schema"
+import { F0FormField } from "@/patterns/F0FormField"
 
 import type {
   SurveyFormBuilderElement,

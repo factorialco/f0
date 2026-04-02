@@ -21,7 +21,7 @@ export * from "@testing-library/react"
 
 import { MotionGlobalConfig } from "motion"
 
-import { WeekStartDay } from "@/experimental/OneCalendar/types"
+import { WeekStartDay } from "@/components/OneCalendar/types"
 import { DataCollectionStorageProvider } from "@/lib/providers/datacollection/DataCollectionStorageProvider"
 import { L10nProvider } from "@/lib/providers/l10n"
 MotionGlobalConfig.skipAnimations = true

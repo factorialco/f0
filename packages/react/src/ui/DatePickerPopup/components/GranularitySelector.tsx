@@ -1,4 +1,4 @@
-import { GranularityDefinitionKey } from "@/experimental/OneCalendar"
+import { GranularityDefinitionKey } from "@/components/OneCalendar"
 import { useI18n } from "@/lib/providers/i18n"
 import { Select, SelectContent, SelectItem } from "@/ui/Select"
 

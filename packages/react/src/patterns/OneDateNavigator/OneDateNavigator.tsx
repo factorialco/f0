@@ -8,12 +8,12 @@ import {
 } from "@/ui/DatePickerPopup/DatePickerPopup"
 import { isSameDatePickerValue } from "@/ui/DatePickerPopup/utils"
 
-import { getGranularityDefinitions } from "@/experimental/OneCalendar/granularities"
+import { getGranularityDefinitions } from "@/components/OneCalendar/granularities"
 import {
   DateRange,
   DateRangeComplete,
   WeekStartDay,
-} from "@/experimental/OneCalendar/types"
+} from "@/components/OneCalendar/types"
 import { DatePickerTrigger } from "./components/DateNavigatorTrigger"
 import { DatePickerValue } from "./types"
 

@@ -7,7 +7,7 @@ import type {
   FileUploadResult,
   FileUploadStatus,
   UseFileUpload,
-} from "@/components/F0Form/fields/file/types"
+} from "@/patterns/F0Form/fields/file/types"
 
 import { F0Button } from "@/components/F0Button"
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import { GranularityDefinitionKey } from "@/experimental/OneCalendar/granularities"
+import { GranularityDefinitionKey } from "@/components/OneCalendar/granularities"
 
 import { DatePickerValue } from "../types"
 import { isSameDatePickerValue } from "../utils"

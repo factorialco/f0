@@ -1,10 +1,10 @@
 import { useMemo } from "react"
 
-import type { F0FormDefinitionSingleSchema } from "@/components/F0WizardForm/types"
+import type { F0FormDefinitionSingleSchema } from "@/patterns/F0WizardForm/types"
 
 import { F0Dialog } from "@/patterns/F0Dialog"
-import { F0WizardForm } from "@/components/F0WizardForm"
-import { useF0FormDefinition } from "@/components/F0WizardForm/useF0FormDefinition"
+import { F0WizardForm } from "@/patterns/F0WizardForm"
+import { useF0FormDefinition } from "@/patterns/F0WizardForm/useF0FormDefinition"
 
 import type {
   F0AiAvailableFormDefinition,

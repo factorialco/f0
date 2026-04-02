@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { z } from "zod"
 
-import { useF0FormDefinition } from "@/components/F0WizardForm"
+import { useF0FormDefinition } from "@/patterns/F0WizardForm"
 
 import { f0FormField, F0Form } from "../index"
 
