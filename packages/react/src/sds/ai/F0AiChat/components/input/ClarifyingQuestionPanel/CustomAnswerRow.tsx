@@ -4,7 +4,7 @@ import { F0Checkbox } from "@/components/F0Checkbox"
 import { F0Icon } from "@/components/F0Icon/F0Icon"
 import { Pencil } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
-import { cn } from "@/lib/utils"
+import { cn, focusRing } from "@/lib/utils"
 
 import type { ClarifyingSelectionMode } from "../../../actions/core/clarifyingQuestion/types"
 
@@ -47,6 +47,8 @@ export const CustomAnswerRow = ({
       <F0Checkbox
         checked={isCustomAnswerActive}
         onCheckedChange={() => onToggleActive(!isCustomAnswerActive)}
+        title={typeYourAnswer}
+        hideLabel
       />
     )
 
@@ -72,7 +74,10 @@ export const CustomAnswerRow = ({
         }}
         placeholder={typeYourAnswer}
         aria-label={typeYourAnswer}
-        className="min-w-0 flex-1 bg-transparent text-base text-f1-foreground outline-none placeholder:text-f1-foreground-tertiary"
+        className={cn(
+          "min-w-0 flex-1 bg-transparent text-base text-f1-foreground outline-none placeholder:text-f1-foreground-tertiary",
+          focusRing()
+        )}
       />
       <F0Icon icon={Pencil} size="md" color="secondary" />
     </div>
